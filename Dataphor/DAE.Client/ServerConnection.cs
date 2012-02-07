@@ -21,35 +21,35 @@ namespace Alphora.Dataphor.DAE.Client
 	/// </remarks>
 	public class ServerConnection : Disposable
 	{
-		public ServerConnection(ServerAlias AServerAlias) : this(AServerAlias, true) {}
+		public ServerConnection(ServerAlias serverAlias) : this(serverAlias, true) {}
 		
-		public ServerConnection(ServerAlias AServerAlias, bool AAutoStart)
+		public ServerConnection(ServerAlias serverAlias, bool autoStart)
 		{
-			if (AServerAlias == null)
+			if (serverAlias == null)
 				throw new ClientException(ClientException.Codes.ServerAliasRequired);
 				
-			FServerAlias = AServerAlias;
-			InProcessAlias LInProcessAlias = FServerAlias as InProcessAlias;
-			ConnectionAlias LConnectionAlias = FServerAlias as ConnectionAlias;
+			_serverAlias = serverAlias;
+			InProcessAlias inProcessAlias = _serverAlias as InProcessAlias;
+			ConnectionAlias connectionAlias = _serverAlias as ConnectionAlias;
 			try
 			{
-				if (LInProcessAlias != null)
+				if (inProcessAlias != null)
 				{
 					#if !SILVERLIGHT
-					if (LInProcessAlias.IsEmbedded)
+					if (inProcessAlias.IsEmbedded)
 					{
-						ServerConfiguration LConfiguration = InstanceManager.GetInstance(LInProcessAlias.InstanceName);
-						FHostedServer = new Server.Server();
-						LConfiguration.ApplyTo(FHostedServer);
-						if (AAutoStart)
-							FHostedServer.Start();
+						ServerConfiguration configuration = InstanceManager.GetInstance(inProcessAlias.InstanceName);
+						_hostedServer = new Server.Server();
+						configuration.ApplyTo(_hostedServer);
+						if (autoStart)
+							_hostedServer.Start();
 					}
 					else
 					{
-						FServiceHost = new DataphorServiceHost();
-						FServiceHost.InstanceName = LInProcessAlias.InstanceName;
-						if (AAutoStart)
-							FServiceHost.Start();
+						_serviceHost = new DataphorServiceHost();
+						_serviceHost.InstanceName = inProcessAlias.InstanceName;
+						if (autoStart)
+							_serviceHost.Start();
 					}
 					#else
 					throw new NotSupportedException("In-process aliases are not supported in Silverlight");
@@ -57,17 +57,17 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 				else
 				{
-					FClientServer = 
+					_clientServer = 
 						new ClientServer
 						(
-							LConnectionAlias.HostName, 
-							LConnectionAlias.InstanceName, 
-							LConnectionAlias.OverridePortNumber, 
-							LConnectionAlias.SecurityMode, 
-							LConnectionAlias.OverrideListenerPortNumber, 
-							LConnectionAlias.ListenerSecurityMode
+							connectionAlias.HostName, 
+							connectionAlias.InstanceName, 
+							connectionAlias.OverridePortNumber, 
+							connectionAlias.SecurityMode, 
+							connectionAlias.OverrideListenerPortNumber, 
+							connectionAlias.ListenerSecurityMode
 						);
-					FLocalServer = new LocalServer(FClientServer, LConnectionAlias.ClientSideLoggingEnabled, TerminalServiceUtility.ClientName);
+					_localServer = new LocalServer(_clientServer, connectionAlias.ClientSideLoggingEnabled, TerminalServiceUtility.ClientName);
 				}
 			}
 			catch
@@ -77,62 +77,62 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		protected override void Dispose(bool ADisposed)
+		protected override void Dispose(bool disposed)
 		{
-			base.Dispose(ADisposed);
+			base.Dispose(disposed);
 			CleanUp();
 		}
 
 		private void CleanUp()
 		{
 			#if !SILVERLIGHT
-			if (FHostedServer != null)
+			if (_hostedServer != null)
 			{
-				FHostedServer.Stop();
-				FHostedServer = null;
+				_hostedServer.Stop();
+				_hostedServer = null;
 			}
 			
-			if (FServiceHost != null)
+			if (_serviceHost != null)
 			{
-				FServiceHost.Stop();
-				FServiceHost = null;
+				_serviceHost.Stop();
+				_serviceHost = null;
 			}
 			#endif
 			
-			if (FLocalServer != null)
+			if (_localServer != null)
 			{
-				FLocalServer.Dispose();
-				FLocalServer = null;
+				_localServer.Dispose();
+				_localServer = null;
 			}
 			
-			if (FClientServer != null)
+			if (_clientServer != null)
 			{
-				FClientServer.Close();
-				FClientServer = null;
+				_clientServer.Close();
+				_clientServer = null;
 			}
 		}
 
-		private ServerAlias FServerAlias;
+		private ServerAlias _serverAlias;
 		/// <summary>The alias used to establish this connection.</summary>
-		public ServerAlias Alias { get { return FServerAlias; } }
+		public ServerAlias Alias { get { return _serverAlias; } }
 		
 		#if !SILVERLIGHT
-		private DataphorServiceHost FServiceHost; // Used for non-embedded in-process server
-		private Server.Server FHostedServer; // Used for embedded in-process server
+		private DataphorServiceHost _serviceHost; // Used for non-embedded in-process server
+		private Server.Server _hostedServer; // Used for embedded in-process server
 		#endif
-		private ClientServer FClientServer; // Used for out-of-process server
-		private LocalServer FLocalServer; // Used for out-of-process server
+		private ClientServer _clientServer; // Used for out-of-process server
+		private LocalServer _localServer; // Used for out-of-process server
 
 		/// <summary>The IServer interface for the server connection.</summary>
 		#if SILVERLIGHT
-		public IServer Server { get { return FLocalServer; } }
+		public IServer Server { get { return _localServer; } }
 		#else
-		public IServer Server { get { return FHostedServer != null ? FHostedServer : (FServiceHost != null ? FServiceHost.Server : FLocalServer); } }
+		public IServer Server { get { return _hostedServer != null ? _hostedServer : (_serviceHost != null ? _serviceHost.Server : _localServer); } }
 		#endif
 
 		public override string ToString()
 		{
-			return FServerAlias.ToString();
+			return _serverAlias.ToString();
 		}
 	}
 }

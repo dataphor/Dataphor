@@ -27,52 +27,52 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 		}
 		
-		public Service(string AServiceName) : base()
+		public Service(string serviceName) : base()
 		{
-			ServiceName = AServiceName;
+			ServiceName = serviceName;
 		}
 		
-		public Service(string AServiceName, string AInstanceName) : base()
+		public Service(string serviceName, string instanceName) : base()
 		{
-			ServiceName = AServiceName;
-			FInstanceName = AInstanceName;
+			ServiceName = serviceName;
+			_instanceName = instanceName;
 		}
 		
-		private string FInstanceName;
+		private string _instanceName;
 		
-		private static string GetInstanceName(string[] AArgs)
+		private static string GetInstanceName(string[] args)
 		{
-			for (int i = 0; i < AArgs.Length - 1; i++)
-				if ((AArgs[i].ToLower() == "-name") || (AArgs[i].ToLower() == "-n"))
-					return AArgs[i + 1];
+			for (int i = 0; i < args.Length - 1; i++)
+				if ((args[i].ToLower() == "-name") || (args[i].ToLower() == "-n"))
+					return args[i + 1];
 					
 			return null;
 		}
 		
 		// The main entry point for the process
-		static void Main(string[] AArgs)
+		static void Main(string[] args)
 		{
-			string LInstanceName = GetInstanceName(AArgs);
-			if (AArgs.Length > 0)
+			string instanceName = GetInstanceName(args);
+			if (args.Length > 0)
 			{
-				switch (AArgs[0].ToLower())
+				switch (args[0].ToLower())
 				{
 					case "-i" :
 					case "-install" :
-						ServiceUtility.Install(LInstanceName);
+						ServiceUtility.Install(instanceName);
 						return;
 					case "-u" :
 					case "-uninstall" :
-						ServiceUtility.Uninstall(LInstanceName);
+						ServiceUtility.Uninstall(instanceName);
 						return;
 					case "-r" :
 					case "-run" :
-						if (LInstanceName == null)
-							LInstanceName = Server.Engine.CDefaultServerName;
+						if (instanceName == null)
+							instanceName = Server.Engine.DefaultServerName;
 							
-						Service LService = new Service(ServiceUtility.GetServiceName(LInstanceName), LInstanceName);
+						Service service = new Service(ServiceUtility.GetServiceName(instanceName), instanceName);
 						Console.WriteLine(Strings.Get("ServiceStarting"));
-						LService.OnStart(AArgs);
+						service.OnStart(args);
 						try
 						{
 							Console.WriteLine(Strings.Get("ServiceRunning"));
@@ -81,7 +81,7 @@ namespace Alphora.Dataphor.DAE.Service
 						finally
 						{
 							Console.WriteLine(Strings.Get("ServiceStopping"));
-							LService.OnStop();
+							service.OnStop();
 						}
 						return;
 					case "-name" :
@@ -94,11 +94,11 @@ namespace Alphora.Dataphor.DAE.Service
 			
 			System.ServiceProcess.ServiceBase.Run
 			(
-				new System.ServiceProcess.ServiceBase[] { LInstanceName == null ? new Service() : new Service(ServiceUtility.GetServiceName(LInstanceName), LInstanceName) }
+				new System.ServiceProcess.ServiceBase[] { instanceName == null ? new Service() : new Service(ServiceUtility.GetServiceName(instanceName), instanceName) }
 			);
 		}
 
-		private DataphorServiceHost FDataphorServiceHost;
+		private DataphorServiceHost _dataphorServiceHost;
 		
 		/// <summary>
 		/// Set things in motion so your Dataphor service can do its work. Checks to see if the ServerSettings.dst file exists
@@ -113,19 +113,19 @@ namespace Alphora.Dataphor.DAE.Service
 			// the service.
 			try
 			{
-				if (FInstanceName == null)
-					FInstanceName = GetInstanceName(args);
+				if (_instanceName == null)
+					_instanceName = GetInstanceName(args);
 
-				if (FInstanceName == null)
-					FInstanceName = Server.Engine.CDefaultServerName;
+				if (_instanceName == null)
+					_instanceName = Server.Engine.DefaultServerName;
 					
-				FDataphorServiceHost = new DataphorServiceHost();
-				FDataphorServiceHost.InstanceName = FInstanceName;
-				FDataphorServiceHost.Start();
+				_dataphorServiceHost = new DataphorServiceHost();
+				_dataphorServiceHost.InstanceName = _instanceName;
+				_dataphorServiceHost.Start();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				LogException(LException);
+				LogException(exception);
 				throw;
 			}
 		}
@@ -134,23 +134,23 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try 
 			{
-				if (FDataphorServiceHost != null)
+				if (_dataphorServiceHost != null)
 				{
-					if (FDataphorServiceHost.IsActive)
-						FDataphorServiceHost.Stop();
-					FDataphorServiceHost = null;
+					if (_dataphorServiceHost.IsActive)
+						_dataphorServiceHost.Stop();
+					_dataphorServiceHost = null;
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				LogException(LException); 
+				LogException(exception); 
 			}
 		}
 
 		/// <summary>Logs exceptions thrown by the server</summary>
-		public static void LogException(Exception AException)
+		public static void LogException(Exception exception)
 		{
-			System.Diagnostics.EventLog.WriteEntry(ServiceUtility.CEventLogSource, ExceptionUtility.BriefDescription(AException), EventLogEntryType.Error); 
+			System.Diagnostics.EventLog.WriteEntry(ServiceUtility.EventLogSource, ExceptionUtility.BriefDescription(exception), EventLogEntryType.Error); 
 		}
 	}
 }

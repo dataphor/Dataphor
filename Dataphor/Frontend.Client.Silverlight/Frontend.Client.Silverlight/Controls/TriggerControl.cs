@@ -43,33 +43,33 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			set { SetValue(ImageHeightProperty, value); }
 		}
 
-		private static void ImagePropertyChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void ImagePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			((TriggerControl)ASender).UpdateImage();
+			((TriggerControl)sender).UpdateImage();
 		}
 
 		private void UpdateImage()
 		{
-			var LBitmap = Image as BitmapImage;
-			if (LBitmap != null)
+			var bitmap = Image as BitmapImage;
+			if (bitmap != null)
 			{
-				ImageWidth = LBitmap.PixelWidth;
-				ImageHeight = LBitmap.PixelHeight;
+				ImageWidth = bitmap.PixelWidth;
+				ImageHeight = bitmap.PixelHeight;
 			}
 			UpdateState(true);
 		}
 		
-		private void UpdateState(bool AUseTransitions)
+		private void UpdateState(bool useTransitions)
 		{
 			if (Image != null || (ImageWidth > 0 && ImageHeight > 0))
 			{
 				if (Content == null)
-					VisualStateManager.GoToState(this, "OnlyImage", AUseTransitions);
+					VisualStateManager.GoToState(this, "OnlyImage", useTransitions);
 				else
-					VisualStateManager.GoToState(this, "HasImage", AUseTransitions);
+					VisualStateManager.GoToState(this, "HasImage", useTransitions);
 			}
 			else
-				VisualStateManager.GoToState(this, "NoImage", AUseTransitions);
+				VisualStateManager.GoToState(this, "NoImage", useTransitions);
 		}
 
 		public override void OnApplyTemplate()

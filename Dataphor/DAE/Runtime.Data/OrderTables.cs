@@ -24,175 +24,175 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public abstract class SortTableBase : Table
     {
-		public SortTableBase(BaseOrderNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public SortTableBase(BaseOrderNode node, Program program) : base(node, program) {}
 		
-		public new BaseOrderNode Node { get { return (BaseOrderNode)FNode; } }
+		public new BaseOrderNode Node { get { return (BaseOrderNode)_node; } }
 		
-        protected NativeTable FTable;
-        protected Scan FScan;
-        protected int FRowCount;
+        protected NativeTable _table;
+        protected Scan _scan;
+        protected int _rowCount;
         
         protected abstract void PopulateTable();
 
 		protected override void InternalOpen()
 		{
 			// TODO: Rewrite this...
-			Schema.TableType LTableType = new Schema.TableType();
-			Schema.BaseTableVar LTableVar = new Schema.BaseTableVar(LTableType);
-			Schema.TableVarColumn LNewColumn;
-			foreach (Schema.TableVarColumn LColumn in Node.TableVar.Columns)
+			Schema.TableType tableType = new Schema.TableType();
+			Schema.BaseTableVar tableVar = new Schema.BaseTableVar(tableType);
+			Schema.TableVarColumn newColumn;
+			foreach (Schema.TableVarColumn column in Node.TableVar.Columns)
 			{
-				LNewColumn = (Schema.TableVarColumn)LColumn.Copy();
-				LTableType.Columns.Add(LNewColumn.Column);
-				LTableVar.Columns.Add(LNewColumn);
+				newColumn = (Schema.TableVarColumn)column.Copy();
+				tableType.Columns.Add(newColumn.Column);
+				tableVar.Columns.Add(newColumn);
 			}
 			
-			Schema.Order LOrder = new Schema.Order();
-			Schema.OrderColumn LNewOrderColumn;
-			Schema.OrderColumn LOrderColumn;
-			for (int LIndex = 0; LIndex < Node.Order.Columns.Count; LIndex++)
+			Schema.Order order = new Schema.Order();
+			Schema.OrderColumn newOrderColumn;
+			Schema.OrderColumn orderColumn;
+			for (int index = 0; index < Node.Order.Columns.Count; index++)
 			{
-				LOrderColumn = Node.Order.Columns[LIndex];
-				LNewOrderColumn = new Schema.OrderColumn(LTableVar.Columns[LOrderColumn.Column], LOrderColumn.Ascending, LOrderColumn.IncludeNils);
-				LNewOrderColumn.Sort = LOrderColumn.Sort;
-				LNewOrderColumn.IsDefaultSort = LOrderColumn.IsDefaultSort;
-				LOrder.Columns.Add(LNewOrderColumn);
+				orderColumn = Node.Order.Columns[index];
+				newOrderColumn = new Schema.OrderColumn(tableVar.Columns[orderColumn.Column], orderColumn.Ascending, orderColumn.IncludeNils);
+				newOrderColumn.Sort = orderColumn.Sort;
+				newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
+				order.Columns.Add(newOrderColumn);
 			}
-			LTableVar.Orders.Add(LOrder);
+			tableVar.Orders.Add(order);
 
-			FTable = new NativeTable(Manager, LTableVar);
+			_table = new NativeTable(Manager, tableVar);
 			PopulateTable();
-			FScan = new Scan(Manager, FTable, FTable.ClusteredIndex, ScanDirection.Forward, null, null);
-			FScan.Open();
+			_scan = new Scan(Manager, _table, _table.ClusteredIndex, ScanDirection.Forward, null, null);
+			_scan.Open();
 		}
 
 		protected override void InternalClose()
 		{
-			if (FScan != null)
-				FScan.Dispose();
-			FScan = null;
-			if (FTable != null)
+			if (_scan != null)
+				_scan.Dispose();
+			_scan = null;
+			if (_table != null)
 			{
-				FTable.Drop(Manager);
-				FTable = null;
+				_table.Drop(Manager);
+				_table = null;
 			}
 		}
 		
 		protected override void InternalReset()
 		{
-			FScan.Dispose();
-			FTable.Truncate(Manager);
+			_scan.Dispose();
+			_table.Truncate(Manager);
 			PopulateTable();
-			FScan = new Scan(Manager, FTable, FTable.ClusteredIndex, ScanDirection.Forward, null, null);
-			FScan.Open();
+			_scan = new Scan(Manager, _table, _table.ClusteredIndex, ScanDirection.Forward, null, null);
+			_scan.Open();
 		}
 		
-		protected override void InternalSelect(Row ARow)
+		protected override void InternalSelect(Row row)
 		{
-			FScan.GetRow(ARow);
+			_scan.GetRow(row);
 		}
 		
 		protected override bool InternalNext()
 		{
-			return FScan.Next();
+			return _scan.Next();
 		}
 		
 		protected override void InternalLast()
 		{
-			FScan.Last();
+			_scan.Last();
 		}
 
 		protected override bool InternalBOF()
 		{
-			return FScan.BOF();
+			return _scan.BOF();
 		}
 		
 		protected override bool InternalEOF()
 		{
-			return FScan.EOF();
+			return _scan.EOF();
 		}
 		
 		protected override void InternalFirst()
 		{
-			FScan.First();
+			_scan.First();
 		}
 		
 		protected override bool InternalPrior()
 		{
-			return FScan.Prior();
+			return _scan.Prior();
 		}
 
         protected override Row InternalGetBookmark()
         {
-			return FScan.GetKey();
+			return _scan.GetKey();
         }
 
-		protected override bool InternalGotoBookmark(Row ABookmark, bool AForward)
+		protected override bool InternalGotoBookmark(Row bookmark, bool forward)
         {
-			return FScan.FindKey(ABookmark);
+			return _scan.FindKey(bookmark);
         }
         
-        protected override int InternalCompareBookmarks(Row ABookmark1, Row ABookmark2)
+        protected override int InternalCompareBookmarks(Row bookmark1, Row bookmark2)
         {
-			return FScan.CompareKeys(ABookmark1, ABookmark2);
+			return _scan.CompareKeys(bookmark1, bookmark2);
         }
 
         protected override Row InternalGetKey()
         {
-			return FScan.GetKey();
+			return _scan.GetKey();
         }
         
-        protected override bool InternalFindKey(Row ARow, bool AForward)
+        protected override bool InternalFindKey(Row row, bool forward)
         {
-			return FScan.FindKey(ARow);
+			return _scan.FindKey(row);
         }
         
-        protected override void InternalFindNearest(Row ARow)
+        protected override void InternalFindNearest(Row row)
         {
-			FScan.FindNearest(ARow);
+			_scan.FindNearest(row);
         }
         
-        protected override bool InternalRefresh(Row ARow)
+        protected override bool InternalRefresh(Row row)
         {					
-			if (ARow == null)
-				ARow = Select();	 
+			if (row == null)
+				row = Select();	 
 			InternalReset();
-			return FScan.FindNearest(ARow);
+			return _scan.FindNearest(row);
         }
 
         // ICountable
         protected override int InternalRowCount()
         {
-			return FRowCount;
+			return _rowCount;
         }
     }
     
     public class CopyTable : SortTableBase
     {
-		public CopyTable(CopyNode ANode, Program AProgram) : base(ANode, AProgram){}
+		public CopyTable(CopyNode node, Program program) : base(node, program){}
 		
-		public new CopyNode Node { get { return (CopyNode)FNode; } }
+		public new CopyNode Node { get { return (CopyNode)_node; } }
 
 		protected override void PopulateTable()
 		{
-			using (Table LTable = (Table)Node.Nodes[0].Execute(Program))
+			using (Table table = (Table)Node.Nodes[0].Execute(Program))
 			{
-				Row LRow = new Row(Manager, DataType.RowType);
+				Row row = new Row(Manager, DataType.RowType);
 				try
 				{
-					FRowCount = 0;
-					while (LTable.Next())
+					_rowCount = 0;
+					while (table.Next())
 					{
-						LTable.Select(LRow);
-						FRowCount++;
-						FTable.Insert(Manager, LRow); // no validation is required because FTable will never be changed
-						LRow.ClearValues();
+						table.Select(row);
+						_rowCount++;
+						_table.Insert(Manager, row); // no validation is required because FTable will never be changed
+						row.ClearValues();
 						Program.CheckAborted(); // Yield
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 			}
 		}
@@ -200,32 +200,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public class OrderTable : SortTableBase
     {
-		public OrderTable(OrderNode ANode, Program AProgram) : base(ANode, AProgram){}
+		public OrderTable(OrderNode node, Program program) : base(node, program){}
 		
-		public new OrderNode Node { get { return (OrderNode)FNode; } }
+		public new OrderNode Node { get { return (OrderNode)_node; } }
 
 		protected override void PopulateTable()
 		{
-			using (Table LTable = (Table)Node.Nodes[0].Execute(Program))
+			using (Table table = (Table)Node.Nodes[0].Execute(Program))
 			{
-				Row LRow = new Row(Manager, DataType.RowType);
+				Row row = new Row(Manager, DataType.RowType);
 				try
 				{
-					FRowCount = 0;
-					while (LTable.Next())
+					_rowCount = 0;
+					while (table.Next())
 					{
-						LTable.Select(LRow);
-						FRowCount++;
+						table.Select(row);
+						_rowCount++;
 						if (Node.SequenceColumnIndex >= 0)
-							LRow[Node.SequenceColumnIndex] = FRowCount;
-						FTable.Insert(Manager, LRow); // no validation is required because FTable will never be changed
-						LRow.ClearValues();
+							row[Node.SequenceColumnIndex] = _rowCount;
+						_table.Insert(Manager, row); // no validation is required because FTable will never be changed
+						row.ClearValues();
 						Program.CheckAborted();	// Yield
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 			}
 		}
@@ -234,145 +234,145 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     public class BrowseTableItem : Disposable
     {
         // constructor
-        protected internal BrowseTableItem(BrowseTable ABrowseTable, Table ATable, object AContextVar, Row AOrigin, bool AForward, bool AInclusive)
+        protected internal BrowseTableItem(BrowseTable browseTable, Table table, object contextVar, Row origin, bool forward, bool inclusive)
         {
-			FBrowseTable = ABrowseTable;
-            FTable = ATable;
-			FContextVar = AContextVar;
-            FRow = new Row(FBrowseTable.Manager, FTable.DataType.RowType);
-            FOrigin = AOrigin;
-            FForward = AForward;
-            FInclusive = AInclusive;
+			_browseTable = browseTable;
+            _table = table;
+			_contextVar = contextVar;
+            _row = new Row(_browseTable.Manager, _table.DataType.RowType);
+            _origin = origin;
+            _forward = forward;
+            _inclusive = inclusive;
         }
         
         // Dispose
-        protected override void Dispose(bool ADisposing)
+        protected override void Dispose(bool disposing)
         {
-            if (FTable != null)
+            if (_table != null)
             {
-                FTable.Dispose();
-                FTable = null;
+                _table.Dispose();
+                _table = null;
             }
             
-            if (FOrigin != null)
+            if (_origin != null)
             {
-				FOrigin.Dispose();
-                FOrigin = null;
+				_origin.Dispose();
+                _origin = null;
             }
             
-            if (FOrderKey != null)
+            if (_orderKey != null)
             {
-				FOrderKey.Dispose();
-                FOrderKey = null;
+				_orderKey.Dispose();
+                _orderKey = null;
             }
             
-            if (FUniqueKey != null)
+            if (_uniqueKey != null)
             {
-				FUniqueKey.Dispose();
-                FUniqueKey = null;
+				_uniqueKey.Dispose();
+                _uniqueKey = null;
             }
             
-            if (FRow != null)
+            if (_row != null)
             {
-				FRow.Dispose();
-                FRow = null;
+				_row.Dispose();
+                _row = null;
             }
 
-            base.Dispose(ADisposing);
+            base.Dispose(disposing);
         }
 
         // Table
-        protected Table FTable;
-        public Table Table { get { return FTable; } }
+        protected Table _table;
+        public Table Table { get { return _table; } }
         
         // ContextVar
-        protected object FContextVar;
-        public object ContextVar { get { return FContextVar; } }
+        protected object _contextVar;
+        public object ContextVar { get { return _contextVar; } }
 
         // Origin
-        protected Row FOrigin;
-        public Row Origin { get { return FOrigin; } }
+        protected Row _origin;
+        public Row Origin { get { return _origin; } }
         
         // OrderKey
-        protected Row FOrderKey;
+        protected Row _orderKey;
         public Row OrderKey
         {
             get
             {
                 FindOrderKey();
-                return FOrderKey;
+                return _orderKey;
             }
         }
         
         protected void FindOrderKey()
         {
-            if (!(FTable.BOF() || FTable.EOF()))
+            if (!(_table.BOF() || _table.EOF()))
             {
-                if (FOrderKey == null)
-                    FOrderKey = BuildOrderKeyRow();
+                if (_orderKey == null)
+                    _orderKey = BuildOrderKeyRow();
                 else
-                    FOrderKey.ClearValues();
+                    _orderKey.ClearValues();
                     
-                FTable.Select(FOrderKey);
+                _table.Select(_orderKey);
 
             }
             else
-                if (FOrderKey != null)
+                if (_orderKey != null)
                 {
-					FOrderKey.Dispose();
-                    FOrderKey = null;
+					_orderKey.Dispose();
+                    _orderKey = null;
                 }
         }
         
         // UniqueKey
-        protected Row FUniqueKey;
+        protected Row _uniqueKey;
         public Row UniqueKey
         {
             get
             {
                 FindUniqueKey();
-                return FUniqueKey;
+                return _uniqueKey;
             }
         }
         
         protected void FindUniqueKey()
         {
-            if (!(FTable.BOF() || FTable.EOF()))
+            if (!(_table.BOF() || _table.EOF()))
             {
-                if (FUniqueKey == null)
-                    FUniqueKey = BuildUniqueKeyRow();
+                if (_uniqueKey == null)
+                    _uniqueKey = BuildUniqueKeyRow();
                 else
-                    FUniqueKey.ClearValues();
+                    _uniqueKey.ClearValues();
 
-                FTable.Select(FUniqueKey);
+                _table.Select(_uniqueKey);
 
             }
             else
-                if (FUniqueKey != null)
+                if (_uniqueKey != null)
                 {
-					FUniqueKey.Dispose();
-                    FUniqueKey = null;
+					_uniqueKey.Dispose();
+                    _uniqueKey = null;
                 }
         }
         
         protected Row BuildOrderKeyRow()
         {
-			return new Row(FBrowseTable.Manager, new Schema.RowType(FBrowseTable.Order.Columns));
+			return new Row(_browseTable.Manager, new Schema.RowType(_browseTable.Order.Columns));
         }
         
         protected Row BuildUniqueKeyRow()
         {
-			Schema.RowType LRowType = new Schema.RowType(FBrowseTable.Order.Columns);
-			return new Row(FBrowseTable.Manager, LRowType);
+			Schema.RowType rowType = new Schema.RowType(_browseTable.Order.Columns);
+			return new Row(_browseTable.Manager, rowType);
         }
         
         // Forward
-        protected bool FForward;
-        public bool Forward { get { return FForward; } }
+        protected bool _forward;
+        public bool Forward { get { return _forward; } }
         
         // Inclusive
-        protected bool FInclusive;
-        public bool Inclusive { get { return FInclusive; } }
+        protected bool _inclusive;
+        public bool Inclusive { get { return _inclusive; } }
         
         // OnOrigin
         public bool OnOrigin
@@ -380,86 +380,86 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             get
             {
                 FindOrderKey();
-                if ((FOrigin == null) || (FOrderKey == null))
+                if ((_origin == null) || (_orderKey == null))
 					return false;
 				else
-	                return FBrowseTable.CompareKeys(FOrigin, FOrderKey) == 0;
+	                return _browseTable.CompareKeys(_origin, _orderKey) == 0;
             }
         }
         
         // OnCrack
-        public bool OnCrack { get { return (FTable.BOF() && !FTable.EOF()) || (FTable.EOF() && !FTable.BOF()); } }
+        public bool OnCrack { get { return (_table.BOF() && !_table.EOF()) || (_table.EOF() && !_table.BOF()); } }
         
         public void MoveCrack()
         {
             if (OnCrack)
-                if (FTable.BOF())
-                    FTable.Next();
+                if (_table.BOF())
+                    _table.Next();
                 else
-                    if (FTable.EOF())
-                        FTable.Prior();
+                    if (_table.EOF())
+                        _table.Prior();
         }
         
-        protected BrowseTable FBrowseTable;
-        public BrowseTable BrowseTable { get { return FBrowseTable; } }
+        protected BrowseTable _browseTable;
+        public BrowseTable BrowseTable { get { return _browseTable; } }
         
-        protected Row FRow;
+        protected Row _row;
     }
     
     public class BrowseTableList : DisposableList<BrowseTableItem>
     {
-        public const int CMinTables = 1;
+        public const int MinTables = 1;
 
-		public BrowseTableList(BrowseTable ABrowseTable) : base(true)
+		public BrowseTableList(BrowseTable browseTable) : base(true)
 		{
-			FBrowseTable = ABrowseTable;
+			_browseTable = browseTable;
 		}
 		
 		// BrowseTable
-        protected BrowseTable FBrowseTable;
-        public BrowseTable BrowseTable { get { return FBrowseTable; } }
+        protected BrowseTable _browseTable;
+        public BrowseTable BrowseTable { get { return _browseTable; } }
         
         // MaxTables
-        protected int FMaxTables = 2;
+        protected int _maxTables = 2;
         public int MaxTables
         {
-            get { return FMaxTables; }
+            get { return _maxTables; }
             set
             {
                 if (value <= Count)
                     throw new RuntimeException(RuntimeException.Codes.CurrentListSizeExceedsNewSetting);
-				if (value < CMinTables)
+				if (value < MinTables)
 					throw new RuntimeException(RuntimeException.Codes.NewValueViolatesMinimumTableCount);
-                FMaxTables = value;
+                _maxTables = value;
             }
         }
         
-        public new void Add(BrowseTableItem ATable)
+        public new void Add(BrowseTableItem table)
         {
-            int LIndex = IndexOf(ATable);
-            if (LIndex < 0)
+            int index = IndexOf(table);
+            if (index < 0)
             {
-                if (Count >= FMaxTables)
+                if (Count >= _maxTables)
 					RemoveAt(Count - 1);
-                Insert(0, ATable);
+                Insert(0, table);
             }
             else
             {
-                if (LIndex > 0)
-					Move(LIndex, 0);
+                if (index > 0)
+					Move(index, 0);
             }
         }
         
-        public new BrowseTableItem this[int AIndex] { get { return base[AIndex]; } }
+        public new BrowseTableItem this[int index] { get { return base[index]; } }
         
-        public BrowseTableItem this[Table AIndex]
+        public BrowseTableItem this[Table index]
         {
             get
             {
-                for (int LIndex = 0; LIndex < Count; LIndex++)
+                for (int localIndex = 0; localIndex < Count; localIndex++)
                 {
-                    if (base[LIndex].Table == AIndex)
-                        return this[LIndex];
+                    if (base[localIndex].Table == index)
+                        return this[localIndex];
                 }
                 return null;
             }
@@ -468,26 +468,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public class BrowseTable : Table
     {
-		public BrowseTable(BrowseNode ANode, Program AProgram) : base(ANode, AProgram)
+		public BrowseTable(BrowseNode node, Program program) : base(node, program)
         {
-            FTables = new BrowseTableList(this);
+            _tables = new BrowseTableList(this);
         }
         
-        protected override void Dispose(bool ADisposing)
+        protected override void Dispose(bool disposing)
         {
 			try
 			{
-	            base.Dispose(ADisposing);
+	            base.Dispose(disposing);
 	        }
 	        finally
 	        {
-	            FTables.Dispose();
+	            _tables.Dispose();
 	        }
         }
         
-        protected BrowseTableList FTables;
+        protected BrowseTableList _tables;
         
-        public new BrowseNode Node { get { return (BrowseNode)FNode; } }
+        public new BrowseNode Node { get { return (BrowseNode)_node; } }
 
 		/*
             for each column in the order descending
@@ -518,87 +518,87 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
                         [and] current order column is not null
         */
         
-        protected void EnterTableContext(BrowseTableItem ATableItem)
+        protected void EnterTableContext(BrowseTableItem tableItem)
         {
-			Program.Stack.Push(ATableItem.ContextVar);
+			Program.Stack.Push(tableItem.ContextVar);
         }
         
-        protected void ExitTableContext(BrowseTableItem ATableItem)
+        protected void ExitTableContext(BrowseTableItem tableItem)
         {
 			Program.Stack.Pop();
         }
         
         // Must be called with the original stack
-        protected BrowseTableItem CreateTable(Row AOrigin, bool AForward, bool AInclusive)
+        protected BrowseTableItem CreateTable(Row origin, bool forward, bool inclusive)
         {
 			// Prepare the context variable to contain the origin value (0 if this is an unanchored set)
-			object LContextVar;
-			Row LOrigin;
-			if (AOrigin == null)
+			object contextVar;
+			Row localOrigin;
+			if (origin == null)
 			{
-				LOrigin = null;
-				LContextVar = 0;
+				localOrigin = null;
+				contextVar = 0;
 			}
 			else
 			{
-				if ((AOrigin.DataType.Columns.Count > 0) && (Schema.Object.Qualifier(AOrigin.DataType.Columns[0].Name) != Keywords.Origin))
-					LOrigin = new Row(Manager, new Schema.RowType(AOrigin.DataType.Columns, Keywords.Origin));
+				if ((origin.DataType.Columns.Count > 0) && (Schema.Object.Qualifier(origin.DataType.Columns[0].Name) != Keywords.Origin))
+					localOrigin = new Row(Manager, new Schema.RowType(origin.DataType.Columns, Keywords.Origin));
 				else
-					LOrigin = new Row(Manager, new Schema.RowType(AOrigin.DataType.Columns));
-				AOrigin.CopyTo(LOrigin);
-				LContextVar = LOrigin;
+					localOrigin = new Row(Manager, new Schema.RowType(origin.DataType.Columns));
+				origin.CopyTo(localOrigin);
+				contextVar = localOrigin;
 			}
 				
-			int LOriginIndex = ((LOrigin == null) ? -1 : LOrigin.DataType.Columns.Count - 1);
-			bool LInclusive = (LOrigin == null) ? true : AInclusive;
+			int originIndex = ((localOrigin == null) ? -1 : localOrigin.DataType.Columns.Count - 1);
+			bool localInclusive = (localOrigin == null) ? true : inclusive;
 
 			// Ensure the browse node has the appropriate browse variant				
 			lock (Node)
 			{
-				if (!Node.HasBrowseVariant(LOriginIndex, AForward, LInclusive))
+				if (!Node.HasBrowseVariant(originIndex, forward, localInclusive))
 				{
 					if (Program.ServerProcess.ApplicationTransactionID != Guid.Empty)
 					{
-						ApplicationTransaction LTransaction = Program.ServerProcess.GetApplicationTransaction();
+						ApplicationTransaction transaction = Program.ServerProcess.GetApplicationTransaction();
 						try
 						{
-							LTransaction.PushGlobalContext();
+							transaction.PushGlobalContext();
 							try
 							{
-								Node.CompileBrowseVariant(Program, LOriginIndex, AForward, LInclusive);
+								Node.CompileBrowseVariant(Program, originIndex, forward, localInclusive);
 							}
 							finally
 							{
-								LTransaction.PopGlobalContext();
+								transaction.PopGlobalContext();
 							}
 						}
 						finally
 						{
-							Monitor.Exit(LTransaction);
+							Monitor.Exit(transaction);
 						}
 					}
 					else
-						Node.CompileBrowseVariant(Program, LOriginIndex, AForward, LInclusive);
+						Node.CompileBrowseVariant(Program, originIndex, forward, localInclusive);
 				}
 			}
 		
 			// Execute the variant with the current context variable
-			Program.Stack.Push(LContextVar);
+			Program.Stack.Push(contextVar);
 			try
 			{
-				PlanNode LBrowseVariantNode = Node.GetBrowseVariantNode(Program.Plan, LOriginIndex, AForward, LInclusive);
+				PlanNode browseVariantNode = Node.GetBrowseVariantNode(Program.Plan, originIndex, forward, localInclusive);
 				#if TRACEBROWSEEVENTS
-				Trace.WriteLine(String.Format("BrowseTableItem created with query: {0}", new D4TextEmitter().Emit(LBrowseVariantNode.EmitStatement(EmitMode.ForCopy))));
+				Trace.WriteLine(String.Format("BrowseTableItem created with query: {0}", new D4TextEmitter().Emit(browseVariantNode.EmitStatement(EmitMode.ForCopy))));
 				#endif
 				return 
 					new BrowseTableItem
 					(
 						this, 
-						(Table)LBrowseVariantNode.Execute(Program),
-						LContextVar,
-						LOrigin, 
-						AForward, 
-						AInclusive
+						(Table)browseVariantNode.Execute(Program),
+						contextVar,
+						localOrigin, 
+						forward, 
+						inclusive
 					);
 			}
 			finally
@@ -608,50 +608,50 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
         
         // Must be called with the original stack
-        protected BrowseTableItem FindTable(Row AOrigin, bool AForward, bool AInclusive)
+        protected BrowseTableItem FindTable(Row origin, bool forward, bool inclusive)
         {
-            foreach (BrowseTableItem LTable in FTables)
+            foreach (BrowseTableItem table in _tables)
             {
-				EnterTableContext(LTable);
+				EnterTableContext(table);
 				try
 				{
 					if 
 						(
 							(
-								(AOrigin != null) &&
-								(LTable.OrderKey != null) &&
-								(LTable.Forward == AForward) &&
-								(LTable.Inclusive == AInclusive) &&
-								(CompareKeys(AOrigin, LTable.OrderKey) == 0)
+								(origin != null) &&
+								(table.OrderKey != null) &&
+								(table.Forward == forward) &&
+								(table.Inclusive == inclusive) &&
+								(CompareKeys(origin, table.OrderKey) == 0)
 							) ||
 							(
-								(AOrigin == null) &&
-								(LTable.Origin == null) &&
-								(LTable.Forward == AForward) &&
-								(LTable.Table.BOF())
+								(origin == null) &&
+								(table.Origin == null) &&
+								(table.Forward == forward) &&
+								(table.Table.BOF())
 							)
 						)
 					{
-						if (!AInclusive)
-							LTable.Table.Next();
-						return LTable;
+						if (!inclusive)
+							table.Table.Next();
+						return table;
 					}
 				}
 				finally
 				{
-					ExitTableContext(LTable);
+					ExitTableContext(table);
 				}
             }
             return null;
         }
 
 		// Must be called with the original stack        
-        protected BrowseTableItem GetTable(Row AOrigin, bool AForward, bool AInclusive)
+        protected BrowseTableItem GetTable(Row origin, bool forward, bool inclusive)
         {
-            BrowseTableItem LResult = FindTable(AOrigin, AForward, AInclusive);
-            if (LResult == null)
-				LResult = CreateTable(AOrigin, AForward, AInclusive);
-            return LResult;
+            BrowseTableItem result = FindTable(origin, forward, inclusive);
+            if (result == null)
+				result = CreateTable(origin, forward, inclusive);
+            return result;
         }
 
 		// Must be called with the original stack        
@@ -665,55 +665,55 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         {
             get
             {
-                if (FTables.Count == 0)
+                if (_tables.Count == 0)
                     throw new RuntimeException(RuntimeException.Codes.NoTopTable);
-                return FTables[0];
+                return _tables[0];
             }
         }
         
         protected override void InternalOpen()
         {
-            FTables.Add(GetTable());
+            _tables.Add(GetTable());
         }
         
         protected override void InternalClose()
         {
-            FTables.Clear();
+            _tables.Clear();
         }
         
         protected override void InternalReset()
         {
-            FTables.Clear();
-	        FTables.Add(GetTable());
+            _tables.Clear();
+	        _tables.Add(GetTable());
         }
         
-        protected override bool InternalRefresh(Row ARow)
+        protected override bool InternalRefresh(Row row)
         {					
-			if (ARow == null)
-				ARow = Select();
+			if (row == null)
+				row = Select();
 
-			FTables.Clear();
+			_tables.Clear();
 			try
 			{
-				bool LResult = InternalFindKey(ARow, true);
-				if (!LResult)
-					InternalFindNearest(ARow);
-				return LResult;
+				bool result = InternalFindKey(row, true);
+				if (!result)
+					InternalFindNearest(row);
+				return result;
 			}
 			catch
 			{
-				if (FTables.Count == 0)
-					FTables.Add(GetTable());
+				if (_tables.Count == 0)
+					_tables.Add(GetTable());
 				throw;
 			}
         }
 
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
 			EnterTableContext(TopTable);
 			try
 			{
-				TopTable.Table.Select(ARow);
+				TopTable.Table.Select(row);
 			}
 			finally
 			{
@@ -722,10 +722,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
 
 		// Must be called with the original stack        
-        protected void SwapReader(Row AOrigin, bool AForward, bool AInclusive)
+        protected void SwapReader(Row origin, bool forward, bool inclusive)
         {
-			BrowseTableItem LItem = GetTable(AOrigin, AForward, AInclusive);
-			FTables.Add(LItem);
+			BrowseTableItem item = GetTable(origin, forward, inclusive);
+			_tables.Add(item);
 			EnterTableContext(TopTable);
 			try
 			{
@@ -738,32 +738,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
         
         // Must be called with the original stack
-        protected void SwapReader(bool AForward)
+        protected void SwapReader(bool forward)
         {
-			Row LOrigin = null;
+			Row origin = null;
 			try
 			{
 				EnterTableContext(TopTable);
 				try
 				{
-					LOrigin = TopTable.Origin != null ? (Row)TopTable.Origin.Copy() : null;
+					origin = TopTable.Origin != null ? (Row)TopTable.Origin.Copy() : null;
 				}
 				finally
 				{
 					ExitTableContext(TopTable);
 				}
-				SwapReader(LOrigin, AForward, !TopTable.Inclusive);
+				SwapReader(origin, forward, !TopTable.Inclusive);
 			}
 			finally
 			{
-				if (LOrigin != null)
-					LOrigin.Dispose();
+				if (origin != null)
+					origin.Dispose();
 			}
         }
         
-        protected void Move(bool AForward)
+        protected void Move(bool forward)
         {
-            if (TopTable.Forward == AForward)
+            if (TopTable.Forward == forward)
             {
 				EnterTableContext(TopTable);
 				try
@@ -777,15 +777,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
             else
             {
-				bool LInTableContext = true;
+				bool inTableContext = true;
 				EnterTableContext(TopTable);
 				try
 				{
 					if (TopTable.Table.BOF() && TopTable.Origin != null)
 					{
 						ExitTableContext(TopTable);
-						LInTableContext = false;
-						SwapReader(AForward);
+						inTableContext = false;
+						SwapReader(forward);
 					}
 					else
 					{
@@ -795,30 +795,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							if (TopTable.Table.BOF() && (TopTable.Origin != null))
 							{
 								ExitTableContext(TopTable);
-								LInTableContext = false;
-								SwapReader(AForward);
+								inTableContext = false;
+								SwapReader(forward);
 							}
 						}
 						else
 						{
-							Row LOrigin = TopTable.OrderKey != null ? (Row)TopTable.OrderKey.Copy() : TopTable.Origin != null ? (Row)TopTable.Origin.Copy() : null;
+							Row origin = TopTable.OrderKey != null ? (Row)TopTable.OrderKey.Copy() : TopTable.Origin != null ? (Row)TopTable.Origin.Copy() : null;
 							try
 							{
 								ExitTableContext(TopTable);
-								LInTableContext = false;
-								SwapReader(LOrigin, AForward, false);
+								inTableContext = false;
+								SwapReader(origin, forward, false);
 							}
 							finally
 							{
-								if (LOrigin != null)
-									LOrigin.Dispose();
+								if (origin != null)
+									origin.Dispose();
 							}
 						}
 					}
 				}
 				finally
 				{
-					if (LInTableContext)
+					if (inTableContext)
 						ExitTableContext(TopTable);
 				}
             }
@@ -832,8 +832,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalLast()
         {
-			BrowseTableItem LItem = GetTable(null, false, true);
-            FTables.Add(LItem);
+			BrowseTableItem item = GetTable(null, false, true);
+            _tables.Add(item);
         }
         
         protected override bool InternalBOF()
@@ -870,8 +870,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalFirst()
         {
-			BrowseTableItem LItem = GetTable(null, true, true);
-            FTables.Add(LItem);
+			BrowseTableItem item = GetTable(null, true, true);
+            _tables.Add(item);
         }
         
         protected override Row InternalGetBookmark()
@@ -879,37 +879,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return InternalGetKey();
         }
 
-		protected override bool InternalGotoBookmark(Row ABookmark, bool AForward)
+		protected override bool InternalGotoBookmark(Row bookmark, bool forward)
         {
-            return InternalFindKey(ABookmark, AForward);
+            return InternalFindKey(bookmark, forward);
         }
         
-        protected override int InternalCompareBookmarks(Row ABookmark1, Row ABookmark2)
+        protected override int InternalCompareBookmarks(Row bookmark1, Row bookmark2)
         {
-			return CompareKeys(ABookmark1, ABookmark2);
+			return CompareKeys(bookmark1, bookmark2);
         }
         
-		public int CompareKeys(Row AIndexKey, Row ACompareKey)
+		public int CompareKeys(Row indexKey, Row compareKey)
         {
-			int LResult = 0;
-			for (int LIndex = 0; LIndex < AIndexKey.DataType.Columns.Count; LIndex++)
+			int result = 0;
+			for (int index = 0; index < indexKey.DataType.Columns.Count; index++)
 			{
-				if (LIndex >= ACompareKey.DataType.Columns.Count)
+				if (index >= compareKey.DataType.Columns.Count)
 					break;
 
-				if (AIndexKey.HasValue(LIndex) && ACompareKey.HasValue(LIndex))
+				if (indexKey.HasValue(index) && compareKey.HasValue(index))
 				{
-					Program.Stack.Push(AIndexKey[LIndex]);
+					Program.Stack.Push(indexKey[index]);
 					try
 					{
-						Program.Stack.Push(ACompareKey[LIndex]);
+						Program.Stack.Push(compareKey[index]);
 						try
 						{
-							LResult = (int)Node.Order.Columns[LIndex].Sort.CompareNode.Execute(Program);
+							result = (int)Node.Order.Columns[index].Sort.CompareNode.Execute(Program);
 
 							// Swap polarity for descending columns
-							if (!Node.Order.Columns[LIndex].Ascending)
-								LResult = -LResult;
+							if (!Node.Order.Columns[index].Ascending)
+								result = -result;
 						}
 						finally
 						{
@@ -921,27 +921,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						Program.Stack.Pop();
 					}
 				}
-				else if (AIndexKey.HasValue(LIndex))
+				else if (indexKey.HasValue(index))
 				{
 					// Index Key Has A Value
-					LResult = Node.Order.Columns[LIndex].Ascending ? 1 : -1;
+					result = Node.Order.Columns[index].Ascending ? 1 : -1;
 				}
-				else if (ACompareKey.HasValue(LIndex))
+				else if (compareKey.HasValue(index))
 				{
 					// Compare Key Has A Value
-					LResult = Node.Order.Columns[LIndex].Ascending ? -1 : 1;
+					result = Node.Order.Columns[index].Ascending ? -1 : 1;
 				}
 				else
 				{
 					// Neither key has a value
-					LResult = 0;
+					result = 0;
 				}
 				
-				if (LResult != 0)
+				if (result != 0)
 					break;
 			}
 
-			return LResult;
+			return result;
         }
         
         protected override Row InternalGetKey()
@@ -957,77 +957,77 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
         }
 
-		protected override bool InternalFindKey(Row ARow, bool AForward)
+		protected override bool InternalFindKey(Row row, bool forward)
         {
-			Row LRow = EnsureKeyRow(ARow);
+			Row localRow = EnsureKeyRow(row);
 			try
 			{
-				bool LTableCreated = false;
-				BrowseTableItem LTable = FindTable(LRow, AForward, true);
-				if (LTable == null)
+				bool tableCreated = false;
+				BrowseTableItem table = FindTable(localRow, forward, true);
+				if (table == null)
 				{
-					LTable = CreateTable(LRow, AForward, true);
-					LTableCreated = true;
+					table = CreateTable(localRow, forward, true);
+					tableCreated = true;
 				}
 				try
 				{
-					EnterTableContext(LTable);
+					EnterTableContext(table);
 					try
 					{
-						LTable.MoveCrack();
-						bool LResult = (LTable.UniqueKey != null) && (CompareKeys(LRow, LTable.UniqueKey) == 0);
-						if (LResult)
-							FTables.Add(LTable);
+						table.MoveCrack();
+						bool result = (table.UniqueKey != null) && (CompareKeys(localRow, table.UniqueKey) == 0);
+						if (result)
+							_tables.Add(table);
 						else
-							if (LTableCreated)
-								LTable.Dispose();
-						return LResult;
+							if (tableCreated)
+								table.Dispose();
+						return result;
 					}
 					finally
 					{
-						ExitTableContext(LTable);
+						ExitTableContext(table);
 					}
 				}
 				catch
 				{
-					if (LTableCreated)
-						LTable.Dispose();
+					if (tableCreated)
+						table.Dispose();
 					throw;
 				}
 			}
 			finally
 			{
-				if (!Object.ReferenceEquals(ARow, LRow))
-					LRow.Dispose();
+				if (!Object.ReferenceEquals(row, localRow))
+					localRow.Dispose();
 			}
         }
         
-        protected override void InternalFindNearest(Row ARow)
+        protected override void InternalFindNearest(Row row)
         {
-			Row LRow = EnsurePartialKeyRow(ARow);
+			Row localRow = EnsurePartialKeyRow(row);
 			try
 			{
-				if (LRow != null)
+				if (localRow != null)
 				{
-					BrowseTableItem LItem = GetTable(LRow, true, true);
-		            FTables.Add(LItem);
-		            EnterTableContext(LItem);
+					BrowseTableItem item = GetTable(localRow, true, true);
+		            _tables.Add(item);
+		            EnterTableContext(item);
 		            try
 		            {
 				        TopTable.MoveCrack();
 				    }
 				    finally
 				    {
-						ExitTableContext(LItem);
+						ExitTableContext(item);
 				    }
 			    }
 			    else
-					FTables.Add(GetTable());
+					_tables.Add(GetTable());
 		    }
 		    finally
 		    {
-				if ((LRow != null) && !Object.ReferenceEquals(ARow, LRow))
-					LRow.Dispose();
+				if ((localRow != null) && !Object.ReferenceEquals(row, localRow))
+					localRow.Dispose();
 		    }
         }
         

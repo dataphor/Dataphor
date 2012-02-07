@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 {
 	internal sealed class SecurityUtility
 	{
-		private static byte[] FKey = new byte[]
+		private static byte[] _key = new byte[]
 		{
 			0x34, 0x4B, 0x3B, 0x52, 0xFB, 0x96, 0xF4, 0x1F,
 			0x87, 0xA4, 0xB8, 0xA8, 0x22, 0x29, 0x97, 0x52, 
@@ -21,75 +21,75 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			0x1E, 0x3B, 0x29, 0x00, 0x13, 0x7F, 0xE0, 0x52 
 		};
 
-		private static byte[] FIV = new byte[]
+		private static byte[] _iV = new byte[]
 		{
 			0x8F, 0xDA, 0x11, 0xFB, 0x90, 0xF3, 0xBF, 0x27, 
 			0xF3, 0xFC, 0xFF, 0x48, 0xEC, 0x9A, 0xE0, 0x41
 		};
 		
-		private static string Encrypt(string AString, byte[] AKey, byte[] AIV)
+		private static string Encrypt(string stringValue, byte[] key, byte[] iV)
 		{
-			if (AString == String.Empty)
-				return AString;
+			if (stringValue == String.Empty)
+				return stringValue;
 			else
 			{
-				byte[] LEncryptedData;
-				using (MemoryStream LStream = new MemoryStream())
+				byte[] encryptedData;
+				using (MemoryStream stream = new MemoryStream())
 				{
-					AesManaged LProvider = new AesManaged();
-					using (CryptoStream LEncryptionStream = new CryptoStream(LStream, LProvider.CreateEncryptor(AKey, AIV), CryptoStreamMode.Write))
+					AesManaged provider = new AesManaged();
+					using (CryptoStream encryptionStream = new CryptoStream(stream, provider.CreateEncryptor(key, iV), CryptoStreamMode.Write))
 					{
-						using (StreamWriter LWriter = new StreamWriter(LEncryptionStream))
+						using (StreamWriter writer = new StreamWriter(encryptionStream))
 						{
-							LWriter.Write(AString);
-							LWriter.Flush();
-							LEncryptionStream.FlushFinalBlock();
-							LStream.Position = 0;
-							LEncryptedData = new byte[LStream.Length + 1];
-							LStream.Read(LEncryptedData, 1, (int)LStream.Length);
-							if (LStream.Length > Byte.MaxValue)
+							writer.Write(stringValue);
+							writer.Flush();
+							encryptionStream.FlushFinalBlock();
+							stream.Position = 0;
+							encryptedData = new byte[stream.Length + 1];
+							stream.Read(encryptedData, 1, (int)stream.Length);
+							if (stream.Length > Byte.MaxValue)
 								throw new ArgumentException("Encrypted data must be less than 256 characters long");
-							LEncryptedData[0] = (byte)LStream.Length;
-							return Convert.ToBase64String(LEncryptedData);
+							encryptedData[0] = (byte)stream.Length;
+							return Convert.ToBase64String(encryptedData);
 						}
 					}
 				}
 			}
 		}
 		
-		private static string Decrypt(string AString, byte[] AKey, byte[] AIV)
+		private static string Decrypt(string stringValue, byte[] key, byte[] iV)
 		{
-			if (AString == String.Empty)
-				return AString;
+			if (stringValue == String.Empty)
+				return stringValue;
 			else
 			{
-				byte[] LMessage = Convert.FromBase64String(AString);
-				byte[] LEncryptedData = new byte[LMessage[0]];
-				for (int LIndex = 0; LIndex < LEncryptedData.Length; LIndex++)
-					LEncryptedData[LIndex] = LMessage[LIndex + 1];
+				byte[] message = Convert.FromBase64String(stringValue);
+				byte[] encryptedData = new byte[message[0]];
+				for (int index = 0; index < encryptedData.Length; index++)
+					encryptedData[index] = message[index + 1];
 
-				using (Stream LStream = new MemoryStream(LEncryptedData))
+				using (Stream stream = new MemoryStream(encryptedData))
 				{
-					AesManaged LProvider = new AesManaged();
-					using (CryptoStream LDecryptionStream = new CryptoStream(LStream, LProvider.CreateDecryptor(AKey, AIV), CryptoStreamMode.Read))
+					AesManaged provider = new AesManaged();
+					using (CryptoStream decryptionStream = new CryptoStream(stream, provider.CreateDecryptor(key, iV), CryptoStreamMode.Read))
 					{
-						using (StreamReader LReader = new StreamReader(LDecryptionStream))
+						using (StreamReader reader = new StreamReader(decryptionStream))
 						{
-							return LReader.ReadToEnd();
+							return reader.ReadToEnd();
 						}
 					}
 				}
 			}
 		}
 
-		public static string EncryptPassword(string APassword)
+		public static string EncryptPassword(string password)
 		{
-			return Encrypt(APassword, FKey, FIV);
+			return Encrypt(password, _key, _iV);
 		}
 		
-		public static string DecryptPassword(string APassword)
+		public static string DecryptPassword(string password)
 		{
-			return Decrypt(APassword, FKey, FIV);
+			return Decrypt(password, _key, _iV);
 		}
 	}
 }

@@ -19,252 +19,252 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
     
     public class OracleRetrieve : SQLDeviceOperator
     {
-        public OracleRetrieve(int AID, string AName) : base(AID, AName)
+        public OracleRetrieve(int iD, string name) : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
-            TableVar LTableVar = ((TableVarNode) APlanNode).TableVar;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
+            TableVar tableVar = ((TableVarNode) planNode).TableVar;
 
-            if (LTableVar is BaseTableVar)
+            if (tableVar is BaseTableVar)
             {
-                var LRangeVar = new SQLRangeVar(LDevicePlan.GetNextTableAlias());
-                foreach (TableVarColumn LColumn in LTableVar.Columns)
-                    LRangeVar.Columns.Add(new SQLRangeVarColumn(LColumn, LRangeVar.Name,
-                                                                LDevicePlan.Device.ToSQLIdentifier(LColumn),
-                                                                LDevicePlan.Device.ToSQLIdentifier(LColumn.Name)));
-                LDevicePlan.CurrentQueryContext().RangeVars.Add(LRangeVar);
-                var LSelectExpression = new SelectExpression();
-                LSelectExpression.OptimizerHints = "FIRST_ROWS(20)";
-                LSelectExpression.FromClause =
+                var rangeVar = new SQLRangeVar(localDevicePlan.GetNextTableAlias());
+                foreach (TableVarColumn column in tableVar.Columns)
+                    rangeVar.Columns.Add(new SQLRangeVarColumn(column, rangeVar.Name,
+                                                                localDevicePlan.Device.ToSQLIdentifier(column),
+                                                                localDevicePlan.Device.ToSQLIdentifier(column.Name)));
+                localDevicePlan.CurrentQueryContext().RangeVars.Add(rangeVar);
+                var selectExpression = new SelectExpression();
+                selectExpression.OptimizerHints = "FIRST_ROWS(20)";
+                selectExpression.FromClause =
                     new AlgebraicFromClause
                         (
                         new TableSpecifier
                             (
                             new TableExpression
                                 (
-                                MetaData.GetTag(LTableVar.MetaData, "Storage.Schema", LDevicePlan.Device.Schema),
-                                LDevicePlan.Device.ToSQLIdentifier(LTableVar)
+                                MetaData.GetTag(tableVar.MetaData, "Storage.Schema", localDevicePlan.Device.Schema),
+                                localDevicePlan.Device.ToSQLIdentifier(tableVar)
                                 ),
-                            LRangeVar.Name
+                            rangeVar.Name
                             )
                         );
-                LSelectExpression.SelectClause = new SelectClause();
-                foreach (TableVarColumn LColumn in LTableVar.Columns)
-                    LSelectExpression.SelectClause.Columns.Add(
-                        LDevicePlan.GetRangeVarColumn(LColumn.Name, true).GetColumnExpression());
+                selectExpression.SelectClause = new SelectClause();
+                foreach (TableVarColumn column in tableVar.Columns)
+                    selectExpression.SelectClause.Columns.Add(
+                        localDevicePlan.GetRangeVarColumn(column.Name, true).GetColumnExpression());
 
-                LSelectExpression.SelectClause.Distinct =
-                    (LTableVar.Keys.Count == 1) &&
-                    Convert.ToBoolean(MetaData.GetTag(LTableVar.Keys[0].MetaData, "Storage.IsImposedKey", "false"));
+                selectExpression.SelectClause.Distinct =
+                    (tableVar.Keys.Count == 1) &&
+                    Convert.ToBoolean(MetaData.GetTag(tableVar.Keys[0].MetaData, "Storage.IsImposedKey", "false"));
 
-                return LSelectExpression;
+                return selectExpression;
             }
             else
-                return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
+                return localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
         }
     }
 
     public class OracleJoin : SQLDeviceOperator
     {
-        public OracleJoin(int AID, string AName) : base(AID, AName)
+        public OracleJoin(int iD, string name) : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
-            var LJoinNode = (JoinNode) APlanNode;
-            JoinType LJoinType;
-            if ((((LJoinNode.Nodes[2] is ValueNode) &&
-                  ((LJoinNode.Nodes[2]).DataType.Is(ADevicePlan.Plan.Catalog.DataTypes.SystemBoolean)) &&
-                  ((bool) ((ValueNode) LJoinNode.Nodes[2]).Value))))
-                LJoinType = JoinType.Cross;
-            else if (LJoinNode is LeftOuterJoinNode)
-                LJoinType = JoinType.Left;
-            else if (LJoinNode is RightOuterJoinNode)
-                LJoinType = JoinType.Right;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
+            var joinNode = (JoinNode) planNode;
+            JoinType joinType;
+            if ((((joinNode.Nodes[2] is ValueNode) &&
+                  ((joinNode.Nodes[2]).DataType.Is(devicePlan.Plan.Catalog.DataTypes.SystemBoolean)) &&
+                  ((bool) ((ValueNode) joinNode.Nodes[2]).Value))))
+                joinType = JoinType.Cross;
+            else if (joinNode is LeftOuterJoinNode)
+                joinType = JoinType.Left;
+            else if (joinNode is RightOuterJoinNode)
+                joinType = JoinType.Right;
             else
-                LJoinType = JoinType.Inner;
+                joinType = JoinType.Inner;
 
-            bool LHasOuterColumnExpressions = false;
+            bool hasOuterColumnExpressions = false;
 
-            LDevicePlan.PushQueryContext();
-            Statement LLeftStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Language.SQL.SelectExpression LLeftSelectExpression =
-                LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode) APlanNode.Nodes[0]).TableVar,
-                                                               LLeftStatement, false);
-            TableVar LLeftTableVar = ((TableNode) APlanNode.Nodes[0]).TableVar;
-            for (int LIndex = 0; LIndex < LJoinNode.LeftKey.Columns.Count; LIndex++)
-                if (LDevicePlan.GetRangeVarColumn(LJoinNode.LeftKey.Columns[LIndex].Name, true).Expression != null)
+            localDevicePlan.PushQueryContext();
+            Statement leftStatement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Language.SQL.SelectExpression leftSelectExpression =
+                localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode) planNode.Nodes[0]).TableVar,
+                                                               leftStatement, false);
+            TableVar leftTableVar = ((TableNode) planNode.Nodes[0]).TableVar;
+            for (int index = 0; index < joinNode.LeftKey.Columns.Count; index++)
+                if (localDevicePlan.GetRangeVarColumn(joinNode.LeftKey.Columns[index].Name, true).Expression != null)
                 {
-                    LHasOuterColumnExpressions = true;
+                    hasOuterColumnExpressions = true;
                     break;
                 }
 
-            if (LHasOuterColumnExpressions || LDevicePlan.CurrentQueryContext().IsAggregate ||
-                LLeftSelectExpression.SelectClause.Distinct)
+            if (hasOuterColumnExpressions || localDevicePlan.CurrentQueryContext().IsAggregate ||
+                leftSelectExpression.SelectClause.Distinct)
             {
-                string LNestingReason = "The left argument to the join operator must be nested because ";
-                if (LHasOuterColumnExpressions)
-                    LNestingReason +=
+                string nestingReason = "The left argument to the join operator must be nested because ";
+                if (hasOuterColumnExpressions)
+                    nestingReason +=
                         "the join is to be performed on columns which are introduced as expressions in the current context.";
-                else if (LDevicePlan.CurrentQueryContext().IsAggregate)
-                    LNestingReason += "it contains aggregation.";
+                else if (localDevicePlan.CurrentQueryContext().IsAggregate)
+                    nestingReason += "it contains aggregation.";
                 else
-                    LNestingReason += "it contains a distinct specification.";
-                LDevicePlan.TranslationMessages.Add(new TranslationMessage(LNestingReason, APlanNode));
-                LLeftStatement = LDevicePlan.Device.NestQueryExpression(LDevicePlan, LLeftTableVar, LLeftStatement);
-                LLeftSelectExpression = LDevicePlan.Device.FindSelectExpression(LLeftStatement);
+                    nestingReason += "it contains a distinct specification.";
+                localDevicePlan.TranslationMessages.Add(new TranslationMessage(nestingReason, planNode));
+                leftStatement = localDevicePlan.Device.NestQueryExpression(localDevicePlan, leftTableVar, leftStatement);
+                leftSelectExpression = localDevicePlan.Device.FindSelectExpression(leftStatement);
             }
-            SQLQueryContext LLeftContext = LDevicePlan.CurrentQueryContext();
-            LDevicePlan.PopQueryContext();
+            SQLQueryContext leftContext = localDevicePlan.CurrentQueryContext();
+            localDevicePlan.PopQueryContext();
 
-            LDevicePlan.PushQueryContext();
-            Statement LRightStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            Language.SQL.SelectExpression LRightSelectExpression =
-                LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode) APlanNode.Nodes[1]).TableVar,
-                                                               LRightStatement, false);
-            TableVar LRightTableVar = ((TableNode) APlanNode.Nodes[1]).TableVar;
-            LHasOuterColumnExpressions = false;
-            for (int LIndex = 0; LIndex < LJoinNode.RightKey.Columns.Count; LIndex++)
-                if (LDevicePlan.GetRangeVarColumn(LJoinNode.RightKey.Columns[LIndex].Name, true).Expression != null)
+            localDevicePlan.PushQueryContext();
+            Statement rightStatement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            Language.SQL.SelectExpression rightSelectExpression =
+                localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode) planNode.Nodes[1]).TableVar,
+                                                               rightStatement, false);
+            TableVar rightTableVar = ((TableNode) planNode.Nodes[1]).TableVar;
+            hasOuterColumnExpressions = false;
+            for (int index = 0; index < joinNode.RightKey.Columns.Count; index++)
+                if (localDevicePlan.GetRangeVarColumn(joinNode.RightKey.Columns[index].Name, true).Expression != null)
                 {
-                    LHasOuterColumnExpressions = true;
+                    hasOuterColumnExpressions = true;
                     break;
                 }
 
-            if (LHasOuterColumnExpressions || LDevicePlan.CurrentQueryContext().IsAggregate ||
-                LRightSelectExpression.SelectClause.Distinct)
+            if (hasOuterColumnExpressions || localDevicePlan.CurrentQueryContext().IsAggregate ||
+                rightSelectExpression.SelectClause.Distinct)
             {
-                string LNestingReason = "The right argument to the join operator must be nested because ";
-                if (LHasOuterColumnExpressions)
-                    LNestingReason +=
+                string nestingReason = "The right argument to the join operator must be nested because ";
+                if (hasOuterColumnExpressions)
+                    nestingReason +=
                         "the join is to be performed on columns which are introduced as expressions in the current context.";
-                else if (LDevicePlan.CurrentQueryContext().IsAggregate)
-                    LNestingReason += "it contains aggregation.";
+                else if (localDevicePlan.CurrentQueryContext().IsAggregate)
+                    nestingReason += "it contains aggregation.";
                 else
-                    LNestingReason += "it contains a distinct specification.";
-                LDevicePlan.TranslationMessages.Add(new TranslationMessage(LNestingReason, APlanNode));
-                LRightStatement = LDevicePlan.Device.NestQueryExpression(LDevicePlan, LRightTableVar, LRightStatement);
-                LRightSelectExpression = LDevicePlan.Device.FindSelectExpression(LRightStatement);
+                    nestingReason += "it contains a distinct specification.";
+                localDevicePlan.TranslationMessages.Add(new TranslationMessage(nestingReason, planNode));
+                rightStatement = localDevicePlan.Device.NestQueryExpression(localDevicePlan, rightTableVar, rightStatement);
+                rightSelectExpression = localDevicePlan.Device.FindSelectExpression(rightStatement);
             }
-            SQLQueryContext LRightContext = LDevicePlan.CurrentQueryContext();
-            LDevicePlan.PopQueryContext();
+            SQLQueryContext rightContext = localDevicePlan.CurrentQueryContext();
+            localDevicePlan.PopQueryContext();
 
             // Merge the query contexts
-            LDevicePlan.CurrentQueryContext().RangeVars.AddRange(LLeftContext.RangeVars);
-            LDevicePlan.CurrentQueryContext().AddedColumns.AddRange(LLeftContext.AddedColumns);
-            LDevicePlan.CurrentQueryContext().RangeVars.AddRange(LRightContext.RangeVars);
-            LDevicePlan.CurrentQueryContext().AddedColumns.AddRange(LRightContext.AddedColumns);
+            localDevicePlan.CurrentQueryContext().RangeVars.AddRange(leftContext.RangeVars);
+            localDevicePlan.CurrentQueryContext().AddedColumns.AddRange(leftContext.AddedColumns);
+            localDevicePlan.CurrentQueryContext().RangeVars.AddRange(rightContext.RangeVars);
+            localDevicePlan.CurrentQueryContext().AddedColumns.AddRange(rightContext.AddedColumns);
 
             // Merge the from clauses
-            var LLeftFromClause = (CalculusFromClause) LLeftSelectExpression.FromClause;
-            var LRightFromClause = (CalculusFromClause) LRightSelectExpression.FromClause;
-            foreach (TableSpecifier LTableSpecifier in LRightFromClause.TableSpecifiers)
-                LLeftFromClause.TableSpecifiers.Add(LTableSpecifier);
+            var leftFromClause = (CalculusFromClause) leftSelectExpression.FromClause;
+            var rightFromClause = (CalculusFromClause) rightSelectExpression.FromClause;
+            foreach (TableSpecifier tableSpecifier in rightFromClause.TableSpecifiers)
+                leftFromClause.TableSpecifiers.Add(tableSpecifier);
 
-            LDevicePlan.PushJoinContext(new SQLJoinContext(LLeftContext, LRightContext));
+            localDevicePlan.PushJoinContext(new SQLJoinContext(leftContext, rightContext));
             try
             {
-                if (LJoinType != JoinType.Cross)
+                if (joinType != JoinType.Cross)
                 {
-                    Expression LJoinCondition = null;
+                    Expression joinCondition = null;
 
-                    for (int LIndex = 0; LIndex < LJoinNode.LeftKey.Columns.Count; LIndex++)
+                    for (int index = 0; index < joinNode.LeftKey.Columns.Count; index++)
                     {
-                        SQLRangeVarColumn LLeftColumn =
-                            LDevicePlan.CurrentJoinContext().LeftQueryContext.GetRangeVarColumn(
-                                LJoinNode.LeftKey.Columns[LIndex].Name);
-                        SQLRangeVarColumn LRightColumn =
-                            LDevicePlan.CurrentJoinContext().RightQueryContext.GetRangeVarColumn(
-                                LJoinNode.RightKey.Columns[LIndex].Name);
-                        Expression LLeftExpression = LLeftColumn.GetExpression();
-                        Expression LRightExpression = LRightColumn.GetExpression();
-                        if (LJoinType == JoinType.Right)
+                        SQLRangeVarColumn leftColumn =
+                            localDevicePlan.CurrentJoinContext().LeftQueryContext.GetRangeVarColumn(
+                                joinNode.LeftKey.Columns[index].Name);
+                        SQLRangeVarColumn rightColumn =
+                            localDevicePlan.CurrentJoinContext().RightQueryContext.GetRangeVarColumn(
+                                joinNode.RightKey.Columns[index].Name);
+                        Expression leftExpression = leftColumn.GetExpression();
+                        Expression rightExpression = rightColumn.GetExpression();
+                        if (joinType == JoinType.Right)
                         {
-                            var LFieldExpression = (QualifiedFieldExpression) LLeftExpression;
-                            LLeftExpression = new OuterJoinFieldExpression(LFieldExpression.FieldName,
-                                                                           LFieldExpression.TableAlias);
+                            var fieldExpression = (QualifiedFieldExpression) leftExpression;
+                            leftExpression = new OuterJoinFieldExpression(fieldExpression.FieldName,
+                                                                           fieldExpression.TableAlias);
                         }
-                        else if (LJoinType == JoinType.Left)
+                        else if (joinType == JoinType.Left)
                         {
-                            var LFieldExpression = (QualifiedFieldExpression) LRightExpression;
-                            LRightExpression = new OuterJoinFieldExpression(LFieldExpression.FieldName,
-                                                                            LFieldExpression.TableAlias);
+                            var fieldExpression = (QualifiedFieldExpression) rightExpression;
+                            rightExpression = new OuterJoinFieldExpression(fieldExpression.FieldName,
+                                                                            fieldExpression.TableAlias);
                         }
 
-                        Expression LEqualExpression =
+                        Expression equalExpression =
                             new BinaryExpression
                                 (
-                                LLeftExpression,
+                                leftExpression,
                                 "iEqual",
-                                LRightExpression
+                                rightExpression
                                 );
 
-                        if (LJoinCondition != null)
-                            LJoinCondition = new BinaryExpression(LJoinCondition, "iAnd", LEqualExpression);
+                        if (joinCondition != null)
+                            joinCondition = new BinaryExpression(joinCondition, "iAnd", equalExpression);
                         else
-                            LJoinCondition = LEqualExpression;
+                            joinCondition = equalExpression;
                     }
 
-                    if (LLeftSelectExpression.WhereClause == null)
-                        LLeftSelectExpression.WhereClause = new WhereClause(LJoinCondition);
+                    if (leftSelectExpression.WhereClause == null)
+                        leftSelectExpression.WhereClause = new WhereClause(joinCondition);
                     else
-                        LLeftSelectExpression.WhereClause.Expression =
-                            new BinaryExpression(LLeftSelectExpression.WhereClause.Expression, "iAnd", LJoinCondition);
+                        leftSelectExpression.WhereClause.Expression =
+                            new BinaryExpression(leftSelectExpression.WhereClause.Expression, "iAnd", joinCondition);
 
-                    var LOuterJoinNode = LJoinNode as OuterJoinNode;
-                    if ((LOuterJoinNode != null) && (LOuterJoinNode.RowExistsColumnIndex >= 0))
+                    var outerJoinNode = joinNode as OuterJoinNode;
+                    if ((outerJoinNode != null) && (outerJoinNode.RowExistsColumnIndex >= 0))
                     {
-                        TableVarColumn LRowExistsColumn =
-                            LOuterJoinNode.TableVar.Columns[LOuterJoinNode.RowExistsColumnIndex];
-                        var LCaseExpression = new CaseExpression();
-                        var LCaseItem = new CaseItemExpression();
-                        if (LOuterJoinNode is LeftOuterJoinNode)
-                            LCaseItem.WhenExpression = new UnaryExpression("iIsNull",
-                                                                           LDevicePlan.CurrentJoinContext().
+                        TableVarColumn rowExistsColumn =
+                            outerJoinNode.TableVar.Columns[outerJoinNode.RowExistsColumnIndex];
+                        var caseExpression = new CaseExpression();
+                        var caseItem = new CaseItemExpression();
+                        if (outerJoinNode is LeftOuterJoinNode)
+                            caseItem.WhenExpression = new UnaryExpression("iIsNull",
+                                                                           localDevicePlan.CurrentJoinContext().
                                                                                RightQueryContext.GetRangeVarColumn(
-                                                                               LOuterJoinNode.RightKey.Columns[0].Name).
+                                                                               outerJoinNode.RightKey.Columns[0].Name).
                                                                                GetExpression());
                         else
-                            LCaseItem.WhenExpression = new UnaryExpression("iIsNull",
-                                                                           LDevicePlan.CurrentJoinContext().
+                            caseItem.WhenExpression = new UnaryExpression("iIsNull",
+                                                                           localDevicePlan.CurrentJoinContext().
                                                                                LeftQueryContext.GetRangeVarColumn(
-                                                                               LOuterJoinNode.LeftKey.Columns[0].Name).
+                                                                               outerJoinNode.LeftKey.Columns[0].Name).
                                                                                GetExpression());
-                        LCaseItem.ThenExpression = new ValueExpression(0);
-                        LCaseExpression.CaseItems.Add(LCaseItem);
-                        LCaseExpression.ElseExpression = new CaseElseExpression(new ValueExpression(1));
-                        var LRangeVarColumn = new SQLRangeVarColumn(LRowExistsColumn, LCaseExpression,
-                                                                    LDevicePlan.Device.ToSQLIdentifier(LRowExistsColumn));
-                        LDevicePlan.CurrentQueryContext().AddedColumns.Add(LRangeVarColumn);
-                        LLeftSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
+                        caseItem.ThenExpression = new ValueExpression(0);
+                        caseExpression.CaseItems.Add(caseItem);
+                        caseExpression.ElseExpression = new CaseElseExpression(new ValueExpression(1));
+                        var rangeVarColumn = new SQLRangeVarColumn(rowExistsColumn, caseExpression,
+                                                                    localDevicePlan.Device.ToSQLIdentifier(rowExistsColumn));
+                        localDevicePlan.CurrentQueryContext().AddedColumns.Add(rangeVarColumn);
+                        leftSelectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
                     }
                 }
 
                 // Build select clause
-                LLeftSelectExpression.SelectClause = new SelectClause();
-                foreach (TableVarColumn LColumn in ((TableNode) APlanNode).TableVar.Columns)
-                    LLeftSelectExpression.SelectClause.Columns.Add(
-                        LDevicePlan.GetRangeVarColumn(LColumn.Name, true).GetColumnExpression());
+                leftSelectExpression.SelectClause = new SelectClause();
+                foreach (TableVarColumn column in ((TableNode) planNode).TableVar.Columns)
+                    leftSelectExpression.SelectClause.Columns.Add(
+                        localDevicePlan.GetRangeVarColumn(column.Name, true).GetColumnExpression());
 
                 // Merge where clauses
-                if (LRightSelectExpression.WhereClause != null)
-                    if (LLeftSelectExpression.WhereClause == null)
-                        LLeftSelectExpression.WhereClause = LRightSelectExpression.WhereClause;
+                if (rightSelectExpression.WhereClause != null)
+                    if (leftSelectExpression.WhereClause == null)
+                        leftSelectExpression.WhereClause = rightSelectExpression.WhereClause;
                     else
-                        LLeftSelectExpression.WhereClause.Expression =
-                            new BinaryExpression(LLeftSelectExpression.WhereClause.Expression, "iAnd",
-                                                 LRightSelectExpression.WhereClause.Expression);
+                        leftSelectExpression.WhereClause.Expression =
+                            new BinaryExpression(leftSelectExpression.WhereClause.Expression, "iAnd",
+                                                 rightSelectExpression.WhereClause.Expression);
 
-                return LLeftStatement;
+                return leftStatement;
             }
             finally
             {
-                LDevicePlan.PopJoinContext();
+                localDevicePlan.PopJoinContext();
             }
         }
     }
@@ -272,22 +272,22 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleMathUtility
     {
-        public static Expression Truncate(Expression AExpression)
+        public static Expression Truncate(Expression expression)
         {
-            return new CallExpression("TRUNC", new[] {AExpression, new ValueExpression(0)});
+            return new CallExpression("TRUNC", new[] {expression, new ValueExpression(0)});
         }
 
-        public static Expression Frac(Expression AExpression, Expression AExpressionCopy)
+        public static Expression Frac(Expression expression, Expression expressionCopy)
             // note that it takes two different refrences to the same value
         {
-            return new BinaryExpression(AExpression, "iSubtraction", Truncate(AExpressionCopy));
+            return new BinaryExpression(expression, "iSubtraction", Truncate(expressionCopy));
         }
     }
 
     public class OracleTimeSpanUtility
     {
         //LReturnVal := TRUNC(DAE_Frac(ATimeSpan / 10000000) * 1000);
-        public static Expression ReadMillisecond(Expression AValue)
+        public static Expression ReadMillisecond(Expression tempValue)
         {
             return
                 OracleMathUtility.Truncate
@@ -296,8 +296,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                         (
                         OracleMathUtility.Frac
                             (
-                            new BinaryExpression(AValue, "iDivision", new ValueExpression(10000000)),
-                            new BinaryExpression(AValue, "iDivision", new ValueExpression(10000000))
+                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(10000000)),
+                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(10000000))
                             ),
                         "iMultiplication",
                         new ValueExpression(1000)
@@ -305,7 +305,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                     );
         }
 
-        public static Expression ReadSecond(Expression AValue)
+        public static Expression ReadSecond(Expression tempValue)
         {
             //LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (10000000 * 60)) * 60);
             return
@@ -315,8 +315,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                         (
                         OracleMathUtility.Frac
                             (
-                            new BinaryExpression(AValue, "iDivision", new ValueExpression(600000000)),
-                            new BinaryExpression(AValue, "iDivision", new ValueExpression(600000000))
+                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(600000000)),
+                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(600000000))
                             ),
                         "iMultiplication",
                         new ValueExpression(60)
@@ -324,7 +324,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                     );
         }
 
-        public static Expression ReadMinute(Expression AValue)
+        public static Expression ReadMinute(Expression tempValue)
         {
             //LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (600000000 * 60)) * 60);
             return
@@ -334,8 +334,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                         (
                         OracleMathUtility.Frac
                             (
-                            new BinaryExpression(AValue, "iDivision", new ValueExpression(36000000000)),
-                            new BinaryExpression(AValue, "iDivision", new ValueExpression(36000000000))
+                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(36000000000)),
+                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(36000000000))
                             ),
                         "iMultiplication",
                         new ValueExpression(60)
@@ -343,7 +343,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                     );
         }
 
-        public static Expression ReadHour(Expression AValue)
+        public static Expression ReadHour(Expression tempValue)
         {
             //LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (36000000000 * 24)) * 24);
             return
@@ -353,8 +353,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                         (
                         OracleMathUtility.Frac
                             (
-                            new BinaryExpression(AValue, "iDivision", new ValueExpression(864000000000)),
-                            new BinaryExpression(AValue, "iDivision", new ValueExpression(864000000000))
+                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(864000000000)),
+                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(864000000000))
                             ),
                         "iMultiplication",
                         new ValueExpression(24)
@@ -362,78 +362,78 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                     );
         }
 
-        public static Expression ReadDay(Expression AValue)
+        public static Expression ReadDay(Expression tempValue)
         {
             //LReturnVal := TRUNC(ATimeSpan / 864000000000);
             return
-                OracleMathUtility.Truncate(new BinaryExpression(AValue, "iDivision", new ValueExpression(864000000000)));
+                OracleMathUtility.Truncate(new BinaryExpression(tempValue, "iDivision", new ValueExpression(864000000000)));
         }
     }
 
     public class OracleDateTimeFunctions
     {
-        public static Expression WriteMonth(Expression ADateTime, Expression ADateTimeCopy, Expression APart)
+        public static Expression WriteMonth(Expression dateTime, Expression dateTimeCopy, Expression part)
         {
-            string LPartString = "mm";
-            Expression LOldPart = new CallExpression("DatePart",
+            string partString = "mm";
+            Expression oldPart = new CallExpression("DatePart",
                                                      new[]
                                                          {
-                                                             new ValueExpression(LPartString, TokenType.Symbol),
-                                                             ADateTimeCopy
+                                                             new ValueExpression(partString, TokenType.Symbol),
+                                                             dateTimeCopy
                                                          });
-            Expression LParts = new BinaryExpression(APart, "iSubtraction", LOldPart);
+            Expression parts = new BinaryExpression(part, "iSubtraction", oldPart);
             return new CallExpression("DateAdd",
-                                      new[] {new ValueExpression(LPartString, TokenType.Symbol), LParts, ADateTime});
+                                      new[] {new ValueExpression(partString, TokenType.Symbol), parts, dateTime});
         }
 
-        public static Expression WriteDay(Expression ADateTime, Expression ADateTimeCopy, Expression APart)
+        public static Expression WriteDay(Expression dateTime, Expression dateTimeCopy, Expression part)
             //pass the DateTime twice
         {
-            string LPartString = "dd";
-            Expression LOldPart = new CallExpression("DatePart",
+            string partString = "dd";
+            Expression oldPart = new CallExpression("DatePart",
                                                      new[]
                                                          {
-                                                             new ValueExpression(LPartString, TokenType.Symbol),
-                                                             ADateTimeCopy
+                                                             new ValueExpression(partString, TokenType.Symbol),
+                                                             dateTimeCopy
                                                          });
-            Expression LParts = new BinaryExpression(APart, "iSubtraction", LOldPart);
+            Expression parts = new BinaryExpression(part, "iSubtraction", oldPart);
             return new CallExpression("DateAdd",
-                                      new[] {new ValueExpression(LPartString, TokenType.Symbol), LParts, ADateTime});
+                                      new[] {new ValueExpression(partString, TokenType.Symbol), parts, dateTime});
         }
 
-        public static Expression WriteYear(Expression ADateTime, Expression ADateTimeCopy, Expression APart)
+        public static Expression WriteYear(Expression dateTime, Expression dateTimeCopy, Expression part)
             //pass the DateTime twice
         {
-            string LPartString = "yyyy";
-            Expression LOldPart = new CallExpression("DatePart",
+            string partString = "yyyy";
+            Expression oldPart = new CallExpression("DatePart",
                                                      new[]
                                                          {
-                                                             new ValueExpression(LPartString, TokenType.Symbol),
-                                                             ADateTimeCopy
+                                                             new ValueExpression(partString, TokenType.Symbol),
+                                                             dateTimeCopy
                                                          });
-            Expression LParts = new BinaryExpression(APart, "iSubtraction", LOldPart);
+            Expression parts = new BinaryExpression(part, "iSubtraction", oldPart);
             return new CallExpression("DateAdd",
-                                      new[] {new ValueExpression(LPartString, TokenType.Symbol), LParts, ADateTime});
+                                      new[] {new ValueExpression(partString, TokenType.Symbol), parts, dateTime});
         }
     }
 
     public class OracleFrac : DeviceOperator
     {
-        public OracleFrac(int AID, string AName) : base(AID, AName)
+        public OracleFrac(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleFrac(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleFrac(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 OracleMathUtility.Frac
                     (
-                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
-                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
+                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                     );
         }
     }
@@ -441,23 +441,23 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
     // TimeSpan
     public class OracleTimeSpanReadMillisecond : DeviceOperator
     {
-        public OracleTimeSpanReadMillisecond(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpanReadMillisecond(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleTimeSpanReadMillisecond(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleTimeSpanReadMillisecond(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = ((SQLDevicePlan) ADevicePlan);
+            var localDevicePlan = ((SQLDevicePlan) devicePlan);
             return
                 OracleTimeSpanUtility.ReadMillisecond
                     (
-                    LDevicePlan.Device.TranslateExpression
+                    localDevicePlan.Device.TranslateExpression
                         (
-                        LDevicePlan,
-                        APlanNode.Nodes[0],
+                        localDevicePlan,
+                        planNode.Nodes[0],
                         false
                         )
                     );
@@ -466,102 +466,102 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleTimeSpanReadSecond : DeviceOperator
     {
-        public OracleTimeSpanReadSecond(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpanReadSecond(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleTimeSpanReadSecond(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleTimeSpanReadSecond(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
-                OracleTimeSpanUtility.ReadSecond(LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                OracleTimeSpanUtility.ReadSecond(localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                         false));
         }
     }
 
     public class OracleTimeSpanReadMinute : DeviceOperator
     {
-        public OracleTimeSpanReadMinute(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpanReadMinute(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleTimeSpanReadMinute(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleTimeSpanReadMinute(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
-                OracleTimeSpanUtility.ReadMinute(LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                OracleTimeSpanUtility.ReadMinute(localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                         false));
         }
     }
 
     public class OracleTimeSpanReadHour : DeviceOperator
     {
-        public OracleTimeSpanReadHour(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpanReadHour(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleTimeSpanReadHour(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleTimeSpanReadHour(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
-                OracleTimeSpanUtility.ReadHour(LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                OracleTimeSpanUtility.ReadHour(localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                       false));
         }
     }
 
     public class OracleTimeSpanReadDay : DeviceOperator
     {
-        public OracleTimeSpanReadDay(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpanReadDay(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleTimeSpanReadDay(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleTimeSpanReadDay(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
-                OracleTimeSpanUtility.ReadDay(LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                OracleTimeSpanUtility.ReadDay(localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                      false));
         }
     }
 
     public class OracleTimeSpanWriteMillisecond : DeviceOperator
     {
-        public OracleTimeSpanWriteMillisecond(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpanWriteMillisecond(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleTimeSpanWriteMillisecond(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleTimeSpanWriteMillisecond(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := ATimeSpan + (APart - ReadMillisecond(ATimeSpan)) * 10000;
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new BinaryExpression
                     (
-                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                     "iAddition",
                     new BinaryExpression
                         (
                         new BinaryExpression
                             (
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false),
                             "iSubtraction",
-                            OracleTimeSpanUtility.ReadMillisecond(LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                         APlanNode.Nodes
+                            OracleTimeSpanUtility.ReadMillisecond(localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                         planNode.Nodes
                                                                                                              [0], false))
                             ),
                         "iMultiplication",
@@ -573,30 +573,30 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleTimeSpanWriteSecond : DeviceOperator
     {
-        public OracleTimeSpanWriteSecond(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpanWriteSecond(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleTimeSpanWriteSecond(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleTimeSpanWriteSecond(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := ATimeSpan + (APart - ReadSecond(ATimeSpan)) * 10000000;
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new BinaryExpression
                     (
-                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                     "iAddition",
                     new BinaryExpression
                         (
                         new BinaryExpression
                             (
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false),
                             "iSubtraction",
-                            OracleTimeSpanUtility.ReadSecond(LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                    APlanNode.Nodes[0],
+                            OracleTimeSpanUtility.ReadSecond(localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                    planNode.Nodes[0],
                                                                                                     false))
                             ),
                         "iMultiplication",
@@ -608,30 +608,30 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleTimeSpanWriteMinute : DeviceOperator
     {
-        public OracleTimeSpanWriteMinute(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpanWriteMinute(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleTimeSpanWriteMinute(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleTimeSpanWriteMinute(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := ATimeSpan + (APart - ReadMinute(ATimeSpan)) * 600000000;
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new BinaryExpression
                     (
-                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                     "iAddition",
                     new BinaryExpression
                         (
                         new BinaryExpression
                             (
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false),
                             "iSubtraction",
-                            OracleTimeSpanUtility.ReadMinute(LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                    APlanNode.Nodes[0],
+                            OracleTimeSpanUtility.ReadMinute(localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                    planNode.Nodes[0],
                                                                                                     false))
                             ),
                         "iMultiplication",
@@ -643,30 +643,30 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleTimeSpanWriteHour : DeviceOperator
     {
-        public OracleTimeSpanWriteHour(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpanWriteHour(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleTimeSpanWriteHour(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleTimeSpanWriteHour(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := ATimeSpan + (APart - ReadHour(ATimeSpan)) * 36000000000;
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new BinaryExpression
                     (
-                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                     "iAddition",
                     new BinaryExpression
                         (
                         new BinaryExpression
                             (
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false),
                             "iSubtraction",
-                            OracleTimeSpanUtility.ReadHour(LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                  APlanNode.Nodes[0],
+                            OracleTimeSpanUtility.ReadHour(localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                  planNode.Nodes[0],
                                                                                                   false))
                             ),
                         "iMultiplication",
@@ -678,30 +678,30 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleTimeSpanWriteDay : DeviceOperator
     {
-        public OracleTimeSpanWriteDay(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpanWriteDay(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleTimeSpanWriteDay(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleTimeSpanWriteDay(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := ATimeSpan + (APart - ReadDay(ATimeSpan)) * 864000000000;
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new BinaryExpression
                     (
-                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                     "iAddition",
                     new BinaryExpression
                         (
                         new BinaryExpression
                             (
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false),
                             "iSubtraction",
-                            OracleTimeSpanUtility.ReadDay(LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                 APlanNode.Nodes[0],
+                            OracleTimeSpanUtility.ReadDay(localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                 planNode.Nodes[0],
                                                                                                  false))
                             ),
                         "iMultiplication",
@@ -713,27 +713,27 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleAddYears : DeviceOperator
     {
-        public OracleAddYears(int AID, string AName) : base(AID, AName)
+        public OracleAddYears(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleAddYears(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleAddYears(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := ADD_MONTHS(ADateTime, AYears * 12);
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new CallExpression
                     (
                     "ADD_MONTHS",
                     new[]
                         {
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                             new BinaryExpression
                                 (
-                                LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
+                                localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false),
                                 "iMultiplication",
                                 new ValueExpression(12)
                                 )
@@ -744,21 +744,21 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDayOfWeek : DeviceOperator
     {
-        public OracleDayOfWeek(int AID, string AName) : base(AID, AName)
+        public OracleDayOfWeek(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDayOfWeek(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDayOfWeek(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Char(ADateTime, 'd');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return new CallExpression("TO_CHAR",
                                       new[]
                                           {
-                                              LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                                              localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                      false), new ValueExpression("d")
                                           });
         }
@@ -766,21 +766,21 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDayOfYear : DeviceOperator
     {
-        public OracleDayOfYear(int AID, string AName) : base(AID, AName)
+        public OracleDayOfYear(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDayOfYear(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDayOfYear(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Char(ADateTime, 'ddd');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return new CallExpression("TO_CHAR",
                                       new[]
                                           {
-                                              LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                                              localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                      false), new ValueExpression("ddd")
                                           });
         }
@@ -788,21 +788,21 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeReadYear : DeviceOperator
     {
-        public OracleDateTimeReadYear(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeReadYear(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeReadYear(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeReadYear(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Char(ADateTime, 'yyyy');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return new CallExpression("TO_CHAR",
                                       new[]
                                           {
-                                              LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                                              localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                      false), new ValueExpression("yyyy")
                                           });
         }
@@ -810,21 +810,21 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeReadMonth : DeviceOperator
     {
-        public OracleDateTimeReadMonth(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeReadMonth(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeReadMonth(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeReadMonth(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Char(ADateTime, 'mm');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return new CallExpression("TO_CHAR",
                                       new[]
                                           {
-                                              LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                                              localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                      false), new ValueExpression("mm")
                                           });
         }
@@ -832,21 +832,21 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeReadDay : DeviceOperator
     {
-        public OracleDateTimeReadDay(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeReadDay(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeReadDay(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeReadDay(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Char(ADateTime, 'dd');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return new CallExpression("TO_CHAR",
                                       new[]
                                           {
-                                              LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                                              localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                      false), new ValueExpression("dd")
                                           });
         }
@@ -854,21 +854,21 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeReadHour : DeviceOperator
     {
-        public OracleDateTimeReadHour(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeReadHour(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeReadHour(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeReadHour(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Char(ADateTime, 'hh');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return new CallExpression("TO_CHAR",
                                       new[]
                                           {
-                                              LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                                              localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                      false), new ValueExpression("hh")
                                           });
         }
@@ -876,21 +876,21 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeReadMinute : DeviceOperator
     {
-        public OracleDateTimeReadMinute(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeReadMinute(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeReadMinute(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeReadMinute(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Char(ADateTime, 'mi');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return new CallExpression("TO_CHAR",
                                       new[]
                                           {
-                                              LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                                              localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                      false), new ValueExpression("mi")
                                           });
         }
@@ -898,21 +898,21 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeReadSecond : DeviceOperator
     {
-        public OracleDateTimeReadSecond(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeReadSecond(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeReadSecond(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeReadSecond(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Char(ADateTime, 'ss');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return new CallExpression("TO_CHAR",
                                       new[]
                                           {
-                                              LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0],
+                                              localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0],
                                                                                      false), new ValueExpression("ss")
                                           });
         }
@@ -920,14 +920,14 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeReadMillisecond : DeviceOperator
     {
-        public OracleDateTimeReadMillisecond(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeReadMillisecond(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeReadMillisecond(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeReadMillisecond(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             return new ValueExpression(0);
         }
@@ -935,33 +935,33 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeWriteMillisecond : DeviceOperator
     {
-        public OracleDateTimeWriteMillisecond(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeWriteMillisecond(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeWriteMillisecond(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeWriteMillisecond(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
-            return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
+            return localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
         }
     }
 
     public class OracleDateTimeWriteSecond : DeviceOperator
     {
-        public OracleDateTimeWriteSecond(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeWriteSecond(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeWriteSecond(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeWriteSecond(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(APart), 'yyyy/mm/dd hh24:mi:ss');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new CallExpression
                     (
@@ -991,10 +991,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                     new CallExpression("TO_CHAR",
                                                                                        new[]
                                                                                            {
-                                                                                               LDevicePlan.Device.
+                                                                                               localDevicePlan.Device.
                                                                                                    TranslateExpression(
-                                                                                                   LDevicePlan,
-                                                                                                   APlanNode.Nodes[0],
+                                                                                                   localDevicePlan,
+                                                                                                   planNode.Nodes[0],
                                                                                                    false),
                                                                                                new ValueExpression(
                                                                                                    "yyyy")
@@ -1006,10 +1006,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                 new CallExpression("TO_CHAR",
                                                                                    new[]
                                                                                        {
-                                                                                           LDevicePlan.Device.
+                                                                                           localDevicePlan.Device.
                                                                                                TranslateExpression(
-                                                                                               LDevicePlan,
-                                                                                               APlanNode.Nodes[0], false)
+                                                                                               localDevicePlan,
+                                                                                               planNode.Nodes[0], false)
                                                                                            , new ValueExpression("mm")
                                                                                        })
                                                                 ),
@@ -1020,9 +1020,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                         new CallExpression("TO_CHAR",
                                                                            new[]
                                                                                {
-                                                                                   LDevicePlan.Device.
-                                                                                       TranslateExpression(LDevicePlan,
-                                                                                                           APlanNode.
+                                                                                   localDevicePlan.Device.
+                                                                                       TranslateExpression(localDevicePlan,
+                                                                                                           planNode.
                                                                                                                Nodes[0],
                                                                                                            false),
                                                                                    new ValueExpression("dd")
@@ -1035,8 +1035,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                 new CallExpression("TO_CHAR",
                                                                    new[]
                                                                        {
-                                                                           LDevicePlan.Device.TranslateExpression(
-                                                                               LDevicePlan, APlanNode.Nodes[0], false),
+                                                                           localDevicePlan.Device.TranslateExpression(
+                                                                               localDevicePlan, planNode.Nodes[0], false),
                                                                            new ValueExpression("hh24")
                                                                        })
                                                 ),
@@ -1047,8 +1047,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                         new CallExpression("TO_CHAR",
                                                            new[]
                                                                {
-                                                                   LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                          APlanNode.
+                                                                   localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                          planNode.
                                                                                                               Nodes[0],
                                                                                                           false),
                                                                    new ValueExpression("mi")
@@ -1061,8 +1061,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                 new CallExpression("TO_CHAR",
                                                    new[]
                                                        {
-                                                           LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                  APlanNode.Nodes[1],
+                                                           localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                  planNode.Nodes[1],
                                                                                                   false)
                                                        })
                                 ),
@@ -1074,17 +1074,17 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeWriteMinute : DeviceOperator
     {
-        public OracleDateTimeWriteMinute(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeWriteMinute(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeWriteMinute(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeWriteMinute(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(APart) || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new CallExpression
                     (
@@ -1114,10 +1114,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                     new CallExpression("TO_CHAR",
                                                                                        new[]
                                                                                            {
-                                                                                               LDevicePlan.Device.
+                                                                                               localDevicePlan.Device.
                                                                                                    TranslateExpression(
-                                                                                                   LDevicePlan,
-                                                                                                   APlanNode.Nodes[0],
+                                                                                                   localDevicePlan,
+                                                                                                   planNode.Nodes[0],
                                                                                                    false),
                                                                                                new ValueExpression(
                                                                                                    "yyyy")
@@ -1129,10 +1129,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                 new CallExpression("TO_CHAR",
                                                                                    new[]
                                                                                        {
-                                                                                           LDevicePlan.Device.
+                                                                                           localDevicePlan.Device.
                                                                                                TranslateExpression(
-                                                                                               LDevicePlan,
-                                                                                               APlanNode.Nodes[0], false)
+                                                                                               localDevicePlan,
+                                                                                               planNode.Nodes[0], false)
                                                                                            , new ValueExpression("mm")
                                                                                        })
                                                                 ),
@@ -1143,9 +1143,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                         new CallExpression("TO_CHAR",
                                                                            new[]
                                                                                {
-                                                                                   LDevicePlan.Device.
-                                                                                       TranslateExpression(LDevicePlan,
-                                                                                                           APlanNode.
+                                                                                   localDevicePlan.Device.
+                                                                                       TranslateExpression(localDevicePlan,
+                                                                                                           planNode.
                                                                                                                Nodes[0],
                                                                                                            false),
                                                                                    new ValueExpression("dd")
@@ -1158,8 +1158,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                 new CallExpression("TO_CHAR",
                                                                    new[]
                                                                        {
-                                                                           LDevicePlan.Device.TranslateExpression(
-                                                                               LDevicePlan, APlanNode.Nodes[0], false),
+                                                                           localDevicePlan.Device.TranslateExpression(
+                                                                               localDevicePlan, planNode.Nodes[0], false),
                                                                            new ValueExpression("hh24")
                                                                        })
                                                 ),
@@ -1170,8 +1170,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                         new CallExpression("TO_CHAR",
                                                            new[]
                                                                {
-                                                                   LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                          APlanNode.
+                                                                   localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                          planNode.
                                                                                                               Nodes[1],
                                                                                                           false)
                                                                })
@@ -1183,8 +1183,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                 new CallExpression("TO_CHAR",
                                                    new[]
                                                        {
-                                                           LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                  APlanNode.Nodes[0],
+                                                           localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                  planNode.Nodes[0],
                                                                                                   false),
                                                            new ValueExpression("ss")
                                                        })
@@ -1197,17 +1197,17 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeWriteHour : DeviceOperator
     {
-        public OracleDateTimeWriteHour(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeWriteHour(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeWriteHour(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeWriteHour(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(APart) || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new CallExpression
                     (
@@ -1237,10 +1237,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                     new CallExpression("TO_CHAR",
                                                                                        new[]
                                                                                            {
-                                                                                               LDevicePlan.Device.
+                                                                                               localDevicePlan.Device.
                                                                                                    TranslateExpression(
-                                                                                                   LDevicePlan,
-                                                                                                   APlanNode.Nodes[0],
+                                                                                                   localDevicePlan,
+                                                                                                   planNode.Nodes[0],
                                                                                                    false),
                                                                                                new ValueExpression(
                                                                                                    "yyyy")
@@ -1252,10 +1252,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                 new CallExpression("TO_CHAR",
                                                                                    new[]
                                                                                        {
-                                                                                           LDevicePlan.Device.
+                                                                                           localDevicePlan.Device.
                                                                                                TranslateExpression(
-                                                                                               LDevicePlan,
-                                                                                               APlanNode.Nodes[0], false)
+                                                                                               localDevicePlan,
+                                                                                               planNode.Nodes[0], false)
                                                                                            , new ValueExpression("mm")
                                                                                        })
                                                                 ),
@@ -1266,9 +1266,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                         new CallExpression("TO_CHAR",
                                                                            new[]
                                                                                {
-                                                                                   LDevicePlan.Device.
-                                                                                       TranslateExpression(LDevicePlan,
-                                                                                                           APlanNode.
+                                                                                   localDevicePlan.Device.
+                                                                                       TranslateExpression(localDevicePlan,
+                                                                                                           planNode.
                                                                                                                Nodes[0],
                                                                                                            false),
                                                                                    new ValueExpression("dd")
@@ -1281,8 +1281,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                 new CallExpression("TO_CHAR",
                                                                    new[]
                                                                        {
-                                                                           LDevicePlan.Device.TranslateExpression(
-                                                                               LDevicePlan, APlanNode.Nodes[1], false)
+                                                                           localDevicePlan.Device.TranslateExpression(
+                                                                               localDevicePlan, planNode.Nodes[1], false)
                                                                        })
                                                 ),
                                             "iConcatenation",
@@ -1292,8 +1292,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                         new CallExpression("TO_CHAR",
                                                            new[]
                                                                {
-                                                                   LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                          APlanNode.
+                                                                   localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                          planNode.
                                                                                                               Nodes[0],
                                                                                                           false),
                                                                    new ValueExpression("mi")
@@ -1306,8 +1306,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                 new CallExpression("TO_CHAR",
                                                    new[]
                                                        {
-                                                           LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                  APlanNode.Nodes[0],
+                                                           localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                  planNode.Nodes[0],
                                                                                                   false),
                                                            new ValueExpression("ss")
                                                        })
@@ -1320,17 +1320,17 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeWriteDay : DeviceOperator
     {
-        public OracleDateTimeWriteDay(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeWriteDay(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeWriteDay(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeWriteDay(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(APart) || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new CallExpression
                     (
@@ -1360,10 +1360,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                     new CallExpression("TO_CHAR",
                                                                                        new[]
                                                                                            {
-                                                                                               LDevicePlan.Device.
+                                                                                               localDevicePlan.Device.
                                                                                                    TranslateExpression(
-                                                                                                   LDevicePlan,
-                                                                                                   APlanNode.Nodes[0],
+                                                                                                   localDevicePlan,
+                                                                                                   planNode.Nodes[0],
                                                                                                    false),
                                                                                                new ValueExpression(
                                                                                                    "yyyy")
@@ -1375,10 +1375,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                 new CallExpression("TO_CHAR",
                                                                                    new[]
                                                                                        {
-                                                                                           LDevicePlan.Device.
+                                                                                           localDevicePlan.Device.
                                                                                                TranslateExpression(
-                                                                                               LDevicePlan,
-                                                                                               APlanNode.Nodes[0], false)
+                                                                                               localDevicePlan,
+                                                                                               planNode.Nodes[0], false)
                                                                                            , new ValueExpression("mm")
                                                                                        })
                                                                 ),
@@ -1389,9 +1389,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                         new CallExpression("TO_CHAR",
                                                                            new[]
                                                                                {
-                                                                                   LDevicePlan.Device.
-                                                                                       TranslateExpression(LDevicePlan,
-                                                                                                           APlanNode.
+                                                                                   localDevicePlan.Device.
+                                                                                       TranslateExpression(localDevicePlan,
+                                                                                                           planNode.
                                                                                                                Nodes[1],
                                                                                                            false)
                                                                                })
@@ -1403,8 +1403,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                 new CallExpression("TO_CHAR",
                                                                    new[]
                                                                        {
-                                                                           LDevicePlan.Device.TranslateExpression(
-                                                                               LDevicePlan, APlanNode.Nodes[0], false),
+                                                                           localDevicePlan.Device.TranslateExpression(
+                                                                               localDevicePlan, planNode.Nodes[0], false),
                                                                            new ValueExpression("hh24")
                                                                        })
                                                 ),
@@ -1415,8 +1415,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                         new CallExpression("TO_CHAR",
                                                            new[]
                                                                {
-                                                                   LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                          APlanNode.
+                                                                   localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                          planNode.
                                                                                                               Nodes[0],
                                                                                                           false),
                                                                    new ValueExpression("mi")
@@ -1429,8 +1429,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                 new CallExpression("TO_CHAR",
                                                    new[]
                                                        {
-                                                           LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                  APlanNode.Nodes[0],
+                                                           localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                  planNode.Nodes[0],
                                                                                                   false),
                                                            new ValueExpression("ss")
                                                        })
@@ -1443,17 +1443,17 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeWriteMonth : DeviceOperator
     {
-        public OracleDateTimeWriteMonth(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeWriteMonth(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeWriteMonth(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeWriteMonth(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(APart) || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new CallExpression
                     (
@@ -1483,10 +1483,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                     new CallExpression("TO_CHAR",
                                                                                        new[]
                                                                                            {
-                                                                                               LDevicePlan.Device.
+                                                                                               localDevicePlan.Device.
                                                                                                    TranslateExpression(
-                                                                                                   LDevicePlan,
-                                                                                                   APlanNode.Nodes[0],
+                                                                                                   localDevicePlan,
+                                                                                                   planNode.Nodes[0],
                                                                                                    false),
                                                                                                new ValueExpression(
                                                                                                    "yyyy")
@@ -1498,10 +1498,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                 new CallExpression("TO_CHAR",
                                                                                    new[]
                                                                                        {
-                                                                                           LDevicePlan.Device.
+                                                                                           localDevicePlan.Device.
                                                                                                TranslateExpression(
-                                                                                               LDevicePlan,
-                                                                                               APlanNode.Nodes[1], false)
+                                                                                               localDevicePlan,
+                                                                                               planNode.Nodes[1], false)
                                                                                        })
                                                                 ),
                                                             "iConcatenation",
@@ -1511,9 +1511,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                         new CallExpression("TO_CHAR",
                                                                            new[]
                                                                                {
-                                                                                   LDevicePlan.Device.
-                                                                                       TranslateExpression(LDevicePlan,
-                                                                                                           APlanNode.
+                                                                                   localDevicePlan.Device.
+                                                                                       TranslateExpression(localDevicePlan,
+                                                                                                           planNode.
                                                                                                                Nodes[0],
                                                                                                            false),
                                                                                    new ValueExpression("dd")
@@ -1526,8 +1526,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                 new CallExpression("TO_CHAR",
                                                                    new[]
                                                                        {
-                                                                           LDevicePlan.Device.TranslateExpression(
-                                                                               LDevicePlan, APlanNode.Nodes[0], false),
+                                                                           localDevicePlan.Device.TranslateExpression(
+                                                                               localDevicePlan, planNode.Nodes[0], false),
                                                                            new ValueExpression("hh24")
                                                                        })
                                                 ),
@@ -1538,8 +1538,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                         new CallExpression("TO_CHAR",
                                                            new[]
                                                                {
-                                                                   LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                          APlanNode.
+                                                                   localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                          planNode.
                                                                                                               Nodes[0],
                                                                                                           false),
                                                                    new ValueExpression("mi")
@@ -1552,8 +1552,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                 new CallExpression("TO_CHAR",
                                                    new[]
                                                        {
-                                                           LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                  APlanNode.Nodes[0],
+                                                           localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                  planNode.Nodes[0],
                                                                                                   false),
                                                            new ValueExpression("ss")
                                                        })
@@ -1566,17 +1566,17 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeWriteYear : DeviceOperator
     {
-        public OracleDateTimeWriteYear(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeWriteYear(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeWriteYear(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeWriteYear(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := To_Date(To_Char(APart) || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new CallExpression
                     (
@@ -1606,10 +1606,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                     new CallExpression("TO_CHAR",
                                                                                        new[]
                                                                                            {
-                                                                                               LDevicePlan.Device.
+                                                                                               localDevicePlan.Device.
                                                                                                    TranslateExpression(
-                                                                                                   LDevicePlan,
-                                                                                                   APlanNode.Nodes[1],
+                                                                                                   localDevicePlan,
+                                                                                                   planNode.Nodes[1],
                                                                                                    false)
                                                                                            }),
                                                                     "iConcatenation",
@@ -1619,10 +1619,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                 new CallExpression("TO_CHAR",
                                                                                    new[]
                                                                                        {
-                                                                                           LDevicePlan.Device.
+                                                                                           localDevicePlan.Device.
                                                                                                TranslateExpression(
-                                                                                               LDevicePlan,
-                                                                                               APlanNode.Nodes[0], false)
+                                                                                               localDevicePlan,
+                                                                                               planNode.Nodes[0], false)
                                                                                            , new ValueExpression("mm")
                                                                                        })
                                                                 ),
@@ -1633,9 +1633,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                         new CallExpression("TO_CHAR",
                                                                            new[]
                                                                                {
-                                                                                   LDevicePlan.Device.
-                                                                                       TranslateExpression(LDevicePlan,
-                                                                                                           APlanNode.
+                                                                                   localDevicePlan.Device.
+                                                                                       TranslateExpression(localDevicePlan,
+                                                                                                           planNode.
                                                                                                                Nodes[0],
                                                                                                            false),
                                                                                    new ValueExpression("dd")
@@ -1648,8 +1648,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                 new CallExpression("TO_CHAR",
                                                                    new[]
                                                                        {
-                                                                           LDevicePlan.Device.TranslateExpression(
-                                                                               LDevicePlan, APlanNode.Nodes[0], false),
+                                                                           localDevicePlan.Device.TranslateExpression(
+                                                                               localDevicePlan, planNode.Nodes[0], false),
                                                                            new ValueExpression("hh24")
                                                                        })
                                                 ),
@@ -1660,8 +1660,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                         new CallExpression("TO_CHAR",
                                                            new[]
                                                                {
-                                                                   LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                          APlanNode.
+                                                                   localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                          planNode.
                                                                                                               Nodes[0],
                                                                                                           false),
                                                                    new ValueExpression("mi")
@@ -1674,8 +1674,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                 new CallExpression("TO_CHAR",
                                                    new[]
                                                        {
-                                                           LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                  APlanNode.Nodes[0],
+                                                           localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                  planNode.Nodes[0],
                                                                                                   false),
                                                            new ValueExpression("ss")
                                                        })
@@ -1688,17 +1688,17 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeDatePart : DeviceOperator
     {
-        public OracleDateTimeDatePart(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeDatePart(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeDatePart(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeDatePart(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnValue := TO_DATE(TO_CHAR(ADateTime, 'yyyy') || '/' || TO_CHAR(ADateTime, 'mm') || '/' TO_CHAR(ADateTime, 'dd'), "yyyy/mm/dd");
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new CallExpression
                     (
@@ -1716,8 +1716,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                             new CallExpression("TO_CHAR",
                                                                new[]
                                                                    {
-                                                                       LDevicePlan.Device.TranslateExpression(
-                                                                           LDevicePlan, APlanNode.Nodes[0], false),
+                                                                       localDevicePlan.Device.TranslateExpression(
+                                                                           localDevicePlan, planNode.Nodes[0], false),
                                                                        new ValueExpression("yyyy")
                                                                    }),
                                             "iConcatenation",
@@ -1727,8 +1727,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                         new CallExpression("TO_CHAR",
                                                            new[]
                                                                {
-                                                                   LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                          APlanNode.
+                                                                   localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                          planNode.
                                                                                                               Nodes[0],
                                                                                                           false),
                                                                    new ValueExpression("mm")
@@ -1741,8 +1741,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                 new CallExpression("TO_CHAR",
                                                    new[]
                                                        {
-                                                           LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                  APlanNode.Nodes[0],
+                                                           localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                  planNode.Nodes[0],
                                                                                                   false),
                                                            new ValueExpression("dd")
                                                        })
@@ -1755,17 +1755,17 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeTimePart : DeviceOperator
     {
-        public OracleDateTimeTimePart(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeTimePart(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeTimePart(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeTimePart(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnValue := TO_DATE(TO_CHAR(ADateTime, 'hh24') || '/' || TO_CHAR(ADateTime, 'mi') || '/' TO_CHAR(ADateTime, 'ss'), "hh24:mi:ss");
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new CallExpression
                     (
@@ -1783,8 +1783,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                             new CallExpression("TO_CHAR",
                                                                new[]
                                                                    {
-                                                                       LDevicePlan.Device.TranslateExpression(
-                                                                           LDevicePlan, APlanNode.Nodes[0], false),
+                                                                       localDevicePlan.Device.TranslateExpression(
+                                                                           localDevicePlan, planNode.Nodes[0], false),
                                                                        new ValueExpression("hh24")
                                                                    }),
                                             "iConcatenation",
@@ -1794,8 +1794,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                         new CallExpression("TO_CHAR",
                                                            new[]
                                                                {
-                                                                   LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                          APlanNode.
+                                                                   localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                          planNode.
                                                                                                               Nodes[0],
                                                                                                           false),
                                                                    new ValueExpression("mi")
@@ -1808,8 +1808,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                 new CallExpression("TO_CHAR",
                                                    new[]
                                                        {
-                                                           LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                  APlanNode.Nodes[0],
+                                                           localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                  planNode.Nodes[0],
                                                                                                   false),
                                                            new ValueExpression("ss")
                                                        })
@@ -1822,17 +1822,17 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeSelector : DeviceOperator
     {
-        public OracleDateTimeSelector(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeSelector(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeSelector(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeSelector(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             // TO_DATE(TO_CHAR(AYears) || "/" || TO_CHAR(AMonths) || "/" || TO_CHAR(ADays) || " " || TO_CHAR(AHours) || ":" || TO_CHAR(AMinutes) ":" || TO_CHAR(ASeconds), "yyyy/mm/dd hh24:mi:ss")
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new CallExpression
                     (
@@ -1862,10 +1862,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                     new CallExpression("TO_CHAR",
                                                                                        new[]
                                                                                            {
-                                                                                               LDevicePlan.Device.
+                                                                                               localDevicePlan.Device.
                                                                                                    TranslateExpression(
-                                                                                                   LDevicePlan,
-                                                                                                   APlanNode.Nodes[0],
+                                                                                                   localDevicePlan,
+                                                                                                   planNode.Nodes[0],
                                                                                                    false)
                                                                                            }),
                                                                     "iConcatenation",
@@ -1875,11 +1875,11 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                                 new CallExpression("TO_CHAR",
                                                                                    new[]
                                                                                        {
-                                                                                           APlanNode.Nodes.Count > 1
-                                                                                               ? LDevicePlan.Device.
+                                                                                           planNode.Nodes.Count > 1
+                                                                                               ? localDevicePlan.Device.
                                                                                                      TranslateExpression
-                                                                                                     (LDevicePlan,
-                                                                                                      APlanNode.Nodes[1],
+                                                                                                     (localDevicePlan,
+                                                                                                      planNode.Nodes[1],
                                                                                                       false)
                                                                                                : new ValueExpression(1)
                                                                                        })
@@ -1891,11 +1891,11 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                         new CallExpression("TO_CHAR",
                                                                            new[]
                                                                                {
-                                                                                   APlanNode.Nodes.Count > 2
-                                                                                       ? LDevicePlan.Device.
+                                                                                   planNode.Nodes.Count > 2
+                                                                                       ? localDevicePlan.Device.
                                                                                              TranslateExpression(
-                                                                                             LDevicePlan,
-                                                                                             APlanNode.Nodes[2], false)
+                                                                                             localDevicePlan,
+                                                                                             planNode.Nodes[2], false)
                                                                                        : new ValueExpression(1)
                                                                                })
                                                         ),
@@ -1906,9 +1906,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                 new CallExpression("TO_CHAR",
                                                                    new[]
                                                                        {
-                                                                           APlanNode.Nodes.Count > 3
-                                                                               ? LDevicePlan.Device.TranslateExpression(
-                                                                                     LDevicePlan, APlanNode.Nodes[3],
+                                                                           planNode.Nodes.Count > 3
+                                                                               ? localDevicePlan.Device.TranslateExpression(
+                                                                                     localDevicePlan, planNode.Nodes[3],
                                                                                      false)
                                                                                : new ValueExpression(12)
                                                                        })
@@ -1920,9 +1920,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                         new CallExpression("TO_CHAR",
                                                            new[]
                                                                {
-                                                                   APlanNode.Nodes.Count > 4
-                                                                       ? LDevicePlan.Device.TranslateExpression(
-                                                                             LDevicePlan, APlanNode.Nodes[4], false)
+                                                                   planNode.Nodes.Count > 4
+                                                                       ? localDevicePlan.Device.TranslateExpression(
+                                                                             localDevicePlan, planNode.Nodes[4], false)
                                                                        : new ValueExpression(0)
                                                                })
                                         ),
@@ -1933,9 +1933,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                 new CallExpression("TO_CHAR",
                                                    new[]
                                                        {
-                                                           APlanNode.Nodes.Count > 5
-                                                               ? LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                        APlanNode.Nodes[
+                                                           planNode.Nodes.Count > 5
+                                                               ? localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                        planNode.Nodes[
                                                                                                             5], false)
                                                                : new ValueExpression(0)
                                                        })
@@ -1948,17 +1948,17 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleDateTimeToTimeSpan : DeviceOperator
     {
-        public OracleDateTimeToTimeSpan(int AID, string AName) : base(AID, AName)
+        public OracleDateTimeToTimeSpan(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleDateTimeToTimeSpan(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleDateTimeToTimeSpan(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := 631139040000000000 + ((ADateTime - TO_DATE('01-JAN-2001')) * 86400 + TO_CHAR(ADateTime, 'sssss')) * 10000000;
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new BinaryExpression
                     (
@@ -1972,7 +1972,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                 (
                                 new BinaryExpression
                                     (
-                                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                                     "iSubtraction",
                                     new CallExpression("TO_DATE", new Expression[] {new ValueExpression("01-JAN-2001")})
                                     ),
@@ -1983,8 +1983,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                             new CallExpression("TO_CHAR",
                                                new[]
                                                    {
-                                                       LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                              APlanNode.Nodes[0], false)
+                                                       localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                              planNode.Nodes[0], false)
                                                        , new ValueExpression("sssss")
                                                    })
                             ),
@@ -1997,17 +1997,17 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleTimeSpanToDateTime : DeviceOperator
     {
-        public OracleTimeSpanToDateTime(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpanToDateTime(int iD, string name) : base(iD, name)
         {
         }
 
         //public OracleTimeSpanToDateTime(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
         //public OracleTimeSpanToDateTime(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             //LReturnVal := TRUNC((ATimeSpan - 630822816000000000) / 864000000000) + TO_DATE(20000101 * 100000 + TRUNC(MOD((ATimeSpan / 10000000), 86400)), 'yyyy dd mm sssss');
-            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan) devicePlan;
             return
                 new BinaryExpression
                     (
@@ -2020,7 +2020,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                     (
                                     new BinaryExpression
                                         (
-                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                        localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                                         "iSubtraction",
                                         new ValueExpression(630822816000000000d)
                                         ),
@@ -2056,8 +2056,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                                                         {
                                                             new BinaryExpression
                                                                 (
-                                                                LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                       APlanNode.Nodes[0
+                                                                localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                       planNode.Nodes[0
                                                                                                            ], false),
                                                                 "iDivision",
                                                                 new ValueExpression(10000000)

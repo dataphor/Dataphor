@@ -12,20 +12,20 @@ namespace Alphora.Dataphor.DAE.Server
 	// Catalog Caches
 	public class CatalogCache : System.Object
 	{
-		public CatalogCache(string ACacheName, long ACacheTimeStamp, Schema.Catalog ADefaultCachedObjects) : base()
+		public CatalogCache(string cacheName, long cacheTimeStamp, Schema.Catalog defaultCachedObjects) : base()
 		{
-			FCacheName = ACacheName;
-			FCacheTimeStamp = ACacheTimeStamp;
-			PopulateDefaultCachedObjects(ADefaultCachedObjects);
+			_cacheName = cacheName;
+			_cacheTimeStamp = cacheTimeStamp;
+			PopulateDefaultCachedObjects(defaultCachedObjects);
 		}
 		
-		private string FCacheName;
-		public string CacheName { get { return FCacheName; } }
+		private string _cacheName;
+		public string CacheName { get { return _cacheName; } }
 		
 		// CacheTimeStamp
 		// The time stamp of the server-side catalog when this cache was built
-		private long FCacheTimeStamp;
-		public long CacheTimeStamp { get { return FCacheTimeStamp; } }
+		private long _cacheTimeStamp;
+		public long CacheTimeStamp { get { return _cacheTimeStamp; } }
 		
 		// TimeStamp
 		// A logical clock used to coordinate changes to the cache with the client
@@ -34,130 +34,130 @@ namespace Alphora.Dataphor.DAE.Server
 		// the client-side must wait until the client-side cache timestamp is timestamp - 1 in order for the cache to be ready
 		// to apply the changes in the deserialization script. A timeout waiting for the timestamp to update will result in an
 		// UpdateTimeStamps call to the server to reset the caching system.
-		private long FTimeStamp = 1;
-		public long TimeStamp { get { return FTimeStamp; } }
+		private long _timeStamp = 1;
+		public long TimeStamp { get { return _timeStamp; } }
 		
 		public void UpdateTimeStamp()
 		{
-			FTimeStamp += 1;
+			_timeStamp += 1;
 		}
 		
-		public bool EnsureConsistent(long ACacheTimeStamp, Schema.Catalog ADefaultCachedObjects)
+		public bool EnsureConsistent(long cacheTimeStamp, Schema.Catalog defaultCachedObjects)
 		{
-			if (ACacheTimeStamp > FCacheTimeStamp)
+			if (cacheTimeStamp > _cacheTimeStamp)
 			{
-				FCachedObjects.Clear();
-				FCacheTimeStamp = ACacheTimeStamp;
-				PopulateDefaultCachedObjects(ADefaultCachedObjects);
+				_cachedObjects.Clear();
+				_cacheTimeStamp = cacheTimeStamp;
+				PopulateDefaultCachedObjects(defaultCachedObjects);
 				UpdateTimeStamp();
 				return true;
 			}
 			return false;
 		}
 		
-		private void PopulateDefaultCachedObjects(Schema.Catalog ADefaultCachedObjects)
+		private void PopulateDefaultCachedObjects(Schema.Catalog defaultCachedObjects)
 		{
-			foreach (Schema.Object LObject in ADefaultCachedObjects)
-				FCachedObjects.Add(LObject);
+			foreach (Schema.Object objectValue in defaultCachedObjects)
+				_cachedObjects.Add(objectValue);
 		}
 		
-		private Schema.Objects FCachedObjects = new Schema.Objects();
-		public Schema.Objects CachedObjects { get { return FCachedObjects; } }
+		private Schema.Objects _cachedObjects = new Schema.Objects();
+		public Schema.Objects CachedObjects { get { return _cachedObjects; } }
 		
-		private RemoteServerSessions FSessions = new RemoteServerSessions(false);
-		public RemoteServerSessions Sessions { get { return FSessions; } }
+		private RemoteServerSessions _sessions = new RemoteServerSessions(false);
+		public RemoteServerSessions Sessions { get { return _sessions; } }
 	}
 	
 	public class CatalogCaches : System.Object
 	{
-		private Hashtable FCaches = new Hashtable();
-		private Schema.Catalog FDefaultCachedObjects = new Schema.Catalog();
+		private Hashtable _caches = new Hashtable();
+		private Schema.Catalog _defaultCachedObjects = new Schema.Catalog();
 		
-		public void AddSession(RemoteServerSession ASession)
+		public void AddSession(RemoteServerSession session)
 		{
 			lock (this)
 			{
-				CatalogCache LCache = (CatalogCache)FCaches[ASession.CatalogCacheName];
-				if (LCache == null)
+				CatalogCache cache = (CatalogCache)_caches[session.CatalogCacheName];
+				if (cache == null)
 				{
-					LCache = new CatalogCache(ASession.CatalogCacheName, ASession.Server.CacheTimeStamp, FDefaultCachedObjects);
-					FCaches.Add(LCache.CacheName, LCache);
+					cache = new CatalogCache(session.CatalogCacheName, session.Server.CacheTimeStamp, _defaultCachedObjects);
+					_caches.Add(cache.CacheName, cache);
 				}
 				
-				LCache.Sessions.Add(ASession);
+				cache.Sessions.Add(session);
 			}
 		}
 		
-		public void RemoveSession(RemoteServerSession ASession)
+		public void RemoveSession(RemoteServerSession session)
 		{
 			lock (this)
 			{
-				CatalogCache LCache = (CatalogCache)FCaches[ASession.CatalogCacheName];
-				if (LCache != null)
-					LCache.Sessions.Remove(ASession);
+				CatalogCache cache = (CatalogCache)_caches[session.CatalogCacheName];
+				if (cache != null)
+					cache.Sessions.Remove(session);
 			}
 		}
 		
-		public void RemoveCache(string ACatalogCacheName)
+		public void RemoveCache(string catalogCacheName)
 		{
 			lock (this)
 			{
-				CatalogCache LCache = (CatalogCache)FCaches[ACatalogCacheName];
-				if (LCache != null)
-					FCaches.Remove(ACatalogCacheName);
+				CatalogCache cache = (CatalogCache)_caches[catalogCacheName];
+				if (cache != null)
+					_caches.Remove(catalogCacheName);
 			}
 		}
 		
-		public string[] GetRequiredObjects(RemoteServerSession ASession, Schema.Catalog ACatalog, long ACacheTimeStamp, out long AClientCacheTimeStamp)
+		public string[] GetRequiredObjects(RemoteServerSession session, Schema.Catalog catalog, long cacheTimeStamp, out long clientCacheTimeStamp)
 		{
-			List<string> LRequiredObjects = new List<string>();
-			CatalogCache LCache = (CatalogCache)FCaches[ASession.CatalogCacheName];
+			List<string> requiredObjects = new List<string>();
+			CatalogCache cache = (CatalogCache)_caches[session.CatalogCacheName];
 
-			lock (LCache)
+			lock (cache)
 			{
-				bool LCacheChanged = LCache.EnsureConsistent(ACacheTimeStamp, FDefaultCachedObjects);
-				foreach (Schema.Object LObject in ACatalog)
-					if (!LCache.CachedObjects.ContainsName(LObject.Name))
+				bool cacheChanged = cache.EnsureConsistent(cacheTimeStamp, _defaultCachedObjects);
+				foreach (Schema.Object objectValue in catalog)
+					if (!cache.CachedObjects.ContainsName(objectValue.Name))
 					{
-						if (!((LObject is Schema.DerivedTableVar) && (LObject.Name == ((Schema.DerivedTableVar)LObject).SessionObjectName)))
-							LCache.CachedObjects.Add(LObject);
-						LRequiredObjects.Add(LObject.Name);
+						if (!((objectValue is Schema.DerivedTableVar) && (objectValue.Name == ((Schema.DerivedTableVar)objectValue).SessionObjectName)))
+							cache.CachedObjects.Add(objectValue);
+						requiredObjects.Add(objectValue.Name);
 					}
 					
-				if (!LCacheChanged)
-					LCache.UpdateTimeStamp();
+				if (!cacheChanged)
+					cache.UpdateTimeStamp();
 					
-				AClientCacheTimeStamp = LCache.TimeStamp;
+				clientCacheTimeStamp = cache.TimeStamp;
 			}
 
-			string[] LResult = new string[LRequiredObjects.Count];
-			LRequiredObjects.CopyTo(LResult, 0);
+			string[] result = new string[requiredObjects.Count];
+			requiredObjects.CopyTo(result, 0);
 
 			#if LOGCACHEEVENTS
-			ASession.Server.LogMessage(String.Format("Session {0} cache timestamp updated to {1} with required objects: {2}", ASession.SessionID.ToString(), AClientCacheTimeStamp.ToString(), ExceptionUtility.StringsToCommaList(LRequiredObjects)));
+			ASession.Server.LogMessage(String.Format("Session {0} cache timestamp updated to {1} with required objects: {2}", ASession.SessionID.ToString(), AClientCacheTimeStamp.ToString(), ExceptionUtility.StringsToCommaList(requiredObjects)));
 			#endif
 
-			return LResult;
+			return result;
 		}
 
-		public void RemovePlanDescriptor(RemoteServerSession ASession, string ACatalogObjectName)
+		public void RemovePlanDescriptor(RemoteServerSession session, string catalogObjectName)
 		{
-			CatalogCache LCache = (CatalogCache)FCaches[ASession.CatalogCacheName];
-			if (LCache != null)
+			CatalogCache cache = (CatalogCache)_caches[session.CatalogCacheName];
+			if (cache != null)
 			{
-				lock (LCache)
+				lock (cache)
 				{
-					int LIndex = LCache.CachedObjects.IndexOfName(ACatalogObjectName);
-					if (LIndex >= 0)
-						LCache.CachedObjects.RemoveAt(LIndex);
+					int index = cache.CachedObjects.IndexOfName(catalogObjectName);
+					if (index >= 0)
+						cache.CachedObjects.RemoveAt(index);
 				}
 			}
 		}
 		
-		public void GatherDefaultCachedObjects(Schema.Objects ABaseObjects)
+		public void GatherDefaultCachedObjects(Schema.Objects baseObjects)
 		{
-			for (int LIndex = 0; LIndex < ABaseObjects.Count; LIndex++)
-				FDefaultCachedObjects.Add(ABaseObjects[LIndex]);
+			for (int index = 0; index < baseObjects.Count; index++)
+				_defaultCachedObjects.Add(baseObjects[index]);
 		}
 	}
 }

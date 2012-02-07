@@ -14,38 +14,38 @@ namespace Alphora.Dataphor.DAE.Compiling
 	
 	public class OperatorMap : Schema.Object
     {
-		public OperatorMap(string AName) : base(AName)
+		public OperatorMap(string name) : base(name)
 		{
-			FSignatures = new OperatorSignatures(null);
+			_signatures = new OperatorSignatures(null);
 		}
 		
-		protected OperatorSignatures FSignatures;
+		protected OperatorSignatures _signatures;
 		
-		public OperatorSignatures Signatures { get { return FSignatures; } }
+		public OperatorSignatures Signatures { get { return _signatures; } }
 		
 		public int SignatureCount
 		{
-			get { return FSignatures.Count; }
+			get { return _signatures.Count; }
 		}
 		
-		public void AddSignature(Operator AOperator)
+		public void AddSignature(Operator operatorValue)
 		{
-			FSignatures.Add(new OperatorSignature(AOperator));
+			_signatures.Add(new OperatorSignature(operatorValue));
 		}
 		
-		public void RemoveSignature(Signature ASignature)
+		public void RemoveSignature(Signature signature)
 		{
-			FSignatures.Remove(ASignature);
+			_signatures.Remove(signature);
 		}
 		
-		public bool ContainsSignature(Signature ASignature)
+		public bool ContainsSignature(Signature signature)
 		{
-			return FSignatures.Contains(ASignature);
+			return _signatures.Contains(signature);
 		}
 		
-		public void ResolveSignature(Plan APlan, OperatorBindingContext AContext)
+		public void ResolveSignature(Plan plan, OperatorBindingContext context)
 		{
-			FSignatures.Resolve(APlan, AContext);
+			_signatures.Resolve(plan, context);
 		}
 
 		#if USEVIRTUAL		
@@ -58,25 +58,25 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public string ShowMap()
 		{
-			StringBuilder LString = new StringBuilder(Name);
-			LString.Append(":\n");
-			LString.Append(FSignatures.ShowSignatures(1));
-			return LString.ToString();
+			StringBuilder stringValue = new StringBuilder(Name);
+			stringValue.Append(":\n");
+			stringValue.Append(_signatures.ShowSignatures(1));
+			return stringValue.ToString();
 		}
     }
     
 	public class OperatorMaps : Schema.Objects
     {		
-		public new OperatorMap this[int AIndex]
+		public new OperatorMap this[int index]
 		{
-			get { return (OperatorMap)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (OperatorMap)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public new OperatorMap this[string AName]
+		public new OperatorMap this[string name]
 		{
-			get { return (OperatorMap)base[AName]; }
-			set { base[AName] = value; }
+			get { return (OperatorMap)base[name]; }
+			set { base[name] = value; }
 		}
 		
 		#if SINGLENAMESPACE
@@ -87,167 +87,167 @@ namespace Alphora.Dataphor.DAE.Compiling
 		}
 		#endif
 		
-		public void ResolveCall(Plan APlan, OperatorBindingContext AContext)
+		public void ResolveCall(Plan plan, OperatorBindingContext context)
 		{
 			lock (this)
 			{
-				bool LDidResolve = false;
-				IntegerList LIndexes = InternalIndexesOf(AContext.OperatorName);
-				OperatorBindingContext LContext = new OperatorBindingContext(AContext.Statement, AContext.OperatorName, AContext.ResolutionPath, AContext.CallSignature, AContext.IsExact);
-				for (int LIndex = 0; LIndex < LIndexes.Count; LIndex++)
+				bool didResolve = false;
+				IntegerList indexes = InternalIndexesOf(context.OperatorName);
+				OperatorBindingContext localContext = new OperatorBindingContext(context.Statement, context.OperatorName, context.ResolutionPath, context.CallSignature, context.IsExact);
+				for (int index = 0; index < indexes.Count; index++)
 				{
-					LContext.OperatorNameContext.Names.Add(this[LIndexes[LIndex]].Name);
-					this[LIndexes[LIndex]].ResolveSignature(APlan, LContext);
+					localContext.OperatorNameContext.Names.Add(this[indexes[index]].Name);
+					this[indexes[index]].ResolveSignature(plan, localContext);
 				}
 				
-				foreach (Schema.LoadedLibraries LLevel in APlan.NameResolutionPath)
+				foreach (Schema.LoadedLibraries level in plan.NameResolutionPath)
 				{
-					OperatorBindingContext LLevelContext = new OperatorBindingContext(AContext.Statement, AContext.OperatorName, AContext.ResolutionPath, AContext.CallSignature, AContext.IsExact);
-					foreach (OperatorMatch LMatch in LContext.Matches)
+					OperatorBindingContext levelContext = new OperatorBindingContext(context.Statement, context.OperatorName, context.ResolutionPath, context.CallSignature, context.IsExact);
+					foreach (OperatorMatch match in localContext.Matches)
 					{
 						// If the operator resolution is in any library at this level, add it to a binding context for this level
-						if ((LMatch.Signature.Operator.Library == null) || LLevel.ContainsName(LMatch.Signature.Operator.Library.Name))
+						if ((match.Signature.Operator.Library == null) || level.ContainsName(match.Signature.Operator.Library.Name))
 						{
-							if (!LLevelContext.OperatorNameContext.Names.Contains(LMatch.Signature.Operator.OperatorName))
-								LLevelContext.OperatorNameContext.Names.Add(LMatch.Signature.Operator.OperatorName);
+							if (!levelContext.OperatorNameContext.Names.Contains(match.Signature.Operator.OperatorName))
+								levelContext.OperatorNameContext.Names.Add(match.Signature.Operator.OperatorName);
 								
-							if (!LLevelContext.Matches.Contains(LMatch))
-								LLevelContext.Matches.Add(LMatch);
+							if (!levelContext.Matches.Contains(match))
+								levelContext.Matches.Add(match);
 						}
 					}
 					
-					if (LLevelContext.Matches.IsExact)
+					if (levelContext.Matches.IsExact)
 					{
-						LLevelContext.Operator = LLevelContext.Matches.Match.Signature.Operator;
-						LLevelContext.OperatorNameContext.Object = this[IndexOfName(LLevelContext.Operator.OperatorName)];
-						LLevelContext.OperatorNameContext.Names.Add(LLevelContext.OperatorNameContext.Object.Name);
-						AContext.SetBindingDataFromContext(LLevelContext);
+						levelContext.Operator = levelContext.Matches.Match.Signature.Operator;
+						levelContext.OperatorNameContext.Object = this[IndexOfName(levelContext.Operator.OperatorName)];
+						levelContext.OperatorNameContext.Names.Add(levelContext.OperatorNameContext.Object.Name);
+						context.SetBindingDataFromContext(levelContext);
 						return;
 					}
 					else
 					{
 						// If there is no match, or a partial match, collect the signatures and map names resolved at this level
-						foreach (string LName in LLevelContext.OperatorNameContext.Names)
-							if (!AContext.OperatorNameContext.Names.Contains(LName))
-								AContext.OperatorNameContext.Names.Add(LName);
+						foreach (string name in levelContext.OperatorNameContext.Names)
+							if (!context.OperatorNameContext.Names.Contains(name))
+								context.OperatorNameContext.Names.Add(name);
 								
-						foreach (OperatorMatch LMatch in LLevelContext.Matches)
-							if (!AContext.Matches.Contains(LMatch))
+						foreach (OperatorMatch match in levelContext.Matches)
+							if (!context.Matches.Contains(match))
 							{
-								AContext.Matches.Add(LMatch);
-								LDidResolve = true;
+								context.Matches.Add(match);
+								didResolve = true;
 							}
 					}
 				}
 				
 				// If a partial match is found within the name resolution path, use it
-				if (!AContext.IsExact && AContext.Matches.IsPartial)
+				if (!context.IsExact && context.Matches.IsPartial)
 				{
-					LDidResolve = true;
+					didResolve = true;
 				}
 				else
 				{
 					// The name resolution path has been searched and no match was found, so attempt to resolve based on all signatures
-					if (LContext.Matches.IsExact)
+					if (localContext.Matches.IsExact)
 					{
-						LContext.Operator = LContext.Matches.Match.Signature.Operator;
-						LContext.OperatorNameContext.Object = this[IndexOfName(LContext.Operator.OperatorName)];
-						LContext.OperatorNameContext.Names.Add(LContext.OperatorNameContext.Object.Name);
-						AContext.SetBindingDataFromContext(LContext);
+						localContext.Operator = localContext.Matches.Match.Signature.Operator;
+						localContext.OperatorNameContext.Object = this[IndexOfName(localContext.Operator.OperatorName)];
+						localContext.OperatorNameContext.Names.Add(localContext.OperatorNameContext.Object.Name);
+						context.SetBindingDataFromContext(localContext);
 						return;
 					}
 					else
 					{
 						// If there is no match, or a partial match, collect the signatures and map names resolved at all levels
-						foreach (string LName in LContext.OperatorNameContext.Names)
-							if (!AContext.OperatorNameContext.Names.Contains(LName))
-								AContext.OperatorNameContext.Names.Add(LName);
+						foreach (string name in localContext.OperatorNameContext.Names)
+							if (!context.OperatorNameContext.Names.Contains(name))
+								context.OperatorNameContext.Names.Add(name);
 								
-						foreach (OperatorMatch LMatch in LContext.Matches)
-							if (!AContext.Matches.Contains(LMatch))
+						foreach (OperatorMatch match in localContext.Matches)
+							if (!context.Matches.Contains(match))
 							{
-								AContext.Matches.Add(LMatch);
-								LDidResolve = true;
+								context.Matches.Add(match);
+								didResolve = true;
 							}
 					}
 				}
 			
 				// Ensure that if any resolutions were performed in this catalog, the binding data is set in the context
-				if (LDidResolve)
+				if (didResolve)
 				{
-					if (AContext.Matches.IsExact || (!AContext.IsExact && AContext.Matches.IsPartial))
+					if (context.Matches.IsExact || (!context.IsExact && context.Matches.IsPartial))
 					{
-						if ((AContext.Operator == null) || (AContext.Operator != AContext.Matches.Match.Signature.Operator))
+						if ((context.Operator == null) || (context.Operator != context.Matches.Match.Signature.Operator))
 						{
-							AContext.Operator = AContext.Matches.Match.Signature.Operator;
-							AContext.OperatorNameContext.Object = this[AContext.Operator.OperatorName];
+							context.Operator = context.Matches.Match.Signature.Operator;
+							context.OperatorNameContext.Object = this[context.Operator.OperatorName];
 						}
 					}
 					else
-						AContext.Operator = null;
+						context.Operator = null;
 				}
 			}
 		}
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is OperatorMap))
+			if (!(item is OperatorMap))
 				throw new SchemaException(SchemaException.Codes.OperatorMapContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 		
-		public void AddOperator(Operator AOperator)
+		public void AddOperator(Operator operatorValue)
 		{
-			int LIndex = IndexOfName(AOperator.OperatorName);
-			if (LIndex < 0)
+			int index = IndexOfName(operatorValue.OperatorName);
+			if (index < 0)
 			{
-				OperatorMap LOperatorMap = new OperatorMap(AOperator.OperatorName);
-				LOperatorMap.Library = AOperator.Library;
-				LIndex = Add(LOperatorMap);
+				OperatorMap operatorMap = new OperatorMap(operatorValue.OperatorName);
+				operatorMap.Library = operatorValue.Library;
+				index = Add(operatorMap);
 			}
 			else
 			{
-				if (String.Compare(this[LIndex].Name, AOperator.OperatorName) != 0)
-					throw new SchemaException(SchemaException.Codes.AmbiguousObjectName, AOperator.OperatorName, this[LIndex].Name);
+				if (String.Compare(this[index].Name, operatorValue.OperatorName) != 0)
+					throw new SchemaException(SchemaException.Codes.AmbiguousObjectName, operatorValue.OperatorName, this[index].Name);
 			}
 				
-			this[LIndex].AddSignature(AOperator);
+			this[index].AddSignature(operatorValue);
 		}
 		
-		public void RemoveOperator(Operator AOperator)
+		public void RemoveOperator(Operator operatorValue)
 		{
-			AOperator.OperatorSignature = null;
-			int LIndex = IndexOfName(AOperator.OperatorName);
-			if (LIndex >= 0)
+			operatorValue.OperatorSignature = null;
+			int index = IndexOfName(operatorValue.OperatorName);
+			if (index >= 0)
 			{
-				this[LIndex].RemoveSignature(AOperator.Signature);
-				if (this[LIndex].SignatureCount == 0)
-					RemoveAt(LIndex);
+				this[index].RemoveSignature(operatorValue.Signature);
+				if (this[index].SignatureCount == 0)
+					RemoveAt(index);
 			}
 			else
-				throw new SchemaException(SchemaException.Codes.OperatorMapNotFound, AOperator.Name);
+				throw new SchemaException(SchemaException.Codes.OperatorMapNotFound, operatorValue.Name);
 		}
 		
-		public bool ContainsOperator(Operator AOperator)
+		public bool ContainsOperator(Operator operatorValue)
 		{
-			int LIndex = IndexOfName(AOperator.OperatorName);
-			if (LIndex >= 0)
-				return this[LIndex].ContainsSignature(AOperator.Signature);
+			int index = IndexOfName(operatorValue.OperatorName);
+			if (index >= 0)
+				return this[index].ContainsSignature(operatorValue.Signature);
 			else
 				return false;
 		}
 		
 		public string ShowMaps()
 		{
-			StringBuilder LString = new StringBuilder();
-			foreach (OperatorMap LMap in this)
+			StringBuilder stringValue = new StringBuilder();
+			foreach (OperatorMap map in this)
 			{
-				LString.Append(LMap.ShowMap());
-				LString.Append("\n");
+				stringValue.Append(map.ShowMap());
+				stringValue.Append("\n");
 			}
-			return LString.ToString();
+			return stringValue.ToString();
 		}
     }
 }

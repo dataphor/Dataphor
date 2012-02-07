@@ -13,10 +13,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 {
 	public class Notebook : Control
 	{
-		public const TabAlignment CDefaultTabAlignment = TabAlignment.Top;
-		public const int CDefaultTabPadding = 4;
-		public const int CScrollerOffset = 8;
-		public const int CInitialPagesCapacity = 16;
+		public const TabAlignment DefaultTabAlignment = TabAlignment.Top;
+		public const int DefaultTabPadding = 4;
+		public const int ScrollerOffset = 8;
+		public const int InitialPagesCapacity = 16;
 
 		public Notebook()
 		{
@@ -30,51 +30,51 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			SetStyle(ControlStyles.SupportsTransparentBackColor, true);
 			TabStop = true;
 			ResumeLayout(false);
-			FTabColor = BackColor;
+			_tabColor = BackColor;
 			BackColor = Color.Transparent;
 			InitializePainting();
-			FPages = new PageCollection(this);
+			_pages = new PageCollection(this);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			DisposePainting();
 		}
 
 		#region Selection
 
-		private NotebookPage FSelected;
+		private NotebookPage _selected;
 		public NotebookPage Selected
 		{
-			get { return FSelected; }
+			get { return _selected; }
 			set
 			{
 				// Ensure that there is a selection if there is at least one tab
 				if ((value == null) && (Pages.Count > 0))
 					value = (NotebookPage)Pages[0];
 
-				if (FSelected != value)
+				if (_selected != value)
 				{
 					SelectionChanging(value);
-					FSelected = value;
+					_selected = value;
 					SuspendLayout();
 					try
 					{
 						// Show the active page
-						if (FSelected != null)
-							FSelected.Visible = true;
+						if (_selected != null)
+							_selected.Visible = true;
 
 						// Hide the inactive pages
-						foreach (NotebookPage LPage in Pages)
-							if (LPage != FSelected)
-								LPage.Visible = false;
+						foreach (NotebookPage page in Pages)
+							if (page != _selected)
+								page.Visible = false;
 					}
 					finally
 					{
 						ResumeLayout(true);
 					}
-					ScrollIntoView(FSelected);
+					ScrollIntoView(_selected);
 					SelectionChanged();
 				}
 			}
@@ -90,21 +90,21 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		public event NotebookTabChangeHandler OnSelectionChanging;
 
-		protected virtual void SelectionChanging(NotebookPage APage)
+		protected virtual void SelectionChanging(NotebookPage page)
 		{
 			if (OnSelectionChanging != null)
-				OnSelectionChanging(this, APage) ;
+				OnSelectionChanging(this, page) ;
 		}
 
 		internal void UpdateSelection()
 		{
 			// Clear the selection if the selected control is no longer a child of this control
-			if ((FSelected != null) && (FSelected.Parent != this))
+			if ((_selected != null) && (_selected.Parent != this))
 				Selected = null;
 			else
 			{
 				// Ensure that there is a selection if there is at least one tab
-				if ((FSelected == null) && (Pages.Count > 0))
+				if ((_selected == null) && (Pages.Count > 0))
 					Selected = (NotebookPage)Pages[0];
 			}
 		}
@@ -113,13 +113,13 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// <returns> True if the selection changed. </returns>
 		public bool SelectNextPage()
 		{
-			if (FSelected != null)
+			if (_selected != null)
 			{
-				int LIndex = Pages.IndexOf(FSelected);
-				if (LIndex >= 0)
+				int index = Pages.IndexOf(_selected);
+				if (index >= 0)
 				{
-					if ((LIndex < (Pages.Count - 1)))
-						Selected = (NotebookPage)Pages[LIndex + 1];
+					if ((index < (Pages.Count - 1)))
+						Selected = (NotebookPage)Pages[index + 1];
 					else
 						Selected = (NotebookPage)Pages[0];
 					return true;
@@ -132,11 +132,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// <returns> True if the selection changed. </returns>
 		public bool SelectPriorPage()
 		{
-			if (FSelected != null)
+			if (_selected != null)
 			{
-				int LIndex = Pages.IndexOf(FSelected);
-				if (LIndex > 0)
-					Selected = (NotebookPage)Pages[LIndex - 1];
+				int index = Pages.IndexOf(_selected);
+				if (index > 0)
+					Selected = (NotebookPage)Pages[index - 1];
 				else
 					Selected = (NotebookPage)Pages[Pages.Count - 1];
 				return true;
@@ -148,19 +148,19 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Appearance
 
-		private int FTabAreaHeight;
+		private int _tabAreaHeight;
 
-		private int FTabPadding = CDefaultTabPadding;
+		private int _tabPadding = DefaultTabPadding;
 		public int TabPadding
 		{
-			get { return FTabPadding; }
+			get { return _tabPadding; }
 			set
 			{
-				if (FTabPadding != value)
+				if (_tabPadding != value)
 				{
-					if (FTabPadding < 0)
+					if (_tabPadding < 0)
 						throw new ArgumentOutOfRangeException("FTabPadding");
-					FTabPadding = value;
+					_tabPadding = value;
 					UpdateTabAreaHeight();
 					PerformLayout();
 					Invalidate(false);
@@ -168,9 +168,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		protected override void OnFontChanged(EventArgs AArgs)
+		protected override void OnFontChanged(EventArgs args)
 		{
-			base.OnFontChanged(AArgs);
+			base.OnFontChanged(args);
 			UpdateTabAreaHeight();
 			PerformLayout();
 		}
@@ -183,77 +183,77 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private void UpdateTabAreaHeight()
 		{
-			FTabAreaHeight = FTabPadding + Font.Height;
+			_tabAreaHeight = _tabPadding + Font.Height;
 		}
 
-		private TabAlignment FTabAlignment = CDefaultTabAlignment;
+		private TabAlignment _tabAlignment = DefaultTabAlignment;
 		public TabAlignment TabAlignment
 		{
-			get { return FTabAlignment; }
+			get { return _tabAlignment; }
 			set
 			{
-				if (FTabAlignment != value)
+				if (_tabAlignment != value)
 				{
 					if ((value != TabAlignment.Top))
 						throw new ControlsException(ControlsException.Codes.InvalidTabAlignment, value.ToString());
-					FTabAlignment = value;
+					_tabAlignment = value;
 					Invalidate();
 					PerformLayout(this, "TabAlignment");
 				}
 			}
 		}
 
-		private Color FTabColor;
+		private Color _tabColor;
 		public Color TabColor
 		{
-			get { return FTabColor; }
+			get { return _tabColor; }
 			set
 			{
-				if (FTabColor != value)
+				if (_tabColor != value)
 				{
-					FTabColor = value;
+					_tabColor = value;
 					InvalidateTabs();
 				}
 			}
 		}
 
-		private Color FTabOriginColor = Color.Wheat;
+		private Color _tabOriginColor = Color.Wheat;
 		public Color TabOriginColor
 		{
-			get { return FTabOriginColor; }
+			get { return _tabOriginColor; }
 			set
 			{
-				if (FTabOriginColor != value)
+				if (_tabOriginColor != value)
 				{
-					FTabOriginColor = value;
+					_tabOriginColor = value;
 					InvalidateTabs();
 				}
 			}
 		}
 		
-		private Color FLineColor = Color.Gray;
+		private Color _lineColor = Color.Gray;
 		public Color LineColor
 		{
-			get { return FLineColor; }
+			get { return _lineColor; }
 			set
 			{
-				if (FLineColor != value)
+				if (_lineColor != value)
 				{
-					FLineColor = value;
+					_lineColor = value;
 					Invalidate();
 				}
 			}
 		}
 
-		private Color FBodyColor = Color.Gray;
+		private Color _bodyColor = Color.Gray;
 		public Color BodyColor
 		{
-			get { return FBodyColor; }
+			get { return _bodyColor; }
 			set
 			{
-				if (FBodyColor != value)
+				if (_bodyColor != value)
 				{
-					FBodyColor = value;
+					_bodyColor = value;
 					Invalidate();
 				}
 			}
@@ -263,96 +263,96 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Painting
 
-		private Bitmap FLeftScrollerBitmap;
-		private Bitmap FRightScrollerBitmap;
+		private Bitmap _leftScrollerBitmap;
+		private Bitmap _rightScrollerBitmap;
 
 		private void InitializePainting()
 		{
-			FLeftScrollerBitmap = IncrementalControlPanel.LoadResourceBitmap("Alphora.Dataphor.DAE.Client.Controls.Images.Clip.png");
-			FRightScrollerBitmap = IncrementalControlPanel.LoadResourceBitmap("Alphora.Dataphor.DAE.Client.Controls.Images.Clip.png");
-			FRightScrollerBitmap.RotateFlip(RotateFlipType.RotateNoneFlipX);
+			_leftScrollerBitmap = IncrementalControlPanel.LoadResourceBitmap("Alphora.Dataphor.DAE.Client.Controls.Images.Clip.png");
+			_rightScrollerBitmap = IncrementalControlPanel.LoadResourceBitmap("Alphora.Dataphor.DAE.Client.Controls.Images.Clip.png");
+			_rightScrollerBitmap.RotateFlip(RotateFlipType.RotateNoneFlipX);
 		}
 
 		private void DisposePainting()
 		{
-			if (FLeftScrollerBitmap != null)
+			if (_leftScrollerBitmap != null)
 			{
-				FLeftScrollerBitmap.Dispose();
-				FLeftScrollerBitmap = null;
+				_leftScrollerBitmap.Dispose();
+				_leftScrollerBitmap = null;
 			}
-			if (FRightScrollerBitmap != null)
+			if (_rightScrollerBitmap != null)
 			{
-				FRightScrollerBitmap.Dispose();
-				FRightScrollerBitmap = null;
+				_rightScrollerBitmap.Dispose();
+				_rightScrollerBitmap = null;
 			}
 		}
 
-		private static StringFormat FStringFormat;
+		private static StringFormat _stringFormat;
 		private static StringFormat GetStringFormat()
 		{
-			if (FStringFormat == null)
+			if (_stringFormat == null)
 			{
-				FStringFormat = new StringFormat();
-				FStringFormat.HotkeyPrefix = System.Drawing.Text.HotkeyPrefix.Show;
+				_stringFormat = new StringFormat();
+				_stringFormat.HotkeyPrefix = System.Drawing.Text.HotkeyPrefix.Show;
 			}
-			return FStringFormat;
+			return _stringFormat;
 		}
 
 		private int GetRounding()
 		{
-			return FTabAreaHeight / 3;
+			return _tabAreaHeight / 3;
 		}
 
-		protected virtual void PaintTabText(Graphics AGraphics, Rectangle ABounds, NotebookPage APage, StringFormat AFormat)
+		protected virtual void PaintTabText(Graphics graphics, Rectangle bounds, NotebookPage page, StringFormat format)
 		{
-			if (APage.Enabled)
-				using (Brush LTextBrush = new SolidBrush(ForeColor))
+			if (page.Enabled)
+				using (Brush textBrush = new SolidBrush(ForeColor))
 				{
-					AGraphics.DrawString(APage.Text, Font, LTextBrush, ABounds, AFormat);
+					graphics.DrawString(page.Text, Font, textBrush, bounds, format);
 				}
 			else
-				ControlPaint.DrawStringDisabled(AGraphics, APage.Text, Font, SystemColors.InactiveCaptionText, ABounds, AFormat);
+				ControlPaint.DrawStringDisabled(graphics, page.Text, Font, SystemColors.InactiveCaptionText, bounds, format);
 		}
 
-		protected virtual void PaintTab(Graphics AGraphics, int AOffset, NotebookPage APage, int ATabWidth, bool AIsActive)
+		protected virtual void PaintTab(Graphics graphics, int offset, NotebookPage page, int tabWidth, bool isActive)
 		{
-			Rectangle LBounds = base.DisplayRectangle;
-			StringFormat LFormat = GetStringFormat();
-			int LRounding = GetRounding();
-			if (FTabAlignment == TabAlignment.Top)
+			Rectangle bounds = base.DisplayRectangle;
+			StringFormat format = GetStringFormat();
+			int rounding = GetRounding();
+			if (_tabAlignment == TabAlignment.Top)
 			{
-				using (GraphicsPath LPath = new GraphicsPath())
+				using (GraphicsPath path = new GraphicsPath())
 				{
 					// Create path for tab fill
-					LPath.AddBezier(AOffset, FTabAreaHeight, AOffset + (FTabAreaHeight / 2), FTabAreaHeight / 2, AOffset + (FTabAreaHeight / 2), 0, AOffset + FTabAreaHeight, 0);
-					LPath.AddLine(AOffset + FTabAreaHeight, 0, AOffset + (ATabWidth - LRounding), 0);
-					LPath.AddBezier(AOffset + (ATabWidth - LRounding), 0, AOffset + ATabWidth, 0, AOffset + ATabWidth, 0, AOffset + ATabWidth, LRounding);
-					LPath.AddLine(AOffset + ATabWidth, LRounding, AOffset + ATabWidth, FTabAreaHeight);
-					LPath.CloseFigure();
+					path.AddBezier(offset, _tabAreaHeight, offset + (_tabAreaHeight / 2), _tabAreaHeight / 2, offset + (_tabAreaHeight / 2), 0, offset + _tabAreaHeight, 0);
+					path.AddLine(offset + _tabAreaHeight, 0, offset + (tabWidth - rounding), 0);
+					path.AddBezier(offset + (tabWidth - rounding), 0, offset + tabWidth, 0, offset + tabWidth, 0, offset + tabWidth, rounding);
+					path.AddLine(offset + tabWidth, rounding, offset + tabWidth, _tabAreaHeight);
+					path.CloseFigure();
 
 					// Fill the tab
-					using (Brush LBrush = new LinearGradientBrush(new Rectangle(0, 0, LBounds.Width, FTabAreaHeight), FTabOriginColor, FTabColor, 90f, true))
+					using (Brush brush = new LinearGradientBrush(new Rectangle(0, 0, bounds.Width, _tabAreaHeight), _tabOriginColor, _tabColor, 90f, true))
 					{
-						AGraphics.FillPath(LBrush, LPath);
+						graphics.FillPath(brush, path);
 					}
 
-					using (Pen LPen = new Pen(FLineColor))
+					using (Pen pen = new Pen(_lineColor))
 					{
 						// Draw the tab border line
-						AGraphics.DrawBezier(LPen, AOffset, FTabAreaHeight, AOffset + (FTabAreaHeight / 2), FTabAreaHeight / 2, AOffset + (FTabAreaHeight / 2), 0, AOffset + FTabAreaHeight, 0);
-						AGraphics.DrawLine(LPen, AOffset + FTabAreaHeight, 0, AOffset + (ATabWidth - LRounding), 0);
-						AGraphics.DrawBezier(LPen, AOffset + (ATabWidth - LRounding), 0, AOffset + ATabWidth, 0, AOffset + ATabWidth, 0, AOffset + ATabWidth, LRounding);
-						AGraphics.DrawLine(LPen, AOffset + ATabWidth, LRounding, AOffset + ATabWidth, FTabAreaHeight);
+						graphics.DrawBezier(pen, offset, _tabAreaHeight, offset + (_tabAreaHeight / 2), _tabAreaHeight / 2, offset + (_tabAreaHeight / 2), 0, offset + _tabAreaHeight, 0);
+						graphics.DrawLine(pen, offset + _tabAreaHeight, 0, offset + (tabWidth - rounding), 0);
+						graphics.DrawBezier(pen, offset + (tabWidth - rounding), 0, offset + tabWidth, 0, offset + tabWidth, 0, offset + tabWidth, rounding);
+						graphics.DrawLine(pen, offset + tabWidth, rounding, offset + tabWidth, _tabAreaHeight);
 
 						// Draw the highlight
-						LPen.Color = Color.White;
-						AGraphics.DrawBezier(LPen, 1 + AOffset, FTabAreaHeight, 1 + AOffset + (FTabAreaHeight / 2), 1 + (FTabAreaHeight / 2), 1 + AOffset + (FTabAreaHeight / 2), 1, 1 + AOffset + FTabAreaHeight, 1);
-						AGraphics.DrawLine(LPen, 1 + AOffset + FTabAreaHeight, 1, AOffset + (ATabWidth - LRounding), 1);
-						AGraphics.DrawBezier(LPen, AOffset + (ATabWidth - LRounding), 1, (AOffset + ATabWidth) - 1, 1, (AOffset + ATabWidth) - 1, 1, (AOffset + ATabWidth) - 1, LRounding / 2);
+						pen.Color = Color.White;
+						graphics.DrawBezier(pen, 1 + offset, _tabAreaHeight, 1 + offset + (_tabAreaHeight / 2), 1 + (_tabAreaHeight / 2), 1 + offset + (_tabAreaHeight / 2), 1, 1 + offset + _tabAreaHeight, 1);
+						graphics.DrawLine(pen, 1 + offset + _tabAreaHeight, 1, offset + (tabWidth - rounding), 1);
+						graphics.DrawBezier(pen, offset + (tabWidth - rounding), 1, (offset + tabWidth) - 1, 1, (offset + tabWidth) - 1, 1, (offset + tabWidth) - 1, rounding / 2);
 					}
 				}
 
-				PaintTabText(AGraphics, new Rectangle((AOffset + FTabAreaHeight) - (FTabPadding / 2), (FTabAreaHeight - Font.Height) / 2, ATabWidth, Font.Height), APage, LFormat);
+				PaintTabText(graphics, new Rectangle((offset + _tabAreaHeight) - (_tabPadding / 2), (_tabAreaHeight - Font.Height) / 2, tabWidth, Font.Height), page, format);
 			}
 			else
 			{
@@ -362,135 +362,135 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		protected virtual int GetTabOverlap()
 		{
-			return GetRounding() + (FTabPadding / 2);
+			return GetRounding() + (_tabPadding / 2);
 		}
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
-			Rectangle LBounds = base.DisplayRectangle;
-			LBounds.Width--;
-			LBounds.Height--;
+			Rectangle bounds = base.DisplayRectangle;
+			bounds.Width--;
+			bounds.Height--;
 
-			Rectangle LTabBounds;
-			Rectangle LBodyBounds;
-			int LTabLineY;
-			int LOtherLineY;
-			if (FTabAlignment == TabAlignment.Top)
+			Rectangle tabBounds;
+			Rectangle bodyBounds;
+			int tabLineY;
+			int otherLineY;
+			if (_tabAlignment == TabAlignment.Top)
 			{
-				LTabBounds = new Rectangle(LBounds.Left, LBounds.Top, LBounds.Width, FTabAreaHeight);
-				LBodyBounds = new Rectangle(LBounds.Left, LBounds.Top + FTabAreaHeight, LBounds.Width, LBounds.Height - FTabAreaHeight);
-				LTabLineY = FTabAreaHeight;
-				LOtherLineY = LBodyBounds.Bottom;
+				tabBounds = new Rectangle(bounds.Left, bounds.Top, bounds.Width, _tabAreaHeight);
+				bodyBounds = new Rectangle(bounds.Left, bounds.Top + _tabAreaHeight, bounds.Width, bounds.Height - _tabAreaHeight);
+				tabLineY = _tabAreaHeight;
+				otherLineY = bodyBounds.Bottom;
 			}
 			else
 			{
-				LTabBounds = new Rectangle(LBounds.Left, LBounds.Bottom - FTabAreaHeight, LBounds.Width, LBounds.Bottom);
-				LBodyBounds = new Rectangle(LBounds.Left, LBounds.Top, LBounds.Width, LBounds.Height - FTabAreaHeight);
-				LTabLineY = LBodyBounds.Bottom;
-				LOtherLineY = LBounds.Top;
+				tabBounds = new Rectangle(bounds.Left, bounds.Bottom - _tabAreaHeight, bounds.Width, bounds.Bottom);
+				bodyBounds = new Rectangle(bounds.Left, bounds.Top, bounds.Width, bounds.Height - _tabAreaHeight);
+				tabLineY = bodyBounds.Bottom;
+				otherLineY = bounds.Top;
 			}
 
 			// Paint the body background
-			using (Brush LBrush = new SolidBrush(FBodyColor))
+			using (Brush brush = new SolidBrush(_bodyColor))
 			{
-				AArgs.Graphics.FillRectangle(LBrush, LBodyBounds);
+				args.Graphics.FillRectangle(brush, bodyBounds);
 			}
 
-			int LXOffset = LTabBounds.Left + CScrollerOffset;
-			int LSelectedOffset = -1;
-			int LSelectedWidth = 0;
-			int LTabOverlap = GetTabOverlap();
-			int[] LTabWidths = GetTabWidths(AArgs.Graphics);
+			int xOffset = tabBounds.Left + ScrollerOffset;
+			int selectedOffset = -1;
+			int selectedWidth = 0;
+			int tabOverlap = GetTabOverlap();
+			int[] tabWidths = GetTabWidths(args.Graphics);
 
 			// Calculate the selected tab's offset and width
-			for (int i = FScrollOffset; (i < Pages.Count) && (LXOffset < LTabBounds.Right); i++)
+			for (int i = _scrollOffset; (i < Pages.Count) && (xOffset < tabBounds.Right); i++)
 			{
-				int LTabWidth = LTabWidths[i];
-				if (Pages[i] == FSelected)
+				int tabWidth = tabWidths[i];
+				if (Pages[i] == _selected)
 				{
 					// Leave room for but do not paint the selected tab
-					LSelectedWidth = LTabWidth;
-					LSelectedOffset = LXOffset;	
+					selectedWidth = tabWidth;
+					selectedOffset = xOffset;	
 				}
-				LXOffset += LTabWidth - LTabOverlap;
+				xOffset += tabWidth - tabOverlap;
 			}
 
-			if (AArgs.Graphics.IsVisible(LTabBounds))
+			if (args.Graphics.IsVisible(tabBounds))
 			{
-				GraphicsState LState = AArgs.Graphics.Save();
-				AArgs.Graphics.SetClip(new Rectangle(LTabBounds.Left + CScrollerOffset, LTabBounds.Top, LTabBounds.Width - (CScrollerOffset * 2), LTabBounds.Height), CombineMode.Intersect);
+				GraphicsState state = args.Graphics.Save();
+				args.Graphics.SetClip(new Rectangle(tabBounds.Left + ScrollerOffset, tabBounds.Top, tabBounds.Width - (ScrollerOffset * 2), tabBounds.Height), CombineMode.Intersect);
 
 				// Paint the unselected tabs
-				LXOffset = LTabBounds.Left + CScrollerOffset;
-				for (int i = FScrollOffset; (i < Pages.Count) && (LXOffset < LTabBounds.Right); i++)
+				xOffset = tabBounds.Left + ScrollerOffset;
+				for (int i = _scrollOffset; (i < Pages.Count) && (xOffset < tabBounds.Right); i++)
 				{
-					int LTabWidth = LTabWidths[i];
-					if (Pages[i] != FSelected)
-						PaintTab(AArgs.Graphics, LXOffset, (NotebookPage)Pages[i], LTabWidth, false);
-					LXOffset += LTabWidth - LTabOverlap;
+					int tabWidth = tabWidths[i];
+					if (Pages[i] != _selected)
+						PaintTab(args.Graphics, xOffset, (NotebookPage)Pages[i], tabWidth, false);
+					xOffset += tabWidth - tabOverlap;
 				}
 
 				// Paint the selected tab
-				if (LSelectedOffset >= 0)
+				if (selectedOffset >= 0)
 				{
-					PaintTab(AArgs.Graphics, LSelectedOffset, FSelected, LSelectedWidth, true);
+					PaintTab(args.Graphics, selectedOffset, _selected, selectedWidth, true);
 					if (Focused)
-						ControlPaint.DrawFocusRectangle(AArgs.Graphics, new Rectangle(LSelectedOffset + FTabAreaHeight, LTabBounds.Y + 2, LSelectedWidth - FTabAreaHeight - GetRounding(), LTabBounds.Height - 4));
+						ControlPaint.DrawFocusRectangle(args.Graphics, new Rectangle(selectedOffset + _tabAreaHeight, tabBounds.Y + 2, selectedWidth - _tabAreaHeight - GetRounding(), tabBounds.Height - 4));
 				}
 
-				AArgs.Graphics.Restore(LState);
+				args.Graphics.Restore(state);
 
 				// Draw the left/right scrollers
-				if (FScrollOffset > 0)
-					AArgs.Graphics.DrawImage(FLeftScrollerBitmap, LTabBounds.Left, LTabBounds.Top + ((LTabBounds.Height - FLeftScrollerBitmap.Height) / 2), FLeftScrollerBitmap.Width, FLeftScrollerBitmap.Height);
-				if (LXOffset > (LTabBounds.Width - CScrollerOffset))
-					AArgs.Graphics.DrawImage(FRightScrollerBitmap, LTabBounds.Right - CScrollerOffset, LTabBounds.Top + ((LTabBounds.Height - FRightScrollerBitmap.Height) / 2), FRightScrollerBitmap.Width, FRightScrollerBitmap.Height);
+				if (_scrollOffset > 0)
+					args.Graphics.DrawImage(_leftScrollerBitmap, tabBounds.Left, tabBounds.Top + ((tabBounds.Height - _leftScrollerBitmap.Height) / 2), _leftScrollerBitmap.Width, _leftScrollerBitmap.Height);
+				if (xOffset > (tabBounds.Width - ScrollerOffset))
+					args.Graphics.DrawImage(_rightScrollerBitmap, tabBounds.Right - ScrollerOffset, tabBounds.Top + ((tabBounds.Height - _rightScrollerBitmap.Height) / 2), _rightScrollerBitmap.Width, _rightScrollerBitmap.Height);
 			}
 			// Paint the border lines
-			using (Pen LPen = new Pen(FLineColor))
+			using (Pen pen = new Pen(_lineColor))
 			{
-				if (LSelectedOffset >= 0)
+				if (selectedOffset >= 0)
 				{
-					AArgs.Graphics.DrawLine(LPen, LBounds.Left, LTabLineY, LSelectedOffset, LTabLineY);
-					AArgs.Graphics.DrawLine(LPen, LSelectedOffset + LSelectedWidth, LTabLineY, LBounds.Right, LTabLineY);
+					args.Graphics.DrawLine(pen, bounds.Left, tabLineY, selectedOffset, tabLineY);
+					args.Graphics.DrawLine(pen, selectedOffset + selectedWidth, tabLineY, bounds.Right, tabLineY);
 				}
 				else
-					AArgs.Graphics.DrawLine(LPen, LBounds.Left, LTabLineY, LBounds.Right, LTabLineY);
-				AArgs.Graphics.DrawLine(LPen, LBounds.Left, LTabLineY, LBounds.Left, LOtherLineY);
-				AArgs.Graphics.DrawLine(LPen, LBounds.Left, LOtherLineY, LBounds.Right, LOtherLineY);
-				AArgs.Graphics.DrawLine(LPen, LBounds.Right, LOtherLineY, LBounds.Right, LTabLineY);
+					args.Graphics.DrawLine(pen, bounds.Left, tabLineY, bounds.Right, tabLineY);
+				args.Graphics.DrawLine(pen, bounds.Left, tabLineY, bounds.Left, otherLineY);
+				args.Graphics.DrawLine(pen, bounds.Left, otherLineY, bounds.Right, otherLineY);
+				args.Graphics.DrawLine(pen, bounds.Right, otherLineY, bounds.Right, tabLineY);
 			}
 		}
 
-		protected override void OnGotFocus(EventArgs AArgs)
+		protected override void OnGotFocus(EventArgs args)
 		{
-			base.OnGotFocus(AArgs);
+			base.OnGotFocus(args);
 			InvalidateTabs();
 		}
 
-		protected override void OnLostFocus(EventArgs AArgs)
+		protected override void OnLostFocus(EventArgs args)
 		{
-			base.OnLostFocus(AArgs);
+			base.OnLostFocus(args);
 			InvalidateTabs();
 		}
 
 		private void InvalidateTabs()
 		{
-			Rectangle LBounds = GetTabBounds();
-			LBounds.Height++;
-			if (FTabAlignment == TabAlignment.Bottom)
-				LBounds.Y--;
-			Invalidate(LBounds, false);
+			Rectangle bounds = GetTabBounds();
+			bounds.Height++;
+			if (_tabAlignment == TabAlignment.Bottom)
+				bounds.Y--;
+			Invalidate(bounds, false);
 		}
 
 		#endregion
 
 		#region Layout
 
-		private int FScrollOffset;
+		private int _scrollOffset;
 		public int ScrollOffset
 		{
-			get { return FScrollOffset; }
+			get { return _scrollOffset; }
 			set
 			{
 				if (value < 0)
@@ -498,9 +498,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				if (value >= Pages.Count)
 					value = Math.Max(Pages.Count - 1, 0);
 
-				if (FScrollOffset != value)
+				if (_scrollOffset != value)
 				{
-					FScrollOffset = value;
+					_scrollOffset = value;
 					InvalidateTabs();
 					MinimizeScrolling();
 				}
@@ -509,20 +509,20 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private void MinimizeScrolling()
 		{
-			int[] LTabWidths = GetTabWidths();
+			int[] tabWidths = GetTabWidths();
 			// Minimize scrolling
-			if (LTabWidths.Length > 0)
+			if (tabWidths.Length > 0)
 			{
-				int LTabWidth = GetTabBounds().Width - (CScrollerOffset * 2);
-				int LTabOverlap = GetTabOverlap();
-				int LAccumulated = LTabWidths[LTabWidths.Length - 1];
+				int tabWidth = GetTabBounds().Width - (ScrollerOffset * 2);
+				int tabOverlap = GetTabOverlap();
+				int accumulated = tabWidths[tabWidths.Length - 1];
 
 				// Don't scroll above the LMax offset, doing so would just waste tab space
-				int LMax;
-				for (LMax = LTabWidths.Length - 1; (LMax > 0) && ((LAccumulated + (LTabWidths[LMax - 1] - LTabOverlap)) <= LTabWidth); LMax--)
-					LAccumulated += LTabWidths[LMax - 1] - LTabOverlap;
+				int max;
+				for (max = tabWidths.Length - 1; (max > 0) && ((accumulated + (tabWidths[max - 1] - tabOverlap)) <= tabWidth); max--)
+					accumulated += tabWidths[max - 1] - tabOverlap;
 
-				ScrollOffset = Math.Min(ScrollOffset, LMax);
+				ScrollOffset = Math.Min(ScrollOffset, max);
 			}
 			else
 				ScrollOffset = 0;
@@ -532,59 +532,59 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			get
 			{
-				Rectangle LBounds = base.DisplayRectangle;
-				if (FTabAlignment == TabAlignment.Top)
+				Rectangle bounds = base.DisplayRectangle;
+				if (_tabAlignment == TabAlignment.Top)
 				{
-					LBounds.Y += FTabAreaHeight;
-					LBounds.Height -= FTabAreaHeight;
+					bounds.Y += _tabAreaHeight;
+					bounds.Height -= _tabAreaHeight;
 				}
 				else
-					LBounds.Height -= FTabAreaHeight;
-				LBounds.Inflate(-2, -2);
-				return LBounds;
+					bounds.Height -= _tabAreaHeight;
+				bounds.Inflate(-2, -2);
+				return bounds;
 			}
 		}
 
-		protected virtual int GetTabWidth(Graphics AGraphics, NotebookPage APage)
+		protected virtual int GetTabWidth(Graphics graphics, NotebookPage page)
 		{
-			return (FTabAreaHeight / 4) + FTabAreaHeight + Size.Ceiling(AGraphics.MeasureString(APage.Text, Font, PointF.Empty, GetStringFormat())).Width;
+			return (_tabAreaHeight / 4) + _tabAreaHeight + Size.Ceiling(graphics.MeasureString(page.Text, Font, PointF.Empty, GetStringFormat())).Width;
 		}
 
-		private int[] GetTabWidths(Graphics AGraphics)
+		private int[] GetTabWidths(Graphics graphics)
 		{
 			// Calculate the tab widths
-			int[] LResult = new int[Pages.Count];
+			int[] result = new int[Pages.Count];
 			for (int i = 0; i < Pages.Count; i++)
-				LResult[i] = GetTabWidth(AGraphics, (NotebookPage)Pages[i]);
-			return LResult;
+				result[i] = GetTabWidth(graphics, (NotebookPage)Pages[i]);
+			return result;
 		}
 
 		private int[] GetTabWidths()
 		{
-			using (Graphics LGraphics = this.CreateGraphics())
+			using (Graphics graphics = this.CreateGraphics())
 			{
-				return GetTabWidths(LGraphics);
+				return GetTabWidths(graphics);
 			}
 		}
 
 		private Rectangle GetTabBounds()
 		{
-			Rectangle LBounds = base.DisplayRectangle;
-			if (FTabAlignment == TabAlignment.Top)
-				return new Rectangle(LBounds.Left, LBounds.Top, LBounds.Width, FTabAreaHeight);
+			Rectangle bounds = base.DisplayRectangle;
+			if (_tabAlignment == TabAlignment.Top)
+				return new Rectangle(bounds.Left, bounds.Top, bounds.Width, _tabAreaHeight);
 			else
-				return new Rectangle(LBounds.Left, LBounds.Bottom - FTabAreaHeight, LBounds.Width, LBounds.Bottom);
+				return new Rectangle(bounds.Left, bounds.Bottom - _tabAreaHeight, bounds.Width, bounds.Bottom);
 		}
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
 			if (!Disposing && IsHandleCreated)
 			{
-				base.OnLayout(AArgs);
+				base.OnLayout(args);
 				
 				// Layout the selected page
-				if (FSelected != null)
-					FSelected.Bounds = DisplayRectangle;
+				if (_selected != null)
+					_selected.Bounds = DisplayRectangle;
 
 				MinimizeScrolling();
 			}
@@ -602,22 +602,22 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		/// <summary> Attempts to scroll the specified page into view. </summary>
 		/// <remarks> If the given page is not a valid child page, nothing happens. </remarks>
-		public void ScrollIntoView(NotebookPage APage)
+		public void ScrollIntoView(NotebookPage page)
 		{
-			int[] LTabWidths = GetTabWidths();
-			int LPageIndex = Pages.IndexOf(APage);
-			if (LPageIndex >= 0)
+			int[] tabWidths = GetTabWidths();
+			int pageIndex = Pages.IndexOf(page);
+			if (pageIndex >= 0)
 			{
-				int LTabWidth = GetTabBounds().Width - (CScrollerOffset * 2);
-				int LTabOverlap = GetTabOverlap();
-				int LAccumulated = LTabWidths[LPageIndex];
+				int tabWidth = GetTabBounds().Width - (ScrollerOffset * 2);
+				int tabOverlap = GetTabOverlap();
+				int accumulated = tabWidths[pageIndex];
 
 				// Don't scroll below LMin offset, doing so would hide the specified page
-				int LMin;
-				for (LMin = LPageIndex; (LMin > 0) && ((LAccumulated + (LTabWidths[LMin - 1] - LTabOverlap)) <= LTabWidth); LMin--)
-					LAccumulated += LTabWidths[LMin - 1] - LTabOverlap;
+				int min;
+				for (min = pageIndex; (min > 0) && ((accumulated + (tabWidths[min - 1] - tabOverlap)) <= tabWidth); min--)
+					accumulated += tabWidths[min - 1] - tabOverlap;
 
-				ScrollOffset = Math.Min(LPageIndex, Math.Max(ScrollOffset, LMin));
+				ScrollOffset = Math.Min(pageIndex, Math.Max(ScrollOffset, min));
 			}
 		}
 
@@ -625,43 +625,43 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Mouse
 
-		protected override void OnMouseDown(MouseEventArgs AArgs)
+		protected override void OnMouseDown(MouseEventArgs args)
 		{
-			base.OnMouseDown(AArgs);
+			base.OnMouseDown(args);
 
 			Focus();
 			
-			Rectangle LTabBounds = GetTabBounds();
-			if (LTabBounds.Contains(AArgs.X, AArgs.Y))
+			Rectangle tabBounds = GetTabBounds();
+			if (tabBounds.Contains(args.X, args.Y))
 			{
-				if (AArgs.X < CScrollerOffset)
+				if (args.X < ScrollerOffset)
 					ScrollLeft();
-				else if (AArgs.X > (LTabBounds.Right - CScrollerOffset))
+				else if (args.X > (tabBounds.Right - ScrollerOffset))
 					ScrollRight();
 				else
 				{
-					NotebookPage LPage = GetTabAt(new Point(AArgs.X, AArgs.Y));
-					if (LPage != null)
-						Selected = LPage;
+					NotebookPage page = GetTabAt(new Point(args.X, args.Y));
+					if (page != null)
+						Selected = page;
 				}
 			}
 		}
  
-		protected virtual NotebookPage GetTabAt(Point ALocation)
+		protected virtual NotebookPage GetTabAt(Point location)
 		{
-			Rectangle LTabBounds = GetTabBounds();
-			LTabBounds.Inflate(-CScrollerOffset, 0);
-			if (LTabBounds.Contains(ALocation))
+			Rectangle tabBounds = GetTabBounds();
+			tabBounds.Inflate(-ScrollerOffset, 0);
+			if (tabBounds.Contains(location))
 			{
-				int LXOffset = LTabBounds.Left;
-				int LTabOverlap = GetTabOverlap();
-				int[] LTabWidths = GetTabWidths();
-				for (int i = FScrollOffset; (i < LTabWidths.Length) && (LXOffset <= LTabBounds.Right); i++)
+				int xOffset = tabBounds.Left;
+				int tabOverlap = GetTabOverlap();
+				int[] tabWidths = GetTabWidths();
+				for (int i = _scrollOffset; (i < tabWidths.Length) && (xOffset <= tabBounds.Right); i++)
 				{
-					int LWidth = LTabWidths[i];
-					if ((ALocation.X >= LXOffset) && (ALocation.X <= (LXOffset + LWidth)))
+					int width = tabWidths[i];
+					if ((location.X >= xOffset) && (location.X <= (xOffset + width)))
 						return (NotebookPage)Pages[i];
-					LXOffset += (LWidth - LTabOverlap);
+					xOffset += (width - tabOverlap);
 				}
 			}
 			return null;
@@ -671,23 +671,23 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Keyboard
 
-		protected override bool ProcessMnemonic(char ACharCode)
+		protected override bool ProcessMnemonic(char charCode)
 		{
 			if (this.Enabled)
-				foreach (NotebookPage LPage in Pages)
+				foreach (NotebookPage page in Pages)
 				{
-					if (Control.IsMnemonic(ACharCode, LPage.Text))
+					if (Control.IsMnemonic(charCode, page.Text))
 					{
-						Selected = LPage;
+						Selected = page;
 						return true;
 					}
 				}
-			return base.ProcessMnemonic(ACharCode);
+			return base.ProcessMnemonic(charCode);
 		}
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
-			switch (AKey)
+			switch (key)
 			{
 				case Keys.Control | Keys.Tab :
 					Focus();
@@ -724,190 +724,190 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 					}
 					break;
 			}
-			return base.ProcessDialogKey(AKey);
+			return base.ProcessDialogKey(key);
 		}
 
 		#endregion
 
 		#region Pages & Controls
 
-		private PageCollection FPages;
+		private PageCollection _pages;
 		public PageCollection Pages
 		{
-			get { return FPages; }
+			get { return _pages; }
 		}
 
 		// Maintain a correctly ordered list of pages (the Controls list is reordered as controls are made visible/invisible)
 		public class PageCollection : IList, ICollection, IEnumerable
 		{
-			public PageCollection(Notebook ANotebook)
+			public PageCollection(Notebook notebook)
 			{
-				FNotebook = ANotebook;
+				_notebook = notebook;
 			}
 
-			private Notebook FNotebook;
+			private Notebook _notebook;
 
 			private void UpdateNotebook()
 			{
-				FNotebook.UpdateSelection();
-				FNotebook.InvalidateTabs();
+				_notebook.UpdateSelection();
+				_notebook.InvalidateTabs();
 			}
 
-			private NotebookPage[] FPages = new NotebookPage[CInitialPagesCapacity];
+			private NotebookPage[] _pages = new NotebookPage[InitialPagesCapacity];
 
-			private int FCount;
-			public int Count { get { return FCount; } }
+			private int _count;
+			public int Count { get { return _count; } }
 		
-			public NotebookPage this[int AIndex]
+			public NotebookPage this[int index]
 			{
 				get 
 				{ 
-					if (AIndex >= FCount)
+					if (index >= _count)
 						throw new ArgumentOutOfRangeException("this");
-					return FPages[AIndex]; 
+					return _pages[index]; 
 				}
 				set 
 				{
-					RemoveAt(AIndex);
-					Insert(AIndex, value);
+					RemoveAt(index);
+					Insert(index, value);
 				}
 			}
 
-			private bool FUpdatingControls;
+			private bool _updatingControls;
 
-			private void InternalAdd(int AIndex, NotebookPage APage)
+			private void InternalAdd(int index, NotebookPage page)
 			{
-				APage.Visible = false;
-				APage.TextChanged += new EventHandler(PageTextChanged);
-				APage.EnabledChanged += new EventHandler(PageEnabledChanged);
+				page.Visible = false;
+				page.TextChanged += new EventHandler(PageTextChanged);
+				page.EnabledChanged += new EventHandler(PageEnabledChanged);
 
 				// Grow the capacity of FPages if necessary
-				if (FCount == FPages.Length)
+				if (_count == _pages.Length)
 				{
-					NotebookPage[] LPages = new NotebookPage[Math.Min(FPages.Length * 2, FPages.Length + 512)];
-					Array.Copy(FPages, LPages, FPages.Length);
-					FPages = LPages;
+					NotebookPage[] pages = new NotebookPage[Math.Min(_pages.Length * 2, _pages.Length + 512)];
+					Array.Copy(_pages, pages, _pages.Length);
+					_pages = pages;
 				}
 				
 				// Shift the items
-				Array.Copy(FPages, AIndex, FPages, AIndex + 1, FCount - AIndex);
+				Array.Copy(_pages, index, _pages, index + 1, _count - index);
 
 				// Set the inserted item
-				FPages[AIndex] = APage;
-				FCount++;
+				_pages[index] = page;
+				_count++;
 
 				UpdateNotebook();
 			}
 
-			public int Add(NotebookPage APage)
+			public int Add(NotebookPage page)
 			{
-				FUpdatingControls = true;
+				_updatingControls = true;
 				try
 				{
-					FNotebook.Controls.Add(APage);
+					_notebook.Controls.Add(page);
 				}
 				finally
 				{
-					FUpdatingControls = false;
+					_updatingControls = false;
 				}
-				InternalAdd(FCount, APage);
-				return FCount - 1;
+				InternalAdd(_count, page);
+				return _count - 1;
 			}
 
-			internal void ControlAdd(NotebookPage APage)
+			internal void ControlAdd(NotebookPage page)
 			{
-				if (!FUpdatingControls)
-					InternalAdd(FCount, APage);
+				if (!_updatingControls)
+					InternalAdd(_count, page);
 			}
 
-			public void Insert(int AIndex, NotebookPage APage)
+			public void Insert(int index, NotebookPage page)
 			{
-				FUpdatingControls = true;
+				_updatingControls = true;
 				try
 				{
-					FNotebook.Controls.Add(APage);
+					_notebook.Controls.Add(page);
 				}
 				finally
 				{
-					FUpdatingControls = false;
+					_updatingControls = false;
 				}
-				InternalAdd(AIndex, APage);
+				InternalAdd(index, page);
 			}
 
-			public void AddRange(NotebookPage[] APages)
+			public void AddRange(NotebookPage[] pages)
 			{
-				foreach (NotebookPage LPage in APages)
-					Add(LPage);
+				foreach (NotebookPage page in pages)
+					Add(page);
 			}
 
 			public void Clear()
 			{
-				while (FCount > 0)
-					RemoveAt(FCount - 1);
+				while (_count > 0)
+					RemoveAt(_count - 1);
 			}
 
-			public bool Contains(NotebookPage APage)
+			public bool Contains(NotebookPage page)
 			{
-				return IndexOf(APage) >= 0;
+				return IndexOf(page) >= 0;
 			}
 
-			public int IndexOf(NotebookPage APage)
+			public int IndexOf(NotebookPage page)
 			{
-				for (int i = 0; i < FCount; i++)
-					if (FPages[i] == APage)
+				for (int i = 0; i < _count; i++)
+					if (_pages[i] == page)
 						return i;
 				return -1;
 			}
 
-			private NotebookPage InternalRemoveAt(int AIndex)
+			private NotebookPage InternalRemoveAt(int index)
 			{
-				if (AIndex >= FCount)
+				if (index >= _count)
 					throw new ArgumentOutOfRangeException("AIndex");
 
-				NotebookPage LResult = FPages[AIndex];
+				NotebookPage result = _pages[index];
 
-                FCount--;
-                Array.Copy(FPages, AIndex + 1, FPages, AIndex, FCount - AIndex);
+                _count--;
+                Array.Copy(_pages, index + 1, _pages, index, _count - index);
 
-				LResult.TextChanged -= new EventHandler(PageTextChanged);
-				LResult.EnabledChanged -= new EventHandler(PageEnabledChanged);
+				result.TextChanged -= new EventHandler(PageTextChanged);
+				result.EnabledChanged -= new EventHandler(PageEnabledChanged);
 				
 				UpdateNotebook();
 
-				return LResult;
+				return result;
 			}
 
-			public void RemoveAt(int AIndex)
+			public void RemoveAt(int index)
 			{
-				NotebookPage LResult = InternalRemoveAt(AIndex);
-				FUpdatingControls = true;
+				NotebookPage result = InternalRemoveAt(index);
+				_updatingControls = true;
 				try
 				{
-					FNotebook.Controls.Remove(LResult);
+					_notebook.Controls.Remove(result);
 				}
 				finally
 				{
-					FUpdatingControls = false;
+					_updatingControls = false;
 				}
 			}
 
-			internal void ControlRemove(NotebookPage APage)
+			internal void ControlRemove(NotebookPage page)
 			{
-				if (!FUpdatingControls)
-					InternalRemoveAt(IndexOf(APage));
+				if (!_updatingControls)
+					InternalRemoveAt(IndexOf(page));
 			}
 
-			public void Remove(NotebookPage APage)
+			public void Remove(NotebookPage page)
 			{
-				InternalRemoveAt(IndexOf(APage));
-				FUpdatingControls = true;
+				InternalRemoveAt(IndexOf(page));
+				_updatingControls = true;
 				try
 				{
-					FNotebook.Controls.Remove(APage);
+					_notebook.Controls.Remove(page);
 				}
 				finally
 				{
-					FUpdatingControls = false;
+					_updatingControls = false;
 				}
 			}
 
@@ -918,42 +918,42 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 			public class PageCollectionEnumerator : IEnumerator
 			{
-				public PageCollectionEnumerator(PageCollection ACollection)
+				public PageCollectionEnumerator(PageCollection collection)
 				{
-					FCollection = ACollection;
+					_collection = collection;
 				}
 
-				private PageCollection FCollection;
-				private int FIndex = -1;
+				private PageCollection _collection;
+				private int _index = -1;
 
 				public void Reset()
 				{
-					FIndex = -1;
+					_index = -1;
 				}
 
 				object IEnumerator.Current
 				{
-					get { return FCollection[FIndex]; }
+					get { return _collection[_index]; }
 				}
 
 				public NotebookPage Current
 				{
-					get { return FCollection[FIndex]; }
+					get { return _collection[_index]; }
 				}
 
 				public bool MoveNext()
 				{
-					FIndex++;
-					return FIndex < FCollection.Count;
+					_index++;
+					return _index < _collection.Count;
 				}
 			}
 
 			#region ICollection / IList
 
-			void ICollection.CopyTo(Array ATarget, int AIndex)
+			void ICollection.CopyTo(Array target, int index)
 			{
-				for (int i = 0; i < FCount; i++)
-					ATarget.SetValue(FPages[i], i + AIndex);
+				for (int i = 0; i < _count; i++)
+					target.SetValue(_pages[i], i + index);
 			}
 
 			bool ICollection.IsSynchronized
@@ -966,49 +966,49 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				get { return this; }
 			}
 
-			int IList.Add(object AValue)
+			int IList.Add(object value)
 			{
-				return this.Add((NotebookPage)AValue);
+				return this.Add((NotebookPage)value);
 			}
 
-			bool IList.Contains(object APage)
+			bool IList.Contains(object page)
 			{
-				return this.Contains((NotebookPage)APage);
+				return this.Contains((NotebookPage)page);
 			}
 
 			bool IList.IsFixedSize { get { return false; } }
 
-			object IList.this[int AIndex] 
+			object IList.this[int index] 
 			{ 
-				get { return this[AIndex]; } 
-				set { this[AIndex] = (NotebookPage)value; }
+				get { return this[index]; } 
+				set { this[index] = (NotebookPage)value; }
 			}
 
-			int IList.IndexOf(object APage)
+			int IList.IndexOf(object page)
 			{
-				return IndexOf((NotebookPage)APage);
+				return IndexOf((NotebookPage)page);
 			}
 
-			void IList.Insert(int AIndex, object AValue)
+			void IList.Insert(int index, object value)
 			{
-				Insert(AIndex, (NotebookPage)AValue);
+				Insert(index, (NotebookPage)value);
 			}
 
-			void IList.Remove(object AValue)
+			void IList.Remove(object value)
 			{
-				Remove((NotebookPage)AValue);
+				Remove((NotebookPage)value);
 			}
 
 			public bool IsReadOnly { get { return false; } }
 
-			private void PageTextChanged(object ASender, EventArgs AArgs)
+			private void PageTextChanged(object sender, EventArgs args)
 			{
-				FNotebook.InvalidateTabs();
+				_notebook.InvalidateTabs();
 			}
 
-			private void PageEnabledChanged(object ASender, EventArgs AArgs)
+			private void PageEnabledChanged(object sender, EventArgs args)
 			{
-				FNotebook.InvalidateTabs();
+				_notebook.InvalidateTabs();
 			}
 
 			#endregion
@@ -1021,25 +1021,25 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		public class NotebookControlCollection : Control.ControlCollection
 		{
-			public NotebookControlCollection(Notebook ANotebook) : base(ANotebook)
+			public NotebookControlCollection(Notebook notebook) : base(notebook)
 			{
-				FNotebook = ANotebook;
+				_notebook = notebook;
 			}
 
-			private Notebook FNotebook;
+			private Notebook _notebook;
 
-			public override void Add(Control AControl)
+			public override void Add(Control control)
 			{
-				if (!(AControl is NotebookPage))
-					throw new ControlsException(ControlsException.Codes.InvalidNotebookChild, (AControl == null ? "<null>" : AControl.GetType().Name));
-				FNotebook.Pages.ControlAdd((NotebookPage)AControl);
-				base.Add(AControl);
+				if (!(control is NotebookPage))
+					throw new ControlsException(ControlsException.Codes.InvalidNotebookChild, (control == null ? "<null>" : control.GetType().Name));
+				_notebook.Pages.ControlAdd((NotebookPage)control);
+				base.Add(control);
 			}
 
-			public override void Remove(Control AControl)
+			public override void Remove(Control control)
 			{
-				base.Remove(AControl);
-				FNotebook.Pages.ControlRemove((NotebookPage)AControl);
+				base.Remove(control);
+				_notebook.Pages.ControlRemove((NotebookPage)control);
 			}
 		}
 

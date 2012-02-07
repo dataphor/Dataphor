@@ -12,43 +12,43 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	[System.Security.SuppressUnmanagedCodeSecurity()]
 	internal class UnsafeNativeMethods
 	{
-		public const string CDLLUSER32 = "user32.dll";
-		public const string CEPSetScrollInfo = "SetScrollInfo";
-		public const string CEPSendMessage = "SendMessage";
-		public const string CEPPostMessage = "PostMessage";
-		public const string CEPScrollWindowEx = "ScrollWindowEx";
-		public const string CEPMessageBeep = "MessageBeep";
-		public const string CEPUpdateWindow = "UpdateWindow";
-		public const string CEPGetUpdateRect = "GetUpdateRect";
+		public const string DLLUSER32 = "user32.dll";
+		public const string EPSetScrollInfo = "SetScrollInfo";
+		public const string EPSendMessage = "SendMessage";
+		public const string EPPostMessage = "PostMessage";
+		public const string EPScrollWindowEx = "ScrollWindowEx";
+		public const string EPMessageBeep = "MessageBeep";
+		public const string EPUpdateWindow = "UpdateWindow";
+		public const string EPGetUpdateRect = "GetUpdateRect";
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPSetScrollInfo, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
-		public static extern int SetScrollInfo(IntPtr AHandle, int fnBar, NativeMethods.SCROLLINFO AScrollInfo, bool ARedraw);
+		[DllImport(DLLUSER32, EntryPoint = EPSetScrollInfo, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		public static extern int SetScrollInfo(IntPtr handle, int fnBar, NativeMethods.SCROLLINFO scrollInfo, bool redraw);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPPostMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPPostMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int PostMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPPostMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPPostMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int PostMessage(IntPtr hWnd, int msg, bool wParam, IntPtr lParam);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPSendMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPSendMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPSendMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPSendMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int SendMessage(IntPtr hWnd, int msg, bool wParam, IntPtr lParam);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPScrollWindowEx, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPScrollWindowEx, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int ScrollWindowEx(IntPtr hWnd, int dx, int dy, ref NativeMethods.RECT lprcScroll, ref NativeMethods.RECT lprcClip, IntPtr hrgnUpdate, ref NativeMethods.RECT lprcUpdate, uint flags);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPScrollWindowEx, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPScrollWindowEx, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int ScrollWindowEx(IntPtr hWnd, int dx, int dy, ref NativeMethods.RECT lprcScroll, ref NativeMethods.RECT lprcClip, IntPtr hrgnUpdate, IntPtr lprcUpdate, uint flags);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPMessageBeep, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPMessageBeep, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern bool MessageBeep(int uType);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPUpdateWindow, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPUpdateWindow, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int UpdateWindow(IntPtr hWnd);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPGetUpdateRect, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPGetUpdateRect, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int GetUpdateRect(IntPtr hWnd, ref NativeMethods.RECT lprcUpdate, bool bErase);
 	}
 }

@@ -81,23 +81,23 @@ namespace Alphora.Dataphor
 		};
 
 		// Resource manager for this exception class
-		private static ResourceManager FResourceManager = new ResourceManager("Alphora.Dataphor.BaseException", typeof(BaseException).Assembly);
+		private static ResourceManager _resourceManager = new ResourceManager("Alphora.Dataphor.BaseException", typeof(BaseException).Assembly);
 
 		// Default constructor
-		public BaseException(Codes AErrorCode) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) {}
-		public BaseException(Codes AErrorCode, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) {}
-		public BaseException(Codes AErrorCode, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) {}
-		public BaseException(Codes AErrorCode, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) {}
-		public BaseException(Codes AErrorCode, ErrorSeverity ASeverity) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null) {}
-		public BaseException(Codes AErrorCode, ErrorSeverity ASeverity, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) {}
-		public BaseException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) {}
-		public BaseException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
+		public BaseException(Codes errorCode) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null) {}
+		public BaseException(Codes errorCode, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, paramsValue) {}
+		public BaseException(Codes errorCode, Exception innerException) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, null) {}
+		public BaseException(Codes errorCode, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, paramsValue) {}
+		public BaseException(Codes errorCode, ErrorSeverity severity) : base(_resourceManager, (int)errorCode, severity, null, null) {}
+		public BaseException(Codes errorCode, ErrorSeverity severity, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) {}
+		public BaseException(Codes errorCode, ErrorSeverity severity, Exception innerException) : base(_resourceManager, (int)errorCode, severity, innerException, null) {}
+		public BaseException(Codes errorCode, ErrorSeverity severity, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) {}
 	    #if !SILVERLIGHT // SerializationInfo
-		public BaseException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) {}
+		public BaseException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) {}
 		#endif
 		
-		public BaseException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, DataphorException AInnerException) 
-			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		public BaseException(ErrorSeverity severity, int code, string message, string details, string serverContext, DataphorException innerException) 
+			: base(severity, code, message, details, serverContext, innerException)
 		{
 		}
 	}
@@ -109,14 +109,14 @@ namespace Alphora.Dataphor
 
 	public class AggregateException : DataphorException
 	{
-		public AggregateException(ErrorList AErrors) : this(AErrors, ErrorSeverity.Application, null) { }
-		public AggregateException(ErrorList AErrors, ErrorSeverity ASeverity) : this(AErrors, ASeverity, null) { }
-		public AggregateException(ErrorList AErrors, ErrorSeverity ASeverity, Exception AInnerException) : base(ASeverity, DataphorException.CApplicationError, AErrors.ToString(), AInnerException)
+		public AggregateException(ErrorList errors) : this(errors, ErrorSeverity.Application, null) { }
+		public AggregateException(ErrorList errors, ErrorSeverity severity) : this(errors, severity, null) { }
+		public AggregateException(ErrorList errors, ErrorSeverity severity, Exception innerException) : base(severity, DataphorException.ApplicationError, errors.ToString(), innerException)
 		{
-			FErrors = AErrors;
+			_errors = errors;
 		}
 
-		private ErrorList FErrors;
-		public ErrorList Errors { get { return FErrors; } }
+		private ErrorList _errors;
+		public ErrorList Errors { get { return _errors; } }
 	}
 }

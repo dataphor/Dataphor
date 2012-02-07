@@ -17,35 +17,35 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	/// <summary> Base node for all visible nodes. </summary>
 	public abstract class Element : Node, IWindowsElement
 	{
-		public const string CAverageChars = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		public const string AverageChars = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 		
-		public const int CDefaultMarginLeft = 2;
-		public const int CDefaultMarginRight = 2;
-		public const int CDefaultMarginTop = 2;
-		public const int CDefaultMarginBottom = 2;
+		public const int DefaultMarginLeft = 2;
+		public const int DefaultMarginRight = 2;
+		public const int DefaultMarginTop = 2;
+		public const int DefaultMarginBottom = 2;
 
 		public Element() : base()
 		{
-			FMarginLeft = GetDefaultMarginLeft();
-			FMarginRight = GetDefaultMarginRight();
-			FMarginTop = GetDefaultMarginTop();
-			FMarginBottom = GetDefaultMarginBottom();
-			FTabStop = GetDefaultTabStop();
+			_marginLeft = GetDefaultMarginLeft();
+			_marginRight = GetDefaultMarginRight();
+			_marginTop = GetDefaultMarginTop();
+			_marginBottom = GetDefaultMarginBottom();
+			_tabStop = GetDefaultTabStop();
 		}
 
 		#region Visible
 
-		private bool FVisible = true;
+		private bool _visible = true;
 		[DefaultValue(true)]
 		[Description("When set to false the control will not be shown.")]
 		public bool Visible
 		{
-			get { return FVisible; }
+			get { return _visible; }
 			set
 			{
-				if (FVisible != value)
+				if (_visible != value)
 				{
-					FVisible = value;
+					_visible = value;
 					VisibleChanged();
 				}
 			}
@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual bool GetVisible() 
 		{
-			return FVisible && ( Parent is IElement ? ((IElement)Parent).GetVisible() : true );
+			return _visible && ( Parent is IElement ? ((IElement)Parent).GetVisible() : true );
 		}
 
 		/// <remarks> Updates all visual children's visibility. </remarks>
@@ -67,12 +67,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				try
 				{
 					InternalUpdateVisible();
-					IWindowsElement LVisualChild;
-					foreach (INode LChild in Children)
+					IWindowsElement visualChild;
+					foreach (INode child in Children)
 					{
-						LVisualChild = LChild as IWindowsElement;
-						if (LVisualChild != null)
-							LVisualChild.VisibleChanged();
+						visualChild = child as IWindowsElement;
+						if (visualChild != null)
+							visualChild.VisibleChanged();
 					}
 				}
 				finally
@@ -87,17 +87,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region TabStop
 
-		private bool FTabStop;
+		private bool _tabStop;
 		[Description("Determines if the control can be focused through tab key navigation.")]
 		[DefaultValueMember("GetDefaultTabStop")]
 		public bool TabStop
 		{
-			get { return FTabStop; }
+			get { return _tabStop; }
 			set 
 			{ 
-				if (FTabStop != value)
+				if (_tabStop != value)
 				{
-					FTabStop = value;
+					_tabStop = value;
 					TabStopChanged();
 				}
 			}
@@ -110,7 +110,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual bool GetTabStop()
 		{
-			return FTabStop;
+			return _tabStop;
 		}
 
 		protected virtual void InternalUpdateTabStop() { }
@@ -125,18 +125,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Hint
 
-		private string FHint = String.Empty;
+		private string _hint = String.Empty;
 		[Browsable(true)]
 		[DefaultValue("")]
 		[Description("Text which describes the element to the end-user.")]
 		public string Hint
 		{
-			get { return FHint; }
+			get { return _hint; }
 			set
 			{
-				if (FHint != value)
+				if (_hint != value)
 				{
-					FHint = value;
+					_hint = value;
 					UpdateToolTip();
 				}
 			}
@@ -144,7 +144,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual string GetHint()
 		{
-			return FHint;
+			return _hint;
 		}
 
 		protected virtual void InternalUpdateToolTip()
@@ -158,11 +158,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				InternalUpdateToolTip();
 		}
 
-		protected void SetToolTip(WinForms.Control AControl)
+		protected void SetToolTip(WinForms.Control control)
 		{
-			Client.IHost LHost = HostNode;
-			if ((LHost != null) && (LHost.Session != null))
-				((Windows.Session)LHost.Session).ToolTip.SetToolTip(AControl, GetHint());
+			Client.IHost host = HostNode;
+			if ((host != null) && (host.Session != null))
+				((Windows.Session)host.Session).ToolTip.SetToolTip(control, GetHint());
 		}
 
 		#endregion
@@ -177,51 +177,51 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				InternalUpdateHelp();
 		}
 
-		private string FHelpKeyword = String.Empty;
+		private string _helpKeyword = String.Empty;
 		[Description("The help keyword to navigate to when the user activates help.")]
 		[DefaultValue("")]
 		public string HelpKeyword 
 		{ 
-			get { return FHelpKeyword; }
+			get { return _helpKeyword; }
 			set 
 			{ 
-				if (value != FHelpKeyword)
+				if (value != _helpKeyword)
 				{
-					FHelpKeyword = (value == null ? String.Empty : value);
+					_helpKeyword = (value == null ? String.Empty : value);
 					UpdateHelp();
 				}
 			}
 		}
 		
-		private HelpKeywordBehavior FHelpKeywordBehavior = HelpKeywordBehavior.KeywordIndex;
+		private HelpKeywordBehavior _helpKeywordBehavior = HelpKeywordBehavior.KeywordIndex;
 		[DefaultValue(HelpKeywordBehavior.KeywordIndex)]
 		[Description("Determines the method used to navigate the the help identified by the HelpKeyword property.")]
 		public HelpKeywordBehavior HelpKeywordBehavior
 		{
-			get { return FHelpKeywordBehavior; }
+			get { return _helpKeywordBehavior; }
 			set 
 			{ 
-				if (value != FHelpKeywordBehavior)
+				if (value != _helpKeywordBehavior)
 				{
-					FHelpKeywordBehavior = value; 
+					_helpKeywordBehavior = value; 
 					UpdateHelp();
 				}
 			}
 		}
 
-		private string FHelpString = String.Empty;
+		private string _helpString = String.Empty;
 		[Description("Specifies the help text to display to the user when keyword navigation is not used.")]
 		[DefaultValue("")]
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		[DAE.Client.Design.EditorDocumentType("txt")]
 		public string HelpString
 		{ 
-			get { return FHelpString; }
+			get { return _helpString; }
 			set 
 			{ 
-				if (value != FHelpString)
+				if (value != _helpString)
 				{
-					FHelpString = (value == null ? String.Empty : value); 
+					_helpString = (value == null ? String.Empty : value); 
 					UpdateHelp();
 				}
 			}
@@ -231,18 +231,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		#region Styles
 		
-		private string FStyle = "";
+		private string _style = "";
 		
 		// TODO: Implement styles in the Windows Client
 		[DefaultValue("")]
 		public string Style
 		{
-			get { return FStyle; }
+			get { return _style; }
 			set
 			{
-				if (FStyle != value)
+				if (_style != value)
 				{
-					FStyle = value;
+					_style = value;
 				}
 			}
 		}
@@ -253,17 +253,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// SuppressMargins
 
-		private bool FSuppressMargins;
+		private bool _suppressMargins;
 		[Browsable(false)]
 		[Publish(PublishMethod.None)]
 		public bool SuppressMargins
 		{
-			get { return FSuppressMargins; }
+			get { return _suppressMargins; }
 			set 
 			{
-				if (FSuppressMargins != value)
+				if (_suppressMargins != value)
 				{
-					FSuppressMargins = value;
+					_suppressMargins = value;
 					UpdateLayout();
 				}
 			}
@@ -271,17 +271,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// MarginLeft
 		
-		private int FMarginLeft;
+		private int _marginLeft;
 		[Description("The left margin for the control")]
 		[DefaultValueMember("GetDefaultMarginLeft")]
 		public int MarginLeft
 		{
-			get { return FMarginLeft; }
+			get { return _marginLeft; }
 			set
 			{
-				if (FMarginLeft != value)
+				if (_marginLeft != value)
 				{
-					FMarginLeft = value;
+					_marginLeft = value;
 					UpdateLayout();
 				}
 			}
@@ -289,22 +289,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual int GetDefaultMarginLeft()
 		{
-			return CDefaultMarginLeft;
+			return DefaultMarginLeft;
 		}
 		
 		// MarginRight
 		
-		private int FMarginRight;
+		private int _marginRight;
 		[Description("The right margin for the control")]
 		[DefaultValueMember("GetDefaultMarginRight")]
 		public int MarginRight
 		{
-			get { return FMarginRight; }
+			get { return _marginRight; }
 			set
 			{
-				if (FMarginRight != value)
+				if (_marginRight != value)
 				{
-					FMarginRight = value;
+					_marginRight = value;
 					UpdateLayout();
 				}
 			}
@@ -312,22 +312,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual int GetDefaultMarginRight()
 		{
-			return CDefaultMarginRight;
+			return DefaultMarginRight;
 		}
 		
 		// MarginTop
 		
-		private int FMarginTop;
+		private int _marginTop;
 		[Description("The top margin for the control")]
 		[DefaultValueMember("GetDefaultMarginTop")]
 		public int MarginTop
 		{
-			get { return FMarginTop; }
+			get { return _marginTop; }
 			set
 			{
-				if (FMarginTop != value)
+				if (_marginTop != value)
 				{
-					FMarginTop = value;
+					_marginTop = value;
 					UpdateLayout();
 				}
 			}
@@ -335,22 +335,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual int GetDefaultMarginTop()
 		{
-			return CDefaultMarginTop;
+			return DefaultMarginTop;
 		}
 		
 		// MarginBottom
 		
-		private int FMarginBottom;
+		private int _marginBottom;
 		[Description("The bottom margin for the control")]
 		[DefaultValueMember("GetDefaultMarginBottom")]
 		public int MarginBottom
 		{
-			get { return FMarginBottom; }
+			get { return _marginBottom; }
 			set
 			{
-				if (FMarginBottom != value)
+				if (_marginBottom != value)
 				{
-					FMarginBottom = value;
+					_marginBottom = value;
 					UpdateLayout();
 				}
 			}
@@ -358,7 +358,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual int GetDefaultMarginBottom()
 		{
-			return CDefaultMarginBottom;
+			return DefaultMarginBottom;
 		}
 		
 		#endregion
@@ -368,9 +368,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// <summary> Call anytime subsequent layouts should recalcuate the sizes. </summary>
 		protected virtual void InvalidateLayoutCache()
 		{
-			FMinSize = Size.Empty;
-			FMaxSize = Size.Empty;
-			FNaturalSize = Size.Empty;
+			_minSize = Size.Empty;
+			_maxSize = Size.Empty;
+			_naturalSize = Size.Empty;
 		}
 
 		/// <summary> Call to update the appearance and size of the element or its children. </summary>
@@ -397,50 +397,50 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual void BeginUpdate()
 		{
-			IUpdateHandler LHandler = (IUpdateHandler)FindParent(typeof(IUpdateHandler));
-			if (LHandler != null)
-				LHandler.BeginUpdate();
+			IUpdateHandler handler = (IUpdateHandler)FindParent(typeof(IUpdateHandler));
+			if (handler != null)
+				handler.BeginUpdate();
 		}
 
-		public virtual void EndUpdate(bool APerformLayout)
+		public virtual void EndUpdate(bool performLayout)
 		{
-			IUpdateHandler LHandler = (IUpdateHandler)FindParent(typeof(IUpdateHandler));
-			if (LHandler != null)
-				LHandler.EndUpdate(APerformLayout);
+			IUpdateHandler handler = (IUpdateHandler)FindParent(typeof(IUpdateHandler));
+			if (handler != null)
+				handler.EndUpdate(performLayout);
 		}
 
 		// GetOverhead()
 
 		public virtual Size GetOverhead()
 		{
-			if (FSuppressMargins)
+			if (_suppressMargins)
 				return Size.Empty;
 			else
-				return new Size(FMarginLeft + FMarginRight, FMarginTop + FMarginBottom);
+				return new Size(_marginLeft + _marginRight, _marginTop + _marginBottom);
 		}
 
 		// InternalLayout
 
-		public void Layout(Rectangle ABounds) 
+		public void Layout(Rectangle bounds) 
 		{
-			if (!FSuppressMargins)
+			if (!_suppressMargins)
 			{
-				ABounds.X += FMarginLeft;
-				ABounds.Y += FMarginTop;
-				ABounds.Width -= (FMarginLeft + FMarginRight);
-				ABounds.Height -= (FMarginTop + FMarginBottom);
+				bounds.X += _marginLeft;
+				bounds.Y += _marginTop;
+				bounds.Width -= (_marginLeft + _marginRight);
+				bounds.Height -= (_marginTop + _marginBottom);
 			}
-			InternalLayout(ABounds);
+			InternalLayout(bounds);
 		}
 
-		protected abstract void InternalLayout(Rectangle ABounds);
+		protected abstract void InternalLayout(Rectangle bounds);
 
 		#endregion
 
 		#region MinSize
 
 		// Cached minimum useful size
-		private Size FMinSize = Size.Empty;
+		private Size _minSize = Size.Empty;
 
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
@@ -448,9 +448,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{ 
 			get 
 			{ 
-				if (FMinSize == Size.Empty)
-					FMinSize = InternalMinSize + GetOverhead();
-				return FMinSize;
+				if (_minSize == Size.Empty)
+					_minSize = InternalMinSize + GetOverhead();
+				return _minSize;
 			}
 		}
 		
@@ -464,7 +464,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		#region MaxSize
 
 		// Cached maximum useful size
-		private Size FMaxSize = Size.Empty;
+		private Size _maxSize = Size.Empty;
 
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
@@ -472,9 +472,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get 
 			{
-				if (FMaxSize == Size.Empty)
-					FMaxSize = InternalMaxSize + GetOverhead();
-				return FMaxSize;
+				if (_maxSize == Size.Empty)
+					_maxSize = InternalMaxSize + GetOverhead();
+				return _maxSize;
 			}
 		}
 
@@ -488,7 +488,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		#region NaturalSize
 
 		// Cached natural size
-		private Size FNaturalSize = Size.Empty;
+		private Size _naturalSize = Size.Empty;
 
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
@@ -496,9 +496,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get 
 			{ 
-				if (FNaturalSize == Size.Empty)
-					FNaturalSize = InternalNaturalSize + GetOverhead();
-				return FNaturalSize;
+				if (_naturalSize == Size.Empty)
+					_naturalSize = InternalNaturalSize + GetOverhead();
+				return _naturalSize;
 			}
 		}
 		
@@ -525,56 +525,56 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		#region Static Layout Utilities
 
 		// <summary> Constrains a size to within specified size. </summary>
-		public static void ConstrainMax(ref Size ASize, Size AMaxSize)
+		public static void ConstrainMax(ref Size size, Size maxSize)
 		{
-			ConstrainMaxWidth(ref ASize, AMaxSize.Width);
-			ConstrainMaxHeight(ref ASize, AMaxSize.Height);
+			ConstrainMaxWidth(ref size, maxSize.Width);
+			ConstrainMaxHeight(ref size, maxSize.Height);
 		}
 
 		// <summary> Grows a size to at least specified size. </summary>
-		public static void ConstrainMin(ref Size ASize, Size AMinSize)
+		public static void ConstrainMin(ref Size size, Size minSize)
 		{
-			ConstrainMinWidth(ref ASize, AMinSize.Width);
-			ConstrainMinHeight(ref ASize, AMinSize.Height);
+			ConstrainMinWidth(ref size, minSize.Width);
+			ConstrainMinHeight(ref size, minSize.Height);
 		}
 
-		public static void ConstrainMaxHeight(ref Size ASize, int AMaxValue)
+		public static void ConstrainMaxHeight(ref Size size, int maxValue)
 		{
-			if (ASize.Height > AMaxValue)
-				ASize.Height = AMaxValue;
+			if (size.Height > maxValue)
+				size.Height = maxValue;
 		}
 
-		public static void ConstrainMinHeight(ref Size ASize, int AMinValue)
+		public static void ConstrainMinHeight(ref Size size, int minValue)
 		{
-			if (ASize.Height < AMinValue)
-				ASize.Height = AMinValue;
+			if (size.Height < minValue)
+				size.Height = minValue;
 		}
 
-		public static void ConstrainMaxWidth(ref Size ASize, int AMaxValue)
+		public static void ConstrainMaxWidth(ref Size size, int maxValue)
 		{
-			if (ASize.Width > AMaxValue)
-				ASize.Width = AMaxValue;
+			if (size.Width > maxValue)
+				size.Width = maxValue;
 		}
 
-		public static void ConstrainMinWidth(ref Size ASize, int AMinValue)
+		public static void ConstrainMinWidth(ref Size size, int minValue)
 		{
-			if (ASize.Width < AMinValue)
-				ASize.Width = AMinValue;
+			if (size.Width < minValue)
+				size.Width = minValue;
 		}
 
 		// TODO: Localize this!
 
 		/// <summary> Calculates the average character width for the font of a given control. </summary>
-		public static int GetAverageCharPixelWidth(WinForms.Control AControl)
+		public static int GetAverageCharPixelWidth(WinForms.Control control)
 		{
-			using (Graphics LGraphics = AControl.CreateGraphics())
-				return (int)(LGraphics.MeasureString(CAverageChars, AControl.Font).Width / (float)CAverageChars.Length);
+			using (Graphics graphics = control.CreateGraphics())
+				return (int)(graphics.MeasureString(AverageChars, control.Font).Width / (float)AverageChars.Length);
 		}
 
 		/// <summary> Calculates the Height for the font of a given control. </summary>
-		public static int GetPixelHeight(WinForms.Control AControl)
+		public static int GetPixelHeight(WinForms.Control control)
 		{
-			return AControl.Font.Height;
+			return control.Font.Height;
 		}
 
 		#endregion

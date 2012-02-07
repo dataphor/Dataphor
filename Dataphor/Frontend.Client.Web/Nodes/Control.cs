@@ -19,76 +19,76 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 {
     public class Trigger : Element, ITrigger
     {		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Action = null;
 		}
 
 		// VerticalAlignment
 
-		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		protected VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
-			set	{ FVerticalAlignment = value; }
+			get { return _verticalAlignment; }
+			set	{ _verticalAlignment = value; }
 		}
 
 		// Action
 
-		protected IAction FAction;
+		protected IAction _action;
 		public IAction Action
 		{
-			get { return FAction; }
+			get { return _action; }
 			set
 			{
-				if (FAction != value)
+				if (_action != value)
 				{
-					if (FAction != null)
-						FAction.Disposed -= new EventHandler(ActionDisposed);
-					FAction = value;
-					if (FAction != null)
-						FAction.Disposed += new EventHandler(ActionDisposed);
+					if (_action != null)
+						_action.Disposed -= new EventHandler(ActionDisposed);
+					_action = value;
+					if (_action != null)
+						_action.Disposed += new EventHandler(ActionDisposed);
 				}
 			}
 		}
 
-		protected void ActionDisposed(object ASender, EventArgs AArgs)
+		protected void ActionDisposed(object sender, EventArgs args)
 		{
 			Action = null;
 		}
 		
 		// ImageWidth
 
-		protected int FImageWidth;
+		protected int _imageWidth;
 		public int ImageWidth
 		{
-			get { return FImageWidth; }
-			set { FImageWidth = value; }
+			get { return _imageWidth; }
+			set { _imageWidth = value; }
 		}
 
 		// ImageHeight
 
-		protected int FImageHeight;
+		protected int _imageHeight;
 		public int ImageHeight
 		{
-			get { return FImageHeight; }
-			set { FImageHeight = value; }
+			get { return _imageHeight; }
+			set { _imageHeight = value; }
 		}
 
 		// Text
 
-		private string FText = String.Empty;
+		private string _text = String.Empty;
 		public string Text
 		{
-			get { return FText; }
-			set { FText = value; }
+			get { return _text; }
+			set { _text = value; }
 		}
 
 		public virtual string GetText()
 		{
-			if (FText != String.Empty)
-				return FText;
+			if (_text != String.Empty)
+				return _text;
 			else 
 				if (Action != null)
 					return Action.Text;
@@ -98,31 +98,31 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// Enabled
 
-		private bool FEnabled = true;
+		private bool _enabled = true;
 		public bool Enabled
 		{
-			get { return FEnabled; }
-			set { FEnabled = value; }
+			get { return _enabled; }
+			set { _enabled = value; }
 		}
 
 		public virtual bool GetEnabled()
 		{
-			return ( FAction == null ? false : FAction.GetEnabled() ) && FEnabled;
+			return ( _action == null ? false : _action.GetEnabled() ) && _enabled;
 		}
 
 		// IWebHandler
 
 		// HACK: fix for IE 5.0 not handling CSS width correctly.
-		private bool FStyleHack = false;
+		private bool _styleHack = false;
 
-		public override bool ProcessRequest(HttpContext AContext)
+		public override bool ProcessRequest(HttpContext context)
 		{
-			if (base.ProcessRequest(AContext))
+			if (base.ProcessRequest(context))
 				return true;
 			else
 			{
-				FStyleHack = AContext.Request.UserAgent.IndexOf("MSIE 5.0") != -1;
-				if (Session.IsActionLink(AContext, ID) && GetEnabled())
+				_styleHack = context.Request.UserAgent.IndexOf("MSIE 5.0") != -1;
+				if (Session.IsActionLink(context, ID) && GetEnabled())
 				{
 					Action.Execute();
 					return true;
@@ -134,34 +134,34 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		
 		// IWebElement
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
 			// TODO: Render the action's image here somewhere
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "trigger");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "button");
-			if (FStyleHack)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Style, "width: 100px;");
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "trigger");
+			writer.AddAttribute(HtmlTextWriterAttribute.Type, "button");
+			if (_styleHack)
+				writer.AddAttribute(HtmlTextWriterAttribute.Style, "width: 100px;");
 			if (!GetEnabled())
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Disabled, "true");
-			switch (FVerticalAlignment)
+				writer.AddAttribute(HtmlTextWriterAttribute.Disabled, "true");
+			switch (_verticalAlignment)
 			{
-				case VerticalAlignment.Middle : AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "middle"); break;
-				case VerticalAlignment.Bottom : AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom"); break;
+				case VerticalAlignment.Middle : writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle"); break;
+				case VerticalAlignment.Bottom : writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom"); break;
 			}
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Value, Session.RemoveAccellerator(GetText()), true);
-			string LHint = GetHint();
-			if (LHint != String.Empty)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LHint, true);
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, ID));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Value, Session.RemoveAccellerator(GetText()), true);
+			string hint = GetHint();
+			if (hint != String.Empty)
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, hint, true);
+			writer.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, ID));
+			writer.RenderBeginTag(HtmlTextWriterTag.Input);
+			writer.RenderEndTag();
 		}
 
 		// Element
 
 		public override bool GetVisible()
 		{
-			return base.GetVisible() && ((FAction == null) || FAction.Visible);
+			return base.GetVisible() && ((_action == null) || _action.Visible);
 		}
 
 		public override int GetDefaultMarginLeft()
@@ -189,13 +189,13 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public ActionNode() : base()
 		{
-			FID = Session.GenerateID();
+			_iD = Session.GenerateID();
 		}
 
 		// ID
 
-		private string FID;
-		public string ID { get { return FID; } }
+		private string _iD;
+		public string ID { get { return _iD; } }
 
 		// IWebHandler
 
@@ -205,9 +205,9 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				Action.Execute();
 		}
 
-		public bool ProcessRequest(HttpContext AContext)
+		public bool ProcessRequest(HttpContext context)
 		{
-			if (Session.IsActionLink(AContext, ID) && GetEnabled())
+			if (Session.IsActionLink(context, ID) && GetEnabled())
 			{
 				Execute();
 				return true;
@@ -221,19 +221,19 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public Exposed()
 		{
-			FToolBarButton = new ToolBarButton();
-			FToolBarButton.OnClick += new EventHandler(ButtonClicked);
+			_toolBarButton = new ToolBarButton();
+			_toolBarButton.OnClick += new EventHandler(ButtonClicked);
 		}
 
 		// ToolBarButton
 
-		private ToolBarButton FToolBarButton;
+		private ToolBarButton _toolBarButton;
 		public ToolBarButton ToolBarButton
 		{
-			get { return FToolBarButton; }
+			get { return _toolBarButton; }
 		}
 
-		private void ButtonClicked(object ASender, EventArgs AArgs)
+		private void ButtonClicked(object sender, EventArgs args)
 		{
 			if (GetEnabled())
 				Action.Execute();
@@ -243,22 +243,22 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		protected override void InternalUpdateEnabled() 
 		{
-			FToolBarButton.Enabled = GetEnabled();
+			_toolBarButton.Enabled = GetEnabled();
 		}
 
 		protected override void InternalUpdateVisible()
 		{
-			FToolBarButton.Visible = GetVisible();
+			_toolBarButton.Visible = GetVisible();
 		}
 
 		protected override void InternalUpdateText()
 		{
-			FToolBarButton.Text = GetText();
+			_toolBarButton.Text = GetText();
 		}
 
 		protected override void InternalUpdateHint()
 		{
-			FToolBarButton.Hint = GetHint();
+			_toolBarButton.Hint = GetHint();
 		}
 
 		// TODO: support images for toolbar buttons
@@ -269,12 +269,12 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		{
 			base.Activate();
 			// TODO: support ordering of exposed items relating to order of nodes
-			((IWebToolbar)FindParent(typeof(IWebToolbar))).ToolBar.Add(FToolBarButton);
+			((IWebToolbar)FindParent(typeof(IWebToolbar))).ToolBar.Add(_toolBarButton);
 		}
 
 		protected override void Deactivate()
 		{
-			((IWebToolbar)FindParent(typeof(IWebToolbar))).ToolBar.Remove(FToolBarButton);
+			((IWebToolbar)FindParent(typeof(IWebToolbar))).ToolBar.Remove(_toolBarButton);
 			base.Deactivate();
 		}
 

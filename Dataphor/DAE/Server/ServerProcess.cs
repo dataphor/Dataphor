@@ -31,56 +31,56 @@ namespace Alphora.Dataphor.DAE.Server
 	// ServerProcess
 	public class ServerProcess : ServerChildObject, IServerProcess
 	{
-		internal ServerProcess(ServerSession AServerSession) : base()
+		internal ServerProcess(ServerSession serverSession) : base()
 		{
-			InternalCreate(AServerSession, new ProcessInfo(AServerSession.SessionInfo));
+			InternalCreate(serverSession, new ProcessInfo(serverSession.SessionInfo));
 		}
 		
-		internal ServerProcess(ServerSession AServerSession, ProcessInfo AProcessInfo) : base()
+		internal ServerProcess(ServerSession serverSession, ProcessInfo processInfo) : base()
 		{
-			InternalCreate(AServerSession, AProcessInfo);
+			InternalCreate(serverSession, processInfo);
 		}
 		
-		private void InternalCreate(ServerSession AServerSession, ProcessInfo AProcessInfo)
+		private void InternalCreate(ServerSession serverSession, ProcessInfo processInfo)
 		{
-			FServerSession = AServerSession;
-			FPlans = new ServerPlans();
-			FScripts = new ServerScripts();
-			FParser = new Parser();
-			FProcessID = GetHashCode();
-			FProcessInfo = AProcessInfo;
-			FDeviceSessions = new Schema.DeviceSessions(false);
-			FStreamManager = (IStreamManager)this;
-			FValueManager = new ValueManager(this, this);
+			_serverSession = serverSession;
+			_plans = new ServerPlans();
+			_scripts = new ServerScripts();
+			_parser = new Parser();
+			_processID = GetHashCode();
+			_processInfo = processInfo;
+			_deviceSessions = new Schema.DeviceSessions(false);
+			_streamManager = (IStreamManager)this;
+			_valueManager = new ValueManager(this, this);
 			#if PROCESSSTREAMSOWNED
-			FOwnedStreams = new Dictionary<StreamID, bool>();
+			_ownedStreams = new Dictionary<StreamID, bool>();
 			#endif
 
-			FExecutingPrograms = new Programs();
-			FProcessLocalStack = new List<DataParams>();
+			_executingPrograms = new Programs();
+			_processLocalStack = new List<DataParams>();
 			PushProcessLocals();
-			FProcessProgram = new Program(this);
-			FProcessProgram.Start(null);
+			_processProgram = new Program(this);
+			_processProgram.Start(null);
 			
-			if (FServerSession.DebuggedByID > 0)
-				FServerSession.Server.GetDebugger(FServerSession.DebuggedByID).Attach(this);
+			if (_serverSession.DebuggedByID > 0)
+				_serverSession.Server.GetDebugger(_serverSession.DebuggedByID).Attach(this);
 		}
 		
-		private bool FDisposed;
+		private bool _disposed;
 		
-		protected void DeallocateProcessLocals(DataParams AParams)
+		protected void DeallocateProcessLocals(DataParams paramsValue)
 		{
-			foreach (DataParam LParam in AParams)
-				DataValue.DisposeValue(FValueManager, LParam.Value);
+			foreach (DataParam param in paramsValue)
+				DataValue.DisposeValue(_valueManager, param.Value);
 		}
 	
 		protected void DeallocateProcessLocalStack()
 		{
-			foreach (DataParams LParams in FProcessLocalStack)
-				DeallocateProcessLocals(LParams);
+			foreach (DataParams paramsValue in _processLocalStack)
+				DeallocateProcessLocals(paramsValue);
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -102,37 +102,37 @@ namespace Alphora.Dataphor.DAE.Server
 											{
 												try
 												{
-													if (FDebuggedBy != null)
-														FDebuggedBy.Detach(this);
+													if (_debuggedBy != null)
+														_debuggedBy.Detach(this);
 														
-													if (FApplicationTransactionID != Guid.Empty)
+													if (_applicationTransactionID != Guid.Empty)
 														LeaveApplicationTransaction();
 												}
 												finally
 												{
-													if (FTransactions != null)
+													if (_transactions != null)
 													{
 														// Rollback all active transactions
 														while (InTransaction)
 															RollbackTransaction();
 															
-														FTransactions.UnprepareDeferredConstraintChecks();
+														_transactions.UnprepareDeferredConstraintChecks();
 													}
 												}
 											}
 											finally
 											{
-												if (FPlans != null)
-													foreach (ServerPlan LPlan in FPlans)
+												if (_plans != null)
+													foreach (ServerPlan plan in _plans)
 													{
-														if (LPlan.ActiveCursor != null)
-															LPlan.ActiveCursor.Dispose();
+														if (plan.ActiveCursor != null)
+															plan.ActiveCursor.Dispose();
 													}
 											}
 										}
 										finally
 										{
-											if (FDeviceSessions != null)
+											if (_deviceSessions != null)
 											{
 												try
 												{
@@ -140,15 +140,15 @@ namespace Alphora.Dataphor.DAE.Server
 												}
 												finally
 												{
-													FDeviceSessions.Dispose();
-													FDeviceSessions = null;
+													_deviceSessions.Dispose();
+													_deviceSessions = null;
 												}
 											}
 										}
 									}
 									finally
 									{
-										if (FRemoteSessions != null)
+										if (_remoteSessions != null)
 										{
 											try
 											{
@@ -156,42 +156,42 @@ namespace Alphora.Dataphor.DAE.Server
 											}
 											finally
 											{
-												FRemoteSessions.Dispose();
-												FRemoteSessions = null;
+												_remoteSessions.Dispose();
+												_remoteSessions = null;
 											}
 										}
 									}
 								}
 								finally
 								{
-									if (FTransactions != null)
+									if (_transactions != null)
 									{
-										FTransactions.Dispose();
-										FTransactions = null;
+										_transactions.Dispose();
+										_transactions = null;
 									}
 								}
 							}
 							finally
 							{
-								if (FProcessProgram != null)
+								if (_processProgram != null)
 								{
-									FProcessProgram.Stop(null);
-									FProcessProgram = null;
+									_processProgram.Stop(null);
+									_processProgram = null;
 								}
 							}
 						}
 						finally
 						{
-							if (FProcessLocalStack != null)
+							if (_processLocalStack != null)
 							{
 								DeallocateProcessLocalStack();
-								FProcessLocalStack = null;
+								_processLocalStack = null;
 							}
 						}
 					}
 					finally
 					{
-						if (FScripts != null)
+						if (_scripts != null)
 						{
 							try
 							{
@@ -199,15 +199,15 @@ namespace Alphora.Dataphor.DAE.Server
 							}
 							finally
 							{
-								FScripts.Dispose();
-								FScripts = null;
+								_scripts.Dispose();
+								_scripts = null;
 							}
 						}
 					}
 				}
 				finally
 				{
-					if (FPlans != null)
+					if (_plans != null)
 					{
 						try
 						{
@@ -215,13 +215,13 @@ namespace Alphora.Dataphor.DAE.Server
 						}
 						finally
 						{
-							FPlans.Dispose();
-							FPlans = null;
+							_plans.Dispose();
+							_plans = null;
 						}
 					}
 					
-					if (!FDisposed)
-						FDisposed = true;
+					if (!_disposed)
+						_disposed = true;
 				}
 			}
 			finally
@@ -230,19 +230,19 @@ namespace Alphora.Dataphor.DAE.Server
 				ReleaseStreams();
 				#endif
 				
-				FExecutingPrograms = null;
-				FStreamManager = null;
-				FValueManager = null;
-				FServerSession = null;
-				FProcessID = -1;
-				FParser = null;
-				base.Dispose(ADisposing);
+				_executingPrograms = null;
+				_streamManager = null;
+				_valueManager = null;
+				_serverSession = null;
+				_processID = -1;
+				_parser = null;
+				base.Dispose(disposing);
 			}
 		}
 		
 		// ServerSession
-		private ServerSession FServerSession;
-		public ServerSession ServerSession { get { return FServerSession; } }
+		private ServerSession _serverSession;
+		public ServerSession ServerSession { get { return _serverSession; } }
 		
 		// This is an internal program used to ensure that there is always at
 		// least on executing program on the process. At this point, this is used 
@@ -251,37 +251,37 @@ namespace Alphora.Dataphor.DAE.Server
 		// a program each time a sort comparison or scalar transformation is
 		// required. Even then, it is only necessary for out-of-process
 		// processes, or in-process Dataphoria processes.
-		private Program FProcessProgram;
+		private Program _processProgram;
 		
 		// ProcessID
-		private int FProcessID = -1;
-		public int ProcessID { get { return FProcessID; } }
+		private int _processID = -1;
+		public int ProcessID { get { return _processID; } }
 		
 		// ProcessInfo
-		private ProcessInfo FProcessInfo;
-		public ProcessInfo ProcessInfo { get { return FProcessInfo; } }
+		private ProcessInfo _processInfo;
+		public ProcessInfo ProcessInfo { get { return _processInfo; } }
 		
 		/// <summary>Determines the default isolation level for transactions on this process.</summary>
 		public IsolationLevel DefaultIsolationLevel
 		{
-			get { return FProcessInfo.DefaultIsolationLevel; }
-			set { FProcessInfo.DefaultIsolationLevel = value; }
+			get { return _processInfo.DefaultIsolationLevel; }
+			set { _processInfo.DefaultIsolationLevel = value; }
 		}
 		
 		/// <summary>Returns the isolation level of the current transaction, if one is active. Otherwise, returns the default isolation level.</summary>
 		public IsolationLevel CurrentIsolationLevel()
 		{
-			return FTransactions.Count > 0 ? FTransactions.CurrentTransaction().IsolationLevel : DefaultIsolationLevel;
+			return _transactions.Count > 0 ? _transactions.CurrentTransaction().IsolationLevel : DefaultIsolationLevel;
 		}
 		
 		// MaxStackDepth
 		public int MaxStackDepth
 		{
-			get { return FExecutingPrograms.Count == 0 ? FServerSession.SessionInfo.DefaultMaxStackDepth : ExecutingProgram.Stack.MaxStackDepth; }
+			get { return _executingPrograms.Count == 0 ? _serverSession.SessionInfo.DefaultMaxStackDepth : ExecutingProgram.Stack.MaxStackDepth; }
 			set 
 			{ 
-				if (FExecutingPrograms.Count == 0)
-					FServerSession.SessionInfo.DefaultMaxStackDepth = value;
+				if (_executingPrograms.Count == 0)
+					_serverSession.SessionInfo.DefaultMaxStackDepth = value;
 				else
 					ExecutingProgram.Stack.MaxStackDepth = value;
 			}
@@ -290,11 +290,11 @@ namespace Alphora.Dataphor.DAE.Server
 		// MaxCallDepth
 		public int MaxCallDepth
 		{
-			get { return FExecutingPrograms.Count == 0 ? FServerSession.SessionInfo.DefaultMaxCallDepth : ExecutingProgram.Stack.MaxCallDepth; }
+			get { return _executingPrograms.Count == 0 ? _serverSession.SessionInfo.DefaultMaxCallDepth : ExecutingProgram.Stack.MaxCallDepth; }
 			set
 			{
-				if (FExecutingPrograms.Count == 0)
-					FServerSession.SessionInfo.DefaultMaxCallDepth = value;
+				if (_executingPrograms.Count == 0)
+					_serverSession.SessionInfo.DefaultMaxCallDepth = value;
 				else
 					ExecutingProgram.Stack.MaxCallDepth = value;
 			}
@@ -302,11 +302,11 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		// NonLogged - Indicates whether logging is performed within the device.  
 		// Is is an error to attempt non logged operations against a device that does not support non logged operations
-		private int FNonLoggedCount;
+		private int _nonLoggedCount;
 		public bool NonLogged
 		{
-			get { return FNonLoggedCount > 0; }
-			set { FNonLoggedCount += (value ? 1 : (NonLogged ? -1 : 0)); }
+			get { return _nonLoggedCount > 0; }
+			set { _nonLoggedCount += (value ? 1 : (NonLogged ? -1 : 0)); }
 		}
 		
 		// IServerProcess.GetServerProcess()
@@ -316,78 +316,78 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// IServerProcess.Session
-		IServerSession IServerProcess.Session { get { return FServerSession; } }
+		IServerSession IServerProcess.Session { get { return _serverSession; } }
 		
 		// Parsing
-		private Parser FParser;		
+		private Parser _parser;		
 		
-		public Statement ParseScript(string AScript, ParserMessages AMessages)
+		public Statement ParseScript(string script, ParserMessages messages)
 		{
-			Statement LStatement;								  
-			LStatement = FParser.ParseScript(AScript, AMessages);
-			return LStatement;
+			Statement statement;								  
+			statement = _parser.ParseScript(script, messages);
+			return statement;
 		}
 		
-		public Statement ParseStatement(string AStatement, ParserMessages AMessages)
+		public Statement ParseStatement(string statement, ParserMessages messages)
 		{
-			Statement LStatement;
-			LStatement = FParser.ParseStatement(AStatement, AMessages);
-			return LStatement;
+			Statement localStatement;
+			localStatement = _parser.ParseStatement(statement, messages);
+			return localStatement;
 		}
 		
-		public Expression ParseExpression(string AExpression)
+		public Expression ParseExpression(string expression)
 		{
-			Expression LExpression;
-			LExpression = FParser.ParseCursorDefinition(AExpression);
-			return LExpression;
+			Expression localExpression;
+			localExpression = _parser.ParseCursorDefinition(expression);
+			return localExpression;
 		}
 
 		// Plans
-		private ServerPlans FPlans;
-		public ServerPlans Plans { get { return FPlans; } }
+		private ServerPlans _plans;
+		public ServerPlans Plans { get { return _plans; } }
         
 		private void UnpreparePlans()
 		{
-			Exception LException = null;
-			while (FPlans.Count > 0)
+			Exception exception = null;
+			while (_plans.Count > 0)
 			{
 				try
 				{
-					ServerPlan LPlan = FPlans.DisownAt(0) as ServerPlan;
-					if (!ServerSession.ReleaseCachedPlan(this, LPlan))
-						LPlan.Dispose();
+					ServerPlan plan = _plans.DisownAt(0) as ServerPlan;
+					if (!ServerSession.ReleaseCachedPlan(this, plan))
+						plan.Dispose();
 					else
-						LPlan.NotifyReleased();
+						plan.NotifyReleased();
 				}
 				catch (Exception E)
 				{
-					LException = E;
+					exception = E;
 				}
 			}
-			if (LException != null)
-				throw LException;
+			if (exception != null)
+				throw exception;
 		}
         
 		// Scripts
-		private ServerScripts FScripts;
-		public ServerScripts Scripts { get { return FScripts; } }
+		private ServerScripts _scripts;
+		public ServerScripts Scripts { get { return _scripts; } }
 
 		private void UnprepareScripts()
 		{
-			Exception LException = null;
-			while (FScripts.Count > 0)
+			Exception exception = null;
+			while (_scripts.Count > 0)
 			{
 				try
 				{
-					FScripts.DisownAt(0).Dispose();
+					_scripts.DisownAt(0).Dispose();
 				}
 				catch (Exception E)
 				{
-					LException = E;
+					exception = E;
 				}
 			}
-			if (LException != null)
-				throw LException;
+			if (exception != null)
+				throw exception;
 		}
 		
 		#if USEROWMANAGER
@@ -401,78 +401,78 @@ namespace Alphora.Dataphor.DAE.Server
 		#endif
 		
 		// IValueManager
-		private IValueManager FValueManager;
-		public IValueManager ValueManager { get { return FValueManager; } }
+		private IValueManager _valueManager;
+		public IValueManager ValueManager { get { return _valueManager; } }
 		
 		// IStreamManager
-		private IStreamManager FStreamManager;
-		public IStreamManager StreamManager { get { return FStreamManager; } }
+		private IStreamManager _streamManager;
+		public IStreamManager StreamManager { get { return _streamManager; } }
 		
 		#if PROCESSSTREAMSOWNED
-		private Dictionary<StreamID, bool> FOwnedStreams;
+		private Dictionary<StreamID, bool> _ownedStreams;
 		
 		private void ReleaseStreams()
 		{
-			if (FOwnedStreams != null)
+			if (_ownedStreams != null)
 			{
-				foreach (StreamID LStreamID in FOwnedStreams.Keys)
+				foreach (StreamID streamID in _ownedStreams.Keys)
 					try
 					{
-						ServerSession.Server.StreamManager.Deallocate(LStreamID);
+						ServerSession.Server.StreamManager.Deallocate(streamID);
 					}
 					catch
 					{
 						// Just keep going, get rid of as many as possible.
 					}
 
-				FOwnedStreams = null;
+				_ownedStreams = null;
 			}
 		}
 		#endif
 		
 		StreamID IStreamManager.Allocate()
 		{
-			StreamID LStreamID = ServerSession.Server.StreamManager.Allocate();
+			StreamID streamID = ServerSession.Server.StreamManager.Allocate();
 			#if PROCESSSTREAMSOWNED
-			FOwnedStreams.Add(LStreamID, false);
+			_ownedStreams.Add(streamID, false);
 			#endif
-			return LStreamID;
+			return streamID;
 		}
 		
-		StreamID IStreamManager.Reference(StreamID AStreamID)
+		StreamID IStreamManager.Reference(StreamID streamID)
 		{
-			StreamID LStreamID = ServerSession.Server.StreamManager.Reference(AStreamID);
+			StreamID localStreamID = ServerSession.Server.StreamManager.Reference(streamID);
 			#if PROCESSSTREAMSOWNED
-			FOwnedStreams.Add(LStreamID, true);
+			_ownedStreams.Add(localStreamID, true);
 			#endif
-			return LStreamID;
+			return localStreamID;
 		}
 		
-		public StreamID Register(IStreamProvider AStreamProvider)
+		public StreamID Register(IStreamProvider streamProvider)
 		{
-			StreamID LStreamID = ServerSession.Server.StreamManager.Register(AStreamProvider);
+			StreamID streamID = ServerSession.Server.StreamManager.Register(streamProvider);
 			#if PROCESSSTREAMSOWNED
-			FOwnedStreams.Add(LStreamID, false);
+			_ownedStreams.Add(streamID, false);
 			#endif
-			return LStreamID;
+			return streamID;
 		}
 		
-		void IStreamManager.Deallocate(StreamID AStreamID)
+		void IStreamManager.Deallocate(StreamID streamID)
 		{
 			#if PROCESSSTREAMSOWNED
-			FOwnedStreams.Remove(AStreamID);
+			_ownedStreams.Remove(streamID);
 			#endif
-			ServerSession.Server.StreamManager.Deallocate(AStreamID);
+			ServerSession.Server.StreamManager.Deallocate(streamID);
 		}
 		
-		Stream IStreamManager.Open(StreamID AStreamID, LockMode ALockMode)
+		Stream IStreamManager.Open(StreamID streamID, LockMode lockMode)
 		{
-			return ServerSession.Server.StreamManager.Open(FProcessID, AStreamID, ALockMode);
+			return ServerSession.Server.StreamManager.Open(_processID, streamID, lockMode);
 		}
 
-		IRemoteStream IStreamManager.OpenRemote(StreamID AStreamID, LockMode ALockMode)
+		IRemoteStream IStreamManager.OpenRemote(StreamID streamID, LockMode lockMode)
 		{
-			return ServerSession.Server.StreamManager.OpenRemote(FProcessID, AStreamID, ALockMode);
+			return ServerSession.Server.StreamManager.OpenRemote(_processID, streamID, lockMode);
 		}
 
 		#if UNMANAGEDSTREAM
@@ -483,49 +483,49 @@ namespace Alphora.Dataphor.DAE.Server
 		#endif
 		
 		// ClassLoader
-		public object CreateObject(ClassDefinition AClassDefinition, object[] AArguments)
+		public object CreateObject(ClassDefinition classDefinition, object[] arguments)
 		{
-			return FServerSession.Server.Catalog.ClassLoader.CreateObject(CatalogDeviceSession, AClassDefinition, AArguments);
+			return _serverSession.Server.Catalog.ClassLoader.CreateObject(CatalogDeviceSession, classDefinition, arguments);
 		}
 		
-		public Type CreateType(ClassDefinition AClassDefinition)
+		public Type CreateType(ClassDefinition classDefinition)
 		{
-			return FServerSession.Server.Catalog.ClassLoader.CreateType(CatalogDeviceSession, AClassDefinition);
+			return _serverSession.Server.Catalog.ClassLoader.CreateType(CatalogDeviceSession, classDefinition);
 		}
 		
 		// DeviceSessions		
-		private Schema.DeviceSessions FDeviceSessions;
-		internal Schema.DeviceSessions DeviceSessions { get { return FDeviceSessions; } }
+		private Schema.DeviceSessions _deviceSessions;
+		internal Schema.DeviceSessions DeviceSessions { get { return _deviceSessions; } }
 
-		public Schema.DeviceSession DeviceConnect(Schema.Device ADevice)
+		public Schema.DeviceSession DeviceConnect(Schema.Device device)
 		{
-			int LIndex = DeviceSessions.IndexOf(ADevice);
-			if (LIndex < 0)
+			int index = DeviceSessions.IndexOf(device);
+			if (index < 0)
 			{
-				EnsureDeviceStarted(ADevice);
-				Schema.DeviceSession LSession = ADevice.Connect(this, ServerSession.SessionInfo);
+				EnsureDeviceStarted(device);
+				Schema.DeviceSession session = device.Connect(this, ServerSession.SessionInfo);
 				try
 				{
 					#if REFERENCECOUNTDEVICESESSIONS
-					LSession.FReferenceCount = 1;
+					session.FReferenceCount = 1;
 					#endif
-					while (LSession.Transactions.Count < FTransactions.Count)
-						LSession.BeginTransaction(FTransactions[FTransactions.Count - 1].IsolationLevel);
-					DeviceSessions.Add(LSession);
-					return LSession;
+					while (session.Transactions.Count < _transactions.Count)
+						session.BeginTransaction(_transactions[_transactions.Count - 1].IsolationLevel);
+					DeviceSessions.Add(session);
+					return session;
 				}
 				catch
 				{
-					ADevice.Disconnect(LSession);
+					device.Disconnect(session);
 					throw;
 				}
 			}
 			else
 			{
 				#if REFERENCECOUNTDEVICESESSIONS
-				DeviceSessions[LIndex].FReferenceCount++;
+				DeviceSessions[index].FReferenceCount++;
 				#endif
-				return DeviceSessions[LIndex];
+				return DeviceSessions[index];
 			}
 		}
 		
@@ -535,22 +535,22 @@ namespace Alphora.Dataphor.DAE.Server
 				DeviceSessions[0].Device.Disconnect(DeviceSessions[0]);
 		}
 		
-		public void DeviceDisconnect(Schema.Device ADevice)
+		public void DeviceDisconnect(Schema.Device device)
 		{
-			int LIndex = DeviceSessions.IndexOf(ADevice);
-			if (LIndex >= 0)
+			int index = DeviceSessions.IndexOf(device);
+			if (index >= 0)
 			{
 				#if REFERENCECOUNTDEVICESESSIONS
-				DeviceSessions[LIndex].FReferenceCount--;
-				if (DeviceSessions[LIndex].FReferenceCount == 0)
+				DeviceSessions[index].FReferenceCount--;
+				if (DeviceSessions[index].FReferenceCount == 0)
 				#endif
-				ADevice.Disconnect(DeviceSessions[LIndex]);
+				device.Disconnect(DeviceSessions[index]);
 			}
 		}
 		
-		public void EnsureDeviceStarted(Schema.Device ADevice)
+		public void EnsureDeviceStarted(Schema.Device device)
 		{
-			ServerSession.Server.StartDevice(this, ADevice);
+			ServerSession.Server.StartDevice(this, device);
 		}
 		
 		// CatalogDeviceSession
@@ -558,56 +558,56 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			get
 			{
-				CatalogDeviceSession LSession = DeviceConnect(ServerSession.Server.CatalogDevice) as CatalogDeviceSession;
-				Error.AssertFail(LSession != null, "Could not connect to catalog device");
-				return LSession;
+				CatalogDeviceSession session = DeviceConnect(ServerSession.Server.CatalogDevice) as CatalogDeviceSession;
+				Error.AssertFail(session != null, "Could not connect to catalog device");
+				return session;
 			}
 		}
 		
 		// RemoteSessions
-		private RemoteSessions FRemoteSessions;
+		private RemoteSessions _remoteSessions;
 		internal RemoteSessions RemoteSessions
 		{
 			get 
 			{ 
-				if (FRemoteSessions == null)
-					FRemoteSessions = new RemoteSessions();
-				return FRemoteSessions; 
+				if (_remoteSessions == null)
+					_remoteSessions = new RemoteSessions();
+				return _remoteSessions; 
 			}
 		}
 		
 		internal string RemoteSessionClassName = "Alphora.Dataphor.DAE.Server.RemoteSessionImplementation,Alphora.Dataphor.Server";
 		
-		internal RemoteSession RemoteConnect(Schema.ServerLink AServerLink)
+		internal RemoteSession RemoteConnect(Schema.ServerLink serverLink)
 		{
-			int LIndex = RemoteSessions.IndexOf(AServerLink);
-			if (LIndex < 0)
+			int index = RemoteSessions.IndexOf(serverLink);
+			if (index < 0)
 			{
-				RemoteSession LSession = (RemoteSession)Activator.CreateInstance(Type.GetType(RemoteSessionClassName), this, AServerLink);
+				RemoteSession session = (RemoteSession)Activator.CreateInstance(Type.GetType(RemoteSessionClassName), this, serverLink);
 				try
 				{
-					while (LSession.TransactionCount < FTransactions.Count)
-						LSession.BeginTransaction(FTransactions[FTransactions.Count - 1].IsolationLevel);
-					RemoteSessions.Add(LSession);
-					return LSession;
+					while (session.TransactionCount < _transactions.Count)
+						session.BeginTransaction(_transactions[_transactions.Count - 1].IsolationLevel);
+					RemoteSessions.Add(session);
+					return session;
 				}
 				catch
 				{
-					LSession.Dispose();
+					session.Dispose();
 					throw;
 				}
 			}
 			else
-				return RemoteSessions[LIndex];
+				return RemoteSessions[index];
 		}
 		
-		internal void RemoteDisconnect(Schema.ServerLink AServerLink)
+		internal void RemoteDisconnect(Schema.ServerLink serverLink)
 		{
-			int LIndex = RemoteSessions.IndexOf(AServerLink);
-			if (LIndex >= 0)
-				RemoteSessions[LIndex].Dispose();
+			int index = RemoteSessions.IndexOf(serverLink);
+			if (index >= 0)
+				RemoteSessions[index].Dispose();
 			else
-				throw new ServerException(ServerException.Codes.NoRemoteSessionForServerLink, AServerLink.Name);
+				throw new ServerException(ServerException.Codes.NoRemoteSessionForServerLink, serverLink.Name);
 		}
 		
 		internal void CloseRemoteSessions()
@@ -620,117 +620,117 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>Indicates whether or not warnings encountered during compilation of plans on this process will be reported.</summary>
 		public bool SuppressWarnings
 		{
-			get { return FProcessInfo.SuppressWarnings; }
-			set { FProcessInfo.SuppressWarnings = value; }
+			get { return _processInfo.SuppressWarnings; }
+			set { _processInfo.SuppressWarnings = value; }
 		}
 		
 		// ProcessLocals
-		private List<DataParams> FProcessLocalStack;
-		public DataParams ProcessLocals { get { return FProcessLocalStack[FProcessLocalStack.Count - 1]; } }
+		private List<DataParams> _processLocalStack;
+		public DataParams ProcessLocals { get { return _processLocalStack[_processLocalStack.Count - 1]; } }
 		
 		public void PushProcessLocals()
 		{
-			FProcessLocalStack.Add(new DataParams());
+			_processLocalStack.Add(new DataParams());
 		}
 		
 		public void PopProcessLocals()
 		{
 			DeallocateProcessLocals(ProcessLocals);
-			FProcessLocalStack.RemoveAt(FProcessLocalStack.Count - 1);
+			_processLocalStack.RemoveAt(_processLocalStack.Count - 1);
 		}
 		
 		public void AddProcessLocal(DataParam LParam)
 		{
-			DataParams LProcessLocals = ProcessLocals;
-			int LParamIndex = LProcessLocals.IndexOf(LParam.Name);
-			if (LParamIndex >= 0)
+			DataParams processLocals = ProcessLocals;
+			int paramIndex = processLocals.IndexOf(LParam.Name);
+			if (paramIndex >= 0)
 			{
-				DataValue.DisposeValue(FValueManager, LProcessLocals[LParamIndex].Value);
-				LProcessLocals[LParamIndex].Value = LParam.Value;
+				DataValue.DisposeValue(_valueManager, processLocals[paramIndex].Value);
+				processLocals[paramIndex].Value = LParam.Value;
 				LParam.Value = null;
 			}
 			else
-				LProcessLocals.Add(LParam);
+				processLocals.Add(LParam);
 		}
 		
-		private void Compile(Plan APlan, Program AProgram, Statement AStatement, DataParams AParams, bool AIsExpression, SourceContext ASourceContext)
+		private void Compile(Plan plan, Program program, Statement statement, DataParams paramsValue, bool isExpression, SourceContext sourceContext)
 		{
 			#if TIMING
-			DateTime LStartTime = DateTime.Now;
+			DateTime startTime = DateTime.Now;
 			System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile", DateTime.Now.ToString("hh:mm:ss.ffff")));
 			#endif
-			Schema.DerivedTableVar LTableVar = null;
-			LTableVar = new Schema.DerivedTableVar(Schema.Object.GetNextObjectID(), Schema.Object.NameFromGuid(AProgram.ID));
-			LTableVar.SessionObjectName = LTableVar.Name;
-			LTableVar.SessionID = APlan.SessionID;
-			APlan.PushCreationObject(LTableVar);
+			Schema.DerivedTableVar tableVar = null;
+			tableVar = new Schema.DerivedTableVar(Schema.Object.GetNextObjectID(), Schema.Object.NameFromGuid(program.ID));
+			tableVar.SessionObjectName = tableVar.Name;
+			tableVar.SessionID = plan.SessionID;
+			plan.PushCreationObject(tableVar);
 			try
 			{
-				DataParams LParams = new DataParams();
-				if (AProgram.ShouldPushLocals)
-					foreach (DataParam LParam in ProcessLocals)
-						LParams.Add(LParam);
+				DataParams localParamsValue = new DataParams();
+				if (program.ShouldPushLocals)
+					foreach (DataParam param in ProcessLocals)
+						localParamsValue.Add(param);
 
-				if (AParams != null)
-					foreach (DataParam LParam in AParams)
-						LParams.Add(LParam);
+				if (paramsValue != null)
+					foreach (DataParam param in paramsValue)
+						localParamsValue.Add(param);
 
-				AProgram.Code = Compiler.Compile(APlan, AStatement, LParams, AIsExpression, ASourceContext);
-				AProgram.SetSourceContext(ASourceContext);
+				program.Code = Compiler.Compile(plan, statement, localParamsValue, isExpression, sourceContext);
+				program.SetSourceContext(sourceContext);
 
 				// Include dependencies for any process context that may be being referenced by the plan
 				// This is necessary to support the variable declaration statements that will be added to support serialization of the plan
-				if (AProgram.ShouldPushLocals && APlan.NewSymbols != null)
-					foreach (Symbol LSymbol in APlan.NewSymbols)
+				if (program.ShouldPushLocals && plan.NewSymbols != null)
+					foreach (Symbol symbol in plan.NewSymbols)
 					{
-						AProgram.ProcessLocals.Add(new DataParam(LSymbol.Name, LSymbol.DataType, Modifier.Var));
-						APlan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Catalog, LSymbol.DataType, EmitMode.ForRemote);
+						program.ProcessLocals.Add(new DataParam(symbol.Name, symbol.DataType, Modifier.Var));
+						plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, plan.Catalog, symbol.DataType, EmitMode.ForRemote);
 					}
 
-				if (!APlan.Messages.HasErrors && AIsExpression)
+				if (!plan.Messages.HasErrors && isExpression)
 				{
-					if (AProgram.Code.DataType == null)
+					if (program.Code.DataType == null)
 						throw new CompilerException(CompilerException.Codes.ExpressionExpected);
-					AProgram.DataType = CopyDataType(APlan, AProgram.Code, LTableVar);
+					program.DataType = CopyDataType(plan, program.Code, tableVar);
 				}
 			}
 			finally
 			{
-				APlan.PopCreationObject();
+				plan.PopCreationObject();
 			}
 			#if TIMING
-			System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile -- Compile Time: {1}", DateTime.Now.ToString("hh:mm:ss.ffff"), (DateTime.Now - LStartTime).ToString()));
+			System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile -- Compile Time: {1}", DateTime.Now.ToString("hh:mm:ss.ffff"), (DateTime.Now - startTime).ToString()));
 			#endif
 		}
         
-		internal ServerPlan CompileStatement(Statement AStatement, ParserMessages AMessages, DataParams AParams, SourceContext ASourceContext)
+		internal ServerPlan CompileStatement(Statement statement, ParserMessages messages, DataParams paramsValue, SourceContext sourceContext)
 		{
-			ServerPlan LPlan = new ServerStatementPlan(this);
+			ServerPlan plan = new ServerStatementPlan(this);
 			try
 			{
-				if (AMessages != null)
-					LPlan.Plan.Messages.AddRange(AMessages);
-				Compile(LPlan.Plan, LPlan.Program, AStatement, AParams, false, ASourceContext);
-				FPlans.Add(LPlan);
-				return LPlan;
+				if (messages != null)
+					plan.Plan.Messages.AddRange(messages);
+				Compile(plan.Plan, plan.Program, statement, paramsValue, false, sourceContext);
+				_plans.Add(plan);
+				return plan;
 			}
 			catch
 			{
-				LPlan.Dispose();
+				plan.Dispose();
 				throw;
 			}
 		}
 
-		private void InternalUnprepare(ServerPlan APlan)
+		private void InternalUnprepare(ServerPlan plan)
 		{
 			BeginCall();
 			try
 			{
-				FPlans.Disown(APlan);
-				if (!ServerSession.ReleaseCachedPlan(this, APlan))
-					APlan.Dispose();
+				_plans.Disown(plan);
+				if (!ServerSession.ReleaseCachedPlan(this, plan))
+					plan.Dispose();
 				else
-					APlan.NotifyReleased();
+					plan.NotifyReleased();
 			}
 			catch (Exception E)
 			{
@@ -742,44 +742,44 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		private int GetContextHashCode(DataParams AParams)
+		private int GetContextHashCode(DataParams paramsValue)
 		{
-			StringBuilder LContextName = new StringBuilder();
-			for (int LIndex = 0; LIndex < ProcessLocals.Count; LIndex++)
-				LContextName.Append(ProcessLocals[LIndex].DataType.Name);
-			if (AParams != null)
-				for (int LIndex = 0; LIndex < AParams.Count; LIndex++)
-					LContextName.Append(AParams[LIndex].DataType.Name);
-			return LContextName.ToString().GetHashCode();
+			StringBuilder contextName = new StringBuilder();
+			for (int index = 0; index < ProcessLocals.Count; index++)
+				contextName.Append(ProcessLocals[index].DataType.Name);
+			if (paramsValue != null)
+				for (int index = 0; index < paramsValue.Count; index++)
+					contextName.Append(paramsValue[index].DataType.Name);
+			return contextName.ToString().GetHashCode();
 		}
 		
-		public IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams)
+		public IServerStatementPlan PrepareStatement(string statement, DataParams paramsValue)
 		{
-			return PrepareStatement(AStatement, AParams, null);
+			return PrepareStatement(statement, paramsValue, null);
 		}
 		
 		// PrepareStatement        
-		public IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams, DebugLocator ALocator)
+		public IServerStatementPlan PrepareStatement(string statement, DataParams paramsValue, DebugLocator locator)
 		{
 			BeginCall();
 			try
 			{
-				int LContextHashCode = GetContextHashCode(AParams);
-				IServerStatementPlan LPlan = ServerSession.GetCachedPlan(this, AStatement, LContextHashCode) as IServerStatementPlan;
-				if (LPlan != null)
+				int contextHashCode = GetContextHashCode(paramsValue);
+				IServerStatementPlan plan = ServerSession.GetCachedPlan(this, statement, contextHashCode) as IServerStatementPlan;
+				if (plan != null)
 				{
-					FPlans.Add(LPlan);
-					((ServerPlan)LPlan).Program.SetSourceContext(new SourceContext(AStatement, ALocator));
+					_plans.Add(plan);
+					((ServerPlan)plan).Program.SetSourceContext(new SourceContext(statement, locator));
 				}
 				else
 				{
-					ParserMessages LMessages = new ParserMessages();
-					Statement LStatement = ParseStatement(AStatement, LMessages);
-					LPlan = (IServerStatementPlan)CompileStatement(LStatement, LMessages, AParams, new SourceContext(AStatement, ALocator));
-					if (!LPlan.Messages.HasErrors)
-						ServerSession.AddCachedPlan(this, AStatement, LContextHashCode, (ServerPlan)LPlan);
+					ParserMessages messages = new ParserMessages();
+					Statement localStatement = ParseStatement(statement, messages);
+					plan = (IServerStatementPlan)CompileStatement(localStatement, messages, paramsValue, new SourceContext(statement, locator));
+					if (!plan.Messages.HasErrors)
+						ServerSession.AddCachedPlan(this, statement, contextHashCode, (ServerPlan)plan);
 				}
-				return LPlan;
+				return plan;
 			}
 			catch (Exception E)
 			{
@@ -792,163 +792,163 @@ namespace Alphora.Dataphor.DAE.Server
 		}
         
 		// UnprepareStatement
-		public void UnprepareStatement(IServerStatementPlan APlan)
+		public void UnprepareStatement(IServerStatementPlan plan)
 		{
-			InternalUnprepare((ServerPlan)APlan);
+			InternalUnprepare((ServerPlan)plan);
 		}
         
 		// Execute
-		public void Execute(string AStatement, DataParams AParams)
+		public void Execute(string statement, DataParams paramsValue)
 		{
-			IServerStatementPlan LStatementPlan = PrepareStatement(AStatement, AParams);
+			IServerStatementPlan statementPlan = PrepareStatement(statement, paramsValue);
 			try
 			{
-				LStatementPlan.Execute(AParams);
+				statementPlan.Execute(paramsValue);
 			}
 			finally
 			{
-				UnprepareStatement(LStatementPlan);
+				UnprepareStatement(statementPlan);
 			}
 		}
 		
-		private Schema.IDataType CopyDataType(Plan APlan, PlanNode ACode, Schema.DerivedTableVar ATableVar)
+		private Schema.IDataType CopyDataType(Plan plan, PlanNode code, Schema.DerivedTableVar tableVar)
 		{
 			#if TIMING
 			System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerProcess.CopyDataType", DateTime.Now.ToString("hh:mm:ss.ffff")));
 			#endif
-			if (ACode.DataType is Schema.CursorType)
+			if (code.DataType is Schema.CursorType)
 			{
-				TableNode LSourceNode = (TableNode)ACode.Nodes[0];	
-				Schema.TableVar LSourceTableVar = LSourceNode.TableVar;
+				TableNode sourceNode = (TableNode)code.Nodes[0];	
+				Schema.TableVar sourceTableVar = sourceNode.TableVar;
 
-				AdornExpression LAdornExpression = new AdornExpression();
-				LAdornExpression.MetaData = new MetaData();
-				LAdornExpression.MetaData.Tags.Add(new Tag("DAE.IsChangeRemotable", (LSourceTableVar.IsChangeRemotable || !LSourceTableVar.ShouldChange).ToString()));
-				LAdornExpression.MetaData.Tags.Add(new Tag("DAE.IsDefaultRemotable", (LSourceTableVar.IsDefaultRemotable || !LSourceTableVar.ShouldDefault).ToString()));
-				LAdornExpression.MetaData.Tags.Add(new Tag("DAE.IsValidateRemotable", (LSourceTableVar.IsValidateRemotable || !LSourceTableVar.ShouldValidate).ToString()));
+				AdornExpression adornExpression = new AdornExpression();
+				adornExpression.MetaData = new MetaData();
+				adornExpression.MetaData.Tags.Add(new Tag("DAE.IsChangeRemotable", (sourceTableVar.IsChangeRemotable || !sourceTableVar.ShouldChange).ToString()));
+				adornExpression.MetaData.Tags.Add(new Tag("DAE.IsDefaultRemotable", (sourceTableVar.IsDefaultRemotable || !sourceTableVar.ShouldDefault).ToString()));
+				adornExpression.MetaData.Tags.Add(new Tag("DAE.IsValidateRemotable", (sourceTableVar.IsValidateRemotable || !sourceTableVar.ShouldValidate).ToString()));
 
-				if (LSourceNode.Order != null)
+				if (sourceNode.Order != null)
 				{
-					if (!LSourceTableVar.Orders.Contains(LSourceNode.Order))
-						LSourceTableVar.Orders.Add(LSourceNode.Order);
-					LAdornExpression.MetaData.Tags.Add(new Tag("DAE.DefaultOrder", LSourceNode.Order.Name));
+					if (!sourceTableVar.Orders.Contains(sourceNode.Order))
+						sourceTableVar.Orders.Add(sourceNode.Order);
+					adornExpression.MetaData.Tags.Add(new Tag("DAE.DefaultOrder", sourceNode.Order.Name));
 				}
 				
-				foreach (Schema.TableVarColumn LColumn in LSourceNode.TableVar.Columns)
+				foreach (Schema.TableVarColumn column in sourceNode.TableVar.Columns)
 				{
-					if (!((LColumn.IsDefaultRemotable || !LColumn.ShouldDefault) && (LColumn.IsValidateRemotable || !LColumn.ShouldValidate) && (LColumn.IsChangeRemotable || !LColumn.ShouldChange)))
+					if (!((column.IsDefaultRemotable || !column.ShouldDefault) && (column.IsValidateRemotable || !column.ShouldValidate) && (column.IsChangeRemotable || !column.ShouldChange)))
 					{
-						AdornColumnExpression LColumnExpression = new AdornColumnExpression();
-						LColumnExpression.ColumnName = Schema.Object.EnsureRooted(LColumn.Name);
-						LColumnExpression.MetaData = new MetaData();
-						LColumnExpression.MetaData.Tags.AddOrUpdate("DAE.IsChangeRemotable", (LColumn.IsChangeRemotable || !LColumn.ShouldChange).ToString());
-						LColumnExpression.MetaData.Tags.AddOrUpdate("DAE.IsDefaultRemotable", (LColumn.IsDefaultRemotable || !LColumn.ShouldDefault).ToString());
-						LColumnExpression.MetaData.Tags.AddOrUpdate("DAE.IsValidateRemotable", (LColumn.IsValidateRemotable || !LColumn.ShouldValidate).ToString());
-						LAdornExpression.Expressions.Add(LColumnExpression);
+						AdornColumnExpression columnExpression = new AdornColumnExpression();
+						columnExpression.ColumnName = Schema.Object.EnsureRooted(column.Name);
+						columnExpression.MetaData = new MetaData();
+						columnExpression.MetaData.Tags.AddOrUpdate("DAE.IsChangeRemotable", (column.IsChangeRemotable || !column.ShouldChange).ToString());
+						columnExpression.MetaData.Tags.AddOrUpdate("DAE.IsDefaultRemotable", (column.IsDefaultRemotable || !column.ShouldDefault).ToString());
+						columnExpression.MetaData.Tags.AddOrUpdate("DAE.IsValidateRemotable", (column.IsValidateRemotable || !column.ShouldValidate).ToString());
+						adornExpression.Expressions.Add(columnExpression);
 					}
 				}
 				
-				PlanNode LViewNode = LSourceNode;
-				while (LViewNode is BaseOrderNode)
-					LViewNode = LViewNode.Nodes[0];
+				PlanNode viewNode = sourceNode;
+				while (viewNode is BaseOrderNode)
+					viewNode = viewNode.Nodes[0];
 					
-				LViewNode = Compiler.EmitAdornNode(APlan, LViewNode, LAdornExpression);
+				viewNode = Compiler.EmitAdornNode(plan, viewNode, adornExpression);
 
-				ATableVar.CopyTableVar((TableNode)LViewNode);
-				ATableVar.CopyReferences((TableNode)LViewNode);
-				ATableVar.InheritMetaData(((TableNode)LViewNode).TableVar.MetaData);
+				tableVar.CopyTableVar((TableNode)viewNode);
+				tableVar.CopyReferences((TableNode)viewNode);
+				tableVar.InheritMetaData(((TableNode)viewNode).TableVar.MetaData);
 				#if USEORIGINALEXPRESSION
-				ATableVar.OriginalExpression = (Expression)LViewNode.EmitStatement(EmitMode.ForRemote);
+				ATableVar.OriginalExpression = (Expression)viewNode.EmitStatement(EmitMode.ForRemote);
 				#else
-				ATableVar.InvocationExpression = (Expression)LViewNode.EmitStatement(EmitMode.ForRemote);
+				tableVar.InvocationExpression = (Expression)viewNode.EmitStatement(EmitMode.ForRemote);
 				#endif
 				
 				// Gather AT dependencies
 				// Each AT object will be emitted remotely as the underlying object, so report the dependency so that the catalog emission happens in the correct order.
-				Schema.Objects LATObjects = new Schema.Objects();
-				if (ATableVar.HasDependencies())
-					for (int LIndex = 0; LIndex < ATableVar.Dependencies.Count; LIndex++)
+				Schema.Objects aTObjects = new Schema.Objects();
+				if (tableVar.HasDependencies())
+					for (int index = 0; index < tableVar.Dependencies.Count; index++)
 					{
-						Schema.Object LObject = ATableVar.Dependencies.ResolveObject(CatalogDeviceSession, LIndex);
-						if ((LObject != null) && LObject.IsATObject && ((LObject is Schema.TableVar) || (LObject is Schema.Operator)))
-							LATObjects.Add(LObject);
+						Schema.Object objectValue = tableVar.Dependencies.ResolveObject(CatalogDeviceSession, index);
+						if ((objectValue != null) && objectValue.IsATObject && ((objectValue is Schema.TableVar) || (objectValue is Schema.Operator)))
+							aTObjects.Add(objectValue);
 					}
 
-				foreach (Schema.Object LATObject in LATObjects)
+				foreach (Schema.Object aTObject in aTObjects)
 				{
-					Schema.TableVar LATTableVar = LATObject as Schema.TableVar;
-					if (LATTableVar != null)
+					Schema.TableVar aTTableVar = aTObject as Schema.TableVar;
+					if (aTTableVar != null)
 					{
-						Schema.TableVar LTableVar = (Schema.TableVar)APlan.Catalog[APlan.Catalog.IndexOfName(LATTableVar.SourceTableName)];
-						ATableVar.Dependencies.Ensure(LTableVar);
+						Schema.TableVar localTableVar = (Schema.TableVar)plan.Catalog[plan.Catalog.IndexOfName(aTTableVar.SourceTableName)];
+						tableVar.Dependencies.Ensure(localTableVar);
 						continue;
 					}
 
-					Schema.Operator LATOperator = LATObject as Schema.Operator;
-					if (LATOperator != null)
+					Schema.Operator aTOperator = aTObject as Schema.Operator;
+					if (aTOperator != null)
 					{
-						ATableVar.Dependencies.Ensure(ServerSession.Server.ATDevice.ResolveSourceOperator(APlan, LATOperator));
+						tableVar.Dependencies.Ensure(ServerSession.Server.ATDevice.ResolveSourceOperator(plan, aTOperator));
 					}
 				}
 				
-				APlan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Catalog, ATableVar, EmitMode.ForRemote);
-				APlan.PlanCatalog.Remove(ATableVar);
-				APlan.PlanCatalog.Add(ATableVar);
-				return ATableVar.DataType;
+				plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, plan.Catalog, tableVar, EmitMode.ForRemote);
+				plan.PlanCatalog.Remove(tableVar);
+				plan.PlanCatalog.Add(tableVar);
+				return tableVar.DataType;
 			}
 			else
 			{
-				APlan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Catalog, ATableVar, EmitMode.ForRemote);
-				APlan.PlanCatalog.SafeRemove(ATableVar);
-				APlan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Catalog, ACode.DataType, EmitMode.ForRemote);
-				return ACode.DataType;
+				plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, plan.Catalog, tableVar, EmitMode.ForRemote);
+				plan.PlanCatalog.SafeRemove(tableVar);
+				plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, plan.Catalog, code.DataType, EmitMode.ForRemote);
+				return code.DataType;
 			}
 		}
 
-		internal ServerPlan CompileExpression(Statement AExpression, ParserMessages AMessages, DataParams AParams, SourceContext ASourceContext)
+		internal ServerPlan CompileExpression(Statement expression, ParserMessages messages, DataParams paramsValue, SourceContext sourceContext)
 		{
-			ServerPlan LPlan = new ServerExpressionPlan(this);
+			ServerPlan plan = new ServerExpressionPlan(this);
 			try
 			{
-				if (AMessages != null)
-					LPlan.Plan.Messages.AddRange(AMessages);
-				Compile(LPlan.Plan, LPlan.Program, AExpression, AParams, true, ASourceContext);
-				FPlans.Add(LPlan);
-				return LPlan;
+				if (messages != null)
+					plan.Plan.Messages.AddRange(messages);
+				Compile(plan.Plan, plan.Program, expression, paramsValue, true, sourceContext);
+				_plans.Add(plan);
+				return plan;
 			}
 			catch
 			{
-				LPlan.Dispose();
+				plan.Dispose();
 				throw;
 			}
 		}
 		
-		public IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams)
+		public IServerExpressionPlan PrepareExpression(string expression, DataParams paramsValue)
 		{
-			return PrepareExpression(AExpression, AParams, null);
+			return PrepareExpression(expression, paramsValue, null);
 		}
 		
 		// PrepareExpression
-		public IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams, DebugLocator ALocator)
+		public IServerExpressionPlan PrepareExpression(string expression, DataParams paramsValue, DebugLocator locator)
 		{
 			BeginCall();
 			try
 			{
-				int LContextHashCode = GetContextHashCode(AParams);
-				IServerExpressionPlan LPlan = ServerSession.GetCachedPlan(this, AExpression, LContextHashCode) as IServerExpressionPlan;
-				if (LPlan != null)
+				int contextHashCode = GetContextHashCode(paramsValue);
+				IServerExpressionPlan plan = ServerSession.GetCachedPlan(this, expression, contextHashCode) as IServerExpressionPlan;
+				if (plan != null)
 				{
-					FPlans.Add(LPlan);
-					((ServerPlan)LPlan).Program.SetSourceContext(new SourceContext(AExpression, ALocator));
+					_plans.Add(plan);
+					((ServerPlan)plan).Program.SetSourceContext(new SourceContext(expression, locator));
 				}
 				else
 				{
-					ParserMessages LMessages = new ParserMessages();
-					LPlan = (IServerExpressionPlan)CompileExpression(ParseExpression(AExpression), LMessages, AParams, new SourceContext(AExpression, ALocator));
-					if (!LPlan.Messages.HasErrors)
-						ServerSession.AddCachedPlan(this, AExpression, LContextHashCode, (ServerPlan)LPlan);
+					ParserMessages messages = new ParserMessages();
+					plan = (IServerExpressionPlan)CompileExpression(ParseExpression(expression), messages, paramsValue, new SourceContext(expression, locator));
+					if (!plan.Messages.HasErrors)
+						ServerSession.AddCachedPlan(this, expression, contextHashCode, (ServerPlan)plan);
 				}
-				return LPlan;
+				return plan;
 			}
 			catch (Exception E)
 			{
@@ -961,74 +961,74 @@ namespace Alphora.Dataphor.DAE.Server
 		}
         
 		// UnprepareExpression
-		public void UnprepareExpression(IServerExpressionPlan APlan)
+		public void UnprepareExpression(IServerExpressionPlan plan)
 		{
-			InternalUnprepare((ServerPlan)APlan);
+			InternalUnprepare((ServerPlan)plan);
 		}
 		
 		// Evaluate
-		public DataValue Evaluate(string AExpression, DataParams AParams)
+		public DataValue Evaluate(string expression, DataParams paramsValue)
 		{
-			IServerExpressionPlan LPlan = PrepareExpression(AExpression, AParams);
+			IServerExpressionPlan plan = PrepareExpression(expression, paramsValue);
 			try
 			{
-				return LPlan.Evaluate(AParams);
+				return plan.Evaluate(paramsValue);
 			}
 			finally
 			{
-				UnprepareExpression(LPlan);
+				UnprepareExpression(plan);
 			}
 		}
 		
 		// OpenCursor
-		public IServerCursor OpenCursor(string AExpression, DataParams AParams)
+		public IServerCursor OpenCursor(string expression, DataParams paramsValue)
 		{
-			IServerExpressionPlan LPlan = PrepareExpression(AExpression, AParams);
+			IServerExpressionPlan plan = PrepareExpression(expression, paramsValue);
 			try
 			{
-				return LPlan.Open(AParams);
+				return plan.Open(paramsValue);
 			}
 			catch
 			{
-				UnprepareExpression(LPlan);
+				UnprepareExpression(plan);
 				throw;
 			}
 		}
 		
 		// CloseCursor
-		public void CloseCursor(IServerCursor ACursor)
+		public void CloseCursor(IServerCursor cursor)
 		{
-			IServerExpressionPlan LPlan = ACursor.Plan;
+			IServerExpressionPlan plan = cursor.Plan;
 			try
 			{
-				LPlan.Close(ACursor);
+				plan.Close(cursor);
 			}
 			finally
 			{
-				UnprepareExpression(LPlan);
+				UnprepareExpression(plan);
 			}
 		}
 		
-		public IServerScript PrepareScript(string AScript)
+		public IServerScript PrepareScript(string script)
 		{
-			return PrepareScript(AScript, null);
+			return PrepareScript(script, null);
 		}
         
 		// PrepareScript
-		public IServerScript PrepareScript(string AScript, DebugLocator ALocator)
+		public IServerScript PrepareScript(string script, DebugLocator locator)
 		{
 			BeginCall();
 			try
 			{
-				ServerScript LScript = new ServerScript(this, AScript, ALocator);
+				ServerScript localScript = new ServerScript(this, script, locator);
 				try
 				{
-					FScripts.Add(LScript);
-					return LScript;
+					_scripts.Add(localScript);
+					return localScript;
 				}
 				catch
 				{
-					LScript.Dispose();
+					localScript.Dispose();
 					throw;
 				}
 			}
@@ -1043,12 +1043,12 @@ namespace Alphora.Dataphor.DAE.Server
 		}
         
 		// UnprepareScript
-		public void UnprepareScript(IServerScript AScript)
+		public void UnprepareScript(IServerScript script)
 		{
 			BeginCall();
 			try
 			{
-				((ServerScript)AScript).Dispose();
+				((ServerScript)script).Dispose();
 			}
 			catch (Exception E)
 			{
@@ -1061,65 +1061,65 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// ExecuteScript
-		public void ExecuteScript(string AScript)
+		public void ExecuteScript(string script)
 		{
-			IServerScript LScript = PrepareScript(AScript);
+			IServerScript localScript = PrepareScript(script);
 			try
 			{
-				LScript.Execute(null);
+				localScript.Execute(null);
 			}
 			finally
 			{
-				UnprepareScript(LScript);
+				UnprepareScript(localScript);
 			}
 		}
 
 		// Transaction		
-		private IServerDTCTransaction FDTCTransaction;
-		private ServerTransactions FTransactions = new ServerTransactions();
-		public ServerTransactions Transactions { get { return FTransactions; } }
+		private IServerDTCTransaction _dTCTransaction;
+		private ServerTransactions _transactions = new ServerTransactions();
+		public ServerTransactions Transactions { get { return _transactions; } }
 
-		internal ServerTransaction CurrentTransaction { get { return FTransactions.CurrentTransaction(); } }
-		internal ServerTransaction RootTransaction { get { return FTransactions.RootTransaction(); } }
+		internal ServerTransaction CurrentTransaction { get { return _transactions.CurrentTransaction(); } }
+		internal ServerTransaction RootTransaction { get { return _transactions.RootTransaction(); } }
 		
-		internal void AddInsertTableVarCheck(Schema.TableVar ATableVar, Row ARow)
+		internal void AddInsertTableVarCheck(Schema.TableVar tableVar, Row row)
 		{
-			FTransactions.AddInsertTableVarCheck(ATableVar, ARow);
+			_transactions.AddInsertTableVarCheck(tableVar, row);
 		}
 		
-		internal void AddUpdateTableVarCheck(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		internal void AddUpdateTableVarCheck(Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
 		{
-			FTransactions.AddUpdateTableVarCheck(ATableVar, AOldRow, ANewRow);
+			_transactions.AddUpdateTableVarCheck(tableVar, oldRow, newRow, valueFlags);
 		}
 		
-		internal void AddDeleteTableVarCheck(Schema.TableVar ATableVar, Row ARow)
+		internal void AddDeleteTableVarCheck(Schema.TableVar tableVar, Row row)
 		{
-			FTransactions.AddDeleteTableVarCheck(ATableVar, ARow);
+			_transactions.AddDeleteTableVarCheck(tableVar, row);
 		}
 		
-		internal void RemoveDeferredConstraintChecks(Schema.TableVar ATableVar)
+		internal void RemoveDeferredConstraintChecks(Schema.TableVar tableVar)
 		{
-			if (FTransactions != null)
-				FTransactions.RemoveDeferredConstraintChecks(ATableVar);
+			if (_transactions != null)
+				_transactions.RemoveDeferredConstraintChecks(tableVar);
 		}
 		
-		internal void RemoveDeferredHandlers(Schema.EventHandler AHandler)
+		internal void RemoveDeferredHandlers(Schema.EventHandler handler)
 		{
-			if (FTransactions != null)
-				FTransactions.RemoveDeferredHandlers(AHandler);
+			if (_transactions != null)
+				_transactions.RemoveDeferredHandlers(handler);
 		}
 		
-		internal void RemoveCatalogConstraintCheck(Schema.CatalogConstraint AConstraint)
+		internal void RemoveCatalogConstraintCheck(Schema.CatalogConstraint constraint)
 		{
-			if (FTransactions != null)
-				FTransactions.RemoveCatalogConstraintCheck(AConstraint);
+			if (_transactions != null)
+				_transactions.RemoveCatalogConstraintCheck(constraint);
 		}
 		
 		// TransactionCount
-		public int TransactionCount { get { return FTransactions.Count; } }
+		public int TransactionCount { get { return _transactions.Count; } }
 
 		// InTransaction
-		public bool InTransaction { get { return FTransactions.Count > 0; } }
+		public bool InTransaction { get { return _transactions.Count > 0; } }
 
 		private void CheckInTransaction()
 		{
@@ -1130,7 +1130,7 @@ namespace Alphora.Dataphor.DAE.Server
 		// UseDTC
 		public bool UseDTC
 		{
-			get { return FProcessInfo.UseDTC; }
+			get { return _processInfo.UseDTC; }
 			set
 			{
 				lock (this)
@@ -1140,7 +1140,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 					if (value && (Environment.OSVersion.Version.Major < 5))
 						throw new ServerException(ServerException.Codes.DTCNotSupported);
-					FProcessInfo.UseDTC = value;
+					_processInfo.UseDTC = value;
 				}
 			}
 		}
@@ -1148,17 +1148,17 @@ namespace Alphora.Dataphor.DAE.Server
 		// UseImplicitTransactions
 		public bool UseImplicitTransactions
 		{
-			get { return FProcessInfo.UseImplicitTransactions; }
-			set { FProcessInfo.UseImplicitTransactions = value; }
+			get { return _processInfo.UseImplicitTransactions; }
+			set { _processInfo.UseImplicitTransactions = value; }
 		}
 
 		// BeginTransaction
-		public void BeginTransaction(IsolationLevel AIsolationLevel)
+		public void BeginTransaction(IsolationLevel isolationLevel)
 		{
 			BeginCall();
 			try
 			{
-				InternalBeginTransaction(AIsolationLevel);
+				InternalBeginTransaction(isolationLevel);
 			}
 			catch (Exception E)
 			{
@@ -1224,59 +1224,59 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
     
-		protected internal void InternalBeginTransaction(IsolationLevel AIsolationLevel)
+		protected internal void InternalBeginTransaction(IsolationLevel isolationLevel)
 		{
-			FTransactions.BeginTransaction(this, AIsolationLevel);
+			_transactions.BeginTransaction(this, isolationLevel);
 
-			if (UseDTC && (FDTCTransaction == null))
+			if (UseDTC && (_dTCTransaction == null))
 			{
 				CloseDeviceSessions();
-				FDTCTransaction = (IServerDTCTransaction)Activator.CreateInstance(Type.GetType("Alphora.Dataphor.DAE.Server.ServerDTCTransaction,Alphora.Dataphor.DAE.Server"));
-				FDTCTransaction.IsolationLevel = AIsolationLevel;
+				_dTCTransaction = (IServerDTCTransaction)Activator.CreateInstance(Type.GetType("Alphora.Dataphor.DAE.Server.ServerDTCTransaction,Alphora.Dataphor.DAE.Server"));
+				_dTCTransaction.IsolationLevel = isolationLevel;
 			}
 			
 			// Begin a transaction on all remote sessions
-			foreach (RemoteSession LRemoteSession in RemoteSessions)
-				LRemoteSession.BeginTransaction(AIsolationLevel);
+			foreach (RemoteSession remoteSession in RemoteSessions)
+				remoteSession.BeginTransaction(isolationLevel);
 
 			// Begin a transaction on all device sessions
-			foreach (Schema.DeviceSession LDeviceSession in DeviceSessions)
-				LDeviceSession.BeginTransaction(AIsolationLevel);
+			foreach (Schema.DeviceSession deviceSession in DeviceSessions)
+				deviceSession.BeginTransaction(isolationLevel);
 		}
 		
 		protected internal void InternalPrepareTransaction()
 		{
 			CheckInTransaction();
 
-			ServerTransaction LTransaction = FTransactions.CurrentTransaction();
-			if (!LTransaction.Prepared)
+			ServerTransaction transaction = _transactions.CurrentTransaction();
+			if (!transaction.Prepared)
 			{
-				foreach (RemoteSession LRemoteSession in RemoteSessions)
-					LRemoteSession.PrepareTransaction();
+				foreach (RemoteSession remoteSession in RemoteSessions)
+					remoteSession.PrepareTransaction();
 					
-				foreach (Schema.DeviceSession LDeviceSession in DeviceSessions)
-					LDeviceSession.PrepareTransaction();
+				foreach (Schema.DeviceSession deviceSession in DeviceSessions)
+					deviceSession.PrepareTransaction();
 					
 				// Create a new program to perform the deferred validation
-				Program LProgram = new Program(this);
-				LProgram.Start(null);
+				Program program = new Program(this);
+				program.Start(null);
 				try
 				{
 					// Invoke event handlers for work done during this transaction
-					LTransaction.InvokeDeferredHandlers(LProgram);
+					transaction.InvokeDeferredHandlers(program);
 
 					// Validate Constraints which have been affected by work done during this transaction
-					FTransactions.ValidateDeferredConstraints(LProgram);
+					_transactions.ValidateDeferredConstraints(program);
 
-					foreach (Schema.CatalogConstraint LConstraint in LTransaction.CatalogConstraints)
-						LConstraint.Validate(LProgram);
+					foreach (Schema.CatalogConstraint constraint in transaction.CatalogConstraints)
+						constraint.Validate(program);
 				}
 				finally
 				{
-					LProgram.Stop(null);
+					program.Stop(null);
 				}
 				
-				LTransaction.Prepared = true;
+				transaction.Prepared = true;
 			}
 		}
 		
@@ -1290,16 +1290,16 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				// Commit the DTC if this is the Top Level Transaction
-				if (UseDTC && (FTransactions.Count == 1))
+				if (UseDTC && (_transactions.Count == 1))
 				{
 					try
 					{
-						FDTCTransaction.Commit();
+						_dTCTransaction.Commit();
 					}
 					finally
 					{
-						FDTCTransaction.Dispose();
-						FDTCTransaction = null;
+						_dTCTransaction.Dispose();
+						_dTCTransaction = null;
 					}
 				}
 			}
@@ -1310,25 +1310,25 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			
 			// Commit
-			foreach (RemoteSession LRemoteSession in RemoteSessions)
-				LRemoteSession.CommitTransaction();
+			foreach (RemoteSession remoteSession in RemoteSessions)
+				remoteSession.CommitTransaction();
 
-			Schema.DeviceSession LCatalogDeviceSession = null;
-			foreach (Schema.DeviceSession LDeviceSession in DeviceSessions)
+			Schema.DeviceSession catalogDeviceSession = null;
+			foreach (Schema.DeviceSession deviceSession in DeviceSessions)
 			{
-				if (LDeviceSession is CatalogDeviceSession)
-					LCatalogDeviceSession = LDeviceSession;
+				if (deviceSession is CatalogDeviceSession)
+					catalogDeviceSession = deviceSession;
 				else
-					LDeviceSession.CommitTransaction();
+					deviceSession.CommitTransaction();
 			}
 			
 			// Commit the catalog device session last. The catalog device session tracks devices
 			// dropped during the session, and will defer the stop of those devices until after the
 			// transaction has committed, allowing any active transactions in that device to commit.
-			if (LCatalogDeviceSession != null)
-				LCatalogDeviceSession.CommitTransaction();
+			if (catalogDeviceSession != null)
+				catalogDeviceSession.CommitTransaction();
 				
-			FTransactions.EndTransaction(true);
+			_transactions.EndTransaction(true);
 		}
 
 		protected internal void InternalRollbackTransaction()
@@ -1336,52 +1336,52 @@ namespace Alphora.Dataphor.DAE.Server
 			CheckInTransaction();
 			try
 			{
-				FTransactions.CurrentTransaction().InRollback = true;
+				_transactions.CurrentTransaction().InRollback = true;
 				try
 				{
-					if (UseDTC && (FTransactions.Count == 1))
+					if (UseDTC && (_transactions.Count == 1))
 					{
 						try
 						{
-							FDTCTransaction.Rollback();
+							_dTCTransaction.Rollback();
 						}
 						finally
 						{
-							FDTCTransaction.Dispose();
-							FDTCTransaction = null;
+							_dTCTransaction.Dispose();
+							_dTCTransaction = null;
 						}
 					}
 
-					Exception LException = null;
+					Exception exception = null;
 					
-					foreach (RemoteSession LRemoteSession in RemoteSessions)
+					foreach (RemoteSession remoteSession in RemoteSessions)
 					{
 						try
 						{
-							if (LRemoteSession.InTransaction)
-								LRemoteSession.RollbackTransaction();
+							if (remoteSession.InTransaction)
+								remoteSession.RollbackTransaction();
 						}
 						catch (Exception E)
 						{
-							LException = E;
+							exception = E;
 							ServerSession.Server.LogError(E);
 						}
 					}
 					
-					Schema.DeviceSession LCatalogDeviceSession = null;
-					foreach (Schema.DeviceSession LDeviceSession in DeviceSessions)
+					Schema.DeviceSession catalogDeviceSession = null;
+					foreach (Schema.DeviceSession deviceSession in DeviceSessions)
 					{
 						try
 						{
-							if (LDeviceSession is CatalogDeviceSession)
-								LCatalogDeviceSession = LDeviceSession;
+							if (deviceSession is CatalogDeviceSession)
+								catalogDeviceSession = deviceSession;
 							else
-								if (LDeviceSession.InTransaction)
-									LDeviceSession.RollbackTransaction();
+								if (deviceSession.InTransaction)
+									deviceSession.RollbackTransaction();
 						}
 						catch (Exception E)
 						{
-							LException = E;
+							exception = E;
 							this.ServerSession.Server.LogError(E);
 						}
 					}
@@ -1393,42 +1393,42 @@ namespace Alphora.Dataphor.DAE.Server
 						// but I don't have another option unless I start managing all transaction logging for
 						// all devices, so rolling it back last seems like the best option (even at that I have
 						// to ignore errors that occur during the rollback - see CatalogDeviceSession.InternalRollbackTransaction).
-						if ((LCatalogDeviceSession != null) && LCatalogDeviceSession.InTransaction)
-							LCatalogDeviceSession.RollbackTransaction();
+						if ((catalogDeviceSession != null) && catalogDeviceSession.InTransaction)
+							catalogDeviceSession.RollbackTransaction();
 					}
 					catch (Exception E)
 					{
-						LException = E;
+						exception = E;
 						this.ServerSession.Server.LogError(E);
 					}
 					
-					if (LException != null)
-						throw LException;
+					if (exception != null)
+						throw exception;
 				}
 				finally
 				{
-					FTransactions.CurrentTransaction().InRollback = false;
+					_transactions.CurrentTransaction().InRollback = false;
 				}
 			}
 			finally
 			{
-				FTransactions.EndTransaction(false);
+				_transactions.EndTransaction(false);
 			}
 		}
 		
 		// Application Transactions
-		private Guid FApplicationTransactionID = Guid.Empty;
-		public Guid ApplicationTransactionID { get { return FApplicationTransactionID; } }
+		private Guid _applicationTransactionID = Guid.Empty;
+		public Guid ApplicationTransactionID { get { return _applicationTransactionID; } }
 		
-		private bool FIsInsert;
+		private bool _isInsert;
 		/// <summary>Indicates whether this process is an insert participant in an application transaction.</summary>
 		public bool IsInsert 
 		{ 
-			get { return FIsInsert; } 
-			set { FIsInsert = value; }
+			get { return _isInsert; } 
+			set { _isInsert = value; }
 		}
 		
-		private bool FIsOpeningInsertCursor;
+		private bool _isOpeningInsertCursor;
 		/// <summary>Indicates whether this process is currently opening an insert cursor.</summary>
 		/// <remarks>
 		/// This flag is used to implement an optimization to the insert process to prevent the actual
@@ -1442,168 +1442,174 @@ namespace Alphora.Dataphor.DAE.Server
 		/// </remarks>
 		public bool IsOpeningInsertCursor
 		{
-			get { return FIsOpeningInsertCursor; }
-			set { FIsOpeningInsertCursor = value; }
+			get { return _isOpeningInsertCursor; }
+			set { _isOpeningInsertCursor = value; }
 		}
 		
 		// AddingTableVar
-		private int FAddingTableVar;
+		private int _addingTableVar;
 		/// <summary>Indicates whether the current process is adding an A/T table map.</summary>
 		/// <remarks>This is used to prevent the resolution process from attempting to add a table map for the table variable being created before the table map is done.</remarks>
-		public bool InAddingTableVar { get { return FAddingTableVar > 0; } }
+		public bool InAddingTableVar { get { return _addingTableVar > 0; } }
 		
 		public void PushAddingTableVar()
 		{
-			FAddingTableVar++;
+			_addingTableVar++;
 		}
 		
 		public void PopAddingTableVar()
 		{
-			FAddingTableVar--;
+			_addingTableVar--;
 		}
 		
 		public ApplicationTransaction GetApplicationTransaction()
 		{
-			return ApplicationTransactionUtility.GetTransaction(this, FApplicationTransactionID);
+			return ApplicationTransactionUtility.GetTransaction(this, _applicationTransactionID);
 		}
 		
 		// BeginApplicationTransaction
-		public Guid BeginApplicationTransaction(bool AShouldJoin, bool AIsInsert)
+		public Guid BeginApplicationTransaction(bool shouldJoin, bool isInsert)
 		{
-			Exception LException = null;
-			int LNestingLevel = BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = BeginTransactionalCall();
 			try
 			{
-				Guid LATID = ApplicationTransactionUtility.BeginApplicationTransaction(this);
+				Guid aTID = ApplicationTransactionUtility.BeginApplicationTransaction(this);
 				
-				if (AShouldJoin)
-					JoinApplicationTransaction(LATID, AIsInsert);
+				if (shouldJoin)
+					JoinApplicationTransaction(aTID, isInsert);
 
-				return LATID;
+				return aTID;
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				EndTransactionalCall(LNestingLevel, LException);
+				EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		// PrepareApplicationTransaction
-		public void PrepareApplicationTransaction(Guid AID)
+		public void PrepareApplicationTransaction(Guid iD)
 		{
-			Exception LException = null;
-			int LNestingLevel = BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = BeginTransactionalCall();
 			try
 			{
-				ApplicationTransactionUtility.PrepareApplicationTransaction(this, AID);
+				ApplicationTransactionUtility.PrepareApplicationTransaction(this, iD);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				EndTransactionalCall(LNestingLevel, LException);
+				EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		// CommitApplicationTransaction
-		public void CommitApplicationTransaction(Guid AID)
+		public void CommitApplicationTransaction(Guid iD)
 		{
-			Exception LException = null;
-			int LNestingLevel = BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = BeginTransactionalCall();
 			try
 			{
-				ApplicationTransactionUtility.CommitApplicationTransaction(this, AID);
+				ApplicationTransactionUtility.CommitApplicationTransaction(this, iD);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				EndTransactionalCall(LNestingLevel, LException);
+				EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		// RollbackApplicationTransaction
-		public void RollbackApplicationTransaction(Guid AID)
+		public void RollbackApplicationTransaction(Guid iD)
 		{
-			Exception LException = null;
-			int LNestingLevel = BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = BeginTransactionalCall();
 			try
 			{
-				ApplicationTransactionUtility.RollbackApplicationTransaction(this, AID);
+				ApplicationTransactionUtility.RollbackApplicationTransaction(this, iD);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				EndTransactionalCall(LNestingLevel, LException);
+				EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 
-		public void JoinApplicationTransaction(Guid AID, bool AIsInsert)
+		public void JoinApplicationTransaction(Guid iD, bool isInsert)
 		{
-			Exception LException = null;
-			int LNestingLevel = BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = BeginTransactionalCall();
 			try
 			{
-				ApplicationTransactionUtility.JoinApplicationTransaction(this, AID);
-				FApplicationTransactionID = AID;
-				FIsInsert = AIsInsert;
+				ApplicationTransactionUtility.JoinApplicationTransaction(this, iD);
+				_applicationTransactionID = iD;
+				_isInsert = isInsert;
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				EndTransactionalCall(LNestingLevel, LException);
+				EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public void LeaveApplicationTransaction()
 		{
-			Exception LException = null;
-			int LNestingLevel = BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = BeginTransactionalCall();
 			try
 			{
-				ApplicationTransactionUtility.LeaveApplicationTransaction(this);
-				FApplicationTransactionID = Guid.Empty;
-				FIsInsert = false;
+				try
+				{
+					ApplicationTransactionUtility.LeaveApplicationTransaction(this);
+				}
+				finally
+				{
+					_applicationTransactionID = Guid.Empty;
+					_isInsert = false;
+				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				EndTransactionalCall(LNestingLevel, LException);
+				EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 
 		// HandlerDepth
-		protected int FHandlerDepth;
+		protected int _handlerDepth;
 		/// <summary>Indicates whether the process has entered an event handler.</summary>
-		public bool InHandler { get { return FHandlerDepth > 0; } }
+		public bool InHandler { get { return _handlerDepth > 0; } }
 		
 		public void PushHandler()
 		{
 			lock (this)
 			{
-				FHandlerDepth++;
+				_handlerDepth++;
 			}
 		}
 		
@@ -1611,135 +1617,135 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			lock (this)
 			{
-				FHandlerDepth--;
+				_handlerDepth--;
 			}
 		}
         
-		protected int FTimeStampCount = 0;
+		protected int _timeStampCount = 0;
 		/// <summary>Indicates whether time stamps should be affected by alter and drop table variable and operator statements.</summary>
-		public bool ShouldAffectTimeStamp { get { return FTimeStampCount == 0; } }
+		public bool ShouldAffectTimeStamp { get { return _timeStampCount == 0; } }
 		
 		public void EnterTimeStampSafeContext()
 		{
-			FTimeStampCount++;
+			_timeStampCount++;
 		}
 		
 		public void ExitTimeStampSafeContext()
 		{
-			FTimeStampCount--;
+			_timeStampCount--;
 		}
 		
-		private Programs FExecutingPrograms;
-		internal Programs ExecutingPrograms { get { return FExecutingPrograms; } }
+		private Programs _executingPrograms;
+		internal Programs ExecutingPrograms { get { return _executingPrograms; } }
 		
 		internal Program ExecutingProgram
 		{
 			get
 			{
-				if (FExecutingPrograms.Count == 0)
+				if (_executingPrograms.Count == 0)
 					throw new ServerException(ServerException.Codes.NoExecutingProgram);
-				return FExecutingPrograms[FExecutingPrograms.Count - 1];
+				return _executingPrograms[_executingPrograms.Count - 1];
 			}
 		}
 		
-		internal void PushExecutingProgram(Program AProgram)
+		internal void PushExecutingProgram(Program program)
 		{
-			FExecutingPrograms.Add(AProgram);
+			_executingPrograms.Add(program);
 		}
 		
-		internal void PopExecutingProgram(Program AProgram)
+		internal void PopExecutingProgram(Program program)
 		{
-			if (ExecutingProgram.ID != AProgram.ID)
-				throw new ServerException(ServerException.Codes.ProgramNotExecuting, AProgram.ID.ToString());
-			FExecutingPrograms.RemoveAt(FExecutingPrograms.Count - 1);
+			if (ExecutingProgram.ID != program.ID)
+				throw new ServerException(ServerException.Codes.ProgramNotExecuting, program.ID.ToString());
+			_executingPrograms.RemoveAt(_executingPrograms.Count - 1);
 		}
 		
 		// Execution
-		private System.Threading.Thread FExecutingThread;
-		public System.Threading.Thread ExecutingThread { get { return FExecutingThread; } }
+		private System.Threading.Thread _executingThread;
+		public System.Threading.Thread ExecutingThread { get { return _executingThread; } }
 		
-		private int FExecutingThreadCount = 0;
+		private int _executingThreadCount = 0;
 		
 		// SyncHandle is used to synchronize CLI calls to the process, ensuring that only one call originating in the CLI is allowed to run through the process at a time
-		private object FSyncHandle = new System.Object();
-		public object SyncHandle { get { return FSyncHandle; } }
+		private object _syncHandle = new System.Object();
+		public object SyncHandle { get { return _syncHandle; } }
 
 		// ExecutionSyncHandle is used to synchronize server-level execution management services involving the executing thread of the process
-		private object FExecutionSyncHandle = new System.Object();
-		public object ExecutionSyncHandle { get { return FExecutionSyncHandle; } }
+		private object _executionSyncHandle = new System.Object();
+		public object ExecutionSyncHandle { get { return _executionSyncHandle; } }
 		
 		// StopError is used to indicate that a system level stop error has occurred on the process, and all transactions should be rolled back
-		private bool FStopError = false;
+		private bool _stopError = false;
 		public bool StopError 
 		{ 
-			get { return FStopError; } 
-			set { FStopError = value; } 
+			get { return _stopError; } 
+			set { _stopError = value; } 
 		}
 		
-		private bool FIsAborted = false;
+		private bool _isAborted = false;
 		public bool IsAborted
 		{
-			get { return FIsAborted; }
-			set { lock (FExecutionSyncHandle) { FIsAborted = value; } }
+			get { return _isAborted; }
+			set { lock (_executionSyncHandle) { _isAborted = value; } }
 		}
 		
 		public void CheckAborted()
 		{
-			if (FIsAborted)
+			if (_isAborted)
 				throw new ServerException(ServerException.Codes.ProcessAborted);
 		}
 		
-		public bool IsRunning { get { return FExecutingThreadCount > 0; } }
+		public bool IsRunning { get { return _executingThreadCount > 0; } }
 		
 		internal void BeginCall()
 		{
-			Monitor.Enter(FSyncHandle);
+			Monitor.Enter(_syncHandle);
 			try
 			{
-				if ((FExecutingThreadCount == 0) && !ServerSession.User.IsAdminUser())
+				if ((_executingThreadCount == 0) && !ServerSession.User.IsAdminUser())
 					ServerSession.Server.BeginProcessCall(this);
-				Monitor.Enter(FExecutionSyncHandle);
+				Monitor.Enter(_executionSyncHandle);
 				try
 				{
-					FExecutingThreadCount++;
-					if (FExecutingThreadCount == 1)
+					_executingThreadCount++;
+					if (_executingThreadCount == 1)
 					{
-						FExecutingThread = System.Threading.Thread.CurrentThread;
-						FIsAborted = false;
+						_executingThread = System.Threading.Thread.CurrentThread;
+						_isAborted = false;
 						//FExecutingThread.ApartmentState = ApartmentState.STA; // This had no effect, the ADO thread lock is still occurring
-						ThreadUtility.SetThreadName(FExecutingThread, String.Format("ServerProcess {0}", FProcessID.ToString()));
+						ThreadUtility.SetThreadName(_executingThread, String.Format("ServerProcess {0}", _processID.ToString()));
 					}
 				}
 				finally
 				{
-					Monitor.Exit(FExecutionSyncHandle);
+					Monitor.Exit(_executionSyncHandle);
 				}
 			}
 			catch
 			{
 				try
 				{
-					if (FExecutingThreadCount > 0)
+					if (_executingThreadCount > 0)
 					{
-						Monitor.Enter(FExecutionSyncHandle);
+						Monitor.Enter(_executionSyncHandle);
 						try
 						{
-							FExecutingThreadCount--;
-							if (FExecutingThreadCount == 0)
+							_executingThreadCount--;
+							if (_executingThreadCount == 0)
 							{
-								ThreadUtility.SetThreadName(FExecutingThread, null);
-								FExecutingThread = null;
+								ThreadUtility.SetThreadName(_executingThread, null);
+								_executingThread = null;
 							}
 						}
 						finally
 						{
-							Monitor.Exit(FExecutionSyncHandle);
+							Monitor.Exit(_executionSyncHandle);
 						}
 					}
 				}
 				finally
 				{
-					Monitor.Exit(FSyncHandle);
+					Monitor.Exit(_syncHandle);
 				}
                 throw;
             }
@@ -1749,31 +1755,31 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			try
 			{
-				if ((FExecutingThreadCount == 1) && !ServerSession.User.IsAdminUser())
+				if ((_executingThreadCount == 1) && !ServerSession.User.IsAdminUser())
 					ServerSession.Server.EndProcessCall(this);
 			}
 			finally
 			{
 				try
 				{
-					Monitor.Enter(FExecutionSyncHandle);
+					Monitor.Enter(_executionSyncHandle);
 					try
 					{
-						FExecutingThreadCount--;
-						if (FExecutingThreadCount == 0)
+						_executingThreadCount--;
+						if (_executingThreadCount == 0)
 						{
-							ThreadUtility.SetThreadName(FExecutingThread, null);
-							FExecutingThread = null;
+							ThreadUtility.SetThreadName(_executingThread, null);
+							_executingThread = null;
 						}
 					}
 					finally
 					{
-						Monitor.Exit(FExecutionSyncHandle);
+						Monitor.Exit(_executionSyncHandle);
 					}
 				}
 				finally
 				{
-					Monitor.Exit(FSyncHandle);
+					Monitor.Exit(_syncHandle);
 				}
 			}
 		}
@@ -1783,13 +1789,13 @@ namespace Alphora.Dataphor.DAE.Server
 			BeginCall();
 			try
 			{
-				FStopError = false;
-				int LNestingLevel = FTransactions.Count;
-				if ((FTransactions.Count == 0) && UseImplicitTransactions)
+				_stopError = false;
+				int nestingLevel = _transactions.Count;
+				if ((_transactions.Count == 0) && UseImplicitTransactions)
 					InternalBeginTransaction(DefaultIsolationLevel);
-				if (FTransactions.Count > 0)
-					FTransactions.CurrentTransaction().Prepared = false;
-				return LNestingLevel;
+				if (_transactions.Count > 0)
+					_transactions.CurrentTransaction().Prepared = false;
+				return nestingLevel;
 			}
 			catch
 			{
@@ -1798,12 +1804,12 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		internal void EndTransactionalCall(int ANestingLevel, Exception AException)
+		internal void EndTransactionalCall(int nestingLevel, Exception exception)
 		{
 			try
 			{
 				if (StopError)
-					while (FTransactions.Count > 0)
+					while (_transactions.Count > 0)
 						try
 						{
 							InternalRollbackTransaction();
@@ -1815,9 +1821,9 @@ namespace Alphora.Dataphor.DAE.Server
 				
 				if (UseImplicitTransactions)
 				{
-					Exception LCommitException = null;
-					while (FTransactions.Count > ANestingLevel)
-						if ((AException != null) || (LCommitException != null))
+					Exception commitException = null;
+					while (_transactions.Count > nestingLevel)
+						if ((exception != null) || (commitException != null))
 							InternalRollbackTransaction();
 						else
 						{
@@ -1826,22 +1832,22 @@ namespace Alphora.Dataphor.DAE.Server
 								InternalPrepareTransaction();
 								InternalCommitTransaction();
 							}
-							catch (Exception LException)
+							catch (Exception localException)
 							{
-								LCommitException = LException;
+								commitException = localException;
 								InternalRollbackTransaction();
 							}
 						}
 
-					if (LCommitException != null)
-						throw LCommitException;
+					if (commitException != null)
+						throw commitException;
 				}
 			}
 			catch (Exception E)
 			{
-				if (AException != null)
+				if (exception != null)
 					// TODO: Should this actually attach the rollback exception as context information to the server exception object?
-					throw new ServerException(ServerException.Codes.RollbackError, AException, E.ToString());
+					throw new ServerException(ServerException.Codes.RollbackError, exception, E.ToString());
 				else
 					throw;
 			}
@@ -1851,62 +1857,62 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		private Exception WrapException(Exception AException)
+		private Exception WrapException(Exception exception)
 		{
-			return FServerSession.WrapException(AException);
+			return _serverSession.WrapException(exception);
 		}
 		
 		// Debugging
 		
-		private Debugger FDebuggedBy;
-		public Debugger DebuggedBy { get { return FDebuggedBy; } }
+		private Debugger _debuggedBy;
+		public Debugger DebuggedBy { get { return _debuggedBy; } }
 		
-		internal void SetDebuggedBy(Debugger ADebuggedBy)
+		internal void SetDebuggedBy(Debugger debuggedBy)
 		{
-			if ((FDebuggedBy != null) && (ADebuggedBy != null))
-				throw new ServerException(ServerException.Codes.DebuggerAlreadyAttached, FProcessID);
-			FDebuggedBy = ADebuggedBy;
+			if ((_debuggedBy != null) && (debuggedBy != null))
+				throw new ServerException(ServerException.Codes.DebuggerAlreadyAttached, _processID);
+			_debuggedBy = debuggedBy;
 		}
 		
-		private bool FBreakNext;
-		private int FBreakOnProgramDepth;
-		private int FBreakOnCallDepth;
+		private bool _breakNext;
+		private int _breakOnProgramDepth;
+		private int _breakOnCallDepth;
 		
 		internal void SetStepOver()
 		{
-			FBreakOnProgramDepth = ExecutingPrograms.Count;
-			FBreakOnCallDepth = ExecutingProgram.Stack.CallDepth;
+			_breakOnProgramDepth = ExecutingPrograms.Count;
+			_breakOnCallDepth = ExecutingProgram.Stack.CallDepth;
 		}
 		
 		internal void SetStepInto()
 		{
-			FBreakNext = true;
+			_breakNext = true;
 		}
 		
 		internal void ClearBreakInfo()
 		{
-			FBreakNext = false;
-			FBreakOnProgramDepth = -1;
-			FBreakOnCallDepth = -1;
+			_breakNext = false;
+			_breakOnProgramDepth = -1;
+			_breakOnCallDepth = -1;
 		}
 		
 		private bool InternalShouldBreak()
 		{
-			if (FBreakNext)
+			if (_breakNext)
 				return true;
 				
-			if (ExecutingPrograms.Count < FBreakOnProgramDepth)
+			if (ExecutingPrograms.Count < _breakOnProgramDepth)
 			{
-				FBreakOnProgramDepth = ExecutingPrograms.Count;
-				FBreakOnCallDepth = ExecutingProgram.Stack.CallDepth;
+				_breakOnProgramDepth = ExecutingPrograms.Count;
+				_breakOnCallDepth = ExecutingProgram.Stack.CallDepth;
 			}
 			
-			if (ExecutingProgram.Stack.CallDepth < FBreakOnCallDepth)
+			if (ExecutingProgram.Stack.CallDepth < _breakOnCallDepth)
 			{
-				FBreakOnCallDepth = ExecutingProgram.Stack.CallDepth;
+				_breakOnCallDepth = ExecutingProgram.Stack.CallDepth;
 			}
 				
-			if ((FBreakOnProgramDepth == ExecutingPrograms.Count) && (FBreakOnCallDepth == ExecutingProgram.Stack.CallDepth))
+			if ((_breakOnProgramDepth == ExecutingPrograms.Count) && (_breakOnCallDepth == ExecutingProgram.Stack.CallDepth))
 				return true;
 				
 			return false;
@@ -1924,44 +1930,44 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// Catalog
-		public Schema.Catalog Catalog { get { return FServerSession.Server.Catalog; } }
+		public Schema.Catalog Catalog { get { return _serverSession.Server.Catalog; } }
 		
-		public Schema.DataTypes DataTypes { get { return FServerSession.Server.Catalog.DataTypes; } }
+		public Schema.DataTypes DataTypes { get { return _serverSession.Server.Catalog.DataTypes; } }
 
 		// Loading
-		private LoadingContexts FLoadingContexts;
+		private LoadingContexts _loadingContexts;
 		
-		public void PushLoadingContext(LoadingContext AContext)
+		public void PushLoadingContext(LoadingContext context)
 		{
-			if (FLoadingContexts == null)
-				FLoadingContexts = new LoadingContexts();
+			if (_loadingContexts == null)
+				_loadingContexts = new LoadingContexts();
 				
-			if (AContext.LibraryName != String.Empty)
+			if (context.LibraryName != String.Empty)
 			{
-				AContext.FCurrentLibrary = ServerSession.CurrentLibrary;
-				ServerSession.CurrentLibrary = ServerSession.Server.Catalog.LoadedLibraries[AContext.LibraryName];
+				context._currentLibrary = ServerSession.CurrentLibrary;
+				ServerSession.CurrentLibrary = ServerSession.Server.Catalog.LoadedLibraries[context.LibraryName];
 			}
 			
-			AContext.FSuppressWarnings = SuppressWarnings;
+			context._suppressWarnings = SuppressWarnings;
 			SuppressWarnings = true;
 
-			if (!AContext.IsLoadingContext)
+			if (!context.IsLoadingContext)
 			{
-				LoadingContext LCurrentLoadingContext = CurrentLoadingContext();
-				if ((LCurrentLoadingContext != null) && LCurrentLoadingContext.IsLoadingContext && !LCurrentLoadingContext.IsInternalContext)
+				LoadingContext currentLoadingContext = CurrentLoadingContext();
+				if ((currentLoadingContext != null) && currentLoadingContext.IsLoadingContext && !currentLoadingContext.IsInternalContext)
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.InvalidLoadingContext, ErrorSeverity.System);
 			}
 
-			FLoadingContexts.Add(AContext);
+			_loadingContexts.Add(context);
 		}
 		
 		public void PopLoadingContext()
 		{
-			LoadingContext LContext = FLoadingContexts[FLoadingContexts.Count - 1];
-			FLoadingContexts.RemoveAt(FLoadingContexts.Count - 1);
-			if (LContext.LibraryName != String.Empty)
-				ServerSession.CurrentLibrary = LContext.FCurrentLibrary;
-			SuppressWarnings = LContext.FSuppressWarnings;
+			LoadingContext context = _loadingContexts[_loadingContexts.Count - 1];
+			_loadingContexts.RemoveAt(_loadingContexts.Count - 1);
+			if (context.LibraryName != String.Empty)
+				ServerSession.CurrentLibrary = context._currentLibrary;
+			SuppressWarnings = context._suppressWarnings;
 		}
 		
 		/// <summary>Returns true if the Server-level loading flag is set, or this process is in a loading context</summary>
@@ -1973,66 +1979,66 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>Returns true if this process is in a loading context.</summary>
 		public bool InLoadingContext()
 		{
-			return (FLoadingContexts != null) && (FLoadingContexts.Count > 0) && (FLoadingContexts[FLoadingContexts.Count - 1].IsLoadingContext);
+			return (_loadingContexts != null) && (_loadingContexts.Count > 0) && (_loadingContexts[_loadingContexts.Count - 1].IsLoadingContext);
 		}
 		
 		public LoadingContext CurrentLoadingContext()
 		{
-			if ((FLoadingContexts != null) && FLoadingContexts.Count > 0)
-				return FLoadingContexts[FLoadingContexts.Count - 1];
+			if ((_loadingContexts != null) && _loadingContexts.Count > 0)
+				return _loadingContexts[_loadingContexts.Count - 1];
 			return null;
 		}
 
-		private int FReconciliationDisabledCount = 0;
+		private int _reconciliationDisabledCount = 0;
 		public void DisableReconciliation()
 		{
-			FReconciliationDisabledCount++;
+			_reconciliationDisabledCount++;
 		}
 		
 		public void EnableReconciliation()
 		{
-			FReconciliationDisabledCount--;
+			_reconciliationDisabledCount--;
 		}
 		
 		public bool IsReconciliationEnabled()
 		{
-			return FReconciliationDisabledCount <= 0;
+			return _reconciliationDisabledCount <= 0;
 		}
 		
 		public int SuspendReconciliationState()
 		{
-			int LResult = FReconciliationDisabledCount;
-			FReconciliationDisabledCount = 0;
-			return LResult;
+			int result = _reconciliationDisabledCount;
+			_reconciliationDisabledCount = 0;
+			return result;
 		}
 		
-		public void ResumeReconciliationState(int AReconciliationDisabledCount)
+		public void ResumeReconciliationState(int reconciliationDisabledCount)
 		{
-			FReconciliationDisabledCount = AReconciliationDisabledCount;
+			_reconciliationDisabledCount = reconciliationDisabledCount;
 		}
 	}
 
 	// ServerProcesses
 	public class ServerProcesses : ServerChildObjects
 	{		
-		protected override void Validate(ServerChildObject AObject)
+		protected override void Validate(ServerChildObject objectValue)
 		{
-			if (!(AObject is ServerProcess))
+			if (!(objectValue is ServerProcess))
 				throw new ServerException(ServerException.Codes.ServerProcessContainer);
 		}
 		
-		public new ServerProcess this[int AIndex]
+		public new ServerProcess this[int index]
 		{
-			get { return (ServerProcess)base[AIndex]; } 
-			set { base[AIndex] = value; } 
+			get { return (ServerProcess)base[index]; } 
+			set { base[index] = value; } 
 		}
 		
-		public ServerProcess GetProcess(int AProcessID)
+		public ServerProcess GetProcess(int processID)
 		{
-			foreach (ServerProcess LProcess in this)
-				if (LProcess.ProcessID == AProcessID)
-					return LProcess;
-			throw new ServerException(ServerException.Codes.ProcessNotFound, AProcessID);
+			foreach (ServerProcess process in this)
+				if (process.ProcessID == processID)
+					return process;
+			throw new ServerException(ServerException.Codes.ProcessNotFound, processID);
 		}
 	}
 }

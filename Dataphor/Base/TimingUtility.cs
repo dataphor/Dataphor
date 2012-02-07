@@ -38,117 +38,117 @@ namespace Alphora.Dataphor
 #endif
 		static TimingUtility()
 		{
-			QueryPerformanceFrequency(out FTicksPerSecond);
+			QueryPerformanceFrequency(out _ticksPerSecond);
 		}
 
-		private static long FTicksPerSecond;
-		public static long TicksPerSecond { get { return FTicksPerSecond; } }
+		private static long _ticksPerSecond;
+		public static long TicksPerSecond { get { return _ticksPerSecond; } }
 
 		public static long CurrentTicks
 		{
 			get
 			{
-				long LResult;
-				QueryPerformanceCounter(out LResult);
-				return LResult;
+				long result;
+				QueryPerformanceCounter(out result);
+				return result;
 			}
 		}
 		
-		public static TimeSpan TimeSpanFromTicks(long AStartTicks)
+		public static TimeSpan TimeSpanFromTicks(long startTicks)
 		{
-			long LCurrentTicks;
-			QueryPerformanceCounter(out LCurrentTicks);
-			return new TimeSpan((long)((((double)(LCurrentTicks - AStartTicks)) / TicksPerSecond) * TimeSpan.TicksPerSecond));
+			long currentTicks;
+			QueryPerformanceCounter(out currentTicks);
+			return new TimeSpan((long)((((double)(currentTicks - startTicks)) / TicksPerSecond) * TimeSpan.TicksPerSecond));
 		}
 
-		private static Timing FCurrentTiming;
+		private static Timing _currentTiming;
 
 		[Conditional("TIMING")]
-		public static void PushTimer(string ADescription)
+		public static void PushTimer(string description)
 		{
-			Timing LTiming = new Timing();
-			LTiming.FPrior = FCurrentTiming;
-			FCurrentTiming = LTiming;
-			LTiming.FDescription = ADescription;
-			Debug.WriteLine(String.Format("Timer: '{0}' -- started", ADescription));
-			QueryPerformanceCounter(out LTiming.FStart);
+			Timing timing = new Timing();
+			timing._prior = _currentTiming;
+			_currentTiming = timing;
+			timing._description = description;
+			Debug.WriteLine(String.Format("Timer: '{0}' -- started", description));
+			QueryPerformanceCounter(out timing._start);
 		}
 
 		[Conditional("TIMING")]
 		public static void PopTimer()
 		{
-			long LEndTime;
-			QueryPerformanceCounter(out LEndTime);
+			long endTime;
+			QueryPerformanceCounter(out endTime);
 			// TODO: account for overhead
-			long LElapsed = LEndTime - FCurrentTiming.FStart;
-			Debug.WriteLine(String.Format("Timer: '{0}' -- ticks: {1}  secs: {2}", FCurrentTiming.FDescription, LElapsed, (decimal)LElapsed / (decimal)FTicksPerSecond));
-			if (FCurrentTiming.FAccumulations != null)
+			long elapsed = endTime - _currentTiming._start;
+			Debug.WriteLine(String.Format("Timer: '{0}' -- ticks: {1}  secs: {2}", _currentTiming._description, elapsed, (decimal)elapsed / (decimal)_ticksPerSecond));
+			if (_currentTiming._accumulations != null)
 			{
-				foreach (KeyValuePair<string, long> LItem in FCurrentTiming.FAccumulations)
+				foreach (KeyValuePair<string, long> item in _currentTiming._accumulations)
 				{
 					System.Diagnostics.Debug.WriteLine
 					(
 						String.Format
 						(
 							"  Accumulator: '{0}' -- ticks: {1}  secs: {2}   timerdiff: {3}", 
-							LItem.Key,
-							LItem.Value,
-							(decimal)LItem.Value / (decimal)FTicksPerSecond, 
-							(decimal)(LElapsed - LItem.Value) / (decimal)FTicksPerSecond
+							item.Key,
+							item.Value,
+							(decimal)item.Value / (decimal)_ticksPerSecond, 
+							(decimal)(elapsed - item.Value) / (decimal)_ticksPerSecond
 						)
 					);
-					if (FCurrentTiming.FPrior != null)
-						FCurrentTiming.FPrior.Accumulate(LItem.Key, LItem.Value);
+					if (_currentTiming._prior != null)
+						_currentTiming._prior.Accumulate(item.Key, item.Value);
 				}
 			}
-			FCurrentTiming = FCurrentTiming.FPrior;
+			_currentTiming = _currentTiming._prior;
 		}
 
 		[Conditional("TIMING")]
-		public static void PushAccumulator(string ADescription)
+		public static void PushAccumulator(string description)
 		{
-			System.Diagnostics.Debug.Assert(FCurrentTiming != null, "No current timer to accumulate into");
-			Accumulator LAccum = new Accumulator();
-			LAccum.FPrior = FCurrentTiming.FAccumulator;
-			LAccum.FDescription = ADescription;
-			FCurrentTiming.FAccumulator = LAccum;
-			QueryPerformanceCounter(out LAccum.FStart);
+			System.Diagnostics.Debug.Assert(_currentTiming != null, "No current timer to accumulate into");
+			Accumulator accum = new Accumulator();
+			accum._prior = _currentTiming._accumulator;
+			accum._description = description;
+			_currentTiming._accumulator = accum;
+			QueryPerformanceCounter(out accum._start);
 		}
 
 		[Conditional("TIMING")]
 		public static void PopAccumulator()
 		{
-			long LEndTime;
-			QueryPerformanceCounter(out LEndTime);
-			Accumulator LAccum = FCurrentTiming.FAccumulator;
-			FCurrentTiming.Accumulate(LAccum.FDescription, LEndTime - LAccum.FStart);
-			FCurrentTiming.FAccumulator = LAccum.FPrior;
+			long endTime;
+			QueryPerformanceCounter(out endTime);
+			Accumulator accum = _currentTiming._accumulator;
+			_currentTiming.Accumulate(accum._description, endTime - accum._start);
+			_currentTiming._accumulator = accum._prior;
 		}
 	}
 
 	internal class Timing
 	{
-		public Timing FPrior;
-		public long FStart;
-		public string FDescription;
-		public Dictionary<string, long> FAccumulations;
-		public Accumulator FAccumulator;
+		public Timing _prior;
+		public long _start;
+		public string _description;
+		public Dictionary<string, long> _accumulations;
+		public Accumulator _accumulator;
 
-		public void Accumulate(string ADescription, long ADuration)
+		public void Accumulate(string description, long duration)
 		{
-			long LCurrent = 0;
-			if (FAccumulations == null)
-				FAccumulations = new Dictionary<string, long>();
+			long current = 0;
+			if (_accumulations == null)
+				_accumulations = new Dictionary<string, long>();
 			else
-				FAccumulations.TryGetValue(ADescription, out LCurrent);
-			FAccumulations[ADescription] = LCurrent + ADuration;
+				_accumulations.TryGetValue(description, out current);
+			_accumulations[description] = current + duration;
 		}
 	}
 
 	internal class Accumulator
 	{
-		public string FDescription;
-		public Accumulator FPrior;
-		public long FStart;
+		public string _description;
+		public Accumulator _prior;
+		public long _start;
 	}
 }

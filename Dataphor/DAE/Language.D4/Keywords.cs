@@ -80,7 +80,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string Exists = "exists";                 
 		public const string Exit = "exit";                     
 		public const string Explode = "explode";               
-		public const string False = Tokenizer.CFalse;              
+		public const string False = Tokenizer.False;              
 		public const string Finalization = "finalization";     
 		public const string Finally = "finally";               
 		public const string For = "for";                       
@@ -124,7 +124,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string Multiplication = "*";              
 		public const string Narrowing = "narrowing";
 		public const string New = "new";                       
-		public const string Nil = Tokenizer.CNil;
+		public const string Nil = Tokenizer.Nil;
 		public const string Not = "not";                       
 		public const string NotEqual = "<>";                   
 		public const string Of = "of";                         
@@ -182,7 +182,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string Times = "times";                   
 		public const string To = "to";                         
 		public const string Transition = "transition";         
-		public const string True = Tokenizer.CTrue;                
+		public const string True = Tokenizer.True;                
 		public const string Try = "try";                       
 		public const string Type = "type";                     
 		public const string TypeOf = "typeof";                 
@@ -214,34 +214,34 @@ namespace Alphora.Dataphor.DAE.Language.D4
         public const string Reintroduce = "reintroduce";
         #endif
 
-        private static string[] FKeywords;
+        private static string[] _keywords;
         
         private static void PopulateKeywords()
         {
-			FieldInfo[] LFields = typeof(Keywords).GetFields();
+			FieldInfo[] fields = typeof(Keywords).GetFields();
 
-			int LFieldCount = 0;
-			foreach (FieldInfo LField in LFields)
-				if (LField.FieldType.Equals(typeof(string)) && LField.IsLiteral)
-					LFieldCount++;
+			int fieldCount = 0;
+			foreach (FieldInfo field in fields)
+				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
+					fieldCount++;
 
-			FKeywords = new string[LFieldCount];
+			_keywords = new string[fieldCount];
 
-			int LFieldCounter = 0;
-			foreach (FieldInfo LField in LFields)
-				if (LField.FieldType.Equals(typeof(string)) && LField.IsLiteral)
+			int fieldCounter = 0;
+			foreach (FieldInfo field in fields)
+				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 				{
-					FKeywords[LFieldCounter] = (string)LField.GetValue(null);
-					LFieldCounter++;
+					_keywords[fieldCounter] = (string)field.GetValue(null);
+					fieldCounter++;
 				}
         }
         
-        public static bool Contains(string AIdentifier)
+        public static bool Contains(string identifier)
         {
-			if (FKeywords == null)
+			if (_keywords == null)
 				PopulateKeywords();
 				
-			return ((IList)FKeywords).Contains(AIdentifier);
+			return ((IList)_keywords).Contains(identifier);
         }
     }
     
@@ -276,7 +276,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string Exists = "exists";             
 		public const string Exit = "exit";                 
 		public const string Explode = "explode";           
-		public const string False = Tokenizer.CFalse;
+		public const string False = Tokenizer.False;
 		public const string Finally = "finally";           
 		public const string For = "for";                   
 		public const string ForEach = "foreach";
@@ -301,7 +301,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string Minus = "minus";               
 		public const string Mod = "mod";                   
 		public const string Not = "not";                   
-		public const string Nil = Tokenizer.CNil;
+		public const string Nil = Tokenizer.Nil;
 		public const string On = "on";                     
 		public const string Or = "or";                     
 		public const string Order = "order";  
@@ -330,7 +330,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string Times = "times";               
 		public const string To = "to";                     
 		public const string Transition = "transition";     
-		public const string True = Tokenizer.CTrue;
+		public const string True = Tokenizer.True;
 		public const string Try = "try";                   
 		public const string TypeOf = "typeof";             
 		public const string Union = "union";               
@@ -345,34 +345,34 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string Write = "write";
 		public const string Xor = "xor";                   
 
-        private static string[] FReservedWords;
+        private static string[] _reservedWords;
         
         private static void PopulateReservedWords()
         {
-			FieldInfo[] LFields = typeof(ReservedWords).GetFields();
+			FieldInfo[] fields = typeof(ReservedWords).GetFields();
 
-			int LFieldCount = 0;
-			foreach (FieldInfo LField in LFields)
-				if (LField.FieldType.Equals(typeof(string)) && LField.IsLiteral)
-					LFieldCount++;
+			int fieldCount = 0;
+			foreach (FieldInfo field in fields)
+				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
+					fieldCount++;
 
-			FReservedWords = new string[LFieldCount];
+			_reservedWords = new string[fieldCount];
 
-			int LFieldCounter = 0;
-			foreach (FieldInfo LField in LFields)
-				if (LField.FieldType.Equals(typeof(string)) && LField.IsLiteral)
+			int fieldCounter = 0;
+			foreach (FieldInfo field in fields)
+				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 				{
-					FReservedWords[LFieldCounter] = (string)LField.GetValue(null);
-					LFieldCounter++;
+					_reservedWords[fieldCounter] = (string)field.GetValue(null);
+					fieldCounter++;
 				}
         }
         
-        public static bool Contains(string AIdentifier)
+        public static bool Contains(string identifier)
         {
-			if (FReservedWords == null)
+			if (_reservedWords == null)
 				PopulateReservedWords();
 				
-			return ((IList)FReservedWords).Contains(AIdentifier);
+			return ((IList)_reservedWords).Contains(identifier);
         }
 	}
 }

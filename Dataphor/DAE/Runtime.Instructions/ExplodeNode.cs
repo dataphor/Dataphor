@@ -3,7 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 #define UseReferenceDerivation
+#define USENAMEDROWVARIABLES
 	
 using System;
 using System.Text;
@@ -25,232 +27,236 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator iExplode(table{}, bool, bool, object, object) : table{}    
     public class ExplodeNode : UnaryTableNode
     {
-		protected IncludeColumnExpression FLevelColumn;
+		protected IncludeColumnExpression _levelColumn;
 		public IncludeColumnExpression LevelColumn
 		{
-			get { return FLevelColumn; }
-			set { FLevelColumn = value; }
+			get { return _levelColumn; }
+			set { _levelColumn = value; }
 		}
 		
-		protected int FLevelColumnIndex = -1;
+		protected int _levelColumnIndex = -1;
 		public int LevelColumnIndex
 		{
-			get { return FLevelColumnIndex; }
+			get { return _levelColumnIndex; }
 		}
 		
-		protected IncludeColumnExpression FSequenceColumn;
+		protected IncludeColumnExpression _sequenceColumn;
 		public IncludeColumnExpression SequenceColumn
 		{
-			get { return FSequenceColumn; }
-			set { FSequenceColumn = value; }
+			get { return _sequenceColumn; }
+			set { _sequenceColumn = value; }
 		}
 		
-		protected int FSequenceColumnIndex = -1;
+		protected int _sequenceColumnIndex = -1;
 		public int SequenceColumnIndex
 		{
-			get { return FSequenceColumnIndex; }
+			get { return _sequenceColumnIndex; }
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(SourceTableVar.MetaData);
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 			CopyTableVarColumns(SourceTableVar.Columns);
 			
-			if (FLevelColumn != null)
+			if (_levelColumn != null)
 			{
-				Schema.TableVarColumn LLevelColumn =
+				Schema.TableVarColumn levelColumn =
 					Compiler.CompileIncludeColumnExpression
 					(
-						APlan,
-						FLevelColumn,
+						plan,
+						_levelColumn,
 						Keywords.Level,
-						APlan.DataTypes.SystemInteger,
+						plan.DataTypes.SystemInteger,
 						Schema.TableVarColumnType.Level
 					);
-				DataType.Columns.Add(LLevelColumn.Column);
-				TableVar.Columns.Add(LLevelColumn);
-				FLevelColumnIndex = TableVar.Columns.Count - 1;
+				DataType.Columns.Add(levelColumn.Column);
+				TableVar.Columns.Add(levelColumn);
+				_levelColumnIndex = TableVar.Columns.Count - 1;
 			}
 				
-			if (FSequenceColumn != null)
+			if (_sequenceColumn != null)
 			{
-				Schema.TableVarColumn LSequenceColumn =
+				Schema.TableVarColumn sequenceColumn =
 					Compiler.CompileIncludeColumnExpression
 					(
-						APlan,
-						FSequenceColumn,
+						plan,
+						_sequenceColumn,
 						Keywords.Sequence,
-						APlan.DataTypes.SystemInteger,
+						plan.DataTypes.SystemInteger,
 						Schema.TableVarColumnType.Sequence
 					);
-				DataType.Columns.Add(LSequenceColumn.Column);
-				TableVar.Columns.Add(LSequenceColumn);
-				FSequenceColumnIndex = DataType.Columns.Count - 1;
+				DataType.Columns.Add(sequenceColumn.Column);
+				TableVar.Columns.Add(sequenceColumn);
+				_sequenceColumnIndex = DataType.Columns.Count - 1;
 			}
 			else
 			{
-				Schema.TableVarColumn LSequenceColumn =
+				Schema.TableVarColumn sequenceColumn =
 					new Schema.TableVarColumn
 					(
-						new Schema.Column(Keywords.Sequence, APlan.DataTypes.SystemInteger),
+						new Schema.Column(Keywords.Sequence, plan.DataTypes.SystemInteger),
 						Schema.TableVarColumnType.Sequence
 					);
-				DataType.Columns.Add(LSequenceColumn.Column);
-				TableVar.Columns.Add(LSequenceColumn);
-				FSequenceColumnIndex = DataType.Columns.Count - 1;
+				DataType.Columns.Add(sequenceColumn.Column);
+				TableVar.Columns.Add(sequenceColumn);
+				_sequenceColumnIndex = DataType.Columns.Count - 1;
 			}
 			
-			DetermineRemotable(APlan);
+			DetermineRemotable(plan);
 
 			//CopyKeys(SourceTableVar.Keys);
-			if (FSequenceColumnIndex >= 0)
+			if (_sequenceColumnIndex >= 0)
 			{
-				Schema.Key LSequenceKey = new Schema.Key();
-				LSequenceKey.IsInherited = true;
-				LSequenceKey.Columns.Add(TableVar.Columns[FSequenceColumnIndex]);
-				TableVar.Keys.Add(LSequenceKey);
+				Schema.Key sequenceKey = new Schema.Key();
+				sequenceKey.IsInherited = true;
+				sequenceKey.Columns.Add(TableVar.Columns[_sequenceColumnIndex]);
+				TableVar.Keys.Add(sequenceKey);
 			}
 			CopyOrders(SourceTableVar.Orders);
-			Order = Compiler.OrderFromKey(APlan, Compiler.FindClusteringKey(APlan, TableVar));
+			Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, TableVar));
 
 			#if UseReferenceDerivation
-			CopySourceReferences(APlan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(APlan, SourceTableVar.TargetReferences);
+			CopySourceReferences(plan, SourceTableVar.SourceReferences);
+			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
 			#endif
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
-			Nodes[1].DetermineBinding(APlan);
-			APlan.EnterRowContext();
+			Nodes[0].DetermineBinding(plan);
+			Nodes[1].DetermineBinding(plan);
+			plan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(SourceTableType.CreateRowType(Keywords.Parent)));
+				#if USENAMEDROWVARIABLES
+				plan.Symbols.Push(new Symbol(Keywords.Parent, SourceTableType.RowType));
+				#else
+				APlan.Symbols.Push(new Symbol(String.Empty, SourceTableType.CreateRowType(Keywords.Parent)));
+				#endif
 				try
 				{
-					Nodes[2].DetermineBinding(APlan);
+					Nodes[2].DetermineBinding(plan);
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = SourceNode.CursorType;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = 
+			_cursorType = SourceNode.CursorType;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = 
 				CursorCapability.Navigable | 
 				(
-					(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
 				);
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 
-			Order = Compiler.OrderFromKey(APlan, Compiler.FindClusteringKey(APlan, TableVar));
+			Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, TableVar));
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			ExplodeTable LTable = new ExplodeTable(this, AProgram);
+			ExplodeTable table = new ExplodeTable(this, program);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			ExplodeExpression LExpression = new ExplodeExpression();
-			LExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			PlanNode LRootNode = Nodes[1];
-			OrderNode LOrderNode = LRootNode as OrderNode;
-			if (LOrderNode != null)
+			ExplodeExpression expression = new ExplodeExpression();
+			expression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			PlanNode rootNode = Nodes[1];
+			OrderNode orderNode = rootNode as OrderNode;
+			if (orderNode != null)
 			{
-				LExpression.HasOrderByClause = true;
-				for (int LIndex = 0; LIndex < LOrderNode.RequestedOrder.Columns.Count; LIndex++)
-					LExpression.OrderColumns.Add(LOrderNode.RequestedOrder.Columns[LIndex].EmitStatement(AMode));
-				LRootNode = LRootNode.Nodes[0];
+				expression.HasOrderByClause = true;
+				for (int index = 0; index < orderNode.RequestedOrder.Columns.Count; index++)
+					expression.OrderColumns.Add(orderNode.RequestedOrder.Columns[index].EmitStatement(mode));
+				rootNode = rootNode.Nodes[0];
 			}
 			
-			LExpression.RootExpression = ((RestrictExpression)LRootNode.EmitStatement(AMode)).Condition;
+			expression.RootExpression = ((RestrictExpression)rootNode.EmitStatement(mode)).Condition;
 			
-			PlanNode LByNode = Nodes[2];
-			if (LByNode is OrderNode)
-				LByNode = LByNode.Nodes[0];
+			PlanNode byNode = Nodes[2];
+			if (byNode is OrderNode)
+				byNode = byNode.Nodes[0];
 
-			LExpression.ByExpression = ((RestrictExpression)LByNode.EmitStatement(AMode)).Condition;
+			expression.ByExpression = ((RestrictExpression)byNode.EmitStatement(mode)).Condition;
 
-			if (FLevelColumnIndex >= 0)
+			if (_levelColumnIndex >= 0)
 			{
-				Schema.TableVarColumn LLevelColumn = TableVar.Columns[FLevelColumnIndex];
-				LExpression.LevelColumn = new IncludeColumnExpression(LLevelColumn.Name, LLevelColumn.MetaData == null ? null : LLevelColumn.MetaData.Copy());
+				Schema.TableVarColumn levelColumn = TableVar.Columns[_levelColumnIndex];
+				expression.LevelColumn = new IncludeColumnExpression(levelColumn.Name, levelColumn.MetaData == null ? null : levelColumn.MetaData.Copy());
 			}
 			
-			if (FSequenceColumnIndex >= 0)
+			if (_sequenceColumnIndex >= 0)
 			{
-				Schema.TableVarColumn LSequenceColumn = TableVar.Columns[FSequenceColumnIndex];
-				LExpression.SequenceColumn = new IncludeColumnExpression(LSequenceColumn.Name, LSequenceColumn.MetaData == null ? null : LSequenceColumn.MetaData.Copy());
+				Schema.TableVarColumn sequenceColumn = TableVar.Columns[_sequenceColumnIndex];
+				expression.SequenceColumn = new IncludeColumnExpression(sequenceColumn.Name, sequenceColumn.MetaData == null ? null : sequenceColumn.MetaData.Copy());
 			}
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 		
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
+			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
+				return base.InternalDefault(program, oldRow, newRow, valueFlags, columnName, isDescending);
 			return false;
 		}
 		
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalChange(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
+				return base.InternalChange(program, oldRow, newRow, valueFlags, columnName);
 			return false;
 		}
 		
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
+				return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 			return false;
 		}
 		
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
+		public override void JoinApplicationTransaction(Program program, Row row)
 		{
 			// Exclude any columns from AKey which were included by this node
-			Schema.RowType LRowType = new Schema.RowType();
-			foreach (Schema.Column LColumn in ARow.DataType.Columns)
-				if (SourceNode.DataType.Columns.ContainsName(LColumn.Name))
-					LRowType.Columns.Add(LColumn.Copy());
+			Schema.RowType rowType = new Schema.RowType();
+			foreach (Schema.Column column in row.DataType.Columns)
+				if (SourceNode.DataType.Columns.ContainsName(column.Name))
+					rowType.Columns.Add(column.Copy());
 
-			Row LRow = new Row(AProgram.ValueManager, LRowType);
+			Row localRow = new Row(program.ValueManager, rowType);
 			try
 			{
-				ARow.CopyTo(LRow);
-				SourceNode.JoinApplicationTransaction(AProgram, LRow);
+				row.CopyTo(localRow);
+				SourceNode.JoinApplicationTransaction(program, localRow);
 			}
 			finally
 			{
-				LRow.Dispose();
+				localRow.Dispose();
 			}
 		}
     }

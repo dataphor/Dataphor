@@ -14,12 +14,12 @@ namespace Alphora.Dataphor.DAE
 {
 	public class SQLCECursor : DotNetCursor
 	{
-		public SQLCECursor(SQLCECommand ACommand, SqlCeResultSet AResultSet) : base(ACommand, AResultSet)
+		public SQLCECursor(SQLCECommand command, SqlCeResultSet resultSet) : base(command, resultSet)
 		{
-			FResultSet = AResultSet;
+			_resultSet = resultSet;
 		}
 		
-		private SqlCeResultSet FResultSet;
-		public SqlCeResultSet ResultSet { get { return FResultSet; } }
+		private SqlCeResultSet _resultSet;
+		public SqlCeResultSet ResultSet { get { return _resultSet; } }
 	}
 }

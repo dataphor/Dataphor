@@ -54,24 +54,24 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	/// </summary>
 	public class OracleTimeSpan : SQLScalarType
 	{
-		public OracleTimeSpan(int AID, string AName) : base(AID, AName) { }
+		public OracleTimeSpan(int iD, string name) : base(iD, name) { }
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			return new TimeSpan(Convert.ToInt64(AValue));
+			return new TimeSpan(Convert.ToInt64(tempValue));
 		}
 
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			return ((TimeSpan)AValue).Ticks;
+			return ((TimeSpan)tempValue).Ticks;
 		}
 
-		public override SQLType GetSQLType(MetaData AMetaData)
+		public override SQLType GetSQLType(MetaData metaData)
 		{
 			return new SQLNumericType(20, 0);
 		}
 
-		protected override string InternalNativeDomainName(MetaData AMetaData)
+		protected override string InternalNativeDomainName(MetaData metaData)
 		{
 			return "number(20, 0)";
 		}
@@ -79,24 +79,24 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleBoolean : SQLScalarType
 	{
-		public OracleBoolean(int AID, string AName) : base(AID, AName) { }
+		public OracleBoolean(int iD, string name) : base(iD, name) { }
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			return Convert.ToBoolean(AValue);
+			return Convert.ToBoolean(tempValue);
 		}
 
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			return ((bool)AValue ? 1.0 : 0.0);
+			return ((bool)tempValue ? 1.0 : 0.0);
 		}
 
-		public override SQLType GetSQLType(MetaData AMetaData)
+		public override SQLType GetSQLType(MetaData metaData)
 		{
 			return new SQLNumericType(1, 0);
 		}
 
-		protected override string InternalNativeDomainName(MetaData AMetaData)
+		protected override string InternalNativeDomainName(MetaData metaData)
 		{
 			return "number(1, 0)";
 		}
@@ -104,27 +104,27 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleInteger : SQLScalarType
 	{
-		public OracleInteger(int AID, string AName)
-			: base(AID, AName)
+		public OracleInteger(int iD, string name)
+			: base(iD, name)
 		{
 		}
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			return Convert.ToInt32(AValue);
+			return Convert.ToInt32(tempValue);
 		}
 
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			return (decimal)(int)AValue;
+			return (decimal)(int)tempValue;
 		}
 
-		public override SQLType GetSQLType(MetaData AMetaData)
+		public override SQLType GetSQLType(MetaData metaData)
 		{
 			return new SQLNumericType(10, 0);
 		}
 
-		protected override string InternalNativeDomainName(MetaData AMetaData)
+		protected override string InternalNativeDomainName(MetaData metaData)
 		{
 			return "number(10, 0)";
 		}
@@ -159,24 +159,24 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleShort : SQLScalarType
 	{
-		public OracleShort(int AID, string AName) : base(AID, AName) { }
+		public OracleShort(int iD, string name) : base(iD, name) { }
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			return Convert.ToInt16((decimal)AValue);
+			return Convert.ToInt16((decimal)tempValue);
 		}
 
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			return (decimal)(short)AValue;
+			return (decimal)(short)tempValue;
 		}
 
-		public override SQLType GetSQLType(MetaData AMetaData)
+		public override SQLType GetSQLType(MetaData metaData)
 		{
 			return new SQLNumericType(5, 0);
 		}
 
-		protected override string InternalNativeDomainName(MetaData AMetaData)
+		protected override string InternalNativeDomainName(MetaData metaData)
 		{
 			return "number(5, 0)";
 		}
@@ -211,24 +211,24 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleByte : SQLScalarType
 	{
-		public OracleByte(int AID, string AName) : base(AID, AName) { }
+		public OracleByte(int iD, string name) : base(iD, name) { }
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			return Convert.ToByte((decimal)AValue);
+			return Convert.ToByte((decimal)tempValue);
 		}
 
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			return (decimal)(byte)AValue;
+			return (decimal)(byte)tempValue;
 		}
 
-		public override SQLType GetSQLType(MetaData AMetaData)
+		public override SQLType GetSQLType(MetaData metaData)
 		{
 			return new SQLNumericType(3, 0);
 		}
 
-		protected override string InternalNativeDomainName(MetaData AMetaData)
+		protected override string InternalNativeDomainName(MetaData metaData)
 		{
 			return "number(3, 0)";
 		}
@@ -263,24 +263,24 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleLong : SQLScalarType
 	{
-		public OracleLong(int AID, string AName) : base(AID, AName) { }
+		public OracleLong(int iD, string name) : base(iD, name) { }
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			return Convert.ToInt64((decimal)AValue);
+			return Convert.ToInt64((decimal)tempValue);
 		}
 
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			return (decimal)(long)AValue;
+			return (decimal)(long)tempValue;
 		}
 
-		public override SQLType GetSQLType(MetaData AMetaData)
+		public override SQLType GetSQLType(MetaData metaData)
 		{
 			return new SQLNumericType(20, 0);
 		}
 
-		protected override string InternalNativeDomainName(MetaData AMetaData)
+		protected override string InternalNativeDomainName(MetaData metaData)
 		{
 			return "number(20, 0)";
 		}
@@ -288,78 +288,78 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleString : SQLString
 	{
-		public OracleString(int AID, string AName) : base(AID, AName) { }
+		public OracleString(int iD, string name) : base(iD, name) { }
 
 		/*
 			Oracle cannot distinguish between an empty string and a null once the empty string has been inserted into a table.
 			To get around this problem, we translate all empty strings to blank strings of length 1.
 		*/
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			if ((AValue is string) && ((string)AValue == " "))
+			if ((tempValue is string) && ((string)tempValue == " "))
 				return "";
 			else
-				return AValue;
+				return tempValue;
 		}
 
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			string LValue = (string)AValue;
-			if (LValue == String.Empty)
+			string localTempValue = (string)tempValue;
+			if (localTempValue == String.Empty)
 				return " ";
 			else
-				return LValue;
+				return localTempValue;
 		}
 
-		protected override string InternalNativeDomainName(MetaData AMetaData)
+		protected override string InternalNativeDomainName(MetaData metaData)
 		{
-			return String.Format("varchar2({0})", GetLength(AMetaData));
+			return String.Format("varchar2({0})", GetLength(metaData));
 		}
 	}
 
 	public class OracleSQLText : SQLScalarType
 	{
-		public OracleSQLText(int AID, string AName) : base(AID, AName) { }
+		public OracleSQLText(int iD, string name) : base(iD, name) { }
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			if ((AValue is string) && ((string)AValue == " "))
+			if ((tempValue is string) && ((string)tempValue == " "))
 				return "";
 			else
-				return AValue;
+				return tempValue;
 		}
 
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			string LValue = (string)AValue;
-			if (LValue == String.Empty)
+			string localTempValue = (string)tempValue;
+			if (localTempValue == String.Empty)
 				return " ";
 			else
-				return LValue;
+				return localTempValue;
 		}
 
-		public override Stream GetStreamAdapter(IValueManager AManager, Stream AStream)
+		public override Stream GetStreamAdapter(IValueManager manager, Stream stream)
 		{
-			using (var LReader = new StreamReader(AStream))
+			using (var reader = new StreamReader(stream))
 			{
-				string LValue = LReader.ReadToEnd();
-				if (LValue == " ")
-					LValue = String.Empty;
-				Conveyor LConveyor = AManager.GetConveyor(ScalarType);
-				var LStream = new MemoryStream(LConveyor.GetSize(LValue));
-				LStream.SetLength(LStream.GetBuffer().Length);
-				LConveyor.Write(LValue, LStream.GetBuffer(), 0);
-				return LStream;
+				string tempValue = reader.ReadToEnd();
+				if (tempValue == " ")
+					tempValue = String.Empty;
+				Conveyor conveyor = manager.GetConveyor(ScalarType);
+				var localStream = new MemoryStream(conveyor.GetSize(tempValue));
+				localStream.SetLength(localStream.GetBuffer().Length);
+				conveyor.Write(tempValue, localStream.GetBuffer(), 0);
+				return localStream;
 			}
 		}
 
-		public override SQLType GetSQLType(MetaData AMetaData)
+		public override SQLType GetSQLType(MetaData metaData)
 		{
 			return new SQLTextType();
 		}
 
-		protected override string InternalNativeDomainName(MetaData AMetaData)
+		protected override string InternalNativeDomainName(MetaData metaData)
 		{
 			return "clob";
 		}

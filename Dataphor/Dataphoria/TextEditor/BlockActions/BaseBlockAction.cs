@@ -5,42 +5,42 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
 {
     public abstract class BaseBlockAction : AbstractEditAction
     {
-        protected int GetPriorBlockOffset(TextArea ATextArea)
+        protected int GetPriorBlockOffset(TextArea textArea)
         {
-            string LTextContent = ATextArea.Document.TextContent.Substring(0, ATextArea.Caret.Offset);
-            int LPriorBlock = LTextContent.LastIndexOf("//*");
-            if (LPriorBlock < 0)
-                LPriorBlock = 0;
+            string textContent = textArea.Document.TextContent.Substring(0, textArea.Caret.Offset);
+            int priorBlock = textContent.LastIndexOf("//*");
+            if (priorBlock < 0)
+                priorBlock = 0;
 
-            return LPriorBlock;
+            return priorBlock;
         }
 
-        protected int GetNextBlockOffset(TextArea ATextArea)
+        protected int GetNextBlockOffset(TextArea textArea)
         {
-            bool LAtBlockStart;
-            return GetNextBlockOffset(ATextArea, out LAtBlockStart);
+            bool atBlockStart;
+            return GetNextBlockOffset(textArea, out atBlockStart);
         }
 
-        protected int GetNextBlockOffset(TextArea ATextArea, out bool AAtBlockStart)
+        protected int GetNextBlockOffset(TextArea textArea, out bool atBlockStart)
         {
-            AAtBlockStart = false;
-            string LTextContent = ATextArea.Document.TextContent.Substring(ATextArea.Caret.Offset);
-            int LNextBlock = LTextContent.IndexOf("//*");
-            if (LNextBlock == 0)
+            atBlockStart = false;
+            string textContent = textArea.Document.TextContent.Substring(textArea.Caret.Offset);
+            int nextBlock = textContent.IndexOf("//*");
+            if (nextBlock == 0)
             {
-                AAtBlockStart = true;
-                LTextContent = LTextContent.Substring(LNextBlock + 3);
-                LNextBlock = LTextContent.IndexOf("//*");
-                if (LNextBlock >= 0)
-                    LNextBlock += 3;
+                atBlockStart = true;
+                textContent = textContent.Substring(nextBlock + 3);
+                nextBlock = textContent.IndexOf("//*");
+                if (nextBlock >= 0)
+                    nextBlock += 3;
             }
 
-            if (LNextBlock < 0)
-                LNextBlock = ATextArea.Document.TextLength;
+            if (nextBlock < 0)
+                nextBlock = textArea.Document.TextLength;
             else
-                LNextBlock = ATextArea.Caret.Offset + LNextBlock;
+                nextBlock = textArea.Caret.Offset + nextBlock;
 
-            return LNextBlock;
+            return nextBlock;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 	[TemplatePart(Name = "TimeBar", Type = typeof(ScheduleTimeBar))]
 	public class Scheduler : Control
 	{
-		public const int CMinutesPerDay = 1440;
+		public const int MinutesPerDay = 1440;
 
 		static Scheduler()
 		{
@@ -29,11 +29,11 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(StartTimeProperty, value); }
 		}
 
-		private static object CoerceStartTime(DependencyObject ASender, object AValue)
+		private static object CoerceStartTime(DependencyObject sender, object tempValue)
 		{
-			var LWeek = (Scheduler)ASender;
-			var LDateTime = (DateTime)AValue;
-			var LMinutes = LDateTime.Minute + (LDateTime.Hour * 60);
+			var week = (Scheduler)sender;
+			var dateTime = (DateTime)tempValue;
+			var minutes = dateTime.Minute + (dateTime.Hour * 60);
 			return
 				new DateTime
 				(
@@ -41,8 +41,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 					(
 						Math.Min
 						(
-							(LMinutes + (LWeek.Granularity / 2)) / LWeek.Granularity * LWeek.Granularity,
-							CMinutesPerDay - (LWeek.TimeBarElement == null ? 0 : LWeek.TimeBarElement.VisibleMinutes)
+							(minutes + (week.Granularity / 2)) / week.Granularity * week.Granularity,
+							MinutesPerDay - (week.TimeBarElement == null ? 0 : week.TimeBarElement.VisibleMinutes)
 						)
 					).Ticks
 				);
@@ -60,9 +60,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(GranularityProperty, value); }
 		}
 
-		private static object CoerceGranularity(DependencyObject ASender, object AValue)
+		private static object CoerceGranularity(DependencyObject sender, object tempValue)
 		{
-			return Math.Max(1, Math.Min(60, (int)AValue));
+			return Math.Max(1, Math.Min(60, (int)tempValue));
 		}
 
 		// StartDate
@@ -77,12 +77,12 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(StartDateProperty, value); }
 		}
 
-		private static void StartDateChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void StartDateChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			((Scheduler)ASender).StartDateChanged((DateTime)AArgs.OldValue, (DateTime)AArgs.NewValue);
+			((Scheduler)sender).StartDateChanged((DateTime)args.OldValue, (DateTime)args.NewValue);
 		}
 		
-		protected virtual void StartDateChanged(DateTime AOldValue, DateTime ANewValue)
+		protected virtual void StartDateChanged(DateTime oldValue, DateTime newValue)
 		{
 		}
 
@@ -288,16 +288,16 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			base.OnApplyTemplate();
 		}
 
-		protected override void OnMouseWheel(System.Windows.Input.MouseWheelEventArgs AArgs)
+		protected override void OnMouseWheel(System.Windows.Input.MouseWheelEventArgs args)
 		{
-			base.OnMouseWheel(AArgs);
-			if (AArgs.Delta < 0)
+			base.OnMouseWheel(args);
+			if (args.Delta < 0)
 				StartTime += TimeSpan.FromHours(1);
-			else if (AArgs.Delta > 0)
+			else if (args.Delta > 0)
 				StartTime = new DateTime(Math.Max(0, (new TimeSpan(StartTime.Ticks) - TimeSpan.FromHours(1)).Ticks));
 			else
 				return;
-			AArgs.Handled = true;
+			args.Handled = true;
 		}
 	}
 }

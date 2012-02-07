@@ -13,16 +13,16 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public Menu()
 		{
-			FMenuItem = new MenuItem();
-			FMenuItem.OnClick += new EventHandler(MenuItemClicked);
+			_menuItem = new MenuItem();
+			_menuItem.OnClick += new EventHandler(MenuItemClicked);
 		}
 
 		// MenuItem
 
-		private MenuItem FMenuItem;
-		public MenuItem MenuItem { get { return FMenuItem; } }
+		private MenuItem _menuItem;
+		public MenuItem MenuItem { get { return _menuItem; } }
 
-		private void MenuItemClicked(object ASender, EventArgs AArgs)
+		private void MenuItemClicked(object sender, EventArgs args)
 		{
 			if (GetEnabled())
 				Action.Execute();
@@ -32,16 +32,16 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		public MenuItemList Items
 		{
-			get { return FMenuItem.Items; }
+			get { return _menuItem.Items; }
 		}
 
 		// Node
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(IMenu).IsAssignableFrom(AChildType))
+			if (typeof(IMenu).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
 
 		protected override void ChildrenChanged()
@@ -53,40 +53,40 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		protected override void Activate()
 		{
-			int LPosition;
+			int position;
 			// calculate the position to insert the menu at
 			if (Parent is IMenu)
-				LPosition = Parent.Children.IndexOf(this);
+				position = Parent.Children.IndexOf(this);
 			else
 			{
-				LPosition = 1;  // start at one since there will always be a file menu at position 0
-				foreach (INode LNode in Parent.Children)
+				position = 1;  // start at one since there will always be a file menu at position 0
+				foreach (INode node in Parent.Children)
 				{
-					if (LNode == this)
+					if (node == this)
 						break;
-					if (LNode is IMenu)
-						LPosition++;
+					if (node is IMenu)
+						position++;
 				}
 			}
-			IWebMenu LWebMenu = (IWebMenu)FindParent(typeof(IWebMenu));
-			LPosition = Math.Min(LWebMenu.Items.Count, LPosition);
-			LWebMenu.Items.Insert(LPosition, FMenuItem);
+			IWebMenu webMenu = (IWebMenu)FindParent(typeof(IWebMenu));
+			position = Math.Min(webMenu.Items.Count, position);
+			webMenu.Items.Insert(position, _menuItem);
 			base.Activate();
 			InternalSetImage(null);
 		}
 
 		protected override void Deactivate()
 		{
-			((IWebMenu)FindParent(typeof(IWebMenu))).Items.Remove(FMenuItem);
+			((IWebMenu)FindParent(typeof(IWebMenu))).Items.Remove(_menuItem);
 			base.Deactivate();
-			Session.Get(this).ImageCache.Deallocate(FMenuItem.ImageID);
+			Session.Get(this).ImageCache.Deallocate(_menuItem.ImageID);
 		}
 
 		// Client.ActionNode
 
 		protected override void InternalUpdateEnabled()
 		{
-			FMenuItem.Enabled = GetEnabled();
+			_menuItem.Enabled = GetEnabled();
 		}
 
 		public override bool GetEnabled()
@@ -96,42 +96,42 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		protected override void InternalUpdateImage()
 		{
-			ImageCache LCache = Session.Get(this).ImageCache;
-			LCache.Deallocate(FMenuItem.ImageID);
+			ImageCache cache = Session.Get(this).ImageCache;
+			cache.Deallocate(_menuItem.ImageID);
 			if (Action != null)
-				FMenuItem.ImageID = LCache.Allocate(Action.Image);
+				_menuItem.ImageID = cache.Allocate(Action.Image);
 			else
-				FMenuItem.ImageID = String.Empty;
+				_menuItem.ImageID = String.Empty;
 		}
 
 		protected override void InternalUpdateVisible()
 		{
-			FMenuItem.Visible = GetVisible();
+			_menuItem.Visible = GetVisible();
 		}
 
 		protected override void InternalUpdateText()
 		{
-			FMenuItem.Text = GetText();
+			_menuItem.Text = GetText();
 		}
 
 		protected override void InternalUpdateHint()
 		{
-			FMenuItem.Hint = GetHint();
+			_menuItem.Hint = GetHint();
 		}
 	}      
 
 	public class MenuItemList : List
 	{
-		protected override void Validate(object AValue)
+		protected override void Validate(object tempValue)
 		{
-			base.Validate(AValue);
-			if (!(AValue is MenuItem))
+			base.Validate(tempValue);
+			if (!(tempValue is MenuItem))
 				throw new WebClientException(WebClientException.Codes.InvalidMenuChild);
 		}
 
-		public new MenuItem this[int AIndex]
+		public new MenuItem this[int index]
 		{
-			get { return (MenuItem)base[AIndex]; }
+			get { return (MenuItem)base[index]; }
 		}
 	}
 
@@ -139,44 +139,44 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		// Items
 
-		private MenuItemList FItems = new MenuItemList();
-		public MenuItemList Items { get { return FItems; } }
+		private MenuItemList _items = new MenuItemList();
+		public MenuItemList Items { get { return _items; } }
 
 		// Render
 
-		public void Render(HttpContext AContext, HtmlTextWriter AWriter)
+		public void Render(HttpContext context, HtmlTextWriter writer)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "mainmenu");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Id, "MainMenu");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Table);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "mainmenu");
+			writer.AddAttribute(HtmlTextWriterAttribute.Id, "MainMenu");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+			writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+			writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			foreach (MenuItem LItem in Items)
-				LItem.RenderMainItem(AContext, AWriter);
+			foreach (MenuItem item in Items)
+				item.RenderMainItem(context, writer);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "100%");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Width, "100%");
+			writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			writer.RenderEndTag();
 
-			AWriter.RenderEndTag();
-			AWriter.RenderEndTag();
+			writer.RenderEndTag();
+			writer.RenderEndTag();
 
 			// Render menus (invisible)
-			foreach (MenuItem LItem in Items)
-				LItem.RenderSubMenu(AContext, AWriter);
+			foreach (MenuItem item in Items)
+				item.RenderSubMenu(context, writer);
 		}
 
 		// ProcessRequest
 
-		public bool ProcessRequest(HttpContext AContext)
+		public bool ProcessRequest(HttpContext context)
 		{
-			foreach (MenuItem LItem in Items)
-				if (LItem.ProcessRequest(AContext))
+			foreach (MenuItem item in Items)
+				if (item.ProcessRequest(context))
 					return true;
 			return false;
 		}
@@ -186,75 +186,75 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public MenuItem()
 		{
-			FID = Session.GenerateID();
+			_iD = Session.GenerateID();
 		}
 
 		// Items
 
-		private MenuItemList FItems = new MenuItemList();
-		public MenuItemList Items { get { return FItems; } }
+		private MenuItemList _items = new MenuItemList();
+		public MenuItemList Items { get { return _items; } }
 
 		// ID
 
-		private string FID;
-		public string ID { get { return FID; } }
+		private string _iD;
+		public string ID { get { return _iD; } }
 
 		// MenuID - ID for submenu
 
-		private string FMenuID;	// null default is okay here
+		private string _menuID;	// null default is okay here
 		public string MenuID
 		{
 			get
 			{
-				if ((FMenuID == null) || (FMenuID == String.Empty))
-					FMenuID = Session.GenerateID();
-				return FMenuID;
+				if ((_menuID == null) || (_menuID == String.Empty))
+					_menuID = Session.GenerateID();
+				return _menuID;
 			}
 		}
 
 		// Hint
 
-		private string FHint = String.Empty;
+		private string _hint = String.Empty;
 		public string Hint
 		{
-			get { return FHint; }
-			set { FHint = (value == null ? String.Empty : value); }
+			get { return _hint; }
+			set { _hint = (value == null ? String.Empty : value); }
 		}
 
 		// Text
 
-		private string FText = String.Empty;
+		private string _text = String.Empty;
 		public string Text
 		{
-			get { return FText; }
-			set { FText = (value == null ? String.Empty : value); }
+			get { return _text; }
+			set { _text = (value == null ? String.Empty : value); }
 		}
 
 		// ImageID
 
-		private string FImageID = String.Empty;
+		private string _imageID = String.Empty;
 		public string ImageID
 		{
-			get { return FImageID; }
-			set { FImageID = value; }
+			get { return _imageID; }
+			set { _imageID = value; }
 		}
 
 		// Enabled
 
-		private bool FEnabled = true;
+		private bool _enabled = true;
 		public bool Enabled
 		{
-			get { return FEnabled; }
-			set { FEnabled = value; }
+			get { return _enabled; }
+			set { _enabled = value; }
 		}
 
 		// Visible
 
-		private bool FVisible = true;
+		private bool _visible = true;
 		public bool Visible
 		{
-			get { return FVisible; }
-			set { FVisible = value; }
+			get { return _visible; }
+			set { _visible = value; }
 		}
 
 		// OnClick
@@ -263,9 +263,9 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// ProcessRequest
 
-		public bool ProcessRequest(HttpContext AContext)
+		public bool ProcessRequest(HttpContext context)
 		{
-			if (Session.IsActionLink(AContext, FID))
+			if (Session.IsActionLink(context, _iD))
 			{
 				if (OnClick != null)
 					OnClick(this, EventArgs.Empty);
@@ -273,8 +273,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			}
 			else
 			{
-				foreach (MenuItem LChild in Items)
-					if (LChild.ProcessRequest(AContext))
+				foreach (MenuItem child in Items)
+					if (child.ProcessRequest(context))
 						return true;
 				return false;
 			}
@@ -282,160 +282,160 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// Rendering
 
-		protected virtual void RenderMenuSpacer(HtmlTextWriter AWriter, string AHeight, string AClass)
+		protected virtual void RenderMenuSpacer(HtmlTextWriter writer, string height, string classValue)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Height, AHeight);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+			writer.AddAttribute(HtmlTextWriterAttribute.Height, height);
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "menuimagepane");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-			Session.RenderDummyImage(AWriter, "24", AHeight);
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "menuimagepane");
+			writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			Session.RenderDummyImage(writer, "24", height);
+			writer.RenderEndTag();
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Colspan, "2");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
-			if (AClass != String.Empty)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Class, AClass);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-			Session.RenderDummyImage(AWriter, "8", AHeight);
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Colspan, "2");
+			writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+			if (classValue != String.Empty)
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, classValue);
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			Session.RenderDummyImage(writer, "8", height);
+			writer.RenderEndTag();
 
-			AWriter.RenderEndTag();
+			writer.RenderEndTag();
 		}
 
-		public virtual void RenderItem(HttpContext AContext, HtmlTextWriter AWriter) 
+		public virtual void RenderItem(HttpContext context, HtmlTextWriter writer) 
 		{
-			if (FVisible)
+			if (_visible)
 			{
-				if (FText == "-")
+				if (_text == "-")
 				{
-					RenderMenuSpacer(AWriter, "3", String.Empty);
-					RenderMenuSpacer(AWriter, "1", "separator");
-					RenderMenuSpacer(AWriter, "3", String.Empty);
+					RenderMenuSpacer(writer, "3", String.Empty);
+					RenderMenuSpacer(writer, "1", "separator");
+					RenderMenuSpacer(writer, "3", String.Empty);
 				}
 				else
 				{
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Id, ID);
-					if (FEnabled)
+					writer.AddAttribute(HtmlTextWriterAttribute.Id, ID);
+					if (_enabled)
 					{
 						if (Items.Count > 0)
 						{
-							AWriter.AddAttribute("submenu", MenuID);
-							AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, @"MenuItemClick(this, event)");
+							writer.AddAttribute("submenu", MenuID);
+							writer.AddAttribute(HtmlTextWriterAttribute.Onclick, @"MenuItemClick(this, event)");
 						}
 						else
-							AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(AContext, ID));
-						AWriter.AddAttribute("onmouseover", @"MenuItemOver(this)");
-						AWriter.AddAttribute("onmouseout", @"MenuItemOut(this)");
+							writer.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(context, ID));
+						writer.AddAttribute("onmouseover", @"MenuItemOver(this)");
+						writer.AddAttribute("onmouseout", @"MenuItemOut(this)");
 					}
-					AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+					writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "menuimagepane");
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
-					AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-					Session.RenderDummyImage(AWriter, "4", "1");
-					if (FImageID != String.Empty)
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "ViewImage.aspx?ImageID=" + FImageID);
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, "menuimagepane");
+					writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+					writer.RenderBeginTag(HtmlTextWriterTag.Td);
+					Session.RenderDummyImage(writer, "4", "1");
+					if (_imageID != String.Empty)
+						writer.AddAttribute(HtmlTextWriterAttribute.Src, "ViewImage.aspx?ImageID=" + _imageID);
 					else
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "images/pixel.gif");
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "16");
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Height, "16");
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-					AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-					AWriter.RenderEndTag();
-					Session.RenderDummyImage(AWriter, "4", "1");
-					AWriter.RenderEndTag();
+						writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/pixel.gif");
+					writer.AddAttribute(HtmlTextWriterAttribute.Width, "16");
+					writer.AddAttribute(HtmlTextWriterAttribute.Height, "16");
+					writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+					writer.RenderBeginTag(HtmlTextWriterTag.Img);
+					writer.RenderEndTag();
+					Session.RenderDummyImage(writer, "4", "1");
+					writer.RenderEndTag();
 
-					if (!FEnabled)
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "disabledmenuitem");
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
-					AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-					Session.RenderDummyImage(AWriter, "4", "1");
-					AWriter.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(FText)));
-					Session.RenderDummyImage(AWriter, "4", "1");
-					AWriter.RenderEndTag();
+					if (!_enabled)
+						writer.AddAttribute(HtmlTextWriterAttribute.Class, "disabledmenuitem");
+					writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+					writer.RenderBeginTag(HtmlTextWriterTag.Td);
+					Session.RenderDummyImage(writer, "4", "1");
+					writer.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(_text)));
+					Session.RenderDummyImage(writer, "4", "1");
+					writer.RenderEndTag();
 
 					if (Items.Count > 0)
 					{
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
-						AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-						Session.RenderDummyImage(AWriter, "4", "1");
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "images/submenu.png");
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "5");
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Height, "9");
-						AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-						AWriter.RenderEndTag();
-						Session.RenderDummyImage(AWriter, "4", "1");
-						AWriter.RenderEndTag();
+						writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+						writer.RenderBeginTag(HtmlTextWriterTag.Td);
+						Session.RenderDummyImage(writer, "4", "1");
+						writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/submenu.png");
+						writer.AddAttribute(HtmlTextWriterAttribute.Width, "5");
+						writer.AddAttribute(HtmlTextWriterAttribute.Height, "9");
+						writer.RenderBeginTag(HtmlTextWriterTag.Img);
+						writer.RenderEndTag();
+						Session.RenderDummyImage(writer, "4", "1");
+						writer.RenderEndTag();
 					}
 
-					AWriter.RenderEndTag();	// tr
+					writer.RenderEndTag();	// tr
 				}
 			}	// visible
 		}
 
-		public virtual void RenderMainItem(HttpContext AContext, HtmlTextWriter AWriter)
+		public virtual void RenderMainItem(HttpContext context, HtmlTextWriter writer)
 		{
-			if (FVisible)
+			if (_visible)
 			{
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Id, ID);
-				AWriter.AddAttribute("menu", "MainMenu");
-				if (FEnabled)
+				writer.AddAttribute(HtmlTextWriterAttribute.Id, ID);
+				writer.AddAttribute("menu", "MainMenu");
+				if (_enabled)
 				{
-					AWriter.AddAttribute("onmouseover", "MenuItemOver(this)");
-					AWriter.AddAttribute("onmouseout", "MenuItemOut(this)");
+					writer.AddAttribute("onmouseover", "MenuItemOver(this)");
+					writer.AddAttribute("onmouseout", "MenuItemOut(this)");
 					if (Items.Count > 0)
 					{
-						AWriter.AddAttribute("submenu", MenuID);
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, @"MenuItemClick(this, event)");
+						writer.AddAttribute("submenu", MenuID);
+						writer.AddAttribute(HtmlTextWriterAttribute.Onclick, @"MenuItemClick(this, event)");
 					}
 					else
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(AContext, FID));
+						writer.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(context, _iD));
 				}
 				else
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "disabledmenuitem");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Align, "left");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, "disabledmenuitem");
+				writer.AddAttribute(HtmlTextWriterAttribute.Align, "left");
+				writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+				writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-				Session.RenderDummyImage(AWriter, "3", "1");
+				Session.RenderDummyImage(writer, "3", "1");
 
-				AWriter.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(FText)));
+				writer.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(_text)));
 
-				Session.RenderDummyImage(AWriter, "3", "1");
+				Session.RenderDummyImage(writer, "3", "1");
 
-				AWriter.RenderEndTag();
+				writer.RenderEndTag();
 			}
 		}
 
-		public virtual void RenderSubMenu(HttpContext AContext, HtmlTextWriter AWriter)
+		public virtual void RenderSubMenu(HttpContext context, HtmlTextWriter writer)
 		{
-			if (FVisible && (Items.Count > 0))
+			if (_visible && (Items.Count > 0))
 			{
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "menu");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Style, "display: none");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Id, FMenuID);
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Div);
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "menu");
+				writer.AddAttribute(HtmlTextWriterAttribute.Style, "display: none");
+				writer.AddAttribute(HtmlTextWriterAttribute.Id, _menuID);
+				writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Table);
+				writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
+				writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+				writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+				writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
-				RenderMenuSpacer(AWriter, "3", String.Empty);
+				RenderMenuSpacer(writer, "3", String.Empty);
 	
-				foreach (MenuItem LItem in Items)
-					LItem.RenderItem(AContext, AWriter);
+				foreach (MenuItem item in Items)
+					item.RenderItem(context, writer);
 
-				RenderMenuSpacer(AWriter, "3", String.Empty);
+				RenderMenuSpacer(writer, "3", String.Empty);
 
-				AWriter.RenderEndTag();	// table
+				writer.RenderEndTag();	// table
 
-				AWriter.RenderEndTag();	// div
+				writer.RenderEndTag();	// div
 
-				foreach (MenuItem LItem in Items)
-					LItem.RenderSubMenu(AContext, AWriter);
+				foreach (MenuItem item in Items)
+					item.RenderSubMenu(context, writer);
 			}
 		}
 

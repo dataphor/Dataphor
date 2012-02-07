@@ -19,63 +19,43 @@ namespace Alphora.Dataphor.DAE.Service
 {
 	public class ListenerServiceHost : IDisposable
 	{
-		public ListenerServiceHost(int AOverridePortNumber, int AOverrideSecurePortNumber, bool ARequireSecureConnection, bool AUseCrossDomainService)
+		public ListenerServiceHost(int overridePortNumber, bool requireSecureConnection, bool useCrossDomainService)
 		{
-			int LListenerPort = AOverridePortNumber == 0 ? DataphorServiceUtility.CDefaultListenerPortNumber : AOverridePortNumber;
-			int LSecureListenerPort = AOverrideSecurePortNumber == 0 ? DataphorServiceUtility.CDefaultSecureListenerPortNumber : AOverrideSecurePortNumber;
+			int listenerPort = overridePortNumber == 0 ? DataphorServiceUtility.DefaultListenerPortNumber : overridePortNumber;
 				
-			FListenerHost = new ServiceHost(typeof(ListenerService));
+			_listenerHost = new ServiceHost(typeof(ListenerService));
 			
-			if (!ARequireSecureConnection)
-				FListenerHost.AddServiceEndpoint
-				(
-					typeof(IListenerService), 
-					DataphorServiceUtility.GetBinding(false), 
-					DataphorServiceUtility.BuildListenerURI(Environment.MachineName, LListenerPort, false)
-				);
-				
-			FListenerHost.AddServiceEndpoint
+			_listenerHost.AddServiceEndpoint
 			(
 				typeof(IListenerService), 
-				DataphorServiceUtility.GetBinding(true), 
-				DataphorServiceUtility.BuildListenerURI(Environment.MachineName, LSecureListenerPort, true)
-			);
+				DataphorServiceUtility.GetBinding(), 
+				DataphorServiceUtility.BuildListenerURI(Environment.MachineName, listenerPort)
+			);	 
 
 			try
 			{
-				FListenerHost.Open();
+				_listenerHost.Open();
 			}
 			catch
 			{
 				// An error indicates the service could not be started because there is already a listener running in another process.
-			}
-			
-			if (AUseCrossDomainService)
-				FCrossDomainServiceHost = new CrossDomainServiceHost(Environment.MachineName, LListenerPort, LSecureListenerPort, ARequireSecureConnection);
+			}	 			
 		}
 
 		#region IDisposable Members
 
 		public void Dispose()
-		{
-			if (FCrossDomainServiceHost != null)
+		{				
+			if (_listenerHost != null)
 			{
-				FCrossDomainServiceHost.Dispose();
-				FCrossDomainServiceHost = null;
-			}
-			
-			if (FListenerHost != null)
-			{
-				if (FListenerHost.State == CommunicationState.Opened)
-					FListenerHost.Close();
-				FListenerHost = null;
+				if (_listenerHost.State == CommunicationState.Opened)
+					_listenerHost.Close();
+				_listenerHost = null;
 			}
 		}
 
 		#endregion
 
-		private ServiceHost FListenerHost;
-		private CrossDomainServiceHost FCrossDomainServiceHost;
-		
+		private ServiceHost _listenerHost;	   		
 	}
 }

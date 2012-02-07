@@ -33,134 +33,134 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	public class CatalogDeviceTable : Table
 	{
-		public CatalogDeviceTable(CatalogDevicePlanNode ADevicePlanNode, Program AProgram, ServerCatalogDeviceSession ASession) : base(ADevicePlanNode.Node as TableNode, AProgram)
+		public CatalogDeviceTable(CatalogDevicePlanNode devicePlanNode, Program program, ServerCatalogDeviceSession session) : base(devicePlanNode.Node as TableNode, program)
 		{
-			FDevicePlanNode = ADevicePlanNode;
-			FSession = ASession;
+			_devicePlanNode = devicePlanNode;
+			_session = session;
 		}
 		
-		private ServerCatalogDeviceSession FSession; 
-		public ServerCatalogDeviceSession Session { get { return FSession; } }
+		private ServerCatalogDeviceSession _session; 
+		public ServerCatalogDeviceSession Session { get { return _session; } }
 		
-		private CatalogDevicePlanNode FDevicePlanNode;
-		public CatalogDevicePlanNode DevicePlanNode { get { return FDevicePlanNode; } }
+		private CatalogDevicePlanNode _devicePlanNode;
+		public CatalogDevicePlanNode DevicePlanNode { get { return _devicePlanNode; } }
 		
-		private SQLConnection FConnection;
-		public SQLConnection Connection { get { return FConnection; } }
+		private SQLConnection _connection;
+		public SQLConnection Connection { get { return _connection; } }
 		
-		private SQLCommand FCommand;
-		public SQLCommand Command { get { return FCommand; } }
+		private SQLCommand _command;
+		public SQLCommand Command { get { return _command; } }
 		
-		private SQLCursor FCursor;
-		public SQLCursor Cursor { get { return FCursor; } }
+		private SQLCursor _cursor;
+		public SQLCursor Cursor { get { return _cursor; } }
 
 		protected override void InternalOpen()
 		{
 			// Connect to the Catalog Store
-			FConnection = Session.Device.Store.GetSQLConnection();
-			FConnection.BeginTransaction(SQLIsolationLevel.ReadUncommitted);
+			_connection = Session.Device.Store.GetSQLConnection();
+			_connection.BeginTransaction(SQLIsolationLevel.ReadUncommitted);
 
 			// Create a command using DevicePlanNode.Statement
-			FCommand = FConnection.CreateCommand(true);
-			FCommand.CursorLocation = SQLCursorLocation.Server;
-			FCommand.CommandBehavior = SQLCommandBehavior.Default;
-			FCommand.CommandType = SQLCommandType.Statement;
-			FCommand.LockType = SQLLockType.ReadOnly;
-			FCommand.Statement = FDevicePlanNode.Statement.ToString();
+			_command = _connection.CreateCommand(true);
+			_command.CursorLocation = SQLCursorLocation.Server;
+			_command.CommandBehavior = SQLCommandBehavior.Default;
+			_command.CommandType = SQLCommandType.Statement;
+			_command.LockType = SQLLockType.ReadOnly;
+			_command.Statement = _devicePlanNode.Statement.ToString();
 			
 			// Set the parameter values
-			foreach (CatalogPlanParameter LPlanParameter in FDevicePlanNode.PlanParameters)
+			foreach (CatalogPlanParameter planParameter in _devicePlanNode.PlanParameters)
 			{
-				FCommand.Parameters.Add(LPlanParameter.SQLParameter);
-				LPlanParameter.SQLParameter.Value = GetSQLValue(LPlanParameter.PlanNode.DataType, LPlanParameter.PlanNode.Execute(Program));
+				_command.Parameters.Add(planParameter.SQLParameter);
+				planParameter.SQLParameter.Value = GetSQLValue(planParameter.PlanNode.DataType, planParameter.PlanNode.Execute(Program));
 			}
 
 			// Open a cursor from the command
-			FCursor = FCommand.Open(SQLCursorType.Dynamic, SQLIsolationLevel.ReadUncommitted);
+			_cursor = _command.Open(SQLCursorType.Dynamic, SQLIsolationLevel.ReadUncommitted);
 			
-			FBOF = true;
-			FEOF = !FCursor.Next();
+			_bOF = true;
+			_eOF = !_cursor.Next();
 		}
 
 		protected override void InternalClose()
 		{
 			// Dispose the cursor
-			if (FCursor != null)
+			if (_cursor != null)
 			{
-				FCursor.Dispose();
-				FCursor = null;
+				_cursor.Dispose();
+				_cursor = null;
 			}
 			// Dispose the command
-			if (FCommand != null)
+			if (_command != null)
 			{
-				FCommand.Dispose();
-				FCommand = null;
+				_command.Dispose();
+				_command = null;
 			}
 			
 			// Dispose the connection
-			if (FConnection != null)
+			if (_connection != null)
 			{
-				FConnection.Dispose();
-				FConnection = null;
+				_connection.Dispose();
+				_connection = null;
 			}
 		}
 		
-		private object GetSQLValue(Schema.IDataType ADataType, object AValue)
+		private object GetSQLValue(Schema.IDataType dataType, object tempValue)
 		{
-			if (AValue == null)
+			if (tempValue == null)
 				return null;
 			
-			if (ADataType.Is(Session.Catalog.DataTypes.SystemBoolean))
-				return (bool)AValue ? 1 : 0;
+			if (dataType.Is(Session.Catalog.DataTypes.SystemBoolean))
+				return (bool)tempValue ? 1 : 0;
 				
-			return AValue;
+			return tempValue;
 		}
 		
-		private object GetNativeValue(object AValue)
+		private object GetNativeValue(object tempValue)
 		{
 			// If this is a byte, then it must be translated as a bool
-			if (AValue is byte)
-				return (byte)AValue == 1;
+			if (tempValue is byte)
+				return (byte)tempValue == 1;
 			// If this is a DBNull, then it must be translated as a null
-			if (AValue is DBNull)
+			if (tempValue is DBNull)
 				return null;
-			return AValue;
+			return tempValue;
 		}
 
-		protected override void InternalSelect(Row ARow)
+		protected override void InternalSelect(Row row)
 		{
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
 			{
-				int LColumnIndex = Node.DataType.Columns.IndexOfName(ARow.DataType.Columns[LIndex].Name);
-				if (LColumnIndex >= 0)
-					ARow[LIndex] = GetNativeValue(FCursor[LColumnIndex]);
+				int columnIndex = Node.DataType.Columns.IndexOfName(row.DataType.Columns[index].Name);
+				if (columnIndex >= 0)
+					row[index] = GetNativeValue(_cursor[columnIndex]);
 			}
 		}
 
 		protected override bool InternalNext()
 		{
-			if (FBOF)
-				FBOF = false;
+			if (_bOF)
+				_bOF = false;
 			else
 			{
-				if (!FEOF)
-					FEOF = !FCursor.Next();
+				if (!_eOF)
+					_eOF = !_cursor.Next();
 			}
 
-			return !FEOF;
+			return !_eOF;
 		}
 		
-		private bool FBOF;
-		private bool FEOF;
+		private bool _bOF;
+		private bool _eOF;
 
 		protected override bool InternalBOF()
 		{
-			return FBOF;
+			return _bOF;
 		}
 
 		protected override bool InternalEOF()
 		{
-			return FEOF;
+			return _eOF;
 		}
 	}
 }

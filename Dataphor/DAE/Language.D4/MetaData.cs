@@ -116,124 +116,124 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// <summary>
 		/// Internal list of tags, null if the list contains no tags.
 		/// </summary>
-		private Tag[] FTags;
+		private Tag[] _tags;
 		
-		private int FCount;
+		private int _count;
 		
-		public int Count { get { return FCount; } }
+		public int Count { get { return _count; } }
 
-		private int IndexOfName(string AName)
+		private int IndexOfName(string name)
 		{
-			if (FTags == null)
+			if (_tags == null)
 				return -1;
 				
-			for (int LIndex = 0; LIndex < FCount; LIndex++)
-				if (FTags[LIndex].Name == AName)
-					return LIndex;
+			for (int index = 0; index < _count; index++)
+				if (_tags[index].Name == name)
+					return index;
 					
 			return -1;
 		}
 		
-        private void EnsureCapacity(int ARequiredCapacity)
+        private void EnsureCapacity(int requiredCapacity)
         {
-			if ((FTags == null) || (FTags.Length <= ARequiredCapacity))
+			if ((_tags == null) || (_tags.Length <= requiredCapacity))
 			{
-				Tag[] FNewTags = new Tag[Math.Max(FTags == null ? 0 : FTags.Length, 1) * 2];
-				if (FTags != null)
-					for (int LIndex = 0; LIndex < FTags.Length; LIndex++)
-						FNewTags[LIndex] = FTags[LIndex];
-				FTags = FNewTags;
+				Tag[] FNewTags = new Tag[Math.Max(_tags == null ? 0 : _tags.Length, 1) * 2];
+				if (_tags != null)
+					for (int index = 0; index < _tags.Length; index++)
+						FNewTags[index] = _tags[index];
+				_tags = FNewTags;
 			}
         }
         
-        private void InternalAdd(Tag ATag)
+        private void InternalAdd(Tag tag)
         {
-			EnsureCapacity(FCount);
-			FTags[FCount] = ATag;
-			FCount++;
+			EnsureCapacity(_count);
+			_tags[_count] = tag;
+			_count++;
         }
         
-        private void RemoveAt(int AIndex)
+        private void RemoveAt(int index)
         {
-			FCount--;
-			for (int LIndex = AIndex; LIndex < FCount; LIndex++)
-				FTags[LIndex] = FTags[LIndex + 1];
-			FTags[FCount] = Tag.None;
+			_count--;
+			for (int localIndex = index; localIndex < _count; localIndex++)
+				_tags[localIndex] = _tags[localIndex + 1];
+			_tags[_count] = Tag.None;
         }
         
-		public Tag this[int AIndex]
+		public Tag this[int index]
 		{
 			get
 			{
 				#if DEBUG
-				if (AIndex < 0 || AIndex >= Count)
+				if (index < 0 || index >= Count)
 					throw new IndexOutOfRangeException();
 				#endif
-				return FTags[AIndex];
+				return _tags[index];
 			}
 		}
 		
 		/// <summary>Returns the Tag for the given name, raises an error if the Tag does not exist.</summary>		
-		public Tag this[string AName]
+		public Tag this[string name]
 		{
 			get
 			{
-				return GetTag(AName, true);
+				return GetTag(name, true);
 			}
 		}
 		
 		/// <summary>Returns the Tag for the given name, if one exists, null otherwise.</summary>
-		public Tag GetTag(string AName)
+		public Tag GetTag(string name)
 		{
-			return GetTag(AName, false);
+			return GetTag(name, false);
 		}
 
         /// <summary>Returns the Tag for the given name. If the tag does not exist, an error is thrown if AShouldThrow is true, otherwise, Tag.None is returned.</summary>
-		public Tag GetTag(string AName, bool AShouldThrow)
+		public Tag GetTag(string name, bool shouldThrow)
 		{
-			int LIndex = IndexOfName(AName);
-			if (LIndex >= 0)
-				return FTags[LIndex];
+			int index = IndexOfName(name);
+			if (index >= 0)
+				return _tags[index];
 				
-			if (AShouldThrow)
-				throw new SchemaException(SchemaException.Codes.TagNotFound, AName);
+			if (shouldThrow)
+				throw new SchemaException(SchemaException.Codes.TagNotFound, name);
 
 			return Tag.None;
 		}
 		
 		/// <summary>Returns the value of the specified tag, returning ADefaultValue if the tag does not exist.</summary>
-		public string GetTagValue(string AName, string ADefaultValue)
+		public string GetTagValue(string name, string defaultValue)
 		{
-			Tag LTag = GetTag(AName);
-			if (LTag != Tag.None)
-				return LTag.Value;
-			return ADefaultValue;
+			Tag tag = GetTag(name);
+			if (tag != Tag.None)
+				return tag.Value;
+			return defaultValue;
 		}
 		
 		/// <summary>Returns the value of the specific tag, returning the value of the default tag if the tag does not exist, and ADefaultValue if the default tag does not exist.</summary>
-		public string GetTagValue(string AName, string ADefaultName, string ADefaultValue)
+		public string GetTagValue(string name, string defaultName, string defaultValue)
 		{
-			Tag LTag = GetTag(AName);
-			if (LTag == Tag.None)
-				LTag = GetTag(ADefaultName);
-			if (LTag != Tag.None)
-				return LTag.Value;
-			return ADefaultValue;
+			Tag tag = GetTag(name);
+			if (tag == Tag.None)
+				tag = GetTag(defaultName);
+			if (tag != Tag.None)
+				return tag.Value;
+			return defaultValue;
 		}
 		
 		/// <summary>Adds the given tag, replacing a reference or inherited tag of the same name.</summary>
 		/// <remarks>If a tag already exists of the same name as the tag being added, the tag will be removed if it is a reference or inherited tag. Otherwise, an error will be raised.</remarks>
-		public void Add(Tag ATag)
+		public void Add(Tag tag)
 		{
-			int LIndex = IndexOfName(ATag.Name);
+			int index = IndexOfName(tag.Name);
 			
-			if (LIndex >= 0)
-				if (FTags[LIndex].IsInherited)
-					RemoveAt(LIndex);
+			if (index >= 0)
+				if (_tags[index].IsInherited)
+					RemoveAt(index);
 				else
-					throw new SchemaException(SchemaException.Codes.DuplicateTagName, ATag.Name);
+					throw new SchemaException(SchemaException.Codes.DuplicateTagName, tag.Name);
 			
-			InternalAdd(ATag);
+			InternalAdd(tag);
 		}
 		
 		/// <summary>Inherits the given tag into this tag list.</summary>
@@ -242,13 +242,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// is a reference, the tag reference is replaced by a call to the Inherit method of the given tag. Otherwise, the value of the existing tag is set
 		/// based on the value of the given tag. Note that changing the value of the tag will cause the IsInherited property to be set to false.
 		/// </remarks>
-		public void Inherit(Tag ATag)
+		public void Inherit(Tag tag)
 		{
-			int LIndex = IndexOfName(ATag.Name);
-			if (LIndex < 0)
-				InternalAdd(ATag.Inherit());
+			int index = IndexOfName(tag.Name);
+			if (index < 0)
+				InternalAdd(tag.Inherit());
 			else
-				FTags[LIndex] = ATag.Inherit();
+				_tags[index] = tag.Inherit();
 		}
 		
 		/// <summary>Joins the given tag to this tag list using copy semantics.</summary>
@@ -257,15 +257,15 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// If the value of the given tag is different than the value of the existing tag, the existing tag is removed. Otherwise, the
 		/// existing tag remains and no action is taken.
 		/// </remarks>
-		public void Join(Tag ATag)
+		public void Join(Tag tag)
 		{
-			int LIndex = IndexOfName(ATag.Name);
-			if (LIndex < 0)
-				InternalAdd(ATag.Copy());
+			int index = IndexOfName(tag.Name);
+			if (index < 0)
+				InternalAdd(tag.Copy());
 			else
 			{
-				if (FTags[LIndex].Value != ATag.Value)
-					RemoveAt(LIndex);
+				if (_tags[index].Value != tag.Value)
+					RemoveAt(index);
 			}
 		}
 		
@@ -275,15 +275,15 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// If the value of the given tag is different than the value of the existing tag, the existing tag is removed.
 		/// Otherwise, the existing tag remains and no action is taken.
 		/// </remarks>
-		public void JoinInherit(Tag ATag)
+		public void JoinInherit(Tag tag)
 		{
-			int LIndex = IndexOfName(ATag.Name);
-			if (LIndex < 0)
-				InternalAdd(ATag.Inherit());
+			int index = IndexOfName(tag.Name);
+			if (index < 0)
+				InternalAdd(tag.Inherit());
 			else
 			{
-				if (FTags[LIndex].Value != ATag.Value)
-					RemoveAt(LIndex);
+				if (_tags[index].Value != tag.Value)
+					RemoveAt(index);
 			}
 		}
 		
@@ -294,27 +294,27 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// with the given value and static setting. Otherwise, the tag is updated with the given value
 		/// and static setting, and the IsInherited property of the tag is set to false.
 		/// </remarks>
-		public void Update(string ATagName, string ATagValue, bool AIsStatic)
+		public void Update(string tagName, string tagValue, bool isStatic)
 		{
-			int LIndex = IndexOfName(ATagName);
-			if (LIndex >= 0)
-				FTags[LIndex] = new Tag(ATagName, ATagValue, false, AIsStatic);
+			int index = IndexOfName(tagName);
+			if (index >= 0)
+				_tags[index] = new Tag(tagName, tagValue, false, isStatic);
 			else
-				throw new SchemaException(SchemaException.Codes.TagNotFound, ATagName);
+				throw new SchemaException(SchemaException.Codes.TagNotFound, tagName);
 		}
 		
 		/// <summary>Updates the value of the given tag, and sets IsStatic to false.</summary>
 		/// <remarks>This overload is equivalent to calling Update(ATagName, ATagValue, false)</remarks>
-		public void Update(string ATagName, string ATagValue)
+		public void Update(string tagName, string tagValue)
 		{
-			Update(ATagName, ATagValue, false);
+			Update(tagName, tagValue, false);
 		}
 		
 		/// <summary>Updates the value of the tag with the same name as the given tag to the value and static setting of the given tag.</summary>
 		/// <remarks>This overload is equivalent to calling Update(ATag.Name, ATag.Value, ATag.IsStatic)</remarks>
-		public void Update(Tag ATag)
+		public void Update(Tag tag)
 		{
-			Update(ATag.Name, ATag.Value, ATag.IsStatic);
+			Update(tag.Name, tag.Value, tag.IsStatic);
 		}
 		
 		/// <summary>Updates or adds a tag of the given name with the given value and static setting.</summary>
@@ -324,152 +324,152 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// with the given value and static setting. Otherwise, the tag is updated with the given value
 		/// and static setting, and the IsInherited property of the tag is set to false.
 		/// </remarks>
-		public void AddOrUpdate(string ATagName, string ATagValue, bool AIsStatic)
+		public void AddOrUpdate(string tagName, string tagValue, bool isStatic)
 		{
-			int LIndex = IndexOfName(ATagName);
-			if (LIndex < 0)
-				InternalAdd(new Tag(ATagName, ATagValue, false, AIsStatic));
+			int index = IndexOfName(tagName);
+			if (index < 0)
+				InternalAdd(new Tag(tagName, tagValue, false, isStatic));
 			else
-				FTags[LIndex] = new Tag(ATagName, ATagValue, false, AIsStatic);
+				_tags[index] = new Tag(tagName, tagValue, false, isStatic);
 		}
 		
 		/// <summary>Add or updates the given tag, and sets IsStatic to false.</summary>
 		/// <remarks>This overload is equivalent to calling AddOrUpdate(ATagName, ATagValue, false)</remarks>
-		public void AddOrUpdate(string ATagName, string ATagValue)
+		public void AddOrUpdate(string tagName, string tagValue)
 		{
-			AddOrUpdate(ATagName, ATagValue, false);
+			AddOrUpdate(tagName, tagValue, false);
 		}
 		
 		/// <summary>Adds or updates the tag with the same name as the given tag to the value and static setting of the given tag.</summary>
 		/// <remarks>This overload is equivalent to calling AddOrUpdate(ATag.Name, ATag.Value, ATag.IsStatic)</remarks>
-		public void AddOrUpdate(Tag ATag)
+		public void AddOrUpdate(Tag tag)
 		{
-			AddOrUpdate(ATag.Name, ATag.Value, ATag.IsStatic);
+			AddOrUpdate(tag.Name, tag.Value, tag.IsStatic);
 		}
 		
 		/// <summary>Calls Add for each Tag in the given array.</summary>
-		public void AddRange(Tag[] ATags)
+		public void AddRange(Tag[] tags)
 		{
-			for (int LIndex = 0; LIndex < ATags.Length; LIndex++)
-				Add(ATags[LIndex]);
+			for (int index = 0; index < tags.Length; index++)
+				Add(tags[index]);
 		}
 		
 		/// <summary>Calls Add for each Tag in the given list.</summary>
-		public void AddRange(Tags ATags)
+		public void AddRange(Tags tags)
 		{
-			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
-				Add(ATags[LIndex]);
+			for (int index = 0; index < tags.Count; index++)
+				Add(tags[index]);
 		}
 		
 		/// <summary>Calls Update for each Tag in the given array.</summary>
-		public void UpdateRange(Tag[] ATags)
+		public void UpdateRange(Tag[] tags)
 		{
-			for (int LIndex = 0; LIndex < ATags.Length; LIndex++)
-				Update(ATags[LIndex]);
+			for (int index = 0; index < tags.Length; index++)
+				Update(tags[index]);
 		}
 		
 		/// <summary>Calls Update for each Tag in the given list.</summary>
-		public void UpdateRange(Tags ATags)
+		public void UpdateRange(Tags tags)
 		{
-			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
-				Update(ATags[LIndex]);
+			for (int index = 0; index < tags.Count; index++)
+				Update(tags[index]);
 		}
 
 		/// <summary>Calls AddOrUpdate for each Tag in the given array.</summary>
-		public void AddOrUpdateRange(Tag[] ATags)
+		public void AddOrUpdateRange(Tag[] tags)
 		{
-			for (int LIndex = 0; LIndex < ATags.Length; LIndex++)
-				AddOrUpdate(ATags[LIndex]);
+			for (int index = 0; index < tags.Length; index++)
+				AddOrUpdate(tags[index]);
 		}
 		
 		/// <summary>Calls AddOrUpdate for each Tag in the given list.</summary>
-		public void AddOrUpdateRange(Tags ATags)
+		public void AddOrUpdateRange(Tags tags)
 		{
-			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
-				AddOrUpdate(ATags[LIndex]);
+			for (int index = 0; index < tags.Count; index++)
+				AddOrUpdate(tags[index]);
 		}
 		
 		/// <summary>Removes the tag of the given name if it exists. Otherwise, no action is taken.</summary>
-		public void SafeRemove(string ATagName)
+		public void SafeRemove(string tagName)
 		{
-			int LIndex = IndexOfName(ATagName);
-			if (LIndex >= 0)
-				RemoveAt(LIndex);
+			int index = IndexOfName(tagName);
+			if (index >= 0)
+				RemoveAt(index);
 		}
 
 		/// <summary>Removes the tag of the given name and returns it, if it exists. Otherwise, null is returned.</summary>		
-		public Tag RemoveTag(string ATagName)
+		public Tag RemoveTag(string tagName)
 		{
-			int LIndex = IndexOfName(ATagName);
-			if (LIndex >= 0)
+			int index = IndexOfName(tagName);
+			if (index >= 0)
 			{
-				Tag LTag = this[LIndex];
-				RemoveAt(LIndex);
-				return LTag;
+				Tag tag = this[index];
+				RemoveAt(index);
+				return tag;
 			}
 			return Tag.None;
 		}
 		
 		/// <summary>Removes the tag of the given name if it exists. Otherwise, an error is raised.</summary>
-		public void Remove(string ATagName)
+		public void Remove(string tagName)
 		{
-			int LIndex = IndexOfName(ATagName);
-			if (LIndex >= 0)
-				RemoveAt(LIndex);
+			int index = IndexOfName(tagName);
+			if (index >= 0)
+				RemoveAt(index);
 			else
-				throw new SchemaException(SchemaException.Codes.TagNotFound, ATagName);
+				throw new SchemaException(SchemaException.Codes.TagNotFound, tagName);
 		}
 		
 		/// <summary>Removes the tag with the same name as the given tag if one exists. Otherwise no action is taken.</summary>
-		public void SafeRemove(Tag ATag)
+		public void SafeRemove(Tag tag)
 		{
-			SafeRemove(ATag.Name);
+			SafeRemove(tag.Name);
 		}
 		
 		/// <summary>Removes the tag with the same name as the given tag if one exists. Otherwise, an error is raised.</summary>
-		public void Remove(Tag ATag)
+		public void Remove(Tag tag)
 		{
-			Remove(ATag.Name);
+			Remove(tag.Name);
 		}
 		
 		/// <summary>Calls Remove for each tag in the given array.</summary>
-		public void RemoveRange(Tag[] ATags)
+		public void RemoveRange(Tag[] tags)
 		{
-			for (int LIndex = 0; LIndex < ATags.Length; LIndex++)
-				Remove(ATags[LIndex]);
+			for (int index = 0; index < tags.Length; index++)
+				Remove(tags[index]);
 		}
 		
 		/// <summary>Calls Remove for each tag in the given list.</summary>
-		public void RemoveRange(Tags ATags)
+		public void RemoveRange(Tags tags)
 		{
-			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
-				Remove(ATags[LIndex]);
+			for (int index = 0; index < tags.Count; index++)
+				Remove(tags[index]);
 		}
 
 		/// <summary>Calls SafeRemove for each tag in the given array.</summary>		
-		public void SafeRemoveRange(Tag[] ATags)
+		public void SafeRemoveRange(Tag[] tags)
 		{
-			for (int LIndex = 0; LIndex < ATags.Length; LIndex++)
-				SafeRemove(ATags[LIndex]);
+			for (int index = 0; index < tags.Length; index++)
+				SafeRemove(tags[index]);
 		}
 		
 		/// <summary>Calls SafeRemove for each tag in the given list.</summary>
-		public void SafeRemoveRange(Tags ATags)
+		public void SafeRemoveRange(Tags tags)
 		{
-			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
-				SafeRemove(ATags[LIndex]);
+			for (int index = 0; index < tags.Count; index++)
+				SafeRemove(tags[index]);
 		}
 		
 		/// <summary>Returns true if this list contains a tag with the same name as the given tag, false otherwise.</summary>
-		public bool Contains(Tag ATag)
+		public bool Contains(Tag tag)
 		{
-			return Contains(ATag.Name);
+			return Contains(tag.Name);
 		}
 		
 		/// <summary>Returns true if this list contains a tag with the given name, false otherwise.
-		public bool Contains(string ATagName)
+		public bool Contains(string tagName)
 		{
-			return IndexOfName(ATagName) >= 0;
+			return IndexOfName(tagName) >= 0;
 		}
 		
 		/// <summary>Copies tags from this tag list to the given tag list.</summary>
@@ -477,26 +477,26 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// If the tag in this tag list is a reference, it is copied using the Inherit() method of the tag being referenced,
 		/// otheriwse it is copied using the Copy() method of the tag.
 		/// </remarks>
-		public void CopyTo(Tags ATags)
+		public void CopyTo(Tags tags)
 		{
-			if (FTags != null)
-				for (int LIndex = 0; LIndex < FCount; LIndex++)
-					ATags.Add(((Tag)FTags[LIndex]).Copy());
+			if (_tags != null)
+				for (int index = 0; index < _count; index++)
+					tags.Add(((Tag)_tags[index]).Copy());
 		}
 
 		/// <summary> Returns the set of static or non-static tags (not cloned). </summary>
-		public Tags GetSubset(bool AStatic)
+		public Tags GetSubset(bool staticValue)
 		{
-			Tag LTag;
-			Tags LTags = new Tags();
-			if (FTags != null)
-				for (int LIndex = 0; LIndex < FCount; LIndex++)
+			Tag tag;
+			Tags tags = new Tags();
+			if (_tags != null)
+				for (int index = 0; index < _count; index++)
 				{
-					LTag = this[LIndex];
-					if (LTag.IsStatic == AStatic)
-						LTags.Add(LTag);
+					tag = this[index];
+					if (tag.IsStatic == staticValue)
+						tags.Add(tag);
 				}
-			return LTags;
+			return tags;
 		}
 	}
 	#else
@@ -1382,7 +1382,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
     public sealed class TagNames : System.Object
     {
-		public const string CIsSystem = @"DAE.IsSystem";
+		public const string IsSystem = @"DAE.IsSystem";
 		#if !NATIVEROW
 		public const string CStaticByteSize = @"DAE.StaticByteSize";
 		#endif
@@ -1432,145 +1432,145 @@ namespace Alphora.Dataphor.DAE.Language.D4
     {
 		public MetaData() : base() { }
 		
-		public MetaData(Tag[] ATags) : base()
+		public MetaData(Tag[] tags) : base()
 		{
-			FTags.AddRange(ATags);
+			_tags.AddRange(tags);
 		}
 		
-		public MetaData(Tags ATags) : base()
+		public MetaData(Tags tags) : base()
 		{
-			FTags.AddRange(ATags);
+			_tags.AddRange(tags);
 		}
 		
 		public int Line = -1;
 		public int LinePos = -1;
 		
 		// Tags
-		protected Tags FTags = new Tags();
-		public Tags Tags { get { return FTags; } }
+		protected Tags _tags = new Tags();
+		public Tags Tags { get { return _tags; } }
 
 		// Copy
 		/// <summary>Creates a copy of the metadata, with tag references copied as inherited tags.</summary>
 		public MetaData Copy()
 		{
-			MetaData LMetaData = new MetaData();
-			FTags.CopyTo(LMetaData.Tags);
-			return LMetaData;
+			MetaData metaData = new MetaData();
+			_tags.CopyTo(metaData.Tags);
+			return metaData;
 		}
 		
 		// Inherit
 		/// <summary>Inherits all dynamic tags, with tag references inherited.</summary>
 		public MetaData Inherit()
 		{
-			MetaData LMetaData = new MetaData();
+			MetaData metaData = new MetaData();
 			#if USEHASHTABLEFORTAGS
-			foreach (Tag LTag in FTags)
-				if (!LTag.IsStatic)
-					LMetaData.Tags.Add(LTag.Inherit());
+			foreach (Tag tag in FTags)
+				if (!tag.IsStatic)
+					metaData.Tags.Add(tag.Inherit());
 			#else
-			Tag LTag;
-			for (int LIndex = 0; LIndex < FTags.Count; LIndex++)
+			Tag tag;
+			for (int index = 0; index < _tags.Count; index++)
 			{
-				LTag = FTags[LIndex];
-				if (!LTag.IsStatic)
-					LMetaData.Tags.Add(LTag.Inherit());
+				tag = _tags[index];
+				if (!tag.IsStatic)
+					metaData.Tags.Add(tag.Inherit());
 			}
 			#endif
-			return LMetaData;
+			return metaData;
 		}
 		
 		// Merge
 		/// <summary>Merges all tags from the given metadata into this metadata.</summary>
-		public void Merge(MetaData AMetaData)
+		public void Merge(MetaData metaData)
 		{
-			Tags.AddOrUpdateRange(AMetaData.Tags);
+			Tags.AddOrUpdateRange(metaData.Tags);
 		}
 		
 		// Inherit
 		/// <summary>Inherits all dynamic tags from the given metadata into this metadata.</summary>
-		public void Inherit(MetaData AMetaData)
+		public void Inherit(MetaData metaData)
 		{
 			#if USEHASHTABLEFORTAGS
-			foreach (Tag LTag in AMetaData.Tags)
-				if (!LTag.IsStatic)
-					Tags.Inherit(LTag);
+			foreach (Tag tag in AMetaData.Tags)
+				if (!tag.IsStatic)
+					Tags.Inherit(tag);
 			#else
-			Tag LTag;
-			for (int LIndex = 0; LIndex < AMetaData.Tags.Count; LIndex++)
+			Tag tag;
+			for (int index = 0; index < metaData.Tags.Count; index++)
 			{
-				LTag = AMetaData.Tags[LIndex];
-				if (!LTag.IsStatic)
-					Tags.Inherit(LTag);
+				tag = metaData.Tags[index];
+				if (!tag.IsStatic)
+					Tags.Inherit(tag);
 			}
 			#endif
 		}
 		
 		// Join
 		/// <summary>Joins each dynamic tag from the given metadata to the tags for this metadata using copy semantics.</summary>
-		public void Join(MetaData AMetaData)
+		public void Join(MetaData metaData)
 		{
 			#if USEHASHTABLEFORTAGS
-			foreach (Tag LTag in AMetaData.Tags)
-				if (!LTag.IsStatic)
-					Tags.Join(LTag);
+			foreach (Tag tag in AMetaData.Tags)
+				if (!tag.IsStatic)
+					Tags.Join(tag);
 			#else
-			Tag LTag;
-			for (int LIndex = 0; LIndex < AMetaData.Tags.Count; LIndex++)
+			Tag tag;
+			for (int index = 0; index < metaData.Tags.Count; index++)
 			{
-				LTag = AMetaData.Tags[LIndex];
-				if (!LTag.IsStatic)
-					Tags.Join(LTag);
+				tag = metaData.Tags[index];
+				if (!tag.IsStatic)
+					Tags.Join(tag);
 			}
 			#endif
 		}
 		
 		// JoinInherit
 		/// <summary>Joins each dynamic tag from the given metadata to the tags for this metadata using reference semantics.</summary>
-		public void JoinInherit(MetaData AMetaData)
+		public void JoinInherit(MetaData metaData)
 		{
 			#if USEHASHTABLEFORTAGS
-			foreach (Tag LTag in AMetaData.Tags)
-				if (!LTag.IsStatic)
-					Tags.JoinInherit(LTag);
+			foreach (Tag tag in AMetaData.Tags)
+				if (!tag.IsStatic)
+					Tags.JoinInherit(tag);
 			#else
-			Tag LTag;
-			for (int LIndex = 0; LIndex < AMetaData.Tags.Count; LIndex++)
+			Tag tag;
+			for (int index = 0; index < metaData.Tags.Count; index++)
 			{
-				LTag = AMetaData.Tags[LIndex];
-				if (!LTag.IsStatic)
-					Tags.JoinInherit(LTag);
+				tag = metaData.Tags[index];
+				if (!tag.IsStatic)
+					Tags.JoinInherit(tag);
 			}
 			#endif
 		}
 		
 		/// <summary>Retrives the tag of the given name from the given metadata, if the tag exists. Otherwise, null is returned.</summary>
-		public static Tag GetTag(MetaData AMetaData, string ATagName)
+		public static Tag GetTag(MetaData metaData, string tagName)
 		{
-			return AMetaData == null ? Tag.None : AMetaData.Tags.GetTag(ATagName);
+			return metaData == null ? Tag.None : metaData.Tags.GetTag(tagName);
 		}
 		
 		/// <summary>Removes the tag of the given name from the given metadata and returns it, if it exists. Otherwise, null is returned.</summary>
-		public static Tag RemoveTag(MetaData AMetaData, string ATagName)
+		public static Tag RemoveTag(MetaData metaData, string tagName)
 		{
-			return AMetaData == null ? Tag.None : AMetaData.Tags.RemoveTag(ATagName);
+			return metaData == null ? Tag.None : metaData.Tags.RemoveTag(tagName);
 		}
 		
 		/// <summary>Retrieves the value of the given tag from the given metadata, defaulted to the value of the default tag, or the given default value, if neither tag exists.</summary>
-		public static string GetTag(MetaData AMetaData, string ATagName, string ADefaultTagName, string ADefaultValue)
+		public static string GetTag(MetaData metaData, string tagName, string defaultTagName, string defaultValue)
 		{
-			if (AMetaData == null)
-				return ADefaultValue;
+			if (metaData == null)
+				return defaultValue;
 			else
-				return AMetaData.Tags.GetTagValue(ATagName, ADefaultTagName, ADefaultValue);
+				return metaData.Tags.GetTagValue(tagName, defaultTagName, defaultValue);
 		}
 		
 		/// <summary>Retrieves the value of the given tag from the given metadata, defaulted to the given default value if no tag of that name exists.</summary>
-		public static string GetTag(MetaData AMetaData, string ATagName, string ADefaultValue)
+		public static string GetTag(MetaData metaData, string tagName, string defaultValue)
 		{
-			if (AMetaData == null)
-				return ADefaultValue;
+			if (metaData == null)
+				return defaultValue;
 			else
-				return AMetaData.Tags.GetTagValue(ATagName, ADefaultValue);
+				return metaData.Tags.GetTagValue(tagName, defaultValue);
 		}
     }
 
@@ -1587,21 +1587,21 @@ namespace Alphora.Dataphor.DAE.Language.D4
     public class AlterMetaData : System.Object
     {
 		// Comment will be null if the comment is not being altered
-		private string FComment;
+		private string _comment;
 		public string Comment
 		{
-			get { return FComment; }
-			set { FComment = value; }
+			get { return _comment; }
+			set { _comment = value; }
 		}
 		
-		private Tags FCreateTags = new Tags();
-		public Tags CreateTags { get { return FCreateTags; } }
+		private Tags _createTags = new Tags();
+		public Tags CreateTags { get { return _createTags; } }
 		
-		private Tags FAlterTags = new Tags();
-		public Tags AlterTags { get { return FAlterTags; } }
+		private Tags _alterTags = new Tags();
+		public Tags AlterTags { get { return _alterTags; } }
 		
-		private Tags FDropTags = new Tags();
-		public Tags DropTags { get { return FDropTags; } }
+		private Tags _dropTags = new Tags();
+		public Tags DropTags { get { return _dropTags; } }
    }
 }
 

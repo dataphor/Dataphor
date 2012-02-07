@@ -18,10 +18,15 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		protected override DependencyObject GetContainerForItemOverride()
 		{
-			var LItem = new NotebookItem();
+			var item = new NotebookItem();
 			if (ItemContainerStyle != null)
-				LItem.Style = ItemContainerStyle;
-			return LItem;
+				item.Style = ItemContainerStyle;
+			return item;
+		}
+
+		protected override bool IsItemItsOwnContainerOverride(object item)
+		{
+			return item is NotebookItem;
 		}
 
 		protected override void OnItemsChanged(NotifyCollectionChangedEventArgs e)
@@ -37,7 +42,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 
 		/// <summary> Handles selection change and sets the current content property to the selected item container's content. </summary>
-		private void OnSelectionChanged(object ASender, SelectionChangedEventArgs AArgs)
+		private void OnSelectionChanged(object sender, SelectionChangedEventArgs args)
 		{
 			TargetSelectedIndex = SelectedIndex;
 			UpdateSelection();
@@ -47,14 +52,14 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			if (Items.Count > 0 && SelectedIndex >= 0 && SelectedIndex < Items.Count)
 			{
-				var LContainer = Items[SelectedIndex] as NotebookItem;
-				var LNewContent = LContainer != null ? LContainer.Content : null;
+				var container = Items[SelectedIndex] as NotebookItem;
+				var newContent = container != null ? container.Content : null;
 				ClearValue(SelectedContentProperty);
-				if (LContainer != null)
+				if (container != null)
 				{
-					var LBinding = new Binding("Content");
-					LBinding.Source = LContainer;
-					SetBinding(SelectedContentProperty, LBinding);
+					var binding = new Binding("Content");
+					binding.Source = container;
+					SetBinding(SelectedContentProperty, binding);
 				}
 			}
 			else

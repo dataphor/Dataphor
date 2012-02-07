@@ -12,11 +12,11 @@ namespace Alphora.Dataphor.DAE.Connection.ODBC
 	
 	public class ODBCConnection : DotNetConnection
 	{
-		public ODBCConnection(string AConnection) : base(AConnection) {}
+		public ODBCConnection(string connection) : base(connection) {}
 		
-		protected override IDbConnection CreateDbConnection(string AConnectionString)
+		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			return new OdbcConnection(AConnectionString);
+			return new OdbcConnection(connectionString);
 		}
 		
 		protected override SQLCommand InternalCreateCommand()
@@ -27,95 +27,95 @@ namespace Alphora.Dataphor.DAE.Connection.ODBC
 	
 	public class ODBCCommand : DotNetCommand
 	{
-		public ODBCCommand(ODBCConnection AConnection, IDbCommand ACommand) : base(AConnection, ACommand) 
+		public ODBCCommand(ODBCConnection connection, IDbCommand command) : base(connection, command) 
 		{
-			FUseOrdinalBinding = true;
+			_useOrdinalBinding = true;
 		}
 		
 		protected override void PrepareParameters()
 		{
 			// Prepare parameters
-			SQLParameter LParameter;
-			for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+			SQLParameter parameter;
+			for (int index = 0; index < _parameterIndexes.Length; index++)
 			{
-				LParameter = Parameters[FParameterIndexes[LIndex]];
-				OdbcParameter LODBCParameter = (OdbcParameter)FCommand.CreateParameter();
-				LODBCParameter.ParameterName = String.Format("@{0}", LParameter.Name);
-				switch (LParameter.Direction)
+				parameter = Parameters[_parameterIndexes[index]];
+				OdbcParameter oDBCParameter = (OdbcParameter)_command.CreateParameter();
+				oDBCParameter.ParameterName = String.Format("@{0}", parameter.Name);
+				switch (parameter.Direction)
 				{
-					case SQLDirection.Out : LODBCParameter.Direction = System.Data.ParameterDirection.Output; break;
-					case SQLDirection.InOut : LODBCParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
-					case SQLDirection.Result : LODBCParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
-					default : LODBCParameter.Direction = System.Data.ParameterDirection.Input; break;
+					case SQLDirection.Out : oDBCParameter.Direction = System.Data.ParameterDirection.Output; break;
+					case SQLDirection.InOut : oDBCParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
+					case SQLDirection.Result : oDBCParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
+					default : oDBCParameter.Direction = System.Data.ParameterDirection.Input; break;
 				}
 
-				if (LParameter.Type is SQLStringType)
+				if (parameter.Type is SQLStringType)
 				{
-					LODBCParameter.OdbcType = OdbcType.VarChar;
-					LODBCParameter.Size = ((SQLStringType)LParameter.Type).Length;
+					oDBCParameter.OdbcType = OdbcType.VarChar;
+					oDBCParameter.Size = ((SQLStringType)parameter.Type).Length;
 				}
-				else if (LParameter.Type is SQLBooleanType)
+				else if (parameter.Type is SQLBooleanType)
 				{
-					LODBCParameter.OdbcType = OdbcType.Bit;
+					oDBCParameter.OdbcType = OdbcType.Bit;
 				}
-				else if (LParameter.Type is SQLIntegerType)
+				else if (parameter.Type is SQLIntegerType)
 				{
-					switch (((SQLIntegerType)LParameter.Type).ByteCount)
+					switch (((SQLIntegerType)parameter.Type).ByteCount)
 					{
-						case 1 : LODBCParameter.OdbcType = OdbcType.TinyInt; break;
-						case 2 : LODBCParameter.OdbcType = OdbcType.SmallInt; break;
-						case 8 : LODBCParameter.OdbcType = OdbcType.BigInt; break;
-						default : LODBCParameter.OdbcType = OdbcType.Int; break;
+						case 1 : oDBCParameter.OdbcType = OdbcType.TinyInt; break;
+						case 2 : oDBCParameter.OdbcType = OdbcType.SmallInt; break;
+						case 8 : oDBCParameter.OdbcType = OdbcType.BigInt; break;
+						default : oDBCParameter.OdbcType = OdbcType.Int; break;
 					}
 				}
-				else if (LParameter.Type is SQLNumericType)
+				else if (parameter.Type is SQLNumericType)
 				{
-					SQLNumericType LType = (SQLNumericType)LParameter.Type;
-					LODBCParameter.OdbcType = OdbcType.Decimal; // could not be decimal because of issue with DB2/400
-					LODBCParameter.Scale = LType.Scale;
-					LODBCParameter.Precision = LType.Precision;
+					SQLNumericType type = (SQLNumericType)parameter.Type;
+					oDBCParameter.OdbcType = OdbcType.Decimal; // could not be decimal because of issue with DB2/400
+					oDBCParameter.Scale = type.Scale;
+					oDBCParameter.Precision = type.Precision;
 				}
-				else if (LParameter.Type is SQLFloatType)
+				else if (parameter.Type is SQLFloatType)
 				{
-					SQLFloatType LType = (SQLFloatType)LParameter.Type;
-					if (LType.Width == 1)
-						LODBCParameter.OdbcType = OdbcType.Real;
+					SQLFloatType type = (SQLFloatType)parameter.Type;
+					if (type.Width == 1)
+						oDBCParameter.OdbcType = OdbcType.Real;
 					else
-						LODBCParameter.OdbcType = OdbcType.Double;
+						oDBCParameter.OdbcType = OdbcType.Double;
 				}
-				else if (LParameter.Type is SQLBinaryType)
+				else if (parameter.Type is SQLBinaryType)
 				{
-					LODBCParameter.OdbcType = OdbcType.Image;
+					oDBCParameter.OdbcType = OdbcType.Image;
 				}
-				else if (LParameter.Type is SQLTextType)
+				else if (parameter.Type is SQLTextType)
 				{
-					LODBCParameter.OdbcType = OdbcType.Text;
+					oDBCParameter.OdbcType = OdbcType.Text;
 				}
-				else if (LParameter.Type is SQLDateTimeType)
+				else if (parameter.Type is SQLDateTimeType)
 				{
-					LODBCParameter.OdbcType = OdbcType.DateTime;
+					oDBCParameter.OdbcType = OdbcType.DateTime;
 				}
-				else if (LParameter.Type is SQLDateType)
+				else if (parameter.Type is SQLDateType)
 				{
-					LODBCParameter.OdbcType = OdbcType.Date;
+					oDBCParameter.OdbcType = OdbcType.Date;
 				}
-				else if (LParameter.Type is SQLTimeType)
+				else if (parameter.Type is SQLTimeType)
 				{
-					LODBCParameter.OdbcType = OdbcType.Time;
+					oDBCParameter.OdbcType = OdbcType.Time;
 				}
-				else if (LParameter.Type is SQLGuidType)
+				else if (parameter.Type is SQLGuidType)
 				{
-					LODBCParameter.OdbcType = OdbcType.UniqueIdentifier;
+					oDBCParameter.OdbcType = OdbcType.UniqueIdentifier;
 				}
-				else if (LParameter.Type is SQLMoneyType)
+				else if (parameter.Type is SQLMoneyType)
 				{
-					LODBCParameter.OdbcType = OdbcType.Decimal;
-					LODBCParameter.Scale = 28;
-					LODBCParameter.Precision = 8;
+					oDBCParameter.OdbcType = OdbcType.Decimal;
+					oDBCParameter.Scale = 28;
+					oDBCParameter.Precision = 8;
 				}
 				else
-					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-				FCommand.Parameters.Add(LODBCParameter);
+					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+				_command.Parameters.Add(oDBCParameter);
 			}
 		}
 	}

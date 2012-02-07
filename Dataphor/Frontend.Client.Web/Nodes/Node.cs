@@ -13,13 +13,13 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public Node()
 		{
-			FID = Session.GenerateID();
+			_iD = Session.GenerateID();
 		}
 
-		private string FID;
+		private string _iD;
 		public string ID
 		{
-			get { return FID; }
+			get { return _iD; }
 		}
 
 		protected Web.Session WebSession

@@ -24,15 +24,15 @@ namespace Alphora.Dataphor.Dataphoria
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
-        /// <param name="ADisposing">true if managed resources should be disposed; otherwise, false.</param>
-		protected override void Dispose(bool ADisposing)
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+		protected override void Dispose(bool disposing)
 		{
 			if (!IsDisposed)
 			{
 				DisposeStatusBar();
 				FStatusHighlightTimer.Dispose();
 				FStatusHighlightTimer = null;
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
@@ -46,17 +46,17 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 		}
 
-		public void SetTooltip(string ATipText)
+		public void SetTooltip(string tipText)
 		{			    
-            FToolTip.SetToolTip(FStatusStrip, ATipText);
+            FToolTip.SetToolTip(FStatusStrip, tipText);
 		}
 
-		public void SetStatus(string AStatus)
+		public void SetStatus(string status)
 		{
-			if (FStatusLabel.Text != AStatus)
+			if (FStatusLabel.Text != status)
 			{
-				FStatusLabel.Text = AStatus;
-				if (AStatus != String.Empty)
+				FStatusLabel.Text = status;
+				if (status != String.Empty)
 				{
 					FStatusLabel.BackColor = System.Drawing.SystemColors.Highlight;
 					FStatusLabel.ForeColor = System.Drawing.SystemColors.HighlightText;
@@ -65,7 +65,7 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		private void StatusHighlightTimerTick(object ASender, EventArgs AArgs)
+		private void StatusHighlightTimerTick(object sender, EventArgs args)
 		{
 			if (FStatusLabel != null)
 			{
@@ -75,74 +75,74 @@ namespace Alphora.Dataphor.Dataphoria
 			FStatusHighlightTimer.Stop();
 		}
 
-		public virtual void MergeStatusBarWith(StatusStrip AStatusBar) 
+		public virtual void MergeStatusBarWith(StatusStrip statusBar) 
 		{
-            ToolStripManager.Merge(FStatusStrip, AStatusBar);
+            ToolStripManager.Merge(FStatusStrip, statusBar);
             FStatusStrip.Visible = false;
 		}
 		
 		#endregion
 
-		protected override void OnClosed(EventArgs AArgs)
+		protected override void OnClosed(EventArgs args)
 		{
 			if (MdiParent != null)
 				MdiParent.Focus();
-			base.OnClosed(AArgs);
+			base.OnClosed(args);
 		}
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
 			// do nothing
 		}
 
-		protected override void OnPaintBackground(PaintEventArgs AArgs)
+		protected override void OnPaintBackground(PaintEventArgs args)
 		{
 			if (DesignMode)
-				base.OnPaintBackground(AArgs);
+				base.OnPaintBackground(args);
 			// else do nothing
 		}
 
 		#region Key Handling
 
-		protected override bool ProcessDialogKey(Keys AKeyData)
+		protected override bool ProcessDialogKey(Keys keyData)
 		{
-			if (((AKeyData & Keys.KeyCode) == Keys.F4) && ((AKeyData & Keys.Modifiers) == Keys.Control))
+			if (((keyData & Keys.KeyCode) == Keys.F4) && ((keyData & Keys.Modifiers) == Keys.Control))
 			{
 				Close();
 				return true;
 			}
 			else
-				return base.ProcessDialogKey(AKeyData);
+				return base.ProcessDialogKey(keyData);
 		}
 
-		protected override bool ProcessCmdKey(ref Message AMessage, Keys AKeyData)
+		protected override bool ProcessCmdKey(ref Message message, Keys keyData)
 		{
 			// HACK: This works around the issue where keys are not treated as handled when an exception is thrown
-			bool LResult;
+			bool result;
 			try
 			{
-				LResult = base.ProcessCmdKey(ref AMessage, AKeyData);
+				result = base.ProcessCmdKey(ref message, keyData);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Program.HandleException(LException);
+				Program.HandleException(exception);
 				return true;
 			}
-			return LResult;
+			return result;
 		}
 
-		protected override bool ProcessMnemonic(char AKey)
+		protected override bool ProcessMnemonic(char key)
 		{
 			try
 			{
 				if (CanSelect && ContainsFocus)
-					return base.ProcessMnemonic(AKey);
+					return base.ProcessMnemonic(key);
 				else
 					return false;
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-                Program.HandleException(LException);
+                Program.HandleException(exception);
 				return true;
 			}
 		}

@@ -38,10 +38,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                 "type", "use", "variance", "views", "when", "while", "work", "write", "xor"
             };
 
-        protected string FHostName = String.Empty;
-        protected bool FShouldEnsureOperators = true;
+        protected string _hostName = String.Empty;
+        protected bool _shouldEnsureOperators = true;
 
-        public OracleDevice(int AID, string AName) : base(AID, AName)
+        public OracleDevice(int iD, string name) : base(iD, name)
         {
             UseStatementTerminator = false;
             SupportsNestedCorrelation = false;
@@ -50,90 +50,90 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
         public string HostName
         {
-            get { return FHostName; }
-            set { FHostName = value == null ? String.Empty : value; }
+            get { return _hostName; }
+            set { _hostName = value == null ? String.Empty : value; }
         }
 
         /// <value>Indicates whether the device should create the DAE support operators if they do not already exist.</value>
         /// <remarks>The value of this property is only valid if IsMSSQL70 is false.</remarks>
         public bool ShouldEnsureOperators
         {
-            get { return FShouldEnsureOperators; }
-            set { FShouldEnsureOperators = value; }
+            get { return _shouldEnsureOperators; }
+            set { _shouldEnsureOperators = value; }
         }
 
         protected override void SetMaxIdentifierLength()
         {
-            FMaxIdentifierLength = 30; // this is the max identifier length in Oracle all the time
+            _maxIdentifierLength = 30; // this is the max identifier length in Oracle all the time
         }
 
-        protected override void InternalStarted(ServerProcess AProcess)
+        protected override void InternalStarted(ServerProcess process)
         {
-            base.InternalStarted(AProcess);
+            base.InternalStarted(process);
 
             if (ShouldEnsureOperators)
-                EnsureOperators(AProcess);
+                EnsureOperators(process);
         }
 
-        protected override void RegisterSystemObjectMaps(ServerProcess AProcess)
+        protected override void RegisterSystemObjectMaps(ServerProcess process)
         {
-            base.RegisterSystemObjectMaps(AProcess);
+            base.RegisterSystemObjectMaps(process);
 
             // Perform system type and operator mapping registration
-            var LResourceManager = new ResourceManager("SystemCatalog", GetType().Assembly);
+            var resourceManager = new ResourceManager("SystemCatalog", GetType().Assembly);
 #if USEISTRING
-			RunScript(AProcess, String.Format(LResourceManager.GetString("SystemObjectMaps"), Name, IsCaseSensitive.ToString().ToLower()));
+			RunScript(AProcess, String.Format(resourceManager.GetString("SystemObjectMaps"), Name, IsCaseSensitive.ToString().ToLower()));
 #else
-            using (Stream LStream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.d4"))
+            using (Stream stream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.d4"))
             {
-                RunScript(AProcess, String.Format(new StreamReader(LStream).ReadToEnd(), Name, "false"));
+                RunScript(process, String.Format(new StreamReader(stream).ReadToEnd(), Name, "false"));
             }
             //RunScript(AProcess, String.Format(LResourceManager.GetString("SystemObjectMaps"), Name, "false"));
 #endif
         }
 
-        protected void EnsureOperators(ServerProcess AProcess)
+        protected void EnsureOperators(ServerProcess process)
         {
             // no access
-            var LDeviceSession = (SQLDeviceSession)Connect(AProcess, AProcess.ServerSession.SessionInfo);
+            var deviceSession = (SQLDeviceSession)Connect(process, process.ServerSession.SessionInfo);
             try
             {
-                SQLConnection LConnection = LDeviceSession.Connection;
-                if (!LConnection.InTransaction)
-                    LConnection.BeginTransaction(SQLIsolationLevel.Serializable);
+                SQLConnection connection = deviceSession.Connection;
+                if (!connection.InTransaction)
+                    connection.BeginTransaction(SQLIsolationLevel.Serializable);
                 try
                 {
-                    using (SQLCommand LCommand = LConnection.CreateCommand(false))
+                    using (SQLCommand command = connection.CreateCommand(false))
                     {
-                        using (Stream LStream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.sql"))
+                        using (Stream stream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.sql"))
                         {
                             foreach (
-                                string LBatch in SQLUtility.ProcessBatches(new StreamReader(LStream).ReadToEnd(), @"\"))
+                                string batch in SQLUtility.ProcessBatches(new StreamReader(stream).ReadToEnd(), @"\"))
                             {
-                                LCommand.Statement = LBatch;
-                                LCommand.Execute();
+                                command.Statement = batch;
+                                command.Execute();
                             }
                         }
                     }
-                    LConnection.CommitTransaction();
+                    connection.CommitTransaction();
                 }
                 catch
                 {
-                    LConnection.RollbackTransaction();
+                    connection.RollbackTransaction();
                     throw;
                 }
             }
             finally
             {
-                Disconnect(LDeviceSession);
+                Disconnect(deviceSession);
             }
 
         }
 
-        protected override DeviceSession InternalConnect(ServerProcess AServerProcess,
-                                                         DeviceSessionInfo ADeviceSessionInfo)
+        protected override DeviceSession InternalConnect(ServerProcess serverProcess,
+                                                         DeviceSessionInfo deviceSessionInfo)
         {
-            return new OracleDeviceSession(this, AServerProcess, ADeviceSessionInfo);
+            return new OracleDeviceSession(this, serverProcess, deviceSessionInfo);
         }
 
         // Emitter
@@ -145,10 +145,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
         // HostName
 
         // ShouldIncludeColumn
-        public override bool ShouldIncludeColumn(Plan APlan, string ATableName, string AColumnName,
-                                                 string ADomainName)
+        public override bool ShouldIncludeColumn(Plan plan, string tableName, string columnName,
+                                                 string domainName)
         {
-            switch (ADomainName.ToLower())
+            switch (domainName.ToLower())
             {
                 case "smallint":
                 case "int":
@@ -174,55 +174,55 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
         }
 
         // FindScalarType
-        public override ScalarType FindScalarType(Plan APlan, string ADomainName, int ALength, MetaData AMetaData)
+        public override ScalarType FindScalarType(Plan plan, string domainName, int length, MetaData metaData)
         {
-            switch (ADomainName.ToLower())
+            switch (domainName.ToLower())
             {
                 case "smallint":
-                    return APlan.DataTypes.SystemShort;
+                    return plan.DataTypes.SystemShort;
                 case "int":
                 case "integer":
                 case "number":
-                    return APlan.DataTypes.SystemInteger;
+                    return plan.DataTypes.SystemInteger;
                 case "bigint":
-                    return APlan.DataTypes.SystemLong;
+                    return plan.DataTypes.SystemLong;
                 case "decimal":
                 case "numeric":
                 case "float":
-                    return APlan.DataTypes.SystemDecimal;
+                    return plan.DataTypes.SystemDecimal;
                 case "date":
-                    return APlan.DataTypes.SystemDateTime;
+                    return plan.DataTypes.SystemDateTime;
                 case "money":
-                    return APlan.DataTypes.SystemMoney;
+                    return plan.DataTypes.SystemMoney;
                 case "char":
                 case "varchar":
                 case "varchar2":
                 case "nchar":
                 case "nvarchar":
-                    AMetaData.Tags.Add(new Tag("Storage.Length", ALength.ToString()));
+                    metaData.Tags.Add(new Tag("Storage.Length", length.ToString()));
 #if USEISTRING
 					return IsCaseSensitive ? APlan.DataTypes.SystemString : APlan.DataTypes.SystemIString;
 #else
-                    return APlan.DataTypes.SystemString;
+                    return plan.DataTypes.SystemString;
 #endif
 #if USEISTRING
 				case "clob": return (ScalarType)(IsCaseSensitive ? APlan.Catalog[CSQLTextScalarType] : APlan.Catalog[CSQLITextScalarType]);
 #else
                 case "clob":
-                    return (ScalarType)Compiler.ResolveCatalogIdentifier(APlan, CSQLTextScalarType, true);
+                    return (ScalarType)Compiler.ResolveCatalogIdentifier(plan, SQLTextScalarType, true);
 #endif
                 case "blob":
-                    return APlan.DataTypes.SystemBinary;
+                    return plan.DataTypes.SystemBinary;
                 default:
-                    throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);
+                    throw new SQLException(SQLException.Codes.UnsupportedImportType, domainName);
             }
         }
 
-        protected override bool IsReservedWord(string AWord)
+        protected override bool IsReservedWord(string word)
         {
             for (int i = 0; i < FOracleReservedWords.Length; i++)
             {
-                if (AWord.ToUpper() == FOracleReservedWords[i].ToUpper())
+                if (word.ToUpper() == FOracleReservedWords[i].ToUpper())
                     return true;
             }
             return false;
@@ -233,7 +233,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
             return new TableSpecifier(new TableExpression("DUAL"));
         }
 
-        protected override string GetDeviceTablesExpression(TableVar ATableVar)
+        protected override string GetDeviceTablesExpression(TableVar tableVar)
         {
             return
                 String.Format
@@ -261,13 +261,13 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                         :
                             DeviceTablesExpression,
                     Schema == String.Empty ? String.Empty : String.Format("and c.owner = '{0}'", Schema),
-                    ATableVar == null
+                    tableVar == null
                         ? String.Empty
-                        : String.Format("and c.table_name = '{0}'", ToSQLIdentifier(ATableVar).ToUpper())
+                        : String.Format("and c.table_name = '{0}'", ToSQLIdentifier(tableVar).ToUpper())
                     );
         }
 
-        protected override string GetDeviceIndexesExpression(TableVar ATableVar)
+        protected override string GetDeviceIndexesExpression(TableVar tableVar)
         {
             return
                 String.Format
@@ -294,13 +294,13 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                         :
                             DeviceIndexesExpression,
                     Schema == String.Empty ? String.Empty : String.Format("and i.table_owner = '{0}'", Schema),
-                    ATableVar == null
+                    tableVar == null
                         ? String.Empty
-                        : String.Format("and c.table_name = '{0}'", ToSQLIdentifier(ATableVar).ToUpper())
+                        : String.Format("and c.table_name = '{0}'", ToSQLIdentifier(tableVar).ToUpper())
                     );
         }
 
-        protected override string GetDeviceForeignKeysExpression(TableVar ATableVar)
+        protected override string GetDeviceForeignKeysExpression(TableVar tableVar)
         {
             return
                 String.Format
@@ -332,17 +332,17 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                         :
                             DeviceForeignKeysExpression,
                     Schema == String.Empty ? String.Empty : String.Format("and c.owner = '{0}'", Schema),
-                    ATableVar == null
+                    tableVar == null
                         ? String.Empty
-                        : String.Format("and c.table_name = '{0}'", ToSQLIdentifier(ATableVar).ToUpper())
+                        : String.Format("and c.table_name = '{0}'", ToSQLIdentifier(tableVar).ToUpper())
                     );
         }
     }
 
     public class OracleDeviceSession : SQLDeviceSession
     {
-        public OracleDeviceSession(SQLDevice ADevice, ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo)
-            : base(ADevice, AServerProcess, ADeviceSessionInfo)
+        public OracleDeviceSession(SQLDevice device, ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo)
+            : base(device, serverProcess, deviceSessionInfo)
         {
         }
 
@@ -363,7 +363,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
             // OracleODBCConnectionStringBuilder
             // OracleOLEDConnectionStringBuilder
 
-            var LClassDefinition =
+            var classDefinition =
                 new ClassDefinition
                     (
                     Device.ConnectionClass == String.Empty
@@ -376,7 +376,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 #endif
                     Device.ConnectionClass
                     );
-            var LBuilderClass =
+            var builderClass =
                 new ClassDefinition
                     (
                     Device.ConnectionStringBuilderClass == String.Empty
@@ -389,22 +389,22 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 #endif
                     Device.ConnectionStringBuilderClass
                     );
-            var LConnectionStringBuilder =
+            var connectionStringBuilder =
                 (ConnectionStringBuilder)
-                ServerProcess.CreateObject(LBuilderClass, new object[] {});
+                ServerProcess.CreateObject(builderClass, new object[] {});
 
-            var LTags = new Tags();
-            LTags.AddOrUpdate("HostName", Device.HostName);
-            LTags.AddOrUpdate("UserName", DeviceSessionInfo.UserName);
-            LTags.AddOrUpdate("Password", DeviceSessionInfo.Password);
+            var tags = new Tags();
+            tags.AddOrUpdate("HostName", Device.HostName);
+            tags.AddOrUpdate("UserName", DeviceSessionInfo.UserName);
+            tags.AddOrUpdate("Password", DeviceSessionInfo.Password);
 
-            LTags = LConnectionStringBuilder.Map(LTags);
-            Device.GetConnectionParameters(LTags, DeviceSessionInfo);
-            string LConnectionString = SQLDevice.TagsToString(LTags);
+            tags = connectionStringBuilder.Map(tags);
+            Device.GetConnectionParameters(tags, DeviceSessionInfo);
+            string connectionString = SQLDevice.TagsToString(tags);
 
             return
                 (SQLConnection)
-                ServerProcess.CreateObject(LClassDefinition, new object[] {LConnectionString});
+                ServerProcess.CreateObject(classDefinition, new object[] {connectionString});
         }
     }
 }

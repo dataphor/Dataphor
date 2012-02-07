@@ -15,38 +15,38 @@ namespace Alphora.Dataphor.Dataphoria
 			InitializeComponent();
 		}
 
-		private IDataphoria FDataphoria;
+		private IDataphoria _dataphoria;
 		public IDataphoria Dataphoria
 		{
-			get { return FDataphoria; }
+			get { return _dataphoria; }
 			set
 			{
-				if (FDataphoria != value)
+				if (_dataphoria != value)
 				{
-					if (FDataphoria != null)
+					if (_dataphoria != null)
 					{
-						FDataphoria.Disconnected -= new EventHandler(FDataphoria_Disconnected);
-						FDataphoria.Connected -= new EventHandler(FDataphoria_Connected);
-						FDataphoria.Debugger.PropertyChanged -= Debugger_PropertyChanged;
+						_dataphoria.Disconnected -= new EventHandler(FDataphoria_Disconnected);
+						_dataphoria.Connected -= new EventHandler(FDataphoria_Connected);
+						_dataphoria.Debugger.PropertyChanged -= Debugger_PropertyChanged;
 					}
-					FDataphoria = value;
-					if (FDataphoria != null)
+					_dataphoria = value;
+					if (_dataphoria != null)
 					{
-						FDataphoria.Disconnected += new EventHandler(FDataphoria_Disconnected);
-						FDataphoria.Connected += new EventHandler(FDataphoria_Connected);
-						FDataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
-						if (FDataphoria.IsConnected)
+						_dataphoria.Disconnected += new EventHandler(FDataphoria_Disconnected);
+						_dataphoria.Connected += new EventHandler(FDataphoria_Connected);
+						_dataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
+						if (_dataphoria.IsConnected)
 							FDataphoria_Connected(this, EventArgs.Empty);
 					}
 				}
 			}
 		}
 
-		private bool FSupressDebuggerChange;
+		private bool _supressDebuggerChange;
 		
-		private void Debugger_PropertyChanged(object ASender, string[] APropertyNames)
+		private void Debugger_PropertyChanged(object sender, string[] propertyNames)
 		{
-			if (!FSupressDebuggerChange && Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "IsStarted" || AItem == "IsPaused"; }))
+			if (!_supressDebuggerChange && Array.Exists<string>(propertyNames, (string AItem) => { return AItem == "IsStarted" || AItem == "IsPaused"; }))
 				RefreshDataView();
 		}
 
@@ -58,23 +58,23 @@ namespace Alphora.Dataphor.Dataphoria
 				FProcessDataView.Session = null;
 				UpdateButtonsEnabled();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FDataphoria.Warnings.AppendError(null, LException, false);
+				_dataphoria.Warnings.AppendError(null, exception, false);
 			}
 		}
 		
 		private void FDataphoria_Connected(object sender, EventArgs e)
 		{
-			FProcessDataView.Session = FDataphoria.DataSession;
+			FProcessDataView.Session = _dataphoria.DataSession;
 			try
 			{
 				FProcessDataView.Open();
 				UpdateButtonsEnabled();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FDataphoria.Warnings.AppendError(null, LException, false);
+				_dataphoria.Warnings.AppendError(null, exception, false);
 			}
 		}
 
@@ -82,14 +82,14 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			if (FProcessDataView.Active && !FProcessDataView.IsEmpty())
 			{
-				FSupressDebuggerChange = true;
+				_supressDebuggerChange = true;
 				try
 				{
-					FDataphoria.Debugger.AttachProcess(FProcessDataView["ID"].AsInt32);
+					_dataphoria.Debugger.AttachProcess(FProcessDataView["ID"].AsInt32);
 				}
 				finally
 				{
-					FSupressDebuggerChange = false;
+					_supressDebuggerChange = false;
 				}
 				RefreshDataView();
 			}
@@ -99,14 +99,14 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			if (FProcessDataView.Active && !FProcessDataView.IsEmpty())
 			{
-				FSupressDebuggerChange = true;
+				_supressDebuggerChange = true;
 				try
 				{
-					FDataphoria.Debugger.DetachProcess(FProcessDataView["ID"].AsInt32);
+					_dataphoria.Debugger.DetachProcess(FProcessDataView["ID"].AsInt32);
 				}
 				finally
 				{
-					FSupressDebuggerChange = false;
+					_supressDebuggerChange = false;
 				}
 				RefreshDataView();
 			}
@@ -130,12 +130,12 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void UpdateButtonsEnabled()
 		{
-			var LHasRow = FProcessDataView.Active && !FProcessDataView.IsEmpty();
-			var LIsAttached = LHasRow && (bool)FProcessDataView["IsAttached"];
-			FAttachButton.Enabled = LHasRow && !LIsAttached;
-			FAttachContextMenuItem.Enabled = LHasRow && !LIsAttached;
-			FDetachButton.Enabled = LHasRow && LIsAttached;
-			FDetachContextMenuItem.Enabled = LHasRow && LIsAttached;
+			var hasRow = FProcessDataView.Active && !FProcessDataView.IsEmpty();
+			var isAttached = hasRow && (bool)FProcessDataView["IsAttached"];
+			FAttachButton.Enabled = hasRow && !isAttached;
+			FAttachContextMenuItem.Enabled = hasRow && !isAttached;
+			FDetachButton.Enabled = hasRow && isAttached;
+			FDetachContextMenuItem.Enabled = hasRow && isAttached;
 		}
 	}
 }

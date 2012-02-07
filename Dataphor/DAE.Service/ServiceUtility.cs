@@ -12,92 +12,92 @@ namespace Alphora.Dataphor.DAE.Service
 	public static class ServiceUtility
 	{
 		// Do not localize
-        public const string CEventLogSource = "Dataphor Server";
-		public const string CServiceStartModeRegName = "Start";
-		public const string CServiceAutoStartRegValueName = "Start";
-		public const int CServiceAutoStart = 2;
-		public const int CServiceManualStart = 3;
+        public const string EventLogSource = "Dataphor Server";
+		public const string ServiceStartModeRegName = "Start";
+		public const string ServiceAutoStartRegValueName = "Start";
+		public const int ServiceAutoStart = 2;
+		public const int ServiceManualStart = 3;
 
-		public static string GetServiceName(string AInstanceName)
+		public static string GetServiceName(string instanceName)
 		{
-			return String.Format("Alphora Dataphor ({0}){1}", AInstanceName, AInstanceName == Server.Engine.CDefaultServerName ? " <default instance>" : "");
+			return String.Format("Alphora Dataphor ({0}){1}", instanceName, instanceName == Server.Engine.DefaultServerName ? " <default instance>" : "");
 		}
 
-		private static Installer PrepareInstaller(string AInstanceName)
+		private static Installer PrepareInstaller(string instanceName)
 		{
-			TransactedInstaller LInstaller = new TransactedInstaller();
-			LInstaller.Context = new InstallContext("DAEService.InstallLog", new string[] {});
-			LInstaller.Context.Parameters.Add("InstanceName", AInstanceName);
-			LInstaller.Installers.Add(new ProjectInstaller());
-			return LInstaller;
+			TransactedInstaller installer = new TransactedInstaller();
+			installer.Context = new InstallContext("DAEService.InstallLog", new string[] {});
+			installer.Context.Parameters.Add("InstanceName", instanceName);
+			installer.Installers.Add(new ProjectInstaller());
+			return installer;
 		}
 
-		public static void Install(string AInstanceName)
+		public static void Install(string instanceName)
 		{
-			Installer LInstaller = PrepareInstaller(AInstanceName);
-			LInstaller.Context.Parameters.Add
+			Installer installer = PrepareInstaller(instanceName);
+			installer.Context.Parameters.Add
 			(
 			    "assemblypath", 
 			    typeof(ServiceUtility).Assembly.Location
 			);
-			LInstaller.Install(new HybridDictionary());
+			installer.Install(new HybridDictionary());
 		}
 		
-		public static void Uninstall(string AInstanceName)
+		public static void Uninstall(string instanceName)
 		{
-			Installer LInstaller = PrepareInstaller(AInstanceName);
-			LInstaller.Uninstall(null);
+			Installer installer = PrepareInstaller(instanceName);
+			installer.Uninstall(null);
 		}
 		
-		public static string GetServiceAutoStartRegKeyName(string AInstanceName)
+		public static string GetServiceAutoStartRegKeyName(string instanceName)
 		{
-			return String.Format(@"System\CurrentControlSet\Services\{0}", GetServiceName(AInstanceName));
+			return String.Format(@"System\CurrentControlSet\Services\{0}", GetServiceName(instanceName));
 		}
 		
-		public static bool GetServiceAutoStart(string AInstanceName)
+		public static bool GetServiceAutoStart(string instanceName)
 		{
-			Microsoft.Win32.RegistryKey LRegKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(GetServiceAutoStartRegKeyName(AInstanceName), true);
+			Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(GetServiceAutoStartRegKeyName(instanceName), true);
 
 			// if we didn't find this reg key, the service isn't installed
-			if (LRegKey == null)
+			if (regKey == null)
 				return false;
 				
 			try
 			{
-				object LObject = LRegKey.GetValue(CServiceStartModeRegName);
-				int LServiceStart = (int)(LObject != null ? LObject : CServiceManualStart);
-				return LServiceStart == CServiceAutoStart;
+				object objectValue = regKey.GetValue(ServiceStartModeRegName);
+				int serviceStart = (int)(objectValue != null ? objectValue : ServiceManualStart);
+				return serviceStart == ServiceAutoStart;
 			}
 			finally
 			{
-				LRegKey.Close();
+				regKey.Close();
 			}
 		}
 		
-		public static void SetServiceAutoStart(string AInstanceName, bool AAutoStart)
+		public static void SetServiceAutoStart(string instanceName, bool autoStart)
 		{
-			Microsoft.Win32.RegistryKey LRegKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(GetServiceAutoStartRegKeyName(AInstanceName), true);
+			Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(GetServiceAutoStartRegKeyName(instanceName), true);
 			
-			if (LRegKey == null)
+			if (regKey == null)
 				return;
 				
 			try
 			{
-				LRegKey.SetValue(CServiceAutoStartRegValueName, AAutoStart ? CServiceAutoStart : CServiceManualStart);
+				regKey.SetValue(ServiceAutoStartRegValueName, autoStart ? ServiceAutoStart : ServiceManualStart);
 			}
 			finally
 			{
-				LRegKey.Close();
+				regKey.Close();
 			}
 		}
 		
-		public static ServiceStatus GetServiceStatus(string AInstanceName)
+		public static ServiceStatus GetServiceStatus(string instanceName)
 		{
 			try
 			{
-				ServiceController LServiceController = new ServiceController(GetServiceName(AInstanceName));
+				ServiceController serviceController = new ServiceController(GetServiceName(instanceName));
 
-				switch (LServiceController.Status)
+				switch (serviceController.Status)
 				{
 					case ServiceControllerStatus.Running: return ServiceStatus.Running;
 					case ServiceControllerStatus.Stopped: return ServiceStatus.Stopped;

@@ -40,30 +40,30 @@ namespace Alphora.Dataphor.DAE.Client
 	{
 		public DataView()
 		{
-			FUseBrowse = true;
-			FWriteWhereClause = true;
+			_useBrowse = true;
+			_writeWhereClause = true;
 			UseApplicationTransactions = true;
-			FShouldEnlist = EnlistMode.Default;
+			_shouldEnlist = EnlistMode.Default;
 		}
 
-		public DataView(IContainer AContainer) : this()
+		public DataView(IContainer container) : this()
 		{
-			if (AContainer != null)
-				AContainer.Add(this);
+			if (container != null)
+				container.Add(this);
 		}
 
-		protected override void InternalDispose(bool ADisposing)
+		protected override void InternalDispose(bool disposing)
 		{
 			try
 			{
-				base.InternalDispose(ADisposing);
+				base.InternalDispose(disposing);
 			}
 			finally
 			{
-				if (FDataSource != null)
+				if (_dataSource != null)
 				{
-					FDataSource.Dispose();
-					FDataSource = null;
+					_dataSource.Dispose();
+					_dataSource = null;
 				}
 			}
 		}
@@ -78,57 +78,57 @@ namespace Alphora.Dataphor.DAE.Client
 		// to the newly inserted/updated row. This is the purpose of the UpdatesThroughCursor()
 		// call, which is overridden by this component to return false if this is an A/T server,
 		// or if custom insert/update/delete statements are provided.
-		private DAECursor FATCursor;
+		private DAECursor _aTCursor;
 
 		// This call is used to return the cursor that should be used to perform update
 		// and proposable calls.		
 		protected override DAECursor GetEditCursor()
 		{
-			if (IsApplicationTransactionServer && (FOpenState == DataSetState.Browse))
-				return FATCursor;
+			if (IsApplicationTransactionServer && (_openState == DataSetState.Browse))
+				return _aTCursor;
 			else
-				return FCursor;
+				return _cursor;
 		}
 
 		#endregion
 		
 		#region Master / Detail
 		
-		protected override void MasterRowChanged(DataLink ALInk, DataSet ADataSet, DataField AField)
+		protected override void MasterRowChanged(DataLink lInk, DataSet dataSet, DataField field)
 		{
 			if (Active)
 			{
-				bool LChanged = ADataSet.IsEmpty() != IsEmpty();
-				if (!LChanged && !IsEmpty())
+				bool changed = dataSet.IsEmpty() != IsEmpty();
+				if (!changed && !IsEmpty())
 					for (int i = 0; i < MasterKey.Columns.Count; i++)
 					{
-						string LMasterColumn = MasterKey.Columns[i].Name;
-						string LDetailColumn = DetailKey.Columns[i].Name;
-						LChanged = !FFields.Contains(LDetailColumn) || (ADataSet[LMasterColumn].IsNil != Fields[LDetailColumn].IsNil);
-						if (LChanged)
+						string masterColumn = MasterKey.Columns[i].Name;
+						string detailColumn = DetailKey.Columns[i].Name;
+						changed = !_fields.Contains(detailColumn) || (dataSet[masterColumn].IsNil != Fields[detailColumn].IsNil);
+						if (changed)
 							break;
-						if (!Fields[LDetailColumn].IsNil)
+						if (!Fields[detailColumn].IsNil)
 						{
-							object LMasterValue = ADataSet[LMasterColumn].AsNative;
-							object LDetailValue = Fields[LDetailColumn].AsNative;
-							if (LMasterValue is IComparable)
-								LChanged = ((IComparable)LMasterValue).CompareTo(LDetailValue) != 0;
+							object masterValue = dataSet[masterColumn].AsNative;
+							object detailValue = Fields[detailColumn].AsNative;
+							if (masterValue is IComparable)
+								changed = ((IComparable)masterValue).CompareTo(detailValue) != 0;
 							else
-								LChanged = !(LMasterValue.Equals(LDetailValue));
-							if (LChanged)
+								changed = !(masterValue.Equals(detailValue));
+							if (changed)
 								break;
 						}
 					}
-				if (LChanged)
-					CursorSetChanged(null, IsApplicationTransactionClient && !FIsJoined);
+				if (changed)
+					CursorSetChanged(null, IsApplicationTransactionClient && !_isJoined);
 			}
 		}
 		
 		/// <summary>Returns true if the master is enlisted in an A/T. Cannot be invoked without a master source.</summary>
 		public bool IsMasterEnlisted()
 		{
-			DataView LDataView = MasterSource.DataSet as DataView;
-			return (LDataView != null) && (LDataView.IsApplicationTransactionClient || LDataView.IsApplicationTransactionServer);
+			DataView dataView = MasterSource.DataSet as DataView;
+			return (dataView != null) && (dataView.IsApplicationTransactionClient || dataView.IsApplicationTransactionServer);
 		}
 
 		/// <summary> Returns true if the master is set up (see IsMasterSetup()), and there is a value for each of the master's columns (or WriteWhereClause is true). </summary>
@@ -136,15 +136,15 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if (IsMasterSetup())
 			{
-				TableDataSet LDataSet = MasterSource.DataSet as TableDataSet;
-				bool LIsMasterValid = (LDataSet == null) || (!LDataSet.IsDetail() || LDataSet.IsMasterValid());
-				if (LIsMasterValid && !MasterSource.DataSet.IsEmpty())
+				TableDataSet dataSet = MasterSource.DataSet as TableDataSet;
+				bool isMasterValid = (dataSet == null) || (!dataSet.IsDetail() || dataSet.IsMasterValid());
+				if (isMasterValid && !MasterSource.DataSet.IsEmpty())
 				{
 					if (!WriteWhereClause) // If the where clause is custom, allow nil master values
 						return true;
 						
-					foreach (DAE.Schema.TableVarColumn LColumn in MasterKey.Columns)
-						if (!(MasterSource.DataSet.Fields[LColumn.Name].HasValue()))
+					foreach (DAE.Schema.TableVarColumn column in MasterKey.Columns)
+						if (!(MasterSource.DataSet.Fields[column.Name].HasValue()))
 							return false;
 					return true;
 				}
@@ -152,34 +152,34 @@ namespace Alphora.Dataphor.DAE.Client
 			return false;
 		}
 		
-		protected override bool InternalColumnChanging(DataField AField, Row AOldRow, Row ANewRow)
+		protected override bool InternalColumnChanging(DataField field, Row oldRow, Row newRow)
 		{
-			base.InternalColumnChanging(AField, AOldRow, ANewRow);
-			if (GetEditCursor().Validate(AOldRow, ANewRow, AField.ColumnName))
+			base.InternalColumnChanging(field, oldRow, newRow);
+			if (GetEditCursor().Validate(oldRow, newRow, field.ColumnName))
 			{
-				FValueFlags.SetAll(true);
+				_valueFlags.SetAll(true);
 				return true;
 			}
 			return false;
 		}
 
-		protected override bool InternalColumnChanged(DataField AField, Row AOldRow, Row ANewRow)
+		protected override bool InternalColumnChanged(DataField field, Row oldRow, Row newRow)
 		{
-			if (GetEditCursor().Change(AOldRow, ANewRow, AField.ColumnName))
+			if (GetEditCursor().Change(oldRow, newRow, field.ColumnName))
 			{
-				FValueFlags.SetAll(true);
-				return base.InternalColumnChanged(null, AOldRow, ANewRow);
+				_valueFlags.SetAll(true);
+				return base.InternalColumnChanged(null, oldRow, newRow);
 			}
 			else
-				return base.InternalColumnChanged(AField, AOldRow, ANewRow);
+				return base.InternalColumnChanged(field, oldRow, newRow);
 		}
 		
-		protected override void InternalChangeColumn(DataField AField, Row AOldRow, Row ANewRow)
+		protected override void InternalChangeColumn(DataField field, Row oldRow, Row newRow)
 		{
 			Process.BeginTransaction(IsolationLevel);
 			try
 			{
-				base.InternalChangeColumn(AField, AOldRow, ANewRow);
+				base.InternalChangeColumn(field, oldRow, newRow);
 
 				Process.CommitTransaction();
 			}
@@ -190,69 +190,69 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		protected override void InternalDefault(Row ARow)
+		protected override void InternalDefault(Row row)
 		{
-			base.InternalDefault(ARow);
-			if (GetEditCursor().Default(ARow, String.Empty))
-				FValueFlags.SetAll(true);
+			base.InternalDefault(row);
+			if (GetEditCursor().Default(row, String.Empty))
+				_valueFlags.SetAll(true);
 		}
 		
 		#endregion
 
 		#region Adorn Expression
 
-		private AdornColumnExpressions FColumns = new AdornColumnExpressions();
+		private AdornColumnExpressions _columns = new AdornColumnExpressions();
 		[Category("Definitions")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public AdornColumnExpressions Columns { get { return FColumns; } }
+		public AdornColumnExpressions Columns { get { return _columns; } }
 		
-		private CreateConstraintDefinitions FConstraints = new CreateConstraintDefinitions();
+		private CreateConstraintDefinitions _constraints = new CreateConstraintDefinitions();
 		[Category("Definitions")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public CreateConstraintDefinitions Constraints { get { return FConstraints; } }
+		public CreateConstraintDefinitions Constraints { get { return _constraints; } }
 		
-		private OrderDefinitions FOrders = new OrderDefinitions();
+		private OrderDefinitions _orders = new OrderDefinitions();
 		[Category("Definitions")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public OrderDefinitions Orders { get { return FOrders; } }
+		public OrderDefinitions Orders { get { return _orders; } }
 
-		private KeyDefinitions FKeys = new KeyDefinitions();
+		private KeyDefinitions _keys = new KeyDefinitions();
 		[Category("Definitions")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public KeyDefinitions Keys { get { return FKeys; } }
+		public KeyDefinitions Keys { get { return _keys; } }
 
 		private string AdornExpressionToString()
 		{
 			if (IsAdorned())
 			{
-				AdornExpression LAdornExpression = new AdornExpression();
-				LAdornExpression.Expression = new IdentifierExpression("A");
-				LAdornExpression.Expressions.AddRange(FColumns);
-				LAdornExpression.Constraints.AddRange(FConstraints);
-				LAdornExpression.Orders.AddRange(FOrders);
-				LAdornExpression.Keys.AddRange(FKeys);
-				return new D4TextEmitter().Emit(LAdornExpression);
+				AdornExpression adornExpression = new AdornExpression();
+				adornExpression.Expression = new IdentifierExpression("A");
+				adornExpression.Expressions.AddRange(_columns);
+				adornExpression.Constraints.AddRange(_constraints);
+				adornExpression.Orders.AddRange(_orders);
+				adornExpression.Keys.AddRange(_keys);
+				return new D4TextEmitter().Emit(adornExpression);
 			}
 			else
 				return String.Empty;
 		}
 
-		private void StringToAdornExpression(string AValue)
+		private void StringToAdornExpression(string value)
 		{
-			if (AValue == String.Empty)
+			if (value == String.Empty)
 			{
-				FOrders.Clear();
-				FConstraints.Clear();
-				FColumns.Clear();
+				_orders.Clear();
+				_constraints.Clear();
+				_columns.Clear();
 			}
 			else
 			{
-				Parser LParser = new Alphora.Dataphor.DAE.Language.D4.Parser();
-				AdornExpression LExpression = (AdornExpression)LParser.ParseExpression(AValue);
-				FColumns = LExpression.Expressions;
-				FConstraints = LExpression.Constraints;
-				FOrders = LExpression.Orders;
-				FKeys = LExpression.Keys;
+				Parser parser = new Alphora.Dataphor.DAE.Language.D4.Parser();
+				AdornExpression expression = (AdornExpression)parser.ParseExpression(value);
+				_columns = expression.Expressions;
+				_constraints = expression.Constraints;
+				_orders = expression.Orders;
+				_keys = expression.Keys;
 			}
 		}
 
@@ -267,9 +267,9 @@ namespace Alphora.Dataphor.DAE.Client
 		private bool IsAdorned()
 		{
 			return
-				(FColumns.Count > 0) ||
-				(FConstraints.Count > 0) ||
-				(FOrders.Count > 0);
+				(_columns.Count > 0) ||
+				(_constraints.Count > 0) ||
+				(_orders.Count > 0);
 		}
 
 		#endregion
@@ -277,7 +277,7 @@ namespace Alphora.Dataphor.DAE.Client
 		#region Expression
 
 		// Expression
-		protected string FExpression = String.Empty;
+		protected string _expression = String.Empty;
 		[DefaultValue("")]
 		[Category("Data")]
 		[Description("Expression")]
@@ -285,15 +285,15 @@ namespace Alphora.Dataphor.DAE.Client
 		[EditorDocumentType("d4")]
 		public string Expression
 		{
-			get { return FExpression; }
+			get { return _expression; }
 			set
 			{
 				CheckInactive();
-				FExpression = value == null ? String.Empty : value;
+				_expression = value == null ? String.Empty : value;
 			}
 		}
 		
-		protected bool FWriteWhereClause;
+		protected bool _writeWhereClause;
 
 		/// <summary> When true, the DataSet will automatically restrict the expression based on the Master/Detail relationship. </summary>
 		/// <remarks> 
@@ -306,19 +306,19 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("When true, the DataSet will automatically restrict the expression based on the Master/Detail relationship.")]
 		public bool WriteWhereClause
 		{
-			get { return FWriteWhereClause; }
+			get { return _writeWhereClause; }
 			set
 			{
-				if (FWriteWhereClause != value)
+				if (_writeWhereClause != value)
 				{
-					FWriteWhereClause = value;
+					_writeWhereClause = value;
 					if (Active)
 						CursorSetChanged(null, true);
 				}
 			}
 		}
 
-		protected bool FUseBrowse;
+		protected bool _useBrowse;
 
 		/// <summary> When true, the DataView will use a "browse" rather than an "order" cursor. </summary>
 		/// <remarks> 
@@ -331,27 +331,27 @@ namespace Alphora.Dataphor.DAE.Client
 		[RefreshProperties(RefreshProperties.Repaint)]
 		public bool UseBrowse
 		{
-			get { return FUseBrowse; }
+			get { return _useBrowse; }
 			set 
 			{
-				if (FUseBrowse != value)
+				if (_useBrowse != value)
 				{
 					if (Active)
 					{
-						using (Row LRow = RememberActive())
+						using (Row row = RememberActive())
 						{
-							FUseBrowse = value; 
-							CursorSetChanged(LRow, true);
+							_useBrowse = value; 
+							CursorSetChanged(row, true);
 						}
 					}
 					else
-						FUseBrowse = value;
+						_useBrowse = value;
 				}
 			}
 		}
 		
 		// Filter
-		protected string FFilter = String.Empty;
+		protected string _filter = String.Empty;
 		/// <summary> A D4 restriction filter expression to limit the data set. </summary>
 		/// <remarks> The filter is a D4 expression returning a true if the row is to be included or false otherwise. </remarks>
 		[DefaultValue("")]
@@ -360,204 +360,204 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("A D4 restriction filter expression to limit the data set.")]
 		public string Filter
 		{
-			get { return FFilter; }
+			get { return _filter; }
 			set
 			{
 				if (Active)
 				{
-					using (Row LRow = RememberActive())
+					using (Row row = RememberActive())
 					{
-						string LOldFilter = FFilter;
-						FFilter = (value == null ? String.Empty : value);
+						string oldFilter = _filter;
+						_filter = (value == null ? String.Empty : value);
 						try
 						{
-							CursorSetChanged(LRow, true);
+							CursorSetChanged(row, true);
 						}
 						catch
 						{
-							FFilter = LOldFilter;
+							_filter = oldFilter;
 							Open();
 							throw;
 						}
 					}
 				}
 				else
-					FFilter = (value == null ? String.Empty : value);
+					_filter = (value == null ? String.Empty : value);
 			}
 		}
 		
-		protected static Expression GetMasterDetailCondition(Schema.Key ADetailKey)
+		protected static Expression GetMasterDetailCondition(Schema.Key detailKey)
 		{
-			Expression LCondition = null;
-			Expression LEqualExpression;
-			for (int LIndex = 0; LIndex < ADetailKey.Columns.Count; LIndex++)
+			Expression condition = null;
+			Expression equalExpression;
+			for (int index = 0; index < detailKey.Columns.Count; index++)
 			{
-				LEqualExpression = new BinaryExpression
+				equalExpression = new BinaryExpression
 				(
-					new IdentifierExpression(ADetailKey.Columns[LIndex].Name), 
+					new IdentifierExpression(detailKey.Columns[index].Name), 
 					Instructions.Equal, 
-					new IdentifierExpression(GetParameterName(ADetailKey.Columns[LIndex].Name))
+					new IdentifierExpression(GetParameterName(detailKey.Columns[index].Name))
 				);
 
-				if (LCondition == null)
-					LCondition = LEqualExpression;
+				if (condition == null)
+					condition = equalExpression;
 				else
-					LCondition = new BinaryExpression(LCondition, Instructions.And, LEqualExpression);
+					condition = new BinaryExpression(condition, Instructions.And, equalExpression);
 			}
-			return LCondition;
+			return condition;
 		}
 		
-		protected static Expression MergeRestrictCondition(Expression AExpression, Expression ACondition)
+		protected static Expression MergeRestrictCondition(Expression expression, Expression condition)
 		{
-			RestrictExpression LRestrictExpression;
-			if (AExpression is RestrictExpression)
-				LRestrictExpression = (RestrictExpression)AExpression;
+			RestrictExpression restrictExpression;
+			if (expression is RestrictExpression)
+				restrictExpression = (RestrictExpression)expression;
 			else
 			{
-				LRestrictExpression = new RestrictExpression();
-				LRestrictExpression.Expression = AExpression;
+				restrictExpression = new RestrictExpression();
+				restrictExpression.Expression = expression;
 			}
-			if (LRestrictExpression.Condition == null)
-				LRestrictExpression.Condition = ACondition;
+			if (restrictExpression.Condition == null)
+				restrictExpression.Condition = condition;
 			else
-				LRestrictExpression.Condition = new BinaryExpression(LRestrictExpression.Condition, Instructions.And, ACondition);
-			return LRestrictExpression;
+				restrictExpression.Condition = new BinaryExpression(restrictExpression.Condition, Instructions.And, condition);
+			return restrictExpression;
 		}
 
 		// Returns a D4 syntax tree for the base user expression
 		protected virtual Expression GetSeedExpression()
 		{
-			Expression LExpression = FParser.ParseCursorDefinition(FExpression);
+			Expression expression = _parser.ParseCursorDefinition(_expression);
 
-			if (LExpression is CursorDefinition)
-				LExpression = ((CursorDefinition)LExpression).Expression;
+			if (expression is CursorDefinition)
+				expression = ((CursorDefinition)expression).Expression;
 
-			return LExpression;			
+			return expression;			
 		}
 		
 		protected override string InternalGetExpression()
 		{
-			Expression LExpression = GetSeedExpression();
+			Expression expression = GetSeedExpression();
 
-			OrderExpression LSaveOrderExpression = LExpression as OrderExpression;
-			BrowseExpression LSaveBrowseExpression = LExpression as BrowseExpression;
+			OrderExpression saveOrderExpression = expression as OrderExpression;
+			BrowseExpression saveBrowseExpression = expression as BrowseExpression;
 			
-			if (LSaveOrderExpression != null)
-				LExpression = LSaveOrderExpression.Expression;
+			if (saveOrderExpression != null)
+				expression = saveOrderExpression.Expression;
 				
-			if (LSaveBrowseExpression != null)
-				LExpression = LSaveBrowseExpression.Expression;
+			if (saveBrowseExpression != null)
+				expression = saveBrowseExpression.Expression;
 			
 			// Eat irrelevant browse and order operators			
-			OrderExpression LOrderExpression = null;
-			BrowseExpression LBrowseExpression = null;
-			while (((LOrderExpression = LExpression as OrderExpression) != null) || ((LBrowseExpression = LExpression as BrowseExpression) != null))
+			OrderExpression orderExpression = null;
+			BrowseExpression browseExpression = null;
+			while (((orderExpression = expression as OrderExpression) != null) || ((browseExpression = expression as BrowseExpression) != null))
 			{
-				if (LOrderExpression != null)
+				if (orderExpression != null)
 				{
-					LExpression = LOrderExpression.Expression;
-					LOrderExpression = null;
+					expression = orderExpression.Expression;
+					orderExpression = null;
 				}
 				
-				if (LBrowseExpression != null)
+				if (browseExpression != null)
 				{
-					LExpression = LBrowseExpression.Expression;
-					LBrowseExpression = null;
+					expression = browseExpression.Expression;
+					browseExpression = null;
 				}
 			}
 			
-			if (IsMasterSetup() && FWriteWhereClause)
+			if (IsMasterSetup() && _writeWhereClause)
 			{
-				LExpression = MergeRestrictCondition
+				expression = MergeRestrictCondition
 				(
-					LExpression, 
+					expression, 
 					GetMasterDetailCondition(DetailKey)
 				);
 			}
 			
-			if (FFilter != String.Empty)
+			if (_filter != String.Empty)
 			{
-				LExpression = MergeRestrictCondition
+				expression = MergeRestrictCondition
 				(
-					LExpression, 
-					FParser.ParseExpression(FFilter)
+					expression, 
+					_parser.ParseExpression(_filter)
 				);
 			}
 			
 			if (IsAdorned())
 			{
-				AdornExpression LAdornExpression = new AdornExpression();
-				LAdornExpression.Expression = LExpression;
-				LAdornExpression.Expressions.AddRange(FColumns);
-				LAdornExpression.Constraints.AddRange(FConstraints);
-				LAdornExpression.Orders.AddRange(FOrders);
-				LAdornExpression.Keys.AddRange(FKeys);
-				LExpression = LAdornExpression;
+				AdornExpression adornExpression = new AdornExpression();
+				adornExpression.Expression = expression;
+				adornExpression.Expressions.AddRange(_columns);
+				adornExpression.Constraints.AddRange(_constraints);
+				adornExpression.Orders.AddRange(_orders);
+				adornExpression.Keys.AddRange(_keys);
+				expression = adornExpression;
 			}
 			
-			if (FOrderDefinition != null)
+			if (_orderDefinition != null)
 			{
-				if (FUseBrowse)
+				if (_useBrowse)
 				{
-					LBrowseExpression = new Language.D4.BrowseExpression();
-					LBrowseExpression.Expression = LExpression;
-					LBrowseExpression.Columns.AddRange(FOrderDefinition.Columns);
-					LExpression = LBrowseExpression;
+					browseExpression = new Language.D4.BrowseExpression();
+					browseExpression.Expression = expression;
+					browseExpression.Columns.AddRange(_orderDefinition.Columns);
+					expression = browseExpression;
 				}
 				else
 				{
-					LOrderExpression = new Language.D4.OrderExpression();
-					LOrderExpression.Expression = LExpression;
-					LOrderExpression.Columns.AddRange(FOrderDefinition.Columns);
-					LExpression = LOrderExpression;
+					orderExpression = new Language.D4.OrderExpression();
+					orderExpression.Expression = expression;
+					orderExpression.Columns.AddRange(_orderDefinition.Columns);
+					expression = orderExpression;
 				}					
 			}
-			else if (FOrder != null)
+			else if (_order != null)
 			{
-				if (FUseBrowse)
+				if (_useBrowse)
 				{
-					LBrowseExpression = new BrowseExpression();
-					foreach (Schema.OrderColumn LColumn in FOrder.Columns)
-						if (LColumn.IsDefaultSort)
-							LBrowseExpression.Columns.Add(new OrderColumnDefinition(LColumn.Column.Name, LColumn.Ascending, LColumn.IncludeNils));
+					browseExpression = new BrowseExpression();
+					foreach (Schema.OrderColumn column in _order.Columns)
+						if (column.IsDefaultSort)
+							browseExpression.Columns.Add(new OrderColumnDefinition(column.Column.Name, column.Ascending, column.IncludeNils));
 						else
-							LBrowseExpression.Columns.Add(new OrderColumnDefinition(LColumn.Column.Name, LColumn.Ascending, LColumn.IncludeNils, LColumn.Sort.EmitDefinition(EmitMode.ForCopy)));
-					LBrowseExpression.Expression = LExpression;
-					LExpression = LBrowseExpression;
+							browseExpression.Columns.Add(new OrderColumnDefinition(column.Column.Name, column.Ascending, column.IncludeNils, column.Sort.EmitDefinition(EmitMode.ForCopy)));
+					browseExpression.Expression = expression;
+					expression = browseExpression;
 				}
 				else
 				{
-					LOrderExpression = new OrderExpression();
-					foreach (Schema.OrderColumn LColumn in FOrder.Columns)
-						if (LColumn.IsDefaultSort)
-							LOrderExpression.Columns.Add(new OrderColumnDefinition(LColumn.Column.Name, LColumn.Ascending, LColumn.IncludeNils));
+					orderExpression = new OrderExpression();
+					foreach (Schema.OrderColumn column in _order.Columns)
+						if (column.IsDefaultSort)
+							orderExpression.Columns.Add(new OrderColumnDefinition(column.Column.Name, column.Ascending, column.IncludeNils));
 						else
-							LOrderExpression.Columns.Add(new OrderColumnDefinition(LColumn.Column.Name, LColumn.Ascending, LColumn.IncludeNils, LColumn.Sort.EmitDefinition(EmitMode.ForCopy)));
-					LOrderExpression.Expression = LExpression;
-					LExpression = LOrderExpression;
+							orderExpression.Columns.Add(new OrderColumnDefinition(column.Column.Name, column.Ascending, column.IncludeNils, column.Sort.EmitDefinition(EmitMode.ForCopy)));
+					orderExpression.Expression = expression;
+					expression = orderExpression;
 				}
 			}
 			else
 			{
-				if (LSaveOrderExpression != null)
+				if (saveOrderExpression != null)
 				{
-					LSaveOrderExpression.Expression = LExpression;
-					LExpression = LSaveOrderExpression;
+					saveOrderExpression.Expression = expression;
+					expression = saveOrderExpression;
 				}
-				else if (LSaveBrowseExpression != null)
+				else if (saveBrowseExpression != null)
 				{
-					LSaveBrowseExpression.Expression = LExpression;
-					LExpression = LSaveBrowseExpression;
+					saveBrowseExpression.Expression = expression;
+					expression = saveBrowseExpression;
 				}
 			}
 			
-			CursorDefinition LCursorExpression = new CursorDefinition(LExpression);
-			LCursorExpression.Isolation = FRequestedIsolation;
-			LCursorExpression.Capabilities = FRequestedCapabilities;
-			LCursorExpression.SpecifiesType = true;
-			LCursorExpression.CursorType = FCursorType;
+			CursorDefinition cursorExpression = new CursorDefinition(expression);
+			cursorExpression.Isolation = _requestedIsolation;
+			cursorExpression.Capabilities = _requestedCapabilities;
+			cursorExpression.SpecifiesType = true;
+			cursorExpression.CursorType = _cursorType;
 			
-			return new D4TextEmitter().Emit(LCursorExpression);
+			return new D4TextEmitter().Emit(cursorExpression);
 		}
 
 		#endregion
@@ -565,7 +565,7 @@ namespace Alphora.Dataphor.DAE.Client
 		#region Connection
 		
 		// BeginScript
-		private string FBeginScript = String.Empty;
+		private string _beginScript = String.Empty;
 		/// <summary> A D4 script that will be run on the view's process, just prior to opening the cursor for the view. </summary>
 		/// <remarks> 
 		/// Because this script will execute on the view's process, it can be used to create local variables that will be accessible
@@ -579,12 +579,12 @@ namespace Alphora.Dataphor.DAE.Client
 		[EditorDocumentType("d4")]
 		public string BeginScript
 		{
-			get { return FBeginScript; }
-			set { FBeginScript = value == null ? String.Empty : value; }
+			get { return _beginScript; }
+			set { _beginScript = value == null ? String.Empty : value; }
 		}
 		
 		// EndScript
-		private string FEndScript = String.Empty;
+		private string _endScript = String.Empty;
 		/// <summary> A D4 script that will be run on the view's process, just after closing the cursor for the view. </summary>
 		[DefaultValue("")]
 		[Category("Data")]
@@ -593,20 +593,20 @@ namespace Alphora.Dataphor.DAE.Client
 		[EditorDocumentType("d4")]
 		public string EndScript
 		{
-			get { return FEndScript; }
-			set { FEndScript = value == null ? String.Empty : value; }
+			get { return _endScript; }
+			set { _endScript = value == null ? String.Empty : value; }
 		}
 		
 		protected void ExecuteBeginScript()
 		{
-			if (FBeginScript != String.Empty)
-				FProcess.ExecuteScript(FBeginScript);
+			if (_beginScript != String.Empty)
+				_process.ExecuteScript(_beginScript);
 		}
 		
 		protected void ExecuteEndScript()
 		{
-			if (FEndScript != String.Empty)
-				FProcess.ExecuteScript(FEndScript);
+			if (_endScript != String.Empty)
+				_process.ExecuteScript(_endScript);
 		}
 
 		protected override void InternalConnect()
@@ -625,20 +625,20 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		#region Open
 		
-		private DataSetState FOpenState = DataSetState.Browse;
+		private DataSetState _openState = DataSetState.Browse;
 
 		protected override bool ShouldFetchAtOpen()
 		{
-			return base.ShouldFetchAtOpen() && (FOpenState != DataSetState.Insert);
+			return base.ShouldFetchAtOpen() && (_openState != DataSetState.Insert);
 		}
 
 		protected override void InternalOpen()
 		{
-			if ((FOpenState != DataSetState.Browse) && UseApplicationTransactions && !IsApplicationTransactionClient && (FApplicationTransactionID == Guid.Empty))
-				FApplicationTransactionID = BeginApplicationTransaction(FOpenState == DataSetState.Insert);
+			if ((_openState != DataSetState.Browse) && UseApplicationTransactions && !IsApplicationTransactionClient && (_applicationTransactionID == Guid.Empty))
+				_applicationTransactionID = BeginApplicationTransaction(_openState == DataSetState.Insert);
 
 			if (IsApplicationTransactionClient)
-				JoinApplicationTransaction(FOpenState == DataSetState.Insert);
+				JoinApplicationTransaction(_openState == DataSetState.Insert);
 				
 			try
 			{
@@ -651,7 +651,7 @@ namespace Alphora.Dataphor.DAE.Client
 					RollbackApplicationTransaction();
 					UnprepareApplicationTransactionServer();
 				}
-				else if (IsApplicationTransactionClient && FIsJoined)
+				else if (IsApplicationTransactionClient && _isJoined)
 					LeaveApplicationTransaction();
 				throw;
 			}
@@ -659,16 +659,16 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		/// <summary> Activates the DataView, with the specification of the initial state. </summary>
 		/// <remarks> If the DataView is already active, then this method has no effect. </remarks>
-		public void Open(DataSetState AOpenState)
+		public void Open(DataSetState openState)
 		{
 			if (State == DataSetState.Inactive)
 			{
-				FOpenState = AOpenState == DataSetState.Inactive ? DataSetState.Browse : AOpenState;
+				_openState = openState == DataSetState.Inactive ? DataSetState.Browse : openState;
 				Open();
 				
 				try
 				{
-					switch (FOpenState)
+					switch (_openState)
 					{
 						case DataSetState.Insert: Insert(); break;
 						case DataSetState.Edit: Edit(); break;
@@ -699,7 +699,7 @@ namespace Alphora.Dataphor.DAE.Client
 					RollbackApplicationTransaction();
 					UnprepareApplicationTransactionServer();
 				}
-				else if (IsApplicationTransactionClient && FIsJoined)
+				else if (IsApplicationTransactionClient && _isJoined)
 					LeaveApplicationTransaction();
 			}
 		}
@@ -718,21 +718,21 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("Specifies whether or not to start or enlist in application transactions.")]
 		public bool UseApplicationTransactions { get; set; }
 		
-		private EnlistMode FShouldEnlist;
+		private EnlistMode _shouldEnlist;
 		/// <summary> Specifies whether or not to enlist in the application transaction of the master DataView. </summary>
 		[DefaultValue(EnlistMode.Default)]
 		[Category("Behavior")]
 		[Description("Specifies whether or not to enlist in the application transaction of the master data view")]
 		public EnlistMode ShouldEnlist
 		{
-			get { return FShouldEnlist; }
-			set { FShouldEnlist = value; }
+			get { return _shouldEnlist; }
+			set { _shouldEnlist = value; }
 		}
 		
-		private Guid FApplicationTransactionID = Guid.Empty;
+		private Guid _applicationTransactionID = Guid.Empty;
 		/// <summary> The ID of the application transaction if this DataView started one. </summary>
 		[Browsable(false)]
-		public Guid ApplicationTransactionID { get { return FApplicationTransactionID; } }
+		public Guid ApplicationTransactionID { get { return _applicationTransactionID; } }
 
 		/// <summary> Returns the DataView that is started the application transaction that this DataView participating in. </summary>
 		/// <remarks> This may return this DataView if it was the one that started the application transaction. </remarks>
@@ -742,50 +742,50 @@ namespace Alphora.Dataphor.DAE.Client
 			get 
 			{
 				// return the highest level view in the link tree that is in insert/edit mode
-				DataView LApplicationTransactionServer = null;
+				DataView applicationTransactionServer = null;
 				if (UseApplicationTransactions)
 				{
 					if (ApplicationTransactionID != Guid.Empty)
-						LApplicationTransactionServer = this;
+						applicationTransactionServer = this;
 					else
 					{
 						if (IsMasterValid())
 						{
-							DataView LDataView = MasterSource.DataSet as DataView;
-							if (LDataView != null)
+							DataView dataView = MasterSource.DataSet as DataView;
+							if (dataView != null)
 							{
-								switch (FShouldEnlist)
+								switch (_shouldEnlist)
 								{
 									case EnlistMode.Default :
-										bool LIsSuperset = false;
-										foreach (Schema.Key LKey in LDataView.TableVar.Keys)
+										bool isSuperset = false;
+										foreach (Schema.Key key in dataView.TableVar.Keys)
 										{
-											Schema.Key LMasterKey = new Schema.Key();
-											LMasterKey.Columns.AddRange(LKey.Columns);
-											if (LDataView.IsMasterSetup() && LDataView.IsMasterEnlisted())
-												foreach (Schema.TableVarColumn LKeyColumn in LDataView.DetailKey.Columns)
-													if (!LMasterKey.Columns.Contains(LKeyColumn))
-														LMasterKey.Columns.Add(LKeyColumn);
-											if (MasterKey.Columns.IsSubsetOf(LMasterKey.Columns) || MasterKey.Columns.IsSupersetOf(LMasterKey.Columns))
+											Schema.Key masterKey = new Schema.Key();
+											masterKey.Columns.AddRange(key.Columns);
+											if (dataView.IsMasterSetup() && dataView.IsMasterEnlisted())
+												foreach (Schema.TableVarColumn keyColumn in dataView.DetailKey.Columns)
+													if (!masterKey.Columns.Contains(keyColumn))
+														masterKey.Columns.Add(keyColumn);
+											if (MasterKey.Columns.IsSubsetOf(masterKey.Columns) || MasterKey.Columns.IsSupersetOf(masterKey.Columns))
 											{
-												LIsSuperset = true;
+												isSuperset = true;
 												break;
 											}
 										}
 											
-										if (LIsSuperset)
-											LApplicationTransactionServer = LDataView.ApplicationTransactionServer;
+										if (isSuperset)
+											applicationTransactionServer = dataView.ApplicationTransactionServer;
 									break;
 									
 									case EnlistMode.True :
-										LApplicationTransactionServer = LDataView.ApplicationTransactionServer;
+										applicationTransactionServer = dataView.ApplicationTransactionServer;
 									break;
 								}
 							}
 						}
 					}
 				}
-				return LApplicationTransactionServer;
+				return applicationTransactionServer;
 			} 
 		}
 		
@@ -793,90 +793,90 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private bool IsApplicationTransactionClient { get { return (ApplicationTransactionServer != null) && (ApplicationTransactionServer != this); } }
 		
-		private Guid BeginApplicationTransaction(bool AIsInsert)
+		private Guid BeginApplicationTransaction(bool isInsert)
 		{
-			Guid LATID = FProcess.BeginApplicationTransaction(true, AIsInsert);
-			FIsJoined = true;
-			return LATID;
+			Guid aTID = _process.BeginApplicationTransaction(true, isInsert);
+			_isJoined = true;
+			return aTID;
 		}
 		
-		private void JoinApplicationTransaction(bool AIsInsert)
+		private void JoinApplicationTransaction(bool isInsert)
 		{
-			FProcess.JoinApplicationTransaction(ApplicationTransactionServer.ApplicationTransactionID, AIsInsert);
-			FIsJoined = true;
+			_process.JoinApplicationTransaction(ApplicationTransactionServer.ApplicationTransactionID, isInsert);
+			_isJoined = true;
 		}
 		
 		private void LeaveApplicationTransaction()
 		{
-			FProcess.LeaveApplicationTransaction();
-			FIsJoined = false;
+			_process.LeaveApplicationTransaction();
+			_isJoined = false;
 		}
 		
 		private void PrepareApplicationTransaction()
 		{
-			FProcess.PrepareApplicationTransaction(FApplicationTransactionID);
+			_process.PrepareApplicationTransaction(_applicationTransactionID);
 		}
 		
 		private void CommitApplicationTransaction()
 		{
-			FProcess.CommitApplicationTransaction(FApplicationTransactionID);
-			FIsJoined = false;
+			_process.CommitApplicationTransaction(_applicationTransactionID);
+			_isJoined = false;
 		}
 
 		private void RollbackApplicationTransaction()
 		{
-			FProcess.RollbackApplicationTransaction(FApplicationTransactionID);
-			FIsJoined = false;
+			_process.RollbackApplicationTransaction(_applicationTransactionID);
+			_isJoined = false;
 		}
 		
-		private bool FIsJoined;
+		private bool _isJoined;
 
-		private void PrepareApplicationTransactionServer(bool AIsInsert)
+		private void PrepareApplicationTransactionServer(bool isInsert)
 		{
-			if (!IsApplicationTransactionClient && UseApplicationTransactions && (FOpenState == DataSetState.Browse))
+			if (!IsApplicationTransactionClient && UseApplicationTransactions && (_openState == DataSetState.Browse))
 			{
-				using (Row LRow = RememberActive())
+				using (Row row = RememberActive())
 				{
-					if (FApplicationTransactionID == Guid.Empty)
-						FApplicationTransactionID = BeginApplicationTransaction(AIsInsert);
+					if (_applicationTransactionID == Guid.Empty)
+						_applicationTransactionID = BeginApplicationTransaction(isInsert);
 						
-					FATCursor = new DAECursor(FProcess);
+					_aTCursor = new DAECursor(_process);
 					try
 					{
-						FATCursor.OnErrors += new CursorErrorsOccurredHandler(CursorOnErrors);
-						FATCursor.Expression = InternalGetExpression();
+						_aTCursor.OnErrors += new CursorErrorsOccurredHandler(CursorOnErrors);
+						_aTCursor.Expression = InternalGetExpression();
 						// Copy the params, but only if they are not already pushed on the process through the FCursor
-						if ((FCursor == null) || !FCursor.ShouldOpen)
-							FATCursor.Params.AddRange(FCursor.Params);
-						FATCursor.Prepare();
+						if ((_cursor == null) || !_cursor.ShouldOpen)
+							_aTCursor.Params.AddRange(_cursor.Params);
+						_aTCursor.Prepare();
 						try
 						{
 							SetParamValues();
-							FATCursor.ShouldOpen = ShouldOpenCursor();
-							FATCursor.Open();
+							_aTCursor.ShouldOpen = ShouldOpenCursor();
+							_aTCursor.Open();
 							try
 							{
-								if (!AIsInsert && (LRow != null))
-									if (!FATCursor.FindKey(LRow))
+								if (!isInsert && (row != null))
+									if (!_aTCursor.FindKey(row))
 										throw new ClientException(ClientException.Codes.RecordNotFound);
 							}
 							catch
 							{
-								FATCursor.Close();
+								_aTCursor.Close();
 								throw;
 							}
 						}
 						catch
 						{
-							FATCursor.Unprepare();
+							_aTCursor.Unprepare();
 							throw;
 						}
 					}
 					catch
 					{
-						FATCursor.OnErrors -= new CursorErrorsOccurredHandler(CursorOnErrors);
-						FATCursor.Dispose();
-						FATCursor = null;
+						_aTCursor.OnErrors -= new CursorErrorsOccurredHandler(CursorOnErrors);
+						_aTCursor.Dispose();
+						_aTCursor = null;
 						throw;
 					}
 				}
@@ -885,15 +885,15 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private void UnprepareApplicationTransactionServer()
 		{
-			Guid LID = FApplicationTransactionID;
-			FApplicationTransactionID = Guid.Empty;
-			if (FOpenState == DataSetState.Browse)
+			Guid iD = _applicationTransactionID;
+			_applicationTransactionID = Guid.Empty;
+			if (_openState == DataSetState.Browse)
 			{
-				if (FATCursor != null)
+				if (_aTCursor != null)
 				{
-					FATCursor.OnErrors -= new CursorErrorsOccurredHandler(CursorOnErrors);
-					FATCursor.Dispose();
-					FATCursor = null;
+					_aTCursor.OnErrors -= new CursorErrorsOccurredHandler(CursorOnErrors);
+					_aTCursor.Dispose();
+					_aTCursor = null;
 				}
 			}
 			else
@@ -908,12 +908,12 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <remarks> This is tied to the ReadOnly property unless a custom insert, update, or delete statement has been provided. </remarks>
 		public override void CheckCanModify()
 		{
-			if (InternalIsReadOnly && (FInsertStatement == String.Empty) && (FUpdateStatement == String.Empty) && (FDeleteStatement == String.Empty))
+			if (InternalIsReadOnly && (_insertStatement == String.Empty) && (_updateStatement == String.Empty) && (_deleteStatement == String.Empty))
 				throw new ClientException(ClientException.Codes.IsReadOnly);
 		}
 		
 		// InsertStatement
-		private string FInsertStatement = String.Empty;
+		private string _insertStatement = String.Empty;
 		/// <summary> A D4 statement that will be used to insert any new rows. </summary>
 		/// <remarks> If no statement is specified, the insert will be performed through the cursor to the Dataphor server.  The new columns are accessible as parameters by their names, qualified by "New.". </remarks>
 		[DefaultValue("")]														   
@@ -923,12 +923,12 @@ namespace Alphora.Dataphor.DAE.Client
 		[EditorDocumentType("d4")]
 		public string InsertStatement
 		{
-			get { return FInsertStatement; }
-			set { FInsertStatement = value == null ? String.Empty : value; }
+			get { return _insertStatement; }
+			set { _insertStatement = value == null ? String.Empty : value; }
 		}
 		
 		// UpdateStatement
-		private string FUpdateStatement = String.Empty;
+		private string _updateStatement = String.Empty;
 		/// <summary> A D4 statement that will be used to update any new rows. </summary>
 		/// <remarks> If no statement is specified, the update will be performed through the cursor to the Dataphor server.  The new and old columns are accessible as parameters by their names, qualified by "New." and "Old." respectively. </remarks>
 		[DefaultValue("")]
@@ -938,12 +938,12 @@ namespace Alphora.Dataphor.DAE.Client
 		[EditorDocumentType("d4")]
 		public string UpdateStatement
 		{
-			get { return FUpdateStatement; }
-			set { FUpdateStatement = value == null ? String.Empty : value; }
+			get { return _updateStatement; }
+			set { _updateStatement = value == null ? String.Empty : value; }
 		}
 		
 		// DeleteStatement
-		private string FDeleteStatement = String.Empty;
+		private string _deleteStatement = String.Empty;
 		/// <summary> A D4 statement that will be used to delete any new rows. </summary>
 		/// <remarks> If no statement is specified, the delete will be performed through the cursor to the Dataphor server.  The old columns are accessible as parameters by their names, qualified by "Old.". </remarks>
 		[DefaultValue("")]
@@ -953,8 +953,8 @@ namespace Alphora.Dataphor.DAE.Client
 		[EditorDocumentType("d4")]
 		public string DeleteStatement
 		{
-			get { return FDeleteStatement; }
-			set { FDeleteStatement = value == null ? String.Empty : value; }
+			get { return _deleteStatement; }
+			set { _deleteStatement = value == null ? String.Empty : value; }
 		}
 		
 		protected override void InternalEdit()
@@ -992,12 +992,12 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		protected override void InternalValidate(bool AIsPosting)
+		protected override void InternalValidate(bool isPosting)
 		{
-			base.InternalValidate(AIsPosting);
+			base.InternalValidate(isPosting);
 
-			if (!AIsPosting)			
-				GetEditCursor().Validate(null, FBuffer[FActiveOffset].Row, String.Empty);
+			if (!isPosting)			
+				GetEditCursor().Validate(null, _buffer[_activeOffset].Row, String.Empty);
 		}
 		
 		protected override void PrepareTransaction()
@@ -1019,92 +1019,92 @@ namespace Alphora.Dataphor.DAE.Client
 			return 
 				!IsApplicationTransactionServer && 
 				(
-					((State == DataSetState.Insert) && (FInsertStatement == String.Empty)) || 
-					((State == DataSetState.Edit) && (FUpdateStatement == String.Empty))
+					((State == DataSetState.Insert) && (_insertStatement == String.Empty)) || 
+					((State == DataSetState.Edit) && (_updateStatement == String.Empty))
 				);
 		}
 		
-		protected override void InternalPost(Row ARow)
+		protected override void InternalPost(Row row)
 		{
-			base.InternalPost(ARow);
+			base.InternalPost(row);
 			
-			bool LShouldRefresh = !UpdatesThroughCursor() && RefreshAfterPost;
+			bool shouldRefresh = !UpdatesThroughCursor() && RefreshAfterPost;
 			
 			if (IsApplicationTransactionServer)
 				UnprepareApplicationTransactionServer();
 
 			// Refresh the main cursor to the newly inserted application transaction row
-			if (LShouldRefresh)
-				InternalRefresh(ARow);
+			if (shouldRefresh)
+				InternalRefresh(row);
 		}
 
-		private DAE.Runtime.DataParams GetParamsFromRow(Row ARow, string APrefix)
+		private DAE.Runtime.DataParams GetParamsFromRow(Row row, string prefix)
 		{
-			DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-			GetParamsFromRow(ARow, LParams, APrefix);
-			return LParams;
+			DAE.Runtime.DataParams paramsValue = new DAE.Runtime.DataParams();
+			GetParamsFromRow(row, paramsValue, prefix);
+			return paramsValue;
 		}
 
-		private static void GetParamsFromRow(Row ARow, DAE.Runtime.DataParams LParams, string APrefix)
+		private static void GetParamsFromRow(Row row, DAE.Runtime.DataParams LParams, string prefix)
 		{
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
-				LParams.Add(new DAE.Runtime.DataParam(APrefix + ARow.DataType.Columns[LIndex].Name, ARow.DataType.Columns[LIndex].DataType, Modifier.In, ARow[LIndex]));
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
+				LParams.Add(new DAE.Runtime.DataParam(prefix + row.DataType.Columns[index].Name, row.DataType.Columns[index].DataType, Modifier.In, row[index]));
 		}
 		
-		protected override void InternalInsert(Row ARow)
+		protected override void InternalInsert(Row row)
 		{
-			if (FInsertStatement == String.Empty)
-				base.InternalInsert(ARow);
+			if (_insertStatement == String.Empty)
+				base.InternalInsert(row);
 			else
 			{
-				DAE.Runtime.DataParams LParams = GetParamsFromRow(FBuffer[FActiveOffset].Row, "New.");
-				IServerStatementPlan LPlan = FProcess.PrepareStatement(FInsertStatement, LParams);
+				DAE.Runtime.DataParams paramsValue = GetParamsFromRow(_buffer[_activeOffset].Row, "New.");
+				IServerStatementPlan plan = _process.PrepareStatement(_insertStatement, paramsValue);
 				try
 				{
-					LPlan.Execute(LParams);
+					plan.Execute(paramsValue);
 				}
 				finally
 				{
-					FProcess.UnprepareStatement(LPlan);
+					_process.UnprepareStatement(plan);
 				}
 			}
 		}
 		
-		protected override void InternalUpdate(Row ARow)
+		protected override void InternalUpdate(Row row)
 		{
-			if (FUpdateStatement == String.Empty)
-				base.InternalUpdate(ARow);
+			if (_updateStatement == String.Empty)
+				base.InternalUpdate(row);
 			else
 			{
-				DAE.Runtime.DataParams LParams = GetParamsFromRow(FOriginalRow, "Old.");
-				GetParamsFromRow(ARow, LParams, "New.");
-				IServerStatementPlan LPlan = FProcess.PrepareStatement(FUpdateStatement, LParams);
+				DAE.Runtime.DataParams paramsValue = GetParamsFromRow(_originalRow, "Old.");
+				GetParamsFromRow(row, paramsValue, "New.");
+				IServerStatementPlan plan = _process.PrepareStatement(_updateStatement, paramsValue);
 				try
 				{
-					LPlan.Execute(LParams);
+					plan.Execute(paramsValue);
 				}
 				finally
 				{
-					FProcess.UnprepareStatement(LPlan);
+					_process.UnprepareStatement(plan);
 				}
 			}
 		}
 		
 		protected override void InternalDelete()
 		{
-			if (FDeleteStatement == String.Empty)
+			if (_deleteStatement == String.Empty)
 				base.InternalDelete();
 			else
 			{
-				DAE.Runtime.DataParams LParams = GetParamsFromRow(FBuffer[FActiveOffset].Row, "Old.");
-				IServerStatementPlan LPlan = FProcess.PrepareStatement(FDeleteStatement, LParams);
+				DAE.Runtime.DataParams paramsValue = GetParamsFromRow(_buffer[_activeOffset].Row, "Old.");
+				IServerStatementPlan plan = _process.PrepareStatement(_deleteStatement, paramsValue);
 				try
 				{
-					LPlan.Execute(LParams);
+					plan.Execute(paramsValue);
 				}
 				finally
 				{
-					FProcess.UnprepareStatement(LPlan);
+					_process.UnprepareStatement(plan);
 				}
 			}
 		}
@@ -1113,7 +1113,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region Utility
 
-		private DataSource FDataSource = null;
+		private DataSource _dataSource = null;
 		/// <summary> Utility DataSource that is linked to this DataView. </summary>
 		/// <remarks> 
 		///		This DataSource is created, attached and disposed by this DataView.  This is useful when programmatically 
@@ -1124,56 +1124,56 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get
 			{
-				if (FDataSource == null)
+				if (_dataSource == null)
 				{
-					FDataSource = new DataSource();
-					FDataSource.DataSet = this;
+					_dataSource = new DataSource();
+					_dataSource.DataSet = this;
 				}
-				return FDataSource;
+				return _dataSource;
 			}
 		}
 
 		/// <summary> Creates and opens a new DataView detailed to this one. </summary>
-		public DataView OpenDetail(string AExpression, string AMasterKeyNames, string ADetailKeyNames, DataSetState AInitialState, bool AIsReadOnly)
+		public DataView OpenDetail(string expression, string masterKeyNames, string detailKeyNames, DataSetState initialState, bool isReadOnly)
 		{
-			DataView LDataView = new DataView();
+			DataView dataView = new DataView();
 			try
 			{
-				LDataView.Session = this.Session;
-				LDataView.Expression = AExpression;
-				LDataView.IsReadOnly = AIsReadOnly;
-				LDataView.MasterSource = DataSource;
-				LDataView.MasterKeyNames = AMasterKeyNames;
-				LDataView.DetailKeyNames = ADetailKeyNames;
-				LDataView.Open(AInitialState);
-				return LDataView;
+				dataView.Session = this.Session;
+				dataView.Expression = expression;
+				dataView.IsReadOnly = isReadOnly;
+				dataView.MasterSource = DataSource;
+				dataView.MasterKeyNames = masterKeyNames;
+				dataView.DetailKeyNames = detailKeyNames;
+				dataView.Open(initialState);
+				return dataView;
 			}
 			catch
 			{
-				LDataView.Dispose();
+				dataView.Dispose();
 				throw;
 			}
 		}
 
 		/// <summary> Creates and opens a new DataView detailed to this one. </summary>
 		/// <remarks> The ReadOnly property for this overload will be false (read/write). </remarks>
-		public DataView OpenDetail(string AExpression, string AMasterKeyNames, string ADetailKeyNames, DataSetState AInitialState)
+		public DataView OpenDetail(string expression, string masterKeyNames, string detailKeyNames, DataSetState initialState)
 		{
-			return OpenDetail(AExpression, AMasterKeyNames, ADetailKeyNames, AInitialState, false);
+			return OpenDetail(expression, masterKeyNames, detailKeyNames, initialState, false);
 		}
 
 		/// <summary> Creates and opens a new DataView detailed to this one. </summary>
 		/// <remarks> The OpenState will be Browse. </remarks>
-		public DataView OpenDetail(string AExpression, string AMasterKeyNames, string ADetailKeyNames, bool AReadOnly)
+		public DataView OpenDetail(string expression, string masterKeyNames, string detailKeyNames, bool readOnly)
 		{
-			return OpenDetail(AExpression, AMasterKeyNames, ADetailKeyNames, DataSetState.Browse, AReadOnly);
+			return OpenDetail(expression, masterKeyNames, detailKeyNames, DataSetState.Browse, readOnly);
 		}
 
 		/// <summary> Creates and opens a new DataView detailed to this one. </summary>
 		/// <remarks> The OpenState will be Browse and the ReadOnly property for this overload will be false (read/write). </remarks>
-		public DataView OpenDetail(string AExpression, string AMasterKeyNames, string ADetailKeyNames)
+		public DataView OpenDetail(string expression, string masterKeyNames, string detailKeyNames)
 		{
-			return OpenDetail(AExpression, AMasterKeyNames, ADetailKeyNames, DataSetState.Browse, false);
+			return OpenDetail(expression, masterKeyNames, detailKeyNames, DataSetState.Browse, false);
 		}
 
 		#endregion

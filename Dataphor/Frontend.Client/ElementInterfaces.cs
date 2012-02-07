@@ -1007,18 +1007,27 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		bool Close(CloseBehavior ABehavior);
 		bool IsAcceptReject { get; }
+		bool AcceptEnabled { get; set; }
 
 		void Enable();
 		void Disable(IFormInterface AChildForm);
 		bool GetEnabled();
 
 		event EventHandler OnClosed;
+		
+		/// <summary> Action taken before when the user interface is Accepted. </summary> <doc/>
+		/// <value> <para>IAction</para>
+		/// <para>Default: (None)</para> </value>
+		IAction OnBeforeAccept { get; set; }			
 
 		// Published
 
 		/// <summary> If true, the accept/reject state is forced. </summary> <doc/>
 		/// <value>Default: False</value>
 		bool ForceAcceptReject { get; set; }
+		
+		/// <summary> If true, the form should be remain in front of other non top-most forms. </summary>
+		bool TopMost { get; set; }
 	}
 
 	/// <summary> A Frame control embeds a user interface document as an element. </summary> <doc/>

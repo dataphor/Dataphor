@@ -19,11 +19,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerImage("Image('Frontend', 'Nodes.Interface')")]
 	public abstract class Interface : Element, IInterface
 	{
-		protected override void Dispose(bool ADisposed)
+		protected override void Dispose(bool disposed)
 		{
 			try
 			{
-				base.Dispose(ADisposed);
+				base.Dispose(disposed);
 			}
 			finally
 			{
@@ -40,25 +40,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// RootElement
 
-		private IWindowsElement FRootElement;
+		private IWindowsElement _rootElement;
 		protected IWindowsElement RootElement
 		{
-			get { return FRootElement; }
+			get { return _rootElement; }
 		}
 
 		// Text
 
-		private string FText = String.Empty;
+		private string _text = String.Empty;
 		[DefaultValue("")]
 		[Description("The text to show as the title of the interface.")]
 		public string Text
 		{
-			get { return FText; }
+			get { return _text; }
 			set
 			{
-				if (FText != value)
+				if (_text != value)
 				{
-					FText = value;
+					_text = value;
 					if (Active)
 						InternalUpdateText();
 				}
@@ -67,54 +67,54 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual string GetText()
 		{
-			return FText;
+			return _text;
 		}
 
 		protected virtual void InternalUpdateText() {}
 
 		// UserState
 
-		private IndexedDictionary<string, object> FUserState = new IndexedDictionary<string, object>();
+		private IndexedDictionary<string, object> _userState = new IndexedDictionary<string, object>();
 		[Browsable(false)]
 		public IndexedDictionary<string, object> UserState
 		{
-			get { return FUserState; }
+			get { return _userState; }
 		}
 
 		// MainSource
 
-		private ISource FMainSource;
+		private ISource _mainSource;
 		/// <summary> The source for the primary DataView of this interface. </summary>
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("The source for the primary DataView of this interface.")]
 		public ISource MainSource
 		{
-			get { return FMainSource; }
+			get { return _mainSource; }
 			set
 			{
-				if (FMainSource != value)
+				if (_mainSource != value)
 				{
-					if (FMainSource != null)
+					if (_mainSource != null)
 					{
-						FMainSource.Disposed -= new EventHandler(MainSourceDisposed);
-						FMainSource.StateChanged -= new DAE.Client.DataLinkHandler(MainSourceStateChanged);
+						_mainSource.Disposed -= new EventHandler(MainSourceDisposed);
+						_mainSource.StateChanged -= new DAE.Client.DataLinkHandler(MainSourceStateChanged);
 					}
-					FMainSource = value;
-					if (FMainSource != null)
+					_mainSource = value;
+					if (_mainSource != null)
 					{
-						FMainSource.Disposed += new EventHandler(MainSourceDisposed);
-						FMainSource.StateChanged += new DAE.Client.DataLinkHandler(MainSourceStateChanged);
+						_mainSource.Disposed += new EventHandler(MainSourceDisposed);
+						_mainSource.StateChanged += new DAE.Client.DataLinkHandler(MainSourceStateChanged);
 					}
 				}
 			}
 		}
 
-		private void MainSourceDisposed(object ASender, EventArgs AArgs)
+		private void MainSourceDisposed(object sender, EventArgs args)
 		{
 			MainSource = null;
 		}
 
-		protected virtual void MainSourceStateChanged(DAE.Client.DataLink ALink, DAE.Client.DataSet ADataSet) {}
+		protected virtual void MainSourceStateChanged(DAE.Client.DataLink link, DAE.Client.DataSet dataSet) {}
 
 		/// <summary> Use to ensure the existence of a MainSource. </summary>
 		public void CheckMainSource()
@@ -153,21 +153,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// OnDefault
 
-		private IAction FOnDefault;
+		private IAction _onDefault;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action to invoke as the default for the form.")]
 		public IAction OnDefault 
 		{ 
-			get { return FOnDefault; }
+			get { return _onDefault; }
 			set
 			{
-				if (FOnDefault != value)
+				if (_onDefault != value)
 				{
-					if (FOnDefault != null)
-						FOnDefault.Disposed -= new EventHandler(DefaultActionDisposed);
-					FOnDefault = value;
-					if (FOnDefault != null)
-						FOnDefault.Disposed += new EventHandler(DefaultActionDisposed);
+					if (_onDefault != null)
+						_onDefault.Disposed -= new EventHandler(DefaultActionDisposed);
+					_onDefault = value;
+					if (_onDefault != null)
+						_onDefault.Disposed += new EventHandler(DefaultActionDisposed);
 					DefaultChanged();
 				}
 			}
@@ -177,219 +177,219 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 		}
 
-		private void DefaultActionDisposed(object ASender, EventArgs AArgs)
+		private void DefaultActionDisposed(object sender, EventArgs args)
 		{
 			OnDefault = null;
 		}
 
 		// OnShown
 
-		private IAction FOnShown;
+		private IAction _onShown;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action to invoke when the interface is shown.")]
 		public IAction OnShown
 		{
-			get { return FOnShown; }
+			get { return _onShown; }
 			set
 			{
-				if (FOnShown != value)
+				if (_onShown != value)
 				{
-					if (FOnShown != null)
-						FOnShown.Disposed -= new EventHandler(OnShownActionDisposed);
-					FOnShown = value;
-					if (FOnShown != null)
-						FOnShown.Disposed += new EventHandler(OnShownActionDisposed);
+					if (_onShown != null)
+						_onShown.Disposed -= new EventHandler(OnShownActionDisposed);
+					_onShown = value;
+					if (_onShown != null)
+						_onShown.Disposed += new EventHandler(OnShownActionDisposed);
 				}
 			}
 		}
 
-		private void OnShownActionDisposed(object ASender, EventArgs AArgs)
+		private void OnShownActionDisposed(object sender, EventArgs args)
 		{
 			OnShown = null;
 		}
 
 		// OnPost
 
-		private IAction FOnPost;
+		private IAction _onPost;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action that executes when the form is posted.")]
 		public IAction OnPost
 		{
-			get { return FOnPost; }
+			get { return _onPost; }
 			set
 			{
-				if (FOnPost != value)
+				if (_onPost != value)
 				{
-					if (FOnPost != null)
-						FOnPost.Disposed -= new EventHandler(OnPostDisposed);
-					FOnPost = value;
-					if (FOnPost != null)
-						FOnPost.Disposed += new EventHandler(OnPostDisposed);
+					if (_onPost != null)
+						_onPost.Disposed -= new EventHandler(OnPostDisposed);
+					_onPost = value;
+					if (_onPost != null)
+						_onPost.Disposed += new EventHandler(OnPostDisposed);
 				}
 			}
 		}
 
-		private void OnPostDisposed(object ASender, EventArgs AArgs)
+		private void OnPostDisposed(object sender, EventArgs args)
 		{
 			OnPost = null;
 		}
 
 		// OnCancel
 
-		private IAction FOnCancel;
+		private IAction _onCancel;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action that will get executed when the form is canceled.")]
 		public IAction OnCancel
 		{
-			get { return FOnCancel; }
+			get { return _onCancel; }
 			set
 			{
-				if (FOnCancel != value)
+				if (_onCancel != value)
 				{
-					if (FOnCancel != null)
-						FOnCancel.Disposed -= new EventHandler(OnCancelDisposed);
-					FOnCancel = value;
-					if (FOnCancel != null)
-						FOnCancel.Disposed += new EventHandler(OnCancelDisposed);
+					if (_onCancel != null)
+						_onCancel.Disposed -= new EventHandler(OnCancelDisposed);
+					_onCancel = value;
+					if (_onCancel != null)
+						_onCancel.Disposed += new EventHandler(OnCancelDisposed);
 				}
 			}
 		}
 
-		private void OnCancelDisposed(object ASender, EventArgs AArgs)
+		private void OnCancelDisposed(object sender, EventArgs args)
 		{
 			OnCancel = null;
 		}
 
 		// OnActivate
 
-		private IAction FOnActivate;
+		private IAction _onActivate;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action that will be executed while form is initially activating.")]
 		public IAction OnActivate
 		{
-			get { return FOnActivate; }
+			get { return _onActivate; }
 			set
 			{
-				if (FOnActivate != value)
+				if (_onActivate != value)
 				{
-					if (FOnActivate != null)
-						FOnActivate.Disposed -= new EventHandler(OnActivateDisposed);
-					FOnActivate = value;
-					if (FOnActivate != null)
-						FOnActivate.Disposed += new EventHandler(OnActivateDisposed);
+					if (_onActivate != null)
+						_onActivate.Disposed -= new EventHandler(OnActivateDisposed);
+					_onActivate = value;
+					if (_onActivate != null)
+						_onActivate.Disposed += new EventHandler(OnActivateDisposed);
 				}
 			}
 		}
 
-		private void OnActivateDisposed(object ASender, EventArgs AArgs)
+		private void OnActivateDisposed(object sender, EventArgs args)
 		{
 			OnActivate = null;
 		}
 
 		// OnAfterActivate
 
-		private IAction FOnAfterActivate;
+		private IAction _onAfterActivate;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action that will be executed after the form is initially activated.")]
 		public IAction OnAfterActivate
 		{
-			get { return FOnAfterActivate; }
+			get { return _onAfterActivate; }
 			set
 			{
-				if (FOnAfterActivate != value)
+				if (_onAfterActivate != value)
 				{
-					if (FOnAfterActivate != null)
-						FOnAfterActivate.Disposed -= new EventHandler(OnAfterActivateDisposed);
-					FOnAfterActivate = value;
-					if (FOnAfterActivate != null)
-						FOnAfterActivate.Disposed += new EventHandler(OnAfterActivateDisposed);
+					if (_onAfterActivate != null)
+						_onAfterActivate.Disposed -= new EventHandler(OnAfterActivateDisposed);
+					_onAfterActivate = value;
+					if (_onAfterActivate != null)
+						_onAfterActivate.Disposed += new EventHandler(OnAfterActivateDisposed);
 				}
 			}
 		}
 
-		private void OnAfterActivateDisposed(object ASender, EventArgs AArgs)
+		private void OnAfterActivateDisposed(object sender, EventArgs args)
 		{
 			OnAfterActivate = null;
 		}
 
 		// OnBeforeDeactivate
 
-		private IAction FOnBeforeDeactivate;
+		private IAction _onBeforeDeactivate;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action that will be executed before the form is deactivated.")]
 		public IAction OnBeforeDeactivate
 		{
-			get { return FOnBeforeDeactivate; }
+			get { return _onBeforeDeactivate; }
 			set
 			{
-				if (FOnBeforeDeactivate != value)
+				if (_onBeforeDeactivate != value)
 				{
-					if (FOnBeforeDeactivate != null)
-						FOnBeforeDeactivate.Disposed -= new EventHandler(OnBeforeDeactivateDisposed);
-					FOnBeforeDeactivate = value;
-					if (FOnBeforeDeactivate != null)
-						FOnBeforeDeactivate.Disposed += new EventHandler(OnBeforeDeactivateDisposed);
+					if (_onBeforeDeactivate != null)
+						_onBeforeDeactivate.Disposed -= new EventHandler(OnBeforeDeactivateDisposed);
+					_onBeforeDeactivate = value;
+					if (_onBeforeDeactivate != null)
+						_onBeforeDeactivate.Disposed += new EventHandler(OnBeforeDeactivateDisposed);
 				}
 			}
 		}
 
-		private void OnBeforeDeactivateDisposed(object ASender, EventArgs AArgs)
+		private void OnBeforeDeactivateDisposed(object sender, EventArgs args)
 		{
 			OnBeforeDeactivate = null;
 		}
 
 		// Node
 
-		public override void HandleEvent(NodeEvent AEvent)
+		public override void HandleEvent(NodeEvent eventValue)
 		{
-			base.HandleEvent(AEvent);
-			if (!AEvent.IsHandled)
-				if (AEvent is ViewActionEvent)
+			base.HandleEvent(eventValue);
+			if (!eventValue.IsHandled)
+				if (eventValue is ViewActionEvent)
 				{
-					switch (((ViewActionEvent)AEvent).Action)
+					switch (((ViewActionEvent)eventValue).Action)
 					{
 						case (SourceActions.Post) :
-							if (FOnPost != null)
-								FOnPost.Execute(this, new EventParams());
+							if (_onPost != null)
+								_onPost.Execute(this, new EventParams());
 							break;
 						case (SourceActions.Cancel) :
-							if (FOnCancel != null)
-								FOnCancel.Execute(this, new EventParams());
+							if (_onCancel != null)
+								_onCancel.Execute(this, new EventParams());
 							break;
                         case (SourceActions.PostIfModified):
-                            if (FOnPost != null)
-                                FOnPost.Execute(this, new EventParams());
+                            if (_onPost != null)
+                                _onPost.Execute(this, new EventParams());
                             break;
 					}
 				}
-				else if ((AEvent is FormShownEvent) && (FOnShown != null))
-					FOnShown.Execute();
+				else if ((eventValue is FormShownEvent) && (_onShown != null))
+					_onShown.Execute();
 		}
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(IWindowsElement).IsAssignableFrom(AChildType))
-				return FRootElement == null;
+			if (typeof(IWindowsElement).IsAssignableFrom(childType))
+				return _rootElement == null;
 			return true;
 		}
 
-		protected override void InvalidChildError(INode AChild) 
+		protected override void InvalidChildError(INode child) 
 		{
 			throw new ClientException(ClientException.Codes.UseSingleElementNode);
 		}
 
-		protected override void AddChild(INode AChild)
+		protected override void AddChild(INode child)
 		{
-			base.AddChild(AChild);
-			if (AChild is IWindowsElement)
-				FRootElement = (IWindowsElement)AChild;
+			base.AddChild(child);
+			if (child is IWindowsElement)
+				_rootElement = (IWindowsElement)child;
 		}
 		
-		protected override void RemoveChild(INode AChild)
+		protected override void RemoveChild(INode child)
 		{
-			base.RemoveChild(AChild);
-			if (AChild == FRootElement)
-				FRootElement = null;
+			base.RemoveChild(child);
+			if (child == _rootElement)
+				_rootElement = null;
 		}
 
 		protected override void Activate()
@@ -399,9 +399,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				if (OnActivate != null)
 					OnActivate.Execute(this, new EventParams());
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Session.HandleException(LException);
+				Session.HandleException(exception);
 			}
 			InternalUpdateText();
 			base.Activate();
@@ -415,9 +415,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				if (OnAfterActivate != null)
 					OnAfterActivate.Execute(this, new EventParams());
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Session.HandleException(LException);
+				Session.HandleException(exception);
 			}
 		}
 
@@ -428,9 +428,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				if (OnBeforeDeactivate != null)
 					OnBeforeDeactivate.Execute(this, new EventParams());
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Session.HandleException(LException);
+				Session.HandleException(exception);
 			}
 			base.BeforeDeactivate();
 		}
@@ -464,18 +464,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return false;
 		}
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
-			if (FRootElement != null)
-				FRootElement.Layout(ABounds);
+			if (_rootElement != null)
+				_rootElement.Layout(bounds);
 		}
 		
 		protected override Size InternalMinSize
 		{
 			get
 			{
-				if (FRootElement != null)
-					return FRootElement.MinSize;
+				if (_rootElement != null)
+					return _rootElement.MinSize;
 				else
 					return Size.Empty;
 			}

@@ -27,119 +27,119 @@ namespace Alphora.Dataphor.DAE.Client
 	public abstract class DataSet : Component, IDisposableNotify, ISupportInitialize, IEnumerable
 	{
 		// Do not localize
-		public readonly static Char[] CColumnNameDelimiters = new Char[] {',',';'};
+		public readonly static Char[] ColumnNameDelimiters = new Char[] {',',';'};
 
 		public DataSet() : base()
 		{
-			FBuffer = new DataSetBuffer();
+			_buffer = new DataSetBuffer();
 			BufferClear();
-			FFields = new Schema.Objects(10);
-			FDataFields = new DataFields(this);
+			_fields = new Schema.Objects(10);
+			_dataFields = new DataFields(this);
 			RefreshAfterPost = true;
-			FIsWriteOnly = false;
+			_isWriteOnly = false;
 		}
 
-		public DataSet(IContainer AContainer) : this()
+		public DataSet(IContainer container) : this()
 		{
-			if (AContainer != null)
-				AContainer.Add(this);
+			if (container != null)
+				container.Add(this);
 		}
 
-		protected virtual void InternalDispose(bool ADisposing)
+		protected virtual void InternalDispose(bool disposing)
 		{
 			Close();
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (ADisposing)	// If not being properly disposed, don't bother, just causes errors
+			if (disposing)	// If not being properly disposed, don't bother, just causes errors
 			{
-				FDisposing = true;
+				_disposing = true;
 				try
 				{
 					try
 					{
-						InternalDispose(ADisposing);
+						InternalDispose(disposing);
 					}
 					finally
 					{
-						base.Dispose(ADisposing);
+						base.Dispose(disposing);
 
-						if (FFields != null)
+						if (_fields != null)
 						{
-							FFields.Clear();
-							FFields = null;
+							_fields.Clear();
+							_fields = null;
 						}
 
-						if (FSources != null)
+						if (_sources != null)
 						{
-							while(FSources.Count != 0)
-								FSources[FSources.Count - 1].DataSet = null;
-							FSources = null;
+							while(_sources.Count != 0)
+								_sources[_sources.Count - 1].DataSet = null;
+							_sources = null;
 						}
 
 						ClearOriginalRow();
 
-						if (FBuffer != null)
+						if (_buffer != null)
 						{
-							FBuffer.Dispose();
-							FBuffer = null; 
+							_buffer.Dispose();
+							_buffer = null; 
 						}
 					}
 				}
 				finally
 				{
-					FDisposing = false;
+					_disposing = false;
 				}
 			}
 		}
 		
-		protected bool FDisposing;
+		protected bool _disposing;
 		
 		#region Buffer Maintenance
 
 		// <summary> Row buffer.  Always contains at least two Rows. </summary>
-		internal DataSetBuffer FBuffer;
+		internal DataSetBuffer _buffer;
 
 		// <summary> The number of "filled" rows in the buffer. </summary>
-		private int FEndOffset;
+		private int _endOffset;
 
 		/// <summary> Offset of current Row from origin of buffer. </summary>
-		private int FCurrentOffset;
+		private int _currentOffset;
 
 		/// <summary> Offset of active Row from origin of buffer. </summary>
-		internal int FActiveOffset;
+		internal int _activeOffset;
 
 		/// <summary> The actively selected row of the DataSet's buffer. </summary>
 		[Browsable(false)]
-		public Row ActiveRow { get { return FBuffer[FActiveOffset].Row; } }
+		public Row ActiveRow { get { return _buffer[_activeOffset].Row; } }
 		
 		/// <summary> Tracks whether the values for each column in the active row have been modified. </summary>
-		protected internal BitArray FValueFlags;
+		protected internal BitArray _valueFlags;
 		
-		protected Row FOriginalRow;
+		protected Row _originalRow;
 		/// <summary> Tracks the original row during an edit. </summary>
 		/// <remarks> The original values for a row can only be accessed when the dataset is in edit state. </remarks>
 		protected internal Row OriginalRow
 		{
 			get
 			{
-				if (FState == DataSetState.Edit)
+				if (_state == DataSetState.Edit)
 					throw new ClientException(ClientException.Codes.OriginalValueNotAvailable);
-				return FOriginalRow;
+				return _originalRow;
 			}
 		}
 
-		protected Row FOldRow;
+		protected Row _oldRow;
 		/// <summary> The old row for the current row changed event. </summary>
 		/// <remarks> This property can only be accessed during change events for the field and dataset. </remarks>
 		protected internal Row OldRow
 		{
 			get
 			{
-				if (FOldRow == null)
+				if (_oldRow == null)
 					throw new ClientException(ClientException.Codes.OldValueNotAvailable);
-				return FOldRow;
+				return _oldRow;
 			}
 		}
 
@@ -148,77 +148,77 @@ namespace Alphora.Dataphor.DAE.Client
 		[Browsable(false)]
 		public int BufferCount
 		{
-			get { return FBuffer.Count - 1; }
+			get { return _buffer.Count - 1; }
 		}
 
 		internal int EndOffset
 		{
-			get { return FEndOffset; }
+			get { return _endOffset; }
 		}
 
 		protected Row RememberActive()
 		{
-			if (FActiveOffset <= FEndOffset)
-				return (Row)FBuffer[FActiveOffset].Row.Copy();
+			if (_activeOffset <= _endOffset)
+				return (Row)_buffer[_activeOffset].Row.Copy();
 			else
 				return null;
 		}
 
 		private void SaveOriginalRow()
 		{
-			Row LRow = RememberActive();
-			if (LRow != null)
-				FOriginalRow = LRow;
+			Row row = RememberActive();
+			if (row != null)
+				_originalRow = row;
 			else
 				ClearOriginalRow();
 				
-			if (FValueFlags != null)
-				FValueFlags.SetAll(false);
+			if (_valueFlags != null)
+				_valueFlags.SetAll(false);
 		}
 		
 		private void ClearOriginalRow()
 		{
-			if (FOriginalRow != null)
+			if (_originalRow != null)
 			{
-				FOriginalRow.Dispose();
-				FOriginalRow = null;
+				_originalRow.Dispose();
+				_originalRow = null;
 			}
 			
-			if (FValueFlags != null)
-				FValueFlags.SetAll(false);
+			if (_valueFlags != null)
+				_valueFlags.SetAll(false);
 		}
 		
 		/// <summary> Used when the cursor no longer is in sync with the current row offset value. </summary>
 		private void CurrentReset()
 		{
-			FCurrentOffset = -1;
+			_currentOffset = -1;
 		}
 		
 		/// <summary> Sets the underlying cursor to the active row. </summary>
-		/// <param name="AStrict"> If true, will throw and exception if unable to position on the buffered row. </param>
-		private void CurrentGotoActive(bool AStrict)
+		/// <param name="strict"> If true, will throw and exception if unable to position on the buffered row. </param>
+		private void CurrentGotoActive(bool strict)
 		{
-			if (FEndOffset > -1)
-				CurrentGoto(FActiveOffset, AStrict, true);
+			if (_endOffset > -1)
+				CurrentGoto(_activeOffset, strict, true);
 		}
 		
 		/// <summary> Sets the underlying cursor to a specific buffer row. </summary>
-		/// <param name="AStrict"> If true, will throw an exception if unable to position on the buffered row. </param>
-		/// <param name="AForward"> Hint about the intended direction of movement after cursor positioning. </param>
-		private void CurrentGoto(int AValue, bool AStrict, bool AForward)
+		/// <param name="strict"> If true, will throw an exception if unable to position on the buffered row. </param>
+		/// <param name="forward"> Hint about the intended direction of movement after cursor positioning. </param>
+		private void CurrentGoto(int value, bool strict, bool forward)
 		{
-			if (FCurrentOffset != AValue)
+			if (_currentOffset != value)
 			{
-				RowFlag LFlag = FBuffer[AValue].RowFlag;
+				RowFlag flag = _buffer[value].RowFlag;
 				
 				// If exception is thrown, current should still be valid (cursor should not move if unable to comply)
-				bool LResult;
-				if ((LFlag & RowFlag.Data) != 0)
-					LResult = InternalGotoBookmark(FBuffer[AValue].Bookmark, AForward);
-				else if ((LFlag & RowFlag.Inserted) != 0)
+				bool result;
+				if ((flag & RowFlag.Data) != 0)
+					result = InternalGotoBookmark(_buffer[value].Bookmark, forward);
+				else if ((flag & RowFlag.Inserted) != 0)
 				{
-					LResult = true;
-					if ((LFlag & RowFlag.BOF) != 0)
+					result = true;
+					if ((flag & RowFlag.BOF) != 0)
 					{
 						InternalFirst();
 						InternalNext();
@@ -234,109 +234,111 @@ namespace Alphora.Dataphor.DAE.Client
 					// If there is no bookmark, we are on an inserted row and RefreshAfterPost is false so the cursor has not been
 					// repositioned to the newly inserted row. However, if the cursor is searchable, we should be able to reposition
 					// to the newly inserted row using the row values, rather than a bookmark.
-					LResult = InternalFindKey(FBuffer[AValue].Row);
+					result = InternalFindKey(_buffer[value].Row);
 				}
 
-				if (AStrict && !LResult)
+				if (strict && !result)
 					throw new ClientException(ClientException.Codes.BookmarkNotFound);
 
-				FCurrentOffset = AValue;
+				_currentOffset = value;
 			}
 		}
 
 		private void FinalizeBuffers(int LFirst, int LLast)
 		{
-			Guid[] LBookmarks = new Guid[LLast - LFirst + 1];
+			List<Guid> bookmarks = new List<Guid>(LLast - LFirst + 1);
 			for (int i = LFirst; i <= LLast; i++)
 			{
-				LBookmarks[i - LFirst] = FBuffer[i].Bookmark;
-				FBuffer[i].Bookmark = Guid.Empty;
-				FBuffer[i].Row.ClearValues();
+				var bookmark = _buffer[i].Bookmark;
+				if (bookmark != Guid.Empty)
+					bookmarks.Add(bookmark);
+				_buffer[i].Bookmark = Guid.Empty;
+				_buffer[i].Row.ClearValues();
 			}
-			InternalDisposeBookmarks(LBookmarks);
+			InternalDisposeBookmarks(bookmarks.ToArray());
 		}
 
-		private void FinalizeBuffer(DataSetRow ARow)
+		private void FinalizeBuffer(DataSetRow row)
 		{
-			if (ARow.Bookmark != Guid.Empty)
+			if (row.Bookmark != Guid.Empty)
 			{
-				InternalDisposeBookmark(ARow.Bookmark);
-				ARow.Bookmark = Guid.Empty;
+				InternalDisposeBookmark(row.Bookmark);
+				row.Bookmark = Guid.Empty;
 			}
-			ARow.Row.ClearValues();
+			row.Row.ClearValues();
 		}
 
 		/// <summary> Selects values from cursor into specified Row of buffer. </summary>
-		private void CursorSelect(int AIndex)
+		private void CursorSelect(int index)
 		{
-			DataSetRow LRow = FBuffer[AIndex];
-			FinalizeBuffer(LRow);
-			InternalSelect(LRow.Row);
-			LRow.Bookmark = InternalGetBookmark();
-			LRow.RowFlag = RowFlag.Data;
+			DataSetRow row = _buffer[index];
+			FinalizeBuffer(row);
+			InternalSelect(row.Row);
+			row.Bookmark = InternalGetBookmark();
+			row.RowFlag = RowFlag.Data;
 		}
 
 		private void BufferClear()
 		{
-			FEndOffset = -1;
-			FActiveOffset = 0;
-			FCurrentOffset = -1;
-			FInternalBOF = true;
-			FInternalEOF = true;
+			_endOffset = -1;
+			_activeOffset = 0;
+			_currentOffset = -1;
+			_internalBOF = true;
+			_internalEOF = true;
 		}
 		
 		private void BufferActivate()
 		{
-			FEndOffset = 0;
-			FActiveOffset = 0;
-			FCurrentOffset = 0;
-			FInternalBOF = false;
-			FInternalEOF = false;
+			_endOffset = 0;
+			_activeOffset = 0;
+			_currentOffset = 0;
+			_internalBOF = false;
+			_internalEOF = false;
 		}
 		
 		// Closes the buffer, finalizing the rows it contains, but leaves the buffer space intact. Used when closing the underlying cursor.
 		private void BufferClose()
 		{
 			BufferClear();
-			FinalizeBuffers(0, FBuffer.Count - 1);
+			FinalizeBuffers(0, _buffer.Count - 1);
 		}
 
 		// Closes the buffer, finalizing the rows it contains, and clearing the buffer space. Only used when closing the dataset.
 		private void CloseBuffer()
 		{
 			BufferClose();
-			FBuffer.Clear();
+			_buffer.Clear();
 		}
 
 		/// <summary> Reads a row into the end of the buffer, scrolling if necessary. </summary>
 		/// <remarks> This call will adjust FCurrentOffset, FActiveOffset, and FEndOffset appropriately. </remarks>
 		private bool CursorNextRow()
 		{
-			bool LGetNext = true;
+			bool getNext = true;
 
 			// Navigate to the last occupied row in the buffer
-			if (FEndOffset >= 0)
+			if (_endOffset >= 0)
 			{
-				if ((FBuffer[FEndOffset].RowFlag & RowFlag.EOF) != 0)
+				if ((_buffer[_endOffset].RowFlag & RowFlag.EOF) != 0)
 					return false;
 
-				CurrentGoto(FEndOffset, false, true);
+				CurrentGoto(_endOffset, false, true);
 			
 				// Skip the move next if the row in question is being inserted (it's cursor info is a duplicate of the preceeding row)
-				if ((FState == DataSetState.Insert) && (FCurrentOffset == FActiveOffset))
-					LGetNext = false;
+				if ((_state == DataSetState.Insert) && (_currentOffset == _activeOffset))
+					getNext = false;
 			}
 
 			// Attempt to navigate to the next row
-			if (LGetNext && !InternalNext())
+			if (getNext && !InternalNext())
 			{
 				CurrentReset();
-				if (FEndOffset >= 0)
-					FBuffer[FEndOffset].RowFlag |= RowFlag.EOF;
+				if (_endOffset >= 0)
+					_buffer[_endOffset].RowFlag |= RowFlag.EOF;
 				return false;
 			}
 
-			if (FEndOffset == -1)
+			if (_endOffset == -1)
 			{
 				// Initially active the buffer
 				CursorSelect(0);
@@ -344,31 +346,31 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			else
 			{
-				if (FEndOffset < (FBuffer.Count - 2))
+				if (_endOffset < (_buffer.Count - 2))
 				{
 					// Add an additional row to the buffer
-					FEndOffset++;
-					CursorSelect(FEndOffset);
+					_endOffset++;
+					CursorSelect(_endOffset);
 				}
 				else
 				{
 					// Scroll the buffer, there are no more available rows
-					CursorSelect(FEndOffset + 1);
-					FBuffer.Move(0, FEndOffset + 1);
-					FActiveOffset--;		// Note that this could potentially place the active offset outside of the buffer boundary (the caller should account for this)
+					CursorSelect(_endOffset + 1);
+					_buffer.Move(0, _endOffset + 1);
+					_activeOffset--;		// Note that this could potentially place the active offset outside of the buffer boundary (the caller should account for this)
 				}
 			}
-			FCurrentOffset = FEndOffset;
+			_currentOffset = _endOffset;
 			return true;
 		}
 		
 		/// <summary> Reads rows onto the end of the buffer until the buffer is full. </summary>
 		private int CursorNextRows()
 		{
-			int LResult = 0;
-			while ((FEndOffset < (FBuffer.Count - 2)) && CursorNextRow())
-				LResult++;
-			return LResult;
+			int result = 0;
+			while ((_endOffset < (_buffer.Count - 2)) && CursorNextRow())
+				result++;
+			return result;
 		}
 
 		/// <summary> Reads a row into the beginning of the buffer scrolling others down. </summary>
@@ -376,9 +378,9 @@ namespace Alphora.Dataphor.DAE.Client
 		private bool CursorPriorRow()
 		{
 			// Navigate to the first row in the buffer (if we have one)
-			if (FEndOffset > -1)
+			if (_endOffset > -1)
 			{
-				if ((FBuffer[0].RowFlag & RowFlag.BOF) != 0)
+				if ((_buffer[0].RowFlag & RowFlag.BOF) != 0)
 					return false;
 
 				CurrentGoto(0, false, false);
@@ -388,26 +390,26 @@ namespace Alphora.Dataphor.DAE.Client
 			if (!InternalPrior())
 			{
 				CurrentReset();
-				if (FEndOffset > -1)
-					FBuffer[0].RowFlag |= RowFlag.BOF;
+				if (_endOffset > -1)
+					_buffer[0].RowFlag |= RowFlag.BOF;
 				return false;
 			}
 		
 			// Select a row into the scratchpad row
-			CursorSelect(FEndOffset + 1);
+			CursorSelect(_endOffset + 1);
 		
-			if (FEndOffset == -1)
+			if (_endOffset == -1)
 				BufferActivate();	// Initially activate the buffer
 			else
 			{
 				// Move the scratchpad row into the first slot of the buffer and updated the other offsets
-				FBuffer.Move(FEndOffset + 1, 0);
-				if (FEndOffset < (FBuffer.Count - 2))
-					FEndOffset++;
-				FActiveOffset++;	// Note that this could potentially place the active offset outside of the buffer boundary (the caller should account for this)
+				_buffer.Move(_endOffset + 1, 0);
+				if (_endOffset < (_buffer.Count - 2))
+					_endOffset++;
+				_activeOffset++;	// Note that this could potentially place the active offset outside of the buffer boundary (the caller should account for this)
 			}
 
-			FCurrentOffset = 0;		
+			_currentOffset = 0;		
 			
 			return true;
 		}
@@ -415,16 +417,16 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Reads records onto the beginning of the buffer until it is full. </summary>
 		private int CursorPriorRows()
 		{
-			int LResult = 0;
-			while ((FEndOffset < (FBuffer.Count - 2)) && CursorPriorRow())
-				LResult++;
-			return LResult;
+			int result = 0;
+			while ((_endOffset < (_buffer.Count - 2)) && CursorPriorRow())
+				result++;
+			return result;
 		}
 		
 		/// <summary> Resyncronizes the row buffer from the cursor. </summary>
-		private void Resync(bool AExact, bool ACenter)
+		private void Resync(bool exact, bool center)
 		{
-			if (AExact)
+			if (exact)
 			{
 				CurrentReset();
 				if (InternalGetBOF() || InternalGetEOF())
@@ -455,17 +457,17 @@ namespace Alphora.Dataphor.DAE.Client
 				#endif
 			}
 			CursorSelect(0);
-			int LOffset;
-			if (ACenter)
-				LOffset = (FBuffer.Count - 2) / 2;
+			int offset;
+			if (center)
+				offset = (_buffer.Count - 2) / 2;
 			else
-				LOffset = FActiveOffset;
+				offset = _activeOffset;
 			BufferActivate();
 
 			try
 			{
-				while ((LOffset > 0) && CursorPriorRow())
-					LOffset--;
+				while ((offset > 0) && CursorPriorRow())
+					offset--;
 				CursorNextRows();
 				CursorPriorRows();
 			}
@@ -476,103 +478,103 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 
 		/// <summary> Reactivates the buffer, optionally from a row. </summary>
-		/// <param name="ARow"> An optional row indicating a row to sync to. </param>
-		private void Resume(Row ARow)
+		/// <param name="row"> An optional row indicating a row to sync to. </param>
+		private void Resume(Row row)
 		{
-			if (ARow != null)
-				FindNearest(ARow);
+			if (row != null)
+				FindNearest(row);
 			else
 			{
 				BufferClear();
 				try
 				{
 					CursorNextRows();
-					if (FEndOffset >= 0)
-						FBuffer[0].RowFlag |= RowFlag.BOF;
+					if (_endOffset >= 0)
+						_buffer[0].RowFlag |= RowFlag.BOF;
 				}
 				finally
 				{
-					FInternalBOF = true;
+					_internalBOF = true;
 					ForcedDataChanged();
 				}
 			}
 		}
 
 		/// <summary> Updates the number and values of rows in the buffer. </summary>
-		/// <param name="AFirst"> When true, no attempt is made to fill the datasource "backwards". </param>
-		internal void BufferUpdateCount(bool AFirst)
+		/// <param name="first"> When true, no attempt is made to fill the datasource "backwards". </param>
+		internal void BufferUpdateCount(bool first)
 		{
 			int i;
-			DataLink[] LLinks = EnumerateLinks();
+			DataLink[] links = EnumerateLinks();
 
 			// Determine the range of buffer utilization from the links
-			int LMin = FActiveOffset;
-			int LMax = FActiveOffset;
-			foreach (DataLink LLink in LLinks)
+			int min = _activeOffset;
+			int max = _activeOffset;
+			foreach (DataLink link in links)
 			{
-				LLink.UpdateRange();	// Make sure the link's virtual buffer range encompasses the active row
-				LMin = Math.Min(LMin, LLink.FFirstOffset);
-				LMax = Math.Max(LMax, (LLink.FFirstOffset + (LLink.BufferCount - 1)));
+				link.UpdateRange();	// Make sure the link's virtual buffer range encompasses the active row
+				min = Math.Min(min, link._firstOffset);
+				max = Math.Max(max, (link._firstOffset + (link.BufferCount - 1)));
 			}
 
-			if ((LMin != 0) || (LMax != (FBuffer.Count - 2)))
+			if ((min != 0) || (max != (_buffer.Count - 2)))
 			{
 				// Add the necessary rows to reach the new capacity
-				FBuffer.Add(Math.Max(0, (LMax - LMin) - (FBuffer.Count - 2)), this);
+				_buffer.Add(Math.Max(0, (max - min) - (_buffer.Count - 2)), this);
 
 				// Adjust the beginning of the buffer
-				int LOffsetDelta;
-				if (LMin > 0)
+				int offsetDelta;
+				if (min > 0)
 				{
 					// Remove any unneeded rows from the beginning of the buffer
-					LOffsetDelta = -LMin;
-					FinalizeBuffers(0, LMin - 1);
-					for (i = 0; i < LMin; i++)
-						FBuffer.RemoveAt(0);
-					if (FCurrentOffset > LMin)
+					offsetDelta = -min;
+					FinalizeBuffers(0, min - 1);
+					for (i = 0; i < min; i++)
+						_buffer.RemoveAt(0);
+					if (_currentOffset > min)
 						CurrentReset();
 					else
-						FCurrentOffset += LOffsetDelta;
-					FActiveOffset += LOffsetDelta;
-					FEndOffset += LOffsetDelta;
+						_currentOffset += offsetDelta;
+					_activeOffset += offsetDelta;
+					_endOffset += offsetDelta;
 				}
 				else
 				{
 					// Add any newly needed rows to the bottom of the buffer
-					LOffsetDelta = 0;
-					if (!AFirst)
-						for (i = 0; i > LMin; i--)
+					offsetDelta = 0;
+					if (!first)
+						for (i = 0; i > min; i--)
 							if (!CursorPriorRow())
 								break;
 							else
-								LOffsetDelta++;
+								offsetDelta++;
 				}
 
 				// Adjust the end of the buffer
-				int LNewEnd = LMax - LMin;
-				if (LNewEnd < (FBuffer.Count - 2))
+				int newEnd = max - min;
+				if (newEnd < (_buffer.Count - 2))
 				{
 					// Shrink the end of the buffer
-					FinalizeBuffers(LNewEnd + 1, (FBuffer.Count - 2));
-					for (i = (FBuffer.Count - 2); i > LNewEnd; i--)
-						FBuffer.RemoveAt(i);
-					if (FCurrentOffset > LNewEnd)
+					FinalizeBuffers(newEnd + 1, (_buffer.Count - 2));
+					for (i = (_buffer.Count - 2); i > newEnd; i--)
+						_buffer.RemoveAt(i);
+					if (_currentOffset > newEnd)
 						CurrentReset();
-					if (FEndOffset > LNewEnd)
-						FEndOffset = LNewEnd;
+					if (_endOffset > newEnd)
+						_endOffset = newEnd;
 				}
 				
 				// Grow the end of the buffer if necessary
 				CursorNextRows();
 
 				// Indicate that the the first row is BOF (if we are told that the cursor is located at the first row)
-				if (AFirst && (FEndOffset >= 0))
-					FBuffer[0].RowFlag |= RowFlag.BOF;
+				if (first && (_endOffset >= 0))
+					_buffer[0].RowFlag |= RowFlag.BOF;
 
 				// Delta each DataLink to maintain the same relative position within their buffers
-				if (LOffsetDelta != 0)
-					foreach (DataLink LLink in LLinks)
-						LLink.UpdateFirstOffset(LOffsetDelta);
+				if (offsetDelta != 0)
+					foreach (DataLink link in links)
+						link.UpdateFirstOffset(offsetDelta);
 			}
 		}
 		
@@ -594,7 +596,7 @@ namespace Alphora.Dataphor.DAE.Client
 		// Navigable
 		protected abstract bool InternalNext();
 		protected abstract void InternalLast();
-		protected abstract void InternalSelect(Row ARow);
+		protected abstract void InternalSelect(Row row);
 		protected abstract void InternalReset();
 		protected abstract bool InternalGetBOF();
 		protected abstract bool InternalGetEOF();
@@ -605,90 +607,90 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		// Bookmarkable
 		protected abstract Guid InternalGetBookmark();
-		protected abstract bool InternalGotoBookmark(Guid ABookmark, bool AForward);
-		protected abstract void InternalDisposeBookmark(Guid ABookmark);
-		protected abstract void InternalDisposeBookmarks(Guid[] ABookmarks);
+		protected abstract bool InternalGotoBookmark(Guid bookmark, bool forward);
+		protected abstract void InternalDisposeBookmark(Guid bookmark);
+		protected abstract void InternalDisposeBookmarks(Guid[] bookmarks);
 		
 		// Searchable
-		protected abstract void InternalRefresh(Row ARow);
+		protected abstract void InternalRefresh(Row row);
 		protected abstract Row InternalGetKey();
-		protected abstract bool InternalFindKey(Row AKey);
-		protected abstract void InternalFindNearest(Row AKey);
+		protected abstract bool InternalFindKey(Row key);
+		protected abstract void InternalFindNearest(Row key);
 
 		// Updateable
 		protected virtual void InternalEdit() {}
 		protected virtual void InternalInsertAppend() {}
-		protected virtual void InternalInitializeRow(Row ARow)
+		protected virtual void InternalInitializeRow(Row row)
 		{
-			InternalDefault(ARow);
+			InternalDefault(row);
 		}
 		protected virtual void InternalCancel() {}
-		protected virtual void InternalValidate(bool AIsPosting) 
+		protected virtual void InternalValidate(bool isPosting) 
 		{
 			// Ensure that all non-nillable are not nil
-			foreach (DAE.Schema.TableVarColumn LColumn in TableVar.Columns)
-				if (!LColumn.IsNilable && this[LColumn.Name].IsNil)
+			foreach (DAE.Schema.TableVarColumn column in TableVar.Columns)
+				if (!column.IsNilable && this[column.Name].IsNil)
 				{
-					this[LColumn.Name].FocusControl();
-					throw new ClientException(ClientException.Codes.ColumnRequired, LColumn.Name);
+					this[column.Name].FocusControl();
+					throw new ClientException(ClientException.Codes.ColumnRequired, column.Name);
 				}
 		}
 
-		protected virtual void InternalDefault(Row ARow)
+		protected virtual void InternalDefault(Row row)
 		{
 			DoDefault();
 		}
 		
-		protected virtual bool InternalColumnChanging(DataField AField, Row AOldRow, Row ANewRow)
+		protected virtual bool InternalColumnChanging(DataField field, Row oldRow, Row newRow)
 		{
-			DoRowChanging(AField);
+			DoRowChanging(field);
 			return true;
 		}
 		
-		protected virtual bool InternalColumnChanged(DataField AField, Row AOldRow, Row ANewRow)
+		protected virtual bool InternalColumnChanged(DataField field, Row oldRow, Row newRow)
 		{
-			DoRowChanged(AField);
+			DoRowChanged(field);
 			return true;
 		}
 		
-		protected virtual void InternalChangeColumn(DataField AField, Row AOldRow, Row ANewRow)
+		protected virtual void InternalChangeColumn(DataField field, Row oldRow, Row newRow)
 		{
 			try
 			{
-				InternalColumnChanging(AField, AOldRow, ANewRow);
+				InternalColumnChanging(field, oldRow, newRow);
 			}
 			catch
 			{
-				if (AOldRow.HasValue(AField.ColumnIndex))
-					ANewRow[AField.ColumnIndex] = AOldRow[AField.ColumnIndex];
+				if (oldRow.HasValue(field.ColumnIndex))
+					newRow[field.ColumnIndex] = oldRow[field.ColumnIndex];
 				else
-					ANewRow.ClearValue(AField.ColumnIndex);
+					newRow.ClearValue(field.ColumnIndex);
 				throw;
 			}
 			
-			InternalColumnChanged(AField, AOldRow, ANewRow);
+			InternalColumnChanged(field, oldRow, newRow);
 		}
 		
-		protected abstract void InternalPost(Row ARow);
+		protected abstract void InternalPost(Row row);
 		protected abstract void InternalDelete();
-		protected abstract void InternalCursorSetChanged(Row ARow, bool AReprepare);
+		protected abstract void InternalCursorSetChanged(Row row, bool reprepare);
 
 		#endregion
 		
 		#region DataLinks & Sources
 
-		private List<DataSource> FSources = new List<DataSource>();
+		private List<DataSource> _sources = new List<DataSource>();
 
-		internal void AddSource(DataSource ADataSource)
+		internal void AddSource(DataSource dataSource)
 		{
-			FSources.Add(ADataSource);
+			_sources.Add(dataSource);
 			if (Active)
 				BufferUpdateCount(false);
 		}
 
-		internal void RemoveSource(DataSource ADataSource)
+		internal void RemoveSource(DataSource dataSource)
 		{
-			FSources.Remove(ADataSource);
+			_sources.Remove(dataSource);
 			if (Active)
 				BufferUpdateCount(false);
 		}
@@ -696,9 +698,9 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Requests that the associated links make any pending updates to the DataSet. </summary>
 		public void RequestSave()
 		{
-			if ((FState == DataSetState.Edit) || (FState == DataSetState.Insert))
-				foreach (DataLink LLink in EnumerateLinks())
-					LLink.SaveRequested();
+			if ((_state == DataSetState.Edit) || (_state == DataSetState.Insert))
+				foreach (DataLink link in EnumerateLinks())
+					link.SaveRequested();
 		}
 		
 		/// <summary> Returns the current set of DataLinks that are associated with all DataSources that reference this DataSet. </summary>
@@ -708,10 +710,10 @@ namespace Alphora.Dataphor.DAE.Client
 		///	</returns>
 		protected DataLink[] EnumerateLinks()
 		{
-			List<DataLink> LTempList = new List<DataLink>();
-			foreach (DataSource LSource in FSources)
-				LSource.EnumerateLinks(LTempList);
-			return LTempList.ToArray();
+			List<DataLink> tempList = new List<DataLink>();
+			foreach (DataSource source in _sources)
+				source.EnumerateLinks(tempList);
+			return tempList.ToArray();
 		}
 								
 		#endregion
@@ -767,14 +769,14 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <remarks> If the DataSet is already active, then this method has no effect. </remarks>
 		public void Open()
 		{
-			if (FState == DataSetState.Inactive)
+			if (_state == DataSetState.Inactive)
 			{
 				DoBeforeOpen();
 				InternalConnect();
 				InternalOpen();
 				CreateFields();
 				BufferUpdateCount(true);
-				FInternalBOF = true;
+				_internalBOF = true;
 				try
 				{
 					SetState(DataSetState.Browse);
@@ -805,7 +807,7 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <remarks> If the DataSet is in Insert or Edit state, a cancel is performed prior to closing. </remarks>
 		public void Close()
 		{
-			if (FState != DataSetState.Inactive)
+			if (_state != DataSetState.Inactive)
 			{
 				Cancel();
 				DoBeforeClose();
@@ -818,37 +820,37 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region State
 
-		private DataSetState FState;
+		private DataSetState _state;
 		/// <summary> The current state of the DataSet. </summary>
 		[Browsable(false)]
-		public DataSetState State { get { return FState; } }
+		public DataSetState State { get { return _state; } }
 
 		/// <summary> Throws an exception if the the DataSet's state is in the given set of states. </summary>
-		public void CheckState(params DataSetState[] AStates)
+		public void CheckState(params DataSetState[] states)
 		{
-			foreach (DataSetState LState in AStates)
-				if (FState == LState)
+			foreach (DataSetState state in states)
+				if (_state == state)
 					return;
-			throw new ClientException(ClientException.Codes.IncorrectState, FState.ToString());
+			throw new ClientException(ClientException.Codes.IncorrectState, _state.ToString());
 		}
 
 		//Note: SetState has side affects, there is no guarantee that the state has not changed if an exception is thrown.
-		private void SetState(DataSetState AState)
+		private void SetState(DataSetState state)
 		{
-			if (FState != AState)
+			if (_state != state)
 			{
-				FState = AState;
-				FIsModified = false;
+				_state = state;
+				_isModified = false;
 				StateChanged();
 			}
 		}
 		
 		/// <summary>Forces a set state, ignoring any exceptions that occur.</summary>
-		private void ForcedSetState(DataSetState AState)
+		private void ForcedSetState(DataSetState state)
 		{
 			try
 			{
-				SetState(AState);
+				SetState(state);
 			}
 			catch
 			{
@@ -856,14 +858,14 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		protected void EnsureBrowseState(bool APostChanges)
+		protected void EnsureBrowseState(bool postChanges)
 		{
 			CheckActive();
 
-			if ((FState == DataSetState.Edit) || (FState == DataSetState.Insert))
+			if ((_state == DataSetState.Edit) || (_state == DataSetState.Insert))
 			{
 				RequestSave();
-				if (IsModified && APostChanges)
+				if (IsModified && postChanges)
 					Post();
 				else
 					Cancel();
@@ -883,14 +885,14 @@ namespace Alphora.Dataphor.DAE.Client
 		[RefreshProperties(RefreshProperties.Repaint)]
 		public bool Active
 		{
-			get { return FState != DataSetState.Inactive; }
+			get { return _state != DataSetState.Inactive; }
 			set
 			{
-				if (FInitializing)
-					FDelayedActive = value;
+				if (_initializing)
+					_delayedActive = value;
 				else
 				{
-					if (value != (FState != DataSetState.Inactive))
+					if (value != (_state != DataSetState.Inactive))
 					{
 						if (value)
 							Open();
@@ -904,18 +906,18 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Throws an exception if the DataSet is not active. </summary>
 		public void CheckActive()
 		{
-			if (FState == DataSetState.Inactive)
+			if (_state == DataSetState.Inactive)
 				throw new ClientException(ClientException.Codes.NotActive);
 		}
 		
 		/// <summary> Throws an exception if the DataSet is active. </summary>
 		public void CheckInactive()
 		{
-			if (FState != DataSetState.Inactive)
+			if (_state != DataSetState.Inactive)
 				throw new ClientException(ClientException.Codes.Active);
 		}
 
-		protected void CursorSetChanged(Row ARow, bool AReprepare)
+		protected void CursorSetChanged(Row row, bool reprepare)
 		{
 			if (State != DataSetState.Inactive)
 			{
@@ -923,14 +925,14 @@ namespace Alphora.Dataphor.DAE.Client
 				BufferClose();
 				try
 				{
-					InternalCursorSetChanged(ARow, AReprepare);
+					InternalCursorSetChanged(row, reprepare);
 				}
 				catch
 				{
 					Close();
 					throw;
 				}
-				Resume(ARow);
+				Resume(row);
 			}
 		}
 		
@@ -938,36 +940,36 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region ISupportInitialize
 
-		private bool FInitializing;
+		private bool _initializing;
 
 		// The Active properties value during the intialization period defined in ISupportInitialize.
-		private bool FDelayedActive;
+		private bool _delayedActive;
 
 		/// <summary> Called to indicate that the properties of the DataSet are being read (and therefore DataSet should not activate yet). </summary>
 		public void BeginInit()
 		{
-			FInitializing = true;
+			_initializing = true;
 		}
 
 		/// <summary> Called to indicate that the properties of the DataSet have been read (and therefore the DataSet can be activated). </summary>
 		public virtual void EndInit()
 		{
-			FInitializing = false;
-			Active = FDelayedActive;
+			_initializing = false;
+			Active = _delayedActive;
 		}
 
 		#endregion
 
 		#region Navigation
 		
-		private bool FInternalBOF;
+		private bool _internalBOF;
 
 		/// <summary> True when the DataSet is on its first row. </summary>
 		/// <remarks> Note that this may not be set until attempting to navigate past the first row. </remarks>
 		[Browsable(false)]
 		public bool IsFirstRow
 		{
-			get { return FInternalBOF || ((FActiveOffset >= 0) && ((FBuffer[FActiveOffset].RowFlag & RowFlag.BOF) != 0)); }
+			get { return _internalBOF || ((_activeOffset >= 0) && ((_buffer[_activeOffset].RowFlag & RowFlag.BOF) != 0)); }
 		}
 		
 		/// <summary> True when the DataSet is on its first row. </summary>
@@ -975,17 +977,17 @@ namespace Alphora.Dataphor.DAE.Client
 		[Browsable(false)]
 		public bool BOF
 		{
-			get { return FInternalBOF; }
+			get { return _internalBOF; }
 		}
 
-		private bool FInternalEOF;
+		private bool _internalEOF;
 
 		/// <summary> True when the DataSet is on its last row. </summary>
 		/// <remarks> Note that this may not be set until attempting to navigate past the last row. </remarks>
 		[Browsable(false)]
 		public bool IsLastRow
 		{
-			get { return FInternalEOF || ((FActiveOffset >= 0) && ((FBuffer[FActiveOffset].RowFlag & RowFlag.EOF) != 0)); }
+			get { return _internalEOF || ((_activeOffset >= 0) && ((_buffer[_activeOffset].RowFlag & RowFlag.EOF) != 0)); }
 		}
 		
 		/// <summary> True when the DataSet is on its last row. </summary>
@@ -993,7 +995,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[Browsable(false)]
 		public bool EOF
 		{
-			get { return FInternalEOF; }
+			get { return _internalEOF; }
 		}
 
 		/// <summary> Navigates the DataSet to the first row in the data set. </summary>
@@ -1006,12 +1008,12 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				InternalFirst();
 				CursorNextRows();
-				if (FEndOffset >= 0)
-					FBuffer[0].RowFlag |= RowFlag.BOF;
+				if (_endOffset >= 0)
+					_buffer[0].RowFlag |= RowFlag.BOF;
 			}
 			finally
 			{
-				FInternalBOF = true;
+				_internalBOF = true;
 				DoDataChanged();
 			}
 		}
@@ -1029,77 +1031,77 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			finally
 			{
-				FInternalEOF = true;
+				_internalEOF = true;
 				DoDataChanged();
 			}
 		}
 		
 		/// <summary> Attempts to scroll the DataSet by the specified delta. </summary>
 		/// <remarks> Any outstanding Insert or Edit will first be posted. </remarks>
-		/// <param name="ADelta"> Number of rows, positive or negative to move relative to the current active row. </param>
+		/// <param name="delta"> Number of rows, positive or negative to move relative to the current active row. </param>
 		/// <returns> Number of rows actually scrolled. </returns>
-		public int MoveBy(int ADelta)
+		public int MoveBy(int delta)
 		{
-			int LResult = 0;
-			if (ADelta != 0)
+			int result = 0;
+			if (delta != 0)
 			{
 				EnsureBrowseState();
-				if (((ADelta > 0) && !IsLastRow) || ((ADelta < 0) && !IsFirstRow))
+				if (((delta > 0) && !IsLastRow) || ((delta < 0) && !IsFirstRow))
 				{
-					FInternalBOF = false;
-					FInternalEOF = false;
-					int LOffsetDelta = 0;
-					bool LWillScroll;
+					_internalBOF = false;
+					_internalEOF = false;
+					int offsetDelta = 0;
+					bool willScroll;
 					try
 					{
-						if (ADelta > 0)
+						if (delta > 0)
 						{
 							// Move the active offset as far a possible within the current buffer
-							LResult = Math.Min(ADelta, FEndOffset - FActiveOffset);
-							ADelta -= LResult;
-							FActiveOffset += LResult;
+							result = Math.Min(delta, _endOffset - _activeOffset);
+							delta -= result;
+							_activeOffset += result;
 
 							// Advance any additional rows by progressing through the cursor
-							while (ADelta > 0) 
+							while (delta > 0) 
 							{
-								LWillScroll = (FEndOffset >= (FBuffer.Count - 2));	// Note whether the read of the next row will cause the buffer to scroll
+								willScroll = (_endOffset >= (_buffer.Count - 2));	// Note whether the read of the next row will cause the buffer to scroll
 								if (CursorNextRow())
 								{
-									if (LWillScroll)
-										LOffsetDelta--;
-									FActiveOffset++;
-									ADelta--;
-									LResult++;
+									if (willScroll)
+										offsetDelta--;
+									_activeOffset++;
+									delta--;
+									result++;
 								}
 								else
 								{
-									FInternalEOF = true;
+									_internalEOF = true;
 									break;
 								}
 							}
 						}
-						else if (ADelta < 0)
+						else if (delta < 0)
 						{
 							// Move the active offset as far a possible within the current buffer
-							LResult = Math.Max(ADelta, -FActiveOffset);
-							ADelta -= LResult;
-							FActiveOffset += LResult;
+							result = Math.Max(delta, -_activeOffset);
+							delta -= result;
+							_activeOffset += result;
 
 							// Retreive any additional rows by digressing through the cursor
-							while (ADelta < 0)
+							while (delta < 0)
 							{
-								LWillScroll = (FEndOffset >= (FBuffer.Count - 2));	// Note whether the read of the next row will cause the buffer to scroll
+								willScroll = (_endOffset >= (_buffer.Count - 2));	// Note whether the read of the next row will cause the buffer to scroll
 								if (CursorPriorRow())
 								{
-									if (LWillScroll)
-										LOffsetDelta++;
-									FActiveOffset--;
-									ADelta++;
-									LResult--;
+									if (willScroll)
+										offsetDelta++;
+									_activeOffset--;
+									delta++;
+									result--;
 								}
 								else
 								{
-									FInternalBOF = true;
+									_internalBOF = true;
 									break;
 								}
 							}
@@ -1107,13 +1109,13 @@ namespace Alphora.Dataphor.DAE.Client
 					}
 					finally
 					{
-						if (LOffsetDelta != 0)
-							UpdateFirstOffsets(LOffsetDelta);
+						if (offsetDelta != 0)
+							UpdateFirstOffsets(offsetDelta);
 						DoDataChanged();
 					}
 				}
 			}
-			return LResult;
+			return result;
 		}
 
 		/// <summary> Attempts to navigate the DataSet to the next row. </summary>
@@ -1146,7 +1148,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public bool IsEmpty()
 		{
 			CheckActive();
-			return FEndOffset == -1;
+			return _endOffset == -1;
 		}
 		
 		/// <summary> Throws and exception if there are now rows in the DataSet. </summary>
@@ -1164,10 +1166,10 @@ namespace Alphora.Dataphor.DAE.Client
 			EnsureBrowseState();
 			try
 			{
-				if (FActiveOffset <= FEndOffset)
+				if (_activeOffset <= _endOffset)
 				{
-					InternalRefresh(FBuffer[FActiveOffset].Row);
-					FCurrentOffset = FActiveOffset;
+					InternalRefresh(_buffer[_activeOffset].Row);
+					_currentOffset = _activeOffset;
 				}
 				else
 				{
@@ -1183,12 +1185,12 @@ namespace Alphora.Dataphor.DAE.Client
 
 		/// <summary> Refreshes the data to a specified row. </summary>
 		/// <remarks> Any outstanding Insert or Edit will first be posted. </remarks>
-		public void Refresh(Row ARow)
+		public void Refresh(Row row)
 		{
 			EnsureBrowseState();
 			try
 			{
-				InternalRefresh(ARow);
+				InternalRefresh(row);
 				CurrentReset();
 			}
 			finally
@@ -1201,7 +1203,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region Modification
 
-		protected bool FIsModified;
+		protected bool _isModified;
 		
 		/// <summary> Indicates whether the DataSet has been modified. </summary>
 		[Browsable(false)]
@@ -1210,16 +1212,16 @@ namespace Alphora.Dataphor.DAE.Client
 			get
 			{
 				CheckActive();
-				return FIsModified;
+				return _isModified;
 			}
 		}
 
-		private bool FIsReadOnly;
+		private bool _isReadOnly;
 
 		protected virtual bool InternalIsReadOnly
 		{
-			get { return FIsReadOnly; }
-			set { FIsReadOnly = value; }
+			get { return _isReadOnly; }
+			set { _isReadOnly = value; }
 		}
 
 		/// <summary> When true, the DataSet's data cannot be modified. </summary>
@@ -1247,7 +1249,7 @@ namespace Alphora.Dataphor.DAE.Client
 				throw new ClientException(ClientException.Codes.IsReadOnly);
 		}
 		
-		protected bool FIsWriteOnly;
+		protected bool _isWriteOnly;
 
 		/// <summary> When true, the underlying data for the dataset will not be retrieved. </summary>
 		/// <remarks> 
@@ -1261,13 +1263,13 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("Write only state")]
 		public bool IsWriteOnly
 		{
-			get { return FIsWriteOnly; }
+			get { return _isWriteOnly; }
 			set
 			{
-				if (FIsWriteOnly != value)
+				if (_isWriteOnly != value)
 				{
 					CheckState(DataSetState.Inactive);
-					FIsWriteOnly = value;
+					_isWriteOnly = value;
 				}
 			}
 		}
@@ -1275,7 +1277,7 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Throws an exception if the DataSet is in WriteOnly mode and cannot be used to Edit or Delete </summary>
 		public virtual void CheckCanRead()
 		{
-			if (FIsWriteOnly)
+			if (_isWriteOnly)
 				throw new ClientException(ClientException.Codes.IsWriteOnly);
 		}
 
@@ -1287,9 +1289,9 @@ namespace Alphora.Dataphor.DAE.Client
 		///	</remarks>
 		public void Edit()
 		{
-			if ((FState != DataSetState.Edit) && (FState != DataSetState.Insert))
+			if ((_state != DataSetState.Edit) && (_state != DataSetState.Insert))
 			{
-				if (FEndOffset == -1)
+				if (_endOffset == -1)
 					Insert();
 				else
 				{
@@ -1314,37 +1316,37 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		protected void InitializeRow(int ARowIndex)
+		protected void InitializeRow(int rowIndex)
 		{
-			Row LTargetRow = FBuffer[ARowIndex].Row;
-			LTargetRow.ClearValues();
-			InternalInitializeRow(LTargetRow);
+			Row targetRow = _buffer[rowIndex].Row;
+			targetRow.ClearValues();
+			InternalInitializeRow(targetRow);
 		}
 		
-		protected internal void ChangeColumn(DataField AField, Scalar AValue)
+		protected internal void ChangeColumn(DataField field, Scalar value)
 		{
 			Edit();
-			Row LActiveRow = FBuffer[FActiveOffset].Row;
-			Row LSaveOldRow = FOldRow;
-			FOldRow = new Row(LActiveRow.Manager, LActiveRow.DataType);
+			Row activeRow = _buffer[_activeOffset].Row;
+			Row saveOldRow = _oldRow;
+			_oldRow = new Row(activeRow.Manager, activeRow.DataType);
 			try
 			{
-				LActiveRow.CopyTo(FOldRow);
-				if (AValue == null)
-					LActiveRow.ClearValue(AField.ColumnIndex);
+				activeRow.CopyTo(_oldRow);
+				if (value == null)
+					activeRow.ClearValue(field.ColumnIndex);
 				else
-					LActiveRow[AField.ColumnIndex] = AValue;
+					activeRow[field.ColumnIndex] = value;
 					
-				FValueFlags[AField.ColumnIndex] = true;
+				_valueFlags[field.ColumnIndex] = true;
 					
-				InternalChangeColumn(AField, FOldRow, LActiveRow);
+				InternalChangeColumn(field, _oldRow, activeRow);
 					
-				FIsModified = true;
+				_isModified = true;
 			}
 			finally
 			{
-				FOldRow.Dispose();
-				FOldRow = LSaveOldRow;
+				_oldRow.Dispose();
+				_oldRow = saveOldRow;
 			}
 		}
 
@@ -1354,8 +1356,8 @@ namespace Alphora.Dataphor.DAE.Client
 			try
 			{
 				SetState(DataSetState.Insert);
-				InitializeRow(FActiveOffset);
-				FIsModified = false;
+				InitializeRow(_activeOffset);
+				_isModified = false;
 				DoDataChanged();
 				DoAfterInsert();
 			}
@@ -1378,20 +1380,20 @@ namespace Alphora.Dataphor.DAE.Client
 			CheckCanModify();
 			DoBeforeInsert();
 			SaveOriginalRow();
-			DataSetRow LActiveRow = FBuffer[FActiveOffset];
-			FBuffer.Move(FBuffer.Count - 1, FActiveOffset);
-			if (FEndOffset == -1)
-				FBuffer[FActiveOffset].RowFlag = RowFlag.Inserted | RowFlag.BOF | RowFlag.EOF;
+			DataSetRow activeRow = _buffer[_activeOffset];
+			_buffer.Move(_buffer.Count - 1, _activeOffset);
+			if (_endOffset == -1)
+				_buffer[_activeOffset].RowFlag = RowFlag.Inserted | RowFlag.BOF | RowFlag.EOF;
 			else
 			{
-				FBuffer[FActiveOffset].RowFlag = RowFlag.Inserted | RowFlag.Data | (LActiveRow.RowFlag & RowFlag.BOF);
-				FBuffer[FActiveOffset].Bookmark = LActiveRow.Bookmark;
-				LActiveRow.RowFlag &= ~RowFlag.BOF;
+				_buffer[_activeOffset].RowFlag = RowFlag.Inserted | RowFlag.Data | (activeRow.RowFlag & RowFlag.BOF);
+				_buffer[_activeOffset].Bookmark = activeRow.Bookmark;
+				activeRow.RowFlag &= ~RowFlag.BOF;
 			}
-			if (FCurrentOffset >= FActiveOffset)
-				FCurrentOffset++;
-			if (FEndOffset < (FBuffer.Count - 2))
-				FEndOffset++;
+			if (_currentOffset >= _activeOffset)
+				_currentOffset++;
+			if (_endOffset < (_buffer.Count - 2))
+				_endOffset++;
 			EndInsertAppend();
 		}
 		
@@ -1407,38 +1409,38 @@ namespace Alphora.Dataphor.DAE.Client
 			CheckCanModify();
 			DoBeforeInsert();
 			SaveOriginalRow();
-			bool LWasEmpty = (FEndOffset < 0);
-			if (LWasEmpty || ((FBuffer[FEndOffset].RowFlag & RowFlag.EOF) == 0))	// Will we have to resync to the end
+			bool wasEmpty = (_endOffset < 0);
+			if (wasEmpty || ((_buffer[_endOffset].RowFlag & RowFlag.EOF) == 0))	// Will we have to resync to the end
 			{
 				// If the EOF row is not in our buffer, we will have to clear the buffer and start with a new row at the end.
 				BufferClear();
-				FEndOffset = 0;
-				FBuffer[0].RowFlag = RowFlag.Inserted | RowFlag.EOF;
+				_endOffset = 0;
+				_buffer[0].RowFlag = RowFlag.Inserted | RowFlag.EOF;
 
 				// If there were rows before, read them again
-				if (!LWasEmpty)
+				if (!wasEmpty)
 					CursorPriorRows();
 			}
 			else
 			{
 				// The EOF row is in our buffer, as an optimization, append our row after the EOF row
-				DataSetRow LLastRow = FBuffer[FEndOffset];
-				if (FEndOffset == (FBuffer.Count - 2))	// Buffer is full so bump the first item
+				DataSetRow lastRow = _buffer[_endOffset];
+				if (_endOffset == (_buffer.Count - 2))	// Buffer is full so bump the first item
 				{
-					FBuffer.Move(0, FEndOffset);
-					if (FCurrentOffset >= 0)
-						FCurrentOffset--;
+					_buffer.Move(0, _endOffset);
+					if (_currentOffset >= 0)
+						_currentOffset--;
 				}
 				else									// The buffer is not full, pull the scratch pad row
 				{
-					FBuffer.Move(FBuffer.Count - 1, FEndOffset);
-					FEndOffset++;
+					_buffer.Move(_buffer.Count - 1, _endOffset);
+					_endOffset++;
 				}
-				FBuffer[FEndOffset].RowFlag = RowFlag.Inserted | RowFlag.EOF | (LLastRow.RowFlag & RowFlag.EOF);
-				LLastRow.RowFlag &= ~RowFlag.EOF;
+				_buffer[_endOffset].RowFlag = RowFlag.Inserted | RowFlag.EOF | (lastRow.RowFlag & RowFlag.EOF);
+				lastRow.RowFlag &= ~RowFlag.EOF;
 			}
-			FActiveOffset = FEndOffset;
-			FInternalBOF = false;
+			_activeOffset = _endOffset;
+			_internalBOF = false;
 			EndInsertAppend();
 		}
 
@@ -1448,7 +1450,7 @@ namespace Alphora.Dataphor.DAE.Client
 		///	</remarks>
 		public void Cancel()
 		{
-			if ((FState == DataSetState.Insert) || (FState == DataSetState.Edit))
+			if ((_state == DataSetState.Insert) || (_state == DataSetState.Edit))
 			{
 				try
 				{
@@ -1473,32 +1475,32 @@ namespace Alphora.Dataphor.DAE.Client
 						else
 						{
 							// Buffer cleanup
-							if ((FBuffer[FActiveOffset].RowFlag & RowFlag.Inserted) != 0)
+							if ((_buffer[_activeOffset].RowFlag & RowFlag.Inserted) != 0)
 							{
 								// Move active row to scratchpad if this was an insert and not the only row
-								bool LWasLastRow = (FBuffer[FActiveOffset].RowFlag & RowFlag.EOF) != 0;
-								if (!LWasLastRow)
-									FBuffer.Move(FActiveOffset, FBuffer.Count - 1);
+								bool wasLastRow = (_buffer[_activeOffset].RowFlag & RowFlag.EOF) != 0;
+								if (!wasLastRow)
+									_buffer.Move(_activeOffset, _buffer.Count - 1);
 								else
-									FBuffer[FActiveOffset].RowFlag &= ~(RowFlag.Inserted | RowFlag.Data);
+									_buffer[_activeOffset].RowFlag &= ~(RowFlag.Inserted | RowFlag.Data);
 
-								if (FEndOffset == 0)
+								if (_endOffset == 0)
 								{
-									if (FOriginalRow != null)
-										FOriginalRow.CopyTo(FBuffer[FActiveOffset].Row);
+									if (_originalRow != null)
+										_originalRow.CopyTo(_buffer[_activeOffset].Row);
 									else
-										FEndOffset--;
+										_endOffset--;
 								}
 								else
 								{
-									FEndOffset--;
-									if (LWasLastRow) // if append
-										FActiveOffset--;
+									_endOffset--;
+									if (wasLastRow) // if append
+										_activeOffset--;
 								}
 							}
 							else
 							{
-								FOriginalRow.CopyTo(FBuffer[FActiveOffset].Row);
+								_originalRow.CopyTo(_buffer[_activeOffset].Row);
 							}
 							ForcedDataChanged();
 						}
@@ -1514,7 +1516,7 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <remarks> If the DataSet is not in Insert or Edit state then this method does nothing. </remarks>
 		public void Validate()
 		{
-			if ((FState == DataSetState.Insert) || (FState == DataSetState.Edit))
+			if ((_state == DataSetState.Insert) || (_state == DataSetState.Edit))
 			{
 				RequestSave();
 				DoValidate();
@@ -1535,25 +1537,25 @@ namespace Alphora.Dataphor.DAE.Client
 		public void Post()
 		{
 			RequestSave();
-			if ((FState == DataSetState.Insert) || (FState == DataSetState.Edit))
+			if ((_state == DataSetState.Insert) || (_state == DataSetState.Edit))
 			{
 				DoValidate();
 				InternalValidate(true);
 				DoBeforePost();
-				if (UpdatesThroughCursor() && (FState == DataSetState.Edit))
+				if (UpdatesThroughCursor() && (_state == DataSetState.Edit))
 					CurrentGotoActive(true);
 
 				// Make sure that all details have posted
 				DoPrepareToPost();
-				InternalPost(FBuffer[FActiveOffset].Row);
-				FIsModified = false;
+				InternalPost(_buffer[_activeOffset].Row);
+				_isModified = false;
 				SetState(DataSetState.Browse);
 				if (RefreshAfterPost)
 					Resync(false, false);
 				else
 				{
-					if ((FBuffer[FActiveOffset].RowFlag & RowFlag.Inserted) != 0)
-						FBuffer[FActiveOffset].RowFlag &= ~(RowFlag.Inserted | RowFlag.Data);
+					if ((_buffer[_activeOffset].RowFlag & RowFlag.Inserted) != 0)
+						_buffer[_activeOffset].RowFlag &= ~(RowFlag.Inserted | RowFlag.Data);
 					DoDataChanged();
 				}
 				ClearOriginalRow();
@@ -1568,7 +1570,7 @@ namespace Alphora.Dataphor.DAE.Client
 		/// </remarks>
 		public void Delete()
 		{
-			if (FState == DataSetState.Insert)
+			if (_state == DataSetState.Insert)
 				Cancel();
 
 			CheckActive();
@@ -1587,7 +1589,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public void ClearFields()
 		{
 			CheckState(DataSetState.Edit, DataSetState.Insert);
-			InitializeRow(FActiveOffset);
+			InitializeRow(_activeOffset);
 			DoRowChanged(null);
 		}
 
@@ -1729,8 +1731,8 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if (OnDefault != null)
 				OnDefault(this, EventArgs.Empty);
-			foreach (DataLink LLink in EnumerateLinks())
-				LLink.Default();
+			foreach (DataLink link in EnumerateLinks())
+				link.Default();
 		}
 		
 		/// <summary> Called before posting to validate the DataSet's data. </summary>
@@ -1741,7 +1743,15 @@ namespace Alphora.Dataphor.DAE.Client
 			if (OnValidate != null)
 				OnValidate(this, EventArgs.Empty);
 		}
-		
+
+		public event ErrorsOccurredHandler OnErrors;
+
+		protected void ReportErrors(CompilerMessages messages)
+		{
+			if (OnErrors != null)
+				OnErrors(this, messages);
+		}
+
 		/// <summary>Forces a data changed, ignoring any exceptions that occur.</summary>
 		protected void ForcedDataChanged()
 		{
@@ -1749,9 +1759,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				DoDataChanged();
 			}
-			catch
+			catch (Exception exception)
 			{
-				// ignore any exceptions
+				ReportErrors(new CompilerMessages { exception });
+				// Don't rethrow
 			}
 		}
 		
@@ -1763,131 +1774,131 @@ namespace Alphora.Dataphor.DAE.Client
 			if (DataChanged != null)
 				DataChanged(this, EventArgs.Empty);
 				
-			Exception LFirstException = null;
-			foreach (DataLink LLink in EnumerateLinks())
+			Exception firstException = null;
+			foreach (DataLink link in EnumerateLinks())
 			{
 				try
 				{
-					LLink.InternalDataChanged();
+					link.InternalDataChanged();
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					if (LFirstException == null)
-						LFirstException = LException;
+					if (firstException == null)
+						firstException = exception;
 				}
 			}
-			if (LFirstException != null)
-				throw LFirstException;
+			if (firstException != null)
+				throw firstException;
 		}
 		
 		/// <summary> Occurs when the active row's position within the buffer changes. </summary>
-		protected virtual void UpdateFirstOffsets(int ADelta)
+		protected virtual void UpdateFirstOffsets(int delta)
 		{
-			foreach (DataLink LLink in EnumerateLinks())
-				LLink.UpdateFirstOffset(ADelta);
+			foreach (DataLink link in EnumerateLinks())
+				link.UpdateFirstOffset(delta);
 		}
 		
 		/// <summary> Occurs before posting (typically to allow any dependants to post). </summary>
 		protected virtual void DoPrepareToPost()
 		{
-			foreach (DataLink LLink in EnumerateLinks())
-				LLink.PrepareToPost();
+			foreach (DataLink link in EnumerateLinks())
+				link.PrepareToPost();
 		}
 
 		/// <summary> Occurs before canceling (typically to allow any dependants to cancel). </summary>
 		protected virtual void DoPrepareToCancel()
 		{
-			foreach (DataLink LLink in EnumerateLinks())
-				LLink.PrepareToCancel();
+			foreach (DataLink link in EnumerateLinks())
+				link.PrepareToCancel();
 		}
 		
 		public event FieldChangeEventHandler RowChanging;
 
 		/// <summary> Occurs only when the fields in the active record are changing. </summary>
-		/// <param name="AField"> Valid reference to a field if one field is changing. Null otherwise. </param>
-		protected virtual void DoRowChanging(DataField AField)
+		/// <param name="field"> Valid reference to a field if one field is changing. Null otherwise. </param>
+		protected virtual void DoRowChanging(DataField field)
 		{
 			if (RowChanging != null)
-				RowChanging(this, AField);
-			foreach (DataLink LLink in EnumerateLinks())
-				LLink.RowChanging(AField);
+				RowChanging(this, field);
+			foreach (DataLink link in EnumerateLinks())
+				link.RowChanging(field);
 		}
 
 		public event FieldChangeEventHandler RowChanged;
 		
 		/// <summary> Occurs only when the fields in the active record has changed. </summary>
-		/// <param name="AField"> Valid reference to a field if one field has changed. Null otherwise. </param>
-		protected virtual void DoRowChanged(DataField AField)
+		/// <param name="field"> Valid reference to a field if one field has changed. Null otherwise. </param>
+		protected virtual void DoRowChanged(DataField field)
 		{
 			if (RowChanged != null)
-				RowChanged(this, AField);
-			foreach (DataLink LLink in EnumerateLinks())
-				LLink.RowChanged(AField);
+				RowChanged(this, field);
+			foreach (DataLink link in EnumerateLinks())
+				link.RowChanged(field);
 		}
 		
 		/// <summary> Occurs when a request is made that any control(s) associated with the given field should be focused. </summary>
 		/// <remarks> This is typically invoked when validation fails for a field (so that the user can use the control to correct the problem). </remarks>
-		protected internal virtual void FocusControl(DataField AField)
+		protected internal virtual void FocusControl(DataField field)
 		{
-			foreach (DataLink LLink in EnumerateLinks())
-				LLink.FocusControl(AField);
+			foreach (DataLink link in EnumerateLinks())
+				link.FocusControl(field);
 		}
 
 		/// <summary> Occurs in reponse to any change in the state of the DataSet. </summary>
 		protected virtual void StateChanged()
 		{
-			Exception LFirstException = null;
-			foreach (DataLink LLink in EnumerateLinks())
+			Exception firstException = null;
+			foreach (DataLink link in EnumerateLinks())
 			{
 				try
 				{
-					LLink.StateChanged();
+					link.StateChanged();
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					if (LFirstException == null)
-						LFirstException = LException;
+					if (firstException == null)
+						firstException = exception;
 				}
 			}
-			if (LFirstException != null)
-				throw LFirstException;
+			if (firstException != null)
+				throw firstException;
 		}
 		
 		#endregion
 
 		#region Fields
 		
-		private DataFields FDataFields;
+		private DataFields _dataFields;
 		/// <summary> Collection of DataField objects representing the columns of the active row. </summary>
 		[Browsable(false)]
-		public DataFields Fields { get { return FDataFields; } }
+		public DataFields Fields { get { return _dataFields; } }
 		
 		/// <summary> Internal fields list. </summary>
-		internal Schema.Objects FFields;
+		internal Schema.Objects _fields;
 
 		/// <summary> Attempts to retrieve a DataField by index. </summary>
 		/// <remarks> An exception is thrown if the specified index is out of bounds. </remarks>
-		public DataField this[int AIndex]
+		public DataField this[int index]
 		{
 			get
 			{
-				DataField LField = (DataField)FFields[AIndex];
-				if (LField == null)
-					throw new ClientException(ClientException.Codes.FieldForColumnNotFound, AIndex);
-				return LField;
+				DataField field = (DataField)_fields[index];
+				if (field == null)
+					throw new ClientException(ClientException.Codes.FieldForColumnNotFound, index);
+				return field;
 			}
 		}
 		
 		/// <summary> Attempts to retrieve a DataField by name. </summary>
 		/// <remarks> An exception is thrown if the specified name is not found. </remarks>
-		public DataField this[string AColumnName]
+		public DataField this[string columnName]
 		{
 			get
 			{
-				DataField LField = (DataField)FFields[AColumnName];
-				if (LField == null)
-					throw new ClientException(ClientException.Codes.FieldForColumnNotFound, AColumnName);
-				return LField;
+				DataField field = (DataField)_fields[columnName];
+				if (field == null)
+					throw new ClientException(ClientException.Codes.FieldForColumnNotFound, columnName);
+				return field;
 			}
 		}
 
@@ -1895,30 +1906,30 @@ namespace Alphora.Dataphor.DAE.Client
 		[Browsable(false)]
 		public int FieldCount
 		{
-			get { return FFields.Count; }
+			get { return _fields.Count; }
 		}
 
 		private void CreateFields()
 		{
-			int LIndex = 0;
-			DataField LField;
-			foreach (Schema.Column LColumn in InternalGetTableType().Columns)
+			int index = 0;
+			DataField field;
+			foreach (Schema.Column column in InternalGetTableType().Columns)
 			{
-				LField = new DataField(this, LColumn);
-				FFields.Add(LField);
-				LIndex++;
+				field = new DataField(this, column);
+				_fields.Add(field);
+				index++;
 			}
 
-			FValueFlags = new BitArray(FFields.Count);
-			FValueFlags.SetAll(false);
+			_valueFlags = new BitArray(_fields.Count);
+			_valueFlags.SetAll(false);
 		}
 		
 		private void FreeFields()
 		{
-			if (FFields != null)
-				FFields.Clear();
+			if (_fields != null)
+				_fields.Clear();
 				
-			FValueFlags = null;
+			_valueFlags = null;
 		}
 		
 		#endregion
@@ -2016,77 +2027,77 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region Keys & Finds
 
-		public static string GetNamesFromKey(Schema.Key AKey)
+		public static string GetNamesFromKey(Schema.Key key)
 		{
-			StringBuilder LResult = new StringBuilder();
-			if (AKey != null)
-				foreach (Schema.TableVarColumn LColumn in AKey.Columns)
+			StringBuilder result = new StringBuilder();
+			if (key != null)
+				foreach (Schema.TableVarColumn column in key.Columns)
 				{
-					if (LResult.Length > 0)
-						LResult.Append(CColumnNameDelimiters[0]);
-					LResult.Append(LColumn.Name);
+					if (result.Length > 0)
+						result.Append(ColumnNameDelimiters[0]);
+					result.Append(column.Name);
 				}
-			return LResult.ToString();
+			return result.ToString();
 		}
 
-		public static Schema.Key GetKeyFromNames(string AKeyNames)
+		public static Schema.Key GetKeyFromNames(string keyNames)
 		{
-			Schema.Key LResult = new Schema.Key();
-			string LTrimmed;
-			foreach (string LItem in AKeyNames.Split(CColumnNameDelimiters))
+			Schema.Key result = new Schema.Key();
+			string trimmed;
+			foreach (string item in keyNames.Split(ColumnNameDelimiters))
 			{
-				LTrimmed = LItem.Trim();
-				if (LTrimmed != String.Empty)
-					LResult.Columns.Add(new Schema.TableVarColumn(new Schema.Column(LTrimmed, null)));
+				trimmed = item.Trim();
+				if (trimmed != String.Empty)
+					result.Columns.Add(new Schema.TableVarColumn(new Schema.Column(trimmed, null)));
 			}
-			return LResult;
+			return result;
 		}
 
-		public static string GetNamesFromOrder(Schema.Order AOrder)
+		public static string GetNamesFromOrder(Schema.Order order)
 		{
-			StringBuilder LResult = new StringBuilder();
-			if (AOrder != null)
-				foreach (Schema.OrderColumn LColumn in AOrder.Columns)
+			StringBuilder result = new StringBuilder();
+			if (order != null)
+				foreach (Schema.OrderColumn column in order.Columns)
 				{
-					if (LResult.Length > 0)
-						LResult.Append(CColumnNameDelimiters[0]);
-					LResult.Append(LColumn.Column.Name);
-					if (!LColumn.Ascending)
-						LResult.AppendFormat(" {0}", Keywords.Asc);
-					if (LColumn.IncludeNils)
-						LResult.AppendFormat(" {0} {1}", Keywords.Include, Keywords.Nil);
+					if (result.Length > 0)
+						result.Append(ColumnNameDelimiters[0]);
+					result.Append(column.Column.Name);
+					if (!column.Ascending)
+						result.AppendFormat(" {0}", Keywords.Asc);
+					if (column.IncludeNils)
+						result.AppendFormat(" {0} {1}", Keywords.Include, Keywords.Nil);
 				}
-			return LResult.ToString();
+			return result.ToString();
 		}
 
-		public static Schema.Order GetOrderFromNames(string AOrderNames)
+		public static Schema.Order GetOrderFromNames(string orderNames)
 		{
-			Schema.Order LResult = new Schema.Order();
-			string LTrimmed;
-			foreach (string LItem in AOrderNames.Split(CColumnNameDelimiters))
+			Schema.Order result = new Schema.Order();
+			string trimmed;
+			foreach (string item in orderNames.Split(ColumnNameDelimiters))
 			{
-				LTrimmed = LItem.Trim();
-				if (LTrimmed != String.Empty)
+				trimmed = item.Trim();
+				if (trimmed != String.Empty)
 				{
-					string[] LItems = LItem.Split(' ');
-					Schema.OrderColumn LOrderColumn = new Schema.OrderColumn(new Schema.TableVarColumn(new Schema.Column(LItems[0], null)), true, false);
+					string[] items = item.Split(' ');
+					Schema.OrderColumn orderColumn = new Schema.OrderColumn(new Schema.TableVarColumn(new Schema.Column(items[0], null)), true, false);
 					
-					if (LItems.Length > 1)
+					if (items.Length > 1)
 					{
-						switch (LItems[1])
+						switch (items[1])
 						{
-							case Keywords.Desc : LOrderColumn.Ascending = false; break;
-							case Keywords.Include : LOrderColumn.IncludeNils = true; break;
+							case Keywords.Desc : orderColumn.Ascending = false; break;
+							case Keywords.Include : orderColumn.IncludeNils = true; break;
 						}
 					}
 					
-					if ((LItems.Length > 2) && (LItems[2] == Keywords.Include))
-						LOrderColumn.IncludeNils = true;
+					if ((items.Length > 2) && (items[2] == Keywords.Include))
+						orderColumn.IncludeNils = true;
 					
-					LResult.Columns.Add(LOrderColumn);
+					result.Columns.Add(orderColumn);
 				}
 			}
-			return LResult;
+			return result;
 		}
 
 		/// <summary> Gets a row representing a key for the active row. </summary>
@@ -2100,17 +2111,17 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 
 		/// <summary> Attempts navigation to a specific row given a key. </summary>
-		/// <param name="AKey"> A row containing key information.  This is typically retrieved using <see cref="GetKey()"/>. </param>
+		/// <param name="key"> A row containing key information.  This is typically retrieved using <see cref="GetKey()"/>. </param>
 		/// <returns> 
 		///		True if the row was located and navigation occurred.  If this method returns false, indicating that the 
 		///		specified key was not located, then the active row will not have changed from before the call. 
 		///	</returns>
-		public bool FindKey(Row AKey)
+		public bool FindKey(Row key)
 		{
 			EnsureBrowseState();
 			try
 			{
-				return InternalFindKey(AKey);
+				return InternalFindKey(key);
 			}
 			finally
 			{
@@ -2119,13 +2130,13 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 		
 		/// <summary> Navigates the DataSet to the row nearest the specified key or partial key. </summary>
-		/// <param name="AKey"> A full or partial row containing search criteria for the current order. </param>
-		public void FindNearest(Row AKey)
+		/// <param name="key"> A full or partial row containing search criteria for the current order. </param>
+		public void FindNearest(Row key)
 		{
 			EnsureBrowseState();
 			try
 			{
-				InternalFindNearest(AKey);
+				InternalFindNearest(key);
 			}
 			finally
 			{
@@ -2144,30 +2155,30 @@ namespace Alphora.Dataphor.DAE.Client
 
 		internal class DataSetEnumerator : IEnumerator
 		{
-			public DataSetEnumerator(DataSet ADataSet)
+			public DataSetEnumerator(DataSet dataSet)
 			{
-				FDataSet = ADataSet;
+				_dataSet = dataSet;
 			}
 
-			private DataSet FDataSet;
-			private bool FInitial = true;
+			private DataSet _dataSet;
+			private bool _initial = true;
 
 			public void Reset()
 			{
-				FDataSet.First();
-				FInitial = true;
+				_dataSet.First();
+				_initial = true;
 			}
 
 			public object Current
 			{
-				get { return FDataSet.ActiveRow; }
+				get { return _dataSet.ActiveRow; }
 			}
 
 			public bool MoveNext()
 			{
-				bool LResult = !FDataSet.IsEmpty() && (FInitial || (FDataSet.MoveBy(1) == 1));
-				FInitial = false;
-				return LResult;
+				bool result = !_dataSet.IsEmpty() && (_initial || (_dataSet.MoveBy(1) == 1));
+				_initial = false;
+				return result;
 			}
 		}
 
@@ -2178,46 +2189,46 @@ namespace Alphora.Dataphor.DAE.Client
 		internal class DataSetRow : Disposable
 		{
 			public DataSetRow() : base(){}
-			public DataSetRow(Row ARow, RowFlag ARowFlag, Guid ABookmark)
+			public DataSetRow(Row row, RowFlag rowFlag, Guid bookmark)
 			{
-				FRow = ARow;
-				FRowFlag = ARowFlag;
-				FBookmark = ABookmark;
+				_row = row;
+				_rowFlag = rowFlag;
+				_bookmark = bookmark;
 			}
 			
-			protected override void Dispose(bool ADisposing)
+			protected override void Dispose(bool disposing)
 			{
-				if (FRow != null)
+				if (_row != null)
 				{
-					FRow.Dispose();
-					FRow = null;
+					_row.Dispose();
+					_row = null;
 				}
 			}
 			
-			private Row FRow;
+			private Row _row;
 			public Row Row
 			{
-				get { return FRow; }
+				get { return _row; }
 				set 
 				{ 
-					if (FRow != null)
-						FRow.Dispose();
-					FRow = value; 
+					if (_row != null)
+						_row.Dispose();
+					_row = value; 
 				}
 			}
 			
-			private RowFlag FRowFlag;
+			private RowFlag _rowFlag;
 			public RowFlag RowFlag
 			{
-				get { return FRowFlag; }
-				set { FRowFlag = value; }
+				get { return _rowFlag; }
+				set { _rowFlag = value; }
 			}
 			
-			private Guid FBookmark;
+			private Guid _bookmark;
 			public Guid Bookmark
 			{
-				get { return FBookmark; }
-				set { FBookmark = value; }
+				get { return _bookmark; }
+				set { _bookmark = value; }
 			}
 		}
 	    
@@ -2240,10 +2251,10 @@ namespace Alphora.Dataphor.DAE.Client
 		internal class DataSetBuffer : DisposableList<DataSetRow>
 		{
 		#endif
-			public void Add(int ACount, DataSet ADataSet)
+			public void Add(int count, DataSet dataSet)
 			{
-				for (int LIndex = 0; LIndex < ACount; LIndex++)
-					Add(new DataSetRow(new Row(ADataSet.Process.ValueManager, ADataSet.TableType.RowType), new RowFlag(), Guid.Empty));
+				for (int index = 0; index < count; index++)
+					Add(new DataSetRow(new Row(dataSet.Process.ValueManager, dataSet.TableType.RowType), new RowFlag(), Guid.Empty));
 			}
 		}
 		
@@ -2252,8 +2263,8 @@ namespace Alphora.Dataphor.DAE.Client
 
 	public class DataSetException : Exception
 	{
-		public DataSetException(string AMessage, Exception AInner) : base(AMessage, AInner) {}
-		public DataSetException(string AMessage) : base(AMessage) {}
+		public DataSetException(string message, Exception inner) : base(message, inner) {}
+		public DataSetException(string message) : base(message) {}
 	}
 
 	/// <summary> Interface for classes which reference a DataSource. </summary>
@@ -2299,37 +2310,37 @@ namespace Alphora.Dataphor.DAE.Client
 	
     public class DataFields : ICollection
     {
-		internal DataFields(DataSet ADataSet)
+		internal DataFields(DataSet dataSet)
 		{
-			FDataSet = ADataSet;
+			_dataSet = dataSet;
 		}
 		
-		DataSet FDataSet;
+		DataSet _dataSet;
 		
 		public int Count
 		{
-			get { return FDataSet.FieldCount; }
+			get { return _dataSet.FieldCount; }
 		}
 		
 		public IEnumerator GetEnumerator()
 		{
-			return new DataFieldEnumerator(FDataSet);
+			return new DataFieldEnumerator(_dataSet);
 		}
 		
-		public DataField this[int AIndex]
+		public DataField this[int index]
 		{
-			get { return FDataSet[AIndex]; }
+			get { return _dataSet[index]; }
 		}
 		
-		public DataField this[string AColumnName]
+		public DataField this[string columnName]
 		{
-			get { return FDataSet[AColumnName]; }
+			get { return _dataSet[columnName]; }
 		}
 		
-		public void CopyTo(Array ATarget, int AStartIndex)
+		public void CopyTo(Array target, int startIndex)
 		{
 			for (int i = 0; i < Count; i++)
-				ATarget.SetValue(this[i], i + AStartIndex);
+				target.SetValue(this[i], i + startIndex);
 		}
 		
 		public bool IsReadOnly
@@ -2344,75 +2355,75 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		public object SyncRoot
 		{
-			get { return FDataSet.FFields; }
+			get { return _dataSet._fields; }
 		}
 
 		public class DataFieldEnumerator : IEnumerator
 		{
-			internal DataFieldEnumerator(DataSet ADataSet)
+			internal DataFieldEnumerator(DataSet dataSet)
 			{
-				FDataSet = ADataSet;
+				_dataSet = dataSet;
 			}
 			
-			private DataSet FDataSet;
-			private int FIndex = -1;
+			private DataSet _dataSet;
+			private int _index = -1;
 			
 			public void Reset()
 			{
-				FIndex = -1;
+				_index = -1;
 			}
 			
 			public bool MoveNext()
 			{
-				FIndex++;
-				return (FIndex < FDataSet.FieldCount);
+				_index++;
+				return (_index < _dataSet.FieldCount);
 			}
 			
 			public object Current
 			{
-				get { return FDataSet[FIndex]; }
+				get { return _dataSet[_index]; }
 			}
 		}
     }
     
     public class DataField : Schema.Object, IConvertible
     {
-		public DataField(DataSet ADataSet, Schema.Column AColumn) : base(AColumn.Name)
+		public DataField(DataSet dataSet, Schema.Column column) : base(column.Name)
 		{
-			FDataSet = ADataSet;
-			FColumn = AColumn;
-			FColumnIndex = ADataSet.TableType.Columns.IndexOfName(AColumn.Name);
+			_dataSet = dataSet;
+			_column = column;
+			_columnIndex = dataSet.TableType.Columns.IndexOfName(column.Name);
 		}
 
-		private DataSet FDataSet;
+		private DataSet _dataSet;
 		/// <summary> The DataSet this field is contained in. </summary>
 		public DataSet DataSet
 		{
-			get { return FDataSet; }
+			get { return _dataSet; }
 		}
 
 		/// <summary> The name of the underlying column. </summary>
 		public string ColumnName
 		{
-			get { return FColumn.Name; }
+			get { return _column.Name; }
 		}
 
-		private Schema.Column FColumn;
+		private Schema.Column _column;
 		public Schema.IScalarType DataType
 		{
-			get { return (Schema.IScalarType)FColumn.DataType; }
+			get { return (Schema.IScalarType)_column.DataType; }
 		}
 
-		private int FColumnIndex;
+		private int _columnIndex;
 		public int ColumnIndex
 		{
-			get { return FColumnIndex; }
+			get { return _columnIndex; }
 		}
 
 		/// <summary> Asks any control(s) that might be attached to this field to set focus. </summary>
 		public void FocusControl()
 		{
-			FDataSet.FocusControl(this);
+			_dataSet.FocusControl(this);
 		}
 
 		private void CheckHasValue()
@@ -2423,7 +2434,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		private void CheckDataSetNotEmpty()
 		{
-			if (FDataSet.IsEmpty())
+			if (_dataSet.IsEmpty())
 				throw new ClientException(ClientException.Codes.EmptyDataSet);
 		}
 		
@@ -2438,16 +2449,16 @@ namespace Alphora.Dataphor.DAE.Client
 			get
 			{
 				CheckHasValue();
-				return (Scalar)FDataSet.ActiveRow.GetValue(FColumnIndex);
+				return (Scalar)_dataSet.ActiveRow.GetValue(_columnIndex);
 			}
 			set
 			{
-				FDataSet.ChangeColumn(this, value);
+				_dataSet.ChangeColumn(this, value);
 			}
 		}
 		
 		/// <summary>Indicates whether the value for this column has been modified.</summary>
-		public bool Modified { get { return FDataSet.FValueFlags == null ? false : FDataSet.FValueFlags[FColumnIndex]; } }
+		public bool Modified { get { return _dataSet._valueFlags == null ? false : _dataSet._valueFlags[_columnIndex]; } }
 
 		/// <summary>Retrieves the old value for this field during a change or validate event.</summary>
 		/// <remarks>This value is only available during a change or validate event. A ClientException exception will be
@@ -2456,7 +2467,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get
 			{
-				return (Scalar)FDataSet.OldRow.GetValue(FColumnIndex);
+				return (Scalar)_dataSet.OldRow.GetValue(_columnIndex);
 			}
 		}
 
@@ -2467,7 +2478,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get
 			{
-				return (Scalar)FDataSet.OriginalRow.GetValue(FColumnIndex);
+				return (Scalar)_dataSet.OriginalRow.GetValue(_columnIndex);
 			}
 		}
 		
@@ -2475,7 +2486,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public bool HasValue()
 		{
 			CheckDataSetNotEmpty();
-			return FDataSet.ActiveRow.HasValue(FColumnIndex);
+			return _dataSet.ActiveRow.HasValue(_columnIndex);
 		}
 
 		public bool IsNil
@@ -2483,7 +2494,7 @@ namespace Alphora.Dataphor.DAE.Client
 			get
 			{
 				CheckDataSetNotEmpty();
-				return !FDataSet.ActiveRow.HasValue(FColumnIndex);
+				return !_dataSet.ActiveRow.HasValue(_columnIndex);
 			}
 		}
 		
@@ -2504,9 +2515,9 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsNative = value; // Has to be done thiw way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsNative = value; // Has to be done thiw way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 
@@ -2522,26 +2533,26 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsBoolean = value; // Has to be done this way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsBoolean = value; // Has to be done this way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 		
-		public bool GetAsBoolean(string ARepresentationName)
+		public bool GetAsBoolean(string representationName)
 		{
 			CheckDataSetNotEmpty();
 			if (HasValue())
-				return Value.GetAsBoolean(ARepresentationName);
+				return Value.GetAsBoolean(representationName);
 			return false;
 		}
 		
-		public void SetAsBoolean(string ARepresentationName, bool AValue)
+		public void SetAsBoolean(string representationName, bool value)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-			LValue.SetAsBoolean(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
-			Value = LValue;
+			Scalar localValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+			localValue.SetAsBoolean(representationName, value); // Has to be done this way in order to fire the appropriate dataset events
+			Value = localValue;
 		}
 		
 		public byte AsByte
@@ -2556,26 +2567,26 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsByte = value; // Has to be done this way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsByte = value; // Has to be done this way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 		
-		public byte GetAsByte(string ARepresentationName)
+		public byte GetAsByte(string representationName)
 		{
 			CheckDataSetNotEmpty();
 			if (HasValue())
-				return Value.GetAsByte(ARepresentationName);
+				return Value.GetAsByte(representationName);
 			return (byte)0;
 		}
 		
-		public void SetAsByte(string ARepresentationName, byte AValue)
+		public void SetAsByte(string representationName, byte value)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-			LValue.SetAsByte(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
-			Value = LValue;
+			Scalar localValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+			localValue.SetAsByte(representationName, value); // Has to be done this way in order to fire the appropriate dataset events
+			Value = localValue;
 		}
 		
 		public decimal AsDecimal
@@ -2590,26 +2601,26 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsDecimal = value; // Has to be done this way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsDecimal = value; // Has to be done this way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 		
-		public decimal GetAsDecimal(string ARepresentationName)
+		public decimal GetAsDecimal(string representationName)
 		{
 			CheckDataSetNotEmpty();
 			if (HasValue())
-				return Value.GetAsDecimal(ARepresentationName);
+				return Value.GetAsDecimal(representationName);
 			return 0m;
 		}
 		
-		public void SetAsDecimal(string ARepresentationName, decimal AValue)
+		public void SetAsDecimal(string representationName, decimal value)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-			LValue.SetAsDecimal(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
-			Value = LValue;
+			Scalar localValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+			localValue.SetAsDecimal(representationName, value); // Has to be done this way in order to fire the appropriate dataset events
+			Value = localValue;
 		}
 		
 		public TimeSpan AsTimeSpan
@@ -2624,26 +2635,26 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsTimeSpan = value; // Has to be done this way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsTimeSpan = value; // Has to be done this way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 		
-		public TimeSpan GetAsTimeSpan(string ARepresentationName)
+		public TimeSpan GetAsTimeSpan(string representationName)
 		{
 			CheckDataSetNotEmpty();
 			if (HasValue())
-				return Value.GetAsTimeSpan(ARepresentationName);
+				return Value.GetAsTimeSpan(representationName);
 			return TimeSpan.Zero;
 		}
 		
-		public void SetAsTimeSpan(string ARepresentationName, TimeSpan AValue)
+		public void SetAsTimeSpan(string representationName, TimeSpan value)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-			LValue.SetAsTimeSpan(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
-			Value = LValue;
+			Scalar localValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+			localValue.SetAsTimeSpan(representationName, value); // Has to be done this way in order to fire the appropriate dataset events
+			Value = localValue;
 		}
 		
 		public DateTime AsDateTime
@@ -2658,39 +2669,39 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsDateTime = value; // Has to be done this way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsDateTime = value; // Has to be done this way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 
-		public DateTime GetAsDateTime(string ARepresentationName)
+		public DateTime GetAsDateTime(string representationName)
 		{
 			CheckDataSetNotEmpty();
 			if (HasValue())
-				return Value.GetAsDateTime(ARepresentationName);
+				return Value.GetAsDateTime(representationName);
 			return DateTime.MinValue;
 		}
 		
-		public void SetAsDateTime(string ARepresentationName, DateTime AValue)
+		public void SetAsDateTime(string representationName, DateTime value)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-			LValue.SetAsDateTime(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
-			Value = LValue;
+			Scalar localValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+			localValue.SetAsDateTime(representationName, value); // Has to be done this way in order to fire the appropriate dataset events
+			Value = localValue;
 		}
 		
-		private const string CDoubleNotSupported = "Alphora.Dataphor.DAE.Client.DataField: Double not supported.  Use Float(single) instead.";
+		private const string DoubleNotSupported = "Alphora.Dataphor.DAE.Client.DataField: Double not supported.  Use Float(single) instead.";
 
 		public double AsDouble
 		{
 			get
 			{
-				throw new Exception(CDoubleNotSupported);
+				throw new Exception(DoubleNotSupported);
 			}
 			set
 			{
-				throw new Exception(CDoubleNotSupported);
+				throw new Exception(DoubleNotSupported);
 			}
 		}
 		
@@ -2706,26 +2717,26 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsInt16 = value; // Has to be done this way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsInt16 = value; // Has to be done this way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 		
-		public short GetAsInt16(string ARepresentationName)
+		public short GetAsInt16(string representationName)
 		{
 			CheckDataSetNotEmpty();
 			if (HasValue())
-				return Value.GetAsInt16(ARepresentationName);
+				return Value.GetAsInt16(representationName);
 			return (short)0;
 		}
 		
-		public void SetAsInt16(string ARepresentationName, short AValue)
+		public void SetAsInt16(string representationName, short value)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-			LValue.SetAsInt16(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
-			Value = LValue;
+			Scalar localValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+			localValue.SetAsInt16(representationName, value); // Has to be done this way in order to fire the appropriate dataset events
+			Value = localValue;
 		}
 		
 		public int AsInt32
@@ -2740,26 +2751,26 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsInt32 = value; // Has to be done this way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsInt32 = value; // Has to be done this way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 		
-		public int GetAsInt32(string ARepresentationName)
+		public int GetAsInt32(string representationName)
 		{
 			CheckDataSetNotEmpty();
 			if (HasValue())
-				return Value.GetAsInt32(ARepresentationName);
+				return Value.GetAsInt32(representationName);
 			return 0;
 		}
 		
-		public void SetAsInt32(string ARepresentationName, int AValue)
+		public void SetAsInt32(string representationName, int value)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-			LValue.SetAsInt32(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
-			Value = LValue;
+			Scalar localValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+			localValue.SetAsInt32(representationName, value); // Has to be done this way in order to fire the appropriate dataset events
+			Value = localValue;
 		}
 		
 		public long AsInt64
@@ -2774,26 +2785,26 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsInt64 = value; // Has to be done this way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsInt64 = value; // Has to be done this way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 		
-		public long GetAsInt64(string ARepresentationName)
+		public long GetAsInt64(string representationName)
 		{
 			CheckDataSetNotEmpty();
 			if (HasValue())
-				return Value.GetAsInt64(ARepresentationName);
+				return Value.GetAsInt64(representationName);
 			return (long)0;
 		}
 		
-		public void SetAsInt64(string ARepresentationName, long AValue)
+		public void SetAsInt64(string representationName, long value)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-			LValue.SetAsInt64(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
-			Value = LValue;
+			Scalar localValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+			localValue.SetAsInt64(representationName, value); // Has to be done this way in order to fire the appropriate dataset events
+			Value = localValue;
 		}
 		
 		public string AsString
@@ -2808,26 +2819,26 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsString = value; // Has to be done this way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsString = value; // Has to be done this way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 		
-		public string GetAsString(string ARepresentationName)
+		public string GetAsString(string representationName)
 		{
 			CheckDataSetNotEmpty();
 			if (HasValue())
-				return Value.GetAsString(ARepresentationName);
+				return Value.GetAsString(representationName);
 			return String.Empty;
 		}
 		
-		public void SetAsString(string ARepresentationName, string AValue)
+		public void SetAsString(string representationName, string value)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-			LValue.SetAsString(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
-			Value = LValue;
+			Scalar localValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+			localValue.SetAsString(representationName, value); // Has to be done this way in order to fire the appropriate dataset events
+			Value = localValue;
 		}
 		
 		public string AsDisplayString
@@ -2842,9 +2853,9 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsDisplayString = value; // Has to be done this way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsDisplayString = value; // Has to be done this way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 		
@@ -2860,31 +2871,31 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-				LValue.AsGuid = value; // Has to be done this way in order to fire the appropriate dataset events
-				Value = LValue;
+				Scalar newValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+				newValue.AsGuid = value; // Has to be done this way in order to fire the appropriate dataset events
+				Value = newValue;
 			}
 		}
 		
-		public Guid GetAsGuid(string ARepresentationName)
+		public Guid GetAsGuid(string representationName)
 		{
 			CheckDataSetNotEmpty();
 			if (HasValue())
-				return Value.GetAsGuid(ARepresentationName);
+				return Value.GetAsGuid(representationName);
 			return Guid.Empty;
 		}
 		
-		public void SetAsGuid(string ARepresentationName, Guid AValue)
+		public void SetAsGuid(string representationName, Guid value)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
-			LValue.SetAsGuid(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
-			Value = LValue;
+			Scalar localValue = new Scalar(_dataSet.Process.ValueManager, DataType, null);
+			localValue.SetAsGuid(representationName, value); // Has to be done this way in order to fire the appropriate dataset events
+			Value = localValue;
 		}
 		
-		public object AsType(Type AType)
+		public object AsType(Type type)
 		{
-			switch (AType.ToString())
+			switch (type.ToString())
 			{
 				case ("Boolean") : return AsBoolean;
 				case ("Byte") : return AsByte;
@@ -2892,7 +2903,7 @@ namespace Alphora.Dataphor.DAE.Client
 				case ("Int32") : return AsInt32;
 				case ("Int64") : return AsInt64;
 				case ("String") : return AsString;
-				default : throw new ClientException(ClientException.Codes.CannotConvertFromType, AType.ToString());
+				default : throw new ClientException(ClientException.Codes.CannotConvertFromType, type.ToString());
 			}
 		}
 		
@@ -2901,95 +2912,95 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			throw new DataSetException("Internal Error: DataField.IConvertible.GetTypeCode()");
 		}
-		bool IConvertible.ToBoolean(IFormatProvider AProvider)
+		bool IConvertible.ToBoolean(IFormatProvider provider)
 		{
 			return AsBoolean;
 		}
-		byte IConvertible.ToByte(IFormatProvider AProvider)
+		byte IConvertible.ToByte(IFormatProvider provider)
 		{
 			return AsByte;
 		}
-		char IConvertible.ToChar(IFormatProvider AProvider)
+		char IConvertible.ToChar(IFormatProvider provider)
 		{
 			return (char)AsType(typeof(char));
 		}
-		DateTime IConvertible.ToDateTime(IFormatProvider AProvider)
+		DateTime IConvertible.ToDateTime(IFormatProvider provider)
 		{
 			return (DateTime)AsType(typeof(DateTime));
 		}
-		decimal IConvertible.ToDecimal(IFormatProvider AProvider)
+		decimal IConvertible.ToDecimal(IFormatProvider provider)
 		{
 			return AsDecimal;
 		}
-		double IConvertible.ToDouble(IFormatProvider AProvider)
+		double IConvertible.ToDouble(IFormatProvider provider)
 		{
-			throw new Exception(CDoubleNotSupported);
+			throw new Exception(DoubleNotSupported);
 		}
-		short IConvertible.ToInt16(IFormatProvider AProvider)
+		short IConvertible.ToInt16(IFormatProvider provider)
 		{
 			return AsInt16;
 		}
-		int IConvertible.ToInt32(IFormatProvider AProvider)
+		int IConvertible.ToInt32(IFormatProvider provider)
 		{
 			return AsInt32;
 		}
-		long IConvertible.ToInt64(IFormatProvider AProvider)
+		long IConvertible.ToInt64(IFormatProvider provider)
 		{
 			return AsInt64;
 		}
-		sbyte IConvertible.ToSByte(IFormatProvider AProvider)
+		sbyte IConvertible.ToSByte(IFormatProvider provider)
 		{
 			return (sbyte)AsType(typeof(sbyte));
 		}
-		float IConvertible.ToSingle(IFormatProvider AProvider)
+		float IConvertible.ToSingle(IFormatProvider provider)
 		{
 			return (float)AsType(typeof(float));
 		}
-		string IConvertible.ToString(IFormatProvider AProvider)
+		string IConvertible.ToString(IFormatProvider provider)
 		{
 			return AsString;
 		}
-		object IConvertible.ToType(Type AConversionType, IFormatProvider AProvider)
+		object IConvertible.ToType(Type conversionType, IFormatProvider provider)
 		{
-			return AsType(AConversionType);
+			return AsType(conversionType);
 		}
-		ushort IConvertible.ToUInt16(IFormatProvider AProvider)
+		ushort IConvertible.ToUInt16(IFormatProvider provider)
 		{
 			return (ushort)AsType(typeof(ushort));
 		}
-		uint IConvertible.ToUInt32(IFormatProvider AProvider)
+		uint IConvertible.ToUInt32(IFormatProvider provider)
 		{
 			return (uint)AsType(typeof(uint));
 		}
-		ulong IConvertible.ToUInt64(IFormatProvider AProvider)
+		ulong IConvertible.ToUInt64(IFormatProvider provider)
 		{
 			return (ulong)AsType(typeof(ulong));
 		}
 		
 		// Explicit operator conversions
-		public static explicit operator bool(DataField AField)
+		public static explicit operator bool(DataField field)
 		{
-			return AField.AsBoolean;
+			return field.AsBoolean;
 		}
-		public static explicit operator byte(DataField AField)
+		public static explicit operator byte(DataField field)
 		{
-			return AField.AsByte;
+			return field.AsByte;
 		}
-		public static explicit operator decimal(DataField AField)
+		public static explicit operator decimal(DataField field)
 		{
-			return AField.AsDecimal;
+			return field.AsDecimal;
 		}
-		public static explicit operator int(DataField AField)
+		public static explicit operator int(DataField field)
 		{
-			return AField.AsInt32;
+			return field.AsInt32;
 		}
-		public static explicit operator long(DataField AField)
+		public static explicit operator long(DataField field)
 		{
-			return AField.AsInt64;
+			return field.AsInt64;
 		}
-		public static explicit operator short(DataField AField)
+		public static explicit operator short(DataField field)
 		{
-			return AField.AsInt16;
+			return field.AsInt16;
 		}
     }
 
@@ -3008,33 +3019,33 @@ namespace Alphora.Dataphor.DAE.Client
 	[ToolboxItem(false)]
     public class DataLink : Disposable, IDataSourceReference
     {
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Source = null;
 		}
 		
-		private DataSource FSource;
+		private DataSource _source;
 		/// <summary> The <see cref="DataSource"/> associated with this DataLink. </summary>
 		public DataSource Source
 		{
-			get { return FSource; }
+			get { return _source; }
 			set
 			{
-				if (FSource != value)
+				if (_source != value)
 				{
-					if (FSource != null)
+					if (_source != null)
 					{
-						FSource.RemoveLink(this);
-						FSource.Disposed -= new EventHandler(DataSourceDisposed);
-						FSource.OnDataSetChanged -= new EventHandler(DataSourceDataSetChanged);
+						_source.RemoveLink(this);
+						_source.Disposed -= new EventHandler(DataSourceDisposed);
+						_source.OnDataSetChanged -= new EventHandler(DataSourceDataSetChanged);
 					}
-					FSource = value;
-					if (FSource != null)
+					_source = value;
+					if (_source != null)
 					{
-						FSource.OnDataSetChanged += new EventHandler(DataSourceDataSetChanged);
-						FSource.Disposed += new EventHandler(DataSourceDisposed);
-						FSource.AddLink(this);
+						_source.OnDataSetChanged += new EventHandler(DataSourceDataSetChanged);
+						_source.Disposed += new EventHandler(DataSourceDisposed);
+						_source.AddLink(this);
 					}
 
 					DataSetChanged();
@@ -3042,12 +3053,12 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		private void DataSourceDisposed(object ASender, EventArgs AArgs)
+		private void DataSourceDisposed(object sender, EventArgs args)
 		{
 			Source = null;
 		}
 		
-		private void DataSourceDataSetChanged(object ASender, EventArgs AArgs)
+		private void DataSourceDataSetChanged(object sender, EventArgs args)
 		{
 			DataSetChanged();
 		}
@@ -3055,7 +3066,7 @@ namespace Alphora.Dataphor.DAE.Client
 		private void DataSetChanged()
 		{
 			// Set FActive to opposite of Active to ensure that ActiveChanged is fired (so that the control always get's an ActiveChanged on way or another)
-			FActive = !Active;
+			_active = !Active;
 			StateChanged();
 		}
 		
@@ -3064,10 +3075,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get
 			{
-				if (FSource == null)
+				if (_source == null)
 					return null;
 				else
-					return FSource.DataSet;
+					return _source.DataSet;
 			}
 		}
 		
@@ -3077,13 +3088,13 @@ namespace Alphora.Dataphor.DAE.Client
 			get { return (DataSet != null) && DataSet.Active; }
 		}
 
-		internal int FFirstOffset;	// This is maintained by the DataSet
+		internal int _firstOffset;	// This is maintained by the DataSet
 		
 		/// <summary> Gets the active row offset relative to the link. </summary>
 		/// <remarks> Do not attempt to retrieve this if the link is not <see cref="Active"/>. </remarks>
 		public int ActiveOffset
 		{
-			get { return DataSet.FActiveOffset - FFirstOffset; }
+			get { return DataSet._activeOffset - _firstOffset; }
 		}
 
 		/// <summary> Retrieves a DataSet buffer row relative to this link. </summary>
@@ -3091,9 +3102,9 @@ namespace Alphora.Dataphor.DAE.Client
 		///		Do not attempt to access this if the link is not <see cref="Active"/>.  Do not modify 
 		///		the buffer rows in any way, use them only to read data. 
 		///	</remarks>
-		public DAE.Runtime.Data.Row Buffer(int AIndex)
+		public DAE.Runtime.Data.Row Buffer(int index)
 		{
-			return DataSet.FBuffer[AIndex + FFirstOffset].Row;
+			return DataSet._buffer[index + _firstOffset].Row;
 		}
 
 		/// <summary> The offset of the last valid row relative to the link. </summary>
@@ -3106,14 +3117,14 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get 
 			{ 
-				int LResult = FFirstOffset + (FBufferCount - 1);
-				if (LResult > DataSet.EndOffset)
-					LResult = DataSet.EndOffset;
-				return LResult - FFirstOffset;
+				int result = _firstOffset + (_bufferCount - 1);
+				if (result > DataSet.EndOffset)
+					result = DataSet.EndOffset;
+				return result - _firstOffset;
 			}
 		}
 
-		private int FBufferCount = 1;
+		private int _bufferCount = 1;
 		/// <summary> The maximum number of rows that are needed by this link. </summary>
 		/// <remarks> 
 		///		The BufferCount will always be at least one.  Attempting to set BufferCount 
@@ -3124,16 +3135,16 @@ namespace Alphora.Dataphor.DAE.Client
 		///	</remarks>
 		public int BufferCount
 		{
-			get { return FBufferCount; }
+			get { return _bufferCount; }
 			set
 			{
 				if (value < 1)
 					value = 1;
-				if (FBufferCount != value)
+				if (_bufferCount != value)
 				{
-					FBufferCount = value;
+					_bufferCount = value;
 					if (Active)
-						FSource.LinkBufferRangeChanged();	// Make any adjustment to the DataSet buffer size
+						_source.LinkBufferRangeChanged();	// Make any adjustment to the DataSet buffer size
 				}
 			}
 		}
@@ -3168,19 +3179,19 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Called when the active row's data is changing as a result of data edits. </summary>
 		public event DataLinkFieldHandler OnRowChanging;
 		/// <summary> Called when the active row's data is changing as a result of data edits. </summary>
-		protected internal virtual void RowChanging(DataField AField)
+		protected internal virtual void RowChanging(DataField field)
 		{
 			if (OnRowChanging != null)
-				OnRowChanging(this, DataSet, AField);
+				OnRowChanging(this, DataSet, field);
 		}
 
 		/// <summary> Called when the active row's data changed as a result of data edits. </summary>
 		public event DataLinkFieldHandler OnRowChanged;
 		/// <summary> Called when the active row's data changed as a result of data edits. </summary>
-		protected internal virtual void RowChanged(DataField AField)
+		protected internal virtual void RowChanged(DataField field)
 		{
 			if (OnRowChanged != null)
-				OnRowChanged(this, DataSet, AField);
+				OnRowChanged(this, DataSet, field);
 		}
 
 		/// <summary> Called when determining the default values for a newly inserted row. </summary>
@@ -3198,8 +3209,8 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <remarks> Assumes that the link is active. </remarks>
 		protected internal virtual void UpdateRange()
 		{
-			FFirstOffset += Math.Min(DataSet.FActiveOffset - FFirstOffset, 0);							// Slide buffer down if active is below first
-			FFirstOffset += Math.Max(DataSet.FActiveOffset - (FFirstOffset + (FBufferCount - 1)), 0);	// Slide buffer up if active is above last
+			_firstOffset += Math.Min(DataSet._activeOffset - _firstOffset, 0);							// Slide buffer down if active is below first
+			_firstOffset += Math.Max(DataSet._activeOffset - (_firstOffset + (_bufferCount - 1)), 0);	// Slide buffer up if active is above last
 		}
 
 		/// <summary> Scrolls the links buffer by the given delta, then ensures that the link buffer is kept in range of the active row. </summary>
@@ -3209,9 +3220,9 @@ namespace Alphora.Dataphor.DAE.Client
 		///		rows of its buffer, this method is called with a Delta of -2 so that the rows in this link's 
 		///		buffer appear to be unmoved. 
 		///	</remarks>
-		protected internal virtual void UpdateFirstOffset(int ADelta)
+		protected internal virtual void UpdateFirstOffset(int delta)
 		{
-			FFirstOffset += ADelta;
+			_firstOffset += delta;
 			UpdateRange();
 		}
 	
@@ -3234,10 +3245,10 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Asks the link to focus any control that might be associated with this link. </summary>
 		public event DataLinkFieldHandler OnFocusControl;
 		/// <summary> Asks the link to focus any control that might be associated with this link. </summary>
-		protected internal virtual void FocusControl(DataField AField)
+		protected internal virtual void FocusControl(DataField field)
 		{
 			if (OnFocusControl != null)
-				OnFocusControl(this, DataSet, AField);
+				OnFocusControl(this, DataSet, field);
 		}
 		
 		/// <summary> Called when the DataSet's state has changed. </summary>
@@ -3245,17 +3256,17 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Called when the DataSet's state has changed. </summary>
 		protected internal virtual void StateChanged()
 		{
-			if (Active != FActive)
+			if (Active != _active)
 			{
 				ActiveChanged();
-				FActive = Active;
+				_active = Active;
 			}
 
 			if (OnStateChanged != null)
 				OnStateChanged(this, DataSet);
 		}
 		
-		private bool FActive;
+		private bool _active;
 		/// <summary> Called when the DataSet's active state changes or when attached/detached from an active DataSet. </summary>
 		public event DataLinkHandler OnActiveChanged;
 		/// <summary> Called when the DataSet's active state changes or when attached/detached from an active DataSet. </summary>
@@ -3264,7 +3275,7 @@ namespace Alphora.Dataphor.DAE.Client
 			if (Active)
 				UpdateRange();
 			else
-				FFirstOffset = 0;
+				_firstOffset = 0;
 				
 			if (OnActiveChanged != null)
 				OnActiveChanged(this, DataSet);
@@ -3282,78 +3293,78 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 		}
 
-		public DataSource(IContainer AContainer) : this()
+		public DataSource(IContainer container) : this()
 		{
-			if (AContainer != null)
-				AContainer.Add(this);
+			if (container != null)
+				container.Add(this);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			DataSet = null;
-			base.Dispose(ADisposing);
-			if (FLinks != null)
+			base.Dispose(disposing);
+			if (_links != null)
 			{
-				while (FLinks.Count > 0)
-					FLinks[FLinks.Count - 1].Source = null;
-				FLinks = null;
+				while (_links.Count > 0)
+					_links[_links.Count - 1].Source = null;
+				_links = null;
 			}
 		}
 
-		internal List<DataLink> FLinks = new List<DataLink>();
+		internal List<DataLink> _links = new List<DataLink>();
 		
-		internal void AddLink(DataLink ALink)
+		internal void AddLink(DataLink link)
 		{
-			FLinks.Add(ALink);
+			_links.Add(link);
 			LinkBufferRangeChanged();
 		}
 		
-		internal void RemoveLink(DataLink ALink)
+		internal void RemoveLink(DataLink link)
 		{
-			FLinks.Remove(ALink);
+			_links.Remove(link);
 			LinkBufferRangeChanged();
 		}
 		
 		internal void LinkBufferRangeChanged()
 		{
-			if ((FDataSet != null) && (FDataSet.Active))
-				FDataSet.BufferUpdateCount(false);
+			if ((_dataSet != null) && (_dataSet.Active))
+				_dataSet.BufferUpdateCount(false);
 		}
 		
-		public void EnumerateLinks(List<DataLink> ALinks)
+		public void EnumerateLinks(List<DataLink> links)
 		{
-			foreach (DataLink LLink in FLinks)
-				ALinks.Add(LLink);
+			foreach (DataLink link in _links)
+				links.Add(link);
 		}
 		
-		private DataSet FDataSet;
+		private DataSet _dataSet;
 		/// <summary> The <see cref="DataSet"/> that is associated with this DataSource. </summary>
 		[Category("Data")]
 		[DefaultValue(null)]
 		public DataSet DataSet
 		{
-			get { return FDataSet; }
+			get { return _dataSet; }
 			set
 			{
-				if (FDataSet != value)
+				if (_dataSet != value)
 				{
-					if (FDataSet != null)
+					if (_dataSet != null)
 					{
-						FDataSet.RemoveSource(this);
-						FDataSet.Disposed -= new EventHandler(DataSetDisposed);
+						_dataSet.RemoveSource(this);
+						_dataSet.Disposed -= new EventHandler(DataSetDisposed);
 					}
-					FDataSet = value;
-					if (FDataSet != null)
+					_dataSet = value;
+					if (_dataSet != null)
 					{
-						FDataSet.AddSource(this);
-						FDataSet.Disposed += new EventHandler(DataSetDisposed);
+						_dataSet.AddSource(this);
+						_dataSet.Disposed += new EventHandler(DataSetDisposed);
 					}
 					DataSetChanged();
 				}
 			}
 		}
 		
-		private void DataSetDisposed(object ASender, EventArgs AArgs)
+		private void DataSetDisposed(object sender, EventArgs args)
 		{
 			DataSet = null;
 		}

@@ -12,36 +12,36 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	public class CopyAction : Action, ICopyAction
 	{
 		// Do not locallize
-		public const string CDefaultClipboardFormatName = "DataphorData";
+		public const string DefaultClipboardFormatName = "DataphorData";
 		
-		private string FClipboardFormatName = CDefaultClipboardFormatName;
+		private string _clipboardFormatName = DefaultClipboardFormatName;
 		[Description("The identifier to use when storing or retrieving information from the clipboard.")]
-		[DefaultValue(CDefaultClipboardFormatName)]
+		[DefaultValue(DefaultClipboardFormatName)]
 		public string ClipboardFormatName
 		{
-			get { return FClipboardFormatName; }
-			set { FClipboardFormatName = value; }
+			get { return _clipboardFormatName; }
+			set { _clipboardFormatName = value; }
 		}
 		
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			return typeof(DataArgument).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
+			return typeof(DataArgument).IsAssignableFrom(childType) || base.IsValidChild(childType);
 		}
 
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
 			// Collect the params
-			DataParams LParams = BaseArgument.CollectArguments(this);
+			DataParams localParamsValue = BaseArgument.CollectArguments(this);
 			
 			// Serialize the params and place them on the clipboard
-			if (LParams != null)
+			if (localParamsValue != null)
 				Clipboard.SetData
 				(
 					ClipboardFormatName, 
 					DataParamSerializer.DataParamsToSerializableParamData
 					(
 						HostNode.Session.DataSession.UtilityProcess, 
-						LParams
+						localParamsValue
 					)
 				);
 		}
@@ -49,31 +49,31 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	
 	public class PasteAction : Action
 	{
-		private string FClipboardFormatName = CopyAction.CDefaultClipboardFormatName;
+		private string _clipboardFormatName = CopyAction.DefaultClipboardFormatName;
 		[Description("The identifier to use when storing or retrieving information from the clipboard.")]
-		[DefaultValue(CopyAction.CDefaultClipboardFormatName)]
+		[DefaultValue(CopyAction.DefaultClipboardFormatName)]
 		public string ClipboardFormatName
 		{
-			get { return FClipboardFormatName; }
+			get { return _clipboardFormatName; }
 			set 
 			{ 
-				if (FClipboardFormatName != value)
+				if (_clipboardFormatName != value)
 				{
-					FClipboardFormatName = value; 
+					_clipboardFormatName = value; 
 					EnabledChanged();
 				}
 			}
 		}
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			return typeof(DataArgument).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
+			return typeof(DataArgument).IsAssignableFrom(childType) || base.IsValidChild(childType);
 		}
 
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
 			// Fetch the data params from the clipboard and deserialize them
-			DataParams LParams =
+			DataParams localParamsValue =
 				DataParamSerializer.SerializableParamDataToDataParams
 				(
 					HostNode.Session.DataSession.UtilityProcess,
@@ -81,11 +81,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				);
 			
 			// Change the params to be out
-			foreach (DataParam LParam in LParams)
-				LParam.Modifier = Modifier.Out;
+			foreach (DataParam param in localParamsValue)
+				param.Modifier = Modifier.Out;
 			
 			// Apply the params	
-			BaseArgument.ApplyArguments(this, LParams);
+			BaseArgument.ApplyArguments(this, localParamsValue);
 		}
 
 		public override bool GetEnabled()
@@ -93,13 +93,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return base.GetEnabled() && Clipboard.ContainsData(ClipboardFormatName);
 		}
 
-		private vbAccelerator.Components.Clipboard.ClipboardChangeNotifier FNotifier;
+		private vbAccelerator.Components.Clipboard.ClipboardChangeNotifier _notifier;
 
 		protected override void Activate()
 		{
 			base.Activate();
-			FNotifier = new vbAccelerator.Components.Clipboard.ClipboardChangeNotifier();
-			FNotifier.ClipboardChanged += new EventHandler(ClipboardChanged);
+			_notifier = new vbAccelerator.Components.Clipboard.ClipboardChangeNotifier();
+			_notifier.ClipboardChanged += new EventHandler(ClipboardChanged);
 		}
 
 		private void ClipboardChanged(object sender, EventArgs e)
@@ -111,7 +111,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			try
 			{
-				FNotifier.Dispose();
+				_notifier.Dispose();
 			}
 			finally
 			{
@@ -126,64 +126,64 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	/// however, uses Serializable rather than WCF DataContracts. </remarks>
 	public static class DataParamSerializer
 	{
-		public static DataParams SerializableParamDataToDataParams(Alphora.Dataphor.DAE.IServerProcess AProcess, SerializableParamData AParams)
+		public static DataParams SerializableParamDataToDataParams(Alphora.Dataphor.DAE.IServerProcess process, SerializableParamData paramsValue)
 		{
-			if ((AParams.Params != null) && (AParams.Params.Length > 0))
+			if ((paramsValue.Params != null) && (paramsValue.Params.Length > 0))
 			{
-				DataParams LParams = new DataParams();
-				Schema.RowType LRowType = new Schema.RowType();
-				for (int LIndex = 0; LIndex < AParams.Params.Length; LIndex++)
-					LRowType.Columns.Add(new Schema.Column(AParams.Params[LIndex].Name, (Schema.ScalarType)AProcess.Session.Server.Catalog[AParams.Params[LIndex].TypeName]));
+				DataParams localParamsValue = new DataParams();
+				Schema.RowType rowType = new Schema.RowType();
+				for (int index = 0; index < paramsValue.Params.Length; index++)
+					rowType.Columns.Add(new Schema.Column(paramsValue.Params[index].Name, (Schema.ScalarType)process.Session.Server.Catalog[paramsValue.Params[index].TypeName]));
 
-				Data.Row LRow = new Data.Row(AProcess.ValueManager, LRowType);
+				Data.Row row = new Data.Row(process.ValueManager, rowType);
 				try
 				{
-					LRow.ValuesOwned = false;
-					LRow.AsPhysical = AParams.Data.Data;
+					row.ValuesOwned = false;
+					row.AsPhysical = paramsValue.Data.Data;
 
-					for (int LIndex = 0; LIndex < AParams.Params.Length; LIndex++)
-						if (LRow.HasValue(LIndex))
-							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, SerializableModifierToModifier(AParams.Params[LIndex].Modifier), Data.DataValue.CopyValue(AProcess.ValueManager, LRow[LIndex])));
+					for (int index = 0; index < paramsValue.Params.Length; index++)
+						if (row.HasValue(index))
+							localParamsValue.Add(new DataParam(row.DataType.Columns[index].Name, row.DataType.Columns[index].DataType, SerializableModifierToModifier(paramsValue.Params[index].Modifier), Data.DataValue.CopyValue(process.ValueManager, row[index])));
 						else
-							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, SerializableModifierToModifier(AParams.Params[LIndex].Modifier), null));
+							localParamsValue.Add(new DataParam(row.DataType.Columns[index].Name, row.DataType.Columns[index].DataType, SerializableModifierToModifier(paramsValue.Params[index].Modifier), null));
 
-					return LParams;
+					return localParamsValue;
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 			}
 			else
 				return null;
 		}
 
-		public static SerializableParamData DataParamsToSerializableParamData(Alphora.Dataphor.DAE.IServerProcess AProcess, DataParams AParams)
+		public static SerializableParamData DataParamsToSerializableParamData(Alphora.Dataphor.DAE.IServerProcess process, DataParams paramsValue)
 		{
-			int LParamCount = AParams != null ? AParams.Count : 0;
-			if (LParamCount > 0)
+			int paramCount = paramsValue != null ? paramsValue.Count : 0;
+			if (paramCount > 0)
 			{
-				Schema.RowType LRowType = new Schema.RowType();
-				if (AParams != null)
-					foreach (DataParam LParam in AParams)
-						LRowType.Columns.Add(new Schema.Column(LParam.Name, LParam.DataType));
-				using (Data.Row LRow = new Data.Row(AProcess.ValueManager, LRowType))
+				Schema.RowType rowType = new Schema.RowType();
+				if (paramsValue != null)
+					foreach (DataParam param in paramsValue)
+						rowType.Columns.Add(new Schema.Column(param.Name, param.DataType));
+				using (Data.Row row = new Data.Row(process.ValueManager, rowType))
 				{
-					LRow.ValuesOwned = false;
-					SerializableParamData LParams = new SerializableParamData();
-					LParams.Params = new SerializableParam[LParamCount];
-					for (int LIndex = 0; LIndex < LParamCount; LIndex++)
+					row.ValuesOwned = false;
+					SerializableParamData localParamsValue = new SerializableParamData();
+					localParamsValue.Params = new SerializableParam[paramCount];
+					for (int index = 0; index < paramCount; index++)
 					{
-						LParams.Params[LIndex].Name = AParams[LIndex].Name;
-						LParams.Params[LIndex].TypeName = AParams[LIndex].DataType.Name;
-						LParams.Params[LIndex].Modifier = ModifierToSerializableModifier(AParams[LIndex].Modifier);
-						if (AParams[LIndex].Value != null)
-							LRow[LIndex] = AParams[LIndex].Value;
+						localParamsValue.Params[index].Name = paramsValue[index].Name;
+						localParamsValue.Params[index].TypeName = paramsValue[index].DataType.Name;
+						localParamsValue.Params[index].Modifier = ModifierToSerializableModifier(paramsValue[index].Modifier);
+						if (paramsValue[index].Value != null)
+							row[index] = paramsValue[index].Value;
 					}
 					// TODO: Not able to adapt this without adding a common StreamManager public property
 					//EnsureOverflowReleased(AProcess, LRow);
-					LParams.Data.Data = LRow.AsPhysical;
-					return LParams;
+					localParamsValue.Data.Data = row.AsPhysical;
+					return localParamsValue;
 				}
 			}
 			else	// optimization
@@ -192,9 +192,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		public static Modifier SerializableModifierToModifier(SerializableParamModifier ASerializableModifier)
+		public static Modifier SerializableModifierToModifier(SerializableParamModifier serializableModifier)
 		{
-			switch (ASerializableModifier)
+			switch (serializableModifier)
 			{
 				case SerializableParamModifier.In: return Modifier.In;
 				case SerializableParamModifier.Out: return Modifier.Out;
@@ -204,9 +204,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		public static SerializableParamModifier ModifierToSerializableModifier(Modifier AModifier)
+		public static SerializableParamModifier ModifierToSerializableModifier(Modifier modifier)
 		{
-			switch (AModifier)
+			switch (modifier)
 			{
 				case Modifier.In: return SerializableParamModifier.In;
 				case Modifier.Out: return SerializableParamModifier.Out;

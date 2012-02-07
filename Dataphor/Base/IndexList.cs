@@ -15,190 +15,190 @@ namespace Alphora.Dataphor
 	/// This structure is not thread-safe. </remarks>
 	public class IndexList
 	{
-		internal const int CFanout = 64;	// Maximum number of items per routing node (must be at least 2)
-		internal const int CCapacity = 128;	// Maximum number of items per data node
-		internal const int CInitialDataNodePoolSize = 128;
-		internal const int CInitialRoutingNodePoolSize = 128;
+		internal const int Fanout = 64;	// Maximum number of items per routing node (must be at least 2)
+		internal const int Capacity = 128;	// Maximum number of items per data node
+		internal const int InitialDataNodePoolSize = 128;
+		internal const int InitialRoutingNodePoolSize = 128;
 
 		public IndexList()
 		{
-			DataNode LNewRoot = AcquireDataNode();
-			FRoot = LNewRoot;
-			FHead = LNewRoot;
-			FTail = LNewRoot;
+			DataNode newRoot = AcquireDataNode();
+			_root = newRoot;
+			_head = newRoot;
+			_tail = newRoot;
 		}
 
-		private Node FRoot;
-		private DataNode FHead;
-		private DataNode FTail;
+		private Node _root;
+		private DataNode _head;
+		private DataNode _tail;
 
-		private int FCount;
+		private int _count;
 		/// <summary> Total number of entries in the index. </summary>
-		public int Count { get { return FCount; } }
+		public int Count { get { return _count; } }
 
 		#if (DEBUG)
 
-		private int FDataNodeCount;
+		private int _dataNodeCount;
 		/// <summary> Number of data nodes allocated for the entire index. </summary>
-		public int DataNodeCount { get { return FDataNodeCount; } }
+		public int DataNodeCount { get { return _dataNodeCount; } }
 
-		private int FRoutingNodeCount;
+		private int _routingNodeCount;
 		/// <summary> Number of routing nodes allocated for the entire index. </summary>
-		public int RoutingNodeCount { get { return FRoutingNodeCount; } }
+		public int RoutingNodeCount { get { return _routingNodeCount; } }
 
-		private int FHeight = 1;
-		public int Height { get { return FHeight; } }
+		private int _height = 1;
+		public int Height { get { return _height; } }
 
 		#endif
 
 		public void Clear()
 		{
-			FRoot.Clear(this);
-			DataNode LNewRoot = AcquireDataNode();
-			FRoot = LNewRoot;
-			FHead = LNewRoot;
-			FTail = LNewRoot;
-			LNewRoot.FNext = null;
-			LNewRoot.FPrior = null;
+			_root.Clear(this);
+			DataNode newRoot = AcquireDataNode();
+			_root = newRoot;
+			_head = newRoot;
+			_tail = newRoot;
+			newRoot._next = null;
+			newRoot._prior = null;
 
 			#if (DEBUG)
-			FHeight = 1;
+			_height = 1;
 			#endif
 		}
 
 		#region Routing and Data Node Pools
 
-		DataNode[] FFreeDataNodes = new DataNode[CInitialDataNodePoolSize];
-		int FFreeDataNodeCount = 0;
+		DataNode[] _freeDataNodes = new DataNode[InitialDataNodePoolSize];
+		int _freeDataNodeCount = 0;
 
 		private DataNode AcquireDataNode()
 		{
-			DataNode LNode;
+			DataNode node;
 
 			#if (DEBUG)
-			FDataNodeCount++;
+			_dataNodeCount++;
 			#endif
 
-			if (FFreeDataNodeCount == 0)
+			if (_freeDataNodeCount == 0)
 				return new DataNode();
 			else
 			{
-				FFreeDataNodeCount--;
-				LNode = FFreeDataNodes[FFreeDataNodeCount];
-				LNode.FCount = 0;
-				return LNode;
+				_freeDataNodeCount--;
+				node = _freeDataNodes[_freeDataNodeCount];
+				node._count = 0;
+				return node;
 			}
 		}
 
-		private void RelinquishDataNode(DataNode ANode)
+		private void RelinquishDataNode(DataNode node)
 		{
 			#if (DEBUG)
-			FDataNodeCount--;
+			_dataNodeCount--;
 			#endif
 
-			if (ANode.FNext == null)
-				FHead = ANode.FPrior;
-			if (ANode.FPrior == null)
-				FTail = ANode.FNext;
+			if (node._next == null)
+				_head = node._prior;
+			if (node._prior == null)
+				_tail = node._next;
 
-			if (FFreeDataNodeCount == FFreeDataNodes.Length) // we need to grow the array of data nodes
+			if (_freeDataNodeCount == _freeDataNodes.Length) // we need to grow the array of data nodes
 			{
-				DataNode[] LNew = new DataNode[FFreeDataNodes.Length + (FFreeDataNodes.Length / 2)];
-				Array.Copy(FFreeDataNodes, 0, LNew, 0, FFreeDataNodes.Length);
-				FFreeDataNodes = LNew;
+				DataNode[] newValue = new DataNode[_freeDataNodes.Length + (_freeDataNodes.Length / 2)];
+				Array.Copy(_freeDataNodes, 0, newValue, 0, _freeDataNodes.Length);
+				_freeDataNodes = newValue;
 			}
-			FFreeDataNodes[FFreeDataNodeCount] = ANode;
-			FFreeDataNodeCount++;
+			_freeDataNodes[_freeDataNodeCount] = node;
+			_freeDataNodeCount++;
 		}
 
-		RoutingNode[] FFreeRoutingNodes = new RoutingNode[CInitialRoutingNodePoolSize];
-		int FFreeRoutingNodeCount = 0;
+		RoutingNode[] _freeRoutingNodes = new RoutingNode[InitialRoutingNodePoolSize];
+		int _freeRoutingNodeCount = 0;
 
 		private RoutingNode AcquireRoutingNode()
 		{
-			RoutingNode LNode;
+			RoutingNode node;
 
 			#if (DEBUG)
-			FRoutingNodeCount++;
+			_routingNodeCount++;
 			#endif
 
-			if (FFreeRoutingNodeCount == 0)
+			if (_freeRoutingNodeCount == 0)
 				return new RoutingNode();
 			else
 			{
-				FFreeRoutingNodeCount--;
-				LNode = FFreeRoutingNodes[FFreeRoutingNodeCount];
-				LNode.FCount = 0;
-				return LNode;
+				_freeRoutingNodeCount--;
+				node = _freeRoutingNodes[_freeRoutingNodeCount];
+				node._count = 0;
+				return node;
 			}
 		}
 
-		private void RelinquishRoutingNode(RoutingNode ANode)
+		private void RelinquishRoutingNode(RoutingNode node)
 		{
 			#if (DEBUG)
-			FRoutingNodeCount--;
+			_routingNodeCount--;
 			#endif
 
-			if (FFreeRoutingNodeCount == FFreeRoutingNodes.Length)
+			if (_freeRoutingNodeCount == _freeRoutingNodes.Length)
 			{
-				RoutingNode[] LNew = new RoutingNode[FFreeRoutingNodes.Length + (FFreeRoutingNodes.Length / 2)];
-				Array.Copy(FFreeRoutingNodes, 0, LNew, 0, FFreeRoutingNodes.Length);
-				FFreeRoutingNodes = LNew;
+				RoutingNode[] newValue = new RoutingNode[_freeRoutingNodes.Length + (_freeRoutingNodes.Length / 2)];
+				Array.Copy(_freeRoutingNodes, 0, newValue, 0, _freeRoutingNodes.Length);
+				_freeRoutingNodes = newValue;
 			}
-			FFreeRoutingNodes[FFreeRoutingNodeCount] = ANode;
-			FFreeRoutingNodeCount++;
+			_freeRoutingNodes[_freeRoutingNodeCount] = node;
+			_freeRoutingNodeCount++;
 		}
 
 		#endregion
 
 		#region Insert
 
-		public void Insert(IComparable AKey, object AData)
+		public void Insert(IComparable key, object data)
 		{
 			for (;;)
 			{
-				if (!FRoot.Insert(AKey, AData, this))
+				if (!_root.Insert(key, data, this))
 				{
-					RoutingNode LNewRoot = AcquireRoutingNode();
-					Node LNewChild = SplitNode(FRoot);
-					LNewRoot.InsertNode(FRoot.FKeys[0], FRoot, 0);
-					LNewRoot.InsertNode(LNewChild.FKeys[0], LNewChild, 1);
-					FRoot = LNewRoot;
+					RoutingNode newRoot = AcquireRoutingNode();
+					Node newChild = SplitNode(_root);
+					newRoot.InsertNode(_root._keys[0], _root, 0);
+					newRoot.InsertNode(newChild._keys[0], newChild, 1);
+					_root = newRoot;
 
 					#if (DEBUG)
-					FHeight++;
+					_height++;
 					#endif
 
 					continue;
 				}
 				break;
 			}
-			FCount++;
+			_count++;
 		}
 
-		private Node SplitNode(Node AChild)
+		private Node SplitNode(Node child)
 		{
-			DataNode LChildDataNode = AChild as DataNode;
-			if (LChildDataNode != null)
+			DataNode childDataNode = child as DataNode;
+			if (childDataNode != null)
 			{
 				// Prepare new node
-				DataNode LNewDataNode = AcquireDataNode();
-				LNewDataNode.FPrior = LChildDataNode;
-				LNewDataNode.FNext = LChildDataNode.FNext;
-				LNewDataNode.CopyHalf(LChildDataNode);
+				DataNode newDataNode = AcquireDataNode();
+				newDataNode._prior = childDataNode;
+				newDataNode._next = childDataNode._next;
+				newDataNode.CopyHalf(childDataNode);
 
 				// Update child node
-				if (LChildDataNode.FNext != null)
-					LChildDataNode.FNext.FPrior = LNewDataNode;
-				LChildDataNode.FNext = LNewDataNode;
+				if (childDataNode._next != null)
+					childDataNode._next._prior = newDataNode;
+				childDataNode._next = newDataNode;
 
-				return LNewDataNode;
+				return newDataNode;
 			}
 			else
 			{
-				RoutingNode LNewRoutingNode = AcquireRoutingNode();
-				LNewRoutingNode.CopyHalf((RoutingNode)AChild);
-				return LNewRoutingNode;
+				RoutingNode newRoutingNode = AcquireRoutingNode();
+				newRoutingNode.CopyHalf((RoutingNode)child);
+				return newRoutingNode;
 			}
 		}
 
@@ -206,249 +206,249 @@ namespace Alphora.Dataphor
 
 		#region Delete
 
-		public bool Delete(IComparable AKey)
+		public bool Delete(IComparable key)
 		{
-			bool LResult = FRoot.Delete(AKey, this);
-			if (LResult)
+			bool result = _root.Delete(key, this);
+			if (result)
 			{
-				RoutingNode LRoutingRoot = FRoot as RoutingNode;
-				if ((LRoutingRoot != null) && (LRoutingRoot.FCount == 1))
+				RoutingNode routingRoot = _root as RoutingNode;
+				if ((routingRoot != null) && (routingRoot._count == 1))
 				{
 					// Collapse the tree if there is only one node in the root (routing node)
-					FRoot = LRoutingRoot.FNodes[0];
-					RelinquishRoutingNode(LRoutingRoot);
+					_root = routingRoot._nodes[0];
+					RelinquishRoutingNode(routingRoot);
 
 					#if (DEBUG)
-					FHeight--;
+					_height--;
 					#endif
 				}
-				FCount--;
+				_count--;
 			}
-			return LResult;
+			return result;
 		}
 
 		#endregion
 
 		/// <summary> Finds the nearest entry to the given key (in the specified direction). </summary>
 		/// <returns> True if an exact match was found. </returns>
-		public bool Find(IComparable AKey, bool AForward, out object ANearest)
+		public bool Find(IComparable key, bool forward, out object nearest)
 		{
-			return FRoot.Find(AKey, AForward, out ANearest);
+			return _root.Find(key, forward, out nearest);
 		}
 
 		internal abstract class Node
 		{
-			public IComparable[] FKeys;
-			public int FCount;
+			public IComparable[] _keys;
+			public int _count;
 
 			/// <summary>
 			/// Performs a binary search among the entries in this node for the given key.  Will always return an
 			/// entry index in AIndex, which is the index of the entry that was found if the method returns true,
 			/// otherwise it is the index where the key should be inserted if the method returns false.
 			/// </summary>
-			public bool Search(int AInitialLow, IComparable AKey, out int AIndex)
+			public bool Search(int initialLow, IComparable key, out int index)
 			{
-				int LLo = AInitialLow;
-				int LHi = FCount - 1;
-				int LIndex = 0;
-				int LResult = -1;
+				int lo = initialLow;
+				int hi = _count - 1;
+				int localIndex = 0;
+				int result = -1;
 				
-				while (LLo <= LHi)
+				while (lo <= hi)
 				{
-					LIndex = (LLo + LHi) / 2;
-					LResult = FKeys[LIndex].CompareTo(AKey);
-					if (LResult == 0)
+					localIndex = (lo + hi) / 2;
+					result = _keys[localIndex].CompareTo(key);
+					if (result == 0)
 						break;
-					else if (LResult > 0)
-						LHi = LIndex - 1;
+					else if (result > 0)
+						hi = localIndex - 1;
 					else 
-						LLo = LIndex + 1;
+						lo = localIndex + 1;
 				}
 				
-				if (LResult == 0)
-					AIndex = LIndex;
+				if (result == 0)
+					index = localIndex;
 				else
-					AIndex = LLo;
+					index = lo;
 					
-				return LResult == 0;
+				return result == 0;
 			}
 
-			public abstract bool Find(IComparable AKey, bool AForward, out object ANearest);
+			public abstract bool Find(IComparable key, bool forward, out object nearest);
 
-			public abstract bool Insert(IComparable AKey, object AData, IndexList AList);
+			public abstract bool Insert(IComparable key, object data, IndexList list);
 
-			public abstract bool Delete(IComparable AKey, IndexList AList);
+			public abstract bool Delete(IComparable key, IndexList list);
 
 			/// <summary> Quickly relinquishes all of the nodes (recursively). </summary>
-			public abstract void Clear(IndexList AList);
+			public abstract void Clear(IndexList list);
 
 			/// <summary> Adds the first ACount nodes from this node to the end of the given node. </summary>
 			/// <remarks> No range checking is done. </remarks>
-			public abstract void AppendTo(Node ANode, int ACount);
+			public abstract void AppendTo(Node node, int count);
 
 			/// <summary> Adds the nodes from this node to the beginning on the given node. </summary>
-			public abstract void PrependTo(Node ANode);
+			public abstract void PrependTo(Node node);
 		}
 
 		internal class RoutingNode : Node
 		{
 			public RoutingNode()
 			{
-				FKeys = new IComparable[CFanout];
-				FNodes = new Node[CFanout];
+				_keys = new IComparable[Fanout];
+				_nodes = new Node[Fanout];
 			}
 
-			public Node[] FNodes;
+			public Node[] _nodes;
 
-			public override bool Find(IComparable AKey, bool AForward, out object ANearest)
+			public override bool Find(IComparable key, bool forward, out object nearest)
 			{
-				int LClosestIndex;
-				bool LMatch = Search(0, AKey, out LClosestIndex);
-				if (!LMatch && LClosestIndex > 0)	// added the guard
-					LClosestIndex--;
-				return FNodes[LClosestIndex].Find(AKey, AForward, out ANearest);
+				int closestIndex;
+				bool match = Search(0, key, out closestIndex);
+				if (!match && closestIndex > 0)	// added the guard
+					closestIndex--;
+				return _nodes[closestIndex].Find(key, forward, out nearest);
 			}
 
-			public override bool Insert(IComparable AKey, object AData, IndexList AList)
+			public override bool Insert(IComparable key, object data, IndexList list)
 			{
 				for (;;)
 				{
 					int AClosestIndex;
-					bool LMatch = Search(0, AKey, out AClosestIndex);
-					if (!LMatch && AClosestIndex > 0)
+					bool match = Search(0, key, out AClosestIndex);
+					if (!match && AClosestIndex > 0)
 						AClosestIndex--;
 					// Do not throw if there is an exact match.  An exact match in a routing node does not mean that a data node with that key exists (deletes do not update the index nodes)
-					Node LChild = FNodes[AClosestIndex];
-					if (!LChild.Insert(AKey, AData, AList))
+					Node child = _nodes[AClosestIndex];
+					if (!child.Insert(key, data, list))
 					{
 						// Make sure that there is room to store a new child for the split
-						if (FCount == CFanout)
+						if (_count == Fanout)
 							return false;
 
 						// Split the child
-						Node LNew = AList.SplitNode(LChild);
-						InsertNode(LNew.FKeys[0], LNew, AClosestIndex + 1);
+						Node newValue = list.SplitNode(child);
+						InsertNode(newValue._keys[0], newValue, AClosestIndex + 1);
 						continue;	// retry the insert
 					}
 					return true;
 				}
 			}
 
-			public void InsertNode(IComparable AKey, Node ANode, int AIndex)
+			public void InsertNode(IComparable key, Node node, int index)
 			{
 				// Slide all entries above the insert index
-				Array.Copy(FKeys, AIndex, FKeys, AIndex + 1, FCount - AIndex);
-				Array.Copy(FNodes, AIndex, FNodes, AIndex + 1, FCount - AIndex);
+				Array.Copy(_keys, index, _keys, index + 1, _count - index);
+				Array.Copy(_nodes, index, _nodes, index + 1, _count - index);
 
 				// Set the new entry data			
-				FKeys[AIndex] = AKey;
-				FNodes[AIndex] = ANode;
+				_keys[index] = key;
+				_nodes[index] = node;
 
 				// Increment entry count			
-				FCount++;
+				_count++;
 			}
 
 			/// <summary> Initializes this node to contain the upper half of nodes from the given node (and removes them from the given one). </summary>
-			public void CopyHalf(RoutingNode ANode)
+			public void CopyHalf(RoutingNode node)
 			{
-				FCount = ANode.FCount / 2;
-				ANode.FCount -= FCount;
-				Array.Copy(FKeys, 0, ANode.FKeys, ANode.FCount, FCount);
-				Array.Copy(FNodes, 0, ANode.FNodes, ANode.FCount, FCount);
+				_count = node._count / 2;
+				node._count -= _count;
+				Array.Copy(_keys, 0, node._keys, node._count, _count);
+				Array.Copy(_nodes, 0, node._nodes, node._count, _count);
 			}
 
-			public override void PrependTo(Node ANode)
+			public override void PrependTo(Node node)
 			{
-				RoutingNode LTarget = ANode as RoutingNode;
-				for (int i = 0; i < FCount; i++)
-					LTarget.InsertNode(FKeys[i], FNodes[i], i);
+				RoutingNode target = node as RoutingNode;
+				for (int i = 0; i < _count; i++)
+					target.InsertNode(_keys[i], _nodes[i], i);
 			}
 
-			public override void AppendTo(Node ANode, int ACount)
+			public override void AppendTo(Node node, int count)
 			{
-				RoutingNode LTarget = ANode as RoutingNode;
-				for (int i = 0; i < ACount; i++)
-					LTarget.InsertNode(FKeys[i], FNodes[i], LTarget.FCount);
-				Array.Copy(FKeys, ACount, FKeys, 0, FCount - ACount);
-				Array.Copy(FNodes, ACount, FNodes, 0, FCount - ACount);
-				FCount -= ACount;
+				RoutingNode target = node as RoutingNode;
+				for (int i = 0; i < count; i++)
+					target.InsertNode(_keys[i], _nodes[i], target._count);
+				Array.Copy(_keys, count, _keys, 0, _count - count);
+				Array.Copy(_nodes, count, _nodes, 0, _count - count);
+				_count -= count;
 			}
 
-			public void DeleteNode(int AIndex)
+			public void DeleteNode(int index)
 			{
 				// Slide all entries above the delete index down over the item to be deleted. 
-				Array.Copy(FKeys, AIndex + 1, FKeys, AIndex, (FCount - AIndex) - 1);
-				Array.Copy(FNodes, AIndex + 1, FNodes, AIndex, (FCount - AIndex) - 1);
+				Array.Copy(_keys, index + 1, _keys, index, (_count - index) - 1);
+				Array.Copy(_nodes, index + 1, _nodes, index, (_count - index) - 1);
 				
 				// Decrement entry count
-				FCount--;
+				_count--;
 			}
 
-			public override bool Delete(IComparable AKey, IndexList AList)
+			public override bool Delete(IComparable key, IndexList list)
 			{
 				int AClosestIndex;
-				bool LMatch = Search(0, AKey, out AClosestIndex);
-				if (!LMatch && AClosestIndex > 0)
+				bool match = Search(0, key, out AClosestIndex);
+				if (!match && AClosestIndex > 0)
 					AClosestIndex--;
-				Node LChild = FNodes[AClosestIndex];
-				LMatch = LChild.Delete(AKey, AList);
-				if (LMatch)
+				Node child = _nodes[AClosestIndex];
+				match = child.Delete(key, list);
+				if (match)
 				{
-					int LChildCapacity = LChild.FKeys.Length;
+					int childCapacity = child._keys.Length;
 
 					// A Delete occurred, check for a possible merge
-					if (LChild.FCount < (LChildCapacity / 3))	// if less than a third full
+					if (child._count < (childCapacity / 3))	// if less than a third full
 					{
-						Node LPrior = (AClosestIndex == 0 ? null : FNodes[AClosestIndex - 1]);
-						Node LNext = (AClosestIndex == (FCount - 1) ? null : FNodes[AClosestIndex + 1]);
+						Node prior = (AClosestIndex == 0 ? null : _nodes[AClosestIndex - 1]);
+						Node next = (AClosestIndex == (_count - 1) ? null : _nodes[AClosestIndex + 1]);
 						if
 						(									// if there is enough room in the adjacent node(s) to handle this node's entries
-							(LChildCapacity * 2)
-								- ((LPrior == null ? 0 : LPrior.FCount) + (LNext == null ? 0 : LNext.FCount))
-								>= LChild.FCount
+							(childCapacity * 2)
+								- ((prior == null ? 0 : prior._count) + (next == null ? 0 : next._count))
+								>= child._count
 						)
 						{
 							// Merge with adjacent nodes
-							if (LPrior != null)
+							if (prior != null)
 							{
-								int LNeeded = (LChild.FCount / 2) + (LChild.FCount % 2);	// Assume half rounded up
-								LChild.AppendTo
+								int needed = (child._count / 2) + (child._count % 2);	// Assume half rounded up
+								child.AppendTo
 								(
-									LPrior, 
+									prior, 
 									Math.Min	// Append the lesser of the number of slots available in the prior node, and half of the items to allocate plus the number that the next will not be able to handle of its half
 									(
-										LChildCapacity - LPrior.FCount, 
-										LNeeded + (LNext == null ? 0 : Math.Max(0, LNeeded - (LChildCapacity - LNext.FCount)))
+										childCapacity - prior._count, 
+										needed + (next == null ? 0 : Math.Max(0, needed - (childCapacity - next._count)))
 									)
 								);
 							}
 
-							if (LNext != null)
-								LChild.PrependTo(LNext);
+							if (next != null)
+								child.PrependTo(next);
 
 							DeleteNode(AClosestIndex);
-							RoutingNode LRoutingChild = LChild as RoutingNode;
-							if (LRoutingChild != null)
-								AList.RelinquishRoutingNode(LRoutingChild);
+							RoutingNode routingChild = child as RoutingNode;
+							if (routingChild != null)
+								list.RelinquishRoutingNode(routingChild);
 							else
-								AList.RelinquishDataNode((DataNode)LChild);
+								list.RelinquishDataNode((DataNode)child);
 						}
 					}
 				}
-				return LMatch;
+				return match;
 			}
 
-			public override void Clear(IndexList AList)
+			public override void Clear(IndexList list)
 			{
-				for (int i = 0; i < FCount; i++)
+				for (int i = 0; i < _count; i++)
 				{
-					Node LNode = FNodes[i];
-					LNode.Clear(AList);
-					DataNode LDataNode = LNode as DataNode;
-					if (LNode != null)
-						AList.RelinquishDataNode(LDataNode);
+					Node node = _nodes[i];
+					node.Clear(list);
+					DataNode dataNode = node as DataNode;
+					if (node != null)
+						list.RelinquishDataNode(dataNode);
 					else
-						AList.RelinquishRoutingNode((RoutingNode)LNode);
+						list.RelinquishRoutingNode((RoutingNode)node);
 				}
 			}
 		}
@@ -457,128 +457,128 @@ namespace Alphora.Dataphor
 		{
 			public DataNode()
 			{
-				FKeys = new IComparable[CCapacity];
-				FEntries = new object[CCapacity];
+				_keys = new IComparable[Capacity];
+				_entries = new object[Capacity];
 			}
 
-			public DataNode FNext;
-			public DataNode FPrior;
+			public DataNode _next;
+			public DataNode _prior;
 
-			public object[] FEntries;
+			public object[] _entries;
 
-			public override bool Find(IComparable AKey, bool AForward, out object ANearest)
+			public override bool Find(IComparable key, bool forward, out object nearest)
 			{
-				int LClosestIndex;
-				bool LMatch = Search(0, AKey, out LClosestIndex);
-				if (!LMatch)
+				int closestIndex;
+				bool match = Search(0, key, out closestIndex);
+				if (!match)
 				{
-					if (AForward)
+					if (forward)
 					{
-						if (LClosestIndex >= FCount)
-							if (FNext != null)
-								return FNext.Find(AKey, AForward, out ANearest);
+						if (closestIndex >= _count)
+							if (_next != null)
+								return _next.Find(key, forward, out nearest);
 							else
 							{
-								ANearest = null;
+								nearest = null;
 								return false;
 							}
 					}
 					else
 					{
-						LClosestIndex--;
-						if (LClosestIndex < 0)
-							if (FPrior != null)
-								return FPrior.Find(AKey, AForward, out ANearest);
+						closestIndex--;
+						if (closestIndex < 0)
+							if (_prior != null)
+								return _prior.Find(key, forward, out nearest);
 							else
 							{
-								ANearest = null;
+								nearest = null;
 								return false;
 							}
 					}
 				}
-				ANearest = FEntries[LClosestIndex];
-				return LMatch;
+				nearest = _entries[closestIndex];
+				return match;
 			}
 
-			public override bool Insert(IComparable AKey, object AData, IndexList AList)
+			public override bool Insert(IComparable key, object data, IndexList list)
 			{
 				int AClosestIndex;
 
 				// Check for a split condition before the search.  In the case of a duplicate, this may cause an unnecessary split, but we'll optimize for the non-duplicate insert case.
-				if (FCount == CCapacity)
+				if (_count == Capacity)
 					return false;
 
 				// Perform the search
-				bool LMatch = Search(0, AKey, out AClosestIndex); // start searching at AIndex = 0
-				if (LMatch)
-					throw new BaseException(BaseException.Codes.Duplicate, AKey.ToString());
+				bool match = Search(0, key, out AClosestIndex); // start searching at AIndex = 0
+				if (match)
+					throw new BaseException(BaseException.Codes.Duplicate, key.ToString());
 
 				// Insert the entry
-				InsertEntry(AKey, AData, AClosestIndex);
+				InsertEntry(key, data, AClosestIndex);
 
 				return true;
 			}
 
 			/// <summary> Initializes this node to contain the upper half of entires from the given node (and removes them from the given one). </summary>
-			public void CopyHalf(DataNode ANode)
+			public void CopyHalf(DataNode node)
 			{
-				FCount = ANode.FCount / 2;
-				ANode.FCount -= FCount;
-				Array.Copy(FKeys, 0, ANode.FKeys, ANode.FCount, FCount);
-				Array.Copy(FEntries, 0, ANode.FEntries, ANode.FCount, FCount);
+				_count = node._count / 2;
+				node._count -= _count;
+				Array.Copy(_keys, 0, node._keys, node._count, _count);
+				Array.Copy(_entries, 0, node._entries, node._count, _count);
 			}
 
-			public override void PrependTo(Node ANode)
+			public override void PrependTo(Node node)
 			{
-				DataNode LTarget = ANode as DataNode;
-				for (int i = 0; i < FCount; i++)
-					LTarget.InsertEntry(FKeys[i], FEntries[i], i);
+				DataNode target = node as DataNode;
+				for (int i = 0; i < _count; i++)
+					target.InsertEntry(_keys[i], _entries[i], i);
 			}
 
-			public override void AppendTo(Node ANode, int ACount)
+			public override void AppendTo(Node node, int count)
 			{
-				DataNode LTarget = ANode as DataNode;
-				for (int i = 0; i < ACount; i++)
-					LTarget.InsertEntry(FKeys[i], FEntries[i], LTarget.FCount);
-				Array.Copy(FKeys, ACount, FKeys, 0, FCount - ACount);
-				Array.Copy(FEntries, ACount, FEntries, 0, FCount - ACount);
-				FCount -= ACount;
+				DataNode target = node as DataNode;
+				for (int i = 0; i < count; i++)
+					target.InsertEntry(_keys[i], _entries[i], target._count);
+				Array.Copy(_keys, count, _keys, 0, _count - count);
+				Array.Copy(_entries, count, _entries, 0, _count - count);
+				_count -= count;
 			}
 
-			public void InsertEntry(IComparable AKey, object AEntry, int AIndex)
+			public void InsertEntry(IComparable key, object entry, int index)
 			{
 				// Slide all entries above the insert index
-				Array.Copy(FKeys, AIndex, FKeys, AIndex + 1, FCount - AIndex);
-				Array.Copy(FEntries, AIndex, FEntries, AIndex + 1, FCount - AIndex);
+				Array.Copy(_keys, index, _keys, index + 1, _count - index);
+				Array.Copy(_entries, index, _entries, index + 1, _count - index);
 
 				// Set the new entry data			
-				FKeys[AIndex] = AKey;
-				FEntries[AIndex] = AEntry;
+				_keys[index] = key;
+				_entries[index] = entry;
 
 				// Increment entry count			
-				FCount++;
+				_count++;
 			}
 
-			public override bool Delete(IComparable AKey, IndexList AList)
+			public override bool Delete(IComparable key, IndexList list)
 			{
 				int AClosestIndex;
-				bool LMatch = Search(0, AKey, out AClosestIndex);
-				if (LMatch)
+				bool match = Search(0, key, out AClosestIndex);
+				if (match)
 					DeleteEntry(AClosestIndex);
-				return LMatch;
+				return match;
 			}
 
-			public void DeleteEntry(int AIndex)
+			public void DeleteEntry(int index)
 			{
 				// Slide all entries above the delete index down over the item to be deleted.
-				Array.Copy(FKeys, AIndex + 1, FKeys, AIndex, (FCount - AIndex) - 1);
-				Array.Copy(FEntries, AIndex + 1, FEntries, AIndex, (FCount - AIndex) - 1);
+				Array.Copy(_keys, index + 1, _keys, index, (_count - index) - 1);
+				Array.Copy(_entries, index + 1, _entries, index, (_count - index) - 1);
 				
 				// Decrement entry count
-				FCount--;
+				_count--;
 			}
 
-			public override void Clear(IndexList AList)
+			public override void Clear(IndexList list)
 			{
 				// Nothing
 			}

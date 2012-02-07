@@ -15,203 +15,203 @@ namespace Alphora.Dataphor
 	/// <summary> Sundry stream methods. </summary>
 	public sealed class StreamUtility
 	{
-		public const int CCopyBufferSize = 4096;
+		public const int CopyBufferSize = 4096;
 
 		/// <summary> Copies remainder of one stream to another stream. </summary>
-		/// <param name="ASource"> Stream to copy from.  Copying begins at the current position. </param>
-		/// <param name="ATarget">
+		/// <param name="source"> Stream to copy from.  Copying begins at the current position. </param>
+		/// <param name="target">
 		///		The destination stream for copying.  The copied contents are placed beginning at 
 		///		the current position.
 		///	</param>
-		public static void CopyStream(Stream ASource, Stream ATarget)
+		public static void CopyStream(Stream source, Stream target)
 		{
-			MemoryStream LSourceMemoryStream = ASource as MemoryStream;
-			MemoryStream LTargetMemoryStream = ATarget as MemoryStream;
+			MemoryStream sourceMemoryStream = source as MemoryStream;
+			MemoryStream targetMemoryStream = target as MemoryStream;
 
-			if (LSourceMemoryStream != null)
+			if (sourceMemoryStream != null)
 			{
-				if (LTargetMemoryStream != null)
-					CopyStream(LSourceMemoryStream, LTargetMemoryStream);
+				if (targetMemoryStream != null)
+					CopyStream(sourceMemoryStream, targetMemoryStream);
 				else
-					CopyStream(LSourceMemoryStream, ATarget);
+					CopyStream(sourceMemoryStream, target);
 			}
 			else 
-				if (LTargetMemoryStream != null)
-					CopyStream(ASource, LTargetMemoryStream);
+				if (targetMemoryStream != null)
+					CopyStream(source, targetMemoryStream);
 				else
-					CopyStreamWithBufferSize(ASource, ATarget, CCopyBufferSize);
+					CopyStreamWithBufferSize(source, target, CopyBufferSize);
 		}
 		
-		public static void CopyStreamWithBufferSize(Stream ASource, Stream ATarget, int ACopyBufferSize)
+		public static void CopyStreamWithBufferSize(Stream source, Stream target, int copyBufferSize)
 		{
-			byte[] LBuffer = new byte[ACopyBufferSize];
-			int LCount;
-			while ((LCount = ASource.Read(LBuffer, 0, ACopyBufferSize)) > 0)
-				ATarget.Write(LBuffer, 0, LCount);
+			byte[] buffer = new byte[copyBufferSize];
+			int count;
+			while ((count = source.Read(buffer, 0, copyBufferSize)) > 0)
+				target.Write(buffer, 0, count);
 		}
 		
 		/// <summary> Copies specified number of bytes from one stream to another stream. </summary>
-		/// <param name="ASource"> Stream to copy from.  Copying begins at the current position. </param>
-		/// <param name="ATarget"> The destination stream for copying.  The copied contents are placed beginning at the current position. </param>
-		/// <param name="ACount"> The number of bytes to copy. </param>
-		public static void CopyStream(Stream ASource, Stream ATarget, long ACount)
+		/// <param name="source"> Stream to copy from.  Copying begins at the current position. </param>
+		/// <param name="target"> The destination stream for copying.  The copied contents are placed beginning at the current position. </param>
+		/// <param name="count"> The number of bytes to copy. </param>
+		public static void CopyStream(Stream source, Stream target, long count)
 		{
-			if (ASource is MemoryStream)
-				CopyStream((MemoryStream)ASource, ATarget, (int)ACount);
-			else if (ATarget is MemoryStream)
-				CopyStream(ASource, (MemoryStream)ATarget, (int)ACount);
+			if (source is MemoryStream)
+				CopyStream((MemoryStream)source, target, (int)count);
+			else if (target is MemoryStream)
+				CopyStream(source, (MemoryStream)target, (int)count);
 			else
 			{
-				byte[] LBuffer = new byte[CCopyBufferSize];
-				while (ACount > 0)
+				byte[] buffer = new byte[CopyBufferSize];
+				while (count > 0)
 				{
-					ATarget.Write(LBuffer, 0, ASource.Read(LBuffer, 0, (int)(ACount > CCopyBufferSize ? CCopyBufferSize : ACount)));
-					ACount -= CCopyBufferSize;
+					target.Write(buffer, 0, source.Read(buffer, 0, (int)(count > CopyBufferSize ? CopyBufferSize : count)));
+					count -= CopyBufferSize;
 				}
 			}
 		}
 		
-		public static void CopyStreamWithBufferSize(Stream ASource, Stream ATarget, long ACount, int ACopyBufferSize)
+		public static void CopyStreamWithBufferSize(Stream source, Stream target, long count, int copyBufferSize)
 		{
-			byte[] LBuffer = new byte[ACopyBufferSize];
-			while (ACount > 0)
+			byte[] buffer = new byte[copyBufferSize];
+			while (count > 0)
 			{
-				ATarget.Write(LBuffer, 0, ASource.Read(LBuffer, 0, (int)(ACount > ACopyBufferSize ? ACopyBufferSize : ACount)));
-				ACount -= ACopyBufferSize;
+				target.Write(buffer, 0, source.Read(buffer, 0, (int)(count > copyBufferSize ? copyBufferSize : count)));
+				count -= copyBufferSize;
 			}
 		}
 
 		/// <summary> CopyStream optimized for MemoryStream as source. </summary>
-		public static void CopyStream(MemoryStream ASource, Stream ATarget)
+		public static void CopyStream(MemoryStream source, Stream target)
 		{
-			ATarget.Write(ASource.GetBuffer(), (int)ASource.Position, (int)ASource.Length - (int)ASource.Position);
-			ASource.Seek(0, SeekOrigin.End);
+			target.Write(source.GetBuffer(), (int)source.Position, (int)source.Length - (int)source.Position);
+			source.Seek(0, SeekOrigin.End);
 		}
 
 		/// <summary> CopyStream optimized for MemoryStream as source. </summary>
-		public static void CopyStream(MemoryStream ASource, Stream ATarget, int ACount)
+		public static void CopyStream(MemoryStream source, Stream target, int count)
 		{
-			ATarget.Write(ASource.GetBuffer(), (int)ASource.Position, ACount);
-			ASource.Position += ACount;
+			target.Write(source.GetBuffer(), (int)source.Position, count);
+			source.Position += count;
 		}
 
 		/// <summary> CopyStream optimized for MemoryStream as target. </summary>
-		public static void CopyStream(Stream ASource, MemoryStream ATarget)
+		public static void CopyStream(Stream source, MemoryStream target)
 		{
-			if (ASource.CanSeek)
-				CopyStream(ASource, ATarget, (int)ASource.Length - (int)ASource.Position);
+			if (source.CanSeek)
+				CopyStream(source, target, (int)source.Length - (int)source.Position);
 			else
 			{
-				int LRequested = CCopyBufferSize;
-				int LCount;
-				long LOldLength = ATarget.Length;
-				ATarget.SetLength(Math.Max(LOldLength, ATarget.Position + LRequested));
-				while ((LCount = ASource.Read(ATarget.GetBuffer(), (int)ATarget.Position, LRequested)) > 0)
+				int requested = CopyBufferSize;
+				int count;
+				long oldLength = target.Length;
+				target.SetLength(Math.Max(oldLength, target.Position + requested));
+				while ((count = source.Read(target.GetBuffer(), (int)target.Position, requested)) > 0)
 				{
-					ATarget.Seek(LCount, SeekOrigin.Current);
-					LRequested = CCopyBufferSize - LCount;
-					if (LRequested == 0)
-						LRequested = CCopyBufferSize;
-					ATarget.SetLength(Math.Max(LOldLength, ATarget.Position + LRequested));
+					target.Seek(count, SeekOrigin.Current);
+					requested = CopyBufferSize - count;
+					if (requested == 0)
+						requested = CopyBufferSize;
+					target.SetLength(Math.Max(oldLength, target.Position + requested));
 				}
-				ATarget.SetLength(Math.Max(LOldLength, ATarget.Position));
+				target.SetLength(Math.Max(oldLength, target.Position));
 			}
 		}
 
 		/// <summary> CopyStream optimized for MemoryStream as target. </summary>
-		public static void CopyStream(Stream ASource, MemoryStream ATarget, int ACount)
+		public static void CopyStream(Stream source, MemoryStream target, int count)
 		{
-			ATarget.SetLength(Math.Max(ATarget.Length, ACount - (ATarget.Length - ATarget.Position) + ATarget.Position)); 
-			ASource.Read(ATarget.GetBuffer(), (int)ATarget.Position, ACount);
-			ATarget.Seek(ACount, SeekOrigin.Current);
+			target.SetLength(Math.Max(target.Length, count - (target.Length - target.Position) + target.Position)); 
+			source.Read(target.GetBuffer(), (int)target.Position, count);
+			target.Seek(count, SeekOrigin.Current);
 		}
 
 		/// <summary> CopyStream optimized for MemoryStream as source and target. </summary>
-		public static void CopyStream(MemoryStream ASource, MemoryStream ATarget)
+		public static void CopyStream(MemoryStream source, MemoryStream target)
 		{
-			long LSourceRemainder = ASource.Length - ASource.Position;
-			ATarget.SetLength(Math.Max(ATarget.Length, LSourceRemainder - (ATarget.Length - ATarget.Position) + ATarget.Position)); 
-			ASource.Read(ATarget.GetBuffer(), (int)ATarget.Position, (int)LSourceRemainder);
-			ATarget.Seek(LSourceRemainder, SeekOrigin.Current);
+			long sourceRemainder = source.Length - source.Position;
+			target.SetLength(Math.Max(target.Length, sourceRemainder - (target.Length - target.Position) + target.Position)); 
+			source.Read(target.GetBuffer(), (int)target.Position, (int)sourceRemainder);
+			target.Seek(sourceRemainder, SeekOrigin.Current);
 		}
 
 		/// <summary> Returns true if the two provided streams are identical in content. </summary>
-		public static bool StreamsEqual(Stream ASourceStream, Stream ATargetStream)
+		public static bool StreamsEqual(Stream sourceStream, Stream targetStream)
 		{
-			if ((ASourceStream.Length - ASourceStream.Position) != (ATargetStream.Length - ATargetStream.Position))
+			if ((sourceStream.Length - sourceStream.Position) != (targetStream.Length - targetStream.Position))
 				return false;
-			byte[] LSourceBuffer = new byte[CCopyBufferSize / 2];
-			byte[] LTargetBuffer = new byte[CCopyBufferSize / 2];
-			int LLength = Math.Min((int)(ASourceStream.Length - ASourceStream.Position), LSourceBuffer.Length);
-			while (LLength > 0)
+			byte[] sourceBuffer = new byte[CopyBufferSize / 2];
+			byte[] targetBuffer = new byte[CopyBufferSize / 2];
+			int length = Math.Min((int)(sourceStream.Length - sourceStream.Position), sourceBuffer.Length);
+			while (length > 0)
 			{
-				ASourceStream.Read(LSourceBuffer, 0, LLength);
-				ATargetStream.Read(LTargetBuffer, 0, LLength);
-				for (int i = 0; i < LLength; i++)
-					if (LSourceBuffer[i] != LTargetBuffer[i])
+				sourceStream.Read(sourceBuffer, 0, length);
+				targetStream.Read(targetBuffer, 0, length);
+				for (int i = 0; i < length; i++)
+					if (sourceBuffer[i] != targetBuffer[i])
 						return false;
-				LLength = Math.Min((int)(ASourceStream.Length - ASourceStream.Position), LSourceBuffer.Length);
+				length = Math.Min((int)(sourceStream.Length - sourceStream.Position), sourceBuffer.Length);
 			}
 			return true;
 		}
 		
-		public static void WriteInteger(Stream AStream, int AValue)
+		public static void WriteInteger(Stream stream, int value)
 		{
-			AStream.WriteByte((byte)(AValue >> 24));
-			AStream.WriteByte((byte)(AValue >> 16));
-			AStream.WriteByte((byte)(AValue >> 8));
-			AStream.WriteByte((byte)AValue);
+			stream.WriteByte((byte)(value >> 24));
+			stream.WriteByte((byte)(value >> 16));
+			stream.WriteByte((byte)(value >> 8));
+			stream.WriteByte((byte)value);
 		}
 		
-		public static int ReadInteger(Stream AStream)
+		public static int ReadInteger(Stream stream)
 		{
 			return
-				(AStream.ReadByte() << 24) +
-				(AStream.ReadByte() << 16) +
-				(AStream.ReadByte() << 8) +
-				(AStream.ReadByte());
+				(stream.ReadByte() << 24) +
+				(stream.ReadByte() << 16) +
+				(stream.ReadByte() << 8) +
+				(stream.ReadByte());
 		}
 
 		// Do not localize
-		public const string CKeyAttribute = "key";
-		public const string CValueAttribute = "value";
+		public const string KeyAttribute = "key";
+		public const string ValueAttribute = "value";
 
 		/// <summary> Saves a dictionary containing both string key and value entries to a stream as XML. </summary>
-		public static void SaveDictionary(Stream AStream, IDictionary ADictionary)
+		public static void SaveDictionary(Stream stream, IDictionary dictionary)
 		{
-			var LWriter = 
+			var writer = 
 				XmlWriter.Create
 				(
-					AStream, 
+					stream, 
 					new XmlWriterSettings() 
 					{ 
 						Encoding = Encoding.Unicode,
 						Indent = true
 					}
 				);
-			LWriter.WriteStartDocument();
-			LWriter.WriteStartElement("stringdictionary");
-			IDictionaryEnumerator LEntry = ADictionary.GetEnumerator();
-			while (LEntry.MoveNext())
+			writer.WriteStartDocument();
+			writer.WriteStartElement("stringdictionary");
+			IDictionaryEnumerator entry = dictionary.GetEnumerator();
+			while (entry.MoveNext())
 			{
-				LWriter.WriteStartElement("entry");
-				LWriter.WriteAttributeString(CKeyAttribute, ReflectionUtility.ValueToString(LEntry.Key, LEntry.Key.GetType()));
-				LWriter.WriteAttributeString(CValueAttribute, ReflectionUtility.ValueToString(LEntry.Value, LEntry.Value.GetType()));
-				LWriter.WriteEndElement();
+				writer.WriteStartElement("entry");
+				writer.WriteAttributeString(KeyAttribute, ReflectionUtility.ValueToString(entry.Key, entry.Key.GetType()));
+				writer.WriteAttributeString(ValueAttribute, ReflectionUtility.ValueToString(entry.Value, entry.Value.GetType()));
+				writer.WriteEndElement();
 			}
-			LWriter.WriteEndElement();
-			LWriter.Flush();
+			writer.WriteEndElement();
+			writer.Flush();
 			// Don't close or dispose LWriter because it will close the stream
 		}
 
 		/// <summary> Loads a dictionary containing both string key and value entries from a stream containing XML. </summary>
-		public static void LoadDictionary(Stream AStream, IDictionary ADictionary, Type AKeyType, Type AValueType)
+		public static void LoadDictionary(Stream stream, IDictionary dictionary, Type keyType, Type valueType)
 		{
-			XDocument LDocument;
-			using (var LReader = new StreamReader(AStream))
-				LDocument = XDocument.Load(LReader);
-			foreach (XElement LNode in LDocument.Root.Elements())
-				ADictionary.Add(ReflectionUtility.StringToValue(LNode.Attribute(CKeyAttribute).Value, AKeyType), ReflectionUtility.StringToValue(LNode.Attribute(CValueAttribute).Value, AValueType));
+			XDocument document;
+			using (var reader = new StreamReader(stream))
+				document = XDocument.Load(reader);
+			foreach (XElement node in document.Root.Elements())
+				dictionary.Add(ReflectionUtility.StringToValue(node.Attribute(KeyAttribute).Value, keyType), ReflectionUtility.StringToValue(node.Attribute(ValueAttribute).Value, valueType));
 		}
 	}
 
@@ -221,21 +221,21 @@ namespace Alphora.Dataphor
 	///		long Length { get; }
 	///		void SetLength(long ALength);
 	///		long Position { get; set; }
-	///		int Read(byte[] ABuffer, int AOffset, int ACount);
-	///		void Write(byte[] ABuffer, int AOffset, int ACount);
+	///		int Read(byte[] ABuffer, int offset, int ACount);
+	///		void Write(byte[] ABuffer, int offset, int ACount);
 	/// </remarks>
 	public abstract class StreamBase : Stream
 	{
 		protected StreamBase() : base(){}
 		
-		public override long Seek(long AOffset, SeekOrigin AOrigin)
+		public override long Seek(long offset, SeekOrigin origin)
 		{
 			// This could be implemented in the base as well
-			switch (AOrigin)
+			switch (origin)
 			{
-				case SeekOrigin.Begin: Position = AOffset; break; 
-				case SeekOrigin.Current: Position = Position + AOffset; break; 
-				case SeekOrigin.End: Position = Length - AOffset; break; 
+				case SeekOrigin.Begin: Position = offset; break; 
+				case SeekOrigin.Current: Position = Position + offset; break; 
+				case SeekOrigin.End: Position = Length - offset; break; 
 			}
 			return Position;
 		}
@@ -260,25 +260,25 @@ namespace Alphora.Dataphor
 			// Do nothing by default
 		}
 		
-		public virtual void CopyFrom(Stream AStream, int ACount)
+		public virtual void CopyFrom(Stream stream, int count)
 		{
-			StreamUtility.CopyStream(AStream, this, ACount);
+			StreamUtility.CopyStream(stream, this, count);
 		}
 		
-		public virtual void CopyFrom(Stream AStream)
+		public virtual void CopyFrom(Stream stream)
 		{
 			SetLength(0);
-			StreamUtility.CopyStream(AStream, this);
+			StreamUtility.CopyStream(stream, this);
 		}
 		
-		public virtual void CopyTo(Stream AStream, int ACount)
+		public new virtual void CopyTo(Stream stream, int count)
 		{
-			StreamUtility.CopyStream(this, AStream, ACount);
+			StreamUtility.CopyStream(this, stream, count);
 		}
 		
-		public virtual void CopyTo(Stream AStream)
+		public new virtual void CopyTo(Stream stream)
 		{
-			StreamUtility.CopyStream(this, AStream);
+			StreamUtility.CopyStream(this, stream);
 		}
 	}
 }

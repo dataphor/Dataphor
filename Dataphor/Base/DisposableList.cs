@@ -8,22 +8,22 @@ namespace Alphora.Dataphor
 	{
 		public DisposableList() : base() 
 		{ 
-			FItemsOwned = true;
+			_itemsOwned = true;
 		}
 		
-		public DisposableList(int ACapacity) : base(ACapacity) 
+		public DisposableList(int capacity) : base(capacity) 
 		{ 
-			FItemsOwned = true;
+			_itemsOwned = true;
 		}
 
-		public DisposableList(bool AItemsOwned) : base()
+		public DisposableList(bool itemsOwned) : base()
 		{
-			FItemsOwned = AItemsOwned;
+			_itemsOwned = itemsOwned;
 		}
 		
-		public DisposableList(bool AItemsOwned, int ACapacity) : base(ACapacity)
+		public DisposableList(bool itemsOwned, int capacity) : base(capacity)
 		{
-			FItemsOwned = AItemsOwned;
+			_itemsOwned = itemsOwned;
 		}
 		
 		#if USEFINALIZER
@@ -37,7 +37,7 @@ namespace Alphora.Dataphor
 		}
 		#endif
 
-		protected bool FItemsOwned;
+		protected bool _itemsOwned;
 		/// <summary>Determines whether or not the list "owns" the items it contains.<summary>
 		/// <remarks>
 		///		ItemsOwned controls whether or not the List "owns" the contained items.  
@@ -46,14 +46,14 @@ namespace Alphora.Dataphor
 		///	</remarks>
 		public bool ItemsOwned
 		{
-			get { return FItemsOwned; }
-			set { FItemsOwned = value; }
+			get { return _itemsOwned; }
+			set { _itemsOwned = value; }
 		}
 
-		protected bool FDisposed;
-		public bool IsDisposed { get { return FDisposed; } }
+		protected bool _disposed;
+		public bool IsDisposed { get { return _disposed; } }
 
-		protected bool FDisowning;
+		protected bool _disowning;
 		
 		/// <summary> IDisposable implementation </summary>
 		public event EventHandler Disposed;
@@ -67,13 +67,13 @@ namespace Alphora.Dataphor
 			Dispose(true);
 		}
 
-		protected virtual void Dispose(bool ADisposing)
+		protected virtual void Dispose(bool disposing)
 		{
-			FDisposed = true;
+			_disposed = true;
 			if (Disposed != null)
 				Disposed(this, EventArgs.Empty);
 
-			Exception LException = null;
+			Exception exception = null;
 			while (Count > 0)
 				try
 				{
@@ -81,11 +81,11 @@ namespace Alphora.Dataphor
 				}
 				catch (Exception E)
 				{
-					LException = E;
+					exception = E;
 				}
 				
-			if (LException != null)
-				throw LException;
+			if (exception != null)
+				throw exception;
 		}
 
 		/// <summary> <c>ItemDispose</c> is called by contained items when they are disposed. </summary>
@@ -93,67 +93,67 @@ namespace Alphora.Dataphor
 		///		This method simply removes the item from the list.  <c>ItemDispose</c> is 
 		///		only called if the item is not disposed by this list.
 		///	</remarks>
-		protected virtual void ItemDispose(object ASender, EventArgs AArgs)
+		protected virtual void ItemDispose(object sender, EventArgs args)
 		{
-			Disown((T)ASender);
+			Disown((T)sender);
 		}
 		
 		///	<remarks> Hooks the Disposed event of the item if the item implements IDisposableNotify. </remarks>
-		protected override void Adding(T AValue, int AIndex)
+		protected override void Adding(T value, int index)
 		{
-			if (AValue is IDisposableNotify)
-				((IDisposableNotify)AValue).Disposed += new EventHandler(ItemDispose);
+			if (value is IDisposableNotify)
+				((IDisposableNotify)value).Disposed += new EventHandler(ItemDispose);
 		}
 
 		/// <remarks> If the item is owned, it is disposed. </remarks>
-		protected override void Removing(T AValue, int AIndex)
+		protected override void Removing(T value, int index)
 		{
-			if (AValue is IDisposableNotify)
-        	    ((IDisposableNotify)AValue).Disposed -= new EventHandler(ItemDispose);
+			if (value is IDisposableNotify)
+        	    ((IDisposableNotify)value).Disposed -= new EventHandler(ItemDispose);
 
-        	if (FItemsOwned && !FDisowning)
-		        AValue.Dispose();
+        	if (_itemsOwned && !_disowning)
+		        value.Dispose();
 		}
 
 		/// <summary> Removes the specified object without disposing it. </summary>
-		public virtual T Disown(T AValue)
+		public virtual T Disown(T value)
 		{
-			FDisowning = true;
+			_disowning = true;
 			try
 			{
-				Remove(AValue);
-				return AValue;
+				Remove(value);
+				return value;
 			}
 			finally
 			{
-				FDisowning = false;
+				_disowning = false;
 			}
 		}
 		
 		/// <summary> Removes the specified object index without disposing it. </summary>
-		public virtual T DisownAt(int AIndex)
+		public virtual T DisownAt(int index)
 		{
-			FDisowning = true;
+			_disowning = true;
 			try
 			{
-				return RemoveAt(AIndex);
+				return RemoveAt(index);
 			}
 			finally
 			{
-				FDisowning = false;
+				_disowning = false;
 			}
 		}
 
-		public override void Move(int AOldIndex, int ANewIndex)
+		public override void Move(int oldIndex, int newIndex)
 		{
-			FDisowning = true;
+			_disowning = true;
 			try
 			{
-				base.Move(AOldIndex, ANewIndex);
+				base.Move(oldIndex, newIndex);
 			}
 			finally
 			{
-				FDisowning = false;
+				_disowning = false;
 			}
 		}
 	}

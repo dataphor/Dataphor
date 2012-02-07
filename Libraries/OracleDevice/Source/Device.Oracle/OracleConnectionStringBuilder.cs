@@ -22,10 +22,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleOLEDBConnectionStringBuilder()
 		{
-			FParameters.AddOrUpdate("Provider", "MSDAORA");
-			FLegend.AddOrUpdate("HostName", "Data source");
-			FLegend.AddOrUpdate("UserName", "user id");
-			FLegend.AddOrUpdate("Password", "password");
+			_parameters.AddOrUpdate("Provider", "MSDAORA");
+			_legend.AddOrUpdate("HostName", "Data source");
+			_legend.AddOrUpdate("UserName", "user id");
+			_legend.AddOrUpdate("Password", "password");
 		}
 	}
 
@@ -34,8 +34,8 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleConnectionStringBuilder()
 		{
-			FLegend.AddOrUpdate("HostName", "Data Source");
-			FLegend.AddOrUpdate("UserName", "User Id");
+			_legend.AddOrUpdate("HostName", "Data Source");
+			_legend.AddOrUpdate("UserName", "User Id");
 		}
 	}
 
@@ -43,9 +43,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleODBCConnectionStringBuilder()
 		{
-			FLegend.AddOrUpdate("HostName", "DSN");
-			FLegend.AddOrUpdate("UserName", "UID");
-			FLegend.AddOrUpdate("Password", "PWD");
+			_legend.AddOrUpdate("HostName", "DSN");
+			_legend.AddOrUpdate("UserName", "UID");
+			_legend.AddOrUpdate("Password", "PWD");
 		}
 	}
 

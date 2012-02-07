@@ -18,139 +18,139 @@ namespace Alphora.Dataphor.DAE.Server
 	// ServerBatch
 	public class ServerBatch : ServerChildObject, IServerBatch
 	{
-		internal ServerBatch(ServerScript AScript, Statement ABatch) : base()
+		internal ServerBatch(ServerScript script, Statement batch) : base()
 		{
-			FScript = AScript;
-			FBatch = ABatch;
+			_script = script;
+			_batch = batch;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			FScript = null;
-			FBatch = null;
-			base.Dispose(ADisposing);
+			_script = null;
+			_batch = null;
+			base.Dispose(disposing);
 		}
 
-		private ServerScript FScript;
-		public ServerScript Script { get { return FScript; } }
+		private ServerScript _script;
+		public ServerScript Script { get { return _script; } }
 		
-		IServerScript IServerBatch.ServerScript { get { return FScript; } }
+		IServerScript IServerBatch.ServerScript { get { return _script; } }
 
-		private Statement FBatch;
+		private Statement _batch;
 		
-		public int Line { get { return FBatch.Line; } }
+		public int Line { get { return _batch.Line; } }
 		
 		public bool IsExpression()
 		{
-			return FBatch is SelectStatement;
+			return _batch is SelectStatement;
 		}
 		
 		public string GetText()
 		{
-			return new D4TextEmitter().Emit(FBatch);
+			return new D4TextEmitter().Emit(_batch);
 		}
 		
-		public void Execute(DataParams AParams)
+		public void Execute(DataParams paramsValue)
 		{
 			try
 			{
 				if (IsExpression())
 				{
-					IServerExpressionPlan LPlan = PrepareExpression(AParams);
+					IServerExpressionPlan plan = PrepareExpression(paramsValue);
 					try
 					{
-						if (LPlan.DataType is Schema.TableType)
-							LPlan.Close(LPlan.Open(AParams));
+						if (plan.DataType is Schema.TableType)
+							plan.Close(plan.Open(paramsValue));
 						else
-							DataValue.DisposeValue(this.Script.Process.ValueManager, LPlan.Evaluate(AParams));
+							DataValue.DisposeValue(this.Script.Process.ValueManager, plan.Evaluate(paramsValue));
 					}
 					finally
 					{
-						UnprepareExpression(LPlan);
+						UnprepareExpression(plan);
 					}
 				}
 				else
 				{
-					IServerStatementPlan LPlan = PrepareStatement(AParams);
+					IServerStatementPlan plan = PrepareStatement(paramsValue);
 					try
 					{
-						LPlan.Execute(AParams);
+						plan.Execute(paramsValue);
 					}
 					finally
 					{
-						UnprepareStatement(LPlan);
+						UnprepareStatement(plan);
 					}
 				}
 			}
 			catch (Exception E)
 			{
-				throw FScript.Process.ServerSession.WrapException(E);
+				throw _script.Process.ServerSession.WrapException(E);
 			}
 		}
 		
-		public IServerPlan Prepare(DataParams AParams)
+		public IServerPlan Prepare(DataParams paramsValue)
 		{
 			if (IsExpression())
-				return PrepareExpression(AParams);
+				return PrepareExpression(paramsValue);
 			else
-				return PrepareStatement(AParams);
+				return PrepareStatement(paramsValue);
 		}
 		
-		public void Unprepare(IServerPlan APlan)
+		public void Unprepare(IServerPlan plan)
 		{
-			if (APlan is IServerExpressionPlan)
-				UnprepareExpression((IServerExpressionPlan)APlan);
+			if (plan is IServerExpressionPlan)
+				UnprepareExpression((IServerExpressionPlan)plan);
 			else
-				UnprepareStatement((IServerStatementPlan)APlan);
+				UnprepareStatement((IServerStatementPlan)plan);
 		}
 		
-		public IServerExpressionPlan PrepareExpression(DataParams AParams)
+		public IServerExpressionPlan PrepareExpression(DataParams paramsValue)
 		{
 			try
 			{
-				FScript.CheckParsed();
-				return (IServerExpressionPlan)FScript.Process.CompileExpression(FBatch, null, AParams, FScript.SourceContext);
+				_script.CheckParsed();
+				return (IServerExpressionPlan)_script.Process.CompileExpression(_batch, null, paramsValue, _script.SourceContext);
 			}
 			catch (Exception E)
 			{
-				throw FScript.Process.ServerSession.WrapException(E);
+				throw _script.Process.ServerSession.WrapException(E);
 			}
 		}
 		
-		public void UnprepareExpression(IServerExpressionPlan APlan)
+		public void UnprepareExpression(IServerExpressionPlan plan)
 		{
 			try
 			{
-				FScript.Process.UnprepareExpression(APlan);
+				_script.Process.UnprepareExpression(plan);
 			}
 			catch (Exception E)
 			{
-				throw FScript.Process.ServerSession.WrapException(E);
+				throw _script.Process.ServerSession.WrapException(E);
 			}
 		}
 		
-		public IServerStatementPlan PrepareStatement(DataParams AParams)
+		public IServerStatementPlan PrepareStatement(DataParams paramsValue)
 		{
 			try
 			{
-				FScript.CheckParsed();
-				return (IServerStatementPlan)FScript.Process.CompileStatement(FBatch, null, AParams, FScript.SourceContext);
+				_script.CheckParsed();
+				return (IServerStatementPlan)_script.Process.CompileStatement(_batch, null, paramsValue, _script.SourceContext);
 			}
 			catch (Exception E)
 			{
-				throw FScript.Process.ServerSession.WrapException(E);
+				throw _script.Process.ServerSession.WrapException(E);
 			}
 		}
 		
-		public void UnprepareStatement(IServerStatementPlan APlan)
+		public void UnprepareStatement(IServerStatementPlan plan)
 		{
 			try
 			{
-				FScript.Process.UnprepareStatement(APlan);
+				_script.Process.UnprepareStatement(plan);
 			}
 			catch (Exception E)
 			{
-				throw FScript.Process.ServerSession.WrapException(E);
+				throw _script.Process.ServerSession.WrapException(E);
 			}
 		}
 	}
@@ -158,37 +158,37 @@ namespace Alphora.Dataphor.DAE.Server
 	// ServerBatches
 	public class ServerBatches : ServerChildObjects, IServerBatches
 	{		
-		protected override void Validate(ServerChildObject AObject)
+		protected override void Validate(ServerChildObject objectValue)
 		{
-			if (!(AObject is ServerBatch))
+			if (!(objectValue is ServerBatch))
 				throw new ServerException(ServerException.Codes.ServerBatchContainer);
 		}
 		
-		public new ServerBatch this[int AIndex]
+		public new ServerBatch this[int index]
 		{
-			get { return (ServerBatch)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ServerBatch)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		IServerBatch IServerBatches.this[int AIndex]
+		IServerBatch IServerBatches.this[int index]
 		{
-			get { return (IServerBatch)base[AIndex]; } 
-			set { base[AIndex] = (ServerBatch)value; } 
+			get { return (IServerBatch)base[index]; } 
+			set { base[index] = (ServerBatch)value; } 
 		}
 		
 		public ServerBatch[] All
 		{
 			get
 			{
-				ServerBatch[] LArray = new ServerBatch[Count];
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					LArray[LIndex] = this[LIndex];
-				return LArray;
+				ServerBatch[] array = new ServerBatch[Count];
+				for (int index = 0; index < Count; index++)
+					array[index] = this[index];
+				return array;
 			}
 			set
 			{
-				foreach (ServerBatch LBatch in value)
-					Add(LBatch);
+				foreach (ServerBatch batch in value)
+					Add(batch);
 			}
 		}
 	}

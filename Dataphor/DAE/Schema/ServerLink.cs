@@ -26,89 +26,89 @@ namespace Alphora.Dataphor.DAE.Schema
 {
 	public class ServerLink : CatalogObject
     {
-		public const string CDefaultUserID = "";
+		public const string DefaultUserID = "";
 		
-		public ServerLink(int AID, string AName) : base(AID, AName)
+		public ServerLink(int iD, string name) : base(iD, name)
 		{
 			IsRemotable = false;
 		}
 
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.ServerLink"), DisplayName, InstanceName, HostName, OverridePortNumber > 0 ? ":" + OverridePortNumber.ToString() : ""); } }
 		
-		private string FHostName = String.Empty;
+		private string _hostName = String.Empty;
 		public string HostName
 		{
-			get { return FHostName; }
-			set { FHostName = value == null ? String.Empty : value; }
+			get { return _hostName; }
+			set { _hostName = value == null ? String.Empty : value; }
 		}
 		
-		private string FInstanceName = String.Empty;
+		private string _instanceName = String.Empty;
 		public string InstanceName
 		{
-			get { return FInstanceName; }
-			set { FInstanceName = value == null ? String.Empty : value; }
+			get { return _instanceName; }
+			set { _instanceName = value == null ? String.Empty : value; }
 		}
 		
-		private int FOverridePortNumber = 0;
+		private int _overridePortNumber = 0;
 		public int OverridePortNumber
 		{
-			get { return FOverridePortNumber; }
-			set { FOverridePortNumber = value; }
+			get { return _overridePortNumber; }
+			set { _overridePortNumber = value; }
 		}
 		
-		private bool FUseSecureConnection = false;
+		private bool _useSecureConnection = false;
 		public bool UseSecureConnection
 		{
-			get { return FUseSecureConnection; }
-			set { FUseSecureConnection = value; }
+			get { return _useSecureConnection; }
+			set { _useSecureConnection = value; }
 		}
 		
-		private int FOverrideListenerPortNumber = 0;
+		private int _overrideListenerPortNumber = 0;
 		public int OverrideListenerPortNumber
 		{
-			get { return FOverrideListenerPortNumber; }
-			set { FOverrideListenerPortNumber = value; }
+			get { return _overrideListenerPortNumber; }
+			set { _overrideListenerPortNumber = value; }
 		}
 		
-		private bool FUseSecureListenerConnection = false;
+		private bool _useSecureListenerConnection = false;
 		public bool UseSecureListenerConnection
 		{
-			get { return FUseSecureListenerConnection; }
-			set { FUseSecureListenerConnection = value; }
+			get { return _useSecureListenerConnection; }
+			set { _useSecureListenerConnection = value; }
 		}
 		
-		private bool FUseSessionInfo = true;
+		private bool _useSessionInfo = true;
 		public bool UseSessionInfo
 		{
-			get { return FUseSessionInfo; }
-			set { FUseSessionInfo = value; }
+			get { return _useSessionInfo; }
+			set { _useSessionInfo = value; }
 		}
 		
 		public void ResetServerLink()
 		{
-			FHostName = String.Empty;
-			FInstanceName = String.Empty;
-			FOverridePortNumber = 0;
-			FUseSessionInfo = true;
+			_hostName = String.Empty;
+			_instanceName = String.Empty;
+			_overridePortNumber = 0;
+			_useSessionInfo = true;
 		}
 		
 		public void ApplyMetaData()
 		{
 			if (MetaData != null)
 			{
-				FHostName = MetaData.Tags.GetTagValue("HostName", "localhost");
-				FInstanceName = MetaData.Tags.GetTagValue("InstanceName", Engine.CDefaultServerName);
-				FOverridePortNumber = Convert.ToInt32(MetaData.Tags.GetTagValue("OverridePortNumber", "0"));
-				FUseSecureConnection = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSecureConnection", "false"));
-				FOverrideListenerPortNumber = Convert.ToInt32(MetaData.Tags.GetTagValue("OverrideListenerPortNumber", "0"));
-				FUseSecureListenerConnection = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSecureListenerConnection", "false"));
-				FUseSessionInfo = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSessionInfo", "true"));
+				_hostName = MetaData.Tags.GetTagValue("HostName", "localhost");
+				_instanceName = MetaData.Tags.GetTagValue("InstanceName", Engine.DefaultServerName);
+				_overridePortNumber = Convert.ToInt32(MetaData.Tags.GetTagValue("OverridePortNumber", "0"));
+				_useSecureConnection = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSecureConnection", "false"));
+				_overrideListenerPortNumber = Convert.ToInt32(MetaData.Tags.GetTagValue("OverrideListenerPortNumber", "0"));
+				_useSecureListenerConnection = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSecureListenerConnection", "false"));
+				_useSessionInfo = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSessionInfo", "true"));
 			}
 		}
 
 		// ServerLinkUsers
-		private ServerLinkUsers FUsers = new ServerLinkUsers();
-		public ServerLinkUsers Users { get { return FUsers; } }
+		private ServerLinkUsers _users = new ServerLinkUsers();
+		public ServerLinkUsers Users { get { return _users; } }
 		
 		/// <summary>
 		/// Returns a ServerLinkUser for the given UserID.
@@ -120,20 +120,20 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// a default ServerLinkUser is returned with credentials of
 		/// Admin and a blank password.
 		/// </remarks>
-		public ServerLinkUser GetUser(string AUserID)
+		public ServerLinkUser GetUser(string userID)
 		{
-			ServerLinkUser LUser = FUsers[AUserID];
-			if (LUser == null)
-				LUser = FUsers[CDefaultUserID];
-			if (LUser == null)
-				LUser = new ServerLinkUser(CDefaultUserID, this, Server.Engine.CAdminUserID, SecurityUtility.EncryptPassword(String.Empty));
+			ServerLinkUser user = _users[userID];
+			if (user == null)
+				user = _users[DefaultUserID];
+			if (user == null)
+				user = new ServerLinkUser(DefaultUserID, this, Server.Engine.AdminUserID, SecurityUtility.EncryptPassword(String.Empty));
 
-			return LUser;
+			return user;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 			{
 				SaveObjectID();
 			}
@@ -142,16 +142,16 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveObjectID();
 			}
 			
-			CreateServerStatement LStatement = new CreateServerStatement();
-			LStatement.ServerName = Schema.Object.EnsureRooted(Name);
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
+			CreateServerStatement statement = new CreateServerStatement();
+			statement.ServerName = Schema.Object.EnsureRooted(Name);
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
 
-			if (FUsers.Count > 0)
+			if (_users.Count > 0)
 			{
-				Block LBlock = new Block();
-				LBlock.Statements.Add(LStatement);
-				foreach (ServerLinkUser LUser in FUsers.Values)
-					LBlock.Statements.Add
+				Block block = new Block();
+				block.Statements.Add(statement);
+				foreach (ServerLinkUser user in _users.Values)
+					block.Statements.Add
 					(
 						new ExpressionStatement
 						(
@@ -160,61 +160,61 @@ namespace Alphora.Dataphor.DAE.Schema
 								"CreateServerLinkUserWithEncryptedPassword", 
 								new Expression[]
 								{
-									new ValueExpression(LUser.UserID), 
-									new CallExpression("Name", new Expression[]{new ValueExpression(LUser.ServerLink.Name)}), 
-									new ValueExpression(LUser.ServerLinkUserID), 
-									new ValueExpression(LUser.ServerLinkPassword)
+									new ValueExpression(user.UserID), 
+									new CallExpression("Name", new Expression[]{new ValueExpression(user.ServerLink.Name)}), 
+									new ValueExpression(user.ServerLinkUserID), 
+									new ValueExpression(user.ServerLinkPassword)
 								}
 							)
 						)
 					);
 				
-				return LBlock;
+				return block;
 			}
 
-			return LStatement;
+			return statement;
 		}
 	}
 
 	public class ServerLinkUser : System.Object
 	{
 		public ServerLinkUser() : base(){}
-		public ServerLinkUser(string AUserID, ServerLink AServerLink, string AServerLinkUserID, string AServerLinkPassword) : base()
+		public ServerLinkUser(string userID, ServerLink serverLink, string serverLinkUserID, string serverLinkPassword) : base()
 		{
-			UserID = AUserID;
-			ServerLink = AServerLink;
-			ServerLinkUserID = AServerLinkUserID;
-			ServerLinkPassword = AServerLinkPassword;
+			UserID = userID;
+			ServerLink = serverLink;
+			ServerLinkUserID = serverLinkUserID;
+			ServerLinkPassword = serverLinkPassword;
 		}
 		
-		private string FUserID;
-		public string UserID { get { return FUserID; } set { FUserID = value; } }
+		private string _userID;
+		public string UserID { get { return _userID; } set { _userID = value; } }
 		
 		[Reference]
-		private ServerLink FServerLink;
-		public ServerLink ServerLink { get { return FServerLink; } set { FServerLink = value; } }
+		private ServerLink _serverLink;
+		public ServerLink ServerLink { get { return _serverLink; } set { _serverLink = value; } }
 		
-		private string FServerLinkUserID = String.Empty;
-		public string ServerLinkUserID { get { return FServerLinkUserID; } set { FServerLinkUserID = value == null ? String.Empty : value; } }
+		private string _serverLinkUserID = String.Empty;
+		public string ServerLinkUserID { get { return _serverLinkUserID; } set { _serverLinkUserID = value == null ? String.Empty : value; } }
 		
-		private string FServerLinkPassword = String.Empty;
-		public string ServerLinkPassword { get { return FServerLinkPassword; } set { FServerLinkPassword = value == null ? String.Empty : value; } }
+		private string _serverLinkPassword = String.Empty;
+		public string ServerLinkPassword { get { return _serverLinkPassword; } set { _serverLinkPassword = value == null ? String.Empty : value; } }
 	}
 	
 	public class ServerLinkUsers : HashtableList<string, ServerLinkUser>
 	{		
 		public ServerLinkUsers() : base(StringComparer.InvariantCultureIgnoreCase) {}
 		
-		public override int Add(object AValue)
+		public override int Add(object tempValue)
 		{
-			ServerLinkUser LUser = (ServerLinkUser)AValue;
-			Add(LUser.UserID, LUser);
-			return IndexOf(LUser.UserID);
+			ServerLinkUser user = (ServerLinkUser)tempValue;
+			Add(user.UserID, user);
+			return IndexOf(user.UserID);
 		}
 		
-		public void Add(ServerLinkUser AServerLinkUser)
+		public void Add(ServerLinkUser serverLinkUser)
 		{
-			Add(AServerLinkUser.UserID, AServerLinkUser);
+			Add(serverLinkUser.UserID, serverLinkUser);
 		}
 	}
 }

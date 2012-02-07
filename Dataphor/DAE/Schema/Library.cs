@@ -29,52 +29,52 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class LibraryReference : System.Object, ICloneable
 	{
 		public LibraryReference() : base() {}
-		public LibraryReference(string AName) : base()
+		public LibraryReference(string name) : base()
 		{
-			Name = AName;
+			Name = name;
 		}
 		
-		public LibraryReference(string AName, VersionNumber AVersion) : base()
+		public LibraryReference(string name, VersionNumber version) : base()
 		{
-			Name = AName;
-			Version = AVersion;
+			Name = name;
+			Version = version;
 		}
 		
-		private string FName;
+		private string _name;
 		public string Name
 		{
-			get { return FName; }
-			set { FName = value == null ? String.Empty : value; }
+			get { return _name; }
+			set { _name = value == null ? String.Empty : value; }
 		}
 		
-		private VersionNumber FVersion = new VersionNumber(-1, -1, -1, -1);
+		private VersionNumber _version = new VersionNumber(-1, -1, -1, -1);
 		public VersionNumber Version
 		{
-			get { return FVersion; }
-			set { FVersion = value; }
+			get { return _version; }
+			set { _version = value; }
 		}
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			return AObject is LibraryReference && (Compare(this, (LibraryReference)AObject) == 0);
+			return objectValue is LibraryReference && (Compare(this, (LibraryReference)objectValue) == 0);
 		}
 		
 		public override int GetHashCode()
 		{
-			return FName.GetHashCode() ^ FVersion.GetHashCode();
+			return _name.GetHashCode() ^ _version.GetHashCode();
 		}
 		
 		public object Clone()
 		{
-			return new LibraryReference(FName, FVersion);
+			return new LibraryReference(_name, _version);
 		}
 
-		public static int Compare(LibraryReference ALeftValue, LibraryReference ARightValue)
+		public static int Compare(LibraryReference leftValue, LibraryReference rightValue)
 		{
-			int LResult = String.Compare(ALeftValue.Name, ARightValue.Name);
-			if (LResult == 0)
-				LResult = VersionNumber.Compare(ALeftValue.Version, ARightValue.Version);
-			return LResult;
+			int result = String.Compare(leftValue.Name, rightValue.Name);
+			if (result == 0)
+				result = VersionNumber.Compare(leftValue.Version, rightValue.Version);
+			return result;
 		}
 	}
 
@@ -98,31 +98,31 @@ namespace Alphora.Dataphor.DAE.Schema
 	#else
 	public class LibraryReferences : ValidatingBaseList<LibraryReference>
 	{
-		protected override void  Validate(LibraryReference AValue)
+		protected override void  Validate(LibraryReference tempValue)
 		{
  			 //base.Validate(AValue);
- 			 if (Contains(AValue.Name))
- 				throw new SchemaException(SchemaException.Codes.DuplicateObjectName, AValue.Name);
+ 			 if (Contains(tempValue.Name))
+ 				throw new SchemaException(SchemaException.Codes.DuplicateObjectName, tempValue.Name);
 		}
 	#endif
 	
-		public LibraryReference this[string AName]
+		public LibraryReference this[string name]
 		{
-			get { return this[IndexOf(AName)]; }
-			set { this[IndexOf(AName)] = value; }
+			get { return this[IndexOf(name)]; }
+			set { this[IndexOf(name)] = value; }
 		}
 		
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Compare(this[LIndex].Name, AName) == 0)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (String.Compare(this[index].Name, name) == 0)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 	}
 	
@@ -134,58 +134,58 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class FileReference : System.Object, ICloneable
 	{
 		public FileReference() : base() {}
-		public FileReference(string AFileName) : base()
+		public FileReference(string fileName) : base()
 		{
-			FFileName = AFileName;
+			_fileName = fileName;
 		}
 		
-		public FileReference(string AFileName, bool AIsAssembly) : base()
+		public FileReference(string fileName, bool isAssembly) : base()
 		{
-			FFileName = AFileName;
-			FIsAssembly = AIsAssembly;
+			_fileName = fileName;
+			_isAssembly = isAssembly;
 		}
 		
-		public FileReference(string AFileName, bool AIsAssembly, IEnumerable<string> AEnvironments) : base()
+		public FileReference(string fileName, bool isAssembly, IEnumerable<string> environments) : base()
 		{
-			FFileName = AFileName;
-			FIsAssembly = AIsAssembly;
-			FEnvironments.AddRange(AEnvironments);
+			_fileName = fileName;
+			_isAssembly = isAssembly;
+			_environments.AddRange(environments);
 		}
 		
-		private string FFileName;
+		private string _fileName;
 		public string FileName
 		{
-			get { return FFileName; }
-			set { FFileName = value; }
+			get { return _fileName; }
+			set { _fileName = value; }
 		}
 		
-		private bool FIsAssembly;
+		private bool _isAssembly;
 		public bool IsAssembly
 		{
-			get { return FIsAssembly; }
-			set { FIsAssembly = value; }
+			get { return _isAssembly; }
+			set { _isAssembly = value; }
 		}
 		
-		private List<String> FEnvironments = new List<String>();
-		public List<String> Environments { get { return FEnvironments; } }
+		private List<String> _environments = new List<String>();
+		public List<String> Environments { get { return _environments; } }
 
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			FileReference LObject = AObject as FileReference;
+			FileReference localObjectValue = objectValue as FileReference;
 			return 
-				(LObject != null) 
-					&& String.Equals(FFileName, LObject.FileName, StringComparison.OrdinalIgnoreCase) 
-					&& (FIsAssembly == LObject.IsAssembly);
+				(localObjectValue != null) 
+					&& String.Equals(_fileName, localObjectValue.FileName, StringComparison.OrdinalIgnoreCase) 
+					&& (_isAssembly == localObjectValue.IsAssembly);
 		}
 		
 		public override int GetHashCode()
 		{
-			return FFileName.GetHashCode();
+			return _fileName.GetHashCode();
 		}
 		
 		public object Clone()
 		{
-			return new FileReference(FFileName, FIsAssembly, FEnvironments.ToArray());
+			return new FileReference(_fileName, _isAssembly, _environments.ToArray());
 		}
 	}
 	
@@ -209,86 +209,86 @@ namespace Alphora.Dataphor.DAE.Schema
 	#else
 	public class FileReferences : ValidatingBaseList<FileReference>
 	{
-		protected override void Validate(FileReference AValue)
+		protected override void Validate(FileReference tempValue)
 		{
 			//base.Validate(AValue);
-			if (Contains(AValue.FileName))
-				throw new SchemaException(SchemaException.Codes.DuplicateObjectName, AValue.FileName);
+			if (Contains(tempValue.FileName))
+				throw new SchemaException(SchemaException.Codes.DuplicateObjectName, tempValue.FileName);
 		}
 	#endif
 		
-		public int IndexOf(string AFileName)
+		public int IndexOf(string fileName)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Equals(this[LIndex].FileName, AFileName, StringComparison.OrdinalIgnoreCase))
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (String.Equals(this[index].FileName, fileName, StringComparison.OrdinalIgnoreCase))
+					return index;
 			return -1;
 		}
 
-		public bool Contains(string AFileName)
+		public bool Contains(string fileName)
 		{
-			return IndexOf(AFileName) >= 0;
+			return IndexOf(fileName) >= 0;
 		}
 		
-		public FileReference this[string AFileName]
+		public FileReference this[string fileName]
 		{
-			get { return this[IndexOf(AFileName)]; }
+			get { return this[IndexOf(fileName)]; }
 		}
 	}
 	
 	public class LibraryInfo : System.Object, ICloneable
 	{
 		public LibraryInfo() : base() {}
-		public LibraryInfo(string AName, bool AIsSuspect, string ASuspectReason)
+		public LibraryInfo(string name, bool isSuspect, string suspectReason)
 		{
-			FName = AName;
-			FIsSuspect = AIsSuspect;
-			FSuspectReason = ASuspectReason;
+			_name = name;
+			_isSuspect = isSuspect;
+			_suspectReason = suspectReason;
 		}
 		
-		private string FName;
+		private string _name;
 		public string Name
 		{
-			get { return FName; }
-			set { FName = value; }
+			get { return _name; }
+			set { _name = value; }
 		}
 		
-		private bool FIsSuspect;
+		private bool _isSuspect;
 		public bool IsSuspect
 		{
-			get { return FIsSuspect; }
+			get { return _isSuspect; }
 			set 
 			{
-				FIsSuspect = value; 
-				if (!FIsSuspect)
-					FSuspectReason = null;
+				_isSuspect = value; 
+				if (!_isSuspect)
+					_suspectReason = null;
 			}
 		}
 		
-		private string FSuspectReason;
+		private string _suspectReason;
 		public string SuspectReason
 		{
-			get { return FSuspectReason; }
-			set { FSuspectReason = value; }
+			get { return _suspectReason; }
+			set { _suspectReason = value; }
 		}
 		
 		#region ICloneable Members
 
 		public object Clone()
 		{
-			return new LibraryInfo(FName, FIsSuspect, FSuspectReason);
+			return new LibraryInfo(_name, _isSuspect, _suspectReason);
 		}
 
 		#endregion
 
-		public void SaveToStream(Stream AStream)
+		public void SaveToStream(Stream stream)
 		{
-			new Serializer().Serialize(AStream, this);
+			new Serializer().Serialize(stream, this);
 		}
 		
-		public static LibraryInfo LoadFromStream(Stream AStream)
+		public static LibraryInfo LoadFromStream(Stream stream)
 		{
-			return new Deserializer().Deserialize(AStream, null) as LibraryInfo;
+			return new Deserializer().Deserialize(stream, null) as LibraryInfo;
 		}
 	}
 	
@@ -306,100 +306,100 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class Library : Schema.Object, ICloneable
 	{
 		public Library() : base(String.Empty) {}
-		public Library(string AName) : base(AName) {}
-		public Library(string AName, VersionNumber AVersion) : base(AName)
+		public Library(string name) : base(name) {}
+		public Library(string name, VersionNumber version) : base(name)
 		{
-			FVersion = AVersion;
+			_version = version;
 		}
 		
-		public Library(string AName, VersionNumber AVersion, string ADefaultDeviceName) : base(AName)
+		public Library(string name, VersionNumber version, string defaultDeviceName) : base(name)
 		{
-			FVersion = AVersion;
-			DefaultDeviceName = ADefaultDeviceName;
+			_version = version;
+			DefaultDeviceName = defaultDeviceName;
 		}
 		
-		public Library(string AName, string ADirectory, VersionNumber AVersion, string ADefaultDeviceName) : base(AName)
+		public Library(string name, string directory, VersionNumber version, string defaultDeviceName) : base(name)
 		{
-			Directory = ADirectory;
-			FVersion = AVersion;
-			DefaultDeviceName = ADefaultDeviceName;
+			Directory = directory;
+			_version = version;
+			DefaultDeviceName = defaultDeviceName;
 		}
 		
-		private VersionNumber FVersion = new VersionNumber(-1, -1, -1, -1);
+		private VersionNumber _version = new VersionNumber(-1, -1, -1, -1);
 		public VersionNumber Version
 		{
-			get { return FVersion; }
-			set { FVersion = value; }
+			get { return _version; }
+			set { _version = value; }
 		}
 		
-		private string FDefaultDeviceName = String.Empty;
+		private string _defaultDeviceName = String.Empty;
 		public string DefaultDeviceName
 		{
-			get { return FDefaultDeviceName; }
-			set { FDefaultDeviceName = value == null ? String.Empty : value; }
+			get { return _defaultDeviceName; }
+			set { _defaultDeviceName = value == null ? String.Empty : value; }
 		}
 		
-		private string FDirectory = String.Empty;
+		private string _directory = String.Empty;
 		[Publish(PublishMethod.None)]
 		public string Directory
 		{
-			get { return FDirectory; }
+			get { return _directory; }
 			set 
 			{ 
 				if ((value == null) || (value == String.Empty))
-					FDirectory = String.Empty; 
+					_directory = String.Empty; 
 				else
-					FDirectory = value;
+					_directory = value;
 			}
 		}
 		
-		private bool FIsSuspect;
+		private bool _isSuspect;
 		[Publish(PublishMethod.None)]
 		public bool IsSuspect
 		{
-			get { return FIsSuspect; }
+			get { return _isSuspect; }
 			set 
 			{
-				FIsSuspect = value; 
-				if (!FIsSuspect)
-					FSuspectReason = null;
+				_isSuspect = value; 
+				if (!_isSuspect)
+					_suspectReason = null;
 			}
 		}
 		
-		private string FSuspectReason;
+		private string _suspectReason;
 		[Publish(PublishMethod.None)]
 		public string SuspectReason
 		{
-			get { return FSuspectReason; }
-			set { FSuspectReason = value; }
+			get { return _suspectReason; }
+			set { _suspectReason = value; }
 		}
 		
-		private string ListToString(List AList)
+		private string ListToString(List list)
 		{
-			StringBuilder LString = new StringBuilder();
-			for (int LIndex = 0; LIndex < AList.Count; LIndex++)
+			StringBuilder stringValue = new StringBuilder();
+			for (int index = 0; index < list.Count; index++)
 			{
-				if (LIndex > 0)
-					LString.Append(";");
-				LString.Append((string)AList[LIndex]);
+				if (index > 0)
+					stringValue.Append(";");
+				stringValue.Append((string)list[index]);
 			}
-			return LString.ToString();
+			return stringValue.ToString();
 		}
 		
-		private void StringToList(string AString, List AList)
+		private void StringToList(string stringValue, List list)
 		{
-			AList.Clear();
-			if (AString.Length > 0)
+			list.Clear();
+			if (stringValue.Length > 0)
 			{
-				string[] LStrings = AString.Split(';');
-				for (int LIndex = 0; LIndex < LStrings.Length; LIndex++)
-					AList.Add(LStrings[LIndex]);
+				string[] strings = stringValue.Split(';');
+				for (int index = 0; index < strings.Length; index++)
+					list.Add(strings[index]);
 			}
 		}
 
 		// A list of FileReference objects. These files will be copied into the DAE's startup directory. If IsAssembly is true, the file will be registered as an assembly with the DAE.
-		private FileReferences FFiles = new FileReferences();
-		public FileReferences Files { get { return FFiles; } }
+		private FileReferences _files = new FileReferences();
+		public FileReferences Files { get { return _files; } }
 		
 		public string AssembliesAsString
 		{
@@ -408,17 +408,17 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				if ((value != null) && (value != String.Empty))
 				{ 
-					List LList = new List();
-					StringToList(value, LList); 
-					foreach (string LString in LList)
-						FFiles.Add(new FileReference(LString, true));
+					List list = new List();
+					StringToList(value, list); 
+					foreach (string stringValue in list)
+						_files.Add(new FileReference(stringValue, true));
 				}
 			}
 		}
 		
 		// A list of LibraryReference objects.
-		private LibraryReferences FLibraries = new LibraryReferences();
-		public LibraryReferences Libraries { get { return FLibraries; } }
+		private LibraryReferences _libraries = new LibraryReferences();
+		public LibraryReferences Libraries { get { return _libraries; } }
 		
 		public string LibrariesAsString
 		{
@@ -427,10 +427,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				if ((value != null) && (value != String.Empty))
 				{
-					List LList = new List();
-					StringToList(value, LList);
-					foreach (string LString in LList)
-						FLibraries.Add(new LibraryReference(LString));
+					List list = new List();
+					StringToList(value, list);
+					foreach (string stringValue in list)
+						_libraries.Add(new LibraryReference(stringValue));
 				}
 			}
 		}
@@ -442,22 +442,22 @@ namespace Alphora.Dataphor.DAE.Schema
 				if (MetaData == null)
 					return String.Empty;
 					
-				StringBuilder LResult = new StringBuilder();
+				StringBuilder result = new StringBuilder();
 				#if USEHASHTABLEFORTAGS
-				foreach (Tag LTag in MetaData.Tags)
+				foreach (Tag tag in MetaData.Tags)
 				{
 				#else
-				Tag LTag;
-				for (int LIndex = 0; LIndex < MetaData.Tags.Count; LIndex++)
+				Tag tag;
+				for (int index = 0; index < MetaData.Tags.Count; index++)
 				{
-					LTag = MetaData.Tags[LIndex];
+					tag = MetaData.Tags[index];
 				#endif
-					if (LResult.Length > 0)
-						LResult.Append(";");
-					LResult.AppendFormat(@"'{0}'='{1}'", LTag.Name.Replace("'", "''"), LTag.Value.Replace("'", "''"));
+					if (result.Length > 0)
+						result.Append(";");
+					result.AppendFormat(@"'{0}'='{1}'", tag.Name.Replace("'", "''"), tag.Value.Replace("'", "''"));
 				}
 				
-				return LResult.ToString();
+				return result.ToString();
 			}
 			set
 			{
@@ -467,33 +467,33 @@ namespace Alphora.Dataphor.DAE.Schema
 				while (FLexer[1].Type != TokenType.EOF)
 				{
 					FLexer.NextToken();
-					string LTagName = FLexer[0].AsString;
+					string tagName = FLexer[0].AsString;
 					FLexer.NextToken().CheckSymbol(Keywords.Equal);
 					FLexer.NextToken();
-					MetaData.Tags.Add(new Tag(LTagName, FLexer[0].AsString));
+					MetaData.Tags.Add(new Tag(tagName, FLexer[0].AsString));
 					if (FLexer.PeekTokenSymbol(1) == Keywords.StatementTerminator)
 						FLexer.NextToken();
 				}
 			}
 		}
 		
-		public void SaveToStream(Stream AStream)
+		public void SaveToStream(Stream stream)
 		{
-			new Serializer().Serialize(AStream, this);
+			new Serializer().Serialize(stream, this);
 		}
 		
 		public object Clone()
 		{
-			Library LLibrary = new Library(Name, FVersion, FDefaultDeviceName);
-			LLibrary.Directory = FDirectory;
-			LLibrary.MergeMetaData(MetaData);
-			LLibrary.IsSuspect = FIsSuspect;
-			LLibrary.SuspectReason = FSuspectReason;
-			foreach (LibraryReference LLibraryReference in FLibraries)
-				LLibrary.Libraries.Add((LibraryReference)LLibraryReference.Clone());
-			foreach (FileReference LFileReference in FFiles)
-				LLibrary.Files.Add((FileReference)LFileReference.Clone());
-			return LLibrary;
+			Library library = new Library(Name, _version, _defaultDeviceName);
+			library.Directory = _directory;
+			library.MergeMetaData(MetaData);
+			library.IsSuspect = _isSuspect;
+			library.SuspectReason = _suspectReason;
+			foreach (LibraryReference libraryReference in _libraries)
+				library.Libraries.Add((LibraryReference)libraryReference.Clone());
+			foreach (FileReference fileReference in _files)
+				library.Files.Add((FileReference)fileReference.Clone());
+			return library;
 		}
 	}
 	
@@ -504,164 +504,164 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class Libraries : Objects
     {
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is Library))
+			if (!(item is Library))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "Library");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 
-		public new Library this[int AIndex]
+		public new Library this[int index]
 		{
-			get { return (Library)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (Library)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new Library this[string AName]
+		public new Library this[string name]
 		{
-			get { return (Library)base[AName]; }
-			set { base[AName] = value; }
+			get { return (Library)base[name]; }
+			set { base[name] = value; }
 		}
 
 		/// <summary>Occurs whenever a library is created in the DAE.</summary>		
 		public event LibraryNotifyEvent OnLibraryCreated;
-		public void DoLibraryCreated(Program AProgram, string ALibraryName)
+		public void DoLibraryCreated(Program program, string libraryName)
 		{
 			if (OnLibraryCreated != null)
-				OnLibraryCreated(AProgram, ALibraryName);
+				OnLibraryCreated(program, libraryName);
 		}
 		
 		/// <summary>Occurs whenever a library is added to the list of available libraries in the DAE.</summary>
 		public event LibraryNotifyEvent OnLibraryAdded;
-		public void DoLibraryAdded(Program AProgram, string ALibraryName)
+		public void DoLibraryAdded(Program program, string libraryName)
 		{
 			if (OnLibraryAdded != null)
-				OnLibraryAdded(AProgram, ALibraryName);
+				OnLibraryAdded(program, libraryName);
 		}
 		
 		/// <summary>Occurs whenever a library is removed from the list of available libraries in the DAE.</summary>
 		public event LibraryNotifyEvent OnLibraryRemoved;
-		public void DoLibraryRemoved(Program AProgram, string ALibraryName)
+		public void DoLibraryRemoved(Program program, string libraryName)
 		{
 			if (OnLibraryRemoved != null)
-				OnLibraryRemoved(AProgram, ALibraryName);
+				OnLibraryRemoved(program, libraryName);
 		}
 		
 		/// <summary>Occurs whenever a library is renamed in the DAE.</summary>
 		public event LibraryRenameEvent OnLibraryRenamed;
-		public void DoLibraryRenamed(Program AProgram, string AOldLibraryName, string ANewLibraryName)
+		public void DoLibraryRenamed(Program program, string oldLibraryName, string newLibraryName)
 		{
 			if (OnLibraryRenamed != null)
-				OnLibraryRenamed(AProgram, AOldLibraryName, ANewLibraryName);
+				OnLibraryRenamed(program, oldLibraryName, newLibraryName);
 		}
 		
 		/// <summary>Occurs whenever a library is deleted in the DAE.</summary>
 		public event LibraryNotifyEvent OnLibraryDeleted;
-		public void DoLibraryDeleted(Program AProgram, string ALibraryName)
+		public void DoLibraryDeleted(Program program, string libraryName)
 		{
 			if (OnLibraryDeleted != null)
-				OnLibraryDeleted(AProgram, ALibraryName);
+				OnLibraryDeleted(program, libraryName);
 		}
 
 		/// <summary>Occurs whenever a library is registered or loaded in the DAE.</summary>
 		public event LibraryNotifyEvent OnLibraryLoaded;
-		public void DoLibraryLoaded(Program AProgram, string ALibraryName)
+		public void DoLibraryLoaded(Program program, string libraryName)
 		{
 			if (OnLibraryLoaded != null)
-				OnLibraryLoaded(AProgram, ALibraryName);
+				OnLibraryLoaded(program, libraryName);
 		}
 
 		/// <summary>Occurs whenever a library is unregistered or unloaded in the DAE.</summary>
 		public event LibraryNotifyEvent OnLibraryUnloaded;
-		public void DoLibraryUnloaded(Program AProgram, string ALibraryName)
+		public void DoLibraryUnloaded(Program program, string libraryName)
 		{
 			if (OnLibraryUnloaded != null)
-				OnLibraryUnloaded(AProgram, ALibraryName);
+				OnLibraryUnloaded(program, libraryName);
 		}
     }
 
 	public class LoadedLibrary : Schema.CatalogObject
 	{
-		public LoadedLibrary(string AName) : base(AName) {}
+		public LoadedLibrary(string name) : base(name) {}
 		
-		private List FAssemblies = new List();
-		public List Assemblies { get { return FAssemblies; } }
+		private List _assemblies = new List();
+		public List Assemblies { get { return _assemblies; } }
 
 		[Reference]
-		private LoadedLibraries FRequiredLibraries = new LoadedLibraries();
-		public LoadedLibraries RequiredLibraries { get { return FRequiredLibraries; } }
+		private LoadedLibraries _requiredLibraries = new LoadedLibraries();
+		public LoadedLibraries RequiredLibraries { get { return _requiredLibraries; } }
 		
 		[Reference]
-		private LoadedLibraries FRequiredByLibraries = new LoadedLibraries();		
-		public LoadedLibraries RequiredByLibraries { get { return FRequiredByLibraries; } }
+		private LoadedLibraries _requiredByLibraries = new LoadedLibraries();		
+		public LoadedLibraries RequiredByLibraries { get { return _requiredByLibraries; } }
 		
-		private NameResolutionPath FNameResolutionPath;
+		private NameResolutionPath _nameResolutionPath;
 		
-		protected void GetNameResolutionPath(NameResolutionPath APath, int ALevel, Schema.LoadedLibrary ALibrary)
+		protected void GetNameResolutionPath(NameResolutionPath path, int level, Schema.LoadedLibrary library)
 		{
-			while (APath.Count <= ALevel)
-				APath.Add(new Schema.LoadedLibraries());
+			while (path.Count <= level)
+				path.Add(new Schema.LoadedLibraries());
 				
-			if (!APath.Contains(ALibrary))
-				APath[ALevel].Add(ALibrary);
+			if (!path.Contains(library))
+				path[level].Add(library);
 				
-			foreach (LoadedLibrary LLibrary in ALibrary.RequiredLibraries)	
-				GetNameResolutionPath(APath, ALevel + 1, LLibrary);
+			foreach (LoadedLibrary localLibrary in library.RequiredLibraries)	
+				GetNameResolutionPath(path, level + 1, localLibrary);
 		}
 		
-		public NameResolutionPath GetNameResolutionPath(LoadedLibrary ASystemLibrary)
+		public NameResolutionPath GetNameResolutionPath(LoadedLibrary systemLibrary)
 		{
-			if (FNameResolutionPath == null)
+			if (_nameResolutionPath == null)
 			{
 				/* Depth first traversal, tracking level, add every unique required library at the level corresponding to the depth of the library in the dependency graph */
-				FNameResolutionPath = new NameResolutionPath();
-				GetNameResolutionPath(FNameResolutionPath, 0, this);
+				_nameResolutionPath = new NameResolutionPath();
+				GetNameResolutionPath(_nameResolutionPath, 0, this);
 
 				/* Remove all levels with no libraries */
-				for (int LIndex = FNameResolutionPath.Count - 1; LIndex >= 0; LIndex--)
-					if (FNameResolutionPath[LIndex].Count == 0)
-						FNameResolutionPath.RemoveAt(LIndex);
+				for (int index = _nameResolutionPath.Count - 1; index >= 0; index--)
+					if (_nameResolutionPath[index].Count == 0)
+						_nameResolutionPath.RemoveAt(index);
 						
 				/* Ensure that system is in the path */
-				if (!FNameResolutionPath.Contains(ASystemLibrary))
+				if (!_nameResolutionPath.Contains(systemLibrary))
 				{
-					FNameResolutionPath.Add(new Schema.LoadedLibraries());
-					FNameResolutionPath[FNameResolutionPath.Count - 1].Add(ASystemLibrary);
+					_nameResolutionPath.Add(new Schema.LoadedLibraries());
+					_nameResolutionPath[_nameResolutionPath.Count - 1].Add(systemLibrary);
 				}
 			}
 								
-			return FNameResolutionPath;
+			return _nameResolutionPath;
 		}
 		
 		public void ClearNameResolutionPath()
 		{
-			FNameResolutionPath = null;
+			_nameResolutionPath = null;
 		}
 		
 		/// <summary>Returns true if ALibrary is the same as this library, or is required by this library.</summary>
-		public bool IsRequiredLibrary(LoadedLibrary ALibrary)
+		public bool IsRequiredLibrary(LoadedLibrary library)
 		{
-			if (this.Equals(ALibrary))
+			if (this.Equals(library))
 				return true;
-			foreach (LoadedLibrary LLibrary in FRequiredLibraries)
-				if (LLibrary.IsRequiredLibrary(ALibrary))
+			foreach (LoadedLibrary localLibrary in _requiredLibraries)
+				if (localLibrary.IsRequiredLibrary(library))
 					return true;
 			return false;
 		}
 		
 		public void AttachLibrary()
 		{
-			foreach (LoadedLibrary LLibrary in FRequiredLibraries)
-				if (!LLibrary.RequiredByLibraries.Contains(this))
-					LLibrary.RequiredByLibraries.Add(this);
+			foreach (LoadedLibrary library in _requiredLibraries)
+				if (!library.RequiredByLibraries.Contains(this))
+					library.RequiredByLibraries.Add(this);
 		}
 		
 		public void DetachLibrary()
 		{
-			foreach (LoadedLibrary LLibrary in FRequiredLibraries)
-				if (LLibrary.RequiredByLibraries.Contains(this))
-					LLibrary.RequiredByLibraries.Remove(this);
+			foreach (LoadedLibrary library in _requiredLibraries)
+				if (library.RequiredByLibraries.Contains(this))
+					library.RequiredByLibraries.Remove(this);
 		}
 	}
 
@@ -669,24 +669,24 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class LoadedLibraries : Objects
     {
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is LoadedLibrary))
+			if (!(item is LoadedLibrary))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "LoadedLibrary");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 
-		public new LoadedLibrary this[int AIndex]
+		public new LoadedLibrary this[int index]
 		{
-			get { return (LoadedLibrary)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (LoadedLibrary)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new LoadedLibrary this[string AName]
+		public new LoadedLibrary this[string name]
 		{
-			get { return (LoadedLibrary)base[AName]; }
-			set { base[AName] = value; }
+			get { return (LoadedLibrary)base[name]; }
+			set { base[name] = value; }
 		}
     }
 
@@ -697,16 +697,16 @@ namespace Alphora.Dataphor.DAE.Schema
 	///	</summary>    
     public class NameResolutionPath : List
     {
-		public new LoadedLibraries this[int AIndex]
+		public new LoadedLibraries this[int index]
 		{
-			get { return (LoadedLibraries)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (LoadedLibraries)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public bool Contains(LoadedLibrary ALibrary)
+		public bool Contains(LoadedLibrary library)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].Contains(ALibrary))
+			for (int index = 0; index < Count; index++)
+				if (this[index].Contains(library))
 					return true;
 			return false;
 		}

@@ -29,65 +29,65 @@ namespace Alphora.Dataphor.DAE.Schema
 
 	public class Property : Object
 	{
-		public Property(int AID, string AName) : base(AID, AName) {}
+		public Property(int iD, string name) : base(iD, name) {}
 		
-		public Property(int AID, string AName, IDataType ADataType) : base(AName)
+		public Property(int iD, string name, IDataType dataType) : base(name)
 		{
-			FDataType = ADataType;
+			_dataType = dataType;
 		}
 		
-		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Property"), DisplayName, FRepresentation.DisplayName, FRepresentation.ScalarType.DisplayName); } }
+		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Property"), DisplayName, _representation.DisplayName, _representation.ScalarType.DisplayName); } }
 
-		public override int CatalogObjectID { get { return FRepresentation == null ? -1 : FRepresentation.CatalogObjectID; } }
+		public override int CatalogObjectID { get { return _representation == null ? -1 : _representation.CatalogObjectID; } }
 
-		public override int ParentObjectID { get { return FRepresentation == null ? -1 : FRepresentation.ID; } }
+		public override int ParentObjectID { get { return _representation == null ? -1 : _representation.ID; } }
 
 		[Reference]
-		internal Representation FRepresentation;
+		internal Representation _representation;
 		public Representation Representation
 		{
-			get { return FRepresentation; }
+			get { return _representation; }
 			set
 			{
-				if (FRepresentation != null)
-					FRepresentation.Properties.Remove(this);
+				if (_representation != null)
+					_representation.Properties.Remove(this);
 				if (value != null)
 					value.Properties.Add(this);
 			}
 		}
 		
 		[Reference]
-		private IDataType FDataType;
+		private IDataType _dataType;
 		public IDataType DataType
 		{
-			get { return FDataType; }
-			set { FDataType = value; }
+			get { return _dataType; }
+			set { _dataType = value; }
 		}
 
-		private bool FIsDefaultReadAccessor;
+		private bool _isDefaultReadAccessor;
 		public bool IsDefaultReadAccessor
 		{
-			get { return FIsDefaultReadAccessor; }
-			set { FIsDefaultReadAccessor = value; }
+			get { return _isDefaultReadAccessor; }
+			set { _isDefaultReadAccessor = value; }
 		}
 		
-		private int FReadAccessorID = -1;
+		private int _readAccessorID = -1;
 		public int ReadAccessorID
 		{
-			get { return FReadAccessorID; }
-			set { FReadAccessorID = value; }
+			get { return _readAccessorID; }
+			set { _readAccessorID = value; }
 		}
 
 		public void LoadReadAccessorID()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.ReadAccessorID");
-			if (LTag != Tag.None)
-				FReadAccessorID = Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.ReadAccessorID");
+			if (tag != Tag.None)
+				_readAccessorID = Int32.Parse(tag.Value);
 		}
 		
 		public void SaveReadAccessorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.ReadAccessorID", FReadAccessorID.ToString(), true);
+			MetaData.Tags.AddOrUpdate("DAE.ReadAccessorID", _readAccessorID.ToString(), true);
 		}
 		
 		public void RemoveReadAccessorID()
@@ -96,49 +96,49 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.ReadAccessorID");
 		}
 
-		public void ResolveReadAccessor(CatalogDeviceSession ASession)
+		public void ResolveReadAccessor(CatalogDeviceSession session)
 		{
-			if ((FReadAccessor == null) && (FReadAccessorID > -1))
-				FReadAccessor = ASession.ResolveCatalogObject(FReadAccessorID) as Schema.Operator;
+			if ((_readAccessor == null) && (_readAccessorID > -1))
+				_readAccessor = session.ResolveCatalogObject(_readAccessorID) as Schema.Operator;
 		}
 
         // ReadAccessor
 		[Reference]
-        private Operator FReadAccessor;
+        private Operator _readAccessor;
         public Operator ReadAccessor
         {
-			get { return FReadAccessor; }
+			get { return _readAccessor; }
 			set 
 			{ 
-				FReadAccessor = value; 
-				FReadAccessorID = value == null ? -1 : value.ID;
+				_readAccessor = value; 
+				_readAccessorID = value == null ? -1 : value.ID;
 			}
         }
         
-		private bool FIsDefaultWriteAccessor;
+		private bool _isDefaultWriteAccessor;
 		public bool IsDefaultWriteAccessor
 		{
-			get { return FIsDefaultWriteAccessor; }
-			set { FIsDefaultWriteAccessor = value; }
+			get { return _isDefaultWriteAccessor; }
+			set { _isDefaultWriteAccessor = value; }
 		}
 		
-		private int FWriteAccessorID = -1;
+		private int _writeAccessorID = -1;
 		public int WriteAccessorID
 		{
-			get { return FWriteAccessorID; }
-			set { FWriteAccessorID = value; }
+			get { return _writeAccessorID; }
+			set { _writeAccessorID = value; }
 		}
 
 		public void LoadWriteAccessorID()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.WriteAccessorID");
-			if (LTag != Tag.None)
-				FWriteAccessorID = Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.WriteAccessorID");
+			if (tag != Tag.None)
+				_writeAccessorID = Int32.Parse(tag.Value);
 		}
 		
 		public void SaveWriteAccessorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.WriteAccessorID", FWriteAccessorID.ToString(), true);
+			MetaData.Tags.AddOrUpdate("DAE.WriteAccessorID", _writeAccessorID.ToString(), true);
 		}
 		
 		public void RemoveWriteAccessorID()
@@ -147,28 +147,28 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.WriteAccessorID");
 		}
 
-		public void ResolveWriteAccessor(CatalogDeviceSession ASession)
+		public void ResolveWriteAccessor(CatalogDeviceSession session)
 		{
-			if ((FWriteAccessor == null) && (FWriteAccessorID > -1))
-				FWriteAccessor = ASession.ResolveCatalogObject(FWriteAccessorID) as Schema.Operator;
+			if ((_writeAccessor == null) && (_writeAccessorID > -1))
+				_writeAccessor = session.ResolveCatalogObject(_writeAccessorID) as Schema.Operator;
 		}
 
         // WriteAccessor
 		[Reference]
-        private Operator FWriteAccessor;
+        private Operator _writeAccessor;
         public Operator WriteAccessor
         {
-			get { return FWriteAccessor; }
+			get { return _writeAccessor; }
 			set 
 			{ 
-				FWriteAccessor = value; 
-				FWriteAccessorID = value == null ? -1 : value.ID;
+				_writeAccessor = value; 
+				_writeAccessorID = value == null ? -1 : value.ID;
 			}
         }
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 			{
 				SaveObjectID();
 				SaveReadAccessorID();
@@ -181,23 +181,23 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveWriteAccessorID();
 			}
 			
-			PropertyDefinition LProperty = new PropertyDefinition(Name, DataType.EmitSpecifier(AMode));
-			if (!FIsDefaultReadAccessor)
-				LProperty.ReadAccessorBlock = FReadAccessor.Block.EmitAccessorBlock(AMode);
+			PropertyDefinition property = new PropertyDefinition(Name, DataType.EmitSpecifier(mode));
+			if (!_isDefaultReadAccessor)
+				property.ReadAccessorBlock = _readAccessor.Block.EmitAccessorBlock(mode);
 			
-			if (!FIsDefaultWriteAccessor)
-				LProperty.WriteAccessorBlock = FWriteAccessor.Block.EmitAccessorBlock(AMode);
+			if (!_isDefaultWriteAccessor)
+				property.WriteAccessorBlock = _writeAccessor.Block.EmitAccessorBlock(mode);
 			
-			LProperty.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LProperty;
+			property.MetaData = MetaData == null ? null : MetaData.Copy();
+			return property;
 		}
 
-		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
 		{
-			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 			
-			ReadAccessor.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
-			WriteAccessor.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			ReadAccessor.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+			WriteAccessor.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 		}
 
 		public bool HasExternalDependencies(Schema.ScalarType LSystemType)
@@ -206,11 +206,11 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				if ((Representation != null) && (Representation.ScalarType != null) && ((Representation.ScalarType.LikeType != null) || (LSystemType != null)))
 				{
-					for (int LIndex = 0; LIndex < Dependencies.Count; LIndex++)
+					for (int index = 0; index < Dependencies.Count; index++)
 						if 
 						(
-							((Representation.ScalarType.LikeType != null) && (Dependencies.IDs[LIndex] != Representation.ScalarType.LikeType.ID)) || 
-							((LSystemType != null) && (Dependencies.IDs[LIndex] != LSystemType.ID))
+							((Representation.ScalarType.LikeType != null) && (Dependencies.IDs[index] != Representation.ScalarType.LikeType.ID)) || 
+							((LSystemType != null) && (Dependencies.IDs[index] != LSystemType.ID))
 						)
 							return true;
 				}
@@ -225,100 +225,100 @@ namespace Alphora.Dataphor.DAE.Schema
     /// <remarks> Properties </remarks>
 	public class Properties : Objects
     {
-		public Properties(Representation ARepresentation) : base()
+		public Properties(Representation representation) : base()
 		{
-			FRepresentation = ARepresentation;
+			_representation = representation;
 		}
 		
 		[Reference]
-		private Representation FRepresentation;
-		public Representation Representation { get { return FRepresentation; } }
+		private Representation _representation;
+		public Representation Representation { get { return _representation; } }
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is Property))
+			if (!(item is Property))
 				throw new SchemaException(SchemaException.Codes.PropertyContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 		
-		protected override void Adding(Object AItem, int AIndex)
+		protected override void Adding(Object item, int index)
 		{
-			base.Adding(AItem, AIndex);
-			((Property)AItem).FRepresentation = FRepresentation;
+			base.Adding(item, index);
+			((Property)item)._representation = _representation;
 		}
 		
-		protected override void Removing(Object AItem, int AIndex)
+		protected override void Removing(Object item, int index)
 		{
-			((Property)AItem).FRepresentation = null;
-			base.Removing(AItem, AIndex);
+			((Property)item)._representation = null;
+			base.Removing(item, index);
 		}
 
-		public new Property this[int AIndex]
+		public new Property this[int index]
 		{
-			get { return (Property)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (Property)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new Property this[string AName]
+		public new Property this[string name]
 		{
-			get { return (Property)base[AName]; }
-			set { base[AName] = value; }
+			get { return (Property)base[name]; }
+			set { base[name] = value; }
 		}
     }
 
 	public class Representation : Object
 	{
-		public Representation(int AID, string AName) : base(AID, AName) 
+		public Representation(int iD, string name) : base(iD, name) 
 		{
-			FProperties = new Properties(this);
+			_properties = new Properties(this);
 		}
 		
-		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Representation"), DisplayName, FScalarType.DisplayName); } }
+		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Representation"), DisplayName, _scalarType.DisplayName); } }
 
-		public override int CatalogObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
+		public override int CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
- 		public override int ParentObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
+ 		public override int ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
 		[Reference]
-		internal ScalarType FScalarType;
+		internal ScalarType _scalarType;
 		public ScalarType ScalarType
 		{
-			get { return FScalarType; }
+			get { return _scalarType; }
 			set
 			{
-				if (FScalarType != null)
-					FScalarType.Representations.Remove(this);
+				if (_scalarType != null)
+					_scalarType.Representations.Remove(this);
 				if (value != null)
 					value.Representations.Add(this);
 			}
 		}
 		
-		private bool FIsDefaultSelector;
+		private bool _isDefaultSelector;
 		public bool IsDefaultSelector
 		{
-			get { return FIsDefaultSelector; }
-			set { FIsDefaultSelector = value; }
+			get { return _isDefaultSelector; }
+			set { _isDefaultSelector = value; }
 		}
 		
-		private int FSelectorID = -1;
+		private int _selectorID = -1;
 		public int SelectorID
 		{
-			get { return FSelectorID; }
-			set { FSelectorID = value; }
+			get { return _selectorID; }
+			set { _selectorID = value; }
 		}
 		
 		public void LoadSelectorID()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.SelectorID");
-			if (LTag != Tag.None)
-				FSelectorID = Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.SelectorID");
+			if (tag != Tag.None)
+				_selectorID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveSelectorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.SelectorID", FSelectorID.ToString(), true);
+			MetaData.Tags.AddOrUpdate("DAE.SelectorID", _selectorID.ToString(), true);
 		}
 		
 		public void RemoveSelectorID()
@@ -327,32 +327,32 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.SelectorID");
 		}
 
-		public void ResolveSelector(CatalogDeviceSession ASession)
+		public void ResolveSelector(CatalogDeviceSession session)
 		{
-			if ((FSelector == null) && (FSelectorID > -1))
-				FSelector = ASession.ResolveCatalogObject(FSelectorID) as Schema.Operator;
+			if ((_selector == null) && (_selectorID > -1))
+				_selector = session.ResolveCatalogObject(_selectorID) as Schema.Operator;
 		}
 
         // Selector -- the selector operator for this representation
 		[Reference]
-        private Operator FSelector;
+        private Operator _selector;
         public Operator Selector
         {
-			get { return FSelector; }
+			get { return _selector; }
 			set 
 			{ 
-				FSelector = value; 
-				FSelectorID = value == null ? -1 : value.ID;
+				_selector = value; 
+				_selectorID = value == null ? -1 : value.ID;
 			}
         }
 
 		// Properties
-		private Properties FProperties;
-		public Properties Properties { get { return FProperties; } } 
+		private Properties _properties;
+		public Properties Properties { get { return _properties; } } 
 		
-		public RepresentationDefinition EmitDefinition(EmitMode AMode)
+		public RepresentationDefinition EmitDefinition(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 			{
 				SaveObjectID();
 				SaveSelectorID();
@@ -367,94 +367,94 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveGeneratorID();
 			}
 			
-			RepresentationDefinition LRepresentation = new RepresentationDefinition(Name);
-			foreach (Property LProperty in Properties)
-				LRepresentation.Properties.Add(LProperty.EmitStatement(AMode));
+			RepresentationDefinition representation = new RepresentationDefinition(Name);
+			foreach (Property property in Properties)
+				representation.Properties.Add(property.EmitStatement(mode));
 			if (!IsDefaultSelector)
-				LRepresentation.SelectorAccessorBlock = Selector.Block.EmitAccessorBlock(AMode);
+				representation.SelectorAccessorBlock = Selector.Block.EmitAccessorBlock(mode);
 			
-			LRepresentation.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LRepresentation;
+			representation.MetaData = MetaData == null ? null : MetaData.Copy();
+			return representation;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			AlterScalarTypeStatement LStatement = new AlterScalarTypeStatement();
-			LStatement.ScalarTypeName = ScalarType.Name;
-			LStatement.CreateRepresentations.Add(EmitDefinition(AMode));
-			return LStatement;
+			AlterScalarTypeStatement statement = new AlterScalarTypeStatement();
+			statement.ScalarTypeName = ScalarType.Name;
+			statement.CreateRepresentations.Add(EmitDefinition(mode));
+			return statement;
 		}
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			AlterScalarTypeStatement LStatement = new AlterScalarTypeStatement();
-			LStatement.ScalarTypeName = ScalarType.Name;
-			LStatement.DropRepresentations.Add(new DropRepresentationDefinition(Name));
-			return LStatement;
+			AlterScalarTypeStatement statement = new AlterScalarTypeStatement();
+			statement.ScalarTypeName = ScalarType.Name;
+			statement.DropRepresentations.Add(new DropRepresentationDefinition(Name));
+			return statement;
 		}
 
-        public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
         {
-			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 			
-			Selector.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			Selector.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 				
-			foreach (Property LProperty in Properties)
-				LProperty.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			foreach (Property property in Properties)
+				property.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
         }
         
-		public override Object GetObjectFromHeader(ObjectHeader AHeader)
+		public override Object GetObjectFromHeader(ObjectHeader header)
 		{
-			if (FID == AHeader.ParentObjectID)
-				foreach (Property LProperty in FProperties)
-					if (AHeader.ID == LProperty.ID)
-						return LProperty;
+			if (_iD == header.ParentObjectID)
+				foreach (Property property in _properties)
+					if (header.ID == property.ID)
+						return property;
 
-			return base.GetObjectFromHeader(AHeader);
+			return base.GetObjectFromHeader(header);
 		}
 
-        private PlanNode FReadNode;
+        private PlanNode _readNode;
         public PlanNode ReadNode
         {
-			get { return FReadNode; }
-			set { FReadNode = value; }
+			get { return _readNode; }
+			set { _readNode = value; }
 		}
         
-        private PlanNode FWriteNode;
+        private PlanNode _writeNode;
         public PlanNode WriteNode
         {
-			get { return FWriteNode; }
-			set { FWriteNode = value; }
+			get { return _writeNode; }
+			set { _writeNode = value; }
 		}
         
-		public bool IsNativeAccessorRepresentation(NativeAccessor ANativeAccessor, bool AExplicit)
+		public bool IsNativeAccessorRepresentation(NativeAccessor nativeAccessor, bool explicitValue)
 		{
 			return 
-				(Name == MetaData.GetTag(MetaData, String.Format("DAE.{0}", ANativeAccessor.Name), ANativeAccessor.Name)) ||
+				(Name == MetaData.GetTag(MetaData, String.Format("DAE.{0}", nativeAccessor.Name), nativeAccessor.Name)) ||
 				(
-					!AExplicit &&
+					!explicitValue &&
 					(Properties.Count == 1) && 
 					(Properties[0].DataType is Schema.ScalarType) && 
-					(((Schema.ScalarType)Properties[0].DataType).NativeType == ANativeAccessor.NativeType)
+					(((Schema.ScalarType)Properties[0].DataType).NativeType == nativeAccessor.NativeType)
 				);
 		}
 		
-        public bool IsNativeAccessorRepresentation(bool AExplicit)
+        public bool IsNativeAccessorRepresentation(bool explicitValue)
         {
 			return 
-				IsNativeAccessorRepresentation(NativeAccessors.AsBoolean, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsByte, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsByteArray, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsDateTime, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsDecimal, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsDisplayString, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsException, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsGuid, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsInt16, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsInt32, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsInt64, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsString, AExplicit) ||
-				IsNativeAccessorRepresentation(NativeAccessors.AsTimeSpan, AExplicit);
+				IsNativeAccessorRepresentation(NativeAccessors.AsBoolean, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsByte, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsByteArray, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsDateTime, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsDecimal, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsDisplayString, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsException, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsGuid, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsInt16, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsInt32, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsInt64, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsString, explicitValue) ||
+				IsNativeAccessorRepresentation(NativeAccessors.AsTimeSpan, explicitValue);
 		}
 		
 		/// <summary>A represntation is persistent if it has external dependencies.</summary>
@@ -466,16 +466,16 @@ namespace Alphora.Dataphor.DAE.Schema
 			if ((ScalarType != null) && ScalarType.IsDefaultConveyor && IsDefaultSelector)
 				return false;
 				
-			Schema.ScalarType LSystemType = (ScalarType != null) && ScalarType.IsDefaultConveyor && IsDefaultSelector && (Properties.Count == 1) ? Properties[0].DataType as Schema.ScalarType : null;
+			Schema.ScalarType systemType = (ScalarType != null) && ScalarType.IsDefaultConveyor && IsDefaultSelector && (Properties.Count == 1) ? Properties[0].DataType as Schema.ScalarType : null;
 			if (HasDependencies())
 			{
-				if ((ScalarType != null) && ((ScalarType.LikeType != null) || (LSystemType != null)))
+				if ((ScalarType != null) && ((ScalarType.LikeType != null) || (systemType != null)))
 				{
-					for (int LIndex = 0; LIndex < Dependencies.Count; LIndex++)
+					for (int index = 0; index < Dependencies.Count; index++)
 						if 
 						(
-							((ScalarType.LikeType != null) && Dependencies.IDs[LIndex] != ScalarType.LikeType.ID) || 
-							((LSystemType != null) && Dependencies.IDs[LIndex] != LSystemType.ID)
+							((ScalarType.LikeType != null) && Dependencies.IDs[index] != ScalarType.LikeType.ID) || 
+							((systemType != null) && Dependencies.IDs[index] != systemType.ID)
 						)
 							return true;
 				}
@@ -483,8 +483,8 @@ namespace Alphora.Dataphor.DAE.Schema
 					return true;
 			}
 				
-			for (int LIndex = 0; LIndex < FProperties.Count; LIndex++)
-				if (FProperties[LIndex].HasExternalDependencies(LSystemType))
+			for (int index = 0; index < _properties.Count; index++)
+				if (_properties[index].HasExternalDependencies(systemType))
 					return true;
 			
 			return false;
@@ -494,78 +494,78 @@ namespace Alphora.Dataphor.DAE.Schema
     /// <remarks> Representations </remarks>
 	public class Representations : Objects
     {
-		public Representations(ScalarType AScalarType) : base()
+		public Representations(ScalarType scalarType) : base()
 		{
-			FScalarType = AScalarType;
+			_scalarType = scalarType;
 		}
 		
 		[Reference]
-		private ScalarType FScalarType;
-		public ScalarType ScalarType { get { return FScalarType; } }
+		private ScalarType _scalarType;
+		public ScalarType ScalarType { get { return _scalarType; } }
 	
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is Representation))
+			if (!(item is Representation))
 				throw new SchemaException(SchemaException.Codes.RepresentationContainer);
-			base.Validate(AItem);
-			FScalarType.ValidateChildObjectName(AItem.Name);
+			base.Validate(item);
+			_scalarType.ValidateChildObjectName(item.Name);
 		}
 		#endif
 		
-		protected override void Adding(Object AItem, int AIndex)
+		protected override void Adding(Object item, int index)
 		{
-			base.Adding(AItem, AIndex);
-			((Representation)AItem).FScalarType = FScalarType;
+			base.Adding(item, index);
+			((Representation)item)._scalarType = _scalarType;
 		}
 		
-		protected override void Removing(Object AItem, int AIndex)
+		protected override void Removing(Object item, int index)
 		{
-			((Representation)AItem).FScalarType = null;
-			base.Removing(AItem, AIndex);
+			((Representation)item)._scalarType = null;
+			base.Removing(item, index);
 		}
 
-		public new Representation this[int AIndex]
+		public new Representation this[int index]
 		{
-			get { return (Representation)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (Representation)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new Representation this[string AName]
+		public new Representation this[string name]
 		{
-			get { return (Representation)base[AName]; }
-			set { base[AName] = value; }
+			get { return (Representation)base[name]; }
+			set { base[name] = value; }
 		}
     }
     
     public class Sort : CatalogObject
     {
-		public Sort(int AID, string AName, IDataType ADataType) : base(AID, AName) 
+		public Sort(int iD, string name, IDataType dataType) : base(iD, name) 
 		{
-			FDataType = ADataType;
+			_dataType = dataType;
 		}
-		public Sort(int AID, string AName, IDataType ADataType, PlanNode ACompareNode) : base(AID, AName) 
+		public Sort(int iD, string name, IDataType dataType, PlanNode compareNode) : base(iD, name) 
 		{
-			FDataType = ADataType;
-			FCompareNode = ACompareNode;
+			_dataType = dataType;
+			_compareNode = compareNode;
 		}
 
 		[Reference]
-		private IDataType FDataType;
-		public IDataType DataType { get { return FDataType; } }
+		private IDataType _dataType;
+		public IDataType DataType { get { return _dataType; } }
 		
-		private bool FIsUnique;
+		private bool _isUnique;
 		public bool IsUnique
 		{
-			get { return FIsUnique; }
-			set { FIsUnique = value; }
+			get { return _isUnique; }
+			set { _isUnique = value; }
 		}
 		
-		private PlanNode FCompareNode;
+		private PlanNode _compareNode;
 		public PlanNode CompareNode
 		{
-			get { return FCompareNode; }
-			set { FCompareNode = value; }
+			get { return _compareNode; }
+			set { _compareNode = value; }
 		}
 		
 		private string GetDataTypeDisplayName()
@@ -578,43 +578,43 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Sort"), DisplayName, GetDataTypeDisplayName()); } }
 		
-		public SortDefinition EmitDefinition(EmitMode AMode)
+		public SortDefinition EmitDefinition(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			SortDefinition LSortDefinition = new SortDefinition();
-			LSortDefinition.Expression = (Expression)FCompareNode.EmitStatement(AMode);
-			LSortDefinition.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LSortDefinition;
+			SortDefinition sortDefinition = new SortDefinition();
+			sortDefinition.Expression = (Expression)_compareNode.EmitStatement(mode);
+			sortDefinition.MetaData = MetaData == null ? null : MetaData.Copy();
+			return sortDefinition;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			CreateSortStatement LStatement = new CreateSortStatement(); 
-			LStatement.ScalarTypeName = Schema.Object.EnsureRooted(DataType.Name);
-			LStatement.Expression = (Expression)FCompareNode.EmitStatement(AMode);
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LStatement;
+			CreateSortStatement statement = new CreateSortStatement(); 
+			statement.ScalarTypeName = Schema.Object.EnsureRooted(DataType.Name);
+			statement.Expression = (Expression)_compareNode.EmitStatement(mode);
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			return statement;
 		}
 		
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			return new DropSortStatement(DataType.Name, FIsUnique);
+			return new DropSortStatement(DataType.Name, _isUnique);
 		}
 
 		/// <summary>Returns true if the compare expression for this sort is syntactically equivalent to the compare expression of the given sort.</summary>
-		public bool Equivalent(Sort ASort)
+		public bool Equivalent(Sort sort)
 		{
-			if ((FCompareNode != null) && (ASort.CompareNode != null))
-				return Object.ReferenceEquals(FCompareNode, ASort.CompareNode) || (String.Compare(FCompareNode.EmitStatementAsString(), ASort.CompareNode.EmitStatementAsString()) == 0);
+			if ((_compareNode != null) && (sort.CompareNode != null))
+				return Object.ReferenceEquals(_compareNode, sort.CompareNode) || (String.Compare(_compareNode.EmitStatementAsString(), sort.CompareNode.EmitStatementAsString()) == 0);
 			else
 				return false;
 		}
@@ -622,34 +622,34 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class Conversion : CatalogObject
     {
-		public Conversion(int AID, string AName, ScalarType ASourceScalarType, ScalarType ATargetScalarType, Operator AOperator, bool AIsNarrowing) : base(AID, AName) 
+		public Conversion(int iD, string name, ScalarType sourceScalarType, ScalarType targetScalarType, Operator operatorValue, bool isNarrowing) : base(iD, name) 
 		{
-			FSourceScalarType = ASourceScalarType;
-			FTargetScalarType = ATargetScalarType;
-			FOperator = AOperator;
-			FIsNarrowing = AIsNarrowing;
+			_sourceScalarType = sourceScalarType;
+			_targetScalarType = targetScalarType;
+			_operator = operatorValue;
+			_isNarrowing = isNarrowing;
 		}
 
-		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Conversion"), IsNarrowing ? Strings.Get("SchemaObjectDescription.Narrowing") : Strings.Get("SchemaObjectDescription.Widening"), FSourceScalarType.DisplayName, FTargetScalarType.DisplayName); } }
+		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Conversion"), IsNarrowing ? Strings.Get("SchemaObjectDescription.Narrowing") : Strings.Get("SchemaObjectDescription.Widening"), _sourceScalarType.DisplayName, _targetScalarType.DisplayName); } }
 		
 		[Reference]
-		private ScalarType FSourceScalarType;
-		public ScalarType SourceScalarType { get { return FSourceScalarType; } }
+		private ScalarType _sourceScalarType;
+		public ScalarType SourceScalarType { get { return _sourceScalarType; } }
 		
 		[Reference]
-		private ScalarType FTargetScalarType;
-		public ScalarType TargetScalarType { get { return FTargetScalarType; } }
+		private ScalarType _targetScalarType;
+		public ScalarType TargetScalarType { get { return _targetScalarType; } }
 		
 		[Reference]
-		private Operator FOperator;
-		public Operator Operator { get { return FOperator; } }
+		private Operator _operator;
+		public Operator Operator { get { return _operator; } }
 		
-		private bool FIsNarrowing = true;
-		public bool IsNarrowing { get { return FIsNarrowing; } }
+		private bool _isNarrowing = true;
+		public bool IsNarrowing { get { return _isNarrowing; } }
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 			{
 				SaveObjectID();
 				SaveGeneratorID();
@@ -660,51 +660,51 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveGeneratorID();
 			}
 
-			CreateConversionStatement LStatement = new CreateConversionStatement();
-			LStatement.SourceScalarTypeName = SourceScalarType.EmitSpecifier(AMode);
-			LStatement.TargetScalarTypeName = TargetScalarType.EmitSpecifier(AMode);
-			LStatement.OperatorName = new IdentifierExpression(Schema.Object.EnsureRooted(Operator.OperatorName));
-			LStatement.IsNarrowing = IsNarrowing;
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			if (AMode == EmitMode.ForRemote)
+			CreateConversionStatement statement = new CreateConversionStatement();
+			statement.SourceScalarTypeName = SourceScalarType.EmitSpecifier(mode);
+			statement.TargetScalarTypeName = TargetScalarType.EmitSpecifier(mode);
+			statement.OperatorName = new IdentifierExpression(Schema.Object.EnsureRooted(Operator.OperatorName));
+			statement.IsNarrowing = IsNarrowing;
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			if (mode == EmitMode.ForRemote)
 			{
-				if (LStatement.MetaData == null)
-					LStatement.MetaData = new MetaData();
-				LStatement.MetaData.Tags.AddOrUpdate("DAE.RootedIdentifier", Schema.Object.EnsureRooted(Name));
+				if (statement.MetaData == null)
+					statement.MetaData = new MetaData();
+				statement.MetaData.Tags.AddOrUpdate("DAE.RootedIdentifier", Schema.Object.EnsureRooted(Name));
 			}
-			return LStatement;
+			return statement;
 		}
 		
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DropConversionStatement LStatement = new DropConversionStatement();
-			LStatement.SourceScalarTypeName = SourceScalarType.EmitSpecifier(AMode);
-			LStatement.TargetScalarTypeName = TargetScalarType.EmitSpecifier(AMode);
-			return LStatement;
+			DropConversionStatement statement = new DropConversionStatement();
+			statement.SourceScalarTypeName = SourceScalarType.EmitSpecifier(mode);
+			statement.TargetScalarTypeName = TargetScalarType.EmitSpecifier(mode);
+			return statement;
 		}
 		
-		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
 		{
-			if (!ATargetCatalog.Contains(Name))
+			if (!targetCatalog.Contains(Name))
 			{
-				ATargetCatalog.Add(this);
-				base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+				targetCatalog.Add(this);
+				base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 			}
 		}
     }
     
     public class Conversions : Objects
     {
-		public new Conversion this[int AIndex]
+		public new Conversion this[int index]
 		{
-			get { return (Conversion)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (Conversion)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public new Object this[string AName]
+		public new Object this[string name]
 		{
-			get { return (Conversion)base[AName]; }
-			set { base[AName] = value; }
+			get { return (Conversion)base[name]; }
+			set { base[name] = value; }
 		}
     }
     
@@ -715,14 +715,14 @@ namespace Alphora.Dataphor.DAE.Schema
 			//FRolloverCount = 4;
 		}
 		
-		public ScalarConversionPath(ScalarConversionPath APath) : base()
+		public ScalarConversionPath(ScalarConversionPath path) : base()
 		{
 			//FRolloverCount = 4;
-			AddRange(APath);
+			AddRange(path);
 		}
 
 		#if USEOBJECTVALIDATE		
-		protected override void Validate(Object AObject)
+		protected override void Validate(Object objectValue)
 		{
 			// Don't validate, duplicates will never be added to a path
 		}
@@ -734,37 +734,37 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Indicates the degree of narrowing that will occur on this conversion path.  Each narrowing conversion encountered along the path decreases the narrowing score by 1.  If no narrowing conversions occur along this path, then this number is 0. </summary>
 		public int NarrowingScore;
 
-		protected override void Adding(Schema.Object AObject, int AIndex)
+		protected override void Adding(Schema.Object objectValue, int index)
 		{
-			base.Adding(AObject, AIndex);
-			if (((Conversion)AObject).IsNarrowing)
+			base.Adding(objectValue, index);
+			if (((Conversion)objectValue).IsNarrowing)
 				NarrowingScore--;
 		}
 
-		protected override void Removing(Schema.Object AObject, int AIndex)
+		protected override void Removing(Schema.Object objectValue, int index)
 		{
-			base.Removing(AObject, AIndex);
-			if (((Conversion)AObject).IsNarrowing)
+			base.Removing(objectValue, index);
+			if (((Conversion)objectValue).IsNarrowing)
 				NarrowingScore++;
 		}
 		
 		public override string ToString()
 		{
-			StringBuilder LBuilder = new StringBuilder();
-			foreach (Conversion LConversion in this)
+			StringBuilder builder = new StringBuilder();
+			foreach (Conversion conversion in this)
 			{
-				if (LBuilder.Length > 0)
-					LBuilder.Append(", ");
-				LBuilder.AppendFormat(LConversion.Name);
+				if (builder.Length > 0)
+					builder.Append(", ");
+				builder.AppendFormat(conversion.Name);
 			}
-			return LBuilder.ToString();
+			return builder.ToString();
 		}
 		
 		/// <summary>Returns true if this path goes through the given scalar type.</summary>
-		public bool Contains(ScalarType AScalarType)
+		public bool Contains(ScalarType scalarType)
 		{
-			foreach (Conversion LConversion in this)
-				if ((AScalarType.Equals(LConversion.SourceScalarType)) || (AScalarType.Equals(LConversion.TargetScalarType)))
+			foreach (Conversion conversion in this)
+				if ((scalarType.Equals(conversion.SourceScalarType)) || (scalarType.Equals(conversion.TargetScalarType)))
 					return true;
 			return false;
 		}
@@ -787,42 +787,42 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	public class ScalarConversionPaths : ScalarConversionPathList
 	{
-		private int FBestNarrowingScore = Int32.MinValue;
+		private int _bestNarrowingScore = Int32.MinValue;
 		/// <summary>Indicates the best narrowing score encountered so far.  Conversion paths with lower narrowing scores than this need not be pursued any further.</summary>
-		public int BestNarrowingScore { get { return FBestNarrowingScore; } }
+		public int BestNarrowingScore { get { return _bestNarrowingScore; } }
 		
-		private int FShortestLength = Int32.MaxValue;
+		private int _shortestLength = Int32.MaxValue;
 		/// <summary>Indicates the shortest path length among paths with the current BestNarrowingScore.</summary>
-		public int ShortestLength { get { return FShortestLength; } }
+		public int ShortestLength { get { return _shortestLength; } }
 		
 		private void FindShortestLength()
 		{
-			FShortestLength = Int32.MaxValue;
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].NarrowingScore == BestNarrowingScore)
-					if (this[LIndex].Count < FShortestLength)
-						FShortestLength = this[LIndex].Count;
+			_shortestLength = Int32.MaxValue;
+			for (int index = 0; index < Count; index++)
+				if (this[index].NarrowingScore == BestNarrowingScore)
+					if (this[index].Count < _shortestLength)
+						_shortestLength = this[index].Count;
 		}
 		
 		private void ComputeBestPaths()
 		{
-			foreach (ScalarConversionPath LPath in this)
-				if (LPath.NarrowingScore == FBestNarrowingScore)
-					FBestPaths.Add(LPath);
+			foreach (ScalarConversionPath path in this)
+				if (path.NarrowingScore == _bestNarrowingScore)
+					_bestPaths.Add(path);
 		}
 		
 		private void ComputeBestPath()
 		{
-			FBestPath = null;
-			foreach (ScalarConversionPath LPath in BestPaths)
-				if (LPath.Count == FShortestLength)
-					if (FBestPath != null)
+			_bestPath = null;
+			foreach (ScalarConversionPath path in BestPaths)
+				if (path.Count == _shortestLength)
+					if (_bestPath != null)
 					{
-						FBestPath = null;
+						_bestPath = null;
 						break;
 					}
 					else
-						FBestPath = LPath;
+						_bestPath = path;
 		}
 		
 		#if USETYPEDLIST
@@ -830,72 +830,72 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			ScalarConversionPath LConversionPath = (ScalarConversionPath)AValue;
 		#else
-		protected override void Adding(ScalarConversionPath LConversionPath, int AIndex)
+		protected override void Adding(ScalarConversionPath LConversionPath, int index)
 		{
 		#endif
 			if (LConversionPath.NarrowingScore > BestNarrowingScore)
 			{
-				FBestNarrowingScore = LConversionPath.NarrowingScore;
+				_bestNarrowingScore = LConversionPath.NarrowingScore;
 				FindShortestLength();
 			}
 			else if (LConversionPath.NarrowingScore == BestNarrowingScore)
-				if (LConversionPath.Count < FShortestLength)
-					FShortestLength = LConversionPath.Count;
+				if (LConversionPath.Count < _shortestLength)
+					_shortestLength = LConversionPath.Count;
 					
-			FBestPaths = null;				
-			FBestPath = null;
+			_bestPaths = null;				
+			_bestPath = null;
 					
 			//base.Adding(AValue, AIndex);
 		}
 		
-		private ScalarConversionPathList FBestPaths;
+		private ScalarConversionPathList _bestPaths;
 		/// <summary>Contains the set of conversion paths with the current best narrowing score.</summary>
 		public ScalarConversionPathList BestPaths 
 		{ 
 			get 
 			{ 
-				if (FBestPaths == null)
+				if (_bestPaths == null)
 				{
-					FBestPaths = new ScalarConversionPathList();
-					FBestPath = null;
+					_bestPaths = new ScalarConversionPathList();
+					_bestPath = null;
 					ComputeBestPaths();
 					ComputeBestPath();
 				}
-				return FBestPaths; 
+				return _bestPaths; 
 			} 
 		}
 		
 		/// <summary>Returns true if there is only one conversion path with the best narrowing score and shortest length, false otherwise.</summary>
 		public bool CanConvert { get { return BestPath != null; } }
 		
-		private ScalarConversionPath FBestPath;
+		private ScalarConversionPath _bestPath;
 		/// <summary>Returns the single conversion path with the best narrowing score and shortest path length, null if there are multiple paths with the same narrowing score and path length.</summary>
 		public ScalarConversionPath BestPath
 		{ 
 			get 
 			{ 
-				if (FBestPaths == null)
+				if (_bestPaths == null)
 				{
-					FBestPaths = new ScalarConversionPathList();
-					FBestPath = null;
+					_bestPaths = new ScalarConversionPathList();
+					_bestPath = null;
 					ComputeBestPaths();
 					ComputeBestPath();
 				}
-				return FBestPath;
+				return _bestPath;
 			}
 		}
 	}
 	
 	public class ScalarConversionPathCache : System.Object
 	{
-		private Dictionary<EndPoints, ScalarConversionPath> FPaths = new Dictionary<EndPoints, ScalarConversionPath>();
+		private Dictionary<EndPoints, ScalarConversionPath> _paths = new Dictionary<EndPoints, ScalarConversionPath>();
 		
 		private class EndPoints : System.Object
 		{
-			public EndPoints(Schema.ScalarType ASourceType, Schema.ScalarType ATargetType)
+			public EndPoints(Schema.ScalarType sourceType, Schema.ScalarType targetType)
 			{
-				SourceType = ASourceType;
-				TargetType = ATargetType;
+				SourceType = sourceType;
+				TargetType = targetType;
 			}
 			
 			[Reference]
@@ -904,9 +904,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			[Reference]
 			public Schema.ScalarType TargetType;
 			
-			public override bool Equals(object AObject)
+			public override bool Equals(object objectValue)
 			{
-				return (AObject is EndPoints) && ((EndPoints)AObject).SourceType.Equals(SourceType) && ((EndPoints)AObject).TargetType.Equals(TargetType);
+				return (objectValue is EndPoints) && ((EndPoints)objectValue).SourceType.Equals(SourceType) && ((EndPoints)objectValue).TargetType.Equals(TargetType);
 			}
 			
 			public override int GetHashCode()
@@ -915,109 +915,109 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public ScalarConversionPath this[Schema.ScalarType ASourceType, Schema.ScalarType ATargetType]
+		public ScalarConversionPath this[Schema.ScalarType sourceType, Schema.ScalarType targetType]
 		{
 			get 
 			{
-				ScalarConversionPath LResult;
-				if (FPaths.TryGetValue(new EndPoints(ASourceType, ATargetType), out LResult))
-					return LResult;
+				ScalarConversionPath result;
+				if (_paths.TryGetValue(new EndPoints(sourceType, targetType), out result))
+					return result;
 				else
 					return null;
 			}
 		}
 		
-		public void Add(Schema.ScalarType ASourceType, Schema.ScalarType ATargetType, Schema.ScalarConversionPath APath)
+		public void Add(Schema.ScalarType sourceType, Schema.ScalarType targetType, Schema.ScalarConversionPath path)
 		{
-			FPaths.Add(new EndPoints(ASourceType, ATargetType), APath);
+			_paths.Add(new EndPoints(sourceType, targetType), path);
 		}
 		
 		/// <summary>Clears the entire conversion path cache.</summary>
 		public void Clear()
 		{
-			FPaths.Clear();
+			_paths.Clear();
 		}
 		
 		/// <summary>Removes any cache entries for conversion paths which reference the specified scalar type.</summary>
-		public void Clear(Schema.ScalarType AScalarType)
+		public void Clear(Schema.ScalarType scalarType)
 		{
-			List<EndPoints> LRemoveList = new List<EndPoints>();
-			foreach (KeyValuePair<EndPoints, ScalarConversionPath> LEntry in FPaths)
-				if (LEntry.Value.Contains(AScalarType))
-					LRemoveList.Add(LEntry.Key);
+			List<EndPoints> removeList = new List<EndPoints>();
+			foreach (KeyValuePair<EndPoints, ScalarConversionPath> entry in _paths)
+				if (entry.Value.Contains(scalarType))
+					removeList.Add(entry.Key);
 					
-			foreach (EndPoints LEndPoints in LRemoveList)
-				FPaths.Remove(LEndPoints);
+			foreach (EndPoints endPoints in removeList)
+				_paths.Remove(endPoints);
 		}
 
 		/// <summary>Removes any cache entries for conversion paths which reference the specified conversion.</summary>		
-		public void Clear(Schema.Conversion AConversion)
+		public void Clear(Schema.Conversion conversion)
 		{
-			List<EndPoints> LRemoveList = new List<EndPoints>();
-			foreach (KeyValuePair<EndPoints, ScalarConversionPath> LEntry in FPaths)
-				if (LEntry.Value.Contains(AConversion))
-					LRemoveList.Add(LEntry.Key);
+			List<EndPoints> removeList = new List<EndPoints>();
+			foreach (KeyValuePair<EndPoints, ScalarConversionPath> entry in _paths)
+				if (entry.Value.Contains(conversion))
+					removeList.Add(entry.Key);
 					
-			foreach (EndPoints LEndPoints in LRemoveList)
-				FPaths.Remove(LEndPoints);
+			foreach (EndPoints endPoints in removeList)
+				_paths.Remove(endPoints);
 		}
 	}
 	
 	public class Special : Object
     {
-		public Special(int AID, string AName) : base(AID, AName) {}
-		public Special(int AID, string AName, PlanNode AValueNode) : base(AID, AName)
+		public Special(int iD, string name) : base(iD, name) {}
+		public Special(int iD, string name, PlanNode valueNode) : base(iD, name)
 		{
-			FValueNode = AValueNode;
+			_valueNode = valueNode;
 		}
 		
-		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Special"), DisplayName, FScalarType.DisplayName); } }
+		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Special"), DisplayName, _scalarType.DisplayName); } }
 		
 		/// <summary>Specials are always persistent.</summary>
 		public override bool IsPersistent { get { return true; } }
 
-		public override int CatalogObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
+		public override int CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 		
-		public override int ParentObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
+		public override int ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
 		[Reference]
-		internal ScalarType FScalarType;
+		internal ScalarType _scalarType;
 		public ScalarType ScalarType
 		{
-			get { return FScalarType; }
+			get { return _scalarType; }
 			set
 			{
-				if (FScalarType != null)
-					FScalarType.Specials.Remove(this);
+				if (_scalarType != null)
+					_scalarType.Specials.Remove(this);
 				if (value != null)
 					value.Specials.Add(this);
 			}
 		}
 
-		private PlanNode FValueNode;		
+		private PlanNode _valueNode;		
 		public PlanNode ValueNode
 		{
-			get { return FValueNode; }
-			set { FValueNode = value; }
+			get { return _valueNode; }
+			set { _valueNode = value; }
 		}
 		
-		private int FSelectorID = -1;
+		private int _selectorID = -1;
 		public int SelectorID
 		{
-			get { return FSelectorID; }
-			set { FSelectorID = value; }
+			get { return _selectorID; }
+			set { _selectorID = value; }
 		}
 		
 		public void LoadSelectorID()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.SelectorID");
-			if (LTag != Tag.None)
-				FSelectorID = Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.SelectorID");
+			if (tag != Tag.None)
+				_selectorID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveSelectorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.SelectorID", FSelectorID.ToString(), true);
+			MetaData.Tags.AddOrUpdate("DAE.SelectorID", _selectorID.ToString(), true);
 		}
 		
 		public void RemoveSelectorID()
@@ -1026,41 +1026,41 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.SelectorID");
 		}
 
-		public void ResolveSelector(CatalogDeviceSession ASession)
+		public void ResolveSelector(CatalogDeviceSession session)
 		{
-			if ((FSelector == null) && (FSelectorID > -1))
-				FSelector = ASession.ResolveCatalogObject(FSelectorID) as Schema.Operator;
+			if ((_selector == null) && (_selectorID > -1))
+				_selector = session.ResolveCatalogObject(_selectorID) as Schema.Operator;
 		}
 
 		[Reference]
-		private Operator FSelector;
+		private Operator _selector;
 		public Operator Selector
 		{
-			get { return FSelector; }
+			get { return _selector; }
 			set 
 			{ 
-				FSelector = value; 
-				FSelectorID = value == null ? -1 : value.ID;
+				_selector = value; 
+				_selectorID = value == null ? -1 : value.ID;
 			}
 		}
 		
-		private int FComparerID = -1;
+		private int _comparerID = -1;
 		public int ComparerID
 		{
-			get { return FComparerID; }
-			set { FComparerID = value; }
+			get { return _comparerID; }
+			set { _comparerID = value; }
 		}
 		
 		public void LoadComparerID()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.ComparerID");
-			if (LTag != Tag.None)
-				FComparerID = Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.ComparerID");
+			if (tag != Tag.None)
+				_comparerID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveComparerID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.ComparerID", FComparerID.ToString(), true);
+			MetaData.Tags.AddOrUpdate("DAE.ComparerID", _comparerID.ToString(), true);
 		}
 		
 		public void RemoveComparerID()
@@ -1069,27 +1069,27 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.ComparerID");
 		}
 
-		public void ResolveComparer(CatalogDeviceSession ASession)
+		public void ResolveComparer(CatalogDeviceSession session)
 		{
-			if ((FComparer == null) && (FComparerID > -1))
-				FComparer = ASession.ResolveCatalogObject(FComparerID) as Schema.Operator;
+			if ((_comparer == null) && (_comparerID > -1))
+				_comparer = session.ResolveCatalogObject(_comparerID) as Schema.Operator;
 		}
 
 		[Reference]
-		private Operator FComparer;
+		private Operator _comparer;
 		public Operator Comparer
 		{
-			get { return FComparer; }
+			get { return _comparer; }
 			set 
 			{ 
-				FComparer = value; 
-				FComparerID = value == null ? -1 : value.ID;
+				_comparer = value; 
+				_comparerID = value == null ? -1 : value.ID;
 			}
 		}
 		
-		public SpecialDefinition EmitDefinition(EmitMode AMode)
+		public SpecialDefinition EmitDefinition(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 			{
 				SaveObjectID();
 				SaveIsGenerated();
@@ -1106,81 +1106,81 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveComparerID();
 			}
 			
-			SpecialDefinition LSpecial = new SpecialDefinition();
-			LSpecial.Name = Name;
-			LSpecial.Value = (Expression)ValueNode.EmitStatement(AMode);
-			LSpecial.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LSpecial;
+			SpecialDefinition special = new SpecialDefinition();
+			special.Name = Name;
+			special.Value = (Expression)ValueNode.EmitStatement(mode);
+			special.MetaData = MetaData == null ? null : MetaData.Copy();
+			return special;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			AlterScalarTypeStatement LStatement = new AlterScalarTypeStatement();
-			LStatement.ScalarTypeName = ScalarType.Name;
-			LStatement.CreateSpecials.Add(EmitDefinition(AMode));
-			return LStatement;
+			AlterScalarTypeStatement statement = new AlterScalarTypeStatement();
+			statement.ScalarTypeName = ScalarType.Name;
+			statement.CreateSpecials.Add(EmitDefinition(mode));
+			return statement;
 		}
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			AlterScalarTypeStatement LAlterStatement = new AlterScalarTypeStatement();
-			LAlterStatement.ScalarTypeName = ScalarType.Name;
-			LAlterStatement.DropSpecials.Add(new DropSpecialDefinition(Name));
-			return LAlterStatement;
+			AlterScalarTypeStatement alterStatement = new AlterScalarTypeStatement();
+			alterStatement.ScalarTypeName = ScalarType.Name;
+			alterStatement.DropSpecials.Add(new DropSpecialDefinition(Name));
+			return alterStatement;
 		}
 
-		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
 		{
-			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 			
-			Selector.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
-			Comparer.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			Selector.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+			Comparer.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 		}
     }
 
     /// <remarks> Specials </remarks>
 	public class Specials : Objects
     {
-		public Specials(ScalarType AScalarType) : base()
+		public Specials(ScalarType scalarType) : base()
 		{
-			FScalarType = AScalarType;
+			_scalarType = scalarType;
 		}
 		
 		[Reference]
-		private ScalarType FScalarType;
-		public ScalarType ScalarType { get { return FScalarType; } }
+		private ScalarType _scalarType;
+		public ScalarType ScalarType { get { return _scalarType; } }
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is Special))
+			if (!(item is Special))
 				throw new SchemaException(SchemaException.Codes.SpecialContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 		
-		protected override void Adding(Object AItem, int AIndex)
+		protected override void Adding(Object item, int index)
 		{
-			base.Adding(AItem, AIndex);
-			((Special)AItem).FScalarType = FScalarType;
+			base.Adding(item, index);
+			((Special)item)._scalarType = _scalarType;
 		}
 		
-		protected override void Removing(Object AItem, int AIndex)
+		protected override void Removing(Object item, int index)
 		{
-			((Special)AItem).FScalarType = null;
-			base.Removing(AItem, AIndex);
+			((Special)item)._scalarType = null;
+			base.Removing(item, index);
 		}
 
-		public new Special this[int AIndex]
+		public new Special this[int index]
 		{
-			get { return (Special)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (Special)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new Special this[string AName]
+		public new Special this[string name]
 		{
-			get { return (Special)base[AName]; }
-			set { base[AName] = value; }
+			get { return (Special)base[name]; }
+			set { base[name] = value; }
 		}
     }
     
@@ -1196,23 +1196,23 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class ScalarType : CatalogObject, IScalarType
     {
 		// constructor
-		public ScalarType(int AID, string AName) : base(AID, AName)
+		public ScalarType(int iD, string name) : base(iD, name)
 		{
 			InternalInitialize();
 		}
 
 		private void InternalInitialize()
 		{
-			FIsDisposable = true;
+			_isDisposable = true;
 			#if USETYPEINHERITANCE
 			FParentTypes = new ScalarTypes();
 			//FParentTypes.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
 			#endif
-			FRepresentations = new Representations(this);
+			_representations = new Representations(this);
 			//FRepresentations.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
-			FSpecials = new Specials(this);
+			_specials = new Specials(this);
 			//FSpecials.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
-			FConstraints = new ScalarTypeConstraints(this);
+			_constraints = new ScalarTypeConstraints(this);
 			//FConstraints.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
 		}
 
@@ -1229,22 +1229,22 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		// IsGeneric
 		// Indicates whether this data type is a generic data type (i.e. table, not table{})
-		private bool FIsGeneric;
+		private bool _isGeneric;
 		public bool IsGeneric
 		{
-			get { return FIsGeneric; }
-			set { FIsGeneric = value; }
+			get { return _isGeneric; }
+			set { _isGeneric = value; }
 		}
 		
 		public bool IsNil { get { return false; } }
 		
 		// IsDisposable
 		// Indicates whether the host representation for this data type must be disposed
-		private bool FIsDisposable = false;
+		private bool _isDisposable = false;
 		public bool IsDisposable
 		{
-			get { return FIsDisposable; }
-			set { FIsDisposable = value; }
+			get { return _isDisposable; }
+			set { _isDisposable = value; }
 		}
 		
 		// IsCompound
@@ -1253,42 +1253,42 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public Schema.IRowType CompoundRowType;
 		
-		public void ValidateChildObjectName(string AName)
+		public void ValidateChildObjectName(string name)
 		{
 			if 
 			(
-				(FConstraints.IndexOfName(AName) >= 0) 
-					|| ((FDefault != null) && (String.Compare(FDefault.Name, AName) == 0)) 
-					|| (FRepresentations.IndexOfName(AName) >= 0)
+				(_constraints.IndexOfName(name) >= 0) 
+					|| ((_default != null) && (String.Compare(_default.Name, name) == 0)) 
+					|| (_representations.IndexOfName(name) >= 0)
 			)
-				throw new SchemaException(SchemaException.Codes.DuplicateChildObjectName, AName);
+				throw new SchemaException(SchemaException.Codes.DuplicateChildObjectName, name);
 		}
 		
-		public bool Equivalent(IDataType ADataType)
+		public bool Equivalent(IDataType dataType)
 		{
-			return Equals(ADataType);
+			return Equals(dataType);
 		}
 		
-		public bool Equals(IDataType ADataType)
+		public bool Equals(IDataType dataType)
 		{
-			return (ADataType is IScalarType) && Schema.Object.NamesEqual(Name, ADataType.Name);
+			return (dataType is IScalarType) && Schema.Object.NamesEqual(Name, dataType.Name);
 		}
 
 		// Is
-		public bool Is(IDataType ADataType)
+		public bool Is(IDataType dataType)
 		{
-			if (ADataType is IGenericType)
+			if (dataType is IGenericType)
 				return true;
-			else if (ADataType is IScalarType)
+			else if (dataType is IScalarType)
 			{
-				if (!this.Equals(ADataType))
+				if (!this.Equals(dataType))
 				{
-					if (ADataType.IsGeneric)
+					if (dataType.IsGeneric)
 						return true;
 					
 					#if USETYPEINHERITANCE	
-					foreach (IScalarType LParentType in FParentTypes)
-						if (LParentType.Is(ADataType))
+					foreach (IScalarType parentType in FParentTypes)
+						if (parentType.Is(ADataType))
 							return true;
 					#endif
 
@@ -1301,9 +1301,9 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		// Compatible
 		// Compatible is A is B or B is A
-		public bool Compatible(IDataType ADataType)
+		public bool Compatible(IDataType dataType)
 		{
-			return Is(ADataType) || ADataType.Is(this);
+			return Is(dataType) || dataType.Is(this);
 		}
 
 		#if NATIVEROW
@@ -1324,30 +1324,30 @@ namespace Alphora.Dataphor.DAE.Schema
 		#endif
 
         // Class Definition
-        private ClassDefinition FClassDefinition;
+        private ClassDefinition _classDefinition;
 		public ClassDefinition ClassDefinition
         {
-			get { return FClassDefinition; }
-			set { FClassDefinition = value; }
+			get { return _classDefinition; }
+			set { _classDefinition = value; }
         }
         
-		private bool FIsDefaultConveyor;
+		private bool _isDefaultConveyor;
 		public bool IsDefaultConveyor
 		{
-			get { return FIsDefaultConveyor; }
-			set { FIsDefaultConveyor = value; }
+			get { return _isDefaultConveyor; }
+			set { _isDefaultConveyor = value; }
 		}
 		
 		public void LoadIsDefaultConveyor()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.IsDefaultConveyor");
-			if (LTag != Tag.None)
-				FIsDefaultConveyor = Boolean.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.IsDefaultConveyor");
+			if (tag != Tag.None)
+				_isDefaultConveyor = Boolean.Parse(tag.Value);
 		}
 
 		public void SaveIsDefaultConveyor()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.IsDefaultConveyor", FIsDefaultConveyor.ToString(), true);
+			MetaData.Tags.AddOrUpdate("DAE.IsDefaultConveyor", _isDefaultConveyor.ToString(), true);
 		}
 
 		public void RemoveIsDefaultConveyor()
@@ -1357,46 +1357,46 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		[Reference]
-		private Type FNativeType;
+		private Type _nativeType;
 		public Type NativeType
 		{
-			get { return FNativeType; }
-			set { FNativeType = value; }
+			get { return _nativeType; }
+			set { _nativeType = value; }
 		}
 		
-		public bool HasRepresentation(NativeAccessor ANativeAccessor)
+		public bool HasRepresentation(NativeAccessor nativeAccessor)
 		{
-			return HasRepresentation(ANativeAccessor, false);
+			return HasRepresentation(nativeAccessor, false);
 		}
 		
-		public bool HasRepresentation(NativeAccessor ANativeAccessor, bool AExplicit)
+		public bool HasRepresentation(NativeAccessor nativeAccessor, bool explicitValue)
 		{
-			return FindRepresentation(ANativeAccessor, AExplicit) != null;
+			return FindRepresentation(nativeAccessor, explicitValue) != null;
 		}
 		
-		public Schema.Representation FindRepresentation(NativeAccessor ANativeAccessor)
+		public Schema.Representation FindRepresentation(NativeAccessor nativeAccessor)
 		{
-			return FindRepresentation(ANativeAccessor, false);
+			return FindRepresentation(nativeAccessor, false);
 		}
 		
-		private object FNativeRepresentationsHandle = new object(); // sync handle for the native representation cache
-		private Dictionary<string, NativeRepresentation> FNativeRepresentations;
+		private object _nativeRepresentationsHandle = new object(); // sync handle for the native representation cache
+		private Dictionary<string, NativeRepresentation> _nativeRepresentations;
 		protected Dictionary<string, NativeRepresentation> NativeRepresentations 
 		{ 
 			get 
 			{ 
-				if (FNativeRepresentations == null)
-					FNativeRepresentations = new Dictionary<string, NativeRepresentation>(); 
-				return FNativeRepresentations; 
+				if (_nativeRepresentations == null)
+					_nativeRepresentations = new Dictionary<string, NativeRepresentation>(); 
+				return _nativeRepresentations; 
 			} 
 		}
 
 		protected class NativeRepresentation
 		{
-			public NativeRepresentation(Representation ARepresentation, bool AExplicit)
+			public NativeRepresentation(Representation representation, bool explicitValue)
 			{
-				Representation = ARepresentation;
-				Explicit = AExplicit;
+				Representation = representation;
+				Explicit = explicitValue;
 			}
 			
 			[Reference]
@@ -1406,51 +1406,51 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void ResetNativeRepresentationCache()
 		{
-			lock (FNativeRepresentationsHandle)
+			lock (_nativeRepresentationsHandle)
 			{
-				FNativeRepresentations = null;
+				_nativeRepresentations = null;
 			}
 		}
 		
-		private NativeRepresentation FindNativeRepresentation(NativeAccessor ANativeAccessor)
+		private NativeRepresentation FindNativeRepresentation(NativeAccessor nativeAccessor)
 		{
-			string LRepresentationName = MetaData.GetTag(MetaData, String.Format("DAE.{0}", ANativeAccessor.Name), String.Empty);
-			int LRepresentationIndex = FRepresentations.IndexOf(LRepresentationName);
-			if (LRepresentationIndex >= 0)
-				return new NativeRepresentation(FRepresentations[LRepresentationIndex], true);
+			string representationName = MetaData.GetTag(MetaData, String.Format("DAE.{0}", nativeAccessor.Name), String.Empty);
+			int representationIndex = _representations.IndexOf(representationName);
+			if (representationIndex >= 0)
+				return new NativeRepresentation(_representations[representationIndex], true);
 
-			foreach (Schema.Representation LRepresentation in FRepresentations)
-				if ((LRepresentation.Properties.Count == 1) && (LRepresentation.Properties[0].DataType is Schema.ScalarType) && (((Schema.ScalarType)LRepresentation.Properties[0].DataType).NativeType == ANativeAccessor.NativeType))
-					return new NativeRepresentation(LRepresentation, false);
+			foreach (Schema.Representation representation in _representations)
+				if ((representation.Properties.Count == 1) && (representation.Properties[0].DataType is Schema.ScalarType) && (((Schema.ScalarType)representation.Properties[0].DataType).NativeType == nativeAccessor.NativeType))
+					return new NativeRepresentation(representation, false);
 			
 			return new NativeRepresentation(null, false);
 		}
 		
-		public Schema.Representation FindRepresentation(NativeAccessor ANativeAccessor, bool AExplicit)
+		public Schema.Representation FindRepresentation(NativeAccessor nativeAccessor, bool explicitValue)
 		{
-			NativeRepresentation LNativeRepresentation;
+			NativeRepresentation nativeRepresentation;
 
-			lock (FNativeRepresentationsHandle)
+			lock (_nativeRepresentationsHandle)
 			{
-				if (!NativeRepresentations.TryGetValue(ANativeAccessor.Name, out LNativeRepresentation))
+				if (!NativeRepresentations.TryGetValue(nativeAccessor.Name, out nativeRepresentation))
 				{
-					LNativeRepresentation = FindNativeRepresentation(ANativeAccessor);
-					NativeRepresentations.Add(ANativeAccessor.Name, LNativeRepresentation);
+					nativeRepresentation = FindNativeRepresentation(nativeAccessor);
+					NativeRepresentations.Add(nativeAccessor.Name, nativeRepresentation);
 				}
 			}
 
-			if (AExplicit && !LNativeRepresentation.Explicit)
+			if (explicitValue && !nativeRepresentation.Explicit)
 				return null;
 				
-			return LNativeRepresentation.Representation;			
+			return nativeRepresentation.Representation;			
 		}
 		
-		public Schema.Representation GetRepresentation(NativeAccessor ANativeAccessor)
+		public Schema.Representation GetRepresentation(NativeAccessor nativeAccessor)
 		{
-			Schema.Representation LRepresentation = FindRepresentation(ANativeAccessor);
-			if (LRepresentation == null)
-				throw new SchemaException(SchemaException.Codes.UnableToLocateConversionRepresentation, Name, ANativeAccessor.Name);
-			return LRepresentation;
+			Schema.Representation representation = FindRepresentation(nativeAccessor);
+			if (representation == null)
+				throw new SchemaException(SchemaException.Codes.UnableToLocateConversionRepresentation, Name, nativeAccessor.Name);
+			return representation;
 		}
 		
 		#if USETYPEINHERITANCE
@@ -1461,42 +1461,42 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		// LikeType
 		[Reference]
-		private ScalarType FLikeType;
+		private ScalarType _likeType;
 		public ScalarType LikeType 
 		{ 
-			get { return FLikeType; } 
-			set { FLikeType = value; }
+			get { return _likeType; } 
+			set { _likeType = value; }
 		}
 		
         // Representations
-        private Representations FRepresentations;
-        public Representations Representations { get { return FRepresentations; } }
+        private Representations _representations;
+        public Representations Representations { get { return _representations; } }
 
 		// Constraints
-		private ScalarTypeConstraints FConstraints;
-		public ScalarTypeConstraints Constraints { get { return FConstraints; } }
+		private ScalarTypeConstraints _constraints;
+		public ScalarTypeConstraints Constraints { get { return _constraints; } }
 
         // Specials
-        private Specials FSpecials;
-        public Specials Specials { get { return FSpecials; } }
+        private Specials _specials;
+        public Specials Specials { get { return _specials; } }
         
-		private int FIsSpecialOperatorID = -1;
+		private int _isSpecialOperatorID = -1;
 		public int IsSpecialOperatorID
 		{
-			get { return FIsSpecialOperatorID; }
-			set { FIsSpecialOperatorID = value; }
+			get { return _isSpecialOperatorID; }
+			set { _isSpecialOperatorID = value; }
 		}
 		
 		public void LoadIsSpecialOperatorID()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.IsSpecialOperatorID");
-			if (LTag != Tag.None)
-				FIsSpecialOperatorID = Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.IsSpecialOperatorID");
+			if (tag != Tag.None)
+				_isSpecialOperatorID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveIsSpecialOperatorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.IsSpecialOperatorID", FIsSpecialOperatorID.ToString(), true);
+			MetaData.Tags.AddOrUpdate("DAE.IsSpecialOperatorID", _isSpecialOperatorID.ToString(), true);
 		}
 		
 		public void RemoveIsSpecialOperatorID()
@@ -1505,42 +1505,42 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.IsSpecialOperatorID");
 		}
 		
-		public void ResolveIsSpecialOperator(CatalogDeviceSession ASession)
+		public void ResolveIsSpecialOperator(CatalogDeviceSession session)
 		{
-			if ((FIsSpecialOperator == null) && (FIsSpecialOperatorID > -1))
-				FIsSpecialOperator = ASession.ResolveCatalogObject(FIsSpecialOperatorID) as Schema.Operator;
+			if ((_isSpecialOperator == null) && (_isSpecialOperatorID > -1))
+				_isSpecialOperator = session.ResolveCatalogObject(_isSpecialOperatorID) as Schema.Operator;
 		}
 
         // IsSpecialOperator
 		[Reference]
-        private Operator FIsSpecialOperator;
+        private Operator _isSpecialOperator;
         public Operator IsSpecialOperator
         {
-			get { return FIsSpecialOperator; }
+			get { return _isSpecialOperator; }
 			set 
 			{ 
-				FIsSpecialOperator = value; 
-				FIsSpecialOperatorID = value == null ? -1 : value.ID;
+				_isSpecialOperator = value; 
+				_isSpecialOperatorID = value == null ? -1 : value.ID;
 			}
         }
         
-		private int FEqualityOperatorID = -1;
+		private int _equalityOperatorID = -1;
 		public int EqualityOperatorID
 		{
-			get { return FEqualityOperatorID; }
-			set { FEqualityOperatorID = value; }
+			get { return _equalityOperatorID; }
+			set { _equalityOperatorID = value; }
 		}
 		
 		public void LoadEqualityOperatorID()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.EqualityOperatorID");
-			if (LTag != Tag.None)
-				FEqualityOperatorID = Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.EqualityOperatorID");
+			if (tag != Tag.None)
+				_equalityOperatorID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveEqualityOperatorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.EqualityOperatorID", FEqualityOperatorID.ToString(), true);
+			MetaData.Tags.AddOrUpdate("DAE.EqualityOperatorID", _equalityOperatorID.ToString(), true);
 		}
 
 		public void RemoveEqualityOperatorID()
@@ -1549,42 +1549,42 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.EqualityOperatorID");
 		}
 		
-		public void ResolveEqualityOperator(CatalogDeviceSession ASession)
+		public void ResolveEqualityOperator(CatalogDeviceSession session)
 		{
-			if ((FEqualityOperator == null) && (FEqualityOperatorID > -1))
-				FEqualityOperator = ASession.ResolveCatalogObject(FEqualityOperatorID) as Schema.Operator;
+			if ((_equalityOperator == null) && (_equalityOperatorID > -1))
+				_equalityOperator = session.ResolveCatalogObject(_equalityOperatorID) as Schema.Operator;
 		}
 
         // EqualityOperator
 		[Reference]
-        private Operator FEqualityOperator;
+        private Operator _equalityOperator;
         public Operator EqualityOperator
         {
-			get { return FEqualityOperator; }
+			get { return _equalityOperator; }
 			set 
 			{ 
-				FEqualityOperator = value; 
-				FEqualityOperatorID = value == null ? -1 : value.ID;
+				_equalityOperator = value; 
+				_equalityOperatorID = value == null ? -1 : value.ID;
 			}
 		}
 
-		private int FComparisonOperatorID = -1;
+		private int _comparisonOperatorID = -1;
 		public int ComparisonOperatorID
 		{
-			get { return FComparisonOperatorID; }
-			set { FComparisonOperatorID = value; }
+			get { return _comparisonOperatorID; }
+			set { _comparisonOperatorID = value; }
 		}
 		
 		public void LoadComparisonOperatorID()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.ComparisonOperatorID");
-			if (LTag != Tag.None)
-				FComparisonOperatorID = Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.ComparisonOperatorID");
+			if (tag != Tag.None)
+				_comparisonOperatorID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveComparisonOperatorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.ComparisonOperatorID", FComparisonOperatorID.ToString(), true);
+			MetaData.Tags.AddOrUpdate("DAE.ComparisonOperatorID", _comparisonOperatorID.ToString(), true);
 		}
 
 		public void RemoveComparisonOperatorID()
@@ -1593,72 +1593,72 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.ComparisonOperatorID");
 		}
 		
-		public void ResolveComparisonOperator(CatalogDeviceSession ASession)
+		public void ResolveComparisonOperator(CatalogDeviceSession session)
 		{
-			if ((FComparisonOperator == null) && (FComparisonOperatorID > -1))
-				FComparisonOperator = ASession.ResolveCatalogObject(FComparisonOperatorID) as Schema.Operator;
+			if ((_comparisonOperator == null) && (_comparisonOperatorID > -1))
+				_comparisonOperator = session.ResolveCatalogObject(_comparisonOperatorID) as Schema.Operator;
 		}
 
         // ComparisonOperator
 		[Reference]
-        private Operator FComparisonOperator;
+        private Operator _comparisonOperator;
         public Operator ComparisonOperator
         {
-			get { return FComparisonOperator; }
+			get { return _comparisonOperator; }
 			set 
 			{ 
-				FComparisonOperator = value; 
-				FComparisonOperatorID = value == null ? -1 : value.ID;
+				_comparisonOperator = value; 
+				_comparisonOperatorID = value == null ? -1 : value.ID;
 			}
         }
 
 		// Default
-		private ScalarTypeDefault FDefault;
+		private ScalarTypeDefault _default;
 		public ScalarTypeDefault Default
 		{
-			get { return FDefault; }
+			get { return _default; }
 			set
 			{
-				if (FDefault != value)
+				if (_default != value)
 				{
-					ScalarTypeDefault FOldDefault = FDefault;
-					FDefault = null;
+					ScalarTypeDefault FOldDefault = _default;
+					_default = null;
 					try
 					{
 						if (value != null)
 							ValidateChildObjectName(value.Name);
 						if (FOldDefault != null)
-							FOldDefault.FScalarType = null;
-						FDefault = value;
-						if (FDefault != null)
-							FDefault.FScalarType = this;
+							FOldDefault._scalarType = null;
+						_default = value;
+						if (_default != null)
+							_default._scalarType = this;
 					}
 					catch
 					{
-						FDefault = FOldDefault;
+						_default = FOldDefault;
 						throw;
 					}
 				}
 			}
 		}
 		
-		private int FSortID = -1;
+		private int _sortID = -1;
 		public int SortID
 		{
-			get { return FSortID; }
-			set { FSortID = value; }
+			get { return _sortID; }
+			set { _sortID = value; }
 		}
 		
 		public void LoadSortID()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.SortID");
-			if (LTag != Tag.None)
-			FSortID = Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.SortID");
+			if (tag != Tag.None)
+			_sortID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveSortID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.SortID", FSortID.ToString(), true);
+			MetaData.Tags.AddOrUpdate("DAE.SortID", _sortID.ToString(), true);
 		}
 		
 		public void RemoveSortID()
@@ -1668,34 +1668,34 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		[Reference]
-		private Sort FSort;
+		private Sort _sort;
 		public Sort Sort
 		{
-			get { return FSort; }
+			get { return _sort; }
 			set 
 			{ 
-				FSort = value; 
-				FSortID = value == null ? -1 : value.ID;
+				_sort = value; 
+				_sortID = value == null ? -1 : value.ID;
 			}
 		}
 		
-		private int FUniqueSortID = -1;
+		private int _uniqueSortID = -1;
 		public int UniqueSortID
 		{
-			get { return FUniqueSortID; }
-			set { FUniqueSortID = value; }
+			get { return _uniqueSortID; }
+			set { _uniqueSortID = value; }
 		}
 		
 		public void LoadUniqueSortID()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.UniqueSortID");
-			if (LTag != Tag.None)
-				FUniqueSortID = Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.UniqueSortID");
+			if (tag != Tag.None)
+				_uniqueSortID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveUniqueSortID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.UniqueSortID", FUniqueSortID.ToString(), true);
+			MetaData.Tags.AddOrUpdate("DAE.UniqueSortID", _uniqueSortID.ToString(), true);
 		}
 
 		public void RemoveUniqueSortID()
@@ -1705,37 +1705,37 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		[Reference]
-		private Sort FUniqueSort;
+		private Sort _uniqueSort;
 		public Sort UniqueSort
 		{
-			get { return FUniqueSort; }
+			get { return _uniqueSort; }
 			set 
 			{ 
-				FUniqueSort = value; 
-				FUniqueSortID = value == null ? -1 : value.ID;
+				_uniqueSort = value; 
+				_uniqueSortID = value == null ? -1 : value.ID;
 			}
 		}
 
 		// HasHandlers
 		public bool HasHandlers()
 		{
-			return (FEventHandlers != null) && (FEventHandlers.Count > 0);
+			return (_eventHandlers != null) && (_eventHandlers.Count > 0);
 		}
 		
-		public bool HasHandlers(EventType AEventType)
+		public bool HasHandlers(EventType eventType)
 		{
-			return (FEventHandlers != null) && FEventHandlers.HasHandlers(AEventType);
+			return (_eventHandlers != null) && _eventHandlers.HasHandlers(eventType);
 		}
 		
 		// EventHandlers
-		private ScalarTypeEventHandlers FEventHandlers;
+		private ScalarTypeEventHandlers _eventHandlers;
 		public ScalarTypeEventHandlers EventHandlers 
 		{ 
 			get 
 			{ 
-				if (FEventHandlers == null)
-					FEventHandlers = new ScalarTypeEventHandlers(this);
-				return FEventHandlers; 
+				if (_eventHandlers == null)
+					_eventHandlers = new ScalarTypeEventHandlers(this);
+				return _eventHandlers; 
 			} 
 		}
 
@@ -1746,8 +1746,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		#endif
 
 		// ImplicitConversions
-		private Conversions FImplicitConversions = new Conversions();
-		public Conversions ImplicitConversions { get { return FImplicitConversions; } }
+		private Conversions _implicitConversions = new Conversions();
+		public Conversions ImplicitConversions { get { return _implicitConversions; } }
 		
 		#if USEPROPOSABLEEVENTS
         // OnValidateValue
@@ -1779,44 +1779,44 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         #endif
 
-        public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
         {
-			if (!ATargetCatalog.Contains(Name))
+			if (!targetCatalog.Contains(Name))
 			{
-				base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+				base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 				
-				ATargetCatalog.Add(this);
+				targetCatalog.Add(this);
 			
-				if ((Default != null) && ((AMode != EmitMode.ForRemote) || Default.IsRemotable))
-					Default.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+				if ((Default != null) && ((mode != EmitMode.ForRemote) || Default.IsRemotable))
+					Default.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 					
-				foreach (Constraint LConstraint in Constraints)
-					if ((AMode != EmitMode.ForRemote) || LConstraint.IsRemotable)
-						LConstraint.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+				foreach (Constraint constraint in Constraints)
+					if ((mode != EmitMode.ForRemote) || constraint.IsRemotable)
+						constraint.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 						
-				foreach (Representation LRepresentation in Representations)
-					LRepresentation.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+				foreach (Representation representation in Representations)
+					representation.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 					
-				if (FIsSpecialOperator != null)
-					FIsSpecialOperator.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+				if (_isSpecialOperator != null)
+					_isSpecialOperator.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 
-				foreach (Special LSpecial in Specials)
-					LSpecial.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+				foreach (Special special in Specials)
+					special.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 					
 			}
         }
 
-        public override void IncludeHandlers(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public override void IncludeHandlers(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
         {
-			if (FEventHandlers != null)
-				foreach (EventHandler LHandler in FEventHandlers)
-					if ((AMode != EmitMode.ForRemote) || LHandler.IsRemotable)
-						LHandler.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			if (_eventHandlers != null)
+				foreach (EventHandler handler in _eventHandlers)
+					if ((mode != EmitMode.ForRemote) || handler.IsRemotable)
+						handler.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
         }
         
-        public override Statement EmitStatement(EmitMode AMode)
+        public override Statement EmitStatement(EmitMode mode)
         {
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 			{
 				SaveObjectID();
 				SaveIsSpecialOperatorID();
@@ -1835,98 +1835,98 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveUniqueSortID();
 			}
 
-			CreateScalarTypeStatement LStatement = new CreateScalarTypeStatement();
-			LStatement.ScalarTypeName = Schema.Object.EnsureRooted(Name);
+			CreateScalarTypeStatement statement = new CreateScalarTypeStatement();
+			statement.ScalarTypeName = Schema.Object.EnsureRooted(Name);
 			#if USETYPEINHERITANCE
-			foreach (ScalarType LParentType in ParentTypes)
-				LStatement.ParentScalarTypes.Add(new ScalarTypeNameDefinition(LParentType.Name));
+			foreach (ScalarType parentType in ParentTypes)
+				statement.ParentScalarTypes.Add(new ScalarTypeNameDefinition(parentType.Name));
 			#endif
 			
 			if (LikeType != null)
-				LStatement.LikeScalarTypeName = LikeType.Name;
+				statement.LikeScalarTypeName = LikeType.Name;
 
-			foreach (Representation LRepresentation in Representations)
-				if ((!LRepresentation.IsGenerated || (AMode == EmitMode.ForStorage)) && !LRepresentation.HasExternalDependencies())
-					LStatement.Representations.Add(LRepresentation.EmitDefinition(AMode));
+			foreach (Representation representation in Representations)
+				if ((!representation.IsGenerated || (mode == EmitMode.ForStorage)) && !representation.HasExternalDependencies())
+					statement.Representations.Add(representation.EmitDefinition(mode));
 					
 			// specials, representations w/dependencies, constraints and defaults are emitted by the catalog as alter statements because they may have dependencies on operators that are undefined when the create scalar type statement is executed.
 
-			LStatement.ClassDefinition = IsDefaultConveyor || (FClassDefinition == null) ? null : (ClassDefinition)FClassDefinition.Clone();
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LStatement;
+			statement.ClassDefinition = IsDefaultConveyor || (_classDefinition == null) ? null : (ClassDefinition)_classDefinition.Clone();
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			return statement;
         }
         
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DropScalarTypeStatement LStatement = new DropScalarTypeStatement();
-			LStatement.ObjectName = Name;
-			return LStatement;
+			DropScalarTypeStatement statement = new DropScalarTypeStatement();
+			statement.ObjectName = Name;
+			return statement;
 		}
 
-        public TypeSpecifier EmitSpecifier(EmitMode AMode)
+        public TypeSpecifier EmitSpecifier(EmitMode mode)
         {
 			return new ScalarTypeSpecifier(Name);
         }
         
-		public override Object GetObjectFromHeader(ObjectHeader AHeader)
+		public override Object GetObjectFromHeader(ObjectHeader header)
 		{
-			switch (AHeader.ObjectType)
+			switch (header.ObjectType)
 			{
 				case "ScalarTypeConstraint" :
-					foreach (Constraint LConstraint in Constraints)
-						if (AHeader.ID == LConstraint.ID)
-							return LConstraint;
+					foreach (Constraint constraint in Constraints)
+						if (header.ID == constraint.ID)
+							return constraint;
 				break;
 						
 				case "Representation" :
-					foreach (Representation LRepresentation in Representations)
-						if (AHeader.ID == LRepresentation.ID)
-							return LRepresentation;
+					foreach (Representation representation in Representations)
+						if (header.ID == representation.ID)
+							return representation;
 				break;
 				
 				case "Property" :
-					foreach (Representation LRepresentation in Representations)
-						if (AHeader.ParentObjectID == LRepresentation.ID)
-							return LRepresentation.GetObjectFromHeader(AHeader);
+					foreach (Representation representation in Representations)
+						if (header.ParentObjectID == representation.ID)
+							return representation.GetObjectFromHeader(header);
 				break;
 				
 				case "Special" :
-					foreach (Special LSpecial in FSpecials)
-						if (AHeader.ID == LSpecial.ID)
-							return LSpecial;
+					foreach (Special special in _specials)
+						if (header.ID == special.ID)
+							return special;
 				break;
 						
 				case "ScalarTypeDefault" :
-					if ((FDefault != null) && (AHeader.ID == FDefault.ID))
-						return FDefault;
+					if ((_default != null) && (header.ID == _default.ID))
+						return _default;
 				break;
 			}
 			
-			return base.GetObjectFromHeader(AHeader);
+			return base.GetObjectFromHeader(header);
 		}
 
-		public void ResolveGeneratedDependents(CatalogDeviceSession ASession)
+		public void ResolveGeneratedDependents(CatalogDeviceSession session)
 		{
-			if (FRepresentations.Count > 0)
+			if (_representations.Count > 0)
 			{
-				ResolveEqualityOperator(ASession);
-				ResolveComparisonOperator(ASession);
-				ResolveIsSpecialOperator(ASession);
+				ResolveEqualityOperator(session);
+				ResolveComparisonOperator(session);
+				ResolveIsSpecialOperator(session);
 				
-				foreach (Schema.Representation LRepresentation in FRepresentations)
+				foreach (Schema.Representation representation in _representations)
 				{
-					LRepresentation.ResolveSelector(ASession);
-					foreach (Schema.Property LProperty in LRepresentation.Properties)
+					representation.ResolveSelector(session);
+					foreach (Schema.Property property in representation.Properties)
 					{
-						LProperty.ResolveReadAccessor(ASession);
-						LProperty.ResolveWriteAccessor(ASession);
+						property.ResolveReadAccessor(session);
+						property.ResolveWriteAccessor(session);
 					}
 				}
 				
-				foreach (Schema.Special LSpecial in FSpecials)
+				foreach (Schema.Special special in _specials)
 				{
-					LSpecial.ResolveSelector(ASession);
-					LSpecial.ResolveComparer(ASession);
+					special.ResolveSelector(session);
+					special.ResolveComparer(session);
 				}
 			}
 		}
@@ -1936,24 +1936,24 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class ScalarTypes : Objects
     {
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is ScalarType))
+			if (!(item is ScalarType))
 				throw new SchemaException(SchemaException.Codes.ScalarTypeContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 
-		public new ScalarType this[int AIndex]
+		public new ScalarType this[int index]
 		{
-			get { return (ScalarType)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ScalarType)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new ScalarType this[string AName]
+		public new ScalarType this[string name]
 		{
-			get { return (ScalarType)base[AName]; }
-			set { base[AName] = value; }
+			get { return (ScalarType)base[name]; }
+			set { base[name] = value; }
 		}
     }
 } 

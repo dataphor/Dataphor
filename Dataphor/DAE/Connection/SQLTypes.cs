@@ -16,9 +16,9 @@ namespace Alphora.Dataphor.DAE.Connection
 	public class SQLStringType : SQLType
 	{
 		public SQLStringType() : base(){}
-		public SQLStringType(int ALength) : base()
+		public SQLStringType(int length) : base()
 		{
-			Length = ALength;
+			Length = length;
 		}
 		
 		public int Length;
@@ -29,9 +29,9 @@ namespace Alphora.Dataphor.DAE.Connection
 	public class SQLIntegerType : SQLType
 	{	
 		public SQLIntegerType() : base(){}
-		public SQLIntegerType(byte AByteCount) : base()
+		public SQLIntegerType(byte byteCount) : base()
 		{
-			ByteCount = AByteCount;
+			ByteCount = byteCount;
 		}
 		
 		public byte ByteCount;
@@ -40,10 +40,10 @@ namespace Alphora.Dataphor.DAE.Connection
 	public class SQLNumericType : SQLType
 	{
 		public SQLNumericType() : base(){}
-		public SQLNumericType(byte APrecision, byte AScale) : base()
+		public SQLNumericType(byte precision, byte scale) : base()
 		{
-			Precision = APrecision;
-			Scale = AScale;
+			Precision = precision;
+			Scale = scale;
 		}
 		
 		public byte Precision;
@@ -53,9 +53,9 @@ namespace Alphora.Dataphor.DAE.Connection
 	public class SQLFloatType : SQLType
 	{
 		public SQLFloatType() : base() {}
-		public SQLFloatType(byte AWidth) : base()
+		public SQLFloatType(byte width) : base()
 		{
-			Width = AWidth;
+			Width = width;
 		}
 		
 		/// <summary>
@@ -75,9 +75,9 @@ namespace Alphora.Dataphor.DAE.Connection
 	public class SQLByteArrayType : SQLType 
 	{
 		public SQLByteArrayType() : base(){}
-		public SQLByteArrayType(int ALength) : base()
+		public SQLByteArrayType(int length) : base()
 		{
-			Length = ALength;	
+			Length = length;	
 		}
 		
 		public int Length;

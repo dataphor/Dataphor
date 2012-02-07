@@ -34,15 +34,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			InitializeDrivers();
 		}
 
-		private bool FLoading;
+		private bool _loading;
 		public bool Loading
 		{
-			get { return FLoading; }
+			get { return _loading; }
 		}
 
 		public void LoadImage()
 		{
-			FLoading = true;
+			_loading = true;
 			ShowDialog();
 		}
 
@@ -56,15 +56,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			int cbVer
 		);
 
-		public const int CCapabilityNameSize = 100;
-		public const int CCapabilityVersionSize = 100;
+		public const int CapabilityNameSize = 100;
+		public const int CapabilityVersionSize = 100;
 		private void InitializeDrivers()
 		{
-			string LName = "".PadRight(100);
-			string LVersion = "".PadRight(100);
-			short LDriverIndex = 0;
-			while (capGetDriverDescriptionA(LDriverIndex++, ref LName, CCapabilityNameSize, ref LVersion, CCapabilityVersionSize))
-				FDevices.Items.Add(LName.Trim());
+			string name = "".PadRight(100);
+			string version = "".PadRight(100);
+			short driverIndex = 0;
+			while (capGetDriverDescriptionA(driverIndex++, ref name, CapabilityNameSize, ref version, CapabilityVersionSize))
+				FDevices.Items.Add(name.Trim());
 			if (FDevices.Items.Count == 1)
 			{
 				FDevices.SelectedIndex = 0;
@@ -91,16 +91,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[DllImport("user32")]
 		protected static extern int SetWindowPos(int hwnd, int hWndInsertAfter, int x, int y, int cx, int cy, int wFlags);
 
-		private const string CCaptureWindowName = "Image Capture Picture Box";
-		private const int CCaptureWindowX = 0;
-		private const int CCaptureWindowY = 0;
-		private const int CCaptureWindowID = 0;
-		private const int CSendMessagenNullParameter = 0;        
-		private const int CPreviewRate = 0x42;
-		private const int CSetWindowFlag = 6;
-		private const int CSetWindowInsertAfter = 1;
-		private const int CSetWindowX = 0;
-		private const int CSetWindowY = 0;
+		private const string CaptureWindowName = "Image Capture Picture Box";
+		private const int CaptureWindowX = 0;
+		private const int CaptureWindowY = 0;
+		private const int CaptureWindowID = 0;
+		private const int SendMessagenNullParameter = 0;        
+		private const int PreviewRate = 0x42;
+		private const int SetWindowFlag = 6;
+		private const int SetWindowInsertAfter = 1;
+		private const int SetWindowX = 0;
+		private const int SetWindowY = 0;
 		private const int WS_VISIBLE = 0x10000000;
 		private const int WS_CHILD = 0x40000000;
 		private const int WM_CAP_DRIVER_CONNECT = 0x40a;
@@ -108,34 +108,34 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private const int WM_CAP_SET_PREVIEW = 0x432;
 		private const int WM_CAP_SET_PREVIEWRATE = 0x434;
 
-		private int FVideoHandle = Int32.MinValue;
-		private int FCurrentDevice = Int32.MinValue;
-		private string FWindowName = CCaptureWindowName;            
+		private int _videoHandle = Int32.MinValue;
+		private int _currentDevice = Int32.MinValue;
+		private string _windowName = CaptureWindowName;            
 		private void FDevices_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			if (FDevices.SelectedIndex > -1)
 			{
 				Disconnect();
-				FVideoHandle =
+				_videoHandle =
 					capCreateCaptureWindowA
 					(
-						ref FWindowName,
+						ref _windowName,
 						WS_VISIBLE | WS_CHILD,
-						CCaptureWindowX,
-						CCaptureWindowY,
+						CaptureWindowX,
+						CaptureWindowY,
 						FPreviewImage.Width,
 						FPreviewImage.Height,
 						FPreviewImage.Handle.ToInt32(),
-						CCaptureWindowID
+						CaptureWindowID
 					 );
 
-				if (SendMessage(FVideoHandle, WM_CAP_DRIVER_CONNECT, FDevices.SelectedIndex, CSendMessagenNullParameter) > 0)
+				if (SendMessage(_videoHandle, WM_CAP_DRIVER_CONNECT, FDevices.SelectedIndex, SendMessagenNullParameter) > 0)
 				{
-					FCurrentDevice = FDevices.SelectedIndex;
-					SendMessage(FVideoHandle, WM_CAP_SET_SCALE, -1, CSendMessagenNullParameter);
-					SendMessage(FVideoHandle, WM_CAP_SET_PREVIEWRATE, CPreviewRate, CSendMessagenNullParameter);
-					SendMessage(FVideoHandle, WM_CAP_SET_PREVIEW, -1, CSendMessagenNullParameter);
-					SetWindowPos(FVideoHandle, CSetWindowInsertAfter, CSetWindowX, CSetWindowY, FPreviewImage.Width, FPreviewImage.Height, CSetWindowFlag);
+					_currentDevice = FDevices.SelectedIndex;
+					SendMessage(_videoHandle, WM_CAP_SET_SCALE, -1, SendMessagenNullParameter);
+					SendMessage(_videoHandle, WM_CAP_SET_PREVIEWRATE, PreviewRate, SendMessagenNullParameter);
+					SendMessage(_videoHandle, WM_CAP_SET_PREVIEW, -1, SendMessagenNullParameter);
+					SetWindowPos(_videoHandle, SetWindowInsertAfter, SetWindowX, SetWindowY, FPreviewImage.Width, FPreviewImage.Height, SetWindowFlag);
 					FCaptureFrame.Enabled = true;
 					FSettings.Enabled = true;
 					SetHintText(Strings.CConnectedText);
@@ -149,35 +149,35 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		private MemoryStream FStream;
+		private MemoryStream _stream;
 		public Stream Stream
 		{
-			get	 { return FStream; }
+			get	 { return _stream; }
 		}
 
 		private const int WM_CAP_FILE_SAVEDIB = 0x419;        
 		private void FCapture_Click(object sender, EventArgs e)
 		{
-			String LTempFileName = Application.LocalUserAppDataPath + @"\" + Strings.CTempFileName;
-			SendMessage(FVideoHandle, WM_CAP_FILE_SAVEDIB, CSendMessagenNullParameter, LTempFileName);
-			using (FileStream LImageFile = new FileStream(LTempFileName, FileMode.Open, FileAccess.Read))
+			String tempFileName = Path.Combine(Application.LocalUserAppDataPath, Strings.CTempFileName);
+			SendMessage(_videoHandle, WM_CAP_FILE_SAVEDIB, SendMessagenNullParameter, tempFileName);
+			using (FileStream imageFile = new FileStream(tempFileName, FileMode.Open, FileAccess.Read))
 			{
-				if (FStream != null)
+				if (_stream != null)
 				{
-					FStream.Close();
-					FStream = null;
+					_stream.Close();
+					_stream = null;
 				}
-				FStream = new MemoryStream();
-				StreamUtility.CopyStream(LImageFile, FStream);
-				FStream.Position = 0;
-				FCaptureImage.Image = System.Drawing.Image.FromStream(FStream);
+				_stream = new MemoryStream();
+				StreamUtility.CopyStream(imageFile, _stream);
+				_stream.Position = 0;
+				FCaptureImage.Image = System.Drawing.Image.FromStream(_stream);
 			}                
 		}
 
 		const int WM_CAP_DLG_VIDEOSOURCE = 0x42a;
 		private void FSettings_Click(object sender, EventArgs e)
 		{
-			SendMessage(FVideoHandle, WM_CAP_DLG_VIDEOSOURCE, CSendMessagenNullParameter, CSendMessagenNullParameter);
+			SendMessage(_videoHandle, WM_CAP_DLG_VIDEOSOURCE, SendMessagenNullParameter, SendMessagenNullParameter);
 		} 
 
 		[DllImport("user32")]
@@ -185,26 +185,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private const int WM_CAP_DRIVER_DISCONNECT = 0x40b;
 		private void Disconnect()
 		{
-			if (FCurrentDevice != Int32.MinValue)
+			if (_currentDevice != Int32.MinValue)
 			{                
 				try
 				{
-					SendMessage(FVideoHandle, WM_CAP_DRIVER_DISCONNECT, FCurrentDevice, CSendMessagenNullParameter);                     
+					SendMessage(_videoHandle, WM_CAP_DRIVER_DISCONNECT, _currentDevice, SendMessagenNullParameter);                     
 				}
 				finally
 				{
-					FCurrentDevice = Int32.MinValue;
+					_currentDevice = Int32.MinValue;
 				}
 			}
-			if (FVideoHandle != Int32.MinValue)
+			if (_videoHandle != Int32.MinValue)
 			{
 				try
 				{
-					DestroyWindow(FVideoHandle);
+					DestroyWindow(_videoHandle);
 				}
 				finally
 				{
-					FVideoHandle = Int32.MinValue;
+					_videoHandle = Int32.MinValue;
 				}
 			}
 			SetHintText(String.Empty);
@@ -212,10 +212,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			FCaptureFrame.Enabled = false;
 		} 
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
-			base.OnClosing(AArgs);
-			AArgs.Cancel = false;
+			base.OnClosing(args);
+			args.Cancel = false;
 			try
 			{
 				if (DialogResult == DialogResult.OK)
@@ -226,7 +226,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					}
 					catch
 					{
-						AArgs.Cancel = true;
+						args.Cancel = true;
 						throw;
 					}
 				}
@@ -240,7 +240,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			finally
 			{
 				Disconnect();
-				FLoading = false;			
+				_loading = false;			
 			}
 		}
 

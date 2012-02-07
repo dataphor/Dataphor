@@ -61,11 +61,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class ColumnCondition : System.Object
 	{
-		public ColumnCondition(PlanNode AColumnReference, string AInstruction, PlanNode AArgument) : base()
+		public ColumnCondition(PlanNode columnReference, string instruction, PlanNode argument) : base()
 		{
-			ColumnReference = AColumnReference;
-			Instruction = AInstruction;
-			Argument = AArgument;
+			ColumnReference = columnReference;
+			Instruction = instruction;
+			Argument = argument;
 		}
 
 		public PlanNode ColumnReference;		
@@ -75,17 +75,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class ColumnConditions : List
 	{
-		public ColumnConditions(Schema.TableVarColumn AColumn) : base()
+		public ColumnConditions(Schema.TableVarColumn column) : base()
 		{
-			Column = AColumn;
+			Column = column;
 		}
 		
 		public Schema.TableVarColumn Column;
 		
-		public new ColumnCondition this[int AIndex]
+		public new ColumnCondition this[int index]
 		{
-			get { return (ColumnCondition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ColumnCondition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
@@ -93,48 +93,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public Conditions() : base() {}
 		
-		public new ColumnConditions this[int AIndex]
+		public new ColumnConditions this[int index]
 		{
-			get { return (ColumnConditions)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ColumnConditions)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public ColumnConditions this[Schema.TableVarColumn AColumn]
+		public ColumnConditions this[Schema.TableVarColumn column]
 		{
 			get 
 			{ 
-				int LIndex = IndexOf(AColumn);
-				if (LIndex < 0)
+				int index = IndexOf(column);
+				if (index < 0)
 				{
-					ColumnConditions LConditions = new ColumnConditions(AColumn);
-					Add(LConditions);
-					return LConditions;
+					ColumnConditions conditions = new ColumnConditions(column);
+					Add(conditions);
+					return conditions;
 				}
 				else
-					return this[LIndex];
+					return this[index];
 			}
 		}
 
-		public int IndexOf(Schema.TableVarColumn AColumn)
+		public int IndexOf(Schema.TableVarColumn column)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].Column == AColumn)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (this[index].Column == column)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(Schema.TableVarColumn AColumn)
+		public bool Contains(Schema.TableVarColumn column)
 		{
-			return IndexOf(AColumn) >= 0;
+			return IndexOf(column) >= 0;
 		}
 	}
 	
 	public class Condition : System.Object
 	{
-		public Condition(PlanNode AArgument, bool AIsExclusive)
+		public Condition(PlanNode argument, bool isExclusive)
 		{
-			Argument = AArgument;
-			IsExclusive = AIsExclusive;
+			Argument = argument;
+			IsExclusive = isExclusive;
 		}
 
 		public PlanNode Argument;
@@ -145,24 +145,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator iRestrict(table{}, object) : table{}
     public class RestrictNode : UnaryTableNode
     {
-		protected bool TranslateCompareOperator(ref string AOperatorName, int AValue)
+		protected bool TranslateCompareOperator(ref string operatorName, int tempValue)
 		{
-			switch (AValue)
+			switch (tempValue)
 			{
 				case 0: break;
 				case 1:
-					switch (AOperatorName)
+					switch (operatorName)
 					{
-						case Instructions.Equal : AOperatorName = Instructions.Greater; break;
-						case Instructions.Less : AOperatorName = Instructions.InclusiveLess; break;
+						case Instructions.Equal : operatorName = Instructions.Greater; break;
+						case Instructions.Less : operatorName = Instructions.InclusiveLess; break;
 						default : return false;
 					}
 				break;
 				case -1:
-					switch (AOperatorName)
+					switch (operatorName)
 					{
-						case Instructions.Equal : AOperatorName = Instructions.Less; break;
-						case Instructions.Greater : AOperatorName = Instructions.InclusiveGreater; break;
+						case Instructions.Equal : operatorName = Instructions.Less; break;
+						case Instructions.Greater : operatorName = Instructions.InclusiveGreater; break;
 						default : return false;
 					}
 				break;
@@ -171,105 +171,105 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return true;
 		}
 		
-		protected bool IsColumnReferencing(PlanNode ANode, ref string AColumnName)
+		protected bool IsColumnReferencing(PlanNode node, ref string columnName)
 		{
-			StackColumnReferenceNode LNode = ANode as StackColumnReferenceNode;
-			if ((LNode != null) && (LNode.Location == 0))
+			StackColumnReferenceNode localNode = node as StackColumnReferenceNode;
+			if ((localNode != null) && (localNode.Location == 0))
 			{
-				AColumnName = LNode.Identifier;
+				columnName = localNode.Identifier;
 				return true;
 			}
-			else if (ANode.IsOrderPreserving && (ANode.Nodes.Count == 1))
-				return IsColumnReferencing(ANode.Nodes[0], ref AColumnName);
+			else if (node.IsOrderPreserving && (node.Nodes.Count == 1))
+				return IsColumnReferencing(node.Nodes[0], ref columnName);
 			else
 				return false;
 		}
 		
-		protected bool IsSargable(Plan APlan, PlanNode APlanNode)
+		protected bool IsSargable(Plan plan, PlanNode planNode)
 		{
-			InstructionNodeBase LNode = APlanNode as InstructionNodeBase;
-			if ((LNode != null) && (LNode.Operator != null))
+			InstructionNodeBase node = planNode as InstructionNodeBase;
+			if ((node != null) && (node.Operator != null))
 			{
-				string LColumnName = String.Empty;
-				switch (Schema.Object.Unqualify(LNode.Operator.OperatorName))
+				string columnName = String.Empty;
+				switch (Schema.Object.Unqualify(node.Operator.OperatorName))
 				{
-					case Instructions.And : return IsSargable(APlan, APlanNode.Nodes[0]) && IsSargable(APlan, APlanNode.Nodes[1]);
+					case Instructions.And : return IsSargable(plan, planNode.Nodes[0]) && IsSargable(plan, planNode.Nodes[1]);
 					case Instructions.NotEqual : return false;
 					case Instructions.Equal : 
 					case Instructions.Greater :
 					case Instructions.InclusiveGreater :
 					case Instructions.Less :
 					case Instructions.InclusiveLess :
-						if (IsColumnReferencing(LNode.Nodes[0], ref LColumnName))
+						if (IsColumnReferencing(node.Nodes[0], ref columnName))
 						{
-							if (LNode.Nodes[1].IsContextLiteral(0))
+							if (node.Nodes[1].IsContextLiteral(0))
 							{
-								FConditions[TableVar.Columns[LColumnName]].Add
+								_conditions[TableVar.Columns[columnName]].Add
 								(
 									new ColumnCondition
 									(
-										LNode.Nodes[0], 
-										Schema.Object.Unqualify(LNode.Operator.OperatorName), 
-										LNode.Nodes[1]
+										node.Nodes[0], 
+										Schema.Object.Unqualify(node.Operator.OperatorName), 
+										node.Nodes[1]
 									)
 								);
 								return true;
 							}
 							return false;
 						}
-						else if (IsColumnReferencing(LNode.Nodes[1], ref LColumnName))
+						else if (IsColumnReferencing(node.Nodes[1], ref columnName))
 						{
-							if (LNode.Nodes[0].IsContextLiteral(0))
+							if (node.Nodes[0].IsContextLiteral(0))
 							{
-								string LOperatorName = Schema.Object.Unqualify(LNode.Operator.OperatorName);
-								switch (LOperatorName)
+								string operatorName = Schema.Object.Unqualify(node.Operator.OperatorName);
+								switch (operatorName)
 								{
-									case Instructions.Greater : LOperatorName = Instructions.Less; break;
-									case Instructions.InclusiveGreater : LOperatorName = Instructions.InclusiveLess; break;
-									case Instructions.Less : LOperatorName = Instructions.Greater; break;
-									case Instructions.InclusiveLess : LOperatorName = Instructions.InclusiveGreater; break;
+									case Instructions.Greater : operatorName = Instructions.Less; break;
+									case Instructions.InclusiveGreater : operatorName = Instructions.InclusiveLess; break;
+									case Instructions.Less : operatorName = Instructions.Greater; break;
+									case Instructions.InclusiveLess : operatorName = Instructions.InclusiveGreater; break;
 								}
-								FConditions[TableVar.Columns[LColumnName]].Add(new ColumnCondition(LNode.Nodes[1], LOperatorName, LNode.Nodes[0]));
+								_conditions[TableVar.Columns[columnName]].Add(new ColumnCondition(node.Nodes[1], operatorName, node.Nodes[0]));
 								return true;
 							}
 							return false;
 						}
 						else if 
 						(
-							(LNode.Nodes[0] is InstructionNodeBase) 
+							(node.Nodes[0] is InstructionNodeBase) 
 							&& 
 							(
-								((InstructionNodeBase)LNode.Nodes[0]).Operator != null) 
-									&& (String.Compare(Schema.Object.Unqualify(((InstructionNodeBase)LNode.Nodes[0]).Operator.OperatorName), Instructions.Compare) == 0) 
-									&& (LNode.Nodes[1] is ValueNode) 
-									&& LNode.Nodes[1].DataType.Is(APlan.DataTypes.SystemInteger)
+								((InstructionNodeBase)node.Nodes[0]).Operator != null) 
+									&& (String.Compare(Schema.Object.Unqualify(((InstructionNodeBase)node.Nodes[0]).Operator.OperatorName), Instructions.Compare) == 0) 
+									&& (node.Nodes[1] is ValueNode) 
+									&& node.Nodes[1].DataType.Is(plan.DataTypes.SystemInteger)
 							)
 						{
-							if (IsColumnReferencing(LNode.Nodes[0].Nodes[0], ref LColumnName))
+							if (IsColumnReferencing(node.Nodes[0].Nodes[0], ref columnName))
 							{
-								string LOperatorName = Schema.Object.Unqualify(LNode.Operator.OperatorName);
-								if (LNode.Nodes[0].Nodes[1].IsContextLiteral(0) && TranslateCompareOperator(ref LOperatorName, (int)((ValueNode)LNode.Nodes[1]).Value))
+								string operatorName = Schema.Object.Unqualify(node.Operator.OperatorName);
+								if (node.Nodes[0].Nodes[1].IsContextLiteral(0) && TranslateCompareOperator(ref operatorName, (int)((ValueNode)node.Nodes[1]).Value))
 								{
-									FConditions[TableVar.Columns[LColumnName]].Add(new ColumnCondition(LNode.Nodes[0].Nodes[0], LOperatorName, LNode.Nodes[0].Nodes[1]));
+									_conditions[TableVar.Columns[columnName]].Add(new ColumnCondition(node.Nodes[0].Nodes[0], operatorName, node.Nodes[0].Nodes[1]));
 									return true;
 								}
 								return false;
 							}
-							else if (IsColumnReferencing(LNode.Nodes[0].Nodes[1], ref LColumnName))
+							else if (IsColumnReferencing(node.Nodes[0].Nodes[1], ref columnName))
 							{
-								string LOperatorName = Schema.Object.Unqualify(LNode.Operator.OperatorName);
-								switch (LOperatorName)
+								string operatorName = Schema.Object.Unqualify(node.Operator.OperatorName);
+								switch (operatorName)
 								{
 									case Instructions.Equal : break;
-									case Instructions.Less : LOperatorName = Instructions.Greater; break;
-									case Instructions.InclusiveLess : LOperatorName = Instructions.InclusiveGreater; break;
-									case Instructions.Greater : LOperatorName = Instructions.Less; break;
-									case Instructions.InclusiveGreater : LOperatorName = Instructions.InclusiveLess; break;
+									case Instructions.Less : operatorName = Instructions.Greater; break;
+									case Instructions.InclusiveLess : operatorName = Instructions.InclusiveGreater; break;
+									case Instructions.Greater : operatorName = Instructions.Less; break;
+									case Instructions.InclusiveGreater : operatorName = Instructions.InclusiveLess; break;
 								}
 								
-								if (LNode.Nodes[0].Nodes[0].IsContextLiteral(0) && TranslateCompareOperator(ref LOperatorName, (int)((ValueNode)LNode.Nodes[1]).Value))
+								if (node.Nodes[0].Nodes[0].IsContextLiteral(0) && TranslateCompareOperator(ref operatorName, (int)((ValueNode)node.Nodes[1]).Value))
 								{
-									FConditions[TableVar.Columns[LColumnName]].Add(new ColumnCondition(LNode.Nodes[0].Nodes[1], LOperatorName, LNode.Nodes[0].Nodes[0]));
+									_conditions[TableVar.Columns[columnName]].Add(new ColumnCondition(node.Nodes[0].Nodes[1], operatorName, node.Nodes[0].Nodes[0]));
 									return true;
 								}
 								return false;
@@ -278,41 +278,41 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						else if 
 						(
-							(LNode.Nodes[1] is InstructionNodeBase) 
+							(node.Nodes[1] is InstructionNodeBase) 
 								&& 
 								(
-									((InstructionNodeBase)LNode.Nodes[1]).Operator != null) 
-										&& (String.Compare(Schema.Object.Unqualify(((InstructionNodeBase)LNode.Nodes[1]).Operator.OperatorName), Instructions.Compare) == 0) 
-										&& (LNode.Nodes[0] is ValueNode) 
-										&& LNode.Nodes[0].DataType.Is(APlan.DataTypes.SystemInteger)
+									((InstructionNodeBase)node.Nodes[1]).Operator != null) 
+										&& (String.Compare(Schema.Object.Unqualify(((InstructionNodeBase)node.Nodes[1]).Operator.OperatorName), Instructions.Compare) == 0) 
+										&& (node.Nodes[0] is ValueNode) 
+										&& node.Nodes[0].DataType.Is(plan.DataTypes.SystemInteger)
 								)
 						{
-							if (IsColumnReferencing(LNode.Nodes[1].Nodes[0], ref LColumnName))
+							if (IsColumnReferencing(node.Nodes[1].Nodes[0], ref columnName))
 							{
-								string LOperatorName = Schema.Object.Unqualify(LNode.Operator.OperatorName);
-								switch (LOperatorName)
+								string operatorName = Schema.Object.Unqualify(node.Operator.OperatorName);
+								switch (operatorName)
 								{
 									case Instructions.Equal : break;
-									case Instructions.Less : LOperatorName = Instructions.Greater; break;
-									case Instructions.InclusiveLess : LOperatorName = Instructions.InclusiveGreater; break;
-									case Instructions.Greater : LOperatorName = Instructions.Less; break;
-									case Instructions.InclusiveGreater : LOperatorName = Instructions.InclusiveLess; break;
+									case Instructions.Less : operatorName = Instructions.Greater; break;
+									case Instructions.InclusiveLess : operatorName = Instructions.InclusiveGreater; break;
+									case Instructions.Greater : operatorName = Instructions.Less; break;
+									case Instructions.InclusiveGreater : operatorName = Instructions.InclusiveLess; break;
 								}
 								
-								if (LNode.Nodes[1].Nodes[1].IsContextLiteral(0) && TranslateCompareOperator(ref LOperatorName, (int)((ValueNode)LNode.Nodes[0]).Value))
+								if (node.Nodes[1].Nodes[1].IsContextLiteral(0) && TranslateCompareOperator(ref operatorName, (int)((ValueNode)node.Nodes[0]).Value))
 								{
-									FConditions[TableVar.Columns[LColumnName]].Add(new ColumnCondition(LNode.Nodes[1].Nodes[0], LOperatorName, LNode.Nodes[1].Nodes[1]));
+									_conditions[TableVar.Columns[columnName]].Add(new ColumnCondition(node.Nodes[1].Nodes[0], operatorName, node.Nodes[1].Nodes[1]));
 									return true;
 								}
 								return false;
 							}
-							else if (IsColumnReferencing(LNode.Nodes[1].Nodes[1], ref LColumnName))
+							else if (IsColumnReferencing(node.Nodes[1].Nodes[1], ref columnName))
 							{
-								string LOperatorName = Schema.Object.Unqualify(LNode.Operator.OperatorName);
+								string operatorName = Schema.Object.Unqualify(node.Operator.OperatorName);
 								
-								if (LNode.Nodes[1].Nodes[0].IsContextLiteral(0) && TranslateCompareOperator(ref LOperatorName, (int)((ValueNode)LNode.Nodes[0]).Value))
+								if (node.Nodes[1].Nodes[0].IsContextLiteral(0) && TranslateCompareOperator(ref operatorName, (int)((ValueNode)node.Nodes[0]).Value))
 								{
-									FConditions[TableVar.Columns[LColumnName]].Add(new ColumnCondition(LNode.Nodes[1].Nodes[1], LOperatorName, LNode.Nodes[1].Nodes[0]));
+									_conditions[TableVar.Columns[columnName]].Add(new ColumnCondition(node.Nodes[1].Nodes[1], operatorName, node.Nodes[1].Nodes[0]));
 									return true;
 								}
 								return false;
@@ -329,30 +329,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected bool DetermineIsSeekable()
 		{
-			for (int LIndex = 0; LIndex < FConditions.Count; LIndex++)
-				if ((FConditions[LIndex].Count > 1) || (FConditions[LIndex][0].Instruction != Instructions.Equal) || !FConditions[LIndex][0].Argument.IsContextLiteral(0))
+			for (int index = 0; index < _conditions.Count; index++)
+				if ((_conditions[index].Count > 1) || (_conditions[index][0].Instruction != Instructions.Equal) || !_conditions[index][0].Argument.IsContextLiteral(0))
 					return false;
 
-			Schema.KeyColumns LKeyColumns = new Schema.KeyColumns(null);
-			for (int LIndex = 0; LIndex < FConditions.Count; LIndex++)
-				LKeyColumns.Add(FConditions[LIndex].Column);
+			Schema.KeyColumns keyColumns = new Schema.KeyColumns(null);
+			for (int index = 0; index < _conditions.Count; index++)
+				keyColumns.Add(_conditions[index].Column);
 
-			foreach (Schema.Key LKey in SourceTableVar.Keys)
-				if (!LKey.IsSparse && (LKey.Columns.Count == LKeyColumns.Count) && LKey.Columns.IsSupersetOf(LKeyColumns))
+			foreach (Schema.Key key in SourceTableVar.Keys)
+				if (!key.IsSparse && (key.Columns.Count == keyColumns.Count) && key.Columns.IsSupersetOf(keyColumns))
 					return true;
 			
 			return false;
 		}
 		
-		protected Schema.Order FindSeekOrder(Plan APlan)
+		protected Schema.Order FindSeekOrder(Plan plan)
 		{
-			Schema.KeyColumns LKeyColumns = new Schema.KeyColumns(null);
-			for (int LIndex = 0; LIndex < FConditions.Count; LIndex++)
-				LKeyColumns.Add(FConditions[LIndex].Column);
+			Schema.KeyColumns keyColumns = new Schema.KeyColumns(null);
+			for (int index = 0; index < _conditions.Count; index++)
+				keyColumns.Add(_conditions[index].Column);
 
-			foreach (Schema.Key LKey in SourceTableVar.Keys)
-				if (!LKey.IsSparse && (LKey.Columns.Count == LKeyColumns.Count) && LKey.Columns.IsSupersetOf(LKeyColumns))
-					return Compiler.OrderFromKey(APlan, LKey);
+			foreach (Schema.Key key in SourceTableVar.Keys)
+				if (!key.IsSparse && (key.Columns.Count == keyColumns.Count) && key.Columns.IsSupersetOf(keyColumns))
+					return Compiler.OrderFromKey(plan, key);
 
 			return null;
 		}
@@ -394,22 +394,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			<=, >=	scanable if <= argument is greater or equal to >= argument, last key <= argument, first key >= argument
 		*/
 		
-		protected bool DetermineIsScanable(Plan APlan)
+		protected bool DetermineIsScanable(Plan plan)
 		{
-			for (int LIndex = 0; LIndex < FConditions.Count; LIndex++)
+			for (int index = 0; index < _conditions.Count; index++)
 			{
-				if (FConditions[LIndex].Count > 2)
+				if (_conditions[index].Count > 2)
 					return false;
 					
-				switch (FConditions[LIndex].Count)
+				switch (_conditions[index].Count)
 				{
 					case 1 :
 						if 
 						(
-							!FConditions[LIndex][0].Argument.IsFunctional || 
-							!FConditions[LIndex][0].Argument.IsDeterministic || 
-							!FConditions[LIndex][0].Argument.IsRepeatable ||
-							!FConditions[LIndex][0].Argument.IsContextLiteral(0)
+							!_conditions[index][0].Argument.IsFunctional || 
+							!_conditions[index][0].Argument.IsDeterministic || 
+							!_conditions[index][0].Argument.IsRepeatable ||
+							!_conditions[index][0].Argument.IsContextLiteral(0)
 						)
 							return false;
 					break;
@@ -417,14 +417,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					case 2 :
 						if 
 						(
-							!FConditions[LIndex][0].Argument.IsFunctional || 
-							!FConditions[LIndex][0].Argument.IsDeterministic || 
-							!FConditions[LIndex][0].Argument.IsRepeatable ||
-							!FConditions[LIndex][0].Argument.IsContextLiteral(0) || 
-							!FConditions[LIndex][1].Argument.IsFunctional || 
-							!FConditions[LIndex][1].Argument.IsDeterministic || 
-							!FConditions[LIndex][1].Argument.IsRepeatable ||
-							!FConditions[LIndex][1].Argument.IsContextLiteral(0)
+							!_conditions[index][0].Argument.IsFunctional || 
+							!_conditions[index][0].Argument.IsDeterministic || 
+							!_conditions[index][0].Argument.IsRepeatable ||
+							!_conditions[index][0].Argument.IsContextLiteral(0) || 
+							!_conditions[index][1].Argument.IsFunctional || 
+							!_conditions[index][1].Argument.IsDeterministic || 
+							!_conditions[index][1].Argument.IsRepeatable ||
+							!_conditions[index][1].Argument.IsContextLiteral(0)
 						)
 							return false;
 					break;
@@ -432,47 +432,47 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 
 			// there can be only one scan condition, open or closed
-			bool LHasScanCondition = false;
-			for (int LIndex = 0; LIndex < FConditions.Count; LIndex++)
+			bool hasScanCondition = false;
+			for (int index = 0; index < _conditions.Count; index++)
 			{
-				switch (FConditions[LIndex].Count)
+				switch (_conditions[index].Count)
 				{
 					case 1 :
-						if (FConditions[LIndex][0].Instruction != Instructions.Equal)
-							if (LHasScanCondition)
+						if (_conditions[index][0].Instruction != Instructions.Equal)
+							if (hasScanCondition)
 								return false;
 							else
-								LHasScanCondition = true;
+								hasScanCondition = true;
 					break;
 					
 					case 2 :
-						if ((FConditions[LIndex][0].Instruction != Instructions.Equal) || (FConditions[LIndex][1].Instruction != Instructions.Equal))
-							if (LHasScanCondition)
+						if ((_conditions[index][0].Instruction != Instructions.Equal) || (_conditions[index][1].Instruction != Instructions.Equal))
+							if (hasScanCondition)
 								return false;
 							else
-								LHasScanCondition = true;
+								hasScanCondition = true;
 					break;
 				}
 
-				for (int LConditionIndex = 0; LConditionIndex < FConditions[LIndex].Count; LConditionIndex++)
+				for (int conditionIndex = 0; conditionIndex < _conditions[index].Count; conditionIndex++)
 				{
-					switch (FConditions[LIndex][LConditionIndex].Instruction)
+					switch (_conditions[index][conditionIndex].Instruction)
 					{
 						case Instructions.Less : 
-							PlanNode LPredNode = Compiler.EmitCallNode(APlan, "Pred", new PlanNode[]{FConditions[LIndex][LConditionIndex].Argument}, false);
-							if (LPredNode != null)
+							PlanNode predNode = Compiler.EmitCallNode(plan, "Pred", new PlanNode[]{_conditions[index][conditionIndex].Argument}, false);
+							if (predNode != null)
 							{
-								FConditions[LIndex][LConditionIndex].Argument = LPredNode;
-								FConditions[LIndex][LConditionIndex].Instruction = Instructions.InclusiveLess;
+								_conditions[index][conditionIndex].Argument = predNode;
+								_conditions[index][conditionIndex].Instruction = Instructions.InclusiveLess;
 							}
 						break;
 						
 						case Instructions.Greater : 
-							PlanNode LSuccNode = Compiler.EmitCallNode(APlan, "Succ", new PlanNode[]{FConditions[LIndex][LConditionIndex].Argument}, false);
-							if (LSuccNode != null)
+							PlanNode succNode = Compiler.EmitCallNode(plan, "Succ", new PlanNode[]{_conditions[index][conditionIndex].Argument}, false);
+							if (succNode != null)
 							{
-								FConditions[LIndex][LConditionIndex].Argument = LSuccNode;
-								FConditions[LIndex][LConditionIndex].Instruction = Instructions.InclusiveGreater;
+								_conditions[index][conditionIndex].Argument = succNode;
+								_conditions[index][conditionIndex].Instruction = Instructions.InclusiveGreater;
 							}
 						break;
 					}
@@ -482,27 +482,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return true;
 		}
 		
-		protected bool IsValidScanOrder(Plan APlan, Schema.Order AOrder, Conditions AClosedConditions, Conditions AOpenConditions, ColumnConditions AScanCondition)
+		protected bool IsValidScanOrder(Plan plan, Schema.Order order, Conditions closedConditions, Conditions openConditions, ColumnConditions scanCondition)
 		{
-			int LColumnIndex;
-			for (int LIndex = 0; LIndex < AClosedConditions.Count; LIndex++)
+			int columnIndex;
+			for (int index = 0; index < closedConditions.Count; index++)
 			{
-				LColumnIndex = AOrder.Columns.IndexOf(AClosedConditions[LIndex].Column.Name, Compiler.GetUniqueSort(APlan, AClosedConditions[LIndex].Column.DataType));
-				if ((LColumnIndex < 0) || (LColumnIndex >= AClosedConditions.Count))
+				columnIndex = order.Columns.IndexOf(closedConditions[index].Column.Name, Compiler.GetUniqueSort(plan, closedConditions[index].Column.DataType));
+				if ((columnIndex < 0) || (columnIndex >= closedConditions.Count))
 					return false;
 			}
 			
-			for (int LIndex = 0; LIndex < AOpenConditions.Count; LIndex++)
+			for (int index = 0; index < openConditions.Count; index++)
 			{
-				LColumnIndex = AOrder.Columns.IndexOf(AOpenConditions[LIndex].Column.Name, Compiler.GetUniqueSort(APlan, AOpenConditions[LIndex].Column.DataType));
-				if ((LColumnIndex < AClosedConditions.Count) || (LColumnIndex >= AClosedConditions.Count + AOpenConditions.Count))
+				columnIndex = order.Columns.IndexOf(openConditions[index].Column.Name, Compiler.GetUniqueSort(plan, openConditions[index].Column.DataType));
+				if ((columnIndex < closedConditions.Count) || (columnIndex >= closedConditions.Count + openConditions.Count))
 					return false;
 			}
 			
-			if (AScanCondition != null)
+			if (scanCondition != null)
 			{
-				LColumnIndex = AOrder.Columns.IndexOf(AScanCondition.Column.Name, Compiler.GetUniqueSort(APlan, AScanCondition.Column.DataType));
-				if (LColumnIndex != (AClosedConditions.Count + AOpenConditions.Count - 1))
+				columnIndex = order.Columns.IndexOf(scanCondition.Column.Name, Compiler.GetUniqueSort(plan, scanCondition.Column.DataType));
+				if (columnIndex != (closedConditions.Count + openConditions.Count - 1))
 					return false;
 			}
 			
@@ -512,93 +512,93 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// A scan order can be any order which includes all the columns in closed conditions, in any order,
 		// followed by all the columns in open conditions, in any order,
 		// if there is a scan condition, it must be the last order column, open or closed
-		protected Schema.Order FindScanOrder(Plan APlan)
+		protected Schema.Order FindScanOrder(Plan plan)
 		{
-			Schema.Order LNewOrder;				
+			Schema.Order newOrder;				
 
-			foreach (Schema.Key LKey in SourceTableVar.Keys)
+			foreach (Schema.Key key in SourceTableVar.Keys)
 			{
-				LNewOrder = Compiler.OrderFromKey(APlan, LKey);
-				if (IsValidScanOrder(APlan, LNewOrder, FClosedConditions, FOpenConditions, FScanCondition))
-					return LNewOrder;
+				newOrder = Compiler.OrderFromKey(plan, key);
+				if (IsValidScanOrder(plan, newOrder, _closedConditions, _openConditions, _scanCondition))
+					return newOrder;
 			}
 					
-			foreach (Schema.Order LOrder in TableVar.Orders)
-				if (IsValidScanOrder(APlan, LOrder, FClosedConditions, FOpenConditions, FScanCondition))
-					return LOrder;
+			foreach (Schema.Order order in TableVar.Orders)
+				if (IsValidScanOrder(plan, order, _closedConditions, _openConditions, _scanCondition))
+					return order;
 					
-			LNewOrder = new Schema.Order();
-			Schema.OrderColumn LNewOrderColumn;
-			for (int LIndex = 0; LIndex < FClosedConditions.Count; LIndex++)
-				if (!Object.ReferenceEquals(FClosedConditions[LIndex], FScanCondition))
+			newOrder = new Schema.Order();
+			Schema.OrderColumn newOrderColumn;
+			for (int index = 0; index < _closedConditions.Count; index++)
+				if (!Object.ReferenceEquals(_closedConditions[index], _scanCondition))
 				{
-					LNewOrderColumn = new Schema.OrderColumn(FClosedConditions[LIndex].Column, true);
-					LNewOrderColumn.Sort = Compiler.GetUniqueSort(APlan, LNewOrderColumn.Column.DataType);
-					if (LNewOrderColumn.Sort.HasDependencies())
-						APlan.AttachDependencies(LNewOrderColumn.Sort.Dependencies);
-					LNewOrder.Columns.Add(LNewOrderColumn);
+					newOrderColumn = new Schema.OrderColumn(_closedConditions[index].Column, true);
+					newOrderColumn.Sort = Compiler.GetUniqueSort(plan, newOrderColumn.Column.DataType);
+					if (newOrderColumn.Sort.HasDependencies())
+						plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+					newOrder.Columns.Add(newOrderColumn);
 				}
 
-			for (int LIndex = 0; LIndex < FOpenConditions.Count; LIndex++)
-				if (!Object.ReferenceEquals(FOpenConditions[LIndex], FScanCondition))
+			for (int index = 0; index < _openConditions.Count; index++)
+				if (!Object.ReferenceEquals(_openConditions[index], _scanCondition))
 				{
-					LNewOrderColumn = new Schema.OrderColumn(FOpenConditions[LIndex].Column, true);
-					LNewOrderColumn.Sort = Compiler.GetUniqueSort(APlan, LNewOrderColumn.Column.DataType);
-					if (LNewOrderColumn.Sort.HasDependencies())
-						APlan.AttachDependencies(LNewOrderColumn.Sort.Dependencies);
-					LNewOrder.Columns.Add(LNewOrderColumn);
+					newOrderColumn = new Schema.OrderColumn(_openConditions[index].Column, true);
+					newOrderColumn.Sort = Compiler.GetUniqueSort(plan, newOrderColumn.Column.DataType);
+					if (newOrderColumn.Sort.HasDependencies())
+						plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+					newOrder.Columns.Add(newOrderColumn);
 				}
 
-			if (FScanCondition != null)
+			if (_scanCondition != null)
 			{
-				LNewOrderColumn = new Schema.OrderColumn(FScanCondition.Column, true);
-				LNewOrderColumn.Sort = Compiler.GetUniqueSort(APlan, LNewOrderColumn.Column.DataType);
-				if (LNewOrderColumn.Sort.HasDependencies())
-					APlan.AttachDependencies(LNewOrderColumn.Sort.Dependencies);
-				LNewOrder.Columns.Add(LNewOrderColumn);
+				newOrderColumn = new Schema.OrderColumn(_scanCondition.Column, true);
+				newOrderColumn.Sort = Compiler.GetUniqueSort(plan, newOrderColumn.Column.DataType);
+				if (newOrderColumn.Sort.HasDependencies())
+					plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+				newOrder.Columns.Add(newOrderColumn);
 			}
 
-			return LNewOrder;
+			return newOrder;
 		}
 		
-		protected override void DetermineModifiers(Plan APlan)
+		protected override void DetermineModifiers(Plan plan)
 		{
-			base.DetermineModifiers(APlan);
+			base.DetermineModifiers(plan);
 			
 			if (Modifiers != null)
 				EnforcePredicate = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "EnforcePredicate", EnforcePredicate.ToString()));
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
+			DetermineModifiers(plan);
 			if (!Nodes[1].IsRepeatable)
 				throw new CompilerException(CompilerException.Codes.InvalidRestrictionCondition);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(SourceTableVar.MetaData);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 			CopyTableVarColumns(SourceTableVar.Columns);
-			DetermineRemotable(APlan);
+			DetermineRemotable(plan);
 			
-			DetermineSargability(APlan);
+			DetermineSargability(plan);
 			
 			CopyKeys(SourceTableVar.Keys);
 
-			int LColumnIndex;				
-			foreach (ColumnConditions LCondition in FConditions)
-				foreach (ColumnCondition LColumnCondition in LCondition)
-					if (LColumnCondition.Instruction == Instructions.Equal)
-						foreach (Schema.Key LKey in FTableVar.Keys)
+			int columnIndex;				
+			foreach (ColumnConditions condition in _conditions)
+				foreach (ColumnCondition columnCondition in condition)
+					if (columnCondition.Instruction == Instructions.Equal)
+						foreach (Schema.Key key in _tableVar.Keys)
 						{
-							LColumnIndex = LKey.Columns.IndexOfName(LCondition.Column.Name);
-							if (LColumnIndex >= 0)
+							columnIndex = key.Columns.IndexOfName(condition.Column.Name);
+							if (columnIndex >= 0)
 							{
-								LKey.Columns.RemoveAt(LColumnIndex);
+								key.Columns.RemoveAt(columnIndex);
 								
 								// A key reduced to the empty key by restriction is no longer sparse
-								if (LKey.Columns.Count == 0)
-									LKey.IsSparse = false;
+								if (key.Columns.Count == 0)
+									key.IsSparse = false;
 							}
 						}
 						
@@ -607,79 +607,79 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			CopyOrders(SourceTableVar.Orders);
 
 			#if UseReferenceDerivation
-			CopySourceReferences(APlan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(APlan, SourceTableVar.TargetReferences);
+			CopySourceReferences(plan, SourceTableVar.SourceReferences);
+			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
 			#endif
 
 			if ((Order == null) && (SourceNode.Order != null))
 				Order = CopyOrder(SourceNode.Order);
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
-			APlan.EnterRowContext();
+			Nodes[0].DetermineBinding(plan);
+			plan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(DataType.RowType));
+				plan.Symbols.Push(new Symbol(String.Empty, DataType.RowType));
 				try
 				{
-					Nodes[1].DetermineBinding(APlan);
+					Nodes[1].DetermineBinding(plan);
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
 		// open condition - a condition for which only one side of the range is specified (e.g. x > 5)
 		// closed condition - a condition for which both sides of the range are specified (e.g. x > 5 and x < 10) An = condition is considered closed (because it sets both the high and low range)
 		// scan condition - a condition which uses a relative comparison operator, can be open or closed (e.g. x > 5)
-		private void DetermineScanConditions(Plan APlan)
+		private void DetermineScanConditions(Plan plan)
 		{
-			FClosedConditions = new Conditions();
-			FOpenConditions = new Conditions();
-			FScanCondition = null;
+			_closedConditions = new Conditions();
+			_openConditions = new Conditions();
+			_scanCondition = null;
 			
-			for (int LIndex = 0; LIndex < FConditions.Count; LIndex++)
+			for (int index = 0; index < _conditions.Count; index++)
 			{
 				if 
 				(
-					((FConditions[LIndex].Count == 1) && (FConditions[LIndex][0].Instruction != Instructions.Equal)) || // There is only one condition, and its instruction is not equal, or
+					((_conditions[index].Count == 1) && (_conditions[index][0].Instruction != Instructions.Equal)) || // There is only one condition, and its instruction is not equal, or
 					(
-						(FConditions[LIndex].Count == 2) && // There are two conditions and
+						(_conditions[index].Count == 2) && // There are two conditions and
 						(
-							((FConditions[LIndex][0].Instruction == Instructions.Equal) ^ (FConditions[LIndex][1].Instruction == Instructions.Equal)) || // one or the other is equal, but not both, or
+							((_conditions[index][0].Instruction == Instructions.Equal) ^ (_conditions[index][1].Instruction == Instructions.Equal)) || // one or the other is equal, but not both, or
 							(
-								(Instructions.IsGreaterInstruction(FConditions[LIndex][0].Instruction) && Instructions.IsGreaterInstruction(FConditions[LIndex][1].Instruction)) || // both are greater instructions, or
-								(Instructions.IsLessInstruction(FConditions[LIndex][0].Instruction) && Instructions.IsLessInstruction(FConditions[LIndex][1].Instruction)) // both are less instructions
+								(Instructions.IsGreaterInstruction(_conditions[index][0].Instruction) && Instructions.IsGreaterInstruction(_conditions[index][1].Instruction)) || // both are greater instructions, or
+								(Instructions.IsLessInstruction(_conditions[index][0].Instruction) && Instructions.IsLessInstruction(_conditions[index][1].Instruction)) // both are less instructions
 							)
 						)
 					)
 				)
 				{
-					FScanCondition = FConditions[LIndex];
-					FOpenConditions.Add(FConditions[LIndex]);
-					if (Instructions.IsGreaterInstruction(FConditions[LIndex][0].Instruction) || ((FConditions[LIndex].Count > 1) && Instructions.IsGreaterInstruction(FConditions[LIndex][1].Instruction)))
-						FOpenConditionsUseFirstKey = true;
+					_scanCondition = _conditions[index];
+					_openConditions.Add(_conditions[index]);
+					if (Instructions.IsGreaterInstruction(_conditions[index][0].Instruction) || ((_conditions[index].Count > 1) && Instructions.IsGreaterInstruction(_conditions[index][1].Instruction)))
+						_openConditionsUseFirstKey = true;
 					else
-						FOpenConditionsUseFirstKey = false;
+						_openConditionsUseFirstKey = false;
 				}
 				else
 				{
-					FClosedConditions.Add(FConditions[LIndex]);
-					if (FConditions[LIndex][0].Instruction != Instructions.Equal)
-						FScanCondition = FConditions[LIndex];
+					_closedConditions.Add(_conditions[index]);
+					if (_conditions[index][0].Instruction != Instructions.Equal)
+						_scanCondition = _conditions[index];
 				}
 			}
 		}
 		
-		private bool ConvertSargableArguments(Plan APlan)
+		private bool ConvertSargableArguments(Plan plan)
 		{
 			// For each comparison,
 				// if the column referencing branch contains conversions, attempt to push the conversion to the context literal branch
@@ -688,81 +688,81 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// note that the original argument node is still participating in the condition expression
 				// this is acceptable because for sargable restrictions, the condition expression is only used
 				// for statement emission and device compilation, not for execution of the actual restriction.
-			bool LCanConvert = true;
-			for (int LColumnIndex = 0; LColumnIndex < FConditions.Count; LColumnIndex++)
+			bool canConvert = true;
+			for (int columnIndex = 0; columnIndex < _conditions.Count; columnIndex++)
 			{
-				Schema.TableVarColumn LColumn = FConditions[LColumnIndex].Column;
-				for (int LConditionIndex = 0; LConditionIndex < FConditions[LColumnIndex].Count; LConditionIndex++)
+				Schema.TableVarColumn column = _conditions[columnIndex].Column;
+				for (int conditionIndex = 0; conditionIndex < _conditions[columnIndex].Count; conditionIndex++)
 				{
-					ColumnCondition LCondition = FConditions[LColumnIndex][LConditionIndex];
-					if (!LCondition.ColumnReference.DataType.Equals(LColumn.DataType))
+					ColumnCondition condition = _conditions[columnIndex][conditionIndex];
+					if (!condition.ColumnReference.DataType.Equals(column.DataType))
 					{
 						// Find a conversion path to convert the type of the argument to the type of the column
-						ConversionContext LConversionContext = Compiler.FindConversionPath(APlan, LCondition.Argument.DataType, LColumn.DataType);
-						if (LConversionContext.CanConvert)
+						ConversionContext conversionContext = Compiler.FindConversionPath(plan, condition.Argument.DataType, column.DataType);
+						if (conversionContext.CanConvert)
 						{
-							LCondition.Argument = Compiler.ConvertNode(APlan, LCondition.Argument, LConversionContext);
+							condition.Argument = Compiler.ConvertNode(plan, condition.Argument, conversionContext);
 						}
 						else
 						{
-							APlan.Messages.Add(new CompilerException(CompilerException.Codes.CouldNotConvertSargableArgument, CompilerErrorLevel.Warning, APlan.CurrentStatement(), LColumn.Name, LConversionContext.SourceType.Name, LConversionContext.TargetType.Name));
-							LCanConvert = false;
+							plan.Messages.Add(new CompilerException(CompilerException.Codes.CouldNotConvertSargableArgument, CompilerErrorLevel.Warning, plan.CurrentStatement(), column.Name, conversionContext.SourceType.Name, conversionContext.TargetType.Name));
+							canConvert = false;
 						}
 					}
 				}
 			}
 			
-			return LCanConvert;
+			return canConvert;
 		}
 		
-		private void DetermineSargability(Plan APlan)
+		private void DetermineSargability(Plan plan)
 		{
-			FIsSeekable = false;
-			FIsScanable = false;
-			FConditions = new Conditions();			
+			_isSeekable = false;
+			_isScanable = false;
+			_conditions = new Conditions();			
 			
-			if (IsSargable(APlan, Nodes[1]) && ConvertSargableArguments(APlan))
+			if (IsSargable(plan, Nodes[1]) && ConvertSargableArguments(plan))
 			{
-				FIsSeekable = DetermineIsSeekable();
-				if (!FIsSeekable)
+				_isSeekable = DetermineIsSeekable();
+				if (!_isSeekable)
 				{
-					FIsScanable = DetermineIsScanable(APlan);
-					if (FIsScanable)
-						DetermineScanConditions(APlan);
+					_isScanable = DetermineIsScanable(plan);
+					if (_isScanable)
+						DetermineScanConditions(plan);
 				}
 			}
 		}
 		
-		private void DetermineRestrictionAlgorithm(Plan APlan)
+		private void DetermineRestrictionAlgorithm(Plan plan)
 		{
 			// determine restriction algorithm
-			FRestrictionAlgorithm = typeof(FilterTable);
+			_restrictionAlgorithm = typeof(FilterTable);
 
 			// If the node is not supported because of chunking, or because the scalar condition on the restrict was not supported,
 			// a filter must be used because a seek or scan would not be supported either			
 			// Note that the call to HasDeviceOperator is preventing a duplicate resolution in the case that the operator is not mapped.
-			if (((FDevice == null) || (FDevice.ResolveDeviceOperator(APlan, Operator) == null)) && (FIsSeekable || FIsScanable))
+			if (((_device == null) || (_device.ResolveDeviceOperator(plan, Operator) == null)) && (_isSeekable || _isScanable))
 			{
 				// if IsSargable returns true, a column conditions list has been built where
 				// the conditions for each column are separated and the comparison instructions are known
-				if (FIsSeekable)
+				if (_isSeekable)
 				{
 					// The condition contains only equal comparisons against all the columns of some key
-					Schema.Order LSeekOrder = FindSeekOrder(APlan);
-					Nodes[0] = Compiler.EnsureSearchableNode(APlan, SourceNode, LSeekOrder);
+					Schema.Order seekOrder = FindSeekOrder(plan);
+					Nodes[0] = Compiler.EnsureSearchableNode(plan, SourceNode, seekOrder);
 					Order = CopyOrder(SourceNode.Order);
-					FRestrictionAlgorithm = typeof(SeekTable);
-					FFirstKeyNodes = new Condition[Order.Columns.Count];
-					for (int LIndex = 0; LIndex < FFirstKeyNodes.Length; LIndex++)
-						FFirstKeyNodes[LIndex] = new Condition(FConditions[Order.Columns[LIndex].Column][0].Argument, false);
+					_restrictionAlgorithm = typeof(SeekTable);
+					_firstKeyNodes = new Condition[Order.Columns.Count];
+					for (int index = 0; index < _firstKeyNodes.Length; index++)
+						_firstKeyNodes[index] = new Condition(_conditions[Order.Columns[index].Column][0].Argument, false);
 				}
-				else if (FIsScanable)
+				else if (_isScanable)
 				{
 					// The condition contains range comparisons against the columns of some order
-					Schema.Order LScanOrder = FindScanOrder(APlan);
-					Nodes[0] = Compiler.EnsureSearchableNode(APlan, SourceNode, LScanOrder);
+					Schema.Order scanOrder = FindScanOrder(plan);
+					Nodes[0] = Compiler.EnsureSearchableNode(plan, SourceNode, scanOrder);
 					Order = CopyOrder(SourceNode.Order);
-					FRestrictionAlgorithm = typeof(ScanTable);
+					_restrictionAlgorithm = typeof(ScanTable);
 				}
 			}
 			else
@@ -772,150 +772,150 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override void DetermineDevice(Plan APlan)
+		public override void DetermineDevice(Plan plan)
 		{
-			base.DetermineDevice(APlan);
-			if (!FDeviceSupported)
+			base.DetermineDevice(plan);
+			if (!_deviceSupported)
 			{
-				DetermineRestrictionAlgorithm(APlan);
-				if (FRestrictionAlgorithm.Equals(typeof(ScanTable)))
-					FCursorCapabilities = FCursorCapabilities | CursorCapability.BackwardsNavigable | CursorCapability.Searchable;
-				else if (FRestrictionAlgorithm.Equals(typeof(SeekTable)))
-					FCursorCapabilities = FCursorCapabilities | CursorCapability.BackwardsNavigable;
+				DetermineRestrictionAlgorithm(plan);
+				if (_restrictionAlgorithm.Equals(typeof(ScanTable)))
+					_cursorCapabilities = _cursorCapabilities | CursorCapability.BackwardsNavigable | CursorCapability.Searchable;
+				else if (_restrictionAlgorithm.Equals(typeof(SeekTable)))
+					_cursorCapabilities = _cursorCapabilities | CursorCapability.BackwardsNavigable;
 			}
 		}
 		
-		private Conditions FConditions;
+		private Conditions _conditions;
 
-		private Conditions FClosedConditions;
+		private Conditions _closedConditions;
 		/// <summary>Conditions where both sides of the range are specified.</summary>
-		public Conditions ClosedConditions { get { return FClosedConditions; } }
+		public Conditions ClosedConditions { get { return _closedConditions; } }
 
-		private Conditions FOpenConditions;
+		private Conditions _openConditions;
 		/// <summary>Conditions where only one side of the range is specified.</summary>
-		public Conditions OpenConditions { get { return FOpenConditions; } }
+		public Conditions OpenConditions { get { return _openConditions; } }
 
 		// TODO: This does not seem to work in general, because it cannot capture the information for the case of multiple open conditions.
-		private bool FOpenConditionsUseFirstKey;
+		private bool _openConditionsUseFirstKey;
 		/// <summary>Indicates whether the open conditions should use the first key.</summary>
-		public bool OpenConditionsUseFirstKey { get { return FOpenConditionsUseFirstKey; } }
+		public bool OpenConditionsUseFirstKey { get { return _openConditionsUseFirstKey; } }
 		
-		private bool FIsSeekable;
+		private bool _isSeekable;
 		/// <summary>Indicates whether the restriction condition is seekable.</summary>
-		public bool IsSeekable { get { return FIsSeekable; } }
+		public bool IsSeekable { get { return _isSeekable; } }
 		
-		private bool FIsScanable;
+		private bool _isScanable;
 		/// <summary>Indicates wheter the restriction condition is scanable.</summary>
-		public bool IsScanable { get { return FIsScanable; } }
+		public bool IsScanable { get { return _isScanable; } }
 
-		private Type FRestrictionAlgorithm;
-		public Type RestrictionAlgorithm { get { return FRestrictionAlgorithm; } }
+		private Type _restrictionAlgorithm;
+		public Type RestrictionAlgorithm { get { return _restrictionAlgorithm; } }
 		
-		private ColumnConditions FScanCondition;
-		public ColumnConditions ScanCondition { get { return FScanCondition; } }
+		private ColumnConditions _scanCondition;
+		public ColumnConditions ScanCondition { get { return _scanCondition; } }
 		
-		private Condition[] FFirstKeyNodes;
-		public Condition[] FirstKeyNodes { get { return FFirstKeyNodes; } }
+		private Condition[] _firstKeyNodes;
+		public Condition[] FirstKeyNodes { get { return _firstKeyNodes; } }
 		
 		// BTR 10/22/2004 -> Removed to avoid warning
 		//private Condition[] FLastKeyNodes;
 		//public Condition[] LastKeyNodes { get { return FLastKeyNodes; } }
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = SourceNode.CursorType;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = 
+			_cursorType = SourceNode.CursorType;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = 
 				CursorCapability.Navigable | 
 				(
-					(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
 				);
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 		}
 		
 		// Execute
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			RestrictTable LTable = (RestrictTable)Activator.CreateInstance(FRestrictionAlgorithm, new object[]{this, AProgram});
+			RestrictTable table = (RestrictTable)Activator.CreateInstance(_restrictionAlgorithm, new object[]{this, program});
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 		
 		// Statement
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (FShouldEmit)
+			if (_shouldEmit)
 			{
-				Expression LExpression = new RestrictExpression((Expression)Nodes[0].EmitStatement(AMode), (Expression)Nodes[1].EmitStatement(AMode));
-				LExpression.Modifiers = Modifiers;
-				return LExpression;
+				Expression expression = new RestrictExpression((Expression)Nodes[0].EmitStatement(mode), (Expression)Nodes[1].EmitStatement(mode));
+				expression.Modifiers = Modifiers;
+				return expression;
 			}
 			else
-				return Nodes[0].EmitStatement(AMode);
+				return Nodes[0].EmitStatement(mode);
 		}
 
 		// Compiling an insert statement includes a 'where false' on the target expression as an optimization. This node is marked as ShouldEmit = false.
-		protected bool FShouldEmit = true;
+		protected bool _shouldEmit = true;
 		public bool ShouldEmit
 		{
-			get { return FShouldEmit; }
-			set { FShouldEmit = value; }
+			get { return _shouldEmit; }
+			set { _shouldEmit = value; }
 		}
 		
 		#if ENFORCERESTRICTIONPREDICATE
 		protected bool FEnforcePredicate = true;
 		#else
-		protected bool FEnforcePredicate = false;
+		protected bool _enforcePredicate = false;
 		#endif
 		public bool EnforcePredicate
 		{
-			get { return FEnforcePredicate; }
-			set { FEnforcePredicate = value; }
+			get { return _enforcePredicate; }
+			set { _enforcePredicate = value; }
 		}
 		
-		public override void DetermineRemotable(Plan APlan)
+		public override void DetermineRemotable(Plan plan)
 		{
-			base.DetermineRemotable(APlan);
+			base.DetermineRemotable(plan);
 			
-			FTableVar.ShouldValidate = FTableVar.ShouldValidate || FEnforcePredicate;
+			_tableVar.ShouldValidate = _tableVar.ShouldValidate || _enforcePredicate;
 		}
 		
 		// Validate
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if (FEnforcePredicate && (AColumnName == String.Empty))
+			if (_enforcePredicate && (columnName == String.Empty))
 			{
-				PushRow(AProgram, ANewRow);
+				PushRow(program, newRow);
 				try
 				{
-					object LObject = Nodes[1].Execute(AProgram);
+					object objectValue = Nodes[1].Execute(program);
 					// BTR 05/03/2005 -> Because the restriction considers nil to be false, the validation should consider it false as well.
-					if ((LObject == null) || !(bool)LObject)
+					if ((objectValue == null) || !(bool)objectValue)
 						throw new RuntimeException(RuntimeException.Codes.NewRowViolatesRestrictPredicate, ErrorSeverity.User);
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
 
-			return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+			return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 		}
 		
-		public override bool IsContextLiteral(int ALocation)
+		public override bool IsContextLiteral(int location)
 		{
-			if (!Nodes[0].IsContextLiteral(ALocation))
+			if (!Nodes[0].IsContextLiteral(location))
 				return false;
-			return Nodes[1].IsContextLiteral(ALocation + 1);
+			return Nodes[1].IsContextLiteral(location + 1);
 		}
     }
 }

@@ -12,8 +12,8 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class ViewListNode : SchemaListNode
 	{
-		public ViewListNode(string ALibraryName)
-			: base(ALibraryName)
+		public ViewListNode(string libraryName)
+			: base(libraryName)
 		{
 			Text = Strings.ObjectTree_ViewListNodeText;
 			ImageIndex = 29;
@@ -22,19 +22,19 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override string GetChildExpression()
 		{
-			return ".System.DerivedTableVars " + CSchemaListFilter + " over { Name }";
+			return ".System.DerivedTableVars " + SchemaListFilter + " over { Name }";
 		}
 
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
 		{
-			return new ViewNode(this, (string)ARow["Name"]);
+			return new ViewNode(this, (string)row["Name"]);
 		}
 	}
 
 	public class ViewNode : BaseTableNode
 	{
-		public ViewNode(SchemaListNode AParent, string AName)
-			: base(AParent, AName)
+		public ViewNode(SchemaListNode parent, string name)
+			: base(parent, name)
 		{
 			ImageIndex = 30;
 			SelectedImageIndex = 30;

@@ -4,6 +4,8 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+#define USENAMEDROWVARIABLES // Can be disabled independently in this unit without being disabled globally
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,384 +26,384 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 	public sealed class ApplicationTransactionUtility : System.Object
 	{
-		public static string NameFromID(Guid AID)
+		public static string NameFromID(Guid iD)
 		{
-			return String.Format("AT_{0}", AID.ToString().Replace("-", "_"));
+			return String.Format("AT_{0}", iD.ToString().Replace("-", "_"));
 		}
 		
 		/// <summary>Gets the application transaction and acquires a lock on it. The caller is responsible for releasing the lock.</summary>
-		public static ApplicationTransaction GetTransaction(ServerProcess AProcess, Guid AID)
+		public static ApplicationTransaction GetTransaction(ServerProcess process, Guid iD)
 		{
-			ApplicationTransaction LTransaction;
-			if (!AProcess.ServerSession.Server.ATDevice.ApplicationTransactions.TryGetValue(AID, out LTransaction))
-				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.InvalidApplicationTransactionID, AID);
+			ApplicationTransaction transaction;
+			if (!process.ServerSession.Server.ATDevice.ApplicationTransactions.TryGetValue(iD, out transaction))
+				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.InvalidApplicationTransactionID, iD);
 				
-			Monitor.Enter(LTransaction);
-			return LTransaction;
+			Monitor.Enter(transaction);
+			return transaction;
 		}
 
-		private static void Cleanup(ServerProcess AProcess, ApplicationTransaction ATransaction)
+		private static void Cleanup(ServerProcess process, ApplicationTransaction transaction)
 		{
-			Exception LException = null;
-			foreach (Operation LOperation in ATransaction.Operations)
+			Exception exception = null;
+			foreach (Operation operation in transaction.Operations)
 				try
 				{
-					LOperation.Dispose(AProcess.ValueManager);
+					operation.Dispose(process.ValueManager);
 				}
 				catch (Exception E)
 				{
-					LException = E;
+					exception = E;
 				}
 				
-			foreach (TableMap LTableMap in ATransaction.TableMaps)
+			foreach (TableMap tableMap in transaction.TableMaps)
 			{
 				try
 				{
-					if (LTableMap.TableVar is Schema.BaseTableVar)
-						ATransaction.Tables[LTableMap.TableVar].Drop(AProcess.ValueManager);
+					if (tableMap.TableVar is Schema.BaseTableVar)
+						transaction.Tables[tableMap.TableVar].Drop(process.ValueManager);
 				}
 				catch (Exception E)
 				{
-					LException = E;
+					exception = E;
 				}
 				try
 				{
-					if (LTableMap.DeletedTableVar is Schema.BaseTableVar)
-						ATransaction.Tables[LTableMap.DeletedTableVar].Drop(AProcess.ValueManager);
+					if (tableMap.DeletedTableVar is Schema.BaseTableVar)
+						transaction.Tables[tableMap.DeletedTableVar].Drop(process.ValueManager);
 				}
 				catch (Exception E)
 				{
-					LException = E;
+					exception = E;
 				}
 			}
 			
-			ServerProcess[] LProcesses = new ServerProcess[ATransaction.Processes.Count];
-			int LCounter = 0;
-			foreach (ServerProcess LProcess in ATransaction.Processes.Values)
+			ServerProcess[] processes = new ServerProcess[transaction.Processes.Count];
+			int counter = 0;
+			foreach (ServerProcess localProcess in transaction.Processes.Values)
 			{
-				LProcesses[LCounter] = LProcess;
-				LCounter++;
+				processes[counter] = localProcess;
+				counter++;
 			}
 			
-			for (int LIndex = 0; LIndex < LProcesses.Length; LIndex++)
+			for (int index = 0; index < processes.Length; index++)
 				try
 				{
-					LProcesses[LIndex].LeaveApplicationTransaction();
+					processes[index].LeaveApplicationTransaction();
 				}
 				catch (Exception E)
 				{
-					LException = E;
+					exception = E;
 				}
 		}
 
-		public static Guid BeginApplicationTransaction(ServerProcess AProcess)
+		public static Guid BeginApplicationTransaction(ServerProcess process)
 		{
-			ApplicationTransaction LTransaction = new ApplicationTransaction(AProcess.ServerSession);
-			LTransaction.Session.ApplicationTransactions.Add(LTransaction.ID, LTransaction);
-			AProcess.ServerSession.Server.ATDevice.ApplicationTransactions.Add(LTransaction.ID, LTransaction);
-			return LTransaction.ID;
+			ApplicationTransaction transaction = new ApplicationTransaction(process.ServerSession);
+			transaction.Session.ApplicationTransactions.Add(transaction.ID, transaction);
+			process.ServerSession.Server.ATDevice.ApplicationTransactions.Add(transaction.ID, transaction);
+			return transaction.ID;
 		}
 		
-		private static void EndApplicationTransaction(ServerProcess AProcess, Guid AID)
+		private static void EndApplicationTransaction(ServerProcess process, Guid iD)
 		{
-			ApplicationTransaction LTransaction = GetTransaction(AProcess, AID);
+			ApplicationTransaction transaction = GetTransaction(process, iD);
 			try
 			{
 				try
 				{
 					try
 					{
-						if (!LTransaction.Closed)
-							RollbackApplicationTransaction(AProcess, AID);
+						if (!transaction.Closed)
+							RollbackApplicationTransaction(process, iD);
 					}
 					finally
 					{
-						Cleanup(AProcess, LTransaction);
+						Cleanup(process, transaction);
 					}
 				}
 				finally
 				{
-					LTransaction.Session.ApplicationTransactions.Remove(AID);
-					LTransaction.Device.ApplicationTransactions.Remove(AID);
+					transaction.Session.ApplicationTransactions.Remove(iD);
+					transaction.Device.ApplicationTransactions.Remove(iD);
 				}
 			}
 			finally
 			{
-				Monitor.Exit(LTransaction);
+				Monitor.Exit(transaction);
 			}
 		}
 		
-		public static void JoinApplicationTransaction(ServerProcess AProcess, Guid AID)
+		public static void JoinApplicationTransaction(ServerProcess process, Guid iD)
 		{
-			if (AProcess.ApplicationTransactionID != Guid.Empty)
+			if (process.ApplicationTransactionID != Guid.Empty)
 				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ProcessAlreadyParticipating);
 			
-			ApplicationTransaction LTransaction = GetTransaction(AProcess, AID);
+			ApplicationTransaction transaction = GetTransaction(process, iD);
 			try
 			{
-				if (LTransaction.Closed)
+				if (transaction.Closed)
 					throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed);
-				LTransaction.Processes.Add(AProcess.ProcessID, AProcess);
+				transaction.Processes.Add(process.ProcessID, process);
 			}
 			finally
 			{
-				Monitor.Exit(LTransaction);
+				Monitor.Exit(transaction);
 			}
 		}
 		
-		public static void LeaveApplicationTransaction(ServerProcess AProcess)
+		public static void LeaveApplicationTransaction(ServerProcess process)
 		{
-			if (AProcess.ApplicationTransactionID != Guid.Empty)
+			if (process.ApplicationTransactionID != Guid.Empty)
 			{
-				ApplicationTransaction LTransaction = GetTransaction(AProcess, AProcess.ApplicationTransactionID);
+				ApplicationTransaction transaction = GetTransaction(process, process.ApplicationTransactionID);
 				try
 				{
-					LTransaction.Processes.Remove(AProcess.ProcessID);
-					AProcess.DeviceDisconnect(LTransaction.Device); // Disconnect the session to ensure that the saved pointer to this AT is cleared
+					transaction.Processes.Remove(process.ProcessID);
+					process.DeviceDisconnect(transaction.Device); // Disconnect the session to ensure that the saved pointer to this AT is cleared
 				}
 				finally
 				{
-					Monitor.Exit(LTransaction);
+					Monitor.Exit(transaction);
 				}
 			}
 		}
 		
-		public static void SetExplicitBind(PlanNode ANode)
+		public static void SetExplicitBind(PlanNode node)
 		{
-			if ((ANode is TableVarNode) && (((TableVarNode)ANode).TableVar.IsATObject))
-				((TableVarNode)ANode).ExplicitBind = true;
+			if ((node is TableVarNode) && (((TableVarNode)node).TableVar.IsATObject))
+				((TableVarNode)node).ExplicitBind = true;
 				
-			for (int LIndex = 0; LIndex < ANode.NodeCount; LIndex++)
-				SetExplicitBind(ANode.Nodes[LIndex]);
+			for (int index = 0; index < node.NodeCount; index++)
+				SetExplicitBind(node.Nodes[index]);
 		}
 		
-		public static TableNode PrepareJoinExpression(Plan APlan, TableNode ASourceNode, out TableNode APopulateNode)
+		public static TableNode PrepareJoinExpression(Plan plan, TableNode sourceNode, out TableNode populateNode)
 		{
-			ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
+			ApplicationTransaction transaction = plan.GetApplicationTransaction();
 			try
 			{
-				LTransaction.PushGlobalContext();
+				transaction.PushGlobalContext();
 				try
 				{
-					APlan.PushATCreationContext();
+					plan.PushATCreationContext();
 					try
 					{
-						APopulateNode = (TableNode)Compiler.CompileExpression(APlan, (Expression)ASourceNode.EmitStatement(EmitMode.ForCopy));
+						populateNode = Compiler.EnsureTableNode(plan, Compiler.CompileExpression(plan, (Expression)sourceNode.EmitStatement(EmitMode.ForCopy)));
 					}
 					finally
 					{
-						APlan.PopATCreationContext();
+						plan.PopATCreationContext();
 					}
 				}
 				finally
 				{
-					LTransaction.PopGlobalContext();
+					transaction.PopGlobalContext();
 				}
 
-				SetExplicitBind(ASourceNode);
-				return ASourceNode;
+				SetExplicitBind(sourceNode);
+				return sourceNode;
 			}
 			finally
 			{
-				Monitor.Exit(LTransaction);
+				Monitor.Exit(transaction);
 			}
 		}
 		
-		public static void JoinExpression(Program AProgram, TableNode APopulateNode, TableNode ATranslatedNode)
+		public static void JoinExpression(Program program, TableNode populateNode, TableNode translatedNode)
 		{
-			ApplicationTransaction LTransaction = AProgram.ServerProcess.GetApplicationTransaction();
+			ApplicationTransaction transaction = program.ServerProcess.GetApplicationTransaction();
 			try
 			{
-				LTransaction.BeginPopulateSource(AProgram.ServerProcess);
+				transaction.BeginPopulateSource(program.ServerProcess);
 				try
 				{
-					using (Table LTable = (Table)APopulateNode.Execute(AProgram))
+					using (Table table = (Table)populateNode.Execute(program))
 					{
-						Row LRow = new Row(AProgram.ValueManager, LTable.DataType.RowType);
+						Row row = new Row(program.ValueManager, table.DataType.RowType);
 						try
 						{
-							while (LTable.Next())
+							while (table.Next())
 							{
-								LTable.Select(LRow);
-								ATranslatedNode.JoinApplicationTransaction(AProgram, LRow);
+								table.Select(row);
+								translatedNode.JoinApplicationTransaction(program, row);
 							}
 						}
 						finally
 						{
-							LRow.Dispose();
+							row.Dispose();
 						}
 					}
 				}
 				finally
 				{
-					LTransaction.EndPopulateSource();
+					transaction.EndPopulateSource();
 				}
 			}
 			finally
 			{
-				Monitor.Exit(LTransaction);
+				Monitor.Exit(transaction);
 			}
 		}
 		
-		public static void PrepareApplicationTransaction(ServerProcess AProcess, Guid AID)
+		public static void PrepareApplicationTransaction(ServerProcess process, Guid iD)
 		{
-			Program LProgram = new Program(AProcess);
-			LProgram.Start(null);
+			Program program = new Program(process);
+			program.Start(null);
 			try
 			{
-				PrepareApplicationTransaction(LProgram, AID);
+				PrepareApplicationTransaction(program, iD);
 			}
 			finally
 			{
-				LProgram.Stop(null);
+				program.Stop(null);
 			}
 		}
 		
-		public static void PrepareApplicationTransaction(Program AProgram, Guid AID)
+		public static void PrepareApplicationTransaction(Program program, Guid iD)
 		{
-			Guid LSaveATID = AProgram.ServerProcess.ApplicationTransactionID;
-			if (AProgram.ServerProcess.ApplicationTransactionID != AID)
-				AProgram.ServerProcess.JoinApplicationTransaction(AID, true);
+			Guid saveATID = program.ServerProcess.ApplicationTransactionID;
+			if (program.ServerProcess.ApplicationTransactionID != iD)
+				program.ServerProcess.JoinApplicationTransaction(iD, true);
 			try
 			{
-				ApplicationTransaction LTransaction = GetTransaction(AProgram.ServerProcess, AID);
+				ApplicationTransaction transaction = GetTransaction(program.ServerProcess, iD);
 				try
 				{
-					LTransaction.PushGlobalContext();
+					transaction.PushGlobalContext();
 					try
 					{
-						ApplicationTransactionDeviceSession LSession = (ApplicationTransactionDeviceSession)AProgram.DeviceConnect(LTransaction.Device);
-						ApplicationTransactionDeviceTransaction LDeviceTransaction = null;
-						if (LSession.InTransaction)
-							LDeviceTransaction = LSession.Transactions.CurrentTransaction();
-						if (!LTransaction.Prepared)
+						ApplicationTransactionDeviceSession session = (ApplicationTransactionDeviceSession)program.DeviceConnect(transaction.Device);
+						ApplicationTransactionDeviceTransaction deviceTransaction = null;
+						if (session.InTransaction)
+							deviceTransaction = session.Transactions.CurrentTransaction();
+						if (!transaction.Prepared)
 						{
-							LTransaction.EnterATReplayContext();
+							transaction.EnterATReplayContext();
 							try
 							{
 								// This code relies on the assumption that operations will only ever be added to the end of the list of operations
-								Operation LOperation;
-								for (int LIndex = 0; LIndex < LTransaction.Operations.Count; LIndex++)
+								Operation operation;
+								for (int index = 0; index < transaction.Operations.Count; index++)
 								{
-									LOperation = LTransaction.Operations[LIndex];
-									LOperation.Apply(AProgram);
-									LDeviceTransaction.AppliedOperations.Add(LOperation);
+									operation = transaction.Operations[index];
+									operation.Apply(program);
+									deviceTransaction.AppliedOperations.Add(operation);
 								}
-								LTransaction.Prepared = true;
+								transaction.Prepared = true;
 							}
 							finally
 							{
-								LTransaction.ExitATReplayContext();
+								transaction.ExitATReplayContext();
 							}
 						}
 					}
 					finally
 					{
-						LTransaction.PopGlobalContext();
+						transaction.PopGlobalContext();
 					}
 				}
 				finally
 				{
-					Monitor.Exit(LTransaction);
+					Monitor.Exit(transaction);
 				}
 			}
 			finally
 			{
-				if (AProgram.ServerProcess.ApplicationTransactionID != LSaveATID)
-					AProgram.ServerProcess.LeaveApplicationTransaction();
+				if (program.ServerProcess.ApplicationTransactionID != saveATID)
+					program.ServerProcess.LeaveApplicationTransaction();
 			}
 		}
 		
-		public static void CommitApplicationTransaction(ServerProcess AProcess, Guid AID)
+		public static void CommitApplicationTransaction(ServerProcess process, Guid iD)
 		{
-			Program LProgram = new Program(AProcess);
-			LProgram.Start(null);
+			Program program = new Program(process);
+			program.Start(null);
 			try
 			{
-				CommitApplicationTransaction(LProgram, AID);
+				CommitApplicationTransaction(program, iD);
 			}
 			finally
 			{
-				LProgram.Stop(null);
+				program.Stop(null);
 			}
 		}
 		
-		public static void CommitApplicationTransaction(Program AProgram, Guid AID)
+		public static void CommitApplicationTransaction(Program program, Guid iD)
 		{
-			ApplicationTransaction LTransaction = GetTransaction(AProgram.ServerProcess, AID);
+			ApplicationTransaction transaction = GetTransaction(program.ServerProcess, iD);
 			try
 			{
-				if (!LTransaction.Prepared)
-					PrepareApplicationTransaction(AProgram, AID);
+				if (!transaction.Prepared)
+					PrepareApplicationTransaction(program, iD);
 					
-				LTransaction.Closed = true;
+				transaction.Closed = true;
 				
-				EndApplicationTransaction(AProgram.ServerProcess, AID);
+				EndApplicationTransaction(program.ServerProcess, iD);
 			}
 			finally
 			{
-				Monitor.Exit(LTransaction);
+				Monitor.Exit(transaction);
 			}
 		}
 		
-		public static void RollbackApplicationTransaction(ServerProcess AProcess, Guid AID)
+		public static void RollbackApplicationTransaction(ServerProcess process, Guid iD)
 		{
-			Program LProgram = new Program(AProcess);
-			LProgram.Start(null);
+			Program program = new Program(process);
+			program.Start(null);
 			try
 			{
-				RollbackApplicationTransaction(LProgram, AID);
+				RollbackApplicationTransaction(program, iD);
 			}
 			finally
 			{
-				LProgram.Stop(null);
+				program.Stop(null);
 			}
 		}
 		
-		public static void RollbackApplicationTransaction(Program AProgram, Guid AID)
+		public static void RollbackApplicationTransaction(Program program, Guid iD)
 		{
-			ApplicationTransaction LTransaction = GetTransaction(AProgram.ServerProcess, AID);
+			ApplicationTransaction transaction = GetTransaction(program.ServerProcess, iD);
 			try
 			{
-				Exception LException = null;
+				Exception exception = null;
 
-				if (LTransaction.Prepared)
+				if (transaction.Prepared)
 				{
-					LTransaction.PushGlobalContext();
+					transaction.PushGlobalContext();
 					try
 					{
-						for (int LIndex = LTransaction.Operations.Count - 1; LIndex >= 0; LIndex--)
+						for (int index = transaction.Operations.Count - 1; index >= 0; index--)
 						{
 							try
 							{
-								LTransaction.Operations[LIndex].Undo(AProgram);
+								transaction.Operations[index].Undo(program);
 							}
 							catch (Exception E)
 							{
-								LException = E;
-								AProgram.ServerProcess.ServerSession.Server.LogError(E);
+								exception = E;
+								program.ServerProcess.ServerSession.Server.LogError(E);
 							}
 						}
 						
-						LTransaction.Prepared = false;
+						transaction.Prepared = false;
 
 					}
 					finally
 					{
-						LTransaction.PopGlobalContext();
+						transaction.PopGlobalContext();
 					}
 				}
 				
-				LTransaction.Closed = true;
+				transaction.Closed = true;
 
-				EndApplicationTransaction(AProgram.ServerProcess, AID);
+				EndApplicationTransaction(program.ServerProcess, iD);
 
-				if (LException != null)
-					throw LException;
+				if (exception != null)
+					throw exception;
 			}
 			finally
 			{
-				Monitor.Exit(LTransaction);
+				Monitor.Exit(transaction);
 			}
 		}
 	}
@@ -416,12 +418,12 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class BeginApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			if (AArguments.Length > 0)
-				return AProgram.ServerProcess.BeginApplicationTransaction((bool)AArguments[0], (bool)AArguments[1]);
+			if (arguments.Length > 0)
+				return program.ServerProcess.BeginApplicationTransaction((bool)arguments[0], (bool)arguments[1]);
 			else
-				return AProgram.ServerProcess.BeginApplicationTransaction(false, false);
+				return program.ServerProcess.BeginApplicationTransaction(false, false);
 		}
 	}
 	
@@ -431,11 +433,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class JoinApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Guid LApplicationTransactionID = (Guid)AArguments[0];
-			bool LIsInsert = (bool)AArguments[1];
-			AProgram.ServerProcess.JoinApplicationTransaction(LApplicationTransactionID, LIsInsert);
+			Guid applicationTransactionID = (Guid)arguments[0];
+			bool isInsert = (bool)arguments[1];
+			program.ServerProcess.JoinApplicationTransaction(applicationTransactionID, isInsert);
 			return null;
 		}
 	}
@@ -446,18 +448,18 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class LeaveApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			AProgram.ServerProcess.LeaveApplicationTransaction();
+			program.ServerProcess.LeaveApplicationTransaction();
 			return null;
 		}
 	}
 
 	public class PrepareApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			AProgram.ServerProcess.PrepareApplicationTransaction((Guid)AArguments[0]);
+			program.ServerProcess.PrepareApplicationTransaction((Guid)arguments[0]);
 			return null;
 		}
 	}
@@ -471,10 +473,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	/// </remarks>
 	public class CommitApplicationTransactionNode : CompleteApplicationTransactionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Guid LApplicationTransactionID = (Guid)AArguments[0];
-			AProgram.ServerProcess.CommitApplicationTransaction(LApplicationTransactionID);
+			Guid applicationTransactionID = (Guid)arguments[0];
+			program.ServerProcess.CommitApplicationTransaction(applicationTransactionID);
 			return null;
 		}
 	}
@@ -486,21 +488,21 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class RollbackApplicationTransactionNode : CompleteApplicationTransactionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Guid LApplicationTransactionID = (Guid)AArguments[0];
-			AProgram.ServerProcess.RollbackApplicationTransaction(LApplicationTransactionID);
+			Guid applicationTransactionID = (Guid)arguments[0];
+			program.ServerProcess.RollbackApplicationTransaction(applicationTransactionID);
 			return null;
 		}
 	}
 	
 	public class TableMapHeader : System.Object
 	{
-		public TableMapHeader(int ASourceTableVarID, int ATranslatedTableVarID, int ADeletedTableVarID) : base()
+		public TableMapHeader(int sourceTableVarID, int translatedTableVarID, int deletedTableVarID) : base()
 		{
-			SourceTableVarID = ASourceTableVarID;
-			TranslatedTableVarID = ATranslatedTableVarID;
-			DeletedTableVarID = ADeletedTableVarID;
+			SourceTableVarID = sourceTableVarID;
+			TranslatedTableVarID = translatedTableVarID;
+			DeletedTableVarID = deletedTableVarID;
 		}
 		
 		public int SourceTableVarID;
@@ -510,212 +512,212 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 	public class TableMap : Schema.Object
 	{
-		public TableMap(string ATableVarName) : base(ATableVarName) {}
+		public TableMap(string tableVarName) : base(tableVarName) {}
 		
-		private TableVar FTableVar;
+		private TableVar _tableVar;
 		public TableVar TableVar 
 		{ 
-			get { return FTableVar; } 
-			set { FTableVar = value; }
+			get { return _tableVar; } 
+			set { _tableVar = value; }
 		}
 		
 		public Schema.IRowType RowType { get { return TableVar.DataType.RowType; } }
 		
-		private BitArray FValueFlags;
+		private BitArray _valueFlags;
 		public BitArray ValueFlags
 		{
 			get
 			{
-				if (FValueFlags == null)
+				if (_valueFlags == null)
 				{
-					FValueFlags = new BitArray(RowType.Columns.Count);
-					for (int LIndex = 0; LIndex < FValueFlags.Length; LIndex++)
-						FValueFlags[LIndex] = true;
+					_valueFlags = new BitArray(RowType.Columns.Count);
+					for (int index = 0; index < _valueFlags.Length; index++)
+						_valueFlags[index] = true;
 				}
 				
-				return FValueFlags;
+				return _valueFlags;
 			}
 		}
 
-		private TableVar FDeletedTableVar;
+		private TableVar _deletedTableVar;
 		public TableVar DeletedTableVar 
 		{ 
-			get { return FDeletedTableVar; } 
-			set { FDeletedTableVar = value; }
+			get { return _deletedTableVar; } 
+			set { _deletedTableVar = value; }
 		}
 		
-		private TableVar FSourceTableVar;
+		private TableVar _sourceTableVar;
 		public TableVar SourceTableVar 
 		{ 
-			get { return FSourceTableVar; } 
-			set { FSourceTableVar = value; }
+			get { return _sourceTableVar; } 
+			set { _sourceTableVar = value; }
 		}
 		
-		private BaseTableVarNode FRetrieveNode;
+		private BaseTableVarNode _retrieveNode;
 		public BaseTableVarNode RetrieveNode
 		{
-			get { return FRetrieveNode; }
-			set { FRetrieveNode = value; }
+			get { return _retrieveNode; }
+			set { _retrieveNode = value; }
 		}
 		
-		private PlanNode FHasRowNode;
+		private PlanNode _hasRowNode;
 		public PlanNode HasRowNode
 		{
-			get { return FHasRowNode; }
-			set { FHasRowNode = value; }
+			get { return _hasRowNode; }
+			set { _hasRowNode = value; }
 		}
 		
-		private PlanNode FHasDeletedRowNode;
+		private PlanNode _hasDeletedRowNode;
 		public PlanNode HasDeletedRowNode
 		{
-			get { return FHasDeletedRowNode; }
-			set { FHasDeletedRowNode = value; }
+			get { return _hasDeletedRowNode; }
+			set { _hasDeletedRowNode = value; }
 		}
 		
-		private BaseTableVarNode FDeletedRetrieveNode;
+		private BaseTableVarNode _deletedRetrieveNode;
 		public BaseTableVarNode DeletedRetrieveNode
 		{
-			get { return FDeletedRetrieveNode; }
-			set { FDeletedRetrieveNode = value; }
+			get { return _deletedRetrieveNode; }
+			set { _deletedRetrieveNode = value; }
 		}
 		
-		private bool FDropped;
+		private bool _dropped;
 		public bool Dropped
 		{
-			get { return FDropped; }
-			set { FDropped = value; }
+			get { return _dropped; }
+			set { _dropped = value; }
 		}
 	}
 	
 	public class TableMaps : Schema.Objects
 	{
-		public TableMap this[TableVar ATableVar] { get { return this[ATableVar.Name]; } }
+		public TableMap this[TableVar tableVar] { get { return this[tableVar.Name]; } }
 		
-		public new TableMap this[int AIndex] { get { return (TableMap)base[AIndex]; } }
+		public new TableMap this[int index] { get { return (TableMap)base[index]; } }
 		
-		public new TableMap this[string ATableName] { get { return (TableMap)base[ATableName]; } }
+		public new TableMap this[string tableName] { get { return (TableMap)base[tableName]; } }
 	}
 	
 	public class OperatorMap : Schema.Object
 	{
-		public OperatorMap(string AOperatorName, string ATranslatedOperatorName) : base(AOperatorName)
+		public OperatorMap(string operatorName, string translatedOperatorName) : base(operatorName)
 		{
-			FTranslatedOperatorName = ATranslatedOperatorName;
+			_translatedOperatorName = translatedOperatorName;
 		}
 		
-		private string FTranslatedOperatorName;
+		private string _translatedOperatorName;
 		public string TranslatedOperatorName
 		{
-			get { return FTranslatedOperatorName; }
-			set { FTranslatedOperatorName = value; }
+			get { return _translatedOperatorName; }
+			set { _translatedOperatorName = value; }
 		}
 		
-		private Schema.Objects FOperators = new Schema.Objects();
-		public Schema.Objects Operators { get { return FOperators; } }
+		private Schema.Objects _operators = new Schema.Objects();
+		public Schema.Objects Operators { get { return _operators; } }
 		
 		/// <summary>Returns the translated operator for the given source operator, if it exists. Null otherwise.</summary>
-		public Schema.Operator ResolveTranslatedOperator(Schema.Operator ASourceOperator)
+		public Schema.Operator ResolveTranslatedOperator(Schema.Operator sourceOperator)
 		{
-			foreach (Schema.Operator LTranslatedOperator in FOperators)
-				if (LTranslatedOperator.Signature.Equals(ASourceOperator.Signature))
-					return LTranslatedOperator;
+			foreach (Schema.Operator translatedOperator in _operators)
+				if (translatedOperator.Signature.Equals(sourceOperator.Signature))
+					return translatedOperator;
 			return null;
 		}
 		
-		private bool FDropped;
+		private bool _dropped;
 		public bool Dropped
 		{
-			get { return FDropped; }
-			set { FDropped = value; }
+			get { return _dropped; }
+			set { _dropped = value; }
 		}
 	}
 	
 	public class OperatorMaps : Schema.Objects
 	{
-		public OperatorMap this[Operator AOperator] { get { return this[AOperator.OperatorName]; } }
+		public OperatorMap this[Operator operatorValue] { get { return this[operatorValue.OperatorName]; } }
 		
-		public new OperatorMap this[int AIndex] { get { return (OperatorMap)base[AIndex]; } }
+		public new OperatorMap this[int index] { get { return (OperatorMap)base[index]; } }
 		
-		public new OperatorMap this[string AOperatorName] { get { return (OperatorMap)base[AOperatorName]; } }
+		public new OperatorMap this[string operatorName] { get { return (OperatorMap)base[operatorName]; } }
 	}
 	
 	public class ApplicationTransaction : System.Object
 	{
-		public ApplicationTransaction(ServerSession ASession) : base()
+		public ApplicationTransaction(ServerSession session) : base()
 		{
-			FSession = ASession;
-			FDevice = ASession.Server.ATDevice;
+			_session = session;
+			_device = session.Server.ATDevice;
 		}
 		
-		private Guid FID = Guid.NewGuid();
+		private Guid _iD = Guid.NewGuid();
 		/// <summary>The unique identifier for this application transaction.</summary>
-		public Guid ID { get { return FID; } }
+		public Guid ID { get { return _iD; } }
 		
-		private ServerSession FSession;
+		private ServerSession _session;
 		/// <summary>The server session managing this application transaction.</summary>
-		public ServerSession Session { get { return FSession; } }
+		public ServerSession Session { get { return _session; } }
 		
-		private ApplicationTransactionDevice FDevice;
+		private ApplicationTransactionDevice _device;
 		/// <summary>The application transaction device for the server.</summary>
-		public ApplicationTransactionDevice Device { get { return FDevice; } }
+		public ApplicationTransactionDevice Device { get { return _device; } }
 		
 		// List of tables in the application transaction, and the deleted table and source mapping for each
-		private TableMaps FTableMaps = new TableMaps();
-		public TableMaps TableMaps { get { return FTableMaps; } }
+		private TableMaps _tableMaps = new TableMaps();
+		public TableMaps TableMaps { get { return _tableMaps; } }
 		
 		// List of operators in the application transaction
-		private OperatorMaps FOperatorMaps = new OperatorMaps();
-		public OperatorMaps OperatorMaps { get { return FOperatorMaps; } }
+		private OperatorMaps _operatorMaps = new OperatorMaps();
+		public OperatorMaps OperatorMaps { get { return _operatorMaps; } }
 		
-		private NativeTables FTables = new NativeTables();
+		private NativeTables _tables = new NativeTables();
 		/// <summary>The storage tables for the table variables within the application transaction.</summary>
-		public NativeTables Tables { get { return FTables; } }
+		public NativeTables Tables { get { return _tables; } }
 
 		// List of operations taking place in the transaction
-		private Operations FOperations = new Operations();
-		public Operations Operations { get { return FOperations; } }
+		private Operations _operations = new Operations();
+		public Operations Operations { get { return _operations; } }
 		
 		// Dictionary of processes (by ID) participating in the transaction
-		private Dictionary<int, ServerProcess> FProcesses = new Dictionary<int, ServerProcess>();
-		public Dictionary<int, ServerProcess> Processes { get { return FProcesses; } }
+		private Dictionary<int, ServerProcess> _processes = new Dictionary<int, ServerProcess>();
+		public Dictionary<int, ServerProcess> Processes { get { return _processes; } }
 		
 		// List of event handlers that have fired in this application transaction.  Event handlers in this list will not fire during an ATReplay
-		private Schema.EventHandlers FInvokedHandlers = new Schema.EventHandlers();
-		public Schema.EventHandlers InvokedHandlers { get { return FInvokedHandlers; } }
+		private Schema.EventHandlers _invokedHandlers = new Schema.EventHandlers();
+		public Schema.EventHandlers InvokedHandlers { get { return _invokedHandlers; } }
 		
 		// Returns true if the application transaction specific equivalent of the given event-handler was invoked during this application transaction
-		public bool WasInvoked(Schema.EventHandler AHandler)
+		public bool WasInvoked(Schema.EventHandler handler)
 		{
-			foreach (Schema.EventHandler LHandler in FInvokedHandlers)
-				if ((LHandler.ATHandlerName != null) && Schema.Object.NamesEqual(LHandler.ATHandlerName, AHandler.Name))
+			foreach (Schema.EventHandler localHandler in _invokedHandlers)
+				if ((localHandler.ATHandlerName != null) && Schema.Object.NamesEqual(localHandler.ATHandlerName, handler.Name))
 					return true;
 			return false;
 		}
 		
 		// Prepared
-		private bool FPrepared;
+		private bool _prepared;
 		public bool Prepared 
 		{
-			get { return FPrepared; } 
-			set { FPrepared = value; } 
+			get { return _prepared; } 
+			set { _prepared = value; } 
 		}
 		
 		// Closed
-		private bool FClosed;
+		private bool _closed;
 		public bool Closed 
 		{
-			get { return FClosed; } 
-			set { FClosed = value; } 
+			get { return _closed; } 
+			set { _closed = value; } 
 		}
 		
-		private ServerProcess FPopulatingProcess;
-		public void BeginPopulateSource(ServerProcess AProcess)
+		private ServerProcess _populatingProcess;
+		public void BeginPopulateSource(ServerProcess process)
 		{
 			lock (this)
 			{
-				if (FPopulatingProcess != null)
+				if (_populatingProcess != null)
 					throw new ApplicationTransactionException(ApplicationTransactionException.Codes.SourceAlreadyPopulating, ID.ToString());
-				FPopulatingProcess = AProcess;
+				_populatingProcess = process;
 			}
 		}
 		
@@ -723,29 +725,29 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		{
 			lock (this)
 			{
-				FPopulatingProcess = null;
+				_populatingProcess = null;
 			}
 		}
 		
-		public bool IsPopulatingSource { get { return FPopulatingProcess != null; } }
+		public bool IsPopulatingSource { get { return _populatingProcess != null; } }
 		
 		// ATReplayContext
-		protected int FATReplayCount;
+		protected int _aTReplayCount;
 		/// <summary>Indicates whether this device is replaying an application transaction.</summary>
-		public bool InATReplayContext { get { return FATReplayCount > 0; } }
+		public bool InATReplayContext { get { return _aTReplayCount > 0; } }
 		
 		public void EnterATReplayContext()
 		{
-			FATReplayCount++;
+			_aTReplayCount++;
 		}
 		
 		public void ExitATReplayContext()
 		{
-			FATReplayCount--;
+			_aTReplayCount--;
 		}
 		
 		// IsGlobalContext
-		private int FGlobalContextCount;
+		private int _globalContextCount;
 		/// <summary>Indicates whether or not the A/T is currently in a global context, preventing enlistment and resolution of A/T objects.</summary>
 		/// <remarks>
 		/// A global context is used to indicate that the process or plan is currently in a context in which no resolution
@@ -757,7 +759,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		///    - Determining whether to enlist a non-A/T resolved operator, it prevents the enlistment
 		///    - Compiling an A/T populate node, it prevents the creation of the node
 		/// </remarks>
-		public bool IsGlobalContext { get { return FGlobalContextCount > 0; } }
+		public bool IsGlobalContext { get { return _globalContextCount > 0; } }
 		
 		/// <summary>Pushes a global context to prevent resolution and enlistment into this A/T.</summary>
 		/// <remarks>
@@ -787,7 +789,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		{
 			lock (this)
 			{
-				FGlobalContextCount++;
+				_globalContextCount++;
 			}
 		}
 		
@@ -795,24 +797,24 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		{
 			lock (this)
 			{
-				FGlobalContextCount--;
+				_globalContextCount--;
 			}
 		}
 		
 		// IsLookup
-		private int FLookupCount = 0;
+		private int _lookupCount = 0;
 		/// <summary>Indicates whether or not we are currently in a lookup context and should not resolve or enlist A/T variables.</summary>
 		/// <remarks>
 		/// A lookup context is entered when compiling the right side of a left lookup, and is used to prevent the compiler from entering
 		/// an A/T on a table that is not going to be modified by the current A/T.
 		/// </remarks>
-		public bool IsLookup { get { return FLookupCount > 0; } }
+		public bool IsLookup { get { return _lookupCount > 0; } }
 		
 		public void PushLookup()
 		{
 			lock (this)
 			{
-				FLookupCount++;
+				_lookupCount++;
 			}
 		}
 		
@@ -820,188 +822,188 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		{
 			lock (this)
 			{
-				FLookupCount--;
+				_lookupCount--;
 			}
 		}
 		
-		private void AddTableMap(ServerProcess AProcess, TableMap ATableMap)
+		private void AddTableMap(ServerProcess process, TableMap tableMap)
 		{
-			int LTableMapIndex = FTableMaps.IndexOfName(ATableMap.SourceTableVar.Name);
-			if (LTableMapIndex >= 0)
+			int tableMapIndex = _tableMaps.IndexOfName(tableMap.SourceTableVar.Name);
+			if (tableMapIndex >= 0)
 			{
-				if (ATableMap.SourceTableVar is Schema.BaseTableVar)
+				if (tableMap.SourceTableVar is Schema.BaseTableVar)
 				{
-					if (!Tables.Contains(ATableMap.TableVar))
-						Tables.Add(new NativeTable(AProcess.ValueManager, ATableMap.TableVar));
+					if (!Tables.Contains(tableMap.TableVar))
+						Tables.Add(new NativeTable(process.ValueManager, tableMap.TableVar));
 						
-					if ((ATableMap.DeletedTableVar != null) && !Tables.Contains(ATableMap.DeletedTableVar))
-						Tables.Add(new NativeTable(AProcess.ValueManager, ATableMap.DeletedTableVar));
+					if ((tableMap.DeletedTableVar != null) && !Tables.Contains(tableMap.DeletedTableVar))
+						Tables.Add(new NativeTable(process.ValueManager, tableMap.DeletedTableVar));
 				}
 			}
 			else
 			{
-				FTableMaps.Add(ATableMap);
-				if (ATableMap.SourceTableVar is Schema.BaseTableVar)
+				_tableMaps.Add(tableMap);
+				if (tableMap.SourceTableVar is Schema.BaseTableVar)
 				{
-					Tables.Add(new NativeTable(AProcess.ValueManager, ATableMap.TableVar));
-					if (ATableMap.DeletedTableVar != null)
-						Tables.Add(new NativeTable(AProcess.ValueManager, ATableMap.DeletedTableVar));
+					Tables.Add(new NativeTable(process.ValueManager, tableMap.TableVar));
+					if (tableMap.DeletedTableVar != null)
+						Tables.Add(new NativeTable(process.ValueManager, tableMap.DeletedTableVar));
 				}
 			}
 		}
 		
-		private void AddDependencies(ServerProcess AProcess, Schema.Object AObject)
+		private void AddDependencies(ServerProcess process, Schema.Object objectValue)
 		{
-			Schema.Object LObject;
-			if (AObject.HasDependencies())
-				for (int LIndex = 0; LIndex < AObject.Dependencies.Count; LIndex++)
+			Schema.Object localObjectValue;
+			if (objectValue.HasDependencies())
+				for (int index = 0; index < objectValue.Dependencies.Count; index++)
 				{
-					LObject = AObject.Dependencies.ResolveObject(AProcess.CatalogDeviceSession, LIndex);
-					if (LObject.IsATObject)
+					localObjectValue = objectValue.Dependencies.ResolveObject(process.CatalogDeviceSession, index);
+					if (localObjectValue.IsATObject)
 					{
-						Schema.TableVar LTableVar = LObject as Schema.TableVar;
-						if (LTableVar != null)
+						Schema.TableVar tableVar = localObjectValue as Schema.TableVar;
+						if (tableVar != null)
 						{
-							EnsureATTableVarMapped(AProcess, LTableVar);
+							EnsureATTableVarMapped(process, tableVar);
 							continue;
 						}
 						
-						Schema.Operator LOperator = LObject as Schema.Operator;
-						if (LOperator != null)
+						Schema.Operator operatorValue = localObjectValue as Schema.Operator;
+						if (operatorValue != null)
 						{
-							EnsureATOperatorMapped(AProcess, LOperator);
+							EnsureATOperatorMapped(process, operatorValue);
 							continue;
 						}
 					}
 				}
 		}
 		
-		private void AddDependencies(ServerProcess AProcess, TableMap ATableMap)
+		private void AddDependencies(ServerProcess process, TableMap tableMap)
 		{
-			AddDependencies(AProcess, ATableMap.TableVar);
+			AddDependencies(process, tableMap.TableVar);
 			
 			// Add dependencies for default expressions, event handlers, and column-level event handlers
-			foreach (Schema.TableVarColumn LColumn in ATableMap.TableVar.Columns)
+			foreach (Schema.TableVarColumn column in tableMap.TableVar.Columns)
 			{
-				if (LColumn.Default != null)
-					AddDependencies(AProcess, LColumn.Default);
+				if (column.Default != null)
+					AddDependencies(process, column.Default);
 
-				if (LColumn.HasHandlers())
-					foreach (Schema.EventHandler LHandler in LColumn.EventHandlers)
-						if (LHandler.Operator.IsATObject)
-							EnsureATOperatorMapped(AProcess, LHandler.Operator);
+				if (column.HasHandlers())
+					foreach (Schema.EventHandler handler in column.EventHandlers)
+						if (handler.Operator.IsATObject)
+							EnsureATOperatorMapped(process, handler.Operator);
 			}
 
-			if (ATableMap.TableVar.HasHandlers())			
-				foreach (Schema.EventHandler LHandler in ATableMap.TableVar.EventHandlers)
-					if (LHandler.Operator.IsATObject)
-						EnsureATOperatorMapped(AProcess, LHandler.Operator);
+			if (tableMap.TableVar.HasHandlers())			
+				foreach (Schema.EventHandler handler in tableMap.TableVar.EventHandlers)
+					if (handler.Operator.IsATObject)
+						EnsureATOperatorMapped(process, handler.Operator);
 		}
 		
-		public void EnsureATTableVarMapped(ServerProcess AProcess, Schema.TableVar AATTableVar)
+		public void EnsureATTableVarMapped(ServerProcess process, Schema.TableVar aTTableVar)
 		{
-			lock (AProcess.Catalog)
+			lock (process.Catalog)
 			{
 				lock (Device)
 				{
-					int LIndex = Device.TableMaps.IndexOfName(AATTableVar.SourceTableName);
-					if (LIndex >= 0)
+					int index = Device.TableMaps.IndexOfName(aTTableVar.SourceTableName);
+					if (index >= 0)
 					{
-						TableMap LTableMap = Device.TableMaps[AATTableVar.SourceTableName];
-						if (!FTableMaps.ContainsName(LTableMap.SourceTableVar.Name))
+						TableMap tableMap = Device.TableMaps[aTTableVar.SourceTableName];
+						if (!_tableMaps.ContainsName(tableMap.SourceTableVar.Name))
 						{
-							AddTableMap(AProcess, LTableMap);
-							AddDependencies(AProcess, LTableMap);
+							AddTableMap(process, tableMap);
+							AddDependencies(process, tableMap);
 						}
 					}
 					else
 					{
-						Device.AddTableVar(AProcess, (Schema.TableVar)AProcess.CatalogDeviceSession.ResolveName(Schema.Object.EnsureRooted(AATTableVar.SourceTableName), AProcess.ServerSession.NameResolutionPath, new List<string>()));
-						AddTableMap(AProcess, Device.TableMaps[AATTableVar.SourceTableName]);
+						Device.AddTableVar(process, (Schema.TableVar)process.CatalogDeviceSession.ResolveName(Schema.Object.EnsureRooted(aTTableVar.SourceTableName), process.ServerSession.NameResolutionPath, new List<string>()));
+						AddTableMap(process, Device.TableMaps[aTTableVar.SourceTableName]);
 					}
 				}
 			}
 		}
 		
-		public Schema.TableVar AddTableVar(ServerProcess AProcess, Schema.TableVar ASourceTableVar)
+		public Schema.TableVar AddTableVar(ServerProcess process, Schema.TableVar sourceTableVar)
 		{
-			lock (AProcess.Catalog)
+			lock (process.Catalog)
 			{
 				lock (Device)
 				{
-					int LIndex = Device.TableMaps.IndexOfName(ASourceTableVar.Name);
-					if (LIndex >= 0)
+					int index = Device.TableMaps.IndexOfName(sourceTableVar.Name);
+					if (index >= 0)
 					{
-						TableMap LTableMap = Device.TableMaps[LIndex];
-						AddTableMap(AProcess, LTableMap);
-						AddDependencies(AProcess, LTableMap);
-						return LTableMap.TableVar;
+						TableMap tableMap = Device.TableMaps[index];
+						AddTableMap(process, tableMap);
+						AddDependencies(process, tableMap);
+						return tableMap.TableVar;
 					}
 					else
 					{
-						Schema.TableVar LResult = Device.AddTableVar(AProcess, ASourceTableVar);
-						AddTableMap(AProcess, Device.TableMaps[ASourceTableVar.Name]);
-						return LResult;
+						Schema.TableVar result = Device.AddTableVar(process, sourceTableVar);
+						AddTableMap(process, Device.TableMaps[sourceTableVar.Name]);
+						return result;
 					}
 				}
 			}
 		}
 		
-		public OperatorMap EnsureOperatorMap(ServerProcess AProcess, OperatorMap ADeviceOperatorMap)
+		public OperatorMap EnsureOperatorMap(ServerProcess process, OperatorMap deviceOperatorMap)
 		{
-			int LIndex = FOperatorMaps.IndexOfName(ADeviceOperatorMap.Name);
-			if (LIndex >= 0)
-				return FOperatorMaps[LIndex];
+			int index = _operatorMaps.IndexOfName(deviceOperatorMap.Name);
+			if (index >= 0)
+				return _operatorMaps[index];
 			else
 			{
-				OperatorMap LOperatorMap = new OperatorMap(ADeviceOperatorMap.Name, ADeviceOperatorMap.TranslatedOperatorName);
-				FOperatorMaps.Add(LOperatorMap);
-				return LOperatorMap;
+				OperatorMap operatorMap = new OperatorMap(deviceOperatorMap.Name, deviceOperatorMap.TranslatedOperatorName);
+				_operatorMaps.Add(operatorMap);
+				return operatorMap;
 			}
 		}
 		
-		public void EnsureATOperatorMapped(ServerProcess AProcess, Schema.Operator AATOperator)
+		public void EnsureATOperatorMapped(ServerProcess process, Schema.Operator aTOperator)
 		{
-			OperatorMap LDeviceOperatorMap = Device.EnsureOperatorMap(AProcess, AATOperator.SourceOperatorName, AATOperator.OperatorName);
-			OperatorMap LTransactionOperatorMap = EnsureOperatorMap(AProcess, LDeviceOperatorMap);
-			if (!LTransactionOperatorMap.Operators.ContainsName(AATOperator.Name))
+			OperatorMap deviceOperatorMap = Device.EnsureOperatorMap(process, aTOperator.SourceOperatorName, aTOperator.OperatorName);
+			OperatorMap transactionOperatorMap = EnsureOperatorMap(process, deviceOperatorMap);
+			if (!transactionOperatorMap.Operators.ContainsName(aTOperator.Name))
 			{
-				LTransactionOperatorMap.Operators.Add(AATOperator);
-				AddDependencies(AProcess, AATOperator);
+				transactionOperatorMap.Operators.Add(aTOperator);
+				AddDependencies(process, aTOperator);
 			}
 		}
 
-		public Schema.Operator AddOperator(ServerProcess AProcess, Schema.Operator ASourceOperator)
+		public Schema.Operator AddOperator(ServerProcess process, Schema.Operator sourceOperator)
 		{
-			lock (AProcess.Catalog)
+			lock (process.Catalog)
 			{
 				lock (Device)
 				{
-					int LIndex = Device.OperatorMaps.IndexOfName(ASourceOperator.OperatorName);
-					if (LIndex >= 0)
+					int index = Device.OperatorMaps.IndexOfName(sourceOperator.OperatorName);
+					if (index >= 0)
 					{
-						OperatorMap LDeviceOperatorMap = Device.OperatorMaps[LIndex];
-						OperatorMap LTransactionOperatorMap = EnsureOperatorMap(AProcess, Device.OperatorMaps[ASourceOperator.OperatorName]);
-						Schema.Operator LTranslatedOperator = LDeviceOperatorMap.ResolveTranslatedOperator(ASourceOperator);
-						if (LTranslatedOperator != null)
+						OperatorMap deviceOperatorMap = Device.OperatorMaps[index];
+						OperatorMap transactionOperatorMap = EnsureOperatorMap(process, Device.OperatorMaps[sourceOperator.OperatorName]);
+						Schema.Operator translatedOperator = deviceOperatorMap.ResolveTranslatedOperator(sourceOperator);
+						if (translatedOperator != null)
 						{
-							LTransactionOperatorMap.Operators.Add(LTranslatedOperator);
-							AddDependencies(AProcess, LTranslatedOperator);
+							transactionOperatorMap.Operators.Add(translatedOperator);
+							AddDependencies(process, translatedOperator);
 						}
 						else
 						{
-							LTranslatedOperator = Device.AddOperator(AProcess, ASourceOperator);
-							LTransactionOperatorMap.Operators.Add(LTranslatedOperator);
+							translatedOperator = Device.AddOperator(process, sourceOperator);
+							transactionOperatorMap.Operators.Add(translatedOperator);
 						}
 						
-						return LTranslatedOperator;
+						return translatedOperator;
 					}
 					else
 					{
-						Schema.Operator LATOperator = Device.AddOperator(AProcess, ASourceOperator);
-						OperatorMap LOperatorMap = EnsureOperatorMap(AProcess, Device.OperatorMaps[ASourceOperator.OperatorName]);
-						LOperatorMap.Operators.Add(LATOperator);
-						return LATOperator;
+						Schema.Operator aTOperator = Device.AddOperator(process, sourceOperator);
+						OperatorMap operatorMap = EnsureOperatorMap(process, Device.OperatorMaps[sourceOperator.OperatorName]);
+						operatorMap.Operators.Add(aTOperator);
+						return aTOperator;
 					}
 				}
 			}
@@ -1010,7 +1012,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 	public class SyncedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 	{
-		private Dictionary<TKey, TValue> FDictionary = new Dictionary<TKey, TValue>();
+		private Dictionary<TKey, TValue> _dictionary = new Dictionary<TKey, TValue>();
 
 		private readonly object FSyncRoot = new object();
 		
@@ -1019,17 +1021,17 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			get { return FSyncRoot; }
 		}
 		
-		public void Add(TKey AKey, TValue AValue)
+		public void Add(TKey key, TValue tempValue)
 		{
 			lock (FSyncRoot)
 			{
-				FDictionary.Add(AKey, AValue);
+				_dictionary.Add(key, tempValue);
 			}
 		}
 
-		public bool ContainsKey(TKey AKey)
+		public bool ContainsKey(TKey key)
 		{
-			return FDictionary.ContainsKey(AKey);
+			return _dictionary.ContainsKey(key);
 		}
 
 		public ICollection<TKey> Keys
@@ -1038,24 +1040,24 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			{
 				lock (FSyncRoot)
 				{
-					return FDictionary.Keys;
+					return _dictionary.Keys;
 				}
 			}
 		}
 
-		public bool Remove(TKey AKey)
+		public bool Remove(TKey key)
 		{
 			lock (FSyncRoot)
 			{
-				return FDictionary.Remove(AKey);
+				return _dictionary.Remove(key);
 			}
 		}
 
-		public bool TryGetValue(TKey AKey, out TValue AValue)
+		public bool TryGetValue(TKey key, out TValue tempValue)
 		{
 			lock (FSyncRoot)
 			{
-				return FDictionary.TryGetValue(AKey, out AValue);
+				return _dictionary.TryGetValue(key, out tempValue);
 			}
 		}
 
@@ -1065,31 +1067,31 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			{
 				lock (FSyncRoot)
 				{
-					return FDictionary.Values;
+					return _dictionary.Values;
 				}
 			}
 		}
 
-		public TValue this[TKey AKey]
+		public TValue this[TKey key]
 		{
 			get
 			{
-				return FDictionary[AKey];
+				return _dictionary[key];
 			}
 			set
 			{
 				lock (FSyncRoot)
 				{
-					FDictionary[AKey] = value;
+					_dictionary[key] = value;
 				}
 			}
 		}
 
-		public void Add(KeyValuePair<TKey, TValue> AItem)
+		public void Add(KeyValuePair<TKey, TValue> item)
 		{
 			lock (FSyncRoot)
 			{
-				((ICollection<KeyValuePair<TKey, TValue>>)FDictionary).Add(AItem);
+				((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Add(item);
 			}
 		}
 
@@ -1097,20 +1099,20 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		{
 			lock (FSyncRoot)
 			{
-				FDictionary.Clear();
+				_dictionary.Clear();
 			}
 		}
 
-		public bool Contains(KeyValuePair<TKey, TValue> AItem)
+		public bool Contains(KeyValuePair<TKey, TValue> item)
 		{
-			return ((ICollection<KeyValuePair<TKey, TValue>>)FDictionary).Contains(AItem);
+			return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Contains(item);
 		}
 
-		public void CopyTo(KeyValuePair<TKey, TValue>[] AArray, int AArrayIndex)
+		public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
 		{
 			lock (FSyncRoot)
 			{
-				((ICollection<KeyValuePair<TKey, TValue>>)FDictionary).CopyTo(AArray, AArrayIndex);
+				((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).CopyTo(array, arrayIndex);
 			}
 		}
 
@@ -1118,7 +1120,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		{
 			get
 			{
-				return FDictionary.Count;
+				return _dictionary.Count;
 			}
 		}
 
@@ -1127,22 +1129,22 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			get { return false; }
 		}
 
-		public bool Remove(KeyValuePair<TKey, TValue> AItem)
+		public bool Remove(KeyValuePair<TKey, TValue> item)
 		{
 			lock (FSyncRoot)
 			{
-				return ((ICollection<KeyValuePair<TKey, TValue>>)FDictionary).Remove(AItem);
+				return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Remove(item);
 			}
 		}
 
 		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
 		{
-			return ((ICollection<KeyValuePair<TKey, TValue>>)FDictionary).GetEnumerator();
+			return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).GetEnumerator();
 		}
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 		{
-			return ((System.Collections.IEnumerable)FDictionary).GetEnumerator();
+			return ((System.Collections.IEnumerable)_dictionary).GetEnumerator();
 		}
 	}
 	
@@ -1152,191 +1154,191 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	
 	public class ApplicationTransactionDevice : MemoryDevice
 	{
-		public ApplicationTransactionDevice(int AID, string AName) : base(AID, AName)
+		public ApplicationTransactionDevice(int iD, string name) : base(iD, name)
 		{
 			IgnoreUnsupported = true;
 		}
 		
-		protected override DeviceSession InternalConnect(ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo)
+		protected override DeviceSession InternalConnect(ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo)
 		{
-			return new ApplicationTransactionDeviceSession(this, AServerProcess, ADeviceSessionInfo);
+			return new ApplicationTransactionDeviceSession(this, serverProcess, deviceSessionInfo);
 		}
 		
 		// List of currently active application transactions
-		private ApplicationTransactions FApplicationTransactions = new ApplicationTransactions();
-		public ApplicationTransactions ApplicationTransactions { get { return FApplicationTransactions; } }
+		private ApplicationTransactions _applicationTransactions = new ApplicationTransactions();
+		public ApplicationTransactions ApplicationTransactions { get { return _applicationTransactions; } }
 		
 		// List of tables in the device, and the deleted table and source mapping for each
-		private TableMaps FTableMaps = new TableMaps();
-		public TableMaps TableMaps { get { return FTableMaps; } }
+		private TableMaps _tableMaps = new TableMaps();
+		public TableMaps TableMaps { get { return _tableMaps; } }
 		
 		// List of operators in the device
-		private OperatorMaps FOperatorMaps = new OperatorMaps();
-		public OperatorMaps OperatorMaps { get { return FOperatorMaps; } }
+		private OperatorMaps _operatorMaps = new OperatorMaps();
+		public OperatorMaps OperatorMaps { get { return _operatorMaps; } }
 		
-		protected void CopyTableVar(ServerProcess AProcess, Schema.TableVar ASourceTableVar, bool AIsMainTableVar)
+		protected void CopyTableVar(ServerProcess process, Schema.TableVar sourceTableVar, bool isMainTableVar)
 		{
-			string LTableVarName = String.Format(".AT_{0}{1}", ASourceTableVar.Name.Replace('.', '_'), AIsMainTableVar ? String.Empty : "_Deleted");
-			Block LBlock = new Block();
-			CreateTableVarStatement LStatement = (CreateTableVarStatement)ASourceTableVar.EmitStatement(EmitMode.ForCopy);
-			LStatement.TableVarName = LTableVarName;
-			if (ASourceTableVar is Schema.BaseTableVar)
-				((CreateTableStatement)LStatement).DeviceName = new IdentifierExpression(Name);
-			LStatement.IsSession = false;
-			if (LStatement.MetaData == null)
-				LStatement.MetaData = new MetaData();
-			LStatement.MetaData.Tags.SafeRemove("DAE.GlobalObjectName");
-			LStatement.MetaData.Tags.AddOrUpdate("DAE.SourceTableName", ASourceTableVar.Name, true);
-			LStatement.MetaData.Tags.AddOrUpdate("DAE.IsDeletedTable", (!AIsMainTableVar).ToString(), true);
+			string tableVarName = String.Format(".AT_{0}{1}", sourceTableVar.Name.Replace('.', '_'), isMainTableVar ? String.Empty : "_Deleted");
+			Block block = new Block();
+			CreateTableVarStatement statement = (CreateTableVarStatement)sourceTableVar.EmitStatement(EmitMode.ForCopy);
+			statement.TableVarName = tableVarName;
+			if (sourceTableVar is Schema.BaseTableVar)
+				((CreateTableStatement)statement).DeviceName = new IdentifierExpression(Name);
+			statement.IsSession = false;
+			if (statement.MetaData == null)
+				statement.MetaData = new MetaData();
+			statement.MetaData.Tags.SafeRemove("DAE.GlobalObjectName");
+			statement.MetaData.Tags.AddOrUpdate("DAE.SourceTableName", sourceTableVar.Name, true);
+			statement.MetaData.Tags.AddOrUpdate("DAE.IsDeletedTable", (!isMainTableVar).ToString(), true);
 
-			LBlock.Statements.Add(LStatement);
+			block.Statements.Add(statement);
 
-			Plan LPlan = new Plan(AProcess);
+			Plan plan = new Plan(process);
 			try
 			{
-				LPlan.PushSecurityContext(new SecurityContext(ASourceTableVar.Owner));
+				plan.PushSecurityContext(new SecurityContext(sourceTableVar.Owner));
 				try
 				{
-					LPlan.PushATCreationContext();
+					plan.PushATCreationContext();
 					try
 					{
-						Program LProgram = new Program(AProcess);
-						LProgram.Code = Compiler.Bind(LPlan, Compiler.CompileStatement(LPlan, LBlock));
-						LPlan.CheckCompiled();
-						LProgram.Execute(null);
+						Program program = new Program(process);
+						program.Code = Compiler.Bind(plan, Compiler.CompileStatement(plan, block));
+						plan.CheckCompiled();
+						program.Execute(null);
 					}
 					finally
 					{
-						LPlan.PopATCreationContext();
+						plan.PopATCreationContext();
 					}
 				}
 				finally
 				{
-					LPlan.PopSecurityContext();
+					plan.PopSecurityContext();
 				}
 			}
 			finally
 			{
-				LPlan.Dispose();
+				plan.Dispose();
 			}
 
-			if (AIsMainTableVar)
+			if (isMainTableVar)
 			{
-				TableMap LTableMap = TableMaps[ASourceTableVar.Name];
+				TableMap tableMap = TableMaps[sourceTableVar.Name];
 
-				LBlock = new Block();
+				block = new Block();
 
-				foreach (Schema.TableVarColumn LColumn in ASourceTableVar.Columns)
+				foreach (Schema.TableVarColumn column in sourceTableVar.Columns)
 				{
-					if ((LColumn.Default != null) && !LColumn.Default.IsRemotable)
+					if ((column.Default != null) && !column.Default.IsRemotable)
 					{
-						AlterTableStatement LAlterStatement = new AlterTableStatement();
-						LAlterStatement.TableVarName = Schema.Object.EnsureRooted(LTableMap.TableVar.Name);
-						AlterColumnDefinition LDefinition = new AlterColumnDefinition();
-						LDefinition.ColumnName = LColumn.Name;
-						LDefinition.Default = LColumn.Default.EmitDefinition(EmitMode.ForCopy);
-						((DefaultDefinition)LDefinition.Default).IsGenerated = true;
-						LAlterStatement.AlterColumns.Add(LDefinition);
-						LBlock.Statements.Add(LAlterStatement);
+						AlterTableStatement alterStatement = new AlterTableStatement();
+						alterStatement.TableVarName = Schema.Object.EnsureRooted(tableMap.TableVar.Name);
+						AlterColumnDefinition definition = new AlterColumnDefinition();
+						definition.ColumnName = column.Name;
+						definition.Default = column.Default.EmitDefinition(EmitMode.ForCopy);
+						((DefaultDefinition)definition.Default).IsGenerated = true;
+						alterStatement.AlterColumns.Add(definition);
+						block.Statements.Add(alterStatement);
 					}
 				}
 				
-				if (ASourceTableVar.HasHandlers())
-					foreach (Schema.EventHandler LHandler in ASourceTableVar.EventHandlers)
-						if (!LHandler.IsGenerated && LHandler.ShouldTranslate)
+				if (sourceTableVar.HasHandlers())
+					foreach (Schema.EventHandler handler in sourceTableVar.EventHandlers)
+						if (!handler.IsGenerated && handler.ShouldTranslate)
 						{
-							AttachStatement LAttachStatement = (AttachStatement)LHandler.EmitTableVarHandler(ASourceTableVar, EmitMode.ForCopy);
-							if (LAttachStatement.MetaData == null)
-								LAttachStatement.MetaData = new MetaData();
-							LAttachStatement.MetaData.Tags.RemoveTag("DAE.ObjectID");
-							LAttachStatement.MetaData.Tags.AddOrUpdate("DAE.ATHandlerName", LHandler.Name, true);
-							((ObjectEventSourceSpecifier)LAttachStatement.EventSourceSpecifier).ObjectName = Schema.Object.EnsureRooted(LTableMap.TableVar.Name);
-							if (LHandler.Operator.ShouldTranslate)
-								LAttachStatement.OperatorName = Schema.Object.EnsureRooted(EnsureOperator(AProcess, LHandler.Operator).OperatorName);
-							LAttachStatement.IsGenerated = true;
-							LBlock.Statements.Add(LAttachStatement);
+							AttachStatement attachStatement = (AttachStatement)handler.EmitTableVarHandler(sourceTableVar, EmitMode.ForCopy);
+							if (attachStatement.MetaData == null)
+								attachStatement.MetaData = new MetaData();
+							attachStatement.MetaData.Tags.RemoveTag("DAE.ObjectID");
+							attachStatement.MetaData.Tags.AddOrUpdate("DAE.ATHandlerName", handler.Name, true);
+							((ObjectEventSourceSpecifier)attachStatement.EventSourceSpecifier).ObjectName = Schema.Object.EnsureRooted(tableMap.TableVar.Name);
+							if (handler.Operator.ShouldTranslate)
+								attachStatement.OperatorName = Schema.Object.EnsureRooted(EnsureOperator(process, handler.Operator).OperatorName);
+							attachStatement.IsGenerated = true;
+							block.Statements.Add(attachStatement);
 						}
 					
-				foreach (Schema.TableVarColumn LColumn in ASourceTableVar.Columns)
-					if (LColumn.HasHandlers())
-						foreach (Schema.EventHandler LHandler in LColumn.EventHandlers)
-							if (!LHandler.IsGenerated && LHandler.ShouldTranslate)
+				foreach (Schema.TableVarColumn column in sourceTableVar.Columns)
+					if (column.HasHandlers())
+						foreach (Schema.EventHandler handler in column.EventHandlers)
+							if (!handler.IsGenerated && handler.ShouldTranslate)
 							{
-								AttachStatement LAttachStatement = (AttachStatement)LHandler.EmitColumnHandler(ASourceTableVar, LColumn, EmitMode.ForCopy);
-								if (LAttachStatement.MetaData == null)
-									LAttachStatement.MetaData = new MetaData();
-								LAttachStatement.MetaData.Tags.RemoveTag("DAE.ObjectID");
-								LAttachStatement.MetaData.Tags.AddOrUpdate("DAE.ATHandlerName", LHandler.Name, true);
-								((ColumnEventSourceSpecifier)LAttachStatement.EventSourceSpecifier).TableVarName = Schema.Object.EnsureRooted(LTableMap.TableVar.Name);
-								if (LHandler.Operator.ShouldTranslate)
-									LAttachStatement.OperatorName = Schema.Object.EnsureRooted(EnsureOperator(AProcess, LHandler.Operator).OperatorName);
-								LAttachStatement.IsGenerated = true;
-								LBlock.Statements.Add(LAttachStatement);
+								AttachStatement attachStatement = (AttachStatement)handler.EmitColumnHandler(sourceTableVar, column, EmitMode.ForCopy);
+								if (attachStatement.MetaData == null)
+									attachStatement.MetaData = new MetaData();
+								attachStatement.MetaData.Tags.RemoveTag("DAE.ObjectID");
+								attachStatement.MetaData.Tags.AddOrUpdate("DAE.ATHandlerName", handler.Name, true);
+								((ColumnEventSourceSpecifier)attachStatement.EventSourceSpecifier).TableVarName = Schema.Object.EnsureRooted(tableMap.TableVar.Name);
+								if (handler.Operator.ShouldTranslate)
+									attachStatement.OperatorName = Schema.Object.EnsureRooted(EnsureOperator(process, handler.Operator).OperatorName);
+								attachStatement.IsGenerated = true;
+								block.Statements.Add(attachStatement);
 							}
 
-				LPlan = new Plan(AProcess);
+				plan = new Plan(process);
 				try
 				{
-					LPlan.PushSecurityContext(new SecurityContext(ASourceTableVar.Owner));
+					plan.PushSecurityContext(new SecurityContext(sourceTableVar.Owner));
 					try
 					{
-						LPlan.EnterTimeStampSafeContext();
+						plan.EnterTimeStampSafeContext();
 						try
 						{
-							Program LProgram = new Program(AProcess);
-							LProgram.Code = Compiler.Bind(LPlan, Compiler.CompileStatement(LPlan, LBlock));
-							LPlan.CheckCompiled();
-							LProgram.Execute(null);
+							Program program = new Program(process);
+							program.Code = Compiler.Bind(plan, Compiler.CompileStatement(plan, block));
+							plan.CheckCompiled();
+							program.Execute(null);
 						}
 						finally
 						{
-							LPlan.ExitTimeStampSafeContext();
+							plan.ExitTimeStampSafeContext();
 						}
 					}
 					finally
 					{
-						LPlan.PopSecurityContext();
+						plan.PopSecurityContext();
 					}
 				}
 				finally
 				{
-					LPlan.Dispose();
+					plan.Dispose();
 				}
 			}
 		}
 		
-		public void AddTableMap(ServerProcess AProcess, Schema.TableVar ATableVar)
+		public void AddTableMap(ServerProcess process, Schema.TableVar tableVar)
 		{
 			// Called by the compiler during processing of the create table statement created by CopyTableVar.
 			// CreatingTableVarName is the name of the table variable being added to the application transaction.
 			// If the table map is already present for this table, then this is the deleted tracking table.
-			string LSourceTableVarName = MetaData.GetTag(ATableVar.MetaData, "DAE.SourceTableName", ATableVar.Name);
-			int LIndex = FTableMaps.IndexOfName(LSourceTableVarName);
-			if (LIndex < 0)
+			string sourceTableVarName = MetaData.GetTag(tableVar.MetaData, "DAE.SourceTableName", tableVar.Name);
+			int index = _tableMaps.IndexOfName(sourceTableVarName);
+			if (index < 0)
 			{
-				TableMap LTableMap = new TableMap(LSourceTableVarName);
-				LTableMap.TableVar = ATableVar;
-				LTableMap.SourceTableVar = (TableVar)AProcess.Catalog[LSourceTableVarName];
-				AProcess.CatalogDeviceSession.AddTableMap(this, LTableMap);
+				TableMap tableMap = new TableMap(sourceTableVarName);
+				tableMap.TableVar = tableVar;
+				tableMap.SourceTableVar = (TableVar)process.Catalog[sourceTableVarName];
+				process.CatalogDeviceSession.AddTableMap(this, tableMap);
 			}
 			else
 			{
-				TableMap LTableMap = FTableMaps[LIndex];
-				LTableMap.DeletedTableVar = ATableVar;
+				TableMap tableMap = _tableMaps[index];
+				tableMap.DeletedTableVar = tableVar;
 			}
 		}
 		
-		private void CheckNotParticipating(ServerProcess AProcess, Schema.TableVar ATableVar)
+		private void CheckNotParticipating(ServerProcess process, Schema.TableVar tableVar)
 		{
 			lock (ApplicationTransactions.SyncRoot)
 			{
-				foreach (ApplicationTransaction LTransaction in ApplicationTransactions.Values)
-					if (LTransaction.TableMaps.ContainsName(ATableVar.Name))
-						throw new ApplicationTransactionException(ApplicationTransactionException.Codes.TableVariableParticipating, ATableVar.Name);
+				foreach (ApplicationTransaction transaction in ApplicationTransactions.Values)
+					if (transaction.TableMaps.ContainsName(tableVar.Name))
+						throw new ApplicationTransactionException(ApplicationTransactionException.Codes.TableVariableParticipating, tableVar.Name);
 			}
 		}
 		
-		public void ReportTableChange(ServerProcess AProcess, Schema.TableVar ATableVar)
+		public void ReportTableChange(ServerProcess process, Schema.TableVar tableVar)
 		{
 			// If the table var is a source table var for an A/T table
 				// if there are active A/Ts for the table var
@@ -1346,55 +1348,55 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					// drop the A/T table vars (safely)
 					// remove the table map
 					
-			if (!AProcess.ServerSession.Server.IsEngine)
+			if (!process.ServerSession.Server.IsEngine)
 			{
-				lock (AProcess.Catalog)
+				lock (process.Catalog)
 				{
 					lock (this)
 					{
-						List<string> LObjectNames = new List<string>();
-						int LTableMapIndex = FTableMaps.IndexOfName(ATableVar.Name);
-						if (LTableMapIndex >= 0)
+						List<string> objectNames = new List<string>();
+						int tableMapIndex = _tableMaps.IndexOfName(tableVar.Name);
+						if (tableMapIndex >= 0)
 						{
-							CheckNotParticipating(AProcess, ATableVar);
+							CheckNotParticipating(process, tableVar);
 							
 							// Drop the table var and deleted table var
-							TableMap LTableMap = FTableMaps[LTableMapIndex];
-							if (LTableMap.TableVar != null)
+							TableMap tableMap = _tableMaps[tableMapIndex];
+							if (tableMap.TableVar != null)
 							{
-								for (int LIndex = 0; LIndex < LTableMap.TableVar.EventHandlers.Count; LIndex++)
-									LObjectNames.Add(LTableMap.TableVar.EventHandlers[LIndex].Name);
-								LObjectNames.Add(LTableMap.TableVar.Name);
+								for (int index = 0; index < tableMap.TableVar.EventHandlers.Count; index++)
+									objectNames.Add(tableMap.TableVar.EventHandlers[index].Name);
+								objectNames.Add(tableMap.TableVar.Name);
 							}
 
-							if (LTableMap.DeletedTableVar != null)
-								LObjectNames.Add(LTableMap.DeletedTableVar.Name);
+							if (tableMap.DeletedTableVar != null)
+								objectNames.Add(tableMap.DeletedTableVar.Name);
 							
-							AProcess.CatalogDeviceSession.RemoveTableMap(this, LTableMap);
+							process.CatalogDeviceSession.RemoveTableMap(this, tableMap);
 						}
 
-						if (LObjectNames.Count > 0)
+						if (objectNames.Count > 0)
 						{
-							string[] LObjectNameArray = new string[LObjectNames.Count];
-							LObjectNames.CopyTo(LObjectNameArray, 0);
-							Plan LPlan = new Plan(AProcess);
+							string[] objectNameArray = new string[objectNames.Count];
+							objectNames.CopyTo(objectNameArray, 0);
+							Plan plan = new Plan(process);
 							try
 							{
-								LPlan.EnterTimeStampSafeContext();
+								plan.EnterTimeStampSafeContext();
 								try
 								{
-									Program LProgram = new Program(AProcess);
-									LProgram.Code = 
+									Program program = new Program(process);
+									program.Code = 
 										Compiler.Bind
 										(
-											LPlan, 
+											plan, 
 											Compiler.Compile
 											(
-												LPlan, 
-												AProcess.Catalog.EmitDropStatement
+												plan, 
+												process.Catalog.EmitDropStatement
 												(
-													AProcess.CatalogDeviceSession, 
-													LObjectNameArray, 
+													process.CatalogDeviceSession, 
+													objectNameArray, 
 													String.Empty, 
 													true, 
 													false, 
@@ -1403,17 +1405,17 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 												)
 											)
 										);
-									LPlan.CheckCompiled();
-									LProgram.Execute(null);
+									plan.CheckCompiled();
+									program.Execute(null);
 								}
 								finally
 								{
-									LPlan.ExitTimeStampSafeContext();
+									plan.ExitTimeStampSafeContext();
 								}
 							}
 							finally
 							{
-								LPlan.Dispose();
+								plan.Dispose();
 							}
 						}
 					}
@@ -1421,12 +1423,12 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
-		public Schema.Operator ResolveSourceOperator(Plan APlan, Schema.Operator ATranslatedOperator)
+		public Schema.Operator ResolveSourceOperator(Plan plan, Schema.Operator translatedOperator)
 		{
-			return Compiler.ResolveOperator(APlan, ATranslatedOperator.SourceOperatorName, ATranslatedOperator.Signature, false, false);
+			return Compiler.ResolveOperator(plan, translatedOperator.SourceOperatorName, translatedOperator.Signature, false, false);
 		}
 		
-		public void ReportOperatorChange(ServerProcess AProcess, Schema.Operator AOperator)
+		public void ReportOperatorChange(ServerProcess process, Schema.Operator operatorValue)
 		{
 			// If the operator is a source operator for an A/T operator
 				// if there are active A/Ts for the operator, or for any A/T table var that may have a handler attached to this operator
@@ -1437,102 +1439,102 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					// remove the operator map
 					// report table changes on the A/T table vars
 					
-			if (!AProcess.ServerSession.Server.IsEngine)
+			if (!process.ServerSession.Server.IsEngine)
 			{
-				lock (AProcess.Catalog)
+				lock (process.Catalog)
 				{
 					lock (this)
 					{
-						List<string> LObjectNames = new List<string>();
-						Schema.Operator LATOperator = null;
-						int LOperatorMapIndex = FOperatorMaps.IndexOfName(AOperator.OperatorName);
-						if (LOperatorMapIndex >= 0)
+						List<string> objectNames = new List<string>();
+						Schema.Operator aTOperator = null;
+						int operatorMapIndex = _operatorMaps.IndexOfName(operatorValue.OperatorName);
+						if (operatorMapIndex >= 0)
 						{
-							OperatorMap LOperatorMap = FOperatorMaps[LOperatorMapIndex];
+							OperatorMap operatorMap = _operatorMaps[operatorMapIndex];
 							
-							LATOperator = LOperatorMap.ResolveTranslatedOperator(AOperator);
-							if (LATOperator != null)
+							aTOperator = operatorMap.ResolveTranslatedOperator(operatorValue);
+							if (aTOperator != null)
 							{
 								// Check for tables with event handlers attached to this operator
-								List<int> LHandlerIDs = AProcess.CatalogDeviceSession.SelectOperatorHandlers(AOperator.ID);
+								List<int> handlerIDs = process.CatalogDeviceSession.SelectOperatorHandlers(operatorValue.ID);
 
-								for (int LIndex = 0; LIndex < LHandlerIDs.Count; LIndex++)
+								for (int index = 0; index < handlerIDs.Count; index++)
 								{
-									Schema.Object LHandler = AProcess.CatalogDeviceSession.ResolveCatalogObject(LHandlerIDs[LIndex]);
-									Schema.TableVar LTableVar = null;
-									if (LHandler is TableVarEventHandler)
-										LTableVar = ((TableVarEventHandler)LHandler).TableVar;
-									if (LHandler is TableVarColumnEventHandler)
-										LTableVar = ((TableVarColumnEventHandler)LHandler).TableVarColumn.TableVar;
+									Schema.Object handler = process.CatalogDeviceSession.ResolveCatalogObject(handlerIDs[index]);
+									Schema.TableVar tableVar = null;
+									if (handler is TableVarEventHandler)
+										tableVar = ((TableVarEventHandler)handler).TableVar;
+									if (handler is TableVarColumnEventHandler)
+										tableVar = ((TableVarColumnEventHandler)handler).TableVarColumn.TableVar;
 									
-									if (LTableVar != null)
+									if (tableVar != null)
 									{
-										int LTableMapIndex = FTableMaps.IndexOfName(LTableVar.Name);
-										if (LTableMapIndex >= 0)
+										int tableMapIndex = _tableMaps.IndexOfName(tableVar.Name);
+										if (tableMapIndex >= 0)
 										{
-											bool LShouldCheckTableVar = false;
-											TableMap LTableMap = FTableMaps[LTableMapIndex];
-											foreach (Schema.TableVarEventHandler LTableVarEventHandler in LTableMap.TableVar.EventHandlers)
-												if (LTableVarEventHandler.Operator.Name == LATOperator.Name)
-													LShouldCheckTableVar = true;
+											bool shouldCheckTableVar = false;
+											TableMap tableMap = _tableMaps[tableMapIndex];
+											foreach (Schema.TableVarEventHandler tableVarEventHandler in tableMap.TableVar.EventHandlers)
+												if (tableVarEventHandler.Operator.Name == aTOperator.Name)
+													shouldCheckTableVar = true;
 											
-											foreach (Schema.TableVarColumn LTableVarColumn in LTableMap.TableVar.Columns)
-												foreach (Schema.TableVarColumnEventHandler LTableVarColumnEventHandler in LTableVarColumn.EventHandlers)
-													if (LTableVarColumnEventHandler.Operator.Name == LATOperator.Name)
-														LShouldCheckTableVar = true;
+											foreach (Schema.TableVarColumn tableVarColumn in tableMap.TableVar.Columns)
+												foreach (Schema.TableVarColumnEventHandler tableVarColumnEventHandler in tableVarColumn.EventHandlers)
+													if (tableVarColumnEventHandler.Operator.Name == aTOperator.Name)
+														shouldCheckTableVar = true;
 											
-											if (LShouldCheckTableVar)
-												ReportTableChange(AProcess, LTableVar);
+											if (shouldCheckTableVar)
+												ReportTableChange(process, tableVar);
 										}
 									}	
 								}
 								
 								lock (ApplicationTransactions.SyncRoot)
 								{
-									foreach (ApplicationTransaction LTransaction in ApplicationTransactions.Values)
+									foreach (ApplicationTransaction transaction in ApplicationTransactions.Values)
 									{
-										int LTransactionOperatorMapIndex = LTransaction.OperatorMaps.IndexOfName(AOperator.OperatorName);
-										if (LTransactionOperatorMapIndex >= 0)
+										int transactionOperatorMapIndex = transaction.OperatorMaps.IndexOfName(operatorValue.OperatorName);
+										if (transactionOperatorMapIndex >= 0)
 										{
-											OperatorMap LTransactionOperatorMap = LTransaction.OperatorMaps[LTransactionOperatorMapIndex];
-											if (LTransactionOperatorMap.Operators.ContainsName(LATOperator.Name))
-												throw new ApplicationTransactionException(ApplicationTransactionException.Codes.OperatorParticipating, AOperator.OperatorName);
+											OperatorMap transactionOperatorMap = transaction.OperatorMaps[transactionOperatorMapIndex];
+											if (transactionOperatorMap.Operators.ContainsName(aTOperator.Name))
+												throw new ApplicationTransactionException(ApplicationTransactionException.Codes.OperatorParticipating, operatorValue.OperatorName);
 										}
 									}
 								}
 								
 								// Drop the operator
-								AProcess.CatalogDeviceSession.RemoveOperatorMap(LOperatorMap, LATOperator);
+								process.CatalogDeviceSession.RemoveOperatorMap(operatorMap, aTOperator);
 								// BTR 2/1/2007 -> Operator Map should never hurt to leave around, so leave it instead of trying to manage the complexity of making it transactional (any process could add the operator map)
 								//if (LOperatorMap.Operators.Count == 0)
 								//	FOperatorMaps.RemoveAt(LOperatorMapIndex);
 							}
 						}
 						
-						if (LATOperator != null)
+						if (aTOperator != null)
 						{
-							LObjectNames.Add(LATOperator.Name);
-							string[] LObjectNameArray = new string[LObjectNames.Count];
-							LObjectNames.CopyTo(LObjectNameArray, 0);
-							Plan LPlan = new Plan(AProcess);
+							objectNames.Add(aTOperator.Name);
+							string[] objectNameArray = new string[objectNames.Count];
+							objectNames.CopyTo(objectNameArray, 0);
+							Plan plan = new Plan(process);
 							try
 							{
-								LPlan.EnterTimeStampSafeContext();
+								plan.EnterTimeStampSafeContext();
 								try
 								{
-									Program LProgram = new Program(AProcess);
-									LProgram.Code = Compiler.Bind(LPlan, Compiler.Compile(LPlan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LObjectNameArray, String.Empty)));
-									LPlan.CheckCompiled();
-									LProgram.Execute(null);
+									Program program = new Program(process);
+									program.Code = Compiler.Bind(plan, Compiler.Compile(plan, process.Catalog.EmitDropStatement(process.CatalogDeviceSession, objectNameArray, String.Empty)));
+									plan.CheckCompiled();
+									program.Execute(null);
 								}
 								finally
 								{
-									LPlan.ExitTimeStampSafeContext();
+									plan.ExitTimeStampSafeContext();
 								}
 							}
 							finally
 							{
-								LPlan.Dispose();
+								plan.Dispose();
 							}
 						}
 					}
@@ -1541,68 +1543,68 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		}
 		
 		// AddTableVar - Creates a TableMap for the given source table and adds it to the table maps, if it is not already present, then returns the name of the mapped table
-		public Schema.TableVar AddTableVar(ServerProcess AProcess, Schema.TableVar ASourceTableVar)
+		public Schema.TableVar AddTableVar(ServerProcess process, Schema.TableVar sourceTableVar)
 		{
-			if (ASourceTableVar.SourceTableName != null)
-				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.AlreadyApplicationTransactionVariable, ASourceTableVar.Name, ASourceTableVar.SourceTableName);
+			if (sourceTableVar.SourceTableName != null)
+				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.AlreadyApplicationTransactionVariable, sourceTableVar.Name, sourceTableVar.SourceTableName);
 				
-			string LSourceTableName = ASourceTableVar.Name;
-			TableMap LTableMap = null;
+			string sourceTableName = sourceTableVar.Name;
+			TableMap tableMap = null;
 			
 			// Push an adding table var context
-			AProcess.PushAddingTableVar();
+			process.PushAddingTableVar();
 			try
 			{
-				int LTableIndex = FTableMaps.IndexOf(LSourceTableName);
-				if (LTableIndex >= 0)
-					LTableMap = FTableMaps[LTableIndex];
+				int tableIndex = _tableMaps.IndexOf(sourceTableName);
+				if (tableIndex >= 0)
+					tableMap = _tableMaps[tableIndex];
 				else
 				{
-					bool LSaveIsInsert = AProcess.IsInsert;
-					AProcess.IsInsert = false;
+					bool saveIsInsert = process.IsInsert;
+					process.IsInsert = false;
 					try
 					{
-						CopyTableVar(AProcess, ASourceTableVar, true);
-						LTableMap = FTableMaps[LSourceTableName];
-						if (ASourceTableVar is Schema.BaseTableVar)
+						CopyTableVar(process, sourceTableVar, true);
+						tableMap = _tableMaps[sourceTableName];
+						if (sourceTableVar is Schema.BaseTableVar)
 						{
-							BaseTableVar LTargetTableVar = (BaseTableVar)LTableMap.TableVar;
+							BaseTableVar targetTableVar = (BaseTableVar)tableMap.TableVar;
 							try
 							{
-								CopyTableVar(AProcess, ASourceTableVar, false);
-								BaseTableVar LDeletedTableVar = (BaseTableVar)LTableMap.DeletedTableVar;
+								CopyTableVar(process, sourceTableVar, false);
+								BaseTableVar deletedTableVar = (BaseTableVar)tableMap.DeletedTableVar;
 								try
 								{
-									CompileTableMapRetrieveNodes(AProcess, ASourceTableVar, LTableMap);
+									CompileTableMapRetrieveNodes(process, sourceTableVar, tableMap);
 								}
 								catch
 								{
-									Plan LPlan = new Plan(AProcess);
+									Plan plan = new Plan(process);
 									try							 
 									{
-										Program LProgram = new Program(AProcess);
-										LProgram.Code = Compiler.Bind(LPlan, new DropTableNode(LDeletedTableVar, false));
-										LProgram.Execute(null);
+										Program program = new Program(process);
+										program.Code = Compiler.Bind(plan, new DropTableNode(deletedTableVar, false));
+										program.Execute(null);
 									}
 									finally
 									{
-										LPlan.Dispose();
+										plan.Dispose();
 									}
 									throw;
 								}
 							}
 							catch
 							{
-								Plan LPlan = new Plan(AProcess);
+								Plan plan = new Plan(process);
 								try							 
 								{
-									Program LProgram = new Program(AProcess);
-									LProgram.Code = Compiler.Bind(LPlan, new DropTableNode(LTargetTableVar, false));
-									LProgram.Execute(null);
+									Program program = new Program(process);
+									program.Code = Compiler.Bind(plan, new DropTableNode(targetTableVar, false));
+									program.Execute(null);
 								}
 								finally
 								{
-									LPlan.Dispose();
+									plan.Dispose();
 								}
 								throw;
 							}
@@ -1610,267 +1612,282 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					}
 					finally
 					{
-						AProcess.IsInsert = LSaveIsInsert;
+						process.IsInsert = saveIsInsert;
 					}
 				}
 			}
 			finally
 			{
-				AProcess.PopAddingTableVar();
+				process.PopAddingTableVar();
 			}
 
-			return LTableMap.TableVar; // return the supporting table variable (generated unique name)
+			return tableMap.TableVar; // return the supporting table variable (generated unique name)
 		}
 
-		private void CompileTableMapRetrieveNodes(ServerProcess AProcess, Schema.TableVar ASourceTableVar, TableMap ATableMap)
+		private void CompileTableMapRetrieveNodes(ServerProcess process, Schema.TableVar sourceTableVar, TableMap tableMap)
 		{
-			ApplicationTransactions[AProcess.ApplicationTransactionID].PushGlobalContext();
+			ApplicationTransactions[process.ApplicationTransactionID].PushGlobalContext();
 			try
 			{
-				Plan LPlan = new Plan(AProcess);
+				Plan plan = new Plan(process);
 				try
 				{
-					LPlan.PushCursorContext(new CursorContext(DAE.CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+					plan.PushCursorContext(new CursorContext(DAE.CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 					try
 					{
-						LPlan.PushSecurityContext(new SecurityContext(ASourceTableVar.Owner));
+						plan.PushSecurityContext(new SecurityContext(sourceTableVar.Owner));
 						try
 						{
-							ATableMap.RetrieveNode = (BaseTableVarNode)Compiler.Bind(LPlan, Compiler.EmitBaseTableVarNode(LPlan, ASourceTableVar));
-							ATableMap.DeletedRetrieveNode = (BaseTableVarNode)Compiler.Bind(LPlan, Compiler.EmitBaseTableVarNode(LPlan, ATableMap.DeletedTableVar));
+							tableMap.RetrieveNode = (BaseTableVarNode)Compiler.Bind(plan, Compiler.EmitBaseTableVarNode(plan, sourceTableVar));
+							tableMap.DeletedRetrieveNode = (BaseTableVarNode)Compiler.Bind(plan, Compiler.EmitBaseTableVarNode(plan, tableMap.DeletedTableVar));
 						}
 						finally
 						{
-							LPlan.PopSecurityContext();
+							plan.PopSecurityContext();
 						}
 					}
 					finally
 					{
-						LPlan.PopCursorContext();
+						plan.PopCursorContext();
 					}
 
-					Schema.Key LClusteringKey = Compiler.FindClusteringKey(LPlan, ATableMap.TableVar);
-					Schema.RowType LOldRowType = new Schema.RowType(ATableMap.TableVar.DataType.Columns, Keywords.Old);
-					Schema.RowType LOldKeyType = new Schema.RowType(LClusteringKey.Columns, Keywords.Old);
-					Schema.RowType LKeyType = new Schema.RowType(LClusteringKey.Columns);
-					LPlan.EnterRowContext();
+					Schema.Key clusteringKey = Compiler.FindClusteringKey(plan, tableMap.TableVar);
+					#if !USENAMEDROWVARIABLES
+					Schema.RowType oldRowType = new Schema.RowType(ATableMap.TableVar.DataType.Columns, Keywords.Old);
+					Schema.RowType oldKeyType = new Schema.RowType(clusteringKey.Columns, Keywords.Old);
+					Schema.RowType keyType = new Schema.RowType(clusteringKey.Columns);
+					#endif
+					plan.EnterRowContext();
 					try
 					{
-						LPlan.Symbols.Push(new Symbol(LOldRowType));
+						#if USENAMEDROWVARIABLES
+						plan.Symbols.Push(new Symbol(Keywords.Old, tableMap.TableVar.DataType.RowType));
+						#else
+						plan.Symbols.Push(new Symbol(String.Empty, oldRowType));
+						#endif
 						try
 						{
-							ATableMap.HasDeletedRowNode =
+							tableMap.HasDeletedRowNode =
 								Compiler.Bind
 								(
-									LPlan,
+									plan,
 									Compiler.EmitUnaryNode
 									(
-										LPlan,
+										plan,
 										Instructions.Exists,
 										Compiler.EmitRestrictNode
 										(
-											LPlan,
-											Compiler.EmitBaseTableVarNode(LPlan, ATableMap.DeletedTableVar),
+											plan,
+											Compiler.EmitBaseTableVarNode(plan, tableMap.DeletedTableVar),
+											#if USENAMEDROWVARIABLES
+											Compiler.BuildKeyEqualExpression(plan, Keywords.Old, String.Empty, clusteringKey.Columns, clusteringKey.Columns)
+											#else
 											Compiler.BuildKeyEqualExpression(LPlan, LOldKeyType.Columns, LKeyType.Columns)
+											#endif
 										)
 									)
 								);
 
-							ATableMap.HasRowNode =
+							tableMap.HasRowNode =
 								Compiler.Bind
 								(
-									LPlan,
+									plan,
 									Compiler.EmitBinaryNode
 									(
-										LPlan,
+										plan,
 										Compiler.EmitUnaryNode
 										(
-											LPlan,
+											plan,
 											Instructions.Exists,
 											Compiler.EmitRestrictNode
 											(
-												LPlan,
-												Compiler.EmitBaseTableVarNode(LPlan, ATableMap.TableVar),
+												plan,
+												Compiler.EmitBaseTableVarNode(plan, tableMap.TableVar),
+												#if USENAMEDROWVARIABLES
+												Compiler.BuildKeyEqualExpression(plan, Keywords.Old, String.Empty, clusteringKey.Columns, clusteringKey.Columns)
+												#else
 												Compiler.BuildKeyEqualExpression(LPlan, LOldKeyType.Columns, LKeyType.Columns)
+												#endif
 											)
 										),
 										Instructions.Or,
-										ATableMap.HasDeletedRowNode
+										tableMap.HasDeletedRowNode
 									)
 								);
 						}
 						finally
 						{
-							LPlan.Symbols.Pop();
+							plan.Symbols.Pop();
 						}
 					}
 					finally
 					{
-						LPlan.ExitRowContext();
+						plan.ExitRowContext();
 					}
 				}
 				finally
 				{
-					LPlan.Dispose();
+					plan.Dispose();
 				}
 			}
 			finally
 			{
-				ApplicationTransactions[AProcess.ApplicationTransactionID].PopGlobalContext();
+				ApplicationTransactions[process.ApplicationTransactionID].PopGlobalContext();
 			}
 		}
 		
-		public OperatorMap EnsureOperatorMap(ServerProcess AProcess, string AOperatorName, string ATranslatedOperatorName)
+		public OperatorMap EnsureOperatorMap(ServerProcess process, string operatorName, string translatedOperatorName)
 		{
-			OperatorMap LOperatorMap;
-			int LIndex = FOperatorMaps.IndexOfName(AOperatorName);
-			if (LIndex >= 0)
-				LOperatorMap = FOperatorMaps[LIndex];
+			OperatorMap operatorMap;
+			int index = _operatorMaps.IndexOfName(operatorName);
+			if (index >= 0)
+				operatorMap = _operatorMaps[index];
 			else
 			{
-				if (ATranslatedOperatorName != null)
-					LOperatorMap = new OperatorMap(AOperatorName, ATranslatedOperatorName);
+				if (translatedOperatorName != null)
+					operatorMap = new OperatorMap(operatorName, translatedOperatorName);
 				else
-					LOperatorMap = new OperatorMap(AOperatorName, String.Format("AT_{0}", AOperatorName.Replace('.', '_')));
-				FOperatorMaps.Add(LOperatorMap);
+					operatorMap = new OperatorMap(operatorName, String.Format("AT_{0}", operatorName.Replace('.', '_')));
+				_operatorMaps.Add(operatorMap);
 			}
-			return LOperatorMap;
+			return operatorMap;
 		}
 		
-		public Schema.Operator AddOperator(ServerProcess AProcess, Schema.Operator AOperator)
+		public Schema.Operator AddOperator(ServerProcess process, Schema.Operator operatorValue)
 		{
 			// Recompile the operator in the application transaction process
-			OperatorMap LOperatorMap = EnsureOperatorMap(AProcess, AOperator.OperatorName, null);
-			Statement LSourceStatement = AOperator.EmitStatement(EmitMode.ForCopy);
-			SourceContext LSourceContext = null;
-			CreateOperatorStatement LStatement = LSourceStatement as CreateOperatorStatement;
-			if (LStatement == null)
+			OperatorMap operatorMap = EnsureOperatorMap(process, operatorValue.OperatorName, null);
+			Statement sourceStatement = operatorValue.EmitStatement(EmitMode.ForCopy);
+			SourceContext sourceContext = null;
+			CreateOperatorStatement statement = sourceStatement as CreateOperatorStatement;
+			if (statement == null)
 			{
-				LSourceContext = new SourceContext(((SourceStatement)LSourceStatement).Source, null);
-				LStatement = (CreateOperatorStatement)new Parser().ParseStatement(LSourceContext.Script, null);
+				sourceContext = new SourceContext(((SourceStatement)sourceStatement).Source, null);
+				statement = (CreateOperatorStatement)new Parser().ParseStatement(sourceContext.Script, null);
 			}
-			LStatement.OperatorName = String.Format(".{0}", LOperatorMap.TranslatedOperatorName);
-			LStatement.IsSession = false;
-			if (LStatement.MetaData == null)
-				LStatement.MetaData = new MetaData();
-			LStatement.MetaData.Tags.SafeRemove("DAE.GlobalObjectName");
-			LStatement.MetaData.Tags.AddOrUpdate("DAE.SourceOperatorName", LOperatorMap.Name, true);
+			statement.OperatorName = String.Format(".{0}", operatorMap.TranslatedOperatorName);
+			statement.IsSession = false;
+			if (statement.MetaData == null)
+				statement.MetaData = new MetaData();
+			statement.MetaData.Tags.SafeRemove("DAE.GlobalObjectName");
+			statement.MetaData.Tags.AddOrUpdate("DAE.SourceOperatorName", operatorMap.Name, true);
+			statement.MetaData.Tags.AddOrUpdate("DAE.SourceObjectName", operatorValue.Name, true);
 
-			Plan LPlan = new Plan(AProcess);
+			Plan plan = new Plan(process);
 			try
 			{
-				bool LSaveIsInsert = AProcess.IsInsert;
-				AProcess.IsInsert = false;
+				bool saveIsInsert = process.IsInsert;
+				process.IsInsert = false;
 				try
 				{
-					if (LSourceContext != null)
-						LPlan.PushSourceContext(LSourceContext);
+					if (sourceContext != null)
+						plan.PushSourceContext(sourceContext);
 					try
 					{
 						// A loading context is required because the operator text is using the original text
 						// so it must be bound with the original resolution path (the owning library).
-						LPlan.PushLoadingContext(new LoadingContext(AOperator.Owner, AOperator.Library.Name, false));
+						plan.PushLoadingContext(new LoadingContext(operatorValue.Owner, operatorValue.Library.Name, false));
 						try
 						{
-							LPlan.PushSecurityContext(new SecurityContext(AOperator.Owner));
+							plan.PushSecurityContext(new SecurityContext(operatorValue.Owner));
 							try
 							{
-								LPlan.PushATCreationContext();
+								plan.PushATCreationContext();
 								try
 								{
-									Program LProgram = new Program(AProcess);
-									LProgram.Code = Compiler.Bind(LPlan, Compiler.CompileStatement(LPlan, LStatement));
-									LPlan.CheckCompiled();
-									LProgram.Execute(null);
-									Schema.Operator LOperator = ((CreateOperatorNode)LProgram.Code).CreateOperator;
-									AProcess.CatalogDeviceSession.AddOperatorMap(LOperatorMap, LOperator);
-									return LOperator;
+									Program program = new Program(process);
+									program.Code = Compiler.Bind(plan, Compiler.CompileStatement(plan, statement));
+									plan.CheckCompiled();
+									program.Execute(null);
+									Schema.Operator localOperatorValue = ((CreateOperatorNode)program.Code).CreateOperator;
+									process.CatalogDeviceSession.AddOperatorMap(operatorMap, localOperatorValue);
+									return localOperatorValue;
 								}
 								finally
 								{
-									LPlan.PopATCreationContext();
+									plan.PopATCreationContext();
 								}
 							}
 							finally
 							{
-								LPlan.PopSecurityContext();
+								plan.PopSecurityContext();
 							}
 						}
 						finally
 						{
-							LPlan.PopLoadingContext();
+							plan.PopLoadingContext();
 						}
 					}
 					finally
 					{
-						if (LSourceContext != null)
-							LPlan.PopSourceContext();
+						if (sourceContext != null)
+							plan.PopSourceContext();
 					}
 				}
 				finally
 				{
-					AProcess.IsInsert = LSaveIsInsert;
+					process.IsInsert = saveIsInsert;
 				}
 			}
 			finally
 			{
-				LPlan.Dispose();
+				plan.Dispose();
 			}
 		}
 		
-		public Schema.Operator EnsureOperator(ServerProcess AProcess, Schema.Operator AOperator)
+		public Schema.Operator EnsureOperator(ServerProcess process, Schema.Operator operatorValue)
 		{
-			using (Plan LPlan = new Plan(AProcess))
+			using (Plan plan = new Plan(process))
 			{
-				OperatorBindingContext LContext = new OperatorBindingContext(null, AOperator.OperatorName, LPlan.NameResolutionPath, AOperator.Signature, false);
-				Compiler.ResolveOperator(LPlan, LContext);
-				Error.AssertFail(LContext.Operator != null, @"Operator ""{0}"" was not translated into the application transaction as expected");
-				return LContext.Operator;
+				OperatorBindingContext context = new OperatorBindingContext(null, operatorValue.OperatorName, plan.NameResolutionPath, operatorValue.Signature, false);
+				Compiler.ResolveOperator(plan, context);
+				Error.AssertFail(context.Operator != null, @"Operator ""{0}"" was not translated into the application transaction as expected");
+				return context.Operator;
 			}
 		}
 	}
 
 	public abstract class Operation : System.Object
 	{
-		public Operation(ApplicationTransaction ATransaction, TableVar ATableVar) : base()
+		public Operation(ApplicationTransaction transaction, TableVar tableVar) : base()
 		{
-			FTransaction = ATransaction;
-			FTableVar = ATableVar;
+			_transaction = transaction;
+			_tableVar = tableVar;
 		}
 		
-		private ApplicationTransaction FTransaction;
-		public ApplicationTransaction Transaction { get { return FTransaction; } }
+		private ApplicationTransaction _transaction;
+		public ApplicationTransaction Transaction { get { return _transaction; } }
 		
-		private TableVar FTableVar;
-		public TableVar TableVar { get { return FTableVar; } }
+		private TableVar _tableVar;
+		public TableVar TableVar { get { return _tableVar; } }
 		
-		private TableMap FTableMap;
+		private TableMap _tableMap;
 		protected TableMap TableMap
 		{
 			get
 			{
-				if (FTableMap == null)
+				if (_tableMap == null)
 				{
-					FTableMap = FTransaction.Device.TableMaps[FTableVar.SourceTableName];
-					if (FTableMap == null)
-						throw new ApplicationTransactionException(ApplicationTransactionException.Codes.TableMapNotFound, FTableVar.Name);
+					_tableMap = _transaction.Device.TableMaps[_tableVar.SourceTableName];
+					if (_tableMap == null)
+						throw new ApplicationTransactionException(ApplicationTransactionException.Codes.TableMapNotFound, _tableVar.Name);
 				}
-				return FTableMap;
+				return _tableMap;
 			}
 		}
 		
-		protected bool FApplied = false;
+		protected bool _applied = false;
 		
 		public void ResetApplied()
 		{
-			FApplied = false;
+			_applied = false;
 		}
 		
-		public abstract void Apply(Program AProgram);
+		public abstract void Apply(Program program);
 		
-		public abstract void Undo(Program AProgram);
+		public abstract void Undo(Program program);
 		
-		public abstract void Dispose(IValueManager AManager);
+		public abstract void Dispose(IValueManager manager);
 	}
 	
 	#if USETYPEDLIST
@@ -1891,200 +1908,200 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	
 	public class InsertOperation : Operation
 	{
-		public InsertOperation(ApplicationTransaction ATransaction, TableVar ATableVar, NativeRow ARow) : base(ATransaction, ATableVar)
+		public InsertOperation(ApplicationTransaction transaction, TableVar tableVar, NativeRow row) : base(transaction, tableVar)
 		{
-			FRow = ARow;
+			_row = row;
 		}
 		
-		private NativeRow FRow;
-		public NativeRow Row { get { return FRow; } }
+		private NativeRow _row;
+		public NativeRow Row { get { return _row; } }
 		
-		public override void Apply(Program AProgram)
+		public override void Apply(Program program)
 		{
-			if (!FApplied)
+			if (!_applied)
 			{
-				Row LRow = new Row(AProgram.ValueManager, TableMap.RowType, FRow);
+				Row row = new Row(program.ValueManager, TableMap.RowType, _row);
 				try
 				{
-					TableMap.RetrieveNode.Insert(AProgram, null, LRow, TableMap.ValueFlags, false);
+					TableMap.RetrieveNode.Insert(program, null, row, TableMap.ValueFlags, false);
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
-				FApplied = true;
+				_applied = true;
 			}
 		}
 		
-		public override void Undo(Program AProgram)
+		public override void Undo(Program program)
 		{
-			if (FApplied)
+			if (_applied)
 			{
-				Row LRow = new Row(AProgram.ValueManager, TableMap.RowType, FRow);
+				Row row = new Row(program.ValueManager, TableMap.RowType, _row);
 				try
 				{
-					TableMap.RetrieveNode.Delete(AProgram, LRow, false, false);
+					TableMap.RetrieveNode.Delete(program, row, false, false);
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
-				FApplied = false;
+				_applied = false;
 			}
 		}
 
-		public override void Dispose(IValueManager AManager)
+		public override void Dispose(IValueManager manager)
 		{
-			DataValue.DisposeNative(AManager, TableMap.RowType, FRow);
+			DataValue.DisposeNative(manager, TableMap.RowType, _row);
 		}
 	}
 	
 	public class UpdateOperation : Operation
 	{
-		public UpdateOperation(ApplicationTransaction ATransaction, TableVar ATableVar, NativeRow AOldRow, NativeRow ANewRow) : base(ATransaction, ATableVar)
+		public UpdateOperation(ApplicationTransaction transaction, TableVar tableVar, NativeRow oldRow, NativeRow newRow) : base(transaction, tableVar)
 		{
-			FOldRow = AOldRow;
-			FNewRow = ANewRow;
+			_oldRow = oldRow;
+			_newRow = newRow;
 		}
 
-		private NativeRow FOldRow;
-		public NativeRow OldRow { get { return FOldRow; } }
+		private NativeRow _oldRow;
+		public NativeRow OldRow { get { return _oldRow; } }
 		
-		private NativeRow FNewRow; 
-		public NativeRow NewRow { get { return FNewRow; } }
+		private NativeRow _newRow; 
+		public NativeRow NewRow { get { return _newRow; } }
 
-		public override void Apply(Program AProgram)
+		public override void Apply(Program program)
 		{
-			if (!FApplied)
+			if (!_applied)
 			{
-				Row LOldRow = new Row(AProgram.ValueManager, TableMap.RowType, FOldRow);
+				Row oldRow = new Row(program.ValueManager, TableMap.RowType, _oldRow);
 				try
 				{
-					Row LNewRow = new Row(AProgram.ValueManager, TableMap.RowType, FNewRow);
+					Row newRow = new Row(program.ValueManager, TableMap.RowType, _newRow);
 					try
 					{
-						TableMap.RetrieveNode.Update(AProgram, LOldRow, LNewRow, null, true, false);
+						TableMap.RetrieveNode.Update(program, oldRow, newRow, null, true, false);
 					}
 					finally
 					{
-						LNewRow.Dispose();
+						newRow.Dispose();
 					}
 				}
 				finally
 				{
-					LOldRow.Dispose();
+					oldRow.Dispose();
 				}
-				FApplied = true;
+				_applied = true;
 			}
 		}
 		
-		public override void Undo(Program AProgram)
+		public override void Undo(Program program)
 		{
-			if (FApplied)
+			if (_applied)
 			{
-				Row LOldRow = new Row(AProgram.ValueManager, TableMap.RowType, FOldRow);
+				Row oldRow = new Row(program.ValueManager, TableMap.RowType, _oldRow);
 				try
 				{
-					Row LNewRow = new Row(AProgram.ValueManager, TableMap.RowType, FNewRow);
+					Row newRow = new Row(program.ValueManager, TableMap.RowType, _newRow);
 					try
 					{
-						TableMap.RetrieveNode.Update(AProgram, LNewRow, LOldRow, null, false, true);
+						TableMap.RetrieveNode.Update(program, newRow, oldRow, null, false, true);
 					}
 					finally
 					{
-						LNewRow.Dispose();
+						newRow.Dispose();
 					}
 				}
 				finally
 				{
-					LOldRow.Dispose();
+					oldRow.Dispose();
 				}
-				FApplied = false;
+				_applied = false;
 			}
 		}
 
-		public override void Dispose(IValueManager AManager)
+		public override void Dispose(IValueManager manager)
 		{
-			DataValue.DisposeNative(AManager, TableMap.RowType, FOldRow);
-			DataValue.DisposeNative(AManager, TableMap.RowType, FNewRow);
+			DataValue.DisposeNative(manager, TableMap.RowType, _oldRow);
+			DataValue.DisposeNative(manager, TableMap.RowType, _newRow);
 		}
 	}
 	
 	public class DeleteOperation : Operation
 	{
-		public DeleteOperation(ApplicationTransaction ATransaction, TableVar ATableVar, NativeRow ARow) : base(ATransaction, ATableVar)
+		public DeleteOperation(ApplicationTransaction transaction, TableVar tableVar, NativeRow row) : base(transaction, tableVar)
 		{
-			FRow = ARow;
+			_row = row;
 		}
 		
-		private NativeRow FRow;
-		public NativeRow Row { get { return FRow; } }
+		private NativeRow _row;
+		public NativeRow Row { get { return _row; } }
 		
-		public override void Apply(Program AProgram)
+		public override void Apply(Program program)
 		{
-			if (!FApplied)
+			if (!_applied)
 			{
-				Row LRow = new Row(AProgram.ValueManager, TableMap.RowType, FRow);
+				Row row = new Row(program.ValueManager, TableMap.RowType, _row);
 				try
 				{
-					TableMap.RetrieveNode.Delete(AProgram, LRow, true, false);
+					TableMap.RetrieveNode.Delete(program, row, true, false);
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
-				FApplied = true;
+				_applied = true;
 			}
 		}
 		
-		public override void Undo(Program AProgram)
+		public override void Undo(Program program)
 		{
-			if (FApplied)
+			if (_applied)
 			{
-				Row LRow = new Row(AProgram.ValueManager, TableMap.RowType, FRow);
+				Row row = new Row(program.ValueManager, TableMap.RowType, _row);
 				try
 				{
-					TableMap.RetrieveNode.Insert(AProgram, null, LRow, TableMap.ValueFlags, true);
+					TableMap.RetrieveNode.Insert(program, null, row, TableMap.ValueFlags, true);
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
-				FApplied = false;
+				_applied = false;
 			}
 		}
 
-		public override void Dispose(IValueManager AManager)
+		public override void Dispose(IValueManager manager)
 		{
-			DataValue.DisposeNative(AManager, TableMap.RowType, FRow);
+			DataValue.DisposeNative(manager, TableMap.RowType, _row);
 		}
 	}
 
 	public class ApplicationTransactionDeviceTransaction : System.Object
 	{
-		public ApplicationTransactionDeviceTransaction(IsolationLevel AIsolationLevel) : base()
+		public ApplicationTransactionDeviceTransaction(IsolationLevel isolationLevel) : base()
 		{
-			FIsolationLevel = AIsolationLevel;
+			_isolationLevel = isolationLevel;
 		}
 		
-		private IsolationLevel FIsolationLevel;
-		public IsolationLevel IsolationLevel { get { return FIsolationLevel; } }
+		private IsolationLevel _isolationLevel;
+		public IsolationLevel IsolationLevel { get { return _isolationLevel; } }
 		
-		private Operations FOperations = new Operations();
-		public Operations Operations { get { return FOperations; } }
+		private Operations _operations = new Operations();
+		public Operations Operations { get { return _operations; } }
 		
-		private Operations FAppliedOperations = new Operations();
-		public Operations AppliedOperations { get { return FAppliedOperations; } }
+		private Operations _appliedOperations = new Operations();
+		public Operations AppliedOperations { get { return _appliedOperations; } }
 		
 		// Committed nested transactions which must be rolled back if this transaction rolls back
-		private ApplicationTransactionDeviceTransactions FTransactions;
+		private ApplicationTransactionDeviceTransactions _transactions;
 		public ApplicationTransactionDeviceTransactions Transactions 
 		{ 
 			get 
 			{
-				if (FTransactions == null)
-					FTransactions = new ApplicationTransactionDeviceTransactions();
-				return FTransactions; 
+				if (_transactions == null)
+					_transactions = new ApplicationTransactionDeviceTransactions();
+				return _transactions; 
 			} 
 		}
 	}
@@ -2104,18 +2121,18 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	public class ApplicationTransactionDeviceTransactions : BaseList<ApplicationTransactionDeviceTransaction>
 	{
 	#endif
-		public void BeginTransaction(IsolationLevel AIsolationLevel)
+		public void BeginTransaction(IsolationLevel isolationLevel)
 		{
-			Add(new ApplicationTransactionDeviceTransaction(AIsolationLevel));
+			Add(new ApplicationTransactionDeviceTransaction(isolationLevel));
 		}
 		
 		// ASuccess indicates whether the transaction ended successfully
-		public void EndTransaction(bool ASuccess)
+		public void EndTransaction(bool success)
 		{
-			if (ASuccess && (Count > 1))
+			if (success && (Count > 1))
 			{
-				ApplicationTransactionDeviceTransaction LTransaction = this[Count - 1];
-				this[Count - 2].Transactions.Add(LTransaction);
+				ApplicationTransactionDeviceTransaction transaction = this[Count - 1];
+				this[Count - 2].Transactions.Add(transaction);
 				RemoveAt(Count - 1);
 			}
 			else
@@ -2132,12 +2149,12 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	{
 		protected internal ApplicationTransactionDeviceSession
 		(
-			Schema.Device ADevice, 
-			ServerProcess AServerProcess, 
-			DeviceSessionInfo ADeviceSessionInfo
-		) : base(ADevice, AServerProcess, ADeviceSessionInfo) {}
+			Schema.Device device, 
+			ServerProcess serverProcess, 
+			DeviceSessionInfo deviceSessionInfo
+		) : base(device, serverProcess, deviceSessionInfo) {}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -2145,30 +2162,30 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 			finally
 			{
-				FTransaction = null;
-				base.Dispose(ADisposing);
+				_transaction = null;
+				base.Dispose(disposing);
 			}
 		}
 		
-		private ApplicationTransactionDeviceTransactions FTransactions = new ApplicationTransactionDeviceTransactions();
-		public new ApplicationTransactionDeviceTransactions Transactions { get { return FTransactions; } }
+		private ApplicationTransactionDeviceTransactions _transactions = new ApplicationTransactionDeviceTransactions();
+		public new ApplicationTransactionDeviceTransactions Transactions { get { return _transactions; } }
 		
 		public new ApplicationTransactionDevice Device { get { return (ApplicationTransactionDevice)base.Device; } }
 		
-		private ApplicationTransaction FTransaction;
+		private ApplicationTransaction _transaction;
 		public ApplicationTransaction Transaction 
 		{ 
 			get 
 			{ 
-				if (FTransaction == null)
-					Device.ApplicationTransactions.TryGetValue(ServerProcess.ApplicationTransactionID, out FTransaction);
-				return FTransaction;
+				if (_transaction == null)
+					Device.ApplicationTransactions.TryGetValue(ServerProcess.ApplicationTransactionID, out _transaction);
+				return _transaction;
 			} 
 		}
 		
-		protected override void InternalBeginTransaction(IsolationLevel AIsolationLevel)
+		protected override void InternalBeginTransaction(IsolationLevel isolationLevel)
 		{
-			FTransactions.BeginTransaction(AIsolationLevel);
+			_transactions.BeginTransaction(isolationLevel);
 		}
 
 		protected override void InternalPrepareTransaction()
@@ -2178,105 +2195,111 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		
 		protected override void InternalCommitTransaction()
 		{
-			FTransactions.EndTransaction(true);
+			_transactions.EndTransaction(true);
 		}
 		
-		protected void InternalRollbackTransaction(ApplicationTransactionDeviceTransaction ATransaction)
+		protected void InternalRollbackTransaction(ApplicationTransactionDeviceTransaction transaction)
 		{
-			Exception LException = null;
-			int LOperationIndex;
-			foreach (Operation LOperation in ATransaction.Operations)
+			Exception exception = null;
+			int operationIndex;
+			foreach (Operation operation in transaction.Operations)
 			{
 				try
 				{
-					LOperationIndex = Transaction.Operations.IndexOf(LOperation);
-					if (LOperationIndex >= 0)
-						Transaction.Operations.RemoveAt(LOperationIndex);
-					LOperation.Dispose(ServerProcess.ValueManager);
+					operationIndex = Transaction.Operations.IndexOf(operation);
+					if (operationIndex >= 0)
+						Transaction.Operations.RemoveAt(operationIndex);
+					operation.Dispose(ServerProcess.ValueManager);
 				}
 				catch (Exception E)
 				{
-					LException = E;
+					exception = E;
 					ServerProcess.ServerSession.Server.LogError(E);
 				}
 			}
 			
-			foreach (Operation LOperation in ATransaction.AppliedOperations)
-				LOperation.ResetApplied();
+			foreach (Operation operation in transaction.AppliedOperations)
+				operation.ResetApplied();
 			
-			foreach (ApplicationTransactionDeviceTransaction LTransaction in ATransaction.Transactions)
+			foreach (ApplicationTransactionDeviceTransaction localTransaction in transaction.Transactions)
 			{
 				try
 				{
-					InternalRollbackTransaction(LTransaction);
+					InternalRollbackTransaction(localTransaction);
 				}
 				catch (Exception E)
 				{
-					LException = E;
+					exception = E;
 					ServerProcess.ServerSession.Server.LogError(E);
 				}
 			}
 			
-			if (LException != null)
-				throw LException;
+			if (exception != null)
+				throw exception;
 		}
 
 		protected override void InternalRollbackTransaction()
 		{
-			InternalRollbackTransaction(FTransactions.CurrentTransaction());
-			FTransactions.EndTransaction(false);
+			try
+			{
+				InternalRollbackTransaction(_transactions.CurrentTransaction());
+			}
+			finally
+			{
+				_transactions.EndTransaction(false);
+			}
 		}
 
-		private TableMap GetTableMap(TableVar ATableVar)
+		private TableMap GetTableMap(TableVar tableVar)
 		{
-			TableMap LTableMap = Device.TableMaps[ATableVar.SourceTableName];
-			if (LTableMap == null)
-				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.TableMapNotFound, ATableVar.Name);
-			return LTableMap;
+			TableMap tableMap = Device.TableMaps[tableVar.SourceTableName];
+			if (tableMap == null)
+				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.TableMapNotFound, tableVar.Name);
+			return tableMap;
 		}
 		
-		public override NativeTables GetTables(Schema.TableVarScope AScope) { return Transaction.Tables; }
+		public override NativeTables GetTables(Schema.TableVarScope scope) { return Transaction.Tables; }
 		
-		protected override object InternalExecute(Program AProgram, DevicePlan ADevicePlan)
+		protected override object InternalExecute(Program program, DevicePlan devicePlan)
 		{
-			if (ADevicePlan.Node is CreateTableVarBaseNode)
+			if (devicePlan.Node is CreateTableVarBaseNode)
 			{
 				return null; // Actual storage will be allocated by the application transaction
 			}
-			else if (ADevicePlan.Node is DropTableNode)
+			else if (devicePlan.Node is DropTableNode)
 			{
 				return null; // Actual storage will be deallocated by the application transaction
 			}
 			else
-				return base.InternalExecute(AProgram, ADevicePlan);
+				return base.InternalExecute(program, devicePlan);
 		}
 
-		protected override void InternalInsertRow(Program AProgram, TableVar ATableVar, Row ARow, BitArray AValueFlags)
+		protected override void InternalInsertRow(Program program, TableVar tableVar, Row row, BitArray valueFlags)
 		{
-			InsertOperation LOperation = null;
+			InsertOperation operation = null;
 			if (Transaction.IsPopulatingSource)
 			{
-				TableMap LTableMap = GetTableMap(ATableVar);
+				TableMap tableMap = GetTableMap(tableVar);
 
 				// Don't insert a row if it is in the DeletedTableVar or the TableVar of the TableMap for this TableVar
 				// if not(exists(DeletedTableVar where ARow) or exists(TableVar where ARow))
-				Row LRow = new Row(AProgram.ValueManager, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
+				Row localRow = new Row(program.ValueManager, tableVar.DataType.RowType, (NativeRow)row.AsNative);
 				try
 				{
-					AProgram.Stack.Push(LRow);
+					program.Stack.Push(localRow);
 					try
 					{
-						if (!(bool)LTableMap.HasRowNode.Execute(AProgram))
-							base.InternalInsertRow(AProgram, ATableVar, ARow, AValueFlags);
+						if (!(bool)tableMap.HasRowNode.Execute(program))
+							base.InternalInsertRow(program, tableVar, row, valueFlags);
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					localRow.Dispose();
 				}
 			}
 			else
@@ -2284,82 +2307,82 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				if (Transaction.Closed)
 					throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed, Transaction.ID.ToString());
 
-				base.InternalInsertRow(AProgram, ATableVar, ARow, AValueFlags);
+				base.InternalInsertRow(program, tableVar, row, valueFlags);
 				Transaction.Prepared = false;
 
 				if (!InTransaction || !ServerProcess.CurrentTransaction.InRollback)
 				{
 					// If this is the deleted table var for a table map, do not log the operation as part of the application transaction
-					if (!ATableVar.IsDeletedTable)
+					if (!tableVar.IsDeletedTable)
 					{
-						LOperation = new InsertOperation(Transaction, ATableVar, (NativeRow)ARow.CopyNative());
-						Transaction.Operations.Add(LOperation);
+						operation = new InsertOperation(Transaction, tableVar, (NativeRow)row.CopyNative());
+						Transaction.Operations.Add(operation);
 					}
 				}
 			}
 
-			if (InTransaction && !ServerProcess.NonLogged && (LOperation != null) && !ServerProcess.CurrentTransaction.InRollback)
-				FTransactions.CurrentTransaction().Operations.Add(LOperation);
+			if (InTransaction && !ServerProcess.NonLogged && (operation != null) && !ServerProcess.CurrentTransaction.InRollback)
+				_transactions.CurrentTransaction().Operations.Add(operation);
 		}
 		
-		protected override void InternalUpdateRow(Program AProgram, TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalUpdateRow(Program program, TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
 		{
 			if (Transaction.Closed)
 				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed);
 
-			base.InternalUpdateRow(AProgram, ATableVar, AOldRow, ANewRow, AValueFlags);
+			base.InternalUpdateRow(program, tableVar, oldRow, newRow, valueFlags);
 			Transaction.Prepared = false;
 
 			if (!InTransaction || !ServerProcess.CurrentTransaction.InRollback)
 			{			
-				UpdateOperation LOperation = new UpdateOperation(Transaction, ATableVar, (NativeRow)AOldRow.CopyNative(), (NativeRow)ANewRow.CopyNative());
-				Transaction.Operations.Add(LOperation);
+				UpdateOperation operation = new UpdateOperation(Transaction, tableVar, (NativeRow)oldRow.CopyNative(), (NativeRow)newRow.CopyNative());
+				Transaction.Operations.Add(operation);
 				if (InTransaction && !ServerProcess.NonLogged)
-					FTransactions.CurrentTransaction().Operations.Add(LOperation);
+					_transactions.CurrentTransaction().Operations.Add(operation);
 
-				LogDeletedRow(AProgram, ATableVar, AOldRow);
+				LogDeletedRow(program, tableVar, oldRow);
 			}
 		}
 		
-		protected void LogDeletedRow(Program AProgram, TableVar ATableVar, Row ARow)
+		protected void LogDeletedRow(Program program, TableVar tableVar, Row row)
 		{
-			TableMap LTableMap = GetTableMap(ATableVar);
-			Row LRow = new Row(AProgram.ValueManager, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
+			TableMap tableMap = GetTableMap(tableVar);
+			Row localRow = new Row(program.ValueManager, tableVar.DataType.RowType, (NativeRow)row.AsNative);
 			try
 			{
-				AProgram.Stack.Push(LRow);
+				program.Stack.Push(localRow);
 				try
 				{
-					if (!(bool)LTableMap.HasDeletedRowNode.Execute(AProgram))
-						LTableMap.DeletedRetrieveNode.Insert(AProgram, null, ARow, null, true);
+					if (!(bool)tableMap.HasDeletedRowNode.Execute(program))
+						tableMap.DeletedRetrieveNode.Insert(program, null, row, null, true);
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			finally
 			{
-				LRow.Dispose();
+				localRow.Dispose();
 			}
 		}
 		
-		protected override void InternalDeleteRow(Program AProgram, TableVar ATableVar, Row ARow)
+		protected override void InternalDeleteRow(Program program, TableVar tableVar, Row row)
 		{
 			if (Transaction.Closed)
-				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed);
+				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed, Transaction.ID);
 
-			base.InternalDeleteRow(AProgram, ATableVar, ARow);
+			base.InternalDeleteRow(program, tableVar, row);
 			Transaction.Prepared = false;
 			
 			if (!InTransaction || !ServerProcess.CurrentTransaction.InRollback)
 			{
-				DeleteOperation LOperation = new DeleteOperation(Transaction, ATableVar, (NativeRow)ARow.CopyNative());
-				Transaction.Operations.Add(LOperation);
+				DeleteOperation operation = new DeleteOperation(Transaction, tableVar, (NativeRow)row.CopyNative());
+				Transaction.Operations.Add(operation);
 				if (InTransaction && !ServerProcess.NonLogged)
-					FTransactions.CurrentTransaction().Operations.Add(LOperation);
+					_transactions.CurrentTransaction().Operations.Add(operation);
 
-				LogDeletedRow(AProgram, ATableVar, ARow);
+				LogDeletedRow(program, tableVar, row);
 			}
 		}
 	}

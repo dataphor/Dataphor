@@ -37,17 +37,17 @@ namespace Alphora.Dataphor.DAE.Language
     public class LineInfo
     {
 		public LineInfo() : this(-1, -1, -1, -1) { }
-		public LineInfo(int ALine, int ALinePos, int AEndLine, int AEndLinePos)
+		public LineInfo(int line, int linePos, int endLine, int endLinePos)
 		{
-			Line = ALine;
-			LinePos = ALinePos;
-			EndLine = AEndLine;
-			EndLinePos = AEndLinePos;
+			Line = line;
+			LinePos = linePos;
+			EndLine = endLine;
+			EndLinePos = endLinePos;
 		}
 		
-		public LineInfo(LineInfo ALineInfo)
+		public LineInfo(LineInfo lineInfo)
 		{
-			SetFromLineInfo(ALineInfo == null ? StartingOffset : ALineInfo);
+			SetFromLineInfo(lineInfo == null ? StartingOffset : lineInfo);
 		}
 		
 		public int Line;
@@ -55,12 +55,12 @@ namespace Alphora.Dataphor.DAE.Language
 		public int EndLine;
 		public int EndLinePos;
 		
-		public void SetFromLineInfo(LineInfo ALineInfo)
+		public void SetFromLineInfo(LineInfo lineInfo)
 		{
-			Line = ALineInfo.Line;
-			LinePos = ALineInfo.LinePos;
-			EndLine = ALineInfo.EndLine;
-			EndLinePos = ALineInfo.EndLinePos;
+			Line = lineInfo.Line;
+			LinePos = lineInfo.LinePos;
+			EndLine = lineInfo.EndLine;
+			EndLinePos = lineInfo.EndLinePos;
 		}
 
 		public static LineInfo Empty = new LineInfo();		
@@ -71,88 +71,88 @@ namespace Alphora.Dataphor.DAE.Language
 	public abstract class Statement : Object 
 	{
 		public Statement() : base() {}
-		public Statement(Lexer ALexer) : base()
+		public Statement(Lexer lexer) : base()
 		{
-			SetPosition(ALexer);
+			SetPosition(lexer);
 		}
 		
 		// The line and position of the starting token for this element in the syntax tree
-		private LineInfo FLineInfo;
-		public LineInfo LineInfo { get { return FLineInfo; } }
+		private LineInfo _lineInfo;
+		public LineInfo LineInfo { get { return _lineInfo; } }
 		
 		public int Line
 		{
-			get { return FLineInfo == null ? -1 : FLineInfo.Line; }
+			get { return _lineInfo == null ? -1 : _lineInfo.Line; }
 			set
 			{
-				if (FLineInfo == null)
-					FLineInfo = new LineInfo();
-				FLineInfo.Line = value;
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.Line = value;
 			}
 		}
 		
 		public int LinePos
 		{
-			get { return FLineInfo == null ? -1 : FLineInfo.LinePos; }
+			get { return _lineInfo == null ? -1 : _lineInfo.LinePos; }
 			set
 			{
-				if (FLineInfo == null)
-					FLineInfo = new LineInfo();
-				FLineInfo.LinePos = value;
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.LinePos = value;
 			}
 		}
 		
 		public int EndLine
 		{
-			get { return FLineInfo == null ? -1 : FLineInfo.EndLine; }
+			get { return _lineInfo == null ? -1 : _lineInfo.EndLine; }
 			set
 			{
-				if (FLineInfo == null)
-					FLineInfo = new LineInfo();
-				FLineInfo.EndLine = value;
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.EndLine = value;
 			}
 		}
 		
 		public int EndLinePos
 		{
-			get { return FLineInfo == null ? -1 : FLineInfo.EndLinePos; }
+			get { return _lineInfo == null ? -1 : _lineInfo.EndLinePos; }
 			set
 			{
-				if (FLineInfo == null)
-					FLineInfo = new LineInfo();
-				FLineInfo.EndLinePos = value;
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.EndLinePos = value;
 			}
 		}
 		
-		public void SetPosition(Lexer ALexer)
+		public void SetPosition(Lexer lexer)
 		{
-			Line = ALexer[0, false].Line;
-			LinePos = ALexer[0, false].LinePos;
+			Line = lexer[0, false].Line;
+			LinePos = lexer[0, false].LinePos;
 		}
 		
-		public void SetEndPosition(Lexer ALexer)
+		public void SetEndPosition(Lexer lexer)
 		{
-			EndLine = ALexer[0, false].Line;
-			LexerToken LToken = ALexer[0, false];
-			EndLinePos = LToken.LinePos + (LToken.Token == null ? 0 : LToken.Token.Length);
+			EndLine = lexer[0, false].Line;
+			LexerToken token = lexer[0, false];
+			EndLinePos = token.LinePos + (token.Token == null ? 0 : token.Token.Length);
 		}
 		
-		public void SetLineInfo(LineInfo ALineInfo)
+		public void SetLineInfo(LineInfo lineInfo)
 		{
-			if (ALineInfo != null)
+			if (lineInfo != null)
 			{
-				Line = ALineInfo.Line;
-				LinePos = ALineInfo.LinePos;
-				EndLine = ALineInfo.EndLine;
-				EndLinePos = ALineInfo.EndLinePos;
+				Line = lineInfo.Line;
+				LinePos = lineInfo.LinePos;
+				EndLine = lineInfo.EndLine;
+				EndLinePos = lineInfo.EndLinePos;
 			}
 		}
 
-		private LanguageModifiers FModifiers;
+		private LanguageModifiers _modifiers;
 		public LanguageModifiers Modifiers 
 		{ 
-			get { return FModifiers; } 
-			set { FModifiers = value; } 
+			get { return _modifiers; } 
+			set { _modifiers = value; } 
 		}
 	}
 	
@@ -160,10 +160,10 @@ namespace Alphora.Dataphor.DAE.Language
     
     public class Statements : List
     {
-		public new Statement this[int AIndex]
+		public new Statement this[int index]
 		{
-			get { return (Statement)base[AIndex]; }
-			set	{ base[AIndex] = value; }
+			get { return (Statement)base[index]; }
+			set	{ base[index] = value; }
 		}
     }
     
@@ -174,183 +174,183 @@ namespace Alphora.Dataphor.DAE.Language
 	public class ParameterExpression : Expression
 	{
 		public ParameterExpression() : base(){}
-		public ParameterExpression(Modifier AModifier, Expression AExpression)
+		public ParameterExpression(Modifier modifier, Expression expression)
 		{
-			FModifier = AModifier;
-			FExpression = AExpression;
+			_modifier = modifier;
+			_expression = expression;
 		}
 		
-		protected Modifier FModifier;
+		protected Modifier _modifier;
 		public Modifier Modifier
 		{
-			get	{ return FModifier; }
-			set { FModifier = value; }
+			get	{ return _modifier; }
+			set { _modifier = value; }
 		}
 		
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 	}
 	
     public class Expressions : Statements
     {		
-		public new Expression this[int AIndex]
+		public new Expression this[int index]
 		{
-			get { return (Expression)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (Expression)base[index]; }
+			set { base[index] = value; }
 		}
     }
     
     public class UnaryExpression : Expression
     {
         public UnaryExpression() : base(){}
-        public UnaryExpression(string AInstruction, Expression AExpression) : base()
+        public UnaryExpression(string instruction, Expression expression) : base()
         {
-            Instruction = AInstruction;
-            Expression = AExpression;
+            Instruction = instruction;
+            Expression = expression;
         }
         
         // Instruction
-        protected string FInstruction = String.Empty;
+        protected string _instruction = String.Empty;
         public string Instruction
         {
-            get { return FInstruction; }
-            set { FInstruction = value; }
+            get { return _instruction; }
+            set { _instruction = value; }
         }
         
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
     }
     
     public class BinaryExpression : Expression
     {
         public BinaryExpression() : base(){}
-        public BinaryExpression(Expression ALeftExpression, string AInstruction, Expression ARightExpression) : base()
+        public BinaryExpression(Expression leftExpression, string instruction, Expression rightExpression) : base()
         {
-            LeftExpression = ALeftExpression;
-            Instruction = AInstruction;
-            RightExpression = ARightExpression;
+            LeftExpression = leftExpression;
+            Instruction = instruction;
+            RightExpression = rightExpression;
         }
     
         // Instruction
-        protected string FInstruction = String.Empty;
+        protected string _instruction = String.Empty;
         public string Instruction
         {
-            get { return FInstruction; }
-            set { FInstruction = value; }
+            get { return _instruction; }
+            set { _instruction = value; }
         }
         
         // LeftExpression
-        private Expression FLeftExpression;
+        private Expression _leftExpression;
         public Expression LeftExpression
         {
-            get { return FLeftExpression; }
-            set { FLeftExpression = value; }
+            get { return _leftExpression; }
+            set { _leftExpression = value; }
         }
 
         // RightExpression        
-        private Expression FRightExpression;
+        private Expression _rightExpression;
         public Expression RightExpression
         {
-            get { return FRightExpression; }
-            set { FRightExpression = value; }
+            get { return _rightExpression; }
+            set { _rightExpression = value; }
         }
     }
     
     public class QualifierExpression : Expression
     {
         public QualifierExpression() : base(){}
-        public QualifierExpression(Expression ALeftExpression, Expression ARightExpression) : base()
+        public QualifierExpression(Expression leftExpression, Expression rightExpression) : base()
         {
-            LeftExpression = ALeftExpression;
-            RightExpression = ARightExpression;
+            LeftExpression = leftExpression;
+            RightExpression = rightExpression;
         }
     
         // LeftExpression
-        private Expression FLeftExpression;
+        private Expression _leftExpression;
         public Expression LeftExpression
         {
-            get { return FLeftExpression; }
-            set { FLeftExpression = value; }
+            get { return _leftExpression; }
+            set { _leftExpression = value; }
         }
 
         // RightExpression        
-        private Expression FRightExpression;
+        private Expression _rightExpression;
         public Expression RightExpression
         {
-            get { return FRightExpression; }
-            set { FRightExpression = value; }
+            get { return _rightExpression; }
+            set { _rightExpression = value; }
         }
     }
     
     public class ValueExpression : Expression
     {
         public ValueExpression() : base(){}
-        public ValueExpression(object AValue) : base()
+        public ValueExpression(object tempValue) : base()
         {
-            Value = AValue;
-            if (AValue is decimal)
+            Value = tempValue;
+            if (tempValue is decimal)
 				Token = TokenType.Decimal;
-			else if (AValue is long)
+			else if (tempValue is long)
 				Token = TokenType.Integer;
-			else if (AValue is int)
+			else if (tempValue is int)
 			{
-				Value = Convert.ToInt64(AValue);
+				Value = Convert.ToInt64(tempValue);
 				Token = TokenType.Integer;
 			}
-			else if (AValue is double)
+			else if (tempValue is double)
 				Token = TokenType.Float;
-			else if (AValue is bool)
+			else if (tempValue is bool)
 				Token = TokenType.Boolean;
-			else if (AValue is string)
+			else if (tempValue is string)
 				Token = TokenType.String;
         }
         
-        public ValueExpression(object AValue, TokenType AToken) : base()
+        public ValueExpression(object tempValue, TokenType token) : base()
         {
-			Value = AValue;
-			Token = AToken;
+			Value = tempValue;
+			Token = token;
         }
         
         // Value
-        private object FValue;
+        private object _value;
         public object Value
         {
-            get { return FValue; }
-            set { FValue = value; }
+            get { return _value; }
+            set { _value = value; }
         }
         
         // Token
-        private TokenType FToken;
+        private TokenType _token;
         public TokenType Token
         {
-			get { return FToken; }
-			set { FToken = value; }
+			get { return _token; }
+			set { _token = value; }
         }
     }
     
     public class IdentifierExpression : Expression
     {
         public IdentifierExpression() : base(){}
-        public IdentifierExpression(string AIdentifier) : base()
+        public IdentifierExpression(string identifier) : base()
         {
-            Identifier = AIdentifier;
+            Identifier = identifier;
         }
         
         // Identifier
-        protected string FIdentifier = String.Empty;
+        protected string _identifier = String.Empty;
         public string Identifier
         {
-            get { return FIdentifier; }
-            set { FIdentifier = value; }
+            get { return _identifier; }
+            set { _identifier = value; }
         }
     }
     
@@ -358,336 +358,336 @@ namespace Alphora.Dataphor.DAE.Language
     {
         public ListExpression() : base()
         {
-            FExpressions = new Expressions();
+            _expressions = new Expressions();
         }
         
-        public ListExpression(Expression[] AExpressions) : base()
+        public ListExpression(Expression[] expressions) : base()
         {
-			FExpressions = new Expressions();
-			FExpressions.AddRange(AExpressions);
+			_expressions = new Expressions();
+			_expressions.AddRange(expressions);
         }
         
         // Expressions
-        protected Expressions FExpressions;
-        public Expressions Expressions { get { return FExpressions; } }
+        protected Expressions _expressions;
+        public Expressions Expressions { get { return _expressions; } }
     }
     
     public class IndexerExpression : Expression
     {
         // Expression
-        private Expression FExpression;
+        private Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // Indexer
         public Expression Indexer
         {
-			get { return FExpressions[0]; }
+			get { return _expressions[0]; }
 			set 
 			{
-				if (FExpressions.Count == 0)
-					FExpressions.Add(value);
+				if (_expressions.Count == 0)
+					_expressions.Add(value);
 				else
-					FExpressions[0] = value;
+					_expressions[0] = value;
 			}
         }
         
         // Expressions
-        protected Expressions FExpressions = new Expressions();
-        public Expressions Expressions { get { return FExpressions; } }
+        protected Expressions _expressions = new Expressions();
+        public Expressions Expressions { get { return _expressions; } }
     }
    
     public class CallExpression : Expression
     {
         public CallExpression() : base()
         {
-            FExpressions = new Expressions();
+            _expressions = new Expressions();
         }
         
-        public CallExpression(string AIdentifier, Expression[] AArguments) : base()
+        public CallExpression(string identifier, Expression[] arguments) : base()
         {
-            FExpressions = new Expressions();
-            FExpressions.AddRange(AArguments);
-            Identifier = AIdentifier;
+            _expressions = new Expressions();
+            _expressions.AddRange(arguments);
+            Identifier = identifier;
         }
         
         // Identifier
-        protected string FIdentifier = String.Empty;
+        protected string _identifier = String.Empty;
         public string Identifier
         {
-            get { return FIdentifier; }
-            set { FIdentifier = value; }
+            get { return _identifier; }
+            set { _identifier = value; }
         }
         
         // Expressions
-        protected Expressions FExpressions;
-        public Expressions Expressions { get { return FExpressions; } }
+        protected Expressions _expressions;
+        public Expressions Expressions { get { return _expressions; } }
     }
    
     public class IfExpression : Expression
     {
         public IfExpression() : base(){}
-        public IfExpression(Expression AExpression, Expression ATrueExpression, Expression AFalseExpression) : base()
+        public IfExpression(Expression expression, Expression trueExpression, Expression falseExpression) : base()
         {
-            Expression = AExpression;
-            TrueExpression = ATrueExpression;
-            FalseExpression = AFalseExpression;
+            Expression = expression;
+            TrueExpression = trueExpression;
+            FalseExpression = falseExpression;
         }
         
         // Expression
-        private Expression FExpression;
+        private Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
 
         // TrueExpression
-        private Expression FTrueExpression;
+        private Expression _trueExpression;
         public Expression TrueExpression
         {
-            get { return FTrueExpression; }
-            set { FTrueExpression = value; }
+            get { return _trueExpression; }
+            set { _trueExpression = value; }
         }
         
         // FalseExpression
-        private Expression FFalseExpression;
+        private Expression _falseExpression;
         public Expression FalseExpression
         {
-            get { return FFalseExpression; }
-            set { FFalseExpression = value; }
+            get { return _falseExpression; }
+            set { _falseExpression = value; }
         }
     }
     
     public class CaseExpression : Expression
     {		
         public CaseExpression() : base(){}
-        public CaseExpression(CaseItemExpression[] AItems, Expression AElseExpression) : base()
+        public CaseExpression(CaseItemExpression[] items, Expression elseExpression) : base()
         {
-			FCaseItems.AddRange(AItems);
-			FElseExpression = AElseExpression;
+			_caseItems.AddRange(items);
+			_elseExpression = elseExpression;
         }
         
-        public CaseExpression(Expression AExpression, CaseItemExpression[] AItems, Expression AElseExpression)
+        public CaseExpression(Expression expression, CaseItemExpression[] items, Expression elseExpression)
         {
-			FExpression = AExpression;
-			FCaseItems.AddRange(AItems);
-			FElseExpression = AElseExpression;
+			_expression = expression;
+			_caseItems.AddRange(items);
+			_elseExpression = elseExpression;
         }
         
         // Expression        
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // CaseItems
-        protected CaseItemExpressions FCaseItems = new CaseItemExpressions();
-        public CaseItemExpressions CaseItems { get { return FCaseItems; } }
+        protected CaseItemExpressions _caseItems = new CaseItemExpressions();
+        public CaseItemExpressions CaseItems { get { return _caseItems; } }
         
         // ElseExpression
-        protected Expression FElseExpression;
+        protected Expression _elseExpression;
         public Expression ElseExpression
         {
-            get { return FElseExpression; }
-            set { FElseExpression = value; }
+            get { return _elseExpression; }
+            set { _elseExpression = value; }
         }
     }
     
     public class CaseItemExpression : Expression
     {
         public CaseItemExpression() : base(){}
-        public CaseItemExpression(Expression AWhenExpression, Expression AThenExpression) : base()
+        public CaseItemExpression(Expression whenExpression, Expression thenExpression) : base()
         {
-            WhenExpression = AWhenExpression;
-            ThenExpression = AThenExpression;
+            WhenExpression = whenExpression;
+            ThenExpression = thenExpression;
         }
     
         // WhenExpression
-        private Expression FWhenExpression;
+        private Expression _whenExpression;
         public Expression WhenExpression
         {
-            get { return FWhenExpression; }
-            set { FWhenExpression = value; }
+            get { return _whenExpression; }
+            set { _whenExpression = value; }
         }
 
         // ThenExpression        
-        private Expression FThenExpression;
+        private Expression _thenExpression;
         public Expression ThenExpression
         {
-            get { return FThenExpression; }
-            set { FThenExpression = value; }
+            get { return _thenExpression; }
+            set { _thenExpression = value; }
         }
     }
     
     public class CaseItemExpressions : Expressions
     {		
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is CaseItemExpression))
+			if (!(item is CaseItemExpression))
 				throw new LanguageException(LanguageException.Codes.CaseItemExpressionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new CaseItemExpression this[int AIndex]
+		public new CaseItemExpression this[int index]
 		{
-			get { return (CaseItemExpression)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (CaseItemExpression)base[index]; }
+			set { base[index] = value; }
 		}
     }
     
     public class CaseElseExpression : Expression
     {
 		public CaseElseExpression() : base(){}
-		public CaseElseExpression(Expression AExpression) : base()
+		public CaseElseExpression(Expression expression) : base()
 		{
-			Expression = AExpression;
+			Expression = expression;
 		}
 		
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
     }
     
     public class BetweenExpression : Expression
     {
 		public BetweenExpression() : base(){}
-		public BetweenExpression(Expression AExpression, Expression ALowerExpression, Expression AUpperExpression) : base()
+		public BetweenExpression(Expression expression, Expression lowerExpression, Expression upperExpression) : base()
 		{
-			FExpression = AExpression;
-			FLowerExpression = ALowerExpression;
-			FUpperExpression = AUpperExpression;
+			_expression = expression;
+			_lowerExpression = lowerExpression;
+			_upperExpression = upperExpression;
 		}
 		
-		private Expression FExpression;
-		public Expression Expression { get { return FExpression; } set { FExpression = value; } }
+		private Expression _expression;
+		public Expression Expression { get { return _expression; } set { _expression = value; } }
 		
-		private Expression FLowerExpression;
-		public Expression LowerExpression { get { return FLowerExpression; } set { FLowerExpression = value; } }
+		private Expression _lowerExpression;
+		public Expression LowerExpression { get { return _lowerExpression; } set { _lowerExpression = value; } }
 		
-		private Expression FUpperExpression;
-		public Expression UpperExpression { get { return FUpperExpression; } set { FUpperExpression = value; } }
+		private Expression _upperExpression;
+		public Expression UpperExpression { get { return _upperExpression; } set { _upperExpression = value; } }
     }
     
 	public class IfStatement : Statement
     {
         public IfStatement() : base(){}
-        public IfStatement(Expression AExpression, Statement ATrueStatement, Statement AFalseStatement)
+        public IfStatement(Expression expression, Statement trueStatement, Statement falseStatement)
         {
-            Expression = AExpression;
-            TrueStatement = ATrueStatement;
-            FalseStatement = AFalseStatement;
+            Expression = expression;
+            TrueStatement = trueStatement;
+            FalseStatement = falseStatement;
         }
 
         // Expression        
-        private Expression FExpression;
+        private Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // TrueStatement
-        private Statement FTrueStatement;
+        private Statement _trueStatement;
         public Statement TrueStatement
         {
-            get { return FTrueStatement; }
-            set { FTrueStatement = value; }
+            get { return _trueStatement; }
+            set { _trueStatement = value; }
         }
 
         // FalseStatement        
-        private Statement FFalseStatement;
+        private Statement _falseStatement;
         public Statement FalseStatement
         {
-            get { return FFalseStatement; }
-            set { FFalseStatement = value; }
+            get { return _falseStatement; }
+            set { _falseStatement = value; }
         }
     }
     
     public class CaseStatement : Statement
     {		
         public CaseStatement() : base(){}
-        public CaseStatement(CaseItemStatement[] AItems, Statement AElseStatement) : base()
+        public CaseStatement(CaseItemStatement[] items, Statement elseStatement) : base()
         {
-			FCaseItems.AddRange(AItems);												
-			FElseStatement = AElseStatement;
+			_caseItems.AddRange(items);												
+			_elseStatement = elseStatement;
         }
         
-        public CaseStatement(Expression AExpression, CaseItemStatement[] AItems, Statement AElseStatement)
+        public CaseStatement(Expression expression, CaseItemStatement[] items, Statement elseStatement)
         {
-			FExpression = AExpression;
-			FCaseItems.AddRange(AItems);
-			FElseStatement = AElseStatement;
+			_expression = expression;
+			_caseItems.AddRange(items);
+			_elseStatement = elseStatement;
         }
         
         // Expression        
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // CaseItems
-        protected CaseItemStatements FCaseItems = new CaseItemStatements();
-        public CaseItemStatements CaseItems { get { return FCaseItems; } }
+        protected CaseItemStatements _caseItems = new CaseItemStatements();
+        public CaseItemStatements CaseItems { get { return _caseItems; } }
         
         // ElseStatement
-        protected Statement FElseStatement;
+        protected Statement _elseStatement;
         public Statement ElseStatement
         {
-            get { return FElseStatement; }
-            set { FElseStatement = value; }
+            get { return _elseStatement; }
+            set { _elseStatement = value; }
         }
     }
     
     public class CaseItemStatement : Statement
     {
         public CaseItemStatement() : base(){}
-        public CaseItemStatement(Expression AWhenExpression, Statement AThenStatement) : base()
+        public CaseItemStatement(Expression whenExpression, Statement thenStatement) : base()
         {
-            WhenExpression = AWhenExpression;
-            ThenStatement = AThenStatement;
+            WhenExpression = whenExpression;
+            ThenStatement = thenStatement;
         }
     
         // WhenExpression
-        private Expression FWhenExpression;
+        private Expression _whenExpression;
         public Expression WhenExpression
         {
-            get { return FWhenExpression; }
-            set { FWhenExpression = value; }
+            get { return _whenExpression; }
+            set { _whenExpression = value; }
         }
 
         // ThenStatement        
-        private Statement FThenStatement;
+        private Statement _thenStatement;
         public Statement ThenStatement
         {
-            get { return FThenStatement; }
-            set { FThenStatement = value; }
+            get { return _thenStatement; }
+            set { _thenStatement = value; }
         }
     }
     
     public class CaseItemStatements : Statements
     {		
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is CaseItemStatement))
+			if (!(item is CaseItemStatement))
 				throw new LanguageException(LanguageException.Codes.CaseItemExpressionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new CaseItemStatement this[int AIndex]
+		public new CaseItemStatement this[int index]
 		{
-			get { return (CaseItemStatement)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (CaseItemStatement)base[index]; }
+			set { base[index] = value; }
 		}
     }
     
@@ -696,8 +696,8 @@ namespace Alphora.Dataphor.DAE.Language
 		public Block() : base(){}
 		
 		// Statements
-		protected Statements FStatements = new Statements();
-		public Statements Statements { get { return FStatements; } }
+		protected Statements _statements = new Statements();
+		public Statements Statements { get { return _statements; } }
     }
     
     public class DelimitedBlock : Block{}
@@ -708,18 +708,18 @@ namespace Alphora.Dataphor.DAE.Language
     {
 		public WhileStatementBase() : base() {}
 
-		protected Expression FCondition;
+		protected Expression _condition;
 		public Expression Condition
 		{
-			get { return FCondition; }
-			set { FCondition = value; }
+			get { return _condition; }
+			set { _condition = value; }
 		}
 		
-		protected Statement FStatement;
+		protected Statement _statement;
 		public Statement Statement
 		{
-			get { return FStatement; }
-			set { FStatement = value; }
+			get { return _statement; }
+			set { _statement = value; }
 		}
     }
     
@@ -733,103 +733,103 @@ namespace Alphora.Dataphor.DAE.Language
     
     public class RaiseStatement : Statement
     {
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
     }
     
     public class TryFinallyStatement : Statement
     {
-		protected Statement FTryStatement;
+		protected Statement _tryStatement;
 		public Statement TryStatement
 		{
-			get { return FTryStatement; }
-			set { FTryStatement = value; }
+			get { return _tryStatement; }
+			set { _tryStatement = value; }
 		}
 		
-		protected Statement FFinallyStatement;
+		protected Statement _finallyStatement;
 		public Statement FinallyStatement
 		{
-			get { return FFinallyStatement; }
-			set { FFinallyStatement = value; }
+			get { return _finallyStatement; }
+			set { _finallyStatement = value; }
 		}
     }
     
     public class GenericErrorHandler : Statement
     {
 		public GenericErrorHandler() : base(){}
-		public GenericErrorHandler(Statement AStatement) : base() 
+		public GenericErrorHandler(Statement statement) : base() 
 		{
-			FStatement = AStatement;
+			_statement = statement;
 		}
 		
-		protected Statement FStatement;
+		protected Statement _statement;
 		public Statement Statement
 		{
-			get { return FStatement; }
-			set { FStatement = value; }
+			get { return _statement; }
+			set { _statement = value; }
 		}
     }
     
 	public class SpecificErrorHandler : GenericErrorHandler
 	{
-		public SpecificErrorHandler(string AErrorTypeName) : base()
+		public SpecificErrorHandler(string errorTypeName) : base()
 		{
-			FErrorTypeName = AErrorTypeName;
+			_errorTypeName = errorTypeName;
 		}
 		
-		protected string FErrorTypeName = String.Empty;
+		protected string _errorTypeName = String.Empty;
 		public string ErrorTypeName
 		{
-			get { return FErrorTypeName; }
-			set { FErrorTypeName = value == null ? String.Empty : value; }
+			get { return _errorTypeName; }
+			set { _errorTypeName = value == null ? String.Empty : value; }
 		}
 	}
     
 	public class ParameterizedErrorHandler : SpecificErrorHandler
 	{
-		public ParameterizedErrorHandler(string AErrorTypeName, string AVariableName) : base(AErrorTypeName)
+		public ParameterizedErrorHandler(string errorTypeName, string variableName) : base(errorTypeName)
 		{
-			FVariableName = AVariableName;
+			_variableName = variableName;
 		}
 		
-		protected string FVariableName = String.Empty;
+		protected string _variableName = String.Empty;
 		public string VariableName
 		{
-			get { return FVariableName; }
-			set { FVariableName = value == null ? String.Empty : value; }
+			get { return _variableName; }
+			set { _variableName = value == null ? String.Empty : value; }
 		}
 	}
     
 	public class ErrorHandlers : Statements
 	{		
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is GenericErrorHandler))
+			if (!(item is GenericErrorHandler))
 				throw new LanguageException(LanguageException.Codes.ErrorHandlerContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new GenericErrorHandler this[int AIndex]
+		public new GenericErrorHandler this[int index]
 		{
-			get { return (GenericErrorHandler)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (GenericErrorHandler)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class TryExceptStatement : Statement
     {
-		protected Statement FTryStatement;
+		protected Statement _tryStatement;
 		public Statement TryStatement
 		{
-			get { return FTryStatement; }
-			set { FTryStatement = value; }
+			get { return _tryStatement; }
+			set { _tryStatement = value; }
 		}
 		
-		protected ErrorHandlers FErrorHandlers = new ErrorHandlers();
-		public ErrorHandlers ErrorHandlers { get { return FErrorHandlers; } }
+		protected ErrorHandlers _errorHandlers = new ErrorHandlers();
+		public ErrorHandlers ErrorHandlers { get { return _errorHandlers; } }
     }
 }

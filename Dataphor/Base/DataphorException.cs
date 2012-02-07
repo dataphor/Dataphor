@@ -13,181 +13,181 @@ namespace Alphora.Dataphor
 	
 	public class DataphorException : System.Exception
 	{
-		public const int COR_E_EXCEPTION = -2146233088;
-		public const int CApplicationError = 500000;
+		public const int OR_E_EXCEPTION = -2146233088;
+		public const int ApplicationError = 500000;
 
-		public const string CMessageNotFound = @"DataphorException: Message ({0}) not found in ""{1}"".";
-		public const string CManifestNotFound = @"DataphorException: Message ({0}) Manifest not found for BaseName ""{1}"".";
+		public const string MessageNotFound = @"DataphorException: Message ({0}) not found in ""{1}"".";
+		public const string ManifestNotFound = @"DataphorException: Message ({0}) Manifest not found for BaseName ""{1}"".";
 		
-		public DataphorException(string AMessage) : base(AMessage)
+		public DataphorException(string message) : base(message)
 		{
-			FCode = CApplicationError;
-			FSeverity = ErrorSeverity.Application;
-			HResult = COR_E_EXCEPTION;
+			_code = ApplicationError;
+			_severity = ErrorSeverity.Application;
+			HResult = OR_E_EXCEPTION;
 		}
 		
-		public DataphorException(int AErrorCode, string AMessage) : base(AMessage)
+		public DataphorException(int errorCode, string message) : base(message)
 		{
-			FCode = AErrorCode;
-			FSeverity = ErrorSeverity.Application;
-			HResult = COR_E_EXCEPTION;
+			_code = errorCode;
+			_severity = ErrorSeverity.Application;
+			HResult = OR_E_EXCEPTION;
 		}
 		
-		public DataphorException(ErrorSeverity ASeverity, int AErrorCode, string AMessage) : base(AMessage)
+		public DataphorException(ErrorSeverity severity, int errorCode, string message) : base(message)
 		{
-			FCode = AErrorCode;
-			FSeverity = ASeverity;
-			HResult = COR_E_EXCEPTION;
+			_code = errorCode;
+			_severity = severity;
+			HResult = OR_E_EXCEPTION;
 		}
 		
-		public DataphorException(ErrorSeverity ASeverity, int AErrorCode, string AMessage, Exception AInnerException) : base(AMessage, AInnerException)
+		public DataphorException(ErrorSeverity severity, int errorCode, string message, Exception innerException) : base(message, innerException)
 		{
-			FCode = AErrorCode;
-			FSeverity = ASeverity;
-			HResult = COR_E_EXCEPTION;
+			_code = errorCode;
+			_severity = severity;
+			HResult = OR_E_EXCEPTION;
 		}
 		
-		public DataphorException(Exception AException) : base(AException.Message)
+		public DataphorException(Exception exception) : base(exception.Message)
 		{
-			HResult = COR_E_EXCEPTION;
-			DataphorException LDataphorException = AException as DataphorException;
-			FServerContext = AException.StackTrace;
-			if (LDataphorException != null)
+			HResult = OR_E_EXCEPTION;
+			DataphorException dataphorException = exception as DataphorException;
+			_serverContext = exception.StackTrace;
+			if (dataphorException != null)
 			{
-				FCode = LDataphorException.Code;
-				FSeverity = LDataphorException.Severity;
-				FDetails = LDataphorException.GetDetails();
+				_code = dataphorException.Code;
+				_severity = dataphorException.Severity;
+				_details = dataphorException.GetDetails();
 			}
 			else
 			{
-				FCode = CApplicationError;
-				FSeverity = ErrorSeverity.Application;
+				_code = ApplicationError;
+				_severity = ErrorSeverity.Application;
 			}
 		}
 		
-		public DataphorException(Exception AException, Exception AInnerException) : base(AException.Message, AInnerException)
+		public DataphorException(Exception exception, Exception innerException) : base(exception.Message, innerException)
 		{
-			HResult = COR_E_EXCEPTION;
-			DataphorException LDataphorException = AException as DataphorException;
-			FServerContext = AException.StackTrace;
-			if (LDataphorException != null)
+			HResult = OR_E_EXCEPTION;
+			DataphorException dataphorException = exception as DataphorException;
+			_serverContext = exception.StackTrace;
+			if (dataphorException != null)
 			{
-				FCode = LDataphorException.Code;
-				FSeverity = LDataphorException.Severity;
-				FDetails = LDataphorException.GetDetails();
+				_code = dataphorException.Code;
+				_severity = dataphorException.Severity;
+				_details = dataphorException.GetDetails();
 			}
 			else
 			{
-				FCode = CApplicationError;
-				FSeverity = ErrorSeverity.Application;
+				_code = ApplicationError;
+				_severity = ErrorSeverity.Application;
 			}
 		}
 		
-		protected DataphorException(ResourceManager AResourceManager, int AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(AParams == null ? GetMessage(AResourceManager, AErrorCode) : String.Format(GetMessage(AResourceManager, AErrorCode), AParams), AInnerException)
+		protected DataphorException(ResourceManager resourceManager, int errorCode, ErrorSeverity severity, Exception innerException, params object[] paramsValue) : base(paramsValue == null ? GetMessage(resourceManager, errorCode) : String.Format(GetMessage(resourceManager, errorCode), paramsValue), innerException)
 		{
-			FCode = AErrorCode;
-			FSeverity = ASeverity;
-			HResult = COR_E_EXCEPTION;
+			_code = errorCode;
+			_severity = severity;
+			HResult = OR_E_EXCEPTION;
 		}
 		
 	    #if !SILVERLIGHT // SerializationInfo
 
-		public DataphorException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) 
+		public DataphorException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) 
 		{
-			FCode = AInfo.GetInt32("Code");
-			FSeverity = (ErrorSeverity)AInfo.GetInt32("Severity");
-			FDetails = AInfo.GetString("Details");
-			FServerContext = AInfo.GetString("ServerContext");
+			_code = info.GetInt32("Code");
+			_severity = (ErrorSeverity)info.GetInt32("Severity");
+			_details = info.GetString("Details");
+			_serverContext = info.GetString("ServerContext");
 		}
 		
-		public override void GetObjectData(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext)
+		public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
 		{
-			base.GetObjectData(AInfo, AContext);
-			AInfo.AddValue("Code", FCode);
-			AInfo.AddValue("Severity", (int)FSeverity);
-			AInfo.AddValue("Details", FDetails);
-			AInfo.AddValue("ServerContext", FServerContext);
+			base.GetObjectData(info, context);
+			info.AddValue("Code", _code);
+			info.AddValue("Severity", (int)_severity);
+			info.AddValue("Details", _details);
+			info.AddValue("ServerContext", _serverContext);
 		}
 		
 		#endif
 		
-		private int FCode;
+		private int _code;
 		public int Code 
 		{ 
-			get { return FCode; } 
-			set { FCode = value; }
+			get { return _code; } 
+			set { _code = value; }
 		}
 		
-		private ErrorSeverity FSeverity;
+		private ErrorSeverity _severity;
 		public ErrorSeverity Severity
 		{
-			get { return FSeverity; }
-			set { FSeverity = value; }
+			get { return _severity; }
+			set { _severity = value; }
 		}
 		
-		private string FDetails;
+		private string _details;
 		public string Details
 		{
-			get { return FDetails; }
-			set { FDetails = value; }
+			get { return _details; }
+			set { _details = value; }
 		}
 		
-		private string FServerContext;
+		private string _serverContext;
 		public string ServerContext
 		{
-			get { return FServerContext; }
-			set { FServerContext = value; }
+			get { return _serverContext; }
+			set { _serverContext = value; }
 		}
 
 		public string CombinedMessages
 		{
 			get
 			{
-				string LMessage = String.Empty;
-				Exception LException = this;
-				while (LException != null)
+				string message = String.Empty;
+				Exception exception = this;
+				while (exception != null)
 				{
-					LMessage += LException.InnerException != null ? LException.Message + ", " : LException.Message;
-					LException = LException.InnerException;
+					message += exception.InnerException != null ? exception.Message + ", " : exception.Message;
+					exception = exception.InnerException;
 				}
-				return LMessage;
+				return message;
 			}
 		}
 		
 		public virtual string GetDetails()
 		{
-			return FDetails != null ? FDetails : String.Empty;
+			return _details != null ? _details : String.Empty;
 		}
 		
 		public string GetServerContext()
 		{
-			return FServerContext != null ? FServerContext : (StackTrace != null ? StackTrace : String.Empty);
+			return _serverContext != null ? _serverContext : (StackTrace != null ? StackTrace : String.Empty);
 		}
 
-		public static string GetMessage(ResourceManager AResourceManager, int AErrorCode)
+		public static string GetMessage(ResourceManager resourceManager, int errorCode)
 		{
-			string LResult = null;
+			string result = null;
 			try
 			{
-				LResult = AResourceManager.GetString(AErrorCode.ToString());
+				result = resourceManager.GetString(errorCode.ToString());
 			}
 			catch
 			{
-				LResult = String.Format(CManifestNotFound, AErrorCode, AResourceManager.BaseName);
+				result = String.Format(ManifestNotFound, errorCode, resourceManager.BaseName);
 			}
 
-			if (LResult == null)
-				LResult = String.Format(CMessageNotFound, AErrorCode, AResourceManager.BaseName);
-			return LResult;
+			if (result == null)
+				result = String.Format(MessageNotFound, errorCode, resourceManager.BaseName);
+			return result;
 		}
 		
-		public DataphorException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, DataphorException AInnerException) : base(AMessage, AInnerException)
+		public DataphorException(ErrorSeverity severity, int code, string message, string details, string serverContext, DataphorException innerException) : base(message, innerException)
 		{
-			FSeverity = ASeverity;
-			FCode = ACode;
-			FDetails = ADetails;
-			FServerContext = AServerContext;
-			HResult = COR_E_EXCEPTION;
+			_severity = severity;
+			_code = code;
+			_details = details;
+			_serverContext = serverContext;
+			HResult = OR_E_EXCEPTION;
 		}
 	}
 }

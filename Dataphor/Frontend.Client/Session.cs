@@ -22,21 +22,21 @@ namespace Alphora.Dataphor.Frontend.Client
 	[ListInDesigner(false)]
 	public abstract class Session : Disposable
 	{
-		public const string CApplicationNodeTableExpression = @".Frontend.GetApplicationNodeTypes(AClientType, AApplicationID)";
-		public const string CGetLibraryFilesExpression = @".Frontend.GetLibraryFiles(.Frontend.ClientTypes[AClientType].Environment, ApplicationLibraries where Application_ID = AApplicationID over { Library_Name })";
-		public const string CPrepareApplicationExpression = @".Frontend.PrepareApplication(AApplicationID)";
+		public const string ApplicationNodeTableExpression = @".Frontend.GetApplicationNodeTypes(AClientType, AApplicationID)";
+		public const string GetLibraryFilesExpression = @".Frontend.GetLibraryFiles(.Frontend.ClientTypes[AClientType].Environment, ApplicationLibraries where Application_ID = AApplicationID over { Library_Name })";
+		public const string PrepareApplicationExpression = @".Frontend.PrepareApplication(AApplicationID)";
 
-		public Session(DataSession ASession, bool AOwnsSession)
+		public Session(DataSession session, bool ownsSession)
 		{
-			FDataSession = ASession;
-			FOwnsDataSession = AOwnsSession;
+			_dataSession = session;
+			_ownsDataSession = ownsSession;
 			InitializePipe();
-			FForms = new Forms();
-			FForms.Added += new FormsHandler(FormAdded);
-			FForms.Removed += new FormsHandler(FormRemoved);
+			_forms = new Forms();
+			_forms.Added += new FormsHandler(FormAdded);
+			_forms.Removed += new FormsHandler(FormRemoved);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -46,39 +46,39 @@ namespace Alphora.Dataphor.Frontend.Client
 			{
 				try
 				{
-					if (FOwnsDataSession && (FDataSession != null))
+					if (_ownsDataSession && (_dataSession != null))
 					{
-						FDataSession.Dispose();
-						FDataSession = null;
+						_dataSession.Dispose();
+						_dataSession = null;
 					}
 				}
 				finally
 				{
-					base.Dispose(ADisposing);
+					base.Dispose(disposing);
 				}
 			}
 		}
 
 		#region Pipe
 
-		private Pipe FPipe;
+		private Pipe _pipe;
 
 		public Pipe Pipe
 		{
-			get { return FPipe; }
+			get { return _pipe; }
 		}
 
 		protected virtual void InitializePipe()
 		{
-			FPipe = new Pipe(FDataSession.ServerSession);
+			_pipe = new Pipe(_dataSession.ServerSession);
 		}
 
 		protected virtual void UninitializePipe()
 		{
-			if (FPipe != null)
+			if (_pipe != null)
 			{
-				FPipe.Dispose();
-				FPipe = null;
+				_pipe.Dispose();
+				_pipe = null;
 			}
 		}
 		
@@ -93,32 +93,32 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// DataSession
 
-		private DataSession FDataSession;
-		private bool FOwnsDataSession;
+		private DataSession _dataSession;
+		private bool _ownsDataSession;
 
 		public DAE.Client.DataSession DataSession
 		{
-			get { return FDataSession; }
+			get { return _dataSession; }
 		}
 		
 		// Errors
 		
-		public virtual void ReportErrors(IHost AHost, ErrorList AErrors)
+		public virtual void ReportErrors(IHost host, ErrorList errors)
 		{
 			// Do nothing here, this is overridden by the Windows Session to report errors to Dataphoria when the session is hosted w/in the IDE.
 		}
 
 		// InvokeHelp
 
-		public virtual void InvokeHelp(INode ASender, string AHelpKeyword, HelpKeywordBehavior AHelpKeywordBehavior, string AHelpString) {}
+		public virtual void InvokeHelp(INode sender, string helpKeyword, HelpKeywordBehavior helpKeywordBehavior, string helpString) {}
 
 		#region NodeTypeTable Setup
 
-		private NodeTypeTable FNodeTypeTable = new NodeTypeTable();
+		private NodeTypeTable _nodeTypeTable = new NodeTypeTable();
 
 		public NodeTypeTable NodeTypeTable
 		{
-			get { return FNodeTypeTable; }
+			get { return _nodeTypeTable; }
 		}
 
 		protected void ValidateNodeTypeTable()
@@ -129,70 +129,70 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		/// <summary> Prepares for opening a document in the specified application. </summary>
 		/// <returns> The starting document configured for the application. </returns>
-		public virtual string SetApplication(string AApplicationID, string AClientType)
+		public virtual string SetApplication(string applicationID, string clientType)
 		{
-			DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-			LParams.Add(DAE.Runtime.DataParam.Create(Pipe.Process, "AApplicationID", AApplicationID));
-			LParams.Add(DAE.Runtime.DataParam.Create(Pipe.Process, "AClientType", AClientType));
+			DAE.Runtime.DataParams paramsValue = new DAE.Runtime.DataParams();
+			paramsValue.Add(DAE.Runtime.DataParam.Create(Pipe.Process, "AApplicationID", applicationID));
+			paramsValue.Add(DAE.Runtime.DataParam.Create(Pipe.Process, "AClientType", clientType));
 			
 			// Get the node types table
-			using (DAE.Runtime.Data.Scalar LNodeTable = DataSession.Evaluate(CApplicationNodeTableExpression, LParams))
+			using (DAE.Runtime.Data.Scalar nodeTable = DataSession.Evaluate(ApplicationNodeTableExpression, paramsValue))
 			{
 				NodeTypeTable.Clear();
-				NodeTypeTable.LoadFromString(LNodeTable.AsString);
+				NodeTypeTable.LoadFromString(nodeTable.AsString);
 			}
 			ValidateNodeTypeTable();
 
 			// Prepare the application and get name of the starting document
-			string LDocumentString = null;
-			using (DAE.Runtime.Data.Scalar LStartingDocument = DataSession.Evaluate(CPrepareApplicationExpression, LParams))
+			string documentString = null;
+			using (DAE.Runtime.Data.Scalar startingDocument = DataSession.Evaluate(PrepareApplicationExpression, paramsValue))
 			{
-				LDocumentString = LStartingDocument.AsString;
+				documentString = startingDocument.AsString;
 			}
 
 			// Load the files required to register any nodes, if necessary				
 			if (DataSession.Server is DAE.Server.LocalServer)
 			{
-				IServerCursor LCursor = DataSession.OpenCursor(CGetLibraryFilesExpression, LParams);
+				IServerCursor cursor = DataSession.OpenCursor(GetLibraryFilesExpression, paramsValue);
 				try
 				{
-					using (DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow())
+					using (DAE.Runtime.Data.Row row = cursor.Plan.RequestRow())
 					{
 						#if !SILVERLIGHT
-						bool LShouldLoad;
-						List<string> LFilesToLoad = new List<string>();
+						bool shouldLoad;
+						List<string> filesToLoad = new List<string>();
 
-						while (LCursor.Next())
+						while (cursor.Next())
 						{
-							LCursor.Select(LRow);
-							string LFullFileName = 
+							cursor.Select(row);
+							string fullFileName = 
 								((DAE.Server.LocalServer)DataSession.Server).GetFile
 								(
-									(DAE.Server.LocalProcess)LCursor.Plan.Process, 
-									(string)LRow["Library_Name"], 
-									(string)LRow["Name"], 
-									(DateTime)LRow["TimeStamp"], 
-									(bool)LRow["IsDotNetAssembly"], 
-									out LShouldLoad
+									(DAE.Server.LocalProcess)cursor.Plan.Process, 
+									(string)row["Library_Name"], 
+									(string)row["Name"], 
+									(DateTime)row["TimeStamp"], 
+									(bool)row["IsDotNetAssembly"], 
+									out shouldLoad
 								);
-							if (LShouldLoad)
-								LFilesToLoad.Add(LFullFileName);
+							if (shouldLoad)
+								filesToLoad.Add(fullFileName);
 						}
 						
 						// Load each file to ensure they can be reached by the assembly resolver hack (see AssemblyUtility)
-						foreach (string LFullFileName in LFilesToLoad)
-							Assembly.LoadFrom(LFullFileName);
+						foreach (string fullFileName in filesToLoad)
+							Assembly.LoadFrom(fullFileName);
 						#else
-						while (LCursor.Next())
+						while (cursor.Next())
 						{
-							LCursor.Select(LRow);
+							cursor.Select(row);
 							((DAE.Server.LocalServer)DataSession.Server).LoadAndRegister
 							(
-								(DAE.Server.LocalProcess)LCursor.Plan.Process,
-								LCursor.Plan.Catalog.ClassLoader,
-								(string)LRow["Library_Name"],
-								(string)LRow["Name"],
-								(bool)LRow["ShouldRegister"]
+								(DAE.Server.LocalProcess)cursor.Plan.Process,
+								cursor.Plan.Catalog.ClassLoader,
+								(string)row["Library_Name"],
+								(string)row["Name"],
+								(bool)row["ShouldRegister"]
 							);
 						}
 						#endif
@@ -200,11 +200,11 @@ namespace Alphora.Dataphor.Frontend.Client
 				}
 				finally
 				{
-					DataSession.CloseCursor(LCursor);
+					DataSession.CloseCursor(cursor);
 				}
 			}
 			
-			return LDocumentString;
+			return documentString;
 		}
 		
 		#endregion
@@ -213,338 +213,338 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		// NOTE: These methods are essentially the same overloads as are provided by the DataSession, except that they participate in the error reporting system of the Frontend session.
 		
-		public void ExecuteScript(string AScript)
+		public void ExecuteScript(string script)
 		{
-			ExecuteScript(null, AScript, null);
+			ExecuteScript(null, script, null);
 		}
 		
-		public void ExecuteScript(IServerProcess AProcess, string AScript)
+		public void ExecuteScript(IServerProcess process, string script)
 		{
-			ExecuteScript(AProcess, AScript, null);
+			ExecuteScript(process, script, null);
 		}
 
-		public void ExecuteScript(string AScript, DAE.Runtime.DataParams AParams)
+		public void ExecuteScript(string script, DAE.Runtime.DataParams paramsValue)
 		{
-			DataSession.ExecuteScript(null, AScript, AParams);
+			DataSession.ExecuteScript(null, script, paramsValue);
 		}
 
-		public void ExecuteScript(IServerProcess AProcess, string AScript, DAE.Runtime.DataParams AParams)
+		public void ExecuteScript(IServerProcess process, string script, DAE.Runtime.DataParams paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = DataSession.UtilityProcess;
+			if (process == null)
+				process = DataSession.UtilityProcess;
 
-			DAE.IServerScript LScript = AProcess.PrepareScript(AScript);
+			DAE.IServerScript localScript = process.PrepareScript(script);
 			try
 			{
-				foreach (DAE.IServerBatch LBatch in LScript.Batches)
-					if (LBatch.IsExpression())
+				foreach (DAE.IServerBatch batch in localScript.Batches)
+					if (batch.IsExpression())
 					{
-						DAE.IServerExpressionPlan LPlan = LBatch.PrepareExpression(AParams);
+						DAE.IServerExpressionPlan plan = batch.PrepareExpression(paramsValue);
 						try
 						{
-							ErrorList LErrors = new ErrorList();
-							LErrors.AddRange(LPlan.Messages);
-							ReportErrors(null, LErrors);
+							ErrorList errors = new ErrorList();
+							errors.AddRange(plan.Messages);
+							ReportErrors(null, errors);
 
-							if (LPlan.DataType is DAE.Schema.TableType)
-								LPlan.Close(LPlan.Open(AParams));
+							if (plan.DataType is DAE.Schema.TableType)
+								plan.Close(plan.Open(paramsValue));
 							else
-								LPlan.Evaluate(AParams).Dispose();
+								plan.Evaluate(paramsValue).Dispose();
 						}
 						finally
 						{
-							LBatch.UnprepareExpression(LPlan);
+							batch.UnprepareExpression(plan);
 						}
 					}
 					else
 					{
-						DAE.IServerStatementPlan LPlan = LBatch.PrepareStatement(AParams);
+						DAE.IServerStatementPlan plan = batch.PrepareStatement(paramsValue);
 						try
 						{
-							ErrorList LErrors = new ErrorList();
-							LErrors.AddRange(LPlan.Messages);
-							ReportErrors(null, LErrors);
+							ErrorList errors = new ErrorList();
+							errors.AddRange(plan.Messages);
+							ReportErrors(null, errors);
 
-							LPlan.Execute(AParams);
+							plan.Execute(paramsValue);
 						}
 						finally
 						{
-							LBatch.UnprepareStatement(LPlan);
+							batch.UnprepareStatement(plan);
 						}
 					}
 			}
 			finally
 			{
-				AProcess.UnprepareScript(LScript);
+				process.UnprepareScript(localScript);
 			}
 		}
 		
-		public void Execute(string AStatement)
+		public void Execute(string statement)
 		{
-			Execute(null, AStatement, (DAE.Runtime.DataParams)null);
+			Execute(null, statement, (DAE.Runtime.DataParams)null);
 		}
 		
-		public void Execute(IServerProcess AProcess, string AStatement)
+		public void Execute(IServerProcess process, string statement)
 		{
-			Execute(AProcess, AStatement, (DAE.Runtime.DataParams)null);
+			Execute(process, statement, (DAE.Runtime.DataParams)null);
 		}
 		
-		public void Execute(string AStatement, DAE.Runtime.DataParams AParams)
+		public void Execute(string statement, DAE.Runtime.DataParams paramsValue)
 		{
-			Execute(null, AStatement, AParams);
+			Execute(null, statement, paramsValue);
 		}
 		
-		public void Execute(IServerProcess AProcess, string AStatement, DAE.Runtime.DataParams AParams)
+		public void Execute(IServerProcess process, string statement, DAE.Runtime.DataParams paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = DataSession.UtilityProcess;
+			if (process == null)
+				process = DataSession.UtilityProcess;
 				
-			DAE.IServerStatementPlan LPlan = AProcess.PrepareStatement(AStatement, AParams);
+			DAE.IServerStatementPlan plan = process.PrepareStatement(statement, paramsValue);
 			try
 			{
-				ErrorList LErrors = new ErrorList();
-				LErrors.AddRange(LPlan.Messages);
-				ReportErrors(null, LErrors);
+				ErrorList errors = new ErrorList();
+				errors.AddRange(plan.Messages);
+				ReportErrors(null, errors);
 				
-				LPlan.Execute(AParams);
+				plan.Execute(paramsValue);
 			}
 			finally
 			{
-				AProcess.UnprepareStatement(LPlan);
+				process.UnprepareStatement(plan);
 			}
 		}
 
-		public void Execute(string AStatement, params object[] AParams)
+		public void Execute(string statement, params object[] paramsValue)
 		{
-			Execute(null, AStatement, AParams);
+			Execute(null, statement, paramsValue);
 		}
 		
-		public void Execute(IServerProcess AProcess, string AStatement, params object[] AParams)
+		public void Execute(IServerProcess process, string statement, params object[] paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = DataSession.UtilityProcess;
+			if (process == null)
+				process = DataSession.UtilityProcess;
 				
-			Execute(AProcess, AStatement, DAE.Client.DataSession.DataParamsFromNativeParams(AProcess, AParams));
+			Execute(process, statement, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramsValue));
 		}
 
-		public DAE.Runtime.Data.DataValue Evaluate(string AExpression)
+		public DAE.Runtime.Data.DataValue Evaluate(string expression)
 		{
-			return Evaluate(null, AExpression, (DAE.Runtime.DataParams)null);
+			return Evaluate(null, expression, (DAE.Runtime.DataParams)null);
 		}
 
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess AProcess, string AExpression)
+		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess process, string expression)
 		{
-			return Evaluate(AProcess, AExpression, (DAE.Runtime.DataParams)null);
+			return Evaluate(process, expression, (DAE.Runtime.DataParams)null);
 		}
 
-		public DAE.Runtime.Data.DataValue Evaluate(string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.DataValue Evaluate(string expression, DAE.Runtime.DataParams paramsValue)
 		{
-			return Evaluate(null, AExpression, AParams);
+			return Evaluate(null, expression, paramsValue);
 		}
 
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = DataSession.UtilityProcess;
+			if (process == null)
+				process = DataSession.UtilityProcess;
 			
-			DAE.IServerExpressionPlan LPlan = AProcess.PrepareExpression(AExpression, AParams);
+			DAE.IServerExpressionPlan plan = process.PrepareExpression(expression, paramsValue);
 			try
 			{
-				ErrorList LErrors = new ErrorList();
-				LErrors.AddRange(LPlan.Messages);
-				ReportErrors(null, LErrors);
+				ErrorList errors = new ErrorList();
+				errors.AddRange(plan.Messages);
+				ReportErrors(null, errors);
 	
-				return LPlan.Evaluate(AParams);
+				return plan.Evaluate(paramsValue);
 			}
 			finally
 			{
-				AProcess.UnprepareExpression(LPlan);
+				process.UnprepareExpression(plan);
 			}
 		}
 
 		/// <summary>Evaluates the given expression using the given parameter values (auto numbered A0..An-1).</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(string AExpression, params object[] AParams)
+		public DAE.Runtime.Data.DataValue Evaluate(string expression, params object[] paramsValue)
 		{
-			return Evaluate(null, AExpression, AParams);
+			return Evaluate(null, expression, paramsValue);
 		}										  
 
 		/// <summary>Evaluates the given expression on the given process and using the given parameter values (auto numbered A0..An-1).</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess AProcess, string AExpression, params object[] AParams)
+		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess process, string expression, params object[] paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = DataSession.UtilityProcess;
+			if (process == null)
+				process = DataSession.UtilityProcess;
 
-			return Evaluate(AProcess, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(AProcess, AParams));
+			return Evaluate(process, expression, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramsValue));
 		}
 
 		/// <summary>Evaluates the given expression on the given process and using the given parameter names and values.</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = DataSession.UtilityProcess;
+			if (process == null)
+				process = DataSession.UtilityProcess;
 			
-			return Evaluate(AProcess, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(AProcess, AParamNames, AParams));
+			return Evaluate(process, expression, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramNames, paramsValue));
 		}
 
-		public DAE.Runtime.Data.Scalar EvaluateScalar(string AExpression)
+		public DAE.Runtime.Data.Scalar EvaluateScalar(string expression)
 		{
-			return EvaluateScalar(null, AExpression, (DAE.Runtime.DataParams)null);
+			return EvaluateScalar(null, expression, (DAE.Runtime.DataParams)null);
 		}
 
-		public DAE.Runtime.Data.Scalar EvaluateScalar(IServerProcess AProcess, string AExpression)
+		public DAE.Runtime.Data.Scalar EvaluateScalar(IServerProcess process, string expression)
 		{
-			return EvaluateScalar(AProcess, AExpression, (DAE.Runtime.DataParams)null);
+			return EvaluateScalar(process, expression, (DAE.Runtime.DataParams)null);
 		}
 
-		public DAE.Runtime.Data.Scalar EvaluateScalar(string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.Scalar EvaluateScalar(string expression, DAE.Runtime.DataParams paramsValue)
 		{
-			return EvaluateScalar(null, AExpression, AParams);
+			return EvaluateScalar(null, expression, paramsValue);
 		}
 
-		public DAE.Runtime.Data.Scalar EvaluateScalar(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.Scalar EvaluateScalar(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = DataSession.UtilityProcess;
+			if (process == null)
+				process = DataSession.UtilityProcess;
 
-			DAE.IServerExpressionPlan LPlan = AProcess.PrepareExpression(AExpression, AParams);
+			DAE.IServerExpressionPlan plan = process.PrepareExpression(expression, paramsValue);
 			try
 			{
-				ErrorList LErrors = new ErrorList();
-				LErrors.AddRange(LPlan.Messages);
-				ReportErrors(null, LErrors);
+				ErrorList errors = new ErrorList();
+				errors.AddRange(plan.Messages);
+				ReportErrors(null, errors);
 
-				return (DAE.Runtime.Data.Scalar)LPlan.Evaluate(AParams);
+				return (DAE.Runtime.Data.Scalar)plan.Evaluate(paramsValue);
 			}
 			finally
 			{
-				AProcess.UnprepareExpression(LPlan);
+				process.UnprepareExpression(plan);
 			}
 		}
 
 		/// <summary>EvaluateScalars the given expression using the given parameter values (auto numbered A0..An-1).</summary>
-		public DAE.Runtime.Data.Scalar EvaluateScalar(string AExpression, params object[] AParams)
+		public DAE.Runtime.Data.Scalar EvaluateScalar(string expression, params object[] paramsValue)
 		{
-			return EvaluateScalar(null, AExpression, AParams);
+			return EvaluateScalar(null, expression, paramsValue);
 		}
 
 		/// <summary>EvaluateScalars the given expression on the given process and using the given parameter values (auto numbered A0..An-1).</summary>
-		public DAE.Runtime.Data.Scalar EvaluateScalar(IServerProcess AProcess, string AExpression, params object[] AParams)
+		public DAE.Runtime.Data.Scalar EvaluateScalar(IServerProcess process, string expression, params object[] paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = DataSession.UtilityProcess;
+			if (process == null)
+				process = DataSession.UtilityProcess;
 
-			return EvaluateScalar(AProcess, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(AProcess, AParams));
+			return EvaluateScalar(process, expression, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramsValue));
 		}
 
 		/// <summary>EvaluateScalars the given expression on the given process and using the given parameter names and values.</summary>
-		public DAE.Runtime.Data.Scalar EvaluateScalar(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		public DAE.Runtime.Data.Scalar EvaluateScalar(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = DataSession.UtilityProcess;
+			if (process == null)
+				process = DataSession.UtilityProcess;
 
-			return EvaluateScalar(AProcess, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(AProcess, AParamNames, AParams));
+			return EvaluateScalar(process, expression, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramNames, paramsValue));
 		}
 
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateWith(Guid AID, string AExpression)
+		public DAE.Runtime.Data.DataValue EvaluateWith(Guid iD, string expression)
 		{
-			return EvaluateWith(null, AID, AExpression, (DAE.Runtime.DataParams)null);
+			return EvaluateWith(null, iD, expression, (DAE.Runtime.DataParams)null);
 		}
 		
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateWith(Guid AID, string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.DataValue EvaluateWith(Guid iD, string expression, DAE.Runtime.DataParams paramsValue)
 		{
-			return EvaluateWith(null, AID, AExpression, AParams);
+			return EvaluateWith(null, iD, expression, paramsValue);
 		}
 		
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateWith(IServerProcess AProcess, Guid AID, string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.DataValue EvaluateWith(IServerProcess process, Guid iD, string expression, DAE.Runtime.DataParams paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = DataSession.UtilityProcess;
-			AProcess.JoinApplicationTransaction(AID, false);
+			if (process == null)
+				process = DataSession.UtilityProcess;
+			process.JoinApplicationTransaction(iD, false);
 			try
 			{
-				return Evaluate(AProcess, AExpression, AParams);
+				return Evaluate(process, expression, paramsValue);
 			}
 			finally
 			{
-				AProcess.LeaveApplicationTransaction();
+				process.LeaveApplicationTransaction();
 			}
 		}
 		
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateWith(Guid AID, string AExpression, params object[] AParams)
+		public DAE.Runtime.Data.DataValue EvaluateWith(Guid iD, string expression, params object[] paramsValue)
 		{
-			IServerProcess LProcess = DataSession.UtilityProcess;
-			return EvaluateWith(LProcess, AID, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(LProcess, AParams));
+			IServerProcess process = DataSession.UtilityProcess;
+			return EvaluateWith(process, iD, expression, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramsValue));
 		}
 		
 		/// <summary>Evaluates the given expression enlisted within the given application transaction.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateWith(Guid AID, string AExpression, string[] AParamNames, object[] AParams)
+		public DAE.Runtime.Data.DataValue EvaluateWith(Guid iD, string expression, string[] paramNames, object[] paramsValue)
 		{
-			IServerProcess LProcess = DataSession.UtilityProcess;
-			return EvaluateWith(LProcess, AID, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(LProcess, AParams));
+			IServerProcess process = DataSession.UtilityProcess;
+			return EvaluateWith(process, iD, expression, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramsValue));
 		}
 
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.Scalar EvaluateScalarWith(Guid AID, string AExpression)
+		public DAE.Runtime.Data.Scalar EvaluateScalarWith(Guid iD, string expression)
 		{
-			return EvaluateScalarWith(null, AID, AExpression, (DAE.Runtime.DataParams)null);
+			return EvaluateScalarWith(null, iD, expression, (DAE.Runtime.DataParams)null);
 		}
 
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.Scalar EvaluateScalarWith(Guid AID, string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.Scalar EvaluateScalarWith(Guid iD, string expression, DAE.Runtime.DataParams paramsValue)
 		{
-			return EvaluateScalarWith(null, AID, AExpression, AParams);
+			return EvaluateScalarWith(null, iD, expression, paramsValue);
 		}
 
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.Scalar EvaluateScalarWith(IServerProcess AProcess, Guid AID, string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.Scalar EvaluateScalarWith(IServerProcess process, Guid iD, string expression, DAE.Runtime.DataParams paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = DataSession.UtilityProcess;
-			AProcess.JoinApplicationTransaction(AID, false);
+			if (process == null)
+				process = DataSession.UtilityProcess;
+			process.JoinApplicationTransaction(iD, false);
 			try
 			{
-				return EvaluateScalar(AProcess, AExpression, AParams);
+				return EvaluateScalar(process, expression, paramsValue);
 			}
 			finally
 			{
-				AProcess.LeaveApplicationTransaction();
+				process.LeaveApplicationTransaction();
 			}
 		}
 
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.Scalar EvaluateScalarWith(Guid AID, string AExpression, params object[] AParams)
+		public DAE.Runtime.Data.Scalar EvaluateScalarWith(Guid iD, string expression, params object[] paramsValue)
 		{
-			IServerProcess LProcess = DataSession.UtilityProcess;
-			return EvaluateScalarWith(LProcess, AID, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(LProcess, AParams));
+			IServerProcess process = DataSession.UtilityProcess;
+			return EvaluateScalarWith(process, iD, expression, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramsValue));
 		}
 
 		/// <summary>Evaluates the given expression enlisted within the given application transaction.</summary>
-		public DAE.Runtime.Data.Scalar EvaluateScalarWith(Guid AID, string AExpression, string[] AParamNames, object[] AParams)
+		public DAE.Runtime.Data.Scalar EvaluateScalarWith(Guid iD, string expression, string[] paramNames, object[] paramsValue)
 		{
-			IServerProcess LProcess = DataSession.UtilityProcess;
-			return EvaluateScalarWith(LProcess, AID, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(LProcess, AParams));
+			IServerProcess process = DataSession.UtilityProcess;
+			return EvaluateScalarWith(process, iD, expression, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramsValue));
 		}
 		
 		#endregion
 
 		#region Forms
 
-		private Forms FForms;
+		private Forms _forms;
 		public Forms Forms
 		{
-			get { return FForms; }
+			get { return _forms; }
 		}
 
-		protected virtual void FormAdded(IFormInterface AForm, bool AStack)
+		protected virtual void FormAdded(IFormInterface form, bool stack)
 		{
 			// pure virtual
 		}
 
-		protected virtual void FormRemoved(IFormInterface AForm, bool AStack)
+		protected virtual void FormRemoved(IFormInterface form, bool stack)
 		{
 			// pure virtual
 		}
@@ -554,62 +554,62 @@ namespace Alphora.Dataphor.Frontend.Client
 			return (IFormInterface)NodeTypeTable.CreateInstance("FormInterface");
 		}
 
-		public IFormInterface LoadForm(INode ANode, string ADocument)
+		public IFormInterface LoadForm(INode node, string document)
 		{
-			return LoadForm(ANode, ADocument, null);
+			return LoadForm(node, document, null);
 		}
 		
-		public IFormInterface LoadForm(INode ANode, string ADocument, FormInterfaceHandler ABeforeActivate)
+		public IFormInterface LoadForm(INode node, string document, FormInterfaceHandler beforeActivate)
 		{
 			// DO NOT use a using block with the interface.  Should return immediately.
-			IHost LHost = CreateHost();
+			IHost host = CreateHost();
 			try
 			{
-				IFormInterface LForm = CreateForm();
+				IFormInterface form = CreateForm();
 				try
 				{
-					LHost.Load
+					host.Load
 					(
-						ADocument,
-						LForm
+						document,
+						form
 					);
-					if (ABeforeActivate != null)
-						ABeforeActivate(LForm);
-					LHost.Open();
-					return LForm;
+					if (beforeActivate != null)
+						beforeActivate(form);
+					host.Open();
+					return form;
 				}
 				catch
 				{
-					LForm.Dispose();
+					form.Dispose();
 					throw;
 				}
 			}
 			catch
 			{
-				LHost.Dispose();
+				host.Dispose();
 				throw;
 			}
 		}
 
 		/// <summary> Attempts to close the session's forms and returns true if they closed. </summary>
-		/// <param name="AExclude"> When true, the given root form is omitted. </param>
-		public bool CloseAllForms(IHost AExclude, CloseBehavior ABehavior)
+		/// <param name="exclude"> When true, the given root form is omitted. </param>
+		public bool CloseAllForms(IHost exclude, CloseBehavior behavior)
 		{
-			Frontend.Client.Forms.FormStack LFormStack;
-			Frontend.Client.Forms.FormStack LNext = this.Forms.First;
-			while (LNext != null)
+			Frontend.Client.Forms.FormStack formStack;
+			Frontend.Client.Forms.FormStack next = this.Forms.First;
+			while (next != null)
 			{
-				LFormStack = LNext;
-				LNext = LNext.Next;	// remember the next item before it get's lost
+				formStack = next;
+				next = next.Next;	// remember the next item before it get's lost
 				while 
 				(
-					!LFormStack.IsEmpty() && 
+					!formStack.IsEmpty() && 
 					(
-						(AExclude == null) || 
-						(LFormStack.GetTopmostForm().HostNode != AExclude)
+						(exclude == null) || 
+						(formStack.GetTopmostForm().HostNode != exclude)
 					)
 				)
-					if (!LFormStack.GetTopmostForm().Close(ABehavior))
+					if (!formStack.GetTopmostForm().Close(behavior))
 						return false;
 			}
 			return true;
@@ -617,21 +617,21 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		/// <summary> Attempts to close all of a forms covering (child-modal) "children". </summary>
 		/// <returns> True if any covering forms were closed. </returns>
-		public bool UncoverForm(IFormInterface AForm, CloseBehavior ABehavior)
+		public bool UncoverForm(IFormInterface form, CloseBehavior behavior)
 		{
-			Frontend.Client.Forms.FormStack LFormStack = Forms.First;
+			Frontend.Client.Forms.FormStack formStack = Forms.First;
 			int i;
-			while (LFormStack != null)
+			while (formStack != null)
 			{
-				for (i = 0; i < LFormStack.Forms.Count; i++)
-					if (LFormStack.Forms[i] == AForm)
+				for (i = 0; i < formStack.Forms.Count; i++)
+					if (formStack.Forms[i] == form)
 					{
-						for (int j = LFormStack.Forms.Count - 1; j > i; j--)
-							if (!LFormStack.Forms[j].Close(ABehavior))
+						for (int j = formStack.Forms.Count - 1; j > i; j--)
+							if (!formStack.Forms[j].Close(behavior))
 								return false;
 						return true;
 					}
-				LFormStack = LFormStack.Next;
+				formStack = formStack.Next;
 			}
 			return true;
 		}
@@ -643,7 +643,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public virtual Deserializer CreateDeserializer()
 		{
-			return new Deserializer(FNodeTypeTable);
+			return new Deserializer(_nodeTypeTable);
 		}
 
 		public virtual Serializer CreateSerializer()
@@ -657,137 +657,137 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// <summary> A linked list of form stacks. </summary>
 	public class Forms : IEnumerable
 	{
-		private FormStack FFirst;
-		public FormStack First { get { return FFirst; } }
+		private FormStack _first;
+		public FormStack First { get { return _first; } }
 
-		private FormStack FLast;
-		public FormStack Last { get { return FLast; } }
+		private FormStack _last;
+		public FormStack Last { get { return _last; } }
 
 		public event FormsHandler Added;
 		public event FormsHandler Removed;
 
-		public void Add(IFormInterface AForm)
+		public void Add(IFormInterface form)
 		{
-			FormStack LNewStack = new FormStack();
-			LNewStack.Push(AForm);
-			AddStackToTop(LNewStack);
+			FormStack newStack = new FormStack();
+			newStack.Push(form);
+			AddStackToTop(newStack);
 			if (Added != null)
-				Added(AForm, true);
+				Added(form, true);
 		}
 
 		/// <summary> Adds the form as modal (top of the stack) over some existing form. </summary>
-		/// <param name="AParentForm"> A form that is at the top of some stack in the list. </param>
-		public void AddModal(IFormInterface AForm, IFormInterface AParentForm)
+		/// <param name="parentForm"> A form that is at the top of some stack in the list. </param>
+		public void AddModal(IFormInterface form, IFormInterface parentForm)
 		{
-			FormStack LSearchStack = FFirst;
-			IFormInterface LTopmost;
-			while (LSearchStack != null)
+			FormStack searchStack = _first;
+			IFormInterface topmost;
+			while (searchStack != null)
 			{
-				LTopmost = LSearchStack.GetTopmostForm();
-				if (AParentForm == LTopmost)
+				topmost = searchStack.GetTopmostForm();
+				if (parentForm == topmost)
 				{
-					LTopmost.Disable(AForm);
-					LSearchStack.Push(AForm);
+					topmost.Disable(form);
+					searchStack.Push(form);
 					if (Added != null)
-						Added(AForm, false);
+						Added(form, false);
 					return;
 				}
-				LSearchStack = LSearchStack.FNext;
+				searchStack = searchStack._next;
 			}
-			throw new ClientException(ClientException.Codes.InvalidParentForm, AParentForm.Text);
+			throw new ClientException(ClientException.Codes.InvalidParentForm, parentForm.Text);
 		}
 
 		/// <summary> Removes a top-most form. </summary>
 		/// <remarks> If the specified form is not a top-most form, nothing happens. </remarks>
 		/// <returns> True if this form was the last of a stack. </returns>
-		public bool Remove(IFormInterface AForm)
+		public bool Remove(IFormInterface form)
 		{
-			FormStack LSearchStack = FFirst;
-			while (LSearchStack != null)
+			FormStack searchStack = _first;
+			while (searchStack != null)
 			{
-				if (AForm == LSearchStack.GetTopmostForm())
+				if (form == searchStack.GetTopmostForm())
 				{
-					LSearchStack.Pop();
-					bool LLast = LSearchStack.IsEmpty();
-					if (LLast)
-						RemoveStack(LSearchStack);
+					searchStack.Pop();
+					bool last = searchStack.IsEmpty();
+					if (last)
+						RemoveStack(searchStack);
 					else
-						LSearchStack.GetTopmostForm().Enable();
+						searchStack.GetTopmostForm().Enable();
 					if (Removed != null)
-						Removed(AForm, LLast);
-					return LLast;
+						Removed(form, last);
+					return last;
 				}
-				LSearchStack = LSearchStack.FNext;
+				searchStack = searchStack._next;
 			}														
-			Error.Warn(String.Format("Unable to find form '{0}' as a top-most form.", AForm.Text));
+			Error.Warn(String.Format("Unable to find form '{0}' as a top-most form.", form.Text));
 			return false;
 		}
 
-		public void BringToFront(IFormInterface AForm)
+		public void BringToFront(IFormInterface form)
 		{
-			FormStack LSearchStack = FFirst;
-			while (LSearchStack != null)
+			FormStack searchStack = _first;
+			while (searchStack != null)
 			{
-				if (AForm == LSearchStack.GetTopmostForm())
+				if (form == searchStack.GetTopmostForm())
 				{
-					RemoveStack(LSearchStack);
-					AddStackToTop(LSearchStack);
+					RemoveStack(searchStack);
+					AddStackToTop(searchStack);
 					return;
 				}
-				LSearchStack = LSearchStack.FNext;
+				searchStack = searchStack._next;
 			}														
-			throw new ClientException(ClientException.Codes.UnableToFindTopmostForm, AForm.Text);
+			throw new ClientException(ClientException.Codes.UnableToFindTopmostForm, form.Text);
 		}
 
-		private void RemoveStack(FormStack AStack)
+		private void RemoveStack(FormStack stack)
 		{
-			if (FFirst == AStack)
-				FFirst = AStack.FNext;
-			if (FLast == AStack)
-				FLast = AStack.FPrior;
-			if (AStack.FPrior != null)
-				AStack.FPrior.FNext = AStack.FNext;
-			if (AStack.FNext != null)
-				AStack.FNext.FPrior = AStack.FPrior;
-			AStack.FPrior = null;
-			AStack.FNext = null;
+			if (_first == stack)
+				_first = stack._next;
+			if (_last == stack)
+				_last = stack._prior;
+			if (stack._prior != null)
+				stack._prior._next = stack._next;
+			if (stack._next != null)
+				stack._next._prior = stack._prior;
+			stack._prior = null;
+			stack._next = null;
 		}
 
-		private void AddStackToTop(FormStack AStack)
+		private void AddStackToTop(FormStack stack)
 		{
-			AStack.FNext = FFirst;
-			AStack.FPrior = null;
-			if (FFirst != null)
-				FFirst.FPrior = AStack;
-			FFirst = AStack;
-			if (FLast == null)
-				FLast = AStack;
+			stack._next = _first;
+			stack._prior = null;
+			if (_first != null)
+				_first._prior = stack;
+			_first = stack;
+			if (_last == null)
+				_last = stack;
 		}
 
 		/// <summary> Returns the topmost form on the topmost stack (or null if there are no forms). </summary>
 		public IFormInterface GetTopmostForm()
 		{
-			if (FFirst != null)
-				return FFirst.GetTopmostForm();
+			if (_first != null)
+				return _first.GetTopmostForm();
 			else
 				return null;
 		}
 		
-		public bool IsTopMostOfSomeStack(IFormInterface AForm)
+		public bool IsTopMostOfSomeStack(IFormInterface form)
 		{
-			FormStack LSearchStack = FFirst;
-			while (LSearchStack != null)
+			FormStack searchStack = _first;
+			while (searchStack != null)
 			{
-				if (AForm == LSearchStack.GetTopmostForm())
+				if (form == searchStack.GetTopmostForm())
 					return true;
-				LSearchStack = LSearchStack.FNext;
+				searchStack = searchStack._next;
 			}
 			return false;
 		}			
 
 		public bool IsEmpty()
 		{
-			return FFirst == null;
+			return _first == null;
 		}
 
 		/// <summary> Gets an enumerator to enumerate the *enabled* forms. </summary>
@@ -800,34 +800,34 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public class FormsEnumerator : IEnumerator
 		{
-			public FormsEnumerator(Forms AForms)
+			public FormsEnumerator(Forms forms)
 			{
-				FForms = AForms;
+				_forms = forms;
 			}
 
-			private Forms FForms;
-			private FormStack FCurrent;
+			private Forms _forms;
+			private FormStack _current;
 
 			public void Reset()
 			{
-				FCurrent = null;
+				_current = null;
 			}
 
 			public object Current
 			{
 				get
 				{
-					return FCurrent.GetTopmostForm();
+					return _current.GetTopmostForm();
 				}
 			}
 
 			public bool MoveNext()
 			{
-				if (FCurrent == null)
-					FCurrent = FForms.FFirst;
+				if (_current == null)
+					_current = _forms._first;
 				else
-					FCurrent = FCurrent.FNext;
-				return (FCurrent != null);
+					_current = _current._next;
+				return (_current != null);
 			}
 		}
 
@@ -837,36 +837,36 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public class FormStack
 		{
-			private List<IFormInterface> FForms = new List<IFormInterface>();
-			public List<IFormInterface> Forms { get { return FForms; } }
+			private List<IFormInterface> _forms = new List<IFormInterface>();
+			public List<IFormInterface> Forms { get { return _forms; } }
 
-			internal FormStack FNext;
-			public FormStack Next { get { return FNext; } }
+			internal FormStack _next;
+			public FormStack Next { get { return _next; } }
 
-			internal FormStack FPrior;
-			public FormStack Prior { get { return FPrior; } }
+			internal FormStack _prior;
+			public FormStack Prior { get { return _prior; } }
 
-			public void Push(IFormInterface AForm)
+			public void Push(IFormInterface form)
 			{
-				FForms.Add(AForm);
+				_forms.Add(form);
 			}
 
 			public IFormInterface Pop()
 			{
-				IFormInterface LResult = FForms[FForms.Count - 1];
-				FForms.RemoveAt(FForms.Count - 1);
-				return LResult;
+				IFormInterface result = _forms[_forms.Count - 1];
+				_forms.RemoveAt(_forms.Count - 1);
+				return result;
 			}
 
 			public bool IsEmpty()
 			{
-				return FForms.Count == 0;
+				return _forms.Count == 0;
 			}
 
 			public IFormInterface GetTopmostForm()
 			{
-				if (FForms.Count > 0)
-					return FForms[FForms.Count - 1];
+				if (_forms.Count > 0)
+					return _forms[_forms.Count - 1];
 				else
 					return null;
 			}

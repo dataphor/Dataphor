@@ -20,37 +20,37 @@ namespace Alphora.Dataphor.DAE.Connection
 	// Deferred streams must be accessible after the Cursor is closed or navigated.
 	public abstract class SQLCursor : Disposable
 	{
-		protected SQLCursor(SQLCommand ACommand) : base()
+		protected SQLCursor(SQLCommand command) : base()
 		{
-			FCommand = ACommand;
-			FCommand.SetActiveCursor(this);
+			_command = command;
+			_command.SetActiveCursor(this);
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				if (FCommand != null)
+				if (_command != null)
 				{
 					try
 					{
-						FCommand.SetActiveCursor(null);
-						FCommand.InternalClose();
+						_command.SetActiveCursor(null);
+						_command.InternalClose();
 					}
 					finally
 					{
-						FCommand = null;
+						_command = null;
 					}
 				}
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
-		protected SQLCommand FCommand;
-		public SQLCommand Command { get { return FCommand; } }
+		protected SQLCommand _command;
+		public SQLCommand Command { get { return _command; } }
 		
 		protected abstract SQLTableSchema InternalGetSchema();
 		protected SQLTableSchema GetSchema()
@@ -59,21 +59,21 @@ namespace Alphora.Dataphor.DAE.Connection
 			{
 				return InternalGetSchema();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "getschema", true);
+				_command.Connection.WrapException(exception, "getschema", true);
 				throw;
 			}
 		}
 		
-		protected SQLTableSchema FSchema;
+		protected SQLTableSchema _schema;
 		public SQLTableSchema Schema
 		{
 			get
 			{
-				if (FSchema == null)
-					FSchema = GetSchema();
-				return FSchema;
+				if (_schema == null)
+					_schema = GetSchema();
+				return _schema;
 			}
 		}
 		
@@ -84,9 +84,9 @@ namespace Alphora.Dataphor.DAE.Connection
 			{
 				return InternalNext();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "next", true);
+				_command.Connection.WrapException(exception, "next", true);
 				throw;
 			}
 		}		
@@ -100,119 +100,119 @@ namespace Alphora.Dataphor.DAE.Connection
 				{
 					return InternalGetColumnCount();
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					FCommand.Connection.WrapException(LException, "getcolumncount", true);
+					_command.Connection.WrapException(exception, "getcolumncount", true);
 					throw;
 				}
 			}
 		}
 		
-		protected abstract string InternalGetColumnName(int AIndex);
-		public string GetColumnName(int AIndex)
+		protected abstract string InternalGetColumnName(int index);
+		public string GetColumnName(int index)
 		{
 			try
 			{
-				return InternalGetColumnName(AIndex);
+				return InternalGetColumnName(index);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "getcolumnname", true);
+				_command.Connection.WrapException(exception, "getcolumnname", true);
 				throw;
 			}
 		}
 		
-		protected abstract object InternalGetColumnValue(int AIndex);
-		public object this[int AIndex] 
+		protected abstract object InternalGetColumnValue(int index);
+		public object this[int index] 
 		{ 
 			get
 			{
 				try
 				{
-					return InternalGetColumnValue(AIndex);
+					return InternalGetColumnValue(index);
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					FCommand.Connection.WrapException(LException, "getcolumnvalue", true);
+					_command.Connection.WrapException(exception, "getcolumnvalue", true);
 					throw;
 				}
 			}
 		}
 
-		protected abstract bool InternalIsNull(int AIndex);
-		public bool IsNull(int AIndex)
+		protected abstract bool InternalIsNull(int index);
+		public bool IsNull(int index)
 		{
 			try
 			{
-				return InternalIsNull(AIndex);
+				return InternalIsNull(index);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "isnull", true);
+				_command.Connection.WrapException(exception, "isnull", true);
 				throw;
 			}
 		}
 		
-		protected abstract bool InternalIsDeferred(int AIndex);
-		public bool IsDeferred(int AIndex)
+		protected abstract bool InternalIsDeferred(int index);
+		public bool IsDeferred(int index)
 		{
 			try
 			{
-				return InternalIsDeferred(AIndex);
+				return InternalIsDeferred(index);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "isdeferred", true);
+				_command.Connection.WrapException(exception, "isdeferred", true);
 				throw;
 			}
 		}
 
-		protected abstract Stream InternalOpenDeferredStream(int AIndex);
-		public Stream OpenDeferredStream(int AIndex)
+		protected abstract Stream InternalOpenDeferredStream(int index);
+		public Stream OpenDeferredStream(int index)
 		{
 			try
 			{
-				return InternalOpenDeferredStream(AIndex);
+				return InternalOpenDeferredStream(index);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "opendeferredstream", true);
+				_command.Connection.WrapException(exception, "opendeferredstream", true);
 				throw;
 			}
 		}
 
-		protected virtual bool InternalFindKey(object[] AKey)
+		protected virtual bool InternalFindKey(object[] key)
 		{
 			throw new ConnectionException(ConnectionException.Codes.UnsupportedSearchableCall);
 		}
 		
-		public bool FindKey(object[] AKey)
+		public bool FindKey(object[] key)
 		{
 			try
 			{
-				return InternalFindKey(AKey);
+				return InternalFindKey(key);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "findkey", true);
+				_command.Connection.WrapException(exception, "findkey", true);
 				throw;
 			}
 		}
 
-		protected virtual void InternalFindNearest(object[] AKey)
+		protected virtual void InternalFindNearest(object[] key)
 		{
 			throw new ConnectionException(ConnectionException.Codes.UnsupportedSearchableCall);
 		}
 		
-		public void FindNearest(object[] AKey)
+		public void FindNearest(object[] key)
 		{
 			try
 			{
-				InternalFindNearest(AKey);
+				InternalFindNearest(key);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "findnearest", true);
+				_command.Connection.WrapException(exception, "findnearest", true);
 				throw;
 			}
 		}
@@ -228,63 +228,63 @@ namespace Alphora.Dataphor.DAE.Connection
 			{
 				return InternalGetFilter();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "getfilter", true);
+				_command.Connection.WrapException(exception, "getfilter", true);
 				throw;
 			}
 		}
 		
-		protected virtual bool InternalSetFilter(string AFilter)
+		protected virtual bool InternalSetFilter(string filter)
 		{
 			throw new ConnectionException(ConnectionException.Codes.UnsupportedSearchableCall);
 		}
 		
-		public bool SetFilter(string AFilter)
+		public bool SetFilter(string filter)
 		{
 			try
 			{
-				return InternalSetFilter(AFilter);
+				return InternalSetFilter(filter);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "setfilter", true);
+				_command.Connection.WrapException(exception, "setfilter", true);
 				throw;
 			}
 		}
 		
-		protected virtual void InternalInsert(string[] ANames, object[] AValues) 
+		protected virtual void InternalInsert(string[] names, object[] values) 
 		{
 			throw new ConnectionException(ConnectionException.Codes.UnsupportedUpdateableCall);
 		}
 
-		public void Insert(string[] ANames, object[] AValues) 
+		public void Insert(string[] names, object[] values) 
 		{
 			try
 			{
-				InternalInsert(ANames, AValues);
+				InternalInsert(names, values);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "insert", true);
+				_command.Connection.WrapException(exception, "insert", true);
 				throw;
 			}
 		}
 
-		protected virtual void InternalUpdate(string[] ANames, object[] AValues)
+		protected virtual void InternalUpdate(string[] names, object[] values)
 		{
 			throw new ConnectionException(ConnectionException.Codes.UnsupportedUpdateableCall);
 		}
 
-		public void Update(string[] ANames, object[] AValues)
+		public void Update(string[] names, object[] values)
 		{
 			try
 			{
-				InternalUpdate(ANames, AValues);
+				InternalUpdate(names, values);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "update", false);
+				_command.Connection.WrapException(exception, "update", false);
 			}
 		}
 
@@ -299,9 +299,9 @@ namespace Alphora.Dataphor.DAE.Connection
 			{
 				InternalDelete();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FCommand.Connection.WrapException(LException, "delete", false);
+				_command.Connection.WrapException(exception, "delete", false);
 			}
 		}
 	}

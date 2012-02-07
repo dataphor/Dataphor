@@ -85,8 +85,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			// 
 			// FTextEdit
 			// 
-			this.FTextEdit.Location = new System.Drawing.Point(0, 25);
-			this.FTextEdit.Size = new System.Drawing.Size(453, 276);
+			this._textEdit.Location = new System.Drawing.Point(0, 25);
+			this._textEdit.Size = new System.Drawing.Size(453, 276);
 			// 
 			// FViewResultsMenuItem
 			// 

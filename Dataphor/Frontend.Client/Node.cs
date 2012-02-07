@@ -19,37 +19,37 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Constructs a new node an initializes it's child list. </summary>
 		public Node() : base()
 		{
-			FChildren = new ChildCollection(this);
+			_children = new ChildCollection(this);
 		}
 
 		/// <summary> Dispose will unhook all of it's children. and call dispose on each one. </summary>
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 			finally
 			{
-				if (FChildren != null)
+				if (_children != null)
 				{
-					FChildren.Dispose();  //Must happen after owner is cleared to deactivate tree
-					FChildren = null;
+					_children.Dispose();  //Must happen after owner is cleared to deactivate tree
+					_children = null;
 				}
 			}
 		}
 
 		#region UserData
 
-		private object FUserData;
+		private object _userData;
 		/// <summary> User-defined scratch-pad for use by the application </summary>
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		[DefaultValue(null)]
 		public object UserData 
 		{ 
-			get { return FUserData; } 
-			set { FUserData = value; } 
+			get { return _userData; } 
+			set { _userData = value; } 
 		}
 
 		#endregion
@@ -59,7 +59,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// Owner
 
 		/// <remarks> This is non private so that ChildCollection.Adding can do it's work without recursing.  (<see cref="ChildCollection.Adding"/>)</remarks>
-		protected internal Node FOwner;
+		protected internal Node _owner;
 		/// <summary> The owner of a node is responsible for it's lifetime. </summary>
 		/// <remarks> 
 		///		The owner is usually the node's parent, but not necessarily.  For example, the ownership heirarchy 
@@ -69,13 +69,13 @@ namespace Alphora.Dataphor.Frontend.Client
 		[Browsable(false)]
 		public INode Owner
 		{
-			get { return FOwner; }
+			get { return _owner; }
 			set
 			{
-				if (FOwner != value)
+				if (_owner != value)
 				{
-					if (FOwner != null)
-						FOwner.Children.Disown(this);
+					if (_owner != null)
+						_owner.Children.Disown(this);
 					if (value != null)
 						value.Children.Add(this);
 				}
@@ -90,26 +90,26 @@ namespace Alphora.Dataphor.Frontend.Client
 		[Browsable(false)]
 		public virtual INode Parent
 		{
-			get { return FOwner; }
+			get { return _owner; }
 		}
 		
 		// Children
 
-		private ChildCollection FChildren;
+		private ChildCollection _children;
 		/// <summary> The set of nodes that this node owns (but is not necessarily a parent to). </summary>
 		[Publish(PublishMethod.List)]
 		[Browsable(false)]
 		public IChildCollection Children
 		{
-			get { return FChildren; }
+			get { return _children; }
 		}
 
 		/// <summary> Allows for descendant behavior when child nodes are added. </summary>
 		/// <remarks> Should not be used for validation (see <see cref="IsValidChild"/>). </remarks>
-		protected internal virtual void AddChild(INode AChild) {}
+		protected internal virtual void AddChild(INode child) {}
 		
 		/// <summary> Allows for descendant behavior when child nodes are removed. </summary>
-		protected internal virtual void RemoveChild(INode AChild) {}
+		protected internal virtual void RemoveChild(INode child) {}
 
 		/// <summary> Indicates that a child node has been removed or added. </summary>
 		protected internal virtual void ChildrenChanged() {}
@@ -121,52 +121,52 @@ namespace Alphora.Dataphor.Frontend.Client
 		///		Should not assume the item will be added (See <see cref="AddChild"/>).
 		///		The default implementation throws an exception, disallowing the child object.
 		/// </remarks>
-		public virtual bool IsValidChild(INode AChild)
+		public virtual bool IsValidChild(INode child)
 		{
-			if (AChild == null)
+			if (child == null)
 				return false;
 			else
-				return IsValidChild(AChild.GetType());
+				return IsValidChild(child.GetType());
 		}
 
 		/// <summary> Determines if a particular class of node is valid as a child of this one. </summary>
-		public virtual bool IsValidChild(Type AChildType)
+		public virtual bool IsValidChild(Type childType)
 		{
 			return false;
 		}
 
 		/// <summary> Determines if a particular node is valid as an owner of this node. </summary>
-		public virtual bool IsValidOwner(INode AOwner)
+		public virtual bool IsValidOwner(INode owner)
 		{
-			if (AOwner == null)
+			if (owner == null)
 				return false;
 			else
-				return IsValidOwner(AOwner.GetType());
+				return IsValidOwner(owner.GetType());
 		}
 
 		/// <summary> Determines if a particular class of node is valid as an owner of this node. </summary>
-		public virtual bool IsValidOwner(Type AOwnerType)
+		public virtual bool IsValidOwner(Type ownerType)
 		{
 			return true;
 		}
 
 		/// <summary> Throws and exception to indicate that a particular node is not valid as a child of this node. </summary>
 		/// <remarks> This method allows for descendents to provide more discriptive errors when invalid children are added. </remarks>
-		protected internal virtual void InvalidChildError(INode AChild)
+		protected internal virtual void InvalidChildError(INode child)
 		{
-			throw new ClientException(ClientException.Codes.InvalidChild, AChild.Name, AChild.GetType().ToString(), GetType().ToString());
+			throw new ClientException(ClientException.Codes.InvalidChild, child.Name, child.GetType().ToString(), GetType().ToString());
 		}
 
 		/// <summary> Finds the first Owner which implements the specified interface. </summary>
 		/// <returns> The located node, or null if non found. </returns>
-		public virtual INode FindParent(Type AType)
+		public virtual INode FindParent(Type type)
 		{
 			if (Parent != null)
 			{
-				if (AType.IsAssignableFrom(Parent.GetType()))
+				if (type.IsAssignableFrom(Parent.GetType()))
 					return Parent;
 				else
-					return Parent.FindParent(AType);
+					return Parent.FindParent(type);
 			}
 			else
 				return null;
@@ -179,10 +179,10 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			get
 			{
-				INode LCurrent = this;
-				while (LCurrent.Owner != null)
-					LCurrent = LCurrent.Owner;
-				return LCurrent as IHost;
+				INode current = this;
+				while (current.Owner != null)
+					current = current.Owner;
+				return current as IHost;
 			}
 		}
 
@@ -190,68 +190,68 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		#region Name and Name Searches
 
-		public INode GetNode(string AName, INode AExcluding)
+		public INode GetNode(string name, INode excluding)
 		{
-			if ((Name != String.Empty) && String.Equals(AName, Name, StringComparison.OrdinalIgnoreCase) && !Object.ReferenceEquals(AExcluding, this))
+			if ((Name != String.Empty) && String.Equals(name, Name, StringComparison.OrdinalIgnoreCase) && !Object.ReferenceEquals(excluding, this))
 				return this;
 			else
 			{
-				INode LResult;
-				foreach (INode LChild in Children)
+				INode result;
+				foreach (INode child in Children)
 				{
-					LResult = LChild.GetNode(AName, AExcluding);
-					if (LResult != null)
-						return LResult;
+					result = child.GetNode(name, excluding);
+					if (result != null)
+						return result;
 				}
 			}
 			return null;
 		}
 		
-		public INode GetNode(string AName)
+		public INode GetNode(string name)
 		{
-			if ((Name != String.Empty) && String.Equals(AName, Name, StringComparison.OrdinalIgnoreCase))
+			if ((Name != String.Empty) && String.Equals(name, Name, StringComparison.OrdinalIgnoreCase))
 				return this;
 			else
 			{
-				INode LResult;
-				foreach (INode LChild in Children)
+				INode result;
+				foreach (INode child in Children)
 				{
-					LResult = LChild.GetNode(AName);
-					if (LResult != null)
-						return LResult;
+					result = child.GetNode(name);
+					if (result != null)
+						return result;
 				}
 			}
 			return null;
 		}
 		
-		public INode FindNode(string AName)
+		public INode FindNode(string name)
 		{
-			INode LResult = GetNode(AName);
-			if (LResult == null)
-				throw new ClientException(ClientException.Codes.NodeNotFound, AName);
-			return LResult;
+			INode result = GetNode(name);
+			if (result == null)
+				throw new ClientException(ClientException.Codes.NodeNotFound, name);
+			return result;
 		}
 		
 		/// <summary> Validates a node's name change. </summary>
 		public event NameChangeHandler OnValidateName;
 
-		private string FName = String.Empty;
+		private string _name = String.Empty;
 		[DefaultValue("")]
 		[Browsable(false)]
 		public string Name
 		{
-			get { return FName; }
+			get { return _name; }
 			set
 			{
-				if (FName != value)
+				if (_name != value)
 				{
 					if(value.IndexOf(' ') != -1)
 						throw new ClientException(ClientException.Codes.InvalidNodeName, value);
 
 					// TODO : Enforce node name uniqueness within owner
 					if (OnValidateName != null)
-						OnValidateName(this, FName, value);
-					FName = value;
+						OnValidateName(this, _name, value);
+					_name = value;
 				}
 			}
 		}
@@ -267,14 +267,14 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		#region Activation/Deactivation
 
-		private bool FTransitional;
+		private bool _transitional;
 		/// <summary> True when the node is transitioning to/from active state. </summary>
 		/// <remarks> While transitioning, the Active property will return false. </remarks>
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public bool Transitional
 		{
-			get { return FTransitional; }
+			get { return _transitional; }
 		}
 
 		[Publish(PublishMethod.None)]
@@ -283,7 +283,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			get
 			{
-				return !FTransitional && (Owner != null) && Owner.Active;
+				return !_transitional && (Owner != null) && Owner.Active;
 			}
 		}
 
@@ -309,17 +309,17 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// </remarks>
 		protected virtual void Activate()
 		{
-			for (int LIndex = 0; LIndex < FChildren.Count; LIndex++)
+			for (int index = 0; index < _children.Count; index++)
 			{
 				try
 				{
-					((Node)Children[LIndex]).ActivateAll();
+					((Node)Children[index]).ActivateAll();
 				}
 				catch
 				{
 					// Note: BeforeDeactivate will not be called in a failure situation (such would not be appropriate as the node is not in an active state)
-					for (int LUndoIndex = LIndex - 1; LUndoIndex >= 0; LUndoIndex--)
-						((Node)Children[LUndoIndex]).Deactivate();
+					for (int undoIndex = index - 1; undoIndex >= 0; undoIndex--)
+						((Node)Children[undoIndex]).Deactivate();
 					throw;
 				}
 			}
@@ -329,22 +329,22 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <remarks> Optimistically attempts to activate each child.  The last error (if any) will be thrown. </remarks>
 		protected internal virtual void AfterActivate()
 		{
-			ErrorList LErrors = null;
-			foreach (Node LChild in Children)
+			ErrorList errors = null;
+			foreach (Node child in Children)
 			{
 				try
 				{
-					LChild.AfterActivate();
+					child.AfterActivate();
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					if (LErrors == null)
-						LErrors = new ErrorList();
-					LErrors.Add(LException);
+					if (errors == null)
+						errors = new ErrorList();
+					errors.Add(exception);
 				}
 			}
-			if (LErrors != null)
-				HostNode.Session.ReportErrors(this.HostNode, LErrors);
+			if (errors != null)
+				HostNode.Session.ReportErrors(this.HostNode, errors);
 		}
 
 		/// <summary> Used internally to bring the node to an inactive state. </summary>
@@ -359,22 +359,22 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			if (Children != null)
 			{
-				ErrorList LErrors = null;
-				foreach (Node LChild in Children)
+				ErrorList errors = null;
+				foreach (Node child in Children)
 				{
 					try
 					{
-						LChild.Deactivate();
+						child.Deactivate();
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						if (LErrors == null)
-							LErrors = new ErrorList();
-						LErrors.Add(LException);
+						if (errors == null)
+							errors = new ErrorList();
+						errors.Add(exception);
 					}
 				}
-				if (LErrors != null)
-					HostNode.Session.ReportErrors(HostNode, LErrors);
+				if (errors != null)
+					HostNode.Session.ReportErrors(HostNode, errors);
 			}
 		}
 
@@ -383,48 +383,48 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			if (Children != null)
 			{
-				ErrorList LErrors = null;
-				foreach (Node LChild in Children)
+				ErrorList errors = null;
+				foreach (Node child in Children)
 				{
 					try
 					{
-						LChild.BeforeDeactivate();
+						child.BeforeDeactivate();
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						if (LErrors == null)
-							LErrors = new ErrorList();
-						LErrors.Add(LException);
+						if (errors == null)
+							errors = new ErrorList();
+						errors.Add(exception);
 					}
 				}
-				if (LErrors != null)
-					HostNode.Session.ReportErrors(HostNode, LErrors);
+				if (errors != null)
+					HostNode.Session.ReportErrors(HostNode, errors);
 			}
 		}
 
 		internal void DeactivateAll()
 		{
-			FTransitional = true;
+			_transitional = true;
 			try
 			{
 				Deactivate();
 			}
 			finally
 			{
-				FTransitional = false;
+				_transitional = false;
 			}
 		}
 
 		internal void ActivateAll()
 		{
-			FTransitional = true;
+			_transitional = true;
 			try
 			{
 				Activate();
 			}
 			finally
 			{
-				FTransitional = false;
+				_transitional = false;
 			}
 		}
 		
@@ -433,19 +433,19 @@ namespace Alphora.Dataphor.Frontend.Client
 		#region Broadcast/Handle events
 
 		/// <remarks> The default behavior is to handle the event then propigate to any children. </remarks>
-		public virtual void BroadcastEvent(NodeEvent AEvent)
+		public virtual void BroadcastEvent(NodeEvent eventValue)
 		{
-			if (!AEvent.IsHandled)
+			if (!eventValue.IsHandled)
 			{
-				HandleEvent(AEvent);
-				if (!AEvent.IsHandled)
+				HandleEvent(eventValue);
+				if (!eventValue.IsHandled)
 				{
-					AEvent.Handle(this);
-					if (!AEvent.IsHandled)
-						foreach (Node LChild in Children)
+					eventValue.Handle(this);
+					if (!eventValue.IsHandled)
+						foreach (Node child in Children)
 						{
-							LChild.BroadcastEvent(AEvent);
-							if (AEvent.IsHandled)
+							child.BroadcastEvent(eventValue);
+							if (eventValue.IsHandled)
 								break;
 						}
 				}
@@ -453,20 +453,20 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 
 		/// <remarks> Override to handle an event. </remarks>
-		public virtual void HandleEvent(NodeEvent AEvent) {}
+		public virtual void HandleEvent(NodeEvent eventValue) {}
 		
 		#endregion
 
 		#region IComponent
 
-		private ISite FSite;
+		private ISite _site;
 		/// <summary> Designer support. </summary>
 		[Browsable(false)]
 		[Publish(PublishMethod.None)]
 		public ISite Site
 		{
-			get { return FSite; }
-			set { FSite = value; }
+			get { return _site; }
+			set { _site = value; }
 		}
 
 		#endregion
@@ -476,147 +476,147 @@ namespace Alphora.Dataphor.Frontend.Client
 	public class ChildCollection : DisposableList<Node>, IChildCollection
 	{
 		/// <summary> Initializes a Child Collection. </summary>
-		/// <param name="ANode"> The node that contains this children collection. </param>
-		protected internal ChildCollection(Node ANode) : base(true)
+		/// <param name="node"> The node that contains this children collection. </param>
+		protected internal ChildCollection(Node node) : base(true)
 		{
-			FNode = ANode;
+			_node = node;
 		}
 
 		/// <summary> The owner node that has this children collection. </summary>
-		protected Node FNode;
+		protected Node _node;
 
 		/// <summary> Called to add a node to the children. </summary>
-		/// <param name="AValue"> The node to be added. </param>
-		/// <param name="AIndex"> The index of the node. </param>
+		/// <param name="value"> The node to be added. </param>
+		/// <param name="index"> The index of the node. </param>
 		/// <remarks> Also links the node to it's owner. </remarks>
-		protected override void Adding(Node AValue, int AIndex)
+		protected override void Adding(Node value, int index)
 		{
-			AValue.Owner = null;
-			if (AValue.Active)
+			value.Owner = null;
+			if (value.Active)
 				throw new ClientException(ClientException.Codes.CannotAddActiveChild);
 
-			base.Adding(AValue, AIndex);
+			base.Adding(value, index);
 
-			FNode.AddChild(AValue);
+			_node.AddChild(value);
 			try
 			{
-				AValue.FOwner = FNode;
+				value._owner = _node;
 				try
 				{
-					if (FNode.Active)
+					if (_node.Active)
 					{
-						IUpdateHandler LHandler = (IUpdateHandler)FNode.FindParent(typeof(IUpdateHandler));
-						if (LHandler != null)
-							LHandler.BeginUpdate();
+						IUpdateHandler handler = (IUpdateHandler)_node.FindParent(typeof(IUpdateHandler));
+						if (handler != null)
+							handler.BeginUpdate();
 						else
-							LHandler = null;
+							handler = null;
 						try
 						{
-							AValue.ActivateAll();
+							value.ActivateAll();
 							try
 							{
-								AValue.AfterActivate();
-								FNode.ChildrenChanged();
+								value.AfterActivate();
+								_node.ChildrenChanged();
 							}
 							catch
 							{
-								AValue.DeactivateAll();
+								value.DeactivateAll();
 								throw;
 							}
 						}
 						finally
 						{
-							if (LHandler != null)
-								LHandler.EndUpdate(true);
+							if (handler != null)
+								handler.EndUpdate(true);
 						}
 					}
 				}
 				catch
 				{
-					AValue.FOwner = null;
+					value._owner = null;
 					throw;
 				}
 			}
 			catch
 			{
-				FNode.RemoveChild(AValue);
+				_node.RemoveChild(value);
 				throw;
 			}
 		}
 		
 		/// <summary> Called to remove a child node. </summary>
-		/// <param name="AValue"> The node to be removed. </param>
-		/// <param name="AIndex"> The nodes index. </param>
+		/// <param name="value"> The node to be removed. </param>
+		/// <param name="index"> The nodes index. </param>
 		/// <remarks> Unlinks a node from it's owner. </remarks>
-		protected override void Removed(Node AValue, int AIndex)
+		protected override void Removed(Node value, int index)
 		{
 			try
 			{
 				try
 				{
-					if (FNode.Active)
+					if (_node.Active)
 					{
-						IUpdateHandler LHandler = (IUpdateHandler)FNode.FindParent(typeof(IUpdateHandler));
-						if (LHandler != null)
-							LHandler.BeginUpdate();
+						IUpdateHandler handler = (IUpdateHandler)_node.FindParent(typeof(IUpdateHandler));
+						if (handler != null)
+							handler.BeginUpdate();
 						else
-							LHandler = null;
+							handler = null;
 						try
 						{
 							try
 							{
-								AValue.BeforeDeactivate();
+								value.BeforeDeactivate();
 							}
 							finally
 							{
-								AValue.DeactivateAll();
+								value.DeactivateAll();
 							}
 						}
 						finally
 						{
-							if (LHandler != null)
-								LHandler.EndUpdate(false);
+							if (handler != null)
+								handler.EndUpdate(false);
 						}
 					}
 				}
 				finally
 				{
-					AValue.FOwner = null;
+					value._owner = null;
 				}
 			}
 			finally
 			{
-				FNode.RemoveChild(AValue);
-				FNode.ChildrenChanged();
-				base.Removed(AValue, AIndex);
+				_node.RemoveChild(value);
+				_node.ChildrenChanged();
+				base.Removed(value, index);
 			}
 		}
 
 		/// <summary> Validates the child nodes. </summary>
-		/// <param name="AValue"> The Node to be validated. </param>
+		/// <param name="value"> The Node to be validated. </param>
 		/// <remarks>  Calls owner node's IsValidChild on the new node. </remarks>
-		protected override void Validate(Node AValue)
+		protected override void Validate(Node value)
 		{
-			base.Validate(AValue);
-			if (!FNode.IsValidChild(AValue))
-				FNode.InvalidChildError(AValue);
+			base.Validate(value);
+			if (!_node.IsValidChild(value))
+				_node.InvalidChildError(value);
 		}
 
 		/// <summary> Index accessor for the children nodes. </summary>
-		public new INode this[int AIndex]
+		public new INode this[int index]
 		{
-			get { return base[AIndex]; }
-			set { base[AIndex] = (Node)value; }
+			get { return base[index]; }
+			set { base[index] = (Node)value; }
 		}
 
-		public void Disown(INode AItem)
+		public void Disown(INode item)
 		{
-			base.Disown((Node)AItem);
+			base.Disown((Node)item);
 		}
 
-		public new INode DisownAt(int AIndex)
+		public new INode DisownAt(int index)
 		{
-			return base.DisownAt(AIndex);
+			return base.DisownAt(index);
 		}
 	}
 }

@@ -17,27 +17,27 @@ namespace Alphora.Dataphor.Dataphoria
 			InitializeComponent();
 		}
 
-		private IDataphoria FDataphoria;
+		private IDataphoria _dataphoria;
 		public IDataphoria Dataphoria
 		{
-			get { return FDataphoria; }
+			get { return _dataphoria; }
 			set
 			{
-				if (FDataphoria != value)
+				if (_dataphoria != value)
 				{
-					if (FDataphoria != null)
+					if (_dataphoria != null)
 					{
-						FDataphoria.Disconnected -= new EventHandler(FDataphoria_Disconnected);
-						FDataphoria.Connected -= new EventHandler(FDataphoria_Connected);
-						FDataphoria.Debugger.PropertyChanged -= Debugger_PropertyChanged;
+						_dataphoria.Disconnected -= new EventHandler(FDataphoria_Disconnected);
+						_dataphoria.Connected -= new EventHandler(FDataphoria_Connected);
+						_dataphoria.Debugger.PropertyChanged -= Debugger_PropertyChanged;
 					}
-					FDataphoria = value;
-					if (FDataphoria != null)
+					_dataphoria = value;
+					if (_dataphoria != null)
 					{
-						FDataphoria.Disconnected += new EventHandler(FDataphoria_Disconnected);
-						FDataphoria.Connected += new EventHandler(FDataphoria_Connected);
-						FDataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
-						if (FDataphoria.IsConnected)
+						_dataphoria.Disconnected += new EventHandler(FDataphoria_Disconnected);
+						_dataphoria.Connected += new EventHandler(FDataphoria_Connected);
+						_dataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
+						if (_dataphoria.IsConnected)
 						{
 							FDataphoria_Connected(this, EventArgs.Empty);
 							UpdateDataView();
@@ -47,36 +47,36 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		private void Debugger_PropertyChanged(object ASender, string[] APropertyNames)
+		private void Debugger_PropertyChanged(object sender, string[] propertyNames)
 		{
 			try
 			{
-				if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "SelectedProcessID" || AItem == "IsPaused" || AItem == "SelectedCallStackIndex"; }))
+				if (Array.Exists<string>(propertyNames, (string AItem) => { return AItem == "SelectedProcessID" || AItem == "IsPaused" || AItem == "SelectedCallStackIndex"; }))
 					UpdateDataView();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FDataphoria.Warnings.AppendError(null, LException, false);
+				_dataphoria.Warnings.AppendError(null, exception, false);
 			}
 		}
 
 		private void UpdateDataView()
 		{
-			if (FDataphoria.Debugger.IsPaused && FDataphoria.Debugger.SelectedProcessID >= 0)
+			if (_dataphoria.Debugger.IsPaused && _dataphoria.Debugger.SelectedProcessID >= 0)
 			{
 				// Save old postion
-				Row LOld = null;
+				Row old = null;
 				if (FCallStackDataView.Active && !FCallStackDataView.IsEmpty())
-					LOld = FCallStackDataView.ActiveRow;
+					old = FCallStackDataView.ActiveRow;
 
 				// Update the selected process
-				FProcessIDParam.Value = FDataphoria.Debugger.SelectedProcessID;
-				FSelectedIndexParam.Value = FDataphoria.Debugger.SelectedCallStackIndex;
+				_processIDParam.Value = _dataphoria.Debugger.SelectedProcessID;
+				_selectedIndexParam.Value = _dataphoria.Debugger.SelectedCallStackIndex;
 				FCallStackDataView.Open();
 
 				// Attempt to seek to old position
-				if (LOld != null)
-					FCallStackDataView.Refresh(LOld);
+				if (old != null)
+					FCallStackDataView.Refresh(old);
 			}
 			else
 				FCallStackDataView.Close();
@@ -91,7 +91,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void FDataphoria_Connected(object sender, EventArgs e)
 		{
-			FCallStackDataView.Session = FDataphoria.DataSession;
+			FCallStackDataView.Session = _dataphoria.DataSession;
 			InitializeParamGroup();
 		}
 
@@ -120,29 +120,29 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void InitializeParamGroup()
 		{
-			if (FGroup == null)
+			if (_group == null)
 			{
-				FGroup = new DataSetParamGroup();
-				FProcessIDParam = new DataSetParam() { Name = "AProcessID", DataType = FDataphoria.UtilityProcess.DataTypes.SystemInteger };
-				FGroup.Params.Add(FProcessIDParam);
-				FSelectedIndexParam = new DataSetParam() { Name = "ASelectedIndex", DataType = FDataphoria.UtilityProcess.DataTypes.SystemInteger };
-				FGroup.Params.Add(FSelectedIndexParam);
-				FCallStackDataView.ParamGroups.Add(FGroup);
+				_group = new DataSetParamGroup();
+				_processIDParam = new DataSetParam() { Name = "AProcessID", DataType = _dataphoria.UtilityProcess.DataTypes.SystemInteger };
+				_group.Params.Add(_processIDParam);
+				_selectedIndexParam = new DataSetParam() { Name = "ASelectedIndex", DataType = _dataphoria.UtilityProcess.DataTypes.SystemInteger };
+				_group.Params.Add(_selectedIndexParam);
+				FCallStackDataView.ParamGroups.Add(_group);
 			}
 		}
 
 		private void DeinitializeParamGroup()
 		{
-			if (FGroup != null)
+			if (_group != null)
 			{
-				FCallStackDataView.ParamGroups.Remove(FGroup);
-				FGroup.Dispose();
-				FGroup = null;
+				FCallStackDataView.ParamGroups.Remove(_group);
+				_group.Dispose();
+				_group = null;
 			}
 		}
 
-		private DataSetParam FProcessIDParam;
-		private DataSetParam FSelectedIndexParam;
-		private DataSetParamGroup FGroup;
+		private DataSetParam _processIDParam;
+		private DataSetParam _selectedIndexParam;
+		private DataSetParamGroup _group;
 	}
 }

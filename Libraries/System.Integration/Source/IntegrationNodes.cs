@@ -20,12 +20,12 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 	// operator Insert(ASource : table, ATarget : table) : String
 	public class InsertNode : InstructionNodeBase
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			return
 				IntegrationHelper.Copy
 				(
-					AProgram,
+					program,
 					(TableNode)Nodes[0],
 					(TableNode)Nodes[1],
 					new GenerateStatementHandler(IntegrationHelper.GenerateInsertStatement)
@@ -36,30 +36,30 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 	// operator Copy(ASourceExpression : String, ATargetExpression : String, AKeyColumnNames : String, AInsertOnly : Boolean) : String
 	public class CopyNode : InstructionNodeBase
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			string AKeyColumnNames = Nodes.Count > 2 ? (string)Nodes[2].Execute(AProgram) : null;
-			bool AInsertOnly = Nodes.Count > 3 ? (bool)Nodes[3].Execute(AProgram) : false;
+			string AKeyColumnNames = Nodes.Count > 2 ? (string)Nodes[2].Execute(program) : null;
+			bool AInsertOnly = Nodes.Count > 3 ? (bool)Nodes[3].Execute(program) : false;
 			
-			IServerExpressionPlan ASourcePlan = ((IServerProcess)AProgram.ServerProcess).PrepareExpression((string)Nodes[0].Execute(AProgram), null);
+			IServerExpressionPlan ASourcePlan = ((IServerProcess)program.ServerProcess).PrepareExpression((string)Nodes[0].Execute(program), null);
 			try
 			{
-				IServerExpressionPlan ATargetPlan = ((IServerProcess)AProgram.ServerProcess).PrepareExpression((string)Nodes[1].Execute(AProgram), null);
+				IServerExpressionPlan ATargetPlan = ((IServerProcess)program.ServerProcess).PrepareExpression((string)Nodes[1].Execute(program), null);
 				try
 				{
 					TableNode ASourceTable = ((CursorNode)((ServerPlan)ASourcePlan).Program.Code).SourceNode;
 					TableNode ATargetTable = ((CursorNode)((ServerPlan)ATargetPlan).Program.Code).SourceNode;
 
-					return CopyTablesNode.InternalCopy(AProgram, FDataType, ASourceTable, ATargetTable, AKeyColumnNames, AInsertOnly);
+					return CopyTablesNode.InternalCopy(program, _dataType, ASourceTable, ATargetTable, AKeyColumnNames, AInsertOnly);
 				}
 				finally
 				{
-					((IServerProcess)AProgram.ServerProcess).UnprepareExpression(ATargetPlan);
+					((IServerProcess)program.ServerProcess).UnprepareExpression(ATargetPlan);
 				}
 			}
 			finally
 			{
-				((IServerProcess)AProgram.ServerProcess).UnprepareExpression(ASourcePlan);
+				((IServerProcess)program.ServerProcess).UnprepareExpression(ASourcePlan);
 			}
 		}
 	}
@@ -69,36 +69,36 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 	// operator Copy(ASource : table, ATarget : table) : String
 	public class CopyTablesNode : InstructionNodeBase
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			string AKeyColumnNames = Nodes.Count > 2 ? (string)Nodes[2].Execute(AProgram) : null;
-			bool AInsertOnly = Nodes.Count > 3 ? (bool)Nodes[3].Execute(AProgram) : false;
+			string AKeyColumnNames = Nodes.Count > 2 ? (string)Nodes[2].Execute(program) : null;
+			bool AInsertOnly = Nodes.Count > 3 ? (bool)Nodes[3].Execute(program) : false;
 
 			TableNode ASourceTable = (TableNode)Nodes[0];
 			TableNode ATargetTable = (TableNode)Nodes[1];
 
-			return InternalCopy(AProgram, FDataType, ASourceTable, ATargetTable, AKeyColumnNames, AInsertOnly);
+			return InternalCopy(program, _dataType, ASourceTable, ATargetTable, AKeyColumnNames, AInsertOnly);
 		}
 
-		internal static object InternalCopy(Program AProgram, Schema.IDataType ADataType, TableNode ASourceTable, TableNode ATargetTable, string AKeyColumnNames, bool AInsertOnly)
+		internal static object InternalCopy(Program program, Schema.IDataType dataType, TableNode sourceTable, TableNode targetTable, string keyColumnNames, bool insertOnly)
 		{
 			return
 				IntegrationHelper.Copy
 				(
-					AProgram,
-					ASourceTable,
-					ATargetTable,
+					program,
+					sourceTable,
+					targetTable,
 					delegate(TableNode ASourceTableInner, TableNode ATargetTableInner, Expression ATargetExpression)
 					{
 						return
 							IntegrationHelper.GenerateConditionedInsertStatement
 							(
-								AProgram,
+								program,
 								ASourceTableInner,
 								ATargetTableInner,
 								ATargetExpression,
-								AInsertOnly,
-								AKeyColumnNames
+								insertOnly,
+								keyColumnNames
 							);
 					}
 				);
@@ -107,149 +107,149 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 
 	public sealed class IntegrationHelper
 	{
-		public static string Copy(Program AProgram, TableNode ASourceTable, TableNode ATargetTable, GenerateStatementHandler AGenerateStatement)
+		public static string Copy(Program program, TableNode sourceTable, TableNode targetTable, GenerateStatementHandler generateStatement)
 		{
-			Statement LTargetStatement =
-				AGenerateStatement
+			Statement targetStatement =
+				generateStatement
 				(
-					ASourceTable,
-					ATargetTable,
-					(Expression)ATargetTable.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy)
+					sourceTable,
+					targetTable,
+					(Expression)targetTable.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy)
 				);
-			Schema.Key LDisplaySourceKey = AProgram.FindClusteringKey(ASourceTable.TableVar);
+			Schema.Key displaySourceKey = program.FindClusteringKey(sourceTable.TableVar);
 
-			StringBuilder LResult = new StringBuilder();
-			long LSucceededUpdateCount = 0;
-			long LFailedUpdateCount = 0;
-			bool LMaxResultLengthMessageWritten = false;
+			StringBuilder result = new StringBuilder();
+			long succeededUpdateCount = 0;
+			long failedUpdateCount = 0;
+			bool maxResultLengthMessageWritten = false;
 
 			// Start a new process so that we don't mess with the transaction context of this one
-			ProcessInfo LInfo = new ProcessInfo(AProgram.ServerProcess.ServerSession.SessionInfo);
-			LInfo.UseImplicitTransactions = false;
-			IServerProcess LTargetProcess = ((IServerSession)AProgram.ServerProcess.ServerSession).StartProcess(LInfo);
+			ProcessInfo info = new ProcessInfo(program.ServerProcess.ServerSession.SessionInfo);
+			info.UseImplicitTransactions = false;
+			IServerProcess targetProcess = ((IServerSession)program.ServerProcess.ServerSession).StartProcess(info);
 			try
 			{
-				Program LTargetProgram = new Program((ServerProcess)LTargetProcess);
-				LTargetProgram.Code = ATargetTable;
-				LTargetProgram.Start(null);
+				Program targetProgram = new Program((ServerProcess)targetProcess);
+				targetProgram.Code = targetTable;
+				targetProgram.Start(null);
 				try
 				{
 					// Have the target program use the main program's context
-					Stack LOldTargetContext = LTargetProgram.SwitchContext(AProgram.Stack);
+					Stack oldTargetContext = targetProgram.SwitchContext(program.Stack);
 					try
 					{
-						LInfo.DefaultIsolationLevel = IsolationLevel.Browse;
-						IServerProcess LSourceProcess = ((IServerSession)AProgram.ServerProcess.ServerSession).StartProcess(LInfo);
+						info.DefaultIsolationLevel = IsolationLevel.Browse;
+						IServerProcess sourceProcess = ((IServerSession)program.ServerProcess.ServerSession).StartProcess(info);
 						try
 						{
-							Program LSourceProgram = new Program((ServerProcess)LSourceProcess);
-							LSourceProgram.Code = ASourceTable;
-							LSourceProgram.Start(null);
+							Program sourceProgram = new Program((ServerProcess)sourceProcess);
+							sourceProgram.Code = sourceTable;
+							sourceProgram.Start(null);
 							try
 							{
 								// Have the source program use the main program's context
-								Stack LOldSourceContext = LSourceProgram.SwitchContext(AProgram.Stack);
+								Stack oldSourceContext = sourceProgram.SwitchContext(program.Stack);
 								try
 								{
-									Table LSource = (Table)ASourceTable.Execute(LSourceProgram);
+									Table source = (Table)sourceTable.Execute(sourceProgram);
 									try
 									{
-										LSource.Open();
+										source.Open();
 
 										// TODO: IBAS Project #26790 - allow cross-process row copies for streamed types
 										// There is a MarshalRow call in the LocalProcess, would that solve this problem?
-										using (Row LRow = new Row(LTargetProcess.ValueManager, ASourceTable.DataType.CreateRowType()))
+										using (Row row = new Row(targetProcess.ValueManager, sourceTable.DataType.CreateRowType()))
 										{
-											DataParams LParams = new DataParams();
-											LParams.Add(new DataParam("ASourceRow", LRow.DataType, DAE.Language.Modifier.Const, LRow));
+											DataParams paramsValue = new DataParams();
+											paramsValue.Add(new DataParam("ASourceRow", row.DataType, DAE.Language.Modifier.Const, row));
 
-											IServerStatementPlan LTarget = LTargetProcess.PrepareStatement(new D4TextEmitter().Emit(LTargetStatement), LParams);
+											IServerStatementPlan target = targetProcess.PrepareStatement(new D4TextEmitter().Emit(targetStatement), paramsValue);
 											try
 											{
-												LTarget.CheckCompiled();
+												target.CheckCompiled();
 
-												while (LSource.Next())
+												while (source.Next())
 												{
-													LRow.ClearValues();
-													LTargetProcess.BeginTransaction(IsolationLevel.Isolated);
+													row.ClearValues();
+													targetProcess.BeginTransaction(IsolationLevel.Isolated);
 													try
 													{
-														LSource.Select(LRow);
-														LTarget.Execute(LParams);
-														LTargetProcess.CommitTransaction();
-														LSucceededUpdateCount++;
+														source.Select(row);
+														target.Execute(paramsValue);
+														targetProcess.CommitTransaction();
+														succeededUpdateCount++;
 													}
-													catch (Exception LException)
+													catch (Exception exception)
 													{
-														LFailedUpdateCount++;
-														LTargetProcess.RollbackTransaction();
-														if (LResult.Length < 100000)
-															LResult.Append(KeyValuesToString(LDisplaySourceKey, LRow) + " - " + LException.Message + "\r\n");
+														failedUpdateCount++;
+														targetProcess.RollbackTransaction();
+														if (result.Length < 100000)
+															result.Append(KeyValuesToString(displaySourceKey, row) + " - " + exception.Message + "\r\n");
 														else
 														{
-															if (!LMaxResultLengthMessageWritten)
+															if (!maxResultLengthMessageWritten)
 															{
-																LResult.Append(Strings.Get("MaxResultLengthExceeded"));
-																LMaxResultLengthMessageWritten = true;
+																result.Append(Strings.Get("MaxResultLengthExceeded"));
+																maxResultLengthMessageWritten = true;
 															}
 														}
 													}
 
 													// Yield in case our process is aborted.
-													AProgram.CheckAborted();
+													program.CheckAborted();
 												}
 											}
 											finally
 											{
-												LTargetProcess.UnprepareStatement(LTarget);
+												targetProcess.UnprepareStatement(target);
 											}
 										}
 									}
 									finally
 									{
-										LSource.Close();
+										source.Close();
 									}
 								}
 								finally
 								{
-									LSourceProgram.SwitchContext(LOldSourceContext);	// Don't let the source program cleanup the main context
+									sourceProgram.SwitchContext(oldSourceContext);	// Don't let the source program cleanup the main context
 								}
 							}
 							finally
 							{
-								LSourceProgram.Stop(null);
+								sourceProgram.Stop(null);
 							}
 						}
 						finally
 						{
-							((IServerSession)AProgram.ServerProcess.ServerSession).StopProcess(LSourceProcess);
+							((IServerSession)program.ServerProcess.ServerSession).StopProcess(sourceProcess);
 						}
 
-						LResult.AppendFormat(Strings.Get("Results"), LSucceededUpdateCount, LFailedUpdateCount);
-						return LResult.ToString();
+						result.AppendFormat(Strings.Get("Results"), succeededUpdateCount, failedUpdateCount);
+						return result.ToString();
 					}
 					finally
 					{
-						LTargetProgram.SwitchContext(LOldTargetContext);	// Don't let the target program cleanup the main context
+						targetProgram.SwitchContext(oldTargetContext);	// Don't let the target program cleanup the main context
 					}
 				}
 				finally
 				{
-					LTargetProgram.Stop(null);
+					targetProgram.Stop(null);
 				}
 			}
 			finally
 			{
-				((IServerSession)AProgram.ServerProcess.ServerSession).StopProcess(LTargetProcess);
+				((IServerSession)program.ServerProcess.ServerSession).StopProcess(targetProcess);
 			}
 		}
 
-		public static Statement GenerateInsertStatement(TableNode ASourceTable, TableNode ATargetTable, Expression ATargetExpression)
+		public static Statement GenerateInsertStatement(TableNode sourceTable, TableNode targetTable, Expression targetExpression)
 		{
-			return new InsertStatement(new IdentifierExpression("ASourceRow"), ATargetExpression);
+			return new InsertStatement(new IdentifierExpression("ASourceRow"), targetExpression);
 		}
 
-		public static Statement GenerateConditionedInsertStatement(Program AProgram, TableNode ASourceTable, TableNode ATargetTable, Expression ATargetExpression, bool AInsertOnly, string AKeyColumns)
+		public static Statement GenerateConditionedInsertStatement(Program program, TableNode sourceTable, TableNode targetTable, Expression targetExpression, bool insertOnly, string keyColumns)
 		{
 			// Produced statement looks similar to this:
 			//	if not exists (<target> rename Target where <key column restriction>) then
@@ -257,36 +257,36 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 			//	else
 			//		update <target> rename Target set { <assignment list> } where <key column restriction>;
 
-			string[] LKeyColumnNames = null;
-			if (AKeyColumns == null)
+			string[] keyColumnNames = null;
+			if (keyColumns == null)
 			{
 				// If no key columns are specified, default to a key from the target
-				Schema.Key LKey = AProgram.FindClusteringKey(ATargetTable.TableVar);
-				LKeyColumnNames = new string[LKey.Columns.Count];
-				for (int i = 0; i < LKey.Columns.Count; i++)
-					LKeyColumnNames[i] = LKey.Columns[i].Name;
+				Schema.Key key = program.FindClusteringKey(targetTable.TableVar);
+				keyColumnNames = new string[key.Columns.Count];
+				for (int i = 0; i < key.Columns.Count; i++)
+					keyColumnNames[i] = key.Columns[i].Name;
 			}
 			else
 			{
 				// Parse and trim the key column names
-				LKeyColumnNames = (AKeyColumns == "" ? new String[] { } : AKeyColumns.Split(new char[] { ',', ';' }));
-				for (int i = 0; i < LKeyColumnNames.Length; i++)
-					LKeyColumnNames[i] = LKeyColumnNames[i].Trim();
+				keyColumnNames = (keyColumns == "" ? new String[] { } : keyColumns.Split(new char[] { ',', ';' }));
+				for (int i = 0; i < keyColumnNames.Length; i++)
+					keyColumnNames[i] = keyColumnNames[i].Trim();
 			}
 
 			// Compute the target restriction
-			Expression LTargetCondition = null;
-			foreach (string LKeyColumnName in LKeyColumnNames)
+			Expression targetCondition = null;
+			foreach (string keyColumnName in keyColumnNames)
 			{
-				BinaryExpression LComparison = new BinaryExpression(new IdentifierExpression(".Target." + LKeyColumnName), Instructions.Equal, new IdentifierExpression(".ASourceRow." + LKeyColumnName));
-				if (LTargetCondition != null)
-					LTargetCondition = new BinaryExpression(LTargetCondition, Instructions.And, LComparison);
+				BinaryExpression comparison = new BinaryExpression(new IdentifierExpression(".Target." + keyColumnName), Instructions.Equal, new IdentifierExpression(".ASourceRow." + keyColumnName));
+				if (targetCondition != null)
+					targetCondition = new BinaryExpression(targetCondition, Instructions.And, comparison);
 				else
-					LTargetCondition = LComparison;
+					targetCondition = comparison;
 			}
 
 			// Construct the if ... then insert ... portion
-			IfStatement LIfStatement =
+			IfStatement ifStatement =
 				new IfStatement
 				(
 					new UnaryExpression
@@ -295,53 +295,53 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 						new UnaryExpression
 						(
 							Instructions.Exists,
-							(LTargetCondition != null)
-								? new RestrictExpression(new RenameAllExpression(ATargetExpression, "Target"), LTargetCondition)
-								: ATargetExpression
+							(targetCondition != null)
+								? new RestrictExpression(new RenameAllExpression(targetExpression, "Target"), targetCondition)
+								: targetExpression
 						)
 					),
-					GenerateInsertStatement(ASourceTable, ATargetTable, ATargetExpression),
+					GenerateInsertStatement(sourceTable, targetTable, targetExpression),
 					null
 				);
 
 			// If also doing updates, construct the else update ... portion
-			if (!AInsertOnly)
+			if (!insertOnly)
 			{
-				UpdateStatement LUpdate = new UpdateStatement(new RenameAllExpression(ATargetExpression, "Target"));
+				UpdateStatement update = new UpdateStatement(new RenameAllExpression(targetExpression, "Target"));
 
 				// Compute the assignments based on the target's columns
-				foreach (Schema.Column LColumn in ATargetTable.DataType.Columns)
+				foreach (Schema.Column column in targetTable.DataType.Columns)
 					// If not a key column and it is in the source then add it as a restriction column
-					if ((Array.IndexOf(LKeyColumnNames, LColumn.Name) < 0) && ASourceTable.DataType.Columns.ContainsName(LColumn.Name))
-						LUpdate.Columns.Add
+					if ((Array.IndexOf(keyColumnNames, column.Name) < 0) && sourceTable.DataType.Columns.ContainsName(column.Name))
+						update.Columns.Add
 						(
 							new UpdateColumnExpression
 							(
-								new IdentifierExpression(".Target." + LColumn.Name),
-								new IdentifierExpression(".ASourceRow." + LColumn.Name)
+								new IdentifierExpression(".Target." + column.Name),
+								new IdentifierExpression(".ASourceRow." + column.Name)
 							)
 						);
 
-				if (LUpdate.Columns.Count > 0)
+				if (update.Columns.Count > 0)
 				{
-					LUpdate.Condition = LTargetCondition;
-					LIfStatement.FalseStatement = LUpdate;
+					update.Condition = targetCondition;
+					ifStatement.FalseStatement = update;
 				}
 			}
 
-			return LIfStatement;
+			return ifStatement;
 		}
 
-		private static string KeyValuesToString(Schema.Key AKey, Row ARow)
+		private static string KeyValuesToString(Schema.Key key, Row row)
 		{
-			StringBuilder LResult = new StringBuilder();
-			foreach (Schema.TableVarColumn LColumn in AKey.Columns)
+			StringBuilder result = new StringBuilder();
+			foreach (Schema.TableVarColumn column in key.Columns)
 			{
-				if (LResult.Length > 0)
-					LResult.Append(", ");
-				LResult.Append(LColumn.Column.Name + " := " + (ARow.HasValue(LColumn.Column.Name) ? (string)ARow[LColumn.Column.Name] : "<nil>"));
+				if (result.Length > 0)
+					result.Append(", ");
+				result.Append(column.Column.Name + " := " + (row.HasValue(column.Column.Name) ? (string)row[column.Column.Name] : "<nil>"));
 			}
-			return "{ " + LResult.ToString() + " }";
+			return "{ " + result.ToString() + " }";
 		}
 	}
 	

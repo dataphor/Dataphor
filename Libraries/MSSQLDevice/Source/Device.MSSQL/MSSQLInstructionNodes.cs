@@ -20,123 +20,123 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 {
     public class MSSQLMSSQLBinaryCompareNode : BinaryInstructionNode
     {
-        public static int Compare(Program AProgram, object ALeftValue, object ARightValue)
+        public static int Compare(Program program, object leftValue, object rightValue)
         {
-            Stream LLeftStream =
-                ALeftValue is byte[]
-                    ? new MemoryStream((byte[])ALeftValue, 0, ((byte[])ALeftValue).Length, false, true)
-                    : AProgram.StreamManager.Open((StreamID)ALeftValue, LockMode.Exclusive);
+            Stream leftStream =
+                leftValue is byte[]
+                    ? new MemoryStream((byte[])leftValue, 0, ((byte[])leftValue).Length, false, true)
+                    : program.StreamManager.Open((StreamID)leftValue, LockMode.Exclusive);
             try
             {
-                Stream LRightStream =
-                    ARightValue is byte[]
-                        ? new MemoryStream((byte[])ARightValue, 0, ((byte[])ARightValue).Length, false, true)
-                        : AProgram.StreamManager.Open((StreamID)ARightValue, LockMode.Exclusive);
+                Stream rightStream =
+                    rightValue is byte[]
+                        ? new MemoryStream((byte[])rightValue, 0, ((byte[])rightValue).Length, false, true)
+                        : program.StreamManager.Open((StreamID)rightValue, LockMode.Exclusive);
                 try
                 {
-                    int LLeftByte;
-                    int LRightByte;
+                    int leftByte;
+                    int rightByte;
 
                     while (true)
                     {
-                        LLeftByte = LLeftStream.ReadByte();
-                        LRightByte = LRightStream.ReadByte();
+                        leftByte = leftStream.ReadByte();
+                        rightByte = rightStream.ReadByte();
 
-                        if (LLeftByte != LRightByte)
+                        if (leftByte != rightByte)
                             break;
 
-                        if (LLeftByte == -1)
+                        if (leftByte == -1)
                             break;
 
-                        if (LRightByte == -1)
+                        if (rightByte == -1)
                             break;
                     }
 
-                    return LLeftByte == LRightByte ? 0 : LLeftByte > LRightByte ? 1 : -1;
+                    return leftByte == rightByte ? 0 : leftByte > rightByte ? 1 : -1;
                 }
                 finally
                 {
-                    LRightStream.Close();
+                    rightStream.Close();
                 }
             }
             finally
             {
-                LLeftStream.Close();
+                leftStream.Close();
             }
         }
 
-        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program program, object argument1, object argument2)
         {
-            if ((AArgument1 == null) || (AArgument2 == null))
+            if ((argument1 == null) || (argument2 == null))
                 return null;
             else
-                return Compare(AProgram, AArgument1, AArgument2);
+                return Compare(program, argument1, argument2);
         }
     }
 
     public class MSSQLMSSQLBinaryEqualNode : BinaryInstructionNode
     {
-        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program program, object argument1, object argument2)
         {
-            if ((AArgument1 == null) || (AArgument2 == null))
+            if ((argument1 == null) || (argument2 == null))
                 return null;
             else
-                return MSSQLMSSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) == 0;
+                return MSSQLMSSQLBinaryCompareNode.Compare(program, argument1, argument2) == 0;
         }
     }
 
     public class MSSQLMSSQLBinaryNotEqualNode : BinaryInstructionNode
     {
-        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program program, object argument1, object argument2)
         {
-            if ((AArgument1 == null) || (AArgument2 == null))
+            if ((argument1 == null) || (argument2 == null))
                 return null;
             else
-                return MSSQLMSSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) != 0;
+                return MSSQLMSSQLBinaryCompareNode.Compare(program, argument1, argument2) != 0;
         }
     }
 
     public class MSSQLMSSQLBinaryLessNode : BinaryInstructionNode
     {
-        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program program, object argument1, object argument2)
         {
-            if ((AArgument1 == null) || (AArgument2 == null))
+            if ((argument1 == null) || (argument2 == null))
                 return null;
             else
-                return MSSQLMSSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) < 0;
+                return MSSQLMSSQLBinaryCompareNode.Compare(program, argument1, argument2) < 0;
         }
     }
 
     public class MSSQLMSSQLBinaryInclusiveLessNode : BinaryInstructionNode
     {
-        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program program, object argument1, object argument2)
         {
-            if ((AArgument1 == null) || (AArgument2 == null))
+            if ((argument1 == null) || (argument2 == null))
                 return null;
             else
-                return MSSQLMSSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) <= 0;
+                return MSSQLMSSQLBinaryCompareNode.Compare(program, argument1, argument2) <= 0;
         }
     }
 
     public class MSSQLMSSQLBinaryGreaterNode : BinaryInstructionNode
     {
-        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program program, object argument1, object argument2)
         {
-            if ((AArgument1 == null) || (AArgument2 == null))
+            if ((argument1 == null) || (argument2 == null))
                 return null;
             else
-                return MSSQLMSSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) > 0;
+                return MSSQLMSSQLBinaryCompareNode.Compare(program, argument1, argument2) > 0;
         }
     }
 
     public class MSSQLMSSQLBinaryInclusiveGreaterNode : BinaryInstructionNode
     {
-        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program program, object argument1, object argument2)
         {
-            if ((AArgument1 == null) || (AArgument2 == null))
+            if ((argument1 == null) || (argument2 == null))
                 return null;
             else
-                return MSSQLMSSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) >= 0;
+                return MSSQLMSSQLBinaryCompareNode.Compare(program, argument1, argument2) >= 0;
         }
     }
 }

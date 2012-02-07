@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 	///	processing the abstract syntax tree for a given program.  The line number and position of the
 	/// invalid constructs will be given if possible.  Only the compiler should throw exceptions of this type.
 	/// </remarks>
-	public class CompilerException : DAEException, ILocatedException
+	public class CompilerException : DAEException, ILocatorException
 	{
 		public enum Codes : int
 		{
@@ -597,232 +597,239 @@ namespace Alphora.Dataphor.DAE.Compiling
 		}
 		
 		// Resource manager for this exception class
-		private static ResourceManager FResourceManager = new ResourceManager("Alphora.Dataphor.DAE.Compiling.CompilerException", typeof(CompilerException).Assembly);
+		private static ResourceManager _resourceManager = new ResourceManager("Alphora.Dataphor.DAE.Compiling.CompilerException", typeof(CompilerException).Assembly);
 
 		// Constructors
-		public CompilerException(Codes AErrorCode) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) {}
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null) {}
-		public CompilerException(Codes AErrorCode, CompilerErrorLevel AErrorLevel) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) 
+		public CompilerException(Codes errorCode) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null) {}
+		public CompilerException(Codes errorCode, ErrorSeverity severity) : base(_resourceManager, (int)errorCode, severity, null, null) {}
+		public CompilerException(Codes errorCode, CompilerErrorLevel errorLevel) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null) 
 		{
-			FErrorLevel = AErrorLevel;
+			_errorLevel = errorLevel;
 		}
 		
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, CompilerErrorLevel AErrorLevel) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null) 
+		public CompilerException(Codes errorCode, ErrorSeverity severity, CompilerErrorLevel errorLevel) : base(_resourceManager, (int)errorCode, severity, null, null) 
 		{
-			FErrorLevel = AErrorLevel;
+			_errorLevel = errorLevel;
 		}
 		
-		public CompilerException(Codes AErrorCode, Statement AStatement) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) 
+		public CompilerException(Codes errorCode, Statement statement) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null) 
 		{
-			if (AStatement != null)
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, Statement AStatement) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null) 
+		public CompilerException(Codes errorCode, ErrorSeverity severity, Statement statement) : base(_resourceManager, (int)errorCode, severity, null, null) 
 		{
-			if (AStatement != null)
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, CompilerErrorLevel AErrorLevel, Statement AStatement) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) 
+		public CompilerException(Codes errorCode, CompilerErrorLevel errorLevel, Statement statement) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null) 
 		{
-			FErrorLevel = AErrorLevel;
-			if (AStatement != null)
+			_errorLevel = errorLevel;
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, CompilerErrorLevel AErrorLevel, Statement AStatement) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null) 
+		public CompilerException(Codes errorCode, ErrorSeverity severity, CompilerErrorLevel errorLevel, Statement statement) : base(_resourceManager, (int)errorCode, severity, null, null) 
 		{
-			FErrorLevel = AErrorLevel;
-			if (AStatement != null)
+			_errorLevel = errorLevel;
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) {}
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) {}
-		public CompilerException(Codes AErrorCode, CompilerErrorLevel AErrorLevel, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) 
+		public CompilerException(Codes errorCode, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, paramsValue) {}
+		public CompilerException(Codes errorCode, ErrorSeverity severity, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) {}
+		public CompilerException(Codes errorCode, CompilerErrorLevel errorLevel, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, paramsValue) 
 		{
-			FErrorLevel = AErrorLevel;
+			_errorLevel = errorLevel;
 		}
 
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, CompilerErrorLevel AErrorLevel, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) 
+		public CompilerException(Codes errorCode, ErrorSeverity severity, CompilerErrorLevel errorLevel, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) 
 		{
-			FErrorLevel = AErrorLevel;
+			_errorLevel = errorLevel;
 		}
 
-		public CompilerException(Codes AErrorCode, Statement AStatement, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) 
+		public CompilerException(Codes errorCode, Statement statement, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, paramsValue) 
 		{
-			if (AStatement != null)
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, Statement AStatement, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) 
+		public CompilerException(Codes errorCode, ErrorSeverity severity, Statement statement, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) 
 		{
-			if (AStatement != null)
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, CompilerErrorLevel AErrorLevel, Statement AStatement, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) 
+		public CompilerException(Codes errorCode, CompilerErrorLevel errorLevel, Statement statement, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, paramsValue) 
 		{
-			FErrorLevel = AErrorLevel;
-			if (AStatement != null)
+			_errorLevel = errorLevel;
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, CompilerErrorLevel AErrorLevel, Statement AStatement, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) 
+		public CompilerException(Codes errorCode, ErrorSeverity severity, CompilerErrorLevel errorLevel, Statement statement, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) 
 		{
-			FErrorLevel = AErrorLevel;
-			if (AStatement != null)
+			_errorLevel = errorLevel;
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) {}
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) {}
-		public CompilerException(Codes AErrorCode, CompilerErrorLevel AErrorLevel, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) 
+		public CompilerException(Codes errorCode, Exception innerException) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, null) {}
+		public CompilerException(Codes errorCode, ErrorSeverity severity, Exception innerException) : base(_resourceManager, (int)errorCode, severity, innerException, null) {}
+		public CompilerException(Codes errorCode, CompilerErrorLevel errorLevel, Exception innerException) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, null) 
 		{
-			FErrorLevel = AErrorLevel;
+			_errorLevel = errorLevel;
 		}
 
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, CompilerErrorLevel AErrorLevel, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) 
+		public CompilerException(Codes errorCode, ErrorSeverity severity, CompilerErrorLevel errorLevel, Exception innerException) : base(_resourceManager, (int)errorCode, severity, innerException, null) 
 		{
-			FErrorLevel = AErrorLevel;
+			_errorLevel = errorLevel;
 		}
 
-		public CompilerException(Codes AErrorCode, Statement AStatement, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) 
+		public CompilerException(Codes errorCode, Statement statement, Exception innerException) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, null) 
 		{
-			if (AStatement != null)
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, Statement AStatement, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) 
+		public CompilerException(Codes errorCode, ErrorSeverity severity, Statement statement, Exception innerException) : base(_resourceManager, (int)errorCode, severity, innerException, null) 
 		{
-			if (AStatement != null)
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, CompilerErrorLevel AErrorLevel, Statement AStatement, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) 
+		public CompilerException(Codes errorCode, CompilerErrorLevel errorLevel, Statement statement, Exception innerException) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, null) 
 		{
-			FErrorLevel = AErrorLevel;
-			if (AStatement != null)
+			_errorLevel = errorLevel;
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, CompilerErrorLevel AErrorLevel, Statement AStatement, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) 
+		public CompilerException(Codes errorCode, ErrorSeverity severity, CompilerErrorLevel errorLevel, Statement statement, Exception innerException) : base(_resourceManager, (int)errorCode, severity, innerException, null) 
 		{
-			FErrorLevel = AErrorLevel;
-			if (AStatement != null)
+			_errorLevel = errorLevel;
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) {}
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
-		public CompilerException(Codes AErrorCode, CompilerErrorLevel AErrorLevel, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams)
+		public CompilerException(Codes errorCode, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, paramsValue) {}
+		public CompilerException(Codes errorCode, ErrorSeverity severity, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) {}
+		public CompilerException(Codes errorCode, CompilerErrorLevel errorLevel, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, paramsValue)
 		{
-			FErrorLevel = AErrorLevel;
+			_errorLevel = errorLevel;
 		}
 
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, CompilerErrorLevel AErrorLevel, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams)
+		public CompilerException(Codes errorCode, ErrorSeverity severity, CompilerErrorLevel errorLevel, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue)
 		{
-			FErrorLevel = AErrorLevel;
+			_errorLevel = errorLevel;
 		}
 
-		public CompilerException(Codes AErrorCode, Statement AStatement, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) 
+		public CompilerException(Codes errorCode, Statement statement, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, paramsValue) 
 		{
-			if (AStatement != null)
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, Statement AStatement, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) 
+		public CompilerException(Codes errorCode, ErrorSeverity severity, Statement statement, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) 
 		{
-			if (AStatement != null)
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, CompilerErrorLevel AErrorLevel, Statement AStatement, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) 
+		public CompilerException(Codes errorCode, CompilerErrorLevel errorLevel, Statement statement, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, paramsValue) 
 		{
-			FErrorLevel = AErrorLevel;
-			if (AStatement != null)
+			_errorLevel = errorLevel;
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
 		
-		public CompilerException(Codes AErrorCode, ErrorSeverity ASeverity, CompilerErrorLevel AErrorLevel, Statement AStatement, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) 
+		public CompilerException(Codes errorCode, ErrorSeverity severity, CompilerErrorLevel errorLevel, Statement statement, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) 
 		{
-			FErrorLevel = AErrorLevel;
-			if (AStatement != null)
+			_errorLevel = errorLevel;
+			if (statement != null)
 			{
-				FLine = AStatement.Line;
-				FLinePos = AStatement.LinePos;
+				_line = statement.Line;
+				_linePos = statement.LinePos;
 			}
 		}
-		
-		private CompilerErrorLevel FErrorLevel = CompilerErrorLevel.NonFatal;
-		public CompilerErrorLevel ErrorLevel { get { return FErrorLevel; } }
 
-		private int FLine = -1;
+		public CompilerException(ErrorSeverity severity, int code, string message, string details, string serverContext, CompilerErrorLevel errorLevel, int line, int linePos, DataphorException innerException)
+			: base(severity, code, message, details, serverContext, innerException)
+		{
+			_errorLevel = errorLevel;
+			_line = line;
+			_linePos = linePos;
+		}
+
+		private CompilerErrorLevel _errorLevel = CompilerErrorLevel.NonFatal;
+		public CompilerErrorLevel ErrorLevel { get { return _errorLevel; } }
+
+		private int _line = -1;
 		public int Line 
 		{ 
-			get { return FLine; } 
-			set { FLine = value; }
+			get { return _line; } 
+			set { _line = value; }
 		}
 			
-		private int FLinePos = -1;
+		private int _linePos = -1;
 		public int LinePos 
 		{ 
-			get { return FLinePos; } 
-			set { FLinePos = value; }
+			get { return _linePos; } 
+			set { _linePos = value; }
 		}
-		
-		public CompilerException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, CompilerErrorLevel AErrorLevel, int ALine, int ALinePos, DataphorException AInnerException) 
-			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+
+		private string _locator;
+		public string Locator
 		{
-			FErrorLevel = AErrorLevel;
-			FLine = ALine;
-			FLinePos = ALinePos;
+			get { return _locator; }
+			set { _locator = value; }
 		}
 	}
 	
@@ -842,58 +849,69 @@ namespace Alphora.Dataphor.DAE.Compiling
 	{
 	#endif
 		// Indicates the stored error flags are out-of-date.
-		private bool FFlagsReset;
+		private bool _flagsReset;
 				
-		private bool FHasFatalErrors;
+		private bool _hasFatalErrors;
 		/// <summary>Returns true if there are any fatal or non-compiler errors.</summary>		
 		public bool HasFatalErrors 
 		{ 
 			get 
 			{ 
-				if (FFlagsReset)
+				if (_flagsReset)
 				{
 					GetFlags();
-					FFlagsReset = false;
+					_flagsReset = false;
 				}
-				return FHasFatalErrors; 
+				return _hasFatalErrors; 
 			} 
 		}
 		
-		private bool FHasErrors;
+		private bool _hasErrors;
 		/// <summary>Returns true if there are any fatal, non-fatal or non-compiler errors.</summary>
 		public bool HasErrors 
 		{ 
 			get 
 			{ 
-				if (FFlagsReset)
+				if (_flagsReset)
 				{
 					GetFlags();
-					FFlagsReset = false;
+					_flagsReset = false;
 				}
-				return FHasErrors; 
+				return _hasErrors; 
 			} 
 		}
-		
+
+		public Exception FirstError
+		{
+			get 
+			{
+				for (int index = 0; index < Count; index++)
+					if ((!(this[index] is CompilerException)) || ((((CompilerException)this[index]).ErrorLevel == CompilerErrorLevel.Fatal) || (((CompilerException)this[index]).ErrorLevel == CompilerErrorLevel.NonFatal)))
+						return this[index];
+				return null;
+			}
+		}
+
 		#if USETYPEDLIST
 		protected override void Adding(object AValue, int AIndex)
 		#else
-		protected override void Adding(Exception AValue, int AIndex)
+		protected override void Adding(Exception tempValue, int index)
 		#endif
 		{
-			if (AValue is CompilerException)
+			if (tempValue is CompilerException)
 			{
-				switch (((CompilerException)AValue).ErrorLevel)
+				switch (((CompilerException)tempValue).ErrorLevel)
 				{
-					case CompilerErrorLevel.Fatal : FHasFatalErrors = true; FHasErrors = true; break;
-					case CompilerErrorLevel.NonFatal : FHasErrors = true; break;
+					case CompilerErrorLevel.Fatal : _hasFatalErrors = true; _hasErrors = true; break;
+					case CompilerErrorLevel.NonFatal : _hasErrors = true; break;
 				}
 			}
-			else if (AValue is SyntaxException)
-				FHasErrors = true;
+			else if (tempValue is SyntaxException)
+				_hasErrors = true;
 			else
 			{
-				FHasFatalErrors = true;
-				FHasErrors = true;
+				_hasFatalErrors = true;
+				_hasErrors = true;
 			}
 			//base.Adding(AValue, AIndex);
 		}
@@ -901,26 +919,26 @@ namespace Alphora.Dataphor.DAE.Compiling
 		#if USETYPEDLIST
 		protected override void Removing(object AValue, int AIndex)
 		#else
-		protected override void Removing(Exception AValue, int AIndex)
+		protected override void Removing(Exception tempValue, int index)
 		#endif
 		{
-			FFlagsReset = true;
+			_flagsReset = true;
 			//base.Removing(AValue, AIndex);
 		}
 		
 		private void GetFlags()
 		{
-			FHasFatalErrors = GetHasFatalErrors();
-			FHasErrors = GetHasErrors();
+			_hasFatalErrors = GetHasFatalErrors();
+			_hasErrors = GetHasErrors();
 		}
 		
 		private bool GetHasFatalErrors()
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
+			for (int index = 0; index < Count; index++)
 			{
-				if (this[LIndex] is SyntaxException)
+				if (this[index] is SyntaxException)
 					continue;
-				if ((!(this[LIndex] is CompilerException)) || (((CompilerException)this[LIndex]).ErrorLevel == CompilerErrorLevel.Fatal))
+				if ((!(this[index] is CompilerException)) || (((CompilerException)this[index]).ErrorLevel == CompilerErrorLevel.Fatal))
 					return true;
 			}
 			return false;
@@ -928,24 +946,36 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 		private bool GetHasErrors()
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if ((!(this[LIndex] is CompilerException)) || ((((CompilerException)this[LIndex]).ErrorLevel == CompilerErrorLevel.Fatal) || (((CompilerException)this[LIndex]).ErrorLevel == CompilerErrorLevel.NonFatal)))
+			for (int index = 0; index < Count; index++)
+				if ((!(this[index] is CompilerException)) || ((((CompilerException)this[index]).ErrorLevel == CompilerErrorLevel.Fatal) || (((CompilerException)this[index]).ErrorLevel == CompilerErrorLevel.NonFatal)))
 					return true;
 			return false;
 		}
 		
-		public string ToString(CompilerErrorLevel ALevel)
+		public string ToString(CompilerErrorLevel level)
 		{
-			StringBuilder LBuilder = new StringBuilder();
-			foreach (Exception LException in this)
-				if (!(LException is CompilerException) || (((CompilerException)LException).ErrorLevel <= ALevel))
-					ExceptionUtility.AppendMessage(LBuilder, 0, LException);
-			return LBuilder.ToString();
+			StringBuilder builder = new StringBuilder();
+			foreach (Exception exception in this)
+				if (!(exception is CompilerException) || (((CompilerException)exception).ErrorLevel <= level))
+					ExceptionUtility.AppendMessage(builder, 0, exception);
+			return builder.ToString();
 		}
 		
 		public override string ToString()
 		{
 			return ToString(CompilerErrorLevel.NonFatal);
+		}
+
+		/// <summary> Sets the locator for all locator exceptions that don't have one. </summary>
+		/// <remarks> Note: Doesn't update the offsets. </remarks>
+		public void SetLocator(string locator)
+		{
+			foreach (Exception exception in this)
+			{
+				ILocatorException locatorException = exception as ILocatorException;
+				if (locatorException != null && String.IsNullOrEmpty(locatorException.Locator))
+					locatorException.Locator = !String.IsNullOrEmpty(locator) ? locator : null;
+			}
 		}
 	}
 }

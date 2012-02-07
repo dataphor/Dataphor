@@ -12,58 +12,58 @@ namespace Alphora.Dataphor.Frontend.Client
 {
 	public sealed class TitleUtility
 	{
-		public static string RemoveAccellerators(string ASource)
+		public static string RemoveAccellerators(string source)
 		{
-			System.Text.StringBuilder LResult = new System.Text.StringBuilder(ASource.Length);
-			for (int i = 0; i < ASource.Length; i++)
+			System.Text.StringBuilder result = new System.Text.StringBuilder(source.Length);
+			for (int i = 0; i < source.Length; i++)
 			{
-				if (ASource[i] == '&') 
+				if (source[i] == '&') 
 				{
-					if ((i < (ASource.Length - 1)) && (ASource[i + 1] == '&'))
+					if ((i < (source.Length - 1)) && (source[i + 1] == '&'))
 						i++;
 					else
 						continue;
 				}
-				LResult.Append(ASource[i]);
+				result.Append(source[i]);
 			}
-			return LResult.ToString();
+			return result.ToString();
 		}
 	}
 	
 	public sealed class SequenceColumnUtility
 	{
-		public static void SequenceChange(Client.Session ASession, ISource ASource, bool AShouldEnlist, DAE.Runtime.Data.Row AFromRow, DAE.Runtime.Data.Row AToRow, bool AAbove, string AScript)
+		public static void SequenceChange(Client.Session session, ISource source, bool shouldEnlist, DAE.Runtime.Data.Row fromRow, DAE.Runtime.Data.Row toRow, bool above, string script)
 		{
-			if (!String.IsNullOrEmpty(AScript) && ASource != null)
+			if (!String.IsNullOrEmpty(script) && source != null)
 			{
-				Guid LEnlistWithATID = Guid.Empty;
+				Guid enlistWithATID = Guid.Empty;
 
-				if (AShouldEnlist && ASource.DataView.Active && ASource.DataView.ApplicationTransactionServer != null)
-					LEnlistWithATID = ASource.DataView.ApplicationTransactionServer.ApplicationTransactionID;
+				if (shouldEnlist && source.DataView.Active && source.DataView.ApplicationTransactionServer != null)
+					enlistWithATID = source.DataView.ApplicationTransactionServer.ApplicationTransactionID;
 
-				DAE.IServerProcess LProcess = ASession.DataSession.ServerSession.StartProcess(new DAE.ProcessInfo(ASession.DataSession.ServerSession.SessionInfo));
+				DAE.IServerProcess process = session.DataSession.ServerSession.StartProcess(new DAE.ProcessInfo(session.DataSession.ServerSession.SessionInfo));
 				try
 				{
-					if (LEnlistWithATID != Guid.Empty)
-						LProcess.JoinApplicationTransaction(LEnlistWithATID, false);
+					if (enlistWithATID != Guid.Empty)
+						process.JoinApplicationTransaction(enlistWithATID, false);
 
 					// Prepare arguments
-					DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-					foreach (DAE.Schema.Column LColumn in AFromRow.DataType.Columns)
+					DAE.Runtime.DataParams paramsValue = new DAE.Runtime.DataParams();
+					foreach (DAE.Schema.Column column in fromRow.DataType.Columns)
 					{
-						LParams.Add(new DAE.Runtime.DataParam("AFromRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AFromRow[LColumn.Name]));
-						LParams.Add(new DAE.Runtime.DataParam("AToRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AToRow[LColumn.Name]));
+						paramsValue.Add(new DAE.Runtime.DataParam("AFromRow." + column.Name, column.DataType, DAE.Language.Modifier.In, fromRow[column.Name]));
+						paramsValue.Add(new DAE.Runtime.DataParam("AToRow." + column.Name, column.DataType, DAE.Language.Modifier.In, toRow[column.Name]));
 					}
-					LParams.Add(new DAE.Runtime.DataParam("AAbove", ASource.DataView.Process.DataTypes.SystemBoolean, DAE.Language.Modifier.In, AAbove));
+					paramsValue.Add(new DAE.Runtime.DataParam("AAbove", source.DataView.Process.DataTypes.SystemBoolean, DAE.Language.Modifier.In, above));
 
-					ASession.ExecuteScript(LProcess, AScript, LParams);
+					session.ExecuteScript(process, script, paramsValue);
 				}
 				finally
 				{
-					ASession.DataSession.ServerSession.StopProcess(LProcess);
+					session.DataSession.ServerSession.StopProcess(process);
 				}
 
-				ASource.DataView.Refresh();
+				source.DataView.Refresh();
 			}
 		}
 

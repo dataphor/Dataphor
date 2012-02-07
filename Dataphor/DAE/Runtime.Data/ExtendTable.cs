@@ -16,66 +16,66 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class ExtendTable : Table
     {
-		public ExtendTable(ExtendNode ANode, Program AProgram) : base(ANode, AProgram){}
+		public ExtendTable(ExtendNode node, Program program) : base(node, program){}
 
-        public new ExtendNode Node { get { return (ExtendNode)FNode; } }
+        public new ExtendNode Node { get { return (ExtendNode)_node; } }
         
-		protected Table FSourceTable;
-		protected Row FSourceRow;
+		protected Table _sourceTable;
+		protected Row _sourceRow;
         
         protected override void InternalOpen()
         {
-			FSourceTable = Node.Nodes[0].Execute(Program) as Table;
+			_sourceTable = Node.Nodes[0].Execute(Program) as Table;
 			try
 			{
-				FSourceRow = new Row(Manager, FSourceTable.DataType.RowType);
+				_sourceRow = new Row(Manager, _sourceTable.DataType.RowType);
 			}
 			catch
 			{
-				FSourceTable.Dispose();
-				FSourceTable = null;
+				_sourceTable.Dispose();
+				_sourceTable = null;
 				throw;
 			}
         }
         
         protected override void InternalClose()
         {
-			if (FSourceTable != null)
+			if (_sourceTable != null)
 			{
-				FSourceTable.Dispose();
-				FSourceTable = null;
+				_sourceTable.Dispose();
+				_sourceTable = null;
 			}
 
-            if (FSourceRow != null)
+            if (_sourceRow != null)
             {
-				FSourceRow.Dispose();
-                FSourceRow = null;
+				_sourceRow.Dispose();
+                _sourceRow = null;
             }
         }
         
         protected override void InternalReset()
         {
-            FSourceTable.Reset();
+            _sourceTable.Reset();
         }
         
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-            FSourceTable.Select(FSourceRow);
-            FSourceRow.CopyTo(ARow);
-            int LIndex;
-            int LColumnIndex;
-	        Program.Stack.Push(FSourceRow);
+            _sourceTable.Select(_sourceRow);
+            _sourceRow.CopyTo(row);
+            int index;
+            int columnIndex;
+	        Program.Stack.Push(_sourceRow);
             try
             {
-				for (LIndex = 1; LIndex < Node.Nodes.Count; LIndex++)
+				for (index = 1; index < Node.Nodes.Count; index++)
 				{
-					LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.ExtendColumnOffset + LIndex - 1].Name);
-					if (LColumnIndex >= 0)
+					columnIndex = row.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.ExtendColumnOffset + index - 1].Name);
+					if (columnIndex >= 0)
 					{
-						object LObject = Node.Nodes[LIndex].Execute(Program);
-						if (ARow.DataType.Columns[LColumnIndex].DataType is Schema.ScalarType)
-							LObject = ValueUtility.ValidateValue(Program, (Schema.ScalarType)ARow.DataType.Columns[LColumnIndex].DataType, LObject);
-						ARow[LColumnIndex] = LObject;
+						object objectValue = Node.Nodes[index].Execute(Program);
+						if (row.DataType.Columns[columnIndex].DataType is Schema.ScalarType)
+							objectValue = ValueUtility.ValidateValue(Program, (Schema.ScalarType)row.DataType.Columns[columnIndex].DataType, objectValue);
+						row[columnIndex] = objectValue;
 					}
 				}
             }
@@ -87,17 +87,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override bool InternalNext()
         {
-            return FSourceTable.Next();
+            return _sourceTable.Next();
         }
         
         protected override bool InternalBOF()
         {
-            return FSourceTable.BOF();
+            return _sourceTable.BOF();
         }
         
         protected override bool InternalEOF()
         {
-            return FSourceTable.EOF();
+            return _sourceTable.EOF();
         }
     }
 }

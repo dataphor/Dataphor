@@ -16,39 +16,39 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 {
 	public abstract class DataElement : Element, IDataElement
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Source = null;
 		}
 
 		// Source
 
-		private ISource FSource;
+		private ISource _source;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("Specifies the source node the control will be attached to.")]
 		public ISource Source
 		{
-			get { return FSource; }
+			get { return _source; }
 			set
 			{
-				if (FSource != value)
+				if (_source != value)
 					SetSource(value);
 			}
 		}
 
-		protected virtual void SetSource(ISource ASource)
+		protected virtual void SetSource(ISource source)
 		{
-			if (FSource != null)
-				FSource.Disposed -= new EventHandler(SourceDisposed);
-			FSource = ASource;
-			if (FSource != null)
-				FSource.Disposed += new EventHandler(SourceDisposed);
+			if (_source != null)
+				_source.Disposed -= new EventHandler(SourceDisposed);
+			_source = source;
+			if (_source != null)
+				_source.Disposed += new EventHandler(SourceDisposed);
 			if (Active)
 				InternalUpdateSource();
 		}
 		
-		protected virtual void SourceDisposed(object ASender, EventArgs AArgs)
+		protected virtual void SourceDisposed(object sender, EventArgs args)
 		{
 			Source = null;
 		}
@@ -57,17 +57,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// ReadOnly
 
-		private bool FReadOnly;
+		private bool _readOnly;
 		[DefaultValue(false)]
 		[Description("When true the control will not modify the data in the data source.")]
 		public bool ReadOnly
 		{
-			get { return FReadOnly; }
+			get { return _readOnly; }
 			set
 			{
-				if (FReadOnly != value)
+				if (_readOnly != value)
 				{
-					FReadOnly = value;
+					_readOnly = value;
 					if (Active)
 						UpdateReadOnly();
 				}
@@ -84,7 +84,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual bool GetReadOnly()
 		{
-			return FReadOnly;
+			return _readOnly;
 		}
 
 		// Element
@@ -117,32 +117,32 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Control
 
-		private WinForms.Control FControl;
+		private WinForms.Control _control;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public WinForms.Control Control
 		{
-			get { return FControl; }
+			get { return _control; }
 			set
 			{
-				if (FControl != value)
+				if (_control != value)
 				{
-					if (FControl != null)
+					if (_control != null)
 					{
-						((Session)HostNode.Session).UnregisterControlHelp(FControl);
-						FControl.Enter -= new EventHandler(ControlGotFocus);
+						((Session)HostNode.Session).UnregisterControlHelp(_control);
+						_control.Enter -= new EventHandler(ControlGotFocus);
 					}
-					FControl = value;
-					if (FControl != null)
+					_control = value;
+					if (_control != null)
 					{
-						((Session)HostNode.Session).RegisterControlHelp(FControl, this);
-						FControl.Enter += new EventHandler(ControlGotFocus);
+						((Session)HostNode.Session).RegisterControlHelp(_control, this);
+						_control.Enter += new EventHandler(ControlGotFocus);
 					}
 				}
 			}
 		}
 
-		protected void ControlGotFocus(object ASender, EventArgs AArgs)
+		protected void ControlGotFocus(object sender, EventArgs args)
 		{
 			FindParent(typeof(IFormInterface)).BroadcastEvent(new FocusChangedEvent(this));
 		}
@@ -168,16 +168,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void InternalUpdateReadOnly()
 		{
-			DAE.Client.IReadOnly LReadOnlyControl = Control as DAE.Client.IReadOnly;
-			if (LReadOnlyControl != null)
-				LReadOnlyControl.ReadOnly = GetReadOnly();
+			DAE.Client.IReadOnly readOnlyControl = Control as DAE.Client.IReadOnly;
+			if (readOnlyControl != null)
+				readOnlyControl.ReadOnly = GetReadOnly();
 		}
 
 		// DataElement
 
 		protected override void InternalUpdateSource()
 		{
-			((DAE.Client.IDataSourceReference)FControl).Source = (Source == null ? null : Source.DataSource);
+			((DAE.Client.IDataSourceReference)_control).Source = (Source == null ? null : Source.DataSource);
 		}
 
 		// Node
@@ -187,17 +187,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			Control = CreateControl();
 			try
 			{
-				FControl.CausesValidation = false;
+				_control.CausesValidation = false;
 				InitializeControl();
 				InternalUpdateSource();
 				base.Activate();
 			}
 			catch
 			{
-				if (FControl != null)
+				if (_control != null)
 				{
-					FControl.Dispose();
-					FControl = null;
+					_control.Dispose();
+					_control = null;
 				}
 				throw;
 			}
@@ -211,22 +211,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			finally
 			{
-				if (FControl != null)
+				if (_control != null)
 				{
-					DAE.Client.IDataSourceReference LSourceReference = FControl as DAE.Client.IDataSourceReference;
-					if (LSourceReference != null)
-						LSourceReference.Source = null;
-					FControl.Dispose();
-					FControl = null;
+					DAE.Client.IDataSourceReference sourceReference = _control as DAE.Client.IDataSourceReference;
+					if (sourceReference != null)
+						sourceReference.Source = null;
+					_control.Dispose();
+					_control = null;
 				}
 			}
 		}
 
 		// Element
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
-			Control.Bounds = ABounds;
+			Control.Bounds = bounds;
 		}
 	}
 
@@ -235,18 +235,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		// ColumnName
 
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[Description("The name of the column in the data source this element is associated with.")]
 		public string ColumnName
 		{
-			get { return FColumnName; }
+			get { return _columnName; }
 			set
 			{
-				if (FColumnName != value)
+				if (_columnName != value)
 				{
-					FColumnName = value;
+					_columnName = value;
 					if (Active)
 						InternalUpdateColumnName();
 				}
@@ -255,24 +255,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected virtual void InternalUpdateColumnName()
 		{
-			DAE.Client.IColumnNameReference LNameReference = Control as DAE.Client.IColumnNameReference;
-			if (LNameReference != null)
-				LNameReference.ColumnName = ColumnName;
+			DAE.Client.IColumnNameReference nameReference = Control as DAE.Client.IColumnNameReference;
+			if (nameReference != null)
+				nameReference.ColumnName = ColumnName;
 		}
 
 		// Title		
 
-		private string FTitle = String.Empty;
+		private string _title = String.Empty;
 		[DefaultValue("")]
 		[Description("Text that describes the control.")]
 		public string Title
 		{
-			get { return FTitle; }
+			get { return _title; }
 			set
 			{
-				if (FTitle != value)
+				if (_title != value)
 				{
-					FTitle = value == null ? String.Empty : value;
+					_title = value == null ? String.Empty : value;
 					if (Active)
 						InternalUpdateTitle();
 					UpdateLayout();
@@ -280,27 +280,27 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		private string FAllocatedTitle;
+		private string _allocatedTitle;
 
 		protected void DeallocateAccelerator()
 		{
-			if (FAllocatedTitle != null)
+			if (_allocatedTitle != null)
 			{
-				((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Deallocate(FAllocatedTitle);
-				FAllocatedTitle = null;
+				((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Deallocate(_allocatedTitle);
+				_allocatedTitle = null;
 			}
 		}
 
 		protected virtual void InternalUpdateTitle()
 		{
 			DeallocateAccelerator();
-			FAllocatedTitle = ((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Allocate(FTitle.Equals(String.Empty) ? ColumnName : FTitle, false);
-			SetControlText(FAllocatedTitle);
+			_allocatedTitle = ((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Allocate(_title.Equals(String.Empty) ? ColumnName : _title, false);
+			SetControlText(_allocatedTitle);
 		}
 
-		protected virtual void SetControlText(string AText)
+		protected virtual void SetControlText(string text)
 		{
-			Control.Text = AText;
+			Control.Text = text;
 		}
 
 		// ControlElement
@@ -342,22 +342,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public abstract class TitledElement : ColumnElement, ITitledElement
 	{
-		public const int CLabelVSpacing = 4;
-		public const int CLabelHSpacing = 2;
+		public const int LabelVSpacing = 4;
+		public const int LabelHSpacing = 2;
 
 		// VerticalAlignment
 
-		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		protected VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		[DefaultValue(VerticalAlignment.Top)]
 		[Description("When this control is given more space than it can use, this property specifies where the control will be placed within it's space.")]
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
+			get { return _verticalAlignment; }
 			set
 			{
-				if (FVerticalAlignment != value)
+				if (_verticalAlignment != value)
 				{
-					FVerticalAlignment = value;
+					_verticalAlignment = value;
 					UpdateLayout();
 				}
 			}
@@ -365,17 +365,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// TitleAlignment		
 
-		private TitleAlignment FTitleAlignment = TitleAlignment.Top;
+		private TitleAlignment _titleAlignment = TitleAlignment.Top;
 		[DefaultValue(TitleAlignment.Top)]
 		[Description("The alignment of the title relative to the control.")]
 		public TitleAlignment TitleAlignment
 		{
-			get { return FTitleAlignment; }
+			get { return _titleAlignment; }
 			set
 			{
-				if (FTitleAlignment != value)
+				if (_titleAlignment != value)
 				{
-					FTitleAlignment = value;
+					_titleAlignment = value;
 					UpdateLayout();
 				}
 			}
@@ -383,23 +383,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Label
 
-		private ExtendedLabel FLabel;
+		private ExtendedLabel _label;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		protected ExtendedLabel Label
 		{
-			get { return FLabel; }
+			get { return _label; }
 		}
 
 		private void CreateLabel()
 		{
-			FLabel = new ExtendedLabel();
+			_label = new ExtendedLabel();
 			try
 			{
-				FLabel.BackColor = ((Session)HostNode.Session).Theme.TextBackgroundColor;
-				FLabel.AutoSize = true;
-				FLabel.Parent = ((IWindowsContainerElement)Parent).Control;
-				FLabel.OnMnemonic += new EventHandler(LabelMnemonic);
+				_label.BackColor = ((Session)HostNode.Session).Theme.TextBackgroundColor;
+				_label.AutoSize = true;
+				_label.Parent = ((IWindowsContainerElement)Parent).Control;
+				_label.OnMnemonic += new EventHandler(LabelMnemonic);
 			}
 			catch
 			{
@@ -410,14 +410,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void DisposeLabel()
 		{
-			if (FLabel != null)
+			if (_label != null)
 			{
-				FLabel.Dispose();
-				FLabel = null;
+				_label.Dispose();
+				_label = null;
 			}
 		}
 
-		private void LabelMnemonic(object ASender, EventArgs AArgs)
+		private void LabelMnemonic(object sender, EventArgs args)
 		{
 			if ((Control != null) && Control.CanFocus)
 				Control.Focus();
@@ -427,12 +427,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// AverageCharPixelWidth
 
-		private int FAverageCharPixelWidth;
+		private int _averageCharPixelWidth;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		protected int AverageCharPixelWidth
 		{
-			get { return FAverageCharPixelWidth; }
+			get { return _averageCharPixelWidth; }
 		}
 
 		// ColumnElement
@@ -450,13 +450,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			UpdateLayout();
 		}
 
-		private Size FLabelPixelSize;
+		private Size _labelPixelSize;
 
-		protected override void SetControlText(string AText)
+		protected override void SetControlText(string text)
 		{
-			FLabel.Text = AText;
-			using (Graphics LGraphics = FLabel.CreateGraphics())
-				FLabelPixelSize = Size.Ceiling(LGraphics.MeasureString(FLabel.Text, FLabel.Font));
+			_label.Text = text;
+			using (Graphics graphics = _label.CreateGraphics())
+				_labelPixelSize = Size.Ceiling(graphics.MeasureString(_label.Text, _label.Font));
 		}
 		
 		// Node
@@ -467,7 +467,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			try
 			{
 				base.Activate();
-				FAverageCharPixelWidth = Element.GetAverageCharPixelWidth(Control);
+				_averageCharPixelWidth = Element.GetAverageCharPixelWidth(Control);
 			}
 			catch
 			{
@@ -492,72 +492,72 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void InternalUpdateVisible()
 		{
-			FLabel.Visible = (TitleAlignment != TitleAlignment.None) && GetVisible();
+			_label.Visible = (TitleAlignment != TitleAlignment.None) && GetVisible();
 			base.InternalUpdateVisible();
 		}
 
-		protected virtual void LayoutControl(Rectangle ABounds)
+		protected virtual void LayoutControl(Rectangle bounds)
 		{
-			Control.Bounds = ABounds;
+			Control.Bounds = bounds;
 		}
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
 			InternalUpdateVisible();
 
 			//Alignment within the allotted space
-			if (FVerticalAlignment != VerticalAlignment.Top)
+			if (_verticalAlignment != VerticalAlignment.Top)
 			{
-				int LDeltaX = Math.Max(0, ABounds.Height - MaxSize.Height);
-				if (FVerticalAlignment == VerticalAlignment.Middle)
-					LDeltaX /= 2;
-				ABounds.Y += LDeltaX;
-				ABounds.Height -= LDeltaX;
+				int deltaX = Math.Max(0, bounds.Height - MaxSize.Height);
+				if (_verticalAlignment == VerticalAlignment.Middle)
+					deltaX /= 2;
+				bounds.Y += deltaX;
+				bounds.Height -= deltaX;
 			}
 
 			// Title alignment
 			if (TitleAlignment != TitleAlignment.None)
 			{
-				FLabel.Location = ABounds.Location;
+				_label.Location = bounds.Location;
 				if (TitleAlignment == TitleAlignment.Top)
 				{
-					int LOffset = FLabelPixelSize.Height + CLabelVSpacing;
-					ABounds.Y += LOffset;
-					ABounds.Height -= LOffset;
+					int offset = _labelPixelSize.Height + LabelVSpacing;
+					bounds.Y += offset;
+					bounds.Height -= offset;
 				}
 				else
 				{
-					int LOffset = FLabelPixelSize.Width + CLabelHSpacing;
-					ABounds.X += LOffset;
-					ABounds.Width -= LOffset;
+					int offset = _labelPixelSize.Width + LabelHSpacing;
+					bounds.X += offset;
+					bounds.Width -= offset;
 				}
 			}
 			
 			// Enforce maximums
 			if (EnforceMaxHeight())
 			{
-				Size LSize = ABounds.Size;
-				ConstrainMaxHeight(ref LSize, GetControlMaxHeight());
-				ABounds.Size = LSize;
+				Size size = bounds.Size;
+				ConstrainMaxHeight(ref size, GetControlMaxHeight());
+				bounds.Size = size;
 			}
 
-			LayoutControl(ABounds);
+			LayoutControl(bounds);
 		}
 		
-		private Size AdjustForAlignment(Size ASize)
+		private Size AdjustForAlignment(Size size)
 		{
 			switch (TitleAlignment)
 			{
 				case TitleAlignment.Top :
-					if (ASize.Width < FLabelPixelSize.Width)
-						ASize.Width = FLabelPixelSize.Width;
-					ASize.Height += FLabelPixelSize.Height + CLabelVSpacing;
+					if (size.Width < _labelPixelSize.Width)
+						size.Width = _labelPixelSize.Width;
+					size.Height += _labelPixelSize.Height + LabelVSpacing;
 					break;
 				case TitleAlignment.Left :
-					ASize.Width += FLabelPixelSize.Width + CLabelHSpacing;
+					size.Width += _labelPixelSize.Width + LabelHSpacing;
 					break;
 			}
-			return ASize;
+			return size;
 		}
 
 		protected virtual bool EnforceMaxHeight()
@@ -577,7 +577,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected virtual int GetControlMinWidth()
 		{
-			return FAverageCharPixelWidth;
+			return _averageCharPixelWidth;
 		}
 		
 		protected virtual int GetControlNaturalHeight()
@@ -622,23 +622,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public abstract class AlignedElement : TitledElement, IAlignedElement
 	{
-		public const int CDefaultWidth = 10;
-		public const int CMinWidth = 16;
+		public const int DefaultWidth = 10;
+		public const int MinWidth = 16;
 
 		// Width
 
-		protected int FWidth = CDefaultWidth;
+		protected int _width = DefaultWidth;
 		[Publish(PublishMethod.Value)]
-		[DefaultValue(CDefaultWidth)]
+		[DefaultValue(DefaultWidth)]
 		[Description("Specifies the width, in characters, of the control.")]
 		public int Width
 		{
-			get { return FWidth; }
+			get { return _width; }
 			set
 			{
-				if (FWidth != value)
+				if (_width != value)
 				{
-					FWidth = value;
+					_width = value;
 					UpdateLayout();
 				}
 			}
@@ -646,17 +646,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// MaxWidth
 
-		private int FMaxWidth = -1;
+		private int _maxWidth = -1;
 		[DefaultValue(-1)]
 		[Description("Specifies the maximum width, in characters, the control can grow to be.")]
 		public int MaxWidth
 		{
-			get { return FMaxWidth; }
+			get { return _maxWidth; }
 			set
 			{
-				if (FMaxWidth != value)
+				if (_maxWidth != value)
 				{
-					FMaxWidth = value;
+					_maxWidth = value;
 					if (Active)
 						UpdateLayout();
 				}
@@ -665,17 +665,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// TextAlignment		
 
-		private HorizontalAlignment FTextAlignment = HorizontalAlignment.Left;
+		private HorizontalAlignment _textAlignment = HorizontalAlignment.Left;
 		[DefaultValue(HorizontalAlignment.Left)]
 		[Description("Specifies the alignment of the text within the element.")]
 		public HorizontalAlignment TextAlignment
 		{
-			get { return FTextAlignment; }
+			get { return _textAlignment; }
 			set
 			{
-				if (FTextAlignment != value)
+				if (_textAlignment != value)
 				{
-					FTextAlignment = value;
+					_textAlignment = value;
 					if (Active)
 						InternalUpdateTextAlignment();
 					UpdateLayout();
@@ -689,13 +689,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override int GetControlNaturalWidth()
 		{
-			return FWidth * AverageCharPixelWidth;
+			return _width * AverageCharPixelWidth;
 		}
 		
 		protected override int GetControlMaxWidth()
 		{
-			if (FMaxWidth > 0)
-				return FMaxWidth * AverageCharPixelWidth;
+			if (_maxWidth > 0)
+				return _maxWidth * AverageCharPixelWidth;
 			else
 				return WinForms.Screen.FromControl(Control).WorkingArea.Width;
 		}

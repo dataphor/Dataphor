@@ -24,41 +24,41 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Length(const ABinary : Binary) : Long
 	public class BinaryLengthNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 
-			if (AArgument1 is byte[])
-				return ((byte[])AArgument1).Length;
-			if (AArgument1 is StreamID)
+			if (argument1 is byte[])
+				return (long)((byte[])argument1).Length;
+			if (argument1 is StreamID)
 			{
-				Stream LStream = AProgram.StreamManager.Open((StreamID)AArgument1, LockMode.Exclusive);
+				Stream stream = program.StreamManager.Open((StreamID)argument1, LockMode.Exclusive);
 				try
 				{
-					return LStream.Length;
+					return stream.Length;
 				}
 				finally
 				{
-					LStream.Close();
+					stream.Close();
 				}
 			}
 			
-			Scalar LScalar = (Scalar)DataValue.FromNative(AProgram.ValueManager, Nodes[0].DataType, AArgument1);
-			if (LScalar.IsNative)
-				return LScalar.AsByteArray.Length;
+			Scalar scalar = (Scalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument1);
+			if (scalar.IsNative)
+				return scalar.AsByteArray.Length;
 			else
 			{
-				Stream LStream = LScalar.OpenStream();
+				Stream stream = scalar.OpenStream();
 				try
 				{
-					return LStream.Length;
+					return stream.Length;
 				}
 				finally
 				{
-					LStream.Close();
+					stream.Close();
 				}
 			}
 		}
@@ -67,77 +67,125 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iEqual(Binary, Binary) : Boolean; </remarks>
 	public class BinaryEqualNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				if ((AArgument1 is byte[]) && (AArgument2 is byte[]))
+				if ((argument1 is byte[]) && (argument2 is byte[]))
 				{
-					byte[] LLeftByteArray = (byte[])AArgument1;
-					byte[] LRightByteArray = (byte[])AArgument2;
+					byte[] leftByteArray = (byte[])argument1;
+					byte[] rightByteArray = (byte[])argument2;
 					
-					if (LLeftByteArray.Length != LRightByteArray.Length)
+					if (leftByteArray.Length != rightByteArray.Length)
 						return false;
 						
-					for (int LIndex = 0; LIndex < LLeftByteArray.Length; LIndex++)
-						if (LLeftByteArray[LIndex] != LRightByteArray[LIndex])
+					for (int index = 0; index < leftByteArray.Length; index++)
+						if (leftByteArray[index] != rightByteArray[index])
 							return false;
 						
 					return true;
 				}
 				
-				Stream LLeftStream = null;
-				Stream LRightStream = null;
+				Stream leftStream = null;
+				Stream rightStream = null;
 				
-				if (AArgument1 is StreamID)
-					LLeftStream = AProgram.StreamManager.Open((StreamID)AArgument1, LockMode.Exclusive);
+				if (argument1 is StreamID)
+					leftStream = program.StreamManager.Open((StreamID)argument1, LockMode.Exclusive);
 				else
-					LLeftStream = ((Scalar)DataValue.FromNative(AProgram.ValueManager, Nodes[0].DataType, AArgument1)).OpenStream();
+					leftStream = ((Scalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument1)).OpenStream();
 				try
 				{
-					if (AArgument2 is StreamID)
-						LRightStream = AProgram.StreamManager.Open((StreamID)AArgument2, LockMode.Exclusive);
+					if (argument2 is StreamID)
+						rightStream = program.StreamManager.Open((StreamID)argument2, LockMode.Exclusive);
 					else
-						LRightStream = ((Scalar)DataValue.FromNative(AProgram.ValueManager, Nodes[0].DataType, AArgument2)).OpenStream();
+						rightStream = ((Scalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument2)).OpenStream();
 					try
 					{
 						#if USESTREAMLENGTHWHENCOMPARINGSTREAMS
-						bool LEqual = LLeftStream.Length == LRightStream.Length; // TODO: Will this force a full read of the stream
+						bool equal = leftStream.Length == rightStream.Length; // TODO: Will this force a full read of the stream
 						#else
-						bool LEqual = true;
+						bool equal = true;
 						#endif
-						int LLeftByte;
-						int LRightByte;
-						while (LEqual)
+						int leftByte;
+						int rightByte;
+						while (equal)
 						{
-							LLeftByte = LLeftStream.ReadByte();
-							LRightByte = LRightStream.ReadByte();
+							leftByte = leftStream.ReadByte();
+							rightByte = rightStream.ReadByte();
 							
-							if (LLeftByte != LRightByte)
+							if (leftByte != rightByte)
 							{
-								LEqual = false;
+								equal = false;
 								break;
 							}
 							
-							if (LLeftByte == -1)
+							if (leftByte == -1)
 								break;
 						}
 						
-						return LEqual;
+						return equal;
 					}
 					finally
 					{
-						LRightStream.Close();
+						rightStream.Close();
 					}
 				}
 				finally
 				{
-					LLeftStream.Close();
+					leftStream.Close();
 				}	
+			}
+		}
+	}
+
+	/// <remarks> operator ToBase64String(AGraphic : Graphic) : string </remarks>
+	/// <remarks> operator ToBase64String(ABinary : Binary) : string </remarks>
+	public class BinaryToBase64StringNode : UnaryInstructionNode
+	{
+		public override object InternalExecute(Program program, object argument1)
+		{
+			#if NILPROPOGATION
+			if (argument1 == null)
+				return null;
+			#endif
+
+			if (argument1 is byte[])
+				return Convert.ToBase64String(((byte[])argument1));
+			if (argument1 is StreamID)
+			{
+				Stream stream = program.StreamManager.Open((StreamID)argument1, LockMode.Exclusive);				 				
+				try
+				{
+					byte[] buffer = new byte[stream.Length];
+					stream.Read(buffer, 0, (int)stream.Length);
+					return Convert.ToBase64String(buffer);
+				}
+				finally
+				{
+					stream.Close();
+				}
+			}
+
+			Scalar scalar = (Scalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument1);
+			if (scalar.IsNative)
+				return scalar.AsBase64String;
+			else
+			{
+				Stream stream = scalar.OpenStream();
+				try
+				{
+					byte[] buffer = new byte[stream.Length];
+					stream.Read(buffer, 0, (int)stream.Length);
+					return Convert.ToBase64String(buffer);
+				}
+				finally
+				{
+					stream.Close();
+				}
 			}
 		}
 	}

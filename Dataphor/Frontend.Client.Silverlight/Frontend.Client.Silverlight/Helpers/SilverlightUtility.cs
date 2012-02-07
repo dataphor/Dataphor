@@ -7,15 +7,15 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	public static class SilverlightUtility
 	{
-		public static DependencyObject FindVisualParent(DependencyObject AObject, Type AType)
+		public static DependencyObject FindVisualParent(DependencyObject objectValue, Type type)
 		{
-			var LParent = VisualTreeHelper.GetParent(AObject);
-			if (LParent != null)
+			var parent = VisualTreeHelper.GetParent(objectValue);
+			if (parent != null)
 			{
-				if (AType.IsAssignableFrom(LParent.GetType()))
-					return LParent;
+				if (type.IsAssignableFrom(parent.GetType()))
+					return parent;
 				else
-					return FindVisualParent(LParent, AType);
+					return FindVisualParent(parent, type);
 			}
 			else
 				return null;

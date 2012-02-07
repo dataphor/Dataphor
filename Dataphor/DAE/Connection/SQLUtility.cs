@@ -29,35 +29,35 @@ namespace Alphora.Dataphor.DAE.Connection
 	public static class SQLUtility
 	{
 		/// <summary>Returns the set of batches in the given script, delimited by the given terminator.</summary>
-		public static List<String> ProcessBatches(string AScript, string ATerminator)
+		public static List<String> ProcessBatches(string script, string terminator)
 		{
-			List<String> LBatches = new List<String>();
+			List<String> batches = new List<String>();
 			
-			string[] LLines = AScript.Split(new string[] {"\r\n", "\r", "\n"}, StringSplitOptions.None);
-			StringBuilder LBatch = new StringBuilder();
-			for (int LIndex = 0; LIndex < LLines.Length; LIndex++)
+			string[] lines = script.Split(new string[] {"\r\n", "\r", "\n"}, StringSplitOptions.None);
+			StringBuilder batch = new StringBuilder();
+			for (int index = 0; index < lines.Length; index++)
 			{
-				if (LLines[LIndex].IndexOf(ATerminator, StringComparison.InvariantCultureIgnoreCase) == 0)
+				if (lines[index].IndexOf(terminator, StringComparison.InvariantCultureIgnoreCase) == 0)
 				{
-					LBatches.Add(LBatch.ToString());
-					LBatch = new StringBuilder();
+					batches.Add(batch.ToString());
+					batch = new StringBuilder();
 				}
 				else
 				{
-					LBatch.Append(LLines[LIndex]);
-					LBatch.Append("\r\n");
+					batch.Append(lines[index]);
+					batch.Append("\r\n");
 				}
 			}
 
-			if (LBatch.Length > 0)
-				LBatches.Add(LBatch.ToString());
+			if (batch.Length > 0)
+				batches.Add(batch.ToString());
 				
-			return LBatches;
+			return batches;
 		}
 
-		public static SQLIsolationLevel IsolationLevelToSQLIsolationLevel(IsolationLevel AIsolationLevel)
+		public static SQLIsolationLevel IsolationLevelToSQLIsolationLevel(IsolationLevel isolationLevel)
 		{
-			switch (AIsolationLevel)
+			switch (isolationLevel)
 			{
 				case IsolationLevel.Isolated : return SQLIsolationLevel.Serializable;
 				case IsolationLevel.CursorStability : return SQLIsolationLevel.ReadCommitted;

@@ -81,89 +81,89 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
 		public AggregateCallExpression() : base(){}
 		
-		protected bool FIsDistinct;
+		protected bool _isDistinct;
 		public bool IsDistinct
 		{
-			get { return FIsDistinct; }
-			set { FIsDistinct = value; }
+			get { return _isDistinct; }
+			set { _isDistinct = value; }
 		}
 		
-		protected bool FIsRowLevel;
+		protected bool _isRowLevel;
 		public bool IsRowLevel
 		{
-			get { return FIsRowLevel; }
-			set { FIsRowLevel = value; }
+			get { return _isRowLevel; }
+			set { _isRowLevel = value; }
 		}
     }
     
     public class UserExpression : Expression
     {
 		public UserExpression() : base() {}
-		public UserExpression(string ATranslationString, Expression[] AArguments) : base()
+		public UserExpression(string translationString, Expression[] arguments) : base()
 		{
-			FTranslationString = ATranslationString;
-			FExpressions.AddRange(AArguments);
+			_translationString = translationString;
+			_expressions.AddRange(arguments);
 		}
 		
-		private string FTranslationString = String.Empty;
+		private string _translationString = String.Empty;
 		public string TranslationString
 		{
-			get { return FTranslationString; }
-			set { FTranslationString = value == null ? String.Empty : value; }
+			get { return _translationString; }
+			set { _translationString = value == null ? String.Empty : value; }
 		}
         
         // Expressions
-        protected Expressions FExpressions = new Expressions();
-        public Expressions Expressions { get { return FExpressions; } }
+        protected Expressions _expressions = new Expressions();
+        public Expressions Expressions { get { return _expressions; } }
 	}
     
     public class QueryParameterExpression : Expression
     {
 		public QueryParameterExpression() : base(){}
-		public QueryParameterExpression(string AParameterName) : base()
+		public QueryParameterExpression(string parameterName) : base()
 		{
-			ParameterName = AParameterName;
+			ParameterName = parameterName;
 		}
 		
         // ParameterName
-        protected string FParameterName = String.Empty;
+        protected string _parameterName = String.Empty;
         public string ParameterName
         {
-            get { return FParameterName; }
-            set { FParameterName = value; }
+            get { return _parameterName; }
+            set { _parameterName = value; }
         }
     }
     
     public abstract class FieldExpression : Expression
     {
 		public FieldExpression() : base(){}
-		public FieldExpression(string AFieldName) : base()
+		public FieldExpression(string fieldName) : base()
 		{
-			FieldName = AFieldName;
+			FieldName = fieldName;
 		}
 		
         // FieldName
-        protected string FFieldName = String.Empty;
+        protected string _fieldName = String.Empty;
         public string FieldName
         {
-            get { return FFieldName; }
-            set { FFieldName = value; }
+            get { return _fieldName; }
+            set { _fieldName = value; }
         }
     }
     
     public class InsertFieldExpression : FieldExpression
     {	
-		public InsertFieldExpression(string AFieldName) : base(AFieldName){}
+		public InsertFieldExpression(string fieldName) : base(fieldName){}
     }
     
     public class UpdateFieldExpression : FieldExpression
     {
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
     }
     
@@ -171,95 +171,95 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public OrderFieldExpression() : base()
         {
-            FAscending = true;
+            _ascending = true;
         }
         
-        public OrderFieldExpression(string AFieldName, string ATableAlias, bool AAscending) : base(AFieldName, ATableAlias)
+        public OrderFieldExpression(string fieldName, string tableAlias, bool ascending) : base(fieldName, tableAlias)
         {
-			FAscending = AAscending;
+			_ascending = ascending;
         }
         
         // Ascending
-        protected bool FAscending;
+        protected bool _ascending;
         public bool Ascending
         {
-            get { return FAscending; }
-            set { FAscending = value; }
+            get { return _ascending; }
+            set { _ascending = value; }
         }
     }
 
     public class QualifiedFieldExpression : FieldExpression
     {
 		public QualifiedFieldExpression() : base(){}
-		public QualifiedFieldExpression(string AFieldName) : base(AFieldName){}
-		public QualifiedFieldExpression(string AFieldName, string ATableAlias) : base(AFieldName)
+		public QualifiedFieldExpression(string fieldName) : base(fieldName){}
+		public QualifiedFieldExpression(string fieldName, string tableAlias) : base(fieldName)
 		{
-			TableAlias = ATableAlias;
+			TableAlias = tableAlias;
 		}
 		
         // TableAlias        
-        protected string FTableAlias = String.Empty;
+        protected string _tableAlias = String.Empty;
         public string TableAlias
         {
-            get { return FTableAlias; }
-            set { FTableAlias = value; }
+            get { return _tableAlias; }
+            set { _tableAlias = value; }
         }
     }
     
     public class ColumnExpression : Expression
     {
 		public ColumnExpression() : base(){}
-		public ColumnExpression(Expression AExpression) : base()
+		public ColumnExpression(Expression expression) : base()
 		{
-			Expression = AExpression;
+			Expression = expression;
 		}
 		
-		public ColumnExpression(Expression AExpression, string AColumnAlias) : base()
+		public ColumnExpression(Expression expression, string columnAlias) : base()
 		{
-			Expression = AExpression;
-			ColumnAlias = AColumnAlias;
+			Expression = expression;
+			ColumnAlias = columnAlias;
 		}
 
         // ColumnAlias
-        protected string FColumnAlias = String.Empty;
+        protected string _columnAlias = String.Empty;
         public string ColumnAlias
         {
-            get { return FColumnAlias; }
-            set { FColumnAlias = value; }
+            get { return _columnAlias; }
+            set { _columnAlias = value; }
         }
         
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
     }
     
     public class CastExpression : Expression
     {
 		public CastExpression() : base(){}
-		public CastExpression(Expression AExpression, string ADomainName) : base()
+		public CastExpression(Expression expression, string domainName) : base()
 		{
-			FExpression = AExpression;
-			FDomainName = ADomainName;
+			_expression = expression;
+			_domainName = domainName;
 		}
 
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
 		
         // DomainName
-		protected string FDomainName = String.Empty;
+		protected string _domainName = String.Empty;
 		public string DomainName
 		{
-			get { return FDomainName; }
-			set { FDomainName = value; }
+			get { return _domainName; }
+			set { _domainName = value; }
 		}
     }
     
@@ -269,29 +269,29 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public ColumnExpressions() : base(){}
         
-        public new ColumnExpression this[int AIndex]
+        public new ColumnExpression this[int index]
         {
-            get { return (ColumnExpression)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (ColumnExpression)(base[index]); }
+            set { base[index] = value; }
         }
         
-        public ColumnExpression this[string AColumnAlias]
+        public ColumnExpression this[string columnAlias]
         {
-			get { return this[IndexOf(AColumnAlias)]; }
-			set { base[IndexOf(AColumnAlias)] = value; }
+			get { return this[IndexOf(columnAlias)]; }
+			set { base[IndexOf(columnAlias)] = value; }
 		}
 		
-		public int IndexOf(string AColumnAlias)
+		public int IndexOf(string columnAlias)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Compare(this[LIndex].ColumnAlias, AColumnAlias) == 0)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (String.Compare(this[index].ColumnAlias, columnAlias) == 0)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AColumnAlias)
+		public bool Contains(string columnAlias)
 		{
-			return IndexOf(AColumnAlias) >= 0;
+			return IndexOf(columnAlias) >= 0;
 		}
     }
     
@@ -299,58 +299,58 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public SelectClause() : base()
         {
-            FColumns = new ColumnExpressions();
+            _columns = new ColumnExpressions();
         }
 
         // Distinct        
-        protected bool FDistinct;
+        protected bool _distinct;
         public bool Distinct
         {
-            get { return FDistinct; }
-            set { FDistinct = value; }
+            get { return _distinct; }
+            set { _distinct = value; }
         }
         
         // NonProject        
-        protected bool FNonProject;
+        protected bool _nonProject;
         public bool NonProject
         {
-            get { return FNonProject; }
-            set { FNonProject = value; }
+            get { return _nonProject; }
+            set { _nonProject = value; }
         }
         
         // Columns        
-        protected ColumnExpressions FColumns;
-        public ColumnExpressions Columns { get { return FColumns; } }
+        protected ColumnExpressions _columns;
+        public ColumnExpressions Columns { get { return _columns; } }
     }
     
     public class TableExpression : Expression
     {
 		public TableExpression() : base(){}
-		public TableExpression(string ATableName) : base()
+		public TableExpression(string tableName) : base()
 		{
-			TableName = ATableName;
+			TableName = tableName;
 		}
 
-		public TableExpression(string ATableSchema, string ATableName) : base()
+		public TableExpression(string tableSchema, string tableName) : base()
 		{
-			TableSchema = ATableSchema;
-			TableName = ATableName;
+			TableSchema = tableSchema;
+			TableName = tableName;
 		}
 
 		// TableSchema
-		protected string FTableSchema = String.Empty;
+		protected string _tableSchema = String.Empty;
 		public virtual string TableSchema
 		{
-			get { return FTableSchema; }
-			set { FTableSchema = value == null ? String.Empty : value; }
+			get { return _tableSchema; }
+			set { _tableSchema = value == null ? String.Empty : value; }
 		}
 
 		// TableName
-        protected string FTableName = String.Empty;
+        protected string _tableName = String.Empty;
         public virtual string TableName
         {
-            get { return FTableName; }
-            set { FTableName = value == null ? String.Empty : value; }
+            get { return _tableName; }
+            set { _tableName = value == null ? String.Empty : value; }
         }
     }
     
@@ -358,38 +358,38 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public JoinClause() : base()
         {
-            FJoinType = JoinType.Inner;
+            _joinType = JoinType.Inner;
         }
         
-        public JoinClause(AlgebraicFromClause AFromClause, JoinType AJoinType, Expression AJoinExpression)
+        public JoinClause(AlgebraicFromClause fromClause, JoinType joinType, Expression joinExpression)
         {
-			FromClause = AFromClause;
-			JoinType = AJoinType;
-			JoinExpression = AJoinExpression;
+			FromClause = fromClause;
+			JoinType = joinType;
+			JoinExpression = joinExpression;
         }
 
         // FromClause
-        protected AlgebraicFromClause FFromClause;
+        protected AlgebraicFromClause _fromClause;
         public AlgebraicFromClause FromClause
         {
-            get { return FFromClause; }
-            set { FFromClause = value; }
+            get { return _fromClause; }
+            set { _fromClause = value; }
         }
  
         // JoinType
-        protected JoinType FJoinType;
+        protected JoinType _joinType;
         public JoinType JoinType
         {
-            get { return FJoinType; }
-            set { FJoinType = value; }
+            get { return _joinType; }
+            set { _joinType = value; }
         }
         
         // JoinExpression
-        protected Expression FJoinExpression;
+        protected Expression _joinExpression;
         public Expression JoinExpression
         {
-            get { return FJoinExpression; }
-            set { FJoinExpression = value; }
+            get { return _joinExpression; }
+            set { _joinExpression = value; }
         }
     }
     
@@ -397,10 +397,10 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public JoinClauses() : base(){}
         
-        public new JoinClause this[int AIndex]
+        public new JoinClause this[int index]
         {
-            get { return (JoinClause)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (JoinClause)(base[index]); }
+            set { base[index] = value; }
         }
     }
     
@@ -412,31 +412,31 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     public class TableSpecifier : Expression
     {
 		public TableSpecifier() : base(){}
-		public TableSpecifier(Expression AExpression)
+		public TableSpecifier(Expression expression)
 		{
-			FTableExpression = AExpression;
+			_tableExpression = expression;
 		}
 		
-		public TableSpecifier(Expression AExpression, string AAlias)
+		public TableSpecifier(Expression expression, string alias)
 		{
-			FTableExpression = AExpression;
-			FTableAlias = AAlias;
+			_tableExpression = expression;
+			_tableAlias = alias;
 		}
 		
         // TableExpression
-        protected Expression FTableExpression;
+        protected Expression _tableExpression;
         public Expression TableExpression
         {
-            get { return FTableExpression; }
-            set { FTableExpression = value; }
+            get { return _tableExpression; }
+            set { _tableExpression = value; }
         }
         
         // TableAlias
-        protected string FTableAlias = String.Empty;
+        protected string _tableAlias = String.Empty;
         public string TableAlias
         {
-            get { return FTableAlias; }
-            set { FTableAlias = value; }
+            get { return _tableAlias; }
+            set { _tableAlias = value; }
         }
     }
     
@@ -444,32 +444,32 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public TableSpecifiers() : base(){}
         
-        public new TableSpecifier this[int AIndex]
+        public new TableSpecifier this[int index]
         {
-            get { return (TableSpecifier)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (TableSpecifier)(base[index]); }
+            set { base[index] = value; }
         }
     }
     
     public class CalculusFromClause : FromClause
     {
 		public CalculusFromClause() : base(){}
-		public CalculusFromClause(TableSpecifier ATableSpecifier) : base()
+		public CalculusFromClause(TableSpecifier tableSpecifier) : base()
 		{
-			FTableSpecifiers.Add(ATableSpecifier);
+			_tableSpecifiers.Add(tableSpecifier);
 		}
 		
-		public CalculusFromClause(TableSpecifier[] ATableSpecifiers) : base()
+		public CalculusFromClause(TableSpecifier[] tableSpecifiers) : base()
 		{
-			FTableSpecifiers.AddRange(ATableSpecifiers);
+			_tableSpecifiers.AddRange(tableSpecifiers);
 		}
 		
-		protected TableSpecifiers FTableSpecifiers = new TableSpecifiers();
-		public TableSpecifiers TableSpecifiers { get { return FTableSpecifiers; } }
+		protected TableSpecifiers _tableSpecifiers = new TableSpecifiers();
+		public TableSpecifiers TableSpecifiers { get { return _tableSpecifiers; } }
 		
 		public override bool HasJoins()
 		{
-			return FTableSpecifiers.Count > 1;
+			return _tableSpecifiers.Count > 1;
 		}
     }
     
@@ -477,104 +477,104 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {    
         // constructor
         public AlgebraicFromClause() : base(){}
-        public AlgebraicFromClause(TableSpecifier ASpecifier) : base()
+        public AlgebraicFromClause(TableSpecifier specifier) : base()
         {
-			FTableSpecifier = ASpecifier;
+			_tableSpecifier = specifier;
         }
         
         // TableSpecifier
-        protected TableSpecifier FTableSpecifier;
+        protected TableSpecifier _tableSpecifier;
         public TableSpecifier TableSpecifier
         {
-			get { return FTableSpecifier; }
-			set { FTableSpecifier = value; }
+			get { return _tableSpecifier; }
+			set { _tableSpecifier = value; }
 		}
 
 		// ParentJoin        
-        protected internal JoinClause FParentJoin;
-        public JoinClause ParentJoin { get { return FParentJoin; } }
+        protected internal JoinClause _parentJoin;
+        public JoinClause ParentJoin { get { return _parentJoin; } }
 
         // Joins
-        protected JoinClauses FJoins = new JoinClauses();
-        public JoinClauses Joins { get { return FJoins; } }
+        protected JoinClauses _joins = new JoinClauses();
+        public JoinClauses Joins { get { return _joins; } }
         
 		public override bool HasJoins()
 		{
-			return FJoins.Count > 0;
+			return _joins.Count > 0;
 		}
         
         // FindTableAlias
-        public string FindTableAlias(string ATableName)
+        public string FindTableAlias(string tableName)
         {
-            string LResult = string.Empty;
+            string result = string.Empty;
             if 
                 (
-                    (FTableSpecifier.TableExpression is TableExpression) && 
-                    (String.Compare(((TableExpression)FTableSpecifier.TableExpression).TableName, ATableName, true) == 0)
+                    (_tableSpecifier.TableExpression is TableExpression) && 
+                    (String.Compare(((TableExpression)_tableSpecifier.TableExpression).TableName, tableName, true) == 0)
                 )
             {
-                LResult = FTableSpecifier.TableAlias;
+                result = _tableSpecifier.TableAlias;
             }
             else
-                foreach (JoinClause LJoin in FJoins)
+                foreach (JoinClause join in _joins)
                 {
-                    LResult = ((AlgebraicFromClause)LJoin.FromClause).FindTableAlias(ATableName);
-                    if (LResult != string.Empty)
+                    result = ((AlgebraicFromClause)join.FromClause).FindTableAlias(tableName);
+                    if (result != string.Empty)
                         break;
                 }
-            return LResult;
+            return result;
         }
     }
     
     public class FilterClause : Clause
     {
 		public FilterClause() : base(){}
-		public FilterClause(Expression AExpression) : base()
+		public FilterClause(Expression expression) : base()
 		{
-			Expression = AExpression;
+			Expression = expression;
 		}
 		
         // Expression;
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
     }
     
     public class WhereClause : FilterClause
     {
 		public WhereClause() : base(){}
-		public WhereClause(Expression AExpression) : base(AExpression){}
+		public WhereClause(Expression expression) : base(expression){}
     }
     
     public class HavingClause : FilterClause
     {
 		public HavingClause() : base(){}
-		public HavingClause(Expression AExpression) : base(AExpression){}
+		public HavingClause(Expression expression) : base(expression){}
     }
     
     public class GroupClause : Clause
     {
         public GroupClause() : base()
         {
-            FColumns = new Expressions();
+            _columns = new Expressions();
         }
         
         // Columns
-        protected Expressions FColumns;
-        public Expressions Columns { get { return FColumns; } }
+        protected Expressions _columns;
+        public Expressions Columns { get { return _columns; } }
     }
     
     public class OrderFieldExpressions : Expressions
     {
         public OrderFieldExpressions() : base(){}
         
-        public new OrderFieldExpression this[int AIndex]
+        public new OrderFieldExpression this[int index]
         {
-            get { return (OrderFieldExpression)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (OrderFieldExpression)(base[index]); }
+            set { base[index] = value; }
         }
     }
     
@@ -582,54 +582,54 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
 		public OrderClause() : base()
         {
-            FColumns = new OrderFieldExpressions();
+            _columns = new OrderFieldExpressions();
         }
 
         // Columns        
-        protected OrderFieldExpressions FColumns;
-        public OrderFieldExpressions Columns { get { return FColumns; } }
+        protected OrderFieldExpressions _columns;
+        public OrderFieldExpressions Columns { get { return _columns; } }
     }
     
     public class SelectExpression : Expression
     {        
         // SelectClause
-        protected SelectClause FSelectClause;
+        protected SelectClause _selectClause;
         public SelectClause SelectClause
         {
-            get { return FSelectClause; }
-            set { FSelectClause = value; }
+            get { return _selectClause; }
+            set { _selectClause = value; }
         }
         
         // FromClause
-        protected FromClause FFromClause;
+        protected FromClause _fromClause;
         public FromClause FromClause
         {
-            get { return FFromClause; }
-            set { FFromClause = value; }
+            get { return _fromClause; }
+            set { _fromClause = value; }
         }
         
         // WhereClause
-        protected WhereClause FWhereClause;
+        protected WhereClause _whereClause;
         public WhereClause WhereClause
         {
-            get { return FWhereClause; }
-            set { FWhereClause = value; }
+            get { return _whereClause; }
+            set { _whereClause = value; }
         }
         
         // GroupClause
-        protected GroupClause FGroupClause;
+        protected GroupClause _groupClause;
         public GroupClause GroupClause
         {
-            get { return FGroupClause; }
-            set { FGroupClause = value; }
+            get { return _groupClause; }
+            set { _groupClause = value; }
         }
         
         // HavingClause
-        protected HavingClause FHavingClause;
+        protected HavingClause _havingClause;
         public HavingClause HavingClause
         {
-            get { return FHavingClause; }
-            set { FHavingClause = value; }
+            get { return _havingClause; }
+            set { _havingClause = value; }
         }
     }
     
@@ -638,41 +638,41 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     public class TableOperatorExpression : Expression
     {
 		public TableOperatorExpression() : base(){}
-		public TableOperatorExpression(TableOperator AOperator, SelectExpression ASelectExpression) : base()
+		public TableOperatorExpression(TableOperator operatorValue, SelectExpression selectExpression) : base()
 		{
-			FTableOperator = AOperator;
-			FSelectExpression = ASelectExpression;
+			_tableOperator = operatorValue;
+			_selectExpression = selectExpression;
 		}
 		
-		public TableOperatorExpression(TableOperator AOperator, bool ADistinct, SelectExpression ASelectExpression) : base()
+		public TableOperatorExpression(TableOperator operatorValue, bool distinct, SelectExpression selectExpression) : base()
 		{
-			FTableOperator = AOperator;
-			FDistinct = ADistinct;
-			FSelectExpression = ASelectExpression;
+			_tableOperator = operatorValue;
+			_distinct = distinct;
+			_selectExpression = selectExpression;
 		}
 		
 		// TableOperator
-		protected TableOperator FTableOperator;
+		protected TableOperator _tableOperator;
 		public TableOperator TableOperator
 		{
-			get { return FTableOperator; }
-			set { FTableOperator = value; }
+			get { return _tableOperator; }
+			set { _tableOperator = value; }
 		}
 
         // Distinct
-        protected bool FDistinct = true;
+        protected bool _distinct = true;
         public bool Distinct
         {
-            get { return FDistinct; }
-            set { FDistinct = value; }
+            get { return _distinct; }
+            set { _distinct = value; }
         }
 
         // SelectExpression
-        protected SelectExpression FSelectExpression;
+        protected SelectExpression _selectExpression;
         public SelectExpression SelectExpression
         {
-            get { return FSelectExpression; }
-            set { FSelectExpression = value; }
+            get { return _selectExpression; }
+            set { _selectExpression = value; }
         }
     }
     
@@ -680,10 +680,10 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public TableOperatorExpressions() : base(){}
         
-        public new TableOperatorExpression this[int AIndex]
+        public new TableOperatorExpression this[int index]
         {
-            get { return (TableOperatorExpression)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (TableOperatorExpression)(base[index]); }
+            set { base[index] = value; }
         }
     }
     
@@ -691,26 +691,26 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {        
         public QueryExpression() : base()
         {
-            FTableOperators = new TableOperatorExpressions();
+            _tableOperators = new TableOperatorExpressions();
         }
         
         // SelectExpression
-        protected SelectExpression FSelectExpression;
+        protected SelectExpression _selectExpression;
         public SelectExpression SelectExpression
         {
-            get { return FSelectExpression; }
-            set { FSelectExpression = value; }
+            get { return _selectExpression; }
+            set { _selectExpression = value; }
         }
         
         // TableOperators
-        protected TableOperatorExpressions FTableOperators;
-        public TableOperatorExpressions TableOperators { get { return FTableOperators; } }
+        protected TableOperatorExpressions _tableOperators;
+        public TableOperatorExpressions TableOperators { get { return _tableOperators; } }
 
 		// Indicates whether the given query expression could safely be extended with another table operator expression of the given table operator        
-        public bool IsCompatibleWith(TableOperator ATableOperator)
+        public bool IsCompatibleWith(TableOperator tableOperator)
         {
-			foreach (TableOperatorExpression LTableOperatorExpression in FTableOperators)
-				if (LTableOperatorExpression.TableOperator != ATableOperator)
+			foreach (TableOperatorExpression tableOperatorExpression in _tableOperators)
+				if (tableOperatorExpression.TableOperator != tableOperator)
 					return false;
 			return true;
         }
@@ -719,19 +719,19 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     public class SelectStatement : Statement
     {        
         // QueryExpression
-        protected QueryExpression FQueryExpression;
+        protected QueryExpression _queryExpression;
         public QueryExpression QueryExpression
         {
-            get { return FQueryExpression; }
-            set { FQueryExpression = value; }
+            get { return _queryExpression; }
+            set { _queryExpression = value; }
         }
 
         // OrderClause
-        protected OrderClause FOrderClause;
+        protected OrderClause _orderClause;
         public OrderClause OrderClause
         {
-            get { return FOrderClause; }
-            set { FOrderClause = value; }
+            get { return _orderClause; }
+            set { _orderClause = value; }
         }
     }
     
@@ -739,10 +739,10 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public InsertFieldExpressions() : base(){}
         
-        public new InsertFieldExpression this[int AIndex]
+        public new InsertFieldExpression this[int index]
         {
-            get { return (InsertFieldExpression)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (InsertFieldExpression)(base[index]); }
+            set { base[index] = value; }
         }
     }
     
@@ -750,19 +750,19 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {        
         public InsertClause() : base()
         {
-            FColumns = new InsertFieldExpressions();
+            _columns = new InsertFieldExpressions();
         }
         
         // Columns
-        protected InsertFieldExpressions FColumns;
-        public InsertFieldExpressions Columns { get { return FColumns; } }
+        protected InsertFieldExpressions _columns;
+        public InsertFieldExpressions Columns { get { return _columns; } }
 
         // TableExpression
-        protected TableExpression FTableExpression;
+        protected TableExpression _tableExpression;
         public TableExpression TableExpression
         {
-            get { return FTableExpression; }
-            set { FTableExpression = value; }
+            get { return _tableExpression; }
+            set { _tableExpression = value; }
         }
     }
     
@@ -770,30 +770,30 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public ValuesExpression() : base()
         {
-            FExpressions = new Expressions();
+            _expressions = new Expressions();
         }
  
         // Expressions
-        protected Expressions FExpressions;
-        public Expressions Expressions { get { return FExpressions; } }
+        protected Expressions _expressions;
+        public Expressions Expressions { get { return _expressions; } }
     }
     
     public class InsertStatement : Statement
     {        
         // InsertClause
-        protected InsertClause FInsertClause;
+        protected InsertClause _insertClause;
         public InsertClause InsertClause
         {
-            get { return FInsertClause; }
-            set { FInsertClause = value; }
+            get { return _insertClause; }
+            set { _insertClause = value; }
         }
 
         // Values
-        protected Expression FValues;
+        protected Expression _values;
         public Expression Values
         {
-            get { return FValues; }
-            set { FValues = value; }
+            get { return _values; }
+            set { _values = value; }
         }
     }
 
@@ -801,10 +801,10 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public UpdateFieldExpressions() : base(){}
         
-        public new UpdateFieldExpression this[int AIndex]
+        public new UpdateFieldExpression this[int index]
         {
-            get { return (UpdateFieldExpression)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (UpdateFieldExpression)(base[index]); }
+            set { base[index] = value; }
         }
     }
     
@@ -812,92 +812,92 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {        
         public UpdateClause() : base()
         {
-            FColumns = new UpdateFieldExpressions();
+            _columns = new UpdateFieldExpressions();
         }
         
         // Columns
-        protected UpdateFieldExpressions FColumns;
-        public UpdateFieldExpressions Columns { get { return FColumns; } }
+        protected UpdateFieldExpressions _columns;
+        public UpdateFieldExpressions Columns { get { return _columns; } }
         
         // TableAlias
-        protected internal string FTableAlias = String.Empty;
-        public string TableAlias { get { return FTableAlias; } }
+        protected internal string _tableAlias = String.Empty;
+        public string TableAlias { get { return _tableAlias; } }
 
         // TableExpression
-        protected TableExpression FTableExpression;
+        protected TableExpression _tableExpression;
         public TableExpression TableExpression
         {
-            get { return FTableExpression; }
-            set { FTableExpression = value; }
+            get { return _tableExpression; }
+            set { _tableExpression = value; }
         }
     }
     
     public class UpdateStatement : Statement
     {
         // UpdateClause
-        protected UpdateClause FUpdateClause;
+        protected UpdateClause _updateClause;
         public UpdateClause UpdateClause
         {
-            get { return FUpdateClause; }
-            set { FUpdateClause = value; }
+            get { return _updateClause; }
+            set { _updateClause = value; }
         }
         
         // FromClause
-        protected FromClause FFromClause;
+        protected FromClause _fromClause;
         public FromClause FromClause
         {
-            get { return FFromClause; }
-            set { FFromClause = value; }
+            get { return _fromClause; }
+            set { _fromClause = value; }
         }
         
         // WhereClause
-        protected WhereClause FWhereClause;
+        protected WhereClause _whereClause;
         public WhereClause WhereClause
         {
-            get { return FWhereClause; }
-            set { FWhereClause = value; }
+            get { return _whereClause; }
+            set { _whereClause = value; }
         }
     }
     
     public class DeleteClause : Clause
     {        
         // TableAlias
-        protected internal string FTableAlias = String.Empty;
-        public string TableAlias { get { return FTableAlias; } }
+        protected internal string _tableAlias = String.Empty;
+        public string TableAlias { get { return _tableAlias; } }
 
         // TableExpression
-        protected TableExpression FTableExpression;
+        protected TableExpression _tableExpression;
         public TableExpression TableExpression
         {
-            get { return FTableExpression; }
-            set { FTableExpression = value; }
+            get { return _tableExpression; }
+            set { _tableExpression = value; }
         }
     }
 
     public class DeleteStatement : Statement
     {
         // DeleteClause
-        protected DeleteClause FDeleteClause;
+        protected DeleteClause _deleteClause;
         public DeleteClause DeleteClause
         {
-            get { return FDeleteClause; }
-            set { FDeleteClause = value; }
+            get { return _deleteClause; }
+            set { _deleteClause = value; }
         }
         
         // FromClause
-        protected FromClause FFromClause;
+        protected FromClause _fromClause;
         public FromClause FromClause
         {
-            get { return FFromClause; }
-            set { FFromClause = value; }
+            get { return _fromClause; }
+            set { _fromClause = value; }
         }
         
         // WhereClause
-        protected WhereClause FWhereClause;
+        protected WhereClause _whereClause;
         public WhereClause WhereClause
         {
-            get { return FWhereClause; }
-            set { FWhereClause = value; }
+            get { return _whereClause; }
+            set { _whereClause = value; }
         }
     }
     
@@ -906,199 +906,199 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     public class ConstraintRecordValueExpression : Expression
     {
         // ColumnName
-        protected string FColumnName = String.Empty;
+        protected string _columnName = String.Empty;
         public string ColumnName
         {
-            get { return FColumnName; }
-            set { FColumnName = value; }
+            get { return _columnName; }
+            set { _columnName = value; }
         }
     }
     
     public class CreateTableStatement : Statement
     {
 		// TableSchema
-		protected string FTableSchema = String.Empty;
+		protected string _tableSchema = String.Empty;
 		public string TableSchema
 		{
-			get { return FTableSchema; }
-			set { FTableSchema = value == null ? String.Empty : value; }
+			get { return _tableSchema; }
+			set { _tableSchema = value == null ? String.Empty : value; }
 		}
 		
 		// TableName
-		protected string FTableName = String.Empty;
+		protected string _tableName = String.Empty;
 		public string TableName
 		{
-			get { return FTableName; }
-			set { FTableName = value == null ? String.Empty : value; }
+			get { return _tableName; }
+			set { _tableName = value == null ? String.Empty : value; }
 		}
 		
 		// Columns
-		protected ColumnDefinitions FColumns = new ColumnDefinitions();
-		public ColumnDefinitions Columns { get { return FColumns; } }
+		protected ColumnDefinitions _columns = new ColumnDefinitions();
+		public ColumnDefinitions Columns { get { return _columns; } }
     }
     
     public class AlterTableStatement : Statement
     {
 		// TableSchema
-		protected string FTableSchema = String.Empty;
+		protected string _tableSchema = String.Empty;
 		public string TableSchema
 		{
-			get { return FTableSchema; }
-			set { FTableSchema = value == null ? String.Empty : value; }
+			get { return _tableSchema; }
+			set { _tableSchema = value == null ? String.Empty : value; }
 		}
 		
 		// TableName
-		protected string FTableName = String.Empty;
+		protected string _tableName = String.Empty;
 		public string TableName
 		{
-			get { return FTableName; }
-			set { FTableName = value == null ? String.Empty : value; }
+			get { return _tableName; }
+			set { _tableName = value == null ? String.Empty : value; }
 		}
 		
 		// AddColumns
-		protected ColumnDefinitions FAddColumns = new ColumnDefinitions();
-		public ColumnDefinitions AddColumns { get { return FAddColumns; } }
+		protected ColumnDefinitions _addColumns = new ColumnDefinitions();
+		public ColumnDefinitions AddColumns { get { return _addColumns; } }
 		
 		// AlterColumns
-		protected AlterColumnDefinitions FAlterColumns = new AlterColumnDefinitions();
-		public AlterColumnDefinitions AlterColumns { get { return FAlterColumns; } }
+		protected AlterColumnDefinitions _alterColumns = new AlterColumnDefinitions();
+		public AlterColumnDefinitions AlterColumns { get { return _alterColumns; } }
 		
 		// DropColumns
-		protected DropColumnDefinitions FDropColumns = new DropColumnDefinitions();
-		public DropColumnDefinitions DropColumns { get { return FDropColumns; } }
+		protected DropColumnDefinitions _dropColumns = new DropColumnDefinitions();
+		public DropColumnDefinitions DropColumns { get { return _dropColumns; } }
     }
     
     public class DropTableStatement : Statement
     {
 		// TableSchema
-		protected string FTableSchema = String.Empty;
+		protected string _tableSchema = String.Empty;
 		public string TableSchema
 		{
-			get { return FTableSchema; }
-			set { FTableSchema = value == null ? String.Empty : value; }
+			get { return _tableSchema; }
+			set { _tableSchema = value == null ? String.Empty : value; }
 		}
 		
 		// TableName
-		protected string FTableName = String.Empty;
+		protected string _tableName = String.Empty;
 		public string TableName
 		{
-			get { return FTableName; }
-			set { FTableName = value == null ? String.Empty : value; }
+			get { return _tableName; }
+			set { _tableName = value == null ? String.Empty : value; }
 		}
     }
     
     public class CreateIndexStatement : Statement
     {
 		// IndexSchema
-		protected string FIndexSchema = String.Empty;
+		protected string _indexSchema = String.Empty;
 		public string IndexSchema
 		{
-			get { return FIndexSchema; }
-			set { FIndexSchema = value == null ? String.Empty : value; }
+			get { return _indexSchema; }
+			set { _indexSchema = value == null ? String.Empty : value; }
 		}
 		
 		// IndexName
-		protected string FIndexName = String.Empty;
+		protected string _indexName = String.Empty;
 		public string IndexName
 		{
-			get { return FIndexName; }
-			set { FIndexName = value == null ? String.Empty : value; }
+			get { return _indexName; }
+			set { _indexName = value == null ? String.Empty : value; }
 		}
 		
 		// IsUnique
-		protected bool FIsUnique;
+		protected bool _isUnique;
 		public bool IsUnique
 		{
-			get { return FIsUnique; }
-			set { FIsUnique = value; }
+			get { return _isUnique; }
+			set { _isUnique = value; }
 		}
 		
 		// IsUnique
-		protected bool FIsClustered;
+		protected bool _isClustered;
 		public bool IsClustered
 		{
-			get { return FIsClustered; }
-			set { FIsClustered = value; }
+			get { return _isClustered; }
+			set { _isClustered = value; }
 		}
 		
 		// TableSchema
-		protected string FTableSchema = String.Empty;
+		protected string _tableSchema = String.Empty;
 		public string TableSchema
 		{
-			get { return FTableSchema; }
-			set { FTableSchema = value == null ? String.Empty : value; }
+			get { return _tableSchema; }
+			set { _tableSchema = value == null ? String.Empty : value; }
 		}
 
 		// TableName
-		protected string FTableName = String.Empty;
+		protected string _tableName = String.Empty;
 		public string TableName
 		{
-			get { return FTableName; }
-			set { FTableName = value == null ? String.Empty : value; }
+			get { return _tableName; }
+			set { _tableName = value == null ? String.Empty : value; }
 		}
 
 		// Columns
-		protected OrderColumnDefinitions FColumns = new OrderColumnDefinitions();
-		public OrderColumnDefinitions Columns { get { return FColumns; } }
+		protected OrderColumnDefinitions _columns = new OrderColumnDefinitions();
+		public OrderColumnDefinitions Columns { get { return _columns; } }
     }
     
     public class DropIndexStatement : Statement
     {
 		// IndexSchema
-		protected string FIndexSchema = String.Empty;
+		protected string _indexSchema = String.Empty;
 		public string IndexSchema
 		{
-			get { return FIndexSchema; }
-			set { FIndexSchema = value == null ? String.Empty : value; }
+			get { return _indexSchema; }
+			set { _indexSchema = value == null ? String.Empty : value; }
 		}
 		
 		// IndexName
-		protected string FIndexName = String.Empty;
+		protected string _indexName = String.Empty;
 		public string IndexName
 		{
-			get { return FIndexName; }
-			set { FIndexName = value == null ? String.Empty : value; }
+			get { return _indexName; }
+			set { _indexName = value == null ? String.Empty : value; }
 		}
     }
     
     public class ColumnDefinition : Statement
     {
 		public ColumnDefinition() : base(){}
-		public ColumnDefinition(string AColumnName, string ADomainName) : base()
+		public ColumnDefinition(string columnName, string domainName) : base()
 		{
-			ColumnName = AColumnName;
-			DomainName = ADomainName;
+			ColumnName = columnName;
+			DomainName = domainName;
 		}
 		
-		public ColumnDefinition(string AColumnName, string ADomainName, bool AIsNullable) : base()
+		public ColumnDefinition(string columnName, string domainName, bool isNullable) : base()
 		{
-			ColumnName = AColumnName;
-			DomainName = ADomainName;
-			FIsNullable = AIsNullable;
+			ColumnName = columnName;
+			DomainName = domainName;
+			_isNullable = isNullable;
 		}
 		
 		// ColumnName
-		protected string FColumnName = String.Empty;
+		protected string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = value == null ? String.Empty : value; }
+			get { return _columnName; }
+			set { _columnName = value == null ? String.Empty : value; }
 		}
 
 		// DomainName
-		protected string FDomainName = String.Empty;
+		protected string _domainName = String.Empty;
 		public string DomainName
 		{
-			get { return FDomainName; }
-			set { FDomainName = value == null ? String.Empty : value; }
+			get { return _domainName; }
+			set { _domainName = value == null ? String.Empty : value; }
 		}
 
 		// IsNullable
-		protected bool FIsNullable = false;
+		protected bool _isNullable = false;
 		public bool IsNullable
 		{
-			get { return FIsNullable; }
-			set { FIsNullable = value; }
+			get { return _isNullable; }
+			set { _isNullable = value; }
 		}
     }
 
@@ -1106,73 +1106,73 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public ColumnDefinitions() : base(){}
         
-        public new ColumnDefinition this[int AIndex]
+        public new ColumnDefinition this[int index]
         {
-            get { return (ColumnDefinition)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (ColumnDefinition)(base[index]); }
+            set { base[index] = value; }
         }
     }
     
     public class AlterColumnDefinition : Statement
     {
 		public AlterColumnDefinition() : base() {}
-		public AlterColumnDefinition(string AColumnName) : base()
+		public AlterColumnDefinition(string columnName) : base()
 		{
-			FColumnName = AColumnName;
+			_columnName = columnName;
 		}
 		
-		public AlterColumnDefinition(string AColumnName, bool AIsNullable)
+		public AlterColumnDefinition(string columnName, bool isNullable)
 		{
-			FColumnName = AColumnName;
-			FAlterNullable = true;
-			FIsNullable = AIsNullable;
+			_columnName = columnName;
+			_alterNullable = true;
+			_isNullable = isNullable;
 		}
 
-		public AlterColumnDefinition(string AColumnName, string ADomainName)
+		public AlterColumnDefinition(string columnName, string domainName)
 		{
-			FColumnName = AColumnName;
-			FDomainName = ADomainName;
+			_columnName = columnName;
+			_domainName = domainName;
 		}
 		
-		public AlterColumnDefinition(string AColumnName, string ADomainName, bool AIsNullable)
+		public AlterColumnDefinition(string columnName, string domainName, bool isNullable)
 		{
-			FColumnName = AColumnName;
-			FDomainName = ADomainName;
-			FAlterNullable = true;
-			FIsNullable = AIsNullable;
+			_columnName = columnName;
+			_domainName = domainName;
+			_alterNullable = true;
+			_isNullable = isNullable;
 		}
 
 		// ColumnName
-		protected string FColumnName = String.Empty;
+		protected string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = value == null ? String.Empty : value; }
+			get { return _columnName; }
+			set { _columnName = value == null ? String.Empty : value; }
 		}
 
 		// DomainName
 		/// <summary>Null domain name indicates no change to the domain of the column</summary>
-		protected string FDomainName = null;
+		protected string _domainName = null;
 		public string DomainName
 		{
-			get { return FDomainName; }
-			set { FDomainName = value; }
+			get { return _domainName; }
+			set { _domainName = value; }
 		}
 		
 		// AlterNullable
-		protected bool FAlterNullable = false;
+		protected bool _alterNullable = false;
 		public bool AlterNullable
 		{
-			get { return FAlterNullable; }
-			set { FAlterNullable = value; }
+			get { return _alterNullable; }
+			set { _alterNullable = value; }
 		}
 
 		// IsNullable
-		protected bool FIsNullable = false;
+		protected bool _isNullable = false;
 		public bool IsNullable
 		{
-			get { return FIsNullable; }
-			set { FIsNullable = value; }
+			get { return _isNullable; }
+			set { _isNullable = value; }
 		}
     }
     
@@ -1180,27 +1180,27 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public AlterColumnDefinitions() : base(){}
         
-        public new AlterColumnDefinition this[int AIndex]
+        public new AlterColumnDefinition this[int index]
         {
-            get { return (AlterColumnDefinition)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (AlterColumnDefinition)(base[index]); }
+            set { base[index] = value; }
         }
     }
     
     public class DropColumnDefinition : Statement
     {
 		public DropColumnDefinition() : base(){}
-		public DropColumnDefinition(string AColumnName) : base()
+		public DropColumnDefinition(string columnName) : base()
 		{
-			ColumnName = AColumnName;
+			ColumnName = columnName;
 		}
 		
 		// ColumnName
-		protected string FColumnName = String.Empty;
+		protected string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = value == null ? String.Empty : value; }
+			get { return _columnName; }
+			set { _columnName = value == null ? String.Empty : value; }
 		}
     }
 
@@ -1208,29 +1208,29 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public DropColumnDefinitions() : base(){}
         
-        public new DropColumnDefinition this[int AIndex]
+        public new DropColumnDefinition this[int index]
         {
-            get { return (DropColumnDefinition)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (DropColumnDefinition)(base[index]); }
+            set { base[index] = value; }
         }
     }
     
     public class OrderColumnDefinition : Statement
     {
 		// ColumnName
-		protected string FColumnName = String.Empty;
+		protected string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = value == null ? String.Empty : value; }
+			get { return _columnName; }
+			set { _columnName = value == null ? String.Empty : value; }
 		}
 
 		// Ascending
-		protected bool FAscending;
+		protected bool _ascending;
 		public bool Ascending
 		{
-			get { return FAscending; }
-			set { FAscending = value; }
+			get { return _ascending; }
+			set { _ascending = value; }
 		}
     }
 
@@ -1238,17 +1238,17 @@ namespace Alphora.Dataphor.DAE.Language.SQL
     {
         public OrderColumnDefinitions() : base(){}
         
-        public new OrderColumnDefinition this[int AIndex]
+        public new OrderColumnDefinition this[int index]
         {
-            get { return (OrderColumnDefinition)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (OrderColumnDefinition)(base[index]); }
+            set { base[index] = value; }
         }
     }
     
     public class Batch : Statement
     {
-		private Statements FStatements = new Statements();
-		public Statements Statements { get { return FStatements; } }
+		private Statements _statements = new Statements();
+		public Statements Statements { get { return _statements; } }
     }
 }
 

@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Store.MSSQL
 {
     public class MSSQLStoreConnection : SQLStoreConnection
     {
-        public MSSQLStoreConnection(MSSQLStore AStore) : base(AStore) { }
+        public MSSQLStoreConnection(MSSQLStore store) : base(store) { }
 
 		#if USESQLCONNECTION
 		protected override SQLConnection InternalCreateConnection()
@@ -37,21 +37,21 @@ namespace Alphora.Dataphor.DAE.Store.MSSQL
         }
         #endif
 
-        public override bool HasTable(string ATableName)
+        public override bool HasTable(string tableName)
         {
-            return ((int)this.ExecuteScalar(String.Format("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '{0}'", ATableName)) != 0);
+            return ((int)this.ExecuteScalar(String.Format("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '{0}'", tableName)) != 0);
         }
 
-		protected override SQLStoreCursor InternalOpenCursor(string ATableName, List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
+		protected override SQLStoreCursor InternalOpenCursor(string tableName, List<string> columns, SQLIndex index, bool isUpdatable)
 		{
 			return
 				new MSSQLStoreCursor
 				(
 					this,
-					ATableName,
-					AColumns,
-					AIndex,
-					AIsUpdatable
+					tableName,
+					columns,
+					index,
+					isUpdatable
 				);
 		}
     }

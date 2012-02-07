@@ -5,98 +5,98 @@ namespace Alphora.Dataphor.DAE.Connection.Oracle
 {
     public class OracleCommand : DotNetCommand
     {
-        public OracleCommand(OracleConnection AConnection, IDbCommand ACommand) : base(AConnection, ACommand) 
+        public OracleCommand(OracleConnection connection, IDbCommand command) : base(connection, command) 
         {
-            FParameterDelimiter = ":";
+            _parameterDelimiter = ":";
         }
 
-        protected override string PrepareStatement(string AStatement)
+        protected override string PrepareStatement(string statement)
         {
-            return base.PrepareStatement(AStatement).Replace("@", ":");
+            return base.PrepareStatement(statement).Replace("@", ":");
         }
 		
         protected override void PrepareParameters()
         {
             // Prepare parameters
-            SQLParameter LParameter;
-            for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+            SQLParameter parameter;
+            for (int index = 0; index < _parameterIndexes.Length; index++)
             {
-                LParameter = Parameters[FParameterIndexes[LIndex]];
-                System.Data.OracleClient.OracleParameter LOracleParameter = (System.Data.OracleClient.OracleParameter)FCommand.CreateParameter();
-                LOracleParameter.ParameterName = String.Format(":{0}", LParameter.Name);
-                LOracleParameter.IsNullable = true;
-                switch (LParameter.Direction)
+                parameter = Parameters[_parameterIndexes[index]];
+                System.Data.OracleClient.OracleParameter oracleParameter = (System.Data.OracleClient.OracleParameter)_command.CreateParameter();
+                oracleParameter.ParameterName = String.Format(":{0}", parameter.Name);
+                oracleParameter.IsNullable = true;
+                switch (parameter.Direction)
                 {
-                    case SQLDirection.Out : LOracleParameter.Direction = System.Data.ParameterDirection.Output; break;
-                    case SQLDirection.InOut : LOracleParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
-                    case SQLDirection.Result : LOracleParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
-                    default : LOracleParameter.Direction = System.Data.ParameterDirection.Input; break;
+                    case SQLDirection.Out : oracleParameter.Direction = System.Data.ParameterDirection.Output; break;
+                    case SQLDirection.InOut : oracleParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
+                    case SQLDirection.Result : oracleParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
+                    default : oracleParameter.Direction = System.Data.ParameterDirection.Input; break;
                 }
 
-                if (LParameter.Type is SQLStringType)
+                if (parameter.Type is SQLStringType)
                 {
-                    LOracleParameter.OracleType = System.Data.OracleClient.OracleType.VarChar;
-                    LOracleParameter.Size = ((SQLStringType)LParameter.Type).Length;
+                    oracleParameter.OracleType = System.Data.OracleClient.OracleType.VarChar;
+                    oracleParameter.Size = ((SQLStringType)parameter.Type).Length;
                 }
-                else if (LParameter.Type is SQLBooleanType)
+                else if (parameter.Type is SQLBooleanType)
                 {
-                    LOracleParameter.OracleType = System.Data.OracleClient.OracleType.Int32;
+                    oracleParameter.OracleType = System.Data.OracleClient.OracleType.Int32;
                 }
-                else if (LParameter.Type is SQLIntegerType)
+                else if (parameter.Type is SQLIntegerType)
                 {
-                    switch (((SQLIntegerType)LParameter.Type).ByteCount)
+                    switch (((SQLIntegerType)parameter.Type).ByteCount)
                     {
-                        case 1 : LOracleParameter.OracleType = System.Data.OracleClient.OracleType.Byte; break;
-                        case 2 : LOracleParameter.OracleType = System.Data.OracleClient.OracleType.Int16; break;
+                        case 1 : oracleParameter.OracleType = System.Data.OracleClient.OracleType.Byte; break;
+                        case 2 : oracleParameter.OracleType = System.Data.OracleClient.OracleType.Int16; break;
                         case 8 : 
-                            LOracleParameter.OracleType = System.Data.OracleClient.OracleType.Number; 
-                            LOracleParameter.Precision = 20;
-                            LOracleParameter.Scale = 0;
+                            oracleParameter.OracleType = System.Data.OracleClient.OracleType.Number; 
+                            oracleParameter.Precision = 20;
+                            oracleParameter.Scale = 0;
                             break;
-                        default : LOracleParameter.OracleType = System.Data.OracleClient.OracleType.Int32; break;
+                        default : oracleParameter.OracleType = System.Data.OracleClient.OracleType.Int32; break;
                     }
                 }
-                else if (LParameter.Type is SQLNumericType)
+                else if (parameter.Type is SQLNumericType)
                 {
-                    SQLNumericType LType = (SQLNumericType)LParameter.Type;
-                    LOracleParameter.OracleType = System.Data.OracleClient.OracleType.Number;
-                    LOracleParameter.Precision = LType.Precision;
-                    LOracleParameter.Scale = LType.Scale;
+                    SQLNumericType type = (SQLNumericType)parameter.Type;
+                    oracleParameter.OracleType = System.Data.OracleClient.OracleType.Number;
+                    oracleParameter.Precision = type.Precision;
+                    oracleParameter.Scale = type.Scale;
                 }
-                else if (LParameter.Type is SQLBinaryType)
+                else if (parameter.Type is SQLBinaryType)
                 {
-                    LOracleParameter.OracleType = System.Data.OracleClient.OracleType.Blob;
+                    oracleParameter.OracleType = System.Data.OracleClient.OracleType.Blob;
                 }
-                else if (LParameter.Type is SQLTextType)
+                else if (parameter.Type is SQLTextType)
                 {
-                    LOracleParameter.OracleType = System.Data.OracleClient.OracleType.Clob;
+                    oracleParameter.OracleType = System.Data.OracleClient.OracleType.Clob;
                 }
-                else if (LParameter.Type is SQLDateTimeType)
+                else if (parameter.Type is SQLDateTimeType)
                 {
-                    LOracleParameter.OracleType = System.Data.OracleClient.OracleType.DateTime;
+                    oracleParameter.OracleType = System.Data.OracleClient.OracleType.DateTime;
                 }
-                else if (LParameter.Type is SQLDateType)
+                else if (parameter.Type is SQLDateType)
                 {
-                    LOracleParameter.OracleType = System.Data.OracleClient.OracleType.DateTime;
+                    oracleParameter.OracleType = System.Data.OracleClient.OracleType.DateTime;
                 }
-                else if (LParameter.Type is SQLTimeType)
+                else if (parameter.Type is SQLTimeType)
                 {
-                    LOracleParameter.OracleType = System.Data.OracleClient.OracleType.DateTime;
+                    oracleParameter.OracleType = System.Data.OracleClient.OracleType.DateTime;
                 }
-                else if (LParameter.Type is SQLGuidType)
+                else if (parameter.Type is SQLGuidType)
                 {
-                    LOracleParameter.OracleType = System.Data.OracleClient.OracleType.Char;
-                    LOracleParameter.Size = 24;
+                    oracleParameter.OracleType = System.Data.OracleClient.OracleType.Char;
+                    oracleParameter.Size = 24;
                 }
-                else if (LParameter.Type is SQLMoneyType)
+                else if (parameter.Type is SQLMoneyType)
                 {
-                    LOracleParameter.OracleType = System.Data.OracleClient.OracleType.Number;
-                    LOracleParameter.Precision = 28;
-                    LOracleParameter.Scale = 8;
+                    oracleParameter.OracleType = System.Data.OracleClient.OracleType.Number;
+                    oracleParameter.Precision = 28;
+                    oracleParameter.Scale = 8;
                 }
                 else
-                    throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-                FCommand.Parameters.Add(LOracleParameter);
+                    throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+                _command.Parameters.Add(oracleParameter);
             }
         }
     }

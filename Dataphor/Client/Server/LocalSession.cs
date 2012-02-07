@@ -17,17 +17,17 @@ namespace Alphora.Dataphor.DAE.Server
 {
     public class LocalSession : LocalServerChildObject, IServerSession
     {
-		public LocalSession(LocalServer AServer, SessionInfo ASessionInfo, IRemoteServerSession ASession) : base()
+		public LocalSession(LocalServer server, SessionInfo sessionInfo, IRemoteServerSession session) : base()
 		{
-			FServer = AServer;
-			FSession = ASession;
-			FSessionInfo = ASessionInfo;
-			FSessionID = ASession.SessionID;
-			FInternalSession = ((IServer)FServer.FInternalServer).Connect(new SessionInfo(Engine.CSystemUserID, String.Empty, Engine.CSystemLibraryName, false));
+			_server = server;
+			_session = session;
+			_sessionInfo = sessionInfo;
+			_sessionID = session.SessionID;
+			_internalSession = ((IServer)_server._internalServer).Connect(new SessionInfo(Engine.SystemUserID, String.Empty, Engine.SystemLibraryName, false));
 			StartKeepAlive();
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -37,47 +37,47 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				try
 				{
-					if (FInternalSession != null)
+					if (_internalSession != null)
 					{
-						((IServer)FServer.FInternalServer).Disconnect(FInternalSession);
-						FInternalSession = null;
+						((IServer)_server._internalServer).Disconnect(_internalSession);
+						_internalSession = null;
 					}
 				}
 				finally
 				{
-					FSession = null;
-					FServer = null;
-					base.Dispose(ADisposing);
+					_session = null;
+					_server = null;
+					base.Dispose(disposing);
 				}
 			}
 		}
 
-		protected internal LocalServer FServer;
+		protected internal LocalServer _server;
         /// <value>Returns the <see cref="IServer"/> instance for this session.</value>
-        public IServer Server { get { return FServer; } }
+        public IServer Server { get { return _server; } }
         
-		private int FSessionID;
-		public int SessionID { get { return FSessionID; } } 
+		private int _sessionID;
+		public int SessionID { get { return _sessionID; } } 
 		
-		protected internal IServerSession FInternalSession;
+		protected internal IServerSession _internalSession;
 
-		protected IRemoteServerSession FSession;
-		public IRemoteServerSession RemoteSession { get { return FSession; } }
+		protected IRemoteServerSession _session;
+		public IRemoteServerSession RemoteSession { get { return _session; } }
 		
-		public IServerProcess StartProcess(ProcessInfo AProcessInfo)
+		public IServerProcess StartProcess(ProcessInfo processInfo)
 		{
-			int LProcessID;
-			IRemoteServerProcess LProcess = FSession.StartProcess(AProcessInfo, out LProcessID);
-			return new LocalProcess(this, AProcessInfo, LProcessID, LProcess);
+			int processID;
+			IRemoteServerProcess process = _session.StartProcess(processInfo, out processID);
+			return new LocalProcess(this, processInfo, processID, process);
 		}
 		
-		public void StopProcess(IServerProcess AProcess)
+		public void StopProcess(IServerProcess process)
 		{
-			IRemoteServerProcess LRemoteProcess = ((LocalProcess)AProcess).RemoteProcess;
-			((LocalProcess)AProcess).Dispose();
+			IRemoteServerProcess remoteProcess = ((LocalProcess)process).RemoteProcess;
+			((LocalProcess)process).Dispose();
 			try
 			{
-				FSession.StopProcess(LRemoteProcess);
+				_session.StopProcess(remoteProcess);
 			}
 			catch
 			{
@@ -85,9 +85,9 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-        private SessionInfo FSessionInfo;
+        private SessionInfo _sessionInfo;
         /// <value>Returns the <see cref="SessionInfo"/> object for this session.</value>
-        public SessionInfo SessionInfo {  get { return FSessionInfo; } }
+        public SessionInfo SessionInfo {  get { return _sessionInfo; } }
 
 		#region Keep Alive
 
@@ -98,19 +98,19 @@ namespace Alphora.Dataphor.DAE.Server
 			 See the comment in the server connection for more details.
 		*/
 
-		public const int CLocalKeepAliveInterval = 120;	// 2 Minutes
+		public const int LocalKeepAliveInterval = 120;	// 2 Minutes
 
 		/// <summary> Signal used to indicate that the keep-alive thread can terminate. </summary>
-		private ManualResetEvent FKeepAliveSignal;
-		private Object FKeepAliveReferenceLock = new Object();
+		private ManualResetEvent _keepAliveSignal;
+		private Object _keepAliveReferenceLock = new Object();
 
 		private void StartKeepAlive()
 		{
-			lock (FKeepAliveReferenceLock)
+			lock (_keepAliveReferenceLock)
 			{
-				if (FKeepAliveSignal != null)
+				if (_keepAliveSignal != null)
 					Error.Fail("Keep alive started more than once");
-				FKeepAliveSignal = new ManualResetEvent(false);
+				_keepAliveSignal = new ManualResetEvent(false);
 			}
 			new Thread(new ThreadStart(KeepAlive)).Start();	// Don't use the thread pool... long running thread
 		}
@@ -119,22 +119,22 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			try
 			{
-				bool LSignaled = false;
-				while (!LSignaled)
+				bool signaled = false;
+				while (!signaled)
 				{
 					// Wait for either a signal or a time-out
-					LSignaled = FKeepAliveSignal.WaitOne(CLocalKeepAliveInterval * 1000);
+					signaled = _keepAliveSignal.WaitOne(LocalKeepAliveInterval * 1000);
 
 					// If WaitOne ended due to timeout, send a keep-alive message (then wait again)
-					if (!LSignaled)
-						FServer.ServerConnection.Ping();
+					if (!signaled)
+						_server.ServerConnection.Ping();
 				}
 
 				// The keep alive processing is complete.  Clean up...
-				lock (FKeepAliveReferenceLock)
+				lock (_keepAliveReferenceLock)
 				{
-					((IDisposable)FKeepAliveSignal).Dispose();
-					FKeepAliveSignal = null;	// Free the reference 
+					((IDisposable)_keepAliveSignal).Dispose();
+					_keepAliveSignal = null;	// Free the reference 
 				}
 			}
 			catch
@@ -145,10 +145,10 @@ namespace Alphora.Dataphor.DAE.Server
 
 		private void StopKeepAlive()
 		{
-			lock (FKeepAliveReferenceLock)
+			lock (_keepAliveReferenceLock)
 			{
-				if (FKeepAliveSignal != null)
-					FKeepAliveSignal.Set();
+				if (_keepAliveSignal != null)
+					_keepAliveSignal.Set();
 			}
 		}
 		

@@ -11,22 +11,22 @@ namespace Alphora.Dataphor
 {
 	public sealed class ThreadUtility
 	{
-		private static FieldInfo FThreadNameFieldInfo;
+		private static FieldInfo _threadNameFieldInfo;
 		private static FieldInfo GetThreadNameFieldInfo()
 		{
 			// This is not thread safe, but in the unlikely event that this is called concurrently, it will simply do an extra lookup
-			if (FThreadNameFieldInfo == null)
-				FThreadNameFieldInfo = typeof(System.Threading.Thread).GetField("m_Name", BindingFlags.NonPublic | BindingFlags.Instance);
-			return FThreadNameFieldInfo;
+			if (_threadNameFieldInfo == null)
+				_threadNameFieldInfo = typeof(System.Threading.Thread).GetField("m_Name", BindingFlags.NonPublic | BindingFlags.Instance);
+			return _threadNameFieldInfo;
 		}
 
 		/// <summary> HACK: This sets a thread's name working around the perf and write-once issues. </summary>
 		/// <remarks> This method is only called if the DEBUG conditional is set.  The name argument is of type object so that it can be reset back to the initial null state. </remarks>
 		[System.Diagnostics.Conditional("DEBUG")]
-		public static void SetThreadName(Thread AThread, string AName)
+		public static void SetThreadName(Thread thread, string name)
 		{
 			#if !SILVERLIGHT
-			GetThreadNameFieldInfo().SetValue(AThread, AName);
+			GetThreadNameFieldInfo().SetValue(thread, name);
 			#endif
 		}
 	}

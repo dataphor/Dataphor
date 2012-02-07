@@ -9,16 +9,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	{
 		// IVerticalAlignedElement
 
-		private VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		private VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		[DefaultValue(VerticalAlignment.Top)]
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
+			get { return _verticalAlignment; }
 			set
 			{
-				if (FVerticalAlignment != value)
+				if (_verticalAlignment != value)
 				{
-					FVerticalAlignment = value;
+					_verticalAlignment = value;
 					UpdateBinding(FrameworkElement.VerticalAlignmentProperty);
 				}
 			}
@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		protected override object UIGetVerticalAlignment()
 		{
-			return ConvertVerticalAlignment(FVerticalAlignment);
+			return ConvertVerticalAlignment(_verticalAlignment);
 		}
 	}
 }

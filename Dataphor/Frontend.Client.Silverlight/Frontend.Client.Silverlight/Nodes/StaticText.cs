@@ -8,7 +8,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	public class StaticText : Element, IStaticText
 	{
-		public const int CDefaultWidth = 40;
+		public const int DefaultWidth = 40;
 				
 		protected override FrameworkElement CreateFrameworkElement()
 		{
@@ -27,16 +27,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return "StaticTextStyle";
 		}
 
-		private string FText = "";
+		private string _text = "";
 		[DefaultValue("")]
 		public string Text
 		{
-			get { return FText; }
+			get { return _text; }
 			set
 			{
-				if (FText != value)
+				if (_text != value)
 				{
-					FText = value;
+					_text = value;
 					UpdateBinding(TextBlock.TextProperty);
 				}
 			}
@@ -47,18 +47,18 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return Text;
 		}
 
-		private int FWidth = CDefaultWidth;
-		[DefaultValue(CDefaultWidth)]
+		private int _width = DefaultWidth;
+		[DefaultValue(DefaultWidth)]
 		public int Width
 		{
-			get { return FWidth; }
+			get { return _width; }
 			set
 			{
-				if (FWidth != value)
+				if (_width != value)
 				{
-					if (FWidth < 1)
+					if (_width < 1)
 						throw new ClientException(ClientException.Codes.CharsPerLineInvalid);
-					FWidth = value;
+					_width = value;
 					UpdateBinding(FrameworkElement.WidthProperty);
 				}
 			}
@@ -66,7 +66,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private object UIGetWidth()
 		{
-			return FWidth * Silverlight.Session.AverageCharacterWidth;
+			return _width * Silverlight.Session.AverageCharacterWidth;
 		}
 	}
 }

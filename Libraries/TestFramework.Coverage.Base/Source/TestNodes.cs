@@ -25,136 +25,136 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	public class TestException : System.Exception
 	{
 		// Constructors
-		public TestException(string AMessage) : base(AMessage) {}
-		public TestException(string AMessage, params object[] AParams) : base(string.Format(AMessage, AParams)) {}
-		public TestException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base (AInfo, AContext) {}
+		public TestException(string message) : base(message) {}
+		public TestException(string message, params object[] paramsValue) : base(string.Format(message, paramsValue)) {}
+		public TestException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base (info, context) {}
 	}
 	
 	public class TestUtility
 	{
-		private static Random FRandom = new Random();
+		private static Random _random = new Random();
 		
 		public static string RandomName()
 		{
-			StringBuilder LName = new StringBuilder();
-			LName.Append(Convert.ToChar(FRandom.Next(26) + 65));
-			for (int LIndex = 0; LIndex < FRandom.Next(7, 15); LIndex++)
-				LName.Append(Convert.ToChar(FRandom.Next(26) + 97));
-			LName.Append(", ");
-			LName.Append(Convert.ToChar(FRandom.Next(26) + 65));
-			for (int LIndex = 0; LIndex < FRandom.Next(5, 10); LIndex++)
-				LName.Append(Convert.ToChar(FRandom.Next(26) + 97));
-			return LName.ToString();
+			StringBuilder name = new StringBuilder();
+			name.Append(Convert.ToChar(_random.Next(26) + 65));
+			for (int index = 0; index < _random.Next(7, 15); index++)
+				name.Append(Convert.ToChar(_random.Next(26) + 97));
+			name.Append(", ");
+			name.Append(Convert.ToChar(_random.Next(26) + 65));
+			for (int index = 0; index < _random.Next(5, 10); index++)
+				name.Append(Convert.ToChar(_random.Next(26) + 97));
+			return name.ToString();
 		}
 		
 		public static string RandomPhone()
 		{
-			StringBuilder LPhone = new StringBuilder();
-			LPhone.Append("(");
-			for (int LIndex = 0; LIndex < 3; LIndex++)
-				LPhone.Append(Convert.ToString(FRandom.Next(10)));
-			LPhone.Append(")");
-			for (int LIndex = 0; LIndex < 3; LIndex++)
-				LPhone.Append(Convert.ToString(FRandom.Next(10)));
-			LPhone.Append("-");
-			for (int LIndex = 0; LIndex < 4; LIndex++)
-				LPhone.Append(Convert.ToString(FRandom.Next(10)));
-			return LPhone.ToString();
+			StringBuilder phone = new StringBuilder();
+			phone.Append("(");
+			for (int index = 0; index < 3; index++)
+				phone.Append(Convert.ToString(_random.Next(10)));
+			phone.Append(")");
+			for (int index = 0; index < 3; index++)
+				phone.Append(Convert.ToString(_random.Next(10)));
+			phone.Append("-");
+			for (int index = 0; index < 4; index++)
+				phone.Append(Convert.ToString(_random.Next(10)));
+			return phone.ToString();
 		}
 	}
 	
 	// operator System.Diagnostics.TestCatalog();
 	public class TestCatalogNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Objects LObjects = new Schema.Objects();
-			for (int LIndex = 0; LIndex < 100; LIndex++)
+			Schema.Objects objects = new Schema.Objects();
+			for (int index = 0; index < 100; index++)
 			{
-				LObjects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), String.Format("Object_{0}", LIndex.ToString())));
+				objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), String.Format("Object_{0}", index.ToString())));
 			}
 			
 			// Verify lookup by name and id
-			for (int LIndex = 0; LIndex < 100; LIndex++)
+			for (int index = 0; index < 100; index++)
 			{
-				string LName = String.Format("Object_{0}", LIndex.ToString());
-				Schema.Object LObject = LObjects[LName];
-				if (LObject.Name != LName)
-					throw new TestException("Name lookup failed for object {0}", LName);
+				string name = String.Format("Object_{0}", index.ToString());
+				Schema.Object objectValue = objects[name];
+				if (objectValue.Name != name)
+					throw new TestException("Name lookup failed for object {0}", name);
 			}
 			
 			// Remove every other object between 25 and 75
-			for (int LIndex = 25; LIndex < 75; LIndex++)
-				if (LIndex % 2 == 0)
-					LObjects.RemoveAt(LObjects.IndexOf(String.Format("Object_{0}", LIndex.ToString())));
+			for (int index = 25; index < 75; index++)
+				if (index % 2 == 0)
+					objects.RemoveAt(objects.IndexOf(String.Format("Object_{0}", index.ToString())));
 					
 			// Verify lookup by name and id
-			for (int LIndex = 0; LIndex < 100; LIndex++)
+			for (int index = 0; index < 100; index++)
 			{
-				if ((LIndex < 25) || (LIndex >= 75) || (LIndex % 2 != 0))
+				if ((index < 25) || (index >= 75) || (index % 2 != 0))
 				{
-					string LName = String.Format("Object_{0}", LIndex.ToString());
-					Schema.Object LObject = LObjects[LName];
-					if (LObject.Name != LName)
-						throw new TestException("Name lookup failed for object {0}", LName);
+					string name = String.Format("Object_{0}", index.ToString());
+					Schema.Object objectValue = objects[name];
+					if (objectValue.Name != name)
+						throw new TestException("Name lookup failed for object {0}", name);
 				}
 			}
 			
 			// Verify that duplicates are not allowed
-			bool LErrorHit = false;
+			bool errorHit = false;
 			try
 			{
-				LObjects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "Object_1"));
+				objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "Object_1"));
 			}
 			catch
 			{
-				LErrorHit = true;
+				errorHit = true;
 			}
 			
-			if (!LErrorHit)
+			if (!errorHit)
 				throw new TestException("Duplicate object name allowed.");
 			
 			// Verify that ambiguous names are not allowed
-			LErrorHit = false;
+			errorHit = false;
 			try
 			{
-				LObjects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "A.Object_1")); // cannot create a hiding identifier
+				objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "A.Object_1")); // cannot create a hiding identifier
 			}
 			catch
 			{
-				LErrorHit = true;
+				errorHit = true;
 			}
 
-			if (!LErrorHit)
+			if (!errorHit)
 				throw new TestException("Hiding object name allowed.");
 			
-			LObjects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "A.A"));
+			objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "A.A"));
 
-			LErrorHit = false;
+			errorHit = false;
 			try
 			{
-				LObjects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "A")); // cannot create a hidden identifier
+				objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "A")); // cannot create a hidden identifier
 			}
 			catch
 			{
-				LErrorHit = true;
+				errorHit = true;
 			}
 
-			if (!LErrorHit)
+			if (!errorHit)
 				throw new TestException("Hidden object name allowed.");
 			
 			// Verify that ambiguous references are not allowed
-			LObjects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "B.A"));
-			List<string> LNames = new List<string>();
-			int LObjectIndex = LObjects.IndexOf("A", LNames);
-			if (LObjectIndex >= 0)
+			objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "B.A"));
+			List<string> names = new List<string>();
+			int objectIndex = objects.IndexOf("A", names);
+			if (objectIndex >= 0)
 				throw new TestException("Ambiguous resolution allowed.");
 				
-			LObjects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "X.Y.Z"));
-			LObjects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "X.Z"));
-			LNames.Clear();
-			LObjectIndex = LObjects.IndexOf("Z", LNames);
-			if (LObjectIndex >= 0)
+			objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "X.Y.Z"));
+			objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "X.Z"));
+			names.Clear();
+			objectIndex = objects.IndexOf("Z", names);
+			if (objectIndex >= 0)
 				throw new TestException("Multi-level ambiguous resolution allowed.");
 
 			return null;
@@ -164,43 +164,43 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	// operator System.Diagnostics.TestStreams();
 	public class TestStreamsNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			// Test the DeferredWriteStream
-			Stream LStream = new MemoryStream();
-			byte[] LData = new byte[100];
-			for (int LIndex = 0; LIndex < LData.Length; LIndex++)
-				LData[LIndex] = 100;
-			LStream.Write(LData, 0, LData.Length);
-			LStream.Position = 0;
+			Stream stream = new MemoryStream();
+			byte[] data = new byte[100];
+			for (int index = 0; index < data.Length; index++)
+				data[index] = 100;
+			stream.Write(data, 0, data.Length);
+			stream.Position = 0;
 			
-			LData = new byte[LData.Length];
-			DeferredWriteStream LDeferredWriteStream = new DeferredWriteStream(LStream);
-			LDeferredWriteStream.Read(LData, 0, LData.Length);
-			for (int LIndex = 0; LIndex < LData.Length; LIndex++)
+			data = new byte[data.Length];
+			DeferredWriteStream deferredWriteStream = new DeferredWriteStream(stream);
+			deferredWriteStream.Read(data, 0, data.Length);
+			for (int index = 0; index < data.Length; index++)
 			{
-				if (LData[LIndex] != 100)
+				if (data[index] != 100)
 					throw new TestException("DeferredWriteStream read failed");
-				LData[LIndex] = 50;
+				data[index] = 50;
 			}
 					
-			LDeferredWriteStream.Position = 0;
-			LDeferredWriteStream.Write(LData, 0, LData.Length);
+			deferredWriteStream.Position = 0;
+			deferredWriteStream.Write(data, 0, data.Length);
 			
-			LData = new byte[LData.Length];
-			LDeferredWriteStream.Position = 0;
-			LDeferredWriteStream.Read(LData, 0, LData.Length);
-			for (int LIndex = 0; LIndex < LData.Length; LIndex++)
-				if (LData[LIndex] != 50)
+			data = new byte[data.Length];
+			deferredWriteStream.Position = 0;
+			deferredWriteStream.Read(data, 0, data.Length);
+			for (int index = 0; index < data.Length; index++)
+				if (data[index] != 50)
 					throw new TestException("DeferredWriteStream write failed");
 					
-			LDeferredWriteStream.Flush();
+			deferredWriteStream.Flush();
 			
-			LData = new byte[LData.Length];
-			LStream.Position = 0;
-			LStream.Read(LData, 0, LData.Length);
-			for (int LIndex = 0; LIndex < LData.Length; LIndex++)
-				if (LData[LIndex] != 50)
+			data = new byte[data.Length];
+			stream.Position = 0;
+			stream.Read(data, 0, data.Length);
+			for (int index = 0; index < data.Length; index++)
+				if (data[index] != 50)
 					throw new TestException("DeferredWriteStream flush failed");
 					
 			return null;
@@ -1326,7 +1326,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	// operator TestBrowse()
 	public class TestBrowseNode : InstructionNode
 	{
-		public const string CPrepareTestData = 
+		public const string PrepareTestDataScript = 
 			@"
 create table Testing in Temp
 {
@@ -1345,76 +1345,76 @@ for LIndex : Integer := 1 to 100 do
 		into Testing;
 			";
 			
-		public const string CUnprepareTestData =
+		public const string UnprepareTestDataScript =
 			@"
 drop table Testing;
 			";
 
-		protected void PrepareTestData(ServerProcess AProcess)
+		protected void PrepareTestData(ServerProcess process)
 		{
-			IServerScript LScript = ((IServerProcess)AProcess).PrepareScript(CPrepareTestData);
+			IServerScript script = ((IServerProcess)process).PrepareScript(PrepareTestDataScript);
 			try
 			{
-				LScript.Execute(null);
+				script.Execute(null);
 			}
 			finally
 			{
-				((IServerProcess)AProcess).UnprepareScript(LScript);
+				((IServerProcess)process).UnprepareScript(script);
 			}
 		}
 		
-		protected void UnprepareTestData(ServerProcess AProcess)
+		protected void UnprepareTestData(ServerProcess process)
 		{
-			IServerScript LScript = ((IServerProcess)AProcess).PrepareScript(CUnprepareTestData);
+			IServerScript script = ((IServerProcess)process).PrepareScript(UnprepareTestDataScript);
 			try
 			{
-				LScript.Execute(null);
+				script.Execute(null);
 			}
 			finally
 			{
-				((IServerProcess)AProcess).UnprepareScript(LScript);
+				((IServerProcess)process).UnprepareScript(script);
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			// Create and populate a test data set
-			PrepareTestData(AProgram.ServerProcess);
+			PrepareTestData(program.ServerProcess);
 			try
 			{
-				Random LRandom = new Random();
-				Guid[] LBookmarks = new Guid[100];
+				Random random = new Random();
+				Guid[] bookmarks = new Guid[100];
 				
-				IServerExpressionPlan LPlan = ((IServerProcess)AProgram.ServerProcess).PrepareExpression("select Testing browse by {ID} isolation chaos", null);
+				IServerExpressionPlan plan = ((IServerProcess)program.ServerProcess).PrepareExpression("select Testing browse by {ID} isolation chaos", null);
 				try
 				{
-					IServerCursor LCursor = LPlan.Open(null);
+					IServerCursor cursor = plan.Open(null);
 					try
 					{
-						int LCounter = 0;
-						while (LCursor.Next())
+						int counter = 0;
+						while (cursor.Next())
 						{
-							Row LRow = LCursor.Select();
+							Row row = cursor.Select();
 							try
 							{
-								LBookmarks[LCounter] = LCursor.GetBookmark();
-								if ((int)LRow[0] != LCounter)
+								bookmarks[counter] = cursor.GetBookmark();
+								if ((int)row[0] != counter)
 									throw new RuntimeException(RuntimeException.Codes.SetNotOrdered);
 							
-								LCounter++;
+								counter++;
 							}
 							finally
 							{
-								LRow.Dispose();
+								row.Dispose();
 							}
 						}
 						
-						LCursor.GotoBookmark(LBookmarks[0], true);
-						if (LCursor.Prior())
+						cursor.GotoBookmark(bookmarks[0], true);
+						if (cursor.Prior())
 							throw new RuntimeException(RuntimeException.Codes.SetShouldBeBOF);
 
-						LCursor.GotoBookmark(LBookmarks[0], false);
-						if (LCursor.Prior())
+						cursor.GotoBookmark(bookmarks[0], false);
+						if (cursor.Prior())
 							throw new RuntimeException(RuntimeException.Codes.SetShouldBeBOF);
 						
 //						while (LCursor.Prior())
@@ -1467,63 +1467,63 @@ drop table Testing;
 //						if (LCounter < LRandomValues.Length / 2)
 //							throw new RuntimeException("BOF reached before known rows");
 //							
-						Row LNewRow = new Row(AProgram.ValueManager, ((Schema.TableType)LCursor.Plan.DataType).CreateRowType());
+						Row newRow = new Row(program.ValueManager, ((Schema.TableType)cursor.Plan.DataType).CreateRowType());
 						try
 						{
-							LNewRow[0] = LRandom.Next();
-							LNewRow[1] = 100;
-							LNewRow[2] = TestUtility.RandomName();
-							LNewRow[3] = TestUtility.RandomPhone();
-							LCursor.Insert(LNewRow);
-							Row LSelectRow = LCursor.Select();
+							newRow[0] = random.Next();
+							newRow[1] = 100;
+							newRow[2] = TestUtility.RandomName();
+							newRow[3] = TestUtility.RandomPhone();
+							cursor.Insert(newRow);
+							Row selectRow = cursor.Select();
 							try
 							{
-								if ((int)LSelectRow[0] != (int)LNewRow[0])
+								if ((int)selectRow[0] != (int)newRow[0])
 									throw new TestException("Insert failed to refresh to proper row");
 									
-								LNewRow[1] = 101;
-								LCursor.Update(LNewRow);
-								LCursor.Select(LSelectRow);
-								if ((int)LSelectRow[0] != (int)LNewRow[0])
+								newRow[1] = 101;
+								cursor.Update(newRow);
+								cursor.Select(selectRow);
+								if ((int)selectRow[0] != (int)newRow[0])
 									throw new TestException("Update failed to refresh to proper row");
-								if ((int)LSelectRow[1] != (int)LNewRow[1])
+								if ((int)selectRow[1] != (int)newRow[1])
 									throw new TestException("Update failed");
 			
-								Row LOldRow = LCursor.GetKey();						
+								Row oldRow = cursor.GetKey();						
 								try
 								{
-									LCursor.Delete();
-									if (LCursor.FindKey(LOldRow))
+									cursor.Delete();
+									if (cursor.FindKey(oldRow))
 										throw new TestException("Delete failed");
 								}
 								finally
 								{
-									LOldRow.Dispose();
+									oldRow.Dispose();
 								}
 							}
 							finally
 							{
-								LSelectRow.Dispose();
+								selectRow.Dispose();
 							}
 						}
 						finally
 						{
-							LNewRow.Dispose();
+							newRow.Dispose();
 						}
 					}
 					finally
 					{
-						LPlan.Close(LCursor);
+						plan.Close(cursor);
 					}
 				}
 				finally
 				{
-					((IServerProcess)AProgram.ServerProcess).UnprepareExpression(LPlan);
+					((IServerProcess)program.ServerProcess).UnprepareExpression(plan);
 				}
 			}
 			finally
 			{
-				UnprepareTestData(AProgram.ServerProcess);
+				UnprepareTestData(program.ServerProcess);
 			}
 			
 			return null;
@@ -1552,15 +1552,15 @@ drop table Testing;
 //			Value = AValue;
 //		}
 //		
-		public TestDataVar(Schema.IDataType ADataType) : base()
+		public TestDataVar(Schema.IDataType dataType) : base()
 		{
-			DataType = ADataType;
+			DataType = dataType;
 		}
 		
-		public TestDataVar(Schema.IDataType ADataType, DataValue AValue) : base()
+		public TestDataVar(Schema.IDataType dataType, DataValue tempValue) : base()
 		{
-			DataType = ADataType;
-			Value = AValue;
+			DataType = dataType;
+			Value = tempValue;
 		}
 		
 //		public string Name;
@@ -1946,320 +1946,320 @@ drop table Testing;
 	// operator TestNext(const AExpression : String, const AExpectedExpression : String) : Boolean
 	public abstract class TestCursorNode : InstructionNode
 	{
-		protected abstract void InternalTest(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode);
+		protected abstract void InternalTest(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode);
 		
-		protected bool RowsSame(Program AProgram, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected bool RowsSame(Program program, Row row, Row expectedRow, PlanNode rowEqualNode)
 		{
-			AProgram.Stack.Push(ARow);
+			program.Stack.Push(row);
 			try
 			{
-				AProgram.Stack.Push(AExpectedRow);
+				program.Stack.Push(expectedRow);
 				try
 				{
-					object LResult = ARowEqualNode.Execute(AProgram);
-					if (LResult == null)
+					object result = rowEqualNode.Execute(program);
+					if (result == null)
 					{
-						bool LSame = true;
-						for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
+						bool same = true;
+						for (int index = 0; index < row.DataType.Columns.Count; index++)
 						{
-							LSame = ARow.HasValue(LIndex) == AExpectedRow.HasValue(LIndex);
-							if (!LSame)
+							same = row.HasValue(index) == expectedRow.HasValue(index);
+							if (!same)
 								break;
 						}
-						return LSame;
+						return same;
 					}
 					else
-						return (bool)LResult;
+						return (bool)result;
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			finally
 			{
-				AProgram.Stack.Pop();
+				program.Stack.Pop();
 			}
 		}
 
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			string AExpression = (string)AArguments[0];
-			string AExpectedExpression = (string)AArguments[1];
-			CursorNode LNode = (CursorNode)Compiler.BindNode(AProgram.Plan, Compiler.OptimizeNode(AProgram.Plan, Compiler.CompileCursor(AProgram.Plan, new Parser().ParseCursorDefinition(AExpression))));
-			Table LTable = (Table)LNode.SourceNode.Execute(AProgram);
+			string AExpression = (string)arguments[0];
+			string AExpectedExpression = (string)arguments[1];
+			CursorNode node = (CursorNode)Compiler.BindNode(program.Plan, Compiler.OptimizeNode(program.Plan, Compiler.CompileCursor(program.Plan, new Parser().ParseCursorDefinition(AExpression))));
+			Table table = (Table)node.SourceNode.Execute(program);
 			try
 			{
-				CursorNode LExpectedNode = (CursorNode)Compiler.BindNode(AProgram.Plan, Compiler.OptimizeNode(AProgram.Plan, Compiler.CompileCursor(AProgram.Plan, new Parser().ParseCursorDefinition(AExpectedExpression))));
-				Table LExpectedTable = (Table)LExpectedNode.SourceNode.Execute(AProgram);
+				CursorNode expectedNode = (CursorNode)Compiler.BindNode(program.Plan, Compiler.OptimizeNode(program.Plan, Compiler.CompileCursor(program.Plan, new Parser().ParseCursorDefinition(AExpectedExpression))));
+				Table expectedTable = (Table)expectedNode.SourceNode.Execute(program);
 				try
 				{
-					Row LRow = new Row(AProgram.ValueManager, LTable.DataType.CreateRowType());
+					Row row = new Row(program.ValueManager, table.DataType.CreateRowType());
 					try
 					{
-						Row LExpectedRow = new Row(AProgram.ValueManager, LExpectedTable.DataType.CreateRowType());
+						Row expectedRow = new Row(program.ValueManager, expectedTable.DataType.CreateRowType());
 						try
 						{
-							PlanNode LEqualNode = null;
-							AProgram.Plan.Symbols.Push(new Symbol("ALeftRow", LRow.DataType));
+							PlanNode equalNode = null;
+							program.Plan.Symbols.Push(new Symbol("ALeftRow", row.DataType));
 							try
 							{
-								AProgram.Plan.Symbols.Push(new Symbol("ARightRow", LExpectedRow.DataType));
+								program.Plan.Symbols.Push(new Symbol("ARightRow", expectedRow.DataType));
 								try
 								{
-									AProgram.Plan.EnterRowContext();
+									program.Plan.EnterRowContext();
 									try
 									{
-										LEqualNode = Compiler.CompileExpression(AProgram.Plan, Compiler.BuildRowEqualExpression(AProgram.Plan, "ALeftRow", "ARightRow", LRow.DataType.Columns));
+										equalNode = Compiler.CompileExpression(program.Plan, Compiler.BuildRowEqualExpression(program.Plan, "ALeftRow", "ARightRow", row.DataType.Columns));
 									}
 									finally
 									{
-										AProgram.Plan.ExitRowContext();
+										program.Plan.ExitRowContext();
 									}
 								}
 								finally
 								{
-									AProgram.Plan.Symbols.Pop();
+									program.Plan.Symbols.Pop();
 								}
 							}
 							finally
 							{
-								AProgram.Plan.Symbols.Pop();
+								program.Plan.Symbols.Pop();
 							}
 							
-							InternalTest(AProgram, LTable, LExpectedTable, LRow, LExpectedRow, LEqualNode);
+							InternalTest(program, table, expectedTable, row, expectedRow, equalNode);
 							return null;
 						}
 						finally
 						{
-							LExpectedRow.Dispose();
+							expectedRow.Dispose();
 						}
 					}
 					finally
 					{
-						LRow.Dispose();
+						row.Dispose();
 					}
 				}
 				finally
 				{
-					LExpectedTable.Dispose();
+					expectedTable.Dispose();
 				}
 			}
 			finally
 			{
-				LTable.Dispose();
+				table.Dispose();
 			}
 		}
 
 		// Opens the cursor, walks through it, resets it, calls last, resets it and walks through it again.
-		protected void TestNavigable(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected void TestNavigable(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
 		{
-			if (!ATable.BOF())
+			if (!table.BOF())
 				throw new TestException("BOF() failed.");
 
-			while (ATable.Next())
+			while (table.Next())
 			{
-				if (!AExpectedTable.Next())
+				if (!expectedTable.Next())
 					throw new TestException("Next() failed.");
 					
-				ATable.Select(ARow);
-				AExpectedTable.Select(AExpectedRow);
-				if (!RowsSame(AProgram, ARow, AExpectedRow, ARowEqualNode))
+				table.Select(row);
+				expectedTable.Select(expectedRow);
+				if (!RowsSame(program, row, expectedRow, rowEqualNode))
 					throw new TestException("Next() returned an unexpected row.");
 			}
 			
-			AExpectedTable.Next();
+			expectedTable.Next();
 			
-			if (!ATable.EOF())
+			if (!table.EOF())
 				throw new TestException("EOF() failed.");
 				
-			if (ATable.EOF() != AExpectedTable.EOF())
+			if (table.EOF() != expectedTable.EOF())
 				throw new TestException("Unexpected EOF().");
 				
-			ATable.Reset();
-			AExpectedTable.Reset();
+			table.Reset();
+			expectedTable.Reset();
 			
-			if (!ATable.BOF())
+			if (!table.BOF())
 				throw new TestException("Reset() failed.");
 				
-			ATable.Last();
-			if (!ATable.EOF())
+			table.Last();
+			if (!table.EOF())
 				throw new TestException("Last() failed.");
 				
-			ATable.Reset();
+			table.Reset();
 
-			while (ATable.Next())
+			while (table.Next())
 			{
-				if (!AExpectedTable.Next())
+				if (!expectedTable.Next())
 					throw new TestException("Next() after Reset() failed.");
 					
-				ATable.Select(ARow);
-				AExpectedTable.Select(AExpectedRow);
-				if (!RowsSame(AProgram, ARow, AExpectedRow, ARowEqualNode))
+				table.Select(row);
+				expectedTable.Select(expectedRow);
+				if (!RowsSame(program, row, expectedRow, rowEqualNode))
 					throw new TestException("Next() after Reset() returned an unexpected row.");
 			}
 
-			AExpectedTable.Next();
+			expectedTable.Next();
 
-			if (ATable.EOF() != AExpectedTable.EOF())
+			if (table.EOF() != expectedTable.EOF())
 				throw new TestException("Unexpected EOF() after Reset().");
 		}
 
 		// Calls last and walks backwards through it, walks forward through it, then calls first and walks forward through it again.
 		// Expects ATable and AExpectedTable to be on the EOF crack
-		protected void TestBackwardsNavigable(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected void TestBackwardsNavigable(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
 		{
-			if (!ATable.EOF())
+			if (!table.EOF())
 				throw new TestException("EOF() failed.");
 				
-			while (ATable.Prior())
+			while (table.Prior())
 			{
-				if (!AExpectedTable.Prior())
+				if (!expectedTable.Prior())
 					throw new TestException("Prior() failed.");
 					
-				ATable.Select(ARow);
-				AExpectedTable.Select(AExpectedRow);
-				if (!RowsSame(AProgram, ARow, AExpectedRow, ARowEqualNode))
+				table.Select(row);
+				expectedTable.Select(expectedRow);
+				if (!RowsSame(program, row, expectedRow, rowEqualNode))
 					throw new TestException("Prior() returned an unexpected row.");
 			}
 			
-			AExpectedTable.Prior();
+			expectedTable.Prior();
 			
-			if (!ATable.BOF())
+			if (!table.BOF())
 				throw new TestException("BOF() failed.");
 				
-			if (ATable.BOF() != AExpectedTable.BOF())
+			if (table.BOF() != expectedTable.BOF())
 				throw new TestException("Unexpected BOF().");
 				
-			while (ATable.Next())
+			while (table.Next())
 			{
-				if (!AExpectedTable.Next())
+				if (!expectedTable.Next())
 					throw new TestException("Next() after Prior() failed.");
 					
-				ATable.Select(ARow);
-				AExpectedTable.Select(AExpectedRow);
-				if (!RowsSame(AProgram, ARow, AExpectedRow, ARowEqualNode))
+				table.Select(row);
+				expectedTable.Select(expectedRow);
+				if (!RowsSame(program, row, expectedRow, rowEqualNode))
 					throw new TestException("Next() after Prior() returned an unexpected row.");
 			}
 			
-			ATable.First();
-			if (!ATable.BOF())
+			table.First();
+			if (!table.BOF())
 				throw new TestException("First() failed.");
 		}
 		
-		protected void TestSearchable(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected void TestSearchable(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
 		{
-			bool LFirst = true;
-			Row LFirstKey = null;
-			AExpectedTable.Reset();
-			while (AExpectedTable.Next())
+			bool first = true;
+			Row firstKey = null;
+			expectedTable.Reset();
+			while (expectedTable.Next())
 			{
-				AExpectedTable.Select(ARow);
-				if (!ATable.FindKey(ARow))
+				expectedTable.Select(row);
+				if (!table.FindKey(row))
 					throw new TestException("FindKey() failed.");
 					
-				if (LFirst)
+				if (first)
 				{
-					if (ATable.Prior())
+					if (table.Prior())
 						throw new TestException("Prior() failed after FindKey() to first row.");
-					ATable.Next();
-					LFirstKey = ATable.GetKey();
-					LFirst = false;
+					table.Next();
+					firstKey = table.GetKey();
+					first = false;
 				}
 			}
 			try
 			{
-				if (ATable.Next())
+				if (table.Next())
 					throw new TestException("Next() failed after FindKey() to last row.");
 					
-				if ((LFirstKey != null) && !ATable.FindKey(LFirstKey))
+				if ((firstKey != null) && !table.FindKey(firstKey))
 					throw new TestException("FindKey() failed to row returned from GetKey()");
 			}
 			finally
 			{
-				if (LFirstKey != null)
-					LFirstKey.Dispose();
+				if (firstKey != null)
+					firstKey.Dispose();
 			}
 				
-			LFirst = true;
-			AExpectedTable.Reset();
-			while (AExpectedTable.Next())
+			first = true;
+			expectedTable.Reset();
+			while (expectedTable.Next())
 			{
-				AExpectedTable.Select(ARow);
-				ATable.FindNearest(ARow);
-				if (ATable.BOF() || ATable.EOF())
+				expectedTable.Select(row);
+				table.FindNearest(row);
+				if (table.BOF() || table.EOF())
 					throw new TestException("FindNearest() failed.");
 					
-				if (LFirst)
+				if (first)
 				{
-					if (ATable.Prior())
+					if (table.Prior())
 						throw new TestException("Prior() failed after FindNearest() to first row.");
-					ATable.Next();
-					LFirst = false;
+					table.Next();
+					first = false;
 				}
 			}
 			
-			if (ATable.Next())
+			if (table.Next())
 				throw new TestException("Next() failed after FindNearest() to last row.");
 		}
 	}
 	
 	public class TestNavigableNode : TestCursorNode
 	{
-		protected override void InternalTest(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected override void InternalTest(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
 		{
-			TestNavigable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
+			TestNavigable(program, table, expectedTable, row, expectedRow, rowEqualNode);
 		}
 	}
 
 	public class TestBackwardsNavigableNode : TestCursorNode
 	{
-		protected override void InternalTest(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected override void InternalTest(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
 		{
-			TestNavigable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
-			TestBackwardsNavigable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
+			TestNavigable(program, table, expectedTable, row, expectedRow, rowEqualNode);
+			TestBackwardsNavigable(program, table, expectedTable, row, expectedRow, rowEqualNode);
 		}
 	}
 
 	public class TestSearchableNode : TestCursorNode
 	{
-		protected override void InternalTest(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected override void InternalTest(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
 		{
-			TestNavigable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
-			TestBackwardsNavigable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
-			TestSearchable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
+			TestNavigable(program, table, expectedTable, row, expectedRow, rowEqualNode);
+			TestBackwardsNavigable(program, table, expectedTable, row, expectedRow, rowEqualNode);
+			TestSearchable(program, table, expectedTable, row, expectedRow, rowEqualNode);
 		}
 	}
 	
 	// operator TestParserEmitter(AScript : String);
 	public class TestParserEmitterNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			string LSource = (string)AArguments[0];
-			Parser LParser = new Parser();
-			D4TextEmitter LEmitter = new D4TextEmitter();
-			Statement LStatement = LParser.ParseScript(LSource, null);
-			string LCanonicalSource = LEmitter.Emit(LStatement);
-			LStatement = LParser.ParseScript(LCanonicalSource, null);
-			string LTarget = LEmitter.Emit(LStatement);
-			if (String.Compare(LCanonicalSource, LTarget) != 0)
-				throw new TestException(String.Format("Parser/Emitter failed for input: \r\n{0}", LSource));
+			string source = (string)arguments[0];
+			Parser parser = new Parser();
+			D4TextEmitter emitter = new D4TextEmitter();
+			Statement statement = parser.ParseScript(source, null);
+			string canonicalSource = emitter.Emit(statement);
+			statement = parser.ParseScript(canonicalSource, null);
+			string target = emitter.Emit(statement);
+			if (String.Compare(canonicalSource, target) != 0)
+				throw new TestException(String.Format("Parser/Emitter failed for input: \r\n{0}", source));
 			return null;
 		}
 	}
 	
 	public class TestOperatorTextNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			// Emit the text of the operator, then attempt to re-parse it
-			Schema.Object LOperator = 
-				(Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					? Compiler.ResolveCatalogObjectSpecifier(AProgram.Plan, (string)AArgument1)
-					: Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArgument1);
+			Schema.Object operatorValue = 
+				(Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
+					? Compiler.ResolveCatalogObjectSpecifier(program.Plan, (string)argument1)
+					: Compiler.ResolveCatalogIdentifier(program.Plan, (string)argument1);
 					
-			new Parser().ParseStatement(new D4TextEmitter().Emit(LOperator.EmitStatement(EmitMode.ForCopy)), null);
+			new Parser().ParseStatement(new D4TextEmitter().Emit(operatorValue.EmitStatement(EmitMode.ForCopy)), null);
 			
 			return null;
 		}
@@ -2267,9 +2267,9 @@ drop table Testing;
 
 	public class TestIsPlanCachedNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
-			return AProgram.IsCached;
+			return program.IsCached;
 		}
 	}
 }

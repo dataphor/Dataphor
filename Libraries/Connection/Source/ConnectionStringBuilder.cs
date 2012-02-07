@@ -14,37 +14,37 @@ namespace Alphora.Dataphor.DAE.Connection
 	/// </summary>
 	public abstract class ConnectionStringBuilder
 	{
-		public virtual Tags Map (Tags ATags)
+		public virtual Tags Map (Tags tags)
 		{
-			Tags LTags = new Tags();
+			Tags localTags = new Tags();
 			
 			#if USEHASHTABLEFORTAGS
-			foreach (Tag LTag in ATags)
+			foreach (Tag tag in ATags)
 			{
 			#else
-			Tag LTag;
-			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
+			Tag tag;
+			for (int index = 0; index < tags.Count; index++)
 			{
-				LTag = ATags[LIndex];
+				tag = tags[index];
 			#endif
-				Tag LLegendTag = FLegend.GetTag(LTag.Name);
-				if (LLegendTag != Tag.None)
-					LTags.AddOrUpdate(LLegendTag.Value, LTag.Value);
+				Tag legendTag = _legend.GetTag(tag.Name);
+				if (legendTag != Tag.None)
+					localTags.AddOrUpdate(legendTag.Value, tag.Value);
 				else
-					LTags.AddOrUpdate(LTag.Name, LTag.Value);
+					localTags.AddOrUpdate(tag.Name, tag.Value);
 			}
 			
-			LTags.AddOrUpdateRange(FParameters);
+			localTags.AddOrUpdateRange(_parameters);
 
-			return LTags;
+			return localTags;
 		}
 
-		protected Tags FLegend = new Tags();
+		protected Tags _legend = new Tags();
 		/// <summary>Used to map connection parameters based on name.</summary>
-		public Tags Legend { get { return FLegend; } }
+		public Tags Legend { get { return _legend; } }
 		
-		protected Tags FParameters = new Tags();
+		protected Tags _parameters = new Tags();
 		/// <summary>Specifies additional connection parameters to be added after the mapping operation takes place.</summary>
-		public Tags Parameters { get { return FParameters; } }
+		public Tags Parameters { get { return _parameters; } }
 	}
 }

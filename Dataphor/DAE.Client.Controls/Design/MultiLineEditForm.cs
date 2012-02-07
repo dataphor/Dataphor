@@ -20,10 +20,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		private System.Windows.Forms.Button btnOK;
 		private System.Windows.Forms.Button btnCancel;
 
-		public MultiLineEditForm(string AValue)
+		public MultiLineEditForm(string tempValue)
 		{
 			InitializeComponent();
-			Value = AValue;
+			Value = tempValue;
 		}
 
 		#region Windows Form Designer generated code
@@ -92,38 +92,38 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		}
 		#endregion
 
-		protected override void Dispose( bool ADisposing )
+		protected override void Dispose( bool disposing )
 		{
 //			if( ADisposing )
 //			{
 //				if (components != null)
 //					components.Dispose();
 //			}
-			base.Dispose( ADisposing );
+			base.Dispose( disposing );
 		}
 
-		private string FValue;
+		private string _value;
 		public string Value
 		{
-			get { return FValue; }
+			get { return _value; }
 			set
 			{
-				if (FValue != value)
+				if (_value != value)
 				{
-					FValue = value;
+					_value = value;
 					tbValue.Text = value;
 				}
 			}
 		}
 
-		protected virtual void TextKeyDown(object ASender, KeyEventArgs AArgs)
+		protected virtual void TextKeyDown(object sender, KeyEventArgs args)
 		{
-			switch (Keys.KeyCode & AArgs.KeyCode)
+			switch (Keys.KeyCode & args.KeyCode)
 			{
 				case Keys.Enter :
-					if (AArgs.Control)
+					if (args.Control)
 					{
-						AArgs.Handled = true;
+						args.Handled = true;
 						btnOK.PerformClick();
 					}
 					break;
@@ -132,7 +132,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		private void btnOK_Click(object sender, System.EventArgs e)
 		{
-			FValue = tbValue.Text;
+			_value = tbValue.Text;
 			Close();
 		}
 
@@ -151,71 +151,71 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 	/// <summary> Enables multi-line editing of a string value. </summary>
 	public class MultiLineEditor : UITypeEditor
 	{
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	 
-			if (AContext != null && AContext.Instance != null && AProvider != null) 
+			if (context != null && context.Instance != null && provider != null) 
 			{
-				ISite LSite = ((IComponent)AContext.Instance).Site;
-				if (LSite != null)
+				ISite site = ((IComponent)context.Instance).Site;
+				if (site != null)
 				{
-					IPropertyTextEditorService LService = (IPropertyTextEditorService)LSite.GetService(typeof(IPropertyTextEditorService));
-					if (LService != null)
+					IPropertyTextEditorService service = (IPropertyTextEditorService)site.GetService(typeof(IPropertyTextEditorService));
+					if (service != null)
 					{
-						LService.EditProperty(AContext.Instance, AContext.PropertyDescriptor);
-						return AValue;
+						service.EditProperty(context.Instance, context.PropertyDescriptor);
+						return tempValue;
 					}
 				}
 
-				IWindowsFormsEditorService LEditorService = (IWindowsFormsEditorService)AProvider.GetService(typeof(IWindowsFormsEditorService));
-				if (LEditorService != null)
+				IWindowsFormsEditorService editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				if (editorService != null)
 				{
-					MultiLineEditForm LForm = new MultiLineEditForm((string)AValue);
+					MultiLineEditForm form = new MultiLineEditForm((string)tempValue);
 					try
 					{
-						LForm.Closing += new CancelEventHandler(Form_Closing);
-						if (AContext.PropertyDescriptor != null)
-							LForm.Text = AContext.PropertyDescriptor.DisplayName;
-						LEditorService.ShowDialog(LForm);
-						if (LForm.DialogResult == DialogResult.OK)
-							AValue = LForm.Value;
+						form.Closing += new CancelEventHandler(Form_Closing);
+						if (context.PropertyDescriptor != null)
+							form.Text = context.PropertyDescriptor.DisplayName;
+						editorService.ShowDialog(form);
+						if (form.DialogResult == DialogResult.OK)
+							tempValue = form.Value;
 					}
 					finally
 					{
-						LForm.Closing -= new CancelEventHandler(Form_Closing);
-						LForm.Dispose();
+						form.Closing -= new CancelEventHandler(Form_Closing);
+						form.Dispose();
 					}
 				}
 			}
-			return AValue;
+			return tempValue;
 		}
 
-		private void Form_Closing(object ASender, System.ComponentModel.CancelEventArgs AArgs)
+		private void Form_Closing(object sender, System.ComponentModel.CancelEventArgs args)
 		{
-			if (((MultiLineEditForm)ASender).DialogResult == DialogResult.OK)
+			if (((MultiLineEditForm)sender).DialogResult == DialogResult.OK)
 			{
 				try
 				{
-					Validate(((MultiLineEditForm)ASender).Value);
+					Validate(((MultiLineEditForm)sender).Value);
 				}
 				catch
 				{
-					AArgs.Cancel = true;
+					args.Cancel = true;
 					throw;
 				}
 			}
 		}
 
-		protected virtual void Validate(string AValue)
+		protected virtual void Validate(string tempValue)
 		{
 			//Abstract validation.
 		}
 	 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{
-			if (AContext != null && AContext.Instance != null) 
+			if (context != null && context.Instance != null) 
 				return UITypeEditorEditStyle.Modal;
 			else
-				return base.GetEditStyle(AContext);
+				return base.GetEditStyle(context);
 		}
 	}
 }

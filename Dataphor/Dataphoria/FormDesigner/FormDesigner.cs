@@ -35,11 +35,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 	public partial class FormDesigner : BaseForm, ILiveDesigner, IErrorSource, IServiceProvider, IContainer, IToolBarClient
 	{
-		protected DockContent FDockContentFormPanel;
-		protected DockContent FDockContentNodesTree;
-		protected DockContent FDockContentPalettePanel;
-		protected DockContent FDockContentPropertyGrid;
-		private ToolBox.ToolBox FPalettePanel;
+		protected DockContent _dockContentFormPanel;
+		protected DockContent _dockContentNodesTree;
+		protected DockContent _dockContentPalettePanel;
+		protected DockContent _dockContentPropertyGrid;
+		private ToolBox.ToolBox _palettePanel;
 
 		public FormDesigner() // dummy constructor for MDI menu merging?
 		{
@@ -47,7 +47,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			InitializeDocking();
 		}
 
-		public FormDesigner(IDataphoria ADataphoria, string ADesignerID)
+		public FormDesigner(IDataphoria dataphoria, string designerID)
 		{
 			InitializeComponent();
 
@@ -55,18 +55,18 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			InitializeDocking();
 
 
-			FDesignerID = ADesignerID;
+			_designerID = designerID;
 
 			FNodesTree.FormDesigner = this;
 
-			InitializeService(ADataphoria);
+			InitializeService(dataphoria);
 
 
 			PrepareSession();
-			ADataphoria.OnFormDesignerLibrariesChanged += FormDesignerLibrariesChanged;
+			dataphoria.OnFormDesignerLibrariesChanged += FormDesignerLibrariesChanged;
 		}
 
-		protected override void Dispose(bool ADisposed)
+		protected override void Dispose(bool disposed)
 		{
 			if (!IsDisposed && (Dataphoria != null))
 			{
@@ -78,16 +78,16 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 				{
 					try
 					{
-						FPalettePanel.ClearPalette();
+						_palettePanel.ClearPalette();
 					}
 					finally
 					{
 						try
 						{
-							if (FFrontendSession != null)
+							if (_frontendSession != null)
 							{
-								FFrontendSession.Dispose();
-								FFrontendSession = null;
+								_frontendSession.Dispose();
+								_frontendSession = null;
 							}
 						}
 						finally
@@ -105,7 +105,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 								}
 								finally
 								{
-									base.Dispose(ADisposed);
+									base.Dispose(disposed);
 								}
 							}
 						}
@@ -120,12 +120,12 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 		[Browsable(false)]
 		public IDataphoria Dataphoria
 		{
-			get { return (FService == null ? null : FService.Dataphoria); }
+			get { return (_service == null ? null : _service.Dataphoria); }
 		}
 
-		void IToolBarClient.MergeToolbarWith(ToolStrip AParentToolStrip)
+		void IToolBarClient.MergeToolbarWith(ToolStrip parentToolStrip)
 		{
-			ToolStripManager.Merge(FToolStrip, AParentToolStrip);
+			ToolStripManager.Merge(FToolStrip, parentToolStrip);
 		}
 
 		void IDisposable.Dispose()
@@ -135,37 +135,37 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 		#region IServiceProvider Members
 
-		public new virtual object GetService(Type AServiceType)
+		public new virtual object GetService(Type serviceType)
 		{
-			if (AServiceType == typeof (IDesignService))
+			if (serviceType == typeof (IDesignService))
 				return Service;
-			object LResult = base.GetService(AServiceType);
-			if (LResult != null)
-				return LResult;
-			return Dataphoria.GetService(AServiceType);
+			object result = base.GetService(serviceType);
+			if (result != null)
+				return result;
+			return Dataphoria.GetService(serviceType);
 		}
 
 		#endregion
 
 		#region Help
 
-		protected override void OnHelpRequested(HelpEventArgs AArgs)
+		protected override void OnHelpRequested(HelpEventArgs args)
 		{
-			base.OnHelpRequested(AArgs);
-			string LKeyword;
+			base.OnHelpRequested(args);
+			string keyword;
 			if (SelectedPaletteItem != null)
-				LKeyword = SelectedPaletteItem.ClassName;
+				keyword = SelectedPaletteItem.ClassName;
 			else
 			{
 				if (ActiveControl.Name == "FNodesTree")
-					LKeyword = FNodesTree.SelectedNode.Node.GetType().Name;
+					keyword = FNodesTree.SelectedNode.Node.GetType().Name;
 				else
-					LKeyword = FPropertyGrid.SelectedObject.GetType().Name;
+					keyword = FPropertyGrid.SelectedObject.GetType().Name;
 			}
-			NodeTypeEntry LEntry = FrontendSession.NodeTypeTable[LKeyword];
-			if (LEntry != null)
-				LKeyword = LEntry.Namespace + "." + LKeyword;
-			Dataphoria.InvokeHelp(LKeyword);
+			NodeTypeEntry entry = FrontendSession.NodeTypeTable[keyword];
+			if (entry != null)
+				keyword = entry.Namespace + "." + keyword;
+			Dataphoria.InvokeHelp(keyword);
 		}
 
 		#endregion
@@ -179,17 +179,17 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			get { return new ComponentCollection(new IComponent[] {}); }
 		}
 
-		public void Remove(IComponent AComponent)
+		public void Remove(IComponent component)
 		{
 			// nadda
 		}
 
-		public void Add(IComponent AComponent, string AName)
+		public void Add(IComponent component, string name)
 		{
 			// nadda
 		}
 
-		void IContainer.Add(IComponent AComponent)
+		void IContainer.Add(IComponent component)
 		{
 			// nadda
 		}
@@ -256,33 +256,33 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			FNodesTree.AfterSelect += FNodesTree_AfterSelect;
 			FNodesTree.Dock = DockStyle.Fill;
 
-			FDockContentNodesTree = new DockContent();
-			FDockContentNodesTree.HideOnClose = true;
-			FDockContentNodesTree.Controls.Add(FNodesTree);
-			FDockContentNodesTree.TabText = "Nodes Tree";
-			FDockContentNodesTree.Text = "Nodes Tree - Dataphoria";
-			FDockContentNodesTree.ShowHint = DockState.Document;
-			FDockContentNodesTree.Show(FDockPanel);
+			_dockContentNodesTree = new DockContent();
+			_dockContentNodesTree.HideOnClose = true;
+			_dockContentNodesTree.Controls.Add(FNodesTree);
+			_dockContentNodesTree.TabText = "Nodes Tree";
+			_dockContentNodesTree.Text = "Nodes Tree - Dataphoria";
+			_dockContentNodesTree.ShowHint = DockState.Document;
+			_dockContentNodesTree.Show(FDockPanel);
 			
 			// 
 			// FPalettePanel
 			// 
-			FPalettePanel = new ToolBox.ToolBox();
-			FPalettePanel.NodesTree = this.FNodesTree;
-			FPalettePanel.Location = new Point(1, 21);
-			FPalettePanel.Name = "FPalettePanel";
-			FPalettePanel.Size = new Size(163, 187);
-			FPalettePanel.TabIndex = 1;
-			FPalettePanel.Dock = DockStyle.Fill;
-			FPalettePanel.StatusChanged += FPalettePanel_StatusChanged;
+			_palettePanel = new ToolBox.ToolBox();
+			_palettePanel.NodesTree = this.FNodesTree;
+			_palettePanel.Location = new Point(1, 21);
+			_palettePanel.Name = "FPalettePanel";
+			_palettePanel.Size = new Size(163, 187);
+			_palettePanel.TabIndex = 1;
+			_palettePanel.Dock = DockStyle.Fill;
+			_palettePanel.StatusChanged += FPalettePanel_StatusChanged;
 
-			FDockContentPalettePanel = new DockContent();
-			FDockContentPalettePanel.HideOnClose = true;
-			FDockContentPalettePanel.Controls.Add(FPalettePanel);
-			FDockContentPalettePanel.TabText = "Node Palette";
-			FDockContentPalettePanel.Text = "Node Palette - Dataphoria";
-			FDockContentPalettePanel.ShowHint = DockState.DockLeft;
-			FDockContentPalettePanel.Show(FDockPanel);
+			_dockContentPalettePanel = new DockContent();
+			_dockContentPalettePanel.HideOnClose = true;
+			_dockContentPalettePanel.Controls.Add(_palettePanel);
+			_dockContentPalettePanel.TabText = "Node Palette";
+			_dockContentPalettePanel.Text = "Node Palette - Dataphoria";
+			_dockContentPalettePanel.ShowHint = DockState.DockLeft;
+			_dockContentPalettePanel.Show(FDockPanel);
 
 			// 
 			// FFormPanel
@@ -295,13 +295,13 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			FFormPanel.TabIndex = 3;
 			FFormPanel.Dock = DockStyle.Fill;
 
-			FDockContentFormPanel = new DockContent();
-			FDockContentFormPanel.HideOnClose = true;
-			FDockContentFormPanel.Controls.Add(FFormPanel);
-			FDockContentFormPanel.TabText = "Form - Dataphoria";
-			FDockContentFormPanel.Text = "Form";
-			FDockContentFormPanel.ShowHint = DockState.DockBottom;
-			FDockContentFormPanel.Show(FDockPanel);
+			_dockContentFormPanel = new DockContent();
+			_dockContentFormPanel.HideOnClose = true;
+			_dockContentFormPanel.Controls.Add(FFormPanel);
+			_dockContentFormPanel.TabText = "Form - Dataphoria";
+			_dockContentFormPanel.Text = "Form";
+			_dockContentFormPanel.ShowHint = DockState.DockBottom;
+			_dockContentFormPanel.Show(FDockPanel);
 
 			// 
 			// FPropertyGrid
@@ -324,61 +324,61 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			FPropertyGrid.PropertyValueChanged +=NodePropertyGrid_PropertyValueChanged;
 			FPropertyGrid.Dock = DockStyle.Fill;
 
-			FDockContentPropertyGrid = new DockContent();
-			FDockContentPropertyGrid.HideOnClose = true;
-			FDockContentPropertyGrid.Controls.Add(FPropertyGrid);
-			FDockContentPropertyGrid.TabText = "Properties";
-			FDockContentPropertyGrid.Text = "Properties - Dataphoria";
-			FDockContentPropertyGrid.ShowHint = DockState.DockRight;
-			FDockContentPropertyGrid.Show(FDockPanel);
+			_dockContentPropertyGrid = new DockContent();
+			_dockContentPropertyGrid.HideOnClose = true;
+			_dockContentPropertyGrid.Controls.Add(FPropertyGrid);
+			_dockContentPropertyGrid.TabText = "Properties";
+			_dockContentPropertyGrid.Text = "Properties - Dataphoria";
+			_dockContentPropertyGrid.ShowHint = DockState.DockRight;
+			_dockContentPropertyGrid.Show(FDockPanel);
 		}
 
-		private void FPalettePanel_StatusChanged(object ASender, StatusEventArgs AArgs)
+		private void FPalettePanel_StatusChanged(object sender, StatusEventArgs args)
 		{
-			this.SetStatus(AArgs.Description);
+			this.SetStatus(args.Description);
 		}
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
-			base.OnClosing(AArgs);
+			base.OnClosing(args);
 			try
 			{
-				FService.CheckModified();
-				if (FIsDesignHostOwner && (!FrontendSession.CloseAllForms(FDesignHost, CloseBehavior.AcceptOrClose)))
+				_service.CheckModified();
+				if (_isDesignHostOwner && (!FrontendSession.CloseAllForms(_designHost, CloseBehavior.AcceptOrClose)))
 					// if we are hosting, close the child forms
 					throw new AbortException();
 			}
 			catch
 			{
-				AArgs.Cancel = true;
+				args.Cancel = true;
 				throw;
 			}
 		}
 
 		#region FrontendSession
 
-		private Session FFrontendSession;
+		private Session _frontendSession;
 
 		[Browsable(false)]
 		public Session FrontendSession
 		{
-			get { return FFrontendSession; }
+			get { return _frontendSession; }
 		}
 
 		/// <summary> Prepares (or re-prepares) the frontend session and the component palette </summary>
 		private void PrepareSession()
 		{
-			if (FFrontendSession == null)
+			if (_frontendSession == null)
 			{
-				FFrontendSession = Dataphoria.GetLiveDesignableFrontendSession();
-				FPalettePanel.FrontendSession = this.FFrontendSession;
+				_frontendSession = Dataphoria.GetLiveDesignableFrontendSession();
+				_palettePanel.FrontendSession = this._frontendSession;
 			}
-			FFrontendSession.SetFormDesigner();
-			FPalettePanel.ClearPalette();
-			FPalettePanel.LoadPalette();
+			_frontendSession.SetFormDesigner();
+			_palettePanel.ClearPalette();
+			_palettePanel.LoadPalette();
 		}
 
-		private void FormDesignerLibrariesChanged(object ASender, EventArgs AArgs)
+		private void FormDesignerLibrariesChanged(object sender, EventArgs args)
 		{
 			PrepareSession();
 		}
@@ -387,101 +387,101 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 		#region Service
 
-		private IDesignService FService;
+		private IDesignService _service;
 
 		[Browsable(false)]
 		public IDesignService Service
 		{
-			get { return FService; }
+			get { return _service; }
 		}
 
-		public void InitializeService(IDataphoria ADataphoria)
+		public void InitializeService(IDataphoria dataphoria)
 		{
-			FService = new DesignService(ADataphoria, this);
-			FService.OnModifiedChanged += NameOrModifiedChanged;
-			FService.OnNameChanged += NameOrModifiedChanged;
-			FService.OnRequestLoad += RequestLoad;
-			FService.OnRequestSave += RequestSave;
+			_service = new DesignService(dataphoria, this);
+			_service.OnModifiedChanged += NameOrModifiedChanged;
+			_service.OnNameChanged += NameOrModifiedChanged;
+			_service.OnRequestLoad += RequestLoad;
+			_service.OnRequestSave += RequestSave;
 		}
 
-		private void NameOrModifiedChanged(object ASender, EventArgs AArgs)
+		private void NameOrModifiedChanged(object sender, EventArgs args)
 		{
 			UpdateTitle();
 		}
 
-		protected virtual void RequestLoad(DesignService AService, DesignBuffer ABuffer)
+		protected virtual void RequestLoad(DesignService service, DesignBuffer buffer)
 		{
-			SetDesignHost(HostFromBuffer(ABuffer), true);
+			SetDesignHost(HostFromBuffer(buffer), true);
 		}
 
-		protected virtual void RequestSave(DesignService AService, DesignBuffer ABuffer)
+		protected virtual void RequestSave(DesignService service, DesignBuffer buffer)
 		{
-			Serializer LSerializer = FrontendSession.CreateSerializer();
-			var LDocument = new XDocument();
-			LSerializer.Serialize(LDocument, FDesignHost.Children[0]);
-			Dataphoria.Warnings.AppendErrors(this, LSerializer.Errors, true);
+			Serializer serializer = FrontendSession.CreateSerializer();
+			var document = new XDocument();
+			serializer.Serialize(document, _designHost.Children[0]);
+			Dataphoria.Warnings.AppendErrors(this, serializer.Errors, true);
 
-			var LStream = new MemoryStream();
-			var LXmlTextWriter = XmlWriter.Create(LStream, new XmlWriterSettings() { Encoding = Encoding.UTF8, Indent = true });
-			LDocument.Save(LXmlTextWriter);
-			LXmlTextWriter.Flush();
-			byte[] LWriterString = LStream.ToArray();
-			ABuffer.SaveData(Encoding.UTF8.GetString(LWriterString, 0, LWriterString.Length));
+			var stream = new MemoryStream();
+			var xmlTextWriter = XmlWriter.Create(stream, new XmlWriterSettings() { Encoding = Encoding.UTF8, Indent = true });
+			document.Save(xmlTextWriter);
+			xmlTextWriter.Flush();
+			byte[] writerString = stream.ToArray();
+			buffer.SaveData(Encoding.UTF8.GetString(writerString, 0, writerString.Length));
 
-			UpdateHostsDocument(ABuffer);
+			UpdateHostsDocument(buffer);
 		}
 
 		#endregion
 
 		#region Tree Nodes
 
-		private void FNodesTree_AfterSelect(object ASender, TreeViewEventArgs AArgs)
+		private void FNodesTree_AfterSelect(object sender, TreeViewEventArgs args)
 		{
-			ActivateNode((DesignerTree.DesignerNode)AArgs.Node);
+			ActivateNode((DesignerTree.DesignerNode)args.Node);
 		}
 
-		public void ActivateNode(DesignerTree.DesignerNode ANode)
+		public void ActivateNode(DesignerTree.DesignerNode node)
 		{
 			if ((FPropertyGrid.SelectedObject != null) && (FPropertyGrid.SelectedObject is IDisposableNotify))
 				((IDisposableNotify) FPropertyGrid.SelectedObject).Disposed -= SelectedNodeDisposed;
 
-			bool LEditsAllowed;
-			if (ANode == null)
+			bool editsAllowed;
+			if (node == null)
 			{
 				FPropertyGrid.SelectedObject = null;
-				LEditsAllowed = false;
+				editsAllowed = false;
 			}
 			else
 			{
-				FPropertyGrid.SelectedObject = ANode.Node;
-				ANode.Node.Disposed += SelectedNodeDisposed;
-				LEditsAllowed = !ANode.ReadOnly;
+				FPropertyGrid.SelectedObject = node.Node;
+				node.Node.Disposed += SelectedNodeDisposed;
+				editsAllowed = !node.ReadOnly;
 			}
-			FDeleteToolStripMenuItem.Enabled = LEditsAllowed;
-			FRenameToolStripMenuItem.Enabled = LEditsAllowed;
-			FCutToolStripMenuItem.Enabled = LEditsAllowed;
+			FDeleteToolStripMenuItem.Enabled = editsAllowed;
+			FRenameToolStripMenuItem.Enabled = editsAllowed;
+			FCutToolStripMenuItem.Enabled = editsAllowed;
 		}
 
-		private void SelectedNodeDisposed(object ASender, EventArgs AArgs)
+		private void SelectedNodeDisposed(object sender, EventArgs args)
 		{
 			ActivateNode(FNodesTree.SelectedNode);
 		}
 
 		private void NodePropertyGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
 		{
-			FService.SetModified(true);
+			_service.SetModified(true);
 		}
 
 		#endregion
 
 		#region IErrorSource
 
-		void IErrorSource.ErrorHighlighted(Exception AException)
+		void IErrorSource.ErrorHighlighted(Exception exception)
 		{
 			// nothing
 		}
 
-		void IErrorSource.ErrorSelected(Exception AException)
+		void IErrorSource.ErrorSelected(Exception exception)
 		{
 			Focus();
 		}
@@ -490,99 +490,99 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 		#region Palette
 
-		private Hashtable FImageIndex = new Hashtable();
-		private bool FIsMultiDrop;
-		private PaletteItem FSelectedPaletteItem;
+		private Hashtable _imageIndex = new Hashtable();
+		private bool _isMultiDrop;
+		private PaletteItem _selectedPaletteItem;
 
 		[Browsable(false)]
 		public PaletteItem SelectedPaletteItem
 		{
-			get { return FSelectedPaletteItem; }
+			get { return _selectedPaletteItem; }
 		}
 
 		[Browsable(false)]
 		public bool IsMultiDrop
 		{
-			get { return FIsMultiDrop; }
+			get { return _isMultiDrop; }
 		}
 
-		private bool IsTypeListed(Type AType)
+		private bool IsTypeListed(Type type)
 		{
-			var LListIn =
-				(ListInDesignerAttribute) ReflectionUtility.GetAttribute(AType, typeof (ListInDesignerAttribute));
-			if (LListIn != null)
-				return LListIn.IsListed;
+			var listIn =
+				(ListInDesignerAttribute) ReflectionUtility.GetAttribute(type, typeof (ListInDesignerAttribute));
+			if (listIn != null)
+				return listIn.IsListed;
 			return true;
 		}
 
-		private string GetDescription(Type AType)
+		private string GetDescription(Type type)
 		{
-			var LDescription =
-				(DescriptionAttribute) ReflectionUtility.GetAttribute(AType, typeof (DescriptionAttribute));
-			if (LDescription != null)
-				return LDescription.Description;
+			var description =
+				(DescriptionAttribute) ReflectionUtility.GetAttribute(type, typeof (DescriptionAttribute));
+			if (description != null)
+				return description.Description;
 			return String.Empty;
 		}
 
-		private string GetDesignerCategory(Type AType)
+		private string GetDesignerCategory(Type type)
 		{
-			var LCategory =
-				(DesignerCategoryAttribute) ReflectionUtility.GetAttribute(AType, typeof (DesignerCategoryAttribute));
-			if (LCategory != null)
-				return LCategory.Category;
+			var category =
+				(DesignerCategoryAttribute) ReflectionUtility.GetAttribute(type, typeof (DesignerCategoryAttribute));
+			if (category != null)
+				return category.Category;
 			return Strings.UnspecifiedCategory;
 		}
 
-		private Image LoadImage(string AImageExpression)
+		private Image LoadImage(string imageExpression)
 		{
 			try
 			{
-				using (DataValue LImageData = FrontendSession.Pipe.RequestDocument(AImageExpression))
+				using (DataValue imageData = FrontendSession.Pipe.RequestDocument(imageExpression))
 				{
-					var LStreamCopy = new MemoryStream();
-					Stream LStream = LImageData.OpenStream();
+					var streamCopy = new MemoryStream();
+					Stream stream = imageData.OpenStream();
 					try
 					{
-						StreamUtility.CopyStream(LStream, LStreamCopy);
+						StreamUtility.CopyStream(stream, streamCopy);
 					}
 					finally
 					{
-						LStream.Close();
+						stream.Close();
 					}
-					return Image.FromStream(LStreamCopy);
+					return Image.FromStream(streamCopy);
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Dataphoria.Warnings.AppendError(this, LException, true);
+				Dataphoria.Warnings.AppendError(this, exception, true);
 				// Don't rethrow
 			}
 			return null;
 		}
 
-		public int GetDesignerImage(Type AType)
+		public int GetDesignerImage(Type type)
 		{
-			var LImageAttribute =
-				(DesignerImageAttribute) ReflectionUtility.GetAttribute(AType, typeof (DesignerImageAttribute));
-			if (LImageAttribute != null)
+			var imageAttribute =
+				(DesignerImageAttribute) ReflectionUtility.GetAttribute(type, typeof (DesignerImageAttribute));
+			if (imageAttribute != null)
 			{
-				object LIndexResult = FImageIndex[LImageAttribute.ImageExpression];
-				if (LIndexResult == null)
+				object indexResult = _imageIndex[imageAttribute.ImageExpression];
+				if (indexResult == null)
 				{
-					Image LImage = LoadImage(LImageAttribute.ImageExpression);
-					if (LImage != null)
+					Image image = LoadImage(imageAttribute.ImageExpression);
+					if (image != null)
 					{
-						if (LImage is Bitmap)
-							((Bitmap) LImage).MakeTransparent();
-						FNodesImageList.Images.Add(LImage);
-						int LIndex = FNodesImageList.Images.Count - 1;
-						FImageIndex.Add(LImageAttribute.ImageExpression, LIndex);
-						return LIndex;
+						if (image is Bitmap)
+							((Bitmap) image).MakeTransparent();
+						FNodesImageList.Images.Add(image);
+						int index = FNodesImageList.Images.Count - 1;
+						_imageIndex.Add(imageAttribute.ImageExpression, index);
+						return index;
 					}
-					FImageIndex.Add(LImageAttribute.ImageExpression, 0);
+					_imageIndex.Add(imageAttribute.ImageExpression, 0);
 				}
 				else
-					return (int) LIndexResult;
+					return (int) indexResult;
 			}
 			return 0; // Zero is the reserved index for the default image
 		}
@@ -592,17 +592,17 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 		#region IDesigner, New, Loading, Saving
 
-		private string FDesignerID;
+		private string _designerID;
 
 		[Browsable(false)]
 		public string DesignerID
 		{
-			get { return FDesignerID; }
+			get { return _designerID; }
 		}
 
-		public void Open(DesignBuffer ABuffer)
+		public void Open(DesignBuffer buffer)
 		{
-			FService.Open(ABuffer);
+			_service.Open(buffer);
 		}
 
 		/// <remarks> 
@@ -621,17 +621,17 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 		public virtual void New()
 		{
-			IHost LHost = FrontendSession.CreateHost();
+			IHost host = FrontendSession.CreateHost();
 			try
 			{
-				INode LNode = GetNewDesignNode();
-				LHost.Children.Add(LNode);
-				LHost.Open();
-				InternalNew(LHost, true);
+				INode node = GetNewDesignNode();
+				host.Children.Add(node);
+				host.Open();
+				InternalNew(host, true);
 			}
 			catch
 			{
-				LHost.Dispose();
+				host.Dispose();
 				throw;
 			}
 		}
@@ -642,123 +642,123 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			return IsDisposed;
 		}
 
-		public virtual void Open(IHost AHost)
+		public virtual void Open(IHost host)
 		{
-			DocumentDesignBuffer LBuffer = BufferFromHost(AHost);
-			FService.ValidateBuffer(LBuffer);
-			SetDesignHost(AHost, false);
-			FService.SetBuffer(LBuffer);
-			FService.SetModified(false);
+			DocumentDesignBuffer buffer = BufferFromHost(host);
+			_service.ValidateBuffer(buffer);
+			SetDesignHost(host, false);
+			_service.SetBuffer(buffer);
+			_service.SetModified(false);
 		}
 
-		protected void InternalNew(IHost AHost, bool AOwner)
+		protected void InternalNew(IHost host, bool owner)
 		{
-			FService.SetBuffer(null);
-			FService.SetModified(false);
-			SetDesignHost(AHost, AOwner);
+			_service.SetBuffer(null);
+			_service.SetModified(false);
+			SetDesignHost(host, owner);
 		}
 
 		public void Save()
 		{
-			FService.Save();
+			_service.Save();
 		}
 
 		public void SaveAsFile()
 		{
-			FService.SaveAsFile();
+			_service.SaveAsFile();
 		}
 
 		public void SaveAsDocument()
 		{
-			FService.SaveAsDocument();
+			_service.SaveAsDocument();
 		}
 
 		protected virtual INode GetNewDesignNode()
 		{
-			var LForm = (IWindowsFormInterface) FrontendSession.CreateForm();
-			Dataphoria.AddDesignerForm(LForm, this);
-			return LForm;
+			var form = (IWindowsFormInterface) FrontendSession.CreateForm();
+			Dataphoria.AddDesignerForm(form, this);
+			return form;
 		}
 
-		protected DocumentDesignBuffer BufferFromHost(IHost AHost)
+		protected DocumentDesignBuffer BufferFromHost(IHost host)
 		{
-			DocumentExpression LExpression = Program.GetDocumentExpression(AHost.Document);
-			var LBuffer = 
+			DocumentExpression expression = Program.GetDocumentExpression(host.Document);
+			var buffer = 
 				new DocumentDesignBuffer
 				(
 					Dataphoria, 
-					LExpression.DocumentArgs.LibraryName,
-					LExpression.DocumentArgs.DocumentName
+					expression.DocumentArgs.LibraryName,
+					expression.DocumentArgs.DocumentName
 				);
-			return LBuffer;
+			return buffer;
 		}
 
-		public void New(IHost AHost)
+		public void New(IHost host)
 		{
-			InternalNew(AHost, false);
+			InternalNew(host, false);
 		}
 
-		protected IHost HostFromBuffer(DesignBuffer ABuffer)
+		protected IHost HostFromBuffer(DesignBuffer buffer)
 		{
-			return HostFromDocumentData(ABuffer.LoadData(), GetDocumentExpression(ABuffer));
+			return HostFromDocumentData(buffer.LoadData(), GetDocumentExpression(buffer));
 		}
 
-		protected IHost HostFromDocumentData(XDocument ADocumentData, string ADocumentExpression)
+		protected IHost HostFromDocumentData(XDocument documentData, string documentExpression)
 		{
-			IHost LHost = FrontendSession.CreateHost();
+			IHost host = FrontendSession.CreateHost();
 			try
 			{
-				Deserializer LDeserializer = FrontendSession.CreateDeserializer();
-				INode LInstance = GetNewDesignNode();
+				Deserializer deserializer = FrontendSession.CreateDeserializer();
+				INode instance = GetNewDesignNode();
 				try
 				{
-					LDeserializer.Deserialize(ADocumentData, LInstance);
-					Dataphoria.Warnings.AppendErrors(this, LDeserializer.Errors, true);
-					LHost.Children.Add(LInstance);
-					LHost.Document = ADocumentExpression;
+					deserializer.Deserialize(documentData, instance);
+					Dataphoria.Warnings.AppendErrors(this, deserializer.Errors, true);
+					host.Children.Add(instance);
+					host.Document = documentExpression;
 				}
 				catch
 				{
-					LInstance.Dispose();
+					instance.Dispose();
 					throw;
 				}
-				LHost.Open();
+				host.Open();
 
-				return LHost;
+				return host;
 			}
 			catch
 			{
-				LHost.Dispose();
+				host.Dispose();
 				throw;
 			}
 		}
 
-		protected IHost HostFromDocumentData(string ADocumentData, string ADocumentExpression)
+		protected IHost HostFromDocumentData(string documentData, string documentExpression)
 		{
-			IHost LHost = FrontendSession.CreateHost();
+			IHost host = FrontendSession.CreateHost();
 			try
 			{
-				Deserializer LDeserializer = FrontendSession.CreateDeserializer();
-				INode LInstance = GetNewDesignNode();
+				Deserializer deserializer = FrontendSession.CreateDeserializer();
+				INode instance = GetNewDesignNode();
 				try
 				{
-					LDeserializer.Deserialize(ADocumentData, LInstance);
-					Dataphoria.Warnings.AppendErrors(this, LDeserializer.Errors, true);
-					LHost.Children.Add(LInstance);
-					LHost.Document = ADocumentExpression;
+					deserializer.Deserialize(documentData, instance);
+					Dataphoria.Warnings.AppendErrors(this, deserializer.Errors, true);
+					host.Children.Add(instance);
+					host.Document = documentExpression;
 				}
 				catch
 				{
-					LInstance.Dispose();
+					instance.Dispose();
 					throw;
 				}
-				LHost.Open();
+				host.Open();
 
-				return LHost;
+				return host;
 			}
 			catch
 			{
-				LHost.Dispose();
+				host.Dispose();
 				throw;
 			}
 		}
@@ -769,87 +769,87 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 				String.Format
 					(
 					"{0} - {1}{2}",
-					(FIsDesignHostOwner ? Strings.Designer : Strings.LiveDesigner),
-					FService.GetDescription(),
-					(FService.IsModified ? "*" : String.Empty)
+					(_isDesignHostOwner ? Strings.Designer : Strings.LiveDesigner),
+					_service.GetDescription(),
+					(_service.IsModified ? "*" : String.Empty)
 					);
 		}
 
-		protected string GetDocumentExpression(DesignBuffer ABuffer)
+		protected string GetDocumentExpression(DesignBuffer buffer)
 		{
-			var LBuffer = ABuffer as DocumentDesignBuffer;
-			if (LBuffer == null)
+			var localBuffer = buffer as DocumentDesignBuffer;
+			if (localBuffer == null)
 				return String.Empty;
-			return String.Format(".Frontend.Form('{0}', '{1}')", LBuffer.LibraryName, LBuffer.DocumentName);
+			return String.Format(".Frontend.Form('{0}', '{1}')", localBuffer.LibraryName, localBuffer.DocumentName);
 		}
 
-		protected void UpdateHostsDocument(DesignBuffer ABuffer)
+		protected void UpdateHostsDocument(DesignBuffer buffer)
 		{
-			DesignHost.Document = GetDocumentExpression(ABuffer);
+			DesignHost.Document = GetDocumentExpression(buffer);
 		}
 
 		#endregion
 
 		#region DesignHost
 
-		private bool FDesignFormClosing;
-		private IHost FDesignHost;
+		private bool _designFormClosing;
+		private IHost _designHost;
 
-		private bool FIsDesignHostOwner;
+		private bool _isDesignHostOwner;
 
 		[Browsable(false)]
 		public IHost DesignHost
 		{
-			get { return FDesignHost; }
+			get { return _designHost; }
 		}
 
 		[Browsable(false)]
 		public bool IsDesignHostOwner
 		{
-			get { return FIsDesignHostOwner; }
+			get { return _isDesignHostOwner; }
 		}
 
 		protected virtual void DetachDesignHost()
 		{
-			var LForm = FDesignHost.Children[0] as IWindowsFormInterface;
-			if (LForm != null)
-				LForm.Form.Closing -= DesignFormClosing;
+			var form = _designHost.Children[0] as IWindowsFormInterface;
+			if (form != null)
+				form.Form.Closing -= DesignFormClosing;
 			FFormPanel.ClearHostedForm();
 		}
 
-		protected virtual void AttachDesignHost(IHost AHost)
+		protected virtual void AttachDesignHost(IHost host)
 		{
-			var LForm = AHost.Children[0] as IWindowsFormInterface;
-			if (LForm != null)
+			var form = host.Children[0] as IWindowsFormInterface;
+			if (form != null)
 			{
-				LForm.Form.Closing += DesignFormClosing;
-				FFormPanel.SetHostedForm(LForm, FIsDesignHostOwner);
+				form.Form.Closing += DesignFormClosing;
+				FFormPanel.SetHostedForm(form, _isDesignHostOwner);
 			}
 		}
 
 		private void ClearNodesTree()
 		{
-			foreach (DesignerTree.DesignerNode LRoot in FNodesTree.Nodes)
-				LRoot.Dispose();
+			foreach (DesignerTree.DesignerNode root in FNodesTree.Nodes)
+				root.Dispose();
 			FNodesTree.Nodes.Clear();
 		}
 
-		protected void SetDesignHost(IHost AHost, bool AOwner)
+		protected void SetDesignHost(IHost host, bool owner)
 		{
-			if (AHost != FDesignHost)
+			if (host != _designHost)
 			{
 				SuspendLayout();
 				try
 				{
-					if (FDesignHost != null)
+					if (_designHost != null)
 					{
 						ActivateNode(null);
-						FPalettePanel.SelectPaletteItem(null, false);
+						_palettePanel.SelectPaletteItem(null, false);
 
 						DetachDesignHost();
-						if (FIsDesignHostOwner && !FDesignFormClosing)
-							((IWindowsFormInterface) FDesignHost.Children[0]).Close(CloseBehavior.RejectOrClose);
-						FDesignHost = null;
+						if (_isDesignHostOwner && !_designFormClosing)
+							((IWindowsFormInterface) _designHost.Children[0]).Close(CloseBehavior.RejectOrClose);
+						_designHost = null;
 
 						FNodesTree.BeginUpdate();
 						try
@@ -862,18 +862,18 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 						}
 					}
 
-					FDesignHost = AHost;
-					FIsDesignHostOwner = AOwner;
+					_designHost = host;
+					_isDesignHostOwner = owner;
 					try
 					{
-						if (FDesignHost != null)
+						if (_designHost != null)
 						{
 							FNodesTree.BeginUpdate();
 							try
 							{
-								if (FDesignHost.Children.Count != 0)
+								if (_designHost.Children.Count != 0)
 								{
-									FNodesTree.SelectedNode = FNodesTree.AddNode(FDesignHost.Children[0]);
+									FNodesTree.SelectedNode = FNodesTree.AddNode(_designHost.Children[0]);
 									FNodesTree.SelectedNode.SetReadOnly(true, false);
 									ActivateNode(FNodesTree.SelectedNode);
 										// the tree doesn't initially raise an ActiveChanged event
@@ -884,12 +884,12 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 								FNodesTree.EndUpdate();
 							}
 
-							AttachDesignHost(FDesignHost);
+							AttachDesignHost(_designHost);
 						}
 					}
 					catch
 					{
-						FDesignHost = null;
+						_designHost = null;
 						ClearNodesTree();
 						throw;
 					}
@@ -901,13 +901,13 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			}
 		}
 
-		protected void DesignFormClosing(object ASender, CancelEventArgs AArgs)
+		protected void DesignFormClosing(object sender, CancelEventArgs args)
 		{
 			try
 			{
-				if (!AArgs.Cancel)
+				if (!args.Cancel)
 				{
-					FDesignFormClosing = true;
+					_designFormClosing = true;
 					try
 					{
 						Close();
@@ -916,13 +916,13 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 					}
 					finally
 					{
-						FDesignFormClosing = false;
+						_designFormClosing = false;
 					}
 				}
 			}
 			catch
 			{
-				AArgs.Cancel = true;
+				args.Cancel = true;
 				throw;
 			}
 		}
@@ -963,67 +963,67 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 		private void ShowPalette()
 		{
-			FDockContentPalettePanel.Show(FDockPanel);						
+			_dockContentPalettePanel.Show(FDockPanel);						
 		}
 
 		private void ShowProperties()
 		{
-			FDockContentPropertyGrid.Show(FDockPanel);						
+			_dockContentPropertyGrid.Show(FDockPanel);						
 		}
 
 		private void ShowForm()
 		{
-			FDockContentFormPanel.Show(FDockPanel);						
+			_dockContentFormPanel.Show(FDockPanel);						
 		}
 
 
-		private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
+		private void FMainMenuStrip_ItemClicked(object sender, EventArgs args)
 		{
-			if (ASender == FSaveToolStripButton || ASender == FSaveToolStripMenuItem)
+			if (sender == FSaveToolStripButton || sender == FSaveToolStripMenuItem)
 			{
 				Save();
 			}
-			else if (ASender == FSaveAsFileToolStripMenuItem || ASender == FSaveAsFileToolStripButton)
+			else if (sender == FSaveAsFileToolStripMenuItem || sender == FSaveAsFileToolStripButton)
 			{
 				SaveAsFile();
 			}
-			else if (ASender == FSaveAsDocumentToolStripMenuItem || ASender == FSaveAsDocumentToolStripButton)
+			else if (sender == FSaveAsDocumentToolStripMenuItem || sender == FSaveAsDocumentToolStripButton)
 			{
 				SaveAsDocument();
 			}
-			else if (ASender == FCloseToolStripMenuItem)
+			else if (sender == FCloseToolStripMenuItem)
 			{
 				Close();
 			}
-			else if (ASender == FCutToolStripMenuItem || ASender == FCutToolStripButton)
+			else if (sender == FCutToolStripMenuItem || sender == FCutToolStripButton)
 			{
 				CutNode();
 			}
-			else if (ASender == FCopyToolStripMenuItem || ASender == FCopyToolStripButton)
+			else if (sender == FCopyToolStripMenuItem || sender == FCopyToolStripButton)
 			{
 				CopyNode();
 			}
-			else if (ASender == FPasteToolStripMenuItem || ASender == FPasteToolStripButton)
+			else if (sender == FPasteToolStripMenuItem || sender == FPasteToolStripButton)
 			{
 				PasteNode();
 			}
-			else if (ASender == FDeleteToolStripMenuItem || ASender == FDeleteToolStripButton)
+			else if (sender == FDeleteToolStripMenuItem || sender == FDeleteToolStripButton)
 			{
 				DeleteNode();
 			}
-			else if (ASender == FRenameToolStripMenuItem || ASender == FRenameToolStripButton)
+			else if (sender == FRenameToolStripMenuItem || sender == FRenameToolStripButton)
 			{
 				RenameNode();
 			}
-			else if (ASender == FPaletteToolStripMenuItem)
+			else if (sender == FPaletteToolStripMenuItem)
 			{
 				ShowPalette();
 			}
-			else if (ASender == FPropertiesToolStripMenuItem)
+			else if (sender == FPropertiesToolStripMenuItem)
 			{
 				ShowProperties();
 			}
-			else if (ASender == FFormToolStripMenuItem)
+			else if (sender == FFormToolStripMenuItem)
 			{
 				ShowForm();
 			}
@@ -1033,7 +1033,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 		public void PaletteItemDropped()
 		{
-			FPalettePanel.PaletteItemDropped();
+			_palettePanel.PaletteItemDropped();
 		}
 	}
 }

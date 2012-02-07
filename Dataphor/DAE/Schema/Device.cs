@@ -38,146 +38,146 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class DevicePlan : Disposable
     {
-		public DevicePlan(Plan APlan, Device ADevice, PlanNode APlanNode)
+		public DevicePlan(Plan plan, Device device, PlanNode planNode)
 		{   
-			FPlan = APlan;
-			FDevice = ADevice;
-			FPlanNode = APlanNode;
+			_plan = plan;
+			_device = device;
+			_planNode = planNode;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			FPlan = null;
-			FDevice = null;
-			FPlanNode = null;
-			base.Dispose(ADisposing);
+			_plan = null;
+			_device = null;
+			_planNode = null;
+			base.Dispose(disposing);
 		}
 
 		// Plan
 		[Reference]
-		private Plan FPlan;
-		public Plan Plan { get { return FPlan; } }
+		private Plan _plan;
+		public Plan Plan { get { return _plan; } }
 
 		// Device
 		[Reference]
-		private Device FDevice;
-		public Device Device { get { return FDevice; } }
+		private Device _device;
+		public Device Device { get { return _device; } }
 
 		// PlanNode
 		[Reference]
-        private PlanNode FPlanNode;
-		public PlanNode Node { get { return FPlanNode; } }
+        private PlanNode _planNode;
+		public PlanNode Node { get { return _planNode; } }
 		
 		// IsSupported
-		private bool FIsSupported = true;
+		private bool _isSupported = true;
 		public bool IsSupported 
 		{ 
-			get { return FIsSupported; } 
-			set { FIsSupported = value; }
+			get { return _isSupported; } 
+			set { _isSupported = value; }
 		}
 		
 		// TranslationMessages
-		private TranslationMessages FTranslationMessages = new TranslationMessages();
-		public TranslationMessages TranslationMessages { get { return FTranslationMessages; } }
+		private TranslationMessages _translationMessages = new TranslationMessages();
+		public TranslationMessages TranslationMessages { get { return _translationMessages; } }
 	}
     
     public abstract class DeviceObject : Schema.CatalogObject
     {
-		public DeviceObject(int AID, string AName) : base(AID, AName)
+		public DeviceObject(int iD, string name) : base(iD, name)
 		{
 			IsRemotable = false;
 		}
 
-		public DeviceObject(int AID, string AName, bool AIsSystem) : base(AID, AName)
+		public DeviceObject(int iD, string name, bool isSystem) : base(iD, name)
 		{
 			IsRemotable = false;
-			IsSystem = AIsSystem;
+			IsSystem = isSystem;
 		}
 		
 		public override string DisplayName { get { return String.Format("Device_{0}_Map_{1}", Device.Name, Name); } }
 
 		[Reference]
-		private Device FDevice;
+		private Device _device;
 		public Device Device 
 		{ 
-			get { return FDevice; } 
-			set { FDevice = value; }
+			get { return _device; } 
+			set { _device = value; }
 		}
     }
     
     public abstract class DeviceOperator : DeviceObject
     {		
-		public DeviceOperator(int AID, string AName) : base(AID, AName){}
+		public DeviceOperator(int iD, string name) : base(iD, name){}
 
-		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.DeviceOperator"), FOperator.OperatorName, FOperator.Signature.ToString(), Device.DisplayName); } }
+		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.DeviceOperator"), _operator.OperatorName, _operator.Signature.ToString(), Device.DisplayName); } }
 
 		// Operator		
 		[Reference]
-		private Schema.Operator FOperator;
+		private Schema.Operator _operator;
 		public Schema.Operator Operator
 		{
-			get { return FOperator; }
-			set { FOperator = value; }
+			get { return _operator; }
+			set { _operator = value; }
 		}
 		
         // ClassDefinition
-        private ClassDefinition FClassDefinition;
+        private ClassDefinition _classDefinition;
 		public ClassDefinition ClassDefinition
         {
-			get { return FClassDefinition; }
-			set { FClassDefinition = value; }
+			get { return _classDefinition; }
+			set { _classDefinition = value; }
         }
         
-		public abstract Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode);
+		public abstract Statement Translate(DevicePlan devicePlan, PlanNode planNode);
 		
-		private void EmitOperatorSpecifier(DeviceOperatorMapBase AOperatorMap, EmitMode AMode)
+		private void EmitOperatorSpecifier(DeviceOperatorMapBase operatorMap, EmitMode mode)
 		{
-			AOperatorMap.OperatorSpecifier = new OperatorSpecifier();
-			AOperatorMap.OperatorSpecifier.OperatorName = Schema.Object.EnsureRooted(Operator.OperatorName);
-			foreach (Operand LOperand in Operator.Operands)
+			operatorMap.OperatorSpecifier = new OperatorSpecifier();
+			operatorMap.OperatorSpecifier.OperatorName = Schema.Object.EnsureRooted(Operator.OperatorName);
+			foreach (Operand operand in Operator.Operands)
 			{
-				FormalParameterSpecifier LSpecifier = new FormalParameterSpecifier();
-				LSpecifier.Modifier = LOperand.Modifier;
-				LSpecifier.TypeSpecifier = LOperand.DataType.EmitSpecifier(AMode);
-				AOperatorMap.OperatorSpecifier.FormalParameterSpecifiers.Add(LSpecifier);
+				FormalParameterSpecifier specifier = new FormalParameterSpecifier();
+				specifier.Modifier = operand.Modifier;
+				specifier.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
+				operatorMap.OperatorSpecifier.FormalParameterSpecifiers.Add(specifier);
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			AlterDeviceStatement LStatement = new AlterDeviceStatement();
-			LStatement.DeviceName = Schema.Object.EnsureRooted(Device.Name);
-			LStatement.CreateDeviceOperatorMaps.Add(EmitCreateDefinition(AMode));
-			return LStatement;
+			AlterDeviceStatement statement = new AlterDeviceStatement();
+			statement.DeviceName = Schema.Object.EnsureRooted(Device.Name);
+			statement.CreateDeviceOperatorMaps.Add(EmitCreateDefinition(mode));
+			return statement;
 		}
 		
-		public DeviceOperatorMap EmitCreateDefinition(EmitMode AMode)
+		public DeviceOperatorMap EmitCreateDefinition(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			DeviceOperatorMap LOperatorMap = new DeviceOperatorMap();
-			EmitOperatorSpecifier(LOperatorMap, AMode);
-			LOperatorMap.ClassDefinition = ClassDefinition == null ? null : (ClassDefinition)ClassDefinition.Clone();
-			LOperatorMap.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LOperatorMap;
+			DeviceOperatorMap operatorMap = new DeviceOperatorMap();
+			EmitOperatorSpecifier(operatorMap, mode);
+			operatorMap.ClassDefinition = ClassDefinition == null ? null : (ClassDefinition)ClassDefinition.Clone();
+			operatorMap.MetaData = MetaData == null ? null : MetaData.Copy();
+			return operatorMap;
 		}
 		
-		public DropDeviceOperatorMap EmitDropDefinition(EmitMode AMode)
+		public DropDeviceOperatorMap EmitDropDefinition(EmitMode mode)
 		{
-			DropDeviceOperatorMap LOperatorMap = new DropDeviceOperatorMap();
-			EmitOperatorSpecifier(LOperatorMap, AMode);
-			return LOperatorMap;
+			DropDeviceOperatorMap operatorMap = new DropDeviceOperatorMap();
+			EmitOperatorSpecifier(operatorMap, mode);
+			return operatorMap;
 		}
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			AlterDeviceStatement LStatement = new AlterDeviceStatement();
-			LStatement.DeviceName = Schema.Object.EnsureRooted(Device.Name);
-			LStatement.DropDeviceOperatorMaps.Add(EmitDropDefinition(AMode));
-			return LStatement;
+			AlterDeviceStatement statement = new AlterDeviceStatement();
+			statement.DeviceName = Schema.Object.EnsureRooted(Device.Name);
+			statement.DropDeviceOperatorMaps.Add(EmitDropDefinition(mode));
+			return statement;
 		}
     }
     
@@ -185,90 +185,90 @@ namespace Alphora.Dataphor.DAE.Schema
 	{		
 		public DeviceOperators() : base(){}
 		
-		public void Add(DeviceOperator AOperator)
+		public void Add(DeviceOperator operatorValue)
 		{
-			Add(AOperator.Operator, AOperator);
+			Add(operatorValue.Operator, operatorValue);
 		}
 	}
 
     public abstract class DeviceScalarType : DeviceObject
     {
-		public DeviceScalarType(int AID, string AName) : base(AID, AName) {}
+		public DeviceScalarType(int iD, string name) : base(iD, name) {}
 
-		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.DeviceScalarType"), FScalarType.DisplayName, Device.DisplayName); } }
+		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.DeviceScalarType"), _scalarType.DisplayName, Device.DisplayName); } }
 
 		// ScalarType
 		[Reference]
-		private ScalarType FScalarType;
+		private ScalarType _scalarType;
 		public ScalarType ScalarType
 		{
-			get { return FScalarType; }
-			set { FScalarType = value; }
+			get { return _scalarType; }
+			set { _scalarType = value; }
 		}
 		
 		// IsDefaultClassDefinition
-		private bool FIsDefaultClassDefinition;
+		private bool _isDefaultClassDefinition;
 		public bool IsDefaultClassDefinition
 		{
-			get { return FIsDefaultClassDefinition; }
-			set { FIsDefaultClassDefinition = value; }
+			get { return _isDefaultClassDefinition; }
+			set { _isDefaultClassDefinition = value; }
 		}
 		
         // ClassDefinition
-        private ClassDefinition FClassDefinition;
+        private ClassDefinition _classDefinition;
 		public ClassDefinition ClassDefinition
         {
-			get { return FClassDefinition; }
-			set { FClassDefinition = value; }
+			get { return _classDefinition; }
+			set { _classDefinition = value; }
         }
         
 		/// <summary>Override this method to provide transformation services to the device for a particular data type.</summary>
-		public abstract object ToScalar(IValueManager AManager, object AValue);
+		public abstract object ToScalar(IValueManager manager, object tempValue);
 		
 		/// <summary>Override this method to provide transformation services to the device for a particular data type.</summary>
-		public abstract object FromScalar(IValueManager AManager, object AValue);
+		public abstract object FromScalar(IValueManager manager, object tempValue);
 		
 		/// <summary>Override this method to provide transformation services to the device for stream access data types.</summary>
-		public virtual Stream GetStreamAdapter(IValueManager AManager, Stream AStream)
+		public virtual Stream GetStreamAdapter(IValueManager manager, Stream stream)
 		{
-			return AStream;
+			return stream;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			AlterDeviceStatement LStatement = new AlterDeviceStatement();
-			LStatement.DeviceName = Schema.Object.EnsureRooted(Device.Name);
-			LStatement.CreateDeviceScalarTypeMaps.Add(EmitCreateDefinition(AMode));
-			return LStatement;
+			AlterDeviceStatement statement = new AlterDeviceStatement();
+			statement.DeviceName = Schema.Object.EnsureRooted(Device.Name);
+			statement.CreateDeviceScalarTypeMaps.Add(EmitCreateDefinition(mode));
+			return statement;
 		}
 		
-		public DeviceScalarTypeMap EmitCreateDefinition(EmitMode AMode)
+		public DeviceScalarTypeMap EmitCreateDefinition(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			DeviceScalarTypeMap LScalarTypeMap = new DeviceScalarTypeMap();
-			LScalarTypeMap.ScalarTypeName = Schema.Object.EnsureRooted(ScalarType.Name);
-			LScalarTypeMap.ClassDefinition = (IsDefaultClassDefinition || (ClassDefinition == null)) ? null : (ClassDefinition)ClassDefinition.Clone();
-			LScalarTypeMap.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LScalarTypeMap;
+			DeviceScalarTypeMap scalarTypeMap = new DeviceScalarTypeMap();
+			scalarTypeMap.ScalarTypeName = Schema.Object.EnsureRooted(ScalarType.Name);
+			scalarTypeMap.ClassDefinition = (IsDefaultClassDefinition || (ClassDefinition == null)) ? null : (ClassDefinition)ClassDefinition.Clone();
+			scalarTypeMap.MetaData = MetaData == null ? null : MetaData.Copy();
+			return scalarTypeMap;
 		}
 		
-		public DropDeviceScalarTypeMap EmitDropDefinition(EmitMode AMode)
+		public DropDeviceScalarTypeMap EmitDropDefinition(EmitMode mode)
 		{
-			DropDeviceScalarTypeMap LMap = new DropDeviceScalarTypeMap();
-			LMap.ScalarTypeName = Schema.Object.EnsureRooted(ScalarType.Name);
-			return LMap;
+			DropDeviceScalarTypeMap map = new DropDeviceScalarTypeMap();
+			map.ScalarTypeName = Schema.Object.EnsureRooted(ScalarType.Name);
+			return map;
 		}
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			AlterDeviceStatement LStatement = new AlterDeviceStatement();
-			LStatement.DeviceName = Schema.Object.EnsureRooted(Device.Name);
-			LStatement.DropDeviceScalarTypeMaps.Add(EmitDropDefinition(AMode));
-			return LStatement;
+			AlterDeviceStatement statement = new AlterDeviceStatement();
+			statement.DeviceName = Schema.Object.EnsureRooted(Device.Name);
+			statement.DropDeviceScalarTypeMaps.Add(EmitDropDefinition(mode));
+			return statement;
 		}
     }
     
@@ -276,9 +276,9 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public DeviceScalarTypes() : base(){}
 		
-		public void Add(DeviceScalarType AScalarType)
+		public void Add(DeviceScalarType scalarType)
 		{
-			Add(AScalarType.ScalarType, AScalarType);
+			Add(scalarType.ScalarType, scalarType);
 		}
 	}
 	
@@ -611,127 +611,127 @@ namespace Alphora.Dataphor.DAE.Schema
 	public abstract class Device : CatalogObject
     {						        
 		// constructor
-		public Device(int AID, string AName) : base(AID, AName)
+		public Device(int iD, string name) : base(iD, name)
 		{
 			IsRemotable = false;
-			FReconcileMode = ReconcileMode.Command;
-			FRequiresAuthentication = true;
+			_reconcileMode = ReconcileMode.Command;
+			_requiresAuthentication = true;
 		}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Device"), DisplayName); } }
 
         // ClassDefinition
-        private ClassDefinition FClassDefinition;
+        private ClassDefinition _classDefinition;
 		public ClassDefinition ClassDefinition
         {
-			get { return FClassDefinition; }
-			set { FClassDefinition = value; }
+			get { return _classDefinition; }
+			set { _classDefinition = value; }
         }
         
         // IgnoreUnsupported
-        private bool FIgnoreUnsupported;
+        private bool _ignoreUnsupported;
         public bool IgnoreUnsupported
         {
-			get { return FIgnoreUnsupported; }
-			set { FIgnoreUnsupported = value; }
+			get { return _ignoreUnsupported; }
+			set { _ignoreUnsupported = value; }
 		}
         
 		// Sessions
-        private DeviceSessions FSessions;
-        public DeviceSessions Sessions { get { return FSessions; } }
+        private DeviceSessions _sessions;
+        public DeviceSessions Sessions { get { return _sessions; } }
         
         // Start
-        protected virtual void ApplyDeviceSettings(ServerProcess AProcess)
+        protected virtual void ApplyDeviceSettings(ServerProcess process)
         {
-			foreach (DeviceSetting LSetting in AProcess.ServerSession.Server.DeviceSettings.GetSettingsForDevice(Name))
+			foreach (DeviceSetting setting in process.ServerSession.Server.DeviceSettings.GetSettingsForDevice(Name))
 			{
 				try
 				{
-					ClassLoader.SetProperty(this, LSetting.SettingName, LSetting.SettingValue);
+					ClassLoader.SetProperty(this, setting.SettingName, setting.SettingValue);
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					AProcess.ServerSession.Server.LogError(new SchemaException(SchemaException.Codes.ErrorApplyingDeviceSetting, LException, Name, LSetting.SettingName, LSetting.SettingValue));
+					process.ServerSession.Server.LogError(new SchemaException(SchemaException.Codes.ErrorApplyingDeviceSetting, exception, Name, setting.SettingName, setting.SettingValue));
 				}
 			}
         }
         
-        protected virtual void InternalStart(ServerProcess AProcess)
+        protected virtual void InternalStart(ServerProcess process)
         {
-			FSessions = new DeviceSessions();
+			_sessions = new DeviceSessions();
         }								  
         
-        protected virtual void InternalStarted(ServerProcess AProcess) { }
+        protected virtual void InternalStarted(ServerProcess process) { }
         
-        public void Start(ServerProcess AProcess)
+        public void Start(ServerProcess process)
         {
-			if (!FRunning)
+			if (!_running)
 			{
 				try
 				{
-					ApplyDeviceSettings(AProcess);
-					InternalStart(AProcess);
-					FRunning = true;
-					InternalStarted(AProcess);
+					ApplyDeviceSettings(process);
+					InternalStart(process);
+					_running = true;
+					InternalStarted(process);
 				}
 				catch
 				{
-					Stop(AProcess);
+					Stop(process);
 					throw;
 				}
 			}
         }
         
         // Stop
-        protected virtual void InternalStop(ServerProcess AProcess)
+        protected virtual void InternalStop(ServerProcess process)
         {
-			if (FSessions != null)
+			if (_sessions != null)
 			{
-				FSessions.Dispose();
-				FSessions = null;
+				_sessions.Dispose();
+				_sessions = null;
 			}
         }
 
-        public void Stop(ServerProcess AProcess)
+        public void Stop(ServerProcess process)
         {
-			if (FRunning)
+			if (_running)
 			{
-				InternalStop(AProcess);
-				FRunning = false;
+				InternalStop(process);
+				_running = false;
 			}
         }
 
         // Running
-        private bool FRunning;
-        public bool Running { get { return FRunning; } }
+        private bool _running;
+        public bool Running { get { return _running; } }
         
         protected void CheckRunning()
         {
-			if (!FRunning)
+			if (!_running)
 				throw new SchemaException(SchemaException.Codes.DeviceNotRunning, Name);
         }
         
         protected void CheckNotRunning()
         {
-			if (FRunning)
+			if (_running)
 				throw new SchemaException(SchemaException.Codes.DeviceRunning, Name);
         }
         
         // Registered
-        private bool FRegistered;
-        public bool Registered { get { return FRegistered; } }
+        private bool _registered;
+        public bool Registered { get { return _registered; } }
         
 		public void LoadRegistered()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.Registered");
-			if (LTag != Tag.None)
-				FRegistered = Boolean.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.Registered");
+			if (tag != Tag.None)
+				_registered = Boolean.Parse(tag.Value);
 		}
 
 		public void SaveRegistered()
 		{
-			if (FRegistered)
-				MetaData.Tags.AddOrUpdate("DAE.Registered", FRegistered.ToString(), true);
+			if (_registered)
+				MetaData.Tags.AddOrUpdate("DAE.Registered", _registered.ToString(), true);
 		}
 		
 		public void RemoveRegistered()
@@ -747,7 +747,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// </remarks>
 		public void SetRegistered()
 		{
-			FRegistered = true;
+			_registered = true;
 		}
 		
 		/// <summary>Used by the catalog device to undo the effects of the register call</summary>
@@ -757,235 +757,235 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// </remarks>
 		public void ClearRegistered()
 		{
-			FRegistered = false;
+			_registered = false;
 		}
 
-        public void Register(ServerProcess AProcess)
+        public void Register(ServerProcess process)
         {
-			if (!FRegistered)
+			if (!_registered)
 			{
-				InternalRegister(AProcess);
-				FRegistered = true;
+				InternalRegister(process);
+				_registered = true;
 			}
         }
         
-        protected virtual void InternalRegister(ServerProcess AProcess) { }
+        protected virtual void InternalRegister(ServerProcess process) { }
         
         // Connect
-        protected abstract DeviceSession InternalConnect(ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo);
-		public DeviceSession Connect(ServerProcess AServerProcess, SessionInfo ASessionInfo)
+        protected abstract DeviceSession InternalConnect(ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo);
+		public DeviceSession Connect(ServerProcess serverProcess, SessionInfo sessionInfo)
         {
-			DeviceSession LSession = InternalConnect(AServerProcess, GetDeviceSessionInfo(AServerProcess, AServerProcess.ServerSession.User, ASessionInfo));
+			DeviceSession session = InternalConnect(serverProcess, GetDeviceSessionInfo(serverProcess, serverProcess.ServerSession.User, sessionInfo));
 			try
 			{
-				lock (FSessions.SyncRoot)
+				lock (_sessions.SyncRoot)
 				{
-					FSessions.Add(LSession);
+					_sessions.Add(session);
 				}
-				return LSession;
+				return session;
 			}
 			catch
 			{
-				Disconnect(LSession);
+				Disconnect(session);
 				throw;
 			}
         }
         
         // Disconnect
-        public void Disconnect(DeviceSession ASession)
+        public void Disconnect(DeviceSession session)
         {
-			lock (FSessions.SyncRoot)
+			lock (_sessions.SyncRoot)
 			{
-				ASession.Dispose();
+				session.Dispose();
 			}
         }
 
         // Prepare
-        protected abstract DevicePlanNode InternalPrepare(DevicePlan APlan, PlanNode APlanNode);
-        public DevicePlan Prepare(Plan APlan, PlanNode APlanNode)
+        protected abstract DevicePlanNode InternalPrepare(DevicePlan plan, PlanNode planNode);
+        public DevicePlan Prepare(Plan plan, PlanNode planNode)
         {
 			CheckRunning();
-			Schema.DevicePlan LDevicePlan = CreateDevicePlan(APlan, APlanNode);
-			if (APlanNode.DeviceNode == null)
+			Schema.DevicePlan devicePlan = CreateDevicePlan(plan, planNode);
+			if (planNode.DeviceNode == null)
 			{
-				APlanNode.DeviceNode = InternalPrepare(LDevicePlan, APlanNode);
-				if (APlanNode.DeviceNode == null)
-					LDevicePlan.IsSupported = false;
+				planNode.DeviceNode = InternalPrepare(devicePlan, planNode);
+				if (planNode.DeviceNode == null)
+					devicePlan.IsSupported = false;
 			}
 					
-			return LDevicePlan;
+			return devicePlan;
         }
         
-        protected virtual DevicePlan CreateDevicePlan(Plan APlan, PlanNode APlanNode)
+        protected virtual DevicePlan CreateDevicePlan(Plan plan, PlanNode planNode)
         {
-			return new DevicePlan(APlan, this, APlanNode);
+			return new DevicePlan(plan, this, planNode);
         }
         
-        protected virtual void InternalUnprepare(DevicePlan APlan) {}
-        public void Unprepare(DevicePlan APlan)
+        protected virtual void InternalUnprepare(DevicePlan plan) {}
+        public void Unprepare(DevicePlan plan)
         {
-			InternalUnprepare(APlan);
-			APlan.Dispose();
+			InternalUnprepare(plan);
+			plan.Dispose();
         }
         
         // Translate
-        public virtual Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode) { return null; }
+        public virtual Statement Translate(DevicePlan devicePlan, PlanNode planNode) { return null; }
         
         // Reconcile
-        public virtual ErrorList Reconcile(ServerProcess AProcess, Catalog AServerCatalog, Catalog ADeviceCatalog) { return new ErrorList(); }
+        public virtual ErrorList Reconcile(ServerProcess process, Catalog serverCatalog, Catalog deviceCatalog) { return new ErrorList(); }
         
-        public Catalog GetServerCatalog(ServerProcess AProcess, TableVar ATableVar)
+        public Catalog GetServerCatalog(ServerProcess process, TableVar tableVar)
         {
-			Catalog LServerCatalog = new Catalog();
-			if (ATableVar != null)
-				LServerCatalog.Add(ATableVar);
+			Catalog serverCatalog = new Catalog();
+			if (tableVar != null)
+				serverCatalog.Add(tableVar);
 			else
 			{
-				DataParams LParams = new DataParams();
-				LParams.Add(new DataParam("ADeviceID", AProcess.DataTypes.SystemInteger, Modifier.In, ID));
-				IServerExpressionPlan LPlan = 
-					((IServerProcess)AProcess).PrepareExpression
+				DataParams paramsValue = new DataParams();
+				paramsValue.Add(new DataParam("ADeviceID", process.DataTypes.SystemInteger, Modifier.In, ID));
+				IServerExpressionPlan plan = 
+					((IServerProcess)process).PrepareExpression
 					(
 						@"
 							select System.ObjectDependencies where Dependency_Object_ID = ADeviceID { Object_ID ID }
 								join (Objects where Type = 'BaseTableVar' { ID })
 						",
-						LParams
+						paramsValue
 					);
 				try
 				{
-					IServerCursor LCursor = LPlan.Open(LParams);
+					IServerCursor cursor = plan.Open(paramsValue);
 					try
 					{
-						while (LCursor.Next())
+						while (cursor.Next())
 						{
-							using (Row LRow = LCursor.Select())
+							using (Row row = cursor.Select())
 							{
-								LServerCatalog.Add(AProcess.CatalogDeviceSession.ResolveCatalogObject((int)LRow[0]));
+								serverCatalog.Add(process.CatalogDeviceSession.ResolveCatalogObject((int)row[0]));
 							}
 						}
 					}
 					finally
 					{
-						LPlan.Close(LCursor);
+						plan.Close(cursor);
 					}
 				}
 				finally
 				{
-					((IServerProcess)AProcess).UnprepareExpression(LPlan);
+					((IServerProcess)process).UnprepareExpression(plan);
 				}
 			}
 
-			return LServerCatalog;
+			return serverCatalog;
         }
         
-        public ErrorList Reconcile(ServerProcess AProcess)
+        public ErrorList Reconcile(ServerProcess process)
         {
-			Catalog LServerCatalog = GetServerCatalog(AProcess, null);
-			return Reconcile(AProcess, LServerCatalog, GetDeviceCatalog(AProcess, LServerCatalog));
+			Catalog serverCatalog = GetServerCatalog(process, null);
+			return Reconcile(process, serverCatalog, GetDeviceCatalog(process, serverCatalog));
         }
         
-        public ErrorList Reconcile(ServerProcess AProcess, TableVar ATableVar)
+        public ErrorList Reconcile(ServerProcess process, TableVar tableVar)
         {			
-			Catalog LServerCatalog = GetServerCatalog(AProcess, ATableVar);
-			return Reconcile(AProcess, LServerCatalog, GetDeviceCatalog(AProcess, LServerCatalog, ATableVar));
+			Catalog serverCatalog = GetServerCatalog(process, tableVar);
+			return Reconcile(process, serverCatalog, GetDeviceCatalog(process, serverCatalog, tableVar));
         }
         
-        public void CheckReconcile(ServerProcess AProcess, TableVar ATableVar)
+        public void CheckReconcile(ServerProcess process, TableVar tableVar)
         {
 			if ((ReconcileMode & ReconcileMode.Automatic) != 0)
 			{
-				ErrorList LErrors = Reconcile(AProcess, ATableVar);	
-				if (LErrors.Count > 0)
-					throw LErrors[0];
+				ErrorList errors = Reconcile(process, tableVar);	
+				if (errors.Count > 0)
+					throw errors[0];
 			}
         }
         
         // CreateTable
-        public virtual void CreateTable(ServerProcess AProcess, TableVar ATableVar, ReconcileMaster AMaster){}
+        public virtual void CreateTable(ServerProcess process, TableVar tableVar, ReconcileMaster master){}
         
         // ReconcileTable
-        public virtual void ReconcileTable(ServerProcess AProcess, TableVar AServerTableVar, TableVar ADeviceTableVar, ReconcileMaster AMaster){}
+        public virtual void ReconcileTable(ServerProcess process, TableVar serverTableVar, TableVar deviceTableVar, ReconcileMaster master){}
         
         // GetDeviceCatalog
-        public virtual Catalog GetDeviceCatalog(ServerProcess AProcess, Catalog AServerCatalog, TableVar ATableVar) { return new Catalog(); }
-        public Catalog GetDeviceCatalog(ServerProcess AProcess, Catalog AServerCatalog)
+        public virtual Catalog GetDeviceCatalog(ServerProcess process, Catalog serverCatalog, TableVar tableVar) { return new Catalog(); }
+        public Catalog GetDeviceCatalog(ServerProcess process, Catalog serverCatalog)
         {
-			return GetDeviceCatalog(AProcess, AServerCatalog, null);
+			return GetDeviceCatalog(process, serverCatalog, null);
         }
         
         // DeviceOperators
-        private DeviceOperators FDeviceOperators = new DeviceOperators();
+        private DeviceOperators _deviceOperators = new DeviceOperators();
 
 		/// <summary>Resolves the operator map for the given operator, caching it if it exists. Returns null if the operator is not mapped.</summary>
-        public DeviceOperator ResolveDeviceOperator(Plan APlan, Schema.Operator AOperator)
+        public DeviceOperator ResolveDeviceOperator(Plan plan, Schema.Operator operatorValue)
         {
-			Schema.DeviceOperator LDeviceOperator;
-			if (!FDeviceOperators.TryGetValue(AOperator, out LDeviceOperator))
-				LDeviceOperator = APlan.CatalogDeviceSession.ResolveDeviceOperator(this, AOperator);
-			if (LDeviceOperator != null)
-				APlan.AttachDependency(LDeviceOperator);
-			return LDeviceOperator;
+			Schema.DeviceOperator deviceOperator;
+			if (!_deviceOperators.TryGetValue(operatorValue, out deviceOperator))
+				deviceOperator = plan.CatalogDeviceSession.ResolveDeviceOperator(this, operatorValue);
+			if (deviceOperator != null)
+				plan.AttachDependency(deviceOperator);
+			return deviceOperator;
         }
         
         /// <summary>Returns true if this device contains a mapping for the given operator, and it is in the cache.</summary>
         /// <remarks>
         /// Note that this method does not perform any resolution. It is only used for cache maintenance.
         /// </remarks>
-        public bool HasDeviceOperator(Schema.Operator AOperator)
+        public bool HasDeviceOperator(Schema.Operator operatorValue)
         {
-			return FDeviceOperators.ContainsKey(AOperator);
+			return _deviceOperators.ContainsKey(operatorValue);
         }
         
         /// <summary>Adds the given operator map to the cache.</summary>
-        public void AddDeviceOperator(Schema.DeviceOperator ADeviceOperator)
+        public void AddDeviceOperator(Schema.DeviceOperator deviceOperator)
         {
-			FDeviceOperators.Add(ADeviceOperator);
+			_deviceOperators.Add(deviceOperator);
         }
         
         /// <summary>Removes the given operator map from the cache.</summary>
-        public void RemoveDeviceOperator(Schema.DeviceOperator ADeviceOperator)
+        public void RemoveDeviceOperator(Schema.DeviceOperator deviceOperator)
         {
-			FDeviceOperators.Remove(ADeviceOperator.Operator);
+			_deviceOperators.Remove(deviceOperator.Operator);
         }
         
         // DeviceScalarTypes
-        private DeviceScalarTypes FDeviceScalarTypes = new DeviceScalarTypes();
+        private DeviceScalarTypes _deviceScalarTypes = new DeviceScalarTypes();
 
 		/// <summary>Returns the scalar type map for the given scalar type, caching it if it exists. Returns null if the scalar type is not mapped.</summary>
-        public DeviceScalarType ResolveDeviceScalarType(Plan APlan, Schema.ScalarType AScalarType)
+        public DeviceScalarType ResolveDeviceScalarType(Plan plan, Schema.ScalarType scalarType)
         {
-			Schema.DeviceScalarType LDeviceScalarType;
-			if (!FDeviceScalarTypes.TryGetValue(AScalarType, out LDeviceScalarType))
-				LDeviceScalarType = APlan.CatalogDeviceSession.ResolveDeviceScalarType(this, AScalarType);
-			if (LDeviceScalarType != null)
-				APlan.AttachDependency(LDeviceScalarType);
-			return LDeviceScalarType;
+			Schema.DeviceScalarType deviceScalarType;
+			if (!_deviceScalarTypes.TryGetValue(scalarType, out deviceScalarType))
+				deviceScalarType = plan.CatalogDeviceSession.ResolveDeviceScalarType(this, scalarType);
+			if (deviceScalarType != null)
+				plan.AttachDependency(deviceScalarType);
+			return deviceScalarType;
         }
         
         /// <summary>Returns true if this device contains a mapping for the given scalar type and it is in the cache.</summary>
         /// <remarks>
         /// Note that this method does not perform any resolution. It is only used for cache maintenance.
         /// </remarks>
-        public bool HasDeviceScalarType(Schema.ScalarType AScalarType)
+        public bool HasDeviceScalarType(Schema.ScalarType scalarType)
         {
-			return FDeviceScalarTypes.ContainsKey(AScalarType);
+			return _deviceScalarTypes.ContainsKey(scalarType);
         }
         
 		/// <summary>Adds the given scalar type map to the cache.</summary>
-        public void AddDeviceScalarType(Schema.DeviceScalarType ADeviceScalarType)
+        public void AddDeviceScalarType(Schema.DeviceScalarType deviceScalarType)
         {
-			FDeviceScalarTypes.Add(ADeviceScalarType);
+			_deviceScalarTypes.Add(deviceScalarType);
         }
         
         /// <summary>Removes the given scalar type map from the cache.</summary>
-        public void RemoveDeviceScalarType(Schema.DeviceScalarType ADeviceScalarType)
+        public void RemoveDeviceScalarType(Schema.DeviceScalarType deviceScalarType)
         {
-			FDeviceScalarTypes.Remove(ADeviceScalarType.ScalarType);
+			_deviceScalarTypes.Remove(deviceScalarType.ScalarType);
         }
         
         // RequiresAuthentication
-        private bool FRequiresAuthentication;
+        private bool _requiresAuthentication;
         /// <summary>Indicates whether the device will attempt to resolve a device user when establishing a connection.</summary>
         /// <remarks>
         /// For the internal devices such as the catalog, temp, and A/T devices, the DAE manages access security, and no
@@ -993,66 +993,66 @@ namespace Alphora.Dataphor.DAE.Schema
         /// </remarks>
         public bool RequiresAuthentication
         {
-			get { return FRequiresAuthentication; }
-			set { FRequiresAuthentication = false; }
+			get { return _requiresAuthentication; }
+			set { _requiresAuthentication = false; }
 		}
         
         // DeviceUsers
-        private DeviceUsers FUsers = new DeviceUsers();
-        public DeviceUsers Users { get { return FUsers; } }
+        private DeviceUsers _users = new DeviceUsers();
+        public DeviceUsers Users { get { return _users; } }
         
         // UserID
-		private string FUserID = String.Empty;
-		public string UserID { get { return FUserID; } set { FUserID = value == null ? String.Empty : value; } }
+		private string _userID = String.Empty;
+		public string UserID { get { return _userID; } set { _userID = value == null ? String.Empty : value; } }
 		
 		// Password
-		private string FPassword = String.Empty;
-		public string Password { get { return FPassword; } set { FPassword = value == null ? String.Empty : SecurityUtility.EncryptPassword(value); } }
+		private string _password = String.Empty;
+		public string Password { get { return _password; } set { _password = value == null ? String.Empty : SecurityUtility.EncryptPassword(value); } }
 		
 		// EncryptedPassword
-		public string EncryptedPassword { get { return FPassword; } set { FPassword = value == null ? String.Empty : value; } }
+		public string EncryptedPassword { get { return _password; } set { _password = value == null ? String.Empty : value; } }
 
 		// ConnectionParameters
-		private string FConnectionParameters = String.Empty;
-		public string ConnectionParameters { get { return FConnectionParameters; } set { FConnectionParameters = value == null ? String.Empty : value; } } 
+		private string _connectionParameters = String.Empty;
+		public string ConnectionParameters { get { return _connectionParameters; } set { _connectionParameters = value == null ? String.Empty : value; } } 
 
-		public DeviceSessionInfo GetDeviceSessionInfo(ServerProcess AProcess, User AUser, SessionInfo ASessionInfo)
+		public DeviceSessionInfo GetDeviceSessionInfo(ServerProcess process, User user, SessionInfo sessionInfo)
 		{
-			DeviceUser LUser = null;
-			if (FRequiresAuthentication)
-				LUser = AProcess.CatalogDeviceSession.ResolveDeviceUser(this, AUser, false);
-			DeviceSessionInfo LDeviceSessionInfo = null;
-			if (LUser != null)
-				LDeviceSessionInfo = new DeviceSessionInfo(LUser.DeviceUserID, SecurityUtility.DecryptPassword(LUser.DevicePassword), LUser.ConnectionParameters);
+			DeviceUser localUser = null;
+			if (_requiresAuthentication)
+				localUser = process.CatalogDeviceSession.ResolveDeviceUser(this, user, false);
+			DeviceSessionInfo deviceSessionInfo = null;
+			if (localUser != null)
+				deviceSessionInfo = new DeviceSessionInfo(localUser.DeviceUserID, SecurityUtility.DecryptPassword(localUser.DevicePassword), localUser.ConnectionParameters);
 			else
 			{
 				if (UserID != String.Empty)
-					LDeviceSessionInfo = new DeviceSessionInfo(UserID, SecurityUtility.DecryptPassword(Password), ConnectionParameters);
+					deviceSessionInfo = new DeviceSessionInfo(UserID, SecurityUtility.DecryptPassword(Password), ConnectionParameters);
 			}
 
-			if (LDeviceSessionInfo == null)
-				LDeviceSessionInfo = new DeviceSessionInfo(ASessionInfo.UserID, ASessionInfo.Password);
-			return LDeviceSessionInfo;
+			if (deviceSessionInfo == null)
+				deviceSessionInfo = new DeviceSessionInfo(sessionInfo.UserID, sessionInfo.Password);
+			return deviceSessionInfo;
 		}
 		
         // ReconcileMode
-        private ReconcileMode FReconcileMode;
+        private ReconcileMode _reconcileMode;
         public ReconcileMode ReconcileMode
         {
-			get { return FReconcileMode; }
-			set { FReconcileMode = value; }
+			get { return _reconcileMode; }
+			set { _reconcileMode = value; }
         }
 
         // ReconcileMaster
-        private ReconcileMaster FReconcileMaster;
+        private ReconcileMaster _reconcileMaster;
         public ReconcileMaster ReconcileMaster
         {
-			get { return FReconcileMaster; }
-			set { FReconcileMaster = value; }
+			get { return _reconcileMaster; }
+			set { _reconcileMaster = value; }
         }
         
 		// verify that all types in the given table are mapped into this device
-        public virtual void CheckSupported(Plan APlan, TableVar ATableVar)
+        public virtual void CheckSupported(Plan plan, TableVar tableVar)
         {
         }
         
@@ -1063,28 +1063,28 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         
         // Supports
-        public bool Supports(DeviceCapability ACapability)
+        public bool Supports(DeviceCapability capability)
         {
-			return (Capabilities & ACapability) != 0;
+			return (Capabilities & capability) != 0;
         }
         
-        protected void CheckCapability(DeviceCapability ACapability)
+        protected void CheckCapability(DeviceCapability capability)
         {
-			if (!Supports(ACapability))
-				throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, Enum.GetName(typeof(DeviceCapability), ACapability), Name);
+			if (!Supports(capability))
+				throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, Enum.GetName(typeof(DeviceCapability), capability), Name);
         }
         
         // SupportsTransactions
-        protected bool FSupportsTransactions;
-		public bool SupportsTransactions { get { return FSupportsTransactions; } }
+        protected bool _supportsTransactions;
+		public bool SupportsTransactions { get { return _supportsTransactions; } }
 		
 		// SupportsNestedTransactions
-		protected bool FSupportsNestedTransactions;
-		public bool SupportsNestedTransactions { get { return FSupportsNestedTransactions; } }
+		protected bool _supportsNestedTransactions;
+		public bool SupportsNestedTransactions { get { return _supportsNestedTransactions; } }
 
-        public override Statement EmitStatement(EmitMode AMode)
+        public override Statement EmitStatement(EmitMode mode)
         {
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 			{
 				SaveObjectID();
 				SaveRegistered();
@@ -1095,22 +1095,22 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveRegistered();
 			}
 
-			CreateDeviceStatement LStatement = new CreateDeviceStatement();
-			LStatement.DeviceName = Schema.Object.EnsureRooted(Name);
-			LStatement.ClassDefinition = ClassDefinition == null ? null : (ClassDefinition)ClassDefinition.Clone();
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			LStatement.ReconciliationSettings = new ReconciliationSettings();
-			LStatement.ReconciliationSettings.ReconcileMaster = ReconcileMaster;
-			LStatement.ReconciliationSettings.ReconcileMode = ReconcileMode;
+			CreateDeviceStatement statement = new CreateDeviceStatement();
+			statement.DeviceName = Schema.Object.EnsureRooted(Name);
+			statement.ClassDefinition = ClassDefinition == null ? null : (ClassDefinition)ClassDefinition.Clone();
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			statement.ReconciliationSettings = new ReconciliationSettings();
+			statement.ReconciliationSettings.ReconcileMaster = ReconcileMaster;
+			statement.ReconciliationSettings.ReconcileMode = ReconcileMode;
 
-			return LStatement;
+			return statement;
         }
         
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DropDeviceStatement LStatement = new DropDeviceStatement();
-			LStatement.ObjectName = Schema.Object.EnsureRooted(Name);
-			return LStatement;
+			DropDeviceStatement statement = new DropDeviceStatement();
+			statement.ObjectName = Schema.Object.EnsureRooted(Name);
+			return statement;
 		}
 		
 		public override string[] GetRights()
@@ -1129,7 +1129,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			};
 		}
 		
-		public virtual ClassDefinition GetDefaultOperatorClassDefinition(MetaData AMetaData)
+		public virtual ClassDefinition GetDefaultOperatorClassDefinition(MetaData metaData)
 		{
 			return null;
 		}
@@ -1152,30 +1152,30 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class DeviceSetting : System.Object
     {
-		private string FDeviceName;
+		private string _deviceName;
 		public string DeviceName
 		{
-			get { return FDeviceName; }
-			set { FDeviceName = value; }
+			get { return _deviceName; }
+			set { _deviceName = value; }
 		}
 		
-		private string FSettingName;
+		private string _settingName;
 		public string SettingName
 		{
-			get { return FSettingName; }
-			set { FSettingName = value; }
+			get { return _settingName; }
+			set { _settingName = value; }
 		}
 		
-		private string FSettingValue;
+		private string _settingValue;
 		public string SettingValue
 		{
-			get { return FSettingValue; }
-			set { FSettingValue = value; }
+			get { return _settingValue; }
+			set { _settingValue = value; }
 		}
 		
 		public override string ToString()
 		{
-			return String.Format("{0}\\{1}={2}", FDeviceName, FSettingName, FSettingValue);
+			return String.Format("{0}\\{1}={2}", _deviceName, _settingName, _settingValue);
 		}
 	}
 	
@@ -1193,79 +1193,79 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class DeviceSettings : BaseList<DeviceSetting>
 	{
 	#endif
-		public DeviceSettings GetSettingsForDevice(string ADeviceName)
+		public DeviceSettings GetSettingsForDevice(string deviceName)
 		{
-			DeviceSettings LResult = new DeviceSettings();
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].DeviceName == ADeviceName)
-					LResult.Add(this[LIndex]);
-			return LResult;
+			DeviceSettings result = new DeviceSettings();
+			for (int index = 0; index < Count; index++)
+				if (this[index].DeviceName == deviceName)
+					result.Add(this[index]);
+			return result;
 		}
 	}
 	
 	public class DeviceSessionInfo : System.Object
 	{
-		public DeviceSessionInfo(string AUserName, string APassword) : base()
+		public DeviceSessionInfo(string userName, string password) : base()
 		{
-			UserName = AUserName;
-			Password = APassword;
+			UserName = userName;
+			Password = password;
 			ConnectionParameters = string.Empty;
 		}
 
-		public DeviceSessionInfo(string AUserName, string APassword, string AConnectionParameters) : base()
+		public DeviceSessionInfo(string userName, string password, string connectionParameters) : base()
 		{
-			UserName = AUserName;
-			Password = APassword;
-			ConnectionParameters = AConnectionParameters;
+			UserName = userName;
+			Password = password;
+			ConnectionParameters = connectionParameters;
 		}
 
-		private string FUserName;
+		private string _userName;
 		public string UserName 
 		{ 
-			get { return FUserName; } 
-			set { FUserName = value; } 
+			get { return _userName; } 
+			set { _userName = value; } 
 		}
 
-		private string FPassword;
+		private string _password;
 		public string Password 
 		{
-			get { return FPassword; } 
-			set { FPassword = value; } 
+			get { return _password; } 
+			set { _password = value; } 
 		} 
 
-		private string FConnectionParameters;
+		private string _connectionParameters;
 		public string ConnectionParameters 
 		{ 
-			get { return FConnectionParameters; } 
-			set { FConnectionParameters = value; } 
+			get { return _connectionParameters; } 
+			set { _connectionParameters = value; } 
 		}
 	}
 
 	public class DeviceTransaction : Disposable
 	{
-		public DeviceTransaction(IsolationLevel AIsolationLevel) : base()
+		public DeviceTransaction(IsolationLevel isolationLevel) : base()
 		{
-			FIsolationLevel = AIsolationLevel;
+			_isolationLevel = isolationLevel;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FOperations != null)
+			if (_operations != null)
 			{
-				foreach (Operation LOperation in FOperations)
-					LOperation.Dispose();
-				FOperations.Clear();
-				FOperations = null;
+				foreach (Operation operation in _operations)
+					operation.Dispose();
+				_operations.Clear();
+				_operations = null;
 			}
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}		
 
-		private Operations FOperations = new Operations();
-		public Operations Operations { get { return FOperations; } }
+		private Operations _operations = new Operations();
+		public Operations Operations { get { return _operations; } }
 		
-		private IsolationLevel FIsolationLevel;
-		public IsolationLevel IsolationLevel { get { return FIsolationLevel; } }
+		private IsolationLevel _isolationLevel;
+		public IsolationLevel IsolationLevel { get { return _isolationLevel; } }
 	}
 	
 	#if USETYPEDLIST
@@ -1283,24 +1283,24 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class DeviceTransactions : BaseList<DeviceTransaction>
 	{
 	#endif
-		public void BeginTransaction(IsolationLevel AIsolationLevel)
+		public void BeginTransaction(IsolationLevel isolationLevel)
 		{
-			Add(new DeviceTransaction(AIsolationLevel));
+			Add(new DeviceTransaction(isolationLevel));
 		}
 		
-		public void EndTransaction(bool ASuccess)
+		public void EndTransaction(bool success)
 		{
 			// If we successfully committed a nested transaction, append it's log to the current transaction so that a subsequent rollback will undo it's affects as well.
-			if ((ASuccess) && (Count > 1))
+			if ((success) && (Count > 1))
 			{
 				#if USETYPEDLIST
-				DeviceTransaction LTransaction = (DeviceTransaction)RemoveItemAt(Count - 1);
+				DeviceTransaction transaction = (DeviceTransaction)RemoveItemAt(Count - 1);
 				#else
-				DeviceTransaction LTransaction = RemoveAt(Count - 1);
+				DeviceTransaction transaction = RemoveAt(Count - 1);
 				#endif
-				CurrentTransaction().Operations.AddRange(LTransaction.Operations);
-				LTransaction.Operations.Clear();
-				LTransaction.Dispose();
+				CurrentTransaction().Operations.AddRange(transaction.Operations);
+				transaction.Operations.Clear();
+				transaction.Dispose();
 			}
 			else
 				#if USETYPEDLIST
@@ -1318,102 +1318,102 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	public abstract class DeviceSession : Disposable
     {		
-		protected internal DeviceSession(Device ADevice, ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo) : base()
+		protected internal DeviceSession(Device device, ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo) : base()
 		{
-			FDevice = ADevice;
-			FServerProcess = AServerProcess;
-			FDeviceSessionInfo = ADeviceSessionInfo;
+			_device = device;
+			_serverProcess = serverProcess;
+			_deviceSessionInfo = deviceSessionInfo;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				if (FTransactions != null)
+				if (_transactions != null)
 				{
 					EnsureTransactionsRolledback();
-					FTransactions = null;
+					_transactions = null;
 				}
 			}
 			finally
 			{
-				FDevice = null;
-				FServerProcess = null;
-				FDeviceSessionInfo = null;
+				_device = null;
+				_serverProcess = null;
+				_deviceSessionInfo = null;
 
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
 		[Reference]
-		private Device FDevice;
-		public Device Device { get { return FDevice; } }
+		private Device _device;
+		public Device Device { get { return _device; } }
 		
 		// ServerProcess
 		[Reference]
-		private ServerProcess FServerProcess;
-		public ServerProcess ServerProcess { get { return FServerProcess; } } 
+		private ServerProcess _serverProcess;
+		public ServerProcess ServerProcess { get { return _serverProcess; } } 
 
 		// DeviceSessionInfo
-		private DeviceSessionInfo FDeviceSessionInfo;
-		public DeviceSessionInfo DeviceSessionInfo { get { return FDeviceSessionInfo; } }
+		private DeviceSessionInfo _deviceSessionInfo;
+		public DeviceSessionInfo DeviceSessionInfo { get { return _deviceSessionInfo; } }
 		
 		#if REFERENCECOUNTDEVICESESSIONS
 		protected internal int FReferenceCount;
 		#endif
 		
 		// Exception Handling
-        protected Exception InternalWrapException(Exception AException)
+        protected Exception InternalWrapException(Exception exception)
         {
-			return AException;
+			return exception;
         }
         
-        protected virtual bool IsConnectionFailure(Exception AException)
+        protected virtual bool IsConnectionFailure(Exception exception)
         {
 			return false;
         }
         
-        protected virtual bool IsTransactionFailure(Exception AException)
+        protected virtual bool IsTransactionFailure(Exception exception)
         {
 			return false;
         }
 
 		// All exceptions from the device layer must come through this point
-        public Exception WrapException(Exception AException)
+        public Exception WrapException(Exception exception)
         {
 			// IsConnectionFailure
-			if (IsConnectionFailure(AException))
+			if (IsConnectionFailure(exception))
 			{
 				ServerProcess.StopError = true;
-				AException = new DeviceException(DeviceException.Codes.ConnectionFailure, ErrorSeverity.Environment, AException, Device.Name);
+				exception = new DeviceException(DeviceException.Codes.ConnectionFailure, ErrorSeverity.Environment, exception, Device.Name);
 			}
 
 			// IsTransactionFailure
-			if (IsTransactionFailure(AException))
+			if (IsTransactionFailure(exception))
 			{
 				ServerProcess.StopError = true;
-				AException = new DeviceException(DeviceException.Codes.TransactionFailure, ErrorSeverity.Environment, AException, Device.Name);
+				exception = new DeviceException(DeviceException.Codes.TransactionFailure, ErrorSeverity.Environment, exception, Device.Name);
 			}
 			
-			return InternalWrapException(AException);
+			return InternalWrapException(exception);
         }
 
 		// Transactions
-		private DeviceTransactions FTransactions = new DeviceTransactions();
-		public DeviceTransactions Transactions { get { return FTransactions; } }
+		private DeviceTransactions _transactions = new DeviceTransactions();
+		public DeviceTransactions Transactions { get { return _transactions; } }
 		
         // BeginTransaction
-        protected abstract void InternalBeginTransaction(IsolationLevel AIsolationLevel);
-        public void BeginTransaction(IsolationLevel AIsolationLevel)
+        protected abstract void InternalBeginTransaction(IsolationLevel isolationLevel);
+        public void BeginTransaction(IsolationLevel isolationLevel)
         {
 			try
 			{
-				FTransactions.BeginTransaction(AIsolationLevel);
-				InternalBeginTransaction(AIsolationLevel);
+				_transactions.BeginTransaction(isolationLevel);
+				InternalBeginTransaction(isolationLevel);
 			} 
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
         }
         
@@ -1426,9 +1426,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				InternalPrepareTransaction();
 			} 
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
 		}
 
@@ -1440,85 +1440,85 @@ namespace Alphora.Dataphor.DAE.Schema
 			try
 			{
 				InternalCommitTransaction();
-				FTransactions.EndTransaction(true);
+				_transactions.EndTransaction(true);
 			} 
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
 		}
 		
-		protected void RemoveTransactionReferences(DeviceTransaction ATransaction, Schema.TableVar ATableVar)
+		protected void RemoveTransactionReferences(DeviceTransaction transaction, Schema.TableVar tableVar)
 		{
-			Operation LOperation;
-			for (int LOperationIndex = ATransaction.Operations.Count - 1; LOperationIndex >= 0; LOperationIndex--)
+			Operation operation;
+			for (int operationIndex = transaction.Operations.Count - 1; operationIndex >= 0; operationIndex--)
 			{
-				LOperation = ATransaction.Operations[LOperationIndex];
-				if (LOperation.TableVar.Equals(ATableVar))
+				operation = transaction.Operations[operationIndex];
+				if (operation.TableVar.Equals(tableVar))
 				{
-					ATransaction.Operations.RemoveAt(LOperationIndex);
-					LOperation.Dispose();
+					transaction.Operations.RemoveAt(operationIndex);
+					operation.Dispose();
 				}
 			}
 		}
 		
-		protected void RemoveTransactionReferences(Schema.TableVar ATableVar)
+		protected void RemoveTransactionReferences(Schema.TableVar tableVar)
 		{
-			foreach (DeviceTransaction LTransaction in FTransactions)
-				RemoveTransactionReferences(LTransaction, ATableVar);
+			foreach (DeviceTransaction transaction in _transactions)
+				RemoveTransactionReferences(transaction, tableVar);
 		}
 		
 		// RollbackTransaction
-		protected void InternalRollbackTransaction(DeviceTransaction ATransaction)
+		protected void InternalRollbackTransaction(DeviceTransaction transaction)
 		{
-			Operation LOperation;
-			InsertOperation LInsertOperation;
-			UpdateOperation LUpdateOperation;
-			DeleteOperation LDeleteOperation;
-			Exception LException = null;
-			Program LProgram = new Program(ServerProcess);
-			LProgram.Start(null);
+			Operation operation;
+			InsertOperation insertOperation;
+			UpdateOperation updateOperation;
+			DeleteOperation deleteOperation;
+			Exception exception = null;
+			Program program = new Program(ServerProcess);
+			program.Start(null);
 			try
 			{
-				for (int LIndex = ATransaction.Operations.Count - 1; LIndex >= 0; LIndex--)
+				for (int index = transaction.Operations.Count - 1; index >= 0; index--)
 				{
 					try
 					{
-						LOperation = ATransaction.Operations[LIndex];
+						operation = transaction.Operations[index];
 						try
 						{
-							LInsertOperation = LOperation as InsertOperation;
-							if (LInsertOperation != null)
-								InternalInsertRow(LProgram, LInsertOperation.TableVar, LInsertOperation.Row, LInsertOperation.ValueFlags);
+							insertOperation = operation as InsertOperation;
+							if (insertOperation != null)
+								InternalInsertRow(program, insertOperation.TableVar, insertOperation.Row, insertOperation.ValueFlags);
 
-							LUpdateOperation = LOperation as UpdateOperation;
-							if (LUpdateOperation != null)
-								InternalUpdateRow(LProgram, LUpdateOperation.TableVar, LUpdateOperation.OldRow, LUpdateOperation.NewRow, LUpdateOperation.ValueFlags);
+							updateOperation = operation as UpdateOperation;
+							if (updateOperation != null)
+								InternalUpdateRow(program, updateOperation.TableVar, updateOperation.OldRow, updateOperation.NewRow, updateOperation.ValueFlags);
 
-							LDeleteOperation = LOperation as DeleteOperation;
-							if (LDeleteOperation != null)
-								InternalDeleteRow(LProgram, LDeleteOperation.TableVar, LDeleteOperation.Row);
+							deleteOperation = operation as DeleteOperation;
+							if (deleteOperation != null)
+								InternalDeleteRow(program, deleteOperation.TableVar, deleteOperation.Row);
 						}
 						finally
 						{
-							ATransaction.Operations.RemoveAt(LIndex);
-							LOperation.Dispose();
+							transaction.Operations.RemoveAt(index);
+							operation.Dispose();
 						}
 					}
 					catch (Exception E)
 					{
-						LException = E;
+						exception = E;
 						ServerProcess.ServerSession.Server.LogError(E);
 					}
 				}
 			}
 			finally
 			{
-				LProgram.Stop(null);
+				program.Stop(null);
 			}
 			
-			if (LException != null)
-				throw LException;
+			if (exception != null)
+				throw exception;
 		}
 		
 		protected abstract void InternalRollbackTransaction();
@@ -1531,7 +1531,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				{
 					try
 					{
-						InternalRollbackTransaction(FTransactions.CurrentTransaction());
+						InternalRollbackTransaction(_transactions.CurrentTransaction());
 					}
 					finally
 					{
@@ -1540,17 +1540,17 @@ namespace Alphora.Dataphor.DAE.Schema
 				}
 				finally
 				{
-					FTransactions.EndTransaction(false);
+					_transactions.EndTransaction(false);
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
 		}
 		
 		// InTransaction
-		public bool InTransaction { get { return FTransactions.Count > 0; } }
+		public bool InTransaction { get { return _transactions.Count > 0; } }
 
         protected void CheckInTransaction()
         {
@@ -1561,43 +1561,43 @@ namespace Alphora.Dataphor.DAE.Schema
         // EnsureTransactionsRolledback
         protected void EnsureTransactionsRolledback()
         {
-			while (FTransactions.Count > 0)
+			while (_transactions.Count > 0)
 				RollbackTransaction();
         }
         
         // Execute
-        protected virtual object InternalExecute(Program AProgram, DevicePlan ADevicePlan)
+        protected virtual object InternalExecute(Program program, DevicePlan devicePlan)
         {
-			throw new DAE.Device.DeviceException(DAE.Device.DeviceException.Codes.InvalidExecuteRequest, Device.Name, ADevicePlan.Node.GetType().Name);
+			throw new DAE.Device.DeviceException(DAE.Device.DeviceException.Codes.InvalidExecuteRequest, Device.Name, devicePlan.Node.GetType().Name);
         }
         
-        public object Execute(Program AProgram, DevicePlan ADevicePlan)
+        public object Execute(Program program, DevicePlan devicePlan)
         {
-			if (ADevicePlan.Node is DropTableNode)
-				RemoveTransactionReferences(((DropTableNode)ADevicePlan.Node).Table);
+			if (devicePlan.Node is DropTableNode)
+				RemoveTransactionReferences(((DropTableNode)devicePlan.Node).Table);
 			try
 			{
-				return InternalExecute(AProgram, ADevicePlan);
+				return InternalExecute(program, devicePlan);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
         }
         
-        protected void CheckCapability(DeviceCapability ACapability)
+        protected void CheckCapability(DeviceCapability capability)
         {
-			if (!Device.Supports(ACapability))
-				throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, Enum.GetName(typeof(DeviceCapability), ACapability), Device.Name);
+			if (!Device.Supports(capability))
+				throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, Enum.GetName(typeof(DeviceCapability), capability), Device.Name);
         }
         
         // Row level operations are provided as implementation details only, not exposed through the Dataphor language.
-        protected virtual void InternalInsertRow(Program AProgram, TableVar ATable, Row ARow, BitArray AValueFlags)
+        protected virtual void InternalInsertRow(Program program, TableVar table, Row row, BitArray valueFlags)
         {
 			throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, DeviceCapability.RowLevelInsert, Device.Name);
         }
 
-        public void InsertRow(Program AProgram, TableVar ATable, Row ARow, BitArray AValueFlags)
+        public void InsertRow(Program program, TableVar table, Row row, BitArray valueFlags)
         {
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
@@ -1605,23 +1605,23 @@ namespace Alphora.Dataphor.DAE.Schema
 
 			try
 			{
-				InternalInsertRow(AProgram, ATable, ARow, AValueFlags);
+				InternalInsertRow(program, table, row, valueFlags);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
 
 			if (!ServerProcess.NonLogged && ((!Device.SupportsTransactions && (Transactions.Count == 1)) || (!Device.SupportsNestedTransactions && (Transactions.Count > 1))) && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new DeleteOperation(ATable, (Row)ARow.Copy()));
+				Transactions.CurrentTransaction().Operations.Add(new DeleteOperation(table, (Row)row.Copy()));
         }
         
-        protected virtual void InternalUpdateRow(Program AProgram, TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+        protected virtual void InternalUpdateRow(Program program, TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
         {
 			throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, DeviceCapability.RowLevelUpdate, Device.Name);
         }
         
-        public void UpdateRow(Program AProgram, TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+        public void UpdateRow(Program program, TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
         {
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
@@ -1629,38 +1629,38 @@ namespace Alphora.Dataphor.DAE.Schema
 			
 			try
 			{
-				InternalUpdateRow(AProgram, ATable, AOldRow, ANewRow, AValueFlags);
+				InternalUpdateRow(program, table, oldRow, newRow, valueFlags);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
 
 			if (!ServerProcess.NonLogged && ((!Device.SupportsTransactions && (Transactions.Count == 1)) || (!Device.SupportsNestedTransactions && (Transactions.Count > 1))) && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new UpdateOperation(ATable, (Row)ANewRow.Copy(), (Row)AOldRow.Copy(), AValueFlags));
+				Transactions.CurrentTransaction().Operations.Add(new UpdateOperation(table, (Row)newRow.Copy(), (Row)oldRow.Copy(), valueFlags));
         }
         
-        protected virtual void InternalDeleteRow(Program AProgram, TableVar ATable, Row ARow)
+        protected virtual void InternalDeleteRow(Program program, TableVar table, Row row)
         {
 			throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, DeviceCapability.RowLevelDelete, Device.Name);
 		}
         
-        public void DeleteRow(Program AProgram, TableVar ATable, Row ARow)
+        public void DeleteRow(Program program, TableVar table, Row row)
         {
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
 			CheckCapability(DeviceCapability.RowLevelDelete);
 			try
 			{
-				InternalDeleteRow(AProgram, ATable, ARow);
+				InternalDeleteRow(program, table, row);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
 
 			if (!ServerProcess.NonLogged && ((!Device.SupportsTransactions && (Transactions.Count == 1)) || (!Device.SupportsNestedTransactions && (Transactions.Count > 1))) && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new InsertOperation(ATable, (Row)ARow.Copy(), null));
+				Transactions.CurrentTransaction().Operations.Add(new InsertOperation(table, (Row)row.Copy(), null));
         }
     }
 
@@ -1688,154 +1688,154 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class DeviceSessions : DisposableList<DeviceSession>
 	{
 		public DeviceSessions() : base() { }
-		public DeviceSessions(bool AItemsOwned) : base(AItemsOwned) { }
+		public DeviceSessions(bool itemsOwned) : base(itemsOwned) { }
 	#endif
 
-		public int IndexOf(Device ADevice)
+		public int IndexOf(Device device)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].Device == ADevice)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (this[index].Device == device)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(Device ADevice)
+		public bool Contains(Device device)
 		{
-			return IndexOf(ADevice) >= 0;
+			return IndexOf(device) >= 0;
 		}
 		
-		public DeviceSession this[Device ADevice]
+		public DeviceSession this[Device device]
 		{
-			get { return this[IndexOf(ADevice)]; }
+			get { return this[IndexOf(device)]; }
 		}
 		
-		private object FSyncRoot = new object();
-		public object SyncRoot { get { return FSyncRoot; } }
+		private object _syncRoot = new object();
+		public object SyncRoot { get { return _syncRoot; } }
     }
 
 	public class DeviceUser : System.Object
 	{
 		public DeviceUser() : base(){}
-		public DeviceUser(User AUser, Device ADevice, string ADeviceUserID, string ADevicePassword) : base()
+		public DeviceUser(User user, Device device, string deviceUserID, string devicePassword) : base()
 		{
-			User = AUser;
-			Device = ADevice;
-			DeviceUserID = ADeviceUserID;
-			DevicePassword = ADevicePassword;
+			User = user;
+			Device = device;
+			DeviceUserID = deviceUserID;
+			DevicePassword = devicePassword;
 		}
 		
-		public DeviceUser(User AUser, Device ADevice, string ADeviceUserID, string ADevicePassword, string AConnectionParameters) : base()
+		public DeviceUser(User user, Device device, string deviceUserID, string devicePassword, string connectionParameters) : base()
 		{
-			User = AUser;
-			Device = ADevice;
-			DeviceUserID = ADeviceUserID;
-			DevicePassword = ADevicePassword;
-			ConnectionParameters = AConnectionParameters;
+			User = user;
+			Device = device;
+			DeviceUserID = deviceUserID;
+			DevicePassword = devicePassword;
+			ConnectionParameters = connectionParameters;
 		}
 
-		public DeviceUser(User AUser, Device ADevice, string ADeviceUserID, string ADevicePassword, bool AEncryptPassword) : base()
+		public DeviceUser(User user, Device device, string deviceUserID, string devicePassword, bool encryptPassword) : base()
 		{
-			User = AUser;
-			Device = ADevice;
-			DeviceUserID = ADeviceUserID;
-			if (AEncryptPassword)
-				DevicePassword = Schema.SecurityUtility.EncryptPassword(ADevicePassword);
+			User = user;
+			Device = device;
+			DeviceUserID = deviceUserID;
+			if (encryptPassword)
+				DevicePassword = Schema.SecurityUtility.EncryptPassword(devicePassword);
 			else
-				DevicePassword = ADevicePassword;
+				DevicePassword = devicePassword;
 		}
 
-		public DeviceUser(User AUser, Device ADevice, string ADeviceUserID, string ADevicePassword, bool AEncryptPassword, string AConnectionParameters) : base()
+		public DeviceUser(User user, Device device, string deviceUserID, string devicePassword, bool encryptPassword, string connectionParameters) : base()
 		{
-			User = AUser;
-			Device = ADevice;
-			DeviceUserID = ADeviceUserID;
-			if (AEncryptPassword)
-				DevicePassword = Schema.SecurityUtility.EncryptPassword(ADevicePassword);
+			User = user;
+			Device = device;
+			DeviceUserID = deviceUserID;
+			if (encryptPassword)
+				DevicePassword = Schema.SecurityUtility.EncryptPassword(devicePassword);
 			else
-				DevicePassword = ADevicePassword;
-			ConnectionParameters = AConnectionParameters;
+				DevicePassword = devicePassword;
+			ConnectionParameters = connectionParameters;
 		}
 		
 		[Reference]
-		private User FUser;
-		public User User { get { return FUser; } set { FUser = value; } }
+		private User _user;
+		public User User { get { return _user; } set { _user = value; } }
 		
 		[Reference]
-		private Device FDevice;
-		public Device Device { get { return FDevice; } set { FDevice = value; } }
+		private Device _device;
+		public Device Device { get { return _device; } set { _device = value; } }
 		
-		private string FDeviceUserID = String.Empty;
-		public string DeviceUserID { get { return FDeviceUserID; } set { FDeviceUserID = value == null ? String.Empty : value; } }
+		private string _deviceUserID = String.Empty;
+		public string DeviceUserID { get { return _deviceUserID; } set { _deviceUserID = value == null ? String.Empty : value; } }
 		
-		private string FDevicePassword = String.Empty;
-		public string DevicePassword { get { return FDevicePassword; } set { FDevicePassword = value == null ? String.Empty : value; } }
+		private string _devicePassword = String.Empty;
+		public string DevicePassword { get { return _devicePassword; } set { _devicePassword = value == null ? String.Empty : value; } }
 
-		private string FConnectionParameters = String.Empty;
-		public string ConnectionParameters { get { return FConnectionParameters; } set { FConnectionParameters = value == null ? String.Empty : value; } } 
+		private string _connectionParameters = String.Empty;
+		public string ConnectionParameters { get { return _connectionParameters; } set { _connectionParameters = value == null ? String.Empty : value; } } 
 	}
 	
 	public class DeviceUsers : Dictionary<string, DeviceUser>
 	{		
 		public DeviceUsers() : base(StringComparer.OrdinalIgnoreCase){}
 		
-		public void Add(DeviceUser ADeviceUser)
+		public void Add(DeviceUser deviceUser)
 		{
-			Add(ADeviceUser.User.ID, ADeviceUser);
+			Add(deviceUser.User.ID, deviceUser);
 		}
 	}
 
     public class TranslationMessage
     {
-		public TranslationMessage(string AMessage) : base()
+		public TranslationMessage(string message) : base()
 		{
-			FMessage = AMessage;
+			_message = message;
 		}
 		
-		public TranslationMessage(string AMessage, PlanNode AContext) : base()
+		public TranslationMessage(string message, PlanNode context) : base()
 		{
-			FMessage = AMessage;
-			if (AContext.Line == -1)
-				FContext = AContext.SafeEmitStatementAsString();
+			_message = message;
+			if (context.Line == -1)
+				_context = context.SafeEmitStatementAsString();
 			else
 			{
-			    FLine = AContext.Line;
-			    FLinePos = AContext.LinePos;
+			    _line = context.Line;
+			    _linePos = context.LinePos;
 			}
 		}
 		
-		private string FMessage;
-		public string Message { get { return FMessage; } }
+		private string _message;
+		public string Message { get { return _message; } }
 		
-		private int FLine = -1;
+		private int _line = -1;
 		public int Line
 		{
-			get { return FLine; }
-			set { FLine = value; }
+			get { return _line; }
+			set { _line = value; }
 		}
 		
-		private int FLinePos = -1;
+		private int _linePos = -1;
 		public int LinePos
 		{
-			get { return FLinePos; }
-			set { FLinePos = value; }
+			get { return _linePos; }
+			set { _linePos = value; }
 		}
 		
-		private string FContext = null;
+		private string _context = null;
 		public string Context
 		{
-			get { return FContext; }
-			set { FContext = value; }
+			get { return _context; }
+			set { _context = value; }
 		}
 		
 		public override string ToString()
 		{
-			if (FLinePos == -1)
-				return String.Format("{0}\r\n\t{1}", FMessage, FContext);
+			if (_linePos == -1)
+				return String.Format("{0}\r\n\t{1}", _message, _context);
 
-			if (FContext == null)
-				return FMessage;
+			if (_context == null)
+				return _message;
 
-			return String.Format("{0} ({1}, {2})", FMessage, FLine.ToString(), FLinePos.ToString());
+			return String.Format("{0} ({1}, {2})", _message, _line.ToString(), _linePos.ToString());
 		}
     }
 
@@ -1856,10 +1856,10 @@ namespace Alphora.Dataphor.DAE.Schema
 	#endif
 		public override string ToString()
 		{
-			StringBuilder LBuilder = new StringBuilder();
-			foreach (TranslationMessage LMessage in this)
-				ExceptionUtility.AppendMessage(LBuilder, 1, LMessage.ToString());
-			return LBuilder.ToString();
+			StringBuilder builder = new StringBuilder();
+			foreach (TranslationMessage message in this)
+				ExceptionUtility.AppendMessage(builder, 1, message.ToString());
+			return builder.ToString();
 		}
 	}
 }

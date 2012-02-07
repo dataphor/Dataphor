@@ -21,32 +21,32 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			InitializeDataLink();
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			DeinitializeDataLink();
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		#region Data Link
 
-		private FieldDataLink FLink;
-		protected FieldDataLink Link { get { return FLink; } }
+		private FieldDataLink _link;
+		protected FieldDataLink Link { get { return _link; } }
 
 		private void InitializeDataLink()
 		{
-			FLink = new FieldDataLink();
-			FLink.OnSaveRequested += new DataLinkHandler(SaveRequested);
-			FLink.OnFieldChanged += new DataLinkFieldHandler(FieldChanged);
-			FLink.OnUpdateReadOnly += new EventHandler(UpdateReadOnly);
-			FLink.OnFocusControl += new DataLinkFieldHandler(FocusControl);
+			_link = new FieldDataLink();
+			_link.OnSaveRequested += new DataLinkHandler(SaveRequested);
+			_link.OnFieldChanged += new DataLinkFieldHandler(FieldChanged);
+			_link.OnUpdateReadOnly += new EventHandler(UpdateReadOnly);
+			_link.OnFocusControl += new DataLinkFieldHandler(FocusControl);
 		}
 
 		private void DeinitializeDataLink()
 		{
-			if (FLink != null)
+			if (_link != null)
 			{
-				FLink.Dispose();
-				FLink = null;
+				_link.Dispose();
+				_link = null;
 			}
 		}
 
@@ -55,16 +55,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[Category("Behavior")]
 		public bool ReadOnly
 		{
-			get { return FLink.ReadOnly; }
-			set { FLink.ReadOnly = value; }
+			get { return _link.ReadOnly; }
+			set { _link.ReadOnly = value; }
 		}
 
 		internal protected bool InternalGetReadOnly()
 		{
-			return FLink.ReadOnly || !FLink.Active;
+			return _link.ReadOnly || !_link.Active;
 		}
 
-		private void UpdateReadOnly(object ASender, EventArgs AArgs)
+		private void UpdateReadOnly(object sender, EventArgs args)
 		{
 			InternalUpdateTabStop();
 		}
@@ -75,8 +75,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.ColumnNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string ColumnName
 		{
-			get { return FLink.ColumnName; }
-			set { FLink.ColumnName = value; }
+			get { return _link.ColumnName; }
+			set { _link.ColumnName = value; }
 		}
 
 		/// <summary> Gets or sets a value indicating the DataSource the control is linked to. </summary>
@@ -86,50 +86,50 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[Description("The DataSource for this control")]
 		public DataSource Source
 		{
-			get { return FLink.Source; }
-			set { FLink.Source = value; }
+			get { return _link.Source; }
+			set { _link.Source = value; }
 		}
 
 		[Browsable(false)]
 		public DataField DataField
 		{
-			get { return FLink == null ? null : FLink.DataField; }
+			get { return _link == null ? null : _link.DataField; }
 		}
 
 		#endregion
 
 		#region Value Synchronization
 		
-		private bool FHasValue;
-		public bool HasValue { get { return FHasValue; } }
-		private void SetHasValue(bool AValue)
+		private bool _hasValue;
+		public bool HasValue { get { return _hasValue; } }
+		private void SetHasValue(bool tempValue)
 		{
-			FHasValue = AValue;
+			_hasValue = tempValue;
 			//UpdateBackColor();
 		}
 
-		private void FieldChanged(DataLink ALink, DataSet ADataSet, DataField AField)
+		private void FieldChanged(DataLink link, DataSet dataSet, DataField field)
 		{
 			SetHasValue((DataField != null) && DataField.HasValue());
 			SetText(HasValue ? DataField.AsString : "");
 		}
 
-		protected override void DoDocumentChanged(object ASender, ICSharpCode.TextEditor.Document.DocumentEventArgs AArgs)
+		protected override void DoDocumentChanged(object sender, ICSharpCode.TextEditor.Document.DocumentEventArgs args)
 		{
-			base.DoDocumentChanged(ASender, AArgs);
+			base.DoDocumentChanged(sender, args);
 			SetHasValue((Document.TextContent != String.Empty) || !NilIfBlank);
 			EnsureEdit();
 		}
 
 		private void EnsureEdit()
 		{
-			if (!FLink.Edit())
+			if (!_link.Edit())
 				throw new DAE.Client.Controls.ControlsException(DAE.Client.Controls.ControlsException.Codes.InvalidViewState);
 		}
 
 		protected void Reset()
 		{
-			FLink.Reset();
+			_link.Reset();
 			//SelectAll();
 		}
 
@@ -139,7 +139,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				try
 				{
-					FLink.SaveRequested();
+					_link.SaveRequested();
 				}
 				catch
 				{
@@ -151,9 +151,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		private void SaveRequested(DataLink ALink, DataSet ADataSet)
+		private void SaveRequested(DataLink link, DataSet dataSet)
 		{
-			if (FLink.DataField != null)
+			if (_link.DataField != null)
 			{
 				if (!HasValue)
 					DataField.ClearValue();
@@ -166,33 +166,33 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		#region Keyboard
 
-		protected override bool IsInputKey(Keys AKeyData)
+		protected override bool IsInputKey(Keys keyData)
 		{
-			switch (AKeyData)
+			switch (keyData)
 			{
 				case Keys.Escape:
-					if (FLink.Modified)
+					if (_link.Modified)
 						return true;
 					break;
 			}
-			return base.IsInputKey(AKeyData);
+			return base.IsInputKey(keyData);
 		}
 
-		protected override void OnKeyDown(KeyEventArgs AArgs)
+		protected override void OnKeyDown(KeyEventArgs args)
 		{
-			switch (AArgs.KeyData)
+			switch (args.KeyData)
 			{
 				case Keys.Escape:
 					Reset();
-					AArgs.Handled = true;
+					args.Handled = true;
 					break;
 			}
-			base.OnKeyDown(AArgs);
+			base.OnKeyDown(args);
 		}
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
-			switch (AKey)
+			switch (key)
 			{
 				case Keys.Control | Keys.Back:
 					if (HasValue && !InternalGetReadOnly())
@@ -215,22 +215,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 						System.Media.SystemSounds.Beep.Play();
 					return true;
 			}
-			return base.ProcessDialogKey(AKey);
+			return base.ProcessDialogKey(key);
 		}
 
 		#endregion
 
 		#region Focus
 		
-		protected override void OnLeave(EventArgs AEventArgs)
+		protected override void OnLeave(EventArgs eventArgs)
 		{
 			UpdateFieldValue();
-			base.OnLeave(AEventArgs);
+			base.OnLeave(eventArgs);
 		}
 
-		private void FocusControl(DataLink ALink, DataSet ADataSet, DataField AField)
+		private void FocusControl(DataLink link, DataSet dataSet, DataField field)
 		{
-			if (AField == DataField)
+			if (field == DataField)
 				Focus();
 		}
 
@@ -238,16 +238,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region TabStop
 
-		private bool FTabStop = true;
+		private bool _tabStop = true;
 		[DefaultValue(true)]
 		public new bool TabStop
 		{
-			get { return FTabStop; }
+			get { return _tabStop; }
 			set
 			{
-				if (FTabStop != value)
+				if (_tabStop != value)
 				{
-					FTabStop = value;
+					_tabStop = value;
 					InternalUpdateTabStop();
 				}
 			}
@@ -255,7 +255,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private bool InternalGetTabStop()
 		{
-			return FTabStop && !InternalGetReadOnly();
+			return _tabStop && !InternalGetReadOnly();
 		}
 
 		private void InternalUpdateTabStop()
@@ -267,32 +267,32 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// DocumentType
 
-		public const string CDefaultDocumentType = "Default";
-		private string FDocumentType = CDefaultDocumentType;
-		[DefaultValue(CDefaultDocumentType)]
+		public const string DefaultDocumentType = "Default";
+		private string _documentType = DefaultDocumentType;
+		[DefaultValue(DefaultDocumentType)]
 		public string DocumentType
 		{
-			get { return FDocumentType; }
+			get { return _documentType; }
 			set
 			{
-				if (FDocumentType != value)
+				if (_documentType != value)
 				{
-					FDocumentType = value != null ? value : "";
-					Document.HighlightingStrategy = SD.Document.HighlightingStrategyFactory.CreateHighlightingStrategy(FDocumentType);
+					_documentType = value != null ? value : "";
+					Document.HighlightingStrategy = SD.Document.HighlightingStrategyFactory.CreateHighlightingStrategy(_documentType);
 				}
 			}
 		}
 
 		// NilIfBlank
 		
-		private bool FNilIfBlank = true;
+		private bool _nilIfBlank = true;
 		[DefaultValue(true)]
 		[Category("Behavior")]
 		[Description("When true, a '' value entered is considered nil")]
 		public bool NilIfBlank
 		{
-			get { return FNilIfBlank; }
-			set { FNilIfBlank = value; }
+			get { return _nilIfBlank; }
+			set { _nilIfBlank = value; }
 		}
 
 	}

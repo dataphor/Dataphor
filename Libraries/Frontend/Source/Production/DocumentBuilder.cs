@@ -20,85 +20,85 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 		
 	public abstract class DocumentBuilder : System.Object
 	{
-		public DocumentBuilder(DerivationInfo ADerivationInfo) : base() 
+		public DocumentBuilder(DerivationInfo derivationInfo) : base() 
 		{
-			FDerivationInfo = ADerivationInfo;
+			_derivationInfo = derivationInfo;
 		}
 		
-		protected DerivationInfo FDerivationInfo;
+		protected DerivationInfo _derivationInfo;
 		
-		protected int FNameCount = 0;
+		protected int _nameCount = 0;
 		protected string GetUniqueName()
 		{
-			FNameCount++;
-			return String.Format("Element{0}", FNameCount.ToString());
+			_nameCount++;
+			return String.Format("Element{0}", _nameCount.ToString());
 		}
 		
-		protected virtual XmlElement BuildInterface(XmlDocument ADocument)
+		protected virtual XmlElement BuildInterface(XmlDocument document)
 		{
 			// "<interface xmlns:bop='www.alphora.com/schemas/bop' text='Browse "<%= PageType %>"' mainsource='"<%= MainSourceName %>"'> ... </interface>"
-			XmlElement LInterface = ADocument.CreateElement("interface");
-			LInterface.SetAttribute("xmlns:bop", BOP.Serializer.CBOPNamespaceURI);
-			LInterface.SetAttribute
+			XmlElement interfaceValue = document.CreateElement("interface");
+			interfaceValue.SetAttribute("xmlns:bop", BOP.Serializer.BOPNamespaceURI);
+			interfaceValue.SetAttribute
 			(
 				"text", 
 				DerivationUtility.GetTag
 				(
-					FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, 
+					_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, 
 					"Caption", 
-					FDerivationInfo.PageType, 
-					String.Format("{0} {1}", FDerivationInfo.PageType, FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableTitle)
+					_derivationInfo.PageType, 
+					String.Format("{0} {1}", _derivationInfo.PageType, _derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableTitle)
 				)
 			);
-			LInterface.SetAttribute("mainsource", FDerivationInfo.MainSourceName);
-			ADocument.AppendChild(LInterface);
+			interfaceValue.SetAttribute("mainsource", _derivationInfo.MainSourceName);
+			document.AppendChild(interfaceValue);
 
-			Tags LProperties = new Tags();
-			DerivationUtility.ExtractProperties(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Interface", FDerivationInfo.PageType, LProperties);
+			Tags properties = new Tags();
+			DerivationUtility.ExtractProperties(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Interface", _derivationInfo.PageType, properties);
 #if USEHASHTABLEFORTAGS
-			foreach (Tag LTag in LProperties)
+			foreach (Tag tag in properties)
 			{
 #else
-			Tag LTag;
-			for (int LIndex = 0; LIndex < LProperties.Count; LIndex++)
+			Tag tag;
+			for (int index = 0; index < properties.Count; index++)
 			{
-				LTag = LProperties[LIndex];
+				tag = properties[index];
 #endif
-				LInterface.SetAttribute(LTag.Name.ToLower(), LTag.Value);
+				interfaceValue.SetAttribute(tag.Name.ToLower(), tag.Value);
 			}
 
-			return LInterface;
+			return interfaceValue;
 		}
 		
-		protected virtual void BuildSource(XmlElement AElement)
+		protected virtual void BuildSource(XmlElement element)
 		{
 			// "<source bop:name="<%= MainSourceName %>" expression="<%= Expression %>" usebrowse="<%= UseBrowse %>" useapplicationtransactions="<%= UseApplicationTransactions %> openstate="<% OpenState %>"/>"
-			XmlElement LSource = AElement.OwnerDocument.CreateElement("source");
-			AElement.AppendChild(LSource);
-			LSource.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, FDerivationInfo.MainSourceName);
-			LSource.SetAttribute("expression", FDerivationInfo.Expression);
-			if (!Boolean.Parse(DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "UseBrowse", FDerivationInfo.PageType, "True")))
-				LSource.SetAttribute("usebrowse", "False");
-			if (!Boolean.Parse(DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "UseApplicationTransactions", FDerivationInfo.PageType, "True")))
-				LSource.SetAttribute("useapplicationtransactions", "False");
-			string LEnlistMode = DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "ShouldEnlist", FDerivationInfo.PageType, "Default");
-			if (LEnlistMode != "Default")
-				LSource.SetAttribute("shouldenlist", LEnlistMode);
-			if (Boolean.Parse(DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "ReadOnly", FDerivationInfo.PageType, (DerivationUtility.IsReadOnlyPageType(FDerivationInfo.PageType) && (FDerivationInfo.PageType != DerivationUtility.CDelete)) ? "True" : "False")))
-				LSource.SetAttribute("isreadonly", "True");
+			XmlElement source = element.OwnerDocument.CreateElement("source");
+			element.AppendChild(source);
+			source.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, _derivationInfo.MainSourceName);
+			source.SetAttribute("expression", _derivationInfo.Expression);
+			if (!Boolean.Parse(DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "UseBrowse", _derivationInfo.PageType, "True")))
+				source.SetAttribute("usebrowse", "False");
+			if (!Boolean.Parse(DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "UseApplicationTransactions", _derivationInfo.PageType, "True")))
+				source.SetAttribute("useapplicationtransactions", "False");
+			string enlistMode = DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "ShouldEnlist", _derivationInfo.PageType, "Default");
+			if (enlistMode != "Default")
+				source.SetAttribute("shouldenlist", enlistMode);
+			if (Boolean.Parse(DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "ReadOnly", _derivationInfo.PageType, (DerivationUtility.IsReadOnlyPageType(_derivationInfo.PageType) && (_derivationInfo.PageType != DerivationUtility.Delete)) ? "True" : "False")))
+				source.SetAttribute("isreadonly", "True");
 				
-			Tags LProperties = new Tags();
-			DerivationUtility.ExtractProperties(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Source", FDerivationInfo.PageType, LProperties);
+			Tags properties = new Tags();
+			DerivationUtility.ExtractProperties(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Source", _derivationInfo.PageType, properties);
 			#if USEHASHTABLEFORTAGS
-			foreach (Tag LTag in LProperties)
+			foreach (Tag tag in properties)
 			{
 			#else
-			Tag LTag;
-			for (int LIndex = 0; LIndex < LProperties.Count; LIndex++)
+			Tag tag;
+			for (int index = 0; index < properties.Count; index++)
 			{
-				LTag = LProperties[LIndex];
+				tag = properties[index];
 			#endif
-				LSource.SetAttribute(LTag.Name.ToLower(), LTag.Value);
+				source.SetAttribute(tag.Name.ToLower(), tag.Value);
 			}
 			
 			//if (FDerivationInfo.PageType == DerivationUtility.CAdd)
@@ -107,1394 +107,1394 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 			//	LSource.SetAttribute("openstate", "Edit");
 		}
 		
-		protected static string GetColumnNames(Schema.Key AKey, string AQualifier)
+		protected static string GetColumnNames(Schema.Key key, string qualifier)
 		{
-			StringBuilder LColumnNames = new StringBuilder();
-			for (int LIndex = 0; LIndex < AKey.Columns.Count; LIndex++)
+			StringBuilder columnNames = new StringBuilder();
+			for (int index = 0; index < key.Columns.Count; index++)
 			{
-				if (LIndex > 0)
-					LColumnNames.Append(",");
-				LColumnNames.Append(Schema.Object.Qualify(AKey.Columns[LIndex].Name, AQualifier));
+				if (index > 0)
+					columnNames.Append(",");
+				columnNames.Append(Schema.Object.Qualify(key.Columns[index].Name, qualifier));
 			}
-			return LColumnNames.ToString();
+			return columnNames.ToString();
 		}
 		
-		protected virtual void BuildDetailActions(XmlElement AElement, ElaboratedTableVar ATableVar, List<string> AMenuItems, List<string> AToolbarItems)
+		protected virtual void BuildDetailActions(XmlElement element, ElaboratedTableVar tableVar, List<string> menuItems, List<string> toolbarItems)
 		{
-			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
-				if (LReference.IsEmbedded && (LReference.ReferenceType == ReferenceType.Parent))
-					BuildDetailActions(AElement, LReference.TargetElaboratedTableVar, AMenuItems, AToolbarItems);
+			foreach (ElaboratedReference reference in tableVar.ElaboratedReferences)
+				if (reference.IsEmbedded && (reference.ReferenceType == ReferenceType.Parent))
+					BuildDetailActions(element, reference.TargetElaboratedTableVar, menuItems, toolbarItems);
 
-			XmlElement LAction;			
-			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
+			XmlElement action;			
+			foreach (ElaboratedReference reference in tableVar.ElaboratedReferences)
 			{
-				if (LReference.ReferenceType == ReferenceType.Detail)
+				if (reference.ReferenceType == ReferenceType.Detail)
 				{
-					string LMasterKeyNames = 
+					string masterKeyNames = 
 						(string)DerivationUtility.GetTag
 						(
-							LReference.Reference.MetaData,
+							reference.Reference.MetaData,
 							"MasterKeyNames",
 							"",
-							LReference.ReferenceType.ToString(),
-							GetColumnNames(LReference.Reference.TargetKey, LReference.TargetElaboratedTableVar.ElaboratedName)
+							reference.ReferenceType.ToString(),
+							GetColumnNames(reference.Reference.TargetKey, reference.TargetElaboratedTableVar.ElaboratedName)
 						);
 
-					string LDetailKeyNames = 
+					string detailKeyNames = 
 						(string)DerivationUtility.GetTag
 						(
-							LReference.Reference.MetaData,
+							reference.Reference.MetaData,
 							"DetailKeyNames",
 							"",
-							LReference.ReferenceType.ToString(),
-							GetColumnNames(LReference.Reference.SourceKey, DerivationUtility.CMainElaboratedTableName)
+							reference.ReferenceType.ToString(),
+							GetColumnNames(reference.Reference.SourceKey, DerivationUtility.MainElaboratedTableName)
 						);
 					
-					LAction = AElement.OwnerDocument.CreateElement("showformaction");
-					LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, LReference.ElaboratedName);
-					LAction.SetAttribute("text", String.Format("{0}...", LReference.ReferenceTitle));
+					action = element.OwnerDocument.CreateElement("showformaction");
+					action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, reference.ElaboratedName);
+					action.SetAttribute("text", String.Format("{0}...", reference.ReferenceTitle));
 
-					string LDetailPageType = 
+					string detailPageType = 
 						Boolean.Parse
 						(
 							DerivationUtility.GetTag
 							(
-								LReference.Reference.MetaData, 
+								reference.Reference.MetaData, 
 								"UseList", 
 								"", 
-								LReference.ReferenceType.ToString(), 
+								reference.ReferenceType.ToString(), 
 								DerivationUtility.GetTag
 								(
-									LReference.Reference.SourceTable.MetaData, 
+									reference.Reference.SourceTable.MetaData, 
 									"UseList", 
 									"False"
 								)
 							)
-						) ? DerivationUtility.CList : DerivationUtility.CBrowse;
+						) ? DerivationUtility.List : DerivationUtility.Browse;
 						
-					bool LElaborate =
+					bool elaborate =
 						Boolean.Parse
 						(
 							DerivationUtility.GetTag
 							(
-								LReference.Reference.MetaData,
+								reference.Reference.MetaData,
 								"Elaborate",
-								LDetailPageType,
-								LReference.ReferenceType.ToString(),
+								detailPageType,
+								reference.ReferenceType.ToString(),
 								DerivationUtility.GetTag
 								(
-									LReference.Reference.SourceTable.MetaData,
+									reference.Reference.SourceTable.MetaData,
 									"Elaborate",
-									LDetailPageType,
+									detailPageType,
 									"True"
 								)
 							)
 						);
 
-					LAction.SetAttribute
+					action.SetAttribute
 					(
 						"document", 
 						DerivationUtility.GetTag
 						(
-							LReference.Reference.MetaData, 
+							reference.Reference.MetaData, 
 							"Document", 
-							LDetailPageType, 
-							LReference.ReferenceType.ToString(),
-							FDerivationInfo.BuildDerivationExpression
+							detailPageType, 
+							reference.ReferenceType.ToString(),
+							_derivationInfo.BuildDerivationExpression
 							(
-								LDetailPageType,
+								detailPageType,
 								DerivationUtility.GetTag
 								(
-									LReference.Reference.MetaData, "Query", 
-									LDetailPageType, 
-									LReference.ReferenceType.ToString(), 
+									reference.Reference.MetaData, "Query", 
+									detailPageType, 
+									reference.ReferenceType.ToString(), 
 									DerivationUtility.GetTag
 									(
-										LReference.Reference.SourceTable.MetaData, 
+										reference.Reference.SourceTable.MetaData, 
 										"Query", 
-										LDetailPageType, 
-										LReference.Reference.SourceTable.Name
+										detailPageType, 
+										reference.Reference.SourceTable.Name
 									)
 								),
-								LMasterKeyNames, 
-								LDetailKeyNames, 
-								LElaborate
+								masterKeyNames, 
+								detailKeyNames, 
+								elaborate
 							)
 						)
 					);
-					LAction.SetAttribute("sourcelinktype", "Detail");
-					LAction.SetAttribute("sourcelink.source", FDerivationInfo.MainSourceName);
-					LAction.SetAttribute("sourcelink.masterkeynames", LMasterKeyNames);
-					LAction.SetAttribute("sourcelink.detailkeynames", LDetailKeyNames);
-					LAction.SetAttribute("sourcelinkrefresh", "False");
-					AElement.AppendChild(LAction);
+					action.SetAttribute("sourcelinktype", "Detail");
+					action.SetAttribute("sourcelink.source", _derivationInfo.MainSourceName);
+					action.SetAttribute("sourcelink.masterkeynames", masterKeyNames);
+					action.SetAttribute("sourcelink.detailkeynames", detailKeyNames);
+					action.SetAttribute("sourcelinkrefresh", "False");
+					element.AppendChild(action);
 
-					if (Convert.ToBoolean(DerivationUtility.GetTag(LReference.Reference.MetaData, DerivationUtility.CVisible, FDerivationInfo.PageType, LReference.ReferenceType.ToString(), "True")))
-						AMenuItems.Add(LReference.ElaboratedName);
+					if (Convert.ToBoolean(DerivationUtility.GetTag(reference.Reference.MetaData, DerivationUtility.Visible, _derivationInfo.PageType, reference.ReferenceType.ToString(), "True")))
+						menuItems.Add(reference.ElaboratedName);
 						
-					if (Convert.ToBoolean(DerivationUtility.GetTag(LReference.Reference.MetaData, DerivationUtility.CExposed, FDerivationInfo.PageType, LReference.ReferenceType.ToString(), "False")))
-						AToolbarItems.Add(LReference.ElaboratedName);
+					if (Convert.ToBoolean(DerivationUtility.GetTag(reference.Reference.MetaData, DerivationUtility.Exposed, _derivationInfo.PageType, reference.ReferenceType.ToString(), "False")))
+						toolbarItems.Add(reference.ElaboratedName);
 				}
 			}
 			
-			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
-				if (LReference.IsEmbedded && (LReference.ReferenceType == ReferenceType.Extension))
-					BuildDetailActions(AElement, LReference.SourceElaboratedTableVar, AMenuItems, AToolbarItems);
+			foreach (ElaboratedReference reference in tableVar.ElaboratedReferences)
+				if (reference.IsEmbedded && (reference.ReferenceType == ReferenceType.Extension))
+					BuildDetailActions(element, reference.SourceElaboratedTableVar, menuItems, toolbarItems);
 		}
 
-		protected virtual void BuildDetailActions(XmlElement AElement)
+		protected virtual void BuildDetailActions(XmlElement element)
 		{
 			//foreach one to many reference in which TableName is a target
 			//	write a detail action with a browse mode
-			List<string> LMenuItems = new List<string>();
-			List<string> LToolbarItems = new List<string>();
-			BuildDetailActions(AElement, FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar, LMenuItems, LToolbarItems);
+			List<string> menuItems = new List<string>();
+			List<string> toolbarItems = new List<string>();
+			BuildDetailActions(element, _derivationInfo.ElaboratedExpression.MainElaboratedTableVar, menuItems, toolbarItems);
 			
-			if (LMenuItems.Count > 0)
+			if (menuItems.Count > 0)
 			{
 				// "<menu text='De&amp;tails' bop:name='DetailsMenuItem'>"
-				XmlElement LMenu = AElement.OwnerDocument.CreateElement("menu");
-				LMenu.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "DetailsMenuItem");
-				LMenu.SetAttribute("text", "De&tails");
-				AElement.AppendChild(LMenu);
+				XmlElement menu = element.OwnerDocument.CreateElement("menu");
+				menu.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "DetailsMenuItem");
+				menu.SetAttribute("text", "De&tails");
+				element.AppendChild(menu);
 				
-				XmlElement LMenuItem;
-				foreach (string LString in LMenuItems)
+				XmlElement menuItem;
+				foreach (string stringValue in menuItems)
 				{
 					// String.Format("<menu action='{0}' bop:name='{0}DetailsMenuItem'/>", LString);
-					LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-					LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, String.Format("{0}DetailsMenuItem", LString));
-					LMenuItem.SetAttribute("action", LString);
-					LMenu.AppendChild(LMenuItem);
+					menuItem = element.OwnerDocument.CreateElement("menu");
+					menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, String.Format("{0}DetailsMenuItem", stringValue));
+					menuItem.SetAttribute("action", stringValue);
+					menu.AppendChild(menuItem);
 				}
 			}
 			
-			XmlElement LToolbarItem;
-			foreach (string LString in LToolbarItems)
+			XmlElement toolbarItem;
+			foreach (string stringValue in toolbarItems)
 			{
 				// Response.Write(String.Format("<exposed action='{0}' bop:name='{0}DetailsExposed' />", LString));
-				LToolbarItem = AElement.OwnerDocument.CreateElement("exposed");
-				LToolbarItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, String.Format("{0}DetailsExposed", LString));
-				LToolbarItem.SetAttribute("action", LString);
-				AElement.AppendChild(LToolbarItem);
+				toolbarItem = element.OwnerDocument.CreateElement("exposed");
+				toolbarItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, String.Format("{0}DetailsExposed", stringValue));
+				toolbarItem.SetAttribute("action", stringValue);
+				element.AppendChild(toolbarItem);
 			}
 		}
 		
-		protected virtual void BuildExtensionActions(XmlElement AElement)
+		protected virtual void BuildExtensionActions(XmlElement element)
 		{
-			XmlElement LAction;
-			List<string> LMenuItems = new List<string>();
-			List<string> LToolbarItems = new List<string>();
-			string LFormMode;
-			string LPageType;
-			foreach (ElaboratedReference LReference in FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.ElaboratedReferences)
+			XmlElement action;
+			List<string> menuItems = new List<string>();
+			List<string> toolbarItems = new List<string>();
+			string formMode;
+			string pageType;
+			foreach (ElaboratedReference reference in _derivationInfo.ElaboratedExpression.MainElaboratedTableVar.ElaboratedReferences)
 			{
-				if (!Convert.ToBoolean(DerivationUtility.GetTag(LReference.Reference.MetaData, DerivationUtility.CEmbedded, FDerivationInfo.PageType, LReference.ReferenceType.ToString(), "False")))
+				if (!Convert.ToBoolean(DerivationUtility.GetTag(reference.Reference.MetaData, DerivationUtility.Embedded, _derivationInfo.PageType, reference.ReferenceType.ToString(), "False")))
 				{
-					if (LReference.ReferenceType == ReferenceType.Extension)
+					if (reference.ReferenceType == ReferenceType.Extension)
 					{
-						switch (FDerivationInfo.PageType)
+						switch (_derivationInfo.PageType)
 						{
-							case DerivationUtility.CBrowse:
-							case DerivationUtility.CList:
-							case DerivationUtility.CEdit: LFormMode = "Edit"; LPageType = DerivationUtility.CEdit; break;
-							case DerivationUtility.CAdd: LFormMode = "Edit"; LPageType = DerivationUtility.CEdit; break;
-							default: LFormMode = "None"; LPageType = DerivationUtility.CView; break;
+							case DerivationUtility.Browse:
+							case DerivationUtility.List:
+							case DerivationUtility.Edit: formMode = "Edit"; pageType = DerivationUtility.Edit; break;
+							case DerivationUtility.Add: formMode = "Edit"; pageType = DerivationUtility.Edit; break;
+							default: formMode = "None"; pageType = DerivationUtility.View; break;
 						}
 
-						string LMasterKeyNames = GetColumnNames(LReference.Reference.TargetKey, LReference.TargetElaboratedTableVar.ElaboratedName);
-						string LDetailKeyNames = GetColumnNames(LReference.Reference.SourceKey, DerivationUtility.CMainElaboratedTableName);
+						string masterKeyNames = GetColumnNames(reference.Reference.TargetKey, reference.TargetElaboratedTableVar.ElaboratedName);
+						string detailKeyNames = GetColumnNames(reference.Reference.SourceKey, DerivationUtility.MainElaboratedTableName);
 						
-						LAction = AElement.OwnerDocument.CreateElement("showformaction");
-						LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, LReference.ElaboratedName);
-						LAction.SetAttribute("text", String.Format("{0}...", LReference.ReferenceTitle));
+						action = element.OwnerDocument.CreateElement("showformaction");
+						action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, reference.ElaboratedName);
+						action.SetAttribute("text", String.Format("{0}...", reference.ReferenceTitle));
 
-						bool LElaborate =
+						bool elaborate =
 							Boolean.Parse
 							(
 								DerivationUtility.GetTag
 								(
-									LReference.Reference.MetaData,
+									reference.Reference.MetaData,
 									"Elaborate",
-									LPageType,
-									LReference.ReferenceType.ToString(),
+									pageType,
+									reference.ReferenceType.ToString(),
 									DerivationUtility.GetTag
 									(
-										LReference.Reference.SourceTable.MetaData,
+										reference.Reference.SourceTable.MetaData,
 										"Elaborate",
-										LPageType,
+										pageType,
 										"True"
 									)
 								)
 							);
 
-						LAction.SetAttribute
+						action.SetAttribute
 						(
 							"document", 
 							DerivationUtility.GetTag
 							(
-								LReference.Reference.MetaData,
+								reference.Reference.MetaData,
 								"Document",
-								LPageType,
-								LReference.ReferenceType.ToString(),
-								FDerivationInfo.BuildDerivationExpression
+								pageType,
+								reference.ReferenceType.ToString(),
+								_derivationInfo.BuildDerivationExpression
 								(
-									LPageType, 
+									pageType, 
 									DerivationUtility.GetTag
 									(
-										LReference.Reference.MetaData, 
+										reference.Reference.MetaData, 
 										"Query", 
-										LPageType, 
-										LReference.ReferenceType.ToString(), 
+										pageType, 
+										reference.ReferenceType.ToString(), 
 										DerivationUtility.GetTag
 										(
-											LReference.Reference.SourceTable.MetaData, 
+											reference.Reference.SourceTable.MetaData, 
 											"Query", 
-											LPageType, 
-											LReference.Reference.SourceTable.Name
+											pageType, 
+											reference.Reference.SourceTable.Name
 										)
 									), 
-									LMasterKeyNames, 
-									LDetailKeyNames,
-									LElaborate
+									masterKeyNames, 
+									detailKeyNames,
+									elaborate
 								)
 							)
 						);
 
-						LAction.SetAttribute("sourcelinktype", "Detail");
-						LAction.SetAttribute("sourcelink.source", FDerivationInfo.MainSourceName);
-						LAction.SetAttribute("sourcelink.masterkeynames", LMasterKeyNames);
-						LAction.SetAttribute("sourcelink.detailkeynames", LDetailKeyNames);
-						LAction.SetAttribute("mode", LFormMode);
-						LAction.SetAttribute("sourcelinkrefresh", "False");
-						AElement.AppendChild(LAction);
+						action.SetAttribute("sourcelinktype", "Detail");
+						action.SetAttribute("sourcelink.source", _derivationInfo.MainSourceName);
+						action.SetAttribute("sourcelink.masterkeynames", masterKeyNames);
+						action.SetAttribute("sourcelink.detailkeynames", detailKeyNames);
+						action.SetAttribute("mode", formMode);
+						action.SetAttribute("sourcelinkrefresh", "False");
+						element.AppendChild(action);
 
-						if (Convert.ToBoolean(DerivationUtility.GetTag(LReference.Reference.MetaData, "Visible", FDerivationInfo.PageType, LReference.ReferenceType.ToString(), "True")))
-							LMenuItems.Add(LReference.ElaboratedName);
+						if (Convert.ToBoolean(DerivationUtility.GetTag(reference.Reference.MetaData, "Visible", _derivationInfo.PageType, reference.ReferenceType.ToString(), "True")))
+							menuItems.Add(reference.ElaboratedName);
 							
-						if (Convert.ToBoolean(DerivationUtility.GetTag(LReference.Reference.MetaData, "Exposed", FDerivationInfo.PageType, LReference.ReferenceType.ToString(), "False")))
-							LToolbarItems.Add(LReference.ElaboratedName);
+						if (Convert.ToBoolean(DerivationUtility.GetTag(reference.Reference.MetaData, "Exposed", _derivationInfo.PageType, reference.ReferenceType.ToString(), "False")))
+							toolbarItems.Add(reference.ElaboratedName);
 					}
 				}
 			}
 			
-			if (LMenuItems.Count > 0)
+			if (menuItems.Count > 0)
 			{
 				// Response.Write("<menu text='E&amp;xtensions' bop:name='ExtensionsMenuItem'>");
-				XmlElement LMenu = AElement.OwnerDocument.CreateElement("menu");
-				LMenu.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "ExtensionsMenuItem");
-				LMenu.SetAttribute("text", "E&xtensions");
-				AElement.AppendChild(LMenu);
+				XmlElement menu = element.OwnerDocument.CreateElement("menu");
+				menu.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "ExtensionsMenuItem");
+				menu.SetAttribute("text", "E&xtensions");
+				element.AppendChild(menu);
 				
-				XmlElement LMenuItem;
-				foreach (string LString in LMenuItems)
+				XmlElement menuItem;
+				foreach (string stringValue in menuItems)
 				{
 					// Response.Write(String.Format("<menu action='{0}' bop:name='{0}ExtensionsMenuItem' />", LString));
-					LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-					LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, String.Format("{0}ExtensionsMenuItem", LString));
-					LMenuItem.SetAttribute("action", LString);
-					LMenu.AppendChild(LMenuItem);
+					menuItem = element.OwnerDocument.CreateElement("menu");
+					menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, String.Format("{0}ExtensionsMenuItem", stringValue));
+					menuItem.SetAttribute("action", stringValue);
+					menu.AppendChild(menuItem);
 				}
 			}
 			
-			XmlElement LExposed;
-			foreach (string LString in LToolbarItems)
+			XmlElement exposed;
+			foreach (string stringValue in toolbarItems)
 			{
 				// Response.Write(String.Format("<exposed action='{0}' />", LString));
-				LExposed = AElement.OwnerDocument.CreateElement("exposed");
-				LExposed.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, String.Format("{0}ExtensionsExposed", LString));
-				LExposed.SetAttribute("action", LString);
-				AElement.AppendChild(LExposed);
+				exposed = element.OwnerDocument.CreateElement("exposed");
+				exposed.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, String.Format("{0}ExtensionsExposed", stringValue));
+				exposed.SetAttribute("action", stringValue);
+				element.AppendChild(exposed);
 			}
 		}
 		
-		protected virtual void BuildLookupActions(XmlElement AElement, ElaboratedTableVar ATableVar, List<string> AMenuItems, List<string> AToolbarItems)
+		protected virtual void BuildLookupActions(XmlElement element, ElaboratedTableVar tableVar, List<string> menuItems, List<string> toolbarItems)
 		{
-			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
-				if (LReference.IsEmbedded && (LReference.ReferenceType == ReferenceType.Parent))
-					BuildLookupActions(AElement, LReference.TargetElaboratedTableVar, AMenuItems, AToolbarItems);
+			foreach (ElaboratedReference reference in tableVar.ElaboratedReferences)
+				if (reference.IsEmbedded && (reference.ReferenceType == ReferenceType.Parent))
+					BuildLookupActions(element, reference.TargetElaboratedTableVar, menuItems, toolbarItems);
 			
-			XmlElement LAction;
-			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
+			XmlElement action;
+			foreach (ElaboratedReference reference in tableVar.ElaboratedReferences)
 			{
-				if ((LReference.ReferenceType == ReferenceType.Lookup) || (LReference.ReferenceType == ReferenceType.Parent))
+				if ((reference.ReferenceType == ReferenceType.Lookup) || (reference.ReferenceType == ReferenceType.Parent))
 				{
-					string LMasterKeyNames = GetColumnNames(LReference.Reference.SourceKey, LReference.SourceElaboratedTableVar.ElaboratedName);
-					string LDetailKeyNames = GetColumnNames(LReference.Reference.TargetKey, DerivationUtility.CMainElaboratedTableName);
+					string masterKeyNames = GetColumnNames(reference.Reference.SourceKey, reference.SourceElaboratedTableVar.ElaboratedName);
+					string detailKeyNames = GetColumnNames(reference.Reference.TargetKey, DerivationUtility.MainElaboratedTableName);
 					
-					LAction = AElement.OwnerDocument.CreateElement("showformaction");
-					LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, LReference.ElaboratedName);
-					LAction.SetAttribute("text", String.Format("{0}...", LReference.ReferenceTitle));
+					action = element.OwnerDocument.CreateElement("showformaction");
+					action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, reference.ElaboratedName);
+					action.SetAttribute("text", String.Format("{0}...", reference.ReferenceTitle));
 
-					string LPageType = DerivationUtility.CView;
+					string pageType = DerivationUtility.View;
 						
-					bool LElaborate =
+					bool elaborate =
 						Boolean.Parse
 						(
 							DerivationUtility.GetTag
 							(
-								LReference.Reference.MetaData,
+								reference.Reference.MetaData,
 								"Elaborate",
-								LPageType,
-								LReference.ReferenceType.ToString(),
+								pageType,
+								reference.ReferenceType.ToString(),
 								DerivationUtility.GetTag
 								(
-									LReference.Reference.TargetTable.MetaData,
+									reference.Reference.TargetTable.MetaData,
 									"Elaborate",
-									LPageType,
+									pageType,
 									"True"
 								)
 							)
 						);
 
 
-					LAction.SetAttribute
+					action.SetAttribute
 					(
 						"document", 
 						DerivationUtility.GetTag
 						(
-							LReference.Reference.MetaData,
+							reference.Reference.MetaData,
 							"Document",
-							DerivationUtility.CView,
-							LReference.ReferenceType.ToString(),
-							FDerivationInfo.BuildDerivationExpression
+							DerivationUtility.View,
+							reference.ReferenceType.ToString(),
+							_derivationInfo.BuildDerivationExpression
 							(
-								LPageType, 
+								pageType, 
 								DerivationUtility.GetTag
 								(
-									LReference.Reference.MetaData, 
+									reference.Reference.MetaData, 
 									"Query", 
-									LPageType, 
-									LReference.ReferenceType.ToString(), 
+									pageType, 
+									reference.ReferenceType.ToString(), 
 									DerivationUtility.GetTag
 									(
-										LReference.Reference.TargetTable.MetaData, 
+										reference.Reference.TargetTable.MetaData, 
 										"Query", 
-										LPageType, 
-										LReference.Reference.TargetTable.Name
+										pageType, 
+										reference.Reference.TargetTable.Name
 									)
 								),
 								"", 
 								"",
-								LElaborate
+								elaborate
 							)
 						)
 					);
 
-					LAction.SetAttribute("sourcelinktype", "Detail");
-					LAction.SetAttribute("sourcelink.source", FDerivationInfo.MainSourceName);
-					LAction.SetAttribute("sourcelink.masterkeynames", LMasterKeyNames);
-					LAction.SetAttribute("sourcelink.detailkeynames", LDetailKeyNames);
-					LAction.SetAttribute("sourcelinkrefresh", "False");
-					AElement.AppendChild(LAction);
+					action.SetAttribute("sourcelinktype", "Detail");
+					action.SetAttribute("sourcelink.source", _derivationInfo.MainSourceName);
+					action.SetAttribute("sourcelink.masterkeynames", masterKeyNames);
+					action.SetAttribute("sourcelink.detailkeynames", detailKeyNames);
+					action.SetAttribute("sourcelinkrefresh", "False");
+					element.AppendChild(action);
 
-					if (Convert.ToBoolean(DerivationUtility.GetTag(LReference.Reference.MetaData, "Visible", FDerivationInfo.PageType, LReference.ReferenceType.ToString(), "True")))
-						AMenuItems.Add(LReference.ElaboratedName);
+					if (Convert.ToBoolean(DerivationUtility.GetTag(reference.Reference.MetaData, "Visible", _derivationInfo.PageType, reference.ReferenceType.ToString(), "True")))
+						menuItems.Add(reference.ElaboratedName);
 
-					if (Convert.ToBoolean(DerivationUtility.GetTag(LReference.Reference.MetaData, "Exposed", FDerivationInfo.PageType, LReference.ReferenceType.ToString(), "False")))
-						AToolbarItems.Add(LReference.ElaboratedName);
+					if (Convert.ToBoolean(DerivationUtility.GetTag(reference.Reference.MetaData, "Exposed", _derivationInfo.PageType, reference.ReferenceType.ToString(), "False")))
+						toolbarItems.Add(reference.ElaboratedName);
 				}
 			}
 			
-			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
-				if (LReference.IsEmbedded && (LReference.ReferenceType == ReferenceType.Extension))
-					BuildLookupActions(AElement, LReference.SourceElaboratedTableVar, AMenuItems, AToolbarItems);
+			foreach (ElaboratedReference reference in tableVar.ElaboratedReferences)
+				if (reference.IsEmbedded && (reference.ReferenceType == ReferenceType.Extension))
+					BuildLookupActions(element, reference.SourceElaboratedTableVar, menuItems, toolbarItems);
 		}
 		
-		protected virtual void BuildLookupActions(XmlElement AElement)
+		protected virtual void BuildLookupActions(XmlElement element)
 		{
-			List<string> LMenuItems = new List<string>();
-			List<string> LToolbarItems = new List<string>();
-			BuildLookupActions(AElement, FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar, LMenuItems, LToolbarItems);
+			List<string> menuItems = new List<string>();
+			List<string> toolbarItems = new List<string>();
+			BuildLookupActions(element, _derivationInfo.ElaboratedExpression.MainElaboratedTableVar, menuItems, toolbarItems);
 
-			if (LMenuItems.Count > 0)
+			if (menuItems.Count > 0)
 			{
 				// Response.Write("<menu text='Vie&amp;w' bop:name='LookupViewMenuItem'>");
-				XmlElement LMenu = AElement.OwnerDocument.CreateElement("menu");
-				LMenu.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "LookupViewMenuItem");
-				LMenu.SetAttribute("text", "Vie&w");
-				AElement.AppendChild(LMenu);
+				XmlElement menu = element.OwnerDocument.CreateElement("menu");
+				menu.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "LookupViewMenuItem");
+				menu.SetAttribute("text", "Vie&w");
+				element.AppendChild(menu);
 				
-				XmlElement LMenuItem;
-				foreach (string LString in LMenuItems)
+				XmlElement menuItem;
+				foreach (string stringValue in menuItems)
 				{
 					// Response.Write(String.Format("<menu action='{0}' bop:name='{0}LookupMenuItem'/>", LString));
-					LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-					LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, String.Format("{0}LookupMenuItem", LString));
-					LMenuItem.SetAttribute("action", LString);
-					LMenu.AppendChild(LMenuItem);
+					menuItem = element.OwnerDocument.CreateElement("menu");
+					menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, String.Format("{0}LookupMenuItem", stringValue));
+					menuItem.SetAttribute("action", stringValue);
+					menu.AppendChild(menuItem);
 				}
 			}
 			
-			XmlElement LExposed;
-			foreach (string LString in LToolbarItems)
+			XmlElement exposed;
+			foreach (string stringValue in toolbarItems)
 			{
 				// Response.Write(String.Format("<exposed action='{0}' bop:name='{0}LookupExposed'/>", LString));
-				LExposed = AElement.OwnerDocument.CreateElement("exposed");
-				LExposed.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, String.Format("{0}LookupExposed", LString));
-				LExposed.SetAttribute("action", LString);
-				AElement.AppendChild(LExposed);
+				exposed = element.OwnerDocument.CreateElement("exposed");
+				exposed.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, String.Format("{0}LookupExposed", stringValue));
+				exposed.SetAttribute("action", stringValue);
+				element.AppendChild(exposed);
 			}
 		}
 		
-		protected ElaboratedReferences GatherEmbeddedDetails(ElaboratedTableVar ATableVar)
+		protected ElaboratedReferences GatherEmbeddedDetails(ElaboratedTableVar tableVar)
 		{
-			ElaboratedReferences LReferences = new ElaboratedReferences();
-			LReferences.OrderByPriorityOnly = true;
-			GatherEmbeddedDetails(ATableVar, LReferences);
-			return LReferences;
+			ElaboratedReferences references = new ElaboratedReferences();
+			references.OrderByPriorityOnly = true;
+			GatherEmbeddedDetails(tableVar, references);
+			return references;
 		}
 		
-		protected virtual void GatherEmbeddedDetails(ElaboratedTableVar ATableVar, ElaboratedReferences AReferences)
+		protected virtual void GatherEmbeddedDetails(ElaboratedTableVar tableVar, ElaboratedReferences references)
 		{
-			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
-				if (LReference.IsEmbedded && (LReference.ReferenceType == ReferenceType.Parent))
-					GatherEmbeddedDetails(LReference.TargetElaboratedTableVar, AReferences);
+			foreach (ElaboratedReference reference in tableVar.ElaboratedReferences)
+				if (reference.IsEmbedded && (reference.ReferenceType == ReferenceType.Parent))
+					GatherEmbeddedDetails(reference.TargetElaboratedTableVar, references);
 					
-			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
-				if (LReference.IsEmbedded && (LReference.ReferenceType == ReferenceType.Detail))
-					AReferences.Add(LReference);
+			foreach (ElaboratedReference reference in tableVar.ElaboratedReferences)
+				if (reference.IsEmbedded && (reference.ReferenceType == ReferenceType.Detail))
+					references.Add(reference);
 					
-			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
-				if (LReference.IsEmbedded && (LReference.ReferenceType == ReferenceType.Extension))
-					GatherEmbeddedDetails(LReference.SourceElaboratedTableVar, AReferences);
+			foreach (ElaboratedReference reference in tableVar.ElaboratedReferences)
+				if (reference.IsEmbedded && (reference.ReferenceType == ReferenceType.Extension))
+					GatherEmbeddedDetails(reference.SourceElaboratedTableVar, references);
 		}
 		
-		protected virtual void BuildEmbeddedDetails(XmlElement AElement, ElaboratedTableVar ATableVar)
+		protected virtual void BuildEmbeddedDetails(XmlElement element, ElaboratedTableVar tableVar)
 		{
-			ElaboratedReferences LReferences = GatherEmbeddedDetails(ATableVar);
+			ElaboratedReferences references = GatherEmbeddedDetails(tableVar);
 			
-			if (LReferences.Count > 0)
+			if (references.Count > 0)
 			{
-				XmlElement LNotebook = AElement.OwnerDocument.CreateElement("notebook");
-				LNotebook.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, ATableVar.ElaboratedName + "EmbeddedDetailsNotebook");
-				AElement.AppendChild(LNotebook);
+				XmlElement notebook = element.OwnerDocument.CreateElement("notebook");
+				notebook.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, tableVar.ElaboratedName + "EmbeddedDetailsNotebook");
+				element.AppendChild(notebook);
 				
-				foreach (ElaboratedReference LReference in LReferences)
-					BuildEmbeddedDetail(AElement, LNotebook, LReference);
+				foreach (ElaboratedReference reference in references)
+					BuildEmbeddedDetail(element, notebook, reference);
 			}
 		}
 		
-		protected virtual void BuildEmbeddedDetail(XmlElement AElement, XmlElement ANotebook, ElaboratedReference AReference)
+		protected virtual void BuildEmbeddedDetail(XmlElement element, XmlElement notebook, ElaboratedReference reference)
 		{
-			string LMasterKeyNames = GetColumnNames(AReference.Reference.TargetKey, AReference.TargetElaboratedTableVar.ElaboratedName);
-			string LDetailKeyNames = GetColumnNames(AReference.Reference.SourceKey, DerivationUtility.CMainElaboratedTableName);
+			string masterKeyNames = GetColumnNames(reference.Reference.TargetKey, reference.TargetElaboratedTableVar.ElaboratedName);
+			string detailKeyNames = GetColumnNames(reference.Reference.SourceKey, DerivationUtility.MainElaboratedTableName);
 		
-			XmlElement LNotebookPage = AElement.OwnerDocument.CreateElement("notebookframepage");
-			LNotebookPage.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, String.Format("{0}Frame", AReference.Reference.OriginatingReferenceName()));
+			XmlElement notebookPage = element.OwnerDocument.CreateElement("notebookframepage");
+			notebookPage.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, String.Format("{0}Frame", reference.Reference.OriginatingReferenceName()));
 
-			string LDetailPageType = 
+			string detailPageType = 
 				Boolean.Parse
 				(
 					DerivationUtility.GetTag
 					(
-						AReference.Reference.MetaData, 
+						reference.Reference.MetaData, 
 						"UseList", 
 						"", 
-						AReference.ReferenceType.ToString(), 
+						reference.ReferenceType.ToString(), 
 						DerivationUtility.GetTag
 						(
-							AReference.Reference.SourceTable.MetaData, 
+							reference.Reference.SourceTable.MetaData, 
 							"UseList", 
 							"False"
 						)
 					)
-				) ? DerivationUtility.CList : DerivationUtility.CBrowse;
+				) ? DerivationUtility.List : DerivationUtility.Browse;
 				
-			bool LElaborate =
+			bool elaborate =
 				Boolean.Parse
 				(
 					DerivationUtility.GetTag
 					(
-						AReference.Reference.MetaData,
+						reference.Reference.MetaData,
 						"Elaborate",
-						LDetailPageType,
-						AReference.ReferenceType.ToString(),
+						detailPageType,
+						reference.ReferenceType.ToString(),
 						DerivationUtility.GetTag
 						(
-							AReference.Reference.SourceTable.MetaData,
+							reference.Reference.SourceTable.MetaData,
 							"Elaborate",
-							LDetailPageType,
+							detailPageType,
 							"True"
 						)
 					)
 				);
 
-			LNotebookPage.SetAttribute
+			notebookPage.SetAttribute
 			(
 				"document",
 				DerivationUtility.GetTag
 				(
-					AReference.Reference.MetaData,
+					reference.Reference.MetaData,
 					"Document",
-					LDetailPageType,
-					AReference.ReferenceType.ToString(),
-					FDerivationInfo.BuildDerivationExpression
+					detailPageType,
+					reference.ReferenceType.ToString(),
+					_derivationInfo.BuildDerivationExpression
 					(
-						LDetailPageType, 
+						detailPageType, 
 						DerivationUtility.GetTag
 						(
-							AReference.Reference.MetaData, 
+							reference.Reference.MetaData, 
 							"Query", 
-							LDetailPageType, 
-							AReference.ReferenceType.ToString(), 
+							detailPageType, 
+							reference.ReferenceType.ToString(), 
 							DerivationUtility.GetTag
 							(
-								AReference.Reference.SourceTable.MetaData, 
+								reference.Reference.SourceTable.MetaData, 
 								"Query", 
-								LDetailPageType, 
-								AReference.Reference.SourceTable.Name
+								detailPageType, 
+								reference.Reference.SourceTable.Name
 							)
 						), 
-						LMasterKeyNames, 
-						LDetailKeyNames,
-						LElaborate
+						masterKeyNames, 
+						detailKeyNames,
+						elaborate
 					)
 				)
 			);
 
-			LNotebookPage.SetAttribute("sourcelinktype", "Detail");
-			LNotebookPage.SetAttribute("sourcelink.source", FDerivationInfo.MainSourceName);
-			LNotebookPage.SetAttribute("sourcelink.masterkeynames", LMasterKeyNames);
-			LNotebookPage.SetAttribute("sourcelink.detailkeynames", LDetailKeyNames);
-			LNotebookPage.SetAttribute("menutext", AReference.ReferenceTitle);
-			LNotebookPage.SetAttribute("title", AReference.ReferenceTitle);
-			ANotebook.AppendChild(LNotebookPage);
+			notebookPage.SetAttribute("sourcelinktype", "Detail");
+			notebookPage.SetAttribute("sourcelink.source", _derivationInfo.MainSourceName);
+			notebookPage.SetAttribute("sourcelink.masterkeynames", masterKeyNames);
+			notebookPage.SetAttribute("sourcelink.detailkeynames", detailKeyNames);
+			notebookPage.SetAttribute("menutext", reference.ReferenceTitle);
+			notebookPage.SetAttribute("title", reference.ReferenceTitle);
+			notebook.AppendChild(notebookPage);
 		}
 		
-		protected virtual void BuildEmbeddedDetails(XmlElement AElement)
+		protected virtual void BuildEmbeddedDetails(XmlElement element)
 		{
-			BuildEmbeddedDetails(AElement, FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar);
+			BuildEmbeddedDetails(element, _derivationInfo.ElaboratedExpression.MainElaboratedTableVar);
 		}
 		
-		protected abstract void InternalBuild(XmlElement AElement);
+		protected abstract void InternalBuild(XmlElement element);
 		
 		public virtual XmlDocument Build()
 		{
-			XmlDocument LDocument = new XmlDocument();
-			XmlElement LInterface = BuildInterface(LDocument);
-			BuildSource(LInterface);
-			InternalBuild(LInterface);
-			return LDocument;
+			XmlDocument document = new XmlDocument();
+			XmlElement interfaceValue = BuildInterface(document);
+			BuildSource(interfaceValue);
+			InternalBuild(interfaceValue);
+			return document;
 		}
 		
-		protected virtual XmlElement BuildElement(XmlElement AXmlElement, Element AElement)
+		protected virtual XmlElement BuildElement(XmlElement xmlElement, Element element)
 		{
-			XmlElement LElement = AXmlElement.OwnerDocument.CreateElement(AElement.ElementType.ToLower());
-			LElement.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, AElement.Name);
-			if ((AElement.Title != null) && (AElement.Title != String.Empty))
-				LElement.SetAttribute("title", AElement.Title);
-			if (AElement.Hint != String.Empty)
-				LElement.SetAttribute("hint", AElement.Hint);
+			XmlElement localElement = xmlElement.OwnerDocument.CreateElement(element.ElementType.ToLower());
+			localElement.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, element.Name);
+			if ((element.Title != null) && (element.Title != String.Empty))
+				localElement.SetAttribute("title", element.Title);
+			if (element.Hint != String.Empty)
+				localElement.SetAttribute("hint", element.Hint);
 			#if USEHASHTABLEFORTAGS
-			foreach (Tag LTag in AElement.Properties)
+			foreach (Tag tag in AElement.Properties)
 			{
 			#else
-			Tag LTag;
-			for (int LIndex = 0; LIndex < AElement.Properties.Count; LIndex++)
+			Tag tag;
+			for (int index = 0; index < element.Properties.Count; index++)
 			{
-				LTag = AElement.Properties[LIndex];
+				tag = element.Properties[index];
 			#endif
-				LElement.SetAttribute(LTag.Name.ToLower(), LTag.Value);
+				localElement.SetAttribute(tag.Name.ToLower(), tag.Value);
 			}
-			return LElement;
+			return localElement;
 		}
 		
-		protected virtual void SkipContainerElement(XmlElement AElement, ContainerElement AContainerElement)
+		protected virtual void SkipContainerElement(XmlElement element, ContainerElement containerElement)
 		{
-			for (int LIndex = 0; LIndex < AContainerElement.Elements.Count; LIndex++)
-				if (AContainerElement.Elements[LIndex] is ContainerElement)
-					SkipContainerElement(AElement, ((ContainerElement)AContainerElement.Elements[LIndex]));
+			for (int index = 0; index < containerElement.Elements.Count; index++)
+				if (containerElement.Elements[index] is ContainerElement)
+					SkipContainerElement(element, ((ContainerElement)containerElement.Elements[index]));
 				else
-					AElement.AppendChild(BuildElement(AElement, AContainerElement.Elements[LIndex]));
+					element.AppendChild(BuildElement(element, containerElement.Elements[index]));
 		}
 		
 		// Build container element is called for grids and searches only, so skip groups used to order the columns
-		protected virtual XmlElement BuildContainerElement(XmlElement AElement, ContainerElement AContainerElement)
+		protected virtual XmlElement BuildContainerElement(XmlElement element, ContainerElement containerElement)
 		{
-			XmlElement LContainerElement = BuildElement(AElement, AContainerElement);
-			SkipContainerElement(LContainerElement, AContainerElement);
-			return LContainerElement;
+			XmlElement localContainerElement = BuildElement(element, containerElement);
+			SkipContainerElement(localContainerElement, containerElement);
+			return localContainerElement;
 		}
 		
-		protected virtual XmlElement BuildElementNode(XmlElement AElement, ElementNode ANode)
+		protected virtual XmlElement BuildElementNode(XmlElement element, ElementNode node)
 		{
-			return BuildElement(AElement, ANode.Element);
+			return BuildElement(element, node.Element);
 		}
 		
-		protected virtual XmlElement BuildColumnNode(XmlElement AElement, ColumnNode ANode)
+		protected virtual XmlElement BuildColumnNode(XmlElement element, ColumnNode node)
 		{
-			XmlElement LElement = AElement.OwnerDocument.CreateElement("column");
-			LElement.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, GetUniqueName());
-			return LElement;
+			XmlElement localElement = element.OwnerDocument.CreateElement("column");
+			localElement.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, GetUniqueName());
+			return localElement;
 		}
 		
-		protected virtual XmlElement BuildRowNode(XmlElement AElement, RowNode ANode)
+		protected virtual XmlElement BuildRowNode(XmlElement element, RowNode node)
 		{
-			XmlElement LElement = AElement.OwnerDocument.CreateElement("row");
-			LElement.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, GetUniqueName());
-			return LElement;
+			XmlElement localElement = element.OwnerDocument.CreateElement("row");
+			localElement.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, GetUniqueName());
+			return localElement;
 		}
 		
-		protected virtual XmlElement BuildLayoutNode(XmlElement AElement, LayoutNode ANode)
+		protected virtual XmlElement BuildLayoutNode(XmlElement element, LayoutNode node)
 		{
-			XmlElement LElement = null;
+			XmlElement localElement = null;
 			
-			if (ANode is ElementNode)	
+			if (node is ElementNode)	
 			{
-				GroupElement LGroupElement = ((ElementNode)ANode).Element as GroupElement;
-				if ((LGroupElement != null) && !LGroupElement.ContainsMultipleElements())
-					ANode = ANode.Children[0]; // Skip the group node
-				LElement = BuildElementNode(AElement, (ElementNode)ANode);
+				GroupElement groupElement = ((ElementNode)node).Element as GroupElement;
+				if ((groupElement != null) && !groupElement.ContainsMultipleElements())
+					node = node.Children[0]; // Skip the group node
+				localElement = BuildElementNode(element, (ElementNode)node);
 			}
-			else if (ANode is ColumnNode)
-				LElement = BuildColumnNode(AElement, (ColumnNode)ANode);
-			else if (ANode is RowNode)
-				LElement = BuildRowNode(AElement, (RowNode)ANode);
+			else if (node is ColumnNode)
+				localElement = BuildColumnNode(element, (ColumnNode)node);
+			else if (node is RowNode)
+				localElement = BuildRowNode(element, (RowNode)node);
 
-			foreach (LayoutNode LNode in ANode.Children)
-				LElement.AppendChild(BuildLayoutNode(LElement, LNode));
+			foreach (LayoutNode localNode in node.Children)
+				localElement.AppendChild(BuildLayoutNode(localElement, localNode));
 				
-			return LElement;
+			return localElement;
 		}
 	}
 
 	public abstract class PluralDocumentBuilder : DocumentBuilder
 	{
-		public PluralDocumentBuilder(DerivationInfo ADerivationInfo) : base(ADerivationInfo)  {}
+		public PluralDocumentBuilder(DerivationInfo derivationInfo) : base(derivationInfo)  {}
 
-		protected virtual void BuildNavigationActions(XmlElement AElement)
+		protected virtual void BuildNavigationActions(XmlElement element)
 		{
 			// Response.Write(String.Format("<sourceaction bop:name='MoveFirst' source='{0}' text='&amp;First' action='First' />\r\n", SourceName));
-			XmlElement LAction = AElement.OwnerDocument.CreateElement("sourceaction");
-			LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "MoveFirst");
-			LAction.SetAttribute("source", FDerivationInfo.MainSourceName);
-			LAction.SetAttribute("text", "&First");
-			LAction.SetAttribute("action", "First");
-			LAction.SetAttribute("image", FDerivationInfo.BuildImageExpression("First"));
-			AElement.AppendChild(LAction);
+			XmlElement action = element.OwnerDocument.CreateElement("sourceaction");
+			action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "MoveFirst");
+			action.SetAttribute("source", _derivationInfo.MainSourceName);
+			action.SetAttribute("text", "&First");
+			action.SetAttribute("action", "First");
+			action.SetAttribute("image", _derivationInfo.BuildImageExpression("First"));
+			element.AppendChild(action);
 			
 			// Response.Write(String.Format("<sourceaction bop:name='MovePrior' source='{0}' text='&amp;Prior' action='Prior' />\r\n", SourceName));
-			LAction = AElement.OwnerDocument.CreateElement("sourceaction");
-			LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "MovePrior");
-			LAction.SetAttribute("source", FDerivationInfo.MainSourceName);
-			LAction.SetAttribute("text", "&Prior");
-			LAction.SetAttribute("action", "Prior");
-			LAction.SetAttribute("image", FDerivationInfo.BuildImageExpression("Prior"));
-			AElement.AppendChild(LAction);
+			action = element.OwnerDocument.CreateElement("sourceaction");
+			action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "MovePrior");
+			action.SetAttribute("source", _derivationInfo.MainSourceName);
+			action.SetAttribute("text", "&Prior");
+			action.SetAttribute("action", "Prior");
+			action.SetAttribute("image", _derivationInfo.BuildImageExpression("Prior"));
+			element.AppendChild(action);
 			
 			// Response.Write(String.Format("<sourceaction bop:name='MoveNext' source='{0}' text='&amp;Next' action='Next' />\r\n", SourceName));
-			LAction = AElement.OwnerDocument.CreateElement("sourceaction");
-			LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "MoveNext");
-			LAction.SetAttribute("source", FDerivationInfo.MainSourceName);
-			LAction.SetAttribute("text", "&Next");
-			LAction.SetAttribute("action", "Next");
-			LAction.SetAttribute("image", FDerivationInfo.BuildImageExpression("Next"));
-			AElement.AppendChild(LAction);
+			action = element.OwnerDocument.CreateElement("sourceaction");
+			action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "MoveNext");
+			action.SetAttribute("source", _derivationInfo.MainSourceName);
+			action.SetAttribute("text", "&Next");
+			action.SetAttribute("action", "Next");
+			action.SetAttribute("image", _derivationInfo.BuildImageExpression("Next"));
+			element.AppendChild(action);
 			
 			// Response.Write(String.Format("<sourceaction bop:name='MoveLast' source='{0}' text='&amp;Last' action='Last' />\r\n", SourceName));
-			LAction = AElement.OwnerDocument.CreateElement("sourceaction");
-			LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "MoveLast");
-			LAction.SetAttribute("source", FDerivationInfo.MainSourceName);
-			LAction.SetAttribute("text", "&Last");
-			LAction.SetAttribute("action", "Last");
-			LAction.SetAttribute("image", FDerivationInfo.BuildImageExpression("Last"));
-			AElement.AppendChild(LAction);
+			action = element.OwnerDocument.CreateElement("sourceaction");
+			action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "MoveLast");
+			action.SetAttribute("source", _derivationInfo.MainSourceName);
+			action.SetAttribute("text", "&Last");
+			action.SetAttribute("action", "Last");
+			action.SetAttribute("image", _derivationInfo.BuildImageExpression("Last"));
+			element.AppendChild(action);
 			
 			// Response.Write(String.Format("<sourceaction bop:name='Refresh' source='{0}' text='&amp;Refresh' action='Refresh' />\r\n", SourceName));
-			LAction = AElement.OwnerDocument.CreateElement("sourceaction");
-			LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "Refresh");
-			LAction.SetAttribute("source", FDerivationInfo.MainSourceName);
-			LAction.SetAttribute("text", "&Refresh");
-			LAction.SetAttribute("action", "Refresh");
-			LAction.SetAttribute("image", FDerivationInfo.BuildImageExpression("Refresh"));
-			AElement.AppendChild(LAction);
+			action = element.OwnerDocument.CreateElement("sourceaction");
+			action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "Refresh");
+			action.SetAttribute("source", _derivationInfo.MainSourceName);
+			action.SetAttribute("text", "&Refresh");
+			action.SetAttribute("action", "Refresh");
+			action.SetAttribute("image", _derivationInfo.BuildImageExpression("Refresh"));
+			element.AppendChild(action);
 			
 			// Response.Write("<menu bop:name='NavigationMenu' text='&amp;Navigation'>");
-			XmlElement LMenu = AElement.OwnerDocument.CreateElement("menu");
-			LMenu.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "NavigationMenu");
-			LMenu.SetAttribute("text", "&Navigation");
-			AElement.AppendChild(LMenu);
+			XmlElement menu = element.OwnerDocument.CreateElement("menu");
+			menu.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "NavigationMenu");
+			menu.SetAttribute("text", "&Navigation");
+			element.AppendChild(menu);
 
 			// Response.Write("<menu bop:name='MoveFirstMenu' action='MoveFirst'/>");
-			XmlElement LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "MoveFirstMenu");
-			LMenuItem.SetAttribute("action", "MoveFirst");
-			LMenu.AppendChild(LMenuItem);
+			XmlElement menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "MoveFirstMenu");
+			menuItem.SetAttribute("action", "MoveFirst");
+			menu.AppendChild(menuItem);
 
 			// Response.Write("<menu bop:name='MovePriorMenu' action='MovePrior'/>");
-			LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "MovePriorMenu");
-			LMenuItem.SetAttribute("action", "MovePrior");
-			LMenu.AppendChild(LMenuItem);
+			menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "MovePriorMenu");
+			menuItem.SetAttribute("action", "MovePrior");
+			menu.AppendChild(menuItem);
 
 			// Response.Write("<menu bop:name='MoveNextMenu' action='MoveNext'/>");
-			LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "MoveNextMenu");
-			LMenuItem.SetAttribute("action", "MoveNext");
-			LMenu.AppendChild(LMenuItem);
+			menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "MoveNextMenu");
+			menuItem.SetAttribute("action", "MoveNext");
+			menu.AppendChild(menuItem);
 
 			// Response.Write("<menu bop:name='MoveLastMenu' action='MoveLast'/>");
-			LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "MoveLastMenu");
-			LMenuItem.SetAttribute("action", "MoveLast");
-			LMenu.AppendChild(LMenuItem);
+			menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "MoveLastMenu");
+			menuItem.SetAttribute("action", "MoveLast");
+			menu.AppendChild(menuItem);
 
 			// Response.Write("<menu bop:name='NavSepMenu1' text='-'/>");
-			LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "NavSepMenu1");
-			LMenuItem.SetAttribute("text", "-");
-			LMenu.AppendChild(LMenuItem);
+			menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "NavSepMenu1");
+			menuItem.SetAttribute("text", "-");
+			menu.AppendChild(menuItem);
 
 			// Response.Write("<menu bop:name='RefreshMenu' action='Refresh'/>");
-			LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "RefreshMenu");
-			LMenuItem.SetAttribute("action", "Refresh");
-			LMenu.AppendChild(LMenuItem);
+			menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "RefreshMenu");
+			menuItem.SetAttribute("action", "Refresh");
+			menu.AppendChild(menuItem);
 		}
 
-		protected virtual XmlElement BuildRootBrowseColumn(XmlElement AElement)
+		protected virtual XmlElement BuildRootBrowseColumn(XmlElement element)
 		{
 			// "<column bop:name='RootBrowseColumn'> ... </column>"
-			XmlElement LRootBrowseColumn = AElement.OwnerDocument.CreateElement("column");
-			LRootBrowseColumn.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "RootBrowseColumn");
-			AElement.AppendChild(LRootBrowseColumn);
-			return LRootBrowseColumn;
+			XmlElement rootBrowseColumn = element.OwnerDocument.CreateElement("column");
+			rootBrowseColumn.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "RootBrowseColumn");
+			element.AppendChild(rootBrowseColumn);
+			return rootBrowseColumn;
 		}
 	}
 	
 	public abstract class SearchableDocumentBuilder : PluralDocumentBuilder
 	{
-		public SearchableDocumentBuilder(DerivationInfo ADerivationInfo, SearchElement ASearchElement, GridElement AGridElement) : base(ADerivationInfo)
+		public SearchableDocumentBuilder(DerivationInfo derivationInfo, SearchElement searchElement, GridElement gridElement) : base(derivationInfo)
 		{
-			FSearchElement = ASearchElement;
-			FGridElement = AGridElement;
+			_searchElement = searchElement;
+			_gridElement = gridElement;
 		}
 
-		protected SearchElement FSearchElement;
-		public SearchElement SearchElement { get { return FSearchElement; } }
+		protected SearchElement _searchElement;
+		public SearchElement SearchElement { get { return _searchElement; } }
 		
-		protected GridElement FGridElement;
-		public GridElement GridElement { get { return FGridElement; } }
+		protected GridElement _gridElement;
+		public GridElement GridElement { get { return _gridElement; } }
 		
-		protected virtual void BuildSearch(XmlElement AElement)
+		protected virtual void BuildSearch(XmlElement element)
 		{
-			AElement.AppendChild(BuildContainerElement(AElement, SearchElement));
+			element.AppendChild(BuildContainerElement(element, SearchElement));
 		}
 		
-		protected virtual void BuildGrid(XmlElement AElement)
+		protected virtual void BuildGrid(XmlElement element)
 		{
-			AElement.AppendChild(BuildContainerElement(AElement, GridElement));
+			element.AppendChild(BuildContainerElement(element, GridElement));
 		}
 
-		protected virtual XmlElement BuildGridRow(XmlElement AElement)
+		protected virtual XmlElement BuildGridRow(XmlElement element)
 		{
-			XmlElement LGridRow = AElement.OwnerDocument.CreateElement("row");
-			LGridRow.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "GridRow");
-			AElement.AppendChild(LGridRow);
-			return LGridRow;
+			XmlElement gridRow = element.OwnerDocument.CreateElement("row");
+			gridRow.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "GridRow");
+			element.AppendChild(gridRow);
+			return gridRow;
 		}
 	}
 	
 	public class ListDocumentBuilder : SearchableDocumentBuilder
 	{
-		public ListDocumentBuilder(DerivationInfo ADerivationInfo, SearchElement ASearchElement, GridElement AGridElement) : base(ADerivationInfo, ASearchElement, AGridElement) {}
+		public ListDocumentBuilder(DerivationInfo derivationInfo, SearchElement searchElement, GridElement gridElement) : base(derivationInfo, searchElement, gridElement) {}
 
-		protected override void InternalBuild(XmlElement AElement)
+		protected override void InternalBuild(XmlElement element)
 		{
-			BuildDetailActions(AElement);
-			BuildExtensionActions(AElement);
-			BuildLookupActions(AElement);
-			BuildNavigationActions(AElement);
-			XmlElement LRootColumn = BuildRootBrowseColumn(AElement);
-			BuildSearch(LRootColumn);
-			XmlElement LGridRow = BuildGridRow(LRootColumn);
-			BuildGrid(LGridRow);
-			BuildEmbeddedDetails(LRootColumn);
+			BuildDetailActions(element);
+			BuildExtensionActions(element);
+			BuildLookupActions(element);
+			BuildNavigationActions(element);
+			XmlElement rootColumn = BuildRootBrowseColumn(element);
+			BuildSearch(rootColumn);
+			XmlElement gridRow = BuildGridRow(rootColumn);
+			BuildGrid(gridRow);
+			BuildEmbeddedDetails(rootColumn);
 		}
 	}
 
 	public class BrowseDocumentBuilder : SearchableDocumentBuilder
 	{
-		public BrowseDocumentBuilder(DerivationInfo ADerivationInfo, SearchElement ASearchElement, GridElement AGridElement) : base(ADerivationInfo, ASearchElement, AGridElement) {}
+		public BrowseDocumentBuilder(DerivationInfo derivationInfo, SearchElement searchElement, GridElement gridElement) : base(derivationInfo, searchElement, gridElement) {}
 
 		// Frontend.Secure = "Visible" | "Disabled" | "Hidden" (Default)
 		
-		protected virtual void BuildUpdateActions(XmlElement AElement)
+		protected virtual void BuildUpdateActions(XmlElement element)
 		{
-			XmlElement LAction;
+			XmlElement action;
 
-			SecureBehavior LSecureBehavior = SecureBehavior.Visible;
-			if (!FDerivationInfo.Program.Plan.HasRight(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Insert)))
-				LSecureBehavior = (SecureBehavior)Enum.Parse(typeof(SecureBehavior), DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Secure", DerivationUtility.CAdd, "Hidden"), true);
+			SecureBehavior secureBehavior = SecureBehavior.Visible;
+			if (!_derivationInfo.Program.Plan.HasRight(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Insert)))
+				secureBehavior = (SecureBehavior)Enum.Parse(typeof(SecureBehavior), DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Secure", DerivationUtility.Add, "Hidden"), true);
 
-			LAction = AElement.OwnerDocument.CreateElement("showformaction");
-			LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "Add");
-			LAction.SetAttribute("text", "&Add...");
-			LAction.SetAttribute
+			action = element.OwnerDocument.CreateElement("showformaction");
+			action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "Add");
+			action.SetAttribute("text", "&Add...");
+			action.SetAttribute
 			(
 				"document", 
 				DerivationUtility.GetTag
 				(
-					FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, 
-					String.Format("{0}.Document", DerivationUtility.CAdd),
-					FDerivationInfo.BuildDerivationExpression
+					_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, 
+					String.Format("{0}.Document", DerivationUtility.Add),
+					_derivationInfo.BuildDerivationExpression
 					(
-						DerivationUtility.CAdd,
-						DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Query", DerivationUtility.CAdd, FDerivationInfo.Query),
-						FDerivationInfo.MasterKeyNames,
-						FDerivationInfo.DetailKeyNames,
-						Boolean.Parse(DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Elaborate", DerivationUtility.CAdd, FDerivationInfo.Elaborate.ToString()))
+						DerivationUtility.Add,
+						DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Query", DerivationUtility.Add, _derivationInfo.Query),
+						_derivationInfo.MasterKeyNames,
+						_derivationInfo.DetailKeyNames,
+						Boolean.Parse(DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Elaborate", DerivationUtility.Add, _derivationInfo.Elaborate.ToString()))
 					)
 				)
 			);
-			LAction.SetAttribute("mode", "Insert");
-			LAction.SetAttribute("sourcelinktype", "Detail");
-			LAction.SetAttribute("sourcelink.source", FDerivationInfo.MainSourceName);
-			if (FDerivationInfo.DetailKeyNames != String.Empty)
-				LAction.SetAttribute("sourcelink.attachmaster",  "True");
-			LAction.SetAttribute("hint", "Add a new row.");
-			LAction.SetAttribute("image", FDerivationInfo.BuildImageExpression("Add"));
-			switch (LSecureBehavior)
+			action.SetAttribute("mode", "Insert");
+			action.SetAttribute("sourcelinktype", "Detail");
+			action.SetAttribute("sourcelink.source", _derivationInfo.MainSourceName);
+			if (_derivationInfo.DetailKeyNames != String.Empty)
+				action.SetAttribute("sourcelink.attachmaster",  "True");
+			action.SetAttribute("hint", "Add a new row.");
+			action.SetAttribute("image", _derivationInfo.BuildImageExpression("Add"));
+			switch (secureBehavior)
 			{
-				case SecureBehavior.Disabled : LAction.SetAttribute("enabled", "False"); break;
-				case SecureBehavior.Hidden : LAction.SetAttribute("visible", "False"); break;
+				case SecureBehavior.Disabled : action.SetAttribute("enabled", "False"); break;
+				case SecureBehavior.Hidden : action.SetAttribute("visible", "False"); break;
 			}
-			AElement.AppendChild(LAction);
+			element.AppendChild(action);
 			
-			LSecureBehavior = SecureBehavior.Visible;
-			if (!FDerivationInfo.Program.Plan.HasRight(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Update)))
-				LSecureBehavior = (SecureBehavior)Enum.Parse(typeof(SecureBehavior), DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Secure", DerivationUtility.CEdit, "Hidden"), true);
+			secureBehavior = SecureBehavior.Visible;
+			if (!_derivationInfo.Program.Plan.HasRight(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Update)))
+				secureBehavior = (SecureBehavior)Enum.Parse(typeof(SecureBehavior), DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Secure", DerivationUtility.Edit, "Hidden"), true);
 
-			LAction = AElement.OwnerDocument.CreateElement("showformaction");
-			LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "Edit");
-			LAction.SetAttribute("text", "&Edit...");
-			LAction.SetAttribute
+			action = element.OwnerDocument.CreateElement("showformaction");
+			action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "Edit");
+			action.SetAttribute("text", "&Edit...");
+			action.SetAttribute
 			(
 				"document", 
 				DerivationUtility.GetTag
 				(
-					FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData,
-					String.Format("{0}.Document", DerivationUtility.CEdit),
-					FDerivationInfo.BuildDerivationExpression
+					_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData,
+					String.Format("{0}.Document", DerivationUtility.Edit),
+					_derivationInfo.BuildDerivationExpression
 					(
-						DerivationUtility.CEdit,
-						DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Query", DerivationUtility.CEdit, FDerivationInfo.Query),
-						FDerivationInfo.MasterKeyNames,
-						FDerivationInfo.DetailKeyNames,
-						Boolean.Parse(DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Elaborate", DerivationUtility.CEdit, FDerivationInfo.Elaborate.ToString()))
+						DerivationUtility.Edit,
+						DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Query", DerivationUtility.Edit, _derivationInfo.Query),
+						_derivationInfo.MasterKeyNames,
+						_derivationInfo.DetailKeyNames,
+						Boolean.Parse(DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Elaborate", DerivationUtility.Edit, _derivationInfo.Elaborate.ToString()))
 					)
 				)
 			);
-			LAction.SetAttribute("mode", "Edit");
-			LAction.SetAttribute("sourcelinktype", "Detail");
-			LAction.SetAttribute("sourcelink.source", FDerivationInfo.MainSourceName);
-			LAction.SetAttribute("sourcelink.masterkeynames", FDerivationInfo.KeyNames);
-			LAction.SetAttribute("sourcelink.detailkeynames", FDerivationInfo.KeyNames);
-			LAction.SetAttribute("hint", "Edit the current row.");
-			LAction.SetAttribute("image", FDerivationInfo.BuildImageExpression("Edit"));
-			switch (LSecureBehavior)
+			action.SetAttribute("mode", "Edit");
+			action.SetAttribute("sourcelinktype", "Detail");
+			action.SetAttribute("sourcelink.source", _derivationInfo.MainSourceName);
+			action.SetAttribute("sourcelink.masterkeynames", _derivationInfo.KeyNames);
+			action.SetAttribute("sourcelink.detailkeynames", _derivationInfo.KeyNames);
+			action.SetAttribute("hint", "Edit the current row.");
+			action.SetAttribute("image", _derivationInfo.BuildImageExpression("Edit"));
+			switch (secureBehavior)
 			{
-				case SecureBehavior.Disabled : LAction.SetAttribute("enabled", "False"); break;
-				case SecureBehavior.Hidden : LAction.SetAttribute("visible", "False"); break;
+				case SecureBehavior.Disabled : action.SetAttribute("enabled", "False"); break;
+				case SecureBehavior.Hidden : action.SetAttribute("visible", "False"); break;
 			}
-			AElement.AppendChild(LAction);
+			element.AppendChild(action);
 			
-			LSecureBehavior = SecureBehavior.Visible;
-			if (!FDerivationInfo.Program.Plan.HasRight(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Delete)))
-				LSecureBehavior = (SecureBehavior)Enum.Parse(typeof(SecureBehavior), DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Secure", "Delete", "Hidden"), true);			
+			secureBehavior = SecureBehavior.Visible;
+			if (!_derivationInfo.Program.Plan.HasRight(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Delete)))
+				secureBehavior = (SecureBehavior)Enum.Parse(typeof(SecureBehavior), DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Secure", "Delete", "Hidden"), true);			
 
-			LAction = AElement.OwnerDocument.CreateElement("showformaction");
-			LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "Delete");
-			LAction.SetAttribute("text", "&Delete...");
-			LAction.SetAttribute
+			action = element.OwnerDocument.CreateElement("showformaction");
+			action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "Delete");
+			action.SetAttribute("text", "&Delete...");
+			action.SetAttribute
 			(
 				"document", 
 				DerivationUtility.GetTag
 				(
-					FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, 
-					String.Format("{0}.Document", DerivationUtility.CDelete),
-					FDerivationInfo.BuildDerivationExpression
+					_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, 
+					String.Format("{0}.Document", DerivationUtility.Delete),
+					_derivationInfo.BuildDerivationExpression
 					(
-						DerivationUtility.CDelete,
-						DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Query", DerivationUtility.CDelete, FDerivationInfo.Query), 
-						FDerivationInfo.MasterKeyNames, 
-						FDerivationInfo.DetailKeyNames,
-						Boolean.Parse(DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Elaborate", DerivationUtility.CDelete, FDerivationInfo.Elaborate.ToString()))
+						DerivationUtility.Delete,
+						DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Query", DerivationUtility.Delete, _derivationInfo.Query), 
+						_derivationInfo.MasterKeyNames, 
+						_derivationInfo.DetailKeyNames,
+						Boolean.Parse(DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Elaborate", DerivationUtility.Delete, _derivationInfo.Elaborate.ToString()))
 					)
 				)
 			);
-			LAction.SetAttribute("mode", "Delete");
-			LAction.SetAttribute("sourcelinktype", "Detail");
-			LAction.SetAttribute("sourcelink.source", FDerivationInfo.MainSourceName);
-			LAction.SetAttribute("sourcelink.masterkeynames", FDerivationInfo.KeyNames);
-			LAction.SetAttribute("sourcelink.detailkeynames", FDerivationInfo.KeyNames);
-			LAction.SetAttribute("hint", "Delete the current row.");
-			LAction.SetAttribute("image", FDerivationInfo.BuildImageExpression("Delete"));
-			switch (LSecureBehavior)
+			action.SetAttribute("mode", "Delete");
+			action.SetAttribute("sourcelinktype", "Detail");
+			action.SetAttribute("sourcelink.source", _derivationInfo.MainSourceName);
+			action.SetAttribute("sourcelink.masterkeynames", _derivationInfo.KeyNames);
+			action.SetAttribute("sourcelink.detailkeynames", _derivationInfo.KeyNames);
+			action.SetAttribute("hint", "Delete the current row.");
+			action.SetAttribute("image", _derivationInfo.BuildImageExpression("Delete"));
+			switch (secureBehavior)
 			{
-				case SecureBehavior.Disabled : LAction.SetAttribute("enabled", "False"); break;
-				case SecureBehavior.Hidden : LAction.SetAttribute("visible", "False"); break;
+				case SecureBehavior.Disabled : action.SetAttribute("enabled", "False"); break;
+				case SecureBehavior.Hidden : action.SetAttribute("visible", "False"); break;
 			}
-			AElement.AppendChild(LAction);
+			element.AppendChild(action);
 			
-			LAction = AElement.OwnerDocument.CreateElement("showformaction");
-			LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "View");
-			LAction.SetAttribute("text", "&View...");
-			LAction.SetAttribute
+			action = element.OwnerDocument.CreateElement("showformaction");
+			action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "View");
+			action.SetAttribute("text", "&View...");
+			action.SetAttribute
 			(
 				"document", 
 				DerivationUtility.GetTag
 				(
-					FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, 
-					String.Format("{0}.Document", DerivationUtility.CView), 
-					FDerivationInfo.BuildDerivationExpression
+					_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, 
+					String.Format("{0}.Document", DerivationUtility.View), 
+					_derivationInfo.BuildDerivationExpression
 					(
-						DerivationUtility.CView,
-						DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Query", DerivationUtility.CView, FDerivationInfo.Query),
-						FDerivationInfo.MasterKeyNames,
-						FDerivationInfo.DetailKeyNames,
-						Boolean.Parse(DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Elaborate", DerivationUtility.CView, FDerivationInfo.Elaborate.ToString()))
+						DerivationUtility.View,
+						DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Query", DerivationUtility.View, _derivationInfo.Query),
+						_derivationInfo.MasterKeyNames,
+						_derivationInfo.DetailKeyNames,
+						Boolean.Parse(DerivationUtility.GetTag(_derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Elaborate", DerivationUtility.View, _derivationInfo.Elaborate.ToString()))
 					)
 				)
 			);
-			LAction.SetAttribute("sourcelinktype", "Detail");
-			LAction.SetAttribute("sourcelink.source", FDerivationInfo.MainSourceName);
-			LAction.SetAttribute("sourcelink.masterkeynames", FDerivationInfo.KeyNames);
-			LAction.SetAttribute("sourcelink.detailkeynames", FDerivationInfo.KeyNames);
-			LAction.SetAttribute("hint", "View the current row.");
-			LAction.SetAttribute("image", FDerivationInfo.BuildImageExpression("View"));
-			AElement.AppendChild(LAction);
+			action.SetAttribute("sourcelinktype", "Detail");
+			action.SetAttribute("sourcelink.source", _derivationInfo.MainSourceName);
+			action.SetAttribute("sourcelink.masterkeynames", _derivationInfo.KeyNames);
+			action.SetAttribute("sourcelink.detailkeynames", _derivationInfo.KeyNames);
+			action.SetAttribute("hint", "View the current row.");
+			action.SetAttribute("image", _derivationInfo.BuildImageExpression("View"));
+			element.AppendChild(action);
 			
 			// Response.Write(String.Format("<editfilteraction bop:name='EditFilter' source='{0}' text='&amp;Filter...' />\r\n", SourceName));
-			LAction = AElement.OwnerDocument.CreateElement("editfilteraction");
-			LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "EditFilter");
-			LAction.SetAttribute("text", "&Filter...");
-			LAction.SetAttribute("source", FDerivationInfo.MainSourceName);
-			AElement.AppendChild(LAction);
+			action = element.OwnerDocument.CreateElement("editfilteraction");
+			action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "EditFilter");
+			action.SetAttribute("text", "&Filter...");
+			action.SetAttribute("source", _derivationInfo.MainSourceName);
+			element.AppendChild(action);
 
 			// Response.Write(String.Format("<menu bop:name='{0}Menu' text='{0}'>", TableTitle));
-			XmlElement LMenu = AElement.OwnerDocument.CreateElement("menu");
-			LMenu.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, String.Format("{0}Menu", FDerivationInfo.Query));
-			LMenu.SetAttribute("text", FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableTitle);
-			LMenu.AppendChild(LAction);
+			XmlElement menu = element.OwnerDocument.CreateElement("menu");
+			menu.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, String.Format("{0}Menu", _derivationInfo.Query));
+			menu.SetAttribute("text", _derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableTitle);
+			menu.AppendChild(action);
 			
 			// Response.Write("<menu bop:name='AddMenu' action='Add'/>");
-			XmlElement LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "AddMenu");
-			LMenuItem.SetAttribute("action", "Add");
-			LMenu.AppendChild(LMenuItem);
+			XmlElement menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "AddMenu");
+			menuItem.SetAttribute("action", "Add");
+			menu.AppendChild(menuItem);
 
 			// Response.Write("<menu bop:name='EditMenu' action='Edit'/>");
-			LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "EditMenu");
-			LMenuItem.SetAttribute("action", "Edit");
-			LMenu.AppendChild(LMenuItem);
+			menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "EditMenu");
+			menuItem.SetAttribute("action", "Edit");
+			menu.AppendChild(menuItem);
 
 			// Response.Write("<menu bop:name='DeleteMenu' action='Delete'/>");
-			LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "DeleteMenu");
-			LMenuItem.SetAttribute("action", "Delete");
-			LMenu.AppendChild(LMenuItem);
+			menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "DeleteMenu");
+			menuItem.SetAttribute("action", "Delete");
+			menu.AppendChild(menuItem);
 
 			// Response.Write("<menu bop:name='ViewMenu' action='View'/>");
-			LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "ViewMenu");
-			LMenuItem.SetAttribute("action", "View");
-			LMenu.AppendChild(LMenuItem);
+			menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "ViewMenu");
+			menuItem.SetAttribute("action", "View");
+			menu.AppendChild(menuItem);
 
 			// Response.Write("<menu bop:name='UpdateSepMenu1' text='-'/>");
-			LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "UpdateSepMenu1");
-			LMenuItem.SetAttribute("text", "-");
-			LMenu.AppendChild(LMenuItem);
+			menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "UpdateSepMenu1");
+			menuItem.SetAttribute("text", "-");
+			menu.AppendChild(menuItem);
 
 			// Response.Write("<menu bop:name='EditFilterMenu' action='EditFilter'/>");
-			LMenuItem = AElement.OwnerDocument.CreateElement("menu");
-			LMenuItem.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "EditFilterMenu");
-			LMenuItem.SetAttribute("action", "EditFilter");
-			LMenu.AppendChild(LMenuItem);
+			menuItem = element.OwnerDocument.CreateElement("menu");
+			menuItem.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "EditFilterMenu");
+			menuItem.SetAttribute("action", "EditFilter");
+			menu.AppendChild(menuItem);
 		}
 		
-		protected virtual void BuildGridBar(XmlElement AElement)
+		protected virtual void BuildGridBar(XmlElement element)
 		{
 			// Response.Write("<column bop:name='GridBar'>");
-			XmlElement LColumn = AElement.OwnerDocument.CreateElement("column");
-			LColumn.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "GridBar");
+			XmlElement column = element.OwnerDocument.CreateElement("column");
+			column.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "GridBar");
 			
 			// Response.Write("<trigger action='Add' bop:name='AddTrigger' imagewidth='11' imageheight='13'/>");
-			XmlElement LTrigger = AElement.OwnerDocument.CreateElement("trigger");
-			LTrigger.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "AddTrigger");
-			LTrigger.SetAttribute("action", "Add");
-			LTrigger.SetAttribute("imagewidth", "11");
-			LTrigger.SetAttribute("imageheight", "13");
-			LColumn.AppendChild(LTrigger);
+			XmlElement trigger = element.OwnerDocument.CreateElement("trigger");
+			trigger.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "AddTrigger");
+			trigger.SetAttribute("action", "Add");
+			trigger.SetAttribute("imagewidth", "11");
+			trigger.SetAttribute("imageheight", "13");
+			column.AppendChild(trigger);
 			
 			// Response.Write("<trigger action='Edit' bop:name='EditTrigger' imagewidth='11' imageheight='13'/>");
-			LTrigger = AElement.OwnerDocument.CreateElement("trigger");
-			LTrigger.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "EditTrigger");
-			LTrigger.SetAttribute("action", "Edit");
-			LTrigger.SetAttribute("imagewidth", "11");
-			LTrigger.SetAttribute("imageheight", "13");
-			LColumn.AppendChild(LTrigger);
+			trigger = element.OwnerDocument.CreateElement("trigger");
+			trigger.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "EditTrigger");
+			trigger.SetAttribute("action", "Edit");
+			trigger.SetAttribute("imagewidth", "11");
+			trigger.SetAttribute("imageheight", "13");
+			column.AppendChild(trigger);
 			
 			// Response.Write("<trigger action='Delete' bop:name='DeleteTrigger' imagewidth='11' imageheight='13'/>");
-			LTrigger = AElement.OwnerDocument.CreateElement("trigger");
-			LTrigger.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "DeleteTrigger");
-			LTrigger.SetAttribute("action", "Delete");
-			LTrigger.SetAttribute("imagewidth", "11");
-			LTrigger.SetAttribute("imageheight", "13");
-			LColumn.AppendChild(LTrigger);
+			trigger = element.OwnerDocument.CreateElement("trigger");
+			trigger.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "DeleteTrigger");
+			trigger.SetAttribute("action", "Delete");
+			trigger.SetAttribute("imagewidth", "11");
+			trigger.SetAttribute("imageheight", "13");
+			column.AppendChild(trigger);
 			
 			// Response.Write("<trigger action='View' bop:name='ViewTrigger' imagewidth='11' imageheight='13'/>");
-			LTrigger = AElement.OwnerDocument.CreateElement("trigger");
-			LTrigger.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "ViewTrigger");
-			LTrigger.SetAttribute("action", "View");
-			LTrigger.SetAttribute("imagewidth", "11");
-			LTrigger.SetAttribute("imageheight", "13");
-			LColumn.AppendChild(LTrigger);
+			trigger = element.OwnerDocument.CreateElement("trigger");
+			trigger.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "ViewTrigger");
+			trigger.SetAttribute("action", "View");
+			trigger.SetAttribute("imagewidth", "11");
+			trigger.SetAttribute("imageheight", "13");
+			column.AppendChild(trigger);
 			
 			// Response.Write("</column>");
-			AElement.AppendChild(LColumn);
+			element.AppendChild(column);
 		}
 		
-		protected override XmlElement BuildInterface(XmlDocument ADocument)
+		protected override XmlElement BuildInterface(XmlDocument document)
 		{
-			XmlElement LInterface = base.BuildInterface(ADocument);
-			LInterface.SetAttribute("OnDefault", "Edit");
-			return LInterface;
+			XmlElement interfaceValue = base.BuildInterface(document);
+			interfaceValue.SetAttribute("OnDefault", "Edit");
+			return interfaceValue;
 		}
 
-		protected override void InternalBuild(XmlElement AElement)
+		protected override void InternalBuild(XmlElement element)
 		{
-			BuildDetailActions(AElement);
-			BuildExtensionActions(AElement);
-			BuildLookupActions(AElement);
-			BuildUpdateActions(AElement);
-			BuildNavigationActions(AElement);
-			XmlElement LRootColumn = BuildRootBrowseColumn(AElement);
-			BuildSearch(LRootColumn);
-			XmlElement LGridRow = BuildGridRow(LRootColumn);
-			BuildGrid(LGridRow);
-			BuildGridBar(LGridRow);
-			BuildEmbeddedDetails(LRootColumn);
+			BuildDetailActions(element);
+			BuildExtensionActions(element);
+			BuildLookupActions(element);
+			BuildUpdateActions(element);
+			BuildNavigationActions(element);
+			XmlElement rootColumn = BuildRootBrowseColumn(element);
+			BuildSearch(rootColumn);
+			XmlElement gridRow = BuildGridRow(rootColumn);
+			BuildGrid(gridRow);
+			BuildGridBar(gridRow);
+			BuildEmbeddedDetails(rootColumn);
 		}
 	}
 	
 	public class OrderBrowseDocumentBuilder : PluralDocumentBuilder
 	{
-		public OrderBrowseDocumentBuilder(DerivationInfo ADerivationInfo) : base(ADerivationInfo) {}
+		public OrderBrowseDocumentBuilder(DerivationInfo derivationInfo) : base(derivationInfo) {}
 		
-		protected override void BuildSource(XmlElement AElement)
+		protected override void BuildSource(XmlElement element)
 		{
-			XmlElement LSource = AElement.OwnerDocument.CreateElement("source");
-			LSource.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, FDerivationInfo.MainSourceName);
-			LSource.SetAttribute("usebrowse", "False");
-			LSource.SetAttribute("expression", GetOrderExpression());
-			LSource.SetAttribute("isreadonly", "True");
-			AElement.AppendChild(LSource);
+			XmlElement source = element.OwnerDocument.CreateElement("source");
+			source.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, _derivationInfo.MainSourceName);
+			source.SetAttribute("usebrowse", "False");
+			source.SetAttribute("expression", GetOrderExpression());
+			source.SetAttribute("isreadonly", "True");
+			element.AppendChild(source);
 		}
 		
-		protected virtual string GetColumnTitle(Schema.TableVarColumn AColumn)
+		protected virtual string GetColumnTitle(Schema.TableVarColumn column)
 		{
 			return
 				DerivationUtility.GetTag
 				(
-					AColumn.MetaData,
+					column.MetaData,
 					"Caption",
-					FDerivationInfo.PageType,
-					FDerivationInfo.ElaboratedExpression.Columns[AColumn.Name].GetTitleSeed() + 
-						DerivationUtility.GetTag(AColumn.MetaData, "Title", FDerivationInfo.PageType, Schema.Object.Unqualify(AColumn.Name))
+					_derivationInfo.PageType,
+					_derivationInfo.ElaboratedExpression.Columns[column.Name].GetTitleSeed() + 
+						DerivationUtility.GetTag(column.MetaData, "Title", _derivationInfo.PageType, Schema.Object.Unqualify(column.Name))
 				);
 		}
 		
-		protected virtual string GetDefaultOrderTitle(Schema.Order AOrder)
+		protected virtual string GetDefaultOrderTitle(Schema.Order order)
 		{
-			StringBuilder LName = new StringBuilder();
-			foreach (Schema.OrderColumn LColumn in AOrder.Columns)
+			StringBuilder name = new StringBuilder();
+			foreach (Schema.OrderColumn column in order.Columns)
 			{
-				if (IsColumnVisible(LColumn.Column))
+				if (IsColumnVisible(column.Column))
 				{
-					if (LName.Length > 0)
-						LName.Append(", ");
-					LName.Append(GetColumnTitle(LColumn.Column));
-					if (!LColumn.Ascending)
-						LName.Append(" (descending)");
+					if (name.Length > 0)
+						name.Append(", ");
+					name.Append(GetColumnTitle(column.Column));
+					if (!column.Ascending)
+						name.Append(" (descending)");
 				}
 			}
 
-			return String.Format("by {0}", LName.ToString());
+			return String.Format("by {0}", name.ToString());
 		}
 		
-		protected bool IsColumnVisible(Schema.TableVarColumn AColumn)
+		protected bool IsColumnVisible(Schema.TableVarColumn column)
 		{
-			return DerivationUtility.IsColumnVisible(AColumn, FDerivationInfo.PageType);
+			return DerivationUtility.IsColumnVisible(column, _derivationInfo.PageType);
 		}
 		
-		protected bool IsOrderVisible(Schema.Order AOrder)
+		protected bool IsOrderVisible(Schema.Order order)
 		{
-			return DerivationUtility.IsOrderVisible(AOrder, FDerivationInfo.PageType);
+			return DerivationUtility.IsOrderVisible(order, _derivationInfo.PageType);
 		}
 		
 		protected virtual string GetOrderExpression()
 		{
 			// Build a table selector with a row selector for each possible order in the page expression
-			Schema.Orders LOrders = new Schema.Orders();
-			LOrders.AddRange(FDerivationInfo.TableVar.Orders);
-			Schema.Order LOrderForKey;
-			foreach (Schema.Key LKey in FDerivationInfo.TableVar.Keys)
+			Schema.Orders orders = new Schema.Orders();
+			orders.AddRange(_derivationInfo.TableVar.Orders);
+			Schema.Order orderForKey;
+			foreach (Schema.Key key in _derivationInfo.TableVar.Keys)
 			{
-				LOrderForKey = FDerivationInfo.Program.OrderFromKey(LKey);
-				if (!LOrders.Contains(LOrderForKey))
-					LOrders.Add(LOrderForKey);
+				orderForKey = _derivationInfo.Program.OrderFromKey(key);
+				if (!orders.Contains(orderForKey))
+					orders.Add(orderForKey);
 			}
 				
-			StringBuilder LExpression = new StringBuilder();
-			foreach (Schema.Order LOrder in LOrders)
-				if (IsOrderVisible(LOrder))
-					LExpression.AppendFormat
+			StringBuilder expression = new StringBuilder();
+			foreach (Schema.Order order in orders)
+				if (IsOrderVisible(order))
+					expression.AppendFormat
 					(
 						@"{0}row {{ ""{1}"" Description, ""{2}"" OrderName }} ", 
-						LExpression.Length > 0 ? ", " : String.Empty, 
-						DerivationUtility.GetTag(LOrder.MetaData, "Title", FDerivationInfo.PageType, GetDefaultOrderTitle(LOrder)), 
-						LOrder.Name
+						expression.Length > 0 ? ", " : String.Empty, 
+						DerivationUtility.GetTag(order.MetaData, "Title", _derivationInfo.PageType, GetDefaultOrderTitle(order)), 
+						order.Name
 					);
 
 			// return an empty table if there were no visible orders, otherwise the expression will be invalid
-			return String.Format("table of {{ OrderName : String, Description : String }} {{ {0} }} order by {{ OrderName }}", LExpression.ToString());
+			return String.Format("table of {{ OrderName : String, Description : String }} {{ {0} }} order by {{ OrderName }}", expression.ToString());
 		}
 
-		protected override void InternalBuild(XmlElement AElement)
+		protected override void InternalBuild(XmlElement element)
 		{
-			BuildNavigationActions(AElement);
-			XmlElement LRootColumn = BuildRootBrowseColumn(AElement);
-			XmlElement LGrid = AElement.OwnerDocument.CreateElement("grid");
-			LGrid.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "MainGrid");
-			LGrid.SetAttribute("source", "Main");
-			LGrid.SetAttribute("readonly", "True");
-			XmlElement LGridColumn = AElement.OwnerDocument.CreateElement("textcolumn");
-			LGridColumn.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "MainGridColumnDescription");
-			LGridColumn.SetAttribute("columnname", "Description");
-			LGridColumn.SetAttribute("width", "45");
-			LGrid.AppendChild(LGridColumn);
-			LRootColumn.AppendChild(LGrid);
+			BuildNavigationActions(element);
+			XmlElement rootColumn = BuildRootBrowseColumn(element);
+			XmlElement grid = element.OwnerDocument.CreateElement("grid");
+			grid.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "MainGrid");
+			grid.SetAttribute("source", "Main");
+			grid.SetAttribute("readonly", "True");
+			XmlElement gridColumn = element.OwnerDocument.CreateElement("textcolumn");
+			gridColumn.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "MainGridColumnDescription");
+			gridColumn.SetAttribute("columnname", "Description");
+			gridColumn.SetAttribute("width", "45");
+			grid.AppendChild(gridColumn);
+			rootColumn.AppendChild(grid);
 		}
 	}
 	
 	public class ReportDocumentBuilder : DocumentBuilder
 	{
-		public ReportDocumentBuilder(DerivationInfo ADerivationInfo) : base(ADerivationInfo) {}
+		public ReportDocumentBuilder(DerivationInfo derivationInfo) : base(derivationInfo) {}
 		
 		private int COffsetMultiplier = 5;
 
-		protected override XmlElement BuildInterface(XmlDocument ADocument)
+		protected override XmlElement BuildInterface(XmlDocument document)
 		{
-			XmlElement LReport = ADocument.CreateElement("report");
-			LReport.SetAttribute("xmlns:bop", "www.alphora.com/schemas/bop");
-			ADocument.AppendChild(LReport);
-			return LReport;
+			XmlElement report = document.CreateElement("report");
+			report.SetAttribute("xmlns:bop", "www.alphora.com/schemas/bop");
+			document.AppendChild(report);
+			return report;
 		}
 		
-		protected virtual void BuildHeader(XmlElement AElement)
+		protected virtual void BuildHeader(XmlElement element)
 		{
-			XmlElement LHeader = AElement.OwnerDocument.CreateElement("header");
-			LHeader.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "PageHeader");
-			LHeader.SetAttribute("height", "15");
-			AElement.AppendChild(LHeader);
+			XmlElement header = element.OwnerDocument.CreateElement("header");
+			header.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "PageHeader");
+			header.SetAttribute("height", "15");
+			element.AppendChild(header);
 			
-			XmlElement LTextArea = AElement.OwnerDocument.CreateElement("textarea");
-			LTextArea.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "ReportName");
-			LTextArea.SetAttribute("text", String.Format("{0} Report", FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableTitle));
-			LTextArea.SetAttribute("y", "0");
-			LHeader.AppendChild(LTextArea);
+			XmlElement textArea = element.OwnerDocument.CreateElement("textarea");
+			textArea.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "ReportName");
+			textArea.SetAttribute("text", String.Format("{0} Report", _derivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableTitle));
+			textArea.SetAttribute("y", "0");
+			header.AppendChild(textArea);
 
-			XmlElement LDate = AElement.OwnerDocument.CreateElement("date");
-			LDate.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "HeaderDate");
-			LDate.SetAttribute("x", "520");
-			LDate.SetAttribute("y", "0");
-			LHeader.AppendChild(LDate);			
+			XmlElement date = element.OwnerDocument.CreateElement("date");
+			date.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "HeaderDate");
+			date.SetAttribute("x", "520");
+			date.SetAttribute("y", "0");
+			header.AppendChild(date);			
 		}
 		
-		protected virtual void BuildDataBandHeader(XmlElement AElement) 
+		protected virtual void BuildDataBandHeader(XmlElement element) 
 		{
-			int LCurrentOffset = 10;
-			int LWidth;
-			foreach (Schema.TableVarColumn LColumn in FDerivationInfo.TableVar.Columns) 
+			int currentOffset = 10;
+			int width;
+			foreach (Schema.TableVarColumn column in _derivationInfo.TableVar.Columns) 
 			{
-				if (Convert.ToBoolean(DerivationUtility.GetTag(LColumn.MetaData, "Visible", FDerivationInfo.PageType, "True"))) 
+				if (Convert.ToBoolean(DerivationUtility.GetTag(column.MetaData, "Visible", _derivationInfo.PageType, "True"))) 
 				{
-					LWidth = Convert.ToInt32(DerivationUtility.GetTag(LColumn.MetaData, "Width", FDerivationInfo.PageType, "40"));
-					XmlElement LTextArea = AElement.OwnerDocument.CreateElement("textarea");
-					LTextArea.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, String.Format("{0}Column{1}Header", FDerivationInfo.MainSourceName, LColumn.Name));
-					LTextArea.SetAttribute("text", DerivationUtility.GetTag(LColumn.MetaData, "Title", FDerivationInfo.PageType, LColumn.Name));
-					LTextArea.SetAttribute("x", LCurrentOffset.ToString());
-					LTextArea.SetAttribute("y", "3");
-					LTextArea.SetAttribute("maxlength", LWidth.ToString());
-					AElement.AppendChild(LTextArea);
+					width = Convert.ToInt32(DerivationUtility.GetTag(column.MetaData, "Width", _derivationInfo.PageType, "40"));
+					XmlElement textArea = element.OwnerDocument.CreateElement("textarea");
+					textArea.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, String.Format("{0}Column{1}Header", _derivationInfo.MainSourceName, column.Name));
+					textArea.SetAttribute("text", DerivationUtility.GetTag(column.MetaData, "Title", _derivationInfo.PageType, column.Name));
+					textArea.SetAttribute("x", currentOffset.ToString());
+					textArea.SetAttribute("y", "3");
+					textArea.SetAttribute("maxlength", width.ToString());
+					element.AppendChild(textArea);
 					
-					LCurrentOffset += LWidth * COffsetMultiplier;
+					currentOffset += width * COffsetMultiplier;
 				}
 			}
 		}
 
-		protected virtual void BuildDataBandContent(XmlElement AElement) 
+		protected virtual void BuildDataBandContent(XmlElement element) 
 		{
-			int LCurrentOffset = 10;
-			int LWidth;
-			foreach (Schema.TableVarColumn LColumn in FDerivationInfo.TableVar.Columns) 
+			int currentOffset = 10;
+			int width;
+			foreach (Schema.TableVarColumn column in _derivationInfo.TableVar.Columns) 
 			{
-				if (Convert.ToBoolean(DerivationUtility.GetTag(LColumn.MetaData, "Visible", FDerivationInfo.PageType, "True"))) 
+				if (Convert.ToBoolean(DerivationUtility.GetTag(column.MetaData, "Visible", _derivationInfo.PageType, "True"))) 
 				{
-					LWidth = Convert.ToInt32(DerivationUtility.GetTag(LColumn.MetaData, "Width", FDerivationInfo.PageType, "40"));
-					XmlElement LField = AElement.OwnerDocument.CreateElement("field");
-					LField.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, String.Format("{0}Column{1}", FDerivationInfo.MainSourceName, LColumn.Name));
-					LField.SetAttribute("source", FDerivationInfo.MainSourceName);
-					LField.SetAttribute("columnname", LColumn.Name);
-					LField.SetAttribute("x", LCurrentOffset.ToString());
-					LField.SetAttribute("maxlength", LWidth.ToString());
-					AElement.AppendChild(LField);
+					width = Convert.ToInt32(DerivationUtility.GetTag(column.MetaData, "Width", _derivationInfo.PageType, "40"));
+					XmlElement field = element.OwnerDocument.CreateElement("field");
+					field.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, String.Format("{0}Column{1}", _derivationInfo.MainSourceName, column.Name));
+					field.SetAttribute("source", _derivationInfo.MainSourceName);
+					field.SetAttribute("columnname", column.Name);
+					field.SetAttribute("x", currentOffset.ToString());
+					field.SetAttribute("maxlength", width.ToString());
+					element.AppendChild(field);
 
-					LCurrentOffset += LWidth * COffsetMultiplier;
+					currentOffset += width * COffsetMultiplier;
 				}
 			}
 		}
 
-		protected virtual void BuildDataBand(XmlElement AElement)
+		protected virtual void BuildDataBand(XmlElement element)
 		{
-			XmlElement LDataBand = AElement.OwnerDocument.CreateElement("databand");
-			LDataBand.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "RootDataBand");
-			LDataBand.SetAttribute("source", "Main");
-			AElement.AppendChild(LDataBand);
+			XmlElement dataBand = element.OwnerDocument.CreateElement("databand");
+			dataBand.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "RootDataBand");
+			dataBand.SetAttribute("source", "Main");
+			element.AppendChild(dataBand);
 			
-			XmlElement LHeader = AElement.OwnerDocument.CreateElement("header");
-			LHeader.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "RootDataBandHeader");
-			LDataBand.AppendChild(LHeader);
+			XmlElement header = element.OwnerDocument.CreateElement("header");
+			header.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "RootDataBandHeader");
+			dataBand.AppendChild(header);
 			
-			XmlElement LBox = AElement.OwnerDocument.CreateElement("box");
-			LBox.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "RootDataBandHeaderBox");
-			LBox.SetAttribute("height", "11");
-			LBox.SetAttribute("width", "600");
-			LBox.SetAttribute("x", "5");
-			LBox.SetAttribute("y", "2");
-			LHeader.AppendChild(LBox);
+			XmlElement box = element.OwnerDocument.CreateElement("box");
+			box.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "RootDataBandHeaderBox");
+			box.SetAttribute("height", "11");
+			box.SetAttribute("width", "600");
+			box.SetAttribute("x", "5");
+			box.SetAttribute("y", "2");
+			header.AppendChild(box);
 			
-			BuildDataBandHeader(LHeader);
+			BuildDataBandHeader(header);
 			
-			XmlElement LStaticGroup = AElement.OwnerDocument.CreateElement("staticgroup");
-			LStaticGroup.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "RootDataBandContent");
-			LDataBand.AppendChild(LStaticGroup);
+			XmlElement staticGroup = element.OwnerDocument.CreateElement("staticgroup");
+			staticGroup.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "RootDataBandContent");
+			dataBand.AppendChild(staticGroup);
 			
-			BuildDataBandContent(LStaticGroup);
+			BuildDataBandContent(staticGroup);
 		}
 		
-		protected virtual void BuildFooter(XmlElement AElement)
+		protected virtual void BuildFooter(XmlElement element)
 		{
-			XmlElement LFooter = AElement.OwnerDocument.CreateElement("footer");
-			LFooter.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "PageFooter");
-			LFooter.SetAttribute("height", "20");
-			AElement.AppendChild(LFooter);
+			XmlElement footer = element.OwnerDocument.CreateElement("footer");
+			footer.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "PageFooter");
+			footer.SetAttribute("height", "20");
+			element.AppendChild(footer);
 			
-			XmlElement LTextArea = AElement.OwnerDocument.CreateElement("textarea");
-			LTextArea.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "PageFooterPageText");
-			LTextArea.SetAttribute("text", "Page");
-			LTextArea.SetAttribute("x", "290");
-			LTextArea.SetAttribute("y", "5");
-			LFooter.AppendChild(LTextArea);
+			XmlElement textArea = element.OwnerDocument.CreateElement("textarea");
+			textArea.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "PageFooterPageText");
+			textArea.SetAttribute("text", "Page");
+			textArea.SetAttribute("x", "290");
+			textArea.SetAttribute("y", "5");
+			footer.AppendChild(textArea);
 			
-			XmlElement LPageNumber = AElement.OwnerDocument.CreateElement("pagenumber");
-			LPageNumber.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "PageFooterPageNumber");
-			LPageNumber.SetAttribute("x", "310");
-			LPageNumber.SetAttribute("y", "5");
-			LFooter.AppendChild(LPageNumber);
+			XmlElement pageNumber = element.OwnerDocument.CreateElement("pagenumber");
+			pageNumber.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "PageFooterPageNumber");
+			pageNumber.SetAttribute("x", "310");
+			pageNumber.SetAttribute("y", "5");
+			footer.AppendChild(pageNumber);
 		}
 		
 		
-		protected override void InternalBuild(XmlElement AElement)
+		protected override void InternalBuild(XmlElement element)
 		{
 			// visible elements
-			BuildHeader(AElement);
-			BuildDataBand(AElement);
-			BuildFooter(AElement);
+			BuildHeader(element);
+			BuildDataBand(element);
+			BuildFooter(element);
 		}
 	}
 	
 	public class SingularDocumentBuilder : DocumentBuilder
 	{
-		public SingularDocumentBuilder(DerivationInfo ADerivationInfo, LayoutNode ALayoutNode) : base(ADerivationInfo)
+		public SingularDocumentBuilder(DerivationInfo derivationInfo, LayoutNode layoutNode) : base(derivationInfo)
 		{
-			FLayoutNode = ALayoutNode;
+			_layoutNode = layoutNode;
 		}
 		
-		protected LayoutNode FLayoutNode;
-		public LayoutNode LayoutNode { get { return FLayoutNode; } }
+		protected LayoutNode _layoutNode;
+		public LayoutNode LayoutNode { get { return _layoutNode; } }
 		
-		protected virtual XmlElement BuildRootEditColumn(XmlElement AElement)
+		protected virtual XmlElement BuildRootEditColumn(XmlElement element)
 		{
 			// "<column bop:name='RootEditColumn'> ... </column>"
-			XmlElement LRootEditColumn = AElement.OwnerDocument.CreateElement("column");
-			LRootEditColumn.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "RootEditColumn");
-			AElement.AppendChild(LRootEditColumn);
-			return LRootEditColumn;
+			XmlElement rootEditColumn = element.OwnerDocument.CreateElement("column");
+			rootEditColumn.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "RootEditColumn");
+			element.AppendChild(rootEditColumn);
+			return rootEditColumn;
 		}
 		
-		protected virtual void BuildBody(XmlElement AElement)
+		protected virtual void BuildBody(XmlElement element)
 		{
 			// Build the body based on the LayoutNodes given
-			if (FLayoutNode != null)
-				AElement.AppendChild(BuildLayoutNode(AElement, LayoutNode));
+			if (_layoutNode != null)
+				element.AppendChild(BuildLayoutNode(element, LayoutNode));
 		}
 		
-		protected virtual void BuildValidateAction(XmlElement AElement)
+		protected virtual void BuildValidateAction(XmlElement element)
 		{
 			// Response.Write(String.Format("<sourceaction bop:name='MoveFirst' source='{0}' text='&amp;First' action='First' />\r\n", SourceName));
-			XmlElement LAction = AElement.OwnerDocument.CreateElement("sourceaction");
-			LAction.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "Validate");
-			LAction.SetAttribute("source", FDerivationInfo.MainSourceName);
-			LAction.SetAttribute("text", "&Validate");
-			LAction.SetAttribute("action", "Validate");
+			XmlElement action = element.OwnerDocument.CreateElement("sourceaction");
+			action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "Validate");
+			action.SetAttribute("source", _derivationInfo.MainSourceName);
+			action.SetAttribute("text", "&Validate");
+			action.SetAttribute("action", "Validate");
 			//LAction.SetAttribute("image", FDerivationInfo.BuildImageExpression("Validate"));
-			AElement.AppendChild(LAction);
+			element.AppendChild(action);
 		}
 
-		protected override void InternalBuild(XmlElement AElement)
+		protected override void InternalBuild(XmlElement element)
 		{
-			BuildDetailActions(AElement);
-			BuildExtensionActions(AElement);
-			BuildLookupActions(AElement);
-			BuildValidateAction(AElement);
-			XmlElement LRootColumn = BuildRootEditColumn(AElement);
-			BuildBody(LRootColumn);
-			BuildEmbeddedDetails(LRootColumn);
+			BuildDetailActions(element);
+			BuildExtensionActions(element);
+			BuildLookupActions(element);
+			BuildValidateAction(element);
+			XmlElement rootColumn = BuildRootEditColumn(element);
+			BuildBody(rootColumn);
+			BuildEmbeddedDetails(rootColumn);
 		}
 	}
 
 	public class DeleteDocumentBuilder : SingularDocumentBuilder
 	{
-		public DeleteDocumentBuilder(DerivationInfo ADerivationInfo, LayoutNode ALayoutNode) : base(ADerivationInfo, ALayoutNode) {}
+		public DeleteDocumentBuilder(DerivationInfo derivationInfo, LayoutNode layoutNode) : base(derivationInfo, layoutNode) {}
 
-		protected override XmlElement BuildRootEditColumn(XmlElement AElement)
+		protected override XmlElement BuildRootEditColumn(XmlElement element)
 		{
-			XmlElement LRootDeleteRow = AElement.OwnerDocument.CreateElement("row");
-			LRootDeleteRow.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "RootDeleteRow");
-			AElement.AppendChild(LRootDeleteRow);
+			XmlElement rootDeleteRow = element.OwnerDocument.CreateElement("row");
+			rootDeleteRow.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "RootDeleteRow");
+			element.AppendChild(rootDeleteRow);
 
-			XmlElement LDeleteImage = AElement.OwnerDocument.CreateElement("staticimage");
-			LDeleteImage.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "DeleteImage");
-			LDeleteImage.SetAttribute("image", FDerivationInfo.BuildImageExpression("Warning"));
-			LDeleteImage.SetAttribute("imagewidth", "32");
-			LDeleteImage.SetAttribute("imageheight", "32");
-			LRootDeleteRow.AppendChild(LDeleteImage);
+			XmlElement deleteImage = element.OwnerDocument.CreateElement("staticimage");
+			deleteImage.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "DeleteImage");
+			deleteImage.SetAttribute("image", _derivationInfo.BuildImageExpression("Warning"));
+			deleteImage.SetAttribute("imagewidth", "32");
+			deleteImage.SetAttribute("imageheight", "32");
+			rootDeleteRow.AppendChild(deleteImage);
 
-			XmlElement LDeleteGroup = AElement.OwnerDocument.CreateElement("group");
-			LDeleteGroup.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "DeleteGroup");
-			LDeleteGroup.SetAttribute("title", Strings.Get("DeleteText"));
-			LRootDeleteRow.AppendChild(LDeleteGroup);
+			XmlElement deleteGroup = element.OwnerDocument.CreateElement("group");
+			deleteGroup.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "DeleteGroup");
+			deleteGroup.SetAttribute("title", Strings.Get("DeleteText"));
+			rootDeleteRow.AppendChild(deleteGroup);
 
-			XmlElement LDeleteColumn = AElement.OwnerDocument.CreateElement("column");
-			LDeleteColumn.SetAttribute("name", BOP.Serializer.CBOPNamespaceURI, "DeleteColumn");
-			LDeleteGroup.AppendChild(LDeleteColumn);
+			XmlElement deleteColumn = element.OwnerDocument.CreateElement("column");
+			deleteColumn.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, "DeleteColumn");
+			deleteGroup.AppendChild(deleteColumn);
 
-			return LDeleteColumn;
+			return deleteColumn;
 		}
 		
 

@@ -16,270 +16,270 @@ namespace Alphora.Dataphor.DAE.Client
 {
 	public class ClientCursor : ClientObject, IRemoteServerCursor
 	{
-		public ClientCursor(ClientExpressionPlan AClientExpressionPlan, CursorDescriptor ACursorDescriptor)
+		public ClientCursor(ClientExpressionPlan clientExpressionPlan, CursorDescriptor cursorDescriptor)
 		{
-			FClientExpressionPlan = AClientExpressionPlan;
-			FCursorDescriptor = ACursorDescriptor;
+			_clientExpressionPlan = clientExpressionPlan;
+			_cursorDescriptor = cursorDescriptor;
 		}
 		
-		private ClientExpressionPlan FClientExpressionPlan;
-		public ClientExpressionPlan ClientExpressionPlan { get { return FClientExpressionPlan; } }
+		private ClientExpressionPlan _clientExpressionPlan;
+		public ClientExpressionPlan ClientExpressionPlan { get { return _clientExpressionPlan; } }
 		
 		private IClientDataphorService GetServiceInterface()
 		{
-			return FClientExpressionPlan.ClientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
+			return _clientExpressionPlan.ClientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
 		}
 		
-		private CursorDescriptor FCursorDescriptor;
+		private CursorDescriptor _cursorDescriptor;
 		
-		public int CursorHandle { get { return FCursorDescriptor.Handle; } }
+		public int CursorHandle { get { return _cursorDescriptor.Handle; } }
 		
 		#region IRemoteServerCursor Members
 
 		public IRemoteServerExpressionPlan Plan
 		{
-			get { return FClientExpressionPlan; }
+			get { return _clientExpressionPlan; }
 		}
 
-		public RemoteRowBody Select(RemoteRowHeader AHeader, ProcessCallInfo ACallInfo)
+		public RemoteRowBody Select(RemoteRowHeader header, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginSelectSpecific(CursorHandle, ACallInfo, AHeader, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndSelectSpecific(LResult);
+				IAsyncResult result = GetServiceInterface().BeginSelectSpecific(CursorHandle, callInfo, header, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndSelectSpecific(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
-			}
-		}
-
-		public RemoteRowBody Select(ProcessCallInfo ACallInfo)
-		{
-			try
-			{
-				IAsyncResult LResult = GetServiceInterface().BeginSelect(CursorHandle, ACallInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndSelect(LResult);
-			}
-			catch (FaultException<DataphorFault> LFault)
-			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public RemoteFetchData Fetch(RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
+		public RemoteRowBody Select(ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginFetchSpecific(CursorHandle, ACallInfo, AHeader, ACount, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				FetchResult LFetchResult = GetServiceInterface().EndFetchSpecific(LResult);
-				ABookmarks = LFetchResult.Bookmarks;
-				return LFetchResult.FetchData;
+				IAsyncResult result = GetServiceInterface().BeginSelect(CursorHandle, callInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndSelect(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
+		public RemoteFetchData Fetch(RemoteRowHeader header, out Guid[] bookmarks, int count, bool skipCurrent, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginFetch(CursorHandle, ACallInfo, ACount, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				FetchResult LFetchResult = GetServiceInterface().EndFetch(LResult);
-				ABookmarks = LFetchResult.Bookmarks;
-				return LFetchResult.FetchData;
+				IAsyncResult result = GetServiceInterface().BeginFetchSpecific(CursorHandle, callInfo, header, count, skipCurrent, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				FetchResult fetchResult = GetServiceInterface().EndFetchSpecific(result);
+				bookmarks = fetchResult.Bookmarks;
+				return fetchResult.FetchData;
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public CursorGetFlags GetFlags(ProcessCallInfo ACallInfo)
+		public RemoteFetchData Fetch(out Guid[] bookmarks, int count, bool skipCurrent, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginGetFlags(CursorHandle, ACallInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetFlags(LResult);
+				IAsyncResult result = GetServiceInterface().BeginFetch(CursorHandle, callInfo, count, skipCurrent, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				FetchResult fetchResult = GetServiceInterface().EndFetch(result);
+				bookmarks = fetchResult.Bookmarks;
+				return fetchResult.FetchData;
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public RemoteMoveData MoveBy(int ADelta, ProcessCallInfo ACallInfo)
+		public CursorGetFlags GetFlags(ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginMoveBy(CursorHandle, ACallInfo, ADelta, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndMoveBy(LResult);
+				IAsyncResult result = GetServiceInterface().BeginGetFlags(CursorHandle, callInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndGetFlags(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public CursorGetFlags First(ProcessCallInfo ACallInfo)
+		public RemoteMoveData MoveBy(int delta, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginFirst(CursorHandle, ACallInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndFirst(LResult);
+				IAsyncResult result = GetServiceInterface().BeginMoveBy(CursorHandle, callInfo, delta, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndMoveBy(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public CursorGetFlags Last(ProcessCallInfo ACallInfo)
+		public CursorGetFlags First(ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginLast(CursorHandle, ACallInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndLast(LResult);
+				IAsyncResult result = GetServiceInterface().BeginFirst(CursorHandle, callInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndFirst(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public CursorGetFlags Reset(ProcessCallInfo ACallInfo)
+		public CursorGetFlags Last(ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginReset(CursorHandle, ACallInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndReset(LResult);
+				IAsyncResult result = GetServiceInterface().BeginLast(CursorHandle, callInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndLast(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public void Insert(RemoteRow ARow, System.Collections.BitArray AValueFlags, ProcessCallInfo ACallInfo)
+		public CursorGetFlags Reset(ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginInsert(CursorHandle, ACallInfo, ARow, AValueFlags, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndInsert(LResult);
+				IAsyncResult result = GetServiceInterface().BeginReset(CursorHandle, callInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndReset(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public void Update(RemoteRow ARow, System.Collections.BitArray AValueFlags, ProcessCallInfo ACallInfo)
+		public void Insert(RemoteRow row, System.Collections.BitArray valueFlags, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginUpdate(CursorHandle, ACallInfo, ARow, AValueFlags, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndUpdate(LResult);
+				IAsyncResult result = GetServiceInterface().BeginInsert(CursorHandle, callInfo, row, valueFlags, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndInsert(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public void Delete(ProcessCallInfo ACallInfo)
+		public void Update(RemoteRow row, System.Collections.BitArray valueFlags, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginDelete(CursorHandle, ACallInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndDelete(LResult);
+				IAsyncResult result = GetServiceInterface().BeginUpdate(CursorHandle, callInfo, row, valueFlags, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndUpdate(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public Guid GetBookmark(ProcessCallInfo ACallInfo)
+		public void Delete(ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginGetBookmark(CursorHandle, ACallInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetBookmark(LResult);
+				IAsyncResult result = GetServiceInterface().BeginDelete(CursorHandle, callInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndDelete(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public RemoteGotoData GotoBookmark(Guid ABookmark, bool AForward, ProcessCallInfo ACallInfo)
+		public Guid GetBookmark(ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginGotoBookmark(CursorHandle, ACallInfo, ABookmark, AForward, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGotoBookmark(LResult);
+				IAsyncResult result = GetServiceInterface().BeginGetBookmark(CursorHandle, callInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndGetBookmark(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public int CompareBookmarks(Guid ABookmark1, Guid ABookmark2, ProcessCallInfo ACallInfo)
+		public RemoteGotoData GotoBookmark(Guid bookmark, bool forward, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginCompareBookmarks(CursorHandle, ACallInfo, ABookmark1, ABookmark2, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndCompareBookmarks(LResult);
+				IAsyncResult result = GetServiceInterface().BeginGotoBookmark(CursorHandle, callInfo, bookmark, forward, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndGotoBookmark(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public void DisposeBookmark(Guid ABookmark, ProcessCallInfo ACallInfo)
+		public int CompareBookmarks(Guid bookmark1, Guid bookmark2, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginDisposeBookmark(CursorHandle, ACallInfo, ABookmark, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndDisposeBookmark(LResult);
+				IAsyncResult result = GetServiceInterface().BeginCompareBookmarks(CursorHandle, callInfo, bookmark1, bookmark2, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndCompareBookmarks(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public void DisposeBookmarks(Guid[] ABookmarks, ProcessCallInfo ACallInfo)
+		public void DisposeBookmark(Guid bookmark, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginDisposeBookmarks(CursorHandle, ACallInfo, ABookmarks, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndDisposeBookmarks(LResult);
+				IAsyncResult result = GetServiceInterface().BeginDisposeBookmark(CursorHandle, callInfo, bookmark, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndDisposeBookmark(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
+		}
+
+		public void DisposeBookmarks(Guid[] bookmarks, ProcessCallInfo callInfo)
+		{
+			try
+			{
+				IAsyncResult result = GetServiceInterface().BeginDisposeBookmarks(CursorHandle, callInfo, bookmarks, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndDisposeBookmarks(result);
+			}
+			catch (FaultException<DataphorFault> fault)
+			{
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
@@ -289,84 +289,84 @@ namespace Alphora.Dataphor.DAE.Client
 			{ 
 				try
 				{
-					IAsyncResult LResult = GetServiceInterface().BeginGetOrder(CursorHandle, null, null);
-					LResult.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetOrder(LResult);
+					IAsyncResult result = GetServiceInterface().BeginGetOrder(CursorHandle, null, null);
+					result.AsyncWaitHandle.WaitOne();
+					return GetServiceInterface().EndGetOrder(result);
 				}
-				catch (FaultException<DataphorFault> LFault)
+				catch (FaultException<DataphorFault> fault)
 				{
-					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+					throw DataphorFaultUtility.FaultToException(fault.Detail);
 				}
 			}
 		}
 
-		public RemoteRow GetKey(ProcessCallInfo ACallInfo)
+		public RemoteRow GetKey(ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginGetKey(CursorHandle, ACallInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetKey(LResult);
+				IAsyncResult result = GetServiceInterface().BeginGetKey(CursorHandle, callInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndGetKey(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public RemoteGotoData FindKey(RemoteRow AKey, ProcessCallInfo ACallInfo)
+		public RemoteGotoData FindKey(RemoteRow key, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginFindKey(CursorHandle, ACallInfo, AKey, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndFindKey(LResult);
+				IAsyncResult result = GetServiceInterface().BeginFindKey(CursorHandle, callInfo, key, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndFindKey(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public CursorGetFlags FindNearest(RemoteRow AKey, ProcessCallInfo ACallInfo)
+		public CursorGetFlags FindNearest(RemoteRow key, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginFindNearest(CursorHandle, ACallInfo, AKey, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndFindNearest(LResult);
+				IAsyncResult result = GetServiceInterface().BeginFindNearest(CursorHandle, callInfo, key, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndFindNearest(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public RemoteGotoData Refresh(RemoteRow ARow, ProcessCallInfo ACallInfo)
+		public RemoteGotoData Refresh(RemoteRow row, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginRefresh(CursorHandle, ACallInfo, ARow, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndRefresh(LResult);
+				IAsyncResult result = GetServiceInterface().BeginRefresh(CursorHandle, callInfo, row, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndRefresh(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public int RowCount(ProcessCallInfo ACallInfo)
+		public int RowCount(ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginGetRowCount(CursorHandle, ACallInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetRowCount(LResult);
+				IAsyncResult result = GetServiceInterface().BeginGetRowCount(CursorHandle, callInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndGetRowCount(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
@@ -396,67 +396,67 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public CursorCapability Capabilities
 		{
-			get { return FCursorDescriptor.Capabilities; }
+			get { return _cursorDescriptor.Capabilities; }
 		}
 
 		public CursorType CursorType
 		{
-			get { return FCursorDescriptor.CursorType; }
+			get { return _cursorDescriptor.CursorType; }
 		}
 
-		public bool Supports(CursorCapability ACapability)
+		public bool Supports(CursorCapability capability)
 		{
-			return (Capabilities & ACapability) != 0;
+			return (Capabilities & capability) != 0;
 		}
 
 		public CursorIsolation Isolation
 		{
-			get { return FCursorDescriptor.CursorIsolation; }
+			get { return _cursorDescriptor.CursorIsolation; }
 		}
 
 		#endregion
 
 		#region IRemoteProposable Members
 
-		public RemoteProposeData Default(RemoteRowBody ARow, string AColumn, ProcessCallInfo ACallInfo)
+		public RemoteProposeData Default(RemoteRowBody row, string column, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginDefault(CursorHandle, ACallInfo, ARow, AColumn, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndDefault(LResult);
+				IAsyncResult result = GetServiceInterface().BeginDefault(CursorHandle, callInfo, row, column, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndDefault(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public RemoteProposeData Change(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn, ProcessCallInfo ACallInfo)
+		public RemoteProposeData Change(RemoteRowBody oldRow, RemoteRowBody newRow, string column, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginChange(CursorHandle, ACallInfo, AOldRow, ANewRow, AColumn, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndChange(LResult);
+				IAsyncResult result = GetServiceInterface().BeginChange(CursorHandle, callInfo, oldRow, newRow, column, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndChange(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public RemoteProposeData Validate(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn, ProcessCallInfo ACallInfo)
+		public RemoteProposeData Validate(RemoteRowBody oldRow, RemoteRowBody newRow, string column, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginValidate(CursorHandle, ACallInfo, AOldRow, ANewRow, AColumn, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndValidate(LResult);
+				IAsyncResult result = GetServiceInterface().BeginValidate(CursorHandle, callInfo, oldRow, newRow, column, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndValidate(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 

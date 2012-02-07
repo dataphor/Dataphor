@@ -29,11 +29,11 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class Reference : CatalogObject
 	{
 		// constructor
-		public Reference(string AName) : base(AName) {}
-		public Reference(int AID, string AName) : base(AID, AName) {}
-		public Reference(int AID, string AName, MetaData AMetaData) : base(AID, AName)
+		public Reference(string name) : base(name) {}
+		public Reference(int iD, string name) : base(iD, name) {}
+		public Reference(int iD, string name, MetaData metaData) : base(iD, name)
 		{
-			MetaData = AMetaData;
+			MetaData = metaData;
 		}
 
 		public override string[] GetRights()
@@ -49,51 +49,51 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		// SourceTable
 		[Reference]
-		private TableVar FSourceTable;
+		private TableVar _sourceTable;
 		public TableVar SourceTable
 		{
-			get { return FSourceTable; }
-			set { FSourceTable = value; }
+			get { return _sourceTable; }
+			set { _sourceTable = value; }
 		}
 
 		// TargetTable
 		[Reference]
-		private TableVar FTargetTable;
+		private TableVar _targetTable;
 		public TableVar TargetTable
 		{
-			get { return FTargetTable; }
-			set { FTargetTable = value; }
+			get { return _targetTable; }
+			set { _targetTable = value; }
 		}
 		
 		// SourceKey
-		private JoinKey FSourceKey = new JoinKey();
-		public JoinKey SourceKey { get { return FSourceKey; } }
+		private JoinKey _sourceKey = new JoinKey();
+		public JoinKey SourceKey { get { return _sourceKey; } }
 		
 		// TargetKey		
-		private JoinKey FTargetKey = new JoinKey();
-		public JoinKey TargetKey { get { return FTargetKey; } }
+		private JoinKey _targetKey = new JoinKey();
+		public JoinKey TargetKey { get { return _targetKey; } }
 		
 		// Enforced
-		private bool FEnforced = true;
+		private bool _enforced = true;
 		/// <summary>Indicates whether or not the constraint is enforced.</summary>
 		/// <remarks>Set by the DAE.Enforced tag when the constraint is created.</remarks>
 		public bool Enforced
 		{
-			get { return FEnforced; }
-			set { FEnforced = value; }
+			get { return _enforced; }
+			set { _enforced = value; }
 		}
 		
 		// ParentReference		
 		[Reference]
-		private Schema.Reference FParentReference;
+		private Schema.Reference _parentReference;
 		/// <summary>For derived references, this is the reference from which this reference was derived.</summary>
 		public Schema.Reference ParentReference
 		{
-			get { return FParentReference; }
-			set { FParentReference = value; }
+			get { return _parentReference; }
+			set { _parentReference = value; }
 		}
 		
-		private bool FIsExcluded;
+		private bool _isExcluded;
 		/// <summary>True if this reference has been excluded by some operation in the expression.</summary>
 		/// <remarks>
 		/// Excluded references should not be considered as an inferred reference, but need to be tracked so
@@ -102,12 +102,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// </remarks>
 		public bool IsExcluded 
 		{ 
-			get { return FIsExcluded; } 
-			set { FIsExcluded = value; }
+			get { return _isExcluded; } 
+			set { _isExcluded = value; }
 		}
 		
 		// IsDerived
-		public bool IsDerived { get { return FParentReference != null; } }
+		public bool IsDerived { get { return _parentReference != null; } }
 		
 		/// <summary>For derived references, this is the base reference from which this reference was derived. Otherwise, this is the reference name.</summary>
 		public string OriginatingReferenceName()
@@ -118,116 +118,116 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// UpdateReferenceAction
-		private ReferenceAction FUpdateReferenceAction;
+		private ReferenceAction _updateReferenceAction;
 		public ReferenceAction UpdateReferenceAction
 		{
-			get { return FUpdateReferenceAction; }
-			set { FUpdateReferenceAction = value; }
+			get { return _updateReferenceAction; }
+			set { _updateReferenceAction = value; }
 		}
 		
 		// UpdateReferenceExpressions
-		private Expressions FUpdateReferenceExpressions = new Expressions();
-		public Expressions UpdateReferenceExpressions { get { return FUpdateReferenceExpressions; } }
+		private Expressions _updateReferenceExpressions = new Expressions();
+		public Expressions UpdateReferenceExpressions { get { return _updateReferenceExpressions; } }
 		
 		// DeleteReferenceAction
-		private ReferenceAction FDeleteReferenceAction;
+		private ReferenceAction _deleteReferenceAction;
 		public ReferenceAction DeleteReferenceAction
 		{
-			get { return FDeleteReferenceAction; }
-			set { FDeleteReferenceAction = value; }
+			get { return _deleteReferenceAction; }
+			set { _deleteReferenceAction = value; }
 		}
 		
 		// DeleteReferenceExpressions
-		private Expressions FDeleteReferenceExpressions = new Expressions();
-		public Expressions DeleteReferenceExpressions { get { return FDeleteReferenceExpressions; } } 
+		private Expressions _deleteReferenceExpressions = new Expressions();
+		public Expressions DeleteReferenceExpressions { get { return _deleteReferenceExpressions; } } 
 		
         // The constraints used to enforce this reference (if necessary)
 		[Reference]
-        private CatalogConstraint FCatalogConstraint;
+        private CatalogConstraint _catalogConstraint;
         public CatalogConstraint CatalogConstraint
         {
-			get { return FCatalogConstraint; }
-			set { FCatalogConstraint = value; }
+			get { return _catalogConstraint; }
+			set { _catalogConstraint = value; }
         }
         
 		[Reference]
-        private TransitionConstraint FSourceConstraint;
+        private TransitionConstraint _sourceConstraint;
         public TransitionConstraint SourceConstraint
         {
-			get { return FSourceConstraint; }
-			set { FSourceConstraint = value; }
+			get { return _sourceConstraint; }
+			set { _sourceConstraint = value; }
 		}
         
 		[Reference]
-        private TransitionConstraint FTargetConstraint;
+        private TransitionConstraint _targetConstraint;
         public TransitionConstraint TargetConstraint
         {
-			get { return FTargetConstraint; }
-			set { FTargetConstraint = value; }
+			get { return _targetConstraint; }
+			set { _targetConstraint = value; }
         }
         
 		[Reference]
-        private EventHandler FUpdateHandler;
+        private EventHandler _updateHandler;
         public EventHandler UpdateHandler
         {
-			get { return FUpdateHandler; }
-			set { FUpdateHandler = value; }
+			get { return _updateHandler; }
+			set { _updateHandler = value; }
         }
         
 		[Reference]
-        private EventHandler FDeleteHandler;
+        private EventHandler _deleteHandler;
         public EventHandler DeleteHandler
         {
-			get { return FDeleteHandler; }
-			set { FDeleteHandler = value; }
+			get { return _deleteHandler; }
+			set { _deleteHandler = value; }
         }
         
-		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
 		{
-			if (!ATargetCatalog.Contains(Name))
+			if (!targetCatalog.Contains(Name))
 			{
-				base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
-				ATargetCatalog.Add(this);
+				base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+				targetCatalog.Add(this);
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			CreateReferenceStatement LStatement = new CreateReferenceStatement();
+			CreateReferenceStatement statement = new CreateReferenceStatement();
 			if (SessionObjectName != null)
 			{
-				LStatement.IsSession = true;
-				LStatement.ReferenceName = Schema.Object.EnsureRooted(SessionObjectName);
+				statement.IsSession = true;
+				statement.ReferenceName = Schema.Object.EnsureRooted(SessionObjectName);
 			}
 			else
-				LStatement.ReferenceName = Schema.Object.EnsureRooted(Name);
-			LStatement.TableVarName = SourceTable.Name;
-			foreach (TableVarColumn LColumn in SourceKey.Columns)
-				LStatement.Columns.Add(new ReferenceColumnDefinition(LColumn.Name));
-			LStatement.MetaData = MetaData == null ? new MetaData() : MetaData.Copy();
+				statement.ReferenceName = Schema.Object.EnsureRooted(Name);
+			statement.TableVarName = SourceTable.Name;
+			foreach (TableVarColumn column in SourceKey.Columns)
+				statement.Columns.Add(new ReferenceColumnDefinition(column.Name));
+			statement.MetaData = MetaData == null ? new MetaData() : MetaData.Copy();
 			if (SessionObjectName != null)
-				LStatement.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", Name, true);
-			LStatement.ReferencesDefinition = new ReferencesDefinition();
-			LStatement.ReferencesDefinition.TableVarName = TargetTable.Name;
-			foreach (TableVarColumn LColumn in TargetKey.Columns)
-				LStatement.ReferencesDefinition.Columns.Add(new ReferenceColumnDefinition(LColumn.Name));
-			LStatement.ReferencesDefinition.UpdateReferenceAction = UpdateReferenceAction;
-			LStatement.ReferencesDefinition.UpdateReferenceExpressions.AddRange(UpdateReferenceExpressions);
-			LStatement.ReferencesDefinition.DeleteReferenceAction = DeleteReferenceAction;
-			LStatement.ReferencesDefinition.DeleteReferenceExpressions.AddRange(DeleteReferenceExpressions);
-			return LStatement;
+				statement.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", Name, true);
+			statement.ReferencesDefinition = new ReferencesDefinition();
+			statement.ReferencesDefinition.TableVarName = TargetTable.Name;
+			foreach (TableVarColumn column in TargetKey.Columns)
+				statement.ReferencesDefinition.Columns.Add(new ReferenceColumnDefinition(column.Name));
+			statement.ReferencesDefinition.UpdateReferenceAction = UpdateReferenceAction;
+			statement.ReferencesDefinition.UpdateReferenceExpressions.AddRange(UpdateReferenceExpressions);
+			statement.ReferencesDefinition.DeleteReferenceAction = DeleteReferenceAction;
+			statement.ReferencesDefinition.DeleteReferenceExpressions.AddRange(DeleteReferenceExpressions);
+			return statement;
 		}
 		
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DropReferenceStatement LStatement = new DropReferenceStatement();
-			LStatement.ReferenceName = Name;
-			return LStatement;
+			DropReferenceStatement statement = new DropReferenceStatement();
+			statement.ReferenceName = Name;
+			return statement;
 		}
 	}
     
@@ -235,65 +235,65 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class References : Objects
     {
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is Reference))
+			if (!(item is Reference))
 				throw new SchemaException(SchemaException.Codes.ReferenceContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 
-		public new Reference this[int AIndex]
+		public new Reference this[int index]
 		{
-			get { return (Reference)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (Reference)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new Reference this[string AName]
+		public new Reference this[string name]
 		{
-			get { return (Reference)base[AName]; }
-			set { base[AName] = value; }
+			get { return (Reference)base[name]; }
+			set { base[name] = value; }
 		}
 		
-		public int IndexOfOriginatingReference(string AOriginatingReferenceName)
+		public int IndexOfOriginatingReference(string originatingReferenceName)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (Schema.Object.NamesEqual(this[LIndex].OriginatingReferenceName(), AOriginatingReferenceName))
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (Schema.Object.NamesEqual(this[index].OriginatingReferenceName(), originatingReferenceName))
+					return index;
 			return -1;
 		}
 		
-		public bool ContainsOriginatingReference(string AOriginatingReferenceName)
+		public bool ContainsOriginatingReference(string originatingReferenceName)
 		{
-			return IndexOfOriginatingReference(AOriginatingReferenceName) >= 0;
+			return IndexOfOriginatingReference(originatingReferenceName) >= 0;
 		}
 		
-		public bool ContainsSourceReference(Schema.Reference AReference)
+		public bool ContainsSourceReference(Schema.Reference reference)
 		{
-			foreach (Schema.Reference LReference in this)
-				if ((LReference.OriginatingReferenceName() == AReference.OriginatingReferenceName()) && LReference.SourceKey.Equals(AReference.SourceKey))
+			foreach (Schema.Reference localReference in this)
+				if ((localReference.OriginatingReferenceName() == reference.OriginatingReferenceName()) && localReference.SourceKey.Equals(reference.SourceKey))
 					return true;
 			return false;
 		}
 		
-		public bool ContainsTargetReference(Schema.Reference AReference)
+		public bool ContainsTargetReference(Schema.Reference reference)
 		{
-			foreach (Schema.Reference LReference in this)
-				if ((LReference.OriginatingReferenceName() == AReference.OriginatingReferenceName()) && LReference.TargetKey.Equals(AReference.TargetKey))
+			foreach (Schema.Reference localReference in this)
+				if ((localReference.OriginatingReferenceName() == reference.OriginatingReferenceName()) && localReference.TargetKey.Equals(reference.TargetKey))
 					return true;
 			return false;
 		}
 		
-		public int AddInCreationOrder(Reference AReference)
+		public int AddInCreationOrder(Reference reference)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].ID > AReference.ID)
+			for (int index = 0; index < Count; index++)
+				if (this[index].ID > reference.ID)
 				{
-					Insert(LIndex, AReference);
-					return LIndex;
+					Insert(index, reference);
+					return index;
 				}
 
-			return Add(AReference);
+			return Add(reference);
 		}
     }
 }

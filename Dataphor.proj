@@ -23,10 +23,14 @@
 
 	<ItemGroup>
 		<BinFiles Include="Dataphor\bin\*.*" Exclude="**\*.pdb" />
+		<CE64BinFiles Include="Dataphor\bin\amd64\*.*" />
+		<CE32BinFiles Include="Dataphor\bin\x86\*.*" />
 	</ItemGroup>
 	<Target Name="CopyDataphor">
 		<Message Text="Copying bin files into deploy..." />
 		<Copy SourceFiles="@(BinFiles)" DestinationFolder="Deploy\Dataphor" />
+		<Copy SourceFiles="@(CE64BinFiles)" DestinationFolder="Deploy\Dataphor\amd64" />
+		<Copy SourceFiles="@(CE32BinFiles)" DestinationFolder="Deploy\Dataphor\x86" />
 	</Target>
 
 	<ItemGroup>

@@ -14,32 +14,32 @@ namespace Alphora.Dataphor.DAE.Listener
 {
 	public static class ListenerFactory
 	{
-		public static string[] EnumerateInstances(string AHostName)
+		public static string[] EnumerateInstances(string hostName)
 		{
-			return EnumerateInstances(AHostName, 0, ConnectionSecurityMode.None);
+			return EnumerateInstances(hostName, 0);
 		}
 		
-		public static string[] EnumerateInstances(string AHostName, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode)
+		public static string[] EnumerateInstances(string hostName, int overrideListenerPortNumber)
 		{
-			using (ListenerClient LClient = new ListenerClient(AHostName, AOverrideListenerPortNumber, AListenerSecurityMode))
+			using (ListenerClient client = new ListenerClient(hostName, overrideListenerPortNumber))
 			{
-				return LClient.EnumerateInstances();
+				return client.EnumerateInstances();
 			}
 		}
 		
-		public static string GetInstanceURI(string AHostName, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode, string AInstanceName, ConnectionSecurityMode ASecurityMode)
+		public static string GetInstanceURI(string hostName, int overrideListenerPortNumber, string instanceName)
 		{
-			return GetInstanceURI(AHostName, AOverrideListenerPortNumber, AListenerSecurityMode, AInstanceName, ASecurityMode, false);
+			return GetInstanceURI(hostName, overrideListenerPortNumber, instanceName, false);
 		}
 		
-		public static string GetInstanceURI(string AHostName, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode, string AInstanceName, ConnectionSecurityMode ASecurityMode, bool AUseNative)
+		public static string GetInstanceURI(string hostName, int overrideListenerPortNumber, string instanceName, bool useNative)
 		{
-			using (ListenerClient LClient = new ListenerClient(AHostName, AOverrideListenerPortNumber, AListenerSecurityMode))
+			using (ListenerClient client = new ListenerClient(hostName, overrideListenerPortNumber))
 			{
-				if (AUseNative)
-					return LClient.GetNativeInstanceURI(AInstanceName, ASecurityMode);
+				if (useNative)
+					return client.GetNativeInstanceURI(instanceName);
 				else
-					return LClient.GetInstanceURI(AInstanceName, ASecurityMode);
+					return client.GetInstanceURI(instanceName);
 			}
 		}
 	}

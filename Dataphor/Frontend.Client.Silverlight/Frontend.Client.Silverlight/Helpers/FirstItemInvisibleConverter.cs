@@ -10,23 +10,23 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	/// <summary> Converts from a ListBoxItem to visibility (1st item = Collapsed). </summary>
 	public class FirstItemInvisibleConverter : IValueConverter
 	{
-		public object Convert(object AValue, Type ATargetType, object AParameter, CultureInfo ACulture)
+		public object Convert(object tempValue, Type targetType, object parameter, CultureInfo culture)
 		{
-			if (ATargetType != typeof(Visibility))
+			if (targetType != typeof(Visibility))
 				throw new InvalidOperationException("The target of the NullToVisiblity converter must be of type Visibility.");
 
-			bool LIsInverted = false;
-			if (AParameter != null)
-				LIsInverted = System.Convert.ToBoolean(AParameter);
+			bool isInverted = false;
+			if (parameter != null)
+				isInverted = System.Convert.ToBoolean(parameter);
 
-			var LListBoxItem = (ListBoxItem)AValue;
-			var LListBox = SilverlightUtility.FindVisualParent(LListBoxItem, typeof(ListBox)) as ListBox;
-			if (LListBox != null)
+			var listBoxItem = (ListBoxItem)tempValue;
+			var listBox = SilverlightUtility.FindVisualParent(listBoxItem, typeof(ListBox)) as ListBox;
+			if (listBox != null)
 			{
-				var LIndex = LListBox.ItemContainerGenerator.IndexFromContainer(LListBoxItem);
-				return (AValue != null && LIndex == 0) ^ LIsInverted ? Visibility.Collapsed : Visibility.Visible;
+				var index = listBox.ItemContainerGenerator.IndexFromContainer(listBoxItem);
+				return (tempValue != null && index == 0) ^ isInverted ? Visibility.Collapsed : Visibility.Visible;
 			}
-			return LIsInverted;
+			return isInverted;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -16,10 +16,10 @@ namespace Alphora.Dataphor.DAE.Server
 	[Transaction(TransactionOption.RequiresNew)]
 	public class ServerDTCTransaction : ServicedComponent
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			Rollback();
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
 		public void Commit()
@@ -32,11 +32,11 @@ namespace Alphora.Dataphor.DAE.Server
 			ContextUtil.SetAbort();
 		}
 		
-		private IsolationLevel FIsolationLevel;
+		private IsolationLevel _isolationLevel;
 		public IsolationLevel IsolationLevel
 		{
-			get { return FIsolationLevel; }
-			set { FIsolationLevel = value; }
+			get { return _isolationLevel; }
+			set { _isolationLevel = value; }
 		}
 	}	
 }

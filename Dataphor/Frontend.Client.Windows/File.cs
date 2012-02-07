@@ -19,18 +19,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ExtensionColumnName
 
-		private string FExtensionColumnName = String.Empty;
+		private string _extensionColumnName = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[Description("The name of the column in the data source containing the extension of the file that this controls is associated with.")]
 		public string ExtensionColumnName
 		{
-			get { return FExtensionColumnName; }
+			get { return _extensionColumnName; }
 			set
 			{
-				if (FExtensionColumnName != value)
+				if (_extensionColumnName != value)
 				{
-					FExtensionColumnName = value;
+					_extensionColumnName = value;
 					if (Active)
 						InternalUpdateExtensionColumnName();
 				}
@@ -39,23 +39,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected virtual void InternalUpdateExtensionColumnName()
 		{
-			FileControl.ExtensionColumnName = FExtensionColumnName;
+			FileControl.ExtensionColumnName = _extensionColumnName;
 		}
 
 		// NameColumnName
 
-		private string FNameColumnName = String.Empty;
+		private string _nameColumnName = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[Description("The name of the column in the data source containing the name of the file that this controls is associated with.")]
 		public string NameColumnName
 		{
-			get { return FNameColumnName; }
+			get { return _nameColumnName; }
 			set
 			{
-				if (FNameColumnName != value)
+				if (_nameColumnName != value)
 				{
-					FNameColumnName = value;
+					_nameColumnName = value;
 					if (Active)
 						InternalUpdateNameColumnName();
 				}
@@ -64,23 +64,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected virtual void InternalUpdateNameColumnName()
 		{
-			FileControl.NameColumnName = FNameColumnName;
+			FileControl.NameColumnName = _nameColumnName;
 		}
 
 		// MaximumContentLength
 
-        private long FMaximumContentLength = DBFileForm.CDefaultMaximumContentLength;
+        private long _maximumContentLength = DBFileForm.DefaultMaximumContentLength;
 		/// <summary> Maximum size in bytes for documents to be loaded into this control. </summary>
-        [DefaultValue(DBFileForm.CDefaultMaximumContentLength)]
+        [DefaultValue(DBFileForm.DefaultMaximumContentLength)]
 		[Description("Maximum size in bytes for documents to be loaded into this control.")]
 		public long MaximumContentLength
 		{
-			get { return FMaximumContentLength; }
+			get { return _maximumContentLength; }
 			set
 			{
-				if (FMaximumContentLength != value)
+				if (_maximumContentLength != value)
 				{
-					FMaximumContentLength = value;
+					_maximumContentLength = value;
 					if (Active)
 						InternalUpdateMaximumContentLength();
 				}
@@ -89,7 +89,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected virtual void InternalUpdateMaximumContentLength()
 		{
-			FileControl.MaximumContentLength = FMaximumContentLength;
+			FileControl.MaximumContentLength = _maximumContentLength;
 		}
 		
 		// ControlElement
@@ -107,9 +107,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			InternalUpdateMaximumContentLength();
 		}
 
-		protected override void LayoutControl(System.Drawing.Rectangle ABounds)
+		protected override void LayoutControl(System.Drawing.Rectangle bounds)
 		{
-			Control.Location = ABounds.Location;
+			Control.Location = bounds.Location;
 		}
 
 		// TitledElement

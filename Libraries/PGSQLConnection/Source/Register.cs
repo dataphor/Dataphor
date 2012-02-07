@@ -15,15 +15,15 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
 
 	class DAERegister
 	{
-        protected const string CD4ClassDefinitionNameSpace = "PGSQLConnection";
+        protected const string D4ClassDefinitionNameSpace = "PGSQLConnection";
 
 		public static SettingsList GetClasses()
 		{
-			SettingsList LClasses = new SettingsList();
+			SettingsList classes = new SettingsList();
 
-            LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "PostgreSQLConnection"), typeof(PostgreSQLConnection).AssemblyQualifiedName));
+            classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "PostgreSQLConnection"), typeof(PostgreSQLConnection).AssemblyQualifiedName));
 			
-			return LClasses;
+			return classes;
 		}
 	}
 }

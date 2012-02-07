@@ -35,17 +35,17 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			SetValue(DaysPropertyKey, value);
 		}
 
-		protected override void StartDateChanged(DateTime AOldValue, DateTime ANewValue)
+		protected override void StartDateChanged(DateTime oldValue, DateTime newValue)
 		{
 			UpdateDays();
 		}
 
 		private void UpdateDays()
 		{
-			var LDays = new DateTime[7];
+			var days = new DateTime[7];
 			for (int i = 0; i < 7; i++)
-				LDays[i] = StartDate + TimeSpan.FromDays(i);
-			SetDays(LDays);
+				days[i] = StartDate + TimeSpan.FromDays(i);
+			SetDays(days);
 		}
 
 		public override void OnApplyTemplate()

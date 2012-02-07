@@ -23,23 +23,23 @@ namespace Alphora.Dataphor.DAE.Server
 	{		
 		internal ServerSession
 		(
-			Engine AServer, 
-			int ASessionID, 
-			SessionInfo ASessionInfo,
-			Schema.User AUser
+			Engine server, 
+			int sessionID, 
+			SessionInfo sessionInfo,
+			Schema.User user
 		) : base()
 		{
-			FServer = AServer;
-			FSessionID = ASessionID;
-			FSessionInfo = ASessionInfo;
-			FSessionObjects = new Schema.Objects();
-			FSessionOperators = new Schema.Objects();
-			FUser = AUser;
-			FProcesses = new ServerProcesses();
+			_server = server;
+			_sessionID = sessionID;
+			_sessionInfo = sessionInfo;
+			_sessionObjects = new Schema.Objects();
+			_sessionOperators = new Schema.Objects();
+			_user = user;
+			_processes = new ServerProcesses();
 		}
 		
 		// Dispose
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -53,31 +53,31 @@ namespace Alphora.Dataphor.DAE.Server
 							{
 								try
 								{
-									if (FDebugger != null)
-										FDebugger.Stop();
+									if (_debugger != null)
+										_debugger.Stop();
 								}
 								finally
 								{
-									if (FApplicationTransactions != null)
+									if (_applicationTransactions != null)
 									{
 										EndApplicationTransactions();
-										FApplicationTransactions = null;
+										_applicationTransactions = null;
 									}
 								}
 							}
 							finally
 							{
-								if (FSessionObjects  != null)
+								if (_sessionObjects  != null)
 								{
 									DropSessionObjects();
-									FSessionObjects  = null;
-									FSessionOperators = null;
+									_sessionObjects  = null;
+									_sessionOperators = null;
 								}
 							}
 						}
 						finally
 						{
-							if (FProcesses != null)
+							if (_processes != null)
 							{
 								try
 								{
@@ -85,82 +85,82 @@ namespace Alphora.Dataphor.DAE.Server
 								}
 								finally
 								{
-									FProcesses.Dispose();
-									FProcesses = null;
+									_processes.Dispose();
+									_processes = null;
 								}
 							}
 						}
 					}
 					finally
 					{
-						if (FCursorManager != null)
+						if (_cursorManager != null)
 						{
-							FCursorManager.Dispose();
-							FCursorManager = null;
+							_cursorManager.Dispose();
+							_cursorManager = null;
 						}
 					}
 				}
 				finally
 				{
-					FSessionInfo = null;
-					FSessionID = -1;
-					FUser = null;
-					FServer = null;
+					_sessionInfo = null;
+					_sessionID = -1;
+					_user = null;
+					_server = null;
 				}
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
         
 		// Processes
-		private ServerProcesses FProcesses;
-		public ServerProcesses Processes { get { return FProcesses; } }		
+		private ServerProcesses _processes;
+		public ServerProcesses Processes { get { return _processes; } }		
 
 		// Server
-		private Engine FServer;
-		public Engine Server { get { return FServer; } }
+		private Engine _server;
+		public Engine Server { get { return _server; } }
 		
-		IServer IServerSession.Server { get { return FServer; } }
+		IServer IServerSession.Server { get { return _server; } }
         
 		// SessionID
-		private int FSessionID = -1;
-		public int SessionID  { get { return FSessionID; } }
+		private int _sessionID = -1;
+		public int SessionID  { get { return _sessionID; } }
         
 		// User        
-		private Schema.User FUser;
-		public Schema.User User { get { return FUser; } }
-		public void SetUser(Schema.User AUser)
+		private Schema.User _user;
+		public Schema.User User { get { return _user; } }
+		public void SetUser(Schema.User user)
 		{
-			FUser = AUser;
+			_user = user;
 		}
 
 		// SessionInfo
-		private SessionInfo FSessionInfo;        
-		public SessionInfo SessionInfo { get { return FSessionInfo; } }
+		private SessionInfo _sessionInfo;        
+		public SessionInfo SessionInfo { get { return _sessionInfo; } }
 
 		// Plan Cache		
-		public void AddCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode, ServerPlan APlan)
+		public void AddCachedPlan(ServerProcess process, string statement, int contextHashCode, ServerPlan plan)
 		{
-			if (FSessionInfo.UsePlanCache && (Server.PlanCacheSize > 0) && !HasNonGeneratedSessionObjects())
+			if (_sessionInfo.UsePlanCache && (Server.PlanCacheSize > 0) && !HasNonGeneratedSessionObjects())
 			{
-				APlan.Program.IsCached = true;
-				Server.PlanCache.Add(AProcess, AStatement, AContextHashCode, APlan);
+				plan.Program.IsCached = true;
+				Server.PlanCache.Add(process, statement, contextHashCode, plan);
 			}
 		}
 		
-		public ServerPlan GetCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode)
+		public ServerPlan GetCachedPlan(ServerProcess process, string statement, int contextHashCode)
 		{
-			if (FSessionInfo.UsePlanCache && (Server.PlanCacheSize > 0) && !HasNonGeneratedSessionObjects())
-				return Server.PlanCache.Get(AProcess, AStatement, AContextHashCode);
+			if (_sessionInfo.UsePlanCache && (Server.PlanCacheSize > 0) && !HasNonGeneratedSessionObjects())
+				return Server.PlanCache.Get(process, statement, contextHashCode);
 			return null;
 		}
 		
-		public bool ReleaseCachedPlan(ServerProcess AProcess, ServerPlan APlan)
+		public bool ReleaseCachedPlan(ServerProcess process, ServerPlan plan)
 		{
-			if (FSessionInfo.UsePlanCache && (Server.PlanCacheSize > 0) && (APlan.Header != null) && (!APlan.Header.IsInvalidPlan) && !HasNonGeneratedSessionObjects())
-				return Server.PlanCache.Release(AProcess, APlan);
+			if (_sessionInfo.UsePlanCache && (Server.PlanCacheSize > 0) && (plan.Header != null) && (!plan.Header.IsInvalidPlan) && !HasNonGeneratedSessionObjects())
+				return Server.PlanCache.Release(process, plan);
 			return false;
 		}
 		
@@ -169,104 +169,104 @@ namespace Alphora.Dataphor.DAE.Server
 		///	Specifies a library which is being registered or loaded on this session. 
 		///	All objects created on this session will be part of this library. 
 		///	</summary>
-		private Schema.LoadedLibrary FCurrentLibrary;
+		private Schema.LoadedLibrary _currentLibrary;
 		public Schema.LoadedLibrary CurrentLibrary
 		{
 			get 
 			{ 
-				if (FCurrentLibrary == null)
+				if (_currentLibrary == null)
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.NoCurrentLibrary);
-				return FCurrentLibrary; 
+				return _currentLibrary; 
 			}
 			set 
 			{ 
-				FCurrentLibrary = value; 
+				_currentLibrary = value; 
 			}
 		}
 		
-		public Schema.NameResolutionPath NameResolutionPath { get { return CurrentLibrary.GetNameResolutionPath(FServer.SystemLibrary); } }
+		public Schema.NameResolutionPath NameResolutionPath { get { return CurrentLibrary.GetNameResolutionPath(_server.SystemLibrary); } }
 
 		// ApplicationTransactions
-		private Dictionary<Guid, AT.ApplicationTransaction> FApplicationTransactions = new Dictionary<Guid, AT.ApplicationTransaction>();
-		public Dictionary<Guid, AT.ApplicationTransaction> ApplicationTransactions { get { return FApplicationTransactions; } }
+		private Dictionary<Guid, AT.ApplicationTransaction> _applicationTransactions = new Dictionary<Guid, AT.ApplicationTransaction>();
+		public Dictionary<Guid, AT.ApplicationTransaction> ApplicationTransactions { get { return _applicationTransactions; } }
 		
 		private void EndApplicationTransactions()
 		{
-			while (FApplicationTransactions.Count > 0)
-				foreach (Guid LID in FApplicationTransactions.Keys)
+			while (_applicationTransactions.Count > 0)
+				foreach (Guid iD in _applicationTransactions.Keys)
 				{
-					FServer.RunScript(String.Format("System.RollbackApplicationTransaction(Guid('{0}'));", LID.ToString()), String.Empty);
+					_server.RunScript(String.Format("System.RollbackApplicationTransaction(Guid('{0}'));", iD.ToString()), String.Empty);
 					break;
 				}
 		}
 
 		// Session-scoped table variables
-		private NativeTables FTables;
+		private NativeTables _tables;
 		public NativeTables Tables
 		{
 			get
 			{
-				if (FTables == null)
-					FTables = new NativeTables();
-				return FTables;
+				if (_tables == null)
+					_tables = new NativeTables();
+				return _tables;
 			}
 		}
 
 		// SessionObjects 		
-		private Schema.Objects FSessionObjects;
-		public Schema.Objects SessionObjects { get { return FSessionObjects; } }
+		private Schema.Objects _sessionObjects;
+		public Schema.Objects SessionObjects { get { return _sessionObjects; } }
 		
 		// SessionOperators
-		private Schema.Objects FSessionOperators;
-		public Schema.Objects SessionOperators { get { return FSessionOperators; } }
+		private Schema.Objects _sessionOperators;
+		public Schema.Objects SessionOperators { get { return _sessionOperators; } }
 		
 		private void DropSessionObjects()
 		{
 			if (HasSessionObjects())
 			{
-				List<String> LObjectNames = new List<String>();
-				for (int LIndex = 0; LIndex < FSessionObjects.Count; LIndex++)
-					LObjectNames.Add(((Schema.SessionObject)FSessionObjects[LIndex]).GlobalName);
+				List<String> objectNames = new List<String>();
+				for (int index = 0; index < _sessionObjects.Count; index++)
+					objectNames.Add(((Schema.SessionObject)_sessionObjects[index]).GlobalName);
 					
-				for (int LIndex = 0; LIndex < FSessionOperators.Count; LIndex++)
+				for (int index = 0; index < _sessionOperators.Count; index++)
 				{
-					FServer.FSystemProcess.CatalogDeviceSession.ResolveOperatorName(((Schema.SessionObject)FSessionOperators[LIndex]).GlobalName);
-					OperatorMap LOperatorMap = FServer.Catalog.OperatorMaps[((Schema.SessionObject)FSessionOperators[LIndex]).GlobalName];
-					foreach (OperatorSignature LSignature in LOperatorMap.Signatures.Signatures.Values)
-						LObjectNames.Add(LSignature.Operator.Name);
+					_server._systemProcess.CatalogDeviceSession.ResolveOperatorName(((Schema.SessionObject)_sessionOperators[index]).GlobalName);
+					OperatorMap operatorMap = _server.Catalog.OperatorMaps[((Schema.SessionObject)_sessionOperators[index]).GlobalName];
+					foreach (OperatorSignature signature in operatorMap.Signatures.Signatures.Values)
+						objectNames.Add(signature.Operator.Name);
 				}
 				
-				string[] LObjectNameArray = new string[LObjectNames.Count];
-				for (int LIndex = 0; LIndex < LObjectNames.Count; LIndex++)
-					LObjectNameArray[LIndex] = LObjectNames[LIndex];
+				string[] objectNameArray = new string[objectNames.Count];
+				for (int index = 0; index < objectNames.Count; index++)
+					objectNameArray[index] = objectNames[index];
 					
-				Block LBlock = (Block)FServer.Catalog.EmitDropStatement(FServer.FSystemProcess.CatalogDeviceSession, LObjectNameArray, String.Empty);
+				Block block = (Block)_server.Catalog.EmitDropStatement(_server._systemProcess.CatalogDeviceSession, objectNameArray, String.Empty);
 				
-				FServer.FSystemProcess.BeginCall();
+				_server._systemProcess.BeginCall();
 				try
 				{
-					ServerStatementPlan LPlan = new ServerStatementPlan(FServer.FSystemProcess);
+					ServerStatementPlan plan = new ServerStatementPlan(_server._systemProcess);
 					try
 					{
 						// Push a timestamp safe context to prevent the drops from flushing cache-points
-						LPlan.Plan.EnterTimeStampSafeContext();
+						plan.Plan.EnterTimeStampSafeContext();
 						try
 						{
-							for (int LIndex = 0; LIndex < LBlock.Statements.Count; LIndex++)
+							for (int index = 0; index < block.Statements.Count; index++)
 							{
-								LPlan.Program.Code = Compiler.BindNode(LPlan.Plan, Compiler.CompileStatement(LPlan.Plan, LBlock.Statements[LIndex]));
-								LPlan.Plan.CheckCompiled();
-								LPlan.Program.Execute(null);
+								plan.Program.Code = Compiler.BindNode(plan.Plan, Compiler.CompileStatement(plan.Plan, block.Statements[index]));
+								plan.Plan.CheckCompiled();
+								plan.Program.Execute(null);
 							}
 						}
 						finally
 						{
-							LPlan.Plan.ExitTimeStampSafeContext();
+							plan.Plan.ExitTimeStampSafeContext();
 						}
 					}
 					finally
 					{
-						LPlan.Dispose();
+						plan.Dispose();
 					}
 				}
 				catch (Exception E)
@@ -275,7 +275,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FServer.FSystemProcess.EndCall();
+					_server._systemProcess.EndCall();
 				}
 					
 				//FServer.RunScript(new D4TextEmitter().Emit(FServer.Catalog.EmitDropStatement(FServer.FSystemProcess, LObjectNameArray, String.Empty)), FCurrentLibrary.Name);
@@ -284,53 +284,53 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public bool HasSessionObjects()
 		{
-			return ((FSessionObjects == null ? 0 : FSessionObjects.Count) + (FSessionOperators == null ? 0 : FSessionOperators.Count)) > 0;
+			return ((_sessionObjects == null ? 0 : _sessionObjects.Count) + (_sessionOperators == null ? 0 : _sessionOperators.Count)) > 0;
 		}
 		
 		public bool HasNonGeneratedSessionObjects()
 		{
-			if ((FSessionObjects == null) && (FSessionOperators == null))
+			if ((_sessionObjects == null) && (_sessionOperators == null))
 				return false;
 				
 			// ASSERTION: The only way a session object could be marked generated is if it is
 			// the check table created to track deferred constraint checks.
-			if (FSessionObjects != null)
-				for (int LIndex = 0; LIndex < FSessionObjects.Count; LIndex++)
-					if (!FSessionObjects[LIndex].IsGenerated)
+			if (_sessionObjects != null)
+				for (int index = 0; index < _sessionObjects.Count; index++)
+					if (!_sessionObjects[index].IsGenerated)
 						return true;
 					
 			// NOTE: The server does not currently create session operators to support any internal operations
 			// If that ever changes, this needs to be changed to look for those generated operators.
 			// For now, this is a shortcut for performance.
-			if ((FSessionOperators != null) && (FSessionOperators.Count) > 0)
+			if ((_sessionOperators != null) && (_sessionOperators.Count) > 0)
 				return true;
 			
 			return false;
 		}
 		
 		// CursorManager
-		private CursorManager FCursorManager;
+		private CursorManager _cursorManager;
 		public CursorManager CursorManager
 		{
 			get 
 			{ 
-				if (FCursorManager == null)
-					FCursorManager = new CursorManager();
-				return FCursorManager; 
+				if (_cursorManager == null)
+					_cursorManager = new CursorManager();
+				return _cursorManager; 
 			}
 		}
 		
 		// Debug
-		private Debugger FDebugger;
-		public Debugger Debugger { get { return FDebugger; } }
+		private Debugger _debugger;
+		public Debugger Debugger { get { return _debugger; } }
 		
 		public Debugger CheckedDebugger
 		{
 			get
 			{
-				if (FDebugger == null)
-					throw new ServerException(ServerException.Codes.DebuggerNotStarted, FSessionID);
-				return FDebugger;
+				if (_debugger == null)
+					throw new ServerException(ServerException.Codes.DebuggerNotStarted, _sessionID);
+				return _debugger;
 			}
 		}
 		
@@ -347,52 +347,52 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>
 		/// Sets the debugger that is started on this session.
 		/// </summary>
-		internal void SetDebugger(Debugger ADebugger)
+		internal void SetDebugger(Debugger debugger)
 		{
-			if ((FDebugger != null) && (ADebugger != null) && (FDebugger != ADebugger))
-				throw new ServerException(ServerException.Codes.DebuggerAlreadyStarted, FSessionID);
-			FDebugger = ADebugger;
+			if ((_debugger != null) && (debugger != null) && (_debugger != debugger))
+				throw new ServerException(ServerException.Codes.DebuggerAlreadyStarted, _sessionID);
+			_debugger = debugger;
 		}
 		
-		private int FDebuggedByID;
-		public int DebuggedByID { get { return FDebuggedByID; } }
+		private int _debuggedByID;
+		public int DebuggedByID { get { return _debuggedByID; } }
 		
 		/// <summary>
 		/// Sets the ID of the debugger to which this session is attached.
 		/// </summary>
-		internal void SetDebuggedByID(int ADebuggedByID)
+		internal void SetDebuggedByID(int debuggedByID)
 		{
-			if (String.IsNullOrEmpty(FSessionInfo.CatalogCacheName))
-				throw new ServerException(ServerException.Codes.CannotAttachToAnInProcessSession, FSessionID);
-			if ((FDebugger != null) && (FSessionID == ADebuggedByID))
-				throw new ServerException(ServerException.Codes.CannotAttachToDebuggerSession, FSessionID);
-			if ((FDebuggedByID != 0) && (ADebuggedByID != 0))
-				throw new ServerException(ServerException.Codes.DebuggerAlreadyAttachedToSession, FSessionID);
-			FDebuggedByID = ADebuggedByID;
+			if (String.IsNullOrEmpty(_sessionInfo.CatalogCacheName))
+				throw new ServerException(ServerException.Codes.CannotAttachToAnInProcessSession, _sessionID);
+			if ((_debugger != null) && (_sessionID == debuggedByID))
+				throw new ServerException(ServerException.Codes.CannotAttachToDebuggerSession, _sessionID);
+			if ((_debuggedByID != 0) && (debuggedByID != 0))
+				throw new ServerException(ServerException.Codes.DebuggerAlreadyAttachedToSession, _sessionID);
+			_debuggedByID = debuggedByID;
 		}
 
 		// Execution
-		internal Exception WrapException(Exception AException)
+		internal Exception WrapException(Exception exception)
 		{
-			return FServer.WrapException(AException);
+			return _server.WrapException(exception);
 		}
 
 		private void StopProcesses()
 		{
-			while (FProcesses.Count > 0)
+			while (_processes.Count > 0)
 			{
 				try
 				{
 					try
 					{
-						Server.TerminateProcessThread(FProcesses[0]);
+						Server.TerminateProcessThread(_processes[0]);
 					}
 					catch (Exception E)
 					{
 						Server.LogError(E);
 					}
 					
-					FProcesses.DisownAt(0).Dispose();
+					_processes.DisownAt(0).Dispose();
 				}
 				catch (Exception E)
 				{
@@ -404,35 +404,35 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>
 		/// Initiates a termination request for a process.
 		/// </summary>
-		/// <param name="AProcessID">The ID of the process to be stopped.</param>
-		public void StopProcess(int AProcessID)
+		/// <param name="processID">The ID of the process to be stopped.</param>
+		public void StopProcess(int processID)
 		{
-			ServerProcess LProcessToStop = null;
-			lock (FProcesses)
-				foreach (ServerProcess LProcess in FProcesses)
-					if (LProcess.ProcessID == AProcessID)
+			ServerProcess processToStop = null;
+			lock (_processes)
+				foreach (ServerProcess process in _processes)
+					if (process.ProcessID == processID)
 					{
-						LProcessToStop = LProcess;
+						processToStop = process;
 						break;
 					}
 			
-			if (LProcessToStop != null)
+			if (processToStop != null)
 			{
-				Server.TerminateProcess(LProcessToStop);
+				Server.TerminateProcess(processToStop);
 				return;
 			}
 
-			throw new ServerException(ServerException.Codes.ProcessNotFound, AProcessID);
+			throw new ServerException(ServerException.Codes.ProcessNotFound, processID);
 		}
 
 		// StartProcess
-		public IServerProcess StartProcess(ProcessInfo AProcessInfo)
+		public IServerProcess StartProcess(ProcessInfo processInfo)
 		{
 			try
 			{
-				ServerProcess LProcess = new ServerProcess(this, AProcessInfo);
-				FProcesses.Add(LProcess); // Is protected by a latch in the ServerChildObjects collection
-				return LProcess;
+				ServerProcess process = new ServerProcess(this, processInfo);
+				_processes.Add(process); // Is protected by a latch in the ServerChildObjects collection
+				return process;
 			}
 			catch (Exception E)
 			{
@@ -441,11 +441,11 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// StopProcess
-		public void StopProcess(IServerProcess AProcess)
+		public void StopProcess(IServerProcess process)
 		{
 			try
 			{
-				((ServerProcess)AProcess).Dispose();	// Is protected by a latch in the ServerChildObjects collection
+				((ServerProcess)process).Dispose();	// Is protected by a latch in the ServerChildObjects collection
 			}
 			catch (Exception E)
 			{
@@ -453,25 +453,25 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		internal void RemoveDeferredConstraintChecks(Schema.TableVar ATableVar)
+		internal void RemoveDeferredConstraintChecks(Schema.TableVar tableVar)
 		{
-			if (FProcesses != null)
-				foreach (ServerProcess LProcess in FProcesses)
-					LProcess.RemoveDeferredConstraintChecks(ATableVar);
+			if (_processes != null)
+				foreach (ServerProcess process in _processes)
+					process.RemoveDeferredConstraintChecks(tableVar);
 		}
 		
-		internal void RemoveDeferredHandlers(Schema.EventHandler AHandler)
+		internal void RemoveDeferredHandlers(Schema.EventHandler handler)
 		{
-			if (FProcesses != null)
-				foreach (ServerProcess LProcess in FProcesses)
-					LProcess.RemoveDeferredHandlers(AHandler);
+			if (_processes != null)
+				foreach (ServerProcess process in _processes)
+					process.RemoveDeferredHandlers(handler);
 		}
 		
-		internal void RemoveCatalogConstraintCheck(Schema.CatalogConstraint AConstraint)
+		internal void RemoveCatalogConstraintCheck(Schema.CatalogConstraint constraint)
 		{
-			if (FProcesses != null)
-				foreach (ServerProcess LProcess in FProcesses)
-					LProcess.RemoveCatalogConstraintCheck(AConstraint);
+			if (_processes != null)
+				foreach (ServerProcess process in _processes)
+					process.RemoveCatalogConstraintCheck(constraint);
 		}
 	}
 	
@@ -479,26 +479,26 @@ namespace Alphora.Dataphor.DAE.Server
 	public class ServerSessions : ServerChildObjects
 	{		
 		public ServerSessions() : base() {}
-		public ServerSessions(bool AIsOwner) : base(AIsOwner) {}
+		public ServerSessions(bool isOwner) : base(isOwner) {}
 		
-		protected override void Validate(ServerChildObject AObject)
+		protected override void Validate(ServerChildObject objectValue)
 		{
-			if (!(AObject is ServerSession))
+			if (!(objectValue is ServerSession))
 				throw new ServerException(ServerException.Codes.ServerSessionContainer);
 		}
 		
-		public new ServerSession this[int AIndex]
+		public new ServerSession this[int index]
 		{
-			get { return (ServerSession)base[AIndex]; } 
-			set { base[AIndex] = value; } 
+			get { return (ServerSession)base[index]; } 
+			set { base[index] = value; } 
 		}
 		
-		public ServerSession GetSession(int ASessionID)
+		public ServerSession GetSession(int sessionID)
 		{
-			foreach (ServerSession LSession in this)
-				if (LSession.SessionID == ASessionID)
-					return LSession;
-			throw new ServerException(ServerException.Codes.SessionNotFound, ASessionID);
+			foreach (ServerSession session in this)
+				if (session.SessionID == sessionID)
+					return session;
+			throw new ServerException(ServerException.Codes.SessionNotFound, sessionID);
 		}
 	}
 }

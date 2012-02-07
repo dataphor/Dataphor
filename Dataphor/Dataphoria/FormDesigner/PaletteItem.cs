@@ -5,19 +5,19 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {
     public class PaletteItem : ListViewItem
     {
-        private string FClassName;
-        private string FDescription = String.Empty;
+        private string _className;
+        private string _description = String.Empty;
 
         public string Description
         {
-            get { return FDescription; }
-            set { FDescription = value; }
+            get { return _description; }
+            set { _description = value; }
         }
 
         public string ClassName
         {
-            get { return FClassName; }
-            set { FClassName = value; }
+            get { return _className; }
+            set { _className = value; }
         }
     }
 }

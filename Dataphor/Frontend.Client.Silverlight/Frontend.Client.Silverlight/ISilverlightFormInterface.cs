@@ -14,5 +14,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		DispatchedReadOnlyCollection<Exception> BindErrors { get; }
 		
 		FormControl Form { get; }
+
+		event EventHandler Accepting;
 	}
 }

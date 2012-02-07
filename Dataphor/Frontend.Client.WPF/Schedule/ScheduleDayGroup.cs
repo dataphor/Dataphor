@@ -50,9 +50,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(GranularityProperty, value); }
 		}
 
-		private static object CoerceGranularity(DependencyObject ASender, object AValue)
+		private static object CoerceGranularity(DependencyObject sender, object tempValue)
 		{
-			return Math.Max(1, Math.Min(60, (int)AValue));
+			return Math.Max(1, Math.Min(60, (int)tempValue));
 		}
 
 		// AppointmentSource
@@ -216,91 +216,91 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			return new ScheduleDay();
 		}
 
-		protected override void PrepareContainerForItemOverride(DependencyObject AElement, object AItem)
+		protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
 		{
-			var LDay = AElement as ScheduleDay;
-			if (LDay != null)
+			var day = element as ScheduleDay;
+			if (day != null)
 			{
-				var LBinding = new Binding("Date");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.DateProperty, LBinding);
+				var binding = new Binding("Date");
+				binding.Source = this;
+				day.SetBinding(ScheduleDay.DateProperty, binding);
 				
-				LDay.ItemContainerStyle = AppointmentContainerStyle;
-				LDay.ItemTemplate = AppointmentItemTemplate;
+				day.ItemContainerStyle = AppointmentContainerStyle;
+				day.ItemTemplate = AppointmentItemTemplate;
 
 				if (!String.IsNullOrEmpty(DisplayMemberPath))
 				{
-					LBinding = new Binding(DisplayMemberPath);
-					LBinding.Source = AItem;
-					LDay.SetBinding(ScheduleDay.HeaderProperty, LBinding);
+					binding = new Binding(DisplayMemberPath);
+					binding.Source = item;
+					day.SetBinding(ScheduleDay.HeaderProperty, binding);
 				}
 
 				if (!String.IsNullOrEmpty(GroupIDMemberPath))
 				{
-					LBinding = new Binding(GroupIDMemberPath);
-					LBinding.Source = AItem;
-					LDay.SetBinding(ScheduleDay.GroupIDProperty, LBinding);
+					binding = new Binding(GroupIDMemberPath);
+					binding.Source = item;
+					day.SetBinding(ScheduleDay.GroupIDProperty, binding);
 				}
 
-				LBinding = new Binding("AppointmentDateMemberPath");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.AppointmentDateMemberPathProperty, LBinding);
+				binding = new Binding("AppointmentDateMemberPath");
+				binding.Source = this;
+				day.SetBinding(ScheduleDay.AppointmentDateMemberPathProperty, binding);
 				
-				LBinding = new Binding("AppointmentGroupIDMemberPath");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.AppointmentGroupIDMemberPathProperty, LBinding);
+				binding = new Binding("AppointmentGroupIDMemberPath");
+				binding.Source = this;
+				day.SetBinding(ScheduleDay.AppointmentGroupIDMemberPathProperty, binding);
 
-				LBinding = new Binding("ShiftDateMemberPath");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.ShiftDateMemberPathProperty, LBinding);
+				binding = new Binding("ShiftDateMemberPath");
+				binding.Source = this;
+				day.SetBinding(ScheduleDay.ShiftDateMemberPathProperty, binding);
 
-				LBinding = new Binding("ShiftGroupIDMemberPath");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.ShiftGroupIDMemberPathProperty, LBinding);
+				binding = new Binding("ShiftGroupIDMemberPath");
+				binding.Source = this;
+				day.SetBinding(ScheduleDay.ShiftGroupIDMemberPathProperty, binding);
 
-				LBinding = new Binding("ShiftItemTemplate");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.ShiftItemTemplateProperty, LBinding);
+				binding = new Binding("ShiftItemTemplate");
+				binding.Source = this;
+				day.SetBinding(ScheduleDay.ShiftItemTemplateProperty, binding);
 
-				LBinding = new Binding("ShiftContainerStyle");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.ShiftContainerStyleProperty, LBinding);
+				binding = new Binding("ShiftContainerStyle");
+				binding.Source = this;
+				day.SetBinding(ScheduleDay.ShiftContainerStyleProperty, binding);
 
-				LBinding = new Binding("HighlightedTime");
-				LBinding.Source = this;
-				LBinding.Mode = BindingMode.TwoWay;
-				LDay.SetBinding(ScheduleDay.HighlightedTimeProperty, LBinding);
+				binding = new Binding("HighlightedTime");
+				binding.Source = this;
+				binding.Mode = BindingMode.TwoWay;
+				day.SetBinding(ScheduleDay.HighlightedTimeProperty, binding);
 				
-				LBinding = new Binding("StartTime");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.StartTimeProperty, LBinding);
+				binding = new Binding("StartTime");
+				binding.Source = this;
+				day.SetBinding(ScheduleDay.StartTimeProperty, binding);
 				
-				LBinding = new Binding("SelectedAppointment");
-				LBinding.Source = this;
-				LBinding.Mode = BindingMode.TwoWay;
-				LDay.SetBinding(ScheduleDay.SelectedAppointmentProperty, LBinding);
+				binding = new Binding("SelectedAppointment");
+				binding.Source = this;
+				binding.Mode = BindingMode.TwoWay;
+				day.SetBinding(ScheduleDay.SelectedAppointmentProperty, binding);
 				
-				LBinding = new Binding("Granularity");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.GranularityProperty, LBinding);
+				binding = new Binding("Granularity");
+				binding.Source = this;
+				day.SetBinding(ScheduleDay.GranularityProperty, binding);
 
-				LBinding = new Binding("AppointmentSource");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.AppointmentSourceProperty, LBinding);
+				binding = new Binding("AppointmentSource");
+				binding.Source = this;
+				day.SetBinding(ScheduleDay.AppointmentSourceProperty, binding);
 
-				LBinding = new Binding("ShiftSource");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.ShiftSourceProperty, LBinding);
+				binding = new Binding("ShiftSource");
+				binding.Source = this;
+				day.SetBinding(ScheduleDay.ShiftSourceProperty, binding);
 			}
-			base.PrepareContainerForItemOverride(AElement, AItem);
+			base.PrepareContainerForItemOverride(element, item);
 		}
 
-		protected override void ClearContainerForItemOverride(DependencyObject AElement, object AItem)
+		protected override void ClearContainerForItemOverride(DependencyObject element, object item)
 		{
-			var LDay = AElement as ScheduleDay;
-			if (LDay != null)
-				BindingOperations.ClearBinding(LDay, ScheduleDay.HighlightedTimeProperty);
-			base.ClearContainerForItemOverride(AElement, AItem);
+			var day = element as ScheduleDay;
+			if (day != null)
+				BindingOperations.ClearBinding(day, ScheduleDay.HighlightedTimeProperty);
+			base.ClearContainerForItemOverride(element, item);
 		}
 	}
 }

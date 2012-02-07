@@ -21,79 +21,79 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			SuspendLayout();
 
-			FTextBox = new DBDateTextBox();
-			FTextBox.Parent = this;
-			FTextBox.Location = Point.Empty;
+			_textBox = new DBDateTextBox();
+			_textBox.Parent = this;
+			_textBox.Location = Point.Empty;
 			
-			Size = FTextBox.Size + (DisplayRectangle.Size - Size);
+			Size = _textBox.Size + (DisplayRectangle.Size - Size);
 
 			Button.Image = SpeedButton.ResourceBitmap(typeof(DateLookup), "Alphora.Dataphor.DAE.Client.Controls.Images.Calendar.png");
 
 			ResumeLayout(false);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			if (!IsDisposed)
 			{
-				if (FPopupForm != null)
+				if (_popupForm != null)
 				{
-					FPopupForm.Dispose();
-					FPopupForm = null;
+					_popupForm.Dispose();
+					_popupForm = null;
 				}
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
-		private DBDateTextBox FTextBox;
+		private DBDateTextBox _textBox;
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		public DBDateTextBox TextBox
 		{
-			get { return FTextBox; }
+			get { return _textBox; }
 		}
 
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public DateTime DateTime
 		{
-			get { return FTextBox.Date; }
-			set { FTextBox.Date = value; }
+			get { return _textBox.Date; }
+			set { _textBox.Date = value; }
 		}
 
 		#region PopupForm
 
-		private CalendarPopup FPopupForm;
+		private CalendarPopup _popupForm;
 
-		private void PopupFormDisposed(object ASender, EventArgs AArgs)
+		private void PopupFormDisposed(object sender, EventArgs args)
 		{
-			FPopupForm.Disposed -= new EventHandler(PopupFormDisposed);
-			FPopupForm = null;
+			_popupForm.Disposed -= new EventHandler(PopupFormDisposed);
+			_popupForm = null;
 		}
 
 		private void ShowPopupForm()
 		{
-			if (FPopupForm == null)
+			if (_popupForm == null)
 			{
-				FPopupForm = new CalendarPopup(this);
-				FPopupForm.Disposed += new EventHandler(PopupFormDisposed);
-				FPopupForm.Accept += new EventHandler(PopupFormAccepted);
+				_popupForm = new CalendarPopup(this);
+				_popupForm.Disposed += new EventHandler(PopupFormDisposed);
+				_popupForm.Accept += new EventHandler(PopupFormAccepted);
 			}
-			if ((FTextBox.DataField != null) && FTextBox.DataField.HasValue())
-				FPopupForm.DateTime = DateTime;
+			if ((_textBox.DataField != null) && _textBox.DataField.HasValue())
+				_popupForm.DateTime = DateTime;
 			else
-				FPopupForm.DateTime = System.DateTime.Today;
-			FPopupForm.Show();
+				_popupForm.DateTime = System.DateTime.Today;
+			_popupForm.Show();
 		}
 
-		protected override void OnLookup(LookupEventArgs AArgs)
+		protected override void OnLookup(LookupEventArgs args)
 		{
-			base.OnLookup(AArgs);
+			base.OnLookup(args);
 			ShowPopupForm();
 		}
 
 		private void PopupFormAccepted(object sender, EventArgs e)
 		{
-			DateTime = FPopupForm.DateTime;
+			DateTime = _popupForm.DateTime;
 		}
 
 		#endregion
@@ -101,9 +101,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 	public class CalendarPopup : Form
 	{
-		public CalendarPopup(Control AParent) : base() 
+		public CalendarPopup(Control parent) : base() 
 		{
-			FParent = AParent;
+			_parent = parent;
 
 			SuspendLayout();
 
@@ -111,55 +111,55 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			ShowInTaskbar = false;
 			KeyPreview = true;
 
-			FCalendar = new MonthCalendar();
-			FCalendar.CausesValidation = false;
-			FCalendar.MaxSelectionCount = 1;
-			FCalendar.TabStop = true;
-			FCalendar.MouseUp += new MouseEventHandler(CalendarMouseUp);
-			FCalendar.Parent = this;
+			_calendar = new MonthCalendar();
+			_calendar.CausesValidation = false;
+			_calendar.MaxSelectionCount = 1;
+			_calendar.TabStop = true;
+			_calendar.MouseUp += new MouseEventHandler(CalendarMouseUp);
+			_calendar.Parent = this;
 
-			Width = FCalendar.Width + 20;
-			Height = FCalendar.Height + 2;
+			Width = _calendar.Width + 20;
+			Height = _calendar.Height + 2;
 
 			ResumeLayout(false);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FCalendar != null)
+			if (_calendar != null)
 			{
-				FCalendar.MouseUp -= new MouseEventHandler(CalendarMouseUp);
-				FCalendar.Dispose();
-				FCalendar = null;
+				_calendar.MouseUp -= new MouseEventHandler(CalendarMouseUp);
+				_calendar.Dispose();
+				_calendar = null;
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
-		private Control FParent;
+		private Control _parent;
 
-		private bool FInitialLayout = true;
+		private bool _initialLayout = true;
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
-			base.OnLayout(AArgs);
-			if ((FParent != null) && FInitialLayout)
+			base.OnLayout(args);
+			if ((_parent != null) && _initialLayout)
 			{	
-				FInitialLayout = false;
-				Point LLocation = FParent.PointToScreen(Point.Empty);
-				LLocation.Y += FParent.Height;
-				Screen LScreen = Screen.FromControl(FParent);
-				if (!LScreen.WorkingArea.IsEmpty)
+				_initialLayout = false;
+				Point location = _parent.PointToScreen(Point.Empty);
+				location.Y += _parent.Height;
+				Screen screen = Screen.FromControl(_parent);
+				if (!screen.WorkingArea.IsEmpty)
 				{
-					if (LLocation.X < LScreen.WorkingArea.Left)
-						LLocation.X = LScreen.WorkingArea.Left;
-					if (LLocation.Y + Height > LScreen.WorkingArea.Bottom)
-						LLocation.Y = Top - FParent.Height - Height;
-					if (LLocation.X + Width > LScreen.WorkingArea.Right)
-						LLocation.X = LScreen.WorkingArea.Right - Width;
-					if (LLocation.Y < LScreen.WorkingArea.Top)
-						LLocation.Y = LScreen.WorkingArea.Top;
+					if (location.X < screen.WorkingArea.Left)
+						location.X = screen.WorkingArea.Left;
+					if (location.Y + Height > screen.WorkingArea.Bottom)
+						location.Y = Top - _parent.Height - Height;
+					if (location.X + Width > screen.WorkingArea.Right)
+						location.X = screen.WorkingArea.Right - Width;
+					if (location.Y < screen.WorkingArea.Top)
+						location.Y = screen.WorkingArea.Top;
 				}
-				Location = LLocation;
+				Location = location;
 			}
 		}
 
@@ -167,34 +167,34 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			get
 			{
-				CreateParams LParams = base.CreateParams;
-				LParams.Style |= NativeMethods.WS_POPUP | NativeMethods.WS_BORDER;
-				return LParams;
+				CreateParams paramsValue = base.CreateParams;
+				paramsValue.Style |= NativeMethods.WS_POPUP | NativeMethods.WS_BORDER;
+				return paramsValue;
 			}
 		}
 
-		private MonthCalendar FCalendar;
-		protected MonthCalendar Calendar { get { return FCalendar; } }
+		private MonthCalendar _calendar;
+		protected MonthCalendar Calendar { get { return _calendar; } }
 
 		public DateTime DateTime
 		{
-			get { return FCalendar.SelectionEnd; }
-			set { FCalendar.SetDate(value); }
+			get { return _calendar.SelectionEnd; }
+			set { _calendar.SetDate(value); }
 		}
 
-		protected override bool ProcessDialogKey(Keys AKeyData)
+		protected override bool ProcessDialogKey(Keys keyData)
 		{
-			switch (AKeyData)
+			switch (keyData)
 			{
 				case Keys.Escape : Close(); return true;
 				case Keys.Enter : OnAccept(); return true;
-				default : return base.ProcessDialogKey(AKeyData);
+				default : return base.ProcessDialogKey(keyData);
 			}
 		}
 
-		protected override void OnDeactivate(EventArgs AArgs)
+		protected override void OnDeactivate(EventArgs args)
 		{
-			base.OnDeactivate(AArgs);
+			base.OnDeactivate(args);
 			Close();
 		}
 
@@ -207,12 +207,12 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			Close();
 		}
 
-		protected virtual void CalendarMouseUp(object ASender, MouseEventArgs AArgs)
+		protected virtual void CalendarMouseUp(object sender, MouseEventArgs args)
 		{
-			if (AArgs.Button == MouseButtons.Left)
+			if (args.Button == MouseButtons.Left)
 			{
-				MonthCalendar.HitTestInfo LInfo = Calendar.HitTest(AArgs.X, AArgs.Y);
-				switch (LInfo.HitArea)
+				MonthCalendar.HitTestInfo info = Calendar.HitTest(args.X, args.Y);
+				switch (info.HitArea)
 				{
 					case MonthCalendar.HitArea.Date:
 					case MonthCalendar.HitArea.TodayLink:

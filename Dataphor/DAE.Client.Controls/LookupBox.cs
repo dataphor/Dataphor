@@ -48,9 +48,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			return false;
 		}
 
-		protected override void OnGotFocus(EventArgs AArgs)
+		protected override void OnGotFocus(EventArgs args)
 		{
-			base.OnGotFocus(AArgs);
+			base.OnGotFocus(args);
 			FocusControl();
 		}
 
@@ -59,37 +59,37 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		#region Layout
 
 		/// <remarks> This control "snaps" to fit it's child control(s). </remarks>
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
-			base.OnLayout(AArgs);
+			base.OnLayout(args);
 
 			// Measure the extent of this control's children
-			Size LExtent = new Size(0, MinButtonSize().Height);
-			foreach (Control LControl in Controls)
+			Size extent = new Size(0, MinButtonSize().Height);
+			foreach (Control control in Controls)
 			{
-				if ((LControl != Button) && (!this.Visible || LControl.Visible))	// Note: Cannot accurately check for visibility in this context because visibility is recursive.  The control should be visible, however, if it's parent (this) is visible.
+				if ((control != Button) && (!this.Visible || control.Visible))	// Note: Cannot accurately check for visibility in this context because visibility is recursive.  The control should be visible, however, if it's parent (this) is visible.
 				{
-					if (LControl.Right > LExtent.Width)
-						LExtent.Width = LControl.Right;
-					if (LControl.Bottom > LExtent.Height)
-						LExtent.Height = LControl.Bottom;
+					if (control.Right > extent.Width)
+						extent.Width = control.Right;
+					if (control.Bottom > extent.Height)
+						extent.Height = control.Bottom;
 				}
 			}
 			
 			// Stretch to include the button
-			LExtent.Width += Button.Width;
+			extent.Width += Button.Width;
 
 			// Size this control to encompass the child
-			ClientSize = LExtent;
+			ClientSize = extent;
 
 			// Layout the button
 			Button.Bounds =
 				new Rectangle
 				(
-					LExtent.Width - Button.Width,
+					extent.Width - Button.Width,
 					0,
 					Button.Width,
-					LExtent.Height
+					extent.Height
 				);
 		}
 
@@ -97,9 +97,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			get
 			{
-				Rectangle LBounds = base.DisplayRectangle;
-				LBounds.Width -= Button.Width;
-				return LBounds;
+				Rectangle bounds = base.DisplayRectangle;
+				bounds.Width -= Button.Width;
+				return bounds;
 			}
 		}
 

@@ -26,33 +26,33 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public static int CDefaultDocumentCacheSize = 800;
 		public static int CDefaultImageCacheSize = 60;
 
-		public const string CClientName = "Windows";
-		public const string CFormDesignerNodeTypesExpression = ".Frontend.GetNodeTypes('" + CClientName + "', Frontend.FormDesignerLibraries)";
-		public const string CLibraryNodeTypesExpression = ".Frontend.GetLibraryNodeTypes('" + CClientName + "', ALibraryName)";
-		public const string CGetFormDesignerLibraryFilesExpression = @".Frontend.GetLibraryFiles(.Frontend.ClientTypes['" + CClientName + "'].Environment, FormDesignerLibraries)";
-		public const string CSettingsExpression = ".Frontend.GetWindowsSettings(AApplicationID)";
+		public const string ClientName = "Windows";
+		public const string FormDesignerNodeTypesExpression = ".Frontend.GetNodeTypes('" + ClientName + "', Frontend.FormDesignerLibraries)";
+		public const string LibraryNodeTypesExpression = ".Frontend.GetLibraryNodeTypes('" + ClientName + "', ALibraryName)";
+		public const string GetFormDesignerLibraryFilesExpression = @".Frontend.GetLibraryFiles(.Frontend.ClientTypes['" + ClientName + "'].Environment, FormDesignerLibraries)";
+		public const string SettingsExpression = ".Frontend.GetWindowsSettings(AApplicationID)";
 
-		public Session(Alphora.Dataphor.DAE.Client.DataSession ADataSession, bool AOwnsDataSession) : base(ADataSession, AOwnsDataSession) 
+		public Session(Alphora.Dataphor.DAE.Client.DataSession dataSession, bool ownsDataSession) : base(dataSession, ownsDataSession) 
 		{
-			FToolTip = new WinForms.ToolTip();
+			_toolTip = new WinForms.ToolTip();
 			try
 			{
-				FToolTip.Active = true;
+				_toolTip.Active = true;
 			}
 			catch
 			{
-				FToolTip.Dispose();
-				FToolTip = null;
+				_toolTip.Dispose();
+				_toolTip = null;
 				throw;
 			}
 
 			// Ensure we are setup for SafelyInvoke.  This must happen on the main windows thread and thus is not in a static constructor.
-			lock (FInvokeControlLock)
+			lock (_invokeControlLock)
 			{
-				if (FInvokeControl == null)
+				if (_invokeControl == null)
 				{
-					FInvokeControl = new WinForms.Control();
-					FInvokeControl.CreateControl();
+					_invokeControl = new WinForms.Control();
+					_invokeControl.CreateControl();
 				}
 			}
 			
@@ -60,32 +60,32 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			Alphora.Dataphor.Windows.AssemblyUtility.Initialize();
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
 				CloseAllForms(null, CloseBehavior.RejectOrClose);
-				if (FRootFormHost != null)	// do this anyway because CloseAllForms may have failed
-					FRootFormHost.Dispose();
+				if (_rootFormHost != null)	// do this anyway because CloseAllForms may have failed
+					_rootFormHost.Dispose();
 			}
 			finally
 			{
 				try
 				{
-					if (FToolTip != null)
+					if (_toolTip != null)
 					{
-						FToolTip.Dispose();
-						FToolTip = null;
+						_toolTip.Dispose();
+						_toolTip = null;
 					}
 				}
 				finally
 				{
 					try
 					{
-						if (FNotifyIcon != null)
+						if (_notifyIcon != null)
 						{
-							FNotifyIcon.Dispose();
-							FNotifyIcon = null;
+							_notifyIcon.Dispose();
+							_notifyIcon = null;
 						}
 					}
 					finally
@@ -108,7 +108,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 								}
 								finally
 								{								
-									base.Dispose(ADisposing); 					
+									base.Dispose(disposing); 					
 								}
 							}
 						}
@@ -119,42 +119,42 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ToolTip
 
-		private WinForms.ToolTip FToolTip;
+		private WinForms.ToolTip _toolTip;
 		
 		public WinForms.ToolTip ToolTip
 		{
-			get { return FToolTip; }
+			get { return _toolTip; }
 		}
 		
 		// NotifyIcon
 
-		private WinForms.NotifyIcon FNotifyIcon;
+		private WinForms.NotifyIcon _notifyIcon;
 		
 		public WinForms.NotifyIcon NotifyIcon
 		{
 			get 
 			{
-				if (FNotifyIcon == null)
+				if (_notifyIcon == null)
 				{
 					System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BaseForm));
-					FNotifyIcon = new System.Windows.Forms.NotifyIcon();
-					FNotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("FNotifyIcon.Icon")));
-					FNotifyIcon.Visible = true;
+					_notifyIcon = new System.Windows.Forms.NotifyIcon();
+					_notifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("FNotifyIcon.Icon")));
+					_notifyIcon.Visible = true;
 				}
-				return FNotifyIcon; 
+				return _notifyIcon; 
 			}
 		}
 						   
 		// Theme
 
-		private Theme FTheme = new Theme();
+		private Theme _theme = new Theme();
 
 		public Theme Theme
 		{
 			get
 			{
-				if (FTheme != null)
-					return FTheme;
+				if (_theme != null)
+					return _theme;
 				else
 					return new Theme();
 			}
@@ -162,15 +162,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// DefaultIcon
 
-		private Icon FDefaultIcon;
-		public Icon DefaultIcon { get { return FDefaultIcon; } }
+		private Icon _defaultIcon;
+		public Icon DefaultIcon { get { return _defaultIcon; } }
 
 		private void DisposeDefaultIcon()
 		{
-			if (FDefaultIcon != null)
+			if (_defaultIcon != null)
 			{
-				FDefaultIcon.Dispose();
-				FDefaultIcon = null;
+				_defaultIcon.Dispose();
+				_defaultIcon = null;
 			}
 		}
         
@@ -178,71 +178,71 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public event FormInterfaceHandler AfterFormActivate;
 
-		public void DoAfterFormActivate(IFormInterface AForm)
+		public void DoAfterFormActivate(IFormInterface form)
 		{
 			if (AfterFormActivate != null)
-				AfterFormActivate(AForm);
+				AfterFormActivate(form);
 		}
 
 		#region HelpProvider
 
 		public bool IsContextHelpAvailable()
 		{
-			return ((FHelpLoader != null) || (FHelpFileName != String.Empty));
+			return ((_helpLoader != null) || (_helpFileName != String.Empty));
 		}
 
-		private string FHelpFileName = String.Empty;
+		private string _helpFileName = String.Empty;
 		/// <summary> The file to use when help is requested on controls. </summary>
 		public string HelpFileName
 		{
-			get { return FHelpFileName; }
-			set { FHelpFileName = (value == null ? String.Empty : value); }
+			get { return _helpFileName; }
+			set { _helpFileName = (value == null ? String.Empty : value); }
 		}
 
-		private Dictionary<WinForms.Control,IElement> FHelpControls = new Dictionary<System.Windows.Forms.Control,IElement>();
-		private FileLoader FHelpLoader;
+		private Dictionary<WinForms.Control,IElement> _helpControls = new Dictionary<System.Windows.Forms.Control,IElement>();
+		private FileLoader _helpLoader;
 
-		public void RegisterControlHelp(WinForms.Control AControl, IElement AElement)
+		public void RegisterControlHelp(WinForms.Control control, IElement element)
 		{
-			if (!FHelpControls.ContainsKey(AControl))
+			if (!_helpControls.ContainsKey(control))
 			{
-				AControl.HelpRequested += new System.Windows.Forms.HelpEventHandler(ControlHelpRequested);
-				AControl.Disposed += new EventHandler(HelpControlDisposed);
-				FHelpControls.Add(AControl, AElement);
+				control.HelpRequested += new System.Windows.Forms.HelpEventHandler(ControlHelpRequested);
+				control.Disposed += new EventHandler(HelpControlDisposed);
+				_helpControls.Add(control, element);
 			}
 		}
 
-		public void UnregisterControlHelp(WinForms.Control AControl)
+		public void UnregisterControlHelp(WinForms.Control control)
 		{
-			if (FHelpControls.ContainsKey(AControl))
+			if (_helpControls.ContainsKey(control))
 			{
-				AControl.HelpRequested -= new System.Windows.Forms.HelpEventHandler(ControlHelpRequested);
-				AControl.Disposed -= new EventHandler(HelpControlDisposed);
-				FHelpControls.Remove(AControl);
+				control.HelpRequested -= new System.Windows.Forms.HelpEventHandler(ControlHelpRequested);
+				control.Disposed -= new EventHandler(HelpControlDisposed);
+				_helpControls.Remove(control);
 			}
 		}
 
-		private bool InternalInvokeHelp(WinForms.Control AControl, string AHelpKeyword, HelpKeywordBehavior AHelpKeywordBehavior, string AHelpString, bool APreferPopup)
+		private bool InternalInvokeHelp(WinForms.Control control, string helpKeyword, HelpKeywordBehavior helpKeywordBehavior, string helpString, bool preferPopup)
 		{
-			WinForms.HelpNavigator LNavigator = (WinForms.HelpNavigator)AHelpKeywordBehavior;
+			WinForms.HelpNavigator navigator = (WinForms.HelpNavigator)helpKeywordBehavior;
 			if 
 			(
-				(APreferPopup || (AHelpKeyword == String.Empty)) 
-					&& (AHelpString != String.Empty)
+				(preferPopup || (helpKeyword == String.Empty)) 
+					&& (helpString != String.Empty)
 			)
-				WinForms.Help.ShowPopup(AControl, AHelpString, WinForms.Control.MousePosition);
+				WinForms.Help.ShowPopup(control, helpString, WinForms.Control.MousePosition);
 			else
 			{
-				if (FHelpLoader != null)
+				if (_helpLoader != null)
 					System.Media.SystemSounds.Beep.Play();
 				else
 				{
-					if (FHelpFileName != String.Empty)
+					if (_helpFileName != String.Empty)
 					{
-						if (AHelpKeyword != String.Empty)
-							WinForms.Help.ShowHelp(AControl, FHelpFileName, LNavigator, AHelpKeyword);
+						if (helpKeyword != String.Empty)
+							WinForms.Help.ShowHelp(control, _helpFileName, navigator, helpKeyword);
 						else
-							WinForms.Help.ShowHelp(AControl, FHelpFileName, LNavigator);
+							WinForms.Help.ShowHelp(control, _helpFileName, navigator);
 					}
 					else
 						return false;
@@ -251,53 +251,53 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return true;
 		}
 
-		public override void InvokeHelp(INode ASender, string AHelpKeyword, HelpKeywordBehavior AHelpKeywordBehavior, string AHelpString)
+		public override void InvokeHelp(INode sender, string helpKeyword, HelpKeywordBehavior helpKeywordBehavior, string helpString)
 		{
-			WinForms.Control LControl = null;
-			if (ASender != null)
+			WinForms.Control control = null;
+			if (sender != null)
 			{
-				IWindowsControlElement LElement = ASender as IWindowsControlElement;
-				if (LElement != null)
-					LControl = LElement.Control;
+				IWindowsControlElement element = sender as IWindowsControlElement;
+				if (element != null)
+					control = element.Control;
 				else
-					LControl = (WinForms.Control)((IWindowsFormInterface)ASender.FindParent(typeof(IWindowsFormInterface))).Form;
+					control = (WinForms.Control)((IWindowsFormInterface)sender.FindParent(typeof(IWindowsFormInterface))).Form;
 			}
 
-			InternalInvokeHelp(LControl, AHelpKeyword, AHelpKeywordBehavior, AHelpString, false);
+			InternalInvokeHelp(control, helpKeyword, helpKeywordBehavior, helpString, false);
 		}
 
-		private void ControlHelpRequested(object ASender, System.Windows.Forms.HelpEventArgs AArgs)
+		private void ControlHelpRequested(object sender, System.Windows.Forms.HelpEventArgs args)
 		{
-			AArgs.Handled |= FindAndInvokeHelp((WinForms.Control)ASender);
+			args.Handled |= FindAndInvokeHelp((WinForms.Control)sender);
 		}
 
-		private bool FindAndInvokeHelp(WinForms.Control AControl)
+		private bool FindAndInvokeHelp(WinForms.Control control)
 		{
-			IElement LElement;
-			if (FHelpControls.TryGetValue(AControl, out LElement))
+			IElement element;
+			if (_helpControls.TryGetValue(control, out element))
 			{
-				while ((LElement != null) && (LElement.HelpKeyword == "") && (LElement.HelpString == "") && (LElement.Parent != null) && (LElement.Parent is IElement))
-					LElement = (IElement)LElement.Parent;
-				string LKeyword = (LElement != null) ? LElement.HelpKeyword : "";
-				HelpKeywordBehavior LBehavior = (LElement != null) ? LElement.HelpKeywordBehavior : HelpKeywordBehavior.KeywordIndex;
-				string LString = (LElement != null) ? LElement.HelpString : "";
-				return InternalInvokeHelp(AControl, LKeyword, LBehavior, LString, (WinForms.Control.MouseButtons != WinForms.MouseButtons.None));
+				while ((element != null) && (element.HelpKeyword == "") && (element.HelpString == "") && (element.Parent != null) && (element.Parent is IElement))
+					element = (IElement)element.Parent;
+				string keyword = (element != null) ? element.HelpKeyword : "";
+				HelpKeywordBehavior behavior = (element != null) ? element.HelpKeywordBehavior : HelpKeywordBehavior.KeywordIndex;
+				string stringValue = (element != null) ? element.HelpString : "";
+				return InternalInvokeHelp(control, keyword, behavior, stringValue, (WinForms.Control.MouseButtons != WinForms.MouseButtons.None));
 			}
 			else
-				return (AControl.Parent != null) && FindAndInvokeHelp(AControl.Parent);
+				return (control.Parent != null) && FindAndInvokeHelp(control.Parent);
 		}
 
-		private void HelpControlDisposed(object ASender, EventArgs AArgs)
+		private void HelpControlDisposed(object sender, EventArgs args)
 		{
-			UnregisterControlHelp((WinForms.Control)ASender);
+			UnregisterControlHelp((WinForms.Control)sender);
 		}
 
-		private string GetHelpFileName(string ADocument)
+		private string GetHelpFileName(string document)
 		{
-			DocumentExpression LExpression = new DocumentExpression(ADocument);
-			if (LExpression.Type == DocumentType.Document)
+			DocumentExpression expression = new DocumentExpression(document);
+			if (expression.Type == DocumentType.Document)
 			{
-				return LExpression.DocumentArgs.LibraryName + "." + LExpression.DocumentArgs.DocumentName + "." 
+				return expression.DocumentArgs.LibraryName + "." + expression.DocumentArgs.DocumentName + "." 
 					+ 
 					(
 						((DAE.Runtime.Data.Scalar)Evaluate
@@ -305,24 +305,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 							String.Format
 							(
 								".Frontend.GetDocumentType('{0}', '{1}')", 
-								LExpression.DocumentArgs.LibraryName, 
-								LExpression.DocumentArgs.DocumentName
+								expression.DocumentArgs.LibraryName, 
+								expression.DocumentArgs.DocumentName
 							)
 						)).AsString
 					);
 			}
 			else
-				return Path.ChangeExtension(ADocument.GetHashCode().ToString(), ".chm");
+				return Path.ChangeExtension(document.GetHashCode().ToString(), ".chm");
 		}
 
 		/// <summary> Loads (to the client) the specified help document and sets <see cref="HelpFileName"/> to the local file name. </summary>
-		public void LoadHelpDocument(string ADocument)
+		public void LoadHelpDocument(string document)
 		{
-			FHelpLoader = 
+			_helpLoader = 
 				new FileLoader
 				(
 					DataSession.ServerSession, 
-					ADocument, 
+					document, 
 					Path.Combine
 					(
 						Path.Combine
@@ -330,25 +330,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 							AppDomain.CurrentDomain.BaseDirectory, 
 							CHelpPath
 						), 
-						GetHelpFileName(ADocument)
+						GetHelpFileName(document)
 					), 
 					new FileLoaderCompleteHandler(HelpFileLoaded)
 				);
 		}
 
-		private void HelpFileLoaded(FileLoader ALoader)
+		private void HelpFileLoaded(FileLoader loader)
 		{
-			FHelpFileName = ALoader.FileName;
-			FHelpLoader = null;
+			_helpFileName = loader.FileName;
+			_helpLoader = null;
 		}
 
 		#endregion
 
 		#region Applications & Libraries
 
-		public string SetApplication(string AApplicationID)
+		public string SetApplication(string applicationID)
 		{
-			return SetApplication(AApplicationID, CClientName);
+			return SetApplication(applicationID, ClientName);
 		}
 
 		private void ClearDocumentCache()
@@ -365,171 +365,171 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			Pipe.ImageCache = null;
 		}
 
-		public override string SetApplication(string AApplicationID, string AClientType)
+		public override string SetApplication(string applicationID, string clientType)
 		{
 			// Reset our current settings
-			FTheme = null;
+			_theme = null;
 			DisposeDefaultIcon();
 			ClearDocumentCache();
 			ClearImageCache();
-			int LDocumentCacheSize = CDefaultDocumentCacheSize;
-			int LImageCacheSize = CDefaultImageCacheSize;
+			int documentCacheSize = CDefaultDocumentCacheSize;
+			int imageCacheSize = CDefaultImageCacheSize;
 
 			// Optimistically load the settings
 			try
 			{
-				DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-				LParams.Add(DAE.Runtime.DataParam.Create(Pipe.Process, "AApplicationID", AApplicationID));
+				DAE.Runtime.DataParams paramsValue = new DAE.Runtime.DataParams();
+				paramsValue.Add(DAE.Runtime.DataParam.Create(Pipe.Process, "AApplicationID", applicationID));
 
-				using (DAE.Runtime.Data.Row LRow = (DAE.Runtime.Data.Row)Evaluate(Pipe.Process, CSettingsExpression, LParams))
+				using (DAE.Runtime.Data.Row row = (DAE.Runtime.Data.Row)Evaluate(Pipe.Process, SettingsExpression, paramsValue))
 				{
-					if (LRow != null)
+					if (row != null)
 					{
 						// Load the theme
-						if (LRow.HasValue("Theme"))
-							FTheme = (Theme)new BOP.Deserializer().Deserialize((string)LRow["Theme"], null);
+						if (row.HasValue("Theme"))
+							_theme = (Theme)new BOP.Deserializer().Deserialize((string)row["Theme"], null);
 
 						// Load the default form icon
-						if (LRow.HasValue("IconImage"))
-							using (Stream LIconStream = LRow.GetValue("IconImage").OpenStream())
+						if (row.HasValue("IconImage"))
+							using (Stream iconStream = row.GetValue("IconImage").OpenStream())
 							{
-								Bitmap LBitmap = System.Drawing.Image.FromStream(LIconStream) as Bitmap;
-								if (LBitmap != null)
-									FDefaultIcon = Icon.FromHandle(LBitmap.GetHicon());	// TODO: Should this bitmap be disposed after this?
+								Bitmap bitmap = System.Drawing.Image.FromStream(iconStream) as Bitmap;
+								if (bitmap != null)
+									_defaultIcon = Icon.FromHandle(bitmap.GetHicon());	// TODO: Should this bitmap be disposed after this?
 							}
 
 						// Load the document cache size
-						if (LRow.HasValue("DocumentCacheSize"))
-							LDocumentCacheSize = (int)LRow["DocumentCacheSize"];
+						if (row.HasValue("DocumentCacheSize"))
+							documentCacheSize = (int)row["DocumentCacheSize"];
 
 						// Load the image cache size
-						if (LRow.HasValue("ImageCacheSize"))
-							LImageCacheSize = (int)LRow["ImageCacheSize"];
+						if (row.HasValue("ImageCacheSize"))
+							imageCacheSize = (int)row["ImageCacheSize"];
 
 						// Load the help file
-						if (LRow.HasValue("HelpDocument"))
+						if (row.HasValue("HelpDocument"))
 						{
-							string LDocument = (string)LRow["HelpDocument"];
-							if (LDocument != String.Empty)
-								LoadHelpDocument(LDocument);
+							string document = (string)row["HelpDocument"];
+							if (document != String.Empty)
+								LoadHelpDocument(document);
 						}
 					}
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				HandleException(new ClientException(ClientException.Codes.ErrorLoadingSettings, LException));
+				HandleException(new ClientException(ClientException.Codes.ErrorLoadingSettings, exception));
 			}
 			finally
 			{
-				if (FTheme == null)
-					FTheme = new Theme();
+				if (_theme == null)
+					_theme = new Theme();
 			}
 
 			// Setup the image cache
 			try
 			{
-				if (LImageCacheSize > 0)
-					Pipe.ImageCache = new FixedSizeCache<string, byte[]>(LImageCacheSize);
+				if (imageCacheSize > 0)
+					Pipe.ImageCache = new FixedSizeCache<string, byte[]>(imageCacheSize);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				HandleException(LException);	// Don't fail, just warn
+				HandleException(exception);	// Don't fail, just warn
 			}
 
 			// Set up the client-side document cache
 			try
 			{
-				if (LDocumentCacheSize > 0)
+				if (documentCacheSize > 0)
 					Pipe.Cache = 
 						new DocumentCache
 						(
 							Path.Combine
 							(
 								Path.Combine(System.IO.Path.GetTempPath(), CCachePath),
-								@"App" + AApplicationID.ToString()
+								@"App" + applicationID.ToString()
 							), 
-							LDocumentCacheSize
+							documentCacheSize
 						);
 			}
 			#if DEBUG
-			catch (Exception LException)
+			catch (Exception exception)
 			#else
 			catch
 			#endif
 			{
 				#if DEBUG
-				HandleException(LException);	// Don't fail if we can't do this and only show something if under debug
+				HandleException(exception);	// Don't fail if we can't do this and only show something if under debug
 				#endif
 			}
 
-			return base.SetApplication(AApplicationID, AClientType);
+			return base.SetApplication(applicationID, clientType);
 		}
 
-		public void SetLibrary(string ALibraryName)
+		public void SetLibrary(string libraryName)
 		{
-			DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-			LParams.Add(DAE.Runtime.DataParam.Create(Pipe.Process, "ALibraryName", ALibraryName));
+			DAE.Runtime.DataParams paramsValue = new DAE.Runtime.DataParams();
+			paramsValue.Add(DAE.Runtime.DataParam.Create(Pipe.Process, "ALibraryName", libraryName));
 			using 
 			(
-				DAE.Runtime.Data.Scalar LNodeTable = 
+				DAE.Runtime.Data.Scalar nodeTable = 
 					DataSession.Evaluate
 					(
-						CLibraryNodeTypesExpression,
-						LParams
+						LibraryNodeTypesExpression,
+						paramsValue
 					)
 			)
 			{
 				NodeTypeTable.Clear();
-				NodeTypeTable.LoadFromString(LNodeTable.AsString);
+				NodeTypeTable.LoadFromString(nodeTable.AsString);
 			}
 			ValidateNodeTypeTable();
 		}
 
 		public void SetFormDesigner()
 		{
-			using (DAE.Runtime.Data.Scalar LNodeTable = DataSession.Evaluate(CFormDesignerNodeTypesExpression))
+			using (DAE.Runtime.Data.Scalar nodeTable = DataSession.Evaluate(FormDesignerNodeTypesExpression))
 			{
 				NodeTypeTable.Clear();
-				NodeTypeTable.LoadFromString(LNodeTable.AsString);
+				NodeTypeTable.LoadFromString(nodeTable.AsString);
 			}
 
 			// Load the files required to register any nodes, if necessary				
 			if (DataSession.Server is DAE.Server.LocalServer)
 			{
-				IServerCursor LCursor = DataSession.OpenCursor(CGetFormDesignerLibraryFilesExpression);
+				IServerCursor cursor = DataSession.OpenCursor(GetFormDesignerLibraryFilesExpression);
 				try
 				{
-					using (DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow())
+					using (DAE.Runtime.Data.Row row = cursor.Plan.RequestRow())
 					{
-						bool LShouldLoad;
-						List<string> LFilesToLoad = new List<string>();
+						bool shouldLoad;
+						List<string> filesToLoad = new List<string>();
 
-						while (LCursor.Next())
+						while (cursor.Next())
 						{
-							LCursor.Select(LRow);
-							string LFullFileName = 
+							cursor.Select(row);
+							string fullFileName = 
 								((DAE.Server.LocalServer)DataSession.Server).GetFile
 								(
-									(DAE.Server.LocalProcess)LCursor.Plan.Process, 
-									(string)LRow["Library_Name"], 
-									(string)LRow["Name"], 
-									(DateTime)LRow["TimeStamp"], 
-									(bool)LRow["IsDotNetAssembly"], 
-									out LShouldLoad
+									(DAE.Server.LocalProcess)cursor.Plan.Process, 
+									(string)row["Library_Name"], 
+									(string)row["Name"], 
+									(DateTime)row["TimeStamp"], 
+									(bool)row["IsDotNetAssembly"], 
+									out shouldLoad
 								);
-							if (LShouldLoad)
-								LFilesToLoad.Add(LFullFileName);
+							if (shouldLoad)
+								filesToLoad.Add(fullFileName);
 						}
 						
 						// Load each file to ensure they can be reached by the assembly resolver hack (see AssemblyUtility)
-						foreach (string LFullFileName in LFilesToLoad)
-							Assembly.LoadFrom(LFullFileName);
+						foreach (string fullFileName in filesToLoad)
+							Assembly.LoadFrom(fullFileName);
 					}
 				}
 				finally
 				{
-					DataSession.CloseCursor(LCursor);
+					DataSession.CloseCursor(cursor);
 				}
 			}
 		}
@@ -539,22 +539,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		#region Execution
 
 		/// <remarks> Must call SetApplication or SetLibrary before calling Start().  Upon completion, this session will be disposed. </remarks>
-		public void Start(string ADocument)
+		public void Start(string document)
 		{
-			TimingUtility.PushTimer(String.Format("Windows.Session.Start('{0}')", ADocument));
+			TimingUtility.PushTimer(String.Format("Windows.Session.Start('{0}')", document));
 			try
 			{
 				// Prepare the root forms host
-				FRootFormHost = CreateHost();
+				_rootFormHost = CreateHost();
 				try
 				{
-					FRootFormHost.NextRequest = new Request(ADocument);
-					IWindowsFormInterface LRootForm;
+					_rootFormHost.NextRequest = new Request(document);
+					IWindowsFormInterface rootForm;
 					do
 					{
-						LRootForm = LoadNextForm(FRootFormHost);
-						LRootForm.ShowModal(FormMode.None);
-					} while (FRootFormHost.NextRequest != null);
+						rootForm = LoadNextForm(_rootFormHost);
+						rootForm.ShowModal(FormMode.None);
+					} while (_rootFormHost.NextRequest != null);
 				}
 				finally
 				{
@@ -568,25 +568,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		/// <remarks> The session should already be prepared before invoking this routine.  Upon completion, this session will be disposed. </remarks>
-		public void StartCallback(string ADocument, EventHandler AOnComplete)
+		public void StartCallback(string document, EventHandler onComplete)
 		{
-			TimingUtility.PushTimer(String.Format("Windows.Session.StartCallback('{0}')", ADocument));
+			TimingUtility.PushTimer(String.Format("Windows.Session.StartCallback('{0}')", document));
 			try
 			{
 				// Prepare the root form's host
-				FRootFormHost = CreateHost();
+				_rootFormHost = CreateHost();
 				try
 				{
-					FRootFormHost.NextRequest = new Request(ADocument);
-					FOnComplete = AOnComplete;
+					_rootFormHost.NextRequest = new Request(document);
+					_onComplete = onComplete;
 					RootFormAdvance(null);
 				}
 				catch
 				{
-					if (FRootFormHost != null)
+					if (_rootFormHost != null)
 					{
-						FRootFormHost.Dispose();
-						FRootFormHost = null;
+						_rootFormHost.Dispose();
+						_rootFormHost = null;
 					}
 					throw;
 				}
@@ -597,38 +597,38 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		private IWindowsFormInterface LoadNextForm(IHost AHost)
+		private IWindowsFormInterface LoadNextForm(IHost host)
 		{
-			IWindowsFormInterface LForm = (IWindowsFormInterface)CreateForm();
+			IWindowsFormInterface form = (IWindowsFormInterface)CreateForm();
 			try
 			{
-				LForm.SupressCloseButton = true;
-				AHost.LoadNext(LForm);
-				AHost.Open();
-				LForm.Form.Closing += new System.ComponentModel.CancelEventHandler(MainFormClosing);
-				return LForm;
+				form.SupressCloseButton = true;
+				host.LoadNext(form);
+				host.Open();
+				form.Form.Closing += new System.ComponentModel.CancelEventHandler(MainFormClosing);
+				return form;
 			}
 			catch
 			{
-				LForm.Dispose();
-				LForm = null;
+				form.Dispose();
+				form = null;
 				throw;
 			}
 		}
 
-		private IHost FRootFormHost;
-		private EventHandler FOnComplete;
+		private IHost _rootFormHost;
+		private EventHandler _onComplete;
 
-		private void RootFormAdvance(IFormInterface AForm)
+		private void RootFormAdvance(IFormInterface form)
 		{
-			if (FRootFormHost.NextRequest != null)
-				LoadNextForm(FRootFormHost).Show(new FormInterfaceHandler(RootFormAdvance));
+			if (_rootFormHost.NextRequest != null)
+				LoadNextForm(_rootFormHost).Show(new FormInterfaceHandler(RootFormAdvance));
 			else
 			{
-				if (FOnComplete != null)
+				if (_onComplete != null)
 				{
-					FOnComplete(this, EventArgs.Empty);
-					FOnComplete = null;
+					_onComplete(this, EventArgs.Empty);
+					_onComplete = null;
 				}
 				Dispose();
 			}
@@ -638,16 +638,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Shut-down
 
-		private void MainFormClosing(object ASender, System.ComponentModel.CancelEventArgs AArgs)
+		private void MainFormClosing(object sender, System.ComponentModel.CancelEventArgs args)
 		{
 			try
 			{
-				if (!AArgs.Cancel && !CloseAllForms(FRootFormHost, CloseBehavior.AcceptOrClose))
-					AArgs.Cancel = true;
+				if (!args.Cancel && !CloseAllForms(_rootFormHost, CloseBehavior.AcceptOrClose))
+					args.Cancel = true;
 			}
 			catch
 			{
-				AArgs.Cancel = true;
+				args.Cancel = true;
 				throw;
 			}
 		}
@@ -658,51 +658,64 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public override Client.IHost CreateHost()
 		{
-			Host LHost = new Host(this);
-			LHost.OnDeserializationErrors += new DeserializationErrorsHandler(DeserializationErrors);
-			return LHost;
+			Host host = new Host(this);
+			host.OnDeserializationErrors += new DeserializationErrorsHandler(ReportErrors);
+			return host;
 		}
 
-		public new IWindowsFormInterface LoadForm(INode ANode, string ADocument)
+		public new IWindowsFormInterface LoadForm(INode node, string document)
 		{
-			return (IWindowsFormInterface)base.LoadForm(ANode, ADocument, null);
+			return (IWindowsFormInterface)base.LoadForm(node, document, null);
 		}
 
-		public new IWindowsFormInterface LoadForm(INode ANode, string ADocument, FormInterfaceHandler ABeforeActivate)
+		public new IWindowsFormInterface LoadForm(INode node, string document, FormInterfaceHandler beforeActivate)
 		{
-			return (IWindowsFormInterface)base.LoadForm(ANode, ADocument, ABeforeActivate);
+			return (IWindowsFormInterface)base.LoadForm(node, document, beforeActivate);
 		}
 
 		/// <remarks> If this event is set, then the default behavior will not be invoked. </remarks>
 		public event DeserializationErrorsHandler OnDeserializationErrors;
 
-		private void DeserializationErrors(IHost AHost, ErrorList AErrorList)
+		private bool HasErrors(ErrorList errorList)
+		{
+			for (int index = 0; index < errorList.Count; index++)
+				if 
+				(
+					(!(errorList[index] is Alphora.Dataphor.DAE.Compiling.CompilerException)) 
+						|| 
+						(
+							(((Alphora.Dataphor.DAE.Compiling.CompilerException)errorList[index]).ErrorLevel == Alphora.Dataphor.DAE.Compiling.CompilerErrorLevel.Fatal) 
+								|| (((Alphora.Dataphor.DAE.Compiling.CompilerException)errorList[index]).ErrorLevel == Alphora.Dataphor.DAE.Compiling.CompilerErrorLevel.NonFatal)
+						)
+				)
+					return true;
+			return false;
+		}
+		
+		public override void ReportErrors(IHost host, ErrorList errorList)
 		{
 			if (OnDeserializationErrors != null)
-				OnDeserializationErrors(AHost, AErrorList);
+				OnDeserializationErrors(host, errorList);
 			else
 			{
-				if ((AHost != null) && (AHost.Children.Count > 0))
+				if ((host != null) && (host.Children.Count > 0))
 				{
-					IFormInterface LFormInterface = AHost.Children[0] as IFormInterface;
-					if (LFormInterface == null)
-						LFormInterface = (IFormInterface)AHost.Children[0].FindParent(typeof(IFormInterface));
+					IFormInterface formInterface = host.Children[0] as IFormInterface;
+					if (formInterface == null)
+						formInterface = (IFormInterface)host.Children[0].FindParent(typeof(IFormInterface));
 
-					if (LFormInterface != null)
+					if (formInterface != null)
 					{
-						LFormInterface.EmbedErrors(AErrorList);
+						formInterface.EmbedErrors(errorList);
 						return;
 					}
 				}
-				
-				ErrorListForm.ShowErrorList(AErrorList, true);
+
+				#if (DEBUG)
+				if (HasErrors(errorList))
+					ErrorListForm.ShowErrorList(errorList, true);
+				#endif
 			}
-		}
-		
-		public override void ReportErrors(IHost AHost, ErrorList AErrorList)
-		{
-			if (OnDeserializationErrors != null)
-				OnDeserializationErrors((Host)AHost, AErrorList);
 		}
 
 		protected override void InitializePipe()
@@ -722,16 +735,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Static Utilities
 
-		public static void HandleException(Exception AException)
+		public static void HandleException(Exception exception)
 		{
 			try
 			{
-				if (!(AException is AbortException))
+				if (!(exception is AbortException))
 				{
-                    using (var LExceptionForm = new ExceptionForm())
+                    using (var exceptionForm = new ExceptionForm())
 					{
-						LExceptionForm.Exception = AException;
-						LExceptionForm.ShowDialog();
+						exceptionForm.Exception = exception;
+						exceptionForm.ShowDialog();
 					}                    
 				}
 			}
@@ -741,18 +754,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		public static object FInvokeControlLock = new Object();
-		public static WinForms.Control FInvokeControl;
+		public static object _invokeControlLock = new Object();
+		public static WinForms.Control _invokeControl;
 
 		/// <summary> Executes a delegate in the context of the main thread. </summary>
-		public static object SafelyInvoke(Delegate ADelegate, object[] AArguments)
+		public static object SafelyInvoke(Delegate delegateValue, object[] arguments)
 		{
-			WinForms.Control LControl = FInvokeControl;	// thread safe... int read
+			WinForms.Control control = _invokeControl;	// thread safe... int read
 
-			if ((LControl != null) && LControl.InvokeRequired)
-				return LControl.Invoke(ADelegate, AArguments);
+			if ((control != null) && control.InvokeRequired)
+				return control.Invoke(delegateValue, arguments);
 			else
-				return ADelegate.DynamicInvoke(AArguments);
+				return delegateValue.DynamicInvoke(arguments);
 		}
 
 		#endregion
@@ -762,59 +775,59 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public class FileLoader
 	{
-		public FileLoader(Alphora.Dataphor.DAE.IServerSession ASession, string ADocument, string AFileName, FileLoaderCompleteHandler AOnComplete)
+		public FileLoader(Alphora.Dataphor.DAE.IServerSession session, string document, string fileName, FileLoaderCompleteHandler onComplete)
 		{
-			FSession = ASession;
-			FDocument = ADocument;
-			FFileName = AFileName;
-			FOnComplete = AOnComplete;
-			FProcess = ASession.StartProcess(new DAE.ProcessInfo(ASession.SessionInfo));
-			Thread LLoadHelpThread = new Thread(new ThreadStart(AsyncLoad));
-			LLoadHelpThread.IsBackground = true;
-			LLoadHelpThread.Start();
+			_session = session;
+			_document = document;
+			_fileName = fileName;
+			_onComplete = onComplete;
+			_process = session.StartProcess(new DAE.ProcessInfo(session.SessionInfo));
+			Thread loadHelpThread = new Thread(new ThreadStart(AsyncLoad));
+			loadHelpThread.IsBackground = true;
+			loadHelpThread.Start();
 		}
 
-		private DAE.IServerSession FSession;
-		private FileLoaderCompleteHandler FOnComplete;
-		private DAE.IServerProcess FProcess;
+		private DAE.IServerSession _session;
+		private FileLoaderCompleteHandler _onComplete;
+		private DAE.IServerProcess _process;
 
-		private string FDocument;
-		public string Document { get { return FDocument; } }
+		private string _document;
+		public string Document { get { return _document; } }
 		
-		private string FFileName;
-		public string FileName { get { return FFileName; } }
+		private string _fileName;
+		public string FileName { get { return _fileName; } }
 
 		public void AsyncLoad()
 		{
 			try
 			{
-				uint LCRC32 = 0;
-				if (System.IO.File.Exists(FFileName))
+				uint cRC32 = 0;
+				if (System.IO.File.Exists(_fileName))
 				{
 					// compute the CRC of the existing file
-					using (FileStream LStream = new FileStream(FFileName, FileMode.Open, FileAccess.Read))
-						LCRC32 = CRC32Utility.GetCRC32(LStream);
+					using (FileStream stream = new FileStream(_fileName, FileMode.Open, FileAccess.Read))
+						cRC32 = CRC32Utility.GetCRC32(stream);
 				}
 				using
 				(					
-					DAE.Runtime.Data.Row LRow = (DAE.Runtime.Data.Row)FProcess.Evaluate
+					DAE.Runtime.Data.Row row = (DAE.Runtime.Data.Row)_process.Evaluate
 					(
 						String.Format
 						(
 							"LoadIfNecessary('{0}', {1})",
-							FDocument.Replace("'", "''"),
-							((int)LCRC32).ToString()
+							_document.Replace("'", "''"),
+							((int)cRC32).ToString()
 						), 
 						null
 					)
 				)
 				{
-					if (!(bool)LRow["CRCMatches"])
+					if (!(bool)row["CRCMatches"])
 					{
-						Directory.CreateDirectory(Path.GetDirectoryName(FFileName));
-						using (Stream LSourceStream = LRow.GetValue("Value").OpenStream())
-							using (FileStream LTargetStream = new FileStream(FFileName, FileMode.Create, FileAccess.Write))
-								StreamUtility.CopyStream(LSourceStream, LTargetStream);
+						Directory.CreateDirectory(Path.GetDirectoryName(_fileName));
+						using (Stream sourceStream = row.GetValue("Value").OpenStream())
+							using (FileStream targetStream = new FileStream(_fileName, FileMode.Create, FileAccess.Write))
+								StreamUtility.CopyStream(sourceStream, targetStream);
 					}
 				}
 				Session.SafelyInvoke(new AsyncFinishHandler(AsyncFinish), new object[] {true});
@@ -828,16 +841,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private delegate void AsyncFinishHandler(bool ASuccess);
 
-		private void AsyncFinish(bool ASuccess)
+		private void AsyncFinish(bool success)
 		{
 			try
 			{
-				FSession.StopProcess(FProcess);
+				_session.StopProcess(_process);
 			}
 			finally
 			{
-				if (ASuccess && (FOnComplete != null))
-					FOnComplete(this);
+				if (success && (_onComplete != null))
+					_onComplete(this);
 			}
 		}
 	}

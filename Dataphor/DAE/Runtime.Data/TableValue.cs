@@ -16,23 +16,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class TableValue : DataValue
 	{
-		public TableValue(IValueManager AManager, NativeTable ATable) : base(AManager, ATable.TableType)
+		public TableValue(IValueManager manager, NativeTable table) : base(manager, table.TableType)
 		{	
-			FTable = ATable;
+			_table = table;
 		}
 		
-		private NativeTable FTable;
+		private NativeTable _table;
 		
-		public override bool IsNil { get { return FTable == null; } }
+		public override bool IsNil { get { return _table == null; } }
 		
 		public override object AsNative
 		{
-			get { return FTable; }
+			get { return _table; }
 			set 
 			{
-				if (FTable != null)
-					FTable.Drop(Manager);
-				FTable = (NativeTable)value; 
+				if (_table != null)
+					_table.Drop(Manager);
+				_table = (NativeTable)value; 
 			} 
 		}
 		
@@ -43,162 +43,162 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				01-05 -> Number of rows
 				06-XX -> N row values written using Row physical representation
 		*/
-		private List<Row> FRowList;
-		private List<int> FSizeList;
+		private List<Row> _rowList;
+		private List<int> _sizeList;
 		
-		public override int GetPhysicalSize(bool AExpandStreams)
+		public override int GetPhysicalSize(bool expandStreams)
 		{
-			int LSize = 1;
+			int size = 1;
 			
 			if (!IsNil)
 			{
-				LSize += sizeof(int);
-				FRowList = new List<Row>();
-				FSizeList = new List<int>();
+				size += sizeof(int);
+				_rowList = new List<Row>();
+				_sizeList = new List<int>();
 				
-				Table LTable = OpenCursor();
+				Table table = OpenCursor();
 				try
 				{
-					while (LTable.Next())
+					while (table.Next())
 					{
-						Row LRow = LTable.Select();
-						int LRowSize = LRow.GetPhysicalSize(AExpandStreams);
-						LSize += LRowSize;
-						FRowList.Add(LRow);
-						FSizeList.Add(LRowSize);
+						Row row = table.Select();
+						int rowSize = row.GetPhysicalSize(expandStreams);
+						size += rowSize;
+						_rowList.Add(row);
+						_sizeList.Add(rowSize);
 					}
 				}
 				finally
 				{
-					LTable.Dispose();
+					table.Dispose();
 				}
 				
-				LSize += sizeof(int) * FRowList.Count;
+				size += sizeof(int) * _rowList.Count;
 			}
 			
-			return LSize;
+			return size;
 		}
 
-		public override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
+		public override void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
 		{
 			if (IsNil)
-				ABuffer[AOffset] = 0;
+				buffer[offset] = 0;
 			else
 			{
-				ABuffer[AOffset] = 1;
-				AOffset++;
+				buffer[offset] = 1;
+				offset++;
 				
-				int LRowSize;
-				Streams.Conveyor LInt32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+				int rowSize;
+				Streams.Conveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 				
-				LInt32Conveyor.Write(FRowList.Count, ABuffer, AOffset);
-				AOffset += sizeof(int);
+				int32Conveyor.Write(_rowList.Count, buffer, offset);
+				offset += sizeof(int);
 				
-				for (int LIndex = 0; LIndex < FRowList.Count; LIndex++)
+				for (int index = 0; index < _rowList.Count; index++)
 				{
-					LRowSize = (int)FSizeList[LIndex];
-					LInt32Conveyor.Write(LRowSize, ABuffer, AOffset);
-					AOffset += sizeof(int);
-					Row LRow = FRowList[LIndex];
-					LRow.WriteToPhysical(ABuffer, AOffset, AExpandStreams);
-					AOffset += LRowSize;
-					LRow.ValuesOwned = false;
-					LRow.Dispose();
+					rowSize = (int)_sizeList[index];
+					int32Conveyor.Write(rowSize, buffer, offset);
+					offset += sizeof(int);
+					Row row = _rowList[index];
+					row.WriteToPhysical(buffer, offset, expandStreams);
+					offset += rowSize;
+					row.ValuesOwned = false;
+					row.Dispose();
 				}
 			}
 		}
 		
-		public override void ReadFromPhysical(byte[] ABuffer, int AOffset)
+		public override void ReadFromPhysical(byte[] buffer, int offset)
 		{
-			FTable.Truncate(Manager);
+			_table.Truncate(Manager);
 			
-			Streams.Conveyor LInt32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+			Streams.Conveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 			
-			if (ABuffer[AOffset] != 0)
+			if (buffer[offset] != 0)
 			{
-				AOffset++;
+				offset++;
 				
-				int LRowSize;
-				int LCount = (int)LInt32Conveyor.Read(ABuffer, AOffset);
+				int rowSize;
+				int count = (int)int32Conveyor.Read(buffer, offset);
 				
-				for (int LIndex = 0; LIndex < LCount; LIndex++)
+				for (int index = 0; index < count; index++)
 				{
-					LRowSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
-					AOffset += sizeof(int);
-					using (Row LRow = (Row)DataValue.FromPhysical(Manager, FTable.RowType, ABuffer, AOffset))
+					rowSize = (int)int32Conveyor.Read(buffer, offset);
+					offset += sizeof(int);
+					using (Row row = (Row)DataValue.FromPhysical(Manager, _table.RowType, buffer, offset))
 					{
-						FTable.Insert(Manager, LRow);
+						_table.Insert(Manager, row);
 					}
-					AOffset += LRowSize;
+					offset += rowSize;
 				}
 			}
 		}
 
 		public override Table OpenCursor()
 		{
-			Table LTable = new TableScan(Manager, FTable, Manager.FindClusteringOrder(FTable.TableVar), ScanDirection.Forward, null, null);
-			LTable.Open();
-			return LTable;
+			Table table = new TableScan(Manager, _table, Manager.FindClusteringOrder(_table.TableVar), ScanDirection.Forward, null, null);
+			table.Open();
+			return table;
 		}
 		
-		public override object CopyNativeAs(Schema.IDataType ADataType)
+		public override object CopyNativeAs(Schema.IDataType dataType)
 		{
-			NativeTable LNewTable = new NativeTable(Manager, FTable.TableVar);
-			using (Scan LScan = new Scan(Manager, FTable, FTable.ClusteredIndex, ScanDirection.Forward, null, null))
+			NativeTable newTable = new NativeTable(Manager, _table.TableVar);
+			using (Scan scan = new Scan(Manager, _table, _table.ClusteredIndex, ScanDirection.Forward, null, null))
 			{
-				LScan.Open();
-				while (LScan.Next())
+				scan.Open();
+				while (scan.Next())
 				{
-					using (Row LRow = LScan.GetRow())
+					using (Row row = scan.GetRow())
 					{
-						LNewTable.Insert(Manager, LRow);
+						newTable.Insert(Manager, row);
 					}
 				}
 			}
-			return LNewTable;
+			return newTable;
 		}
 	}
 	
     /// <remarks> Table </remarks>
     public abstract class Table : DataValue
     {        
-		protected Table(IValueManager AManager, Schema.ITableType ATableType) : base(AManager, ATableType) { }
+		protected Table(IValueManager manager, Schema.ITableType tableType) : base(manager, tableType) { }
 		
-		protected Table(IValueManager AManager, TableNode ANode) : base(AManager, ANode.DataType)
+		protected Table(IValueManager manager, TableNode node) : base(manager, node.DataType)
 		{
-			FNode = ANode;
+			_node = node;
 		}
 		
-		protected Table(TableNode ANode, Program AProgram) : base(AProgram.ValueManager, ANode.DataType)
+		protected Table(TableNode node, Program program) : base(program.ValueManager, node.DataType)
 		{
-			FNode = ANode;
-			FProgram = AProgram;
+			_node = node;
+			_program = program;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			Close();
-			base.Dispose(ADisposing);
-			FNode = null;
+			base.Dispose(disposing);
+			_node = null;
 		}
 		
-		protected Program FProgram;
-		public Program Program { get { return FProgram; } }
+		protected Program _program;
+		public Program Program { get { return _program; } }
         
         // DataType
         public new Schema.ITableType DataType { get { return (Schema.ITableType)base.DataType; } }
         
 		// Node
-		protected TableNode FNode;
+		protected TableNode _node;
 		public TableNode Node
 		{
 			get
 			{
 				#if DEBUG
-				if (FNode == null)
+				if (_node == null)
 					throw new RuntimeException(RuntimeException.Codes.InternalError, "FNode is null.");
 				#endif
-				return FNode;
+				return _node;
 			}
 		}
 
@@ -211,34 +211,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		// Isolation
 		public virtual CursorIsolation Isolation { get { return Node.CursorIsolation; } }
 		
-        public bool Supports(CursorCapability ACapability)
+        public bool Supports(CursorCapability capability)
         {
-			return ((ACapability & Capabilities) != 0);
+			return ((capability & Capabilities) != 0);
         }
         
-        public void CheckCapability(CursorCapability ACapability)
+        public void CheckCapability(CursorCapability capability)
         {
-			if (!Supports(ACapability))
-				throw new RuntimeException(RuntimeException.Codes.CapabilityNotSupported, Enum.GetName(typeof(CursorCapability), ACapability));
+			if (!Supports(capability))
+				throw new RuntimeException(RuntimeException.Codes.CapabilityNotSupported, Enum.GetName(typeof(CursorCapability), capability));
         }
         
         protected void CheckAborted()
         {
-            if (FProgram != null)
-				FProgram.CheckAborted();
+            if (_program != null)
+				_program.CheckAborted();
         }
         
         // Open        
         protected abstract void InternalOpen();
         public void Open()
         {
-            if (!FActive)
+            if (!_active)
             {
 				#if USETABLEEVENTS
                 DoBeforeOpen();
                 #endif
                 InternalOpen();
-                FActive = true;
+                _active = true;
                 #if USETABLEEVENTS
                 DoAfterOpen();
                 #endif
@@ -249,13 +249,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         protected abstract void InternalClose();
         public void Close()
         {
-            if (FActive)
+            if (_active)
             {
 				#if USETABLEEVENTS
                 DoBeforeClose();
                 #endif
                 InternalClose();
-                FActive = false;
+                _active = false;
                 #if USETABLEEVENTS
                 DoAfterClose();
                 #endif
@@ -263,12 +263,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
         
         // Active
-        protected bool FActive;
+        protected bool _active;
         public bool Active
         {
             get
             {
-                return FActive;
+                return _active;
             }
             set
             {
@@ -307,27 +307,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
       
         // Select
-        protected abstract void InternalSelect(Row ARow);
-        public void Select(Row ARow)
+        protected abstract void InternalSelect(Row row);
+        public void Select(Row row)
         {
 			#if SAFETABLES
             CheckActive();
             #endif
             CheckNotOnCrack();
-            InternalSelect(ARow);
+            InternalSelect(row);
         }
 
         public Row Select()
         {
-			Row LRow = new Row(Manager, DataType.RowType);
+			Row row = new Row(Manager, DataType.RowType);
 			try
 			{
-				Select(LRow);
-				return LRow;
+				Select(row);
+				return row;
 			}
 			catch
 			{
-				LRow.Dispose();
+				row.Dispose();
 				throw;
 			}
         }
@@ -436,37 +436,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return InternalGetBookmark();
         }
 
-		protected virtual bool InternalGotoBookmark(Row ABookmark, bool AForward)
+		protected virtual bool InternalGotoBookmark(Row bookmark, bool forward)
         {
             throw new RuntimeException(RuntimeException.Codes.NotBookmarkable);
         }
 
-		public bool GotoBookmark(Row ABookmark, bool AForward)
+		public bool GotoBookmark(Row bookmark, bool forward)
 		{
 			#if SAFETABLES
             CheckActive();
             CheckCapability(CursorCapability.Bookmarkable);
 			#endif
-			return InternalGotoBookmark(ABookmark, AForward);
+			return InternalGotoBookmark(bookmark, forward);
 		}
 
-		public bool GotoBookmark(Row ABookmark)
+		public bool GotoBookmark(Row bookmark)
         {
-			return GotoBookmark(ABookmark, true);
+			return GotoBookmark(bookmark, true);
         }
         
-        protected virtual int InternalCompareBookmarks(Row ABokmark1, Row ABookmark2)
+        protected virtual int InternalCompareBookmarks(Row bokmark1, Row bookmark2)
         {
             throw new RuntimeException(RuntimeException.Codes.NotBookmarkable);
         }
         
-        public int CompareBookmarks(Row ABookmark1, Row ABookmark2)
+        public int CompareBookmarks(Row bookmark1, Row bookmark2)
         {
 			#if SAFETABLES
             CheckActive();
             CheckCapability(CursorCapability.Bookmarkable);
             #endif
-            return InternalCompareBookmarks(ABookmark1, ABookmark2);
+            return InternalCompareBookmarks(bookmark1, bookmark2);
         }
 		
 		// Searchable
@@ -502,7 +502,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             return InternalGetKey();
         }
         
-        protected virtual bool InternalFindKey(Row ARow, bool AForward)
+        protected virtual bool InternalFindKey(Row row, bool forward)
         {
             throw new RuntimeException(RuntimeException.Codes.NotSearchable);
         }
@@ -512,22 +512,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		///	The row must be a superset of the current order key of the table.
 		/// Returns true if successful, false otherwise.
 		/// </summary>        
-        public bool FindKey(Row ARow)
+        public bool FindKey(Row row)
         {
-			return FindKey(ARow, true);
+			return FindKey(row, true);
         }
 
-		/// <param name="AForward"> Provides a hint about the intended direction for bi-directionally navigable cursors. </param>
-		public bool FindKey(Row ARow, bool AForward)
+		/// <param name="forward"> Provides a hint about the intended direction for bi-directionally navigable cursors. </param>
+		public bool FindKey(Row row, bool forward)
 		{
 			#if SAFETABLES
             CheckActive();
             CheckCapability(CursorCapability.Searchable);
 			#endif
-			return InternalFindKey(ARow, AForward);
+			return InternalFindKey(row, forward);
 		}
         
-        protected virtual void InternalFindNearest(Row ARow)
+        protected virtual void InternalFindNearest(Row row)
         {
             throw new RuntimeException(RuntimeException.Codes.NotSearchable);
         }
@@ -542,33 +542,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         /// value.  If a row cannot be constructed meeting this criteria, the
         /// FindNearest will fail.
         /// </summary>
-        public void FindNearest(Row ARow)
+        public void FindNearest(Row row)
         {
 			#if SAFETABLES
             CheckActive();
             CheckCapability(CursorCapability.Searchable);
             #endif
-            InternalFindNearest(ARow);
+            InternalFindNearest(row);
         }
         
-        protected virtual bool InternalRefresh(Row ARow)
+        protected virtual bool InternalRefresh(Row row)
         {
             throw new RuntimeException(RuntimeException.Codes.NotSearchable);
         }
         
-        public bool Refresh(Row ARow)
+        public bool Refresh(Row row)
         {
 			#if SAFETABLES
             CheckActive();
             CheckCapability(CursorCapability.Searchable);
             #endif
-            return InternalRefresh(ARow);
+            return InternalRefresh(row);
         }
         
-        public bool OptimisticRefresh(Row ARow)
+        public bool OptimisticRefresh(Row row)
         {
             if (Supports(CursorCapability.Searchable))
-				return Refresh(ARow);
+				return Refresh(row);
             else
             {
                 Reset();
@@ -592,79 +592,79 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
         
 		// Updateable        
-		protected virtual void InternalInsert(Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected virtual void InternalInsert(Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			Node.Insert(Program, AOldRow, ANewRow, AValueFlags, AUnchecked);
+			Node.Insert(Program, oldRow, newRow, valueFlags, uncheckedValue);
 			if (CursorType == CursorType.Dynamic)
-				OptimisticRefresh(ANewRow);
+				OptimisticRefresh(newRow);
 		}
         
-        public void Insert(Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+        public void Insert(Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
         {
 			#if SAFETABLES
             CheckActive();
             CheckCapability(CursorCapability.Updateable);
             #endif
-            InternalInsert(AOldRow, ANewRow, AValueFlags, AUnchecked);
+            InternalInsert(oldRow, newRow, valueFlags, uncheckedValue);
         }
         
-        public void Insert(Row ARow)
+        public void Insert(Row row)
         {
-			BitArray LValueFlags = new BitArray(ARow.DataType.Columns.Count);
-			for (int LIndex = 0; LIndex < LValueFlags.Length; LIndex++)
-				LValueFlags[LIndex] = true;
-			Insert(null, ARow, LValueFlags, false);
+			BitArray valueFlags = new BitArray(row.DataType.Columns.Count);
+			for (int index = 0; index < valueFlags.Length; index++)
+				valueFlags[index] = true;
+			Insert(null, row, valueFlags, false);
         }
         
-		protected virtual void InternalUpdate(Row ARow, BitArray AValueFlags, bool AUnchecked)
+		protected virtual void InternalUpdate(Row row, BitArray valueFlags, bool uncheckedValue)
 		{
-			using (Row LRow = Select())
+			using (Row localRow = Select())
 			{
-				Node.Update(Program, LRow, ARow, AValueFlags, Isolation != CursorIsolation.Isolated, AUnchecked);
+				Node.Update(Program, localRow, row, valueFlags, Isolation != CursorIsolation.Isolated, uncheckedValue);
 				if (CursorType == CursorType.Dynamic)
 				{
-					ARow.CopyTo(LRow);
-					OptimisticRefresh(LRow);
+					row.CopyTo(localRow);
+					OptimisticRefresh(localRow);
 				}
 			}
 		}
         
-        public void Update(Row ARow, BitArray AValueFlags, bool AUnchecked)
+        public void Update(Row row, BitArray valueFlags, bool uncheckedValue)
         {
 			#if SAFETABLES
             CheckActive();
             CheckCapability(CursorCapability.Updateable);
             CheckNotOnCrack(); // Don't need this, the select will do it
             #endif
-            InternalUpdate(ARow, AValueFlags, AUnchecked);
+            InternalUpdate(row, valueFlags, uncheckedValue);
         }
         
-        public void Update(Row ARow)
+        public void Update(Row row)
         {
-			BitArray LValueFlags = new BitArray(ARow.DataType.Columns.Count);
-			for (int LIndex = 0; LIndex < LValueFlags.Length; LIndex++)
-				LValueFlags[LIndex] = true;
-			Update(ARow, LValueFlags, false);
+			BitArray valueFlags = new BitArray(row.DataType.Columns.Count);
+			for (int index = 0; index < valueFlags.Length; index++)
+				valueFlags[index] = true;
+			Update(row, valueFlags, false);
         }
         
-		protected virtual void InternalDelete(bool AUnchecked)
+		protected virtual void InternalDelete(bool uncheckedValue)
 		{
-			using (Row LRow = Select())
+			using (Row row = Select())
 			{
-				Node.Delete(Program, LRow, Isolation != CursorIsolation.Isolated, AUnchecked);
+				Node.Delete(Program, row, Isolation != CursorIsolation.Isolated, uncheckedValue);
 				if (CursorType == CursorType.Dynamic)
-					OptimisticRefresh(LRow);
+					OptimisticRefresh(row);
 			}
 		}
 		
-        public void Delete(bool AUnchecked)
+        public void Delete(bool uncheckedValue)
         {
 			#if SAFETABLES
             CheckActive();
             CheckCapability(CursorCapability.Updateable);
             CheckNotOnCrack(); // Don't need this, the select will do it
             #endif
-            InternalDelete(AUnchecked);
+            InternalDelete(uncheckedValue);
         }
 
 		public void Delete()
@@ -725,17 +725,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			set { throw new NotSupportedException(); } 
 		}
 		
-		public override int GetPhysicalSize(bool AExpandStreams)
+		public override int GetPhysicalSize(bool expandStreams)
 		{
 			throw new NotSupportedException();
 		}
 
-		public override void ReadFromPhysical(byte[] ABuffer, int AOffset)
+		public override void ReadFromPhysical(byte[] buffer, int offset)
 		{
 			throw new NotSupportedException();
 		}
 
-		public override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
+		public override void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
 		{
 			throw new NotSupportedException();
 		}
@@ -745,42 +745,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			throw new NotSupportedException();
 		}
 		
-        public override object CopyNativeAs(Schema.IDataType ADataType)
+        public override object CopyNativeAs(Schema.IDataType dataType)
         {
 			throw new NotSupportedException();
         }
 
 		///<summary>Returns true if the given key has the same number of columns in the same order as the node order key.</summary>
-        protected bool IsKeyRow(Row AKey)
+        protected bool IsKeyRow(Row key)
         {
-			Schema.Order LOrder = Order;
-			if (AKey.DataType.Columns.Count != LOrder.Columns.Count)
+			Schema.Order order = Order;
+			if (key.DataType.Columns.Count != order.Columns.Count)
 				return false;
 				
-			for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
-				if ((AKey.DataType.Columns.Count <= LIndex) || !Schema.Object.NamesEqual(AKey.DataType.Columns[LIndex].Name, LOrder.Columns[LIndex].Column.Name))
+			for (int index = 0; index < order.Columns.Count; index++)
+				if ((key.DataType.Columns.Count <= index) || !Schema.Object.NamesEqual(key.DataType.Columns[index].Name, order.Columns[index].Column.Name))
 					return false;
 
 			return true;
         }
 
 		///<summary>Returns true if the given key has the same or fewer columns in the same order as the node order key, and once any column is null, the rest of the columns are also null.</summary>        
-        protected bool IsPartialKeyRow(Row AKey)
+        protected bool IsPartialKeyRow(Row key)
         {
-			bool LIsNull = false;
-			Schema.Order LOrder = Order;
-			if (AKey.DataType.Columns.Count > LOrder.Columns.Count)
+			bool isNull = false;
+			Schema.Order order = Order;
+			if (key.DataType.Columns.Count > order.Columns.Count)
 				return false;
 			
-			for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
-				if (AKey.DataType.Columns.Count > LIndex)
+			for (int index = 0; index < order.Columns.Count; index++)
+				if (key.DataType.Columns.Count > index)
 				{
-					if (!Schema.Object.NamesEqual(AKey.DataType.Columns[LIndex].Name, LOrder.Columns[LIndex].Column.Name))
+					if (!Schema.Object.NamesEqual(key.DataType.Columns[index].Name, order.Columns[index].Column.Name))
 						return false;
-					if (LIsNull && AKey.HasValue(LIndex))
+					if (isNull && key.HasValue(index))
 						return false;
-					if (!AKey.HasValue(LIndex))
-						LIsNull = true;
+					if (!key.HasValue(index))
+						isNull = true;
 				}
 				
 			return true;
@@ -790,28 +790,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         ///	Returns a row that is guaranteed to contain the same columns in the same order as the node order.  
         /// If the given row does not satisfy this requirement, a row of the proper row type is created and the values from the given row are copied into it.
         /// </summary>
-        protected Row EnsureKeyRow(Row AKey)
+        protected Row EnsureKeyRow(Row key)
         {
-			if (IsKeyRow(AKey))
-				return AKey;
+			if (IsKeyRow(key))
+				return key;
 			else
 			{
-				Schema.IRowType LRowType = DataType.CreateRowType(String.Empty, false);
-				Schema.Order LOrder = Order;
-				for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
+				Schema.IRowType rowType = DataType.CreateRowType(String.Empty, false);
+				Schema.Order order = Order;
+				for (int index = 0; index < order.Columns.Count; index++)
 				{
 					//int LColumnIndex = AKey.DataType.Columns.IndexOfName(LOrder.Columns[LIndex].Column.Name);
 					//if (LColumnIndex >= 0)
-						LRowType.Columns.Add(LOrder.Columns[LIndex].Column.Column.Copy());
+						rowType.Columns.Add(order.Columns[index].Column.Column.Copy());
 					// BTR 4/25/2005 -> There is no difference between not having the column, and having the column, but not having a value.
 					// as such, I see no reason to throw this error, simply create the row and leave the column empty.
 					//else
 					//	throw new RuntimeException(RuntimeException.Codes.InvalidSearchArgument);
 				}
 
-				Row LKey = new Row(Manager, LRowType);
-				AKey.CopyTo(LKey);
-				return LKey;
+				Row localKey = new Row(Manager, rowType);
+				key.CopyTo(localKey);
+				return localKey;
 			}
         }
 
@@ -821,229 +821,229 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// requirement, a row of the proper row type is created and the values from the given row are copied into it.
 		/// If no such row can be created, null is returned.
 		/// </summary>
-        protected Row EnsurePartialKeyRow(Row AKey)
+        protected Row EnsurePartialKeyRow(Row key)
         {
-			if (IsPartialKeyRow(AKey))
-				return AKey;
+			if (IsPartialKeyRow(key))
+				return key;
 			else
 			{
-				bool LIsNull = false;
-				Schema.IRowType LRowType = DataType.CreateRowType(String.Empty, false);
-				Schema.Order LOrder = Order;
-				for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
+				bool isNull = false;
+				Schema.IRowType rowType = DataType.CreateRowType(String.Empty, false);
+				Schema.Order order = Order;
+				for (int index = 0; index < order.Columns.Count; index++)
 				{
-					int LColumnIndex = AKey.DataType.Columns.IndexOfName(LOrder.Columns[LIndex].Column.Name);
-					if (LColumnIndex >= 0)
+					int columnIndex = key.DataType.Columns.IndexOfName(order.Columns[index].Column.Name);
+					if (columnIndex >= 0)
 					{
-						LRowType.Columns.Add(LOrder.Columns[LIndex].Column.Column.Copy());
-						if (LIsNull && AKey.HasValue(LColumnIndex))
+						rowType.Columns.Add(order.Columns[index].Column.Column.Copy());
+						if (isNull && key.HasValue(columnIndex))
 							return null;
 							
-						if (!AKey.HasValue(LIndex))
-							LIsNull = true;
+						if (!key.HasValue(index))
+							isNull = true;
 					}
 					else
 						break;
 				}
 				
-				Row LKey = new Row(Manager, LRowType);
-				AKey.CopyTo(LKey);
-				return LKey;
+				Row localKey = new Row(Manager, rowType);
+				key.CopyTo(localKey);
+				return localKey;
 			}
         }
     }
     
 	public class TableScan : Table
 	{
-		protected TableScan(TableNode ANode, Program AProgram) : base(ANode, AProgram) { }
-		protected TableScan(IValueManager AManager, TableNode ANode) : base(AManager, ANode) { }
+		protected TableScan(TableNode node, Program program) : base(node, program) { }
+		protected TableScan(IValueManager manager, TableNode node) : base(manager, node) { }
 		
-		public TableScan(IValueManager AManager, NativeTable ATable, Schema.Order AKey, ScanDirection ADirection, Row AFirstKey, Row ALastKey) : base(AManager, ATable.TableType)
+		public TableScan(IValueManager manager, NativeTable table, Schema.Order key, ScanDirection direction, Row firstKey, Row lastKey) : base(manager, table.TableType)
 		{
-			FNativeTable = ATable;
-			FKey = AKey;
-			FDirection = ADirection;
-			FFirstKey = AFirstKey;
-			FLastKey = ALastKey;
+			_nativeTable = table;
+			_key = key;
+			_direction = direction;
+			_firstKey = firstKey;
+			_lastKey = lastKey;
 		}
 		
-		protected NativeTable FNativeTable;
+		protected NativeTable _nativeTable;
 		public NativeTable NativeTable
 		{
-			get { return FNativeTable; }
-			set { FNativeTable = value; }
+			get { return _nativeTable; }
+			set { _nativeTable = value; }
 		}
 
-		private Schema.Order FKey;
+		private Schema.Order _key;
 		public Schema.Order Key
 		{
-			get { return FKey; }
-			set { FKey = value; }
+			get { return _key; }
+			set { _key = value; }
 		}
 		
-		private ScanDirection FDirection;
+		private ScanDirection _direction;
 		public ScanDirection Direction
 		{	
-			get { return FDirection; }
-			set { FDirection = value; }
+			get { return _direction; }
+			set { _direction = value; }
 		}
 		
-		private Row FFirstKey;
+		private Row _firstKey;
 		public Row FirstKey
 		{
-			get { return FFirstKey; }
-			set { FFirstKey = value; }
+			get { return _firstKey; }
+			set { _firstKey = value; }
 		}
 		
-		private Row FLastKey;
+		private Row _lastKey;
 		public Row LastKey
 		{
-			get { return FLastKey; }
-			set { FLastKey = value; }
+			get { return _lastKey; }
+			set { _lastKey = value; }
 		}
 		
-		private Scan FScan;
+		private Scan _scan;
 
 		protected override void InternalOpen()
 		{
-			if (FKey.Equivalent(FNativeTable.ClusteredIndex.Key))
-				FScan = new Scan(Manager, FNativeTable, FNativeTable.ClusteredIndex, FDirection, FFirstKey, FLastKey);
+			if (_key.Equivalent(_nativeTable.ClusteredIndex.Key))
+				_scan = new Scan(Manager, _nativeTable, _nativeTable.ClusteredIndex, _direction, _firstKey, _lastKey);
 			else
-				FScan = new Scan(Manager, FNativeTable, FNativeTable.NonClusteredIndexes[FKey], FDirection, FFirstKey, FLastKey);
-			FScan.Open();
+				_scan = new Scan(Manager, _nativeTable, _nativeTable.NonClusteredIndexes[_key], _direction, _firstKey, _lastKey);
+			_scan.Open();
 		}
 		
 		protected override void InternalClose()
 		{
-			if (FScan != null)
+			if (_scan != null)
 			{
-				FScan.Dispose();
-				FScan = null;
+				_scan.Dispose();
+				_scan = null;
 			}
 		}
 		
 		protected override void InternalReset()
 		{
-			FScan.Reset();
+			_scan.Reset();
 		}
 		
-		protected override void InternalSelect(Row ARow)
+		protected override void InternalSelect(Row row)
 		{
-			FScan.GetRow(ARow);
+			_scan.GetRow(row);
 		}
 		
 		protected override void InternalFirst()
 		{
-			FScan.First();
+			_scan.First();
 		}
 		
 		protected override bool InternalPrior()
 		{
-			return FScan.Prior();
+			return _scan.Prior();
 		}
 		
 		protected override bool InternalNext()
 		{
-			return FScan.Next();
+			return _scan.Next();
 		}
 		
 		protected override void InternalLast()
 		{
-			FScan.Last();
+			_scan.Last();
 		}
 		
 		protected override bool InternalBOF()
 		{
-			return FScan.BOF();
+			return _scan.BOF();
 		}
 		
 		protected override bool InternalEOF()
 		{
-			return FScan.EOF();
+			return _scan.EOF();
 		}
 
 		// Bookmarkable
 
 		protected override Row InternalGetBookmark()
 		{
-			return FScan.GetKey();
+			return _scan.GetKey();
 		}
 
-		protected override bool InternalGotoBookmark(Row ABookmark, bool AForward)
+		protected override bool InternalGotoBookmark(Row bookmark, bool forward)
 		{
-			return FScan.FindKey(ABookmark);
+			return _scan.FindKey(bookmark);
 		}
         
-		protected override int InternalCompareBookmarks(Row ABookmark1, Row ABookmark2)
+		protected override int InternalCompareBookmarks(Row bookmark1, Row bookmark2)
 		{
-			return FScan.CompareKeys(ABookmark1, ABookmark2);
+			return _scan.CompareKeys(bookmark1, bookmark2);
 		}
 
 		// Searchable
 
 		protected override Schema.Order InternalGetOrder()
 		{
-			return FKey;
+			return _key;
 		}
 		
 		protected override Row InternalGetKey()
 		{
-			return FScan.GetKey();
+			return _scan.GetKey();
 		}
 
-		protected override bool InternalFindKey(Row AKey, bool AForward)
+		protected override bool InternalFindKey(Row key, bool forward)
 		{
-			return FScan.FindKey(AKey);
+			return _scan.FindKey(key);
 		}
 		
-		protected override void InternalFindNearest(Row AKey)
+		protected override void InternalFindNearest(Row key)
 		{
-			FScan.FindNearest(AKey);
+			_scan.FindNearest(key);
 		}
 		
-		protected override bool InternalRefresh(Row AKey)
+		protected override bool InternalRefresh(Row key)
 		{
-			return FScan.FindNearest(AKey);
+			return _scan.FindNearest(key);
 		}
 	}
 	
 	public class TableValueScan : TableScan
 	{
-		public TableValueScan(TableNode ANode, TableValue ATableValue) : base(ATableValue.Manager, ANode)
+		public TableValueScan(TableNode node, TableValue tableValue) : base(tableValue.Manager, node)
 		{
-			FNativeTable = ATableValue.AsNative as NativeTable;
-			Key = Manager.FindClusteringOrder(FNativeTable.TableVar); // ?? Why doesn't this use the order from the compile (ANode.Order)?
+			_nativeTable = tableValue.AsNative as NativeTable;
+			Key = Manager.FindClusteringOrder(_nativeTable.TableVar); // ?? Why doesn't this use the order from the compile (ANode.Order)?
 			Direction = ScanDirection.Forward;
 		}
 		
 		// Updatable
-		protected override void InternalInsert(Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalInsert(Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			FNativeTable.Insert(Manager, ANewRow);
+			_nativeTable.Insert(Manager, newRow);
 			if (CursorType == CursorType.Dynamic)
-				Refresh(ANewRow);
+				Refresh(newRow);
 		}
 		
-		protected override void InternalUpdate(Row ARow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalUpdate(Row row, BitArray valueFlags, bool uncheckedValue)
 		{
-			using (Row LRow = Select())
+			using (Row localRow = Select())
 			{
-				FNativeTable.Update(Manager, LRow, ARow);
+				_nativeTable.Update(Manager, localRow, row);
 				if (CursorType == CursorType.Dynamic)
 				{
-					ARow.CopyTo(LRow);
-					Refresh(LRow);
+					row.CopyTo(localRow);
+					Refresh(localRow);
 				}
 			}
 		}
 		
-		protected override void InternalDelete(bool AUnchecked)
+		protected override void InternalDelete(bool uncheckedValue)
 		{
-			using (Row LRow = Select())
+			using (Row row = Select())
 			{
-				FNativeTable.Delete(Manager, LRow);
+				_nativeTable.Delete(Manager, row);
 				if (CursorType == CursorType.Dynamic)
-					Refresh(LRow);
+					Refresh(row);
 			}
 		}
 	}

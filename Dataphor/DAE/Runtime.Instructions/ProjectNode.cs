@@ -3,7 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 #define UseReferenceDerivation
+#define USENAMEDROWVARIABLES
 	
 using System;
 using System.Text;
@@ -26,19 +28,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     public abstract class ProjectNodeBase : UnaryTableNode
     {
 		// DistinctRequired
-		protected bool FDistinctRequired;
+		protected bool _distinctRequired;
 		public bool DistinctRequired
 		{
-			get { return FDistinctRequired; }
-			set { FDistinctRequired = value; }
+			get { return _distinctRequired; }
+			set { _distinctRequired = value; }
 		}
 		
 		// EqualNode
-		protected PlanNode FEqualNode;
+		protected PlanNode _equalNode;
 		public PlanNode EqualNode
 		{
-			get { return FEqualNode; }
-			set { FEqualNode = value; }
+			get { return _equalNode; }
+			set { _equalNode = value; }
 		}
 		
 		// ColumnNames
@@ -46,23 +48,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected TypedList FColumnNames = new TypedList(typeof(string), false);
 		public TypedList ColumnNames { get { return FColumnNames; } }
 		#else
-		protected BaseList<string> FColumnNames = new BaseList<string>();
-		public BaseList<string> ColumnNames { get { return FColumnNames; } }
+		protected BaseList<string> _columnNames = new BaseList<string>();
+		public BaseList<string> ColumnNames { get { return _columnNames; } }
 		#endif
 		
-		protected abstract void DetermineColumns(Plan APlan);
+		protected abstract void DetermineColumns(Plan plan);
 		
 		// DetermineDataType
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(SourceTableVar.MetaData);
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 			
-			DetermineColumns(APlan);
-			DetermineRemotable(APlan);
+			DetermineColumns(plan);
+			DetermineRemotable(plan);
 
 			// copy all non-sparse keys with all fields preserved in the projection
 			CopyPreservedKeys(SourceTableVar.Keys, false, false);
@@ -73,54 +75,73 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			CopyPreservedOrders(SourceTableVar.Orders);
 
-			FDistinctRequired = (TableVar.Keys.Count == 0);
-			if (FDistinctRequired)
+			_distinctRequired = (TableVar.Keys.Count == 0);
+			if (_distinctRequired)
 			{
-				Schema.Key LNewKey = new Schema.Key();
-				LNewKey.IsInherited = true;
-				foreach (Schema.TableVarColumn LColumn in TableVar.Columns)
-				    LNewKey.Columns.Add(LColumn);
-				TableVar.Keys.Add(LNewKey);
-				if (LNewKey.Columns.Count > 0)
-					Nodes[0] = Compiler.EmitOrderNode(APlan, SourceNode, LNewKey, true);
+				Schema.Key newKey = new Schema.Key();
+				newKey.IsInherited = true;
+				foreach (Schema.TableVarColumn column in TableVar.Columns)
+				    newKey.Columns.Add(column);
+				TableVar.Keys.Add(newKey);
+				if (newKey.Columns.Count > 0)
+					Nodes[0] = Compiler.EmitOrderNode(plan, SourceNode, newKey, true);
 			
-				APlan.EnterRowContext();
+				plan.EnterRowContext();
 				try
 				{	
-					APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Left)));
+					#if USENAMEDROWVARIABLES
+					plan.Symbols.Push(new Symbol(Keywords.Left, DataType.RowType));
+					#else
+					APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Left)));
+					#endif
 					try
 					{
-						APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Right)));
+						#if USENAMEDROWVARIABLES
+						plan.Symbols.Push(new Symbol(Keywords.Right, DataType.RowType));
+						#else
+						APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Right)));
+						#endif
 						try
 						{
-							FEqualNode = 
+							_equalNode = 
 								Compiler.CompileExpression
 								(
-									APlan, 
+									plan, 
+									#if USENAMEDROWVARIABLES
+									Compiler.BuildRowEqualExpression
+									(
+										plan, 
+										Keywords.Left,
+										Keywords.Right,
+										newKey.Columns,
+										newKey.Columns
+									)
+									#else
 									Compiler.BuildRowEqualExpression
 									(
 										APlan, 
 										new Schema.RowType(LNewKey.Columns, Keywords.Left).Columns, 
 										new Schema.RowType(LNewKey.Columns, Keywords.Right).Columns
 									)
+									#endif
 								);
 						}
 						finally
 						{
-							APlan.Symbols.Pop();
+							plan.Symbols.Pop();
 						}
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.ExitRowContext();
+					plan.ExitRowContext();
 				}
 				
-				Order = Compiler.OrderFromKey(APlan, Compiler.FindClusteringKey(APlan, TableVar));
+				Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, TableVar));
 			}
 			else
 			{
@@ -132,55 +153,63 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				TableVar.Orders.Add(Order);
 
 			#if UseReferenceDerivation
-			CopySourceReferences(APlan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(APlan, SourceTableVar.TargetReferences);
+			CopySourceReferences(plan, SourceTableVar.SourceReferences);
+			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
 			#endif
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			base.InternalDetermineBinding(APlan);
-			if (FDistinctRequired)
+			base.InternalDetermineBinding(plan);
+			if (_distinctRequired)
 			{
-				APlan.EnterRowContext();
+				plan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Left)));
+					#if USENAMEDROWVARIABLES
+					plan.Symbols.Push(new Symbol(Keywords.Left, DataType.RowType));
+					#else
+					APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Left)));
+					#endif
 					try
 					{
-						APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Right)));
+						#if USENAMEDROWVARIABLES
+						plan.Symbols.Push(new Symbol(Keywords.Right, DataType.RowType));
+						#else
+						APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Right)));
+						#endif
 						try
 						{
-							FEqualNode.DetermineBinding(APlan);
+							_equalNode.DetermineBinding(plan);
 						}
 						finally
 						{
-							APlan.Symbols.Pop();
+							plan.Symbols.Pop();
 						}
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.ExitRowContext();
+					plan.ExitRowContext();
 				}
 			}
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = SourceNode.CursorType;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = 
+			_cursorType = SourceNode.CursorType;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = 
 				CursorCapability.Navigable | 
 				(
-					(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
 				);
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 
 			// If this node has no determined order, it is because the projection did not affect cardinality, and we may therefore assume the order of the source, as long as it's columns have been preserved by the projection
 			if ((SourceNode.Order != null) && SourceNode.Order.Columns.IsSubsetOf(TableVar.Columns))
@@ -190,82 +219,82 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Execute
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			ProjectTable LTable = new ProjectTable(this, AProgram);
+			ProjectTable table = new ProjectTable(this, program);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 		
 		// Change
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
 			if (PropagateChange)
 			{
 				// select the current row from the base node using the given row
-				Row LSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType);
+				Row sourceRow = new Row(program.ValueManager, SourceNode.DataType.RowType);
 				try
 				{
-					ANewRow.CopyTo(LSourceRow);
-					Row LCurrentRow = null;
-					if (!AProgram.ServerProcess.ServerSession.Server.IsEngine)
-						LCurrentRow = SourceNode.Select(AProgram, LSourceRow);
+					newRow.CopyTo(sourceRow);
+					Row currentRow = null;
+					if (!program.ServerProcess.ServerSession.Server.IsEngine)
+						currentRow = SourceNode.Select(program, sourceRow);
 					try
 					{
-						if (LCurrentRow == null)
-							LCurrentRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType);
-						ANewRow.CopyTo(LCurrentRow);
-						BitArray LValueFlags = AValueFlags != null ? new BitArray(LCurrentRow.DataType.Columns.Count) : null;
-						if (LValueFlags != null)
-							for (int LIndex = 0; LIndex < LValueFlags.Length; LIndex++)
+						if (currentRow == null)
+							currentRow = new Row(program.ValueManager, SourceNode.DataType.RowType);
+						newRow.CopyTo(currentRow);
+						BitArray localValueFlags = valueFlags != null ? new BitArray(currentRow.DataType.Columns.Count) : null;
+						if (localValueFlags != null)
+							for (int index = 0; index < localValueFlags.Length; index++)
 							{
-								int LRowIndex = ANewRow.DataType.Columns.IndexOfName(LCurrentRow.DataType.Columns[LIndex].Name);
-								LValueFlags[LIndex] = LRowIndex >= 0 ? AValueFlags[LRowIndex] : false;
+								int rowIndex = newRow.DataType.Columns.IndexOfName(currentRow.DataType.Columns[index].Name);
+								localValueFlags[index] = rowIndex >= 0 ? valueFlags[rowIndex] : false;
 							}
-						bool LChanged = SourceNode.Change(AProgram, AOldRow, LCurrentRow, LValueFlags, AColumnName);
-						if (LChanged)
-							LCurrentRow.CopyTo(ANewRow);
-						return LChanged;
+						bool changed = SourceNode.Change(program, oldRow, currentRow, localValueFlags, columnName);
+						if (changed)
+							currentRow.CopyTo(newRow);
+						return changed;
 					}
 					finally
 					{
-						LCurrentRow.Dispose();
+						currentRow.Dispose();
 					}
 				}
 				finally
 				{
-					LSourceRow.Dispose();
+					sourceRow.Dispose();
 				}
 			}
 			return false;
 		}
 
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow) 
+		public override void JoinApplicationTransaction(Program program, Row row) 
 		{
-			Schema.RowType LRowType = new Schema.RowType();
+			Schema.RowType rowType = new Schema.RowType();
 			
-			foreach (Schema.Column LColumn in ARow.DataType.Columns)
-				LRowType.Columns.Add(LColumn.Copy());
-			foreach (Schema.Column LColumn in SourceNode.DataType.Columns)
-				if (!DataType.Columns.ContainsName(LColumn.Name))	
-					LRowType.Columns.Add(LColumn.Copy());
-			Row LRow = new Row(AProgram.ValueManager, LRowType);
+			foreach (Schema.Column column in row.DataType.Columns)
+				rowType.Columns.Add(column.Copy());
+			foreach (Schema.Column column in SourceNode.DataType.Columns)
+				if (!DataType.Columns.ContainsName(column.Name))	
+					rowType.Columns.Add(column.Copy());
+			Row localRow = new Row(program.ValueManager, rowType);
 			try
 			{
-				ARow.CopyTo(LRow);
-				base.JoinApplicationTransaction(AProgram, LRow);
+				row.CopyTo(localRow);
+				base.JoinApplicationTransaction(program, localRow);
 			}
 			finally
 			{
-				LRow.Dispose();
+				localRow.Dispose();
 			}
 		}
     }
@@ -273,72 +302,72 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator iProject(table{}, list{string}) : table{}
     public class ProjectNode : ProjectNodeBase
     {
-		protected override void DetermineColumns(Plan APlan)
+		protected override void DetermineColumns(Plan plan)
 		{
 			// Determine project columns
-			Schema.TableVarColumn LTableVarColumn;
-			foreach (string LColumnName in FColumnNames)
+			Schema.TableVarColumn tableVarColumn;
+			foreach (string columnName in _columnNames)
 			{
-				LTableVarColumn = SourceTableVar.Columns[LColumnName].Inherit();
-				TableVar.Columns.Add(LTableVarColumn);
-				DataType.Columns.Add(LTableVarColumn.Column);
+				tableVarColumn = SourceTableVar.Columns[columnName].Inherit();
+				TableVar.Columns.Add(tableVarColumn);
+				DataType.Columns.Add(tableVarColumn.Column);
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			ProjectExpression LExpression = new ProjectExpression();
-			LExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			foreach (Schema.TableVarColumn LColumn in TableVar.Columns)
-				LExpression.Columns.Add(new ColumnExpression(Schema.Object.EnsureRooted(LColumn.Name)));
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			ProjectExpression expression = new ProjectExpression();
+			expression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			foreach (Schema.TableVarColumn column in TableVar.Columns)
+				expression.Columns.Add(new ColumnExpression(Schema.Object.EnsureRooted(column.Name)));
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
     }
     
     public class RemoveNode : ProjectNodeBase
     {
-		protected override void DetermineColumns(Plan APlan)
+		protected override void DetermineColumns(Plan plan)
 		{
 			// this loop is done this way to ensure that the columns are looked up
 			// using the name resolution algorithms found in the Columns object,
 			// and to ensure that all the columns named in the remove list are valid
-			bool LFound;
-			int LColumnIndex;
-			Schema.TableVarColumn LColumn;
-			for (int LIndex = 0; LIndex < SourceTableVar.Columns.Count; LIndex++)
+			bool found;
+			int columnIndex;
+			Schema.TableVarColumn column;
+			for (int index = 0; index < SourceTableVar.Columns.Count; index++)
 			{
-				LFound = false;
-				foreach (string LColumnName in FColumnNames)
+				found = false;
+				foreach (string columnName in _columnNames)
 				{
-					LColumnIndex = SourceTableVar.Columns.IndexOf(LColumnName);
-					if (LColumnIndex < 0)
-						throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, LColumnName);
-					else if (LColumnIndex == LIndex)
+					columnIndex = SourceTableVar.Columns.IndexOf(columnName);
+					if (columnIndex < 0)
+						throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, columnName);
+					else if (columnIndex == index)
 					{
-						LFound = true;
+						found = true;
 						break;
 					}
 				}
 			
-				if (!LFound)
+				if (!found)
 				{
-					LColumn = SourceTableVar.Columns[LIndex].Inherit();
-					DataType.Columns.Add(LColumn.Column);
-					TableVar.Columns.Add(LColumn);
+					column = SourceTableVar.Columns[index].Inherit();
+					DataType.Columns.Add(column.Column);
+					TableVar.Columns.Add(column);
 				}
 			}
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			RemoveExpression LExpression = new RemoveExpression();
-			LExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			foreach (Schema.TableVarColumn LColumn in SourceTableVar.Columns)
-				if (!TableVar.Columns.ContainsName(LColumn.Name))
-					LExpression.Columns.Add(new ColumnExpression(Schema.Object.EnsureRooted(LColumn.Name)));
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			RemoveExpression expression = new RemoveExpression();
+			expression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			foreach (Schema.TableVarColumn column in SourceTableVar.Columns)
+				if (!TableVar.Columns.ContainsName(column.Name))
+					expression.Columns.Add(new ColumnExpression(Schema.Object.EnsureRooted(column.Name)));
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
     }
 }

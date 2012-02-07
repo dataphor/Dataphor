@@ -31,13 +31,13 @@ namespace Alphora.Dataphor.DAE.Connection
 	/// </remarks>
 	public class GenericDotNetConnection : DotNetConnection
 	{
-		public GenericDotNetConnection(string AProviderInvariantName, string AConnectionString) : base()
+		public GenericDotNetConnection(string providerInvariantName, string connectionString) : base()
 		{ 
-			ProviderInvariantName = AProviderInvariantName;
-			InternalConnect(AConnectionString);
+			ProviderInvariantName = providerInvariantName;
+			InternalConnect(connectionString);
 		}
 		
-		private string FProviderInvariantName;
+		private string _providerInvariantName;
 		/// <summary>
 		/// Gets or sets the provider invariant name used to obtain the DbProviderFactory instance for this connection.
 		/// </summary>
@@ -46,23 +46,23 @@ namespace Alphora.Dataphor.DAE.Connection
 		/// </remarks>
 		public string ProviderInvariantName
 		{
-			get { return FProviderInvariantName; }
+			get { return _providerInvariantName; }
 			set 
 			{ 
-				if (FProviderInvariantName != value)
+				if (_providerInvariantName != value)
 				{
-					if (FProviderFactory != null)
+					if (_providerFactory != null)
 						throw new ConnectionException(ConnectionException.Codes.ProviderFactoryAlreadyConstructed);
 						
 					if (String.IsNullOrEmpty(value))
 						throw new ConnectionException(ConnectionException.Codes.ProviderInvariantNameRequired);
 						
-					FProviderInvariantName = value; 
+					_providerInvariantName = value; 
 				}
 			}
 		}
 		
-		private DbProviderFactory FProviderFactory;
+		private DbProviderFactory _providerFactory;
 		/// <summary>
 		/// Gets the provider factory used for this connection.
 		/// </summary>
@@ -70,17 +70,17 @@ namespace Alphora.Dataphor.DAE.Connection
 		{
 			get
 			{
-				if (FProviderFactory == null)
-					FProviderFactory = DbProviderFactories.GetFactory(FProviderInvariantName);
-				return FProviderFactory;
+				if (_providerFactory == null)
+					_providerFactory = DbProviderFactories.GetFactory(_providerInvariantName);
+				return _providerFactory;
 			}
 		}
 		
-		protected override IDbConnection CreateDbConnection(string AConnectionString)
+		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			IDbConnection LConnection = ProviderFactory.CreateConnection();
-			LConnection.ConnectionString = AConnectionString;
-			return LConnection;
+			IDbConnection connection = ProviderFactory.CreateConnection();
+			connection.ConnectionString = connectionString;
+			return connection;
 		}
 		
 		protected override SQLCommand InternalCreateCommand()
@@ -94,9 +94,9 @@ namespace Alphora.Dataphor.DAE.Connection
 	
 	public class GenericDotNetCommand : DotNetCommand
 	{
-		public GenericDotNetCommand(GenericDotNetConnection AConnection, IDbCommand ACommand) : base(AConnection, ACommand) 
+		public GenericDotNetCommand(GenericDotNetConnection connection, IDbCommand command) : base(connection, command) 
 		{
-			FUseOrdinalBinding = true;
+			_useOrdinalBinding = true;
 		}
 		
 		public new GenericDotNetConnection Connection { get { return (GenericDotNetConnection)base.Connection; } }
@@ -104,91 +104,91 @@ namespace Alphora.Dataphor.DAE.Connection
 		protected override void PrepareParameters()
 		{
 			// Prepare parameters
-			SQLParameter LParameter;
-			for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+			SQLParameter parameter;
+			for (int index = 0; index < _parameterIndexes.Length; index++)
 			{
-				LParameter = Parameters[FParameterIndexes[LIndex]];
-				DbParameter LDBParameter = Connection.ProviderFactory.CreateParameter();
-				LDBParameter.ParameterName = String.Format("@{0}", LParameter.Name);
-				switch (LParameter.Direction)
+				parameter = Parameters[_parameterIndexes[index]];
+				DbParameter dBParameter = Connection.ProviderFactory.CreateParameter();
+				dBParameter.ParameterName = String.Format("@{0}", parameter.Name);
+				switch (parameter.Direction)
 				{
-					case SQLDirection.Out : LDBParameter.Direction = System.Data.ParameterDirection.Output; break;
-					case SQLDirection.InOut : LDBParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
-					case SQLDirection.Result : LDBParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
-					default : LDBParameter.Direction = System.Data.ParameterDirection.Input; break;
+					case SQLDirection.Out : dBParameter.Direction = System.Data.ParameterDirection.Output; break;
+					case SQLDirection.InOut : dBParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
+					case SQLDirection.Result : dBParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
+					default : dBParameter.Direction = System.Data.ParameterDirection.Input; break;
 				}
 
-				if (LParameter.Type is SQLStringType)
+				if (parameter.Type is SQLStringType)
 				{
-					LDBParameter.DbType = DbType.String;
-					LDBParameter.Size = ((SQLStringType)LParameter.Type).Length;
+					dBParameter.DbType = DbType.String;
+					dBParameter.Size = ((SQLStringType)parameter.Type).Length;
 				}
-				else if (LParameter.Type is SQLBooleanType)
+				else if (parameter.Type is SQLBooleanType)
 				{
-					LDBParameter.DbType = DbType.Boolean;
+					dBParameter.DbType = DbType.Boolean;
 				}
-				else if (LParameter.Type is SQLByteArrayType)
+				else if (parameter.Type is SQLByteArrayType)
 				{
-					LDBParameter.DbType = DbType.Binary;
-					LDBParameter.Size = ((SQLByteArrayType)LParameter.Type).Length;
+					dBParameter.DbType = DbType.Binary;
+					dBParameter.Size = ((SQLByteArrayType)parameter.Type).Length;
 				}
-				else if (LParameter.Type is SQLIntegerType)
+				else if (parameter.Type is SQLIntegerType)
 				{
-					switch (((SQLIntegerType)LParameter.Type).ByteCount)
+					switch (((SQLIntegerType)parameter.Type).ByteCount)
 					{
-						case 1 : LDBParameter.DbType = DbType.Byte; break;
-						case 2 : LDBParameter.DbType = DbType.Int16; break;
-						case 8 : LDBParameter.DbType = DbType.Int64; break;
-						default : LDBParameter.DbType = DbType.Int32; break;
+						case 1 : dBParameter.DbType = DbType.Byte; break;
+						case 2 : dBParameter.DbType = DbType.Int16; break;
+						case 8 : dBParameter.DbType = DbType.Int64; break;
+						default : dBParameter.DbType = DbType.Int32; break;
 					}
 				}
-				else if (LParameter.Type is SQLNumericType)
+				else if (parameter.Type is SQLNumericType)
 				{
-					SQLNumericType LType = (SQLNumericType)LParameter.Type;
-					LDBParameter.DbType = DbType.Decimal;
+					SQLNumericType type = (SQLNumericType)parameter.Type;
+					dBParameter.DbType = DbType.Decimal;
 					// No ability to specify scale and precision generically. Gracias.
 					//LDBParameter.Scale = LType.Scale;
 					//LDBParameter.Precision = LType.Precision;
 				}
-				else if (LParameter.Type is SQLFloatType)
+				else if (parameter.Type is SQLFloatType)
 				{
-					SQLFloatType LType = (SQLFloatType)LParameter.Type;
-					if (LType.Width == 1)
-						LDBParameter.DbType = DbType.Single;
+					SQLFloatType type = (SQLFloatType)parameter.Type;
+					if (type.Width == 1)
+						dBParameter.DbType = DbType.Single;
 					else
-						LDBParameter.DbType = DbType.Double;
+						dBParameter.DbType = DbType.Double;
 				}
-				else if (LParameter.Type is SQLBinaryType)
+				else if (parameter.Type is SQLBinaryType)
 				{
-					LDBParameter.DbType = DbType.Binary;
+					dBParameter.DbType = DbType.Binary;
 				}
-				else if (LParameter.Type is SQLTextType)
+				else if (parameter.Type is SQLTextType)
 				{
-					LDBParameter.DbType = DbType.String; // Hmmmm.... seems like this mapping is wrong. Can't find a clob type in the DbType enumeration.
+					dBParameter.DbType = DbType.String; // Hmmmm.... seems like this mapping is wrong. Can't find a clob type in the DbType enumeration.
 				}
-				else if (LParameter.Type is SQLDateType)
+				else if (parameter.Type is SQLDateType)
 				{
-					LDBParameter.DbType = DbType.Date;
+					dBParameter.DbType = DbType.Date;
 				}
-				else if (LParameter.Type is SQLTimeType)
+				else if (parameter.Type is SQLTimeType)
 				{
-					LDBParameter.DbType = DbType.Time;
+					dBParameter.DbType = DbType.Time;
 				}
-				else if (LParameter.Type is SQLDateTimeType)
+				else if (parameter.Type is SQLDateTimeType)
 				{
-					LDBParameter.DbType = DbType.DateTime;
+					dBParameter.DbType = DbType.DateTime;
 				}
-				else if (LParameter.Type is SQLGuidType)
+				else if (parameter.Type is SQLGuidType)
 				{
-					LDBParameter.DbType = DbType.Guid;
+					dBParameter.DbType = DbType.Guid;
 				}
-				else if (LParameter.Type is SQLMoneyType)
+				else if (parameter.Type is SQLMoneyType)
 				{
-					LDBParameter.DbType = DbType.Currency;
+					dBParameter.DbType = DbType.Currency;
 				}
 				else
-					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-				FCommand.Parameters.Add(LDBParameter);
+					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+				_command.Parameters.Add(dBParameter);
 			}
 		}
 	}

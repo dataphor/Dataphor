@@ -15,17 +15,17 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public class MSSQLCommand : DotNetCommand
 	{
-		public const int CDefaultFetchCount = 20;
+		public const int DefaultFetchCount = 20;
 
-		protected internal MSSQLCommand(DotNetConnection AConnection, IDbCommand ACommand) : base(AConnection, ACommand) { }
+		protected internal MSSQLCommand(DotNetConnection connection, IDbCommand command) : base(connection, command) { }
 
-		private int FFetchCount = CDefaultFetchCount;
+		private int _fetchCount = DefaultFetchCount;
 		/// <summary> Represents the number of rows to fetch at a time when using server-side cursors. </summary>
 		/// <remarks> The default is 20. </remarks>
 		public int FetchCount
 		{
-			get { return FFetchCount; }
-			set { FFetchCount = value; }
+			get { return _fetchCount; }
+			set { _fetchCount = value; }
 		}
 
 		#region Parameters
@@ -34,153 +34,153 @@ namespace Alphora.Dataphor.DAE.Connection
 		protected override void PrepareParameters()
 		{
 			// Prepare parameters
-			for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+			for (int index = 0; index < _parameterIndexes.Length; index++)
 			{
-				SQLParameter LParameter = Parameters[FParameterIndexes[LIndex]];
-				SqlParameter LMSSQLParameter = (SqlParameter)FCommand.CreateParameter();
-				LMSSQLParameter.ParameterName = String.Format("@{0}", ConvertParameterName(LParameter.Name));
-				switch (LParameter.Direction)
+				SQLParameter parameter = Parameters[_parameterIndexes[index]];
+				SqlParameter mSSQLParameter = (SqlParameter)_command.CreateParameter();
+				mSSQLParameter.ParameterName = String.Format("@{0}", ConvertParameterName(parameter.Name));
+				switch (parameter.Direction)
 				{
 					case SQLDirection.Out:
-						LMSSQLParameter.Direction = System.Data.ParameterDirection.Output;
+						mSSQLParameter.Direction = System.Data.ParameterDirection.Output;
 						break;
 					case SQLDirection.InOut:
-						LMSSQLParameter.Direction = System.Data.ParameterDirection.InputOutput;
+						mSSQLParameter.Direction = System.Data.ParameterDirection.InputOutput;
 						break;
 					case SQLDirection.Result:
-						LMSSQLParameter.Direction = System.Data.ParameterDirection.ReturnValue;
+						mSSQLParameter.Direction = System.Data.ParameterDirection.ReturnValue;
 						break;
 					default:
-						LMSSQLParameter.Direction = System.Data.ParameterDirection.Input;
+						mSSQLParameter.Direction = System.Data.ParameterDirection.Input;
 						break;
 				}
 
-				if (LParameter.Type is SQLStringType)
+				if (parameter.Type is SQLStringType)
 				{
-					LMSSQLParameter.SqlDbType = SqlDbType.VarChar;
-					LMSSQLParameter.Size = ((SQLStringType)LParameter.Type).Length;
+					mSSQLParameter.SqlDbType = SqlDbType.VarChar;
+					mSSQLParameter.Size = ((SQLStringType)parameter.Type).Length;
 				}
-				else if (LParameter.Type is SQLBooleanType)
+				else if (parameter.Type is SQLBooleanType)
 				{
-					LMSSQLParameter.SqlDbType = SqlDbType.Bit;
+					mSSQLParameter.SqlDbType = SqlDbType.Bit;
 				}
-				else if (LParameter.Type is SQLByteArrayType)
+				else if (parameter.Type is SQLByteArrayType)
 				{
-					LMSSQLParameter.SqlDbType = SqlDbType.Binary;
-					LMSSQLParameter.Size = ((SQLByteArrayType)LParameter.Type).Length;
+					mSSQLParameter.SqlDbType = SqlDbType.Binary;
+					mSSQLParameter.Size = ((SQLByteArrayType)parameter.Type).Length;
 				}
-				else if (LParameter.Type is SQLIntegerType)
+				else if (parameter.Type is SQLIntegerType)
 				{
-					switch (((SQLIntegerType)LParameter.Type).ByteCount)
+					switch (((SQLIntegerType)parameter.Type).ByteCount)
 					{
 						case 1:
-							LMSSQLParameter.SqlDbType = SqlDbType.TinyInt;
+							mSSQLParameter.SqlDbType = SqlDbType.TinyInt;
 							break;
 						case 2:
-							LMSSQLParameter.SqlDbType = SqlDbType.SmallInt;
+							mSSQLParameter.SqlDbType = SqlDbType.SmallInt;
 							break;
 						case 8:
-							LMSSQLParameter.SqlDbType = SqlDbType.BigInt;
+							mSSQLParameter.SqlDbType = SqlDbType.BigInt;
 							break;
 						default:
-							LMSSQLParameter.SqlDbType = SqlDbType.Int;
+							mSSQLParameter.SqlDbType = SqlDbType.Int;
 							break;
 					}
 				}
-				else if (LParameter.Type is SQLNumericType)
+				else if (parameter.Type is SQLNumericType)
 				{
-					SQLNumericType LType = (SQLNumericType)LParameter.Type;
-					LMSSQLParameter.SqlDbType = SqlDbType.Decimal;
-					LMSSQLParameter.Scale = LType.Scale;
-					LMSSQLParameter.Precision = LType.Precision;
+					SQLNumericType type = (SQLNumericType)parameter.Type;
+					mSSQLParameter.SqlDbType = SqlDbType.Decimal;
+					mSSQLParameter.Scale = type.Scale;
+					mSSQLParameter.Precision = type.Precision;
 				}
-				else if (LParameter.Type is SQLFloatType)
+				else if (parameter.Type is SQLFloatType)
 				{
-					SQLFloatType LType = (SQLFloatType)LParameter.Type;
-					if (LType.Width == 1)
-						LMSSQLParameter.SqlDbType = SqlDbType.Real;
+					SQLFloatType type = (SQLFloatType)parameter.Type;
+					if (type.Width == 1)
+						mSSQLParameter.SqlDbType = SqlDbType.Real;
 					else
-						LMSSQLParameter.SqlDbType = SqlDbType.Float;
+						mSSQLParameter.SqlDbType = SqlDbType.Float;
 				}
-				else if (LParameter.Type is SQLBinaryType)
+				else if (parameter.Type is SQLBinaryType)
 				{
-					LMSSQLParameter.SqlDbType = SqlDbType.Image;
+					mSSQLParameter.SqlDbType = SqlDbType.Image;
 				}
-				else if (LParameter.Type is SQLTextType)
+				else if (parameter.Type is SQLTextType)
 				{
-					LMSSQLParameter.SqlDbType = SqlDbType.Text;
+					mSSQLParameter.SqlDbType = SqlDbType.Text;
 				}
-				else if (LParameter.Type is SQLDateType)
+				else if (parameter.Type is SQLDateType)
 				{
-					LMSSQLParameter.SqlDbType = SqlDbType.DateTime;
+					mSSQLParameter.SqlDbType = SqlDbType.DateTime;
 				}
-				else if (LParameter.Type is SQLTimeType)
+				else if (parameter.Type is SQLTimeType)
 				{
-					LMSSQLParameter.SqlDbType = SqlDbType.DateTime;
+					mSSQLParameter.SqlDbType = SqlDbType.DateTime;
 				}
-				else if (LParameter.Type is SQLDateTimeType)
+				else if (parameter.Type is SQLDateTimeType)
 				{
-					LMSSQLParameter.SqlDbType = SqlDbType.DateTime;
+					mSSQLParameter.SqlDbType = SqlDbType.DateTime;
 				}
-				else if (LParameter.Type is SQLGuidType)
+				else if (parameter.Type is SQLGuidType)
 				{
-					LMSSQLParameter.SqlDbType = SqlDbType.UniqueIdentifier;
+					mSSQLParameter.SqlDbType = SqlDbType.UniqueIdentifier;
 				}
-				else if (LParameter.Type is SQLMoneyType)
+				else if (parameter.Type is SQLMoneyType)
 				{
-					LMSSQLParameter.SqlDbType = SqlDbType.Money;
+					mSSQLParameter.SqlDbType = SqlDbType.Money;
 				}
 				else
-					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-				FCommand.Parameters.Add(LMSSQLParameter);
+					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+				_command.Parameters.Add(mSSQLParameter);
 			}
 		}
 
 		/// <remarks> If the parameter is named "Pnnn" there may be a conflict with the provider's automatic parameter scheme, so escape (with an extra P) under those circumstances. </remarks>
-		protected override string ConvertParameterName(string AParameterName)
+		protected override string ConvertParameterName(string parameterName)
 		{
-			if (AParameterName.StartsWith("P", StringComparison.OrdinalIgnoreCase) && (AParameterName.Length > 1) && Char.IsDigit(AParameterName[1]))
-				return "P" + AParameterName;
+			if (parameterName.StartsWith("P", StringComparison.OrdinalIgnoreCase) && (parameterName.Length > 1) && Char.IsDigit(parameterName[1]))
+				return "P" + parameterName;
 			else
-				return AParameterName;
+				return parameterName;
 		}
 
 		/// <summary> The number of internal parameters so that we can "hide" the internal parameters. </summary>
-		private int FInternalParameterCount;
+		private int _internalParameterCount;
 
 		/// <summary> Accesses a given non-internal parameter. </summary>
 		/// <remarks> This method hides the presence of the internal parameters so that generic command routines can deal with parameters ordinally starting from 0.
 		/// This method should be used rather than access the provider's parameters directly by index. </remarks>
-		protected override IDataParameter ParameterByIndex(int AIndex)
+		protected override IDataParameter ParameterByIndex(int index)
 		{
 			// Internal Parameters are kept before regular parameters (because sp_cursoropen requires this)
-			return base.ParameterByIndex(AIndex + FInternalParameterCount);
+			return base.ParameterByIndex(index + _internalParameterCount);
 		}
 
 		/// <summary> Creates an internal parameter. </summary>
 		/// <remarks> Internal parameters are only part of the provider's parameter space.  They are used as part of the sp_cursor calls. </remarks>
-		internal SqlParameter InternalParameterCreate(string AName, SqlDbType AType, ParameterDirection ADirection)
+		internal SqlParameter InternalParameterCreate(string name, SqlDbType type, ParameterDirection direction)
 		{
-			SqlParameter LParameter = (SqlParameter)FCommand.CreateParameter();
-			LParameter.ParameterName = AName;
-			LParameter.SqlDbType = AType;
-			LParameter.Direction = ADirection;
-			FCommand.Parameters.Add(LParameter);
-			FInternalParameterCount++;
-			return LParameter;
+			SqlParameter parameter = (SqlParameter)_command.CreateParameter();
+			parameter.ParameterName = name;
+			parameter.SqlDbType = type;
+			parameter.Direction = direction;
+			_command.Parameters.Add(parameter);
+			_internalParameterCount++;
+			return parameter;
 		}
 
 		/// <summary> Clears all internal and non-internal parameters. </summary>
 		protected override void ClearParameters()
 		{
 			base.ClearParameters();
-			FInternalParameterCount = 0;
+			_internalParameterCount = 0;
 		}
 
 		/// <summary> Determines whether parameters are being used and that there are any non-internal parameters. </summary>
 		protected bool ParametersActive()
 		{
-			return (FParameterIndexes.Length > 0) && UseParameters;
+			return (_parameterIndexes.Length > 0) && UseParameters;
 		}
 
 		#endregion
@@ -188,16 +188,16 @@ namespace Alphora.Dataphor.DAE.Connection
 		#region Server Cursor Open preparation
 
 		/// <summary> Prepares for invocation of a server-side cursor. </summary>
-		private void PrepareCursorStatement(string AStatement, SQLCursorType ACursorType, SQLIsolationLevel AIsolationLevel)
+		private void PrepareCursorStatement(string statement, SQLCursorType cursorType, SQLIsolationLevel isolationLevel)
 		{
 			// Cannot use the provider's command type behavior because we are always enclosing the expression in sp_cursor calls
 			if (CommandType == SQLCommandType.Table)
-				AStatement = "select * from " + AStatement;
+				statement = "select * from " + statement;
 
 			InternalParameterCreate("@retval", SqlDbType.Int, ParameterDirection.ReturnValue);
 			InternalParameterCreate("@cursor", SqlDbType.Int, ParameterDirection.Output).Value = 0;
-			InternalParameterCreate("@stmt", SqlDbType.NVarChar, ParameterDirection.Input).Value = AStatement;
-			InternalParameterCreate("@scrollopt", SqlDbType.Int, ParameterDirection.Input).Value = GetScrollOptions(ACursorType, AIsolationLevel);
+			InternalParameterCreate("@stmt", SqlDbType.NVarChar, ParameterDirection.Input).Value = statement;
+			InternalParameterCreate("@scrollopt", SqlDbType.Int, ParameterDirection.Input).Value = GetScrollOptions(cursorType, isolationLevel);
 			InternalParameterCreate("@ccopt", SqlDbType.Int, ParameterDirection.Input).Value = GetConcurrencyOptions();
 			InternalParameterCreate("@rowcount", SqlDbType.Int, ParameterDirection.InputOutput).Value = FetchCount;	// This must be an output parameter or an error will occur
 
@@ -205,21 +205,21 @@ namespace Alphora.Dataphor.DAE.Connection
 			if (ParametersActive())
 				InternalParameterCreate("@paramdef", SqlDbType.NVarChar, ParameterDirection.Input).Value = "";
 
-			FCommand.CommandText = "sp_cursoropen";
+			_command.CommandText = "sp_cursoropen";
 		}
 
 		/// <summary> Gets the SQL Server server side cursor scroll options. </summary>
-		private SQLServerCursorScrollOptions GetScrollOptions(SQLCursorType ACursorType, SQLIsolationLevel AIsolationLevel)
+		private SQLServerCursorScrollOptions GetScrollOptions(SQLCursorType cursorType, SQLIsolationLevel isolationLevel)
 		{
-			SQLServerCursorScrollOptions LResults = SQLServerCursorScrollOptions.AutoFetch | SQLServerCursorScrollOptions.AutoClose;
+			SQLServerCursorScrollOptions results = SQLServerCursorScrollOptions.AutoFetch | SQLServerCursorScrollOptions.AutoClose;
 
 			if (ParametersActive())
-				LResults |= SQLServerCursorScrollOptions.Parameterized;
+				results |= SQLServerCursorScrollOptions.Parameterized;
 
 			if (LockType == SQLLockType.ReadOnly)
-				LResults |= SQLServerCursorScrollOptions.FastForward;
+				results |= SQLServerCursorScrollOptions.FastForward;
 			else
-				LResults |= SQLServerCursorScrollOptions.ForwardOnly;
+				results |= SQLServerCursorScrollOptions.ForwardOnly;
 
 			/*
 			Setting these is not agreeable to the server
@@ -230,56 +230,56 @@ namespace Alphora.Dataphor.DAE.Connection
 			*/
 			// TODO: Set additional "acceptible" options 
 
-			return LResults;
+			return results;
 		}
 
 		/// <summary> Gets the SQL Server server side cursor concurrency options.</summary>
 		private SQLServerCursorConcurrencyOptions GetConcurrencyOptions()
 		{
-			SQLServerCursorConcurrencyOptions LResult = SQLServerCursorConcurrencyOptions.OpenOnAnySQL;
+			SQLServerCursorConcurrencyOptions result = SQLServerCursorConcurrencyOptions.OpenOnAnySQL;
 
 			switch (LockType)
 			{
-				case SQLLockType.ReadOnly: LResult |= SQLServerCursorConcurrencyOptions.ReadOnly; break;
-				case SQLLockType.Pessimistic: LResult |= SQLServerCursorConcurrencyOptions.ScrollLocks; break;
-				case SQLLockType.Optimistic: LResult |= SQLServerCursorConcurrencyOptions.OptimisticValues; break;
+				case SQLLockType.ReadOnly: result |= SQLServerCursorConcurrencyOptions.ReadOnly; break;
+				case SQLLockType.Pessimistic: result |= SQLServerCursorConcurrencyOptions.ScrollLocks; break;
+				case SQLLockType.Optimistic: result |= SQLServerCursorConcurrencyOptions.OptimisticValues; break;
 			}
 
-			return LResult;
+			return result;
 		}
 
 		/// <summary> Sets the parameter specifying the names and types of the non-internal parameters. </summary>
 		private void SetParameterDefinition()
 		{
-			StringBuilder LResult = new StringBuilder();
-			for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+			StringBuilder result = new StringBuilder();
+			for (int index = 0; index < _parameterIndexes.Length; index++)
 			{
-				SQLParameter LParameter = Parameters[FParameterIndexes[LIndex]];
-				if (LParameter.Direction != SQLDirection.Result)
+				SQLParameter parameter = Parameters[_parameterIndexes[index]];
+				if (parameter.Direction != SQLDirection.Result)
 				{
-					if (LResult.Length > 0)
-						LResult.Append(", ");
+					if (result.Length > 0)
+						result.Append(", ");
 
-					LResult.Append("@" + ConvertParameterName(LParameter.Name) + " " + GetParamTypeDescriptor(LParameter));
-					if (LParameter.Direction != SQLDirection.In)
-						LResult.Append(" out");
+					result.Append("@" + ConvertParameterName(parameter.Name) + " " + GetParamTypeDescriptor(parameter));
+					if (parameter.Direction != SQLDirection.In)
+						result.Append(" out");
 				}
 			}
-			((SqlParameter)FCommand.Parameters["@paramdef"]).Value = LResult.ToString();
+			((SqlParameter)_command.Parameters["@paramdef"]).Value = result.ToString();
 		}
 
 		/// <summary> Generates a SQL Server type descriptor given a parameter definition. </summary>
-		private static string GetParamTypeDescriptor(SQLParameter AParameter)
+		private static string GetParamTypeDescriptor(SQLParameter parameter)
 		{
-			if (AParameter.Type is SQLStringType)
-				return "varchar(" + ((SQLStringType)AParameter.Type).Length.ToString() + ")";
-			else if (AParameter.Type is SQLBooleanType)
+			if (parameter.Type is SQLStringType)
+				return "varchar(" + ((SQLStringType)parameter.Type).Length.ToString() + ")";
+			else if (parameter.Type is SQLBooleanType)
 				return "bit";
-			else if (AParameter.Type is SQLByteArrayType)
-				return "binary(" + ((SQLByteArrayType)AParameter.Type).Length.ToString() + ")";
-			else if (AParameter.Type is SQLIntegerType)
+			else if (parameter.Type is SQLByteArrayType)
+				return "binary(" + ((SQLByteArrayType)parameter.Type).Length.ToString() + ")";
+			else if (parameter.Type is SQLIntegerType)
 			{
-				switch (((SQLIntegerType)AParameter.Type).ByteCount)
+				switch (((SQLIntegerType)parameter.Type).ByteCount)
 				{
 					case 1:
 						return "tinyint";
@@ -291,31 +291,31 @@ namespace Alphora.Dataphor.DAE.Connection
 						return "int";
 				}
 			}
-			else if (AParameter.Type is SQLNumericType)
+			else if (parameter.Type is SQLNumericType)
 			{
-				SQLNumericType LType = (SQLNumericType)AParameter.Type;
-				return "decimal(" + LType.Precision.ToString() + "," + LType.Scale.ToString() + ")";
+				SQLNumericType type = (SQLNumericType)parameter.Type;
+				return "decimal(" + type.Precision.ToString() + "," + type.Scale.ToString() + ")";
 			}
-			else if (AParameter.Type is SQLFloatType)
+			else if (parameter.Type is SQLFloatType)
 			{
-				SQLFloatType LType = (SQLFloatType)AParameter.Type;
-				if (LType.Width == 1)
+				SQLFloatType type = (SQLFloatType)parameter.Type;
+				if (type.Width == 1)
 					return "real";
 				else
 					return "float";
 			}
-			else if (AParameter.Type is SQLBinaryType)
+			else if (parameter.Type is SQLBinaryType)
 				return "image";
-			else if (AParameter.Type is SQLTextType)
+			else if (parameter.Type is SQLTextType)
 				return "text";		// Q: Should this be NText or text
-			else if ((AParameter.Type is SQLDateType) || (AParameter.Type is SQLTimeType) || (AParameter.Type is SQLDateTimeType))
+			else if ((parameter.Type is SQLDateType) || (parameter.Type is SQLTimeType) || (parameter.Type is SQLDateTimeType))
 				return "datetime";
-			else if (AParameter.Type is SQLGuidType)
+			else if (parameter.Type is SQLGuidType)
 				return "uniqueidentifier";
-			else if (AParameter.Type is SQLMoneyType)
+			else if (parameter.Type is SQLMoneyType)
 				return "money";
 			else
-				throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, AParameter.Type.GetType().Name);
+				throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
 		}
 
 		#endregion
@@ -328,18 +328,18 @@ namespace Alphora.Dataphor.DAE.Connection
 		}
 
 		/// <summary> Prepares for a server cursor open. </summary>
-		protected void PrepareServerCursorCommand(SQLCursorType ACursorType, SQLIsolationLevel AIsolationLevel)
+		protected void PrepareServerCursorCommand(SQLCursorType cursorType, SQLIsolationLevel isolationLevel)
 		{
 			// All commands will be stored procedures when using server-side cursors
-			FCommand.CommandType = System.Data.CommandType.StoredProcedure;	// always use stored procedure because queries are wrapped in a server-side cursor stored procedure call
+			_command.CommandType = System.Data.CommandType.StoredProcedure;	// always use stored procedure because queries are wrapped in a server-side cursor stored procedure call
 			if (CommandTimeout >= 0)
-				FCommand.CommandTimeout = CommandTimeout;
+				_command.CommandTimeout = CommandTimeout;
 
 			// Call PrepareStatement first to determine the set of non-internal parameters and normalize the statement
-			string LStatement = PrepareStatement(Statement);
+			string statement = PrepareStatement(Statement);
 
 			// Call PrepareCursorStatement before creating the non-internal parameters because sp_cursoropen is fickle about the order of the arguments (even though they are passed by name)
-			PrepareCursorStatement(LStatement, ACursorType, AIsolationLevel);
+			PrepareCursorStatement(statement, cursorType, isolationLevel);
 			
 			if (ParametersActive())
 			{
@@ -353,26 +353,26 @@ namespace Alphora.Dataphor.DAE.Connection
 			}
 		}
 
-		protected override SQLCursor InternalOpen(SQLCursorType ACursorType, SQLIsolationLevel AIsolationLevel)
+		protected override SQLCursor InternalOpen(SQLCursorType cursorType, SQLIsolationLevel isolationLevel)
 		{
 			// Prepare the connection
-			SQLCursorLocation LLocation = GetCursorLocation();
-			if (LLocation == SQLCursorLocation.Server)
-				PrepareServerCursorCommand(ACursorType, AIsolationLevel);
+			SQLCursorLocation location = GetCursorLocation();
+			if (location == SQLCursorLocation.Server)
+				PrepareServerCursorCommand(cursorType, isolationLevel);
 			else
-				PrepareCommand(false, AIsolationLevel);
+				PrepareCommand(false, isolationLevel);
 
 			// Set the non-internal parameters
 			SetParameters();
 
 			// Open the reader
-			IDataReader LCursor = FCommand.ExecuteReader(SQLCommandBehaviorToCommandBehavior(CommandBehavior));
+			IDataReader cursor = _command.ExecuteReader(SQLCommandBehaviorToCommandBehavior(CommandBehavior));
 
 			// Return the appropriate cursor
-			if (LLocation == SQLCursorLocation.Server)
-				return new MSSQLServerCursor(this, LCursor);
+			if (location == SQLCursorLocation.Server)
+				return new MSSQLServerCursor(this, cursor);
 			else
-				return new DotNetCursor(this, LCursor);
+				return new DotNetCursor(this, cursor);
 		}
 
 		#endregion
@@ -415,34 +415,34 @@ namespace Alphora.Dataphor.DAE.Connection
 
 		#region Helpers
 
-		internal void CloseServerCursor(int ACursorHandle)
+		internal void CloseServerCursor(int cursorHandle)
 		{
 			ClearParameters();
-			InternalParameterCreate("@cursor", SqlDbType.Int, ParameterDirection.Input).Value = ACursorHandle;
-			FCommand.CommandText = "sp_cursorclose";
-			FCommand.ExecuteNonQuery();
+			InternalParameterCreate("@cursor", SqlDbType.Int, ParameterDirection.Input).Value = cursorHandle;
+			_command.CommandText = "sp_cursorclose";
+			_command.ExecuteNonQuery();
 		}
 
-		internal IDataReader FetchServerCursor(int ACursorHandle)
+		internal IDataReader FetchServerCursor(int cursorHandle)
 		{
 			ClearParameters();
 			InternalParameterCreate("@retval", SqlDbType.Int, ParameterDirection.ReturnValue);
-			InternalParameterCreate("@cursor", SqlDbType.Int, ParameterDirection.Input).Value = ACursorHandle;
+			InternalParameterCreate("@cursor", SqlDbType.Int, ParameterDirection.Input).Value = cursorHandle;
 			InternalParameterCreate("@fetchtype", SqlDbType.Int, ParameterDirection.Input).Value = 0x0002 /* next */;
 			InternalParameterCreate("@rownum", SqlDbType.Int, ParameterDirection.Input).Value = 0;
 			InternalParameterCreate("@nrows", SqlDbType.Int, ParameterDirection.Input).Value = FetchCount;
-			FCommand.CommandText = "sp_cursorfetch";
-			return FCommand.ExecuteReader(SQLCommandBehaviorToCommandBehavior(CommandBehavior));
+			_command.CommandText = "sp_cursorfetch";
+			return _command.ExecuteReader(SQLCommandBehaviorToCommandBehavior(CommandBehavior));
 		}
 
-		internal object GetParameterValue(string AParameterName)
+		internal object GetParameterValue(string parameterName)
 		{
-			return ((SqlParameter)FCommand.Parameters[AParameterName]).Value;
+			return ((SqlParameter)_command.Parameters[parameterName]).Value;
 		}
 		
-		internal bool ContainsParameter(string AParameterName)
+		internal bool ContainsParameter(string parameterName)
 		{
-			return (FCommand != null) && FCommand.Parameters.Contains(AParameterName);
+			return (_command != null) && _command.Parameters.Contains(parameterName);
 		}
 
 		internal void ParametersAreAvailable()

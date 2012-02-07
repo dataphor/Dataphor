@@ -11,11 +11,11 @@ namespace Alphora.Dataphor.DAE.Connection.MySQL
 	
 	public class MySQLConnection : DotNetConnection
 	{
-		public MySQLConnection(string AConnection) : base(AConnection) {}
+		public MySQLConnection(string connection) : base(connection) {}
 		
-		protected override IDbConnection CreateDbConnection(string AConnectionString)
+		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			return new MySqlConnection(AConnectionString);
+			return new MySqlConnection(connectionString);
 		}
 		
 		protected override SQLCommand InternalCreateCommand()
@@ -26,80 +26,80 @@ namespace Alphora.Dataphor.DAE.Connection.MySQL
 	
 	public class MySQLCommand : DotNetCommand
 	{
-		public MySQLCommand(MySQLConnection AConnection, IDbCommand ACommand) : base(AConnection, ACommand) {}
+		public MySQLCommand(MySQLConnection connection, IDbCommand command) : base(connection, command) {}
 		
 		protected override void PrepareParameters()
 		{
 			// Prepare parameters
-			foreach (SQLParameter LParameter in Parameters)
+			foreach (SQLParameter parameter in Parameters)
 			{
-				MySqlParameter LMySQLParameter = (MySqlParameter)FCommand.CreateParameter();
-				LMySQLParameter.ParameterName = String.Format("@{0}", LParameter.Name);
-				switch (LParameter.Direction)
+				MySqlParameter mySQLParameter = (MySqlParameter)_command.CreateParameter();
+				mySQLParameter.ParameterName = String.Format("@{0}", parameter.Name);
+				switch (parameter.Direction)
 				{
-					case SQLDirection.Out : LMySQLParameter.Direction = System.Data.ParameterDirection.Output; break;
-					case SQLDirection.InOut : LMySQLParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
-					case SQLDirection.Result : LMySQLParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
-					default : LMySQLParameter.Direction = System.Data.ParameterDirection.Input; break;
+					case SQLDirection.Out : mySQLParameter.Direction = System.Data.ParameterDirection.Output; break;
+					case SQLDirection.InOut : mySQLParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
+					case SQLDirection.Result : mySQLParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
+					default : mySQLParameter.Direction = System.Data.ParameterDirection.Input; break;
 				}
 
-				if (LParameter.Type is SQLStringType)
+				if (parameter.Type is SQLStringType)
 				{
-					LMySQLParameter.DbType = DbType.String;
-					LMySQLParameter.Size = ((SQLStringType)LParameter.Type).Length;
+					mySQLParameter.DbType = DbType.String;
+					mySQLParameter.Size = ((SQLStringType)parameter.Type).Length;
 				}
-				else if (LParameter.Type is SQLBooleanType)
+				else if (parameter.Type is SQLBooleanType)
 				{
-					LMySQLParameter.DbType = DbType.Boolean;
+					mySQLParameter.DbType = DbType.Boolean;
 				}
-				else if (LParameter.Type is SQLIntegerType)
+				else if (parameter.Type is SQLIntegerType)
 				{
-					switch (((SQLIntegerType)LParameter.Type).ByteCount)
+					switch (((SQLIntegerType)parameter.Type).ByteCount)
 					{
-						case 1 : LMySQLParameter.DbType = DbType.Byte; break;
-						case 2 : LMySQLParameter.DbType = DbType.Int16; break;
-						case 8 : LMySQLParameter.DbType = DbType.Int64; break;
-						default : LMySQLParameter.DbType = DbType.Int32; break;
+						case 1 : mySQLParameter.DbType = DbType.Byte; break;
+						case 2 : mySQLParameter.DbType = DbType.Int16; break;
+						case 8 : mySQLParameter.DbType = DbType.Int64; break;
+						default : mySQLParameter.DbType = DbType.Int32; break;
 					}
 				}
-				else if (LParameter.Type is SQLNumericType)
+				else if (parameter.Type is SQLNumericType)
 				{
-					SQLNumericType LType = (SQLNumericType)LParameter.Type;
-					LMySQLParameter.DbType = DbType.Decimal;
-					LMySQLParameter.Scale = LType.Scale;
-					LMySQLParameter.Precision = LType.Precision;
+					SQLNumericType type = (SQLNumericType)parameter.Type;
+					mySQLParameter.DbType = DbType.Decimal;
+					mySQLParameter.Scale = type.Scale;
+					mySQLParameter.Precision = type.Precision;
 				}
-				else if (LParameter.Type is SQLBinaryType)
+				else if (parameter.Type is SQLBinaryType)
 				{
-					LMySQLParameter.DbType = DbType.Binary;
+					mySQLParameter.DbType = DbType.Binary;
 				}
-				else if (LParameter.Type is SQLTextType)
+				else if (parameter.Type is SQLTextType)
 				{
-					LMySQLParameter.DbType = DbType.String;
+					mySQLParameter.DbType = DbType.String;
 				}
-				else if (LParameter.Type is SQLDateTimeType)
+				else if (parameter.Type is SQLDateTimeType)
 				{
-					LMySQLParameter.DbType = DbType.DateTime;
+					mySQLParameter.DbType = DbType.DateTime;
 				}
-				else if (LParameter.Type is SQLDateType)
+				else if (parameter.Type is SQLDateType)
 				{
-					LMySQLParameter.DbType = DbType.DateTime;
+					mySQLParameter.DbType = DbType.DateTime;
 				}
-				else if (LParameter.Type is SQLTimeType)
+				else if (parameter.Type is SQLTimeType)
 				{
-					LMySQLParameter.DbType = DbType.DateTime;
+					mySQLParameter.DbType = DbType.DateTime;
 				}
-				else if (LParameter.Type is SQLGuidType)
+				else if (parameter.Type is SQLGuidType)
 				{
-					LMySQLParameter.DbType = DbType.Guid;
+					mySQLParameter.DbType = DbType.Guid;
 				}
-				else if (LParameter.Type is SQLMoneyType)
+				else if (parameter.Type is SQLMoneyType)
 				{
-					LMySQLParameter.DbType = DbType.Currency;
+					mySQLParameter.DbType = DbType.Currency;
 				}
 				else
-					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-				FCommand.Parameters.Add(LMySQLParameter);
+					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+				_command.Parameters.Add(mySQLParameter);
 			}
 		}
 	}

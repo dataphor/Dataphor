@@ -103,7 +103,27 @@ namespace Alphora.Dataphor.Frontend.Client
 		bool Visible { get; set; }
 	}
 
-	/// <summary> Executes a list of actions sequentially, 
+	/// <summary> Executes an action if the condition evaluates to true. </summary> <doc/>
+	/// <remarks> An Actions is allowed as a child. The action that is a child 
+	/// of the the ConditionalAction will be executed if the Condition evaluates to true.</remarks>
+	/// <example> An example can be seen in the Sample.Components library
+	/// in the Sample07 [dfd] document.</example>
+	public interface IConditionalAction : IAction
+	{
+		// Published
+		/// <summary> Condition to be evaluated on upon executing. </summary> <doc/>
+		/// <doc/>
+		/// <value> <para>string: The d4 expression representing the condition.</para>
+		/// <para>Default: empty string</para></value>
+		/// <remarks> The child action will only be executed if the condition
+		/// evaluates to true.  An error will be thrown if the condition contains
+		/// more than a single expression or if the expression does not result
+		/// in a boolean value.</remarks>
+		/// 
+		string Condition { get; set; }
+	}
+
+		/// <summary> Executes a list of actions sequentially, 
 	/// like a begin...end block. </summary> <doc/>
 	/// <remarks> Actions are allowed as children. Each action that is a child 
 	/// of the the BlockAction will be executed. The order of execution will be 
@@ -489,6 +509,9 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <value> <para>String:</para>
 		/// <para>Default: empty string</para></value>
 		string Filter { get; set; }
+		
+		/// <summary> The TopMost setting of the shown form. </summary>
+		bool TopMost { get; set; }
 
 		/// <summary> An action that will be executed after the form is closed. </summary> <doc/>
 		/// <value> <para>IAction: The name of an action.</para>

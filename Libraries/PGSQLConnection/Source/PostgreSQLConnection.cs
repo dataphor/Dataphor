@@ -13,17 +13,17 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
 	
 	public class PostgreSQLConnection : DotNetConnection
 	{
-        public PostgreSQLConnection(string AConnection) : base(AConnection) { }
+        public PostgreSQLConnection(string connection) : base(connection) { }
 		
-		protected override IDbConnection CreateDbConnection(string AConnectionString)
+		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
 			try
 			{
-                return new NpgsqlConnection(AConnectionString);
+                return new NpgsqlConnection(connectionString);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-                WrapException(LException, string.Format("connect ({0})", AConnectionString), true);
+                WrapException(exception, string.Format("connect ({0})", connectionString), true);
 				throw;
 			}
 		}
@@ -33,23 +33,23 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
             return new PostgreSQLCommand(this, CreateDbCommand());
 		}
 
-		protected override void InternalBeginTransaction(SQLIsolationLevel AIsolationLevel)
+		protected override void InternalBeginTransaction(SQLIsolationLevel isolationLevel)
 		{
-            FIsolationLevel = System.Data.IsolationLevel.Unspecified;
-			switch (AIsolationLevel)
+            _isolationLevel = System.Data.IsolationLevel.Unspecified;
+			switch (isolationLevel)
 			{
 				case SQLIsolationLevel.ReadUncommitted : // all three will map to committed in this Optimisitc system
 				case SQLIsolationLevel.RepeatableRead :
-                case SQLIsolationLevel.ReadCommitted: FIsolationLevel = System.Data.IsolationLevel.ReadCommitted; break;
-                case SQLIsolationLevel.Serializable: FIsolationLevel = System.Data.IsolationLevel.Serializable; break;
+                case SQLIsolationLevel.ReadCommitted: _isolationLevel = System.Data.IsolationLevel.ReadCommitted; break;
+                case SQLIsolationLevel.Serializable: _isolationLevel = System.Data.IsolationLevel.Serializable; break;
 			}
-			FTransaction = FConnection.BeginTransaction(FIsolationLevel);
+			_transaction = _connection.BeginTransaction(_isolationLevel);
 		}
 
-		protected override Exception InternalWrapException(Exception AException, string AStatement)
+		protected override Exception InternalWrapException(Exception exception, string statement)
 		{
 			// Wrap all exceptions coming back with a simple Exception so that it crosses the boundary.
-			return new ConnectionException(ConnectionException.Codes.SQLException, ErrorSeverity.Application, new Exception(AException.Message), AStatement);
+			return new ConnectionException(ConnectionException.Codes.SQLException, ErrorSeverity.Application, new Exception(exception.Message), statement);
 		}
 	}
 }

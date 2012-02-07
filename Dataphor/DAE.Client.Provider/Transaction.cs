@@ -16,35 +16,35 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 	/// </remarks>
 	public class DAETransaction : DbTransaction, IDbTransaction
 	{
-		internal DAETransaction(DAEConnection AConnection, System.Data.IsolationLevel AIsolationLevel)
+		internal DAETransaction(DAEConnection connection, System.Data.IsolationLevel isolationLevel)
 		{
-			FConnection = AConnection;
-			FIsolationLevel = AIsolationLevel;
-			IsolationLevel LIsolationLevel;
-			switch (FIsolationLevel)
+			_connection = connection;
+			_isolationLevel = isolationLevel;
+			IsolationLevel localIsolationLevel;
+			switch (_isolationLevel)
 			{
-				case System.Data.IsolationLevel.ReadUncommitted : LIsolationLevel = DAE.IsolationLevel.Browse; break;
-				case System.Data.IsolationLevel.ReadCommitted : LIsolationLevel = DAE.IsolationLevel.CursorStability; break;
+				case System.Data.IsolationLevel.ReadUncommitted : localIsolationLevel = DAE.IsolationLevel.Browse; break;
+				case System.Data.IsolationLevel.ReadCommitted : localIsolationLevel = DAE.IsolationLevel.CursorStability; break;
 				case System.Data.IsolationLevel.RepeatableRead :
-				case System.Data.IsolationLevel.Serializable : LIsolationLevel = DAE.IsolationLevel.Isolated; break;
-				default : LIsolationLevel = FConnection.ServerProcess.ProcessInfo.DefaultIsolationLevel; break;
+				case System.Data.IsolationLevel.Serializable : localIsolationLevel = DAE.IsolationLevel.Isolated; break;
+				default : localIsolationLevel = _connection.ServerProcess.ProcessInfo.DefaultIsolationLevel; break;
 			}
-			FConnection.ServerProcess.BeginTransaction(LIsolationLevel);
+			_connection.ServerProcess.BeginTransaction(localIsolationLevel);
 		}
 
 		// IDisposable
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				if (!IsComplete && FConnection.InTransaction)
+				if (!IsComplete && _connection.InTransaction)
 					Rollback();
 			}
 			finally
 			{
-				FConnection = null;
-				base.Dispose(ADisposing);
+				_connection = null;
+				base.Dispose(disposing);
 			}
 		}
 
@@ -53,41 +53,41 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			Dispose(false);
 		}
 
-		public bool IsComplete { get { return FConnection == null; } }
+		public bool IsComplete { get { return _connection == null; } }
 		protected void CompleteTransaction()
 		{
-			FConnection = null;
+			_connection = null;
 		}
 
-		private DAEConnection FConnection;
+		private DAEConnection _connection;
 		protected override DbConnection DbConnection
 		{
-			get { return FConnection; }
+			get { return _connection; }
 		}
 
-		private System.Data.IsolationLevel FIsolationLevel;
+		private System.Data.IsolationLevel _isolationLevel;
 		/// <summary> Determines the isolation level for the transaction. </summary>
 		public override System.Data.IsolationLevel IsolationLevel
 		{
-			get { return FIsolationLevel; }
+			get { return _isolationLevel; }
 		}
 
 		public event EventHandler OnCommit;
 
 		public override void Commit()
 		{
-			if ((FConnection == null) || !FConnection.InTransaction)
+			if ((_connection == null) || !_connection.InTransaction)
 				throw new ProviderException(ProviderException.Codes.ConnectionLost, "Commit");
 			try
 			{
-				FConnection.ServerProcess.CommitTransaction();
+				_connection.ServerProcess.CommitTransaction();
 				CompleteTransaction(); //transaction complete.
 				if (OnCommit != null)
 					OnCommit(this, EventArgs.Empty);
 			}
 			catch
 			{
-				if ((Connection != null) && !FConnection.InTransaction)
+				if ((Connection != null) && !_connection.InTransaction)
 					CompleteTransaction();
 				throw;
 			}
@@ -97,18 +97,18 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		public override void Rollback()
 		{
-			if ((FConnection == null) || !FConnection.InTransaction)
+			if ((_connection == null) || !_connection.InTransaction)
 				throw new ProviderException(ProviderException.Codes.ConnectionLost, "RollBack");
 			try
 			{
-				FConnection.ServerProcess.RollbackTransaction();
+				_connection.ServerProcess.RollbackTransaction();
 				CompleteTransaction(); //transaction complete.
 				if (OnRollBack != null)
 					OnRollBack(this, EventArgs.Empty);
 			}
 			catch
 			{
-				if ((Connection != null) && !FConnection.InTransaction)
+				if ((Connection != null) && !_connection.InTransaction)
 					CompleteTransaction();
 				throw;
 			}

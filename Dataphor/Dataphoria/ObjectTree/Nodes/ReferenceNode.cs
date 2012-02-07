@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class ReferenceListNode : SchemaListNode
 	{
-		public ReferenceListNode(string ALibraryName) : base (ALibraryName)
+		public ReferenceListNode(string libraryName) : base (libraryName)
 		{
 			Text = "References";
 			ImageIndex = 16;
@@ -22,22 +22,22 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override string GetChildExpression()
 		{
-			return ".System.References " + CSchemaListFilter + " over { Name }";
+			return ".System.References " + SchemaListFilter + " over { Name }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
 		{
-			return new ReferenceNode(this, (string)ARow["Name"]);
+			return new ReferenceNode(this, (string)row["Name"]);
 		}
 		
 	}
 
 	public class ReferenceNode : SchemaItemNode
 	{
-		public ReferenceNode(ReferenceListNode ANode, string AReferenceName) : base()
+		public ReferenceNode(ReferenceListNode node, string referenceName) : base()
 		{
-			ParentSchemaList = ANode;
-			ObjectName = AReferenceName;
+			ParentSchemaList = node;
+			ObjectName = referenceName;
 			ImageIndex = 17;
 			SelectedImageIndex = ImageIndex;
 		}

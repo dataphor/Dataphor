@@ -1,0 +1,127 @@
+﻿<?xml version="1.0"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <!-- Set Version based on build_number env. variable. -->
+  
+  <Product Id="*"
+		Name="Dataphor"
+		Language="1033"
+		Version="1.0.0000"
+		UpgradeCode="B08DF609-D4F8-48CF-9620-A7F65D080EAB"
+		Manufacturer="Alphora">
+		
+		<Package Description="Alphora Dataphor"
+			Comments="Installs Dataphor"
+			InstallerVersion="200"
+			Compressed="yes"/>
+
+		<!-- Source media for the installation. Specifies a single cab file to be embedded in the installer's .msi. -->
+		<Media Id="1" Cabinet="disk1.cab" EmbedCab="yes" CompressionLevel="high"/>
+		
+		<!-- Installation directory and files are defined in Files.wxs -->
+		<Directory Id="TARGETDIR" Name="SourceDir"/>
+    <CustomAction Id="SET_SHORTCUTDIR" Property="SHORTCUTDIR" Value="[ProgramMenuFolder][Manufacturer] [ProductName]" Execute="firstSequence" />
+    
+    
+    <!-- Features -->
+    
+    <Feature
+      Id="DataphorCore"
+      Title="Dataphor Core"
+      Description="The Main Dataphor Feature"
+      Display="expand"
+      Level="1">
+
+      <ComponentRef Id="BinFiles"/>
+      <ComponentRef Id="LibraryFiles"/>
+            
+      <Feature
+        Id="DataphoreDocumentation"
+        Title="Dataphore Documentation"
+        Description="Dataphore Documentation in CHM and PDF Formats"
+        Level="1">
+        
+        <ComponentRef Id="DocumentationFiles"/>
+        
+      </Feature>
+
+      <Feature
+        Id="WebClient"
+        Title="Web Client"
+        Description="Dataphor Web Client Application (Installs as an IIS application)"
+        Display="expand"
+        Level="1">
+        
+        <ComponentRef Id="WebClientFiles"/>
+        
+        <Feature
+          Id="WebClientService"
+          Title="Web Client Service"
+          Description="Set Web Client Service to Automatic at System Startup"
+          Display="expand"
+          Level="1">
+
+          <ComponentRef Id="WebClientService"/>
+
+        </Feature>
+
+      </Feature>
+
+      <Feature
+        Id="WebRegistration"
+        Title="Online Registration"
+        Description="Allows user to register online"
+        Display="expand"
+        Level="1">
+        
+      </Feature>
+
+    </Feature>
+    
+
+		<UIRef Id="WixUI_Common" />
+	
+		<UI>
+			<Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+			<TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+			<TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+			<TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+			
+			<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+			<Property Id="PIDTemplate" Value="####-####-####-####" />
+			<Property Id="ARPNOMODIFY" Value="1" />
+			
+			<DialogRef Id="BrowseDlg" />
+			<DialogRef Id="DiskCostDlg" />
+			<DialogRef Id="ErrorDlg" />
+			<DialogRef Id="FatalError" />
+			<DialogRef Id="FilesInUse" />
+			<DialogRef Id="MsiRMFilesInUse" />
+			<DialogRef Id="PrepareDlg" />
+			<DialogRef Id="ProgressDlg" />
+			<DialogRef Id="ResumeDlg" />
+			<DialogRef Id="UserExit" />
+			
+			<Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">1</Publish>
+			
+			<Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+			<Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+			<Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="FeaturesDlg" Order="2">1</Publish>
+			<Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+			<Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
+			
+			<Publish Dialog="FeaturesDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="1">1</Publish>
+			<!-- Publish Dialog="FeaturesDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="1">1</Publish-->
+
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="FeaturesDlg" Order="1">NOT Installed</Publish>
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed</Publish>
+			
+			<Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+
+			<Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+		</UI>
+	</Product>
+</Wix>

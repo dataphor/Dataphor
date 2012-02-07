@@ -22,9 +22,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		public Frame() {}
 
-		public Frame([PublishSource("SourceLinkType")] SourceLinkType ASourceLinkType): base()
+		public Frame([PublishSource("SourceLinkType")] SourceLinkType sourceLinkType): base()
 		{
-			SourceLinkType = ASourceLinkType;
+			SourceLinkType = sourceLinkType;
 			// No margin (by default)... the frame interface root node should have its own margin
 			MarginLeft = 0;
 			MarginRight = 0;
@@ -32,67 +32,67 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			MarginBottom = 0;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			BeforeCloseEmbedded = null;
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 			
 		// this link must be set first when deserializing.
 		// which is why it is set in the constructor
-		private SourceLinkType FSourceLinkType;
+		private SourceLinkType _sourceLinkType;
 		[DefaultValue(SourceLinkType.None)]
 		[RefreshProperties(RefreshProperties.All)]
 		[Description("Determines the data relationship between this document and the one that will be shown.")]
 		public SourceLinkType SourceLinkType
 		{
-			get { return FSourceLinkType; }
+			get { return _sourceLinkType; }
 			set
 			{
-				if (FSourceLinkType != value)
+				if (_sourceLinkType != value)
 				{
-					if (FSourceLink != null)
-						FSourceLink.Dispose();
-					FSourceLinkType = value;
-					if (FSourceLinkType == SourceLinkType.None)
-						FSourceLink = null;
+					if (_sourceLink != null)
+						_sourceLink.Dispose();
+					_sourceLinkType = value;
+					if (_sourceLinkType == SourceLinkType.None)
+						_sourceLink = null;
 					else 
 					{
-						if (FSourceLinkType == SourceLinkType.Surrogate)
-							FSourceLink = new SurrogateSourceLink(this);
-						else if (FSourceLinkType == SourceLinkType.Detail)
-							FSourceLink = new DetailSourceLink(this);
-						if (FFrameInterfaceNode != null)
-							FSourceLink.TargetSource = FFrameInterfaceNode.MainSource;
+						if (_sourceLinkType == SourceLinkType.Surrogate)
+							_sourceLink = new SurrogateSourceLink(this);
+						else if (_sourceLinkType == SourceLinkType.Detail)
+							_sourceLink = new DetailSourceLink(this);
+						if (_frameInterfaceNode != null)
+							_sourceLink.TargetSource = _frameInterfaceNode.MainSource;
 					}
 				}
 			}
 		}
 
-		private SourceLink FSourceLink;
+		private SourceLink _sourceLink;
 		[BOP.Publish(BOP.PublishMethod.Inline)]
 		[Description("Contains the specific settings based on the SourceLinkType.")]
 		public SourceLink SourceLink
 		{
-			get { return FSourceLink; }
-			set { FSourceLink = value; }
+			get { return _sourceLink; }
+			set { _sourceLink = value; }
 		}
 
 		// Document
 
-		private string FDocument = String.Empty;
+		private string _document = String.Empty;
 		[DefaultValue("")]
 		[Description("A form interface Document to load inside of the frame.")]
 		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", typeof(System.Drawing.Design.UITypeEditor))]
 		[DocumentExpressionOperator("Form")]
 		public string Document
 		{
-			get { return FDocument; }
+			get { return _document; }
 			set
 			{
-				if (FDocument != value)
+				if (_document != value)
 				{
-					FDocument = value;
+					_document = value;
 					UpdateFrameInterface();
 				}
 			}
@@ -100,49 +100,49 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// PostBeforeClosingEmbedded
 
-		private bool FPostBeforeClosingEmbedded;
+		private bool _postBeforeClosingEmbedded;
 		[DefaultValue(false)]
 		[Description("Determines whether the frame will automatically request a post of an embedded interface before closing it")]
 		public bool PostBeforeClosingEmbedded
 		{
-			get { return FPostBeforeClosingEmbedded; }
-			set { FPostBeforeClosingEmbedded = value; }
+			get { return _postBeforeClosingEmbedded; }
+			set { _postBeforeClosingEmbedded = value; }
 		}
 
 		// BeforeCloseEmbedded
 
-		private IAction FBeforeCloseEmbedded;
+		private IAction _beforeCloseEmbedded;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action that will be executed before closing an embedded interface (AInterface).")]
 		public IAction BeforeCloseEmbedded
 		{
-			get { return FBeforeCloseEmbedded; }
+			get { return _beforeCloseEmbedded; }
 			set
 			{
-				if (FBeforeCloseEmbedded != value)
+				if (_beforeCloseEmbedded != value)
 				{
-					if (FBeforeCloseEmbedded != null)
-						FBeforeCloseEmbedded.Disposed -= new EventHandler(BeforeCloseEmbeddedActionDisposed);
-					FBeforeCloseEmbedded = value;
-					if (FBeforeCloseEmbedded != null)
-						FBeforeCloseEmbedded.Disposed += new EventHandler(BeforeCloseEmbeddedActionDisposed);
+					if (_beforeCloseEmbedded != null)
+						_beforeCloseEmbedded.Disposed -= new EventHandler(BeforeCloseEmbeddedActionDisposed);
+					_beforeCloseEmbedded = value;
+					if (_beforeCloseEmbedded != null)
+						_beforeCloseEmbedded.Disposed += new EventHandler(BeforeCloseEmbeddedActionDisposed);
 				}
 			}
 		}
 
-		private void BeforeCloseEmbeddedActionDisposed(object ASender, EventArgs AArgs)
+		private void BeforeCloseEmbeddedActionDisposed(object sender, EventArgs args)
 		{
 			BeforeCloseEmbedded = null;
 		}
 
 		// FrameInterface
 
-		private FrameInterface FFrameInterfaceNode;
+		private FrameInterface _frameInterfaceNode;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public IFrameInterface FrameInterfaceNode
 		{
-			get { return FFrameInterfaceNode; }
+			get { return _frameInterfaceNode; }
 		}
 
 		private void UpdateFrameInterface()
@@ -150,15 +150,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			ResetFrameInterfaceNode(Active);
 		}
 
-		private void ResetFrameInterfaceNode(bool ABuild)
+		private void ResetFrameInterfaceNode(bool build)
 		{
 			BeginUpdate();
 			try
 			{
 				// Clean up the old frame if there is one
-				if (FFrameInterfaceNode != null)
+				if (_frameInterfaceNode != null)
 					EnsureFrameInterfaceClosed();
-				if (ABuild && (FDocument != String.Empty))
+				if (build && (_document != String.Empty))
 					LoadFrameInterface();
 			}
 			finally
@@ -171,29 +171,29 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void LoadFrameInterface()
 		{
-			IHost LHost = HostNode.Session.CreateHost();
+			IHost host = HostNode.Session.CreateHost();
 			try
 			{
-				FFrameInterfaceNode = new FrameInterface(this);
+				_frameInterfaceNode = new FrameInterface(this);
 				try
 				{
-					LHost.Load(FDocument, FFrameInterfaceNode);
-					if (FSourceLink != null)
-						FSourceLink.TargetSource = FFrameInterfaceNode.MainSource;
-					LHost.Open(!Active);
+					host.Load(_document, _frameInterfaceNode);
+					if (_sourceLink != null)
+						_sourceLink.TargetSource = _frameInterfaceNode.MainSource;
+					host.Open(!Active);
 					if (Active)
 						BroadcastEvent(new FormShownEvent());
 				}
 				catch
 				{
-					FFrameInterfaceNode.Dispose();
-					FFrameInterfaceNode = null;
+					_frameInterfaceNode.Dispose();
+					_frameInterfaceNode = null;
 					throw;
 				}
 			}
 			catch
 			{
-				LHost.Dispose();
+				host.Dispose();
 				throw;
 			}
 		}
@@ -201,28 +201,28 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private void EnsureFrameInterfaceClosed()
 		{
 			// Optionally post the data changes
-			if (FPostBeforeClosingEmbedded)
-				FFrameInterfaceNode.PostChanges();
+			if (_postBeforeClosingEmbedded)
+				_frameInterfaceNode.PostChanges();
 
 			// Invoke the before close embedded handler
-			if (FBeforeCloseEmbedded != null)
-				FBeforeCloseEmbedded.Execute(this, new EventParams("AInterface", FFrameInterfaceNode));
+			if (_beforeCloseEmbedded != null)
+				_beforeCloseEmbedded.Execute(this, new EventParams("AInterface", _frameInterfaceNode));
 
 			try
 			{
-				FFrameInterfaceNode.HostNode.BroadcastEvent(new DisableSourceEvent());
-				if (FSourceLink != null)
-					FSourceLink.TargetSource = null;
+				_frameInterfaceNode.HostNode.BroadcastEvent(new DisableSourceEvent());
+				if (_sourceLink != null)
+					_sourceLink.TargetSource = null;
 			}
 			finally
 			{
 				try
 				{
-					FFrameInterfaceNode.HostNode.Dispose();
+					_frameInterfaceNode.HostNode.Dispose();
 				}
 				finally
 				{
-					FFrameInterfaceNode = null;
+					_frameInterfaceNode = null;
 					RemoveMenu();
 				}
 			}
@@ -230,73 +230,73 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// IWindowsMenuHost
 
-		private IWindowsBarContainer FMenuContainer;
+		private IWindowsBarContainer _menuContainer;
 		[Browsable(false)]
 		public IWindowsBarContainer MenuContainer
 		{
 			get 
 			{ 
 				EnsureMenu();
-				return FMenuContainer; 
+				return _menuContainer; 
 			}
 		}
 
 		private void EnsureMenu()
 		{
-			if (FMenuContainer == null)
+			if (_menuContainer == null)
 			{
-				IWindowsMenuHost LWindowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
-				if (LWindowsMenuHost != null)
+				IWindowsMenuHost windowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
+				if (windowsMenuHost != null)
 				{
-					FMenuContainer = LWindowsMenuHost.MenuContainer.CreateContainer();
-					((IWindowsBarButton)FMenuContainer).Text = GetMenuText();
-					LWindowsMenuHost.MenuContainer.AddBarItem(FMenuContainer, null);
+					_menuContainer = windowsMenuHost.MenuContainer.CreateContainer();
+					((IWindowsBarButton)_menuContainer).Text = GetMenuText();
+					windowsMenuHost.MenuContainer.AddBarItem(_menuContainer, null);
 				}
 			}
 		}
 
 		private void RemoveMenu()
 		{
-			if (FMenuContainer != null)
+			if (_menuContainer != null)
 			{
-				IWindowsMenuHost LWindowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
-				if (LWindowsMenuHost != null)
-					LWindowsMenuHost.MenuContainer.RemoveBarItem(FMenuContainer);
-				FMenuContainer.Dispose();
-				FMenuContainer = null;
+				IWindowsMenuHost windowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
+				if (windowsMenuHost != null)
+					windowsMenuHost.MenuContainer.RemoveBarItem(_menuContainer);
+				_menuContainer.Dispose();
+				_menuContainer = null;
 			}
 		}
 
 		// MenuText
 
-		private string FMenuText = String.Empty;
+		private string _menuText = String.Empty;
 		[DefaultValue("")]
 		[Description("The menu name under which the frames' menus will be available.")]
 		public string MenuText
 		{
-			get { return FMenuText; }
+			get { return _menuText; }
 			set
 			{
-				FMenuText = value;
+				_menuText = value;
 				UpdateMenuText();
 			}
 		}
 
 		public string GetMenuText()
 		{
-			if (FMenuText == String.Empty)
+			if (_menuText == String.Empty)
 				if (Name != String.Empty)
 					return Name;
 				else
 					return Strings.CFrameDefaultMenuText;
 			else
-				return FMenuText;
+				return _menuText;
 		}
 
 		public void UpdateMenuText()
 		{
-			if (Active && (FMenuContainer != null))
-				((IWindowsBarButton)FMenuContainer).Text = GetMenuText();
+			if (Active && (_menuContainer != null))
+				((IWindowsBarButton)_menuContainer).Text = GetMenuText();
 		}
 
 		// Node
@@ -309,8 +309,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void AfterActivate()
 		{
-			if (FFrameInterfaceNode != null)
-				FFrameInterfaceNode.HostNode.AfterOpen();
+			if (_frameInterfaceNode != null)
+				_frameInterfaceNode.HostNode.AfterOpen();
 			base.AfterActivate();
 		}
 
@@ -326,10 +326,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		public override void BroadcastEvent(NodeEvent AEvent)
+		public override void BroadcastEvent(NodeEvent eventValue)
 		{
 			if (FrameInterfaceNode != null)
-				FrameInterfaceNode.BroadcastEvent(AEvent);
+				FrameInterfaceNode.BroadcastEvent(eventValue);
 		}
 
 		// IWindowsContainerElement
@@ -366,29 +366,29 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		protected override void InternalUpdateVisible() 
 		{
 			base.InternalUpdateVisible();
-			if (FMenuContainer != null)
-				FMenuContainer.Visible = GetVisible();
+			if (_menuContainer != null)
+				_menuContainer.Visible = GetVisible();
 		}
 
 		public override void VisibleChanged()
 		{
 			base.VisibleChanged();
-			if (FFrameInterfaceNode != null)
-				FFrameInterfaceNode.VisibleChanged();
+			if (_frameInterfaceNode != null)
+				_frameInterfaceNode.VisibleChanged();
 		}
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
-			if (FFrameInterfaceNode != null)
-				FFrameInterfaceNode.Layout(ABounds);
+			if (_frameInterfaceNode != null)
+				_frameInterfaceNode.Layout(bounds);
 		}
 
 		protected override Size InternalMinSize
 		{
 			get
 			{
-				if (FFrameInterfaceNode != null)
-					return FFrameInterfaceNode.MinSize;
+				if (_frameInterfaceNode != null)
+					return _frameInterfaceNode.MinSize;
 				else
 					return Size.Empty;
 			}
@@ -398,8 +398,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				if (FFrameInterfaceNode != null)
-					return FFrameInterfaceNode.MaxSize;
+				if (_frameInterfaceNode != null)
+					return _frameInterfaceNode.MaxSize;
 				else
 					return Size.Empty;
 			}
@@ -409,8 +409,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				if (FFrameInterfaceNode != null)
-					return FFrameInterfaceNode.NaturalSize;
+				if (_frameInterfaceNode != null)
+					return _frameInterfaceNode.NaturalSize;
 				else
 					return Size.Empty;
 			}
@@ -422,25 +422,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[PublishAs("Interface")]
 	public class FrameInterface : Interface, IWindowsContainerElement, IFrameInterface
 	{
-		public FrameInterface(IFrame AFrame) : base()
+		public FrameInterface(IFrame frame) : base()
 		{
-			FFrame = AFrame;
+			_frame = frame;
 		}
 
 		// Frame
 
-		private IFrame FFrame;
+		private IFrame _frame;
 		
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public IFrame Frame
 		{
-			get { return FFrame; }
+			get { return _frame; }
 		}
 
 		// BackgroundImage
 
-		private string FBackgroundImage = String.Empty;
+		private string _backgroundImage = String.Empty;
 		
 		/// <summary> Frame does nothing with the BackgroundImage, but it's value is preserved. </summary>
 		[DefaultValue("")]
@@ -448,13 +448,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[DocumentExpressionOperator("Image")]
 		public override string BackgroundImage
 		{
-			get { return FBackgroundImage; }
-			set { FBackgroundImage = value; }
+			get { return _backgroundImage; }
+			set { _backgroundImage = value; }
 		}
 
 		// IconImage
 
-		private string FIconImage = String.Empty;
+		private string _iconImage = String.Empty;
 
 		/// <remarks> Frame does nothing with the IconImage, but it's value is preserved. </remarks>
 		[DefaultValue("")]
@@ -462,8 +462,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[DocumentExpressionOperator("Image")]
 		public override string IconImage
 		{
-			get { return FIconImage; }
-			set { FIconImage = value; }
+			get { return _iconImage; }
+			set { _iconImage = value; }
 		}
 
 		/// <remarks> Frame does nothing with the ForceAcceptReject. Vestigial of IInterface ancestry. </remarks>
@@ -483,7 +483,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public override INode Parent
 		{
-			get { return FFrame; }
+			get { return _frame; }
 		}
 
 		// IWindowsContainerElement
@@ -492,7 +492,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[Browsable(false)]
 		public WinForms.Control Control
 		{
-			get { return ((IWindowsContainerElement)FFrame).Control; }
+			get { return ((IWindowsContainerElement)_frame).Control; }
 		}
 	}
 }

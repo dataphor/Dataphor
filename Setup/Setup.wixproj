@@ -1,0 +1,38 @@
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{F9098478-6455-4A97-B268-8B6B6228C101}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Package</OutputType>
+    <RootNamespace>Setup</RootNamespace>
+    <OutputName Condition=" '$(OutputName)' == '' ">Dataphor</OutputName>
+    <WixToolPath>../Utilities\wix\3.5\</WixToolPath>
+    <WixTargetsPath>Wix.targets</WixTargetsPath>
+    <WixTasksPath>wixtasks.dll</WixTasksPath>
+    <SupressIces>ICE45</SupressIces>
+    <WixVariables>WixUILicenseRtf=license.rtf</WixVariables>
+    <OutputPath Condition=" '$(OutputPath)' == '' ">$(MSBuildProjectDirectory)\..\..\MSIs</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>Full</DebugType>
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>False</DebugSymbols>
+    <DebugType>None</DebugType>
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DefineConstants>
+    </DefineConstants>
+  </PropertyGroup>
+  <Import Project="$(WixToolPath)\wix.targets" />
+  <ItemGroup>
+    <WixExtension Include="WixUIExtension">
+      <HintPath>..\Utilities\Wix\3.5\WixUIExtension.dll</HintPath>
+    </WixExtension>
+    <Compile Include="Files.wxs" />
+    <Compile Include="Setup.wxs" />
+  </ItemGroup>
+</Project>

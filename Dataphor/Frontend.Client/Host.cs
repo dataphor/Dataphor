@@ -17,14 +17,14 @@ namespace Alphora.Dataphor.Frontend.Client
 	public class Host : Node, IHost
 	{
 		/// <summary> Create a new host object. </summary>
-		/// <param name="ASession"> The session which this host is part of. </param>
-		public Host(Session ASession) : base()
+		/// <param name="session"> The session which this host is part of. </param>
+		public Host(Session session) : base()
 		{
-			FSession = ASession;
+			_session = session;
 		}
 
 		/// <remarks> Calls Close (<see cref="Close"/>) and dereferences ParentHost. </remarks>
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -32,36 +32,36 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
 		// Session
 
-		private Session FSession;
+		private Session _session;
 		public virtual Session Session
 		{
-			get { return FSession; }
+			get { return _session; }
 		}
 
 		// Pipe
 
 		public virtual Pipe Pipe
 		{
-			get { return FSession.Pipe; }
+			get { return _session.Pipe; }
 		}
 
 		// Document
 
-		private string FDocument = String.Empty;
+		private string _document = String.Empty;
 		public string Document
 		{
-			get { return FDocument; }
+			get { return _document; }
 			set 
 			{ 
-				if (value != FDocument)
+				if (value != _document)
 				{
-					FDocument = ( value == null ? String.Empty : value ); 
+					_document = ( value == null ? String.Empty : value ); 
 					if (OnDocumentChanged != null)
 						OnDocumentChanged(this, EventArgs.Empty);
 				}
@@ -72,11 +72,11 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// NextRequest
 
-		private Request FNextRequest;
+		private Request _nextRequest;
 		public Request NextRequest
 		{
-			get { return FNextRequest; }
-			set { FNextRequest = value; }
+			get { return _nextRequest; }
+			set { _nextRequest = value; }
 		}
 
 		/// <summary> Ensures that this host does not have a parent. </summary>
@@ -88,7 +88,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// Active
 
-		private bool FActive;
+		private bool _active;
 		/// <remarks> When true the host node and all it's children are active. </remarks>
 		public override bool Active
 		{
@@ -97,7 +97,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				if (Parent != null)
 					return base.Active;
 				else
-					return FActive & !Transitional;
+					return _active & !Transitional;
 			}
 		}
 
@@ -106,14 +106,14 @@ namespace Alphora.Dataphor.Frontend.Client
 			Open(false);
 		}
 
-		public void Open(bool ADeferAfterActivate)
+		public void Open(bool deferAfterActivate)
 		{
 			if (!Active)
 			{
 				CheckRootNode();
 				ActivateAll();
-				FActive = true;
-				if (!ADeferAfterActivate)
+				_active = true;
+				if (!deferAfterActivate)
 					AfterActivate();
 			}
 		}
@@ -135,118 +135,118 @@ namespace Alphora.Dataphor.Frontend.Client
 				}
 				finally
 				{
-					FActive = false;
+					_active = false;
 					DeactivateAll();
 				}
 			}
 		}
 
-		public INode Load(string ADocument, object AInstance)
+		public INode Load(string document, object instance)
 		{
-			string LDocumentValue = EvaluateDocument(ADocument);
+			string documentValue = EvaluateDocument(document);
 			Children.Clear();
  
-			Deserializer LDeserializer;
+			Deserializer deserializer;
 
-			LDeserializer = Session.CreateDeserializer();
+			deserializer = Session.CreateDeserializer();
 
-			INode LNode;
+			INode node;
 			try
 			{
-				LNode = (INode)LDeserializer.Deserialize(LDocumentValue, AInstance);
+				node = (INode)deserializer.Deserialize(documentValue, instance);
 				try
 				{
-					LNode.Owner = this;
+					node.Owner = this;
 				}
 				catch
 				{
-					LNode.Dispose();
+					node.Dispose();
 					throw;
 				}
 			}
 			catch (Exception E)
 			{
-				throw new ClientException(ClientException.Codes.DocumentDeserializationError, E, LDocumentValue);
+				throw new ClientException(ClientException.Codes.DocumentDeserializationError, E, documentValue);
 			}
-			if (LDeserializer.Errors.Count > 0)
-				HandleDeserializationErrors(LDeserializer.Errors);
-			Children.Add(LNode);
-			Document = ADocument;
-			return LNode;
+			if (deserializer.Errors.Count > 0)
+				HandleDeserializationErrors(deserializer.Errors);
+			Children.Add(node);
+			Document = document;
+			return node;
 		}
 
-		private string EvaluateDocument(string ADocument)
+		private string EvaluateDocument(string document)
 		{
 			// Optimization: check to see if the document expression is merely a string literal before making a trip to the server
-			var LExpression = new DAE.Language.D4.Parser().ParseExpression(ADocument);
-			var LStringValue = LExpression as DAE.Language.ValueExpression;
-			if (LStringValue != null && LStringValue.Token == DAE.Language.TokenType.String)
-				return (string)LStringValue.Value;
+			var expression = new DAE.Language.D4.Parser().ParseExpression(document);
+			var stringValue = expression as DAE.Language.ValueExpression;
+			if (stringValue != null && stringValue.Token == DAE.Language.TokenType.String)
+				return (string)stringValue.Value;
 			else
-				using (DAE.Runtime.Data.Scalar LScalar = Pipe.RequestDocument(ADocument))
+				using (DAE.Runtime.Data.Scalar scalar = Pipe.RequestDocument(document))
 				{
-					return LScalar.AsString;
+					return scalar.AsString;
 				}
 		}
 
-		public INode LoadNext(object AInstance)
+		public INode LoadNext(object instance)
 		{
-			Request LRequest = NextRequest;
+			Request request = NextRequest;
 			NextRequest = null;
-			if (LRequest != null)
-				return Load(LRequest.Document, AInstance);
+			if (request != null)
+				return Load(request.Document, instance);
 			else
 				return null;
 		}
 
 		/// <summary> Determines a unique name for the specified node. </summary>
-		public void GetUniqueName(INode ANode)
+		public void GetUniqueName(INode node)
 		{
-            string LBaseName;
-			int LCount = 1;
+            string baseName;
+			int count = 1;
 
-			if (ANode.Name == String.Empty)
-				LBaseName = ANode.GetType().Name;
+			if (node.Name == String.Empty)
+				baseName = node.GetType().Name;
 			else
-				LBaseName = ANode.Name;
+				baseName = node.Name;
 
-			if (GetNode(LBaseName, ANode) == null)	// will the unaffected name do?
-				ANode.Name = LBaseName;
+			if (GetNode(baseName, node) == null)	// will the unaffected name do?
+				node.Name = baseName;
 			else
 			{
 				// Strip any trailing number from the name
-				int LNumIndex = LBaseName.Length - 1;
-				while ((LNumIndex >= 0) && Char.IsNumber(LBaseName, LNumIndex))
-					LNumIndex--;
-				if (LNumIndex < (LBaseName.Length - 1))
+				int numIndex = baseName.Length - 1;
+				while ((numIndex >= 0) && Char.IsNumber(baseName, numIndex))
+					numIndex--;
+				if (numIndex < (baseName.Length - 1))
 				{
-					LCount = Int32.Parse(LBaseName.Substring(LNumIndex + 1));
-					LBaseName = LBaseName.Substring(0, LNumIndex + 1);
+					count = Int32.Parse(baseName.Substring(numIndex + 1));
+					baseName = baseName.Substring(0, numIndex + 1);
 				}
 
 				// Iterate through numbers until a unique number is found
-				string LName;
+				string name;
 				do
 				{
-					LName = LBaseName + LCount.ToString();
-					LCount++;
-				} while (GetNode(LName, ANode) != null);
-				ANode.Name = LName;
+					name = baseName + count.ToString();
+					count++;
+				} while (GetNode(name, node) != null);
+				node.Name = name;
 			}
 		}
 
 		/// <remarks> Allows any type of child. </remarks>
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
 			return true;
 		}
 
 		public event DeserializationErrorsHandler OnDeserializationErrors;
 
-		public void HandleDeserializationErrors(ErrorList AErrors)
+		public void HandleDeserializationErrors(ErrorList errors)
 		{
 			if (OnDeserializationErrors != null)
-				OnDeserializationErrors(this, AErrors);
+				OnDeserializationErrors(this, errors);
 		}
 	}
 

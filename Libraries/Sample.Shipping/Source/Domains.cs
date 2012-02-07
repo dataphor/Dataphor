@@ -22,37 +22,37 @@ namespace Alphora.Shipping
 	/// </summary>
     public class SQLCoordinate : SQLScalarType
     {
-		public SQLCoordinate(int AID, string AName) : base(AID, AName) {}
+		public SQLCoordinate(int iD, string name) : base(iD, name) {}
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			return StringToCoordinate((string)AValue);
+			return StringToCoordinate((string)tempValue);
 		}
 		
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			return CoordinateToString((Coordinate)AValue);
+			return CoordinateToString((Coordinate)tempValue);
 		}
 
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
+		public override SQLType GetSQLType(D4.MetaData metaData)
 		{
 			return new SQLStringType(25);
 		}
 		
-		protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+		protected override string InternalNativeDomainName(D4.MetaData metaData)
 		{
 			return "varchar(25)";
 		}
 
-		public string CoordinateToString(Coordinate ACoordinate)
+		public string CoordinateToString(Coordinate coordinate)
 		{
-			return String.Format("{0:F6}/{1:F6}", ACoordinate.Latitude, ACoordinate.Longitude);
+			return String.Format("{0:F6}/{1:F6}", coordinate.Latitude, coordinate.Longitude);
 		}
 		
-		public Coordinate StringToCoordinate(string AValue)
+		public Coordinate StringToCoordinate(string tempValue)
 		{
-			int LIndex = AValue.IndexOf('/');
-			return new Coordinate(Decimal.Parse(AValue.Substring(0, LIndex)), Decimal.Parse(AValue.Substring(LIndex + 1, AValue.Length - (LIndex + 1))));
+			int index = tempValue.IndexOf('/');
+			return new Coordinate(Decimal.Parse(tempValue.Substring(0, index)), Decimal.Parse(tempValue.Substring(index + 1, tempValue.Length - (index + 1))));
 		}
     }
 }

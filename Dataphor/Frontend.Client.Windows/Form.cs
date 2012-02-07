@@ -25,24 +25,36 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	public class FormInterface : Interface, IWindowsFormInterface, IWindowsMenuHost, IAccelerates, IWindowsExposedHost, IWindowsContainerElement, IUpdateHandler, IErrorSource
 	{
 		// Min and max height are in terms root element size
-		public const int CMinWidth = 310;
-		public const int CMinHeight = 4;
+		public const int MinWidth = 310;
+		public const int MinHeight = 4;
 
-		public const int CMarginLeft = 4;
-		public const int CMarginRight = 4;
-		public const int CMarginTop = 6;
-		public const int CMarginBottom = 6;
+		public const int MarginLeft = 4;
+		public const int MarginRight = 4;
+		public const int MarginTop = 6;
+		public const int MarginBottom = 6;
 
 		public const int WM_NEXTDLGCTL = 0x0028;
+
+		protected override void Dispose(bool disposed)
+		{
+			try
+			{
+				base.Dispose(disposed);
+			}
+			finally
+			{
+				OnBeforeAccept = null;
+			}
+		}
 	
 		#region IAccelerates
 
-		private AcceleratorManager FAccelerators = new AcceleratorManager();
+		private AcceleratorManager _accelerators = new AcceleratorManager();
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public AcceleratorManager Accelerators
 		{
-			get { return FAccelerators; }
+			get { return _accelerators; }
 		}
 
 		#endregion
@@ -52,55 +64,55 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[Browsable(false)]
 		public IWindowsBarContainer MenuContainer
 		{
-			get { return (FForm == null ? null : FForm.MenuContainer); }
+			get { return (_form == null ? null : _form.MenuContainer); }
 		}
 
 		#endregion
 
 		#region IWindowsInterface
 
-		private Dictionary<object, FormInterfaceHandler> FCustomActionHandlers = new Dictionary<object, FormInterfaceHandler>();
+		private Dictionary<object, FormInterfaceHandler> _customActionHandlers = new Dictionary<object, FormInterfaceHandler>();
 
-		public virtual object AddCustomAction(string AText, System.Drawing.Image AImage, FormInterfaceHandler AHandler)
+		public virtual object AddCustomAction(string text, System.Drawing.Image image, FormInterfaceHandler handler)
 		{
-			object LResult = 
-				FForm.AddCustomAction
+			object result = 
+				_form.AddCustomAction
 				(
-					AText, 
-					AImage, 
+					text, 
+					image, 
 					new EventHandler
 					(
 						delegate(object ASender, EventArgs AArgs) 
 						{
-							FCustomActionHandlers[ASender](this);
+							_customActionHandlers[ASender](this);
 						}
 					)
 				);
-			FCustomActionHandlers.Add(LResult, AHandler);
-			return LResult;
+			_customActionHandlers.Add(result, handler);
+			return result;
 		}
 
-		public virtual void RemoveCustomAction(object AAction)
+		public virtual void RemoveCustomAction(object action)
 		{
-			FForm.RemoveCustomAction(AAction);
-			FCustomActionHandlers.Remove(AAction);
+			_form.RemoveCustomAction(action);
+			_customActionHandlers.Remove(action);
 		}
 
 		public virtual void ClearCustomActions()
 		{
-			FForm.ClearCustomActions();
-			FCustomActionHandlers.Clear();
+			_form.ClearCustomActions();
+			_customActionHandlers.Clear();
 		}
 
-		private ErrorList FErrorList;
+		private ErrorList _errorList;
 		[Browsable(false)]
-		public ErrorList ErrorList { get { return FErrorList; }	}
+		public ErrorList ErrorList { get { return _errorList; }	}
 
-		public virtual void EmbedErrors(ErrorList AErrorList)
+		public virtual void EmbedErrors(ErrorList errorList)
 		{
-			FErrorList = AErrorList;
+			_errorList = errorList;
 			if (Active)
-				FForm.EmbedErrors(AErrorList);
+				_form.EmbedErrors(errorList);
 		}
 
 		#endregion
@@ -110,7 +122,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[Browsable(false)]
 		public IWindowsBarContainer ExposedContainer
 		{
-			get { return (FForm == null ? null : FForm.ExposedContainer); }
+			get { return (_form == null ? null : _form.ExposedContainer); }
 		}
 
 		#endregion
@@ -119,7 +131,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// BackgroundImage
 
-		private string FBackgroundImage = String.Empty;
+		private string _backgroundImage = String.Empty;
 
 		/// <summary> A URL referring to an image resource which is used as a background for the Form. </summary>
 		[DefaultValue("")]
@@ -128,19 +140,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[DocumentExpressionOperator("Image")]
 		public override string BackgroundImage
 		{
-			get { return FBackgroundImage; }
+			get { return _backgroundImage; }
 			set
 			{
-				if (FBackgroundImage != value)
+				if (_backgroundImage != value)
 				{
-					FBackgroundImage = value;
+					_backgroundImage = value;
 					if (Active)
 						UpdateBackgroundImage();
 				}
 			}
 		}
 	
-		private AsyncImageRequest FBackgroundImageRequest = null;
+		private AsyncImageRequest _backgroundImageRequest = null;
 
 		private void UpdateBackgroundImage()
 		{
@@ -148,27 +160,27 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				ClearBackgroundImage();
 			else
 			{
-				FBackgroundImageRequest = new AsyncImageRequest(this, FBackgroundImage, new EventHandler(BackgroundLoaded));
+				_backgroundImageRequest = new AsyncImageRequest(this, _backgroundImage, new EventHandler(BackgroundLoaded));
 			}
 		}
 
-		private void BackgroundLoaded(object ASender, EventArgs AArgs)
+		private void BackgroundLoaded(object sender, EventArgs args)
 		{
-			FForm.BackgroundImage = ((AsyncImageRequest)ASender).Image;
+			_form.BackgroundImage = ((AsyncImageRequest)sender).Image;
 		}
 
 		private void ClearBackgroundImage()
 		{
-			if (FForm.BackgroundImage != null)
+			if (_form.BackgroundImage != null)
 			{
-				FForm.BackgroundImage.Dispose();
-				FForm.BackgroundImage = null;
+				_form.BackgroundImage.Dispose();
+				_form.BackgroundImage = null;
 			}
 		}
 
 		// IconImage
 
-		private string FIconImage = String.Empty;
+		private string _iconImage = String.Empty;
 
 		/// <summary> The image be used as an icon for this form. </summary>
 		[DefaultValue("")]
@@ -177,52 +189,78 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[DocumentExpressionOperator("Image")]
 		public override string IconImage
 		{
-			get { return FIconImage; }
+			get { return _iconImage; }
 			set
 			{
-				if (FIconImage != value)
+				if (_iconImage != value)
 				{
-					FIconImage = value;
+					_iconImage = value;
 					if (Active)
 						UpdateImage();
 				}
 			}
 		}
 	
-		private AsyncImageRequest FImageRequest = null;
+		private AsyncImageRequest _imageRequest = null;
 
 		private void UpdateImage()
 		{
-			if (FIconImage == String.Empty)
+			if (_iconImage == String.Empty)
 				ClearImage();
 			else
 			{
-				FImageRequest = new AsyncImageRequest(this, FIconImage, new EventHandler(ImageLoaded));
+				_imageRequest = new AsyncImageRequest(this, _iconImage, new EventHandler(ImageLoaded));
 			}
 		}
 
-		private void ImageLoaded(object ASender, EventArgs AArgs)
+		private void ImageLoaded(object sender, EventArgs args)
 		{
-			if (FImageRequest.Image is Bitmap)
-				FForm.Icon = Icon.FromHandle(((Bitmap)FImageRequest.Image).GetHicon());
+			if (_imageRequest.Image is Bitmap)
+				_form.Icon = Icon.FromHandle(((Bitmap)_imageRequest.Image).GetHicon());
 		}
 
 		private void ClearImage()
 		{
-			Icon LDefaultIcon = ((Session)HostNode.Session).DefaultIcon;
+			Icon defaultIcon = ((Session)HostNode.Session).DefaultIcon;
 			if 
 			(
-				(FForm.Icon != null) && 
+				(_form.Icon != null) && 
 				(
-					(LDefaultIcon == null) || 
-					((LDefaultIcon != null) && (FForm.Icon != LDefaultIcon))
+					(defaultIcon == null) || 
+					((defaultIcon != null) && (_form.Icon != defaultIcon))
 				)
 			)
-				FForm.Icon.Dispose();
-			if (LDefaultIcon != null)
-				FForm.Icon = LDefaultIcon;
+				_form.Icon.Dispose();
+			if (defaultIcon != null)
+				_form.Icon = defaultIcon;
 			else
-				FForm.ResetIcon();
+				_form.ResetIcon();
+		}
+
+		// TopMost
+		
+		private bool _topMost;
+		[DefaultValue(false)]
+		[Publish(PublishMethod.None)]
+		public bool TopMost 
+		{ 
+			get { return _topMost; }
+			set 
+			{
+				if (_topMost != value)
+				{
+					_topMost = value;
+					if (Active)
+						UpdateTopMost();
+				}
+			}
+		}
+
+		private void UpdateTopMost()
+		{
+			// HACK: if the form's TopMost property is set to false (even though it already is false) the first control is not focused.
+			if (_topMost != Form.TopMost)
+				Form.TopMost = _topMost;
 		}
 
 		#endregion
@@ -231,34 +269,34 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// IsAcceptReject
 
-		private bool FSupressCloseButton;
+		private bool _supressCloseButton;
 		/// <summary> Supresses the Close button on the form. </summary>
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public bool SupressCloseButton
 		{
-			get { return FSupressCloseButton; }
+			get { return _supressCloseButton; }
 			set 
 			{ 
-				if (FSupressCloseButton != value)
+				if (_supressCloseButton != value)
 				{
-					FSupressCloseButton = value; 
+					_supressCloseButton = value; 
 					if (Active)
 						AcceptRejectChanged();
 				}
 			}
 		}
 
-		private bool FForceAcceptReject;
+		private bool _forceAcceptReject;
 		[DefaultValue(false)]
 		public bool ForceAcceptReject
 		{
-			get { return FForceAcceptReject; }
+			get { return _forceAcceptReject; }
 			set
 			{
-				if (FForceAcceptReject != value)
+				if (_forceAcceptReject != value)
 				{
-					FForceAcceptReject = value;
+					_forceAcceptReject = value;
 					AcceptRejectChanged();
 				}
 			}
@@ -271,8 +309,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			get
 			{
 				return 
-					ForceAcceptReject 
-						|| (FMode != FormMode.None) 
+					AcceptEnabled
+					&&
+					(
+						ForceAcceptReject 
+						|| (_mode != FormMode.None) 
 						|| 
 						(
 							(MainSource != null) &&
@@ -281,32 +322,87 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 								(MainSource.DataView.State == DAE.Client.DataSetState.Edit) || 
 								(MainSource.DataView.State == DAE.Client.DataSetState.Insert)
 							)
-						);
+						)
+					);
 			}
 		}
 
-		private AcceptRejectState FAcceptRejectState;
+		private bool _acceptEnabled = true;
+		[DefaultValue(true)]
+		public bool AcceptEnabled
+		{
+			get { return _acceptEnabled; }
+			set
+			{
+				if (_acceptEnabled != value)
+				{
+					_acceptEnabled = value;
+					AcceptRejectChanged();
+				}
+			}
+		}
+
+		// OnBeforeAccept
+
+		private IAction _onBeforeAccept;
+		[TypeConverter(typeof(NodeReferenceConverter))]
+		[Description("An action that will be executed before the form is accepted.")]
+		public IAction OnBeforeAccept
+		{
+			get { return _onBeforeAccept; }
+			set
+			{
+				if (_onBeforeAccept != value)
+				{
+					if (_onBeforeAccept != null)
+						_onBeforeAccept.Disposed -= new EventHandler(OnBeforeAcceptDisposed);
+					_onBeforeAccept = value;
+					if (_onBeforeAccept != null)
+						_onBeforeAccept.Disposed += new EventHandler(OnBeforeAcceptDisposed);
+				}
+			}
+		}
+		 
+		private void OnBeforeAcceptDisposed(object sender, EventArgs args)
+		{
+			_onBeforeAccept = null;
+		}
+
+		protected virtual void BeforeAccept()
+		{
+			try
+			{
+				if (OnBeforeAccept != null)
+					OnBeforeAccept.Execute(this, new EventParams());
+			}
+			catch (Exception exception)
+			{
+				Session.HandleException(exception);
+			}
+		} 		
+				
+		private AcceptRejectState _acceptRejectState;
 
 		protected void AcceptRejectChanged()
 		{
-			bool LIsAcceptReject = IsAcceptReject;
+			bool isAcceptReject = IsAcceptReject;
 			if 
 			(
-				(FAcceptRejectState == AcceptRejectState.None) ||
-				(LIsAcceptReject != (FAcceptRejectState == AcceptRejectState.True))
+				(_acceptRejectState == AcceptRejectState.None) ||
+				(isAcceptReject != (_acceptRejectState == AcceptRejectState.True))
 			)
 			{
-				if (LIsAcceptReject)
-					FAcceptRejectState = AcceptRejectState.True;
+				if (isAcceptReject)
+					_acceptRejectState = AcceptRejectState.True;
 				else
-					FAcceptRejectState = AcceptRejectState.False;
+					_acceptRejectState = AcceptRejectState.False;
 
-				if (FForm != null)
-					FForm.SetAcceptReject(LIsAcceptReject, FSupressCloseButton);
+				if (_form != null)
+					_form.SetAcceptReject(isAcceptReject, _supressCloseButton);
 			}
 		}
 
-		protected override void MainSourceStateChanged(DAE.Client.DataLink ALink, DAE.Client.DataSet ADataSet)
+		protected override void MainSourceStateChanged(DAE.Client.DataLink link, DAE.Client.DataSet dataSet)
 		{
 			if (Active)
 				AcceptRejectChanged();
@@ -324,19 +420,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				SetForm(CreateForm());
 				try
 				{
-					FForm.SuspendLayout();
+					_form.SuspendLayout();
 					try
 					{
-						FAcceptRejectState = AcceptRejectState.None;
+						_acceptRejectState = AcceptRejectState.None;
 
-						FAccelerators.Reset();
-						FAccelerators.Allocate('C');	// Close / Accept
-						FAccelerators.Allocate('F');	// Form
-						FAccelerators.Allocate('R');	// Reject (must allocate now, cuz we won't be able to re-claim it if we go from Close to Accept/Reject)
+						_accelerators.Reset();
+						_accelerators.Allocate('C');	// Close / Accept
+						_accelerators.Allocate('F');	// Form
+						_accelerators.Allocate('R');	// Reject (must allocate now, cuz we won't be able to re-claim it if we go from Close to Accept/Reject)
 
-						if (FErrorList != null)
-							FForm.EmbedErrors(FErrorList);
-						FForm.ForeColor = ((Session)HostNode.Session).Theme.ForeColor;
+						if (_errorList != null)
+							_form.EmbedErrors(_errorList);
+						_form.ForeColor = ((Session)HostNode.Session).Theme.ForeColor;
 
 						base.Activate();
 						InternalUpdateEnabled();
@@ -345,13 +441,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					}
 					catch
 					{
-						FForm.ResumeLayout(false);
+						_form.ResumeLayout(false);
 						throw;
 					}
 				}
 				catch
 				{
-					FForm.Dispose();
+					_form.Dispose();
 					SetForm(null);
 					throw;
 				}
@@ -365,14 +461,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		protected override void BeforeDeactivate()
 		{
 			// Don't BeginUpdate() here, this causes the screen to not be refreshed where the form was.
-			FForm.SuspendLayout();
+			_form.SuspendLayout();
 			try
 			{
 				base.BeforeDeactivate();
 			}
 			catch
 			{
-				FForm.ResumeLayout(false);
+				_form.ResumeLayout(false);
 				throw;
 			}
 		}
@@ -381,9 +477,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			try
 			{
-				if (FForm != null)
+				if (_form != null)
 				{
-					FForm.Hide();
+					_form.Hide();
 					base.Deactivate();
 				}
 				else
@@ -391,11 +487,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			finally
 			{
-				if (FForm != null)
+				if (_form != null)
 				{
 					// Don't bother resuming layout and ending update.
 					ClearBackgroundImage();
-					FForm.Dispose();
+					_form.Dispose();
 					SetForm(null);
 				}
 			}
@@ -403,7 +499,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void AfterActivate()
 		{
-			WinForms.Cursor LOldCursor = WinForms.Cursor.Current;
+			WinForms.Cursor oldCursor = WinForms.Cursor.Current;
 			WinForms.Cursor.Current = WinForms.Cursors.WaitCursor;
 			try
 			{
@@ -414,6 +510,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 						UpdateActiveControl(null);
 						UpdateBackgroundImage();
 						UpdateImage();
+						UpdateTopMost();
 					}
 					finally
 					{
@@ -422,28 +519,28 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				}
 				finally
 				{
-					FForm.ResumeLayout(false);
+					_form.ResumeLayout(false);
 				}
 			}
 			finally
 			{
-				WinForms.Cursor.Current = LOldCursor;
+				WinForms.Cursor.Current = oldCursor;
 			}
 			((Session)HostNode.Session).DoAfterFormActivate(this);
 		}
 
-		public override void HandleEvent(NodeEvent AEvent)
+		public override void HandleEvent(NodeEvent eventValue)
 		{
-			if (AEvent is FocusChangedEvent)
-				UpdateActiveControl(((FocusChangedEvent)AEvent).Node);
-			else if (AEvent is AdvanceFocusEvent)
-				Form.AdvanceFocus(((AdvanceFocusEvent)AEvent).Forward);
+			if (eventValue is FocusChangedEvent)
+				UpdateActiveControl(((FocusChangedEvent)eventValue).Node);
+			else if (eventValue is AdvanceFocusEvent)
+				Form.AdvanceFocus(((AdvanceFocusEvent)eventValue).Forward);
 			else
 			{
-				base.HandleEvent(AEvent);
+				base.HandleEvent(eventValue);
 				return;
 			}
-			AEvent.IsHandled = true;
+			eventValue.IsHandled = true;
 		}
 
 		#endregion
@@ -452,7 +549,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		public override void PerformDefaultAction()
 		{
-			if (FMode == FormMode.None) 
+			if (_mode == FormMode.None) 
 			{
 				if (OnDefault != null)
 					OnDefault.Execute(this, new EventParams());
@@ -463,7 +560,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public string GetDefaultActionDescription()
 		{
-			if (FMode == FormMode.None)
+			if (_mode == FormMode.None)
 				if (OnDefault != null)
 					return OnDefault.GetDescription();
 				else
@@ -475,59 +572,61 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		protected override void DefaultChanged()
 		{
 			if (Active)
-				FForm.UpdateStatusText();
+				_form.UpdateStatusText();
 		}
 
 		#endregion
 
 		#region Form
 
-		private IBaseForm FForm;
+		private IBaseForm _form;
 		/// <summary> Represents for windows Form object which is maintained by this node. </summary>
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public IBaseForm Form
 		{
-			get { return FForm; }
+			get { return _form; }
 		}
 
-		private void SetForm(IBaseForm AForm)
+		private void SetForm(IBaseForm form)
 		{
-			if (FForm != AForm)
+			if (_form != form)
 			{
-				if (FForm != null)
+				if (_form != null)
 				{
-					FForm.Closing -= new CancelEventHandler(FormClosing);
-					FForm.Closed -= new EventHandler(FormClosed);
-					FForm.PaintBackground -= new PaintHandledEventHandler(FormPaintBackground);
-					FForm.LayoutContents -= new EventHandler(FormLayoutContents);
-					FForm.GetNaturalSize -= new GetSizeHandler(FormGetNaturalSize);
-					FForm.DefaultAction -= new EventHandler(FormDefaultAction);
-					FForm.Shown -= new EventHandler(FormShown);
-					FForm.GetDefaultActionDescription -= new GetStringHandler(FormGetDefaultActionDescription);
+					_form.Accepting -= new EventHandler(FormAccepting);
+					_form.Closing -= new CancelEventHandler(FormClosing);
+					_form.Closed -= new EventHandler(FormClosed);
+					_form.PaintBackground -= new PaintHandledEventHandler(FormPaintBackground);
+					_form.LayoutContents -= new EventHandler(FormLayoutContents);
+					_form.GetNaturalSize -= new GetSizeHandler(FormGetNaturalSize);
+					_form.DefaultAction -= new EventHandler(FormDefaultAction);
+					_form.Shown -= new EventHandler(FormShown);
+					_form.GetDefaultActionDescription -= new GetStringHandler(FormGetDefaultActionDescription);
 
-					((Session)HostNode.Session).UnregisterControlHelp((WinForms.Control)FForm);
+					((Session)HostNode.Session).UnregisterControlHelp((WinForms.Control)_form);
 				}
-				FForm = AForm;
-				if (FForm != null)
+				_form = form;
+				if (_form != null)
 				{
-					FForm.Closing += new CancelEventHandler(FormClosing);
-					FForm.Closed += new EventHandler(FormClosed);
-					FForm.PaintBackground += new PaintHandledEventHandler(FormPaintBackground);
-					FForm.LayoutContents += new EventHandler(FormLayoutContents);
-					FForm.GetNaturalSize += new GetSizeHandler(FormGetNaturalSize);
-					FForm.DefaultAction += new EventHandler(FormDefaultAction);
-					FForm.Shown += new EventHandler(FormShown);
-					FForm.GetDefaultActionDescription += new GetStringHandler(FormGetDefaultActionDescription);
+					_form.Accepting += new EventHandler(FormAccepting);
+					_form.Closing += new CancelEventHandler(FormClosing);
+					_form.Closed += new EventHandler(FormClosed);
+					_form.PaintBackground += new PaintHandledEventHandler(FormPaintBackground);
+					_form.LayoutContents += new EventHandler(FormLayoutContents);
+					_form.GetNaturalSize += new GetSizeHandler(FormGetNaturalSize);
+					_form.DefaultAction += new EventHandler(FormDefaultAction);
+					_form.Shown += new EventHandler(FormShown);
+					_form.GetDefaultActionDescription += new GetStringHandler(FormGetDefaultActionDescription);
 
-					FForm.HelpButton = ((Session)HostNode.Session).IsContextHelpAvailable();
-					((Session)HostNode.Session).RegisterControlHelp((WinForms.Control)FForm, this);
-					MapDialogKeys(FForm);
+					_form.HelpButton = ((Session)HostNode.Session).IsContextHelpAvailable();
+					((Session)HostNode.Session).RegisterControlHelp((WinForms.Control)_form, this);
+					MapDialogKeys(_form);
 				}
 			}
 		}
 
-		private void FormShown(object ASender, EventArgs AArgs)
+		private void FormShown(object sender, EventArgs args)
 		{
 			BroadcastEvent(new FormShownEvent());
 		}
@@ -538,70 +637,75 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return new BaseForm();
 		}
 
-		private void FormPaintBackground(object ASender, WinForms.PaintEventArgs AArgs, out bool AHandled)
+		private void FormPaintBackground(object sender, WinForms.PaintEventArgs args, out bool handled)
 		{
-			AHandled = (FForm.BackgroundImage != null);
-			if (!AHandled)
-				AHandled = ((Session)HostNode.Session).Theme.PaintBackground((WinForms.Control)FForm, AArgs);
+			handled = (_form.BackgroundImage != null);
+			if (!handled)
+				handled = ((Session)HostNode.Session).Theme.PaintBackground((WinForms.Control)_form, args);
 		}
 
-		private void FormLayoutContents(object ASender, EventArgs AArgs)
+		private void FormLayoutContents(object sender, EventArgs args)
 		{
-			Rectangle LDisplayRectangle = FForm.ContentPanel.Bounds;
+			Rectangle displayRectangle = _form.ContentPanel.Bounds;
 
 			// Enforce minimums and compensate for any area lost to scroll bars
-			Size LMinSize = MinSize;
-			if (LDisplayRectangle.Width < LMinSize.Width)
+			Size minSize = MinSize;
+			if (displayRectangle.Width < minSize.Width)
 			{
-				LDisplayRectangle.Width = LMinSize.Width;
-				LDisplayRectangle.Height = Math.Max(LMinSize.Height, LDisplayRectangle.Height - WinForms.SystemInformation.HorizontalScrollBarHeight);
+				displayRectangle.Width = minSize.Width;
+				displayRectangle.Height = Math.Max(minSize.Height, displayRectangle.Height - WinForms.SystemInformation.HorizontalScrollBarHeight);
 			}
-			if (LDisplayRectangle.Height < LMinSize.Height)
+			if (displayRectangle.Height < minSize.Height)
 			{
-				LDisplayRectangle.Height = LMinSize.Height;
-				LDisplayRectangle.Width = Math.Max(LMinSize.Width, LDisplayRectangle.Width - WinForms.SystemInformation.VerticalScrollBarWidth);
+				displayRectangle.Height = minSize.Height;
+				displayRectangle.Width = Math.Max(minSize.Width, displayRectangle.Width - WinForms.SystemInformation.VerticalScrollBarWidth);
 			}
 
 			// Perform contents layout
-			Layout(new Rectangle(Point.Empty, LDisplayRectangle.Size));
+			Layout(new Rectangle(Point.Empty, displayRectangle.Size));
 		}
 
-		private Size FormGetNaturalSize(object ASender)
+		private Size FormGetNaturalSize(object sender)
 		{
 			return NaturalSize;
 		}
 
-		private void FormDefaultAction(object ASender, EventArgs AArgs)
+		private void FormDefaultAction(object sender, EventArgs args)
 		{
 			PerformDefaultAction();
 		}
 
-		private string FormGetDefaultActionDescription(object ASender)
+		private string FormGetDefaultActionDescription(object sender)
 		{
 			return GetDefaultActionDescription();
 		}
 
-		private void FormClosing(object ASender, CancelEventArgs AArgs)
+		private void FormAccepting(object sender, EventArgs args)
 		{
-			AArgs.Cancel = FormClosing();
+			BeforeAccept();
+		}
+		
+		private void FormClosing(object sender, CancelEventArgs args)
+		{
+			args.Cancel = FormClosing();
 		}
 
 		#endregion
 
 		#region Form Key Mappings
 
-		private void MapDialogKeys(IBaseForm AForm)
+		private void MapDialogKeys(IBaseForm form)
 		{
-			AForm.DialogKeys[WinForms.Keys.Up] = new DialogKeyHandler(NavigatePrior);
-			AForm.DialogKeys[WinForms.Keys.Down] = new DialogKeyHandler(NavigateNext);
-			AForm.DialogKeys[WinForms.Keys.PageUp] = new DialogKeyHandler(NavigatePriorPage);
-			AForm.DialogKeys[WinForms.Keys.PageDown] = new DialogKeyHandler(NavigateNextPage);
-			AForm.DialogKeys[WinForms.Keys.Home | WinForms.Keys.Control] = new DialogKeyHandler(NavigateFirst);
-			AForm.DialogKeys[WinForms.Keys.End | WinForms.Keys.Control] = new DialogKeyHandler(NavigateLast);
-			AForm.DialogKeys[WinForms.Keys.Escape] = new DialogKeyHandler(CancelForm);
+			form.DialogKeys[WinForms.Keys.Up] = new DialogKeyHandler(NavigatePrior);
+			form.DialogKeys[WinForms.Keys.Down] = new DialogKeyHandler(NavigateNext);
+			form.DialogKeys[WinForms.Keys.PageUp] = new DialogKeyHandler(NavigatePriorPage);
+			form.DialogKeys[WinForms.Keys.PageDown] = new DialogKeyHandler(NavigateNextPage);
+			form.DialogKeys[WinForms.Keys.Home | WinForms.Keys.Control] = new DialogKeyHandler(NavigateFirst);
+			form.DialogKeys[WinForms.Keys.End | WinForms.Keys.Control] = new DialogKeyHandler(NavigateLast);
+			form.DialogKeys[WinForms.Keys.Escape] = new DialogKeyHandler(CancelForm);
 		}
 
-		private bool CancelForm(WinForms.Form AForm, WinForms.Keys AKey)
+		private bool CancelForm(WinForms.Form form, WinForms.Keys key)
 		{
 			if (!SupressCloseButton)	// Don't close with escape key if supressclosebutton
 			{
@@ -622,7 +726,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			get { return (MainView != null) && MainView.Active && (MainView.State == DAE.Client.DataSetState.Browse); }
 		}
 
-		private bool NavigatePrior(WinForms.Form AForm, WinForms.Keys AKey)
+		private bool NavigatePrior(WinForms.Form form, WinForms.Keys key)
 		{
 			if (MainViewCanNavigate)
 			{
@@ -633,7 +737,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				return false;
 		}
 
-		private bool NavigateNext(WinForms.Form AForm, WinForms.Keys AKey)
+		private bool NavigateNext(WinForms.Form form, WinForms.Keys key)
 		{
 			if (MainViewCanNavigate)
 			{
@@ -644,7 +748,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				return false;
 		}
 
-		private bool NavigatePriorPage(WinForms.Form AForm, WinForms.Keys AKey)
+		private bool NavigatePriorPage(WinForms.Form form, WinForms.Keys key)
 		{
 			if (MainViewCanNavigate)
 			{
@@ -655,7 +759,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				return false;
 		}
 
-		private bool NavigateNextPage(WinForms.Form AForm, WinForms.Keys AKey)
+		private bool NavigateNextPage(WinForms.Form form, WinForms.Keys key)
 		{
 			if (MainViewCanNavigate)
 			{
@@ -666,7 +770,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				return false;
 		}
 
-		private bool NavigateFirst(WinForms.Form AForm, WinForms.Keys AKey)
+		private bool NavigateFirst(WinForms.Form form, WinForms.Keys key)
 		{
 			if (MainViewCanNavigate)
 			{
@@ -677,7 +781,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				return false;
 		}
 
-		private bool NavigateLast(WinForms.Form AForm, WinForms.Keys AKey)
+		private bool NavigateLast(WinForms.Form form, WinForms.Keys key)
 		{
 			if (MainViewCanNavigate)
 			{
@@ -692,18 +796,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Layout & Sizing
 
-		private bool FAutoSize = true;
+		private bool _autoSize = true;
 		/// <summary> Specifies whether the form should initially auto-size itself. </summary>
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public bool AutoSize 
 		{ 
-			get { return FAutoSize; }
+			get { return _autoSize; }
 			set 
 			{
-				if (FAutoSize != value)
+				if (_autoSize != value)
 				{
-					FAutoSize = value;
+					_autoSize = value;
 					if (Active)
 						InternalUpdateAutoSize();
 				}
@@ -712,13 +816,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected virtual void InternalUpdateAutoSize()
 		{
-			FForm.AutoResize = FAutoSize;
+			_form.AutoResize = _autoSize;
 		}
 	
 		public void RootLayout()
 		{
 			if (Active)
-				FForm.PerformLayout();
+				_form.PerformLayout();
 		}
 
 
@@ -729,12 +833,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual bool FormClosing()
 		{
-			bool LCancel = false;
+			bool cancel = false;
 			try
 			{
-				if (FForm != null)
+				if (_form != null)
 				{
-					if (FForm.DialogResult == WinForms.DialogResult.OK)	
+					if (_form.DialogResult == WinForms.DialogResult.OK)	
 					{
 						try
 						{
@@ -742,8 +846,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 						}
 						catch
 						{
-							LCancel = true;
-							FForm.DialogResult = WinForms.DialogResult.None;
+							cancel = true;
+							_form.DialogResult = WinForms.DialogResult.None;
 							throw;
 						}
 					}
@@ -755,10 +859,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				Session.HandleException(AException);
 			}
-			return LCancel;
+			return cancel;
 		}
 
-		private void FormClosed(object ASender, EventArgs AArgs)
+		private void FormClosed(object sender, EventArgs args)
 		{
 			FormClosed();
 		}
@@ -775,7 +879,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					try
 					{
-						if (FForm.DialogResult == WinForms.DialogResult.OK)
+						if (_form.DialogResult == WinForms.DialogResult.OK)
 							FormAccepted();
 						else
 							FormRejected();
@@ -791,15 +895,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 						{
 							try
 							{
-								if (FOnCloseForm != null)
+								if (_onCloseForm != null)
 								{
-									FOnCloseForm(this);
-									FOnCloseForm = null;
+									_onCloseForm(this);
+									_onCloseForm = null;
 								}
 							}
 							finally
 							{
-								if ((FForm == null) || !FForm.Modal)  // Some forms (such as the main form) may be truly modal.
+								if ((_form == null) || !_form.Modal)  // Some forms (such as the main form) may be truly modal.
 								{
 									EndChildModal();
 									if ((HostNode != null) && (HostNode.NextRequest == null))
@@ -813,12 +917,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			catch (Exception AException)
 			{
 				Session.HandleException(AException);
-				if (FForm != null)
-					FForm.DialogResult = WinForms.DialogResult.Cancel;
+				if (_form != null)
+					_form.DialogResult = WinForms.DialogResult.Cancel;
 			}
 		}
 
-		protected void EnsureSearchControlTimerElapsed(INode ANode)
+		protected void EnsureSearchControlTimerElapsed(INode node)
 		{
 			BroadcastEvent(new ProcessPendingSearchEvent());
 		}
@@ -833,13 +937,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				try
 				{
-					if ((FMode == FormMode.Delete) && (MainSource != null))
+					if ((_mode == FormMode.Delete) && (MainSource != null))
 						MainSource.DataView.Delete();
 				}
 				finally
 				{
-					if (FOnAcceptForm != null)
-						FOnAcceptForm(this);
+					if (_onAcceptForm != null)
+						_onAcceptForm(this);
 				}
 			}
 		}
@@ -848,29 +952,29 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			try
 			{
-				if (((FMode == FormMode.Edit) || (FMode == FormMode.Insert)) && (MainSource != null))
+				if (((_mode == FormMode.Edit) || (_mode == FormMode.Insert)) && (MainSource != null))
 					MainSource.DataView.Cancel();
 			}
 			finally
 			{
-				if (FOnRejectForm != null)
-					FOnRejectForm(this);
+				if (_onRejectForm != null)
+					_onRejectForm(this);
 			}
 		}
-
-		private void UpdateActiveControl(IWindowsElement ANode)
+		
+		private void UpdateActiveControl(IWindowsElement node)
 		{
-			FForm.SetHintText((ANode != null) ? ANode.GetHint() : String.Empty);
-			FForm.UpdateStatusText();
+			_form.SetHintText((node != null) ? node.GetHint() : String.Empty);
+			_form.UpdateStatusText();
 		}
 
 		public event EventHandler OnClosed;
 
-		public bool Close(CloseBehavior ABehavior)
+		public bool Close(CloseBehavior behavior)
 		{
-			if (FForm != null)
-				FForm.Close(ABehavior);
-			return FForm == null;	// will be null of close succussfully completed (this should never be true for a windows form because closing will not happen until the next message loop iteration)
+			if (_form != null)
+				_form.Close(behavior);
+			return _form == null;	// will be null of close succussfully completed (this should never be true for a windows form because closing will not happen until the next message loop iteration)
 		}
 
 		#endregion
@@ -879,7 +983,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public bool IsChildModal()
 		{
-			return (FOnAcceptForm != null) || (FOnRejectForm != null);
+			return (_onAcceptForm != null) || (_onRejectForm != null);
 		}
 
 		private void CheckNotChildModal()
@@ -890,21 +994,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Accept/Reject is tied to the data edit state and modal state (someone waiting on accept/reject)
 
-		private FormMode FMode;
+		private FormMode _mode;
 		[Browsable(false)]
-		public FormMode Mode { get { return FMode; } }
+		public FormMode Mode { get { return _mode; } }
 
 		/// <remarks> The form interface must be active before calling this. </remarks>
-		private void SetMode(FormMode AMode)
+		private void SetMode(FormMode mode)
 		{
 			Form.SuspendLayout();
 			try
 			{
-				FMode = AMode;
-				if ((FMode != FormMode.None) && ((MainSource == null) || (MainSource.DataView == null)))
-					throw new ClientException(ClientException.Codes.MainSourceNotSpecified, AMode.ToString());
-				FForm.EnterNavigates = (FMode == FormMode.Insert) || (FMode == FormMode.Edit);
-				switch (FMode)
+				_mode = mode;
+				if ((_mode != FormMode.None) && ((MainSource == null) || (MainSource.DataView == null)))
+					throw new ClientException(ClientException.Codes.MainSourceNotSpecified, mode.ToString());
+				_form.EnterNavigates = (_mode == FormMode.Insert) || (_mode == FormMode.Edit);
+				switch (_mode)
 				{
 					case FormMode.Insert :
 						if (MainSource.DataView.State != DAE.Client.DataSetState.Insert)
@@ -928,70 +1032,70 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			Show(FormMode.None);
 		}
 
-		public void Show(FormMode AFormMode)
+		public void Show(FormMode formMode)
 		{
-			Show(null, null, null, AFormMode);
+			Show(null, null, null, formMode);
 		}
 
-		public WinForms.DialogResult ShowModal(FormMode AMode)
+		public WinForms.DialogResult ShowModal(FormMode mode)
 		{
 			CheckNotChildModal();
-			SetMode(AMode);
+			SetMode(mode);
 			try
 			{			
 				AcceptRejectChanged();
 				HostNode.Session.Forms.Add(this);
-				return FForm.ShowDialog();
+				return _form.ShowDialog();
 			}
 			catch
 			{
-				if ((FMode == FormMode.Edit) || (FMode == FormMode.Insert))
+				if ((_mode == FormMode.Edit) || (_mode == FormMode.Insert))
 					MainSource.DataView.Cancel();
 				throw;
 			}
 		}
 
-		public void Show(FormInterfaceHandler AOnCloseForm)
+		public void Show(FormInterfaceHandler onCloseForm)
 		{
 			CheckNotChildModal();
-			FOnCloseForm = AOnCloseForm;
+			_onCloseForm = onCloseForm;
 			try
 			{
 				SetMode(FormMode.None);
 				HostNode.Session.Forms.Add(this);
-				FForm.Show(null);
+				_form.Show(null);
 			}
 			catch
 			{
-				FOnCloseForm = null;
+				_onCloseForm = null;
 				throw;
 			}
 		}
 
-		private FormInterfaceHandler FOnCloseForm;
-		private FormInterfaceHandler FOnAcceptForm;
-		private FormInterfaceHandler FOnRejectForm;
+		private FormInterfaceHandler _onCloseForm;
+		private FormInterfaceHandler _onAcceptForm;
+		private FormInterfaceHandler _onRejectForm;
 
-		public void Show(IFormInterface AParentForm, FormInterfaceHandler AOnAcceptForm, FormInterfaceHandler AOnRejectForm, FormMode AMode)
+		public void Show(IFormInterface parentForm, FormInterfaceHandler onAcceptForm, FormInterfaceHandler onRejectForm, FormMode mode)
 		{
 			CheckNotChildModal();
-			FOnAcceptForm = AOnAcceptForm;
-			FOnRejectForm = AOnRejectForm;
+			_onAcceptForm = onAcceptForm;
+			_onRejectForm = onRejectForm;
 			try
 			{
-				SetMode(AMode);
+				SetMode(mode);
 				try
 				{
-					if (AParentForm != null)
-						HostNode.Session.Forms.AddModal(this, AParentForm);
+					if (parentForm != null)
+						HostNode.Session.Forms.AddModal(this, parentForm);
 					else
 						HostNode.Session.Forms.Add(this);
 					AcceptRejectChanged();
-					FForm.Show(AParentForm);
+					_form.Show(parentForm);
 				}
 				catch
 				{
-					if ((FMode == FormMode.Edit) || (FMode == FormMode.Insert))
+					if ((_mode == FormMode.Edit) || (_mode == FormMode.Insert))
 						MainSource.DataView.Cancel();
 					throw;
 				}
@@ -1006,28 +1110,28 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void EndChildModal()
 		{
-			FOnAcceptForm = null;
-			FOnRejectForm = null;
-			FMode = FormMode.None;
+			_onAcceptForm = null;
+			_onRejectForm = null;
+			_mode = FormMode.None;
 		}
 
 		#endregion
 
 		#region IsLookup
 
-		private bool FIsLookup;
+		private bool _isLookup;
 		
 		/// <remarks> Only effectual on show. </remarks>
 		[Browsable(false)]
 		[Publish(PublishMethod.None)]
 		public bool IsLookup
 		{
-			get { return FIsLookup; }
+			get { return _isLookup; }
 			set 
 			{ 
-				if (FIsLookup != value)
+				if (_isLookup != value)
 				{
-					FIsLookup = value;
+					_isLookup = value;
 					if (Active) 
 						InternalUpdateIsLookup();
 				}
@@ -1036,49 +1140,49 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		private void InternalUpdateIsLookup()
 		{
-			FForm.IsLookup = FIsLookup;
+			_form.IsLookup = _isLookup;
 		}
 		
 		#endregion
 		
 		#region Enabled / Disabled
 
-		private int FDisableCount;
+		private int _disableCount;
 
 		public virtual void Enable()
 		{
-			FDisableCount--;
+			_disableCount--;
 			if (Active)
 				InternalUpdateEnabled();
 		}
 
-		public virtual void Disable(IFormInterface AForm)
+		public virtual void Disable(IFormInterface form)
 		{
-			FDisableCount++;
+			_disableCount++;
 			if (Active)
 				InternalUpdateEnabled();
 
-			IWindowsFormInterface LForm = AForm as IWindowsFormInterface;
-			if (LForm != null)
+			IWindowsFormInterface localForm = form as IWindowsFormInterface;
+			if (localForm != null)
 			{
-				LForm.Form.Owner = (WinForms.Form)Form;
+				localForm.Form.Owner = (WinForms.Form)Form;
 				// LForm.Form.ShowInTaskbar = false;	this would be okay, except that alt-tab doesn't seem to work unless the owned form is also in the task bar
 			}
 		}
 
 		public virtual bool GetEnabled()
 		{
-			return FDisableCount <= 0;
+			return _disableCount <= 0;
 		}
 
 		protected virtual void InternalUpdateEnabled()
 		{
-			bool LIsEnabled = GetEnabled();
+			bool isEnabled = GetEnabled();
 			// WinForms form handling seems to re-create the handle when the ShowInTaskbar property is toggled
 			// Setting the taskbar before the enabled made the form disable properly.  -- Bryan
 			// disabled again, besides the proplem above there is a huge amount of eyesore flickering happening.
 //			Form.ShowInTaskbar = LIsEnabled;
-			Form.Enabled = LIsEnabled;
+			Form.Enabled = isEnabled;
 		}
 
 		#endregion
@@ -1089,8 +1193,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			if (Active)
 			{
-				FForm.BeginUpdate();
-				FForm.SuspendLayout();
+				_form.BeginUpdate();
+				_form.SuspendLayout();
 			}
 		}
 
@@ -1099,12 +1203,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			EndUpdate(true);
 		}
 
-		public override void EndUpdate(bool APerformLayout)
+		public override void EndUpdate(bool performLayout)
 		{
 			if (Active)
 			{
-				FForm.EndUpdate();
-				FForm.ResumeLayout(APerformLayout);
+				_form.EndUpdate();
+				_form.ResumeLayout(performLayout);
 			}
 		}
 
@@ -1116,7 +1220,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		[Browsable(false)]
 		public virtual WinForms.Control Control
 		{
-			get { return FForm.ContentPanel; }
+			get { return _form.ContentPanel; }
 		}
 
 		#endregion
@@ -1127,7 +1231,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void InternalUpdateToolTip()
 		{
-			SetToolTip((WinForms.Control)FForm);
+			SetToolTip((WinForms.Control)_form);
 		}
 
 		// Setting visible on the form is equivilant to showing which we handle differently
@@ -1135,32 +1239,32 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public override int GetDefaultMarginLeft()
 		{
-			return CMarginLeft;
+			return MarginLeft;
 		}
 
 		public override int GetDefaultMarginRight()
 		{
-			return CMarginRight;
+			return MarginRight;
 		}
 
 		public override int GetDefaultMarginTop()
 		{
-			return CMarginTop;
+			return MarginTop;
 		}
 
 		public override int GetDefaultMarginBottom()
 		{
-			return CMarginBottom;
+			return MarginBottom;
 		}
 
 		protected override Size InternalMinSize
 		{
 			get
 			{
-				Size LResult = base.InternalMinSize;
+				Size result = base.InternalMinSize;
 				// constrain to the minimum required of the form.
-				ConstrainMin(ref LResult, new Size(CMinWidth, CMinHeight));
-				return LResult;
+				ConstrainMin(ref result, new Size(MinWidth, MinHeight));
+				return result;
 			}
 		}
 
@@ -1168,20 +1272,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				Size LNatural = base.InternalNaturalSize;
-				Size LMaxSize = InternalMaxSize;
-				Size LMinSize = InternalMinSize;
-				ConstrainMin(ref LMaxSize, LMinSize);	// make sure we don't allow the max to be below the min
-				ConstrainMin(ref LNatural, LMinSize);
-				ConstrainMax(ref LNatural, LMaxSize);
-				return LNatural;
+				Size natural = base.InternalNaturalSize;
+				Size maxSize = InternalMaxSize;
+				Size minSize = InternalMinSize;
+				ConstrainMin(ref maxSize, minSize);	// make sure we don't allow the max to be below the min
+				ConstrainMin(ref natural, minSize);
+				ConstrainMax(ref natural, maxSize);
+				return natural;
 			}
 		}
 
 		/// <summary> Text becomes the caption of the Form. </summary>
 		protected override void InternalUpdateText()
 		{
-			FForm.Text = GetText();
+			_form.Text = GetText();
 		}
 
 		/// <summary> Estemates the Minimum size of the overall form. </summary>
@@ -1189,7 +1293,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public virtual Size FormMinSize()
 		{
 			CheckActive();
-			return MinSize + FForm.GetBorderSize();
+			return MinSize + _form.GetBorderSize();
 		}
 
 		/// <summary> Estemates the Natural size of the overall form. </summary>
@@ -1197,7 +1301,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public virtual Size FormNaturalSize()
 		{
 			CheckActive();
-			return NaturalSize + FForm.GetBorderSize();
+			return NaturalSize + _form.GetBorderSize();
 		}
 
 		/// <summary> Estemates the Max size of the overall form. </summary>
@@ -1205,22 +1309,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public virtual Size FormMaxSize()
 		{
 			CheckActive();
-			return MaxSize + FForm.GetBorderSize();
+			return MaxSize + _form.GetBorderSize();
 		}
 
 		#endregion
 
 		#region IErrorSource Members
 
-		public void ErrorHighlighted(Exception AException)
+		public void ErrorHighlighted(Exception exception)
 		{
 			// Nothing
 		}
 
-		public void ErrorSelected(Exception AException)
+		public void ErrorSelected(Exception exception)
 		{
-			if (FForm != null)
-				FForm.Activate();
+			if (_form != null)
+				_form.Activate();
 		}
 
 		#endregion
@@ -1228,27 +1332,27 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public class AcceleratorManager
 	{
-		private const int CFirstAcceleratorOffset = 0x30;
-		private const int CAcceleratorRange = 0x4A;
+		private const int FirstAcceleratorOffset = 0x30;
+		private const int AcceleratorRange = 0x4A;
 
 		public AcceleratorManager()
 		{
-			FAccelerators = new System.Collections.BitArray(CAcceleratorRange, false);
+			_accelerators = new System.Collections.BitArray(AcceleratorRange, false);
 		}
 
-		private System.Collections.BitArray FAccelerators;
+		private System.Collections.BitArray _accelerators;
 
 		public void Reset()
 		{
-			FAccelerators.SetAll(false);
+			_accelerators.SetAll(false);
 		}
 
-		internal bool Allocate(char AChar)
+		internal bool Allocate(char charValue)
 		{
-			int LIndex = (int)Char.ToUpper(AChar) - CFirstAcceleratorOffset;
-			if ((LIndex > 0) && (LIndex < CAcceleratorRange) && !FAccelerators[LIndex])
+			int index = (int)Char.ToUpper(charValue) - FirstAcceleratorOffset;
+			if ((index > 0) && (index < AcceleratorRange) && !_accelerators[index])
 			{
-				FAccelerators[LIndex] = true;
+				_accelerators[index] = true;
 				return true;
 			}
 			else
@@ -1256,95 +1360,95 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		// This Method will try to allocate an accelorator if it can. (for use internally and with Groupers and Pushers)
-		private string AllocateTry(string AText)
+		private string AllocateTry(string text)
 		{
-			if (AText != String.Empty)
+			if (text != String.Empty)
 			{
-				int LPos;
-				System.Text.StringBuilder LResult = new System.Text.StringBuilder(AText.Length);
-				bool LSatisfied = false;
+				int pos;
+				System.Text.StringBuilder result = new System.Text.StringBuilder(text.Length);
+				bool satisfied = false;
 
 				// First look to see if the "desired" accellerator is available
-				for (LPos = 0; LPos < AText.Length; LPos++)
+				for (pos = 0; pos < text.Length; pos++)
 				{
-					if (AText[LPos] == '&') 
-						if (LPos < (AText.Length - 1))
+					if (text[pos] == '&') 
+						if (pos < (text.Length - 1))
 						{
-							if (AText[LPos + 1] == '&')	// skip escaped ampersands
+							if (text[pos + 1] == '&')	// skip escaped ampersands
 							{
-								LResult.Append("&");
-								LPos++;
+								result.Append("&");
+								pos++;
 							}
 							else
-								if (!LSatisfied && Allocate(AText[LPos + 1]))
-									LSatisfied = true;
+								if (!satisfied && Allocate(text[pos + 1]))
+									satisfied = true;
 								else
 									continue;
 						}
 						else
 							continue;
-					LResult.Append(AText[LPos]);
+					result.Append(text[pos]);
 				}
-				if (LSatisfied)
-					return LResult.ToString();
+				if (satisfied)
+					return result.ToString();
 				else
-					AText = LResult.ToString();
+					text = result.ToString();
 
 				// Step through the characters until we find an elligable accelerator
-				for (LPos = 0; LPos < AText.Length; LPos++)
+				for (pos = 0; pos < text.Length; pos++)
 				{
-					if (Allocate(AText[LPos]))
-						return AText.Insert(LPos, "&");
+					if (Allocate(text[pos]))
+						return text.Insert(pos, "&");
 				}
 
 				// No accelerators were found, try to use an appended number
-				for (LPos = 0; LPos < 10; LPos++)
-					if (Allocate((char)(LPos + CFirstAcceleratorOffset)))
-						return String.Format("{0} &{1}", AText, (char)(LPos + CFirstAcceleratorOffset));
+				for (pos = 0; pos < 10; pos++)
+					if (Allocate((char)(pos + FirstAcceleratorOffset)))
+						return String.Format("{0} &{1}", text, (char)(pos + FirstAcceleratorOffset));
 			}
 
 			// Unable to accelerate, use plain text
-			return AText;
+			return text;
 		}
 
 		/// <summary> Attempts to allocate accellerated text based on the given string. </summary>
-		/// <param name="AText"> This string may contain one or more ampersands followed by alphanumerics.  
+		/// <param name="text"> This string may contain one or more ampersands followed by alphanumerics.  
 		/// Each ampersand preceeded character will be tested for accellerator availability.  If the 
 		/// character is not available or an accellerator has already been successfully allocated, the 
 		/// ampersand will be stripped off.  Literal ampersands can be specified using a double ampersand 
 		/// escape.</param>
-		/// <param name="ATryIfNotRequested"> If true, then an attempt will be made to accellerate the 
+		/// <param name="tryIfNotRequested"> If true, then an attempt will be made to accellerate the 
 		/// text regardless of whether or not the text contains a requested accellerator. </param>
 		/// <returns> Text with any successfully allocated accellerator, and all others stripped off. </returns>
-		public string Allocate(string AText, bool ATryIfNotRequested)
+		public string Allocate(string text, bool tryIfNotRequested)
 		{
-			if ((AText.Length > 0) && (AText[0] == '~'))
-				return AText.Substring(1).Replace("&", "&&");
+			if ((text.Length > 0) && (text[0] == '~'))
+				return text.Substring(1).Replace("&", "&&");
 			else
 			{
-				if (ATryIfNotRequested)
-					return AllocateTry(AText);
+				if (tryIfNotRequested)
+					return AllocateTry(text);
 				else
 				{
-					for (int i = 0; i < AText.Length; i++)
-						if ((AText[i] == '&') && ((i == (AText.Length - 1)) || (AText[i + 1] != '&')))
-							return AllocateTry(AText);
-					return AText;	// no accellerators requested
+					for (int i = 0; i < text.Length; i++)
+						if ((text[i] == '&') && ((i == (text.Length - 1)) || (text[i + 1] != '&')))
+							return AllocateTry(text);
+					return text;	// no accellerators requested
 				}
 			}
 		}
 
-		internal void Deallocate(char AChar)
+		internal void Deallocate(char charValue)
 		{
-			FAccelerators[(int)Char.ToUpper(AChar) - CFirstAcceleratorOffset] = false;
+			_accelerators[(int)Char.ToUpper(charValue) - FirstAcceleratorOffset] = false;
 		}
 
-		public void Deallocate(string AText)
+		public void Deallocate(string text)
 		{
-			for (int i = 0; i < AText.Length; i++)
-				if ((AText[i] == '&') && ((i == (AText.Length - 1)) || (AText[i + 1] != '&')))
+			for (int i = 0; i < text.Length; i++)
+				if ((text[i] == '&') && ((i == (text.Length - 1)) || (text[i + 1] != '&')))
 				{
-					Deallocate(AText[i + 1]);
+					Deallocate(text[i + 1]);
 					return;
 				}
 		}
@@ -1352,10 +1456,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public class ProcessPendingSearchEvent : NodeEvent
 	{
-		public override void Handle(INode ANode)
+		public override void Handle(INode node)
 		{
-			if (ANode is IWindowsSearch)
-				((IWindowsSearch)ANode).SearchControl.ProcessPending();
+			if (node is IWindowsSearch)
+				((IWindowsSearch)node).SearchControl.ProcessPending();
 		}
 	}
 }

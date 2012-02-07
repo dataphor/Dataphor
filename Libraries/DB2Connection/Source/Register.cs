@@ -13,15 +13,15 @@ namespace Alphora.Dataphor.DAE.Connection.DB2
 
 	class DAERegister
 	{
-		protected const string CD4ClassDefinitionNameSpace = "DB2Connection";
+		protected const string D4ClassDefinitionNameSpace = "DB2Connection";
 
 		public static SettingsList GetClasses()
 		{
-			SettingsList LClasses = new SettingsList();
+			SettingsList classes = new SettingsList();
 			
-			LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "DB2Connection"), typeof(DB2Connection).AssemblyQualifiedName));
+			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "DB2Connection"), typeof(DB2Connection).AssemblyQualifiedName));
 			
-			return LClasses;
+			return classes;
 		}
 	}
 }

@@ -25,44 +25,44 @@ namespace Alphora.Dataphor.DAE.Service
 	{
 		public DataphorService()
 		{
-			string LInstanceName = ServerConfiguration.CDefaultLocalInstanceName;
+			string instanceName = ServerConfiguration.DefaultLocalInstanceName;
 
-			IDictionary LSettings = (IDictionary)ConfigurationManager.GetSection("instance");
-			if ((LSettings != null) && LSettings.Contains("name"))
-				LInstanceName = (string)LSettings["name"];
+			IDictionary settings = (IDictionary)ConfigurationManager.GetSection("instance");
+			if ((settings != null) && settings.Contains("name"))
+				instanceName = (string)settings["name"];
 				
-			ServerConfiguration LConfiguration = InstanceManager.GetInstance(LInstanceName);
+			ServerConfiguration configuration = InstanceManager.GetInstance(instanceName);
 				
-			FServer = new Server();
-			LConfiguration.ApplyTo(FServer);
+			_server = new Server();
+			configuration.ApplyTo(_server);
 
-			FServer.Start();
-			FRemoteServer = new RemoteServer(FServer);
+			_server.Start();
+			_remoteServer = new RemoteServer(_server);
 			
-			FConnectionManager = new ConnectionManager(FRemoteServer);
+			_connectionManager = new ConnectionManager(_remoteServer);
 		}
 		
-		public DataphorService(RemoteServer ARemoteServer)
+		public DataphorService(RemoteServer remoteServer)
 		{
-			FServer = ARemoteServer.Server;
-			FRemoteServer = ARemoteServer;
-			FConnectionManager = new ConnectionManager(FRemoteServer);
+			_server = remoteServer.Server;
+			_remoteServer = remoteServer;
+			_connectionManager = new ConnectionManager(_remoteServer);
 		}
 		
-		private Server FServer;
-		private RemoteServer FRemoteServer;
+		private Server _server;
+		private RemoteServer _remoteServer;
 
-		private HandleManager FHandleManager = new HandleManager();
-		private ConnectionManager FConnectionManager;
+		private HandleManager _handleManager = new HandleManager();
+		private ConnectionManager _connectionManager;
 		
 		#region IDisposable Members
 
 		public void Dispose()
 		{
-			if (FConnectionManager != null)
+			if (_connectionManager != null)
 			{
-				FConnectionManager.Dispose();
-				FConnectionManager = null;
+				_connectionManager.Dispose();
+				_connectionManager = null;
 			}
 		}
 
@@ -74,11 +74,11 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try
 			{
-				return FServer.Name;
+				return _server.Name;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
@@ -86,11 +86,11 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try
 			{
-				return FServer.CacheTimeStamp;
+				return _server.CacheTimeStamp;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
@@ -98,1110 +98,1110 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try
 			{
-				return FServer.DerivationTimeStamp;
+				return _server.DerivationTimeStamp;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
-			}
-		}
-		
-		public int OpenConnection(string AConnectionName, string AHostName)
-		{
-			try
-			{
-				return FHandleManager.GetHandle(FRemoteServer.Establish(AConnectionName, AHostName));
-			}
-			catch (DataphorException LException)
-			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		public void PingConnection(int AConnectionHandle)
+		public int OpenConnection(string connectionName, string hostName)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerConnection>(AConnectionHandle).Ping();
+				return _handleManager.GetHandle(_remoteServer.Establish(connectionName, hostName));
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		public void CloseConnection(int AConnectionHandle)
+		public void PingConnection(int connectionHandle)
 		{
 			try
 			{
-				FRemoteServer.Relinquish(FHandleManager.GetObject<RemoteServerConnection>(AConnectionHandle));
+				_handleManager.GetObject<RemoteServerConnection>(connectionHandle).Ping();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
+			}
+		}
+		
+		public void CloseConnection(int connectionHandle)
+		{
+			try
+			{
+				_remoteServer.Relinquish(_handleManager.GetObject<RemoteServerConnection>(connectionHandle));
+			}
+			catch (DataphorException exception)
+			{
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public SessionDescriptor Connect(int AConnectionHandle, SessionInfo ASessionInfo)
+		public SessionDescriptor Connect(int connectionHandle, SessionInfo sessionInfo)
 		{
 			try
 			{
-				RemoteServerSession LSession = (RemoteServerSession)FHandleManager.GetObject<RemoteServerConnection>(AConnectionHandle).Connect(ASessionInfo);
-				return new SessionDescriptor(FHandleManager.GetHandle(LSession), LSession.SessionID);
+				RemoteServerSession session = (RemoteServerSession)_handleManager.GetObject<RemoteServerConnection>(connectionHandle).Connect(sessionInfo);
+				return new SessionDescriptor(_handleManager.GetHandle(session), session.SessionID);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void Disconnect(int ASessionHandle)
+		public void Disconnect(int sessionHandle)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerSession>(ASessionHandle).Dispose();
+				_handleManager.GetObject<RemoteServerSession>(sessionHandle).Dispose();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public ProcessDescriptor StartProcess(int ASessionHandle, ProcessInfo AProcessInfo)
+		public ProcessDescriptor StartProcess(int sessionHandle, ProcessInfo processInfo)
 		{
 			try
 			{
-				int LProcessID;
+				int processID;
 				return 
 					new ProcessDescriptor
 					(
-						FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerSession>(ASessionHandle).StartProcess(AProcessInfo, out LProcessID)), 
-						LProcessID
+						_handleManager.GetHandle(_handleManager.GetObject<RemoteServerSession>(sessionHandle).StartProcess(processInfo, out processID)), 
+						processID
 					);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void StopProcess(int AProcessHandle)
+		public void StopProcess(int processHandle)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).Dispose();
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).Dispose();
 				//FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).Stop();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void BeginTransaction(int AProcessHandle, IsolationLevel AIsolationLevel)
+		public void BeginTransaction(int processHandle, IsolationLevel isolationLevel)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).BeginTransaction(AIsolationLevel);
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).BeginTransaction(isolationLevel);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void PrepareTransaction(int AProcessHandle)
+		public void PrepareTransaction(int processHandle)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareTransaction();
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).PrepareTransaction();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void CommitTransaction(int AProcessHandle)
+		public void CommitTransaction(int processHandle)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).CommitTransaction();
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).CommitTransaction();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void RollbackTransaction(int AProcessHandle)
+		public void RollbackTransaction(int processHandle)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).RollbackTransaction();
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).RollbackTransaction();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public int GetTransactionCount(int AProcessHandle)
+		public int GetTransactionCount(int processHandle)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).TransactionCount;
+				return _handleManager.GetObject<RemoteServerProcess>(processHandle).TransactionCount;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public Guid BeginApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, bool AShouldJoin, bool AIsInsert)
+		public Guid BeginApplicationTransaction(int processHandle, ProcessCallInfo callInfo, bool shouldJoin, bool isInsert)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).BeginApplicationTransaction(AShouldJoin, AIsInsert, ACallInfo);
+				return _handleManager.GetObject<RemoteServerProcess>(processHandle).BeginApplicationTransaction(shouldJoin, isInsert, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void PrepareApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID)
+		public void PrepareApplicationTransaction(int processHandle, ProcessCallInfo callInfo, Guid iD)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareApplicationTransaction(AID, ACallInfo);
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).PrepareApplicationTransaction(iD, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void CommitApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID)
+		public void CommitApplicationTransaction(int processHandle, ProcessCallInfo callInfo, Guid iD)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).CommitApplicationTransaction(AID, ACallInfo);
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).CommitApplicationTransaction(iD, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void RollbackApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID)
+		public void RollbackApplicationTransaction(int processHandle, ProcessCallInfo callInfo, Guid iD)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).RollbackApplicationTransaction(AID, ACallInfo);
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).RollbackApplicationTransaction(iD, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public Guid GetApplicationTransactionID(int AProcessHandle)
+		public Guid GetApplicationTransactionID(int processHandle)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).ApplicationTransactionID;
+				return _handleManager.GetObject<RemoteServerProcess>(processHandle).ApplicationTransactionID;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void JoinApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID, bool AIsInsert)
+		public void JoinApplicationTransaction(int processHandle, ProcessCallInfo callInfo, Guid iD, bool isInsert)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).JoinApplicationTransaction(AID, AIsInsert, ACallInfo);
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).JoinApplicationTransaction(iD, isInsert, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void LeaveApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo)
+		public void LeaveApplicationTransaction(int processHandle, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).LeaveApplicationTransaction(ACallInfo);
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).LeaveApplicationTransaction(callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		private RemoteProcessCleanupInfo GetRemoteProcessCleanupInfo(ProcessCleanupInfo ACleanupInfo)
+		private RemoteProcessCleanupInfo GetRemoteProcessCleanupInfo(ProcessCleanupInfo cleanupInfo)
 		{
 			try
 			{
-				RemoteProcessCleanupInfo LCleanupInfo = new RemoteProcessCleanupInfo();
-				LCleanupInfo.UnprepareList = new IRemoteServerPlan[ACleanupInfo.UnprepareList.Length];
-				for (int LIndex = 0; LIndex < ACleanupInfo.UnprepareList.Length; LIndex++)
-					LCleanupInfo.UnprepareList[LIndex] = FHandleManager.GetObject<RemoteServerPlan>(ACleanupInfo.UnprepareList[LIndex]);
-				return LCleanupInfo;
+				RemoteProcessCleanupInfo localCleanupInfo = new RemoteProcessCleanupInfo();
+				localCleanupInfo.UnprepareList = new IRemoteServerPlan[cleanupInfo.UnprepareList.Length];
+				for (int index = 0; index < cleanupInfo.UnprepareList.Length; index++)
+					localCleanupInfo.UnprepareList[index] = _handleManager.GetObject<RemoteServerPlan>(cleanupInfo.UnprepareList[index]);
+				return localCleanupInfo;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public PlanDescriptor PrepareStatement(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, string AStatement, RemoteParam[] AParams, DebugLocator ALocator)
+		public PlanDescriptor PrepareStatement(int processHandle, ProcessCleanupInfo cleanupInfo, string statement, RemoteParam[] paramsValue, DebugLocator locator)
 		{
 			try
 			{
-				PlanDescriptor LDescriptor;
+				PlanDescriptor descriptor;
 				// It seems to me we should be able to perform the assignment directly to LDescriptor because it will be assigned by the out
 				// evaluation in the PrepareStatement call, but the C# compiler is complaining that this is a use of unassigned local variable.
 				//LDescriptor.Handle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareStatement(AStatement, AParams, ALocator, out LDescriptor, ACleanupInfo));
-				int LHandle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareStatement(AStatement, AParams, ALocator, out LDescriptor, GetRemoteProcessCleanupInfo(ACleanupInfo)));
-				LDescriptor.Handle = LHandle;
-				return LDescriptor;
+				int handle = _handleManager.GetHandle(_handleManager.GetObject<RemoteServerProcess>(processHandle).PrepareStatement(statement, paramsValue, locator, out descriptor, GetRemoteProcessCleanupInfo(cleanupInfo)));
+				descriptor.Handle = handle;
+				return descriptor;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
-			}
-		}
-
-		public ExecuteResult ExecutePlan(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams)
-		{
-			try
-			{
-				ProgramStatistics LExecuteTime;
-				FHandleManager.GetObject<RemoteServerStatementPlan>(APlanHandle).Execute(ref AParams, out LExecuteTime, ACallInfo);
-				return new ExecuteResult() { ExecuteTime = LExecuteTime, ParamData = AParams.Data };
-			}
-			catch (DataphorException LException)
-			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void UnprepareStatement(int APlanHandle)
+		public ExecuteResult ExecutePlan(int planHandle, ProcessCallInfo callInfo, RemoteParamData paramsValue)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerStatementPlan>(APlanHandle).Unprepare();
+				ProgramStatistics executeTime;
+				_handleManager.GetObject<RemoteServerStatementPlan>(planHandle).Execute(ref paramsValue, out executeTime, callInfo);
+				return new ExecuteResult() { ExecuteTime = executeTime, ParamData = paramsValue.Data };
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
+			}
+		}
+
+		public void UnprepareStatement(int planHandle)
+		{
+			try
+			{
+				_handleManager.GetObject<RemoteServerStatementPlan>(planHandle).Unprepare();
+			}
+			catch (DataphorException exception)
+			{
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		public ExecuteResult ExecuteStatement(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AStatement, RemoteParamData AParams)
+		public ExecuteResult ExecuteStatement(int processHandle, ProcessCleanupInfo cleanupInfo, ProcessCallInfo callInfo, string statement, RemoteParamData paramsValue)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).Execute(AStatement, ref AParams, ACallInfo, GetRemoteProcessCleanupInfo(ACleanupInfo));
-				return new ExecuteResult() { ExecuteTime = new ProgramStatistics(), ParamData = AParams.Data };
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).Execute(statement, ref paramsValue, callInfo, GetRemoteProcessCleanupInfo(cleanupInfo));
+				return new ExecuteResult() { ExecuteTime = new ProgramStatistics(), ParamData = paramsValue.Data };
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public PlanDescriptor PrepareExpression(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, string AExpression, RemoteParam[] AParams, DebugLocator ALocator)
+		public PlanDescriptor PrepareExpression(int processHandle, ProcessCleanupInfo cleanupInfo, string expression, RemoteParam[] paramsValue, DebugLocator locator)
 		{
 			try
 			{
-				PlanDescriptor LDescriptor;
-				int LHandle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareExpression(AExpression, AParams, ALocator, out LDescriptor, GetRemoteProcessCleanupInfo(ACleanupInfo)));
-				LDescriptor.Handle = LHandle;
-				return LDescriptor;
+				PlanDescriptor descriptor;
+				int handle = _handleManager.GetHandle(_handleManager.GetObject<RemoteServerProcess>(processHandle).PrepareExpression(expression, paramsValue, locator, out descriptor, GetRemoteProcessCleanupInfo(cleanupInfo)));
+				descriptor.Handle = handle;
+				return descriptor;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public EvaluateResult EvaluatePlan(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams)
+		public EvaluateResult EvaluatePlan(int planHandle, ProcessCallInfo callInfo, RemoteParamData paramsValue)
 		{
 			try
 			{
-				ProgramStatistics LExecuteTime;
-				byte[] LResult = FHandleManager.GetObject<RemoteServerExpressionPlan>(APlanHandle).Evaluate(ref AParams, out LExecuteTime, ACallInfo);
-				return new EvaluateResult() { ExecuteTime = LExecuteTime, ParamData = AParams.Data, Result = LResult };
+				ProgramStatistics executeTime;
+				byte[] result = _handleManager.GetObject<RemoteServerExpressionPlan>(planHandle).Evaluate(ref paramsValue, out executeTime, callInfo);
+				return new EvaluateResult() { ExecuteTime = executeTime, ParamData = paramsValue.Data, Result = result };
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		public CursorResult OpenPlanCursor(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams)
+		public CursorResult OpenPlanCursor(int planHandle, ProcessCallInfo callInfo, RemoteParamData paramsValue)
 		{
 			try
 			{
-				ProgramStatistics LExecuteTime;
-				RemoteServerCursor LCursor = (RemoteServerCursor)FHandleManager.GetObject<RemoteServerExpressionPlan>(APlanHandle).Open(ref AParams, out LExecuteTime, ACallInfo);
-				CursorDescriptor LDescriptor = new CursorDescriptor(FHandleManager.GetHandle(LCursor), LCursor.Capabilities, LCursor.CursorType, LCursor.Isolation);
-				return new CursorResult() { ExecuteTime = LExecuteTime, ParamData = AParams.Data, CursorDescriptor = LDescriptor };
+				ProgramStatistics executeTime;
+				RemoteServerCursor cursor = (RemoteServerCursor)_handleManager.GetObject<RemoteServerExpressionPlan>(planHandle).Open(ref paramsValue, out executeTime, callInfo);
+				CursorDescriptor descriptor = new CursorDescriptor(_handleManager.GetHandle(cursor), cursor.Capabilities, cursor.CursorType, cursor.Isolation);
+				return new CursorResult() { ExecuteTime = executeTime, ParamData = paramsValue.Data, CursorDescriptor = descriptor };
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public CursorWithFetchResult OpenPlanCursorWithFetch(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams, int ACount)
+		public CursorWithFetchResult OpenPlanCursorWithFetch(int planHandle, ProcessCallInfo callInfo, RemoteParamData paramsValue, int count)
 		{
 			try
 			{
-				ProgramStatistics LExecuteTime;
-				Guid[] LBookmarks;
-				RemoteFetchData LFetchData;
-				RemoteServerCursor LCursor = (RemoteServerCursor)FHandleManager.GetObject<RemoteServerExpressionPlan>(APlanHandle).Open(ref AParams, out LExecuteTime, out LBookmarks, ACount, out LFetchData, ACallInfo);
-				CursorDescriptor LDescriptor = new CursorDescriptor(FHandleManager.GetHandle(LCursor), LCursor.Capabilities, LCursor.CursorType, LCursor.Isolation);
-				return new CursorWithFetchResult() { ExecuteTime = LExecuteTime, ParamData = AParams.Data, CursorDescriptor = LDescriptor, Bookmarks = LBookmarks, FetchData = LFetchData };
+				ProgramStatistics executeTime;
+				Guid[] bookmarks;
+				RemoteFetchData fetchData;
+				RemoteServerCursor cursor = (RemoteServerCursor)_handleManager.GetObject<RemoteServerExpressionPlan>(planHandle).Open(ref paramsValue, out executeTime, out bookmarks, count, out fetchData, callInfo);
+				CursorDescriptor descriptor = new CursorDescriptor(_handleManager.GetHandle(cursor), cursor.Capabilities, cursor.CursorType, cursor.Isolation);
+				return new CursorWithFetchResult() { ExecuteTime = executeTime, ParamData = paramsValue.Data, CursorDescriptor = descriptor, Bookmarks = bookmarks, FetchData = fetchData };
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void UnprepareExpression(int APlanHandle)
+		public void UnprepareExpression(int planHandle)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerExpressionPlan>(APlanHandle).Unprepare();
+				_handleManager.GetObject<RemoteServerExpressionPlan>(planHandle).Unprepare();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public DirectEvaluateResult EvaluateExpression(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AExpression, RemoteParamData AParams)
+		public DirectEvaluateResult EvaluateExpression(int processHandle, ProcessCleanupInfo cleanupInfo, ProcessCallInfo callInfo, string expression, RemoteParamData paramsValue)
 		{
 			try
 			{
-				IRemoteServerExpressionPlan LPlan;
-				PlanDescriptor LPlanDescriptor;
-				ProgramStatistics LExecuteTime;
-				byte[] LResult = FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).Evaluate(AExpression, ref AParams, out LPlan, out LPlanDescriptor, out LExecuteTime, ACallInfo, GetRemoteProcessCleanupInfo(ACleanupInfo));
-				LPlanDescriptor.Handle = FHandleManager.GetHandle(LPlan);
-				return new DirectEvaluateResult { ExecuteTime = LExecuteTime, ParamData = AParams.Data, Result = LResult, PlanDescriptor = LPlanDescriptor };
+				IRemoteServerExpressionPlan plan;
+				PlanDescriptor planDescriptor;
+				ProgramStatistics executeTime;
+				byte[] result = _handleManager.GetObject<RemoteServerProcess>(processHandle).Evaluate(expression, ref paramsValue, out plan, out planDescriptor, out executeTime, callInfo, GetRemoteProcessCleanupInfo(cleanupInfo));
+				planDescriptor.Handle = _handleManager.GetHandle(plan);
+				return new DirectEvaluateResult { ExecuteTime = executeTime, ParamData = paramsValue.Data, Result = result, PlanDescriptor = planDescriptor };
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		public DirectCursorResult OpenCursor(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AExpression, RemoteParamData AParams)
+		public DirectCursorResult OpenCursor(int processHandle, ProcessCleanupInfo cleanupInfo, ProcessCallInfo callInfo, string expression, RemoteParamData paramsValue)
 		{
 			try
 			{
-				IRemoteServerExpressionPlan LPlan;
-				PlanDescriptor LPlanDescriptor;
-				ProgramStatistics LExecuteTime;
-				IRemoteServerCursor LCursor = FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).OpenCursor(AExpression, ref AParams, out LPlan, out LPlanDescriptor, out LExecuteTime, ACallInfo, GetRemoteProcessCleanupInfo(ACleanupInfo));
-				LPlanDescriptor.Handle = FHandleManager.GetHandle(LPlan);
+				IRemoteServerExpressionPlan plan;
+				PlanDescriptor planDescriptor;
+				ProgramStatistics executeTime;
+				IRemoteServerCursor cursor = _handleManager.GetObject<RemoteServerProcess>(processHandle).OpenCursor(expression, ref paramsValue, out plan, out planDescriptor, out executeTime, callInfo, GetRemoteProcessCleanupInfo(cleanupInfo));
+				planDescriptor.Handle = _handleManager.GetHandle(plan);
 				return 
 					new DirectCursorResult 
 					{
-						ExecuteTime = LExecuteTime, 
-						ParamData = AParams.Data, 
-						PlanDescriptor = LPlanDescriptor, 
-						CursorDescriptor = new CursorDescriptor(FHandleManager.GetHandle(LCursor), LCursor.Capabilities, LCursor.CursorType, LCursor.Isolation) 
+						ExecuteTime = executeTime, 
+						ParamData = paramsValue.Data, 
+						PlanDescriptor = planDescriptor, 
+						CursorDescriptor = new CursorDescriptor(_handleManager.GetHandle(cursor), cursor.Capabilities, cursor.CursorType, cursor.Isolation) 
 					};
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		public DirectCursorWithFetchResult OpenCursorWithFetch(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AExpression, RemoteParamData AParams, int ACount)
+		public DirectCursorWithFetchResult OpenCursorWithFetch(int processHandle, ProcessCleanupInfo cleanupInfo, ProcessCallInfo callInfo, string expression, RemoteParamData paramsValue, int count)
 		{
 			try
 			{
-				IRemoteServerExpressionPlan LPlan;
-				PlanDescriptor LPlanDescriptor;
-				ProgramStatistics LExecuteTime;
-				Guid[] LBookmarks;
-				RemoteFetchData LFetchData;
-				IRemoteServerCursor LCursor = FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).OpenCursor(AExpression, ref AParams, out LPlan, out LPlanDescriptor, out LExecuteTime, ACallInfo, GetRemoteProcessCleanupInfo(ACleanupInfo), out LBookmarks, ACount, out LFetchData);
-				LPlanDescriptor.Handle = FHandleManager.GetHandle(LPlan);
+				IRemoteServerExpressionPlan plan;
+				PlanDescriptor planDescriptor;
+				ProgramStatistics executeTime;
+				Guid[] bookmarks;
+				RemoteFetchData fetchData;
+				IRemoteServerCursor cursor = _handleManager.GetObject<RemoteServerProcess>(processHandle).OpenCursor(expression, ref paramsValue, out plan, out planDescriptor, out executeTime, callInfo, GetRemoteProcessCleanupInfo(cleanupInfo), out bookmarks, count, out fetchData);
+				planDescriptor.Handle = _handleManager.GetHandle(plan);
 				return 
 					new DirectCursorWithFetchResult
 					{
-						ExecuteTime = LExecuteTime,
-						ParamData = AParams.Data,
-						PlanDescriptor = LPlanDescriptor,
-						CursorDescriptor = new CursorDescriptor(FHandleManager.GetHandle(LCursor), LCursor.Capabilities, LCursor.CursorType, LCursor.Isolation),
-						Bookmarks = LBookmarks,
-						FetchData = LFetchData
+						ExecuteTime = executeTime,
+						ParamData = paramsValue.Data,
+						PlanDescriptor = planDescriptor,
+						CursorDescriptor = new CursorDescriptor(_handleManager.GetHandle(cursor), cursor.Capabilities, cursor.CursorType, cursor.Isolation),
+						Bookmarks = bookmarks,
+						FetchData = fetchData
 					};
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		public void CloseCursor(int ACursorHandle, ProcessCallInfo ACallInfo)
+		public void CloseCursor(int cursorHandle, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Dispose();
+				_handleManager.GetObject<RemoteServerCursor>(cursorHandle).Dispose();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public RemoteRowBody Select(int ACursorHandle, ProcessCallInfo ACallInfo)
+		public RemoteRowBody Select(int cursorHandle, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Select(ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).Select(callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public RemoteRowBody SelectSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader)
+		public RemoteRowBody SelectSpecific(int cursorHandle, ProcessCallInfo callInfo, RemoteRowHeader header)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Select(AHeader, ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).Select(header, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public FetchResult Fetch(int ACursorHandle, ProcessCallInfo ACallInfo, int ACount)
+		public FetchResult Fetch(int cursorHandle, ProcessCallInfo callInfo, int count, bool skipCurrent)
 		{
 			try
 			{
-				Guid[] LBookmarks;
-				RemoteFetchData LFetchData = FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Fetch(out LBookmarks, ACount, ACallInfo);
-				return new FetchResult { Bookmarks = LBookmarks, FetchData = LFetchData };
+				Guid[] bookmarks;
+				RemoteFetchData fetchData = _handleManager.GetObject<RemoteServerCursor>(cursorHandle).Fetch(out bookmarks, count, skipCurrent, callInfo);
+				return new FetchResult { Bookmarks = bookmarks, FetchData = fetchData };
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public FetchResult FetchSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, int ACount)
+		public FetchResult FetchSpecific(int cursorHandle, ProcessCallInfo callInfo, RemoteRowHeader header, int count, bool skipCurrent)
 		{
 			try
 			{
-				Guid[] LBookmarks;
-				RemoteFetchData LFetchData = FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Fetch(AHeader, out LBookmarks, ACount, ACallInfo);
-				return new FetchResult { Bookmarks = LBookmarks, FetchData = LFetchData };
+				Guid[] bookmarks;
+				RemoteFetchData fetchData = _handleManager.GetObject<RemoteServerCursor>(cursorHandle).Fetch(header, out bookmarks, count, skipCurrent, callInfo);
+				return new FetchResult { Bookmarks = bookmarks, FetchData = fetchData };
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public CursorGetFlags GetFlags(int ACursorHandle, ProcessCallInfo ACallInfo)
+		public CursorGetFlags GetFlags(int cursorHandle, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).GetFlags(ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).GetFlags(callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public RemoteMoveData MoveBy(int ACursorHandle, ProcessCallInfo ACallInfo, int ADelta)
+		public RemoteMoveData MoveBy(int cursorHandle, ProcessCallInfo callInfo, int delta)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).MoveBy(ADelta, ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).MoveBy(delta, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public CursorGetFlags First(int ACursorHandle, ProcessCallInfo ACallInfo)
+		public CursorGetFlags First(int cursorHandle, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).First(ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).First(callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public CursorGetFlags Last(int ACursorHandle, ProcessCallInfo ACallInfo)
+		public CursorGetFlags Last(int cursorHandle, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Last(ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).Last(callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public CursorGetFlags Reset(int ACursorHandle, ProcessCallInfo ACallInfo)
+		public CursorGetFlags Reset(int cursorHandle, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Reset(ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).Reset(callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void Insert(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow ARow, BitArray AValueFlags)
+		public void Insert(int cursorHandle, ProcessCallInfo callInfo, RemoteRow row, BitArray valueFlags)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Insert(ARow, AValueFlags, ACallInfo);
+				_handleManager.GetObject<RemoteServerCursor>(cursorHandle).Insert(row, valueFlags, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void Update(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow ARow, BitArray AValueFlags)
+		public void Update(int cursorHandle, ProcessCallInfo callInfo, RemoteRow row, BitArray valueFlags)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Update(ARow, AValueFlags, ACallInfo);
+				_handleManager.GetObject<RemoteServerCursor>(cursorHandle).Update(row, valueFlags, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void Delete(int ACursorHandle, ProcessCallInfo ACallInfo)
+		public void Delete(int cursorHandle, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Delete(ACallInfo);
+				_handleManager.GetObject<RemoteServerCursor>(cursorHandle).Delete(callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public Guid GetBookmark(int ACursorHandle, ProcessCallInfo ACallInfo)
+		public Guid GetBookmark(int cursorHandle, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).GetBookmark(ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).GetBookmark(callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public RemoteGotoData GotoBookmark(int ACursorHandle, ProcessCallInfo ACallInfo, Guid ABookmark, bool AForward)
+		public RemoteGotoData GotoBookmark(int cursorHandle, ProcessCallInfo callInfo, Guid bookmark, bool forward)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).GotoBookmark(ABookmark, AForward, ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).GotoBookmark(bookmark, forward, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public int CompareBookmarks(int ACursorHandle, ProcessCallInfo ACallInfo, Guid ABookmark1, Guid ABookmark2)
+		public int CompareBookmarks(int cursorHandle, ProcessCallInfo callInfo, Guid bookmark1, Guid bookmark2)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).CompareBookmarks(ABookmark1, ABookmark2, ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).CompareBookmarks(bookmark1, bookmark2, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void DisposeBookmark(int ACursorHandle, ProcessCallInfo ACallInfo, Guid ABookmark)
+		public void DisposeBookmark(int cursorHandle, ProcessCallInfo callInfo, Guid bookmark)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).DisposeBookmark(ABookmark, ACallInfo);
+				_handleManager.GetObject<RemoteServerCursor>(cursorHandle).DisposeBookmark(bookmark, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void DisposeBookmarks(int ACursorHandle, ProcessCallInfo ACallInfo, Guid[] ABookmarks)
+		public void DisposeBookmarks(int cursorHandle, ProcessCallInfo callInfo, Guid[] bookmarks)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).DisposeBookmarks(ABookmarks, ACallInfo);
+				_handleManager.GetObject<RemoteServerCursor>(cursorHandle).DisposeBookmarks(bookmarks, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public string GetOrder(int ACursorHandle)
+		public string GetOrder(int cursorHandle)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Order;
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).Order;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public RemoteRow GetKey(int ACursorHandle, ProcessCallInfo ACallInfo)
+		public RemoteRow GetKey(int cursorHandle, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).GetKey(ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).GetKey(callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public RemoteGotoData FindKey(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow AKey)
+		public RemoteGotoData FindKey(int cursorHandle, ProcessCallInfo callInfo, RemoteRow key)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).FindKey(AKey, ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).FindKey(key, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public CursorGetFlags FindNearest(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow AKey)
+		public CursorGetFlags FindNearest(int cursorHandle, ProcessCallInfo callInfo, RemoteRow key)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).FindNearest(AKey, ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).FindNearest(key, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public RemoteGotoData Refresh(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow ARow)
+		public RemoteGotoData Refresh(int cursorHandle, ProcessCallInfo callInfo, RemoteRow row)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Refresh(ARow, ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).Refresh(row, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public int GetRowCount(int ACursorHandle, ProcessCallInfo ACallInfo)
+		public int GetRowCount(int cursorHandle, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).RowCount(ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).RowCount(callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public RemoteProposeData Default(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowBody ARow, string AColumn)
+		public RemoteProposeData Default(int cursorHandle, ProcessCallInfo callInfo, RemoteRowBody row, string column)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Default(ARow, AColumn, ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).Default(row, column, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public RemoteProposeData Change(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn)
+		public RemoteProposeData Change(int cursorHandle, ProcessCallInfo callInfo, RemoteRowBody oldRow, RemoteRowBody newRow, string column)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Change(AOldRow, ANewRow, AColumn, ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).Change(oldRow, newRow, column, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public RemoteProposeData Validate(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn)
+		public RemoteProposeData Validate(int cursorHandle, ProcessCallInfo callInfo, RemoteRowBody oldRow, RemoteRowBody newRow, string column)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Validate(AOldRow, ANewRow, AColumn, ACallInfo);
+				return _handleManager.GetObject<RemoteServerCursor>(cursorHandle).Validate(oldRow, newRow, column, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public ScriptDescriptor PrepareScript(int AProcessHandle, string AScript, DebugLocator ALocator)
+		public ScriptDescriptor PrepareScript(int processHandle, string script, DebugLocator locator)
 		{
 			try
 			{
-				RemoteServerScript LScript = (RemoteServerScript)FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareScript(AScript, ALocator);
-				ScriptDescriptor LDescriptor = new ScriptDescriptor(FHandleManager.GetHandle(LScript));
-				foreach (Exception LException in LScript.Messages)
-					LDescriptor.Messages.Add(DataphorFaultUtility.ExceptionToFault(LException is DataphorException ? (DataphorException)LException : new DataphorException(LException)));
-				foreach (RemoteServerBatch LBatch in LScript.Batches)
-					LDescriptor.Batches.Add(new BatchDescriptor(FHandleManager.GetHandle(LBatch), LBatch.IsExpression(), LBatch.Line));
-				return LDescriptor;
+				RemoteServerScript localScript = (RemoteServerScript)_handleManager.GetObject<RemoteServerProcess>(processHandle).PrepareScript(script, locator);
+				ScriptDescriptor descriptor = new ScriptDescriptor(_handleManager.GetHandle(localScript));
+				foreach (Exception exception in localScript.Messages)
+					descriptor.Messages.Add(DataphorFaultUtility.ExceptionToFault(exception is DataphorException ? (DataphorException)exception : new DataphorException(exception)));
+				foreach (RemoteServerBatch batch in localScript.Batches)
+					descriptor.Batches.Add(new BatchDescriptor(_handleManager.GetHandle(batch), batch.IsExpression(), batch.Line));
+				return descriptor;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void UnprepareScript(int AScriptHandle)
+		public void UnprepareScript(int scriptHandle)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerScript>(AScriptHandle).Unprepare();
+				_handleManager.GetObject<RemoteServerScript>(scriptHandle).Unprepare();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void ExecuteScript(int AProcessHandle, ProcessCallInfo ACallInfo, string AScript)
+		public void ExecuteScript(int processHandle, ProcessCallInfo callInfo, string script)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).ExecuteScript(AScript, ACallInfo);
+				_handleManager.GetObject<RemoteServerProcess>(processHandle).ExecuteScript(script, callInfo);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public string GetBatchText(int ABatchHandle)
+		public string GetBatchText(int batchHandle)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerBatch>(ABatchHandle).GetText();
+				return _handleManager.GetObject<RemoteServerBatch>(batchHandle).GetText();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public PlanDescriptor PrepareBatch(int ABatchHandle, RemoteParam[] AParams)
+		public PlanDescriptor PrepareBatch(int batchHandle, RemoteParam[] paramsValue)
 		{
 			try
 			{
-				RemoteServerBatch LBatch = FHandleManager.GetObject<RemoteServerBatch>(ABatchHandle);
-				if (LBatch.IsExpression())
+				RemoteServerBatch batch = _handleManager.GetObject<RemoteServerBatch>(batchHandle);
+				if (batch.IsExpression())
 				{
-					PlanDescriptor LDescriptor;
-					int LHandle = FHandleManager.GetHandle(LBatch.PrepareExpression(AParams, out LDescriptor));
-					LDescriptor.Handle = LHandle;
-					return LDescriptor;
+					PlanDescriptor descriptor;
+					int handle = _handleManager.GetHandle(batch.PrepareExpression(paramsValue, out descriptor));
+					descriptor.Handle = handle;
+					return descriptor;
 				}
 				else
 				{
-					PlanDescriptor LDescriptor;
-					int LHandle = FHandleManager.GetHandle(LBatch.PrepareStatement(AParams, out LDescriptor));
-					LDescriptor.Handle = LHandle;
-					return LDescriptor;
+					PlanDescriptor descriptor;
+					int handle = _handleManager.GetHandle(batch.PrepareStatement(paramsValue, out descriptor));
+					descriptor.Handle = handle;
+					return descriptor;
 				}
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void UnprepareBatch(int APlanHandle)
+		public void UnprepareBatch(int planHandle)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerPlan>(APlanHandle).Unprepare();
+				_handleManager.GetObject<RemoteServerPlan>(planHandle).Unprepare();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public ExecuteResult ExecuteBatch(int ABatchHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams)
+		public ExecuteResult ExecuteBatch(int batchHandle, ProcessCallInfo callInfo, RemoteParamData paramsValue)
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerBatch>(ABatchHandle).Execute(ref AParams, ACallInfo);
-				return new ExecuteResult { ExecuteTime = new ProgramStatistics(), ParamData = AParams.Data };
+				_handleManager.GetObject<RemoteServerBatch>(batchHandle).Execute(ref paramsValue, callInfo);
+				return new ExecuteResult { ExecuteTime = new ProgramStatistics(), ParamData = paramsValue.Data };
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public CatalogResult GetCatalog(int AProcessHandle, string AName)
+		public CatalogResult GetCatalog(int processHandle, string name)
 		{
 			try
 			{
-				long LCacheTimeStamp;
-				long LClientCacheTimeStamp;
-				bool LCacheChanged;
-				string LCatalog = FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).GetCatalog(AName, out LCacheTimeStamp, out LClientCacheTimeStamp, out LCacheChanged);
-				return new CatalogResult { Catalog = LCatalog, CacheTimeStamp = LCacheTimeStamp, ClientCacheTimeStamp = LClientCacheTimeStamp, CacheChanged = LCacheChanged };
+				long cacheTimeStamp;
+				long clientCacheTimeStamp;
+				bool cacheChanged;
+				string catalog = _handleManager.GetObject<RemoteServerProcess>(processHandle).GetCatalog(name, out cacheTimeStamp, out clientCacheTimeStamp, out cacheChanged);
+				return new CatalogResult { Catalog = catalog, CacheTimeStamp = cacheTimeStamp, ClientCacheTimeStamp = clientCacheTimeStamp, CacheChanged = cacheChanged };
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public string GetClassName(int AProcessHandle, string AClassName)
+		public string GetClassName(int processHandle, string className)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).GetClassName(AClassName);
+				return _handleManager.GetObject<RemoteServerProcess>(processHandle).GetClassName(className);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public ServerFileInfo[] GetFileNames(int AProcessHandle, string AClassName, string AEnvironment)
+		public ServerFileInfo[] GetFileNames(int processHandle, string className, string environment)
 		{
 			try
 			{
-				return FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).GetFileNames(AClassName, AEnvironment);
+				return _handleManager.GetObject<RemoteServerProcess>(processHandle).GetFileNames(className, environment);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public int GetFile(int AProcessHandle, string ALibraryName, string AFileName)
+		public int GetFile(int processHandle, string libraryName, string fileName)
 		{
 			try
 			{
-				return FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).GetFile(ALibraryName, AFileName));
+				return _handleManager.GetHandle(_handleManager.GetObject<RemoteServerProcess>(processHandle).GetFile(libraryName, fileName));
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public StreamID AllocateStream(int AProcessHandle)
+		public StreamID AllocateStream(int processHandle)
 		{
 			try
 			{
-				return FHandleManager.GetObject<IStreamManager>(AProcessHandle).Allocate();
+				return _handleManager.GetObject<IStreamManager>(processHandle).Allocate();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public StreamID ReferenceStream(int AProcessHandle, StreamID AStreamID)
+		public StreamID ReferenceStream(int processHandle, StreamID streamID)
 		{
 			try
 			{
-				return FHandleManager.GetObject<IStreamManager>(AProcessHandle).Reference(AStreamID);
+				return _handleManager.GetObject<IStreamManager>(processHandle).Reference(streamID);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void DeallocateStream(int AProcessHandle, StreamID AStreamID)
+		public void DeallocateStream(int processHandle, StreamID streamID)
 		{
 			try
 			{
-				FHandleManager.GetObject<IStreamManager>(AProcessHandle).Deallocate(AStreamID);
+				_handleManager.GetObject<IStreamManager>(processHandle).Deallocate(streamID);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public int OpenStream(int AProcessHandle, StreamID AStreamID, LockMode ALockMode)
+		public int OpenStream(int processHandle, StreamID streamID, LockMode lockMode)
 		{
 			try
 			{
-				return FHandleManager.GetHandle(FHandleManager.GetObject<IStreamManager>(AProcessHandle).Open(AStreamID, ALockMode));
+				return _handleManager.GetHandle(_handleManager.GetObject<IStreamManager>(processHandle).Open(streamID, lockMode));
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void CloseStream(int AStreamHandle)
+		public void CloseStream(int streamHandle)
 		{
 			try
 			{
-				FHandleManager.ReleaseObject<Stream>(AStreamHandle).Close();
+				_handleManager.ReleaseObject<Stream>(streamHandle).Close();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public long GetStreamLength(int AStreamHandle)
+		public long GetStreamLength(int streamHandle)
 		{
 			try
 			{
-				return FHandleManager.GetObject<Stream>(AStreamHandle).Length;
+				return _handleManager.GetObject<Stream>(streamHandle).Length;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void SetStreamLength(int AStreamHandle, long AValue)
+		public void SetStreamLength(int streamHandle, long tempValue)
 		{
 			try
 			{
-				FHandleManager.GetObject<Stream>(AStreamHandle).SetLength(AValue);
+				_handleManager.GetObject<Stream>(streamHandle).SetLength(tempValue);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public long GetStreamPosition(int AStreamHandle)
+		public long GetStreamPosition(int streamHandle)
 		{
 			try
 			{
-				return FHandleManager.GetObject<Stream>(AStreamHandle).Position;
+				return _handleManager.GetObject<Stream>(streamHandle).Position;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void SetStreamPosition(int AStreamHandle, long APosition)
+		public void SetStreamPosition(int streamHandle, long position)
 		{
 			try
 			{
-				FHandleManager.GetObject<Stream>(AStreamHandle).Position = APosition;
+				_handleManager.GetObject<Stream>(streamHandle).Position = position;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void FlushStream(int AStreamHandle)
+		public void FlushStream(int streamHandle)
 		{
 			try
 			{
-				FHandleManager.GetObject<Stream>(AStreamHandle).Flush();
+				_handleManager.GetObject<Stream>(streamHandle).Flush();
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public byte[] ReadStream(int AStreamHandle, int ACount)
+		public byte[] ReadStream(int streamHandle, int count)
 		{
 			try
 			{
-				byte[] LResult = new byte[ACount];
-				int ARead = FHandleManager.GetObject<Stream>(AStreamHandle).Read(LResult, 0, ACount);
-				if (ARead == ACount)
-					return LResult;
+				byte[] result = new byte[count];
+				int ARead = _handleManager.GetObject<Stream>(streamHandle).Read(result, 0, count);
+				if (ARead == count)
+					return result;
 				
-				byte[] LReadResult = new byte[ARead];
-				Array.Copy(LResult, LReadResult, ARead);
-				return LReadResult;
+				byte[] readResult = new byte[ARead];
+				Array.Copy(result, readResult, ARead);
+				return readResult;
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
-			}
-		}
-
-		public long SeekStream(int AStreamHandle, long AOffset, SeekOrigin AOrigin)
-		{
-			try
-			{
-				return FHandleManager.GetObject<Stream>(AStreamHandle).Seek(AOffset, AOrigin);
-			}
-			catch (DataphorException LException)
-			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 
-		public void WriteStream(int AStreamHandle, byte[] AData)
+		public long SeekStream(int streamHandle, long offset, SeekOrigin origin)
 		{
 			try
 			{
-				FHandleManager.GetObject<Stream>(AStreamHandle).Write(AData, 0, AData.Length);
+				return _handleManager.GetObject<Stream>(streamHandle).Seek(offset, origin);
 			}
-			catch (DataphorException LException)
+			catch (DataphorException exception)
 			{
-				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
+			}
+		}
+
+		public void WriteStream(int streamHandle, byte[] data)
+		{
+			try
+			{
+				_handleManager.GetObject<Stream>(streamHandle).Write(data, 0, data.Length);
+			}
+			catch (DataphorException exception)
+			{
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 

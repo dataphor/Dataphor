@@ -31,60 +31,62 @@ using Alphora.Dataphor.DAE.Debug;
 using Alphora.Dataphor.Windows;
 
 using WeifenLuo.WinFormsUI.Docking;
+using Action=System.Action;
 
 namespace Alphora.Dataphor.Dataphoria
 {
 	public partial class Dataphoria : Form, IDataphoria
 	{
-		public const string CConfigurationFileName = "Dataphoria{0}.config";
-
+		public const string ConfigurationFileName = "Dataphoria{0}.config";
+		public const string ScratchPadFileName = "ScratchPad.d4";		
+		
 		public Dataphoria()
 		{
 			InitializeComponent();
 
 			ICSharpCode.TextEditor.Document.HighlightingManager.Manager.AddSyntaxModeFileProvider(new ICSharpCode.TextEditor.Document.FileSyntaxModeProvider(PathUtility.GetBinDirectory()));
 
-			FServices.Add(typeof(DAE.Client.Controls.Design.IPropertyTextEditorService), new PropertyTextEditorService());
+			_services.Add(typeof(DAE.Client.Controls.Design.IPropertyTextEditorService), new PropertyTextEditorService());
 
 			CreateDebugger();
 
-			FExplorer = new DataTree();
-			FExplorer.AllowDrop = true;
-			FExplorer.BorderStyle = BorderStyle.None;
-			FExplorer.CausesValidation = false;
-			FExplorer.HideSelection = false;
-			FExplorer.ImageIndex = 0;
-			FExplorer.ImageList = FTreeImageList;
-			FExplorer.Name = "FExplorer";
-			FExplorer.SelectedImageIndex = 0;
-			FExplorer.ShowRootLines = false;			
-			FExplorer.TabIndex = 1;
-			FExplorer.HelpRequested += FExplorer_HelpRequested;
-			FExplorer.Dataphoria = this;
-			FExplorer.Select();
-			FExplorer.Dock = DockStyle.Fill;
+			_explorer = new DataTree();
+			_explorer.AllowDrop = true;
+			_explorer.BorderStyle = BorderStyle.None;
+			_explorer.CausesValidation = false;
+			_explorer.HideSelection = false;
+			_explorer.ImageIndex = 0;
+			_explorer.ImageList = FTreeImageList;
+			_explorer.Name = "FExplorer";
+			_explorer.SelectedImageIndex = 0;
+			_explorer.ShowRootLines = false;			
+			_explorer.TabIndex = 1;
+			_explorer.HelpRequested += FExplorer_HelpRequested;
+			_explorer.Dataphoria = this;
+			_explorer.Select();
+			_explorer.Dock = DockStyle.Fill;
 
-			FDockContentExplorer = new DockContent();
-			FDockContentExplorer.Controls.Add(FExplorer);
-			FDockContentExplorer.HideOnClose = true;
-			FDockContentExplorer.TabText = "Dataphor Explorer";
-			FDockContentExplorer.Text = "Dataphor Explorer - Dataphoria";
-			FDockContentExplorer.ShowHint = DockState.DockLeft;
+			_dockContentExplorer = new DockContent();
+			_dockContentExplorer.Controls.Add(_explorer);
+			_dockContentExplorer.HideOnClose = true;
+			_dockContentExplorer.TabText = "Dataphor Explorer";
+			_dockContentExplorer.Text = "Dataphor Explorer - Dataphoria";
+			_dockContentExplorer.ShowHint = DockState.DockLeft;
 
-			FErrorListView = new ErrorListView();
-			FErrorListView.OnErrorsAdded += ErrorsAdded;
-			FErrorListView.OnWarningsAdded += WarningsAdded;
-			FErrorListView.Dock = DockStyle.Fill;
+			_errorListView = new ErrorListView();
+			_errorListView.OnErrorsAdded += ErrorsAdded;
+			_errorListView.OnWarningsAdded += WarningsAdded;
+			_errorListView.Dock = DockStyle.Fill;
 
-			FDockContentErrorListView = new DockContent();
-			FDockContentErrorListView.HideOnClose = true;
-			FDockContentErrorListView.Controls.Add(FErrorListView);
-			FDockContentErrorListView.TabText = "Errors/Warnings ";	// HACK: Space is to work around last character being cut-off in tab
-			FDockContentErrorListView.Text = "Errors/Warnings - Dataphoria";
-			FDockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
+			_dockContentErrorListView = new DockContent();
+			_dockContentErrorListView.HideOnClose = true;
+			_dockContentErrorListView.Controls.Add(_errorListView);
+			_dockContentErrorListView.TabText = "Errors/Warnings ";	// HACK: Space is to work around last character being cut-off in tab
+			_dockContentErrorListView.Text = "Errors/Warnings - Dataphoria";
+			_dockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
 
-			FDockContentExplorer.Show(this.FDockPanel);
-			FDockContentErrorListView.Show(this.FDockPanel);
+			_dockContentExplorer.Show(this.FDockPanel);
+			_dockContentErrorListView.Show(this.FDockPanel);
 
 			FDockPanel.DockLeftPortion = 240;
 			FDockPanel.DockRightPortion = 240;
@@ -96,99 +98,104 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#if TRACEFOCUS
 
-		private static string WalkParentControls(Control AControl)
+		private static string WalkParentControls(Control control)
 		{
-			if (AControl == null)
+			if (control == null)
 				return "";
 			else
 				return 
-					WalkParentControls(AControl.Parent)
+					WalkParentControls(control.Parent)
 						+ "->"
-						+ (AControl.Parent != null ? "(" + AControl.Parent.Controls.IndexOf(AControl).ToString() + ")" : "")
-						+ (AControl.Name != null ? AControl.Name : "")
-						+ (AControl.Text != null ? "\"" + AControl.Name + "\"" : "")
-						+ "[" + AControl.GetType().Name + "]";
+						+ (control.Parent != null ? "(" + control.Parent.Controls.IndexOf(control).ToString() + ")" : "")
+						+ (control.Name != null ? control.Name : "")
+						+ (control.Text != null ? "\"" + control.Name + "\"" : "")
+						+ "[" + control.GetType().Name + "]";
 		}
 
 		[System.Runtime.InteropServices.DllImport("user32.dll", CharSet=System.Runtime.InteropServices.CharSet.Auto, ExactSpelling=true)]
 		public static extern IntPtr GetFocus();
  
-		private bool ProcessQueryFocus(Form AForm, Keys AKey)
+		private bool ProcessQueryFocus(Form form, Keys key)
 		{
-			IntPtr LFocusPtr = GetFocus();
-			if (LFocusPtr != IntPtr.Zero)
+			IntPtr focusPtr = GetFocus();
+			if (focusPtr != IntPtr.Zero)
 			{
-				Control LControl = Control.FromHandle(LFocusPtr);
-				if (LControl != null)
-					System.Diagnostics.Trace.WriteLine("Focus: " + WalkParentControls(LControl));
+				Control control = Control.FromHandle(focusPtr);
+				if (control != null)
+					System.Diagnostics.Trace.WriteLine("Focus: " + WalkParentControls(control));
 			}
 			return true;
 		}
 
-		protected override bool ProcessDialogKey(Keys AKeyData)
+		protected override bool ProcessDialogKey(Keys keyData)
 		{
-			if (AKeyData == (Keys.Control | Keys.Shift | Keys.Alt | Keys.F))
-				ProcessQueryFocus(this, AKeyData);
-			return base.ProcessDialogKey(AKeyData);
+			if (keyData == (Keys.Control | Keys.Shift | Keys.Alt | Keys.F))
+				ProcessQueryFocus(this, keyData);
+			return base.ProcessDialogKey(keyData);
 		}
 		
 		#endif
 
-		protected override void OnClosing(CancelEventArgs AArgs)
-		{
+		protected override void OnClosing(CancelEventArgs args)   
+		{	 		
 			// HACK: Something in the WinForms validation process is returning false.  We don't care so always make sure Cancel is false at the beginning of OnClosing
-			AArgs.Cancel = false;
-			base.OnClosing(AArgs);
+			args.Cancel = false;
+			base.OnClosing(args);
 		}
 
-		private DataTree FExplorer;
-		private ErrorListView FErrorListView;
-		private SessionsView FSessionsView;
-		private CallStackView FCallStackView;
-		private DebugProcessesView FDebugProcessesView;
-		private ProcessesView FProcessesView;
-		private StackView FStackView;
+		private DataTree _explorer;
+		private ErrorListView _errorListView;
+		private SessionsView _sessionsView;
+		private CallStackView _callStackView;
+		private DebugProcessesView _debugProcessesView;
+		private ProcessesView _processesView;
+		private StackView _stackView;
 
-		private DockContent FDockContentExplorer;
-		private DockContent FDockContentErrorListView;
-		private DockContent FDockContentSessionsView;
-		private DockContent FDockContentCallStackView;
-		private DockContent FDockContentDebugProcessesView;
-		private DockContent FDockContentProcessesView;
-		private DockContent FDockContentStackView;
+		private DockContent _dockContentExplorer;
+		private DockContent _dockContentErrorListView;
+		private DockContent _dockContentSessionsView;
+		private DockContent _dockContentCallStackView;
+		private DockContent _dockContentDebugProcessesView;
+		private DockContent _dockContentProcessesView;
+		private DockContent _dockContentStackView;
 
 		#region Settings
 
-		private Settings FSettings;
-		public Settings Settings { get { return FSettings; } }
+		private Settings _settings;
+		public Settings Settings { get { return _settings; } }
 
 		// when the form state is saved when maximized, the restore size needs to be remembered
-		private Rectangle FNormalBounds = Rectangle.Empty;
+		private Rectangle _normalBounds = Rectangle.Empty;
 
-		public string GetConfigurationFileName(string AType)
+		public string GetConfigurationFileName(string type)
 		{
-			return Path.Combine(PathUtility.UserAppDataPath(), String.Format(CConfigurationFileName, AType));
+			return Path.Combine(PathUtility.UserAppDataPath(), String.Format(ConfigurationFileName, type));
 		}
+		
+		public string GetScratchPadFileName()
+		{
+			return Path.Combine(PathUtility.UserAppDataPath(), ScratchPadFileName);
+		}		
 
-		private ServerNode FServerNode;
+		private ServerNode _serverNode;
 		
 		public void RefreshLibraries()
 		{
-			FServerNode.Build();
-			FServerNode.LibraryNode.Refresh();
+			_serverNode.Build();
+			_serverNode.LibraryNode.Refresh();
 		}
 		
-		public void RefreshDocuments(string ALibraryName)
+		public void RefreshDocuments(string libraryName)
 		{
-			FServerNode.Build();
-			LibraryNode LLibraryNode = (LibraryNode)FServerNode.LibraryNode.FindByText(ALibraryName);
-			if ((LLibraryNode != null) && (LLibraryNode.DocumentListNode != null))
-				LLibraryNode.DocumentListNode.Refresh();
+			_serverNode.Build();
+			LibraryNode libraryNode = (LibraryNode)_serverNode.LibraryNode.FindByText(libraryName);
+			if ((libraryNode != null) && (libraryNode.DocumentListNode != null))
+				libraryNode.DocumentListNode.Refresh();
 		}
 
-		protected override void OnLoad(EventArgs AArgs)
+		protected override void OnLoad(EventArgs args)
 		{
-			base.OnLoad(AArgs);
+			base.OnLoad(args);
 			RestoreBoundsAndState();
 		}
 
@@ -196,19 +203,19 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			try
 			{
-				Rectangle LBounds = SystemInformation.WorkingArea;
-				LBounds = (Rectangle)FSettings.GetSetting("Dataphoria.Bounds", typeof(Rectangle), LBounds);
-				FNormalBounds = LBounds;
-				Bounds = LBounds;
+				Rectangle bounds = SystemInformation.WorkingArea;
+				bounds = (Rectangle)_settings.GetSetting("Dataphoria.Bounds", typeof(Rectangle), bounds);
+				_normalBounds = bounds;
+				Bounds = bounds;
 
-				FormWindowState LState = (FormWindowState)FSettings.GetSetting("Dataphoria.WindowState", typeof(FormWindowState), FormWindowState.Normal);
-				if (LState == FormWindowState.Minimized)  // don't start minimized, because it gets messed up
-					LState = FormWindowState.Normal;
-				WindowState = LState;
+				FormWindowState state = (FormWindowState)_settings.GetSetting("Dataphoria.WindowState", typeof(FormWindowState), FormWindowState.Normal);
+				if (state == FormWindowState.Minimized)  // don't start minimized, because it gets messed up
+					state = FormWindowState.Normal;
+				WindowState = state;
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Warnings.AppendError(this, LException, true);
+				Warnings.AppendError(this, exception, true);
 				// don't rethrow
 			}
 		}
@@ -217,147 +224,167 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			try
 			{
-				string LFileName = GetConfigurationFileName(String.Empty);
+				string fileName = GetConfigurationFileName(String.Empty);
 				// Load configuration settings
 				try
 				{
-					FSettings = new Settings(LFileName);
+					_settings = new Settings(fileName);
 				}
 				catch
 				{
-					FSettings = new Settings();
+					_settings = new Settings();
 					throw;
 				}
 
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Warnings.AppendError(this, LException, true);
+				Warnings.AppendError(this, exception, true);
 				// don't rethrow
 			}
 		}
 
 		private void SaveSettings()
 		{
-			if (FSettings != null)
+			if (_settings != null)
 			{
 				// Save the configuration settings
-				FSettings.SetSetting("Dataphoria.WindowState", WindowState);
+				_settings.SetSetting("Dataphoria.WindowState", WindowState);
 				if (WindowState == FormWindowState.Normal)
-					FSettings.SetSetting("Dataphoria.Bounds", Bounds);
+					_settings.SetSetting("Dataphoria.Bounds", Bounds);
 				else
 				{
-					if (FNormalBounds != Rectangle.Empty)
-						FSettings.SetSetting("Dataphoria.Bounds", FNormalBounds);
+					if (_normalBounds != Rectangle.Empty)
+						_settings.SetSetting("Dataphoria.Bounds", _normalBounds);
 				}
-				FSettings.SaveSettings(GetConfigurationFileName(String.Empty));
+				_settings.SaveSettings(GetConfigurationFileName(String.Empty));
 			}
 		}
+		
+		private void EnsureScratchPad()
+		{
+			try
+			{
+				string fileName = GetScratchPadFileName();			
+																	
+				DesignerInfo info = GetDefaultDesigner(Program.DocumentTypeFromFileName(fileName));
+				FileDesignBuffer buffer = new FileDesignBuffer(this, fileName);
+				buffer.EnsureFile();
+				IDesigner designer = OpenDesigner(info, buffer);	   									
+				designer.Service.StartAutoSave();
+			}
+			catch (Exception exception)
+			{
+				Warnings.AppendError(this, exception, true);
+				// don't rethrow
+			} 
+		}
 
-		protected override void OnSizeChanged(EventArgs AArgs)
+		protected override void OnSizeChanged(EventArgs args)
 		{
 			if (WindowState == FormWindowState.Normal)
-				FNormalBounds = Bounds;
-			base.OnSizeChanged(AArgs);
+				_normalBounds = Bounds;
+			base.OnSizeChanged(args);
 		}
 
 		#endregion
 
 		#region Connection
 
-		private DataSession FDataSession;
-		public DataSession DataSession { get { return FDataSession; } }
+		private DataSession _dataSession;
+		public DataSession DataSession { get { return _dataSession; } }
 		
-		private Frontend.Client.Windows.Session FFrontendSession;
-		public Frontend.Client.Windows.Session FrontendSession { get { return FFrontendSession; } }
+		private Frontend.Client.Windows.Session _frontendSession;
+		public Frontend.Client.Windows.Session FrontendSession { get { return _frontendSession; } }
 		
-		private IServerProcess FUtilityProcess;
-		public IServerProcess UtilityProcess { get { return FUtilityProcess; } }
+		private IServerProcess _utilityProcess;
+		public IServerProcess UtilityProcess { get { return _utilityProcess; } }
 
 		public void EnsureServerConnection()
 		{
-			if (FDataSession == null)
+			if (_dataSession == null)
 			{
-				InstanceConfiguration LInstanceConfiguration = InstanceManager.LoadConfiguration();
-				ServerConfiguration LDefaultInstance = LInstanceConfiguration.Instances[Engine.CDefaultServerName];
-				if (LInstanceConfiguration.Instances.Count == 0)
+				InstanceConfiguration instanceConfiguration = InstanceManager.LoadConfiguration();
+				ServerConfiguration defaultInstance = instanceConfiguration.Instances[Engine.DefaultServerName];
+				if (instanceConfiguration.Instances.Count == 0)
 				{
-					LDefaultInstance = ServerConfiguration.DefaultLocalInstance();
-					LInstanceConfiguration.Instances.Add(LDefaultInstance);
-					InstanceManager.SaveConfiguration(LInstanceConfiguration);
+					defaultInstance = ServerConfiguration.DefaultLocalInstance();
+					instanceConfiguration.Instances.Add(defaultInstance);
+					InstanceManager.SaveConfiguration(instanceConfiguration);
 				}
 				
-				AliasConfiguration LConfiguration = AliasManager.LoadConfiguration();
-				if (LConfiguration.Aliases.Count == 0)
+				AliasConfiguration configuration = AliasManager.LoadConfiguration();
+				if (configuration.Aliases.Count == 0)
 				{
-					InProcessAlias LAlias = new InProcessAlias();
-					LAlias.Name = LDefaultInstance == null ? ServerConfiguration.CDefaultLocalInstanceName : LDefaultInstance.Name;
-					LAlias.InstanceName = LDefaultInstance == null ? ServerConfiguration.CDefaultLocalInstanceName : LDefaultInstance.Name;
-					LConfiguration.Aliases.Add(LAlias);
+					InProcessAlias alias = new InProcessAlias();
+					alias.Name = defaultInstance == null ? ServerConfiguration.DefaultLocalInstanceName : defaultInstance.Name;
+					alias.InstanceName = defaultInstance == null ? ServerConfiguration.DefaultLocalInstanceName : defaultInstance.Name;
+					configuration.Aliases.Add(alias);
 				}
 
-				ServerConnectForm.Execute(LConfiguration);
+				ServerConnectForm.Execute(configuration);
 
-				using (var LStatusForm = new StatusForm(Strings.Connecting))
+				using (var statusForm = new StatusForm(Strings.Connecting))
 				{
-					FDataSession = new DataSession();
+					_dataSession = new DataSession();
 					try
 					{
-						FDataSession.AliasName = LConfiguration.DefaultAliasName;
-						FDataSession.SessionInfo.Environment = "WindowsClient";
-						FDataSession.Open();
+						_dataSession.AliasName = configuration.DefaultAliasName;
+						_dataSession.SessionInfo.Environment = "WindowsClient";
+						_dataSession.Open();
 
-						FUtilityProcess = FDataSession.ServerSession.StartProcess(new ProcessInfo(FDataSession.ServerSession.SessionInfo));
+						_utilityProcess = _dataSession.ServerSession.StartProcess(new ProcessInfo(_dataSession.ServerSession.SessionInfo));
 						try
 						{
 							EnsureFrontendRegistered();
 							
-							FFrontendSession = new Frontend.Client.Windows.Session(FDataSession, false);
+							_frontendSession = new Frontend.Client.Windows.Session(_dataSession, false);
 							try
 							{
-								FFrontendSession.SetLibrary("Frontend");
-								FFrontendSession.OnDeserializationErrors += FrontendSessionDeserializationErrors;
-								FServerNode = new ServerNode(FDataSession.Server != null);
-								FServerNode.Text = FDataSession.Alias.ToString();
-								FExplorer.AddBaseNode(FServerNode);
+								_frontendSession.SetLibrary("Frontend");
+								_frontendSession.OnDeserializationErrors += FrontendSessionDeserializationErrors;
+								_serverNode = new ServerNode(_dataSession.Server != null);
+								_serverNode.Text = _dataSession.Alias.ToString();
+								_explorer.AddBaseNode(_serverNode);
 								try
 								{
 									OnConnected(EventArgs.Empty);
-									FServerNode.Expand();
+									_serverNode.Expand();
 									FConnectToolStripMenuItem.Visible = false;
 									FDisconnectToolStripMenuItem.Visible = true;									
-									Text = Strings.DataphoriaTitle + " - " + FDataSession.Alias;
-									FDockContentExplorer.Show(FDockPanel);
-									FExplorer.Focus();
+									Text = Strings.DataphoriaTitle + " - " + _dataSession.Alias;
+									_dockContentExplorer.Show(FDockPanel);
+									EnsureScratchPad();
+									_explorer.Focus();
 								}
 								catch
 								{
-									FServerNode = null;
-									FExplorer.Nodes.Clear();
+									_serverNode = null;
+									_explorer.Nodes.Clear();
 									throw;
 								}
 							}
 							catch
 							{
-								FFrontendSession.Dispose();
-								FFrontendSession = null;
+								_frontendSession.Dispose();
+								_frontendSession = null;
 								throw;
 							}
 						}
 						catch
 						{
-							if (FUtilityProcess != null)
+							if (_utilityProcess != null)
 							{
-								FDataSession.ServerSession.StopProcess(FUtilityProcess);
-								FUtilityProcess = null;
+								_dataSession.ServerSession.StopProcess(_utilityProcess);
+								_utilityProcess = null;
 							}
 							throw;
 						}
 					}
 					catch
 					{						
-						FDataSession.Dispose();
-						FDataSession = null;						
+						_dataSession.Dispose();
+						_dataSession = null;						
 						throw;
 					}
 				}
@@ -366,32 +393,32 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public event EventHandler Connected;
 
-		private void OnConnected(EventArgs AArgs)
+		private void OnConnected(EventArgs args)
 		{
 			if (Connected != null)
-				Connected(this, AArgs);
+				Connected(this, args);
 		}
 
-		private void Dataphoria_Shown(object ASender, EventArgs AArgs)
+		private void Dataphoria_Shown(object sender, EventArgs args)
 		{
 			EnsureServerConnection();
 		}
 
 		private void InternalDisconnect()
 		{
-			using (StatusForm LStatusForm = new StatusForm(Strings.Disconnecting))
+			using (StatusForm statusForm = new StatusForm(Strings.Disconnecting))
 			{
-				if (FDataSession != null)
+				if (_dataSession != null)
 				{
 					try
 					{
 						Text = Strings.DataphoriaTitle;
 						FConnectToolStripMenuItem.Visible = true;
 						FDisconnectToolStripMenuItem.Visible = false;						
-						FDockContentExplorer.Hide();
+						_dockContentExplorer.Hide();
 
-						FExplorer.Nodes.Clear();
-						FServerNode = null;
+						_explorer.Nodes.Clear();
+						_serverNode = null;
 						
 						OnDisconnected(EventArgs.Empty);
 					}
@@ -399,29 +426,29 @@ namespace Alphora.Dataphor.Dataphoria
 					{
 						try
 						{
-							if (FUtilityProcess != null)
+							if (_utilityProcess != null)
 							{
-								FDataSession.ServerSession.StopProcess(FUtilityProcess);
-								FUtilityProcess = null;
+								_dataSession.ServerSession.StopProcess(_utilityProcess);
+								_utilityProcess = null;
 							}
 						}
 						finally
 						{
 							try
 							{
-								if (FFrontendSession != null)
+								if (_frontendSession != null)
 								{
-									FFrontendSession.Dispose();	// Will dispose the connection
-									FFrontendSession = null;
+									_frontendSession.Dispose();	// Will dispose the connection
+									_frontendSession = null;
 								}
 							}
 							finally
 							{
-								if (FDataSession != null)
+								if (_dataSession != null)
 								{
-									DataSession LDataSession = FDataSession;
-									FDataSession = null;
-									LDataSession.Dispose(); // Set the DataSession null before the close to ensure the Dataphoria appears disconnected and cleanup executes properly.
+									DataSession dataSession = _dataSession;
+									_dataSession = null;
+									dataSession.Dispose(); // Set the DataSession null before the close to ensure the Dataphoria appears disconnected and cleanup executes properly.
 								}
 							}							
 						}
@@ -432,10 +459,10 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public event EventHandler Disconnected;
 		
-		private void OnDisconnected(EventArgs AArgs)
+		private void OnDisconnected(EventArgs args)
 		{
 			if (Disconnected != null)
-				Disconnected(this, AArgs);
+				Disconnected(this, args);
 		}
 
 		public void Disconnect()
@@ -448,84 +475,84 @@ namespace Alphora.Dataphor.Dataphoria
 			InternalDisconnect();
 		}
 
-		private void FrontendSessionDeserializationErrors(IHost AHost, ErrorList AErrors)
+		private void FrontendSessionDeserializationErrors(IHost host, ErrorList errors)
 		{
-			IErrorSource LSource = null;
+			IErrorSource source = null;
 			
-			if ((AHost != null) && (AHost.Children.Count > 0))
-				LSource = AHost.Children[0] as IErrorSource;
+			if ((host != null) && (host.Children.Count > 0))
+				source = host.Children[0] as IErrorSource;
 
-			Warnings.AppendErrors(LSource, AErrors, true);
+			Warnings.AppendErrors(source, errors, true);
 		}
 		
 		public bool IsConnected
 		{
-			get { return FDataSession != null; }
+			get { return _dataSession != null; }
 		}
 
 		#endregion
 
 		#region Live Designer Support
 
-		private Bitmap LoadBitmap(string AResourceName)
+		private Bitmap LoadBitmap(string resourceName)
 		{
-			Stream LManifestResourceStream = GetType().Assembly.GetManifestResourceStream(AResourceName);
-			if (LManifestResourceStream != null)
+			Stream manifestResourceStream = GetType().Assembly.GetManifestResourceStream(resourceName);
+			if (manifestResourceStream != null)
 			{
-				var LResult = new Bitmap(LManifestResourceStream);
-				LResult.MakeTransparent();
-				return LResult;
+				var result = new Bitmap(manifestResourceStream);
+				result.MakeTransparent();
+				return result;
 			}
-			throw new ArgumentException("Could not get manifest resource stream for: " + AResourceName, "AResourceName");
+			throw new ArgumentException("Could not get manifest resource stream for: " + resourceName, "AResourceName");
 		}
 
 		public Frontend.Client.Windows.Session GetLiveDesignableFrontendSession()
 		{
-			Frontend.Client.Windows.Session LSession = new Frontend.Client.Windows.Session(FDataSession, false);
-			LSession.AfterFormActivate += AfterFormActivated;
-			LSession.OnDeserializationErrors += FrontendSessionDeserializationErrors;
-			return LSession;
+			Frontend.Client.Windows.Session session = new Frontend.Client.Windows.Session(_dataSession, false);
+			session.AfterFormActivate += AfterFormActivated;
+			session.OnDeserializationErrors += FrontendSessionDeserializationErrors;
+			return session;
 		}
 
-		private Hashtable FDesignedForms = new Hashtable();
+		private Hashtable _designedForms = new Hashtable();
 
-		private void AfterFormActivated(IFormInterface AInterface)
+		private void AfterFormActivated(IFormInterface interfaceValue)
 		{
-			AInterface.HostNode.OnDocumentChanged += HostDocumentChanged;
-			UpdateDesignerActions(AInterface);
+			interfaceValue.HostNode.OnDocumentChanged += HostDocumentChanged;
+			UpdateDesignerActions(interfaceValue);
 		}
 
-		private void HostDocumentChanged(object ASender, EventArgs AArgs)
+		private void HostDocumentChanged(object sender, EventArgs args)
 		{
-			UpdateDesignerActions((IFormInterface)((IHost)ASender).Children[0]);
+			UpdateDesignerActions((IFormInterface)((IHost)sender).Children[0]);
 		}
 
-		private void UpdateDesignerActions(IFormInterface AInterface)
+		private void UpdateDesignerActions(IFormInterface interfaceValue)
 		{
-			IWindowsFormInterface LForm = (IWindowsFormInterface)AInterface;
+			IWindowsFormInterface form = (IWindowsFormInterface)interfaceValue;
 
-			LForm.ClearCustomActions();
+			form.ClearCustomActions();
 
-			DocumentExpression LExpression = new DocumentExpression(AInterface.HostNode.Document);
+			DocumentExpression expression = new DocumentExpression(interfaceValue.HostNode.Document);
 
-			if (LExpression.Type != DocumentType.None)
-				LForm.AddCustomAction
+			if (expression.Type != DocumentType.None)
+				form.AddCustomAction
 				(
 					Strings.CustomizeMenuText, 
 					LoadBitmap("Alphora.Dataphor.Dataphoria.Images.Customize.bmp"), 
 					CustomizeForm
 				);
 
-			LForm.AddCustomAction
+			form.AddCustomAction
 			(
 				Strings.EditCopyMenuText, 
 				LoadBitmap("Alphora.Dataphor.Dataphoria.Images.EditCopy.bmp"), 
 				EditCopyForm
 			);
 
-			if (LExpression.Type == DocumentType.Document)
+			if (expression.Type == DocumentType.Document)
 			{
-				LForm.AddCustomAction
+				form.AddCustomAction
 				(
 					Strings.EditMenuText,  
 					LoadBitmap("Alphora.Dataphor.Dataphoria.Images.Edit.bmp"), 
@@ -534,108 +561,108 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		private void CheckExclusiveDesigner(IFormInterface AInterface)
+		private void CheckExclusiveDesigner(IFormInterface interfaceValue)
 		{
-			if (FDesignedForms[AInterface] != null) 
+			if (_designedForms[interfaceValue] != null) 
 				throw new DataphoriaException(DataphoriaException.Codes.SingleDesigner);
 		}
 
-		public void AddDesignerForm(IFormInterface AInterface, IDesigner ADesigner)
+		public void AddDesignerForm(IFormInterface interfaceValue, IDesigner designer)
 		{
-			FDesignedForms.Add(AInterface, ADesigner);
-			ADesigner.Disposed += DesignerDisposed;
+			_designedForms.Add(interfaceValue, designer);
+			designer.Disposed += DesignerDisposed;
 		}
 
-		private void EditForm(IFormInterface AInterface)
+		private void EditForm(IFormInterface interfaceValue)
 		{
-			CheckExclusiveDesigner(AInterface);
+			CheckExclusiveDesigner(interfaceValue);
 
-			DocumentExpression LExpression = Program.GetDocumentExpression(AInterface.HostNode.Document);
-			string LDocumentType;
+			DocumentExpression expression = Program.GetDocumentExpression(interfaceValue.HostNode.Document);
+			string documentType;
 			using 
 			(
-				DAE.Runtime.Data.Scalar LDocumentTypeValue = 
+				DAE.Runtime.Data.Scalar documentTypeValue = 
 					(DAE.Runtime.Data.Scalar)EvaluateQuery
 					(
 						String.Format
 						(
 							".Frontend.GetDocumentType('{0}', '{1}')", 
-							LExpression.DocumentArgs.LibraryName, 
-							LExpression.DocumentArgs.DocumentName
+							expression.DocumentArgs.LibraryName, 
+							expression.DocumentArgs.DocumentName
 						)
 					)
 			)
 			{
-				LDocumentType = LDocumentTypeValue.AsString;
+				documentType = documentTypeValue.AsString;
 			}
 
-			ILiveDesigner LDesigner;
-			switch (LDocumentType)
+			ILiveDesigner designer;
+			switch (documentType)
 			{
-				case "dfd" : LDesigner = new FormDesigner.FormDesigner(this, "DFD"); break;
-				case "dfdx" : LDesigner = new FormDesigner.CustomFormDesigner(this, "DFDX"); break;
-				default : throw new DataphoriaException(DataphoriaException.Codes.DocumentTypeLiveEditNotSupported, LDocumentType);
+				case "dfd" : designer = new FormDesigner.FormDesigner(this, "DFD"); break;
+				case "dfdx" : designer = new FormDesigner.CustomFormDesigner(this, "DFDX"); break;
+				default : throw new DataphoriaException(DataphoriaException.Codes.DocumentTypeLiveEditNotSupported, documentType);
 			}
 			try
 			{
-				LDesigner.Open(AInterface.HostNode);
-				LDesigner.Show();
+				designer.Open(interfaceValue.HostNode);
+				designer.Show();
 				
-				AddDesignerForm(AInterface, LDesigner);
+				AddDesignerForm(interfaceValue, designer);
 			}
 			catch
 			{
-				LDesigner.Dispose();
+				designer.Dispose();
 				throw;
 			}
 		}
 
-		private void EditCopyForm(IFormInterface AInterface)
+		private void EditCopyForm(IFormInterface interfaceValue)
 		{
-			CheckExclusiveDesigner(AInterface);
+			CheckExclusiveDesigner(interfaceValue);
 
-			FormDesigner.FormDesigner LDesigner = new FormDesigner.FormDesigner(this, "DFD");
+			FormDesigner.FormDesigner designer = new FormDesigner.FormDesigner(this, "DFD");
 			try
 			{
-				LDesigner.New(AInterface.HostNode);
-				((IDesigner)LDesigner).Show();
+				designer.New(interfaceValue.HostNode);
+				((IDesigner)designer).Show();
 				
-				AddDesignerForm(AInterface, LDesigner);
+				AddDesignerForm(interfaceValue, designer);
 			}
 			catch
 			{
-				LDesigner.Dispose();
+				designer.Dispose();
 				throw;
 			}
 		}
 
-		private void CustomizeForm(IFormInterface AInterface)
+		private void CustomizeForm(IFormInterface interfaceValue)
 		{
-			CheckExclusiveDesigner(AInterface);
+			CheckExclusiveDesigner(interfaceValue);
 
-			FormDesigner.CustomFormDesigner LDesigner = new FormDesigner.CustomFormDesigner(this, "DFDX");
+			FormDesigner.CustomFormDesigner designer = new FormDesigner.CustomFormDesigner(this, "DFDX");
 			try
 			{
-				LDesigner.New(AInterface.HostNode);
-				((IDesigner)LDesigner).Show();
+				designer.New(interfaceValue.HostNode);
+				((IDesigner)designer).Show();
 				
-				AddDesignerForm(AInterface, LDesigner);
+				AddDesignerForm(interfaceValue, designer);
 			}
 			catch
 			{
-				LDesigner.Dispose();
+				designer.Dispose();
 				throw;
 			}
 		}
 
-		private void DesignerDisposed(object ASender, EventArgs AArgs)
+		private void DesignerDisposed(object sender, EventArgs args)
 		{
 			// Remove the designer once it is closed
-			IDictionaryEnumerator LEnumerator = FDesignedForms.GetEnumerator();
-			while (LEnumerator.MoveNext())
-				if (LEnumerator.Value == ASender)
+			IDictionaryEnumerator enumerator = _designedForms.GetEnumerator();
+			while (enumerator.MoveNext())
+				if (enumerator.Value == sender)
 				{
-					FDesignedForms.Remove(LEnumerator.Key);
+					_designedForms.Remove(enumerator.Key);
 					break;
 				}
 		}
@@ -644,84 +671,84 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region Designer support
 
-		private Hashtable FDesigners = new Hashtable();
+		private Hashtable _designers = new Hashtable();
 		
-		public void CheckNotRegistered(DesignBuffer ABuffer)
+		public void CheckNotRegistered(DesignBuffer buffer)
 		{
-			if (FDesigners[ABuffer] != null)
-				throw new DataphoriaException(DataphoriaException.Codes.AlreadyDesigning, ABuffer.GetDescription());
+			if (_designers[buffer] != null)
+				throw new DataphoriaException(DataphoriaException.Codes.AlreadyDesigning, buffer.GetDescription());
 		}
 
-		public void RegisterDesigner(DesignBuffer ABuffer, IDesigner ADesigner)
+		public void RegisterDesigner(DesignBuffer buffer, IDesigner designer)
 		{
-			CheckNotRegistered(ABuffer);
-			FDesigners.Add(ABuffer, ADesigner);
+			CheckNotRegistered(buffer);
+			_designers.Add(buffer, designer);
 		}
 
-		public void UnregisterDesigner(DesignBuffer ABuffer)
+		public void UnregisterDesigner(DesignBuffer buffer)
 		{
-			FDesigners.Remove(ABuffer);
+			_designers.Remove(buffer);
 		}
 
-		public IDesigner GetDesigner(DesignBuffer ABuffer)
+		public IDesigner GetDesigner(DesignBuffer buffer)
 		{
-			return (IDesigner)FDesigners[ABuffer];
+			return (IDesigner)_designers[buffer];
 		}
 
 		/// <summary> Opens up a new query window against the specified server. </summary>
 		/// <returns> The newly created script editor. </returns>
 		public IDesigner NewDesigner()
 		{
-			DesignerInfo LInfo = new DesignerInfo();
-			string LSelectDesigner = Strings.SelectDesigner;
-			IWindowsFormInterface LForm = FrontendSession.LoadForm(null, String.Format(".Frontend.Derive('Designers adorn {{ ClassName tags {{ Frontend.Browse.Visible = ''false'' }} }} tags {{ Frontend.Caption = ''{0}'' }}')", LSelectDesigner));
+			DesignerInfo info = new DesignerInfo();
+			string selectDesigner = Strings.SelectDesigner;
+			IWindowsFormInterface form = FrontendSession.LoadForm(null, String.Format(".Frontend.Derive('Designers adorn {{ ClassName tags {{ Frontend.Browse.Visible = ''false'' }} }} tags {{ Frontend.Caption = ''{0}'' }}')", selectDesigner));
 			try
 			{
-				if (LForm.ShowModal(FormMode.Query) != DialogResult.OK)
+				if (form.ShowModal(FormMode.Query) != DialogResult.OK)
 					throw new AbortException();
-				LInfo.ID = LForm.MainSource.DataView.Fields["Main.ID"].AsString;
-				LInfo.ClassName = LForm.MainSource.DataView.Fields["Main.ClassName"].AsString;
+				info.ID = form.MainSource.DataView.Fields["Main.ID"].AsString;
+				info.ClassName = form.MainSource.DataView.Fields["Main.ClassName"].AsString;
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 
-			return OpenDesigner(LInfo, null);
+			return OpenDesigner(info, null);
 		}
 
 		/// <summary> Determine the default designer for the specified document type ID. </summary>
-		public DesignerInfo GetDefaultDesigner(string ADocumentTypeID)
+		public DesignerInfo GetDefaultDesigner(string documentTypeID)
 		{
-			IServerCursor LCursor = OpenCursor(String.Format("DocumentTypeDefaultDesigners where DocumentType_ID = '{0}' join Designers by ID = Default_Designer_ID over {{ ID, ClassName }}", ADocumentTypeID));
+			IServerCursor cursor = OpenCursor(String.Format("DocumentTypeDefaultDesigners where DocumentType_ID = '{0}' join Designers by ID = Default_Designer_ID over {{ ID, ClassName }}", documentTypeID));
 			try
 			{
-				DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow();
+				DAE.Runtime.Data.Row row = cursor.Plan.RequestRow();
 				try
 				{
-					if (!LCursor.Next())
-						throw new DataphoriaException(DataphoriaException.Codes.NoDefaultDesignerForDocumentType, ADocumentTypeID);
-					LCursor.Select(LRow);
-					DesignerInfo LResult = new DesignerInfo();
-					LResult.ID = (string)LRow["ID"];
-					LResult.ClassName = (string)LRow["ClassName"];
-					return LResult;
+					if (!cursor.Next())
+						throw new DataphoriaException(DataphoriaException.Codes.NoDefaultDesignerForDocumentType, documentTypeID);
+					cursor.Select(row);
+					DesignerInfo result = new DesignerInfo();
+					result.ID = (string)row["ID"];
+					result.ClassName = (string)row["ClassName"];
+					return result;
 				}
 				finally
 				{
-					LCursor.Plan.ReleaseRow(LRow);
+					cursor.Plan.ReleaseRow(row);
 				}
 			}
 			finally
 			{
-				CloseCursor(LCursor);
+				CloseCursor(cursor);
 			}
 		}
 
 		/// <summary> Allow the user to choose from the designers associated with the specified document type ID. </summary>
-		public DesignerInfo ChooseDesigner(string ADocumentTypeID)
+		public DesignerInfo ChooseDesigner(string documentTypeID)
 		{
-			IWindowsFormInterface LForm = 
+			IWindowsFormInterface form = 
 				FrontendSession.LoadForm
 				(
 					null,
@@ -740,81 +767,81 @@ namespace Alphora.Dataphor.Dataphoria
 								'
 							)
 						",
-						ADocumentTypeID
+						documentTypeID
 					)
 				);
 			try
 			{
-				LForm.Text = Strings.SelectDesigner;
-				if (LForm.MainSource.DataView.IsEmpty())
-					throw new DataphoriaException(DataphoriaException.Codes.NoDesignersForDocumentType, ADocumentTypeID);
-				if (LForm.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
+				form.Text = Strings.SelectDesigner;
+				if (form.MainSource.DataView.IsEmpty())
+					throw new DataphoriaException(DataphoriaException.Codes.NoDesignersForDocumentType, documentTypeID);
+				if (form.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
 					throw new AbortException();
-				DesignerInfo LResult = new DesignerInfo();
-				LResult.ID = LForm.MainSource.DataView.Fields["Main.Designer_ID"].AsString;
-				LResult.ClassName = LForm.MainSource.DataView.Fields["Main.ClassName"].AsString;
-				return LResult;
+				DesignerInfo result = new DesignerInfo();
+				result.ID = form.MainSource.DataView.Fields["Main.Designer_ID"].AsString;
+				result.ClassName = form.MainSource.DataView.Fields["Main.ClassName"].AsString;
+				return result;
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 		}
 
-		public IDesigner OpenDesigner(DesignerInfo AInfo, DesignBuffer ABuffer)
+		public IDesigner OpenDesigner(DesignerInfo info, DesignBuffer buffer)
 		{
-			IDesigner LDesigner = (IDesigner)Activator.CreateInstance(Type.GetType(AInfo.ClassName, true), new object[] {this, AInfo.ID});
+			IDesigner designer = (IDesigner)Activator.CreateInstance(Type.GetType(info.ClassName, true), new object[] {this, info.ID});
 			try
 			{
-				if (ABuffer != null)
-					LDesigner.Open(ABuffer);
+				if (buffer != null)
+					designer.Open(buffer);
 				else
-					LDesigner.New();
-				LDesigner.Show();
-				return LDesigner;
+					designer.New();
+				designer.Show();
+				return designer;
 			}
 			catch
 			{
-				LDesigner.Dispose();
+				designer.Dispose();
 				throw;
 			}
 		}
 
 		/// <summary> Instantiates a new D4 text editor with the specified initial content. </summary>
-		public TextEditor.TextEditor NewEditor(string AText, string ADocumentTypeID)
+		public TextEditor.TextEditor NewEditor(string text, string documentTypeID)
 		{
-			TextEditor.TextEditor LEditor = (TextEditor.TextEditor)OpenDesigner(GetDefaultDesigner(ADocumentTypeID), null);
+			TextEditor.TextEditor editor = (TextEditor.TextEditor)OpenDesigner(GetDefaultDesigner(documentTypeID), null);
 			try
 			{
-				LEditor.New();
-				LEditor.EditorText = AText;
-				LEditor.Service.SetModified(false);
-				return LEditor;
+				editor.New();
+				editor.EditorText = text;
+				editor.Service.SetModified(false);
+				return editor;
 			}
 			catch
 			{
-				LEditor.Dispose();
+				editor.Dispose();
 				throw;
 			}
 		}
 
 		/// <summary> Evaluates a D4 expression that returns a D4 document, and shows the document in an editor. </summary>
-		public TextEditor.TextEditor EvaluateAndEdit(string AExpression, string ADocumentTypeID)
+		public TextEditor.TextEditor EvaluateAndEdit(string expression, string documentTypeID)
 		{
-			using (DAE.Runtime.Data.Scalar LScript = (DAE.Runtime.Data.Scalar)EvaluateQuery(AExpression))
+			using (DAE.Runtime.Data.Scalar script = (DAE.Runtime.Data.Scalar)EvaluateQuery(expression))
 			{
-				return NewEditor(LScript.AsString, ADocumentTypeID);
+				return NewEditor(script.AsString, documentTypeID);
 			}
 		}
 
 		// DesignBuffers
 
-		private void SetInsertOpenState(Frontend.Client.IFormInterface AForm)
+		private void SetInsertOpenState(Frontend.Client.IFormInterface form)
 		{
-			AForm.MainSource.OpenState = DAE.Client.DataSetState.Insert;
+			form.MainSource.OpenState = DAE.Client.DataSetState.Insert;
 		}
 
-		public DocumentDesignBuffer PromptForDocumentBuffer(IDesigner ADesigner, string ADefaultLibraryName, string ADefaultDocumentName)
+		public DocumentDesignBuffer PromptForDocumentBuffer(IDesigner designer, string defaultLibraryName, string defaultDocumentName)
 		{
 			ExecuteScript
 			(
@@ -828,39 +855,39 @@ namespace Alphora.Dataphor.Dataphoria
 						create session reference NewDocument_Libraries NewDocument {{ Library_Name }} references Libraries {{ Name }} tags {{ Frontend.Detail.Visible = 'false', Frontend.Lookup.Title = 'Library' }};
 						create session reference NewDocument_FilteredDocumentTypes NewDocument {{ Type_ID }} references FilteredDocumentTypes {{ DocumentType_ID }} tags {{ Frontend.Detail.Visible = 'false', Frontend.Lookup.Title = 'Document Type' }};
 					",
-					ADesigner.DesignerID
+					designer.DesignerID
 				)
 			);
 			try
 			{
-				IWindowsFormInterface LForm = FrontendSession.LoadForm(null, ".Frontend.Derive('NewDocument', 'Add')", SetInsertOpenState);
+				IWindowsFormInterface form = FrontendSession.LoadForm(null, ".Frontend.Derive('NewDocument', 'Add')", SetInsertOpenState);
 				try
 				{
-					LForm.Text = Strings.SaveAsDocumentFormTitle;
-					LForm.MainSource.DataView.Edit();
-					if (ADefaultLibraryName != String.Empty)
-						LForm.MainSource.DataView["Main.Library_Name"].AsString = ADefaultLibraryName;
-					if (ADefaultDocumentName != String.Empty)
-						LForm.MainSource.DataView["Main.Name"].AsString = ADefaultDocumentName;
-					LForm.MainSource.DataView["Main.Type_ID"].AsString = GetDefaultDocumentType(ADesigner);
-					LForm.MainSource.DataView.OnValidate += new EventHandler(SaveFormValidate);
+					form.Text = Strings.SaveAsDocumentFormTitle;
+					form.MainSource.DataView.Edit();
+					if (defaultLibraryName != String.Empty)
+						form.MainSource.DataView["Main.Library_Name"].AsString = defaultLibraryName;
+					if (defaultDocumentName != String.Empty)
+						form.MainSource.DataView["Main.Name"].AsString = defaultDocumentName;
+					form.MainSource.DataView["Main.Type_ID"].AsString = GetDefaultDocumentType(designer);
+					form.MainSource.DataView.OnValidate += new EventHandler(SaveFormValidate);
 
-					if (LForm.ShowModal(Frontend.Client.FormMode.Insert) != DialogResult.OK)
+					if (form.ShowModal(Frontend.Client.FormMode.Insert) != DialogResult.OK)
 						throw new AbortException();
 
-					DocumentDesignBuffer LBuffer = 
+					DocumentDesignBuffer buffer = 
 						new DocumentDesignBuffer
 						(
 							this,
-							LForm.MainSource.DataView["Main.Library_Name"].AsString,
-							LForm.MainSource.DataView["Main.Name"].AsString
+							form.MainSource.DataView["Main.Library_Name"].AsString,
+							form.MainSource.DataView["Main.Name"].AsString
 						);
-					LBuffer.DocumentType = LForm.MainSource.DataView["Main.Type_ID"].AsString;
-					return LBuffer;
+					buffer.DocumentType = form.MainSource.DataView["Main.Type_ID"].AsString;
+					return buffer;
 				}
 				finally
 				{
-					LForm.HostNode.Dispose();
+					form.HostNode.Dispose();
 				}
 			}
 			finally
@@ -877,44 +904,44 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		private void SaveFormValidate(object ASender, EventArgs AArgs)
+		private void SaveFormValidate(object sender, EventArgs args)
 		{
-			var LView = (DataView)ASender;
-			CheckDocumentOverwrite(LView["Main.Library_Name"].AsString, LView["Main.Name"].AsString);
+			var view = (DataView)sender;
+			CheckDocumentOverwrite(view["Main.Library_Name"].AsString, view["Main.Name"].AsString);
 		}
 
-		public FileDesignBuffer PromptForFileBuffer(IDesigner ADesigner, string ADefaultFileName)
+		public FileDesignBuffer PromptForFileBuffer(IDesigner designer, string defaultFileName)
 		{
-			using (SaveFileDialog LDialog = new SaveFileDialog())
+			using (SaveFileDialog dialog = new SaveFileDialog())
 			{
-				LDialog.InitialDirectory = (string)FSettings.GetSetting("Dataphoria.SaveDirectory", typeof(string), ".");
-				LDialog.Filter = GetSaveFilter(ADesigner);
-				LDialog.FilterIndex = 0;
-				LDialog.RestoreDirectory = false;
-				LDialog.Title = Strings.SaveDialogTitle;
-				LDialog.AddExtension = true;
-				if (ADefaultFileName != String.Empty)
-					LDialog.DefaultExt = Path.GetExtension(ADefaultFileName);
+				dialog.InitialDirectory = (string)_settings.GetSetting("Dataphoria.SaveDirectory", typeof(string), ".");
+				dialog.Filter = GetSaveFilter(designer);
+				dialog.FilterIndex = 0;
+				dialog.RestoreDirectory = false;
+				dialog.Title = Strings.SaveDialogTitle;
+				dialog.AddExtension = true;
+				if (defaultFileName != String.Empty)
+					dialog.DefaultExt = Path.GetExtension(defaultFileName);
 				else
 				{
-					string LDefaultDocumentType = GetDefaultDocumentType(ADesigner);
-					if (LDefaultDocumentType.Length != 0)
-						LDialog.DefaultExt = "." + LDefaultDocumentType;
+					string defaultDocumentType = GetDefaultDocumentType(designer);
+					if (defaultDocumentType.Length != 0)
+						dialog.DefaultExt = "." + defaultDocumentType;
 					else
 					{
-						LDialog.DefaultExt = String.Empty;
-						LDialog.AddExtension = false;
+						dialog.DefaultExt = String.Empty;
+						dialog.AddExtension = false;
 					}
 				}
-				LDialog.CheckPathExists = true;
-				LDialog.OverwritePrompt = true;
+				dialog.CheckPathExists = true;
+				dialog.OverwritePrompt = true;
 
-				if (LDialog.ShowDialog() != DialogResult.OK)
+				if (dialog.ShowDialog() != DialogResult.OK)
 					throw new AbortException();
 
-				FSettings.SetSetting("Dataphoria.SaveDirectory", Path.GetDirectoryName(LDialog.FileName));
+				_settings.SetSetting("Dataphoria.SaveDirectory", Path.GetDirectoryName(dialog.FileName));
 
-				return new FileDesignBuffer(this, LDialog.FileName);
+				return new FileDesignBuffer(this, dialog.FileName);
 			}
 		}
 
@@ -922,22 +949,22 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			
 			
-			IDesigner LDesigner;
-			foreach (Form LForm in this.MdiChildren)
+			IDesigner designer;
+			foreach (Form form in this.MdiChildren)
 			{
-				LDesigner = LForm as IDesigner;
-				if ((LDesigner != null) && LDesigner.Service.IsModified)
-					LDesigner.Service.Save();
+				designer = form as IDesigner;
+				if ((designer != null) && designer.Service.IsModified)
+					designer.Service.Save();
 			}
-		}
+		}	   		
 
-		public string GetDocumentType(string ALibraryName, string ADocumentName)
+		public string GetDocumentType(string libraryName, string documentName)
 		{
 			return
 			(
 				(Alphora.Dataphor.DAE.Runtime.Data.Scalar)EvaluateQuery
 				(
-					String.Format(".Frontend.GetDocumentType('{0}', '{1}')", ALibraryName, ADocumentName)
+					String.Format(".Frontend.GetDocumentType('{0}', '{1}')", libraryName, documentName)
 				)
 			).AsString;
 		}
@@ -946,15 +973,15 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region IServiceProvider Members
 
-		private Hashtable FServices = new Hashtable();
-		public Hashtable Services { get { return FServices; } }
+		private Hashtable _services = new Hashtable();
+		public Hashtable Services { get { return _services; } }
 
-		public new virtual object GetService(Type AServiceType)
+		public new virtual object GetService(Type serviceType)
 		{
-			object LResult = base.GetService(AServiceType);
-			if (LResult != null)
-				return LResult;
-			return FServices[AServiceType];
+			object result = base.GetService(serviceType);
+			if (result != null)
+				return result;
+			return _services[serviceType];
 		}
 
 		#endregion
@@ -963,114 +990,114 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private string GetOpenFilter()
 		{
-			StringBuilder LFilter = new StringBuilder();
-			LFilter.Append(Strings.AllFilesFilter);
-			IServerCursor LCursor = OpenCursor("DocumentTypes over { ID, Description }");
+			StringBuilder filter = new StringBuilder();
+			filter.Append(Strings.AllFilesFilter);
+			IServerCursor cursor = OpenCursor("DocumentTypes over { ID, Description }");
 			try
 			{
-				DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow();
+				DAE.Runtime.Data.Row row = cursor.Plan.RequestRow();
 				try
 				{
-					while (LCursor.Next())
+					while (cursor.Next())
 					{
-						LCursor.Select(LRow);
-						LFilter.AppendFormat("|{1} (*.{0})|*.{0}", (string)LRow["ID"], (string)LRow["Description"]);
+						cursor.Select(row);
+						filter.AppendFormat("|{1} (*.{0})|*.{0}", (string)row["ID"], (string)row["Description"]);
 					}
 				}
 				finally
 				{
-					LCursor.Plan.ReleaseRow(LRow);
+					cursor.Plan.ReleaseRow(row);
 				}
 			}
 			finally
 			{
-				CloseCursor(LCursor);
+				CloseCursor(cursor);
 			}
-			return LFilter.ToString();
+			return filter.ToString();
 		}
 
-		private string GetSaveFilter(IDesigner ADesigner)
+		private string GetSaveFilter(IDesigner designer)
 		{
-			StringBuilder LFilter = new StringBuilder();
-			IServerCursor LCursor = 
+			StringBuilder filter = new StringBuilder();
+			IServerCursor cursor = 
 				OpenCursor
 				(
 					String.Format
 					(
 						"DocumentTypeDesigners where Designer_ID = '{0}' join DocumentTypes by ID = DocumentType_ID over {{ ID, Description }}",
-						ADesigner.DesignerID
+						designer.DesignerID
 					)
 				);
 			try
 			{
-				DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow();
+				DAE.Runtime.Data.Row row = cursor.Plan.RequestRow();
 				try
 				{
-					while (LCursor.Next())
+					while (cursor.Next())
 					{
-						LCursor.Select(LRow);
-						if (LFilter.Length > 0)
-							LFilter.Append('|');
-						LFilter.AppendFormat("{1} (*.{0})|*.{0}", (string)LRow["ID"], (string)LRow["Description"]);
+						cursor.Select(row);
+						if (filter.Length > 0)
+							filter.Append('|');
+						filter.AppendFormat("{1} (*.{0})|*.{0}", (string)row["ID"], (string)row["Description"]);
 					}
 				}
 				finally
 				{
-					LCursor.Plan.ReleaseRow(LRow);
+					cursor.Plan.ReleaseRow(row);
 				}
 			}
 			finally
 			{
-				LCursor.Plan.Close(LCursor);
+				cursor.Plan.Close(cursor);
 			}
-			if (LFilter.Length > 0)
-				LFilter.Append('|');
-			LFilter.Append(Strings.AllFilesFilter);
-			return LFilter.ToString();
+			if (filter.Length > 0)
+				filter.Append('|');
+			filter.Append(Strings.AllFilesFilter);
+			return filter.ToString();
 		}
 
-		private string[] FileOpenPrompt(bool AAllowMultiple)
+		private string[] FileOpenPrompt(bool allowMultiple)
 		{
-			using (OpenFileDialog LDialog = new OpenFileDialog())
+			using (OpenFileDialog dialog = new OpenFileDialog())
 			{
-				LDialog.InitialDirectory = (string)FSettings.GetSetting("Dataphoria.OpenDirectory", typeof(string), ".");
-				LDialog.Filter = GetOpenFilter();
-				LDialog.FilterIndex = 0;
-				LDialog.RestoreDirectory = false;
-				LDialog.Title = Strings.FileOpenTitle;
-				LDialog.Multiselect = AAllowMultiple;
-				LDialog.CheckFileExists = true;
+				dialog.InitialDirectory = (string)_settings.GetSetting("Dataphoria.OpenDirectory", typeof(string), ".");
+				dialog.Filter = GetOpenFilter();
+				dialog.FilterIndex = 0;
+				dialog.RestoreDirectory = false;
+				dialog.Title = Strings.FileOpenTitle;
+				dialog.Multiselect = allowMultiple;
+				dialog.CheckFileExists = true;
 
-				if (LDialog.ShowDialog() != DialogResult.OK)
+				if (dialog.ShowDialog() != DialogResult.OK)
 					throw new AbortException();
 
-				FSettings.SetSetting("Dataphoria.OpenDirectory", Path.GetDirectoryName(LDialog.FileName));
+				_settings.SetSetting("Dataphoria.OpenDirectory", Path.GetDirectoryName(dialog.FileName));
 
-				return LDialog.FileNames;
+				return dialog.FileNames;
 			}
 		}
 
-		public void OpenFiles(string[] AFileNames)
+		public void OpenFiles(string[] fileNames)
 		{
-			string LFileName;
-			FileDesignBuffer LBuffer;
+			string fileName;
+			FileDesignBuffer buffer;
 
-			for (int i = 0; i < AFileNames.Length; i++)
+			for (int i = 0; i < fileNames.Length; i++)
 			{
-				LFileName = AFileNames[i];
-				DesignerInfo LInfo = GetDefaultDesigner(Program.DocumentTypeFromFileName(LFileName));
-				LBuffer = new FileDesignBuffer(this, LFileName);
+				fileName = fileNames[i];
+				DesignerInfo info = GetDefaultDesigner(Program.DocumentTypeFromFileName(fileName));
+				buffer = new FileDesignBuffer(this, fileName);
 				try
 				{
 					OpenDesigner
 					(
-						LInfo, 
-						LBuffer
+						info, 
+						buffer
 					);
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					Program.HandleException(LException);
+					Program.HandleException(exception);
 				}
 			}
 		}
@@ -1082,14 +1109,14 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void OpenFileWith()
 		{
-			string[] LFileNames = FileOpenPrompt(false);
-			string LFileName = LFileNames[0];
+			string[] fileNames = FileOpenPrompt(false);
+			string fileName = fileNames[0];
 
-			DesignerInfo LInfo = ChooseDesigner(Program.DocumentTypeFromFileName(LFileName));
+			DesignerInfo info = ChooseDesigner(Program.DocumentTypeFromFileName(fileName));
 
-			FileDesignBuffer LBuffer = new FileDesignBuffer(this, LFileName);
+			FileDesignBuffer buffer = new FileDesignBuffer(this, fileName);
 
-			OpenDesigner(LInfo, LBuffer);
+			OpenDesigner(info, buffer);
 		}
 		
 		public void SaveCatalog()
@@ -1111,29 +1138,29 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region Child Forms
 
-		public void AttachForm(BaseForm AForm) 
+		public void AttachForm(BaseForm form) 
 		{
-			AForm.Show(this.FDockPanel);
-			AForm.SelectNextControl(AForm, true, true, true, false);	
+			form.Show(this.FDockPanel);
+			form.SelectNextControl(form, true, true, true, false);	
 		}
 
 		private void CloseChildren()
 		{
-			Form[] LForms = this.MdiChildren;
-			foreach (Form LForm in LForms)
-				LForm.Close();
+			Form[] forms = this.MdiChildren;
+			foreach (Form form in forms)
+				form.Close();
 		}
 
 		private void DisposeChildren()
 		{
-			Form[] LForms = this.MdiChildren;
-			foreach (Form LForm in LForms)
-				LForm.Dispose();
+			Form[] forms = this.MdiChildren;
+			foreach (Form form in forms)
+				form.Dispose();
 		}
 
-		protected override void OnMdiChildActivate(EventArgs AArgs)
+		protected override void OnMdiChildActivate(EventArgs args)
 		{
-			base.OnMdiChildActivate(AArgs);
+			base.OnMdiChildActivate(args);
 			MergeOrRevertMergeOfToolbars();
 			MergeOrRevertMergeOfStatusBars();
 		}
@@ -1141,20 +1168,20 @@ namespace Alphora.Dataphor.Dataphoria
 		private void MergeOrRevertMergeOfStatusBars()
 		{
 			ToolStripManager.RevertMerge(this.FStatusStrip);
-			var LChildForm = ActiveMdiChild as IStatusBarClient;
-			if (LChildForm != null)
+			var childForm = ActiveMdiChild as IStatusBarClient;
+			if (childForm != null)
 			{
-				LChildForm.MergeStatusBarWith(this.FStatusStrip);
+				childForm.MergeStatusBarWith(this.FStatusStrip);
 			}
 		}
 
 		private void MergeOrRevertMergeOfToolbars()
 		{
 			ToolStripManager.RevertMerge(this.FToolStrip);			
-			var LChildForm = ActiveMdiChild as IToolBarClient;
-			if (LChildForm != null)
+			var childForm = ActiveMdiChild as IToolBarClient;
+			if (childForm != null)
 			{
-				LChildForm.MergeToolbarWith(this.FToolStrip);
+				childForm.MergeToolbarWith(this.FToolStrip);
 			}
 		}
 
@@ -1163,124 +1190,150 @@ namespace Alphora.Dataphor.Dataphoria
 		#region DAE & Frontend Server Helpers
 
 		// these two methods should be moved to serverconnection or even higher
-		public void ExecuteScript(string AScript)
+		public void ExecuteScript(string script)
 		{
-			ExecuteScript(AScript, null);
+			ExecuteScript(script, null);
 		}
 
 		/// <summary> Executes a string on the dataphor server. </summary>
-		public void ExecuteScript(string AScript, DAE.Runtime.DataParams AParams)
+		public void ExecuteScript(string script, DAE.Runtime.DataParams paramsValue)
 		{
-			if (AScript != String.Empty)
+			if (script != String.Empty)
 			{
-				Cursor LOldCursor = Cursor.Current;
+				Cursor oldCursor = Cursor.Current;
 				Cursor.Current = Cursors.WaitCursor;
 				try
 				{
-					IServerScript LScript = FUtilityProcess.PrepareScript(AScript);
+					IServerScript localScript = _utilityProcess.PrepareScript(script);
 					try
 					{
-						LScript.Execute(AParams);
+						localScript.Execute(paramsValue);
 					}
 					finally
 					{
-						FUtilityProcess.UnprepareScript(LScript);
+						_utilityProcess.UnprepareScript(localScript);
 					}
 				}
 				finally
 				{
-					Cursor.Current = LOldCursor;
+					Cursor.Current = oldCursor;
 				}
 			}
 		}
 
-		public IServerCursor OpenCursor(string AQuery)
+		public IServerCursor OpenCursor(string query)
 		{
-			return OpenCursor(AQuery, null);
+			return OpenCursor(query, null);
 		}
 
-		public IServerCursor OpenCursor(string AQuery, DAE.Runtime.DataParams AParams)
+        public void Execute(string query, DAE.Runtime.DataParams paramsValue, Action<DAE.Runtime.Data.Row> action)
+        {
+            IServerCursor cursor = this.OpenCursor(query, paramsValue);
+            
+            try
+            {
+                DAE.Runtime.Data.Row row = cursor.Plan.RequestRow();
+                try
+                {
+                    while (cursor.Next())
+                    {
+                        cursor.Select(row);
+                        action(row);
+                    }
+                }
+                finally
+                {
+                    cursor.Plan.ReleaseRow(row);
+                }
+            }
+            finally
+            {
+                CloseCursor(cursor);
+            }          
+        }
+
+	    public IServerCursor OpenCursor(string query, DAE.Runtime.DataParams paramsValue)
 		{
-			Cursor LOldCursor = Cursor.Current;
+			Cursor oldCursor = Cursor.Current;
 			Cursor.Current = Cursors.WaitCursor;
 			try
 			{
-				IServerExpressionPlan LPlan = FUtilityProcess.PrepareExpression(AQuery, AParams);
+				IServerExpressionPlan plan = _utilityProcess.PrepareExpression(query, paramsValue);
 				try
 				{
-					return LPlan.Open(AParams);
+					return plan.Open(paramsValue);
 				}
 				catch
 				{
-					FUtilityProcess.UnprepareExpression(LPlan);
+					_utilityProcess.UnprepareExpression(plan);
 					throw;
 				}
 			}
 			finally
 			{
-				Cursor.Current = LOldCursor;
+				Cursor.Current = oldCursor;
 			}
 		}
 
-		public void CloseCursor(IServerCursor ACursor)
+		public void CloseCursor(IServerCursor cursor)
 		{
-			IServerExpressionPlan LPlan = ACursor.Plan;
-			LPlan.Close(ACursor);
-			FUtilityProcess.UnprepareExpression(LPlan);
+			IServerExpressionPlan plan = cursor.Plan;
+			plan.Close(cursor);
+			_utilityProcess.UnprepareExpression(plan);
 		}
 
-		public DAE.Runtime.Data.DataValue EvaluateQuery(string AQuery)
+		public DAE.Runtime.Data.DataValue EvaluateQuery(string query)
 		{
-			return EvaluateQuery(AQuery, null);
+			return EvaluateQuery(query, null);
 		}
 
-		public DAE.Runtime.Data.DataValue EvaluateQuery(string AQuery, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.DataValue EvaluateQuery(string query, DAE.Runtime.DataParams paramsValue)
 		{
-			Cursor LOldCursor = Cursor.Current;
+			Cursor oldCursor = Cursor.Current;
 			Cursor.Current = Cursors.WaitCursor;
 			try
 			{
-				var LPlan = FUtilityProcess.PrepareExpression(AQuery, AParams);
-				DAE.Runtime.Data.DataValue LResult;
+				var plan = _utilityProcess.PrepareExpression(query, paramsValue);
+				DAE.Runtime.Data.DataValue result;
 				try
 				{
-					LResult = LPlan.Evaluate(AParams);
+					result = plan.Evaluate(paramsValue);
 				}
 				finally
 				{
-					FUtilityProcess.UnprepareExpression(LPlan);				
+					_utilityProcess.UnprepareExpression(plan);				
 				}
-				return LResult;
+				return result;
 			}
 			finally
 			{
-				Cursor.Current = LOldCursor;
+				Cursor.Current = oldCursor;
 			}
 		}
 
-		public bool DocumentExists(string ALibraryName, string ADocumentName)
+		public bool DocumentExists(string libraryName, string documentName)
 		{
 			using 
 			(
-				DAE.Runtime.Data.Scalar LDocumentExistsData = 
+				DAE.Runtime.Data.Scalar documentExistsData = 
 					(DAE.Runtime.Data.Scalar)EvaluateQuery
 					(
 						String.Format
 						(
 							@".Frontend.DocumentExists('{0}', '{1}')",
-							DAE.Schema.Object.EnsureRooted(ALibraryName),
-							DAE.Schema.Object.EnsureRooted(ADocumentName)
+							DAE.Schema.Object.EnsureRooted(libraryName),
+							DAE.Schema.Object.EnsureRooted(documentName)
 						)
 					)
 			)
 			{
-				return LDocumentExistsData.AsBoolean;
+				return documentExistsData.AsBoolean;
 			}
 		}
 
-		public void CheckDocumentOverwrite(string ALibraryName, string ADocumentName)
+		public void CheckDocumentOverwrite(string libraryName, string documentName)
 		{
-			if (DocumentExists(ALibraryName, ADocumentName))
+			if (DocumentExists(libraryName, documentName))
 				if 
 				(
 					MessageBox.Show
@@ -1288,8 +1341,8 @@ namespace Alphora.Dataphor.Dataphoria
 						String.Format
 						(
 							Strings.SaveAsDialogReplaceText,
-							ALibraryName,
-							ADocumentName
+							libraryName,
+							documentName
 						), 
 						Strings.SaveAsDocumentFormTitle, 
 						MessageBoxButtons.YesNo, 
@@ -1337,28 +1390,28 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public string GetCurrentLibraryName()
 		{
-			using (DAE.Runtime.Data.Scalar LScalar = (DAE.Runtime.Data.Scalar)EvaluateQuery("LibraryName()"))
+			using (DAE.Runtime.Data.Scalar scalar = (DAE.Runtime.Data.Scalar)EvaluateQuery("LibraryName()"))
 			{
-				return LScalar.AsDisplayString;
+				return scalar.AsDisplayString;
 			}
 		}
 
-		public string GetDefaultDocumentType(IDesigner ADesigner)
+		public string GetDefaultDocumentType(IDesigner designer)
 		{
 			using 
 			(
-				DAE.Runtime.Data.Scalar LDefaultTypeData = 
+				DAE.Runtime.Data.Scalar defaultTypeData = 
 					(DAE.Runtime.Data.Scalar)EvaluateQuery
 					(
 						String.Format
 						(
 							@".Frontend.GetDefaultDocumentType('{0}')",
-							ADesigner.DesignerID
+							designer.DesignerID
 						)
 					)
 			)
 			{
-				return LDefaultTypeData.AsString;
+				return defaultTypeData.AsString;
 			}
 		}
 
@@ -1371,136 +1424,167 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			get
 			{
-				return FErrorListView; 
+				return _errorListView; 
 			}
 		}
 
 		private void ShowWarnings()
 		{
-			FDockContentErrorListView.Show(FDockPanel);
-			FDockContentErrorListView.Activate();								   
+			_dockContentErrorListView.Show(FDockPanel);
+			_dockContentErrorListView.Activate();								   
 		}
 
-		private void WarningsAdded(object ASender, EventArgs AArgs)
+		private void WarningsAdded(object sender, EventArgs args)
 		{
 			ShowWarnings();
 		}
 
-		private void ErrorsAdded(object ASender, EventArgs AArgs)
+		private void ErrorsAdded(object sender, EventArgs args)
 		{
 			ShowWarnings();
-			FDockContentErrorListView.Show(FDockPanel);			
+			_dockContentErrorListView.Show(FDockPanel);			
 		}
 
 		private void ClearWarnings()
 		{
-			FErrorListView.ClearErrors();
+			_errorListView.ClearErrors();
 		}
 
 		// IErrorSource
 
-		void IErrorSource.ErrorHighlighted(Exception AException)
+		private DebugLocator GetInnermostLocator(Exception exception)
+		{
+			var inner = exception != null ? GetInnermostLocator(exception.InnerException) : null;
+			if (inner != null)
+				return inner;
+			var locator = exception as ILocatorException;
+			if (locator != null && locator.Line > -1 && locator.LinePos > -1)
+				return new DebugLocator(locator.Locator, locator.Line, locator.LinePos);
+			else
+				return null;
+		}
+		
+		public bool LocateToError(Exception exception)
+		{
+			var locator = GetInnermostLocator(exception);
+			if (locator != null)
+			{
+				try
+				{
+					OpenLocator(locator);
+					return true;
+				}
+				catch
+				{
+					// ignore exceptions trying to locate, the locator may no longer even be valid
+					return false;
+				}
+			}
+			return false;
+		}
+		
+		void IErrorSource.ErrorHighlighted(Exception exception)
 		{
 			// nothing
 		}
 
-		void IErrorSource.ErrorSelected(Exception AException)
+		void IErrorSource.ErrorSelected(Exception exception)
 		{
-			// nothing
+			LocateToError(exception);
 		}
 
 		#endregion
 
 		#region Commands
 
-		private EventHandler FOnFormDesignerLibrariesChanged;
+		private EventHandler _onFormDesignerLibrariesChanged;
 
 		public event EventHandler OnFormDesignerLibrariesChanged {
 			add {
-				this.FOnFormDesignerLibrariesChanged += value;
+				this._onFormDesignerLibrariesChanged += value;
 			}
 			remove {
-				this.FOnFormDesignerLibrariesChanged -= value;
+				this._onFormDesignerLibrariesChanged -= value;
 			}
 		}
 
 		private void BrowseDesignerLibraries()
 		{
-			IWindowsFormInterface LForm = FrontendSession.LoadForm(null, ".Frontend.Derive('FormDesignerLibraries')");
+			IWindowsFormInterface form = FrontendSession.LoadForm(null, ".Frontend.Derive('FormDesignerLibraries')");
 			try
 			{
-				LForm.ShowModal(FormMode.None);
+				form.ShowModal(FormMode.None);
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
-			if (FOnFormDesignerLibrariesChanged != null)
-				FOnFormDesignerLibrariesChanged(this, EventArgs.Empty);
+			if (_onFormDesignerLibrariesChanged != null)
+				_onFormDesignerLibrariesChanged(this, EventArgs.Empty);
 		}
 
 		private void BrowseDocumentTypes()
 		{
-			IWindowsFormInterface LForm = FrontendSession.LoadForm(null, ".Frontend.Derive('DocumentTypes')", null);
+			IWindowsFormInterface form = FrontendSession.LoadForm(null, ".Frontend.Derive('DocumentTypes')", null);
 			try
 			{
-				LForm.ShowModal(FormMode.None);
+				form.ShowModal(FormMode.None);
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 		}
 
 		private void Documentation()
 		{
-			string LFileName = GetHelpFileName();
+			string fileName = GetHelpFileName();
 			try 
 			{
-				System.Diagnostics.Process.Start(LFileName);
+				System.Diagnostics.Process.Start(fileName);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Program.HandleException(new DataphoriaException(DataphoriaException.Codes.UnableToOpenHelp, LException, LFileName));
+				Program.HandleException(new DataphoriaException(DataphoriaException.Codes.UnableToOpenHelp, exception, fileName));
 			}
 		}
 
 		private void About()
 		{
-			using (AboutForm LAboutForm = new AboutForm())
+			using (AboutForm aboutForm = new AboutForm())
 			{
-				LAboutForm.ShowDialog(this);
+				aboutForm.ShowDialog(this);
 			}
 		}
 
 		private void LaunchForm()
 		{
-			Frontend.Client.Windows.Session LSession = GetLiveDesignableFrontendSession();
+			Frontend.Client.Windows.Session session = GetLiveDesignableFrontendSession();
 			try
 			{
-				LSession.SetFormDesigner();
-				IWindowsFormInterface LForm = LSession.LoadForm(null, ".Frontend.Form('.Frontend', 'DerivedFormLauncher')");
+				session.SetFormDesigner();
+				IWindowsFormInterface form = session.LoadForm(null, ".Frontend.Form('.Frontend', 'DerivedFormLauncher')");
 				try
 				{
-					LForm.Show();
+					form.Show();
 				}
 				catch
 				{
-					LForm.HostNode.Dispose();
+					form.HostNode.Dispose();
 					throw;
 				}
 			}
 			catch
 			{
-				LSession.Dispose();
+				session.Dispose();
 				throw;
 			}
 		}
 
 		public void ShowDataphorExplorer()
 		{
-			FDockContentExplorer.Show(FDockPanel);
-			FDockContentExplorer.Activate();			
+			_dockContentExplorer.Show(FDockPanel);
+			_dockContentExplorer.Activate();			
 		}
 
 		public void LaunchAlphoraWebsite()
@@ -1518,9 +1602,9 @@ namespace Alphora.Dataphor.Dataphoria
 			System.Diagnostics.Process.Start(@"http://news.alphora.com/");
 		}
 
-		private void FToolStrip_ItemClicked(object ASender, ToolStripItemClickedEventArgs AArgs)
+		private void FToolStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs args)
 		{
-			switch (AArgs.ClickedItem.Name)
+			switch (args.ClickedItem.Name)
 			{
 				case "FClearWarningsToolStripMenuItem" :
 					ClearWarnings();
@@ -1587,7 +1671,7 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		private void ClearWarningsClicked(object ASender, System.EventArgs AArgs)
+		private void ClearWarningsClicked(object sender, System.EventArgs args)
 		{
 			ClearWarnings();
 		}
@@ -1596,21 +1680,21 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region Debugger
 
-		private Debugger FDebugger;
-		public Debugger Debugger { get { return FDebugger; } }
+		private Debugger _debugger;
+		public Debugger Debugger { get { return _debugger; } }
 
 		private void CreateDebugger()
 		{
-			if (FDebugger == null)
+			if (_debugger == null)
 			{
-				FDebugger = new Debugger(this);
-				FDebugger.PropertyChanged += DebuggerPropertyChanged;
+				_debugger = new Debugger(this);
+				_debugger.PropertyChanged += DebuggerPropertyChanged;
 			}
 		}
 
-		private void DebuggerPropertyChanged(object ASender, string[] APropertyNames)
+		private void DebuggerPropertyChanged(object sender, string[] propertyNames)
 		{
-			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "IsStarted" || AItem == "IsPaused"; }))
+			if (Array.Exists<string>(propertyNames, (string AItem) => { return AItem == "IsStarted" || AItem == "IsPaused"; }))
  			{
  				UpdateDebuggerState();
  				UpdateBreakOnException();
@@ -1618,12 +1702,12 @@ namespace Alphora.Dataphor.Dataphoria
  			}
 			else 
 			{
-			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "BreakOnException"; }))
+			if (Array.Exists<string>(propertyNames, (string AItem) => { return AItem == "BreakOnException"; }))
 				UpdateBreakOnException();
-				else if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "BreakOnStart"; }))
+				else if (Array.Exists<string>(propertyNames, (string AItem) => { return AItem == "BreakOnStart"; }))
 					UpdateBreakOnStart();
 		}
-			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "CurrentLocation"; }))
+			if (Array.Exists<string>(propertyNames, (string AItem) => { return AItem == "CurrentLocation"; }))
 				EnsureEditorForCurrentLocation();
 			
 		}
@@ -1636,64 +1720,64 @@ namespace Alphora.Dataphor.Dataphoria
 				{
 					OpenLocator(Debugger.CurrentLocation);
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
 					// Log errors, don't pop-up
-					Warnings.AppendError(null, LException, false);
+					Warnings.AppendError(null, exception, false);
 				}
 			}
 		}
 
-		public void OpenLocator(DebugLocator ALocator)
+		public void OpenLocator(DebugLocator locator)
 		{
-					DesignerInfo LInfo;
-			DesignBuffer LBuffer = DesignBufferFromLocator(out LInfo, ALocator);
-					if (LBuffer != null)
-					{
-						IDesigner LDesigner = this.GetDesigner(LBuffer);
-						if (LDesigner != null)
+			DesignerInfo info;
+			DesignBuffer buffer = DesignBufferFromLocator(out info, locator);
+			if (buffer != null)
+			{
+				IDesigner designer = this.GetDesigner(buffer);
+				if (designer != null)
 				{
-					LDesigner.Service.RequestLocate(ALocator);
-							LDesigner.Select();
+					designer.Service.RequestLocate(locator);
+					designer.Select();
 				}
-						else
-							OpenDesigner(LInfo, LBuffer);
-					}
-				}
+				else
+					OpenDesigner(info, buffer);
+			}
+		}
 
-		public DesignBuffer DesignBufferFromLocator(out DesignerInfo AInfo, DebugLocator ALocator)
+		public DesignBuffer DesignBufferFromLocator(out DesignerInfo info, DebugLocator locator)
 		{
-			AInfo = new DesignerInfo();
-			DesignBuffer LBuffer = null;
+			info = new DesignerInfo();
+			DesignBuffer buffer = null;
 			
 			// TODO: Introduce a buffer factory for locators
 			
 			// Files
-			if (FileDesignBuffer.IsFileLocator(ALocator.Locator))
+			if (FileDesignBuffer.IsFileLocator(locator.Locator))
 			{
-				var LFileBuffer = new FileDesignBuffer(this, ALocator);
-				AInfo = GetDefaultDesigner(Program.DocumentTypeFromFileName(LFileBuffer.FileName));
-				LBuffer = LFileBuffer;
+				var fileBuffer = new FileDesignBuffer(this, locator);
+				info = GetDefaultDesigner(Program.DocumentTypeFromFileName(fileBuffer.FileName));
+				buffer = fileBuffer;
 			}
 			// Documents
-			else if (DocumentDesignBuffer.IsDocumentLocator(ALocator.Locator))
+			else if (DocumentDesignBuffer.IsDocumentLocator(locator.Locator))
 			{
-				var LDocumentBuffer = new DocumentDesignBuffer(this, ALocator);
-				AInfo = GetDefaultDesigner(GetDocumentType(LDocumentBuffer.LibraryName, LDocumentBuffer.DocumentName));
-				LBuffer = LDocumentBuffer;
-				}
-			else if (ProgramDesignBuffer.IsProgramLocator(ALocator.Locator))
+				var documentBuffer = new DocumentDesignBuffer(this, locator);
+				info = GetDefaultDesigner(GetDocumentType(documentBuffer.LibraryName, documentBuffer.DocumentName));
+				buffer = documentBuffer;
+			}
+			else if (ProgramDesignBuffer.IsProgramLocator(locator.Locator))
 			{
-				LBuffer = new ProgramDesignBuffer(this, ALocator);
-				AInfo = GetDefaultDesigner("d4");
+				buffer = new ProgramDesignBuffer(this, locator);
+				info = GetDefaultDesigner("d4");
 			}
 			
-			return LBuffer;
+			return buffer;
 		}
 
-		private void DebugMenuItemClicked(object ASender, ToolStripItemClickedEventArgs AArgs)
+		private void DebugMenuItemClicked(object sender, ToolStripItemClickedEventArgs args)
 		{
-			switch (AArgs.ClickedItem.Name)
+			switch (args.ClickedItem.Name)
 			{
 				case "FDebugStopMenuItem" :
 				case "FDebugStopButton" :
@@ -1726,27 +1810,27 @@ namespace Alphora.Dataphor.Dataphoria
 				case "FViewSessionsMenuItem":
 				case "FViewSessionsButton" :
 					EnsureSessionView();
-					FDockContentSessionsView.Show(FDockPanel);
+					_dockContentSessionsView.Show(FDockPanel);
 					break;
 				case "FViewProcessesMenuItem":
 				case "FViewProcessesButton":
 					EnsureProcessesView();
-					FDockContentProcessesView.Show(FDockPanel);
+					_dockContentProcessesView.Show(FDockPanel);
 					break;
 				case "FViewDebugProcessesMenuItem" :
 				case "FViewDebugProcessesButton":
 					EnsureDebugProcessesView();
-					FDockContentDebugProcessesView.Show(FDockPanel);
+					_dockContentDebugProcessesView.Show(FDockPanel);
 					break;
 				case "FViewCallStackMenuItem":
 				case "FViewCallStackButton" :
 					EnsureCallStackView();
-					FDockContentCallStackView.Show(FDockPanel);
+					_dockContentCallStackView.Show(FDockPanel);
 					break;
 				case "FViewStackMenuItem":
 				case "FViewStackButton":
 					EnsureStackView();
-					FDockContentStackView.Show(FDockPanel);
+					_dockContentStackView.Show(FDockPanel);
 					break;
 			}
 		}
@@ -1793,91 +1877,91 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void EnsureSessionView()
 		{
-			if (FSessionsView == null)
+			if (_sessionsView == null)
 			{
-				FSessionsView = new SessionsView();
-				FSessionsView.Dataphoria = this;
-				FSessionsView.Name = "FSessionView";
-				FSessionsView.Dock = DockStyle.Fill;
+				_sessionsView = new SessionsView();
+				_sessionsView.Dataphoria = this;
+				_sessionsView.Name = "FSessionView";
+				_sessionsView.Dock = DockStyle.Fill;
 
-				FDockContentSessionsView = new DockContent();
-				FDockContentSessionsView.HideOnClose = true;
-				FDockContentSessionsView.Controls.Add(FSessionsView);
-				FDockContentSessionsView.TabText = "Sessions";
-				FDockContentSessionsView.Text = "Sessions - Dataphoria";
-				FDockContentSessionsView.ShowHint = DockState.DockBottomAutoHide;
+				_dockContentSessionsView = new DockContent();
+				_dockContentSessionsView.HideOnClose = true;
+				_dockContentSessionsView.Controls.Add(_sessionsView);
+				_dockContentSessionsView.TabText = "Sessions";
+				_dockContentSessionsView.Text = "Sessions - Dataphoria";
+				_dockContentSessionsView.ShowHint = DockState.DockBottomAutoHide;
 			}
 		}
 
 		private void EnsureProcessesView()
 		{
-			if (FProcessesView == null)
+			if (_processesView == null)
 			{
-				FProcessesView = new ProcessesView();
-				FProcessesView.Dataphoria = this;
-				FProcessesView.Name = "FProcessesView";
-				FProcessesView.Dock = DockStyle.Fill;
+				_processesView = new ProcessesView();
+				_processesView.Dataphoria = this;
+				_processesView.Name = "FProcessesView";
+				_processesView.Dock = DockStyle.Fill;
 
-				FDockContentProcessesView = new DockContent();
-				FDockContentProcessesView.HideOnClose = true;
-				FDockContentProcessesView.Controls.Add(FProcessesView);
-				FDockContentProcessesView.TabText = "Processes";
-				FDockContentProcessesView.Text = "Processes - Dataphoria";
-				FDockContentProcessesView.ShowHint = DockState.DockBottomAutoHide;
+				_dockContentProcessesView = new DockContent();
+				_dockContentProcessesView.HideOnClose = true;
+				_dockContentProcessesView.Controls.Add(_processesView);
+				_dockContentProcessesView.TabText = "Processes";
+				_dockContentProcessesView.Text = "Processes - Dataphoria";
+				_dockContentProcessesView.ShowHint = DockState.DockBottomAutoHide;
 			}
 		}
 
 		private void EnsureDebugProcessesView()
 		{
-			if (FDebugProcessesView == null)
+			if (_debugProcessesView == null)
 			{
-				FDebugProcessesView = new DebugProcessesView();
-				FDebugProcessesView.Dataphoria = this;
-				FDebugProcessesView.Name = "FDebugProcessesView";
-				FDebugProcessesView.Dock = DockStyle.Fill;
+				_debugProcessesView = new DebugProcessesView();
+				_debugProcessesView.Dataphoria = this;
+				_debugProcessesView.Name = "FDebugProcessesView";
+				_debugProcessesView.Dock = DockStyle.Fill;
 
-				FDockContentDebugProcessesView = new DockContent();
-				FDockContentDebugProcessesView.HideOnClose = true;
-				FDockContentDebugProcessesView.Controls.Add(FDebugProcessesView);
-				FDockContentDebugProcessesView.TabText = "Debug Processes ";
-				FDockContentDebugProcessesView.Text = "Debug Processes - Dataphoria";
-				FDockContentDebugProcessesView.ShowHint = DockState.DockBottomAutoHide;
+				_dockContentDebugProcessesView = new DockContent();
+				_dockContentDebugProcessesView.HideOnClose = true;
+				_dockContentDebugProcessesView.Controls.Add(_debugProcessesView);
+				_dockContentDebugProcessesView.TabText = "Debug Processes ";
+				_dockContentDebugProcessesView.Text = "Debug Processes - Dataphoria";
+				_dockContentDebugProcessesView.ShowHint = DockState.DockBottomAutoHide;
 			}
 		}
 
 		private void EnsureCallStackView()
 		{
-			if (FCallStackView == null)
+			if (_callStackView == null)
 			{
-				FCallStackView = new CallStackView();
-				FCallStackView.Dataphoria = this;
-				FCallStackView.Name = "FCallStackView";
-				FCallStackView.Dock = DockStyle.Fill;
+				_callStackView = new CallStackView();
+				_callStackView.Dataphoria = this;
+				_callStackView.Name = "FCallStackView";
+				_callStackView.Dock = DockStyle.Fill;
 
-				FDockContentCallStackView = new DockContent();
-				FDockContentCallStackView.HideOnClose = true;
-				FDockContentCallStackView.Controls.Add(FCallStackView);
-				FDockContentCallStackView.TabText = "Call Stack";
-				FDockContentCallStackView.Text = "Call Stack - Dataphoria";
-				FDockContentCallStackView.ShowHint = DockState.DockBottomAutoHide;
+				_dockContentCallStackView = new DockContent();
+				_dockContentCallStackView.HideOnClose = true;
+				_dockContentCallStackView.Controls.Add(_callStackView);
+				_dockContentCallStackView.TabText = "Call Stack";
+				_dockContentCallStackView.Text = "Call Stack - Dataphoria";
+				_dockContentCallStackView.ShowHint = DockState.DockBottomAutoHide;
 			}
 		}
 
 		private void EnsureStackView()
 		{
-			if (FStackView == null)
+			if (_stackView == null)
 			{
-				FStackView = new StackView();
-				FStackView.Dataphoria = this;
-				FStackView.Name = "FStackView";
-				FStackView.Dock = DockStyle.Fill;
+				_stackView = new StackView();
+				_stackView.Dataphoria = this;
+				_stackView.Name = "_stackView";
+				_stackView.Dock = DockStyle.Fill;
 
-				FDockContentStackView = new DockContent();
-				FDockContentStackView.HideOnClose = true;
-				FDockContentStackView.Controls.Add(FStackView);
-				FDockContentStackView.TabText = "Stack";
-				FDockContentStackView.Text = "Stack - Dataphoria";
-				FDockContentStackView.ShowHint = DockState.DockBottomAutoHide;
+				_dockContentStackView = new DockContent();
+				_dockContentStackView.HideOnClose = true;
+				_dockContentStackView.Controls.Add(_stackView);
+				_dockContentStackView.TabText = "Stack";
+				_dockContentStackView.Text = "Stack - Dataphoria";
+				_dockContentStackView.ShowHint = DockState.DockBottomAutoHide;
 			}
 		}
 
@@ -1885,35 +1969,35 @@ namespace Alphora.Dataphor.Dataphoria
 				
 		#region Help
 
-		public const string CDefaultHelpFileName = @"..\Documentation\Dataphor.chm";
+		public const string DefaultHelpFileName = @"..\Documentation\Dataphor.chm";
 
 		private string GetHelpFileName()
 		{
-			return Path.Combine(Application.StartupPath, (string)FSettings.GetSetting("HelpFileName", typeof(string), CDefaultHelpFileName));
+			return Path.Combine(Application.StartupPath, (string)_settings.GetSetting("HelpFileName", typeof(string), DefaultHelpFileName));
 		}
 
-		public void InvokeHelp(string AKeyword)
+		public void InvokeHelp(string keyword)
 		{
-			Help.ShowHelp(null, GetHelpFileName(), HelpNavigator.KeywordIndex, AKeyword.Trim());
+			Help.ShowHelp(null, GetHelpFileName(), HelpNavigator.KeywordIndex, keyword.Trim());
 		}
 
-		protected override void OnHelpRequested(HelpEventArgs AArgs)
+		protected override void OnHelpRequested(HelpEventArgs args)
 		{
-			base.OnHelpRequested(AArgs);
+			base.OnHelpRequested(args);
 			InvokeHelp("Dataphoria");
 		}
 
-		private void FErrorListView_HelpRequested(object ASender, HelpEventArgs AArgs)
+		private void FErrorListView_HelpRequested(object sender, HelpEventArgs args)
 		{
-			string LKeyword = "Errors and Warnings";
-			DataphorException LException = FErrorListView.SelectedError as DataphorException;
-			if (LException != null)
-				LKeyword = LException.Code.ToString();
+			string keyword = "Errors and Warnings";
+			DataphorException exception = _errorListView.SelectedError as DataphorException;
+			if (exception != null)
+				keyword = exception.Code.ToString();
 
-			InvokeHelp(LKeyword);
+			InvokeHelp(keyword);
 		}
 
-		private void FExplorer_HelpRequested(object ASender, HelpEventArgs AHlpEvent)
+		private void FExplorer_HelpRequested(object sender, HelpEventArgs hlpEvent)
 		{
 			InvokeHelp("Dataphor Explorer");
 		}

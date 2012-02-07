@@ -14,14 +14,14 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 	public class FileStreamHeader : Disposable, ISponsor
 	{
-		public FileStreamHeader(StreamID AStreamID, string AFileName)
+		public FileStreamHeader(StreamID streamID, string fileName)
 		{
-			StreamID = AStreamID;
-			FileName = AFileName;
-			Stream = new FileStream(AFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, false);
+			StreamID = streamID;
+			FileName = fileName;
+			Stream = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, false);
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			if (Stream != null)
 			{
@@ -35,11 +35,11 @@ namespace Alphora.Dataphor.DAE.Streams
 				FileName = String.Empty;
 			}
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
 		// ISponsor
-		TimeSpan ISponsor.Renewal(ILease ALease)
+		TimeSpan ISponsor.Renewal(ILease lease)
 		{
 			return TimeSpan.FromMinutes(5);
 		}
@@ -53,9 +53,9 @@ namespace Alphora.Dataphor.DAE.Streams
 	{
 		public FileStreamHeaders() : base(){}
 		
-		public new FileStreamHeader this[StreamID AStreamID] 
+		public new FileStreamHeader this[StreamID streamID] 
 		{ 
-			get { return (FileStreamHeader)base[AStreamID]; } 
+			get { return (FileStreamHeader)base[streamID]; } 
 		}
 		
 		#if USEFINALIZER
@@ -77,16 +77,16 @@ namespace Alphora.Dataphor.DAE.Streams
 			Dispose(true);
 		}
 		
-		protected void Dispose(bool ADisposing)
+		protected void Dispose(bool disposing)
 		{
-			foreach (KeyValuePair<StreamID, FileStreamHeader> LEntry in this)
-				LEntry.Value.Dispose();
+			foreach (KeyValuePair<StreamID, FileStreamHeader> entry in this)
+				entry.Value.Dispose();
 			Clear();
 		}
 
-		public void Add(FileStreamHeader AStream)
+		public void Add(FileStreamHeader stream)
 		{
-			Add(AStream.StreamID, AStream);
+			Add(stream.StreamID, stream);
 		}
 	}
 	
@@ -94,85 +94,85 @@ namespace Alphora.Dataphor.DAE.Streams
 	{
 		public FileStreamProvider() : base()
 		{
-			FPath = PathUtility.CommonAppDataPath(Schema.Object.NameFromGuid(Guid.NewGuid()));
-			if (!Directory.Exists(FPath))
-				Directory.CreateDirectory(FPath);
+			_path = PathUtility.CommonAppDataPath(Schema.Object.NameFromGuid(Guid.NewGuid()));
+			if (!Directory.Exists(_path))
+				Directory.CreateDirectory(_path);
 		}
 		
-		public FileStreamProvider(string APath) : base()
+		public FileStreamProvider(string path) : base()
 		{
-			FPath = APath;
+			_path = path;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FHeaders != null)
+			if (_headers != null)
 			{
-				FHeaders.Dispose();
-				FHeaders = null;
+				_headers.Dispose();
+				_headers = null;
 			}
 			
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
-		private string FPath;
-		public string Path { get { return FPath; } }
+		private string _path;
+		public string Path { get { return _path; } }
 		
-		private FileStreamHeaders FHeaders = new FileStreamHeaders();
+		private FileStreamHeaders _headers = new FileStreamHeaders();
 		
-		private string GetFileNameForStreamID(StreamID AStreamID)
+		private string GetFileNameForStreamID(StreamID streamID)
 		{
-			return String.Format("{0}\\{1}", FPath, AStreamID.ToString());
+			return String.Format("{0}\\{1}", _path, streamID.ToString());
 		}
 				
-		public void Create(StreamID AID)
+		public void Create(StreamID iD)
 		{
 			lock (this)
 			{
-				FHeaders.Add(new FileStreamHeader(AID, GetFileNameForStreamID(AID)));
+				_headers.Add(new FileStreamHeader(iD, GetFileNameForStreamID(iD)));
 			}
 		}
 		
-		private FileStreamHeader GetStreamHeader(StreamID AStreamID)
+		private FileStreamHeader GetStreamHeader(StreamID streamID)
 		{
-			FileStreamHeader LHeader;
-			if (!FHeaders.TryGetValue(AStreamID, out LHeader))
-				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, AStreamID.ToString());
-			return LHeader;
+			FileStreamHeader header;
+			if (!_headers.TryGetValue(streamID, out header))
+				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, streamID.ToString());
+			return header;
 		}
 		
-		public override Stream Open(StreamID AStreamID)
+		public override Stream Open(StreamID streamID)
 		{
 			lock (this)
 			{
-				FileStreamHeader LHeader = GetStreamHeader(AStreamID);
-				return LHeader.Stream;
+				FileStreamHeader header = GetStreamHeader(streamID);
+				return header.Stream;
 			}
 		}
 		
-		public override void Close(StreamID AStreamID)
+		public override void Close(StreamID streamID)
 		{
 			// no cleanup to perform here
 		}
 		
-		public override void Destroy(StreamID AStreamID)
+		public override void Destroy(StreamID streamID)
 		{
 			lock (this)
 			{
-				FileStreamHeader LHeader = GetStreamHeader(AStreamID);
-				FHeaders.Remove(AStreamID);
-				LHeader.Dispose();
+				FileStreamHeader header = GetStreamHeader(streamID);
+				_headers.Remove(streamID);
+				header.Dispose();
 			}
 		}
 
-		public override void Reassign(StreamID AOldStreamID, StreamID ANewStreamID)
+		public override void Reassign(StreamID oldStreamID, StreamID newStreamID)
 		{
 			lock (this)
 			{
-				FileStreamHeader LOldHeader = GetStreamHeader(AOldStreamID);
-				FHeaders.Remove(AOldStreamID);
-				LOldHeader.StreamID = ANewStreamID;
-				FHeaders.Add(LOldHeader);
+				FileStreamHeader oldHeader = GetStreamHeader(oldStreamID);
+				_headers.Remove(oldStreamID);
+				oldHeader.StreamID = newStreamID;
+				_headers.Add(oldHeader);
 			}
 		}
 	}

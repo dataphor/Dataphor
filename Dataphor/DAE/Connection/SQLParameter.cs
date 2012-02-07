@@ -17,86 +17,86 @@ namespace Alphora.Dataphor.DAE.Connection
 	public class SQLParameter
 	{
 		public SQLParameter() : base(){}
-		public SQLParameter(string AName, SQLType AType) : base()
+		public SQLParameter(string name, SQLType type) : base()
 		{
-			FName = AName;
-			FType = AType;
+			_name = name;
+			_type = type;
 		}
 		
-		public SQLParameter(string AName, SQLType AType, object AValue) : base()
+		public SQLParameter(string name, SQLType type, object tempValue) : base()
 		{
-			FName = AName;
-			FType = AType;
-			FValue = AValue;
+			_name = name;
+			_type = type;
+			_value = tempValue;
 		}
 		
-		public SQLParameter(string AName, SQLType AType, object AValue, SQLDirection ADirection) : base()
+		public SQLParameter(string name, SQLType type, object tempValue, SQLDirection direction) : base()
 		{
-			FName = AName;
-			FType = AType;
-			FValue = AValue;
-			FDirection = ADirection;
+			_name = name;
+			_type = type;
+			_value = tempValue;
+			_direction = direction;
 		}
 		
-		public SQLParameter(string AName, SQLType AType, object AValue, SQLDirection ADirection, string AMarker) : base()
+		public SQLParameter(string name, SQLType type, object tempValue, SQLDirection direction, string marker) : base()
 		{
-			FName = AName;
-			FType = AType;
-			FValue = AValue;
-			FDirection = ADirection;
-			FMarker = AMarker;
+			_name = name;
+			_type = type;
+			_value = tempValue;
+			_direction = direction;
+			_marker = marker;
 		}
 		
-		public SQLParameter(string AName, SQLType AType, object AValue, SQLDirection ADirection, string AMarker, string ALiteral) : base()
+		public SQLParameter(string name, SQLType type, object tempValue, SQLDirection direction, string marker, string literal) : base()
 		{
-			FName = AName;
-			FType = AType;
-			FValue = AValue;
-			FDirection = ADirection;
-			FMarker = AMarker;
-			FLiteral = ALiteral;
+			_name = name;
+			_type = type;
+			_value = tempValue;
+			_direction = direction;
+			_marker = marker;
+			_literal = literal;
 		}
 		
-		private string FName;
+		private string _name;
 		public string Name
 		{
-			get { return FName; }
-			set { FName = value; }
+			get { return _name; }
+			set { _name = value; }
 		}	
 
-		private SQLType FType;
+		private SQLType _type;
 		public SQLType Type
 		{
-			get { return FType; }
-			set { FType = value; }
+			get { return _type; }
+			set { _type = value; }
 		}
 
-		private SQLDirection FDirection;
+		private SQLDirection _direction;
 		public SQLDirection Direction
 		{
-			get { return FDirection; }
-			set { FDirection = value; }
+			get { return _direction; }
+			set { _direction = value; }
 		}
 		
-		private object FValue;
+		private object _value;
 		public object Value
 		{
-			get { return FValue; }
-			set { FValue = value; }
+			get { return _value; }
+			set { _value = value; }
 		}	
 		
-		private string FMarker;
+		private string _marker;
 		public string Marker
 		{
-			get { return FMarker; }
-			set { FMarker = value; }
+			get { return _marker; }
+			set { _marker = value; }
 		}
 		
-		private string FLiteral;
+		private string _literal;
 		public string Literal
 		{
-			get { return FLiteral; }
-			set { FLiteral = value; }
+			get { return _literal; }
+			set { _literal = value; }
 		}
 	}
 	
@@ -116,17 +116,17 @@ namespace Alphora.Dataphor.DAE.Connection
 	public class SQLParameters : BaseList<SQLParameter>
 	{
 	#endif
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (AName == this[LIndex].Name)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (name == this[index].Name)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 	}
 }

@@ -19,60 +19,60 @@ namespace Alphora.Dataphor.DAE.Server
 {
     public class LocalScript : LocalServerChildObject, IServerScript
     {
-		public LocalScript(LocalProcess AProcess, IRemoteServerScript AScript) : base()
+		public LocalScript(LocalProcess process, IRemoteServerScript script) : base()
 		{
-			FProcess = AProcess;
-			FScript = AScript;
+			_process = process;
+			_script = script;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			FBatches = null;
-			FScript = null;
-			FProcess = null;
+			_batches = null;
+			_script = null;
+			_process = null;
 			
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
-		protected IRemoteServerScript FScript;
-		public IRemoteServerScript RemoteScript { get { return FScript; } }
+		protected IRemoteServerScript _script;
+		public IRemoteServerScript RemoteScript { get { return _script; } }
 		
-		protected internal LocalProcess FProcess;
-		public IServerProcess Process { get { return FProcess; } }
+		protected internal LocalProcess _process;
+		public IServerProcess Process { get { return _process; } }
 		
-		public void Execute(DataParams AParams)
+		public void Execute(DataParams paramsValue)
 		{
-			RemoteParamData LParams = ((LocalProcess)FProcess).DataParamsToRemoteParamData(AParams);
-			FScript.Execute(ref LParams, FProcess.GetProcessCallInfo());
-			((LocalProcess)FProcess).RemoteParamDataToDataParams(AParams, LParams);
+			RemoteParamData localParamsValue = ((LocalProcess)_process).DataParamsToRemoteParamData(paramsValue);
+			_script.Execute(ref localParamsValue, _process.GetProcessCallInfo());
+			((LocalProcess)_process).RemoteParamDataToDataParams(paramsValue, localParamsValue);
 		}
 
-		private ParserMessages FMessages;		
+		private ParserMessages _messages;		
 		public ParserMessages Messages
 		{
 			get
 			{
-				if (FMessages == null)
+				if (_messages == null)
 				{
-					FMessages = new ParserMessages();
-					FMessages.AddRange(FScript.Messages);
+					_messages = new ParserMessages();
+					_messages.AddRange(_script.Messages);
 				}
-				return FMessages;
+				return _messages;
 			}
 		}
 		
-		protected LocalBatches FBatches;
+		protected LocalBatches _batches;
 		public IServerBatches Batches
 		{
 			get
 			{
-				if (FBatches == null)
+				if (_batches == null)
 				{
-					FBatches = new LocalBatches();
-					foreach (object LBatch in FScript.Batches)
-						FBatches.Add(new LocalBatch(this, (IRemoteServerBatch)LBatch));
+					_batches = new LocalBatches();
+					foreach (object batch in _script.Batches)
+						_batches.Add(new LocalBatch(this, (IRemoteServerBatch)batch));
 				}
-				return (IServerBatches)FBatches;
+				return (IServerBatches)_batches;
 			}
 		}
     }

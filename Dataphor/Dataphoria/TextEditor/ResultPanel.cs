@@ -29,11 +29,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		// override to return true if the passed key is control-tab
 		// this is done so that the result control doesn't eat the control-tab
 		// it is used by the tab control in the servermanager
-		protected override bool IsInputKey(Keys AInputKey)
+		protected override bool IsInputKey(Keys inputKey)
 		{
-			if (AInputKey == (Keys.Control | Keys.Tab))
+			if (inputKey == (Keys.Control | Keys.Tab))
 				return true;
-			return base.IsInputKey(AInputKey);
+			return base.IsInputKey(inputKey);
 		}
 	}
 

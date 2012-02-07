@@ -20,14 +20,14 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			UpdateBackColor();
 		}
 
-		public bool ExtractValue(DAE.Runtime.Data.Row ARow)
+		public bool ExtractValue(DAE.Runtime.Data.Row row)
 		{
 			try
 			{
 				if (HasValue)
-					((DAE.Runtime.Data.Scalar)ARow.GetValue(FColumnName)).AsString = Text;
+					((DAE.Runtime.Data.Scalar)row.GetValue(_columnName)).AsString = Text;
 				else
-					ARow.ClearValue(FColumnName);
+					row.ClearValue(_columnName);
 				return true;
 			}
 			catch
@@ -37,14 +37,14 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		public void InjectValue(DAE.Runtime.Data.Row ARow, bool AOverwrite)
+		public void InjectValue(DAE.Runtime.Data.Row row, bool overwrite)
 		{
-			if (AOverwrite)
+			if (overwrite)
 			{
-				if (ARow.HasValue(ColumnName))
+				if (row.HasValue(ColumnName))
 				{
 					SetHasValue(true);
-					Text = ((DAE.Runtime.Data.Scalar)ARow.GetValue(ColumnName)).AsString;
+					Text = ((DAE.Runtime.Data.Scalar)row.GetValue(ColumnName)).AsString;
 				}
 				else
 				{
@@ -54,99 +54,99 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 			else
 			{
-				if (ARow.HasValue(ColumnName) && (Text != String.Empty))
+				if (row.HasValue(ColumnName) && (Text != String.Empty))
 				{
 					// Show partial match
 					// TODO: More intelligent mechanism for displaying partial matches
-					string LNewValue = ((DAE.Runtime.Data.Scalar)ARow.GetValue(ColumnName)).AsString;
-					if (LNewValue.ToLower().StartsWith(Text.ToLower()))
+					string newValue = ((DAE.Runtime.Data.Scalar)row.GetValue(ColumnName)).AsString;
+					if (newValue.ToLower().StartsWith(Text.ToLower()))
 					{
-						int LPreviousTextLength = Text.Length;
-						Text = LNewValue;
-						Select(LPreviousTextLength, LNewValue.Length - LPreviousTextLength);
+						int previousTextLength = Text.Length;
+						Text = newValue;
+						Select(previousTextLength, newValue.Length - previousTextLength);
 					}
 				}
 			}
 		}
 
-		private string FColumnName;
+		private string _columnName;
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = (value == null ? String.Empty : value); }
+			get { return _columnName; }
+			set { _columnName = (value == null ? String.Empty : value); }
 		}
 
-		private string FTitle = null;
+		private string _title = null;
 		public string Title
 		{
 			get 
 			{ 
-				if (FTitle == null)
+				if (_title == null)
 					return ColumnName;
 				else
-					return FTitle;
+					return _title;
 			}
 		}
 
-		public void Initialize(IncrementalSearchColumn AColumn)
+		public void Initialize(IncrementalSearchColumn column)
 		{
-			Width = AColumn.ControlWidth;
-			if ((AColumn.Title != null) && (AColumn.Title != String.Empty))
-				FTitle = AColumn.Title;
+			Width = column.ControlWidth;
+			if ((column.Title != null) && (column.Title != String.Empty))
+				_title = column.Title;
 			else
-				FTitle = null;
-			TextAlign = AColumn.TextAlignment;
+				_title = null;
+			TextAlign = column.TextAlignment;
 		}
 
-		public void UpdateStyle(IncrementalSearch ASearch)
+		public void UpdateStyle(IncrementalSearch search)
 		{
-			NoValueBackColor = ASearch.NoValueBackColor;
-			InvalidValueBackColor = ASearch.InvalidValueBackColor;
+			NoValueBackColor = search.NoValueBackColor;
+			InvalidValueBackColor = search.InvalidValueBackColor;
 		}
 
 		public event EventHandler OnChanged;
 		
-		protected override void OnTextChanged(EventArgs AArgs)
+		protected override void OnTextChanged(EventArgs args)
 		{
-			base.OnTextChanged(AArgs);
+			base.OnTextChanged(args);
 			ConversionFailed = false;
-			FHasValue = true;
+			_hasValue = true;
 			UpdateBackColor();
 			if (OnChanged != null)
-				OnChanged(this, AArgs);
+				OnChanged(this, args);
 		}
 
-		private bool FConversionFailed;
+		private bool _conversionFailed;
 		protected bool ConversionFailed
 		{
-			get { return FConversionFailed; }
+			get { return _conversionFailed; }
 			set 
 			{
-				if (FConversionFailed != value)
+				if (_conversionFailed != value)
 				{
-					FConversionFailed = value;
+					_conversionFailed = value;
 					UpdateBackColor();
 				}
 			}
 		}
 
-		protected override void OnGotFocus(EventArgs AArgs)
+		protected override void OnGotFocus(EventArgs args)
 		{
-			base.OnGotFocus(AArgs);
+			base.OnGotFocus(args);
 			if (HasValue && (SelectionLength == 0))
 				SelectAll();
 		}
 
-		private Color FInvalidValueBackColor = ControlColor.ConversionFailBackColor;
+		private Color _invalidValueBackColor = ControlColor.ConversionFailBackColor;
 		public Color InvalidValueBackColor
 		{
-			get { return FInvalidValueBackColor; }
+			get { return _invalidValueBackColor; }
 			set
 			{
-				if (FInvalidValueBackColor != value)
+				if (_invalidValueBackColor != value)
 				{
-					FInvalidValueBackColor = value;
-					if (FConversionFailed)
+					_invalidValueBackColor = value;
+					if (_conversionFailed)
 						UpdateBackColor();
 				}
 			}
@@ -155,22 +155,22 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		protected override void InternalUpdateBackColor()
 		{
 			base.InternalUpdateBackColor();
-			if (FConversionFailed)
-				BackColor = FInvalidValueBackColor;
+			if (_conversionFailed)
+				BackColor = _invalidValueBackColor;
 		}
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
 			// Process backspace as though selection didn't exist
-			if ((AKey == Keys.Back) && (SelectionLength > 0) && (SelectionStart > 0))
+			if ((key == Keys.Back) && (SelectionLength > 0) && (SelectionStart > 0))
 			{
-				int LStart = SelectionStart - 1;
-				Text = Text.Remove(LStart, SelectionLength + 1);
-				SelectionStart = LStart;
+				int start = SelectionStart - 1;
+				Text = Text.Remove(start, SelectionLength + 1);
+				SelectionStart = start;
 				return true;
 			}
 			else
-				return base.ProcessDialogKey(AKey);
+				return base.ProcessDialogKey(key);
 		}
 
 		public void Reset()
@@ -180,17 +180,17 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			SetHasValue(false);
 		}
 
-		private bool FHasValue = false;
+		private bool _hasValue = false;
 		public override bool HasValue 
 		{	
-			get { return FHasValue; } 
+			get { return _hasValue; } 
 		}
 
-		private void SetHasValue(bool AValue)
+		private void SetHasValue(bool value)
 		{
-			if (AValue != FHasValue)
+			if (value != _hasValue)
 			{
-				FHasValue = AValue;
+				_hasValue = value;
 				UpdateBackColor();
 			}
 		}

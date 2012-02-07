@@ -19,41 +19,41 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public Frame() {}
 
-		public Frame([PublishSource("SourceLinkType")] SourceLinkType ASourceLinkType): base()
+		public Frame([PublishSource("SourceLinkType")] SourceLinkType sourceLinkType): base()
 		{
-			SourceLinkType = ASourceLinkType;
+			SourceLinkType = sourceLinkType;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			BeforeCloseEmbedded = null;
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		// SourceLinkType - This link must be set first when deserializing, which is why it is set in the constructor.
 
-		private SourceLinkType FSourceLinkType;
+		private SourceLinkType _sourceLinkType;
 		[DefaultValue(SourceLinkType.None)]
 		public SourceLinkType SourceLinkType
 		{
-			get { return FSourceLinkType; }
+			get { return _sourceLinkType; }
 			set
 			{
-				if (FSourceLinkType != value)
+				if (_sourceLinkType != value)
 				{
-					if (FSourceLink != null)
-						FSourceLink.Dispose();
-					FSourceLinkType = value;
-					if (FSourceLinkType == SourceLinkType.None)
-						FSourceLink = null;
+					if (_sourceLink != null)
+						_sourceLink.Dispose();
+					_sourceLinkType = value;
+					if (_sourceLinkType == SourceLinkType.None)
+						_sourceLink = null;
 					else 
 					{
-						if (FSourceLinkType == SourceLinkType.Surrogate)
-							FSourceLink = new SurrogateSourceLink(this);
-						else if (FSourceLinkType == SourceLinkType.Detail)
-							FSourceLink = new DetailSourceLink(this);
-						if (FFrameInterfaceNode != null)
-							FSourceLink.TargetSource = FFrameInterfaceNode.MainSource;
+						if (_sourceLinkType == SourceLinkType.Surrogate)
+							_sourceLink = new SurrogateSourceLink(this);
+						else if (_sourceLinkType == SourceLinkType.Detail)
+							_sourceLink = new DetailSourceLink(this);
+						if (_frameInterfaceNode != null)
+							_sourceLink.TargetSource = _frameInterfaceNode.MainSource;
 					}
 				}
 			}
@@ -61,35 +61,35 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// SourceLink
 
-		private SourceLink FSourceLink;
+		private SourceLink _sourceLink;
 
 		public SourceLink SourceLink
 		{
-			get { return FSourceLink; }
-			set { FSourceLink = value; }
+			get { return _sourceLink; }
+			set { _sourceLink = value; }
 		}
 		
 		// FrameInterface
 
-		private IFrameInterface FFrameInterfaceNode;
+		private IFrameInterface _frameInterfaceNode;
 
 		public IFrameInterface FrameInterfaceNode
 		{
-			get { return FFrameInterfaceNode; }
+			get { return _frameInterfaceNode; }
 		}
 
 		// MenuText
 
-		private string FMenuText;
+		private string _menuText;
 		
 		public string MenuText
 		{
-			get { return FMenuText; }
+			get { return _menuText; }
 			set 
 			{
-				if (FMenuText != value)
+				if (_menuText != value)
 				{
-					FMenuText = value; 
+					_menuText = value; 
 					UpdateMenuText();
 				}
 			}
@@ -97,33 +97,33 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		public string GetMenuText()
 		{
-			if (FMenuText == String.Empty)
+			if (_menuText == String.Empty)
 				if (Name != String.Empty)
 					return Name;
 				else
 					return Strings.Get("FrameDefaultMenuText");
 			else
-				return FMenuText;
+				return _menuText;
 		}
 
 		public void UpdateMenuText()
 		{
-			if (Active && (FMenuItem != null))
-				FMenuItem.Text = GetMenuText();
+			if (Active && (_menuItem != null))
+				_menuItem.Text = GetMenuText();
 		}
 
 		// MenuItem
 
-		private MenuItem FMenuItem;
-		public MenuItem MenuItem { get { return FMenuItem; } }
+		private MenuItem _menuItem;
+		public MenuItem MenuItem { get { return _menuItem; } }
 
 		private void EnsureMenuItem()
 		{
-			if (FMenuItem == null)
+			if (_menuItem == null)
 			{
-				FMenuItem = new MenuItem();
-				FMenuItem.Text = GetMenuText();
-				((IWebMenu)FindParent(typeof(IWebMenu))).Items.Add(FMenuItem);
+				_menuItem = new MenuItem();
+				_menuItem.Text = GetMenuText();
+				((IWebMenu)FindParent(typeof(IWebMenu))).Items.Add(_menuItem);
 			}
 		}
 
@@ -134,119 +134,119 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			get
 			{
 				EnsureMenuItem();
-				return FMenuItem.Items;
+				return _menuItem.Items;
 			}
 		}
 
 		// PostBeforeClosingEmbedded
 
-		private bool FPostBeforeClosingEmbedded;
+		private bool _postBeforeClosingEmbedded;
 		[DefaultValue(false)]
 		[Description("Determines whether the frame will automatically request a post of an embedded interface before closing it")]
 		public bool PostBeforeClosingEmbedded
 		{
-			get { return FPostBeforeClosingEmbedded; }
-			set { FPostBeforeClosingEmbedded = value; }
+			get { return _postBeforeClosingEmbedded; }
+			set { _postBeforeClosingEmbedded = value; }
 		}
 
 		// BeforeCloseEmbedded
 
-		private IAction FBeforeCloseEmbedded;
+		private IAction _beforeCloseEmbedded;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action that will be executed before closing an embedded interface (AInterface).")]
 		public IAction BeforeCloseEmbedded
 		{
-			get { return FBeforeCloseEmbedded; }
+			get { return _beforeCloseEmbedded; }
 			set
 			{
-				if (FBeforeCloseEmbedded != value)
+				if (_beforeCloseEmbedded != value)
 				{
-					if (FBeforeCloseEmbedded != null)
-						FBeforeCloseEmbedded.Disposed -= new EventHandler(BeforeCloseEmbeddedActionDisposed);
-					FBeforeCloseEmbedded = value;
-					if (FBeforeCloseEmbedded != null)
-						FBeforeCloseEmbedded.Disposed += new EventHandler(BeforeCloseEmbeddedActionDisposed);
+					if (_beforeCloseEmbedded != null)
+						_beforeCloseEmbedded.Disposed -= new EventHandler(BeforeCloseEmbeddedActionDisposed);
+					_beforeCloseEmbedded = value;
+					if (_beforeCloseEmbedded != null)
+						_beforeCloseEmbedded.Disposed += new EventHandler(BeforeCloseEmbeddedActionDisposed);
 				}
 			}
 		}
 
-		private void BeforeCloseEmbeddedActionDisposed(object ASender, EventArgs AArgs)
+		private void BeforeCloseEmbeddedActionDisposed(object sender, EventArgs args)
 		{
 			BeforeCloseEmbedded = null;
 		}
 
 		// Document
 
-		private string FDocument = String.Empty;
+		private string _document = String.Empty;
 		
 		public string Document
 		{
-			get { return FDocument; }
+			get { return _document; }
 			set
 			{
-				if (FDocument != value)
+				if (_document != value)
 				{
-					FDocument = value;
+					_document = value;
 					UpdateFrameInterfaceNode(Active);
 				}
 			}
 		}
 
-		protected void UpdateFrameInterfaceNode(bool ABuild)
+		protected void UpdateFrameInterfaceNode(bool build)
 		{
-			if (FFrameInterfaceNode != null)
+			if (_frameInterfaceNode != null)
 			{
 				// Optionally post the data changes
-				if (FPostBeforeClosingEmbedded)
-					FFrameInterfaceNode.PostChanges();
+				if (_postBeforeClosingEmbedded)
+					_frameInterfaceNode.PostChanges();
 
 				// Invoke the before close embedded handler
-				if (FBeforeCloseEmbedded != null)
-					FBeforeCloseEmbedded.Execute(this, new EventParams("AInterface", FFrameInterfaceNode));
+				if (_beforeCloseEmbedded != null)
+					_beforeCloseEmbedded.Execute(this, new EventParams("AInterface", _frameInterfaceNode));
 
 				try
 				{
-					FFrameInterfaceNode.HostNode.BroadcastEvent(new Frontend.Client.DisableSourceEvent());
-					if (FSourceLink != null)
-						FSourceLink.TargetSource = null;
+					_frameInterfaceNode.HostNode.BroadcastEvent(new Frontend.Client.DisableSourceEvent());
+					if (_sourceLink != null)
+						_sourceLink.TargetSource = null;
 				}
 				finally
 				{
 					try
 					{
-						FFrameInterfaceNode.HostNode.Dispose();
+						_frameInterfaceNode.HostNode.Dispose();
 					}
 					finally
 					{
-						FFrameInterfaceNode = null;
+						_frameInterfaceNode = null;
 					}
 				}
 			}
-			if (ABuild && (FDocument != String.Empty))
+			if (build && (_document != String.Empty))
 			{
-				IHost LHost = HostNode.Session.CreateHost();
+				IHost host = HostNode.Session.CreateHost();
 				try
 				{
-					FFrameInterfaceNode = new FrameInterface(this);
+					_frameInterfaceNode = new FrameInterface(this);
 					try
 					{
-						LHost.Load(FDocument, FFrameInterfaceNode);
-						if (FSourceLink != null)
-							FSourceLink.TargetSource = FFrameInterfaceNode.MainSource;
-						LHost.Open(!Active);
+						host.Load(_document, _frameInterfaceNode);
+						if (_sourceLink != null)
+							_sourceLink.TargetSource = _frameInterfaceNode.MainSource;
+						host.Open(!Active);
 						if (Active)
 							BroadcastEvent(new FormShownEvent());
 					}
 					catch
 					{
-						FFrameInterfaceNode.Dispose();
-						FFrameInterfaceNode = null;
+						_frameInterfaceNode.Dispose();
+						_frameInterfaceNode = null;
 						throw;
 					}
 				}
 				catch
 				{
-					LHost.Dispose();
+					host.Dispose();
 					throw;
 				}
 			}
@@ -254,10 +254,10 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// IWebElement
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			if (FFrameInterfaceNode != null) 
-				((IWebElement)FFrameInterfaceNode).Render(AWriter);
+			if (_frameInterfaceNode != null) 
+				((IWebElement)_frameInterfaceNode).Render(writer);
 		}
 		
 		// Element
@@ -284,10 +284,10 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// Node
 
-		public override void BroadcastEvent(NodeEvent AEvent)
+		public override void BroadcastEvent(NodeEvent eventValue)
 		{
-			if (FFrameInterfaceNode != null)
-				FFrameInterfaceNode.BroadcastEvent(AEvent);
+			if (_frameInterfaceNode != null)
+				_frameInterfaceNode.BroadcastEvent(eventValue);
 		}
 
 		protected virtual bool LoadOnActivate()
@@ -304,8 +304,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		protected override void AfterActivate()
 		{
-			if (FFrameInterfaceNode != null)
-				FFrameInterfaceNode.HostNode.AfterOpen();
+			if (_frameInterfaceNode != null)
+				_frameInterfaceNode.HostNode.AfterOpen();
 			base.AfterActivate();
 		}
 
@@ -331,10 +331,10 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		protected void ReleaseMenu()
 		{
-			if (FMenuItem != null)
+			if (_menuItem != null)
 			{
-				((IWebMenu)Parent.FindParent(typeof(IWebMenu))).Items.Remove(FMenuItem);
-				FMenuItem = null;
+				((IWebMenu)Parent.FindParent(typeof(IWebMenu))).Items.Remove(_menuItem);
+				_menuItem = null;
 			}
 		}
 	}
@@ -342,24 +342,24 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	[PublishAs("Interface")]
 	public class FrameInterface : Interface, IFrameInterface
 	{
-		public FrameInterface(IFrame AFrame) : base()
+		public FrameInterface(IFrame frame) : base()
 		{
-			FFrame = AFrame;
+			_frame = frame;
 		}
 
 		// Frame
 
-		private IFrame FFrame;
+		private IFrame _frame;
 		public IFrame Frame
 		{
-			get { return FFrame; }
+			get { return _frame; }
 		}
 
 		// Node
 
 		public override INode Parent
 		{
-			get { return FFrame; }
+			get { return _frame; }
 		}
 	}
 }

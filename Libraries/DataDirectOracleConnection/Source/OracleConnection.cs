@@ -12,11 +12,11 @@ namespace Alphora.Dataphor.DAE.Connection.DataDirect.Oracle
 	
 	public class OracleConnection : DotNetConnection
 	{
-		public OracleConnection(string AConnection) : base(AConnection) {}
+		public OracleConnection(string connection) : base(connection) {}
 		
-		protected override IDbConnection CreateDbConnection(string AConnectionString)
+		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			return new DDTek.OracleConnection(AConnectionString);
+			return new DDTek.OracleConnection(connectionString);
 		}
 		
 		protected override SQLCommand InternalCreateCommand()
@@ -27,79 +27,79 @@ namespace Alphora.Dataphor.DAE.Connection.DataDirect.Oracle
 
 	public class OracleCommand : DotNetCommand
 	{
-		public OracleCommand(OracleConnection AConnection, IDbCommand ACommand) : base(AConnection, ACommand){}
+		public OracleCommand(OracleConnection connection, IDbCommand command) : base(connection, command){}
 		
 		protected override void PrepareParameters()
 		{
 			// Prepare parameters
-			foreach (SQLParameter LParameter in Parameters)
+			foreach (SQLParameter parameter in Parameters)
 			{
-				DDTek.OracleParameter LOracleParameter = (DDTek.OracleParameter)FCommand.CreateParameter();
-				LOracleParameter.ParameterName = String.Format("@{0}", LParameter.Name);
-				switch (LParameter.Direction)
+				DDTek.OracleParameter oracleParameter = (DDTek.OracleParameter)_command.CreateParameter();
+				oracleParameter.ParameterName = String.Format("@{0}", parameter.Name);
+				switch (parameter.Direction)
 				{
-					case SQLDirection.Out : LOracleParameter.Direction = System.Data.ParameterDirection.Output; break;
-					case SQLDirection.InOut : LOracleParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
-					case SQLDirection.Result : LOracleParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
-					default : LOracleParameter.Direction = System.Data.ParameterDirection.Input; break;
+					case SQLDirection.Out : oracleParameter.Direction = System.Data.ParameterDirection.Output; break;
+					case SQLDirection.InOut : oracleParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
+					case SQLDirection.Result : oracleParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
+					default : oracleParameter.Direction = System.Data.ParameterDirection.Input; break;
 				}
 
-				if (LParameter.Type is SQLStringType)
+				if (parameter.Type is SQLStringType)
 				{
-					LOracleParameter.OracleDbType = DDTek.OracleDbType.VarChar;
-					LOracleParameter.Size = ((SQLStringType)LParameter.Type).Length;
+					oracleParameter.OracleDbType = DDTek.OracleDbType.VarChar;
+					oracleParameter.Size = ((SQLStringType)parameter.Type).Length;
 				}
-				else if (LParameter.Type is SQLBooleanType)
+				else if (parameter.Type is SQLBooleanType)
 				{
-					LOracleParameter.OracleDbType = DDTek.OracleDbType.Number;
-					LOracleParameter.Precision = 1;
-					LOracleParameter.Scale = 0;
+					oracleParameter.OracleDbType = DDTek.OracleDbType.Number;
+					oracleParameter.Precision = 1;
+					oracleParameter.Scale = 0;
 				}
-				else if (LParameter.Type is SQLIntegerType)
+				else if (parameter.Type is SQLIntegerType)
 				{
-					LOracleParameter.OracleDbType = DDTek.OracleDbType.Number;
-					LOracleParameter.Scale = 0;
-					switch (((SQLIntegerType)LParameter.Type).ByteCount)
+					oracleParameter.OracleDbType = DDTek.OracleDbType.Number;
+					oracleParameter.Scale = 0;
+					switch (((SQLIntegerType)parameter.Type).ByteCount)
 					{
-						case 1 : LOracleParameter.Precision = 3; break;
-						case 2 : LOracleParameter.Precision = 5; break;
-						case 8 : LOracleParameter.Precision = 20; break;
-						default : LOracleParameter.Precision = 10; break;
+						case 1 : oracleParameter.Precision = 3; break;
+						case 2 : oracleParameter.Precision = 5; break;
+						case 8 : oracleParameter.Precision = 20; break;
+						default : oracleParameter.Precision = 10; break;
 					}
 				}
-				else if (LParameter.Type is SQLNumericType)
+				else if (parameter.Type is SQLNumericType)
 				{
-					SQLNumericType LType = (SQLNumericType)LParameter.Type;
-					LOracleParameter.OracleDbType = DDTek.OracleDbType.Number;
-					LOracleParameter.Precision = LType.Precision;
-					LOracleParameter.Scale = LType.Scale;
+					SQLNumericType type = (SQLNumericType)parameter.Type;
+					oracleParameter.OracleDbType = DDTek.OracleDbType.Number;
+					oracleParameter.Precision = type.Precision;
+					oracleParameter.Scale = type.Scale;
 				}
-				else if (LParameter.Type is SQLBinaryType)
+				else if (parameter.Type is SQLBinaryType)
 				{
-					LOracleParameter.OracleDbType = DDTek.OracleDbType.Blob;
+					oracleParameter.OracleDbType = DDTek.OracleDbType.Blob;
 				}
-				else if (LParameter.Type is SQLTextType)
+				else if (parameter.Type is SQLTextType)
 				{
-					LOracleParameter.OracleDbType = DDTek.OracleDbType.Clob;
+					oracleParameter.OracleDbType = DDTek.OracleDbType.Clob;
 				}
-				else if (LParameter.Type is SQLDateTimeType)
+				else if (parameter.Type is SQLDateTimeType)
 				{
-					LOracleParameter.OracleDbType = DDTek.OracleDbType.Date;
+					oracleParameter.OracleDbType = DDTek.OracleDbType.Date;
 				}
-				else if (LParameter.Type is SQLGuidType)
+				else if (parameter.Type is SQLGuidType)
 				{
-					LOracleParameter.OracleDbType = DDTek.OracleDbType.Char;
-					LOracleParameter.Size = 24;
+					oracleParameter.OracleDbType = DDTek.OracleDbType.Char;
+					oracleParameter.Size = 24;
 				}
-				else if (LParameter.Type is SQLMoneyType)
+				else if (parameter.Type is SQLMoneyType)
 				{
-					LOracleParameter.OracleDbType = DDTek.OracleDbType.Number;
-					LOracleParameter.Precision = 28;
-					LOracleParameter.Scale = 8;
+					oracleParameter.OracleDbType = DDTek.OracleDbType.Number;
+					oracleParameter.Precision = 28;
+					oracleParameter.Scale = 8;
 				}
 				else
-					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-				FCommand.Parameters.Add(LOracleParameter);
+					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+				_command.Parameters.Add(oracleParameter);
 			}
 		}
 	}

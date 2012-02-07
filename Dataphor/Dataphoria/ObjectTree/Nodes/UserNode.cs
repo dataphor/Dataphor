@@ -29,16 +29,16 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		#if !ALLOWMANAGEUSERS
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = new ContextMenu();
-			LMenu.MenuItems.Add(0, new MenuItem(Strings.ObjectTree_ManageUsersText, new EventHandler(ManageUsersClicked)));
-			return LMenu;
+			ContextMenu menu = new ContextMenu();
+			menu.MenuItems.Add(0, new MenuItem(Strings.ObjectTree_ManageUsersText, new EventHandler(ManageUsersClicked)));
+			return menu;
 		}
 
-		protected void ManageUsersClicked(object ASender, EventArgs AArgs)
+		protected void ManageUsersClicked(object sender, EventArgs args)
 		{
 			Dataphoria.EnsureSecurityRegistered();
-			Frontend.Client.Windows.IWindowsFormInterface LForm = Dataphoria.FrontendSession.LoadForm(null, "Form('Security', 'UserBrowse')");
-			LForm.Show();
+			Frontend.Client.Windows.IWindowsFormInterface form = Dataphoria.FrontendSession.LoadForm(null, "Form('Security', 'UserBrowse')");
+			form.Show();
 		}
 		#endif
 	}
@@ -67,9 +67,9 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return ".System.Users over { ID }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
 		{
-			return new UserNode((string)ARow["ID"]);
+			return new UserNode((string)row["ID"]);
 		}
 
 		#if ALLOWMANAGEUSERS		
@@ -83,9 +83,9 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 	public class UserNode : ItemNode
 	{
-		public UserNode(string AUserName) : base()
+		public UserNode(string userName) : base()
 		{
-			Text = AUserName;
+			Text = userName;
 			ImageIndex = 4;
 			SelectedImageIndex = ImageIndex;
 		}
@@ -95,9 +95,9 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return String.Format("ID = '{0}'", Text);
 		}
 
-		public override bool IsEqual(DAE.Runtime.Data.Row ARow)
+		public override bool IsEqual(DAE.Runtime.Data.Row row)
 		{
-			return (string)ARow["ID"] == Text;
+			return (string)row["ID"] == Text;
 		}
 
 		protected override string ViewDocument()

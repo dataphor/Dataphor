@@ -13,19 +13,19 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.Controls.ToolBarButton), "Icons.ToolBarButton.bmp")]
 	public class ToolBarButton : Button
 	{
-		public const int CWidthPadding = 10;
-		public const int CImagePadding = 0;
+		public const int WidthPadding = 10;
+		public const int ImagePadding = 0;
 
 		public ToolBarButton() : base()
 		{
 			InitializeControl();
 		}
 
-		public ToolBarButton(string AText, EventHandler AClick) : base()
+		public ToolBarButton(string text, EventHandler click) : base()
 		{
 			InitializeControl();
-			Text = AText;
-			Click += AClick;
+			Text = text;
+			Click += click;
 		}
 
 		private void InitializeControl()
@@ -42,20 +42,20 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			if (IsHandleCreated)
 			{
-				using (Graphics LGraphics = this.CreateGraphics())
-					Width = CWidthPadding + (Image == null ? 0 : Image.Width + CImagePadding) + Size.Ceiling(LGraphics.MeasureString(Text, Font)).Width;
+				using (Graphics graphics = this.CreateGraphics())
+					Width = WidthPadding + (Image == null ? 0 : Image.Width + ImagePadding) + Size.Ceiling(graphics.MeasureString(Text, Font)).Width;
 			}
 		}
 
-		protected override void OnHandleCreated(EventArgs AArgs)
+		protected override void OnHandleCreated(EventArgs args)
 		{
-			base.OnHandleCreated(AArgs);
+			base.OnHandleCreated(args);
 			UpdateSize();
 		}
 
-		protected override void OnTextChanged(EventArgs AArgs)
+		protected override void OnTextChanged(EventArgs args)
 		{
-			base.OnTextChanged(AArgs);
+			base.OnTextChanged(args);
 			UpdateSize();
 		}
 
@@ -71,9 +71,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		// TODO: Update size after image is changed (no OnImageChanged and Image prop not virtual)
 
-		protected override bool ProcessMnemonic(char ACharCode)
+		protected override bool ProcessMnemonic(char charCode)
 		{
-			if (base.ProcessMnemonic(ACharCode))
+			if (base.ProcessMnemonic(charCode))
 			{
 				OnClick(EventArgs.Empty);
 				return true;
@@ -96,44 +96,44 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			Dock = DockStyle.Top;
 		}
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
 			//base.OnLayout();
-			int LOffset = 0;
+			int offset = 0;
 			if ((Dock == DockStyle.Left) || (Dock == DockStyle.Right))
 			{
-				foreach (Control LChild in Controls)
+				foreach (Control child in Controls)
 				{
-					if (LChild.Visible)
+					if (child.Visible)
 					{
-						LChild.Top = LOffset;
-						LChild.Width = ClientSize.Width;
-						LOffset += LChild.Height;
+						child.Top = offset;
+						child.Width = ClientSize.Width;
+						offset += child.Height;
 					}
 				}
 			}
 			else
 			{
-				foreach (Control LChild in Controls)
+				foreach (Control child in Controls)
 				{
-					if (LChild.Visible)
+					if (child.Visible)
 					{
-						LChild.Left = LOffset;
-						LChild.Height = ClientSize.Height;
-						LOffset += LChild.Width;
+						child.Left = offset;
+						child.Height = ClientSize.Height;
+						offset += child.Width;
 					}
 				}
 			}
 		}
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
-			base.OnPaint(AArgs);
-			using (Pen LPen = new Pen(Color.White, 1))
+			base.OnPaint(args);
+			using (Pen pen = new Pen(Color.White, 1))
 			{
-				AArgs.Graphics.DrawLine(LPen, 0, 0, ClientSize.Width, 0);
-				LPen.Color = Color.Gray;
-				AArgs.Graphics.DrawLine(LPen, 0, ClientSize.Height - 1, ClientSize.Width, ClientSize.Height - 1);
+				args.Graphics.DrawLine(pen, 0, 0, ClientSize.Width, 0);
+				pen.Color = Color.Gray;
+				args.Graphics.DrawLine(pen, 0, ClientSize.Height - 1, ClientSize.Width, ClientSize.Height - 1);
 			}
 		}
 	}

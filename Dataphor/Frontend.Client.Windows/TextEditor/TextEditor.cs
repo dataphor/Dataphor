@@ -21,17 +21,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// NilIfBlank
 		
-		public const bool CDefaultNilIfBlank = true;
-		private bool FNilIfBlank = CDefaultNilIfBlank;
-		[DefaultValue(CDefaultNilIfBlank)]
+		public const bool DefaultNilIfBlank = true;
+		private bool _nilIfBlank = DefaultNilIfBlank;
+		[DefaultValue(DefaultNilIfBlank)]
 		public bool NilIfBlank 
 		{ 
-			get { return FNilIfBlank; }
+			get { return _nilIfBlank; }
 			set 
 			{ 
-				if (FNilIfBlank != value)
+				if (_nilIfBlank != value)
 				{
-					FNilIfBlank = value;
+					_nilIfBlank = value;
 					if (Active)
 						InternalUpdateTextEditControl();
 				}
@@ -40,17 +40,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// DocumentType
 		
-		public const string CDefaultDocumentType = "Default";
-		private string FDocumentType = CDefaultDocumentType;
-		[DefaultValue(CDefaultDocumentType)]
+		public const string DefaultDocumentType = "Default";
+		private string _documentType = DefaultDocumentType;
+		[DefaultValue(DefaultDocumentType)]
 		public string DocumentType
 		{
-			get { return FDocumentType; }
+			get { return _documentType; }
 			set
 			{
-				if (FDocumentType != value)
+				if (_documentType != value)
 				{
-					FDocumentType = value != null ? value : "";
+					_documentType = value != null ? value : "";
 					if (Active)
 						InternalUpdateTextEditControl();
 				}
@@ -59,27 +59,27 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void InternalUpdateTextEditControl()
 		{
-			DBTextEdit LControl = TextEditControl;
-			if (LControl != null)
+			DBTextEdit control = TextEditControl;
+			if (control != null)
 			{
-				LControl.NilIfBlank = FNilIfBlank;
-				LControl.DocumentType = FDocumentType;
+				control.NilIfBlank = _nilIfBlank;
+				control.DocumentType = _documentType;
 			}
 		}
 
 		// Height
 
-		public const int CDefaultHeight = 6;
-		private int FHeight = CDefaultHeight;
-		[DefaultValue(CDefaultHeight)]
+		public const int DefaultHeight = 6;
+		private int _height = DefaultHeight;
+		[DefaultValue(DefaultHeight)]
 		public int Height
 		{
-			get { return FHeight; }
+			get { return _height; }
 			set
 			{
-				if (value != FHeight)
+				if (value != _height)
 				{
-					FHeight = value;
+					_height = value;
 					UpdateLayout();
 				}
 			}
@@ -92,11 +92,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return new DBTextEdit();
 		}
 
-		private int FRowHeight;
+		private int _rowHeight;
 
 		protected override void InitializeControl()
 		{
-			FRowHeight = TextEditControl.ActiveTextAreaControl.TextArea.TextView.FontHeight + 1;
+			_rowHeight = TextEditControl.ActiveTextAreaControl.TextArea.TextView.FontHeight + 1;
 			InternalUpdateTextEditControl();
 			base.InitializeControl();
 		}
@@ -111,14 +111,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		protected override int GetControlNaturalHeight()
 		{
 			return (WinForms.SystemInformation.Border3DSize.Height * 2) 
-				+ (FRowHeight * FHeight)
+				+ (_rowHeight * _height)
 				+ WinForms.SystemInformation.HorizontalScrollBarHeight;
 		}
 
 		protected override int GetControlMinHeight()
 		{
 			return (WinForms.SystemInformation.Border3DSize.Height * 2) 
-				+ FRowHeight
+				+ _rowHeight
 				+ WinForms.SystemInformation.HorizontalScrollBarHeight;
 		}
 

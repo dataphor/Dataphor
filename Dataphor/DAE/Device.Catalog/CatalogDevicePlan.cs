@@ -12,7 +12,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	public class CatalogDevicePlan : DevicePlan
 	{
-		public CatalogDevicePlan(Plan APlan, CatalogDevice ADevice, PlanNode APlanNode) : base(APlan, ADevice, APlanNode) 
+		public CatalogDevicePlan(Plan plan, CatalogDevice device, PlanNode planNode) : base(plan, device, planNode) 
 		{ 
 		}
 		

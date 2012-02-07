@@ -20,12 +20,12 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = new ContextMenu();
-			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_RefreshMenuText, new EventHandler(RefreshClicked), Shortcut.F5));
-			return LMenu;
+			ContextMenu menu = new ContextMenu();
+			menu.MenuItems.Add(new MenuItem(Strings.ObjectTree_RefreshMenuText, new EventHandler(RefreshClicked), Shortcut.F5));
+			return menu;
 		}
 
-		private void RefreshClicked(object ASender, EventArgs AArgs)
+		private void RefreshClicked(object sender, EventArgs args)
 		{
 			Refresh();
 		}
@@ -42,94 +42,74 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return null;
 		}
 		
-		protected abstract BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow);
-		
-		protected override void InternalReconcileChildren()
-		{
-			ArrayList LItems = new ArrayList(Nodes.Count);
-			foreach (TreeNode LNode in Nodes)
-				LItems.Add(LNode);
+		protected abstract BaseNode CreateChildNode(DAE.Runtime.Data.Row row);
 
-			DAE.IServerCursor LCursor = Dataphoria.OpenCursor(GetChildExpression(), GetParams());
-			try
-			{
-				DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow();
-				try
-				{
-					TreeNode LNode;
-					while (LCursor.Next())
-					{
-						LCursor.Select(LRow);
-						LNode = FindByKey(LRow);
-						if (LNode != null)
-						{
-							LItems.Remove(LNode);
-							ReconcileNode((BaseNode)LNode, LRow);
-						}
-						else
-							AddNode(CreateChildNode(LRow));
-					}
-				}
-				finally
-				{
-					LCursor.Plan.ReleaseRow(LRow);
-				}
-			}
-			finally
-			{
-				Dataphoria.CloseCursor(LCursor);
-			}
-
-			foreach (TreeNode LNode in LItems)
-				Nodes.Remove(LNode);
-		}
+        protected override void InternalReconcileChildren()
+        {
+            ArrayList items = new ArrayList(Nodes.Count);
+            foreach (TreeNode node in Nodes)
+                items.Add(node);
+            Dataphoria.Execute(GetChildExpression(), GetParams(), ARow =>
+                                                                      {
+                                                                          TreeNode node = FindByKey(ARow);
+                                                                          if (node != null)
+                                                                          {
+                                                                              items.Remove(node);
+                                                                              ReconcileNode((BaseNode)node, ARow);
+                                                                          }
+                                                                          else
+                                                                              AddNode(CreateChildNode(ARow));
+                                                                      });
+            foreach (TreeNode node in items)
+                Nodes.Remove(node);
+        }
 
  		/// <summary> Finds the first node using the specified row. </summary>
 		/// <returns> The matching node reference or null (if not found). </returns>
-		public BaseNode FindByKey(DAE.Runtime.Data.Row ARow)
+		public BaseNode FindByKey(DAE.Runtime.Data.Row row)
 		{
-			ItemNode LItemNode;
-			foreach (TreeNode LNode in Nodes)
+			ItemNode itemNode;
+			foreach (TreeNode node in Nodes)
 			{
-				LItemNode = LNode as ItemNode;
-				if ((LItemNode != null) && LItemNode.IsEqual(ARow))
-					return LItemNode;
+				itemNode = node as ItemNode;
+				if ((itemNode != null) && itemNode.IsEqual(row))
+					return itemNode;
 			}
 			return null;
 		}
 
  		/// <summary> Finds the first node using the specified text. </summary>
 		/// <returns> The matching node reference or null (if not found). </returns>
-		public BaseNode FindByText(string AText)
+		public BaseNode FindByText(string text)
 		{
-			foreach (TreeNode LNode in Nodes)
+			foreach (TreeNode node in Nodes)
 			{
-				if (LNode.Text.Trim() == AText)
-					return LNode as BaseNode;
+				if (node.Text.Trim() == text)
+					return node as BaseNode;
 			}
 			return null;
 		}
 
-		public void AddNode(BaseNode ANode)
+		public void AddNode(BaseNode node)
 		{
 			if (SortChildren)
 			{
 				// Insertion sort
 				for (int i = Nodes.Count - 1; i >= 0; i--)
 				{
-					if (String.Compare(ANode.Text, Nodes[i].Text) > 0)
+					if (String.Compare(node.Text, Nodes[i].Text) > 0)
 					{
-						InsertBaseNode(i + 1, ANode);
+						InsertBaseNode(i + 1, node);
 						return;
 					}
 				}
-				InsertBaseNode(0, ANode);
+				InsertBaseNode(0, node);
 			}
 			else
-				AddBaseNode(ANode);
+				AddBaseNode(node);
 		}
 		
-		protected virtual void ReconcileNode(BaseNode ANode, DAE.Runtime.Data.Row ARow)
+		protected virtual void ReconcileNode(BaseNode node, DAE.Runtime.Data.Row row)
 		{
 			// Stub for node-level reconciliation
 		}
@@ -137,38 +117,38 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 	
 	public abstract class BrowseNode : ListNode
 	{
-		protected MenuItem FAddSeparator;
-		protected MenuItem FAddMenuItem;
+		protected MenuItem _addSeparator;
+		protected MenuItem _addMenuItem;
 		
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = base.GetContextMenu();
-			FAddSeparator = new MenuItem("-");
-			LMenu.MenuItems.Add(0, FAddSeparator);
-			FAddMenuItem = new MenuItem(Strings.ObjectTree_AddMenuText, new EventHandler(AddClicked), Shortcut.Ins);
-			LMenu.MenuItems.Add(0, FAddMenuItem);
-			return LMenu;
+			ContextMenu menu = base.GetContextMenu();
+			_addSeparator = new MenuItem("-");
+			menu.MenuItems.Add(0, _addSeparator);
+			_addMenuItem = new MenuItem(Strings.ObjectTree_AddMenuText, new EventHandler(AddClicked), Shortcut.Ins);
+			menu.MenuItems.Add(0, _addMenuItem);
+			return menu;
 		}
 
-		protected void SetInsertOpenState(Frontend.Client.IFormInterface AForm)
+		protected void SetInsertOpenState(Frontend.Client.IFormInterface form)
 		{
-			AForm.MainSource.OpenState = DAE.Client.DataSetState.Insert;
+			form.MainSource.OpenState = DAE.Client.DataSetState.Insert;
 		}
 
-		protected virtual void AddClicked(object ASender, EventArgs AArgs)
+		protected virtual void AddClicked(object sender, EventArgs args)
 		{
-			Frontend.Client.Windows.IWindowsFormInterface LForm = Dataphoria.FrontendSession.LoadForm(null, AddDocument(), new Frontend.Client.FormInterfaceHandler(SetInsertOpenState));
+			Frontend.Client.Windows.IWindowsFormInterface form = Dataphoria.FrontendSession.LoadForm(null, AddDocument(), new Frontend.Client.FormInterfaceHandler(SetInsertOpenState));
 			try
 			{
-				if (LForm.ShowModal(Frontend.Client.FormMode.Insert) != DialogResult.OK)
+				if (form.ShowModal(Frontend.Client.FormMode.Insert) != DialogResult.OK)
 					throw new AbortException();
-				BaseNode LNode = CreateChildNode(LForm.MainSource.DataView.ActiveRow);
-				AddNode(LNode);
-				TreeView.SelectedNode = LNode;
+				BaseNode node = CreateChildNode(form.MainSource.DataView.ActiveRow);
+				AddNode(node);
+				TreeView.SelectedNode = node;
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 		}
 
@@ -184,9 +164,9 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = new ContextMenu();
-			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_ViewMenuText, new EventHandler(ViewClicked), Shortcut.CtrlF2));
-			return LMenu;
+			ContextMenu menu = new ContextMenu();
+			menu.MenuItems.Add(new MenuItem(Strings.ObjectTree_ViewMenuText, new EventHandler(ViewClicked), Shortcut.CtrlF2));
+			return menu;
 		}
 
 		public ListNode ParentList
@@ -202,20 +182,20 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		public abstract string GetFilter();
 
-		public abstract bool IsEqual(DAE.Runtime.Data.Row ARow);
+		public abstract bool IsEqual(DAE.Runtime.Data.Row row);
 
 		public virtual void View()
 		{
-			using (Frontend.Client.Windows.IWindowsFormInterface LForm = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
+			using (Frontend.Client.Windows.IWindowsFormInterface form = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
 			{
-				Dataphoria.FrontendSession.CreateHost().Load(ViewDocument(), LForm);
-				LForm.MainSource.Filter = GetFilter();
-				LForm.HostNode.Open();
-				LForm.ShowModal(Frontend.Client.FormMode.None);
+				Dataphoria.FrontendSession.CreateHost().Load(ViewDocument(), form);
+				form.MainSource.Filter = GetFilter();
+				form.HostNode.Open();
+				form.ShowModal(Frontend.Client.FormMode.None);
 			}
 		}
 
-		private void ViewClicked(object ASender, EventArgs AArgs)
+		private void ViewClicked(object sender, EventArgs args)
 		{
 			View();
 		}
@@ -225,10 +205,10 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 	{
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = base.GetContextMenu();
-			LMenu.MenuItems.Add(0, new MenuItem(Strings.ObjectTree_EditMenuText, new EventHandler(EditClicked), Shortcut.F2));
-			LMenu.MenuItems.Add(0, new MenuItem(Strings.ObjectTree_DeleteMenuText, new EventHandler(DeleteClicked), Shortcut.Del));
-			return LMenu;
+			ContextMenu menu = base.GetContextMenu();
+			menu.MenuItems.Add(0, new MenuItem(Strings.ObjectTree_EditMenuText, new EventHandler(EditClicked), Shortcut.F2));
+			menu.MenuItems.Add(0, new MenuItem(Strings.ObjectTree_DeleteMenuText, new EventHandler(DeleteClicked), Shortcut.Del));
+			return menu;
 		}
 
 		protected virtual string EditDocument()
@@ -241,70 +221,70 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return String.Empty;
 		}
 		
-		private string FNewText;
+		private string _newText;
 		
 		protected virtual string KeyColumnName()
 		{
 			return null;
 		}
 
-		private void EditDataViewOnValidate(object ASender, EventArgs AArgs)
+		private void EditDataViewOnValidate(object sender, EventArgs args)
 		{
 			string AKey = KeyColumnName();
 			if (AKey != null)
-				FNewText = ((DAE.Client.DataView)ASender)[AKey].AsDisplayString;
+				_newText = ((DAE.Client.DataView)sender)[AKey].AsDisplayString;
 			else
-				FNewText = Text;
+				_newText = Text;
 		}
 
-		protected virtual void PrepareEditForm(Frontend.Client.Windows.IWindowsFormInterface AForm)
+		protected virtual void PrepareEditForm(Frontend.Client.Windows.IWindowsFormInterface form)
 		{
-			AForm.MainSource.Filter = GetFilter();
+			form.MainSource.Filter = GetFilter();
 		}
 
 		public virtual void Edit()
 		{
-			using (Frontend.Client.Windows.IWindowsFormInterface LForm = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
+			using (Frontend.Client.Windows.IWindowsFormInterface form = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
 			{
-				Dataphoria.FrontendSession.CreateHost().Load(EditDocument(), LForm);
-				PrepareEditForm(LForm);
-				LForm.HostNode.Open();
-				LForm.MainSource.DataView.OnValidate += new EventHandler(EditDataViewOnValidate);
-				if (LForm.ShowModal(Frontend.Client.FormMode.Edit) != DialogResult.OK)
+				Dataphoria.FrontendSession.CreateHost().Load(EditDocument(), form);
+				PrepareEditForm(form);
+				form.HostNode.Open();
+				form.MainSource.DataView.OnValidate += new EventHandler(EditDataViewOnValidate);
+				if (form.ShowModal(Frontend.Client.FormMode.Edit) != DialogResult.OK)
 					throw new AbortException();
-				if (FNewText != Text.Trim())
-					NameChanged(FNewText);
+				if (_newText != Text.Trim())
+					NameChanged(_newText);
 			}
 		}
 
-		protected virtual void NameChanged(string ANewName)
+		protected virtual void NameChanged(string newName)
 		{
-			ListNode LParent = ParentList;
+			ListNode parent = ParentList;
 			Parent.Nodes.Remove(this);
 			UpdateText();
-			LParent.AddNode(this);
+			parent.AddNode(this);
 			TreeView.SelectedNode = this;
 		}
 
-		private void EditClicked(object ASender, EventArgs AArgs)
+		private void EditClicked(object sender, EventArgs args)
 		{
 			Edit();
 		}
 		
 		public virtual void Delete()
 		{
-			using (Frontend.Client.Windows.IWindowsFormInterface LForm = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
+			using (Frontend.Client.Windows.IWindowsFormInterface form = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
 			{
-				Dataphoria.FrontendSession.CreateHost().Load(DeleteDocument(), LForm);
-				LForm.MainSource.Filter = GetFilter();
-				LForm.HostNode.Open();
-				if (LForm.ShowModal(Frontend.Client.FormMode.Delete) != DialogResult.OK)
+				Dataphoria.FrontendSession.CreateHost().Load(DeleteDocument(), form);
+				form.MainSource.Filter = GetFilter();
+				form.HostNode.Open();
+				if (form.ShowModal(Frontend.Client.FormMode.Delete) != DialogResult.OK)
 					throw new AbortException();
 			}
 			Remove();
 		}
 
-		private void DeleteClicked(object ASender, EventArgs AArgs)
+		private void DeleteClicked(object sender, EventArgs args)
 		{
 			Delete();
 		}
@@ -312,82 +292,82 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 	public abstract class SchemaListNode : ListNode
 	{
-		protected const string CSchemaListFilter = 
+		protected const string SchemaListFilter = 
 			@"
 				where (Library_Name = ALibraryName) 
 				where (AShowGenerated or not(IsGenerated)) 
 					and (AShowSystem or not(IsSystem))
 			";
 
-		public SchemaListNode(string ALibraryName)
+		public SchemaListNode(string libraryName)
 		{
-			FLibraryName = ALibraryName;
+			_libraryName = libraryName;
 		}
 
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = base.GetContextMenu();
-			MenuItem LMenuItem = new MenuItem(Strings.ObjectTree_ShowGeneratedObjects, new EventHandler(ShowGeneratedObjectsClicked));
-			LMenuItem.Checked = false;
-			LMenu.MenuItems.Add(0, LMenuItem);
-			LMenuItem = new MenuItem(Strings.ObjectTree_ShowSystemObjects, new EventHandler(ShowSystemObjectsClicked));
-			LMenuItem.Checked = true;
-			LMenu.MenuItems.Add(1, LMenuItem);
-			LMenu.MenuItems.Add(2, new MenuItem("-"));
-			return LMenu;
+			ContextMenu menu = base.GetContextMenu();
+			MenuItem menuItem = new MenuItem(Strings.ObjectTree_ShowGeneratedObjects, new EventHandler(ShowGeneratedObjectsClicked));
+			menuItem.Checked = false;
+			menu.MenuItems.Add(0, menuItem);
+			menuItem = new MenuItem(Strings.ObjectTree_ShowSystemObjects, new EventHandler(ShowSystemObjectsClicked));
+			menuItem.Checked = true;
+			menu.MenuItems.Add(1, menuItem);
+			menu.MenuItems.Add(2, new MenuItem("-"));
+			return menu;
 		}
 
-		private bool FShowGeneratedObjects;
-		public bool ShowGeneratedObjects { get { return FShowGeneratedObjects; } }
+		private bool _showGeneratedObjects;
+		public bool ShowGeneratedObjects { get { return _showGeneratedObjects; } }
 		
-		private bool FShowSystemObjects = true;
-		public bool ShowSystemObjects { get { return FShowSystemObjects; } }
+		private bool _showSystemObjects = true;
+		public bool ShowSystemObjects { get { return _showSystemObjects; } }
 
 		protected override Alphora.Dataphor.DAE.Runtime.DataParams GetParams()
 		{
-			DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-			LParams.Add(DAE.Runtime.DataParam.Create(Dataphoria.UtilityProcess, "AShowGenerated", FShowGeneratedObjects));
-			LParams.Add(DAE.Runtime.DataParam.Create(Dataphoria.UtilityProcess, "AShowSystem", FShowSystemObjects));
-			LParams.Add(DAE.Runtime.DataParam.Create(Dataphoria.UtilityProcess, "ALibraryName", FLibraryName));
-			return LParams;
+			DAE.Runtime.DataParams paramsValue = new DAE.Runtime.DataParams();
+			paramsValue.Add(DAE.Runtime.DataParam.Create(Dataphoria.UtilityProcess, "AShowGenerated", _showGeneratedObjects));
+			paramsValue.Add(DAE.Runtime.DataParam.Create(Dataphoria.UtilityProcess, "AShowSystem", _showSystemObjects));
+			paramsValue.Add(DAE.Runtime.DataParam.Create(Dataphoria.UtilityProcess, "ALibraryName", _libraryName));
+			return paramsValue;
 		}
 		
-		private void ShowGeneratedObjectsClicked(object ASender, EventArgs AArgs)
+		private void ShowGeneratedObjectsClicked(object sender, EventArgs args)
 		{
-			MenuItem LMenuItem = (MenuItem)ASender;
-			LMenuItem.Checked = !LMenuItem.Checked;
-			FShowGeneratedObjects = LMenuItem.Checked;
+			MenuItem menuItem = (MenuItem)sender;
+			menuItem.Checked = !menuItem.Checked;
+			_showGeneratedObjects = menuItem.Checked;
 			Refresh();
 		}
 		
-		private void ShowSystemObjectsClicked(object ASender, EventArgs AArgs)
+		private void ShowSystemObjectsClicked(object sender, EventArgs args)
 		{
-			MenuItem LMenuItem = (MenuItem)ASender;
-			LMenuItem.Checked = !LMenuItem.Checked;
-			FShowSystemObjects = LMenuItem.Checked;
+			MenuItem menuItem = (MenuItem)sender;
+			menuItem.Checked = !menuItem.Checked;
+			_showSystemObjects = menuItem.Checked;
 			Refresh();
 		}
 		
-		private string FLibraryName;
+		private string _libraryName;
 		public string LibraryName
 		{
-			get { return FLibraryName; }
+			get { return _libraryName; }
 		}
 
-		public string QualifyObjectName(string AName)
+		public string QualifyObjectName(string name)
 		{
-			if (AName.StartsWith("."))
-				return AName;
+			if (name.StartsWith("."))
+				return name;
 			else
-				return FLibraryName + "." + AName;
+				return _libraryName + "." + name;
 		}
 
-		public string UnqualifyObjectName(string AName)
+		public string UnqualifyObjectName(string name)
 		{
-			if (AName.IndexOf(FLibraryName) == 0)
-				return AName.Substring(FLibraryName.Length + 1);
+			if (name.IndexOf(_libraryName) == 0)
+				return name.Substring(_libraryName.Length + 1);
 			else
-				return "." + AName;
+				return "." + name;
 		}
 	}
 
@@ -395,70 +375,70 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 	{
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = base.GetContextMenu();
-			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_DropMenuText, new EventHandler(DropClicked), Shortcut.Del));
-			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_ViewDependencies, new EventHandler(ViewDependenciesClicked)));
-			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_ViewDependents, new EventHandler(ViewDependentsClicked)));
-			LMenu.MenuItems.Add(new MenuItem("-"));
-			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitCreateScriptMenuText, new EventHandler(EmitCreateScriptClicked)));
-			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitDropScriptMenuText, new EventHandler(EmitDropScriptClicked)));
-			return LMenu;
+			ContextMenu menu = base.GetContextMenu();
+			menu.MenuItems.Add(new MenuItem(Strings.ObjectTree_DropMenuText, new EventHandler(DropClicked), Shortcut.Del));
+			menu.MenuItems.Add(new MenuItem(Strings.ObjectTree_ViewDependencies, new EventHandler(ViewDependenciesClicked)));
+			menu.MenuItems.Add(new MenuItem(Strings.ObjectTree_ViewDependents, new EventHandler(ViewDependentsClicked)));
+			menu.MenuItems.Add(new MenuItem("-"));
+			menu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitCreateScriptMenuText, new EventHandler(EmitCreateScriptClicked)));
+			menu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitDropScriptMenuText, new EventHandler(EmitDropScriptClicked)));
+			return menu;
 		}
 
-		private SchemaListNode FParentSchemaList;
+		private SchemaListNode _parentSchemaList;
 		public SchemaListNode ParentSchemaList
 		{
-			get { return FParentSchemaList; }
-			set { FParentSchemaList = value; }
+			get { return _parentSchemaList; }
+			set { _parentSchemaList = value; }
 		}
 
-		private string FObjectName;
+		private string _objectName;
 		public string ObjectName
 		{
-			get { return FObjectName; }
+			get { return _objectName; }
 			set
 			{
-				FObjectName = value;
+				_objectName = value;
 				UpdateText();
 			}
 		}
 
-		public override bool IsEqual(DAE.Runtime.Data.Row ARow)
+		public override bool IsEqual(DAE.Runtime.Data.Row row)
 		{
-			return ((string)ARow["Name"] == FObjectName);
+			return ((string)row["Name"] == _objectName);
 		}
 
 		public override string GetFilter()
 		{
-			return String.Format("Name = '{0}'", FObjectName);
+			return String.Format("Name = '{0}'", _objectName);
 		}
 
 		protected override void UpdateText()
 		{
-			Text = ParentSchemaList.UnqualifyObjectName(FObjectName);
+			Text = ParentSchemaList.UnqualifyObjectName(_objectName);
 		}
 
-		private void ViewDependentsClicked(object ASender, EventArgs AArgs)
+		private void ViewDependentsClicked(object sender, EventArgs args)
 		{
 			ViewDependents();
 		}
 		
-		private void ViewDependenciesClicked(object ASender, EventArgs AArgs)
+		private void ViewDependenciesClicked(object sender, EventArgs args)
 		{
 			ViewDependencies();
 		}
 
-		private void DropClicked(object ASender, EventArgs AArgs)
+		private void DropClicked(object sender, EventArgs args)
 		{
 			Drop();
 		}
 
-		private void EmitCreateScriptClicked(object ASender, EventArgs AArgs)
+		private void EmitCreateScriptClicked(object sender, EventArgs args)
 		{
 			EmitCreate();
 		}
 
-		private void EmitDropScriptClicked(object ASender, EventArgs AArgs)
+		private void EmitDropScriptClicked(object sender, EventArgs args)
 		{
 			EmitDrop();
 		}
@@ -466,7 +446,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		protected virtual void Drop()
 		{
 			// Confirm the deletion
-			Frontend.Client.Windows.IWindowsFormInterface LForm = 
+			Frontend.Client.Windows.IWindowsFormInterface form = 
 				Dataphoria.FrontendSession.LoadForm
 				(
 					null,
@@ -474,8 +454,8 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 				);
 			try
 			{
-				Frontend.Client.ISource LSource = (Frontend.Client.ISource)LForm.FindNode("Dependents");
-				LSource.Expression = 
+				Frontend.Client.ISource source = (Frontend.Client.ISource)form.FindNode("Dependents");
+				source.Expression = 
 					String.Format
 					(
 						@"	
@@ -486,18 +466,18 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 						",
 						ObjectName
 					);
-				LSource.Enabled = true;
-				if (LForm.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
+				source.Enabled = true;
+				if (form.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
 					throw new AbortException();
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 
 			// Emit and execute the drop script
-			using (DAE.Runtime.Data.Scalar LScript = (DAE.Runtime.Data.Scalar)Dataphoria.EvaluateQuery(GetScriptDropExpression()))
-				Dataphoria.ExecuteScript(LScript.AsString);
+			using (DAE.Runtime.Data.Scalar script = (DAE.Runtime.Data.Scalar)Dataphoria.EvaluateQuery(GetScriptDropExpression()))
+				Dataphoria.ExecuteScript(script.AsString);
 
 			ParentList.Refresh();
 		}
@@ -519,7 +499,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected virtual void ViewDependents()
 		{
-			Frontend.Client.Windows.IWindowsFormInterface LForm = 
+			Frontend.Client.Windows.IWindowsFormInterface form = 
 				Dataphoria.FrontendSession.LoadForm
 				(
 					null,
@@ -550,18 +530,18 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 				);
 			try
 			{
-				if (LForm.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
+				if (form.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
 					throw new AbortException();
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 		}
 
 		protected virtual void ViewDependencies()
 		{
-			Frontend.Client.Windows.IWindowsFormInterface LForm = 
+			Frontend.Client.Windows.IWindowsFormInterface form = 
 				Dataphoria.FrontendSession.LoadForm
 				(
 					null,
@@ -592,12 +572,12 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 				);
 			try
 			{
-				if (LForm.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
+				if (form.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
 					throw new AbortException();
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 		}
 

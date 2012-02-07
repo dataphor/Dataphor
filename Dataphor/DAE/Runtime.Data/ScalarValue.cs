@@ -16,42 +16,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// </remarks>
 	public class Scalar : DataValue
 	{
-		public Scalar(IValueManager AManager, Schema.IScalarType ADataType, object AValue) : base(AManager, ADataType)
+		public Scalar(IValueManager manager, Schema.IScalarType dataType, object tempValue) : base(manager, dataType)
 		{
-			FValue = AValue;
-			FIsNative = true;
+			_value = tempValue;
+			_isNative = true;
 		}
 		
-		public Scalar(IValueManager AManager, Schema.IScalarType ADataType) : base(AManager, ADataType)
+		public Scalar(IValueManager manager, Schema.IScalarType dataType) : base(manager, dataType)
 		{
-			FStreamID = AManager.StreamManager.Allocate();
+			_streamID = manager.StreamManager.Allocate();
 			ValuesOwned = true;
 		}
 
-		public Scalar(IValueManager AManager, Schema.IScalarType ADataType, StreamID AStreamID) : base(AManager, ADataType)
+		public Scalar(IValueManager manager, Schema.IScalarType dataType, StreamID streamID) : base(manager, dataType)
 		{
-			FStreamID = AStreamID;
+			_streamID = streamID;
 			ValuesOwned = false;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			if (!IsNative && (StreamID != StreamID.Null))
 			{
 				if (ValuesOwned)
 					Manager.StreamManager.Deallocate(StreamID);
-				FStreamID = StreamID.Null;
+				_streamID = StreamID.Null;
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		private bool FIsNative;		
-		private StreamID FStreamID;
-		private object FValue;
+		private bool _isNative;		
+		private StreamID _streamID;
+		private object _value;
 
 		public new Schema.ScalarType DataType { get { return (Schema.ScalarType)base.DataType; } }
 
-		public override bool IsNative { get { return FIsNative; } }
+		public override bool IsNative { get { return _isNative; } }
 
 		protected void CheckNonNative()
 		{
@@ -61,19 +61,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected virtual object Value
 		{
-			get { return FIsNative ? FValue : FStreamID; }
+			get { return _isNative ? _value : _streamID; }
 			set
 			{
-				FIsNative = !(value is StreamID);
-				if (!FIsNative)
+				_isNative = !(value is StreamID);
+				if (!_isNative)
 				{
-					FStreamID = (StreamID)value;
-					FValue = null;
+					_streamID = (StreamID)value;
+					_value = null;
 				}
 				else
 				{
-					FStreamID = StreamID.Null;
-					FValue = value;
+					_streamID = StreamID.Null;
+					_value = value;
 				}
 			}
 		}
@@ -120,22 +120,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				if (StreamID == StreamID.Null)
 					throw new RuntimeException(RuntimeException.Codes.NilEncountered);
 				
-				Stream LStream = OpenStream();
+				Stream stream = OpenStream();
 				try
 				{
-					Conveyor LConveyor = Manager.GetConveyor(DataType);
-					if (LConveyor.IsStreaming)
-						return LConveyor.Read(LStream);
+					Conveyor conveyor = Manager.GetConveyor(DataType);
+					if (conveyor.IsStreaming)
+						return conveyor.Read(stream);
 					else
 					{
-						byte[] LValue = new byte[(int)LStream.Length];
-						LStream.Read(LValue, 0, LValue.Length);
-						return LConveyor.Read(LValue, 0);
+						byte[] tempValue = new byte[(int)stream.Length];
+						stream.Read(tempValue, 0, tempValue.Length);
+						return conveyor.Read(tempValue, 0);
 					}
 				}
 				finally
 				{
-					LStream.Close();
+					stream.Close();
 				}
 			}
 			set
@@ -147,23 +147,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					if (StreamID == StreamID.Null)
 						StreamID = Manager.StreamManager.Allocate();
 						
-					Stream LStream = OpenStream();
+					Stream stream = OpenStream();
 					try
 					{
-						LStream.SetLength(0);
-						Conveyor LConveyor = Manager.GetConveyor(DataType);
-						if (LConveyor.IsStreaming)
-							LConveyor.Write(value, LStream);
+						stream.SetLength(0);
+						Conveyor conveyor = Manager.GetConveyor(DataType);
+						if (conveyor.IsStreaming)
+							conveyor.Write(value, stream);
 						else
 						{
-							byte[] LValue = new byte[LConveyor.GetSize(value)];
-							LConveyor.Write(value, LValue, 0);
-							LStream.Write(LValue, 0, LValue.Length);
+							byte[] tempValue = new byte[conveyor.GetSize(value)];
+							conveyor.Write(value, tempValue, 0);
+							stream.Write(tempValue, 0, tempValue.Length);
 						}
 					}
 					finally
 					{
-						LStream.Close();
+						stream.Close();
 					}
 				}
 			}
@@ -200,14 +200,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public bool GetAsBoolean(string ARepresentationName)
+		public bool GetAsBoolean(string representationName)
 		{
-			return (bool)Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (bool)Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsBoolean(string ARepresentationName, bool AValue)
+		public void SetAsBoolean(string representationName, bool tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public byte AsByte
@@ -241,14 +241,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public byte GetAsByte(string ARepresentationName)
+		public byte GetAsByte(string representationName)
 		{
-			return (byte)Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (byte)Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsByte(string ARepresentationName, byte AValue)
+		public void SetAsByte(string representationName, byte tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public short AsInt16
@@ -282,14 +282,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public short GetAsInt16(string ARepresentationName)
+		public short GetAsInt16(string representationName)
 		{
-			return (short)Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (short)Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsInt16(string ARepresentationName, short AValue)
+		public void SetAsInt16(string representationName, short tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public int AsInt32
@@ -323,14 +323,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public int GetAsInt32(string ARepresentationName)
+		public int GetAsInt32(string representationName)
 		{
-			return (int)Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (int)Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsInt32(string ARepresentationName, int AValue)
+		public void SetAsInt32(string representationName, int tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public long AsInt64
@@ -364,14 +364,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public long GetAsInt64(string ARepresentationName)
+		public long GetAsInt64(string representationName)
 		{
-			return (long)Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (long)Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsInt64(string ARepresentationName, long AValue)
+		public void SetAsInt64(string representationName, long tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public decimal AsDecimal
@@ -405,14 +405,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public decimal GetAsDecimal(string ARepresentationName)
+		public decimal GetAsDecimal(string representationName)
 		{
-			return (decimal)Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (decimal)Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsDecimal(string ARepresentationName, decimal AValue)
+		public void SetAsDecimal(string representationName, decimal tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public TimeSpan AsTimeSpan
@@ -446,14 +446,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public TimeSpan GetAsTimeSpan(string ARepresentationName)
+		public TimeSpan GetAsTimeSpan(string representationName)
 		{
-			return (TimeSpan)Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (TimeSpan)Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsTimeSpan(string ARepresentationName, TimeSpan AValue)
+		public void SetAsTimeSpan(string representationName, TimeSpan tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public DateTime AsDateTime
@@ -487,14 +487,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public DateTime GetAsDateTime(string ARepresentationName)
+		public DateTime GetAsDateTime(string representationName)
 		{
-			return (DateTime)Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (DateTime)Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsDateTime(string ARepresentationName, DateTime AValue)
+		public void SetAsDateTime(string representationName, DateTime tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public Guid AsGuid
@@ -528,14 +528,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public Guid GetAsGuid(string ARepresentationName)
+		public Guid GetAsGuid(string representationName)
 		{
-			return (Guid)Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (Guid)Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsGuid(string ARepresentationName, Guid AValue)
+		public void SetAsGuid(string representationName, Guid tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public String AsString
@@ -569,14 +569,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public string GetAsString(string ARepresentationName)
+		public string GetAsString(string representationName)
 		{
-			return (string)Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (string)Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsString(string ARepresentationName, string AValue)
+		public void SetAsString(string representationName, string tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public string AsDisplayString
@@ -616,14 +616,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public Exception GetAsException(string ARepresentationName)
+		public Exception GetAsException(string representationName)
 		{
-			return (Exception)Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (Exception)Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsException(string ARepresentationName, Exception AValue)
+		public void SetAsException(string representationName, Exception tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public byte[] AsByteArray
@@ -639,16 +639,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						return (byte[])Value;
 					}
 
-					Stream LStream = OpenStream();
+					Stream stream = OpenStream();
 					try
 					{
-						byte[] LValue = new byte[LStream.Length];
-						LStream.Read(LValue, 0, (int)LStream.Length);
-						return LValue;
+						byte[] tempValue = new byte[stream.Length];
+						stream.Read(tempValue, 0, (int)stream.Length);
+						return tempValue;
 					}
 					finally
 					{
-						LStream.Close();
+						stream.Close();
 					}
 				}
 				
@@ -662,14 +662,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						Value = value;
 					else
 					{
-						Stream LStream = OpenStream();
+						Stream stream = OpenStream();
 						try
 						{
-							LStream.Write(value, 0, value.Length);
+							stream.Write(value, 0, value.Length);
 						}
 						finally
 						{
-							LStream.Close();
+							stream.Close();
 						}
 					}
 				}
@@ -678,14 +678,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public byte[] GetAsByteArray(string ARepresentationName)
+		public byte[] GetAsByteArray(string representationName)
 		{
-			return (byte[])Manager.GetAsNative(DataType.Representations[ARepresentationName], Value);
+			return (byte[])Manager.GetAsNative(DataType.Representations[representationName], Value);
 		}
 		
-		public void SetAsByteArray(string ARepresentationName, byte[] AValue)
+		public void SetAsByteArray(string representationName, byte[] tempValue)
 		{
-			Value = Manager.SetAsNative(DataType.Representations[ARepresentationName], Value, AValue);
+			Value = Manager.SetAsNative(DataType.Representations[representationName], Value, tempValue);
 		}
 
 		public string AsBase64String
@@ -694,53 +694,53 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			set { AsByteArray = Convert.FromBase64String(value); }
 		}
 		
-		private Stream FWriteStream; // saves the write stream between the GetPhysicalSize and WriteToPhysical calls
-		private DataValue FWriteValue; // saves the row instantiated to write the compound value if this is a compound scalar
+		private Stream _writeStream; // saves the write stream between the GetPhysicalSize and WriteToPhysical calls
+		private DataValue _writeValue; // saves the row instantiated to write the compound value if this is a compound scalar
 		
-		public override int GetPhysicalSize(bool AExpandStreams)
+		public override int GetPhysicalSize(bool expandStreams)
 		{
-			int LSize = 1; // Scalar header
+			int size = 1; // Scalar header
 			if (!IsNil)
 			{
 				if (IsNative)
 				{
 					if (DataType.IsCompound)
 					{
-						FWriteValue = DataValue.FromNative(Manager, DataType.CompoundRowType, Value);
-						return LSize + FWriteValue.GetPhysicalSize(AExpandStreams);
+						_writeValue = DataValue.FromNative(Manager, DataType.CompoundRowType, Value);
+						return size + _writeValue.GetPhysicalSize(expandStreams);
 					}
 					else
 					{
-						Streams.Conveyor LConveyor = Manager.GetConveyor(DataType);
-						if (LConveyor.IsStreaming)
+						Streams.Conveyor conveyor = Manager.GetConveyor(DataType);
+						if (conveyor.IsStreaming)
 						{
-							FWriteStream = new MemoryStream(64);
-							LConveyor.Write(Value, FWriteStream);
-							return LSize + (int)FWriteStream.Length;
+							_writeStream = new MemoryStream(64);
+							conveyor.Write(Value, _writeStream);
+							return size + (int)_writeStream.Length;
 						}
-						return LSize + LConveyor.GetSize(Value);
+						return size + conveyor.GetSize(Value);
 					}
 				}
 					
-				if (AExpandStreams)
+				if (expandStreams)
 				{
-					FWriteStream = Manager.StreamManager.Open(StreamID, LockMode.Exclusive);
-					return LSize + (int)FWriteStream.Length;
+					_writeStream = Manager.StreamManager.Open(StreamID, LockMode.Exclusive);
+					return size + (int)_writeStream.Length;
 				}
 
-				return LSize + StreamID.CSizeOf;
+				return size + StreamID.CSizeOf;
 			}
-			return LSize;
+			return size;
 		}
 
-		public override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
+		public override void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
 		{
 			// Write scalar header
-			byte LHeader = (byte)(IsNil ? 0 : 1);
-			LHeader |= (byte)(IsNative ? 2 : 0);
-			LHeader |= (byte)(AExpandStreams ? 4 : 0);
-			ABuffer[AOffset] = LHeader;
-			AOffset++;
+			byte header = (byte)(IsNil ? 0 : 1);
+			header |= (byte)(IsNative ? 2 : 0);
+			header |= (byte)(expandStreams ? 4 : 0);
+			buffer[offset] = header;
+			offset++;
 
 			if (!IsNil)
 			{
@@ -748,89 +748,89 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				{
 					if (DataType.IsCompound)
 					{
-						FWriteValue.WriteToPhysical(ABuffer, AOffset, AExpandStreams);
-						FWriteValue.Dispose();
-						FWriteValue = null;
+						_writeValue.WriteToPhysical(buffer, offset, expandStreams);
+						_writeValue.Dispose();
+						_writeValue = null;
 					}
 					else
 					{
-						Streams.Conveyor LConveyor = Manager.GetConveyor(DataType);
-						if (LConveyor.IsStreaming)
+						Streams.Conveyor conveyor = Manager.GetConveyor(DataType);
+						if (conveyor.IsStreaming)
 						{
-							FWriteStream.Position = 0;
-							FWriteStream.Read(ABuffer, AOffset, (int)FWriteStream.Length);
-							FWriteStream.Close();
+							_writeStream.Position = 0;
+							_writeStream.Read(buffer, offset, (int)_writeStream.Length);
+							_writeStream.Close();
 						}
 						else
-							LConveyor.Write(Value, ABuffer, AOffset);
+							conveyor.Write(Value, buffer, offset);
 					}
 				}
 				else
 				{
-					if (AExpandStreams)
+					if (expandStreams)
 					{
-						FWriteStream.Position = 0;
-						FWriteStream.Read(ABuffer, AOffset, (int)FWriteStream.Length);
-						FWriteStream.Close();
+						_writeStream.Position = 0;
+						_writeStream.Read(buffer, offset, (int)_writeStream.Length);
+						_writeStream.Close();
 					}
 					else
-						((StreamID)Value).Write(ABuffer, AOffset);
+						((StreamID)Value).Write(buffer, offset);
 				}
 			}
 		}
 
-		public override void ReadFromPhysical(byte[] ABuffer, int AOffset)
+		public override void ReadFromPhysical(byte[] buffer, int offset)
 		{
 			// Clear current value
 			if (ValuesOwned && !IsNative && (StreamID != StreamID.Null))
 				Manager.StreamManager.Deallocate(StreamID);
 
 			// Read scalar header
-			byte LHeader = ABuffer[AOffset];
-			AOffset++;
-			if ((LHeader & 1) != 0) // if not nil
+			byte header = buffer[offset];
+			offset++;
+			if ((header & 1) != 0) // if not nil
 			{
-				if ((LHeader & 2) != 0)
+				if ((header & 2) != 0)
 				{
 					if (DataType.IsCompound)
 					{
-						using (Row LRow = (Row)DataValue.FromPhysical(Manager, DataType.CompoundRowType, ABuffer, AOffset))
+						using (Row row = (Row)DataValue.FromPhysical(Manager, DataType.CompoundRowType, buffer, offset))
 						{
-							Value = LRow.AsNative;
-							LRow.ValuesOwned = false;
+							Value = row.AsNative;
+							row.ValuesOwned = false;
 						}
 					}
 					else
 					{
-						Streams.Conveyor LConveyor = Manager.GetConveyor(DataType);
-						if (LConveyor.IsStreaming)
+						Streams.Conveyor conveyor = Manager.GetConveyor(DataType);
+						if (conveyor.IsStreaming)
 						{
-							Stream LStream = new MemoryStream(ABuffer, AOffset, ABuffer.Length - AOffset, false, true);
-							Value = LConveyor.Read(LStream);
-							LStream.Close();
+							Stream stream = new MemoryStream(buffer, offset, buffer.Length - offset, false, true);
+							Value = conveyor.Read(stream);
+							stream.Close();
 						}
 						else
 						{
-							Value = LConveyor.Read(ABuffer, AOffset);
+							Value = conveyor.Read(buffer, offset);
 						}
 					}
 				}
 				else
 				{
-					if ((LHeader & 4) != 0) // if expanded form
+					if ((header & 4) != 0) // if expanded form
 					{
 						Value = Manager.StreamManager.Allocate();
-						Stream LStream = Manager.StreamManager.Open(StreamID, LockMode.Exclusive);
-						LStream.Write(ABuffer, AOffset, ABuffer.Length - AOffset);
-						LStream.Close();
+						Stream stream = Manager.StreamManager.Open(StreamID, LockMode.Exclusive);
+						stream.Write(buffer, offset, buffer.Length - offset);
+						stream.Close();
 					}
 					else
-						Value = StreamID.Read(ABuffer, AOffset);
+						Value = StreamID.Read(buffer, offset);
 				}
 			}
 			else
 			{
-				if ((LHeader & 2) != 0)
+				if ((header & 2) != 0)
 					Value = null;
 				else
 					Value = StreamID.Null;
@@ -842,27 +842,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			if (IsNative)
 			{
-				byte[] LValue = 
+				byte[] tempValue = 
 					(DataType.NativeType == NativeAccessors.AsByteArray.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsByteArray, true)
 						? (byte[])Value
 						: (byte[])Manager.GetAsNative(DataType.GetRepresentation(NativeAccessors.AsByteArray), this);
-				return new MemoryStream(LValue, 0, LValue.Length, false, true);
+				return new MemoryStream(tempValue, 0, tempValue.Length, false, true);
 			}
 			return Manager.StreamManager.Open(StreamID, LockMode.Exclusive);
 		}
 		
-		public override Stream OpenStream(string ARepresentationName)
+		public override Stream OpenStream(string representationName)
 		{
-			return Manager.GetAsDataValue(DataType.Representations[ARepresentationName], AsNative).OpenStream();
+			return Manager.GetAsDataValue(DataType.Representations[representationName], AsNative).OpenStream();
 		}
 
-		public override object CopyNativeAs(Schema.IDataType ADataType)
+		public override object CopyNativeAs(Schema.IDataType dataType)
 		{
 			if (IsNative)
 			{
-				ICloneable LCloneable = Value as ICloneable;
-				if (LCloneable != null)
-					return LCloneable.Clone();
+				ICloneable cloneable = Value as ICloneable;
+				if (cloneable != null)
+					return cloneable.Clone();
 					
 				if (DataType.IsCompound)
 					return DataValue.CopyNative(Manager, DataType.CompoundRowType, Value);
@@ -884,7 +884,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// <summary>A scalar value which is currently contained inside a native row or list.</summary>	
 	public abstract class InternedScalar : Scalar
 	{
-		public InternedScalar(IValueManager AManager, Schema.IScalarType ADataType) : base(AManager, ADataType, null)
+		public InternedScalar(IValueManager manager, Schema.IScalarType dataType) : base(manager, dataType, null)
 		{
 			ValuesOwned = false;
 		}
@@ -895,42 +895,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class RowInternedScalar : InternedScalar
 	{
-		public RowInternedScalar(IValueManager AManager, Schema.IScalarType ADataType, NativeRow ANativeRow, int AIndex) : base(AManager, ADataType)
+		public RowInternedScalar(IValueManager manager, Schema.IScalarType dataType, NativeRow nativeRow, int index) : base(manager, dataType)
 		{
-			FNativeRow = ANativeRow;
-			FIndex = AIndex;
+			_nativeRow = nativeRow;
+			_index = index;
 		}
 		
-		private NativeRow FNativeRow;
-		private int FIndex;
+		private NativeRow _nativeRow;
+		private int _index;
 		
 		protected override object Value
 		{
-			get { return FNativeRow.Values[FIndex]; }
+			get { return _nativeRow.Values[_index]; }
 			set 
 			{ 
-				FNativeRow.Values[FIndex] = value; 
-				if (FNativeRow.ModifiedFlags != null)
-					FNativeRow.ModifiedFlags[FIndex] = true;
+				_nativeRow.Values[_index] = value; 
+				if (_nativeRow.ModifiedFlags != null)
+					_nativeRow.ModifiedFlags[_index] = true;
 			}
 		}
 	}
 	
 	public class ListInternedScalar : InternedScalar
 	{
-		public ListInternedScalar(IValueManager AManager, Schema.IScalarType ADataType, NativeList ANativeList, int AIndex) : base(AManager, ADataType)
+		public ListInternedScalar(IValueManager manager, Schema.IScalarType dataType, NativeList nativeList, int index) : base(manager, dataType)
 		{
-			FNativeList = ANativeList;
-			FIndex = AIndex;
+			_nativeList = nativeList;
+			_index = index;
 		}
 		
-		private NativeList FNativeList;
-		private int FIndex;
+		private NativeList _nativeList;
+		private int _index;
 		
 		protected override object Value
 		{
-			get { return FNativeList.Values[FIndex]; }
-			set { FNativeList.Values[FIndex] = value; }
+			get { return _nativeList.Values[_index]; }
+			set { _nativeList.Values[_index] = value; }
 		}
 	}
 }

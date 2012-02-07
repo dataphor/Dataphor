@@ -10,36 +10,36 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	/// <summary> Implements a read only observable that invokes the change notifications on the main thread. </summary>
 	public class DispatchedReadOnlyCollection<T> : ReadOnlyCollection<T>, INotifyCollectionChanged, INotifyPropertyChanged
 	{
-		public DispatchedReadOnlyCollection(ObservableCollection<T> AList) : base(AList)
+		public DispatchedReadOnlyCollection(ObservableCollection<T> list) : base(list)
 		{
-			AList.CollectionChanged += HandleCollectionChanged;
-			((INotifyPropertyChanged)AList).PropertyChanged += HandlePropertyChanged;
+			list.CollectionChanged += HandleCollectionChanged;
+			((INotifyPropertyChanged)list).PropertyChanged += HandlePropertyChanged;
 		}
 
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-		private void HandleCollectionChanged(object ASender, NotifyCollectionChangedEventArgs AArgs)
+		private void HandleCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
 		{
-			OnCollectionChanged(AArgs);
+			OnCollectionChanged(args);
 		}
 
-		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs AArgs)
+		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs args)
 		{
 			if (CollectionChanged != null)
-				Silverlight.Session.DispatcherInvoke(new NotifyCollectionChangedEventHandler(CollectionChanged), this, AArgs);
+				Silverlight.Session.DispatcherInvoke(new NotifyCollectionChangedEventHandler(CollectionChanged), this, args);
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		private void HandlePropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
+		private void HandlePropertyChanged(object sender, PropertyChangedEventArgs args)
 		{
-			OnPropertyChanged(AArgs);
+			OnPropertyChanged(args);
 		}
 
-		protected virtual void OnPropertyChanged(PropertyChangedEventArgs AArgs)
+		protected virtual void OnPropertyChanged(PropertyChangedEventArgs args)
 		{
 			if (PropertyChanged != null)
-				Silverlight.Session.DispatcherInvoke(new PropertyChangedEventHandler(PropertyChanged), this, AArgs);
+				Silverlight.Session.DispatcherInvoke(new PropertyChangedEventHandler(PropertyChanged), this, args);
 		}
 	}
 

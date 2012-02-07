@@ -106,20 +106,20 @@ namespace Alphora.Dataphor.DAE.Language
 
 		/// <summary> Ensures that the current TokenType is of the given type.  </summary>
 		/// <remarks> Will raise a <see cref="LexerException"/> if it is not. </remarks>
-		public void CheckType(TokenType AToken)
+		public void CheckType(TokenType token)
 		{
 			if (Type == TokenType.Error)
 				throw Error;
-			if (Type != AToken)
-				throw new LexerException(LexerException.Codes.TokenExpected, Enum.GetName(typeof(TokenType), AToken));
+			if (Type != token)
+				throw new LexerException(LexerException.Codes.TokenExpected, Enum.GetName(typeof(TokenType), token));
 		}
 
 		/// <summary> Ensures that the current TokenType is a symbol equal to the given symbol.  </summary>
 		/// <remarks> Will raise a <see cref="LexerException"/> if it is not. </remarks>
-		public void CheckSymbol(string ASymbol)
+		public void CheckSymbol(string symbol)
 		{
-			if ((Type != TokenType.Symbol) || !String.Equals(Token, ASymbol, StringComparison.Ordinal))
-				throw new LexerException(LexerException.Codes.SymbolExpected, ASymbol);
+			if ((Type != TokenType.Symbol) || !String.Equals(Token, symbol, StringComparison.Ordinal))
+				throw new LexerException(LexerException.Codes.SymbolExpected, symbol);
 		}
 	}
 
@@ -132,65 +132,65 @@ namespace Alphora.Dataphor.DAE.Language
     /// </remarks>
     public class Lexer
     {
-		private const int CLookAheadCount = 3;
+		private const int LookAheadCount = 3;
 
 		/// <remarks> It is an error to access the current TokenType until <see cref="NextToken"/> has been called. </remarks>
-        public Lexer(string AInput)
+        public Lexer(string input)
         {
-			FTokenizer = new Tokenizer(AInput);
-			for (int i = 0; i < CLookAheadCount; i++)
-				FTokens[i] = new LexerToken();
-			for (int i = 0; i < (CLookAheadCount - 1); i++)
+			_tokenizer = new Tokenizer(input);
+			for (int i = 0; i < LookAheadCount; i++)
+				_tokens[i] = new LexerToken();
+			for (int i = 0; i < (LookAheadCount - 1); i++)
 				if (!ReadNext(i))
 					break;
         }
 
-		private Tokenizer FTokenizer;
+		private Tokenizer _tokenizer;
 
 		/// <summary> Buffer of tokens (clock allocation). </summary>
-		private LexerToken[] FTokens = new LexerToken[CLookAheadCount];
+		private LexerToken[] _tokens = new LexerToken[LookAheadCount];
 		/// <summary> Current position within the token buffer of the current token. </summary>
 		/// <remarks> Initialized in the constructor to last position so that the lexer starts on a "crack". </remarks>
-		private int FCurrentIndex = CLookAheadCount - 1;
+		private int _currentIndex = LookAheadCount - 1;
 
 		/// <summary> Reads the next token into the specified location within the buffer. </summary>
 		/// <returns> True if the read token type is not EOF. </returns>
-		private bool ReadNext(int AIndex)
+		private bool ReadNext(int index)
 		{
-			LexerToken LToken = FTokens[AIndex];
+			LexerToken token = _tokens[index];
 			try
 			{
-				LToken.Type = FTokenizer.NextToken();
-				LToken.Token = FTokenizer.Token;
+				token.Type = _tokenizer.NextToken();
+				token.Token = _tokenizer.Token;
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				LToken.Type = TokenType.Error;
-				LToken.Error = LException;
+				token.Type = TokenType.Error;
+				token.Error = exception;
 			}
-			LToken.Line = FTokenizer.Line;
-			LToken.LinePos = FTokenizer.LinePos;
-			return (LToken.Type != TokenType.EOF) && (LToken.Type != TokenType.Error);
+			token.Line = _tokenizer.Line;
+			token.LinePos = _tokenizer.LinePos;
+			return (token.Type != TokenType.EOF) && (token.Type != TokenType.Error);
 		}
 
 		/// <summary> The token a specific number of tokens ahead of the current token. </summary>
-		public LexerToken this[int AIndex, bool ACheckActive]
+		public LexerToken this[int index, bool checkActive]
 		{
 			get
 			{
-				System.Diagnostics.Debug.Assert(AIndex < CLookAheadCount, "Lexer look ahead attempt exceeds maximum");
-				LexerToken LToken = FTokens[(FCurrentIndex + AIndex) % CLookAheadCount];
-				if (ACheckActive && (LToken.Type == TokenType.Unknown))
+				System.Diagnostics.Debug.Assert(index < LookAheadCount, "Lexer look ahead attempt exceeds maximum");
+				LexerToken token = _tokens[(_currentIndex + index) % LookAheadCount];
+				if (checkActive && (token.Type == TokenType.Unknown))
 					throw new LexerException(LexerException.Codes.NoActiveToken);
-				return LToken;
+				return token;
 			}
 		}
 
-		public LexerToken this[int AIndex]
+		public LexerToken this[int index]
 		{
 			get
 			{
-				return this[AIndex, true];
+				return this[index, true];
 			}
 		}
 
@@ -198,35 +198,35 @@ namespace Alphora.Dataphor.DAE.Language
 		/// <returns>Returns the now active token.</returns>
 		public LexerToken NextToken()
 		{
-			ReadNext(FCurrentIndex);
-			FCurrentIndex = (FCurrentIndex + 1) % CLookAheadCount;
-			LexerToken LToken = FTokens[FCurrentIndex];
-			if (LToken.Type == TokenType.EOF)
+			ReadNext(_currentIndex);
+			_currentIndex = (_currentIndex + 1) % LookAheadCount;
+			LexerToken token = _tokens[_currentIndex];
+			if (token.Type == TokenType.EOF)
 				throw new LexerException(LexerException.Codes.UnexpectedEOF);
-			if (LToken.Type == TokenType.Error)
-				throw LToken.Error;
-			return LToken;
+			if (token.Type == TokenType.Error)
+				throw token.Error;
+			return token;
 		}
 
 		/// <summary> Gets the symbol the specified number of tokens ahead without advancing the current token. </summary>
 		/// <remarks> If the token is not a symbol, returns an empty string. </remarks>
-		public LexerToken PeekToken(int ACount)
+		public LexerToken PeekToken(int count)
 		{
-			LexerToken LToken = this[ACount];
-			if (LToken.Type == TokenType.Error)
-				throw LToken.Error;
-			return LToken;
+			LexerToken token = this[count];
+			if (token.Type == TokenType.Error)
+				throw token.Error;
+			return token;
 		}
 
 		/// <summary> Gets the symbol the specified number of tokens ahead without advancing the current token. </summary>
 		/// <remarks> If the token is not a symbol, returns an empty string. </remarks>
-		public string PeekTokenSymbol(int ACount)
+		public string PeekTokenSymbol(int count)
 		{
-			LexerToken LToken = this[ACount];
-			if (LToken.Type == TokenType.Symbol)
-				return LToken.Token;
-			else if (LToken.Type == TokenType.Error)
-				throw LToken.Error;
+			LexerToken token = this[count];
+			if (token.Type == TokenType.Symbol)
+				return token.Token;
+			else if (token.Type == TokenType.Error)
+				throw token.Error;
 			else
 				return String.Empty;
 		}
@@ -235,36 +235,36 @@ namespace Alphora.Dataphor.DAE.Language
     public class Tokenizer
     {
 		// Boolean constants
-		public const string CTrue = "true";
-		public const string CFalse = "false";
-		public const string CNil = "nil";
+		public const string True = "true";
+		public const string False = "false";
+		public const string Nil = "nil";
 
-		public Tokenizer(string AInput)
+		public Tokenizer(string input)
 			: base()
 		{
-			FInput = AInput;
+			_input = input;
 			ReadNext();
 		}
 
-		private string FInput;
-		private int FPos = -1;
+		private string _input;
+		private int _pos = -1;
 
-		private Char FCurrent;
-		public Char Current { get { return FCurrent; } }
+		private Char _current;
+		public Char Current { get { return _current; } }
 
-		private Char FNext;
+		private Char _next;
 		public Char Next
 		{
 			get
 			{
-				if (FNextEOF)
+				if (_nextEOF)
 					throw new LexerException(LexerException.Codes.UnexpectedEOF);
-				return FNext;
+				return _next;
 			}
 		}
 
-		private bool FNextEOF;
-		public bool NextEOF { get { return FNextEOF; } }
+		private bool _nextEOF;
+		public bool NextEOF { get { return _nextEOF; } }
 
 		public Char Peek
 		{
@@ -272,7 +272,7 @@ namespace Alphora.Dataphor.DAE.Language
 			{
 				if (PeekEOF)
 					throw new LexerException(LexerException.Codes.UnexpectedEOF);
-				return FInput[FPos + 1];
+				return _input[_pos + 1];
 			}
 		}
 
@@ -280,58 +280,58 @@ namespace Alphora.Dataphor.DAE.Language
 		{
 			get
 			{
-				return FPos + 1 >= FInput.Length;
+				return _pos + 1 >= _input.Length;
 			}
 		}
 
-		private int FLine = 1;
-		private int FLinePos = 1;
-		private int FTokenLine = 1;
-		private int FTokenLinePos = 1;
+		private int _line = 1;
+		private int _linePos = 1;
+		private int _tokenLine = 1;
+		private int _tokenLinePos = 1;
 
 		/// <summary> The line number (one-based) of the beginning of the last read token. </summary>
-		public int Line { get { return FTokenLine; } }
+		public int Line { get { return _tokenLine; } }
 		
 		/// <summary> The offset position (one-based) of the beginning of the last read token. </summary>
-		public int LinePos { get { return FTokenLinePos; } }
+		public int LinePos { get { return _tokenLinePos; } }
 
-		private TokenType FTokenType;
-		public TokenType TokenType { get { return FTokenType; } }
+		private TokenType _tokenType;
+		public TokenType TokenType { get { return _tokenType; } }
 
-		private string FToken;
+		private string _token;
 		public string Token
 		{
-			get { return FToken; }
+			get { return _token; }
 		}
 
-		private StringBuilder FBuilder = new StringBuilder();
+		private StringBuilder _builder = new StringBuilder();
 
 		/// <summary> Pre-reads the next TokenType (does not affect current). </summary>
 		private void ReadNext()
 		{
-			FPos++;
-			FNextEOF = FPos >= FInput.Length;
-			if (!FNextEOF) 
-				FNext = FInput[FPos];
+			_pos++;
+			_nextEOF = _pos >= _input.Length;
+			if (!_nextEOF) 
+				_next = _input[_pos];
 		}
 
 		public void Advance()
 		{
-			FCurrent = Next;
+			_current = Next;
 			ReadNext();
-			if (FCurrent == '\n')
+			if (_current == '\n')
 			{
-				FLine++;
-				FLinePos = 1;
+				_line++;
+				_linePos = 1;
 			}
 			else
-				FLinePos++;
+				_linePos++;
 		}
 
 		/// <summary> Skips any whitespace. </summary>
 		public void SkipWhiteSpace()
 		{
-			while (!FNextEOF && Char.IsWhiteSpace(FNext))
+			while (!_nextEOF && Char.IsWhiteSpace(_next))
 				Advance();
 		}
 
@@ -345,26 +345,26 @@ namespace Alphora.Dataphor.DAE.Language
 					continue;
 
 				// Skip block comments
-				if ((FNext == '/') && !PeekEOF && (Peek == '*'))
+				if ((_next == '/') && !PeekEOF && (Peek == '*'))
 				{
 					Advance();
 					Advance();
-					int LBlockCommentDepth = 1;
-					while (LBlockCommentDepth > 0)
+					int blockCommentDepth = 1;
+					while (blockCommentDepth > 0)
 					{
 						if (SkipLineComments())		// Line comments may be \\* block delimiters, so ignore them inside block comments
 							continue;
 						if (PeekEOF)
 							throw new LexerException(LexerException.Codes.UnterminatedComment);
-						Char LPeek = Peek;
-						if ((FNext == '/') && (LPeek == '*'))
+						Char peek = Peek;
+						if ((_next == '/') && (peek == '*'))
 						{
-							LBlockCommentDepth++;
+							blockCommentDepth++;
 							Advance();
 						}
-						else if ((FNext == '*') && (LPeek == '/'))
+						else if ((_next == '*') && (peek == '/'))
 						{
-							LBlockCommentDepth--;
+							blockCommentDepth--;
 							Advance();
 						}
 						Advance();
@@ -380,14 +380,14 @@ namespace Alphora.Dataphor.DAE.Language
 		/// <returns> True if comment parsing should continue. </return>
 		private bool SkipLineComments()
 		{
-			Char LPeek = Peek;
-			if ((FNext == '/') && (LPeek == '/'))
+			Char peek = Peek;
+			if ((_next == '/') && (peek == '/'))
 			{
 				Advance();
 				Advance();
-				while (!FNextEOF && (FNext != '\n'))
+				while (!_nextEOF && (_next != '\n'))
 					Advance();
-				if (!FNextEOF)
+				if (!_nextEOF)
 				{
 					Advance();
 					SkipWhiteSpace();
@@ -397,9 +397,9 @@ namespace Alphora.Dataphor.DAE.Language
 			return false;
 		}
 
-		private bool IsSymbol(char AChar)
+		private bool IsSymbol(char charValue)
 		{
-			switch (AChar)
+			switch (charValue)
 			{
 				case '.':
 				case ',':
@@ -434,42 +434,42 @@ namespace Alphora.Dataphor.DAE.Language
 			SkipComments();
 
 			// Clear the TokenType
-			FBuilder.Length = 0;
-			FToken = String.Empty;
-			FTokenLine = FLine;
-			FTokenLinePos = FLinePos;
+			_builder.Length = 0;
+			_token = String.Empty;
+			_tokenLine = _line;
+			_tokenLinePos = _linePos;
 
-			if (!FNextEOF)
+			if (!_nextEOF)
 			{
-				if (Char.IsLetter(FNext) || (FNext == '_'))			// Identifiers
+				if (Char.IsLetter(_next) || (_next == '_'))			// Identifiers
 				{
 					Advance();
-					FBuilder.Append(FCurrent);
-					while (!FNextEOF && (Char.IsLetterOrDigit(FNext) || (FNext == '_')))
+					_builder.Append(_current);
+					while (!_nextEOF && (Char.IsLetterOrDigit(_next) || (_next == '_')))
 					{
 						Advance();
-						FBuilder.Append(FCurrent);
+						_builder.Append(_current);
 					}
-					FToken = FBuilder.ToString();
-					if (String.Equals(FToken, CTrue, StringComparison.OrdinalIgnoreCase) || String.Equals(FToken, CFalse, StringComparison.OrdinalIgnoreCase))
-						FTokenType = TokenType.Boolean;
-					else if (String.Equals(FToken, CNil, StringComparison.OrdinalIgnoreCase))
-						FTokenType = TokenType.Nil;
+					_token = _builder.ToString();
+					if (String.Equals(_token, True, StringComparison.OrdinalIgnoreCase) || String.Equals(_token, False, StringComparison.OrdinalIgnoreCase))
+						_tokenType = TokenType.Boolean;
+					else if (String.Equals(_token, Nil, StringComparison.OrdinalIgnoreCase))
+						_tokenType = TokenType.Nil;
 					else
-						FTokenType = TokenType.Symbol;
+						_tokenType = TokenType.Symbol;
 				}
-				else if (IsSymbol(FNext))							// Symbols
+				else if (IsSymbol(_next))							// Symbols
 				{
-					FTokenType = TokenType.Symbol;
+					_tokenType = TokenType.Symbol;
 					Advance();
-					FBuilder.Append(FCurrent);
-					switch (FCurrent)
+					_builder.Append(_current);
+					switch (_current)
 					{
 						case ':':
-							if (!FNextEOF && (FNext == '='))
+							if (!_nextEOF && (_next == '='))
 							{
 								Advance();
-								FBuilder.Append(FCurrent);
+								_builder.Append(_current);
 							}
 							break;
 
@@ -477,77 +477,77 @@ namespace Alphora.Dataphor.DAE.Language
 							if (Next == '=')
 							{
 								Advance();
-								FBuilder.Append(FCurrent);
+								_builder.Append(_current);
 							}
 							else
-								throw new LexerException(LexerException.Codes.IllegalInputCharacter, FNext);
+								throw new LexerException(LexerException.Codes.IllegalInputCharacter, _next);
 							break;
 
 						case '*':
-							if (!FNextEOF && (FNext == '*'))
+							if (!_nextEOF && (_next == '*'))
 							{
 								Advance();
-								FBuilder.Append(FCurrent);
+								_builder.Append(_current);
 							}
 							break;
 							
 						case '>':
-							if (!FNextEOF)
-								switch (FNext)
+							if (!_nextEOF)
+								switch (_next)
 								{
 									case '=':
 									case '>':
 										Advance();
-										FBuilder.Append(FCurrent);
+										_builder.Append(_current);
 									break;
 								}
 							break;
 
 						case '<':
-							if (!FNextEOF)
-								switch (FNext)
+							if (!_nextEOF)
+								switch (_next)
 								{
 									case '=':
 									case '>':
 									case '<':
 										Advance();
-										FBuilder.Append(FCurrent);
+										_builder.Append(_current);
 									break;
 								}
 							break;
 					}
-					FToken = FBuilder.ToString();
+					_token = _builder.ToString();
 				}
-				else if	(Char.IsDigit(FNext) || (FNext == '$'))		// Numbers
+				else if	(Char.IsDigit(_next) || (_next == '$'))		// Numbers
 				{
 					Advance();
 
-					bool LDigitSatisfied = false;	// at least one digit required
+					bool digitSatisfied = false;	// at least one digit required
 
-					if (FCurrent == '$')
-						FTokenType = TokenType.Money;
+					if (_current == '$')
+						_tokenType = TokenType.Money;
 					else
 					{
-						if ((FCurrent == '0') && (!FNextEOF && ((FNext == 'x') || (FNext == 'X'))))
+						if ((_current == '0') && (!_nextEOF && ((_next == 'x') || (_next == 'X'))))
 						{
-							FTokenType = TokenType.Hex;
+							_tokenType = TokenType.Hex;
 							Advance();
 						}
 						else
 						{
-							LDigitSatisfied = true;
-							FBuilder.Append(FCurrent);
-							FTokenType = TokenType.Integer;
+							digitSatisfied = true;
+							_builder.Append(_current);
+							_tokenType = TokenType.Integer;
 						}
 					}
 
-					bool LDone = false;
-					bool LHitPeriod = false;
-					bool LHitScalar = false;
+					bool done = false;
+					bool hitPeriod = false;
+					bool hitScalar = false;
 
-					while (!LDone && !FNextEOF)
+					while (!done && !_nextEOF)
 					{
-						switch (FNext)
+						switch (_next)
 						{
 							case '0':
 							case '1':
@@ -560,8 +560,8 @@ namespace Alphora.Dataphor.DAE.Language
 							case '8':
 							case '9':
 								Advance();
-								LDigitSatisfied = true;
-								FBuilder.Append(FCurrent);
+								digitSatisfied = true;
+								_builder.Append(_current);
 								break;
 
 							case 'A':
@@ -570,25 +570,25 @@ namespace Alphora.Dataphor.DAE.Language
 							case 'b':
 							case 'C':
 							case 'c':
-								if (FTokenType != TokenType.Hex)
+								if (_tokenType != TokenType.Hex)
 									throw new LexerException(LexerException.Codes.InvalidNumericValue);
 								Advance();
-								LDigitSatisfied = true;
-								FBuilder.Append(FCurrent);
+								digitSatisfied = true;
+								_builder.Append(_current);
 								break;
 								
 							case 'D':
 							case 'd':
 								Advance();
-								if (FTokenType == TokenType.Hex)
+								if (_tokenType == TokenType.Hex)
 								{
-									LDigitSatisfied = true;
-									FBuilder.Append(FCurrent);
+									digitSatisfied = true;
+									_builder.Append(_current);
 								}
-								else if (FTokenType != TokenType.Money)
+								else if (_tokenType != TokenType.Money)
 								{
-									FTokenType = TokenType.Decimal;
-									LDone = true;
+									_tokenType = TokenType.Decimal;
+									done = true;
 								}
 								else
 									throw new LexerException(LexerException.Codes.InvalidNumericValue);
@@ -597,21 +597,21 @@ namespace Alphora.Dataphor.DAE.Language
 							case 'E':
 							case 'e':
 								Advance();
-								if (FTokenType == TokenType.Hex)
+								if (_tokenType == TokenType.Hex)
 								{
-									LDigitSatisfied = true;
-									FBuilder.Append(FCurrent);
+									digitSatisfied = true;
+									_builder.Append(_current);
 								}
-								else if (!LHitScalar && LDigitSatisfied)
+								else if (!hitScalar && digitSatisfied)
 								{
-									LHitScalar = true;
-									LDigitSatisfied = false;
-									FTokenType = TokenType.Float;
-									FBuilder.Append(FCurrent);
-									if ((FNext == '-') || (FNext == '+'))
+									hitScalar = true;
+									digitSatisfied = false;
+									_tokenType = TokenType.Float;
+									_builder.Append(_current);
+									if ((_next == '-') || (_next == '+'))
 									{
 										Advance();
-										FBuilder.Append(FCurrent);
+										_builder.Append(_current);
 									}
 								}
 								else
@@ -621,71 +621,71 @@ namespace Alphora.Dataphor.DAE.Language
 							case 'f':
 							case 'F':
 								Advance();
-								if (FTokenType == TokenType.Hex)
+								if (_tokenType == TokenType.Hex)
 								{
-									LDigitSatisfied = true;
-									FBuilder.Append(FCurrent);
+									digitSatisfied = true;
+									_builder.Append(_current);
 								}
-								else if (FTokenType != TokenType.Money)
+								else if (_tokenType != TokenType.Money)
 								{
-									FTokenType = TokenType.Float;
-									LDone = true;
+									_tokenType = TokenType.Float;
+									done = true;
 								}
 								else
 									throw new LexerException(LexerException.Codes.InvalidNumericValue);
 								break;
 
 							case '.':
-								if (!LHitPeriod)
+								if (!hitPeriod)
 								{
 									Advance();
-									if (FTokenType == TokenType.Hex)
+									if (_tokenType == TokenType.Hex)
 										throw new LexerException(LexerException.Codes.InvalidNumericValue);
-									if (FTokenType == TokenType.Integer)
-										FTokenType = TokenType.Decimal;
-									LHitPeriod = true;
-									LDigitSatisfied = false;
-									FBuilder.Append(FCurrent);
+									if (_tokenType == TokenType.Integer)
+										_tokenType = TokenType.Decimal;
+									hitPeriod = true;
+									digitSatisfied = false;
+									_builder.Append(_current);
 								}
 								else
-									LDone = true;	// a dot, not a point
+									done = true;	// a dot, not a point
 								break;
 
 							default:
-								LDone = true;
+								done = true;
 								break;
 						}
 					}
-					if (!LDigitSatisfied)
+					if (!digitSatisfied)
 						throw new LexerException(LexerException.Codes.InvalidNumericValue);
-					FToken = FBuilder.ToString();
+					_token = _builder.ToString();
 				}	
-				else if ((FNext == '\'') || (FNext == '"'))
+				else if ((_next == '\'') || (_next == '"'))
 				{
-					FTokenType = TokenType.String;
+					_tokenType = TokenType.String;
 					Advance();
-					char LQuoteChar = FCurrent;
+					char quoteChar = _current;
 					while (true)
 					{
-						if (FNextEOF)
+						if (_nextEOF)
 							throw new LexerException(LexerException.Codes.UnterminatedString);	// Better error than EOF
 						Advance();
-						if (FCurrent == LQuoteChar)
-							if (!FNextEOF && (FNext == LQuoteChar))
+						if (_current == quoteChar)
+							if (!_nextEOF && (_next == quoteChar))
 								Advance();
 							else
 								break;
-						FBuilder.Append(FCurrent);
+						_builder.Append(_current);
 					}
-					FToken = FBuilder.ToString();
+					_token = _builder.ToString();
 				}
 				else
-					throw new LexerException(LexerException.Codes.IllegalInputCharacter, FNext); 
+					throw new LexerException(LexerException.Codes.IllegalInputCharacter, _next); 
 			}
 			else
-				FTokenType = TokenType.EOF;
+				_tokenType = TokenType.EOF;
 
-			return FTokenType;
+			return _tokenType;
 		}
     }
 }

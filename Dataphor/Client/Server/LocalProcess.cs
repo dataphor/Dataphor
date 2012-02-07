@@ -27,188 +27,188 @@ namespace Alphora.Dataphor.DAE.Server
 {
     public class LocalProcess : LocalServerChildObject, IServerProcess
     {
-		public const int CStreamManagerID = 10;
+		public const int StreamManagerID = 10;
 
-		public LocalProcess(LocalSession ASession, ProcessInfo AProcessInfo, int AProcessID, IRemoteServerProcess AProcess) : base()
+		public LocalProcess(LocalSession session, ProcessInfo processInfo, int processID, IRemoteServerProcess process) : base()
 		{
-			FSession = ASession;
-			FProcess = AProcess;
-			FProcessID = AProcessID;
-			FProcessInfo = AProcessInfo;
-			FStreamManager = new LocalStreamManager((IStreamManager)FProcess);
-			FInternalProcess = (ServerProcess)FSession.FInternalSession.StartProcess(new ProcessInfo(FSession.FInternalSession.SessionInfo));
-			FSession.FServer.OnCacheCleared += new CacheClearedEvent(CacheCleared);
-			FSession.FServer.OnCacheClearing += new CacheClearedEvent(CacheClearing);
-			CacheCleared(FSession.FServer);
-			FValueManager = new ValueManager(FInternalProcess, this);
+			_session = session;
+			_process = process;
+			_processID = processID;
+			_processInfo = processInfo;
+			_streamManager = new LocalStreamManager((IStreamManager)_process);
+			_internalProcess = (ServerProcess)_session._internalSession.StartProcess(new ProcessInfo(_session._internalSession.SessionInfo));
+			_session._server.OnCacheCleared += new CacheClearedEvent(CacheCleared);
+			_session._server.OnCacheClearing += new CacheClearedEvent(CacheClearing);
+			CacheCleared(_session._server);
+			_valueManager = new ValueManager(_internalProcess, this);
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if ((FSession != null) && (FSession.FServer != null))
+			if ((_session != null) && (_session._server != null))
 			{
-				if (FSession.FServer.Catalog != null)
-					FSession.FServer.Catalog.ClassLoader.OnMiss -= new ClassLoaderMissedEvent(ClassLoaderMissed);
-				FSession.FServer.OnCacheClearing -= new CacheClearedEvent(CacheClearing);
-				FSession.FServer.OnCacheCleared -= new CacheClearedEvent(CacheCleared);
+				if (_session._server.Catalog != null)
+					_session._server.Catalog.ClassLoader.OnMiss -= new ClassLoaderMissedEvent(ClassLoaderMissed);
+				_session._server.OnCacheClearing -= new CacheClearedEvent(CacheClearing);
+				_session._server.OnCacheCleared -= new CacheClearedEvent(CacheCleared);
 			}
 			
-			if (FStreamManager != null)
+			if (_streamManager != null)
 			{
-				FStreamManager.Dispose();
-				FStreamManager = null;
+				_streamManager.Dispose();
+				_streamManager = null;
 			}
 			
-			if (FInternalProcess != null)
+			if (_internalProcess != null)
 			{
-				if ((FSession != null) && (FSession.FInternalSession != null))
-					FSession.FInternalSession.StopProcess(FInternalProcess);
-				FInternalProcess = null;
+				if ((_session != null) && (_session._internalSession != null))
+					_session._internalSession.StopProcess(_internalProcess);
+				_internalProcess = null;
 			}
 			
-			FValueManager = null;
-			FProcess = null;
-			FProcessID = -1;
-			FSession = null;
-			base.Dispose(ADisposing);
+			_valueManager = null;
+			_process = null;
+			_processID = -1;
+			_session = null;
+			base.Dispose(disposing);
 		}
 		
-		private int FProcessID;
-		public int ProcessID { get { return FProcessID; } }
+		private int _processID;
+		public int ProcessID { get { return _processID; } }
 		
-		private ProcessInfo FProcessInfo;
-		public ProcessInfo ProcessInfo { get { return FProcessInfo; } }
+		private ProcessInfo _processInfo;
+		public ProcessInfo ProcessInfo { get { return _processInfo; } }
 		
 		public ServerProcess GetServerProcess()
 		{
-			return FInternalProcess;
+			return _internalProcess;
 		}
 		
-		private IRemoteServerProcess FProcess;
-		public IRemoteServerProcess RemoteProcess { get { return FProcess; } }
+		private IRemoteServerProcess _process;
+		public IRemoteServerProcess RemoteProcess { get { return _process; } }
 		
-		private Schema.DataTypes FDataTypes;
-		public Schema.DataTypes DataTypes { get { return FDataTypes; } }
+		private Schema.DataTypes _dataTypes;
+		public Schema.DataTypes DataTypes { get { return _dataTypes; } }
 		
-		private void ClassLoaderMissed(ClassLoader AClassLoader, CatalogDeviceSession ASession, ClassDefinition AClassDefinition)
+		private void ClassLoaderMissed(ClassLoader classLoader, CatalogDeviceSession session, ClassDefinition classDefinition)
 		{
-			if ((FSession != null) && (FSession.FServer != null))
-				FSession.FServer.ClassLoaderMissed(this, AClassLoader, AClassDefinition);
+			if ((_session != null) && (_session._server != null))
+				_session._server.ClassLoaderMissed(this, classLoader, classDefinition);
 		}
 		
-		public object CreateObject(ClassDefinition AClassDefinition, object[] AArguments)
+		public object CreateObject(ClassDefinition classDefinition, object[] arguments)
 		{
-			return FSession.FServer.Catalog.ClassLoader.CreateObject(FInternalProcess.CatalogDeviceSession, AClassDefinition, AArguments);
+			return _session._server.Catalog.ClassLoader.CreateObject(_internalProcess.CatalogDeviceSession, classDefinition, arguments);
 		}
 		
-		public Type CreateType(ClassDefinition AClassDefinition)
+		public Type CreateType(ClassDefinition classDefinition)
 		{
-			return FSession.FServer.Catalog.ClassLoader.CreateType(FInternalProcess.CatalogDeviceSession, AClassDefinition);
+			return _session._server.Catalog.ClassLoader.CreateType(_internalProcess.CatalogDeviceSession, classDefinition);
 		}
 		
-		private void CacheClearing(LocalServer AServer)
+		private void CacheClearing(LocalServer server)
 		{
-			AServer.FInternalServer.Catalog.ClassLoader.OnMiss -= new ClassLoaderMissedEvent(ClassLoaderMissed);
+			server._internalServer.Catalog.ClassLoader.OnMiss -= new ClassLoaderMissedEvent(ClassLoaderMissed);
 		}
 		
-		private void CacheCleared(LocalServer AServer)
+		private void CacheCleared(LocalServer server)
 		{
-			if (FDataTypes != null)
-				FDataTypes.OnCatalogLookupFailed -= new Schema.CatalogLookupFailedEvent(CatalogLookupFailed);
-			FDataTypes = new Schema.DataTypes(AServer.FInternalServer.Catalog);
-			FDataTypes.OnCatalogLookupFailed += new Schema.CatalogLookupFailedEvent(CatalogLookupFailed);
+			if (_dataTypes != null)
+				_dataTypes.OnCatalogLookupFailed -= new Schema.CatalogLookupFailedEvent(CatalogLookupFailed);
+			_dataTypes = new Schema.DataTypes(server._internalServer.Catalog);
+			_dataTypes.OnCatalogLookupFailed += new Schema.CatalogLookupFailedEvent(CatalogLookupFailed);
 			
-			FSession.FServer.Catalog.ClassLoader.OnMiss += new ClassLoaderMissedEvent(ClassLoaderMissed);
+			_session._server.Catalog.ClassLoader.OnMiss += new ClassLoaderMissedEvent(ClassLoaderMissed);
 		}
 		
-		private void CatalogLookupFailed(Schema.Catalog ACatalog, string AName)
+		private void CatalogLookupFailed(Schema.Catalog catalog, string name)
 		{
 			#if LOGCACHEEVENTS
 			FSession.FServer.FInternalServer.LogMessage(String.Format("Retrieving catalog for '{0}'.", AName));
 			#endif
 			
 			// A cache miss forces the retrieval of the datatype and its dependencies from the remote server process
-			long LCacheTimeStamp;
-			long LClientCacheTimeStamp;
-			bool LCacheChanged;
-			string LString = FProcess.GetCatalog(AName, out LCacheTimeStamp, out LClientCacheTimeStamp, out LCacheChanged);
+			long cacheTimeStamp;
+			long clientCacheTimeStamp;
+			bool cacheChanged;
+			string stringValue = _process.GetCatalog(name, out cacheTimeStamp, out clientCacheTimeStamp, out cacheChanged);
 		
 			// Ensure that the local cache is consistent before adding to the cache
-			if (LCacheChanged)
+			if (cacheChanged)
 			{
 				try
 				{
-					FSession.FServer.WaitForCacheTimeStamp(this, LClientCacheTimeStamp - 1);
-					FSession.FServer.AcquireCacheLock(this, LockMode.Exclusive);
+					_session._server.WaitForCacheTimeStamp(this, clientCacheTimeStamp - 1);
+					_session._server.AcquireCacheLock(this, LockMode.Exclusive);
 					try
 					{
-						FSession.FServer.EnsureCacheConsistent(LCacheTimeStamp);
-						if (LString != String.Empty)
+						_session._server.EnsureCacheConsistent(cacheTimeStamp);
+						if (stringValue != String.Empty)
 						{
-							IServerScript LScript = ((IServerProcess)FInternalProcess).PrepareScript(LString);
+							IServerScript script = ((IServerProcess)_internalProcess).PrepareScript(stringValue);
 							try
 							{
-								LScript.Execute(null);
+								script.Execute(null);
 							}
 							finally
 							{
-								((IServerProcess)FInternalProcess).UnprepareScript(LScript);
+								((IServerProcess)_internalProcess).UnprepareScript(script);
 							}
 						}
 					}
 					finally
 					{
-						FSession.FServer.ReleaseCacheLock(this, LockMode.Exclusive);
+						_session._server.ReleaseCacheLock(this, LockMode.Exclusive);
 					}
 				}
 				catch (Exception E)
 				{
 					// Notify the server that the client cache is out of sync
 					Execute(".System.UpdateTimeStamps();", null);
-					E = new ServerException(ServerException.Codes.CacheDeserializationError, E, LClientCacheTimeStamp);
-					FSession.FServer.FInternalServer.LogError(E);
+					E = new ServerException(ServerException.Codes.CacheDeserializationError, E, clientCacheTimeStamp);
+					_session._server._internalServer.LogError(E);
 					throw E;
 				}
 				finally
 				{
-					FSession.FServer.SetCacheTimeStamp(this, LClientCacheTimeStamp);
+					_session._server.SetCacheTimeStamp(this, clientCacheTimeStamp);
 				}
 			}
 		}
 		
-		protected internal ServerProcess FInternalProcess;
+		protected internal ServerProcess _internalProcess;
 
-		protected internal LocalStreamManager FStreamManager;
+		protected internal LocalStreamManager _streamManager;
 		
-		private IValueManager FValueManager;
-		public IValueManager ValueManager { get { return FValueManager; } }
+		private IValueManager _valueManager;
+		public IValueManager ValueManager { get { return _valueManager; } }
 
-		protected internal LocalSession FSession;		
-		public IServerSession Session { get { return FSession; } }
+		protected internal LocalSession _session;		
+		public IServerSession Session { get { return _session; } }
 		
 		StreamID IStreamManager.Allocate()
 		{
-			return FStreamManager.Allocate();
+			return _streamManager.Allocate();
 		}
 		
-		StreamID IStreamManager.Reference(StreamID AStreamID)
+		StreamID IStreamManager.Reference(StreamID streamID)
 		{
-			return FStreamManager.Reference(AStreamID);
+			return _streamManager.Reference(streamID);
 		}
 		
-		void IStreamManager.Deallocate(StreamID AStreamID)
+		void IStreamManager.Deallocate(StreamID streamID)
 		{
-			FStreamManager.Deallocate(AStreamID);
+			_streamManager.Deallocate(streamID);
 		}
 		
-		Stream IStreamManager.Open(StreamID AStreamID, LockMode ALockMode)
+		Stream IStreamManager.Open(StreamID streamID, LockMode lockMode)
 		{
-			return FStreamManager.Open(AStreamID, ALockMode);
+			return _streamManager.Open(streamID, lockMode);
 		}
 		
-		IRemoteStream IStreamManager.OpenRemote(StreamID AStreamID, LockMode ALockMode)
+		IRemoteStream IStreamManager.OpenRemote(StreamID streamID, LockMode lockMode)
 		{
-			return FStreamManager.OpenRemote(AStreamID, ALockMode);
+			return _streamManager.OpenRemote(streamID, lockMode);
 		}
 
 		#if UNMANAGEDSTREAM
@@ -218,9 +218,9 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		#endif
 		
-		public static RemoteParamModifier ModifierToRemoteModifier(Modifier AModifier)
+		public static RemoteParamModifier ModifierToRemoteModifier(Modifier modifier)
 		{
-			switch (AModifier)
+			switch (modifier)
 			{
 				case Modifier.In : return RemoteParamModifier.In;
 				case Modifier.Out : return RemoteParamModifier.Out;
@@ -231,50 +231,50 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// Parameter Translation
-		public RemoteParam[] DataParamsToRemoteParams(DataParams AParams)
+		public RemoteParam[] DataParamsToRemoteParams(DataParams paramsValue)
 		{
-			int LParamCount = AParams != null ? AParams.Count : 0;
-			if (LParamCount > 0)
+			int paramCount = paramsValue != null ? paramsValue.Count : 0;
+			if (paramCount > 0)
 			{
-				RemoteParam[] LParams= new RemoteParam[LParamCount];
+				RemoteParam[] localParamsValue= new RemoteParam[paramCount];
 
-				for (int LIndex = 0; LIndex < LParamCount; LIndex++)
+				for (int index = 0; index < paramCount; index++)
 				{
-					LParams[LIndex].Name = AParams[LIndex].Name;
-					LParams[LIndex].TypeName = AParams[LIndex].DataType.Name;
-					LParams[LIndex].Modifier = ModifierToRemoteModifier(AParams[LIndex].Modifier);
+					localParamsValue[index].Name = paramsValue[index].Name;
+					localParamsValue[index].TypeName = paramsValue[index].DataType.Name;
+					localParamsValue[index].Modifier = ModifierToRemoteModifier(paramsValue[index].Modifier);
 				}
-				return LParams;
+				return localParamsValue;
 			}
 			else
 				return null;
 		}
 		
-		public RemoteParamData DataParamsToRemoteParamData(DataParams AParams)
+		public RemoteParamData DataParamsToRemoteParamData(DataParams paramsValue)
 		{
-			int LParamCount = AParams != null ? AParams.Count : 0;
-			if (LParamCount > 0)
+			int paramCount = paramsValue != null ? paramsValue.Count : 0;
+			if (paramCount > 0)
 			{
-				Schema.RowType LRowType = new Schema.RowType();
-				if (AParams != null)
-					foreach (DataParam LParam in AParams)
-						LRowType.Columns.Add(new Schema.Column(LParam.Name, LParam.DataType));
-				using (Row LRow = new Row(this.ValueManager, LRowType))
+				Schema.RowType rowType = new Schema.RowType();
+				if (paramsValue != null)
+					foreach (DataParam param in paramsValue)
+						rowType.Columns.Add(new Schema.Column(param.Name, param.DataType));
+				using (Row row = new Row(this.ValueManager, rowType))
 				{
-					LRow.ValuesOwned = false;
-					RemoteParamData LParams = new RemoteParamData();
-					LParams.Params = new RemoteParam[LParamCount];
-					for (int LIndex = 0; LIndex < LParamCount; LIndex++)
+					row.ValuesOwned = false;
+					RemoteParamData localParamsValue = new RemoteParamData();
+					localParamsValue.Params = new RemoteParam[paramCount];
+					for (int index = 0; index < paramCount; index++)
 					{
-						LParams.Params[LIndex].Name = AParams[LIndex].Name;
-						LParams.Params[LIndex].TypeName = AParams[LIndex].DataType.Name;
-						LParams.Params[LIndex].Modifier = ModifierToRemoteModifier(AParams[LIndex].Modifier);
-						if (AParams[LIndex].Value != null)
-							LRow[LIndex] = AParams[LIndex].Value;
+						localParamsValue.Params[index].Name = paramsValue[index].Name;
+						localParamsValue.Params[index].TypeName = paramsValue[index].DataType.Name;
+						localParamsValue.Params[index].Modifier = ModifierToRemoteModifier(paramsValue[index].Modifier);
+						if (paramsValue[index].Value != null)
+							row[index] = paramsValue[index].Value;
 					}
-					EnsureOverflowReleased(LRow);
-					LParams.Data.Data = LRow.AsPhysical;
-					return LParams;
+					EnsureOverflowReleased(row);
+					localParamsValue.Data.Data = row.AsPhysical;
+					return localParamsValue;
 				}
 			}
 			else	// optimization
@@ -283,295 +283,295 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void RemoteParamDataToDataParams(DataParams AParams, RemoteParamData ARemoteParams)
+		public void RemoteParamDataToDataParams(DataParams paramsValue, RemoteParamData remoteParams)
 		{
-			if ((AParams != null) && (AParams.Count > 0))
+			if ((paramsValue != null) && (paramsValue.Count > 0))
 			{
-				Schema.RowType LRowType = new Schema.RowType();
-				foreach (DataParam LParam in AParams)
-					LRowType.Columns.Add(new Schema.Column(LParam.Name, LParam.DataType));
-				using (Row LRow = new Row(this.ValueManager, LRowType))
+				Schema.RowType rowType = new Schema.RowType();
+				foreach (DataParam param in paramsValue)
+					rowType.Columns.Add(new Schema.Column(param.Name, param.DataType));
+				using (Row row = new Row(this.ValueManager, rowType))
 				{
-					LRow.ValuesOwned = false;
-					LRow.AsPhysical = ARemoteParams.Data.Data;
-					for (int LIndex = 0; LIndex < AParams.Count; LIndex++)
-						if (AParams[LIndex].Modifier != Modifier.In)
+					row.ValuesOwned = false;
+					row.AsPhysical = remoteParams.Data.Data;
+					for (int index = 0; index < paramsValue.Count; index++)
+						if (paramsValue[index].Modifier != Modifier.In)
 						{
-							if (LRow.HasValue(LIndex))
-								AParams[LIndex].Value = DataValue.CopyValue(FInternalProcess.ValueManager, LRow[LIndex]);
+							if (row.HasValue(index))
+								paramsValue[index].Value = DataValue.CopyValue(_internalProcess.ValueManager, row[index]);
 							else
-								AParams[LIndex].Value = null;
+								paramsValue[index].Value = null;
 						}
 				}
 			}
 		}
         
-		public void EnsureOverflowConsistent(Row ARow)
+		public void EnsureOverflowConsistent(Row row)
 		{
-			List<StreamID> LList = new List<StreamID>();
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
-				if (ARow.HasNonNativeValue(LIndex))
-					LList.Add(ARow.GetNonNativeStreamID(LIndex));
+			List<StreamID> list = new List<StreamID>();
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
+				if (row.HasNonNativeValue(index))
+					list.Add(row.GetNonNativeStreamID(index));
 
-			FStreamManager.FlushStreams(LList.ToArray());
+			_streamManager.FlushStreams(list.ToArray());
 		}
 
-		public void EnsureOverflowReleased(Row ARow)
+		public void EnsureOverflowReleased(Row row)
 		{
-			List<StreamID> LList = new List<StreamID>();
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
-				if (ARow.HasNonNativeValue(LIndex)) // TODO: This won't work for non-scalar-valued attributes
-					LList.Add(ARow.GetNonNativeStreamID(LIndex));
+			List<StreamID> list = new List<StreamID>();
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
+				if (row.HasNonNativeValue(index)) // TODO: This won't work for non-scalar-valued attributes
+					list.Add(row.GetNonNativeStreamID(index));
 
-			FStreamManager.ReleaseStreams(LList.ToArray());
+			_streamManager.ReleaseStreams(list.ToArray());
 		}
 
-		private List<IRemoteServerPlan> FUnprepareList = new List<IRemoteServerPlan>();
+		private List<IRemoteServerPlan> _unprepareList = new List<IRemoteServerPlan>();
 
-		private void ReportCleanup(IRemoteServerPlan APlan)
+		private void ReportCleanup(IRemoteServerPlan plan)
 		{
-			FUnprepareList.Add(APlan);
+			_unprepareList.Add(plan);
 		}
 		
-		private void ClearCleanup(IRemoteServerPlan APlan)
+		private void ClearCleanup(IRemoteServerPlan plan)
 		{
-			for (int LIndex = 0; LIndex < FUnprepareList.Count; LIndex++)
-				if (Object.ReferenceEquals(APlan, FUnprepareList[LIndex]))
+			for (int index = 0; index < _unprepareList.Count; index++)
+				if (Object.ReferenceEquals(plan, _unprepareList[index]))
 				{
-					FUnprepareList.RemoveAt(LIndex);
+					_unprepareList.RemoveAt(index);
 					break;
 				}
 		}
 		
 		private RemoteProcessCleanupInfo GetProcessCleanupInfo()
 		{
-			RemoteProcessCleanupInfo LInfo = 
+			RemoteProcessCleanupInfo info = 
 				new RemoteProcessCleanupInfo()
 				{
-					UnprepareList = FUnprepareList.ToArray()
+					UnprepareList = _unprepareList.ToArray()
 				};
 				
-			FUnprepareList.Clear();
+			_unprepareList.Clear();
 			
-			return LInfo;
+			return info;
 		}
 
-		private List<IsolationLevel> FTransactionList = new List<IsolationLevel>();
+		private List<IsolationLevel> _transactionList = new List<IsolationLevel>();
 		
 		internal ProcessCallInfo GetProcessCallInfo()
 		{
-			ProcessCallInfo LInfo = 
+			ProcessCallInfo info = 
 				new ProcessCallInfo()
 				{
-					TransactionList = FTransactionList.ToArray()
+					TransactionList = _transactionList.ToArray()
 				};
 				
-			FTransactionList.Clear();
+			_transactionList.Clear();
 			
-			return LInfo;
+			return info;
 		}
 		
-		public IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams)
+		public IServerStatementPlan PrepareStatement(string statement, DataParams paramsValue)
 		{
-			return PrepareStatement(AStatement, AParams, null);
+			return PrepareStatement(statement, paramsValue, null);
 		}
 		
         /// <summary> Prepares the given statement for execution. </summary>
-        /// <param name='AStatement'> A single valid Dataphor statement to prepare. </param>
+        /// <param name='statement'> A single valid Dataphor statement to prepare. </param>
         /// <returns> An <see cref="IServerStatementPlan"/> instance for the prepared statement. </returns>
-        public IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams, DebugLocator ALocator)
+        public IServerStatementPlan PrepareStatement(string statement, DataParams paramsValue, DebugLocator locator)
         {
-			PlanDescriptor LPlanDescriptor;
-			IRemoteServerStatementPlan LPlan = FProcess.PrepareStatement(AStatement, DataParamsToRemoteParams(AParams), ALocator, out LPlanDescriptor, GetProcessCleanupInfo());
-			return new LocalStatementPlan(this, LPlan, LPlanDescriptor);
+			PlanDescriptor planDescriptor;
+			IRemoteServerStatementPlan plan = _process.PrepareStatement(statement, DataParamsToRemoteParams(paramsValue), locator, out planDescriptor, GetProcessCleanupInfo());
+			return new LocalStatementPlan(this, plan, planDescriptor);
 		}
         
         /// <summary> Unprepares a statement plan. </summary>
-        /// <param name="APlan"> A reference to a plan object returned from a call to PrepareStatement. </param>
-        public void UnprepareStatement(IServerStatementPlan APlan)
+        /// <param name="plan"> A reference to a plan object returned from a call to PrepareStatement. </param>
+        public void UnprepareStatement(IServerStatementPlan plan)
         {
 			try
 			{
 				// The plan will be unprepared on the next prepare call
-				ReportCleanup(((LocalStatementPlan)APlan).RemotePlan);
+				ReportCleanup(((LocalStatementPlan)plan).RemotePlan);
 				//FProcess.UnprepareStatement(((LocalStatementPlan)APlan).RemotePlan);
 			}
 			catch
 			{
 				// ignore exceptions here 
 			}
-			((LocalStatementPlan)APlan).Dispose();
+			((LocalStatementPlan)plan).Dispose();
 		}
 		
-		public void Execute(string AStatement, DataParams AParams)
+		public void Execute(string statement, DataParams paramsValue)
 		{
-			RemoteParamData LParamData = DataParamsToRemoteParamData(AParams);
-			FProcess.Execute(AStatement, ref LParamData, GetProcessCallInfo(), GetProcessCleanupInfo());
-			RemoteParamDataToDataParams(AParams, LParamData);
+			RemoteParamData paramData = DataParamsToRemoteParamData(paramsValue);
+			_process.Execute(statement, ref paramData, GetProcessCallInfo(), GetProcessCleanupInfo());
+			RemoteParamDataToDataParams(paramsValue, paramData);
 		}
 		
-		public IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams)
+		public IServerExpressionPlan PrepareExpression(string expression, DataParams paramsValue)
 		{
-			return PrepareExpression(AExpression, AParams, null);
+			return PrepareExpression(expression, paramsValue, null);
 		}
 		
         /// <summary> Prepares the given expression for selection. </summary>
-        /// <param name='AExpression'> A single valid Dataphor expression to prepare. </param>
+        /// <param name='expression'> A single valid Dataphor expression to prepare. </param>
         /// <returns> An <see cref="IServerExpressionPlan"/> instance for the prepared expression. </returns>
-        public IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams, DebugLocator ALocator)
+        public IServerExpressionPlan PrepareExpression(string expression, DataParams paramsValue, DebugLocator locator)
         {
 			#if LOGCACHEEVENTS
 			FSession.FServer.FInternalServer.LogMessage(String.Format("Thread {0} preparing expression '{1}'.", Thread.CurrentThread.GetHashCode(), AExpression));
 			#endif
 			
-			PlanDescriptor LPlanDescriptor;
-			IRemoteServerExpressionPlan LPlan = FProcess.PrepareExpression(AExpression, DataParamsToRemoteParams(AParams), ALocator, out LPlanDescriptor, GetProcessCleanupInfo());
-			return new LocalExpressionPlan(this, LPlan, LPlanDescriptor, AParams);
+			PlanDescriptor planDescriptor;
+			IRemoteServerExpressionPlan plan = _process.PrepareExpression(expression, DataParamsToRemoteParams(paramsValue), locator, out planDescriptor, GetProcessCleanupInfo());
+			return new LocalExpressionPlan(this, plan, planDescriptor, paramsValue);
 		}
 		
         /// <summary> Unprepares an expression plan. </summary>
-        /// <param name="APlan"> A reference to a plan object returned from a call to PrepareExpression. </param>
-        public void UnprepareExpression(IServerExpressionPlan APlan)
+        /// <param name="plan"> A reference to a plan object returned from a call to PrepareExpression. </param>
+        public void UnprepareExpression(IServerExpressionPlan plan)
         {
 			try
 			{
 				// The plan will be unprepared on the next prepare call
-				ReportCleanup(((LocalExpressionPlan)APlan).RemotePlan);
+				ReportCleanup(((LocalExpressionPlan)plan).RemotePlan);
 			}
 			catch
 			{
 				// do nothing here as this indicates that the plan has been disconnected at the server
 			}
-			((LocalExpressionPlan)APlan).Dispose();
+			((LocalExpressionPlan)plan).Dispose();
 		}
 		
-		public DataValue Evaluate(string AExpression, DataParams AParams)
+		public DataValue Evaluate(string expression, DataParams paramsValue)
 		{
 			#if USECOLLAPSEDEVALUATECALLS
 			#if LOGCACHEEVENTS
 			FSession.FServer.FInternalServer.LogMessage(String.Format("Thread {0} evaluating expression '{1}'.", Thread.CurrentThread.GetHashCode(), AExpression));
 			#endif
 			
-			RemoteParamData LParams = DataParamsToRemoteParamData(AParams);
-			IRemoteServerExpressionPlan LPlan;
-			PlanDescriptor LPlanDescriptor;
-			ProgramStatistics LExecuteTime;
-			byte[] LResult = FProcess.Evaluate(AExpression, ref LParams, out LPlan, out LPlanDescriptor, out LExecuteTime, GetProcessCallInfo(), GetProcessCleanupInfo());
-			RemoteParamDataToDataParams(AParams, LParams);
+			RemoteParamData localParamsValue = DataParamsToRemoteParamData(AParams);
+			IRemoteServerExpressionPlan plan;
+			PlanDescriptor planDescriptor;
+			ProgramStatistics executeTime;
+			byte[] result = FProcess.Evaluate(AExpression, ref localParamsValue, out plan, out planDescriptor, out executeTime, GetProcessCallInfo(), GetProcessCleanupInfo());
+			RemoteParamDataToDataParams(AParams, localParamsValue);
 			
 			#if LOGCACHEEVENTS
 			FSession.FServer.FInternalServer.LogMessage(String.Format("Thread {0} expression evaluated.", Thread.CurrentThread.GetHashCode()));
 			#endif
 			
-			LocalExpressionPlan LLocalPlan = new LocalExpressionPlan(this, LPlan, LPlanDescriptor, AParams);
+			LocalExpressionPlan localPlan = new LocalExpressionPlan(this, plan, planDescriptor, AParams);
 			try
 			{
-				return LResult == null ? null : DataValue.FromPhysical(this.ValueManager, LLocalPlan.DataType, LResult, 0);
+				return result == null ? null : DataValue.FromPhysical(this.ValueManager, localPlan.DataType, result, 0);
 			}
 			finally
 			{
-				UnprepareExpression(LLocalPlan);
+				UnprepareExpression(localPlan);
 			}
 			#else
-			IServerExpressionPlan LLocalPlan = PrepareExpression(AExpression, AParams);
+			IServerExpressionPlan localPlan = PrepareExpression(expression, paramsValue);
 			try
 			{
-				return LLocalPlan.Evaluate(AParams);
+				return localPlan.Evaluate(paramsValue);
 			}
 			finally
 			{
-				UnprepareExpression(LLocalPlan);
+				UnprepareExpression(localPlan);
 			}
 			#endif
 		}
 		
-		public IServerCursor OpenCursor(string AExpression, DataParams AParams)
+		public IServerCursor OpenCursor(string expression, DataParams paramsValue)
 		{
 			#if LOGCACHEEVENTS
 			FSession.FServer.FInternalServer.LogMessage(String.Format("Thread {0} opening cursor '{1}'.", Thread.CurrentThread.GetHashCode(), AExpression));
 			#endif
 			
-			RemoteParamData LParams = DataParamsToRemoteParamData(AParams);
-			IRemoteServerExpressionPlan LPlan;
-			IRemoteServerCursor LCursor;
-			PlanDescriptor LDescriptor;
-			ProgramStatistics LExecuteTime;
-			LocalExpressionPlan LLocalPlan;
-			LocalCursor LLocalCursor;
+			RemoteParamData localParamsValue = DataParamsToRemoteParamData(paramsValue);
+			IRemoteServerExpressionPlan plan;
+			IRemoteServerCursor cursor;
+			PlanDescriptor descriptor;
+			ProgramStatistics executeTime;
+			LocalExpressionPlan localPlan;
+			LocalCursor localCursor;
 			
 			if (ProcessInfo.FetchAtOpen && (ProcessInfo.FetchCount > 1))
 			{
-				Guid[] LBookmarks;
-				RemoteFetchData LFetchData;
-				LCursor = FProcess.OpenCursor(AExpression, ref LParams, out LPlan, out LDescriptor, out LExecuteTime, GetProcessCallInfo(), GetProcessCleanupInfo(), out LBookmarks, ProcessInfo.FetchCount, out LFetchData);
-				RemoteParamDataToDataParams(AParams, LParams);
-				LLocalPlan = new LocalExpressionPlan(this, LPlan, LDescriptor, AParams, LExecuteTime);
-				LLocalCursor = new LocalCursor(LLocalPlan, LCursor);
-				LLocalCursor.ProcessFetchData(LFetchData, LBookmarks, true);
+				Guid[] bookmarks;
+				RemoteFetchData fetchData;
+				cursor = _process.OpenCursor(expression, ref localParamsValue, out plan, out descriptor, out executeTime, GetProcessCallInfo(), GetProcessCleanupInfo(), out bookmarks, ProcessInfo.FetchCount, out fetchData);
+				RemoteParamDataToDataParams(paramsValue, localParamsValue);
+				localPlan = new LocalExpressionPlan(this, plan, descriptor, paramsValue, executeTime);
+				localCursor = new LocalCursor(localPlan, cursor);
+				localCursor.ProcessFetchData(fetchData, bookmarks, true);
 			}
 			else
 			{
-				LCursor = FProcess.OpenCursor(AExpression, ref LParams, out LPlan, out LDescriptor, out LExecuteTime, GetProcessCallInfo(), GetProcessCleanupInfo());
-				RemoteParamDataToDataParams(AParams, LParams);
-				LLocalPlan = new LocalExpressionPlan(this, LPlan, LDescriptor, AParams, LExecuteTime);
-				LLocalCursor = new LocalCursor(LLocalPlan, LCursor);
+				cursor = _process.OpenCursor(expression, ref localParamsValue, out plan, out descriptor, out executeTime, GetProcessCallInfo(), GetProcessCleanupInfo());
+				RemoteParamDataToDataParams(paramsValue, localParamsValue);
+				localPlan = new LocalExpressionPlan(this, plan, descriptor, paramsValue, executeTime);
+				localCursor = new LocalCursor(localPlan, cursor);
 			}
-			return LLocalCursor;
+			return localCursor;
 		}
 		
-		public void CloseCursor(IServerCursor ACursor)
+		public void CloseCursor(IServerCursor cursor)
 		{
-			IServerExpressionPlan LPlan = ACursor.Plan;
+			IServerExpressionPlan plan = cursor.Plan;
 			try
 			{
-				LPlan.Close(ACursor);
+				plan.Close(cursor);
 			}
 			finally
 			{
-				UnprepareExpression(LPlan);
+				UnprepareExpression(plan);
 			}
 		}
 		
-		public IServerScript PrepareScript(string AScript)
+		public IServerScript PrepareScript(string script)
 		{
-			return PrepareScript(AScript, null);
+			return PrepareScript(script, null);
 		}
 		
-		public IServerScript PrepareScript(string AScript, DebugLocator ALocator)
+		public IServerScript PrepareScript(string script, DebugLocator locator)
 		{
-			return new LocalScript(this, FProcess.PrepareScript(AScript, ALocator));
+			return new LocalScript(this, _process.PrepareScript(script, locator));
 		}
 		
-		public void UnprepareScript(IServerScript AScript)
+		public void UnprepareScript(IServerScript script)
 		{
 			try
 			{
-				FProcess.UnprepareScript(((LocalScript)AScript).RemoteScript);
+				_process.UnprepareScript(((LocalScript)script).RemoteScript);
 			}
 			catch
 			{
 				// ignore exceptions here
 			}
-			((LocalScript)AScript).Dispose();
+			((LocalScript)script).Dispose();
 		}
 		
-		public void ExecuteScript(string AScript)
+		public void ExecuteScript(string script)
 		{
-			FProcess.ExecuteScript(AScript, GetProcessCallInfo());
+			_process.ExecuteScript(script, GetProcessCallInfo());
 		}
 
         /// <summary>Begins a new transaction on this process.  Transactions may be nested.</summary>
-        public void BeginTransaction(IsolationLevel AIsolationLevel)
+        public void BeginTransaction(IsolationLevel isolationLevel)
 		{
-			FTransactionList.Add(AIsolationLevel);
+			_transactionList.Add(isolationLevel);
 			//FProcess.BeginTransaction(AIsolationLevel);
 		}
 		
 		public void PrepareTransaction()
 		{
 			// If the current transaction has not been started on the server side, preparing it will not do anything
-			if (FTransactionList.Count == 0)
-				FProcess.PrepareTransaction();
+			if (_transactionList.Count == 0)
+				_process.PrepareTransaction();
 		}
         
         /// <summary>
@@ -581,10 +581,10 @@ namespace Alphora.Dataphor.DAE.Server
         /// </summary>
         public void CommitTransaction()
         {
-			if (FTransactionList.Count > 0)
-				FTransactionList.RemoveAt(FTransactionList.Count - 1);
+			if (_transactionList.Count > 0)
+				_transactionList.RemoveAt(_transactionList.Count - 1);
 			else
-				FProcess.CommitTransaction();
+				_process.CommitTransaction();
 		}
         
         /// <summary>
@@ -594,48 +594,48 @@ namespace Alphora.Dataphor.DAE.Server
         /// </summary>
         public void RollbackTransaction()
         {
-			if (FTransactionList.Count > 0)
-				FTransactionList.RemoveAt(FTransactionList.Count - 1);
+			if (_transactionList.Count > 0)
+				_transactionList.RemoveAt(_transactionList.Count - 1);
 			else
-				FProcess.RollbackTransaction();
+				_process.RollbackTransaction();
 		}
         
         /// <value>Returns whether the process currently has an active transaction.</value>
-        public bool InTransaction { get { return (FTransactionList.Count > 0) || FProcess.InTransaction; } }
+        public bool InTransaction { get { return (_transactionList.Count > 0) || _process.InTransaction; } }
         
         /// <value>Returns the number of currently active transactions on the current process.</value>
-        public int TransactionCount { get { return FTransactionList.Count + FProcess.TransactionCount; } }
+        public int TransactionCount { get { return _transactionList.Count + _process.TransactionCount; } }
 		
-		public Guid BeginApplicationTransaction(bool AShouldJoin, bool AIsInsert)
+		public Guid BeginApplicationTransaction(bool shouldJoin, bool isInsert)
 		{
-			return FProcess.BeginApplicationTransaction(AShouldJoin, AIsInsert, GetProcessCallInfo());
+			return _process.BeginApplicationTransaction(shouldJoin, isInsert, GetProcessCallInfo());
 		}
 		
-		public void PrepareApplicationTransaction(Guid AID)
+		public void PrepareApplicationTransaction(Guid iD)
 		{
-			FProcess.PrepareApplicationTransaction(AID, GetProcessCallInfo());
+			_process.PrepareApplicationTransaction(iD, GetProcessCallInfo());
 		}
 		
-		public void CommitApplicationTransaction(Guid AID)
+		public void CommitApplicationTransaction(Guid iD)
 		{
-			FProcess.CommitApplicationTransaction(AID, GetProcessCallInfo());
+			_process.CommitApplicationTransaction(iD, GetProcessCallInfo());
 		}
 		
-		public void RollbackApplicationTransaction(Guid AID)
+		public void RollbackApplicationTransaction(Guid iD)
 		{
-			FProcess.RollbackApplicationTransaction(AID, GetProcessCallInfo());
+			_process.RollbackApplicationTransaction(iD, GetProcessCallInfo());
 		}
 		
-		public Guid ApplicationTransactionID { get { return FProcess.ApplicationTransactionID; } }
+		public Guid ApplicationTransactionID { get { return _process.ApplicationTransactionID; } }
 
-		public void JoinApplicationTransaction(Guid AID, bool AIsInsert)
+		public void JoinApplicationTransaction(Guid iD, bool isInsert)
 		{
-			FProcess.JoinApplicationTransaction(AID, AIsInsert, GetProcessCallInfo());
+			_process.JoinApplicationTransaction(iD, isInsert, GetProcessCallInfo());
 		}
 		
 		public void LeaveApplicationTransaction()
 		{
-			FProcess.LeaveApplicationTransaction(GetProcessCallInfo());
+			_process.LeaveApplicationTransaction(GetProcessCallInfo());
 		}
     }
 }

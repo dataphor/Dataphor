@@ -13,16 +13,16 @@ namespace Alphora.Dataphor.DAE.Server
 	[AttributeUsage(AttributeTargets.Assembly)]
 	public class DAERegisterAttribute : Attribute
 	{
-		public DAERegisterAttribute(string ARegisterClassName)
+		public DAERegisterAttribute(string registerClassName)
 		{
-			FRegisterClassName = ARegisterClassName;
+			_registerClassName = registerClassName;
 		}
 		
-		private string FRegisterClassName;
+		private string _registerClassName;
 		public string RegisterClassName
 		{
-			get { return FRegisterClassName; }
-			set { FRegisterClassName = value; }
+			get { return _registerClassName; }
+			set { _registerClassName = value; }
 		}
 	}
 }

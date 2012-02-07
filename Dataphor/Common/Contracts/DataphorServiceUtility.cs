@@ -14,71 +14,47 @@ namespace Alphora.Dataphor.DAE.Contracts
 
 	public static class DataphorServiceUtility
 	{
-		public const int CDefaultListenerPortNumber = 8060;
-		public const int CDefaultSecureListenerPortNumber = 8600;
+		public const int DefaultListenerPortNumber = 8060;
 		
-		private static string GetScheme(bool ASecure)
+		private static string GetScheme()
 		{
-			return ASecure ? Uri.UriSchemeHttps : Uri.UriSchemeHttp;
+			return Uri.UriSchemeNetTcp;
 		}
 		
-		public static string BuildInstanceURI(string AHostName, int APortNumber, bool ASecure, string AInstanceName)
+		public static string BuildInstanceURI(string hostName, int portNumber, string instanceName)
 		{
-			return String.Format("{0}://{1}:{2}/{3}/service", GetScheme(ASecure), AHostName, APortNumber, AInstanceName);
+			return String.Format("{0}://{1}:{2}/{3}/service", GetScheme(), hostName, portNumber, instanceName);
 		}
 		
-		public static string BuildNativeInstanceURI(string AHostName, int APortNumber, bool ASecure, string AInstanceName)
+		public static string BuildNativeInstanceURI(string hostName, int portNumber, string instanceName)
 		{
-			return String.Format("{0}://{1}:{2}/{3}/service/native", GetScheme(ASecure), AHostName, APortNumber, AInstanceName);
-		}
-		
-		public static string BuildListenerURI(string AHostName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode)
-		{
-			return 
-				BuildListenerURI
-				(
-					AHostName, 
-					AOverridePortNumber == 0 
-						? 
-						(
-							ASecurityMode == ConnectionSecurityMode.Transport 
-								? CDefaultSecureListenerPortNumber 
-								: CDefaultListenerPortNumber 
-						)
-						: AOverridePortNumber, 
-					ASecurityMode == ConnectionSecurityMode.Transport
-				);
-		}
-		
-		public static string BuildListenerURI(string AHostName, int APortNumber, bool ASecure)
-		{
-			return String.Format("{0}://{1}:{2}/listener/service", GetScheme(ASecure), AHostName, APortNumber);
-		}
-		
-		public static string BuildCrossDomainServiceURI(string AHostName, int APortNumber, bool ASecure)
-		{
-			return String.Format("{0}://{1}:{2}", GetScheme(ASecure), AHostName, APortNumber);
+			return String.Format("{0}://{1}:{2}/{3}/service/native", GetScheme(), hostName, portNumber, instanceName);
 		}
 
-		public const int CMaxMessageLength = 2147483647;
-
-		public static Binding GetBinding(bool ASecure)
+		public static string BuildListenerURI(string hostName, int overridePortNumber)
 		{
-			//return new BasicHttpBinding();
-			var LMessageEncodingElement = new BinaryMessageEncodingBindingElement();
+			return String.Format("{0}://{1}:{2}/listener/service", GetScheme(), hostName, overridePortNumber == 0 ? DefaultListenerPortNumber : overridePortNumber);  				
+		} 		
+	
+		public const int MaxMessageLength = 2147483647;
+
+		public static Binding GetBinding()
+		{
+			var messageEncodingElement = new BinaryMessageEncodingBindingElement();
 			#if !SILVERLIGHT
-			LMessageEncodingElement.ReaderQuotas.MaxArrayLength = CMaxMessageLength;
-			LMessageEncodingElement.ReaderQuotas.MaxStringContentLength = CMaxMessageLength;
+			messageEncodingElement.ReaderQuotas.MaxArrayLength = MaxMessageLength;
+			messageEncodingElement.ReaderQuotas.MaxStringContentLength = MaxMessageLength;
 			#endif
+
+			TcpTransportBindingElement transportElement = new TcpTransportBindingElement();
+
+			transportElement.MaxBufferSize = MaxMessageLength;
+			transportElement.MaxReceivedMessageSize = MaxMessageLength;
 			
-			var LTransportElement = ASecure ? new HttpsTransportBindingElement() : new HttpTransportBindingElement();
-			LTransportElement.MaxBufferSize = CMaxMessageLength;
-			LTransportElement.MaxReceivedMessageSize = CMaxMessageLength;
-			
-			var LBinding = new CustomBinding(LMessageEncodingElement, LTransportElement);
-			LBinding.SendTimeout = TimeSpan.MaxValue;
-			LBinding.ReceiveTimeout = TimeSpan.MaxValue;
-			return LBinding;
+			var binding = new CustomBinding(messageEncodingElement, transportElement);
+			binding.SendTimeout = TimeSpan.MaxValue;
+			binding.ReceiveTimeout = TimeSpan.MaxValue;
+			return binding;
 		}
 	}
 }

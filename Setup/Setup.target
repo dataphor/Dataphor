@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<!-- Imports -->
+	<PropertyGroup>
+		<DataphorBuildExtensionsPath>$(MSBuildProjectDirectory)\Dataphor.Build</DataphorBuildExtensionsPath>
+		<WixToolPath Condition=" '$(WixToolPath)' == '' ">$(MSBuildProjectDirectory)\..\3rdParty\Wix</WixToolPath>
+    <Major Condition=" '$(Major)' == '' ">3</Major>
+    <Minor Condition=" '$(Minor)' == '' ">0</Minor>
+    <Release Condition=" '$(Release)' == '' ">0</Release>
+    <Revision Condition=" '$(Revision)' == '' ">0</Revision>
+
+
+  </PropertyGroup>
+	<Import Project="$(MSBuildProjectDirectory)\Dataphor.Build\Dataphor.Build.targets" />
+  
+  <!-- Properties (variables) -->
+	<PropertyGroup>
+		<Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+		<DataphorOutputName Condition=" '$(DataphorOutputName)' == '' ">Dataphor</DataphorOutputName>
+	</PropertyGroup>
+
+  <!-- Synchronize DocumentationFiles -->
+  <ItemGroup>
+    <DocumentationFiles Include="..\Deploy\Documentation\*.*" />
+  </ItemGroup>
+  <Target Name="SyncDocumentation" >
+    <Message Text="Synchronize Documentation files with WiX." />
+    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="DocumentationFiles" SourceFiles="@(DocumentationFiles)" />
+  </Target>
+
+
+  <!-- Synchronize LibraryFiles -->
+  <ItemGroup>
+    <LibraryFiles Include="..\Deploy\Libraries\**\*.*" />
+  </ItemGroup>
+  <Target Name="SyncLibraries" >
+    <Message Text="Synchronize Library files with WiX." />
+    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="LibraryFiles" ComponentGroupID ="LibraryFilesGroup" SourceFiles="@(LibraryFiles)" />
+  </Target>
+
+
+  <!-- Synchronize BinFiles -->
+  <ItemGroup>
+    <BinFiles Include="..\Deploy\Dataphor\*.*" />
+  </ItemGroup>
+  <Target Name="SyncBin" >
+    <Message Text="Synchronize Bin files with WiX." />
+    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="BinFiles" SourceFiles="@(BinFiles)" />
+  </Target>
+  
+    
+  <!-- Synchronize WebClientFiles -->
+  <ItemGroup>
+    <WebClientFiles Include="..\Deploy\WebClient\*\*.*" />
+  </ItemGroup>
+  <Target Name="SyncWebClient" >
+    <Message Text="Synchronize Web Client files with WiX." />
+    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="WebClientFiles" SourceFiles="@(WebClient)" />
+  </Target>
+  
+  
+  
+	<!-- Build Dataphor Client Setup -->
+	<Target Name="BuildDataphorSetup" >
+		<Message Text="Building Dataphor Client Setup." />
+		<MSBuild Projects="Setup.wixproj" Targets="Build" Properties="WixToolPath=$(WixToolPath);OutputName=$(DataphorOutputName)"/>
+	</Target>
+
+	<!-- Main Build -->
+	<Target Name="Build" DependsOnTargets="SyncDocumentation; SyncBin; SyncLibraries; SyncWebClient" />
+</Project>

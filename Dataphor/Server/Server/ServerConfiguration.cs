@@ -17,146 +17,127 @@ namespace Alphora.Dataphor.DAE.Server
 	/// </summary>
 	public class ServerConfiguration
 	{
-		public const int CDefaultPortNumber = 8061;
-		public const int CDefaultSecurePortNumber = 8601;
-		public const string CDefaultLocalInstanceName = "LocalInstance";
-		public const int CDefaultLocalPortNumber = 8062;
-		public const int CDefaultLocalSecurePortNumber = 8602;
+		public const int DefaultPortNumber = 8061;
+		public const string DefaultLocalInstanceName = "LocalInstance";
+		public const int DefaultLocalPortNumber = 8062;
 		
-		private string FName;
+		private string _name;
 		public string Name
 		{
-			get { return FName; }
-			set { FName = value; }
+			get { return _name; }
+			set { _name = value; }
 		}
 		
-		private int FPortNumber;
+		private int _portNumber;
 		public int PortNumber
 		{
-			get { return FPortNumber; }
-			set { FPortNumber = value; }
+			get { return _portNumber; }
+			set { _portNumber = value; }
 		}
 		
-		private int FSecurePortNumber;
-		public int SecurePortNumber
-		{
-			get { return FSecurePortNumber; }
-			set { FSecurePortNumber = value; }
-		}
-		
-		private bool FRequireSecureConnection;
+		private bool _requireSecureConnection;
 		/// <summary>
 		/// Indicates whether or not the server will require all remote connections to use a secure channel.
 		/// </summary>
 		[DefaultValue(false)]
 		public bool RequireSecureConnection
 		{
-			get { return FRequireSecureConnection; }
-			set { FRequireSecureConnection = value; }
+			get { return _requireSecureConnection; }
+			set { _requireSecureConnection = value; }
 		}
 		
-		private bool FShouldListen = true;
+		private bool _shouldListen = true;
 		[DefaultValue(true)]
 		public bool ShouldListen
 		{
-			get { return FShouldListen; }
-			set { FShouldListen = value; }
+			get { return _shouldListen; }
+			set { _shouldListen = value; }
 		}
 		
-		private int FOverrideListenerPortNumber;
+		private int _overrideListenerPortNumber;
 		[DefaultValue(0)]
 		public int OverrideListenerPortNumber
 		{
-			get { return FOverrideListenerPortNumber; }
-			set { FOverrideListenerPortNumber = value; }
+			get { return _overrideListenerPortNumber; }
+			set { _overrideListenerPortNumber = value; }
 		}
 		
-		private int FOverrideSecureListenerPortNumber;
-		[DefaultValue(0)]
-		public int OverrideSecureListenerPortNumber
-		{
-			get { return FOverrideSecureListenerPortNumber; }
-			set { FOverrideSecureListenerPortNumber = value; }
-		}
-		
-		private bool FRequireSecureListenerConnection;
+		private bool _requireSecureListenerConnection;
 		[DefaultValue(false)]
 		public bool RequireSecureListenerConnection
 		{
-			get { return FRequireSecureListenerConnection; }
-			set { FRequireSecureListenerConnection = value; }
+			get { return _requireSecureListenerConnection; }
+			set { _requireSecureListenerConnection = value; }
 		}
 		
-		private bool FAllowSilverlightClients = true;
+		private bool _allowSilverlightClients = true;
 		[DefaultValue(true)]
 		public bool AllowSilverlightClients
 		{
-			get { return FAllowSilverlightClients; }
-			set { FAllowSilverlightClients = value; }
+			get { return _allowSilverlightClients; }
+			set { _allowSilverlightClients = value; }
 		}
 		
-		private string FLibraryDirectories;
+		private string _libraryDirectories;
 		public string LibraryDirectories
 		{
-			get { return FLibraryDirectories; }
-			set { FLibraryDirectories = value; }
+			get { return _libraryDirectories; }
+			set { _libraryDirectories = value; }
 		}
 		
-		private string FInstanceDirectory;
+		private string _instanceDirectory;
 		public string InstanceDirectory
 		{
-			get { return FInstanceDirectory; }
-			set { FInstanceDirectory = value; }
+			get { return _instanceDirectory; }
+			set { _instanceDirectory = value; }
 		}
 		
-		private string FCatalogStoreClassName;
+		private string _catalogStoreClassName;
 		public string CatalogStoreClassName
 		{
-			get { return FCatalogStoreClassName; }
-			set { FCatalogStoreClassName = value; }
+			get { return _catalogStoreClassName; }
+			set { _catalogStoreClassName = value; }
 		}
 		
-		private string FCatalogStoreConnectionString;
+		private string _catalogStoreConnectionString;
 		public string CatalogStoreConnectionString
 		{
-			get { return FCatalogStoreConnectionString; }
-			set { FCatalogStoreConnectionString = value; }
+			get { return _catalogStoreConnectionString; }
+			set { _catalogStoreConnectionString = value; }
 		}
 		
-		private Schema.DeviceSettings FDeviceSettings = new Schema.DeviceSettings();
+		private Schema.DeviceSettings _deviceSettings = new Schema.DeviceSettings();
 		public Schema.DeviceSettings DeviceSettings
 		{
-			get { return FDeviceSettings; }
+			get { return _deviceSettings; }
 		}
 		
-		public void ApplyTo(Server AServer)
+		public void ApplyTo(Server server)
 		{
-			AServer.Name = FName;
-			AServer.LibraryDirectory = FLibraryDirectories;
-			AServer.InstanceDirectory = FInstanceDirectory;
-			AServer.CatalogStoreClassName = FCatalogStoreClassName;
-			AServer.CatalogStoreConnectionString = FCatalogStoreConnectionString;
-			AServer.DeviceSettings.AddRange(FDeviceSettings);
+			server.Name = _name;
+			server.LibraryDirectory = _libraryDirectories;
+			server.InstanceDirectory = _instanceDirectory;
+			server.CatalogStoreClassName = _catalogStoreClassName;
+			server.CatalogStoreConnectionString = _catalogStoreConnectionString;
+			server.DeviceSettings.AddRange(_deviceSettings);
 		}
 		
-		public static ServerConfiguration DefaultInstance(string AInstanceName)
+		public static ServerConfiguration DefaultInstance(string instanceName)
 		{
-			ServerConfiguration LInstance = new ServerConfiguration();
-			LInstance.Name = String.IsNullOrEmpty(AInstanceName) ? Engine.CDefaultServerName : AInstanceName;
-			LInstance.PortNumber = CDefaultPortNumber;
-			LInstance.SecurePortNumber = CDefaultSecurePortNumber;
-			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.CDefaultLibraryDirectory);
-			return LInstance;
+			ServerConfiguration instance = new ServerConfiguration();
+			instance.Name = String.IsNullOrEmpty(instanceName) ? Engine.DefaultServerName : instanceName;
+			instance.PortNumber = DefaultPortNumber;
+			instance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.DefaultLibraryDirectory);
+			return instance;
 		}
 		
 		public static ServerConfiguration DefaultLocalInstance()
 		{
-			ServerConfiguration LInstance = new ServerConfiguration();
-			LInstance.Name = CDefaultLocalInstanceName;
-			LInstance.PortNumber = CDefaultLocalPortNumber; // don't use the same default port as the service
-			LInstance.SecurePortNumber = CDefaultLocalSecurePortNumber;
-			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.CDefaultLibraryDirectory);
-			return LInstance;
+			ServerConfiguration instance = new ServerConfiguration();
+			instance.Name = DefaultLocalInstanceName;
+			instance.PortNumber = DefaultLocalPortNumber; // don't use the same default port as the service
+			instance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.DefaultLibraryDirectory);
+			return instance;
 		}
 	}
 }

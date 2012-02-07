@@ -12,7 +12,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	[ListInDesigner(false)]
 	public class Module : Node, IModule
 	{
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
 			return true;
 		}

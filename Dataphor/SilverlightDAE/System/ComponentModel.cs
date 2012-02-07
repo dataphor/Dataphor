@@ -31,9 +31,9 @@ namespace System.ComponentModel
 			GC.SuppressFinalize(this);
 		}
 		
-		protected virtual void Dispose(bool ADisposing)
+		protected virtual void Dispose(bool disposing)
 		{
-			if (ADisposing)
+			if (disposing)
 			{
 				lock (this)
 				{
@@ -47,28 +47,17 @@ namespace System.ComponentModel
 			}
 		}
 		
-		protected virtual object GetService(Type AService)
+		protected virtual object GetService(Type service)
 		{
-			return (Site != null ? Site.GetService(AService) : false);
+			return (Site != null ? Site.GetService(service) : false);
 		}
 	}
 	
 	public class EditorAttribute : Attribute
 	{
-		public EditorAttribute(string AClassName, string AUITypeEditor) { }
+		public EditorAttribute(string className, string uITypeEditor) { }
 	}
 	
-	public class BrowsableAttribute : Attribute
-	{
-		public BrowsableAttribute(bool AValue) { }
-	}
-
-	public interface ISupportInitialize
-	{
-		void BeginInit();
-		void EndInit();
-	}
-
 	public enum DesignerSerializationVisibility
 	{
 		Hidden,
@@ -78,7 +67,7 @@ namespace System.ComponentModel
 
 	public class DesignerSerializationVisibilityAttribute : Attribute
 	{
-		public DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility AVisibility) { }
+		public DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility visibility) { }
 	}
 	
 	public enum RefreshProperties
@@ -91,11 +80,6 @@ namespace System.ComponentModel
 	public class RefreshPropertiesAttribute : Attribute
 	{
 		public RefreshPropertiesAttribute(RefreshProperties A) { }
-	}
-	
-	public class DefaultEventAttribute : Attribute
-	{
-		public DefaultEventAttribute(string A) { }
 	}
 	
 	public class DesignerCategoryAttribute : Attribute

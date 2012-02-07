@@ -1,0 +1,132 @@
+SafeDrop('T1');
+SafeDrop('T2');
+create table T1 { ID : Integer, key { ID } };
+create table T2 { ID : Integer, T1_ID : Integer, key { ID }, reference T2_T1 { T1_ID } references T1 { ID } };
+
+
+insert row { 1 ID } into T1;
+insert row { 2 ID } into T1;
+
+//insert row { 1 ID, 1 T1_ID } into T2;
+//insert row { 2 ID, 2 T1_ID } into T2;
+
+try
+	delete T1 where ID = 2;
+	update T1 set { ID := 2 } where ID = 1;
+commit;
+// **********
+
+//*
+SafeDrop('R1');
+create table R1 {
+	PersId : Integer,
+	PersInfo : String,
+	key { PersId }
+};
+
+//*
+SafeDrop('R1X');
+create table R1X {
+	PersId : Integer,
+	ExtraInfo : String,
+	key { PersId },
+	reference R1X_ref_R1{PersId}
+		references R1{PersId}
+			update cascade delete cascade
+};
+
+//*
+R1 := table {
+	row { 1 PersId, 'Anna' PersInfo },
+	row { 2, 'Britta' },
+	row { 3, 'Cecilia' },
+	row { 4, 'Diana' },
+	row { 5, 'Eva' },
+	row { 6, 'Frida' },
+	row { 7, 'Gudrun' }
+};
+
+//*
+R1X := table {
+	row { 1 PersId, 'A' ExtraInfo },
+	row { 3, 'C' },
+	row { 4, 'D' },
+	row { 5, 'E' },
+	row { 7, 'G' }
+};
+
+//*
+SafeDrop('DeleteAndPackR1(Integer, Integer)');
+create operator DeleteAndPackR1(PersFrom : Integer, PersTo : Integer) begin
+	if PersTo < PersFrom then
+		exit;
+
+	var iLength := 1 + PersTo - PersFrom;
+
+//try
+	delete R1 where PersId between PersFrom and PersTo;
+//commit;
+
+	foreach var LRow in (R1 where PersId > PersTo)
+		order by { PersId asc } isolation browse type static do
+		update R1 where PersId = LRow.PersId
+		set { PersId := PersId - iLength };
+end;
+
+// **********
+
+// Now if I try to execute:
+
+//*
+DeleteAndPackR1(3, 5);
+
+/*
+ I got following error:
+
+User:104232 --->
+The table Object_0ea3a97d_da1b_4f24_8a8f_ca4a5d603ec4 already has a row with PersId (4). (operator:TILTidMain.DeleteAndPackR1(System.Integer,
+System.Integer)@15:37)
+(operator:TILTidMain.DeleteAndPackR1(System.Integer,
+System.Integer)@15:37)
+---- Server Context ----
+   at
+Alphora.Dataphor.DAE.Client.ClientStatementPlan.Execute(RemoteParamData&
+AParams, ProgramStatistics& AExecuteTime, ProcessCallInfo ACallInfo)
+   at Alphora.Dataphor.DAE.Server.LocalStatementPlan.Execute(DataParams
+AParams)
+   at
+Alphora.Dataphor.DAE.Client.ScriptExecutionUtility.ExecuteScript(IServer
+Process AProcess, String AScript, ScriptExecuteOption AOptions, ErrorList& AErrors, TimeSpan& ATimeElapsed, ReportScriptProgressHandler AReportScriptProgress, DebugLocator ALocator)
+*/
+
+//A workaround is to uncomment (i.e. activate) BeginTransaction(); and CommitTransaction(); in the operator code above. Now executing...
+
+DeleteAndPackR1(3, 5);
+
+//... will have the expected behaviour as may be verified by...
+
+select R1;
+select R1X;
+
+//... yielding:
+
+/*
+PersId PersInfo
+------ -------- 
+1      Anna     
+2      Britta   
+3      Frida    
+4      Gudrun   
+
+PersId ExtraInfo
+------ --------- 
+1      A         
+4      G         
+
+*/
+
+//Is this to be considered as "Behaviour by Design" or as a bug? To me this seems to be quite counterintuitive anyway.
+
+//Best regards,
+///Johan
+

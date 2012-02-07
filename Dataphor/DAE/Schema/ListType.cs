@@ -26,32 +26,32 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	public class ListType : IListType
     {
-		public ListType(IDataType AElementType) : base()
+		public ListType(IDataType elementType) : base()
 		{
-			FIsDisposable = true;
-			FElementType = AElementType;
+			_isDisposable = true;
+			_elementType = elementType;
 		}
 		
 		[Reference]
-		private IDataType FElementType;
+		private IDataType _elementType;
 		public IDataType ElementType
 		{
-			get { return FElementType; }
-			set { FElementType = value; }
+			get { return _elementType; }
+			set { _elementType = value; }
 		}
 		
 		public string Name
 		{
 			get 
 			{ 
-				StringBuilder LBuilder = new StringBuilder(Keywords.List);
+				StringBuilder builder = new StringBuilder(Keywords.List);
 				if (!IsGeneric)
 				{
-					LBuilder.Append(Keywords.BeginGroup);
-					LBuilder.Append(FElementType.Name);
-					LBuilder.Append(Keywords.EndGroup);
+					builder.Append(Keywords.BeginGroup);
+					builder.Append(_elementType.Name);
+					builder.Append(Keywords.EndGroup);
 				}
-				return LBuilder.ToString();
+				return builder.ToString();
 			}
 			set { }
 		}
@@ -90,73 +90,73 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		// IsGeneric
 		// Indicates whether this data type is a generic data type (i.e. table, not table{})
-		private bool FIsGeneric;
+		private bool _isGeneric;
 		public bool IsGeneric
 		{
-			get { return FIsGeneric; }
-			set { FIsGeneric = value; }
+			get { return _isGeneric; }
+			set { _isGeneric = value; }
 		}
 		
 		public bool IsNil { get { return false; } }
 		
 		// IsDisposable
 		// Indicates whether the host representation for this data type must be disposed
-		private bool FIsDisposable = false;
+		private bool _isDisposable = false;
 		public bool IsDisposable
 		{
-			get { return FIsDisposable; }
-			set { FIsDisposable = value; }
+			get { return _isDisposable; }
+			set { _isDisposable = value; }
 		}
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			return (AObject is IDataType) && Equals((IDataType)AObject);
+			return (objectValue is IDataType) && Equals((IDataType)objectValue);
 		}
 		
 		public override int GetHashCode()
 		{
-			return FElementType.GetHashCode();
+			return _elementType.GetHashCode();
 		}
 		
-		public bool Equivalent(IDataType ADataType)
+		public bool Equivalent(IDataType dataType)
 		{
-			return (ADataType is IListType) && FElementType.Equivalent(((IListType)ADataType).ElementType);
+			return (dataType is IListType) && _elementType.Equivalent(((IListType)dataType).ElementType);
 		}
 
-		public bool Equals(IDataType ADataType)
+		public bool Equals(IDataType dataType)
 		{
-			return (ADataType is IListType) && FElementType.Equals(((IListType)ADataType).ElementType);
+			return (dataType is IListType) && _elementType.Equals(((IListType)dataType).ElementType);
 		}
 
-		public bool Is(IDataType ADataType)
+		public bool Is(IDataType dataType)
 		{
 			return 
-				(ADataType is IGenericType) ||
+				(dataType is IGenericType) ||
 				(
-					(ADataType is IListType) && 
+					(dataType is IListType) && 
 					(
-						ADataType.IsGeneric ||
-						FElementType.Is(((IListType)ADataType).ElementType)
+						dataType.IsGeneric ||
+						_elementType.Is(((IListType)dataType).ElementType)
 					)
 				);
 		}
 		
-		public bool Compatible(IDataType ADataType)
+		public bool Compatible(IDataType dataType)
 		{
-			return Is(ADataType) || ADataType.Is(this);
+			return Is(dataType) || dataType.Is(this);
 		}
 		
-		public TypeSpecifier EmitSpecifier(EmitMode AMode)
+		public TypeSpecifier EmitSpecifier(EmitMode mode)
 		{
-			ListTypeSpecifier LSpecifier = new ListTypeSpecifier();
-			LSpecifier.IsGeneric = IsGeneric;
-			LSpecifier.TypeSpecifier = ElementType == null ? null : ElementType.EmitSpecifier(AMode);
-			return LSpecifier;
+			ListTypeSpecifier specifier = new ListTypeSpecifier();
+			specifier.IsGeneric = IsGeneric;
+			specifier.TypeSpecifier = ElementType == null ? null : ElementType.EmitSpecifier(mode);
+			return specifier;
 		}
 
-        public void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
         {
-			ElementType.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			ElementType.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
         }
    }
 }

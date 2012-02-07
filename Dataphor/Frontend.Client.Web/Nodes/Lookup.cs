@@ -18,107 +18,107 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 {
 	public abstract class LookupBase : SingleElementContainer, ILookupElement
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Source = null;
 		}
 
 		// Source
 
-		private ISource FSource;
+		private ISource _source;
 		public ISource Source
 		{
-			get { return FSource; }
+			get { return _source; }
 			set
 			{
-				if (FSource != value)
+				if (_source != value)
 				{
-					if (FSource != null)
-						FSource.Disposed -= new EventHandler(SourceDisposed);
-					FSource = value;
-					if (FSource != null)
-						FSource.Disposed += new EventHandler(SourceDisposed);
+					if (_source != null)
+						_source.Disposed -= new EventHandler(SourceDisposed);
+					_source = value;
+					if (_source != null)
+						_source.Disposed += new EventHandler(SourceDisposed);
 				}
 			}
 		}
 		
-		protected virtual void SourceDisposed(object ASender, EventArgs AArgs)
+		protected virtual void SourceDisposed(object sender, EventArgs args)
 		{
 			Source = null;
 		}
 
 		// ReadOnly
 
-		private bool FReadOnly;
+		private bool _readOnly;
 		[DefaultValue(false)]
 		public bool ReadOnly
 		{
-			get { return FReadOnly; }
-			set { FReadOnly = value; }
+			get { return _readOnly; }
+			set { _readOnly = value; }
 		}
 
 		// Title		
 
-		private string FTitle = String.Empty;
+		private string _title = String.Empty;
 		[DefaultValue("")]
 		public string Title
 		{
-			get { return FTitle; }
-			set { FTitle = value == null ? String.Empty : value; }
+			get { return _title; }
+			set { _title = value == null ? String.Empty : value; }
 		}
 
 		public virtual string GetTitle()
 		{
-			return FTitle;
+			return _title;
 		}
 
 		// Document
 
-		private string FDocument = String.Empty;
+		private string _document = String.Empty;
 		[DefaultValue("")]
 		public string Document
 		{
-			get { return FDocument; }
-			set { FDocument = value; }
+			get { return _document; }
+			set { _document = value; }
 		}
 
 		// MasterKeyNames
 
-		private string FMasterKeyNames = String.Empty;
+		private string _masterKeyNames = String.Empty;
 		[DefaultValue("")]
 		public string MasterKeyNames
 		{
-			get { return FMasterKeyNames; }
-			set { FMasterKeyNames = value == null ? String.Empty : value; }
+			get { return _masterKeyNames; }
+			set { _masterKeyNames = value == null ? String.Empty : value; }
 		}
 
 		// DetailKeyNames
 
-		private string FDetailKeyNames = String.Empty;
+		private string _detailKeyNames = String.Empty;
 		[DefaultValue("")]
 		public string DetailKeyNames
 		{
-			get { return FDetailKeyNames; }
-			set { FDetailKeyNames = value == null ? String.Empty : value; }
+			get { return _detailKeyNames; }
+			set { _detailKeyNames = value == null ? String.Empty : value; }
 		}
 
 		// AutoLookup - NOT SUPPORTED by the web client
 
-		private bool FAutoLookup = false;
+		private bool _autoLookup = false;
 		[DefaultValue(false)]
 		public bool AutoLookup
 		{
-			get { return FAutoLookup; }
-			set { FAutoLookup = value; }
+			get { return _autoLookup; }
+			set { _autoLookup = value; }
 		}
 
-		private bool FAutoLookupWhenNotNil;
+		private bool _autoLookupWhenNotNil;
 		[DefaultValue(false)]
 		public bool AutoLookupWhenNotNil
 		{
-			get { return FAutoLookupWhenNotNil; }
-			set { FAutoLookupWhenNotNil = value; }
+			get { return _autoLookupWhenNotNil; }
+			set { _autoLookupWhenNotNil = value; }
 		}
 
 		public void ResetAutoLookup() {}
@@ -136,29 +136,29 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			);
 		}
 
-		private void LookupAccepted(IFormInterface AForm) 
+		private void LookupAccepted(IFormInterface form) 
 		{
 			if 
 			(
 				!ReadOnly
 					&& (Source != null) 
 					&& (Source.DataView != null) 
-					&& (AForm.MainSource != null) 
-					&& (AForm.MainSource.DataView != null) 
-					&& !AForm.MainSource.DataView.IsEmpty()
+					&& (form.MainSource != null) 
+					&& (form.MainSource.DataView != null) 
+					&& !form.MainSource.DataView.IsEmpty()
 			)
 			{
-				int LIndex = -1;
-				string[] LTargetColumns = GetColumnNames().Split(DAE.Client.DataView.CColumnNameDelimiters);
-				foreach (string LSourceColumnName in GetLookupColumnNames().Split(DAE.Client.DataView.CColumnNameDelimiters))
+				int index = -1;
+				string[] targetColumns = GetColumnNames().Split(DAE.Client.DataView.ColumnNameDelimiters);
+				foreach (string sourceColumnName in GetLookupColumnNames().Split(DAE.Client.DataView.ColumnNameDelimiters))
 				{
-					++LIndex;
-					DAE.Client.DataField LSource = AForm.MainSource.DataView.Fields[LSourceColumnName.Trim()];
-					DAE.Client.DataField LTarget = Source.DataSource.DataSet.Fields[LTargetColumns[LIndex].Trim()];
-					if (!LSource.HasValue())
-						LTarget.ClearValue();
+					++index;
+					DAE.Client.DataField source = form.MainSource.DataView.Fields[sourceColumnName.Trim()];
+					DAE.Client.DataField target = Source.DataSource.DataSet.Fields[targetColumns[index].Trim()];
+					if (!source.HasValue())
+						target.ClearValue();
 					else
-						LTarget.Value = LSource.Value;
+						target.Value = source.Value;
 				}
 			}
 		}
@@ -179,20 +179,20 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 					&& (Source.DataView != null);
 		}
 
-		public override bool ProcessRequest(HttpContext AContext)
+		public override bool ProcessRequest(HttpContext context)
 		{
-			if (Session.IsActionLink(AContext, ID) && IsDataViewActive() && !ReadOnly)
+			if (Session.IsActionLink(context, ID) && IsDataViewActive() && !ReadOnly)
 			{
 				Lookup();
 				return true;
 			}
 			else
-				return base.ProcessRequest(AContext);
+				return base.ProcessRequest(context);
 		}
 
 		// ILookup
 
-		void ILookup.LookupFormInitialize(IFormInterface AForm) 
+		void ILookup.LookupFormInitialize(IFormInterface form) 
 		{
 			// Nadda
 		}
@@ -203,93 +203,93 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		#region LookupColumnName
 
-		private string FLookupColumnName = String.Empty;
+		private string _lookupColumnName = String.Empty;
 		[DefaultValue("")]
 		public string LookupColumnName
 		{
-			get { return FLookupColumnName; }
-			set { FLookupColumnName = (value == null ? String.Empty : value); }
+			get { return _lookupColumnName; }
+			set { _lookupColumnName = (value == null ? String.Empty : value); }
 		}
 		
 		public override string GetLookupColumnNames()
 		{
-			return FLookupColumnName;
+			return _lookupColumnName;
 		}
 
 		#endregion
 
 		#region ColumnName
 
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		[DefaultValue("")]
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = (value == null ? String.Empty : value); }
+			get { return _columnName; }
+			set { _columnName = (value == null ? String.Empty : value); }
 		}
 		
 		public override string GetColumnNames()
 		{
-			return FColumnName;
+			return _columnName;
 		}
 
 		#endregion
 
 		#region VerticalAlignment
 
-		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		protected VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		[DefaultValue(VerticalAlignment.Top)]
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
-			set { FVerticalAlignment = value; }
+			get { return _verticalAlignment; }
+			set { _verticalAlignment = value; }
 		}
 
 		#endregion
 
 		#region TitleAlignment		
 
-		private TitleAlignment FTitleAlignment = TitleAlignment.Top;
+		private TitleAlignment _titleAlignment = TitleAlignment.Top;
 		[DefaultValue(TitleAlignment.Top)]
 		public TitleAlignment TitleAlignment
 		{
-			get { return FTitleAlignment; }
-			set { FTitleAlignment = value; }
+			get { return _titleAlignment; }
+			set { _titleAlignment = value; }
 		}
 
 		#endregion
 
 		// TitledElement
 
-		protected virtual void RenderElement(HtmlTextWriter AWriter)
+		protected virtual void RenderElement(HtmlTextWriter writer)
 		{
-			base.InternalRender(AWriter);
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "images/lookup.png");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "16");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Height, "15");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Alt, Strings.Get("LookupButtonAlt"));
+			base.InternalRender(writer);
+			writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/lookup.png");
+			writer.AddAttribute(HtmlTextWriterAttribute.Width, "16");
+			writer.AddAttribute(HtmlTextWriterAttribute.Height, "15");
+			writer.AddAttribute(HtmlTextWriterAttribute.Alt, Strings.Get("LookupButtonAlt"));
 			if (!ReadOnly && IsDataViewActive())
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, ID));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-			AWriter.RenderEndTag();
+				writer.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, ID));
+			writer.RenderBeginTag(HtmlTextWriterTag.Img);
+			writer.RenderEndTag();
 		}
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			switch (FTitleAlignment)
+			switch (_titleAlignment)
 			{
-				case TitleAlignment.None : RenderElement(AWriter); break;
+				case TitleAlignment.None : RenderElement(writer); break;
 				case TitleAlignment.Top :
-					AWriter.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(GetTitle())));
-					AWriter.Write("<br>");
-					RenderElement(AWriter);
+					writer.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(GetTitle())));
+					writer.Write("<br>");
+					RenderElement(writer);
 					break;
 				case TitleAlignment.Left :
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
-					AWriter.RenderBeginTag(HtmlTextWriterTag.Div);
-					AWriter.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(GetTitle())));
-					RenderElement(AWriter);
-					AWriter.RenderEndTag();
+					writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+					writer.RenderBeginTag(HtmlTextWriterTag.Div);
+					writer.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(GetTitle())));
+					RenderElement(writer);
+					writer.RenderEndTag();
 					break;
 			}
 		}
@@ -299,77 +299,77 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		//ColumnNames
 
-		private string FColumnNames = String.Empty;
+		private string _columnNames = String.Empty;
 		[DefaultValue("")]
 		public string ColumnNames
 		{
-			get { return FColumnNames; }
-			set { FColumnNames = value == null ? String.Empty : value; }
+			get { return _columnNames; }
+			set { _columnNames = value == null ? String.Empty : value; }
 		}
 
 		public override string GetColumnNames()
 		{
-			return FColumnNames;
+			return _columnNames;
 		}
 
 		// LookupColumnNames
 
-		private string FLookupColumnNames = String.Empty;
+		private string _lookupColumnNames = String.Empty;
 		[DefaultValue("")]
 		public string LookupColumnNames
 		{
-			get { return FLookupColumnNames; }
-			set { FLookupColumnNames = value == null ? String.Empty : value; }
+			get { return _lookupColumnNames; }
+			set { _lookupColumnNames = value == null ? String.Empty : value; }
 		}
 
 		public override string GetLookupColumnNames()
 		{
-			return FLookupColumnNames;
+			return _lookupColumnNames;
 		}
 
 		// IWebElement
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "group");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "1");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "7");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "100%");
-			string LTemp = GetHint();
-			if (LTemp != String.Empty)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LTemp, true);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Table);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "group");
+			writer.AddAttribute(HtmlTextWriterAttribute.Border, "1");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "7");
+			writer.AddAttribute(HtmlTextWriterAttribute.Width, "100%");
+			string temp = GetHint();
+			if (temp != String.Empty)
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, temp, true);
+			writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
-			LTemp = GetTitle();
-			if (LTemp != String.Empty)
+			temp = GetTitle();
+			if (temp != String.Empty)
 			{
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Caption);
-				AWriter.Write(HttpUtility.HtmlEncode(LTemp));
-				AWriter.RenderEndTag();
+				writer.RenderBeginTag(HtmlTextWriterTag.Caption);
+				writer.Write(HttpUtility.HtmlEncode(temp));
+				writer.RenderEndTag();
 			}
 
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-			base.InternalRender(AWriter);
-			AWriter.RenderEndTag();
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			base.InternalRender(writer);
+			writer.RenderEndTag();
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+			writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "images/lookup.png");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "16");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Height, "15");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Alt, Strings.Get("LookupButtonAlt"));
+			writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/lookup.png");
+			writer.AddAttribute(HtmlTextWriterAttribute.Width, "16");
+			writer.AddAttribute(HtmlTextWriterAttribute.Height, "15");
+			writer.AddAttribute(HtmlTextWriterAttribute.Alt, Strings.Get("LookupButtonAlt"));
 			if (!ReadOnly && IsDataViewActive())
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, ID));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-			AWriter.RenderEndTag();
+				writer.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, ID));
+			writer.RenderBeginTag(HtmlTextWriterTag.Img);
+			writer.RenderEndTag();
 
-			AWriter.RenderEndTag();	// TD
-			AWriter.RenderEndTag();	// TR
-			AWriter.RenderEndTag(); // TABLE
+			writer.RenderEndTag();	// TD
+			writer.RenderEndTag();	// TR
+			writer.RenderEndTag(); // TABLE
 		}
 	}
 }

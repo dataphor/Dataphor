@@ -12,42 +12,42 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public abstract class DotNetCommand : SQLCommand
 	{
-		public DotNetCommand(DotNetConnection AConnection, IDbCommand ACommand) : base(AConnection)
+		public DotNetCommand(DotNetConnection connection, IDbCommand command) : base(connection)
 		{
-			FCommand = ACommand;
+			_command = command;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
 				UnprepareCommand();
 				
-				if (FCommand != null)
+				if (_command != null)
 				{
-					FCommand.Dispose();
-					FCommand = null;
+					_command.Dispose();
+					_command = null;
 				}
 			}
 			finally
 			{
-				base.Dispose(ADisposing);	
+				base.Dispose(disposing);	
 			}
 		}
 		
 		public new DotNetConnection Connection { get { return (DotNetConnection)base.Connection; } }
 
-		protected IDbCommand FCommand;
+		protected IDbCommand _command;
 		
-		protected void PrepareCommand(bool AExecute, SQLIsolationLevel AIsolationLevel)
+		protected void PrepareCommand(bool execute, SQLIsolationLevel isolationLevel)
 		{
-			FCommand.CommandText = PrepareStatement(Statement);
+			_command.CommandText = PrepareStatement(Statement);
 			if (CommandTimeout >= 0)
-				FCommand.CommandTimeout = CommandTimeout;
+				_command.CommandTimeout = CommandTimeout;
 			switch (CommandType)
 			{
-				case SQLCommandType.Statement : FCommand.CommandType = System.Data.CommandType.Text; break;
-				case SQLCommandType.Table : FCommand.CommandType = System.Data.CommandType.TableDirect; break;
+				case SQLCommandType.Statement : _command.CommandType = System.Data.CommandType.Text; break;
+				case SQLCommandType.Table : _command.CommandType = System.Data.CommandType.TableDirect; break;
 			}
 			if (UseParameters)
 				PrepareParameters();
@@ -76,20 +76,20 @@ namespace Alphora.Dataphor.DAE.Connection
 		{
 			if (UseParameters)
 			{
-				SQLParameter LParameter;
-				for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+				SQLParameter parameter;
+				for (int index = 0; index < _parameterIndexes.Length; index++)
 				{
-					LParameter = Parameters[FParameterIndexes[LIndex]];
-					if ((LParameter.Direction == SQLDirection.In) || (LParameter.Direction == SQLDirection.InOut))
-						if (LParameter.Value == null)
-							ParameterByIndex(LIndex).Value = DBNull.Value;
+					parameter = Parameters[_parameterIndexes[index]];
+					if ((parameter.Direction == SQLDirection.In) || (parameter.Direction == SQLDirection.InOut))
+						if (parameter.Value == null)
+							ParameterByIndex(index).Value = DBNull.Value;
 						else
 						{
 							// TODO: Better story for the length of string parameters.  This usage prevents the use of prepared commands in general
-							IDbDataParameter LDataParameter = (IDbDataParameter)ParameterByIndex(LIndex);
-							if ((LParameter.Value is string) && (LDataParameter.Size < ((string)LParameter.Value).Length))
-								LDataParameter.Size = ((string)LParameter.Value).Length;
-							LDataParameter.Value = LParameter.Value;
+							IDbDataParameter dataParameter = (IDbDataParameter)ParameterByIndex(index);
+							if ((parameter.Value is string) && (dataParameter.Size < ((string)parameter.Value).Length))
+								dataParameter.Size = ((string)parameter.Value).Length;
+							dataParameter.Value = parameter.Value;
 						}
 				}
 			}
@@ -99,30 +99,30 @@ namespace Alphora.Dataphor.DAE.Connection
 		{
 			if (UseParameters)
 			{
-				SQLParameter LParameter;
-				for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+				SQLParameter parameter;
+				for (int index = 0; index < _parameterIndexes.Length; index++)
 				{
-					LParameter = Parameters[FParameterIndexes[LIndex]];
-					if ((LParameter.Direction == SQLDirection.InOut) || (LParameter.Direction == SQLDirection.Out) || (LParameter.Direction == SQLDirection.Result))
+					parameter = Parameters[_parameterIndexes[index]];
+					if ((parameter.Direction == SQLDirection.InOut) || (parameter.Direction == SQLDirection.Out) || (parameter.Direction == SQLDirection.Result))
 					{
-						if (ParameterByIndex(LIndex).Value == DBNull.Value)
-							LParameter.Value = null;
+						if (ParameterByIndex(index).Value == DBNull.Value)
+							parameter.Value = null;
 						else
-							LParameter.Value = ParameterByIndex(LIndex).Value;
+							parameter.Value = ParameterByIndex(index).Value;
 					}
 				}
 			}
 		}
 
 		/// <summary> Access parameters by index through this routine to allow descendants to change the semantics. </summary>
-		protected virtual IDataParameter ParameterByIndex(int AIndex)
+		protected virtual IDataParameter ParameterByIndex(int index)
 		{
-			return (IDataParameter)FCommand.Parameters[AIndex];
+			return (IDataParameter)_command.Parameters[index];
 		}
 
 		protected virtual void ClearParameters()
 		{
-			FCommand.Parameters.Clear();
+			_command.Parameters.Clear();
 		}
 
 		#endregion
@@ -133,7 +133,7 @@ namespace Alphora.Dataphor.DAE.Connection
 			try
 			{
 				SetParameters();
-				FCommand.ExecuteNonQuery();
+				_command.ExecuteNonQuery();
 				GetParameters();
 			}
 			finally
@@ -142,38 +142,38 @@ namespace Alphora.Dataphor.DAE.Connection
 			}
 		}
 		
-		protected virtual CommandBehavior SQLCommandBehaviorToCommandBehavior(SQLCommandBehavior ACommandBehavior)
+		protected virtual CommandBehavior SQLCommandBehaviorToCommandBehavior(SQLCommandBehavior commandBehavior)
 		{
-			System.Data.CommandBehavior LBehavior = System.Data.CommandBehavior.Default | System.Data.CommandBehavior.SingleResult;
+			System.Data.CommandBehavior behavior = System.Data.CommandBehavior.Default | System.Data.CommandBehavior.SingleResult;
 			
-			if ((ACommandBehavior & SQLCommandBehavior.KeyInfo) != 0)
-				LBehavior |= System.Data.CommandBehavior.KeyInfo;
+			if ((commandBehavior & SQLCommandBehavior.KeyInfo) != 0)
+				behavior |= System.Data.CommandBehavior.KeyInfo;
 				
-			if ((ACommandBehavior & SQLCommandBehavior.SchemaOnly) != 0)
-				LBehavior |= System.Data.CommandBehavior.SchemaOnly;
+			if ((commandBehavior & SQLCommandBehavior.SchemaOnly) != 0)
+				behavior |= System.Data.CommandBehavior.SchemaOnly;
 				
-			return LBehavior;
+			return behavior;
 		}
 		
-		protected override SQLCursor InternalOpen(SQLCursorType ACursorType, SQLIsolationLevel AIsolationLevel)
+		protected override SQLCursor InternalOpen(SQLCursorType cursorType, SQLIsolationLevel isolationLevel)
 		{
-			PrepareCommand(false, AIsolationLevel);
+			PrepareCommand(false, isolationLevel);
 			SetParameters();
-			IDataReader LCursor = FCommand.ExecuteReader(SQLCommandBehaviorToCommandBehavior(CommandBehavior));
+			IDataReader cursor = _command.ExecuteReader(SQLCommandBehaviorToCommandBehavior(CommandBehavior));
 			GetParameters();
-			return new DotNetCursor(this, LCursor);
+			return new DotNetCursor(this, cursor);
 		}
 		
 		protected override void InternalClose()
 		{
-			if (FCommand != null)
+			if (_command != null)
 				UnprepareCommand();
 		}
 		
 		public void Cancel()
 		{
-			if ((FCommand != null) && (Connection != null) && Connection.IsConnectionValid())
-				FCommand.Cancel();
+			if ((_command != null) && (Connection != null) && Connection.IsConnectionValid())
+				_command.Cancel();
 		}
 	}
 }

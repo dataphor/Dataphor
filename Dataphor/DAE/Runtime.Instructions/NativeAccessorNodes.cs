@@ -24,625 +24,625 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BooleanAsStringSelectorNode
     public class BooleanAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return Convert.ToBoolean((string)AArgument1);
+			return Convert.ToBoolean((string)argument1);
 		}
     }
     
     // BooleanAsStringReadAccessorNode
     public class BooleanAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((bool)AArgument1).ToString().ToLower();
+			return ((bool)argument1).ToString().ToLower();
 		}
     }
     
     // BooleanAsStringWriteAccessorNode
     public class BooleanAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return Convert.ToBoolean((string)AArgument2);
+			return Convert.ToBoolean((string)argument2);
 		}
     }   
 
     // BooleanAsDisplayStringSelectorNode
     public class BooleanAsDisplayStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return Convert.ToBoolean((string)AArgument1);
+			return Convert.ToBoolean((string)argument1);
 		}
     }
     
     // BooleanAsDisplayStringReadAccessorNode
     public class BooleanAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((bool)AArgument1).ToString();
+			return ((bool)argument1).ToString();
 		}
     }
     
     // BooleanAsDisplayStringWriteAccessorNode
     public class BooleanAsDisplayStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return Convert.ToBoolean((string)AArgument2);
+			return Convert.ToBoolean((string)argument2);
 		}
     }   
 
     // ByteAsStringSelectorNode
     public class ByteAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return Convert.ToByte((string)AArgument1);
+			return Convert.ToByte((string)argument1);
 		}
     }
     
     // ByteAsStringReadAccessorNode
     public class ByteAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((byte)AArgument1).ToString();
+			return ((byte)argument1).ToString();
 		}
     }
     
     // ByteAsStringWriteAccessorNode
     public class ByteAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return Convert.ToByte((string)AArgument2);
+			return Convert.ToByte((string)argument2);
 		}
     }   
 
     // ShortAsStringSelectorNode
     public class ShortAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return Convert.ToInt16((string)AArgument1);
+			return Convert.ToInt16((string)argument1);
 		}
     }
     
     // ShortAsStringReadAccessorNode
     public class ShortAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((short)AArgument1).ToString();
+			return ((short)argument1).ToString();
 		}
     }
     
     // ShortAsStringWriteAccessorNode
     public class ShortAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return Convert.ToInt16((string)AArgument2);
+			return Convert.ToInt16((string)argument2);
 		}
     }   
 
     // IntegerAsStringSelectorNode
     public class IntegerAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return Convert.ToInt32((string)AArgument1);
+			return Convert.ToInt32((string)argument1);
 		}
     }
     
     // IntegerAsStringReadAccessorNode
     public class IntegerAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((int)AArgument1).ToString();
+			return ((int)argument1).ToString();
 		}
     }
     
     // IntegerAsStringWriteAccessorNode
     public class IntegerAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return Convert.ToInt32((string)AArgument2);
+			return Convert.ToInt32((string)argument2);
 		}
     }   
 
     // LongAsStringSelectorNode
     public class LongAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return Convert.ToInt64((string)AArgument1);
+			return Convert.ToInt64((string)argument1);
 		}
     }
     
     // LongAsStringReadAccessorNode
     public class LongAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((long)AArgument1).ToString();
+			return ((long)argument1).ToString();
 		}
     }
     
     // LongAsStringWriteAccessorNode
     public class LongAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return Convert.ToInt64((string)AArgument2);
+			return Convert.ToInt64((string)argument2);
 		}
     }   
 
     // DecimalAsStringSelectorNode
     public class DecimalAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return Convert.ToDecimal((string)AArgument1);
+			return Convert.ToDecimal((string)argument1);
 		}
     }
     
     // DecimalAsStringReadAccessorNode
     public class DecimalAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((decimal)AArgument1).ToString();
+			return ((decimal)argument1).ToString();
 		}
     }
     
     // DecimalAsStringWriteAccessorNode
     public class DecimalAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return Convert.ToDecimal((string)AArgument2);
+			return Convert.ToDecimal((string)argument2);
 		}
     }   
 
     // GuidAsStringSelectorNode
     public class GuidAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return new Guid((string)AArgument1);
+			return new Guid((string)argument1);
 		}
     }
     
     // GuidAsStringReadAccessorNode
     public class GuidAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((Guid)AArgument1).ToString();
+			return ((Guid)argument1).ToString();
 		}
     }
     
     // GuidAsStringWriteAccessorNode
     public class GuidAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return new Guid((string)AArgument2);
+			return new Guid((string)argument2);
 		}
     }   
 
     // MoneyAsStringSelectorNode
     public class MoneyAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return Decimal.Parse((string)AArgument1, System.Globalization.NumberStyles.Currency);
+			return Decimal.Parse((string)argument1, System.Globalization.NumberStyles.Currency);
 		}
     }
     
     // MoneyAsStringReadAccessorNode
     public class MoneyAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((decimal)AArgument1).ToString("F");
+			return ((decimal)argument1).ToString("F");
 		}
     }
     
     // MoneyAsDisplayStringReadAccessorNode
     public class MoneyAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((decimal)AArgument1).ToString("C");
+			return ((decimal)argument1).ToString("C");
 		}
     }
     
     // MoneyAsStringWriteAccessorNode
     public class MoneyAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return Decimal.Parse((string)AArgument2, System.Globalization.NumberStyles.Currency);
+			return Decimal.Parse((string)argument2, System.Globalization.NumberStyles.Currency);
 		}
     }   
 
     // DateTimeAsStringSelectorNode
     public class DateTimeAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return DateTime.Parse((string)AArgument1);
+			return DateTime.Parse((string)argument1);
 		}
     }
     
     // DateTimeAsStringReadAccessorNode
     public class DateTimeAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((DateTime)AArgument1).ToString("G");
+			return ((DateTime)argument1).ToString("G");
 		}
     }
     
     // DateTimeAsStringWriteAccessorNode
     public class DateTimeAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return DateTime.Parse((string)AArgument2);
+			return DateTime.Parse((string)argument2);
 		}
     }   
 
     // DateAsStringSelectorNode
     public class DateAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return DateTime.Parse((string)AArgument1).Date;
+			return DateTime.Parse((string)argument1).Date;
 		}
     }
     
     // DateAsStringReadAccessorNode
     public class DateAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((DateTime)AArgument1).ToString("d");
+			return ((DateTime)argument1).ToString("d");
 		}
     }
     
     // DateAsStringWriteAccessorNode
     public class DateAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return DateTime.Parse((string)AArgument2).Date;
+			return DateTime.Parse((string)argument2).Date;
 		}
     }   
 
     // TimeSpanAsStringSelectorNode
     public class TimeSpanAsStringSelectorNode : UnaryInstructionNode
     {
-		public static TimeSpan StringToTimeSpan(string AValue)
+		public static TimeSpan StringToTimeSpan(string value)
 		{
 			try
 			{
-				return TimeSpan.Parse(AValue);
+				return TimeSpan.Parse(value);
 			}
 			catch
 			{
-				return CustomParse(AValue);
+				return CustomParse(value);
 			}
 		}
 
-		public static TimeSpan CustomParse(string AValue)
+		public static TimeSpan CustomParse(string value)
 		{ 
-			bool LIsNegative = false;
-			int LWeeks = 0;
-			int LDays = 0;
-			int LHours = 0;
-			int LMinutes = 0;
-			int LSeconds = 0;
-			int LMilliseconds = 0;
-			int LNanoseconds = 0;
-			long LTicks = 0;
-			bool LHasWeeks = false;
-			bool LHasDays = false;
-			bool LHasHours = false;
-			bool LHasMinutes = false;
-			bool LHasSeconds = false;
-			bool LHasMilliseconds = false;
-			bool LHasNanoseconds = false;
+			bool isNegative = false;
+			int weeks = 0;
+			int days = 0;
+			int hours = 0;
+			int minutes = 0;
+			int seconds = 0;
+			int milliseconds = 0;
+			int nanoseconds = 0;
+			long ticks = 0;
+			bool hasWeeks = false;
+			bool hasDays = false;
+			bool hasHours = false;
+			bool hasMinutes = false;
+			bool hasSeconds = false;
+			bool hasMilliseconds = false;
+			bool hasNanoseconds = false;
 			 
-			System.Text.StringBuilder LString = new System.Text.StringBuilder(AValue.ToLower());
+			System.Text.StringBuilder stringValue = new System.Text.StringBuilder(value.ToLower());
 			
-			LString.Replace("ms","x");
-			LString.Replace("mil","x");
+			stringValue.Replace("ms","x");
+			stringValue.Replace("mil","x");
 			int i = 0;
-			while (i < LString.Length)
+			while (i < stringValue.Length)
 			{
-				if (LString[i] == ' ')                       
-					LString.Remove(i,1);
-				else if (LString[i] == '-')                  
+				if (stringValue[i] == ' ')                       
+					stringValue.Remove(i,1);
+				else if (stringValue[i] == '-')                  
 				{
-					if (i == 0 && LIsNegative == false)
+					if (i == 0 && isNegative == false)
 					{
-						LIsNegative = true;
-						LString.Remove(i,1);
+						isNegative = true;
+						stringValue.Remove(i,1);
 					}
 					else
-						throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, AValue);	
+						throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, value);	
 				}
-				else if (i == 0 && ((int)LString[i] < 48 || (int)LString[i] > 57))
-					throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, AValue);	
-				else if ((int)LString[i] >= 48 && (int)LString[i] <= 57)
+				else if (i == 0 && ((int)stringValue[i] < 48 || (int)stringValue[i] > 57))
+					throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, value);	
+				else if ((int)stringValue[i] >= 48 && (int)stringValue[i] <= 57)
 					i++;
-				else if ((int)LString[i] < 48 || (int)LString[i] > 57)
+				else if ((int)stringValue[i] < 48 || (int)stringValue[i] > 57)
 				{
-					if ((((int)LString[i - 1]) >= 48) && (((int)LString[i - 1]) <= 57))
+					if ((((int)stringValue[i - 1]) >= 48) && (((int)stringValue[i - 1]) <= 57))
 					{
 						if 
 						(
-							LString[i] == 'w' || LString[i] == 'd' || LString[i] == 'h' || 
-							LString[i] == 'm' || LString[i] == 's' || LString[i] == 'n' ||
-							LString[i] == 'x'
+							stringValue[i] == 'w' || stringValue[i] == 'd' || stringValue[i] == 'h' || 
+							stringValue[i] == 'm' || stringValue[i] == 's' || stringValue[i] == 'n' ||
+							stringValue[i] == 'x'
 						)
 							i++;	 
 						else
-							throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, AValue);	 
+							throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, value);	 
 					}
 					else
-						LString.Remove(i,1);
+						stringValue.Remove(i,1);
 				}
 			}
 			
 			if 
 			(
-				(LString.Length == 0) ||
+				(stringValue.Length == 0) ||
 				(
-					LString[LString.Length - 1] != 'w' && LString[LString.Length - 1] != 'd' &&
-					LString[LString.Length - 1] != 'h' && LString[LString.Length - 1] != 'm' &&
-					LString[LString.Length - 1] != 's' && LString[LString.Length - 1] != 'x' &&
-					LString[LString.Length - 1] != 'n'
+					stringValue[stringValue.Length - 1] != 'w' && stringValue[stringValue.Length - 1] != 'd' &&
+					stringValue[stringValue.Length - 1] != 'h' && stringValue[stringValue.Length - 1] != 'm' &&
+					stringValue[stringValue.Length - 1] != 's' && stringValue[stringValue.Length - 1] != 'x' &&
+					stringValue[stringValue.Length - 1] != 'n'
 				)
 			)
-				throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, AValue);	 
+				throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, value);	 
 
 			i = 0;
-			while (LString.Length > 0)
+			while (stringValue.Length > 0)
 			{
-				if (((int)LString[i] >= 48) && ((int)LString[i] <= 57))
+				if (((int)stringValue[i] >= 48) && ((int)stringValue[i] <= 57))
 					i++;
 				else
 				{
-					switch (LString[i])
+					switch (stringValue[i])
 					{
 						case 'w':
-							if (!(LHasWeeks))
+							if (!(hasWeeks))
 							{
-								LWeeks = Convert.ToInt32(LString.ToString().Substring(0,i));
-								LHasWeeks = true;
+								weeks = Convert.ToInt32(stringValue.ToString().Substring(0,i));
+								hasWeeks = true;
 							}
 							else
-								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, AValue);	
+								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, value);	
 							break;
 						case 'd':
-							if (!(LHasDays))
+							if (!(hasDays))
 							{	 
-								LDays = Convert.ToInt32(LString.ToString().Substring(0,i));
-								LHasDays = true;
+								days = Convert.ToInt32(stringValue.ToString().Substring(0,i));
+								hasDays = true;
 							}
 							else
-								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, AValue);	
+								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, value);	
 							break;
 						case 'h':
-							if (!(LHasHours))
+							if (!(hasHours))
 							{	
-								LHours = Convert.ToInt32(LString.ToString().Substring(0,i));
-								LHasHours = true;
+								hours = Convert.ToInt32(stringValue.ToString().Substring(0,i));
+								hasHours = true;
 							}
 							else
-								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, AValue);	 
+								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, value);	 
 							break;
 						case 'm':
-							if (!(LHasMinutes))
+							if (!(hasMinutes))
 							{	 
-								LMinutes = Convert.ToInt32(LString.ToString().Substring(0,i));
-								LHasMinutes = true;
+								minutes = Convert.ToInt32(stringValue.ToString().Substring(0,i));
+								hasMinutes = true;
 							}
 							else
-								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, AValue);	 
+								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, value);	 
 							break;
 						case 's':
-							if (!(LHasSeconds))
+							if (!(hasSeconds))
 							{	
-								LSeconds = Convert.ToInt32(LString.ToString().Substring(0,i));
-								LHasSeconds = true;
+								seconds = Convert.ToInt32(stringValue.ToString().Substring(0,i));
+								hasSeconds = true;
 							} 
 							else
-								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, AValue);	
+								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, value);	
 							break;
 						case 'x':
-							if (!(LHasMilliseconds))
+							if (!(hasMilliseconds))
 							{
-								LMilliseconds = Convert.ToInt32(LString.ToString().Substring(0,i));
-								LHasMilliseconds = true;
+								milliseconds = Convert.ToInt32(stringValue.ToString().Substring(0,i));
+								hasMilliseconds = true;
 							}
 							else
-								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, AValue);	
+								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, value);	
 							break;
 						case 'n':
-							if (!(LHasNanoseconds))
+							if (!(hasNanoseconds))
 							{
-								LNanoseconds = Convert.ToInt32(LString.ToString().Substring(0,i));
-								if (LNanoseconds % 100 != 0)
-									throw new ConveyorException(ConveyorException.Codes.InvalidNanosecondArgument, AValue);
-								LHasNanoseconds = true;
+								nanoseconds = Convert.ToInt32(stringValue.ToString().Substring(0,i));
+								if (nanoseconds % 100 != 0)
+									throw new ConveyorException(ConveyorException.Codes.InvalidNanosecondArgument, value);
+								hasNanoseconds = true;
 							}
 							else
-								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, AValue);	
+								throw new ConveyorException(ConveyorException.Codes.InvalidStringArgument, value);	
 							break;
 					}
-					LString.Remove(0,i + 1);
+					stringValue.Remove(0,i + 1);
 					i = 0;
 				}
 			}
-			LTicks = 
-				LWeeks * TimeSpan.TicksPerDay * 7 +
-				LDays * TimeSpan.TicksPerDay +
-				LHours * TimeSpan.TicksPerHour +
-				LMinutes * TimeSpan.TicksPerMinute + 
-				LSeconds * TimeSpan.TicksPerSecond +
-				LMilliseconds * TimeSpan.TicksPerMillisecond +
-				LNanoseconds / 100;
+			ticks = 
+				weeks * TimeSpan.TicksPerDay * 7 +
+				days * TimeSpan.TicksPerDay +
+				hours * TimeSpan.TicksPerHour +
+				minutes * TimeSpan.TicksPerMinute + 
+				seconds * TimeSpan.TicksPerSecond +
+				milliseconds * TimeSpan.TicksPerMillisecond +
+				nanoseconds / 100;
 
-			return LIsNegative ? (new TimeSpan(LTicks)).Negate() : new TimeSpan(LTicks);
+			return isNegative ? (new TimeSpan(ticks)).Negate() : new TimeSpan(ticks);
 		}
 
-		public static string TimeSpanToString(TimeSpan AValue)
+		public static string TimeSpanToString(TimeSpan value)
 		{
 			const string CWeeks = "wks ";
 			const string CDays = "days ";
@@ -651,186 +651,186 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			const string CSeconds = "sec ";
 			const string CMilliseconds = "mil ";
 			const string CNanoseconds = "nan ";
-			String LTimeSpan = String.Empty;
-			bool LLeft = false;
-			int LWeeks = AValue.Days / 7;
-			int LDays = AValue.Days % 7;
-			int LHours = AValue.Hours;
-			int LMinutes = AValue.Minutes;
-			int LSeconds = AValue.Seconds;
-			int LMilseconds = AValue.Milliseconds;
-			long LNanoseconds = ((AValue.Ticks % 10000) * 100);
+			String timeSpan = String.Empty;
+			bool left = false;
+			int weeks = value.Days / 7;
+			int days = value.Days % 7;
+			int hours = value.Hours;
+			int minutes = value.Minutes;
+			int seconds = value.Seconds;
+			int milseconds = value.Milliseconds;
+			long nanoseconds = ((value.Ticks % 10000) * 100);
  
-			if (LWeeks != 0)
+			if (weeks != 0)
 			{
-				LLeft = true;
-				LTimeSpan = LTimeSpan + LWeeks.ToString() + CWeeks;
+				left = true;
+				timeSpan = timeSpan + weeks.ToString() + CWeeks;
 			}
-			if (LLeft)
+			if (left)
 			{
-				if (LDays + LHours + LMinutes + LSeconds + LMilseconds + LNanoseconds != 0)
+				if (days + hours + minutes + seconds + milseconds + nanoseconds != 0)
 				{
-					LDays = System.Math.Abs(LDays);
-					LTimeSpan = LTimeSpan + LDays.ToString() + CDays;
-				}
-			}
-			else 
-				if (LDays != 0)
-				{
-					LLeft = true;
-					LTimeSpan = LTimeSpan + LDays.ToString() + CDays;
-				}
-			if (LLeft)
-			{
-				if (LHours + LMinutes + LSeconds + LMilseconds + LNanoseconds != 0)
-				{
-					LHours = System.Math.Abs(LHours);
-					LTimeSpan = LTimeSpan + LHours.ToString() + CHours;
+					days = System.Math.Abs(days);
+					timeSpan = timeSpan + days.ToString() + CDays;
 				}
 			}
 			else 
-				if (LHours != 0)
+				if (days != 0)
 				{
-					LLeft = true;
-					LTimeSpan = LTimeSpan + LHours.ToString() + CHours;
+					left = true;
+					timeSpan = timeSpan + days.ToString() + CDays;
 				}
-			if (LLeft)
+			if (left)
 			{
-				if (LMinutes + LSeconds + LMilseconds + LNanoseconds != 0)
+				if (hours + minutes + seconds + milseconds + nanoseconds != 0)
 				{
-					LMinutes = System.Math.Abs(LMinutes);
-					LTimeSpan = LTimeSpan + LMinutes.ToString() + CMinutes;
+					hours = System.Math.Abs(hours);
+					timeSpan = timeSpan + hours.ToString() + CHours;
 				}
 			}
 			else 
-				if (LMinutes != 0)
+				if (hours != 0)
+				{
+					left = true;
+					timeSpan = timeSpan + hours.ToString() + CHours;
+				}
+			if (left)
+			{
+				if (minutes + seconds + milseconds + nanoseconds != 0)
+				{
+					minutes = System.Math.Abs(minutes);
+					timeSpan = timeSpan + minutes.ToString() + CMinutes;
+				}
+			}
+			else 
+				if (minutes != 0)
 				{ 
-					LLeft = true;
-					LTimeSpan = LTimeSpan + LMinutes.ToString() + CMinutes; 
+					left = true;
+					timeSpan = timeSpan + minutes.ToString() + CMinutes; 
 				}
-			if (LLeft)
+			if (left)
 			{
-				if (LSeconds + LMilseconds + LNanoseconds != 0)
+				if (seconds + milseconds + nanoseconds != 0)
 				{
-					LSeconds = System.Math.Abs(LSeconds);
-					LTimeSpan = LTimeSpan + LSeconds.ToString() + CSeconds;
+					seconds = System.Math.Abs(seconds);
+					timeSpan = timeSpan + seconds.ToString() + CSeconds;
 				}
 			}
 			else 
-				if (LSeconds != 0)
+				if (seconds != 0)
 				{
-					LLeft = true;
-					LTimeSpan = LTimeSpan + LSeconds.ToString() + CSeconds;	 
+					left = true;
+					timeSpan = timeSpan + seconds.ToString() + CSeconds;	 
 				}
-			if (LLeft)
+			if (left)
 			{
-				if (LMilseconds + LNanoseconds != 0)
+				if (milseconds + nanoseconds != 0)
 				{
-					LMilseconds = System.Math.Abs(LMilseconds);
-					LTimeSpan = LTimeSpan + LMilseconds.ToString() + CMilliseconds;
+					milseconds = System.Math.Abs(milseconds);
+					timeSpan = timeSpan + milseconds.ToString() + CMilliseconds;
 				}
 			}
 			else 
-				if (LMilseconds != 0)
+				if (milseconds != 0)
 				{
-					LLeft = true;
-					LTimeSpan = LTimeSpan + LMilseconds.ToString() + CMilliseconds;
+					left = true;
+					timeSpan = timeSpan + milseconds.ToString() + CMilliseconds;
 				}
 
-			if (LLeft && (LNanoseconds != 0))
+			if (left && (nanoseconds != 0))
 			{
-				LNanoseconds = System.Math.Abs(LNanoseconds);
-				LTimeSpan = LTimeSpan + LNanoseconds.ToString() + CNanoseconds;
+				nanoseconds = System.Math.Abs(nanoseconds);
+				timeSpan = timeSpan + nanoseconds.ToString() + CNanoseconds;
 			}
-			else if (!(LLeft) && (LNanoseconds == 0))
-				LTimeSpan = LTimeSpan + LNanoseconds.ToString();
-			else if (LNanoseconds != 0)
+			else if (!(left) && (nanoseconds == 0))
+				timeSpan = timeSpan + nanoseconds.ToString();
+			else if (nanoseconds != 0)
 			{
-				LLeft = true;
-				LTimeSpan = LTimeSpan + LNanoseconds.ToString() + CNanoseconds;
+				left = true;
+				timeSpan = timeSpan + nanoseconds.ToString() + CNanoseconds;
 			}
-			return LTimeSpan;
+			return timeSpan;
 		}
 
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return StringToTimeSpan((string)AArgument1);
+			return StringToTimeSpan((string)argument1);
 		}
     }
     
     // TimeSpanAsStringReadAccessorNode
     public class TimeSpanAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return TimeSpanAsStringSelectorNode.TimeSpanToString(((TimeSpan)AArgument1));
+			return TimeSpanAsStringSelectorNode.TimeSpanToString(((TimeSpan)argument1));
 		}
     }
     
     // TimeSpanAsStringWriteAccessorNode
     public class TimeSpanAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return TimeSpanAsStringSelectorNode.StringToTimeSpan((string)AArgument2);
+			return TimeSpanAsStringSelectorNode.StringToTimeSpan((string)argument2);
 		}
     }   
 
     // TimeAsStringSelectorNode
     public class TimeAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return new DateTime(DateTime.Parse((string)AArgument1).TimeOfDay.Ticks);
+			return new DateTime(DateTime.Parse((string)argument1).TimeOfDay.Ticks);
 		}
     }
     
     // TimeAsStringReadAccessorNode
     public class TimeAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ((DateTime)AArgument1).ToString("T");
+			return ((DateTime)argument1).ToString("T");
 		}
     }
     
     // TimeAsStringWriteAccessorNode
     public class TimeAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			#endif
-			return new DateTime(DateTime.Parse((string)AArgument2).TimeOfDay.Ticks);
+			return new DateTime(DateTime.Parse((string)argument2).TimeOfDay.Ticks);
 		}
     }   
 
     // BinaryAsDisplayStringSelectorNode
     public class BinaryAsDisplayStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Binary");
 		}
@@ -839,10 +839,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BinaryAsDisplayStringReadAccessorNode
     public class BinaryAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			return Strings.Get("BinaryAsDisplayStringReadAccessorNode.BinaryData");
@@ -852,7 +852,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BinaryAsDisplayStringWriteAccessorNode
     public class BinaryAsDisplayStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Binary");
 		}
@@ -861,7 +861,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // GraphicAsDisplayStringSelectorNode
     public class GraphicAsDisplayStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Graphic");
 		}
@@ -870,10 +870,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // GraphicAsDisplayStringReadAccessorNode
     public class GraphicAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			return Strings.Get("GraphicAsDisplayStringReadAccessorNode.GraphicData");
@@ -883,7 +883,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // GraphicAsDisplayStringWriteAccessorNode
     public class GraphicAsDisplayStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Graphic");
 		}
@@ -892,7 +892,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // ErrorAsDisplayStringSelectorNode
     public class ErrorAsDisplayStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsDisplayString", "System.Error");
 		}
@@ -901,20 +901,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // ErrorAsDisplayStringReadAccessorNode
     public class ErrorAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
-			return ExceptionUtility.BriefDescription((Exception)AArgument1);
+			return ExceptionUtility.BriefDescription((Exception)argument1);
 		}
     }
     
     // ErrorAsDisplayStringWriteAccessorNode
     public class ErrorAsDisplayStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsDisplayString", "System.Error");
 		}

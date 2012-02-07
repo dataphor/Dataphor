@@ -11,135 +11,135 @@ namespace Alphora.Dataphor.Frontend.Client
 {
 	public sealed class LookupUtility
 	{
-		public static string[] GetColumnNames(string AFirstKeyNames, string ASecondKeyNames)
+		public static string[] GetColumnNames(string firstKeyNames, string secondKeyNames)
 		{
-			if (AFirstKeyNames != String.Empty)
+			if (firstKeyNames != String.Empty)
 			{
-				string[] LFirstKeyNames = AFirstKeyNames.Split(DAE.Client.DataView.CColumnNameDelimiters);
-				string[] LSecondKeyNames = ASecondKeyNames.Split(DAE.Client.DataView.CColumnNameDelimiters);
-				string[] LKeyNames = new string[LFirstKeyNames.Length + LSecondKeyNames.Length];
-				for (int LIndex = 0; LIndex < LFirstKeyNames.Length; LIndex++)
-					LKeyNames[LIndex] = LFirstKeyNames[LIndex];
+				string[] localFirstKeyNames = firstKeyNames.Split(DAE.Client.DataView.ColumnNameDelimiters);
+				string[] localSecondKeyNames = secondKeyNames.Split(DAE.Client.DataView.ColumnNameDelimiters);
+				string[] keyNames = new string[localFirstKeyNames.Length + localSecondKeyNames.Length];
+				for (int index = 0; index < localFirstKeyNames.Length; index++)
+					keyNames[index] = localFirstKeyNames[index];
 					
-				for (int LIndex = 0; LIndex < LSecondKeyNames.Length; LIndex++)
-					LKeyNames[LIndex + LFirstKeyNames.Length] = LSecondKeyNames[LIndex];
+				for (int index = 0; index < localSecondKeyNames.Length; index++)
+					keyNames[index + localFirstKeyNames.Length] = localSecondKeyNames[index];
 				
-				return LKeyNames;
+				return keyNames;
 			}
 			else
-				return ASecondKeyNames.Split(DAE.Client.DataView.CColumnNameDelimiters);
+				return secondKeyNames.Split(DAE.Client.DataView.ColumnNameDelimiters);
 		}
 		
-		public static void DoLookup(ILookup ALookupNode, FormInterfaceHandler AOnFormAccept, FormInterfaceHandler AOnFormReject, System.Collections.IDictionary AState)
+		public static void DoLookup(ILookup lookupNode, FormInterfaceHandler onFormAccept, FormInterfaceHandler onFormReject, System.Collections.IDictionary state)
 		{
-			bool LIsReadOnly = (ALookupNode is ILookupElement) && ((ILookupElement)ALookupNode).ReadOnly;
-			if (!LIsReadOnly && (ALookupNode.Document != String.Empty) && (ALookupNode.Source != null) && (ALookupNode.Source.DataView != null))
+			bool isReadOnly = (lookupNode is ILookupElement) && ((ILookupElement)lookupNode).ReadOnly;
+			if (!isReadOnly && (lookupNode.Document != String.Empty) && (lookupNode.Source != null) && (lookupNode.Source.DataView != null))
 			{
-				ALookupNode.Source.DataView.Edit();
-				ALookupNode.Source.DataView.RequestSave();
-				IFormInterface LForm = ALookupNode.HostNode.Session.LoadForm(ALookupNode, ALookupNode.Document, new FormInterfaceHandler(new LookupContext(ALookupNode).PreLookup));
+				lookupNode.Source.DataView.Edit();
+				lookupNode.Source.DataView.RequestSave();
+				IFormInterface form = lookupNode.HostNode.Session.LoadForm(lookupNode, lookupNode.Document, new FormInterfaceHandler(new LookupContext(lookupNode).PreLookup));
 				try
 				{
 					// Append the specified state
-					if (AState != null)
+					if (state != null)
 					{
-						foreach (KeyValuePair<string, object> LEntry in AState)
-							LForm.UserState.Add(LEntry.Key, LEntry.Value);
+						foreach (KeyValuePair<string, object> entry in state)
+							form.UserState.Add(entry.Key, entry.Value);
 					}
 
-					ALookupNode.LookupFormInitialize(LForm);
+					lookupNode.LookupFormInitialize(form);
 					
-					string[] LColumnNames = GetColumnNames(ALookupNode.MasterKeyNames, ALookupNode.GetColumnNames());
-					string[] LLookupColumnNames = GetColumnNames(ALookupNode.DetailKeyNames, ALookupNode.GetLookupColumnNames());
+					string[] columnNames = GetColumnNames(lookupNode.MasterKeyNames, lookupNode.GetColumnNames());
+					string[] lookupColumnNames = GetColumnNames(lookupNode.DetailKeyNames, lookupNode.GetLookupColumnNames());
 
-					LForm.CheckMainSource();
+					form.CheckMainSource();
 					
 					LookupUtility.FindNearestRow
 					(
-						LForm.MainSource.DataSource,
-						LLookupColumnNames,
-						ALookupNode.Source.DataSource,
-						LColumnNames
+						form.MainSource.DataSource,
+						lookupColumnNames,
+						lookupNode.Source.DataSource,
+						columnNames
 					);
 
-					LForm.Show
+					form.Show
 					(
-						(IFormInterface)ALookupNode.FindParent(typeof(IFormInterface)),
-						AOnFormAccept, 
-						AOnFormReject, 
+						(IFormInterface)lookupNode.FindParent(typeof(IFormInterface)),
+						onFormAccept, 
+						onFormReject, 
 						FormMode.Query
 					);
 				}
 				catch
 				{
-					LForm.HostNode.Dispose();
+					form.HostNode.Dispose();
 					throw;
 				}
 			}
 		}
 		
 		/// <summary> Locates the nearest matching row in one DataSource given another DataSource. </summary>
-		/// <param name="ATarget"> The DataSource to target for the search. </param>
-		/// <param name="ATargetColumnNames"> The list of columns to search by. </param>
-		/// <param name="ASource"> A DataSource to pull search values from. </param>
-		/// <param name="ASourceColumnNames">
+		/// <param name="target"> The DataSource to target for the search. </param>
+		/// <param name="targetColumnNames"> The list of columns to search by. </param>
+		/// <param name="source"> A DataSource to pull search values from. </param>
+		/// <param name="sourceColumnNames">
 		///		Column names corresponding ATargetColumnNames, which map to fields 
 		///		within ASource.
 		///	</param>
-		public static void FindNearestRow(DAE.Client.DataSource ATarget, string[] ATargetColumnNames, DAE.Client.DataSource ASource, string[] ASourceColumnNames)
+		public static void FindNearestRow(DAE.Client.DataSource target, string[] targetColumnNames, DAE.Client.DataSource source, string[] sourceColumnNames)
 		{
 			//Build the row type
-			DAE.Schema.RowType LRowType = new DAE.Schema.RowType();
-			string LTrimmedName;
-			foreach (string LColumnName in ATargetColumnNames)
+			DAE.Schema.RowType rowType = new DAE.Schema.RowType();
+			string trimmedName;
+			foreach (string columnName in targetColumnNames)
 			{
-				LTrimmedName = LColumnName.Trim();
-				LRowType.Columns.Add(new DAE.Schema.Column(LTrimmedName, ATarget.DataSet[LTrimmedName].DataType));
+				trimmedName = columnName.Trim();
+				rowType.Columns.Add(new DAE.Schema.Column(trimmedName, target.DataSet[trimmedName].DataType));
 			}
 
 			//Fill in the row values
-			bool LFind = true;
-			using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(ATarget.DataSet.Process.ValueManager, LRowType))
+			bool find = true;
+			using (DAE.Runtime.Data.Row row = new DAE.Runtime.Data.Row(target.DataSet.Process.ValueManager, rowType))
 			{
-				for (int i = 0; i < ATargetColumnNames.Length; i++)
-					if (!ASource.DataSet[ASourceColumnNames[i].Trim()].HasValue())
+				for (int i = 0; i < targetColumnNames.Length; i++)
+					if (!source.DataSet[sourceColumnNames[i].Trim()].HasValue())
 					{
-						LFind = false;
+						find = false;
 						break;
 					}
 					else
-						LRow[i] = ASource.DataSet[ASourceColumnNames[i].Trim()].Value;
+						row[i] = source.DataSet[sourceColumnNames[i].Trim()].Value;
 
-				DAE.Client.TableDataSet LTargetDataSet = ATarget.DataSet as DAE.Client.TableDataSet;
-				if (LFind && (LTargetDataSet != null))
+				DAE.Client.TableDataSet targetDataSet = target.DataSet as DAE.Client.TableDataSet;
+				if (find && (targetDataSet != null))
 				{
-					string LSaveOrder = String.Empty;
+					string saveOrder = String.Empty;
 					
 					// If the view order does not match the row to find
-					bool LOrderMatches = true;
-					for (int LIndex = 0; LIndex < LRow.DataType.Columns.Count; LIndex++)
-						if ((LIndex >= LTargetDataSet.Order.Columns.Count) || !DAE.Schema.Object.NamesEqual(LTargetDataSet.Order.Columns[LIndex].Column.Name, LRow.DataType.Columns[LIndex].Name))
+					bool orderMatches = true;
+					for (int index = 0; index < row.DataType.Columns.Count; index++)
+						if ((index >= targetDataSet.Order.Columns.Count) || !DAE.Schema.Object.NamesEqual(targetDataSet.Order.Columns[index].Column.Name, row.DataType.Columns[index].Name))
 						{
-							LOrderMatches = false;
+							orderMatches = false;
 							break;
 						}
 
-					if (!LOrderMatches)
+					if (!orderMatches)
 					{
-						LSaveOrder = LTargetDataSet.OrderString;
-						DAE.Schema.Order LNewOrder = new DAE.Schema.Order();
-						foreach (DAE.Schema.Column LColumn in LRow.DataType.Columns)
-							LNewOrder.Columns.Add(new DAE.Schema.OrderColumn(ATarget.DataSet.TableVar.Columns[LColumn.Name], true));
-						LTargetDataSet.Order = LNewOrder;
+						saveOrder = targetDataSet.OrderString;
+						DAE.Schema.Order newOrder = new DAE.Schema.Order();
+						foreach (DAE.Schema.Column column in row.DataType.Columns)
+							newOrder.Columns.Add(new DAE.Schema.OrderColumn(target.DataSet.TableVar.Columns[column.Name], true));
+						targetDataSet.Order = newOrder;
 					}
 					try
 					{
-						LTargetDataSet.FindNearest(LRow);
+						targetDataSet.FindNearest(row);
 					}
 					finally
 					{
-						if (LSaveOrder != String.Empty)
-							LTargetDataSet.OrderString = LSaveOrder;
+						if (saveOrder != String.Empty)
+							targetDataSet.OrderString = saveOrder;
 					}
 				}
 			}
@@ -148,26 +148,26 @@ namespace Alphora.Dataphor.Frontend.Client
 
 	public class LookupContext
 	{
-		public LookupContext(ILookup ALookup)
+		public LookupContext(ILookup lookup)
 		{
-			FLookup = ALookup;
+			_lookup = lookup;
 		}
 
-		private ILookup FLookup;
+		private ILookup _lookup;
 
 		public bool HasMasterSource()
 		{
-			return ((FLookup.MasterKeyNames != String.Empty) && (FLookup.DetailKeyNames != String.Empty) && (FLookup.Source != null));
+			return ((_lookup.MasterKeyNames != String.Empty) && (_lookup.DetailKeyNames != String.Empty) && (_lookup.Source != null));
 		}
 		
-		public void PreLookup(IFormInterface AForm)
+		public void PreLookup(IFormInterface form)
 		{
 			if (HasMasterSource())
 			{
-				AForm.CheckMainSource();
-				AForm.MainSource.MasterKeyNames = FLookup.MasterKeyNames;
-				AForm.MainSource.DetailKeyNames = FLookup.DetailKeyNames;
-				AForm.MainSource.Master = FLookup.Source;
+				form.CheckMainSource();
+				form.MainSource.MasterKeyNames = _lookup.MasterKeyNames;
+				form.MainSource.DetailKeyNames = _lookup.DetailKeyNames;
+				form.MainSource.Master = _lookup.Source;
 			}
 		}
 

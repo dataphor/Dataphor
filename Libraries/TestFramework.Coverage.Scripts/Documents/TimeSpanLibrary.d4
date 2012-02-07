@@ -54,6 +54,8 @@ begin
 	// 										Accessors										   //
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// Ticks
+	var LTicks := ToLong(628418938670000000);
+	var LMillisecondTicks := ToLong(10000);
 	LTimeSpan.Ticks := ToLong(100);
 	if LTimeSpan.Ticks <> ToLong(100) then
 		raise Error("TimeSpan.Ticks assignment Error");
@@ -64,6 +66,15 @@ begin
 		raise Error("TimeSpan.Milliseconds assignment Error");		
 	LTimeSpan.Millisecond := 135.24;
 	if LTimeSpan.Millisecond <> 135.24 then
+		raise Error("TimeSpan.Millisecond assignment Error");	
+	LTimeSpan.Ticks := LTicks;
+	if LTimeSpan.Millisecond <> 0 then
+		raise Error("TimeSpan.Millisecond assignment Error");
+	LTimeSpan.Ticks := LTicks + LMillisecondTicks;
+	if LTimeSpan.Millisecond <> 1 then
+		raise Error("TimeSpan.Millisecond assignment Error");
+	LTimeSpan.Ticks := LTicks + (LMillisecondTicks * 1000);
+	if LTimeSpan.Millisecond <> 0 then
 		raise Error("TimeSpan.Millisecond assignment Error");
 	
 	// Seconds		
@@ -72,14 +83,32 @@ begin
 		raise Error("TimeSpan.Seconds assignment Error");		
 	LTimeSpan.Second := 45;
 	if LTimeSpan.Second <> 45 then
-		raise Error("TimeSpan.Second assignment Error");		
-		
+		raise Error("TimeSpan.Second assignment Error");	
+	LTimeSpan.Ticks := LTicks - (LMillisecondTicks * 1000);
+	if LTimeSpan.Second <> 46 then
+		raise Error("TimeSpan.Second assignment Error");
+	LTimeSpan.Ticks := LTicks;
+	if LTimeSpan.Second <> 47 then
+		raise Error("TimeSpan.Second assignment Error");
+		LTimeSpan.Ticks := LTicks + (LMillisecondTicks * 1000);
+	if LTimeSpan.Second <> 48 then
+		raise Error("TimeSpan.Second assignment Error");
+	
 	// Minutes		
 	LTimeSpan.Minutes := 100.00;
 	if LTimeSpan.Minutes <> 100.00 then
 		raise Error("TimeSpan.Minutes assignment Error");		
 	LTimeSpan.Minute := 30;
 	if LTimeSpan.Minute <> 30 then
+		raise Error("TimeSpan.Minute assignment Error");
+	LTimeSpan.Ticks := LTicks;
+	if LTimeSpan.Minute <> 37 then
+		raise Error("TimeSpan.Minute assignment Error");
+	LTimeSpan.Ticks := LTicks - (LMillisecondTicks * 1000 * 60);
+	if LTimeSpan.Minute <> 36 then
+		raise Error("TimeSpan.Minute assignment Error");
+	LTimeSpan.Ticks := LTicks + (LMillisecondTicks * 1000 * 60);
+	if LTimeSpan.Minute <> 38 then
 		raise Error("TimeSpan.Minute assignment Error");
 		
 	// Hours		
@@ -89,6 +118,15 @@ begin
 	LTimeSpan.Hour := 23;
 	if LTimeSpan.Hour <> 23 then
 		raise Error("TimeSpan.Hour assignment Error");
+	LTimeSpan.Ticks := LTicks;
+	if LTimeSpan.Hour <> 17 then
+		raise Error("TimeSpan.Hour assignment Error");
+	LTimeSpan.Ticks := LTicks - (LMillisecondTicks * 1000 * 3600);
+	if LTimeSpan.Hour <> 16 then
+		raise Error("TimeSpan.Hour assignment Error");
+	LTimeSpan.Ticks := LTicks + (LMillisecondTicks * 1000 * 3600);
+	if LTimeSpan.Hour <> 18 then
+		raise Error("TimeSpan.Hour assignment Error");
 		
 	// Days		
 	LTimeSpan.Days := 100.00;
@@ -97,6 +135,15 @@ begin
 	LTimeSpan.Day := 100;
 	if LTimeSpan.Day <> 100 then
 		raise Error("TimeSpan.Day assignment Error");
+	LTimeSpan.Ticks := LTicks;
+	if LTimeSpan.Day <> 727336 then
+		raise Error("TimeSpan.Hour assignment Error");
+	LTimeSpan.Ticks := LTicks - (LMillisecondTicks * 1000 * 3600 * 24);
+	if LTimeSpan.Day <> 727335 then
+		raise Error("TimeSpan.Hour assignment Error");
+	LTimeSpan.Ticks := LTicks + (LMillisecondTicks * 1000 * 3600 * 24);
+	if LTimeSpan.Day <> 727337 then
+		raise Error("TimeSpan.Hour assignment Error");
 		
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// 										Conversions										   //

@@ -21,95 +21,95 @@ namespace Alphora.Dataphor.DAE.Server
 	{		
 		internal RemoteServerSession
 		(
-			RemoteServer AServer, 
-			ServerSession AServerSession
+			RemoteServer server, 
+			ServerSession serverSession
 		) : base()
 		{
-			FServer = AServer;
-			FServerSession = AServerSession;
+			_server = server;
+			_serverSession = serverSession;
 			AttachServerSession();
-			FCatalogCacheName = SessionInfo == null ? null : SessionInfo.CatalogCacheName;
+			_catalogCacheName = SessionInfo == null ? null : SessionInfo.CatalogCacheName;
 		}
 		
 		private void AttachServerSession()
 		{
-			FServerSession.Disposed += new EventHandler(FServerSessionDisposed);
+			_serverSession.Disposed += new EventHandler(FServerSessionDisposed);
 		}
 		
 		private void DetachServerSession()
 		{
-			FServerSession.Disposed -= new EventHandler(FServerSessionDisposed);
+			_serverSession.Disposed -= new EventHandler(FServerSessionDisposed);
 		}
 
-		private void FServerSessionDisposed(object ASender, EventArgs AArgs)
+		private void FServerSessionDisposed(object sender, EventArgs args)
 		{
 			DetachServerSession();
-			FServerSession = null;
+			_serverSession = null;
 			Dispose();
 		}
 		
-		private string FCatalogCacheName;
-		public string CatalogCacheName { get { return FCatalogCacheName; } }
+		private string _catalogCacheName;
+		public string CatalogCacheName { get { return _catalogCacheName; } }
 		
 		// Dispose
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				if (!String.IsNullOrEmpty(CatalogCacheName) && (FServer != null) && (FServer.CatalogCaches != null))
+				if (!String.IsNullOrEmpty(CatalogCacheName) && (_server != null) && (_server.CatalogCaches != null))
 				{
-					FServer.CatalogCaches.RemoveSession(this);
-					FCatalogCacheName = null;
+					_server.CatalogCaches.RemoveSession(this);
+					_catalogCacheName = null;
 				}
 
-				if (FServerSession != null)
+				if (_serverSession != null)
 				{
 					DetachServerSession();
-					FServerSession.Dispose();
-					FServerSession = null;
+					_serverSession.Dispose();
+					_serverSession = null;
 				}
 				
-				FServer = null;
+				_server = null;
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
         
 		// Server
-		private RemoteServer FServer;
-		public RemoteServer Server { get { return FServer; } }
+		private RemoteServer _server;
+		public RemoteServer Server { get { return _server; } }
 		
-		IRemoteServer IRemoteServerSession.Server { get { return FServer; } }
+		IRemoteServer IRemoteServerSession.Server { get { return _server; } }
 		
-		private ServerSession FServerSession;
-		internal ServerSession ServerSession { get { return FServerSession; } }
+		private ServerSession _serverSession;
+		internal ServerSession ServerSession { get { return _serverSession; } }
         
 		// SessionID
-		public int SessionID { get { return FServerSession.SessionID; } }
+		public int SessionID { get { return _serverSession.SessionID; } }
 		
 		// SessionInfo
-		public SessionInfo SessionInfo { get { return FServerSession.SessionInfo; } }
+		public SessionInfo SessionInfo { get { return _serverSession.SessionInfo; } }
         
 		// Execution
-		internal Exception WrapException(Exception AException)
+		internal Exception WrapException(Exception exception)
 		{
-			return RemoteServer.WrapException(AException);
+			return RemoteServer.WrapException(exception);
 		}
 
 		// StartProcess
-		public IRemoteServerProcess StartProcess(ProcessInfo AProcessInfo, out int AProcessID)
+		public IRemoteServerProcess StartProcess(ProcessInfo processInfo, out int processID)
 		{
-			ServerProcess LServerProcess = (ServerProcess)FServerSession.StartProcess(AProcessInfo);
-			AProcessID = LServerProcess.ProcessID;
-			return new RemoteServerProcess(this, LServerProcess);
+			ServerProcess serverProcess = (ServerProcess)_serverSession.StartProcess(processInfo);
+			processID = serverProcess.ProcessID;
+			return new RemoteServerProcess(this, serverProcess);
 		}
 		
 		// StopProcess
-		public void StopProcess(IRemoteServerProcess AProcess)
+		public void StopProcess(IRemoteServerProcess process)
 		{
-			FServerSession.StopProcess(((RemoteServerProcess)AProcess).ServerProcess);
+			_serverSession.StopProcess(((RemoteServerProcess)process).ServerProcess);
 		}
 	}
 	
@@ -117,26 +117,26 @@ namespace Alphora.Dataphor.DAE.Server
 	public class RemoteServerSessions : RemoteServerChildObjects
 	{		
 		public RemoteServerSessions() : base() {}
-		public RemoteServerSessions(bool AIsOwner) : base(AIsOwner) {}
+		public RemoteServerSessions(bool isOwner) : base(isOwner) {}
 		
-		protected override void Validate(RemoteServerChildObject AObject)
+		protected override void Validate(RemoteServerChildObject objectValue)
 		{
-			if (!(AObject is RemoteServerSession))
+			if (!(objectValue is RemoteServerSession))
 				throw new ServerException(ServerException.Codes.TypedObjectContainer, "RemoteServerSession");
 		}
 		
-		public new RemoteServerSession this[int AIndex]
+		public new RemoteServerSession this[int index]
 		{
-			get { return (RemoteServerSession)base[AIndex]; } 
-			set { base[AIndex] = value; } 
+			get { return (RemoteServerSession)base[index]; } 
+			set { base[index] = value; } 
 		}
 		
-		public RemoteServerSession GetSession(int ASessionID)
+		public RemoteServerSession GetSession(int sessionID)
 		{
-			foreach (RemoteServerSession LSession in this)
-				if (LSession.SessionID == ASessionID)
-					return LSession;
-			throw new ServerException(ServerException.Codes.SessionNotFound, ASessionID);
+			foreach (RemoteServerSession session in this)
+				if (session.SessionID == sessionID)
+					return session;
+			throw new ServerException(ServerException.Codes.SessionNotFound, sessionID);
 		}
 	}
 }

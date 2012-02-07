@@ -142,27 +142,27 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public class FocusChangedEvent : NodeEvent
 	{
-		public FocusChangedEvent(IWindowsElement ANode)
+		public FocusChangedEvent(IWindowsElement node)
 		{
-			FNode = ANode;
+			_node = node;
 		}
 
-		private IWindowsElement FNode;
-		public IWindowsElement Node { get { return FNode; } }
+		private IWindowsElement _node;
+		public IWindowsElement Node { get { return _node; } }
 	}
 
 	public class AdvanceFocusEvent : NodeEvent
 	{
-		public AdvanceFocusEvent(bool AForward)
+		public AdvanceFocusEvent(bool forward)
 		{
-			FForward = AForward;
+			_forward = forward;
 		}
 
-		private bool FForward;
+		private bool _forward;
 		public bool Forward
 		{
-			get { return FForward; }
-			set { FForward = value; }
+			get { return _forward; }
+			set { _forward = value; }
 		}
 	}
 
@@ -188,6 +188,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		WinForms.FormWindowState WindowState { get; set; }
 		bool Visible { get; set; }
 		event EventHandler Activated;
+		event EventHandler Accepting;
 		event CancelEventHandler Closing;
 		event EventHandler Closed;
 		event EventHandler Resize;
@@ -204,6 +205,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		Point Location { get; set; }
 		System.Drawing.Icon Icon { get; set; }
 		bool TopLevel { get; set; }
+		bool TopMost { get; set; }
 		bool HelpButton { get; set; }
 		WinForms.Form Owner { get; set; }
 
@@ -231,5 +233,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		Dictionary<WinForms.Keys, DialogKeyHandler> DialogKeys { get; }
 		void Close(CloseBehavior ABehavior);
 		bool IsLookup { get; set; }
+		bool AcceptEnabled { get; set; }
 	}
 }

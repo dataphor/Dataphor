@@ -16,82 +16,82 @@ namespace Alphora.Dataphor.DAE.Client
     
 	public class Sessions : IEnumerable
 	{
-		List<DataSession> FList = new List<DataSession>();
+		List<DataSession> _list = new List<DataSession>();
 
 		public int Count
 		{
-			get { return FList.Count; }
+			get { return _list.Count; }
 		}
 
-		private Object FSyncRoot = new Object();
-		public object SyncRoot { get { return FSyncRoot; } }
+		private Object _syncRoot = new Object();
+		public object SyncRoot { get { return _syncRoot; } }
 		
 		protected internal string NextSessionName()
 		{
-			string LRequest;
-			int LCount = 1;
-			lock (FSyncRoot)
+			string request;
+			int count = 1;
+			lock (_syncRoot)
 			{
-				while (LCount <= Count)
+				while (count <= Count)
 				{
-					LRequest = "Session" + LCount.ToString();
-					if (!Contains(LRequest))
-						return LRequest;
-					++LCount;
+					request = "Session" + count.ToString();
+					if (!Contains(request))
+						return request;
+					++count;
 				}
 			}
-			return "Session" + LCount.ToString();
+			return "Session" + count.ToString();
 		}
 
-		public bool Contains(DataSession ASession)
+		public bool Contains(DataSession session)
 		{
-			return Contains(ASession.SessionName);
+			return Contains(session.SessionName);
 		}
 
-		public bool Contains(string ASessionName)
+		public bool Contains(string sessionName)
 		{
-			lock (FSyncRoot)
+			lock (_syncRoot)
 			{
-				foreach (DataSession LSession in FList)
-					if ((LSession.SessionName == ASessionName))
+				foreach (DataSession session in _list)
+					if ((session.SessionName == sessionName))
 						return true;
 				return false;
 			}
 		}
 
-		public void Add(DataSession ASession)
+		public void Add(DataSession session)
 		{
-			lock (FSyncRoot)
+			lock (_syncRoot)
 			{
-				FList.Add(ASession);
+				_list.Add(session);
 			}
 		}
 
-		public bool Remove(DataSession ASession)
+		public bool Remove(DataSession session)
 		{
-			lock (FSyncRoot)
+			lock (_syncRoot)
 			{
-				return FList.Remove(ASession);
+				return _list.Remove(session);
 			}
 		}
 		
-		public DataSession this[string ASessionName]
+		public DataSession this[string sessionName]
 		{
 			get
 			{
-				lock (FSyncRoot)
+				lock (_syncRoot)
 				{
-					foreach (DataSession LSession in FList)
-						if ((LSession.SessionName == ASessionName))
-							return LSession;
-					throw new ClientException(ClientException.Codes.SessionNotFound, ASessionName);
+					foreach (DataSession session in _list)
+						if ((session.SessionName == sessionName))
+							return session;
+					throw new ClientException(ClientException.Codes.SessionNotFound, sessionName);
 				}
 			}
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			return FList.GetEnumerator();
+			return _list.GetEnumerator();
 		}
 	}
 
@@ -102,29 +102,29 @@ namespace Alphora.Dataphor.DAE.Client
 	{
 		public DataSession() : base()
 		{
-			FSessionInfo = new SessionInfo();
-			FSessionName = DataSession.Sessions.NextSessionName();
+			_sessionInfo = new SessionInfo();
+			_sessionName = DataSession.Sessions.NextSessionName();
 			Sessions.Add(this);
 		}
 		
-		public DataSession(IContainer AContainer)
+		public DataSession(IContainer container)
 			: this()
 		{
-			if (AContainer != null)
-				AContainer.Add(this);
+			if (container != null)
+				container.Add(this);
 		}
 
 		/// <summary> Disposes the object and notifies other objects </summary>
 		/// <seealso cref="IDisposable"/>
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Close();	// Must close after the Disposed event so that this class is still valid during disposal
 			SessionInfo = null;
 			DeinitializeSessions();
 		}
 
-		private SessionInfo FSessionInfo;
+		private SessionInfo _sessionInfo;
 		/// <summary> The <see cref="SessionInfo"/> structure to use when connecting to the server. </summary>
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		[System.ComponentModel.TypeConverter("System.ComponentModel.ExpandableObjectConverter,Alphora.Dataphor.DAE.Client")]
@@ -132,14 +132,14 @@ namespace Alphora.Dataphor.DAE.Client
 		[Category("Session")]
 		public SessionInfo SessionInfo
 		{
-			get { return FSessionInfo; }
-			set { FSessionInfo = value; }
+			get { return _sessionInfo; }
+			set { _sessionInfo = value; }
 		}
 
 			
 		#region ServerSession
 		
-		protected IServerSession FServerSession;
+		protected IServerSession _serverSession;
 		/// <summary> The CLI Session object obtained through connection. </summary>
 		[Browsable(false)]
 		public IServerSession ServerSession
@@ -147,13 +147,13 @@ namespace Alphora.Dataphor.DAE.Client
 			get
 			{
 				Open();
-				return FServerSession;
+				return _serverSession;
 			}
 		}
 
-		protected void ServerSessionDisposed(object ASender, EventArgs AArgs)
+		protected void ServerSessionDisposed(object sender, EventArgs args)
 		{
-			FServerSession = null;
+			_serverSession = null;
 			Close();
 		}
 		
@@ -187,8 +187,8 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		#region Server connection
 
-		private bool FServerConnectionOwned = true;
-		private ServerConnection FServerConnection;
+		private bool _serverConnectionOwned = true;
+		private ServerConnection _serverConnection;
 		/// <summary>The server connection established to the Dataphor Server.</summary>
 		/// <remarks>
 		/// Setting this property allows the DataSession to use an existing ServerConnection.
@@ -200,12 +200,12 @@ namespace Alphora.Dataphor.DAE.Client
 		/// </remarks>
 		public ServerConnection ServerConnection
 		{
-			get { return FServerConnection; }
+			get { return _serverConnection; }
 			set
 			{
 				CheckInactive();
-				FServerConnection = value;
-				FServerConnectionOwned = false;
+				_serverConnection = value;
+				_serverConnectionOwned = false;
 			}
 		}
 		
@@ -217,7 +217,7 @@ namespace Alphora.Dataphor.DAE.Client
 			get
 			{
 				CheckActive();
-				return FServerConnection.Server;
+				return _serverConnection.Server;
 			}
 		}
 		
@@ -226,7 +226,7 @@ namespace Alphora.Dataphor.DAE.Client
 		#region Open/Close
 			
 		// Active
-		private bool FActive;
+		private bool _active;
 		
 		/// <summary> The current connection state of this session. </summary>
 		[DefaultValue(false)]
@@ -234,14 +234,14 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("Connection state of this session.")]
 		public bool Active
 		{
-			get { return FActive; }
+			get { return _active; }
 			set
 			{
 				if (Initializing)
 					DelayedActive = value;
 				else
 				{
-					if (FActive != value)
+					if (_active != value)
 					{
 						if (value)
 							Open();
@@ -254,39 +254,39 @@ namespace Alphora.Dataphor.DAE.Client
 
 		protected void CheckActive()
 		{
-			if (!FActive)
+			if (!_active)
 				throw new ClientException(ClientException.Codes.DataSessionInactive);
 		}
 
 		/// <summary> Used internally to throw if the session isn't active. </summary>
 		protected void CheckInactive()
 		{
-			if (FActive)
+			if (_active)
 				throw new ClientException(ClientException.Codes.DataSessionActive);
 		}
 
 		/// <summary> Connects to a server and retrieves a session from it. </summary>
 		public void Open()
 		{
-			if (!FActive)
+			if (!_active)
 			{
 				InternalOpen();
-				FActive = true;
+				_active = true;
 			}
 		}
 
 		protected void InternalOpen()
 		{
-			if (FServerConnection == null)
+			if (_serverConnection == null)
 			{
 				CheckAlias();
-				FServerConnection = new ServerConnection(FAlias);
-				FServerConnectionOwned = true;
+				_serverConnection = new ServerConnection(_alias);
+				_serverConnectionOwned = true;
 			}
 			try
 			{
-				FServerSession = FServerConnection.Server.Connect(SessionInfo);
-				FServerSession.Disposed += new EventHandler(ServerSessionDisposed);
+				_serverSession = _serverConnection.Server.Connect(SessionInfo);
+				_serverSession.Disposed += new EventHandler(ServerSessionDisposed);
 			}
 			catch
 			{
@@ -298,16 +298,16 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Dereferences the session and disconnects from the server. </summary>
 		public void Close()
 		{
-			if (FActive)
+			if (_active)
 			{
 				try
 				{
 					try
 					{
-						if (FUtilityProcess != null)
+						if (_utilityProcess != null)
 						{
-							ServerSession.StopProcess(FUtilityProcess);
-							FUtilityProcess = null;
+							ServerSession.StopProcess(_utilityProcess);
+							_utilityProcess = null;
 						}
 						if (OnClosing != null)
 							OnClosing(this, EventArgs.Empty);
@@ -319,12 +319,12 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 				finally
 				{
-					FActive = false;
+					_active = false;
 				}
 			}
 		}
 		
-		private void ServerStoppedOrDisposed(object ASender, EventArgs AArgs)
+		private void ServerStoppedOrDisposed(object sender, EventArgs args)
 		{
 			Close();
 		}
@@ -335,15 +335,15 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				try
 				{
-					if (FServerSession != null)
+					if (_serverSession != null)
 					{
-						FServerSession.Disposed -= new EventHandler(ServerSessionDisposed);
-						Server.Disconnect(FServerSession);
+						_serverSession.Disposed -= new EventHandler(ServerSessionDisposed);
+						Server.Disconnect(_serverSession);
 					}
 				}
 				finally
 				{
-					FServerSession = null;
+					_serverSession = null;
 				}
 			}
 			finally
@@ -354,10 +354,10 @@ namespace Alphora.Dataphor.DAE.Client
 
 		private void CloseConnection()
 		{
-			if (FServerConnectionOwned && (FServerConnection != null))
+			if (_serverConnectionOwned && (_serverConnection != null))
 			{
-				FServerConnection.Dispose();
-				FServerConnection = null;
+				_serverConnection.Dispose();
+				_serverConnection = null;
 			}
 		}
 		
@@ -368,33 +368,33 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region Session Name / Sessions static
 		
-		private string FSessionName;
+		private string _sessionName;
 		/// <summary> Associates a global name with the session. </summary>
 		/// <remarks> The SessionName can be used to reference the DataSession instance elsewere in the application. </remarks>
 		[Description("Associates a global name with the session.")]
 		[Category("Session")]
 		public string SessionName
 		{
-			get	{ return FSessionName; }
+			get	{ return _sessionName; }
 			set
 			{
-				if (FSessionName != value)
+				if (_sessionName != value)
 				{
 					if (DataSession.Sessions.Contains(value))
 						throw new ClientException(ClientException.Codes.SessionExists, value);
-					FSessionName = value;
+					_sessionName = value;
 				}
 			}
 		}
 		
-		private static Sessions FSessions;
+		private static Sessions _sessions;
 		protected internal static Sessions Sessions
 		{
 			get
 			{
-				if (FSessions == null)
-					FSessions = new Sessions();
-				return FSessions;
+				if (_sessions == null)
+					_sessions = new Sessions();
+				return _sessions;
 			}
 		}
 
@@ -408,16 +408,16 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		#region Utility process
 		
-		private IServerProcess FUtilityProcess = null;
+		private IServerProcess _utilityProcess = null;
 		public IServerProcess UtilityProcess
 		{
 			get
 			{
 				CheckActive();
 				
-				if (FUtilityProcess == null)
-					FUtilityProcess = ServerSession.StartProcess(new ProcessInfo(ServerSession.SessionInfo));
-				return FUtilityProcess;
+				if (_utilityProcess == null)
+					_utilityProcess = ServerSession.StartProcess(new ProcessInfo(ServerSession.SessionInfo));
+				return _utilityProcess;
 			}
 		}
 
@@ -426,23 +426,23 @@ namespace Alphora.Dataphor.DAE.Client
 		#region Type helpers
 		
 		/// <summary>Returns the equivalent D4 type for the given native (CLR) type. Will throw a ClientException if there is no mapping for the given native (CLR) type.</summary>
-		public static DAE.Schema.IScalarType ScalarTypeFromNativeType(IServerProcess AProcess, Type AType)
+		public static DAE.Schema.IScalarType ScalarTypeFromNativeType(IServerProcess process, Type type)
 		{
-			if (AType == null)
-				return AProcess.DataTypes.SystemScalar;
+			if (type == null)
+				return process.DataTypes.SystemScalar;
 
-			switch (AType.Name)
+			switch (type.Name)
 			{
-				case "Int32" : return AProcess.DataTypes.SystemInteger;
-				case "Byte" : return AProcess.DataTypes.SystemByte;
-				case "Boolean" : return AProcess.DataTypes.SystemBoolean;
-				case "String" : return AProcess.DataTypes.SystemString;
-				case "Decimal" : return AProcess.DataTypes.SystemDecimal;
-				case "DateTime" : return AProcess.DataTypes.SystemDateTime;
-				case "TimeSpan" : return AProcess.DataTypes.SystemTimeSpan;
-				case "Guid" : return AProcess.DataTypes.SystemGuid;
-				case "System.Exception" : return AProcess.DataTypes.SystemError;
-				default : throw new ClientException(ClientException.Codes.InvalidParamType, AType.Name);
+				case "Int32" : return process.DataTypes.SystemInteger;
+				case "Byte" : return process.DataTypes.SystemByte;
+				case "Boolean" : return process.DataTypes.SystemBoolean;
+				case "String" : return process.DataTypes.SystemString;
+				case "Decimal" : return process.DataTypes.SystemDecimal;
+				case "DateTime" : return process.DataTypes.SystemDateTime;
+				case "TimeSpan" : return process.DataTypes.SystemTimeSpan;
+				case "Guid" : return process.DataTypes.SystemGuid;
+				case "System.Exception" : return process.DataTypes.SystemError;
+				default : throw new ClientException(ClientException.Codes.InvalidParamType, type.Name);
 			}
 		}
 		
@@ -451,35 +451,35 @@ namespace Alphora.Dataphor.DAE.Client
 		#region Param helpers
 		
 		/// <summary>Constructs a DataParams from the given native value array, automatically naming the parameters A0..An-1.</summary>
-		public static DAE.Runtime.DataParams DataParamsFromNativeParams(IServerProcess AProcess, params object[] AParams)
+		public static DAE.Runtime.DataParams DataParamsFromNativeParams(IServerProcess process, params object[] paramsValue)
 		{
-            DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-            for (int i = 0; i < AParams.Length; i++)
+            DAE.Runtime.DataParams localParamsValue = new DAE.Runtime.DataParams();
+            for (int i = 0; i < paramsValue.Length; i++)
             {
-                object LObject = AParams[i];
-                if (LObject is DBNull)
-					LObject = null;
-                if (LObject is Double)
-					LObject = Convert.ToDecimal((double)LObject);
-                LParams.Add(DAE.Runtime.DataParam.Create(AProcess, "A" + i.ToString(), LObject, ScalarTypeFromNativeType(AProcess, LObject == null ? null : LObject.GetType())));
+                object objectValue = paramsValue[i];
+                if (objectValue is DBNull)
+					objectValue = null;
+                if (objectValue is Double)
+					objectValue = Convert.ToDecimal((double)objectValue);
+                localParamsValue.Add(DAE.Runtime.DataParam.Create(process, "A" + i.ToString(), objectValue, ScalarTypeFromNativeType(process, objectValue == null ? null : objectValue.GetType())));
             }
-            return LParams;
+            return localParamsValue;
 		}
 		
 		/// <summary>Constructs a DataParams from the given parameter names and native value arrays.</summary>
-        public static DAE.Runtime.DataParams DataParamsFromNativeParams(IServerProcess AProcess, string[] AParamNames, object[] AParams)
+        public static DAE.Runtime.DataParams DataParamsFromNativeParams(IServerProcess process, string[] paramNames, object[] paramsValue)
         {
-            DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-            for (int i = 0; i < AParams.Length; i++)
+            DAE.Runtime.DataParams localParamsValue = new DAE.Runtime.DataParams();
+            for (int i = 0; i < paramsValue.Length; i++)
             {
-                object LObject = AParams[i];
-                if (LObject is DBNull)
-					LObject = null;
-                if (LObject is Double)
-					LObject = Convert.ToDecimal((double)LObject);
-                LParams.Add(DAE.Runtime.DataParam.Create(AProcess, AParamNames[i], LObject, ScalarTypeFromNativeType(AProcess, LObject == null ? null : LObject.GetType())));
+                object objectValue = paramsValue[i];
+                if (objectValue is DBNull)
+					objectValue = null;
+                if (objectValue is Double)
+					objectValue = Convert.ToDecimal((double)objectValue);
+                localParamsValue.Add(DAE.Runtime.DataParam.Create(process, paramNames[i], objectValue, ScalarTypeFromNativeType(process, objectValue == null ? null : objectValue.GetType())));
             }
-            return LParams;
+            return localParamsValue;
         }
         
         #endregion
@@ -487,41 +487,41 @@ namespace Alphora.Dataphor.DAE.Client
         #region ExecuteScript
 
 		/// <summary>Executes the given script using the utility process.</summary>
-		public void ExecuteScript(string AScript)
+		public void ExecuteScript(string script)
 		{
-			ExecuteScript(null, AScript, null);
+			ExecuteScript(null, script, null);
 		}
 
 		/// <summary>Executes the given script using the given process.</summary>
-		public void ExecuteScript(IServerProcess AProcess, string AScript)
+		public void ExecuteScript(IServerProcess process, string script)
 		{
-			ExecuteScript(AProcess, AScript, null);
+			ExecuteScript(process, script, null);
 		}
 
 		/// <summary>Executes the given script using the utility process.</summary>
-		public void ExecuteScript(string AScript, DAE.Runtime.DataParams AParams)
+		public void ExecuteScript(string script, DAE.Runtime.DataParams paramsValue)
 		{
-			ExecuteScript(null, AScript, AParams);
+			ExecuteScript(null, script, paramsValue);
 		}
 
 		/// <summary>Executes the given script using the given process.</summary>
-		public void ExecuteScript(IServerProcess AProcess, string AScript, DAE.Runtime.DataParams AParams)
+		public void ExecuteScript(IServerProcess process, string script, DAE.Runtime.DataParams paramsValue)
 		{
-			if (AScript != String.Empty)
+			if (script != String.Empty)
 			{
 				CheckActive();
 
-				if (AProcess == null)
-					AProcess = UtilityProcess;
+				if (process == null)
+					process = UtilityProcess;
 
-				IServerScript LScript = AProcess.PrepareScript(AScript);
+				IServerScript localScript = process.PrepareScript(script);
 				try
 				{
-					LScript.Execute(AParams);
+					localScript.Execute(paramsValue);
 				}
 				finally
 				{
-					AProcess.UnprepareScript(LScript);
+					process.UnprepareScript(localScript);
 				}
 			}
 		}
@@ -531,64 +531,64 @@ namespace Alphora.Dataphor.DAE.Client
 		#region Execute
 		
 		/// <summary>Executes the given statement using the utility process.</summary>
-		public void Execute(string AStatement)
+		public void Execute(string statement)
 		{
-            Execute(null, AStatement, (DAE.Runtime.DataParams)null);
+            Execute(null, statement, (DAE.Runtime.DataParams)null);
 		}
 		
 		/// <summary>Executes the given statement on the given process.</summary>
-		public void Execute(IServerProcess AProcess, string AStatement)
+		public void Execute(IServerProcess process, string statement)
 		{
-            Execute(AProcess, AStatement, (DAE.Runtime.DataParams)null);
+            Execute(process, statement, (DAE.Runtime.DataParams)null);
 		}
 		
 		/// <summary>Executes the given statement using the utility process.</summary>
-		public void Execute(string AStatement, DAE.Runtime.DataParams AParams)
+		public void Execute(string statement, DAE.Runtime.DataParams paramsValue)
 		{
-			Execute(null, AStatement, AParams);
+			Execute(null, statement, paramsValue);
 		}
 		
 		/// <summary>Executes the given statement using the utility process.</summary>
-		public void Execute(IServerProcess AProcess, string AStatement, DAE.Runtime.DataParams AParams)
+		public void Execute(IServerProcess process, string statement, DAE.Runtime.DataParams paramsValue)
 		{
 			CheckActive();
 			
-			if (AProcess == null)
-				AProcess = UtilityProcess;
+			if (process == null)
+				process = UtilityProcess;
 				
-			IServerStatementPlan LPlan = AProcess.PrepareStatement(AStatement, AParams);
+			IServerStatementPlan plan = process.PrepareStatement(statement, paramsValue);
 			try
 			{
-				LPlan.Execute(AParams);
+				plan.Execute(paramsValue);
 			}
 			finally
 			{
-				AProcess.UnprepareStatement(LPlan);
+				process.UnprepareStatement(plan);
 			}
 		}
         
 		/// <summary>Executes the given statement using the utility process and using the given parameter values (auto numbered A0..An-1).</summary>
-		public void Execute(string AStatement, params object[] AParams)
+		public void Execute(string statement, params object[] paramsValue)
 		{
-			Execute(null, AStatement, AParams);
+			Execute(null, statement, paramsValue);
 		}
 		
         /// <summary> Executes the given statement on the given process and using the given parameter values (auto numbered A0..An-1). </summary>
-        public void Execute(IServerProcess AProcess, string AStatement, params object[] AParams)
+        public void Execute(IServerProcess process, string statement, params object[] paramsValue)
         {
-            if (AProcess == null)
-                AProcess = UtilityProcess;
+            if (process == null)
+                process = UtilityProcess;
 
-            Execute(AProcess, AStatement, DataParamsFromNativeParams(AProcess, AParams));
+            Execute(process, statement, DataParamsFromNativeParams(process, paramsValue));
         }
         
         /// <summary> Executes the given statement on the given process and using the given parameter names and values. </summary>
-        public void Execute(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+        public void Execute(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
         {
-            if (AProcess == null)
-                AProcess = UtilityProcess;
+            if (process == null)
+                process = UtilityProcess;
 
-            Execute(AProcess, AExpression, DataParamsFromNativeParams(AProcess, AParamNames, AParams));
+            Execute(process, expression, DataParamsFromNativeParams(process, paramNames, paramsValue));
         }
         
         #endregion
@@ -596,45 +596,45 @@ namespace Alphora.Dataphor.DAE.Client
         #region Evaluate
         
 		/// <summary> Evaluates the given expression using the utility process and returns the result as a scalar.</summary>
-        public DAE.Runtime.Data.Scalar Evaluate(string AExpression)
+        public DAE.Runtime.Data.Scalar Evaluate(string expression)
         {
-			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AExpression);
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(expression);
         }
         
 		/// <summary>Evaluates the given expression on the given process and returns the result as a scalar.</summary>
-        public DAE.Runtime.Data.Scalar Evaluate(IServerProcess AProcess, string AExpression)
+        public DAE.Runtime.Data.Scalar Evaluate(IServerProcess process, string expression)
         {
-			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AProcess, AExpression);
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(process, expression);
         }
         
 		/// <summary>Evaluates the given expression using the utility process and returns the result as a scalar.</summary>
-        public DAE.Runtime.Data.Scalar Evaluate(string AExpression, DAE.Runtime.DataParams AParams)
+        public DAE.Runtime.Data.Scalar Evaluate(string expression, DAE.Runtime.DataParams paramsValue)
         {
-			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AExpression, AParams);
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(expression, paramsValue);
         }
         
 		/// <summary>Evaluates the given expression using the given process and returns the result as a scalar.</summary>
-        public DAE.Runtime.Data.Scalar Evaluate(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+        public DAE.Runtime.Data.Scalar Evaluate(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
         {
-			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AProcess, AExpression, AParams);
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(process, expression, paramsValue);
         }
         
 		/// <summary>Evaluates the given expression using the utility process and the given parameter values (auto numbered A0..An-1) and returns the result as a scalar.</summary>
-        public DAE.Runtime.Data.Scalar Evaluate(string AExpression, params object[] AParams)
+        public DAE.Runtime.Data.Scalar Evaluate(string expression, params object[] paramsValue)
         {
-			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AExpression, AParams);
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(expression, paramsValue);
         }
         
 		/// <summary>Evaluates the given expression on the given process using the given parameter values (auto numbered A0..An-1) and returns the result as a scalar.</summary>
-        public DAE.Runtime.Data.Scalar Evaluate(IServerProcess AProcess, string AExpression, params object[] AParams)
+        public DAE.Runtime.Data.Scalar Evaluate(IServerProcess process, string expression, params object[] paramsValue)
         {
-			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AProcess, AExpression, AParams);
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(process, expression, paramsValue);
         }
         
 		/// <summary>Evaluates the given expression on the given process using the given parameter names and values and returns the result as a scalar.</summary>
-		public DAE.Runtime.Data.Scalar Evaluate(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		public DAE.Runtime.Data.Scalar Evaluate(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
 		{
-			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AProcess, AExpression, AParamNames, AParams);
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(process, expression, paramNames, paramsValue);
 		}
 		
 		#endregion
@@ -642,45 +642,45 @@ namespace Alphora.Dataphor.DAE.Client
         #region EvaluateRow
         
 		/// <summary> EvaluateRows the given expression using the utility process and returns the result as a row.</summary>
-        public DAE.Runtime.Data.Row EvaluateRow(string AExpression)
+        public DAE.Runtime.Data.Row EvaluateRow(string expression)
         {
-			return (DAE.Runtime.Data.Row)EvaluateRaw(AExpression);
+			return (DAE.Runtime.Data.Row)EvaluateRaw(expression);
         }
         
 		/// <summary>EvaluateRows the given expression on the given process and returns the result as a row.</summary>
-        public DAE.Runtime.Data.Row EvaluateRow(IServerProcess AProcess, string AExpression)
+        public DAE.Runtime.Data.Row EvaluateRow(IServerProcess process, string expression)
         {
-			return (DAE.Runtime.Data.Row)EvaluateRaw(AProcess, AExpression);
+			return (DAE.Runtime.Data.Row)EvaluateRaw(process, expression);
         }
         
 		/// <summary>EvaluateRows the given expression using the utility process and returns the result as a row.</summary>
-        public DAE.Runtime.Data.Row EvaluateRow(string AExpression, DAE.Runtime.DataParams AParams)
+        public DAE.Runtime.Data.Row EvaluateRow(string expression, DAE.Runtime.DataParams paramsValue)
         {
-			return (DAE.Runtime.Data.Row)EvaluateRaw(AExpression, AParams);
+			return (DAE.Runtime.Data.Row)EvaluateRaw(expression, paramsValue);
         }
         
 		/// <summary>EvaluateRows the given expression using the given process and returns the result as a row.</summary>
-        public DAE.Runtime.Data.Row EvaluateRow(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+        public DAE.Runtime.Data.Row EvaluateRow(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
         {
-			return (DAE.Runtime.Data.Row)EvaluateRaw(AProcess, AExpression, AParams);
+			return (DAE.Runtime.Data.Row)EvaluateRaw(process, expression, paramsValue);
         }
         
 		/// <summary>EvaluateRows the given expression using the utility process and the given parameter values (auto numbered A0..An-1) and returns the result as a row.</summary>
-        public DAE.Runtime.Data.Row EvaluateRow(string AExpression, params object[] AParams)
+        public DAE.Runtime.Data.Row EvaluateRow(string expression, params object[] paramsValue)
         {
-			return (DAE.Runtime.Data.Row)EvaluateRaw(AExpression, AParams);
+			return (DAE.Runtime.Data.Row)EvaluateRaw(expression, paramsValue);
         }
         
 		/// <summary>EvaluateRows the given expression on the given process using the given parameter values (auto numbered A0..An-1) and returns the result as a row.</summary>
-        public DAE.Runtime.Data.Row EvaluateRow(IServerProcess AProcess, string AExpression, params object[] AParams)
+        public DAE.Runtime.Data.Row EvaluateRow(IServerProcess process, string expression, params object[] paramsValue)
         {
-			return (DAE.Runtime.Data.Row)EvaluateRaw(AProcess, AExpression, AParams);
+			return (DAE.Runtime.Data.Row)EvaluateRaw(process, expression, paramsValue);
         }
         
 		/// <summary>EvaluateRows the given expression on the given process using the given parameter names and values and returns the result as a row.</summary>
-		public DAE.Runtime.Data.Row EvaluateRow(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		public DAE.Runtime.Data.Row EvaluateRow(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
 		{
-			return (DAE.Runtime.Data.Row)EvaluateRaw(AProcess, AExpression, AParamNames, AParams);
+			return (DAE.Runtime.Data.Row)EvaluateRaw(process, expression, paramNames, paramsValue);
 		}
 		
 		#endregion
@@ -688,45 +688,45 @@ namespace Alphora.Dataphor.DAE.Client
         #region EvaluateList
         
 		/// <summary> EvaluateLists the given expression using the utility process and returns the result as a list.</summary>
-        public DAE.Runtime.Data.ListValue EvaluateList(string AExpression)
+        public DAE.Runtime.Data.ListValue EvaluateList(string expression)
         {
-			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AExpression);
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(expression);
         }
         
 		/// <summary>EvaluateLists the given expression on the given process and returns the result as a list.</summary>
-        public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess AProcess, string AExpression)
+        public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess process, string expression)
         {
-			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AProcess, AExpression);
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(process, expression);
         }
         
 		/// <summary>EvaluateLists the given expression using the utility process and returns the result as a list.</summary>
-        public DAE.Runtime.Data.ListValue EvaluateList(string AExpression, DAE.Runtime.DataParams AParams)
+        public DAE.Runtime.Data.ListValue EvaluateList(string expression, DAE.Runtime.DataParams paramsValue)
         {
-			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AExpression, AParams);
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(expression, paramsValue);
         }
         
 		/// <summary>EvaluateLists the given expression using the given process and returns the result as a list.</summary>
-        public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+        public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
         {
-			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AProcess, AExpression, AParams);
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(process, expression, paramsValue);
         }
         
 		/// <summary>EvaluateLists the given expression using the utility process and the given parameter values (auto numbered A0..An-1) and returns the result as a list.</summary>
-        public DAE.Runtime.Data.ListValue EvaluateList(string AExpression, params object[] AParams)
+        public DAE.Runtime.Data.ListValue EvaluateList(string expression, params object[] paramsValue)
         {
-			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AExpression, AParams);
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(expression, paramsValue);
         }
         
 		/// <summary>EvaluateLists the given expression on the given process using the given parameter values (auto numbered A0..An-1) and returns the result as a list.</summary>
-        public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess AProcess, string AExpression, params object[] AParams)
+        public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess process, string expression, params object[] paramsValue)
         {
-			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AProcess, AExpression, AParams);
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(process, expression, paramsValue);
         }
         
 		/// <summary>EvaluateLists the given expression on the given process using the given parameter names and values and returns the result as a list.</summary>
-		public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
 		{
-			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AProcess, AExpression, AParamNames, AParams);
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(process, expression, paramNames, paramsValue);
 		}
 		
 		#endregion
@@ -734,45 +734,45 @@ namespace Alphora.Dataphor.DAE.Client
         #region EvaluateTable
         
 		/// <summary> EvaluateTables the given expression using the utility process and returns the result as a table.</summary>
-        public DAE.Runtime.Data.Table EvaluateTable(string AExpression)
+        public DAE.Runtime.Data.Table EvaluateTable(string expression)
         {
-			return (DAE.Runtime.Data.Table)EvaluateRaw(AExpression);
+			return (DAE.Runtime.Data.Table)EvaluateRaw(expression);
         }
         
 		/// <summary>EvaluateTables the given expression on the given process and returns the result as a table.</summary>
-        public DAE.Runtime.Data.Table EvaluateTable(IServerProcess AProcess, string AExpression)
+        public DAE.Runtime.Data.Table EvaluateTable(IServerProcess process, string expression)
         {
-			return (DAE.Runtime.Data.Table)EvaluateRaw(AProcess, AExpression);
+			return (DAE.Runtime.Data.Table)EvaluateRaw(process, expression);
         }
         
 		/// <summary>EvaluateTables the given expression using the utility process and returns the result as a table.</summary>
-        public DAE.Runtime.Data.Table EvaluateTable(string AExpression, DAE.Runtime.DataParams AParams)
+        public DAE.Runtime.Data.Table EvaluateTable(string expression, DAE.Runtime.DataParams paramsValue)
         {
-			return (DAE.Runtime.Data.Table)EvaluateRaw(AExpression, AParams);
+			return (DAE.Runtime.Data.Table)EvaluateRaw(expression, paramsValue);
         }
         
 		/// <summary>EvaluateTables the given expression using the given process and returns the result as a table.</summary>
-        public DAE.Runtime.Data.Table EvaluateTable(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+        public DAE.Runtime.Data.Table EvaluateTable(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
         {
-			return (DAE.Runtime.Data.Table)EvaluateRaw(AProcess, AExpression, AParams);
+			return (DAE.Runtime.Data.Table)EvaluateRaw(process, expression, paramsValue);
         }
         
 		/// <summary>EvaluateTables the given expression using the utility process and the given parameter values (auto numbered A0..An-1) and returns the result as a table.</summary>
-        public DAE.Runtime.Data.Table EvaluateTable(string AExpression, params object[] AParams)
+        public DAE.Runtime.Data.Table EvaluateTable(string expression, params object[] paramsValue)
         {
-			return (DAE.Runtime.Data.Table)EvaluateRaw(AExpression, AParams);
+			return (DAE.Runtime.Data.Table)EvaluateRaw(expression, paramsValue);
         }
         
 		/// <summary>EvaluateTables the given expression on the given process using the given parameter values (auto numbered A0..An-1) and returns the result as a table.</summary>
-        public DAE.Runtime.Data.Table EvaluateTable(IServerProcess AProcess, string AExpression, params object[] AParams)
+        public DAE.Runtime.Data.Table EvaluateTable(IServerProcess process, string expression, params object[] paramsValue)
         {
-			return (DAE.Runtime.Data.Table)EvaluateRaw(AProcess, AExpression, AParams);
+			return (DAE.Runtime.Data.Table)EvaluateRaw(process, expression, paramsValue);
         }
         
 		/// <summary>EvaluateTables the given expression on the given process using the given parameter names and values and returns the result as a table.</summary>
-		public DAE.Runtime.Data.Table EvaluateTable(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		public DAE.Runtime.Data.Table EvaluateTable(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
 		{
-			return (DAE.Runtime.Data.Table)EvaluateRaw(AProcess, AExpression, AParamNames, AParams);
+			return (DAE.Runtime.Data.Table)EvaluateRaw(process, expression, paramNames, paramsValue);
 		}
 		
 		#endregion
@@ -780,64 +780,64 @@ namespace Alphora.Dataphor.DAE.Client
 		#region EvaluateRaw
 		
 		/// <summary> Evaluates the given expression using the utility process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(string AExpression)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(string expression)
 		{
-			return EvaluateRaw(null, AExpression, (DAE.Runtime.DataParams)null);
+			return EvaluateRaw(null, expression, (DAE.Runtime.DataParams)null);
 		}
 
 		/// <summary>Evaluates the given expression on the given process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess AProcess, string AExpression)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess process, string expression)
 		{
-			return EvaluateRaw(AProcess, AExpression, (DAE.Runtime.DataParams)null);
+			return EvaluateRaw(process, expression, (DAE.Runtime.DataParams)null);
 		}
 
 		/// <summary>Evaluates the given expression using the utility process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(string expression, DAE.Runtime.DataParams paramsValue)
 		{
-			return EvaluateRaw(null, AExpression, AParams);
+			return EvaluateRaw(null, expression, paramsValue);
 		}
 
 		/// <summary>Evaluates the given expression using the given process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
 		{
 			CheckActive();
 
-			if (AProcess == null)
-				AProcess = UtilityProcess;
+			if (process == null)
+				process = UtilityProcess;
 
-			IServerExpressionPlan LPlan = AProcess.PrepareExpression(AExpression, AParams);
+			IServerExpressionPlan plan = process.PrepareExpression(expression, paramsValue);
 			try
 			{
-				return LPlan.Evaluate(AParams);
+				return plan.Evaluate(paramsValue);
 			}
 			finally
 			{
-				AProcess.UnprepareExpression(LPlan);
+				process.UnprepareExpression(plan);
 			}
 		}
 		
 		/// <summary>Evaluates the given expression using the utility process and the given parameter values (auto numbered A0..An-1) and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(string AExpression, params object[] AParams)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(string expression, params object[] paramsValue)
 		{
-			return EvaluateRaw(null, AExpression, AParams);
+			return EvaluateRaw(null, expression, paramsValue);
 		}
 
 		/// <summary>Evaluates the given expression on the given process using the given parameter values (auto numbered A0..An-1) and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess AProcess, string AExpression, params object[] AParams)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess process, string expression, params object[] paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = UtilityProcess;
+			if (process == null)
+				process = UtilityProcess;
 			
-			return EvaluateRaw(AProcess, AExpression, DataParamsFromNativeParams(AProcess, AParams));
+			return EvaluateRaw(process, expression, DataParamsFromNativeParams(process, paramsValue));
 		}
 
 		/// <summary>Evaluates the given expression on the given process using the given parameter names and values and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = UtilityProcess;
+			if (process == null)
+				process = UtilityProcess;
 			
-			return EvaluateRaw(AProcess, AExpression, DataParamsFromNativeParams(AProcess, AParamNames, AParams));
+			return EvaluateRaw(process, expression, DataParamsFromNativeParams(process, paramNames, paramsValue));
 		}
 		
 		#endregion
@@ -845,118 +845,118 @@ namespace Alphora.Dataphor.DAE.Client
 		#region OpenCursor
 
 		/// <summary>Opens a cursor on the given expression using the utility process.</summary>
-		public IServerCursor OpenCursor(string AExpression)
+		public IServerCursor OpenCursor(string expression)
 		{
-			return OpenCursor(null, AExpression, (DAE.Runtime.DataParams)null);
+			return OpenCursor(null, expression, (DAE.Runtime.DataParams)null);
 		}
 		
 		/// <summary>Opens a cursor on the given expression using the given process.</summary>
-		public IServerCursor OpenCursor(IServerProcess AProcess, string AExpression)
+		public IServerCursor OpenCursor(IServerProcess process, string expression)
 		{
-			return OpenCursor(AProcess, AExpression, (DAE.Runtime.DataParams)null);
+			return OpenCursor(process, expression, (DAE.Runtime.DataParams)null);
 		}
 		
 		/// <summary>Opens a cursor on the given expression using the utility process.</summary>
-		public IServerCursor OpenCursor(string AExpression, DAE.Runtime.DataParams AParams)
+		public IServerCursor OpenCursor(string expression, DAE.Runtime.DataParams paramsValue)
 		{
-			return OpenCursor(null, AExpression, AParams);
+			return OpenCursor(null, expression, paramsValue);
 		}
 		
 		/// <summary>Opens a cursor on the given expression using the given process.</summary>
-		public IServerCursor OpenCursor(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+		public IServerCursor OpenCursor(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
 		{                              			
 			CheckActive();
 			
-			if (AProcess == null)
-				AProcess = UtilityProcess;
+			if (process == null)
+				process = UtilityProcess;
 			
-			IServerExpressionPlan LPlan = AProcess.PrepareExpression(AExpression, AParams);
+			IServerExpressionPlan plan = process.PrepareExpression(expression, paramsValue);
 			try
 			{
-				return LPlan.Open(AParams);
+				return plan.Open(paramsValue);
 			}
 			catch
 			{
-				AProcess.UnprepareExpression(LPlan);
+				process.UnprepareExpression(plan);
 				throw;
 			}
 		}
 		
-		public IServerCursor OpenCursor(string AExpression, params object[] AParams)
+		public IServerCursor OpenCursor(string expression, params object[] paramsValue)
 		{
-			return OpenCursor(null, AExpression, AParams);
+			return OpenCursor(null, expression, paramsValue);
 		}
 		
-		public IServerCursor OpenCursor(IServerProcess AProcess, string AExpression, params object[] AParams)
+		public IServerCursor OpenCursor(IServerProcess process, string expression, params object[] paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = UtilityProcess;
+			if (process == null)
+				process = UtilityProcess;
 
-			return OpenCursor(AProcess, AExpression, DataParamsFromNativeParams(AProcess, AParams));
+			return OpenCursor(process, expression, DataParamsFromNativeParams(process, paramsValue));
 		}
 		
-		public IServerCursor OpenCursor(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		public IServerCursor OpenCursor(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
 		{
-			if (AProcess == null)
-				AProcess = UtilityProcess;
+			if (process == null)
+				process = UtilityProcess;
 				
-			return OpenCursor(AProcess, AExpression, DataParamsFromNativeParams(AProcess, AParamNames, AParams));
+			return OpenCursor(process, expression, DataParamsFromNativeParams(process, paramNames, paramsValue));
 		}
 		
 		/// <summary>Closes the given cursor.</summary>
-		public void CloseCursor(IServerCursor ACursor)
+		public void CloseCursor(IServerCursor cursor)
 		{
-			IServerExpressionPlan LPlan = ACursor.Plan;
-			LPlan.Close(ACursor);
-			LPlan.Process.UnprepareExpression(LPlan);
+			IServerExpressionPlan plan = cursor.Plan;
+			plan.Close(cursor);
+			plan.Process.UnprepareExpression(plan);
 		}
 		
 		#endregion
 		
 		#region OpenDataView
 		
-		private DataView OpenDataView(string AExpression, DataSetState AInitialState, bool AIsReadOnly)
+		private DataView OpenDataView(string expression, DataSetState initialState, bool isReadOnly)
 		{
-			DataView LDataView = new DataView();
+			DataView dataView = new DataView();
 			try
 			{
-				LDataView.Session = this;
-				LDataView.Expression = AExpression;
-				LDataView.IsReadOnly = AIsReadOnly;
-				LDataView.Open(AInitialState);
-				return LDataView;
+				dataView.Session = this;
+				dataView.Expression = expression;
+				dataView.IsReadOnly = isReadOnly;
+				dataView.Open(initialState);
+				return dataView;
 			}
 			catch
 			{
-				LDataView.Dispose();
+				dataView.Dispose();
 				throw;
 			}
 		}
 
 		/// <summary> Opens a DataView on this session using the specified expression. </summary>
-		/// <param name="AExpression"></param>
+		/// <param name="expression"></param>
 		/// <returns></returns>
-		public DataView OpenDataView(string AExpression)
+		public DataView OpenDataView(string expression)
 		{
-			return OpenDataView(AExpression, DataSetState.Browse, false);
+			return OpenDataView(expression, DataSetState.Browse, false);
 		}
 
 		/// <summary> Opens a DataView on this session using the specified expression and opened in the specified state. </summary>
-		/// <param name="AExpression"></param>
-		/// <param name="AInitialState"></param>
+		/// <param name="expression"></param>
+		/// <param name="initialState"></param>
 		/// <returns></returns>
-		public DataView OpenDataView(string AExpression, DataSetState AInitialState)
+		public DataView OpenDataView(string expression, DataSetState initialState)
 		{
-			return OpenDataView(AExpression, AInitialState, false);
+			return OpenDataView(expression, initialState, false);
 		}
 
 		/// <summary> Opens a read-only DataView on this session using the specified expression. </summary>
-		/// <param name="AExpression"></param>
+		/// <param name="expression"></param>
 		/// <returns></returns>
 		/// <remarks>This opens up a slightly faster database cursor than the read/write OpenDataView call so use this one if you are just retrieving data.</remarks>
-		public DataView OpenReadOnlyDataView(string AExpression)
+		public DataView OpenReadOnlyDataView(string expression)
 		{
-			return OpenDataView(AExpression, DataSetState.Browse, true);
+			return OpenDataView(expression, DataSetState.Browse, true);
 		}
 		
 		#endregion
@@ -965,7 +965,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		#if !SILVERLIGHT
 		// AliasName
-		private string FAliasName = String.Empty;
+		private string _aliasName = String.Empty;
 		/// <summary> The name of the alias to use to establish a connection to a Dataphor Server. </summary>
 		/// <remarks>
 		/// If an alias name is provided, an AliasManager will be used to retrieve the alias settings.
@@ -976,34 +976,34 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("The name of the alias to use to establish a connection to a Dataphor Server.")]
 		public string AliasName 
 		{ 
-			get { return FAliasName; } 
+			get { return _aliasName; } 
 			set 
 			{ 
 				CheckInactive();
-				if (FAliasName != value)
+				if (_aliasName != value)
 				{
 					InternalSetAlias(AliasManager.GetAlias(value));
-					FAliasName = value;
+					_aliasName = value;
 				}
 			}
 		}
 		#endif
 		
-		private void InternalSetAlias(ServerAlias AAlias)
+		private void InternalSetAlias(ServerAlias alias)
 		{
-			FAlias = AAlias;
-			if (FAlias != null)
-				SessionInfo = (SessionInfo)FAlias.SessionInfo.Clone();
+			_alias = alias;
+			if (_alias != null)
+				SessionInfo = (SessionInfo)_alias.SessionInfo.Clone();
 		}
 		
 		private void CheckAlias()
 		{
-			if (FAlias == null)
+			if (_alias == null)
 				throw new ClientException(ClientException.Codes.NoServerAliasSpecified);
 		}
 		
 		// Alias
-		private ServerAlias FAlias;
+		private ServerAlias _alias;
 		/// <summary>The alias used to establish a connection to a Dataphor Server.</summary>
 		/// <remarks>
 		/// In order to use this property, the AliasName property must not be set. If an AliasName
@@ -1016,16 +1016,16 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get
 			{
-				return FAlias;
+				return _alias;
 			}
 			set
 			{
 				CheckInactive();
-				if (FAlias != value)
+				if (_alias != value)
 				{
 					InternalSetAlias(value);
 					#if !SILVERLIGHT
-					FAliasName = String.Empty;
+					_aliasName = String.Empty;
 					#endif
 				}
 			}

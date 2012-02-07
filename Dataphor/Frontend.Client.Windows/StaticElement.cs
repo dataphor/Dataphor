@@ -22,29 +22,29 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Static Controls")]
 	public class Trigger : Element, ITrigger // note: a lot of code in this class is repeated in ActionNode.  If we had multiple inheritance this wouldn't be mess.
     {		
-		public const int COffsetWidth = 10;
-		public const int COffsetHeight = 12;
-		public const int CImageSpacing = 0;
+		public const int OffsetWidth = 10;
+		public const int OffsetHeight = 12;
+		public const int ImageSpacing = 0;
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Action = null;
 		}
 		
 		// IVerticalAlignedElement
 
-		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		protected VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		[DefaultValue(VerticalAlignment.Top)]
 		[Description("When this element is given more space than it can use, this property will control where the element will be placed within it's space.")]
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
+			get { return _verticalAlignment; }
 			set
 			{
-				if (FVerticalAlignment != value)
+				if (_verticalAlignment != value)
 				{
-					FVerticalAlignment = value;
+					_verticalAlignment = value;
 					UpdateLayout();
 				}
 			}
@@ -52,39 +52,39 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Button
 
-		private WinForms.Button FButton;
+		private WinForms.Button _button;
 		protected WinForms.Button Button
 		{
-			get { return FButton; }
+			get { return _button; }
 		}
 
-		private void SetButton(WinForms.Button AButton)
+		private void SetButton(WinForms.Button button)
 		{
-			if (FButton != AButton)
+			if (_button != button)
 			{
-				if (FButton != null)
+				if (_button != null)
 				{
-					FButton.Enter -= new EventHandler(ControlEnter);
-					FButton.Click -= new EventHandler(ButtonClicked);
-					((Session)HostNode.Session).UnregisterControlHelp(FButton);
+					_button.Enter -= new EventHandler(ControlEnter);
+					_button.Click -= new EventHandler(ButtonClicked);
+					((Session)HostNode.Session).UnregisterControlHelp(_button);
 				}
-				FButton = AButton;
-				if (FButton != null)
+				_button = button;
+				if (_button != null)
 				{
-					FButton.Enter += new EventHandler(ControlEnter);
-					FButton.Click += new EventHandler(ButtonClicked);
-					((Session)HostNode.Session).RegisterControlHelp(FButton, this);
+					_button.Enter += new EventHandler(ControlEnter);
+					_button.Click += new EventHandler(ButtonClicked);
+					((Session)HostNode.Session).RegisterControlHelp(_button, this);
 				}
 			}
 		}
 
-		private void ControlEnter(object ASender, EventArgs AArgs)
+		private void ControlEnter(object sender, EventArgs args)
 		{
 			if (Active)
 				FindParent(typeof(IFormInterface)).BroadcastEvent(new FocusChangedEvent(this));
 		}
 		
-		private void ButtonClicked(object ASender, EventArgs AArgs)
+		private void ButtonClicked(object sender, EventArgs args)
 		{
 			try
 			{
@@ -99,34 +99,34 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// Action
 
-		protected IAction FAction;
+		protected IAction _action;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action that will be executed when this control is pressed.")]
 		public IAction Action
 		{
-			get { return FAction; }
+			get { return _action; }
 			set
 			{
-				if (FAction != value)
+				if (_action != value)
 				{
-					if (FAction != null)
+					if (_action != null)
 					{
-						FAction.OnEnabledChanged -= new EventHandler(ActionEnabledChanged);
-						FAction.OnTextChanged -= new EventHandler(ActionTextChanged);
-						FAction.OnImageChanged -= new EventHandler(ActionImageChanged);
-						FAction.OnHintChanged -= new EventHandler(ActionHintChanged);
-						FAction.OnVisibleChanged -= new EventHandler(ActionVisibleChanged);
-						FAction.Disposed -= new EventHandler(ActionDisposed);
+						_action.OnEnabledChanged -= new EventHandler(ActionEnabledChanged);
+						_action.OnTextChanged -= new EventHandler(ActionTextChanged);
+						_action.OnImageChanged -= new EventHandler(ActionImageChanged);
+						_action.OnHintChanged -= new EventHandler(ActionHintChanged);
+						_action.OnVisibleChanged -= new EventHandler(ActionVisibleChanged);
+						_action.Disposed -= new EventHandler(ActionDisposed);
 					}
-					FAction = value;
-					if (FAction != null)
+					_action = value;
+					if (_action != null)
 					{
-						FAction.OnEnabledChanged += new EventHandler(ActionEnabledChanged);
-						FAction.OnTextChanged += new EventHandler(ActionTextChanged);
-						FAction.OnImageChanged += new EventHandler(ActionImageChanged);
-						FAction.OnHintChanged += new EventHandler(ActionHintChanged);
-						FAction.OnVisibleChanged += new EventHandler(ActionVisibleChanged);
-						FAction.Disposed += new EventHandler(ActionDisposed);
+						_action.OnEnabledChanged += new EventHandler(ActionEnabledChanged);
+						_action.OnTextChanged += new EventHandler(ActionTextChanged);
+						_action.OnImageChanged += new EventHandler(ActionImageChanged);
+						_action.OnHintChanged += new EventHandler(ActionHintChanged);
+						_action.OnVisibleChanged += new EventHandler(ActionVisibleChanged);
+						_action.Disposed += new EventHandler(ActionDisposed);
 					}
 					if (Active)
 					{
@@ -141,14 +141,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 		
-		protected void ActionDisposed(object ASender, EventArgs AArgs)
+		protected void ActionDisposed(object sender, EventArgs args)
 		{
 			Action = null;
 		}
 		
 		// Image
 
-		private void ActionImageChanged(object ASender, EventArgs AArgs)
+		private void ActionImageChanged(object sender, EventArgs args)
 		{
 			if (Active)
 				UpdateImage();
@@ -156,47 +156,47 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected virtual void InternalUpdateImage()
 		{
-			FButton.Image = (Action == null ? null : ((Action)Action).LoadedImage);
-			FButton.TextAlign = (Button.Image == null ? ContentAlignment.MiddleCenter : ContentAlignment.MiddleRight);
+			_button.Image = (Action == null ? null : ((Action)Action).LoadedImage);
+			_button.TextAlign = (Button.Image == null ? ContentAlignment.MiddleCenter : ContentAlignment.MiddleRight);
 		}
 
 		protected void UpdateImage()
 		{
 			InternalUpdateImage();
-			if (Active && (Button.Image != null) && (Button.Image.Size != new Size(FImageWidth, FImageHeight)))
+			if (Active && (Button.Image != null) && (Button.Image.Size != new Size(_imageWidth, _imageHeight)))
 				UpdateLayout();
 		}
 
-		protected int FImageWidth = 0;
+		protected int _imageWidth = 0;
 		[Publish(PublishMethod.Value)]
 		[DefaultValue(0)]
 		[Description("The width in pixels that the actions icon will be show as.")]
 		public int ImageWidth
 		{
-			get { return FImageWidth; }
+			get { return _imageWidth; }
 			set
 			{
-				if (FImageWidth != value)
+				if (_imageWidth != value)
 				{
-					FImageWidth = value;
+					_imageWidth = value;
 					if (Active && (Button.Image == null))
 						UpdateLayout();
 				}
 			}
 		}
 
-		protected int FImageHeight = 0;
+		protected int _imageHeight = 0;
 		[Publish(PublishMethod.Value)]
 		[DefaultValue(0)]
 		[Description("The height in pixels that the actions icon will be show as.")]
 		public int ImageHeight
 		{
-			get { return FImageHeight; }
+			get { return _imageHeight; }
 			set
 			{
-				if (FImageHeight != value)
+				if (_imageHeight != value)
 				{
-					FImageHeight = value;
+					_imageHeight = value;
 					if (Active && (Button.Image == null))
 						UpdateLayout();
 				}
@@ -205,58 +205,58 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// Text
 
-		private string FText = String.Empty;
+		private string _text = String.Empty;
 		[Publish(PublishMethod.Value)]
 		[DefaultValue("")]
 		[Description("A text string that will be used by this control.  If this is not set the text property of the action will be used.")]
 		public string Text
 		{
-			get { return FText; }
+			get { return _text; }
 			set
 			{
-				if (FText != value)
+				if (_text != value)
 				{
-					FText = value;
+					_text = value;
 					UpdateText();
 				}
 			}
 		}
 
-		private void ActionTextChanged(object ASender, EventArgs AArgs)
+		private void ActionTextChanged(object sender, EventArgs args)
 		{
-			if (FText == String.Empty)
+			if (_text == String.Empty)
 				UpdateText();
 		}
 
-		private string FAllocatedText;
+		private string _allocatedText;
 
 		protected void DeallocateAccelerator()
 		{
-			if (FAllocatedText != null)
+			if (_allocatedText != null)
 			{
-				((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Deallocate(FAllocatedText);
-				FAllocatedText = null;
+				((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Deallocate(_allocatedText);
+				_allocatedText = null;
 			}
 		}
 
 		protected virtual void InternalUpdateText()
 		{
 			DeallocateAccelerator();
-			FAllocatedText = ((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Allocate(GetText(), true);
-			Button.Text = FAllocatedText;
-			using (Graphics LGraphics = Button.CreateGraphics())
-				FTextPixelSize = Size.Ceiling(LGraphics.MeasureString(Button.Text, Button.Font));
+			_allocatedText = ((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Allocate(GetText(), true);
+			Button.Text = _allocatedText;
+			using (Graphics graphics = Button.CreateGraphics())
+				_textPixelSize = Size.Ceiling(graphics.MeasureString(Button.Text, Button.Font));
 		}
 
 		public string GetText()
 		{
-			if ((Action != null) && (FText == String.Empty))
+			if ((Action != null) && (_text == String.Empty))
 				return Action.Text;
 			else
-				return FText;
+				return _text;
 		}
 
-		protected Size FTextPixelSize;
+		protected Size _textPixelSize;
 
 		protected void UpdateText()
 		{
@@ -269,17 +269,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// Enabled
 
-		private bool FEnabled = true;
+		private bool _enabled = true;
 		[DefaultValue(true)]
 		[Description("When this is set to false this control will be disabled.  This control will also be disabled if the action is disabled.")]
 		public bool Enabled
 		{
-			get { return FEnabled; }
+			get { return _enabled; }
 			set
 			{
-				if (FEnabled != value)
+				if (_enabled != value)
 				{
-					FEnabled = value;
+					_enabled = value;
 					UpdateEnabled();
 				}
 			}
@@ -292,10 +292,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		///	</remarks>
 		public bool GetEnabled()
 		{
-			return ( Action == null ? false : Action.GetEnabled() ) && FEnabled;
+			return ( Action == null ? false : Action.GetEnabled() ) && _enabled;
 		}
 
-		private void ActionEnabledChanged(object ASender, EventArgs AArgs)
+		private void ActionEnabledChanged(object sender, EventArgs args)
 		{
 			UpdateEnabled();
 		}
@@ -330,7 +330,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				return String.Empty;
 		}
 
-		private void ActionHintChanged(object ASender, EventArgs AArgs)
+		private void ActionHintChanged(object sender, EventArgs args)
 		{
 			UpdateToolTip();
 		}
@@ -349,10 +349,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void InternalUpdateVisible() 
 		{
-			FButton.Visible = GetVisible();
+			_button.Visible = GetVisible();
 		}
 
-		private void ActionVisibleChanged(object ASender, EventArgs AArgs)
+		private void ActionVisibleChanged(object sender, EventArgs args)
 		{
 			VisibleChanged();
 		}
@@ -394,7 +394,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			catch
 			{
-				FButton.Dispose();
+				_button.Dispose();
 				SetButton(null);
 				throw;
 			}
@@ -416,50 +416,50 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					if (Button != null)
 					{
-						FButton.Dispose();
+						_button.Dispose();
 						SetButton(null);
 					}
 				}
 			}
 		}
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
 			//Alignment within the allotted space
-			if (FVerticalAlignment != VerticalAlignment.Top)
+			if (_verticalAlignment != VerticalAlignment.Top)
 			{
-				int LDeltaX = Math.Max(0, ABounds.Height - InternalNaturalSize.Height);
-				if (FVerticalAlignment == VerticalAlignment.Middle)
-					LDeltaX /= 2;
-				ABounds.Y += LDeltaX;
+				int deltaX = Math.Max(0, bounds.Height - InternalNaturalSize.Height);
+				if (_verticalAlignment == VerticalAlignment.Middle)
+					deltaX /= 2;
+				bounds.Y += deltaX;
 			}
-			ABounds.Height -= Math.Max(0, ABounds.Height - InternalNaturalSize.Height);
+			bounds.Height -= Math.Max(0, bounds.Height - InternalNaturalSize.Height);
 
-			Button.Bounds = ABounds;
+			Button.Bounds = bounds;
 		}
 		
 		protected override Size InternalNaturalSize
 		{
 			get
 			{
-				Size LResult;
+				Size result;
 
 				// Account for image image size
 				if (Button.Image != null)
-					LResult = Button.Image.Size;
+					result = Button.Image.Size;
 				else
-					LResult = new Size(ImageWidth, ImageHeight);
+					result = new Size(ImageWidth, ImageHeight);
 
 				// Account for text size
 				if ((Button.Text != String.Empty) && (Button.Image != null))
-					LResult.Width += CImageSpacing;
-				LResult.Width += FTextPixelSize.Width + COffsetWidth;
-				ConstrainMinHeight(ref LResult, FTextPixelSize.Height);
+					result.Width += ImageSpacing;
+				result.Width += _textPixelSize.Width + OffsetWidth;
+				ConstrainMinHeight(ref result, _textPixelSize.Height);
 
 				// Padding
-				LResult.Height += COffsetHeight;
+				result.Height += OffsetHeight;
 
-				return LResult;
+				return result;
 			}
 		}
 	}
@@ -475,9 +475,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public event EventHandler OnMnemonic;
 
-		protected override bool ProcessMnemonic(char AChar)
+		protected override bool ProcessMnemonic(char charValue)
 		{
-			if (WinForms.Control.IsMnemonic(AChar, Text) && (OnMnemonic != null))
+			if (WinForms.Control.IsMnemonic(charValue, Text) && (OnMnemonic != null))
 			{
 				OnMnemonic(this, EventArgs.Empty);
 				return true;
@@ -492,26 +492,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Static Controls")]
 	public class StaticText : Element, IStaticText
     {
-		public const int CDefaultWidth = 40;
+		public const int DefaultWidth = 40;
 				
 		// Text
 
-		protected string FText = String.Empty;
+		protected string _text = String.Empty;
 		[Publish(PublishMethod.Value)]
 		[DefaultValue("")]
 		[Description("The text to be shown on the form.")]
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string Text
 		{
-			get { return FText; }
+			get { return _text; }
 			set
 			{
-				if (FText != value)
+				if (_text != value)
 				{
-					FText = value;
+					_text = value;
 					if (Active)
 					{
-						SetLabelText(FText);
+						SetLabelText(_text);
 						UpdateLayout();
 					}
 				}
@@ -520,63 +520,63 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected virtual string GetText()
 		{
-			return FText;
+			return _text;
 		}
 
 		// Width
 
-		protected int FWidth = CDefaultWidth;
+		protected int _width = DefaultWidth;
 		[Publish(PublishMethod.Value)]
-		[DefaultValue(CDefaultWidth)]
+		[DefaultValue(DefaultWidth)]
 		[Description("The line width in characters that the text will be displayed as.  Extra text will be wrapped to new lines.")]
 		public int Width
 		{
-			get { return FWidth; }
+			get { return _width; }
 			set
 			{
-				if (FWidth != value)
+				if (_width != value)
 				{
-					if (FWidth < 1)
+					if (_width < 1)
 						throw new ClientException(ClientException.Codes.CharsPerLineInvalid);
-					FWidth = value;
+					_width = value;
 					if (Active)
 						UpdateLayout();
 				}
 			}
 		}
 
-		protected ExtendedLabel FLabel;
+		protected ExtendedLabel _label;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public ExtendedLabel Label
 		{
-			get { return FLabel; }
+			get { return _label; }
 		}
 		
-		protected Size FLabelSize;
+		protected Size _labelSize;
 		
-		protected void SetLabelText(string AText)
+		protected void SetLabelText(string text)
 		{
 			// Don't allow accelerators here
-			Label.Text = AText.Replace("&", "&&");
+			Label.Text = text.Replace("&", "&&");
 
-			Graphics LGraphics = Label.CreateGraphics();
+			Graphics graphics = Label.CreateGraphics();
 			try
 			{
-				FLabelSize = 
+				_labelSize = 
 					Size.Ceiling
 					(
-						LGraphics.MeasureString
+						graphics.MeasureString
 						(
-							AText, 
+							text, 
 							Label.Font, 
-							(int)(LGraphics.MeasureString(Element.CAverageChars, Label.Font).Width / CAverageChars.Length) * FWidth
+							(int)(graphics.MeasureString(Element.AverageChars, Label.Font).Width / AverageChars.Length) * _width
 						)
 					);
 			}
 			finally
 			{
-				LGraphics.Dispose();
+				graphics.Dispose();
 			}
 		}
 
@@ -587,19 +587,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void InternalUpdateVisible() 
 		{
-			FLabel.Visible = GetVisible();
+			_label.Visible = GetVisible();
 		}
 
 		// Element
 
 		protected override Size InternalNaturalSize
 		{
-			get	{ return FLabelSize + GetOverhead(); }
+			get	{ return _labelSize + GetOverhead(); }
 		}
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
-			Label.Bounds = ABounds;
+			Label.Bounds = bounds;
 		}
 
 		public override bool GetDefaultTabStop()
@@ -609,11 +609,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void DisposeLabel()
 		{
-			if (FLabel != null)
+			if (_label != null)
 			{
-				((Session)HostNode.Session).UnregisterControlHelp(FLabel);
-				FLabel.Dispose();
-				FLabel = null;
+				((Session)HostNode.Session).UnregisterControlHelp(_label);
+				_label.Dispose();
+				_label = null;
 			}
 		}
 
@@ -621,14 +621,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void Activate()
 		{
-			FLabel = new ExtendedLabel();
+			_label = new ExtendedLabel();
 			try
 			{
-				FLabel.BackColor = ((Windows.Session)HostNode.Session).Theme.TextBackgroundColor;
-				FLabel.AutoSize = false;
-				FLabel.Visible = GetVisible();
-				FLabel.Parent = ((IWindowsContainerElement)Parent).Control;
-				((Session)HostNode.Session).RegisterControlHelp(FLabel, this);
+				_label.BackColor = ((Windows.Session)HostNode.Session).Theme.TextBackgroundColor;
+				_label.AutoSize = false;
+				_label.Visible = GetVisible();
+				_label.Parent = ((IWindowsContainerElement)Parent).Control;
+				((Session)HostNode.Session).RegisterControlHelp(_label, this);
 				SetLabelText(GetText());
 				base.Activate();
 			}
@@ -661,17 +661,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// IVerticalAlignedElement
 
-		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		protected VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		[DefaultValue(VerticalAlignment.Top)]
 		[Description("When this element is given more space than it can use, this property will control where the element will be placed within it's space.")]
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
+			get { return _verticalAlignment; }
 			set
 			{
-				if (FVerticalAlignment != value)
+				if (_verticalAlignment != value)
 				{
-					FVerticalAlignment = value;
+					_verticalAlignment = value;
 					UpdateLayout();
 				}
 			}
@@ -679,49 +679,49 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// IHorizontalAlignedElement
 
-		protected HorizontalAlignment FHorizontalAlignment = HorizontalAlignment.Left;
+		protected HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Left;
 		[DefaultValue(HorizontalAlignment.Left)]
 		[Description("When this element is given more space than it can use, this property will control where the element will be placed within it's space.")]
 		public HorizontalAlignment HorizontalAlignment
 		{
-			get { return FHorizontalAlignment; }
+			get { return _horizontalAlignment; }
 			set
 			{
-				if (FHorizontalAlignment != value)
+				if (_horizontalAlignment != value)
 				{
-					FHorizontalAlignment = value;
+					_horizontalAlignment = value;
 					UpdateLayout();
 				}
 			}
 		}
 
-		private int FImageWidth = -1;
+		private int _imageWidth = -1;
 		[DefaultValue(-1)]
 		[Description("The width in pixels that the image will be show as.  If set to -1 then the image's width will be used.")]
 		public int ImageWidth
 		{
-			get { return FImageWidth; }
+			get { return _imageWidth; }
 			set
 			{
-				if (FImageWidth != value)
+				if (_imageWidth != value)
 				{
-					FImageWidth = value;
+					_imageWidth = value;
 					UpdateLayout();
 				}
 			}
 		}
 
-		private int FImageHeight = -1;
+		private int _imageHeight = -1;
 		[DefaultValue(-1)]
 		[Description("The height in pixels that the image will be show as.  If set to -1 then the image's height will be used.")]
 		public int ImageHeight
 		{
-			get { return FImageHeight; }
+			get { return _imageHeight; }
 			set
 			{
-				if (FImageHeight != value)
+				if (_imageHeight != value)
 				{
-					FImageHeight = value;
+					_imageHeight = value;
 					UpdateLayout();
 				}
 			}
@@ -729,125 +729,125 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// StretchStyle
 		
-		private StretchStyles FStretchStyle = StretchStyles.StretchRatio;
+		private StretchStyles _stretchStyle = StretchStyles.StretchRatio;
 		[DefaultValue(StretchStyles.StretchRatio)]
 		[Description("Specifies how to fit the image into the specified space.")]
 		public StretchStyles StretchStyle
 		{
-			get { return FStretchStyle; }
+			get { return _stretchStyle; }
 			set 
 			{ 
-				if (FStretchStyle != value)
+				if (_stretchStyle != value)
 				{
-					FStretchStyle = value; 
+					_stretchStyle = value; 
 					UpdateLayout();
 				}
 			}
 		}
 
-		private string FImage = String.Empty;
+		private string _image = String.Empty;
 		[DefaultValue("")]
 		[Description("An image to be displayed.")]
 		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", typeof(System.Drawing.Design.UITypeEditor))]
 		[Alphora.Dataphor.Frontend.Client.DocumentExpressionOperator("Image")]
 		public string Image
 		{
-			get { return FImage; }
+			get { return _image; }
 			set
 			{
-				if (FImage != value)
+				if (_image != value)
 				{
-					FImage = value;
+					_image = value;
 					if (Active)
 						UpdateImageAspect();
 				}
 			}
 		}
 
-		private DAE.Client.Controls.ImageAspect FImageAspect;
+		private DAE.Client.Controls.ImageAspect _imageAspect;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public DAE.Client.Controls.ImageAspect ImageAspect
 		{
-			get { return FImageAspect; }
+			get { return _imageAspect; }
 		}
 
-		protected PipeRequest FImageRequest;
+		protected PipeRequest _imageRequest;
 
 		private void ClearImageAspectImage()
 		{
-			if (FImageAspect.Image != null)
+			if (_imageAspect.Image != null)
 			{
-				FImageAspect.Image.Dispose();
-				FImageAspect.Image = null;
+				_imageAspect.Image.Dispose();
+				_imageAspect.Image = null;
 			}
 		}
 
 		private void CancelImageRequest()
 		{
-			if (FImageRequest != null)
+			if (_imageRequest != null)
 			{
-				HostNode.Pipe.CancelRequest(FImageRequest);
-				FImageRequest = null;
+				HostNode.Pipe.CancelRequest(_imageRequest);
+				_imageRequest = null;
 			}
 		}
 
 		private void UpdateImageAspect()
 		{
 			CancelImageRequest();
-			if (FImage == String.Empty)
+			if (_image == String.Empty)
 				ClearImageAspectImage();
 			else
 			{
 				// Queue up an asynchronous request
-				FImageRequest = new PipeRequest(FImage, new PipeResponseHandler(ImageRead), new PipeErrorHandler(ImageError));
-				HostNode.Pipe.QueueRequest(FImageRequest);
+				_imageRequest = new PipeRequest(_image, new PipeResponseHandler(ImageRead), new PipeErrorHandler(ImageError));
+				HostNode.Pipe.QueueRequest(_imageRequest);
 			}
 		}
 
-		protected void ImageRead(PipeRequest ARequest, Pipe APipe)
+		protected void ImageRead(PipeRequest request, Pipe pipe)
 		{
-			Size LOldSize;
+			Size oldSize;
 			if (Active)
 			{
-				if (FImageAspect.Image != null)
-					LOldSize = FImageAspect.Image.Size;
+				if (_imageAspect.Image != null)
+					oldSize = _imageAspect.Image.Size;
 				else
-					LOldSize = Size.Empty;
+					oldSize = Size.Empty;
 
-				FImageRequest = null;
+				_imageRequest = null;
 				try
 				{
-					if (ARequest.Result.IsNative)
+					if (request.Result.IsNative)
 					{
-						byte[] LResultBytes = ARequest.Result.AsByteArray;
-						FImageAspect.Image = System.Drawing.Image.FromStream(new MemoryStream(LResultBytes, 0, LResultBytes.Length, false, true));
+						byte[] resultBytes = request.Result.AsByteArray;
+						_imageAspect.Image = System.Drawing.Image.FromStream(new MemoryStream(resultBytes, 0, resultBytes.Length, false, true));
 					}
 					else
 					{
-						using (Stream LStream = ARequest.Result.OpenStream())
+						using (Stream stream = request.Result.OpenStream())
 						{
-							MemoryStream LCopyStream = new MemoryStream();
-							StreamUtility.CopyStream(LStream, LCopyStream);
-							FImageAspect.Image = System.Drawing.Image.FromStream(LCopyStream);
+							MemoryStream copyStream = new MemoryStream();
+							StreamUtility.CopyStream(stream, copyStream);
+							_imageAspect.Image = System.Drawing.Image.FromStream(copyStream);
 						}
 					}
 				}
 				catch
 				{
-					FImageAspect.Image = ImageUtility.GetErrorImage();
+					_imageAspect.Image = ImageUtility.GetErrorImage();
 				}
-				if ((ImageWidth < 0) || (ImageHeight < 0) || !(FImageAspect.Image.Size != LOldSize))
+				if ((ImageWidth < 0) || (ImageHeight < 0) || !(_imageAspect.Image.Size != oldSize))
 					UpdateLayout();
 			}
 		}
 
-		protected void ImageError(PipeRequest ARequest, Pipe APipe, Exception AException)
+		protected void ImageError(PipeRequest request, Pipe pipe, Exception exception)
 		{
 			// TODO: On image error, somehow update the error (warnings) list for the form
-			FImageRequest = null;
-			if (FImageAspect != null)
-				FImageAspect.Image = ImageUtility.GetErrorImage();
+			_imageRequest = null;
+			if (_imageAspect != null)
+				_imageAspect.Image = ImageUtility.GetErrorImage();
 			if ((ImageWidth < 0) || (ImageHeight < 0))
 				UpdateLayout();
 		}
@@ -859,12 +859,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void InternalUpdateVisible() 
 		{
-			FImageAspect.Visible = GetVisible();
+			_imageAspect.Visible = GetVisible();
 		}
 
 		protected override void InternalUpdateTabStop()
 		{
-			FImageAspect.TabStop = GetTabStop();
+			_imageAspect.TabStop = GetTabStop();
 		}
 
 		public override bool GetDefaultTabStop()
@@ -874,25 +874,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void DisposeImageAspect()
 		{
-			if (FImageAspect != null)
+			if (_imageAspect != null)
 			{
 				ClearImageAspectImage();
-				((Session)HostNode.Session).UnregisterControlHelp(FImageAspect);
-				FImageAspect.Dispose();
-				FImageAspect = null;
+				((Session)HostNode.Session).UnregisterControlHelp(_imageAspect);
+				_imageAspect.Dispose();
+				_imageAspect = null;
 			}
 		}
 
 		protected override void Activate()
 		{
-			FImageAspect = new DAE.Client.Controls.ImageAspect();
+			_imageAspect = new DAE.Client.Controls.ImageAspect();
 			try
 			{
-				FImageAspect.BorderStyle = ((Windows.Session)HostNode.Session).Theme.ImageBorderStyle;
-				FImageAspect.BackColor = ((Windows.Session)HostNode.Session).Theme.TextBackgroundColor;
-				FImageAspect.Center = true;
-				FImageAspect.Parent = ((IWindowsContainerElement)Parent).Control;
-				((Session)HostNode.Session).RegisterControlHelp(FImageAspect, this);
+				_imageAspect.BorderStyle = ((Windows.Session)HostNode.Session).Theme.ImageBorderStyle;
+				_imageAspect.BackColor = ((Windows.Session)HostNode.Session).Theme.TextBackgroundColor;
+				_imageAspect.Center = true;
+				_imageAspect.Parent = ((IWindowsContainerElement)Parent).Control;
+				((Session)HostNode.Session).RegisterControlHelp(_imageAspect, this);
 				base.Activate();
 			}
 			catch
@@ -929,58 +929,58 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Element
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
-			ImageAspect.StretchStyle = (DAE.Client.Controls.StretchStyles)FStretchStyle;
+			ImageAspect.StretchStyle = (DAE.Client.Controls.StretchStyles)_stretchStyle;
 
-			Size LImageSize;
+			Size imageSize;
 			if (ImageAspect.Image != null)
-				LImageSize = ImageAspect.Image.Size;
+				imageSize = ImageAspect.Image.Size;
 			else
-				LImageSize = new Size(FImageWidth, FImageHeight);
+				imageSize = new Size(_imageWidth, _imageHeight);
 
 			// adjust for alignment
-			if ((LImageSize.Width > -1) && (LImageSize.Width < ABounds.Width))
+			if ((imageSize.Width > -1) && (imageSize.Width < bounds.Width))
 			{
-				if (FHorizontalAlignment != HorizontalAlignment.Left)
+				if (_horizontalAlignment != HorizontalAlignment.Left)
 				{
-					if (FHorizontalAlignment == HorizontalAlignment.Center)
-						ABounds.X += (ABounds.Width - LImageSize.Width) / 2;
+					if (_horizontalAlignment == HorizontalAlignment.Center)
+						bounds.X += (bounds.Width - imageSize.Width) / 2;
 					else
-						ABounds.X += ABounds.Width - LImageSize.Width;
+						bounds.X += bounds.Width - imageSize.Width;
 				}
-				ABounds.Width = LImageSize.Width;
+				bounds.Width = imageSize.Width;
 			}
-			if ((LImageSize.Height > -1) && (LImageSize.Height < ABounds.Height))
+			if ((imageSize.Height > -1) && (imageSize.Height < bounds.Height))
 			{
-				if (FVerticalAlignment != VerticalAlignment.Top)
+				if (_verticalAlignment != VerticalAlignment.Top)
 				{
-					if (FVerticalAlignment == VerticalAlignment.Middle)
-						ABounds.Y += (ABounds.Height - LImageSize.Height) / 2;
+					if (_verticalAlignment == VerticalAlignment.Middle)
+						bounds.Y += (bounds.Height - imageSize.Height) / 2;
 					else
-						ABounds.Y += ABounds.Height - LImageSize.Height;
+						bounds.Y += bounds.Height - imageSize.Height;
 				}
-				ABounds.Height = LImageSize.Height;
+				bounds.Height = imageSize.Height;
 			}
 
-			ImageAspect.Bounds = ABounds;
+			ImageAspect.Bounds = bounds;
 		}
 		
 		protected override Size InternalNaturalSize
 		{
 			get
 			{
-				Size LSize = new Size(FImageWidth, FImageHeight);
-				if ((FImageAspect != null) && (FImageAspect.Image != null))
+				Size size = new Size(_imageWidth, _imageHeight);
+				if ((_imageAspect != null) && (_imageAspect.Image != null))
 				{
-					Size LBorderSize = FImageAspect.Size - FImageAspect.ClientSize;
-					if (LSize.Width < 0)
-						LSize.Width = FImageAspect.Image.Width + LBorderSize.Width;
-					if (LSize.Height < 0)
-						LSize.Height = FImageAspect.Image.Height + LBorderSize.Height;
+					Size borderSize = _imageAspect.Size - _imageAspect.ClientSize;
+					if (size.Width < 0)
+						size.Width = _imageAspect.Image.Width + borderSize.Width;
+					if (size.Height < 0)
+						size.Height = _imageAspect.Image.Height + borderSize.Height;
 				}
-				ConstrainMin(ref LSize, Size.Empty);
-				return LSize;
+				ConstrainMin(ref size, Size.Empty);
+				return size;
 			}
 		}
 	}
@@ -991,82 +991,82 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Static Controls")]
 	public class HtmlBox : Element, IHtmlBox
 	{
-		public const int CDefaultWidth = 100;
-		public const int CDefaultHeight = 100;
+		public const int DefaultWidth = 100;
+		public const int DefaultHeight = 100;
 
-		private int FPixelWidth = CDefaultWidth;
-		[DefaultValue(CDefaultWidth)]
+		private int _pixelWidth = DefaultWidth;
+		[DefaultValue(DefaultWidth)]
 		[Description("The width in pixels that the web page will be show as.")]
 		public int PixelWidth
 		{
-			get { return FPixelWidth; }
+			get { return _pixelWidth; }
 			set
 			{
-				if (FPixelWidth != value)
+				if (_pixelWidth != value)
 				{
-					FPixelWidth = value;
+					_pixelWidth = value;
 					UpdateLayout();
 				}
 			}
 		}
 
-		private int FPixelHeight = CDefaultHeight;
-		[DefaultValue(CDefaultHeight)]
+		private int _pixelHeight = DefaultHeight;
+		[DefaultValue(DefaultHeight)]
 		[Description("The height in pixels that the web page will be show as.")]
 		public int PixelHeight
 		{
-			get { return FPixelHeight; }
+			get { return _pixelHeight; }
 			set
 			{
-				if (FPixelHeight != value)
+				if (_pixelHeight != value)
 				{
-					FPixelHeight = value;
+					_pixelHeight = value;
 					UpdateLayout();
 				}
 			}
 		}
 
-		private string FURL = String.Empty;
+		private string _uRL = String.Empty;
 		[DefaultValue("")]
 		[Description("The URL of the web page to be displayed.")]
 		public string URL
 		{
-			get { return FURL; }
+			get { return _uRL; }
 			set
 			{
-				if (FURL != value)
+				if (_uRL != value)
 				{
-					FURL = value;
+					_uRL = value;
 					if (Active)
 						InternalUpdateURL();
 				}
 			}
 		}
 
-		private WinForms.WebBrowser FWebBrowser;
+		private WinForms.WebBrowser _webBrowser;
 		[Browsable(false)]
 		public WinForms.WebBrowser WebBrowser
 		{
-			get { return FWebBrowser; }
+			get { return _webBrowser; }
 		}
 
 		protected override void InternalUpdateVisible() 
 		{
-			FWebBrowser.Visible = GetVisible();
+			_webBrowser.Visible = GetVisible();
 		}
 
 		protected override void InternalUpdateTabStop()
 		{
-			FWebBrowser.TabStop = GetTabStop();
+			_webBrowser.TabStop = GetTabStop();
 		}
 
 		private void InternalUpdateURL()
 		{
-			if (FURL != String.Empty) 
+			if (_uRL != String.Empty) 
 			{
 				try 
 				{
-					FWebBrowser.Navigate(FURL);
+					_webBrowser.Navigate(_uRL);
 					return;
 				}
 				catch 
@@ -1074,30 +1074,30 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					// Do nothing
 				}
 			}
-			FWebBrowser.Navigate("about:blank");
+			_webBrowser.Navigate("about:blank");
 		}
 
 		private void DisposeWebBrowser()
 		{
-			if (FWebBrowser != null)
+			if (_webBrowser != null)
 			{
-				((Session)HostNode.Session).UnregisterControlHelp(FWebBrowser);
-				FWebBrowser.Dispose();
-				FWebBrowser = null;
+				((Session)HostNode.Session).UnregisterControlHelp(_webBrowser);
+				_webBrowser.Dispose();
+				_webBrowser = null;
 			}
 		}
 
 		protected override void Activate()
 		{
-			FWebBrowser = new WinForms.WebBrowser();
+			_webBrowser = new WinForms.WebBrowser();
 			try 
 			{
-				FWebBrowser.Parent = ((IWindowsContainerElement)Parent).Control;
-				FWebBrowser.Visible = GetVisible();
-				FWebBrowser.TabStop = GetTabStop();
+				_webBrowser.Parent = ((IWindowsContainerElement)Parent).Control;
+				_webBrowser.Visible = GetVisible();
+				_webBrowser.TabStop = GetTabStop();
 				base.Activate();
 				InternalUpdateURL();
-				((Session)HostNode.Session).RegisterControlHelp(FWebBrowser, this);
+				((Session)HostNode.Session).RegisterControlHelp(_webBrowser, this);
 			} 
 			catch
 			{
@@ -1120,15 +1120,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Element
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
-			if (FWebBrowser != null) 
-				FWebBrowser.Bounds = ABounds;
+			if (_webBrowser != null) 
+				_webBrowser.Bounds = bounds;
 		}
 		
 		protected override Size InternalNaturalSize
 		{
-			get { return new Size(FPixelWidth, FPixelHeight); }
+			get { return new Size(_pixelWidth, _pixelHeight); }
 		}
 	}
 }

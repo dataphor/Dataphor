@@ -22,102 +22,102 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public abstract class DifferenceTable : Table
     {
-		public DifferenceTable(DifferenceNode ANode, Program AProgram) : base(ANode, AProgram){}
+		public DifferenceTable(DifferenceNode node, Program program) : base(node, program){}
 
-        public new DifferenceNode Node { get { return (DifferenceNode)FNode; } }
+        public new DifferenceNode Node { get { return (DifferenceNode)_node; } }
         
-		protected Table FLeftTable;
-		protected Table FRightTable;
-		protected bool FBOF;
+		protected Table _leftTable;
+		protected Table _rightTable;
+		protected bool _bOF;
         
         protected override void InternalOpen()
         {
-			FLeftTable = (Table)Node.Nodes[0].Execute(Program);
-			FRightTable = (Table)Node.Nodes[1].Execute(Program);
-			FBOF = true;
+			_leftTable = (Table)Node.Nodes[0].Execute(Program);
+			_rightTable = (Table)Node.Nodes[1].Execute(Program);
+			_bOF = true;
         }
         
         protected override void InternalClose()
         {
-			if (FLeftTable != null)
+			if (_leftTable != null)
 			{
-				FLeftTable.Dispose();
-				FLeftTable = null;
+				_leftTable.Dispose();
+				_leftTable = null;
 			}
 
-			if (FRightTable != null)
+			if (_rightTable != null)
 			{
-				FRightTable.Dispose();
-				FRightTable = null;
+				_rightTable.Dispose();
+				_rightTable = null;
 			}
         }
         
         protected override void InternalReset()
         {
-			FLeftTable.Reset();
-			FBOF = true;
+			_leftTable.Reset();
+			_bOF = true;
         }
         
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-			FLeftTable.Select(ARow);
+			_leftTable.Select(row);
         }
         
         protected override void InternalLast()
         {
-			FLeftTable.Last();
+			_leftTable.Last();
         }
         
         protected override bool InternalBOF()
         {
-			return FBOF;
+			return _bOF;
         }
         
         protected override bool InternalEOF()
         {
-			if (FBOF)
+			if (_bOF)
 			{
 				InternalNext();
-				if (FLeftTable.EOF())
+				if (_leftTable.EOF())
 					return true;
 				else
 				{
-					if (FLeftTable.Supports(CursorCapability.BackwardsNavigable))
-						FLeftTable.First();
+					if (_leftTable.Supports(CursorCapability.BackwardsNavigable))
+						_leftTable.First();
 					else
-						FLeftTable.Reset();
-					FBOF = true;
+						_leftTable.Reset();
+					_bOF = true;
 					return false;
 				}
 			}
-			return FLeftTable.EOF();
+			return _leftTable.EOF();
         }
         
         protected override void InternalFirst()
         {
-			FLeftTable.First();
-			FBOF = true;
+			_leftTable.First();
+			_bOF = true;
         }
     }
     
     public class SearchedDifferenceTable : DifferenceTable
     {
-		public SearchedDifferenceTable(DifferenceNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public SearchedDifferenceTable(DifferenceNode node, Program program) : base(node, program) {}
 		
-		protected Row FKeyRow;
+		protected Row _keyRow;
 		
 		protected override void InternalOpen()
 		{
 			base.InternalOpen();
-			FKeyRow = new Row(Manager, new Schema.RowType(Node.RightNode.Order.Columns));
+			_keyRow = new Row(Manager, new Schema.RowType(Node.RightNode.Order.Columns));
 		}
 		
 		protected override void InternalClose()
 		{
-			if (FKeyRow != null)
+			if (_keyRow != null)
 			{
-				FKeyRow.Dispose();
-				FKeyRow = null;
+				_keyRow.Dispose();
+				_keyRow = null;
 			}
 			
 			base.InternalClose();
@@ -125,12 +125,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalNext()
 		{
-			while (FLeftTable.Next())
+			while (_leftTable.Next())
 			{
-				FLeftTable.Select(FKeyRow);
-				if (!FRightTable.FindKey(FKeyRow))
+				_leftTable.Select(_keyRow);
+				if (!_rightTable.FindKey(_keyRow))
 				{
-					FBOF = false;
+					_bOF = false;
 					return true;
 				}
 			}
@@ -139,43 +139,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			while (FLeftTable.Prior())
+			while (_leftTable.Prior())
 			{
-				FLeftTable.Select(FKeyRow);
-				if (!FRightTable.FindKey(FKeyRow))
+				_leftTable.Select(_keyRow);
+				if (!_rightTable.FindKey(_keyRow))
 					return true;
 			}
-			FBOF = true;
+			_bOF = true;
 			return false;
 		}
     }
     
     public class ScannedDifferenceTable : DifferenceTable
     {
-		public ScannedDifferenceTable(DifferenceNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public ScannedDifferenceTable(DifferenceNode node, Program program) : base(node, program) {}
 		
-		protected Row FLeftRow;
-		protected Row FRightRow;
+		protected Row _leftRow;
+		protected Row _rightRow;
 
         protected override void InternalOpen()
         {
 			base.InternalOpen();
-			FLeftRow = new Row(Manager, FLeftTable.DataType.RowType);
-			FRightRow = new Row(Manager, FRightTable.DataType.RowType);
+			_leftRow = new Row(Manager, _leftTable.DataType.RowType);
+			_rightRow = new Row(Manager, _rightTable.DataType.RowType);
         }
         
         protected override void InternalClose()
         {
-            if (FLeftRow != null)
+            if (_leftRow != null)
             {
-				FLeftRow.Dispose();
-                FLeftRow = null;
+				_leftRow.Dispose();
+                _leftRow = null;
             }
 
-            if (FRightRow != null)
+            if (_rightRow != null)
             {
-				FRightRow.Dispose();
-                FRightRow = null;
+				_rightRow.Dispose();
+                _rightRow = null;
             }
 
 			base.InternalClose();
@@ -183,14 +183,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected bool RowsEqual()
         {
-			Program.Stack.Push(FRightRow);
+			Program.Stack.Push(_rightRow);
 			try
 			{
-				Program.Stack.Push(FLeftRow);
+				Program.Stack.Push(_leftRow);
 				try
 				{
-					object LObject = Node.EqualNode.Execute(Program);
-					return (LObject != null) && (bool)LObject;
+					object objectValue = Node.EqualNode.Execute(Program);
+					return (objectValue != null) && (bool)objectValue;
 				}
 				finally
 				{
@@ -205,67 +205,67 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override bool InternalNext()
         {
-			bool LFound = false;
-			bool LHasRow;
-			while (!LFound && !FLeftTable.EOF())
+			bool found = false;
+			bool hasRow;
+			while (!found && !_leftTable.EOF())
 			{
-				FLeftTable.Next();
-				if (!FLeftTable.EOF())
+				_leftTable.Next();
+				if (!_leftTable.EOF())
 				{
-					FLeftTable.Select(FLeftRow);
-					LHasRow = false;
-					if (FRightTable.Supports(CursorCapability.BackwardsNavigable))
-						FRightTable.First();
+					_leftTable.Select(_leftRow);
+					hasRow = false;
+					if (_rightTable.Supports(CursorCapability.BackwardsNavigable))
+						_rightTable.First();
 					else
-						FRightTable.Reset();
-					while (FRightTable.Next())
+						_rightTable.Reset();
+					while (_rightTable.Next())
 					{
-						FRightTable.Select(FRightRow);
+						_rightTable.Select(_rightRow);
 						if (RowsEqual())
 						{
-							LHasRow = true;
+							hasRow = true;
 							break;
 						}
 					}
-					if (!LHasRow)
+					if (!hasRow)
 					{
-						FBOF = false;
-						LFound = true;
+						_bOF = false;
+						found = true;
 					}
 				}
 			}
-			return LFound;
+			return found;
         }
         
         protected override bool InternalPrior()
         {
-			bool LFound = false;
-			bool LHasRow;
-			while (!LFound && !FLeftTable.BOF())
+			bool found = false;
+			bool hasRow;
+			while (!found && !_leftTable.BOF())
 			{
-				FLeftTable.Prior();
-				if (!FLeftTable.BOF())
+				_leftTable.Prior();
+				if (!_leftTable.BOF())
 				{
-					FLeftTable.Select(FLeftRow);
-					LHasRow = false;
-					if (FRightTable.Supports(CursorCapability.BackwardsNavigable))
-						FRightTable.First();
+					_leftTable.Select(_leftRow);
+					hasRow = false;
+					if (_rightTable.Supports(CursorCapability.BackwardsNavigable))
+						_rightTable.First();
 					else
-						FRightTable.Reset();
-					while (FRightTable.Next())
+						_rightTable.Reset();
+					while (_rightTable.Next())
 					{
-						FRightTable.Select(FRightRow);
+						_rightTable.Select(_rightRow);
 						if (RowsEqual())
 						{
-							LHasRow = true;
+							hasRow = true;
 							break;
 						}
 					}
-					if (!LHasRow)
-						LFound = true;
+					if (!hasRow)
+						found = true;
 				}
 			}
-			return LFound;
+			return found;
         }
     }
 }

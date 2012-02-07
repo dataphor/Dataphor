@@ -24,60 +24,43 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try
 			{
-				InstanceConfiguration LConfiguration = InstanceManager.LoadConfiguration();
-				string[] LResult = new string[LConfiguration.Instances.Count];
-				for (int LIndex = 0; LIndex < LConfiguration.Instances.Count; LIndex++)
-					LResult[LIndex] = LConfiguration.Instances[LIndex].Name;
-				return LResult;
+				InstanceConfiguration configuration = InstanceManager.LoadConfiguration();
+				string[] result = new string[configuration.Instances.Count];
+				for (int index = 0; index < configuration.Instances.Count; index++)
+					result[index] = configuration.Instances[index].Name;
+				return result;
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw new FaultException<ListenerFault>(ListenerFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<ListenerFault>(ListenerFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		private string GetInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode, bool AUseNative)
+		private string GetInstanceURI(string hostName, string instanceName, bool useNative)
 		{
 			try
 			{
-				ServerConfiguration LServer = InstanceManager.LoadConfiguration().Instances[AInstanceName];
+				ServerConfiguration server = InstanceManager.LoadConfiguration().Instances[instanceName];
 					
-				bool LSecure = false;
-				switch (ASecurityMode)
-				{
-					case ConnectionSecurityMode.Default : 
-						LSecure = LServer.RequireSecureConnection;
-					break;
-					
-					case ConnectionSecurityMode.None :
-						if (LServer.RequireSecureConnection)
-							throw new NotSupportedException("The URI cannot be determined because the instance does not support unsecured connections.");
-					break;
-
-					case ConnectionSecurityMode.Transport :
-						LSecure = true;
-					break;
-				}
-					
-				if (AUseNative)
-					return DataphorServiceUtility.BuildNativeInstanceURI(AHostName, LServer.PortNumber, LSecure, LServer.Name);
+				if (useNative)
+					return DataphorServiceUtility.BuildNativeInstanceURI(hostName, server.PortNumber, server.Name);
 				
-				return DataphorServiceUtility.BuildInstanceURI(AHostName, LServer.PortNumber, LSecure, LServer.Name);
+				return DataphorServiceUtility.BuildInstanceURI(hostName, server.PortNumber, server.Name);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw new FaultException<ListenerFault>(ListenerFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<ListenerFault>(ListenerFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		public string GetInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode)
+		public string GetInstanceURI(string hostName, string instanceName)
 		{
-			return GetInstanceURI(AHostName, AInstanceName, ASecurityMode, false);
+			return GetInstanceURI(hostName, instanceName, false);
 		}
 		
-		public string GetNativeInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode)
+		public string GetNativeInstanceURI(string hostName, string instanceName)
 		{
-			return GetInstanceURI(AHostName, AInstanceName, ASecurityMode, true);
+			return GetInstanceURI(hostName, instanceName, true);
 		}
 	}
 }

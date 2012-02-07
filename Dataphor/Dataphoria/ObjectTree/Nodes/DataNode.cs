@@ -19,13 +19,13 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
         {
         }
 
-        public virtual void DragDrop(DragEventArgs AArgs)
+        public virtual void DragDrop(DragEventArgs args)
         {
         }
 
-        public virtual void DragOver(DragEventArgs AArgs)
+        public virtual void DragOver(DragEventArgs args)
         {
-            AArgs.Effect = DragDropEffects.None;
+            args.Effect = DragDropEffects.None;
         }
 
         public virtual void DragLeave()

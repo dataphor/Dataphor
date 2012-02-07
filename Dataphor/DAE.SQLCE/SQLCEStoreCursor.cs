@@ -16,14 +16,14 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 {
     public class SQLCEStoreCursor : SQLStoreCursor
     {
-        public SQLCEStoreCursor(SQLCEStoreConnection AConnection, string ATableName, SQLIndex AIndex, bool AIsUpdatable) 
-            : base(AConnection, ATableName, AIndex, AIsUpdatable)
+        public SQLCEStoreCursor(SQLCEStoreConnection connection, string tableName, SQLIndex index, bool isUpdatable) 
+            : base(connection, tableName, index, isUpdatable)
         { 
             EnsureReader(null, true, true);
         }
         
-        public SQLCEStoreCursor(SQLCEStoreConnection AConnection, string ATableName, List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
-			: base(AConnection, ATableName, AColumns, AIndex, AIsUpdatable)
+        public SQLCEStoreCursor(SQLCEStoreConnection connection, string tableName, List<string> columns, SQLIndex index, bool isUpdatable)
+			: base(connection, tableName, columns, index, isUpdatable)
         {	
 			EnsureReader(null, true, true);
         }
@@ -31,9 +31,9 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
         public new SQLCEStoreConnection Connection { get { return (SQLCEStoreConnection)base.Connection; } }
 
 		#if USESQLCONNECTION
-		protected override SQLCursor InternalCreateReader(object[] AOrigin, bool AForward, bool AInclusive)
+		protected override SQLCursor InternalCreateReader(object[] origin, bool forward, bool inclusive)
 		{
-			SQLCECursor LCursor =
+			SQLCECursor cursor =
 				Connection.ExecuteCommand.ExecuteResultSet
 				(
 					TableName, 
@@ -44,8 +44,8 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 					ResultSetOptions.Scrollable | ResultSetOptions.Sensitive | (IsUpdatable ? ResultSetOptions.Updatable : ResultSetOptions.None)
 				);
 
-			FResultSet = LCursor.ResultSet;
-			return LCursor;
+			_resultSet = cursor.ResultSet;
+			return cursor;
 		}
 		#else
         protected override System.Data.Common.DbDataReader InternalCreateReader(object[] AOrigin, bool AForward, bool AInclusive)
@@ -68,40 +68,40 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
         protected override void InternalDispose()
         {
             // This is the same reference as FReader in the base, so no need to dispose it, just clear it.
-            FResultSet = null;
+            _resultSet = null;
 			
             base.InternalDispose();
         }
 		
-        private SqlCeResultSet FResultSet;
+        private SqlCeResultSet _resultSet;
 		
         protected override bool InternalNext()
         {
-            return FResultSet.Read();
+            return _resultSet.Read();
         }
 
         protected override bool InternalLast()
         {
-            return FResultSet.ReadLast();
+            return _resultSet.ReadLast();
         }
 
         protected override bool InternalPrior()
         {
-			return FResultSet.ReadPrevious();
+			return _resultSet.ReadPrevious();
         }
 
         protected override bool InternalFirst()
         {
-            return FResultSet.ReadFirst();
+            return _resultSet.ReadFirst();
         }
 
-        protected override bool InternalSeek(object[] AKey)
+        protected override bool InternalSeek(object[] key)
         {
             EnsureReader(null, true, true);
-			object[] LKey = new object[AKey.Length];
-			for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
-				LKey[LIndex] = NativeToStoreValue(AKey[LIndex]);
-			FResultSet.Seek(DbSeekOptions.FirstEqual, LKey);
+			object[] localKey = new object[key.Length];
+			for (int index = 0; index < localKey.Length; index++)
+				localKey[index] = NativeToStoreValue(key[index]);
+			_resultSet.Seek(DbSeekOptions.FirstEqual, localKey);
 			// Despite the fact that the documentation says that the
 			// result value of the Seek operation indicates whether or
 			// not the cursor is positioned on a row, this does not
@@ -109,53 +109,53 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 			return false;
         }
 		
-        protected override object InternalGetValue(int AIndex)
+        protected override object InternalGetValue(int index)
         {
-            return StoreToNativeValue(FResultSet.GetValue(AIndex)); 
+            return StoreToNativeValue(_resultSet.GetValue(index)); 
         }
 		
-        protected override void InternalSetValue(int AIndex, object AValue)
+        protected override void InternalSetValue(int index, object tempValue)
         {
-            FResultSet.SetValue(AIndex, NativeToStoreValue(AValue));
+            _resultSet.SetValue(index, NativeToStoreValue(tempValue));
         }
 		
-        protected override bool InternalInsert(object[] ARow)
+        protected override bool InternalInsert(object[] row)
         {
-            SqlCeUpdatableRecord LRecord = FResultSet.CreateRecord();
-            for (int LIndex = 0; LIndex < ARow.Length; LIndex++)
-                LRecord.SetValue(LIndex, NativeToStoreValue(ARow[LIndex]));
+            SqlCeUpdatableRecord record = _resultSet.CreateRecord();
+            for (int index = 0; index < row.Length; index++)
+                record.SetValue(index, NativeToStoreValue(row[index]));
 
-            FResultSet.Insert(LRecord, DbInsertOptions.KeepCurrentPosition);
+            _resultSet.Insert(record, DbInsertOptions.KeepCurrentPosition);
 
             return false;
         }
 
         protected override bool InternalUpdate()
         {
-            FResultSet.Update();
+            _resultSet.Update();
 
             return true;
         }
 
         protected override bool InternalDelete()
         {
-            FResultSet.Delete();
+            _resultSet.Delete();
             
             return true;
         }
 
-		public override object NativeToStoreValue(object AValue)
+		public override object NativeToStoreValue(object tempValue)
 		{
-			if (AValue is bool)
-				return (byte)((bool)AValue ? 1 : 0);
-			return base.NativeToStoreValue(AValue);
+			if (tempValue is bool)
+				return (byte)((bool)tempValue ? 1 : 0);
+			return base.NativeToStoreValue(tempValue);
 		}
 
-		public override object StoreToNativeValue(object AValue)
+		public override object StoreToNativeValue(object tempValue)
 		{
-			if (AValue is byte)
-				return ((byte)AValue) == 1;			
-			return base.StoreToNativeValue(AValue);
+			if (tempValue is byte)
+				return ((byte)tempValue) == 1;			
+			return base.StoreToNativeValue(tempValue);
 		}
     }
 }

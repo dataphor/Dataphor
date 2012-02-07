@@ -12,25 +12,25 @@ namespace Alphora.Dataphor.DAE.Streams
 
 	public class ManagedStream : CoverStream
 	{
-		public ManagedStream(ServerStreamManager AManager, int AOwnerID, StreamID AStreamID, Stream ASourceStream) : base(ASourceStream)
+		public ManagedStream(ServerStreamManager manager, int ownerID, StreamID streamID, Stream sourceStream) : base(sourceStream)
 		{
-			FStreamManager = AManager;
-			FOwnerID = AOwnerID;
-			FStreamID = AStreamID;
+			_streamManager = manager;
+			_ownerID = ownerID;
+			_streamID = streamID;
 		}
 		
 		public override void Close()
 		{
 			base.Close();
-			if (FStreamManager != null)
+			if (_streamManager != null)
 			{
-				FStreamManager.Close(FOwnerID, FStreamID);
-				FStreamManager = null;
+				_streamManager.Close(_ownerID, _streamID);
+				_streamManager = null;
 			}
 		}
 		
-		private ServerStreamManager FStreamManager;
-		private int FOwnerID;
-		private StreamID FStreamID;
+		private ServerStreamManager _streamManager;
+		private int _ownerID;
+		private StreamID _streamID;
 	}
 }

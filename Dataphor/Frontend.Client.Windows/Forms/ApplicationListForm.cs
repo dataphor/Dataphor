@@ -14,9 +14,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	/// <summary> ApplicationListForm </summary>
 	public class ApplicationListForm : BaseForm
 	{
-		private Alphora.Dataphor.DAE.Client.DataSource FDataSource;
+		private Alphora.Dataphor.DAE.Client.DataSource _dataSource;
 		private Label uriLabel;
-		private Alphora.Dataphor.DAE.Client.Controls.DBGrid FGrid;
+		private Alphora.Dataphor.DAE.Client.Controls.DBGrid _grid;
 		private System.ComponentModel.IContainer components;
 
 		public ApplicationListForm()
@@ -53,8 +53,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			this.FDataSource = new Alphora.Dataphor.DAE.Client.DataSource(this.components);
-			this.FGrid = new Alphora.Dataphor.DAE.Client.Controls.DBGrid();
+			this._dataSource = new Alphora.Dataphor.DAE.Client.DataSource(this.components);
+			this._grid = new Alphora.Dataphor.DAE.Client.Controls.DBGrid();
 			this.uriLabel = new System.Windows.Forms.Label();
 			this.FContentPanel.SuspendLayout();
 			this.SuspendLayout();
@@ -62,26 +62,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// FContentPanel
 			// 
 			this.FContentPanel.Controls.Add(this.uriLabel);
-			this.FContentPanel.Controls.Add(this.FGrid);
+			this.FContentPanel.Controls.Add(this._grid);
 			this.FContentPanel.Size = new System.Drawing.Size(444, 194);
 			// 
 			// FGrid
 			// 
-			this.FGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+			this._grid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 						| System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this.FGrid.BackColor = System.Drawing.Color.Transparent;
-			this.FGrid.CausesValidation = false;
-			this.FGrid.Columns.Add(new Alphora.Dataphor.DAE.Client.Controls.TextColumn("Description", "Description", 398, System.Windows.Forms.HorizontalAlignment.Left, System.Windows.Forms.HorizontalAlignment.Left, Alphora.Dataphor.DAE.Client.Controls.VerticalAlignment.Top, System.Drawing.Color.Transparent, true, System.Windows.Forms.Border3DStyle.RaisedInner, ((System.Windows.Forms.Border3DSide)((((System.Windows.Forms.Border3DSide.Left | System.Windows.Forms.Border3DSide.Top)
+			this._grid.BackColor = System.Drawing.Color.Transparent;
+			this._grid.CausesValidation = false;
+			this._grid.Columns.Add(new Alphora.Dataphor.DAE.Client.Controls.TextColumn("Description", "Description", 398, System.Windows.Forms.HorizontalAlignment.Left, System.Windows.Forms.HorizontalAlignment.Left, Alphora.Dataphor.DAE.Client.Controls.VerticalAlignment.Top, System.Drawing.Color.Transparent, true, System.Windows.Forms.Border3DStyle.RaisedInner, ((System.Windows.Forms.Border3DSide)((((System.Windows.Forms.Border3DSide.Left | System.Windows.Forms.Border3DSide.Top)
 								| System.Windows.Forms.Border3DSide.Right)
 								| System.Windows.Forms.Border3DSide.Bottom))), -1, -1, new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0))), System.Drawing.SystemColors.ControlText, false, false));
-			this.FGrid.Location = new System.Drawing.Point(10, 27);
-			this.FGrid.Name = "FGrid";
-			this.FGrid.NoValueBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))), ((int)(((byte)(240)))));
-			this.FGrid.Size = new System.Drawing.Size(426, 158);
-			this.FGrid.Source = this.FDataSource;
-			this.FGrid.TabIndex = 1;
-			this.FGrid.Text = "dbGrid1";
+			this._grid.Location = new System.Drawing.Point(10, 27);
+			this._grid.Name = "FGrid";
+			this._grid.NoValueBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))), ((int)(((byte)(240)))));
+			this._grid.Size = new System.Drawing.Size(426, 158);
+			this._grid.Source = this._dataSource;
+			this._grid.TabIndex = 1;
+			this._grid.Text = "dbGrid1";
 			// 
 			// uriLabel
 			// 
@@ -106,12 +106,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 		#endregion
 
-		public static void Execute(DAE.Client.DataView AView)
+		public static void Execute(DAE.Client.DataView view)
 		{
-			using (ApplicationListForm LForm = new ApplicationListForm())
+			using (ApplicationListForm form = new ApplicationListForm())
 			{
-				LForm.FDataSource.DataSet = AView;
-				if (LForm.ShowDialog() != DialogResult.OK)
+				form._dataSource.DataSet = view;
+				if (form.ShowDialog() != DialogResult.OK)
 					throw new AbortException();
 			}
 		}
@@ -123,7 +123,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void RefreshClicked(object sender, EventArgs e)
 		{
-			FDataSource.DataSet.Refresh();
+			_dataSource.DataSet.Refresh();
 		}
 	}
 }

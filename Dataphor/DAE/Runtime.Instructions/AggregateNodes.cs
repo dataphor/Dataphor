@@ -25,166 +25,166 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		// Operator
 		// The operator this node is implementing
-		private Schema.AggregateOperator FOperator;
+		private Schema.AggregateOperator _operator;
 		public Schema.AggregateOperator Operator
 		{
-			get { return FOperator; }
-			set { FOperator = value; }
+			get { return _operator; }
+			set { _operator = value; }
 		}
 		
-		protected int[] FAggregateColumnIndexes;
+		protected int[] _aggregateColumnIndexes;
 		public int[] AggregateColumnIndexes
 		{
-			get { return FAggregateColumnIndexes; }
-			set { FAggregateColumnIndexes = value; }
+			get { return _aggregateColumnIndexes; }
+			set { _aggregateColumnIndexes = value; }
 		}
 		
-		protected string[] FValueNames;
+		protected string[] _valueNames;
 		public string[] ValueNames
 		{
-			get { return FValueNames; }
-			set { FValueNames = value; }
+			get { return _valueNames; }
+			set { _valueNames = value; }
 		}
 		
 		public TableNode SourceNode { get { return (TableNode)Nodes[0]; } }
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
+			DetermineModifiers(plan);
 			
 			// if the operator being invoked is order dependent, verify that the source is requested ordered by a unique order
-			if (Operator.IsOrderDependent && !APlan.SuppressWarnings)
+			if (Operator.IsOrderDependent && !plan.SuppressWarnings)
 			{
-				OrderNode LOrderNode = SourceNode as OrderNode;
-				if (LOrderNode == null)
-					APlan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidOrderDependentAggregateInvocation, CompilerErrorLevel.Warning, Operator.OperatorName));
-				else if (!Compiler.IsOrderUnique(APlan, SourceNode.TableVar, LOrderNode.RequestedOrder))
-					APlan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidOrderDependentAggregateInvocationOrder, CompilerErrorLevel.Warning, Operator.OperatorName));
+				OrderNode orderNode = SourceNode as OrderNode;
+				if (orderNode == null)
+					plan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidOrderDependentAggregateInvocation, CompilerErrorLevel.Warning, Operator.OperatorName));
+				else if (!Compiler.IsOrderUnique(plan, SourceNode.TableVar, orderNode.RequestedOrder))
+					plan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidOrderDependentAggregateInvocationOrder, CompilerErrorLevel.Warning, Operator.OperatorName));
 			}
 		}
 		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
 			if (Modifiers != null)
 			{
-				FIsLiteral = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsLiteral", Operator.IsLiteral.ToString()));
-				FIsFunctional = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsFunctional", Operator.IsFunctional.ToString()));
-				FIsDeterministic = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsDeterministic", Operator.IsDeterministic.ToString()));
-				FIsRepeatable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsRepeatable", Operator.IsRepeatable.ToString()));
-				FIsNilable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsNilable", Operator.IsNilable.ToString()));
+				_isLiteral = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsLiteral", Operator.IsLiteral.ToString()));
+				_isFunctional = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsFunctional", Operator.IsFunctional.ToString()));
+				_isDeterministic = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsDeterministic", Operator.IsDeterministic.ToString()));
+				_isRepeatable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsRepeatable", Operator.IsRepeatable.ToString()));
+				_isNilable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsNilable", Operator.IsNilable.ToString()));
 			}
 			else
 			{
-				FIsLiteral = Operator.IsLiteral;
-				FIsFunctional = Operator.IsFunctional;
-				FIsDeterministic = Operator.IsDeterministic;
-				FIsRepeatable = Operator.IsRepeatable;
-				FIsNilable = Operator.IsNilable;
+				_isLiteral = Operator.IsLiteral;
+				_isFunctional = Operator.IsFunctional;
+				_isDeterministic = Operator.IsDeterministic;
+				_isRepeatable = Operator.IsRepeatable;
+				_isNilable = Operator.IsNilable;
 			}
 
-			for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
+			for (int index = 0; index < Operator.Operands.Count; index++)
 			{
-				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
-				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;
-				FIsDeterministic = FIsDeterministic && Nodes[LIndex].IsDeterministic;
-				FIsRepeatable = FIsRepeatable && Nodes[LIndex].IsRepeatable;
-				FIsNilable = FIsNilable || Nodes[LIndex].IsNilable;
+				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
+				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
+				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
+				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
+				_isNilable = _isNilable || Nodes[index].IsNilable;
 			} 
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			APlan.Symbols.PushWindow(0);
+			plan.Symbols.PushWindow(0);
 			try
 			{
-				APlan.Symbols.Push(new Symbol(Keywords.Result, FDataType));
+				plan.Symbols.Push(new Symbol(Keywords.Result, _dataType));
 				try
 				{
-					Nodes[1].DetermineBinding(APlan);
+					Nodes[1].DetermineBinding(plan);
 
-					for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
-						APlan.Symbols.Push(new Symbol(FValueNames[LIndex], SourceNode.DataType.Columns[FAggregateColumnIndexes[LIndex]].DataType));
+					for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
+						plan.Symbols.Push(new Symbol(_valueNames[index], SourceNode.DataType.Columns[_aggregateColumnIndexes[index]].DataType));
 					try
 					{
 						// This AllowExtraWindowAccess call remains in the runtime because it allows the
 						// determine binding step to find the reference to the external source restriction values
-						APlan.Symbols.AllowExtraWindowAccess = true;
+						plan.Symbols.AllowExtraWindowAccess = true;
 						try
 						{
-							Nodes[0].DetermineBinding(APlan);
+							Nodes[0].DetermineBinding(plan);
 						}
 						finally
 						{
-							APlan.Symbols.AllowExtraWindowAccess = false;
+							plan.Symbols.AllowExtraWindowAccess = false;
 						}
 						
-						APlan.Symbols.PushFrame();
+						plan.Symbols.PushFrame();
 						try
 						{
-							Nodes[2].DetermineBinding(APlan);
+							Nodes[2].DetermineBinding(plan);
 						}
 						finally
 						{
-							APlan.Symbols.PopFrame();
+							plan.Symbols.PopFrame();
 						}
 					}
 					finally
 					{
-						for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
-							APlan.Symbols.Pop();
+						for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
+							plan.Symbols.Pop();
 					}
 
-					Nodes[3].DetermineBinding(APlan);
+					Nodes[3].DetermineBinding(plan);
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.Symbols.PopWindow();
+				plan.Symbols.PopWindow();
 			}
 		}
 		
-		public override void BindToProcess(Plan APlan)
+		public override void BindToProcess(Plan plan)
 		{
 			if (Operator != null)
 			{
-				APlan.CheckRight(Operator.GetRight(Schema.RightNames.Execute));
-				APlan.EnsureApplicationTransactionOperator(Operator);
+				plan.CheckRight(Operator.GetRight(Schema.RightNames.Execute));
+				plan.EnsureApplicationTransactionOperator(Operator);
 			}
-			base.BindToProcess(APlan);
+			base.BindToProcess(plan);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack.PushWindow(0, this, Operator.Locator);
+			program.Stack.PushWindow(0, this, Operator.Locator);
 			try
 			{
-				Table LTable = null;
+				Table table = null;
 				try
 				{
-					AProgram.Stack.Push(null); // result
-					int LStackDepth = AProgram.Stack.Count;
+					program.Stack.Push(null); // result
+					int stackDepth = program.Stack.Count;
 
 					// Initialization
 					try
 					{
-						Nodes[1].Execute(AProgram);
+						Nodes[1].Execute(program);
 					}
 					catch (ExitError){}
 					
 					// Aggregation
-					Row LRow = null;
-					if (FAggregateColumnIndexes.Length > 0)
-						LRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType);
+					Row row = null;
+					if (_aggregateColumnIndexes.Length > 0)
+						row = new Row(program.ValueManager, SourceNode.DataType.RowType);
 					//object[] LValues = new object[FAggregateColumnIndexes.Length];
-					for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
+					for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
 					{
-						Schema.IDataType LType = SourceNode.TableVar.Columns[FAggregateColumnIndexes[LIndex]].DataType;
+						Schema.IDataType type = SourceNode.TableVar.Columns[_aggregateColumnIndexes[index]].DataType;
 						//LValues[LIndex] = new DataVar(FValueNames[LIndex], LType, null);
-						AProgram.Stack.Push(null);
+						program.Stack.Push(null);
 					}
 					try
 					{
@@ -193,123 +193,123 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							#if DEBUG
 							// This AllowExtraWindowAccess call is only necessary debug because the check is not
 							// made in release executables
-							AProgram.Stack.AllowExtraWindowAccess = true;
+							program.Stack.AllowExtraWindowAccess = true;
 							try
 							{
 							#endif
-								if (LTable == null)
+								if (table == null)
 								{
-									LTable = (Table)Nodes[0].Execute(AProgram);
-									LTable.Open();
+									table = (Table)Nodes[0].Execute(program);
+									table.Open();
 								}
 
-								if (!LTable.Next())
+								if (!table.Next())
 									break;
 									
-								if (FAggregateColumnIndexes.Length > 0)
-									LTable.Select(LRow);
+								if (_aggregateColumnIndexes.Length > 0)
+									table.Select(row);
 							#if DEBUG
 							}
 							finally
 							{
-								AProgram.Stack.AllowExtraWindowAccess = false;
+								program.Stack.AllowExtraWindowAccess = false;
 							}
 							#endif
 							
-							for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
-								if (LRow.HasValue(FAggregateColumnIndexes[LIndex]))
-									AProgram.Stack.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, LRow[FAggregateColumnIndexes[LIndex]]);
+							for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
+								if (row.HasValue(_aggregateColumnIndexes[index]))
+									program.Stack.Poke(_aggregateColumnIndexes.Length - 1 - index, row[_aggregateColumnIndexes[index]]);
 								else
-									AProgram.Stack.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, null);
+									program.Stack.Poke(_aggregateColumnIndexes.Length - 1 - index, null);
 							
-							AProgram.Stack.PushFrame();
+							program.Stack.PushFrame();
 							try
 							{
-								Nodes[2].Execute(AProgram);
+								Nodes[2].Execute(program);
 							}
 							catch (ExitError){}
 							finally
 							{
-								AProgram.Stack.PopFrame();
+								program.Stack.PopFrame();
 							}
 						}
 					}
 					finally
 					{
-						for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
-							AProgram.Stack.Pop();
+						for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
+							program.Stack.Pop();
 
-						if (FAggregateColumnIndexes.Length > 0)
-							LRow.Dispose();
+						if (_aggregateColumnIndexes.Length > 0)
+							row.Dispose();
 					}
 					
 					// Finalization
 					try
 					{
-						Nodes[3].Execute(AProgram);
+						Nodes[3].Execute(program);
 					}
 					catch (ExitError){}
 					
-					return AProgram.Stack.Peek(AProgram.Stack.Count - LStackDepth);
+					return program.Stack.Peek(program.Stack.Count - stackDepth);
 				}
 				finally
 				{
-					if (LTable != null)
-						LTable.Dispose();
+					if (table != null)
+						table.Dispose();
 				}
 			}
 			finally
 			{
-				AProgram.Stack.PopWindow();
+				program.Stack.PopWindow();
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			CallExpression LExpression = new CallExpression();
-			LExpression.Identifier = Schema.Object.EnsureRooted(FOperator.OperatorName);
-			Expression LSourceExpression = (Expression)Nodes[0].EmitStatement(AMode);
-			if (FAggregateColumnIndexes.Length > 0)
+			CallExpression expression = new CallExpression();
+			expression.Identifier = Schema.Object.EnsureRooted(_operator.OperatorName);
+			Expression sourceExpression = (Expression)Nodes[0].EmitStatement(mode);
+			if (_aggregateColumnIndexes.Length > 0)
 			{
-				if (FAggregateColumnIndexes.Length == 0)
-					LExpression.Expressions.Add(new ColumnExtractorExpression(((TableNode)Nodes[0]).DataType.Columns[FAggregateColumnIndexes[0]].Name, LSourceExpression));
+				if (_aggregateColumnIndexes.Length == 0)
+					expression.Expressions.Add(new ColumnExtractorExpression(((TableNode)Nodes[0]).DataType.Columns[_aggregateColumnIndexes[0]].Name, sourceExpression));
 				else
 				{
-					ColumnExtractorExpression LColumnExpression = new ColumnExtractorExpression();
-					LColumnExpression.Expression = LSourceExpression;
-					for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
-						LColumnExpression.Columns.Add(new ColumnExpression(((TableNode)Nodes[0]).DataType.Columns[FAggregateColumnIndexes[LIndex]].Name));
-					LExpression.Expressions.Add(LColumnExpression);
+					ColumnExtractorExpression columnExpression = new ColumnExtractorExpression();
+					columnExpression.Expression = sourceExpression;
+					for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
+						columnExpression.Columns.Add(new ColumnExpression(((TableNode)Nodes[0]).DataType.Columns[_aggregateColumnIndexes[index]].Name));
+					expression.Expressions.Add(columnExpression);
 				}
 			}
 			else
-				LExpression.Expressions.Add(LSourceExpression);
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+				expression.Expressions.Add(sourceExpression);
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 	}
 	
 	public class CountInitializationNode : PlanNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack[0] = 0;
+			program.Stack[0] = 0;
 			return null;
 		}
 	}
 
     public class IntegerInitializationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack[0] = null;
+			program.Stack[0] = null;
 			return null;
 		}
     }
     
     public class EmptyFinalizationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			return null;
 		}
@@ -317,33 +317,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
     public class CountAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack[0] = checked((int)AProgram.Stack[0] + 1);
+			program.Stack[0] = checked((int)program.Stack[0] + 1);
 			return null;
 		}
     }
     
     public class ObjectCountAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				AProgram.Stack[1] = checked((int)AProgram.Stack[1] + 1);
+			if (program.Stack[0] != null)
+				program.Stack[1] = checked((int)program.Stack[1] + 1);
 			return null;
 		}
     }
     
     public class IntegerSumAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				AProgram.Stack[1] =
+			if (program.Stack[0] != null)
+				program.Stack[1] =
 					checked
 					(
-						(int)AProgram.Stack[0] +
-						(AProgram.Stack[1] == null ? 0 : (int)AProgram.Stack[1])
+						(int)program.Stack[0] +
+						(program.Stack[1] == null ? 0 : (int)program.Stack[1])
 					);
 			return null;
 		}
@@ -351,61 +351,61 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class IntegerMinAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			if 
 			(
-				AProgram.Stack[0] != null && 
+				program.Stack[0] != null && 
 				(
-					AProgram.Stack[1] == null || 
-					((int)AProgram.Stack[0] < (int)AProgram.Stack[1])
+					program.Stack[1] == null || 
+					((int)program.Stack[0] < (int)program.Stack[1])
 				)
 			)
-				AProgram.Stack[1] = AProgram.Stack[0];
+				program.Stack[1] = program.Stack[0];
 			return null;
 		}
     }
     
     public class IntegerMaxAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			if 
 			(
-				AProgram.Stack[0] != null && 
+				program.Stack[0] != null && 
 				(
-					AProgram.Stack[1] == null || 
-					((int)AProgram.Stack[0] > (int)AProgram.Stack[1])
+					program.Stack[1] == null || 
+					((int)program.Stack[0] > (int)program.Stack[1])
 				)
 			)
-				AProgram.Stack[1] = AProgram.Stack[0];
+				program.Stack[1] = program.Stack[0];
 			return null;
 		}
     }
     
     public class IntegerAvgInitializationNode : PlanNode
     {
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			APlan.Symbols.Push(new Symbol("LCounter", APlan.DataTypes.SystemInteger));
+			plan.Symbols.Push(new Symbol("LCounter", plan.DataTypes.SystemInteger));
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack.Push(0);
-			AProgram.Stack[1] = 0;
+			program.Stack.Push(0);
+			program.Stack[1] = 0;
 			return null;
 		}
     }
     
     public class IntegerAvgAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
+			if (program.Stack[0] != null)
 			{
-				AProgram.Stack[1] = checked((int)AProgram.Stack[1] + 1);
-				AProgram.Stack[2] = checked((int)AProgram.Stack[2] + (int)AProgram.Stack[0]);
+				program.Stack[1] = checked((int)program.Stack[1] + 1);
+				program.Stack[2] = checked((int)program.Stack[2] + (int)program.Stack[0]);
 			}
 			return null;
 		}
@@ -413,12 +413,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class IntegerAvgFinalizationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if ((int)AProgram.Stack[0] == 0)
-				AProgram.Stack[1] = null;
+			if ((int)program.Stack[0] == 0)
+				program.Stack[1] = null;
 			else
-				AProgram.Stack[1] = (decimal)(int)AProgram.Stack[1] / (decimal)(int)AProgram.Stack[0];
+				program.Stack[1] = (decimal)(int)program.Stack[1] / (decimal)(int)program.Stack[0];
 			return null;
 		}
     }
@@ -517,71 +517,71 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DecimalInitializationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack[0] = null;
+			program.Stack[0] = null;
 			return null;
 		}
     }
     
     public class DecimalSumAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				AProgram.Stack[1] = 
-					AProgram.Stack[1] == null ? 
-						(decimal)AProgram.Stack[0] : 
-						((decimal)AProgram.Stack[1] + (decimal)AProgram.Stack[0]);
+			if (program.Stack[0] != null)
+				program.Stack[1] = 
+					program.Stack[1] == null ? 
+						(decimal)program.Stack[0] : 
+						((decimal)program.Stack[1] + (decimal)program.Stack[0]);
 			return null;
 		}
     }
     
     public class DecimalMinAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				if (AProgram.Stack[1] == null || ((decimal)AProgram.Stack[0] < (decimal)AProgram.Stack[1]))
-					AProgram.Stack[1] = AProgram.Stack[0];
+			if (program.Stack[0] != null)
+				if (program.Stack[1] == null || ((decimal)program.Stack[0] < (decimal)program.Stack[1]))
+					program.Stack[1] = program.Stack[0];
 			return null;
 		}
     }
     
     public class DecimalMaxAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				if (AProgram.Stack[1] == null || ((decimal)AProgram.Stack[0] > (decimal)AProgram.Stack[1]))
-					AProgram.Stack[1] = AProgram.Stack[0];
+			if (program.Stack[0] != null)
+				if (program.Stack[1] == null || ((decimal)program.Stack[0] > (decimal)program.Stack[1]))
+					program.Stack[1] = program.Stack[0];
 			return null;
 		}
     }
     
     public class DecimalAvgInitializationNode : PlanNode
     {
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			APlan.Symbols.Push(new Symbol("LCounter", APlan.DataTypes.SystemInteger));
+			plan.Symbols.Push(new Symbol("LCounter", plan.DataTypes.SystemInteger));
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack.Push(0);
-			AProgram.Stack[1] = 0.0m;
+			program.Stack.Push(0);
+			program.Stack[1] = 0.0m;
 			return null;
 		}
     }
     
     public class DecimalAvgAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
+			if (program.Stack[0] != null)
 			{
-				AProgram.Stack[1] = checked((int)AProgram.Stack[1] + 1);
-				AProgram.Stack[2] = (decimal)AProgram.Stack[2] + (decimal)AProgram.Stack[0];
+				program.Stack[1] = checked((int)program.Stack[1] + 1);
+				program.Stack[2] = (decimal)program.Stack[2] + (decimal)program.Stack[0];
 			}
 			return null;
 		}
@@ -589,83 +589,83 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DecimalAvgFinalizationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if ((int)AProgram.Stack[0] == 0)
-				AProgram.Stack[1] = null;
+			if ((int)program.Stack[0] == 0)
+				program.Stack[1] = null;
 			else
-				AProgram.Stack[1] = (decimal)AProgram.Stack[1] / (int)AProgram.Stack[0];
+				program.Stack[1] = (decimal)program.Stack[1] / (int)program.Stack[0];
 			return null;
 		}
     }
     
 	public class MoneyInitializationNode : PlanNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack[0] = null;
+			program.Stack[0] = null;
 			return null;
 		}
 	}
     
 	public class MoneySumAggregationNode : PlanNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				AProgram.Stack[1] = 
-					AProgram.Stack[1] == null ? 
-						(decimal)AProgram.Stack[0] :
-						((decimal)AProgram.Stack[1] + (decimal)AProgram.Stack[0]);
+			if (program.Stack[0] != null)
+				program.Stack[1] = 
+					program.Stack[1] == null ? 
+						(decimal)program.Stack[0] :
+						((decimal)program.Stack[1] + (decimal)program.Stack[0]);
 			return null;
 		}
 	}
 	
 	public class MoneyMinAggregationNode : PlanNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				if (AProgram.Stack[1] == null || ((decimal)AProgram.Stack[0] < (decimal)AProgram.Stack[1]))
-					AProgram.Stack[1] = AProgram.Stack[0];
+			if (program.Stack[0] != null)
+				if (program.Stack[1] == null || ((decimal)program.Stack[0] < (decimal)program.Stack[1]))
+					program.Stack[1] = program.Stack[0];
 			return null;
 		}
 	}
     
 	public class MoneyMaxAggregationNode : PlanNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				if (AProgram.Stack[1] == null || ((decimal)AProgram.Stack[0] > (decimal)AProgram.Stack[1]))
-					AProgram.Stack[1] = AProgram.Stack[0];
+			if (program.Stack[0] != null)
+				if (program.Stack[1] == null || ((decimal)program.Stack[0] > (decimal)program.Stack[1]))
+					program.Stack[1] = program.Stack[0];
 			return null;
 		}
 	}
 	
 	public class MoneyAvgInitializationNode : PlanNode
 	{
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			APlan.Symbols.Push(new Symbol("LCounter", APlan.DataTypes.SystemInteger));
+			plan.Symbols.Push(new Symbol("LCounter", plan.DataTypes.SystemInteger));
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack.Push(0);
-			AProgram.Stack[1] = 0.0m;
+			program.Stack.Push(0);
+			program.Stack[1] = 0.0m;
 			return null;
 		}
 	}
     
 	public class MoneyAvgAggregationNode : PlanNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
+			if (program.Stack[0] != null)
 			{
-				AProgram.Stack[1] = checked((int)AProgram.Stack[1] + 1);
-				AProgram.Stack[2] = (decimal)AProgram.Stack[2] + (decimal)AProgram.Stack[0];
+				program.Stack[1] = checked((int)program.Stack[1] + 1);
+				program.Stack[2] = (decimal)program.Stack[2] + (decimal)program.Stack[0];
 			}
 			return null;
 		}
@@ -673,65 +673,65 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class MoneyAvgFinalizationNode : PlanNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if ((int)AProgram.Stack[0] == 0)
-				AProgram.Stack[1] = null;
+			if ((int)program.Stack[0] == 0)
+				program.Stack[1] = null;
 			else
-				AProgram.Stack[1] = (decimal)AProgram.Stack[1] / (int)AProgram.Stack[0];
+				program.Stack[1] = (decimal)program.Stack[1] / (int)program.Stack[0];
 			return null;
 		}
 	}
 	
 	public class StringInitializationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack[0] = null;
+			program.Stack[0] = null;
 			return null;
 		}
     }
     
     public class StringMinAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				if (AProgram.Stack[1] == null || (String.Compare((string)AProgram.Stack[0], (string)AProgram.Stack[1], StringComparison.OrdinalIgnoreCase) < 0))
-					AProgram.Stack[1] = AProgram.Stack[0];
+			if (program.Stack[0] != null)
+				if (program.Stack[1] == null || (String.Compare((string)program.Stack[0], (string)program.Stack[1], StringComparison.OrdinalIgnoreCase) < 0))
+					program.Stack[1] = program.Stack[0];
 			return null;
 		}
     }
     
     public class StringMaxAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				if (AProgram.Stack[1] == null || (String.Compare((string)AProgram.Stack[0], (string)AProgram.Stack[1], StringComparison.OrdinalIgnoreCase) > 0))
-					AProgram.Stack[1] = AProgram.Stack[0];
+			if (program.Stack[0] != null)
+				if (program.Stack[1] == null || (String.Compare((string)program.Stack[0], (string)program.Stack[1], StringComparison.OrdinalIgnoreCase) > 0))
+					program.Stack[1] = program.Stack[0];
 			return null;
 		}
     }
 
     public class VersionNumberMinAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				if ((AProgram.Stack[1] == null) || (VersionNumber.Compare((VersionNumber)AProgram.Stack[0], (VersionNumber)AProgram.Stack[1]) < 0))
-					AProgram.Stack[1] = AProgram.Stack[0];
+			if (program.Stack[0] != null)
+				if ((program.Stack[1] == null) || (VersionNumber.Compare((VersionNumber)program.Stack[0], (VersionNumber)program.Stack[1]) < 0))
+					program.Stack[1] = program.Stack[0];
 			return null;
 		}
     }
     
     public class VersionNumberMaxAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				if ((AProgram.Stack[1] == null) || (VersionNumber.Compare((VersionNumber)AProgram.Stack[0], (VersionNumber)AProgram.Stack[1]) > 0))
-					AProgram.Stack[1] = AProgram.Stack[0];
+			if (program.Stack[0] != null)
+				if ((program.Stack[1] == null) || (VersionNumber.Compare((VersionNumber)program.Stack[0], (VersionNumber)program.Stack[1]) > 0))
+					program.Stack[1] = program.Stack[0];
 			return null;
 		}
     }
@@ -771,38 +771,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
 	public class BooleanAllInitializationNode : PlanNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack[0] = true;
+			program.Stack[0] = true;
 			return null;
 		}
 	}
 	    
     public class BooleanAllAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				AProgram.Stack[1] = (bool)AProgram.Stack[1] && (bool)AProgram.Stack[0];
+			if (program.Stack[0] != null)
+				program.Stack[1] = (bool)program.Stack[1] && (bool)program.Stack[0];
 			return null;
 		}
     }
     
     public class BooleanAnyInitializationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack[0] = false;
+			program.Stack[0] = false;
 			return null;
 		}
     }
     
     public class BooleanAnyAggregationNode : PlanNode
     {
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.Stack[0] != null)
-				AProgram.Stack[1] = (bool)AProgram.Stack[1] || (bool)AProgram.Stack[0];
+			if (program.Stack[0] != null)
+				program.Stack[1] = (bool)program.Stack[1] || (bool)program.Stack[0];
 			return null;
 		}
     }

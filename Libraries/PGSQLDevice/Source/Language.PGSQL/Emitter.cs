@@ -14,34 +14,34 @@ namespace Alphora.Dataphor.DAE.Language.PGSQL
 	public class TSQLTextEmitter : SQL.SQLTextEmitter
 	{
 
-        protected override void EmitCreateIndexStatement(SQL.CreateIndexStatement AStatement)
+        protected override void EmitCreateIndexStatement(SQL.CreateIndexStatement statement)
         {
             Indent();
             AppendFormat("{0} ", SQL.Keywords.Create);
-            if (AStatement.IsUnique)
+            if (statement.IsUnique)
                 AppendFormat("{0} ", SQL.Keywords.Unique);
             //if (AStatement.IsClustered)
             //	AppendFormat("{0} ", SQL.Keywords.Clustered);
             AppendFormat("{0} ", SQL.Keywords.Index);
-            if (AStatement.IndexSchema != String.Empty)
+            if (statement.IndexSchema != String.Empty)
             {
-                EmitIdentifier(AStatement.IndexSchema);
+                EmitIdentifier(statement.IndexSchema);
                 Append(SQL.Keywords.Qualifier);
             }
-            EmitIdentifier(AStatement.IndexName);
+            EmitIdentifier(statement.IndexName);
             AppendFormat(" {0} ", SQL.Keywords.On);
-            if (AStatement.TableSchema != String.Empty)
+            if (statement.TableSchema != String.Empty)
             {
-                EmitIdentifier(AStatement.TableSchema);
+                EmitIdentifier(statement.TableSchema);
                 Append(SQL.Keywords.Qualifier);
             }
-            EmitIdentifier(AStatement.TableName);
+            EmitIdentifier(statement.TableName);
             Append(SQL.Keywords.BeginGroup);
-            for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+            for (int index = 0; index < statement.Columns.Count; index++)
             {
-                if (LIndex > 0)
+                if (index > 0)
                     EmitListSeparator();
-                EmitOrderColumnDefinition(AStatement.Columns[LIndex]);
+                EmitOrderColumnDefinition(statement.Columns[index]);
             }
             Append(SQL.Keywords.EndGroup);
         }

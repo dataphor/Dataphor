@@ -9,47 +9,47 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	// TODO: Support the HtmlBox
 	public class HtmlBox : Element, IHtmlBox
 	{
-		public const int CDefaultWidth = 100;
-		public const int CDefaultHeight = 100;
+		public const int DefaultWidth = 100;
+		public const int DefaultHeight = 100;
 
-		private int FPixelWidth = CDefaultWidth;
-		[DefaultValue(CDefaultWidth)]
+		private int _pixelWidth = DefaultWidth;
+		[DefaultValue(DefaultWidth)]
 		public int PixelWidth
 		{
-			get { return FPixelWidth; }
+			get { return _pixelWidth; }
 			set
 			{
-				if (FPixelWidth != value)
+				if (_pixelWidth != value)
 				{
-					FPixelWidth = value;
+					_pixelWidth = value;
 				}
 			}
 		}
 
-		private int FPixelHeight = CDefaultHeight;
-		[DefaultValue(CDefaultHeight)]
+		private int _pixelHeight = DefaultHeight;
+		[DefaultValue(DefaultHeight)]
 		public int PixelHeight
 		{
-			get { return FPixelHeight; }
+			get { return _pixelHeight; }
 			set
 			{
-				if (FPixelHeight != value)
+				if (_pixelHeight != value)
 				{
-					FPixelHeight = value;
+					_pixelHeight = value;
 				}
 			}
 		}
 
-		private string FURL = String.Empty;
+		private string _uRL = String.Empty;
 		[DefaultValue("")]
 		public string URL
 		{
-			get { return FURL; }
+			get { return _uRL; }
 			set
 			{
-				if (FURL != value)
+				if (_uRL != value)
 				{
-					FURL = value;
+					_uRL = value;
 				}
 			}
 		}

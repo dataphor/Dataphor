@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class OperatorListNode : SchemaListNode
 	{
-		public OperatorListNode(string ALibraryName) : base (ALibraryName)
+		public OperatorListNode(string libraryName) : base (libraryName)
 		{
 			Text = "Operators";
 			ImageIndex = 12;
@@ -23,33 +23,33 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override string GetChildExpression()
 		{
-			return ".System.Operators " + CSchemaListFilter + " { Name, OperatorName + Signature DisplayName, Locator, Line, LinePos }";
+			return ".System.Operators " + SchemaListFilter + " { Name, OperatorName + Signature DisplayName, Locator, Line, LinePos }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
 		{
-			return new OperatorNode(this, (string)ARow["Name"], (string)ARow["DisplayName"], new DebugLocator((string)ARow["Locator"], (int)ARow["Line"], (int)ARow["LinePos"]));
+			return new OperatorNode(this, (string)row["Name"], (string)row["DisplayName"], new DebugLocator((string)row["Locator"], (int)row["Line"], (int)row["LinePos"]));
 		}
 	}
 
 	public class OperatorNode : SchemaItemNode
 	{
-		public OperatorNode(OperatorListNode ANode, string ACatalogName, string AOperatorName, DebugLocator ALocator) : base()
+		public OperatorNode(OperatorListNode node, string catalogName, string operatorName, DebugLocator locator) : base()
 		{
-			ParentSchemaList = ANode;
-			FFriendlyName = AOperatorName;
-			ObjectName = ACatalogName;
+			ParentSchemaList = node;
+			_friendlyName = operatorName;
+			ObjectName = catalogName;
 			ImageIndex = 12;
 			SelectedImageIndex = ImageIndex;
-			FLocator = ALocator;
+			_locator = locator;
 		}
 
-		private string FFriendlyName;
-		private DebugLocator FLocator;
+		private string _friendlyName;
+		private DebugLocator _locator;
 
 		protected override void UpdateText()
 		{
-			Text = ParentSchemaList.UnqualifyObjectName(FFriendlyName);
+			Text = ParentSchemaList.UnqualifyObjectName(_friendlyName);
 		}
 
 		public override string GetFilter()
@@ -64,18 +64,18 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = base.GetContextMenu();
-			LMenu.MenuItems.Add
+			ContextMenu menu = base.GetContextMenu();
+			menu.MenuItems.Add
 			(
 				0, 
 				new MenuItem(Strings.ObjectTree_OpenMenuText, new EventHandler(OpenClicked)) { DefaultItem = true }
 			);
-			return LMenu;
+			return menu;
 		}
 
-		private void OpenClicked(object ASender, EventArgs AArgs)
+		private void OpenClicked(object sender, EventArgs args)
 		{
-			Dataphoria.OpenLocator(FLocator);
+			Dataphoria.OpenLocator(_locator);
 		}
 	}
 }

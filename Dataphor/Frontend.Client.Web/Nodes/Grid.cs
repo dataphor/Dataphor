@@ -24,66 +24,66 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		// Hint
 
 		// Does nothing (common property)
-		private string FHint = String.Empty;
+		private string _hint = String.Empty;
 		public string Hint
 		{
-			get { return FHint; }
-			set { FHint = value; }
+			get { return _hint; }
+			set { _hint = value; }
 		}
 
 		// Title
 
-		private string FTitle = String.Empty;
+		private string _title = String.Empty;
 		public string Title
 		{
-			get { return FTitle; }
-			set { FTitle = value == null ? String.Empty : value; }
+			get { return _title; }
+			set { _title = value == null ? String.Empty : value; }
 		}
 
 		public virtual string GetTitle()
 		{
-			return FTitle;
+			return _title;
 		}
 		
 		// Width
 
-		private int FWidth = 10;
+		private int _width = 10;
 		public int Width
 		{
-			get { return FWidth; }
-			set { FWidth = value; }
+			get { return _width; }
+			set { _width = value; }
 		}
 
 		// MinRowHeight
 
-		private int FMinRowHeight = -1;
+		private int _minRowHeight = -1;
 		public int MinRowHeight
 		{
-			get { return FMinRowHeight; }
-			set { FMinRowHeight = value; }
+			get { return _minRowHeight; }
+			set { _minRowHeight = value; }
 		}
 
 		// MaxRowHeight
 
-		private int FMaxRowHeight = -1;
+		private int _maxRowHeight = -1;
 		public int MaxRowHeight
 		{
-			get { return FMaxRowHeight; }
-			set { FMaxRowHeight = value; }
+			get { return _maxRowHeight; }
+			set { _maxRowHeight = value; }
 		}
 
 		// Visible
 
-		private bool FVisible = true;
+		private bool _visible = true;
 		public bool Visible
 		{
-			get { return FVisible; }
-			set { FVisible = value; }
+			get { return _visible; }
+			set { _visible = value; }
 		}
 
 		public virtual bool GetVisible()
 		{
-			return FVisible;
+			return _visible;
 		}
 
 		// ParentGrid
@@ -95,29 +95,29 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// Render
 
-		public virtual void RenderCell(HtmlTextWriter AWriter, DAE.Runtime.Data.Row ACurrentRow, bool AIsActiveRow, int ARowIndex)
+		public virtual void RenderCell(HtmlTextWriter writer, DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
 		{
 			if (GetVisible())
-				InternalRenderCell(AWriter, ACurrentRow, AIsActiveRow, ARowIndex);
+				InternalRenderCell(writer, currentRow, isActiveRow, rowIndex);
 		}
 
-		public abstract void InternalRenderCell(HtmlTextWriter AWriter, DAE.Runtime.Data.Row ACurrentRow, bool AIsActiveRow, int ARowIndex);
+		public abstract void InternalRenderCell(HtmlTextWriter writer, DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex);
 
-		public virtual void RenderHeader(HtmlTextWriter AWriter) 
+		public virtual void RenderHeader(HtmlTextWriter writer) 
 		{
 			if (GetVisible())
-				InternalRenderHeader(AWriter);
+				InternalRenderHeader(writer);
 		}
 
-		public virtual void InternalRenderHeader(HtmlTextWriter AWriter)
+		public virtual void InternalRenderHeader(HtmlTextWriter writer)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridheadercell");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-			if (FTitle == String.Empty)
-				AWriter.Write("&nbsp;");
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridheadercell");
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			if (_title == String.Empty)
+				writer.Write("&nbsp;");
 			else
-				AWriter.Write(HttpUtility.HtmlEncode(Title));
-			AWriter.RenderEndTag();
+				writer.Write(HttpUtility.HtmlEncode(Title));
+			writer.RenderEndTag();
 		}
 	}
 
@@ -125,22 +125,22 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public DataGridColumn()
 		{
-			FHeaderID = Session.GenerateID();
+			_headerID = Session.GenerateID();
 		}
 
 		// ColumnName
 
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = value == null ? String.Empty : value; }
+			get { return _columnName; }
+			set { _columnName = value == null ? String.Empty : value; }
 		}
 
 		// HeaderID
 
-		private string FHeaderID;
-		public string HeaderID { get { return FHeaderID; } }
+		private string _headerID;
+		public string HeaderID { get { return _headerID; } }
 
 		// GridColumn
 
@@ -152,57 +152,57 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				return base.GetTitle();
 		}
 
-		protected virtual string GetClass(DAE.Runtime.Data.Row ACurrentRow, bool AIsActiveRow)
+		protected virtual string GetClass(DAE.Runtime.Data.Row currentRow, bool isActiveRow)
 		{
-			string LClass;
-			if (AIsActiveRow)
-				LClass = "gridcellcurrent";
+			string classValue;
+			if (isActiveRow)
+				classValue = "gridcellcurrent";
 			else
-				LClass = "gridcell";
-			if ((ColumnName != String.Empty) && !ACurrentRow.HasValue(ColumnName))
-				LClass = LClass + "null";
-			return LClass;
+				classValue = "gridcell";
+			if ((ColumnName != String.Empty) && !currentRow.HasValue(ColumnName))
+				classValue = classValue + "null";
+			return classValue;
 		}
 
-		public override void InternalRenderHeader(HtmlTextWriter AWriter)
+		public override void InternalRenderHeader(HtmlTextWriter writer)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridheaderdatacell");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, FHeaderID));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-			string LTitle = GetTitle();
-			if (LTitle == String.Empty)
-				AWriter.Write("&nbsp;");
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridheaderdatacell");
+			writer.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, _headerID));
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			string title = GetTitle();
+			if (title == String.Empty)
+				writer.Write("&nbsp;");
 			else
-				AWriter.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(LTitle)));
+				writer.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(title)));
 
-			DAE.Client.DataLink LLink = ParentGrid.DataLink;
-			if (LLink.Active)
+			DAE.Client.DataLink link = ParentGrid.DataLink;
+			if (link.Active)
 			{
-				DAE.Client.TableDataSet LDataSet = ParentGrid.DataLink.DataSet as DAE.Client.TableDataSet;
-				if (LDataSet != null)
+				DAE.Client.TableDataSet dataSet = ParentGrid.DataLink.DataSet as DAE.Client.TableDataSet;
+				if (dataSet != null)
 				{
-					Schema.Order LOrder = LDataSet.Order;
-					if ((LOrder != null) && (LOrder.Columns.IndexOf(ColumnName) > -1))
+					Schema.Order order = dataSet.Order;
+					if ((order != null) && (order.Columns.IndexOf(ColumnName) > -1))
 					{
-						AWriter.Write("&nbsp;");
-						if (((Schema.OrderColumn)LOrder.Columns[ColumnName]).Ascending)
-							AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "images/downarrow.gif");
+						writer.Write("&nbsp;");
+						if (((Schema.OrderColumn)order.Columns[ColumnName]).Ascending)
+							writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/downarrow.gif");
 						else
-							AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "images/uparrow.gif");
-						AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-						AWriter.RenderEndTag();
-						AWriter.Write("&nbsp;");
+							writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/uparrow.gif");
+						writer.RenderBeginTag(HtmlTextWriterTag.Img);
+						writer.RenderEndTag();
+						writer.Write("&nbsp;");
 					}
 				}
 			}
-			AWriter.RenderEndTag();
+			writer.RenderEndTag();
 		}
 
 		// IWebHandler
 
-		public virtual bool ProcessRequest(HttpContext AContext)
+		public virtual bool ProcessRequest(HttpContext context)
 		{
-			if (Session.IsActionLink(AContext, FHeaderID))
+			if (Session.IsActionLink(context, _headerID))
 			{
 				if (InKey() || InOrder())
 					ChangeOrderTo();
@@ -216,20 +216,20 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		protected Schema.Order FindOrderForColumn()
 		{
-			DAE.Client.TableDataSet LDataSet = ParentGrid.DataLink.DataSet as DAE.Client.TableDataSet;
-			if (LDataSet != null)
+			DAE.Client.TableDataSet dataSet = ParentGrid.DataLink.DataSet as DAE.Client.TableDataSet;
+			if (dataSet != null)
 			{
 				// Returns the order that has the given column as the first column
-				if ((LDataSet.Order != null) && (LDataSet.Order.Columns.Count >= 1) && (LDataSet.Order.Columns[0].Column.Name == ColumnName))
-					return LDataSet.Order;
+				if ((dataSet.Order != null) && (dataSet.Order.Columns.Count >= 1) && (dataSet.Order.Columns[0].Column.Name == ColumnName))
+					return dataSet.Order;
 
-				foreach (Schema.Order LOrder in ParentGrid.DataLink.DataSet.TableVar.Orders)
-					if ((LOrder.Columns.Count >= 1) && (LOrder.Columns[0].Column.Name == ColumnName))
-						return LOrder;
+				foreach (Schema.Order order in ParentGrid.DataLink.DataSet.TableVar.Orders)
+					if ((order.Columns.Count >= 1) && (order.Columns[0].Column.Name == ColumnName))
+						return order;
 
-				foreach (Schema.Key LKey in ParentGrid.DataLink.DataSet.TableVar.Keys)
-					if (!LKey.IsSparse && (LKey.Columns.Count >= 1) && (LKey.Columns[0].Name == ColumnName))
-						return new Schema.Order(LKey);
+				foreach (Schema.Key key in ParentGrid.DataLink.DataSet.TableVar.Keys)
+					if (!key.IsSparse && (key.Columns.Count >= 1) && (key.Columns[0].Name == ColumnName))
+						return new Schema.Order(key);
 			}		
 			return null;
 		}
@@ -238,22 +238,22 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		{
 			if (ParentGrid.DataLink.Active)
 			{
-				DAE.Client.TableDataSet LDataSet = ParentGrid.DataLink.DataSet as DAE.Client.TableDataSet;
-				if (LDataSet != null)
+				DAE.Client.TableDataSet dataSet = ParentGrid.DataLink.DataSet as DAE.Client.TableDataSet;
+				if (dataSet != null)
 				{
-					Schema.Order LOrder = FindOrderForColumn();
-					if (LOrder == null)
-						LDataSet.OrderString = "order { " + ColumnName + " asc }";
+					Schema.Order order = FindOrderForColumn();
+					if (order == null)
+						dataSet.OrderString = "order { " + ColumnName + " asc }";
 					else
 					{
-						Schema.Order LCurrentOrder = LDataSet.Order;
-						int LCurrentColumnIndex = LCurrentOrder == null ? -1 : LCurrentOrder.Columns.IndexOf(ColumnName);
+						Schema.Order currentOrder = dataSet.Order;
+						int currentColumnIndex = currentOrder == null ? -1 : currentOrder.Columns.IndexOf(ColumnName);
 
-						bool LDescending = (LCurrentColumnIndex >= 0) && LCurrentOrder.Columns[LCurrentColumnIndex].Ascending;
-						if (!LDescending ^ LOrder.Columns[ColumnName].Ascending)
-							LOrder = new Schema.Order(LOrder, true);
+						bool descending = (currentColumnIndex >= 0) && currentOrder.Columns[currentColumnIndex].Ascending;
+						if (!descending ^ order.Columns[ColumnName].Ascending)
+							order = new Schema.Order(order, true);
 
-						LDataSet.Order = LOrder;
+						dataSet.Order = order;
 					}
 				}
 			}
@@ -261,20 +261,20 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		private bool InKey()
 		{
-			DAE.Client.DataLink LLink = ParentGrid.DataLink;
-			if (LLink.Active)
-				foreach (Schema.Key LKey in LLink.DataSet.TableVar.Keys)
-					if (!LKey.IsSparse && (LKey.Columns.IndexOfName(ColumnName) >= 0))
+			DAE.Client.DataLink link = ParentGrid.DataLink;
+			if (link.Active)
+				foreach (Schema.Key key in link.DataSet.TableVar.Keys)
+					if (!key.IsSparse && (key.Columns.IndexOfName(ColumnName) >= 0))
 						return true;
 			return false;
 		}
 
 		private bool InOrder()
 		{
-			DAE.Client.DataLink LLink = ParentGrid.DataLink;
-			if (LLink.Active)
-				foreach (Schema.Order LOrder in LLink.DataSet.TableVar.Orders)
-					if (LOrder.Columns.IndexOf(ColumnName) >= 0)
+			DAE.Client.DataLink link = ParentGrid.DataLink;
+			if (link.Active)
+				foreach (Schema.Order order in link.DataSet.TableVar.Orders)
+					if (order.Columns.IndexOf(ColumnName) >= 0)
 						return true;
 			return false;
 		}
@@ -286,75 +286,75 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		// TextAlignment
 
-		private HorizontalAlignment FTextAlignment = HorizontalAlignment.Left;
+		private HorizontalAlignment _textAlignment = HorizontalAlignment.Left;
 		public HorizontalAlignment TextAlignment
 		{
-			get { return FTextAlignment; }
-			set { FTextAlignment = value; }
+			get { return _textAlignment; }
+			set { _textAlignment = value; }
 		}
 
 		// VerticalAlignment
 
-		private VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		private VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
-			set { FVerticalAlignment = value; }
+			get { return _verticalAlignment; }
+			set { _verticalAlignment = value; }
 		}
 
 		// MaxRows
 
-		private int FMaxRows = -1;
+		private int _maxRows = -1;
 		public int MaxRows
 		{
-			get { return FMaxRows; }
-			set { FMaxRows = value; }
+			get { return _maxRows; }
+			set { _maxRows = value; }
 		}
 
 		// WordWrap
 
-		private bool FWordWrap = false;
+		private bool _wordWrap = false;
 		public bool WordWrap
 		{
-			get { return FWordWrap; }
-			set { FWordWrap = value; }
+			get { return _wordWrap; }
+			set { _wordWrap = value; }
 		}
 
 		// VerticalText
 
-		private bool FVerticalText = false;
+		private bool _verticalText = false;
 		public bool VerticalText
 		{
-			get { return FVerticalText; }
-			set { FVerticalText = value; }
+			get { return _verticalText; }
+			set { _verticalText = value; }
 		}
 
-		public override void InternalRenderCell(HtmlTextWriter AWriter, Alphora.Dataphor.DAE.Runtime.Data.Row ACurrentRow, bool AIsActiveRow, int ARowIndex)
+		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
 		{
-			string LValue;
-			if ((ColumnName == String.Empty) || !ACurrentRow.HasValue(ColumnName))
-				LValue = String.Empty;
+			string tempValue;
+			if ((ColumnName == String.Empty) || !currentRow.HasValue(ColumnName))
+				tempValue = String.Empty;
 			else
-				LValue = ((DAE.Runtime.Data.Scalar)ACurrentRow.GetValue(ColumnName)).AsDisplayString;
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, GetClass(ACurrentRow, AIsActiveRow));
+				tempValue = ((DAE.Runtime.Data.Scalar)currentRow.GetValue(ColumnName)).AsDisplayString;
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, GetClass(currentRow, isActiveRow));
 
-			if (!FWordWrap)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+			if (!_wordWrap)
+				writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Align, TextAlignment.ToString());
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, VerticalAlignment.ToString());
-			if (FVerticalText)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Style, "mso-rotate:-90");
-			if (FMaxRows >= 1)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Rows, FMaxRows.ToString());
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+			writer.AddAttribute(HtmlTextWriterAttribute.Align, TextAlignment.ToString());
+			writer.AddAttribute(HtmlTextWriterAttribute.Valign, VerticalAlignment.ToString());
+			if (_verticalText)
+				writer.AddAttribute(HtmlTextWriterAttribute.Style, "mso-rotate:-90");
+			if (_maxRows >= 1)
+				writer.AddAttribute(HtmlTextWriterAttribute.Rows, _maxRows.ToString());
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-			if (LValue == String.Empty)
-				AWriter.Write("&nbsp;");
+			if (tempValue == String.Empty)
+				writer.Write("&nbsp;");
 			else
-				AWriter.Write(HttpUtility.HtmlEncode(Session.TruncateTitle(LValue, Width)).Replace("\n","<br>"));
+				writer.Write(HttpUtility.HtmlEncode(Session.TruncateTitle(tempValue, Width)).Replace("\n","<br>"));
 
-			AWriter.RenderEndTag();
+			writer.RenderEndTag();
 		}
 	}
 
@@ -362,106 +362,106 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public TriggerColumn()
 		{
-			FTriggerID = Session.GenerateID();
+			_triggerID = Session.GenerateID();
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Action = null;
 		}
 
 		// Action
 
-		private IAction FAction;
+		private IAction _action;
 		public IAction Action
 		{
-			get { return FAction; }
+			get { return _action; }
 			set
 			{
-				if (value != FAction)
+				if (value != _action)
 				{
-					if (FAction != null)
-						FAction.Disposed -= new EventHandler(ActionDisposed);
-					FAction = value;
-					if (FAction != null)
-						FAction.Disposed += new EventHandler(ActionDisposed);
+					if (_action != null)
+						_action.Disposed -= new EventHandler(ActionDisposed);
+					_action = value;
+					if (_action != null)
+						_action.Disposed += new EventHandler(ActionDisposed);
 				}
 			}
 		}
 
-		private void ActionDisposed(object ASender, EventArgs AArgs)
+		private void ActionDisposed(object sender, EventArgs args)
 		{
 			Action = null;
 		}
 
 		public virtual bool GetEnabled()
 		{
-			return (FAction != null) && FAction.GetEnabled();
+			return (_action != null) && _action.GetEnabled();
 		}
 
 		// Text
 
-		private string FText = String.Empty;
+		private string _text = String.Empty;
 
 		public string Text
 		{
-			get { return FText; }
-			set { FText = value; }
+			get { return _text; }
+			set { _text = value; }
 		}
 
 		public virtual string GetText()
 		{
-			if ((FText != String.Empty) || (FAction == null))
-				return FText;
+			if ((_text != String.Empty) || (_action == null))
+				return _text;
 			else
-				return FAction.GetText();
+				return _action.GetText();
 		}
 
 		// TriggerID
 
-		private string FTriggerID;
-		public string TriggerID { get { return FTriggerID; } }
+		private string _triggerID;
+		public string TriggerID { get { return _triggerID; } }
 
 		// GridColumn
 
-		public override void InternalRenderCell(HtmlTextWriter AWriter, Alphora.Dataphor.DAE.Runtime.Data.Row ACurrentRow, bool AIsActiveRow, int ARowIndex)
+		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
 		{
-			string LClass;
-			if (AIsActiveRow)
-				LClass = "gridcellcurrent";
+			string classValue;
+			if (isActiveRow)
+				classValue = "gridcellcurrent";
 			else
-				LClass = "gridcell";
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, LClass);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+				classValue = "gridcell";
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, classValue);
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "trigger");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "button");
-			string LHint = String.Empty;
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "trigger");
+			writer.AddAttribute(HtmlTextWriterAttribute.Type, "button");
+			string hint = String.Empty;
 			if (!GetEnabled())
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Disabled, "true");
+				writer.AddAttribute(HtmlTextWriterAttribute.Disabled, "true");
 			else
-				LHint = Action.Hint;
-			if (LHint != String.Empty)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LHint, true);
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Value, Session.RemoveAccellerator(GetText()), true);
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit({0}?ActionID={1}&RowIndex={2}',event)", (string)Session.Get(this).Context.Session["DefaultPage"], FTriggerID, ARowIndex.ToString()));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-			AWriter.RenderEndTag();
+				hint = Action.Hint;
+			if (hint != String.Empty)
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, hint, true);
+			writer.AddAttribute(HtmlTextWriterAttribute.Value, Session.RemoveAccellerator(GetText()), true);
+			writer.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit({0}?ActionID={1}&RowIndex={2}',event)", (string)Session.Get(this).Context.Session["DefaultPage"], _triggerID, rowIndex.ToString()));
+			writer.RenderBeginTag(HtmlTextWriterTag.Input);
+			writer.RenderEndTag();
 
-			AWriter.RenderEndTag();
+			writer.RenderEndTag();
 		}
 
 		// IWebHandler
 
-		public virtual bool ProcessRequest(HttpContext AContext)
+		public virtual bool ProcessRequest(HttpContext context)
 		{
-			if (Session.IsActionLink(AContext, FTriggerID))
+			if (Session.IsActionLink(context, _triggerID))
 			{
-				string LRowIndex = AContext.Request.QueryString["RowIndex"];
-				if (LRowIndex != null)
+				string rowIndex = context.Request.QueryString["RowIndex"];
+				if (rowIndex != null)
 				{
-					ParentGrid.MoveTo(Int32.Parse(LRowIndex));
+					ParentGrid.MoveTo(Int32.Parse(rowIndex));
 					if (GetEnabled())
 						Action.Execute();
 				}
@@ -475,7 +475,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		public override bool GetVisible()
 		{
-			return base.GetVisible() && ((FAction == null) || FAction.Visible);
+			return base.GetVisible() && ((_action == null) || _action.Visible);
 		}
 	}
 
@@ -483,44 +483,44 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		// HorizontalAlignment
 
-		private HorizontalAlignment FHorizontalAlignment = HorizontalAlignment.Center;
+		private HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Center;
 		public virtual HorizontalAlignment HorizontalAlignment
 		{
-			get { return FHorizontalAlignment; }
-			set { FHorizontalAlignment = value; }
+			get { return _horizontalAlignment; }
+			set { _horizontalAlignment = value; }
 		}
 
 		// ImageHandlerID
 
-		private string FImageHandlerID;
-		public string ImageHandlerID { get { return FImageHandlerID; } }
+		private string _imageHandlerID;
+		public string ImageHandlerID { get { return _imageHandlerID; } }
 
 		// GridColumn
 
-		public override void InternalRenderCell(HtmlTextWriter AWriter, Alphora.Dataphor.DAE.Runtime.Data.Row ACurrentRow, bool AIsActiveRow, int ARowIndex)
+		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, GetClass(ACurrentRow, AIsActiveRow));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, GetClass(currentRow, isActiveRow));
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "ViewImage.aspx?HandlerID=" + FImageHandlerID + "&RowIndex=" + ARowIndex);
+			writer.AddAttribute(HtmlTextWriterAttribute.Src, "ViewImage.aspx?HandlerID=" + _imageHandlerID + "&RowIndex=" + rowIndex);
 			if (MaxRowHeight > 0)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Height, MaxRowHeight.ToString());
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-			AWriter.RenderEndTag();
+				writer.AddAttribute(HtmlTextWriterAttribute.Height, MaxRowHeight.ToString());
+			writer.RenderBeginTag(HtmlTextWriterTag.Img);
+			writer.RenderEndTag();
 
-			AWriter.RenderEndTag();
+			writer.RenderEndTag();
 		}
 
-		private void LoadImage(HttpContext AContext, string AID, Stream AStream)
+		private void LoadImage(HttpContext context, string iD, Stream stream)
 		{
-			string LRowIndex = AContext.Request.QueryString["RowIndex"];
-			if ((LRowIndex != String.Empty) && (ColumnName != String.Empty))
+			string rowIndex = context.Request.QueryString["RowIndex"];
+			if ((rowIndex != String.Empty) && (ColumnName != String.Empty))
 			{
-				DAE.Runtime.Data.Row LRow = ParentGrid.DataLink.Buffer(Int32.Parse(LRowIndex));
-				if ((LRow != null) && LRow.HasValue(ColumnName))
-					using (Stream LSource = LRow.GetValue(ColumnName).OpenStream())
+				DAE.Runtime.Data.Row row = ParentGrid.DataLink.Buffer(Int32.Parse(rowIndex));
+				if ((row != null) && row.HasValue(ColumnName))
+					using (Stream source = row.GetValue(ColumnName).OpenStream())
 					{
-						StreamUtility.CopyStream(LSource, AStream);
+						StreamUtility.CopyStream(source, stream);
 					}
 			}
 		}
@@ -530,14 +530,14 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		protected override void Activate()
 		{
 			base.Activate();
-			FImageHandlerID = WebSession.ImageCache.RegisterImageHandler(new LoadImageHandler(LoadImage));
+			_imageHandlerID = WebSession.ImageCache.RegisterImageHandler(new LoadImageHandler(LoadImage));
 		}
 
 		protected override void Deactivate()
 		{
 			try
 			{
-				WebSession.ImageCache.UnregisterImageHandler(FImageHandlerID);
+				WebSession.ImageCache.UnregisterImageHandler(_imageHandlerID);
 			}
 			finally
 			{
@@ -551,48 +551,48 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public CheckBoxColumn()
 		{
-			FCheckID = Session.GenerateID();
+			_checkID = Session.GenerateID();
 		}
 
 		// ReadOnly
 
-		private bool FReadOnly = true;
+		private bool _readOnly = true;
 		public bool ReadOnly
 		{
-			get { return FReadOnly; }
-			set { FReadOnly = value; }
+			get { return _readOnly; }
+			set { _readOnly = value; }
 		}
 
 		// CheckID
 
-		private string FCheckID;
-		public string CheckID { get { return FCheckID; } }
+		private string _checkID;
+		public string CheckID { get { return _checkID; } }
 
 		// IWebPrehander
 
-		public override bool ProcessRequest(HttpContext AContext)
+		public override bool ProcessRequest(HttpContext context)
 		{
-			if (base.ProcessRequest(AContext))
+			if (base.ProcessRequest(context))
 				return true;
-			ISource LSource = ParentGrid.Source;
-			if (!ReadOnly && (ColumnName != String.Empty) && Session.IsActionLink(AContext, FCheckID) && ParentGrid.DataLink.Active && !LSource.DataView.IsEmpty())
+			ISource source = ParentGrid.Source;
+			if (!ReadOnly && (ColumnName != String.Empty) && Session.IsActionLink(context, _checkID) && ParentGrid.DataLink.Active && !source.DataView.IsEmpty())
 			{
-				string LRowIndex = AContext.Request.QueryString["RowIndex"];
-				if (LRowIndex != null)
+				string rowIndex = context.Request.QueryString["RowIndex"];
+				if (rowIndex != null)
 				{
-					ParentGrid.MoveTo(Int32.Parse(LRowIndex));
-					DAE.Client.DataField LField = LSource.DataView.Fields[ColumnName];
-					DAE.Client.DataSetState LOldState = LSource.DataView.State;
-					LField.AsBoolean = !(LField.HasValue() && LField.AsBoolean);
-					if (LOldState == DAE.Client.DataSetState.Browse)
+					ParentGrid.MoveTo(Int32.Parse(rowIndex));
+					DAE.Client.DataField field = source.DataView.Fields[ColumnName];
+					DAE.Client.DataSetState oldState = source.DataView.State;
+					field.AsBoolean = !(field.HasValue() && field.AsBoolean);
+					if (oldState == DAE.Client.DataSetState.Browse)
 					{
 						try
 						{
-							LSource.DataView.Post();
+							source.DataView.Post();
 						}
 						catch
 						{
-							LSource.DataView.Cancel();
+							source.DataView.Cancel();
 							throw;
 						}
 					}
@@ -602,37 +602,37 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			return false;
 		}
 
-		public override void InternalRenderCell(HtmlTextWriter AWriter, Alphora.Dataphor.DAE.Runtime.Data.Row ACurrentRow, bool AIsActiveRow, int ARowIndex)
+		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
 		{
-			bool LHasValue = ACurrentRow.HasValue(ColumnName);
-			bool LValue = false;
-			if (LHasValue)
-				LValue = ((DAE.Runtime.Data.Scalar)ACurrentRow.GetValue(ColumnName)).AsBoolean;
+			bool hasValue = currentRow.HasValue(ColumnName);
+			bool tempValue = false;
+			if (hasValue)
+				tempValue = ((DAE.Runtime.Data.Scalar)currentRow.GetValue(ColumnName)).AsBoolean;
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, GetClass(ACurrentRow, AIsActiveRow));
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, GetClass(currentRow, isActiveRow));
 			if (!ReadOnly)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('{0}?ActionID={1}&RowIndex={2}',event)", (string)Session.Get(this).Context.Session["DefaultPage"], CheckID, ARowIndex));
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Align, "center");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+				writer.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('{0}?ActionID={1}&RowIndex={2}',event)", (string)Session.Get(this).Context.Session["DefaultPage"], CheckID, rowIndex));
+			writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
+			writer.AddAttribute(HtmlTextWriterAttribute.Align, "center");
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "10");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Height, "10");
-			AWriter.AddAttribute
+			writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+			writer.AddAttribute(HtmlTextWriterAttribute.Width, "10");
+			writer.AddAttribute(HtmlTextWriterAttribute.Height, "10");
+			writer.AddAttribute
 			(
 				HtmlTextWriterAttribute.Src, 
 				String.Format
 				(
 					"images/{0}{1}.gif", 
-					LValue.ToString().ToLower(), 
+					tempValue.ToString().ToLower(), 
 					ReadOnly ? "readonly" : ""
 				)
 			);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-			AWriter.RenderEndTag();
+			writer.RenderBeginTag(HtmlTextWriterTag.Img);
+			writer.RenderEndTag();
 
-			AWriter.RenderEndTag();	// TD
+			writer.RenderEndTag();	// TD
 		}
 	}
 
@@ -640,26 +640,26 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public SequenceColumn()
 		{
-			FMoveID = Session.GenerateID();
+			_moveID = Session.GenerateID();
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			CancelMove();
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		// Image
 
-		private string FImage = String.Empty;
+		private string _image = String.Empty;
 		public string Image
 		{
-			get { return FImage; }
+			get { return _image; }
 			set 
 			{ 
-				if (FImage != value)
+				if (_image != value)
 				{
-					FImage = value;
+					_image = value;
 					DeallocateImage();
 					if (Active)
 						AllocateImage();
@@ -669,122 +669,122 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		protected void AllocateImage()
 		{
-			FImageID = WebSession.ImageCache.Allocate(Image);
+			_imageID = WebSession.ImageCache.Allocate(Image);
 		}
 
 		protected void DeallocateImage()
 		{
-			if (FImageID != String.Empty)
+			if (_imageID != String.Empty)
 			{
-				WebSession.ImageCache.Deallocate(FImageID);
-				FImageID = String.Empty;
+				WebSession.ImageCache.Deallocate(_imageID);
+				_imageID = String.Empty;
 			}
 		}
 
 		// ImageID
 
-		private string FImageID = String.Empty;
+		private string _imageID = String.Empty;
 		public string ImageID
 		{
-			get { return FImageID; }
+			get { return _imageID; }
 		}
 
 		// MoveID
 
-		private string FMoveID;
-		public string MoveID { get { return FMoveID; } }
+		private string _moveID;
+		public string MoveID { get { return _moveID; } }
 
 		// Script
 
-		private string FScript = String.Empty;
+		private string _script = String.Empty;
 		public string Script
 		{
-			get { return FScript; }
-			set { FScript = (value == null ? String.Empty : value); }
+			get { return _script; }
+			set { _script = (value == null ? String.Empty : value); }
 		}
 
 		// GridColumn
 
-		public override void InternalRenderCell(HtmlTextWriter AWriter, Alphora.Dataphor.DAE.Runtime.Data.Row ACurrentRow, bool AIsActiveRow, int ARowIndex)
+		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
 		{
-			string LClass;
-			if (AIsActiveRow)
-				LClass = "gridcellcurrent";
+			string classValue;
+			if (isActiveRow)
+				classValue = "gridcellcurrent";
 			else
-				LClass = "gridcell";
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, LClass);
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+				classValue = "gridcell";
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, classValue);
+			writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-			string LImageLink;
-			if (FMovingRow != null)
+			string imageLink;
+			if (_movingRow != null)
 			{
-				LImageLink = "images/place.png";
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "18");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Height, "19");
+				imageLink = "images/place.png";
+				writer.AddAttribute(HtmlTextWriterAttribute.Width, "18");
+				writer.AddAttribute(HtmlTextWriterAttribute.Height, "19");
 			}
 			else
 			{
-				if (FImageID != String.Empty)
-					LImageLink = "ViewImage.aspx?ImageID=" + FImageID;
+				if (_imageID != String.Empty)
+					imageLink = "ViewImage.aspx?ImageID=" + _imageID;
 				else
-					LImageLink = "images/move.png";
+					imageLink = "images/move.png";
 			}
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Src, LImageLink);
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('{0}?ActionID={1}&RowIndex={2}&Y='+event.offsetY,event)", (string)Session.Get(this).Context.Session["DefaultPage"], FMoveID, ARowIndex));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Src, imageLink);
+			writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+			writer.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('{0}?ActionID={1}&RowIndex={2}&Y='+event.offsetY,event)", (string)Session.Get(this).Context.Session["DefaultPage"], _moveID, rowIndex));
+			writer.RenderBeginTag(HtmlTextWriterTag.Img);
+			writer.RenderEndTag();
 
-			AWriter.RenderEndTag();
+			writer.RenderEndTag();
 		}
 
-		protected virtual void SequenceChange(DAE.Runtime.Data.Row AFromRow, DAE.Runtime.Data.Row AToRow, bool AAbove)
+		protected virtual void SequenceChange(DAE.Runtime.Data.Row fromRow, DAE.Runtime.Data.Row toRow, bool above)
 		{
-			SequenceColumnUtility.SequenceChange(HostNode.Session, ParentGrid.Source, FShouldEnlist, AFromRow, AToRow, AAbove, FScript);
+			SequenceColumnUtility.SequenceChange(HostNode.Session, ParentGrid.Source, _shouldEnlist, fromRow, toRow, above, _script);
 		}
 
-		private bool FShouldEnlist = true;
+		private bool _shouldEnlist = true;
 		[DefaultValue(true)]
 		[Description("Enlist with the application transaction if there is one active.")]
 		public bool ShouldEnlist
 		{
-			get { return FShouldEnlist; }
-			set { FShouldEnlist = value; }
+			get { return _shouldEnlist; }
+			set { _shouldEnlist = value; }
 		}
 
-		private DAE.Runtime.Data.Row FMovingRow = null;
+		private DAE.Runtime.Data.Row _movingRow = null;
 
 		private void CancelMove()
 		{
-			if (FMovingRow != null)
+			if (_movingRow != null)
 			{
-				FMovingRow.Dispose();
-				FMovingRow = null;
+				_movingRow.Dispose();
+				_movingRow = null;
 			}
 		}
 
 		// IWebHandler
 
-		public virtual bool ProcessRequest(HttpContext AContext)
+		public virtual bool ProcessRequest(HttpContext context)
 		{
-			if (Session.IsActionLink(AContext, FMoveID))
+			if (Session.IsActionLink(context, _moveID))
 			{
-				string LRowIndex = AContext.Request.QueryString["RowIndex"];
-				if (LRowIndex != null)
+				string rowIndex = context.Request.QueryString["RowIndex"];
+				if (rowIndex != null)
 				{
-					if (FMovingRow != null)
+					if (_movingRow != null)
 					{
-						string LPosY = AContext.Request.QueryString["Y"];
-						if (LPosY != null)
+						string posY = context.Request.QueryString["Y"];
+						if (posY != null)
 						{
-							DAE.Runtime.Data.Row LTarget = ParentGrid.DataLink.Buffer(Int32.Parse(LRowIndex));
-							SequenceChange(FMovingRow, LTarget, Int32.Parse(LPosY) < 10);
+							DAE.Runtime.Data.Row target = ParentGrid.DataLink.Buffer(Int32.Parse(rowIndex));
+							SequenceChange(_movingRow, target, Int32.Parse(posY) < 10);
 						}
 					}
 					else
 					{
-						FMovingRow = (DAE.Runtime.Data.Row)ParentGrid.DataLink.Buffer(Int32.Parse(LRowIndex)).Copy();
+						_movingRow = (DAE.Runtime.Data.Row)ParentGrid.DataLink.Buffer(Int32.Parse(rowIndex)).Copy();
 						return true;
 					}
 				}
@@ -815,45 +815,45 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public Grid() : base()
 		{
-			FPageUpID = Session.GenerateID();
-			FPageDownID = Session.GenerateID();
-			FFirstID = Session.GenerateID();
-			FLastID = Session.GenerateID();
-			FDataLink = new DAE.Client.DataLink();
-			FDataLink.OnActiveChanged += new DAE.Client.DataLinkHandler(DataLinkActiveChanged);
+			_pageUpID = Session.GenerateID();
+			_pageDownID = Session.GenerateID();
+			_firstID = Session.GenerateID();
+			_lastID = Session.GenerateID();
+			_dataLink = new DAE.Client.DataLink();
+			_dataLink.OnActiveChanged += new DAE.Client.DataLinkHandler(DataLinkActiveChanged);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			OnDoubleClick = null;
 		}
 
 		// RowCount
 
-		private int FRowCount = 10;
+		private int _rowCount = 10;
 		public int RowCount
 		{
-			get { return FRowCount; }
+			get { return _rowCount; }
 			set
 			{
-				FRowCount = value;
-				FDataLink.BufferCount = FRowCount;
+				_rowCount = value;
+				_dataLink.BufferCount = _rowCount;
 			}
 		}
 
         //ColumnCount
 
-        private int FColumnCount = -1;
+        private int _columnCount = -1;
         public int ColumnCount
         {
-            get { return FColumnCount; }
+            get { return _columnCount; }
             set
             {
                 if (value < 1)
-                    FColumnCount = -1;
+                    _columnCount = -1;
                 else
-                    FColumnCount = value;
+                    _columnCount = value;
             }
         }
 
@@ -861,247 +861,247 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	
 		// TODO: Support for double-click in the web client
 		
-		private IAction FOnDoubleClick;
+		private IAction _onDoubleClick;
 		public IAction OnDoubleClick 
 		{ 
-			get { return FOnDoubleClick; }
+			get { return _onDoubleClick; }
 			set
 			{
-				if (FOnDoubleClick != value)
+				if (_onDoubleClick != value)
 				{
-					if (FOnDoubleClick != null)
-						FOnDoubleClick.Disposed -= new EventHandler(DoubleClickActionDisposed);
-					FOnDoubleClick = value;
-					if (FOnDoubleClick != null)
-						FOnDoubleClick.Disposed += new EventHandler(DoubleClickActionDisposed);
+					if (_onDoubleClick != null)
+						_onDoubleClick.Disposed -= new EventHandler(DoubleClickActionDisposed);
+					_onDoubleClick = value;
+					if (_onDoubleClick != null)
+						_onDoubleClick.Disposed += new EventHandler(DoubleClickActionDisposed);
 				}
 			}
 		}
 
-		private void DoubleClickActionDisposed(object ASender, EventArgs AArgs)
+		private void DoubleClickActionDisposed(object sender, EventArgs args)
 		{
 			OnDoubleClick = null;
 		}
 
 		// PageUpID
 
-		private string FPageUpID;
-		public string PageUpID { get { return FPageUpID; } }
+		private string _pageUpID;
+		public string PageUpID { get { return _pageUpID; } }
 		
 		// PageDownID
 
-		private string FPageDownID;
-		public string PageDownID { get { return FPageDownID; } }
+		private string _pageDownID;
+		public string PageDownID { get { return _pageDownID; } }
 
 		// FirstID
 
-		private string FFirstID;
-		public string FirstID { get { return FFirstID; } }
+		private string _firstID;
+		public string FirstID { get { return _firstID; } }
 
 		// LastID
 
-		private string FLastID;
-		public string LastID { get { return FLastID; } }
+		private string _lastID;
+		public string LastID { get { return _lastID; } }
 
 		// DataElement
 
-		protected override void SourceChanged(ISource AOldSource)
+		protected override void SourceChanged(ISource oldSource)
 		{
-			FDataLink.Source = ( Source == null ? null : Source.DataSource );
+			_dataLink.Source = ( Source == null ? null : Source.DataSource );
 		}
 
 		// Element
 
-		protected virtual void RenderNavButton(HtmlTextWriter AWriter, string AImageSrc, string AID, bool AEnabled)
+		protected virtual void RenderNavButton(HtmlTextWriter writer, string imageSrc, string iD, bool enabled)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridnav");
-			if (AEnabled)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, AID));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridnav");
+			if (enabled)
+				writer.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, iD));
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Height, "16");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "16");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-			if (AEnabled)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Src, AImageSrc);
+			writer.AddAttribute(HtmlTextWriterAttribute.Height, "16");
+			writer.AddAttribute(HtmlTextWriterAttribute.Width, "16");
+			writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+			if (enabled)
+				writer.AddAttribute(HtmlTextWriterAttribute.Src, imageSrc);
 			else
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "images/pixel.gif");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-			AWriter.RenderEndTag();
+				writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/pixel.gif");
+			writer.RenderBeginTag(HtmlTextWriterTag.Img);
+			writer.RenderEndTag();
 
-			AWriter.RenderEndTag();	// TD
+			writer.RenderEndTag();	// TD
 		}
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			bool LBOF = !FDataLink.Active || FDataLink.DataSet.BOF;
-			bool LEOF = !FDataLink.Active || FDataLink.DataSet.EOF;
+			bool bOF = !_dataLink.Active || _dataLink.DataSet.BOF;
+			bool eOF = !_dataLink.Active || _dataLink.DataSet.EOF;
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "grid");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Table);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "grid");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+			writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Rowspan, "4");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "top");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-			RenderGrid(AWriter);
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Rowspan, "4");
+			writer.AddAttribute(HtmlTextWriterAttribute.Valign, "top");
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			RenderGrid(writer);
+			writer.RenderEndTag();
 
-			RenderNavButton(AWriter, "images/first.png", FFirstID, !LBOF);
-			AWriter.RenderEndTag();
+			RenderNavButton(writer, "images/first.png", _firstID, !bOF);
+			writer.RenderEndTag();
 
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
-			RenderNavButton(AWriter, "images/pageup.png", FPageUpID, !LBOF);
-			AWriter.RenderEndTag();
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
+			RenderNavButton(writer, "images/pageup.png", _pageUpID, !bOF);
+			writer.RenderEndTag();
 
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
-			RenderNavButton(AWriter, "images/pagedown.png", FPageDownID, !LEOF);
-			AWriter.RenderEndTag();
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
+			RenderNavButton(writer, "images/pagedown.png", _pageDownID, !eOF);
+			writer.RenderEndTag();
 
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
-			RenderNavButton(AWriter, "images/last.png", FLastID, !LEOF);
-			AWriter.RenderEndTag();
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
+			RenderNavButton(writer, "images/last.png", _lastID, !eOF);
+			writer.RenderEndTag();
 
-			AWriter.RenderEndTag();	// TABLE
+			writer.RenderEndTag();	// TABLE
 		}
 
-		protected virtual void RenderGrid(HtmlTextWriter AWriter)
+		protected virtual void RenderGrid(HtmlTextWriter writer)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "innergrid");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
-			string LHint = GetHint();
-			if (LHint != String.Empty)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LHint, true);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Table);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "innergrid");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+			string hint = GetHint();
+			if (hint != String.Empty)
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, hint, true);
+			writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
 			// Header
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridheaderrow");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridheaderrow");
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			foreach (IWebGridColumn LColumn in Children)
-				LColumn.RenderHeader(AWriter);
+			foreach (IWebGridColumn column in Children)
+				column.RenderHeader(writer);
 
-			AWriter.RenderEndTag();
+			writer.RenderEndTag();
 
 			// Rows
 
-			bool LCurrent;
-			DAE.Runtime.Data.Row LCurrentRow;
-			int LCount = FDataLink.LastOffset + 1;
-			for (int LRowIndex = 0; LRowIndex < LCount; LRowIndex++) 
+			bool current;
+			DAE.Runtime.Data.Row currentRow;
+			int count = _dataLink.LastOffset + 1;
+			for (int rowIndex = 0; rowIndex < count; rowIndex++) 
 			{
-				LCurrent = LRowIndex == FDataLink.ActiveOffset;
-				if (LCurrent)
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridrowcurrent");
+				current = rowIndex == _dataLink.ActiveOffset;
+				if (current)
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridrowcurrent");
 				else
 				{
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('{0}?ActionID={1}&RowIndex={2}',event)", (string)Session.Get(this).Context.Session["DefaultPage"], ID, LRowIndex.ToString()));
-					if ((LRowIndex % 2) == 1)
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridrowalt");
+					writer.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('{0}?ActionID={1}&RowIndex={2}',event)", (string)Session.Get(this).Context.Session["DefaultPage"], ID, rowIndex.ToString()));
+					if ((rowIndex % 2) == 1)
+						writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridrowalt");
 					else
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridrow");
+						writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridrow");
 				}
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+				writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-				LCurrentRow = FDataLink.Buffer(LRowIndex);
-				foreach (IWebGridColumn LColumn in Children)
-					LColumn.RenderCell(AWriter, LCurrentRow, LCurrent, LRowIndex);
+				currentRow = _dataLink.Buffer(rowIndex);
+				foreach (IWebGridColumn column in Children)
+					column.RenderCell(writer, currentRow, current, rowIndex);
 
-				AWriter.RenderEndTag();
+				writer.RenderEndTag();
 			}
 
-			AWriter.RenderEndTag();	// TABLE
+			writer.RenderEndTag();	// TABLE
 		}
 
-		private bool FAutoBuiltColumns;
+		private bool _autoBuiltColumns;
 
 		// Node
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(IWebGridColumn).IsAssignableFrom(AChildType))
+			if (typeof(IWebGridColumn).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
 		
 		protected override void Activate()
 		{
-			FDataLink.BufferCount = FRowCount;
+			_dataLink.BufferCount = _rowCount;
 			base.Activate();
 		}
 
 		// DataLink
 
-		protected DAE.Client.DataLink FDataLink;
+		protected DAE.Client.DataLink _dataLink;
 		public DAE.Client.DataLink DataLink 
 		{
-			get { return FDataLink; }
+			get { return _dataLink; }
 		}
 
         //this is a no-op in the web client
-        private bool FUseNaturalMaxWidth;
+        private bool _useNaturalMaxWidth;
         public bool UseNaturalMaxWidth
         {
-            get { return FUseNaturalMaxWidth; }
-            set { FUseNaturalMaxWidth = value; }
+            get { return _useNaturalMaxWidth; }
+            set { _useNaturalMaxWidth = value; }
         }
 
-		private void DataLinkActiveChanged(DAE.Client.DataLink ALink, DAE.Client.DataSet ADataSet)
+		private void DataLinkActiveChanged(DAE.Client.DataLink link, DAE.Client.DataSet dataSet)
 		{
-			if (ALink.Active)
+			if (link.Active)
 			{
 				// if no children, then default to a full set of columns.
 				if (Children.Count == 0) 
 				{
-					foreach (DAE.Client.DataField LColumn in Source.DataView.Fields)
+					foreach (DAE.Client.DataField column in Source.DataView.Fields)
 					{
-						TextColumn LNewColumn = new TextColumn();
-						LNewColumn.ColumnName = LColumn.ColumnName;
-						LNewColumn.Title = LColumn.ColumnName;
-						Children.Add(LNewColumn);
+						TextColumn newColumn = new TextColumn();
+						newColumn.ColumnName = column.ColumnName;
+						newColumn.Title = column.ColumnName;
+						Children.Add(newColumn);
 					}
-					FAutoBuiltColumns = true;
+					_autoBuiltColumns = true;
 				}
-					FAutoBuiltColumns = false;
+					_autoBuiltColumns = false;
 			}
 			else
 			{
-				if (FAutoBuiltColumns)
+				if (_autoBuiltColumns)
 					Children.Clear();
 			}
 		}
 
-		public void MoveTo(int AIndex) 
+		public void MoveTo(int index) 
 		{
-			FDataLink.DataSet.MoveBy(AIndex - FDataLink.ActiveOffset);
+			_dataLink.DataSet.MoveBy(index - _dataLink.ActiveOffset);
 		}
 
 		// IWebHandler
 
-		public override bool ProcessRequest(HttpContext AContext)
+		public override bool ProcessRequest(HttpContext context)
 		{
-			if (base.ProcessRequest(AContext))
+			if (base.ProcessRequest(context))
 				return true;
 			else
 			{
-				if (Session.IsActionLink(AContext, FPageUpID))
+				if (Session.IsActionLink(context, _pageUpID))
 					Source.DataView.MoveBy(-RowCount);
-				else if (Session.IsActionLink(AContext, FPageDownID))
+				else if (Session.IsActionLink(context, _pageDownID))
 					Source.DataView.MoveBy(RowCount);
-				else if (Session.IsActionLink(AContext, FFirstID))
+				else if (Session.IsActionLink(context, _firstID))
 					Source.DataView.First();
-				else if (Session.IsActionLink(AContext, FLastID))
+				else if (Session.IsActionLink(context, _lastID))
 					Source.DataView.Last();
-				else if (Session.IsActionLink(AContext, ID))
+				else if (Session.IsActionLink(context, ID))
 				{
-					string LRowIndex = AContext.Request.QueryString["RowIndex"];
-					if ((LRowIndex != null) && (LRowIndex != String.Empty))
-						MoveTo(Int32.Parse(LRowIndex));
+					string rowIndex = context.Request.QueryString["RowIndex"];
+					if ((rowIndex != null) && (rowIndex != String.Empty))
+						MoveTo(Int32.Parse(rowIndex));
 				}
 				else
 					return false;
@@ -1115,41 +1115,41 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		// Action
 
-		protected override void InternalExecute(Alphora.Dataphor.Frontend.Client.INode ASender, Alphora.Dataphor.Frontend.Client.EventParams AParams)
+		protected override void InternalExecute(Alphora.Dataphor.Frontend.Client.INode sender, Alphora.Dataphor.Frontend.Client.EventParams paramsValue)
 		{
 			if (Source != null)
 			{
-				Host LHost = (Host)HostNode.Session.CreateHost();
+				Host host = (Host)HostNode.Session.CreateHost();
 				try
 				{
-					EditFilterForm LForm = new EditFilterForm();
+					EditFilterForm form = new EditFilterForm();
 					try
 					{
-						LHost.Children.Add(LForm);
+						host.Children.Add(form);
 					}
 					catch
 					{
-						LForm.Dispose();
+						form.Dispose();
 						throw;
 					}
-					LForm.Text = Strings.Get("EditFilterFormTitle");
-					LForm.FilterExpression = Source.DataView.Filter;
-					LHost.Open();
-					LForm.Show((IFormInterface)FindParent(typeof(IFormInterface)), new FormInterfaceHandler(FilterAccepted), null, FormMode.None);
+					form.Text = Strings.Get("EditFilterFormTitle");
+					form.FilterExpression = Source.DataView.Filter;
+					host.Open();
+					form.Show((IFormInterface)FindParent(typeof(IFormInterface)), new FormInterfaceHandler(FilterAccepted), null, FormMode.None);
 				}
 				catch
 				{
-					LHost.Dispose();
+					host.Dispose();
 					throw;
 				}
 			}
 		}
 
-		private void FilterAccepted(IFormInterface AForm)
+		private void FilterAccepted(IFormInterface form)
 		{
 			if ((Source != null) && (Source.DataView != null))
 			{
-				Source.DataView.Filter = ((EditFilterForm)AForm).FilterExpression;
+				Source.DataView.Filter = ((EditFilterForm)form).FilterExpression;
 				Source.DataView.Open();		// Ensure the DataView is open in case a previous filter change caused it to close
 			}
 		}
@@ -1159,50 +1159,50 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public EditFilterForm()
 		{
-			FNameID = Session.GenerateID();
+			_nameID = Session.GenerateID();
 		}
 
 		// NameID
 
-		private string FNameID;
-		public string NameID { get { return FNameID; } }
+		private string _nameID;
+		public string NameID { get { return _nameID; } }
 
 		// FilterExpression
 
-		private string FFilterExpression = String.Empty;
+		private string _filterExpression = String.Empty;
 		public string FilterExpression
 		{
-			get { return FFilterExpression; }
-			set { FFilterExpression = ( value == null ? String.Empty : value ); }
+			get { return _filterExpression; }
+			set { _filterExpression = ( value == null ? String.Empty : value ); }
 		}
 
 		// Element
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			base.InternalRender(AWriter);
-			AWriter.Write(HttpUtility.HtmlEncode(Strings.Get("FilterExpression")));
-			AWriter.Write("<br>");
+			base.InternalRender(writer);
+			writer.Write(HttpUtility.HtmlEncode(Strings.Get("FilterExpression")));
+			writer.Write("<br>");
 			
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Name, FNameID);
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cols, "60");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Rows, "4");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Wrap, "on");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Textarea);
+			writer.AddAttribute(HtmlTextWriterAttribute.Name, _nameID);
+			writer.AddAttribute(HtmlTextWriterAttribute.Cols, "60");
+			writer.AddAttribute(HtmlTextWriterAttribute.Rows, "4");
+			writer.AddAttribute(HtmlTextWriterAttribute.Wrap, "on");
+			writer.RenderBeginTag(HtmlTextWriterTag.Textarea);
 
-			AWriter.Write(HttpUtility.HtmlEncode(FFilterExpression));
+			writer.Write(HttpUtility.HtmlEncode(_filterExpression));
 
-			AWriter.RenderEndTag();
+			writer.RenderEndTag();
 		}
 
-		public override bool ProcessRequest(HttpContext AContext)
+		public override bool ProcessRequest(HttpContext context)
 		{
-			if (base.ProcessRequest(AContext))
+			if (base.ProcessRequest(context))
 				return true;
-			string LValue = AContext.Request.Form[FNameID];
-			if (LValue != null)
+			string tempValue = context.Request.Form[_nameID];
+			if (tempValue != null)
 			{
-				FFilterExpression = LValue;
+				_filterExpression = tempValue;
 				return true;
 			}
 			else

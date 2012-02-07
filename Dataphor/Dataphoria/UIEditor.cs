@@ -20,39 +20,39 @@ namespace Alphora.Dataphor.Dataphoria
 	/// <summary>Enables the creation and editing of a Document Expression</summary>
 	public class DocumentExpressionUIEditor : UITypeEditor
 	{
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value) 
 		{	 
 			try
 			{
-				if (((string)AValue) == String.Empty)
+				if (((string)value) == String.Empty)
 				{
-					if (AContext != null) 
+					if (context != null) 
 					{
-						DocumentExpression LDocumentExpression = new DocumentExpression();
-						LDocumentExpression.Type = DocumentType.Document;
+						DocumentExpression documentExpression = new DocumentExpression();
+						documentExpression.Type = DocumentType.Document;
 						
-						DocumentExpressionOperatorAttribute LAttribute = (DocumentExpressionOperatorAttribute)AContext.PropertyDescriptor.Attributes[typeof(DocumentExpressionOperatorAttribute)];
-						if (LAttribute != null)
-							LDocumentExpression.DocumentArgs.OperatorName = LAttribute.OperatorName;
-						AValue = DocumentExpressionForm.Execute(LDocumentExpression);
+						DocumentExpressionOperatorAttribute attribute = (DocumentExpressionOperatorAttribute)context.PropertyDescriptor.Attributes[typeof(DocumentExpressionOperatorAttribute)];
+						if (attribute != null)
+							documentExpression.DocumentArgs.OperatorName = attribute.OperatorName;
+						value = DocumentExpressionForm.Execute(documentExpression);
 					}
 				}
 				else
-					AValue = DocumentExpressionForm.Execute((string)AValue);
+					value = DocumentExpressionForm.Execute((string)value);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Frontend.Client.Windows.Session.HandleException(LException);
+				Frontend.Client.Windows.Session.HandleException(exception);
 			}
-			return AValue;
+			return value;
 		}
 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{
-			if (AContext != null && AContext.Instance != null) 
+			if (context != null && context.Instance != null) 
 				return UITypeEditorEditStyle.Modal;
 			else
-				return base.GetEditStyle(AContext);
+				return base.GetEditStyle(context);
 		}
 	}
 }

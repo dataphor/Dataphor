@@ -13,15 +13,15 @@ namespace Alphora.Dataphor.DAE.Connection.Oracle
 
 	class DAERegister
 	{
-		protected const string CD4ClassDefinitionNameSpace = "MSOracleConnection";
+		protected const string D4ClassDefinitionNameSpace = "MSOracleConnection";
 
 		public static SettingsList GetClasses()
 		{
-			SettingsList LClasses = new SettingsList();
+			SettingsList classes = new SettingsList();
 			
-			LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "OracleConnection"), typeof(OracleConnection).AssemblyQualifiedName));
+			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "OracleConnection"), typeof(OracleConnection).AssemblyQualifiedName));
 			
-			return LClasses;
+			return classes;
 		}
 	}
 }

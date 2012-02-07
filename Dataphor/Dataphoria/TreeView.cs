@@ -18,84 +18,84 @@ namespace Alphora.Dataphor.Dataphoria
 {
 	public class TreeView : System.Windows.Forms.TreeView
 	{
-		public const int CDragOverInterval = 500;
-		public const int CHoverScrollInterval = 50;
-		public const int CHoverScrollMargin = 5;
+		public const int DragOverInterval = 500;
+		public const int HoverScrollInterval = 50;
+		public const int HoverScrollMargin = 5;
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			ClearTimer();
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		#region Custom Painting
 
-		protected override void WndProc(ref Message AMessage)
+		protected override void WndProc(ref Message message)
 		{
-			base.WndProc(ref AMessage);
-			if (AMessage.Msg == (int)NativeMethods.OCM_NOTIFY)
+			base.WndProc(ref message);
+			if (message.Msg == (int)NativeMethods.OCM_NOTIFY)
 			{
-				NMHDR LHeader = (NMHDR)AMessage.GetLParam(typeof(NMHDR));	
-				if (LHeader.code == (int)NotificationMessages.NM_CUSTOMDRAW)
-					NotifyTreeCustomDraw(ref AMessage);
+				NMHDR header = (NMHDR)message.GetLParam(typeof(NMHDR));	
+				if (header.code == (int)NotificationMessages.NM_CUSTOMDRAW)
+					NotifyTreeCustomDraw(ref message);
 			}
 		}
 
-		private bool NotifyTreeCustomDraw(ref Message AMessage)
+		private bool NotifyTreeCustomDraw(ref Message message)
 		{
-			AMessage.Result = (IntPtr)CustomDrawReturnFlags.CDRF_DODEFAULT;
-			NMTVCUSTOMDRAW LCustomDrawInfo = (NMTVCUSTOMDRAW)AMessage.GetLParam(typeof(NMTVCUSTOMDRAW));
-			IntPtr LThisHandle = Handle;
+			message.Result = (IntPtr)CustomDrawReturnFlags.CDRF_DODEFAULT;
+			NMTVCUSTOMDRAW customDrawInfo = (NMTVCUSTOMDRAW)message.GetLParam(typeof(NMTVCUSTOMDRAW));
+			IntPtr thisHandle = Handle;
 			
-			if (LCustomDrawInfo.nmcd.hdr.hwndFrom == Handle)
+			if (customDrawInfo.nmcd.hdr.hwndFrom == Handle)
 			{
-				switch (LCustomDrawInfo.nmcd.dwDrawStage)
+				switch (customDrawInfo.nmcd.dwDrawStage)
 				{
 					case (int)CustomDrawDrawStateFlags.CDDS_PREPAINT:
-						AMessage.Result = (IntPtr)CustomDrawReturnFlags.CDRF_NOTIFYITEMDRAW;
+						message.Result = (IntPtr)CustomDrawReturnFlags.CDRF_NOTIFYITEMDRAW;
 						break;
 					case (int)CustomDrawDrawStateFlags.CDDS_ITEMPREPAINT:
-						AMessage.Result = (IntPtr)CustomDrawReturnFlags.CDRF_NOTIFYPOSTPAINT;
-						PaintTreeItemEventArgs LArgs = GetPaintTreeItemEventArgs(LCustomDrawInfo);
+						message.Result = (IntPtr)CustomDrawReturnFlags.CDRF_NOTIFYPOSTPAINT;
+						PaintTreeItemEventArgs args = GetPaintTreeItemEventArgs(customDrawInfo);
 						try
 						{
-							LArgs.ForeColor = SystemColors.WindowText;
-							LArgs.BackColor = SystemColors.Window;
-							if (DoPrePaintItem(LArgs))
+							args.ForeColor = SystemColors.WindowText;
+							args.BackColor = SystemColors.Window;
+							if (DoPrePaintItem(args))
 							{
-								DoPostPaintItem(LArgs);
-								AMessage.Result = (IntPtr)CustomDrawReturnFlags.CDRF_SKIPDEFAULT;
+								DoPostPaintItem(args);
+								message.Result = (IntPtr)CustomDrawReturnFlags.CDRF_SKIPDEFAULT;
 							}
-							LCustomDrawInfo.clrTextBk = 
+							customDrawInfo.clrTextBk = 
 								RGB
 								(
-									LArgs.BackColor.R,
-									LArgs.BackColor.G, 
-									LArgs.BackColor.B
+									args.BackColor.R,
+									args.BackColor.G, 
+									args.BackColor.B
 								);
-							LCustomDrawInfo.clrText =
+							customDrawInfo.clrText =
 								RGB
 								(
-									LArgs.ForeColor.R,
-									LArgs.ForeColor.G, 
-									LArgs.ForeColor.B
+									args.ForeColor.R,
+									args.ForeColor.G, 
+									args.ForeColor.B
 								);
-							Marshal.StructureToPtr(LCustomDrawInfo, AMessage.LParam, true);
+							Marshal.StructureToPtr(customDrawInfo, message.LParam, true);
 						}
 						finally
 						{
-							LArgs.Graphics.Dispose();
+							args.Graphics.Dispose();
 						}
 						break;
 					case (int)CustomDrawDrawStateFlags.CDDS_ITEMPOSTPAINT:
-						LArgs = GetPaintTreeItemEventArgs(LCustomDrawInfo);
+						args = GetPaintTreeItemEventArgs(customDrawInfo);
 						try
 						{
-							DoPostPaintItem(LArgs);
+							DoPostPaintItem(args);
 						}
 						finally
 						{
-							LArgs.Graphics.Dispose();
+							args.Graphics.Dispose();
 						}
 						break;
 				}
@@ -108,54 +108,54 @@ namespace Alphora.Dataphor.Dataphoria
 			return ((uint)(((byte)(r)|((short)((byte)(g))<<8))|(((short)(byte)(b))<<16)));
 		}
 
-		private PaintTreeItemEventArgs GetPaintTreeItemEventArgs(NMTVCUSTOMDRAW ACustomDrawInfo)
+		private PaintTreeItemEventArgs GetPaintTreeItemEventArgs(NMTVCUSTOMDRAW customDrawInfo)
 		{
-			TreeNode LNode = TreeNode.FromHandle(this, (IntPtr)ACustomDrawInfo.nmcd.dwItemSpec);
+			TreeNode node = TreeNode.FromHandle(this, (IntPtr)customDrawInfo.nmcd.dwItemSpec);
 			return
 				new PaintTreeItemEventArgs
 				(
-					LNode,
-					Graphics.FromHdc(ACustomDrawInfo.nmcd.hdc),
-					(ACustomDrawInfo.nmcd.uItemState & (int)CustomDrawItemStateFlags.CDIS_FOCUS) != 0,
-					(ACustomDrawInfo.nmcd.uItemState & (int)CustomDrawItemStateFlags.CDIS_SELECTED) != 0,
-					Rectangle.FromLTRB(ACustomDrawInfo.nmcd.rc.left, ACustomDrawInfo.nmcd.rc.top, ACustomDrawInfo.nmcd.rc.right, ACustomDrawInfo.nmcd.rc.bottom)
+					node,
+					Graphics.FromHdc(customDrawInfo.nmcd.hdc),
+					(customDrawInfo.nmcd.uItemState & (int)CustomDrawItemStateFlags.CDIS_FOCUS) != 0,
+					(customDrawInfo.nmcd.uItemState & (int)CustomDrawItemStateFlags.CDIS_SELECTED) != 0,
+					Rectangle.FromLTRB(customDrawInfo.nmcd.rc.left, customDrawInfo.nmcd.rc.top, customDrawInfo.nmcd.rc.right, customDrawInfo.nmcd.rc.bottom)
 				);
 		}
 
 		public event PaintTreeItemEventHandler OnPrePaintItem;
 
 		/// <returns> True if painting is handled (should skip default). </returns>
-		protected virtual bool DoPrePaintItem(PaintTreeItemEventArgs AArgs)
+		protected virtual bool DoPrePaintItem(PaintTreeItemEventArgs args)
 		{
-			if (AArgs.Node != null)
+			if (args.Node != null)
 			{
-				using (Brush LBrush = new SolidBrush(SystemColors.Window))
+				using (Brush brush = new SolidBrush(SystemColors.Window))
 				{
-					AArgs.Graphics.FillRectangle(LBrush, AArgs.Bounds);
+					args.Graphics.FillRectangle(brush, args.Bounds);
 				}
 				if (OnPrePaintItem != null)
-					OnPrePaintItem(this, AArgs);
+					OnPrePaintItem(this, args);
 			}
 			return false;
 		}
 
 		public event PaintTreeItemEventHandler OnPostPaintItem;
 
-		protected virtual void DoPostPaintItem(PaintTreeItemEventArgs AArgs)
+		protected virtual void DoPostPaintItem(PaintTreeItemEventArgs args)
 		{
-			if (AArgs.Node != null)
+			if (args.Node != null)
 			{
-				Rectangle LBounds = AArgs.Node.Bounds;
-				LBounds.Height -= 1;
-				if (AArgs.Focused)
-					using (Brush LBrush = new SolidBrush(Color.FromArgb(70, SystemColors.Highlight)))
+				Rectangle bounds = args.Node.Bounds;
+				bounds.Height -= 1;
+				if (args.Focused)
+					using (Brush brush = new SolidBrush(Color.FromArgb(70, SystemColors.Highlight)))
 					{
-						AArgs.Graphics.FillRectangle(LBrush, LBounds);
+						args.Graphics.FillRectangle(brush, bounds);
 					}
-				if (AArgs.Selected)
-					AArgs.Graphics.DrawRectangle(SystemPens.Highlight, LBounds);
+				if (args.Selected)
+					args.Graphics.DrawRectangle(SystemPens.Highlight, bounds);
 				if (OnPostPaintItem != null)
-					OnPostPaintItem(this, AArgs);
+					OnPostPaintItem(this, args);
 			}
 		}
 
@@ -163,88 +163,88 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region Drag & Drop and hover
 
-		private HoverTimer FHoverTimer;
+		private HoverTimer _hoverTimer;
 
 		private void ClearTimer()
 		{
-			if (FHoverTimer != null)
+			if (_hoverTimer != null)
 			{
-				FHoverTimer.Dispose();
-				FHoverTimer = null;
+				_hoverTimer.Dispose();
+				_hoverTimer = null;
 			}
 		}
 
-		protected override void OnDragOver(DragEventArgs AArgs)
+		protected override void OnDragOver(DragEventArgs args)
 		{
-			base.OnDragOver(AArgs);
-			HoverAction LNewAction;
-			TreeNode LNewNode = null;
-			Point LLocalPoint = PointToClient(new Point(AArgs.X, AArgs.Y));
-			if (LLocalPoint.Y < CHoverScrollMargin)
-				LNewAction = HoverAction.ScrollUp;
-			else if (LLocalPoint.Y > (ClientSize.Height - CHoverScrollMargin))
-				LNewAction = HoverAction.ScrollDown;
+			base.OnDragOver(args);
+			HoverAction newAction;
+			TreeNode newNode = null;
+			Point localPoint = PointToClient(new Point(args.X, args.Y));
+			if (localPoint.Y < HoverScrollMargin)
+				newAction = HoverAction.ScrollUp;
+			else if (localPoint.Y > (ClientSize.Height - HoverScrollMargin))
+				newAction = HoverAction.ScrollDown;
 			else
 			{
-				LNewAction = HoverAction.OverNode;
-				LNewNode = GetNodeAt(LLocalPoint.X, LLocalPoint.Y);
+				newAction = HoverAction.OverNode;
+				newNode = GetNodeAt(localPoint.X, localPoint.Y);
 			}
 
-			if (FHoverTimer != null)
+			if (_hoverTimer != null)
 			{
-				if ((FHoverTimer.Action != LNewAction) || (FHoverTimer.Node != LNewNode))
+				if ((_hoverTimer.Action != newAction) || (_hoverTimer.Node != newNode))
 					ClearTimer();
 				else
 					return;		// do not reset the timer if nothing has changed
 			}
 
-			if ((LNewAction != HoverAction.OverNode) || (LNewNode != null))
+			if ((newAction != HoverAction.OverNode) || (newNode != null))
 			{
-				FHoverTimer = new HoverTimer(LNewAction, LNewNode);
-				switch (LNewAction)
+				_hoverTimer = new HoverTimer(newAction, newNode);
+				switch (newAction)
 				{
 					case HoverAction.OverNode :
-						FHoverTimer.Interval = CDragOverInterval;
-						FHoverTimer.Tick += new EventHandler(HoverExpand);
+						_hoverTimer.Interval = DragOverInterval;
+						_hoverTimer.Tick += new EventHandler(HoverExpand);
 						break;
 					case HoverAction.ScrollUp :
 					case HoverAction.ScrollDown :
-						FHoverTimer.Interval = CHoverScrollInterval;
-						FHoverTimer.Tick += new EventHandler(HoverScroll);
+						_hoverTimer.Interval = HoverScrollInterval;
+						_hoverTimer.Tick += new EventHandler(HoverScroll);
 						break;
 				}
-				FHoverTimer.Enabled = true;
+				_hoverTimer.Enabled = true;
 			}
 		}
 
-		protected override void OnDragLeave(EventArgs AArgs)
+		protected override void OnDragLeave(EventArgs args)
 		{
-			base.OnDragLeave(AArgs);
+			base.OnDragLeave(args);
 			ClearTimer();
 		}
 
-		private void ScrollTree(int ADelta)
+		private void ScrollTree(int delta)
 		{
-			int LPosition = UnsafeNativeMethods.GetScrollPos(Handle, 1);
-			UnsafeNativeMethods.SetScrollPos(Handle, 1, LPosition + ADelta, true);
+			int position = UnsafeNativeMethods.GetScrollPos(Handle, 1);
+			UnsafeNativeMethods.SetScrollPos(Handle, 1, position + delta, true);
 			UnsafeNativeMethods.PostMessage(Handle, NativeMethods.WM_SETREDRAW, (IntPtr)1, (IntPtr)0);
 		}
 
-		private void HoverScroll(object ASender, EventArgs AArgs)
+		private void HoverScroll(object sender, EventArgs args)
 		{
-			HoverTimer LTimer = (HoverTimer)ASender;
-			if (LTimer.Action == HoverAction.ScrollUp)
+			HoverTimer timer = (HoverTimer)sender;
+			if (timer.Action == HoverAction.ScrollUp)
 				ScrollTree(-2);
 			else
 				ScrollTree(2);
 		}
 
-		private void HoverExpand(object ASender, EventArgs AArgs)
+		private void HoverExpand(object sender, EventArgs args)
 		{
-			HoverTimer LTimer = (HoverTimer)ASender;
-			if (LTimer.Node != null)
-				LTimer.Node.Expand();
-			LTimer.Enabled = false;
+			HoverTimer timer = (HoverTimer)sender;
+			if (timer.Node != null)
+				timer.Node.Expand();
+			timer.Enabled = false;
 		}
 
 		#endregion
@@ -259,81 +259,81 @@ namespace Alphora.Dataphor.Dataphoria
 
 	public class HoverTimer : Timer
 	{
-		public HoverTimer(HoverAction AAction, TreeNode ANode)
+		public HoverTimer(HoverAction action, TreeNode node)
 		{
-			FAction = AAction;
-			FNode = ANode;
+			_action = action;
+			_node = node;
 		}
 
-		private HoverAction FAction;
+		private HoverAction _action;
 		public HoverAction Action
 		{
-			get { return FAction; }
+			get { return _action; }
 		}
 
-		private TreeNode FNode;
+		private TreeNode _node;
 		public TreeNode Node
 		{
-			get { return FNode; }
+			get { return _node; }
 		}
 	}
 
 	public class PaintTreeItemEventArgs
 	{
-		public PaintTreeItemEventArgs(TreeNode ANode, Graphics AGraphics, bool AFocused, bool ASelected, Rectangle ABounds)
+		public PaintTreeItemEventArgs(TreeNode node, Graphics graphics, bool focused, bool selected, Rectangle bounds)
 		{
-			FNode = ANode;
-			FGraphics = AGraphics;
-			FFocused = AFocused;
-			FSelected = ASelected;
-			FBounds = ABounds;
+			_node = node;
+			_graphics = graphics;
+			_focused = focused;
+			_selected = selected;
+			_bounds = bounds;
 		}
 
-		private TreeNode FNode;
+		private TreeNode _node;
 		public TreeNode Node
 		{
-			get { return FNode; }
+			get { return _node; }
 		}
 
-		private Graphics FGraphics;
+		private Graphics _graphics;
 		public Graphics Graphics
 		{
-			get { return FGraphics; }
+			get { return _graphics; }
 		}
 
-		private Rectangle FBounds;
+		private Rectangle _bounds;
 		public Rectangle Bounds
 		{
-			get { return FBounds; }
-			set { FBounds = value; }
+			get { return _bounds; }
+			set { _bounds = value; }
 		}
 
-		private bool FFocused;
+		private bool _focused;
 		public bool Focused
 		{
-			get { return FFocused; }
-			set { FFocused = value; }
+			get { return _focused; }
+			set { _focused = value; }
 		}
 
-		private bool FSelected;
+		private bool _selected;
 		public bool Selected
 		{
-			get { return FSelected; }
-			set { FSelected = value; }
+			get { return _selected; }
+			set { _selected = value; }
 		}
 
-		private Color FBackColor;
+		private Color _backColor;
 		public Color BackColor
 		{
-			get { return FBackColor; }
-			set { FBackColor = value; }
+			get { return _backColor; }
+			set { _backColor = value; }
 		}
 
-		private Color FForeColor;
+		private Color _foreColor;
 		public Color ForeColor
 		{
-			get { return FForeColor; }
-			set { FForeColor = value; }
+			get { return _foreColor; }
+			set { _foreColor = value; }
 		}
 
 	}

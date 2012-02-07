@@ -10,91 +10,91 @@ namespace Alphora.Dataphor.DAE.Language
 	
 	public abstract class TextEmitter
 	{
-		private StringBuilder FText;
-		private int FIndent;
+		private StringBuilder _text;
+		private int _indent;
 		
 		protected void IncreaseIndent()
 		{
-			FIndent++;
+			_indent++;
 		}
 		
 		protected void DecreaseIndent()
 		{
-			if (FIndent > 0)
-				FIndent--;
+			if (_indent > 0)
+				_indent--;
 		}
 		
 		protected void NewLine()
 		{
-			FText.Append("\r\n");
+			_text.Append("\r\n");
 		}
 		
 		protected void Indent()
 		{
-			for (int LIndex = 0; LIndex < FIndent; LIndex++)
-				FText.Append("\t");
+			for (int index = 0; index < _indent; index++)
+				_text.Append("\t");
 		}
 		
-		protected void Append(string AString)
+		protected void Append(string stringValue)
 		{
-			FText.Append(AString);
+			_text.Append(stringValue);
 		}
 		
-		protected void AppendFormat(string AString, params object[] AParams)
+		protected void AppendFormat(string stringValue, params object[] paramsValue)
 		{
-			FText.AppendFormat(AString, AParams);
+			_text.AppendFormat(stringValue, paramsValue);
 		}
 		
-		protected void AppendLine(string AString)
+		protected void AppendLine(string stringValue)
 		{
 			Indent();
-			Append(AString);
+			Append(stringValue);
 			NewLine();
 		}
 		
-		protected void AppendFormatLine(string AString, params object[] AParams)
+		protected void AppendFormatLine(string stringValue, params object[] paramsValue)
 		{
 			Indent();
-			AppendFormat(AString, AParams);
+			AppendFormat(stringValue, paramsValue);
 			NewLine();
 		}
 
-		protected abstract void InternalEmit(Statement AStatement);
+		protected abstract void InternalEmit(Statement statement);
 		
-		public string Emit(Statement AStatement)
+		public string Emit(Statement statement)
 		{
-			FText = new StringBuilder();
-			FIndent = 0;
-			InternalEmit(AStatement);
-			return FText.ToString();
+			_text = new StringBuilder();
+			_indent = 0;
+			InternalEmit(statement);
+			return _text.ToString();
 		}
 	}
 	
 	public class BasicTextEmitter : TextEmitter
 	{
-		protected virtual void EmitExpression(Expression AExpression)
+		protected virtual void EmitExpression(Expression expression)
 		{
-			if (AExpression is UnaryExpression)
-				EmitUnaryExpression((UnaryExpression)AExpression);
-			else if (AExpression is BinaryExpression)
-				EmitBinaryExpression((BinaryExpression)AExpression);
-			else if (AExpression is CallExpression)
-				EmitCallExpression((CallExpression)AExpression);
-			else if (AExpression is ValueExpression)
-				EmitValueExpression((ValueExpression)AExpression);
-			else if (AExpression is IdentifierExpression)
-				EmitIdentifierExpression((IdentifierExpression)AExpression);
-			else if (AExpression is CaseExpression)
-				EmitCaseExpression((CaseExpression)AExpression);
-			else if (AExpression is BetweenExpression)
-				EmitBetweenExpression((BetweenExpression)AExpression);
+			if (expression is UnaryExpression)
+				EmitUnaryExpression((UnaryExpression)expression);
+			else if (expression is BinaryExpression)
+				EmitBinaryExpression((BinaryExpression)expression);
+			else if (expression is CallExpression)
+				EmitCallExpression((CallExpression)expression);
+			else if (expression is ValueExpression)
+				EmitValueExpression((ValueExpression)expression);
+			else if (expression is IdentifierExpression)
+				EmitIdentifierExpression((IdentifierExpression)expression);
+			else if (expression is CaseExpression)
+				EmitCaseExpression((CaseExpression)expression);
+			else if (expression is BetweenExpression)
+				EmitBetweenExpression((BetweenExpression)expression);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, AExpression == null ? "null" : AExpression.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, expression == null ? "null" : expression.GetType().Name);
 		}
 
-		public static string InstructionNameToKeyword(string AInstruction)
+		public static string InstructionNameToKeyword(string instruction)
 		{
-			switch (AInstruction)
+			switch (instruction)
 			{
 				case "iNot": return "not";
 				case "iNegate": return "-";
@@ -125,115 +125,115 @@ namespace Alphora.Dataphor.DAE.Language
 				case "iBitwiseXor": return "^";
 				case "iShiftLeft": return "<<";
 				case "iShiftRight": return ">>";
-				default: throw new LanguageException(LanguageException.Codes.UnknownInstruction, AInstruction);
+				default: throw new LanguageException(LanguageException.Codes.UnknownInstruction, instruction);
 			}
 		}
 		
-		protected virtual string GetInstructionKeyword(string AInstruction)
+		protected virtual string GetInstructionKeyword(string instruction)
 		{
-			return InstructionNameToKeyword(AInstruction);
+			return InstructionNameToKeyword(instruction);
 		}
 
-		protected virtual void EmitUnaryExpression(UnaryExpression AExpression)
+		protected virtual void EmitUnaryExpression(UnaryExpression expression)
 		{
-			AppendFormat("{0}{1}", GetInstructionKeyword(Schema.Object.Unqualify(AExpression.Instruction)), "(");
-			EmitExpression(AExpression.Expression);
+			AppendFormat("{0}{1}", GetInstructionKeyword(Schema.Object.Unqualify(expression.Instruction)), "(");
+			EmitExpression(expression.Expression);
 			Append(")");
 		}
 		
-		protected virtual void EmitBinaryExpression(BinaryExpression AExpression)
+		protected virtual void EmitBinaryExpression(BinaryExpression expression)
 		{
 			Append("(");
-			EmitExpression(AExpression.LeftExpression);
-			AppendFormat(" {0} ", GetInstructionKeyword(Schema.Object.Unqualify(AExpression.Instruction)));
-			EmitExpression(AExpression.RightExpression);
+			EmitExpression(expression.LeftExpression);
+			AppendFormat(" {0} ", GetInstructionKeyword(Schema.Object.Unqualify(expression.Instruction)));
+			EmitExpression(expression.RightExpression);
 			Append(")");
 		}
 		
-		protected virtual void EmitCallExpression(CallExpression AExpression)
+		protected virtual void EmitCallExpression(CallExpression expression)
 		{
-			AppendFormat("{0}{1}", AExpression.Identifier, "(");
-			for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+			AppendFormat("{0}{1}", expression.Identifier, "(");
+			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					AppendFormat("{0} ", ",");
-				EmitExpression(AExpression.Expressions[LIndex]);
+				EmitExpression(expression.Expressions[index]);
 			}
 			Append(")");
 		}
 		
-		protected virtual void EmitBetweenExpression(BetweenExpression AExpression)
+		protected virtual void EmitBetweenExpression(BetweenExpression expression)
 		{
 			Append("(");
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			Append(" between ");
-			EmitExpression(AExpression.LowerExpression);
+			EmitExpression(expression.LowerExpression);
 			Append(" and ");
-			EmitExpression(AExpression.UpperExpression);
+			EmitExpression(expression.UpperExpression);
 			Append(")");
 		}
 		
-		protected virtual void EmitValueExpression(ValueExpression AExpression)
+		protected virtual void EmitValueExpression(ValueExpression expression)
 		{
-			switch (AExpression.Token)
+			switch (expression.Token)
 			{
 				case TokenType.Nil : Append(D4.Keywords.Nil); break;
-				case TokenType.String : Append("'" + ((string)AExpression.Value).Replace("'", "''") + "'"); break;
-				case TokenType.Decimal: Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}d", AExpression.Value)); break;
-				case TokenType.Money : Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "${0}", AExpression.Value)); break;
-				case TokenType.Boolean : Append(((bool)AExpression.Value ? "true" : "false")); break;
-				case TokenType.Hex : ((long)AExpression.Value).ToString("X"); break;
-				default : Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", AExpression.Value)); break;
+				case TokenType.String : Append("'" + ((string)expression.Value).Replace("'", "''") + "'"); break;
+				case TokenType.Decimal: Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}d", expression.Value)); break;
+				case TokenType.Money : Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "${0}", expression.Value)); break;
+				case TokenType.Boolean : Append(((bool)expression.Value ? "true" : "false")); break;
+				case TokenType.Hex : ((long)expression.Value).ToString("X"); break;
+				default : Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", expression.Value)); break;
 			}
 		}
 		
-		protected virtual void EmitIdentifierExpression(IdentifierExpression AExpression)
+		protected virtual void EmitIdentifierExpression(IdentifierExpression expression)
 		{
-			Append(AExpression.Identifier);
+			Append(expression.Identifier);
 		}
 		
-		protected virtual void EmitCaseExpression(CaseExpression AExpression)
+		protected virtual void EmitCaseExpression(CaseExpression expression)
 		{
 			AppendFormat("{0}", "case");
 
-			if (AExpression.Expression != null)
+			if (expression.Expression != null)
 			{
 				Append(" ");
-				EmitExpression(AExpression.Expression);
+				EmitExpression(expression.Expression);
 			}
 			
-			for (int LIndex = 0; LIndex < AExpression.CaseItems.Count; LIndex++)
+			for (int index = 0; index < expression.CaseItems.Count; index++)
 			{
 				AppendFormat(" {0} ", "when");
-				EmitExpression(AExpression.CaseItems[LIndex].WhenExpression);
+				EmitExpression(expression.CaseItems[index].WhenExpression);
 				AppendFormat(" {0} ", "then");
-				EmitExpression(AExpression.CaseItems[LIndex].ThenExpression);
+				EmitExpression(expression.CaseItems[index].ThenExpression);
 			}
 			
-			if (AExpression.ElseExpression != null)
+			if (expression.ElseExpression != null)
 			{
 				AppendFormat(" {0} ", "else");
-				EmitExpression(((CaseElseExpression)AExpression.ElseExpression).Expression);
+				EmitExpression(((CaseElseExpression)expression.ElseExpression).Expression);
 			}
 
 			AppendFormat(" {0}", "end");
 		}
 		
-		protected virtual void EmitStatement(Statement AStatement)
+		protected virtual void EmitStatement(Statement statement)
 		{
-			throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+			throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected override void InternalEmit(Statement AStatement)
+		protected override void InternalEmit(Statement statement)
 		{
-			if (AStatement is Expression)
-				EmitExpression((Expression)AStatement);
-			else if (AStatement is EmptyStatement)
+			if (statement is Expression)
+				EmitExpression((Expression)statement);
+			else if (statement is EmptyStatement)
 			{
 				// do nothing;
 			}
 			else
-				EmitStatement(AStatement);
+				EmitStatement(statement);
 		}
 		
 		protected virtual void EmitListSeparator()

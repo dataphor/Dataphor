@@ -11,11 +11,11 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	{
 		public PostgreSQLConnectionStringBuilder()
 		{
-			FLegend.AddOrUpdate("HostName", "Server");
-			FLegend.AddOrUpdate("UserName", "User Id");
-			FLegend.AddOrUpdate("Password", "Password");
-			FLegend.AddOrUpdate("Database", "Database");
-			FLegend.AddOrUpdate("SearchPath", "SearchPath");			
+			_legend.AddOrUpdate("HostName", "Server");
+			_legend.AddOrUpdate("UserName", "User Id");
+			_legend.AddOrUpdate("Password", "Password");
+			_legend.AddOrUpdate("Database", "Database");
+			_legend.AddOrUpdate("SearchPath", "SearchPath");			
 		}
 	}
 

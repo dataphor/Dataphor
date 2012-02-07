@@ -19,8 +19,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.Controls.LookupPanel),"Icons.LookupPanel.bmp")]
 	public class LookupPanel : LookupBase
 	{
-		public const int CTextOffset = 8;
-		public const int CTextMargin = 2;
+		public const int TextOffset = 8;
+		public const int TextMargin = 2;
 
 		public LookupPanel() : base()
 		{
@@ -44,10 +44,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		public event EventHandler ClearValue;
 		
-		protected virtual void OnClearValue(EventArgs AArgs)
+		protected virtual void OnClearValue(EventArgs args)
 		{
 			if (ClearValue != null)
-				ClearValue(this, AArgs);
+				ClearValue(this, args);
 		}
 		
 		protected void PerformClearValue()
@@ -57,64 +57,64 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		
 		#region Keyboard & Mouse
 
-		protected override void OnClick(EventArgs AArgs)
+		protected override void OnClick(EventArgs args)
 		{
-			base.OnClick(AArgs);
+			base.OnClick(args);
 			Focus();
 		}
 
-		protected override bool ProcessMnemonic(char AChar)
+		protected override bool ProcessMnemonic(char charValue)
 		{
-			if (Control.IsMnemonic(AChar, Text))
+			if (Control.IsMnemonic(charValue, Text))
 			{
 				Focus();
 				return true;
 			}
 			else
-				return base.ProcessMnemonic(AChar);
+				return base.ProcessMnemonic(charValue);
 		}
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
-			if (AKey == (Keys.Control | Keys.Back))
+			if (key == (Keys.Control | Keys.Back))
 			{
 				PerformClearValue();
 				return true;
 			}
 			else
-				return base.ProcessDialogKey(AKey);
+				return base.ProcessDialogKey(key);
 		}
 
-		protected override bool ProcessKeyPreview(ref Message AMessage)
+		protected override bool ProcessKeyPreview(ref Message message)
 		{
 			const int WM_KEYUP = 0x101;
-			if (AMessage.Msg == WM_KEYUP && (((Keys)((int)((long)AMessage.WParam))) | ModifierKeys) == (Keys.Control | Keys.Back))
+			if (message.Msg == WM_KEYUP && (((Keys)((int)((long)message.WParam))) | ModifierKeys) == (Keys.Control | Keys.Back))
 			{
 				PerformClearValue();
 				return true;
 			}
 			else
-				return base.ProcessKeyPreview(ref AMessage);
+				return base.ProcessKeyPreview(ref message);
 		}
 
 		#endregion
 
 		#region Layout
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
-			base.OnLayout(AArgs);
+			base.OnLayout(args);
 
 			// Layout the button
-			Rectangle LBounds = base.DisplayRectangle;
-			int LDeltaY = (Text != String.Empty) ? (Font.Height / 2) + 1 : 0;
+			Rectangle bounds = base.DisplayRectangle;
+			int deltaY = (Text != String.Empty) ? (Font.Height / 2) + 1 : 0;
 			Button.Bounds =
 				new Rectangle
 				(
-					LBounds.Right - (1 + Button.Width),
-					LBounds.Y + LDeltaY,
+					bounds.Right - (1 + Button.Width),
+					bounds.Y + deltaY,
 					Button.Width,
-					LBounds.Height - (LDeltaY + 1)
+					bounds.Height - (deltaY + 1)
 				);
 		}
 
@@ -123,15 +123,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			get
 			{
-				Rectangle LBounds = base.DisplayRectangle;
-				LBounds.Inflate(-2, -2);
-				LBounds.Width -= Button.Width;
+				Rectangle bounds = base.DisplayRectangle;
+				bounds.Inflate(-2, -2);
+				bounds.Width -= Button.Width;
 				if (Text != String.Empty)
 				{
-					LBounds.Y += Font.Height;
-					LBounds.Height -= Font.Height;
+					bounds.Y += Font.Height;
+					bounds.Height -= Font.Height;
 				}
-				return LBounds;
+				return bounds;
 			}
 		}
 
@@ -139,114 +139,114 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Painting
 
-		private static StringFormat FFormat;
+		private static StringFormat _format;
 		private static StringFormat GetFormat()
 		{
-			if (FFormat == null)
+			if (_format == null)
 			{
-				FFormat = new StringFormat(StringFormat.GenericDefault);
-				FFormat.Trimming = StringTrimming.EllipsisWord;
-				FFormat.HotkeyPrefix = System.Drawing.Text.HotkeyPrefix.Show;
+				_format = new StringFormat(StringFormat.GenericDefault);
+				_format.Trimming = StringTrimming.EllipsisWord;
+				_format.HotkeyPrefix = System.Drawing.Text.HotkeyPrefix.Show;
 			}
-			return FFormat;
+			return _format;
 		}
 
-		protected override void OnTextChanged(EventArgs AArgs)
+		protected override void OnTextChanged(EventArgs args)
 		{
-			base.OnTextChanged(AArgs);
+			base.OnTextChanged(args);
 			PerformLayout(this, "Height");
 			Invalidate();
 		}
 
-		protected override void OnLostFocus(EventArgs AArgs)
+		protected override void OnLostFocus(EventArgs args)
 		{
-			base.OnLostFocus(AArgs);
+			base.OnLostFocus(args);
 			InvalidateFocusBorder();
 		}
 
-		protected override void OnGotFocus(EventArgs AArgs)
+		protected override void OnGotFocus(EventArgs args)
 		{
-			base.OnGotFocus(AArgs);
+			base.OnGotFocus(args);
 			InvalidateFocusBorder();
 		}
 
 		protected virtual void InvalidateFocusBorder()
 		{
-			Rectangle LBounds = DisplayRectangle;
-			LBounds.Inflate(1, 1);
-			Region LRegion = new Region(LBounds);
-			LBounds.Inflate(-1, -1);
-			LRegion.Exclude(LBounds);
-			Invalidate(LRegion);
-			LRegion.Dispose();
+			Rectangle bounds = DisplayRectangle;
+			bounds.Inflate(1, 1);
+			Region region = new Region(bounds);
+			bounds.Inflate(-1, -1);
+			region.Exclude(bounds);
+			Invalidate(region);
+			region.Dispose();
 		}
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
-			base.OnPaint(AArgs);
-			Rectangle LBounds = base.DisplayRectangle;
-			LBounds.Height--;
-			LBounds.Width--;
+			base.OnPaint(args);
+			Rectangle bounds = base.DisplayRectangle;
+			bounds.Height--;
+			bounds.Width--;
 
-			int LTextWidth = 0;
+			int textWidth = 0;
 
 			// Paint title
 			if (Text != String.Empty)
 			{
 				// Measure the title
-				StringFormat LFormat = GetFormat();
-				LTextWidth = Size.Ceiling(AArgs.Graphics.MeasureString(Text, Font, LBounds.Width - (CTextOffset * 2), GetFormat())).Width;
+				StringFormat format = GetFormat();
+				textWidth = Size.Ceiling(args.Graphics.MeasureString(Text, Font, bounds.Width - (TextOffset * 2), GetFormat())).Width;
 
 				// Paint the title
-				using (Brush LBrush = new SolidBrush(Enabled ? SystemColors.ControlText : SystemColors.GrayText))
+				using (Brush brush = new SolidBrush(Enabled ? SystemColors.ControlText : SystemColors.GrayText))
 				{
-					AArgs.Graphics.DrawString
+					args.Graphics.DrawString
 					(
 						Text,
 						Font,
-						LBrush,
+						brush,
 						new Rectangle
 						(
-							CTextOffset,
+							TextOffset,
 							0,
-							LTextWidth,
+							textWidth,
 							Font.Height
 						),
-						LFormat
+						format
 					);
 				}
 			}
 
 			// Paint the border
-			using (Pen LPen = new Pen(Enabled ? SystemColors.ControlText : SystemColors.InactiveBorder))
+			using (Pen pen = new Pen(Enabled ? SystemColors.ControlText : SystemColors.InactiveBorder))
 			{
 				if (Text != String.Empty)
 				{
-					int LTopLineY = LBounds.Y + (Font.Height / 2);
-					AArgs.Graphics.DrawLines
+					int topLineY = bounds.Y + (Font.Height / 2);
+					args.Graphics.DrawLines
 					(
-						LPen,
+						pen,
 						new Point[] 
 						{
-							new Point(CTextOffset - CTextMargin, LTopLineY),
-							new Point(LBounds.Left, LTopLineY),
-							new Point(LBounds.Left, LBounds.Bottom),
-							new Point(LBounds.Right, LBounds.Bottom),
-							new Point(LBounds.Right, LTopLineY),
-							new Point(LBounds.Left + CTextOffset + LTextWidth + CTextMargin, LTopLineY)
+							new Point(TextOffset - TextMargin, topLineY),
+							new Point(bounds.Left, topLineY),
+							new Point(bounds.Left, bounds.Bottom),
+							new Point(bounds.Right, bounds.Bottom),
+							new Point(bounds.Right, topLineY),
+							new Point(bounds.Left + TextOffset + textWidth + TextMargin, topLineY)
 						}
 					);
 				}
 				else
-					AArgs.Graphics.DrawRectangle(LPen, LBounds);
+					args.Graphics.DrawRectangle(pen, bounds);
 			}
 
 			// Paint the focus rectangle
 			if (Focused)
 			{
-				LBounds = DisplayRectangle;
-				LBounds.Inflate(1, 1);
-				ControlPaint.DrawFocusRectangle(AArgs.Graphics, LBounds);
+				bounds = DisplayRectangle;
+				bounds.Inflate(1, 1);
+				ControlPaint.DrawFocusRectangle(args.Graphics, bounds);
 			}
 		}
 

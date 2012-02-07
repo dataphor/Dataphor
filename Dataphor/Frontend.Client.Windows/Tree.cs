@@ -18,10 +18,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class Tree : ControlElement, ITree
 	{
-		public const int CMinWidth = 50;
-		public const int CMinHeight = 100;
-		public const int CNaturalWidth = 120;
-		public const int CNaturalHeight = 180;
+		public const int MinWidth = 50;
+		public const int MinHeight = 100;
+		public const int NaturalWidth = 120;
+		public const int NaturalHeight = 180;
 		
 		// TreeViewControl
 
@@ -36,18 +36,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ColumnName
 
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[Description("The name of the column which will be show in the tree.")]
 		public string ColumnName
 		{
-			get { return FColumnName; }
+			get { return _columnName; }
 			set
 			{
-				if (FColumnName != value)
+				if (_columnName != value)
 				{
-					FColumnName = value;
+					_columnName = value;
 					if (Active)
 						InternalUpdateColumnName();
 				}
@@ -65,19 +65,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 		
 		// RootExpression
-		private string FRootExpression = String.Empty;
+		private string _rootExpression = String.Empty;
 		[DefaultValue("")]
 		[Description("The expression defining the root set of nodes to display. The columns in this result must include the order columns for the data source of the tree, and the ColumnName.  The master key and other parameters of the associated DataView are available as variables such as AMasterXXX (where XXX is the name of the detail column with '.'s changed to '_'s).")]
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string RootExpression
 		{
-			get { return FRootExpression; }
+			get { return _rootExpression; }
 			set
 			{
-				if (FRootExpression != value)
+				if (_rootExpression != value)
 				{
-					FRootExpression = ( value == null ? String.Empty : value );
+					_rootExpression = ( value == null ? String.Empty : value );
 					if (Active)
 						InternalUpdateTreeView();
 				}
@@ -85,19 +85,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		// ChildExpression
-		private string FChildExpression = String.Empty;
+		private string _childExpression = String.Empty;
 		[DefaultValue("")]
 		[Description("The expression defining the set of child nodes for a given parent node. The values for the current key are available as variables named ACurrentXXX, where XXX is the name of the key column, within this expression. The columns in this result must include the order columns for the data source of the tree, and the ColumnName.")]
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string ChildExpression
 		{
-			get { return FChildExpression; }
+			get { return _childExpression; }
 			set
 			{
-				if (FChildExpression != value)
+				if (_childExpression != value)
 				{
-					FChildExpression = ( value == null ? String.Empty : value );
+					_childExpression = ( value == null ? String.Empty : value );
 					if (Active)
 						InternalUpdateTreeView();
 				}
@@ -105,19 +105,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		// ParentExpression
-		private string FParentExpression = String.Empty;
+		private string _parentExpression = String.Empty;
 		[DefaultValue("")]
 		[Description("The expression defining the parent node for a given child node. The values for the current key are available as variables named ACurrentXXX, where XXX is the name of the key column, within this expression. The columns in this result must include the order columns for the data source of the tree, and the ColumnName. If this result returns more than one row, only the first row will be used.")]
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string ParentExpression
 		{
-			get { return FParentExpression; }
+			get { return _parentExpression; }
 			set
 			{
-				if (FParentExpression != value)
+				if (_parentExpression != value)
 				{
-					FParentExpression = ( value == null ? String.Empty : value );
+					_parentExpression = ( value == null ? String.Empty : value );
 					if (Active)
 						InternalUpdateTreeView();
 				}
@@ -126,24 +126,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected virtual void InternalUpdateTreeView()
 		{
-			TreeViewControl.RootExpression = FRootExpression;
-			TreeViewControl.ChildExpression = FChildExpression;
-			TreeViewControl.ParentExpression = FParentExpression;
+			TreeViewControl.RootExpression = _rootExpression;
+			TreeViewControl.ChildExpression = _childExpression;
+			TreeViewControl.ParentExpression = _parentExpression;
 		}
 
 		// Width
 
-		private int FWidth = 25;
+		private int _width = 25;
 		[DefaultValue(25)]
 		[Description("Approximate width (in characters) of the control.")]
 		public int Width
 		{
-			get { return FWidth; }
+			get { return _width; }
 			set
 			{
-				if (FWidth != value)
+				if (_width != value)
 				{
-					FWidth = value;
+					_width = value;
 					UpdateLayout();
 				}
 			}
@@ -151,17 +151,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Height
 
-		private int FHeight = 20;
+		private int _height = 20;
 		[DefaultValue(20)]
 		[Description("Height (in rows) of the control.")]
 		public int Height
 		{
-			get { return FHeight; }
+			get { return _height; }
 			set
 			{
-				if (FHeight != value)
+				if (_height != value)
 				{
-					FHeight = value;
+					_height = value;
 					UpdateLayout();
 				}
 			}
@@ -174,14 +174,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return new DAE.Client.Controls.DBTreeView();
 		}
 
-		private int FAverageCharPixelWidth;
+		private int _averageCharPixelWidth;
 
 		protected override void InitializeControl()
 		{
 			Control.BackColor = ((Session)HostNode.Session).Theme.TreeColor;
 			InternalUpdateTreeView();
 			InternalUpdateColumnName();
-			FAverageCharPixelWidth = Element.GetAverageCharPixelWidth(Control);
+			_averageCharPixelWidth = Element.GetAverageCharPixelWidth(Control);
 			base.InitializeControl();
 		}
 
@@ -189,7 +189,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override Size InternalMinSize
 		{
-			get { return new Size(CMinWidth, CMinHeight); }
+			get { return new Size(MinWidth, MinHeight); }
 		}
 		
 		protected override Size InternalMaxSize
@@ -201,12 +201,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get 
 			{ 
-				Size LClientSize = Control.ClientSize;
+				Size clientSize = Control.ClientSize;
 				return
 					new Size
 					(
-						(FAverageCharPixelWidth * FWidth) + (Control.Width - LClientSize.Width) + WinForms.SystemInformation.VerticalScrollBarWidth, 
-						(TreeViewControl.ItemHeight * FHeight) + (Control.Width - LClientSize.Width) + WinForms.SystemInformation.HorizontalScrollBarHeight
+						(_averageCharPixelWidth * _width) + (Control.Width - clientSize.Width) + WinForms.SystemInformation.VerticalScrollBarWidth, 
+						(TreeViewControl.ItemHeight * _height) + (Control.Width - clientSize.Width) + WinForms.SystemInformation.HorizontalScrollBarHeight
 					); 
 			}
 		}

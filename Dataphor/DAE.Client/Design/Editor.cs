@@ -17,16 +17,16 @@ namespace Alphora.Dataphor.DAE.Client.Design
 	[AttributeUsage(AttributeTargets.Property)]
 	public class EditorDocumentTypeAttribute : Attribute
 	{
-		public EditorDocumentTypeAttribute(string ADocumentTypeID)
+		public EditorDocumentTypeAttribute(string documentTypeID)
 		{
-			FDocumentTypeID = ADocumentTypeID;
+			_documentTypeID = documentTypeID;
 		}
 
-		private string FDocumentTypeID;
+		private string _documentTypeID;
 		public string DocumentTypeID
 		{
-			get { return FDocumentTypeID; }
-			set { FDocumentTypeID = value; }
+			get { return _documentTypeID; }
+			set { _documentTypeID = value; }
 		}
 	}
 
@@ -34,154 +34,154 @@ namespace Alphora.Dataphor.DAE.Client.Design
 	/// <summary> Creates a list of available column names if and only if the linked DataSet is active. </summary>
 	public class ColumnNameEditor : UITypeEditor
 	{
-		private IWindowsFormsEditorService FEditorService = null;
+		private IWindowsFormsEditorService _editorService = null;
 
-		protected virtual void SetEditorProperties(ITypeDescriptorContext AContext, ListBox AControl, string AValue)
+		protected virtual void SetEditorProperties(ITypeDescriptorContext context, ListBox control, string tempValue)
 		{
-			AControl.BorderStyle = BorderStyle.None;
-			DataSet LDataSet = DataSet(AContext);
-			if (LDataSet.FieldCount > 0)
+			control.BorderStyle = BorderStyle.None;
+			DataSet dataSet = DataSet(context);
+			if (dataSet.FieldCount > 0)
 			{
-				AControl.Items.Add("(none)");
-				foreach (DataField LField in LDataSet.Fields)
-					AControl.Items.Add(LField.ColumnName);
-				if ((AValue == null) || (AValue == String.Empty))
-					AControl.SelectedIndex = 0;
+				control.Items.Add("(none)");
+				foreach (DataField field in dataSet.Fields)
+					control.Items.Add(field.ColumnName);
+				if ((tempValue == null) || (tempValue == String.Empty))
+					control.SelectedIndex = 0;
 				else
-					AControl.SelectedItem = AValue;
+					control.SelectedItem = tempValue;
 			}			
 		}
 
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	
-			if (AContext != null && AContext.Instance != null && AProvider != null) 
+			if (context != null && context.Instance != null && provider != null) 
 			{
-				FEditorService = (IWindowsFormsEditorService)AProvider.GetService(typeof(IWindowsFormsEditorService));
-				if (FEditorService != null)
+				_editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				if (_editorService != null)
 				{
-					if (DataLinkActive(AContext))
+					if (DataLinkActive(context))
 					{
-						ListBox LListBox = new ListBox();
+						ListBox listBox = new ListBox();
 						try
 						{
-							SetEditorProperties(AContext, LListBox, AValue as string);
-							LListBox.SelectedIndexChanged += new EventHandler(ValueChanged);
-							FEditorService.DropDownControl(LListBox);
-							if (LListBox.SelectedIndex == 0)
-								AValue = String.Empty;
+							SetEditorProperties(context, listBox, tempValue as string);
+							listBox.SelectedIndexChanged += new EventHandler(ValueChanged);
+							_editorService.DropDownControl(listBox);
+							if (listBox.SelectedIndex == 0)
+								tempValue = String.Empty;
 							else
-								AValue = LListBox.SelectedItem;
+								tempValue = listBox.SelectedItem;
 						}
 						finally
 						{
-							LListBox.SelectedIndexChanged -= new EventHandler(ValueChanged);
-							LListBox.Dispose();
+							listBox.SelectedIndexChanged -= new EventHandler(ValueChanged);
+							listBox.Dispose();
 						}
 					}
 				}
 			}
-			return AValue;
+			return tempValue;
 		}
 
-		private void ValueChanged(object ASender, EventArgs AArgs) 
+		private void ValueChanged(object sender, EventArgs args) 
 		{
-			if (FEditorService != null) 
-				FEditorService.CloseDropDown();
+			if (_editorService != null) 
+				_editorService.CloseDropDown();
 		}
 
 		/// <summary> Retrieves the DataSet associated with the property. </summary>
 		/// <remarks> Override this method in derived classes to return a DataSet from which to build the list of column names. </remarks>
-		/// <param name="AContext"> An ITypeDescriptorContext </param>
+		/// <param name="context"> An ITypeDescriptorContext </param>
 		/// <returns> The DataSet from which to build the column names list. </returns>
-		public virtual DataSet DataSet(ITypeDescriptorContext AContext)
+		public virtual DataSet DataSet(ITypeDescriptorContext context)
 		{
 			if
 				(
-					(AContext != null) && 
-					(AContext.Instance != null) &&
-					(AContext.Instance is IDataSourceReference) &&
-					(((IDataSourceReference)AContext.Instance).Source != null)
+					(context != null) && 
+					(context.Instance != null) &&
+					(context.Instance is IDataSourceReference) &&
+					(((IDataSourceReference)context.Instance).Source != null)
 				)
-				return ((IDataSourceReference)AContext.Instance).Source.DataSet;
+				return ((IDataSourceReference)context.Instance).Source.DataSet;
 			return null;
 		}
 
-		protected bool DataLinkActive(ITypeDescriptorContext AContext)
+		protected bool DataLinkActive(ITypeDescriptorContext context)
 		{
-			DataSet LDataSet = DataSet(AContext);
-			return (LDataSet != null) && (LDataSet.Active);		
+			DataSet dataSet = DataSet(context);
+			return (dataSet != null) && (dataSet.Active);		
 		}
 	 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{ 
-			if (DataLinkActive(AContext))
+			if (DataLinkActive(context))
 				return UITypeEditorEditStyle.DropDown;
-			return base.GetEditStyle(AContext);
+			return base.GetEditStyle(context);
 		}
 	}
 
 	/// <summary> Creates a list of available DataSessions by name. </summary>
 	public class SessionEditor : UITypeEditor
 	{
-		private IWindowsFormsEditorService FEditorService = null;
+		private IWindowsFormsEditorService _editorService = null;
 
-		protected virtual void SetEditorProperties(ListBox AControl, string AValue)
+		protected virtual void SetEditorProperties(ListBox control, string tempValue)
 		{
-			AControl.BorderStyle = BorderStyle.None;
+			control.BorderStyle = BorderStyle.None;
 			if (DataSession.Sessions.Count > 0)
 			{
-				AControl.Items.Add("(none)");
+				control.Items.Add("(none)");
 				lock (DataSession.Sessions.SyncRoot)
 				{
-					foreach (DataSession LSession in DataSession.Sessions)
-						AControl.Items.Add(LSession.SessionName);
+					foreach (DataSession session in DataSession.Sessions)
+						control.Items.Add(session.SessionName);
 				}
-				if ((AValue == null) || (AValue == String.Empty))
-					AControl.SelectedIndex = 0;
+				if ((tempValue == null) || (tempValue == String.Empty))
+					control.SelectedIndex = 0;
 				else
-					AControl.SelectedItem = AValue;
+					control.SelectedItem = tempValue;
 			}			
 		}
 
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	
-			if (AContext != null && AContext.Instance != null && AProvider != null) 
+			if (context != null && context.Instance != null && provider != null) 
 			{
-				FEditorService = (IWindowsFormsEditorService)AProvider.GetService(typeof(IWindowsFormsEditorService));
-				if (FEditorService != null)
+				_editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				if (_editorService != null)
 				{
-					ListBox LListBox = new ListBox();
+					ListBox listBox = new ListBox();
 					try
 					{
-						SetEditorProperties(LListBox, AValue as string);
-						LListBox.SelectedIndexChanged += new EventHandler(ValueChanged);
-						FEditorService.DropDownControl(LListBox);
-						if (LListBox.SelectedIndex == 0)
-							AValue = String.Empty;
+						SetEditorProperties(listBox, tempValue as string);
+						listBox.SelectedIndexChanged += new EventHandler(ValueChanged);
+						_editorService.DropDownControl(listBox);
+						if (listBox.SelectedIndex == 0)
+							tempValue = String.Empty;
 						else
-							AValue = LListBox.SelectedItem;
+							tempValue = listBox.SelectedItem;
 					}
 					finally
 					{
-						LListBox.SelectedIndexChanged -= new EventHandler(ValueChanged);
-						LListBox.Dispose();
+						listBox.SelectedIndexChanged -= new EventHandler(ValueChanged);
+						listBox.Dispose();
 					}
 				}
 			}
-			return AValue;
+			return tempValue;
 		}
 
-		private void ValueChanged(object ASender, EventArgs AArgs) 
+		private void ValueChanged(object sender, EventArgs args) 
 		{
-			if (FEditorService != null) 
-				FEditorService.CloseDropDown();
+			if (_editorService != null) 
+				_editorService.CloseDropDown();
 		}
 	 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{ 
-			if (AContext != null && AContext.Instance != null) 
+			if (context != null && context.Instance != null) 
 				return UITypeEditorEditStyle.DropDown;
-			return base.GetEditStyle(AContext);
+			return base.GetEditStyle(context);
 		}
 	}
 	#endif

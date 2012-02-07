@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		/// <summary> Custom paints the form's client area. </summary>
 		/// <returns> True if the painting was handled by this method. </returns>
-		public virtual bool PaintBackground(Control AControl, PaintEventArgs AArgs)
+		public virtual bool PaintBackground(Control control, PaintEventArgs args)
 		{
 			return false;
 		}
@@ -51,178 +51,178 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public Color GradiantBackgroundColor;
 		public float Angle;
 		
-		public override bool PaintBackground(Control AControl, PaintEventArgs AArgs)
+		public override bool PaintBackground(Control control, PaintEventArgs args)
 		{
-			Rectangle LRect = AControl.ClientRectangle;
-			if ((LRect.Width > 0) && (LRect.Height > 0))
-				using (Brush LBrush = new System.Drawing.Drawing2D.LinearGradientBrush(LRect, BackgroundColor, GradiantBackgroundColor, Angle, false))
-					AArgs.Graphics.FillRectangle(LBrush, LRect);
+			Rectangle rect = control.ClientRectangle;
+			if ((rect.Width > 0) && (rect.Height > 0))
+				using (Brush brush = new System.Drawing.Drawing2D.LinearGradientBrush(rect, BackgroundColor, GradiantBackgroundColor, Angle, false))
+					args.Graphics.FillRectangle(brush, rect);
 			return true;
 		}
 	}
 	
 	public class ImageAlignmentTheme : Theme
 	{
-		private int FImageAlpha = 220;
+		private int _imageAlpha = 220;
 		public int ImageAlpha
 		{
-			get { return FImageAlpha; }
-			set { FImageAlpha = value; }
+			get { return _imageAlpha; }
+			set { _imageAlpha = value; }
 		}
 		
-		private System.Drawing.Image FImage;
-		private string FImageFileName;
+		private System.Drawing.Image _image;
+		private string _imageFileName;
 		public string ImageFileName
 		{
-			get { return FImageFileName; }
+			get { return _imageFileName; }
 			set
 			{
-				if (FImageFileName != value)
+				if (_imageFileName != value)
 				{
-					FImageFileName = value;
-					if (FImage != null)
-						FImage.Dispose();
-					FImage = System.Drawing.Image.FromFile(FImageFileName);
-					if (FImage is Bitmap)
-						((Bitmap)FImage).MakeTransparent();
+					_imageFileName = value;
+					if (_image != null)
+						_image.Dispose();
+					_image = System.Drawing.Image.FromFile(_imageFileName);
+					if (_image is Bitmap)
+						((Bitmap)_image).MakeTransparent();
 				}
 			}
 		}
 		
-		private ContentAlignment FImageAlignment = ContentAlignment.BottomRight;
+		private ContentAlignment _imageAlignment = ContentAlignment.BottomRight;
 		public ContentAlignment ImageAlignment
 		{
-			get { return FImageAlignment; }
-			set { FImageAlignment = value; }
+			get { return _imageAlignment; }
+			set { _imageAlignment = value; }
 		}
 		
-		private int FTopMargin = 10;
+		private int _topMargin = 10;
 		public int TopMargin
 		{
-			get { return FTopMargin; }
-			set { FTopMargin = value; }
+			get { return _topMargin; }
+			set { _topMargin = value; }
 		}
 		
-		private int FLeftMargin = 10;
+		private int _leftMargin = 10;
 		public int LeftMargin
 		{
-			get { return FLeftMargin; }
-			set { FLeftMargin = value; }
+			get { return _leftMargin; }
+			set { _leftMargin = value; }
 		}
 		
-		private int FBottomMargin = 10;
+		private int _bottomMargin = 10;
 		public int BottomMargin
 		{
-			get { return FBottomMargin; }
-			set { FBottomMargin = value; }
+			get { return _bottomMargin; }
+			set { _bottomMargin = value; }
 		}
 		
-		private int FRightMargin = 10;
+		private int _rightMargin = 10;
 		public int RightMargin
 		{
-			get { return FRightMargin; }
-			set { FRightMargin = value; }
+			get { return _rightMargin; }
+			set { _rightMargin = value; }
 		}
 		
-		public override bool PaintBackground(Control AControl, PaintEventArgs AArgs)
+		public override bool PaintBackground(Control control, PaintEventArgs args)
 		{
-			if (AControl is IBaseForm)
+			if (control is IBaseForm)
 			{
-				IBaseForm LForm = (IBaseForm)AControl;
-				using (Brush LBrush = new SolidBrush(BackgroundColor))
-					AArgs.Graphics.FillRectangle(LBrush, AArgs.ClipRectangle);
+				IBaseForm form = (IBaseForm)control;
+				using (Brush brush = new SolidBrush(BackgroundColor))
+					args.Graphics.FillRectangle(brush, args.ClipRectangle);
 
-				switch (FImageAlignment)
+				switch (_imageAlignment)
 				{
 					case ContentAlignment.TopLeft:
-						AArgs.Graphics.DrawImageUnscaled
+						args.Graphics.DrawImageUnscaled
 						(
-							FImage,
-							LForm.ClientRectangle.Left + FLeftMargin,
-							LForm.ClientRectangle.Top + FTopMargin
+							_image,
+							form.ClientRectangle.Left + _leftMargin,
+							form.ClientRectangle.Top + _topMargin
 						);
 					break;
 
 					case ContentAlignment.TopCenter:
-						AArgs.Graphics.DrawImageUnscaled
+						args.Graphics.DrawImageUnscaled
 						(
-							FImage,
-							LForm.ClientRectangle.Left + (LForm.ClientRectangle.Width / 2) - (FImage.Size.Width / 2),
-							LForm.ClientRectangle.Top + FTopMargin
+							_image,
+							form.ClientRectangle.Left + (form.ClientRectangle.Width / 2) - (_image.Size.Width / 2),
+							form.ClientRectangle.Top + _topMargin
 						);
 					break;
 
 					case ContentAlignment.TopRight:
-						AArgs.Graphics.DrawImageUnscaled
+						args.Graphics.DrawImageUnscaled
 						(
-							FImage,
-							LForm.ClientRectangle.Right - FImage.Size.Width - FRightMargin,
-							LForm.ClientRectangle.Top + FTopMargin
+							_image,
+							form.ClientRectangle.Right - _image.Size.Width - _rightMargin,
+							form.ClientRectangle.Top + _topMargin
 						);
 					break;
 
 					case ContentAlignment.MiddleLeft:
-						AArgs.Graphics.DrawImageUnscaled
+						args.Graphics.DrawImageUnscaled
 						(
-							FImage,
-							LForm.ClientRectangle.Left + FLeftMargin,
-							LForm.ClientRectangle.Top + (LForm.ClientRectangle.Height / 2) - (FImage.Size.Height / 2)
+							_image,
+							form.ClientRectangle.Left + _leftMargin,
+							form.ClientRectangle.Top + (form.ClientRectangle.Height / 2) - (_image.Size.Height / 2)
 						);
 					break;
 
 					case ContentAlignment.MiddleCenter:
-						AArgs.Graphics.DrawImageUnscaled
+						args.Graphics.DrawImageUnscaled
 						(
-							FImage,
-							LForm.ClientRectangle.Left + (LForm.ClientRectangle.Width / 2) - (FImage.Size.Width / 2),
-							LForm.ClientRectangle.Top + (LForm.ClientRectangle.Height / 2) - (FImage.Size.Height / 2)
+							_image,
+							form.ClientRectangle.Left + (form.ClientRectangle.Width / 2) - (_image.Size.Width / 2),
+							form.ClientRectangle.Top + (form.ClientRectangle.Height / 2) - (_image.Size.Height / 2)
 						);
 					break;
 
 					case ContentAlignment.MiddleRight:
-						AArgs.Graphics.DrawImageUnscaled
+						args.Graphics.DrawImageUnscaled
 						(
-							FImage,
-							LForm.ClientRectangle.Right - FImage.Size.Width - FRightMargin,
-							LForm.ClientRectangle.Top + (LForm.ClientRectangle.Height / 2) - (FImage.Size.Height / 2)
+							_image,
+							form.ClientRectangle.Right - _image.Size.Width - _rightMargin,
+							form.ClientRectangle.Top + (form.ClientRectangle.Height / 2) - (_image.Size.Height / 2)
 						);
 					break;
 
 					case ContentAlignment.BottomLeft:
-						AArgs.Graphics.DrawImageUnscaled
+						args.Graphics.DrawImageUnscaled
 						(
-							FImage,
-							LForm.ClientRectangle.Left + FLeftMargin,
-							LForm.ClientRectangle.Bottom - FImage.Size.Height - (LForm.ClientSize.Height - LForm.ContentPanel.Bottom) - FBottomMargin
+							_image,
+							form.ClientRectangle.Left + _leftMargin,
+							form.ClientRectangle.Bottom - _image.Size.Height - (form.ClientSize.Height - form.ContentPanel.Bottom) - _bottomMargin
 						);
 					break;
 					
 					case ContentAlignment.BottomCenter:
-						AArgs.Graphics.DrawImageUnscaled
+						args.Graphics.DrawImageUnscaled
 						(
-							FImage,
-							LForm.ClientRectangle.Left + (LForm.ClientRectangle.Width / 2) - (FImage.Size.Width / 2),
-							LForm.ClientRectangle.Bottom - FImage.Size.Height - (LForm.ClientSize.Height - LForm.ContentPanel.Bottom) - FBottomMargin
+							_image,
+							form.ClientRectangle.Left + (form.ClientRectangle.Width / 2) - (_image.Size.Width / 2),
+							form.ClientRectangle.Bottom - _image.Size.Height - (form.ClientSize.Height - form.ContentPanel.Bottom) - _bottomMargin
 						);
 					break;
 					
 					case ContentAlignment.BottomRight:
-						AArgs.Graphics.DrawImageUnscaled
+						args.Graphics.DrawImageUnscaled
 						(
-							FImage, 
-							LForm.ClientRectangle.Right - FImage.Size.Width - FRightMargin, 
-							LForm.ClientRectangle.Bottom - FImage.Size.Height - (LForm.ClientSize.Height - LForm.ContentPanel.Bottom) - FBottomMargin
+							_image, 
+							form.ClientRectangle.Right - _image.Size.Width - _rightMargin, 
+							form.ClientRectangle.Bottom - _image.Size.Height - (form.ClientSize.Height - form.ContentPanel.Bottom) - _bottomMargin
 						);
 					break;
 				}
 				
-				using (Brush LBrush = new SolidBrush(Color.FromArgb(FImageAlpha, BackgroundColor)))
-					AArgs.Graphics.FillRectangle(LBrush, AArgs.ClipRectangle);
+				using (Brush brush = new SolidBrush(Color.FromArgb(_imageAlpha, BackgroundColor)))
+					args.Graphics.FillRectangle(brush, args.ClipRectangle);
 
 				return true;
 			}
 			else
-				return base.PaintBackground(AControl, AArgs);
+				return base.PaintBackground(control, args);
 		}
 	}
 }

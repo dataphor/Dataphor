@@ -20,32 +20,32 @@ namespace Alphora.Dataphor.BOP
 		public event DeserializedObjectHandler AfterDeserialized;
 
 		/// <summary> Initializes or creates an instance of an object from a BOP serialized stream. </summary>
-		/// <param name="AInstance"> Instance to initialize.  If null, a new instance is created. </param>
+		/// <param name="instance"> Instance to initialize.  If null, a new instance is created. </param>
 		/// <returns> A new object instance, or the object passed as AInstance </returns>
-		public object Deserialize(Stream AStream, object AInstance)
+		public object Deserialize(Stream stream, object instance)
 		{
-			return Deserialize(XDocument.Load(XmlReader.Create(AStream)), AInstance);
+			return Deserialize(XDocument.Load(XmlReader.Create(stream)), instance);
 		}
 
 		/// <summary> Initializes or creates an instance of an object from a BOP serialized string. </summary>
-		/// <param name="AInstance"> Instance to initialize.  If null, a new instance is created. </param>
+		/// <param name="instance"> Instance to initialize.  If null, a new instance is created. </param>
 		/// <returns> A new object instance, or the object passed as AInstance </returns>
-		public object Deserialize(string AString, object AInstance)
+		public object Deserialize(string stringValue, object instance)
 		{
-			return Deserialize(XDocument.Load(new StringReader(AString)), AInstance);
+			return Deserialize(XDocument.Load(new StringReader(stringValue)), instance);
 		}
 
 		/// <summary> Initializes or creates an instance of an object from a BOP serialized XML document. </summary>
-		/// <param name="AInstance"> Instance to initialize.  If null, a new instance is created. </param>
+		/// <param name="instance"> Instance to initialize.  If null, a new instance is created. </param>
 		/// <returns> A new object instance, or the object passed as AInstance </returns>
-		public virtual object Deserialize(XDocument ADocument, object AInstance)
+		public virtual object Deserialize(XDocument document, object instance)
 		{
 			Errors.Clear();
 
 			BeginFixups();
 			try
 			{
-				return ReadObject(ADocument.Root, AInstance);
+				return ReadObject(document.Root, instance);
 			}
 			finally
 			{
@@ -53,21 +53,21 @@ namespace Alphora.Dataphor.BOP
 			}
 		}
 
-		protected Dictionary<string, object> FInstancesByName;
+		protected Dictionary<string, object> _instancesByName;
 		public Dictionary<string, object> InstancesByName
 		{
-			get { return FInstancesByName; }
+			get { return _instancesByName; }
 		}
 
-		private List<Fixup> FFixups;
+		private List<Fixup> _fixups;
 
 		private class Fixup
 		{
-			public Fixup(string AName, object AInstance, MemberInfo AMember)
+			public Fixup(string name, object instance, MemberInfo member)
 			{
-				Name = AName;
-				Instance = AInstance;
-				Member = AMember;
+				Name = name;
+				Instance = instance;
+				Member = member;
 			}
 			public string Name;
 			public object Instance;
@@ -76,121 +76,121 @@ namespace Alphora.Dataphor.BOP
 
 		private void BeginFixups()
 		{
-			FFixups = new List<Fixup>();
-			FInstancesByName = new Dictionary<string, object>();
+			_fixups = new List<Fixup>();
+			_instancesByName = new Dictionary<string, object>();
 		}
 
 		private void EndFixups()
 		{
-			foreach (Fixup LFixup in FFixups)
+			foreach (Fixup fixup in _fixups)
 			{
 				try
 				{
-					object LInstance;
-					if (!InstancesByName.TryGetValue(LFixup.Name, out LInstance))
-						Errors.Add(new BOPException(BOPException.Codes.ReferenceNotFound, LFixup.Name));
+					object instance;
+					if (!InstancesByName.TryGetValue(fixup.Name, out instance))
+						Errors.Add(new BOPException(BOPException.Codes.ReferenceNotFound, fixup.Name));
 					else
-						ReflectionUtility.SetMemberValue(LFixup.Member, LFixup.Instance, LInstance);
+						ReflectionUtility.SetMemberValue(fixup.Member, fixup.Instance, instance);
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					Errors.Add(LException);
+					Errors.Add(exception);
 				}
 			}
-			FFixups = null;
-			FInstancesByName = null;
+			_fixups = null;
+			_instancesByName = null;
 		}
 
 		/// <summary> Constructs a class type from a name and optionally a namespace/assembly. </summary>
 		/// <remarks> The namespace may also include an assembly name (after a comma). </remarks>
-		protected virtual Type GetClassType(string AClassName, string ANamespace)
+		protected virtual Type GetClassType(string className, string namespaceValue)
 		{
-			string LAssemblyName = "";
-			if (ANamespace != String.Empty)
+			string assemblyName = "";
+			if (namespaceValue != String.Empty)
 			{
-				int LDelimiter = ANamespace.IndexOf(',');	// assembly qualified name if there is a comma
-				if (LDelimiter < 0)
-					LAssemblyName = "";
+				int delimiter = namespaceValue.IndexOf(',');	// assembly qualified name if there is a comma
+				if (delimiter < 0)
+					assemblyName = "";
 				else
 				{
-					LAssemblyName = ANamespace.Substring(LDelimiter + 1).Trim();
-					ANamespace = ANamespace.Substring(0, LDelimiter).Trim();
+					assemblyName = namespaceValue.Substring(delimiter + 1).Trim();
+					namespaceValue = namespaceValue.Substring(0, delimiter).Trim();
 				}
 			}
-			return ReflectionUtility.GetType(ANamespace, AClassName, LAssemblyName);
+			return ReflectionUtility.GetType(namespaceValue, className, assemblyName);
 		}
 
-		private static bool IsBOPNode(XName AName)
+		private static bool IsBOPNode(XName name)
 		{
-			return String.Equals(AName.NamespaceName, CBOPNamespaceURI);
+			return String.Equals(name.NamespaceName, BOPNamespaceURI);
 		}
 
 		/// <summary> Resolve an instance reference. </summary>
 		/// <remarks> If AInstance or AMember are null than fixups will not be performed if the reference is not found. </remarks>
-		private object GetReference(string AName, object AInstance, MemberInfo AMember)
+		private object GetReference(string name, object instance, MemberInfo member)
 		{
-			if (AName == String.Empty)
+			if (name == String.Empty)
 				return null;
 
-			object LValue;
-			if (InstancesByName.TryGetValue(AName, out LValue))
-				return LValue;
+			object tempValue;
+			if (InstancesByName.TryGetValue(name, out tempValue))
+				return tempValue;
 
 			if (FindReference != null)
-				LValue = FindReference(AName);
+				tempValue = FindReference(name);
 
-			if ((LValue == null) && (AInstance != null) && (AMember != null))
-				FFixups.Add(new Fixup(AName, AInstance, AMember));
+			if ((tempValue == null) && (instance != null) && (member != null))
+				_fixups.Add(new Fixup(name, instance, member));
 
-			return LValue;
+			return tempValue;
 		}
 
 		/// <summary> Gets the MemberInfo for the name member of the specified type. </summary>
-		private MemberInfo GetNameMemberInfo(Type AType)
+		private MemberInfo GetNameMemberInfo(Type type)
 		{
-			PublishNameAttribute LPublishName = (PublishNameAttribute)ReflectionUtility.GetAttribute(AType, typeof(PublishNameAttribute));
-			if (LPublishName == null)
+			PublishNameAttribute publishName = (PublishNameAttribute)ReflectionUtility.GetAttribute(type, typeof(PublishNameAttribute));
+			if (publishName == null)
 				return null;
 			else
-				return ReflectionUtility.FindSimpleMember(AType, LPublishName.MemberName);
+				return ReflectionUtility.FindSimpleMember(type, publishName.MemberName);
 		}
 
 		/// <summary> Reads a property value (value type or reference) from the string. </summary>
 		/// <remarks> If AInstance and AMember are null, than fixups will not be performed for references. </remarks>
-		private object AttributeToValue(string AValue, Type AType, object AInstance, MemberInfo AMember)
+		private object AttributeToValue(string tempValue, Type type, object instance, MemberInfo member)
 		{
-			if (IsValueType(AType)) // value types (strings are effectively a value type)
-				return ReflectionUtility.StringToValue(AValue, AType);
-			else if (AType.IsSubclassOf(typeof(Delegate)))
+			if (IsValueType(type)) // value types (strings are effectively a value type)
+				return ReflectionUtility.StringToValue(tempValue, type);
+			else if (type.IsSubclassOf(typeof(Delegate)))
 				throw new BOPException(BOPException.Codes.DelegatesNotSupported);		// TODO: Read delegates
 			else
 			{
 				 // reference type, try a type converter, then assume it is a reference to another object in the tree
 				// Attempt to load the reference using a value converter, maybe it's not a name but a converted value
-				var LConverter = Persistence.GetTypeConverter(AType);
-				if (LConverter != null)
-					return LConverter.ConvertFromString(AValue);
+				var converter = Persistence.GetTypeConverter(type);
+				if (converter != null)
+					return converter.ConvertFromString(tempValue);
 				else
-					return GetReference(AValue, AInstance, AMember);
+					return GetReference(tempValue, instance, member);
 			}
 		}
 
 		/// <summary> Reads the default value for a type's member. </summary>
 		/// <remarks> Throws if no default is provided. </remarks>
-		private static object ReadAttributeDefault(MemberInfo AMember, object AInstance)
+		private static object ReadAttributeDefault(MemberInfo member, object instance)
 		{
-			DefaultValueAttribute LDefaultValue = (DefaultValueAttribute)ReflectionUtility.GetAttribute(AMember, typeof(DefaultValueAttribute));
-			if (LDefaultValue != null)
-				return LDefaultValue.Value;
+			DefaultValueAttribute defaultValue = (DefaultValueAttribute)ReflectionUtility.GetAttribute(member, typeof(DefaultValueAttribute));
+			if (defaultValue != null)
+				return defaultValue.Value;
 
-			if (AInstance != null)
+			if (instance != null)
 			{
-				DefaultValueMemberAttribute LDefaultMember = (DefaultValueMemberAttribute)ReflectionUtility.GetAttribute(AMember, typeof(DefaultValueMemberAttribute));
-				if (LDefaultMember != null)
-					return ReflectionUtility.GetMemberValue(AMember, AInstance);
+				DefaultValueMemberAttribute defaultMember = (DefaultValueMemberAttribute)ReflectionUtility.GetAttribute(member, typeof(DefaultValueMemberAttribute));
+				if (defaultMember != null)
+					return ReflectionUtility.GetMemberValue(member, instance);
 			}
 
-			throw new BOPException(BOPException.Codes.DefaultNotSpecified, AMember.Name, AMember.DeclaringType.Name);
+			throw new BOPException(BOPException.Codes.DefaultNotSpecified, member.Name, member.DeclaringType.Name);
 		}
 
 		/// <summary> Finds the instance for a specific member. </summary>
@@ -202,11 +202,11 @@ namespace Alphora.Dataphor.BOP
 		///	<returns> The instance containing the member named the simple (unqualified) name. </returns>
 		private static object FindMemberInstance(object LInstance, ref string LNamePath)
 		{
-			int LDotPos;
-			while ((LDotPos = LNamePath.IndexOf('.')) >= 0)
+			int dotPos;
+			while ((dotPos = LNamePath.IndexOf('.')) >= 0)
 			{
-				LInstance = ReflectionUtility.GetMemberValue(ReflectionUtility.FindSimpleMember(LInstance.GetType(), LNamePath.Substring(0, LDotPos)), LInstance);
-				LNamePath = LNamePath.Substring(LDotPos + 1);
+				LInstance = ReflectionUtility.GetMemberValue(ReflectionUtility.FindSimpleMember(LInstance.GetType(), LNamePath.Substring(0, dotPos)), LInstance);
+				LNamePath = LNamePath.Substring(dotPos + 1);
 			};
 			return LInstance;
 		}
@@ -216,233 +216,233 @@ namespace Alphora.Dataphor.BOP
 		///		Any constructor arguments are loaded from the specified XML node.  
 		///		The specified node may be altered by this method.  (clone it first if you do not want it affected)
 		///	</remarks>
-		private object ConstructInstance(string ASignature, Type AType, XElement ANode)
+		private object ConstructInstance(string signature, Type type, XElement node)
 		{
 			// Determine the constructor signature
-			string[] LSignatureNames = ASignature.Split(new char[] { ';' });
-			Type[] LSignature = new Type[LSignatureNames.Length];
-			for (int i = LSignature.Length - 1; i >= 0; i--)
-				LSignature[i] = ReflectionUtility.GetType(LSignatureNames[i], AType.Assembly);
+			string[] signatureNames = signature.Split(new char[] { ';' });
+			Type[] localSignature = new Type[signatureNames.Length];
+			for (int i = localSignature.Length - 1; i >= 0; i--)
+				localSignature[i] = ReflectionUtility.GetType(signatureNames[i], type.Assembly);
 
 			// Find the matching constructor
-			ConstructorInfo LConstructor = AType.GetConstructor(LSignature);
-			if (LConstructor == null)
-				throw new BOPException(BOPException.Codes.DefaultConstructorNotFound, ASignature);
+			ConstructorInfo constructor = type.GetConstructor(localSignature);
+			if (constructor == null)
+				throw new BOPException(BOPException.Codes.DefaultConstructorNotFound, signature);
 
-			string LNameMemberName = GetNameMemberName(AType);
+			string nameMemberName = GetNameMemberName(type);
 
 			// Build the constructor's parameter list
-			ParameterInfo[] LParameters = LConstructor.GetParameters();
-			object[] LParameterValues = new object[LParameters.Length];
-			PublishSourceAttribute LSource;
-			for (int i = LParameters.Length - 1; i >= 0; i--)	// order doesn't matter so step down to avoid re-eval of length - 1
+			ParameterInfo[] parameters = constructor.GetParameters();
+			object[] parameterValues = new object[parameters.Length];
+			PublishSourceAttribute source;
+			for (int i = parameters.Length - 1; i >= 0; i--)	// order doesn't matter so step down to avoid re-eval of length - 1
 			{
-				LSource = (PublishSourceAttribute)ReflectionUtility.GetAttribute(LParameters[i], typeof(PublishSourceAttribute));
-				if (LSource == null)
-					throw new BOPException(BOPException.Codes.ConstructorArgumentRefNotSpecified, LParameters[i].Name, AType.FullName);
+				source = (PublishSourceAttribute)ReflectionUtility.GetAttribute(parameters[i], typeof(PublishSourceAttribute));
+				if (source == null)
+					throw new BOPException(BOPException.Codes.ConstructorArgumentRefNotSpecified, parameters[i].Name, type.FullName);
 
-				var LMemberName = LSource.MemberName.ToLower();
-				XAttribute LAttribute = ANode.Attribute(LMemberName);
-				if (LAttribute != null)
+				var memberName = source.MemberName.ToLower();
+				XAttribute attribute = node.Attribute(memberName);
+				if (attribute != null)
 				{
-					LParameterValues[i] = AttributeToValue
+					parameterValues[i] = AttributeToValue
 					(
-						LAttribute.Value,
-						GetMemberType(ANode, ReflectionUtility.FindSimpleMember(AType, LMemberName)),
+						attribute.Value,
+						GetMemberType(node, ReflectionUtility.FindSimpleMember(type, memberName)),
 						null,
 						null
 					);
 
-					LAttribute.Remove();	// remove so we don't read the attribute later
+					attribute.Remove();	// remove so we don't read the attribute later
 				}
 				else  // didn't find a regular attribute, so look for a default tag in the xml
 				{
-					LAttribute = ANode.Attribute(CXmlBOPDefault + LSource.MemberName.ToLower());
-					if (LAttribute != null)
+					attribute = node.Attribute(XmlBOPDefault + source.MemberName.ToLower());
+					if (attribute != null)
 					{
-						LParameterValues[i] = ReadAttributeDefault(ReflectionUtility.FindSimpleMember(AType, LMemberName), null);
-						LAttribute.Remove();
+						parameterValues[i] = ReadAttributeDefault(ReflectionUtility.FindSimpleMember(type, memberName), null);
+						attribute.Remove();
 					}
 					else
 					{
 						// see if the property on the object has a DefaultValueAttribute set
-						DefaultValueAttribute LDefault = (DefaultValueAttribute)ReflectionUtility.GetAttribute(ReflectionUtility.FindSimpleMember(AType, LSource.MemberName), typeof(DefaultValueAttribute));
-						if (LDefault != null)
-							LParameterValues[i] = LDefault.Value;
+						DefaultValueAttribute defaultValue = (DefaultValueAttribute)ReflectionUtility.GetAttribute(ReflectionUtility.FindSimpleMember(type, source.MemberName), typeof(DefaultValueAttribute));
+						if (defaultValue != null)
+							parameterValues[i] = defaultValue.Value;
 						else
-							throw new BOPException(BOPException.Codes.ConstructorArgumentRefNotFound, LSource.MemberName, AType.FullName);
+							throw new BOPException(BOPException.Codes.ConstructorArgumentRefNotFound, source.MemberName, type.FullName);
 					}
 				}
 			}
-			return LConstructor.Invoke(LParameterValues);
+			return constructor.Invoke(parameterValues);
 		}
 
 		/// <summary> Deserializes an instance from a node. </summary>
-		/// <param name="ANode"> The XML node.  This node will not be affected by this method. </param>
-		/// <param name="AInstance"> An optional instance to deserialize "into". </param>
+		/// <param name="node"> The XML node.  This node will not be affected by this method. </param>
+		/// <param name="instance"> An optional instance to deserialize "into". </param>
 		/// <returns> The instance that was passed by AInstance or was constructed if null was passed. </returns>
-		private object ReadObject(XElement ANode, object AInstance)
+		private object ReadObject(XElement node, object instance)
 		{
-			string LElementName = ANode.Name.LocalName.Substring(ANode.Name.LocalName.LastIndexOf('.') + 1).ToLower();	// simple type name
+			string elementName = node.Name.LocalName.Substring(node.Name.LocalName.LastIndexOf('.') + 1).ToLower();	// simple type name
 
-			Type LType;
+			Type type;
 
-			if (AInstance != null)	// instance provided
+			if (instance != null)	// instance provided
 			{
-				LType = AInstance.GetType();
-				string LTypeName = GetElementName(LType);	// result is lower case
-				if (LElementName != LTypeName)
-					Errors.Add(new BOPException(BOPException.Codes.TypeNameMismatch, LElementName, LTypeName));
+				type = instance.GetType();
+				string typeName = GetElementName(type);	// result is lower case
+				if (elementName != typeName)
+					Errors.Add(new BOPException(BOPException.Codes.TypeNameMismatch, elementName, typeName));
 			}
 			else	// construct instance
 			{
-				LType = GetClassType(LElementName, ANode.Name.NamespaceName);
+				type = GetClassType(elementName, node.Name.NamespaceName);
 				
 				try
 				{
-					if (!IsValueType(LType))
+					if (!IsValueType(type))
 					{
-						PublishDefaultConstructorAttribute LConstructorAttribute = (PublishDefaultConstructorAttribute)ReflectionUtility.GetAttribute(LType, typeof(PublishDefaultConstructorAttribute));
-						if ((LConstructorAttribute == null) || (LConstructorAttribute.ConstructorSignature == String.Empty))
-							AInstance = Activator.CreateInstance(LType, new object[] { });
+						PublishDefaultConstructorAttribute constructorAttribute = (PublishDefaultConstructorAttribute)ReflectionUtility.GetAttribute(type, typeof(PublishDefaultConstructorAttribute));
+						if ((constructorAttribute == null) || (constructorAttribute.ConstructorSignature == String.Empty))
+							instance = Activator.CreateInstance(type, new object[] { });
 						else
 						{
 							// create a copy of the node to work with
 							// so that the original is not corrupted by disappearing attributes
-							ANode = new XElement(ANode);
-							AInstance = ConstructInstance(LConstructorAttribute.ConstructorSignature, LType, ANode);
+							node = new XElement(node);
+							instance = ConstructInstance(constructorAttribute.ConstructorSignature, type, node);
 						}
 					}
 					else
 					{
-						return ReflectionUtility.StringToValue(ANode.Attribute("value").Value, LType);
+						return ReflectionUtility.StringToValue(node.Attribute("value").Value, type);
 					}
 				}
 				catch (Exception E)
 				{
-					throw new BOPException(BOPException.Codes.UnableToConstruct, E, LType.FullName);
+					throw new BOPException(BOPException.Codes.UnableToConstruct, E, type.FullName);
 				}
 			}
 
-			MemberInfo LMember;
-			object LMemberInstance;
-			string LMemberName;
-			Type LMemberType;
+			MemberInfo member;
+			object memberInstance;
+			string memberName;
+			Type memberType;
 
 			// Have Type and Instance, now read the properties
 			try
 			{
 
 				// Read attributes
-				foreach (XAttribute LAttribute in ANode.Attributes())
+				foreach (XAttribute attribute in node.Attributes())
 				{
 					try
 					{
-						LMemberName = LAttribute.Name.LocalName.ToLower();
+						memberName = attribute.Name.LocalName.ToLower();
 						if
 						(
-							(!LAttribute.IsNamespaceDeclaration)
+							(!attribute.IsNamespaceDeclaration)
 								&& 
 								!(
-									IsBOPNode(LAttribute.Name) 
-										&& (LMemberName.StartsWith(CBOPType) || LMemberName.StartsWith(CBOPDefault))
+									IsBOPNode(attribute.Name) 
+										&& (memberName.StartsWith(BOPType) || memberName.StartsWith(BOPDefault))
 								)
 						)
 						{
-							if (IsBOPNode(LAttribute.Name))
+							if (IsBOPNode(attribute.Name))
 							{
-								LMemberInstance = AInstance;
-								if (Persistence.XNamesEqual(LAttribute.Name, CXmlBOPName))
+								memberInstance = instance;
+								if (Persistence.XNamesEqual(attribute.Name, XmlBOPName))
 								{
-									LMember = GetNameMemberInfo(LType);
-									if (LMember == null)
-										throw new BOPException(BOPException.Codes.InvalidElementName, LType.Name);
+									member = GetNameMemberInfo(type);
+									if (member == null)
+										throw new BOPException(BOPException.Codes.InvalidElementName, type.Name);
 								}
 								else
-									throw new BOPException(BOPException.Codes.InvalidAttribute, LAttribute.Name);
+									throw new BOPException(BOPException.Codes.InvalidAttribute, attribute.Name);
 							}
 							else
 							{
-								LMemberInstance = FindMemberInstance(AInstance, ref LMemberName);
-								LMember = ReflectionUtility.FindSimpleMember(LMemberInstance.GetType(), LMemberName);
+								memberInstance = FindMemberInstance(instance, ref memberName);
+								member = ReflectionUtility.FindSimpleMember(memberInstance.GetType(), memberName);
 							}
-							LMemberType = GetMemberType(ANode, LMember);
+							memberType = GetMemberType(node, member);
 
 							ReflectionUtility.SetMemberValue
 							(
-								LMember,
-								LMemberInstance,
+								member,
+								memberInstance,
 								(
 									AttributeToValue
 									(
-										LAttribute.Value,
-										LMemberType,
-										LMemberInstance,
-										LMember
+										attribute.Value,
+										memberType,
+										memberInstance,
+										member
 									)
 								)
 							);
 						}
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						Errors.Add(LException);
+						Errors.Add(exception);
 					}
 				}
 
 				// Add this instance to the list of read instances if it has a name
-				LMember = GetNameMemberInfo(AInstance.GetType());
-				if (LMember != null)
+				member = GetNameMemberInfo(instance.GetType());
+				if (member != null)
 				{
-					LMemberName = (string)ReflectionUtility.GetMemberValue(LMember, AInstance);
-					if (LMemberName != String.Empty)
-						InstancesByName.Add(LMemberName, AInstance);
+					memberName = (string)ReflectionUtility.GetMemberValue(member, instance);
+					if (memberName != String.Empty)
+						InstancesByName.Add(memberName, instance);
 				}
 
 				// read child nodes
-				IList LList;
-				foreach (XElement LNode in ANode.Elements())
+				IList list;
+				foreach (XElement localNode in node.Elements())
 				{
 					try
 					{
-						LMemberName = LNode.Name.LocalName.ToLower();
-						LMemberInstance = FindMemberInstance(AInstance, ref LMemberName);
+						memberName = localNode.Name.LocalName.ToLower();
+						memberInstance = FindMemberInstance(instance, ref memberName);
 
 						// First see if the member instance has a default list attribute and use it if it does
-						string LDefaultListName = GetDefaultListMemberName(LMemberInstance.GetType());
-						if (LDefaultListName == String.Empty)
-							LList = LMemberInstance as IList;
+						string defaultListName = GetDefaultListMemberName(memberInstance.GetType());
+						if (defaultListName == String.Empty)
+							list = memberInstance as IList;
 						else // if no default list, assume the member instance IS the list
-							LList = ReflectionUtility.GetMemberValue
+							list = ReflectionUtility.GetMemberValue
 							(
-								ReflectionUtility.FindSimpleMember(LMemberInstance.GetType(), LDefaultListName),
-								LMemberInstance
+								ReflectionUtility.FindSimpleMember(memberInstance.GetType(), defaultListName),
+								memberInstance
 							) as IList;
-						if (LList == null)
-							throw new BOPException(BOPException.Codes.DefaultListNotFound, LMemberInstance.GetType().Name);
-						LList.Add(ReadObject(LNode, null));
+						if (list == null)
+							throw new BOPException(BOPException.Codes.DefaultListNotFound, memberInstance.GetType().Name);
+						list.Add(ReadObject(localNode, null));
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						Errors.Add(LException);
+						Errors.Add(exception);
 					}
 				}
 
 				// call AfterDeserialize
-				if (AInstance is IBOPSerializationEvents)
-					((IBOPSerializationEvents)AInstance).AfterDeserialize(this);
+				if (instance is IBOPSerializationEvents)
+					((IBOPSerializationEvents)instance).AfterDeserialize(this);
 
 				if (AfterDeserialized != null)
-					AfterDeserialized(AInstance);
+					AfterDeserialized(instance);
 			}
 			catch
 			{
-				if ((AInstance != null) && (AInstance is IDisposable))
-					((IDisposable)AInstance).Dispose();
+				if ((instance != null) && (instance is IDisposable))
+					((IDisposable)instance).Dispose();
 				throw;
 			}
 
-			return AInstance;
+			return instance;
 		}
 	}
 }

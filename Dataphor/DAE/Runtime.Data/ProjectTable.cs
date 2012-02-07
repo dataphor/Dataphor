@@ -26,78 +26,78 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     /// </remarks>    
     public class ProjectTable : Table
     {
-        public ProjectTable(ProjectNodeBase ANode, Program AProgram) : base(ANode, AProgram){}
+        public ProjectTable(ProjectNodeBase node, Program program) : base(node, program){}
         
         public new ProjectNodeBase Node
         {
             get
             {
-                return (ProjectNodeBase)FNode;
+                return (ProjectNodeBase)_node;
             }
         }
         
         // SourceTable
-        protected Table FSourceTable;
-        protected Row FSourceRow;
-        protected Row FCurrentRow;
-        protected Row FLastRow;
+        protected Table _sourceTable;
+        protected Row _sourceRow;
+        protected Row _currentRow;
+        protected Row _lastRow;
         
-        protected bool FCrack;
+        protected bool _crack;
         
         // Table Support
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Program);
-			FSourceRow = new Row(Manager, ((Schema.TableType)Node.DataType).RowType); // Prepare the row on the projected nodes, the select will only fill in what it can
+			_sourceTable = (Table)Node.Nodes[0].Execute(Program);
+			_sourceRow = new Row(Manager, ((Schema.TableType)Node.DataType).RowType); // Prepare the row on the projected nodes, the select will only fill in what it can
 			if (Node.DistinctRequired)
 			{
-				FCurrentRow = new Row(Manager, Node.DataType.RowType);
-				FLastRow = new Row(Manager, Node.DataType.RowType);
-				FCrack = true;
+				_currentRow = new Row(Manager, Node.DataType.RowType);
+				_lastRow = new Row(Manager, Node.DataType.RowType);
+				_crack = true;
 			}
         }
         
         protected override void InternalClose()
         {
-            if (FSourceTable != null)
+            if (_sourceTable != null)
             {
-				FSourceTable.Dispose();
-                FSourceTable = null;
+				_sourceTable.Dispose();
+                _sourceTable = null;
             }
             
-            if (FSourceRow != null)
+            if (_sourceRow != null)
 			{
-				FSourceRow.Dispose();
-                FSourceRow = null;
+				_sourceRow.Dispose();
+                _sourceRow = null;
 			}
             
-            if (FCurrentRow != null)
+            if (_currentRow != null)
 			{
-				FCurrentRow.Dispose();
-				FCurrentRow = null;
+				_currentRow.Dispose();
+				_currentRow = null;
 			}
             
-            if (FLastRow != null)
+            if (_lastRow != null)
             {
-				FLastRow.Dispose();
-				FLastRow = null;
+				_lastRow.Dispose();
+				_lastRow = null;
             }
         }
         
         protected override void InternalReset()
         {
-            FSourceTable.Reset();
+            _sourceTable.Reset();
             if (Node.DistinctRequired)
 			{
-				FCrack = true;
-                FLastRow.ClearValues();
+				_crack = true;
+                _lastRow.ClearValues();
             }
         }
         
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-			FSourceTable.Select(FSourceRow);
-			FSourceRow.CopyTo(ARow);
+			_sourceTable.Select(_sourceRow);
+			_sourceRow.CopyTo(row);
         }
     
         protected override bool InternalNext()
@@ -106,23 +106,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             {
 				while (true)
 				{
-					if (FSourceTable.Next())
+					if (_sourceTable.Next())
 					{
-						FSourceTable.Select(FCurrentRow);
-						if (FCrack)
+						_sourceTable.Select(_currentRow);
+						if (_crack)
 						{
-							FCrack = false;
+							_crack = false;
 							break;
 						}
 						
-						Program.Stack.Push(FCurrentRow);
+						Program.Stack.Push(_currentRow);
 						try
 						{
-							Program.Stack.Push(FLastRow);
+							Program.Stack.Push(_lastRow);
 							try
 							{
-								object LEqual = Node.EqualNode.Execute(Program);
-								if ((LEqual == null) || !(bool)LEqual)
+								object equal = Node.EqualNode.Execute(Program);
+								if ((equal == null) || !(bool)equal)
 									break;
 							}
 							finally
@@ -137,37 +137,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 					else
 					{
-						FCrack = true;
-						FLastRow.ClearValues();
+						_crack = true;
+						_lastRow.ClearValues();
 						return false;
 					}
 				}
 
-				FCurrentRow.CopyTo(FLastRow);            
+				_currentRow.CopyTo(_lastRow);            
 				return true;
             }
             else
-                return FSourceTable.Next();
+                return _sourceTable.Next();
         }
         
         protected override void InternalLast()
         {
-            FSourceTable.Last();
+            _sourceTable.Last();
             if (Node.DistinctRequired)
             {
-                FLastRow.ClearValues();
-                FCrack = true;
+                _lastRow.ClearValues();
+                _crack = true;
             }
         }
         
         protected override bool InternalBOF()
         {
-            return FSourceTable.BOF();
+            return _sourceTable.BOF();
         }
         
         protected override bool InternalEOF()
         {
-            return FSourceTable.EOF();
+            return _sourceTable.EOF();
         }
     }
 }

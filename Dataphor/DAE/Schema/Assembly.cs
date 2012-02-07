@@ -14,72 +14,72 @@ namespace Alphora.Dataphor.DAE.Schema
 {
 	public class RegisteredAssembly : System.Object
 	{
-		public RegisteredAssembly(Assembly AAssembly, LoadedLibrary ALibrary) : base()
+		public RegisteredAssembly(Assembly assembly, LoadedLibrary library) : base()
 		{
-			FName = AAssembly.FullName;
-			FAssembly = AAssembly;
-			FLibrary = ALibrary;
+			_name = assembly.FullName;
+			_assembly = assembly;
+			_library = library;
 		}
 		
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 		
 		[Reference]
-		private Assembly FAssembly;
-		public Assembly Assembly { get { return FAssembly; } }
+		private Assembly _assembly;
+		public Assembly Assembly { get { return _assembly; } }
 		
 		[Reference]
-		private LoadedLibrary FLibrary;
-		public LoadedLibrary Library { get { return FLibrary; } }
+		private LoadedLibrary _library;
+		public LoadedLibrary Library { get { return _library; } }
 		
 		public override int GetHashCode()
 		{
-			return FName.GetHashCode();
+			return _name.GetHashCode();
 		}
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			RegisteredAssembly LObject = AObject as RegisteredAssembly;
-			return LObject != null && FName.Equals(LObject.Name);
+			RegisteredAssembly localObjectValue = objectValue as RegisteredAssembly;
+			return localObjectValue != null && _name.Equals(localObjectValue.Name);
 		}
 	}
 	
 	public class RegisteredAssemblies : List<RegisteredAssembly>
 	{
-		public RegisteredAssembly this[string AName] { get { return this[IndexOf(AName)]; } }
+		public RegisteredAssembly this[string name] { get { return this[IndexOf(name)]; } }
 		
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Equals(AName, this[LIndex].Name, StringComparison.OrdinalIgnoreCase))
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (String.Equals(name, this[index].Name, StringComparison.OrdinalIgnoreCase))
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 	}
 	
 	public class RegisteredClass : Schema.Object
 	{
-		public RegisteredClass(string AName, LoadedLibrary ALibrary, RegisteredAssembly AAssembly, string AClassName) : base(AName) 
+		public RegisteredClass(string name, LoadedLibrary library, RegisteredAssembly assembly, string className) : base(name) 
 		{
-			FLibrary = ALibrary;
-			FAssembly = AAssembly;
-			FClassName = AClassName;
+			_library = library;
+			_assembly = assembly;
+			_className = className;
 		}
 		
 		[Reference]
-		private RegisteredAssembly FAssembly;
-		public RegisteredAssembly Assembly { get { return FAssembly; } }
+		private RegisteredAssembly _assembly;
+		public RegisteredAssembly Assembly { get { return _assembly; } }
 		
-		private string FClassName;
+		private string _className;
 		public string ClassName 
 		{
-			get { return FClassName; } 
-			set { FClassName = value; }
+			get { return _className; } 
+			set { _className = value; }
 		}
 	}
 	
@@ -87,29 +87,29 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public RegisteredClasses() : base() {}
 		
-		public new RegisteredClass this[int AIndex]
+		public new RegisteredClass this[int index]
 		{
-			get { return (RegisteredClass)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (RegisteredClass)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public new RegisteredClass this[string AName]
+		public new RegisteredClass this[string name]
 		{
 			get 
 			{ 
-				int LIndex = IndexOf(AName);
-				if (LIndex >= 0)
-					return this[LIndex];
+				int index = IndexOf(name);
+				if (index >= 0)
+					return this[index];
 				else
-					throw new SchemaException(SchemaException.Codes.RegisteredClassNotFound, AName);
+					throw new SchemaException(SchemaException.Codes.RegisteredClassNotFound, name);
 			}
 			set 
 			{ 
-				int LIndex = IndexOf(AName);
-				if (LIndex >= 0)
-					this[LIndex] = value;
+				int index = IndexOf(name);
+				if (index >= 0)
+					this[index] = value;
 				else
-					throw new SchemaException(SchemaException.Codes.RegisteredClassNotFound, AName);
+					throw new SchemaException(SchemaException.Codes.RegisteredClassNotFound, name);
 			}
 		}
 	}

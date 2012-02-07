@@ -23,9 +23,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(TimeProperty, value); }
 		}
 		
-		private static void TimeChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void TimeChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			((ScheduleTimeBlock)ASender).UpdateIsHourMarker();
+			((ScheduleTimeBlock)sender).UpdateIsHourMarker();
 		}
 
 		private void UpdateIsHourMarker()
@@ -114,12 +114,12 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			if (value != null && value is DateTime)
 			{
-				var LValue = (DateTime)value;
-				switch (LValue.Hour)
+				var tempValue = (DateTime)value;
+				switch (tempValue.Hour)
 				{
 					case 0 : return "12m";
 					case 12 : return "12n";
-					default : return LValue.Hour < 12 ? (LValue.Hour.ToString() + "am") : ((LValue.Hour - 12).ToString() + "pm");
+					default : return tempValue.Hour < 12 ? (tempValue.Hour.ToString() + "am") : ((tempValue.Hour - 12).ToString() + "pm");
 				}
 			}
 			else

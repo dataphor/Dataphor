@@ -19,37 +19,37 @@ namespace Alphora.Dataphor.DAE.Store
 {
 	public class SQLStoreCounter
 	{
-		public SQLStoreCounter(string AOperation, string ATableName, string AIndexName, bool AIsMatched, bool AIsRanged, bool AIsUpdatable, TimeSpan ADuration)
+		public SQLStoreCounter(string operation, string tableName, string indexName, bool isMatched, bool isRanged, bool isUpdatable, TimeSpan duration)
 		{
-			FOperation = AOperation;
-			FTableName = ATableName;
-			FIndexName = AIndexName;
-			FIsMatched = AIsMatched;
-			FIsRanged = AIsRanged;
-			FIsUpdatable = AIsUpdatable;
-			FDuration = ADuration;
+			_operation = operation;
+			_tableName = tableName;
+			_indexName = indexName;
+			_isMatched = isMatched;
+			_isRanged = isRanged;
+			_isUpdatable = isUpdatable;
+			_duration = duration;
 		}
 		
-		private string FOperation;
-		public string Operation { get { return FOperation; } }
+		private string _operation;
+		public string Operation { get { return _operation; } }
 		
-		private string FTableName;
-		public string TableName { get { return FTableName; } }
+		private string _tableName;
+		public string TableName { get { return _tableName; } }
 		
-		private string FIndexName;
-		public string IndexName { get { return FIndexName; } }
+		private string _indexName;
+		public string IndexName { get { return _indexName; } }
 		
-		private bool FIsMatched;
-		public bool IsMatched { get { return FIsMatched; } }
+		private bool _isMatched;
+		public bool IsMatched { get { return _isMatched; } }
 		
-		private bool FIsRanged;
-		public bool IsRanged { get { return FIsRanged; } }
+		private bool _isRanged;
+		public bool IsRanged { get { return _isRanged; } }
 		
-		private bool FIsUpdatable;
-		public bool IsUpdatable { get { return FIsUpdatable; } }
+		private bool _isUpdatable;
+		public bool IsUpdatable { get { return _isUpdatable; } }
 		
-		private TimeSpan FDuration;
-		public TimeSpan Duration { get { return FDuration; } }
+		private TimeSpan _duration;
+		public TimeSpan Duration { get { return _duration; } }
 	}
 	
 	public class SQLStoreCounters : List<SQLStoreCounter> {}

@@ -22,22 +22,21 @@ namespace Alphora.Dataphor.DAE.Service
 
 	public class DataphorServiceHost
 	{
-		private Server FServer;
+		private Server _server;
 		/// <summary>
 		/// Provides in-process access to the hosted server
 		/// </summary>
-		public IServer Server { get { return FServer; } }
+		public IServer Server { get { return _server; } }
 		
-		private RemoteServer FRemoteServer;
-		private DataphorService FService;
-		private ServiceHost FServiceHost;
-		private NativeServer FNativeServer;
-		private NativeCLIService FNativeService;
-		private ServiceHost FNativeServiceHost;
-		private ListenerServiceHost FListenerServiceHost;
-		private CrossDomainServiceHost FCrossDomainServiceHost;
-		
-		public bool IsActive { get { return FServer != null; } }
+		private RemoteServer _remoteServer;
+		private DataphorService _service;
+		private ServiceHost _serviceHost;
+		private NativeServer _nativeServer;
+		private NativeCLIService _nativeService;
+		private ServiceHost _nativeServiceHost;
+		private ListenerServiceHost _listenerServiceHost;
+				
+		public bool IsActive { get { return _server != null; } }
 		
 		private void CheckInactive()
 		{
@@ -51,14 +50,14 @@ namespace Alphora.Dataphor.DAE.Service
 				throw new ServerException(ServerException.Codes.ServiceInactive);
 		}
 		
-		private string FInstanceName;
+		private string _instanceName;
 		public string InstanceName
 		{
-			get { return FInstanceName; }
+			get { return _instanceName; }
 			set
 			{
 				CheckInactive();
-				FInstanceName = value;
+				_instanceName = value;
 			}
 		}
 		
@@ -70,90 +69,65 @@ namespace Alphora.Dataphor.DAE.Service
 				{
 					InstanceManager.Load();
 					
-					ServerConfiguration LInstance = InstanceManager.Instances[FInstanceName];
-					if (LInstance == null)
+					ServerConfiguration instance = InstanceManager.Instances[_instanceName];
+					if (instance == null)
 					{
 						// Establish a default configuration
-						LInstance = ServerConfiguration.DefaultInstance(FInstanceName);
-						InstanceManager.Instances.Add(LInstance);
+						instance = ServerConfiguration.DefaultInstance(_instanceName);
+						InstanceManager.Instances.Add(instance);
 						InstanceManager.Save();
 					}
 					
-					FServer = new Server();
-					LInstance.ApplyTo(FServer);
-					FRemoteServer = new RemoteServer(FServer);
-					FNativeServer = new NativeServer(FServer);
-					FServer.Start();
+					_server = new Server();
+					instance.ApplyTo(_server);
+					_remoteServer = new RemoteServer(_server);
+					_nativeServer = new NativeServer(_server);
+					_server.Start();
 					try
 					{
-						FServer.LogMessage("Creating WCF Service...");
-						FService = new DataphorService(FRemoteServer);
+						_server.LogMessage("Creating WCF Service...");
+						_service = new DataphorService(_remoteServer);
 						
-						FServer.LogMessage("Creating Native CLI Service...");
-						FNativeService = new NativeCLIService(FNativeServer);
+						_server.LogMessage("Creating Native CLI Service...");
+						_nativeService = new NativeCLIService(_nativeServer);
 
 						// TODO: Enable configuration of endpoints through instances or app.config files
-						FServer.LogMessage("Configuring Service Host...");
-						FServiceHost = new ServiceHost(FService);
+						_server.LogMessage("Configuring Service Host...");
+						_serviceHost = new ServiceHost(_service);
 						
-						if (!LInstance.RequireSecureConnection)
-							FServiceHost.AddServiceEndpoint
-							(
-								typeof(IDataphorService), 
-								DataphorServiceUtility.GetBinding(false), 
-								DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, LInstance.PortNumber, false, LInstance.Name)
-							);
-
-						FServiceHost.AddServiceEndpoint
+						_serviceHost.AddServiceEndpoint
 						(
 							typeof(IDataphorService), 
-							DataphorServiceUtility.GetBinding(true), 
-							DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, LInstance.SecurePortNumber, true, LInstance.Name)
+							DataphorServiceUtility.GetBinding(), 
+							DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, instance.PortNumber, instance.Name)
 						);
 
-						FServer.LogMessage("Opening Service Host...");
-						FServiceHost.Open();
+						_server.LogMessage("Opening Service Host...");
+						_serviceHost.Open();
 						
-						FServer.LogMessage("Configuring Native CLI Service Host...");
-						FNativeServiceHost = new ServiceHost(FNativeService);
+						_server.LogMessage("Configuring Native CLI Service Host...");
+						_nativeServiceHost = new ServiceHost(_nativeService);
 						
-						if (!LInstance.RequireSecureConnection)
-							FNativeServiceHost.AddServiceEndpoint
-							(
-								typeof(INativeCLIService),
-								DataphorServiceUtility.GetBinding(false), 
-								DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, LInstance.PortNumber, false, LInstance.Name)
-							);
-						
-						FNativeServiceHost.AddServiceEndpoint
+						_nativeServiceHost.AddServiceEndpoint
 						(
 							typeof(INativeCLIService),
-							DataphorServiceUtility.GetBinding(true), 
-							DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, LInstance.SecurePortNumber, true, LInstance.Name)
+							DataphorServiceUtility.GetBinding(), 
+							DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, instance.PortNumber, instance.Name)
 						);
 					
-						FServer.LogMessage("Opening Native CLI Service Host...");
-						FNativeServiceHost.Open();
+						_server.LogMessage("Opening Native CLI Service Host...");
+						_nativeServiceHost.Open();
 						
 						// Start the listener
-						if (LInstance.ShouldListen)
+						if (instance.ShouldListen)
 						{
-							FServer.LogMessage("Starting Listener Service...");
-							FListenerServiceHost = new ListenerServiceHost(LInstance.OverrideListenerPortNumber, LInstance.OverrideSecureListenerPortNumber, LInstance.RequireSecureListenerConnection, LInstance.AllowSilverlightClients);
-						}
-						
-						// Start the CrossDomainServer
-						// This is required in order to serve a ClientAccessPolicy to enable cross-domain access in a sliverlight application.
-						// Without this, the Silverlight client will not work correctly.
-						if (LInstance.AllowSilverlightClients)
-						{
-							FServer.LogMessage("Starting Cross Domain Service...");
-							FCrossDomainServiceHost = new CrossDomainServiceHost(Environment.MachineName, LInstance.PortNumber, LInstance.SecurePortNumber, LInstance.RequireSecureConnection);
-						}
+							_server.LogMessage("Starting Listener Service...");
+							_listenerServiceHost = new ListenerServiceHost(instance.OverrideListenerPortNumber, instance.RequireSecureListenerConnection, instance.AllowSilverlightClients);
+						}							
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						FServer.LogError(LException);
+						_server.LogError(exception);
 						throw;
 					}
 				}
@@ -167,48 +141,42 @@ namespace Alphora.Dataphor.DAE.Service
 		
 		public void Stop()
 		{
-			if (FCrossDomainServiceHost != null)
+			if (_listenerServiceHost != null)
 			{
-				FCrossDomainServiceHost.Dispose();
-				FCrossDomainServiceHost = null;
+				_listenerServiceHost.Dispose();
+				_listenerServiceHost = null;
 			}
 			
-			if (FListenerServiceHost != null)
+			if (_nativeServiceHost != null)
 			{
-				FListenerServiceHost.Dispose();
-				FListenerServiceHost = null;
+				if (_nativeServiceHost.State != CommunicationState.Faulted)
+					_nativeServiceHost.BeginClose(null, null);
+				_nativeServiceHost = null;
 			}
 			
-			if (FNativeServiceHost != null)
+			if (_serviceHost != null)
 			{
-				if (FNativeServiceHost.State != CommunicationState.Faulted)
-					FNativeServiceHost.BeginClose(null, null);
-				FNativeServiceHost = null;
+				if (_serviceHost.State != CommunicationState.Faulted)
+					_serviceHost.BeginClose(null, null);
+				_serviceHost = null;
 			}
 			
-			if (FServiceHost != null)
+			if (_service != null)
 			{
-				if (FServiceHost.State != CommunicationState.Faulted)
-					FServiceHost.BeginClose(null, null);
-				FServiceHost = null;
+				_service.Dispose();
+				_service = null;
 			}
 			
-			if (FService != null)
+			if (_remoteServer != null)
 			{
-				FService.Dispose();
-				FService = null;
+				_remoteServer.Dispose();
+				_remoteServer = null;
 			}
 			
-			if (FRemoteServer != null)
+			if (_server != null)
 			{
-				FRemoteServer.Dispose();
-				FRemoteServer = null;
-			}
-			
-			if (FServer != null)
-			{
-				FServer.Stop();
-				FServer = null;
+				_server.Stop();
+				_server = null;
 			}
 		}
 	}

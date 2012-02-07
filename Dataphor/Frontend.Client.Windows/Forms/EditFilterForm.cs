@@ -119,13 +119,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 		#endregion
 
-		public static string ExecuteEditFilter(string AFilter)
+		public static string ExecuteEditFilter(string filter)
 		{
-			using (EditFilterForm LForm = new EditFilterForm())
+			using (EditFilterForm form = new EditFilterForm())
 			{
-				LForm.filterTextBox.Text = AFilter;
-				if (LForm.ShowDialog() == DialogResult.OK)
-					return LForm.filterTextBox.Text;
+				form.filterTextBox.Text = filter;
+				if (form.ShowDialog() == DialogResult.OK)
+					return form.filterTextBox.Text;
 				else
 					throw new AbortException();
 			}

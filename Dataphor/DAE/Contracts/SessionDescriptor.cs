@@ -13,18 +13,18 @@ namespace Alphora.Dataphor.DAE.Contracts
 	[DataContract]
 	public class SessionDescriptor
 	{
-		public SessionDescriptor(int AHandle, int AID)
+		public SessionDescriptor(int handle, int iD)
 		{
-			FHandle = AHandle;
-			FID = AID;
+			_handle = handle;
+			_iD = iD;
 		}
 		
 		[DataMember]
-		internal int FHandle;
-		public int Handle { get { return FHandle; } }
+		internal int _handle;
+		public int Handle { get { return _handle; } }
 
 		[DataMember]
-		internal int FID;
-		public int ID { get { return FID; } }
+		internal int _iD;
+		public int ID { get { return _iD; } }
 	}
 }

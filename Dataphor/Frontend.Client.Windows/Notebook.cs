@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Static Controls")]
 	public class Notebook : ControlContainer, INotebook
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
@@ -43,7 +43,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			get { return (EnhancedTabControl)Control; }
 		}
 
-		private void SelectionChanged(object ASender, EventArgs AArgs)
+		private void SelectionChanged(object sender, EventArgs args)
 		{
 			if (Active)
 			{
@@ -56,20 +56,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		private void SetActive(IBaseNotebookPage APage)
+		private void SetActive(IBaseNotebookPage page)
 		{
-			if (APage != FActivePage)
+			if (page != _activePage)
 			{
-				IBaseNotebookPage LOldPage = FActivePage;
-				FActivePage = APage;
+				IBaseNotebookPage oldPage = _activePage;
+				_activePage = page;
 
 				BeginUpdate();
 				try
 				{
-					if (LOldPage != null)
-						((BaseNotebookPage)LOldPage).Unselected();
-					if (FActivePage != null)
-						((BaseNotebookPage)FActivePage).Selected();
+					if (oldPage != null)
+						((BaseNotebookPage)oldPage).Unselected();
+					if (_activePage != null)
+						((BaseNotebookPage)_activePage).Selected();
 				}
 				finally
 				{
@@ -82,15 +82,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ActivePage
 
-		private IBaseNotebookPage FActivePage;
+		private IBaseNotebookPage _activePage;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("The currently active notebook page.")]
 		public IBaseNotebookPage ActivePage
 		{
-			get { return FActivePage; }
+			get { return _activePage; }
 			set
 			{
-				if (FActivePage != value)
+				if (_activePage != value)
 				{
 					if ((value != null) && (!IsChildNode(value)))
 						throw new ClientException(ClientException.Codes.InvalidActivePage);
@@ -102,38 +102,38 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 							TabControl.Selected = ((BaseNotebookPage)value).TabPageControl;
 					}
 					else
-						FActivePage = value;
+						_activePage = value;
 				}
 			}
 		}
 
-		private bool IsChildNode(INode ANode)
+		private bool IsChildNode(INode node)
 		{
-			foreach (INode LNode in Children)
-				if (LNode == ANode)
+			foreach (INode localNode in Children)
+				if (localNode == node)
 					return true;
 			return false;
 		}
 
 		// OnActivePageChange
 
-		private IAction FOnActivePageChange;
+		private IAction _onActivePageChange;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("Action triggered when the active page changes.")]
 		public IAction OnActivePageChange
 		{
-			get { return FOnActivePageChange; }
+			get { return _onActivePageChange; }
 			set
 			{
-				if (FOnActivePageChange != null)
-					FOnActivePageChange.Disposed -= new EventHandler(OnActivePageChangeDisposed);
-				FOnActivePageChange = value;
-				if (FOnActivePageChange != null)
-					FOnActivePageChange.Disposed += new EventHandler(OnActivePageChangeDisposed);
+				if (_onActivePageChange != null)
+					_onActivePageChange.Disposed -= new EventHandler(OnActivePageChangeDisposed);
+				_onActivePageChange = value;
+				if (_onActivePageChange != null)
+					_onActivePageChange.Disposed += new EventHandler(OnActivePageChangeDisposed);
 			}
 		}
 
-		private void OnActivePageChangeDisposed(object ASender, EventArgs AArgs)
+		private void OnActivePageChangeDisposed(object sender, EventArgs args)
 		{
 			OnActivePageChange = null;
 		}
@@ -143,30 +143,30 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		protected override void Activate()
 		{
 			// Use the first child if there is not an explicit active page set (do this before calling base so the child will know that it will be active)
-			if ((FActivePage == null) && (Children.Count > 0))
-				FActivePage = (IBaseNotebookPage)Children[0];
+			if ((_activePage == null) && (Children.Count > 0))
+				_activePage = (IBaseNotebookPage)Children[0];
 
 			base.Activate();
 
-			if (FActivePage != null)
+			if (_activePage != null)
 			{
-				((BaseNotebookPage)FActivePage).Selected();
-				TabControl.Selected = ((BaseNotebookPage)FActivePage).TabPageControl;
+				((BaseNotebookPage)_activePage).Selected();
+				TabControl.Selected = ((BaseNotebookPage)_activePage).TabPageControl;
 			}
 		}
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(BaseNotebookPage).IsAssignableFrom(AChildType))
+			if (typeof(BaseNotebookPage).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
 
 		protected override void ChildrenChanged()
 		{
 			base.ChildrenChanged();
-			if ((FActivePage == null) && (Children.Count > 0))
-				FActivePage = (IBaseNotebookPage)Children[0];
+			if ((_activePage == null) && (Children.Count > 0))
+				_activePage = (IBaseNotebookPage)Children[0];
 		}
 
 
@@ -177,21 +177,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return true;
 		}
 
-		internal protected void LayoutPage(BaseNotebookPage APage)
+		internal protected void LayoutPage(BaseNotebookPage page)
 		{
-			LayoutChild(APage, Rectangle.Empty);
+			LayoutChild(page, Rectangle.Empty);
 		}
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
-			LayoutControl(ABounds);
+			LayoutControl(bounds);
 
-			foreach (BaseNotebookPage LPage in Children)
+			foreach (BaseNotebookPage page in Children)
 			{
-				if (LPage == FActivePage)
-					LayoutPage(LPage);
+				if (page == _activePage)
+					LayoutPage(page);
 				else
-					((BaseNotebookPage)LPage).InvalidateLaidOut();
+					((BaseNotebookPage)page).InvalidateLaidOut();
 			}
 		}
 
@@ -200,10 +200,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				Size LMinSize = Size.Empty;
-				foreach (BaseNotebookPage LPage in Children)
-					ConstrainMin(ref LMinSize, LPage.MinSize);
-				return LMinSize;
+				Size minSize = Size.Empty;
+				foreach (BaseNotebookPage page in Children)
+					ConstrainMin(ref minSize, page.MinSize);
+				return minSize;
 			}
 		}
 
@@ -212,10 +212,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				Size LMaxSize = Size.Empty;
-				foreach (BaseNotebookPage LPage in Children)
-					ConstrainMin(ref LMaxSize, LPage.MaxSize);
-				return LMaxSize;
+				Size maxSize = Size.Empty;
+				foreach (BaseNotebookPage page in Children)
+					ConstrainMin(ref maxSize, page.MaxSize);
+				return maxSize;
 			}
 		}
 
@@ -224,10 +224,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				Size LNaturalSize = Size.Empty;
-				foreach (BaseNotebookPage LPage in Children)
-					ConstrainMin(ref LNaturalSize, LPage.NaturalSize);
-				return LNaturalSize;
+				Size naturalSize = Size.Empty;
+				foreach (BaseNotebookPage page in Children)
+					ConstrainMin(ref naturalSize, page.NaturalSize);
+				return naturalSize;
 			}
 		}
 
@@ -247,27 +247,27 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void InitializeControl()
 		{
-			Theme LTheme = ((Session)HostNode.Session).Theme;
-			TabControl.TabColor = LTheme.TabColor;
-			TabControl.TabOriginColor = LTheme.TabOriginColor;
-			TabControl.LineColor = LTheme.TabLineColor;
-			TabControl.BodyColor = LTheme.ContainerColor;
+			Theme theme = ((Session)HostNode.Session).Theme;
+			TabControl.TabColor = theme.TabColor;
+			TabControl.TabOriginColor = theme.TabOriginColor;
+			TabControl.LineColor = theme.TabLineColor;
+			TabControl.BodyColor = theme.ContainerColor;
 			TabControl.OnSelectionChanged += new EventHandler(SelectionChanged);
 		}
 	}
 
 	public abstract class BaseNotebookPage : ControlContainer
 	{
-		protected bool FLaidOut;
+		protected bool _laidOut;
 
 		internal protected virtual void InvalidateLaidOut() 
 		{
-			FLaidOut = false;
+			_laidOut = false;
 		}
 
 		public virtual void Selected() 
 		{
-			if (!FLaidOut)
+			if (!_laidOut)
 				((Notebook)Parent).LayoutPage(this);
 		}
 
@@ -275,7 +275,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ControlContainer
 
-		protected override void LayoutControl(Rectangle ABounds)
+		protected override void LayoutControl(Rectangle bounds)
 		{
 			// Do nothing... tab pages auto-size themselves within the tab notebook
 		}
@@ -283,18 +283,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// <remarks> Ensure that the pages are in the same order as the nodes. </remarks>
 		protected override void SetParent()
 		{
-			EnhancedTabControl LParent = ((Notebook)Parent).TabControl;
+			EnhancedTabControl parent = ((Notebook)Parent).TabControl;
 			
-			int LThisIndex = 0;
+			int thisIndex = 0;
 			for (int i = 0; i < Parent.Children.Count; i++)
 				if (Parent.Children[i] == this)
 					break;
 				else
 					if (((IElement)Parent.Children[i]).Visible)	// Don't use GetVisible() - we don't care if the page's parent is visible for inclusion purposes
-						LThisIndex++;
+						thisIndex++;
 
-			if (!LParent.Pages.Contains(TabPageControl))
-				LParent.Pages.Insert(LThisIndex, TabPageControl);
+			if (!parent.Pages.Contains(TabPageControl))
+				parent.Pages.Insert(thisIndex, TabPageControl);
 		}
 
 		protected override System.Windows.Forms.Control CreateControl()
@@ -307,15 +307,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			TabPageControl.Tag = this;
 		}
 
-		protected override void SetControlText(string ATitle)
+		protected override void SetControlText(string title)
 		{
-			TabPageControl.Text = ATitle;
+			TabPageControl.Text = title;
 		}
 
 		protected override void InternalUpdateTitle()
 		{
 			base.InternalUpdateTitle();
-			if (FTitle == String.Empty)
+			if (_title == String.Empty)
 				TabPageControl.Text = Strings.CDefaultNotebookPageTitle;
 		}
 
@@ -336,10 +336,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Element
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
-			base.InternalLayout(ABounds);
-			FLaidOut = true;
+			base.InternalLayout(bounds);
+			_laidOut = true;
 		}
 
 		// Node
@@ -355,9 +355,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			base.Deactivate();
 		}
 
-		public override bool IsValidOwner(Type AOwnerType)
+		public override bool IsValidOwner(Type ownerType)
 		{
-			return typeof(INotebook).IsAssignableFrom(AOwnerType);
+			return typeof(INotebook).IsAssignableFrom(ownerType);
 		}
 	}
 
@@ -374,108 +374,108 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		public NotebookFramePage() {}
 
-		public NotebookFramePage([PublishSource("SourceLinkType")] SourceLinkType ASourceLinkType): base()
+		public NotebookFramePage([PublishSource("SourceLinkType")] SourceLinkType sourceLinkType): base()
 		{
-			SourceLinkType = ASourceLinkType;
+			SourceLinkType = sourceLinkType;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			BeforeCloseEmbedded = null;
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		// this link must be set first when deserializing.
 		// which is why it is set in the constructor
-		private SourceLinkType FSourceLinkType;
+		private SourceLinkType _sourceLinkType;
 		[DefaultValue(SourceLinkType.None)]
 		[RefreshProperties(RefreshProperties.All)]
 		[Description("Determines the data relationship between this document one that will be shown.")]
 		public SourceLinkType SourceLinkType
 		{
-			get { return FSourceLinkType; }
+			get { return _sourceLinkType; }
 			set
 			{
-				if (FSourceLinkType != value)
+				if (_sourceLinkType != value)
 				{
-					if (FSourceLink != null)
-						FSourceLink.Dispose();
-					FSourceLinkType = value;
-					if (FSourceLinkType == SourceLinkType.None)
-						FSourceLink = null;
+					if (_sourceLink != null)
+						_sourceLink.Dispose();
+					_sourceLinkType = value;
+					if (_sourceLinkType == SourceLinkType.None)
+						_sourceLink = null;
 					else 
 					{
-						if (FSourceLinkType == SourceLinkType.Surrogate)
-							FSourceLink = new SurrogateSourceLink(this);
-						else if (FSourceLinkType == SourceLinkType.Detail)
-							FSourceLink = new DetailSourceLink(this);
-						if (FFrameInterfaceNode != null)
-							FSourceLink.TargetSource = FFrameInterfaceNode.MainSource;
+						if (_sourceLinkType == SourceLinkType.Surrogate)
+							_sourceLink = new SurrogateSourceLink(this);
+						else if (_sourceLinkType == SourceLinkType.Detail)
+							_sourceLink = new DetailSourceLink(this);
+						if (_frameInterfaceNode != null)
+							_sourceLink.TargetSource = _frameInterfaceNode.MainSource;
 					}
 				}
 			}
 		}
 
-		private SourceLink FSourceLink;
+		private SourceLink _sourceLink;
 		[BOP.Publish(BOP.PublishMethod.Inline)]
 		[Description("Contains the specific settings based on the SourceLinkType.")]
 		public SourceLink SourceLink
 		{
-			get { return FSourceLink; }
+			get { return _sourceLink; }
 		}
 
 		// PostBeforeClosingEmbedded
 
-		private bool FPostBeforeClosingEmbedded = true;
+		private bool _postBeforeClosingEmbedded = true;
 		[DefaultValue(true)]
 		[Description("Determines whether the frame will automatically request a post of an embedded interface before closing it.")]
 		public bool PostBeforeClosingEmbedded
 		{
-			get { return FPostBeforeClosingEmbedded; }
-			set { FPostBeforeClosingEmbedded = value; }
+			get { return _postBeforeClosingEmbedded; }
+			set { _postBeforeClosingEmbedded = value; }
 		}
 
 		// BeforeCloseEmbedded
 
-		private IAction FBeforeCloseEmbedded;
+		private IAction _beforeCloseEmbedded;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action that will be executed before closing an embedded interface (AInterface).")]
 		public IAction BeforeCloseEmbedded
 		{
-			get { return FBeforeCloseEmbedded; }
+			get { return _beforeCloseEmbedded; }
 			set
 			{
-				if (FBeforeCloseEmbedded != value)
+				if (_beforeCloseEmbedded != value)
 				{
-					if (FBeforeCloseEmbedded != null)
-						FBeforeCloseEmbedded.Disposed -= new EventHandler(BeforeCloseEmbeddedActionDisposed);
-					FBeforeCloseEmbedded = value;
-					if (FBeforeCloseEmbedded != null)
-						FBeforeCloseEmbedded.Disposed += new EventHandler(BeforeCloseEmbeddedActionDisposed);
+					if (_beforeCloseEmbedded != null)
+						_beforeCloseEmbedded.Disposed -= new EventHandler(BeforeCloseEmbeddedActionDisposed);
+					_beforeCloseEmbedded = value;
+					if (_beforeCloseEmbedded != null)
+						_beforeCloseEmbedded.Disposed += new EventHandler(BeforeCloseEmbeddedActionDisposed);
 				}
 			}
 		}
 
-		private void BeforeCloseEmbeddedActionDisposed(object ASender, EventArgs AArgs)
+		private void BeforeCloseEmbeddedActionDisposed(object sender, EventArgs args)
 		{
 			BeforeCloseEmbedded = null;
 		}
 
 		// Document
 
-		private string FDocument = String.Empty;
+		private string _document = String.Empty;
 		[DefaultValue("")]
 		[Description("Specifies the Document of the form interface to embed.")]
 		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", typeof(System.Drawing.Design.UITypeEditor))]
 		[DocumentExpressionOperator("Form")]
 		public string Document
 		{
-			get { return FDocument; }
+			get { return _document; }
 			set
 			{
-				if (FDocument != value)
+				if (_document != value)
 				{
-					FDocument = value;
+					_document = value;
 					UpdateFrameInterface(true);
 				}
 			}
@@ -483,23 +483,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// FrameInterface
 
-		private FrameInterface FFrameInterfaceNode;
+		private FrameInterface _frameInterfaceNode;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public IFrameInterface FrameInterfaceNode
 		{
-			get { return FFrameInterfaceNode; }
+			get { return _frameInterfaceNode; }
 		}
 
-		private void UpdateFrameInterface(bool AForce)
+		private void UpdateFrameInterface(bool force)
 		{
 			// If the frame should be loaded and it is not, or vise versa... then fix it
 			if 
 			(
 				Active && 
 				(
-					(ShouldLoad() == (FFrameInterfaceNode == null)) || 
-					AForce
+					(ShouldLoad() == (_frameInterfaceNode == null)) || 
+					force
 				)
 			)
 				ResetFrameInterfaceNode(Active);
@@ -512,41 +512,41 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private bool ShouldLoad()
 		{
-			return (FDocument != String.Empty) && (IsSelected() || !FLoadAsSelected);
+			return (_document != String.Empty) && (IsSelected() || !_loadAsSelected);
 		}
 
 		// This is based the Frame code
-		private void ResetFrameInterfaceNode(bool ABuild)
+		private void ResetFrameInterfaceNode(bool build)
 		{
 			BeginUpdate();
 			try
 			{
 				// Clean up the old frame if there is one
-				if (FFrameInterfaceNode != null)
+				if (_frameInterfaceNode != null)
 				{
 					// Optionally post the data changes
-					if (FPostBeforeClosingEmbedded)
-						FFrameInterfaceNode.PostChanges();
+					if (_postBeforeClosingEmbedded)
+						_frameInterfaceNode.PostChanges();
 
 					// Invoke the before close embedded handler
-					if (FBeforeCloseEmbedded != null)
-						FBeforeCloseEmbedded.Execute(this, new EventParams("AInterface", FFrameInterfaceNode));
+					if (_beforeCloseEmbedded != null)
+						_beforeCloseEmbedded.Execute(this, new EventParams("AInterface", _frameInterfaceNode));
 
 					try
 					{
-						FFrameInterfaceNode.HostNode.BroadcastEvent(new DisableSourceEvent());
-						if (FSourceLink != null)
-							FSourceLink.TargetSource = null;
+						_frameInterfaceNode.HostNode.BroadcastEvent(new DisableSourceEvent());
+						if (_sourceLink != null)
+							_sourceLink.TargetSource = null;
 					}
 					finally
 					{
 						try
 						{
-							FFrameInterfaceNode.HostNode.Dispose();
+							_frameInterfaceNode.HostNode.Dispose();
 						}
 						finally
 						{
-							FFrameInterfaceNode = null;
+							_frameInterfaceNode = null;
 							RemoveMenu();
 						}
 						InvalidateLaidOut();
@@ -555,33 +555,33 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				// Create the new frame
 				if 
 				(
-					ABuild && 
+					build && 
 					ShouldLoad()
 				)
 				{
-					IHost LHost = HostNode.Session.CreateHost();
+					IHost host = HostNode.Session.CreateHost();
 					try
 					{
-						FFrameInterfaceNode = new FrameInterface(this);
+						_frameInterfaceNode = new FrameInterface(this);
 						try
 						{
-							LHost.Load(FDocument, FFrameInterfaceNode);
-							if (FSourceLink != null)
-								FSourceLink.TargetSource = FFrameInterfaceNode.MainSource;
-							LHost.Open(!Active);
+							host.Load(_document, _frameInterfaceNode);
+							if (_sourceLink != null)
+								_sourceLink.TargetSource = _frameInterfaceNode.MainSource;
+							host.Open(!Active);
 							if (Active)
 								BroadcastEvent(new FormShownEvent());
 						}
 						catch
 						{
-							FFrameInterfaceNode.Dispose();
-							FFrameInterfaceNode = null;
+							_frameInterfaceNode.Dispose();
+							_frameInterfaceNode = null;
 							throw;
 						}
 					}
 					catch
 					{
-						LHost.Dispose();
+						host.Dispose();
 						throw;
 					}
 				}
@@ -596,74 +596,74 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// IWindowsMenuHost
 
-		private IWindowsBarContainer FMenuContainer;
+		private IWindowsBarContainer _menuContainer;
 		[Browsable(false)]
 		public IWindowsBarContainer MenuContainer
 		{
 			get 
 			{ 
 				EnsureMenu();
-				return FMenuContainer; 
+				return _menuContainer; 
 			}
 		}
 
 		private void EnsureMenu()
 		{
-			if (FMenuContainer == null)
+			if (_menuContainer == null)
 			{
-				IWindowsMenuHost LWindowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
-				if (LWindowsMenuHost != null)
+				IWindowsMenuHost windowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
+				if (windowsMenuHost != null)
 				{
-					FMenuContainer = LWindowsMenuHost.MenuContainer.CreateContainer();
-					((IWindowsBarButton)FMenuContainer).Text = GetMenuText();
-					FMenuContainer.Visible = IsSelected();
-					LWindowsMenuHost.MenuContainer.AddBarItem(FMenuContainer, null);
+					_menuContainer = windowsMenuHost.MenuContainer.CreateContainer();
+					((IWindowsBarButton)_menuContainer).Text = GetMenuText();
+					_menuContainer.Visible = IsSelected();
+					windowsMenuHost.MenuContainer.AddBarItem(_menuContainer, null);
 				}
 			}
 		}
 
 		private void RemoveMenu()
 		{
-			if (FMenuContainer != null)
+			if (_menuContainer != null)
 			{
-				IWindowsMenuHost LWindowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
-				if (LWindowsMenuHost != null)
-					LWindowsMenuHost.MenuContainer.RemoveBarItem(FMenuContainer);
-				FMenuContainer.Dispose();
-				FMenuContainer = null;
+				IWindowsMenuHost windowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
+				if (windowsMenuHost != null)
+					windowsMenuHost.MenuContainer.RemoveBarItem(_menuContainer);
+				_menuContainer.Dispose();
+				_menuContainer = null;
 			}
 		}
 
 		// MenuText
 
-		private string FMenuText = String.Empty;
+		private string _menuText = String.Empty;
 		[DefaultValue("")]
 		[Description("The menu name under which the frames' menus will be available.")]
 		public string MenuText
 		{
-			get { return FMenuText; }
+			get { return _menuText; }
 			set
 			{
-				FMenuText = value;
+				_menuText = value;
 				UpdateMenuText();
 			}
 		}
 
 		public string GetMenuText()
 		{
-			if (FMenuText == String.Empty)
+			if (_menuText == String.Empty)
 				if (Title != String.Empty)
 					return Title;
 				else
 					return (new System.Resources.ResourceManager("Alphora.Dataphor.Frontend.Client.Windows.Strings", typeof(Frame).Assembly).GetString("CFrameDefaultMenuText"));
 			else
-				return FMenuText;
+				return _menuText;
 		}
 
 		public void UpdateMenuText()
 		{
-			if (Active && (FMenuContainer != null))
-				((IWindowsBarButton)FMenuContainer).Text = GetMenuText();
+			if (Active && (_menuContainer != null))
+				((IWindowsBarButton)_menuContainer).Text = GetMenuText();
 		}
 
 		protected override void InternalUpdateTitle()
@@ -674,25 +674,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// LoadAsSelected
 
-		private bool FLoadAsSelected = true;
+		private bool _loadAsSelected = true;
 		[DefaultValue(true)]
 		[Description("When true, the frame will only be loaded when the tab is selected; otherwise the frame is loaded when activated.")]
 		public bool LoadAsSelected
 		{
-			get { return FLoadAsSelected; }
+			get { return _loadAsSelected; }
 			set
 			{
-				if (FLoadAsSelected != value)
+				if (_loadAsSelected != value)
 				{
 					try
 					{
 						// Set the property before updating so the update function appropriately
-						FLoadAsSelected = value;
+						_loadAsSelected = value;
 						UpdateFrameInterface(false);
 					}
 					catch
 					{
-						FLoadAsSelected = !value;
+						_loadAsSelected = !value;
 						throw;
 					}
 				}
@@ -704,8 +704,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public override void Selected()
 		{
 			UpdateFrameInterface(false);
-			if (FMenuContainer != null)
-				FMenuContainer.Visible = GetVisible();
+			if (_menuContainer != null)
+				_menuContainer.Visible = GetVisible();
 			base.Selected();
 		}
 
@@ -718,8 +718,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			finally
 			{
-				if (FMenuContainer != null)
-					FMenuContainer.Visible = false;
+				if (_menuContainer != null)
+					_menuContainer.Visible = false;
 			}
 		}
 
@@ -733,8 +733,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void AfterActivate()
 		{
-			if (FFrameInterfaceNode != null)
-				FFrameInterfaceNode.HostNode.AfterOpen();
+			if (_frameInterfaceNode != null)
+				_frameInterfaceNode.HostNode.AfterOpen();
 			base.AfterActivate();
 		}
 
@@ -750,10 +750,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		public override void BroadcastEvent(NodeEvent AEvent)
+		public override void BroadcastEvent(NodeEvent eventValue)
 		{
 			if (FrameInterfaceNode != null)
-				FrameInterfaceNode.BroadcastEvent(AEvent);
+				FrameInterfaceNode.BroadcastEvent(eventValue);
 		}
 
 		// Element
@@ -761,59 +761,59 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		protected override void InternalUpdateVisible() 
 		{
 			base.InternalUpdateVisible();
-			if (FMenuContainer != null)
-				FMenuContainer.Visible = (GetVisible() && IsSelected());
+			if (_menuContainer != null)
+				_menuContainer.Visible = (GetVisible() && IsSelected());
 		}
 
 		public override void VisibleChanged()
 		{
 			base.VisibleChanged();
-			if (FFrameInterfaceNode != null)
-				FFrameInterfaceNode.VisibleChanged();
+			if (_frameInterfaceNode != null)
+				_frameInterfaceNode.VisibleChanged();
 		}
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
-			LayoutChild(FFrameInterfaceNode, Rectangle.Empty);
+			LayoutChild(_frameInterfaceNode, Rectangle.Empty);
 		}
 
-		private Size FPriorMinSize = Size.Empty;
+		private Size _priorMinSize = Size.Empty;
 		
 		protected override Size InternalMinSize
 		{
 			get
 			{
-				if (FFrameInterfaceNode != null)
-					FPriorMinSize = FFrameInterfaceNode.MinSize;
+				if (_frameInterfaceNode != null)
+					_priorMinSize = _frameInterfaceNode.MinSize;
 				
-				return FPriorMinSize;
+				return _priorMinSize;
 			}
 		}
 		
-		private Size FPriorMaxSize = Size.Empty;
+		private Size _priorMaxSize = Size.Empty;
 		
 		protected override Size InternalMaxSize
 		{
 			get
 			{
-				if (FFrameInterfaceNode != null)
-					FPriorMaxSize = FFrameInterfaceNode.MaxSize;
+				if (_frameInterfaceNode != null)
+					_priorMaxSize = _frameInterfaceNode.MaxSize;
 
-				return FPriorMaxSize;
+				return _priorMaxSize;
 			}
 		}
 
 		// Remember the natural size so that if we are not loaded we can use what the size was when we were loaded
-		private Size FPriorNaturalSize = Size.Empty;
+		private Size _priorNaturalSize = Size.Empty;
 
 		protected override Size InternalNaturalSize
 		{
 			get
 			{
-				if (FFrameInterfaceNode != null)
-					FPriorNaturalSize = FFrameInterfaceNode.NaturalSize;
+				if (_frameInterfaceNode != null)
+					_priorNaturalSize = _frameInterfaceNode.NaturalSize;
 
-				return FPriorNaturalSize;
+				return _priorNaturalSize;
 			}
 		}
 	}

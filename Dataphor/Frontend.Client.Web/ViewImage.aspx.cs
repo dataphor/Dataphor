@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 {
 	public class ViewImage : System.Web.UI.Page
 	{
-		public const string CContentLengthHeader = "Content-Length";
+		public const string ContentLengthHeader = "Content-Length";
 
 		public Web.Session WebSession;
 		
@@ -35,23 +35,23 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			Response.ClearContent();
 			Response.BufferOutput = false;
 
-			string LImageID = Request.QueryString["ImageID"];
-			if ((LImageID != null) && (LImageID != String.Empty))
+			string imageID = Request.QueryString["ImageID"];
+			if ((imageID != null) && (imageID != String.Empty))
 			{
-				using (Stream LStream = WebSession.ImageCache.Read(LImageID))
+				using (Stream stream = WebSession.ImageCache.Read(imageID))
 				{
-					Response.AppendHeader(CContentLengthHeader, LStream.Length.ToString());
-					StreamUtility.CopyStream(LStream, Response.OutputStream);
+					Response.AppendHeader(ContentLengthHeader, stream.Length.ToString());
+					StreamUtility.CopyStream(stream, Response.OutputStream);
 				}
 			}
 			else
 			{
-				LImageID = Request.QueryString["HandlerID"];
-				if ((LImageID != null) && (LImageID != String.Empty))
+				imageID = Request.QueryString["HandlerID"];
+				if ((imageID != null) && (imageID != String.Empty))
 				{
-					LoadImageHandler LHandler = WebSession.ImageCache.GetImageHandler(LImageID);
-					if (LHandler != null)
-						LHandler(Context, LImageID, Response.OutputStream);
+					LoadImageHandler handler = WebSession.ImageCache.GetImageHandler(imageID);
+					if (handler != null)
+						handler(Context, imageID, Response.OutputStream);
 				}
 			}
 		}
@@ -66,67 +66,67 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	/// </remarks>
 	public class ImageCache
 	{
-		public const string CCacheFileExtension = ".dfc";
+		public const string CacheFileExtension = ".dfc";
 
 		/// <summary> Instantiates a new DocumentCache. </summary>
-		/// <param name="ACachePath"> Specifies the path to use to store cached items.  </param>
-		public ImageCache(string ACachePath, Session ASession)
+		/// <param name="cachePath"> Specifies the path to use to store cached items.  </param>
+		public ImageCache(string cachePath, Session session)
 		{
 			// Prepare the folder
-			Directory.CreateDirectory(ACachePath);
-			FCachePath = ACachePath;
-			FSession = ASession;
-			FIdentifiers = new Hashtable();
+			Directory.CreateDirectory(cachePath);
+			_cachePath = cachePath;
+			_session = session;
+			_identifiers = new Hashtable();
 		}
 
 		public void Dispose()
 		{
-			if (FIdentifiers != null)
+			if (_identifiers != null)
 			{
-				string LFileName;
-				foreach (DictionaryEntry LEntry in FIdentifiers)
+				string fileName;
+				foreach (DictionaryEntry entry in _identifiers)
 				{
-					LFileName = BuildFileName((string)LEntry.Key);
-					if (File.Exists(LFileName))
-						File.Delete(LFileName);
+					fileName = BuildFileName((string)entry.Key);
+					if (File.Exists(fileName))
+						File.Delete(fileName);
 				}
-				FIdentifiers = null;
+				_identifiers = null;
 			}
 		}
 
 		// FImageHandlers
 
-		private Hashtable FImageHandlers = new Hashtable();
+		private Hashtable _imageHandlers = new Hashtable();
 
-		public LoadImageHandler GetImageHandler(string AID)
+		public LoadImageHandler GetImageHandler(string iD)
 		{
-			return (LoadImageHandler)FImageHandlers[AID];
+			return (LoadImageHandler)_imageHandlers[iD];
 		}
 
-		public string RegisterImageHandler(LoadImageHandler AHandler)
+		public string RegisterImageHandler(LoadImageHandler handler)
 		{
-			string LID = Session.GenerateID();
-			FImageHandlers[LID] = AHandler;
-			return LID;
+			string iD = Session.GenerateID();
+			_imageHandlers[iD] = handler;
+			return iD;
 		}
 
-		public void UnregisterImageHandler(string AID)
+		public void UnregisterImageHandler(string iD)
 		{
-			FImageHandlers.Remove(AID);
+			_imageHandlers.Remove(iD);
 		}
 
 		// Allocate / Deallocate
 
-		private Hashtable FIdentifiers;
+		private Hashtable _identifiers;
 
-		private string FCachePath;
-		public string CachePath { get { return FCachePath; } }
+		private string _cachePath;
+		public string CachePath { get { return _cachePath; } }
 
-		private Session FSession;
+		private Session _session;
 
-		private string BuildFileName(string AImageID)
+		private string BuildFileName(string imageID)
 		{
-			return String.Format("{0}\\{1}{2}", FCachePath, AImageID, CCacheFileExtension);
+			return String.Format("{0}\\{1}{2}", _cachePath, imageID, CacheFileExtension);
 		}
 
 		private string GetImageID()
@@ -134,67 +134,67 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			return Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace('/', '_').Replace('+', '~');
 		}
 
-		public string Allocate(string AImageExpression)
+		public string Allocate(string imageExpression)
 		{
-			if (AImageExpression != String.Empty)
+			if (imageExpression != String.Empty)
 			{
-				string LImageID = GetImageID();
-				FIdentifiers.Add(LImageID, AImageExpression);
-				return LImageID;
+				string imageID = GetImageID();
+				_identifiers.Add(imageID, imageExpression);
+				return imageID;
 			}
 			else
 				return String.Empty;
 		}
 
-		public string Allocate(GetImageHandler AGetImage)
+		public string Allocate(GetImageHandler getImage)
 		{
-			if (AGetImage != null)
+			if (getImage != null)
 			{
-				string LImageID = GetImageID();
-				FIdentifiers.Add(LImageID, AGetImage);
-				return LImageID;
+				string imageID = GetImageID();
+				_identifiers.Add(imageID, getImage);
+				return imageID;
 			}
 			else
 				return String.Empty;
 		}
 
-		public void Deallocate(string AImageID)
+		public void Deallocate(string imageID)
 		{
-			if (AImageID != String.Empty)
+			if (imageID != String.Empty)
 			{
-				string LFileName = BuildFileName(AImageID);
-				if (File.Exists(LFileName))
-					File.Delete(LFileName);
-				FIdentifiers.Remove(AImageID);
+				string fileName = BuildFileName(imageID);
+				if (File.Exists(fileName))
+					File.Delete(fileName);
+				_identifiers.Remove(imageID);
 			}
 		}
 
-		public Stream Read(string AImageID)
+		public Stream Read(string imageID)
 		{
-			string LFileName = BuildFileName(AImageID);
-			if (File.Exists(LFileName))
-				return File.OpenRead(LFileName);
+			string fileName = BuildFileName(imageID);
+			if (File.Exists(fileName))
+				return File.OpenRead(fileName);
 			else
 			{
-				FileStream LFileStream = new FileStream(LFileName, FileMode.CreateNew, FileAccess.ReadWrite);
+				FileStream fileStream = new FileStream(fileName, FileMode.CreateNew, FileAccess.ReadWrite);
 				try
 				{
-					object LValue = FIdentifiers[AImageID];
-					if (LValue is String)
+					object tempValue = _identifiers[imageID];
+					if (tempValue is String)
 					{
-						using (DAE.Runtime.Data.Scalar LScalar = (DAE.Runtime.Data.Scalar)FSession.Pipe.RequestDocument((string)LValue))
-							StreamUtility.CopyStream(LScalar.OpenStream(), LFileStream);
+						using (DAE.Runtime.Data.Scalar scalar = (DAE.Runtime.Data.Scalar)_session.Pipe.RequestDocument((string)tempValue))
+							StreamUtility.CopyStream(scalar.OpenStream(), fileStream);
 					}
 					else
-						((GetImageHandler)LValue)(AImageID, LFileStream); 
-					LFileStream.Position = 0;
-					return LFileStream;
+						((GetImageHandler)tempValue)(imageID, fileStream); 
+					fileStream.Position = 0;
+					return fileStream;
 				}
 				catch
 				{
-					LFileStream.Close();
-					if (File.Exists(LFileName))
-						File.Delete(LFileName);
+					fileStream.Close();
+					if (File.Exists(fileName))
+						File.Delete(fileName);
 					throw;
 				}
 			}

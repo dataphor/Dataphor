@@ -23,15 +23,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// <summary> Initializes a new instance of the DBDateTextBox class. </summary>
 		public DBDateTextBox() : base()
 		{
-			FDateTimeFormatInfo = DateTimeFormatInfo.CurrentInfo;
+			_dateTimeFormatInfo = DateTimeFormatInfo.CurrentInfo;
 			Link.OnActiveChanged += new DataLinkHandler(ActiveChanged);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			if (!IsDisposed)
 				Link.OnActiveChanged -= new DataLinkHandler(ActiveChanged);
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		protected override string FieldValue
@@ -40,16 +40,16 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			set { DataField.AsDateTime = Convert.ToDateTime(value); }
 		}
 
-		private DateTimeFormatInfo FDateTimeFormatInfo;
+		private DateTimeFormatInfo _dateTimeFormatInfo;
 		protected DateTimeFormatInfo DateTimeFormatInfo
 		{
-			get { return FDateTimeFormatInfo; }
+			get { return _dateTimeFormatInfo; }
 		}
 
-		protected string ShortDatePattern { get { return FDateTimeFormatInfo.ShortDatePattern; } }
-		protected string LongTimePattern { get { return FDateTimeFormatInfo.LongTimePattern; } }
+		protected string ShortDatePattern { get { return _dateTimeFormatInfo.ShortDatePattern; } }
+		protected string LongTimePattern { get { return _dateTimeFormatInfo.LongTimePattern; } }
 
-		private bool FEditByCell = true;
+		private bool _editByCell = true;
 		/// <summary> Validate individual month, day, and year input. </summary>
 		/// <remarks> Month, day, and year order is determined by culture settings. </remarks>
 		[DefaultValue(true)]
@@ -57,22 +57,22 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Description("Validate individual month, day, and year input.")]
 		public bool EditByCell
 		{
-			get { return FEditByCell; }
-			set { FEditByCell = value; }
+			get { return _editByCell; }
+			set { _editByCell = value; }
 		}
 
-		private bool FAutoComplete = true;
+		private bool _autoComplete = true;
 		/// <summary> Complete user input when applicable. </summary>
 		[DefaultValue(true)]
 		[Category("Behavior")]
 		[Description("Complete user input add date separators when applicable.")]
 		public bool AutoComplete
 		{
-			get { return FAutoComplete; }
+			get { return _autoComplete; }
 			set
 			{
-				if (FAutoComplete != value)
-					FAutoComplete = value;
+				if (_autoComplete != value)
+					_autoComplete = value;
 			}
 		}
 
@@ -85,7 +85,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			set { Text = InternalConvertDateTimeToString(value); }
 		}
 
-        private bool FHideDate = false;
+        private bool _hideDate = false;
         /// <summary> Do not display the date part. </summary>
         /// <remarks> Could result in nothing being displayed. </remarks>
         [DefaultValue(false)]
@@ -93,11 +93,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
         [Description("Do not display the date part.")]
         public bool HideDate
         {
-            get { return FHideDate; }
-            set { FHideDate = value; }
+            get { return _hideDate; }
+            set { _hideDate = value; }
         }
 
-        private bool FHideTime = true;
+        private bool _hideTime = true;
         /// <summary> Do not display the time part. </summary>
         /// <remarks> Could result in nothing being displayed. </remarks>
         [DefaultValue(true)]
@@ -105,102 +105,102 @@ namespace Alphora.Dataphor.DAE.Client.Controls
         [Description("Do not display the time part.")]
         public bool HideTime
         {
-            get { return FHideTime; }
-            set { FHideTime = value; }
+            get { return _hideTime; }
+            set { _hideTime = value; }
         }
 
-		private string InternalConvertDateTimeToString(DateTime ADateTime)
+		private string InternalConvertDateTimeToString(DateTime dateTime)
 		{
 			if (EditByCell)
 				return 
-                    ADateTime.TimeOfDay.Ticks == 0 ? 
-                        FHideDate ? String.Empty : ADateTime.ToString(ShortDatePattern) 
-                        : ADateTime.ToString
+                    dateTime.TimeOfDay.Ticks == 0 ? 
+                        _hideDate ? String.Empty : dateTime.ToString(ShortDatePattern) 
+                        : dateTime.ToString
                         (
                             String.Format
                             (
                                 "{0} {1}", 
-                                FHideDate ? String.Empty : ShortDatePattern, 
-                                FHideTime ? String.Empty : LongTimePattern
+                                _hideDate ? String.Empty : ShortDatePattern, 
+                                _hideTime ? String.Empty : LongTimePattern
                             ).Trim()
                         );
 			else
-				return ADateTime.ToString("G");
+				return dateTime.ToString("G");
 		}
 
-		protected void InternalSetDate(DateTime ADateTime)
+		protected void InternalSetDate(DateTime dateTime)
 		{
-			InternalSetText(InternalConvertDateTimeToString(ADateTime));
+			InternalSetText(InternalConvertDateTimeToString(dateTime));
 		}
 
-		private void ActiveChanged(DataLink ALink, DataSet ADataSet)
+		private void ActiveChanged(DataLink link, DataSet dataSet)
 		{
 			// BTR -> This control should work with any data type that exposes an AsDateTime representation.
 			//if ((DataField != null) && !(DataField.DataType.Is(AView.Process.DataTypes.SystemDateTime))&& !(DataField.DataType.Is(AView.Process.DataTypes.SystemDate)))
 			//	throw new ControlsException(ControlsException.Codes.InvalidColumn, ColumnName);
 		}
 
-		private DateTime IncEditCell(DateTime ADate, DateTimeEditCell ACell, int AStep)
+		private DateTime IncEditCell(DateTime date, DateTimeEditCell cell, int step)
 		{
-			switch (ACell)
+			switch (cell)
 			{
 				case DateTimeEditCell.Day:
-					return ADate.AddDays((double)AStep);
+					return date.AddDays((double)step);
 				case DateTimeEditCell.Month:
-					return ADate.AddMonths(AStep);
+					return date.AddMonths(step);
 				case DateTimeEditCell.Year:
-					return ADate.AddYears(AStep);
+					return date.AddYears(step);
 				default:
-					return ADate;
+					return date;
 			}
 		}
 
 		private bool CanAddSeparator()
 		{
-			string LFirstCell = String.Empty, LSecondCell = String.Empty, LThirdCell = String.Empty;
-			DateTimeEditCellPos LCellPos;
-			ParseDateCells(Text, ref LFirstCell, ref LSecondCell, ref LThirdCell);
-			if ((LFirstCell.Length > 0) && (LSecondCell.Length == 0))
-				LCellPos = DateTimeEditCellPos.First;
-			else if ((LSecondCell.Length > 0) && (LThirdCell.Length == 0))
-				LCellPos = DateTimeEditCellPos.Second;
+			string firstCell = String.Empty, secondCell = String.Empty, thirdCell = String.Empty;
+			DateTimeEditCellPos cellPos;
+			ParseDateCells(Text, ref firstCell, ref secondCell, ref thirdCell);
+			if ((firstCell.Length > 0) && (secondCell.Length == 0))
+				cellPos = DateTimeEditCellPos.First;
+			else if ((secondCell.Length > 0) && (thirdCell.Length == 0))
+				cellPos = DateTimeEditCellPos.Second;
 			else
-				LCellPos = DateTimeEditCellPos.None;
+				cellPos = DateTimeEditCellPos.None;
 
-			int LFirstSeparatorIndex = Text.IndexOf(FDateTimeFormatInfo.DateSeparator);
-			int LSecondSeparatorIndex = Text.IndexOf(FDateTimeFormatInfo.DateSeparator, LFirstSeparatorIndex + 1);
-			bool LHasFirstDateSeparator = LFirstSeparatorIndex > 0;
-			bool LHasSecondDateSeparator = LSecondSeparatorIndex > LFirstSeparatorIndex;
+			int firstSeparatorIndex = Text.IndexOf(_dateTimeFormatInfo.DateSeparator);
+			int secondSeparatorIndex = Text.IndexOf(_dateTimeFormatInfo.DateSeparator, firstSeparatorIndex + 1);
+			bool hasFirstDateSeparator = firstSeparatorIndex > 0;
+			bool hasSecondDateSeparator = secondSeparatorIndex > firstSeparatorIndex;
 
-			return ((LCellPos == DateTimeEditCellPos.First) && !LHasFirstDateSeparator)
-				|| ((LCellPos == DateTimeEditCellPos.Second) && !LHasSecondDateSeparator);
+			return ((cellPos == DateTimeEditCellPos.First) && !hasFirstDateSeparator)
+				|| ((cellPos == DateTimeEditCellPos.Second) && !hasSecondDateSeparator);
 		}
 
-		private void BackSpaceCleanup(KeyEventArgs AArgs)
+		private void BackSpaceCleanup(KeyEventArgs args)
 		{
-			if (FAutoComplete && (Text.Length > 0) && !CanAddSeparator() && ((Text.LastIndexOf(DateSeparator) + DateSeparator.Length) == Text.Length))
+			if (_autoComplete && (Text.Length > 0) && !CanAddSeparator() && ((Text.LastIndexOf(DateSeparator) + DateSeparator.Length) == Text.Length))
 			{
-				int LSaveSelectionStart = SelectionStart;
-				FInternalDisableAutoComplete = true;
+				int saveSelectionStart = SelectionStart;
+				_internalDisableAutoComplete = true;
 				try
 				{
 					InternalSetText(Text.Substring(0, Text.Length - DateSeparator.Length));
 				}
 				finally
 				{
-					FInternalDisableAutoComplete = false;
-					SelectionStart = LSaveSelectionStart;
+					_internalDisableAutoComplete = false;
+					SelectionStart = saveSelectionStart;
 				}
 			}	
 		}
 
-		protected override void OnKeyDown(KeyEventArgs AArgs)
+		protected override void OnKeyDown(KeyEventArgs args)
 		{
-			base.OnKeyDown(AArgs);
-			switch (AArgs.KeyData)
+			base.OnKeyDown(args);
+			switch (args.KeyData)
 			{
 				case Keys.Left:
-					if (FEditByCell && (AArgs.Modifiers == Keys.None))
+					if (_editByCell && (args.Modifiers == Keys.None))
 					{
 						switch (GetFormatCellPos(EditCell))
 						{
@@ -234,11 +234,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 								}
 								break;
 						}
-						AArgs.Handled = true;
+						args.Handled = true;
 					}
 					break;
 				case Keys.Right:
-					if (FEditByCell && (AArgs.Modifiers == Keys.None))
+					if (_editByCell && (args.Modifiers == Keys.None))
 					{
 						switch (GetFormatCellPos(EditCell))
 						{
@@ -255,182 +255,182 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 								EditCell = GetFormatCellType(GetFormatCellPos(EditingCell));
 								break;
 						}
-						AArgs.Handled = true;
+						args.Handled = true;
 					}
 					break;
 				case Keys.Up:
 				case Keys.Down:
-					if (FEditByCell && (AArgs.Modifiers == Keys.None) && Link.Active)
+					if (_editByCell && (args.Modifiers == Keys.None) && Link.Active)
 					{
 						Link.Edit();
-						DateTimeEditCell LSaveEditCell = EditCell;
+						DateTimeEditCell saveEditCell = EditCell;
 						try
 						{
-							if (AArgs.KeyData == Keys.Up)
+							if (args.KeyData == Keys.Up)
 								InternalSetDate(IncEditCell(Date, EditCell, 1));
 							else
 								InternalSetDate(IncEditCell(Date, EditCell, -1));
 						}
 						finally
 						{
-							EditCell = LSaveEditCell;
+							EditCell = saveEditCell;
 						}
-						AArgs.Handled = true;
+						args.Handled = true;
 					}
 					break;
 				case Keys.H:
-					if (AArgs.Control)
-						BackSpaceCleanup(AArgs);
+					if (args.Control)
+						BackSpaceCleanup(args);
 					break;
 				case Keys.Back :
-					BackSpaceCleanup(AArgs);
+					BackSpaceCleanup(args);
 					break;
 			}
 		}
 
-		private bool CheckValidKey(char AKey)
+		private bool CheckValidKey(char key)
 		{
-			string LFirstCell = String.Empty, LSecondCell = String.Empty, LThirdCell = String.Empty;
-			string LCurrentCell;
-			ParseDateCells(Text, ref LFirstCell, ref LSecondCell, ref LThirdCell);
+			string firstCell = String.Empty, secondCell = String.Empty, thirdCell = String.Empty;
+			string currentCell;
+			ParseDateCells(Text, ref firstCell, ref secondCell, ref thirdCell);
 			
 			switch (EditingCell)
 			{
 				case DateTimeEditCell.Day:
-					int LMonth = 0;
+					int month = 0;
 					switch (GetFormatCellPos(DateTimeEditCell.Month))
 					{
 						case DateTimeEditCellPos.First:
-							if (LFirstCell != String.Empty)
-								LMonth = Convert.ToInt32(LFirstCell);
+							if (firstCell != String.Empty)
+								month = Convert.ToInt32(firstCell);
 							break;
 						case DateTimeEditCellPos.Second:
-							if (LSecondCell != String.Empty)
-								LMonth = Convert.ToInt32(LSecondCell);
+							if (secondCell != String.Empty)
+								month = Convert.ToInt32(secondCell);
 							break;
 						case DateTimeEditCellPos.Third:
-							if (LThirdCell != String.Empty)
-								LMonth = Convert.ToInt32(LThirdCell);
+							if (thirdCell != String.Empty)
+								month = Convert.ToInt32(thirdCell);
 							break;
 					}
 
-					int LYear = 0;
+					int year = 0;
 					switch (GetFormatCellPos(DateTimeEditCell.Year))
 					{
 						case DateTimeEditCellPos.First:
-							if (LFirstCell != String.Empty)
-								LYear = Convert.ToInt32(LFirstCell);
+							if (firstCell != String.Empty)
+								year = Convert.ToInt32(firstCell);
 							break;
 						case DateTimeEditCellPos.Second:
-							if (LSecondCell != String.Empty)
-								LYear = Convert.ToInt32(LSecondCell);
+							if (secondCell != String.Empty)
+								year = Convert.ToInt32(secondCell);
 							break;
 						case DateTimeEditCellPos.Third:
-							if (LThirdCell != String.Empty)
-								LYear = Convert.ToInt32(LThirdCell);
+							if (thirdCell != String.Empty)
+								year = Convert.ToInt32(thirdCell);
 							break;
 					}
 
 					//Thirty days hath September, April, June and November
 					//all the rest have thirty one except for grandma she drives a Buick.
 					
-					int LMinDay = 1, LMaxDay = 31;
-					switch (LMonth)
+					int minDay = 1, maxDay = 31;
+					switch (month)
 					{
 						case 2:
-							if ((LYear == 0) || DateTime.IsLeapYear(LYear))
-								LMaxDay = 29;
+							if ((year == 0) || DateTime.IsLeapYear(year))
+								maxDay = 29;
 							else
-								LMaxDay = 28;
+								maxDay = 28;
 							break;
 						case 4:
 						case 6:
 						case 9:
 						case 11:
-							LMaxDay = 30;
+							maxDay = 30;
 							break;
 					}
 
 					switch (GetFormatCellPos(DateTimeEditCell.Day))
 					{
-						case DateTimeEditCellPos.First : LCurrentCell = LFirstCell;
+						case DateTimeEditCellPos.First : currentCell = firstCell;
 							break;
-						case DateTimeEditCellPos.Second : LCurrentCell = LSecondCell;
+						case DateTimeEditCellPos.Second : currentCell = secondCell;
 							break;
-						case DateTimeEditCellPos.Third : LCurrentCell = LThirdCell;
+						case DateTimeEditCellPos.Third : currentCell = thirdCell;
 							break;
-						default : LCurrentCell = String.Empty;
+						default : currentCell = String.Empty;
 							break;
 					}
 
 					if (SelectionLength > 0)
-						LCurrentCell = String.Empty;
-					if (LCurrentCell == String.Empty)
-						LMinDay = 0;
-					int LDayToTest = Convert.ToInt32(LCurrentCell + AKey);
-					return (LDayToTest >= LMinDay) && (LDayToTest <= LMaxDay);
+						currentCell = String.Empty;
+					if (currentCell == String.Empty)
+						minDay = 0;
+					int dayToTest = Convert.ToInt32(currentCell + key);
+					return (dayToTest >= minDay) && (dayToTest <= maxDay);
 				case DateTimeEditCell.Month:
 					switch (GetFormatCellPos(DateTimeEditCell.Month))
 					{
-						case DateTimeEditCellPos.First : LCurrentCell = LFirstCell;
+						case DateTimeEditCellPos.First : currentCell = firstCell;
 							break;
-						case DateTimeEditCellPos.Second : LCurrentCell = LSecondCell;
+						case DateTimeEditCellPos.Second : currentCell = secondCell;
 							break;
-						case DateTimeEditCellPos.Third : LCurrentCell = LThirdCell;
+						case DateTimeEditCellPos.Third : currentCell = thirdCell;
 							break;
-						default : LCurrentCell = String.Empty;
+						default : currentCell = String.Empty;
 							break;
 					}
 
-					int LMinMonth = 1, LMaxMonth = 12;
+					int minMonth = 1, maxMonth = 12;
 
 					if (SelectionLength > 0)
-						LCurrentCell = String.Empty;
-					if (LCurrentCell == String.Empty)
-						LMinMonth = 0;
-					int LMonthToTest = Convert.ToInt32(LCurrentCell + AKey);
-					return (LMonthToTest >= LMinMonth) && (LMonthToTest <= LMaxMonth);
+						currentCell = String.Empty;
+					if (currentCell == String.Empty)
+						minMonth = 0;
+					int monthToTest = Convert.ToInt32(currentCell + key);
+					return (monthToTest >= minMonth) && (monthToTest <= maxMonth);
 				default:
 					return true;
 			}
 		}
 
-		protected override void OnKeyPress(KeyPressEventArgs AArgs)
+		protected override void OnKeyPress(KeyPressEventArgs args)
 		{
-			base.OnKeyPress(AArgs);
-			if ((AArgs.KeyChar == '+') || (AArgs.KeyChar == '-'))
+			base.OnKeyPress(args);
+			if ((args.KeyChar == '+') || (args.KeyChar == '-'))
 			{
 				Link.Edit();
-				if (AArgs.KeyChar == '+')
+				if (args.KeyChar == '+')
 					InternalSetDate(Date.AddDays(1));
 				else
 					InternalSetDate(Date.AddDays(-1));
-				AArgs.Handled = true;
+				args.Handled = true;
 			}
-			else if ((DateSeparator.Length > 0) && (DateSeparator[0] == AArgs.KeyChar))
-				AArgs.Handled = !CanAddSeparator();
-			else if ((AArgs.KeyChar >= (char)32) && (AArgs.KeyChar <= (char)255))
-				if (FEditByCell)
-					AArgs.Handled = !CheckValidKey(AArgs.KeyChar);
+			else if ((DateSeparator.Length > 0) && (DateSeparator[0] == args.KeyChar))
+				args.Handled = !CanAddSeparator();
+			else if ((args.KeyChar >= (char)32) && (args.KeyChar <= (char)255))
+				if (_editByCell)
+					args.Handled = !CheckValidKey(args.KeyChar);
 		}
 
-		private bool FInternalDisableAutoComplete;
+		private bool _internalDisableAutoComplete;
 		protected bool InternalDisableAutoComplete
 		{
-			get { return FInternalDisableAutoComplete; }
-			set { FInternalDisableAutoComplete = value; }
+			get { return _internalDisableAutoComplete; }
+			set { _internalDisableAutoComplete = value; }
 		}
 
 		protected override void InternalAutoUpdate()
 		{
-			if (!FAutoComplete || (!InternalDisableAutoComplete && (GetFormatCellPos(EditingCell) == DateTimeEditCellPos.Third)))
+			if (!_autoComplete || (!InternalDisableAutoComplete && (GetFormatCellPos(EditingCell) == DateTimeEditCellPos.Third)))
 				base.InternalAutoUpdate();
 		}
 		
-		protected override void OnTextChanged(EventArgs AArgs)
+		protected override void OnTextChanged(EventArgs args)
 		{
-			base.OnTextChanged(AArgs);
-			if (FAutoComplete && !InternalDisableAutoComplete)
+			base.OnTextChanged(args);
+			if (_autoComplete && !InternalDisableAutoComplete)
 				CheckAddDateSeparator();
 		}
 
@@ -445,44 +445,44 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			SelectionStart = Text.Length;
 		}
 
-		private void ParseDateCells(string AText, ref string AFirstCell, ref string ASecondCell, ref string AThirdCell)
+		private void ParseDateCells(string text, ref string firstCell, ref string secondCell, ref string thirdCell)
 		{
-			string[] LDateStrings = AText.Split(DateSeparator.ToCharArray());
-			AFirstCell = LDateStrings[0];
-			if (LDateStrings.Length > 1)
-				ASecondCell = LDateStrings[1];
-			if (LDateStrings.Length > 2)
-				AThirdCell = LDateStrings[2];
+			string[] dateStrings = text.Split(DateSeparator.ToCharArray());
+			firstCell = dateStrings[0];
+			if (dateStrings.Length > 1)
+				secondCell = dateStrings[1];
+			if (dateStrings.Length > 2)
+				thirdCell = dateStrings[2];
 		}
 
-		private DateTimeEditCellPos GetFormatCellPos(DateTimeEditCell ACell)
+		private DateTimeEditCellPos GetFormatCellPos(DateTimeEditCell cell)
 		{
-			string LFirstCell = String.Empty, LSecondCell = String.Empty, LThirdCell = String.Empty;
-			ParseDateCells(ShortDatePattern.ToUpper(), ref LFirstCell, ref LSecondCell, ref LThirdCell);
-			switch (ACell)
+			string firstCell = String.Empty, secondCell = String.Empty, thirdCell = String.Empty;
+			ParseDateCells(ShortDatePattern.ToUpper(), ref firstCell, ref secondCell, ref thirdCell);
+			switch (cell)
 			{
 				case DateTimeEditCell.Day:
-					if (LFirstCell.IndexOf("D") >= 0)
+					if (firstCell.IndexOf("D") >= 0)
 						return DateTimeEditCellPos.First;
-					if (LSecondCell.IndexOf("D") >= 0)
+					if (secondCell.IndexOf("D") >= 0)
 						return DateTimeEditCellPos.Second;
-					if (LThirdCell.IndexOf("D") >= 0)
+					if (thirdCell.IndexOf("D") >= 0)
 						return DateTimeEditCellPos.Third;
 					return DateTimeEditCellPos.None;
 				case DateTimeEditCell.Month:
-					if (LFirstCell.IndexOf("M") >= 0)
+					if (firstCell.IndexOf("M") >= 0)
 						return DateTimeEditCellPos.First;
-					if (LSecondCell.IndexOf("M") >= 0)
+					if (secondCell.IndexOf("M") >= 0)
 						return DateTimeEditCellPos.Second;
-					if (LThirdCell.IndexOf("M") >= 0)
+					if (thirdCell.IndexOf("M") >= 0)
 						return DateTimeEditCellPos.Third;
 					return DateTimeEditCellPos.None;
 				case DateTimeEditCell.Year:
-					if (LFirstCell.IndexOf("Y") >= 0)
+					if (firstCell.IndexOf("Y") >= 0)
 						return DateTimeEditCellPos.First;
-					if (LSecondCell.IndexOf("Y") >= 0)
+					if (secondCell.IndexOf("Y") >= 0)
 						return DateTimeEditCellPos.Second;
-					if (LThirdCell.IndexOf("Y") >= 0)
+					if (thirdCell.IndexOf("Y") >= 0)
 						return DateTimeEditCellPos.Third;
 					return DateTimeEditCellPos.None;
 				default:
@@ -490,34 +490,34 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		private DateTimeEditCell GetFormatCellType(DateTimeEditCellPos APos)
+		private DateTimeEditCell GetFormatCellType(DateTimeEditCellPos pos)
 		{
-			string LFirstCell = String.Empty, LSecondCell = String.Empty, LThirdCell = String.Empty;
-			ParseDateCells(ShortDatePattern.ToUpper(), ref LFirstCell, ref LSecondCell, ref LThirdCell);
-			switch (APos)
+			string firstCell = String.Empty, secondCell = String.Empty, thirdCell = String.Empty;
+			ParseDateCells(ShortDatePattern.ToUpper(), ref firstCell, ref secondCell, ref thirdCell);
+			switch (pos)
 			{
 				case DateTimeEditCellPos.First:
-					if (LFirstCell.IndexOf("D") >= 0)
+					if (firstCell.IndexOf("D") >= 0)
 						return DateTimeEditCell.Day;
-					if (LFirstCell.IndexOf("M") >= 0)
+					if (firstCell.IndexOf("M") >= 0)
 						return DateTimeEditCell.Month;
-					if (LFirstCell.IndexOf("Y") >= 0)
+					if (firstCell.IndexOf("Y") >= 0)
 						return DateTimeEditCell.Year;
 					return DateTimeEditCell.None;
 				case DateTimeEditCellPos.Second:
-					if (LSecondCell.IndexOf("D") >= 0)
+					if (secondCell.IndexOf("D") >= 0)
 						return DateTimeEditCell.Day;
-					if (LSecondCell.IndexOf("M") >= 0)
+					if (secondCell.IndexOf("M") >= 0)
 						return DateTimeEditCell.Month;
-					if (LSecondCell.IndexOf("Y") >= 0)
+					if (secondCell.IndexOf("Y") >= 0)
 						return DateTimeEditCell.Year;
 					return DateTimeEditCell.None;
 				case DateTimeEditCellPos.Third:
-					if (LThirdCell.IndexOf("D") >= 0)
+					if (thirdCell.IndexOf("D") >= 0)
 						return DateTimeEditCell.Day;
-					if (LThirdCell.IndexOf("M") >= 0)
+					if (thirdCell.IndexOf("M") >= 0)
 						return DateTimeEditCell.Month;
-					if (LThirdCell.IndexOf("Y") >= 0)
+					if (thirdCell.IndexOf("Y") >= 0)
 						return DateTimeEditCell.Year;
 					return DateTimeEditCell.None;
 				default:
@@ -525,24 +525,24 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		private int GetFormatCellLength(DateTimeEditCellPos APos)
+		private int GetFormatCellLength(DateTimeEditCellPos pos)
 		{
-			string LFirstCell = String.Empty, LSecondCell = String.Empty, LThirdCell = String.Empty;
-			ParseDateCells(ShortDatePattern.ToUpper(), ref LFirstCell, ref LSecondCell, ref LThirdCell);
-			switch (GetFormatCellType(APos))
+			string firstCell = String.Empty, secondCell = String.Empty, thirdCell = String.Empty;
+			ParseDateCells(ShortDatePattern.ToUpper(), ref firstCell, ref secondCell, ref thirdCell);
+			switch (GetFormatCellType(pos))
 			{
 				case DateTimeEditCell.Day:
 				case DateTimeEditCell.Month:
 					return 2;
 				default:
-					switch (APos)
+					switch (pos)
 					{
 						case DateTimeEditCellPos.First:
-							return LFirstCell.Length;
+							return firstCell.Length;
 						case DateTimeEditCellPos.Second:
-							return LSecondCell.Length;
+							return secondCell.Length;
 						case DateTimeEditCellPos.Third:
-							return LThirdCell.Length;
+							return thirdCell.Length;
 					}
 					return 0;
 			}
@@ -550,47 +550,47 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private void CheckAddDateSeparator()
 		{
-			string LFirstCell = String.Empty, LSecondCell = String.Empty, LThirdCell = String.Empty, LCurrentCell;
-			ParseDateCells(Text, ref LFirstCell, ref LSecondCell, ref LThirdCell);
-			DateTimeEditCellPos LCellPos;
-			if ((LFirstCell != String.Empty) && (LSecondCell == String.Empty))
+			string firstCell = String.Empty, secondCell = String.Empty, thirdCell = String.Empty, currentCell;
+			ParseDateCells(Text, ref firstCell, ref secondCell, ref thirdCell);
+			DateTimeEditCellPos cellPos;
+			if ((firstCell != String.Empty) && (secondCell == String.Empty))
 			{
-				LCellPos = DateTimeEditCellPos.First;
-				LCurrentCell = LFirstCell;
+				cellPos = DateTimeEditCellPos.First;
+				currentCell = firstCell;
 			}
-			else if ((LSecondCell != String.Empty) && (LThirdCell == String.Empty))
+			else if ((secondCell != String.Empty) && (thirdCell == String.Empty))
 			{
-				LCellPos = DateTimeEditCellPos.Second;
-				LCurrentCell = LSecondCell;
+				cellPos = DateTimeEditCellPos.Second;
+				currentCell = secondCell;
 			}
 			else
 			{
-				LCellPos = DateTimeEditCellPos.None;
-				LCurrentCell = String.Empty;
+				cellPos = DateTimeEditCellPos.None;
+				currentCell = String.Empty;
 			}
 
-			int LFirstSeparatorIndex = Text.IndexOf(FDateTimeFormatInfo.DateSeparator);
-			int LSecondSeparatorIndex = Text.IndexOf(FDateTimeFormatInfo.DateSeparator, LFirstSeparatorIndex + 1);
-			bool LHasFirstDateSeparator = LFirstSeparatorIndex > 0;
-			bool LHasSecondDateSeparator = LSecondSeparatorIndex > LFirstSeparatorIndex;
-			if ((LCellPos == DateTimeEditCellPos.First) && LHasFirstDateSeparator)
-				LCellPos = DateTimeEditCellPos.None;
-			if ((LCellPos == DateTimeEditCellPos.Second) && LHasSecondDateSeparator)
-				LCellPos = DateTimeEditCellPos.None;
-			if ((LCellPos != DateTimeEditCellPos.None) && (LCurrentCell.Length == GetFormatCellLength(LCellPos)))
+			int firstSeparatorIndex = Text.IndexOf(_dateTimeFormatInfo.DateSeparator);
+			int secondSeparatorIndex = Text.IndexOf(_dateTimeFormatInfo.DateSeparator, firstSeparatorIndex + 1);
+			bool hasFirstDateSeparator = firstSeparatorIndex > 0;
+			bool hasSecondDateSeparator = secondSeparatorIndex > firstSeparatorIndex;
+			if ((cellPos == DateTimeEditCellPos.First) && hasFirstDateSeparator)
+				cellPos = DateTimeEditCellPos.None;
+			if ((cellPos == DateTimeEditCellPos.Second) && hasSecondDateSeparator)
+				cellPos = DateTimeEditCellPos.None;
+			if ((cellPos != DateTimeEditCellPos.None) && (currentCell.Length == GetFormatCellLength(cellPos)))
 				AddDateSeparator();
 			else
 			{
-				switch (GetFormatCellType(LCellPos))
+				switch (GetFormatCellType(cellPos))
 				{
 					case DateTimeEditCell.Day:
-						int LDay = Convert.ToInt32(LCurrentCell);
-						if ((LDay >= 4) && (LDay <= 31))
+						int day = Convert.ToInt32(currentCell);
+						if ((day >= 4) && (day <= 31))
 							AddDateSeparator();
 						break;
 					case DateTimeEditCell.Month:
-						int LMonth = Convert.ToInt32(LCurrentCell);
-						if ((LMonth >= 2) && (LMonth <= 12))
+						int month = Convert.ToInt32(currentCell);
+						if ((month >= 2) && (month <= 12))
 							AddDateSeparator();
 						break;
 				}
@@ -599,16 +599,16 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private DateTimeEditCell InternalGetEditingCell()
 		{
-			string LFirstCell = String.Empty, LSecondCell = String.Empty, LThirdCell = String.Empty;
-			ParseDateCells(Text, ref LFirstCell, ref LSecondCell, ref LThirdCell);
-			if (SelectionStart <= LFirstCell.Length)
+			string firstCell = String.Empty, secondCell = String.Empty, thirdCell = String.Empty;
+			ParseDateCells(Text, ref firstCell, ref secondCell, ref thirdCell);
+			if (SelectionStart <= firstCell.Length)
 			{
-				if ((SelectionLength == Text.Length) && (LFirstCell.Length != Text.Length))
+				if ((SelectionLength == Text.Length) && (firstCell.Length != Text.Length))
 					return DateTimeEditCell.None;
 				else
 					return GetFormatCellType(DateTimeEditCellPos.First);
 			}
-			else if (SelectionStart <= (LFirstCell.Length + LSecondCell.Length + DateSeparator.Length))
+			else if (SelectionStart <= (firstCell.Length + secondCell.Length + DateSeparator.Length))
 				return GetFormatCellType(DateTimeEditCellPos.Second);
 			else if (SelectionStart <= Text.Length)
 				return GetFormatCellType(DateTimeEditCellPos.Third);
@@ -616,23 +616,23 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				return DateTimeEditCell.None;
 		}
 
-		private void InternalSetEditCell(DateTimeEditCell AValue)
+		private void InternalSetEditCell(DateTimeEditCell value)
 		{
-			string LFirstCell = String.Empty, LSecondCell = String.Empty, LThirdCell = String.Empty;
-			ParseDateCells(Text, ref LFirstCell, ref LSecondCell, ref LThirdCell);
-			switch (GetFormatCellPos(AValue))
+			string firstCell = String.Empty, secondCell = String.Empty, thirdCell = String.Empty;
+			ParseDateCells(Text, ref firstCell, ref secondCell, ref thirdCell);
+			switch (GetFormatCellPos(value))
 			{
 				case DateTimeEditCellPos.First:
 					SelectionStart = 0;
-					SelectionLength = LFirstCell.Length;
+					SelectionLength = firstCell.Length;
 					break;
 				case DateTimeEditCellPos.Second:
-					SelectionStart = LFirstCell.Length + DateSeparator.Length;
-					SelectionLength = LSecondCell.Length;
+					SelectionStart = firstCell.Length + DateSeparator.Length;
+					SelectionLength = secondCell.Length;
 					break;
 				case DateTimeEditCellPos.Third:
-					SelectionStart = LFirstCell.Length + LSecondCell.Length + (2 * DateSeparator.Length);
-					SelectionLength = LThirdCell.Length;
+					SelectionStart = firstCell.Length + secondCell.Length + (2 * DateSeparator.Length);
+					SelectionLength = thirdCell.Length;
 					break;
 				default:
 					SelectionStart = 0;

@@ -7,26 +7,26 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
 {
     public class ToggleBlockDelimiter : AbstractEditAction
     {
-        public override void Execute(TextArea ATextArea)
+        public override void Execute(TextArea textArea)
         {
             // Add a block delimiter on the current line
 
-            TextLocation LPosition = ATextArea.Caret.Position;
-            LineSegment LSegment = ATextArea.Document.GetLineSegment(LPosition.Y);
-            string LTextContent = ATextArea.Document.GetText(LSegment);
+            TextLocation position = textArea.Caret.Position;
+            LineSegment segment = textArea.Document.GetLineSegment(position.Y);
+            string textContent = textArea.Document.GetText(segment);
 
-            if (LTextContent.IndexOf("//*") == 0)
+            if (textContent.IndexOf("//*") == 0)
             {
-                ATextArea.Document.Remove(LSegment.Offset, 3);
-                ATextArea.Refresh(); // Doesn't refresh properly (if on the last line) without this
+                textArea.Document.Remove(segment.Offset, 3);
+                textArea.Refresh(); // Doesn't refresh properly (if on the last line) without this
             }
             else
             {
-                ATextArea.Document.Insert(LSegment.Offset, "//*");
-                if (LPosition.X == 0)
+                textArea.Document.Insert(segment.Offset, "//*");
+                if (position.X == 0)
                 {
-                    ATextArea.Caret.Position = new TextLocation(3, LPosition.Y);
-                    ATextArea.SetDesiredColumn();
+                    textArea.Caret.Position = new TextLocation(3, position.Y);
+                    textArea.SetDesiredColumn();
                 }
             }
         }

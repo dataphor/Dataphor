@@ -18,83 +18,83 @@ namespace Alphora.Dataphor.DAE.Server
 	// RemoteServerBatch
 	public class RemoteServerBatch : RemoteServerChildObject, IRemoteServerBatch
 	{
-		internal RemoteServerBatch(RemoteServerScript AScript, ServerBatch ABatch) : base()
+		internal RemoteServerBatch(RemoteServerScript script, ServerBatch batch) : base()
 		{
-			FScript = AScript;
-			FServerBatch = ABatch;
+			_script = script;
+			_serverBatch = batch;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			FScript = null;
-			FServerBatch = null;
-			base.Dispose(ADisposing);
-		}
-
-		private RemoteServerScript FScript;
-		public RemoteServerScript Script { get { return FScript; } }
-		
-		IRemoteServerScript IRemoteServerBatch.ServerScript { get { return FScript; } }
-		
-		private ServerBatch FServerBatch;
-		internal ServerBatch ServerBatch { get { return FServerBatch; } }
-		
-		private Exception WrapException(Exception AException)
-		{
-			return RemoteServer.WrapException(AException);
+			_script = null;
+			_serverBatch = null;
+			base.Dispose(disposing);
 		}
 
-		public int Line { get { return FServerBatch.Line; } }
+		private RemoteServerScript _script;
+		public RemoteServerScript Script { get { return _script; } }
+		
+		IRemoteServerScript IRemoteServerBatch.ServerScript { get { return _script; } }
+		
+		private ServerBatch _serverBatch;
+		internal ServerBatch ServerBatch { get { return _serverBatch; } }
+		
+		private Exception WrapException(Exception exception)
+		{
+			return RemoteServer.WrapException(exception);
+		}
+
+		public int Line { get { return _serverBatch.Line; } }
 		
 		public bool IsExpression()
 		{
-			return FServerBatch.IsExpression();
+			return _serverBatch.IsExpression();
 		}
 		
 		public string GetText()
 		{
-			return FServerBatch.GetText();
+			return _serverBatch.GetText();
 		}
 		
-		public void Execute(ref RemoteParamData AParams, ProcessCallInfo ACallInfo)
+		public void Execute(ref RemoteParamData paramsValue, ProcessCallInfo callInfo)
 		{
-			FScript.Process.ProcessCallInfo(ACallInfo);
+			_script.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				RemoteParam[] LParams = new RemoteParam[AParams.Params == null ? 0 : AParams.Params.Length];
-				for (int LIndex = 0; LIndex < (AParams.Params == null ? 0 : AParams.Params.Length); LIndex++)
+				RemoteParam[] localParamsValue = new RemoteParam[paramsValue.Params == null ? 0 : paramsValue.Params.Length];
+				for (int index = 0; index < (paramsValue.Params == null ? 0 : paramsValue.Params.Length); index++)
 				{
-					LParams[LIndex].Name = AParams.Params[LIndex].Name;
-					LParams[LIndex].TypeName = AParams.Params[LIndex].TypeName;
-					LParams[LIndex].Modifier = AParams.Params[LIndex].Modifier;
+					localParamsValue[index].Name = paramsValue.Params[index].Name;
+					localParamsValue[index].TypeName = paramsValue.Params[index].TypeName;
+					localParamsValue[index].Modifier = paramsValue.Params[index].Modifier;
 				}
 				if (IsExpression())
 				{
-					PlanDescriptor LPlanDescriptor;
-					IRemoteServerExpressionPlan LPlan = PrepareExpression(LParams, out LPlanDescriptor);
+					PlanDescriptor planDescriptor;
+					IRemoteServerExpressionPlan plan = PrepareExpression(localParamsValue, out planDescriptor);
 					try
 					{
-						ProgramStatistics LProgramStatistics;
-						LPlan.Close(LPlan.Open(ref AParams, out LProgramStatistics, FScript.Process.EmptyCallInfo()), FScript.Process.EmptyCallInfo());
+						ProgramStatistics programStatistics;
+						plan.Close(plan.Open(ref paramsValue, out programStatistics, _script.Process.EmptyCallInfo()), _script.Process.EmptyCallInfo());
 						// TODO: Provide a mechanism for determining whether or not an expression should be evaluated or opened through the remoting CLI.
 					}
 					finally
 					{
-						UnprepareExpression(LPlan);
+						UnprepareExpression(plan);
 					}
 				}
 				else
 				{
-					PlanDescriptor LPlanDescriptor;
-					IRemoteServerStatementPlan LPlan = PrepareStatement(LParams, out LPlanDescriptor);
+					PlanDescriptor planDescriptor;
+					IRemoteServerStatementPlan plan = PrepareStatement(localParamsValue, out planDescriptor);
 					try
 					{
-						ProgramStatistics LProgramStatistics;
-						LPlan.Execute(ref AParams, out LProgramStatistics, ACallInfo);
+						ProgramStatistics programStatistics;
+						plan.Execute(ref paramsValue, out programStatistics, callInfo);
 					}
 					finally
 					{
-						UnprepareStatement(LPlan);
+						UnprepareStatement(plan);
 					}
 				}
 			}
@@ -104,31 +104,31 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public IRemoteServerPlan Prepare(RemoteParam[] AParams)
+		public IRemoteServerPlan Prepare(RemoteParam[] paramsValue)
 		{
-			PlanDescriptor LPlanDescriptor;
+			PlanDescriptor planDescriptor;
 			if (IsExpression())
-				return PrepareExpression(AParams, out LPlanDescriptor);
+				return PrepareExpression(paramsValue, out planDescriptor);
 			else
-				return PrepareStatement(AParams, out LPlanDescriptor);
+				return PrepareStatement(paramsValue, out planDescriptor);
 		}
 		
-		public void Unprepare(IRemoteServerPlan APlan)
+		public void Unprepare(IRemoteServerPlan plan)
 		{
-			if (APlan  is IRemoteServerExpressionPlan)
-				UnprepareExpression((IRemoteServerExpressionPlan)APlan);
+			if (plan  is IRemoteServerExpressionPlan)
+				UnprepareExpression((IRemoteServerExpressionPlan)plan);
 			else
-				UnprepareStatement((IRemoteServerStatementPlan)APlan);
+				UnprepareStatement((IRemoteServerStatementPlan)plan);
 		}
 		
-		public IRemoteServerExpressionPlan PrepareExpression(RemoteParam[] AParams, out PlanDescriptor APlanDescriptor)
+		public IRemoteServerExpressionPlan PrepareExpression(RemoteParam[] paramsValue, out PlanDescriptor planDescriptor)
 		{
 			try
 			{
-				DataParams LParams = FScript.Process.RemoteParamsToDataParams(AParams);
-				RemoteServerExpressionPlan LRemotePlan = new RemoteServerExpressionPlan(FScript.Process, (ServerExpressionPlan)FServerBatch.PrepareExpression(LParams));
-				APlanDescriptor = FScript.Process.GetPlanDescriptor(LRemotePlan, AParams);
-				return LRemotePlan;
+				DataParams localParamsValue = _script.Process.RemoteParamsToDataParams(paramsValue);
+				RemoteServerExpressionPlan remotePlan = new RemoteServerExpressionPlan(_script.Process, (ServerExpressionPlan)_serverBatch.PrepareExpression(localParamsValue));
+				planDescriptor = _script.Process.GetPlanDescriptor(remotePlan, paramsValue);
+				return remotePlan;
 			}
 			catch (Exception E)
 			{
@@ -136,19 +136,19 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void UnprepareExpression(IRemoteServerExpressionPlan APlan)
+		public void UnprepareExpression(IRemoteServerExpressionPlan plan)
 		{
-			FScript.Process.UnprepareExpression(APlan);
+			_script.Process.UnprepareExpression(plan);
 		}
 		
-		public IRemoteServerStatementPlan PrepareStatement(RemoteParam[] AParams, out PlanDescriptor APlanDescriptor)
+		public IRemoteServerStatementPlan PrepareStatement(RemoteParam[] paramsValue, out PlanDescriptor planDescriptor)
 		{
 			try
 			{
-				DataParams LParams = FScript.Process.RemoteParamsToDataParams(AParams);
-				RemoteServerStatementPlan LRemotePlan = new RemoteServerStatementPlan(FScript.Process, (ServerStatementPlan)FServerBatch.PrepareStatement(LParams));
-				APlanDescriptor = FScript.Process.GetPlanDescriptor(LRemotePlan);
-				return LRemotePlan;
+				DataParams localParamsValue = _script.Process.RemoteParamsToDataParams(paramsValue);
+				RemoteServerStatementPlan remotePlan = new RemoteServerStatementPlan(_script.Process, (ServerStatementPlan)_serverBatch.PrepareStatement(localParamsValue));
+				planDescriptor = _script.Process.GetPlanDescriptor(remotePlan);
+				return remotePlan;
 			}
 			catch (Exception E)
 			{
@@ -156,9 +156,9 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void UnprepareStatement(IRemoteServerStatementPlan APlan)
+		public void UnprepareStatement(IRemoteServerStatementPlan plan)
 		{
-			FScript.Process.UnprepareStatement(APlan);
+			_script.Process.UnprepareStatement(plan);
 		}
 	}
 	
@@ -166,37 +166,37 @@ namespace Alphora.Dataphor.DAE.Server
 	[Serializable]
 	public class RemoteServerBatches : RemoteServerChildObjects, IRemoteServerBatches
 	{		
-		protected override void Validate(RemoteServerChildObject AObject)
+		protected override void Validate(RemoteServerChildObject objectValue)
 		{
-			if (!(AObject is RemoteServerBatch))
+			if (!(objectValue is RemoteServerBatch))
 				throw new ServerException(ServerException.Codes.TypedObjectContainer, "RemoteServerBatch");
 		}
 		
-		public new RemoteServerBatch this[int AIndex]
+		public new RemoteServerBatch this[int index]
 		{
-			get { return (RemoteServerBatch)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (RemoteServerBatch)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		IRemoteServerBatch IRemoteServerBatches.this[int AIndex]
+		IRemoteServerBatch IRemoteServerBatches.this[int index]
 		{
-			get { return (IRemoteServerBatch)base[AIndex]; } 
-			set { base[AIndex] = (RemoteServerBatch)value; } 
+			get { return (IRemoteServerBatch)base[index]; } 
+			set { base[index] = (RemoteServerBatch)value; } 
 		}
 		
 		public RemoteServerBatch[] All
 		{
 			get
 			{
-				RemoteServerBatch[] LArray = new RemoteServerBatch[Count];
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					LArray[LIndex] = this[LIndex];
-				return LArray;
+				RemoteServerBatch[] array = new RemoteServerBatch[Count];
+				for (int index = 0; index < Count; index++)
+					array[index] = this[index];
+				return array;
 			}
 			set
 			{
-				foreach (RemoteServerBatch LBatch in value)
-					Add(LBatch);
+				foreach (RemoteServerBatch batch in value)
+					Add(batch);
 			}
 		}
 	}

@@ -468,10 +468,11 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor from which the rows will be fetched.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="ACount">The number of rows to be fetched.</param>
+        /// <param name='ASkipCurrent'> True if the fetch should skip the current row of the cursor, false to include the current row in the fetch. </param>
 		/// <returns>A FetchResult describing the results of the fetch.</returns>
 		[OperationContract(AsyncPattern = true)]
 		[FaultContract(typeof(DataphorFault))]
-		IAsyncResult BeginFetch(int ACursorHandle, ProcessCallInfo ACallInfo, int ACount, AsyncCallback ACallback, object AState);
+		IAsyncResult BeginFetch(int ACursorHandle, ProcessCallInfo ACallInfo, int ACount, bool ASkipCurrent, AsyncCallback ACallback, object AState);
 		FetchResult EndFetch(IAsyncResult AResult);
 		
 		/// <summary>
@@ -481,10 +482,11 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AHeader">A RemoteRowHeader describing the set of columns to be included in the fetched rows.</param>
 		/// <param name="ACount">The number of rows to be fetched.</param>
+        /// <param name='ASkipCurrent'> True if the fetch should skip the current row of the cursor, false to include the current row in the fetch. </param>
 		/// <returns>A FetchResult describing the results of the fetch.</returns>
 		[OperationContract(AsyncPattern = true)]
 		[FaultContract(typeof(DataphorFault))]
-		IAsyncResult BeginFetchSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, int ACount, AsyncCallback ACallback, object AState);
+		IAsyncResult BeginFetchSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, int ACount, bool ASkipCurrent, AsyncCallback ACallback, object AState);
 		FetchResult EndFetchSpecific(IAsyncResult AResult);
 		
 		/// <summary>
@@ -1000,12 +1002,12 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Seeks on a stream.
 		/// </summary>
 		/// <param name="AStreamHandle">The handle of the stream to be navigated.</param>
-		/// <param name="AOffset">The number of bytes to seek.</param>
+		/// <param name="offset">The number of bytes to seek.</param>
 		/// <param name="AOrigin">The origin of the seek.</param>
 		/// <returns>The new position of the stream.</returns>
 		[OperationContract(AsyncPattern = true)]
 		[FaultContract(typeof(DataphorFault))]
-		IAsyncResult BeginSeekStream(int AStreamHandle, long AOffset, SeekOrigin AOrigin, AsyncCallback ACallback, object AState);
+		IAsyncResult BeginSeekStream(int AStreamHandle, long offset, SeekOrigin AOrigin, AsyncCallback ACallback, object AState);
 		long EndSeekStream(IAsyncResult AResult);
 
 		/// <summary>

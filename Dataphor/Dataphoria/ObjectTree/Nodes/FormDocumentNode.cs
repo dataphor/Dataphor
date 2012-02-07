@@ -6,7 +6,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
     public class FormDocumentNode : DocumentNode
     {
-        public FormDocumentNode(DocumentListNode AParent, string ADocumentName, string ADocumentType) : base(AParent, ADocumentName, ADocumentType) 
+        public FormDocumentNode(DocumentListNode parent, string documentName, string documentType) : base(parent, documentName, documentType) 
         {
             ImageIndex = 10;
             SelectedImageIndex = ImageIndex;
@@ -14,12 +14,12 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
         protected override ContextMenu GetContextMenu()
         {
-            ContextMenu LMenu = base.GetContextMenu();
+            ContextMenu menu = base.GetContextMenu();
 			
-            LMenu.MenuItems.Add(2, new MenuItem(Strings.ObjectTree_CustomizeMenuText, new EventHandler(CustomizeClicked)));
-            LMenu.MenuItems.Add(3, new MenuItem(Strings.ObjectTree_ShowMenuText, new EventHandler(StartClicked), Shortcut.F9));
+            menu.MenuItems.Add(2, new MenuItem(Strings.ObjectTree_CustomizeMenuText, new EventHandler(CustomizeClicked)));
+            menu.MenuItems.Add(3, new MenuItem(Strings.ObjectTree_ShowMenuText, new EventHandler(StartClicked), Shortcut.F9));
 
-            return LMenu;
+            return menu;
         }
 
         private string GetDocumentExpression()
@@ -33,35 +33,35 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
                     );
         }
 
-        private void CustomizeClicked(object ASender, EventArgs AArgs)
+        private void CustomizeClicked(object sender, EventArgs args)
         {
-            Dataphor.Dataphoria.FormDesigner.CustomFormDesigner LDesigner = new Dataphor.Dataphoria.FormDesigner.CustomFormDesigner(Dataphoria, "DFDX");
+            Dataphor.Dataphoria.FormDesigner.CustomFormDesigner designer = new Dataphor.Dataphoria.FormDesigner.CustomFormDesigner(Dataphoria, "DFDX");
             try
             {
-                BOP.Ancestors LAncestors = new BOP.Ancestors();
-                LAncestors.Add(GetDocumentExpression());
-                LDesigner.New(LAncestors);
-                ((IDesigner)LDesigner).Show();
+                BOP.Ancestors ancestors = new BOP.Ancestors();
+                ancestors.Add(GetDocumentExpression());
+                designer.New(ancestors);
+                ((IDesigner)designer).Show();
             }
             catch
             {
-                LDesigner.Dispose();
+                designer.Dispose();
                 throw;
             }
 			
         }
 
-        private void StartClicked(object ASender, EventArgs AArgs)
+        private void StartClicked(object sender, EventArgs args)
         {
-            Frontend.Client.Windows.Session LSession = Dataphoria.GetLiveDesignableFrontendSession();
+            Frontend.Client.Windows.Session session = Dataphoria.GetLiveDesignableFrontendSession();
             try
             {
-                LSession.SetLibrary(LibraryName);
-                LSession.StartCallback(GetDocumentExpression(), null);
+                session.SetLibrary(LibraryName);
+                session.StartCallback(GetDocumentExpression(), null);
             }
             catch
             {
-                LSession.Dispose();
+                session.Dispose();
                 throw;
             }
         }

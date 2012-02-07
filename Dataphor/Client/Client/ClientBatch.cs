@@ -15,94 +15,94 @@ namespace Alphora.Dataphor.DAE.Client
 {
 	public class ClientBatch : ClientObject, IRemoteServerBatch
 	{
-		public ClientBatch(ClientScript AClientScript, BatchDescriptor ABatchDescriptor)
+		public ClientBatch(ClientScript clientScript, BatchDescriptor batchDescriptor)
 		{
-			FClientScript = AClientScript;
-			FBatchDescriptor = ABatchDescriptor;
+			_clientScript = clientScript;
+			_batchDescriptor = batchDescriptor;
 		}
 		
-		private ClientScript FClientScript;
-		public ClientScript ClientScript { get { return FClientScript; } }
+		private ClientScript _clientScript;
+		public ClientScript ClientScript { get { return _clientScript; } }
 		
 		private IClientDataphorService GetServiceInterface()
 		{
-			return FClientScript.ClientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
+			return _clientScript.ClientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
 		}
 		
-		private BatchDescriptor FBatchDescriptor;
+		private BatchDescriptor _batchDescriptor;
 		
-		public int BatchHandle { get { return FBatchDescriptor.Handle; } }
+		public int BatchHandle { get { return _batchDescriptor.Handle; } }
 		
 		#region IRemoteServerBatch Members
 
 		public IRemoteServerScript ServerScript
 		{
-			get { return FClientScript; }
+			get { return _clientScript; }
 		}
 
-		public IRemoteServerPlan Prepare(RemoteParam[] AParams)
+		public IRemoteServerPlan Prepare(RemoteParam[] paramsValue)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginPrepareBatch(BatchHandle, AParams, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				PlanDescriptor LPlanDescriptor = GetServiceInterface().EndPrepareBatch(LResult);
+				IAsyncResult result = GetServiceInterface().BeginPrepareBatch(BatchHandle, paramsValue, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				PlanDescriptor planDescriptor = GetServiceInterface().EndPrepareBatch(result);
 				if (IsExpression())
-					return new ClientExpressionPlan(FClientScript.ClientProcess, LPlanDescriptor);
+					return new ClientExpressionPlan(_clientScript.ClientProcess, planDescriptor);
 				else
-					return new ClientStatementPlan(FClientScript.ClientProcess, LPlanDescriptor);
+					return new ClientStatementPlan(_clientScript.ClientProcess, planDescriptor);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public void Unprepare(IRemoteServerPlan APlan)
+		public void Unprepare(IRemoteServerPlan plan)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginUnprepareBatch(((ClientPlan)APlan).PlanHandle, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndUnprepareBatch(LResult);
+				IAsyncResult result = GetServiceInterface().BeginUnprepareBatch(((ClientPlan)plan).PlanHandle, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndUnprepareBatch(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public IRemoteServerExpressionPlan PrepareExpression(RemoteParam[] AParams, out PlanDescriptor APlanDescriptor)
+		public IRemoteServerExpressionPlan PrepareExpression(RemoteParam[] paramsValue, out PlanDescriptor planDescriptor)
 		{
-			ClientPlan LPlan = (ClientPlan)Prepare(AParams);
-			APlanDescriptor = LPlan.PlanDescriptor;
-			return (IRemoteServerExpressionPlan)LPlan;
+			ClientPlan plan = (ClientPlan)Prepare(paramsValue);
+			planDescriptor = plan.PlanDescriptor;
+			return (IRemoteServerExpressionPlan)plan;
 		}
 
-		public void UnprepareExpression(IRemoteServerExpressionPlan APlan)
+		public void UnprepareExpression(IRemoteServerExpressionPlan plan)
 		{
-			Unprepare(APlan);
+			Unprepare(plan);
 		}
 
-		public IRemoteServerStatementPlan PrepareStatement(RemoteParam[] AParams, out PlanDescriptor APlanDescriptor)
+		public IRemoteServerStatementPlan PrepareStatement(RemoteParam[] paramsValue, out PlanDescriptor planDescriptor)
 		{
-			ClientPlan LPlan = (ClientPlan)Prepare(AParams);
-			APlanDescriptor = LPlan.PlanDescriptor;
-			return (IRemoteServerStatementPlan)LPlan;
+			ClientPlan plan = (ClientPlan)Prepare(paramsValue);
+			planDescriptor = plan.PlanDescriptor;
+			return (IRemoteServerStatementPlan)plan;
 		}
 
-		public void UnprepareStatement(IRemoteServerStatementPlan APlan)
+		public void UnprepareStatement(IRemoteServerStatementPlan plan)
 		{
-			Unprepare(APlan);
+			Unprepare(plan);
 		}
 
-		public void Execute(ref RemoteParamData AParams, ProcessCallInfo ACallInfo)
+		public void Execute(ref RemoteParamData paramsValue, ProcessCallInfo callInfo)
 		{
-			ProgramStatistics LExecuteTime;
+			ProgramStatistics executeTime;
 			if (IsExpression())
-				((IRemoteServerExpressionPlan)Prepare(AParams.Params)).Evaluate(ref AParams, out LExecuteTime, ACallInfo);
+				((IRemoteServerExpressionPlan)Prepare(paramsValue.Params)).Evaluate(ref paramsValue, out executeTime, callInfo);
 			else
-				((IRemoteServerStatementPlan)Prepare(AParams.Params)).Execute(ref AParams, out LExecuteTime, ACallInfo);
+				((IRemoteServerStatementPlan)Prepare(paramsValue.Params)).Execute(ref paramsValue, out executeTime, callInfo);
 		}
 
 		#endregion
@@ -111,26 +111,26 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public bool IsExpression()
 		{
-			return FBatchDescriptor.IsExpression;
+			return _batchDescriptor.IsExpression;
 		}
 
 		public string GetText()
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginGetBatchText(BatchHandle, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetBatchText(LResult);
+				IAsyncResult result = GetServiceInterface().BeginGetBatchText(BatchHandle, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndGetBatchText(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
 		public int Line
 		{
-			get { return FBatchDescriptor.Line; }
+			get { return _batchDescriptor.Line; }
 		}
 
 		#endregion
@@ -140,9 +140,9 @@ namespace Alphora.Dataphor.DAE.Client
 	{
 		#region IRemoteServerBatches Members
 
-		public new IRemoteServerBatch this[int AIndex]
+		public new IRemoteServerBatch this[int index]
 		{
-			get { return this[AIndex]; }
+			get { return this[index]; }
 			set { throw new NotImplementedException(); }
 		}
 

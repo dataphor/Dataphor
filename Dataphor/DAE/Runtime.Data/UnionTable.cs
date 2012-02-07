@@ -22,147 +22,147 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class UnionTable : Table
     {
-		public UnionTable(UnionNode ANode, Program AProgram) : base(ANode, AProgram){}
+		public UnionTable(UnionNode node, Program program) : base(node, program){}
 
-        public new UnionNode Node { get { return (UnionNode)FNode; } }
+        public new UnionNode Node { get { return (UnionNode)_node; } }
         
-		protected Table FLeftTable;
-		protected Table FRightTable;
-		protected Row FSourceRow;
-		protected NativeTable FBuffer;
-		protected Scan FScan;
+		protected Table _leftTable;
+		protected Table _rightTable;
+		protected Row _sourceRow;
+		protected NativeTable _buffer;
+		protected Scan _scan;
         
         protected override void InternalOpen()
         {
-			FSourceRow = new Row(Manager, Node.DataType.RowType);
-			FLeftTable = Node.Nodes[0].Execute(Program) as Table;
+			_sourceRow = new Row(Manager, Node.DataType.RowType);
+			_leftTable = Node.Nodes[0].Execute(Program) as Table;
 			try
 			{
-				FRightTable = Node.Nodes[1].Execute(Program) as Table;
+				_rightTable = Node.Nodes[1].Execute(Program) as Table;
 			}
 			catch
 			{
-				FLeftTable.Dispose();
+				_leftTable.Dispose();
 				throw;
 			}
 			
-			Schema.TableType LTableType = new Schema.TableType();
-			Schema.BaseTableVar LTableVar = new Schema.BaseTableVar(LTableType, Program.TempDevice);
-			Schema.TableVarColumn LNewColumn;
-			foreach (Schema.TableVarColumn LColumn in FLeftTable.Node.TableVar.Columns)
+			Schema.TableType tableType = new Schema.TableType();
+			Schema.BaseTableVar tableVar = new Schema.BaseTableVar(tableType, Program.TempDevice);
+			Schema.TableVarColumn newColumn;
+			foreach (Schema.TableVarColumn column in _leftTable.Node.TableVar.Columns)
 			{
-				LNewColumn = LColumn.Inherit();
-				LTableType.Columns.Add(LColumn.Column);
-				LTableVar.Columns.Add(LColumn);
+				newColumn = column.Inherit();
+				tableType.Columns.Add(column.Column);
+				tableVar.Columns.Add(column);
 			}
 			
-			Schema.Key LKey = new Schema.Key();
-			foreach (Schema.TableVarColumn LColumn in Node.TableVar.Keys.MinimumKey(true).Columns)
-				LKey.Columns.Add(LTableVar.Columns[LColumn.Name]);
-			LTableVar.Keys.Add(LKey);
+			Schema.Key key = new Schema.Key();
+			foreach (Schema.TableVarColumn column in Node.TableVar.Keys.MinimumKey(true).Columns)
+				key.Columns.Add(tableVar.Columns[column.Name]);
+			tableVar.Keys.Add(key);
 			
-			FBuffer = new NativeTable(Manager, LTableVar);
+			_buffer = new NativeTable(Manager, tableVar);
 			PopulateBuffer();
 
-			FScan = new Scan(Manager, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
-			FScan.Open();
+			_scan = new Scan(Manager, _buffer, _buffer.ClusteredIndex, ScanDirection.Forward, null, null);
+			_scan.Open();
         }
         
         protected override void InternalClose()
         {
-			if (FScan != null)
+			if (_scan != null)
 			{
-				FScan.Dispose();
-				FScan = null;
+				_scan.Dispose();
+				_scan = null;
 			}
 			
-			if (FBuffer != null)
+			if (_buffer != null)
 			{
-				FBuffer.Drop(Manager);
-				FBuffer = null;
+				_buffer.Drop(Manager);
+				_buffer = null;
 			}
 			
-			if (FLeftTable != null)
+			if (_leftTable != null)
 			{
-				FLeftTable.Dispose();
-				FLeftTable = null;
+				_leftTable.Dispose();
+				_leftTable = null;
 			}
 
-			if (FRightTable != null)
+			if (_rightTable != null)
 			{
-				FRightTable.Dispose();
-				FRightTable = null;
+				_rightTable.Dispose();
+				_rightTable = null;
 			}
 
-            if (FSourceRow != null)
+            if (_sourceRow != null)
             {
-				FSourceRow.Dispose();
-                FSourceRow = null;
+				_sourceRow.Dispose();
+                _sourceRow = null;
             }
         }
         
         protected void PopulateBuffer()
         {
-			while (FLeftTable.Next())
+			while (_leftTable.Next())
 			{
-				FLeftTable.Select(FSourceRow);
-				FBuffer.Insert(Manager, FSourceRow);
+				_leftTable.Select(_sourceRow);
+				_buffer.Insert(Manager, _sourceRow);
 			}
 			
-			while (FRightTable.Next())
+			while (_rightTable.Next())
 			{
-				FRightTable.Select(FSourceRow);
-				if (!FBuffer.HasRow(Manager, FSourceRow))
-					FBuffer.Insert(Manager, FSourceRow);
+				_rightTable.Select(_sourceRow);
+				if (!_buffer.HasRow(Manager, _sourceRow))
+					_buffer.Insert(Manager, _sourceRow);
 			}
         }
         
         protected override void InternalReset()
         {
-			FLeftTable.Reset();
-			FRightTable.Reset();
-			FScan.Close();
-			FScan.Dispose();
-			FBuffer.Truncate(Manager);
+			_leftTable.Reset();
+			_rightTable.Reset();
+			_scan.Close();
+			_scan.Dispose();
+			_buffer.Truncate(Manager);
 			PopulateBuffer();
-			FScan = new Scan(Manager, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
-			FScan.Open();
+			_scan = new Scan(Manager, _buffer, _buffer.ClusteredIndex, ScanDirection.Forward, null, null);
+			_scan.Open();
         }
         
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-			FScan.GetRow(ARow);
+			_scan.GetRow(row);
         }
         
         protected override bool InternalNext()
         {
-			return FScan.Next();
+			return _scan.Next();
         }
         
         protected override void InternalLast()
         {
-			FScan.Last();
+			_scan.Last();
 			//while (Next()); ??
         }
         
         protected override bool InternalBOF()
         {
-			return FScan.BOF();
+			return _scan.BOF();
         }
         
         protected override bool InternalEOF()
         {
-			return FScan.EOF();
+			return _scan.EOF();
         }
         
         protected override bool InternalPrior()
         {
-			return FScan.Prior();
+			return _scan.Prior();
         }
         
         protected override void InternalFirst()
         {
-			FScan.First();
+			_scan.First();
         }
     }
 }

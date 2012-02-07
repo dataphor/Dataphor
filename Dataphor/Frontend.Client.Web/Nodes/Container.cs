@@ -41,15 +41,15 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// Node
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			return typeof(IWebElement).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
+			return typeof(IWebElement).IsAssignableFrom(childType) || base.IsValidChild(childType);
 		}
 
 		protected bool HasVisibleChild()
 		{
-			foreach (IElement LChild in Children)
-				if (LChild.GetVisible())
+			foreach (IElement child in Children)
+				if (child.GetVisible())
 					return true;
 			return false;
 		}
@@ -59,48 +59,48 @@ namespace Alphora.Dataphor.Frontend.Client.Web
     {
 		// IColumn
 
-		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		protected VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		[DefaultValue(VerticalAlignment.Top)]
 		[Description("When this element is given more space than it can use, this property will control where the element will be placed within it's space.")]
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
-			set	{ FVerticalAlignment = value; }
+			get { return _verticalAlignment; }
+			set	{ _verticalAlignment = value; }
 		}
 		
 		// IWebElement
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
 			if (HasVisibleChild())
 			{
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "1");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
-				string LHint = GetHint();
-				if (LHint != String.Empty)
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LHint, true);
-				switch (FVerticalAlignment)
+				writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+				writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "1");
+				writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+				string hint = GetHint();
+				if (hint != String.Empty)
+					writer.AddAttribute(HtmlTextWriterAttribute.Title, hint, true);
+				switch (_verticalAlignment)
 				{
-					case VerticalAlignment.Middle : AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "middle"); break;
-					case VerticalAlignment.Bottom : AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom"); break;
+					case VerticalAlignment.Middle : writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle"); break;
+					case VerticalAlignment.Bottom : writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom"); break;
 				}
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Table);
+				writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
-				foreach (IWebElement LElement in Children)
+				foreach (IWebElement element in Children)
 				{
-					if (LElement.GetVisible())
+					if (element.GetVisible())
 					{
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
-						AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
-						AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-						LElement.Render(AWriter);
-						AWriter.RenderEndTag();
-						AWriter.RenderEndTag();
+						writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
+						writer.RenderBeginTag(HtmlTextWriterTag.Tr);
+						writer.RenderBeginTag(HtmlTextWriterTag.Td);
+						element.Render(writer);
+						writer.RenderEndTag();
+						writer.RenderEndTag();
 					}
 				}
 
-				AWriter.RenderEndTag();
+				writer.RenderEndTag();
 			}
 		}
     }
@@ -109,91 +109,91 @@ namespace Alphora.Dataphor.Frontend.Client.Web
     {		
 		// IRow
 
-		protected HorizontalAlignment FHorizontalAlignment = HorizontalAlignment.Left;
+		protected HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Left;
 		[DefaultValue(HorizontalAlignment.Left)]
 		public HorizontalAlignment HorizontalAlignment
 		{
-			get { return FHorizontalAlignment; }
-			set { FHorizontalAlignment = value; }
+			get { return _horizontalAlignment; }
+			set { _horizontalAlignment = value; }
 		}
 
 		// IWebElement
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
 			if (HasVisibleChild())
 			{
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "1");
-				string LHint = GetHint();
-				if (LHint != String.Empty)
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LHint, true);
-				switch (FHorizontalAlignment)
+				writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+				writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+				writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "1");
+				string hint = GetHint();
+				if (hint != String.Empty)
+					writer.AddAttribute(HtmlTextWriterAttribute.Title, hint, true);
+				switch (_horizontalAlignment)
 				{
-					case HorizontalAlignment.Center : AWriter.AddAttribute(HtmlTextWriterAttribute.Align, "center"); break;
-					case HorizontalAlignment.Right : AWriter.AddAttribute(HtmlTextWriterAttribute.Align, "right"); break;
+					case HorizontalAlignment.Center : writer.AddAttribute(HtmlTextWriterAttribute.Align, "center"); break;
+					case HorizontalAlignment.Right : writer.AddAttribute(HtmlTextWriterAttribute.Align, "right"); break;
 				}
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Table);
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+				writer.RenderBeginTag(HtmlTextWriterTag.Table);
+				writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
+				writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-				foreach (IWebElement LElement in Children)
+				foreach (IWebElement element in Children)
 				{
-					if (LElement.GetVisible())
+					if (element.GetVisible())
 					{
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "top");
-						AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-						LElement.Render(AWriter);
-						AWriter.RenderEndTag();
+						writer.AddAttribute(HtmlTextWriterAttribute.Valign, "top");
+						writer.RenderBeginTag(HtmlTextWriterTag.Td);
+						element.Render(writer);
+						writer.RenderEndTag();
 					}
 				}
 
-				AWriter.RenderEndTag();
-				AWriter.RenderEndTag();
+				writer.RenderEndTag();
+				writer.RenderEndTag();
 			}
 		}
     }
     
 	public abstract class SingleElementContainer : ContainerElement
 	{
-		private IWebElement FChild;
-		protected IWebElement Child { get { return FChild; } }
+		private IWebElement _child;
+		protected IWebElement Child { get { return _child; } }
 
 		// Element
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			if ((FChild != null) && FChild.GetVisible())
-				FChild.Render(AWriter);
+			if ((_child != null) && _child.GetVisible())
+				_child.Render(writer);
 		}
 
 		// Node
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
 			return 
-				(typeof(IWebElement).IsAssignableFrom(AChildType) && (FChild == null)) ||
-				base.IsValidChild(AChildType);
+				(typeof(IWebElement).IsAssignableFrom(childType) && (_child == null)) ||
+				base.IsValidChild(childType);
 		}
 
-		protected override void InvalidChildError(INode AChild) 
+		protected override void InvalidChildError(INode child) 
 		{
 			throw new ClientException(ClientException.Codes.UseSingleElementNode);
 		}
 		
-		protected override void AddChild(INode AChild)
+		protected override void AddChild(INode child)
 		{
-			base.AddChild(AChild);
-			if (AChild is IWebElement)
-				FChild = (IWebElement)AChild;
+			base.AddChild(child);
+			if (child is IWebElement)
+				_child = (IWebElement)child;
 		}
 
-		protected override void RemoveChild(INode AChild)
+		protected override void RemoveChild(INode child)
 		{
-			if (AChild == FChild)
-				FChild = null;
-			base.RemoveChild(AChild);
+			if (child == _child)
+				_child = null;
+			base.RemoveChild(child);
 		}
 	}
 
@@ -201,49 +201,49 @@ namespace Alphora.Dataphor.Frontend.Client.Web
     {
 		// Title
 
-		protected string FTitle = String.Empty;
+		protected string _title = String.Empty;
 		public string Title
 		{
-			get { return FTitle; }
-			set { FTitle = value; }
+			get { return _title; }
+			set { _title = value; }
 		}
 
 		public virtual string GetTitle()
 		{
-			return Session.RemoveAccellerator(FTitle);
+			return Session.RemoveAccellerator(_title);
 		}
 
 		// IWebElement
 		
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "group");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "1");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "7");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "100%");
-			string LTemp = GetHint();
-			if (LTemp != String.Empty)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LTemp, true);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Table);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "group");
+			writer.AddAttribute(HtmlTextWriterAttribute.Border, "1");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "7");
+			writer.AddAttribute(HtmlTextWriterAttribute.Width, "100%");
+			string temp = GetHint();
+			if (temp != String.Empty)
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, temp, true);
+			writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
-			LTemp = GetTitle();
-			if (LTemp != String.Empty)
+			temp = GetTitle();
+			if (temp != String.Empty)
 			{
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Caption);
-				AWriter.Write(HttpUtility.HtmlEncode(LTemp));
-				AWriter.RenderEndTag();
+				writer.RenderBeginTag(HtmlTextWriterTag.Caption);
+				writer.Write(HttpUtility.HtmlEncode(temp));
+				writer.RenderEndTag();
 			}
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+			writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-			base.InternalRender(AWriter);
+			base.InternalRender(writer);
 
-			AWriter.RenderEndTag();	// TD
-			AWriter.RenderEndTag();	// TR
-			AWriter.RenderEndTag();	// TABLE
+			writer.RenderEndTag();	// TD
+			writer.RenderEndTag();	// TR
+			writer.RenderEndTag();	// TABLE
 		}
     }
 }

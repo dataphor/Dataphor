@@ -424,93 +424,93 @@ namespace Alphora.Dataphor.DAE.Runtime
 		}
 
 		// Resource manager for this exception class
-		private static ResourceManager FResourceManager = new ResourceManager("Alphora.Dataphor.DAE.Runtime.RuntimeException", typeof(RuntimeException).Assembly);
+		private static ResourceManager _resourceManager = new ResourceManager("Alphora.Dataphor.DAE.Runtime.RuntimeException", typeof(RuntimeException).Assembly);
 
 		// Constructors
-		public RuntimeException(Codes AErrorCode) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) {}
-		public RuntimeException(Codes AErrorCode, PlanNode AContext) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null)
+		public RuntimeException(Codes errorCode) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null) {}
+		public RuntimeException(Codes errorCode, PlanNode context) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null)
 		{
-			SetContext(AContext);
+			SetContext(context);
 		}
-		public RuntimeException(Codes AErrorCode, DebugLocator ALocator) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null)
+		public RuntimeException(Codes errorCode, DebugLocator locator) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null)
 		{
-			SetLocator(ALocator);
-		}
-		
-		public RuntimeException(Codes AErrorCode, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) {}
-		public RuntimeException(Codes AErrorCode, PlanNode AContext, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) 
-		{
-			SetContext(AContext);
-		}
-		public RuntimeException(Codes AErrorCode, DebugLocator ALocator, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) 
-		{
-			SetLocator(ALocator);
+			SetLocator(locator);
 		}
 		
-		public RuntimeException(Codes AErrorCode, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) {}
-		public RuntimeException(Codes AErrorCode, Exception AInnerException, PlanNode AContext) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) 
+		public RuntimeException(Codes errorCode, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, paramsValue) {}
+		public RuntimeException(Codes errorCode, PlanNode context, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, paramsValue) 
 		{
-			SetContext(AContext);
+			SetContext(context);
 		}
-		public RuntimeException(Codes AErrorCode, Exception AInnerException, DebugLocator ALocator) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) 
+		public RuntimeException(Codes errorCode, DebugLocator locator, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, paramsValue) 
 		{
-			SetLocator(ALocator);
-		}
-		
-		public RuntimeException(Codes AErrorCode, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) {}
-		public RuntimeException(Codes AErrorCode, Exception AInnerException, PlanNode AContext, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) 
-		{
-			SetContext(AContext);
-		}
-		public RuntimeException(Codes AErrorCode, Exception AInnerException, DebugLocator ALocator, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) 
-		{
-			SetLocator(ALocator);
+			SetLocator(locator);
 		}
 		
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null) {}
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, PlanNode AContext) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null)
+		public RuntimeException(Codes errorCode, Exception innerException) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, null) {}
+		public RuntimeException(Codes errorCode, Exception innerException, PlanNode context) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, null) 
 		{
-			SetContext(AContext);
+			SetContext(context);
 		}
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, DebugLocator ALocator) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null)
+		public RuntimeException(Codes errorCode, Exception innerException, DebugLocator locator) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, null) 
 		{
-			SetLocator(ALocator);
-		}
-		
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) {}
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, PlanNode AContext, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) 
-		{
-			SetContext(AContext);
-		}
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, DebugLocator ALocator, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) 
-		{
-			SetLocator(ALocator);
+			SetLocator(locator);
 		}
 		
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) {}
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, PlanNode AContext) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) 
+		public RuntimeException(Codes errorCode, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, paramsValue) {}
+		public RuntimeException(Codes errorCode, Exception innerException, PlanNode context, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, paramsValue) 
 		{
-			SetContext(AContext);
+			SetContext(context);
 		}
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, DebugLocator ALocator) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) 
+		public RuntimeException(Codes errorCode, Exception innerException, DebugLocator locator, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, paramsValue) 
 		{
-			SetLocator(ALocator);
+			SetLocator(locator);
 		}
 		
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, PlanNode AContext, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) 
+		public RuntimeException(Codes errorCode, ErrorSeverity severity) : base(_resourceManager, (int)errorCode, severity, null, null) {}
+		public RuntimeException(Codes errorCode, ErrorSeverity severity, PlanNode context) : base(_resourceManager, (int)errorCode, severity, null, null)
 		{
-			SetContext(AContext);
+			SetContext(context);
 		}
-		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, DebugLocator ALocator, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) 
+		public RuntimeException(Codes errorCode, ErrorSeverity severity, DebugLocator locator) : base(_resourceManager, (int)errorCode, severity, null, null)
 		{
-			SetLocator(ALocator);
+			SetLocator(locator);
+		}
+		
+		public RuntimeException(Codes errorCode, ErrorSeverity severity, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) {}
+		public RuntimeException(Codes errorCode, ErrorSeverity severity, PlanNode context, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) 
+		{
+			SetContext(context);
+		}
+		public RuntimeException(Codes errorCode, ErrorSeverity severity, DebugLocator locator, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) 
+		{
+			SetLocator(locator);
+		}
+		
+		public RuntimeException(Codes errorCode, ErrorSeverity severity, Exception innerException) : base(_resourceManager, (int)errorCode, severity, innerException, null) {}
+		public RuntimeException(Codes errorCode, ErrorSeverity severity, Exception innerException, PlanNode context) : base(_resourceManager, (int)errorCode, severity, innerException, null) 
+		{
+			SetContext(context);
+		}
+		public RuntimeException(Codes errorCode, ErrorSeverity severity, Exception innerException, DebugLocator locator) : base(_resourceManager, (int)errorCode, severity, innerException, null) 
+		{
+			SetLocator(locator);
+		}
+		
+		public RuntimeException(Codes errorCode, ErrorSeverity severity, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) {}
+		public RuntimeException(Codes errorCode, ErrorSeverity severity, Exception innerException, PlanNode context, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) 
+		{
+			SetContext(context);
+		}
+		public RuntimeException(Codes errorCode, ErrorSeverity severity, Exception innerException, DebugLocator locator, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) 
+		{
+			SetLocator(locator);
 		}
 		
 		public override string GetDetails()
 		{
-			if (FContext != null)
-				return String.Format("Exception occurred while executing the following code: {0}", FContext);
+			if (_context != null)
+				return String.Format("Exception occurred while executing the following code: {0}", _context);
 			
 			return base.GetDetails();
 		}
@@ -519,74 +519,74 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			get
 			{
-				if (FLine > -1)
-					return String.Format("{0} ({1}{2}:{3})", base.Message, FLocator == null ? "" : (FLocator + "@"), FLine, FLinePos);
+				if (_line > -1)
+					return String.Format("{0} ({1}{2}:{3})", base.Message, _locator == null ? "" : (_locator + "@"), _line, _linePos);
 					
 				return base.Message;
 			}
 		}
 		
-		private string FLocator;
+		private string _locator;
 		public string Locator
 		{
-			get { return FLocator; }
-			set { FLocator = value; }
+			get { return _locator; }
+			set { _locator = value; }
 		}
 
-		private int FLine = -1;
+		private int _line = -1;
 		public int Line
 		{
-			get { return FLine; }
-			set { FLine = value; }
+			get { return _line; }
+			set { _line = value; }
 		}
 		
-		private int FLinePos = -1;
+		private int _linePos = -1;
 		public int LinePos
 		{
-			get { return FLinePos; }
-			set { FLinePos = value; }
+			get { return _linePos; }
+			set { _linePos = value; }
 		}
 		
-		private string FContext = null;
+		private string _context = null;
 		public string Context
 		{
-			get { return FContext; }
-			set { FContext = value; }
+			get { return _context; }
+			set { _context = value; }
 		}
 		
 		public bool HasContext()
 		{
-			return (FLine > -1) || (FContext != null);
+			return (_line > -1) || (_context != null);
 		}
 		
-		public void SetContext(PlanNode APlanNode)
+		public void SetContext(PlanNode planNode)
 		{
-			if (APlanNode.Line > -1)
+			if (planNode.Line > -1)
 			{
-				FLine = APlanNode.Line;
-				FLinePos = APlanNode.LinePos;
+				_line = planNode.Line;
+				_linePos = planNode.LinePos;
 			}
 			else
-				FContext = APlanNode.SafeEmitStatementAsString();
+				_context = planNode.SafeEmitStatementAsString();
 		}
 
-		public void SetLocator(DebugLocator ALocator)
+		public void SetLocator(DebugLocator locator)
 		{
-			if (ALocator != null)
+			if (locator != null)
 			{
-				FLocator = ALocator.Locator;
-				FLine = ALocator.Line;
-				FLinePos = ALocator.LinePos;
+				_locator = locator.Locator;
+				_line = locator.Line;
+				_linePos = locator.LinePos;
 			}
 		}
 
-		public RuntimeException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, string ALocator, int ALine, int ALinePos, string AContext, DataphorException AInnerException) 
-			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		public RuntimeException(ErrorSeverity severity, int code, string message, string details, string serverContext, string locator, int line, int linePos, string context, DataphorException innerException) 
+			: base(severity, code, message, details, serverContext, innerException)
 		{
-			FLocator = ALocator;
-			FLine = ALine;
-			FLinePos = ALinePos;
-			FContext = AContext;
+			_locator = locator;
+			_line = line;
+			_linePos = linePos;
+			_context = context;
 		}
 	}
 }

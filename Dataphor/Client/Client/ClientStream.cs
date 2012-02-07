@@ -19,22 +19,22 @@ namespace Alphora.Dataphor.DAE.Client
 {
 	public class ClientStream : StreamBase, IRemoteStream
 	{
-		public ClientStream(ClientProcess AClientProcess, int AStreamHandle)
+		public ClientStream(ClientProcess clientProcess, int streamHandle)
 		{
-			FClientProcess = AClientProcess;
-			FStreamHandle = AStreamHandle;
+			_clientProcess = clientProcess;
+			_streamHandle = streamHandle;
 		}
 		
-		private ClientProcess FClientProcess;
-		public ClientProcess ClientProcess { get { return FClientProcess; } }
+		private ClientProcess _clientProcess;
+		public ClientProcess ClientProcess { get { return _clientProcess; } }
 		
 		private IClientDataphorService GetServiceInterface()
 		{
-			return FClientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
+			return _clientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
 		}
 		
-		private int FStreamHandle;
-		public int StreamHandle { get { return FStreamHandle; } }
+		private int _streamHandle;
+		public int StreamHandle { get { return _streamHandle; } }
 		
 		public override long Length
 		{
@@ -42,28 +42,28 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				try
 				{
-					IAsyncResult LResult = GetServiceInterface().BeginGetStreamLength(FStreamHandle, null, null);
-					LResult.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetStreamLength(LResult);
+					IAsyncResult result = GetServiceInterface().BeginGetStreamLength(_streamHandle, null, null);
+					result.AsyncWaitHandle.WaitOne();
+					return GetServiceInterface().EndGetStreamLength(result);
 				}
-				catch (FaultException<DataphorFault> LFault)
+				catch (FaultException<DataphorFault> fault)
 				{
-					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+					throw DataphorFaultUtility.FaultToException(fault.Detail);
 				}
 			}
 		}
 		
-		public override void SetLength(long AValue)
+		public override void SetLength(long tempValue)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginSetStreamLength(FStreamHandle, AValue, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndSetStreamLength(LResult);
+				IAsyncResult result = GetServiceInterface().BeginSetStreamLength(_streamHandle, tempValue, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndSetStreamLength(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 		
@@ -73,59 +73,59 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				try
 				{
-					IAsyncResult LResult = GetServiceInterface().BeginGetStreamPosition(FStreamHandle, null, null);
-					LResult.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetStreamPosition(LResult);
+					IAsyncResult result = GetServiceInterface().BeginGetStreamPosition(_streamHandle, null, null);
+					result.AsyncWaitHandle.WaitOne();
+					return GetServiceInterface().EndGetStreamPosition(result);
 				}
-				catch (FaultException<DataphorFault> LFault)
+				catch (FaultException<DataphorFault> fault)
 				{
-					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+					throw DataphorFaultUtility.FaultToException(fault.Detail);
 				}
 			}
 			set
 			{
 				try
 				{
-					IAsyncResult LResult = GetServiceInterface().BeginSetStreamPosition(FStreamHandle, value, null, null);
-					LResult.AsyncWaitHandle.WaitOne();
-					GetServiceInterface().EndSetStreamPosition(LResult);
+					IAsyncResult result = GetServiceInterface().BeginSetStreamPosition(_streamHandle, value, null, null);
+					result.AsyncWaitHandle.WaitOne();
+					GetServiceInterface().EndSetStreamPosition(result);
 				}
-				catch (FaultException<DataphorFault> LFault)
+				catch (FaultException<DataphorFault> fault)
 				{
-					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+					throw DataphorFaultUtility.FaultToException(fault.Detail);
 				}
 			}
 		}
 		
-		public override int Read(byte[] ABuffer, int AOffset, int ACount)
+		public override int Read(byte[] buffer, int offset, int count)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginReadStream(FStreamHandle, ACount, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				byte[] LBytes = GetServiceInterface().EndReadStream(LResult);
-				Array.Copy(LBytes, 0, ABuffer, AOffset, LBytes.Length); // ?? Should the buffer bytes beyond the read bytes be cleared?
-				return LBytes.Length;
+				IAsyncResult result = GetServiceInterface().BeginReadStream(_streamHandle, count, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				byte[] bytes = GetServiceInterface().EndReadStream(result);
+				Array.Copy(bytes, 0, buffer, offset, bytes.Length); // ?? Should the buffer bytes beyond the read bytes be cleared?
+				return bytes.Length;
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 		
-		public override void Write(byte[] ABuffer, int AOffset, int ACount)
+		public override void Write(byte[] buffer, int offset, int count)
 		{
 			try
 			{
-				byte[] LBytes = new byte[ACount];
-				Array.Copy(ABuffer, AOffset, LBytes, 0, ACount);
-				IAsyncResult LResult = GetServiceInterface().BeginWriteStream(FStreamHandle, LBytes, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndWriteStream(LResult);
+				byte[] bytes = new byte[count];
+				Array.Copy(buffer, offset, bytes, 0, count);
+				IAsyncResult result = GetServiceInterface().BeginWriteStream(_streamHandle, bytes, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndWriteStream(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
@@ -135,13 +135,13 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				try
 				{
-					IAsyncResult LResult = GetServiceInterface().BeginCloseStream(FStreamHandle, null, null);
-					LResult.AsyncWaitHandle.WaitOne();
-					GetServiceInterface().EndCloseStream(LResult);
+					IAsyncResult result = GetServiceInterface().BeginCloseStream(_streamHandle, null, null);
+					result.AsyncWaitHandle.WaitOne();
+					GetServiceInterface().EndCloseStream(result);
 				}
-				catch (FaultException<DataphorFault> LFault)
+				catch (FaultException<DataphorFault> fault)
 				{
-					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+					throw DataphorFaultUtility.FaultToException(fault.Detail);
 				}
 			}
 			finally
@@ -157,9 +157,9 @@ namespace Alphora.Dataphor.DAE.Client
 			get { return Length; }
 		}
 
-		void IRemoteStream.SetLength(long AValue)
+		void IRemoteStream.SetLength(long tempValue)
 		{
-			SetLength(AValue);
+			SetLength(tempValue);
 		}
 
 		long IRemoteStream.Position
@@ -188,9 +188,9 @@ namespace Alphora.Dataphor.DAE.Client
 			get { return CanWrite; }
 		}
 
-		int IRemoteStream.Read(byte[] ABuffer, int AOffset, int ACount)
+		int IRemoteStream.Read(byte[] buffer, int offset, int count)
 		{
-			return Read(ABuffer, AOffset, ACount);
+			return Read(buffer, offset, count);
 		}
 
 		int IRemoteStream.ReadByte()
@@ -198,19 +198,19 @@ namespace Alphora.Dataphor.DAE.Client
 			return ReadByte();
 		}
 
-		long IRemoteStream.Seek(long AOffset, SeekOrigin AOrigin)
+		long IRemoteStream.Seek(long offset, SeekOrigin origin)
 		{
-			return Seek(AOffset, AOrigin);
+			return Seek(offset, origin);
 		}
 
-		void IRemoteStream.Write(byte[] ABuffer, int AOffset, int ACount)
+		void IRemoteStream.Write(byte[] buffer, int offset, int count)
 		{
-			Write(ABuffer, AOffset, ACount);
+			Write(buffer, offset, count);
 		}
 
-		void IRemoteStream.WriteByte(byte AByte)
+		void IRemoteStream.WriteByte(byte byteValue)
 		{
-			WriteByte(AByte);
+			WriteByte(byteValue);
 		}
 
 		void IRemoteStream.Close()

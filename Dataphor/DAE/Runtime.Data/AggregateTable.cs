@@ -22,65 +22,65 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class AggregateTable : Table
     {
-		public AggregateTable(AggregateNode ANode, Program AProgram) : base(ANode, AProgram){}
+		public AggregateTable(AggregateNode node, Program program) : base(node, program){}
 
-        public new AggregateNode Node { get { return (AggregateNode)FNode; } }
+        public new AggregateNode Node { get { return (AggregateNode)_node; } }
         
-		protected Table FSourceTable;
-		protected Row FSourceRow;
+		protected Table _sourceTable;
+		protected Row _sourceRow;
         
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Program);
-			FSourceRow = new Row(Manager, FSourceTable.DataType.RowType);
+			_sourceTable = (Table)Node.Nodes[0].Execute(Program);
+			_sourceRow = new Row(Manager, _sourceTable.DataType.RowType);
         }
         
         protected override void InternalClose()
         {
-			if (FSourceTable != null)
+			if (_sourceTable != null)
 			{
-				FSourceTable.Dispose();
-				FSourceTable = null;
+				_sourceTable.Dispose();
+				_sourceTable = null;
 			}
 			
-            if (FSourceRow != null)
+            if (_sourceRow != null)
             {
-				FSourceRow.Dispose();
-                FSourceRow = null;
+				_sourceRow.Dispose();
+                _sourceRow = null;
             }
         }
         
         protected override void InternalReset()
         {
-			FSourceTable.Reset();
+			_sourceTable.Reset();
         }
         
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-			FSourceTable.Select(FSourceRow);
-			FSourceRow.CopyTo(ARow);
+			_sourceTable.Select(_sourceRow);
+			_sourceRow.CopyTo(row);
 			
-			Program.Stack.Push(FSourceRow);
+			Program.Stack.Push(_sourceRow);
 			try
 			{
-				int LNodeIndex;
-				int LColumnIndex;
-				for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
+				int nodeIndex;
+				int columnIndex;
+				for (int index = 0; index < DataType.Columns.Count; index++)
 				{
-					LColumnIndex = ARow.DataType.Columns.IndexOfName(DataType.Columns[LIndex].Name);
-					if (LColumnIndex >= 0)
+					columnIndex = row.DataType.Columns.IndexOfName(DataType.Columns[index].Name);
+					if (columnIndex >= 0)
 					{
-						LNodeIndex = (LIndex - Node.AggregateColumnOffset) + 1;
-						if (LNodeIndex >= 1)
+						nodeIndex = (index - Node.AggregateColumnOffset) + 1;
+						if (nodeIndex >= 1)
 						{
-							ARow[LColumnIndex] = Node.Nodes[LNodeIndex].Execute(Program);
+							row[columnIndex] = Node.Nodes[nodeIndex].Execute(Program);
 						}
 						else
 						{
-							if (FSourceRow.HasValue(LIndex))
-								ARow[LColumnIndex] = FSourceRow[LIndex];
+							if (_sourceRow.HasValue(index))
+								row[columnIndex] = _sourceRow[index];
 							else
-								ARow.ClearValue(LColumnIndex);
+								row.ClearValue(columnIndex);
 						}
 					}
 				}
@@ -93,68 +93,68 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override bool InternalNext()
         {
-			return FSourceTable.Next();
+			return _sourceTable.Next();
         }
         
         protected override bool InternalBOF()
         {
-			return FSourceTable.BOF();
+			return _sourceTable.BOF();
         }
         
         protected override bool InternalEOF()
         {
-			return FSourceTable.EOF();
+			return _sourceTable.EOF();
         }
         
         protected override bool InternalPrior()
         {
-			return FSourceTable.Prior();
+			return _sourceTable.Prior();
         }
         
         protected override void InternalFirst()
         {
-			FSourceTable.First();
+			_sourceTable.First();
         }
         
         protected override Row InternalGetBookmark()
         {
-			return FSourceTable.GetBookmark();
+			return _sourceTable.GetBookmark();
         }
 
-		protected override bool InternalGotoBookmark(Row ABookmark, bool AForward)
+		protected override bool InternalGotoBookmark(Row bookmark, bool forward)
         {
-			return FSourceTable.GotoBookmark(ABookmark, AForward);
+			return _sourceTable.GotoBookmark(bookmark, forward);
         }
         
-        protected override int InternalCompareBookmarks(Row ABookmark1, Row ABookmark2)
+        protected override int InternalCompareBookmarks(Row bookmark1, Row bookmark2)
         {
-			return FSourceTable.CompareBookmarks(ABookmark1, ABookmark2);
+			return _sourceTable.CompareBookmarks(bookmark1, bookmark2);
         }
 
         protected override Row InternalGetKey()
         {
-			return FSourceTable.GetKey();
+			return _sourceTable.GetKey();
         }
 
-		protected override bool InternalFindKey(Row ARow, bool AForward)
+		protected override bool InternalFindKey(Row row, bool forward)
         {
-			return FSourceTable.FindKey(ARow, AForward);
+			return _sourceTable.FindKey(row, forward);
         }
         
-        protected override void InternalFindNearest(Row ARow)
+        protected override void InternalFindNearest(Row row)
         {
-			FSourceTable.FindNearest(ARow);
+			_sourceTable.FindNearest(row);
         }
         
-        protected override bool InternalRefresh(Row ARow)
+        protected override bool InternalRefresh(Row row)
         {					
-			return FSourceTable.Refresh(ARow);
+			return _sourceTable.Refresh(row);
         }
 
         // ICountable
         protected override int InternalRowCount()
         {
-			return FSourceTable.RowCount();
+			return _sourceTable.RowCount();
         }
     }
 }

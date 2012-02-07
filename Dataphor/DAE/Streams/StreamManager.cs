@@ -85,17 +85,17 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#if USE_UNSAFE
 		
-		public unsafe void Write(byte[] ABuffer, int AOffset)
+		public unsafe void Write(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((StreamID*)LBufferPtr) = (StreamID)Value;
 			}
 		}
 		
-		public static unsafe StreamID Read(byte[] ABuffer, int AOffset)
+		public static unsafe StreamID Read(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				return *((StreamID*)LBufferPtr);
 			}
@@ -103,14 +103,14 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		#else
 
-		public void Write(byte[] ABuffer, int AOffset)
+		public void Write(byte[] ABuffer, int offset)
 		{
-			ByteArrayUtility.WriteInt64(ABuffer, AOffset, (long)Value);
+			ByteArrayUtility.WriteInt64(ABuffer, offset, (long)Value);
 		}
 
-		public static StreamID Read(byte[] ABuffer, int AOffset)
+		public static StreamID Read(byte[] ABuffer, int offset)
 		{
-			return new StreamID((ulong)ByteArrayUtility.ReadInt64(ABuffer, AOffset));
+			return new StreamID((ulong)ByteArrayUtility.ReadInt64(ABuffer, offset));
 		}
 		
 		#endif
@@ -147,14 +147,14 @@ namespace Alphora.Dataphor.DAE.Streams
 	public abstract class StreamManager : Disposable
 	{
 		public abstract StreamID Allocate();
-		public abstract StreamID Reference(StreamID AStreamID);
-		public abstract void Deallocate(StreamID AStreamID);
-		public abstract Stream Open(int AOwnerID, StreamID AStreamID, LockMode AMode);
-		public IRemoteStream OpenRemote(int AOwnerID, StreamID AStreamID, LockMode AMode)
+		public abstract StreamID Reference(StreamID streamID);
+		public abstract void Deallocate(StreamID streamID);
+		public abstract Stream Open(int ownerID, StreamID streamID, LockMode mode);
+		public IRemoteStream OpenRemote(int ownerID, StreamID streamID, LockMode mode)
 		{
-			return (IRemoteStream)Open(AOwnerID, AStreamID, AMode);
+			return (IRemoteStream)Open(ownerID, streamID, mode);
 		}
-		public abstract void Close(int AOwnerID, StreamID AStreamID);
+		public abstract void Close(int ownerID, StreamID streamID);
 	}
 	
 	public interface IStreamProvider : IDisposable
@@ -167,10 +167,10 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 	public abstract class StreamProvider : Disposable, IStreamProvider
 	{
-		public abstract Stream Open(StreamID AStreamID);
-		public abstract void Close(StreamID AStreamID);
-		public abstract void Destroy(StreamID AStreamID);
-		public abstract void Reassign(StreamID AOldStreamID, StreamID ANewStreamID);
+		public abstract Stream Open(StreamID streamID);
+		public abstract void Close(StreamID streamID);
+		public abstract void Destroy(StreamID streamID);
+		public abstract void Reassign(StreamID oldStreamID, StreamID newStreamID);
 	}
 }
 

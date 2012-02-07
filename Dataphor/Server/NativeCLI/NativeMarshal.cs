@@ -23,380 +23,380 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	/// </summary>
 	public static class NativeMarshal
 	{
-		public static ScalarType DataTypeNameToScalarType(Schema.DataTypes ADataTypes, string ANativeDataTypeName)
+		public static ScalarType DataTypeNameToScalarType(Schema.DataTypes dataTypes, string nativeDataTypeName)
 		{
-			switch (ANativeDataTypeName.ToLower())
+			switch (nativeDataTypeName.ToLower())
 			{
-				case "byte[]" : return ADataTypes.SystemBinary;
+				case "byte[]" : return dataTypes.SystemBinary;
 				case "bool" :
-				case "boolean" : return ADataTypes.SystemBoolean;
-				case "byte" : return ADataTypes.SystemByte;
-				case "date" : return ADataTypes.SystemDate;
-				case "datetime" : return ADataTypes.SystemDateTime;
-				case "decimal" : return ADataTypes.SystemDecimal;
-				case "exception" : return ADataTypes.SystemError;
-				case "guid" : return ADataTypes.SystemGuid;
+				case "boolean" : return dataTypes.SystemBoolean;
+				case "byte" : return dataTypes.SystemByte;
+				case "date" : return dataTypes.SystemDate;
+				case "datetime" : return dataTypes.SystemDateTime;
+				case "decimal" : return dataTypes.SystemDecimal;
+				case "exception" : return dataTypes.SystemError;
+				case "guid" : return dataTypes.SystemGuid;
 				case "int32" :
-				case "integer" : return ADataTypes.SystemInteger;
+				case "integer" : return dataTypes.SystemInteger;
 				case "int64" :
-				case "long" : return ADataTypes.SystemLong;
-				case "money" : return ADataTypes.SystemMoney;
+				case "long" : return dataTypes.SystemLong;
+				case "money" : return dataTypes.SystemMoney;
 				case "int16" :
-				case "short" : return ADataTypes.SystemShort;
-				case "string" : return ADataTypes.SystemString;
-				case "time" : return ADataTypes.SystemTime;
-				case "timespan" : return ADataTypes.SystemTimeSpan;
-				default: throw new ArgumentException(String.Format("Invalid native data type name: \"{0}\".", ANativeDataTypeName));
+				case "short" : return dataTypes.SystemShort;
+				case "string" : return dataTypes.SystemString;
+				case "time" : return dataTypes.SystemTime;
+				case "timespan" : return dataTypes.SystemTimeSpan;
+				default: throw new ArgumentException(String.Format("Invalid native data type name: \"{0}\".", nativeDataTypeName));
 			}
 		}
 		
-		public static string DataTypeToDataTypeName(Schema.DataTypes ADataTypes, IDataType ADataType)
+		public static string DataTypeToDataTypeName(Schema.DataTypes dataTypes, IDataType dataType)
 		{
-			ScalarType LScalarType = ADataType as ScalarType;
-			if (LScalarType != null)
-				return ScalarTypeToDataTypeName(ADataTypes, LScalarType);
+			ScalarType scalarType = dataType as ScalarType;
+			if (scalarType != null)
+				return ScalarTypeToDataTypeName(dataTypes, scalarType);
 			
 			throw new NotSupportedException("Non-scalar-valued attributes are not supported.");
 		}
 		
-		public static string ScalarTypeToDataTypeName(Schema.DataTypes ADataTypes, ScalarType AScalarType)
+		public static string ScalarTypeToDataTypeName(Schema.DataTypes dataTypes, ScalarType scalarType)
 		{
-			if (AScalarType.NativeType == NativeAccessors.AsBoolean.NativeType) return "Boolean";
-			if (AScalarType.NativeType == NativeAccessors.AsByte.NativeType) return "Byte";
-			if (AScalarType.NativeType == NativeAccessors.AsByteArray.NativeType) return "Byte[]";
-			if (AScalarType.NativeType == NativeAccessors.AsDateTime.NativeType)
+			if (scalarType.NativeType == NativeAccessors.AsBoolean.NativeType) return "Boolean";
+			if (scalarType.NativeType == NativeAccessors.AsByte.NativeType) return "Byte";
+			if (scalarType.NativeType == NativeAccessors.AsByteArray.NativeType) return "Byte[]";
+			if (scalarType.NativeType == NativeAccessors.AsDateTime.NativeType)
 			{
-				if (AScalarType.Is(ADataTypes.SystemDateTime)) return "DateTime";
-				if (AScalarType.Is(ADataTypes.SystemDate)) return "Date";
-				if (AScalarType.Is(ADataTypes.SystemTime)) return "Time";
+				if (scalarType.Is(dataTypes.SystemDateTime)) return "DateTime";
+				if (scalarType.Is(dataTypes.SystemDate)) return "Date";
+				if (scalarType.Is(dataTypes.SystemTime)) return "Time";
 			}
-			if (AScalarType.NativeType == NativeAccessors.AsDecimal.NativeType) return "Decimal";
-			if (AScalarType.NativeType == NativeAccessors.AsException.NativeType) return "Exception";
-			if (AScalarType.NativeType == NativeAccessors.AsGuid.NativeType) return "Guid";
-			if (AScalarType.NativeType == NativeAccessors.AsInt16.NativeType) return "Int16";
-			if (AScalarType.NativeType == NativeAccessors.AsInt32.NativeType) return "Int32";
-			if (AScalarType.NativeType == NativeAccessors.AsInt64.NativeType) return "Int64";
-			if (AScalarType.NativeType == NativeAccessors.AsString.NativeType) return "String";
-			if (AScalarType.NativeType == NativeAccessors.AsTimeSpan.NativeType) return "TimeSpan";
-			throw new ArgumentException(String.Format("Scalar type \"{0}\" has no native type.", AScalarType.Name));
+			if (scalarType.NativeType == NativeAccessors.AsDecimal.NativeType) return "Decimal";
+			if (scalarType.NativeType == NativeAccessors.AsException.NativeType) return "Exception";
+			if (scalarType.NativeType == NativeAccessors.AsGuid.NativeType) return "Guid";
+			if (scalarType.NativeType == NativeAccessors.AsInt16.NativeType) return "Int16";
+			if (scalarType.NativeType == NativeAccessors.AsInt32.NativeType) return "Int32";
+			if (scalarType.NativeType == NativeAccessors.AsInt64.NativeType) return "Int64";
+			if (scalarType.NativeType == NativeAccessors.AsString.NativeType) return "String";
+			if (scalarType.NativeType == NativeAccessors.AsTimeSpan.NativeType) return "TimeSpan";
+			throw new ArgumentException(String.Format("Scalar type \"{0}\" has no native type.", scalarType.Name));
 		}
 		
-		public static NativeColumn[] ColumnsToNativeColumns(Schema.DataTypes ADataTypes, Columns AColumns)
+		public static NativeColumn[] ColumnsToNativeColumns(Schema.DataTypes dataTypes, Columns columns)
 		{
-			NativeColumn[] LColumns = new NativeColumn[AColumns.Count];
-			for (int LIndex = 0; LIndex < AColumns.Count; LIndex++)
-				LColumns[LIndex] = 
+			NativeColumn[] localColumns = new NativeColumn[columns.Count];
+			for (int index = 0; index < columns.Count; index++)
+				localColumns[index] = 
 					new NativeColumn 
 					{ 
-						Name = AColumns[LIndex].Name, 
-						DataTypeName = DataTypeToDataTypeName(ADataTypes, AColumns[LIndex].DataType) 
+						Name = columns[index].Name, 
+						DataTypeName = DataTypeToDataTypeName(dataTypes, columns[index].DataType) 
 					};
 			
-			return LColumns;
+			return localColumns;
 		}
 		
-		public static Columns NativeColumnsToColumns(Schema.DataTypes ADataTypes, NativeColumn[] ANativeColumns)
+		public static Columns NativeColumnsToColumns(Schema.DataTypes dataTypes, NativeColumn[] nativeColumns)
 		{
-			Columns LColumns = new Columns();
-			for (int LIndex = 0; LIndex < ANativeColumns.Length; LIndex++)
-				LColumns.Add(new Column(ANativeColumns[LIndex].Name, DataTypeNameToScalarType(ADataTypes, ANativeColumns[LIndex].DataTypeName)));
-			return LColumns;
+			Columns columns = new Columns();
+			for (int index = 0; index < nativeColumns.Length; index++)
+				columns.Add(new Column(nativeColumns[index].Name, DataTypeNameToScalarType(dataTypes, nativeColumns[index].DataTypeName)));
+			return columns;
 		}
 		
-		public static TableVar NativeTableToTableVar(ServerProcess AProcess, NativeTableValue ANativeTable)
+		public static TableVar NativeTableToTableVar(ServerProcess process, NativeTableValue nativeTable)
 		{
-			using (Plan LPlan = new Plan(AProcess))
+			using (Plan plan = new Plan(process))
 			{
-				return NativeTableToTableVar(LPlan, ANativeTable);
+				return NativeTableToTableVar(plan, nativeTable);
 			}
 		}
 		
-		public static TableVar NativeTableToTableVar(Plan APlan, NativeTableValue ANativeTable)
+		public static TableVar NativeTableToTableVar(Plan plan, NativeTableValue nativeTable)
 		{
-			TableType LTableType = new TableType();
-			foreach (Column LColumn in NativeColumnsToColumns(APlan.DataTypes, ANativeTable.Columns))
-				LTableType.Columns.Add(LColumn);
+			TableType tableType = new TableType();
+			foreach (Column column in NativeColumnsToColumns(plan.DataTypes, nativeTable.Columns))
+				tableType.Columns.Add(column);
 
-			BaseTableVar LTableVar = new BaseTableVar(LTableType);
-			LTableVar.EnsureTableVarColumns();
-			if (ANativeTable.Keys != null)
+			BaseTableVar tableVar = new BaseTableVar(tableType);
+			tableVar.EnsureTableVarColumns();
+			if (nativeTable.Keys != null)
 			{
-				foreach (NativeKey LNativeKey in ANativeTable.Keys)
+				foreach (NativeKey nativeKey in nativeTable.Keys)
 				{
-					Key LKey = new Key();
-					foreach (string LColumnName in LNativeKey.KeyColumns)
-						LKey.Columns.Add(LTableVar.Columns[LColumnName]);
-					LTableVar.Keys.Add(LKey);
+					Key key = new Key();
+					foreach (string columnName in nativeKey.KeyColumns)
+						key.Columns.Add(tableVar.Columns[columnName]);
+					tableVar.Keys.Add(key);
 				}
 			}
-			Compiler.EnsureKey(APlan, LTableVar);
-			return LTableVar;
+			Compiler.EnsureKey(plan, tableVar);
+			return tableVar;
 		}
 		
-		public static DataValue NativeValueToDataValue(ServerProcess AProcess, NativeValue ANativeValue)
+		public static DataValue NativeValueToDataValue(ServerProcess process, NativeValue nativeValue)
 		{
-			NativeScalarValue LNativeScalar = ANativeValue as NativeScalarValue;
-			if (LNativeScalar != null)
-				return new Scalar(AProcess.ValueManager, DataTypeNameToScalarType(AProcess.DataTypes, LNativeScalar.DataTypeName), LNativeScalar.Value);
+			NativeScalarValue nativeScalar = nativeValue as NativeScalarValue;
+			if (nativeScalar != null)
+				return new Scalar(process.ValueManager, DataTypeNameToScalarType(process.DataTypes, nativeScalar.DataTypeName), nativeScalar.Value);
 			
-			NativeListValue LNativeList = ANativeValue as NativeListValue;
-			if (LNativeList != null)
+			NativeListValue nativeList = nativeValue as NativeListValue;
+			if (nativeList != null)
 			{
-				ListValue LList = new ListValue(AProcess.ValueManager, AProcess.DataTypes.SystemList, LNativeList.Elements == null ? null : new NativeList());
-				if (LNativeList.Elements != null)
-					for (int LIndex = 0; LIndex < LNativeList.Elements.Length; LIndex++)
-						LList.Add(NativeValueToDataValue(AProcess, LNativeList.Elements[LIndex]));
-				return LList;
+				ListValue list = new ListValue(process.ValueManager, process.DataTypes.SystemList, nativeList.Elements == null ? null : new NativeList());
+				if (nativeList.Elements != null)
+					for (int index = 0; index < nativeList.Elements.Length; index++)
+						list.Add(NativeValueToDataValue(process, nativeList.Elements[index]));
+				return list;
 			}
 			
-			NativeRowValue LNativeRow = ANativeValue as NativeRowValue;
-			if (LNativeRow != null)
+			NativeRowValue nativeRow = nativeValue as NativeRowValue;
+			if (nativeRow != null)
 			{
-				Row LRow = new Row(AProcess.ValueManager, new Schema.RowType(NativeColumnsToColumns(AProcess.DataTypes, LNativeRow.Columns)));
-				if (LNativeRow.Values == null)
-					LRow.AsNative = null;
+				Row row = new Row(process.ValueManager, new Schema.RowType(NativeColumnsToColumns(process.DataTypes, nativeRow.Columns)));
+				if (nativeRow.Values == null)
+					row.AsNative = null;
 				else
 				{
-					for (int LIndex = 0; LIndex < LNativeRow.Values.Length; LIndex++)
-						LRow[LIndex] = LNativeRow.Values[LIndex];
+					for (int index = 0; index < nativeRow.Values.Length; index++)
+						row[index] = nativeRow.Values[index];
 				}
-				return LRow;
+				return row;
 			}
 			
-			NativeTableValue LNativeTable = ANativeValue as NativeTableValue;
-			if (LNativeTable != null)
+			NativeTableValue nativeTable = nativeValue as NativeTableValue;
+			if (nativeTable != null)
 			{
-				NativeTable LInternalTable = new NativeTable(AProcess.ValueManager, NativeTableToTableVar(AProcess, LNativeTable));
-				TableValue LTable = new TableValue(AProcess.ValueManager, LInternalTable); 
-				if (LNativeTable.Rows == null)
-					LTable.AsNative = null;
+				NativeTable internalTable = new NativeTable(process.ValueManager, NativeTableToTableVar(process, nativeTable));
+				TableValue table = new TableValue(process.ValueManager, internalTable); 
+				if (nativeTable.Rows == null)
+					table.AsNative = null;
 				else
 				{
-					for (int LIndex = 0; LIndex < LNativeTable.Rows.Length; LIndex++)
+					for (int index = 0; index < nativeTable.Rows.Length; index++)
 					{
-						Row LRow = new Row(AProcess.ValueManager, LInternalTable.RowType);
+						Row row = new Row(process.ValueManager, internalTable.RowType);
 						try
 						{
-							for (int LColumnIndex = 0; LColumnIndex < LNativeTable.Rows[LIndex].Length; LColumnIndex++)
-								LRow[LColumnIndex] = LNativeTable.Rows[LIndex][LColumnIndex];
-							LInternalTable.Insert(AProcess.ValueManager, LRow);
+							for (int columnIndex = 0; columnIndex < nativeTable.Rows[index].Length; columnIndex++)
+								row[columnIndex] = nativeTable.Rows[index][columnIndex];
+							internalTable.Insert(process.ValueManager, row);
 						}
 						catch (Exception)
 						{
-							LRow.Dispose();
+							row.Dispose();
 							throw;
 						}
 					}
 				}
-				return LTable;
+				return table;
 			}
 			
-			throw new NotSupportedException(String.Format("Unknown native value type: \"{0}\".", ANativeValue.GetType().Name));
+			throw new NotSupportedException(String.Format("Unknown native value type: \"{0}\".", nativeValue.GetType().Name));
 		}
 		
-		public static NativeValue DataTypeToNativeValue(IServerProcess AProcess, IDataType ADataType)
+		public static NativeValue DataTypeToNativeValue(IServerProcess process, IDataType dataType)
 		{
-			ScalarType LScalarType = ADataType as ScalarType;
-			if (LScalarType != null)
+			ScalarType scalarType = dataType as ScalarType;
+			if (scalarType != null)
 			{
-				NativeScalarValue LNativeScalar = new NativeScalarValue();
-				LNativeScalar.DataTypeName = ScalarTypeToDataTypeName(AProcess.DataTypes, LScalarType);
-				return LNativeScalar;
+				NativeScalarValue nativeScalar = new NativeScalarValue();
+				nativeScalar.DataTypeName = ScalarTypeToDataTypeName(process.DataTypes, scalarType);
+				return nativeScalar;
 			}
 			
-			ListType LListType = ADataType as ListType;
-			if (LListType != null)
+			ListType listType = dataType as ListType;
+			if (listType != null)
 			{
-				NativeListValue LNativeList = new NativeListValue();
-				return LNativeList;
+				NativeListValue nativeList = new NativeListValue();
+				return nativeList;
 			}
 			
-			RowType LRowType = ADataType as RowType;
-			if (LRowType != null)
+			RowType rowType = dataType as RowType;
+			if (rowType != null)
 			{
-				NativeRowValue LNativeRow = new NativeRowValue();
-				LNativeRow.Columns = ColumnsToNativeColumns(AProcess.DataTypes, LRowType.Columns);
-				return LNativeRow;
+				NativeRowValue nativeRow = new NativeRowValue();
+				nativeRow.Columns = ColumnsToNativeColumns(process.DataTypes, rowType.Columns);
+				return nativeRow;
 			}
 			
-			TableType LTableType = ADataType as TableType;
-			if (LTableType != null)
+			TableType tableType = dataType as TableType;
+			if (tableType != null)
 			{
-				NativeTableValue LNativeTable = new NativeTableValue();
-				LNativeTable.Columns = ColumnsToNativeColumns(AProcess.DataTypes, LTableType.Columns);
-				return LNativeTable;
+				NativeTableValue nativeTable = new NativeTableValue();
+				nativeTable.Columns = ColumnsToNativeColumns(process.DataTypes, tableType.Columns);
+				return nativeTable;
 			}
 				
-			throw new NotSupportedException(String.Format("Values of type \"{0}\" are not supported.", ADataType.Name));
+			throw new NotSupportedException(String.Format("Values of type \"{0}\" are not supported.", dataType.Name));
 		}
 		
-		public static NativeValue DataValueToNativeValue(IServerProcess AProcess, DataValue ADataValue)
+		public static NativeValue DataValueToNativeValue(IServerProcess process, DataValue dataValue)
 		{
-			Scalar LScalar = ADataValue as Scalar;
-			if (LScalar != null)
+			Scalar scalar = dataValue as Scalar;
+			if (scalar != null)
 			{
-				NativeScalarValue LNativeScalar = new NativeScalarValue();
-				LNativeScalar.DataTypeName = ScalarTypeToDataTypeName(AProcess.DataTypes, LScalar.DataType);
-				LNativeScalar.Value = ADataValue.IsNil ? null : LScalar.AsNative;
-				return LNativeScalar;
+				NativeScalarValue nativeScalar = new NativeScalarValue();
+				nativeScalar.DataTypeName = ScalarTypeToDataTypeName(process.DataTypes, scalar.DataType);
+				nativeScalar.Value = dataValue.IsNil ? null : scalar.AsNative;
+				return nativeScalar;
 			}
 			
-			ListValue LList = ADataValue as ListValue;
-			if (LList != null)
+			ListValue list = dataValue as ListValue;
+			if (list != null)
 			{
-				NativeListValue LNativeList = new NativeListValue();
-				if (!LList.IsNil)
+				NativeListValue nativeList = new NativeListValue();
+				if (!list.IsNil)
 				{
-					LNativeList.Elements = new NativeValue[LList.Count()];
-					for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
-						LNativeList.Elements[LIndex] = DataValueToNativeValue(AProcess, LList.GetValue(LIndex));
+					nativeList.Elements = new NativeValue[list.Count()];
+					for (int index = 0; index < list.Count(); index++)
+						nativeList.Elements[index] = DataValueToNativeValue(process, list.GetValue(index));
 				}
-				return LNativeList;
+				return nativeList;
 			}
 			
-			Row LRow = ADataValue as Row;
-			if (LRow != null)
+			Row row = dataValue as Row;
+			if (row != null)
 			{
-				NativeRowValue LNativeRow = new NativeRowValue();
-				LNativeRow.Columns = ColumnsToNativeColumns(AProcess.DataTypes, LRow.DataType.Columns);
+				NativeRowValue nativeRow = new NativeRowValue();
+				nativeRow.Columns = ColumnsToNativeColumns(process.DataTypes, row.DataType.Columns);
 					
-				if (!LRow.IsNil)
+				if (!row.IsNil)
 				{
-					LNativeRow.Values = new object[LNativeRow.Columns.Length];
-					for (int LIndex = 0; LIndex < LNativeRow.Values.Length; LIndex++)
-						LNativeRow.Values[LIndex] = LRow[LIndex];
+					nativeRow.Values = new object[nativeRow.Columns.Length];
+					for (int index = 0; index < nativeRow.Values.Length; index++)
+						nativeRow.Values[index] = row[index];
 				}
-				return LNativeRow;
+				return nativeRow;
 			}
 			
-			Table LTable = ADataValue as Table;
-			if (LTable != null)
+			Table table = dataValue as Table;
+			if (table != null)
 			{
-				NativeTableValue LNativeTable = new NativeTableValue();
-				LNativeTable.Columns = ColumnsToNativeColumns(AProcess.DataTypes, LTable.DataType.Columns);
+				NativeTableValue nativeTable = new NativeTableValue();
+				nativeTable.Columns = ColumnsToNativeColumns(process.DataTypes, table.DataType.Columns);
 					
-				List<object[]> LNativeRows = new List<object[]>();
+				List<object[]> nativeRows = new List<object[]>();
 
-				if (!LTable.BOF())
-					LTable.First();
+				if (!table.BOF())
+					table.First();
 					
-				while (LTable.Next())
+				while (table.Next())
 				{
-					using (Row LCurrentRow = LTable.Select())
+					using (Row currentRow = table.Select())
 					{
-						object[] LNativeRow = new object[LNativeTable.Columns.Length];
-						for (int LIndex = 0; LIndex < LNativeTable.Columns.Length; LIndex++)
-							LNativeRow[LIndex] = LCurrentRow[LIndex];
-						LNativeRows.Add(LNativeRow);
+						object[] nativeRow = new object[nativeTable.Columns.Length];
+						for (int index = 0; index < nativeTable.Columns.Length; index++)
+							nativeRow[index] = currentRow[index];
+						nativeRows.Add(nativeRow);
 					}
 				}
 				
-				LNativeTable.Rows = LNativeRows.ToArray();
-				return LNativeTable;
+				nativeTable.Rows = nativeRows.ToArray();
+				return nativeTable;
 			}
 			
-			throw new NotSupportedException(String.Format("Values of type \"{0}\" are not supported.", ADataValue.DataType.Name));
+			throw new NotSupportedException(String.Format("Values of type \"{0}\" are not supported.", dataValue.DataType.Name));
 		}
 		
-		public static NativeTableValue TableVarToNativeTableValue(IServerProcess AProcess, TableVar ATableVar)
+		public static NativeTableValue TableVarToNativeTableValue(IServerProcess process, TableVar tableVar)
 		{
-			NativeTableValue LNativeTable = new NativeTableValue();
-			LNativeTable.Columns = ColumnsToNativeColumns(AProcess.DataTypes, ATableVar.DataType.Columns);
-			LNativeTable.Keys = new NativeKey[ATableVar.Keys.Count];
-			for (int LIndex = 0; LIndex < ATableVar.Keys.Count; LIndex++)
+			NativeTableValue nativeTable = new NativeTableValue();
+			nativeTable.Columns = ColumnsToNativeColumns(process.DataTypes, tableVar.DataType.Columns);
+			nativeTable.Keys = new NativeKey[tableVar.Keys.Count];
+			for (int index = 0; index < tableVar.Keys.Count; index++)
 			{
-				LNativeTable.Keys[LIndex] = new NativeKey();
-				LNativeTable.Keys[LIndex].KeyColumns = ATableVar.Keys[LIndex].Columns.ColumnNames;
+				nativeTable.Keys[index] = new NativeKey();
+				nativeTable.Keys[index].KeyColumns = tableVar.Keys[index].Columns.ColumnNames;
 			}
 			
-			return LNativeTable;
+			return nativeTable;
 		}
 		
-		public static NativeValue ServerCursorToNativeValue(IServerProcess AProcess, IServerCursor ACursor)
+		public static NativeValue ServerCursorToNativeValue(IServerProcess process, IServerCursor cursor)
 		{
-			NativeTableValue LNativeTable = TableVarToNativeTableValue(AProcess, ACursor.Plan.TableVar);
+			NativeTableValue nativeTable = TableVarToNativeTableValue(process, cursor.Plan.TableVar);
 				
-			List<object[]> LNativeRows = new List<object[]>();
+			List<object[]> nativeRows = new List<object[]>();
 			
-			Row LCurrentRow = ACursor.Plan.RequestRow();
+			Row currentRow = cursor.Plan.RequestRow();
 			try
 			{
-				while (ACursor.Next())
+				while (cursor.Next())
 				{
-					ACursor.Select(LCurrentRow);
-					object[] LNativeRow = new object[LNativeTable.Columns.Length];
-					for (int LIndex = 0; LIndex < LNativeTable.Columns.Length; LIndex++)
-						LNativeRow[LIndex] = LCurrentRow[LIndex];
-					LNativeRows.Add(LNativeRow);
+					cursor.Select(currentRow);
+					object[] nativeRow = new object[nativeTable.Columns.Length];
+					for (int index = 0; index < nativeTable.Columns.Length; index++)
+						nativeRow[index] = currentRow[index];
+					nativeRows.Add(nativeRow);
 				}
 			}
 			finally
 			{
-				ACursor.Plan.ReleaseRow(LCurrentRow);
+				cursor.Plan.ReleaseRow(currentRow);
 			}
 			
-			LNativeTable.Rows = LNativeRows.ToArray();
+			nativeTable.Rows = nativeRows.ToArray();
 			
-			return LNativeTable;
+			return nativeTable;
 		}
 		
-		public static DataParams NativeParamsToDataParams(IServerProcess AProcess, NativeParam[] ANativeParams)
+		public static DataParams NativeParamsToDataParams(IServerProcess process, NativeParam[] nativeParams)
 		{
-			DataParams LDataParams = new DataParams();
-			for (int LIndex = 0; LIndex < ANativeParams.Length; LIndex++)
+			DataParams dataParams = new DataParams();
+			for (int index = 0; index < nativeParams.Length; index++)
 			{
-				NativeParam LNativeParam = ANativeParams[LIndex];
-				DataParam LDataParam = 
+				NativeParam nativeParam = nativeParams[index];
+				DataParam dataParam = 
 					new DataParam
 					(
-						LNativeParam.Name, 
-						DataTypeNameToScalarType(AProcess.DataTypes, LNativeParam.DataTypeName), 
-						NativeCLIUtility.NativeModifierToModifier(LNativeParam.Modifier), 
-						LNativeParam.Value
+						nativeParam.Name, 
+						DataTypeNameToScalarType(process.DataTypes, nativeParam.DataTypeName), 
+						NativeCLIUtility.NativeModifierToModifier(nativeParam.Modifier), 
+						nativeParam.Value
 					);
-				LDataParams.Add(LDataParam);
+				dataParams.Add(dataParam);
 			}
-			return LDataParams;
+			return dataParams;
 		}
 		
-		public static void SetNativeOutputParams(IServerProcess AProcess, NativeParam[] ANativeParams, DataParams ADataParams)
+		public static void SetNativeOutputParams(IServerProcess process, NativeParam[] nativeParams, DataParams dataParams)
 		{
-			for (int LIndex = 0; LIndex < ANativeParams.Length; LIndex++)
+			for (int index = 0; index < nativeParams.Length; index++)
 			{
-				NativeParam LNativeParam = ANativeParams[LIndex];
-				if ((LNativeParam.Modifier == NativeModifier.Var) || (LNativeParam.Modifier == NativeModifier.Out))
+				NativeParam nativeParam = nativeParams[index];
+				if ((nativeParam.Modifier == NativeModifier.Var) || (nativeParam.Modifier == NativeModifier.Out))
 				{
-					DataParam LDataParam = ADataParams[LIndex];
-					LNativeParam.Value = LDataParam.Value;
+					DataParam dataParam = dataParams[index];
+					nativeParam.Value = dataParam.Value;
 				}
 			}
 		}
 		
-		public static NativeParam[] DataParamsToNativeParams(IServerProcess AProcess, DataParams ADataParams)
+		public static NativeParam[] DataParamsToNativeParams(IServerProcess process, DataParams dataParams)
 		{
-			NativeParam[] LNativeParams = new NativeParam[ADataParams.Count];
-			for (int LIndex = 0; LIndex < ADataParams.Count; LIndex++)
+			NativeParam[] nativeParams = new NativeParam[dataParams.Count];
+			for (int index = 0; index < dataParams.Count; index++)
 			{
-				DataParam LDataParam = ADataParams[LIndex];
-				LNativeParams[LIndex] =	
+				DataParam dataParam = dataParams[index];
+				nativeParams[index] =	
 					new NativeParam() 
 					{
-						Name = LDataParam.Name, 
-						DataTypeName = DataTypeToDataTypeName(AProcess.DataTypes, LDataParam.DataType),
-						Modifier = NativeCLIUtility.ModifierToNativeModifier(LDataParam.Modifier),
-						Value = LDataParam.Value
+						Name = dataParam.Name, 
+						DataTypeName = DataTypeToDataTypeName(process.DataTypes, dataParam.DataType),
+						Modifier = NativeCLIUtility.ModifierToNativeModifier(dataParam.Modifier),
+						Value = dataParam.Value
 					};
 			}
-			return LNativeParams;
+			return nativeParams;
 		}
 		
-		public static void SetDataOutputParams(IServerProcess AProcess, DataParams ADataParams, NativeParam[] ANativeParams)
+		public static void SetDataOutputParams(IServerProcess process, DataParams dataParams, NativeParam[] nativeParams)
 		{
-			for (int LIndex = 0; LIndex < ADataParams.Count; LIndex++)
+			for (int index = 0; index < dataParams.Count; index++)
 			{
-				DataParam LDataParam = ADataParams[LIndex];
-				if ((LDataParam.Modifier == Modifier.Var) || (LDataParam.Modifier == Modifier.Out))
-					LDataParam.Value = ANativeParams[LIndex].Value;
+				DataParam dataParam = dataParams[index];
+				if ((dataParam.Modifier == Modifier.Var) || (dataParam.Modifier == Modifier.Out))
+					dataParam.Value = nativeParams[index].Value;
 			}
 		}
 	}

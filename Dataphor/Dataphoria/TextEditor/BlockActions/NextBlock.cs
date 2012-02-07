@@ -5,14 +5,14 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
 {
     public class NextBlock : BaseBlockAction
     {
-        public override void Execute(TextArea ATextArea)
+        public override void Execute(TextArea textArea)
         {
-            if (ATextArea.Document.TextLength > 0)
+            if (textArea.Document.TextLength > 0)
             {                
-                int LNextBlock = GetNextBlockOffset(ATextArea);
-                ATextArea.AutoClearSelection = true;
-                ATextArea.Caret.Position = ATextArea.Document.OffsetToPosition(LNextBlock);
-                ATextArea.SetDesiredColumn();
+                int nextBlock = GetNextBlockOffset(textArea);
+                textArea.AutoClearSelection = true;
+                textArea.Caret.Position = textArea.Document.OffsetToPosition(nextBlock);
+                textArea.SetDesiredColumn();
             }
         }
     }

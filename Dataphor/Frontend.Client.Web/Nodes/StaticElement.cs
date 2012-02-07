@@ -18,48 +18,48 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 {
     public class StaticText : Element, IStaticText
     {
-		const int CDefaultWidth = 40;
+		const int DefaultWidth = 40;
 
 		// Text
 
-		protected string FText = String.Empty;
+		protected string _text = String.Empty;
 		public string Text
 		{
-			get { return FText; }
-			set { FText = value; }
+			get { return _text; }
+			set { _text = value; }
 		}
 
 		// Width
 
-		protected int FWidth = CDefaultWidth;
+		protected int _width = DefaultWidth;
 		public int Width
 		{
-			get { return FWidth; }
+			get { return _width; }
 			set
 			{
-				if (FWidth != value)
+				if (_width != value)
 				{
-					if (FWidth < 1)
+					if (_width < 1)
 						throw new ClientException(ClientException.Codes.CharsPerLineInvalid);
-					FWidth = value;
+					_width = value;
 				}
 			}
 		}
 
 		// IWebElement
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			string LHint = GetHint();
-			if (LHint != String.Empty)
+			string hint = GetHint();
+			if (hint != String.Empty)
 			{
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LHint, true);
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Div);
-				AWriter.Write(HttpUtility.HtmlEncode(FText));
-				AWriter.RenderEndTag();
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, hint, true);
+				writer.RenderBeginTag(HtmlTextWriterTag.Div);
+				writer.Write(HttpUtility.HtmlEncode(_text));
+				writer.RenderEndTag();
 			}
 			else
-				AWriter.Write(HttpUtility.HtmlEncode(FText));
+				writer.Write(HttpUtility.HtmlEncode(_text));
 		}
 
     }
@@ -71,66 +71,66 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// VerticalAlignment
 
-		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		protected VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		[DefaultValue(VerticalAlignment.Top)]
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
-			set	{ FVerticalAlignment = value; }
+			get { return _verticalAlignment; }
+			set	{ _verticalAlignment = value; }
 		}
 
 		// HorizontalAlignment
 
-		protected HorizontalAlignment FHorizontalAlignment = HorizontalAlignment.Left;
+		protected HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Left;
 		[DefaultValue(HorizontalAlignment.Left)]
 		public HorizontalAlignment HorizontalAlignment
 		{
-			get { return FHorizontalAlignment; }
-			set { FHorizontalAlignment = value; }
+			get { return _horizontalAlignment; }
+			set { _horizontalAlignment = value; }
 		}
 
 		// ImageWidth
 
-		private int FImageWidth = -1;
+		private int _imageWidth = -1;
 		[DefaultValue(-1)]
 		public int ImageWidth
 		{
-			get { return FImageWidth; }
-			set { FImageWidth = value; }
+			get { return _imageWidth; }
+			set { _imageWidth = value; }
 		}
 
 		// ImageHeight
 
-		private int FImageHeight = -1;
+		private int _imageHeight = -1;
 		[DefaultValue(-1)]
 		public int ImageHeight
 		{
-			get { return FImageHeight; }
-			set { FImageHeight = value; }
+			get { return _imageHeight; }
+			set { _imageHeight = value; }
 		}
 
 		// StretchStyle
 		
-		private StretchStyles FStretchStyle = StretchStyles.StretchRatio;
+		private StretchStyles _stretchStyle = StretchStyles.StretchRatio;
 		[DefaultValue(StretchStyles.StretchRatio)]
 		public StretchStyles StretchStyle
 		{
-			get { return FStretchStyle; }
-			set { FStretchStyle = value; }
+			get { return _stretchStyle; }
+			set { _stretchStyle = value; }
 		}
 
 		// Image
 
-		private string FImage = String.Empty;
+		private string _image = String.Empty;
 		[DefaultValue("")]
 		public string Image
 		{
-			get { return FImage; }
+			get { return _image; }
 			set 
 			{
-				if (FImage != value)
+				if (_image != value)
 				{
-					FImage = value;
+					_image = value;
 					DeallocateImage();
 					if (Active)
 						AllocateImage();
@@ -140,46 +140,46 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		private void AllocateImage()
 		{
-			FImageID = WebSession.ImageCache.Allocate(FImage);
+			_imageID = WebSession.ImageCache.Allocate(_image);
 		}
 
 		private void DeallocateImage()
 		{
-			if (FImageID != String.Empty)
+			if (_imageID != String.Empty)
 			{
-				WebSession.ImageCache.Deallocate(FImageID);
-				FImageID = String.Empty;
+				WebSession.ImageCache.Deallocate(_imageID);
+				_imageID = String.Empty;
 			}
 		}
 
-		private string FImageID = String.Empty;
-		public string ImageID { get { return FImageID; } }
+		private string _imageID = String.Empty;
+		public string ImageID { get { return _imageID; } }
 
 		// IWebElement
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			if (FHorizontalAlignment != HorizontalAlignment.Left)
+			if (_horizontalAlignment != HorizontalAlignment.Left)
 			{
-				if (FHorizontalAlignment == HorizontalAlignment.Center)
-					AWriter.AddAttribute("align", "center", false);
+				if (_horizontalAlignment == HorizontalAlignment.Center)
+					writer.AddAttribute("align", "center", false);
 				else
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Align, "right", false);
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Div);
+					writer.AddAttribute(HtmlTextWriterAttribute.Align, "right", false);
+				writer.RenderBeginTag(HtmlTextWriterTag.Div);
 			}
 			
-			string LHint = GetHint();
-			if (LHint != String.Empty)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LHint, true);
+			string hint = GetHint();
+			if (hint != String.Empty)
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, hint, true);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "ViewImage.aspx?ImageID=" + FImageID);
-			RenderStretchAttributes(AWriter, FStretchStyle, FImageWidth, FImageHeight);
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, FVerticalAlignment.ToString().ToLower());
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Src, "ViewImage.aspx?ImageID=" + _imageID);
+			RenderStretchAttributes(writer, _stretchStyle, _imageWidth, _imageHeight);
+			writer.AddAttribute(HtmlTextWriterAttribute.Valign, _verticalAlignment.ToString().ToLower());
+			writer.RenderBeginTag(HtmlTextWriterTag.Img);
+			writer.RenderEndTag();
 
-			if (FHorizontalAlignment != HorizontalAlignment.Left)
-				AWriter.RenderEndTag();
+			if (_horizontalAlignment != HorizontalAlignment.Left)
+				writer.RenderEndTag();
 		}
 
 		// Node
@@ -198,23 +198,23 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// Static utilities
 
-		public static void RenderStretchAttributes(HtmlTextWriter AWriter, StretchStyles AStretchStyle, int AWidth, int AHeight)
+		public static void RenderStretchAttributes(HtmlTextWriter writer, StretchStyles stretchStyle, int width, int height)
 		{
-			switch (AStretchStyle)
+			switch (stretchStyle)
 			{
 				case StretchStyles.StretchFill :
-					if (AWidth >= 0)
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Width, AWidth.ToString());
-					if (AHeight >= 0)
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Height, AHeight.ToString());
+					if (width >= 0)
+						writer.AddAttribute(HtmlTextWriterAttribute.Width, width.ToString());
+					if (height >= 0)
+						writer.AddAttribute(HtmlTextWriterAttribute.Height, height.ToString());
 					break;
 				case StretchStyles.StretchRatio :
-					if ((AWidth >= 0) && (AHeight >= 0))
+					if ((width >= 0) && (height >= 0))
 					{
 						// If both dimensions are constrained, then we must resize the image on the client once loading has completed
-						int LWidth = (AWidth >= 0 ? AWidth : Int32.MaxValue);
-						int LHeight = (AHeight >= 0 ? AHeight : Int32.MaxValue);
-						AWriter.AddAttribute("onload", String.Format("ConstrainSizeWithRatio(this, {0}, {1})", LWidth, LHeight));
+						int localWidth = (width >= 0 ? width : Int32.MaxValue);
+						int localHeight = (height >= 0 ? height : Int32.MaxValue);
+						writer.AddAttribute("onload", String.Format("ConstrainSizeWithRatio(this, {0}, {1})", localWidth, localHeight));
 					}
 					else
 						goto case StretchStyles.StretchFill;	// if only one dimension is constrained, then static width/height attribute should do it
@@ -227,40 +227,40 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		// PixelWidth
 
-		private int FPixelWidth = 100;
+		private int _pixelWidth = 100;
 		public int PixelWidth
 		{
-			get { return FPixelWidth; }
-			set { FPixelWidth = value; }
+			get { return _pixelWidth; }
+			set { _pixelWidth = value; }
 		}
 
 		// PixelHeight
 
-		private int FPixelHeight = 100;
+		private int _pixelHeight = 100;
 		public int PixelHeight
 		{
-			get { return FPixelHeight; }
-			set { FPixelHeight = value; }
+			get { return _pixelHeight; }
+			set { _pixelHeight = value; }
 		}
 
 		// URL
 
-		private string FURL = String.Empty;
+		private string _uRL = String.Empty;
 		public string URL
 		{
-			get { return FURL; }
-			set { FURL = value; }
+			get { return _uRL; }
+			set { _uRL = value; }
 		}
 
 		// IWebElement
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Src, FURL);
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Width, Convert.ToString(FPixelWidth));
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Height, Convert.ToString(FPixelHeight));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Iframe);
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Src, _uRL);
+			writer.AddAttribute(HtmlTextWriterAttribute.Width, Convert.ToString(_pixelWidth));
+			writer.AddAttribute(HtmlTextWriterAttribute.Height, Convert.ToString(_pixelHeight));
+			writer.RenderBeginTag(HtmlTextWriterTag.Iframe);
+			writer.RenderEndTag();
 		}
 	}
 }

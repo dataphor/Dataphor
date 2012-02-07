@@ -12,17 +12,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 {
 	public class NativeAccessor
 	{
-		public NativeAccessor(string AName, Type ANativeType) : base()
+		public NativeAccessor(string name, Type nativeType) : base()
 		{
-			FName = AName;
-			FNativeType = ANativeType;
+			_name = name;
+			_nativeType = nativeType;
 		}
 		
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 		
-		private Type FNativeType;
-		public Type NativeType { get { return FNativeType; } }
+		private Type _nativeType;
+		public Type NativeType { get { return _nativeType; } }
 	}
 	
 	public class NativeAccessors

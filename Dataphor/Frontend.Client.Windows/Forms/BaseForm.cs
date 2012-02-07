@@ -30,9 +30,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			CausesValidation = false;
 
 			FMainMenu.CanOverflow = true;	// Now browsable so must be set programmatically
-			FMenuContainer = new FormMainMenuContainer(FMainMenu);
-			((FormMainMenuContainer)FMenuContainer).ReservedItems = 1;
-			FExposedContainer = new FormExposedContainer(FToolBar);
+			_menuContainer = new FormMainMenuContainer(FMainMenu);
+			((FormMainMenuContainer)_menuContainer).ReservedItems = 1;
+			_exposedContainer = new FormExposedContainer(FToolBar);
 
 			// Prepare Accept/Reject/Close menu items
 			InitializeAcceptReject();
@@ -63,17 +63,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public event PaintHandledEventHandler PaintBackground;
 
-		protected override void OnPaintBackground(PaintEventArgs AArgs)
+		protected override void OnPaintBackground(PaintEventArgs args)
 		{
 			// Don't bother painting the form's background, it will not be seen
 		}
 
-		private void ContentPanelPaint(object ASender, PaintEventArgs AArgs)
+		private void ContentPanelPaint(object sender, PaintEventArgs args)
 		{
 			if (PaintBackground != null)
 			{
-				bool LHandled;
-				PaintBackground(ASender, AArgs, out LHandled);
+				bool handled;
+				PaintBackground(sender, args, out handled);
 			}
 		}
 
@@ -103,16 +103,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Sizing & Layout
 
-		private bool FInitialLayout = true;
+		private bool _initialLayout = true;
 		
-		private bool FAutoResize = true;	// True while the user has not manually resized Form
+		private bool _autoResize = true;	// True while the user has not manually resized Form
 		[DefaultValue(true)]
 		public virtual bool AutoResize
 		{ 
-			get { return FAutoResize; }
+			get { return _autoResize; }
 			set 
 			{
-				if (FAutoResize != value)
+				if (_autoResize != value)
 				{
 					InternalSetAutoResize(value);
 					if (value)
@@ -121,11 +121,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		private void InternalSetAutoResize(bool AValue)
+		private void InternalSetAutoResize(bool tempValue)
 		{
-			if (AValue != FAutoResize)
+			if (tempValue != _autoResize)
 			{
-				FAutoResize = AValue;
+				_autoResize = tempValue;
 				UpdateNaturalSizeMenuItem();
 			}
 		}
@@ -133,71 +133,71 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// <summary> Returns the total bordering area surrounding the client box. </summary>
 		public virtual Size GetBorderSize()
 		{
-			Size LSize = (Size - DisplayRectangle.Size);
-			LSize.Height += 
+			Size size = (Size - DisplayRectangle.Size);
+			size.Height += 
 				(this.FMainMenu.Visible ? this.FMainMenu.Height : 0)
 					+ (this.FToolBar.Visible ? this.FToolBar.Height : 0)
 					+ (this.FStatusBar.Visible ? this.FStatusBar.Height : 0);
-			return LSize;
+			return size;
 		}
 
-		private bool FPerformingResize;
+		private bool _performingResize;
 
 		private void InternalSizeToNatural()
 		{
-			Size LNaturalSize = OnGetNaturalSize() + GetBorderSize();
+			Size naturalSize = OnGetNaturalSize() + GetBorderSize();
 			// Don't size larger than the screen
-			Rectangle LMaxWorkingArea = (FInitialLayout ? Screen.FromPoint(Control.MousePosition).WorkingArea : Screen.FromControl(this).WorkingArea);
-			Element.ConstrainMax(ref LNaturalSize, new Size(LMaxWorkingArea.Width, LMaxWorkingArea.Height));
-			Rectangle LProposed = new Rectangle(Location, LNaturalSize);
-			LProposed.X += Math.Min((LMaxWorkingArea.Right - LProposed.Right), 0);
-			LProposed.Y += Math.Min((LMaxWorkingArea.Bottom - LProposed.Bottom), 0);
+			Rectangle maxWorkingArea = (_initialLayout ? Screen.FromPoint(Control.MousePosition).WorkingArea : Screen.FromControl(this).WorkingArea);
+			Element.ConstrainMax(ref naturalSize, new Size(maxWorkingArea.Width, maxWorkingArea.Height));
+			Rectangle proposed = new Rectangle(Location, naturalSize);
+			proposed.X += Math.Min((maxWorkingArea.Right - proposed.Right), 0);
+			proposed.Y += Math.Min((maxWorkingArea.Bottom - proposed.Bottom), 0);
 
-			FPerformingResize = true;
+			_performingResize = true;
 			try
 			{
-				this.Bounds = LProposed;
+				this.Bounds = proposed;
 			}
 			finally
 			{
-				FPerformingResize = false;
+				_performingResize = false;
 			}
 			InternalSetAutoResize(true);
 		}
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
 			if
 			(
 				Visible && !Disposing && IsHandleCreated
-					&& (AArgs.AffectedProperty != "PreferredSize")
+					&& (args.AffectedProperty != "PreferredSize")
 			)
 			{
 				FContentPanel.AutoScroll = false;
 
 				// Size the form before layout so that dockers will layout to the appropriate size
-				if (FAutoResize)
+				if (_autoResize)
 					InternalSizeToNatural();
 
 				FContentPanel.BringToFront();	// Otherwise, sometimes the layout will lay the toolbar over the content
 
-				base.OnLayout(AArgs);
+				base.OnLayout(args);
 
 				OnLayoutContents();
 
-				if (FInitialLayout)
+				if (_initialLayout)
 				{
-					FInitialLayout = false;
+					_initialLayout = false;
 
 					// if initially laying out, manually position the form centered (setting the StartPosition doesn't seem to do it)
 					if ((StartPosition == FormStartPosition.CenterScreen) && !DesignMode)
 					{
-						Rectangle LWorkingArea = Screen.FromPoint(Control.MousePosition).WorkingArea;
+						Rectangle workingArea = Screen.FromPoint(Control.MousePosition).WorkingArea;
 						Location =
 							new Point
 							(
-								((LWorkingArea.Width - Width) / 2) + LWorkingArea.X,
-								((LWorkingArea.Height - Height) / 2) + LWorkingArea.Y
+								((workingArea.Width - Width) / 2) + workingArea.X,
+								((workingArea.Height - Height) / 2) + workingArea.Y
 							);
 					}
 				}
@@ -206,13 +206,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		protected override void OnResize(EventArgs AArgs)
+		protected override void OnResize(EventArgs args)
 		{
 			// Update the AutoResize property if the user manually resizes the form
-			if (!FPerformingResize)
-				InternalSetAutoResize(FAutoResize && (OnGetNaturalSize() + GetBorderSize()) == Size);
+			if (!_performingResize)
+				InternalSetAutoResize(_autoResize && (OnGetNaturalSize() + GetBorderSize()) == Size);
 
-			base.OnResize(AArgs);
+			base.OnResize(args);
 		}
 
 		public event EventHandler LayoutContents;
@@ -238,10 +238,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			PerformLayout(this, "Bounds");
 		}
 
-		void IBaseForm.ResumeLayout(bool APerformLayout)
+		void IBaseForm.ResumeLayout(bool performLayout)
 		{
 			base.ResumeLayout(false);	// Don't use the base perform layout overload, the layout will appear to come from the ToolBar (we want it to come from the Form)
-			if (APerformLayout)
+			if (performLayout)
 				PerformLayout(this, "Bounds");
 		}
 
@@ -249,53 +249,53 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Natural Size Menu Item
 
-		private void UpdateSysMenuItem(int AID, bool ADisable)
+		private void UpdateSysMenuItem(int iD, bool disable)
 		{
 			UnsafeNativeMethods.EnableMenuItem
 			(
 				UnsafeNativeMethods.GetSystemMenu(Handle, false),
-				AID,
-				NativeMethods.MF_BYCOMMAND | (ADisable ? (NativeMethods.MF_GRAYED | NativeMethods.MF_DISABLED ) : NativeMethods.MF_ENABLED)
+				iD,
+				NativeMethods.MF_BYCOMMAND | (disable ? (NativeMethods.MF_GRAYED | NativeMethods.MF_DISABLED ) : NativeMethods.MF_ENABLED)
 			);
 		}
 
 		private void UpdateNaturalSizeMenuItem()
 		{
-			UpdateSysMenuItem(NativeMethods.SC_NATURALSIZE, FAutoResize || (WindowState != FormWindowState.Normal));
+			UpdateSysMenuItem(NativeMethods.SC_NATURALSIZE, _autoResize || (WindowState != FormWindowState.Normal));
 		}
 
-		protected override void OnHandleCreated(EventArgs AArgs)
+		protected override void OnHandleCreated(EventArgs args)
 		{
-			base.OnHandleCreated(AArgs);
-			string LItemText = "Natural Size";
-			IntPtr LSysMenuHandle = UnsafeNativeMethods.GetSystemMenu(Handle, false);
-			NativeMethods.MenuItemInfo LInfo = new NativeMethods.MenuItemInfo();
-			LInfo.cbSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(NativeMethods.MenuItemInfo));
-			LInfo.fMask = NativeMethods.MIIM_STRING | NativeMethods.MIIM_STATE | NativeMethods.MIIM_ID | NativeMethods.MIIM_DATA;
-			LInfo.fType = NativeMethods.MFT_STRING;
-			LInfo.fState = NativeMethods.MFS_DEFAULT;
-			LInfo.dwItemData = NativeMethods.SC_NATURALSIZE;
-			LInfo.wID = NativeMethods.SC_NATURALSIZE;
-			LInfo.dwTypeData = LItemText;
-			LInfo.cch = LItemText.Length;
-			LInfo.hSubMenu = IntPtr.Zero;
-			LInfo.hbmpChecked = IntPtr.Zero;
-			LInfo.hbmpUnchecked = IntPtr.Zero;
-			UnsafeNativeMethods.InsertMenuItem(LSysMenuHandle, 5, true, ref LInfo);
+			base.OnHandleCreated(args);
+			string itemText = "Natural Size";
+			IntPtr sysMenuHandle = UnsafeNativeMethods.GetSystemMenu(Handle, false);
+			NativeMethods.MenuItemInfo info = new NativeMethods.MenuItemInfo();
+			info.cbSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(NativeMethods.MenuItemInfo));
+			info.fMask = NativeMethods.MIIM_STRING | NativeMethods.MIIM_STATE | NativeMethods.MIIM_ID | NativeMethods.MIIM_DATA;
+			info.fType = NativeMethods.MFT_STRING;
+			info.fState = NativeMethods.MFS_DEFAULT;
+			info.dwItemData = NativeMethods.SC_NATURALSIZE;
+			info.wID = NativeMethods.SC_NATURALSIZE;
+			info.dwTypeData = itemText;
+			info.cch = itemText.Length;
+			info.hSubMenu = IntPtr.Zero;
+			info.hbmpChecked = IntPtr.Zero;
+			info.hbmpUnchecked = IntPtr.Zero;
+			UnsafeNativeMethods.InsertMenuItem(sysMenuHandle, 5, true, ref info);
 			UnsafeNativeMethods.DrawMenuBar(Handle);
 			UpdateNaturalSizeMenuItem();
 		}
 
-		protected override void WndProc(ref Message AMessage)
+		protected override void WndProc(ref Message message)
 		{
-			switch (AMessage.Msg)
+			switch (message.Msg)
 			{
 				case NativeMethods.WM_SYSCOMMAND :
-					if (AMessage.WParam == (IntPtr)NativeMethods.SC_NATURALSIZE)
+					if (message.WParam == (IntPtr)NativeMethods.SC_NATURALSIZE)
 						AutoResize = true;
 					break;
 			}
-			base.WndProc(ref AMessage);
+			base.WndProc(ref message);
 		}
 
 		#endregion
@@ -304,15 +304,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Enter navigates 
 
-		private bool FEnterNavigates = true;
+		private bool _enterNavigates = true;
 		public virtual bool EnterNavigates
 		{ 
-			get { return FEnterNavigates; } 
+			get { return _enterNavigates; } 
 			set
 			{
-				if (value != FEnterNavigates)
+				if (value != _enterNavigates)
 				{
-					FEnterNavigates = value;
+					_enterNavigates = value;
 					UpdateStatusText();
 				}
 			}
@@ -322,59 +322,59 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// <returns> True if last control is active, or no control is active. </returns>
 		public bool LastControlActive()
 		{
-			IntPtr LFocusedHandle = UnsafeNativeMethods.GetFocus();
-			if (LFocusedHandle == IntPtr.Zero)
+			IntPtr focusedHandle = UnsafeNativeMethods.GetFocus();
+			if (focusedHandle == IntPtr.Zero)
 				return false;
-			Control LActive = Control.FromChildHandle(LFocusedHandle);
-			if (LActive == null)
+			Control active = Control.FromChildHandle(focusedHandle);
+			if (active == null)
 				return false;
-			while (LActive != null)
+			while (active != null)
 			{
-				LActive = GetNextControl(LActive, true);
+				active = GetNextControl(active, true);
 				if 
 				(
-					(LActive != null)
-						&& LActive.CanSelect 
-						&& LActive.CanFocus
-						&& LActive.TabStop
-						&& !ControlProcessesEnter(LActive)
+					(active != null)
+						&& active.CanSelect 
+						&& active.CanFocus
+						&& active.TabStop
+						&& !ControlProcessesEnter(active)
 				)
 					return false;
 			}
 			return true;
 		}
 
-		private bool ControlProcessesEnter(Control AControl)
+		private bool ControlProcessesEnter(Control control)
 		{
 			// Reflection is necessary because IsInputKey is a protected member
-			MethodInfo LMethod = AControl.GetType().GetMethod("IsInputKey", BindingFlags.Instance | BindingFlags.NonPublic);
-			if (LMethod != null)
-				return (bool)LMethod.Invoke(AControl, new object[] {Keys.Enter});
+			MethodInfo method = control.GetType().GetMethod("IsInputKey", BindingFlags.Instance | BindingFlags.NonPublic);
+			if (method != null)
+				return (bool)method.Invoke(control, new object[] {Keys.Enter});
 			else
 				return false;
 		}
 
 		public bool ActiveControlProcessesEnter()
 		{
-			Control LActive = ActiveControl;
-			if (LActive != null)
-				return ControlProcessesEnter(LActive);
+			Control active = ActiveControl;
+			if (active != null)
+				return ControlProcessesEnter(active);
 			else
 				return false;
 		}
 
-		private bool ProcessEnter(Form AForm, Keys AKey)
+		private bool ProcessEnter(Form form, Keys key)
 		{
-			if (!FEnterNavigates || LastControlActive())
+			if (!_enterNavigates || LastControlActive())
 				OnDefaultAction();
 			else
 				AdvanceFocus(true);
 			return true;
 		}
 
-		public virtual void AdvanceFocus(bool AForward)
+		public virtual void AdvanceFocus(bool forward)
 		{
-			SelectNextControl(ActiveControl, AForward, true, true, false);
+			SelectNextControl(ActiveControl, forward, true, true, false);
 		}
 
 		#if TRACEFOCUS
@@ -421,72 +421,72 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			get { return FStatusBar; }
 		}
 
-		public virtual void SetHintText(string AText)
+		public virtual void SetHintText(string text)
 		{
-			FHintPanel.Text = AText;
+			FHintPanel.Text = text;
 		}
 
-		protected void SetStatusText(string AText)
+		protected void SetStatusText(string text)
 		{
-			FStatusPanel.Text = AText;
+			FStatusPanel.Text = text;
 		}
 
 		public virtual void UpdateStatusText()
 		{
-			string LText;
-			if (!FEnterNavigates || LastControlActive())
+			string text;
+			if (!_enterNavigates || LastControlActive())
 			{
-				string LDefaultActionDescription = OnGetDefaultActionDescription();
-				if (!String.IsNullOrEmpty(LDefaultActionDescription))
+				string defaultActionDescription = OnGetDefaultActionDescription();
+				if (!String.IsNullOrEmpty(defaultActionDescription))
 				{
 					if (ActiveControlProcessesEnter())
-						LText = Strings.F9ToDefault;
+						text = Strings.F9ToDefault;
 					else
-						LText = Strings.EnterToDefault;
-					LText = String.Format(LText, LDefaultActionDescription);
+						text = Strings.EnterToDefault;
+					text = String.Format(text, defaultActionDescription);
 				}
 				else
-					LText = "";
+					text = "";
 			}
 			else
 			{
 				if (ActiveControlProcessesEnter())
-					LText = Strings.CtrlTabToContinue;
+					text = Strings.CtrlTabToContinue;
 				else
-					LText = Strings.EnterToContinue;
+					text = Strings.EnterToContinue;
 			}
-			SetStatusText(LText);
+			SetStatusText(text);
 		}
 
 		#endregion
 
 		#region Embedded errors
 
-		private ErrorList FErrorList;
+		private ErrorList _errorList;
 		
-		public virtual void EmbedErrors(ErrorList AErrorList)
+		public virtual void EmbedErrors(ErrorList errorList)
 		{
-			if (FErrorList == null)
+			if (_errorList == null)
 			{
-				ToolStripButton LButton = new ToolStripButton();
-				using (Stream LStream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.Frontend.Client.Windows.Images.Warning.ico"))
+				ToolStripButton button = new ToolStripButton();
+				using (Stream stream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.Frontend.Client.Windows.Images.Warning.ico"))
 				{
-					using (Icon LIcon = new Icon(LStream, 16, 16))
-						LButton.Image = LIcon.ToBitmap();
+					using (Icon icon = new Icon(stream, 16, 16))
+						button.Image = icon.ToBitmap();
 				}
-				LButton.ImageTransparentColor = Color.FromArgb(13, 11, 12);
-				LButton.AutoSize = true;
-				LButton.Click += new EventHandler(EmbeddedErrorsClicked);
-				FStatusBar.Items.Add(LButton);
-				FErrorList = AErrorList;
+				button.ImageTransparentColor = Color.FromArgb(13, 11, 12);
+				button.AutoSize = true;
+				button.Click += new EventHandler(EmbeddedErrorsClicked);
+				FStatusBar.Items.Add(button);
+				_errorList = errorList;
 			}
 			else
-				FErrorList.AddRange(AErrorList);
+				_errorList.AddRange(errorList);
 		}
 
-		private void EmbeddedErrorsClicked(object ASender, EventArgs AArgs)
+		private void EmbeddedErrorsClicked(object sender, EventArgs args)
 		{
-			ErrorListForm.ShowErrorList(FErrorList, true);
+			ErrorListForm.ShowErrorList(_errorList, true);
 		}
 
 		#endregion
@@ -495,12 +495,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ToolBar
 
-		private void ToolBarItemAdded(object ASender, ToolStripItemEventArgs AArgs)
+		private void ToolBarItemAdded(object sender, ToolStripItemEventArgs args)
 		{
 			UpdateToolBarVisible();
 		}
 
-		private void ToolBarItemDeleted(object ASender, ToolStripItemEventArgs AArgs)
+		private void ToolBarItemDeleted(object sender, ToolStripItemEventArgs args)
 		{
 			UpdateToolBarVisible();
 		}
@@ -510,10 +510,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			FToolBar.Visible = FToolBar.Items.Count > 0;
 		}
 
-		private IWindowsBarContainer FExposedContainer;
+		private IWindowsBarContainer _exposedContainer;
 		public virtual IWindowsBarContainer ExposedContainer
 		{
-			get { return FExposedContainer; }
+			get { return _exposedContainer; }
 		}
 
 		#endregion
@@ -522,41 +522,41 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Menu
 
-		private IWindowsBarContainer FMenuContainer;
+		private IWindowsBarContainer _menuContainer;
 		public virtual IWindowsBarContainer MenuContainer
 		{
-			get { return FMenuContainer; }
+			get { return _menuContainer; }
 		}
 
-		private List<ToolStripMenuItem> FCustomActions;
+		private List<ToolStripMenuItem> _customActions;
 
-		public virtual object AddCustomAction(string AText, System.Drawing.Image AImage, EventHandler AHandler)
+		public virtual object AddCustomAction(string text, System.Drawing.Image image, EventHandler handler)
 		{
-			ToolStripMenuItem LItem = new ToolStripMenuItem(AText, AImage);
-			LItem.Click += AHandler;
-			if (FCustomActions == null)
-				FCustomActions = new List<ToolStripMenuItem>();
-			FCustomActions.Add(LItem);
-			FFormMenu.DropDownItems.Insert(0, LItem);
-			return LItem;
+			ToolStripMenuItem item = new ToolStripMenuItem(text, image);
+			item.Click += handler;
+			if (_customActions == null)
+				_customActions = new List<ToolStripMenuItem>();
+			_customActions.Add(item);
+			FFormMenu.DropDownItems.Insert(0, item);
+			return item;
 		}
 
-		public virtual void RemoveCustomAction(object AAction)
+		public virtual void RemoveCustomAction(object action)
 		{
-			ToolStripMenuItem LItem = (ToolStripMenuItem)AAction;
-			if (FCustomActions != null)
-				FCustomActions.Remove(LItem);
-			FFormMenu.DropDownItems.Remove(LItem);
-			LItem.Dispose();
+			ToolStripMenuItem item = (ToolStripMenuItem)action;
+			if (_customActions != null)
+				_customActions.Remove(item);
+			FFormMenu.DropDownItems.Remove(item);
+			item.Dispose();
 		}
 
 		public virtual void ClearCustomActions()
 		{
-			if (FCustomActions != null)
+			if (_customActions != null)
 			{
-				while (FCustomActions.Count > 0)
-					RemoveCustomAction(FCustomActions[FCustomActions.Count - 1]);
-				FCustomActions = null;
+				while (_customActions.Count > 0)
+					RemoveCustomAction(_customActions[_customActions.Count - 1]);
+				_customActions = null;
 			}
 		}
 
@@ -564,121 +564,121 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Images
 
-		protected static Bitmap LoadBitmap(string AResourceName)
+		protected static Bitmap LoadBitmap(string resourceName)
 		{
-			return new Bitmap(typeof(BaseForm).Assembly.GetManifestResourceStream(AResourceName));
+			return new Bitmap(typeof(BaseForm).Assembly.GetManifestResourceStream(resourceName));
 		}
 
 		static BaseForm()
 		{
-			FAcceptButtonImage = (System.Drawing.Image)LoadBitmap("Alphora.Dataphor.Frontend.Client.Windows.Images.Accept.png");
-			FRejectButtonImage = (System.Drawing.Image)LoadBitmap("Alphora.Dataphor.Frontend.Client.Windows.Images.Reject.png");
-			FCloseButtonImage = (System.Drawing.Image)LoadBitmap("Alphora.Dataphor.Frontend.Client.Windows.Images.Close.png");
+			_acceptButtonImage = (System.Drawing.Image)LoadBitmap("Alphora.Dataphor.Frontend.Client.Windows.Images.Accept.png");
+			_rejectButtonImage = (System.Drawing.Image)LoadBitmap("Alphora.Dataphor.Frontend.Client.Windows.Images.Reject.png");
+			_closeButtonImage = (System.Drawing.Image)LoadBitmap("Alphora.Dataphor.Frontend.Client.Windows.Images.Close.png");
 		}
 
-		private static System.Drawing.Image FAcceptButtonImage;
-		private static System.Drawing.Image FRejectButtonImage;
-		private static System.Drawing.Image FCloseButtonImage;
+		private static System.Drawing.Image _acceptButtonImage;
+		private static System.Drawing.Image _rejectButtonImage;
+		private static System.Drawing.Image _closeButtonImage;
 
 		#endregion
 
 		#region Accept/Reject vs. Close handling
 
-		protected void DisposeItem(IDisposable AItem)
+		protected void DisposeItem(IDisposable item)
 		{
-			if (AItem != null)
-				AItem.Dispose();
+			if (item != null)
+				item.Dispose();
 		}
 
-		private ToolStripButton FAcceptButton;
-		private ToolStripButton FRejectButton;
-		private ToolStripButton FCloseButton;
+		private ToolStripButton _acceptButton;
+		private ToolStripButton _rejectButton;
+		private ToolStripButton _closeButton;
 
-		private ToolStripMenuItem FAcceptMenuItem;
-		private ToolStripMenuItem FRejectMenuItem;
-		private ToolStripMenuItem FCloseMenuItem;
+		private ToolStripMenuItem _acceptMenuItem;
+		private ToolStripMenuItem _rejectMenuItem;
+		private ToolStripMenuItem _closeMenuItem;
 
 		private void InitializeAcceptReject()
 		{
-			FAcceptButton = new ToolStripButton
+			_acceptButton = new ToolStripButton
 			(
 				Strings.AcceptButtonText,
-				FAcceptButtonImage,
+				_acceptButtonImage,
 				new EventHandler(AcceptClick)
 			);
-			FRejectButton = new ToolStripButton
+			_rejectButton = new ToolStripButton
 			(
 				Strings.RejectButtonText,
-				FRejectButtonImage,
+				_rejectButtonImage,
 				new EventHandler(RejectClick)
 			);
-			FCloseButton = new ToolStripButton
+			_closeButton = new ToolStripButton
 			(
 				Strings.CloseButtonText,
-				FCloseButtonImage,
+				_closeButtonImage,
 				new EventHandler(CloseClick)
 			);
 
-			FAcceptMenuItem = new ToolStripMenuItem
+			_acceptMenuItem = new ToolStripMenuItem
 			(
 				Strings.AcceptButtonText,
-				FAcceptButtonImage,
+				_acceptButtonImage,
 				new EventHandler(AcceptClick)
 			);
-			FAcceptMenuItem.ShortcutKeys = Keys.F9;
-			FRejectMenuItem = new ToolStripMenuItem
+			_acceptMenuItem.ShortcutKeys = Keys.F9;
+			_rejectMenuItem = new ToolStripMenuItem
 			(
 				Strings.RejectButtonText,
-				FRejectButtonImage,
+				_rejectButtonImage,
 				new EventHandler(RejectClick)
 			);
-			FCloseMenuItem = new ToolStripMenuItem
+			_closeMenuItem = new ToolStripMenuItem
 			(
 				Strings.CloseButtonText,
-				FCloseButtonImage,
+				_closeButtonImage,
 				new EventHandler(CloseClick)
 			);
-			FCloseMenuItem.ShortcutKeys = Keys.F9;
+			_closeMenuItem.ShortcutKeys = Keys.F9;
 		}
 
-		private void UninitializeAcceptReject(object ASender, EventArgs AArgs)
+		private void UninitializeAcceptReject(object sender, EventArgs args)
 		{
 			UninitializeAcceptReject();
 		}
 
 		private void UninitializeAcceptReject()
 		{
-			DisposeItem(FAcceptButton);
-			DisposeItem(FRejectButton);
-			DisposeItem(FCloseButton);
-			DisposeItem(FAcceptMenuItem);
-			DisposeItem(FRejectMenuItem);
-			DisposeItem(FCloseMenuItem);
+			DisposeItem(_acceptButton);
+			DisposeItem(_rejectButton);
+			DisposeItem(_closeButton);
+			DisposeItem(_acceptMenuItem);
+			DisposeItem(_rejectMenuItem);
+			DisposeItem(_closeMenuItem);
 		}
 
-		private void AddToToolBar(ToolStripItem AItem, int APosition)
+		private void AddToToolBar(ToolStripItem item, int position)
 		{
-			FToolBar.Items.Insert(APosition, AItem);
+			FToolBar.Items.Insert(position, item);
 		}
 
-		private void RemoveFromToolBar(ToolStripItem AItem)
+		private void RemoveFromToolBar(ToolStripItem item)
 		{
-			FToolBar.Items.Remove(AItem);
+			FToolBar.Items.Remove(item);
 		}
 
-		private void AddMenu(ToolStripItem AMenu)
+		private void AddMenu(ToolStripItem menu)
 		{
-			FFormMenu.DropDownItems.Add(AMenu);
+			FFormMenu.DropDownItems.Add(menu);
 		}
 
-		private void RemoveMenu(ToolStripItem AMenu)
+		private void RemoveMenu(ToolStripItem menu)
 		{
-			FFormMenu.DropDownItems.Remove(AMenu);
+			FFormMenu.DropDownItems.Remove(menu);
 		}
 
-		private bool FIsAcceptReject;
+		private bool _isAcceptReject;
 
-		public virtual void SetAcceptReject(bool AIsAcceptReject, bool ASupressCloseButton)
+		public virtual void SetAcceptReject(bool isAcceptReject, bool supressCloseButton)
 		{
 			if (!IsDisposed)	// TODO: Something better here to determine if form is closing
 			{
@@ -686,32 +686,32 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				FToolBar.SuspendLayout();
 				try
 				{
-					if (AIsAcceptReject)
+					if (isAcceptReject)
 					{
-						FCloseMenuItem.ShortcutKeys = Keys.None;	// HACK: If this shortcut key isn't changed, the key for accept does not work (presumably because there is a conflict for a moment)
-						AddMenu(FAcceptMenuItem);
-						AddMenu(FRejectMenuItem);
-						RemoveMenu(FCloseMenuItem);
-						FAcceptMenuItem.ShortcutKeys = Keys.F9;
+						_closeMenuItem.ShortcutKeys = Keys.None;	// HACK: If this shortcut key isn't changed, the key for accept does not work (presumably because there is a conflict for a moment)
+						AddMenu(_acceptMenuItem);
+						AddMenu(_rejectMenuItem);
+						RemoveMenu(_closeMenuItem);
+						_acceptMenuItem.ShortcutKeys = Keys.F9;
 
-						AddToToolBar(FAcceptButton, 0);
-						AddToToolBar(FRejectButton, 1);
-						RemoveFromToolBar(FCloseButton);
+						AddToToolBar(_acceptButton, 0);
+						AddToToolBar(_rejectButton, 1);
+						RemoveFromToolBar(_closeButton);
 					}
 					else
 					{
-						FAcceptMenuItem.ShortcutKeys = Keys.None;
-						AddMenu(FCloseMenuItem);
-						RemoveMenu(FAcceptMenuItem);
-						RemoveMenu(FRejectMenuItem);
-						FCloseMenuItem.ShortcutKeys = Keys.F9;
+						_acceptMenuItem.ShortcutKeys = Keys.None;
+						AddMenu(_closeMenuItem);
+						RemoveMenu(_acceptMenuItem);
+						RemoveMenu(_rejectMenuItem);
+						_closeMenuItem.ShortcutKeys = Keys.F9;
 
-						if (!ASupressCloseButton)
-							AddToToolBar(FCloseButton, 0);
-						RemoveFromToolBar(FAcceptButton);
-						RemoveFromToolBar(FRejectButton);
+						if (!supressCloseButton)
+							AddToToolBar(_closeButton, 0);
+						RemoveFromToolBar(_acceptButton);
+						RemoveFromToolBar(_rejectButton);
 					}
-					FIsAcceptReject = AIsAcceptReject;
+					_isAcceptReject = isAcceptReject;
 				}
 				finally
 				{
@@ -721,36 +721,49 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		protected void CloseClick(object ASender, EventArgs AArgs)
+		protected void CloseClick(object sender, EventArgs args)
 		{
 			if (Enabled)
 				Close(CloseBehavior.AcceptOrClose);
 		}
-	
-		private void AcceptClick(object ASender, EventArgs AArgs)
+
+		// Accept Enabled
+
+		private bool _acceptEnabled = true;
+
+		public bool AcceptEnabled
 		{
-			if (Enabled)
+			get { return _acceptEnabled; }
+			set { _acceptEnabled = value; }
+		}
+
+		public event EventHandler Accepting;  	
+		private void AcceptClick(object sender, EventArgs args)
+		{
+			if (Accepting != null)
+				Accepting(this, EventArgs.Empty);
+			if (Enabled && AcceptEnabled)
 				Close(CloseBehavior.AcceptOrClose);
 		}
 	
-		protected void RejectClick(object ASender, EventArgs AArgs)
+		protected void RejectClick(object sender, EventArgs args)
 		{
 			if (Enabled)
 				Close(CloseBehavior.RejectOrClose);
 		}
 
-		public virtual void Show(IFormInterface AParent)
+		public virtual void Show(IFormInterface parent)
 		{
-			if (AParent != null)
-				Owner = (Form)((FormInterface)AParent).Form;
+			if (parent != null)
+				Owner = (Form)((FormInterface)parent).Form;
 			base.Show();
 		}
 		
-		public virtual void Close(CloseBehavior ABehavior)
+		public virtual void Close(CloseBehavior behavior)
 		{
-			if (FIsAcceptReject)
+			if (_isAcceptReject)
 			{
-				if (ABehavior == CloseBehavior.AcceptOrClose)
+				if (behavior == CloseBehavior.AcceptOrClose)
 					DialogResult = DialogResult.OK;
 				else
 					DialogResult = DialogResult.Cancel;
@@ -761,44 +774,44 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				UnsafeNativeMethods.PostMessage(Handle, NativeMethods.WM_CLOSE, IntPtr.Zero, IntPtr.Zero);	//Close();   Don't call close directly here so that callers can safely complete their message loop before the form goes away.
 		}
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
 			// Dissociate all owned forms before closing to ensure predictable close event behavior
-			foreach (System.Windows.Forms.Form LForm in OwnedForms)
-				LForm.Owner = null;
+			foreach (System.Windows.Forms.Form form in OwnedForms)
+				form.Owner = null;
 
-			base.OnClosing(AArgs);
+			base.OnClosing(args);
 		}
 
 		#endregion
 
 		#region Begin/End Update
 
-		private int FUpdateCount;
+		private int _updateCount;
 		protected bool InUpdate
 		{
-			get { return FUpdateCount > 0; }
+			get { return _updateCount > 0; }
 		}
 
 		public virtual void BeginUpdate()
 		{
-			if (++FUpdateCount == 1)
+			if (++_updateCount == 1)
 				SetUpdateState(true);
 		}
 
 		public virtual void EndUpdate()
 		{
-			if (--FUpdateCount <= 0)
+			if (--_updateCount <= 0)
 			{
-				FUpdateCount = 0;
+				_updateCount = 0;
 				SetUpdateState(false);
 			}
 		}
 
-		private void SetUpdateState(bool AUpdating)
+		private void SetUpdateState(bool updating)
 		{
-			UnsafeNativeMethods.SendMessage(ContentPanel.Handle, NativeMethods.WM_SETREDRAW, !AUpdating, IntPtr.Zero);
-			if (!AUpdating)
+			UnsafeNativeMethods.SendMessage(ContentPanel.Handle, NativeMethods.WM_SETREDRAW, !updating, IntPtr.Zero);
+			if (!updating)
 				this.Invalidate(true);
 		}
 
@@ -806,32 +819,32 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Keyboard Handling
 
-		private Dictionary<Keys, DialogKeyHandler> FDialogKeys = new Dictionary<Keys, DialogKeyHandler>();
-		public Dictionary<Keys, DialogKeyHandler> DialogKeys { get { return FDialogKeys; } }
+		private Dictionary<Keys, DialogKeyHandler> _dialogKeys = new Dictionary<Keys, DialogKeyHandler>();
+		public Dictionary<Keys, DialogKeyHandler> DialogKeys { get { return _dialogKeys; } }
 
-		protected override bool ProcessDialogKey(Keys AKeyData)
+		protected override bool ProcessDialogKey(Keys keyData)
 		{
-			DialogKeyHandler LHandler;
-			if (FDialogKeys.TryGetValue(AKeyData, out LHandler) && LHandler(this, AKeyData))
+			DialogKeyHandler handler;
+			if (_dialogKeys.TryGetValue(keyData, out handler) && handler(this, keyData))
 				return true;
 			else
-				return base.ProcessDialogKey(AKeyData);
+				return base.ProcessDialogKey(keyData);
 		}
 
 		#endregion
 
 		#region Lookup
 
-		private bool FIsLookup;
+		private bool _isLookup;
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public bool IsLookup
 		{
-			get { return FIsLookup; }
+			get { return _isLookup; }
 			set
 			{
-				if (FIsLookup != value)
+				if (_isLookup != value)
 				{
-					FIsLookup = value;
+					_isLookup = value;
 					UpdateIsLookup();
 				}
 			}
@@ -839,7 +852,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected void UpdateIsLookup()
 		{
-			if (FIsLookup)
+			if (_isLookup)
 			{
 				ShowInTaskbar = false;
 				FormBorderStyle = FormBorderStyle.None;
@@ -861,7 +874,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			    //Close(CloseBehavior.RejectOrClose);
 		}
 
-		private const int CS_DROPSHADOW = 0x00020000;
+		private const int S_DROPSHADOW = 0x00020000;
 		
 		protected override CreateParams CreateParams
 		{
@@ -869,10 +882,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				CreateParams result = base.CreateParams;
 				// If this form is a lookup, put a small border and a drop shadow on it
-				if (FIsLookup)
+				if (_isLookup)
 				{
 					result.Style |= 0x800000;
-					result.ClassStyle |= CS_DROPSHADOW;
+					result.ClassStyle |= S_DROPSHADOW;
 				}
 				return result;
 			}
@@ -882,14 +895,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Hacks
 
-		protected override void OnVisibleChanged(EventArgs AArgs)
+		protected override void OnVisibleChanged(EventArgs args)
 		{
 			// HACK: This is to avoid the excess layouts performed by Bars during form showing
 			if (Visible)
 				SuspendLayout();
 			try
 			{
-				base.OnVisibleChanged(AArgs);
+				base.OnVisibleChanged(args);
 			}
 			finally
 			{
@@ -898,7 +911,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		protected override void OnEnabledChanged(EventArgs AArgs)
+		protected override void OnEnabledChanged(EventArgs args)
 		{
 			// HACK: Don't call base... very slow.  We'll do it ourselves
 			//base.OnEnabledChanged(AArgs);
@@ -913,25 +926,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				if (this.ActiveControl == null)
 					this.SelectNextControl(null, true, true, true, false);
-				ContainerControl LControl = (ContainerControl)typeof(ContainerControl).GetProperty("InnerMostActiveContainerControl", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(this, new object[] {});
-				typeof(ContainerControl).GetMethod("FocusActiveControlInternal", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(LControl, new object[] {});
-			}
+				ContainerControl control = (ContainerControl)typeof(ContainerControl).GetProperty("InnerMostActiveContainerControl", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(this, new object[] {});
+				typeof(ContainerControl).GetMethod("FocusActiveControlInternal", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(control, new object[] {});
+			} 	
 		}
 
-		protected override bool ProcessCmdKey(ref Message AMessage, Keys AKeyData)
+		protected override bool ProcessCmdKey(ref Message message, Keys keyData)
 		{
-			bool LResult;
+			bool result;
 			try
 			{
-				LResult = base.ProcessCmdKey(ref AMessage, AKeyData);
+				result = base.ProcessCmdKey(ref message, keyData);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
 				// HACK: This works around the issue where keys are not treated as handled when an exception is thrown
-				Session.HandleException(LException);
+				Session.HandleException(exception);
 				return true;
 			}
-			return LResult;
+			return result;
 		}
 
 		#endregion
@@ -977,19 +990,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		public abstract void Dispose();
 
-		protected ToolStripItemCollection FItems;
-		public ToolStripItemCollection Items { get { return FItems; } }
+		protected ToolStripItemCollection _items;
+		public ToolStripItemCollection Items { get { return _items; } }
 	
 		public virtual IWindowsBarContainer CreateContainer()
 		{
 			return new FormMenuContainer();
 		}
 
-		public virtual IWindowsBarButton CreateMenuItem(System.EventHandler AHandler)
+		public virtual IWindowsBarButton CreateMenuItem(System.EventHandler handler)
 		{
-			IWindowsBarButton LItem = new FormMenuContainer();
-			LItem.Item.Click += AHandler;
-			return LItem;
+			IWindowsBarButton item = new FormMenuContainer();
+			item.Item.Click += handler;
+			return item;
 		}
 
 		public virtual IWindowsBarSeparator CreateSeparator()
@@ -997,33 +1010,33 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return new FormMenuSeparator();
 		}
 
-		private int FReservedItems = 0;
+		private int _reservedItems = 0;
 		/// <summary> Number of menu items to lock to the left and not treat as part of the InsertBarItem index space. </summary>
 		public int ReservedItems
 		{
-			get { return FReservedItems; }
-			set { FReservedItems = value; }
+			get { return _reservedItems; }
+			set { _reservedItems = value; }
 		}
 
-		private SortedList<BarItemComparer,IWindowsBarItem> FSortedBarItems = new SortedList<BarItemComparer,IWindowsBarItem>();
+		private SortedList<BarItemComparer,IWindowsBarItem> _sortedBarItems = new SortedList<BarItemComparer,IWindowsBarItem>();
 
-		public virtual void AddBarItem(IWindowsBarItem AItem, GetPriorityHandler AGetPriority)
+		public virtual void AddBarItem(IWindowsBarItem item, GetPriorityHandler getPriority)
 		{
 			// Add the item to the sorted list
-			BarItemComparer LNewBarItemComparer = new BarItemComparer(AItem, AGetPriority);
-			FSortedBarItems.Add(LNewBarItemComparer, AItem);
-			int LIndex = FSortedBarItems.IndexOfKey(LNewBarItemComparer) + FReservedItems;
+			BarItemComparer newBarItemComparer = new BarItemComparer(item, getPriority);
+			_sortedBarItems.Add(newBarItemComparer, item);
+			int index = _sortedBarItems.IndexOfKey(newBarItemComparer) + _reservedItems;
 
-			if (LIndex > FItems.Count)
-				FItems.Add(((IToolStripItemContainer)AItem).Item);
+			if (index > _items.Count)
+				_items.Add(((IToolStripItemContainer)item).Item);
 			else
-				FItems.Insert(LIndex, ((IToolStripItemContainer)AItem).Item);
+				_items.Insert(index, ((IToolStripItemContainer)item).Item);
 		}
 
-		public virtual void RemoveBarItem(IWindowsBarItem AItem)
+		public virtual void RemoveBarItem(IWindowsBarItem item)
 		{
-			FItems.Remove(((IToolStripItemContainer)AItem).Item);
-			FSortedBarItems.RemoveAt(FSortedBarItems.IndexOfValue(AItem));
+			_items.Remove(((IToolStripItemContainer)item).Item);
+			_sortedBarItems.RemoveAt(_sortedBarItems.IndexOfValue(item));
 		}
 
 		public abstract bool Visible { get; set; }
@@ -1038,44 +1051,44 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		public FormMenuContainer() : base()
 		{
-			FItem = new ToolStripMenuItem();
-			FItems = FItem.DropDownItems;
+			_item = new ToolStripMenuItem();
+			_items = _item.DropDownItems;
 		}
 
 		public override void Dispose()
 		{
-			if (FItem != null)
+			if (_item != null)
 			{
-				FItem.Dispose();
-				FItem = null;
+				_item.Dispose();
+				_item = null;
 			}
 		}
 
-		private ToolStripMenuItem FItem;
-		public ToolStripItem Item { get { return FItem; } }
+		private ToolStripMenuItem _item;
+		public ToolStripItem Item { get { return _item; } }
 
 		public string Text
 		{
-			get { return FItem.Text; }
-			set { FItem.Text = value; }
+			get { return _item.Text; }
+			set { _item.Text = value; }
 		}
 
 		public bool Enabled
 		{
-			get { return FItem.Enabled; }
-			set { FItem.Enabled = value; }
+			get { return _item.Enabled; }
+			set { _item.Enabled = value; }
 		}
 
 		public System.Drawing.Image Image
 		{
-			get { return FItem.Image; }
-			set { FItem.Image = value; }
+			get { return _item.Image; }
+			set { _item.Image = value; }
 		}
 
 		public override bool Visible
 		{
-			get { return FItem.Visible; }
-			set { FItem.Visible = value; }
+			get { return _item.Visible; }
+			set { _item.Visible = value; }
 		}
 	}
 
@@ -1083,105 +1096,105 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		public FormMenuSeparator()
 		{
-			FItem = new ToolStripSeparator();
+			_item = new ToolStripSeparator();
 		}
 
 		public virtual void Dispose() 
 		{
-			if (FItem != null)
+			if (_item != null)
 			{
-				FItem.Dispose();
-				FItem = null;
+				_item.Dispose();
+				_item = null;
 			}
 		}
 
-		private ToolStripSeparator FItem;
-		public ToolStripItem Item { get { return FItem; } }
+		private ToolStripSeparator _item;
+		public ToolStripItem Item { get { return _item; } }
 
 		public bool Visible
 		{
-			get { return FItem.Visible; }
-			set { FItem.Visible = value; }
+			get { return _item.Visible; }
+			set { _item.Visible = value; }
 		}
 	}
 
 	public class FormMainMenuContainer : FormMenuContainerBase, IWindowsBarItem
 	{
-		public FormMainMenuContainer(MenuStrip AMainMenu) : base()
+		public FormMainMenuContainer(MenuStrip mainMenu) : base()
 		{
-			FMainMenu = AMainMenu;
-			FItems = AMainMenu.Items;
+			_mainMenu = mainMenu;
+			_items = mainMenu.Items;
 		}
 
 		public override void Dispose() {}
 
-		private MenuStrip FMainMenu;
-		public MenuStrip MainMenu { get { return FMainMenu; } }
+		private MenuStrip _mainMenu;
+		public MenuStrip MainMenu { get { return _mainMenu; } }
 
 		public override bool Visible
 		{
-			get { return FMainMenu.Visible; }
-			set { FMainMenu.Visible = value; }
+			get { return _mainMenu.Visible; }
+			set { _mainMenu.Visible = value; }
 		}
 	}
 
 	public class FormButton : IWindowsBarButton, IToolStripItemContainer
 	{
-		public FormButton(EventHandler AHandler)
+		public FormButton(EventHandler handler)
 		{
-			FItem = new ToolStripButton();
-			FItem.Click += AHandler;
+			_item = new ToolStripButton();
+			_item.Click += handler;
 		}
 
 		public virtual void Dispose()
 		{
-			if (FItem != null)
+			if (_item != null)
 			{
-				FItem.Dispose();
-				FItem = null;
+				_item.Dispose();
+				_item = null;
 			}
 		}
 
-		private ToolStripButton FItem;
-		public ToolStripButton ButtonItem { get { return FItem; } }
-		public ToolStripItem Item { get { return FItem; } }
+		private ToolStripButton _item;
+		public ToolStripButton ButtonItem { get { return _item; } }
+		public ToolStripItem Item { get { return _item; } }
 
 		public string Text
 		{
-			get { return FItem.Text; }
-			set { FItem.Text = value; }
+			get { return _item.Text; }
+			set { _item.Text = value; }
 		}
 
 		public bool Enabled
 		{
-			get { return FItem.Enabled; }
-			set { FItem.Enabled = value; }
+			get { return _item.Enabled; }
+			set { _item.Enabled = value; }
 		}
 
 		public System.Drawing.Image Image
 		{
-			get { return FItem.Image; }
-			set { FItem.Image = value; }
+			get { return _item.Image; }
+			set { _item.Image = value; }
 		}
 
 		public bool Visible
 		{
-			get { return FItem.Visible; }
-			set { FItem.Visible = value; }
+			get { return _item.Visible; }
+			set { _item.Visible = value; }
 		}
 	}
 
 	public class FormExposedContainer : IWindowsBarContainer
 	{
-		public FormExposedContainer(ToolStrip AToolBar)
+		public FormExposedContainer(ToolStrip toolBar)
 		{
-			FToolBar = AToolBar;
+			_toolBar = toolBar;
 		}
 
 		public virtual void Dispose() {}
 
-		private ToolStrip FToolBar;
-		public ToolStrip ToolBar { get { return FToolBar; } }
+		private ToolStrip _toolBar;
+		public ToolStrip ToolBar { get { return _toolBar; } }
 
 		public IWindowsBarContainer CreateContainer()
 		{
@@ -1189,9 +1202,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return null;
 		}
 
-		public IWindowsBarButton CreateMenuItem(System.EventHandler AHandler)
+		public IWindowsBarButton CreateMenuItem(System.EventHandler handler)
 		{
-			return new FormButton(AHandler);
+			return new FormButton(handler);
 		}
 
 		public IWindowsBarSeparator CreateSeparator()
@@ -1201,20 +1214,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		/// <remarks> The AGetPriority handler is ignored. </remarks>
-		public void AddBarItem(IWindowsBarItem AItem, GetPriorityHandler AGetPriority)
+		public void AddBarItem(IWindowsBarItem item, GetPriorityHandler getPriority)
 		{
-			FToolBar.Items.Add(((IToolStripItemContainer)AItem).Item);
+			_toolBar.Items.Add(((IToolStripItemContainer)item).Item);
 		}
 
-		public void RemoveBarItem(IWindowsBarItem AItem)
+		public void RemoveBarItem(IWindowsBarItem item)
 		{
-			FToolBar.Items.Remove(((IToolStripItemContainer)AItem).Item);
+			_toolBar.Items.Remove(((IToolStripItemContainer)item).Item);
 		}
 
 		public bool Visible
 		{
-			get { return FToolBar.Visible; }
-			set { FToolBar.Visible = value; }
+			get { return _toolBar.Visible; }
+			set { _toolBar.Visible = value; }
 		}
 	}
 }

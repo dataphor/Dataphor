@@ -14,10 +14,10 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
     public class DocumentNode : EditableItemNode
 	{
-		public DocumentNode(DocumentListNode AParent, string ADocumentName, string ADocumentType) : base()
+		public DocumentNode(DocumentListNode parent, string documentName, string documentType) : base()
 		{
-			FDocumentType = ADocumentType;
-			FDocumentName = ADocumentName;
+			_documentType = documentType;
+			_documentName = documentName;
 			UpdateText();
 			ImageIndex = 8;
 			SelectedImageIndex = ImageIndex;
@@ -25,31 +25,31 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = base.GetContextMenu();
+			ContextMenu menu = base.GetContextMenu();
 			
-			MenuItem LOpenMenuItem = new MenuItem(Strings.ObjectTree_OpenMenuText, new EventHandler(OpenClicked));
-			LOpenMenuItem.DefaultItem = true;
-			LMenu.MenuItems.Add(0, LOpenMenuItem);
+			MenuItem openMenuItem = new MenuItem(Strings.ObjectTree_OpenMenuText, new EventHandler(OpenClicked));
+			openMenuItem.DefaultItem = true;
+			menu.MenuItems.Add(0, openMenuItem);
 
-			LMenu.MenuItems.Add(1, new MenuItem(Strings.ObjectTree_OpenWithMenuText, new EventHandler(OpenWithClicked)));
-			LMenu.MenuItems.Add(2, new MenuItem("-"));
+			menu.MenuItems.Add(1, new MenuItem(Strings.ObjectTree_OpenWithMenuText, new EventHandler(OpenWithClicked)));
+			menu.MenuItems.Add(2, new MenuItem("-"));
 
-			return LMenu;
+			return menu;
 		}
 
 		protected override void UpdateText()
 		{
-			Text = String.Format("{0}  [{1}]", FDocumentName, FDocumentType);
+			Text = String.Format("{0}  [{1}]", _documentName, _documentType);
 		}
 
-		public override bool IsEqual(DAE.Runtime.Data.Row ARow)
+		public override bool IsEqual(DAE.Runtime.Data.Row row)
 		{
-			return ((string)ARow["Main.Name"] == FDocumentName) && ((string)ARow["Main.Type_ID"] == FDocumentType);
+			return ((string)row["Main.Name"] == _documentName) && ((string)row["Main.Type_ID"] == _documentType);
 		}
 
 		public override string GetFilter()
 		{
-			return String.Format("(Library_Name = '{0}') and (Main.Name = '{1}')", LibraryName, FDocumentName);
+			return String.Format("(Library_Name = '{0}') and (Main.Name = '{1}')", LibraryName, _documentName);
 		}
 
 		protected override string KeyColumnName()
@@ -57,16 +57,16 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return "Main.Name";
 		}
 
-		private string FDocumentName;
+		private string _documentName;
 		public string DocumentName
 		{
-			get { return FDocumentName; }
+			get { return _documentName; }
 		}
 
-		private string FDocumentType;
+		private string _documentType;
 		public string DocumentType
 		{
-			get { return FDocumentType; }
+			get { return _documentType; }
 		}
 
 		public string LibraryName
@@ -74,38 +74,38 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			get { return ((LibraryNode)Parent.Parent).LibraryName; }
 		}
 
-		protected override void NameChanged(string ANewName)
+		protected override void NameChanged(string newName)
 		{
-			FDocumentName = ANewName;
-			base.NameChanged(ANewName);
+			_documentName = newName;
+			base.NameChanged(newName);
 		}
 
 		protected DocumentDesignBuffer GetBuffer()
 		{
-			return new DocumentDesignBuffer(Dataphoria, LibraryName, FDocumentName);
+			return new DocumentDesignBuffer(Dataphoria, Alphora.Dataphor.DAE.Schema.Object.EnsureRooted(LibraryName), _documentName);
 		}
 
-		private void OpenDesigner(DesignerInfo AInfo)
+		private void OpenDesigner(DesignerInfo info)
 		{
-			Dataphoria.OpenDesigner(AInfo, GetBuffer());
+			Dataphoria.OpenDesigner(info, GetBuffer());
 		}
 
-		private void OpenClicked(object ASender, EventArgs AArgs)
+		private void OpenClicked(object sender, EventArgs args)
 		{
-			IDesigner LDesigner = Dataphoria.GetDesigner(GetBuffer());
-			if (LDesigner != null)
-				LDesigner.Select();
+			IDesigner designer = Dataphoria.GetDesigner(GetBuffer());
+			if (designer != null)
+				designer.Select();
 			else
-				OpenDesigner(Dataphoria.GetDefaultDesigner(FDocumentType));
+				OpenDesigner(Dataphoria.GetDefaultDesigner(_documentType));
 		}
 
-		private void OpenWithClicked(object ASender, EventArgs AArgs)
+		private void OpenWithClicked(object sender, EventArgs args)
 		{
-			DesignerInfo LInfo = Dataphoria.ChooseDesigner(FDocumentType);
-			IDesigner LDesigner = Dataphoria.GetDesigner(GetBuffer());
-			if (LDesigner != null)
+			DesignerInfo info = Dataphoria.ChooseDesigner(_documentType);
+			IDesigner designer = Dataphoria.GetDesigner(GetBuffer());
+			if (designer != null)
 			{
-				if (LDesigner.DesignerID != LInfo.ID)
+				if (designer.DesignerID != info.ID)
 				{
 					if 
 					(
@@ -119,15 +119,15 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 								MessageBoxDefaultButton.Button1
 							) == DialogResult.Yes
 						) &&
-						LDesigner.CloseSafely()
+						designer.CloseSafely()
 					)
-						OpenDesigner(LInfo);
+						OpenDesigner(info);
 				}
 				else
-					LDesigner.Select();
+					designer.Select();
 			}
 			else
-				OpenDesigner(LInfo);
+				OpenDesigner(info);
 		}
 
 		protected override string EditDocument()
@@ -147,8 +147,8 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		public override void ItemDrag()
 		{
-			MouseButtons LButton = System.Windows.Forms.Control.MouseButtons;
-			if ((LButton == MouseButtons.Left) || (LButton == MouseButtons.Right))
+			MouseButtons button = System.Windows.Forms.Control.MouseButtons;
+			if ((button == MouseButtons.Left) || (button == MouseButtons.Right))
 				TreeView.DoDragDrop(new DocumentData(this), DragDropEffects.Move | DragDropEffects.Copy | DragDropEffects.Link);
 			else
 				base.ItemDrag();
@@ -156,8 +156,8 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		public override void Delete()
 		{
-			IDesigner LDesigner = Dataphoria.GetDesigner(GetBuffer());
-			if ((LDesigner == null) || ((LDesigner != null) && LDesigner.CloseSafely()))
+			IDesigner designer = Dataphoria.GetDesigner(GetBuffer());
+			if ((designer == null) || ((designer != null) && designer.CloseSafely()))
 				base.Delete();
 		}
 	}

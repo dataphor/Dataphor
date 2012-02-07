@@ -19,56 +19,56 @@ namespace Alphora.Dataphor
 	/// </remarks>
 	public class ValidatingBaseList<T> : IList<T>, IList
 	{
-		public const int CDefaultInitialCapacity = 0;
-		public const int CMinimumGrowth = 4;
-		public const int CMaximumGrowth = 512;
+		public const int DefaultInitialCapacity = 0;
+		public const int MinimumGrowth = 4;
+		public const int MaximumGrowth = 512;
 		
 		public ValidatingBaseList() : base() { }
-		public ValidatingBaseList(int ACapacity) : base()
+		public ValidatingBaseList(int capacity) : base()
 		{
 			#if DEBUG
-			if (ACapacity < 0)
+			if (capacity < 0)
 				throw new ArgumentOutOfRangeException("ACapacity", "Capacity must be greater than or equal to zero.");
 			#endif
 			
-			if (ACapacity > 0)
-				SetCapacity(ACapacity);
+			if (capacity > 0)
+				SetCapacity(capacity);
 		}
 		
-		private int FCount;
-		public int Count { get { return FCount; } }
+		private int _count;
+		public int Count { get { return _count; } }
 
-		private T[] FItems;
+		private T[] _items;
 		
 		public int Capacity 
 		{ 
-			get { return FItems == null ? 0 : FItems.Length; }
+			get { return _items == null ? 0 : _items.Length; }
 			set { SetCapacity(value); }
 		}
 		
-		private void SetCapacity(int ACapacity)
+		private void SetCapacity(int capacity)
 		{
-			if (ACapacity < FCount)
+			if (capacity < _count)
 				throw new ArgumentException("Capacity cannot be set to a value lower than the number of items currently in the list.");
 
-			if ((FItems == null) || (FItems.Length <= ACapacity))
+			if ((_items == null) || (_items.Length <= capacity))
 			{
-				T[] LNewItems = new T[ACapacity];
-				if (FItems != null)
-					Array.Copy(FItems, LNewItems, FItems.Length);
-				FItems = LNewItems;
+				T[] newItems = new T[capacity];
+				if (_items != null)
+					Array.Copy(_items, newItems, _items.Length);
+				_items = newItems;
 			}
 		}
 		
-		private void EnsureCapacity(int ARequiredCapacity)
+		private void EnsureCapacity(int requiredCapacity)
 		{
-			if (Capacity <= ARequiredCapacity)
+			if (Capacity <= requiredCapacity)
 			{
-				int LAdditionalCapacity = Math.Min(Math.Max(Capacity, CMinimumGrowth), CMaximumGrowth);
-				if (Capacity + LAdditionalCapacity < ARequiredCapacity)
-					Capacity = ARequiredCapacity;
+				int additionalCapacity = Math.Min(Math.Max(Capacity, MinimumGrowth), MaximumGrowth);
+				if (Capacity + additionalCapacity < requiredCapacity)
+					Capacity = requiredCapacity;
 				else
-					Capacity += LAdditionalCapacity;
+					Capacity += additionalCapacity;
 			}
 		}
 		
@@ -77,89 +77,89 @@ namespace Alphora.Dataphor
 		///		Override and throw an exception in order to perform item validation for
 		///		the list.
 		/// </remarks>
-		protected virtual void Validate(T AValue) { }
+		protected virtual void Validate(T tempValue) { }
 		
 		/// <summary> Adding is called when an item is added to the list. </summary>
 		/// <remarks>
 		///		This should NOT be used for validation, but is a good place to put 
 		///		code that interacts with items in the list.  
 		///	</remarks>
-		protected virtual void Adding(T AValue, int AIndex) { }
+		protected virtual void Adding(T tempValue, int index) { }
 		
 		/// <summary> Removing is called when an item is being removed from the List. </summary>
-		protected virtual void Removing(T AValue, int AIndex) { }
+		protected virtual void Removing(T tempValue, int index) { }
 
 		/// <summary> Removed is call <i>after</i> an item as been removed from the list. </summary>
-		protected virtual void Removed(T AValue, int AIndex) { }
+		protected virtual void Removed(T tempValue, int index) { }
 		
 		/// <summary> Adds an item to the end of the list. </summary>
-		public int Add(T AValue)
+		public int Add(T tempValue)
 		{
-			int LIndex = Count;
-			Insert(LIndex, AValue);
-			return LIndex;
+			int index = Count;
+			Insert(index, tempValue);
+			return index;
 		}
 		
 		/// <summary> Adds a collection of items to the list. </summary>
-		public void AddRange(IEnumerable<T> AItems)
+		public void AddRange(IEnumerable<T> items)
 		{
-			foreach (T LItem in AItems)
-				Add(LItem);
+			foreach (T item in items)
+				Add(item);
 		}
 		
 		/// <summary> Inserts an item into the list. </summary>
-		public void Insert(int AIndex, T AValue)
+		public void Insert(int index, T tempValue)
 		{
-			Validate(AValue);
-			EnsureCapacity(FCount);
-			for (int LIndex = FCount - 1; LIndex >= AIndex; LIndex--)
-				FItems[LIndex + 1] = FItems[LIndex];
-			FItems[AIndex] = AValue;
-			FCount++;
-			Adding(AValue, AIndex);
+			Validate(tempValue);
+			EnsureCapacity(_count);
+			for (int localIndex = _count - 1; localIndex >= index; localIndex--)
+				_items[localIndex + 1] = _items[localIndex];
+			_items[index] = tempValue;
+			_count++;
+			Adding(tempValue, index);
 		}
 
-		public void InsertRange(int AIndex, IEnumerable<T> AItems)
+		public void InsertRange(int index, IEnumerable<T> items)
 		{
-			foreach (T LItem in AItems)
-				Insert(AIndex++, LItem);
+			foreach (T item in items)
+				Insert(index++, item);
 		}
 		
-		public void Remove(T AValue)
+		public void Remove(T tempValue)
 		{
-		    RemoveAt(IndexOf(AValue));
+		    RemoveAt(IndexOf(tempValue));
 		}
 
 		/// <summary>Removes AValue if it is found in the list, does nothing otherwise.</summary>		
-		public void SafeRemove(T AValue)
+		public void SafeRemove(T tempValue)
 		{
-			int LIndex = IndexOf(AValue);
-			if (LIndex >= 0)
-				RemoveAt(LIndex);
+			int index = IndexOf(tempValue);
+			if (index >= 0)
+				RemoveAt(index);
 		}
 		
-		public T RemoveAt(int AIndex)
+		public T RemoveAt(int index)
 		{
-			T LItem = this[AIndex];
+			T item = this[index];
 			try
 			{
-				Removing(LItem, AIndex);
+				Removing(item, index);
 			}
 			finally
 			{
-				FCount--;
-				for (int LIndex = AIndex; LIndex < FCount; LIndex++)
-					FItems[LIndex] = FItems[LIndex + 1];
-				FItems[FCount] = default(T); // Clear the last slot
+				_count--;
+				for (int localIndex = index; localIndex < _count; localIndex++)
+					_items[localIndex] = _items[localIndex + 1];
+				_items[_count] = default(T); // Clear the last slot
 			}
-			Removed(LItem, AIndex);
-			return LItem;
+			Removed(item, index);
+			return item;
 		}
 		
-		public void RemoveRange(int AIndex, int ACount)
+		public void RemoveRange(int index, int count)
 		{
-			for (int LIndex = 0; LIndex < ACount; LIndex++)
-				RemoveAt(AIndex);
+			for (int localIndex = 0; localIndex < count; localIndex++)
+				RemoveAt(index);
 		}
 		
 		public virtual void Clear()
@@ -168,97 +168,97 @@ namespace Alphora.Dataphor
 				RemoveAt(Count - 1);
 		}
 		
-		public void SetRange(int AIndex, IEnumerable<T> AItems)
+		public void SetRange(int index, IEnumerable<T> items)
 		{
-			foreach (T LItem in AItems)
-				this[AIndex++] = LItem;
+			foreach (T item in items)
+				this[index++] = item;
 		}
 		
-		public T this[int AIndex]
+		public T this[int index]
 		{
 			get 
 			{ 
 				#if DEBUG
-				if ((AIndex < 0) || (AIndex >= Count))
+				if ((index < 0) || (index >= Count))
 					throw new IndexOutOfRangeException();
 				#endif
-				return FItems[AIndex]; 
+				return _items[index]; 
 			}
 			set
 			{
 				#if DEBUG
-				if ((AIndex < 0) || (AIndex >= Count))
+				if ((index < 0) || (index >= Count))
 					throw new IndexOutOfRangeException();
 				#endif
-				T LItem = this[AIndex];
-				Removing(LItem, AIndex);
+				T item = this[index];
+				Removing(item, index);
 				Validate(value);
-				FItems[AIndex] = value;
-				Removed(LItem, AIndex);
-				Adding(value, AIndex);
+				_items[index] = value;
+				Removed(item, index);
+				Adding(value, index);
 			}
 		}
 		
-		public virtual int IndexOf(T AItem)
+		public virtual int IndexOf(T item)
 		{
-			for (int LIndex = 0; LIndex < FCount; LIndex++)
-				if (Object.Equals(this[LIndex], AItem))
-					return LIndex;
+			for (int index = 0; index < _count; index++)
+				if (Object.Equals(this[index], item))
+					return index;
 					
 			return -1;
 		}
 		
-		public bool Contains(T AItem)
+		public bool Contains(T item)
 		{
-			return IndexOf(AItem) >= 0;
+			return IndexOf(item) >= 0;
 		}
 		
-		public void CopyTo(int ASourceIndex, T[] AArray, int AArrayIndex, int ACount)
+		public void CopyTo(int sourceIndex, T[] array, int arrayIndex, int count)
 		{
-			if (FItems != null)
-				Array.Copy(FItems, ASourceIndex, AArray, AArrayIndex, ACount);
+			if (_items != null)
+				Array.Copy(_items, sourceIndex, array, arrayIndex, count);
 		}
 
-		public void CopyTo(T[] AArray, int AArrayIndex)
+		public void CopyTo(T[] array, int arrayIndex)
 		{
-			CopyTo(0, AArray, AArrayIndex, FCount);
+			CopyTo(0, array, arrayIndex, _count);
 		}
 		
-		public void CopyTo(T[] AArray)
+		public void CopyTo(T[] array)
 		{
-			CopyTo(AArray, 0);
+			CopyTo(array, 0);
 		}
 
 		#region IList<T> Members
 
-		int IList<T>.IndexOf(T AItem)
+		int IList<T>.IndexOf(T item)
 		{
-			return IndexOf(AItem);
+			return IndexOf(item);
 		}
 
-		void IList<T>.Insert(int AIndex, T AItem)
+		void IList<T>.Insert(int index, T item)
 		{
-			Insert(AIndex, AItem);
+			Insert(index, item);
 		}
 
-		void IList<T>.RemoveAt(int AIndex)
+		void IList<T>.RemoveAt(int index)
 		{
-			RemoveAt(AIndex);
+			RemoveAt(index);
 		}
 
-		T IList<T>.this[int AIndex]
+		T IList<T>.this[int index]
 		{
-			get { return this[AIndex]; }
-			set { this[AIndex] = value; }
+			get { return this[index]; }
+			set { this[index] = value; }
 		}
 
 		#endregion
 
 		#region ICollection<T> Members
 
-		void ICollection<T>.Add(T AItem)
+		void ICollection<T>.Add(T item)
 		{
-			Add(AItem);
+			Add(item);
 		}
 
 		void ICollection<T>.Clear()
@@ -266,14 +266,14 @@ namespace Alphora.Dataphor
 			Clear();
 		}
 
-		bool ICollection<T>.Contains(T AItem)
+		bool ICollection<T>.Contains(T item)
 		{
-			return Contains(AItem);
+			return Contains(item);
 		}
 
-		void ICollection<T>.CopyTo(T[] AArray, int AArrayIndex)
+		void ICollection<T>.CopyTo(T[] array, int arrayIndex)
 		{
-			CopyTo(AArray, AArrayIndex);
+			CopyTo(array, arrayIndex);
 		}
 
 		int ICollection<T>.Count
@@ -286,12 +286,12 @@ namespace Alphora.Dataphor
 			get { return false; }
 		}
 
-		bool ICollection<T>.Remove(T AItem)
+		bool ICollection<T>.Remove(T item)
 		{
-			int LIndex = IndexOf(AItem);
-			if (LIndex >= 0)
+			int index = IndexOf(item);
+			if (index >= 0)
 			{
-				RemoveAt(LIndex);
+				RemoveAt(index);
 				return true;
 			}
 			
@@ -309,27 +309,27 @@ namespace Alphora.Dataphor
 
         public class BaseListEnumerator : IEnumerator<T>
         {
-            public BaseListEnumerator(ValidatingBaseList<T> AList) : base()
+            public BaseListEnumerator(ValidatingBaseList<T> list) : base()
             {
-                FList = AList;
+                _list = list;
             }
             
-            private int FCurrent = -1;
-            private ValidatingBaseList<T> FList;
+            private int _current = -1;
+            private ValidatingBaseList<T> _list;
 
-            public T Current { get { return FList[FCurrent]; } }
+            public T Current { get { return _list[_current]; } }
             
-            object IEnumerator.Current { get { return FList[FCurrent]; } }
+            object IEnumerator.Current { get { return _list[_current]; } }
 
             public void Reset()
             {
-                FCurrent = -1;
+                _current = -1;
             }
 
             public bool MoveNext()
             {
-				FCurrent++;
-				return FCurrent < FList.Count;
+				_current++;
+				return _current < _list.Count;
             }
             
             public void Dispose()
@@ -339,9 +339,9 @@ namespace Alphora.Dataphor
         }
         
 		/// <summary> Changes the index of an item. </summary>
-		public virtual void Move(int AOldIndex, int ANewIndex)
+		public virtual void Move(int oldIndex, int newIndex)
 		{
-			Insert(ANewIndex, RemoveAt(AOldIndex));
+			Insert(newIndex, RemoveAt(oldIndex));
 		}
 		
 		#endregion
@@ -357,9 +357,9 @@ namespace Alphora.Dataphor
 
 		#region IList Members
 
-		int IList.Add(object AValue)
+		int IList.Add(object tempValue)
 		{
-			return Add((T)AValue);
+			return Add((T)tempValue);
 		}
 
 		void IList.Clear()
@@ -367,19 +367,19 @@ namespace Alphora.Dataphor
 			Clear();
 		}
 
-		bool IList.Contains(object AValue)
+		bool IList.Contains(object tempValue)
 		{
-			return Contains((T)AValue);
+			return Contains((T)tempValue);
 		}
 
-		int IList.IndexOf(object AValue)
+		int IList.IndexOf(object tempValue)
 		{
-			return IndexOf((T)AValue);
+			return IndexOf((T)tempValue);
 		}
 
-		void IList.Insert(int AIndex, object AValue)
+		void IList.Insert(int index, object tempValue)
 		{
-			Insert(AIndex, (T)AValue);
+			Insert(index, (T)tempValue);
 		}
 
 		bool IList.IsFixedSize
@@ -392,29 +392,29 @@ namespace Alphora.Dataphor
 			get { return false; }
 		}
 
-		void IList.Remove(object AValue)
+		void IList.Remove(object tempValue)
 		{
-			Remove((T)AValue);
+			Remove((T)tempValue);
 		}
 
-		void IList.RemoveAt(int AIndex)
+		void IList.RemoveAt(int index)
 		{
-			RemoveAt(AIndex);
+			RemoveAt(index);
 		}
 
-		object IList.this[int AIndex]
+		object IList.this[int index]
 		{
-			get { return this[AIndex]; }
-			set { this[AIndex] = (T)value; }
+			get { return this[index]; }
+			set { this[index] = (T)value; }
 		}
 
 		#endregion
 
 		#region ICollection Members
 
-		void ICollection.CopyTo(Array AArray, int AIndex)
+		void ICollection.CopyTo(Array array, int index)
 		{
-			((IList<T>)this).CopyTo((T[])AArray, AIndex);
+			((IList<T>)this).CopyTo((T[])array, index);
 		}
 
 		int ICollection.Count

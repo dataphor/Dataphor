@@ -49,33 +49,33 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 	
 	public class FrontendDevice : MemoryDevice
 	{
-		public const string CFrontendDeviceName = @".Frontend.Server";
-		public const string CDocumentsTableVarName = @".Frontend.Documents";
-		public const string CDfdxDocumentID = @"dfdx";
+		public const string FrontendDeviceName = @".Frontend.Server";
+		public const string DocumentsTableVarName = @".Frontend.Documents";
+		public const string DfdxDocumentID = @"dfdx";
 		
-		public FrontendDevice(int AID, string AName) : base(AID, AName){}
+		public FrontendDevice(int iD, string name) : base(iD, name){}
 		
-		protected override void InternalStart(ServerProcess AProcess)
+		protected override void InternalStart(ServerProcess process)
 		{
-			base.InternalStart(AProcess);
-			FFrontendServer = FrontendServer.GetFrontendServer(AProcess.ServerSession.Server);
+			base.InternalStart(process);
+			_frontendServer = FrontendServer.GetFrontendServer(process.ServerSession.Server);
 			#if USEWATCHERS
 			FServerSession = AProcess.ServerSession;
 			#endif
-			FFrontendDirectory = AProcess.ServerSession.Server.Catalog.Libraries[Library.Name].GetInstanceLibraryDirectory(((DAE.Server.Server)AProcess.ServerSession.Server).InstanceDirectory);
-			string LOldFrontendDirectory = Path.Combine(Schema.LibraryUtility.GetDefaultLibraryDirectory(((DAE.Server.Server)AProcess.ServerSession.Server).LibraryDirectory), Library.Name);
+			_frontendDirectory = process.ServerSession.Server.Catalog.Libraries[Library.Name].GetInstanceLibraryDirectory(((DAE.Server.Server)process.ServerSession.Server).InstanceDirectory);
+			string oldFrontendDirectory = Path.Combine(Schema.LibraryUtility.GetDefaultLibraryDirectory(((DAE.Server.Server)process.ServerSession.Server).LibraryDirectory), Library.Name);
 
-			FDesignersFileName = Path.Combine(FFrontendDirectory, "Designers.bop");
-			string LOldDesignersFileName = Path.Combine(LOldFrontendDirectory, "Designers.bop");
-			if (!File.Exists(FDesignersFileName) && File.Exists(LOldDesignersFileName))
-				File.Copy(LOldDesignersFileName, FDesignersFileName);
+			_designersFileName = Path.Combine(_frontendDirectory, "Designers.bop");
+			string oldDesignersFileName = Path.Combine(oldFrontendDirectory, "Designers.bop");
+			if (!File.Exists(_designersFileName) && File.Exists(oldDesignersFileName))
+				File.Copy(oldDesignersFileName, _designersFileName);
 
 			LoadDesigners();
 
-			FDocumentTypesFileName = Path.Combine(FFrontendDirectory, "DocumentTypes.bop");
-			string LOldDocumentTypesFileName = Path.Combine(LOldFrontendDirectory, "DocumentTypes.bop");
-			if (!File.Exists(FDocumentTypesFileName) && File.Exists(LOldDocumentTypesFileName))
-				File.Copy(LOldDocumentTypesFileName, FDocumentTypesFileName);
+			_documentTypesFileName = Path.Combine(_frontendDirectory, "DocumentTypes.bop");
+			string oldDocumentTypesFileName = Path.Combine(oldFrontendDirectory, "DocumentTypes.bop");
+			if (!File.Exists(_documentTypesFileName) && File.Exists(oldDocumentTypesFileName))
+				File.Copy(oldDocumentTypesFileName, _documentTypesFileName);
 				
 			LoadDocumentTypes();
 
@@ -88,24 +88,24 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			FWatcher.Renamed += new RenamedEventHandler(DirectoryRenamed);
 			FWatcher.EnableRaisingEvents = true;
 			#endif
-			AProcess.Catalog.Libraries.OnLibraryCreated += new Schema.LibraryNotifyEvent(LibraryCreated);
-			AProcess.Catalog.Libraries.OnLibraryDeleted += new Schema.LibraryNotifyEvent(LibraryDeleted);
-			AProcess.Catalog.Libraries.OnLibraryAdded += new Schema.LibraryNotifyEvent(LibraryAdded);
-			AProcess.Catalog.Libraries.OnLibraryRemoved += new Schema.LibraryNotifyEvent(LibraryRemoved);
-			AProcess.Catalog.Libraries.OnLibraryRenamed += new Schema.LibraryRenameEvent(LibraryRenamed);
-			AProcess.Catalog.Libraries.OnLibraryLoaded += new Schema.LibraryNotifyEvent(LibraryLoaded);
-			AProcess.Catalog.Libraries.OnLibraryUnloaded += new Schema.LibraryNotifyEvent(LibraryUnloaded);
+			process.Catalog.Libraries.OnLibraryCreated += new Schema.LibraryNotifyEvent(LibraryCreated);
+			process.Catalog.Libraries.OnLibraryDeleted += new Schema.LibraryNotifyEvent(LibraryDeleted);
+			process.Catalog.Libraries.OnLibraryAdded += new Schema.LibraryNotifyEvent(LibraryAdded);
+			process.Catalog.Libraries.OnLibraryRemoved += new Schema.LibraryNotifyEvent(LibraryRemoved);
+			process.Catalog.Libraries.OnLibraryRenamed += new Schema.LibraryRenameEvent(LibraryRenamed);
+			process.Catalog.Libraries.OnLibraryLoaded += new Schema.LibraryNotifyEvent(LibraryLoaded);
+			process.Catalog.Libraries.OnLibraryUnloaded += new Schema.LibraryNotifyEvent(LibraryUnloaded);
 		}
 		
-		protected override void InternalStop(ServerProcess AProcess)
+		protected override void InternalStop(ServerProcess process)
 		{
-			AProcess.Catalog.Libraries.OnLibraryCreated -= new Schema.LibraryNotifyEvent(LibraryCreated);
-			AProcess.Catalog.Libraries.OnLibraryDeleted -= new Schema.LibraryNotifyEvent(LibraryDeleted);
-			AProcess.Catalog.Libraries.OnLibraryAdded -= new Schema.LibraryNotifyEvent(LibraryAdded);
-			AProcess.Catalog.Libraries.OnLibraryRemoved -= new Schema.LibraryNotifyEvent(LibraryRemoved);
-			AProcess.Catalog.Libraries.OnLibraryRenamed -= new Schema.LibraryRenameEvent(LibraryRenamed);
-			AProcess.Catalog.Libraries.OnLibraryLoaded -= new Schema.LibraryNotifyEvent(LibraryLoaded);
-			AProcess.Catalog.Libraries.OnLibraryUnloaded -= new Schema.LibraryNotifyEvent(LibraryUnloaded);
+			process.Catalog.Libraries.OnLibraryCreated -= new Schema.LibraryNotifyEvent(LibraryCreated);
+			process.Catalog.Libraries.OnLibraryDeleted -= new Schema.LibraryNotifyEvent(LibraryDeleted);
+			process.Catalog.Libraries.OnLibraryAdded -= new Schema.LibraryNotifyEvent(LibraryAdded);
+			process.Catalog.Libraries.OnLibraryRemoved -= new Schema.LibraryNotifyEvent(LibraryRemoved);
+			process.Catalog.Libraries.OnLibraryRenamed -= new Schema.LibraryRenameEvent(LibraryRenamed);
+			process.Catalog.Libraries.OnLibraryLoaded -= new Schema.LibraryNotifyEvent(LibraryLoaded);
+			process.Catalog.Libraries.OnLibraryUnloaded -= new Schema.LibraryNotifyEvent(LibraryUnloaded);
 			#if USEWATCHERS
 			FWatcher.Changed -= new FileSystemEventHandler(DirectoryChanged);
 			FWatcher.Created -= new FileSystemEventHandler(DirectoryChanged);
@@ -113,10 +113,10 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			FWatcher.Renamed -= new RenamedEventHandler(DirectoryRenamed);
 			FWatcher.Dispose();
 			#endif
-			base.InternalStop(AProcess);
+			base.InternalStop(process);
 		}
 		
-		private FrontendServer FFrontendServer;
+		private FrontendServer _frontendServer;
 		#if USEWATCHERS
 		// To enable watchers, you would have to resolve the issue that the ServerSession attached to with this reference during device startup may be disposed.
 		// You would have to start an owned server session that could be guaranteed to exist in all cases in order to enable this behavior.
@@ -124,39 +124,39 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		#endif
 		
 		// DAE Library Events		
-		private void LibraryCreated(Program AProgram, string ALibraryName)
+		private void LibraryCreated(Program program, string libraryName)
 		{
 		}
 		
-		private void LibraryAdded(Program AProgram, string ALibraryName)
+		private void LibraryAdded(Program program, string libraryName)
 		{
-			LoadLibrary(AProgram, Schema.Object.EnsureRooted(ALibraryName));
-			EnsureRegisterScript(AProgram, Schema.Object.EnsureRooted(ALibraryName));
+			LoadLibrary(program, Schema.Object.EnsureRooted(libraryName));
+			EnsureRegisterScript(program, Schema.Object.EnsureRooted(libraryName));
 		}
 		
-		private void LibraryRenamed(Program AProgram, string AOldLibraryName, string ANewLibraryName)
+		private void LibraryRenamed(Program program, string oldLibraryName, string newLibraryName)
 		{
-			UnloadLibrary(AProgram, Schema.Object.EnsureRooted(AOldLibraryName));
-			LoadLibrary(AProgram, Schema.Object.EnsureRooted(ANewLibraryName));
+			UnloadLibrary(program, Schema.Object.EnsureRooted(oldLibraryName));
+			LoadLibrary(program, Schema.Object.EnsureRooted(newLibraryName));
 		}
 		
-		private void LibraryRemoved(Program AProgram, string ALibraryName)
+		private void LibraryRemoved(Program program, string libraryName)
 		{
-			UnloadLibrary(AProgram, Schema.Object.EnsureRooted(ALibraryName));
+			UnloadLibrary(program, Schema.Object.EnsureRooted(libraryName));
 		}
 		
-		private void LibraryDeleted(Program AProgram, string ALibraryName)
+		private void LibraryDeleted(Program program, string libraryName)
 		{
 		}
 		
-		private void LibraryLoaded(Program AProgram, string ALibraryName)
+		private void LibraryLoaded(Program program, string libraryName)
 		{
-			EnsureLibrariesLoaded(AProgram);
+			EnsureLibrariesLoaded(program);
 		}
 		
-		private void LibraryUnloaded(Program AProgram, string ALibraryName)
+		private void LibraryUnloaded(Program program, string libraryName)
 		{
-			EnsureLibrariesLoaded(AProgram);
+			EnsureLibrariesLoaded(program);
 		}
 		
 		#if USEWATCHERS
@@ -201,44 +201,44 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		#endif
 
 		// Session
-		protected override DeviceSession InternalConnect(ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo)
+		protected override DeviceSession InternalConnect(ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo)
 		{
-			return new FrontendDeviceSession(this, AServerProcess, ADeviceSessionInfo);
+			return new FrontendDeviceSession(this, serverProcess, deviceSessionInfo);
 		}
 		
-		public static FrontendDevice GetFrontendDevice(Program AProgram)
+		public static FrontendDevice GetFrontendDevice(Program program)
 		{
-			return (FrontendDevice)Compiler.ResolveCatalogIdentifier(AProgram.Plan, CFrontendDeviceName, true);
+			return (FrontendDevice)Compiler.ResolveCatalogIdentifier(program.Plan, FrontendDeviceName, true);
 		}
 		
-		public static Schema.TableVar GetDocumentsTableVar(Plan APlan)
+		public static Schema.TableVar GetDocumentsTableVar(Plan plan)
 		{
-			ApplicationTransaction LTransaction = null;
-			if (APlan.ApplicationTransactionID != Guid.Empty)
-				LTransaction = APlan.GetApplicationTransaction();
+			ApplicationTransaction transaction = null;
+			if (plan.ApplicationTransactionID != Guid.Empty)
+				transaction = plan.GetApplicationTransaction();
 			try
 			{
-				if (LTransaction != null)
-					LTransaction.PushGlobalContext();
+				if (transaction != null)
+					transaction.PushGlobalContext();
 				try
 				{
-					return (Schema.TableVar)Compiler.ResolveCatalogIdentifier(APlan, CDocumentsTableVarName, true);
+					return (Schema.TableVar)Compiler.ResolveCatalogIdentifier(plan, DocumentsTableVarName, true);
 				}
 				finally
 				{
-					if (LTransaction != null)
-						LTransaction.PopGlobalContext();
+					if (transaction != null)
+						transaction.PopGlobalContext();
 				}
 			}
 			finally
 			{
-				if (LTransaction != null)
-					Monitor.Exit(LTransaction);
+				if (transaction != null)
+					Monitor.Exit(transaction);
 			}
 		}
 
 		// FrontendDirectory
-		private string FFrontendDirectory;
+		private string _frontendDirectory;
 		
 		// LibraryDirectory
 		//private string FLibraryDirectory;
@@ -246,93 +246,93 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		// DirectoryLock - protects file operations within the FrontendDirectory		
 		public void AcquireDirectoryLock()
 		{
-			System.Threading.Monitor.Enter(FFrontendDirectory);
+			System.Threading.Monitor.Enter(_frontendDirectory);
 		}
 		
 		public void ReleaseDirectoryLock()
 		{
-			System.Threading.Monitor.Exit(FFrontendDirectory);
+			System.Threading.Monitor.Exit(_frontendDirectory);
 		}
 
-		private Serializer FSerializer = new Serializer();
-		private Deserializer FDeserializer = new Deserializer();
+		private Serializer _serializer = new Serializer();
+		private Deserializer _deserializer = new Deserializer();
 		
 		// DocumentTypes
-		private string FDocumentTypesFileName;
-		private long FDocumentTypesTimeStamp = Int64.MinValue;
-		public long DocumentTypesTimeStamp { get { return FDocumentTypesTimeStamp; } }
+		private string _documentTypesFileName;
+		private long _documentTypesTimeStamp = Int64.MinValue;
+		public long DocumentTypesTimeStamp { get { return _documentTypesTimeStamp; } }
 		
-		private long FDocumentTypesBufferTimeStamp = Int64.MinValue;
-		public long DocumentTypesBufferTimeStamp { get { return FDocumentTypesBufferTimeStamp; } }
+		private long _documentTypesBufferTimeStamp = Int64.MinValue;
+		public long DocumentTypesBufferTimeStamp { get { return _documentTypesBufferTimeStamp; } }
 		
 		public void UpdateDocumentTypesBufferTimeStamp()
 		{
-			FDocumentTypesBufferTimeStamp = FDocumentTypesTimeStamp;
+			_documentTypesBufferTimeStamp = _documentTypesTimeStamp;
 		}
 		
-		private DocumentTypes FDocumentTypes = new DocumentTypes();
-		public DocumentTypes DocumentTypes { get { return FDocumentTypes; } }
+		private DocumentTypes _documentTypes = new DocumentTypes();
+		public DocumentTypes DocumentTypes { get { return _documentTypes; } }
 		
 		private void EnsureDocumentTypeDesigners()
 		{
-			ArrayList LInvalidDesigners;
-			foreach (DocumentType LDocumentType in FDocumentTypes.Values)
+			ArrayList invalidDesigners;
+			foreach (DocumentType documentType in _documentTypes.Values)
 			{
-				LInvalidDesigners = new ArrayList();
-				foreach (string LString in LDocumentType.Designers)
-					if (!FDesigners.Contains(LString))
-						LInvalidDesigners.Add(LString);
-				foreach (string LString in LInvalidDesigners)
-					LDocumentType.Designers.Remove(LString);
+				invalidDesigners = new ArrayList();
+				foreach (string stringValue in documentType.Designers)
+					if (!_designers.Contains(stringValue))
+						invalidDesigners.Add(stringValue);
+				foreach (string stringValue in invalidDesigners)
+					documentType.Designers.Remove(stringValue);
 			}
 		}
 		
 		public void LoadDocumentTypes()
 		{
-			lock (FFrontendDirectory)
+			lock (_frontendDirectory)
 			{
-				if (File.Exists(FDocumentTypesFileName))
+				if (File.Exists(_documentTypesFileName))
 				{
-					using (FileStream LStream = new FileStream(FDocumentTypesFileName, FileMode.Open, FileAccess.Read))
+					using (FileStream stream = new FileStream(_documentTypesFileName, FileMode.Open, FileAccess.Read))
 					{
-						FDocumentTypes = ((DocumentTypesContainer)FDeserializer.Deserialize(LStream, null)).DocumentTypes;
+						_documentTypes = ((DocumentTypesContainer)_deserializer.Deserialize(stream, null)).DocumentTypes;
 					}
 				}
 				else
-					FDocumentTypes.Clear();
+					_documentTypes.Clear();
 					
 				EnsureDocumentTypeDesigners();
 
-				FDocumentTypesTimeStamp += 1;
+				_documentTypesTimeStamp += 1;
 			}
 		}
 		
 		public void ClearDocumentTypes()
 		{
-			lock (FFrontendDirectory)
+			lock (_frontendDirectory)
 			{
-				if (File.Exists(FDocumentTypesFileName))
-					File.Delete(FDocumentTypesFileName);
+				if (File.Exists(_documentTypesFileName))
+					File.Delete(_documentTypesFileName);
 				
-				FDocumentTypes.Clear();
+				_documentTypes.Clear();
 				
 				EnsureDocumentTypeDesigners();
 				
-				FDocumentTypesTimeStamp += 1;
+				_documentTypesTimeStamp += 1;
 			}
 		}
 		
 		public void SaveDocumentTypes()
 		{
-			lock (FFrontendDirectory)
+			lock (_frontendDirectory)
 			{
 				MaintainedUpdate = true;
 				try
 				{
-					FileUtility.EnsureWriteable(FDocumentTypesFileName);
-					using (FileStream LStream = new FileStream(FDocumentTypesFileName, FileMode.Create, FileAccess.Write))
+					FileUtility.EnsureWriteable(_documentTypesFileName);
+					using (FileStream stream = new FileStream(_documentTypesFileName, FileMode.Create, FileAccess.Write))
 					{
-						FSerializer.Serialize(LStream, new DocumentTypesContainer(FDocumentTypes));
+						_serializer.Serialize(stream, new DocumentTypesContainer(_documentTypes));
 					}
 				}
 				finally
@@ -342,80 +342,80 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		public bool HasDocumentTypeDesigners(string ADesignerID)
+		public bool HasDocumentTypeDesigners(string designerID)
 		{
-			foreach (DocumentType LDocumentType in DocumentTypes.Values)
-				if (LDocumentType.Designers.Contains(ADesignerID))
+			foreach (DocumentType documentType in DocumentTypes.Values)
+				if (documentType.Designers.Contains(designerID))
 					return true;
 			return false;
 		}
 		
 		// Designers
-		private string FDesignersFileName;
-		private long FDesignersTimeStamp = Int64.MinValue;
-		public long DesignersTimeStamp { get { return FDesignersTimeStamp; } }
+		private string _designersFileName;
+		private long _designersTimeStamp = Int64.MinValue;
+		public long DesignersTimeStamp { get { return _designersTimeStamp; } }
 		
-		private long FDesignersBufferTimeStamp = Int64.MinValue;
-		public long DesignersBufferTimeStamp { get { return FDesignersBufferTimeStamp; } }
+		private long _designersBufferTimeStamp = Int64.MinValue;
+		public long DesignersBufferTimeStamp { get { return _designersBufferTimeStamp; } }
 		
 		public void UpdateDesignersBufferTimeStamp()
 		{
-			FDesignersBufferTimeStamp = FDesignersTimeStamp;
+			_designersBufferTimeStamp = _designersTimeStamp;
 		}
 		
-		private long FDocumentTypeDesignersBufferTimeStamp = Int64.MinValue;
-		public long DocumentTypeDesignersBufferTimeStamp { get { return FDocumentTypeDesignersBufferTimeStamp; } }
+		private long _documentTypeDesignersBufferTimeStamp = Int64.MinValue;
+		public long DocumentTypeDesignersBufferTimeStamp { get { return _documentTypeDesignersBufferTimeStamp; } }
 		
 		public void UpdateDocumentTypeDesignersBufferTimeStamp()
 		{
-			FDocumentTypeDesignersBufferTimeStamp = FDocumentTypesTimeStamp;
+			_documentTypeDesignersBufferTimeStamp = _documentTypesTimeStamp;
 		}
 		
-		private Designers FDesigners = new Designers();
-		public Designers Designers { get { return FDesigners; } }
+		private Designers _designers = new Designers();
+		public Designers Designers { get { return _designers; } }
 		
 		public void LoadDesigners()
 		{
-			lock (FFrontendDirectory)
+			lock (_frontendDirectory)
 			{
-				if (File.Exists(FDesignersFileName))
+				if (File.Exists(_designersFileName))
 				{
-					using (FileStream LStream = new FileStream(FDesignersFileName, FileMode.Open, FileAccess.Read))
+					using (FileStream stream = new FileStream(_designersFileName, FileMode.Open, FileAccess.Read))
 					{
-						FDesigners = ((DesignersContainer)FDeserializer.Deserialize(LStream, null)).Designers;
+						_designers = ((DesignersContainer)_deserializer.Deserialize(stream, null)).Designers;
 					}
 				}
 				else
-					FDesigners.Clear();
+					_designers.Clear();
 
-				FDesignersTimeStamp += 1;
+				_designersTimeStamp += 1;
 			}
 		}
 		
 		public void ClearDesigners()
 		{
-			lock (FFrontendDirectory)
+			lock (_frontendDirectory)
 			{
-				if (File.Exists(FDesignersFileName))
-					File.Delete(FDesignersFileName);
+				if (File.Exists(_designersFileName))
+					File.Delete(_designersFileName);
 
-				FDesigners.Clear();
+				_designers.Clear();
 
-				FDesignersTimeStamp += 1;
+				_designersTimeStamp += 1;
 			}
 		}
 		
 		public void SaveDesigners()
 		{
-			lock (FFrontendDirectory)
+			lock (_frontendDirectory)
 			{
 				MaintainedUpdate = true;
 				try
 				{
-					FileUtility.EnsureWriteable(FDesignersFileName);
-					using (FileStream LStream = new FileStream(FDesignersFileName, FileMode.Create, FileAccess.Write))
+					FileUtility.EnsureWriteable(_designersFileName);
+					using (FileStream stream = new FileStream(_designersFileName, FileMode.Create, FileAccess.Write))
 					{
-						FSerializer.Serialize(LStream, new DesignersContainer(FDesigners));
+						_serializer.Serialize(stream, new DesignersContainer(_designers));
 					}
 				}
 				finally
@@ -426,22 +426,22 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 		
 		// Libraries
-		private FrontendLibraries FLibraries = new FrontendLibraries();
-		public FrontendLibraries Libraries { get { return FLibraries; } }
+		private FrontendLibraries _libraries = new FrontendLibraries();
+		public FrontendLibraries Libraries { get { return _libraries; } }
 		
 		/// <remarks> GetFrontendLibrary takes a monitor lock on the returned library.  (Caller must exit the monitor!)</remarks>
-		private FrontendLibrary GetFrontendLibrary(Program AProgram, string AName)
+		private FrontendLibrary GetFrontendLibrary(Program program, string name)
 		{
-			FrontendLibrary LResult = null;
-			lock (AProgram.Catalog.Libraries)
+			FrontendLibrary result = null;
+			lock (program.Catalog.Libraries)
 			{
-				if (!FLibraries.Contains(AName))
-					LoadLibrary(AProgram, AName);
-				LResult = FLibraries[AName];
+				if (!_libraries.Contains(name))
+					LoadLibrary(program, name);
+				result = _libraries[name];
 			}
 
-			Monitor.Enter(LResult);
-			return LResult;
+			Monitor.Enter(result);
+			return result;
 		}
 
 		#if USEWATCHERS		
@@ -459,50 +459,50 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 		#endif
 		
-		public NativeTable EnsureNativeTable(Program AProgram, Schema.TableVar ATableVar)
+		public NativeTable EnsureNativeTable(Program program, Schema.TableVar tableVar)
 		{
-			int LIndex = Tables.IndexOf(ATableVar);
-			if (LIndex < 0)
-				LIndex= Tables.Add(new NativeTable(AProgram.ValueManager, ATableVar));
-			return Tables[LIndex];
+			int index = Tables.IndexOf(tableVar);
+			if (index < 0)
+				index= Tables.Add(new NativeTable(program.ValueManager, tableVar));
+			return Tables[index];
 		}
 		
-		private void InsertDocument(Program AProgram, FrontendLibrary ALibrary, Document ADocument)
+		private void InsertDocument(Program program, FrontendLibrary library, Document document)
 		{
-			EnsureLibrariesLoaded(AProgram);
-			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
-			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
+			EnsureLibrariesLoaded(program);
+			NativeTable nativeTable = EnsureNativeTable(program, GetDocumentsTableVar(program.Plan));
+			Row row = new Row(program.ValueManager, nativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
-				LRow[0] = ALibrary.Name;
-				LRow[1] = ADocument.Name;
-				LRow[2] = ADocument.DocumentType.ID;
-				LNativeTable.Insert(AProgram.ValueManager, LRow);
+				row[0] = library.Name;
+				row[1] = document.Name;
+				row[2] = document.DocumentType.ID;
+				nativeTable.Insert(program.ValueManager, row);
 			}
 			finally
 			{
-				LRow.Dispose();
+				row.Dispose();
 			}
 		}
 		
-		private void InsertLibraryDocuments(Program AProgram, FrontendLibrary ALibrary)
+		private void InsertLibraryDocuments(Program program, FrontendLibrary library)
 		{
 			// Insert all the documents from this library
-			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
-			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
+			NativeTable nativeTable = EnsureNativeTable(program, GetDocumentsTableVar(program.Plan));
+			Row row = new Row(program.ValueManager, nativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
-				foreach (Document LDocument in ALibrary.Documents)
+				foreach (Document document in library.Documents)
 				{
-					LRow[0] = ALibrary.Name;
-					LRow[1] = LDocument.Name;
-					LRow[2] = LDocument.DocumentType.ID;
-					LNativeTable.Insert(AProgram.ValueManager, LRow);
+					row[0] = library.Name;
+					row[1] = document.Name;
+					row[2] = document.DocumentType.ID;
+					nativeTable.Insert(program.ValueManager, row);
 				}
 			}
 			finally
 			{
-				LRow.Dispose();
+				row.Dispose();
 			}
 		}
 		
@@ -521,42 +521,42 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 		#endif
 		
-		private void DeleteDocument(Program AProgram, FrontendLibrary ALibrary, Document ADocument)
+		private void DeleteDocument(Program program, FrontendLibrary library, Document document)
 		{	
-			EnsureLibrariesLoaded(AProgram);
-			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
-			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
+			EnsureLibrariesLoaded(program);
+			NativeTable nativeTable = EnsureNativeTable(program, GetDocumentsTableVar(program.Plan));
+			Row row = new Row(program.ValueManager, nativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
-				LRow[0] = ALibrary.Name;
-				LRow[1] = ADocument.Name;
-				if (LNativeTable.HasRow(AProgram.ValueManager, LRow))
-					LNativeTable.Delete(AProgram.ValueManager, LRow);
+				row[0] = library.Name;
+				row[1] = document.Name;
+				if (nativeTable.HasRow(program.ValueManager, row))
+					nativeTable.Delete(program.ValueManager, row);
 			}
 			finally
 			{
-				LRow.Dispose();
+				row.Dispose();
 			}
 		}
 		
-		private void DeleteLibraryDocuments(Program AProgram, FrontendLibrary ALibrary)
+		private void DeleteLibraryDocuments(Program program, FrontendLibrary library)
 		{
 			// Delete all the documents from this library
-			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
-			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
+			NativeTable nativeTable = EnsureNativeTable(program, GetDocumentsTableVar(program.Plan));
+			Row row = new Row(program.ValueManager, nativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
-				foreach (Document LDocument in ALibrary.Documents)
+				foreach (Document document in library.Documents)
 				{
-					LRow[0] = ALibrary.Name;
-					LRow[1] = LDocument.Name;
-					if (LNativeTable.HasRow(AProgram.ValueManager, LRow))
-						LNativeTable.Delete(AProgram.ValueManager, LRow);
+					row[0] = library.Name;
+					row[1] = document.Name;
+					if (nativeTable.HasRow(program.ValueManager, row))
+						nativeTable.Delete(program.ValueManager, row);
 				}
 			}
 			finally
 			{
-				LRow.Dispose();
+				row.Dispose();
 			}
 		}
 		
@@ -575,21 +575,21 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 		#endif
 		
-		private void LoadLibrary(Program AProgram, string AName)
+		private void LoadLibrary(Program program, string name)
 		{
-			lock (AProgram.Catalog.Libraries)
+			lock (program.Catalog.Libraries)
 			{
-				if (FLibraries.Contains(AName))
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateObjectName, AName);
-				FrontendLibrary LLibrary = new FrontendLibrary(AProgram, Schema.Object.EnsureUnrooted(AName));
+				if (_libraries.Contains(name))
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateObjectName, name);
+				FrontendLibrary library = new FrontendLibrary(program, Schema.Object.EnsureUnrooted(name));
 				#if USEWATCHERS
-				LLibrary.OnDocumentCreated += new DocumentEventHandler(DocumentCreated);
-				LLibrary.OnDocumentDeleted += new DocumentEventHandler(DocumentDeleted);
+				library.OnDocumentCreated += new DocumentEventHandler(DocumentCreated);
+				library.OnDocumentDeleted += new DocumentEventHandler(DocumentDeleted);
 				#endif
-				FLibraries.Add(LLibrary);
+				_libraries.Add(library);
 
 				// Insert all the documents in this library
-				InsertLibraryDocuments(AProgram, LLibrary);
+				InsertLibraryDocuments(program, library);
 			}
 		}
 		
@@ -608,721 +608,721 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 		#endif
 		
-		private void InternalUnloadLibrary(Program AProgram, FrontendLibrary ALibrary)
+		private void InternalUnloadLibrary(Program program, FrontendLibrary library)
 		{
-			DeleteLibraryDocuments(AProgram, ALibrary);
+			DeleteLibraryDocuments(program, library);
 
-			ALibrary.Close(AProgram);
-			FLibraries.Remove(ALibrary);
+			library.Close(program);
+			_libraries.Remove(library);
 		}
 
-		private void UnloadLibrary(Program AProgram, string AName)
+		private void UnloadLibrary(Program program, string name)
 		{
-			lock (AProgram.Catalog.Libraries)
+			lock (program.Catalog.Libraries)
 			{
-				int LIndex = FLibraries.IndexOf(AName);
-				if (LIndex >= 0)
-					InternalUnloadLibrary(AProgram, FLibraries[LIndex]);
+				int index = _libraries.IndexOf(name);
+				if (index >= 0)
+					InternalUnloadLibrary(program, _libraries[index]);
 			}
 		}
 		
-		private void UnloadLibrary(Program AProgram, FrontendLibrary ALibrary)
+		private void UnloadLibrary(Program program, FrontendLibrary library)
 		{
-			lock (AProgram.Catalog.Libraries)
-				InternalUnloadLibrary(AProgram, ALibrary);
+			lock (program.Catalog.Libraries)
+				InternalUnloadLibrary(program, library);
 		}
 		
-		private bool FLibrariesLoaded;
-		public void EnsureLibrariesLoaded(Program AProgram)
+		private bool _librariesLoaded;
+		public void EnsureLibrariesLoaded(Program program)
 		{
-			lock (AProgram.Catalog.Libraries)
+			lock (program.Catalog.Libraries)
 			{
-				if (!FLibrariesLoaded)
+				if (!_librariesLoaded)
 				{
-					foreach (Schema.Library LLibrary in AProgram.Catalog.Libraries)
-						if (!Schema.Object.NamesEqual(LLibrary.Name, DAE.Server.Engine.CSystemLibraryName) && !FLibraries.ContainsName(LLibrary.Name))
-							LoadLibrary(AProgram, Schema.Object.EnsureRooted(LLibrary.Name));
-					FLibrariesLoaded = true;
+					foreach (Schema.Library library in program.Catalog.Libraries)
+						if (!Schema.Object.NamesEqual(library.Name, DAE.Server.Engine.SystemLibraryName) && !_libraries.ContainsName(library.Name))
+							LoadLibrary(program, Schema.Object.EnsureRooted(library.Name));
+					_librariesLoaded = true;
 				}
 			}
 		}
 		
-		private void EnsureRegisterScript(Program AProgram, string ALibraryName)
+		private void EnsureRegisterScript(Program program, string libraryName)
 		{
-			string LDocumentName = Path.GetFileNameWithoutExtension(Schema.LibraryUtility.CRegisterFileName);
-			string LDocumentType = Path.GetExtension(Schema.LibraryUtility.CRegisterFileName);
-			LDocumentType = LDocumentType.Substring(1, LDocumentType.Length - 1);
-			if (!HasDocument(AProgram, ALibraryName, Schema.Object.EnsureRooted(LDocumentName)))
-				CreateDocument(AProgram, ALibraryName, LDocumentName, LDocumentType, true);
+			string documentName = Path.GetFileNameWithoutExtension(Schema.LibraryUtility.RegisterFileName);
+			string documentType = Path.GetExtension(Schema.LibraryUtility.RegisterFileName);
+			documentType = documentType.Substring(1, documentType.Length - 1);
+			if (!HasDocument(program, libraryName, Schema.Object.EnsureRooted(documentName)))
+				CreateDocument(program, libraryName, documentName, documentType, true);
 		}
 		
 		// Documents
 
-		public bool HasDocument(Program AProgram, string ALibraryName, string AName)
+		public bool HasDocument(Program program, string libraryName, string name)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
+			FrontendLibrary library = GetFrontendLibrary(program, libraryName);
 			try
 			{
-				return LLibrary.Documents.IndexOf(AName) >= 0;
+				return library.Documents.IndexOf(name) >= 0;
 			}
 			finally
 			{
-				Monitor.Exit(LLibrary);
+				Monitor.Exit(library);
 			}
 		}
 		
-		private Document InternalCreateDocument(Program AProgram, FrontendLibrary ALibrary, string AName, string ADocumentType, bool AMaintainTable)
+		private Document InternalCreateDocument(Program program, FrontendLibrary library, string name, string documentType, bool maintainTable)
 		{
-			Document LDocument = new Document(Schema.Object.EnsureUnrooted(AName), DocumentTypes[ADocumentType]);
-			ALibrary.MaintainedUpdate = true;
+			Document document = new Document(Schema.Object.EnsureUnrooted(name), DocumentTypes[documentType]);
+			library.MaintainedUpdate = true;
 			try
 			{
-				string LDocumentFileName = Path.Combine(ALibrary.DocumentsDirectoryName, LDocument.GetFileName());
-				if (File.Exists(LDocumentFileName))
-					throw new SchemaException(SchemaException.Codes.DuplicateObjectName, AName);
-				using (File.Create(LDocumentFileName)) {}
+				string documentFileName = Path.Combine(library.DocumentsDirectoryName, document.GetFileName());
+				if (File.Exists(documentFileName))
+					throw new SchemaException(SchemaException.Codes.DuplicateObjectName, name);
+				using (File.Create(documentFileName)) {}
 				try
 				{
-					ALibrary.Documents.Add(LDocument);
+					library.Documents.Add(document);
 					try
 					{
-						if (AMaintainTable)
-							InsertDocument(AProgram, ALibrary, LDocument);
+						if (maintainTable)
+							InsertDocument(program, library, document);
 					}
 					catch
 					{
-						ALibrary.Documents.Remove(LDocument);
+						library.Documents.Remove(document);
 						throw;
 					}
 				}
 				catch
 				{
-					File.Delete(LDocumentFileName);
+					File.Delete(documentFileName);
 					throw;
 				}
 			}
 			finally
 			{
-				ALibrary.MaintainedUpdate = false;
+				library.MaintainedUpdate = false;
 			}
-			return LDocument;
+			return document;
 		}
 
-		public void CreateDocument(Program AProgram, string ALibraryName, string AName, string ADocumentType, bool AMaintainTable)
+		public void CreateDocument(Program program, string libraryName, string name, string documentType, bool maintainTable)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
+			FrontendLibrary library = GetFrontendLibrary(program, libraryName);
 			try
 			{
-				InternalCreateDocument(AProgram, LLibrary, AName, ADocumentType, AMaintainTable);
+				InternalCreateDocument(program, library, name, documentType, maintainTable);
 			}
 			finally
 			{
-				Monitor.Exit(LLibrary);
+				Monitor.Exit(library);
 			}
 		}
 
-		private void InternalDeleteDocument(Program AProgram, FrontendLibrary ALibrary, Document ADocument, bool AMaintainTable)
+		private void InternalDeleteDocument(Program program, FrontendLibrary library, Document document, bool maintainTable)
 		{
-			if (AMaintainTable)
-				DeleteDocument(AProgram, ALibrary, ADocument);
+			if (maintainTable)
+				DeleteDocument(program, library, document);
 			try
 			{
-				ALibrary.Documents.Remove(ADocument);
+				library.Documents.Remove(document);
 				try
 				{
-					ALibrary.MaintainedUpdate = true;
+					library.MaintainedUpdate = true;
 					try
 					{
-						string LFileName = Path.Combine(ALibrary.DocumentsDirectoryName, ADocument.GetFileName());
+						string fileName = Path.Combine(library.DocumentsDirectoryName, document.GetFileName());
 						#if !RESPECTREADONLY
-						FileUtility.EnsureWriteable(LFileName);
+						FileUtility.EnsureWriteable(fileName);
 						#endif
-						File.Delete(LFileName);
+						File.Delete(fileName);
 					}
 					finally
 					{
-						ALibrary.MaintainedUpdate = false;
+						library.MaintainedUpdate = false;
 					}
 				}
 				catch
 				{
-					ALibrary.Documents.Add(ADocument);
+					library.Documents.Add(document);
 					throw;
 				}
 			}
 			catch
 			{
-				if (AMaintainTable)
-					InsertDocument(AProgram, ALibrary, ADocument);
+				if (maintainTable)
+					InsertDocument(program, library, document);
 				throw;
 			}
 		}
 
-		public void DeleteDocument(Program AProgram, string ALibraryName, string AName, bool AMaintainTable)
+		public void DeleteDocument(Program program, string libraryName, string name, bool maintainTable)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
+			FrontendLibrary library = GetFrontendLibrary(program, libraryName);
 			try
 			{
-				InternalDeleteDocument(AProgram, LLibrary, LLibrary.Documents[AName], AMaintainTable);
+				InternalDeleteDocument(program, library, library.Documents[name], maintainTable);
 			}
 			finally
 			{
-				Monitor.Exit(LLibrary);
+				Monitor.Exit(library);
 			}
 		}
 		
-		public void RenameDocument(Program AProgram, string AOldLibraryName, string AOldName, string ANewLibraryName, string ANewName, bool AMaintainTable)
+		public void RenameDocument(Program program, string oldLibraryName, string oldName, string newLibraryName, string newName, bool maintainTable)
 		{
-			FrontendLibrary LOldLibrary = GetFrontendLibrary(AProgram, AOldLibraryName);
+			FrontendLibrary oldLibrary = GetFrontendLibrary(program, oldLibraryName);
 			try
 			{
-				FrontendLibrary LNewLibrary = GetFrontendLibrary(AProgram, ANewLibraryName);
+				FrontendLibrary newLibrary = GetFrontendLibrary(program, newLibraryName);
 				try
 				{
-					Document LDocument = LOldLibrary.Documents[AOldName];
-					LOldLibrary.MaintainedUpdate = true;
+					Document document = oldLibrary.Documents[oldName];
+					oldLibrary.MaintainedUpdate = true;
 					try
 					{
-						if (!System.Object.ReferenceEquals(LOldLibrary, LNewLibrary))
-							LNewLibrary.MaintainedUpdate = true;
+						if (!System.Object.ReferenceEquals(oldLibrary, newLibrary))
+							newLibrary.MaintainedUpdate = true;
 						try
 						{
-							if (AMaintainTable)
-								DeleteDocument(AProgram, LOldLibrary, LDocument);
+							if (maintainTable)
+								DeleteDocument(program, oldLibrary, document);
 							try
 							{
-								LOldLibrary.Documents.Remove(LDocument);
+								oldLibrary.Documents.Remove(document);
 								try
 								{
-									string LOldName = LDocument.Name;
-									string LOldFileName = Path.Combine(LOldLibrary.DocumentsDirectoryName, LDocument.GetFileName());
-									LDocument.Name = Schema.Object.EnsureUnrooted(ANewName);
-									string LNewFileName = Path.Combine(LNewLibrary.DocumentsDirectoryName, LDocument.GetFileName());
+									string localOldName = document.Name;
+									string oldFileName = Path.Combine(oldLibrary.DocumentsDirectoryName, document.GetFileName());
+									document.Name = Schema.Object.EnsureUnrooted(newName);
+									string newFileName = Path.Combine(newLibrary.DocumentsDirectoryName, document.GetFileName());
 									try
 									{
 										#if !RESPECTREADONLY
-										FileUtility.EnsureWriteable(LNewFileName);
+										FileUtility.EnsureWriteable(newFileName);
 										#endif
-										File.Move(LOldFileName, LNewFileName);
+										File.Move(oldFileName, newFileName);
 										try
 										{
-											LNewLibrary.Documents.Add(LDocument);
+											newLibrary.Documents.Add(document);
 											try
 											{
-												if (AMaintainTable)
-													InsertDocument(AProgram, LNewLibrary, LDocument);	
+												if (maintainTable)
+													InsertDocument(program, newLibrary, document);	
 											}
 											catch
 											{
-												LNewLibrary.Documents.Remove(LDocument);
+												newLibrary.Documents.Remove(document);
 												throw;
 											}
 										}
 										catch
 										{
 											#if !RESPECTREADONLY
-											FileUtility.EnsureWriteable(LOldFileName);
+											FileUtility.EnsureWriteable(oldFileName);
 											#endif
-											File.Move(LNewFileName, LOldFileName);
+											File.Move(newFileName, oldFileName);
 											throw;
 										}
 									}
 									catch
 									{
-										LDocument.Name = LOldName;
+										document.Name = localOldName;
 										throw;
 									}
 								}
 								catch
 								{
-									LOldLibrary.Documents.Add(LDocument);
+									oldLibrary.Documents.Add(document);
 									throw;
 								}
 							}
 							catch
 							{
-								if (AMaintainTable)
-									InsertDocument(AProgram, LOldLibrary, LDocument);
+								if (maintainTable)
+									InsertDocument(program, oldLibrary, document);
 								throw;
 							}
 						}
 						finally
 						{
-							if (!System.Object.ReferenceEquals(LOldLibrary, LNewLibrary))
-								LNewLibrary.MaintainedUpdate = false;
+							if (!System.Object.ReferenceEquals(oldLibrary, newLibrary))
+								newLibrary.MaintainedUpdate = false;
 						}
 					}
 					finally
 					{
-						LOldLibrary.MaintainedUpdate = false;
+						oldLibrary.MaintainedUpdate = false;
 					}
 				}
 				finally
 				{
-					Monitor.Exit(LNewLibrary);
+					Monitor.Exit(newLibrary);
 				}
 			}
 			finally
 			{
-				Monitor.Exit(LOldLibrary);
+				Monitor.Exit(oldLibrary);
 			}
 		}
 		
-		public void RefreshDocuments(Program AProgram, string ALibraryName)
+		public void RefreshDocuments(Program program, string libraryName)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
+			FrontendLibrary library = GetFrontendLibrary(program, libraryName);
 			try
 			{
 				// Remove all the documents from the documents buffer
-				DeleteLibraryDocuments(AProgram, LLibrary);
-				LLibrary.LoadDocuments();
+				DeleteLibraryDocuments(program, library);
+				library.LoadDocuments();
 				// Add all the documents to the documents buffer
-				InsertLibraryDocuments(AProgram, LLibrary);
+				InsertLibraryDocuments(program, library);
 			}
 			finally
 			{
-				Monitor.Exit(LLibrary);
+				Monitor.Exit(library);
 			}
 		}
 
-		private void InternalCopyMoveDocument(Program AProgram, string ASourceLibrary, string ASourceDocument, string ATargetLibrary, string ATargetDocument, bool AMove)
+		private void InternalCopyMoveDocument(Program program, string sourceLibrary, string sourceDocument, string targetLibrary, string targetDocument, bool move)
 		{
-			FrontendLibrary LSourceLibrary = GetFrontendLibrary(AProgram, ASourceLibrary);
+			FrontendLibrary localSourceLibrary = GetFrontendLibrary(program, sourceLibrary);
 			try
 			{
-				FrontendLibrary LTargetLibrary = GetFrontendLibrary(AProgram, ATargetLibrary);
+				FrontendLibrary localTargetLibrary = GetFrontendLibrary(program, targetLibrary);
 				try
 				{
-					Document LSourceDocument = LSourceLibrary.Documents[ASourceDocument];
-					Document LTargetDocument;
+					Document localSourceDocument = localSourceLibrary.Documents[sourceDocument];
+					Document localTargetDocument;
 
-					int LTargetDocumentIndex = LTargetLibrary.Documents.IndexOf(ATargetDocument);
-					if (LTargetDocumentIndex >= 0)
+					int targetDocumentIndex = localTargetLibrary.Documents.IndexOf(targetDocument);
+					if (targetDocumentIndex >= 0)
 					{
 						// delete the target document
-						LTargetDocument = LTargetLibrary.Documents[LTargetDocumentIndex];
-						if (System.Object.ReferenceEquals(LSourceLibrary, LTargetLibrary) && System.Object.ReferenceEquals(LSourceDocument, LTargetDocument))
-							throw new FrontendDeviceException(FrontendDeviceException.Codes.CannotCopyDocumentToSelf, ASourceLibrary, ASourceDocument);
-						InternalDeleteDocument(AProgram, LTargetLibrary, LTargetDocument, true);
+						localTargetDocument = localTargetLibrary.Documents[targetDocumentIndex];
+						if (System.Object.ReferenceEquals(localSourceLibrary, localTargetLibrary) && System.Object.ReferenceEquals(localSourceDocument, localTargetDocument))
+							throw new FrontendDeviceException(FrontendDeviceException.Codes.CannotCopyDocumentToSelf, sourceLibrary, sourceDocument);
+						InternalDeleteDocument(program, localTargetLibrary, localTargetDocument, true);
 					}
 
 					// create the target document
-					LTargetDocument = InternalCreateDocument(AProgram, LTargetLibrary, ATargetDocument, LSourceDocument.DocumentType.ID, true);
+					localTargetDocument = InternalCreateDocument(program, localTargetLibrary, targetDocument, localSourceDocument.DocumentType.ID, true);
 
 					// copy the document
-					using (FileStream LSourceStream = new FileStream(Path.Combine(LSourceLibrary.DocumentsDirectoryName, LSourceDocument.GetFileName()), FileMode.Open, FileAccess.Read))
+					using (FileStream sourceStream = new FileStream(Path.Combine(localSourceLibrary.DocumentsDirectoryName, localSourceDocument.GetFileName()), FileMode.Open, FileAccess.Read))
 					{
-						LTargetLibrary.MaintainedUpdate = true;
+						localTargetLibrary.MaintainedUpdate = true;
 						try
 						{			
-							using (FileStream LTargetStream = new FileStream(Path.Combine(LTargetLibrary.DocumentsDirectoryName, LTargetDocument.GetFileName()), FileMode.Create, FileAccess.Write))
+							using (FileStream targetStream = new FileStream(Path.Combine(localTargetLibrary.DocumentsDirectoryName, localTargetDocument.GetFileName()), FileMode.Create, FileAccess.Write))
 							{
-								StreamUtility.CopyStream(LSourceStream, LTargetStream);
+								StreamUtility.CopyStream(sourceStream, targetStream);
 							}
 						}
 						finally
 						{
-							LTargetLibrary.MaintainedUpdate = false;
+							localTargetLibrary.MaintainedUpdate = false;
 						}
 					}
 
 					// delete the old if we are doing a move
-					if (AMove)
-						InternalDeleteDocument(AProgram, LSourceLibrary, LSourceDocument, true);
+					if (move)
+						InternalDeleteDocument(program, localSourceLibrary, localSourceDocument, true);
 				}
 				finally
 				{
-					Monitor.Exit(LTargetLibrary);
+					Monitor.Exit(localTargetLibrary);
 				}
 			}
 			finally
 			{
-				Monitor.Exit(LSourceLibrary);
+				Monitor.Exit(localSourceLibrary);
 			}
 		}
 
-		public void CopyDocument(Program AProgram, string ASourceLibrary, string ASourceDocument, string ATargetLibrary, string ATargetDocument)
+		public void CopyDocument(Program program, string sourceLibrary, string sourceDocument, string targetLibrary, string targetDocument)
 		{
-			InternalCopyMoveDocument(AProgram, ASourceLibrary, ASourceDocument, ATargetLibrary, ATargetDocument, false);
+			InternalCopyMoveDocument(program, sourceLibrary, sourceDocument, targetLibrary, targetDocument, false);
 		}
 		
-		public void MoveDocument(Program AProgram, string ASourceLibrary, string ASourceDocument, string ATargetLibrary, string ATargetDocument)
+		public void MoveDocument(Program program, string sourceLibrary, string sourceDocument, string targetLibrary, string targetDocument)
 		{
-			InternalCopyMoveDocument(AProgram, ASourceLibrary, ASourceDocument, ATargetLibrary, ATargetDocument, true);
+			InternalCopyMoveDocument(program, sourceLibrary, sourceDocument, targetLibrary, targetDocument, true);
 		}
 		
-		public string LoadDocument(Program AProgram, string ALibraryName, string AName)
+		public string LoadDocument(Program program, string libraryName, string name)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
+			FrontendLibrary library = GetFrontendLibrary(program, libraryName);
 			try
 			{
-				Document LDocument = LLibrary.Documents[AName];
+				Document document = library.Documents[name];
 
-				LDocument.CheckDataType(AProgram.Plan, AProgram.DataTypes.SystemString);
+				document.CheckDataType(program.Plan, program.DataTypes.SystemString);
 
-				using (StreamReader LReader = new StreamReader(Path.Combine(LLibrary.DocumentsDirectoryName, LDocument.GetFileName())))
+				using (StreamReader reader = new StreamReader(Path.Combine(library.DocumentsDirectoryName, document.GetFileName())))
 				{
-					return LReader.ReadToEnd();
+					return reader.ReadToEnd();
 				}
 			}
 			finally
 			{
-				Monitor.Exit(LLibrary);
+				Monitor.Exit(library);
 			}
 		}
 
-		public string LoadCustomization(Program AProgram, string ADilxDocument)
+		public string LoadCustomization(Program program, string dilxDocument)
 		{
-			DilxDocument LDilxDocument = new DilxDocument();
-			LDilxDocument.Read(ADilxDocument);
-			return ProcessDilxDocument(AProgram, LDilxDocument);
+			DilxDocument localDilxDocument = new DilxDocument();
+			localDilxDocument.Read(dilxDocument);
+			return ProcessDilxDocument(program, localDilxDocument);
 		}
 
-		public string Merge(string AForm, string ADelta)
+		public string Merge(string form, string delta)
 		{
-			XDocument LForm = XDocument.Load(new StringReader(AForm));
-			XDocument LDelta = XDocument.Load(new StringReader(ADelta));
-			Inheritance.Merge(LForm, LDelta);
-			StringWriter LWriter = new StringWriter();
-			LForm.Save(LWriter);
-			return LWriter.ToString();
+			XDocument localForm = XDocument.Load(new StringReader(form));
+			XDocument localDelta = XDocument.Load(new StringReader(delta));
+			Inheritance.Merge(localForm, localDelta);
+			StringWriter writer = new StringWriter();
+			localForm.Save(writer);
+			return writer.ToString();
 		}
 
-		public string Difference(string AForm, string ADelta)
+		public string Difference(string form, string delta)
 		{
-			XDocument LForm = XDocument.Load(new StringReader(AForm));
-			XDocument LDelta = XDocument.Load(new StringReader(ADelta));
-			StringWriter LWriter = new StringWriter();
-			Inheritance.Diff(LForm, LDelta).Save(LWriter);
-			return LWriter.ToString();
+			XDocument localForm = XDocument.Load(new StringReader(form));
+			XDocument localDelta = XDocument.Load(new StringReader(delta));
+			StringWriter writer = new StringWriter();
+			Inheritance.Diff(localForm, localDelta).Save(writer);
+			return writer.ToString();
 		}
 
-		public string LoadAndProcessDocument(Program AProgram, string ALibraryName, string AName)
+		public string LoadAndProcessDocument(Program program, string libraryName, string name)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
+			FrontendLibrary library = GetFrontendLibrary(program, libraryName);
 			try
 			{
-				Document LDocument = LLibrary.Documents[AName];
+				Document document = library.Documents[name];
 
-				LDocument.CheckDataType(AProgram.Plan, AProgram.DataTypes.SystemString);
+				document.CheckDataType(program.Plan, program.DataTypes.SystemString);
 
-				string LDocumentData;
-				using (StreamReader LReader = new StreamReader(Path.Combine(LLibrary.DocumentsDirectoryName, LDocument.GetFileName())))
+				string documentData;
+				using (StreamReader reader = new StreamReader(Path.Combine(library.DocumentsDirectoryName, document.GetFileName())))
 				{
-					LDocumentData = LReader.ReadToEnd();
+					documentData = reader.ReadToEnd();
 				}
 
-				if (LDocument.DocumentType.ID == CDfdxDocumentID)
+				if (document.DocumentType.ID == DfdxDocumentID)
 				{
 					// Read the document
-					DilxDocument LDilxDocument = new DilxDocument();
-					LDilxDocument.Read(LDocumentData);
-					return ProcessDilxDocument(AProgram, LDilxDocument);
+					DilxDocument dilxDocument = new DilxDocument();
+					dilxDocument.Read(documentData);
+					return ProcessDilxDocument(program, dilxDocument);
 				}
 				else
-					return LDocumentData;
+					return documentData;
 			}
 			finally
 			{
-				Monitor.Exit(LLibrary);
+				Monitor.Exit(library);
 			}
 		}
 
-		private static string ProcessDilxDocument(Program AProgram, DilxDocument ADocument)
+		private static string ProcessDilxDocument(Program program, DilxDocument document)
 		{
 			// Process ancestors
-			XDocument LCurrent = MergeAncestors(AProgram, ADocument.Ancestors);
+			XDocument current = MergeAncestors(program, document.Ancestors);
 
-			if (LCurrent == null)
-				return ADocument.Content;
+			if (current == null)
+				return document.Content;
 			else
 			{
-				XDocument LMerge = XDocument.Load(new StringReader(ADocument.Content));
-				Inheritance.Merge(LCurrent, LMerge);
-				StringWriter LWriter = new StringWriter();
-				LCurrent.Save(LWriter);
-				return LWriter.ToString();
+				XDocument merge = XDocument.Load(new StringReader(document.Content));
+				Inheritance.Merge(current, merge);
+				StringWriter writer = new StringWriter();
+				current.Save(writer);
+				return writer.ToString();
 			}
 		}
 
-		private static XDocument MergeAncestors(Program AProgram, Ancestors AAncestors)
+		private static XDocument MergeAncestors(Program program, Ancestors ancestors)
 		{
-			XDocument LDocument = null;
+			XDocument document = null;
 			// Process any ancestors
-			foreach (string LAncestor in AAncestors)
+			foreach (string ancestor in ancestors)
 			{
-				if (LDocument == null)
-					LDocument = LoadAncestor(AProgram, LAncestor);
+				if (document == null)
+					document = LoadAncestor(program, ancestor);
 				else
-					Inheritance.Merge(LDocument, LoadAncestor(AProgram, LAncestor));
+					Inheritance.Merge(document, LoadAncestor(program, ancestor));
 			}
-			return LDocument;
+			return document;
 		}
 
-		private static XDocument LoadAncestor(Program AProgram, string ADocumentExpression)
+		private static XDocument LoadAncestor(Program program, string documentExpression)
 		{
-			IServerProcess LProcess = ((IServerProcess)AProgram.ServerProcess);
-			IServerExpressionPlan LPlan = LProcess.PrepareExpression(ADocumentExpression, null);
+			IServerProcess process = ((IServerProcess)program.ServerProcess);
+			IServerExpressionPlan plan = process.PrepareExpression(documentExpression, null);
 			try
 			{
-				using (Scalar LScalar = (Scalar)LPlan.Evaluate(null))
+				using (Scalar scalar = (Scalar)plan.Evaluate(null))
 				{
-					string LDocument = LScalar.AsString;
+					string document = scalar.AsString;
 					try
 					{
-						return XDocument.Load(new StringReader(LDocument));
+						return XDocument.Load(new StringReader(document));
 					}
 					catch (Exception AException)
 					{
-						throw new ServerException(ServerException.Codes.InvalidXMLDocument, AException, LDocument);
+						throw new ServerException(ServerException.Codes.InvalidXMLDocument, AException, document);
 					}
 				}
 			}
 			finally
 			{
-				LProcess.UnprepareExpression(LPlan);
+				process.UnprepareExpression(plan);
 			}
 		}
 		
-		public MemoryStream LoadBinary(Program AProgram, string ALibraryName, string AName)
+		public MemoryStream LoadBinary(Program program, string libraryName, string name)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
+			FrontendLibrary library = GetFrontendLibrary(program, libraryName);
 			try
 			{
-				Document LDocument = LLibrary.Documents[AName];
+				Document document = library.Documents[name];
 				
-				LDocument.CheckDataType(AProgram.Plan, AProgram.DataTypes.SystemBinary);
+				document.CheckDataType(program.Plan, program.DataTypes.SystemBinary);
 				
-				using (FileStream LStream = new FileStream(Path.Combine(LLibrary.DocumentsDirectoryName, LDocument.GetFileName()), FileMode.Open, FileAccess.Read))
+				using (FileStream stream = new FileStream(Path.Combine(library.DocumentsDirectoryName, document.GetFileName()), FileMode.Open, FileAccess.Read))
 				{
-					MemoryStream LData = new MemoryStream();
-					StreamUtility.CopyStream(LStream, LData);
-					LData.Position = 0;
-					return LData;
+					MemoryStream data = new MemoryStream();
+					StreamUtility.CopyStream(stream, data);
+					data.Position = 0;
+					return data;
 				}
 			}
 			finally
 			{
-				Monitor.Exit(LLibrary);
+				Monitor.Exit(library);
 			}
 		}
 		
-		public StreamID RegisterBinary(Program AProgram, Stream AData)
+		public StreamID RegisterBinary(Program program, Stream data)
 		{
-			FrontendDeviceSession LDeviceSession = (FrontendDeviceSession)AProgram.DeviceConnect(this);
-			StreamID LStreamID = AProgram.ServerProcess.Register(LDeviceSession);
-			LDeviceSession.Create(LStreamID, AData);
-			return LStreamID;
+			FrontendDeviceSession deviceSession = (FrontendDeviceSession)program.DeviceConnect(this);
+			StreamID streamID = program.ServerProcess.Register(deviceSession);
+			deviceSession.Create(streamID, data);
+			return streamID;
 		}
 		
-		public void SaveDocument(Program AProgram, string ALibraryName, string AName, string AData)
+		public void SaveDocument(Program program, string libraryName, string name, string data)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
+			FrontendLibrary library = GetFrontendLibrary(program, libraryName);
 			try
 			{
-				Document LDocument = LLibrary.Documents[AName];
+				Document document = library.Documents[name];
 
-				LDocument.CheckDataType(AProgram.Plan, AProgram.DataTypes.SystemString);
+				document.CheckDataType(program.Plan, program.DataTypes.SystemString);
 
-				LLibrary.MaintainedUpdate = true;
+				library.MaintainedUpdate = true;
 				try
 				{			
-					string LFileName = Path.Combine(LLibrary.DocumentsDirectoryName, LDocument.GetFileName());
+					string fileName = Path.Combine(library.DocumentsDirectoryName, document.GetFileName());
 					#if !RESPECTREADONLY
-					FileUtility.EnsureWriteable(LFileName);
+					FileUtility.EnsureWriteable(fileName);
 					#endif
-					using (FileStream LStream = new FileStream(LFileName, FileMode.Create, FileAccess.Write))
+					using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
 					{
-						using (StreamWriter LWriter = new StreamWriter(LStream))
+						using (StreamWriter writer = new StreamWriter(stream))
 						{
-							LWriter.Write(AData);
+							writer.Write(data);
 						}
 					}
 				}
 				finally
 				{
-					LLibrary.MaintainedUpdate = false;
+					library.MaintainedUpdate = false;
 				}
 			}
 			finally
 			{
-				Monitor.Exit(LLibrary);
+				Monitor.Exit(library);
 			}
 		}
 		
-		public void SaveBinary(Program AProgram, string ALibraryName, string AName, Stream AData)
+		public void SaveBinary(Program program, string libraryName, string name, Stream data)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
+			FrontendLibrary library = GetFrontendLibrary(program, libraryName);
 			try
 			{
-				Document LDocument = LLibrary.Documents[AName];
+				Document document = library.Documents[name];
 
-				LDocument.CheckDataType(AProgram.Plan, AProgram.DataTypes.SystemBinary);							
+				document.CheckDataType(program.Plan, program.DataTypes.SystemBinary);							
 
-				LLibrary.MaintainedUpdate = true;
+				library.MaintainedUpdate = true;
 				try
 				{			
-					string LFileName = Path.Combine(LLibrary.DocumentsDirectoryName, LDocument.GetFileName());
+					string fileName = Path.Combine(library.DocumentsDirectoryName, document.GetFileName());
 					#if !RESPECTREADONLY
-					FileUtility.EnsureWriteable(LFileName);
+					FileUtility.EnsureWriteable(fileName);
 					#endif
-					using (FileStream LStream = new FileStream(LFileName, FileMode.Create, FileAccess.Write))
+					using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
 					{
-						StreamUtility.CopyStream(AData, LStream);
+						StreamUtility.CopyStream(data, stream);
 					}
 				}
 				finally
 				{
-					LLibrary.MaintainedUpdate = false;
+					library.MaintainedUpdate = false;
 				}
 			}
 			finally
 			{
-				Monitor.Exit(LLibrary);
+				Monitor.Exit(library);
 			}
 		}
 
-		public string GetDocumentType(Program AProgram, string ALibraryName, string AName)
+		public string GetDocumentType(Program program, string libraryName, string name)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
+			FrontendLibrary library = GetFrontendLibrary(program, libraryName);
 			try
 			{
-				return LLibrary.Documents[AName].DocumentType.ID;
+				return library.Documents[name].DocumentType.ID;
 			}
 			finally
 			{
-				Monitor.Exit(LLibrary);
+				Monitor.Exit(library);
 			}
 		}
 	}
 	
 	public class FrontendDeviceSession : MemoryDeviceSession, IStreamProvider
 	{		
-		protected internal FrontendDeviceSession(DAE.Schema.Device ADevice, ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo) : base(ADevice, AServerProcess, ADeviceSessionInfo){}
+		protected internal FrontendDeviceSession(DAE.Schema.Device device, ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo) : base(device, serverProcess, deviceSessionInfo){}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			DestroyStreams();
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
 		public Catalog Catalog { get { return ServerProcess.ServerSession.Server.Catalog; } }
 		
 		public new FrontendDevice Device { get { return (FrontendDevice)base.Device; } }
 		
-		protected void PopulateDocuments(Program AProgram, NativeTable ANativeTable, Row ARow)
+		protected void PopulateDocuments(Program program, NativeTable nativeTable, Row row)
 		{
-			Device.EnsureLibrariesLoaded(AProgram);
+			Device.EnsureLibrariesLoaded(program);
 		}
 		
-		protected void PopulateDocumentTypes(Program AProgram, NativeTable ANativeTable, Row ARow)
+		protected void PopulateDocumentTypes(Program program, NativeTable nativeTable, Row row)
 		{
 			if (Device.DocumentTypesBufferTimeStamp < Device.DocumentTypesTimeStamp)
 			{
-				ANativeTable.Truncate(AProgram.ValueManager);
+				nativeTable.Truncate(program.ValueManager);
 				Device.UpdateDocumentTypesBufferTimeStamp();
-				foreach (DocumentType LDocumentType in Device.DocumentTypes.Values)
+				foreach (DocumentType documentType in Device.DocumentTypes.Values)
 				{
-					ARow[0] = LDocumentType.ID;
-					ARow[1] = LDocumentType.Description;
-					ARow[2] = LDocumentType.DataType;
-					ANativeTable.Insert(AProgram.ValueManager, ARow);
+					row[0] = documentType.ID;
+					row[1] = documentType.Description;
+					row[2] = documentType.DataType;
+					nativeTable.Insert(program.ValueManager, row);
 				}
 			}
 		}
 		
-		protected void PopulateDesigners(Program AProgram, NativeTable ANativeTable, Row ARow)
+		protected void PopulateDesigners(Program program, NativeTable nativeTable, Row row)
 		{
 			if (Device.DesignersBufferTimeStamp < Device.DesignersTimeStamp)
 			{
-				ANativeTable.Truncate(AProgram.ValueManager);
+				nativeTable.Truncate(program.ValueManager);
 				Device.UpdateDesignersBufferTimeStamp();
-				foreach (Designer LDesigner in Device.Designers.Values)
+				foreach (Designer designer in Device.Designers.Values)
 				{
-					ARow[0] = LDesigner.ID;
-					ARow[1] = LDesigner.Description;
-					ARow[2] = LDesigner.ClassName;
-					ANativeTable.Insert(AProgram.ValueManager, ARow);
+					row[0] = designer.ID;
+					row[1] = designer.Description;
+					row[2] = designer.ClassName;
+					nativeTable.Insert(program.ValueManager, row);
 				}
 			}
 		}
 		
-		protected void PopulateDocumentTypeDesigners(Program AProgram, NativeTable ANativeTable, Row ARow)
+		protected void PopulateDocumentTypeDesigners(Program program, NativeTable nativeTable, Row row)
 		{
 			if (Device.DocumentTypeDesignersBufferTimeStamp < Device.DocumentTypesTimeStamp)
 			{
-				ANativeTable.Truncate(AProgram.ValueManager);
+				nativeTable.Truncate(program.ValueManager);
 				Device.UpdateDocumentTypeDesignersBufferTimeStamp();
-				foreach (DocumentType LDocumentType in Device.DocumentTypes.Values)
+				foreach (DocumentType documentType in Device.DocumentTypes.Values)
 				{
-					for (int LDesignerIndex = 0; LDesignerIndex < LDocumentType.Designers.Count; LDesignerIndex++)
+					for (int designerIndex = 0; designerIndex < documentType.Designers.Count; designerIndex++)
 					{
-						ARow[0] = LDocumentType.ID;
-						ARow[1] = (string)LDocumentType.Designers[LDesignerIndex];
-						ANativeTable.Insert(AProgram.ValueManager, ARow);
+						row[0] = documentType.ID;
+						row[1] = (string)documentType.Designers[designerIndex];
+						nativeTable.Insert(program.ValueManager, row);
 					}
 				}
 			}
 		}
 
-		protected virtual void PopulateTableVar(Program AProgram, Schema.TableVar ATableVar)
+		protected virtual void PopulateTableVar(Program program, Schema.TableVar tableVar)
 		{
-			NativeTable LNativeTable = Device.Tables[ATableVar];
-			Row LRow = new Row(AProgram.ValueManager, ATableVar.DataType.CreateRowType());
+			NativeTable nativeTable = Device.Tables[tableVar];
+			Row row = new Row(program.ValueManager, tableVar.DataType.CreateRowType());
 			try
 			{
-				switch (ATableVar.Name)
+				switch (tableVar.Name)
 				{
-					case "Frontend.Documents" : PopulateDocuments(AProgram, LNativeTable, LRow); break;
-					case "Frontend.DocumentTypes" : PopulateDocumentTypes(AProgram, LNativeTable, LRow); break;
-					case "Frontend.Designers" : PopulateDesigners(AProgram, LNativeTable, LRow); break;
-					case "Frontend.DocumentTypeDesigners" : PopulateDocumentTypeDesigners(AProgram, LNativeTable, LRow); break;
+					case "Frontend.Documents" : PopulateDocuments(program, nativeTable, row); break;
+					case "Frontend.DocumentTypes" : PopulateDocumentTypes(program, nativeTable, row); break;
+					case "Frontend.Designers" : PopulateDesigners(program, nativeTable, row); break;
+					case "Frontend.DocumentTypeDesigners" : PopulateDocumentTypeDesigners(program, nativeTable, row); break;
 				}
 			}
 			finally
 			{
-				LRow.Dispose();
+				row.Dispose();
 			}
 		}
 
-		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Program program, Schema.DevicePlan devicePlan)
 		{
-			if ((ADevicePlan.Node is BaseTableVarNode) || (ADevicePlan.Node is OrderNode))
+			if ((devicePlan.Node is BaseTableVarNode) || (devicePlan.Node is OrderNode))
 			{
-				Schema.TableVar LTableVar = null;
-				if (ADevicePlan.Node is BaseTableVarNode)
-					LTableVar = ((BaseTableVarNode)ADevicePlan.Node).TableVar;
-				else if (ADevicePlan.Node is OrderNode)
-					LTableVar = ((BaseTableVarNode)ADevicePlan.Node.Nodes[0]).TableVar;
-				if (LTableVar != null)
-					PopulateTableVar(AProgram, LTableVar);
+				Schema.TableVar tableVar = null;
+				if (devicePlan.Node is BaseTableVarNode)
+					tableVar = ((BaseTableVarNode)devicePlan.Node).TableVar;
+				else if (devicePlan.Node is OrderNode)
+					tableVar = ((BaseTableVarNode)devicePlan.Node.Nodes[0]).TableVar;
+				if (tableVar != null)
+					PopulateTableVar(program, tableVar);
 			}
-			object LResult = base.InternalExecute(AProgram, ADevicePlan);
-			if (ADevicePlan.Node is CreateTableNode)
+			object result = base.InternalExecute(program, devicePlan);
+			if (devicePlan.Node is CreateTableNode)
 			{
-				Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;
+				Schema.TableVar tableVar = ((CreateTableNode)devicePlan.Node).Table;
 				if (!ServerProcess.IsLoading() && ((Device.ReconcileMode & ReconcileMode.Command) != 0))
 				{
-					switch (LTableVar.Name)
+					switch (tableVar.Name)
 					{
 						case "Frontend.Designers" : Device.ClearDesigners(); break;
 						case "Frontend.DocumentTypes" : Device.ClearDocumentTypes(); break;
 					}
 				}
 			}
-			return LResult;
+			return result;
 		}
 		
-		protected void InsertDocumentType(Schema.TableVar ATableVar, Row ARow)
+		protected void InsertDocumentType(Schema.TableVar tableVar, Row row)
 		{
-			DocumentType LDocumentType = new DocumentType();
-			LDocumentType.ID = (string)ARow["ID"];
-			LDocumentType.Description = (string)ARow["Description"];
-			LDocumentType.DataType = (string)ARow["DataType"];
+			DocumentType documentType = new DocumentType();
+			documentType.ID = (string)row["ID"];
+			documentType.Description = (string)row["Description"];
+			documentType.DataType = (string)row["DataType"];
 			Device.AcquireDirectoryLock();
 			try
 			{
-				Device.DocumentTypes.Add(LDocumentType);
+				Device.DocumentTypes.Add(documentType);
 				Device.SaveDocumentTypes();
 			}
 			finally
@@ -1331,16 +1331,16 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void UpdateDocumentType(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateDocumentType(Schema.TableVar tableVar, Row oldRow, Row newRow)
 		{
 			Device.AcquireDirectoryLock();
 			try
 			{
-				DocumentType LDocumentType = Device.DocumentTypes[(string)AOldRow["ID"]];
-				Device.DocumentTypes.Remove(LDocumentType.ID);
-				LDocumentType.ID = (string)ANewRow["ID"];
-				LDocumentType.DataType = (string)ANewRow["DataType"];
-				Device.DocumentTypes.Add(LDocumentType);
+				DocumentType documentType = Device.DocumentTypes[(string)oldRow["ID"]];
+				Device.DocumentTypes.Remove(documentType.ID);
+				documentType.ID = (string)newRow["ID"];
+				documentType.DataType = (string)newRow["DataType"];
+				Device.DocumentTypes.Add(documentType);
 				Device.SaveDocumentTypes();
 			}
 			finally
@@ -1349,13 +1349,13 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void DeleteDocumentType(Schema.TableVar ATableVar, Row ARow)
+		protected void DeleteDocumentType(Schema.TableVar tableVar, Row row)
 		{
 			Device.AcquireDirectoryLock();
 			try
 			{
-				DocumentType LDocumentType = Device.DocumentTypes[(string)ARow["ID"]];
-				Device.DocumentTypes.Remove(LDocumentType.ID);
+				DocumentType documentType = Device.DocumentTypes[(string)row["ID"]];
+				Device.DocumentTypes.Remove(documentType.ID);
 				Device.SaveDocumentTypes();
 			}
 			finally
@@ -1364,16 +1364,16 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void InsertDesigner(Schema.TableVar ATableVar, Row ARow)
+		protected void InsertDesigner(Schema.TableVar tableVar, Row row)
 		{
-			Designer LDesigner = new Designer();
-			LDesigner.ID = (string)ARow["ID"];
-			LDesigner.Description = (string)ARow["Description"];
-			LDesigner.ClassName = (string)ARow["ClassName"];
+			Designer designer = new Designer();
+			designer.ID = (string)row["ID"];
+			designer.Description = (string)row["Description"];
+			designer.ClassName = (string)row["ClassName"];
 			Device.AcquireDirectoryLock();
 			try
 			{
-				Device.Designers.Add(LDesigner);
+				Device.Designers.Add(designer);
 				Device.SaveDesigners();
 			}
 			finally
@@ -1382,20 +1382,20 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void UpdateDesigner(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateDesigner(Schema.TableVar tableVar, Row oldRow, Row newRow)
 		{
 			Device.AcquireDirectoryLock();
 			try
 			{
-				Designer LDesigner = Device.Designers[(string)AOldRow["ID"]];
-				string LNewDesignerID = (string)ANewRow["ID"];
-				if ((LDesigner.ID != LNewDesignerID) && Device.HasDocumentTypeDesigners(LDesigner.ID))
-					throw new FrontendDeviceException(FrontendDeviceException.Codes.DesignerIsAssociatedWithDocumentTypes, LDesigner.ID);
-				Device.Designers.Remove(LDesigner.ID);
-				LDesigner.ID = LNewDesignerID;
-				LDesigner.Description = (string)ANewRow["Description"];
-				LDesigner.ClassName = (string)ANewRow["ClassName"];
-				Device.Designers.Add(LDesigner);
+				Designer designer = Device.Designers[(string)oldRow["ID"]];
+				string newDesignerID = (string)newRow["ID"];
+				if ((designer.ID != newDesignerID) && Device.HasDocumentTypeDesigners(designer.ID))
+					throw new FrontendDeviceException(FrontendDeviceException.Codes.DesignerIsAssociatedWithDocumentTypes, designer.ID);
+				Device.Designers.Remove(designer.ID);
+				designer.ID = newDesignerID;
+				designer.Description = (string)newRow["Description"];
+				designer.ClassName = (string)newRow["ClassName"];
+				Device.Designers.Add(designer);
 				Device.SaveDesigners();
 			}
 			finally
@@ -1404,15 +1404,15 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void DeleteDesigner(Schema.TableVar ATableVar, Row ARow)
+		protected void DeleteDesigner(Schema.TableVar tableVar, Row row)
 		{
 			Device.AcquireDirectoryLock();
 			try
 			{
-				Designer LDesigner = Device.Designers[(string)ARow["ID"]];
-				if (Device.HasDocumentTypeDesigners(LDesigner.ID))
-					throw new FrontendDeviceException(FrontendDeviceException.Codes.DesignerIsAssociatedWithDocumentTypes, LDesigner.ID);
-				Device.Designers.Remove(LDesigner.ID);
+				Designer designer = Device.Designers[(string)row["ID"]];
+				if (Device.HasDocumentTypeDesigners(designer.ID))
+					throw new FrontendDeviceException(FrontendDeviceException.Codes.DesignerIsAssociatedWithDocumentTypes, designer.ID);
+				Device.Designers.Remove(designer.ID);
 				Device.SaveDesigners();
 			}
 			finally
@@ -1421,14 +1421,14 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void InsertDocumentTypeDesigner(Schema.TableVar ATableVar, Row ARow)
+		protected void InsertDocumentTypeDesigner(Schema.TableVar tableVar, Row row)
 		{
 			Device.AcquireDirectoryLock();
 			try
 			{
-				DocumentType LDocumentType = Device.DocumentTypes[(string)ARow["DocumentType_ID"]];
-				Designer LDesigner = Device.Designers[(string)ARow["Designer_ID"]];
-				LDocumentType.Designers.Add(LDesigner.ID);
+				DocumentType documentType = Device.DocumentTypes[(string)row["DocumentType_ID"]];
+				Designer designer = Device.Designers[(string)row["Designer_ID"]];
+				documentType.Designers.Add(designer.ID);
 				Device.SaveDocumentTypes();
 			}
 			finally
@@ -1437,17 +1437,17 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void UpdateDocumentTypeDesigner(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateDocumentTypeDesigner(Schema.TableVar tableVar, Row oldRow, Row newRow)
 		{
 			Device.AcquireDirectoryLock();
 			try
 			{
-				DocumentType LOldDocumentType = Device.DocumentTypes[(string)AOldRow["DocumentType_ID"]];
-				DocumentType LNewDocumentType = Device.DocumentTypes[(string)ANewRow["DocumentType_ID"]];
-				Designer LOldDesigner = Device.Designers[(string)AOldRow["Designer_ID"]];
-				Designer LNewDesigner = Device.Designers[(string)ANewRow["Designer_ID"]];
-				LOldDocumentType.Designers.Remove(LOldDesigner.ID);
-				LNewDocumentType.Designers.Add(LNewDesigner.ID);
+				DocumentType oldDocumentType = Device.DocumentTypes[(string)oldRow["DocumentType_ID"]];
+				DocumentType newDocumentType = Device.DocumentTypes[(string)newRow["DocumentType_ID"]];
+				Designer oldDesigner = Device.Designers[(string)oldRow["Designer_ID"]];
+				Designer newDesigner = Device.Designers[(string)newRow["Designer_ID"]];
+				oldDocumentType.Designers.Remove(oldDesigner.ID);
+				newDocumentType.Designers.Add(newDesigner.ID);
 				Device.SaveDocumentTypes();
 			}
 			finally
@@ -1456,14 +1456,14 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void DeleteDocumentTypeDesigner(Schema.TableVar ATableVar, Row ARow)
+		protected void DeleteDocumentTypeDesigner(Schema.TableVar tableVar, Row row)
 		{
 			Device.AcquireDirectoryLock();
 			try
 			{
-				DocumentType LDocumentType = Device.DocumentTypes[(string)ARow["DocumentType_ID"]];
-				Designer LDesigner = Device.Designers[(string)ARow["Designer_ID"]];
-				LDocumentType.Designers.Remove(LDesigner.ID);
+				DocumentType documentType = Device.DocumentTypes[(string)row["DocumentType_ID"]];
+				Designer designer = Device.Designers[(string)row["Designer_ID"]];
+				documentType.Designers.Remove(designer.ID);
 				Device.SaveDocumentTypes();
 			}
 			finally
@@ -1477,135 +1477,135 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			FrontendServer.GetFrontendServer(ServerProcess.ServerSession.Server).ClearDerivationCache();
 		}
 
-		protected void InsertDocument(Program AProgram, Schema.TableVar ATableVar, Row ARow)
+		protected void InsertDocument(Program program, Schema.TableVar tableVar, Row row)
 		{
 			Device.CreateDocument
 			(
-				AProgram, 
-				Schema.Object.EnsureRooted((string)ARow["Library_Name"]), 
-				(string)ARow["Name"],
-				(string)ARow["Type_ID"],
+				program, 
+				Schema.Object.EnsureRooted((string)row["Library_Name"]), 
+				(string)row["Name"],
+				(string)row["Type_ID"],
 				false
 			);
 		}
 		
-		protected void UpdateDocument(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateDocument(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
 		{
-			string LOldLibraryName = (string)AOldRow["Library_Name"];
-			string LNewLibraryName = (string)ANewRow["Library_Name"];
-			string LOldName = (string)AOldRow["Name"];
-			string LNewName = (string)ANewRow["Name"];
-			string LOldTypeID = (string)AOldRow["Type_ID"];
-			string LNewTypeID = (string)ANewRow["Type_ID"];
-			if (LOldTypeID != LNewTypeID)
+			string oldLibraryName = (string)oldRow["Library_Name"];
+			string newLibraryName = (string)newRow["Library_Name"];
+			string oldName = (string)oldRow["Name"];
+			string newName = (string)newRow["Name"];
+			string oldTypeID = (string)oldRow["Type_ID"];
+			string newTypeID = (string)newRow["Type_ID"];
+			if (oldTypeID != newTypeID)
 				throw new ServerException(ServerException.Codes.CannotChangeDocumentType);
-			if ((LOldLibraryName != LNewLibraryName) || (LOldName != LNewName))
+			if ((oldLibraryName != newLibraryName) || (oldName != newName))
 				Device.RenameDocument
 				(
-					AProgram, 
-					Schema.Object.EnsureRooted(LOldLibraryName), 
-					Schema.Object.EnsureRooted(LOldName), 
-					Schema.Object.EnsureRooted(LNewLibraryName), 
-					LNewName, 
+					program, 
+					Schema.Object.EnsureRooted(oldLibraryName), 
+					Schema.Object.EnsureRooted(oldName), 
+					Schema.Object.EnsureRooted(newLibraryName), 
+					newName, 
 					false
 				);
 		}
 		
-		protected void DeleteDocument(Program AProgram, Schema.TableVar ATableVar, Row ARow)
+		protected void DeleteDocument(Program program, Schema.TableVar tableVar, Row row)
 		{
 			Device.DeleteDocument
 			(
-				AProgram, 
-				Schema.Object.EnsureRooted((string)ARow["Library_Name"]), 
-				Schema.Object.EnsureRooted((string)ARow["Name"]), 
+				program, 
+				Schema.Object.EnsureRooted((string)row["Library_Name"]), 
+				Schema.Object.EnsureRooted((string)row["Name"]), 
 				false
 			);
 		}
 
-		protected override void InternalInsertRow(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags)
+		protected override void InternalInsertRow(Program program, Schema.TableVar tableVar, Row row, BitArray valueFlags)
 		{
-			switch (ATableVar.Name)
+			switch (tableVar.Name)
 			{
-				case "Frontend.DocumentTypes" : InsertDocumentType(ATableVar, ARow); break;
-				case "Frontend.Designers" : InsertDesigner(ATableVar, ARow); break;
-				case "Frontend.DocumentTypeDesigners" : InsertDocumentTypeDesigner(ATableVar, ARow); break;
-				case "Frontend.Documents" : InsertDocument(AProgram, ATableVar, ARow); break;
-				default : throw new FrontendDeviceException(FrontendDeviceException.Codes.UnsupportedUpdate, ATableVar.Name);
+				case "Frontend.DocumentTypes" : InsertDocumentType(tableVar, row); break;
+				case "Frontend.Designers" : InsertDesigner(tableVar, row); break;
+				case "Frontend.DocumentTypeDesigners" : InsertDocumentTypeDesigner(tableVar, row); break;
+				case "Frontend.Documents" : InsertDocument(program, tableVar, row); break;
+				default : throw new FrontendDeviceException(FrontendDeviceException.Codes.UnsupportedUpdate, tableVar.Name);
 			}
-			base.InternalInsertRow(AProgram, ATableVar, ARow, AValueFlags);
+			base.InternalInsertRow(program, tableVar, row, valueFlags);
 		}
 		
-		protected override void InternalUpdateRow(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalUpdateRow(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
 		{
-			switch (ATableVar.Name)
+			switch (tableVar.Name)
 			{
-				case "Frontend.DocumentTypes" : UpdateDocumentType(ATableVar, AOldRow, ANewRow); break;
-				case "Frontend.Designers" : UpdateDesigner(ATableVar, AOldRow, ANewRow); break;
-				case "Frontend.DocumentTypeDesigners" : UpdateDocumentTypeDesigner(ATableVar, AOldRow, ANewRow); break;
-				case "Frontend.Documents" : UpdateDocument(AProgram, ATableVar, AOldRow, ANewRow); break;
-				default : throw new FrontendDeviceException(FrontendDeviceException.Codes.UnsupportedUpdate, ATableVar.Name);
+				case "Frontend.DocumentTypes" : UpdateDocumentType(tableVar, oldRow, newRow); break;
+				case "Frontend.Designers" : UpdateDesigner(tableVar, oldRow, newRow); break;
+				case "Frontend.DocumentTypeDesigners" : UpdateDocumentTypeDesigner(tableVar, oldRow, newRow); break;
+				case "Frontend.Documents" : UpdateDocument(program, tableVar, oldRow, newRow); break;
+				default : throw new FrontendDeviceException(FrontendDeviceException.Codes.UnsupportedUpdate, tableVar.Name);
 			}
-			base.InternalUpdateRow(AProgram, ATableVar, AOldRow, ANewRow, AValueFlags);
+			base.InternalUpdateRow(program, tableVar, oldRow, newRow, valueFlags);
 		}
 		
-		protected override void InternalDeleteRow(Program AProgram, Schema.TableVar ATableVar, Row ARow)
+		protected override void InternalDeleteRow(Program program, Schema.TableVar tableVar, Row row)
 		{
-			switch (ATableVar.Name)
+			switch (tableVar.Name)
 			{
-				case "Frontend.DocumentTypes" : DeleteDocumentType(ATableVar, ARow); break;
-				case "Frontend.Designers" : DeleteDesigner(ATableVar, ARow); break;
-				case "Frontend.DocumentTypeDesigners" : DeleteDocumentTypeDesigner(ATableVar, ARow); break;
-				case "Frontend.Documents" : DeleteDocument(AProgram, ATableVar, ARow); break;
-				default : throw new FrontendDeviceException(FrontendDeviceException.Codes.UnsupportedUpdate, ATableVar.Name);
+				case "Frontend.DocumentTypes" : DeleteDocumentType(tableVar, row); break;
+				case "Frontend.Designers" : DeleteDesigner(tableVar, row); break;
+				case "Frontend.DocumentTypeDesigners" : DeleteDocumentTypeDesigner(tableVar, row); break;
+				case "Frontend.Documents" : DeleteDocument(program, tableVar, row); break;
+				default : throw new FrontendDeviceException(FrontendDeviceException.Codes.UnsupportedUpdate, tableVar.Name);
 			}
-			base.InternalDeleteRow(AProgram, ATableVar, ARow);
+			base.InternalDeleteRow(program, tableVar, row);
 		}
 
 		// IStreamProvider
-		private Hashtable FStreams = new Hashtable();
+		private Hashtable _streams = new Hashtable();
 		
-		private Stream GetStream(StreamID AStreamID)
+		private Stream GetStream(StreamID streamID)
 		{
-			Stream LStream = (Stream)FStreams[AStreamID];
-			if (LStream == null)
-				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, AStreamID.ToString());
-			return LStream;
+			Stream stream = (Stream)_streams[streamID];
+			if (stream == null)
+				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, streamID.ToString());
+			return stream;
 		}
 		
 		protected void DestroyStreams()
 		{
-			foreach (StreamID LStreamID in FStreams.Keys)
-				((Stream)FStreams[LStreamID]).Close();
-			FStreams.Clear();
+			foreach (StreamID streamID in _streams.Keys)
+				((Stream)_streams[streamID]).Close();
+			_streams.Clear();
 		}
 		
-		public void Create(StreamID AStreamID, Stream AStream)
+		public void Create(StreamID streamID, Stream stream)
 		{
-			FStreams.Add(AStreamID, AStream);
+			_streams.Add(streamID, stream);
 		}
 		
-		public void Destroy(StreamID AStreamID)
+		public void Destroy(StreamID streamID)
 		{
-			Stream LStream = GetStream(AStreamID);
-			FStreams.Remove(AStreamID);
-			LStream.Close();
+			Stream stream = GetStream(streamID);
+			_streams.Remove(streamID);
+			stream.Close();
 		}
 		
-		public void Reassign(StreamID AOldStreamID, StreamID ANewStreamID)
+		public void Reassign(StreamID oldStreamID, StreamID newStreamID)
 		{
-			Stream LOldStream = GetStream(AOldStreamID);
-			FStreams.Remove(AOldStreamID);
-			FStreams.Add(ANewStreamID, LOldStream);
+			Stream oldStream = GetStream(oldStreamID);
+			_streams.Remove(oldStreamID);
+			_streams.Add(newStreamID, oldStream);
 		}
 
-		public void Close(StreamID AStreamID)
+		public void Close(StreamID streamID)
 		{
 			// no action to perform
 		}
 
-		public Stream Open(StreamID AStreamID)
+		public Stream Open(StreamID streamID)
 		{
-			return new CoverStream(GetStream(AStreamID));
+			return new CoverStream(GetStream(streamID));
 		}
 	}
 }

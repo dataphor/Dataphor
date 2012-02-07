@@ -9,38 +9,38 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
     public class DesignerNode : BaseNode, ISite, IDisposable
     {
         /// <summary> Constructs a node, but does not build its children. </summary>
-        public DesignerNode(INode ANode, DesignerTree ATree, bool AReadOnly)
+        public DesignerNode(INode node, DesignerTree tree, bool readOnly)
         {
-            InitializeNode(ANode, ATree, AReadOnly);
+            InitializeNode(node, tree, readOnly);
         }
 
         /// <summary> Constructs a node and builds its children. </summary>
-        public DesignerNode(INode ANode, DesignerTree ATree)
+        public DesignerNode(INode node, DesignerTree tree)
         {
-            InitializeNode(ANode, ATree, false);
-            foreach (INode LChild in FNode.Children) 
-                AddNode(LChild);
+            InitializeNode(node, tree, false);
+            foreach (INode child in _node.Children) 
+                AddNode(child);
         }
 
-        private void InitializeNode(INode ANode, DesignerTree ATree, bool AReadOnly)
+        private void InitializeNode(INode node, DesignerTree tree, bool readOnly)
         {
-            FNode = ANode;
-            FNode.Site = this;
+            _node = node;
+            _node.Site = this;
 
-            FDesignerTree = ATree;
-            FReadOnly = AReadOnly;
+            _designerTree = tree;
+            _readOnly = readOnly;
 
             UpdateText(false);
 
-            ImageIndex = ATree.FormDesigner.GetDesignerImage(ANode.GetType());
+            ImageIndex = tree.FormDesigner.GetDesignerImage(node.GetType());
             SelectedImageIndex = ImageIndex;
         }
 
-        protected virtual void Dispose(bool ADisposing)
+        protected virtual void Dispose(bool disposing)
         {
-            foreach (DesignerNode LChild in Nodes)
-                LChild.Dispose();
-            FNode.Site = null;
+            foreach (DesignerNode child in Nodes)
+                child.Dispose();
+            _node.Site = null;
         }
 
         public void Dispose()
@@ -50,34 +50,34 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 
         // Node
 
-        private INode FNode;
+        private INode _node;
         public INode Node
         {
-            get	{ return FNode; }
+            get	{ return _node; }
         }
 
         // ReadOnly
 
-        private bool FReadOnly;
+        private bool _readOnly;
         public bool ReadOnly
         {
-            get { return FReadOnly; }
+            get { return _readOnly; }
         }
 
-        public void SetReadOnly(bool AValue, bool ARecursive)
+        public void SetReadOnly(bool tempValue, bool recursive)
         {
-            FReadOnly = AValue;
-            if (ARecursive)
-                foreach (DesignerNode LChild in Nodes) 
-                    LChild.SetReadOnly(AValue, true);
+            _readOnly = tempValue;
+            if (recursive)
+                foreach (DesignerNode child in Nodes) 
+                    child.SetReadOnly(tempValue, true);
         }
 
         // DesignerTree
 
-        private DesignerTree FDesignerTree;
+        private DesignerTree _designerTree;
         public DesignerTree DesignerTree
         {
-            get { return FDesignerTree; }
+            get { return _designerTree; }
         }
 
         // Parent
@@ -91,10 +91,10 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 
         private DesignerNode Copy()
         {
-            DesignerNode LCopy = new DesignerNode(Node, FDesignerTree, ReadOnly);
-            foreach (DesignerNode LNode in Nodes)
-                LCopy.AddBaseNode(LNode.Copy());
-            return LCopy;
+            DesignerNode copy = new DesignerNode(Node, _designerTree, ReadOnly);
+            foreach (DesignerNode node in Nodes)
+                copy.AddBaseNode(node.Copy());
+            return copy;
         }
 
         public void DeleteNode()
@@ -126,14 +126,14 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 
         public void CopyToClipboard()
         {
-            using (MemoryStream LStream = new MemoryStream())
+            using (MemoryStream stream = new MemoryStream())
             {
-                BOP.Serializer LSerializer = DesignerTree.FormDesigner.FrontendSession.CreateSerializer();
-                LSerializer.RemoveReferencesToObjectsNotSerialized = false;
-                LSerializer.Serialize(LStream, Node);
-                DesignerTree.FormDesigner.Dataphoria.Warnings.AppendErrors(DesignerTree.FormDesigner, LSerializer.Errors, true);
-                LStream.Position = 0;
-                Clipboard.SetDataObject(new DataObject(DataFormats.UnicodeText, new StreamReader(LStream).ReadToEnd()));
+                BOP.Serializer serializer = DesignerTree.FormDesigner.FrontendSession.CreateSerializer();
+                serializer.RemoveReferencesToObjectsNotSerialized = false;
+                serializer.Serialize(stream, Node);
+                DesignerTree.FormDesigner.Dataphoria.Warnings.AppendErrors(DesignerTree.FormDesigner, serializer.Errors, true);
+                stream.Position = 0;
+                Clipboard.SetDataObject(new DataObject(DataFormats.UnicodeText, new StreamReader(stream).ReadToEnd()));
             }
         }
 
@@ -143,197 +143,197 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
             InternalDelete();
         }
 
-        private void RecursiveGetUniqueName(INode ANode) 
+        private void RecursiveGetUniqueName(INode node) 
         {
-            Node.HostNode.GetUniqueName(ANode);
-            foreach (INode LChild in ANode.Children) 
-                RecursiveGetUniqueName(LChild);
+            Node.HostNode.GetUniqueName(node);
+            foreach (INode child in node.Children) 
+                RecursiveGetUniqueName(child);
         }
 
         public void PasteFromClipboard()
         {
-            INode LNode;
-            using (MemoryStream LStream = new MemoryStream())
+            INode node;
+            using (MemoryStream stream = new MemoryStream())
             {
-                StreamWriter LWriter = new StreamWriter(LStream);
-                LWriter.Write((string)Clipboard.GetDataObject().GetData(DataFormats.UnicodeText, true));
-                LWriter.Flush();
-                LStream.Position = 0;
-                BOP.Deserializer LDeserializer = DesignerTree.FormDesigner.FrontendSession.CreateDeserializer();
-                LDeserializer.FindReference += new BOP.FindReferenceHandler(DeserializeFindReference);
-                LNode = (INode)LDeserializer.Deserialize(LStream, null);
-                DesignerTree.FormDesigner.Dataphoria.Warnings.AppendErrors(DesignerTree.FormDesigner, LDeserializer.Errors, true);
+                StreamWriter writer = new StreamWriter(stream);
+                writer.Write((string)Clipboard.GetDataObject().GetData(DataFormats.UnicodeText, true));
+                writer.Flush();
+                stream.Position = 0;
+                BOP.Deserializer deserializer = DesignerTree.FormDesigner.FrontendSession.CreateDeserializer();
+                deserializer.FindReference += new BOP.FindReferenceHandler(DeserializeFindReference);
+                node = (INode)deserializer.Deserialize(stream, null);
+                DesignerTree.FormDesigner.Dataphoria.Warnings.AppendErrors(DesignerTree.FormDesigner, deserializer.Errors, true);
             }
 
-            Node.Children.Add(LNode);
+            Node.Children.Add(node);
 
-            RecursiveGetUniqueName(LNode);	// make names unique after adding the node in order to properly account for all nodes
+            RecursiveGetUniqueName(node);	// make names unique after adding the node in order to properly account for all nodes
 
-            DesignerNode LDesignerNode = AddNode(LNode);
-            TreeView.SelectedNode = LDesignerNode;
-            LDesignerNode.ExpandAll();
+            DesignerNode designerNode = AddNode(node);
+            TreeView.SelectedNode = designerNode;
+            designerNode.ExpandAll();
             DesignerTree.Modified();
         }
 
-        private DesignerNode PlaceNewNode(INode ANode, DropLinePosition APosition)
+        private DesignerNode PlaceNewNode(INode node, DropLinePosition position)
         {
-            DesignerNode LDesignerNode;
-            int LIndex;
-            switch (APosition)
+            DesignerNode designerNode;
+            int index;
+            switch (position)
             {
                 case DropLinePosition.OnNode :
-                    Node.Children.Add(ANode);
-                    LDesignerNode = AddNode(ANode);
+                    Node.Children.Add(node);
+                    designerNode = AddNode(node);
                     break;
                 case DropLinePosition.AboveNode :
-                    LIndex = Parent.Nodes.IndexOf(this);
-                    Node.Parent.Children.Insert(LIndex, ANode);
-                    LDesignerNode = Parent.InsertNode(LIndex, ANode);
+                    index = Parent.Nodes.IndexOf(this);
+                    Node.Parent.Children.Insert(index, node);
+                    designerNode = Parent.InsertNode(index, node);
                     break;
                 case DropLinePosition.BelowNode :
-                    LIndex = Parent.Nodes.IndexOf(this) + 1;
-                    Node.Parent.Children.Insert(LIndex, ANode);
-                    LDesignerNode = Parent.InsertNode(LIndex, ANode);
+                    index = Parent.Nodes.IndexOf(this) + 1;
+                    Node.Parent.Children.Insert(index, node);
+                    designerNode = Parent.InsertNode(index, node);
                     break;
                 default :
                     System.Diagnostics.Debug.Fail("Invalid DropLinePosition passed to CopyFromNode()");
-                    LDesignerNode = null;
+                    designerNode = null;
                     break;
             }
-            TreeView.SelectedNode = LDesignerNode;
-            LDesignerNode.ExpandAll();
-            return LDesignerNode;
+            TreeView.SelectedNode = designerNode;
+            designerNode.ExpandAll();
+            return designerNode;
         }
 
-        public void CopyFromNode(DesignerNode ASource, DropLinePosition APosition)
+        public void CopyFromNode(DesignerNode source, DropLinePosition position)
         {
-            INode LNode;
-            using (MemoryStream LStream = new MemoryStream())
+            INode node;
+            using (MemoryStream stream = new MemoryStream())
             {
-                BOP.Serializer LSerializer = DesignerTree.FormDesigner.FrontendSession.CreateSerializer();
-                LSerializer.Serialize(LStream, ASource);
-                DesignerTree.FormDesigner.Dataphoria.Warnings.AppendErrors(DesignerTree.FormDesigner, LSerializer.Errors, true);
-                LStream.Position = 0;
-                BOP.Deserializer LDeserializer = DesignerTree.FormDesigner.FrontendSession.CreateDeserializer();
-                LDeserializer.FindReference += new BOP.FindReferenceHandler(DeserializeFindReference);
-                LNode = (INode)LDeserializer.Deserialize(LStream, null);
-                DesignerTree.FormDesigner.Dataphoria.Warnings.AppendErrors(DesignerTree.FormDesigner, LDeserializer.Errors, true);
+                BOP.Serializer serializer = DesignerTree.FormDesigner.FrontendSession.CreateSerializer();
+                serializer.Serialize(stream, source);
+                DesignerTree.FormDesigner.Dataphoria.Warnings.AppendErrors(DesignerTree.FormDesigner, serializer.Errors, true);
+                stream.Position = 0;
+                BOP.Deserializer deserializer = DesignerTree.FormDesigner.FrontendSession.CreateDeserializer();
+                deserializer.FindReference += new BOP.FindReferenceHandler(DeserializeFindReference);
+                node = (INode)deserializer.Deserialize(stream, null);
+                DesignerTree.FormDesigner.Dataphoria.Warnings.AppendErrors(DesignerTree.FormDesigner, deserializer.Errors, true);
             }
-            RecursiveGetUniqueName(LNode);
+            RecursiveGetUniqueName(node);
 
-            PlaceNewNode(LNode, APosition);
+            PlaceNewNode(node, position);
             DesignerTree.Modified();
         }
 
-        private void InternalMoveNode(INode ANode, INode ANewParent, int ANewIndex)
+        private void InternalMoveNode(INode node, INode newParent, int newIndex)
         {
-            int LOldIndex = ANode.Parent.Children.IndexOf(ANode);
-            INode LOldParent = ANode.Parent;
-            LOldParent.Children.DisownAt(LOldIndex);
+            int oldIndex = node.Parent.Children.IndexOf(node);
+            INode oldParent = node.Parent;
+            oldParent.Children.DisownAt(oldIndex);
             try
             {
-                ANewParent.Children.Insert(ANewIndex, ANode);
+                newParent.Children.Insert(newIndex, node);
             }
             catch
             {
-                LOldParent.Children.Insert(LOldIndex, ANode);		// attempt recovery
+                oldParent.Children.Insert(oldIndex, node);		// attempt recovery
                 throw;
             }
         }
 
-        private void MoveIntoSibling(DesignerNode ASource, int AIndex)
+        private void MoveIntoSibling(DesignerNode source, int index)
         {
-            int LSiblingIndex = Parent.Nodes.IndexOf(ASource);
-            if ((LSiblingIndex >= 0) && (LSiblingIndex < AIndex))
-                AIndex--;
-            InternalMoveNode(ASource.Node, Node.Parent, AIndex);
+            int siblingIndex = Parent.Nodes.IndexOf(source);
+            if ((siblingIndex >= 0) && (siblingIndex < index))
+                index--;
+            InternalMoveNode(source.Node, Node.Parent, index);
             // Remove and recreate the node -- the tree draws the lines improperly if we just move the node, and ASource.Reposition raises a null reference exception
-            ASource.Remove();
-            DesignerNode LNewNode = ASource.Copy();
-            Parent.InsertBaseNode(AIndex, LNewNode);
-            TreeView.SelectedNode = LNewNode;
+            source.Remove();
+            DesignerNode newNode = source.Copy();
+            Parent.InsertBaseNode(index, newNode);
+            TreeView.SelectedNode = newNode;
             Parent.ExpandAll();
         }
 
-        public void MoveFromNode(DesignerNode ASource, DropLinePosition APosition)
+        public void MoveFromNode(DesignerNode source, DropLinePosition position)
         {
-            switch (APosition)
+            switch (position)
             {
                 case DropLinePosition.OnNode :
-                    int LNewIndex = Node.Children.Count;
-                    if (Node.Children.Contains(ASource.Node))
-                        LNewIndex--;
-                    InternalMoveNode(ASource.Node, Node, LNewIndex);
+                    int newIndex = Node.Children.Count;
+                    if (Node.Children.Contains(source.Node))
+                        newIndex--;
+                    InternalMoveNode(source.Node, Node, newIndex);
                     // Remove and recreate the designer node -- the tree draws the lines improperly if we just move the node, and ASource.Reposition raises a null reference exception
-                    ASource.Remove();
-                    DesignerNode LNewNode = ASource.Copy();
-                    AddBaseNode(LNewNode);
-                    TreeView.SelectedNode = LNewNode;
+                    source.Remove();
+                    DesignerNode newNode = source.Copy();
+                    AddBaseNode(newNode);
+                    TreeView.SelectedNode = newNode;
                     if (Parent != null)
                         Parent.ExpandAll();
                     break;
                 case DropLinePosition.AboveNode :
-                    MoveIntoSibling(ASource, Node.Parent.Children.IndexOf(Node));
+                    MoveIntoSibling(source, Node.Parent.Children.IndexOf(Node));
                     break;
                 case DropLinePosition.BelowNode :
-                    MoveIntoSibling(ASource, Node.Parent.Children.IndexOf(Node) + 1);
+                    MoveIntoSibling(source, Node.Parent.Children.IndexOf(Node) + 1);
                     break;
             }
             DesignerTree.Modified();
         }
 
-        public void AddNew(PaletteItem AItem, DropLinePosition APosition)
+        public void AddNew(PaletteItem item, DropLinePosition position)
         {
-            INode LNode = (INode)DesignerTree.FormDesigner.FrontendSession.NodeTypeTable.CreateInstance(AItem.ClassName);
+            INode node = (INode)DesignerTree.FormDesigner.FrontendSession.NodeTypeTable.CreateInstance(item.ClassName);
             try
             {
-                Node.HostNode.GetUniqueName(LNode);
-                PlaceNewNode(LNode, APosition).Rename();
+                Node.HostNode.GetUniqueName(node);
+                PlaceNewNode(node, position).Rename();
             }
             catch
             {
-                LNode.Dispose();
+                node.Dispose();
                 throw;
             }
             DesignerTree.Modified();
         }
 
-        private object DeserializeFindReference(string AString)
+        private object DeserializeFindReference(string stringValue)
         {
-            return Node.HostNode.FindNode(AString);
+            return Node.HostNode.FindNode(stringValue);
         }
 
         /// <remarks> This method does not change the modified state of the editor. </remarks>
-        public DesignerNode AddNode(INode ANode)
+        public DesignerNode AddNode(INode node)
         {
-            DesignerNode LNewNode = new DesignerNode(ANode, FDesignerTree);
-            AddBaseNode(LNewNode);
+            DesignerNode newNode = new DesignerNode(node, _designerTree);
+            AddBaseNode(newNode);
             if (TreeView != null)	// throws if node is not inserted
                 ExpandAll();
-            return LNewNode;
+            return newNode;
         }
 
         /// <remarks> This method does not change the modified state of the editor. </remarks>
-        public DesignerNode InsertNode(int AIndex, INode ANode)
+        public DesignerNode InsertNode(int index, INode node)
         {
-            DesignerNode LNewNode = new DesignerNode(ANode, FDesignerTree);
-            InsertBaseNode(AIndex, LNewNode);
+            DesignerNode newNode = new DesignerNode(node, _designerTree);
+            InsertBaseNode(index, newNode);
             if (TreeView != null)	// throws if node is not inserted
                 ExpandAll();
-            return LNewNode;
+            return newNode;
         }
 
-        public void UpdateText(bool AEditText)
+        public void UpdateText(bool editText)
         {
-            if (AEditText)
+            if (editText)
                 Text = Node.Name;
             else
             {
-                string LName = FNode.GetType().Name;
-                if ((FNode.Name == null) || (FNode.Name == String.Empty))
-                    Text = String.Format("[{0}]", LName);
+                string name = _node.GetType().Name;
+                if ((_node.Name == null) || (_node.Name == String.Empty))
+                    Text = String.Format("[{0}]", name);
                 else
-                    Text = String.Format("{0}  [{1}]", FNode.Name, LName);
+                    Text = String.Format("{0}  [{1}]", _node.Name, name);
             }
         }
 
@@ -348,68 +348,68 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
         }
 
         /// <summary> Searches for AQueryNode optionally in ANode and always in ANode's children. </summary>
-        public static bool IsNodeContained(INode ANode, INode AQueryNode, bool ACheckNode) 
+        public static bool IsNodeContained(INode node, INode queryNode, bool checkNode) 
         {
-            if (ACheckNode && Object.ReferenceEquals(ANode, AQueryNode))
+            if (checkNode && Object.ReferenceEquals(node, queryNode))
                 return true;
 
-            foreach (INode LChild in ANode.Children) 
-                if (IsNodeContained(LChild, AQueryNode, true))
+            foreach (INode child in node.Children) 
+                if (IsNodeContained(child, queryNode, true))
                     return true;
 
             return false;
         }
 
-        public void QueryAllowedPalettePositions(QueryAllowedPositionsEventArgs AArgs)
+        public void QueryAllowedPalettePositions(QueryAllowedPositionsEventArgs args)
         {
-            AArgs.AllowedCopyPositions = DropLinePosition.None;
-            AArgs.AllowedMovePositions = DropLinePosition.None;
-            PaletteItem LItem = AArgs.Source as PaletteItem;
-            if (LItem != null)
+            args.AllowedCopyPositions = DropLinePosition.None;
+            args.AllowedMovePositions = DropLinePosition.None;
+            PaletteItem item = args.Source as PaletteItem;
+            if (item != null)
             {
-                INode LTarget = ((DesignerNode)AArgs.TargetNode).Node;
-                Type LType = DesignerTree.FormDesigner.FrontendSession.NodeTypeTable.GetClassType(LItem.ClassName);
-                if (LTarget.IsValidChild(LType))
-                    AArgs.AllowedCopyPositions |= DropLinePosition.OnNode;
-                if ((AArgs.TargetNode.Parent != null) && LTarget.Parent.IsValidChild(LType))
-                    AArgs.AllowedCopyPositions |= (DropLinePosition.AboveNode | DropLinePosition.BelowNode);
+                INode target = ((DesignerNode)args.TargetNode).Node;
+                Type type = DesignerTree.FormDesigner.FrontendSession.NodeTypeTable.GetClassType(item.ClassName);
+                if (target.IsValidChild(type))
+                    args.AllowedCopyPositions |= DropLinePosition.OnNode;
+                if ((args.TargetNode.Parent != null) && target.Parent.IsValidChild(type))
+                    args.AllowedCopyPositions |= (DropLinePosition.AboveNode | DropLinePosition.BelowNode);
             }
         }
 
-        public void QueryAllowedDragPositions(QueryAllowedPositionsEventArgs AArgs)
+        public void QueryAllowedDragPositions(QueryAllowedPositionsEventArgs args)
         {
-            AArgs.AllowedCopyPositions = DropLinePosition.None;
-            AArgs.AllowedMovePositions = DropLinePosition.None;
-            DesignerNodeData LSourceNodeData = AArgs.Source as DesignerNodeData;
-            if (LSourceNodeData != null)
+            args.AllowedCopyPositions = DropLinePosition.None;
+            args.AllowedMovePositions = DropLinePosition.None;
+            DesignerNodeData sourceNodeData = args.Source as DesignerNodeData;
+            if (sourceNodeData != null)
             {
-                INode LSource = LSourceNodeData.TreeNode.Node;
-                INode LTarget = ((DesignerNode)AArgs.TargetNode).Node;
-                if (LTarget.IsValidChild(LSource))
+                INode source = sourceNodeData.TreeNode.Node;
+                INode target = ((DesignerNode)args.TargetNode).Node;
+                if (target.IsValidChild(source))
                 {
-                    AArgs.AllowedCopyPositions |= DropLinePosition.OnNode;
-                    if (!IsNodeContained(LSource, LTarget, true))
-                        AArgs.AllowedMovePositions |= DropLinePosition.OnNode;
+                    args.AllowedCopyPositions |= DropLinePosition.OnNode;
+                    if (!IsNodeContained(source, target, true))
+                        args.AllowedMovePositions |= DropLinePosition.OnNode;
                 }
 
-                if ((AArgs.TargetNode.Parent != null) && LTarget.Parent.IsValidChild(LSource))
+                if ((args.TargetNode.Parent != null) && target.Parent.IsValidChild(source))
                 {
-                    AArgs.AllowedCopyPositions |= (DropLinePosition.AboveNode | DropLinePosition.BelowNode);
-                    if (!IsNodeContained(LSource, LTarget.Parent, true) && !Object.ReferenceEquals(LTarget, LSource))
+                    args.AllowedCopyPositions |= (DropLinePosition.AboveNode | DropLinePosition.BelowNode);
+                    if (!IsNodeContained(source, target.Parent, true) && !Object.ReferenceEquals(target, source))
                     {
-                        int LIndex = LTarget.Parent.Children.IndexOf(LTarget);
+                        int index = target.Parent.Children.IndexOf(target);
                         if 
                             (
-                            (LIndex == 0) || 
-                            ((LIndex > 0) && !ReferenceEquals(LTarget.Parent.Children[LIndex - 1], LSource))
+                            (index == 0) || 
+                            ((index > 0) && !ReferenceEquals(target.Parent.Children[index - 1], source))
                             )
-                            AArgs.AllowedMovePositions |= DropLinePosition.AboveNode;
+                            args.AllowedMovePositions |= DropLinePosition.AboveNode;
                         if
                             (
-                            (LIndex == LTarget.Parent.Children.Count - 1) ||
-                            ((LIndex < LTarget.Parent.Children.Count - 1) && !ReferenceEquals(LTarget.Parent.Children[LIndex + 1], LSource))
+                            (index == target.Parent.Children.Count - 1) ||
+                            ((index < target.Parent.Children.Count - 1) && !ReferenceEquals(target.Parent.Children[index + 1], source))
                             )
-                            AArgs.AllowedMovePositions |= DropLinePosition.BelowNode;
+                            args.AllowedMovePositions |= DropLinePosition.BelowNode;
                     }
                 }
             }
@@ -436,9 +436,9 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 
         #region IServiceProvider Members
 
-        public object GetService(Type AServiceType)
+        public object GetService(Type serviceType)
         {
-            return DesignerTree.FormDesigner.GetService(AServiceType);
+            return DesignerTree.FormDesigner.GetService(serviceType);
         }
 
         #endregion

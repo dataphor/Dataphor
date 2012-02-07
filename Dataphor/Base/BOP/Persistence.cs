@@ -9,81 +9,81 @@ namespace Alphora.Dataphor.BOP
 	/// <summary> Base class for serializer and deserializer. </summary>
 	public abstract class Persistence
 	{
-		public const string CBOPName = "name";
-		public const string CBOPNamespaceURI = "www.alphora.com/schemas/bop";
-		public const string CBOPNamespacePrefix = "bop";
-		public const string CBOPType = "typeof-";
-		public const string CBOPDefault = "default-";
-		public const string CXmlBOPName = "{" + CBOPNamespaceURI + "}" + CBOPName;
-		public const string CXmlBOPType = "{" + CBOPNamespaceURI + "}" + CBOPType;
-		public const string CXmlBOPDefault = "{" + CBOPNamespaceURI + "}" + CBOPDefault;
+		public const string BOPName = "name";
+		public const string BOPNamespaceURI = "www.alphora.com/schemas/bop";
+		public const string BOPNamespacePrefix = "bop";
+		public const string BOPType = "typeof-";
+		public const string BOPDefault = "default-";
+		public const string XmlBOPName = "{" + BOPNamespaceURI + "}" + BOPName;
+		public const string XmlBOPType = "{" + BOPNamespaceURI + "}" + BOPType;
+		public const string XmlBOPDefault = "{" + BOPNamespaceURI + "}" + BOPDefault;
 
-		protected ErrorList FErrors = new ErrorList();
+		protected ErrorList _errors = new ErrorList();
 		public ErrorList Errors
 		{
-			get { return FErrors; }
+			get { return _errors; }
 		}
 
 		/// <summary> Determines the name of the member that is the default list for the type. </summary>
-		protected static string GetDefaultListMemberName(MemberInfo AMember)
+		protected static string GetDefaultListMemberName(MemberInfo member)
 		{
-			PublishDefaultListAttribute LAttribute = (PublishDefaultListAttribute)ReflectionUtility.GetAttribute(AMember, typeof(PublishDefaultListAttribute));
-			if (LAttribute != null)
-				return LAttribute.MemberName;
+			PublishDefaultListAttribute attribute = (PublishDefaultListAttribute)ReflectionUtility.GetAttribute(member, typeof(PublishDefaultListAttribute));
+			if (attribute != null)
+				return attribute.MemberName;
 			else
 				return String.Empty;
 		}
 
 		/// <summary> Determines the member name that is designated as the bop:name for the type. </summary>
-		protected static string GetNameMemberName(MemberInfo AMember)
+		protected static string GetNameMemberName(MemberInfo member)
 		{
-			PublishNameAttribute LAttribute = (PublishNameAttribute)ReflectionUtility.GetAttribute(AMember, typeof(PublishNameAttribute));
-			if (LAttribute == null)
+			PublishNameAttribute attribute = (PublishNameAttribute)ReflectionUtility.GetAttribute(member, typeof(PublishNameAttribute));
+			if (attribute == null)
 				return String.Empty;
-			return LAttribute.MemberName;
+			return attribute.MemberName;
 		}
 
 		/// <summary> Determines the element text to use when writing the specified type. </summary>
-		protected virtual string GetElementName(Type AType)
+		protected virtual string GetElementName(Type type)
 		{
-			PublishAsAttribute LPublishAs = (PublishAsAttribute)ReflectionUtility.GetAttribute(AType, typeof(PublishAsAttribute));
-			if (LPublishAs != null)
-				return LPublishAs.ClassName.ToLower();
-			return AType.Name.ToLower();
+			PublishAsAttribute publishAs = (PublishAsAttribute)ReflectionUtility.GetAttribute(type, typeof(PublishAsAttribute));
+			if (publishAs != null)
+				return publishAs.ClassName.ToLower();
+			return type.Name.ToLower();
 		}
 
 		/// <summary> Gets the type of the member from the name/namespace of the XML element. </summary>
-		protected static Type GetMemberType(XElement ANode, MemberInfo AMember)
+		protected static Type GetMemberType(XElement node, MemberInfo member)
 		{
 			// Determine the type (look for bop:type)
-			XAttribute LMemberTypeAttribute = ANode.Attribute(CXmlBOPType + AMember.Name.ToLower());
-			if (LMemberTypeAttribute != null)
-				return Type.GetType(LMemberTypeAttribute.Value, true, true);
+			XAttribute memberTypeAttribute = node.Attribute(XmlBOPType + member.Name.ToLower());
+			if (memberTypeAttribute != null)
+				return Type.GetType(memberTypeAttribute.Value, true, true);
 			else
-				return ReflectionUtility.GetMemberType(AMember);
+				return ReflectionUtility.GetMemberType(member);
 		}
 		
 		/// <summary> Performs a case sensitive comparison on the namespace name, and a case insensitive comparison on the local name. </summary>
-		public static bool XNamesEqual(XName ALeft, XName ARight)
+		public static bool XNamesEqual(XName left, XName right)
 		{
-			return String.Equals(ALeft.LocalName, ARight.LocalName, StringComparison.OrdinalIgnoreCase)
-				&& String.Equals(ALeft.NamespaceName, ARight.NamespaceName);
+			return String.Equals(left.LocalName, right.LocalName, StringComparison.OrdinalIgnoreCase)
+				&& String.Equals(left.NamespaceName, right.NamespaceName);
 		}
 
-		protected bool IsValueType(Type AType)
+		protected bool IsValueType(Type type)
 		{
-			return AType.IsValueType || (AType == typeof(String));
+			return type.IsValueType || (type == typeof(String));
 		}
 		
-		public static TypeConverter GetTypeConverter(Type AType)
+		public static TypeConverter GetTypeConverter(Type type)
 		{
 			// Attempt to find and use a value converter
-			var LConverterAttribute = ((TypeConverterAttribute)ReflectionUtility.GetAttribute(AType, typeof(TypeConverterAttribute)));
-			if (LConverterAttribute != null)
+			var converterAttribute = ((TypeConverterAttribute)ReflectionUtility.GetAttribute(type, typeof(TypeConverterAttribute)));
+			if (converterAttribute != null)
 			{
-				var LConverterType = Type.GetType(LConverterAttribute.ConverterTypeName);
-				if (LConverterType != null)
-					return (TypeConverter)Activator.CreateInstance(LConverterType);
+				var converterType = Type.GetType(converterAttribute.ConverterTypeName);
+				if (converterType != null)
+					return (TypeConverter)Activator.CreateInstance(converterType);
 			}
 			return null;
 		}

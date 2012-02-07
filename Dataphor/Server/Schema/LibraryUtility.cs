@@ -21,380 +21,380 @@ namespace Alphora.Dataphor.DAE.Schema
 {
 	public static class LibraryUtility
 	{
-		public const string CRegisterFileName = @"Documents\Register.d4";
-		public const string CRegisterDocumentLocator = @"doc:{0}:Register";
+		public const string RegisterFileName = @"Documents\Register.d4";
+		public const string RegisterDocumentLocator = @"doc:{0}:Register";
 
-		public static string GetInstanceLibraryDirectory(string AInstanceDirectory, string ALibraryName)
+		public static string GetInstanceLibraryDirectory(string instanceDirectory, string libraryName)
 		{
-			string LResult = Path.Combine(Path.Combine(AInstanceDirectory, Server.Server.CDefaultLibraryDataDirectory), ALibraryName);
-			System.IO.Directory.CreateDirectory(LResult);
-			return LResult;
+			string result = Path.Combine(Path.Combine(instanceDirectory, Server.Server.DefaultLibraryDataDirectory), libraryName);
+			System.IO.Directory.CreateDirectory(result);
+			return result;
 		}
 		
-		public static Library LoadFromFile(string AFileName, string AInstanceDirectory)
+		public static Library LoadFromFile(string fileName, string instanceDirectory)
 		{
-			using (FileStream LStream = new FileStream(AFileName, FileMode.Open, FileAccess.Read))
+			using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
 			{
-				Library LLibrary = LoadFromStream(LStream);
-				LLibrary.Name = Path.GetFileNameWithoutExtension(AFileName);
-				LLibrary.LoadInfoFromFile(Path.Combine(GetInstanceLibraryDirectory(AInstanceDirectory, LLibrary.Name), GetInfoFileName(LLibrary.Name)));
-				return LLibrary;
+				Library library = LoadFromStream(stream);
+				library.Name = Path.GetFileNameWithoutExtension(fileName);
+				library.LoadInfoFromFile(Path.Combine(GetInstanceLibraryDirectory(instanceDirectory, library.Name), GetInfoFileName(library.Name)));
+				return library;
 			}
 		}
 
-		public static string GetInfoFileName(string ALibraryName)
+		public static string GetInfoFileName(string libraryName)
 		{
-			return String.Format("{0}.d4l.info", ALibraryName);
+			return String.Format("{0}.d4l.info", libraryName);
 		}
 		
-		public static Library LoadFromStream(Stream AStream)
+		public static Library LoadFromStream(Stream stream)
 		{
-			return new Deserializer().Deserialize(AStream, null) as Library;
+			return new Deserializer().Deserialize(stream, null) as Library;
 		}
 		
-		public static string GetFileName(string ALibraryName)
+		public static string GetFileName(string libraryName)
 		{
-			return String.Format("{0}.d4l", ALibraryName);
+			return String.Format("{0}.d4l", libraryName);
 		}
 		
-		public static string GetLibraryDirectory(string AServerLibraryDirectory, string ALibraryName, string ALibraryDirectory)
+		public static string GetLibraryDirectory(string serverLibraryDirectory, string libraryName, string libraryDirectory)
 		{
-			return ALibraryDirectory == String.Empty ? Path.Combine(GetDefaultLibraryDirectory(AServerLibraryDirectory), ALibraryName) : ALibraryDirectory;
+			return libraryDirectory == String.Empty ? Path.Combine(GetDefaultLibraryDirectory(serverLibraryDirectory), libraryName) : libraryDirectory;
 		}
 		
-		public static string GetDefaultLibraryDirectory(string AServerLibraryDirectory)
+		public static string GetDefaultLibraryDirectory(string serverLibraryDirectory)
 		{
-			return AServerLibraryDirectory.Split(';')[0];
+			return serverLibraryDirectory.Split(';')[0];
 		}
 
-		public static void GetAvailableLibraries(string AInstanceDirectory, string ALibraryDirectory, Libraries ALibraries)
+		public static void GetAvailableLibraries(string instanceDirectory, string libraryDirectory, Libraries libraries)
 		{
-			ALibraries.Clear();
-			string[] LDirectories = ALibraryDirectory.Split(';');
-			for (int LIndex = 0; LIndex < LDirectories.Length; LIndex++)
-				GetAvailableLibraries(AInstanceDirectory, LDirectories[LIndex], ALibraries, LIndex > 0);
+			libraries.Clear();
+			string[] directories = libraryDirectory.Split(';');
+			for (int index = 0; index < directories.Length; index++)
+				GetAvailableLibraries(instanceDirectory, directories[index], libraries, index > 0);
 		}
 		
-		public static void GetAvailableLibraries(string AInstanceDirectory, string ALibraryDirectory, Libraries ALibraries, bool ASetLibraryDirectory)
+		public static void GetAvailableLibraries(string instanceDirectory, string libraryDirectory, Libraries libraries, bool setLibraryDirectory)
 		{
-			string LLibraryName;
-			string LLibraryFileName;
-			string[] LLibraries = System.IO.Directory.GetDirectories(ALibraryDirectory);
-			for (int LIndex = 0; LIndex < LLibraries.Length; LIndex++)
+			string libraryName;
+			string libraryFileName;
+			string[] localLibraries = System.IO.Directory.GetDirectories(libraryDirectory);
+			for (int index = 0; index < localLibraries.Length; index++)
 			{
-				LLibraryName = Path.GetFileName(LLibraries[LIndex]);
-				LLibraryFileName = Path.Combine(LLibraries[LIndex], GetFileName(LLibraryName));
-				if (File.Exists(LLibraryFileName))
+				libraryName = Path.GetFileName(localLibraries[index]);
+				libraryFileName = Path.Combine(localLibraries[index], GetFileName(libraryName));
+				if (File.Exists(libraryFileName))
 				{
-					Schema.Library LLibrary = LoadFromFile(LLibraryFileName, AInstanceDirectory);
-					if (ASetLibraryDirectory)
-						LLibrary.Directory = LLibraries[LIndex];
-					ALibraries.Add(LLibrary);
+					Schema.Library library = LoadFromFile(libraryFileName, instanceDirectory);
+					if (setLibraryDirectory)
+						library.Directory = localLibraries[index];
+					libraries.Add(library);
 				}
 			}
 		}
 		
-		public static Schema.Library GetAvailableLibrary(string AInstanceDirectory, string ALibraryName, string ALibraryDirectory)
+		public static Schema.Library GetAvailableLibrary(string instanceDirectory, string libraryName, string libraryDirectory)
 		{
-			string LLibraryFileName = Path.Combine(ALibraryDirectory, GetFileName(ALibraryName));
-			if (File.Exists(LLibraryFileName))
+			string libraryFileName = Path.Combine(libraryDirectory, GetFileName(libraryName));
+			if (File.Exists(libraryFileName))
 			{
-				Schema.Library LLibrary = LoadFromFile(LLibraryFileName, AInstanceDirectory);
-				LLibrary.Directory = ALibraryDirectory;
-				return LLibrary;
+				Schema.Library library = LoadFromFile(libraryFileName, instanceDirectory);
+				library.Directory = libraryDirectory;
+				return library;
 			}
 			return null;
 		}
 
-		public static string GetLibraryDirectory(this Library ALibrary, string AServerLibraryDirectory)
+		public static string GetLibraryDirectory(this Library library, string serverLibraryDirectory)
 		{
-			return GetLibraryDirectory(AServerLibraryDirectory, ALibrary.Name, ALibrary.Directory);
+			return GetLibraryDirectory(serverLibraryDirectory, library.Name, library.Directory);
 		}
 		
-		public static string GetInstanceLibraryDirectory(this Library ALibrary, string AInstanceDirectory)
+		public static string GetInstanceLibraryDirectory(this Library library, string instanceDirectory)
 		{
-			return GetInstanceLibraryDirectory(AInstanceDirectory, ALibrary.Name);
+			return GetInstanceLibraryDirectory(instanceDirectory, library.Name);
 		}
 		
-		public static void SaveToFile(this Library ALibrary, string AFileName)
+		public static void SaveToFile(this Library library, string fileName)
 		{
 			#if !RESPECTREADONLY
-			FileUtility.EnsureWriteable(AFileName);
+			FileUtility.EnsureWriteable(fileName);
 			#endif
-			using (FileStream LStream = new FileStream(AFileName, FileMode.Create, FileAccess.Write))
+			using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
 			{
-				ALibrary.SaveToStream(LStream);
+				library.SaveToStream(stream);
 			}
 		}
 		
-		public static void SaveInfoToFile(this Library ALibrary, string AFileName)
+		public static void SaveInfoToFile(this Library library, string fileName)
 		{
-			FileUtility.EnsureWriteable(AFileName);
-			using (FileStream LStream = new FileStream(AFileName, FileMode.Create, FileAccess.Write))
+			FileUtility.EnsureWriteable(fileName);
+			using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
 			{
-				new LibraryInfo(ALibrary.Name, ALibrary.IsSuspect, ALibrary.SuspectReason).SaveToStream(LStream);
+				new LibraryInfo(library.Name, library.IsSuspect, library.SuspectReason).SaveToStream(stream);
 			}
 		}
 		
-		public static void LoadInfoFromFile(this Library ALibrary, string AFileName)
+		public static void LoadInfoFromFile(this Library library, string fileName)
 		{
-			if (File.Exists(AFileName))
+			if (File.Exists(fileName))
 			{
-				using (FileStream LStream = new FileStream(AFileName, FileMode.Open, FileAccess.Read))
+				using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
 				{
-					LibraryInfo LLibraryInfo = LibraryInfo.LoadFromStream(LStream);
-					ALibrary.IsSuspect = LLibraryInfo.IsSuspect;
-					ALibrary.SuspectReason = LLibraryInfo.SuspectReason;
+					LibraryInfo libraryInfo = LibraryInfo.LoadFromStream(stream);
+					library.IsSuspect = libraryInfo.IsSuspect;
+					library.SuspectReason = libraryInfo.SuspectReason;
 				}
 			}
 		}
 
-		private static void EnsureLibraryUnregistered(Program AProgram, Schema.Library ALibrary, bool AWithReconciliation)
+		private static void EnsureLibraryUnregistered(Program program, Schema.Library library, bool withReconciliation)
 		{
-			Schema.LoadedLibrary LLoadedLibrary = AProgram.CatalogDeviceSession.ResolveLoadedLibrary(ALibrary.Name, false);
-			if (LLoadedLibrary != null)
+			Schema.LoadedLibrary loadedLibrary = program.CatalogDeviceSession.ResolveLoadedLibrary(library.Name, false);
+			if (loadedLibrary != null)
 			{
-				while (LLoadedLibrary.RequiredByLibraries.Count > 0)
-					EnsureLibraryUnregistered(AProgram, AProgram.Catalog.Libraries[LLoadedLibrary.RequiredByLibraries[0].Name], AWithReconciliation);
-				UnregisterLibrary(AProgram, ALibrary.Name, AWithReconciliation);
+				while (loadedLibrary.RequiredByLibraries.Count > 0)
+					EnsureLibraryUnregistered(program, program.Catalog.Libraries[loadedLibrary.RequiredByLibraries[0].Name], withReconciliation);
+				UnregisterLibrary(program, library.Name, withReconciliation);
 			}
 		}
 		
-		private static void RemoveLibrary(Program AProgram, Schema.Library ALibrary)
+		private static void RemoveLibrary(Program program, Schema.Library library)
 		{
 			// Ensure that the library and any dependencies of it are unregistered
-			EnsureLibraryUnregistered(AProgram, ALibrary, false);
-			DetachLibrary(AProgram, ALibrary.Name);
+			EnsureLibraryUnregistered(program, library, false);
+			DetachLibrary(program, library.Name);
 		}
 		
-		public static void RefreshLibraries(Program AProgram)
+		public static void RefreshLibraries(Program program)
 		{
 			// Get the list of available libraries from the library directory
-			Schema.Libraries LLibraries = new Schema.Libraries();
-			Schema.Libraries LOldLibraries = new Schema.Libraries();
-			Server.Server LServer = (Server.Server)AProgram.ServerProcess.ServerSession.Server;
-			GetAvailableLibraries(LServer.InstanceDirectory, LServer.LibraryDirectory, LLibraries);
+			Schema.Libraries libraries = new Schema.Libraries();
+			Schema.Libraries oldLibraries = new Schema.Libraries();
+			Server.Server server = (Server.Server)program.ServerProcess.ServerSession.Server;
+			GetAvailableLibraries(server.InstanceDirectory, server.LibraryDirectory, libraries);
 			
-			lock (AProgram.Catalog.Libraries)
+			lock (program.Catalog.Libraries)
 			{
 				// Ensure that each library in the directory is available in the DAE
-				foreach (Schema.Library LLibrary in LLibraries)
-					if (!AProgram.Catalog.Libraries.ContainsName(LLibrary.Name) && !AProgram.Catalog.ContainsName(LLibrary.Name))
-						AttachLibrary(AProgram, LLibrary, false);
+				foreach (Schema.Library library in libraries)
+					if (!program.Catalog.Libraries.ContainsName(library.Name) && !program.Catalog.ContainsName(library.Name))
+						AttachLibrary(program, library, false);
 						
 				// Ensure that each library in the DAE is supported by a library in the directory, remove non-existent libraries
 				// The System library is not required to have a directory.
-				foreach (Schema.Library LLibrary in AProgram.Catalog.Libraries)
-					if ((Engine.CSystemLibraryName != LLibrary.Name) && (LLibrary.Directory == String.Empty) && !LLibraries.ContainsName(LLibrary.Name))
-						LOldLibraries.Add(LLibrary);
+				foreach (Schema.Library library in program.Catalog.Libraries)
+					if ((Engine.SystemLibraryName != library.Name) && (library.Directory == String.Empty) && !libraries.ContainsName(library.Name))
+						oldLibraries.Add(library);
 						
-				foreach (Schema.Library LLibrary in LOldLibraries)
-					RemoveLibrary(AProgram, LLibrary);
+				foreach (Schema.Library library in oldLibraries)
+					RemoveLibrary(program, library);
 			}
 		}
 
-		public static void UnregisterLibrary(Program AProgram, string ALibraryName, bool AWithReconciliation)
+		public static void UnregisterLibrary(Program program, string libraryName, bool withReconciliation)
 		{
-			int LSaveReconciliationState = AProgram.ServerProcess.SuspendReconciliationState();
+			int saveReconciliationState = program.ServerProcess.SuspendReconciliationState();
 			try
 			{
-				if (!AWithReconciliation)
-					AProgram.ServerProcess.DisableReconciliation();
+				if (!withReconciliation)
+					program.ServerProcess.DisableReconciliation();
 				try
 				{
-					lock (AProgram.Catalog.Libraries)
+					lock (program.Catalog.Libraries)
 					{
-						Schema.LoadedLibrary LLoadedLibrary = AProgram.CatalogDeviceSession.ResolveLoadedLibrary(ALibraryName);
+						Schema.LoadedLibrary loadedLibrary = program.CatalogDeviceSession.ResolveLoadedLibrary(libraryName);
 						
-						if (Schema.Object.NamesEqual(LLoadedLibrary.Name, Engine.CSystemLibraryName))
+						if (Schema.Object.NamesEqual(loadedLibrary.Name, Engine.SystemLibraryName))
 							throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotUnregisterSystemLibrary);
 							
-						if (Schema.Object.NamesEqual(LLoadedLibrary.Name, Engine.CGeneralLibraryName))
+						if (Schema.Object.NamesEqual(loadedLibrary.Name, Engine.GeneralLibraryName))
 							throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotUnregisterGeneralLibrary);
 
-						if (LLoadedLibrary.RequiredByLibraries.Count > 0)
-							throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryIsRequired, LLoadedLibrary.Name);
+						if (loadedLibrary.RequiredByLibraries.Count > 0)
+							throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryIsRequired, loadedLibrary.Name);
 							
 						// Drop all the objects in the library
-						AProgram.ServerProcess.ServerSession.Server.RunScript
+						program.ServerProcess.ServerSession.Server.RunScript
 						(
-							AProgram.ServerProcess, 
-							AProgram.ServerProcess.ServerSession.Server.ScriptDropLibrary(AProgram.CatalogDeviceSession, ALibraryName), 
-							LLoadedLibrary.Name,
+							program.ServerProcess, 
+							program.ServerProcess.ServerSession.Server.ScriptDropLibrary(program.CatalogDeviceSession, libraryName), 
+							loadedLibrary.Name,
 							null
 						);
 						
 						// Any session with current library set to the unregistered library will be set to General
-						AProgram.ServerProcess.ServerSession.Server.LibraryUnloaded(LLoadedLibrary.Name);
+						program.ServerProcess.ServerSession.Server.LibraryUnloaded(loadedLibrary.Name);
 
 						// Remove the library from the catalog
-						AProgram.CatalogDeviceSession.DeleteLoadedLibrary(LLoadedLibrary);
-						LLoadedLibrary.DetachLibrary();
+						program.CatalogDeviceSession.DeleteLoadedLibrary(loadedLibrary);
+						loadedLibrary.DetachLibrary();
 						
 						// Unregister each assembly that was loaded with this library
-						UnregisterLibraryAssemblies(AProgram, LLoadedLibrary);
+						UnregisterLibraryAssemblies(program, loadedLibrary);
 
 						// TODO: Unregister assemblies when the .NET framework supports it
 						
-						AProgram.Catalog.Libraries.DoLibraryUnloaded(AProgram, LLoadedLibrary.Name);
+						program.Catalog.Libraries.DoLibraryUnloaded(program, loadedLibrary.Name);
 					}
 				}
 				finally
 				{
-					if (!AWithReconciliation)
-						AProgram.ServerProcess.EnableReconciliation();
+					if (!withReconciliation)
+						program.ServerProcess.EnableReconciliation();
 				}
 			}
 			finally
 			{
-				AProgram.ServerProcess.ResumeReconciliationState(LSaveReconciliationState);
+				program.ServerProcess.ResumeReconciliationState(saveReconciliationState);
 			}
 		}
 
-		public static void DropLibrary(Program AProgram, string ALibraryName, bool AUpdateCatalogTimeStamp)
+		public static void DropLibrary(Program program, string libraryName, bool updateCatalogTimeStamp)
 		{
-			lock (AProgram.Catalog.Libraries)
+			lock (program.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProgram.Catalog.Libraries[ALibraryName];
-				if (AProgram.CatalogDeviceSession.IsLoadedLibrary(LLibrary.Name))
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotDropRegisteredLibrary, LLibrary.Name);
+				Schema.Library library = program.Catalog.Libraries[libraryName];
+				if (program.CatalogDeviceSession.IsLoadedLibrary(library.Name))
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotDropRegisteredLibrary, library.Name);
 					
-				string LLibraryDirectory = LLibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory);
+				string libraryDirectory = library.GetLibraryDirectory(((Server.Server)program.ServerProcess.ServerSession.Server).LibraryDirectory);
 
-				AProgram.Catalog.Libraries.DoLibraryRemoved(AProgram, LLibrary.Name);
-				AProgram.Catalog.Libraries.DoLibraryDeleted(AProgram, LLibrary.Name);
+				program.Catalog.Libraries.DoLibraryRemoved(program, library.Name);
+				program.Catalog.Libraries.DoLibraryDeleted(program, library.Name);
 				try
 				{
-					AProgram.Catalog.Libraries.Remove(LLibrary);
+					program.Catalog.Libraries.Remove(library);
 					try
 					{
-						if (AUpdateCatalogTimeStamp)
-							AProgram.Catalog.UpdateTimeStamp();
-						if (Directory.Exists(LLibraryDirectory))
+						if (updateCatalogTimeStamp)
+							program.Catalog.UpdateTimeStamp();
+						if (Directory.Exists(libraryDirectory))
 						{
 							#if !RESPECTREADONLY
-							PathUtility.EnsureWriteable(LLibraryDirectory, true);
+							PathUtility.EnsureWriteable(libraryDirectory, true);
 							#endif
-							Directory.Delete(LLibraryDirectory, true);
+							Directory.Delete(libraryDirectory, true);
 						}
 						
-						((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ClearLibraryOwner(ALibraryName);
-						((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ClearCurrentLibraryVersion(ALibraryName);
+						((ServerCatalogDeviceSession)program.CatalogDeviceSession).ClearLibraryOwner(libraryName);
+						((ServerCatalogDeviceSession)program.CatalogDeviceSession).ClearCurrentLibraryVersion(libraryName);
 					}
 					catch
 					{
-						if (Directory.Exists(LLibraryDirectory))
-							AProgram.Catalog.Libraries.Add(LLibrary);
+						if (Directory.Exists(libraryDirectory))
+							program.Catalog.Libraries.Add(library);
 						throw;
 					}
 				}
 				catch
 				{
-					if (Directory.Exists(LLibraryDirectory))
+					if (Directory.Exists(libraryDirectory))
 					{
-						AProgram.Catalog.Libraries.DoLibraryCreated(AProgram, LLibrary.Name);
-						AProgram.Catalog.Libraries.DoLibraryAdded(AProgram, LLibrary.Name);
+						program.Catalog.Libraries.DoLibraryCreated(program, library.Name);
+						program.Catalog.Libraries.DoLibraryAdded(program, library.Name);
 					}
 					throw;
 				}
 			}
 		}
 		
-		public static void DetachLibrary(Program AProgram, string ALibraryName)
+		public static void DetachLibrary(Program program, string libraryName)
 		{
-			lock (AProgram.Catalog.Libraries)
+			lock (program.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProgram.Catalog.Libraries[ALibraryName];
-				if (AProgram.CatalogDeviceSession.IsLoadedLibrary(LLibrary.Name))
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotDetachRegisteredLibrary, LLibrary.Name);
+				Schema.Library library = program.Catalog.Libraries[libraryName];
+				if (program.CatalogDeviceSession.IsLoadedLibrary(library.Name))
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotDetachRegisteredLibrary, library.Name);
 					
-				string LLibraryDirectory = LLibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory);
+				string libraryDirectory = library.GetLibraryDirectory(((Server.Server)program.ServerProcess.ServerSession.Server).LibraryDirectory);
 
-				AProgram.Catalog.Libraries.DoLibraryRemoved(AProgram, LLibrary.Name);
-				AProgram.Catalog.Libraries.Remove(LLibrary);
-				AProgram.Catalog.UpdateTimeStamp();
-				((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).DeleteLibraryDirectory(LLibrary.Name);
+				program.Catalog.Libraries.DoLibraryRemoved(program, library.Name);
+				program.Catalog.Libraries.Remove(library);
+				program.Catalog.UpdateTimeStamp();
+				((ServerCatalogDeviceSession)program.CatalogDeviceSession).DeleteLibraryDirectory(library.Name);
 			}
 		}
 
 		/// <summary>Attaches the library given by ALibraryName from ALibraryDirectory. AIsAttached indicates whether this library is being attached as part of catalog startup.</summary>
-		public static void AttachLibrary(Program AProgram, string ALibraryName, string ALibraryDirectory, bool AIsAttached)
+		public static void AttachLibrary(Program program, string libraryName, string libraryDirectory, bool isAttached)
 		{
-			Schema.Library LLibrary = GetAvailableLibrary(((Server.Server)AProgram.ServerProcess.ServerSession.Server).InstanceDirectory, ALibraryName, ALibraryDirectory);
-			if ((LLibrary != null) && !AProgram.Catalog.Libraries.ContainsName(LLibrary.Name))
-				AttachLibrary(AProgram, LLibrary, AIsAttached);
+			Schema.Library library = GetAvailableLibrary(((Server.Server)program.ServerProcess.ServerSession.Server).InstanceDirectory, libraryName, libraryDirectory);
+			if ((library != null) && !program.Catalog.Libraries.ContainsName(library.Name))
+				AttachLibrary(program, library, isAttached);
 		}
 
-		public static void AttachLibrary(Program AProgram, Schema.Library ALibrary, bool AIsAttached)
+		public static void AttachLibrary(Program program, Schema.Library library, bool isAttached)
 		{
-			lock (AProgram.Catalog.Libraries)
+			lock (program.Catalog.Libraries)
 			{
-				string LLibraryDirectory = ALibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory);
+				string libraryDirectory = library.GetLibraryDirectory(((Server.Server)program.ServerProcess.ServerSession.Server).LibraryDirectory);
 
-				AProgram.Catalog.Libraries.Add(ALibrary);
-				AProgram.Catalog.UpdateTimeStamp();
-				AProgram.Catalog.Libraries.DoLibraryAdded(AProgram, ALibrary.Name);
-				if ((ALibrary.Directory != String.Empty) && !AIsAttached)
-					((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetLibraryDirectory(ALibrary.Name, LLibraryDirectory);
+				program.Catalog.Libraries.Add(library);
+				program.Catalog.UpdateTimeStamp();
+				program.Catalog.Libraries.DoLibraryAdded(program, library.Name);
+				if ((library.Directory != String.Empty) && !isAttached)
+					((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetLibraryDirectory(library.Name, libraryDirectory);
 			}
 		}
 		
-		public static void EnsureLibraryRegistered(Program AProgram, string ALibraryName, bool AWithReconciliation)
+		public static void EnsureLibraryRegistered(Program program, string libraryName, bool withReconciliation)
 		{
-			lock (AProgram.Catalog.Libraries)
+			lock (program.Catalog.Libraries)
 			{
-				if (AProgram.CatalogDeviceSession.ResolveLoadedLibrary(ALibraryName, false) == null)
-					RegisterLibrary(AProgram, ALibraryName, AWithReconciliation);
+				if (program.CatalogDeviceSession.ResolveLoadedLibrary(libraryName, false) == null)
+					RegisterLibrary(program, libraryName, withReconciliation);
 			}
 		}
 		
-		public static void EnsureLibraryRegistered(Program AProgram, Schema.LibraryReference ALibraryReference, bool AWithReconciliation)
+		public static void EnsureLibraryRegistered(Program program, Schema.LibraryReference libraryReference, bool withReconciliation)
 		{
-			Schema.LoadedLibrary LLoadedLibrary = AProgram.CatalogDeviceSession.ResolveLoadedLibrary(ALibraryReference.Name, false);
-			if (LLoadedLibrary == null)
+			Schema.LoadedLibrary loadedLibrary = program.CatalogDeviceSession.ResolveLoadedLibrary(libraryReference.Name, false);
+			if (loadedLibrary == null)
 			{
-				Schema.LoadedLibrary LCurrentLibrary = AProgram.ServerProcess.ServerSession.CurrentLibrary;
+				Schema.LoadedLibrary currentLibrary = program.ServerProcess.ServerSession.CurrentLibrary;
 				try
 				{
-					Schema.Library LLibrary = AProgram.Catalog.Libraries[ALibraryReference.Name];
-					if (!VersionNumber.Compatible(ALibraryReference.Version, LLibrary.Version))
-						throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, ALibraryReference.Name, ALibraryReference.Version.ToString(), LLibrary.Version.ToString());
-					RegisterLibrary(AProgram, LLibrary.Name, AWithReconciliation);
+					Schema.Library library = program.Catalog.Libraries[libraryReference.Name];
+					if (!VersionNumber.Compatible(libraryReference.Version, library.Version))
+						throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, libraryReference.Name, libraryReference.Version.ToString(), library.Version.ToString());
+					RegisterLibrary(program, library.Name, withReconciliation);
 				}
 				finally
 				{
-					AProgram.ServerProcess.ServerSession.CurrentLibrary = LCurrentLibrary;
+					program.ServerProcess.ServerSession.CurrentLibrary = currentLibrary;
 				}
 			}
 			else
 			{
-				Schema.Library LLibrary = AProgram.Catalog.Libraries[ALibraryReference.Name];
-				if (!VersionNumber.Compatible(ALibraryReference.Version, LLibrary.Version))
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, ALibraryReference.Name, ALibraryReference.Version.ToString(), LLibrary.Version.ToString());
+				Schema.Library library = program.Catalog.Libraries[libraryReference.Name];
+				if (!VersionNumber.Compatible(libraryReference.Version, library.Version))
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, libraryReference.Name, libraryReference.Version.ToString(), library.Version.ToString());
 			}
 		}
 		
-		public static void RegisterLibraryFiles(Program AProgram, Schema.Library ALibrary, Schema.LoadedLibrary ALoadedLibrary)
+		public static void RegisterLibraryFiles(Program program, Schema.Library library, Schema.LoadedLibrary loadedLibrary)
 		{
 			// Register each assembly with the DAE
 			#if !LOADFROMLIBRARIES
-			foreach (Schema.FileReference LFile in ALibrary.Files)
+			foreach (Schema.FileReference file in ALibrary.Files)
 			{
-				if ((LFile.Environments.Count == 0) || LFile.Environments.Contains(Environments.WindowsServer))
+				if ((file.Environments.Count == 0) || file.Environments.Contains(Environments.WindowsServer))
 				{
-					string LSourceFile = Path.IsPathRooted(LFile.FileName) ? LFile.FileName : Path.Combine(ALibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), LFile.FileName);
-					string LTargetFile = Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(LFile.FileName));
+					string sourceFile = Path.IsPathRooted(file.FileName) ? file.FileName : Path.Combine(ALibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), file.FileName);
+					string targetFile = Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(file.FileName));
 					
-					if (!File.Exists(LSourceFile))
-						throw new System.IO.IOException(String.Format("File \"{0}\" not found.", LSourceFile));
+					if (!File.Exists(sourceFile))
+						throw new System.IO.IOException(String.Format("File \"{0}\" not found.", sourceFile));
 					try
 					{
 						#if !RESPECTREADONLY
-						FileUtility.EnsureWriteable(LTargetFile);
+						FileUtility.EnsureWriteable(targetFile);
 						#endif
-						if ((File.GetLastWriteTimeUtc(LSourceFile) > File.GetLastWriteTimeUtc(LTargetFile))) // source newer than target
+						if ((File.GetLastWriteTimeUtc(sourceFile) > File.GetLastWriteTimeUtc(targetFile))) // source newer than target
 						{
-							File.Copy(LSourceFile, LTargetFile, true);
+							File.Copy(sourceFile, targetFile, true);
 						}
 					}
 					catch (IOException)
@@ -406,259 +406,259 @@ namespace Alphora.Dataphor.DAE.Schema
 			#endif
 			
 			// Load assemblies after all files are copied in so that multi-file assemblies and other dependencies are certain to be present
-			foreach (Schema.FileReference LFile in ALibrary.Files)
+			foreach (Schema.FileReference file in library.Files)
 			{
-				if ((LFile.Environments.Count == 0) || LFile.Environments.Contains(Environments.WindowsServer))
+				if ((file.Environments.Count == 0) || file.Environments.Contains(Environments.WindowsServer))
 				{
 					#if LOADFROMLIBRARIES
-					string LSourceFile = Path.IsPathRooted(LFile.FileName) ? LFile.FileName : Path.Combine(ALibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), LFile.FileName);
-					if (FileUtility.IsAssembly(LSourceFile))
+					string sourceFile = Path.IsPathRooted(file.FileName) ? file.FileName : Path.Combine(library.GetLibraryDirectory(((Server.Server)program.ServerProcess.ServerSession.Server).LibraryDirectory), file.FileName);
+					if (FileUtility.IsAssembly(sourceFile))
 					{
-	                    Assembly LAssembly = Assembly.LoadFrom(LSourceFile);
+	                    Assembly assembly = Assembly.LoadFrom(sourceFile);
 					#else
-                    string LTargetFile = Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(LFile.FileName));
-					if (FileUtility.IsAssembly(LTargetFile))
+                    string targetFile = Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(file.FileName));
+					if (FileUtility.IsAssembly(targetFile))
 					{
-	                    Assembly LAssembly = Assembly.LoadFrom(LTargetFile);
+	                    Assembly assembly = Assembly.LoadFrom(targetFile);
                     #endif
-						if (LFile.IsAssembly)
-		                    AProgram.CatalogDeviceSession.RegisterAssembly(ALoadedLibrary, LAssembly);
+						if (file.IsAssembly)
+		                    program.CatalogDeviceSession.RegisterAssembly(loadedLibrary, assembly);
 					}
 				}
 			}
 		}
 		
-		public static void UnregisterLibraryAssemblies(Program AProgram, Schema.LoadedLibrary ALoadedLibrary)
+		public static void UnregisterLibraryAssemblies(Program program, Schema.LoadedLibrary loadedLibrary)
 		{
-			while (ALoadedLibrary.Assemblies.Count > 0)
-				AProgram.CatalogDeviceSession.UnregisterAssembly(ALoadedLibrary, ALoadedLibrary.Assemblies[ALoadedLibrary.Assemblies.Count - 1] as Assembly);
+			while (loadedLibrary.Assemblies.Count > 0)
+				program.CatalogDeviceSession.UnregisterAssembly(loadedLibrary, loadedLibrary.Assemblies[loadedLibrary.Assemblies.Count - 1] as Assembly);
 		}
 		
-		public static void CheckCircularLibraryReference(Program AProgram, Schema.Library ALibrary, string ARequiredLibraryName)
+		public static void CheckCircularLibraryReference(Program program, Schema.Library library, string requiredLibraryName)
 		{
-			if (IsCircularLibraryReference(AProgram, ALibrary, ARequiredLibraryName))
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.CircularLibraryReference, ALibrary.Name, ARequiredLibraryName);
+			if (IsCircularLibraryReference(program, library, requiredLibraryName))
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.CircularLibraryReference, library.Name, requiredLibraryName);
 		}
 		
-		public static bool IsCircularLibraryReference(Program AProgram, Schema.Library ALibrary, string ARequiredLibraryName)
+		public static bool IsCircularLibraryReference(Program program, Schema.Library library, string requiredLibraryName)
 		{
-			Schema.Library LRequiredLibrary = AProgram.Catalog.Libraries[ARequiredLibraryName];
-			if (Schema.Object.NamesEqual(ALibrary.Name, ARequiredLibraryName))
+			Schema.Library requiredLibrary = program.Catalog.Libraries[requiredLibraryName];
+			if (Schema.Object.NamesEqual(library.Name, requiredLibraryName))
 				return true;
 				
-			foreach (Schema.LibraryReference LReference in LRequiredLibrary.Libraries)
-				if (IsCircularLibraryReference(AProgram, ALibrary, LReference.Name))
+			foreach (Schema.LibraryReference reference in requiredLibrary.Libraries)
+				if (IsCircularLibraryReference(program, library, reference.Name))
 					return true;
 					
 			return false;
 		}
 		
-		public static void RegisterLibrary(Program AProgram, string ALibraryName, bool AWithReconciliation)
+		public static void RegisterLibrary(Program program, string libraryName, bool withReconciliation)
 		{
-			int LSaveReconciliationState = AProgram.ServerProcess.SuspendReconciliationState();
+			int saveReconciliationState = program.ServerProcess.SuspendReconciliationState();
 			try
 			{
-				if (!AWithReconciliation)
-					AProgram.ServerProcess.DisableReconciliation();
+				if (!withReconciliation)
+					program.ServerProcess.DisableReconciliation();
 				try
 				{
-					lock (AProgram.Catalog.Libraries)
+					lock (program.Catalog.Libraries)
 					{
-						Schema.Library LLibrary = AProgram.Catalog.Libraries[ALibraryName];
+						Schema.Library library = program.Catalog.Libraries[libraryName];
 						
-						Schema.LoadedLibrary LLoadedLibrary = AProgram.CatalogDeviceSession.ResolveLoadedLibrary(LLibrary.Name, false);
-						if (LLoadedLibrary != null)
-							throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryAlreadyRegistered, ALibraryName);
+						Schema.LoadedLibrary loadedLibrary = program.CatalogDeviceSession.ResolveLoadedLibrary(library.Name, false);
+						if (loadedLibrary != null)
+							throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryAlreadyRegistered, libraryName);
 							
-						LLoadedLibrary = new Schema.LoadedLibrary(ALibraryName);
-						LLoadedLibrary.Owner = AProgram.Plan.User;
+						loadedLibrary = new Schema.LoadedLibrary(libraryName);
+						loadedLibrary.Owner = program.Plan.User;
 							
 						//	Ensure that each required library is registered
-						foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
+						foreach (Schema.LibraryReference reference in library.Libraries)
 						{
-							CheckCircularLibraryReference(AProgram, LLibrary, LReference.Name);
-							EnsureLibraryRegistered(AProgram, LReference, AWithReconciliation);
-							LLoadedLibrary.RequiredLibraries.Add(AProgram.CatalogDeviceSession.ResolveLoadedLibrary(LReference.Name));
-							AProgram.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProgram.ServerProcess.ServerSession.Server.SystemLibrary));
-							LLoadedLibrary.ClearNameResolutionPath();
+							CheckCircularLibraryReference(program, library, reference.Name);
+							EnsureLibraryRegistered(program, reference, withReconciliation);
+							loadedLibrary.RequiredLibraries.Add(program.CatalogDeviceSession.ResolveLoadedLibrary(reference.Name));
+							program.Catalog.OperatorResolutionCache.Clear(loadedLibrary.GetNameResolutionPath(program.ServerProcess.ServerSession.Server.SystemLibrary));
+							loadedLibrary.ClearNameResolutionPath();
 						}
 						
-						((Server.Server)AProgram.ServerProcess.ServerSession.Server).DoLibraryLoading(LLibrary.Name);
+						((Server.Server)program.ServerProcess.ServerSession.Server).DoLibraryLoading(library.Name);
 						try
 						{
 							// Register the assemblies
-							RegisterLibraryFiles(AProgram, LLibrary, LLoadedLibrary);
-							AProgram.CatalogDeviceSession.InsertLoadedLibrary(LLoadedLibrary);
-							LLoadedLibrary.AttachLibrary();
+							RegisterLibraryFiles(program, library, loadedLibrary);
+							program.CatalogDeviceSession.InsertLoadedLibrary(loadedLibrary);
+							loadedLibrary.AttachLibrary();
 							try
 							{
 								// Set the current library to the newly registered library
-								Schema.LoadedLibrary LCurrentLibrary = AProgram.Plan.CurrentLibrary;
-								AProgram.ServerProcess.ServerSession.CurrentLibrary = LLoadedLibrary;
+								Schema.LoadedLibrary currentLibrary = program.Plan.CurrentLibrary;
+								program.ServerProcess.ServerSession.CurrentLibrary = loadedLibrary;
 								try
 								{
 									//	run the register.d4 script if it exists in the library
 									//		catalog objects created in this script are part of this library
-									string LRegisterFileName = Path.Combine(LLibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), CRegisterFileName);
-									if (File.Exists(LRegisterFileName))
+									string registerFileName = Path.Combine(library.GetLibraryDirectory(((Server.Server)program.ServerProcess.ServerSession.Server).LibraryDirectory), RegisterFileName);
+									if (File.Exists(registerFileName))
 									{
 										try
 										{
-											using (StreamReader LReader = new StreamReader(LRegisterFileName))
+											using (StreamReader reader = new StreamReader(registerFileName))
 											{
-												AProgram.ServerProcess.ServerSession.Server.RunScript
+												program.ServerProcess.ServerSession.Server.RunScript
 												(
-													AProgram.ServerProcess, 
-													LReader.ReadToEnd(), 
-													ALibraryName, 
-													new DAE.Debug.DebugLocator(String.Format(CRegisterDocumentLocator, ALibraryName), 1, 1)
+													program.ServerProcess, 
+													reader.ReadToEnd(), 
+													libraryName, 
+													new DAE.Debug.DebugLocator(String.Format(RegisterDocumentLocator, libraryName), 1, 1)
 												);
 											}
 										}
-										catch (Exception LException)
+										catch (Exception exception)
 										{
-											throw new RuntimeException(RuntimeException.Codes.LibraryRegistrationFailed, LException, ALibraryName);
+											throw new RuntimeException(RuntimeException.Codes.LibraryRegistrationFailed, exception, libraryName);
 										}
 									}
 
-									((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetCurrentLibraryVersion(LLibrary.Name, LLibrary.Version);
-									((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetLibraryOwner(LLoadedLibrary.Name, LLoadedLibrary.Owner.ID);
-									if (LLibrary.IsSuspect)
+									((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetCurrentLibraryVersion(library.Name, library.Version);
+									((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetLibraryOwner(loadedLibrary.Name, loadedLibrary.Owner.ID);
+									if (library.IsSuspect)
 									{
-										LLibrary.IsSuspect = false;
-										LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).InstanceDirectory), GetInfoFileName(LLibrary.Name)));
+										library.IsSuspect = false;
+										library.SaveInfoToFile(Path.Combine(library.GetInstanceLibraryDirectory(((Server.Server)program.ServerProcess.ServerSession.Server).InstanceDirectory), GetInfoFileName(library.Name)));
 									}					
 								}
 								catch
 								{
-									AProgram.ServerProcess.ServerSession.CurrentLibrary = LCurrentLibrary;
+									program.ServerProcess.ServerSession.CurrentLibrary = currentLibrary;
 									throw;
 								}
 							}
 							catch
 							{
-								LLoadedLibrary.DetachLibrary();
+								loadedLibrary.DetachLibrary();
 								throw;
 							}
-							AProgram.Catalog.Libraries.DoLibraryLoaded(AProgram, LLibrary.Name);
+							program.Catalog.Libraries.DoLibraryLoaded(program, library.Name);
 						}
 						finally
 						{
-							((Server.Server)AProgram.ServerProcess.ServerSession.Server).DoLibraryLoaded(ALibraryName);
+							((Server.Server)program.ServerProcess.ServerSession.Server).DoLibraryLoaded(libraryName);
 						}
 					}
 				}
 				finally
 				{
-					if (!AWithReconciliation)
-						AProgram.ServerProcess.EnableReconciliation();
+					if (!withReconciliation)
+						program.ServerProcess.EnableReconciliation();
 				}
 			}
 			finally
 			{
-				AProgram.ServerProcess.ResumeReconciliationState(LSaveReconciliationState);
+				program.ServerProcess.ResumeReconciliationState(saveReconciliationState);
 			}
 		}
 
-		public static void LoadLibrary(Program AProgram, string ALibraryName)
+		public static void LoadLibrary(Program program, string libraryName)
 		{
-			LoadLibrary(AProgram, ALibraryName, false);
+			LoadLibrary(program, libraryName, false);
 		}
 		
-		private static void LoadLibrary(Program AProgram, string ALibraryName, bool AIsKnown)
+		private static void LoadLibrary(Program program, string libraryName, bool isKnown)
 		{
-			lock (AProgram.Catalog.Libraries)
+			lock (program.Catalog.Libraries)
 			{
 				try
 				{
-					Schema.Library LLibrary = AProgram.Catalog.Libraries[ALibraryName];
-					VersionNumber LCurrentVersion = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).GetCurrentLibraryVersion(ALibraryName);
+					Schema.Library library = program.Catalog.Libraries[libraryName];
+					VersionNumber currentVersion = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetCurrentLibraryVersion(libraryName);
 					
-					if (AProgram.Catalog.LoadedLibraries.Contains(LLibrary.Name))
-						throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryAlreadyLoaded, ALibraryName);
+					if (program.Catalog.LoadedLibraries.Contains(library.Name))
+						throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryAlreadyLoaded, libraryName);
 
-					bool LIsLoaded = false;				
-					bool LAreAssembliesRegistered = false;	
-					Schema.LoadedLibrary LLoadedLibrary = null;
+					bool isLoaded = false;				
+					bool areAssembliesRegistered = false;	
+					Schema.LoadedLibrary loadedLibrary = null;
 					try
 					{
-						LLoadedLibrary = new Schema.LoadedLibrary(ALibraryName);
-						LLoadedLibrary.Owner = AProgram.CatalogDeviceSession.ResolveUser(((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).GetLibraryOwner(ALibraryName));
+						loadedLibrary = new Schema.LoadedLibrary(libraryName);
+						loadedLibrary.Owner = program.CatalogDeviceSession.ResolveUser(((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetLibraryOwner(libraryName));
 							
 						//	Ensure that each required library is loaded
-						foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
+						foreach (Schema.LibraryReference reference in library.Libraries)
 						{
-							Schema.Library LRequiredLibrary = AProgram.Catalog.Libraries[LReference.Name];
-							if (!VersionNumber.Compatible(LReference.Version, LRequiredLibrary.Version))
-								throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, LReference.Name, LReference.Version.ToString(), LRequiredLibrary.Version.ToString());
+							Schema.Library requiredLibrary = program.Catalog.Libraries[reference.Name];
+							if (!VersionNumber.Compatible(reference.Version, requiredLibrary.Version))
+								throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, reference.Name, reference.Version.ToString(), requiredLibrary.Version.ToString());
 
-							if (!AProgram.Catalog.LoadedLibraries.Contains(LReference.Name))
+							if (!program.Catalog.LoadedLibraries.Contains(reference.Name))
 							{
-								if (!LRequiredLibrary.IsSuspect)
-									LoadLibrary(AProgram, LReference.Name, AIsKnown);
+								if (!requiredLibrary.IsSuspect)
+									LoadLibrary(program, reference.Name, isKnown);
 								else
-									throw new Schema.SchemaException(Schema.SchemaException.Codes.RequiredLibraryNotLoaded, ALibraryName, LReference.Name);
+									throw new Schema.SchemaException(Schema.SchemaException.Codes.RequiredLibraryNotLoaded, libraryName, reference.Name);
 							}
 							
-							LLoadedLibrary.RequiredLibraries.Add(AProgram.CatalogDeviceSession.ResolveLoadedLibrary(LReference.Name));
-							AProgram.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProgram.ServerProcess.ServerSession.Server.SystemLibrary));
-							LLoadedLibrary.ClearNameResolutionPath();
+							loadedLibrary.RequiredLibraries.Add(program.CatalogDeviceSession.ResolveLoadedLibrary(reference.Name));
+							program.Catalog.OperatorResolutionCache.Clear(loadedLibrary.GetNameResolutionPath(program.ServerProcess.ServerSession.Server.SystemLibrary));
+							loadedLibrary.ClearNameResolutionPath();
 						}
 						
-						AProgram.ServerProcess.ServerSession.Server.DoLibraryLoading(LLibrary.Name);
+						program.ServerProcess.ServerSession.Server.DoLibraryLoading(library.Name);
 						try
 						{
 							// RegisterAssemblies
-							RegisterLibraryFiles(AProgram, LLibrary, LLoadedLibrary);
+							RegisterLibraryFiles(program, library, loadedLibrary);
 							
-							LAreAssembliesRegistered = true;
+							areAssembliesRegistered = true;
 
-							AProgram.CatalogDeviceSession.InsertLoadedLibrary(LLoadedLibrary);
-							LLoadedLibrary.AttachLibrary();
+							program.CatalogDeviceSession.InsertLoadedLibrary(loadedLibrary);
+							loadedLibrary.AttachLibrary();
 							try
 							{
-								((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetLibraryOwner(LLoadedLibrary.Name, LLoadedLibrary.Owner.ID);
+								((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetLibraryOwner(loadedLibrary.Name, loadedLibrary.Owner.ID);
 							}
-							catch (Exception LRegisterException)
+							catch (Exception registerException)
 							{
-								LLoadedLibrary.DetachLibrary();
-								throw LRegisterException;
+								loadedLibrary.DetachLibrary();
+								throw registerException;
 							}
 
-							LIsLoaded = true; // If we reach this point, a subsequent exception must unload the library
-							if (LLibrary.IsSuspect)
+							isLoaded = true; // If we reach this point, a subsequent exception must unload the library
+							if (library.IsSuspect)
 							{
-								LLibrary.IsSuspect = false;
-								LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).InstanceDirectory), Schema.LibraryUtility.GetInfoFileName(LLibrary.Name)));
+								library.IsSuspect = false;
+								library.SaveInfoToFile(Path.Combine(library.GetInstanceLibraryDirectory(((Server.Server)program.ServerProcess.ServerSession.Server).InstanceDirectory), Schema.LibraryUtility.GetInfoFileName(library.Name)));
 							}					
 						}
 						finally
 						{
-							AProgram.ServerProcess.ServerSession.Server.DoLibraryLoaded(LLibrary.Name);
+							program.ServerProcess.ServerSession.Server.DoLibraryLoaded(library.Name);
 						}
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						AProgram.ServerProcess.ServerSession.Server.LogError(LException);
-						LLibrary.IsSuspect = true;
-						LLibrary.SuspectReason = ExceptionUtility.DetailedDescription(LException);
-						LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).InstanceDirectory), Schema.LibraryUtility.GetInfoFileName(LLibrary.Name)));
+						program.ServerProcess.ServerSession.Server.LogError(exception);
+						library.IsSuspect = true;
+						library.SuspectReason = ExceptionUtility.DetailedDescription(exception);
+						library.SaveInfoToFile(Path.Combine(library.GetInstanceLibraryDirectory(((Server.Server)program.ServerProcess.ServerSession.Server).InstanceDirectory), Schema.LibraryUtility.GetInfoFileName(library.Name)));
 						
-						if (LIsLoaded)
-							UnregisterLibrary(AProgram, ALibraryName, false);
-						else if (LAreAssembliesRegistered)
-							UnregisterLibraryAssemblies(AProgram, LLoadedLibrary);
+						if (isLoaded)
+							UnregisterLibrary(program, libraryName, false);
+						else if (areAssembliesRegistered)
+							UnregisterLibraryAssemblies(program, loadedLibrary);
 							
 						throw;
 					}
 
-					((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetCurrentLibraryVersion(LLibrary.Name, LCurrentVersion); // Once a library has loaded, record the version number
+					((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetCurrentLibraryVersion(library.Name, currentVersion); // Once a library has loaded, record the version number
 					
-					AProgram.Catalog.Libraries.DoLibraryLoaded(AProgram, LLibrary.Name);
+					program.Catalog.Libraries.DoLibraryLoaded(program, library.Name);
 				}
 				catch
 				{
-					if (AProgram.ServerProcess.ServerSession.Server.State == ServerState.Started)
+					if (program.ServerProcess.ServerSession.Server.State == ServerState.Started)
 						throw;
 				}
 			}

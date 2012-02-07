@@ -21,36 +21,36 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 {
 	public class Connect : System.Web.UI.Page
 	{
-		protected System.Web.UI.WebControls.Button FAddButton;
-		protected System.Web.UI.WebControls.Button FEditButton;
+		protected System.Web.UI.WebControls.Button _addButton;
+		protected System.Web.UI.WebControls.Button _editButton;
 		protected System.Web.UI.WebControls.Label Label1;
 		protected System.Web.UI.WebControls.TextBox UserIDTextBox;
 		protected System.Web.UI.WebControls.Label Label2;
 		protected System.Web.UI.WebControls.TextBox PasswordTextBox;
-		protected System.Web.UI.WebControls.Button FDeleteButton;
-		protected System.Web.UI.WebControls.Button FLogin;
+		protected System.Web.UI.WebControls.Button _deleteButton;
+		protected System.Web.UI.WebControls.Button _login;
 
 		private string AliasConfigurationFileName
 		{
-			get { return Path.Combine(Request.PhysicalApplicationPath, AliasManager.CAliasConfigurationFileName); }
+			get { return Path.Combine(Request.PhysicalApplicationPath, AliasManager.AliasConfigurationFileName); }
 		}
 
 		private void Page_Load(object sender, System.EventArgs e)
 		{
-			FConfiguration = (AliasConfiguration)Session["AliasConfiguration"];
-			if (FConfiguration == null)
+			_configuration = (AliasConfiguration)Session["AliasConfiguration"];
+			if (_configuration == null)
 			{
-				FConfiguration = AliasConfiguration.Load(AliasConfigurationFileName);
-				Session["AliasConfiguration"] = FConfiguration;
+				_configuration = AliasConfiguration.Load(AliasConfigurationFileName);
+				Session["AliasConfiguration"] = _configuration;
 			}
 
 			// End any previous session
-			Web.Session LSession = (Web.Session)Session["WebSession"];
-			if (LSession != null)
+			Web.Session session = (Web.Session)Session["WebSession"];
+			if (session != null)
 			{
 				try
 				{
-					LSession.Dispose();
+					session.Dispose();
 				}
 				finally
 				{
@@ -58,50 +58,50 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				}
 			}
 
-			string LAliasName = Request.QueryString["Alias"];
-			if (LAliasName == null)
-				LAliasName = String.Empty;
+			string aliasName = Request.QueryString["Alias"];
+			if (aliasName == null)
+				aliasName = String.Empty;
 
 			if (IsPostBack)
 			{
-				if (LAliasName != String.Empty)
+				if (aliasName != String.Empty)
 				{
-					UserIDTextBox.Text = FConfiguration.Aliases[LAliasName].SessionInfo.UserID;
-					FConfiguration.DefaultAliasName = LAliasName;
+					UserIDTextBox.Text = _configuration.Aliases[aliasName].SessionInfo.UserID;
+					_configuration.DefaultAliasName = aliasName;
 				}
 
-				string LDeleteAlias = Request.QueryString["Delete"];
-				if ((LDeleteAlias != null) && (LDeleteAlias != String.Empty))
+				string deleteAlias = Request.QueryString["Delete"];
+				if ((deleteAlias != null) && (deleteAlias != String.Empty))
 				{
-					FConfiguration.Aliases.Remove(LDeleteAlias);
-					if (String.Compare(LDeleteAlias, FConfiguration.DefaultAliasName, true) == 0)
-						FConfiguration.DefaultAliasName = String.Empty;
-					FConfiguration.Save(AliasConfigurationFileName);
+					_configuration.Aliases.Remove(deleteAlias);
+					if (String.Compare(deleteAlias, _configuration.DefaultAliasName, true) == 0)
+						_configuration.DefaultAliasName = String.Empty;
+					_configuration.Save(AliasConfigurationFileName);
 				}
 			}
 			else
 			{
-				if (FConfiguration.DefaultAliasName != String.Empty)
+				if (_configuration.DefaultAliasName != String.Empty)
 				{
-					ServerAlias LConnection = FConfiguration.Aliases[FConfiguration.DefaultAliasName];
-					if (LConnection != null)
-						UserIDTextBox.Text = LConnection.SessionInfo.UserID;
+					ServerAlias connection = _configuration.Aliases[_configuration.DefaultAliasName];
+					if (connection != null)
+						UserIDTextBox.Text = connection.SessionInfo.UserID;
 				}
 
-				string LApplicationID = Request.QueryString["ApplicationID"];
-				if ((LApplicationID != null) && (LApplicationID != String.Empty))
-					Session["ApplicationID"] = LApplicationID;
+				string applicationID = Request.QueryString["ApplicationID"];
+				if ((applicationID != null) && (applicationID != String.Empty))
+					Session["ApplicationID"] = applicationID;
 
-				if (LAliasName != String.Empty)
+				if (aliasName != String.Empty)
 				{
-					FConfiguration.DefaultAliasName = LAliasName;
+					_configuration.DefaultAliasName = aliasName;
 					AdvanceToApplication();
 				}
 			}
 
-			FEditButton.Enabled = FConfiguration.Aliases.Count > 0;
-			FDeleteButton.Enabled = FEditButton.Enabled;
-			FDeleteButton.Attributes.Add
+			_editButton.Enabled = _configuration.Aliases.Count > 0;
+			_deleteButton.Enabled = _editButton.Enabled;
+			_deleteButton.Attributes.Add
 			(
 				"onclick", 
 				HttpUtility.HtmlAttributeEncode
@@ -134,9 +134,9 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		/// </summary>
 		private void InitializeComponent()
 		{    
-			this.FAddButton.Click += new System.EventHandler(this.FAddButton_Click);
-			this.FEditButton.Click += new System.EventHandler(this.FEditButton_Click);
-			this.FLogin.Click += new System.EventHandler(this.FLogin_Click);
+			this._addButton.Click += new System.EventHandler(this.FAddButton_Click);
+			this._editButton.Click += new System.EventHandler(this.FEditButton_Click);
+			this._login.Click += new System.EventHandler(this.FLogin_Click);
 			this.Load += new System.EventHandler(this.Page_Load);
 
 		}
@@ -144,60 +144,60 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// Configuration
 
-		private AliasConfiguration FConfiguration;
+		private AliasConfiguration _configuration;
 
 		public AliasConfiguration Configuration
 		{
-			get { return FConfiguration; }
+			get { return _configuration; }
 		}
 
 		protected void WriteAliases()
 		{
-			HtmlTextWriter LWriter = new HtmlTextWriter(Response.Output);
+			HtmlTextWriter writer = new HtmlTextWriter(Response.Output);
 			try
 			{
-				bool LCurrent;
+				bool current;
 				// TODO: Paging
-				foreach (ServerAlias LAlias in Configuration.Aliases.Values)
+				foreach (ServerAlias alias in Configuration.Aliases.Values)
 				{
-					LCurrent = String.Compare(LAlias.Name, Configuration.DefaultAliasName, true) == 0;
-					if (LCurrent)
-						LWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridrowcurrent");
+					current = String.Compare(alias.Name, Configuration.DefaultAliasName, true) == 0;
+					if (current)
+						writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridrowcurrent");
 					else
-						LWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridrow");
-					LWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
-					if (LCurrent)
-						LWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridcellcurrent");
+						writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridrow");
+					writer.RenderBeginTag(HtmlTextWriterTag.Tr);
+					if (current)
+						writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridcellcurrent");
 					else
 					{
-						LWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridcell");
-						LWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('Connect.aspx?Alias={0}',event)", HttpUtility.UrlEncode(LAlias.Name).Replace("'", "\\'")), true);
+						writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridcell");
+						writer.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('Connect.aspx?Alias={0}',event)", HttpUtility.UrlEncode(alias.Name).Replace("'", "\\'")), true);
 					}
-					LWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-					LWriter.Write(HttpUtility.HtmlEncode(LAlias.ToString()));
-					LWriter.RenderEndTag();
-					LWriter.RenderEndTag();
+					writer.RenderBeginTag(HtmlTextWriterTag.Td);
+					writer.Write(HttpUtility.HtmlEncode(alias.ToString()));
+					writer.RenderEndTag();
+					writer.RenderEndTag();
 				}
 			}
 			finally
 			{
-				LWriter.Close();
+				writer.Close();
 			}
 		}
 
 		private void AdvanceToApplication()
 		{
-			DataSession LSession = new DataSession();
-			LSession.Alias = FConfiguration.Aliases[FConfiguration.DefaultAliasName];
-			LSession.Active = true;
+			DataSession session = new DataSession();
+			session.Alias = _configuration.Aliases[_configuration.DefaultAliasName];
+			session.Active = true;
 			
-			Web.Session LWebSession = new Web.Session(LSession, true);
-			Session["WebSession"] = LWebSession;
+			Web.Session webSession = new Web.Session(session, true);
+			Session["WebSession"] = webSession;
 
-			string LApplicationID = (string)Session["ApplicationID"];
-			if ((LApplicationID != null) && (LApplicationID != String.Empty))
+			string applicationID = (string)Session["ApplicationID"];
+			if ((applicationID != null) && (applicationID != String.Empty))
 			{
-				LWebSession.SetApplication(LApplicationID);
+				webSession.SetApplication(applicationID);
 				Response.Redirect((string)Session["DefaultPage"]);
 			}
 			else
@@ -206,12 +206,12 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		private void FLogin_Click(object sender, System.EventArgs e)
 		{
-			ServerAlias LAlias = FConfiguration.Aliases[FConfiguration.DefaultAliasName];
-			LAlias.SessionInfo.UserID = UserIDTextBox.Text;
+			ServerAlias alias = _configuration.Aliases[_configuration.DefaultAliasName];
+			alias.SessionInfo.UserID = UserIDTextBox.Text;
 
-			FConfiguration.Save(AliasConfigurationFileName);
+			_configuration.Save(AliasConfigurationFileName);
 			
-			LAlias.SessionInfo.Password = PasswordTextBox.Text;
+			alias.SessionInfo.Password = PasswordTextBox.Text;
 
 			AdvanceToApplication();
 		}

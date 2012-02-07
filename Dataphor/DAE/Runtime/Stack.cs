@@ -16,23 +16,23 @@ namespace Alphora.Dataphor.DAE.Runtime
 	public class Stack : Stack<object>
 	{
 		public Stack() : base() { }
-		public Stack(int AMaxStackDepth, int AMaxCallDepth) : base(AMaxStackDepth, AMaxCallDepth) { }
+		public Stack(int maxStackDepth, int maxCallDepth) : base(maxStackDepth, maxCallDepth) { }
 
-		public override void PushWindow(int ACount)
+		public override void PushWindow(int count)
 		{
-			FWindows.Push(new RuntimeStackWindow(FCount - ACount));
+			_windows.Push(new RuntimeStackWindow(_count - count));
 		}
 		
-		public void PushWindow(int ACount, PlanNode AOriginator, DebugLocator ALocator)
+		public void PushWindow(int count, PlanNode originator, DebugLocator locator)
 		{
-			FWindows.Push(new RuntimeStackWindow(FCount - ACount, AOriginator, ALocator));
+			_windows.Push(new RuntimeStackWindow(_count - count, originator, locator));
 		}
 		
-		protected object FErrorVar;
+		protected object _errorVar;
 		public object ErrorVar
 		{
-			get { return FErrorVar; }
-			set { FErrorVar = value; }
+			get { return _errorVar; }
+			set { _errorVar = value; }
 		}
 	}
 }

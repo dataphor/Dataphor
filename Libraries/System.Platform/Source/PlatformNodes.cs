@@ -24,18 +24,18 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator FileExists(const AFileName : FileName) : Boolean
 	public class FileExistsNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return File.Exists((string)AArguments[0]);
+			return File.Exists((string)arguments[0]);
 		}
 	}
 
 	// operator DeleteFile(const AFileName : FileName)
 	public class DeleteFileNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			File.Delete((string)AArguments[0]);
+			File.Delete((string)arguments[0]);
 			return null;
 		}
 	}
@@ -44,9 +44,9 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator CopyFile(const ASourceFileName : FileName, const ATargetFileName : FileName, const AOverwrite : Boolean)
 	public class CopyFileNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			File.Copy((string)AArguments[0], (string)AArguments[1], AArguments.Length == 3 ? (bool)AArguments[2] : false);
+			File.Copy((string)arguments[0], (string)arguments[1], arguments.Length == 3 ? (bool)arguments[2] : false);
 			return null;
 		}
 	}
@@ -56,31 +56,31 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator CreateBinaryFile(const AFileName : FileName, const AData : Binary)
 	public class CreateFileNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			using (FileStream LFile = File.Create((string)AArguments[0]))
+			using (FileStream file = File.Create((string)arguments[0]))
 			{	
-				if (AArguments.Length == 2)
-					if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemString))
+				if (arguments.Length == 2)
+					if (Operator.Operands[1].DataType.Is(program.DataTypes.SystemString))
 					{
-						using (StreamWriter LWriter = new StreamWriter(LFile))
+						using (StreamWriter writer = new StreamWriter(file))
 						{
-							LWriter.Write((string)AArguments[1]);
+							writer.Write((string)arguments[1]);
 						}
 					}
 					else
 					{
-						if (AArguments[1] is StreamID)
+						if (arguments[1] is StreamID)
 						{
-							using (Stream LSourceStream = AProgram.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
+							using (Stream sourceStream = program.StreamManager.Open((StreamID)arguments[1], LockMode.Exclusive))
 							{
-								StreamUtility.CopyStream(LSourceStream, LFile);
+								StreamUtility.CopyStream(sourceStream, file);
 							}
 						}
 						else
 						{
-							byte[] LValue = (byte[])AArguments[1];
-							LFile.Write(LValue, 0, LValue.Length);
+							byte[] tempValue = (byte[])arguments[1];
+							file.Write(tempValue, 0, tempValue.Length);
 						}
 					}
 			}
@@ -92,30 +92,30 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator AppendBinaryFile(const AFileName : FileName, const AData : Binary)
 	public class AppendFileNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			using (FileStream LFile = File.Open((string)AArguments[0], FileMode.Append, FileAccess.Write, FileShare.Read))
+			using (FileStream file = File.Open((string)arguments[0], FileMode.Append, FileAccess.Write, FileShare.Read))
 			{
-				if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemString))
+				if (Operator.Operands[1].DataType.Is(program.DataTypes.SystemString))
 				{
-					using (StreamWriter LWriter = new StreamWriter(LFile))
+					using (StreamWriter writer = new StreamWriter(file))
 					{
-						LWriter.Write((string)AArguments[1]);
+						writer.Write((string)arguments[1]);
 					}
 				}
 				else
 				{
-					if (AArguments[1] is StreamID)
+					if (arguments[1] is StreamID)
 					{
-						using (Stream LSourceStream = AProgram.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
+						using (Stream sourceStream = program.StreamManager.Open((StreamID)arguments[1], LockMode.Exclusive))
 						{
-							StreamUtility.CopyStream(LSourceStream, LFile);
+							StreamUtility.CopyStream(sourceStream, file);
 						}
 					}
 					else
 					{
-						byte[] LValue = (byte[])AArguments[1];
-						LFile.Write(LValue, 0, LValue.Length);
+						byte[] tempValue = (byte[])arguments[1];
+						file.Write(tempValue, 0, tempValue.Length);
 					}
 				}
 			}
@@ -126,11 +126,11 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator LoadTextFile(const AFileName : FileName) : String
 	public class LoadTextFileNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			using (StreamReader LReader = File.OpenText((string)AArguments[0]))
+			using (StreamReader reader = File.OpenText((string)arguments[0]))
 			{
-				return LReader.ReadToEnd();
+				return reader.ReadToEnd();
 			}
 		}
 	}
@@ -138,13 +138,13 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator LoadBinaryFile(const AFileName : FileName) : Binary
 	public class LoadBinaryFileNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			using (FileStream LFile = File.OpenRead((string)AArguments[0]))
+			using (FileStream file = File.OpenRead((string)arguments[0]))
 			{
-				byte[] LValue = new byte[LFile.Length];
-				LFile.Read(LValue, 0, LValue.Length);
-				return LValue;
+				byte[] tempValue = new byte[file.Length];
+				file.Read(tempValue, 0, tempValue.Length);
+				return tempValue;
 			}
 		}
 	}
@@ -153,30 +153,30 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator SaveBinaryFile(const AFileName : FileName, const AData : Binary)
 	public class SaveFileNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			using (FileStream LFile = File.Open((string)AArguments[0], FileMode.Truncate, FileAccess.Write, FileShare.Read))
+			using (FileStream file = File.Open((string)arguments[0], FileMode.Truncate, FileAccess.Write, FileShare.Read))
 			{
-				if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemString))
+				if (Operator.Operands[1].DataType.Is(program.DataTypes.SystemString))
 				{
-					using (StreamWriter LWriter = new StreamWriter(LFile))
+					using (StreamWriter writer = new StreamWriter(file))
 					{
-						LWriter.Write((string)AArguments[1]);
+						writer.Write((string)arguments[1]);
 					}
 				}
 				else
 				{
-					if (AArguments[1] is StreamID)
+					if (arguments[1] is StreamID)
 					{
-						using (Stream LSourceStream = AProgram.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
+						using (Stream sourceStream = program.StreamManager.Open((StreamID)arguments[1], LockMode.Exclusive))
 						{
-							StreamUtility.CopyStream(LSourceStream, LFile);
+							StreamUtility.CopyStream(sourceStream, file);
 						}
 					}
 					else
 					{
-						byte[] LValue = (byte[])AArguments[1];
-						LFile.Write(LValue, 0, LValue.Length);
+						byte[] tempValue = (byte[])arguments[1];
+						file.Write(tempValue, 0, tempValue.Length);
 					}
 				}
 			}
@@ -187,9 +187,9 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator MoveFile(const ASourceFileName : FileName, const ATargetFileName : FileName)
 	public class MoveFileNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			File.Move((string)AArguments[0], (string)AArguments[1]);
+			File.Move((string)arguments[0], (string)arguments[1]);
 			return null;
 		}
 	}
@@ -197,72 +197,72 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator DirectoryExists(const ADirectoryName : FileName) : Boolean
 	public class DirectoryExistsNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return Directory.Exists((string)AArguments[0]);
+			return Directory.Exists((string)arguments[0]);
 		}
 	}
 	
 	// operator GetFileName(const AFileName : FileName) : FileName
 	public class GetFileNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return Path.GetFileName((string)AArguments[0]);
+			return Path.GetFileName((string)arguments[0]);
 		}
 	}
 	
 	// operator GetDirectoryName(const AFileName : FileName) : FileName
 	public class GetDirectoryNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return Path.GetDirectoryName((string)AArguments[0]);
+			return Path.GetDirectoryName((string)arguments[0]);
 		}
 	}
 	
 	// operator GetFileExtension(const AFileName : FileName) : FileName
 	public class GetFileExtensionNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return Path.GetExtension((string)AArguments[0]);
+			return Path.GetExtension((string)arguments[0]);
 		}
 	}
 	
 	// operator ChangeFileExtension(const AFileName : FileName, const AExtension : FileName) : FileName
 	public class ChangeFileExtensionNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return Path.ChangeExtension((string)AArguments[0], (string)AArguments[1]);
+			return Path.ChangeExtension((string)arguments[0], (string)arguments[1]);
 		}
 	}
 	
 	// operator FileNameHasExtension(const AFileName : FileName) : Boolean
 	public class FileNameHasExtensionNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return Path.HasExtension((string)AArguments[0]);
+			return Path.HasExtension((string)arguments[0]);
 		}
 	}
 	
 	// operator CombinePath(const APath : FileName, const ASubPath : FileName) : FileName
 	public class CombinePathNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return Path.Combine((string)AArguments[0], (string)AArguments[1]);
+			return Path.Combine((string)arguments[0], (string)arguments[1]);
 		}
 	}
 	
 	// operator CreateDirectory(const ADirectoryName : FileName)
 	public class CreateDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Directory.CreateDirectory((string)AArguments[0]);
+			Directory.CreateDirectory((string)arguments[0]);
 			return null;
 		}
 	}
@@ -270,9 +270,9 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator DeleteDirectory(const ADirectoryName : FileName)
 	public class DeleteDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Directory.Delete((string)AArguments[0]);
+			Directory.Delete((string)arguments[0]);
 			return null;
 		}
 	}
@@ -280,9 +280,9 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator MoveDirectory(const ASourceDirectoryName : FileName, const ATargetDirectoryName : FileName)
 	public class MoveDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Directory.Move((string)AArguments[0], (string)AArguments[1]);
+			Directory.Move((string)arguments[0], (string)arguments[1]);
 			return null;
 		}
 	}
@@ -290,18 +290,18 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetAttributes(const APath : FileName) : Integer
 	public class GetAttributesNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return File.GetAttributes((string)AArguments[0]);
+			return File.GetAttributes((string)arguments[0]);
 		}
 	}
 	
 	// operator SetAttributes(const APath : FileName, const AAttributes : Integer);
 	public class SetAttributesNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			File.SetAttributes((string)AArguments[0], (FileAttributes)(int)AArguments[1]);
+			File.SetAttributes((string)arguments[0], (FileAttributes)(int)arguments[1]);
 			return null;
 		}
 	}
@@ -309,18 +309,18 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetCreationTime(const APath : FileName) : DateTime;
 	public class GetCreationTimeNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return File.GetCreationTime((string)AArguments[0]);
+			return File.GetCreationTime((string)arguments[0]);
 		}
 	}
 	
 	// operator SetCreationTime(const APath : FileName, const ADateTime : DateTime);
 	public class SetCreationTimeNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			File.SetCreationTime((string)AArguments[0], ((DateTime)AArguments[1]));
+			File.SetCreationTime((string)arguments[0], ((DateTime)arguments[1]));
 			return null;
 		}
 	}
@@ -328,18 +328,18 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetLastWriteTime(const APath : FileName) : DateTime;
 	public class GetLastWriteTimeNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return File.GetLastWriteTime((string)AArguments[0]);
+			return File.GetLastWriteTime((string)arguments[0]);
 		}
 	}
 	
 	// operator SetLastWriteTime(const APath : FileName, const ADateTime : DateTime);
 	public class SetLastWriteTimeNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			File.SetLastWriteTime((string)AArguments[0], ((DateTime)AArguments[1]));
+			File.SetLastWriteTime((string)arguments[0], ((DateTime)arguments[1]));
 			return null;
 		}
 	}
@@ -347,18 +347,18 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetLastAccessTime(const APath : FileName) : DateTime;
 	public class GetLastAccessTimeNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return File.GetLastAccessTime((string)AArguments[0]);
+			return File.GetLastAccessTime((string)arguments[0]);
 		}
 	}
 	
 	// operator SetLastAccessTime(const APath : FileName, const ADateTime : DateTime);
 	public class SetLastAccessTimeNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			File.SetLastAccessTime((string)AArguments[0], ((DateTime)AArguments[1]));
+			File.SetLastAccessTime((string)arguments[0], ((DateTime)arguments[1]));
 			return null;
 		}
 	}
@@ -366,58 +366,58 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator ListDrives() : table { Path : FileName };
     public class ListDrivesNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Path", (Schema.ScalarType)Compiler.ResolveCatalogIdentifier(APlan, "System.Platform.FileName", true)));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Path", (Schema.ScalarType)Compiler.ResolveCatalogIdentifier(plan, "System.Platform.FileName", true)));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Path"]}));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
-					string[] LDrives = Directory.GetLogicalDrives();
-					for (int LIndex = 0; LIndex < LDrives.Length; LIndex++)
+					row.ValuesOwned = false;
+					string[] drives = Directory.GetLogicalDrives();
+					for (int index = 0; index < drives.Length; index++)
 					{
-						LRow[0] = LDrives[LIndex];
-						LResult.Insert(LRow);
+						row[0] = drives[index];
+						result.Insert(row);
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 				
-				LResult.First();
+				result.First();
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -427,58 +427,58 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator ListDirectories(const APath : FileName, const AMask : FileName) : table { Path : FileName };
     public class ListDirectoriesNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Path", (Schema.ScalarType)Compiler.ResolveCatalogIdentifier(APlan, "System.Platform.FileName", true)));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Path", (Schema.ScalarType)Compiler.ResolveCatalogIdentifier(plan, "System.Platform.FileName", true)));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Path"]}));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
-					string[] LDirectories = Directory.GetDirectories((string)Nodes[0].Execute(AProgram), Nodes.Count == 2 ? (string)Nodes[1].Execute(AProgram) : "*");
-					for (int LIndex = 0; LIndex < LDirectories.Length; LIndex++)
+					row.ValuesOwned = false;
+					string[] directories = Directory.GetDirectories((string)Nodes[0].Execute(program), Nodes.Count == 2 ? (string)Nodes[1].Execute(program) : "*");
+					for (int index = 0; index < directories.Length; index++)
 					{
-						LRow[0] = LDirectories[LIndex];
-						LResult.Insert(LRow);
+						row[0] = directories[index];
+						result.Insert(row);
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 				
-				LResult.First();
+				result.First();
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -488,58 +488,58 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator ListFiles(const APath : FileName, const AMask : String) : table { Path : FileName };
     public class ListFilesNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Path", (Schema.ScalarType)Compiler.ResolveCatalogIdentifier(APlan, "System.Platform.FileName", true)));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Path", (Schema.ScalarType)Compiler.ResolveCatalogIdentifier(plan, "System.Platform.FileName", true)));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Path"]}));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
-					string[] LFiles = Directory.GetFiles((string)Nodes[0].Execute(AProgram), Nodes.Count == 2 ? (string)Nodes[1].Execute(AProgram) : "*");
-					for (int LIndex = 0; LIndex < LFiles.Length; LIndex++)
+					row.ValuesOwned = false;
+					string[] files = Directory.GetFiles((string)Nodes[0].Execute(program), Nodes.Count == 2 ? (string)Nodes[1].Execute(program) : "*");
+					for (int index = 0; index < files.Length; index++)
 					{
-						LRow[0] = LFiles[LIndex];
-						LResult.Insert(LRow);
+						row[0] = files[index];
+						result.Insert(row);
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 				
-				LResult.First();
+				result.First();
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -551,113 +551,113 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator PlatformExecute(const AFileName : String, const AArguments : String, const ASettings : row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean, RedirectErrors : Boolean }, const AStartAs : row { UserName : String, Password : String, Domain : String, LoadUserProfile : Boolean }) : row { ExitCode : Integer, Output : String, Errors : String };
     public class PlatformExecuteNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			using (Process LProcess = new Process())
+			using (Process process = new Process())
 			{
-				LProcess.StartInfo.FileName = (string)AArguments[0];
-				LProcess.StartInfo.Arguments = AArguments.Length > 1 ? (string)AArguments[1] : String.Empty;
-				LProcess.StartInfo.UseShellExecute = false;
-				bool LRedirectOutput = true;
-				bool LRedirectErrors = true;
-				if (AArguments.Length > 2)
+				process.StartInfo.FileName = (string)arguments[0];
+				process.StartInfo.Arguments = arguments.Length > 1 ? (string)arguments[1] : String.Empty;
+				process.StartInfo.UseShellExecute = false;
+				bool redirectOutput = true;
+				bool redirectErrors = true;
+				if (arguments.Length > 2)
 				{
-					Row LSettings = (Row)AArguments[2];
-					if (LSettings != null)
+					Row settings = (Row)arguments[2];
+					if (settings != null)
 					{
-						if (LSettings.HasValue("WorkingDirectory"))
-							LProcess.StartInfo.WorkingDirectory = (string)LSettings["WorkingDirectory"];
-						if (LSettings.HasValue("NoWindow"))
-							LProcess.StartInfo.CreateNoWindow = (bool)LSettings["NoWindow"];
-						if (LSettings.HasValue("WindowStyle"))
-							LProcess.StartInfo.WindowStyle = (ProcessWindowStyle)(int)LSettings["WindowStyle"];	//Enum.Parse(typeof(ProcessWindowStyle), 
-						if (LSettings.HasValue("RedirectOutput"))
-							LRedirectOutput = (bool)LSettings["RedirectOutput"];
-						if (LSettings.HasValue("RedirectErrors"))
-							LRedirectErrors = (bool)LSettings["RedirectErrors"];
+						if (settings.HasValue("WorkingDirectory"))
+							process.StartInfo.WorkingDirectory = (string)settings["WorkingDirectory"];
+						if (settings.HasValue("NoWindow"))
+							process.StartInfo.CreateNoWindow = (bool)settings["NoWindow"];
+						if (settings.HasValue("WindowStyle"))
+							process.StartInfo.WindowStyle = (ProcessWindowStyle)(int)settings["WindowStyle"];	//Enum.Parse(typeof(ProcessWindowStyle), 
+						if (settings.HasValue("RedirectOutput"))
+							redirectOutput = (bool)settings["RedirectOutput"];
+						if (settings.HasValue("RedirectErrors"))
+							redirectErrors = (bool)settings["RedirectErrors"];
 					}
-					if (AArguments.Length > 3)
+					if (arguments.Length > 3)
 					{
-						LSettings = (Row)AArguments[3];
-						if (LSettings != null)
+						settings = (Row)arguments[3];
+						if (settings != null)
 						{
-							if (LSettings.HasValue("UserName"))
-								LProcess.StartInfo.UserName = (string)LSettings["UserName"];
-							if (LSettings.HasValue("Password"))
+							if (settings.HasValue("UserName"))
+								process.StartInfo.UserName = (string)settings["UserName"];
+							if (settings.HasValue("Password"))
 							{
-								Security.SecureString LPassword = new Security.SecureString();
-								foreach (char LChar in (string)LSettings["Password"])
-									LPassword.AppendChar(LChar);
-								LPassword.MakeReadOnly();
-								LProcess.StartInfo.Password = LPassword;
+								Security.SecureString password = new Security.SecureString();
+								foreach (char charValue in (string)settings["Password"])
+									password.AppendChar(charValue);
+								password.MakeReadOnly();
+								process.StartInfo.Password = password;
 							}
-							if (LSettings.HasValue("Domain"))
-								LProcess.StartInfo.Domain = (string)LSettings["Domain"];
-							if (LSettings.HasValue("LoadUserProfile"))
-								LProcess.StartInfo.LoadUserProfile = (bool)LSettings["LoadUserProfile"];
+							if (settings.HasValue("Domain"))
+								process.StartInfo.Domain = (string)settings["Domain"];
+							if (settings.HasValue("LoadUserProfile"))
+								process.StartInfo.LoadUserProfile = (bool)settings["LoadUserProfile"];
 						}
 					}
 				}
-				LProcess.StartInfo.RedirectStandardOutput = LRedirectOutput;
-				LProcess.StartInfo.RedirectStandardError = LRedirectErrors;
-				if (LRedirectOutput)
+				process.StartInfo.RedirectStandardOutput = redirectOutput;
+				process.StartInfo.RedirectStandardError = redirectErrors;
+				if (redirectOutput)
 				{
-					FOutput = new StringBuilder();
-					LProcess.OutputDataReceived += new DataReceivedEventHandler(ExecutedProcessOutputReceived);
+					_output = new StringBuilder();
+					process.OutputDataReceived += new DataReceivedEventHandler(ExecutedProcessOutputReceived);
 				}
-				if (LRedirectErrors)
+				if (redirectErrors)
 				{
-					FErrors = new StringBuilder();
-					LProcess.ErrorDataReceived += new DataReceivedEventHandler(ExecutedProcessErrorsReceived);
+					_errors = new StringBuilder();
+					process.ErrorDataReceived += new DataReceivedEventHandler(ExecutedProcessErrorsReceived);
 				}
-				LProcess.Start();
-				if (LRedirectOutput)
-					LProcess.BeginOutputReadLine();
-				if (LRedirectErrors)
-					LProcess.BeginErrorReadLine();
-				LProcess.WaitForExit();
+				process.Start();
+				if (redirectOutput)
+					process.BeginOutputReadLine();
+				if (redirectErrors)
+					process.BeginErrorReadLine();
+				process.WaitForExit();
 
-				Row LRow = new Row(AProgram.ValueManager, (Schema.IRowType)FDataType);
-				if (LRedirectOutput)
-					LRow["Output"] = FOutput.ToString();
+				Row row = new Row(program.ValueManager, (Schema.IRowType)_dataType);
+				if (redirectOutput)
+					row["Output"] = _output.ToString();
 				else
-					LRow.ClearValue("Output");
-				if (((Schema.IRowType)FDataType).Columns.ContainsName("Errors"))
+					row.ClearValue("Output");
+				if (((Schema.IRowType)_dataType).Columns.ContainsName("Errors"))
 				{
-					if (LRedirectErrors)
-						LRow["Errors"] = FErrors.ToString();
+					if (redirectErrors)
+						row["Errors"] = _errors.ToString();
 					else
-						LRow.ClearValue("Errors");
+						row.ClearValue("Errors");
 				}
-				LRow["ExitCode"] = LProcess.ExitCode;
+				row["ExitCode"] = process.ExitCode;
 				
-				return LRow;
+				return row;
 			}
 		}
 
-		private StringBuilder FErrors;
+		private StringBuilder _errors;
 
-		void ExecutedProcessErrorsReceived(object ASender, DataReceivedEventArgs AArgs)
+		void ExecutedProcessErrorsReceived(object sender, DataReceivedEventArgs args)
 		{
-			if (!String.IsNullOrEmpty(AArgs.Data))
-				FErrors.AppendLine(AArgs.Data);
+			if (!String.IsNullOrEmpty(args.Data))
+				_errors.AppendLine(args.Data);
 		}
 
-		private StringBuilder FOutput;
+		private StringBuilder _output;
 
-		void ExecutedProcessOutputReceived(object ASender, DataReceivedEventArgs AArgs)
+		void ExecutedProcessOutputReceived(object sender, DataReceivedEventArgs args)
 		{
-			if (!String.IsNullOrEmpty(AArgs.Data))
-				FOutput.AppendLine(AArgs.Data);
+			if (!String.IsNullOrEmpty(args.Data))
+				_output.AppendLine(args.Data);
 		}
     }
 
 	// operator SetCurrentDirectory(const APath : String)
     public class SetCurrentDirectoryNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Environment.CurrentDirectory = (string)AArguments[0];
+			Environment.CurrentDirectory = (string)arguments[0];
 			return null;
 		}
     }
@@ -665,7 +665,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetCurrentDirectory() : String
     public class GetCurrentDirectoryNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			return Environment.CurrentDirectory;
 		}

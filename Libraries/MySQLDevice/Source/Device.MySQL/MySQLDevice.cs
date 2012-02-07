@@ -80,37 +80,37 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 
     public class MySQLDevice : SQLDevice
     {        
-		public MySQLDevice(int AID, string AName) : base(AID, AName){}
+		public MySQLDevice(int iD, string name) : base(iD, name){}
 
-		protected override void RegisterSystemObjectMaps(ServerProcess AProcess)
+		protected override void RegisterSystemObjectMaps(ServerProcess process)
 		{
-			base.RegisterSystemObjectMaps(AProcess);
+			base.RegisterSystemObjectMaps(process);
 
 			// Perform system type and operator mapping registration
 			#if USEISTRING
 			RunScript(AProcess, String.Format(new ResourceManager("SystemCatalog", GetType().Assembly).GetString("SystemObjectMaps"), Name, IsCaseSensitive.ToString().ToLower()));
 			#else
-			RunScript(AProcess, String.Format(new ResourceManager("SystemCatalog", GetType().Assembly).GetString("SystemObjectMaps"), Name, "false"));
+			RunScript(process, String.Format(new ResourceManager("SystemCatalog", GetType().Assembly).GetString("SystemObjectMaps"), Name, "false"));
 			#endif
 		}
 		
-		protected override DeviceSession InternalConnect(ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo)
+		protected override DeviceSession InternalConnect(ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo)
 		{
-			return new MySQLDeviceSession(this, AServerProcess, ADeviceSessionInfo);
+			return new MySQLDeviceSession(this, serverProcess, deviceSessionInfo);
 		}
 
         public override TableSpecifier GetDummyTableSpecifier()
         {
-			SelectExpression LSelectExpression = new SelectExpression();
-			LSelectExpression.SelectClause = new SelectClause();
-			LSelectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(0), "dummy1"));
-			return new TableSpecifier(LSelectExpression, "dummy1");
+			SelectExpression selectExpression = new SelectExpression();
+			selectExpression.SelectClause = new SelectClause();
+			selectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(0), "dummy1"));
+			return new TableSpecifier(selectExpression, "dummy1");
         }
         
         // ShouldIncludeColumn
-        public override bool ShouldIncludeColumn(Plan APlan, string ATableName, string AColumnName, string ADomainName)
+        public override bool ShouldIncludeColumn(Plan plan, string tableName, string columnName, string domainName)
         {
-			switch (ADomainName.ToLower())
+			switch (domainName.ToLower())
 			{
 				case "bit":
 				case "tinyint":
@@ -139,85 +139,85 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
         }
         
 		// FindScalarType
-        public override ScalarType FindScalarType(Plan APlan, string ADomainName, int ALength, D4.MetaData AMetaData)
+        public override ScalarType FindScalarType(Plan plan, string domainName, int length, D4.MetaData metaData)
         {
-			switch (ADomainName.ToLower())
+			switch (domainName.ToLower())
 			{
-				case "bit": return APlan.DataTypes.SystemBoolean;
-				case "tinyint": return APlan.DataTypes.SystemByte;
-				case "smallint": return APlan.DataTypes.SystemShort;
+				case "bit": return plan.DataTypes.SystemBoolean;
+				case "tinyint": return plan.DataTypes.SystemByte;
+				case "smallint": return plan.DataTypes.SystemShort;
 				case "int": 
-				case "integer": return APlan.DataTypes.SystemInteger;
-				case "bigint": return APlan.DataTypes.SystemLong;
+				case "integer": return plan.DataTypes.SystemInteger;
+				case "bigint": return plan.DataTypes.SystemLong;
 				case "decimal":
 				case "numeric":
 				case "double":
 				case "float": 
-				case "real": return APlan.DataTypes.SystemDecimal;
-				case "datetime": return APlan.DataTypes.SystemDateTime;
-				case "date": return APlan.DataTypes.SystemDate;
-				case "time":  return APlan.DataTypes.SystemTime;
-				case "timestamp": return APlan.DataTypes.SystemDateTime;
+				case "real": return plan.DataTypes.SystemDecimal;
+				case "datetime": return plan.DataTypes.SystemDateTime;
+				case "date": return plan.DataTypes.SystemDate;
+				case "time":  return plan.DataTypes.SystemTime;
+				case "timestamp": return plan.DataTypes.SystemDateTime;
 				case "char":
 				case "varchar":
 				case "nchar":
 				case "nvarchar": 
-					AMetaData.Tags.Add(new D4.Tag("Storage.Length", ALength.ToString()));
+					metaData.Tags.Add(new D4.Tag("Storage.Length", length.ToString()));
 					#if USEISTRING
 					return IsCaseSensitive ? APlan.DataTypes.SystemString : APlan.DataTypes.SystemIString;
 					#else
-					return APlan.DataTypes.SystemString;
+					return plan.DataTypes.SystemString;
 					#endif
 				case "text":
 				#if USEISTRING
 				case "ntext": return (ScalarType)(IsCaseSensitive ? APlan.Catalog[CSQLTextScalarType] : APlan.Catalog[CSQLITextScalarType]);
 				#else
-				case "ntext": return (ScalarType)Compiler.ResolveCatalogIdentifier(APlan, CSQLTextScalarType, true);
+				case "ntext": return (ScalarType)Compiler.ResolveCatalogIdentifier(plan, SQLTextScalarType, true);
 				#endif
-				case "blob": return APlan.DataTypes.SystemBinary;
-				default: throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);
+				case "blob": return plan.DataTypes.SystemBinary;
+				default: throw new SQLException(SQLException.Codes.UnsupportedImportType, domainName);
 			}
         }
         
 		// Emitter
 		protected override SQLTextEmitter InternalCreateEmitter() { return new MySQL.MySQLTextEmitter(); }
 		
-		protected override string GetDeviceTablesExpression(TableVar ATableVar)
+		protected override string GetDeviceTablesExpression(TableVar tableVar)
 		{
 			throw new Exception("MySQL Device does not support schema import");
 		}
 		
-		protected override string GetDeviceIndexesExpression(TableVar ATableVar)
+		protected override string GetDeviceIndexesExpression(TableVar tableVar)
 		{
 			throw new Exception("MySQL device does not support schema import");
 		}
 		
-        public override void DetermineCursorBehavior(Plan APlan, TableNode ATableNode)
+        public override void DetermineCursorBehavior(Plan plan, TableNode tableNode)
         {
-			base.DetermineCursorBehavior(APlan, ATableNode);
+			base.DetermineCursorBehavior(plan, tableNode);
 			// TODO: This will actually only be static if the ADOConnection is used because the DotNet providers do not support a method for obtaining a static cursor.
         }
 
 		// ServerName		
-		protected string FServerName = String.Empty;
+		protected string _serverName = String.Empty;
 		public string ServerName
 		{
-			get { return FServerName; }
-			set { FServerName = value == null ? String.Empty : value; }
+			get { return _serverName; }
+			set { _serverName = value == null ? String.Empty : value; }
 		}
 		
 		// DatabaseName		
-		protected string FDatabaseName = String.Empty;
+		protected string _databaseName = String.Empty;
 		public string DatabaseName 
 		{ 
-			get { return FDatabaseName; } 
-			set { FDatabaseName = value == null ? String.Empty : value; } 
+			get { return _databaseName; } 
+			set { _databaseName = value == null ? String.Empty : value; } 
 		}
 	}
 	
     public class MySQLDeviceSession : SQLDeviceSession
     {
-		public MySQLDeviceSession(MySQLDevice ADevice, ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo) : base(ADevice, AServerProcess, ADeviceSessionInfo){}
+		public MySQLDeviceSession(MySQLDevice device, ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo) : base(device, serverProcess, deviceSessionInfo){}
 		
 		public new MySQLDevice Device { get { return (MySQLDevice)base.Device; } }
 
@@ -228,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 			// ConnectionStringBuilderClass
 				// MySQLConnectionStringBuilder (default)
 
-			D4.ClassDefinition LClassDefinition = 
+			D4.ClassDefinition classDefinition = 
 				new D4.ClassDefinition
 				(
 					Device.ConnectionClass == String.Empty ? 
@@ -236,7 +236,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 						Device.ConnectionClass
 				);
 
-			D4.ClassDefinition LBuilderClass = 
+			D4.ClassDefinition builderClass = 
 				new D4.ClassDefinition
 				(
 					Device.ConnectionStringBuilderClass == String.Empty ?
@@ -244,18 +244,18 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 						Device.ConnectionStringBuilderClass
 				);
 
-			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.CreateObject(LBuilderClass, new object[]{});
+			ConnectionStringBuilder connectionStringBuilder = (ConnectionStringBuilder)ServerProcess.CreateObject(builderClass, new object[]{});
 			
-			D4.Tags LTags = new D4.Tags();
-			LTags.AddOrUpdate("ServerName", Device.ServerName);
-			LTags.AddOrUpdate("DatabaseName", Device.DatabaseName);
-			LTags.AddOrUpdate("UserName", DeviceSessionInfo.UserName);
-			LTags.AddOrUpdate("Password", DeviceSessionInfo.Password);
+			D4.Tags tags = new D4.Tags();
+			tags.AddOrUpdate("ServerName", Device.ServerName);
+			tags.AddOrUpdate("DatabaseName", Device.DatabaseName);
+			tags.AddOrUpdate("UserName", DeviceSessionInfo.UserName);
+			tags.AddOrUpdate("Password", DeviceSessionInfo.Password);
 
-			LTags = LConnectionStringBuilder.Map(LTags);
-			Device.GetConnectionParameters(LTags, DeviceSessionInfo);
-			string LConnectionString = SQLDevice.TagsToString(LTags);				
-			return (SQLConnection)ServerProcess.CreateObject(LClassDefinition, new object[]{LConnectionString});
+			tags = connectionStringBuilder.Map(tags);
+			Device.GetConnectionParameters(tags, DeviceSessionInfo);
+			string connectionString = SQLDevice.TagsToString(tags);				
+			return (SQLConnection)ServerProcess.CreateObject(classDefinition, new object[]{connectionString});
 		}
     }
 
@@ -270,22 +270,22 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 	{
 		public MySQLConnectionStringBuilder()
 		{
-			FLegend.AddOrUpdate("ServerName", "Data source");
-			FLegend.AddOrUpdate("DatabaseName", "Database");
-			FLegend.AddOrUpdate("UserName", "user id");
-			FLegend.AddOrUpdate("Password", "password");
+			_legend.AddOrUpdate("ServerName", "Data source");
+			_legend.AddOrUpdate("DatabaseName", "Database");
+			_legend.AddOrUpdate("UserName", "user id");
+			_legend.AddOrUpdate("Password", "password");
 		}
 		
-		public override D4.Tags Map(D4.Tags ATags)
+		public override D4.Tags Map(D4.Tags tags)
 		{
-			D4.Tags LTags = base.Map(ATags);
-            D4.Tag LTag = LTags.GetTag("IntegratedSecurity");
-            if (LTag != D4.Tag.None)
+			D4.Tags localTags = base.Map(tags);
+            D4.Tag tag = localTags.GetTag("IntegratedSecurity");
+            if (tag != D4.Tag.None)
             {
-                LTags.Remove(LTag);
-                LTags.AddOrUpdate("Integrated Security", "SSPI");
+                localTags.Remove(tag);
+                localTags.AddOrUpdate("Integrated Security", "SSPI");
             }
-			return LTags;
+			return localTags;
 		}
 	}
 
@@ -301,27 +301,27 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     /// </summary>
     public class MySQLBoolean : SQLScalarType
     {
-		public MySQLBoolean(int AID, string AName) : base(AID, AName) {}
+		public MySQLBoolean(int iD, string name) : base(iD, name) {}
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			if (AValue is bool)
-				return (bool)AValue;
+			if (tempValue is bool)
+				return (bool)tempValue;
 			else 
-				return (int)AValue == 0 ? false : true;
+				return (int)tempValue == 0 ? false : true;
 		}
 		
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			return (bool)AValue;
+			return (bool)tempValue;
 		}
 		
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
+		public override SQLType GetSQLType(D4.MetaData metaData)
 		{
 			return new SQLBooleanType();
 		}
 
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        protected override string InternalNativeDomainName(D4.MetaData metaData)
 		{
 			return "bit";
 		}
@@ -333,26 +333,26 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 	/// </summary>
     public class MySQLByte : SQLScalarType
     {
-		public MySQLByte(int AID, string AName) : base(AID, AName) {}
+		public MySQLByte(int iD, string name) : base(iD, name) {}
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
 			// According to the docs for the SQLOLEDB provider this is supposed to come back as a byte, but
 			// it is coming back as a short, I don't know why, maybe interop?
-			return Convert.ToByte((short)AValue);
+			return Convert.ToByte((short)tempValue);
 		}
 
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			return (byte)AValue;
+			return (byte)tempValue;
 		}
 		
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
+		public override SQLType GetSQLType(D4.MetaData metaData)
 		{
 			return new SQLIntegerType(1);
 		}
 
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        protected override string InternalNativeDomainName(D4.MetaData metaData)
 		{
 			return "tinyint";
 		}
@@ -369,27 +369,27 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 		public static readonly DateTime MinValue = new DateTime(1753, 1, 1);
 		public static readonly DateTime Accuracy = new DateTime((long)(TimeSpan.TicksPerMillisecond * 3.33));
 
-		public MySQLDateTime(int AID, string AName) : base(AID, AName) {}
+		public MySQLDateTime(int iD, string name) : base(iD, name) {}
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			return (DateTime)AValue;
+			return (DateTime)tempValue;
 		}
 		
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			DateTime LValue = (DateTime)AValue;
-			if (LValue < MinValue)
-				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
-			return LValue;
+			DateTime localTempValue = (DateTime)tempValue;
+			if (localTempValue < MinValue)
+				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, localTempValue.ToString());
+			return localTempValue;
 		}
 		
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
+		public override SQLType GetSQLType(D4.MetaData metaData)
 		{
 			return new SQLDateTimeType();
 		}
 
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        protected override string InternalNativeDomainName(D4.MetaData metaData)
 		{
 			return "datetime";
 		}
@@ -402,27 +402,27 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 	/// </summary>
     public class MySQLDate : SQLScalarType
     {
-		public MySQLDate(int AID, string AName) : base(AID, AName) {}
+		public MySQLDate(int iD, string name) : base(iD, name) {}
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			return (DateTime)AValue;
+			return (DateTime)tempValue;
 		}
 		
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			DateTime LValue = (DateTime)AValue;
-			if (LValue < MySQLDateTime.MinValue)
-				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
-			return LValue;
+			DateTime localTempValue = (DateTime)tempValue;
+			if (localTempValue < MySQLDateTime.MinValue)
+				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, localTempValue.ToString());
+			return localTempValue;
 		}
 		
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
+		public override SQLType GetSQLType(D4.MetaData metaData)
 		{
 			return new SQLDateType();
 		}
 
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        protected override string InternalNativeDomainName(D4.MetaData metaData)
 		{
 			return "datetime";
 		}
@@ -435,27 +435,27 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 	/// </summary>
     public class MySQLTime : SQLScalarType
     {
-		public MySQLTime(int AID, string AName) : base(AID, AName) {}
+		public MySQLTime(int iD, string name) : base(iD, name) {}
 
-		public override object ToScalar(IValueManager AManager, object AValue)
+		public override object ToScalar(IValueManager manager, object tempValue)
 		{
-			return (DateTime)AValue;
+			return (DateTime)tempValue;
 		}
 		
-		public override object FromScalar(IValueManager AManager, object AValue)
+		public override object FromScalar(IValueManager manager, object tempValue)
 		{
-			DateTime LValue = (DateTime)AValue;
-			if (LValue < MySQLDateTime.MinValue)
-				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
-			return new DateTime(1, 1, 1, LValue.Hour, LValue.Minute, LValue.Second, LValue.Millisecond);
+			DateTime localTempValue = (DateTime)tempValue;
+			if (localTempValue < MySQLDateTime.MinValue)
+				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, localTempValue.ToString());
+			return new DateTime(1, 1, 1, localTempValue.Hour, localTempValue.Minute, localTempValue.Second, localTempValue.Millisecond);
 		}
 		
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
+		public override SQLType GetSQLType(D4.MetaData metaData)
 		{
 			return new SQLTimeType();
 		}
 
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        protected override string InternalNativeDomainName(D4.MetaData metaData)
 		{
 			return "datetime";
 		}
@@ -467,11 +467,11 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 	/// </summary>
     public class MySQLText : SQLText
     {
-		public MySQLText(int AID, string AName) : base(AID, AName) {}
+		public MySQLText(int iD, string name) : base(iD, name) {}
 		//public MySQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public MySQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        protected override string InternalNativeDomainName(D4.MetaData metaData)
 		{
 			return "text";
 		}
@@ -483,11 +483,11 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     /// </summary>
     public class MySQLBinary : SQLBinary
     {
-		public MySQLBinary(int AID, string AName) : base(AID, AName) {}
+		public MySQLBinary(int iD, string name) : base(iD, name) {}
 		//public MySQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public MySQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        protected override string InternalNativeDomainName(D4.MetaData metaData)
 		{
 			return "image";
 		}
@@ -2050,10 +2050,10 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 //	
 	public class EnsureOperatorDDL
 	{
-		public EnsureOperatorDDL(string ADropStatement, string ACreateStatement) : base()
+		public EnsureOperatorDDL(string dropStatement, string createStatement) : base()
 		{
-			DropStatement = ADropStatement;
-			CreateStatement = ACreateStatement;
+			DropStatement = dropStatement;
+			CreateStatement = createStatement;
 		}
 		
 		public string DropStatement;

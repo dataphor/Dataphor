@@ -7,50 +7,50 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 	/// <summary> Panel that lays out light a horizontal stack panel, but proportionally sizes the children to take up all available space. </summary>
 	public class FillPanel : Panel
 	{
-		protected override System.Windows.Size MeasureOverride(System.Windows.Size AAvailableSize)
+		protected override System.Windows.Size MeasureOverride(System.Windows.Size availableSize)
 		{
-			var LResult = new Size(0d, 0d);
-			foreach (UIElement LChild in Children)
+			var result = new Size(0d, 0d);
+			foreach (UIElement child in Children)
 			{
-				LChild.Measure
+				child.Measure
 				(
 					new Size
 					(
-						AAvailableSize.Width - LResult.Width,
-						AAvailableSize.Height
+						availableSize.Width - result.Width,
+						availableSize.Height
 					)
 				);
-				LResult.Width += LChild.DesiredSize.Width;
-				LResult.Height = Math.Max(LChild.DesiredSize.Height, LResult.Height);
+				result.Width += child.DesiredSize.Width;
+				result.Height = Math.Max(child.DesiredSize.Height, result.Height);
 			}
 
-			return LResult;
+			return result;
 		}
 
-		protected override Size ArrangeOverride(Size AFinalSize)
+		protected override Size ArrangeOverride(Size finalSize)
 		{
-			var LDesiredWidth = 0d;
-			foreach (UIElement LChild in Children)
-				LDesiredWidth += LChild.DesiredSize.Width;
-			var LScalingFactor = LDesiredWidth == 0d ? 0d : (AFinalSize.Width / LDesiredWidth);
+			var desiredWidth = 0d;
+			foreach (UIElement child in Children)
+				desiredWidth += child.DesiredSize.Width;
+			var scalingFactor = desiredWidth == 0d ? 0d : (finalSize.Width / desiredWidth);
 				
-			var LOffsetX = 0d;
-			foreach (UIElement LChild in Children)
+			var offsetX = 0d;
+			foreach (UIElement child in Children)
 			{
-				var LWidth = LChild.DesiredSize.Width * LScalingFactor;
-				LChild.Arrange
+				var width = child.DesiredSize.Width * scalingFactor;
+				child.Arrange
 				(
 					new Rect
 					(
-						LOffsetX,
+						offsetX,
 						0,
-						(SnapsToDevicePixels ? Math.Floor(LWidth) : LWidth),
-						AFinalSize.Height
+						(SnapsToDevicePixels ? Math.Floor(width) : width),
+						finalSize.Height
 					)
 				);
-				LOffsetX += LWidth;
+				offsetX += width;
 			}
-			return new Size(LOffsetX, AFinalSize.Height);
+			return new Size(offsetX, finalSize.Height);
 		}
 	}
 }

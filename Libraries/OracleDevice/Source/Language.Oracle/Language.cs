@@ -13,18 +13,18 @@ namespace Alphora.Dataphor.DAE.Language.Oracle
 	public class OuterJoinFieldExpression : SQL.QualifiedFieldExpression
 	{
 		public OuterJoinFieldExpression() : base(){}
-		public OuterJoinFieldExpression(string AFieldName) : base(AFieldName){}
-		public OuterJoinFieldExpression(string AFieldName, string ATableAlias) : base(AFieldName, ATableAlias){}
+		public OuterJoinFieldExpression(string fieldName) : base(fieldName){}
+		public OuterJoinFieldExpression(string fieldName, string tableAlias) : base(fieldName, tableAlias){}
 	}
 	
 	public class SelectExpression : SQL.SelectExpression
 	{
 		// OptimizerHints
-		private string FOptimizerHints = String.Empty;
+		private string _optimizerHints = String.Empty;
 		public string OptimizerHints
 		{
-			get { return FOptimizerHints; }
-			set { FOptimizerHints = value == null ? String.Empty : value; }
+			get { return _optimizerHints; }
+			set { _optimizerHints = value == null ? String.Empty : value; }
 		}
 	}
 }

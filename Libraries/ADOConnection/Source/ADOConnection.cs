@@ -15,46 +15,46 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 	
 	public class ADOConnection : SQLConnection
 	{
-		public ADOConnection(string AConnectionString) : base() 
+		public ADOConnection(string connectionString) : base() 
 		{
-			FConnection = new ADODB.Connection();
-			FConnection.Open(AConnectionString, String.Empty, String.Empty, -1);
-			FConnection.CursorLocation = ADODB.CursorLocationEnum.adUseServer;
+			_connection = new ADODB.Connection();
+			_connection.Open(connectionString, String.Empty, String.Empty, -1);
+			_connection.CursorLocation = ADODB.CursorLocationEnum.adUseServer;
 			SetState(SQLConnectionState.Idle);
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FConnection != null)
+			if (_connection != null)
 			{
 				try
 				{
-					while (FNestingLevel > 0)
+					while (_nestingLevel > 0)
 						InternalRollbackTransaction();
 
-					if (FConnection.State != (int)ADODB.ObjectStateEnum.adStateClosed)
-						FConnection.Close();
+					if (_connection.State != (int)ADODB.ObjectStateEnum.adStateClosed)
+						_connection.Close();
 				}
 				catch
 				{
 					// Who cares.
 				}
 
-				while (System.Runtime.InteropServices.Marshal.ReleaseComObject(FConnection) > 0);
+				while (System.Runtime.InteropServices.Marshal.ReleaseComObject(_connection) > 0);
 				SetState(SQLConnectionState.Closed);
-				FConnection = null;
+				_connection = null;
 			}
 			
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		private ADODB.Connection FConnection;
+		private ADODB.Connection _connection;
 		
 		public override bool IsConnectionValid()
 		{
 			try
 			{
-				return (FConnection != null) && (FConnection.State != 0);
+				return (_connection != null) && (_connection.State != 0);
 			}
 			catch
 			{
@@ -64,71 +64,71 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 		
 		protected override SQLCommand InternalCreateCommand()
 		{
-			ADODB.Command LCommand = new ADODB.Command();
-			LCommand.ActiveConnection = FConnection;
-			return new ADOCommand(this, LCommand);
+			ADODB.Command command = new ADODB.Command();
+			command.ActiveConnection = _connection;
+			return new ADOCommand(this, command);
 		}
 
-		private int FNestingLevel;
+		private int _nestingLevel;
 		/// <summary>Returns the current nesting level of the connection.</summary>
-		public int NestingLevel { get { return FNestingLevel; } }
+		public int NestingLevel { get { return _nestingLevel; } }
 		
-		protected override void InternalBeginTransaction(SQLIsolationLevel AIsolationLevel)
+		protected override void InternalBeginTransaction(SQLIsolationLevel isolationLevel)
 		{
-			switch (AIsolationLevel)
+			switch (isolationLevel)
 			{
-				case SQLIsolationLevel.ReadUncommitted : FConnection.IsolationLevel = ADODB.IsolationLevelEnum.adXactReadUncommitted; break;
-				case SQLIsolationLevel.ReadCommitted : FConnection.IsolationLevel = ADODB.IsolationLevelEnum.adXactReadCommitted; break;
-				case SQLIsolationLevel.RepeatableRead : FConnection.IsolationLevel = ADODB.IsolationLevelEnum.adXactRepeatableRead; break;
-				case SQLIsolationLevel.Serializable : FConnection.IsolationLevel = ADODB.IsolationLevelEnum.adXactSerializable; break;
-				default : FConnection.IsolationLevel = ADODB.IsolationLevelEnum.adXactUnspecified; break;
+				case SQLIsolationLevel.ReadUncommitted : _connection.IsolationLevel = ADODB.IsolationLevelEnum.adXactReadUncommitted; break;
+				case SQLIsolationLevel.ReadCommitted : _connection.IsolationLevel = ADODB.IsolationLevelEnum.adXactReadCommitted; break;
+				case SQLIsolationLevel.RepeatableRead : _connection.IsolationLevel = ADODB.IsolationLevelEnum.adXactRepeatableRead; break;
+				case SQLIsolationLevel.Serializable : _connection.IsolationLevel = ADODB.IsolationLevelEnum.adXactSerializable; break;
+				default : _connection.IsolationLevel = ADODB.IsolationLevelEnum.adXactUnspecified; break;
 			}
-			FNestingLevel = FConnection.BeginTrans();
+			_nestingLevel = _connection.BeginTrans();
 		}
 		
 		protected override void InternalCommitTransaction()
 		{
-			FConnection.CommitTrans();
-			FNestingLevel--;
+			_connection.CommitTrans();
+			_nestingLevel--;
 		}
 		
 		protected override void InternalRollbackTransaction()
 		{
-			FConnection.RollbackTrans();
-			FNestingLevel--;
+			_connection.RollbackTrans();
+			_nestingLevel--;
 		}
 	}
 	
 	public class ADOCommand : SQLCommand
 	{
-		protected internal ADOCommand(ADOConnection AConnection, ADODB.Command ACommand) : base(AConnection)
+		protected internal ADOCommand(ADOConnection connection, ADODB.Command command) : base(connection)
 		{
-			FCommand = ACommand;
-			FUseOrdinalBinding = true;
+			_command = command;
+			_useOrdinalBinding = true;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			//UnprepareCommand();
-			if (FCommand != null)
+			if (_command != null)
 			{
-				while (System.Runtime.InteropServices.Marshal.ReleaseComObject(FCommand) > 0);
-				FCommand = null;
+				while (System.Runtime.InteropServices.Marshal.ReleaseComObject(_command) > 0);
+				_command = null;
 			}
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
 		public new ADOConnection Connection { get { return (ADOConnection)base.Connection; } }
 		
-		private ADODB.Command FCommand;
+		private ADODB.Command _command;
 		
-		protected void PrepareCommand(SQLIsolationLevel AIsolationLevel)
+		protected void PrepareCommand(SQLIsolationLevel isolationLevel)
 		{
-			FCommand.CommandText = PrepareStatement(Statement);
-			FCommand.CommandTimeout = CommandTimeout; 
+			_command.CommandText = PrepareStatement(Statement);
+			_command.CommandTimeout = CommandTimeout; 
 			if (CommandType == SQLCommandType.Statement)
-				FCommand.CommandType = CommandTypeEnum.adCmdText;
+				_command.CommandType = CommandTypeEnum.adCmdText;
 			if (UseParameters)
 				PrepareParameters();
 			//FCommand.Prepared = true; // this causes a 'syntax error or access violation' in some cases ???
@@ -137,8 +137,8 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 		protected void UnprepareCommand()
 		{
 			if (UseParameters && (Parameters.Count > 0))
-				while (FCommand.Parameters.Count > 0)
-					FCommand.Parameters.Delete(0);
+				while (_command.Parameters.Count > 0)
+					_command.Parameters.Delete(0);
 		}
 		
 		protected override void InternalPrepare()
@@ -152,95 +152,95 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 		private void PrepareParameters()
 		{
 			// Prepare parameters
-			SQLParameter LParameter;
-			for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+			SQLParameter parameter;
+			for (int index = 0; index < _parameterIndexes.Length; index++)
 			{
-				LParameter = Parameters[FParameterIndexes[LIndex]];
-				ADODB.Parameter LADOParameter = FCommand.CreateParameter(LParameter.Name, ADODB.DataTypeEnum.adInteger, ADODB.ParameterDirectionEnum.adParamInput, 0, Missing.Value) ;
-				switch (LParameter.Direction)
+				parameter = Parameters[_parameterIndexes[index]];
+				ADODB.Parameter aDOParameter = _command.CreateParameter(parameter.Name, ADODB.DataTypeEnum.adInteger, ADODB.ParameterDirectionEnum.adParamInput, 0, Missing.Value) ;
+				switch (parameter.Direction)
 				{
-					case SQLDirection.In : LADOParameter.Direction = ADODB.ParameterDirectionEnum.adParamInput; break;
-					case SQLDirection.Out : LADOParameter.Direction = ADODB.ParameterDirectionEnum.adParamOutput; break;
-					case SQLDirection.InOut : LADOParameter.Direction = ADODB.ParameterDirectionEnum.adParamInputOutput; break;
-					case SQLDirection.Result : LADOParameter.Direction = ADODB.ParameterDirectionEnum.adParamReturnValue; break;
-					default : LADOParameter.Direction = ADODB.ParameterDirectionEnum.adParamUnknown; break;
+					case SQLDirection.In : aDOParameter.Direction = ADODB.ParameterDirectionEnum.adParamInput; break;
+					case SQLDirection.Out : aDOParameter.Direction = ADODB.ParameterDirectionEnum.adParamOutput; break;
+					case SQLDirection.InOut : aDOParameter.Direction = ADODB.ParameterDirectionEnum.adParamInputOutput; break;
+					case SQLDirection.Result : aDOParameter.Direction = ADODB.ParameterDirectionEnum.adParamReturnValue; break;
+					default : aDOParameter.Direction = ADODB.ParameterDirectionEnum.adParamUnknown; break;
 				}
 
-				if (LParameter.Type is SQLStringType)
+				if (parameter.Type is SQLStringType)
 				{
-					LADOParameter.Type = ADODB.DataTypeEnum.adVarChar;
-					LADOParameter.Size = ((SQLStringType)LParameter.Type).Length;
+					aDOParameter.Type = ADODB.DataTypeEnum.adVarChar;
+					aDOParameter.Size = ((SQLStringType)parameter.Type).Length;
 				}
-				else if (LParameter.Type is SQLBooleanType)
+				else if (parameter.Type is SQLBooleanType)
 				{
-					LADOParameter.Type = ADODB.DataTypeEnum.adBoolean;
+					aDOParameter.Type = ADODB.DataTypeEnum.adBoolean;
 				}
-				else if (LParameter.Type is SQLIntegerType)
+				else if (parameter.Type is SQLIntegerType)
 				{
-					switch (((SQLIntegerType)LParameter.Type).ByteCount)
+					switch (((SQLIntegerType)parameter.Type).ByteCount)
 					{
-						case 1 : LADOParameter.Type = ADODB.DataTypeEnum.adTinyInt; break;
-						case 2 : LADOParameter.Type = ADODB.DataTypeEnum.adSmallInt; break;
-						case 8 : LADOParameter.Type = ADODB.DataTypeEnum.adBigInt; break;
-						default : LADOParameter.Type = ADODB.DataTypeEnum.adInteger; break;
+						case 1 : aDOParameter.Type = ADODB.DataTypeEnum.adTinyInt; break;
+						case 2 : aDOParameter.Type = ADODB.DataTypeEnum.adSmallInt; break;
+						case 8 : aDOParameter.Type = ADODB.DataTypeEnum.adBigInt; break;
+						default : aDOParameter.Type = ADODB.DataTypeEnum.adInteger; break;
 					}
 				}
-				else if (LParameter.Type is SQLNumericType)
+				else if (parameter.Type is SQLNumericType)
 				{
-					SQLNumericType LType = (SQLNumericType)LParameter.Type;
-					LADOParameter.Type = ADODB.DataTypeEnum.adNumeric;
-					LADOParameter.NumericScale = LType.Scale;
-					LADOParameter.Precision = LType.Precision;
+					SQLNumericType type = (SQLNumericType)parameter.Type;
+					aDOParameter.Type = ADODB.DataTypeEnum.adNumeric;
+					aDOParameter.NumericScale = type.Scale;
+					aDOParameter.Precision = type.Precision;
 				}
-				else if (LParameter.Type is SQLFloatType)
+				else if (parameter.Type is SQLFloatType)
 				{
-					SQLFloatType LType = (SQLFloatType)LParameter.Type;
-					if (LType.Width == 1)
-						LADOParameter.Type = ADODB.DataTypeEnum.adSingle;
+					SQLFloatType type = (SQLFloatType)parameter.Type;
+					if (type.Width == 1)
+						aDOParameter.Type = ADODB.DataTypeEnum.adSingle;
 					else
-						LADOParameter.Type = ADODB.DataTypeEnum.adDouble;
+						aDOParameter.Type = ADODB.DataTypeEnum.adDouble;
 				}
-				else if (LParameter.Type is SQLBinaryType)
+				else if (parameter.Type is SQLBinaryType)
 				{
-					LADOParameter.Type = ADODB.DataTypeEnum.adLongVarBinary;	
-					LADOParameter.Attributes |= (int)ADODB.ParameterAttributesEnum.adParamLong;
-					LADOParameter.Size = 255;
+					aDOParameter.Type = ADODB.DataTypeEnum.adLongVarBinary;	
+					aDOParameter.Attributes |= (int)ADODB.ParameterAttributesEnum.adParamLong;
+					aDOParameter.Size = 255;
 				}
-				else if (LParameter.Type is SQLByteArrayType)
+				else if (parameter.Type is SQLByteArrayType)
 				{
-					LADOParameter.Type = ADODB.DataTypeEnum.adBinary;
-					LADOParameter.Size = ((SQLByteArrayType)LParameter.Type).Length;
+					aDOParameter.Type = ADODB.DataTypeEnum.adBinary;
+					aDOParameter.Size = ((SQLByteArrayType)parameter.Type).Length;
 				}
-				else if (LParameter.Type is SQLTextType)
+				else if (parameter.Type is SQLTextType)
 				{
-					LADOParameter.Type = ADODB.DataTypeEnum.adLongVarChar;
-					LADOParameter.Size = 255;
+					aDOParameter.Type = ADODB.DataTypeEnum.adLongVarChar;
+					aDOParameter.Size = 255;
 				}
-				else if (LParameter.Type is SQLDateTimeType)
+				else if (parameter.Type is SQLDateTimeType)
 				{
-					LADOParameter.Type = ADODB.DataTypeEnum.adDBTimeStamp;
+					aDOParameter.Type = ADODB.DataTypeEnum.adDBTimeStamp;
 				}
-				else if (LParameter.Type is SQLDateType)
+				else if (parameter.Type is SQLDateType)
 				{
-					LADOParameter.Type = ADODB.DataTypeEnum.adDBDate;
+					aDOParameter.Type = ADODB.DataTypeEnum.adDBDate;
 				}
-				else if (LParameter.Type is SQLTimeType)
+				else if (parameter.Type is SQLTimeType)
 				{
-					LADOParameter.Type = ADODB.DataTypeEnum.adDBTime;
+					aDOParameter.Type = ADODB.DataTypeEnum.adDBTime;
 				}
-				else if (LParameter.Type is SQLGuidType)
+				else if (parameter.Type is SQLGuidType)
 				{
-					LADOParameter.Type = ADODB.DataTypeEnum.adChar;
-					LADOParameter.Size = 38;
+					aDOParameter.Type = ADODB.DataTypeEnum.adChar;
+					aDOParameter.Size = 38;
 					//LADOParameter.Type = ADODB.DataTypeEnum.adGUID;
 				}
-				else if (LParameter.Type is SQLMoneyType)
+				else if (parameter.Type is SQLMoneyType)
 				{
-					LADOParameter.Type = ADODB.DataTypeEnum.adCurrency;
+					aDOParameter.Type = ADODB.DataTypeEnum.adCurrency;
 				}
 				else
-					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-				FCommand.Parameters.Append(LADOParameter);
+					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+				_command.Parameters.Append(aDOParameter);
 			}
 		}
 		
@@ -248,41 +248,41 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 		{
 			if (UseParameters)
 			{
-				SQLParameter LSQLParameter;
-				for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+				SQLParameter sQLParameter;
+				for (int index = 0; index < _parameterIndexes.Length; index++)
 				{
-					LSQLParameter = Parameters[FParameterIndexes[LIndex]];
-					if ((LSQLParameter.Direction == SQLDirection.In) || (LSQLParameter.Direction == SQLDirection.InOut))
+					sQLParameter = Parameters[_parameterIndexes[index]];
+					if ((sQLParameter.Direction == SQLDirection.In) || (sQLParameter.Direction == SQLDirection.InOut))
 					{
-						ADODB.Parameter LParameter = FCommand.Parameters[LIndex];
-						if ((LParameter.Attributes & (int)ADODB.ParameterAttributesEnum.adParamLong) != 0)
+						ADODB.Parameter parameter = _command.Parameters[index];
+						if ((parameter.Attributes & (int)ADODB.ParameterAttributesEnum.adParamLong) != 0)
 						{
-							object LValue = LSQLParameter.Value;
-							if (LValue is byte[])
-								LParameter.Size = ((byte[])LValue).Length;
-							else if (LValue is string)
-								LParameter.Size = ((string)LValue).Length;
+							object tempValue = sQLParameter.Value;
+							if (tempValue is byte[])
+								parameter.Size = ((byte[])tempValue).Length;
+							else if (tempValue is string)
+								parameter.Size = ((string)tempValue).Length;
 
-							if (LValue == null)
-								LParameter.Value = DBNull.Value;
+							if (tempValue == null)
+								parameter.Value = DBNull.Value;
 							else
-								LParameter.Value = LValue;
+								parameter.Value = tempValue;
 						}
 						else
 						{
 							// TODO: Better story for the length of string parameters.  This usage prevents the use of prepared commands in general
-							object LValue = LSQLParameter.Value;
-							if ((LValue is string) && (LParameter.Size < ((string)LValue).Length))
-								LParameter.Size = ((string)LValue).Length;
+							object tempValue = sQLParameter.Value;
+							if ((tempValue is string) && (parameter.Size < ((string)tempValue).Length))
+								parameter.Size = ((string)tempValue).Length;
 
-							if (LValue == null)
-								LParameter.Value = DBNull.Value;
+							if (tempValue == null)
+								parameter.Value = DBNull.Value;
 							else
 							{
-								if (LSQLParameter.Type is SQLGuidType)
-									LParameter.Value = LValue.ToString();
+								if (sQLParameter.Type is SQLGuidType)
+									parameter.Value = tempValue.ToString();
 								else
-									LParameter.Value = LValue;
+									parameter.Value = tempValue;
 							}
 						}
 					}
@@ -352,12 +352,12 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 		{
 			if (UseParameters)
 			{
-				SQLParameter LSQLParameter;
-				for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+				SQLParameter sQLParameter;
+				for (int index = 0; index < _parameterIndexes.Length; index++)
 				{
-					LSQLParameter = Parameters[FParameterIndexes[LIndex]];
-					if ((LSQLParameter.Direction == SQLDirection.InOut) || (LSQLParameter.Direction == SQLDirection.Out) || (LSQLParameter.Direction == SQLDirection.Result))
-						LSQLParameter.Value = FCommand.Parameters[LIndex].Value;
+					sQLParameter = Parameters[_parameterIndexes[index]];
+					if ((sQLParameter.Direction == SQLDirection.InOut) || (sQLParameter.Direction == SQLDirection.Out) || (sQLParameter.Direction == SQLDirection.Result))
+						sQLParameter.Value = _command.Parameters[index].Value;
 				}
 			}
 		}
@@ -368,9 +368,9 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 			try
 			{
 				SetParameters();
-				object LRecordsAffected;
-				object LParameters = Missing.Value;
-				FCommand.Execute(out LRecordsAffected, ref LParameters, -1);
+				object recordsAffected;
+				object parameters = Missing.Value;
+				_command.Execute(out recordsAffected, ref parameters, -1);
 				GetParameters();
 			}
 			finally
@@ -384,21 +384,21 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 			NOTE: ADO WORKAROUND only required when the isolation level > read uncommitted because the browse Cursors are all opened on a separate Cursor connection which runs its own transaction.
 			NOTE: ADO WORKAROUND not required at all because the only cursors that span transactions are browse Cursors
 		*/
-		protected override SQLCursor InternalOpen(SQLCursorType ACursorType, SQLIsolationLevel AIsolationLevel)
+		protected override SQLCursor InternalOpen(SQLCursorType cursorType, SQLIsolationLevel isolationLevel)
 		{
-			PrepareCommand(AIsolationLevel);
+			PrepareCommand(isolationLevel);
 			SetParameters();
-			ADODB.Recordset LRecordset = new ADODB.Recordset();
-			LRecordset.Source = FCommand;
-			LRecordset.CacheSize = 20;
+			ADODB.Recordset recordset = new ADODB.Recordset();
+			recordset.Source = _command;
+			recordset.CacheSize = 20;
 			//LRecordset.Properties["Preserve on Commit"].Value = true;
 			//LRecordset.Properties["Preserve on Abort"].Value = true;
-			LRecordset.Open
+			recordset.Open
 			(
 				Missing.Value, 
 				Missing.Value, 
 				(
-					(ACursorType == SQLCursorType.Static) ? 
+					(cursorType == SQLCursorType.Static) ? 
 						ADODB.CursorTypeEnum.adOpenStatic : 
 						(
 							(LockType == SQLLockType.ReadOnly) ?
@@ -415,9 +415,9 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 					),
 				CommandType == SQLCommandType.Table ? (int)CommandTypeEnum.adCmdTableDirect : -1
 			);
-			SQLCursor LCursor = new ADOCursor(this, LRecordset);
+			SQLCursor cursor = new ADOCursor(this, recordset);
 			GetParameters();
-			return LCursor;
+			return cursor;
 		}
 		
 		protected override void InternalClose()
@@ -434,23 +434,23 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 	
 	public class ADOCursor : SQLCursor
 	{
-		public ADOCursor(ADOCommand ACommand, ADODB.Recordset ARecordset) : base(ACommand)
+		public ADOCursor(ADOCommand command, ADODB.Recordset recordset) : base(command)
 		{
-			FRecordset = ARecordset;
-			FValues = new ADOValue[FRecordset.Fields.Count];
-			for (int LIndex = 0; LIndex < FValues.Length; LIndex++)
-				FValues[LIndex] = new ADOValue();
-			FBOF = true;
+			_recordset = recordset;
+			_values = new ADOValue[_recordset.Fields.Count];
+			for (int index = 0; index < _values.Length; index++)
+				_values[index] = new ADOValue();
+			_bOF = true;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FRecordset != null)
+			if (_recordset != null)
 			{
-				if (FRecordset.State != 0)
+				if (_recordset.State != 0)
 					try
 					{
-						FRecordset.Close();
+						_recordset.Close();
 					}
 					catch
 					{
@@ -458,42 +458,42 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 						// if we can't close it, oh well... it shouldn't be throwing anyway
 					}
 
-				while (System.Runtime.InteropServices.Marshal.ReleaseComObject(FRecordset) > 0);
-				FRecordset = null;
+				while (System.Runtime.InteropServices.Marshal.ReleaseComObject(_recordset) > 0);
+				_recordset = null;
 			}
 			
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 	
-		private bool FBOF;	
-		private ADODB.Recordset FRecordset;
-		private ADOValue[] FValues;
+		private bool _bOF;	
+		private ADODB.Recordset _recordset;
+		private ADOValue[] _values;
 		
 		protected override bool InternalNext()
 		{
-			if (FBOF)
-				FBOF = false;
+			if (_bOF)
+				_bOF = false;
 			else
-				if (!FRecordset.EOF)
-					FRecordset.MoveNext();
+				if (!_recordset.EOF)
+					_recordset.MoveNext();
 			ClearValues();
-			return !FRecordset.EOF;
+			return !_recordset.EOF;
 		}
 		
 		private void ClearValues()
 		{
-			for (int LIndex = 0; LIndex < FValues.Length; LIndex++)
-				FValues[LIndex].IsCached = false;
+			for (int index = 0; index < _values.Length; index++)
+				_values[index].IsCached = false;
 		}
 		
-		private object GetValue(int AIndex)
+		private object GetValue(int index)
 		{
-			if (!FValues[AIndex].IsCached)
+			if (!_values[index].IsCached)
 			{
-				FValues[AIndex].Value = FRecordset.Fields[AIndex].Value;
-				FValues[AIndex].IsCached = true;
+				_values[index].Value = _recordset.Fields[index].Value;
+				_values[index].IsCached = true;
 			}
-			return FValues[AIndex].Value;
+			return _values[index].Value;
 		}
 
 		protected override SQLTableSchema InternalGetSchema()
@@ -503,55 +503,55 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 		
 		protected override int InternalGetColumnCount()
 		{
-			return FValues.Length;
+			return _values.Length;
 		}
 
-		protected override string InternalGetColumnName(int AIndex)
+		protected override string InternalGetColumnName(int index)
 		{
-			return FRecordset.Fields[AIndex].Name;
+			return _recordset.Fields[index].Name;
 		}
 		
-		protected override object InternalGetColumnValue(int AIndex)
+		protected override object InternalGetColumnValue(int index)
 		{
-			return GetValue(AIndex);
+			return GetValue(index);
 		}
 		
-		protected override bool InternalIsNull(int AIndex)
+		protected override bool InternalIsNull(int index)
 		{
-			object LValue = GetValue(AIndex);
+			object tempValue = GetValue(index);
 			return 
 				(
 					(
-						(LValue == null) || 
-						(LValue == System.DBNull.Value)
+						(tempValue == null) || 
+						(tempValue == System.DBNull.Value)
 					)
 				);
 		}
 		
-		protected override bool InternalIsDeferred(int AIndex)
+		protected override bool InternalIsDeferred(int index)
 		{
-			return ((FRecordset.Fields[AIndex].Attributes & (int)FieldAttributeEnum.adFldLong) != 0);
+			return ((_recordset.Fields[index].Attributes & (int)FieldAttributeEnum.adFldLong) != 0);
 		}
 		
-		protected override System.IO.Stream InternalOpenDeferredStream(int AIndex)
+		protected override System.IO.Stream InternalOpenDeferredStream(int index)
 		{
-			object LValue = GetValue(AIndex);
-			if (!((LValue == null) || (LValue == System.DBNull.Value)))
+			object tempValue = GetValue(index);
+			if (!((tempValue == null) || (tempValue == System.DBNull.Value)))
 			{
-				if (LValue is string)
+				if (tempValue is string)
 				{
-					MemoryStream LMemoryStream = new MemoryStream();
-					using (StreamWriter LWriter = new StreamWriter(LMemoryStream))
+					MemoryStream memoryStream = new MemoryStream();
+					using (StreamWriter writer = new StreamWriter(memoryStream))
 					{
-						LWriter.Write(LValue);
-						LWriter.Flush();
-						return new MemoryStream(LMemoryStream.GetBuffer(), 0, LMemoryStream.GetBuffer().Length, false, true);
+						writer.Write(tempValue);
+						writer.Flush();
+						return new MemoryStream(memoryStream.GetBuffer(), 0, memoryStream.GetBuffer().Length, false, true);
 					}
 				}
-				else if (LValue is byte[])
+				else if (tempValue is byte[])
 				{
-					byte[] LByteValue = (byte[])LValue;
-					return new MemoryStream(LByteValue, 0, LByteValue.Length, false, true);
+					byte[] byteValue = (byte[])tempValue;
+					return new MemoryStream(byteValue, 0, byteValue.Length, false, true);
 				}
 				else
 					throw new ConnectionException(ConnectionException.Codes.UnableToConvertDeferredStreamValue);
@@ -560,47 +560,47 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 				return new MemoryStream();
 		}
 		
-		protected override bool InternalFindKey(object[] AKey)
+		protected override bool InternalFindKey(object[] key)
 		{
-			FRecordset.Seek(AKey, ADODB.SeekEnum.adSeekFirstEQ);
-			return !FRecordset.EOF;
+			_recordset.Seek(key, ADODB.SeekEnum.adSeekFirstEQ);
+			return !_recordset.EOF;
 		}
 
-		protected override void InternalFindNearest(object[] AKey)
+		protected override void InternalFindNearest(object[] key)
 		{
-			FRecordset.Seek(AKey, ADODB.SeekEnum.adSeekAfterEQ);
+			_recordset.Seek(key, ADODB.SeekEnum.adSeekAfterEQ);
 		}
 		
 		protected override string InternalGetFilter()
 		{
-			String LValue = FRecordset.Filter as String;
-			return LValue == null ? String.Empty : LValue;
+			String tempValue = _recordset.Filter as String;
+			return tempValue == null ? String.Empty : tempValue;
 		}
 		
-		protected override bool InternalSetFilter(string AFilter)
+		protected override bool InternalSetFilter(string filter)
 		{
-			FRecordset.Filter = AFilter;
-			return !FRecordset.EOF;
+			_recordset.Filter = filter;
+			return !_recordset.EOF;
 		}
 
-		protected override void InternalInsert(string[] ANames, object[] AValues)
+		protected override void InternalInsert(string[] names, object[] values)
 		{
-			FRecordset.AddNew(System.Reflection.Missing.Value, System.Reflection.Missing.Value);
-			for (int LIndex = 0; LIndex < ANames.Length; LIndex++)
-				FRecordset.Fields[ANames[LIndex]].Value = AValues[LIndex];
-			FRecordset.Update(System.Reflection.Missing.Value, System.Reflection.Missing.Value);
+			_recordset.AddNew(System.Reflection.Missing.Value, System.Reflection.Missing.Value);
+			for (int index = 0; index < names.Length; index++)
+				_recordset.Fields[names[index]].Value = values[index];
+			_recordset.Update(System.Reflection.Missing.Value, System.Reflection.Missing.Value);
 		}
 
-		protected override void InternalUpdate(string[] ANames, object[] AValues)
+		protected override void InternalUpdate(string[] names, object[] values)
 		{
-			for (int LIndex = 0; LIndex < ANames.Length; LIndex++)
-				FRecordset.Fields[ANames[LIndex]].Value = AValues[LIndex];
-			FRecordset.Update(System.Reflection.Missing.Value, System.Reflection.Missing.Value);
+			for (int index = 0; index < names.Length; index++)
+				_recordset.Fields[names[index]].Value = values[index];
+			_recordset.Update(System.Reflection.Missing.Value, System.Reflection.Missing.Value);
 		}
 
 		protected override void InternalDelete()
 		{
-			FRecordset.Delete(ADODB.AffectEnum.adAffectCurrent);
+			_recordset.Delete(ADODB.AffectEnum.adAffectCurrent);
 		}
 	}
 }

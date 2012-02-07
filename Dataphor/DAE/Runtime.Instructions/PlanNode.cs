@@ -68,189 +68,189 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
  		}
 		
         // IsLiteral
-        protected bool FIsLiteral = true;
+        protected bool _isLiteral = true;
         public bool IsLiteral
         {
-			get { return FIsLiteral; }
-			set { FIsLiteral = value; }
+			get { return _isLiteral; }
+			set { _isLiteral = value; }
         }
         
         // IsFunctional
-        protected bool FIsFunctional = true;
+        protected bool _isFunctional = true;
         public bool IsFunctional
         {
-			get { return FIsFunctional; }
-			set { FIsFunctional = value; }
+			get { return _isFunctional; }
+			set { _isFunctional = value; }
         }
         
         // IsDeterministic
-        protected bool FIsDeterministic = true;
+        protected bool _isDeterministic = true;
         public bool IsDeterministic
         {
-			get { return FIsDeterministic; }
-			set { FIsDeterministic = value; }
+			get { return _isDeterministic; }
+			set { _isDeterministic = value; }
         }
         
         // IsRepeatable
-        protected bool FIsRepeatable = true;
+        protected bool _isRepeatable = true;
         public bool IsRepeatable
         {
-			get { return FIsRepeatable; }
-			set { FIsRepeatable = value; }
+			get { return _isRepeatable; }
+			set { _isRepeatable = value; }
         }
 
         // IsNilable
-        protected bool FIsNilable = false;
+        protected bool _isNilable = false;
         public bool IsNilable
         {
-			get { return FIsNilable; }
-			set { FIsNilable = value; }
+			get { return _isNilable; }
+			set { _isNilable = value; }
 		}
         
-		public static string CharacteristicsToString(PlanNode ANode)
+		public static string CharacteristicsToString(PlanNode node)
 		{
-			StringBuilder LString = new StringBuilder();
-			LString.Append(ANode.IsLiteral ? Strings.Get("Characteristics.Literal") : Strings.Get("Characteristics.NonLiteral"));
-			LString.AppendFormat(", {0}", ANode.IsFunctional ? Strings.Get("Characteristics.Functional") : Strings.Get("Characteristics.NonFunctional"));
-			LString.AppendFormat(", {0}", ANode.IsDeterministic ? Strings.Get("Characteristics.Deterministic") : Strings.Get("Characteristics.NonDeterministic"));
-			LString.AppendFormat(", {0}", ANode.IsRepeatable ? Strings.Get("Characteristics.Repeatable") : Strings.Get("Characteristics.NonRepeatable"));
-			LString.AppendFormat(", {0}", ANode.IsNilable ? Strings.Get("Characteristics.Nilable") : Strings.Get("Characteristics.NonNilable"));
-			return LString.ToString();
+			StringBuilder stringValue = new StringBuilder();
+			stringValue.Append(node.IsLiteral ? Strings.Get("Characteristics.Literal") : Strings.Get("Characteristics.NonLiteral"));
+			stringValue.AppendFormat(", {0}", node.IsFunctional ? Strings.Get("Characteristics.Functional") : Strings.Get("Characteristics.NonFunctional"));
+			stringValue.AppendFormat(", {0}", node.IsDeterministic ? Strings.Get("Characteristics.Deterministic") : Strings.Get("Characteristics.NonDeterministic"));
+			stringValue.AppendFormat(", {0}", node.IsRepeatable ? Strings.Get("Characteristics.Repeatable") : Strings.Get("Characteristics.NonRepeatable"));
+			stringValue.AppendFormat(", {0}", node.IsNilable ? Strings.Get("Characteristics.Nilable") : Strings.Get("Characteristics.NonNilable"));
+			return stringValue.ToString();
 		}
 
         // IsOrderPreserving (see the sargability discussion in RestrictNode.cs for a description of this characteristic)
-        protected bool FIsOrderPreserving = false;
+        protected bool _isOrderPreserving = false;
         public bool IsOrderPreserving
         {
-			get { return FIsOrderPreserving; }
-			set { FIsOrderPreserving = value; }
+			get { return _isOrderPreserving; }
+			set { _isOrderPreserving = value; }
 		}
 		
 		// IsContextLiteral (see the sargability discussion in RestrictNode.cs for a description of this characteristic)
-		public virtual bool IsContextLiteral(int ALocation)
+		public virtual bool IsContextLiteral(int location)
 		{
-			if (FNodes != null)
-				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
-					if (!Nodes[LIndex].IsContextLiteral(ALocation))
+			if (_nodes != null)
+				for (int index = 0; index < Nodes.Count; index++)
+					if (!Nodes[index].IsContextLiteral(location))
 						return false;
 			return true;
 		}
 		
 		// Modifiers
-		protected LanguageModifiers FModifiers;
+		protected LanguageModifiers _modifiers;
 		public LanguageModifiers Modifiers
 		{
-			get { return FModifiers; }
-			set { FModifiers = value; }
+			get { return _modifiers; }
+			set { _modifiers = value; }
 		}
         
         // Device
 		[Reference]
-        protected Schema.Device FDevice;
+        protected Schema.Device _device;
         public Schema.Device Device
         {
-			get { return FDevice; }
-			set { FDevice = value; }
+			get { return _device; }
+			set { _device = value; }
         }
         
         // DeviceNode
-        protected DevicePlanNode FDeviceNode;
+        protected DevicePlanNode _deviceNode;
         public DevicePlanNode DeviceNode
         {
-			get { return FDeviceNode; }
-			set { FDeviceNode = value; }
+			get { return _deviceNode; }
+			set { _deviceNode = value; }
 		}
         
         // NoDevice
-        protected bool FNoDevice;
+        protected bool _noDevice;
         public bool NoDevice
         {
-			get { return FNoDevice; }
-			set { FNoDevice = value; }
+			get { return _noDevice; }
+			set { _noDevice = value; }
         }
         
         // DeviceSupported
-        protected bool FDeviceSupported;
+        protected bool _deviceSupported;
         public bool DeviceSupported
         {
-			get { return FDeviceSupported; }
-			set { FDeviceSupported = value; }
+			get { return _deviceSupported; }
+			set { _deviceSupported = value; }
         }
         
         // DeviceMessages
         // Set by the device during the prepare phase.
         // Will be null if this node has not been prepared, so test all access to this reference.
-        protected Schema.TranslationMessages FDeviceMessages;
-        public Schema.TranslationMessages DeviceMessages { get { return FDeviceMessages; } }
+        protected Schema.TranslationMessages _deviceMessages;
+        public Schema.TranslationMessages DeviceMessages { get { return _deviceMessages; } }
         
 		// DetermineDevice
-		public virtual void DetermineDevice(Plan APlan)
+		public virtual void DetermineDevice(Plan plan)
 		{
 			//	if child nodes are flagged with nodevice, or have more than one non-null device
 			//		this node is flagged as nodevice
 			//	otherwise
 			//		this node uses the same device as its children
-            Schema.Device LChildDevice = null;
-            Schema.Device LCurrentChildDevice = null;
-            FNoDevice = !ShouldSupport;
+            Schema.Device childDevice = null;
+            Schema.Device currentChildDevice = null;
+            _noDevice = !ShouldSupport;
             
-            if (FNodes != null)
-				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+            if (_nodes != null)
+				for (int index = 0; index < Nodes.Count; index++)
 				{
-					FNoDevice = FNoDevice || Nodes[LIndex].NoDevice;
-					if (!FNoDevice)
+					_noDevice = _noDevice || Nodes[index].NoDevice;
+					if (!_noDevice)
 					{
-						LChildDevice = Nodes[LIndex].Device;
-						if (LChildDevice != null)
+						childDevice = Nodes[index].Device;
+						if (childDevice != null)
 						{
-							if (LCurrentChildDevice == null)
-								LCurrentChildDevice = LChildDevice;
-							else if (LCurrentChildDevice != LChildDevice)
+							if (currentChildDevice == null)
+								currentChildDevice = childDevice;
+							else if (currentChildDevice != childDevice)
 							{
-								FNoDevice = true;
+								_noDevice = true;
 								break;
 							}
 						}
 					}
 				}
 
-            if (!FNoDevice)
+            if (!_noDevice)
             {
-				FDevice = LCurrentChildDevice;
-				if (FDevice != null)
+				_device = currentChildDevice;
+				if (_device != null)
 				{							
-					Schema.DevicePlan LDevicePlan = null;
+					Schema.DevicePlan devicePlan = null;
 					if (ShouldSupport)
 					{
-						APlan.EnsureDeviceStarted(FDevice);
-						LDevicePlan = FDevice.Prepare(APlan, this);
+						plan.EnsureDeviceStarted(_device);
+						devicePlan = _device.Prepare(plan, this);
 					}
 					
-					if (LDevicePlan != null)
-						FDeviceMessages = LDevicePlan.TranslationMessages;
+					if (devicePlan != null)
+						_deviceMessages = devicePlan.TranslationMessages;
 
-					if ((LDevicePlan != null) && LDevicePlan.IsSupported)
+					if ((devicePlan != null) && devicePlan.IsSupported)
 					{
 						// If the plan could be supported via parameterization, it is not actually supported by the device
 						// and setting the device supported to false ensures that if this node is actually executed, the
 						// device will not be asked to perform a useless parameterization.
-						FDeviceSupported = !FCouldSupport;
-						APlan.AddDevicePlan(LDevicePlan);
+						_deviceSupported = !_couldSupport;
+						plan.AddDevicePlan(devicePlan);
 					}
 					else
 					{
-						if (!FDevice.IgnoreUnsupported && (DataType != null) && !IgnoreUnsupported && !APlan.InTypeOfContext)
+						if (!_device.IgnoreUnsupported && (DataType != null) && !IgnoreUnsupported && !plan.InTypeOfContext)
 						{
-							if ((LDevicePlan != null) && !APlan.SuppressWarnings)
-								APlan.Messages.Add(new CompilerException(CompilerException.Codes.UnsupportedPlan, CompilerErrorLevel.Warning, FDevice.Name, SafeEmitStatementAsString(), LDevicePlan.TranslationMessages.ToString()));
+							if ((devicePlan != null) && !plan.SuppressWarnings)
+								plan.Messages.Add(new CompilerException(CompilerException.Codes.UnsupportedPlan, CompilerErrorLevel.Warning, _device.Name, SafeEmitStatementAsString(), devicePlan.TranslationMessages.ToString()));
 						}
-						FDeviceSupported = false;
-						FNoDevice = true;
+						_deviceSupported = false;
+						_noDevice = true;
 					}
 				}
 				else
 				{
-					FDeviceSupported = false;
+					_deviceSupported = false;
 					// BTR 4/28/2005 ->
 					// Not sure why this is here, but it is preventing the translation of several otherwise translatable items.
 					// I will turn it off and see what happens.
@@ -259,151 +259,151 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 			else
-				FDeviceSupported = false;
+				_deviceSupported = false;
 		}
 		
 		// IgnoreUnsupported -- only applies if DataType is not null
-		private bool FIgnoreUnsupported;
+		private bool _ignoreUnsupported;
 		public bool IgnoreUnsupported
 		{
-			get { return FIgnoreUnsupported; }
-			set { FIgnoreUnsupported = value; }
+			get { return _ignoreUnsupported; }
+			set { _ignoreUnsupported = value; }
 		}
 		
-		private bool FCouldSupport = false;
+		private bool _couldSupport = false;
 		/// <summary>Set by the device to indicate that the node could be supported if necessary, but only by parameterization.</summary>
 		public bool CouldSupport
 		{
-			get { return FCouldSupport; }
-			set { FCouldSupport = value; }
+			get { return _couldSupport; }
+			set { _couldSupport = value; }
 		}
 		
-		private bool FShouldSupport = true;
+		private bool _shouldSupport = true;
 		public bool ShouldSupport
 		{
-			get { return FShouldSupport; }
-			set { FShouldSupport = value; }
+			get { return _shouldSupport; }
+			set { _shouldSupport = value; }
 		}
 		
-		private bool FShouldEmitIL = false;
+		private bool _shouldEmitIL = false;
 		public bool ShouldEmitIL
 		{
-			get { return FShouldEmitIL; }
-			set { FShouldEmitIL = value; }
+			get { return _shouldEmitIL; }
+			set { _shouldEmitIL = value; }
 		}
 		
-		private bool FIsBreakable = false;
+		private bool _isBreakable = false;
 		public bool IsBreakable
 		{
-			get { return FIsBreakable; }
-			set { FIsBreakable = value; }
+			get { return _isBreakable; }
+			set { _isBreakable = value; }
 		}
 		
-		private LineInfo FLineInfo;
+		private LineInfo _lineInfo;
 		public LineInfo LineInfo
 		{
-			get { return FLineInfo; }
-			set { FLineInfo = value; }
+			get { return _lineInfo; }
+			set { _lineInfo = value; }
 		}
 		
-		public void SetLineInfo(Plan APlan, LineInfo ALineInfo)
+		public void SetLineInfo(Plan plan, LineInfo lineInfo)
 		{
-			if (ALineInfo != null)
+			if (lineInfo != null)
 			{
-				if (FLineInfo == null)
-					FLineInfo = new LineInfo();
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
 				
-				if (APlan.CompilingOffset != null)
+				if (plan.CompilingOffset != null)
 				{
-					FLineInfo.Line = ALineInfo.Line - APlan.CompilingOffset.Line;
-					FLineInfo.LinePos = ALineInfo.LinePos - ((APlan.CompilingOffset.Line == ALineInfo.Line) ? APlan.CompilingOffset.LinePos : 0);
-					FLineInfo.EndLine = ALineInfo.EndLine - APlan.CompilingOffset.Line;
-					FLineInfo.EndLinePos = ALineInfo.EndLinePos - ((APlan.CompilingOffset.Line == ALineInfo.EndLine) ? APlan.CompilingOffset.LinePos : 0);
+					_lineInfo.Line = lineInfo.Line - plan.CompilingOffset.Line;
+					_lineInfo.LinePos = lineInfo.LinePos - ((plan.CompilingOffset.Line == lineInfo.Line) ? plan.CompilingOffset.LinePos : 0);
+					_lineInfo.EndLine = lineInfo.EndLine - plan.CompilingOffset.Line;
+					_lineInfo.EndLinePos = lineInfo.EndLinePos - ((plan.CompilingOffset.Line == lineInfo.EndLine) ? plan.CompilingOffset.LinePos : 0);
 				}
 				else
 				{
-					FLineInfo.SetFromLineInfo(ALineInfo);
+					_lineInfo.SetFromLineInfo(lineInfo);
 				}
 			}
 		}
 
 		public int Line 
 		{ 
-			get { return FLineInfo == null ? -1 : FLineInfo.Line; } 
+			get { return _lineInfo == null ? -1 : _lineInfo.Line; } 
 			set
 			{
-				if (FLineInfo == null)
-					FLineInfo = new LineInfo();
-				FLineInfo.Line = value;
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.Line = value;
 			}
 		}
 		
 		public int LinePos
 		{
-			get { return FLineInfo == null ? -1 : FLineInfo.LinePos; }
+			get { return _lineInfo == null ? -1 : _lineInfo.LinePos; }
 			set
 			{
-				if (FLineInfo == null)
-					FLineInfo = new LineInfo();
-				FLineInfo.LinePos = value;
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.LinePos = value;
 			}
 		}
 		
 		public int EndLine
 		{
-			get { return FLineInfo == null ? -1 : FLineInfo.EndLine; }
+			get { return _lineInfo == null ? -1 : _lineInfo.EndLine; }
 			set
 			{
-				if (FLineInfo == null)
-					FLineInfo = new LineInfo();
-				FLineInfo.EndLine = value;
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.EndLine = value;
 			}
 		}
 		
 		public int EndLinePos
 		{
-			get { return FLineInfo == null ? -1 : FLineInfo.EndLinePos; }
+			get { return _lineInfo == null ? -1 : _lineInfo.EndLinePos; }
 			set
 			{
-				if (FLineInfo == null)
-					FLineInfo = new LineInfo();
-				FLineInfo.EndLinePos = value;
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.EndLinePos = value;
 			}
 		}
 		
         // Nodes
-        private PlanNodes FNodes;
+        private PlanNodes _nodes;
         public PlanNodes Nodes
         {
 			get
 			{
-				if (FNodes == null)
-					FNodes = new PlanNodes();
-				return FNodes;
+				if (_nodes == null)
+					_nodes = new PlanNodes();
+				return _nodes;
 			}
 		}
 		
-		public int NodeCount { get { return FNodes == null ? 0 : FNodes.Count; } }
+		public int NodeCount { get { return _nodes == null ? 0 : _nodes.Count; } }
 
 		// IL Generation        
-        public void EmitIL(Plan APlan, bool AParentEmitted) 
+        public void EmitIL(Plan plan, bool parentEmitted) 
         {
-			if (!FDeviceSupported)
+			if (!_deviceSupported)
 			{
-				if (!AParentEmitted)
-					InternalEmitIL(APlan);
+				if (!parentEmitted)
+					InternalEmitIL(plan);
 
-				if (FNodes != null)				
-					for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
-						Nodes[LIndex].EmitIL(APlan, FShouldEmitIL);
+				if (_nodes != null)				
+					for (int index = 0; index < Nodes.Count; index++)
+						Nodes[index].EmitIL(plan, _shouldEmitIL);
 			}
         }
 
-		protected static FieldInfo FNodesFieldInfo = typeof(PlanNode).GetField("Nodes");
-		protected static FieldInfo FPlanNodesFieldInfo = typeof(PlanNodes).GetField("FNodes", BindingFlags.NonPublic | BindingFlags.Instance);        
-        protected static FieldInfo FExecuteFieldInfo = typeof(PlanNode).GetField("Execute");
-        protected static MethodInfo FExecuteMethodInfo = typeof(ExecuteDelegate).GetMethod("Invoke", new Type[] { typeof(ServerProcess) });
-        protected static MethodInfo FPlanNodesIndexerInfo = typeof(PlanNodes).GetMethod("get_Item", new Type[] { typeof(int) });
+		protected static FieldInfo _nodesFieldInfo = typeof(PlanNode).GetField("Nodes");
+		protected static FieldInfo _planNodesFieldInfo = typeof(PlanNodes).GetField("FNodes", BindingFlags.NonPublic | BindingFlags.Instance);        
+        protected static FieldInfo _executeFieldInfo = typeof(PlanNode).GetField("Execute");
+        protected static MethodInfo _executeMethodInfo = typeof(ExecuteDelegate).GetMethod("Invoke", new Type[] { typeof(ServerProcess) });
+        protected static MethodInfo _planNodesIndexerInfo = typeof(PlanNodes).GetMethod("get_Item", new Type[] { typeof(int) });
 
 		/// <summary>
 		/// Prepares a dynamic method for use in generating the IL for a node.
@@ -417,130 +417,130 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// <summary>
 		/// If AExecute is not null, calls the CreateDelegate of the DynamicMethod and sets the execute field of the node to the value returned.
 		/// </summary>
-		/// <param name="AExecute">The DynamicMethod instance returned by a previous call to BeginEmitIL.</param>
-		protected void EndEmitIL(DynamicMethod AExecute, ILGenerator AGenerator)
+		/// <param name="execute">The DynamicMethod instance returned by a previous call to BeginEmitIL.</param>
+		protected void EndEmitIL(DynamicMethod execute, ILGenerator generator)
 		{
 			if (DataType == null)
-				AGenerator.Emit(OpCodes.Ldnull);
-			AGenerator.Emit(OpCodes.Ret);
-			ILExecute = (ExecuteDelegate)AExecute.CreateDelegate(typeof(ExecuteDelegate), this);
+				generator.Emit(OpCodes.Ldnull);
+			generator.Emit(OpCodes.Ret);
+			ILExecute = (ExecuteDelegate)execute.CreateDelegate(typeof(ExecuteDelegate), this);
 		}
 		
-		public object TestExecute(Program AProgram)
+		public object TestExecute(Program program)
 		{
-			return Nodes[0].Execute(AProgram);
+			return Nodes[0].Execute(program);
 		}
 		
-		public LocalBuilder EmitThis(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public LocalBuilder EmitThis(Plan plan, ILGenerator generator, int[] executePath)
 		{
 			// Declare a local variable to store the "this" pointer for the method (This is a path to the PlanNode for this node from the root IL generation node)
-			LocalBuilder LThis = AGenerator.DeclareLocal(typeof(PlanNode));
+			LocalBuilder thisValue = generator.DeclareLocal(typeof(PlanNode));
 			
 			// Load this of root plan node
-			AGenerator.Emit(OpCodes.Ldarg_0);
+			generator.Emit(OpCodes.Ldarg_0);
 
 			// for each index in the execute path, load the node reference in the Nodes list for that node
-			for (int LIndex = 0; LIndex < AExecutePath.Length; LIndex++)
+			for (int index = 0; index < executePath.Length; index++)
 			{
-			    AGenerator.Emit(OpCodes.Ldfld, FNodesFieldInfo);
-				AGenerator.Emit(OpCodes.Ldfld, FPlanNodesFieldInfo);
-				AGenerator.Emit(OpCodes.Ldc_I4, AExecutePath[LIndex]);
-				AGenerator.Emit(OpCodes.Ldelem_Ref);
+			    generator.Emit(OpCodes.Ldfld, _nodesFieldInfo);
+				generator.Emit(OpCodes.Ldfld, _planNodesFieldInfo);
+				generator.Emit(OpCodes.Ldc_I4, executePath[index]);
+				generator.Emit(OpCodes.Ldelem_Ref);
 			}
 			
 			// Store it in the "this" local
-			AGenerator.Emit(OpCodes.Stloc, LThis);
+			generator.Emit(OpCodes.Stloc, thisValue);
 
-			return LThis;			
+			return thisValue;			
 		}
 		
-		public int[] PrepareExecutePath(Plan APlan, int[] AExecutePath)
+		public int[] PrepareExecutePath(Plan plan, int[] executePath)
 		{
-			int[] LExecutePath = new int[AExecutePath.Length + 1];
-			AExecutePath.CopyTo(LExecutePath, 0);
-			return LExecutePath;
+			int[] localExecutePath = new int[executePath.Length + 1];
+			executePath.CopyTo(localExecutePath, 0);
+			return localExecutePath;
 		}
 		
-		public void EmitExecute(Plan APlan, ILGenerator AGenerator, int[] AExecutePath, int ANodeIndex)
+		public void EmitExecute(Plan plan, ILGenerator generator, int[] executePath, int nodeIndex)
 		{
-			AExecutePath[AExecutePath.Length - 1] = ANodeIndex;
-			Nodes[ANodeIndex].EmitIL(APlan, AGenerator, AExecutePath);
+			executePath[executePath.Length - 1] = nodeIndex;
+			Nodes[nodeIndex].EmitIL(plan, generator, executePath);
 			
 			// Pop the return value if necessary
-			if (Nodes[ANodeIndex].DataType != null)
-				AGenerator.Emit(OpCodes.Pop);
+			if (Nodes[nodeIndex].DataType != null)
+				generator.Emit(OpCodes.Pop);
 		}
 		
-		public void EmitEvaluate(Plan APlan, ILGenerator AGenerator, int[] AExecutePath, int ANodeIndex)
+		public void EmitEvaluate(Plan plan, ILGenerator generator, int[] executePath, int nodeIndex)
 		{
-			AExecutePath[AExecutePath.Length - 1] = ANodeIndex;
-			Nodes[ANodeIndex].EmitIL(APlan, AGenerator, AExecutePath);
+			executePath[executePath.Length - 1] = nodeIndex;
+			Nodes[nodeIndex].EmitIL(plan, generator, executePath);
 		}
 		
-		public virtual void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public virtual void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{
 			// Generate a call to the Execute delegate for this node
 			
-			LocalBuilder LThis = EmitThis(APlan, AGenerator, AExecutePath);
+			LocalBuilder thisValue = EmitThis(plan, generator, executePath);
 			
 			// Load the address of the execute delegate for the "this" node
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, FExecuteFieldInfo);
+			generator.Emit(OpCodes.Ldloc, thisValue);
+			generator.Emit(OpCodes.Ldfld, _executeFieldInfo);
 			
 			// Prepare the execute call arguments
-			AGenerator.Emit(OpCodes.Ldarg_1);		 // AProcess
+			generator.Emit(OpCodes.Ldarg_1);		 // AProcess
 			
 			// Invoke Execute
-			AGenerator.EmitCall(OpCodes.Callvirt, FExecuteMethodInfo, null);
+			generator.EmitCall(OpCodes.Callvirt, _executeMethodInfo, null);
 			
 			// If no return value, eat the null
 			if (DataType == null)
-				AGenerator.Emit(OpCodes.Pop);
+				generator.Emit(OpCodes.Pop);
 		}
 		
-		protected virtual void InternalEmitIL(Plan APlan) 
+		protected virtual void InternalEmitIL(Plan plan) 
 		{
-			if (FShouldEmitIL)
+			if (_shouldEmitIL)
 			{
-				DynamicMethod LExecute = BeginEmitIL();
-				ILGenerator LGenerator = LExecute.GetILGenerator();
-				EmitIL(APlan, LGenerator, new int[]{});
-				EndEmitIL(LExecute, LGenerator);
+				DynamicMethod execute = BeginEmitIL();
+				ILGenerator generator = execute.GetILGenerator();
+				EmitIL(plan, generator, new int[]{});
+				EndEmitIL(execute, generator);
 			} 
 		}
 		
 		// Statement
-		public virtual Statement EmitStatement(EmitMode AMode)
+		public virtual Statement EmitStatement(EmitMode mode)
 		{
 			throw new RuntimeException(RuntimeException.Codes.StatementNotSupported, ToString());
 		}
 		
-		public string EmitStatementAsString(bool ARemoveLineBreaks)
+		public string EmitStatementAsString(bool removeLineBreaks)
 		{
-			string LStatement = new D4TextEmitter().Emit(EmitStatement(EmitMode.ForCopy));
-			if (ARemoveLineBreaks)
+			string statement = new D4TextEmitter().Emit(EmitStatement(EmitMode.ForCopy));
+			if (removeLineBreaks)
 			{
-				bool LInWhiteSpace = false;
-				StringBuilder LBuilder = new StringBuilder();
-				for (int LIndex = 0; LIndex < LStatement.Length; LIndex++)
+				bool inWhiteSpace = false;
+				StringBuilder builder = new StringBuilder();
+				for (int index = 0; index < statement.Length; index++)
 				{
-					if (Char.IsWhiteSpace(LStatement, LIndex))
+					if (Char.IsWhiteSpace(statement, index))
 					{
-						if (!LInWhiteSpace)
+						if (!inWhiteSpace)
 						{
-							LInWhiteSpace = true;
-							LBuilder.Append(" ");
+							inWhiteSpace = true;
+							builder.Append(" ");
 						}
 					}
 					else
 					{
-						LInWhiteSpace = false;
-						LBuilder.Append(LStatement[LIndex]);
+						inWhiteSpace = false;
+						builder.Append(statement[index]);
 					}
 				}
-				return LBuilder.ToString();
+				return builder.ToString();
 			}
-			return LStatement;
+			return statement;
 		}
 		
 		public string EmitStatementAsString()
@@ -553,11 +553,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return SafeEmitStatementAsString(true);
 		}
 		
-		public string SafeEmitStatementAsString(bool ARemoveLineBreaks)
+		public string SafeEmitStatementAsString(bool removeLineBreaks)
 		{
 			try
 			{
-				return EmitStatementAsString(ARemoveLineBreaks);
+				return EmitStatementAsString(removeLineBreaks);
 			}
 			catch
 			{
@@ -567,70 +567,70 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		// DataType
 		[Reference] // TODO: This should be a reference for scalar types, but owned for all other types
-		protected Schema.IDataType FDataType;
+		protected Schema.IDataType _dataType;
 		public virtual Schema.IDataType DataType
 		{
-			get { return FDataType; }
-			set { FDataType = value; }
+			get { return _dataType; }
+			set { _dataType = value; }
 		}
 		
         // DetermineDataType
-        public virtual void DetermineDataType(Plan APlan) {}
+        public virtual void DetermineDataType(Plan plan) {}
         
         // DetermineModifiers
-        protected virtual void DetermineModifiers(Plan APlan) 
+        protected virtual void DetermineModifiers(Plan plan) 
         {
 			if (Modifiers != null)
 			{
 				IgnoreUnsupported = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "IgnoreUnsupported", IgnoreUnsupported.ToString()));
 				ShouldSupport = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldSupport", ShouldSupport.ToString()));
-				ShouldEmitIL = FShouldEmitIL && (Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldEmitIL", ShouldEmitIL.ToString())));
+				ShouldEmitIL = _shouldEmitIL && (Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldEmitIL", ShouldEmitIL.ToString())));
 			}
         }
 
 		// DetermineCharacteristics        
-		public virtual void DetermineCharacteristics(Plan APlan) {}
+		public virtual void DetermineCharacteristics(Plan plan) {}
 		
         // DetermineBinding
-        public virtual void DetermineBinding(Plan APlan)
+        public virtual void DetermineBinding(Plan plan)
         {
-			if (FDataType != null)
-				APlan.PushTypeContext(FDataType);
+			if (_dataType != null)
+				plan.PushTypeContext(_dataType);
 			try
 			{
-				InternalDetermineBinding(APlan);
+				InternalDetermineBinding(plan);
 			}
 			finally
 			{
-				if (FDataType != null)
-					APlan.PopTypeContext(FDataType);
+				if (_dataType != null)
+					plan.PopTypeContext(_dataType);
 			}
 			
-			DetermineDevice(APlan);
+			DetermineDevice(plan);
         }
 
-		public virtual void InternalDetermineBinding(Plan APlan)
+		public virtual void InternalDetermineBinding(Plan plan)
 		{
-			if (FNodes != null)
-				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
-					Nodes[LIndex].DetermineBinding(APlan);
+			if (_nodes != null)
+				for (int index = 0; index < Nodes.Count; index++)
+					Nodes[index].DetermineBinding(plan);
 		}
 		
 		/// <summary>Rechecks security for the plan using the given plan and associated security context.</summary>
-		public virtual void BindToProcess(Plan APlan)
+		public virtual void BindToProcess(Plan plan)
 		{
-			if (FNodes != null)
-				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
-					Nodes[LIndex].BindToProcess(APlan);
+			if (_nodes != null)
+				for (int index = 0; index < Nodes.Count; index++)
+					Nodes[index].BindToProcess(plan);
 		}
 		
         // ILExecute
         protected ExecuteDelegate ILExecute;
 
 		// BeforeExecute        
-        protected virtual void InternalBeforeExecute(Program AProgram) { }
+        protected virtual void InternalBeforeExecute(Program program) { }
         
-		public object Execute(Program AProgram)
+		public object Execute(Program program)
 		{
 			#if WRAPRUNTIMEEXCEPTIONS
 			try
@@ -638,83 +638,83 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 
 				if (IsBreakable)
-					AProgram.Yield(this, false);
+					program.Yield(this, false);
 				else
-					AProgram.CheckAborted();
+					program.CheckAborted();
 
 				if (ILExecute != null)
-					return ILExecute(AProgram);
-				InternalBeforeExecute(AProgram);
-				if (FDeviceSupported)
-					return AProgram.DeviceExecute(FDevice, this);
-				return InternalExecute(AProgram);
+					return ILExecute(program);
+				InternalBeforeExecute(program);
+				if (_deviceSupported)
+					return program.DeviceExecute(_device, this);
+				return InternalExecute(program);
 
 			#if WRAPRUNTIMEEXCEPTIONS
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				bool LIsNew = false;
-				Exception LToThrow = null;
+				bool isNew = false;
+				Exception toThrow = null;
 				
-				RuntimeException LRuntimeException = LException as RuntimeException;
-				if (LRuntimeException != null)
+				RuntimeException runtimeException = exception as RuntimeException;
+				if (runtimeException != null)
 				{
-					if (!LRuntimeException.HasContext())
+					if (!runtimeException.HasContext())
 					{
-						LRuntimeException.SetLocator(AProgram.GetLocation(this, true));
-						LIsNew = true;
+						runtimeException.SetLocator(program.GetLocation(this, true));
+						isNew = true;
 					}
-					LToThrow = LRuntimeException;
+					toThrow = runtimeException;
 				}
 				
-				if ((LToThrow == null) && (LException is ControlError))
-					throw LException;
+				if ((toThrow == null) && (exception is ControlError))
+					throw exception;
 
-				if ((LToThrow == null) && (LException is NullReferenceException))
+				if ((toThrow == null) && (exception is NullReferenceException))
 				{
-					LToThrow = new RuntimeException(RuntimeException.Codes.NilEncountered, LException, AProgram.GetLocation(this, true));
-					LIsNew = true;
+					toThrow = new RuntimeException(RuntimeException.Codes.NilEncountered, exception, program.GetLocation(this, true));
+					isNew = true;
 				}
 					
-				if (LToThrow == null)
+				if (toThrow == null)
 				{
-					DataphorException LDataphorException = LException as DataphorException;
-					if (LDataphorException != null)
+					DataphorException dataphorException = exception as DataphorException;
+					if (dataphorException != null)
 					{
-						if ((LDataphorException.Severity == ErrorSeverity.User) || (LDataphorException.ServerContext != null) || (LDataphorException.Code == (int)RuntimeException.Codes.RuntimeError))
-							LToThrow = LDataphorException;
+						if ((dataphorException.Severity == ErrorSeverity.User) || (dataphorException.ServerContext != null) || (dataphorException.Code == (int)RuntimeException.Codes.RuntimeError))
+							toThrow = dataphorException;
 						else
 						{
-							LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, LDataphorException.Severity, LDataphorException, AProgram.GetLocation(this, true), LDataphorException.Message);
-							LIsNew = true;
+							toThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, dataphorException.Severity, dataphorException, program.GetLocation(this, true), dataphorException.Message);
+							isNew = true;
 						}
 					}
 				}
 				
-				if ((LToThrow == null) && ((LException is FormatException) || (LException is ArgumentException) || (LException is ArithmeticException)))
+				if ((toThrow == null) && ((exception is FormatException) || (exception is ArgumentException) || (exception is ArithmeticException)))
 				{
-					LToThrow = new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LException.Message, LException);
-					LIsNew = true;
+					toThrow = new DataphorException(ErrorSeverity.User, DataphorException.ApplicationError, exception.Message, exception);
+					isNew = true;
 				}
 					
-				if (LToThrow == null)
+				if (toThrow == null)
 				{
-					LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, AProgram.GetLocation(this, true), LException.Message);
-					LIsNew = true;
+					toThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, exception, program.GetLocation(this, true), exception.Message);
+					isNew = true;
 				}
 				
-				if (LIsNew)
-					AProgram.ReportThrow();
+				if (isNew)
+					program.ReportThrow();
 					
 				if (IsBreakable)
-					AProgram.Yield(this, true);
+					program.Yield(this, true);
 					
-				throw LToThrow;
+				throw toThrow;
 			}
 			#endif
 		}
 		
-        public abstract object InternalExecute(Program AProgram);
+        public abstract object InternalExecute(Program program);
         
 		#region ShowPlan
 
@@ -722,11 +722,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			get 
 			{
-				string LName = GetType().Name;
-				if (LName.EndsWith("Node"))
-					return LName.Substring(0, LName.Length - 4);
+				string name = GetType().Name;
+				if (name.EndsWith("Node"))
+					return name.Substring(0, name.Length - 4);
 				else
-					return LName;
+					return name;
 			}
 		}
 
@@ -735,66 +735,66 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return "Unknown"; }
 		}
 
-		protected virtual void WritePlanElement(System.Xml.XmlWriter AWriter)
+		protected virtual void WritePlanElement(System.Xml.XmlWriter writer)
 		{
-			AWriter.WriteStartElement(GetType().Name);
+			writer.WriteStartElement(GetType().Name);
 		}
 
-		protected virtual void WritePlanNodes(System.Xml.XmlWriter AWriter)
+		protected virtual void WritePlanNodes(System.Xml.XmlWriter writer)
 		{
-			if (FNodes != null)
-				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
-					Nodes[LIndex].WritePlan(AWriter);
+			if (_nodes != null)
+				for (int index = 0; index < Nodes.Count; index++)
+					Nodes[index].WritePlan(writer);
 		}
 
-		protected static void WritePlanTags(System.Xml.XmlWriter AWriter, MetaData AMetaData)
+		protected static void WritePlanTags(System.Xml.XmlWriter writer, MetaData metaData)
 		{
-			if (AMetaData != null)
+			if (metaData != null)
 			{
 				#if USEHASHTABLEFORTAGS
-				foreach (Tag LTag in AMetaData.Tags)
+				foreach (Tag tag in AMetaData.Tags)
 				{
 				#else
-				Tag LTag;
-				for (int LIndex = 0; LIndex < AMetaData.Tags.Count; LIndex++)
+				Tag tag;
+				for (int index = 0; index < metaData.Tags.Count; index++)
 				{
-					LTag = AMetaData.Tags[LIndex];
+					tag = metaData.Tags[index];
 				#endif
-					AWriter.WriteStartElement("Tags.Tag");
-					AWriter.WriteAttributeString("Name", LTag.Name);
-					AWriter.WriteAttributeString("Value", LTag.Value);
-					AWriter.WriteEndElement();
+					writer.WriteStartElement("Tags.Tag");
+					writer.WriteAttributeString("Name", tag.Name);
+					writer.WriteAttributeString("Value", tag.Value);
+					writer.WriteEndElement();
 				}
 			}
 		}
 
-		protected virtual void WritePlanAttributes(System.Xml.XmlWriter AWriter)
+		protected virtual void WritePlanAttributes(System.Xml.XmlWriter writer)
 		{
-			AWriter.WriteAttributeString("ID", GetHashCode().ToString());
-			AWriter.WriteAttributeString("Statement", SafeEmitStatementAsString(false));
-			AWriter.WriteAttributeString("Class", GetType().FullName);
-			AWriter.WriteAttributeString("Description", Description);
-			AWriter.WriteAttributeString("Category", Category);
-			if (FDataType != null)
-				AWriter.WriteAttributeString("Type", FDataType.Name);
-			AWriter.WriteAttributeString("Characteristics", CharacteristicsToString(this));
-			AWriter.WriteAttributeString("DeviceSupported", Convert.ToString(DeviceSupported));
+			writer.WriteAttributeString("ID", GetHashCode().ToString());
+			writer.WriteAttributeString("Statement", SafeEmitStatementAsString(false));
+			writer.WriteAttributeString("Class", GetType().FullName);
+			writer.WriteAttributeString("Description", Description);
+			writer.WriteAttributeString("Category", Category);
+			if (_dataType != null)
+				writer.WriteAttributeString("Type", _dataType.Name);
+			writer.WriteAttributeString("Characteristics", CharacteristicsToString(this));
+			writer.WriteAttributeString("DeviceSupported", Convert.ToString(DeviceSupported));
 			if (DeviceSupported)
-				AWriter.WriteAttributeString("Device", FDevice.DisplayName);
-			AWriter.WriteAttributeString("CouldSupport", Convert.ToString(FCouldSupport));
-			AWriter.WriteAttributeString("ShouldSupport", Convert.ToString(FShouldSupport));
-			AWriter.WriteAttributeString("IgnoreUnsupported", Convert.ToString(FIgnoreUnsupported));
-			AWriter.WriteAttributeString("DeviceAssociative", Convert.ToString((FDevice == null) && !FNoDevice));
-			if (FDeviceMessages != null)
-				AWriter.WriteAttributeString("DeviceMessages", FDeviceMessages.ToString());
+				writer.WriteAttributeString("Device", _device.DisplayName);
+			writer.WriteAttributeString("CouldSupport", Convert.ToString(_couldSupport));
+			writer.WriteAttributeString("ShouldSupport", Convert.ToString(_shouldSupport));
+			writer.WriteAttributeString("IgnoreUnsupported", Convert.ToString(_ignoreUnsupported));
+			writer.WriteAttributeString("DeviceAssociative", Convert.ToString((_device == null) && !_noDevice));
+			if (_deviceMessages != null)
+				writer.WriteAttributeString("DeviceMessages", _deviceMessages.ToString());
 		}
 
-        public virtual void WritePlan(System.Xml.XmlWriter AWriter)
+        public virtual void WritePlan(System.Xml.XmlWriter writer)
         {
-			WritePlanElement(AWriter);
-			WritePlanAttributes(AWriter);
-			WritePlanNodes(AWriter);
-			AWriter.WriteEndElement();
+			WritePlanElement(writer);
+			WritePlanAttributes(writer);
+			WritePlanNodes(writer);
+			writer.WriteEndElement();
         }
 
 		#endregion
@@ -802,97 +802,97 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class PlanNodes : System.Object, IList
 	{
-		public const int CInitialCapacity = 0;
+		public const int InitialCapacity = 0;
 		
 		public PlanNodes() : base(){}
 
-		private int FCount;
-		private PlanNode[] FNodes;
+		private int _count;
+		private PlanNode[] _nodes;
 		
-        public PlanNode this[int AIndex]
+        public PlanNode this[int index]
         {	
 			get 
 			{ 
 				#if DEBUG
-				if (AIndex >= FCount)
+				if (index >= _count)
 					throw new IndexOutOfRangeException();
 				#endif
-				return FNodes[AIndex];
+				return _nodes[index];
 			}
 			set 
 			{ 
 				#if DEBUG
-				if (AIndex >= FCount)
+				if (index >= _count)
 					throw new IndexOutOfRangeException();
 				#endif
-				FNodes[AIndex] = value;
+				_nodes[index] = value;
 			}
         }
         
-        private void EnsureCapacity(int ARequiredCapacity)
+        private void EnsureCapacity(int requiredCapacity)
         {
-			if ((FNodes == null) || (FNodes.Length <= ARequiredCapacity))
+			if ((_nodes == null) || (_nodes.Length <= requiredCapacity))
 			{
-				PlanNode[] FNewNodes = new PlanNode[Math.Max(FNodes == null ? 0 : FNodes.Length, 1) * 2];
-				if (FNodes != null)
-					for (int LIndex = 0; LIndex < FNodes.Length; LIndex++)
-						FNewNodes[LIndex] = FNodes[LIndex];
-				FNodes = FNewNodes;
+				PlanNode[] FNewNodes = new PlanNode[Math.Max(_nodes == null ? 0 : _nodes.Length, 1) * 2];
+				if (_nodes != null)
+					for (int index = 0; index < _nodes.Length; index++)
+						FNewNodes[index] = _nodes[index];
+				_nodes = FNewNodes;
 			}
         }
         
-        public int Add(PlanNode AValue)
+        public int Add(PlanNode tempValue)
         {
-			EnsureCapacity(FCount);
-			FNodes[FCount] = AValue;
-			FCount++;
-			return FCount - 1;
+			EnsureCapacity(_count);
+			_nodes[_count] = tempValue;
+			_count++;
+			return _count - 1;
         }
         
-        public void Insert(int AIndex, PlanNode AValue)
+        public void Insert(int index, PlanNode tempValue)
         {
-			EnsureCapacity(FCount);
-			for (int LIndex = FCount - 1; LIndex >= AIndex; LIndex--)
-				FNodes[LIndex + 1] = FNodes[LIndex];
-			FNodes[AIndex] = AValue;
-			FCount++;
+			EnsureCapacity(_count);
+			for (int localIndex = _count - 1; localIndex >= index; localIndex--)
+				_nodes[localIndex + 1] = _nodes[localIndex];
+			_nodes[index] = tempValue;
+			_count++;
         }
 
-        public PlanNode Remove(PlanNode AValue)
+        public PlanNode Remove(PlanNode tempValue)
         {
-			return RemoveAt(IndexOf(AValue));
+			return RemoveAt(IndexOf(tempValue));
         }
         
-        public PlanNode RemoveAt(int AIndex)
+        public PlanNode RemoveAt(int index)
         {
-			PlanNode LNode = FNodes[AIndex];
-			FCount--;
-			for (int LIndex = AIndex; LIndex < FCount; LIndex++)
-				FNodes[LIndex] = FNodes[LIndex + 1];
-			FNodes[FCount] = null; // Clear the last item to prevent a resource leak
-			return LNode;
+			PlanNode node = _nodes[index];
+			_count--;
+			for (int localIndex = index; localIndex < _count; localIndex++)
+				_nodes[localIndex] = _nodes[localIndex + 1];
+			_nodes[_count] = null; // Clear the last item to prevent a resource leak
+			return node;
         }
         
         public void Clear()
         {
-			while (FCount > 0)
-				RemoveAt(FCount - 1);
+			while (_count > 0)
+				RemoveAt(_count - 1);
         }
         
-        public bool Contains(PlanNode AValue)
+        public bool Contains(PlanNode tempValue)
         {
-			return IndexOf(AValue) >= 0;
+			return IndexOf(tempValue) >= 0;
         }
 
-        public int IndexOf(object AValue)
+        public int IndexOf(object tempValue)
         {
-			for (int LIndex = 0; LIndex < FCount; LIndex++)
-				if (FNodes[LIndex] == AValue)
-					return LIndex;
+			for (int index = 0; index < _count; index++)
+				if (_nodes[index] == tempValue)
+					return index;
 			return -1;
         }
 
-        public int Count { get { return FCount; } }
+        public int Count { get { return _count; } }
 
         // IEnumerable interface
         IEnumerator IEnumerable.GetEnumerator()
@@ -907,36 +907,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
         public class PlanNodeEnumerator : IEnumerator
         {
-            public PlanNodeEnumerator(PlanNodes APlanNodes) : base()
+            public PlanNodeEnumerator(PlanNodes planNodes) : base()
             {
-                FPlanNodes = APlanNodes;
+                _planNodes = planNodes;
             }
             
-            private int FCurrent = -1;
-            private PlanNodes FPlanNodes;
+            private int _current = -1;
+            private PlanNodes _planNodes;
 
-            public PlanNode Current { get { return FPlanNodes[FCurrent]; } }
+            public PlanNode Current { get { return _planNodes[_current]; } }
             
-            object IEnumerator.Current { get { return FPlanNodes[FCurrent]; } }
+            object IEnumerator.Current { get { return _planNodes[_current]; } }
 
             public void Reset()
             {
-                FCurrent = -1;
+                _current = -1;
             }
 
             public bool MoveNext()
             {
-				FCurrent++;
-				return FCurrent < FPlanNodes.Count;
+				_current++;
+				return _current < _planNodes.Count;
             }
         }
         
         // ICollection
-        void ICollection.CopyTo(System.Array AArray, int AIndex)
+        void ICollection.CopyTo(System.Array array, int index)
         {
-			IList LList = (IList)AArray;
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				LList[AIndex + LIndex] = this[LIndex];
+			IList list = (IList)array;
+			for (int localIndex = 0; localIndex < Count; localIndex++)
+				list[index + localIndex] = this[localIndex];
         }
         
         bool ICollection.IsSynchronized { get { return false; } }
@@ -944,51 +944,51 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         object ICollection.SyncRoot { get { return this; } }
         
         // IList
-        int IList.Add(object AValue)
+        int IList.Add(object tempValue)
         {
-			return Add((PlanNode)AValue);
+			return Add((PlanNode)tempValue);
         }
         
-        bool IList.Contains(object AValue)
+        bool IList.Contains(object tempValue)
         {
-			return IndexOf(AValue) >= 0;
+			return IndexOf(tempValue) >= 0;
         }
         
-        void IList.Insert(int AIndex, object AValue)
+        void IList.Insert(int index, object tempValue)
         {
-			Insert(AIndex, (PlanNode)AValue);
+			Insert(index, (PlanNode)tempValue);
         }
         
         bool IList.IsFixedSize { get { return false; } }
         
         bool IList.IsReadOnly { get { return false; } }
         
-        void IList.Remove(object AValue)
+        void IList.Remove(object tempValue)
         {
-			Remove((PlanNode)AValue);
+			Remove((PlanNode)tempValue);
         }
         
-        void IList.RemoveAt(int AIndex)
+        void IList.RemoveAt(int index)
         {
-			RemoveAt(AIndex);
+			RemoveAt(index);
         }
         
-        object IList.this[int AIndex]
+        object IList.this[int index]
         {
-			get { return this[AIndex]; }
-			set { this[AIndex] = (PlanNode)value; }
+			get { return this[index]; }
+			set { this[index] = (PlanNode)value; }
         }
 	}
 	
 	public class DevicePlanNode : System.Object
 	{
-		public DevicePlanNode(PlanNode ANode) : base()
+		public DevicePlanNode(PlanNode node) : base()
 		{
-			FNode = ANode;
+			_node = node;
 		}
 		
-		protected PlanNode FNode;
-		public PlanNode Node { get { return FNode; } }
+		protected PlanNode _node;
+		public PlanNode Node { get { return _node; } }
 	}
 }
 

@@ -16,13 +16,13 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public class SQLDomain
 	{
-		public SQLDomain(Type AType, int ALength, int AScale, int APrecision, bool AIsLong) : base()
+		public SQLDomain(Type type, int length, int scale, int precision, bool isLong) : base()
 		{
-			Type = AType;
-			Length = ALength;
-			Scale = AScale;
-			Precision = APrecision;
-			IsLong = AIsLong;
+			Type = type;
+			Length = length;
+			Scale = scale;
+			Precision = precision;
+			IsLong = isLong;
 		}
 		
 		public Type Type;
@@ -34,17 +34,17 @@ namespace Alphora.Dataphor.DAE.Connection
 	
 	public class SQLColumn
 	{
-		public SQLColumn(string AName, SQLDomain ADomain) : base()
+		public SQLColumn(string name, SQLDomain domain) : base()
 		{
-			FName = AName;
-			FDomain = ADomain;
+			_name = name;
+			_domain = domain;
 		}
 		
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 		
-		private SQLDomain FDomain;
-		public SQLDomain Domain { get { return FDomain; } }
+		private SQLDomain _domain;
+		public SQLDomain Domain { get { return _domain; } }
 	}
 	
 	#if USETYPEDLIST
@@ -62,38 +62,38 @@ namespace Alphora.Dataphor.DAE.Connection
 	public class SQLColumns : BaseList<SQLColumn>
 	{
 	#endif
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (AName == this[LIndex].Name)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (name == this[index].Name)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 	}
 	
 	public class SQLIndexColumn
 	{
-		public SQLIndexColumn(string AName) : base()
+		public SQLIndexColumn(string name) : base()
 		{
-			FName = AName;
+			_name = name;
 		}
 		
-		public SQLIndexColumn(string AName, bool AAscending) : base()
+		public SQLIndexColumn(string name, bool ascending) : base()
 		{
-			FName = AName;
-			FAscending = AAscending;
+			_name = name;
+			_ascending = ascending;
 		}
 		
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 		
-		private bool FAscending = true;
-		public bool Ascending { get { return FAscending; } }
+		private bool _ascending = true;
+		public bool Ascending { get { return _ascending; } }
 	}
 	
 	#if USETYPEDLIST
@@ -111,51 +111,51 @@ namespace Alphora.Dataphor.DAE.Connection
 	public class SQLIndexColumns : BaseList<SQLIndexColumn>
 	{
 	#endif
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (AName == this[LIndex].Name)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (name == this[index].Name)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 	}
 	
 	public class SQLIndex
 	{
-		public SQLIndex(string AName) : base()
+		public SQLIndex(string name) : base()
 		{
-			FName = AName;
+			_name = name;
 		}
 		
-		public SQLIndex(string AName, SQLIndexColumn[] AColumns)
+		public SQLIndex(string name, SQLIndexColumn[] columns)
 		{
-			FName = AName;
-			FColumns.AddRange(AColumns);
+			_name = name;
+			_columns.AddRange(columns);
 		}
 		
-		public SQLIndex(string AName, SQLIndexColumns AColumns)
+		public SQLIndex(string name, SQLIndexColumns columns)
 		{
-			FName = AName;
-			FColumns.AddRange(AColumns);
+			_name = name;
+			_columns.AddRange(columns);
 		}
 		
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 		
-		private bool FIsUnique = false;
+		private bool _isUnique = false;
 		public bool IsUnique 
 		{ 
-			get { return FIsUnique; } 
-			set { FIsUnique = value; }
+			get { return _isUnique; } 
+			set { _isUnique = value; }
 		}
 		
-		private SQLIndexColumns FColumns = new SQLIndexColumns();
-		public SQLIndexColumns Columns { get { return FColumns; } }
+		private SQLIndexColumns _columns = new SQLIndexColumns();
+		public SQLIndexColumns Columns { get { return _columns; } }
 	}
 	
 	#if USETYPEDLIST
@@ -173,26 +173,26 @@ namespace Alphora.Dataphor.DAE.Connection
 	public class SQLIndexes : BaseList<SQLIndex>
 	{
 	#endif
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (AName == this[LIndex].Name)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (name == this[index].Name)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 	}
 	
 	public class SQLTableSchema
 	{
-		private SQLColumns FColumns = new SQLColumns();
-		public SQLColumns Columns { get { return FColumns; } }
+		private SQLColumns _columns = new SQLColumns();
+		public SQLColumns Columns { get { return _columns; } }
 		
-		private SQLIndexes FIndexes = new SQLIndexes();
-		public SQLIndexes Indexes { get { return FIndexes; } }
+		private SQLIndexes _indexes = new SQLIndexes();
+		public SQLIndexes Indexes { get { return _indexes; } }
 	}
 }

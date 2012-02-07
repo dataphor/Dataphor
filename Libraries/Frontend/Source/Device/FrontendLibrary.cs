@@ -29,59 +29,59 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 	public class DocumentType : System.Object
 	{
 		public DocumentType() : base() {}
-		public DocumentType(string AID, string ADescription, string ADataType) : base() 
+		public DocumentType(string iD, string description, string dataType) : base() 
 		{
-			FID = AID;
-			FDescription = ADescription;
-			FDataType = ADataType;
+			_iD = iD;
+			_description = description;
+			_dataType = dataType;
 		}
 
-		private string FID;
+		private string _iD;
 		public string ID 
 		{ 
-			get { return FID; } 
-			set { FID = value; }
+			get { return _iD; } 
+			set { _iD = value; }
 		}
 		
-		private string FDescription;
+		private string _description;
 		public string Description
 		{
-			get { return FDescription; }
-			set { FDescription = value; }
+			get { return _description; }
+			set { _description = value; }
 		}
 		
-		public string FDataType;
+		public string _dataType;
 		public string DataType
 		{
-			get { return FDataType; }
-			set { FDataType = value; }
+			get { return _dataType; }
+			set { _dataType = value; }
 		}
 		
-		private List FDesigners = new List();
+		private List _designers = new List();
 		[Publish(PublishMethod.None)]
-		public List Designers { get { return FDesigners; } }
+		public List Designers { get { return _designers; } }
 		
 		private string DesignersToString()
 		{
-			StringBuilder LBuilder = new StringBuilder();
-			for (int LIndex = 0; LIndex < FDesigners.Count; LIndex++)
+			StringBuilder builder = new StringBuilder();
+			for (int index = 0; index < _designers.Count; index++)
 			{
-				if (LIndex > 0)
-					LBuilder.Append(";");
-				LBuilder.Append((string)FDesigners[LIndex]);
+				if (index > 0)
+					builder.Append(";");
+				builder.Append((string)_designers[index]);
 			}
 				
-			return LBuilder.ToString();
+			return builder.ToString();
 		}
 		
-		private void StringToDesigners(string AValue)
+		private void StringToDesigners(string tempValue)
 		{
-			FDesigners.Clear();
-			if (AValue.Length > 0)
+			_designers.Clear();
+			if (tempValue.Length > 0)
 			{
-				string[] LDesigners = AValue.Split(';');
-				for (int LIndex = 0; LIndex < LDesigners.Length; LIndex++)
-					FDesigners.Add(LDesigners[LIndex]);
+				string[] designers = tempValue.Split(';');
+				for (int index = 0; index < designers.Length; index++)
+					_designers.Add(designers[index]);
 			}
 		}
 		
@@ -91,14 +91,14 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			set { StringToDesigners(value); }
 		}
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			return (AObject is DocumentType) && (((DocumentType)AObject).ID == FID);
+			return (objectValue is DocumentType) && (((DocumentType)objectValue).ID == _iD);
 		}
 		
 		public override int GetHashCode()
 		{
-			return FID.GetHashCode();
+			return _iD.GetHashCode();
 		}
 	}
 	
@@ -106,22 +106,22 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 	{
 		public DocumentTypes() : base() {}
 		
-		public new DocumentType this[string AID]
+		public new DocumentType this[string iD]
 		{
 			get
 			{
-				DocumentType LResult;
-				if (!TryGetValue(AID, out LResult))
-					throw new FrontendDeviceException(FrontendDeviceException.Codes.DocumentTypeNotFound, AID);
-				return LResult;
+				DocumentType result;
+				if (!TryGetValue(iD, out result))
+					throw new FrontendDeviceException(FrontendDeviceException.Codes.DocumentTypeNotFound, iD);
+				return result;
 			}
 		}
 		
-		public override int Add(object AValue)
+		public override int Add(object tempValue)
 		{
-			var LDocument = (DocumentType)AValue;
-			Add(LDocument.ID, LDocument);
-			return IndexOf(AValue);
+			var document = (DocumentType)tempValue;
+			Add(document.ID, document);
+			return IndexOf(tempValue);
 		}
 	}
 	
@@ -129,130 +129,130 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 	{
 		public DocumentTypesContainer() : base()
 		{
-			FDocumentTypes = new DocumentTypes();
+			_documentTypes = new DocumentTypes();
 		}
 		
-		public DocumentTypesContainer(DocumentTypes ADocumentTypes) : base()
+		public DocumentTypesContainer(DocumentTypes documentTypes) : base()
 		{
-			FDocumentTypes = ADocumentTypes;
+			_documentTypes = documentTypes;
 		}
 		
-		private DocumentTypes FDocumentTypes;
-		public DocumentTypes DocumentTypes { get { return FDocumentTypes; } }
+		private DocumentTypes _documentTypes;
+		public DocumentTypes DocumentTypes { get { return _documentTypes; } }
 	}
 		
 	public class Document : Schema.Object
 	{
-		public Document(string AName) : base(AName) {}
+		public Document(string name) : base(name) {}
 		
-		public Document(string AName, DocumentType ADocumentType) : base(AName)
+		public Document(string name, DocumentType documentType) : base(name)
 		{
-			FDocumentType = ADocumentType;
+			_documentType = documentType;
 		}
 		
 		[Reference]
-		private DocumentType FDocumentType;
+		private DocumentType _documentType;
 		public DocumentType DocumentType
 		{
-			get { return FDocumentType; }
-			set { FDocumentType = value; }
+			get { return _documentType; }
+			set { _documentType = value; }
 		}
 		
 		public string GetFileName()
 		{
-			return String.Format("{0}.{1}", Name, FDocumentType.ID);
+			return String.Format("{0}.{1}", Name, _documentType.ID);
 		}
 		
-		public static bool IsValidDocumentName(string AFileName)
+		public static bool IsValidDocumentName(string fileName)
 		{
-			if ((AFileName == null) || (AFileName == String.Empty))
+			if ((fileName == null) || (fileName == String.Empty))
 				return false;
 				
-			if (AFileName.IndexOf(Keywords.Qualifier) >= 0)
+			if (fileName.IndexOf(Keywords.Qualifier) >= 0)
 			{
-				string[] LNames = AFileName.Split('.');
-				for (int LIndex = 0; LIndex < LNames.Length; LIndex++)
-					if (!Parser.IsValidIdentifier(LNames[LIndex]))
+				string[] names = fileName.Split('.');
+				for (int index = 0; index < names.Length; index++)
+					if (!Parser.IsValidIdentifier(names[index]))
 						return false;
 				return true;
 			}
 			else
-				return Parser.IsValidIdentifier(AFileName);
+				return Parser.IsValidIdentifier(fileName);
 		}
 		
-		public static Document FromFileName(FrontendDevice AFrontendDevice, string AFileName)
+		public static Document FromFileName(FrontendDevice frontendDevice, string fileName)
 		{
-			string LExtension = Path.GetExtension(AFileName);
-			if ((LExtension == null) || (LExtension == String.Empty) || (LExtension == "."))
+			string extension = Path.GetExtension(fileName);
+			if ((extension == null) || (extension == String.Empty) || (extension == "."))
 				return null;
 
-			LExtension = LExtension.Substring(1, LExtension.Length - 1).ToLower();
-			DocumentType LDocumentType = null;
-			if (AFrontendDevice.DocumentTypes.Contains(LExtension))
-				LDocumentType = AFrontendDevice.DocumentTypes[LExtension];
+			extension = extension.Substring(1, extension.Length - 1).ToLower();
+			DocumentType documentType = null;
+			if (frontendDevice.DocumentTypes.Contains(extension))
+				documentType = frontendDevice.DocumentTypes[extension];
 			else
 				return null;
 				
-			string LFileName = Path.GetFileNameWithoutExtension(AFileName);
-			if (!IsValidDocumentName(LFileName))
+			string localFileName = Path.GetFileNameWithoutExtension(fileName);
+			if (!IsValidDocumentName(localFileName))
 				return null;
 				
-			return new Document(LFileName, LDocumentType);
+			return new Document(localFileName, documentType);
 		}
 		
-		public void CheckDataType(Plan APlan, Schema.ScalarType AExpectedDataType)
+		public void CheckDataType(Plan plan, Schema.ScalarType expectedDataType)
 		{
-			Schema.Object LDataTypeObject = Compiler.ResolveCatalogIdentifier(APlan, DocumentType.DataType, true);
+			Schema.Object dataTypeObject = Compiler.ResolveCatalogIdentifier(plan, DocumentType.DataType, true);
 			if 
 			(
-				!(LDataTypeObject is Schema.ScalarType) || 
+				!(dataTypeObject is Schema.ScalarType) || 
 				(
-					(AExpectedDataType != APlan.DataTypes.SystemBinary) && 
-					!((Schema.ScalarType)LDataTypeObject).Is(AExpectedDataType)
+					(expectedDataType != plan.DataTypes.SystemBinary) && 
+					!((Schema.ScalarType)dataTypeObject).Is(expectedDataType)
 				)
 			)
-				throw new CompilerException(CompilerException.Codes.ExpressionTypeMismatch, LDataTypeObject.Name, AExpectedDataType.Name);
+				throw new CompilerException(CompilerException.Codes.ExpressionTypeMismatch, dataTypeObject.Name, expectedDataType.Name);
 		}
 	}
 	
 	public class Documents : Schema.Objects
 	{
-		public new Document this[int AIndex]
+		public new Document this[int index]
 		{
-			get { return (Document)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (Document)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public new Document this[string AName]
+		public new Document this[string name]
 		{
-			get { return (Document)base[AName]; }
-			set { base[AName] = value; }
+			get { return (Document)base[name]; }
+			set { base[name] = value; }
 		}
 		
-		protected Hashtable FInsensitiveIndex = new Hashtable(StringComparer.OrdinalIgnoreCase);
+		protected Hashtable _insensitiveIndex = new Hashtable(StringComparer.OrdinalIgnoreCase);
 		
-		protected override void Validate(Schema.Object AObject)
+		protected override void Validate(Schema.Object objectValue)
 		{
-			base.Validate(AObject);
-			if (FInsensitiveIndex.Contains(AObject.Name))
-				throw new SchemaException(SchemaException.Codes.DuplicateObjectName, AObject.Name);
+			base.Validate(objectValue);
+			if (_insensitiveIndex.Contains(objectValue.Name))
+				throw new SchemaException(SchemaException.Codes.DuplicateObjectName, objectValue.Name);
 		}
 		
-		protected override void Adding(Schema.Object AObject, int AIndex)
+		protected override void Adding(Schema.Object objectValue, int index)
 		{
-			base.Adding(AObject, AIndex);
-			FInsensitiveIndex.Add(AObject.Name, AObject);
+			base.Adding(objectValue, index);
+			_insensitiveIndex.Add(objectValue.Name, objectValue);
 		}
 		
-		protected override void Removing(Schema.Object AObject, int AIndex)
+		protected override void Removing(Schema.Object objectValue, int index)
 		{
-			FInsensitiveIndex.Remove(AObject.Name);
-			base.Removing(AObject, AIndex);
+			_insensitiveIndex.Remove(objectValue.Name);
+			base.Removing(objectValue, index);
 		}
 		
-		public Document GetDocumentFromFileName(string AFileName)
+		public Document GetDocumentFromFileName(string fileName)
 		{
-			return FInsensitiveIndex[AFileName] as Document;
+			return _insensitiveIndex[fileName] as Document;
 		}
 	}
 
@@ -261,18 +261,18 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 
 	public class FrontendLibrary : Schema.Object
 	{
-		public const string CDocumentsName = @"Documents";
+		public const string DocumentsName = @"Documents";
 		
-		public FrontendLibrary(Program AProgram, string AName) : base(AName) 
+		public FrontendLibrary(Program program, string name) : base(name) 
 		{
-			FFrontendDevice = FrontendDevice.GetFrontendDevice(AProgram);
-			FDirectoryName = AProgram.Catalog.Libraries[AName].GetLibraryDirectory(((DAE.Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory);
-			FDocumentsDirectoryName = Path.Combine(FDirectoryName, CDocumentsName);
+			_frontendDevice = FrontendDevice.GetFrontendDevice(program);
+			_directoryName = program.Catalog.Libraries[name].GetLibraryDirectory(((DAE.Server.Server)program.ServerProcess.ServerSession.Server).LibraryDirectory);
+			_documentsDirectoryName = Path.Combine(_directoryName, DocumentsName);
 			LoadDocuments();
-			if (Directory.Exists(FDirectoryName))
+			if (Directory.Exists(_directoryName))
 			{
-				if (!Directory.Exists(FDocumentsDirectoryName))
-					Directory.CreateDirectory(FDocumentsDirectoryName);
+				if (!Directory.Exists(_documentsDirectoryName))
+					Directory.CreateDirectory(_documentsDirectoryName);
 				#if USEWATCHERS
 				FWatcher = new FileSystemWatcher(FDirectoryName);
 				FWatcher.IncludeSubdirectories = false;
@@ -285,7 +285,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		public void Close(Program AProgram)
+		public void Close(Program program)
 		{
 			#if USEWATCHERS
 			if (FWatcher != null)
@@ -301,16 +301,16 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 		
 		[Reference]
-		private FrontendDevice FFrontendDevice;
-		public FrontendDevice FrontendDevice { get { return FFrontendDevice; } }
+		private FrontendDevice _frontendDevice;
+		public FrontendDevice FrontendDevice { get { return _frontendDevice; } }
 
-		private Documents FDocuments = new Documents();
-		public Documents Documents { get { return FDocuments; } }
+		private Documents _documents = new Documents();
+		public Documents Documents { get { return _documents; } }
 		
-		private string FDirectoryName;
+		private string _directoryName;
 		
-		private string FDocumentsDirectoryName;
-		public string DocumentsDirectoryName { get { return FDocumentsDirectoryName; } }
+		private string _documentsDirectoryName;
+		public string DocumentsDirectoryName { get { return _documentsDirectoryName; } }
 
 		#if USEWATCHERS
 		private FileSystemWatcher FWatcher;
@@ -407,80 +407,80 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		// Should only be called on initial library creation
 		public void LoadDocuments()
 		{
-			lock (FDocuments)
+			lock (_documents)
 			{
-				FDocuments.Clear();
-				if (Directory.Exists(FDocumentsDirectoryName))
+				_documents.Clear();
+				if (Directory.Exists(_documentsDirectoryName))
 				{
-					string[] LFileNames = Directory.GetFiles(FDocumentsDirectoryName);
-					for (int LIndex = 0; LIndex < LFileNames.Length; LIndex++)
+					string[] fileNames = Directory.GetFiles(_documentsDirectoryName);
+					for (int index = 0; index < fileNames.Length; index++)
 					{
-						Document LDocument = Document.FromFileName(FFrontendDevice, LFileNames[LIndex]);
-						if ((LDocument != null) && !FDocuments.ContainsName(LDocument.Name))
-							FDocuments.Add(LDocument);
+						Document document = Document.FromFileName(_frontendDevice, fileNames[index]);
+						if ((document != null) && !_documents.ContainsName(document.Name))
+							_documents.Add(document);
 					}
 				}
 			}
 		}
 		
-		private Serializer FSerializer = new Serializer();
-		private Deserializer FDeserializer = new Deserializer();
+		private Serializer _serializer = new Serializer();
+		private Deserializer _deserializer = new Deserializer();
 	}
 	
 	public class FrontendLibraries : Schema.Objects
 	{
-		public new FrontendLibrary this[int AIndex]
+		public new FrontendLibrary this[int index]
 		{
-			get { return (FrontendLibrary)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (FrontendLibrary)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public new FrontendLibrary this[string AName]
+		public new FrontendLibrary this[string name]
 		{
-			get { return (FrontendLibrary)base[AName]; }
-			set { base[AName] = value; }
+			get { return (FrontendLibrary)base[name]; }
+			set { base[name] = value; }
 		}
 	}	
 
 	public class Designer : System.Object
 	{
 		public Designer() : base() {}
-		public Designer(string AID, string ADescription, string AClassName) : base() 
+		public Designer(string iD, string description, string className) : base() 
 		{
-			FID = AID;
-			FDescription = ADescription;
-			FClassName = AClassName;
+			_iD = iD;
+			_description = description;
+			_className = className;
 		}
 		
-		private string FID;
+		private string _iD;
 		public string ID 
 		{
-			get { return FID; } 
-			set { FID = value; }
+			get { return _iD; } 
+			set { _iD = value; }
 		}
 		
-		private string FDescription;
+		private string _description;
 		public string Description
 		{
-			get { return FDescription; }
-			set { FDescription = value; }
+			get { return _description; }
+			set { _description = value; }
 		}
 
-		private string FClassName;
+		private string _className;
 		public string ClassName
 		{
-			get { return FClassName; }
-			set { FClassName = value; }
+			get { return _className; }
+			set { _className = value; }
 		}
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			return (AObject is Designer) && (((Designer)AObject).ID == FID);
+			return (objectValue is Designer) && (((Designer)objectValue).ID == _iD);
 		}
 		
 		public override int GetHashCode()
 		{
-			return FID.GetHashCode();
+			return _iD.GetHashCode();
 		}
 	}
 	
@@ -488,22 +488,22 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 	{
 		public Designers() : base() {}
 		
-		public new Designer this[string AID]
+		public new Designer this[string iD]
 		{
 			get
 			{
-				Designer LResult;
-				if (!TryGetValue(AID, out LResult))
-					throw new FrontendDeviceException(FrontendDeviceException.Codes.DesignerNotFound, AID);
-				return LResult;
+				Designer result;
+				if (!TryGetValue(iD, out result))
+					throw new FrontendDeviceException(FrontendDeviceException.Codes.DesignerNotFound, iD);
+				return result;
 			}
 		}
 		
-		public override int Add(object AValue)
+		public override int Add(object tempValue)
 		{
-			Designer LValue = (Designer)AValue;
-			Add(LValue.ID, LValue);
-			return IndexOf(LValue);
+			Designer localTempValue = (Designer)tempValue;
+			Add(localTempValue.ID, localTempValue);
+			return IndexOf(localTempValue);
 		}
 	}
 	
@@ -511,16 +511,16 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 	{
 		public DesignersContainer() : base()
 		{
-			FDesigners = new Designers();
+			_designers = new Designers();
 		}
 		
-		public DesignersContainer(Designers ADesigners) : base()
+		public DesignersContainer(Designers designers) : base()
 		{
-			FDesigners = ADesigners;
+			_designers = designers;
 		}
 		
-		private Designers FDesigners;
-		public Designers Designers { get { return FDesigners; } }
+		private Designers _designers;
+		public Designers Designers { get { return _designers; } }
 	}
 }
 

@@ -26,234 +26,234 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 {
 	public class SaveTableNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[0], true) as SimpleDevice;
-			if (LDevice == null)
+			SimpleDevice device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0], true) as SimpleDevice;
+			if (device == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.SimpleDeviceExpected);
-			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.TableVar;
-			if (LTableVar == null)
+			Schema.TableVar tableVar = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.TableVar;
+			if (tableVar == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.TableVarExpected);
-			LDevice.SaveTable(AProgram.ServerProcess, LTableVar);
+			device.SaveTable(program.ServerProcess, tableVar);
 			return null;
 		}
 	}
 	
 	public class LoadTableNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[0], true) as SimpleDevice;
-			if (LDevice == null)
+			SimpleDevice device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0], true) as SimpleDevice;
+			if (device == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.SimpleDeviceExpected);
-			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.TableVar;
-			if (LTableVar == null)
+			Schema.TableVar tableVar = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.TableVar;
+			if (tableVar == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.TableVarExpected);
-			LDevice.LoadTable(AProgram.ServerProcess, LTableVar);
+			device.LoadTable(program.ServerProcess, tableVar);
 			return null;
 		}
 	}
 	
 	public class TruncateTableNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[0], true) as SimpleDevice;
-			if (LDevice == null)
+			SimpleDevice device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0], true) as SimpleDevice;
+			if (device == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.SimpleDeviceExpected);
-			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.TableVar;
-			if (LTableVar == null)
+			Schema.TableVar tableVar = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.TableVar;
+			if (tableVar == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.TableVarExpected);
-			LDevice.TruncateTable(AProgram.ServerProcess, LTableVar);
+			device.TruncateTable(program.ServerProcess, tableVar);
 			return null;
 		}
 	}
 	
 	public class BeginUpdateNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[0], true) as SimpleDevice;
-			if (LDevice == null)
+			SimpleDevice device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0], true) as SimpleDevice;
+			if (device == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.SimpleDeviceExpected);
-			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.TableVar;
-			if (LTableVar == null)
+			Schema.TableVar tableVar = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.TableVar;
+			if (tableVar == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.TableVarExpected);
-			LDevice.BeginUpdate(AProgram.ServerProcess, LTableVar);
+			device.BeginUpdate(program.ServerProcess, tableVar);
 			return null;
 		}
 	}
 	
 	public class EndUpdateNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[0], true) as SimpleDevice;
-			if (LDevice == null)
+			SimpleDevice device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0], true) as SimpleDevice;
+			if (device == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.SimpleDeviceExpected);
-			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.TableVar;
-			if (LTableVar == null)
+			Schema.TableVar tableVar = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.TableVar;
+			if (tableVar == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.TableVarExpected);
-			LDevice.EndUpdate(AProgram.ServerProcess, LTableVar);
+			device.EndUpdate(program.ServerProcess, tableVar);
 			return null;
 		}
 	}
 	
 	public class SimpleDevice : MemoryDevice
 	{
-		public const string CDataDirectoryName = "Data";
+		public const string DataDirectoryName = "Data";
 	
-		public SimpleDevice(int AID, string AName) : base(AID, AName)
+		public SimpleDevice(int iD, string name) : base(iD, name)
 		{
 		}
 		
-		protected override void InternalStart(ServerProcess AProcess)
+		protected override void InternalStart(ServerProcess process)
 		{
-			if (String.IsNullOrEmpty(FDirectoryName))
-				FDirectoryName = CDataDirectoryName;
-			if (!Path.IsPathRooted(FDirectoryName))
-				FDirectoryName = Path.Combine(((Server.Server)AProcess.ServerSession.Server).InstanceDirectory, FDirectoryName);
-			if (!Directory.Exists(FDirectoryName))
-				Directory.CreateDirectory(FDirectoryName);
+			if (String.IsNullOrEmpty(_directoryName))
+				_directoryName = DataDirectoryName;
+			if (!Path.IsPathRooted(_directoryName))
+				_directoryName = Path.Combine(((Server.Server)process.ServerSession.Server).InstanceDirectory, _directoryName);
+			if (!Directory.Exists(_directoryName))
+				Directory.CreateDirectory(_directoryName);
 			
-			base.InternalStart(AProcess);
+			base.InternalStart(process);
 		}
 		
-		protected override void InternalStop(ServerProcess AProcess)
+		protected override void InternalStop(ServerProcess process)
 		{
-			foreach (SimpleDeviceHeader LHeader in FHeaders.Values)
-				if (LHeader.TimeStamp > LHeader.SaveTimeStamp)
-					SaveTable(AProcess, LHeader.TableVar);
-			base.InternalStop(AProcess);
+			foreach (SimpleDeviceHeader header in _headers.Values)
+				if (header.TimeStamp > header.SaveTimeStamp)
+					SaveTable(process, header.TableVar);
+			base.InternalStop(process);
 		}
 		
 		// Session
-		protected override DeviceSession InternalConnect(ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo)
+		protected override DeviceSession InternalConnect(ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo)
 		{
-			return new SimpleDeviceSession(this, AServerProcess, ADeviceSessionInfo);
+			return new SimpleDeviceSession(this, serverProcess, deviceSessionInfo);
 		}
 		
-		private SimpleDeviceHeaders FHeaders = new SimpleDeviceHeaders();
-		public SimpleDeviceHeaders Headers { get { return FHeaders; } }
+		private SimpleDeviceHeaders _headers = new SimpleDeviceHeaders();
+		public SimpleDeviceHeaders Headers { get { return _headers; } }
 
-		private string FDirectoryName;
+		private string _directoryName;
 		public string DirectoryName
 		{
-			get { return FDirectoryName; }
+			get { return _directoryName; }
 			set 
 			{
 				CheckNotRunning();
-				FDirectoryName = value;
+				_directoryName = value;
 			}
 		}
 		
-		private bool FAutoSave = true;
+		private bool _autoSave = true;
 		public bool AutoSave
 		{
-			get { return FAutoSave; }
-			set { FAutoSave = value; }
+			get { return _autoSave; }
+			set { _autoSave = value; }
 		}
 		
-		internal string GetTableVarFileName(Schema.TableVar ATableVar)
+		internal string GetTableVarFileName(Schema.TableVar tableVar)
 		{
-			return Path.Combine(FDirectoryName, String.Format("{0}.dat", ATableVar.Name));
+			return Path.Combine(_directoryName, String.Format("{0}.dat", tableVar.Name));
 		}
 		
-		public void SaveTable(ServerProcess AProcess, Schema.TableVar ATableVar)
+		public void SaveTable(ServerProcess process, Schema.TableVar tableVar)
 		{
-			SimpleDeviceHeader LHeader = FHeaders[ATableVar];
-			if ((LHeader.UpdateCount == 0) && (LHeader.TimeStamp > LHeader.SaveTimeStamp))
+			SimpleDeviceHeader header = _headers[tableVar];
+			if ((header.UpdateCount == 0) && (header.TimeStamp > header.SaveTimeStamp))
 			{
-				Plan LPlan = new Plan(AProcess);
+				Plan plan = new Plan(process);
 				try
 				{
-					LPlan.PushSecurityContext(new SecurityContext(ATableVar.Owner));
+					plan.PushSecurityContext(new SecurityContext(tableVar.Owner));
 					try
 					{
-						Program LProgram = new Program(AProcess);
-						LProgram.Code = Compiler.BindNode(LPlan, Compiler.EmitBaseTableVarNode(LPlan, ATableVar));
-						LProgram.Start(null);
+						Program program = new Program(process);
+						program.Code = Compiler.BindNode(plan, Compiler.EmitBaseTableVarNode(plan, tableVar));
+						program.Start(null);
 						try
 						{
-							Table LTable = LProgram.Code.Execute(LProgram) as Table;
+							Table table = program.Code.Execute(program) as Table;
 							try
 							{
-								LTable.Open();
-								Row LRow = new Row(LProgram.ValueManager, ATableVar.DataType.CreateRowType());
+								table.Open();
+								Row row = new Row(program.ValueManager, tableVar.DataType.CreateRowType());
 								try
 								{
-									string LFileName = GetTableVarFileName(ATableVar);
-									FileUtility.EnsureWriteable(LFileName);
-									using (FileStream LStream = new FileStream(LFileName, FileMode.Create, FileAccess.Write))
+									string fileName = GetTableVarFileName(tableVar);
+									FileUtility.EnsureWriteable(fileName);
+									using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
 									{
-										while (LTable.Next())
+										while (table.Next())
 										{
-											LTable.Select(LRow);
-											byte[] LRowValue = LRow.AsPhysical;
-											StreamUtility.WriteInteger(LStream, LRowValue.Length);
-											LStream.Write(LRowValue, 0, LRowValue.Length);
+											table.Select(row);
+											byte[] rowValue = row.AsPhysical;
+											StreamUtility.WriteInteger(stream, rowValue.Length);
+											stream.Write(rowValue, 0, rowValue.Length);
 										}
 									}
 								}
 								finally
 								{
-									LRow.Dispose();
+									row.Dispose();
 								}
 							}
 							finally
 							{
-								LTable.Dispose();
+								table.Dispose();
 							}
 						}
 						finally
 						{
-							LProgram.Stop(null);
+							program.Stop(null);
 						}
 					}
 					finally
 					{
-						LPlan.PopSecurityContext();
+						plan.PopSecurityContext();
 					}
 				}
 				finally
 				{
-					LPlan.Dispose();
+					plan.Dispose();
 				}
-				LHeader.SaveTimeStamp = LHeader.TimeStamp;
+				header.SaveTimeStamp = header.TimeStamp;
 			}
 		}
 		
-		private Schema.Objects FLoadedTables = new Schema.Objects();
-		public bool IsLoaded(Schema.TableVar ATableVar)
+		private Schema.Objects _loadedTables = new Schema.Objects();
+		public bool IsLoaded(Schema.TableVar tableVar)
 		{
-			return FLoadedTables.Contains(ATableVar);
+			return _loadedTables.Contains(tableVar);
 		}
 		
-		public void LoadTable(ServerProcess AProcess, Schema.TableVar ATableVar)
+		public void LoadTable(ServerProcess process, Schema.TableVar tableVar)
 		{
-			lock (FLoadedTables)
+			lock (_loadedTables)
 			{
-				if (!IsLoaded(ATableVar))
+				if (!IsLoaded(tableVar))
 				{
-					FLoadedTables.Add(ATableVar);
-					if (File.Exists(GetTableVarFileName(ATableVar)))				   
+					_loadedTables.Add(tableVar);
+					if (File.Exists(GetTableVarFileName(tableVar)))				   
 					{
-						using (FileStream LStream = new FileStream(GetTableVarFileName(ATableVar), FileMode.Open, FileAccess.Read))
+						using (FileStream stream = new FileStream(GetTableVarFileName(tableVar), FileMode.Open, FileAccess.Read))
 						{
-							NativeTable LNativeTable = Tables[ATableVar];
-							while (LStream.Position < LStream.Length)
+							NativeTable nativeTable = Tables[tableVar];
+							while (stream.Position < stream.Length)
 							{
-								int LLength = StreamUtility.ReadInteger(LStream);
-								byte[] LRowValue = new byte[LLength];
-								LStream.Read(LRowValue, 0, LRowValue.Length);
-								Row LRow = (Row)DataValue.FromPhysical(AProcess.ValueManager, LNativeTable.RowType, LRowValue, 0);
+								int length = StreamUtility.ReadInteger(stream);
+								byte[] rowValue = new byte[length];
+								stream.Read(rowValue, 0, rowValue.Length);
+								Row row = (Row)DataValue.FromPhysical(process.ValueManager, nativeTable.RowType, rowValue, 0);
 								try
 								{
-									LNativeTable.Insert(AProcess.ValueManager, LRow);
+									nativeTable.Insert(process.ValueManager, row);
 								}
 								finally
 								{
-									LRow.Dispose();
+									row.Dispose();
 								}
 							}
 						}
@@ -262,92 +262,92 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 			}
 		}
 		
-		public void TruncateTable(ServerProcess AProcess, Schema.TableVar ATableVar)
+		public void TruncateTable(ServerProcess process, Schema.TableVar tableVar)
 		{
-			string LTableVarFileName = GetTableVarFileName(ATableVar);
-			if (File.Exists(LTableVarFileName))
-				File.Delete(LTableVarFileName);
-			Tables[ATableVar].Truncate(AProcess.ValueManager);
-			SimpleDeviceHeader LHeader = FHeaders[ATableVar];
-			LHeader.TimeStamp += 1;
-			LHeader.SaveTimeStamp = LHeader.TimeStamp;
+			string tableVarFileName = GetTableVarFileName(tableVar);
+			if (File.Exists(tableVarFileName))
+				File.Delete(tableVarFileName);
+			Tables[tableVar].Truncate(process.ValueManager);
+			SimpleDeviceHeader header = _headers[tableVar];
+			header.TimeStamp += 1;
+			header.SaveTimeStamp = header.TimeStamp;
 		}
 		
-		public void BeginUpdate(ServerProcess AProcess, Schema.TableVar ATableVar)
+		public void BeginUpdate(ServerProcess process, Schema.TableVar tableVar)
 		{
-			SimpleDeviceHeader LHeader = FHeaders[ATableVar];
-			LHeader.UpdateCount++;
+			SimpleDeviceHeader header = _headers[tableVar];
+			header.UpdateCount++;
 		}
 		
-		public void EndUpdate(ServerProcess AProcess, Schema.TableVar ATableVar)
+		public void EndUpdate(ServerProcess process, Schema.TableVar tableVar)
 		{
-			SimpleDeviceHeader LHeader = FHeaders[ATableVar];
-			if (LHeader.UpdateCount > 0)
+			SimpleDeviceHeader header = _headers[tableVar];
+			if (header.UpdateCount > 0)
 			{
-				LHeader.UpdateCount--;
-				if (LHeader.UpdateCount == 0)
-					SaveTable(AProcess, ATableVar);
+				header.UpdateCount--;
+				if (header.UpdateCount == 0)
+					SaveTable(process, tableVar);
 			}
 		}
 	}
 	
 	public class SimpleDeviceSession : MemoryDeviceSession
 	{		
-		protected internal SimpleDeviceSession(SimpleDevice ADevice, ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo) : base(ADevice, AServerProcess, ADeviceSessionInfo){}
+		protected internal SimpleDeviceSession(SimpleDevice device, ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo) : base(device, serverProcess, deviceSessionInfo){}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}		
 
 		public new SimpleDevice Device { get { return (SimpleDevice)base.Device; } }
 		
-		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Program program, Schema.DevicePlan devicePlan)
 		{
-			if ((ADevicePlan.Node is BaseTableVarNode) || (ADevicePlan.Node is OrderNode))
+			if ((devicePlan.Node is BaseTableVarNode) || (devicePlan.Node is OrderNode))
 			{
-				Schema.TableVar LTableVar = null;
-				if (ADevicePlan.Node is BaseTableVarNode)
-					LTableVar = ((BaseTableVarNode)ADevicePlan.Node).TableVar;
-				else if (ADevicePlan.Node is OrderNode)
-					LTableVar = ((BaseTableVarNode)ADevicePlan.Node.Nodes[0]).TableVar;
-				if (LTableVar != null)
-					Device.LoadTable(ServerProcess, LTableVar);
+				Schema.TableVar tableVar = null;
+				if (devicePlan.Node is BaseTableVarNode)
+					tableVar = ((BaseTableVarNode)devicePlan.Node).TableVar;
+				else if (devicePlan.Node is OrderNode)
+					tableVar = ((BaseTableVarNode)devicePlan.Node.Nodes[0]).TableVar;
+				if (tableVar != null)
+					Device.LoadTable(ServerProcess, tableVar);
 			}
-			object LResult = base.InternalExecute(AProgram, ADevicePlan);
-			if (ADevicePlan.Node is CreateTableNode)
+			object result = base.InternalExecute(program, devicePlan);
+			if (devicePlan.Node is CreateTableNode)
 			{
-				Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;
-				SimpleDeviceHeader LHeader = new SimpleDeviceHeader(LTableVar, 0);
-				Device.Headers.Add(LHeader);
+				Schema.TableVar tableVar = ((CreateTableNode)devicePlan.Node).Table;
+				SimpleDeviceHeader header = new SimpleDeviceHeader(tableVar, 0);
+				Device.Headers.Add(header);
 				if (!ServerProcess.IsLoading() && ((Device.ReconcileMode & ReconcileMode.Command) != 0)) 
 				{
-					string LFileName = Device.GetTableVarFileName(LTableVar);
-					if (File.Exists(LFileName))
-						File.Delete(LFileName);
+					string fileName = Device.GetTableVarFileName(tableVar);
+					if (File.Exists(fileName))
+						File.Delete(fileName);
 				}
 			}
-			else if (ADevicePlan.Node is DropTableNode)
-				Device.Headers.Remove(((DropTableNode)ADevicePlan.Node).Table);
-			return LResult;
+			else if (devicePlan.Node is DropTableNode)
+				Device.Headers.Remove(((DropTableNode)devicePlan.Node).Table);
+			return result;
 		}
 		
-		protected override void InternalInsertRow(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags)
+		protected override void InternalInsertRow(Program program, Schema.TableVar tableVar, Row row, BitArray valueFlags)
 		{
-			base.InternalInsertRow(AProgram, ATableVar, ARow, AValueFlags);
-			Device.Headers[ATableVar].TimeStamp += 1;
+			base.InternalInsertRow(program, tableVar, row, valueFlags);
+			Device.Headers[tableVar].TimeStamp += 1;
 		}
 		
-		protected override void InternalUpdateRow(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalUpdateRow(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
 		{
-			base.InternalUpdateRow(AProgram, ATableVar, AOldRow, ANewRow, AValueFlags);
-			Device.Headers[ATableVar].TimeStamp += 1;
+			base.InternalUpdateRow(program, tableVar, oldRow, newRow, valueFlags);
+			Device.Headers[tableVar].TimeStamp += 1;
 		}
 		
-		protected override void InternalDeleteRow(Program AProgram, Schema.TableVar ATableVar, Row ARow)
+		protected override void InternalDeleteRow(Program program, Schema.TableVar tableVar, Row row)
 		{
-			base.InternalDeleteRow(AProgram, ATableVar, ARow);
-			Device.Headers[ATableVar].TimeStamp += 1;
+			base.InternalDeleteRow(program, tableVar, row);
+			Device.Headers[tableVar].TimeStamp += 1;
 		}
 
 		protected override void InternalCommitTransaction()
@@ -355,40 +355,40 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 			base.InternalCommitTransaction();
 			if ((Transactions.Count == 1) && Device.AutoSave)
 			{
-				HybridDictionary LTables = new HybridDictionary();
-				Exception LLastException = null;
-				foreach (Operation LOperation in Transactions.CurrentTransaction().Operations)
+				HybridDictionary tables = new HybridDictionary();
+				Exception lastException = null;
+				foreach (Operation operation in Transactions.CurrentTransaction().Operations)
 				{
-					if (!(LTables.Contains(LOperation.TableVar)))
+					if (!(tables.Contains(operation.TableVar)))
 					{
-						LTables.Add(LOperation.TableVar, null);
+						tables.Add(operation.TableVar, null);
 						try
 						{
-							Device.SaveTable(ServerProcess, LOperation.TableVar);
+							Device.SaveTable(ServerProcess, operation.TableVar);
 						}
-						catch (Exception LException)
+						catch (Exception exception)
 						{
-							LLastException = LException;
+							lastException = exception;
 						}
 					}
 				}
-				if (LLastException != null)
-					throw LLastException;
+				if (lastException != null)
+					throw lastException;
 			}
 		}
 	}
 
 	public class SimpleDeviceHeader : System.Object
 	{
-		public SimpleDeviceHeader(Schema.TableVar ATableVar, long ATimeStamp) : base()
+		public SimpleDeviceHeader(Schema.TableVar tableVar, long timeStamp) : base()
 		{
-			FTableVar = ATableVar;
-			TimeStamp = ATimeStamp;
-			SaveTimeStamp = ATimeStamp;
+			_tableVar = tableVar;
+			TimeStamp = timeStamp;
+			SaveTimeStamp = timeStamp;
 		}
 		
-		private Schema.TableVar FTableVar;
-		public Schema.TableVar TableVar { get { return FTableVar; } }
+		private Schema.TableVar _tableVar;
+		public Schema.TableVar TableVar { get { return _tableVar; } }
 		
 		public long TimeStamp;
 		
@@ -401,16 +401,16 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 	{		
 		public SimpleDeviceHeaders() : base(){}
 		
-		public override int Add(object AValue)
+		public override int Add(object tempValue)
 		{
-			if (AValue is SimpleDeviceHeader)
-				Add((SimpleDeviceHeader)AValue);
-			return IndexOf(AValue);
+			if (tempValue is SimpleDeviceHeader)
+				Add((SimpleDeviceHeader)tempValue);
+			return IndexOf(tempValue);
 		}
 		
-		public void Add(SimpleDeviceHeader AHeader)
+		public void Add(SimpleDeviceHeader header)
 		{
-			Add(AHeader.TableVar, AHeader);
+			Add(header.TableVar, header);
 		}
 	}
 }

@@ -47,53 +47,53 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// Operator
 		// The operator this node is implementing
 		[Reference]
-		private Schema.Operator FOperator;
+		private Schema.Operator _operator;
 		public Schema.Operator Operator
 		{
-			get { return FOperator; }
-			set { FOperator = value; }
+			get { return _operator; }
+			set { _operator = value; }
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{		
-			if (FOperator.IsBuiltin && (NodeCount > 0) && (NodeCount <= 2))
+			if (_operator.IsBuiltin && (NodeCount > 0) && (NodeCount <= 2))
 			{
-				Expression LExpression;
+				Expression expression;
 				if (Nodes.Count == 1)
-					LExpression =
+					expression =
 						new UnaryExpression
 						(
-							FOperator.OperatorName, 
-							FOperator.Operands[0].Modifier == Modifier.Var ? 
-								new ParameterExpression(Modifier.Var, (Expression)Nodes[0].EmitStatement(AMode)) : 
-								(Expression)Nodes[0].EmitStatement(AMode)
+							_operator.OperatorName, 
+							_operator.Operands[0].Modifier == Modifier.Var ? 
+								new ParameterExpression(Modifier.Var, (Expression)Nodes[0].EmitStatement(mode)) : 
+								(Expression)Nodes[0].EmitStatement(mode)
 						);
 				else
-					LExpression =
+					expression =
 						new BinaryExpression
 						(
-							FOperator.Operands[0].Modifier == Modifier.Var ?
-								new ParameterExpression(Modifier.Var, (Expression)Nodes[0].EmitStatement(AMode)) :
-								(Expression)Nodes[0].EmitStatement(AMode), 
-							FOperator.OperatorName, 
-							FOperator.Operands[1].Modifier == Modifier.Var ?
-								new ParameterExpression(Modifier.Var, (Expression)Nodes[1].EmitStatement(AMode)) :
-								(Expression)Nodes[1].EmitStatement(AMode)
+							_operator.Operands[0].Modifier == Modifier.Var ?
+								new ParameterExpression(Modifier.Var, (Expression)Nodes[0].EmitStatement(mode)) :
+								(Expression)Nodes[0].EmitStatement(mode), 
+							_operator.OperatorName, 
+							_operator.Operands[1].Modifier == Modifier.Var ?
+								new ParameterExpression(Modifier.Var, (Expression)Nodes[1].EmitStatement(mode)) :
+								(Expression)Nodes[1].EmitStatement(mode)
 						);
-				LExpression.Modifiers = Modifiers;
-				return LExpression;
+				expression.Modifiers = Modifiers;
+				return expression;
 			}
 			else
 			{
-				CallExpression LExpression = new CallExpression();
-				LExpression.Identifier = Schema.Object.EnsureRooted(FOperator.OperatorName);
-				for (int LIndex = 0; LIndex < NodeCount; LIndex++)
-					if (FOperator.Operands[LIndex].Modifier == Modifier.Var)
-						LExpression.Expressions.Add(new ParameterExpression(Modifier.Var, (Expression)Nodes[LIndex].EmitStatement(AMode)));
+				CallExpression expression = new CallExpression();
+				expression.Identifier = Schema.Object.EnsureRooted(_operator.OperatorName);
+				for (int index = 0; index < NodeCount; index++)
+					if (_operator.Operands[index].Modifier == Modifier.Var)
+						expression.Expressions.Add(new ParameterExpression(Modifier.Var, (Expression)Nodes[index].EmitStatement(mode)));
 					else
-						LExpression.Expressions.Add((Expression)Nodes[LIndex].EmitStatement(AMode));
-				LExpression.Modifiers = Modifiers;
-				return LExpression;
+						expression.Expressions.Add((Expression)Nodes[index].EmitStatement(mode));
+				expression.Modifiers = Modifiers;
+				return expression;
 			}
 		}
 		
@@ -102,116 +102,116 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public PlanNodes CleanupNodes { get { return FCleanupNodes; } }
 		#endif
 		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
 			if (Modifiers != null)
 			{
-				FIsLiteral = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsLiteral", Operator.IsLiteral.ToString()));
-				FIsFunctional = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsFunctional", Operator.IsFunctional.ToString()));
-				FIsDeterministic = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsDeterministic", Operator.IsDeterministic.ToString()));
-				FIsRepeatable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsRepeatable", Operator.IsRepeatable.ToString()));
-				FIsNilable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsNilable", Operator.IsNilable.ToString()));
+				_isLiteral = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsLiteral", Operator.IsLiteral.ToString()));
+				_isFunctional = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsFunctional", Operator.IsFunctional.ToString()));
+				_isDeterministic = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsDeterministic", Operator.IsDeterministic.ToString()));
+				_isRepeatable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsRepeatable", Operator.IsRepeatable.ToString()));
+				_isNilable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsNilable", Operator.IsNilable.ToString()));
 			}
 			else
 			{
-				FIsLiteral = Operator.IsLiteral;
-				FIsFunctional = Operator.IsFunctional;
-				FIsDeterministic = Operator.IsDeterministic;
-				FIsRepeatable = Operator.IsRepeatable;
-				FIsNilable = Operator.IsNilable;
+				_isLiteral = Operator.IsLiteral;
+				_isFunctional = Operator.IsFunctional;
+				_isDeterministic = Operator.IsDeterministic;
+				_isRepeatable = Operator.IsRepeatable;
+				_isNilable = Operator.IsNilable;
 			}
 
-			for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
+			for (int index = 0; index < Operator.Operands.Count; index++)
 			{
-				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
-				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;
-				FIsDeterministic = FIsDeterministic && Nodes[LIndex].IsDeterministic;
-				FIsRepeatable = FIsRepeatable && Nodes[LIndex].IsRepeatable;
-				FIsNilable = FIsNilable || Nodes[LIndex].IsNilable;
+				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
+				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
+				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
+				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
+				_isNilable = _isNilable || Nodes[index].IsNilable;
 			} 
 			
-			FIsOrderPreserving = Convert.ToBoolean(MetaData.GetTag(Operator.MetaData, "DAE.IsOrderPreserving", FIsOrderPreserving.ToString()));
+			_isOrderPreserving = Convert.ToBoolean(MetaData.GetTag(Operator.MetaData, "DAE.IsOrderPreserving", _isOrderPreserving.ToString()));
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = Operator.ReturnDataType;
+			DetermineModifiers(plan);
+			_dataType = Operator.ReturnDataType;
 			
-			for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
+			for (int index = 0; index < Operator.Operands.Count; index++)
 			{
-				switch (Operator.Operands[LIndex].Modifier)
+				switch (Operator.Operands[index].Modifier)
 				{
 					case Modifier.In : break;
 					
 					case Modifier.Var :
-						if (Nodes[LIndex] is ParameterNode)
-							Nodes[LIndex] = Nodes[LIndex].Nodes[0];
+						if (Nodes[index] is ParameterNode)
+							Nodes[index] = Nodes[index].Nodes[0];
 							
-						if (!(Nodes[LIndex] is StackReferenceNode) || APlan.Symbols[((StackReferenceNode)Nodes[LIndex]).Location].IsConstant)
-							throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBePassedByReference, APlan.CurrentStatement(), Operator.Operands[LIndex].Name);
+						if (!(Nodes[index] is StackReferenceNode) || plan.Symbols[((StackReferenceNode)Nodes[index]).Location].IsConstant)
+							throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBePassedByReference, plan.CurrentStatement(), Operator.Operands[index].Name);
 
-						((StackReferenceNode)Nodes[LIndex]).ByReference = true;
+						((StackReferenceNode)Nodes[index]).ByReference = true;
 					break;
 
 					case Modifier.Const :
-						if (Nodes[LIndex] is ParameterNode)
-							Nodes[LIndex] = Nodes[LIndex].Nodes[0];
+						if (Nodes[index] is ParameterNode)
+							Nodes[index] = Nodes[index].Nodes[0];
 							
-						if (Nodes[LIndex] is StackReferenceNode)
-							((StackReferenceNode)Nodes[LIndex]).ByReference = true;
-						else if (Nodes[LIndex] is StackColumnReferenceNode)
-							((StackColumnReferenceNode)Nodes[LIndex]).ByReference = true;
+						if (Nodes[index] is StackReferenceNode)
+							((StackReferenceNode)Nodes[index]).ByReference = true;
+						else if (Nodes[index] is StackColumnReferenceNode)
+							((StackColumnReferenceNode)Nodes[index]).ByReference = true;
 					break;
 				}
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			base.InternalDetermineBinding(APlan);
+			base.InternalDetermineBinding(plan);
 			
 			#if USECLEANUPNODES
 			if (CleanupNodes != null)
-				foreach (PlanNode LNode in CleanupNodes)
-					LNode.DetermineBinding(APlan);
+				foreach (PlanNode node in CleanupNodes)
+					node.DetermineBinding(APlan);
 			#endif
 		}
 		
-		public override void BindToProcess(Plan APlan)
+		public override void BindToProcess(Plan plan)
 		{
 			if (Operator != null)
 			{
-				APlan.CheckRight(Operator.GetRight(Schema.RightNames.Execute));
-				APlan.EnsureApplicationTransactionOperator(Operator);
+				plan.CheckRight(Operator.GetRight(Schema.RightNames.Execute));
+				plan.EnsureApplicationTransactionOperator(Operator);
 			}
-			base.BindToProcess(APlan);
+			base.BindToProcess(plan);
 		}
 		
-		protected virtual void EmitInstructionIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath, LocalBuilder AArguments)
+		protected virtual void EmitInstructionIL(Plan plan, ILGenerator generator, int[] executePath, LocalBuilder arguments)
 		{
 		}
 
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{
 			if (ShouldEmitIL)
 			{
-				int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
+				int[] localExecutePath = PrepareExecutePath(plan, executePath);
 				
-				LocalBuilder LArguments = AGenerator.DeclareLocal(typeof(object[]));
+				LocalBuilder arguments = generator.DeclareLocal(typeof(object[]));
 				
-				AGenerator.Emit(OpCodes.Ldc_I4, NodeCount);
-				AGenerator.Emit(OpCodes.Newarr, typeof(object));
-				AGenerator.Emit(OpCodes.Stloc, LArguments);
+				generator.Emit(OpCodes.Ldc_I4, NodeCount);
+				generator.Emit(OpCodes.Newarr, typeof(object));
+				generator.Emit(OpCodes.Stloc, arguments);
 				
-				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+				for (int index = 0; index < Nodes.Count; index++)
 				{
-					AGenerator.Emit(OpCodes.Ldloc, LArguments);
-					AGenerator.Emit(OpCodes.Ldc_I4, LIndex);
+					generator.Emit(OpCodes.Ldloc, arguments);
+					generator.Emit(OpCodes.Ldc_I4, index);
 
-					EmitEvaluate(APlan, AGenerator, LExecutePath, LIndex);
+					EmitEvaluate(plan, generator, localExecutePath, index);
 					
-					AGenerator.Emit(OpCodes.Stelem_Ref);
+					generator.Emit(OpCodes.Stelem_Ref);
 				}
 				
 				#if USECLEANUPNODES
@@ -219,19 +219,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AGenerator.BeginExceptionBlock();
 				#endif
 				
-				EmitInstructionIL(APlan, AGenerator, AExecutePath, LArguments);
+				EmitInstructionIL(plan, generator, executePath, arguments);
 				
 				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
 				{
 					AGenerator.BeginFinallyBlock();
 
-					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
+					for (int index = 0; index < FCleanupNodes.Count; index++)
 					{
-						FCleanupNodes[LIndex].EmitIL(APlan, AGenerator, AExecutePath);
+						FCleanupNodes[index].EmitIL(APlan, AGenerator, AExecutePath);
 						
 						// Pop the return value if necessary
-						if (FCleanupNodes[LIndex].DataType != null)
+						if (FCleanupNodes[index].DataType != null)
 							AGenerator.Emit(OpCodes.Pop);
 					}
 
@@ -240,23 +240,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				#endif
 			}
 			else
-				base.EmitIL(APlan, AGenerator, AExecutePath);
+				base.EmitIL(plan, generator, executePath);
 		}
 		
 		// TODO: This should be compiled and added as cleanup nodes
 		// TODO: Handle var arguments for more than just stack references
-		protected void CleanupOperand(Program AProgram, Schema.SignatureElement ASignatureElement, PlanNode AArgumentNode, object AArgumentValue)
+		protected void CleanupOperand(Program program, Schema.SignatureElement signatureElement, PlanNode argumentNode, object argumentValue)
 		{
-			switch (ASignatureElement.Modifier)
+			switch (signatureElement.Modifier)
 			{
 				case Modifier.In :
-					DataValue.DisposeValue(AProgram.ValueManager, AArgumentValue);
+					DataValue.DisposeValue(program.ValueManager, argumentValue);
 				break;
 					
 				case Modifier.Var :
-					if (AArgumentNode.DataType is Schema.ScalarType)
-						AArgumentValue = ValueUtility.ValidateValue(AProgram, (Schema.ScalarType)AArgumentNode.DataType, AArgumentValue, FOperator);
-					AProgram.Stack.Poke(((StackReferenceNode)AArgumentNode).Location, AArgumentValue);
+					if (argumentNode.DataType is Schema.ScalarType)
+						argumentValue = ValueUtility.ValidateValue(program, (Schema.ScalarType)argumentNode.DataType, argumentValue, _operator);
+					program.Stack.Poke(((StackReferenceNode)argumentNode).Location, argumentValue);
 				break;
 			}
 		}
@@ -269,9 +269,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public abstract class NilaryInstructionNode : InstructionNodeBase
 	{
-		public abstract object NilaryInternalExecute(Program AProgram);
+		public abstract object NilaryInternalExecute(Program program);
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			#if USECLEANUPNODES
 			try
@@ -280,19 +280,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				if (IsBreakable)
 				{
-				    AProgram.Stack.PushWindow(0, this, Operator.Locator);
+				    program.Stack.PushWindow(0, this, Operator.Locator);
 				    try
 				    {
-				        return NilaryInternalExecute(AProgram);
+				        return NilaryInternalExecute(program);
 				    }
 				    finally
 				    {
-				        AProgram.Stack.PopWindow();
+				        program.Stack.PopWindow();
 				    }
 				}
 				else
 				{
-					return NilaryInternalExecute(AProgram);
+					return NilaryInternalExecute(program);
 				}
 
 			#if USECLEANUPNODES
@@ -300,8 +300,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			finally
 			{
 				if (FCleanupNodes != null)
-					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
-						FCleanupNodes[LIndex].Execute(AProgram);
+					for (int index = 0; index < FCleanupNodes.Count; index++)
+						FCleanupNodes[index].Execute(AProgram);
 			}
 			#endif
 		}
@@ -309,39 +309,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public abstract class UnaryInstructionNode : InstructionNodeBase
 	{
-		public abstract object InternalExecute(Program AProgram, object AArgument1);
+		public abstract object InternalExecute(Program program, object argument1);
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			object LArgument = Nodes[0].Execute(AProgram);
+			object argument = Nodes[0].Execute(program);
 			try
 			{
 				if (IsBreakable)
 				{
-				    AProgram.Stack.PushWindow(0, this, Operator.Locator);
+				    program.Stack.PushWindow(0, this, Operator.Locator);
 				    try
 				    {
-				        return InternalExecute(AProgram, LArgument);
+				        return InternalExecute(program, argument);
 				    }
 				    finally
 				    {
-				        AProgram.Stack.PopWindow();
+				        program.Stack.PopWindow();
 				    }
 				}
 				else
 				{
-					return InternalExecute(AProgram, LArgument);
+					return InternalExecute(program, argument);
 				}
 			}
 			finally
 			{
 				if (Operator != null)
-					CleanupOperand(AProgram, Operator.Signature[0], Nodes[0], LArgument);
+					CleanupOperand(program, Operator.Signature[0], Nodes[0], argument);
 				
 				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
-					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
-						FCleanupNodes[LIndex].Execute(AProgram);
+					for (int index = 0; index < FCleanupNodes.Count; index++)
+						FCleanupNodes[index].Execute(AProgram);
 				#endif
 			}
 		}
@@ -349,43 +349,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public abstract class BinaryInstructionNode : InstructionNodeBase
 	{
-		public abstract object InternalExecute(Program AProgram, object AArgument1, object AArgument2);
+		public abstract object InternalExecute(Program program, object argument1, object argument2);
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			object LArgument1 = Nodes[0].Execute(AProgram);
-			object LArgument2 = Nodes[1].Execute(AProgram);
+			object argument1 = Nodes[0].Execute(program);
+			object argument2 = Nodes[1].Execute(program);
 			try
 			{
 				if (IsBreakable)
 				{
-				    AProgram.Stack.PushWindow(0, this, Operator.Locator);
+				    program.Stack.PushWindow(0, this, Operator.Locator);
 				    try
 				    {
-				        return InternalExecute(AProgram, LArgument1, LArgument2);
+				        return InternalExecute(program, argument1, argument2);
 				    }
 				    finally
 				    {
-				        AProgram.Stack.PopWindow();
+				        program.Stack.PopWindow();
 				    }
 				}
 				else
 				{
-					return InternalExecute(AProgram, LArgument1, LArgument2);
+					return InternalExecute(program, argument1, argument2);
 				}
 			}
 			finally
 			{
 				if (Operator != null) 
 				{
-					CleanupOperand(AProgram, Operator.Signature[0], Nodes[0], LArgument1);
-					CleanupOperand(AProgram, Operator.Signature[1], Nodes[1], LArgument2);
+					CleanupOperand(program, Operator.Signature[0], Nodes[0], argument1);
+					CleanupOperand(program, Operator.Signature[1], Nodes[1], argument2);
 				}
 					
 				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
-					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
-						FCleanupNodes[LIndex].Execute(AProgram);
+					for (int index = 0; index < FCleanupNodes.Count; index++)
+						FCleanupNodes[index].Execute(AProgram);
 				#endif
 			}
 		}
@@ -393,45 +393,45 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public abstract class TernaryInstructionNode : InstructionNodeBase
 	{
-		public abstract object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3);
+		public abstract object InternalExecute(Program program, object argument1, object argument2, object argument3);
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			object LArgument1 = Nodes[0].Execute(AProgram);
-			object LArgument2 = Nodes[1].Execute(AProgram);
-			object LArgument3 = Nodes[2].Execute(AProgram);
+			object argument1 = Nodes[0].Execute(program);
+			object argument2 = Nodes[1].Execute(program);
+			object argument3 = Nodes[2].Execute(program);
 			try
 			{
 				if (IsBreakable)
 				{
-				    AProgram.Stack.PushWindow(0, this, Operator.Locator);
+				    program.Stack.PushWindow(0, this, Operator.Locator);
 				    try
 				    {
-				        return InternalExecute(AProgram, LArgument1, LArgument2, LArgument3);
+				        return InternalExecute(program, argument1, argument2, argument3);
 				    }
 				    finally
 				    {
-				        AProgram.Stack.PopWindow();
+				        program.Stack.PopWindow();
 				    }
 				}
 				else
 				{
-					return InternalExecute(AProgram, LArgument1, LArgument2, LArgument3);
+					return InternalExecute(program, argument1, argument2, argument3);
 				}
 			}
 			finally
 			{
 				if (Operator != null) 
 				{
-					CleanupOperand(AProgram, Operator.Signature[0], Nodes[0], LArgument1);
-					CleanupOperand(AProgram, Operator.Signature[1], Nodes[1], LArgument2);
-					CleanupOperand(AProgram, Operator.Signature[2], Nodes[2], LArgument3);
+					CleanupOperand(program, Operator.Signature[0], Nodes[0], argument1);
+					CleanupOperand(program, Operator.Signature[1], Nodes[1], argument2);
+					CleanupOperand(program, Operator.Signature[2], Nodes[2], argument3);
 				}
 					
 				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
-					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
-						FCleanupNodes[LIndex].Execute(AProgram);
+					for (int index = 0; index < FCleanupNodes.Count; index++)
+						FCleanupNodes[index].Execute(AProgram);
 				#endif
 			}
 		}
@@ -439,43 +439,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public abstract class InstructionNode : InstructionNodeBase
 	{
-		public abstract object InternalExecute(Program AProgram, object[] AArguments);
+		public abstract object InternalExecute(Program program, object[] arguments);
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			object[] LArguments = new object[NodeCount];
-			for (int LIndex = 0; LIndex < LArguments.Length; LIndex++)
-				LArguments[LIndex] = Nodes[LIndex].Execute(AProgram);
+			object[] arguments = new object[NodeCount];
+			for (int index = 0; index < arguments.Length; index++)
+				arguments[index] = Nodes[index].Execute(program);
 			try
 			{
 				if (IsBreakable)
 				{
-				    AProgram.Stack.PushWindow(0, this, Operator.Locator);
+				    program.Stack.PushWindow(0, this, Operator.Locator);
 				    try
 				    {
-				        return InternalExecute(AProgram, LArguments);
+				        return InternalExecute(program, arguments);
 				    }
 				    finally
 				    {
-				        AProgram.Stack.PopWindow();
+				        program.Stack.PopWindow();
 				    }
 				}
 				else
 				{
-					return InternalExecute(AProgram, LArguments);
+					return InternalExecute(program, arguments);
 				}
 			}
 			finally
 			{
 				// TODO: Compile the dispose calls and var argument assignment calls
 				if (Operator != null)
-					for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
-						CleanupOperand(AProgram, Operator.Signature[LIndex], Nodes[LIndex], LArguments[LIndex]);
+					for (int index = 0; index < Operator.Operands.Count; index++)
+						CleanupOperand(program, Operator.Signature[index], Nodes[index], arguments[index]);
 
 				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
-					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
-						FCleanupNodes[LIndex].Execute(AProgram);
+					for (int index = 0; index < FCleanupNodes.Count; index++)
+						FCleanupNodes[index].Execute(AProgram);
 				#endif
 			}
 		}

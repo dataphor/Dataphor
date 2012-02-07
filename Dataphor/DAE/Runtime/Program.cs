@@ -27,25 +27,25 @@ namespace Alphora.Dataphor.DAE.Runtime
 	/// </summary>
 	public class Program
 	{
-		public Program(ServerProcess AProcess) : this(AProcess, Guid.NewGuid()) { }
-		public Program(ServerProcess AProcess, Guid AID)
+		public Program(ServerProcess process) : this(process, Guid.NewGuid()) { }
+		public Program(ServerProcess process, Guid iD)
 		{
-			SetServerProcess(AProcess);
-			FID = AID;
-			FStack = new Stack(FServerProcess.MaxStackDepth, FServerProcess.MaxCallDepth);
+			SetServerProcess(process);
+			_iD = iD;
+			_stack = new Stack(_serverProcess.MaxStackDepth, _serverProcess.MaxCallDepth);
 		}
 		
-		private ServerProcess FServerProcess;
-		public ServerProcess ServerProcess { get { return FServerProcess; } }
+		private ServerProcess _serverProcess;
+		public ServerProcess ServerProcess { get { return _serverProcess; } }
 		 
-		private void SetServerProcess(ServerProcess AServerProcess)
+		private void SetServerProcess(ServerProcess serverProcess)
 		{
 			#if USEPROCESSDISPOSED 
 			if (FServerProcess != null)
 				FServerProcess.Disposed -= new EventHandler(ServerProcessDisposed);
 			#endif
 			
-			FServerProcess = AServerProcess;
+			_serverProcess = serverProcess;
 			
 			#if USEPROCESSDISPOSED
 			if (FServerProcess != null)
@@ -53,31 +53,31 @@ namespace Alphora.Dataphor.DAE.Runtime
 			#endif
 		}
 		
-		private void ServerProcessDisposed(object ASender, EventArgs AArgs)
+		private void ServerProcessDisposed(object sender, EventArgs args)
 		{
 			SetServerProcess(null);
 		}
 		
-		private bool FIsCached;
+		private bool _isCached;
 		public bool IsCached
 		{
-			get { return FIsCached; }
-			set { FIsCached = value; }
+			get { return _isCached; }
+			set { _isCached = value; }
 		}
 		
-		public void BindToProcess(ServerProcess AProcess, Plan APlan)
+		public void BindToProcess(ServerProcess process, Plan plan)
 		{
-			SetServerProcess(AProcess);
+			SetServerProcess(process);
 			
-			if (FCode != null)
-				FCode.BindToProcess(APlan);
+			if (_code != null)
+				_code.BindToProcess(plan);
 
-			if (FPlan != null)
-				FPlan.BindToProcess(FServerProcess);
+			if (_plan != null)
+				_plan.BindToProcess(_serverProcess);
 			
 			// Reset execution time
-			FStatistics.ExecuteTime = TimeSpan.Zero;
-			FStatistics.DeviceExecuteTime = TimeSpan.Zero;
+			_statistics.ExecuteTime = TimeSpan.Zero;
+			_statistics.DeviceExecuteTime = TimeSpan.Zero;
 		}
 		
 		public void UnbindFromProcess()
@@ -89,69 +89,69 @@ namespace Alphora.Dataphor.DAE.Runtime
 			#endif
 		}
 		
-		private Guid FID;
-		public Guid ID { get { return FID; } }
+		private Guid _iD;
+		public Guid ID { get { return _iD; } }
 		
 		public int DefaultMaxStackDepth
 		{
-			get { return FServerProcess.ServerSession.SessionInfo.DefaultMaxStackDepth; }
-			set { FServerProcess.ServerSession.SessionInfo.DefaultMaxStackDepth = value; }
+			get { return _serverProcess.ServerSession.SessionInfo.DefaultMaxStackDepth; }
+			set { _serverProcess.ServerSession.SessionInfo.DefaultMaxStackDepth = value; }
 		}
 		
 		public int DefaultMaxCallDepth
 		{
-			get { return FServerProcess.ServerSession.SessionInfo.DefaultMaxCallDepth; }
-			set { FServerProcess.ServerSession.SessionInfo.DefaultMaxCallDepth = value; }
+			get { return _serverProcess.ServerSession.SessionInfo.DefaultMaxCallDepth; }
+			set { _serverProcess.ServerSession.SessionInfo.DefaultMaxCallDepth = value; }
 		}
 		
-		private Stack FStack;
-		public Stack Stack { get { return FStack; } }
+		private Stack _stack;
+		public Stack Stack { get { return _stack; } }
 		
-		public Stack SwitchContext(Stack AContext)
+		public Stack SwitchContext(Stack context)
 		{
-			Stack LContext = FStack;
-			FStack = AContext;
-			return LContext;
+			Stack localContext = _stack;
+			_stack = context;
+			return localContext;
 		}
 
-		private ProgramStatistics FStatistics = new ProgramStatistics();
-		public ProgramStatistics Statistics { get { return FStatistics; } }
+		private ProgramStatistics _statistics = new ProgramStatistics();
+		public ProgramStatistics Statistics { get { return _statistics; } }
 
 		// Code
-		protected PlanNode FCode;
+		protected PlanNode _code;
 		public PlanNode Code
 		{
-			get { return FCode; }
-			set { FCode = value; }
+			get { return _code; }
+			set { _code = value; }
 		}
 		
 		// DataType
-		protected Schema.IDataType FDataType;
+		protected Schema.IDataType _dataType;
 		public Schema.IDataType DataType 
 		{ 
-			get { return FDataType; }
-			set { FDataType = value; } 
+			get { return _dataType; }
+			set { _dataType = value; } 
 		}
 		
 		// ProcessLocals - New local variables declared by allocation statements in the program
-		private DataParams FProcessLocals = new DataParams();
-		public DataParams ProcessLocals { get { return FProcessLocals; } }
+		private DataParams _processLocals = new DataParams();
+		public DataParams ProcessLocals { get { return _processLocals; } }
 		
-		private bool FShouldPushLocals;
+		private bool _shouldPushLocals;
 		/// <summary>
 		/// Indicates whether or not process local variables should be pushed onto the program's stack.
 		/// </summary>
 		public bool ShouldPushLocals
 		{
-			get { return FShouldPushLocals; }
-			set { FShouldPushLocals = value; }
+			get { return _shouldPushLocals; }
+			set { _shouldPushLocals = value; }
 		}
 		
 		// Used to track the set of process local variables pushed when the program was started.
-		private DataParams FLocalParams;
+		private DataParams _localParams;
 		
 		// Source
-		protected string FSource;
+		protected string _source;
 		/// <summary>
 		/// Contains the source text for the plan. Only present if no debug locator is provided.
 		/// </summary>
@@ -159,18 +159,18 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{ 
 			get 
 			{
-				if (FSource != null) 
-					return FSource;
+				if (_source != null) 
+					return _source;
 					
-				if (FCode != null)
-					return FCode.SafeEmitStatementAsString(false);
+				if (_code != null)
+					return _code.SafeEmitStatementAsString(false);
 					
 				return "<Program has no source>";
 			} 
 		}
 		
 		// Locator
-		protected DebugLocator FLocator;
+		protected DebugLocator _locator;
 		/// <summary>
 		/// Provides a reference for identifying the source text for the plan. May be null for dynamic or ad-hoc execution.
 		/// </summary>
@@ -178,48 +178,48 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{ 
 			get 
 			{ 
-				if (FLocator == null)
-					FLocator = new DebugLocator(DebugLocator.ProgramLocator(FID), -1, -1);
-				return FLocator; 
+				if (_locator == null)
+					_locator = new DebugLocator(DebugLocator.ProgramLocator(_iD), -1, -1);
+				return _locator; 
 			} 
 		}
 		
 		/// <summary>
 		/// Sets the source context for the plan.
 		/// </summary>
-		public void SetSourceContext(SourceContext ASourceContext)
+		public void SetSourceContext(SourceContext sourceContext)
 		{
 			// Clear existing context
-			FSource = null;
-			FLocator = null;
+			_source = null;
+			_locator = null;
 			
-			if (ASourceContext.Locator != null)
-				FLocator = ASourceContext.Locator;
+			if (sourceContext.Locator != null)
+				_locator = sourceContext.Locator;
 			else
 			{
-				FLocator = new DebugLocator(DebugLocator.ProgramLocator(this.ID), 1, 1);
-				FSource = ASourceContext.Script;
+				_locator = new DebugLocator(DebugLocator.ProgramLocator(this.ID), 1, 1);
+				_source = sourceContext.Script;
 			}
 		}
 		
 		// Devices
-		public Schema.DeviceSession DeviceConnect(Schema.Device ADevice)
+		public Schema.DeviceSession DeviceConnect(Schema.Device device)
 		{
-			return FServerProcess.DeviceConnect(ADevice);
+			return _serverProcess.DeviceConnect(device);
 		}
 		
-		public object DeviceExecute(Schema.Device ADevice, PlanNode APlanNode)
+		public object DeviceExecute(Schema.Device device, PlanNode planNode)
 		{	
-			if (FServerProcess.IsReconciliationEnabled() || (APlanNode.DataType != null))
+			if (_serverProcess.IsReconciliationEnabled() || (planNode.DataType != null))
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return DeviceConnect(ADevice).Execute(this, Plan.GetDevicePlan(APlanNode));
+					return DeviceConnect(device).Execute(this, Plan.GetDevicePlan(planNode));
 				}
 				finally
 				{
-					FStatistics.DeviceExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_statistics.DeviceExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 
@@ -227,20 +227,20 @@ namespace Alphora.Dataphor.DAE.Runtime
 		}
 		
 		// Remote Sessions
-		public RemoteSession RemoteConnect(Schema.ServerLink ALink)
+		public RemoteSession RemoteConnect(Schema.ServerLink link)
 		{
-			return FServerProcess.RemoteConnect(ALink);
+			return _serverProcess.RemoteConnect(link);
 		}
 		
 		// Plan
-		private Plan FPlan;
+		private Plan _plan;
 		public Plan Plan 
 		{ 
 			get 
 			{ 
-				if (FPlan == null)
-					FPlan = new Plan(FServerProcess);
-				return FPlan;
+				if (_plan == null)
+					_plan = new Plan(_serverProcess);
+				return _plan;
 			}
 		}
 		
@@ -249,166 +249,166 @@ namespace Alphora.Dataphor.DAE.Runtime
 		public Schema.User User { get { return Plan.User; } }
 		
 		// Catalog
-		public Schema.Catalog Catalog { get { return FServerProcess.Catalog; } }
+		public Schema.Catalog Catalog { get { return _serverProcess.Catalog; } }
 		
-		public CatalogDeviceSession CatalogDeviceSession { get { return FServerProcess.CatalogDeviceSession; } }
+		public CatalogDeviceSession CatalogDeviceSession { get { return _serverProcess.CatalogDeviceSession; } }
 		
-		public Schema.DataTypes DataTypes { get { return FServerProcess.DataTypes; } }
+		public Schema.DataTypes DataTypes { get { return _serverProcess.DataTypes; } }
 		
-		public Schema.Device TempDevice { get { return FServerProcess.ServerSession.Server.TempDevice; } }
+		public Schema.Device TempDevice { get { return _serverProcess.ServerSession.Server.TempDevice; } }
 		
 		// Values
-		public IValueManager ValueManager { get { return FServerProcess.ValueManager; } }
+		public IValueManager ValueManager { get { return _serverProcess.ValueManager; } }
 		
 		// Streams
-		public IStreamManager StreamManager { get { return FServerProcess.StreamManager; } }
+		public IStreamManager StreamManager { get { return _serverProcess.StreamManager; } }
 		
 		// Cursors
-		public CursorManager CursorManager { get { return FServerProcess.ServerSession.CursorManager; } }
+		public CursorManager CursorManager { get { return _serverProcess.ServerSession.CursorManager; } }
 
 		// Execution
-		public void Start(DataParams AParams)
+		public void Start(DataParams paramsValue)
 		{
-			FStack.PushWindow(0, null, Locator);
+			_stack.PushWindow(0, null, Locator);
 			try
 			{
-				FServerProcess.PushExecutingProgram(this);
+				_serverProcess.PushExecutingProgram(this);
 				try
 				{
-					FLocalParams = new DataParams();
-					DataParams LParams = new DataParams();
-					if (FShouldPushLocals)
-						foreach (DataParam LParam in FServerProcess.ProcessLocals)
-							if (!ProcessLocals.Contains(LParam.Name))
+					_localParams = new DataParams();
+					DataParams localParamsValue = new DataParams();
+					if (_shouldPushLocals)
+						foreach (DataParam param in _serverProcess.ProcessLocals)
+							if (!ProcessLocals.Contains(param.Name))
 							{
-								FLocalParams.Add(LParam);
-								LParams.Add(LParam);
+								_localParams.Add(param);
+								localParamsValue.Add(param);
 							}
 					
-					if (AParams != null)
-						foreach (DataParam LParam in AParams)
-							LParams.Add(LParam);
+					if (paramsValue != null)
+						foreach (DataParam param in paramsValue)
+							localParamsValue.Add(param);
 							
-					foreach (DataParam LParam in LParams)
-						FStack.Push(LParam.Modifier == Modifier.In ? DataValue.CopyValue(ValueManager, LParam.Value) : LParam.Value);
+					foreach (DataParam param in localParamsValue)
+						_stack.Push(param.Modifier == Modifier.In ? DataValue.CopyValue(ValueManager, param.Value) : param.Value);
 						
 					// Set the BreakNext flag for the process if the debugger is set to Break On Start
 					ReportStart();
 				}
 				catch
 				{
-					FServerProcess.PopExecutingProgram(this);
+					_serverProcess.PopExecutingProgram(this);
 					throw;
 				}
 			}
 			catch
 			{
-				FStack.PopWindow();
+				_stack.PopWindow();
 				throw;
 			}
 		}
 		
-		public void Stop(DataParams AParams)
+		public void Stop(DataParams paramsValue)
 		{
 			try
 			{
 				try
 				{
-					DataParams LParams = new DataParams();
-					foreach (DataParam LParam in FLocalParams)
-						LParams.Add(LParam);
+					DataParams localParamsValue = new DataParams();
+					foreach (DataParam param in _localParams)
+						localParamsValue.Add(param);
 						
-					if (AParams != null)
-						foreach (DataParam LParam in AParams)
-							LParams.Add(LParam);
+					if (paramsValue != null)
+						foreach (DataParam param in paramsValue)
+							localParamsValue.Add(param);
 							
-					for (int LIndex = ProcessLocals.Count - 1; LIndex >= 0; LIndex--)
+					for (int index = ProcessLocals.Count - 1; index >= 0; index--)
 					{
-						ProcessLocals[LIndex].Value = FStack.Pop();
-						FServerProcess.AddProcessLocal(ProcessLocals[LIndex]);
+						ProcessLocals[index].Value = _stack.Pop();
+						_serverProcess.AddProcessLocal(ProcessLocals[index]);
 					}
 							
-					for (int LIndex = LParams.Count - 1; LIndex >= 0; LIndex--)
+					for (int index = localParamsValue.Count - 1; index >= 0; index--)
 					{
-						object LValue = FStack.Pop();
-						if (LParams[LIndex].Modifier != Modifier.In)
-							LParams[LIndex].Value = LValue;
+						object tempValue = _stack.Pop();
+						if (localParamsValue[index].Modifier != Modifier.In)
+							localParamsValue[index].Value = tempValue;
 					}
 				}
 				finally
 				{
-					FServerProcess.PopExecutingProgram(this);
+					_serverProcess.PopExecutingProgram(this);
 				}
 			}
 			finally
 			{
-				FStack.PopWindow();
+				_stack.PopWindow();
 			}
 		}
 		
-		public object Execute(DataParams AParams)
+		public object Execute(DataParams paramsValue)
 		{	
-			object LResult;
-			Start(AParams);
+			object result;
+			Start(paramsValue);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				LResult = FCode.Execute(this);
-				FStatistics.ExecuteTime = TimingUtility.TimeSpanFromTicks(LStartTicks);
+				long startTicks = TimingUtility.CurrentTicks;
+				result = _code.Execute(this);
+				_statistics.ExecuteTime = TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			finally
 			{
-				Stop(AParams);
+				Stop(paramsValue);
 			}
-			return LResult;
+			return result;
 		}
 		
-		private PlanNode FCurrentNode;
-		public PlanNode CurrentNode { get { return FCurrentNode; } }
+		private PlanNode _currentNode;
+		public PlanNode CurrentNode { get { return _currentNode; } }
 		
-		private bool FAfterNode;
-		public bool AfterNode { get { return FAfterNode; } }
+		private bool _afterNode;
+		public bool AfterNode { get { return _afterNode; } }
 		
 		public void ReportStart()
 		{
-			Debugger LDebugger = FServerProcess.DebuggedBy;
-			if ((LDebugger != null) && LDebugger.BreakOnStart)
-				FServerProcess.SetStepInto();
+			Debugger debugger = _serverProcess.DebuggedBy;
+			if ((debugger != null) && debugger.BreakOnStart)
+				_serverProcess.SetStepInto();
 		}
 		
 		public void ReportThrow()
 		{
-			Debugger LDebugger = FServerProcess.DebuggedBy;
-			if ((LDebugger != null) && LDebugger.BreakOnException)
-				FServerProcess.SetStepInto();
+			Debugger debugger = _serverProcess.DebuggedBy;
+			if ((debugger != null) && debugger.BreakOnException)
+				_serverProcess.SetStepInto();
 		}
 		
-		public void Yield(PlanNode APlanNode, bool AAfterNode)
+		public void Yield(PlanNode planNode, bool afterNode)
 		{
-			if (FServerProcess.IsAborted)
+			if (_serverProcess.IsAborted)
 				throw new ServerException(ServerException.Codes.ProcessAborted);
 
 			// Double-check debugger here to optimize for the case that there is no debugger
 			// With this check first, if there is no debugger we've saved an assignment
-			if (FServerProcess.DebuggedBy != null)
+			if (_serverProcess.DebuggedBy != null)
 			{
-				Debugger LDebugger = FServerProcess.DebuggedBy;
-				if (LDebugger != null)
+				Debugger debugger = _serverProcess.DebuggedBy;
+				if (debugger != null)
 				{
-					FCurrentNode = APlanNode;
-					FAfterNode = AAfterNode;
-					LDebugger.Yield(FServerProcess, APlanNode);
+					_currentNode = planNode;
+					_afterNode = afterNode;
+					debugger.Yield(_serverProcess, planNode);
 				}
 			}
 		}
 		
 		public void CheckAborted()
 		{
-			if (FServerProcess.IsAborted)
+			if (_serverProcess.IsAborted)
 				throw new ServerException(ServerException.Codes.ProcessAborted);
 		}
 		
-		public DebugLocator GetLocation(PlanNode APlanNode, bool AAfterNode)
+		public DebugLocator GetLocation(PlanNode planNode, bool afterNode)
 		{
 			try
 			{
@@ -416,20 +416,20 @@ namespace Alphora.Dataphor.DAE.Runtime
 				return 
 					new DebugLocator
 					(
-						((RuntimeStackWindow)FStack.CurrentStackWindow).Locator, 
-						APlanNode == null ? -1 : (AAfterNode ? APlanNode.EndLine : APlanNode.Line), 
-						APlanNode == null ? -1 : ((AAfterNode && APlanNode.Line != APlanNode.EndLine) ? APlanNode.EndLinePos : APlanNode.LinePos)
+						((RuntimeStackWindow)_stack.CurrentStackWindow).Locator, 
+						planNode == null ? -1 : (afterNode ? planNode.EndLine : planNode.Line), 
+						planNode == null ? -1 : ((afterNode && planNode.Line != planNode.EndLine) ? planNode.EndLinePos : planNode.LinePos)
 					);
 			}
 			catch (Exception E)
 			{
-				throw new ServerException(ServerException.Codes.CouldNotDetermineProgramLocation, E, FID);
+				throw new ServerException(ServerException.Codes.CouldNotDetermineProgramLocation, E, _iD);
 			}
 		}
 		
 		public DebugLocator GetCurrentLocation()
 		{
-			return GetLocation(FCurrentNode, FAfterNode);
+			return GetLocation(_currentNode, _afterNode);
 		}
 		
 		public DebugLocator SafeGetCurrentLocation()
@@ -445,49 +445,49 @@ namespace Alphora.Dataphor.DAE.Runtime
 		}
 		
 		// Run-time Compilation
-		public void EnsureKey(Schema.TableVar ATableVar)
+		public void EnsureKey(Schema.TableVar tableVar)
 		{
-			Compiler.EnsureKey(Plan, ATableVar);
+			Compiler.EnsureKey(Plan, tableVar);
 		}
 		
-		public Schema.Key FindKey(Schema.TableVar ATableVar, KeyDefinitionBase AKeyDefinition)
+		public Schema.Key FindKey(Schema.TableVar tableVar, KeyDefinitionBase keyDefinition)
 		{
-			return Compiler.FindKey(Plan, ATableVar, AKeyDefinition);
+			return Compiler.FindKey(Plan, tableVar, keyDefinition);
 		}
 		
-		public Schema.Key FindClusteringKey(Schema.TableVar ATableVar)
+		public Schema.Key FindClusteringKey(Schema.TableVar tableVar)
 		{
-			return Compiler.FindClusteringKey(Plan, ATableVar);
+			return Compiler.FindClusteringKey(Plan, tableVar);
 		}
 		
-		public Schema.Order OrderFromKey(Schema.Key AKey)
+		public Schema.Order OrderFromKey(Schema.Key key)
 		{
-			return Compiler.OrderFromKey(Plan, AKey);
+			return Compiler.OrderFromKey(Plan, key);
 		}
 		
-		public Schema.Order FindClusteringOrder(Schema.TableVar ATableVar)
+		public Schema.Order FindClusteringOrder(Schema.TableVar tableVar)
 		{
-			return Compiler.FindClusteringOrder(Plan, ATableVar);
+			return Compiler.FindClusteringOrder(Plan, tableVar);
 		}
 		
-		public Schema.Object ResolveCatalogObjectSpecifier(string ASpecifier)
+		public Schema.Object ResolveCatalogObjectSpecifier(string specifier)
 		{
-			return Compiler.ResolveCatalogObjectSpecifier(Plan, ASpecifier);
+			return Compiler.ResolveCatalogObjectSpecifier(Plan, specifier);
 		}
 		
-		public Schema.Object ResolveCatalogObjectSpecifier(string ASpecifier, bool AMustResolve)
+		public Schema.Object ResolveCatalogObjectSpecifier(string specifier, bool mustResolve)
 		{
-			return Compiler.ResolveCatalogObjectSpecifier(Plan, ASpecifier, AMustResolve);
+			return Compiler.ResolveCatalogObjectSpecifier(Plan, specifier, mustResolve);
 		}
 		
-		public Schema.Object ResolveCatalogIdentifier(string AIdentifier)
+		public Schema.Object ResolveCatalogIdentifier(string identifier)
 		{
-			return Compiler.ResolveCatalogIdentifier(Plan, AIdentifier);
+			return Compiler.ResolveCatalogIdentifier(Plan, identifier);
 		}
 
-		public Schema.Object ResolveCatalogIdentifier(string AIdentifier, bool AMustResolve)
+		public Schema.Object ResolveCatalogIdentifier(string identifier, bool mustResolve)
 		{
-			return Compiler.ResolveCatalogIdentifier(Plan, AIdentifier, AMustResolve);
+			return Compiler.ResolveCatalogIdentifier(Plan, identifier, mustResolve);
 		}
 	}
 	

@@ -25,15 +25,15 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
 		/// <summary>Initializes the store, ensuring that an instance of the server is running and a database is attached.</summary>
         protected override void InternalInitialize()
         {
-            FSupportsMARS = false;
-            FSupportsUpdatableCursor = false;
+            _supportsMARS = false;
+            _supportsUpdatableCursor = false;
         }
 		
-		private bool FShouldEnsureDatabase = true;
+		private bool _shouldEnsureDatabase = true;
 		public bool ShouldEnsureDatabase
 		{
-			get { return FShouldEnsureDatabase; }
-			set { FShouldEnsureDatabase = value; }
+			get { return _shouldEnsureDatabase; }
+			set { _shouldEnsureDatabase = value; }
 		}
 
 	    public override SQLConnection GetSQLConnection()

@@ -13,23 +13,23 @@ namespace Alphora.Dataphor.DAE.Contracts
 	[DataContract]
 	public class BatchDescriptor
 	{
-		public BatchDescriptor(int AHandle, bool AIsExpression, int ALine)
+		public BatchDescriptor(int handle, bool isExpression, int line)
 		{
-			FHandle = AHandle;
-			FIsExpression = AIsExpression;
-			FLine = ALine;
+			_handle = handle;
+			_isExpression = isExpression;
+			_line = line;
 		}
 		
 		[DataMember]
-		internal int FHandle;
-		public int Handle { get { return FHandle; } }
+		internal int _handle;
+		public int Handle { get { return _handle; } }
 		
 		[DataMember]
-		internal bool FIsExpression;
-		public bool IsExpression { get { return FIsExpression; } }
+		internal bool _isExpression;
+		public bool IsExpression { get { return _isExpression; } }
 		
 		[DataMember]
-		internal int FLine;
-		public int Line { get { return FLine; } }
+		internal int _line;
+		public int Line { get { return _line; } }
 	}
 }

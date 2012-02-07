@@ -20,68 +20,68 @@ namespace Alphora.Dataphor.Frontend.Server
 	// manages frontend sessions
 	public class FrontendServer : System.Object
 	{
-		private static Hashtable FServers = new Hashtable();
+		private static Hashtable _servers = new Hashtable();
 		
 		// returns the frontend server for the given DAE instance
-		public static FrontendServer GetFrontendServer(DAE.Server.Engine AServer)
+		public static FrontendServer GetFrontendServer(DAE.Server.Engine server)
 		{
-			lock (FServers)
+			lock (_servers)
 			{
-				FrontendServer LServer = FServers[AServer] as FrontendServer;
-				if (LServer == null)
+				FrontendServer localServer = _servers[server] as FrontendServer;
+				if (localServer == null)
 				{
-					LServer = new FrontendServer(AServer);
-					FServers.Add(AServer, LServer);
+					localServer = new FrontendServer(server);
+					_servers.Add(server, localServer);
 				}
-				return LServer;
+				return localServer;
 			}
 		}
 
-		public FrontendServer(DAE.Server.Engine AServer)
+		public FrontendServer(DAE.Server.Engine server)
 		{
-			FServer = AServer;
-			FServer.Disposed += new EventHandler(ServerDisposed);
+			_server = server;
+			_server.Disposed += new EventHandler(ServerDisposed);
 		}
 		
 		[Reference]
-		private DAE.Server.Engine FServer;
-		public DAE.Server.Engine Server { get { return FServer; } }
+		private DAE.Server.Engine _server;
+		public DAE.Server.Engine Server { get { return _server; } }
 		
-		private void ServerDisposed(object ASender, EventArgs AArgs)
+		private void ServerDisposed(object sender, EventArgs args)
 		{
-			if (FServer != null)
+			if (_server != null)
 			{
-				lock (FServers)
+				lock (_servers)
 				{
-					FServer.Disposed -= new EventHandler(ServerDisposed);
-					FServers.Remove(FServer);
-					FServer = null;
+					_server.Disposed -= new EventHandler(ServerDisposed);
+					_servers.Remove(_server);
+					_server = null;
 				}
 			}
 		}
 		
-		internal Hashtable FSessions = new Hashtable();
+		internal Hashtable _sessions = new Hashtable();
 		
-		public FrontendSession GetFrontendSession(ServerSession ASession)
+		public FrontendSession GetFrontendSession(ServerSession session)
 		{
-			lock (FSessions)
+			lock (_sessions)
 			{
-				FrontendSession LSession = FSessions[ASession] as FrontendSession;
-				if (LSession == null)
+				FrontendSession localSession = _sessions[session] as FrontendSession;
+				if (localSession == null)
 				{
-					LSession = new FrontendSession(this, ASession);
-					FSessions.Add(ASession, LSession);
+					localSession = new FrontendSession(this, session);
+					_sessions.Add(session, localSession);
 				}
-				return LSession;
+				return localSession;
 			}
 		}
 		
 		public void ClearDerivationCache()
 		{
-			lock (FSessions)
+			lock (_sessions)
 			{
-				foreach (FrontendSession LSession in FSessions.Values)
-					LSession.ClearDerivationCache();
+				foreach (FrontendSession session in _sessions.Values)
+					session.ClearDerivationCache();
 			}
 		}
 	}
@@ -90,63 +90,63 @@ namespace Alphora.Dataphor.Frontend.Server
 	// manages derivation cache and other session specific settings
 	public class FrontendSession : System.Object
 	{
-		public const int CDefaultDerivationCacheSize = 50;
+		public const int DefaultDerivationCacheSize = 50;
 		
-		public FrontendSession(FrontendServer AFrontendServer, ServerSession ASession)
+		public FrontendSession(FrontendServer frontendServer, ServerSession session)
 		{
-			FFrontendServer = AFrontendServer;
-			FSession = ASession;
-			FSession.Disposed += new EventHandler(SessionDisposed);
+			_frontendServer = frontendServer;
+			_session = session;
+			_session.Disposed += new EventHandler(SessionDisposed);
 		}
 
 		[Reference]
-		private FrontendServer FFrontendServer;		
-		public FrontendServer FrontendServer { get { return FFrontendServer; } }
+		private FrontendServer _frontendServer;		
+		public FrontendServer FrontendServer { get { return _frontendServer; } }
 		
 		[Reference]
-		private ServerSession FSession;
-		public ServerSession Session { get { return FSession; } }
+		private ServerSession _session;
+		public ServerSession Session { get { return _session; } }
 		
-		private void SessionDisposed(object ASender, EventArgs AArgs)
+		private void SessionDisposed(object sender, EventArgs args)
 		{
-			if (FSession != null)
+			if (_session != null)
 			{
-				FSession.Disposed -= new EventHandler(SessionDisposed);
-				FFrontendServer.FSessions.Remove(FSession);
-				FSession = null;
-				FFrontendServer = null;
+				_session.Disposed -= new EventHandler(SessionDisposed);
+				_frontendServer._sessions.Remove(_session);
+				_session = null;
+				_frontendServer = null;
 			}
 		}
 		
-		private bool FUseDerivationCache = true;
+		private bool _useDerivationCache = true;
 		public bool UseDerivationCache
 		{
-			get { return FUseDerivationCache; }
-			set { FUseDerivationCache = value; }
+			get { return _useDerivationCache; }
+			set { _useDerivationCache = value; }
 		}
 
-		private FixedSizeCache<DerivationSeed, DerivationCacheItem> FDerivationCache = new FixedSizeCache<DerivationSeed, DerivationCacheItem>(CDefaultDerivationCacheSize);
-		public FixedSizeCache<DerivationSeed, DerivationCacheItem> DerivationCache { get { return FDerivationCache; } }
+		private FixedSizeCache<DerivationSeed, DerivationCacheItem> _derivationCache = new FixedSizeCache<DerivationSeed, DerivationCacheItem>(DefaultDerivationCacheSize);
+		public FixedSizeCache<DerivationSeed, DerivationCacheItem> DerivationCache { get { return _derivationCache; } }
 		
-		private long FDerivationTimeStamp;
+		private long _derivationTimeStamp;
 		
 		public void EnsureDerivationCacheConsistent()
 		{
-			lock (FDerivationCache)
+			lock (_derivationCache)
 			{
-				if (FDerivationTimeStamp < FFrontendServer.Server.DerivationTimeStamp)
+				if (_derivationTimeStamp < _frontendServer.Server.DerivationTimeStamp)
 				{
-					FDerivationCache.Clear();
-					FDerivationTimeStamp = FFrontendServer.Server.DerivationTimeStamp;
+					_derivationCache.Clear();
+					_derivationTimeStamp = _frontendServer.Server.DerivationTimeStamp;
 				}
 			}
 		}
 		
 		public void ClearDerivationCache()
 		{
-			lock (FDerivationCache)
+			lock (_derivationCache)
 			{
-				FDerivationCache.Clear();
+				_derivationCache.Clear();
 			}
 		}
 	}

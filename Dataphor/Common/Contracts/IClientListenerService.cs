@@ -28,7 +28,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		[OperationContract(AsyncPattern = true)]
 		[FaultContract(typeof(ListenerFault))]
-		IAsyncResult BeginGetInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode, AsyncCallback ACallback, object AState);
+		IAsyncResult BeginGetInstanceURI(string AHostName, string AInstanceName, AsyncCallback ACallback, object AState);
 		string EndGetInstanceURI(IAsyncResult AResult);
 		
 		/// <summary>
@@ -36,7 +36,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		[OperationContract(AsyncPattern = true)]
 		[FaultContract(typeof(ListenerFault))]
-		IAsyncResult BeginGetNativeInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode, AsyncCallback ACallback, object AState);
+		IAsyncResult BeginGetNativeInstanceURI(string AHostName, string AInstanceName, AsyncCallback ACallback, object AState);
 		string EndGetNativeInstanceURI(IAsyncResult AResult);
 	}
 }

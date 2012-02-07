@@ -12,517 +12,517 @@ namespace Alphora.Dataphor.DAE.Language.SQL
 	
 	public class SQLTextEmitter : BasicTextEmitter, ICloneable
 	{
-		private bool FUseStatementTerminator = true;
+		private bool _useStatementTerminator = true;
 		public bool UseStatementTerminator
 		{
-			set { FUseStatementTerminator = value; }
-			get { return FUseStatementTerminator; }
+			set { _useStatementTerminator = value; }
+			get { return _useStatementTerminator; }
 		}
 
-		private bool FUseQuotedIdentifiers = true;
+		private bool _useQuotedIdentifiers = true;
 		public bool UseQuotedIdentifiers
 		{
-			set { FUseQuotedIdentifiers = value;}
-			get { return FUseQuotedIdentifiers;}
+			set { _useQuotedIdentifiers = value;}
+			get { return _useQuotedIdentifiers;}
 		}
 		
-		protected override void EmitExpression(Expression AExpression)
+		protected override void EmitExpression(Expression expression)
 		{
-			if (AExpression is QualifiedFieldExpression)
-				EmitQualifiedFieldExpression((QualifiedFieldExpression)AExpression);
-			else if (AExpression is TableExpression)
-				EmitTableExpression((TableExpression)AExpression);
-			else if (AExpression is AggregateCallExpression)
-				EmitAggregateCallExpression((AggregateCallExpression)AExpression);
-			else if (AExpression is UserExpression)
-				EmitUserExpression((UserExpression)AExpression);
-			else if (AExpression is QueryParameterExpression)
-				EmitQueryParameterExpression((QueryParameterExpression)AExpression);
-			else if ((AExpression is QueryExpression) || (AExpression is SelectExpression))
-				EmitSubQueryExpression(AExpression);
-			else if (AExpression is CastExpression)
-				EmitCastExpression((CastExpression)AExpression);
-			else if (AExpression is ListExpression)
-				EmitListExpression((ListExpression)AExpression);
+			if (expression is QualifiedFieldExpression)
+				EmitQualifiedFieldExpression((QualifiedFieldExpression)expression);
+			else if (expression is TableExpression)
+				EmitTableExpression((TableExpression)expression);
+			else if (expression is AggregateCallExpression)
+				EmitAggregateCallExpression((AggregateCallExpression)expression);
+			else if (expression is UserExpression)
+				EmitUserExpression((UserExpression)expression);
+			else if (expression is QueryParameterExpression)
+				EmitQueryParameterExpression((QueryParameterExpression)expression);
+			else if ((expression is QueryExpression) || (expression is SelectExpression))
+				EmitSubQueryExpression(expression);
+			else if (expression is CastExpression)
+				EmitCastExpression((CastExpression)expression);
+			else if (expression is ListExpression)
+				EmitListExpression((ListExpression)expression);
 			else
-				base.EmitExpression(AExpression);
+				base.EmitExpression(expression);
 		}
 		
-		protected virtual void EmitQueryParameterExpression(QueryParameterExpression AExpression)
+		protected virtual void EmitQueryParameterExpression(QueryParameterExpression expression)
 		{
-			AppendFormat("@{0}", AExpression.ParameterName);
+			AppendFormat("@{0}", expression.ParameterName);
 		}
 
-		protected virtual void EmitCastExpression(CastExpression AExpression)
+		protected virtual void EmitCastExpression(CastExpression expression)
 		{
 			AppendFormat("cast(");
-			EmitExpression(AExpression.Expression);
-			AppendFormat(" as {0})", AExpression.DomainName);
+			EmitExpression(expression.Expression);
+			AppendFormat(" as {0})", expression.DomainName);
 		}
 		
-		protected virtual void EmitListExpression(ListExpression AExpression)
+		protected virtual void EmitListExpression(ListExpression expression)
 		{
 			AppendFormat("( ");
-			for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitExpression(AExpression.Expressions[LIndex]);
+				EmitExpression(expression.Expressions[index]);
 			}
 			AppendFormat(" )");
 		}
 		
-		protected override void EmitValueExpression(ValueExpression AExpression)
+		protected override void EmitValueExpression(ValueExpression expression)
 		{
-			if (AExpression.Value == null)
+			if (expression.Value == null)
 				Append(Keywords.Null);
-			else if (AExpression.Token == TokenType.Decimal)
+			else if (expression.Token == TokenType.Decimal)
 			{
-				decimal LValue = (decimal)AExpression.Value;
-				if (Decimal.Truncate(LValue) == LValue)
-					Append(String.Format(System.Globalization.NumberFormatInfo.InvariantInfo, "{0:F0}.0", LValue));
+				decimal tempValue = (decimal)expression.Value;
+				if (Decimal.Truncate(tempValue) == tempValue)
+					Append(String.Format(System.Globalization.NumberFormatInfo.InvariantInfo, "{0:F0}.0", tempValue));
 				else
-					Append(String.Format(System.Globalization.NumberFormatInfo.InvariantInfo, "{0:G}", LValue));
+					Append(String.Format(System.Globalization.NumberFormatInfo.InvariantInfo, "{0:G}", tempValue));
 			}
 			else
-				base.EmitValueExpression(AExpression);
+				base.EmitValueExpression(expression);
 		}
 		
-		protected override void EmitUnaryExpression(UnaryExpression AExpression)
+		protected override void EmitUnaryExpression(UnaryExpression expression)
 		{
-			if (AExpression.Instruction == "iIsNull")
+			if (expression.Instruction == "iIsNull")
 			{
-				EmitExpression(AExpression.Expression);
+				EmitExpression(expression.Expression);
 				AppendFormat(" {0}", " is null");
 			}
-			else if (AExpression.Instruction == "iIsNotNull")
+			else if (expression.Instruction == "iIsNotNull")
 			{
-				EmitExpression(AExpression.Expression);
+				EmitExpression(expression.Expression);
 				AppendFormat(" {0}", " is not null");
 			}
 			else
 			{
-				base.EmitUnaryExpression(AExpression);
+				base.EmitUnaryExpression(expression);
 			}
 		}
 
-		protected virtual void EmitTerminatedStatement(Statement AStatement)
+		protected virtual void EmitTerminatedStatement(Statement statement)
 		{
-			if (AStatement is SelectStatement)
-				EmitSelectStatement((SelectStatement)AStatement);
-			else if (AStatement is InsertStatement)
-				EmitInsertStatement((InsertStatement)AStatement);
-			else if (AStatement is UpdateStatement)
-				EmitUpdateStatement((UpdateStatement)AStatement);
-			else if (AStatement is DeleteStatement)
-				EmitDeleteStatement((DeleteStatement)AStatement);
-			else if (AStatement is CreateTableStatement)
-				EmitCreateTableStatement((CreateTableStatement)AStatement);
-			else if (AStatement is AlterTableStatement)
-				EmitAlterTableStatement((AlterTableStatement)AStatement);
-			else if (AStatement is DropTableStatement)
-				EmitDropTableStatement((DropTableStatement)AStatement);
-			else if (AStatement is CreateIndexStatement)
-				EmitCreateIndexStatement((CreateIndexStatement)AStatement);
-			else if (AStatement is DropIndexStatement)
-				EmitDropIndexStatement((DropIndexStatement)AStatement);
+			if (statement is SelectStatement)
+				EmitSelectStatement((SelectStatement)statement);
+			else if (statement is InsertStatement)
+				EmitInsertStatement((InsertStatement)statement);
+			else if (statement is UpdateStatement)
+				EmitUpdateStatement((UpdateStatement)statement);
+			else if (statement is DeleteStatement)
+				EmitDeleteStatement((DeleteStatement)statement);
+			else if (statement is CreateTableStatement)
+				EmitCreateTableStatement((CreateTableStatement)statement);
+			else if (statement is AlterTableStatement)
+				EmitAlterTableStatement((AlterTableStatement)statement);
+			else if (statement is DropTableStatement)
+				EmitDropTableStatement((DropTableStatement)statement);
+			else if (statement is CreateIndexStatement)
+				EmitCreateIndexStatement((CreateIndexStatement)statement);
+			else if (statement is DropIndexStatement)
+				EmitDropIndexStatement((DropIndexStatement)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 			EmitStatementTerminator();
 		}
 		
-		protected override void EmitStatement(Statement AStatement)
+		protected override void EmitStatement(Statement statement)
 		{
-			if (AStatement is Batch)
-				EmitBatch((Batch)AStatement);
+			if (statement is Batch)
+				EmitBatch((Batch)statement);
 			else
-				EmitTerminatedStatement(AStatement);
+				EmitTerminatedStatement(statement);
 		}
 		
-		protected virtual void EmitBatch(Batch ABatch)
+		protected virtual void EmitBatch(Batch batch)
 		{
-			for (int LIndex = 0; LIndex < ABatch.Statements.Count; LIndex++)
+			for (int index = 0; index < batch.Statements.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					NewLine();
-				EmitStatement(ABatch.Statements[LIndex]);
+				EmitStatement(batch.Statements[index]);
 			}
 		}
 
-		protected virtual void EmitSelectStatement(SelectStatement ASelectStatement)
+		protected virtual void EmitSelectStatement(SelectStatement selectStatement)
 		{
 			Indent();
-			EmitQueryExpression(ASelectStatement.QueryExpression);
-			if (ASelectStatement.OrderClause != null)
+			EmitQueryExpression(selectStatement.QueryExpression);
+			if (selectStatement.OrderClause != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} {1} ", Keywords.Order, Keywords.By);
-				for (int LIndex = 0; LIndex < ASelectStatement.OrderClause.Columns.Count; LIndex++)
+				for (int index = 0; index < selectStatement.OrderClause.Columns.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						EmitListSeparator();
-					EmitOrderFieldExpression(ASelectStatement.OrderClause.Columns[LIndex]);
+					EmitOrderFieldExpression(selectStatement.OrderClause.Columns[index]);
 				}
 			}
 		}
 		
-		protected virtual void EmitOrderFieldExpression(OrderFieldExpression AOrderFieldExpression)
+		protected virtual void EmitOrderFieldExpression(OrderFieldExpression orderFieldExpression)
 		{
-			EmitQualifiedFieldExpression(AOrderFieldExpression);
-			AppendFormat(" {0}", AOrderFieldExpression.Ascending ? Keywords.Asc : Keywords.Desc);
+			EmitQualifiedFieldExpression(orderFieldExpression);
+			AppendFormat(" {0}", orderFieldExpression.Ascending ? Keywords.Asc : Keywords.Desc);
 		}
 		
-		protected virtual void EmitIdentifier(string AIdentifier)
+		protected virtual void EmitIdentifier(string identifier)
 		{
-			if (AIdentifier == "*")
-				Append(AIdentifier);
+			if (identifier == "*")
+				Append(identifier);
 			else
 			{
-				string LAppendString = "{0}";
-				if (FUseQuotedIdentifiers)
-					LAppendString = "\"" + LAppendString + "\"";
-				AppendFormat(LAppendString, AIdentifier);
+				string appendString = "{0}";
+				if (_useQuotedIdentifiers)
+					appendString = "\"" + appendString + "\"";
+				AppendFormat(appendString, identifier);
 			}
 		}
 		
-		protected virtual void EmitQualifiedFieldExpression(QualifiedFieldExpression AExpression)
+		protected virtual void EmitQualifiedFieldExpression(QualifiedFieldExpression expression)
 		{
-			if (AExpression.TableAlias != String.Empty)
+			if (expression.TableAlias != String.Empty)
 			{
-				EmitIdentifier(AExpression.TableAlias);
+				EmitIdentifier(expression.TableAlias);
 				Append(Keywords.Qualifier);
 			}
-			EmitIdentifier(AExpression.FieldName);
+			EmitIdentifier(expression.FieldName);
 		}
 		
-		protected virtual void EmitQueryExpression(QueryExpression AQueryExpression)
+		protected virtual void EmitQueryExpression(QueryExpression queryExpression)
 		{
-			EmitSelectExpression(AQueryExpression.SelectExpression);
-			foreach (TableOperatorExpression LTableOperatorExpression in AQueryExpression.TableOperators)
-				EmitTableOperatorExpression(LTableOperatorExpression);
+			EmitSelectExpression(queryExpression.SelectExpression);
+			foreach (TableOperatorExpression tableOperatorExpression in queryExpression.TableOperators)
+				EmitTableOperatorExpression(tableOperatorExpression);
 		}
 		
-		protected virtual string GetTableOperatorKeyword(TableOperator ATableOperator)
+		protected virtual string GetTableOperatorKeyword(TableOperator tableOperator)
 		{
-			switch (ATableOperator)
+			switch (tableOperator)
 			{
 				case TableOperator.Union: return Keywords.Union;
 				case TableOperator.Intersect: return Keywords.Intersect;
 				case TableOperator.Difference: return Keywords.Minus;
-				default: throw new LanguageException(LanguageException.Codes.UnknownInstruction, ATableOperator.ToString());
+				default: throw new LanguageException(LanguageException.Codes.UnknownInstruction, tableOperator.ToString());
 			}
 		}
 		
-		protected virtual void EmitTableOperatorExpression(TableOperatorExpression ATableOperatorExpression)
+		protected virtual void EmitTableOperatorExpression(TableOperatorExpression tableOperatorExpression)
 		{
 			NewLine();
 			Indent();
-			Append(GetTableOperatorKeyword(ATableOperatorExpression.TableOperator));
-			if (!ATableOperatorExpression.Distinct)
+			Append(GetTableOperatorKeyword(tableOperatorExpression.TableOperator));
+			if (!tableOperatorExpression.Distinct)
 				AppendFormat(" {0}", Keywords.All);
 			
 			NewLine();
 			Indent();
-			EmitSelectExpression(ATableOperatorExpression.SelectExpression);
+			EmitSelectExpression(tableOperatorExpression.SelectExpression);
 		}
 		
-		protected virtual void EmitSelectExpression(SelectExpression AExpression)
+		protected virtual void EmitSelectExpression(SelectExpression expression)
 		{
 			AppendFormat("{0} ", Keywords.Select);
 			IncreaseIndent();
-			EmitSelectClause(AExpression.SelectClause);
-			EmitFromClause(AExpression.FromClause);
-			EmitWhereClause(AExpression.WhereClause);
-			EmitGroupClause(AExpression.GroupClause);
-			EmitHavingClause(AExpression.HavingClause);
+			EmitSelectClause(expression.SelectClause);
+			EmitFromClause(expression.FromClause);
+			EmitWhereClause(expression.WhereClause);
+			EmitGroupClause(expression.GroupClause);
+			EmitHavingClause(expression.HavingClause);
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitSelectClause(SelectClause AClause)
+		protected virtual void EmitSelectClause(SelectClause clause)
 		{
 			NewLine();
 			Indent();
-			if (AClause.Distinct)
+			if (clause.Distinct)
 				AppendFormat("{0} ", Keywords.Distinct);
-			if (AClause.Columns.Count == 0)
+			if (clause.Columns.Count == 0)
 				Append(Keywords.Star);
-			for (int LIndex = 0; LIndex < AClause.Columns.Count; LIndex++)
+			for (int index = 0; index < clause.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitColumnExpression(AClause.Columns[LIndex]);
+				EmitColumnExpression(clause.Columns[index]);
 			}
 		}
 		
-		protected virtual void EmitColumnExpression(ColumnExpression AExpression)
+		protected virtual void EmitColumnExpression(ColumnExpression expression)
 		{
-			EmitExpression(AExpression.Expression);
-			if (AExpression.ColumnAlias != String.Empty)
+			EmitExpression(expression.Expression);
+			if (expression.ColumnAlias != String.Empty)
 			{
 				AppendFormat(" {0} ", Keywords.As);
-				EmitIdentifier(AExpression.ColumnAlias);
+				EmitIdentifier(expression.ColumnAlias);
 			}
 		}
 		
-		protected virtual void EmitAggregateCallExpression(AggregateCallExpression AExpression)
+		protected virtual void EmitAggregateCallExpression(AggregateCallExpression expression)
 		{
-			AppendFormat("{0}{1}", AExpression.Identifier, Keywords.BeginGroup);
-			if (AExpression.IsDistinct)
+			AppendFormat("{0}{1}", expression.Identifier, Keywords.BeginGroup);
+			if (expression.IsDistinct)
 				AppendFormat("{0} ", Keywords.Distinct);
-			EmitExpression(AExpression.Expressions[0]);
+			EmitExpression(expression.Expressions[0]);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitUserExpression(UserExpression AExpression)
+		protected virtual void EmitUserExpression(UserExpression expression)
 		{
-			string[] LArguments = new string[AExpression.Expressions.Count];
-			SQLTextEmitter LEmitter = Clone();
-			for (int LIndex = 0; LIndex < LArguments.Length; LIndex++)
-				LArguments[LIndex] = LEmitter.Emit(AExpression.Expressions[LIndex]);
+			string[] arguments = new string[expression.Expressions.Count];
+			SQLTextEmitter emitter = Clone();
+			for (int index = 0; index < arguments.Length; index++)
+				arguments[index] = emitter.Emit(expression.Expressions[index]);
 				
-			AppendFormat(AExpression.TranslationString, LArguments);
+			AppendFormat(expression.TranslationString, arguments);
 		}
 		
-		protected virtual void EmitFromClause(FromClause AClause)
+		protected virtual void EmitFromClause(FromClause clause)
 		{
-			if (AClause is AlgebraicFromClause)
-				EmitAlgebraicFromClause((AlgebraicFromClause)AClause);
-			else if (AClause is CalculusFromClause)
-				EmitCalculusFromClause((CalculusFromClause)AClause);
+			if (clause is AlgebraicFromClause)
+				EmitAlgebraicFromClause((AlgebraicFromClause)clause);
+			else if (clause is CalculusFromClause)
+				EmitCalculusFromClause((CalculusFromClause)clause);
 		}
 		
-		protected virtual void EmitAlgebraicFromClause(AlgebraicFromClause AClause)
+		protected virtual void EmitAlgebraicFromClause(AlgebraicFromClause clause)
 		{
 			NewLine();
 			Indent();
 			AppendFormat("{0} ", Keywords.From);
-			EmitTableSpecifier(AClause.TableSpecifier);
+			EmitTableSpecifier(clause.TableSpecifier);
 			IncreaseIndent();
-			for (int LIndex = 0; LIndex < AClause.Joins.Count; LIndex++)
-				EmitJoinClause(AClause.Joins[LIndex]);
+			for (int index = 0; index < clause.Joins.Count; index++)
+				EmitJoinClause(clause.Joins[index]);
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitJoinClause(JoinClause AClause)
+		protected virtual void EmitJoinClause(JoinClause clause)
 		{
 			NewLine();
 			Indent();
-			if (AClause.JoinType == JoinType.Cross)
+			if (clause.JoinType == JoinType.Cross)
 			{
 				AppendFormat("{0} {1} ", Keywords.Cross, Keywords.Join);
-				EmitTableSpecifier(AClause.FromClause.TableSpecifier);
+				EmitTableSpecifier(clause.FromClause.TableSpecifier);
 			}
 			else
 			{
-				switch (AClause.JoinType)
+				switch (clause.JoinType)
 				{
 					case JoinType.Inner : Append(Keywords.Inner); break;
 					case JoinType.Left : AppendFormat("{0} {1}", Keywords.Left, Keywords.Outer); break;
 					case JoinType.Right : AppendFormat("{0} {1}", Keywords.Right, Keywords.Outer); break;
-					default : throw new LanguageException(LanguageException.Codes.InvalidJoinType, AClause.JoinType.ToString());
+					default : throw new LanguageException(LanguageException.Codes.InvalidJoinType, clause.JoinType.ToString());
 				}
 				
 				AppendFormat(" {0} ", Keywords.Join);
-				EmitTableSpecifier(AClause.FromClause.TableSpecifier);
+				EmitTableSpecifier(clause.FromClause.TableSpecifier);
 				AppendFormat(" {0} ", Keywords.On);
-				EmitExpression(AClause.JoinExpression);
+				EmitExpression(clause.JoinExpression);
 			}
 			
 			IncreaseIndent();
-			for (int LIndex = 0; LIndex < AClause.FromClause.Joins.Count; LIndex++)
-				EmitJoinClause(AClause.FromClause.Joins[LIndex]);
+			for (int index = 0; index < clause.FromClause.Joins.Count; index++)
+				EmitJoinClause(clause.FromClause.Joins[index]);
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitCalculusFromClause(CalculusFromClause AClause)
+		protected virtual void EmitCalculusFromClause(CalculusFromClause clause)
 		{
 			NewLine();
 			Indent();
 			AppendFormat("{0} ", Keywords.From);
-			for (int LIndex = 0; LIndex < AClause.TableSpecifiers.Count; LIndex++)
+			for (int index = 0; index < clause.TableSpecifiers.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitTableSpecifier(AClause.TableSpecifiers[LIndex]);
+				EmitTableSpecifier(clause.TableSpecifiers[index]);
 			}
 		}
 		
-		protected virtual void EmitSubQueryExpression(Expression AExpression)
+		protected virtual void EmitSubQueryExpression(Expression expression)
 		{
 			Append(Keywords.BeginGroup);
-			if (AExpression is QueryExpression)
-				EmitQueryExpression((QueryExpression)AExpression);
-			else if (AExpression is SelectExpression)
-				EmitSelectExpression((SelectExpression)AExpression);
+			if (expression is QueryExpression)
+				EmitQueryExpression((QueryExpression)expression);
+			else if (expression is SelectExpression)
+				EmitSelectExpression((SelectExpression)expression);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, AExpression.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, expression.GetType().Name);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitTableSpecifier(TableSpecifier ATableSpecifier)
+		protected virtual void EmitTableSpecifier(TableSpecifier tableSpecifier)
 		{
-			if (ATableSpecifier.TableExpression is TableExpression)
-				EmitTableExpression((TableExpression)ATableSpecifier.TableExpression);
+			if (tableSpecifier.TableExpression is TableExpression)
+				EmitTableExpression((TableExpression)tableSpecifier.TableExpression);
 			else
-				EmitSubQueryExpression(ATableSpecifier.TableExpression);
+				EmitSubQueryExpression(tableSpecifier.TableExpression);
 				
-			if (ATableSpecifier.TableAlias != String.Empty)
+			if (tableSpecifier.TableAlias != String.Empty)
 			{
 				AppendFormat(" {0} ", Keywords.As);
-				EmitIdentifier(ATableSpecifier.TableAlias);
+				EmitIdentifier(tableSpecifier.TableAlias);
 			}
 		}
 		
-		protected virtual void EmitWhereClause(WhereClause AClause)
+		protected virtual void EmitWhereClause(WhereClause clause)
 		{
-			if (AClause != null)
+			if (clause != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.Where);
-				EmitExpression(AClause.Expression);
+				EmitExpression(clause.Expression);
 			}
 		}
 		
-		protected virtual void EmitGroupClause(GroupClause AClause)
+		protected virtual void EmitGroupClause(GroupClause clause)
 		{
-			if (AClause != null)
+			if (clause != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} {1} ", Keywords.Group, Keywords.By);
-				for (int LIndex = 0; LIndex < AClause.Columns.Count; LIndex++)
+				for (int index = 0; index < clause.Columns.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						EmitListSeparator();
-					EmitExpression(AClause.Columns[LIndex]);
+					EmitExpression(clause.Columns[index]);
 				}
 			}
 		}
 		
-		protected virtual void EmitHavingClause(HavingClause AClause)
+		protected virtual void EmitHavingClause(HavingClause clause)
 		{
-			if (AClause != null)
+			if (clause != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.Having);
-				EmitExpression(AClause.Expression);
+				EmitExpression(clause.Expression);
 			}
 		}
 		
-		protected virtual void EmitInsertStatement(InsertStatement AInsertStatement)
+		protected virtual void EmitInsertStatement(InsertStatement insertStatement)
 		{
 			Indent();
 			AppendFormat("{0} {1} ", Keywords.Insert, Keywords.Into);
-			EmitExpression(AInsertStatement.InsertClause.TableExpression);
+			EmitExpression(insertStatement.InsertClause.TableExpression);
 			Append(Keywords.BeginGroup);
-			for (int LIndex = 0; LIndex < AInsertStatement.InsertClause.Columns.Count; LIndex++)
+			for (int index = 0; index < insertStatement.InsertClause.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitInsertFieldExpression(AInsertStatement.InsertClause.Columns[LIndex]);
+				EmitInsertFieldExpression(insertStatement.InsertClause.Columns[index]);
 			}
 			Append(Keywords.EndGroup);
 			NewLine();
 			IncreaseIndent();
 			Indent();
-			if (AInsertStatement.Values is ValuesExpression)
-				EmitValuesExpression((ValuesExpression)AInsertStatement.Values);
-			else if (AInsertStatement.Values is QueryExpression)
-				EmitQueryExpression((QueryExpression)AInsertStatement.Values);
-			else if (AInsertStatement.Values is SelectExpression)
-				EmitSelectExpression((SelectExpression)AInsertStatement.Values);
+			if (insertStatement.Values is ValuesExpression)
+				EmitValuesExpression((ValuesExpression)insertStatement.Values);
+			else if (insertStatement.Values is QueryExpression)
+				EmitQueryExpression((QueryExpression)insertStatement.Values);
+			else if (insertStatement.Values is SelectExpression)
+				EmitSelectExpression((SelectExpression)insertStatement.Values);
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitInsertFieldExpression(InsertFieldExpression AExpression)
+		protected virtual void EmitInsertFieldExpression(InsertFieldExpression expression)
 		{
-			EmitIdentifier(AExpression.FieldName);
+			EmitIdentifier(expression.FieldName);
 		}
 		
-		protected virtual void EmitTableExpression(TableExpression AExpression)
+		protected virtual void EmitTableExpression(TableExpression expression)
 		{
-			if (AExpression.TableSchema != String.Empty)
+			if (expression.TableSchema != String.Empty)
 			{
-				EmitIdentifier(AExpression.TableSchema);
+				EmitIdentifier(expression.TableSchema);
 				Append(Keywords.Qualifier);
 			}
-			EmitIdentifier(AExpression.TableName);
+			EmitIdentifier(expression.TableName);
 		}
 		
-		protected virtual void EmitValuesExpression(ValuesExpression AExpression)
+		protected virtual void EmitValuesExpression(ValuesExpression expression)
 		{
 			AppendFormat("{0}{1}", Keywords.Values, Keywords.BeginGroup);
-			for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitExpression(AExpression.Expressions[LIndex]);
+				EmitExpression(expression.Expressions[index]);
 			}
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitUpdateStatement(UpdateStatement AUpdateStatement)
+		protected virtual void EmitUpdateStatement(UpdateStatement updateStatement)
 		{
 			Indent();
 			AppendFormat("{0} ", Keywords.Update);
-			EmitExpression(AUpdateStatement.UpdateClause.TableExpression);
+			EmitExpression(updateStatement.UpdateClause.TableExpression);
 			NewLine();
 			IncreaseIndent();
 			Indent();
 			AppendFormat("{0} ", Keywords.Set);
-			for (int LIndex = 0; LIndex < AUpdateStatement.UpdateClause.Columns.Count; LIndex++)
+			for (int index = 0; index < updateStatement.UpdateClause.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitUpdateFieldExpression(AUpdateStatement.UpdateClause.Columns[LIndex]);
+				EmitUpdateFieldExpression(updateStatement.UpdateClause.Columns[index]);
 			}
 			
-			EmitWhereClause(AUpdateStatement.WhereClause);
+			EmitWhereClause(updateStatement.WhereClause);
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitUpdateFieldExpression(UpdateFieldExpression AExpression)
+		protected virtual void EmitUpdateFieldExpression(UpdateFieldExpression expression)
 		{
-			EmitIdentifier(AExpression.FieldName);
+			EmitIdentifier(expression.FieldName);
 			AppendFormat(" {0} ", Keywords.Equal);
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 		}
 		
-		protected virtual void EmitDeleteStatement(DeleteStatement ADeleteStatement)
+		protected virtual void EmitDeleteStatement(DeleteStatement deleteStatement)
 		{
 			Indent();
 			AppendFormat("{0} {1} ", Keywords.Delete, Keywords.From);
-			EmitExpression(ADeleteStatement.DeleteClause.TableExpression);
+			EmitExpression(deleteStatement.DeleteClause.TableExpression);
 			IncreaseIndent();
-			EmitWhereClause(ADeleteStatement.WhereClause);
+			EmitWhereClause(deleteStatement.WhereClause);
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitCreateTableStatement(CreateTableStatement AStatement)
+		protected virtual void EmitCreateTableStatement(CreateTableStatement statement)
 		{
 			Indent();
 			AppendFormat("{0} {1} ", Keywords.Create, Keywords.Table);
-			if (AStatement.TableSchema != String.Empty)
+			if (statement.TableSchema != String.Empty)
 			{
-				EmitIdentifier(AStatement.TableSchema);
+				EmitIdentifier(statement.TableSchema);
 				Append(Keywords.Qualifier);
 			}
-			EmitIdentifier(AStatement.TableName);
+			EmitIdentifier(statement.TableName);
 			NewLine();
 			Indent();
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
 				NewLine();
 				Indent();
-				EmitColumnDefinition(AStatement.Columns[LIndex]);
+				EmitColumnDefinition(statement.Columns[index]);
 			}
 			
 			DecreaseIndent();
@@ -531,133 +531,133 @@ namespace Alphora.Dataphor.DAE.Language.SQL
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitColumnDefinition(ColumnDefinition AColumn)
+		protected virtual void EmitColumnDefinition(ColumnDefinition column)
 		{
-			EmitIdentifier(AColumn.ColumnName);
-			AppendFormat(" {0}", AColumn.DomainName);
-			if (AColumn.IsNullable)
+			EmitIdentifier(column.ColumnName);
+			AppendFormat(" {0}", column.DomainName);
+			if (column.IsNullable)
 				AppendFormat(" {0}", Keywords.Null);
 			else
 				AppendFormat(" {0} {1}", Keywords.Not, Keywords.Null);
 		}
 		
-		protected virtual void EmitAlterColumnDefinition(AlterColumnDefinition AColumn)
+		protected virtual void EmitAlterColumnDefinition(AlterColumnDefinition column)
 		{
-			EmitIdentifier(AColumn.ColumnName);
-			if (AColumn.DomainName != null)
-				AppendFormat(" {0}", AColumn.DomainName);
-			if (AColumn.AlterNullable)
-				if (AColumn.IsNullable)
+			EmitIdentifier(column.ColumnName);
+			if (column.DomainName != null)
+				AppendFormat(" {0}", column.DomainName);
+			if (column.AlterNullable)
+				if (column.IsNullable)
 					AppendFormat(" {0}", Keywords.Null);
 				else
 					AppendFormat(" {0} {1}", Keywords.Not, Keywords.Null);
 		}
 		
-		protected virtual void EmitAlterTableStatement(AlterTableStatement AStatement)
+		protected virtual void EmitAlterTableStatement(AlterTableStatement statement)
 		{
 			Indent();
 			AppendFormat("{0} {1} ", Keywords.Alter, Keywords.Table);
-			if (AStatement.TableSchema != String.Empty)
+			if (statement.TableSchema != String.Empty)
 			{
-				EmitIdentifier(AStatement.TableSchema);
+				EmitIdentifier(statement.TableSchema);
 				Append(Keywords.Qualifier);
 			}
-			EmitIdentifier(AStatement.TableName);
+			EmitIdentifier(statement.TableName);
 			Append(" ");
 			
-			bool LFirst = true;
-			for (int LIndex = 0; LIndex < AStatement.AddColumns.Count; LIndex++)
+			bool first = true;
+			for (int index = 0; index < statement.AddColumns.Count; index++)
 			{
-				if (!LFirst)
+				if (!first)
 					AppendFormat("{0} ", Keywords.ListSeparator);
 				else
-					LFirst = false;
+					first = false;
 				AppendFormat("{0} ", Keywords.Add);
-				EmitColumnDefinition(AStatement.AddColumns[LIndex]);
+				EmitColumnDefinition(statement.AddColumns[index]);
 			}
 			
-			for (int LIndex = 0; LIndex < AStatement.AlterColumns.Count; LIndex++)
+			for (int index = 0; index < statement.AlterColumns.Count; index++)
 			{
-				if (!LFirst)
+				if (!first)
 					AppendFormat("{0} ", Keywords.ListSeparator);
 				else
-					LFirst = false;
+					first = false;
 				AppendFormat("{0} {1} ", Keywords.Alter, Keywords.Column);
-				EmitAlterColumnDefinition(AStatement.AlterColumns[LIndex]);
+				EmitAlterColumnDefinition(statement.AlterColumns[index]);
 			}
 			
-			for (int LIndex = 0; LIndex < AStatement.DropColumns.Count; LIndex++)
+			for (int index = 0; index < statement.DropColumns.Count; index++)
 			{
-				if (!LFirst)
+				if (!first)
 					AppendFormat("{0} ", Keywords.ListSeparator);
 				else
-					LFirst = false;
+					first = false;
 				AppendFormat("{0} {1} ", Keywords.Drop, Keywords.Column);
-				EmitIdentifier(AStatement.DropColumns[LIndex].ColumnName);
+				EmitIdentifier(statement.DropColumns[index].ColumnName);
 			}
 		}
 		
-		protected virtual void EmitDropTableStatement(DropTableStatement AStatement)
+		protected virtual void EmitDropTableStatement(DropTableStatement statement)
 		{
 			Indent();
 			AppendFormat("{0} {1} ", Keywords.Drop, Keywords.Table);
-			if (AStatement.TableSchema != String.Empty)
+			if (statement.TableSchema != String.Empty)
 			{
-				EmitIdentifier(AStatement.TableSchema);
+				EmitIdentifier(statement.TableSchema);
 				Append(Keywords.Qualifier);
 			}
-			EmitIdentifier(AStatement.TableName);
+			EmitIdentifier(statement.TableName);
 		}
 		
-		protected virtual void EmitCreateIndexStatement(CreateIndexStatement AStatement)
+		protected virtual void EmitCreateIndexStatement(CreateIndexStatement statement)
 		{
 			Indent();
 			AppendFormat("{0} ", Keywords.Create);
-			if (AStatement.IsUnique)
+			if (statement.IsUnique)
 				AppendFormat("{0} ", Keywords.Unique);
-			if (AStatement.IsClustered)
+			if (statement.IsClustered)
 				AppendFormat("{0} ", Keywords.Clustered);
 			AppendFormat("{0} ", Keywords.Index);
-			if (AStatement.IndexSchema != String.Empty)
+			if (statement.IndexSchema != String.Empty)
 			{
-				EmitIdentifier(AStatement.IndexSchema);
+				EmitIdentifier(statement.IndexSchema);
 				Append(Keywords.Qualifier);
 			}
-			EmitIdentifier(AStatement.IndexName);
+			EmitIdentifier(statement.IndexName);
 			AppendFormat(" {0} ", Keywords.On);
-			if (AStatement.TableSchema != String.Empty)
+			if (statement.TableSchema != String.Empty)
 			{
-				EmitIdentifier(AStatement.TableSchema);
+				EmitIdentifier(statement.TableSchema);
 				Append(Keywords.Qualifier);
 			}
-			EmitIdentifier(AStatement.TableName);
+			EmitIdentifier(statement.TableName);
 			Append(Keywords.BeginGroup);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitOrderColumnDefinition(AStatement.Columns[LIndex]);
+				EmitOrderColumnDefinition(statement.Columns[index]);
 			}
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitOrderColumnDefinition(OrderColumnDefinition AColumn)
+		protected virtual void EmitOrderColumnDefinition(OrderColumnDefinition column)
 		{
-			EmitIdentifier(AColumn.ColumnName);
-			if (!AColumn.Ascending)
+			EmitIdentifier(column.ColumnName);
+			if (!column.Ascending)
 				AppendFormat(" {0}", Keywords.Desc);
 		}
 		
-		protected virtual void EmitDropIndexStatement(DropIndexStatement AStatement)
+		protected virtual void EmitDropIndexStatement(DropIndexStatement statement)
 		{
 			Indent();
 			AppendFormat("{0} {1} ", Keywords.Drop, Keywords.Index);
-			if (AStatement.IndexSchema != String.Empty)
+			if (statement.IndexSchema != String.Empty)
 			{
-				EmitIdentifier(AStatement.IndexSchema);
+				EmitIdentifier(statement.IndexSchema);
 				Append(Keywords.Qualifier);
 			}
-			EmitIdentifier(AStatement.IndexName);
+			EmitIdentifier(statement.IndexName);
 		}
 
 		override protected void EmitStatementTerminator()
@@ -666,20 +666,20 @@ namespace Alphora.Dataphor.DAE.Language.SQL
 				Append(";");
 		}
 
-		protected override string GetInstructionKeyword(string AInstruction)
+		protected override string GetInstructionKeyword(string instruction)
 		{
-			if (AInstruction == "iConcatenation")
+			if (instruction == "iConcatenation")
 				return "||";
 			else
-				return base.GetInstructionKeyword(AInstruction);
+				return base.GetInstructionKeyword(instruction);
 		}
 
 		public virtual SQLTextEmitter Clone()
 		{
-			SQLTextEmitter LEmitter = (SQLTextEmitter)Activator.CreateInstance(GetType());
-			LEmitter.UseQuotedIdentifiers = UseQuotedIdentifiers;
-			LEmitter.UseStatementTerminator = UseStatementTerminator;
-			return LEmitter;
+			SQLTextEmitter emitter = (SQLTextEmitter)Activator.CreateInstance(GetType());
+			emitter.UseQuotedIdentifiers = UseQuotedIdentifiers;
+			emitter.UseStatementTerminator = UseStatementTerminator;
+			return emitter;
 		}
 		
 		object ICloneable.Clone()

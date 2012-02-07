@@ -11,15 +11,15 @@ namespace Alphora.Dataphor
 {
 	public class IndexedDictionary<TKey, TValue> : Dictionary<TKey, TValue>
 	{
-		public new TValue this [TKey AIndex]
+		public new TValue this [TKey index]
 		{
 			get
 			{
-				TValue LReturn = default(TValue);
-				TryGetValue(AIndex, out LReturn);
-				return LReturn;
+				TValue returnValue = default(TValue);
+				TryGetValue(index, out returnValue);
+				return returnValue;
 			}
-			set { base[AIndex] = value; }			
+			set { base[index] = value; }			
 		}
 	}
 }

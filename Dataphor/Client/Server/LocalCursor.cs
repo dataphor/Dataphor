@@ -22,63 +22,67 @@ namespace Alphora.Dataphor.DAE.Server
 {
     public class LocalCursor : LocalServerChildObject, IServerCursor
     {	
-		public LocalCursor(LocalExpressionPlan APlan, IRemoteServerCursor ACursor) : base()
+		public const int SourceCursorIndexUnknown = -2;
+		
+		public LocalCursor(LocalExpressionPlan plan, IRemoteServerCursor cursor) : base()
 		{
-			FPlan = APlan;
-			FCursor = ACursor;
-			FInternalProcess = FPlan.FProcess.FInternalProcess;
-			FInternalProgram = new Program(FInternalProcess);
-			FInternalProgram.Start(null);
-			FBuffer = new LocalRows();
-			FBookmarks = new LocalBookmarks();
-			FFetchCount = FPlan.FProcess.ProcessInfo.FetchCount;
+			_plan = plan;
+			_cursor = cursor;
+			_internalProcess = _plan._process._internalProcess;
+			_internalProgram = new Program(_internalProcess);
+			_internalProgram.Start(null);
+			_buffer = new LocalRows();
+			_bookmarks = new LocalBookmarks();
+			_fetchCount = _plan._process.ProcessInfo.FetchCount;
+			_trivialBOF = true;
+			_sourceCursorIndex = -1;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FBuffer != null)
+			if (_buffer != null)
 			{
-				FBuffer.Dispose();
-				FBuffer = null;
+				_buffer.Dispose();
+				_buffer = null;
 			}
 			
-			if (FInternalProgram != null)
+			if (_internalProgram != null)
 			{
-				FInternalProgram.Stop(null);
-				FInternalProgram = null;
+				_internalProgram.Stop(null);
+				_internalProgram = null;
 			}
 			
-			FInternalProcess = null;
-			FCursor = null;
-			FPlan = null;
-			base.Dispose(ADisposing);
+			_internalProcess = null;
+			_cursor = null;
+			_plan = null;
+			base.Dispose(disposing);
 		}
 		
-		private ServerProcess FInternalProcess;
-		private Program FInternalProgram;
+		private ServerProcess _internalProcess;
+		private Program _internalProgram;
 
-		protected LocalExpressionPlan FPlan;
+		protected LocalExpressionPlan _plan;
         /// <value>Returns the <see cref="IServerExpressionPlan"/> instance for this cursor.</value>
-        public IServerExpressionPlan Plan { get { return FPlan; } }
+        public IServerExpressionPlan Plan { get { return _plan; } }
 		
-		protected IRemoteServerCursor FCursor;
-		public IRemoteServerCursor RemoteCursor { get { return FCursor; } }
+		protected IRemoteServerCursor _cursor;
+		public IRemoteServerCursor RemoteCursor { get { return _cursor; } }
 
 		// CursorType
-		public CursorType CursorType { get { return FPlan.CursorType; } }
+		public CursorType CursorType { get { return _plan.CursorType; } }
 
 		// Isolation
-		public CursorIsolation Isolation { get { return FPlan.Isolation; } }
+		public CursorIsolation Isolation { get { return _plan.Isolation; } }
 
 		// Capabilites
-		public CursorCapability Capabilities { get { return FPlan.Capabilities; } }
+		public CursorCapability Capabilities { get { return _plan.Capabilities; } }
 		
-		public bool Supports(CursorCapability ACapability)
+		public bool Supports(CursorCapability capability)
 		{
-			return (Capabilities & ACapability) != 0;
+			return (Capabilities & capability) != 0;
 		}
 
-		protected int FFetchCount = SessionInfo.CDefaultFetchCount;
+		protected int _fetchCount = SessionInfo.DefaultFetchCount;
 		/// <value>Gets or sets the number of rows to fetch at a time.  </value>
 		/// <remarks>
 		/// FetchCount must be greater than or equal to 1.  
@@ -87,8 +91,8 @@ namespace Alphora.Dataphor.DAE.Server
 		/// </remarks>
 		public int FetchCount 
 		{
-			get { return FFetchCount; } 
-			set { FFetchCount = ((value < 1) ? 1 : value); } 
+			get { return _fetchCount; } 
+			set { _fetchCount = ((value < 1) ? 1 : value); } 
 		}
 		
 		/*
@@ -224,194 +228,266 @@ namespace Alphora.Dataphor.DAE.Server
 					The proposable interfaces do not require a located cursor so they have no effect on the caching
 		*/
 		
-		protected LocalRows FBuffer;
-		protected LocalBookmarks FBookmarks;
-		protected int FBufferIndex = -1; 
-		protected bool FBufferFull;
+		protected LocalRows _buffer;
+		protected LocalBookmarks _bookmarks;
+		protected int _bufferIndex = -1; 
+		protected bool _bufferFull;
 		//protected bool FBufferFirst;
-		protected BufferDirection FBufferDirection = BufferDirection.Forward;
+		protected BufferDirection _bufferDirection = BufferDirection.Forward;
+		/// <summary> Index of FCursor relative to the buffer or CSourceCursorIndexUnknown if unknown. </summary>
+		protected int _sourceCursorIndex;
 		
 		protected bool BufferActive()
 		{
-			return UseBuffer() && FBufferFull;
+			return UseBuffer() && _bufferFull;
 		}
 		
 		protected bool UseBuffer()
 		{
-			return (FFetchCount > 1) && Supports(CursorCapability.Bookmarkable);
+			return (_fetchCount > 1) 
+				&& 
+				(
+					Supports(CursorCapability.Bookmarkable) 
+						|| ((Capabilities & (CursorCapability.Updateable | CursorCapability.BackwardsNavigable)) == 0)
+				);
 		}
 		
 		protected void ClearBuffer()
 		{
-			for (int LIndex = 0; LIndex < FBuffer.Count; LIndex++)
-				BufferDisposeBookmark(FBuffer[LIndex].Bookmark);
-			FBuffer.Clear();
-			FBufferIndex = -1;
-			FBufferFull = false;
+			// Dereference all used bookmarks
+			Guid[] bookmarks = new Guid[_buffer.Count];
+			for (int index = 0; index < _buffer.Count; index++)
+				bookmarks[index] = _buffer[index].Bookmark;
+			BufferDisposeBookmarks(bookmarks);
+			
+			_buffer.Clear();
+			_bufferIndex = -1;
+			_bufferFull = false;
+			_sourceCursorIndex = SourceCursorIndexUnknown;
 		}
-		
-		protected void SetBufferDirection(BufferDirection ABufferDirection)
+
+		protected void SetBufferDirection(BufferDirection bufferDirection)
 		{
-			FBufferDirection = ABufferDirection;
+			_bufferDirection = bufferDirection;
 		}
 		
         public void Open()
         {
-			FCursor.Open();
+			_cursor.Open();
 		}
 		
         public void Close()
         {
 			if (BufferActive())
 				ClearBuffer();
-			FCursor.Close();
+			_cursor.Close();
 		}
 		
         public bool Active
         {
-			get { return FCursor.Active; }
-			set { FCursor.Active = value; }
+			get { return _cursor.Active; }
+			set { _cursor.Active = value; }
 		}
 
 		// Flags tracks the current status of the remote cursor, BOF, EOF, none, or both
-		protected bool FFlagsCached;
-		protected CursorGetFlags FFlags;
+		protected bool _flagsCached;
+		protected CursorGetFlags _flags;
+		protected bool _trivialBOF;
+		// TrivialEOF unneccesary because Last returns flags
 		
-		protected void SetFlags(CursorGetFlags AFlags)
+		protected void SetFlags(CursorGetFlags flags)
 		{
-			FFlags = AFlags;
-			FFlagsCached = true;
+			_flags = flags;
+			_flagsCached = true;
+			_trivialBOF = false;
 		}
 		
 		protected CursorGetFlags GetFlags()
 		{
-			if (!FFlagsCached)
+			if (!_flagsCached)
 			{
-				SetFlags(FCursor.GetFlags(FPlan.FProcess.GetProcessCallInfo()));
-				FPlan.FProgramStatisticsCached = false;
+				SetFlags(_cursor.GetFlags(_plan._process.GetProcessCallInfo()));
+				_plan._programStatisticsCached = false;
 			}
-			return FFlags;
+			return _flags;
 		}
 
 		public void Reset()
         {
 			if (BufferActive())
 				ClearBuffer();
-			SetFlags(FCursor.Reset(FPlan.FProcess.GetProcessCallInfo()));
+			_sourceCursorIndex = -1;
+			SetFlags(_cursor.Reset(_plan._process.GetProcessCallInfo()));
 			SetBufferDirection(BufferDirection.Forward);
-			FPlan.FProgramStatisticsCached = false;
+			_plan._programStatisticsCached = false;
 		}
 
         public Row Select()
         {
-			Row LRow = new Row(FPlan.FProcess.ValueManager, ((Schema.TableType)FPlan.DataType).RowType);
+			Row row = new Row(_plan._process.ValueManager, ((Schema.TableType)_plan.DataType).RowType);
 			try
 			{
-				Select(LRow);
+				Select(row);
 			}
 			catch
 			{
-				LRow.Dispose();
+				row.Dispose();
 				throw;
 			}
-			return LRow;
+			return row;
 		}
 		
-		private void SourceSelect(Row ARow)
+		private void SourceSelect(Row row)
 		{
-			RemoteRowHeader LHeader = new RemoteRowHeader();
-			LHeader.Columns = new string[ARow.DataType.Columns.Count];
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
-				LHeader.Columns[LIndex] = ARow.DataType.Columns[LIndex].Name;
-			ARow.ValuesOwned = false;
-			byte[] AData = FCursor.Select(LHeader, FPlan.FProcess.GetProcessCallInfo()).Data;
-			ARow.AsPhysical = AData;
-			FPlan.FProgramStatisticsCached = false;
+			RemoteRowHeader header = new RemoteRowHeader();
+			header.Columns = new string[row.DataType.Columns.Count];
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
+				header.Columns[index] = row.DataType.Columns[index].Name;
+			row.ValuesOwned = false;
+			byte[] AData = _cursor.Select(header, _plan._process.GetProcessCallInfo()).Data;
+			row.AsPhysical = AData;
+			_plan._programStatisticsCached = false;
 		}
 		
-		private void BufferSelect(Row ARow)
+		private void BufferCheckNotOnCrack()
 		{
+			if ((_bufferIndex < 0) || (_bufferIndex >= _buffer.Count))
+				throw new RuntimeException(RuntimeException.Codes.NoCurrentRow);
+		}
+		
+		private void BufferSelect(Row row)
+		{
+			//BufferCheckNotOnCrack();
+
 			// TODO: implement a version of CopyTo that does not copy overflow 
 			// problem is that this requires a row type of exactly the same type as the cursor table type
-			FBuffer[FBufferIndex].Row.CopyTo(ARow);
+			_buffer[_bufferIndex].Row.CopyTo(row);
 		}
 		
-        public void Select(Row ARow)
+        public void Select(Row row)
         {
 			if (BufferActive())
-				BufferSelect(ARow);
+				BufferSelect(row);
 			else
 			{
 				if (UseBuffer())
 				{
 					SourceFetch(false);
-					BufferSelect(ARow);
+					BufferSelect(row);
 				}
 				else
-					SourceSelect(ARow);
+					SourceSelect(row);
 			}
 		}
 		
-		protected void SourceFetch(bool AIsFirst)
+		protected void SourceFetch(bool isFirst)
 		{
-			// Execute fetch on the remote cursor, selecting all columns, requesting FFetchCount rows from the current position
-			Guid[] LBookmarks;
-			RemoteFetchData LFetchData = FCursor.Fetch(out LBookmarks, FFetchCount * (int)FBufferDirection, FPlan.FProcess.GetProcessCallInfo());
-			ProcessFetchData(LFetchData, LBookmarks, AIsFirst);
-			FPlan.FProgramStatisticsCached = false;
+			SourceFetch(isFirst, isFirst);
 		}
 		
-		public void ProcessFetchData(RemoteFetchData AFetchData, Guid[] ABookmarks, bool AIsFirst)
+		protected void SourceFetch(bool isFirst, bool skipCurrent)
 		{
-			FBuffer.BufferDirection = FBufferDirection;
-			Schema.IRowType LRowType = DataType.RowType;
-			if (FBufferDirection == BufferDirection.Forward)
+			// Execute fetch on the remote cursor, selecting all columns, requesting FFetchCount rows from the current position
+			Guid[] bookmarks;
+			RemoteFetchData fetchData = _cursor.Fetch(out bookmarks, _fetchCount * (int)_bufferDirection, skipCurrent, _plan._process.GetProcessCallInfo());
+			ProcessFetchData(fetchData, bookmarks, isFirst);
+			_plan._programStatisticsCached = false;
+		}
+		
+		public void ProcessFetchData(RemoteFetchData fetchData, Guid[] bookmarks, bool isFirst)
+		{
+			_buffer.BufferDirection = _bufferDirection;
+			Schema.IRowType rowType = DataType.RowType;
+			if (_bufferDirection == BufferDirection.Forward)
 			{
-				for (int LIndex = 0; LIndex < AFetchData.Body.Length; LIndex++)
+				for (int index = 0; index < fetchData.Body.Length; index++)
 				{
-					LocalRow LRow = new LocalRow(new Row(FPlan.FProcess.ValueManager, LRowType), ABookmarks[LIndex]);
-					LRow.Row.AsPhysical = AFetchData.Body[LIndex].Data;
-					FBuffer.Add(LRow);
-					FBookmarks.Add(new LocalBookmark(ABookmarks[LIndex]));
+					LocalRow row = new LocalRow(new Row(_plan._process.ValueManager, rowType), bookmarks[index]);
+					row.Row.AsPhysical = fetchData.Body[index].Data;
+					_buffer.Add(row);
+					AddBookmarkIfNotEmpty(bookmarks[index]);
 				}
-				
-				if ((AFetchData.Body.Length > 0) && !AIsFirst)
-					FBufferIndex = 0;
+
+				if ((fetchData.Body.Length > 0) && !isFirst)
+					_bufferIndex = 0;
 				else
-					FBufferIndex = -1;
+					_bufferIndex = -1;
+					
+				if ((fetchData.Flags & CursorGetFlags.EOF) != 0)
+					_sourceCursorIndex = _buffer.Count;
+				else
+					_sourceCursorIndex = _buffer.Count - 1;
 			}
 			else
 			{
-				for (int LIndex = 0; LIndex < AFetchData.Body.Length; LIndex++)
+				for (int index = 0; index < fetchData.Body.Length; index++)
 				{
-					LocalRow LRow = new LocalRow(new Row(FPlan.FProcess.ValueManager, LRowType), ABookmarks[LIndex]);
-					LRow.Row.AsPhysical = AFetchData.Body[LIndex].Data;
-					FBuffer.Insert(0, LRow);
-					FBookmarks.Add(new LocalBookmark(ABookmarks[LIndex]));
+					LocalRow row = new LocalRow(new Row(_plan._process.ValueManager, rowType), bookmarks[index]);
+					row.Row.AsPhysical = fetchData.Body[index].Data;
+					_buffer.Insert(0, row);
+					AddBookmarkIfNotEmpty(bookmarks[index]);
 				}
-				
-				if ((AFetchData.Body.Length > 0) && !AIsFirst)
-					FBufferIndex = FBuffer.Count - 1;
+
+				if ((fetchData.Body.Length > 0) && !isFirst)
+					_bufferIndex = _buffer.Count - 1;
 				else
-					FBufferIndex = -1;
+					_bufferIndex = _buffer.Count; 
+
+				if ((fetchData.Flags & CursorGetFlags.BOF) != 0)
+					_sourceCursorIndex = -1;
+				else
+					_sourceCursorIndex = 0;
 			}
 			
-			SetFlags(AFetchData.Flags);
-			FBufferFull = true;
+			SetFlags(fetchData.Flags);
+			_bufferFull = true;
+		}
+
+		private void AddBookmarkIfNotEmpty(Guid bookmark)
+		{
+			if (bookmark != Guid.Empty)
+				_bookmarks.Add(new LocalBookmark(bookmark));
 		}
 		
 		protected bool SourceNext()
 		{
-			RemoteMoveData LMoveData = FCursor.MoveBy(1, FPlan.FProcess.GetProcessCallInfo());
-			FPlan.FProgramStatisticsCached = false;
-			SetFlags(LMoveData.Flags);
-			return LMoveData.Flags == CursorGetFlags.None;
+			RemoteMoveData moveData = _cursor.MoveBy(1, _plan._process.GetProcessCallInfo());
+			_plan._programStatisticsCached = false;
+			SetFlags(moveData.Flags);
+			return moveData.Flags == CursorGetFlags.None;
 		}
-		
-		protected void SyncSource(bool AForward)
+
+		private void GotoBookmarkIndex(int index, bool forward)
 		{
-			if (!SourceGotoBookmark(FBuffer[FBufferIndex].Bookmark, AForward))
+			if (!SourceGotoBookmark(_buffer[index].Bookmark, forward))
 				throw new ServerException(ServerException.Codes.CursorSyncError);
+		}		
+		
+		protected bool SyncSource(bool forward)
+		{
+			if (_sourceCursorIndex != _bufferIndex)
+			{
+				_sourceCursorIndex = _bufferIndex;
+				if (_bufferIndex == -1)
+				{
+					if (_buffer.Count > 0)
+						GotoBookmarkIndex(0, false);
+					return SourcePrior();
+				}
+				else if (_bufferIndex == _buffer.Count)
+				{
+					if (_buffer.Count > 0)
+						GotoBookmarkIndex(_buffer.Count - 1, true);
+					return SourceNext();
+				}
+				else
+				{
+					GotoBookmarkIndex(_bufferIndex, forward);
+					return true;
+				}
+			}
+			else
+				return true;
 		}
 		
         public bool Next()
@@ -422,31 +498,32 @@ namespace Alphora.Dataphor.DAE.Server
 				if (!BufferActive())
 					SourceFetch(SourceBOF());
 					
-				if (FBufferIndex >= FBuffer.Count - 1)
+				if (_bufferIndex >= _buffer.Count - 1)
 				{
-					if (SourceEOF())
+					if (_bufferIndex == _sourceCursorIndex - 1 && SourceEOF())
 					{
-						FBufferIndex++;
+						_bufferIndex++;
 						return false;
 					}
 
-					SyncSource(true);
+					bool synced = SyncSource(true);
 					ClearBuffer();
-					return SourceNext();
+					SourceFetch(false, true);
+					return synced && !EOF();
 				}
-				FBufferIndex++;
+				_bufferIndex++;
 				return true;
 			}
 
-			if (FFlagsCached && SourceEOF())
+			if (_flagsCached && SourceEOF())
 				return false;
 			return SourceNext();
 		}
 		
 		protected void SourceLast()
 		{
-			SetFlags(FCursor.Last(FPlan.FProcess.GetProcessCallInfo()));
-			FPlan.FProgramStatisticsCached = false;
+			SetFlags(_cursor.Last(_plan._process.GetProcessCallInfo()));
+			_plan._programStatisticsCached = false;
 		}
 		
         public void Last()
@@ -459,13 +536,13 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected bool SourceBOF()
 		{
-			return (GetFlags() & CursorGetFlags.BOF) != 0;
+			return _trivialBOF || ((GetFlags() & CursorGetFlags.BOF) != 0);
 		}
 
         public bool BOF()
 		{
 			if (BufferActive())
-				return SourceBOF() && (FBufferIndex < 0);
+				return SourceBOF() && ((_buffer.Count == 0) || (_bufferIndex < 0));
 			else
 				return SourceBOF();
 		}
@@ -478,7 +555,7 @@ namespace Alphora.Dataphor.DAE.Server
         public bool EOF()
         {
 			if (BufferActive())
-				return SourceEOF() && (FBufferIndex >= FBuffer.Count);
+				return SourceEOF() && ((_buffer.Count == 0) || (_bufferIndex >= _buffer.Count));
 			else
 				return SourceEOF();
 		}
@@ -488,49 +565,49 @@ namespace Alphora.Dataphor.DAE.Server
 			return BOF() && EOF();
 		}
 		
-		public void Insert(Row ARow)
+		public void Insert(Row row)
 		{
-			Insert(ARow, null);
+			Insert(row, null);
 		}
 		
-        public void Insert(Row ARow, BitArray AValueFlags)
+        public void Insert(Row row, BitArray valueFlags)
         {
-			RemoteRow LRow = new RemoteRow();
-			FPlan.FProcess.EnsureOverflowReleased(ARow);
-			LRow.Header = new RemoteRowHeader();
-			LRow.Header.Columns = new string[ARow.DataType.Columns.Count];
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
-				LRow.Header.Columns[LIndex] = ARow.DataType.Columns[LIndex].Name;
-			LRow.Body = new RemoteRowBody();
-			LRow.Body.Data = ARow.AsPhysical;
-			FCursor.Insert(LRow, AValueFlags, FPlan.FProcess.GetProcessCallInfo());
-			FFlagsCached = false;
-			FPlan.FProgramStatisticsCached = false;
+			RemoteRow localRow = new RemoteRow();
+			_plan._process.EnsureOverflowReleased(row);
+			localRow.Header = new RemoteRowHeader();
+			localRow.Header.Columns = new string[row.DataType.Columns.Count];
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
+				localRow.Header.Columns[index] = row.DataType.Columns[index].Name;
+			localRow.Body = new RemoteRowBody();
+			localRow.Body.Data = row.AsPhysical;
+			_cursor.Insert(localRow, valueFlags, _plan._process.GetProcessCallInfo());
+			_flagsCached = false;
+			_plan._programStatisticsCached = false;
 			if (BufferActive())
 				ClearBuffer();
 			SetBufferDirection(BufferDirection.Backward);
 		}
 		
-		public void Update(Row ARow)
+		public void Update(Row row)
 		{
-			Update(ARow, null);
+			Update(row, null);
 		}
 		
-        public void Update(Row ARow, BitArray AValueFlags)
+        public void Update(Row row, BitArray valueFlags)
         {
-			RemoteRow LRow = new RemoteRow();
-			FPlan.FProcess.EnsureOverflowReleased(ARow);
-			LRow.Header = new RemoteRowHeader();
-			LRow.Header.Columns = new string[ARow.DataType.Columns.Count];
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
-				LRow.Header.Columns[LIndex] = ARow.DataType.Columns[LIndex].Name;
-			LRow.Body = new RemoteRowBody();
-			LRow.Body.Data = ARow.AsPhysical;
+			RemoteRow localRow = new RemoteRow();
+			_plan._process.EnsureOverflowReleased(row);
+			localRow.Header = new RemoteRowHeader();
+			localRow.Header.Columns = new string[row.DataType.Columns.Count];
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
+				localRow.Header.Columns[index] = row.DataType.Columns[index].Name;
+			localRow.Body = new RemoteRowBody();
+			localRow.Body.Data = row.AsPhysical;
 			if (BufferActive())
 				SyncSource(true);
-			FCursor.Update(LRow, AValueFlags, FPlan.FProcess.GetProcessCallInfo());
-			FFlagsCached = false;
-			FPlan.FProgramStatisticsCached = false;
+			_cursor.Update(localRow, valueFlags, _plan._process.GetProcessCallInfo());
+			_flagsCached = false;
+			_plan._programStatisticsCached = false;
 			if (BufferActive())
 				ClearBuffer();
 			SetBufferDirection(BufferDirection.Backward);
@@ -540,9 +617,9 @@ namespace Alphora.Dataphor.DAE.Server
         {
 			if (BufferActive())
 				SyncSource(true);
-			FCursor.Delete(FPlan.FProcess.GetProcessCallInfo());
-			FFlagsCached = false;
-			FPlan.FProgramStatisticsCached = false;
+			_cursor.Delete(_plan._process.GetProcessCallInfo());
+			_flagsCached = false;
+			_plan._programStatisticsCached = false;
 			if (BufferActive())
 				ClearBuffer();
 			SetBufferDirection(BufferDirection.Backward);
@@ -550,8 +627,8 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected void SourceFirst()
 		{
-			SetFlags(FCursor.First(FPlan.FProcess.GetProcessCallInfo()));
-			FPlan.FProgramStatisticsCached = false;
+			SetFlags(_cursor.First(_plan._process.GetProcessCallInfo()));
+			_plan._programStatisticsCached = false;
 		}
 
         public void First()
@@ -564,432 +641,458 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected bool SourcePrior()
 		{
-			RemoteMoveData LMoveData = FCursor.MoveBy(-1, FPlan.FProcess.GetProcessCallInfo());
-			SetFlags(LMoveData.Flags);
-			FPlan.FProgramStatisticsCached = false;
-			return LMoveData.Flags == CursorGetFlags.None;
+			RemoteMoveData moveData = _cursor.MoveBy(-1, _plan._process.GetProcessCallInfo());
+			SetFlags(moveData.Flags);
+			_plan._programStatisticsCached = false;
+			return moveData.Flags == CursorGetFlags.None;
 		}
 		
         public bool Prior()
         {
 			SetBufferDirection(BufferDirection.Backward);
-			if (BufferActive())
+			if (UseBuffer())
 			{
-				if (FBufferIndex <= 0)
+				if (!BufferActive())
+					SourceFetch(SourceEOF());
+
+				if (_bufferIndex <= 0)
 				{
-					if (SourceBOF())
+					if (_bufferIndex == _sourceCursorIndex + 1 && SourceBOF())
 					{
-						FBufferIndex--;
+						_bufferIndex--;
 						return false;
 					}
 
-					SyncSource(false);
+					bool synced = SyncSource(false);
 					ClearBuffer();
-					return SourcePrior();
+					SourceFetch(false, true);
+					return synced && !BOF();
 				}
-				FBufferIndex--;
+				_bufferIndex--;
 				return true;
 			}
-			if (FFlagsCached && SourceBOF())
+
+			if (_flagsCached && SourceBOF())
 				return false;
 			return SourcePrior();
 		}
 		
 		protected Guid SourceGetBookmark()
 		{
-			FPlan.FProgramStatisticsCached = false;
-			return FCursor.GetBookmark(FPlan.FProcess.GetProcessCallInfo());
+			_plan._programStatisticsCached = false;
+			return _cursor.GetBookmark(_plan._process.GetProcessCallInfo());
 		}
 
         public Guid GetBookmark()
         {
 			if (BufferActive())
 			{
-				FBookmarks[FBuffer[FBufferIndex].Bookmark].ReferenceCount++;
-				return FBuffer[FBufferIndex].Bookmark;
+				//BufferCheckNotOnCrack();
+				_bookmarks[_buffer[_bufferIndex].Bookmark].ReferenceCount++;
+				return _buffer[_bufferIndex].Bookmark;
 			}
 
 			if (UseBuffer())
 			{
-				SourceFetch(FBuffer.BufferDirection == BufferDirection.Forward ? SourceBOF() : SourceEOF());
-				FBookmarks[FBuffer[FBufferIndex].Bookmark].ReferenceCount++;
-				return FBuffer[FBufferIndex].Bookmark;
+				SourceFetch(_buffer.BufferDirection == BufferDirection.Forward ? SourceBOF() : SourceEOF());
+				//BufferCheckNotOnCrack();
+				_bookmarks[_buffer[_bufferIndex].Bookmark].ReferenceCount++;
+				return _buffer[_bufferIndex].Bookmark;
 			}
 
 			return SourceGetBookmark();
         }
 
-		protected bool SourceGotoBookmark(Guid ABookmark, bool AForward)
+		protected bool SourceGotoBookmark(Guid bookmark, bool forward)
         {
-			RemoteGotoData LGotoData = FCursor.GotoBookmark(ABookmark, AForward, FPlan.FProcess.GetProcessCallInfo());
-			SetFlags(LGotoData.Flags);
-			FPlan.FProgramStatisticsCached = false;
-			return LGotoData.Success;
+			RemoteGotoData gotoData = _cursor.GotoBookmark(bookmark, forward, _plan._process.GetProcessCallInfo());
+			SetFlags(gotoData.Flags);
+			_plan._programStatisticsCached = false;
+			return gotoData.Success;
         }
 
-		public bool GotoBookmark(Guid ABookmark, bool AForward)
+		public bool GotoBookmark(Guid bookmark, bool forward)
         {
-			SetBufferDirection((AForward ? BufferDirection.Forward : BufferDirection.Backward));
+			SetBufferDirection((forward ? BufferDirection.Forward : BufferDirection.Backward));
 			if (UseBuffer())
 			{
-				for (int LIndex = 0; LIndex < FBuffer.Count; LIndex++)
-					if (FBuffer[LIndex].Bookmark == ABookmark)
+				for (int index = 0; index < _buffer.Count; index++)
+					if (_buffer[index].Bookmark == bookmark)
 					{
-						FBufferIndex = LIndex;
+						_bufferIndex = index;
 						return true;
 					}
 				
 				ClearBuffer();
-				return SourceGotoBookmark(ABookmark, AForward);
+				return SourceGotoBookmark(bookmark, forward);
 			}
-			return SourceGotoBookmark(ABookmark, AForward);
+			return SourceGotoBookmark(bookmark, forward);
 		}
 		
-        public int CompareBookmarks(Guid ABookmark1, Guid ABookmark2)
+        public int CompareBookmarks(Guid bookmark1, Guid bookmark2)
         {
-			FPlan.FProgramStatisticsCached = false;
-			return FCursor.CompareBookmarks(ABookmark1, ABookmark2, FPlan.FProcess.GetProcessCallInfo());
+			_plan._programStatisticsCached = false;
+			return _cursor.CompareBookmarks(bookmark1, bookmark2, _plan._process.GetProcessCallInfo());
 		}
 		
-		protected void SourceDisposeBookmark(Guid ABookmark)
+		protected void SourceDisposeBookmark(Guid bookmark)
 		{
-			FCursor.DisposeBookmark(ABookmark, FPlan.FProcess.GetProcessCallInfo());
-			FPlan.FProgramStatisticsCached = false;
+			_cursor.DisposeBookmark(bookmark, _plan._process.GetProcessCallInfo());
+			_plan._programStatisticsCached = false;
 		}
-		
-		protected void BufferDisposeBookmark(Guid ABookmark)
+
+		protected void SourceDisposeBookmarks(Guid[] bookmarks)
 		{
-			if (ABookmark != Guid.Empty)
+			_cursor.DisposeBookmarks(bookmarks, _plan._process.GetProcessCallInfo());
+			_plan._programStatisticsCached = false;
+		}
+
+		protected void BufferDisposeBookmark(Guid bookmark)
+		{
+			if (bookmark != Guid.Empty)
 			{
-				LocalBookmark LBookmark = FBookmarks[ABookmark];
-				if (LBookmark == null)
-					throw new ServerException(ServerException.Codes.InvalidBookmark, ABookmark.ToString());
+				LocalBookmark localBookmark = _bookmarks[bookmark];
+				if (localBookmark == null)
+					throw new ServerException(ServerException.Codes.InvalidBookmark, bookmark.ToString());
 					
-				LBookmark.ReferenceCount--;
+				localBookmark.ReferenceCount--;
 				
-				if (LBookmark.ReferenceCount <= 0)
+				if (localBookmark.ReferenceCount == 0)
 				{
-					SourceDisposeBookmark(LBookmark.Bookmark);
-					FBookmarks.Remove(LBookmark.Bookmark);
+					SourceDisposeBookmark(localBookmark.Bookmark);
+					_bookmarks.Remove(localBookmark.Bookmark);
 				}
 			}
 		}
 
-		public void DisposeBookmark(Guid ABookmark)
+		protected void BufferDisposeBookmarks(Guid[] bookmarks)
 		{
-			if (BufferActive())
-				BufferDisposeBookmark(ABookmark);
-			else
-				SourceDisposeBookmark(ABookmark);
-		}
-		
-		protected void SourceDisposeBookmarks(Guid[] ABookmarks)
-		{
-			FCursor.DisposeBookmarks(ABookmarks, FPlan.FProcess.GetProcessCallInfo());
-			FPlan.FProgramStatisticsCached = false;
-		}
-		
-		protected void BufferDisposeBookmarks(Guid[] ABookmarks)
-		{
-			for (int LIndex = 0; LIndex < ABookmarks.Length; LIndex++)
-				BufferDisposeBookmark(ABookmarks[LIndex]);
+			// Dereference each bookmark and prepare list of unreferenced bookmarks
+			List<Guid> toDispose = new List<Guid>(bookmarks.Length);
+			for (int index = 0; index < bookmarks.Length; index++)
+			{
+				LocalBookmark bookmark;
+				if (_bookmarks.TryGetValue(bookmarks[index], out bookmark))
+				{
+					bookmark.ReferenceCount--;
+					if (bookmark.ReferenceCount == 0)
+					{
+						toDispose.Add(bookmark.Bookmark);
+						_bookmarks.Remove(bookmark.Bookmark);
+					}
+				}
+				else
+					toDispose.Add(bookmarks[index]);
+			}
+
+			// Free all unreferenced bookmarks together
+			if (toDispose.Count > 0)
+				SourceDisposeBookmarks(toDispose.ToArray());
 		}
 
-		public void DisposeBookmarks(Guid[] ABookmarks)
+		public void DisposeBookmark(Guid bookmark)
 		{
 			if (BufferActive())
-				BufferDisposeBookmarks(ABookmarks);
+				BufferDisposeBookmark(bookmark);
 			else
-				SourceDisposeBookmarks(ABookmarks);
+				SourceDisposeBookmark(bookmark);
+		}
+
+		public void DisposeBookmarks(Guid[] bookmarks)
+		{
+			if (BufferActive())
+				BufferDisposeBookmarks(bookmarks);
+			else
+				SourceDisposeBookmarks(bookmarks);
 		}
 		
-		public Schema.Order Order { get { return FPlan.Order; } }
+		public Schema.Order Order { get { return _plan.Order; } }
 		
         public Row GetKey()
         {
 			if (BufferActive())
 				SyncSource(true);
-			RemoteRow LKey = FCursor.GetKey(FPlan.FProcess.GetProcessCallInfo());
-			FPlan.FProgramStatisticsCached = false;
-			Row LRow;
-			Schema.RowType LType = new Schema.RowType();
-			foreach (string LString in LKey.Header.Columns)
-				LType.Columns.Add(((Schema.TableType)FPlan.DataType).Columns[LString].Copy());
-			LRow = new Row(FPlan.FProcess.ValueManager, LType);
-			LRow.ValuesOwned = false;
-			LRow.AsPhysical = LKey.Body.Data;
-			return LRow;
+			RemoteRow key = _cursor.GetKey(_plan._process.GetProcessCallInfo());
+			_plan._programStatisticsCached = false;
+			Row row;
+			Schema.RowType type = new Schema.RowType();
+			foreach (string stringValue in key.Header.Columns)
+				type.Columns.Add(((Schema.TableType)_plan.DataType).Columns[stringValue].Copy());
+			row = new Row(_plan._process.ValueManager, type);
+			row.ValuesOwned = false;
+			row.AsPhysical = key.Body.Data;
+			return row;
 		}
 		
-        public bool FindKey(Row AKey)
+        public bool FindKey(Row key)
         {
-			RemoteRow LKey = new RemoteRow();
-			FPlan.FProcess.EnsureOverflowConsistent(AKey);
-			LKey.Header = new RemoteRowHeader();
-			LKey.Header.Columns = new string[AKey.DataType.Columns.Count];
-			for (int LIndex = 0; LIndex < AKey.DataType.Columns.Count; LIndex++)
-				LKey.Header.Columns[LIndex] = AKey.DataType.Columns[LIndex].Name;
-			LKey.Body = new RemoteRowBody();
-			LKey.Body.Data = AKey.AsPhysical;
-			RemoteGotoData LGotoData = FCursor.FindKey(LKey, FPlan.FProcess.GetProcessCallInfo());
-			SetFlags(LGotoData.Flags);
-			FPlan.FProgramStatisticsCached = false;
-			if (LGotoData.Success && BufferActive())
+			RemoteRow localKey = new RemoteRow();
+			_plan._process.EnsureOverflowConsistent(key);
+			localKey.Header = new RemoteRowHeader();
+			localKey.Header.Columns = new string[key.DataType.Columns.Count];
+			for (int index = 0; index < key.DataType.Columns.Count; index++)
+				localKey.Header.Columns[index] = key.DataType.Columns[index].Name;
+			localKey.Body = new RemoteRowBody();
+			localKey.Body.Data = key.AsPhysical;
+			RemoteGotoData gotoData = _cursor.FindKey(localKey, _plan._process.GetProcessCallInfo());
+			SetFlags(gotoData.Flags);
+			_plan._programStatisticsCached = false;
+			if (gotoData.Success && BufferActive())
 				ClearBuffer();
 			SetBufferDirection(BufferDirection.Backward);
-			return LGotoData.Success;
+			return gotoData.Success;
 		}
 		
-        public void FindNearest(Row AKey)
-        {
-			if (BufferActive())
-				ClearBuffer();
-			SetBufferDirection(BufferDirection.Backward);
-			FPlan.FProcess.EnsureOverflowConsistent(AKey);
-			RemoteRow LKey = new RemoteRow();
-			LKey.Header = new RemoteRowHeader();
-			LKey.Header.Columns = new string[AKey.DataType.Columns.Count];
-			for (int LIndex = 0; LIndex < AKey.DataType.Columns.Count; LIndex++)
-				LKey.Header.Columns[LIndex] = AKey.DataType.Columns[LIndex].Name;
-			LKey.Body = new RemoteRowBody();
-			LKey.Body.Data = AKey.AsPhysical;
-			SetFlags(FCursor.FindNearest(LKey, FPlan.FProcess.GetProcessCallInfo()));
-			FPlan.FProgramStatisticsCached = false;
-		}
-		
-        public bool Refresh(Row ARow)
+        public void FindNearest(Row key)
         {
 			if (BufferActive())
 				ClearBuffer();
 			SetBufferDirection(BufferDirection.Backward);
-			RemoteRow LRow = new RemoteRow();
-			FPlan.FProcess.EnsureOverflowConsistent(ARow);
-			LRow.Header = new RemoteRowHeader();
-			LRow.Header.Columns = new string[ARow.DataType.Columns.Count];
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
-				LRow.Header.Columns[LIndex] = ARow.DataType.Columns[LIndex].Name;
-			LRow.Body = new RemoteRowBody();
-			LRow.Body.Data = ARow.AsPhysical;
-			RemoteGotoData LGotoData = FCursor.Refresh(LRow, FPlan.FProcess.GetProcessCallInfo());
-			SetFlags(LGotoData.Flags);
-			FPlan.FProgramStatisticsCached = false;
-			return LGotoData.Success;
+			_plan._process.EnsureOverflowConsistent(key);
+			RemoteRow localKey = new RemoteRow();
+			localKey.Header = new RemoteRowHeader();
+			localKey.Header.Columns = new string[key.DataType.Columns.Count];
+			for (int index = 0; index < key.DataType.Columns.Count; index++)
+				localKey.Header.Columns[index] = key.DataType.Columns[index].Name;
+			localKey.Body = new RemoteRowBody();
+			localKey.Body.Data = key.AsPhysical;
+			SetFlags(_cursor.FindNearest(localKey, _plan._process.GetProcessCallInfo()));
+			_plan._programStatisticsCached = false;
+		}
+		
+        public bool Refresh(Row row)
+        {
+			if (BufferActive())
+				ClearBuffer();
+			SetBufferDirection(BufferDirection.Backward);
+			RemoteRow localRow = new RemoteRow();
+			_plan._process.EnsureOverflowConsistent(row);
+			localRow.Header = new RemoteRowHeader();
+			localRow.Header.Columns = new string[row.DataType.Columns.Count];
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
+				localRow.Header.Columns[index] = row.DataType.Columns[index].Name;
+			localRow.Body = new RemoteRowBody();
+			localRow.Body.Data = row.AsPhysical;
+			RemoteGotoData gotoData = _cursor.Refresh(localRow, _plan._process.GetProcessCallInfo());
+			SetFlags(gotoData.Flags);
+			_plan._programStatisticsCached = false;
+			return gotoData.Success;
 		}
 		
         public int RowCount()
         {
-			FPlan.FProgramStatisticsCached = false;
-			return FCursor.RowCount(FPlan.FProcess.GetProcessCallInfo());
+			_plan._programStatisticsCached = false;
+			return _cursor.RowCount(_plan._process.GetProcessCallInfo());
 		}
 		
-		public Schema.TableType DataType { get { return (Schema.TableType)FPlan.DataType; } }
-		public Schema.TableVar TableVar { get { return FPlan.TableVar; } }
-		public TableNode TableNode { get { return FPlan.TableNode; } }
+		public Schema.TableType DataType { get { return (Schema.TableType)_plan.DataType; } }
+		public Schema.TableVar TableVar { get { return _plan.TableVar; } }
+		public TableNode TableNode { get { return _plan.TableNode; } }
 		
 		// Copies the values from source row to the given target row, without using stream referencing
 		// ASourceRow and ATargetRow must be of equivalent row types.
-		protected void MarshalRow(Row ASourceRow, Row ATargetRow)
+		protected void MarshalRow(Row sourceRow, Row targetRow)
 		{
-			for (int LIndex = 0; LIndex < ASourceRow.DataType.Columns.Count; LIndex++)
-				if (ASourceRow.HasValue(LIndex))
+			for (int index = 0; index < sourceRow.DataType.Columns.Count; index++)
+				if (sourceRow.HasValue(index))
 				{
-					if (ASourceRow.HasNonNativeValue(LIndex))
+					if (sourceRow.HasNonNativeValue(index))
 					{
-						Scalar LScalar = new Scalar(ATargetRow.Manager, (Schema.ScalarType)ASourceRow.DataType.Columns[LIndex].DataType);
-						Stream LSourceStream = ASourceRow.GetValue(LIndex).OpenStream();
+						Scalar scalar = new Scalar(targetRow.Manager, (Schema.ScalarType)sourceRow.DataType.Columns[index].DataType);
+						Stream sourceStream = sourceRow.GetValue(index).OpenStream();
 						try
 						{
-							Stream LTargetStream = LScalar.OpenStream();
+							Stream targetStream = scalar.OpenStream();
 							try
 							{
-								StreamUtility.CopyStream(LSourceStream, LTargetStream);
+								StreamUtility.CopyStream(sourceStream, targetStream);
 							}
 							finally
 							{
-								LTargetStream.Close();
+								targetStream.Close();
 							}
 						}
 						finally
 						{
-							LSourceStream.Close();
+							sourceStream.Close();
 						}
-						ATargetRow[LIndex] = LScalar;
+						targetRow[index] = scalar;
 					}
 					else
-						ATargetRow[LIndex] = ASourceRow[LIndex];
+						targetRow[index] = sourceRow[index];
 				}
 				else
-					ATargetRow.ClearValue(LIndex);
+					targetRow.ClearValue(index);
 		}
 		
         /// <summary>Requests the default values for a new row in the cursor.</summary>        
-        /// <param name='ARow'>A <see cref="Row"/> to be filled in with default values.</param>
-        /// <returns>A boolean value indicating whether any change was made to <paramref name="ARow"/>.</returns>
-        public bool Default(Row ARow, string AColumnName)
+        /// <param name='row'>A <see cref="Row"/> to be filled in with default values.</param>
+        /// <returns>A boolean value indicating whether any change was made to <paramref name="row"/>.</returns>
+        public bool Default(Row row, string columnName)
         {
-			if ((FInternalProcess != null) && TableVar.IsDefaultCallRemotable(AColumnName))
+			if ((_internalProcess != null) && TableVar.IsDefaultCallRemotable(columnName))
 			{
 				// create a new row based on FInternalProcess, and copy the data from 
-				Row LRow = ARow;
-				if (ARow.HasNonNativeValues())
+				Row localRow = row;
+				if (row.HasNonNativeValues())
 				{
-					LRow = new Row(FInternalProcess.ValueManager, ARow.DataType);
-					MarshalRow(ARow, LRow);
+					localRow = new Row(_internalProcess.ValueManager, row.DataType);
+					MarshalRow(row, localRow);
 				}
 
-				FPlan.FProcess.FSession.FServer.AcquireCacheLock(FPlan.FProcess, LockMode.Shared);
+				_plan._process._session._server.AcquireCacheLock(_plan._process, LockMode.Shared);
 				try
 				{
-					bool LChanged = TableNode.Default(FInternalProgram, null, LRow, null, AColumnName);
-					if (LChanged && !Object.ReferenceEquals(LRow, ARow))
-						MarshalRow(LRow, ARow);
-					return LChanged;
+					bool changed = TableNode.Default(_internalProgram, null, localRow, null, columnName);
+					if (changed && !Object.ReferenceEquals(localRow, row))
+						MarshalRow(localRow, row);
+					return changed;
 				}
 				finally
 				{
-					FPlan.FProcess.FSession.FServer.ReleaseCacheLock(FPlan.FProcess, LockMode.Shared);
+					_plan._process._session._server.ReleaseCacheLock(_plan._process, LockMode.Shared);
 				}
 			}
 			else
 			{
-				FPlan.FProcess.EnsureOverflowReleased(ARow);
-				RemoteRowBody LBody = new RemoteRowBody();
-				LBody.Data = ARow.AsPhysical;
+				_plan._process.EnsureOverflowReleased(row);
+				RemoteRowBody body = new RemoteRowBody();
+				body.Data = row.AsPhysical;
 
-				RemoteProposeData LProposeData = FCursor.Default(LBody, AColumnName, FPlan.FProcess.GetProcessCallInfo());
-				FPlan.FProgramStatisticsCached = false;
+				RemoteProposeData proposeData = _cursor.Default(body, columnName, _plan._process.GetProcessCallInfo());
+				_plan._programStatisticsCached = false;
 
-				if (LProposeData.Success)
+				if (proposeData.Success)
 				{
-					ARow.ValuesOwned = false; // do not clear the overflow streams because the row is effectively owned by the server for the course of the default call.
-					ARow.AsPhysical = LProposeData.Body.Data;
-					ARow.ValuesOwned = true;
+					row.ValuesOwned = false; // do not clear the overflow streams because the row is effectively owned by the server for the course of the default call.
+					row.AsPhysical = proposeData.Body.Data;
+					row.ValuesOwned = true;
 				}
-				return LProposeData.Success;
+				return proposeData.Success;
 			}
         }
         
         /// <summary>Requests the affect of a change to the given row.</summary>
-        /// <param name='AOldRow'>A <see cref="Row"/> containing the original values for the row.</param>
-        /// <param name='ANewRow'>A <see cref="Row"/> containing the changed values for the row.</param>
-        /// <param name='AColumnName'>The name of the column which changed in <paramref name="ANewRow"/>.  If empty, the change affected more than one column.</param>
-        /// <returns>A boolean value indicating whether any change was made to <paramref name="ANewRow"/>.</returns>
-        public bool Change(Row AOldRow, Row ANewRow, string AColumnName)
+        /// <param name='oldRow'>A <see cref="Row"/> containing the original values for the row.</param>
+        /// <param name='newRow'>A <see cref="Row"/> containing the changed values for the row.</param>
+        /// <param name='columnName'>The name of the column which changed in <paramref name="newRow"/>.  If empty, the change affected more than one column.</param>
+        /// <returns>A boolean value indicating whether any change was made to <paramref name="newRow"/>.</returns>
+        public bool Change(Row oldRow, Row newRow, string columnName)
         {
 			// if the table level change is remotable and the named column is remotable or no column is named and all columns are remotable
 				// the change can be evaluated locally, otherwise a remote call is required
-			if ((FInternalProcess != null) && TableVar.IsChangeCallRemotable(AColumnName))
+			if ((_internalProcess != null) && TableVar.IsChangeCallRemotable(columnName))
 			{
-				Row LOldRow = AOldRow;
-				if (AOldRow.HasNonNativeValues())
+				Row localOldRow = oldRow;
+				if (oldRow.HasNonNativeValues())
 				{
-					LOldRow = new Row(FInternalProcess.ValueManager, AOldRow.DataType);
-					MarshalRow(AOldRow, LOldRow);
+					localOldRow = new Row(_internalProcess.ValueManager, oldRow.DataType);
+					MarshalRow(oldRow, localOldRow);
 				}
 				
-				Row LNewRow = ANewRow;
-				if (ANewRow.HasNonNativeValues())
+				Row localNewRow = newRow;
+				if (newRow.HasNonNativeValues())
 				{
-					LNewRow = new Row(FInternalProcess.ValueManager, ANewRow.DataType);
-					MarshalRow(ANewRow, LNewRow);
+					localNewRow = new Row(_internalProcess.ValueManager, newRow.DataType);
+					MarshalRow(newRow, localNewRow);
 				}
 
-				FPlan.FProcess.FSession.FServer.AcquireCacheLock(FPlan.FProcess, LockMode.Shared);
+				_plan._process._session._server.AcquireCacheLock(_plan._process, LockMode.Shared);
 				try
 				{
-					bool LChanged = TableNode.Change(FInternalProgram, LOldRow, LNewRow, null, AColumnName);
-					if (LChanged && !Object.ReferenceEquals(LNewRow, ANewRow))
-						MarshalRow(LNewRow, ANewRow);
-					return LChanged;
+					bool changed = TableNode.Change(_internalProgram, localOldRow, localNewRow, null, columnName);
+					if (changed && !Object.ReferenceEquals(localNewRow, newRow))
+						MarshalRow(localNewRow, newRow);
+					return changed;
 				}
 				finally
 				{
-					FPlan.FProcess.FSession.FServer.ReleaseCacheLock(FPlan.FProcess, LockMode.Shared);
+					_plan._process._session._server.ReleaseCacheLock(_plan._process, LockMode.Shared);
 				}
 			}
 			else
 			{			
-				FPlan.FProcess.EnsureOverflowReleased(AOldRow);
-				RemoteRowBody LOldBody = new RemoteRowBody();
-				LOldBody.Data = AOldRow.AsPhysical;
+				_plan._process.EnsureOverflowReleased(oldRow);
+				RemoteRowBody oldBody = new RemoteRowBody();
+				oldBody.Data = oldRow.AsPhysical;
 				
-				FPlan.FProcess.EnsureOverflowReleased(ANewRow);
-				RemoteRowBody LNewBody = new RemoteRowBody();
-				LNewBody.Data = ANewRow.AsPhysical;
+				_plan._process.EnsureOverflowReleased(newRow);
+				RemoteRowBody newBody = new RemoteRowBody();
+				newBody.Data = newRow.AsPhysical;
 
-				RemoteProposeData LProposeData = FCursor.Change(LOldBody, LNewBody, AColumnName, FPlan.FProcess.GetProcessCallInfo());
-				FPlan.FProgramStatisticsCached = false;
+				RemoteProposeData proposeData = _cursor.Change(oldBody, newBody, columnName, _plan._process.GetProcessCallInfo());
+				_plan._programStatisticsCached = false;
 
-				if (LProposeData.Success)
+				if (proposeData.Success)
 				{
-					ANewRow.ValuesOwned = false; // do not clear the overflow streams because the row is effectively owned by the server during the change call
-					ANewRow.AsPhysical = LProposeData.Body.Data;
-					ANewRow.ValuesOwned = true;
+					newRow.ValuesOwned = false; // do not clear the overflow streams because the row is effectively owned by the server during the change call
+					newRow.AsPhysical = proposeData.Body.Data;
+					newRow.ValuesOwned = true;
 				}
 
-				return LProposeData.Success;
+				return proposeData.Success;
 			}
         }
         
         /// <summary>Ensures that the given row is valid.</summary>
-        /// <param name='AOldRow'>A <see cref="Row"/> containing the original values for the row.</param>
-        /// <param name='ANewRow'>A <see cref="Row"/> containing the changed values for the row.</param>
-        /// <param name='AColumnName'>The name of the column which changed in <paramref name="ANewRow"/>.  If empty, the change affected more than one column.</param>
-        /// <returns>A boolean value indicating whether any change was made to <paramref name="ANewRow"/>.</returns>
-        public bool Validate(Row AOldRow, Row ANewRow, string AColumnName)
+        /// <param name='oldRow'>A <see cref="Row"/> containing the original values for the row.</param>
+        /// <param name='newRow'>A <see cref="Row"/> containing the changed values for the row.</param>
+        /// <param name='columnName'>The name of the column which changed in <paramref name="newRow"/>.  If empty, the change affected more than one column.</param>
+        /// <returns>A boolean value indicating whether any change was made to <paramref name="newRow"/>.</returns>
+        public bool Validate(Row oldRow, Row newRow, string columnName)
         {
-			if ((FInternalProcess != null) && TableVar.IsValidateCallRemotable(AColumnName))
+			if ((_internalProcess != null) && TableVar.IsValidateCallRemotable(columnName))
 			{
-				Row LOldRow = AOldRow;
-				if ((AOldRow != null) && AOldRow.HasNonNativeValues())
+				Row localOldRow = oldRow;
+				if ((oldRow != null) && oldRow.HasNonNativeValues())
 				{
-					LOldRow = new Row(FInternalProcess.ValueManager, AOldRow.DataType);
-					MarshalRow(AOldRow, LOldRow);
+					localOldRow = new Row(_internalProcess.ValueManager, oldRow.DataType);
+					MarshalRow(oldRow, localOldRow);
 				}
 				
-				Row LNewRow = ANewRow;
-				if (ANewRow.HasNonNativeValues())
+				Row localNewRow = newRow;
+				if (newRow.HasNonNativeValues())
 				{
-					LNewRow = new Row(FInternalProcess.ValueManager, ANewRow.DataType);
-					MarshalRow(ANewRow, LNewRow);
+					localNewRow = new Row(_internalProcess.ValueManager, newRow.DataType);
+					MarshalRow(newRow, localNewRow);
 				}
 
-				FPlan.FProcess.FSession.FServer.AcquireCacheLock(FPlan.FProcess, LockMode.Shared);
+				_plan._process._session._server.AcquireCacheLock(_plan._process, LockMode.Shared);
 				try
 				{
-					bool LChanged = TableNode.Validate(FInternalProgram, LOldRow, LNewRow, null, AColumnName);
-					if (LChanged && !Object.ReferenceEquals(ANewRow, LNewRow))
-						MarshalRow(LNewRow, ANewRow);
-					return LChanged;
+					bool changed = TableNode.Validate(_internalProgram, localOldRow, localNewRow, null, columnName);
+					if (changed && !Object.ReferenceEquals(newRow, localNewRow))
+						MarshalRow(localNewRow, newRow);
+					return changed;
 				}
 				finally
 				{
-					FPlan.FProcess.FSession.FServer.ReleaseCacheLock(FPlan.FProcess, LockMode.Shared);
+					_plan._process._session._server.ReleaseCacheLock(_plan._process, LockMode.Shared);
 				}
 			}
 			else
 			{
-				RemoteRowBody LOldBody = new RemoteRowBody();
-				if (AOldRow != null)
+				RemoteRowBody oldBody = new RemoteRowBody();
+				if (oldRow != null)
 				{
-					FPlan.FProcess.EnsureOverflowReleased(AOldRow);
-					LOldBody.Data = AOldRow.AsPhysical;
+					_plan._process.EnsureOverflowReleased(oldRow);
+					oldBody.Data = oldRow.AsPhysical;
 				}
 				
-				FPlan.FProcess.EnsureOverflowReleased(ANewRow);
-				RemoteRowBody LNewBody = new RemoteRowBody();
-				LNewBody.Data = ANewRow.AsPhysical;
+				_plan._process.EnsureOverflowReleased(newRow);
+				RemoteRowBody newBody = new RemoteRowBody();
+				newBody.Data = newRow.AsPhysical;
 				
-				RemoteProposeData LProposeData = FCursor.Validate(LOldBody, LNewBody, AColumnName, FPlan.FProcess.GetProcessCallInfo());
-				FPlan.FProgramStatisticsCached = false;
+				RemoteProposeData proposeData = _cursor.Validate(oldBody, newBody, columnName, _plan._process.GetProcessCallInfo());
+				_plan._programStatisticsCached = false;
 
-				if (LProposeData.Success)
+				if (proposeData.Success)
 				{
-					ANewRow.ValuesOwned = false; // do not clear the overflow streams because the row is effectively owned by the server during the validate call
-					ANewRow.AsPhysical = LProposeData.Body.Data;
-					ANewRow.ValuesOwned = true;
+					newRow.ValuesOwned = false; // do not clear the overflow streams because the row is effectively owned by the server during the validate call
+					newRow.AsPhysical = proposeData.Body.Data;
+					newRow.ValuesOwned = true;
 				}
-				return LProposeData.Success;
+				return proposeData.Success;
 			}
         }
     }

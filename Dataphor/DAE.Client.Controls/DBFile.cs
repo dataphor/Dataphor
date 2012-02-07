@@ -39,24 +39,24 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			InitializeImages();
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			DeinitializeDBFileForm();
 			DeinitializeLinks();
 			DeinitializeImages();
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		#region MaximumContentLength
 
-		private long FMaximumContentLength = DBFileForm.CDefaultMaximumContentLength;
+		private long _maximumContentLength = DBFileForm.DefaultMaximumContentLength;
 		/// <summary> Maximum size in bytes for documents to be loaded into this control. </summary>
-		[DefaultValue(DBFileForm.CDefaultMaximumContentLength)]
+		[DefaultValue(DBFileForm.DefaultMaximumContentLength)]
 		[Description("Maximum size in bytes for documents to be loaded into this control.")]
 		public long MaximumContentLength
 		{
-			get { return FMaximumContentLength; }
-			set { FMaximumContentLength = Math.Max(0, value); }
+			get { return _maximumContentLength; }
+			set { _maximumContentLength = Math.Max(0, value); }
 		}
 
 		#endregion
@@ -65,52 +65,52 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private void InitializeLinks()
 		{
-			FLink = new FieldDataLink();
-			FLink.OnFieldChanged += new DataLinkFieldHandler(ContentChanged);
-			FLink.OnUpdateReadOnly += new EventHandler(UpdateReadOnly);
-			FLink.OnFocusControl += new DataLinkFieldHandler(FocusControl);
+			_link = new FieldDataLink();
+			_link.OnFieldChanged += new DataLinkFieldHandler(ContentChanged);
+			_link.OnUpdateReadOnly += new EventHandler(UpdateReadOnly);
+			_link.OnFocusControl += new DataLinkFieldHandler(FocusControl);
 
-			FExtensionLink = new FieldDataLink();
-			FExtensionLink.OnFieldChanged += new DataLinkFieldHandler(ExtensionChanged);
+			_extensionLink = new FieldDataLink();
+			_extensionLink.OnFieldChanged += new DataLinkFieldHandler(ExtensionChanged);
 
-			FNameLink = new FieldDataLink();
+			_nameLink = new FieldDataLink();
 		}
 
 		private void DeinitializeLinks()
 		{
-			if (FNameLink != null)
+			if (_nameLink != null)
 			{
-				FNameLink.Dispose();
-				FNameLink = null;
+				_nameLink.Dispose();
+				_nameLink = null;
 			}
-			if (FExtensionLink != null)
+			if (_extensionLink != null)
 			{
-				FExtensionLink.Dispose();
-				FExtensionLink = null;
+				_extensionLink.Dispose();
+				_extensionLink = null;
 			}
-			if (FLink != null)
+			if (_link != null)
 			{
-				FLink.Dispose();
-				FLink = null;
+				_link.Dispose();
+				_link = null;
 			}
 		}
 
-		private FieldDataLink FExtensionLink;
+		private FieldDataLink _extensionLink;
 		internal protected FieldDataLink ExtensionLink
 		{
-			get { return FExtensionLink; }
+			get { return _extensionLink; }
 		}
 
-		private FieldDataLink FNameLink;
+		private FieldDataLink _nameLink;
 		internal protected FieldDataLink NameLink
 		{
-			get { return FNameLink; }
+			get { return _nameLink; }
 		}
 
-		private FieldDataLink FLink;
+		private FieldDataLink _link;
 		internal protected FieldDataLink ContentLink
 		{
-			get { return FLink; }
+			get { return _link; }
 		}
 
 		/// <summary> Gets or sets a value indicating whether to allow the user to modify the file. </summary>
@@ -118,8 +118,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Category("Behavior")]
 		public bool ReadOnly
 		{
-			get { return FLink.ReadOnly; }
-			set { FLink.ReadOnly = value; }
+			get { return _link.ReadOnly; }
+			set { _link.ReadOnly = value; }
 		}
 
 		/// <summary> Gets or sets a value indicating the column in the DataView to link to. </summary>
@@ -128,8 +128,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.ColumnNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string ColumnName
 		{
-			get { return FLink.ColumnName; }
-			set { FLink.ColumnName = value; }
+			get { return _link.ColumnName; }
+			set { _link.ColumnName = value; }
 		}
 
 		[DefaultValue("")]
@@ -137,8 +137,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.ColumnNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string ExtensionColumnName
 		{
-			get { return FExtensionLink.ColumnName; }
-			set { FExtensionLink.ColumnName = value; }
+			get { return _extensionLink.ColumnName; }
+			set { _extensionLink.ColumnName = value; }
 		}
 
 		[DefaultValue("")]
@@ -146,48 +146,48 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.ColumnNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string NameColumnName
 		{
-			get { return FNameLink.ColumnName; }
-			set { FNameLink.ColumnName = value; }
+			get { return _nameLink.ColumnName; }
+			set { _nameLink.ColumnName = value; }
 		}
 
-		private bool FAutoSetNameOnLoad = true;
+		private bool _autoSetNameOnLoad = true;
 		/// <summary> Indicates whether of not to set the values of the Name and/or Extension columns when a file is loaded. </summary>
 		[DefaultValue(true)]
 		[Category("Behavior")]
 		public bool AutoSetNameOnLoad
 		{
-			get { return FAutoSetNameOnLoad; }
-			set { FAutoSetNameOnLoad = value; }
+			get { return _autoSetNameOnLoad; }
+			set { _autoSetNameOnLoad = value; }
 		}
 
-		private bool FAutoRenameOnOpen = true;
+		private bool _autoRenameOnOpen = true;
 		/// <summary> Indicates whether of not to rename the temporary file if a file with that name already exists. </summary>
 		[DefaultValue(true)]
 		[Category("Behavior")]
 		public bool AutoRenameOnOpen
 		{
-			get { return FAutoRenameOnOpen; }
-			set { FAutoRenameOnOpen = value; }
+			get { return _autoRenameOnOpen; }
+			set { _autoRenameOnOpen = value; }
 		}
 
-		private int FWaitForProcessInterval = DBFileForm.CDefaultWaitForProcessInterval;
+		private int _waitForProcessInterval = DBFileForm.DefaultWaitForProcessInterval;
 		/// <summary> Number of seconds to wait for the spawned process to load. </summary>
-		[DefaultValue(DBFileForm.CDefaultWaitForProcessInterval)]
+		[DefaultValue(DBFileForm.DefaultWaitForProcessInterval)]
 		[Category("Behavior")]
 		public int WaitForProcessInterval
 		{
-			get { return FWaitForProcessInterval; }
-			set { FWaitForProcessInterval = value; }
+			get { return _waitForProcessInterval; }
+			set { _waitForProcessInterval = value; }
 		}
 
-		private int FPollInterval = DBFileForm.CDefaultPollInterval;
+		private int _pollInterval = DBFileForm.DefaultPollInterval;
 		/// <summary> Interval to poll the temporary file. </summary>
-		[DefaultValue(DBFileForm.CDefaultPollInterval)]
+		[DefaultValue(DBFileForm.DefaultPollInterval)]
 		[Category("Behavior")]
 		public int PollInterval
 		{
-			get { return FPollInterval; }
-			set { FPollInterval = value; }
+			get { return _pollInterval; }
+			set { _pollInterval = value; }
 		}
 
 		/// <summary> Gets or sets a value indicating the DataSource the control is linked to. </summary>
@@ -197,38 +197,38 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Description("The DataSource for this control")]
 		public DataSource Source
 		{
-			get { return FLink.Source; }
+			get { return _link.Source; }
 			set
 			{
-				FLink.Source = value;
-				FNameLink.Source = value;
-				FExtensionLink.Source = value;
+				_link.Source = value;
+				_nameLink.Source = value;
+				_extensionLink.Source = value;
 			}
 		}
 
 		[Browsable(false)]
 		public DataField DataField
 		{
-			get { return FLink == null ? null : FLink.DataField; }
+			get { return _link == null ? null : _link.DataField; }
 		}
 
-		private void FocusControl(DataLink ALink, DataSet ADataSet, DataField AField)
+		private void FocusControl(DataLink link, DataSet dataSet, DataField field)
 		{
-			if (AField == DataField)
+			if (field == DataField)
 				Focus();
 		}
 
-		private void ExtensionChanged(DataLink ALink, DataSet ADataSet, DataField AField)
+		private void ExtensionChanged(DataLink link, DataSet dataSet, DataField field)
 		{
 			UpdateMenuItems();
 		}
 
 		internal protected bool InternalGetReadOnly()
 		{
-			return FLink.ReadOnly || !FLink.Active;
+			return _link.ReadOnly || !_link.Active;
 		}
 
-		private void UpdateReadOnly(object ASender, EventArgs AArgs)
+		private void UpdateReadOnly(object sender, EventArgs args)
 		{
 			if (!DesignMode)
 			{
@@ -241,16 +241,16 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region TabStop
 
-		private bool FTabStop = true;
+		private bool _tabStop = true;
 		[DefaultValue(true)]
 		public new bool TabStop
 		{
-			get { return FTabStop; }
+			get { return _tabStop; }
 			set
 			{
-				if (FTabStop != value)
+				if (_tabStop != value)
 				{
-					FTabStop = value;
+					_tabStop = value;
 					InternalUpdateTabStop();
 				}
 			}
@@ -258,7 +258,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private bool InternalGetTabStop()
 		{
-			return FTabStop && !InternalGetReadOnly();
+			return _tabStop && !InternalGetReadOnly();
 		}
 
 		private void InternalUpdateTabStop()
@@ -270,22 +270,22 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region HasValue
 
-		private void ContentChanged(DataLink ADataLink, DataSet ADataSet, DataField AField)
+		private void ContentChanged(DataLink dataLink, DataSet dataSet, DataField field)
 		{
 			SetHasValue((DataField != null) && DataField.HasValue());
 		}
 
-		private bool FHasValue;
+		private bool _hasValue;
 		internal protected bool HasValue
 		{
-			get { return FHasValue; }
+			get { return _hasValue; }
 		}
 
-		private void SetHasValue(bool AHasValue)
+		private void SetHasValue(bool hasValue)
 		{
-			if (FHasValue != AHasValue)
+			if (_hasValue != hasValue)
 			{
-				FHasValue = AHasValue;
+				_hasValue = hasValue;
 				UpdateMenuItems();
 				Invalidate();
 			}
@@ -295,58 +295,58 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Painting
 
-		private Image FInactiveImage;
-		private Image FActiveImage;
+		private Image _inactiveImage;
+		private Image _activeImage;
 
 		private void DeinitializeDBFileForm()
 		{
-			if (FDBFileForm != null)
+			if (_dBFileForm != null)
 			{
-				if (FDBFileForm.FileOpened && !FDBFileForm.FileProcessed)
-					FDBFileForm.RecoverFile();
-				FDBFileForm.Dispose();
-				FDBFileForm = null;
+				if (_dBFileForm.FileOpened && !_dBFileForm.FileProcessed)
+					_dBFileForm.RecoverFile();
+				_dBFileForm.Dispose();
+				_dBFileForm = null;
 			}
 		}
 
 		private void InitializeImages()
 		{
-			FInactiveImage = new Bitmap(GetType().Assembly.GetManifestResourceStream(@"Alphora.Dataphor.DAE.Client.Controls.Images.File.png"));
-			FActiveImage = new Bitmap(GetType().Assembly.GetManifestResourceStream(@"Alphora.Dataphor.DAE.Client.Controls.Images.FileActive.png"));
+			_inactiveImage = new Bitmap(GetType().Assembly.GetManifestResourceStream(@"Alphora.Dataphor.DAE.Client.Controls.Images.File.png"));
+			_activeImage = new Bitmap(GetType().Assembly.GetManifestResourceStream(@"Alphora.Dataphor.DAE.Client.Controls.Images.FileActive.png"));
 		}
 
 		private void DeinitializeImages()
 		{
-			if (FInactiveImage != null)
+			if (_inactiveImage != null)
 			{
-				FInactiveImage.Dispose();
-				FInactiveImage = null;
+				_inactiveImage.Dispose();
+				_inactiveImage = null;
 			}
-			if (FActiveImage != null)
+			if (_activeImage != null)
 			{
-				FActiveImage.Dispose();
-				FActiveImage = null;
+				_activeImage.Dispose();
+				_activeImage = null;
 			}
 		}
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
 			if (Focused)
-				ControlPaint.DrawFocusRectangle(AArgs.Graphics, new Rectangle(0, 0, Width - 1, Height - 1));
-			Image LImage = FHasValue ? FActiveImage : FInactiveImage;
-			AArgs.Graphics.DrawImage(LImage, 1, 1, LImage.Width - 1, LImage.Height - 1);
+				ControlPaint.DrawFocusRectangle(args.Graphics, new Rectangle(0, 0, Width - 1, Height - 1));
+			Image image = _hasValue ? _activeImage : _inactiveImage;
+			args.Graphics.DrawImage(image, 1, 1, image.Width - 1, image.Height - 1);
 		}
 
-		protected override void OnGotFocus(EventArgs AArgs)
+		protected override void OnGotFocus(EventArgs args)
 		{
-			base.OnGotFocus(AArgs);
+			base.OnGotFocus(args);
 			Invalidate();
 			BuildContextMenu();
 		}
 
-		protected override void OnLostFocus(EventArgs AArgs)
+		protected override void OnLostFocus(EventArgs args)
 		{
-			base.OnLostFocus(AArgs);
+			base.OnLostFocus(args);
 			Invalidate();
 		}
 
@@ -356,13 +356,13 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		const int WM_CONTEXTMENU = 0x007B;
 
-		protected override void WndProc(ref Message AMessage)
+		protected override void WndProc(ref Message message)
 		{
 			// Don't build the context menu until it is requested
-			if (AMessage.Msg == WM_CONTEXTMENU)
+			if (message.Msg == WM_CONTEXTMENU)
 				BuildContextMenu();
 
-			base.WndProc(ref AMessage);
+			base.WndProc(ref message);
 		}
 
 		private void BuildContextMenu()
@@ -381,29 +381,29 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		protected virtual void InternalBuildContextMenu()
 		{
-			DBFileMenuItem LItem;
+			DBFileMenuItem item;
 
 			// Open
-			LItem = new DBFileMenuItem(this, true, false);
-			LItem.Text = Strings.Get("DBFile.Menu.OpenText");
-			LItem.Click += new EventHandler(OpenClicked);
-			LItem.DefaultItem = true;
-			ContextMenu.MenuItems.Add(LItem);
+			item = new DBFileMenuItem(this, true, false);
+			item.Text = Strings.Get("DBFile.Menu.OpenText");
+			item.Click += new EventHandler(OpenClicked);
+			item.DefaultItem = true;
+			ContextMenu.MenuItems.Add(item);
 
 			// -
 			ContextMenu.MenuItems.Add(new MenuItem("-"));
 
 			// Save As...
-			LItem = new DBFileMenuItem(this, true, false);
-			LItem.Text = Strings.Get("DBFile.Menu.SaveAsText");
-			LItem.Click += new EventHandler(SaveAsClicked);
-			ContextMenu.MenuItems.Add(LItem);
+			item = new DBFileMenuItem(this, true, false);
+			item.Text = Strings.Get("DBFile.Menu.SaveAsText");
+			item.Click += new EventHandler(SaveAsClicked);
+			ContextMenu.MenuItems.Add(item);
 
 			// Load...
-			LItem = new DBFileMenuItem(this, false, true);
-			LItem.Text = Strings.Get("DBFile.Menu.LoadText");
-			LItem.Click += new EventHandler(LoadClicked);
-			ContextMenu.MenuItems.Add(LItem);
+			item = new DBFileMenuItem(this, false, true);
+			item.Text = Strings.Get("DBFile.Menu.LoadText");
+			item.Click += new EventHandler(LoadClicked);
+			ContextMenu.MenuItems.Add(item);
 
 			// -
 			ContextMenu.MenuItems.Add(new MenuItem("-"));
@@ -425,10 +425,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			//ContextMenu.MenuItems.Add(LItem);
 
 			// Clear
-			LItem = new DBFileMenuItem(this, true, true);
-			LItem.Text = Strings.Get("DBFile.Menu.ClearText");
-			LItem.Click += new EventHandler(ClearClicked);
-			ContextMenu.MenuItems.Add(LItem);
+			item = new DBFileMenuItem(this, true, true);
+			item.Text = Strings.Get("DBFile.Menu.ClearText");
+			item.Click += new EventHandler(ClearClicked);
+			ContextMenu.MenuItems.Add(item);
 
 			if (OnBuildContextMenu != null)
 				OnBuildContextMenu(this, EventArgs.Empty);
@@ -440,11 +440,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			if (ContextMenu != null)
 			{
-				foreach (MenuItem LItem in ContextMenu.MenuItems)
+				foreach (MenuItem item in ContextMenu.MenuItems)
 				{
-					DBFileMenuItem LFileItem = LItem as DBFileMenuItem;
-					if (LFileItem != null)
-						LFileItem.UpdateEnabled();
+					DBFileMenuItem fileItem = item as DBFileMenuItem;
+					if (fileItem != null)
+						fileItem.UpdateEnabled();
 				}
 
 				if (OnUpdateMenuItems != null)
@@ -456,9 +456,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Keyboard and Mouse
 
-		protected override bool IsInputKey(Keys AKeyData)
+		protected override bool IsInputKey(Keys keyData)
 		{
-			switch (AKeyData)
+			switch (keyData)
 			{
 				case Keys.Insert:
 				case Keys.L:
@@ -466,72 +466,72 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				case Keys.Space:
 					return true;
 			}
-			return base.IsInputKey(AKeyData);
+			return base.IsInputKey(keyData);
 		}
 
-		protected override void OnKeyDown(KeyEventArgs AArgs)
+		protected override void OnKeyDown(KeyEventArgs args)
 		{
 			BuildContextMenu();
-			switch (AArgs.KeyData)
+			switch (args.KeyData)
 			{
 				case Keys.Insert:
 					ContextMenu.Show(this, new Point(Width / 2, Height / 2));
-					AArgs.Handled = true;
+					args.Handled = true;
 					break;
 				case Keys.L:
 					LoadClicked(this, EventArgs.Empty);
-					AArgs.Handled = true;
+					args.Handled = true;
 					break;
 				case Keys.S:
 					SaveAsClicked(this, EventArgs.Empty);
-					AArgs.Handled = true;
+					args.Handled = true;
 					break;
 				case Keys.Space:
 					OpenClicked(this, EventArgs.Empty);
-					AArgs.Handled = true;
+					args.Handled = true;
 					break;
 			}
-			base.OnKeyDown(AArgs);
+			base.OnKeyDown(args);
 		}
 
-		protected override void OnDoubleClick(EventArgs AArgs)
+		protected override void OnDoubleClick(EventArgs args)
 		{
-			OpenClicked(this, AArgs);
-			base.OnDoubleClick(AArgs);
+			OpenClicked(this, args);
+			base.OnDoubleClick(args);
 		}
 
-		protected override void OnClick(EventArgs AArgs)
+		protected override void OnClick(EventArgs args)
 		{
 			Focus();
-			base.OnClick(AArgs);
+			base.OnClick(args);
 		}
 
 		#endregion
 
 		#region Actions
 
-		private DBFileForm FDBFileForm;
+		private DBFileForm _dBFileForm;
 		private DBFileForm DBFileForm
 		{
 			get
 			{
-				if (FDBFileForm == null)
-					FDBFileForm = new DBFileForm(FLink, FNameLink, FExtensionLink);
+				if (_dBFileForm == null)
+					_dBFileForm = new DBFileForm(_link, _nameLink, _extensionLink);
 
-				FDBFileForm.MaximumContentLength = FMaximumContentLength;
-				FDBFileForm.PollInterval = FPollInterval;
-				FDBFileForm.WaitForProcessInterval = FWaitForProcessInterval;
-				FDBFileForm.AutoRenameOnOpen = FAutoRenameOnOpen;
-				return FDBFileForm;
+				_dBFileForm.MaximumContentLength = _maximumContentLength;
+				_dBFileForm.PollInterval = _pollInterval;
+				_dBFileForm.WaitForProcessInterval = _waitForProcessInterval;
+				_dBFileForm.AutoRenameOnOpen = _autoRenameOnOpen;
+				return _dBFileForm;
 			}
 		}
 
-		private void CopyClicked(object ASender, EventArgs AArgs)
+		private void CopyClicked(object sender, EventArgs args)
 		{
 			// TODO	
 		}
 
-		private void PasteClicked(object ASender, EventArgs AArgs)
+		private void PasteClicked(object sender, EventArgs args)
 		{
 			if (DataField != null)
 			{
@@ -539,50 +539,50 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		private void SaveAsClicked(object ASender, EventArgs AArgs)
+		private void SaveAsClicked(object sender, EventArgs args)
 		{
 			if ((DataField != null) && DataField.HasValue())
 				DBFileForm.SaveToFile();
 		}
 
-		private string ExtensionWithoutDot(string AExtension)
+		private string ExtensionWithoutDot(string extension)
 		{
-			return (AExtension == String.Empty ? String.Empty : AExtension.Substring(1));
+			return (extension == String.Empty ? String.Empty : extension.Substring(1));
 		}
 
-		private void LoadClicked(object ASender, EventArgs AArgs)
+		private void LoadClicked(object sender, EventArgs args)
 		{
-			if (FLink.DataSet != null)
+			if (_link.DataSet != null)
 			{
-				FLink.DataSet.Edit();
+				_link.DataSet.Edit();
 				if (DataField != null)
 				{
 					DBFileForm.LoadFromFile();
 					if (AutoSetNameOnLoad)
 					{
-						if ((FNameLink.DataField != null) && FNameLink.DataField.IsNil)
-							FNameLink.DataField.AsString = Path.GetFileNameWithoutExtension(DBFileForm.FileName);
-						if ((FExtensionLink.DataField != null) && FExtensionLink.DataField.IsNil)
-							FExtensionLink.DataField.AsString = ExtensionWithoutDot(Path.GetExtension(DBFileForm.FileName));
+						if ((_nameLink.DataField != null) && _nameLink.DataField.IsNil)
+							_nameLink.DataField.AsString = Path.GetFileNameWithoutExtension(DBFileForm.FileName);
+						if ((_extensionLink.DataField != null) && _extensionLink.DataField.IsNil)
+							_extensionLink.DataField.AsString = ExtensionWithoutDot(Path.GetExtension(DBFileForm.FileName));
 					}
 				}
 			}
 		}
 
-		private void ClearClicked(object ASender, EventArgs AArgs)
+		private void ClearClicked(object sender, EventArgs args)
 		{
 			if ((DataField != null) && !DataField.IsNil)
 				DataField.ClearValue();
 		}
 
-		private void OpenClicked(object ASender, EventArgs AArgs)
+		private void OpenClicked(object sender, EventArgs args)
 		{
 			if ((DataField != null) && DataField.HasValue())
 			{
-				if (FDBFileForm != null)
+				if (_dBFileForm != null)
 				{
-					FDBFileForm.Dispose();
-					FDBFileForm = null;
+					_dBFileForm.Dispose();
+					_dBFileForm = null;
 				}
 				
 				DBFileForm.OpenFile();
@@ -593,36 +593,36 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 	public class DBFileMenuItem : MenuItem
 	{
-		public DBFileMenuItem(DBFile AFileControl, bool AReadsData, bool AWritesData)
+		public DBFileMenuItem(DBFile fileControl, bool readsData, bool writesData)
 		{
-			FFileControl = AFileControl;
-			FReadsData = AReadsData;
-			FWritesData = AWritesData;
+			_fileControl = fileControl;
+			_readsData = readsData;
+			_writesData = writesData;
 		}
 
-		private DBFile FFileControl;
+		private DBFile _fileControl;
 		public DBFile FileControl
 		{
-			get { return FFileControl; }
+			get { return _fileControl; }
 		}
 
-		private bool FReadsData;
+		private bool _readsData;
 		public bool ReadsData
 		{
-			get { return FReadsData; }
+			get { return _readsData; }
 		}
 
-		private bool FWritesData;
+		private bool _writesData;
 		public bool WritesData
 		{
-			get { return FWritesData; }
+			get { return _writesData; }
 		}
 
 		internal protected virtual void UpdateEnabled()
 		{
 			Enabled =
-				(!FWritesData || !FFileControl.InternalGetReadOnly())
-					&& (!FReadsData || FFileControl.HasValue);
+				(!_writesData || !_fileControl.InternalGetReadOnly())
+					&& (!_readsData || _fileControl.HasValue);
 		}
 	}
 }

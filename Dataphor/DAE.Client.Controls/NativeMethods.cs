@@ -75,7 +75,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			MK_MBUTTON = 0x0010;
 
 		internal const int
-			CS_DBLCLKS = 0x0008;
+			S_DBLCLKS = 0x0008;
 
 		internal const int
 			SW_SCROLLCHILDREN = 0x0001,
@@ -151,34 +151,34 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.LinkDemand, Flags=System.Security.Permissions.SecurityPermissionFlag.UnmanagedCode)]
 		internal class Utilities
 		{
-			internal static int MakeLong(int ALow, int AHigh) 
+			internal static int MakeLong(int low, int high) 
 			{
-				return (AHigh << 16) | (ALow & 0xffff);
+				return (high << 16) | (low & 0xffff);
 			}
     
-			internal static IntPtr MakeLParam(int ALow, int AHigh) 
+			internal static IntPtr MakeLParam(int low, int high) 
 			{
-				return (IntPtr) ((AHigh << 16) | (ALow & 0xffff));
+				return (IntPtr) ((high << 16) | (low & 0xffff));
 			}
     
-			internal static int HiWord(int AValue) 
+			internal static int HiWord(int value) 
 			{
-				return (AValue >> 16) & 0xffff;
+				return (value >> 16) & 0xffff;
 			}
     
-			internal static int HiWord(IntPtr AValue) 
+			internal static int HiWord(IntPtr value) 
 			{
-				return HiWord((int)AValue);
+				return HiWord((int)value);
 			}
     
-			internal static int LowWord(int AValue) 
+			internal static int LowWord(int value) 
 			{
-				return AValue & 0xffff;
+				return value & 0xffff;
 			}
     
-			internal static int LowWord(IntPtr AValue) 
+			internal static int LowWord(IntPtr value) 
 			{
-				return LowWord((int)AValue);
+				return LowWord((int)value);
 			}
     
 		}

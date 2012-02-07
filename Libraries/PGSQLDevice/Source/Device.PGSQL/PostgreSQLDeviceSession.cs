@@ -11,9 +11,9 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
        
     public class PostgreSQLDeviceSession : SQLDeviceSession
     {
-        public PostgreSQLDeviceSession(PostgreSQLDevice ADevice, ServerProcess AServerProcess,
-                                  DeviceSessionInfo ADeviceSessionInfo)
-            : base(ADevice, AServerProcess, ADeviceSessionInfo)
+        public PostgreSQLDeviceSession(PostgreSQLDevice device, ServerProcess serverProcess,
+                                  DeviceSessionInfo deviceSessionInfo)
+            : base(device, serverProcess, deviceSessionInfo)
         {
         }
 
@@ -24,50 +24,50 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
         protected override SQLConnection InternalCreateConnection()
         {
-        	string LConnectionClassName = Device.ConnectionClass == String.Empty
+        	string connectionClassName = Device.ConnectionClass == String.Empty
         	            	?"Connection.PostgreSQLConnection": Device.ConnectionClass;
         	
-			var LClassDefinition = new ClassDefinition(LConnectionClassName);
+			var classDefinition = new ClassDefinition(connectionClassName);
 
-        	string LConnectionStringBuilderClassName = Device.ConnectionStringBuilderClass == String.Empty
+        	string connectionStringBuilderClassName = Device.ConnectionStringBuilderClass == String.Empty
         	               	?
 								"PostgreSQLDevice.PostgreSQLConnectionStringBuilder" : Device.ConnectionStringBuilderClass;
         	
-			var LBuilderClassDefinition =new ClassDefinition(LConnectionStringBuilderClassName);
+			var builderClassDefinition =new ClassDefinition(connectionStringBuilderClassName);
 
-            var LConnectionStringBuilder =
+            var connectionStringBuilder =
                 (ConnectionStringBuilder)ServerProcess.CreateObject
                 (
-                    LBuilderClassDefinition,
+                    builderClassDefinition,
                     new object[] { }
                 );
 
-            var LTags = new Tags();
-            LTags.AddOrUpdate("Server", Device.Server);
-            LTags.AddOrUpdate("Port", Device.Port);
-            LTags.AddOrUpdate("Database", Device.Database);
-            LTags.AddOrUpdate("SearchPath", Device.SearchPath);            
+            var tags = new Tags();
+            tags.AddOrUpdate("Server", Device.Server);
+            tags.AddOrUpdate("Port", Device.Port);
+            tags.AddOrUpdate("Database", Device.Database);
+            tags.AddOrUpdate("SearchPath", Device.SearchPath);            
             if (Device.UseIntegratedSecurity)
-                LTags.AddOrUpdate("Integrated Security", "true");
+                tags.AddOrUpdate("Integrated Security", "true");
             else
             {
-                LTags.AddOrUpdate("User Id", DeviceSessionInfo.UserName);
-                LTags.AddOrUpdate("Password", DeviceSessionInfo.Password);
+                tags.AddOrUpdate("User Id", DeviceSessionInfo.UserName);
+                tags.AddOrUpdate("Password", DeviceSessionInfo.Password);
             }
 
             
             
 
-            LTags = LConnectionStringBuilder.Map(LTags);
-            Device.GetConnectionParameters(LTags, DeviceSessionInfo);
-            string LConnectionString = SQLDevice.TagsToString(LTags);
-            SQLConnection LConnection;
-            LConnection = (SQLConnection)ServerProcess.CreateObject
+            tags = connectionStringBuilder.Map(tags);
+            Device.GetConnectionParameters(tags, DeviceSessionInfo);
+            string connectionString = SQLDevice.TagsToString(tags);
+            SQLConnection connection;
+            connection = (SQLConnection)ServerProcess.CreateObject
                 (
-                LClassDefinition,
-                new object[] { LConnectionString }
+                classDefinition,
+                new object[] { connectionString }
                 );
-            return LConnection;
+            return connection;
         }
     }
 

@@ -11,60 +11,60 @@ namespace Alphora.Dataphor.DAE.Server
 {
 	public class SignalPool
 	{
-		private const int CInitialSignalPoolCapacity = 10;
+		private const int InitialSignalPoolCapacity = 10;
 		
-		private ManualResetEvent[] FSignalPool = new ManualResetEvent[CInitialSignalPoolCapacity];
-		private int FSignalPoolCount;
-		private int FSignalPoolInUse;
+		private ManualResetEvent[] _signalPool = new ManualResetEvent[InitialSignalPoolCapacity];
+		private int _signalPoolCount;
+		private int _signalPoolInUse;
 
 		public ManualResetEvent Acquire()
 		{
 			// Spin until we have exlusive
-			while (Interlocked.CompareExchange(ref FSignalPoolInUse, 1, 0) == 1);
+			while (Interlocked.CompareExchange(ref _signalPoolInUse, 1, 0) == 1);
 
-			ManualResetEvent LSignal = null;
-			if (FSignalPoolCount > 0)
+			ManualResetEvent signal = null;
+			if (_signalPoolCount > 0)
 			{
 				try
 				{
-					FSignalPoolCount--;
-					LSignal = FSignalPool[FSignalPoolCount];
+					_signalPoolCount--;
+					signal = _signalPool[_signalPoolCount];
 				}
 				finally
 				{
-					Interlocked.Decrement(ref FSignalPoolInUse);
+					Interlocked.Decrement(ref _signalPoolInUse);
 				}
-				LSignal.Reset();
-				return LSignal;
+				signal.Reset();
+				return signal;
 			}
 			else
 			{
-				Interlocked.Decrement(ref FSignalPoolInUse);
+				Interlocked.Decrement(ref _signalPoolInUse);
 				return new ManualResetEvent(false);
 			}
 		}
 
-		public void Relinquish(ManualResetEvent AEvent)
+		public void Relinquish(ManualResetEvent eventValue)
 		{
 			// Spin until we have exlusive
-			while (Interlocked.CompareExchange(ref FSignalPoolInUse, 1, 0) == 1);
+			while (Interlocked.CompareExchange(ref _signalPoolInUse, 1, 0) == 1);
 			try
 			{
 				// Grow the capacity if necessary
-				if (FSignalPool.Length <= FSignalPoolCount)
+				if (_signalPool.Length <= _signalPoolCount)
 				{
-					ManualResetEvent[] LNewList = new ManualResetEvent[Math.Min(FSignalPool.Length * 2, FSignalPool.Length + 512)];
-					Array.Copy(FSignalPool, 0, LNewList, 0, FSignalPool.Length);
-					FSignalPool = LNewList;
+					ManualResetEvent[] newList = new ManualResetEvent[Math.Min(_signalPool.Length * 2, _signalPool.Length + 512)];
+					Array.Copy(_signalPool, 0, newList, 0, _signalPool.Length);
+					_signalPool = newList;
 				}
 
 				// Add to the pool
-				FSignalPool[FSignalPoolCount] = AEvent;
-				FSignalPoolCount++;
+				_signalPool[_signalPoolCount] = eventValue;
+				_signalPoolCount++;
 			}
 			finally
 			{
-				Interlocked.Decrement(ref FSignalPoolInUse);
+				Interlocked.Decrement(ref _signalPoolInUse);
 			}
 		}
 	}

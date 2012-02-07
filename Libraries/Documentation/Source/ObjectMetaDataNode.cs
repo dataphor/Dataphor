@@ -35,23 +35,23 @@ namespace DocSamples
 	// similar to ObjectDescriptionNode
 	public class ObjectMetaDataNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Object LObject = null;
+			Schema.Object objectValue = null;
 
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			else
 			#endif
 			{
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					LObject = AProgram.Catalog.Objects[(string)AArguments[0]];
-				else if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemName))
-					LObject = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[0]);
+				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
+					objectValue = program.Catalog.Objects[(string)arguments[0]];
+				else if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemName))
+					objectValue = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0]);
 				else
-					LObject = AProgram.Catalog.Objects[(int)AArguments[0]];
-				return MetaData.GetTag(LObject.MetaData, (string)AArguments[1], (string)AArguments[2]);
+					objectValue = program.Catalog.Objects[(int)arguments[0]];
+				return MetaData.GetTag(objectValue.MetaData, (string)arguments[1], (string)arguments[2]);
 			}
 		}
 	}

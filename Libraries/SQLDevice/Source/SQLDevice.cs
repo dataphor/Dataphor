@@ -187,173 +187,173 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
 	public abstract class SQLDevice : Device
 	{
-		public const string CSQLDateTimeScalarType = "SQLDevice.SQLDateTime";
-		public const string CSQLTimeScalarType = "SQLDevice.SQLTime";
-		public const string CSQLTextScalarType = "SQLDevice.SQLText";
-		public const string CSQLITextScalarType = "SQLDevice.SQLIText";
+		public const string SQLDateTimeScalarType = "SQLDevice.SQLDateTime";
+		public const string SQLTimeScalarType = "SQLDevice.SQLTime";
+		public const string SQLTextScalarType = "SQLDevice.SQLText";
+		public const string SQLITextScalarType = "SQLDevice.SQLIText";
 
-		public SQLDevice(int AID, string AName) : base(AID, AName)
+		public SQLDevice(int iD, string name) : base(iD, name)
 		{
 			SetMaxIdentifierLength();
-			FSupportsTransactions = true;
+			_supportsTransactions = true;
 		}
 
 		// Schema
-		private string FSchema = String.Empty;
+		private string _schema = String.Empty;
 		public string Schema
 		{
-			get { return FSchema; }
-			set { FSchema = value == null ? String.Empty : value; }
+			get { return _schema; }
+			set { _schema = value == null ? String.Empty : value; }
 		}
 
-		private bool FUseStatementTerminator = true;
+		private bool _useStatementTerminator = true;
 		public bool UseStatementTerminator
 		{
-			get { return FUseStatementTerminator; }
-			set { FUseStatementTerminator = value; }
+			get { return _useStatementTerminator; }
+			set { _useStatementTerminator = value; }
 		}
 		
-		private bool FUseParametersForCursors = false;
+		private bool _useParametersForCursors = false;
 		public bool UseParametersForCursors
 		{
-			get { return FUseParametersForCursors; }
-			set { FUseParametersForCursors = value; }
+			get { return _useParametersForCursors; }
+			set { _useParametersForCursors = value; }
 		}
 		
-		private bool FShouldNormalizeWhitespace = true;
+		private bool _shouldNormalizeWhitespace = true;
 		public bool ShouldNormalizeWhitespace
 		{
-			get { return FShouldNormalizeWhitespace; }
-			set { FShouldNormalizeWhitespace = value; }
+			get { return _shouldNormalizeWhitespace; }
+			set { _shouldNormalizeWhitespace = value; }
 		}
 
-		private bool FUseQuotedIdentifiers = true;
+		private bool _useQuotedIdentifiers = true;
 		public bool UseQuotedIdentifiers
 		{
-			set { FUseQuotedIdentifiers = value;}
-			get { return FUseQuotedIdentifiers;}
+			set { _useQuotedIdentifiers = value;}
+			get { return _useQuotedIdentifiers;}
 		}
 		
-		private bool FUseTransactions = true;
+		private bool _useTransactions = true;
 		/// <summary>Indicates whether or not to use transactions through the CLI of the target system.</summary>
 		public bool UseTransactions
 		{
-			set { FUseTransactions = value; }
-			get { return FUseTransactions; }
+			set { _useTransactions = value; }
+			get { return _useTransactions; }
 		}
 		
-		private bool FUseQualifiedNames = false;
+		private bool _useQualifiedNames = false;
 		/// <summary>Indicates whether or not to use the fully qualified name of an object in D4 to produce the storage name for the object.</summary>
 		/// <remarks>Qualifiers will be replaced with underscores in the resulting storage name.</remarks>
 		public bool UseQualifiedNames
 		{
-			get { return FUseQualifiedNames; }
-			set { FUseQualifiedNames = value; }
+			get { return _useQualifiedNames; }
+			set { _useQualifiedNames = value; }
 		}
 		
-		private bool FSupportsAlgebraicFromClause = true;
+		private bool _supportsAlgebraicFromClause = true;
 		/// <summary>Indicates whether or not the dialect supports an algebraic from clause.</summary>
 		public bool SupportsAlgebraicFromClause
 		{
-			get { return FSupportsAlgebraicFromClause; }
-			set { FSupportsAlgebraicFromClause = value; }
+			get { return _supportsAlgebraicFromClause; }
+			set { _supportsAlgebraicFromClause = value; }
 		}
 		
-		private string FOnExecuteConnectStatement;
+		private string _onExecuteConnectStatement;
 		/// <summary>A D4 expression denoting an SQL statement in the target dialect to be executed on all new execute connections.</summary>
 		/// <remarks>The statement will be executed in its own transaction, not the transactional context of the spawning process.</remarks>
 		public string OnExecuteConnectStatement
 		{
-			get { return FOnExecuteConnectStatement; }
-			set { FOnExecuteConnectStatement = value; }
+			get { return _onExecuteConnectStatement; }
+			set { _onExecuteConnectStatement = value; }
 		}
 		
-		private string FOnBrowseConnectStatement;
+		private string _onBrowseConnectStatement;
 		/// <summary>A D4 expression denoting an SQL statement in the target dialect to be executed on all new browse connections.</summary>
 		/// <remarks>The statement will be executed in its own transaction, not the transactional context of the spawning process.</remarks>
 		public string OnBrowseConnectStatement
 		{
-			get { return FOnBrowseConnectStatement; }
-			set { FOnBrowseConnectStatement = value; }
+			get { return _onBrowseConnectStatement; }
+			set { _onBrowseConnectStatement = value; }
 		}
 		
-		private bool FSupportsSubSelectInSelectClause = true;
+		private bool _supportsSubSelectInSelectClause = true;
 		public bool SupportsSubSelectInSelectClause
 		{
-			get { return FSupportsSubSelectInSelectClause; }
-			set { FSupportsSubSelectInSelectClause = value; }
+			get { return _supportsSubSelectInSelectClause; }
+			set { _supportsSubSelectInSelectClause = value; }
 		}
 		
-		private bool FSupportsSubSelectInWhereClause = true;
+		private bool _supportsSubSelectInWhereClause = true;
 		public bool SupportsSubSelectInWhereClause
 		{
-			get { return FSupportsSubSelectInWhereClause; }
-			set { FSupportsSubSelectInWhereClause = value; }
+			get { return _supportsSubSelectInWhereClause; }
+			set { _supportsSubSelectInWhereClause = value; }
 		}
 		
-		private bool FSupportsSubSelectInGroupByClause = true;
+		private bool _supportsSubSelectInGroupByClause = true;
 		public bool SupportsSubSelectInGroupByClause
 		{
-			get { return FSupportsSubSelectInGroupByClause; }
-			set { FSupportsSubSelectInGroupByClause = value; }
+			get { return _supportsSubSelectInGroupByClause; }
+			set { _supportsSubSelectInGroupByClause = value; }
 		}
 		
-		private bool FSupportsSubSelectInHavingClause = true;
+		private bool _supportsSubSelectInHavingClause = true;
 		public bool SupportsSubSelectInHavingClause
 		{
-			get { return FSupportsSubSelectInHavingClause; }
-			set { FSupportsSubSelectInHavingClause = value; }
+			get { return _supportsSubSelectInHavingClause; }
+			set { _supportsSubSelectInHavingClause = value; }
 		}
 		
-		private bool FSupportsSubSelectInOrderByClause = true;
+		private bool _supportsSubSelectInOrderByClause = true;
 		public bool SupportsSubSelectInOrderByClause
 		{
-			get { return FSupportsSubSelectInOrderByClause; }
-			set { FSupportsSubSelectInOrderByClause = value; }
+			get { return _supportsSubSelectInOrderByClause; }
+			set { _supportsSubSelectInOrderByClause = value; }
 		}
 		
 		// True if the device supports nesting in the from clause.
 		// This is also used to determine whether an extend whose source has introduced columns (an add following another add), will nest the resulting expression, or use replacement referencing to avoid the nesting.
-		private bool FSupportsNestedFrom = true;
+		private bool _supportsNestedFrom = true;
 		public bool SupportsNestedFrom
 		{
-			get { return FSupportsNestedFrom; }
-			set { FSupportsNestedFrom = value; }
+			get { return _supportsNestedFrom; }
+			set { _supportsNestedFrom = value; }
 		}
 
-		private bool FSupportsNestedCorrelation = true;
+		private bool _supportsNestedCorrelation = true;
 		public bool SupportsNestedCorrelation
 		{
-			get { return FSupportsNestedCorrelation; }
-			set { FSupportsNestedCorrelation = value; }
+			get { return _supportsNestedCorrelation; }
+			set { _supportsNestedCorrelation = value; }
 		}
 
 		// True if the device supports the use of expressions in the order by clause		
-		private bool FSupportsOrderByExpressions = false;
+		private bool _supportsOrderByExpressions = false;
 		public bool SupportsOrderByExpressions
 		{
-			get { return FSupportsOrderByExpressions; }
-			set { FSupportsOrderByExpressions = value; }
+			get { return _supportsOrderByExpressions; }
+			set { _supportsOrderByExpressions = value; }
 		}
 
 		// True if the order by clause is processed as part of the query context 
 		// If this is false the order must be specified in terms of the result set columns, rather than the range variable columns within the query
-		private bool FIsOrderByInContext = true;
+		private bool _isOrderByInContext = true;
 		public bool IsOrderByInContext
 		{
-			get { return FIsOrderByInContext; }
-			set { FIsOrderByInContext = value; }
+			get { return _isOrderByInContext; }
+			set { _isOrderByInContext = value; }
 		}
 
 		// True if insert statements should be constructed using a values clause, false to use a select expression		
-		private bool FUseValuesClauseInInsert = true;
+		private bool _useValuesClauseInInsert = true;
 		public bool UseValuesClauseInInsert
 		{
-			get { return FUseValuesClauseInInsert; }
-			set { FUseValuesClauseInInsert = value; }
+			get { return _useValuesClauseInInsert; }
+			set { _useValuesClauseInInsert = value; }
 		}
 		
-		private int FCommandTimeout = -1;
+		private int _commandTimeout = -1;
 		/// <summary>The amount of time in seconds to wait before timing out waiting for a command to complete.</summary>
 		/// <remarks>
 		/// The default value for this property is -1, indicating that the default timeout value for the connectivity 
@@ -363,8 +363,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		/// </remarks>
 		public int CommandTimeout
 		{
-			get { return FCommandTimeout; }
-			set { FCommandTimeout = value; }
+			get { return _commandTimeout; }
+			set { _commandTimeout = value; }
 		}
 
 		#if USEISTRING		
@@ -376,57 +376,57 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		}
 		#endif
 		
-		public virtual ErrorSeverity ExceptionOccurred(Exception AException)
+		public virtual ErrorSeverity ExceptionOccurred(Exception exception)
 		{
 			return ErrorSeverity.Application;
 		}
 
-		protected int FMaxIdentifierLength = int.MaxValue;
+		protected int _maxIdentifierLength = int.MaxValue;
 		public int MaxIdentifierLength
 		{
-			get { return FMaxIdentifierLength; }
-			set { FMaxIdentifierLength = value; }
+			get { return _maxIdentifierLength; }
+			set { _maxIdentifierLength = value; }
 		}
 		
 		protected virtual void SetMaxIdentifierLength() {}
 
 		// verify that all types in the given table are mapped into this device
-        public override void CheckSupported(Plan APlan, TableVar ATableVar)
+        public override void CheckSupported(Plan plan, TableVar tableVar)
         {
 			// verify that the types of all columns have type maps
-			foreach (Schema.Column LColumn in ATableVar.DataType.Columns)
-				if (!(LColumn.DataType is Schema.ScalarType) || (ResolveDeviceScalarType(APlan, (Schema.ScalarType)LColumn.DataType) == null))
-					if (Compiler.CouldGenerateDeviceScalarTypeMap(APlan, this, (Schema.ScalarType)LColumn.DataType))
+			foreach (Schema.Column column in tableVar.DataType.Columns)
+				if (!(column.DataType is Schema.ScalarType) || (ResolveDeviceScalarType(plan, (Schema.ScalarType)column.DataType) == null))
+					if (Compiler.CouldGenerateDeviceScalarTypeMap(plan, this, (Schema.ScalarType)column.DataType))
 					{
-						D4.AlterDeviceStatement LStatement = new D4.AlterDeviceStatement();
-						LStatement.DeviceName = Name;
+						D4.AlterDeviceStatement statement = new D4.AlterDeviceStatement();
+						statement.DeviceName = Name;
 						// BTR 1/18/2007 -> This really should be being marked as generated, however doing so
 						// changes the dependency reporting for scalar type maps, and causes some catalog dependency errors,
 						// so I cannot justify making this change in this version. Perhaps at some point, but not now...
-						LStatement.CreateDeviceScalarTypeMaps.Add(new D4.DeviceScalarTypeMap(LColumn.DataType.Name));
-						APlan.ExecuteNode(Compiler.BindNode(APlan, Compiler.CompileAlterDeviceStatement(APlan, LStatement)));
-						ResolveDeviceScalarType(APlan, (Schema.ScalarType)LColumn.DataType); // Reresolve to attach a dependency to the generated map
+						statement.CreateDeviceScalarTypeMaps.Add(new D4.DeviceScalarTypeMap(column.DataType.Name));
+						plan.ExecuteNode(Compiler.BindNode(plan, Compiler.CompileAlterDeviceStatement(plan, statement)));
+						ResolveDeviceScalarType(plan, (Schema.ScalarType)column.DataType); // Reresolve to attach a dependency to the generated map
 					}
 					else
-						throw new SchemaException(SchemaException.Codes.UnsupportedScalarType, ATableVar.Name, Name, LColumn.DataType.Name, LColumn.Name);
+						throw new SchemaException(SchemaException.Codes.UnsupportedScalarType, tableVar.Name, Name, column.DataType.Name, column.Name);
 					
-			foreach (Schema.Key LKey in ATableVar.Keys)
-				foreach (Schema.TableVarColumn LColumn in LKey.Columns)
-					if (!SupportsComparison(APlan, LColumn.DataType))
-						throw new SchemaException(SchemaException.Codes.UnsupportedKeyType, ATableVar.Name, Name, LColumn.DataType.Name, LColumn.Name);
+			foreach (Schema.Key key in tableVar.Keys)
+				foreach (Schema.TableVarColumn column in key.Columns)
+					if (!SupportsComparison(plan, column.DataType))
+						throw new SchemaException(SchemaException.Codes.UnsupportedKeyType, tableVar.Name, Name, column.DataType.Name, column.Name);
         }								   
         
-        public override D4.ClassDefinition GetDefaultOperatorClassDefinition(D4.MetaData AMetaData)
+        public override D4.ClassDefinition GetDefaultOperatorClassDefinition(D4.MetaData metaData)
         {
-			if ((AMetaData != null) && (AMetaData.Tags.Contains("Storage.TranslationString")))
+			if ((metaData != null) && (metaData.Tags.Contains("Storage.TranslationString")))
 				return 
 					new D4.ClassDefinition
 					(
 						"SQLDevice.SQLUserOperator", 
 						new D4.ClassAttributeDefinition[]
 						{
-							new D4.ClassAttributeDefinition("TranslationString", AMetaData.Tags["Storage.TranslationString"].Value),
-							new D4.ClassAttributeDefinition("ContextLiteralParameterIndexes", D4.MetaData.GetTag(AMetaData, "Storage.ContextLiteralParameterIndexes", ""))
+							new D4.ClassAttributeDefinition("TranslationString", metaData.Tags["Storage.TranslationString"].Value),
+							new D4.ClassAttributeDefinition("ContextLiteralParameterIndexes", D4.MetaData.GetTag(metaData, "Storage.ContextLiteralParameterIndexes", ""))
 						}
 					);
 			return null;
@@ -458,37 +458,37 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
 		
-		protected override void InternalRegister(ServerProcess AProcess)
+		protected override void InternalRegister(ServerProcess process)
 		{
-			base.InternalRegister(AProcess);
-			RegisterSystemObjectMaps(AProcess);
+			base.InternalRegister(process);
+			RegisterSystemObjectMaps(process);
 		}
 		
-		protected void RunScript(ServerProcess AProcess, string AScript)
+		protected void RunScript(ServerProcess process, string script)
 		{
 			// Note that this is also used to load the internal system catalog.
-			IServerScript LScript = ((IServerProcess)AProcess).PrepareScript(AScript);
+			IServerScript localScript = ((IServerProcess)process).PrepareScript(script);
 			try
 			{
-				LScript.Execute(null);
+				localScript.Execute(null);
 			}
 			finally
 			{
-				((IServerProcess)AProcess).UnprepareScript(LScript);
+				((IServerProcess)process).UnprepareScript(localScript);
 			}
 		}
 		
-		protected virtual void RegisterSystemObjectMaps(ServerProcess AProcess) {}
+		protected virtual void RegisterSystemObjectMaps(ServerProcess process) {}
 		
 		// Emitter
 		public virtual TextEmitter Emitter
 		{
 			get
 			{
-				SQLTextEmitter LEmitter = InternalCreateEmitter();
-				LEmitter.UseStatementTerminator = UseStatementTerminator;
-				LEmitter.UseQuotedIdentifiers = UseQuotedIdentifiers;					
-				return LEmitter;
+				SQLTextEmitter emitter = InternalCreateEmitter();
+				emitter.UseStatementTerminator = UseStatementTerminator;
+				emitter.UseQuotedIdentifiers = UseQuotedIdentifiers;					
+				return emitter;
 			}
 		}
 
@@ -498,42 +498,42 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		}
 
 		// Prepare		
-		protected override DevicePlan CreateDevicePlan(Plan APlan, PlanNode APlanNode)
+		protected override DevicePlan CreateDevicePlan(Plan plan, PlanNode planNode)
 		{
-			return new SQLDevicePlan(APlan, this, APlanNode);
+			return new SQLDevicePlan(plan, this, planNode);
 		}
 		
-		protected override DevicePlanNode InternalPrepare(DevicePlan APlan, PlanNode APlanNode)
+		protected override DevicePlanNode InternalPrepare(DevicePlan plan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)APlan;
-			LDevicePlan.DevicePlanNode = new SQLDevicePlanNode(APlanNode);
-			if (!((APlanNode is TableNode) || (APlanNode.DataType is Schema.IRowType)))
+			SQLDevicePlan devicePlan = (SQLDevicePlan)plan;
+			devicePlan.DevicePlanNode = new SQLDevicePlanNode(planNode);
+			if (!((planNode is TableNode) || (planNode.DataType is Schema.IRowType)))
 			{
-				LDevicePlan.PushScalarContext();
-				LDevicePlan.CurrentQueryContext().IsSelectClause = true;
+				devicePlan.PushScalarContext();
+				devicePlan.CurrentQueryContext().IsSelectClause = true;
 			}
 			try
 			{
-				if ((APlanNode.DataType != null) && APlanNode.DataType.Is(APlan.Plan.Catalog.DataTypes.SystemBoolean))
-					LDevicePlan.EnterContext(true);
+				if ((planNode.DataType != null) && planNode.DataType.Is(plan.Plan.Catalog.DataTypes.SystemBoolean))
+					devicePlan.EnterContext(true);
 				try
 				{
-					LDevicePlan.DevicePlanNode.Statement = Translate(LDevicePlan, APlanNode);
+					devicePlan.DevicePlanNode.Statement = Translate(devicePlan, planNode);
 
-					if (LDevicePlan.IsSupported)
+					if (devicePlan.IsSupported)
 					{
-						if (APlanNode.DataType != null)
+						if (planNode.DataType != null)
 						{
-							if (APlanNode.DataType.Is(APlan.Plan.Catalog.DataTypes.SystemBoolean))
+							if (planNode.DataType.Is(plan.Plan.Catalog.DataTypes.SystemBoolean))
 							{
-								LDevicePlan.DevicePlanNode.Statement =
+								devicePlan.DevicePlanNode.Statement =
 									new CaseExpression
 									(
 										new CaseItemExpression[]
 										{
 											new CaseItemExpression
 											(
-												(Expression)LDevicePlan.DevicePlanNode.Statement,
+												(Expression)devicePlan.DevicePlanNode.Statement,
 												new ValueExpression(1)
 											)
 										},
@@ -542,98 +542,98 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							}
 							
 							// Ensure that the statement is a unary select expression for the device Cursors...
-							if ((APlanNode is TableNode) && (LDevicePlan.DevicePlanNode.Statement is QueryExpression) && (((QueryExpression)LDevicePlan.DevicePlanNode.Statement).TableOperators.Count > 0))
-								LDevicePlan.DevicePlanNode.Statement = NestQueryExpression(LDevicePlan, ((TableNode)APlanNode).TableVar, LDevicePlan.DevicePlanNode.Statement);
+							if ((planNode is TableNode) && (devicePlan.DevicePlanNode.Statement is QueryExpression) && (((QueryExpression)devicePlan.DevicePlanNode.Statement).TableOperators.Count > 0))
+								devicePlan.DevicePlanNode.Statement = NestQueryExpression(devicePlan, ((TableNode)planNode).TableVar, devicePlan.DevicePlanNode.Statement);
 
-							if (!(LDevicePlan.DevicePlanNode.Statement is SelectStatement))
+							if (!(devicePlan.DevicePlanNode.Statement is SelectStatement))
 							{
-								if (!(LDevicePlan.DevicePlanNode.Statement is QueryExpression))
+								if (!(devicePlan.DevicePlanNode.Statement is QueryExpression))
 								{
-									if (!(LDevicePlan.DevicePlanNode.Statement is SelectExpression))
+									if (!(devicePlan.DevicePlanNode.Statement is SelectExpression))
 									{
-										SelectExpression LSelectExpression = new SelectExpression();
-										LSelectExpression.SelectClause = new SelectClause();
-										LSelectExpression.SelectClause.Columns.Add(new ColumnExpression((Expression)LDevicePlan.DevicePlanNode.Statement, "dummy1"));
-										LSelectExpression.FromClause = new CalculusFromClause(GetDummyTableSpecifier());
-										LDevicePlan.DevicePlanNode.Statement = LSelectExpression;
+										SelectExpression selectExpression = new SelectExpression();
+										selectExpression.SelectClause = new SelectClause();
+										selectExpression.SelectClause.Columns.Add(new ColumnExpression((Expression)devicePlan.DevicePlanNode.Statement, "dummy1"));
+										selectExpression.FromClause = new CalculusFromClause(GetDummyTableSpecifier());
+										devicePlan.DevicePlanNode.Statement = selectExpression;
 									}
 
-									QueryExpression LQueryExpression = new QueryExpression();
-									LQueryExpression.SelectExpression = (SelectExpression)LDevicePlan.DevicePlanNode.Statement;
-									LDevicePlan.DevicePlanNode.Statement = LQueryExpression;
+									QueryExpression queryExpression = new QueryExpression();
+									queryExpression.SelectExpression = (SelectExpression)devicePlan.DevicePlanNode.Statement;
+									devicePlan.DevicePlanNode.Statement = queryExpression;
 								}
 
-								SelectStatement LSelectStatement = new SelectStatement();
-								LSelectStatement.QueryExpression = (QueryExpression)LDevicePlan.DevicePlanNode.Statement;
-								LDevicePlan.DevicePlanNode.Statement = LSelectStatement;
+								SelectStatement selectStatement = new SelectStatement();
+								selectStatement.QueryExpression = (QueryExpression)devicePlan.DevicePlanNode.Statement;
+								devicePlan.DevicePlanNode.Statement = selectStatement;
 							}
 							
-							if (APlanNode is TableNode)
+							if (planNode is TableNode)
 							{
-								LDevicePlan.DevicePlanNode.Statement = TranslateOrder(LDevicePlan, (TableNode)APlanNode, (SelectStatement)LDevicePlan.DevicePlanNode.Statement);
-								if (!LDevicePlan.IsSupported)
+								devicePlan.DevicePlanNode.Statement = TranslateOrder(devicePlan, (TableNode)planNode, (SelectStatement)devicePlan.DevicePlanNode.Statement);
+								if (!devicePlan.IsSupported)
 									return null;
 							}
 						}
 								
-						return LDevicePlan.DevicePlanNode;
+						return devicePlan.DevicePlanNode;
 					}
 
 					return null;
 				}
 				finally
 				{
-					if ((APlanNode.DataType != null) && APlanNode.DataType.Is(APlan.Plan.Catalog.DataTypes.SystemBoolean))
-						LDevicePlan.ExitContext();
+					if ((planNode.DataType != null) && planNode.DataType.Is(plan.Plan.Catalog.DataTypes.SystemBoolean))
+						devicePlan.ExitContext();
 				}
 			}
 			finally
 			{
-				if (!(APlanNode is TableNode))
-					LDevicePlan.PopScalarContext();
+				if (!(planNode is TableNode))
+					devicePlan.PopScalarContext();
 			}
 		}
 
-		public virtual void DetermineCursorBehavior(Plan APlan, TableNode ATableNode)
+		public virtual void DetermineCursorBehavior(Plan plan, TableNode tableNode)
 		{
-			ATableNode.RequestedCursorType = APlan.CursorContext.CursorType;
-			ATableNode.CursorType = APlan.CursorContext.CursorType;
-			ATableNode.CursorCapabilities = 
+			tableNode.RequestedCursorType = plan.CursorContext.CursorType;
+			tableNode.CursorType = plan.CursorContext.CursorType;
+			tableNode.CursorCapabilities = 
 				CursorCapability.Navigable | 
-				(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
-			ATableNode.CursorIsolation = APlan.CursorContext.CursorIsolation;
+				(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
+			tableNode.CursorIsolation = plan.CursorContext.CursorIsolation;
 			
 			// Ensure that the node has an order that is a superset of some key
-			Schema.Key LClusteringKey = Compiler.FindClusteringKey(APlan, ATableNode.TableVar);
-			if ((ATableNode.Order == null) && (LClusteringKey.Columns.Count > 0))
-				ATableNode.Order = Compiler.OrderFromKey(APlan, LClusteringKey);
+			Schema.Key clusteringKey = Compiler.FindClusteringKey(plan, tableNode.TableVar);
+			if ((tableNode.Order == null) && (clusteringKey.Columns.Count > 0))
+				tableNode.Order = Compiler.OrderFromKey(plan, clusteringKey);
 
-			if (ATableNode.Order != null)
+			if (tableNode.Order != null)
 			{
 				// Ensure that the order is unique
-				bool LOrderUnique = false;	
-				Schema.OrderColumn LNewColumn;
+				bool orderUnique = false;	
+				Schema.OrderColumn newColumn;
 
-				foreach (Schema.Key LKey in ATableNode.TableVar.Keys)
-					if (Compiler.OrderIncludesKey(APlan, ATableNode.Order, LKey))
+				foreach (Schema.Key key in tableNode.TableVar.Keys)
+					if (Compiler.OrderIncludesKey(plan, tableNode.Order, key))
 					{
-						LOrderUnique = true;
+						orderUnique = true;
 						break;
 					}
 
-				if (!LOrderUnique)
-					foreach (Schema.TableVarColumn LColumn in Compiler.FindClusteringKey(APlan, ATableNode.TableVar).Columns)
-						if (!ATableNode.Order.Columns.Contains(LColumn.Name))
+				if (!orderUnique)
+					foreach (Schema.TableVarColumn column in Compiler.FindClusteringKey(plan, tableNode.TableVar).Columns)
+						if (!tableNode.Order.Columns.Contains(column.Name))
 						{
-							LNewColumn = new Schema.OrderColumn(LColumn, true);
-							LNewColumn.Sort = Compiler.GetSort(APlan, LColumn.DataType);
-							LNewColumn.IsDefaultSort = true;
-							ATableNode.Order.Columns.Add(LNewColumn);
+							newColumn = new Schema.OrderColumn(column, true);
+							newColumn.Sort = Compiler.GetSort(plan, column.DataType);
+							newColumn.IsDefaultSort = true;
+							tableNode.Order.Columns.Add(newColumn);
 						}
 						else 
 						{
-							if (!System.Object.ReferenceEquals(ATableNode.Order.Columns[LColumn.Name].Sort, ((ScalarType)ATableNode.Order.Columns[LColumn.Name].Column.DataType).UniqueSort))
-								ATableNode.Order.Columns[LColumn.Name].Sort = Compiler.GetUniqueSort(APlan, (ScalarType)LColumn.DataType);
+							if (!System.Object.ReferenceEquals(tableNode.Order.Columns[column.Name].Sort, ((ScalarType)tableNode.Order.Columns[column.Name].Column.DataType).UniqueSort))
+								tableNode.Order.Columns[column.Name].Sort = Compiler.GetUniqueSort(plan, (ScalarType)column.DataType);
 						}
 			}
 		}
@@ -641,70 +641,70 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		/// <summary>
 		/// This method returns a valid identifier for the specific SQL system in which it is called.  If overloaded, it must be completely deterministic.
 		/// </summary>
-		/// <param name="AIdentifier">The identifier to check</param>
+		/// <param name="identifier">The identifier to check</param>
 		/// <returns>A valid identifier, based as close as possible to AIdentifier</returns>
-		public string EnsureValidIdentifier(string AIdentifier)
+		public string EnsureValidIdentifier(string identifier)
 		{
-			return EnsureValidIdentifier(AIdentifier, FMaxIdentifierLength);
+			return EnsureValidIdentifier(identifier, _maxIdentifierLength);
 		}
 
-		public virtual unsafe string EnsureValidIdentifier(string AIdentifier, int AMaxLength)
+		public virtual unsafe string EnsureValidIdentifier(string identifier, int maxLength)
 		{
 			// first check to see if it is not reserved
-			if (IsReservedWord(AIdentifier))
+			if (IsReservedWord(identifier))
 			{
-				AIdentifier += "_DAE";
+				identifier += "_DAE";
 			}
 			
 			// Replace all double underscores with triple underscores
-			AIdentifier = AIdentifier.Replace("__", "___");
+			identifier = identifier.Replace("__", "___");
 
 			// Replace all qualifiers with double underscores
-			AIdentifier = AIdentifier.Replace(".", "__");
+			identifier = identifier.Replace(".", "__");
 
 			// then check to see if it has a name longer than AMaxLength characters
-			if (AIdentifier.Length > AMaxLength)
+			if (identifier.Length > maxLength)
 			{
-				byte[] LByteArray = new byte[4];
-				fixed (byte* LArray = &LByteArray[0])
+				byte[] byteArray = new byte[4];
+				fixed (byte* array = &byteArray[0])
 				{
-					*((int*)LArray) = AIdentifier.GetHashCode();
+					*((int*)array) = identifier.GetHashCode();
 				}
-				string LString = Convert.ToBase64String(LByteArray);
-				AIdentifier = AIdentifier.Substring(0, AMaxLength - LString.Length) + LString;
+				string stringValue = Convert.ToBase64String(byteArray);
+				identifier = identifier.Substring(0, maxLength - stringValue.Length) + stringValue;
 			}
 
 			// replace invalid characters
-			AIdentifier = AIdentifier.Replace("+", "_");
-			AIdentifier = AIdentifier.Replace("/", "_");
-			AIdentifier = AIdentifier.Replace("=", "_");
-			return AIdentifier;
+			identifier = identifier.Replace("+", "_");
+			identifier = identifier.Replace("/", "_");
+			identifier = identifier.Replace("=", "_");
+			return identifier;
 		}
 
-		protected virtual bool IsReservedWord(string AWord) { return false; }
+		protected virtual bool IsReservedWord(string word) { return false; }
 
-		public string ToSQLIdentifier(string AIdentifier)
+		public string ToSQLIdentifier(string identifier)
 		{
-			return EnsureValidIdentifier(AIdentifier);
+			return EnsureValidIdentifier(identifier);
 		}
 		
-		public virtual string ToSQLIdentifier(string AIdentifier, D4.MetaData AMetaData)
+		public virtual string ToSQLIdentifier(string identifier, D4.MetaData metaData)
 		{
-			return D4.MetaData.GetTag(AMetaData, "Storage.Name", ToSQLIdentifier(AIdentifier));
+			return D4.MetaData.GetTag(metaData, "Storage.Name", ToSQLIdentifier(identifier));
 		}
 		
 		//public virtual string ToSQLIdentifier(string AIdentifier, D4.MetaData AMetaData)
-		public virtual string ToSQLIdentifier(Schema.Object AObject)
+		public virtual string ToSQLIdentifier(Schema.Object objectValue)
 		{
-			if ((AObject is CatalogObject) && (((CatalogObject)AObject).Library != null) && !UseQualifiedNames)
-				return ToSQLIdentifier(DAE.Schema.Object.RemoveQualifier(AObject.Name, ((CatalogObject)AObject).Library.Name), AObject.MetaData);
+			if ((objectValue is CatalogObject) && (((CatalogObject)objectValue).Library != null) && !UseQualifiedNames)
+				return ToSQLIdentifier(DAE.Schema.Object.RemoveQualifier(objectValue.Name, ((CatalogObject)objectValue).Library.Name), objectValue.MetaData);
 			else
-				return ToSQLIdentifier(AObject.Name, AObject.MetaData);
+				return ToSQLIdentifier(objectValue.Name, objectValue.MetaData);
 		}
 
-		public virtual string ConvertNonIdentifierCharacter(char AInvalidChar)
+		public virtual string ConvertNonIdentifierCharacter(char invalidChar)
 		{
-			switch (AInvalidChar)
+			switch (invalidChar)
 			{
 				case '#' : return "POUND";
 				case '~' : return "TILDE";
@@ -721,31 +721,31 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				case '\\' : return "BSLASH";
 				case '/' : return "FSLASH";
 				case '`' : return "ACCENT";
-				default : return Convert.ToUInt16(AInvalidChar).ToString();
+				default : return Convert.ToUInt16(invalidChar).ToString();
 			}
 		}
 
-		public virtual string FromSQLIdentifier(string AIdentifier)
+		public virtual string FromSQLIdentifier(string identifier)
 		{
-			StringBuilder LIdentifier = new StringBuilder();
-			for (int LIndex = 0; LIndex < AIdentifier.Length; LIndex++)
-				if (!Char.IsLetterOrDigit(AIdentifier[LIndex]) && (AIdentifier[LIndex] != '_'))
-					LIdentifier.Append(ConvertNonIdentifierCharacter(AIdentifier[LIndex]));
+			StringBuilder localIdentifier = new StringBuilder();
+			for (int index = 0; index < identifier.Length; index++)
+				if (!Char.IsLetterOrDigit(identifier[index]) && (identifier[index] != '_'))
+					localIdentifier.Append(ConvertNonIdentifierCharacter(identifier[index]));
 				else
-					LIdentifier.Append(AIdentifier[LIndex]);
-			AIdentifier = LIdentifier.ToString();
+					localIdentifier.Append(identifier[index]);
+			identifier = localIdentifier.ToString();
 
-			if (D4.ReservedWords.Contains(AIdentifier) || ((AIdentifier.Length > 0) && Char.IsDigit(AIdentifier[0])))
-				AIdentifier = String.Format("_{0}", AIdentifier);
-			return AIdentifier;
+			if (D4.ReservedWords.Contains(identifier) || ((identifier.Length > 0) && Char.IsDigit(identifier[0])))
+				identifier = String.Format("_{0}", identifier);
+			return identifier;
 		}
 		
-		public virtual SelectExpression FindSelectExpression(Statement AStatement)
+		public virtual SelectExpression FindSelectExpression(Statement statement)
 		{
-			if (AStatement is QueryExpression)
-				return ((QueryExpression)AStatement).SelectExpression;
-			else if (AStatement is SelectExpression)
-				return (SelectExpression)AStatement;
+			if (statement is QueryExpression)
+				return ((QueryExpression)statement).SelectExpression;
+			else if (statement is SelectExpression)
+				return (SelectExpression)statement;
 			else
 				throw new SQLException(SQLException.Codes.InvalidStatementClass);
 		}
@@ -753,236 +753,265 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		/// <remarks> In some contexts (such as an add) it is desireable to nest contexts to avoid duplicating entire 
 		/// extend expressions.  Such contexts should pass true to ANestIfSupported.  Theoretically, each such context
 		/// could detect references to the introduced columns before nesting, but for now their presence is used. </remarks>
-		public virtual SelectExpression EnsureUnarySelectExpression(SQLDevicePlan ADevicePlan, TableVar ATableVar, Statement AStatement, bool ANestIfSupported)
+		public virtual SelectExpression EnsureUnarySelectExpression(SQLDevicePlan devicePlan, TableVar tableVar, Statement statement, bool nestIfSupported)
 		{
-			if ((AStatement is QueryExpression) && (((QueryExpression)AStatement).TableOperators.Count > 0))
-				return NestQueryExpression(ADevicePlan, ATableVar, AStatement);
-			else if (ANestIfSupported && ADevicePlan.Device.SupportsNestedFrom && (ADevicePlan.CurrentQueryContext().AddedColumns.Count > 0))
+			if ((statement is QueryExpression) && (((QueryExpression)statement).TableOperators.Count > 0))
+				return NestQueryExpression(devicePlan, tableVar, statement);
+			else if (nestIfSupported && devicePlan.Device.SupportsNestedFrom && (devicePlan.CurrentQueryContext().AddedColumns.Count > 0))
 			{
-				ADevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("The query is being nested to avoid unnecessary repetition of column expressions."));
-				return NestQueryExpression(ADevicePlan, ATableVar, AStatement);
+				devicePlan.TranslationMessages.Add(new Schema.TranslationMessage("The query is being nested to avoid unnecessary repetition of column expressions."));
+				return NestQueryExpression(devicePlan, tableVar, statement);
 			}
 			else
-				return FindSelectExpression(AStatement);
+				return FindSelectExpression(statement);
 		}
 
-		public virtual SelectExpression NestQueryExpression(SQLDevicePlan ADevicePlan, TableVar ATableVar, Statement AStatement)
+		public virtual SelectExpression NestQueryExpression(SQLDevicePlan devicePlan, TableVar tableVar, Statement statement)
 		{
-			if (!ADevicePlan.Device.SupportsNestedFrom)
+			if (!devicePlan.Device.SupportsNestedFrom)
 			{
-				ADevicePlan.IsSupported = false;
-				ADevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the device does not support nesting in the from clause."));
+				devicePlan.IsSupported = false;
+				devicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the device does not support nesting in the from clause."));
 			}
 			
-			if (((ADevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasCorrelation) != 0) && !ADevicePlan.Device.SupportsNestedCorrelation)
+			if (((devicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasCorrelation) != 0) && !devicePlan.Device.SupportsNestedCorrelation)
 			{
-				ADevicePlan.IsSupported = false;
-				ADevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the device does not support nested correlation."));
+				devicePlan.IsSupported = false;
+				devicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the device does not support nested correlation."));
 			}
 				
-			SQLRangeVar LRangeVar = new SQLRangeVar(ADevicePlan.GetNextTableAlias());
-			foreach (TableVarColumn LColumn in ATableVar.Columns)
+			SQLRangeVar rangeVar = new SQLRangeVar(devicePlan.GetNextTableAlias());
+			foreach (TableVarColumn column in tableVar.Columns)
 			{
-				SQLRangeVarColumn LNestedRangeVarColumn = ADevicePlan.CurrentQueryContext().GetRangeVarColumn(LColumn.Name);
-				SQLRangeVarColumn LRangeVarColumn = new SQLRangeVarColumn(LColumn, LRangeVar.Name, LNestedRangeVarColumn.Alias);
-				LRangeVar.Columns.Add(LRangeVarColumn);
+				SQLRangeVarColumn nestedRangeVarColumn = devicePlan.CurrentQueryContext().GetRangeVarColumn(column.Name);
+				SQLRangeVarColumn rangeVarColumn = new SQLRangeVarColumn(column, rangeVar.Name, nestedRangeVarColumn.Alias);
+				rangeVar.Columns.Add(rangeVarColumn);
 			}
 			
-			ADevicePlan.PopQueryContext();
-			ADevicePlan.PushQueryContext();
+			devicePlan.PopQueryContext();
+			devicePlan.PushQueryContext();
 			
-			ADevicePlan.CurrentQueryContext().RangeVars.Add(LRangeVar);
-			SelectExpression LSelectExpression = ADevicePlan.Device.FindSelectExpression(AStatement);
+			devicePlan.CurrentQueryContext().RangeVars.Add(rangeVar);
+			SelectExpression selectExpression = devicePlan.Device.FindSelectExpression(statement);
 
-			SelectExpression LNewSelectExpression = new SelectExpression();
-			if (LSelectExpression.FromClause is AlgebraicFromClause)
-				LNewSelectExpression.FromClause = new AlgebraicFromClause(new TableSpecifier((Expression)AStatement, LRangeVar.Name));
+			SelectExpression newSelectExpression = new SelectExpression();
+			if (selectExpression.FromClause is AlgebraicFromClause)
+				newSelectExpression.FromClause = new AlgebraicFromClause(new TableSpecifier((Expression)statement, rangeVar.Name));
 			else
-				LNewSelectExpression.FromClause = new CalculusFromClause(new TableSpecifier((Expression)AStatement, LRangeVar.Name));
+				newSelectExpression.FromClause = new CalculusFromClause(new TableSpecifier((Expression)statement, rangeVar.Name));
 				
-			LNewSelectExpression.SelectClause = new SelectClause();
-			foreach (TableVarColumn LColumn in ATableVar.Columns)
-				LNewSelectExpression.SelectClause.Columns.Add(ADevicePlan.CurrentQueryContext().GetRangeVarColumn(LColumn.Name).GetColumnExpression());
+			newSelectExpression.SelectClause = new SelectClause();
+			foreach (TableVarColumn column in tableVar.Columns)
+				newSelectExpression.SelectClause.Columns.Add(devicePlan.CurrentQueryContext().GetRangeVarColumn(column.Name).GetColumnExpression());
 
-			return LNewSelectExpression;
+			return newSelectExpression;
 		}
 		
-		protected virtual Statement FromScalar(SQLDevicePlan ADevicePlan, PlanNode APlanNode)
+		protected virtual Statement FromScalar(SQLDevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLScalarType LScalarType = (SQLScalarType)ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType);
+			SQLScalarType scalarType = (SQLScalarType)ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType);
 			
-			if (APlanNode.IsLiteral && APlanNode.IsDeterministic && !LScalarType.UseParametersForLiterals)
+			if (planNode.IsLiteral && planNode.IsDeterministic && !scalarType.UseParametersForLiterals)
 			{
-				object LValue = ADevicePlan.Plan.EvaluateLiteralArgument(APlanNode, APlanNode.Description);
+				object tempValue = devicePlan.Plan.EvaluateLiteralArgument(planNode, planNode.Description);
 				
-				Expression LValueExpression = null;
-				if (LValue == null)
-					LValueExpression = new CastExpression(new ValueExpression(null, TokenType.Nil), LScalarType.ParameterDomainName());
+				Expression valueExpression = null;
+				if (tempValue == null)
+					valueExpression = new CastExpression(new ValueExpression(null, TokenType.Nil), scalarType.ParameterDomainName());
 				else
-					LValueExpression = new ValueExpression(LScalarType.ParameterFromScalar(ADevicePlan.Plan.ValueManager, LValue));
+					valueExpression = new ValueExpression(scalarType.ParameterFromScalar(devicePlan.Plan.ValueManager, tempValue));
 				
-				if (APlanNode.DataType.Is(ADevicePlan.Plan.Catalog.DataTypes.SystemBoolean) && ADevicePlan.IsBooleanContext())
-					return new BinaryExpression(new ValueExpression(1), "iEqual", LValueExpression);
+				if (planNode.DataType.Is(devicePlan.Plan.Catalog.DataTypes.SystemBoolean) && devicePlan.IsBooleanContext())
+					return new BinaryExpression(new ValueExpression(1), "iEqual", valueExpression);
 				else
-					return LValueExpression;
+					return valueExpression;
 			}
 			else
 			{
-				string LParameterName = String.Format("P{0}", ADevicePlan.DevicePlanNode.PlanParameters.Count + 1);
-				SQLPlanParameter LPlanParameter = 
+				string parameterName = String.Format("P{0}", devicePlan.DevicePlanNode.PlanParameters.Count + 1);
+				SQLPlanParameter planParameter = 
 					new SQLPlanParameter
 					(
 						new SQLParameter
 						(
-							LParameterName, 
-							LScalarType.GetSQLParameterType(), 
+							parameterName, 
+							scalarType.GetSQLParameterType(), 
 							null, 
 							SQLDirection.In, 
-							GetParameterMarker(LScalarType)
+							GetParameterMarker(scalarType)
 						), 
-						APlanNode
+						planNode
 					);
-				ADevicePlan.DevicePlanNode.PlanParameters.Add(LPlanParameter);
-				ADevicePlan.CurrentQueryContext().ReferenceFlags |= SQLReferenceFlags.HasParameters;
-				if (APlanNode.DataType.Is(ADevicePlan.Plan.Catalog.DataTypes.SystemBoolean) && ADevicePlan.IsBooleanContext())
-					return new BinaryExpression(new ValueExpression(1), "iEqual", new QueryParameterExpression(LParameterName));
+				devicePlan.DevicePlanNode.PlanParameters.Add(planParameter);
+				devicePlan.CurrentQueryContext().ReferenceFlags |= SQLReferenceFlags.HasParameters;
+				if (planNode.DataType.Is(devicePlan.Plan.Catalog.DataTypes.SystemBoolean) && devicePlan.IsBooleanContext())
+					return new BinaryExpression(new ValueExpression(1), "iEqual", new QueryParameterExpression(parameterName));
 				else
-					return new QueryParameterExpression(LParameterName);
+					return new QueryParameterExpression(parameterName);
 			}
 		}
 
-		public string GetParameterMarker(SQLScalarType AScalarType, TableVarColumn AColumn)
+		public string GetParameterMarker(SQLScalarType scalarType, TableVarColumn column)
 		{
-			return GetParameterMarker(AScalarType, AColumn.MetaData);
+			return GetParameterMarker(scalarType, column.MetaData);
 		}
 
-		public string GetParameterMarker(SQLScalarType AScalarType)
+		public string GetParameterMarker(SQLScalarType scalarType)
 		{
-			return GetParameterMarker(AScalarType, (D4.MetaData)null);
+			return GetParameterMarker(scalarType, (D4.MetaData)null);
 		}		
 		
-		public virtual string GetParameterMarker(SQLScalarType AScalarType, D4.MetaData AMetaData)
+		public virtual string GetParameterMarker(SQLScalarType scalarType, D4.MetaData metaData)
 		{
 			return null;
 		}
 		
-		protected virtual Statement TranslateStackReference(SQLDevicePlan ADevicePlan, StackReferenceNode ANode)
+		protected virtual Statement TranslateStackReference(SQLDevicePlan devicePlan, StackReferenceNode node)
 		{
-			return FromScalar(ADevicePlan, new StackReferenceNode(ANode.DataType, ANode.Location - ADevicePlan.Stack.Count));
+			return FromScalar(devicePlan, new StackReferenceNode(node.DataType, node.Location - devicePlan.Stack.Count));
 		}
 		
-		protected virtual Statement TranslateStackColumnReference(SQLDevicePlan ADevicePlan, StackColumnReferenceNode ANode)
+		protected virtual Statement TranslateStackColumnReference(SQLDevicePlan devicePlan, StackColumnReferenceNode node)
 		{
 			// If this is referencing an item on the device plan stack, translate as an identifier,
 			// otherwise, translate as a query parameter
-			if (ANode.Location < ADevicePlan.Stack.Count)
+			if (node.Location < devicePlan.Stack.Count)
 			{
-				Expression LExpression = new QualifiedFieldExpression();
-				SQLRangeVarColumn LRangeVarColumn = null;
+				Expression expression = new QualifiedFieldExpression();
+				SQLRangeVarColumn rangeVarColumn = null;
 
-				if (DAE.Schema.Object.Qualifier(ANode.Identifier) == Keywords.Left)
-					LRangeVarColumn = ADevicePlan.CurrentJoinContext().LeftQueryContext.FindRangeVarColumn(DAE.Schema.Object.Dequalify(ANode.Identifier));
-				else if (DAE.Schema.Object.Qualifier(ANode.Identifier) == Keywords.Right)
-					LRangeVarColumn = ADevicePlan.CurrentJoinContext().RightQueryContext.FindRangeVarColumn(DAE.Schema.Object.Dequalify(ANode.Identifier));
+				if (DAE.Schema.Object.Qualifier(node.Identifier) == Keywords.Left)
+					rangeVarColumn = devicePlan.CurrentJoinContext().LeftQueryContext.FindRangeVarColumn(DAE.Schema.Object.Dequalify(node.Identifier));
+				else if (DAE.Schema.Object.Qualifier(node.Identifier) == Keywords.Right)
+					rangeVarColumn = devicePlan.CurrentJoinContext().RightQueryContext.FindRangeVarColumn(DAE.Schema.Object.Dequalify(node.Identifier));
 				else
-					LRangeVarColumn = ADevicePlan.FindRangeVarColumn(ANode.Identifier, false);
+					rangeVarColumn = devicePlan.FindRangeVarColumn(node.Identifier, false);
 
-				if (LRangeVarColumn == null)
+				if (rangeVarColumn == null)
 				{
-					ADevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the reference to column ""{0}"" is out of context.", ANode.Identifier), ANode));
-					ADevicePlan.IsSupported = false;
+					devicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the reference to column ""{0}"" is out of context.", node.Identifier), node));
+					devicePlan.IsSupported = false;
 				}
 				else
-					LExpression = LRangeVarColumn.GetExpression();
+					expression = rangeVarColumn.GetExpression();
 				
-				if (ADevicePlan.IsBooleanContext())
-					return new BinaryExpression(LExpression, "iEqual", new ValueExpression(1)); // <> 0 is more robust, but = 1 is potentially more efficient
+				if (devicePlan.IsBooleanContext())
+					return new BinaryExpression(expression, "iEqual", new ValueExpression(1)); // <> 0 is more robust, but = 1 is potentially more efficient
 
-				return LExpression;
+				return expression;
 			}
 			else
 			{
 				#if USECOLUMNLOCATIONBINDING
 				return FromScalar(ADevicePlan, new StackColumnReferenceNode(ANode.Identifier, ANode.DataType, ANode.Location - ADevicePlan.Stack.Count, ANode.ColumnLocation));
 				#else
-				return FromScalar(ADevicePlan, new StackColumnReferenceNode(ANode.Identifier, ANode.DataType, ANode.Location - ADevicePlan.Stack.Count));
+				return FromScalar(devicePlan, new StackColumnReferenceNode(node.Identifier, node.DataType, node.Location - devicePlan.Stack.Count));
 				#endif
 			}
 		}
 
-		protected virtual Statement TranslateExtractColumnNode(SQLDevicePlan ADevicePlan, ExtractColumnNode ANode)
+		protected virtual Statement TranslateExtractColumnNode(SQLDevicePlan devicePlan, ExtractColumnNode node)
 		{
-			if (ANode.Nodes[0] is StackReferenceNode)
-				return FromScalar(ADevicePlan, new StackColumnReferenceNode(ANode.Identifier, ANode.DataType, ((StackReferenceNode)ANode.Nodes[0]).Location - ADevicePlan.Stack.Count));
+			StackReferenceNode sourceNode = node.Nodes[0] as StackReferenceNode;
+			if (sourceNode != null)
+			{
+				if (sourceNode.Location < devicePlan.Stack.Count)
+				{
+					Expression expression = new QualifiedFieldExpression();
+					SQLRangeVarColumn rangeVarColumn = null;
+					
+					if (DAE.Schema.Object.EnsureUnrooted(sourceNode.Identifier) == Keywords.Left)
+						rangeVarColumn = devicePlan.CurrentJoinContext().LeftQueryContext.FindRangeVarColumn(node.Identifier);
+					else if (DAE.Schema.Object.EnsureUnrooted(sourceNode.Identifier) == Keywords.Right)
+						rangeVarColumn = devicePlan.CurrentJoinContext().RightQueryContext.FindRangeVarColumn(node.Identifier);
+					else
+						rangeVarColumn = devicePlan.FindRangeVarColumn(DAE.Schema.Object.Qualify(node.Identifier, sourceNode.Identifier), false);
+
+					if (rangeVarColumn == null)
+					{
+						devicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the reference to column ""{0}"" is out of context.", node.Identifier), node));
+						devicePlan.IsSupported = false;
+					}
+					else
+						expression = rangeVarColumn.GetExpression();
+					
+					if (devicePlan.IsBooleanContext())
+						return new BinaryExpression(expression, "iEqual", new ValueExpression(1)); // <> 0 is more robust, but = 1 is potentially more efficient
+
+					return expression;
+				}
+				else
+					return FromScalar(devicePlan, new StackColumnReferenceNode(node.Identifier, node.DataType, sourceNode.Location - devicePlan.Stack.Count));
+			}
 			else
 			{
-				Statement LStatement = Translate(ADevicePlan, ANode.Nodes[0]);
-				if (ADevicePlan.IsSupported)
+				Statement statement = Translate(devicePlan, node.Nodes[0]);
+				if (devicePlan.IsSupported)
 				{
-					SelectExpression LExpression = FindSelectExpression(LStatement);
-					ColumnExpression LColumnExpression = LExpression.SelectClause.Columns[ToSQLIdentifier(((Schema.IRowType)ANode.Nodes[0].DataType).Columns[ANode.Identifier].Name)];
-					LExpression.SelectClause.Columns.Clear();
-					LExpression.SelectClause.Columns.Add(LColumnExpression);
+					SelectExpression expression = FindSelectExpression(statement);
+					ColumnExpression columnExpression = expression.SelectClause.Columns[ToSQLIdentifier(((Schema.IRowType)node.Nodes[0].DataType).Columns[node.Identifier].Name)];
+					expression.SelectClause.Columns.Clear();
+					expression.SelectClause.Columns.Add(columnExpression);
 
-					if (ANode.DataType.Is(ADevicePlan.Plan.Catalog.DataTypes.SystemBoolean))
-						if (!ADevicePlan.IsBooleanContext())
-							LStatement =
+					if (node.DataType.Is(devicePlan.Plan.Catalog.DataTypes.SystemBoolean))
+						if (!devicePlan.IsBooleanContext())
+							statement =
 								new CaseExpression
 								(
 									new CaseItemExpression[]
 									{
 										new CaseItemExpression
 										(
-											(Expression)LStatement,
+											(Expression)statement,
 											new ValueExpression(1)
 										)
 									}, 
 									new CaseElseExpression(new ValueExpression(0))
 								);
 						else
-							LStatement = new BinaryExpression((Expression)LStatement, "iEqual", new ValueExpression(1));
+							statement = new BinaryExpression((Expression)statement, "iEqual", new ValueExpression(1));
 				}
 
-				return LStatement;
+				return statement;
 			}
 		}
         
-		protected virtual Statement TranslateExtractRowNode(SQLDevicePlan ADevicePlan, ExtractRowNode ANode)
+		protected virtual Statement TranslateExtractRowNode(SQLDevicePlan devicePlan, ExtractRowNode node)
 		{
 			// Row extraction cannot be supported unless each column in the row being extracted has a map for equality comparison. Otherwise, the SQL Server
 			// will complain that the 'blob column' cannot be used the given context (such as a subquery).
-			foreach (Schema.Column LColumn in ((Schema.IRowType)ANode.DataType).Columns)
-				if (!SupportsEqual(ADevicePlan.Plan, LColumn.DataType))
+			foreach (Schema.Column column in ((Schema.IRowType)node.DataType).Columns)
+				if (!SupportsEqual(devicePlan.Plan, column.DataType))
 				{
-					ADevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not support equality comparison for values of type ""{0}"" for column ""{1}"".", LColumn.DataType.Name, LColumn.Name), ANode));
-					ADevicePlan.IsSupported = false;
+					devicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not support equality comparison for values of type ""{0}"" for column ""{1}"".", column.DataType.Name, column.Name), node));
+					devicePlan.IsSupported = false;
 					return new CallExpression();
 				}
 				
-			return TranslateExpression(ADevicePlan, ANode.Nodes[0], false);
+			return TranslateExpression(devicePlan, node.Nodes[0], false);
 		}
         
-		protected virtual Statement TranslateValueNode(SQLDevicePlan ADevicePlan, ValueNode ANode)
+		protected virtual Statement TranslateValueNode(SQLDevicePlan devicePlan, ValueNode node)
 		{
-			if (ANode.DataType.IsGeneric && ((ANode.Value == null) || (ANode.Value == DBNull.Value)))	
+			if (node.DataType.IsGeneric && ((node.Value == null) || (node.Value == DBNull.Value)))	
 				return new ValueExpression(null);
-			return FromScalar(ADevicePlan, ANode);
+			return FromScalar(devicePlan, node);
 		}
 		
-		protected virtual Statement TranslateAsNode(SQLDevicePlan ADevicePlan, AsNode ANode)
+		protected virtual Statement TranslateAsNode(SQLDevicePlan devicePlan, AsNode node)
 		{
-			return new CastExpression((Expression)Translate(ADevicePlan, ANode.Nodes[0]), ((SQLScalarType)ADevicePlan.Device.ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)ANode.DataType)).ParameterDomainName());
+			return new CastExpression((Expression)Translate(devicePlan, node.Nodes[0]), ((SQLScalarType)devicePlan.Device.ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)node.DataType)).ParameterDomainName());
 		}
         
-		public virtual Expression TranslateExpression(SQLDevicePlan ADevicePlan, PlanNode ANode, bool AIsBooleanContext)
+		public virtual Expression TranslateExpression(SQLDevicePlan devicePlan, PlanNode node, bool isBooleanContext)
 		{
-			ADevicePlan.EnterContext(AIsBooleanContext);
+			devicePlan.EnterContext(isBooleanContext);
 			try
 			{
-				if (!AIsBooleanContext && ANode.DataType.Is(ADevicePlan.Plan.Catalog.DataTypes.SystemBoolean))
+				if (!isBooleanContext && node.DataType.Is(devicePlan.Plan.Catalog.DataTypes.SystemBoolean))
 				{	
 					// case when <expression> then 1 else 0 end
-					ADevicePlan.EnterContext(true);
+					devicePlan.EnterContext(true);
 					try
 					{
 						return
@@ -992,7 +1021,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								{
 									new CaseItemExpression
 									(
-										(Expression)Translate(ADevicePlan, ANode), 
+										(Expression)Translate(devicePlan, node), 
 										new ValueExpression(1)
 									)
 								}, 
@@ -1001,19 +1030,19 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					}
 					finally
 					{
-						ADevicePlan.ExitContext();
+						devicePlan.ExitContext();
 					}
 				}
 				else
-					return (Expression)Translate(ADevicePlan, ANode);
+					return (Expression)Translate(devicePlan, node);
 			}
 			finally
 			{
-				ADevicePlan.ExitContext();
+				devicePlan.ExitContext();
 			}
 		}
 		
-		protected virtual Statement TranslateConditionNode(SQLDevicePlan ADevicePlan, ConditionNode ANode)
+		protected virtual Statement TranslateConditionNode(SQLDevicePlan devicePlan, ConditionNode node)
 		{
 			return
 				new CaseExpression
@@ -1022,834 +1051,834 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					{
 						new CaseItemExpression
 						(
-							TranslateExpression(ADevicePlan, ANode.Nodes[0], true),
-							TranslateExpression(ADevicePlan, ANode.Nodes[1], false)
+							TranslateExpression(devicePlan, node.Nodes[0], true),
+							TranslateExpression(devicePlan, node.Nodes[1], false)
 						)
 					},
-					new CaseElseExpression(TranslateExpression(ADevicePlan, ANode.Nodes[2], false))
+					new CaseElseExpression(TranslateExpression(devicePlan, node.Nodes[2], false))
 				);
 		}
 		
-		protected virtual Statement TranslateConditionedCaseNode(SQLDevicePlan ADevicePlan, ConditionedCaseNode ANode)
+		protected virtual Statement TranslateConditionedCaseNode(SQLDevicePlan devicePlan, ConditionedCaseNode node)
 		{
-			CaseExpression LCaseExpression = new CaseExpression();
-			foreach (ConditionedCaseItemNode LNode in ANode.Nodes)
+			CaseExpression caseExpression = new CaseExpression();
+			foreach (ConditionedCaseItemNode localNode in node.Nodes)
 			{
-				if (LNode.Nodes.Count == 2)
-					LCaseExpression.CaseItems.Add
+				if (localNode.Nodes.Count == 2)
+					caseExpression.CaseItems.Add
 					(
 						new CaseItemExpression
 						(
-							TranslateExpression(ADevicePlan, LNode.Nodes[0], true),
-							TranslateExpression(ADevicePlan, LNode.Nodes[1], false)
+							TranslateExpression(devicePlan, localNode.Nodes[0], true),
+							TranslateExpression(devicePlan, localNode.Nodes[1], false)
 						)
 					);
 				else
-					LCaseExpression.ElseExpression = new CaseElseExpression(TranslateExpression(ADevicePlan, LNode.Nodes[0], false));
+					caseExpression.ElseExpression = new CaseElseExpression(TranslateExpression(devicePlan, localNode.Nodes[0], false));
 			}
-			return LCaseExpression;
+			return caseExpression;
 		}
 		
-		protected virtual Statement TranslateSelectedConditionedCaseNode(SQLDevicePlan ADevicePlan, SelectedConditionedCaseNode ANode)
+		protected virtual Statement TranslateSelectedConditionedCaseNode(SQLDevicePlan devicePlan, SelectedConditionedCaseNode node)
 		{
-			CaseExpression LCaseExpression = new CaseExpression();
-			LCaseExpression.Expression = TranslateExpression(ADevicePlan, ANode.Nodes[0], false);
-			for (int LIndex = 2; LIndex < ANode.Nodes.Count; LIndex++)
+			CaseExpression caseExpression = new CaseExpression();
+			caseExpression.Expression = TranslateExpression(devicePlan, node.Nodes[0], false);
+			for (int index = 2; index < node.Nodes.Count; index++)
 			{
-				ConditionedCaseItemNode LNode = (ConditionedCaseItemNode)ANode.Nodes[LIndex];
-				if (LNode.Nodes.Count == 2)
-					LCaseExpression.CaseItems.Add
+				ConditionedCaseItemNode localNode = (ConditionedCaseItemNode)node.Nodes[index];
+				if (localNode.Nodes.Count == 2)
+					caseExpression.CaseItems.Add
 					(
 						new CaseItemExpression
 						(
-							TranslateExpression(ADevicePlan, LNode.Nodes[0], false),
-							TranslateExpression(ADevicePlan, LNode.Nodes[1], false)
+							TranslateExpression(devicePlan, localNode.Nodes[0], false),
+							TranslateExpression(devicePlan, localNode.Nodes[1], false)
 						)
 					);
 				else
-					LCaseExpression.ElseExpression = new CaseElseExpression(TranslateExpression(ADevicePlan, LNode.Nodes[0], false));
+					caseExpression.ElseExpression = new CaseElseExpression(TranslateExpression(devicePlan, localNode.Nodes[0], false));
 			}
-			return LCaseExpression; 
+			return caseExpression; 
 		}
         
 		public virtual TableSpecifier GetDummyTableSpecifier()
 		{
-			SelectExpression LSelectExpression = new SelectExpression();
-			LSelectExpression.SelectClause = new SelectClause();
-			LSelectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(0), "dummy1"));
-			return new TableSpecifier(LSelectExpression, "dummy1");
+			SelectExpression selectExpression = new SelectExpression();
+			selectExpression.SelectClause = new SelectClause();
+			selectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(0), "dummy1"));
+			return new TableSpecifier(selectExpression, "dummy1");
 		}
 		
-		protected virtual Statement TranslateListNode(SQLDevicePlan ADevicePlan, ListNode ANode)
+		protected virtual Statement TranslateListNode(SQLDevicePlan devicePlan, ListNode node)
 		{
-			if (!ADevicePlan.CurrentQueryContext().IsListContext)
+			if (!devicePlan.CurrentQueryContext().IsListContext)
 			{
-				ADevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(@"Plan is not supported because the device only supports list expressions as the right argument to an invocation of the membership operator (in).", ANode));
-				ADevicePlan.IsSupported = false;
+				devicePlan.TranslationMessages.Add(new Schema.TranslationMessage(@"Plan is not supported because the device only supports list expressions as the right argument to an invocation of the membership operator (in).", node));
+				devicePlan.IsSupported = false;
 				return new CallExpression();
 			}
 			
-			ListExpression LListExpression = new ListExpression();
-			foreach (PlanNode LNode in ANode.Nodes)
-				LListExpression.Expressions.Add(TranslateExpression(ADevicePlan, LNode, false));
-			return LListExpression;
+			ListExpression listExpression = new ListExpression();
+			foreach (PlanNode localNode in node.Nodes)
+				listExpression.Expressions.Add(TranslateExpression(devicePlan, localNode, false));
+			return listExpression;
 		}
 		
-		protected virtual Statement TranslateRowSelectorNode(SQLDevicePlan ADevicePlan, RowSelectorNode ANode)
+		protected virtual Statement TranslateRowSelectorNode(SQLDevicePlan devicePlan, RowSelectorNode node)
 		{
-			SelectExpression LSelectExpression = new SelectExpression();
-			LSelectExpression.SelectClause = new SelectClause();
-			if (FSupportsAlgebraicFromClause)
-				LSelectExpression.FromClause = new AlgebraicFromClause(GetDummyTableSpecifier());
+			SelectExpression selectExpression = new SelectExpression();
+			selectExpression.SelectClause = new SelectClause();
+			if (_supportsAlgebraicFromClause)
+				selectExpression.FromClause = new AlgebraicFromClause(GetDummyTableSpecifier());
 			else
-				LSelectExpression.FromClause = new CalculusFromClause(GetDummyTableSpecifier());
-			ADevicePlan.PushScalarContext();
+				selectExpression.FromClause = new CalculusFromClause(GetDummyTableSpecifier());
+			devicePlan.PushScalarContext();
 			try
 			{
-				for (int LIndex = 0; LIndex < ANode.DataType.Columns.Count; LIndex++)
+				for (int index = 0; index < node.DataType.Columns.Count; index++)
 				{
-					SQLRangeVarColumn LRangeVarColumn = ADevicePlan.FindRangeVarColumn(ANode.DataType.Columns[LIndex].Name, false);
-					if (LRangeVarColumn != null)
+					SQLRangeVarColumn rangeVarColumn = devicePlan.FindRangeVarColumn(node.DataType.Columns[index].Name, false);
+					if (rangeVarColumn != null)
 					{
-						LRangeVarColumn.Expression = TranslateExpression(ADevicePlan, ANode.Nodes[LIndex], false);
-						LSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
+						rangeVarColumn.Expression = TranslateExpression(devicePlan, node.Nodes[index], false);
+						selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
 					}
 					else
-						LSelectExpression.SelectClause.Columns.Add(new ColumnExpression(TranslateExpression(ADevicePlan, ANode.Nodes[LIndex], false), ToSQLIdentifier(ANode.DataType.Columns[LIndex].Name)));
+						selectExpression.SelectClause.Columns.Add(new ColumnExpression(TranslateExpression(devicePlan, node.Nodes[index], false), ToSQLIdentifier(node.DataType.Columns[index].Name)));
 				}
 				
-				ADevicePlan.CurrentQueryContext().ParentContext.ReferenceFlags |= ADevicePlan.CurrentQueryContext().ReferenceFlags;
+				devicePlan.CurrentQueryContext().ParentContext.ReferenceFlags |= devicePlan.CurrentQueryContext().ReferenceFlags;
 			}
 			finally
 			{
-				ADevicePlan.PopScalarContext();
+				devicePlan.PopScalarContext();
 			}
 
-			return LSelectExpression;
+			return selectExpression;
 		}
         
-		protected virtual Statement TranslateTableSelectorNode(SQLDevicePlan ADevicePlan, TableSelectorNode ANode)
+		protected virtual Statement TranslateTableSelectorNode(SQLDevicePlan devicePlan, TableSelectorNode node)
 		{
-			QueryExpression LQueryExpression = new QueryExpression();
-			ADevicePlan.CurrentQueryContext().RangeVars.Add(new SQLRangeVar(ADevicePlan.GetNextTableAlias()));
-			SQLRangeVar LRangeVar = new SQLRangeVar(ADevicePlan.GetNextTableAlias());
-			foreach (TableVarColumn LColumn in ANode.TableVar.Columns)
-				ADevicePlan.CurrentQueryContext().AddedColumns.Add(new SQLRangeVarColumn(LColumn, String.Empty, ADevicePlan.Device.ToSQLIdentifier(LColumn), ADevicePlan.Device.ToSQLIdentifier(LColumn.Name)));
+			QueryExpression queryExpression = new QueryExpression();
+			devicePlan.CurrentQueryContext().RangeVars.Add(new SQLRangeVar(devicePlan.GetNextTableAlias()));
+			SQLRangeVar rangeVar = new SQLRangeVar(devicePlan.GetNextTableAlias());
+			foreach (TableVarColumn column in node.TableVar.Columns)
+				devicePlan.CurrentQueryContext().AddedColumns.Add(new SQLRangeVarColumn(column, String.Empty, devicePlan.Device.ToSQLIdentifier(column), devicePlan.Device.ToSQLIdentifier(column.Name)));
 			
-			foreach (PlanNode LNode in ANode.Nodes)
+			foreach (PlanNode localNode in node.Nodes)
 			{
-				Statement LStatement = Translate(ADevicePlan, LNode);
-				if (ADevicePlan.IsSupported)
+				Statement statement = Translate(devicePlan, localNode);
+				if (devicePlan.IsSupported)
 				{
-					SelectExpression LSelectExpression = ADevicePlan.Device.FindSelectExpression(LStatement);
-					if (LQueryExpression.SelectExpression == null)
-						LQueryExpression.SelectExpression = LSelectExpression;
+					SelectExpression selectExpression = devicePlan.Device.FindSelectExpression(statement);
+					if (queryExpression.SelectExpression == null)
+						queryExpression.SelectExpression = selectExpression;
 					else
-						LQueryExpression.TableOperators.Add(new TableOperatorExpression(TableOperator.Union, false, LSelectExpression));
+						queryExpression.TableOperators.Add(new TableOperatorExpression(TableOperator.Union, false, selectExpression));
 				}
 			}
-			return LQueryExpression;
+			return queryExpression;
 		}
         
-		protected virtual Statement TranslateInsertNode(SQLDevicePlan ADevicePlan, InsertNode ANode)
+		protected virtual Statement TranslateInsertNode(SQLDevicePlan devicePlan, InsertNode node)
 		{
-			if (ADevicePlan.Plan.ServerProcess.NonLogged)
+			if (devicePlan.Plan.ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
-			InsertStatement LStatement = new InsertStatement();
-			LStatement.InsertClause = new InsertClause();
-			LStatement.InsertClause.TableExpression = new TableExpression();
-			BaseTableVar LTarget = (BaseTableVar)((TableVarNode)ANode.Nodes[1]).TableVar;
-			LStatement.InsertClause.TableExpression.TableSchema = D4.MetaData.GetTag(LTarget.MetaData, "Storage.Schema", Schema);
-			LStatement.InsertClause.TableExpression.TableName = ToSQLIdentifier(LTarget);
-			foreach (Column LColumn in ((TableNode)ANode.Nodes[0]).DataType.Columns)
-				LStatement.InsertClause.Columns.Add(new InsertFieldExpression(ToSQLIdentifier(LColumn.Name)));
-			LStatement.Values = TranslateExpression(ADevicePlan, ANode.Nodes[0], false);	
-			return LStatement;
+			InsertStatement statement = new InsertStatement();
+			statement.InsertClause = new InsertClause();
+			statement.InsertClause.TableExpression = new TableExpression();
+			BaseTableVar target = (BaseTableVar)((TableVarNode)node.Nodes[1]).TableVar;
+			statement.InsertClause.TableExpression.TableSchema = D4.MetaData.GetTag(target.MetaData, "Storage.Schema", Schema);
+			statement.InsertClause.TableExpression.TableName = ToSQLIdentifier(target);
+			foreach (Column column in ((TableNode)node.Nodes[0]).DataType.Columns)
+				statement.InsertClause.Columns.Add(new InsertFieldExpression(ToSQLIdentifier(column.Name)));
+			statement.Values = TranslateExpression(devicePlan, node.Nodes[0], false);	
+			return statement;
 		}
         
-		protected virtual Statement TranslateUpdateNode(SQLDevicePlan ADevicePlan, UpdateNode ANode)
+		protected virtual Statement TranslateUpdateNode(SQLDevicePlan devicePlan, UpdateNode node)
 		{														
-			if (ADevicePlan.Plan.ServerProcess.NonLogged)
+			if (devicePlan.Plan.ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
-			BaseTableVar LTarget = ((BaseTableVar)((TableVarNode)ANode.Nodes[0]).TableVar);
-			UpdateStatement LStatement = new UpdateStatement();
-			LStatement.UpdateClause = new UpdateClause();
-			LStatement.UpdateClause.TableExpression = new TableExpression();
-			LStatement.UpdateClause.TableExpression.TableSchema = D4.MetaData.GetTag(LTarget.MetaData, "Storage.Schema", Schema);
-			LStatement.UpdateClause.TableExpression.TableName = ToSQLIdentifier(LTarget);
+			BaseTableVar target = ((BaseTableVar)((TableVarNode)node.Nodes[0]).TableVar);
+			UpdateStatement statement = new UpdateStatement();
+			statement.UpdateClause = new UpdateClause();
+			statement.UpdateClause.TableExpression = new TableExpression();
+			statement.UpdateClause.TableExpression.TableSchema = D4.MetaData.GetTag(target.MetaData, "Storage.Schema", Schema);
+			statement.UpdateClause.TableExpression.TableName = ToSQLIdentifier(target);
 
-			ADevicePlan.Stack.Push(new Symbol(LTarget.DataType.RowType));
+			devicePlan.Stack.Push(new Symbol(String.Empty, target.DataType.RowType));
 			try
 			{
-				for (int LIndex = 1; LIndex < ANode.Nodes.Count; LIndex++)
+				for (int index = 1; index < node.Nodes.Count; index++)
 				{
-					UpdateFieldExpression LFieldExpression = new UpdateFieldExpression();
-					UpdateColumnNode LColumnNode = (UpdateColumnNode)ANode.Nodes[LIndex];
+					UpdateFieldExpression fieldExpression = new UpdateFieldExpression();
+					UpdateColumnNode columnNode = (UpdateColumnNode)node.Nodes[index];
 					#if USECOLUMNLOCATIONBINDING
-					LFieldExpression.FieldName = ToSQLIdentifier(LTarget.DataType.Columns[LColumnNode.ColumnLocation].Name);
+					fieldExpression.FieldName = ToSQLIdentifier(target.DataType.Columns[columnNode.ColumnLocation].Name);
 					#else
-					LFieldExpression.FieldName = ToSQLIdentifier(LTarget.DataType.Columns[LColumnNode.ColumnName].Name);
+					fieldExpression.FieldName = ToSQLIdentifier(target.DataType.Columns[columnNode.ColumnName].Name);
 					#endif
-					LFieldExpression.Expression = TranslateExpression(ADevicePlan, LColumnNode.Nodes[0], false);
-					LStatement.UpdateClause.Columns.Add(LFieldExpression);
+					fieldExpression.Expression = TranslateExpression(devicePlan, columnNode.Nodes[0], false);
+					statement.UpdateClause.Columns.Add(fieldExpression);
 				}
 			}
 			finally
 			{
-				ADevicePlan.Stack.Pop();
+				devicePlan.Stack.Pop();
 			}
 
-			return LStatement;
+			return statement;
 		}
         
-		protected virtual Statement TranslateDeleteNode(SQLDevicePlan ADevicePlan, DeleteNode ANode)
+		protected virtual Statement TranslateDeleteNode(SQLDevicePlan devicePlan, DeleteNode node)
 		{
-			if (ADevicePlan.Plan.ServerProcess.NonLogged)
+			if (devicePlan.Plan.ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
-			DeleteStatement LStatement = new DeleteStatement();
-			LStatement.DeleteClause = new DeleteClause();
-			LStatement.DeleteClause.TableExpression = new TableExpression();
-			BaseTableVar LTarget = (BaseTableVar)((TableVarNode)ANode.Nodes[0]).TableVar;
-			LStatement.DeleteClause.TableExpression.TableSchema = D4.MetaData.GetTag(LTarget.MetaData, "Storage.Schema", Schema);
-			LStatement.DeleteClause.TableExpression.TableName = ToSQLIdentifier(LTarget);
-			return LStatement;
+			DeleteStatement statement = new DeleteStatement();
+			statement.DeleteClause = new DeleteClause();
+			statement.DeleteClause.TableExpression = new TableExpression();
+			BaseTableVar target = (BaseTableVar)((TableVarNode)node.Nodes[0]).TableVar;
+			statement.DeleteClause.TableExpression.TableSchema = D4.MetaData.GetTag(target.MetaData, "Storage.Schema", Schema);
+			statement.DeleteClause.TableExpression.TableName = ToSQLIdentifier(target);
+			return statement;
 		}
         
-		protected virtual string GetIndexName(string ATableName, Key AKey)
+		protected virtual string GetIndexName(string tableName, Key key)
 		{
-			if ((AKey.MetaData != null) && AKey.MetaData.Tags.Contains("Storage.Name"))
-				return AKey.MetaData.Tags["Storage.Name"].Value;
+			if ((key.MetaData != null) && key.MetaData.Tags.Contains("Storage.Name"))
+				return key.MetaData.Tags["Storage.Name"].Value;
 			else
 			{
-				StringBuilder LIndexName = new StringBuilder();
-				LIndexName.AppendFormat("UIDX_{0}", ATableName);
-				foreach (TableVarColumn LColumn in AKey.Columns)
-					LIndexName.AppendFormat("_{0}", (LColumn.Name));
-				return EnsureValidIdentifier(LIndexName.ToString());
+				StringBuilder indexName = new StringBuilder();
+				indexName.AppendFormat("UIDX_{0}", tableName);
+				foreach (TableVarColumn column in key.Columns)
+					indexName.AppendFormat("_{0}", (column.Name));
+				return EnsureValidIdentifier(indexName.ToString());
 			}
 		}
         
-		protected virtual string GetIndexName(string ATableName, Order AOrder)
+		protected virtual string GetIndexName(string tableName, Order order)
 		{
-			if ((AOrder.MetaData != null) && AOrder.MetaData.Tags.Contains("Storage.Name"))
-				return AOrder.MetaData.Tags["Storage.Name"].Value;
+			if ((order.MetaData != null) && order.MetaData.Tags.Contains("Storage.Name"))
+				return order.MetaData.Tags["Storage.Name"].Value;
 			else
 			{
-				StringBuilder LIndexName = new StringBuilder();
-				LIndexName.AppendFormat("IDX_{0}", ATableName);
-				foreach (OrderColumn LColumn in AOrder.Columns)
-					LIndexName.AppendFormat("_{0}", (LColumn.Column.Name));
-				return EnsureValidIdentifier(LIndexName.ToString());
+				StringBuilder indexName = new StringBuilder();
+				indexName.AppendFormat("IDX_{0}", tableName);
+				foreach (OrderColumn column in order.Columns)
+					indexName.AppendFormat("_{0}", (column.Column.Name));
+				return EnsureValidIdentifier(indexName.ToString());
 			}
 		}
         
-		protected virtual Statement TranslateCreateIndex(SQLDevicePlan APlan, TableVar ATableVar, Key AKey)
+		protected virtual Statement TranslateCreateIndex(SQLDevicePlan plan, TableVar tableVar, Key key)
 		{
-			CreateIndexStatement LIndex = new CreateIndexStatement();
-			LIndex.IsUnique = !AKey.IsSparse;
-			LIndex.IsClustered = AKey.Equals(Compiler.FindClusteringKey(APlan.Plan, ATableVar));
-			LIndex.TableSchema = D4.MetaData.GetTag(ATableVar.MetaData, "Storage.Schema", Schema);
-			LIndex.TableName = ToSQLIdentifier(ATableVar);
-			LIndex.IndexSchema = D4.MetaData.GetTag(AKey.MetaData, "Storage.Schema", String.Empty);
-			LIndex.IndexName = GetIndexName(LIndex.TableName, AKey);
-			OrderColumnDefinition LColumnDefinition;
-			foreach (TableVarColumn LColumn in AKey.Columns)
+			CreateIndexStatement index = new CreateIndexStatement();
+			index.IsUnique = !key.IsSparse;
+			index.IsClustered = key.Equals(Compiler.FindClusteringKey(plan.Plan, tableVar));
+			index.TableSchema = D4.MetaData.GetTag(tableVar.MetaData, "Storage.Schema", Schema);
+			index.TableName = ToSQLIdentifier(tableVar);
+			index.IndexSchema = D4.MetaData.GetTag(key.MetaData, "Storage.Schema", String.Empty);
+			index.IndexName = GetIndexName(index.TableName, key);
+			OrderColumnDefinition columnDefinition;
+			foreach (TableVarColumn column in key.Columns)
 			{
-				LColumnDefinition = new OrderColumnDefinition();
-				LColumnDefinition.ColumnName = ToSQLIdentifier(LColumn);
-				LColumnDefinition.Ascending = true;
-				LIndex.Columns.Add(LColumnDefinition);
+				columnDefinition = new OrderColumnDefinition();
+				columnDefinition.ColumnName = ToSQLIdentifier(column);
+				columnDefinition.Ascending = true;
+				index.Columns.Add(columnDefinition);
 			}
-			return LIndex;
+			return index;
 		}
         
-		protected virtual Statement TranslateDropIndex(SQLDevicePlan APlan, TableVar ATableVar, Key AKey)
+		protected virtual Statement TranslateDropIndex(SQLDevicePlan plan, TableVar tableVar, Key key)
 		{
-			DropIndexStatement LStatement = new DropIndexStatement();
-			LStatement.IndexSchema = D4.MetaData.GetTag(AKey.MetaData, "Storage.Schema", String.Empty);
-			LStatement.IndexName = GetIndexName(ToSQLIdentifier(ATableVar), AKey);
-			return LStatement;
+			DropIndexStatement statement = new DropIndexStatement();
+			statement.IndexSchema = D4.MetaData.GetTag(key.MetaData, "Storage.Schema", String.Empty);
+			statement.IndexName = GetIndexName(ToSQLIdentifier(tableVar), key);
+			return statement;
 		}
         
-		protected virtual Statement TranslateCreateIndex(SQLDevicePlan APlan, TableVar ATableVar, Order AOrder)
+		protected virtual Statement TranslateCreateIndex(SQLDevicePlan plan, TableVar tableVar, Order order)
 		{
-			CreateIndexStatement LIndex = new CreateIndexStatement();
-			LIndex.IsClustered = Convert.ToBoolean(D4.MetaData.GetTag(AOrder.MetaData, "DAE.IsClustered", "false"));
-			LIndex.TableSchema = D4.MetaData.GetTag(ATableVar.MetaData, "Storage.Schema", Schema);
-			LIndex.TableName = ToSQLIdentifier(ATableVar);
-			LIndex.IndexSchema = D4.MetaData.GetTag(AOrder.MetaData, "Storage.Schema", String.Empty);
-			LIndex.IndexName = GetIndexName(LIndex.TableName, AOrder);
-			OrderColumnDefinition LColumnDefinition;
-			foreach (OrderColumn LColumn in AOrder.Columns)
+			CreateIndexStatement index = new CreateIndexStatement();
+			index.IsClustered = Convert.ToBoolean(D4.MetaData.GetTag(order.MetaData, "DAE.IsClustered", "false"));
+			index.TableSchema = D4.MetaData.GetTag(tableVar.MetaData, "Storage.Schema", Schema);
+			index.TableName = ToSQLIdentifier(tableVar);
+			index.IndexSchema = D4.MetaData.GetTag(order.MetaData, "Storage.Schema", String.Empty);
+			index.IndexName = GetIndexName(index.TableName, order);
+			OrderColumnDefinition columnDefinition;
+			foreach (OrderColumn column in order.Columns)
 			{
-				LColumnDefinition = new OrderColumnDefinition();
-				LColumnDefinition.ColumnName = ToSQLIdentifier(LColumn.Column);
-				LColumnDefinition.Ascending = LColumn.Ascending;
-				LIndex.Columns.Add(LColumnDefinition);
+				columnDefinition = new OrderColumnDefinition();
+				columnDefinition.ColumnName = ToSQLIdentifier(column.Column);
+				columnDefinition.Ascending = column.Ascending;
+				index.Columns.Add(columnDefinition);
 			}
-			return LIndex;
+			return index;
 		}
         
-		protected virtual Statement TranslateDropIndex(SQLDevicePlan APlan, TableVar ATableVar, Order AOrder)
+		protected virtual Statement TranslateDropIndex(SQLDevicePlan plan, TableVar tableVar, Order order)
 		{
-			DropIndexStatement LStatement = new DropIndexStatement();
-			LStatement.IndexSchema = D4.MetaData.GetTag(AOrder.MetaData, "Storage.Schema", String.Empty);
-			LStatement.IndexName = GetIndexName(ToSQLIdentifier(ATableVar), AOrder);
-			return LStatement;
+			DropIndexStatement statement = new DropIndexStatement();
+			statement.IndexSchema = D4.MetaData.GetTag(order.MetaData, "Storage.Schema", String.Empty);
+			statement.IndexName = GetIndexName(ToSQLIdentifier(tableVar), order);
+			return statement;
 		}
         
-		protected virtual Statement TranslateCreateTable(SQLDevicePlan APlan, TableVar ATableVar)
+		protected virtual Statement TranslateCreateTable(SQLDevicePlan plan, TableVar tableVar)
 		{
-			Batch LBatch = new Batch();
-			CreateTableStatement LStatement = new CreateTableStatement();
-			LStatement.TableSchema = D4.MetaData.GetTag(ATableVar.MetaData, "Storage.Schema", Schema);
-			LStatement.TableName = ToSQLIdentifier(ATableVar);
-			foreach (TableVarColumn LColumn in ATableVar.Columns)
+			Batch batch = new Batch();
+			CreateTableStatement statement = new CreateTableStatement();
+			statement.TableSchema = D4.MetaData.GetTag(tableVar.MetaData, "Storage.Schema", Schema);
+			statement.TableName = ToSQLIdentifier(tableVar);
+			foreach (TableVarColumn column in tableVar.Columns)
 			{
-				if (Convert.ToBoolean(D4.MetaData.GetTag(LColumn.MetaData, "Storage.ShouldReconcile", "true")))
+				if (Convert.ToBoolean(D4.MetaData.GetTag(column.MetaData, "Storage.ShouldReconcile", "true")))
 				{
-					SQLScalarType LSQLScalarType = (SQLScalarType)ResolveDeviceScalarType(APlan.Plan, (Schema.ScalarType)LColumn.DataType);
-					if (LSQLScalarType == null)
-						throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, LColumn.DataType.ToString());
-					LStatement.Columns.Add
+					SQLScalarType sQLScalarType = (SQLScalarType)ResolveDeviceScalarType(plan.Plan, (Schema.ScalarType)column.DataType);
+					if (sQLScalarType == null)
+						throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, column.DataType.ToString());
+					statement.Columns.Add
 					(
 						new ColumnDefinition
 						(
-							ToSQLIdentifier(LColumn), 
-							LSQLScalarType.DomainName(LColumn), 
-							LColumn.IsNilable
+							ToSQLIdentifier(column), 
+							sQLScalarType.DomainName(column), 
+							column.IsNilable
 						)
 					);
 				}
 			}
-			LBatch.Statements.Add(LStatement);
+			batch.Statements.Add(statement);
 
-			foreach (Key LKey in ATableVar.Keys)
-				if (Convert.ToBoolean(D4.MetaData.GetTag(LKey.MetaData, "Storage.ShouldReconcile", (LKey.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateCreateIndex(APlan, ATableVar, LKey));
+			foreach (Key key in tableVar.Keys)
+				if (Convert.ToBoolean(D4.MetaData.GetTag(key.MetaData, "Storage.ShouldReconcile", (key.Columns.Count > 0).ToString())))
+					batch.Statements.Add(TranslateCreateIndex(plan, tableVar, key));
 
-			foreach (Order LOrder in ATableVar.Orders)
-				if (Convert.ToBoolean(D4.MetaData.GetTag(LOrder.MetaData, "Storage.ShouldReconcile", (LOrder.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateCreateIndex(APlan, ATableVar, LOrder));
+			foreach (Order order in tableVar.Orders)
+				if (Convert.ToBoolean(D4.MetaData.GetTag(order.MetaData, "Storage.ShouldReconcile", (order.Columns.Count > 0).ToString())))
+					batch.Statements.Add(TranslateCreateIndex(plan, tableVar, order));
 			
-			return LBatch;
+			return batch;
 		}
         
-		protected virtual Statement TranslateCreateTableNode(SQLDevicePlan ADevicePlan, CreateTableNode ANode)
+		protected virtual Statement TranslateCreateTableNode(SQLDevicePlan devicePlan, CreateTableNode node)
 		{
-			return TranslateCreateTable(ADevicePlan, ANode.Table);
+			return TranslateCreateTable(devicePlan, node.Table);
 		}
 		
-		protected bool AltersStorageTags(D4.AlterMetaData AAlterMetaData)
+		protected bool AltersStorageTags(D4.AlterMetaData alterMetaData)
 		{
-			if (AAlterMetaData == null)
+			if (alterMetaData == null)
 				return false;
 				
-			for (int LIndex = 0; LIndex < AAlterMetaData.DropTags.Count; LIndex++)
-				if (AAlterMetaData.DropTags[LIndex].Name.IndexOf("Storage") == 0)
+			for (int index = 0; index < alterMetaData.DropTags.Count; index++)
+				if (alterMetaData.DropTags[index].Name.IndexOf("Storage") == 0)
 					return true;
 					
-			for (int LIndex = 0; LIndex < AAlterMetaData.AlterTags.Count; LIndex++)
-				if (AAlterMetaData.AlterTags[LIndex].Name.IndexOf("Storage") == 0)
+			for (int index = 0; index < alterMetaData.AlterTags.Count; index++)
+				if (alterMetaData.AlterTags[index].Name.IndexOf("Storage") == 0)
 					return true;
 					
-			for (int LIndex = 0; LIndex < AAlterMetaData.CreateTags.Count; LIndex++)
-				if (AAlterMetaData.CreateTags[LIndex].Name.IndexOf("Storage") == 0)
+			for (int index = 0; index < alterMetaData.CreateTags.Count; index++)
+				if (alterMetaData.CreateTags[index].Name.IndexOf("Storage") == 0)
 					return true;
 					
 			return false;
 		}
         
-		protected virtual Statement TranslateAlterTableNode(SQLDevicePlan ADevicePlan, AlterTableNode ANode)
+		protected virtual Statement TranslateAlterTableNode(SQLDevicePlan devicePlan, AlterTableNode node)
 		{
-			Batch LBatch = new Batch();
-			string LTableSchema = D4.MetaData.GetTag(ANode.TableVar.MetaData, "Storage.Schema", Schema);
-			string LTableName = ToSQLIdentifier(ANode.TableVar);
-			if (ANode.AlterTableStatement.DropColumns.Count > 0)
+			Batch batch = new Batch();
+			string tableSchema = D4.MetaData.GetTag(node.TableVar.MetaData, "Storage.Schema", Schema);
+			string tableName = ToSQLIdentifier(node.TableVar);
+			if (node.AlterTableStatement.DropColumns.Count > 0)
 			{
-				foreach (D4.DropColumnDefinition LColumn in ANode.AlterTableStatement.DropColumns)
+				foreach (D4.DropColumnDefinition column in node.AlterTableStatement.DropColumns)
 				{
-					TableVarColumn LTableVarColumn = null;
-					SchemaLevelDropColumnDefinition LSchemaLevelDropColumnDefinition = LColumn as SchemaLevelDropColumnDefinition;
-					if (LSchemaLevelDropColumnDefinition != null)
-						LTableVarColumn = LSchemaLevelDropColumnDefinition.Column;
+					TableVarColumn tableVarColumn = null;
+					SchemaLevelDropColumnDefinition schemaLevelDropColumnDefinition = column as SchemaLevelDropColumnDefinition;
+					if (schemaLevelDropColumnDefinition != null)
+						tableVarColumn = schemaLevelDropColumnDefinition.Column;
 					else
-						LTableVarColumn = ANode.TableVar.Columns[ANode.TableVar.Columns.IndexOfName(LColumn.ColumnName)];
+						tableVarColumn = node.TableVar.Columns[node.TableVar.Columns.IndexOfName(column.ColumnName)];
 						
-					if (Convert.ToBoolean(D4.MetaData.GetTag(LTableVarColumn.MetaData, "Storage.ShouldReconcile", "true")))
+					if (Convert.ToBoolean(D4.MetaData.GetTag(tableVarColumn.MetaData, "Storage.ShouldReconcile", "true")))
 					{
-						AlterTableStatement LStatement = new AlterTableStatement();
-						LStatement.TableSchema = LTableSchema;
-						LStatement.TableName = LTableName;
-						LStatement.DropColumns.Add(new DropColumnDefinition(ToSQLIdentifier(LTableVarColumn)));
-						LBatch.Statements.Add(LStatement);
+						AlterTableStatement statement = new AlterTableStatement();
+						statement.TableSchema = tableSchema;
+						statement.TableName = tableName;
+						statement.DropColumns.Add(new DropColumnDefinition(ToSQLIdentifier(tableVarColumn)));
+						batch.Statements.Add(statement);
 					}
 				}
 			}
 			
-			if (ANode.AlterTableStatement.AlterColumns.Count > 0)
+			if (node.AlterTableStatement.AlterColumns.Count > 0)
 			{
-				foreach (D4.AlterColumnDefinition LAlterColumnDefinition in ANode.AlterTableStatement.AlterColumns)
+				foreach (D4.AlterColumnDefinition alterColumnDefinition in node.AlterTableStatement.AlterColumns)
 				{
-					TableVarColumn LColumn = ANode.TableVar.Columns[LAlterColumnDefinition.ColumnName];
-					if (Convert.ToBoolean(D4.MetaData.GetTag(LColumn.MetaData, "Storage.ShouldReconcile", "true")))
+					TableVarColumn column = node.TableVar.Columns[alterColumnDefinition.ColumnName];
+					if (Convert.ToBoolean(D4.MetaData.GetTag(column.MetaData, "Storage.ShouldReconcile", "true")))
 					{
 						// The assumption being made here is that the type of the column in the table var has already been changed to the new type, the presence of the type specifier is just to indicate that the alter should be performed
 						// This assumption will likely need to be revisited when (if) we actually start supporting changing the type of a column
-						if (LAlterColumnDefinition.ChangeNilable || (LAlterColumnDefinition.TypeSpecifier != null) || AltersStorageTags(LAlterColumnDefinition.AlterMetaData))
+						if (alterColumnDefinition.ChangeNilable || (alterColumnDefinition.TypeSpecifier != null) || AltersStorageTags(alterColumnDefinition.AlterMetaData))
 						{
-							AlterTableStatement LStatement = new AlterTableStatement();
-							LStatement.TableSchema = LTableSchema;
-							LStatement.TableName = LTableName;
-							LStatement.AlterColumns.Add(new AlterColumnDefinition(ToSQLIdentifier(LColumn), ((SQLScalarType)ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)LColumn.DataType)).DomainName(LColumn), LColumn.IsNilable));
-							LBatch.Statements.Add(LStatement);
+							AlterTableStatement statement = new AlterTableStatement();
+							statement.TableSchema = tableSchema;
+							statement.TableName = tableName;
+							statement.AlterColumns.Add(new AlterColumnDefinition(ToSQLIdentifier(column), ((SQLScalarType)ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)column.DataType)).DomainName(column), column.IsNilable));
+							batch.Statements.Add(statement);
 						}
 					}
 				}
 			}
 			
-			if (ANode.AlterTableStatement.CreateColumns.Count > 0)
+			if (node.AlterTableStatement.CreateColumns.Count > 0)
 			{
-				foreach (D4.ColumnDefinition LColumnDefinition in ANode.AlterTableStatement.CreateColumns)
+				foreach (D4.ColumnDefinition columnDefinition in node.AlterTableStatement.CreateColumns)
 				{
-					TableVarColumn LColumn = ANode.TableVar.Columns[LColumnDefinition.ColumnName];
-					if (Convert.ToBoolean(D4.MetaData.GetTag(LColumn.MetaData, "Storage.ShouldReconcile", "true")))
+					TableVarColumn column = node.TableVar.Columns[columnDefinition.ColumnName];
+					if (Convert.ToBoolean(D4.MetaData.GetTag(column.MetaData, "Storage.ShouldReconcile", "true")))
 					{
-						AlterTableStatement LStatement = new AlterTableStatement();
-						LStatement.TableSchema = LTableSchema;
-						LStatement.TableName = LTableName;
-						LStatement.AddColumns.Add(new ColumnDefinition(ToSQLIdentifier(LColumn), ((SQLScalarType)ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)LColumn.DataType)).DomainName(LColumn), true));
-						LBatch.Statements.Add(LStatement);
+						AlterTableStatement statement = new AlterTableStatement();
+						statement.TableSchema = tableSchema;
+						statement.TableName = tableName;
+						statement.AddColumns.Add(new ColumnDefinition(ToSQLIdentifier(column), ((SQLScalarType)ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)column.DataType)).DomainName(column), true));
+						batch.Statements.Add(statement);
 					}
 				}
 			}
 			
-			foreach (D4.DropKeyDefinition LKeyDefinition in ANode.AlterTableStatement.DropKeys)
+			foreach (D4.DropKeyDefinition keyDefinition in node.AlterTableStatement.DropKeys)
 			{
-				Schema.Key LKey = null;
-				SchemaLevelDropKeyDefinition LSchemaLevelDropKeyDefinition = LKeyDefinition as SchemaLevelDropKeyDefinition;
-				if (LSchemaLevelDropKeyDefinition != null)
-					LKey = LSchemaLevelDropKeyDefinition.Key;
+				Schema.Key key = null;
+				SchemaLevelDropKeyDefinition schemaLevelDropKeyDefinition = keyDefinition as SchemaLevelDropKeyDefinition;
+				if (schemaLevelDropKeyDefinition != null)
+					key = schemaLevelDropKeyDefinition.Key;
 				else
-					LKey = Compiler.FindKey(ADevicePlan.Plan, ANode.TableVar, LKeyDefinition);
+					key = Compiler.FindKey(devicePlan.Plan, node.TableVar, keyDefinition);
 
-				if (Convert.ToBoolean(D4.MetaData.GetTag(LKey.MetaData, "Storage.ShouldReconcile", (LKey.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateDropIndex(ADevicePlan, ANode.TableVar, LKey));
+				if (Convert.ToBoolean(D4.MetaData.GetTag(key.MetaData, "Storage.ShouldReconcile", (key.Columns.Count > 0).ToString())))
+					batch.Statements.Add(TranslateDropIndex(devicePlan, node.TableVar, key));
 			}
 				
-			foreach (D4.DropOrderDefinition LOrderDefinition in ANode.AlterTableStatement.DropOrders)
+			foreach (D4.DropOrderDefinition orderDefinition in node.AlterTableStatement.DropOrders)
 			{
-				Schema.Order LOrder = null;
-				SchemaLevelDropOrderDefinition LSchemaLevelDropOrderDefinition = LOrderDefinition as SchemaLevelDropOrderDefinition;
-				if (LSchemaLevelDropOrderDefinition != null)
-					LOrder = LSchemaLevelDropOrderDefinition.Order;
+				Schema.Order order = null;
+				SchemaLevelDropOrderDefinition schemaLevelDropOrderDefinition = orderDefinition as SchemaLevelDropOrderDefinition;
+				if (schemaLevelDropOrderDefinition != null)
+					order = schemaLevelDropOrderDefinition.Order;
 				else
-					LOrder = Compiler.FindOrder(ADevicePlan.Plan, ANode.TableVar, LOrderDefinition);
+					order = Compiler.FindOrder(devicePlan.Plan, node.TableVar, orderDefinition);
 
-				if (Convert.ToBoolean(D4.MetaData.GetTag(LOrder.MetaData, "Storage.ShouldReconcile", (LOrder.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateDropIndex(ADevicePlan, ANode.TableVar, LOrder));
+				if (Convert.ToBoolean(D4.MetaData.GetTag(order.MetaData, "Storage.ShouldReconcile", (order.Columns.Count > 0).ToString())))
+					batch.Statements.Add(TranslateDropIndex(devicePlan, node.TableVar, order));
 			}
 				
-			foreach (D4.KeyDefinition LKeyDefinition in ANode.AlterTableStatement.CreateKeys)
+			foreach (D4.KeyDefinition keyDefinition in node.AlterTableStatement.CreateKeys)
 			{
-				Schema.Key LKey = Compiler.CompileKeyDefinition(ADevicePlan.Plan, ANode.TableVar, LKeyDefinition);
-				if (Convert.ToBoolean(D4.MetaData.GetTag(LKey.MetaData, "Storage.ShouldReconcile", (LKey.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateCreateIndex(ADevicePlan, ANode.TableVar, LKey));
+				Schema.Key key = Compiler.CompileKeyDefinition(devicePlan.Plan, node.TableVar, keyDefinition);
+				if (Convert.ToBoolean(D4.MetaData.GetTag(key.MetaData, "Storage.ShouldReconcile", (key.Columns.Count > 0).ToString())))
+					batch.Statements.Add(TranslateCreateIndex(devicePlan, node.TableVar, key));
 			}
 				
-			foreach (D4.OrderDefinition LOrderDefinition in ANode.AlterTableVarStatement.CreateOrders)
+			foreach (D4.OrderDefinition orderDefinition in node.AlterTableVarStatement.CreateOrders)
 			{
-				Schema.Order LOrder = Compiler.CompileOrderDefinition(ADevicePlan.Plan, ANode.TableVar, LOrderDefinition, false);
-				if (Convert.ToBoolean(D4.MetaData.GetTag(LOrder.MetaData, "Storage.ShouldReconcile", (LOrder.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateCreateIndex(ADevicePlan, ANode.TableVar, LOrder));
+				Schema.Order order = Compiler.CompileOrderDefinition(devicePlan.Plan, node.TableVar, orderDefinition, false);
+				if (Convert.ToBoolean(D4.MetaData.GetTag(order.MetaData, "Storage.ShouldReconcile", (order.Columns.Count > 0).ToString())))
+					batch.Statements.Add(TranslateCreateIndex(devicePlan, node.TableVar, order));
 			}
 
-			return LBatch;
+			return batch;
 		}
         
-		protected virtual Statement TranslateDropTableNode(DevicePlan ADevicePlan, DropTableNode ANode)
+		protected virtual Statement TranslateDropTableNode(DevicePlan devicePlan, DropTableNode node)
 		{
-			DropTableStatement LStatement = new DropTableStatement();
-			LStatement.TableSchema = D4.MetaData.GetTag(ANode.Table.MetaData, "Storage.Schema", Schema);
-			LStatement.TableName = ToSQLIdentifier(ANode.Table);
-			return LStatement;
+			DropTableStatement statement = new DropTableStatement();
+			statement.TableSchema = D4.MetaData.GetTag(node.Table.MetaData, "Storage.Schema", Schema);
+			statement.TableName = ToSQLIdentifier(node.Table);
+			return statement;
 		}
         
-		public virtual SelectStatement TranslateOrder(DevicePlan ADevicePlan, TableNode ANode, SelectStatement AStatement)
+		public virtual SelectStatement TranslateOrder(DevicePlan devicePlan, TableNode node, SelectStatement statement)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			if ((ANode.Order != null) && (ANode.Order.Columns.Count > 0))
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			if ((node.Order != null) && (node.Order.Columns.Count > 0))
 			{
-				AStatement.OrderClause = new OrderClause();
-				SQLRangeVarColumn LRangeVarColumn;
-				foreach (OrderColumn LColumn in ANode.Order.Columns)
+				statement.OrderClause = new OrderClause();
+				SQLRangeVarColumn rangeVarColumn;
+				foreach (OrderColumn column in node.Order.Columns)
 				{
-					if (!LColumn.IsDefaultSort)
+					if (!column.IsDefaultSort)
 					{
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(@"Plan is not supported because the order uses expression-based sorting.", ANode));
-						LDevicePlan.IsSupported = false;
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(@"Plan is not supported because the order uses expression-based sorting.", node));
+						localDevicePlan.IsSupported = false;
 						break;
 					}
 					
-					if (!LDevicePlan.Device.SupportsComparison(ADevicePlan.Plan, LColumn.Column.DataType))
+					if (!localDevicePlan.Device.SupportsComparison(devicePlan.Plan, column.Column.DataType))
 					{
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not support comparison of values of type ""{0}"" for column ""{1}"".", LColumn.Column.DataType.Name, LColumn.Column.Name), ANode));
-						LDevicePlan.IsSupported = false;
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not support comparison of values of type ""{0}"" for column ""{1}"".", column.Column.DataType.Name, column.Column.Name), node));
+						localDevicePlan.IsSupported = false;
 						break;
 					}
 
-					OrderFieldExpression LFieldExpression = new OrderFieldExpression();
-					LRangeVarColumn = LDevicePlan.GetRangeVarColumn(LColumn.Column.Name, true);
+					OrderFieldExpression fieldExpression = new OrderFieldExpression();
+					rangeVarColumn = localDevicePlan.GetRangeVarColumn(column.Column.Name, true);
 					if (IsOrderByInContext)
 					{
-						if (LRangeVarColumn.Expression != null)
+						if (rangeVarColumn.Expression != null)
 							Error.Fail("Expressions in the order by clause are not implemented.");
-						LFieldExpression.FieldName = LRangeVarColumn.ColumnName;
-						LFieldExpression.TableAlias = LRangeVarColumn.TableAlias;
+						fieldExpression.FieldName = rangeVarColumn.ColumnName;
+						fieldExpression.TableAlias = rangeVarColumn.TableAlias;
 					}
 					else
-						LFieldExpression.FieldName = LRangeVarColumn.Alias == String.Empty ? LRangeVarColumn.ColumnName : LRangeVarColumn.Alias;
-					LFieldExpression.Ascending = LColumn.Ascending;
-					AStatement.OrderClause.Columns.Add(LFieldExpression);
+						fieldExpression.FieldName = rangeVarColumn.Alias == String.Empty ? rangeVarColumn.ColumnName : rangeVarColumn.Alias;
+					fieldExpression.Ascending = column.Ascending;
+					statement.OrderClause.Columns.Add(fieldExpression);
 				}
 			}
 			
-			return AStatement;
+			return statement;
 		}
 
-		private bool SupportsOperator(Plan APlan, Schema.Operator AOperator)
+		private bool SupportsOperator(Plan plan, Schema.Operator operatorValue)
 		{
 			// returns true if there exists a ScalarTypeOperator corresponding to the Operator for this InstructionNode
-			return ResolveDeviceOperator(APlan, AOperator) != null;
+			return ResolveDeviceOperator(plan, operatorValue) != null;
 		}
 
-		private bool SupportsOperands(InstructionNodeBase ANode)
+		private bool SupportsOperands(InstructionNodeBase node)
 		{
-			if ((ANode.DataType is Schema.ITableType) || (ANode.DataType is Schema.IScalarType) || (ANode.DataType is Schema.IRowType))
+			if ((node.DataType is Schema.ITableType) || (node.DataType is Schema.IScalarType) || (node.DataType is Schema.IRowType))
 				return true;
 			
 			return false;
 		}
 		
-		public bool SupportsEqual(Plan APlan, Schema.IDataType ADataType)
+		public bool SupportsEqual(Plan plan, Schema.IDataType dataType)
 		{
-			if (SupportsComparison(APlan, ADataType))
+			if (SupportsComparison(plan, dataType))
 				return true;
 				
-			Schema.Signature LSignature = new Schema.Signature(new SignatureElement[]{new SignatureElement(ADataType), new SignatureElement(ADataType)});
-			OperatorBindingContext LContext = new OperatorBindingContext(null, "iEqual", APlan.NameResolutionPath, LSignature, true);
-			Compiler.ResolveOperator(APlan, LContext);
-			if (LContext.Operator != null)
+			Schema.Signature signature = new Schema.Signature(new SignatureElement[]{new SignatureElement(dataType), new SignatureElement(dataType)});
+			OperatorBindingContext context = new OperatorBindingContext(null, "iEqual", plan.NameResolutionPath, signature, true);
+			Compiler.ResolveOperator(plan, context);
+			if (context.Operator != null)
 			{
-				Schema.DeviceOperator LDeviceOperator = ResolveDeviceOperator(APlan, LContext.Operator);
-				if (LDeviceOperator != null)
+				Schema.DeviceOperator deviceOperator = ResolveDeviceOperator(plan, context.Operator);
+				if (deviceOperator != null)
 				{
-					APlan.AttachDependency(LDeviceOperator);
+					plan.AttachDependency(deviceOperator);
 					return true;
 				}
 			}
 			return false;
 		}
 		
-		public bool SupportsComparison(Plan APlan, Schema.IDataType ADataType)
+		public bool SupportsComparison(Plan plan, Schema.IDataType dataType)
 		{
-			Schema.Signature LSignature = new Schema.Signature(new SignatureElement[]{new SignatureElement(ADataType), new SignatureElement(ADataType)});
-			OperatorBindingContext LContext = new OperatorBindingContext(null, "iCompare", APlan.NameResolutionPath, LSignature, true);
-			Compiler.ResolveOperator(APlan, LContext);
-			if (LContext.Operator != null)
+			Schema.Signature signature = new Schema.Signature(new SignatureElement[]{new SignatureElement(dataType), new SignatureElement(dataType)});
+			OperatorBindingContext context = new OperatorBindingContext(null, "iCompare", plan.NameResolutionPath, signature, true);
+			Compiler.ResolveOperator(plan, context);
+			if (context.Operator != null)
 			{
-				Schema.DeviceOperator LDeviceOperator = ResolveDeviceOperator(APlan, LContext.Operator);
-				if (LDeviceOperator != null)
+				Schema.DeviceOperator deviceOperator = ResolveDeviceOperator(plan, context.Operator);
+				if (deviceOperator != null)
 				{
-					APlan.AttachDependency(LDeviceOperator);
+					plan.AttachDependency(deviceOperator);
 					return true;
 				}
 			}
 			return false;
 		}
 		
-		protected bool IsTruthValued(DeviceOperator ADeviceOperator)
+		protected bool IsTruthValued(DeviceOperator deviceOperator)
 		{
-			SQLDeviceOperator LDeviceOperator = ADeviceOperator as SQLDeviceOperator;
-			return (LDeviceOperator != null) && LDeviceOperator.IsTruthValued;
+			SQLDeviceOperator localDeviceOperator = deviceOperator as SQLDeviceOperator;
+			return (localDeviceOperator != null) && localDeviceOperator.IsTruthValued;
 		}
 
 		// Translate
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			bool LScalarContext = false;
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			if (((APlanNode is TableNode) || (APlanNode.DataType is Schema.IRowType)) && (LDevicePlan.CurrentQueryContext().IsScalarContext))
+			bool scalarContext = false;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			if (((planNode is TableNode) || (planNode.DataType is Schema.IRowType)) && (localDevicePlan.CurrentQueryContext().IsScalarContext))
 			{
-				bool LSupportsSubSelect = LDevicePlan.IsSubSelectSupported();
-				if (!LSupportsSubSelect)
-					LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(LDevicePlan.GetSubSelectNotSupportedReason(), APlanNode));
-				LDevicePlan.IsSupported = LDevicePlan.IsSupported && LSupportsSubSelect;
-				LDevicePlan.CurrentQueryContext().ReferenceFlags |= SQLReferenceFlags.HasSubSelectExpressions;
-				LDevicePlan.PushQueryContext();
-				LScalarContext = true;
+				bool supportsSubSelect = localDevicePlan.IsSubSelectSupported();
+				if (!supportsSubSelect)
+					localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(localDevicePlan.GetSubSelectNotSupportedReason(), planNode));
+				localDevicePlan.IsSupported = localDevicePlan.IsSupported && supportsSubSelect;
+				localDevicePlan.CurrentQueryContext().ReferenceFlags |= SQLReferenceFlags.HasSubSelectExpressions;
+				localDevicePlan.PushQueryContext();
+				scalarContext = true;
 			}  
 			try
 			{
-				InstructionNodeBase LInstructionNode = APlanNode as InstructionNodeBase;
-				if ((LInstructionNode != null) && (LInstructionNode.DataType != null) && (LInstructionNode.Operator != null))
+				InstructionNodeBase instructionNode = planNode as InstructionNodeBase;
+				if ((instructionNode != null) && (instructionNode.DataType != null) && (instructionNode.Operator != null))
 				{
-					bool LSupportsOperator = SupportsOperator(ADevicePlan.Plan, LInstructionNode.Operator) && SupportsOperands(LInstructionNode);
-					if (!LSupportsOperator)
+					bool supportsOperator = SupportsOperator(devicePlan.Plan, instructionNode.Operator) && SupportsOperands(instructionNode);
+					if (!supportsOperator)
 					{
 						if 
 						(
-							(LDevicePlan.CurrentQueryContext().IsScalarContext) 
-								&& (LInstructionNode.DataType is Schema.ScalarType) 
-								&& (ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)LInstructionNode.DataType) != null) 
-								&& LInstructionNode.IsFunctional 
-								&& LInstructionNode.IsRepeatable 
-								&& LInstructionNode.IsContextLiteral(LDevicePlan.Stack.Count == 0 ? 0 : LDevicePlan.Stack.Count - 1)
+							(localDevicePlan.CurrentQueryContext().IsScalarContext) 
+								&& (instructionNode.DataType is Schema.ScalarType) 
+								&& (ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)instructionNode.DataType) != null) 
+								&& instructionNode.IsFunctional 
+								&& instructionNode.IsRepeatable 
+								&& instructionNode.IsContextLiteral(localDevicePlan.Stack.Count == 0 ? 0 : localDevicePlan.Stack.Count - 1)
 						)
 						{
-							ServerStatementPlan LPlan = new ServerStatementPlan(ADevicePlan.Plan.ServerProcess);
+							ServerStatementPlan plan = new ServerStatementPlan(devicePlan.Plan.ServerProcess);
 							try
 							{
-								LPlan.Plan.PushStatementContext(LDevicePlan.Plan.StatementContext);
-								LPlan.Plan.PushSecurityContext(LDevicePlan.Plan.SecurityContext);
-								LPlan.Plan.PushCursorContext(LDevicePlan.Plan.CursorContext);
-								if (LDevicePlan.Plan.InRowContext)
-									LPlan.Plan.EnterRowContext();
-								for (int LIndex = LDevicePlan.Plan.Symbols.Count - 1; LIndex >= 0; LIndex--)
-									LPlan.Plan.Symbols.Push(LDevicePlan.Plan.Symbols.Peek(LIndex));
+								plan.Plan.PushStatementContext(localDevicePlan.Plan.StatementContext);
+								plan.Plan.PushSecurityContext(localDevicePlan.Plan.SecurityContext);
+								plan.Plan.PushCursorContext(localDevicePlan.Plan.CursorContext);
+								if (localDevicePlan.Plan.InRowContext)
+									plan.Plan.EnterRowContext();
+								for (int index = localDevicePlan.Plan.Symbols.Count - 1; index >= 0; index--)
+									plan.Plan.Symbols.Push(localDevicePlan.Plan.Symbols.Peek(index));
 								try
 								{
-									PlanNode LNode = Compiler.CompileExpression(LPlan.Plan, new D4.Parser(true).ParseExpression(LInstructionNode.EmitStatementAsString()));
-									LNode = Compiler.OptimizeNode(LPlan.Plan, LNode);
-									LNode.InternalDetermineBinding(LPlan.Plan); // Don't use the compiler bind here because we already know a determine device call on the top level node will fail
-									APlanNode.CouldSupport = true; // Set this to indicate that support could be provided if it would be beneficial to do so
-									return FromScalar(LDevicePlan, LNode);
+									PlanNode node = Compiler.CompileExpression(plan.Plan, new D4.Parser(true).ParseExpression(instructionNode.EmitStatementAsString()));
+									node = Compiler.OptimizeNode(plan.Plan, node);
+									node.InternalDetermineBinding(plan.Plan); // Don't use the compiler bind here because we already know a determine device call on the top level node will fail
+									planNode.CouldSupport = true; // Set this to indicate that support could be provided if it would be beneficial to do so
+									return FromScalar(localDevicePlan, node);
 								}
 								finally
 								{
-									while (LPlan.Plan.Symbols.Count > 0)
-										LPlan.Plan.Symbols.Pop();
+									while (plan.Plan.Symbols.Count > 0)
+										plan.Plan.Symbols.Pop();
 								}
 							}
 							finally
 							{
-								LPlan.Dispose();
+								plan.Dispose();
 							}
 						}
 						else
 						{
-							LDevicePlan.IsSupported = false;
-							LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not contain an operator map for operator ""{0}"" with signature ""{1}"".", LInstructionNode.Operator.OperatorName, LInstructionNode.Operator.Signature.ToString()), APlanNode));
+							localDevicePlan.IsSupported = false;
+							localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not contain an operator map for operator ""{0}"" with signature ""{1}"".", instructionNode.Operator.OperatorName, instructionNode.Operator.Signature.ToString()), planNode));
 						}
 					}
 					else
 					{
-						TableNode LTableNode = APlanNode as TableNode;
-						if (LTableNode != null)
-							DetermineCursorBehavior(LDevicePlan.Plan, LTableNode);
-						DeviceOperator LDeviceOperator = ResolveDeviceOperator(ADevicePlan.Plan, LInstructionNode.Operator);
-						if (LDevicePlan.IsBooleanContext() && APlanNode.DataType.Is(ADevicePlan.Plan.Catalog.DataTypes.SystemBoolean) && !IsTruthValued(LDeviceOperator))
-							return new BinaryExpression((Expression)LDeviceOperator.Translate(LDevicePlan, APlanNode), "iEqual", new ValueExpression(1));
+						TableNode tableNode = planNode as TableNode;
+						if (tableNode != null)
+							DetermineCursorBehavior(localDevicePlan.Plan, tableNode);
+						DeviceOperator deviceOperator = ResolveDeviceOperator(devicePlan.Plan, instructionNode.Operator);
+						if (localDevicePlan.IsBooleanContext() && planNode.DataType.Is(devicePlan.Plan.Catalog.DataTypes.SystemBoolean) && !IsTruthValued(deviceOperator))
+							return new BinaryExpression((Expression)deviceOperator.Translate(localDevicePlan, planNode), "iEqual", new ValueExpression(1));
 						else
-							return LDeviceOperator.Translate(LDevicePlan, APlanNode);
+							return deviceOperator.Translate(localDevicePlan, planNode);
 					}
 					return new CallExpression();
 				}
-				else if ((APlanNode is AggregateCallNode) && (APlanNode.DataType != null) && ((AggregateCallNode)APlanNode).Operator != null)
+				else if ((planNode is AggregateCallNode) && (planNode.DataType != null) && ((AggregateCallNode)planNode).Operator != null)
 				{
-					AggregateCallNode LAggregateCallNode = (AggregateCallNode)APlanNode;
-					bool LSupportsOperator = SupportsOperator(ADevicePlan.Plan, LAggregateCallNode.Operator);
-					if (!LSupportsOperator)
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have an operator map for the operator ""{0}"" with signature ""{1}"".", LAggregateCallNode.Operator.OperatorName, LAggregateCallNode.Operator.Signature.ToString()), APlanNode));
-					LDevicePlan.IsSupported = LDevicePlan.IsSupported && LSupportsOperator;
-					if (LDevicePlan.IsSupported)
+					AggregateCallNode aggregateCallNode = (AggregateCallNode)planNode;
+					bool supportsOperator = SupportsOperator(devicePlan.Plan, aggregateCallNode.Operator);
+					if (!supportsOperator)
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have an operator map for the operator ""{0}"" with signature ""{1}"".", aggregateCallNode.Operator.OperatorName, aggregateCallNode.Operator.Signature.ToString()), planNode));
+					localDevicePlan.IsSupported = localDevicePlan.IsSupported && supportsOperator;
+					if (localDevicePlan.IsSupported)
 					{
-						DeviceOperator LDeviceOperator = ResolveDeviceOperator(ADevicePlan.Plan, LAggregateCallNode.Operator);
-						if (LDevicePlan.IsBooleanContext() && APlanNode.DataType.Is(ADevicePlan.Plan.Catalog.DataTypes.SystemBoolean) && !IsTruthValued(LDeviceOperator))
-							return new BinaryExpression((Expression)LDeviceOperator.Translate(LDevicePlan, APlanNode), "iEqual", new ValueExpression(1));
+						DeviceOperator deviceOperator = ResolveDeviceOperator(devicePlan.Plan, aggregateCallNode.Operator);
+						if (localDevicePlan.IsBooleanContext() && planNode.DataType.Is(devicePlan.Plan.Catalog.DataTypes.SystemBoolean) && !IsTruthValued(deviceOperator))
+							return new BinaryExpression((Expression)deviceOperator.Translate(localDevicePlan, planNode), "iEqual", new ValueExpression(1));
 						else
-							return LDeviceOperator.Translate(LDevicePlan, APlanNode);
+							return deviceOperator.Translate(localDevicePlan, planNode);
 					}
 					return new CallExpression();
 				}
-				else if (APlanNode is StackReferenceNode)
+				else if (planNode is StackReferenceNode)
 				{
-					bool LSupportsDataType = (APlanNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType) != null);
-					if (!LSupportsDataType)
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"" of variable reference ""{1}"".", APlanNode.DataType.Name, ((StackReferenceNode)APlanNode).Identifier), APlanNode));
-					LDevicePlan.IsSupported = LDevicePlan.IsSupported && LSupportsDataType;
-					if (LDevicePlan.IsSupported)
-						return TranslateStackReference((SQLDevicePlan)LDevicePlan, (StackReferenceNode)APlanNode);
+					bool supportsDataType = (planNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType) != null);
+					if (!supportsDataType)
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"" of variable reference ""{1}"".", planNode.DataType.Name, ((StackReferenceNode)planNode).Identifier), planNode));
+					localDevicePlan.IsSupported = localDevicePlan.IsSupported && supportsDataType;
+					if (localDevicePlan.IsSupported)
+						return TranslateStackReference((SQLDevicePlan)localDevicePlan, (StackReferenceNode)planNode);
 					return new CallExpression();
 				}
-				else if (APlanNode is StackColumnReferenceNode)
+				else if (planNode is StackColumnReferenceNode)
 				{
-					bool LSupportsDataType = (APlanNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType) != null);
-					if (!LSupportsDataType)
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"" of column reference ""{1}"".", APlanNode.DataType.Name, ((StackColumnReferenceNode)APlanNode).Identifier), APlanNode));
-					LDevicePlan.IsSupported = LDevicePlan.IsSupported && LSupportsDataType;
-					if (LDevicePlan.IsSupported)
-						return TranslateStackColumnReference((SQLDevicePlan)LDevicePlan, (StackColumnReferenceNode)APlanNode);
+					bool supportsDataType = (planNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType) != null);
+					if (!supportsDataType)
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"" of column reference ""{1}"".", planNode.DataType.Name, ((StackColumnReferenceNode)planNode).Identifier), planNode));
+					localDevicePlan.IsSupported = localDevicePlan.IsSupported && supportsDataType;
+					if (localDevicePlan.IsSupported)
+						return TranslateStackColumnReference((SQLDevicePlan)localDevicePlan, (StackColumnReferenceNode)planNode);
 					return new CallExpression();
 				}
-				else if (APlanNode is ExtractColumnNode)
+				else if (planNode is ExtractColumnNode)
 				{
-					bool LSupportsDataType = (APlanNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType) != null);
-					if (!LSupportsDataType)
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"" of column reference ""{1}"".", APlanNode.DataType.Name, ((ExtractColumnNode)APlanNode).Identifier), APlanNode));
-					LDevicePlan.IsSupported = LDevicePlan.IsSupported && LSupportsDataType;
-					if (LDevicePlan.IsSupported)
-						return TranslateExtractColumnNode((SQLDevicePlan)LDevicePlan, (ExtractColumnNode)APlanNode);
+					bool supportsDataType = (planNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType) != null);
+					if (!supportsDataType)
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"" of column reference ""{1}"".", planNode.DataType.Name, ((ExtractColumnNode)planNode).Identifier), planNode));
+					localDevicePlan.IsSupported = localDevicePlan.IsSupported && supportsDataType;
+					if (localDevicePlan.IsSupported)
+						return TranslateExtractColumnNode((SQLDevicePlan)localDevicePlan, (ExtractColumnNode)planNode);
 					return new CallExpression();
 				}
-				else if (APlanNode is ExtractRowNode)
+				else if (planNode is ExtractRowNode)
 				{
-					return TranslateExtractRowNode(LDevicePlan, (ExtractRowNode)APlanNode);
+					return TranslateExtractRowNode(localDevicePlan, (ExtractRowNode)planNode);
 				}
-				else if (APlanNode is ValueNode)
+				else if (planNode is ValueNode)
 				{
-					bool LSupportsDataType = ((APlanNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType) != null)) || (APlanNode.DataType is Schema.GenericType);
-					if (!LSupportsDataType)
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"".", APlanNode.DataType.Name), APlanNode));
-					LDevicePlan.IsSupported = LDevicePlan.IsSupported && LSupportsDataType;
-					if (LDevicePlan.IsSupported)
-						return TranslateValueNode(LDevicePlan, (ValueNode)APlanNode);
+					bool supportsDataType = ((planNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType) != null)) || (planNode.DataType is Schema.GenericType);
+					if (!supportsDataType)
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"".", planNode.DataType.Name), planNode));
+					localDevicePlan.IsSupported = localDevicePlan.IsSupported && supportsDataType;
+					if (localDevicePlan.IsSupported)
+						return TranslateValueNode(localDevicePlan, (ValueNode)planNode);
 					return new CallExpression();
 				}
-				else if (APlanNode is AsNode)
+				else if (planNode is AsNode)
 				{
-					bool LSupportsDataType = (APlanNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType) != null);
-					if (!LSupportsDataType)
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"".", APlanNode.DataType.Name), APlanNode));
-					LDevicePlan.IsSupported = LDevicePlan.IsSupported && LSupportsDataType;
-					if (LDevicePlan.IsSupported)
-						return TranslateAsNode(LDevicePlan, (AsNode)APlanNode);
+					bool supportsDataType = (planNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType) != null);
+					if (!supportsDataType)
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"".", planNode.DataType.Name), planNode));
+					localDevicePlan.IsSupported = localDevicePlan.IsSupported && supportsDataType;
+					if (localDevicePlan.IsSupported)
+						return TranslateAsNode(localDevicePlan, (AsNode)planNode);
 					return new CallExpression();
 				}
-				else if (APlanNode is ConditionNode)
+				else if (planNode is ConditionNode)
 				{
-					bool LSupportsDataType = (APlanNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType) != null);
-					if (!LSupportsDataType)
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"".", APlanNode.DataType.Name), APlanNode));
-					LDevicePlan.IsSupported = LDevicePlan.IsSupported && LSupportsDataType;
-					if (LDevicePlan.IsSupported)
-						if (LDevicePlan.IsBooleanContext() && APlanNode.DataType.Is(ADevicePlan.Plan.Catalog.DataTypes.SystemBoolean))
-							return new BinaryExpression((Expression)TranslateConditionNode(LDevicePlan, (ConditionNode)APlanNode), "iEqual", new ValueExpression(1));
+					bool supportsDataType = (planNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType) != null);
+					if (!supportsDataType)
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"".", planNode.DataType.Name), planNode));
+					localDevicePlan.IsSupported = localDevicePlan.IsSupported && supportsDataType;
+					if (localDevicePlan.IsSupported)
+						if (localDevicePlan.IsBooleanContext() && planNode.DataType.Is(devicePlan.Plan.Catalog.DataTypes.SystemBoolean))
+							return new BinaryExpression((Expression)TranslateConditionNode(localDevicePlan, (ConditionNode)planNode), "iEqual", new ValueExpression(1));
 						else
-							return TranslateConditionNode(LDevicePlan, (ConditionNode)APlanNode);
+							return TranslateConditionNode(localDevicePlan, (ConditionNode)planNode);
 					return new CallExpression();
 				}
-				else if (APlanNode is ConditionedCaseNode)
+				else if (planNode is ConditionedCaseNode)
 				{
-					bool LSupportsDataType = (APlanNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType) != null);
-					if (!LSupportsDataType)
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"".", APlanNode.DataType.Name), APlanNode));
-					LDevicePlan.IsSupported = LDevicePlan.IsSupported && LSupportsDataType;
-					if (LDevicePlan.IsSupported)
-						if (LDevicePlan.IsBooleanContext() && APlanNode.DataType.Is(ADevicePlan.Plan.Catalog.DataTypes.SystemBoolean))
-							return new BinaryExpression((Expression)TranslateConditionedCaseNode(LDevicePlan, (ConditionedCaseNode)APlanNode), "iEqual", new ValueExpression(1));
+					bool supportsDataType = (planNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType) != null);
+					if (!supportsDataType)
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"".", planNode.DataType.Name), planNode));
+					localDevicePlan.IsSupported = localDevicePlan.IsSupported && supportsDataType;
+					if (localDevicePlan.IsSupported)
+						if (localDevicePlan.IsBooleanContext() && planNode.DataType.Is(devicePlan.Plan.Catalog.DataTypes.SystemBoolean))
+							return new BinaryExpression((Expression)TranslateConditionedCaseNode(localDevicePlan, (ConditionedCaseNode)planNode), "iEqual", new ValueExpression(1));
 						else
-							return TranslateConditionedCaseNode(LDevicePlan, (ConditionedCaseNode)APlanNode);
+							return TranslateConditionedCaseNode(localDevicePlan, (ConditionedCaseNode)planNode);
 					return new CallExpression();
 				}
-				else if (APlanNode is SelectedConditionedCaseNode)
+				else if (planNode is SelectedConditionedCaseNode)
 				{
-					bool LSupportsDataType = (APlanNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType) != null);
-					if (!LSupportsDataType)
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"".", APlanNode.DataType.Name), APlanNode));
-					LDevicePlan.IsSupported = LDevicePlan.IsSupported && LSupportsDataType;
-					if (LDevicePlan.IsSupported)
-						if (LDevicePlan.IsBooleanContext() && APlanNode.DataType.Is(ADevicePlan.Plan.Catalog.DataTypes.SystemBoolean))
-							return new BinaryExpression((Expression)TranslateSelectedConditionedCaseNode(LDevicePlan, (SelectedConditionedCaseNode)APlanNode), "iEqual", new ValueExpression(1));
+					bool supportsDataType = (planNode.DataType is Schema.ScalarType) && (ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType) != null);
+					if (!supportsDataType)
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not have a type map for the type ""{0}"".", planNode.DataType.Name), planNode));
+					localDevicePlan.IsSupported = localDevicePlan.IsSupported && supportsDataType;
+					if (localDevicePlan.IsSupported)
+						if (localDevicePlan.IsBooleanContext() && planNode.DataType.Is(devicePlan.Plan.Catalog.DataTypes.SystemBoolean))
+							return new BinaryExpression((Expression)TranslateSelectedConditionedCaseNode(localDevicePlan, (SelectedConditionedCaseNode)planNode), "iEqual", new ValueExpression(1));
 						else
-							return TranslateSelectedConditionedCaseNode(LDevicePlan, (SelectedConditionedCaseNode)APlanNode);
+							return TranslateSelectedConditionedCaseNode(localDevicePlan, (SelectedConditionedCaseNode)planNode);
 					return new CallExpression();
 				}
-				else if (APlanNode is ConditionedCaseItemNode)
+				else if (planNode is ConditionedCaseItemNode)
 				{
 					// Let the support walk up to the parent CaseNode for translation
 					return new CallExpression();
 				}
-				else if (APlanNode is ListNode)
+				else if (planNode is ListNode)
 				{
-					return TranslateListNode(LDevicePlan, (ListNode)APlanNode);
+					return TranslateListNode(localDevicePlan, (ListNode)planNode);
 				}
-				else if (APlanNode is TableSelectorNode)
+				else if (planNode is TableSelectorNode)
 				{
-					DetermineCursorBehavior(LDevicePlan.Plan, (TableNode)APlanNode);
-					return TranslateTableSelectorNode(LDevicePlan, (TableSelectorNode)APlanNode);
+					DetermineCursorBehavior(localDevicePlan.Plan, (TableNode)planNode);
+					return TranslateTableSelectorNode(localDevicePlan, (TableSelectorNode)planNode);
 				}
-				else if (APlanNode is RowSelectorNode)
-					return TranslateRowSelectorNode(LDevicePlan, (RowSelectorNode)APlanNode);
+				else if (planNode is RowSelectorNode)
+					return TranslateRowSelectorNode(localDevicePlan, (RowSelectorNode)planNode);
 				#if TranslateModifications
 				else if (APlanNode is InsertNode)
-					return TranslateInsertNode(LDevicePlan, (InsertNode)APlanNode);
+					return TranslateInsertNode(localDevicePlan, (InsertNode)APlanNode);
 				else if (APlanNode is UpdateNode)
-					return TranslateUpdateNode(LDevicePlan, (UpdateNode)APlanNode);
+					return TranslateUpdateNode(localDevicePlan, (UpdateNode)APlanNode);
 				else if (APlanNode is DeleteNode)
-					return TranslateDeleteNode(LDevicePlan, (DeleteNode)APlanNode);
+					return TranslateDeleteNode(localDevicePlan, (DeleteNode)APlanNode);
 				#endif
-				else if (APlanNode is CreateTableNode)
-					return TranslateCreateTableNode(LDevicePlan, (CreateTableNode)APlanNode);
-				else if (APlanNode is AlterTableNode)
-					return TranslateAlterTableNode(LDevicePlan, (AlterTableNode)APlanNode);
-				else if (APlanNode is DropTableNode)
-					return TranslateDropTableNode(LDevicePlan, (DropTableNode)APlanNode);
+				else if (planNode is CreateTableNode)
+					return TranslateCreateTableNode(localDevicePlan, (CreateTableNode)planNode);
+				else if (planNode is AlterTableNode)
+					return TranslateAlterTableNode(localDevicePlan, (AlterTableNode)planNode);
+				else if (planNode is DropTableNode)
+					return TranslateDropTableNode(localDevicePlan, (DropTableNode)planNode);
 				else
 				{
-					LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not support translation for nodes of type ""{0}"".", APlanNode.GetType().Name)));
-					LDevicePlan.IsSupported = false;
+					localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not support translation for nodes of type ""{0}"".", planNode.GetType().Name)));
+					localDevicePlan.IsSupported = false;
 					return new CallExpression();
 				}
 			}
 			finally
 			{
-				if (LScalarContext)
-					LDevicePlan.PopQueryContext();
+				if (scalarContext)
+					localDevicePlan.PopQueryContext();
 			}
 		}
         
-		public Batch DeviceReconciliationScript(ServerProcess AProcess, ReconcileOptions AOptions)
+		public Batch DeviceReconciliationScript(ServerProcess process, ReconcileOptions options)
 		{
-			Catalog LServerCatalog = GetServerCatalog(AProcess, null);
-			return DeviceReconciliationScript(AProcess, LServerCatalog, GetDeviceCatalog(AProcess, LServerCatalog), AOptions);
+			Catalog serverCatalog = GetServerCatalog(process, null);
+			return DeviceReconciliationScript(process, serverCatalog, GetDeviceCatalog(process, serverCatalog), options);
 		}
 		
-		public Batch DeviceReconciliationScript(ServerProcess AProcess, TableVar ATableVar, ReconcileOptions AOptions)
+		public Batch DeviceReconciliationScript(ServerProcess process, TableVar tableVar, ReconcileOptions options)
 		{
-			Catalog LServerCatalog = GetServerCatalog(AProcess, ATableVar);
-			return DeviceReconciliationScript(AProcess, LServerCatalog, GetDeviceCatalog(AProcess, LServerCatalog, ATableVar), AOptions);
+			Catalog serverCatalog = GetServerCatalog(process, tableVar);
+			return DeviceReconciliationScript(process, serverCatalog, GetDeviceCatalog(process, serverCatalog, tableVar), options);
 		}
 
 		/// <summary>Produces a script to reconcile the given device catalog to the given server catalog, with the specified options.</summary>        
-        public Batch DeviceReconciliationScript(ServerProcess AProcess, Catalog AServerCatalog, Catalog ADeviceCatalog, ReconcileOptions AOptions)
+        public Batch DeviceReconciliationScript(ServerProcess process, Catalog serverCatalog, Catalog deviceCatalog, ReconcileOptions options)
         {
-			Batch LBatch = new Batch();
-			foreach (Schema.Object LObject in AServerCatalog)
+			Batch batch = new Batch();
+			foreach (Schema.Object objectValue in serverCatalog)
 			{
-				Schema.BaseTableVar LBaseTableVar = LObject as Schema.BaseTableVar;
-				if (LBaseTableVar != null)
+				Schema.BaseTableVar baseTableVar = objectValue as Schema.BaseTableVar;
+				if (baseTableVar != null)
 				{
-					if (Convert.ToBoolean(D4.MetaData.GetTag(LBaseTableVar.MetaData, "Storage.ShouldReconcile", "true")))
+					if (Convert.ToBoolean(D4.MetaData.GetTag(baseTableVar.MetaData, "Storage.ShouldReconcile", "true")))
 					{	
-						AlterTableNode LAlterTableNode = new AlterTableNode();
-						using (Plan LPlan = new Plan(AProcess))
+						AlterTableNode alterTableNode = new AlterTableNode();
+						using (Plan plan = new Plan(process))
 						{
-							using (SQLDevicePlan LDevicePlan = new SQLDevicePlan(LPlan, this, LAlterTableNode))
+							using (SQLDevicePlan devicePlan = new SQLDevicePlan(plan, this, alterTableNode))
 							{
-								int LObjectIndex = ADeviceCatalog.IndexOf(LBaseTableVar.Name);
-								if (LObjectIndex < 0)
-									LBatch.Statements.Add(TranslateCreateTable(LDevicePlan, LBaseTableVar));
+								int objectIndex = deviceCatalog.IndexOf(baseTableVar.Name);
+								if (objectIndex < 0)
+									batch.Statements.Add(TranslateCreateTable(devicePlan, baseTableVar));
 								else
 								{
 									// Compile and translate the D4.AlterTableStatement returned from ReconcileTable and add it to LBatch
-									bool LReconciliationRequired;
-									D4.AlterTableStatement LD4AlterTableStatement = ReconcileTable(LPlan, LBaseTableVar, (Schema.TableVar)ADeviceCatalog[LObjectIndex], AOptions, out LReconciliationRequired);
-									if (LReconciliationRequired)
+									bool reconciliationRequired;
+									D4.AlterTableStatement d4AlterTableStatement = ReconcileTable(plan, baseTableVar, (Schema.TableVar)deviceCatalog[objectIndex], options, out reconciliationRequired);
+									if (reconciliationRequired)
 									{
-										LAlterTableNode.AlterTableStatement = LD4AlterTableStatement;
-										LAlterTableNode.DetermineDevice(LDevicePlan.Plan);
-										LBatch.Statements.Add(TranslateAlterTableNode(LDevicePlan, LAlterTableNode));
+										alterTableNode.AlterTableStatement = d4AlterTableStatement;
+										alterTableNode.DetermineDevice(devicePlan.Plan);
+										batch.Statements.Add(TranslateAlterTableNode(devicePlan, alterTableNode));
 									}
 								}
 							}
@@ -1858,273 +1887,273 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				}
 			}
 			
-			if ((AOptions & ReconcileOptions.ShouldDropTables) != 0)
+			if ((options & ReconcileOptions.ShouldDropTables) != 0)
 			{
-				foreach (Schema.Object LObject in ADeviceCatalog)
+				foreach (Schema.Object objectValue in deviceCatalog)
 				{
-					Schema.BaseTableVar LBaseTableVar = LObject as Schema.BaseTableVar;
-					if ((LBaseTableVar != null) && !AServerCatalog.Contains(LBaseTableVar.Name))
+					Schema.BaseTableVar baseTableVar = objectValue as Schema.BaseTableVar;
+					if ((baseTableVar != null) && !serverCatalog.Contains(baseTableVar.Name))
 					{
-						DropTableNode LDropTableNode = new DropTableNode(LBaseTableVar);
-						using (Plan LPlan = new Plan(AProcess))
+						DropTableNode dropTableNode = new DropTableNode(baseTableVar);
+						using (Plan plan = new Plan(process))
 						{
-							using (SQLDevicePlan LDevicePlan = new SQLDevicePlan(LPlan, this, LDropTableNode))
+							using (SQLDevicePlan devicePlan = new SQLDevicePlan(plan, this, dropTableNode))
 							{
-								LBatch.Statements.Add(TranslateDropTableNode(LDevicePlan, new DropTableNode(LBaseTableVar)));
+								batch.Statements.Add(TranslateDropTableNode(devicePlan, new DropTableNode(baseTableVar)));
 							}
 						}
 					}
 				}
 			}
 			
-			return LBatch;
+			return batch;
         }
         
-		public override ErrorList Reconcile(ServerProcess AProcess, Catalog AServerCatalog, Catalog ADeviceCatalog)
+		public override ErrorList Reconcile(ServerProcess process, Catalog serverCatalog, Catalog deviceCatalog)
 		{
-			ErrorList LErrors = base.Reconcile(AProcess, AServerCatalog, ADeviceCatalog);
+			ErrorList errors = base.Reconcile(process, serverCatalog, deviceCatalog);
 
 			if ((ReconcileMaster == D4.ReconcileMaster.Server) || (ReconcileMaster == D4.ReconcileMaster.Both))
-				foreach (Schema.Object LObject in AServerCatalog)
-					if (LObject is Schema.BaseTableVar)
+				foreach (Schema.Object objectValue in serverCatalog)
+					if (objectValue is Schema.BaseTableVar)
 					{
 						try
 						{
-							Schema.BaseTableVar LTableVar = (Schema.BaseTableVar)LObject;
-							if (Convert.ToBoolean(D4.MetaData.GetTag(LTableVar.MetaData, "Storage.ShouldReconcile", "true")))
+							Schema.BaseTableVar tableVar = (Schema.BaseTableVar)objectValue;
+							if (Convert.ToBoolean(D4.MetaData.GetTag(tableVar.MetaData, "Storage.ShouldReconcile", "true")))
 							{
-								int LObjectIndex = ADeviceCatalog.IndexOf(LTableVar.Name);
-								if (LObjectIndex < 0)
-									CreateTable(AProcess, LTableVar, D4.ReconcileMaster.Server);
+								int objectIndex = deviceCatalog.IndexOf(tableVar.Name);
+								if (objectIndex < 0)
+									CreateTable(process, tableVar, D4.ReconcileMaster.Server);
 								else
-									ReconcileTable(AProcess, LTableVar, (Schema.BaseTableVar)ADeviceCatalog[LObjectIndex], D4.ReconcileMaster.Server);
+									ReconcileTable(process, tableVar, (Schema.BaseTableVar)deviceCatalog[objectIndex], D4.ReconcileMaster.Server);
 							}
 						}
-						catch (Exception LException)
+						catch (Exception exception)
 						{
-							LErrors.Add(LException);
+							errors.Add(exception);
 						}
 					}
 			
 			if ((ReconcileMaster == D4.ReconcileMaster.Device) || (ReconcileMaster == D4.ReconcileMaster.Both))
-				foreach (Schema.Object LObject in ADeviceCatalog)
-					if (LObject is Schema.BaseTableVar)
+				foreach (Schema.Object objectValue in deviceCatalog)
+					if (objectValue is Schema.BaseTableVar)
 					{
 						try
 						{
-							Schema.BaseTableVar LTableVar = (Schema.BaseTableVar)LObject;
-							if (Convert.ToBoolean(D4.MetaData.GetTag(LTableVar.MetaData, "Storage.ShouldReconcile", "true")))
+							Schema.BaseTableVar tableVar = (Schema.BaseTableVar)objectValue;
+							if (Convert.ToBoolean(D4.MetaData.GetTag(tableVar.MetaData, "Storage.ShouldReconcile", "true")))
 							{
-								int LObjectIndex = AServerCatalog.IndexOf(LTableVar.Name);
-								if ((LObjectIndex < 0) || (AServerCatalog[LObjectIndex].Library == null)) // Library will be null if this table was created only to specify a name for the table to reconcile
-									CreateTable(AProcess, LTableVar, D4.ReconcileMaster.Device);
+								int objectIndex = serverCatalog.IndexOf(tableVar.Name);
+								if ((objectIndex < 0) || (serverCatalog[objectIndex].Library == null)) // Library will be null if this table was created only to specify a name for the table to reconcile
+									CreateTable(process, tableVar, D4.ReconcileMaster.Device);
 								else
-									ReconcileTable(AProcess, (Schema.BaseTableVar)AServerCatalog[LObjectIndex], LTableVar, D4.ReconcileMaster.Device);
+									ReconcileTable(process, (Schema.BaseTableVar)serverCatalog[objectIndex], tableVar, D4.ReconcileMaster.Device);
 							}
 						}
-						catch (Exception LException)
+						catch (Exception exception)
 						{
-							LErrors.Add(LException);
+							errors.Add(exception);
 						}
 					}
-					else if (LObject is Schema.Reference)
+					else if (objectValue is Schema.Reference)
 					{
 						try
 						{
-							Schema.Reference LReference = (Schema.Reference)LObject;
-							if (Convert.ToBoolean(D4.MetaData.GetTag(LReference.MetaData, "Storage.ShouldReconcile", "true")))
+							Schema.Reference reference = (Schema.Reference)objectValue;
+							if (Convert.ToBoolean(D4.MetaData.GetTag(reference.MetaData, "Storage.ShouldReconcile", "true")))
 							{
-								int LObjectIndex = AServerCatalog.IndexOf(LReference.Name);
-								if (LObjectIndex < 0)
-									CreateReference(AProcess, LReference, D4.ReconcileMaster.Device);
+								int objectIndex = serverCatalog.IndexOf(reference.Name);
+								if (objectIndex < 0)
+									CreateReference(process, reference, D4.ReconcileMaster.Device);
 								else
-									ReconcileReference(AProcess, (Schema.Reference)AServerCatalog[LObjectIndex], LReference, D4.ReconcileMaster.Device);
+									ReconcileReference(process, (Schema.Reference)serverCatalog[objectIndex], reference, D4.ReconcileMaster.Device);
 							}
 						}
-						catch (Exception LException)
+						catch (Exception exception)
 						{
-							LErrors.Add(LException);
+							errors.Add(exception);
 						}
 					}
 					
-			return LErrors;
+			return errors;
 		}
         
-		public override void CreateTable(ServerProcess AProcess, TableVar ATableVar, D4.ReconcileMaster AMaster)
+		public override void CreateTable(ServerProcess process, TableVar tableVar, D4.ReconcileMaster master)
 		{
-			if (AMaster == D4.ReconcileMaster.Server)
+			if (master == D4.ReconcileMaster.Server)
 			{
-				using (Plan LPlan = new Plan(AProcess))
+				using (Plan plan = new Plan(process))
 				{
-					using (SQLDevicePlan LDevicePlan = new SQLDevicePlan(LPlan, this, null))
+					using (SQLDevicePlan devicePlan = new SQLDevicePlan(plan, this, null))
 					{
-						Statement LStatement = TranslateCreateTable(LDevicePlan, ATableVar);
-						SQLDeviceSession LDeviceSession = (SQLDeviceSession)LPlan.DeviceConnect(this);
+						Statement statement = TranslateCreateTable(devicePlan, tableVar);
+						SQLDeviceSession deviceSession = (SQLDeviceSession)plan.DeviceConnect(this);
 						{
-							Batch LBatch = LStatement as Batch;
-							if (LBatch != null)
+							Batch batch = statement as Batch;
+							if (batch != null)
 							{
-								foreach (Statement LSingleStatement in LBatch.Statements)
-									LDeviceSession.Connection.Execute(Emitter.Emit(LSingleStatement));
+								foreach (Statement singleStatement in batch.Statements)
+									deviceSession.Connection.Execute(Emitter.Emit(singleStatement));
 							}
 							else
-								LDeviceSession.Connection.Execute(Emitter.Emit(LStatement));
+								deviceSession.Connection.Execute(Emitter.Emit(statement));
 						}
 					}
 				}
 			}
-			else if (AMaster == D4.ReconcileMaster.Device)
+			else if (master == D4.ReconcileMaster.Device)
 			{
 				// Add the TableVar to the Catalog
 				// Note that this does not call the usual CreateTable method because there is no need to request device storage.
-				Plan LPlan = new Plan(AProcess);
+				Plan plan = new Plan(process);
 				try
 				{
-					LPlan.PlanCatalog.Add(ATableVar);
+					plan.PlanCatalog.Add(tableVar);
 					try
 					{
-						LPlan.PushCreationObject(ATableVar);
+						plan.PushCreationObject(tableVar);
 						try
 						{
-							CheckSupported(LPlan, ATableVar);
-							if (!AProcess.ServerSession.Server.IsEngine)
-								Compiler.CompileTableVarKeyConstraints(LPlan, ATableVar);
+							CheckSupported(plan, tableVar);
+							if (!process.ServerSession.Server.IsEngine)
+								Compiler.CompileTableVarKeyConstraints(plan, tableVar);
 						}
 						finally
 						{
-							LPlan.PopCreationObject();
+							plan.PopCreationObject();
 						}
 					}
 					finally
 					{
-						LPlan.PlanCatalog.Remove(ATableVar);
+						plan.PlanCatalog.Remove(tableVar);
 					}
 				}
 				finally
 				{
-					LPlan.Dispose();
+					plan.Dispose();
 				}
 
-				AProcess.CatalogDeviceSession.InsertCatalogObject(ATableVar);
+				process.CatalogDeviceSession.InsertCatalogObject(tableVar);
 			}
 		}
 		
-		public virtual void CreateReference(ServerProcess AProcess, Reference AReference, D4.ReconcileMaster AMaster)
+		public virtual void CreateReference(ServerProcess process, Reference reference, D4.ReconcileMaster master)
 		{
-			if (AMaster == D4.ReconcileMaster.Server)
+			if (master == D4.ReconcileMaster.Server)
 			{
 				Error.Fail("Reconciliation of foreign keys to the target device is not yet implemented");
 			}
-			else if (AMaster == D4.ReconcileMaster.Device)
+			else if (master == D4.ReconcileMaster.Device)
 			{
-				using (Plan LPlan = new Plan(AProcess))
+				using (Plan plan = new Plan(process))
 				{
-					Program LProgram = new Program(AProcess);
-					LProgram.Code = Compiler.CompileCreateReferenceStatement(LPlan, AReference.EmitStatement(D4.EmitMode.ForCopy));
-					LProgram.Execute(null);
+					Program program = new Program(process);
+					program.Code = Compiler.CompileCreateReferenceStatement(plan, reference.EmitStatement(D4.EmitMode.ForCopy));
+					program.Execute(null);
 				}
 			}
 		}
 		
 		public class SchemaLevelDropColumnDefinition : D4.DropColumnDefinition
 		{
-			public SchemaLevelDropColumnDefinition(Schema.TableVarColumn AColumn) : base()
+			public SchemaLevelDropColumnDefinition(Schema.TableVarColumn column) : base()
 			{
-				FColumn = AColumn;
+				_column = column;
 			}
 			
-			private Schema.TableVarColumn FColumn;
-			public Schema.TableVarColumn Column { get { return FColumn; } }
+			private Schema.TableVarColumn _column;
+			public Schema.TableVarColumn Column { get { return _column; } }
 		}
 		
 		public class SchemaLevelDropKeyDefinition : D4.DropKeyDefinition
 		{
-			public SchemaLevelDropKeyDefinition(Schema.Key AKey) : base()
+			public SchemaLevelDropKeyDefinition(Schema.Key key) : base()
 			{
-				FKey = AKey;
+				_key = key;
 			}
 
-			private Schema.Key FKey;
-			public Schema.Key Key { get { return FKey; } }
+			private Schema.Key _key;
+			public Schema.Key Key { get { return _key; } }
 		}
 		
 		public class SchemaLevelDropOrderDefinition : D4.DropOrderDefinition
 		{
-			public SchemaLevelDropOrderDefinition(Schema.Order AOrder) : base()
+			public SchemaLevelDropOrderDefinition(Schema.Order order) : base()
 			{
-				FOrder = AOrder;
+				_order = order;
 			}
 			
-			private Schema.Order FOrder;
-			public Schema.Order Order { get { return FOrder; } }
+			private Schema.Order _order;
+			public Schema.Order Order { get { return _order; } }
 		}
 		
-		public virtual D4.AlterTableStatement ReconcileTable(Plan APlan, TableVar ASourceTableVar, TableVar ATargetTableVar, ReconcileOptions AOptions, out bool AReconciliationRequired)
+		public virtual D4.AlterTableStatement ReconcileTable(Plan plan, TableVar sourceTableVar, TableVar targetTableVar, ReconcileOptions options, out bool reconciliationRequired)
 		{
-			AReconciliationRequired = false;
-			D4.AlterTableStatement LStatement = new D4.AlterTableStatement();
-			LStatement.TableVarName = ATargetTableVar.Name;
+			reconciliationRequired = false;
+			D4.AlterTableStatement statement = new D4.AlterTableStatement();
+			statement.TableVarName = targetTableVar.Name;
 			
 			// Ensure ASourceTableVar.Columns is a subset of ATargetTableVar.Columns
-			foreach (Schema.TableVarColumn LColumn in ASourceTableVar.Columns)
-				if (Convert.ToBoolean(D4.MetaData.GetTag(LColumn.MetaData, "Storage.ShouldReconcile", "true")))
+			foreach (Schema.TableVarColumn column in sourceTableVar.Columns)
+				if (Convert.ToBoolean(D4.MetaData.GetTag(column.MetaData, "Storage.ShouldReconcile", "true")))
 				{
-					int LTargetIndex = ColumnIndexFromNativeColumnName(ATargetTableVar, ToSQLIdentifier(LColumn));
-					if (LTargetIndex < 0)
+					int targetIndex = ColumnIndexFromNativeColumnName(targetTableVar, ToSQLIdentifier(column));
+					if (targetIndex < 0)
 					{
 						// Add the column to the target table var
-						LStatement.CreateColumns.Add(LColumn.EmitStatement(D4.EmitMode.ForCopy));
-						AReconciliationRequired = true;
+						statement.CreateColumns.Add(column.EmitStatement(D4.EmitMode.ForCopy));
+						reconciliationRequired = true;
 					}
 					else
 					{
-						if ((AOptions & ReconcileOptions.ShouldReconcileColumns) != 0)
+						if ((options & ReconcileOptions.ShouldReconcileColumns) != 0)
 						{
-							Schema.TableVarColumn LTargetColumn = ATargetTableVar.Columns[LTargetIndex];
+							Schema.TableVarColumn targetColumn = targetTableVar.Columns[targetIndex];
 							
 							// Type of the column (Needs to be based on domain name because the reconciliation process will only create the column with the D4 type map for the native domain)
-							SQLScalarType LSourceType = (SQLScalarType)ResolveDeviceScalarType(APlan, (Schema.ScalarType)LColumn.DataType);
-							SQLScalarType LTargetType = (SQLScalarType)ResolveDeviceScalarType(APlan, (Schema.ScalarType)LTargetColumn.DataType);
-							bool LDomainsDifferent = 
-								(LSourceType.DomainName(LColumn) != LTargetType.DomainName(LTargetColumn))
-									|| (LSourceType.NativeDomainName(LColumn) != LTargetType.NativeDomainName(LTargetColumn));
+							SQLScalarType sourceType = (SQLScalarType)ResolveDeviceScalarType(plan, (Schema.ScalarType)column.DataType);
+							SQLScalarType targetType = (SQLScalarType)ResolveDeviceScalarType(plan, (Schema.ScalarType)targetColumn.DataType);
+							bool domainsDifferent = 
+								(sourceType.DomainName(column) != targetType.DomainName(targetColumn))
+									|| (sourceType.NativeDomainName(column) != targetType.NativeDomainName(targetColumn));
 
 							// Nilability of the column
-							bool LNilabilityDifferent = LColumn.IsNilable != LTargetColumn.IsNilable;
+							bool nilabilityDifferent = column.IsNilable != targetColumn.IsNilable;
 							
-							if (LDomainsDifferent || LNilabilityDifferent)
+							if (domainsDifferent || nilabilityDifferent)
 							{
-								D4.AlterColumnDefinition LAlterColumnDefinition = new D4.AlterColumnDefinition();
-								LAlterColumnDefinition.ColumnName = LTargetColumn.Name;
-								LAlterColumnDefinition.ChangeNilable = LNilabilityDifferent;
-								LAlterColumnDefinition.IsNilable = LColumn.IsNilable;
-								if (LDomainsDifferent)
-									LAlterColumnDefinition.TypeSpecifier = LColumn.DataType.EmitSpecifier(D4.EmitMode.ForCopy);
-								LStatement.AlterColumns.Add(LAlterColumnDefinition);
-								AReconciliationRequired = true;
+								D4.AlterColumnDefinition alterColumnDefinition = new D4.AlterColumnDefinition();
+								alterColumnDefinition.ColumnName = targetColumn.Name;
+								alterColumnDefinition.ChangeNilable = nilabilityDifferent;
+								alterColumnDefinition.IsNilable = column.IsNilable;
+								if (domainsDifferent)
+									alterColumnDefinition.TypeSpecifier = column.DataType.EmitSpecifier(D4.EmitMode.ForCopy);
+								statement.AlterColumns.Add(alterColumnDefinition);
+								reconciliationRequired = true;
 							}
 						}
 					}
 				}
 			
 			// Ensure ATargetTableVar.Columns is a subset of ASourceTableVar.Columns
-			if ((AOptions & ReconcileOptions.ShouldDropColumns) != 0)
-				foreach (Schema.TableVarColumn LColumn in ATargetTableVar.Columns)
-					if (!ASourceTableVar.Columns.ContainsName(LColumn.Name))
+			if ((options & ReconcileOptions.ShouldDropColumns) != 0)
+				foreach (Schema.TableVarColumn column in targetTableVar.Columns)
+					if (!sourceTableVar.Columns.ContainsName(column.Name))
 					{
-						LStatement.DropColumns.Add(new SchemaLevelDropColumnDefinition(LColumn));
-						AReconciliationRequired = true;
+						statement.DropColumns.Add(new SchemaLevelDropColumnDefinition(column));
+						reconciliationRequired = true;
 					}
 				
 			// Ensure All keys and orders have supporting indexes
 			// TODO: Replace an imposed key if a new key is added
-			foreach (Schema.Key LKey in ASourceTableVar.Keys)
-				if (Convert.ToBoolean(D4.MetaData.GetTag(LKey.MetaData, "Storage.ShouldReconcile", "true")))
-					if (!ATargetTableVar.Keys.Contains(LKey))
+			foreach (Schema.Key key in sourceTableVar.Keys)
+				if (Convert.ToBoolean(D4.MetaData.GetTag(key.MetaData, "Storage.ShouldReconcile", "true")))
+					if (!targetTableVar.Keys.Contains(key))
 					{
 						// Add the key to the target table var
-						LStatement.CreateKeys.Add(LKey.EmitStatement(D4.EmitMode.ForCopy));
-						AReconciliationRequired = true;
+						statement.CreateKeys.Add(key.EmitStatement(D4.EmitMode.ForCopy));
+						reconciliationRequired = true;
 					}
 					else
 					{
@@ -2132,21 +2161,21 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					}
 
 			// Ensure ATargetTableVar.Keys is a subset of ASourceTableVar.Keys
-			if ((AOptions & ReconcileOptions.ShouldDropKeys) != 0)
-				foreach (Schema.Key LKey in ATargetTableVar.Keys)
-					if (!ASourceTableVar.Keys.Contains(LKey) && !Convert.ToBoolean(D4.MetaData.GetTag(LKey.MetaData, "Storage.IsImposedKey", "false")))
+			if ((options & ReconcileOptions.ShouldDropKeys) != 0)
+				foreach (Schema.Key key in targetTableVar.Keys)
+					if (!sourceTableVar.Keys.Contains(key) && !Convert.ToBoolean(D4.MetaData.GetTag(key.MetaData, "Storage.IsImposedKey", "false")))
 					{
-						LStatement.DropKeys.Add(new SchemaLevelDropKeyDefinition(LKey));
-						AReconciliationRequired = true;
+						statement.DropKeys.Add(new SchemaLevelDropKeyDefinition(key));
+						reconciliationRequired = true;
 					}
 				
-			foreach (Schema.Order LOrder in ASourceTableVar.Orders)
-				if (Convert.ToBoolean(D4.MetaData.GetTag(LOrder.MetaData, "Storage.ShouldReconcile", "true")))
-					if (!(ATargetTableVar.Orders.Contains(LOrder)))
+			foreach (Schema.Order order in sourceTableVar.Orders)
+				if (Convert.ToBoolean(D4.MetaData.GetTag(order.MetaData, "Storage.ShouldReconcile", "true")))
+					if (!(targetTableVar.Orders.Contains(order)))
 					{
 						// Add the key to the target table var
-						LStatement.CreateOrders.Add(LOrder.EmitStatement(D4.EmitMode.ForCopy));
-						AReconciliationRequired = true;
+						statement.CreateOrders.Add(order.EmitStatement(D4.EmitMode.ForCopy));
+						reconciliationRequired = true;
 					}
 					else
 					{
@@ -2154,335 +2183,335 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					}
 			
 			// Ensure ATargetTableVar.Orders is a subset of ASourceTableVar.Orders
-			if ((AOptions & ReconcileOptions.ShouldDropOrders) != 0)
-				foreach (Schema.Order LOrder in ATargetTableVar.Orders)
-					if (!ASourceTableVar.Orders.Contains(LOrder))
+			if ((options & ReconcileOptions.ShouldDropOrders) != 0)
+				foreach (Schema.Order order in targetTableVar.Orders)
+					if (!sourceTableVar.Orders.Contains(order))
 					{
-						LStatement.DropOrders.Add(new SchemaLevelDropOrderDefinition(LOrder));
-						AReconciliationRequired = true;
+						statement.DropOrders.Add(new SchemaLevelDropOrderDefinition(order));
+						reconciliationRequired = true;
 					}
 
-			return LStatement;
+			return statement;
 		}
         
-		public override void ReconcileTable(ServerProcess AProcess, TableVar AServerTableVar, TableVar ADeviceTableVar, D4.ReconcileMaster AMaster)
+		public override void ReconcileTable(ServerProcess process, TableVar serverTableVar, TableVar deviceTableVar, D4.ReconcileMaster master)
 		{
-			if ((AMaster == D4.ReconcileMaster.Server) || (AMaster == D4.ReconcileMaster.Both))
+			if ((master == D4.ReconcileMaster.Server) || (master == D4.ReconcileMaster.Both))
 			{
-				using (Plan LPlan = new Plan(AProcess))
+				using (Plan plan = new Plan(process))
 				{
-					bool LReconciliationRequired;
-					D4.AlterTableStatement LStatement = ReconcileTable(LPlan, AServerTableVar, ADeviceTableVar, ReconcileOptions.All, out LReconciliationRequired);
-					if (LReconciliationRequired)
+					bool reconciliationRequired;
+					D4.AlterTableStatement statement = ReconcileTable(plan, serverTableVar, deviceTableVar, ReconcileOptions.All, out reconciliationRequired);
+					if (reconciliationRequired)
 					{
-						D4.ReconcileMode LSaveMode = ReconcileMode;
+						D4.ReconcileMode saveMode = ReconcileMode;
 						try
 						{
 							ReconcileMode = D4.ReconcileMode.None; // turn off reconciliation to avoid a command being re-issued to the target system
-							Program LProgram = new Program(AProcess);
-							LProgram.Code = Compiler.Compile(LPlan, LStatement);
-							LPlan.CheckCompiled();
-							LProgram.Start(null);
+							Program program = new Program(process);
+							program.Code = Compiler.Compile(plan, statement);
+							plan.CheckCompiled();
+							program.Start(null);
 							try
 							{
-								LProgram.DeviceExecute(this, LProgram.Code);
+								program.DeviceExecute(this, program.Code);
 							}
 							finally
 							{
-								LProgram.Stop(null);
+								program.Stop(null);
 							}
 						}
 						finally
 						{
-							ReconcileMode = LSaveMode;
+							ReconcileMode = saveMode;
 						}
 					}
 				}
 			}
 			
-			if ((AMaster == D4.ReconcileMaster.Device) || (AMaster == D4.ReconcileMaster.Both))
+			if ((master == D4.ReconcileMaster.Device) || (master == D4.ReconcileMaster.Both))
 			{
-				using (Plan LPlan = new Plan(AProcess))
+				using (Plan plan = new Plan(process))
 				{
-					bool LReconciliationRequired;
-					D4.AlterTableStatement LStatement = ReconcileTable(LPlan, ADeviceTableVar, AServerTableVar, ReconcileOptions.None, out LReconciliationRequired);
-					if (LReconciliationRequired)
+					bool reconciliationRequired;
+					D4.AlterTableStatement statement = ReconcileTable(plan, deviceTableVar, serverTableVar, ReconcileOptions.None, out reconciliationRequired);
+					if (reconciliationRequired)
 					{
-						D4.ReconcileMode LSaveMode = ReconcileMode;
+						D4.ReconcileMode saveMode = ReconcileMode;
 						try
 						{
 							ReconcileMode = D4.ReconcileMode.None; // turn off reconciliation to avoid a command being re-issued to the target system
-							Program LProgram = new Program(AProcess);
-							LProgram.Code = Compiler.Compile(LPlan, LStatement);
-							LPlan.CheckCompiled();
-							LProgram.Execute(null);
+							Program program = new Program(process);
+							program.Code = Compiler.Compile(plan, statement);
+							plan.CheckCompiled();
+							program.Execute(null);
 						}
 						finally
 						{
-							ReconcileMode = LSaveMode;
+							ReconcileMode = saveMode;
 						}
 					}
 				}
 			}
 		}
 		
-		public virtual void ReconcileReference(ServerProcess AProcess, Reference AServerReference, Reference ADeviceReference, D4.ReconcileMaster AMaster)
+		public virtual void ReconcileReference(ServerProcess process, Reference serverReference, Reference deviceReference, D4.ReconcileMaster master)
 		{
-			if ((AMaster == D4.ReconcileMaster.Server) || (AMaster == D4.ReconcileMaster.Both))
+			if ((master == D4.ReconcileMaster.Server) || (master == D4.ReconcileMaster.Both))
 			{
 				// TODO: Reference reconciliation
 			}
 			
-			if ((AMaster == D4.ReconcileMaster.Device) || (AMaster == D4.ReconcileMaster.Both))
+			if ((master == D4.ReconcileMaster.Device) || (master == D4.ReconcileMaster.Both))
 			{
 				// TODO: Reference reconciliation
 			}
 		}
         
-		public virtual bool ShouldIncludeColumn(Plan APlan, string ATableName, string AColumnName, string ADomainName)
+		public virtual bool ShouldIncludeColumn(Plan plan, string tableName, string columnName, string domainName)
 		{
 			return true;
 		}
         
-		public virtual ScalarType FindScalarType(Plan APlan, string ADomainName, int ALength, D4.MetaData AMetaData)
+		public virtual ScalarType FindScalarType(Plan plan, string domainName, int length, D4.MetaData metaData)
 		{
-			throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);
+			throw new SQLException(SQLException.Codes.UnsupportedImportType, domainName);
 		}
 		
-		public virtual ScalarType FindScalarType(Plan APlan, SQLDomain ADomain)
+		public virtual ScalarType FindScalarType(Plan plan, SQLDomain domain)
 		{
-			if (ADomain.Type.Equals(typeof(bool))) return APlan.DataTypes.SystemBoolean;
-			else if (ADomain.Type.Equals(typeof(byte))) return APlan.DataTypes.SystemByte;
-			else if (ADomain.Type.Equals(typeof(short))) return APlan.DataTypes.SystemShort;
-			else if (ADomain.Type.Equals(typeof(int))) return APlan.DataTypes.SystemInteger;
-			else if (ADomain.Type.Equals(typeof(long))) return APlan.DataTypes.SystemLong;
-			else if (ADomain.Type.Equals(typeof(decimal))) return APlan.DataTypes.SystemDecimal;
-			else if (ADomain.Type.Equals(typeof(float))) return APlan.DataTypes.SystemDecimal;
-			else if (ADomain.Type.Equals(typeof(double))) return APlan.DataTypes.SystemDecimal;
-			else if (ADomain.Type.Equals(typeof(string))) return APlan.DataTypes.SystemString;
-			else if (ADomain.Type.Equals(typeof(byte[]))) return APlan.DataTypes.SystemBinary;
-			else if (ADomain.Type.Equals(typeof(Guid))) return APlan.DataTypes.SystemGuid;
-			else if (ADomain.Type.Equals(typeof(DateTime))) return APlan.DataTypes.SystemDateTime;
-			else if (ADomain.Type.Equals(typeof(TimeSpan))) return APlan.DataTypes.SystemTimeSpan;
-			else throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomain.Type.Name);
+			if (domain.Type.Equals(typeof(bool))) return plan.DataTypes.SystemBoolean;
+			else if (domain.Type.Equals(typeof(byte))) return plan.DataTypes.SystemByte;
+			else if (domain.Type.Equals(typeof(short))) return plan.DataTypes.SystemShort;
+			else if (domain.Type.Equals(typeof(int))) return plan.DataTypes.SystemInteger;
+			else if (domain.Type.Equals(typeof(long))) return plan.DataTypes.SystemLong;
+			else if (domain.Type.Equals(typeof(decimal))) return plan.DataTypes.SystemDecimal;
+			else if (domain.Type.Equals(typeof(float))) return plan.DataTypes.SystemDecimal;
+			else if (domain.Type.Equals(typeof(double))) return plan.DataTypes.SystemDecimal;
+			else if (domain.Type.Equals(typeof(string))) return plan.DataTypes.SystemString;
+			else if (domain.Type.Equals(typeof(byte[]))) return plan.DataTypes.SystemBinary;
+			else if (domain.Type.Equals(typeof(Guid))) return plan.DataTypes.SystemGuid;
+			else if (domain.Type.Equals(typeof(DateTime))) return plan.DataTypes.SystemDateTime;
+			else if (domain.Type.Equals(typeof(TimeSpan))) return plan.DataTypes.SystemTimeSpan;
+			else throw new SQLException(SQLException.Codes.UnsupportedImportType, domain.Type.Name);
 		}
         
-		private void ConfigureTableVar(Plan APlan, TableVar ATableVar, Objects AColumns, Catalog ACatalog)
+		private void ConfigureTableVar(Plan plan, TableVar tableVar, Objects columns, Catalog catalog)
 		{
-			if (ATableVar != null)
+			if (tableVar != null)
 			{
-				ATableVar.DataType = new TableType();
+				tableVar.DataType = new TableType();
 
-				foreach (TableVarColumn LColumn in AColumns)
+				foreach (TableVarColumn column in columns)
 				{
-					ATableVar.Columns.Add(LColumn);
-					ATableVar.DataType.Columns.Add(LColumn.Column);
+					tableVar.Columns.Add(column);
+					tableVar.DataType.Columns.Add(column.Column);
 				}
 				
-				ACatalog.Add(ATableVar);
+				catalog.Add(tableVar);
 			}
 		}
 		
-		private void AttachKeyOrOrder(Plan APlan, TableVar ATableVar, ref Key AKey, ref Order AOrder)
+		private void AttachKeyOrOrder(Plan plan, TableVar tableVar, ref Key key, ref Order order)
 		{
-			if (AKey != null)
+			if (key != null)
 			{
-				if (!ATableVar.Keys.Contains(AKey) && (AKey.Columns.Count > 0))
-					ATableVar.Keys.Add(AKey);
-				AKey = null;
+				if (!tableVar.Keys.Contains(key) && (key.Columns.Count > 0))
+					tableVar.Keys.Add(key);
+				key = null;
 			}
-			else if (AOrder != null)
+			else if (order != null)
 			{
-				if (!ATableVar.Orders.Contains(AOrder) && (AOrder.Columns.Count > 0))
-					ATableVar.Orders.Add(AOrder);
-				AOrder = null;
+				if (!tableVar.Orders.Contains(order) && (order.Columns.Count > 0))
+					tableVar.Orders.Add(order);
+				order = null;
 			}
 		}
 		
-		private string FDeviceTablesExpression = String.Empty;
+		private string _deviceTablesExpression = String.Empty;
 		public string DeviceTablesExpression
 		{
-			get { return FDeviceTablesExpression; }
-			set { FDeviceTablesExpression = value == null ? String.Empty : value; }
+			get { return _deviceTablesExpression; }
+			set { _deviceTablesExpression = value == null ? String.Empty : value; }
 		}
 		
-		protected virtual string GetDeviceTablesExpression(TableVar ATableVar)
+		protected virtual string GetDeviceTablesExpression(TableVar tableVar)
 		{
 			return
 				String.Format
 				(
 					DeviceTablesExpression,
-					ATableVar == null ? String.Empty : ToSQLIdentifier(ATableVar)
+					tableVar == null ? String.Empty : ToSQLIdentifier(tableVar)
 				);
 		}
 		
-		protected virtual string GetTitleFromName(string AObjectName)
+		protected virtual string GetTitleFromName(string objectName)
 		{
-			StringBuilder LColumnTitle = new StringBuilder();
-			bool LFirstChar = true;
-			for (int LIndex = 0; LIndex < AObjectName.Length; LIndex++)
-				if (Char.IsLetterOrDigit(AObjectName, LIndex))
-					if (LFirstChar)
+			StringBuilder columnTitle = new StringBuilder();
+			bool firstChar = true;
+			for (int index = 0; index < objectName.Length; index++)
+				if (Char.IsLetterOrDigit(objectName, index))
+					if (firstChar)
 					{
-						LFirstChar = false;
-						LColumnTitle.Append(Char.ToUpper(AObjectName[LIndex]));
+						firstChar = false;
+						columnTitle.Append(Char.ToUpper(objectName[index]));
 					}
 					else
-						LColumnTitle.Append(Char.ToLower(AObjectName[LIndex]));
+						columnTitle.Append(Char.ToLower(objectName[index]));
 				else
-					if (!LFirstChar)
+					if (!firstChar)
 					{
-						LColumnTitle.Append(" ");
-						LFirstChar = true;
+						columnTitle.Append(" ");
+						firstChar = true;
 					}
 
-			return LColumnTitle.ToString();
+			return columnTitle.ToString();
 		}
 		
-		protected string GetServerTableName(Plan APlan, Catalog AServerCatalog, string ADeviceTableName)
+		protected string GetServerTableName(Plan plan, Catalog serverCatalog, string deviceTableName)
 		{
-			string LServerTableName = FromSQLIdentifier(ADeviceTableName);
-			List<string> LNames = new List<string>();
-			int LIndex = AServerCatalog.IndexOf(LServerTableName, LNames);
-			if ((LIndex >= 0) && (AServerCatalog[LIndex].Library != null) && (D4.MetaData.GetTag(AServerCatalog[LIndex].MetaData, "Storage.Name", ADeviceTableName) == ADeviceTableName))
-				LServerTableName = AServerCatalog[LIndex].Name;
+			string serverTableName = FromSQLIdentifier(deviceTableName);
+			List<string> names = new List<string>();
+			int index = serverCatalog.IndexOf(serverTableName, names);
+			if ((index >= 0) && (serverCatalog[index].Library != null) && (D4.MetaData.GetTag(serverCatalog[index].MetaData, "Storage.Name", deviceTableName) == deviceTableName))
+				serverTableName = serverCatalog[index].Name;
 			else
 			{
 				// if LNames is populated, all but one of them must have a Storage.Name tag specifying a different name for the table
-				bool LFound = false;
-				foreach (string LName in LNames)
+				bool found = false;
+				foreach (string name in names)
 				{
-					TableVar LTableVar = (TableVar)AServerCatalog[AServerCatalog.IndexOfName(LName)];
-					if (LTableVar.Library != null)
-						if (D4.MetaData.GetTag(LTableVar.MetaData, "Storage.Name", ADeviceTableName) == ADeviceTableName)
+					TableVar tableVar = (TableVar)serverCatalog[serverCatalog.IndexOfName(name)];
+					if (tableVar.Library != null)
+						if (D4.MetaData.GetTag(tableVar.MetaData, "Storage.Name", deviceTableName) == deviceTableName)
 						{
-							LServerTableName = LTableVar.Name;
-							LFound = true;
+							serverTableName = tableVar.Name;
+							found = true;
 						}
 				}
 				
 				// search for a table with ADeviceTableName as it's Storage.Name tag
-				if (!LFound)
-					foreach (TableVar LTableVar in AServerCatalog)
-						if (LTableVar.Library != null)
-							if (D4.MetaData.GetTag(LTableVar.MetaData, "Storage.Name", "") == ADeviceTableName)
+				if (!found)
+					foreach (TableVar tableVar in serverCatalog)
+						if (tableVar.Library != null)
+							if (D4.MetaData.GetTag(tableVar.MetaData, "Storage.Name", "") == deviceTableName)
 							{
-								LServerTableName = LTableVar.Name;
-								LFound = true;
+								serverTableName = tableVar.Name;
+								found = true;
 								break;
 							}
 					
-				if (!LFound)
-					LServerTableName = DAE.Schema.Object.Qualify(LServerTableName, APlan.CurrentLibrary.Name);
+				if (!found)
+					serverTableName = DAE.Schema.Object.Qualify(serverTableName, plan.CurrentLibrary.Name);
 			}
 
-			return LServerTableName;
+			return serverTableName;
 		}
 		
-		public int ColumnIndexFromNativeColumnName(TableVar AExistingTableVar, string ANativeColumnName)
+		public int ColumnIndexFromNativeColumnName(TableVar existingTableVar, string nativeColumnName)
 		{
-			if (AExistingTableVar != null)
-				for (int LIndex = 0; LIndex < AExistingTableVar.Columns.Count; LIndex++)
-					if (D4.MetaData.GetTag(AExistingTableVar.Columns[LIndex].MetaData, "Storage.Name", "") == ANativeColumnName)
-						return LIndex;
+			if (existingTableVar != null)
+				for (int index = 0; index < existingTableVar.Columns.Count; index++)
+					if (D4.MetaData.GetTag(existingTableVar.Columns[index].MetaData, "Storage.Name", "") == nativeColumnName)
+						return index;
 			return -1;
 		}
 		
-		public unsafe virtual void GetDeviceTables(Plan APlan, Catalog AServerCatalog, Catalog ADeviceCatalog, TableVar ATableVar)
+		public unsafe virtual void GetDeviceTables(Plan plan, Catalog serverCatalog, Catalog deviceCatalog, TableVar tableVar)
 		{
-			string LDeviceTablesExpression = GetDeviceTablesExpression(ATableVar);
-			if (LDeviceTablesExpression != String.Empty)
+			string deviceTablesExpression = GetDeviceTablesExpression(tableVar);
+			if (deviceTablesExpression != String.Empty)
 			{
-				SQLCursor LCursor = ((SQLDeviceSession)APlan.DeviceConnect(this)).Connection.Open(LDeviceTablesExpression);
+				SQLCursor cursor = ((SQLDeviceSession)plan.DeviceConnect(this)).Connection.Open(deviceTablesExpression);
 				try
 				{
-					string LTableName = String.Empty;
-					BaseTableVar LTableVar = null;
-					BaseTableVar LExistingTableVar = null;
-					Objects LColumns = new Objects();
+					string tableName = String.Empty;
+					BaseTableVar localTableVar = null;
+					BaseTableVar existingTableVar = null;
+					Objects columns = new Objects();
 					
-					while (LCursor.Next())
+					while (cursor.Next())
 					{
-						if (LTableName != (string)LCursor[1])
+						if (tableName != (string)cursor[1])
 						{
-							ConfigureTableVar(APlan, LTableVar, LColumns, ADeviceCatalog);
+							ConfigureTableVar(plan, localTableVar, columns, deviceCatalog);
 
-							LTableName = (string)LCursor[1];
+							tableName = (string)cursor[1];
 							
 							// Search for a table with this name unqualified in the server catalog
-							string LTableTitle = (string)LCursor[4];
-							LTableVar = new BaseTableVar(GetServerTableName(APlan, AServerCatalog, LTableName), null);
-							LTableVar.Owner = APlan.User;
-							LTableVar.Library = APlan.CurrentLibrary;
-							LTableVar.Device = this;
-							LTableVar.MetaData = new D4.MetaData();
-							LTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Name", LTableName, true));
-							LTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Schema", (string)LCursor[0], true));
+							string tableTitle = (string)cursor[4];
+							localTableVar = new BaseTableVar(GetServerTableName(plan, serverCatalog, tableName), null);
+							localTableVar.Owner = plan.User;
+							localTableVar.Library = plan.CurrentLibrary;
+							localTableVar.Device = this;
+							localTableVar.MetaData = new D4.MetaData();
+							localTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Name", tableName, true));
+							localTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Schema", (string)cursor[0], true));
 							
 							// if this table is already present in the server catalog, use StorageNames to map the columns
-							int LExistingTableIndex = AServerCatalog.IndexOfName(LTableVar.Name);
-							if (LExistingTableIndex >= 0)
-								LExistingTableVar = AServerCatalog[LExistingTableIndex] as BaseTableVar;
+							int existingTableIndex = serverCatalog.IndexOfName(localTableVar.Name);
+							if (existingTableIndex >= 0)
+								existingTableVar = serverCatalog[existingTableIndex] as BaseTableVar;
 							else
-								LExistingTableVar = null;
+								existingTableVar = null;
 							
-							if (LTableTitle == LTableName)
-								LTableTitle = GetTitleFromName(LTableName);
-							LTableVar.MetaData.Tags.Add(new D4.Tag("Frontend.Title", LTableTitle));
-							LTableVar.AddDependency(this);
-							LColumns = new Objects();
+							if (tableTitle == tableName)
+								tableTitle = GetTitleFromName(tableName);
+							localTableVar.MetaData.Tags.Add(new D4.Tag("Frontend.Title", tableTitle));
+							localTableVar.AddDependency(this);
+							columns = new Objects();
 						}
 						
-						string LNativeColumnName = (string)LCursor[2];
-						string LColumnName = FromSQLIdentifier(LNativeColumnName);
-						string LColumnTitle = (string)LCursor[5];
-						string LNativeDomainName = (string)LCursor[6];
-						string LDomainName = (string)LCursor[7];
-						int LLength = Convert.ToInt32(LCursor[8]);
+						string nativeColumnName = (string)cursor[2];
+						string columnName = FromSQLIdentifier(nativeColumnName);
+						string columnTitle = (string)cursor[5];
+						string nativeDomainName = (string)cursor[6];
+						string domainName = (string)cursor[7];
+						int length = Convert.ToInt32(cursor[8]);
 						
-						int LExistingColumnIndex = ColumnIndexFromNativeColumnName(LExistingTableVar, LNativeColumnName);
-						if (LExistingColumnIndex >= 0)
-							LColumnName = LExistingTableVar.Columns[LExistingColumnIndex].Name;
+						int existingColumnIndex = ColumnIndexFromNativeColumnName(existingTableVar, nativeColumnName);
+						if (existingColumnIndex >= 0)
+							columnName = existingTableVar.Columns[existingColumnIndex].Name;
 						
-						if (ShouldIncludeColumn(APlan, LTableName, LColumnName, LNativeDomainName))
+						if (ShouldIncludeColumn(plan, tableName, columnName, nativeDomainName))
 						{
-							D4.MetaData LMetaData = new D4.MetaData();
-							TableVarColumn LColumn =
+							D4.MetaData metaData = new D4.MetaData();
+							TableVarColumn column =
 								new TableVarColumn
 								(
-									new Column(LColumnName, FindScalarType(APlan, LNativeDomainName, LLength, LMetaData)),
-									LMetaData, 
+									new Column(columnName, FindScalarType(plan, nativeDomainName, length, metaData)),
+									metaData, 
 									TableVarColumnType.Stored
 								);
 								
-							LColumn.MetaData.Tags.Add(new D4.Tag("Storage.Name", LNativeColumnName));
-							if (LNativeDomainName != LDomainName)
-								LColumn.MetaData.Tags.Add(new D4.Tag("Storage.DomainName", LDomainName));
+							column.MetaData.Tags.Add(new D4.Tag("Storage.Name", nativeColumnName));
+							if (nativeDomainName != domainName)
+								column.MetaData.Tags.Add(new D4.Tag("Storage.DomainName", domainName));
 							
-							if (LColumn.MetaData.Tags.Contains("Storage.Length"))
+							if (column.MetaData.Tags.Contains("Storage.Length"))
 							{
-								LColumn.MetaData.Tags.Add(new D4.Tag("Frontend.Width", Math.Min(Math.Max(3, LLength), 40).ToString()));
-								if (LLength >= 0) // A (n)varchar(max) column in Microsoft SQL Server will reconcile with length -1
-									LColumn.Constraints.Add(Compiler.CompileTableVarColumnConstraint(APlan, LTableVar, LColumn, new D4.ConstraintDefinition("LengthValid", new BinaryExpression(new CallExpression("Length", new Expression[]{new IdentifierExpression(D4.Keywords.Value)}), D4.Instructions.InclusiveLess, new ValueExpression(LLength)), null)));
+								column.MetaData.Tags.Add(new D4.Tag("Frontend.Width", Math.Min(Math.Max(3, length), 40).ToString()));
+								if (length >= 0) // A (n)varchar(max) column in Microsoft SQL Server will reconcile with length -1
+									column.Constraints.Add(Compiler.CompileTableVarColumnConstraint(plan, localTableVar, column, new D4.ConstraintDefinition("LengthValid", new BinaryExpression(new CallExpression("Length", new Expression[]{new IdentifierExpression(D4.Keywords.Value)}), D4.Instructions.InclusiveLess, new ValueExpression(length)), null)));
 							}
 							
-							if (LColumnTitle == LNativeColumnName)
-								LColumnTitle = GetTitleFromName(LNativeColumnName);
+							if (columnTitle == nativeColumnName)
+								columnTitle = GetTitleFromName(nativeColumnName);
 								
-							LColumn.MetaData.Tags.AddOrUpdate("Frontend.Title", LColumnTitle);
+							column.MetaData.Tags.AddOrUpdate("Frontend.Title", columnTitle);
 								
-							if (Convert.ToInt32(LCursor[9]) != 0)
-								LColumn.IsNilable = true;
+							if (Convert.ToInt32(cursor[9]) != 0)
+								column.IsNilable = true;
 
-							if (Convert.ToInt32(LCursor[10]) != 0)
-								LColumn.MetaData.Tags.AddOrUpdate("Storage.Deferred", "true");
+							if (Convert.ToInt32(cursor[10]) != 0)
+								column.MetaData.Tags.AddOrUpdate("Storage.Deferred", "true");
 								
-							LColumns.Add(LColumn);
-							LTableVar.Dependencies.Ensure((Schema.ScalarType)LColumn.DataType);
+							columns.Add(column);
+							localTableVar.Dependencies.Ensure((Schema.ScalarType)column.DataType);
 						}
 					}	// while
 
-					ConfigureTableVar(APlan, LTableVar, LColumns, ADeviceCatalog);
+					ConfigureTableVar(plan, localTableVar, columns, deviceCatalog);
 				}
 				catch (Exception E)
 				{
@@ -2490,114 +2519,114 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				}
 				finally
 				{
-					LCursor.Command.Connection.Close(LCursor);
+					cursor.Command.Connection.Close(cursor);
 				}
 			}
 		}
 
-		private string FDeviceIndexesExpression = String.Empty;
+		private string _deviceIndexesExpression = String.Empty;
 		public string DeviceIndexesExpression
 		{
-			get { return FDeviceIndexesExpression; }
-			set { FDeviceIndexesExpression = value == null ? String.Empty : value; }
+			get { return _deviceIndexesExpression; }
+			set { _deviceIndexesExpression = value == null ? String.Empty : value; }
 		}
 		
-		protected virtual string GetDeviceIndexesExpression(TableVar ATableVar)
+		protected virtual string GetDeviceIndexesExpression(TableVar tableVar)
 		{
 			return
 				String.Format
 				(
 					DeviceIndexesExpression,
-					(ATableVar == null) ? String.Empty : ToSQLIdentifier(ATableVar)
+					(tableVar == null) ? String.Empty : ToSQLIdentifier(tableVar)
 				);
 		}
 		
-		public virtual void GetDeviceIndexes(Plan APlan, Catalog AServerCatalog, Catalog ADeviceCatalog, TableVar ATableVar)
+		public virtual void GetDeviceIndexes(Plan plan, Catalog serverCatalog, Catalog deviceCatalog, TableVar tableVar)
 		{
-			string LDeviceIndexesExpression = GetDeviceIndexesExpression(ATableVar);
-			if (LDeviceIndexesExpression != String.Empty)
+			string deviceIndexesExpression = GetDeviceIndexesExpression(tableVar);
+			if (deviceIndexesExpression != String.Empty)
 			{
-				SQLCursor LCursor = ((SQLDeviceSession)APlan.DeviceConnect(this)).Connection.Open(LDeviceIndexesExpression);
+				SQLCursor cursor = ((SQLDeviceSession)plan.DeviceConnect(this)).Connection.Open(deviceIndexesExpression);
 				try
 				{
-					string LTableName = String.Empty;
-					string LIndexName = String.Empty;
-					BaseTableVar LTableVar = null;
-					Key LKey = null;
-					Order LOrder = null;
-					OrderColumn LOrderColumn;
-					int LColumnIndex = -1;
-					bool LShouldIncludeIndex = true;
+					string tableName = String.Empty;
+					string indexName = String.Empty;
+					BaseTableVar localTableVar = null;
+					Key key = null;
+					Order order = null;
+					OrderColumn orderColumn;
+					int columnIndex = -1;
+					bool shouldIncludeIndex = true;
 					
-					while (LCursor.Next())
+					while (cursor.Next())
 					{
-						if (LTableName != (string)LCursor[1])
+						if (tableName != (string)cursor[1])
 						{
-							if ((LTableVar != null) && LShouldIncludeIndex)
-								AttachKeyOrOrder(APlan, LTableVar, ref LKey, ref LOrder);
+							if ((localTableVar != null) && shouldIncludeIndex)
+								AttachKeyOrOrder(plan, localTableVar, ref key, ref order);
 							else
 							{
-								LKey = null;
-								LOrder = null;
+								key = null;
+								order = null;
 							}
 							
-							LTableName = (string)LCursor[1];
-							LTableVar = (BaseTableVar)ADeviceCatalog[GetServerTableName(APlan, AServerCatalog, LTableName)];
-							LIndexName = (string)LCursor[2];
-							D4.MetaData LMetaData = new D4.MetaData();
-							LMetaData.Tags.Add(new D4.Tag("Storage.Name", LIndexName, true));
-							if (Convert.ToInt32(LCursor[5]) != 0)
-								LKey = new Key(LMetaData);
+							tableName = (string)cursor[1];
+							localTableVar = (BaseTableVar)deviceCatalog[GetServerTableName(plan, serverCatalog, tableName)];
+							indexName = (string)cursor[2];
+							D4.MetaData metaData = new D4.MetaData();
+							metaData.Tags.Add(new D4.Tag("Storage.Name", indexName, true));
+							if (Convert.ToInt32(cursor[5]) != 0)
+								key = new Key(metaData);
 							else
-								LOrder = new Order(LMetaData);
-							LShouldIncludeIndex = true;
+								order = new Order(metaData);
+							shouldIncludeIndex = true;
 						}
 						
-						if (LIndexName != (string)LCursor[2])
+						if (indexName != (string)cursor[2])
 						{
-							if (LShouldIncludeIndex)
-								AttachKeyOrOrder(APlan, LTableVar, ref LKey, ref LOrder);
+							if (shouldIncludeIndex)
+								AttachKeyOrOrder(plan, localTableVar, ref key, ref order);
 							else
 							{
-								LKey = null;
-								LOrder = null;
+								key = null;
+								order = null;
 							}
 
-							LIndexName = (string)LCursor[2];
-							D4.MetaData LMetaData = new D4.MetaData();
-							LMetaData.Tags.Add(new D4.Tag("Storage.Name", LIndexName, true));
-							if (Convert.ToInt32(LCursor[5]) != 0)
-								LKey = new Key(LMetaData);
+							indexName = (string)cursor[2];
+							D4.MetaData metaData = new D4.MetaData();
+							metaData.Tags.Add(new D4.Tag("Storage.Name", indexName, true));
+							if (Convert.ToInt32(cursor[5]) != 0)
+								key = new Key(metaData);
 							else
-								LOrder = new Order(LMetaData);
-							LShouldIncludeIndex = true;
+								order = new Order(metaData);
+							shouldIncludeIndex = true;
 						}
 						
-						if (LKey != null)
+						if (key != null)
 						{
-							LColumnIndex = ColumnIndexFromNativeColumnName(LTableVar, (string)LCursor[3]);
-							if (LColumnIndex >= 0)
-								LKey.Columns.Add(LTableVar.Columns[LColumnIndex]);
+							columnIndex = ColumnIndexFromNativeColumnName(localTableVar, (string)cursor[3]);
+							if (columnIndex >= 0)
+								key.Columns.Add(localTableVar.Columns[columnIndex]);
 							else
-								LShouldIncludeIndex = false;
+								shouldIncludeIndex = false;
 						}
 						else
 						{
-							LColumnIndex = ColumnIndexFromNativeColumnName(LTableVar, (string)LCursor[3]);
-							if (LColumnIndex >= 0)
+							columnIndex = ColumnIndexFromNativeColumnName(localTableVar, (string)cursor[3]);
+							if (columnIndex >= 0)
 							{
-								LOrderColumn = new OrderColumn(LTableVar.Columns[LColumnIndex], Convert.ToInt32(LCursor[6]) == 0);
-								LOrderColumn.Sort = Compiler.GetSort(APlan, LOrderColumn.Column.DataType);
-								LOrderColumn.IsDefaultSort = true;
-								LOrder.Columns.Add(LOrderColumn);
+								orderColumn = new OrderColumn(localTableVar.Columns[columnIndex], Convert.ToInt32(cursor[6]) == 0);
+								orderColumn.Sort = Compiler.GetSort(plan, orderColumn.Column.DataType);
+								orderColumn.IsDefaultSort = true;
+								order.Columns.Add(orderColumn);
 							}
 							else
-								LShouldIncludeIndex = false;
+								shouldIncludeIndex = false;
 						}
 					}
 					
-					if (LShouldIncludeIndex)
-						AttachKeyOrOrder(APlan, LTableVar, ref LKey, ref LOrder);
+					if (shouldIncludeIndex)
+						AttachKeyOrOrder(plan, localTableVar, ref key, ref order);
 				}
 				catch (Exception E)
 				{
@@ -2605,101 +2634,101 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				}
 				finally
 				{
-					LCursor.Command.Connection.Close(LCursor);
+					cursor.Command.Connection.Close(cursor);
 				}
 			}
 		}
 
-		private string FDeviceForeignKeysExpression = String.Empty;
+		private string _deviceForeignKeysExpression = String.Empty;
 		public string DeviceForeignKeysExpression
 		{
-			get { return FDeviceForeignKeysExpression; }
-			set { FDeviceForeignKeysExpression = value == null ? String.Empty : value; }
+			get { return _deviceForeignKeysExpression; }
+			set { _deviceForeignKeysExpression = value == null ? String.Empty : value; }
 		}
 		
-		protected virtual string GetDeviceForeignKeysExpression(TableVar ATableVar)
+		protected virtual string GetDeviceForeignKeysExpression(TableVar tableVar)
 		{
 			return
 				String.Format
 				(
 					DeviceForeignKeysExpression,
-					(ATableVar == null) ? String.Empty : ToSQLIdentifier(ATableVar)
+					(tableVar == null) ? String.Empty : ToSQLIdentifier(tableVar)
 				);
 		}
 		
-		public virtual void GetDeviceForeignKeys(Plan APlan, Catalog AServerCatalog, Catalog ADeviceCatalog, TableVar ATableVar)
+		public virtual void GetDeviceForeignKeys(Plan plan, Catalog serverCatalog, Catalog deviceCatalog, TableVar tableVar)
 		{
-			string LDeviceForeignKeysExpression = GetDeviceForeignKeysExpression(ATableVar);
-			if (LDeviceForeignKeysExpression != String.Empty)
+			string deviceForeignKeysExpression = GetDeviceForeignKeysExpression(tableVar);
+			if (deviceForeignKeysExpression != String.Empty)
 			{
-				SQLCursor LCursor = ((SQLDeviceSession)APlan.DeviceConnect(this)).Connection.Open(LDeviceForeignKeysExpression);
+				SQLCursor cursor = ((SQLDeviceSession)plan.DeviceConnect(this)).Connection.Open(deviceForeignKeysExpression);
 				try
 				{
-					string LConstraintName = String.Empty;
-					TableVar LSourceTableVar = null;
-					TableVar LTargetTableVar = null;
-					Reference LReference = null;
-					int LColumnIndex;
-					bool LShouldIncludeReference = true;
+					string constraintName = String.Empty;
+					TableVar sourceTableVar = null;
+					TableVar targetTableVar = null;
+					Reference reference = null;
+					int columnIndex;
+					bool shouldIncludeReference = true;
 					
-					while (LCursor.Next())
+					while (cursor.Next())
 					{
-						if (LConstraintName != (string)LCursor[1])
+						if (constraintName != (string)cursor[1])
 						{
-							if ((LReference != null) && LShouldIncludeReference)
+							if ((reference != null) && shouldIncludeReference)
 							{
-								ADeviceCatalog.Add(LReference);
-								LReference = null;
+								deviceCatalog.Add(reference);
+								reference = null;
 							}
 							
-							LConstraintName = (string)LCursor[1];
-							string LSourceTableName = GetServerTableName(APlan, AServerCatalog, (string)LCursor[3]);
-							string LTargetTableName = GetServerTableName(APlan, AServerCatalog, (string)LCursor[6]);
-							if (ADeviceCatalog.Contains(LSourceTableName))
-								LSourceTableVar = (TableVar)ADeviceCatalog[LSourceTableName];
+							constraintName = (string)cursor[1];
+							string sourceTableName = GetServerTableName(plan, serverCatalog, (string)cursor[3]);
+							string targetTableName = GetServerTableName(plan, serverCatalog, (string)cursor[6]);
+							if (deviceCatalog.Contains(sourceTableName))
+								sourceTableVar = (TableVar)deviceCatalog[sourceTableName];
 							else
-								LSourceTableVar = null;
+								sourceTableVar = null;
 								
-							if (ADeviceCatalog.Contains(LTargetTableName))
-								LTargetTableVar = (TableVar)ADeviceCatalog[LTargetTableName];
+							if (deviceCatalog.Contains(targetTableName))
+								targetTableVar = (TableVar)deviceCatalog[targetTableName];
 							else
-								LTargetTableVar = null;
+								targetTableVar = null;
 							
-							LShouldIncludeReference = (LSourceTableVar != null) && (LTargetTableVar != null);
-							if (LShouldIncludeReference)
+							shouldIncludeReference = (sourceTableVar != null) && (targetTableVar != null);
+							if (shouldIncludeReference)
 							{
-								D4.MetaData LMetaData = new D4.MetaData();
-								LMetaData.Tags.Add(new D4.Tag("Storage.Name", LConstraintName, true));
-								LMetaData.Tags.Add(new D4.Tag("Storage.Schema", (string)LCursor[0], true));
-								LMetaData.Tags.Add(new D4.Tag("DAE.Enforced", "false", true));
-								LReference = new Schema.Reference(DAE.Schema.Object.Qualify(FromSQLIdentifier(LConstraintName), DAE.Schema.Object.Qualifier(LSourceTableVar.Name)));
-								LReference.MergeMetaData(LMetaData);
-								LReference.Owner = APlan.User;
-								LReference.Library = APlan.CurrentLibrary;
-								LReference.SourceTable = LSourceTableVar;
-								LReference.TargetTable = LTargetTableVar;
-								LReference.Enforced = false;
+								D4.MetaData metaData = new D4.MetaData();
+								metaData.Tags.Add(new D4.Tag("Storage.Name", constraintName, true));
+								metaData.Tags.Add(new D4.Tag("Storage.Schema", (string)cursor[0], true));
+								metaData.Tags.Add(new D4.Tag("DAE.Enforced", "false", true));
+								reference = new Schema.Reference(DAE.Schema.Object.Qualify(FromSQLIdentifier(constraintName), DAE.Schema.Object.Qualifier(sourceTableVar.Name)));
+								reference.MergeMetaData(metaData);
+								reference.Owner = plan.User;
+								reference.Library = plan.CurrentLibrary;
+								reference.SourceTable = sourceTableVar;
+								reference.TargetTable = targetTableVar;
+								reference.Enforced = false;
 							}
 						}
 						
-						if (LReference != null)
+						if (reference != null)
 						{
-							LColumnIndex = LSourceTableVar.Columns.IndexOf(FromSQLIdentifier((string)LCursor[4]));
-							if (LColumnIndex >= 0)
-								LReference.SourceKey.Columns.Add(LSourceTableVar.Columns[LColumnIndex]);
+							columnIndex = sourceTableVar.Columns.IndexOf(FromSQLIdentifier((string)cursor[4]));
+							if (columnIndex >= 0)
+								reference.SourceKey.Columns.Add(sourceTableVar.Columns[columnIndex]);
 							else
-								LShouldIncludeReference = false;
+								shouldIncludeReference = false;
 								
-							LColumnIndex = LTargetTableVar.Columns.IndexOf(FromSQLIdentifier((string)LCursor[7]));
-							if (LColumnIndex >= 0)
-								LReference.TargetKey.Columns.Add(LTargetTableVar.Columns[LColumnIndex]);
+							columnIndex = targetTableVar.Columns.IndexOf(FromSQLIdentifier((string)cursor[7]));
+							if (columnIndex >= 0)
+								reference.TargetKey.Columns.Add(targetTableVar.Columns[columnIndex]);
 							else
-								LShouldIncludeReference = false;
+								shouldIncludeReference = false;
 						}
 					}
 					
-					if ((LReference != null) && LShouldIncludeReference)
-						ADeviceCatalog.Add(LReference);
+					if ((reference != null) && shouldIncludeReference)
+						deviceCatalog.Add(reference);
 				}
 				catch (Exception E)
 				{
@@ -2707,130 +2736,130 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				}
 				finally
 				{
-					LCursor.Command.Connection.Close(LCursor);
+					cursor.Command.Connection.Close(cursor);
 				}
 			}
 		}
 
-		public override Catalog GetDeviceCatalog(ServerProcess AProcess, Catalog AServerCatalog, TableVar ATableVar)
+		public override Catalog GetDeviceCatalog(ServerProcess process, Catalog serverCatalog, TableVar tableVar)
 		{
-			Catalog LCatalog = base.GetDeviceCatalog(AProcess, AServerCatalog, ATableVar);
+			Catalog catalog = base.GetDeviceCatalog(process, serverCatalog, tableVar);
 
-			using (Plan LPlan = new Plan(AProcess))
+			using (Plan plan = new Plan(process))
 			{
-				GetDeviceTables(LPlan, AServerCatalog, LCatalog, ATableVar);
-				GetDeviceIndexes(LPlan, AServerCatalog, LCatalog, ATableVar);
-				GetDeviceForeignKeys(LPlan, AServerCatalog, LCatalog, ATableVar);
+				GetDeviceTables(plan, serverCatalog, catalog, tableVar);
+				GetDeviceIndexes(plan, serverCatalog, catalog, tableVar);
+				GetDeviceForeignKeys(plan, serverCatalog, catalog, tableVar);
 				
 				// Impose a key on each table if one is not defined by the device
-				foreach (Schema.Object LObject in LCatalog)
-					if ((LObject is TableVar) && (((TableVar)LObject).Keys.Count == 0))
+				foreach (Schema.Object objectValue in catalog)
+					if ((objectValue is TableVar) && (((TableVar)objectValue).Keys.Count == 0))
 					{
-						TableVar LTableVar = (TableVar)LObject;
-						Key LKey = new Key();
-						foreach (TableVarColumn LColumn in LTableVar.Columns)
-							if (!Convert.ToBoolean(D4.MetaData.GetTag(LColumn.MetaData, "Storage.Deferred", "false")))
-								LKey.Columns.Add(LColumn);
-						LKey.IsGenerated = true;
-						LKey.MetaData = new D4.MetaData();
-						LKey.MetaData.Tags.Add(new D4.Tag("Storage.IsImposedKey", "true"));
-						LTableVar.Keys.Add(LKey);
+						TableVar localTableVar = (TableVar)objectValue;
+						Key key = new Key();
+						foreach (TableVarColumn column in localTableVar.Columns)
+							if (!Convert.ToBoolean(D4.MetaData.GetTag(column.MetaData, "Storage.Deferred", "false")))
+								key.Columns.Add(column);
+						key.IsGenerated = true;
+						key.MetaData = new D4.MetaData();
+						key.MetaData.Tags.Add(new D4.Tag("Storage.IsImposedKey", "true"));
+						localTableVar.Keys.Add(key);
 					}
 			}
 
-			return LCatalog;
+			return catalog;
 		}
 
-		private string FConnectionClass = String.Empty;
+		private string _connectionClass = String.Empty;
 		public string ConnectionClass
 		{
-			get { return FConnectionClass; }
-			set { FConnectionClass = value == null ? String.Empty : value; }
+			get { return _connectionClass; }
+			set { _connectionClass = value == null ? String.Empty : value; }
 		}
 
-		private string FConnectionStringBuilderClass = String.Empty;
+		private string _connectionStringBuilderClass = String.Empty;
 		public string ConnectionStringBuilderClass
 		{
-			get { return FConnectionStringBuilderClass; }
-			set { FConnectionStringBuilderClass = value == null ? String.Empty : value; }
+			get { return _connectionStringBuilderClass; }
+			set { _connectionStringBuilderClass = value == null ? String.Empty : value; }
 		}
 
-		public void GetConnectionParameters (D4.Tags ATags, Schema.DeviceSessionInfo ADeviceSessionInfo)
+		public void GetConnectionParameters (D4.Tags tags, Schema.DeviceSessionInfo deviceSessionInfo)
 		{
-			StringToTags(ConnectionParameters, ATags);
-			StringToTags(ADeviceSessionInfo.ConnectionParameters, ATags);
+			StringToTags(ConnectionParameters, tags);
+			StringToTags(deviceSessionInfo.ConnectionParameters, tags);
 		}
 		
-		public static string TagsToString(Language.D4.Tags ATags)
+		public static string TagsToString(Language.D4.Tags tags)
 		{
-			StringBuilder LResult = new StringBuilder();
+			StringBuilder result = new StringBuilder();
 			#if USEHASHTABLEFORTAGS
-			foreach (D4.Tag LTag in ATags)
+			foreach (D4.Tag tag in ATags)
 			{
 			#else
-			D4.Tag LTag;
-			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
+			D4.Tag tag;
+			for (int index = 0; index < tags.Count; index++)
 			{
-				LTag = ATags[LIndex];
+				tag = tags[index];
 			#endif
-				if (LResult.Length > 0)
-					LResult.Append(";");
-				LResult.AppendFormat("{0}={1}", LTag.Name, LTag.Value);
+				if (result.Length > 0)
+					result.Append(";");
+				result.AppendFormat("{0}={1}", tag.Name, tag.Value);
 			}
-			return LResult.ToString();
+			return result.ToString();
 		}
 
-		public static void StringToTags(String AString, Language.D4.Tags ATags)
+		public static void StringToTags(String stringValue, Language.D4.Tags tags)
 		{
-			if (AString != null && AString != "")
+			if (stringValue != null && stringValue != "")
 			{
-				string[] LArray = AString.Split(';');
-				for (int LIndex = 0; LIndex < LArray.Length; LIndex++)
+				string[] array = stringValue.Split(';');
+				for (int index = 0; index < array.Length; index++)
 				{
-					string[] LTempArray = LArray[LIndex].Split('=');
-					if (LTempArray.Length != 2)
+					string[] tempArray = array[index].Split('=');
+					if (tempArray.Length != 2)
 						throw new Schema.SchemaException(DAE.Schema.SchemaException.Codes.InvalidConnectionString);
-					ATags.AddOrUpdate(LTempArray[0], LTempArray[1]);
+					tags.AddOrUpdate(tempArray[0], tempArray[1]);
 				}
 			}
 		}
 
 		/// <summary>Determines the default buffer size for SQLDeviceCursors created for this device.</summary>
 		/// <remarks>A value of 0 for this property indicates that the SQLDeviceCursors should be disconnected, i.e. the entire result set will be cached by the device on open.</remarks>
-		private int FConnectionBufferSize = SQLDeviceCursor.CDefaultBufferSize;
+		private int _connectionBufferSize = SQLDeviceCursor.DefaultBufferSize;
 		public int ConnectionBufferSize
 		{
-			get { return FConnectionBufferSize; }
-			set { FConnectionBufferSize = value; }
+			get { return _connectionBufferSize; }
+			set { _connectionBufferSize = value; }
 		}
 	}
 	
 	public class SQLConnectionHeader : Disposable
 	{
-		public SQLConnectionHeader(SQLConnection AConnection) : base() 
+		public SQLConnectionHeader(SQLConnection connection) : base() 
 		{
-			FConnection = AConnection;
+			_connection = connection;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FConnection != null)
+			if (_connection != null)
 			{
-				FConnection.Dispose();
-				FConnection = null;
+				_connection.Dispose();
+				_connection = null;
 			}
 			
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		private SQLConnection FConnection;
-		public SQLConnection Connection { get { return FConnection; } }
+		private SQLConnection _connection;
+		public SQLConnection Connection { get { return _connection; } }
 		
-		private SQLDeviceCursor FDeviceCursor;
+		private SQLDeviceCursor _deviceCursor;
 		public SQLDeviceCursor DeviceCursor 
 		{ 
-			get { return FDeviceCursor; } 
-			set { FDeviceCursor = value; }
+			get { return _deviceCursor; } 
+			set { _deviceCursor = value; }
 		}
 	}
 
@@ -2852,30 +2881,30 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		/// <returns>Returns the first avaiable connection in the pool.  Will return null, if there are no available connections.</returns>
 		public SQLConnectionHeader AvailableConnectionHeader()
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].Connection.State == SQLConnectionState.Idle)
+			for (int index = 0; index < Count; index++)
+				if (this[index].Connection.State == SQLConnectionState.Idle)
 				{
-					Move(LIndex, Count - 1);
+					Move(index, Count - 1);
 					return this[Count - 1];
 				}
 			return null;
 		}
 		
-		public int IndexOfConnection(SQLConnection AConnection)
+		public int IndexOfConnection(SQLConnection connection)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (System.Object.ReferenceEquals(this[LIndex].Connection, AConnection))
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (System.Object.ReferenceEquals(this[index].Connection, connection))
+					return index;
 			return -1;
 		}
 	}
 	
 	public class SQLJoinContext : System.Object
 	{
-		public SQLJoinContext(SQLQueryContext ALeftQueryContext, SQLQueryContext ARightQueryContext) : base()
+		public SQLJoinContext(SQLQueryContext leftQueryContext, SQLQueryContext rightQueryContext) : base()
 		{
-			LeftQueryContext = ALeftQueryContext;
-			RightQueryContext = ARightQueryContext;
+			LeftQueryContext = leftQueryContext;
+			RightQueryContext = rightQueryContext;
 		}
 
 		public SQLQueryContext LeftQueryContext;
@@ -2909,99 +2938,99 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
 	public class SQLRangeVarColumn : System.Object
 	{
-		public SQLRangeVarColumn(TableVarColumn ATableVarColumn, string ATableAlias, string AColumnName)
+		public SQLRangeVarColumn(TableVarColumn tableVarColumn, string tableAlias, string columnName)
 		{
-			FTableVarColumn = ATableVarColumn;
-			TableAlias = ATableAlias;
-			ColumnName = AColumnName;
+			_tableVarColumn = tableVarColumn;
+			TableAlias = tableAlias;
+			ColumnName = columnName;
 			Alias = ColumnName;
 		}
 		
-		public SQLRangeVarColumn(TableVarColumn ATableVarColumn, string ATableAlias, string AColumnName, string AAlias)
+		public SQLRangeVarColumn(TableVarColumn tableVarColumn, string tableAlias, string columnName, string alias)
 		{
-			FTableVarColumn = ATableVarColumn;
-			TableAlias = ATableAlias;
-			ColumnName = AColumnName;
-			Alias = AAlias;
+			_tableVarColumn = tableVarColumn;
+			TableAlias = tableAlias;
+			ColumnName = columnName;
+			Alias = alias;
 		}
 		
-		public SQLRangeVarColumn(TableVarColumn ATableVarColumn, Expression AExpression, string AAlias)
+		public SQLRangeVarColumn(TableVarColumn tableVarColumn, Expression expression, string alias)
 		{
-			FTableVarColumn = ATableVarColumn;
-			FExpression = AExpression;
-			Alias = AAlias;
+			_tableVarColumn = tableVarColumn;
+			_expression = expression;
+			Alias = alias;
 		}
 		
-		private TableVarColumn FTableVarColumn;
+		private TableVarColumn _tableVarColumn;
 		/// <summary>The table var column in the D4 expression.  This is the unique identifier for the range var column.</summary>
-		public TableVarColumn TableVarColumn { get { return FTableVarColumn; } }
+		public TableVarColumn TableVarColumn { get { return _tableVarColumn; } }
 		
-		private string FTableAlias = String.Empty;
+		private string _tableAlias = String.Empty;
 		/// <summary>The name of the range var containing the column in the current query context.  If this is empty, the expression will be specified, and vice versa.</summary>
 		public string TableAlias
 		{
-			get { return FTableAlias; }
-			set { FTableAlias = value == null ? String.Empty : value; }
+			get { return _tableAlias; }
+			set { _tableAlias = value == null ? String.Empty : value; }
 		}
 		
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		/// <summary>The name of the column in the table in the target system.  If the column name is specified, the expression will be null, and vice versa.</summary>
 		public string ColumnName
 		{
-			get { return FColumnName; }
+			get { return _columnName; }
 			set 
 			{ 
-				FColumnName = value == null ? String.Empty : value; 
-				if (FColumnName != String.Empty)
-					FExpression = null;
+				_columnName = value == null ? String.Empty : value; 
+				if (_columnName != String.Empty)
+					_expression = null;
 			}
 		}
 		
-		private Expression FExpression;
+		private Expression _expression;
 		/// <summary>Expression is the expression used to define this column. Will be null if this is a base column reference.</summary>
 		public Expression Expression
 		{
-			get { return FExpression; }
+			get { return _expression; }
 			set 
 			{ 
-				FExpression = value; 
-				if (FExpression != null)
+				_expression = value; 
+				if (_expression != null)
 				{
-					FTableAlias = String.Empty;
-					FColumnName = String.Empty;
+					_tableAlias = String.Empty;
+					_columnName = String.Empty;
 				}
 			}
 		}
 		
-		private string FAlias = String.Empty;
+		private string _alias = String.Empty;
 		/// <summary>The alias name for this column in the current query context, if specified.</summary>
 		public string Alias
 		{
-			get { return FAlias; }
-			set { FAlias = value == null ? String.Empty : value; }
+			get { return _alias; }
+			set { _alias = value == null ? String.Empty : value; }
 		}
 		
 		// ReferenceFlags
-		private SQLReferenceFlags FReferenceFlags;
+		private SQLReferenceFlags _referenceFlags;
 		public SQLReferenceFlags ReferenceFlags
 		{
-			get { return FReferenceFlags; }
-			set { FReferenceFlags = value; }
+			get { return _referenceFlags; }
+			set { _referenceFlags = value; }
 		}
 
 		// GetExpression - returns an expression suitable for use in a where clause or other referencing context
 		public Expression GetExpression()
 		{
-			if (FExpression == null)
-				return new QualifiedFieldExpression(FColumnName, FTableAlias);
+			if (_expression == null)
+				return new QualifiedFieldExpression(_columnName, _tableAlias);
 			else
-				return FExpression;
+				return _expression;
 		}
 		
 		// GetColumnExpression - returns a ColumnExpression suitable for use in a select list
 		public ColumnExpression GetColumnExpression()
 		{
-			return new ColumnExpression(GetExpression(), FAlias);
+			return new ColumnExpression(GetExpression(), _alias);
 		}
 	}
 	
@@ -3020,45 +3049,45 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	public class SQLRangeVarColumns : BaseList<SQLRangeVarColumn>
 	{
 	#endif
-		public SQLRangeVarColumn this[string AColumnName] { get { return this[IndexOf(AColumnName)]; } }
+		public SQLRangeVarColumn this[string columnName] { get { return this[IndexOf(columnName)]; } }
 		
-		public int IndexOf(string AColumnName)
+		public int IndexOf(string columnName)
 		{
-			if (AColumnName.IndexOf(Keywords.Qualifier) == 0)
+			if (columnName.IndexOf(Keywords.Qualifier) == 0)
 			{
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					if (Schema.Object.NamesEqual(this[LIndex].TableVarColumn.Name, AColumnName))
-						return LIndex;
+				for (int index = 0; index < Count; index++)
+					if (Schema.Object.NamesEqual(this[index].TableVarColumn.Name, columnName))
+						return index;
 			}
 			else
 			{
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					if (this[LIndex].TableVarColumn.Name == AColumnName)
-						return LIndex;
+				for (int index = 0; index < Count; index++)
+					if (this[index].TableVarColumn.Name == columnName)
+						return index;
 			}
 			return -1;
 		}
 		
-		public bool Contains(string AColumnName)
+		public bool Contains(string columnName)
 		{
-			return IndexOf(AColumnName) >= 0;
+			return IndexOf(columnName) >= 0;
 		}
 	}
 	
 	public class SQLRangeVar : System.Object
 	{
-		public SQLRangeVar(string AName)
+		public SQLRangeVar(string name)
 		{
-		   FName = AName;
+		   _name = name;
 		}
 
 		// Name
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 
 		// Columns
-		private SQLRangeVarColumns FColumns = new SQLRangeVarColumns();
-		public SQLRangeVarColumns Columns { get { return FColumns; } }
+		private SQLRangeVarColumns _columns = new SQLRangeVarColumns();
+		public SQLRangeVarColumns Columns { get { return _columns; } }
 	}
 
 	#if USETYPEDLIST
@@ -3080,179 +3109,179 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	{
 		public SQLQueryContext() : base() {}
 		
-		public SQLQueryContext(SQLQueryContext AParentContext) : base()
+		public SQLQueryContext(SQLQueryContext parentContext) : base()
 		{
-			FParentContext = AParentContext;
+			_parentContext = parentContext;
 		}
 		
-		public SQLQueryContext(SQLQueryContext AParentContext, bool AIsNestedFrom) : base()
+		public SQLQueryContext(SQLQueryContext parentContext, bool isNestedFrom) : base()
 		{
-			FParentContext = AParentContext;
-			FIsNestedFrom = AIsNestedFrom;
+			_parentContext = parentContext;
+			_isNestedFrom = isNestedFrom;
 		}
 
-		public SQLQueryContext(SQLQueryContext AParentContext, bool AIsNestedFrom, bool AIsScalarContext) : base()
+		public SQLQueryContext(SQLQueryContext parentContext, bool isNestedFrom, bool isScalarContext) : base()
 		{
-			FParentContext = AParentContext;
-			FIsNestedFrom = AIsNestedFrom;
-			FIsScalarContext = AIsScalarContext;
+			_parentContext = parentContext;
+			_isNestedFrom = isNestedFrom;
+			_isScalarContext = isScalarContext;
 		}
 
-		private SQLRangeVars FRangeVars = new SQLRangeVars();
-		public SQLRangeVars RangeVars { get { return FRangeVars; } }
+		private SQLRangeVars _rangeVars = new SQLRangeVars();
+		public SQLRangeVars RangeVars { get { return _rangeVars; } }
 		
-		private SQLRangeVarColumns FAddedColumns = new SQLRangeVarColumns();
-		public SQLRangeVarColumns AddedColumns { get { return FAddedColumns; } }
+		private SQLRangeVarColumns _addedColumns = new SQLRangeVarColumns();
+		public SQLRangeVarColumns AddedColumns { get { return _addedColumns; } }
 
-		private SQLQueryContext FParentContext;
-		public SQLQueryContext ParentContext { get { return FParentContext; } }
+		private SQLQueryContext _parentContext;
+		public SQLQueryContext ParentContext { get { return _parentContext; } }
 
-		private bool FIsNestedFrom;
-		public bool IsNestedFrom { get { return FIsNestedFrom; } }
+		private bool _isNestedFrom;
+		public bool IsNestedFrom { get { return _isNestedFrom; } }
 		
-		private bool FIsScalarContext;
-		public bool IsScalarContext { get { return FIsScalarContext; } }
+		private bool _isScalarContext;
+		public bool IsScalarContext { get { return _isScalarContext; } }
 
 		// True if this query context is an aggregate expression		
-		private bool FIsAggregate;
+		private bool _isAggregate;
 		public bool IsAggregate 
 		{ 
-			get { return FIsAggregate; }
-			set { FIsAggregate = value; }
+			get { return _isAggregate; }
+			set { _isAggregate = value; }
 		}
 		
 		// True if this query context contains computed columns
-		private bool FIsExtension;
+		private bool _isExtension;
 		public bool IsExtension
 		{
-			get { return FIsExtension; }
-			set { FIsExtension = value; }
+			get { return _isExtension; }
+			set { _isExtension = value; }
 		}
 		
-		private bool FIsSelectClause;
+		private bool _isSelectClause;
 		public bool IsSelectClause
 		{
-			get { return FIsSelectClause; }
-			set { FIsSelectClause = value; }
+			get { return _isSelectClause; }
+			set { _isSelectClause = value; }
 		}
 
-		private bool FIsWhereClause;
+		private bool _isWhereClause;
 		public bool IsWhereClause
 		{
-			get { return FIsWhereClause; }
-			set { FIsWhereClause = value; }
+			get { return _isWhereClause; }
+			set { _isWhereClause = value; }
 		}
 		
-		private bool FIsGroupByClause;
+		private bool _isGroupByClause;
 		public bool IsGroupByClause
 		{
-			get { return FIsGroupByClause; }
-			set { FIsGroupByClause = value; }
+			get { return _isGroupByClause; }
+			set { _isGroupByClause = value; }
 		}
 
-		private bool FIsHavingClause;
+		private bool _isHavingClause;
 		public bool IsHavingClause
 		{
-			get { return FIsHavingClause; }
-			set { FIsHavingClause = value; }
+			get { return _isHavingClause; }
+			set { _isHavingClause = value; }
 		}
 		
-		private bool FIsListContext;
+		private bool _isListContext;
 		public bool IsListContext
 		{
-			get { return FIsListContext; }
-			set { FIsListContext = value; }
+			get { return _isListContext; }
+			set { _isListContext = value; }
 		}
 
 		// ReferenceFlags - These flags are set when the appropriate type of reference has taken place in this context
-		private SQLReferenceFlags FReferenceFlags;
+		private SQLReferenceFlags _referenceFlags;
 		public SQLReferenceFlags ReferenceFlags
 		{
-			get { return FReferenceFlags; }
-			set { FReferenceFlags = value; }
+			get { return _referenceFlags; }
+			set { _referenceFlags = value; }
 		}
 		
 		public void ResetReferenceFlags()
 		{
-			FReferenceFlags = SQLReferenceFlags.None;
+			_referenceFlags = SQLReferenceFlags.None;
 		}
 		
-		public SQLRangeVarColumn GetRangeVarColumn(string AIdentifier)
+		public SQLRangeVarColumn GetRangeVarColumn(string identifier)
 		{
-			SQLRangeVarColumn LColumn = FindRangeVarColumn(AIdentifier);
-			if (LColumn == null)
-				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, AIdentifier);
-			return LColumn;
+			SQLRangeVarColumn column = FindRangeVarColumn(identifier);
+			if (column == null)
+				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, identifier);
+			return column;
 		}
 		
-		public SQLRangeVarColumn FindRangeVarColumn(string AIdentifier)
+		public SQLRangeVarColumn FindRangeVarColumn(string identifier)
 		{
-			if (FAddedColumns.Contains(AIdentifier))
-				return FAddedColumns[AIdentifier];
+			if (_addedColumns.Contains(identifier))
+				return _addedColumns[identifier];
 				
-			foreach (SQLRangeVar LRangeVar in FRangeVars)
-				if (LRangeVar.Columns.Contains(AIdentifier))
-					return LRangeVar.Columns[AIdentifier];
+			foreach (SQLRangeVar rangeVar in _rangeVars)
+				if (rangeVar.Columns.Contains(identifier))
+					return rangeVar.Columns[identifier];
 				
 			return null;
 		}
 		
-		public void ProjectColumns(Schema.TableVarColumns AColumns)
+		public void ProjectColumns(Schema.TableVarColumns columns)
 		{
-			for (int LIndex = FAddedColumns.Count - 1; LIndex >= 0; LIndex--)
-				if (!AColumns.Contains(FAddedColumns[LIndex].TableVarColumn))
-					FAddedColumns.RemoveAt(LIndex);
+			for (int index = _addedColumns.Count - 1; index >= 0; index--)
+				if (!columns.Contains(_addedColumns[index].TableVarColumn))
+					_addedColumns.RemoveAt(index);
 				
-			foreach (SQLRangeVar LRangeVar in FRangeVars)
-				for (int LIndex = LRangeVar.Columns.Count - 1; LIndex >= 0; LIndex--)
-					if (!AColumns.Contains(LRangeVar.Columns[LIndex].TableVarColumn))
-						LRangeVar.Columns.RemoveAt(LIndex);
+			foreach (SQLRangeVar rangeVar in _rangeVars)
+				for (int index = rangeVar.Columns.Count - 1; index >= 0; index--)
+					if (!columns.Contains(rangeVar.Columns[index].TableVarColumn))
+						rangeVar.Columns.RemoveAt(index);
 		}
 		
-		public void RemoveColumn(SQLRangeVarColumn AColumn)
+		public void RemoveColumn(SQLRangeVarColumn column)
 		{
-			if (FAddedColumns.Contains(AColumn))
-				FAddedColumns.Remove(AColumn);
+			if (_addedColumns.Contains(column))
+				_addedColumns.Remove(column);
 			
-			foreach (SQLRangeVar LRangeVar in FRangeVars)
-				if (LRangeVar.Columns.Contains(AColumn))
-					LRangeVar.Columns.Remove(AColumn);
+			foreach (SQLRangeVar rangeVar in _rangeVars)
+				if (rangeVar.Columns.Contains(column))
+					rangeVar.Columns.Remove(column);
 		}
 		
-		public SQLRangeVarColumn RenameColumn(SQLDevicePlan ADevicePlan, Schema.TableVarColumn AOldColumn, Schema.TableVarColumn ANewColumn)
+		public SQLRangeVarColumn RenameColumn(SQLDevicePlan devicePlan, Schema.TableVarColumn oldColumn, Schema.TableVarColumn newColumn)
 		{
-			SQLRangeVarColumn LOldColumn = GetRangeVarColumn(AOldColumn.Name);
-			SQLRangeVarColumn LNewColumn;
-			if (LOldColumn.ColumnName != String.Empty)
-				LNewColumn = new SQLRangeVarColumn(ANewColumn, LOldColumn.TableAlias, LOldColumn.ColumnName);
+			SQLRangeVarColumn localOldColumn = GetRangeVarColumn(oldColumn.Name);
+			SQLRangeVarColumn localNewColumn;
+			if (localOldColumn.ColumnName != String.Empty)
+				localNewColumn = new SQLRangeVarColumn(newColumn, localOldColumn.TableAlias, localOldColumn.ColumnName);
 			else
-				LNewColumn = new SQLRangeVarColumn(ANewColumn, LOldColumn.Expression, LOldColumn.Alias);
+				localNewColumn = new SQLRangeVarColumn(newColumn, localOldColumn.Expression, localOldColumn.Alias);
 			
-			RemoveColumn(LOldColumn);
-			FAddedColumns.Add(LNewColumn);
+			RemoveColumn(localOldColumn);
+			_addedColumns.Add(localNewColumn);
 			
-			LNewColumn.ReferenceFlags = LOldColumn.ReferenceFlags;
-			LNewColumn.Alias = ADevicePlan.Device.ToSQLIdentifier(ANewColumn.Name);
+			localNewColumn.ReferenceFlags = localOldColumn.ReferenceFlags;
+			localNewColumn.Alias = devicePlan.Device.ToSQLIdentifier(newColumn.Name);
 			
-			return LNewColumn;
+			return localNewColumn;
 		}
 	}
 
     public class SQLDevicePlan : DevicePlan
     {
-		public SQLDevicePlan(Plan APlan, SQLDevice ADevice, PlanNode APlanNode) : base(APlan, ADevice, APlanNode) 
+		public SQLDevicePlan(Plan plan, SQLDevice device, PlanNode planNode) : base(plan, device, planNode) 
 		{
-			if ((APlanNode != null) && (APlanNode.DeviceNode != null))
-				FDevicePlanNode = (SQLDevicePlanNode)APlanNode.DeviceNode;
+			if ((planNode != null) && (planNode.DeviceNode != null))
+				_devicePlanNode = (SQLDevicePlanNode)planNode.DeviceNode;
 		}
 		
 		public new SQLDevice Device { get { return (SQLDevice)base.Device; } }
 
 		// SQLQueryContexts
-		private SQLQueryContext FQueryContext = new SQLQueryContext();
-		public void PushQueryContext(bool AIsNestedFrom)
+		private SQLQueryContext _queryContext = new SQLQueryContext();
+		public void PushQueryContext(bool isNestedFrom)
 		{
-			FQueryContext = new SQLQueryContext(FQueryContext, AIsNestedFrom, false);
+			_queryContext = new SQLQueryContext(_queryContext, isNestedFrom, false);
 		}
 
 		public void PushQueryContext()
@@ -3262,19 +3291,19 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
 		public void PopQueryContext()
 		{
-			FQueryContext = FQueryContext.ParentContext;
+			_queryContext = _queryContext.ParentContext;
 		}
 
 		public SQLQueryContext CurrentQueryContext()
 		{
-			if (FQueryContext == null)
+			if (_queryContext == null)
 				throw new SQLException(SQLException.Codes.NoCurrentQueryContext);
-			return FQueryContext;
+			return _queryContext;
 		}
 		
 		public void PushScalarContext()
 		{
-			FQueryContext = new SQLQueryContext(FQueryContext, false, true);
+			_queryContext = new SQLQueryContext(_queryContext, false, true);
 		}
 
 		public void PopScalarContext()
@@ -3283,27 +3312,27 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		}
 
 		// Internal stack used for translation		
-		private Symbols FStack = new Symbols();
-		public Symbols Stack { get { return FStack; } }
+		private Symbols _stack = new Symbols();
+		public Symbols Stack { get { return _stack; } }
 		
 		// JoinContexts (only used for natural join translation)
-		private SQLJoinContexts FJoinContexts = new SQLJoinContexts();
-		public void PushJoinContext(SQLJoinContext AJoinContext)
+		private SQLJoinContexts _joinContexts = new SQLJoinContexts();
+		public void PushJoinContext(SQLJoinContext joinContext)
 		{
-			FJoinContexts.Add(AJoinContext);
+			_joinContexts.Add(joinContext);
 		}
 		
 		public void PopJoinContext()
 		{
-			FJoinContexts.RemoveAt(FJoinContexts.Count - 1);
+			_joinContexts.RemoveAt(_joinContexts.Count - 1);
 		}
 		
 		// This will return null if the join being translated is not a natural join
 		public SQLJoinContext CurrentJoinContext()
 		{
-			if (FJoinContexts.Count == 0)
+			if (_joinContexts.Count == 0)
 				throw new SQLException(SQLException.Codes.NoCurrentJoinContext);
-			return FJoinContexts[FJoinContexts.Count - 1];
+			return _joinContexts[_joinContexts.Count - 1];
 		}
 		
 		public bool HasJoinContext()
@@ -3314,138 +3343,138 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		// IsSubSelectSupported() - returns true if a subselect is supported in the current context
 		public bool IsSubSelectSupported()
 		{
-			SQLQueryContext LContext = CurrentQueryContext();
+			SQLQueryContext context = CurrentQueryContext();
 			return 
-				LContext.IsScalarContext &&
+				context.IsScalarContext &&
 				(
-					!(LContext.IsSelectClause || LContext.IsWhereClause || LContext.IsGroupByClause || LContext.IsHavingClause) ||
-					(LContext.IsSelectClause && Device.SupportsSubSelectInSelectClause) ||
-					(LContext.IsWhereClause && Device.SupportsSubSelectInWhereClause) ||
-					(LContext.IsGroupByClause && Device.SupportsSubSelectInGroupByClause) ||
-					(LContext.IsHavingClause && Device.SupportsSubSelectInHavingClause)
+					!(context.IsSelectClause || context.IsWhereClause || context.IsGroupByClause || context.IsHavingClause) ||
+					(context.IsSelectClause && Device.SupportsSubSelectInSelectClause) ||
+					(context.IsWhereClause && Device.SupportsSubSelectInWhereClause) ||
+					(context.IsGroupByClause && Device.SupportsSubSelectInGroupByClause) ||
+					(context.IsHavingClause && Device.SupportsSubSelectInHavingClause)
 				);
 		}
 		
 		public string GetSubSelectNotSupportedReason()
 		{
-			SQLQueryContext LContext = CurrentQueryContext();
-			if (LContext.IsSelectClause && !Device.SupportsSubSelectInSelectClause)
+			SQLQueryContext context = CurrentQueryContext();
+			if (context.IsSelectClause && !Device.SupportsSubSelectInSelectClause)
 				return "Plan is not supported because the device does not support sub-selects in the select clause.";
-			if (LContext.IsWhereClause && !Device.SupportsSubSelectInWhereClause)
+			if (context.IsWhereClause && !Device.SupportsSubSelectInWhereClause)
 				return "Plan is not supported because the device does not support sub-selects in the where clause.";
-			if (LContext.IsGroupByClause && !Device.SupportsSubSelectInGroupByClause)
+			if (context.IsGroupByClause && !Device.SupportsSubSelectInGroupByClause)
 				return "Plan is not supported because the device does not support sub-selects in the group by clause.";
-			if (LContext.IsHavingClause && !Device.SupportsSubSelectInHavingClause)
+			if (context.IsHavingClause && !Device.SupportsSubSelectInHavingClause)
 				return "Plan is not supported because the device does not support sub-selects in the having clause.";
 			return String.Empty;
 		}
 		
 		// IsBooleanContext
-		private ArrayList FContexts = new ArrayList();
+		private ArrayList _contexts = new ArrayList();
 		public bool IsBooleanContext()
 		{
-			return (FContexts.Count > 0) && ((bool)FContexts[FContexts.Count - 1]);
+			return (_contexts.Count > 0) && ((bool)_contexts[_contexts.Count - 1]);
 		}
 		
-		public void EnterContext(bool AIsBooleanContext)
+		public void EnterContext(bool isBooleanContext)
 		{
-			FContexts.Add(AIsBooleanContext);
+			_contexts.Add(isBooleanContext);
 		}
 		
 		public void ExitContext()
 		{
-			FContexts.RemoveAt(FContexts.Count - 1);
+			_contexts.RemoveAt(_contexts.Count - 1);
 		}
 		
-		private int FCounter = 0;
-		private List<string> FTableAliases = new List<string>();
+		private int _counter = 0;
+		private List<string> _tableAliases = new List<string>();
 		public string GetNextTableAlias()
 		{
-			FCounter++;
-			string LTableAlias = String.Format("T{0}", FCounter.ToString());
-			FTableAliases.Add(LTableAlias);
-			return LTableAlias;
+			_counter++;
+			string tableAlias = String.Format("T{0}", _counter.ToString());
+			_tableAliases.Add(tableAlias);
+			return tableAlias;
 		}
 
-		private SQLDevicePlanNode FDevicePlanNode;		
+		private SQLDevicePlanNode _devicePlanNode;		
 		public SQLDevicePlanNode DevicePlanNode
 		{
-			get { return FDevicePlanNode; }
-			set { FDevicePlanNode = value; }
+			get { return _devicePlanNode; }
+			set { _devicePlanNode = value; }
 		}
 		
-		public SQLRangeVarColumn GetRangeVarColumn(string AIdentifier, bool ACurrentContextOnly)
+		public SQLRangeVarColumn GetRangeVarColumn(string identifier, bool currentContextOnly)
 		{
-			SQLRangeVarColumn LColumn = FindRangeVarColumn(AIdentifier, ACurrentContextOnly);
-			if (LColumn == null)
-				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, AIdentifier);
-			return LColumn;
+			SQLRangeVarColumn column = FindRangeVarColumn(identifier, currentContextOnly);
+			if (column == null)
+				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, identifier);
+			return column;
 		}
 		
-		public SQLRangeVarColumn FindRangeVarColumn(string AIdentifier, bool ACurrentContextOnly)
+		public SQLRangeVarColumn FindRangeVarColumn(string identifier, bool currentContextOnly)
 		{
-			SQLRangeVarColumn LColumn = null;
-			bool LInCurrentContext = true;
-			SQLQueryContext LQueryContext = CurrentQueryContext();
-			while (LQueryContext != null)
+			SQLRangeVarColumn column = null;
+			bool inCurrentContext = true;
+			SQLQueryContext queryContext = CurrentQueryContext();
+			while (queryContext != null)
 			{
-				LColumn = LQueryContext.FindRangeVarColumn(AIdentifier);
-				if (LColumn != null)
+				column = queryContext.FindRangeVarColumn(identifier);
+				if (column != null)
 					break;
 
-				if (LQueryContext.IsScalarContext)
-					LQueryContext = LQueryContext.ParentContext;
+				if (queryContext.IsScalarContext)
+					queryContext = queryContext.ParentContext;
 				else
 				{
-					if (ACurrentContextOnly || (LQueryContext.IsNestedFrom && !Device.SupportsNestedCorrelation))
+					if (currentContextOnly || (queryContext.IsNestedFrom && !Device.SupportsNestedCorrelation))
 						break;
 					
-					LQueryContext = LQueryContext.ParentContext;
-					LInCurrentContext = false;
+					queryContext = queryContext.ParentContext;
+					inCurrentContext = false;
 				}
 			}
 
-			if (LColumn != null)
+			if (column != null)
 			{
-				if (!LInCurrentContext)
+				if (!inCurrentContext)
 					CurrentQueryContext().ReferenceFlags |= SQLReferenceFlags.HasCorrelation;
 					
-				CurrentQueryContext().ReferenceFlags |= LColumn.ReferenceFlags;
+				CurrentQueryContext().ReferenceFlags |= column.ReferenceFlags;
 			}
 				
-			return LColumn;
+			return column;
 		}
     }
     
     public class SQLDevicePlanNode : DevicePlanNode
     {
-		public SQLDevicePlanNode(PlanNode APlanNode) : base(APlanNode) {}
+		public SQLDevicePlanNode(PlanNode planNode) : base(planNode) {}
 		
-		private Statement FStatement;
+		private Statement _statement;
 		public Statement Statement
 		{
-			get { return FStatement; }
-			set { FStatement = value; }
+			get { return _statement; }
+			set { _statement = value; }
 		}
 
 		// Parameters
-		private SQLPlanParameters FPlanParameters = new SQLPlanParameters();
-		public SQLPlanParameters PlanParameters { get { return FPlanParameters; } }
+		private SQLPlanParameters _planParameters = new SQLPlanParameters();
+		public SQLPlanParameters PlanParameters { get { return _planParameters; } }
     }
     
 	public class SQLPlanParameter  : System.Object
 	{
-		public SQLPlanParameter(SQLParameter ASQLParameter, PlanNode APlanNode) : base()
+		public SQLPlanParameter(SQLParameter sQLParameter, PlanNode planNode) : base()
 		{	
-			FSQLParameter = ASQLParameter;
-			FPlanNode = APlanNode; 
+			_sQLParameter = sQLParameter;
+			_planNode = planNode; 
 		}
 		
-		private SQLParameter FSQLParameter;
-		public SQLParameter SQLParameter { get { return FSQLParameter; } }
+		private SQLParameter _sQLParameter;
+		public SQLParameter SQLParameter { get { return _sQLParameter; } }
 
-		private PlanNode FPlanNode;
-		public PlanNode PlanNode { get { return FPlanNode; } }
+		private PlanNode _planNode;
+		public PlanNode PlanNode { get { return _planNode; } }
 	}
 
 	#if USETYPEDLIST
@@ -3465,9 +3494,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public abstract class SQLDeviceSession : DeviceSession, IStreamProvider
 	{
-		public SQLDeviceSession(SQLDevice ADevice, ServerProcess AProcess, Schema.DeviceSessionInfo ADeviceSessionInfo) : base(ADevice, AProcess, ADeviceSessionInfo) {}
+		public SQLDeviceSession(SQLDevice device, ServerProcess process, Schema.DeviceSessionInfo deviceSessionInfo) : base(device, process, deviceSessionInfo) {}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -3478,46 +3507,46 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			{
 				try
 				{
-					if (FStreams != null)
+					if (_streams != null)
 					{
 						DestroyStreams();
-						FStreams = null;
+						_streams = null;
 					}
 				}
 				finally
 				{
 					try
 					{
-						if (FBrowsePool != null)
+						if (_browsePool != null)
 						{
 							if (Device.UseTransactions)
 							{
-								for (int LIndex = 0; LIndex < FBrowsePool.Count; LIndex++)
+								for (int index = 0; index < _browsePool.Count; index++)
 									try
 									{
-										if (FBrowsePool[LIndex].Connection.InTransaction)
-											FBrowsePool[LIndex].Connection.CommitTransaction();
+										if (_browsePool[index].Connection.InTransaction)
+											_browsePool[index].Connection.CommitTransaction();
 									}
 									catch {}
 							}
 
-							FBrowsePool.Dispose();
-							FBrowsePool = null;
+							_browsePool.Dispose();
+							_browsePool = null;
 						}
 					}
 					finally
 					{
 						try
 						{
-							if (FExecutePool != null)
+							if (_executePool != null)
 							{
-								FExecutePool.Dispose();
-								FExecutePool = null;
+								_executePool.Dispose();
+								_executePool = null;
 							}
 						}
 						finally
 						{
-							base.Dispose(ADisposing); // Call the base here to clean up any outstanding transactions
+							base.Dispose(disposing); // Call the base here to clean up any outstanding transactions
 						}
 					}
 				}
@@ -3529,55 +3558,55 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		protected abstract SQLConnection InternalCreateConnection();
 		protected SQLConnection CreateConnection()
 		{
-			SQLConnection LConnection = InternalCreateConnection();
-			LConnection.DefaultCommandTimeout = Device.CommandTimeout;
-			LConnection.DefaultUseParametersForCursors = Device.UseParametersForCursors;
-			LConnection.DefaultShouldNormalizeWhitespace = Device.ShouldNormalizeWhitespace;
-			return LConnection;
+			SQLConnection connection = InternalCreateConnection();
+			connection.DefaultCommandTimeout = Device.CommandTimeout;
+			connection.DefaultUseParametersForCursors = Device.UseParametersForCursors;
+			connection.DefaultShouldNormalizeWhitespace = Device.ShouldNormalizeWhitespace;
+			return connection;
 		}
 		
-		private SQLConnectionPool FBrowsePool = new SQLConnectionPool();
-		private SQLConnectionPool FExecutePool = new SQLConnectionPool();
+		private SQLConnectionPool _browsePool = new SQLConnectionPool();
+		private SQLConnectionPool _executePool = new SQLConnectionPool();
 		
 		public SQLConnection Connection { get { return RequestConnection(false).Connection; } }
 		
-		private bool FExecutingConnectionStatement;
+		private bool _executingConnectionStatement;
 		
-		protected virtual void ExecuteConnectStatement(SQLConnectionHeader AConnectionHeader, bool AIsBrowseCursor)
+		protected virtual void ExecuteConnectStatement(SQLConnectionHeader connectionHeader, bool isBrowseCursor)
 		{
 			if (!ServerProcess.IsLoading())
 			{
-				if (!FExecutingConnectionStatement)
+				if (!_executingConnectionStatement)
 				{
-					FExecutingConnectionStatement = true;
+					_executingConnectionStatement = true;
 					try
 					{
-						string LExecuteStatementExpression = AIsBrowseCursor ? Device.OnBrowseConnectStatement : Device.OnExecuteConnectStatement;
-						if (LExecuteStatementExpression != null)
+						string executeStatementExpression = isBrowseCursor ? Device.OnBrowseConnectStatement : Device.OnExecuteConnectStatement;
+						if (executeStatementExpression != null)
 						{
-							string LExecuteStatement = null;
-							IServerExpressionPlan LPlan = ((IServerProcess)ServerProcess).PrepareExpression(LExecuteStatementExpression, null);
+							string executeStatement = null;
+							IServerExpressionPlan plan = ((IServerProcess)ServerProcess).PrepareExpression(executeStatementExpression, null);
 							try
 							{
-								LExecuteStatement = ((Scalar)LPlan.Evaluate(null)).AsString;
+								executeStatement = ((Scalar)plan.Evaluate(null)).AsString;
 							}
 							finally
 							{
-								((IServerProcess)ServerProcess).UnprepareExpression(LPlan);
+								((IServerProcess)ServerProcess).UnprepareExpression(plan);
 							}
 							
-							AConnectionHeader.Connection.Execute(LExecuteStatement);
+							connectionHeader.Connection.Execute(executeStatement);
 							
-							if (AConnectionHeader.Connection.InTransaction)
+							if (connectionHeader.Connection.InTransaction)
 							{
-								AConnectionHeader.Connection.CommitTransaction();
-								AConnectionHeader.Connection.BeginTransaction(FIsolationLevel);
+								connectionHeader.Connection.CommitTransaction();
+								connectionHeader.Connection.BeginTransaction(_isolationLevel);
 							}
 						}
 					}
 					finally
 					{
-						FExecutingConnectionStatement = false;
+						_executingConnectionStatement = false;
 					}
 				}
 				else
@@ -3585,120 +3614,136 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
 		
-		public virtual SQLConnectionHeader RequestConnection(bool AIsBrowseCursor)
+		public virtual SQLConnectionHeader RequestConnection(bool isBrowseCursor)
 		{
-			SQLConnectionHeader LConnectionHeader = AIsBrowseCursor ? FBrowsePool.AvailableConnectionHeader() : FExecutePool.AvailableConnectionHeader();
+			SQLConnectionHeader connectionHeader = isBrowseCursor ? _browsePool.AvailableConnectionHeader() : _executePool.AvailableConnectionHeader();
 
 			// Ensure Transaction Started
-			if (Device.UseTransactions && (Transactions.Count > 0) && !FTransactionStarted)
-				FTransactionStarted = true;
+			if (Device.UseTransactions && (Transactions.Count > 0) && !_transactionStarted)
+				_transactionStarted = true;
 			
-			if (LConnectionHeader == null)
+			if (connectionHeader == null)
 			{
-				SQLConnection LConnection = AddConnection(AIsBrowseCursor);
-				if (LConnection != null)
+				SQLConnection connection = AddConnection(isBrowseCursor);
+				if (connection != null)
 				{
-					LConnectionHeader = new SQLConnectionHeader(LConnection);
-					if (AIsBrowseCursor)
-						FBrowsePool.Add(LConnectionHeader);
+					connectionHeader = new SQLConnectionHeader(connection);
+					if (isBrowseCursor)
+						_browsePool.Add(connectionHeader);
 					else
-						FExecutePool.Add(LConnectionHeader);
+						_executePool.Add(connectionHeader);
 					try
 					{
-						ExecuteConnectStatement(LConnectionHeader, AIsBrowseCursor);
+						ExecuteConnectStatement(connectionHeader, isBrowseCursor);
 					}
 					catch
 					{
-						if (AIsBrowseCursor)
-							FBrowsePool.Remove(LConnectionHeader);
+						if (isBrowseCursor)
+							_browsePool.Remove(connectionHeader);
 						else
-							FExecutePool.Remove(LConnectionHeader);
-						LConnectionHeader.Dispose();
+							_executePool.Remove(connectionHeader);
+						connectionHeader.Dispose();
 						throw;
 					}
 				}
 			}
 
-			if (LConnectionHeader == null)
+			if (connectionHeader == null)
 			{
 				// Perform a Cursor switch here to free up a connection on the transaction
 				// This means that all connections in the execute pool are currently supporting open cursors.
 				// Select the connection victim (the first connection in the execute pool)
-				LConnectionHeader = FExecutePool[0];
+				connectionHeader = _executePool[0];
 				
 				// Move the connection to the back of the list for round-robin pool replacement
-				FExecutePool.Move(0, FExecutePool.Count - 1);
+				_executePool.Move(0, _executePool.Count - 1);
 
-				if (LConnectionHeader.DeviceCursor != null)				
-					LConnectionHeader.DeviceCursor.ReleaseConnection(LConnectionHeader);
+				if (connectionHeader.DeviceCursor != null)				
+					connectionHeader.DeviceCursor.ReleaseConnection(connectionHeader);
 			}
 			
 			// If the connection is closed, throw out the connection
-			if (!LConnectionHeader.Connection.IsConnectionValid())
+			if (!connectionHeader.Connection.IsConnectionValid())
 			{
-				if (AIsBrowseCursor)
-					FBrowsePool.Remove(LConnectionHeader);
+				if (isBrowseCursor)
+					_browsePool.Remove(connectionHeader);
 				else
-					FExecutePool.Remove(LConnectionHeader);
+					_executePool.Remove(connectionHeader);
 
-				LConnectionHeader.Dispose();
-				LConnectionHeader = RequestConnection(AIsBrowseCursor);
+				connectionHeader.Dispose();
+				connectionHeader = RequestConnection(isBrowseCursor);
 			}
 			
 			// Ensure the connection has an active transaction
-			if (Device.UseTransactions && (Transactions.Count > 0) && !AIsBrowseCursor && !LConnectionHeader.Connection.InTransaction)
-				LConnectionHeader.Connection.BeginTransaction(FIsolationLevel);
+			if (Device.UseTransactions && (Transactions.Count > 0) && !isBrowseCursor && !connectionHeader.Connection.InTransaction)
+				connectionHeader.Connection.BeginTransaction(_isolationLevel);
 			
-			return LConnectionHeader;
+			return connectionHeader;
 		}
 		
-		public void ReleaseConnection(SQLConnection AConnection)
+		public void ReleaseConnection(SQLConnection connection)
 		{
-			ReleaseConnection(AConnection, false);
+			ReleaseConnection(connection, false);
 		}
 		
-		public virtual void ReleaseConnection(SQLConnection AConnection, bool ADisposing)
+		public virtual void ReleaseConnection(SQLConnection connection, bool disposing)
 		{
-			int LIndex = FBrowsePool.IndexOfConnection(AConnection);
-			if (LIndex >= 0)
-				FBrowsePool[LIndex].DeviceCursor.ReleaseConnection(FBrowsePool[LIndex], ADisposing);
+			int index = _browsePool.IndexOfConnection(connection);
+			if (index >= 0)
+			{
+				var header = _browsePool[index];
+				if (header.DeviceCursor != null)
+					header.DeviceCursor.ReleaseConnection(header, disposing);
+					
+				if (header.Connection.InTransaction)
+					header.Connection.CommitTransaction();
+					
+				header.Dispose(); // Always release browse connections
+			}
 			else
 			{
-				LIndex = FExecutePool.IndexOfConnection(AConnection);
-				if (LIndex >= 0)
-					FExecutePool[LIndex].DeviceCursor.ReleaseConnection(FExecutePool[LIndex], ADisposing);
+				index = _executePool.IndexOfConnection(connection);
+				if (index >= 0)
+				{
+					var header = _executePool[index];
+					if (header.DeviceCursor != null)
+						header.DeviceCursor.ReleaseConnection(header, disposing);
+						
+					if (!Device.UseTransactions || Transactions.Count == 0)
+						header.Dispose();
+				}
 				else
 					throw new SQLException(SQLException.Codes.ConnectionNotFound);
 			}
 		}
 
 		// This override allows for the implementation of transaction binding across connections such as distributed transactions or session binding.		
-		protected virtual SQLConnection AddConnection(bool AIsBrowseCursor)
+		protected virtual SQLConnection AddConnection(bool isBrowseCursor)
 		{
-			if (AIsBrowseCursor)
+			if (isBrowseCursor)
 			{
-				SQLConnection LConnection = CreateConnection();
+				SQLConnection connection = CreateConnection();
 				if (Device.UseTransactions && (Transactions.Count > 0))
-					LConnection.BeginTransaction(SQLIsolationLevel.ReadUncommitted);
-				return LConnection;
+					connection.BeginTransaction(SQLIsolationLevel.ReadUncommitted);
+				return connection;
 			}
 			else
 			{
-				if (FExecutePool.Count == 0)
+				if (_executePool.Count == 0)
 				{
-					SQLConnection LConnection = CreateConnection();
-					if (Device.UseTransactions && (Transactions.Count > 0) && FTransactionStarted)
-						LConnection.BeginTransaction(FIsolationLevel);
-					return LConnection;
+					SQLConnection connection = CreateConnection();
+					if (Device.UseTransactions && (Transactions.Count > 0) && _transactionStarted)
+						connection.BeginTransaction(_isolationLevel);
+					return connection;
 				}
 				else
 					return null;
 			}
 		}
 		
-		public static SQLIsolationLevel IsolationLevelToSQLIsolationLevel(IsolationLevel AIsolationLevel)
+		public static SQLIsolationLevel IsolationLevelToSQLIsolationLevel(IsolationLevel isolationLevel)
 		{
-			switch (AIsolationLevel)
+			switch (isolationLevel)
 			{
 				case IsolationLevel.Browse : return SQLIsolationLevel.ReadUncommitted;
 				case IsolationLevel.CursorStability : return SQLIsolationLevel.ReadCommitted;
@@ -3709,30 +3754,31 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		}
 		
 		// BeginTransaction
-		private SQLIsolationLevel FIsolationLevel;
-		private bool FTransactionStarted;
-		protected override void InternalBeginTransaction(IsolationLevel AIsolationLevel)
+		private SQLIsolationLevel _isolationLevel;
+		private bool _transactionStarted;
+		protected override void InternalBeginTransaction(IsolationLevel isolationLevel)
 		{
 			if (Device.UseTransactions && (Transactions.Count == 1)) // If this is the first transaction
 			{
-				FIsolationLevel = IsolationLevelToSQLIsolationLevel(AIsolationLevel);
+				_isolationLevel = IsolationLevelToSQLIsolationLevel(isolationLevel);
 
 				// Transaction starting is deferred until actually necessary
-				FTransactionStarted = false;
-				FTransactionFailure = false;
+				_transactionStarted = false;
+				_transactionFailure = false;
 			}
 		}
 		
-		private bool FTransactionFailure;
+		private bool _transactionFailure;
+		/// <summary> Indicates whether the DBMS-side transaction has been rolled-back. </summary>
 		public bool TransactionFailure
 		{
-			get { return FTransactionFailure; }
-			set { FTransactionFailure = value; }
+			get { return _transactionFailure; }
+			set { _transactionFailure = value; }
 		}
 		
-		protected override bool IsTransactionFailure(Exception AException)
+		protected override bool IsTransactionFailure(Exception exception)
 		{
-			return FTransactionFailure;
+			return _transactionFailure;
 		}
 		
 		protected override void InternalPrepareTransaction() {}
@@ -3740,152 +3786,194 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		// CommitTransaction
 		protected override void InternalCommitTransaction()
 		{
-			if (Device.UseTransactions && (Transactions.Count == 1) && FTransactionStarted)
+			if (Device.UseTransactions && (Transactions.Count == 1) && _transactionStarted)
 			{
-				for (int LIndex = 0; LIndex < FExecutePool.Count; LIndex++)
+				for (int index = _executePool.Count - 1; index >= 0; index--)
 				{
-					if (FExecutePool[LIndex].DeviceCursor != null)
-						FExecutePool[LIndex].DeviceCursor.ReleaseConnection(FExecutePool[LIndex], true);
-
+					var header = _executePool[index];
+					
+					if (header.DeviceCursor != null)
+						header.DeviceCursor.ReleaseConnection(header, true);
+						
 					try
 					{
-						if (FExecutePool[LIndex].Connection.InTransaction)
-							FExecutePool[LIndex].Connection.CommitTransaction();
+						if (header.Connection.InTransaction)
+							header.Connection.CommitTransaction();
 					}
 					catch
 					{
-						FTransactionFailure = FExecutePool[LIndex].Connection.TransactionFailure;
+						_transactionFailure = header.Connection.TransactionFailure;
 						throw;
 					}
+
+					// Dispose the connection to release it back to the server
+					try
+					{
+						_executePool.DisownAt(index).Dispose();
+					}
+					catch
+					{
+						// Ignore errors disposing the connection, as long as it removed from the execute pool, we are good
+					}
 				}
-				FTransactionStarted = false;
+
+				_transactionStarted = false;
 			}
 		}
 		
 		// RollbackTransaction
 		protected override void InternalRollbackTransaction()
 		{
-			if (Device.UseTransactions && (Transactions.Count == 1) && FTransactionStarted)
+			if (Device.UseTransactions && (Transactions.Count == 1) && _transactionStarted)
 			{
-				for (int LIndex = 0; LIndex < FExecutePool.Count; LIndex++)
+				for (int index = _executePool.Count - 1; index >= 0; index--)
 				{
-					if (FExecutePool[LIndex].DeviceCursor != null)
-						FExecutePool[LIndex].DeviceCursor.ReleaseConnection(FExecutePool[LIndex], true);
+					var header = _executePool[index];
+					
+					if (header.DeviceCursor != null)
+						header.DeviceCursor.ReleaseConnection(header, true);
 						
 					try
 					{
-						if (FExecutePool[LIndex].Connection.InTransaction)
-							FExecutePool[LIndex].Connection.RollbackTransaction();
+						if (header.Connection.InTransaction)
+							header.Connection.RollbackTransaction();
 					}
 					catch
 					{
-						FTransactionFailure = FExecutePool[LIndex].Connection.TransactionFailure;
+						_transactionFailure = header.Connection.TransactionFailure;
+						// Don't rethrow, we do not care if there was an issue rolling back on the server, there's nothing we can do about it here
+					}
+					
+					// Dispose the connection to release it back to the server
+					try
+					{
+						_executePool.DisownAt(index).Dispose();
+					}
+					catch
+					{
+						// Ignore errors disposing the connection, as long as it is removed from the execute pool, we are good
 					}
 				}
-				FTransactionStarted = false;
+			
+				for (int index = 0; index < _executePool.Count; index++)
+				{
+					if (_executePool[index].DeviceCursor != null)
+						_executePool[index].DeviceCursor.ReleaseConnection(_executePool[index], true);
+						
+					try
+					{
+						if (_executePool[index].Connection.InTransaction)
+							_executePool[index].Connection.RollbackTransaction();
+					}
+					catch
+					{
+						_transactionFailure = _executePool[index].Connection.TransactionFailure;
+					}
+				}
+				_transactionStarted = false;
 			}
 		}
 
-		protected virtual SQLTable CreateSQLTable(Program AProgram, TableNode ANode, SelectStatement ASelectStatement, SQLParameters AParameters, bool AIsAggregate)
+		protected virtual SQLTable CreateSQLTable(Program program, TableNode node, SelectStatement selectStatement, SQLParameters parameters, bool isAggregate)
 		{
-			return new SQLTable(this, AProgram, ANode, ASelectStatement, AParameters, AIsAggregate);
+			return new SQLTable(this, program, node, selectStatement, parameters, isAggregate);
 		}
 		
-        protected void SetParameterValueLength(object ANativeParamValue, SQLPlanParameter APlanParameter)
+        protected void SetParameterValueLength(object nativeParamValue, SQLPlanParameter planParameter)
         {
-            string LStringParamValue = ANativeParamValue as String;
-            SQLStringType LParameterType = APlanParameter.SQLParameter.Type as SQLStringType;
-            if ((LParameterType != null) && (LStringParamValue != null) && (LParameterType.Length != LStringParamValue.Length))
-                LParameterType.Length = LStringParamValue.Length <= 20 ? 20 : LStringParamValue.Length;
+            string stringParamValue = nativeParamValue as String;
+            SQLStringType parameterType = planParameter.SQLParameter.Type as SQLStringType;
+            if ((parameterType != null) && (stringParamValue != null) && (parameterType.Length != stringParamValue.Length))
+                parameterType.Length = stringParamValue.Length <= 20 ? 20 : stringParamValue.Length;
         }
 
-		protected void PrepareSQLParameters(SQLDevicePlan ADevicePlan, Program AProgram, bool AIsCursor, SQLParameters AParameters)
+		protected void PrepareSQLParameters(SQLDevicePlan devicePlan, Program program, bool isCursor, SQLParameters parameters)
 		{
-			object LParamValue;
-			object LNativeParamValue;
-            SQLScalarType LParamType;
-			foreach (SQLPlanParameter LPlanParameter in ADevicePlan.DevicePlanNode.PlanParameters)
+			object paramValue;
+			object nativeParamValue;
+            SQLScalarType paramType;
+			foreach (SQLPlanParameter planParameter in devicePlan.DevicePlanNode.PlanParameters)
 			{
-				LParamValue = LPlanParameter.PlanNode.Execute(AProgram);
-				LParamType = (SQLScalarType)Device.ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)LPlanParameter.PlanNode.DataType);
-                LNativeParamValue = (LParamValue == null) ? null : LParamType.ParameterFromScalar(AProgram.ValueManager, LParamValue);
-                if (LNativeParamValue != null)
-                    SetParameterValueLength(LNativeParamValue, LPlanParameter);
+				paramValue = planParameter.PlanNode.Execute(program);
+				paramType = (SQLScalarType)Device.ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planParameter.PlanNode.DataType);
+                nativeParamValue = (paramValue == null) ? null : paramType.ParameterFromScalar(program.ValueManager, paramValue);
+                if (nativeParamValue != null)
+                    SetParameterValueLength(nativeParamValue, planParameter);
 
-				AParameters.Add
+				parameters.Add
 				(
 					new SQLParameter
 					(
-						LPlanParameter.SQLParameter.Name, 
-						LPlanParameter.SQLParameter.Type, 
-						LNativeParamValue,
-						LPlanParameter.SQLParameter.Direction,
-						LPlanParameter.SQLParameter.Marker,
-						Device.UseParametersForCursors && AIsCursor ? null : LParamType.ToLiteral(AProgram.ValueManager, LParamValue)
+						planParameter.SQLParameter.Name, 
+						planParameter.SQLParameter.Type, 
+						nativeParamValue,
+						planParameter.SQLParameter.Direction,
+						planParameter.SQLParameter.Marker,
+						Device.UseParametersForCursors && isCursor ? null : paramType.ToLiteral(program.ValueManager, paramValue)
 					)
 				);
 			}
 		}
 
 		// Execute
-		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Program program, Schema.DevicePlan devicePlan)
 		{
-			SQLDevicePlan LPlan = (SQLDevicePlan)ADevicePlan;			
-			LPlan.DevicePlanNode = (SQLDevicePlanNode)LPlan.Node.DeviceNode;
-			if (LPlan.Node is DMLNode)
+			SQLDevicePlan plan = (SQLDevicePlan)devicePlan;			
+			plan.DevicePlanNode = (SQLDevicePlanNode)plan.Node.DeviceNode;
+			if (plan.Node is DMLNode)
 			{
-				SQLConnectionHeader LHeader = RequestConnection(false);                             
+				SQLConnectionHeader header = RequestConnection(false);                             
 				try
 				{
-					using (SQLCommand LCommand = LHeader.Connection.CreateCommand(false))
+					using (SQLCommand command = header.Connection.CreateCommand(false))
 					{
-						LCommand.Statement = Device.Emitter.Emit(LPlan.DevicePlanNode.Statement);						
-						PrepareSQLParameters(LPlan, AProgram, false, LCommand.Parameters);
-						LCommand.Execute();
+						command.Statement = Device.Emitter.Emit(plan.DevicePlanNode.Statement);						
+						PrepareSQLParameters(plan, program, false, command.Parameters);
+						command.Execute();
 						return null;
 					}
 				}
 				catch
 				{
-					FTransactionFailure = LHeader.Connection.TransactionFailure;
+					_transactionFailure = header.Connection.TransactionFailure;
 					throw;
 				}
 			}
-			else if (LPlan.Node is DDLNode)
+			else if (plan.Node is DDLNode)
 			{
-				SQLConnectionHeader LHeader = RequestConnection(false);
+				SQLConnectionHeader header = RequestConnection(false);
 				try
 				{
 					if ((!ServerProcess.IsLoading()) && ((Device.ReconcileMode & D4.ReconcileMode.Command) != 0))
 					{
-						Statement LDDLStatement = LPlan.DevicePlanNode.Statement;
-						if (LDDLStatement is Batch)
+						Statement dDLStatement = plan.DevicePlanNode.Statement;
+						if (dDLStatement is Batch)
 						{
 							// If this is a batch, split it into separate statements for execution.  This is required because the Oracle ODBC driver does
 							// not allow multiple statements to be executed at a time.
-							using (SQLCommand LCommand = LHeader.Connection.CreateCommand(false))
+							using (SQLCommand command = header.Connection.CreateCommand(false))
 							{
-								foreach (Statement LStatement in ((Batch)LDDLStatement).Statements)
+								foreach (Statement statement in ((Batch)dDLStatement).Statements)
 								{
-									string LStatementString = Device.Emitter.Emit(LStatement);
-									if (LStatementString != String.Empty)
+									string statementString = Device.Emitter.Emit(statement);
+									if (statementString != String.Empty)
 									{
-										LCommand.Statement = LStatementString;
-										LCommand.Execute();
+										command.Statement = statementString;
+										command.Execute();
 									}
 								}
 							}
 						}
 						else
 						{
-							string LStatement = Device.Emitter.Emit(LPlan.DevicePlanNode.Statement);
-							if (LStatement != String.Empty)
+							string statement = Device.Emitter.Emit(plan.DevicePlanNode.Statement);
+							if (statement != String.Empty)
 							{
-								using (SQLCommand LCommand = LHeader.Connection.CreateCommand(false))
+								using (SQLCommand command = header.Connection.CreateCommand(false))
 								{
-									LCommand.Statement = LStatement;									
-									PrepareSQLParameters(LPlan, AProgram, false, LCommand.Parameters);
-									LCommand.Execute();
+									command.Statement = statement;									
+									PrepareSQLParameters(plan, program, false, command.Parameters);
+									command.Execute();
 								}
 							}
 						}
@@ -3894,60 +3982,60 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				}
 				catch
 				{
-					FTransactionFailure = LHeader.Connection.TransactionFailure;
+					_transactionFailure = header.Connection.TransactionFailure;
 					throw;
 				}
 			}
 			else
 			{
-				if (LPlan.Node is TableNode)
+				if (plan.Node is TableNode)
 				{
-					SQLParameters LParameters = new SQLParameters();
-					PrepareSQLParameters(LPlan, AProgram, true, LParameters);
-					SQLTable LTable = CreateSQLTable(AProgram, (TableNode)LPlan.Node, (SelectStatement)LPlan.DevicePlanNode.Statement, LParameters, LPlan.CurrentQueryContext().IsAggregate);
+					SQLParameters parameters = new SQLParameters();
+					PrepareSQLParameters(plan, program, true, parameters);
+					SQLTable table = CreateSQLTable(program, (TableNode)plan.Node, (SelectStatement)plan.DevicePlanNode.Statement, parameters, plan.CurrentQueryContext().IsAggregate);
 					try
 					{
-						LTable.Open();
-						return LTable;
+						table.Open();
+						return table;
 					}
 					catch
 					{
-						LTable.Dispose();
+						table.Dispose();
 						throw;
 					}
 				}
 				else
 				{
-					SQLConnectionHeader LHeader = RequestConnection(false);
+					SQLConnectionHeader header = RequestConnection(false);
 					try
 					{
-						using (SQLCommand LCommand = LHeader.Connection.CreateCommand(true))
+						using (SQLCommand command = header.Connection.CreateCommand(true))
 						{
-							LCommand.Statement = Device.Emitter.Emit(LPlan.DevicePlanNode.Statement);							
-							PrepareSQLParameters(LPlan, AProgram, true, LCommand.Parameters);
-							SQLCursor LCursor = LCommand.Open(SQLCursorType.Dynamic, IsolationLevelToSQLIsolationLevel(ServerProcess.CurrentIsolationLevel())); //SQLIsolationLevel.ReadCommitted);
+							command.Statement = Device.Emitter.Emit(plan.DevicePlanNode.Statement);							
+							PrepareSQLParameters(plan, program, true, command.Parameters);
+							SQLCursor cursor = command.Open(SQLCursorType.Dynamic, IsolationLevelToSQLIsolationLevel(ServerProcess.CurrentIsolationLevel())); //SQLIsolationLevel.ReadCommitted);
 							try
 							{
-								if (LCursor.Next())
+								if (cursor.Next())
 								{
-									if (LPlan.Node.DataType is Schema.IScalarType)
+									if (plan.Node.DataType is Schema.IScalarType)
 									{
-										if (LCursor.IsNull(0))
+										if (cursor.IsNull(0))
 											return null;
 										else
-											return Device.ResolveDeviceScalarType(ADevicePlan.Plan, (ScalarType)LPlan.Node.DataType).ToScalar(ServerProcess.ValueManager, LCursor[0]);	
+											return Device.ResolveDeviceScalarType(devicePlan.Plan, (ScalarType)plan.Node.DataType).ToScalar(ServerProcess.ValueManager, cursor[0]);	
 									}
 									else
 									{
-										Row LRow = new Row(AProgram.ValueManager, (Schema.IRowType)LPlan.Node.DataType);
-										for (int LIndex = 0; LIndex < LRow.DataType.Columns.Count; LIndex++)
-											if (!LCursor.IsNull(LIndex))
-												LRow[LIndex] = Device.ResolveDeviceScalarType(ADevicePlan.Plan, (ScalarType)LRow.DataType.Columns[LIndex].DataType).ToScalar(ServerProcess.ValueManager, LCursor[LIndex]);
+										Row row = new Row(program.ValueManager, (Schema.IRowType)plan.Node.DataType);
+										for (int index = 0; index < row.DataType.Columns.Count; index++)
+											if (!cursor.IsNull(index))
+												row[index] = Device.ResolveDeviceScalarType(devicePlan.Plan, (ScalarType)row.DataType.Columns[index].DataType).ToScalar(ServerProcess.ValueManager, cursor[index]);
 												
-										if (LCursor.Next())
+										if (cursor.Next())
 											throw new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression);
 
-										return LRow;
+										return row;
 									}
 								}
 								else
@@ -3955,13 +4043,13 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							}
 							finally
 							{
-								LCommand.Close(LCursor);
+								command.Close(cursor);
 							}
 						}
 					}
 					catch
 					{
-						FTransactionFailure = LHeader.Connection.TransactionFailure;
+						_transactionFailure = header.Connection.TransactionFailure;
 						throw;
 					}
 				}
@@ -3969,44 +4057,44 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		}
 
 		// InsertRow
-		protected virtual void InternalVerifyInsertStatement(TableVar ATable, Row ARow, InsertStatement AStatement) {}
-        protected override void InternalInsertRow(Program AProgram, TableVar ATable, Row ARow, BitArray AValueFlags)
+		protected virtual void InternalVerifyInsertStatement(TableVar table, Row row, InsertStatement statement) {}
+        protected override void InternalInsertRow(Program program, TableVar table, Row row, BitArray valueFlags)
         {
-			SQLConnectionHeader LHeader = RequestConnection(false);
+			SQLConnectionHeader header = RequestConnection(false);
 			try
 			{
-				using (SQLCommand LCommand = LHeader.Connection.CreateCommand(false))
+				using (SQLCommand command = header.Connection.CreateCommand(false))
 				{
-					InsertStatement LInsertStatement = new InsertStatement();
-					LInsertStatement.InsertClause = new InsertClause();
-					LInsertStatement.InsertClause.TableExpression = new TableExpression();
-					LInsertStatement.InsertClause.TableExpression.TableSchema = D4.MetaData.GetTag(ATable.MetaData, "Storage.Schema", Device.Schema);
-					LInsertStatement.InsertClause.TableExpression.TableName = Device.ToSQLIdentifier(ATable);
+					InsertStatement insertStatement = new InsertStatement();
+					insertStatement.InsertClause = new InsertClause();
+					insertStatement.InsertClause.TableExpression = new TableExpression();
+					insertStatement.InsertClause.TableExpression.TableSchema = D4.MetaData.GetTag(table.MetaData, "Storage.Schema", Device.Schema);
+					insertStatement.InsertClause.TableExpression.TableName = Device.ToSQLIdentifier(table);
 					if (Device.UseValuesClauseInInsert)
 					{
-						ValuesExpression LValues = new ValuesExpression();
-						LInsertStatement.Values = LValues;
-						string LColumnName;
-						string LParameterName;
-						Schema.TableVarColumn LColumn;
-						SQLScalarType LScalarType;
-						for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
+						ValuesExpression values = new ValuesExpression();
+						insertStatement.Values = values;
+						string columnName;
+						string parameterName;
+						Schema.TableVarColumn column;
+						SQLScalarType scalarType;
+						for (int index = 0; index < row.DataType.Columns.Count; index++)
 						{
-							LColumn = ATable.Columns[ATable.Columns.IndexOfName(ARow.DataType.Columns[LIndex].Name)];
-							LColumnName = Device.ToSQLIdentifier(LColumn);
-							LParameterName = String.Format("P{0}", LIndex.ToString());
-							LInsertStatement.InsertClause.Columns.Add(new InsertFieldExpression(LColumnName));
-							LValues.Expressions.Add(new QueryParameterExpression(LParameterName));
-							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType);
-							LCommand.Parameters.Add
+							column = table.Columns[table.Columns.IndexOfName(row.DataType.Columns[index].Name)];
+							columnName = Device.ToSQLIdentifier(column);
+							parameterName = String.Format("P{0}", index.ToString());
+							insertStatement.InsertClause.Columns.Add(new InsertFieldExpression(columnName));
+							values.Expressions.Add(new QueryParameterExpression(parameterName));
+							scalarType = (SQLScalarType)Device.ResolveDeviceScalarType(program.Plan, (Schema.ScalarType)column.DataType);
+							command.Parameters.Add
 							(
 								new SQLParameter
 								(
-									LParameterName,
-									LScalarType.GetSQLParameterType(LColumn),
-									ARow.HasValue(LIndex) ? LScalarType.ParameterFromScalar(AProgram.ValueManager, ARow[LIndex]) : null,
+									parameterName,
+									scalarType.GetSQLParameterType(column),
+									row.HasValue(index) ? scalarType.ParameterFromScalar(program.ValueManager, row[index]) : null,
 									SQLDirection.In, 
-									Device.GetParameterMarker(LScalarType, LColumn)
+									Device.GetParameterMarker(scalarType, column)
 								)
 							);					
 						}
@@ -4019,299 +4107,299 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						// parameter markers capability to force a cast client side in order to use strings to pass values
 						// across the CLI, but convert those strings to different types on the target system. This is to work around
 						// an issue with passing decimals through the CLI.
-						SelectExpression LSelectExpression = new SelectExpression();
-						LInsertStatement.Values = LSelectExpression;
-						LSelectExpression.FromClause = new CalculusFromClause(Device.GetDummyTableSpecifier());
-						LSelectExpression.SelectClause = new SelectClause();
-						string LColumnName;
-						string LParameterName;
-						Schema.TableVarColumn LColumn;
-						SQLScalarType LScalarType;
-						for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
+						SelectExpression selectExpression = new SelectExpression();
+						insertStatement.Values = selectExpression;
+						selectExpression.FromClause = new CalculusFromClause(Device.GetDummyTableSpecifier());
+						selectExpression.SelectClause = new SelectClause();
+						string columnName;
+						string parameterName;
+						Schema.TableVarColumn column;
+						SQLScalarType scalarType;
+						for (int index = 0; index < row.DataType.Columns.Count; index++)
 						{
-							LColumn = ATable.Columns[ATable.Columns.IndexOfName(ARow.DataType.Columns[LIndex].Name)];
-							LColumnName = Device.ToSQLIdentifier(LColumn);
-							LParameterName = String.Format("P{0}", LIndex.ToString());
-							LInsertStatement.InsertClause.Columns.Add(new InsertFieldExpression(LColumnName));
-							LSelectExpression.SelectClause.Columns.Add(new ColumnExpression(new QueryParameterExpression(LParameterName), LColumnName));
-							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType);
-							LCommand.Parameters.Add
+							column = table.Columns[table.Columns.IndexOfName(row.DataType.Columns[index].Name)];
+							columnName = Device.ToSQLIdentifier(column);
+							parameterName = String.Format("P{0}", index.ToString());
+							insertStatement.InsertClause.Columns.Add(new InsertFieldExpression(columnName));
+							selectExpression.SelectClause.Columns.Add(new ColumnExpression(new QueryParameterExpression(parameterName), columnName));
+							scalarType = (SQLScalarType)Device.ResolveDeviceScalarType(program.Plan, (Schema.ScalarType)column.DataType);
+							command.Parameters.Add
 							(
 								new SQLParameter
 								(
-									LParameterName,
-									LScalarType.GetSQLParameterType(LColumn),
-									ARow.HasValue(LIndex) ? LScalarType.ParameterFromScalar(AProgram.ValueManager, ARow[LIndex]) : null,
+									parameterName,
+									scalarType.GetSQLParameterType(column),
+									row.HasValue(index) ? scalarType.ParameterFromScalar(program.ValueManager, row[index]) : null,
 									SQLDirection.In,
-									Device.GetParameterMarker(LScalarType, LColumn)
+									Device.GetParameterMarker(scalarType, column)
 								)
 							);
 						}
 						
 					}
 					
-					InternalVerifyInsertStatement(ATable, ARow, LInsertStatement);
+					InternalVerifyInsertStatement(table, row, insertStatement);
 					if (Device.CommandTimeout >= 0)
-						LCommand.CommandTimeout = Device.CommandTimeout;
-					LCommand.Statement = Device.Emitter.Emit(LInsertStatement);
-					LCommand.Execute();
+						command.CommandTimeout = Device.CommandTimeout;
+					command.Statement = Device.Emitter.Emit(insertStatement);
+					command.Execute();
 				}
 			}
 			catch
 			{
-				FTransactionFailure = LHeader.Connection.TransactionFailure;
+				_transactionFailure = header.Connection.TransactionFailure;
 				throw;
 			}
         }
         
         // UpdateRow
-        protected virtual void InternalVerifyUpdateStatement(TableVar ATable, Row AOldRow, Row ANewRow, UpdateStatement AStatement) {}
-        protected override void InternalUpdateRow(Program AProgram, TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+        protected virtual void InternalVerifyUpdateStatement(TableVar table, Row oldRow, Row newRow, UpdateStatement statement) {}
+        protected override void InternalUpdateRow(Program program, TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
         {
-			UpdateStatement LStatement = new UpdateStatement();
-			LStatement.UpdateClause = new UpdateClause();
-			LStatement.UpdateClause.TableExpression = new TableExpression();
-			LStatement.UpdateClause.TableExpression.TableSchema = D4.MetaData.GetTag(ATable.MetaData, "Storage.Schema", Device.Schema);
-			LStatement.UpdateClause.TableExpression.TableName = Device.ToSQLIdentifier(ATable);
+			UpdateStatement statement = new UpdateStatement();
+			statement.UpdateClause = new UpdateClause();
+			statement.UpdateClause.TableExpression = new TableExpression();
+			statement.UpdateClause.TableExpression.TableSchema = D4.MetaData.GetTag(table.MetaData, "Storage.Schema", Device.Schema);
+			statement.UpdateClause.TableExpression.TableName = Device.ToSQLIdentifier(table);
 
-			SQLConnectionHeader LHeader = RequestConnection(false);
+			SQLConnectionHeader header = RequestConnection(false);
 			try
 			{
-				using (SQLCommand LCommand = LHeader.Connection.CreateCommand(false))
+				using (SQLCommand command = header.Connection.CreateCommand(false))
 				{
-					string LColumnName;
-					string LParameterName;
-					Schema.TableVarColumn LColumn;
-					SQLScalarType LScalarType;			
-					for (int LIndex = 0; LIndex < ANewRow.DataType.Columns.Count; LIndex++)
+					string columnName;
+					string parameterName;
+					Schema.TableVarColumn column;
+					SQLScalarType scalarType;			
+					for (int index = 0; index < newRow.DataType.Columns.Count; index++)
 					{
-						if ((AValueFlags == null) || AValueFlags[LIndex])
+						if ((valueFlags == null) || valueFlags[index])
 						{
-							LColumn = ATable.Columns[LIndex];
-							LColumnName = Device.ToSQLIdentifier(LColumn);
-							LParameterName = String.Format("P{0}", LIndex.ToString());
-							UpdateFieldExpression LExpression = new UpdateFieldExpression();
-							LExpression.FieldName = LColumnName;
-							LExpression.Expression = new QueryParameterExpression(LParameterName);
-							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType);
-							LCommand.Parameters.Add
+							column = table.Columns[index];
+							columnName = Device.ToSQLIdentifier(column);
+							parameterName = String.Format("P{0}", index.ToString());
+							UpdateFieldExpression expression = new UpdateFieldExpression();
+							expression.FieldName = columnName;
+							expression.Expression = new QueryParameterExpression(parameterName);
+							scalarType = (SQLScalarType)Device.ResolveDeviceScalarType(program.Plan, (Schema.ScalarType)column.DataType);
+							command.Parameters.Add
 							(
 								new SQLParameter
 								(
-									LParameterName, 
-									LScalarType.GetSQLParameterType(LColumn), 
-									ANewRow.HasValue(LIndex) ? LScalarType.ParameterFromScalar(AProgram.ValueManager, ANewRow[LIndex]) : null, 
+									parameterName, 
+									scalarType.GetSQLParameterType(column), 
+									newRow.HasValue(index) ? scalarType.ParameterFromScalar(program.ValueManager, newRow[index]) : null, 
 									SQLDirection.In, 
-									Device.GetParameterMarker(LScalarType, LColumn)
+									Device.GetParameterMarker(scalarType, column)
 								)
 							);
-							LStatement.UpdateClause.Columns.Add(LExpression);
+							statement.UpdateClause.Columns.Add(expression);
 						}
 					}
 					
-					if (LStatement.UpdateClause.Columns.Count > 0)
+					if (statement.UpdateClause.Columns.Count > 0)
 					{
-						Schema.Key LClusteringKey = AProgram.FindClusteringKey(ATable);
-						if (LClusteringKey.Columns.Count > 0)
+						Schema.Key clusteringKey = program.FindClusteringKey(table);
+						if (clusteringKey.Columns.Count > 0)
 						{
-							int LRowIndex;
-							LStatement.WhereClause = new WhereClause();
-							for (int LIndex = 0; LIndex < LClusteringKey.Columns.Count; LIndex++)
+							int rowIndex;
+							statement.WhereClause = new WhereClause();
+							for (int index = 0; index < clusteringKey.Columns.Count; index++)
 							{
-								LColumn = LClusteringKey.Columns[LIndex];
-								LRowIndex = AOldRow.DataType.Columns.IndexOfName(LColumn.Name);
-								LColumnName = Device.ToSQLIdentifier(LColumn);
-								LParameterName = String.Format("P{0}", (LIndex + ANewRow.DataType.Columns.Count).ToString());
-								LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType);
-								LCommand.Parameters.Add
+								column = clusteringKey.Columns[index];
+								rowIndex = oldRow.DataType.Columns.IndexOfName(column.Name);
+								columnName = Device.ToSQLIdentifier(column);
+								parameterName = String.Format("P{0}", (index + newRow.DataType.Columns.Count).ToString());
+								scalarType = (SQLScalarType)Device.ResolveDeviceScalarType(program.Plan, (Schema.ScalarType)column.DataType);
+								command.Parameters.Add
 								(
 									new SQLParameter
 									(
-										LParameterName, 
-										LScalarType.GetSQLParameterType(LColumn), 
-										AOldRow.HasValue(LRowIndex) ? LScalarType.ParameterFromScalar(AProgram.ValueManager, AOldRow[LRowIndex]) : null, 
+										parameterName, 
+										scalarType.GetSQLParameterType(column), 
+										oldRow.HasValue(rowIndex) ? scalarType.ParameterFromScalar(program.ValueManager, oldRow[rowIndex]) : null, 
 										SQLDirection.In, 
-										Device.GetParameterMarker(LScalarType, LColumn)
+										Device.GetParameterMarker(scalarType, column)
 									)
 								);
-								Expression LExpression = 
+								Expression expression = 
 									new BinaryExpression
 									(
-										new QualifiedFieldExpression(LColumnName),
+										new QualifiedFieldExpression(columnName),
 										"iEqual",
-										new QueryParameterExpression(LParameterName)
+										new QueryParameterExpression(parameterName)
 									);
 									
-								if (LStatement.WhereClause.Expression == null)
-									LStatement.WhereClause.Expression = LExpression;
+								if (statement.WhereClause.Expression == null)
+									statement.WhereClause.Expression = expression;
 								else
-									LStatement.WhereClause.Expression = new BinaryExpression(LStatement.WhereClause.Expression, "iAnd", LExpression);
+									statement.WhereClause.Expression = new BinaryExpression(statement.WhereClause.Expression, "iAnd", expression);
 							}
 						}
 						
-						InternalVerifyUpdateStatement(ATable, AOldRow, ANewRow, LStatement);
+						InternalVerifyUpdateStatement(table, oldRow, newRow, statement);
 						if (Device.CommandTimeout >= 0)
-							LCommand.CommandTimeout = Device.CommandTimeout;
-						LCommand.Statement = Device.Emitter.Emit(LStatement);
-						LCommand.Execute();
+							command.CommandTimeout = Device.CommandTimeout;
+						command.Statement = Device.Emitter.Emit(statement);
+						command.Execute();
 					}
 				}
 			}
 			catch
 			{
-				FTransactionFailure = LHeader.Connection.TransactionFailure;
+				_transactionFailure = header.Connection.TransactionFailure;
 				throw;
 			}
         }
         
         // DeleteRow
-        protected virtual void InternalVerifyDeleteStatement(TableVar ATable, Row ARow, DeleteStatement AStatement) {}
-        protected override void InternalDeleteRow(Program AProgram, TableVar ATable, Row ARow)
+        protected virtual void InternalVerifyDeleteStatement(TableVar table, Row row, DeleteStatement statement) {}
+        protected override void InternalDeleteRow(Program program, TableVar table, Row row)
         {
-			DeleteStatement LStatement = new DeleteStatement();
-			LStatement.DeleteClause = new DeleteClause();
-			LStatement.DeleteClause.TableExpression = new TableExpression();
-			LStatement.DeleteClause.TableExpression.TableSchema = D4.MetaData.GetTag(ATable.MetaData, "Storage.Schema", Device.Schema);
-			LStatement.DeleteClause.TableExpression.TableName = Device.ToSQLIdentifier(ATable);
+			DeleteStatement statement = new DeleteStatement();
+			statement.DeleteClause = new DeleteClause();
+			statement.DeleteClause.TableExpression = new TableExpression();
+			statement.DeleteClause.TableExpression.TableSchema = D4.MetaData.GetTag(table.MetaData, "Storage.Schema", Device.Schema);
+			statement.DeleteClause.TableExpression.TableName = Device.ToSQLIdentifier(table);
 
-			SQLConnectionHeader LHeader = RequestConnection(false);
+			SQLConnectionHeader header = RequestConnection(false);
 			try
 			{			
-				using (SQLCommand LCommand = LHeader.Connection.CreateCommand(false))
+				using (SQLCommand command = header.Connection.CreateCommand(false))
 				{
-					Schema.TableVarColumn LColumn;
-					string LColumnName;
-					string LParameterName;
-					SQLScalarType LScalarType;
+					Schema.TableVarColumn column;
+					string columnName;
+					string parameterName;
+					SQLScalarType scalarType;
 					
-					Schema.Key LClusteringKey = AProgram.FindClusteringKey(ATable);
-					if (LClusteringKey.Columns.Count > 0)
+					Schema.Key clusteringKey = program.FindClusteringKey(table);
+					if (clusteringKey.Columns.Count > 0)
 					{
-						int LRowIndex;
-						LStatement.WhereClause = new WhereClause();
-						for (int LIndex = 0; LIndex < LClusteringKey.Columns.Count; LIndex++)
+						int rowIndex;
+						statement.WhereClause = new WhereClause();
+						for (int index = 0; index < clusteringKey.Columns.Count; index++)
 						{
-							LColumn = LClusteringKey.Columns[LIndex];					
-							LRowIndex = ARow.DataType.Columns.IndexOfName(LColumn.Name);
-							LColumnName = Device.ToSQLIdentifier(LColumn);
-							LParameterName = String.Format("P{0}", LIndex.ToString());
-							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType);
-							LCommand.Parameters.Add
+							column = clusteringKey.Columns[index];					
+							rowIndex = row.DataType.Columns.IndexOfName(column.Name);
+							columnName = Device.ToSQLIdentifier(column);
+							parameterName = String.Format("P{0}", index.ToString());
+							scalarType = (SQLScalarType)Device.ResolveDeviceScalarType(program.Plan, (Schema.ScalarType)column.DataType);
+							command.Parameters.Add
 							(
 								new SQLParameter
 								(
-									LParameterName, 
-									LScalarType.GetSQLParameterType(LColumn), 
-									ARow.HasValue(LRowIndex) ? LScalarType.ParameterFromScalar(AProgram.ValueManager, ARow[LRowIndex]) : null, 
+									parameterName, 
+									scalarType.GetSQLParameterType(column), 
+									row.HasValue(rowIndex) ? scalarType.ParameterFromScalar(program.ValueManager, row[rowIndex]) : null, 
 									SQLDirection.In, 
-									Device.GetParameterMarker(LScalarType, LColumn)
+									Device.GetParameterMarker(scalarType, column)
 								)
 							);
-							Expression LExpression = 
+							Expression expression = 
 								new BinaryExpression
 								(
-									new QualifiedFieldExpression(LColumnName),
+									new QualifiedFieldExpression(columnName),
 									"iEqual",
-									new QueryParameterExpression(LParameterName)
+									new QueryParameterExpression(parameterName)
 								);
 								
-							if (LStatement.WhereClause.Expression == null)
-								LStatement.WhereClause.Expression = LExpression;
+							if (statement.WhereClause.Expression == null)
+								statement.WhereClause.Expression = expression;
 							else
-								LStatement.WhereClause.Expression = new BinaryExpression(LStatement.WhereClause.Expression, "iAnd", LExpression);
+								statement.WhereClause.Expression = new BinaryExpression(statement.WhereClause.Expression, "iAnd", expression);
 						}
 					}
 
-					InternalVerifyDeleteStatement(ATable, ARow, LStatement);
+					InternalVerifyDeleteStatement(table, row, statement);
 					if (Device.CommandTimeout >= 0)
-						LCommand.CommandTimeout = Device.CommandTimeout;
-					LCommand.Statement = Device.Emitter.Emit(LStatement);
-					LCommand.Execute();			
+						command.CommandTimeout = Device.CommandTimeout;
+					command.Statement = Device.Emitter.Emit(statement);
+					command.Execute();			
 				}
 			}
 			catch
 			{
-				FTransactionFailure = LHeader.Connection.TransactionFailure;
+				_transactionFailure = header.Connection.TransactionFailure;
 				throw;
 			}
         }
 
 		// IStreamProvider
-		private SQLStreamHeaders FStreams = new SQLStreamHeaders();
+		private SQLStreamHeaders _streams = new SQLStreamHeaders();
 		
-		private SQLStreamHeader GetStreamHeader(StreamID AStreamID)
+		private SQLStreamHeader GetStreamHeader(StreamID streamID)
 		{
-			SQLStreamHeader LStreamHeader = FStreams[AStreamID];
-			if (LStreamHeader == null)
-				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, AStreamID.ToString());
-			return LStreamHeader;
+			SQLStreamHeader streamHeader = _streams[streamID];
+			if (streamHeader == null)
+				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, streamID.ToString());
+			return streamHeader;
 		}
 		
 		protected void DestroyStreams()
 		{
-			foreach (StreamID LStreamID in FStreams.Keys)
-				FStreams[LStreamID].Dispose();
-			FStreams.Clear();
+			foreach (StreamID streamID in _streams.Keys)
+				_streams[streamID].Dispose();
+			_streams.Clear();
 		}
 		
 		public virtual void Create
 		(
-			StreamID AStreamID, 
-			string AColumnName, 
-			Schema.DeviceScalarType ADeviceScalarType, 
-			string AStatement, 
-			SQLParameters AParameters, 
-			SQLCursorType ACursorType, 
-			SQLIsolationLevel AIsolationLevel
+			StreamID streamID, 
+			string columnName, 
+			Schema.DeviceScalarType deviceScalarType, 
+			string statement, 
+			SQLParameters parameters, 
+			SQLCursorType cursorType, 
+			SQLIsolationLevel isolationLevel
 		)
 		{
-			FStreams.Add(new SQLStreamHeader(AStreamID, this, AColumnName, ADeviceScalarType, AStatement, AParameters, ACursorType, AIsolationLevel));
+			_streams.Add(new SQLStreamHeader(streamID, this, columnName, deviceScalarType, statement, parameters, cursorType, isolationLevel));
 		}
 		
-		public virtual Stream Open(StreamID AStreamID)
+		public virtual Stream Open(StreamID streamID)
 		{
 			try
 			{
-				return GetStreamHeader(AStreamID).GetSourceStream();
+				return GetStreamHeader(streamID).GetSourceStream();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
 		}
 		
-		public virtual void Close(StreamID AStreamID)
+		public virtual void Close(StreamID streamID)
 		{
 			// no action to perform
 		}
 		
-		public virtual void Destroy(StreamID AStreamID)
+		public virtual void Destroy(StreamID streamID)
 		{
-			SQLStreamHeader LStreamHeader = GetStreamHeader(AStreamID);
-			FStreams.Remove(AStreamID);
-			LStreamHeader.Dispose();
+			SQLStreamHeader streamHeader = GetStreamHeader(streamID);
+			_streams.Remove(streamID);
+			streamHeader.Dispose();
 		}
 		
-		public virtual void Reassign(StreamID AOldStreamID, StreamID ANewStreamID)
+		public virtual void Reassign(StreamID oldStreamID, StreamID newStreamID)
 		{
-			SQLStreamHeader LStreamHeader = GetStreamHeader(AOldStreamID);
-			FStreams.Remove(AOldStreamID);
-			LStreamHeader.StreamID = ANewStreamID;
-			FStreams.Add(LStreamHeader);
+			SQLStreamHeader streamHeader = GetStreamHeader(oldStreamID);
+			_streams.Remove(oldStreamID);
+			streamHeader.StreamID = newStreamID;
+			_streams.Add(streamHeader);
 		}
 		
 		// SQLExecute
-		public void SQLExecute(string AStatement, SQLParameters AParameters)
+		public void SQLExecute(string statement, SQLParameters parameters)
 		{
-			SQLConnectionHeader LHeader = RequestConnection(false);
+			SQLConnectionHeader header = RequestConnection(false);
 			try
 			{
-				LHeader.Connection.Execute(AStatement, AParameters);
+				header.Connection.Execute(statement, parameters);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FTransactionFailure = LHeader.Connection.TransactionFailure;
-				throw WrapException(LException);
+				_transactionFailure = header.Connection.TransactionFailure;
+				throw WrapException(exception);
 			}
 		}
 	}
@@ -4320,111 +4408,111 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	{
 		public SQLStreamHeader
 		(
-			StreamID AStreamID, 
-			SQLDeviceSession ADeviceSession, 
-			string AColumnName, 
-			Schema.DeviceScalarType ADeviceScalarType, 
-			string AStatement, 
-			SQLParameters AParameters, 
-			SQLCursorType ACursorType, 
-			SQLIsolationLevel AIsolationLevel
+			StreamID streamID, 
+			SQLDeviceSession deviceSession, 
+			string columnName, 
+			Schema.DeviceScalarType deviceScalarType, 
+			string statement, 
+			SQLParameters parameters, 
+			SQLCursorType cursorType, 
+			SQLIsolationLevel isolationLevel
 		) : base()
 		{
-			FStreamID = AStreamID;
-			FDeviceSession = ADeviceSession;
-			FColumnName = AColumnName;
-			FDeviceScalarType = ADeviceScalarType;
-			FStatement = AStatement;
-			FParameters = AParameters;
-			FCursorType = ACursorType;
-			FIsolationLevel = AIsolationLevel;
+			_streamID = streamID;
+			_deviceSession = deviceSession;
+			_columnName = columnName;
+			_deviceScalarType = deviceScalarType;
+			_statement = statement;
+			_parameters = parameters;
+			_cursorType = cursorType;
+			_isolationLevel = isolationLevel;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			CloseSource();
-			FDeviceScalarType = null;
-			FDeviceSession = null;
-			FParameters = null;
-			FStreamID = StreamID.Null;
-			base.Dispose(ADisposing);
+			_deviceScalarType = null;
+			_deviceSession = null;
+			_parameters = null;
+			_streamID = StreamID.Null;
+			base.Dispose(disposing);
 		}
 		
 		// The stream manager id for this stream
-		private StreamID FStreamID;
+		private StreamID _streamID;
 		public StreamID StreamID 
 		{ 
-			get { return FStreamID; } 
-			set { FStreamID = value; }
+			get { return _streamID; } 
+			set { _streamID = value; }
 		}
 		
 		// The device session supporting this stream
-		private SQLDeviceSession FDeviceSession;
+		private SQLDeviceSession _deviceSession;
 		
 		// The name of the column from which this stream originated
-		private string FColumnName;
+		private string _columnName;
 		
 		// The device scalar type map for the data type of this stream
-		private Schema.DeviceScalarType FDeviceScalarType;
+		private Schema.DeviceScalarType _deviceScalarType;
 		
 		// The statement used to retrieve the data for the stream
-		private string FStatement;
+		private string _statement;
 		
 		// The parameters used to retrieve the data for the stream
-		private SQLParameters FParameters;
+		private SQLParameters _parameters;
 		
 		// The cursor type used for the open request
-		private SQLCursorType FCursorType;
+		private SQLCursorType _cursorType;
 		
 		// The isolation level used for the open request
-		private SQLIsolationLevel FIsolationLevel;
+		private SQLIsolationLevel _isolationLevel;
 
 		// A DeferredWriteStream built on the DeferredStream obtained from a cursor based on the expression
 		//	<FTable.Node> where KeyColumns = KeyRowValues over { KeyColumns, DataColumn }
-		private DeferredWriteStream FSourceStream;
+		private DeferredWriteStream _sourceStream;
 		public Stream GetSourceStream()
 		{
 			OpenSource();
-			return FSourceStream;
+			return _sourceStream;
 		}
 		
 		// If the underlying value cannot be opened deferred from the connectivity layer, it is stored in this non-native scalar
-		private Scalar FSourceValue;
+		private Scalar _sourceValue;
 
 		// The Cursor used to access the deferred stream		
-		private SQLCursor FCursor;
+		private SQLCursor _cursor;
 		
 		public void OpenSource()
 		{
-			if (FSourceStream == null)
+			if (_sourceStream == null)
 			{
-				SQLConnectionHeader LHeader = FDeviceSession.RequestConnection(false);
+				SQLConnectionHeader header = _deviceSession.RequestConnection(false);
 				try
 				{
-					FCursor = LHeader.Connection.Open(FStatement, FParameters, FCursorType, FIsolationLevel, SQLCommandBehavior.Default);
+					_cursor = header.Connection.Open(_statement, _parameters, _cursorType, _isolationLevel, SQLCommandBehavior.Default);
 					try
 					{
-						if (FCursor.Next())
-							if (FCursor.IsDeferred(FCursor.ColumnCount - 1))
-								FSourceStream = new DeferredWriteStream(FDeviceScalarType.GetStreamAdapter(FDeviceSession.ServerProcess.ValueManager, FCursor.OpenDeferredStream(FCursor.ColumnCount - 1)));
+						if (_cursor.Next())
+							if (_cursor.IsDeferred(_cursor.ColumnCount - 1))
+								_sourceStream = new DeferredWriteStream(_deviceScalarType.GetStreamAdapter(_deviceSession.ServerProcess.ValueManager, _cursor.OpenDeferredStream(_cursor.ColumnCount - 1)));
 							else
 							{
-								FSourceValue = new Scalar(FDeviceSession.ServerProcess.ValueManager, FDeviceScalarType.ScalarType);
-								FSourceValue.AsNative = FDeviceScalarType.ToScalar(FDeviceSession.ServerProcess.ValueManager, FCursor[FCursor.ColumnCount - 1]);
-								FSourceStream = new DeferredWriteStream(FSourceValue.OpenStream());
+								_sourceValue = new Scalar(_deviceSession.ServerProcess.ValueManager, _deviceScalarType.ScalarType);
+								_sourceValue.AsNative = _deviceScalarType.ToScalar(_deviceSession.ServerProcess.ValueManager, _cursor[_cursor.ColumnCount - 1]);
+								_sourceStream = new DeferredWriteStream(_sourceValue.OpenStream());
 							}
 						else
-							throw new SQLException(SQLException.Codes.DeferredDataNotFound, FColumnName);
+							throw new SQLException(SQLException.Codes.DeferredDataNotFound, _columnName);
 					}
 					finally
 					{
-						FCursor.Command.Connection.Close(FCursor);
-						FCursor = null;
+						_cursor.Command.Connection.Close(_cursor);
+						_cursor = null;
 					}
 				}
 				catch
 				{
-					FDeviceSession.TransactionFailure = LHeader.Connection.TransactionFailure;
+					_deviceSession.TransactionFailure = header.Connection.TransactionFailure;
 					throw;
 				}
 			}
@@ -4434,18 +4522,18 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			try
 			{
-				if (FSourceStream != null)
+				if (_sourceStream != null)
 				{
-					FSourceStream.Close();
-					FSourceStream = null;
+					_sourceStream.Close();
+					_sourceStream = null;
 				}
 			}
 			finally
 			{
-				if (FSourceValue != null)
+				if (_sourceValue != null)
 				{
-					FSourceValue.Dispose();
-					FSourceValue = null;
+					_sourceValue.Dispose();
+					_sourceValue = null;
 				}
 			}
 		}
@@ -4455,39 +4543,39 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	{
 		public SQLStreamHeaders() : base(){}
 		
-		public SQLStreamHeader this[StreamID AStreamID] { get { return (SQLStreamHeader)base[AStreamID]; } }
+		public SQLStreamHeader this[StreamID streamID] { get { return (SQLStreamHeader)base[streamID]; } }
 		
-		public void Add(SQLStreamHeader AStream)
+		public void Add(SQLStreamHeader stream)
 		{
-			Add(AStream.StreamID, AStream);
+			Add(stream.StreamID, stream);
 		}
 		
-		public void Remove(SQLStreamHeader AStream)
+		public void Remove(SQLStreamHeader stream)
 		{
-			Remove(AStream.StreamID);
+			Remove(stream.StreamID);
 		}
 	}
 	
 	public class ColumnMap
 	{
-		public ColumnMap(Column AColumn, ColumnExpression AExpression, int AIndex)
+		public ColumnMap(Column column, ColumnExpression expression, int index)
 		{
-			FColumn = AColumn;
-			FColumnExpression = AExpression;
-			FIndex = AIndex;
+			_column = column;
+			_columnExpression = expression;
+			_index = index;
 		}
 		
 		// The Column instance in DataType.Columns
-		private Column FColumn;
-		public Column Column { get { return FColumn; } }
+		private Column _column;
+		public Column Column { get { return _column; } }
 		
 		// The index of FColumn in DataType.Columns
-		private int FIndex;
-		public int Index { get { return FIndex; } }
+		private int _index;
+		public int Index { get { return _index; } }
 		
 		// The column expression in the translated statement
-		private ColumnExpression FColumnExpression;
-		public ColumnExpression ColumnExpression { get { return FColumnExpression; } }
+		private ColumnExpression _columnExpression;
+		public ColumnExpression ColumnExpression { get { return _columnExpression; } }
 	}
 	
 	#if USETYPEDLIST
@@ -4506,22 +4594,22 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	{
 	#endif	
 		// Returns the ColumnMap with the given ColumnIndex into DataType.Columns
-		public ColumnMap ColumnMapByIndex(int AIndex)
+		public ColumnMap ColumnMapByIndex(int index)
 		{
-			foreach (ColumnMap LColumnMap in this)
-				if (LColumnMap.Index == AIndex)
-					return LColumnMap;
+			foreach (ColumnMap columnMap in this)
+				if (columnMap.Index == index)
+					return columnMap;
 					
-			throw new SQLException(SQLException.Codes.ColumnMapNotFound, AIndex);
+			throw new SQLException(SQLException.Codes.ColumnMapNotFound, index);
 		}
 	}
 	
 	public class SQLTableColumn
 	{
-		public SQLTableColumn(Schema.TableVarColumn AColumn, Schema.DeviceScalarType AScalarType) : base()
+		public SQLTableColumn(Schema.TableVarColumn column, Schema.DeviceScalarType scalarType) : base()
 		{
-			Column = AColumn;
-			ScalarType = AScalarType;
+			Column = column;
+			ScalarType = scalarType;
 			IsDeferred = Convert.ToBoolean(D4.MetaData.GetTag(Column.MetaData, "Storage.Deferred", "false"));
 		}
 		
@@ -4547,106 +4635,106 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
 	public class SQLTable : Table
 	{
-		public SQLTable(SQLDeviceSession ADeviceSession, Program AProgram, TableNode ATableNode, SelectStatement AStatement, SQLParameters AParameters, bool AIsAggregate) : base(ATableNode, AProgram)
+		public SQLTable(SQLDeviceSession deviceSession, Program program, TableNode tableNode, SelectStatement statement, SQLParameters parameters, bool isAggregate) : base(tableNode, program)
 		{
-			FDeviceSession = ADeviceSession;
-			FParameters = AParameters;
-			FStatement = new SelectStatement();
-			FStatement.Modifiers = AStatement.Modifiers;
-			FIsAggregate = AIsAggregate;
-			FStatement.QueryExpression = new QueryExpression();
-			FStatement.QueryExpression.SelectExpression = new SelectExpression();
-			SelectClause LSelectClause = new SelectClause();
-			SelectClause LGivenSelectClause = AStatement.QueryExpression.SelectExpression.SelectClause;
-			LSelectClause.Distinct = LGivenSelectClause.Distinct;
-			LSelectClause.NonProject = LGivenSelectClause.NonProject;
-			LSelectClause.Columns.AddRange(LGivenSelectClause.Columns);
-			FStatement.QueryExpression.SelectExpression.SelectClause = LSelectClause;
-			FStatement.QueryExpression.SelectExpression.FromClause = AStatement.QueryExpression.SelectExpression.FromClause;
-			FStatement.QueryExpression.SelectExpression.WhereClause = AStatement.QueryExpression.SelectExpression.WhereClause;
-			FStatement.QueryExpression.SelectExpression.GroupClause = AStatement.QueryExpression.SelectExpression.GroupClause;
-			FStatement.QueryExpression.SelectExpression.HavingClause = AStatement.QueryExpression.SelectExpression.HavingClause;
-			FStatement.OrderClause = AStatement.OrderClause;
+			_deviceSession = deviceSession;
+			_parameters = parameters;
+			_statement = new SelectStatement();
+			_statement.Modifiers = statement.Modifiers;
+			_isAggregate = isAggregate;
+			_statement.QueryExpression = new QueryExpression();
+			_statement.QueryExpression.SelectExpression = new SelectExpression();
+			SelectClause selectClause = new SelectClause();
+			SelectClause givenSelectClause = statement.QueryExpression.SelectExpression.SelectClause;
+			selectClause.Distinct = givenSelectClause.Distinct;
+			selectClause.NonProject = givenSelectClause.NonProject;
+			selectClause.Columns.AddRange(givenSelectClause.Columns);
+			_statement.QueryExpression.SelectExpression.SelectClause = selectClause;
+			_statement.QueryExpression.SelectExpression.FromClause = statement.QueryExpression.SelectExpression.FromClause;
+			_statement.QueryExpression.SelectExpression.WhereClause = statement.QueryExpression.SelectExpression.WhereClause;
+			_statement.QueryExpression.SelectExpression.GroupClause = statement.QueryExpression.SelectExpression.GroupClause;
+			_statement.QueryExpression.SelectExpression.HavingClause = statement.QueryExpression.SelectExpression.HavingClause;
+			_statement.OrderClause = statement.OrderClause;
 			
-			foreach (TableVarColumn LColumn in Node.TableVar.Columns)
+			foreach (TableVarColumn column in Node.TableVar.Columns)
 			{
-				SQLTableColumn LSQLColumn = new SQLTableColumn(LColumn, (DeviceScalarType)FDeviceSession.Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType));
-				FSQLColumns.Add(LSQLColumn);
-				if (LSQLColumn.IsDeferred)
-					FHasDeferredData = true;
+				SQLTableColumn sQLColumn = new SQLTableColumn(column, (DeviceScalarType)_deviceSession.Device.ResolveDeviceScalarType(program.Plan, (Schema.ScalarType)column.DataType));
+				_sQLColumns.Add(sQLColumn);
+				if (sQLColumn.IsDeferred)
+					_hasDeferredData = true;
 			}
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			Close();
-			FDeviceSession = null;
-			base.Dispose(ADisposing);
+			_deviceSession = null;
+			base.Dispose(disposing);
 		}
 		
-		protected SQLDeviceSession FDeviceSession;
-		public SQLDeviceSession DeviceSession { get { return FDeviceSession; } }
+		protected SQLDeviceSession _deviceSession;
+		public SQLDeviceSession DeviceSession { get { return _deviceSession; } }
 		
-		protected SQLDeviceCursor FCursor;
-		protected SQLParameters FParameters;
-		protected SelectStatement FStatement;
-		protected bool FIsAggregate;
-		protected ColumnMaps FMainColumns = new ColumnMaps();
-		protected ColumnMaps FDeferredColumns = new ColumnMaps();
-		protected SQLTableColumns FSQLColumns = new SQLTableColumns();
-		protected bool FHasDeferredData;
-		protected bool FBOF;
-		protected bool FEOF;
+		protected SQLDeviceCursor _cursor;
+		protected SQLParameters _parameters;
+		protected SelectStatement _statement;
+		protected bool _isAggregate;
+		protected ColumnMaps _mainColumns = new ColumnMaps();
+		protected ColumnMaps _deferredColumns = new ColumnMaps();
+		protected SQLTableColumns _sQLColumns = new SQLTableColumns();
+		protected bool _hasDeferredData;
+		protected bool _bOF;
+		protected bool _eOF;
 		
-		public static SQLCursorType CursorTypeToSQLCursorType(DAE.CursorType ACursorType)
+		public static SQLCursorType CursorTypeToSQLCursorType(DAE.CursorType cursorType)
 		{
-			switch (ACursorType)
+			switch (cursorType)
 			{
 				case DAE.CursorType.Static: return SQLCursorType.Static;
 				default: return SQLCursorType.Dynamic;
 			}
 		}
 
-		public static SQLLockType CursorCapabilitiesToSQLLockType(CursorCapability ACapabilities, IsolationLevel AIsolation)
+		public static SQLLockType CursorCapabilitiesToSQLLockType(CursorCapability capabilities, IsolationLevel isolation)
 		{
-			return (((ACapabilities & CursorCapability.Updateable) != 0) && (AIsolation == IsolationLevel.Isolated)) ? SQLLockType.Pessimistic : SQLLockType.ReadOnly;
+			return (((capabilities & CursorCapability.Updateable) != 0) && (isolation == IsolationLevel.Isolated)) ? SQLLockType.Pessimistic : SQLLockType.ReadOnly;
 		}
 		
-		public static IsolationLevel CursorIsolationToIsolationLevel(CursorIsolation ACursorIsolation, IsolationLevel AIsolation)
+		public static IsolationLevel CursorIsolationToIsolationLevel(CursorIsolation cursorIsolation, IsolationLevel isolation)
 		{
-			switch (ACursorIsolation)
+			switch (cursorIsolation)
 			{
 				case CursorIsolation.Chaos:
 				case CursorIsolation.Browse: return IsolationLevel.Browse;
 				case CursorIsolation.CursorStability:
 				case CursorIsolation.Isolated: return IsolationLevel.Isolated;
-				default: return (AIsolation == IsolationLevel.Browse) ? IsolationLevel.Browse : IsolationLevel.Isolated;
+				default: return (isolation == IsolationLevel.Browse) ? IsolationLevel.Browse : IsolationLevel.Isolated;
 			}
 		}
 
-		public static SQLIsolationLevel CursorIsolationToSQLIsolationLevel(CursorIsolation ACursorIsolation, IsolationLevel AIsolation)
+		public static SQLIsolationLevel CursorIsolationToSQLIsolationLevel(CursorIsolation cursorIsolation, IsolationLevel isolation)
 		{
-			return SQLDeviceSession.IsolationLevelToSQLIsolationLevel(CursorIsolationToIsolationLevel(ACursorIsolation, AIsolation));
+			return SQLDeviceSession.IsolationLevelToSQLIsolationLevel(CursorIsolationToIsolationLevel(cursorIsolation, isolation));
 		}
 		
 		private SQLDeviceCursor GetMainCursor()
 		{
-			SelectExpression LSelectExpression = FStatement.QueryExpression.SelectExpression;
+			SelectExpression selectExpression = _statement.QueryExpression.SelectExpression;
 
-			if (FHasDeferredData)
+			if (_hasDeferredData)
 			{
-				for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-					if (FSQLColumns[LIndex].IsDeferred)
+				for (int index = 0; index < DataType.Columns.Count; index++)
+					if (_sQLColumns[index].IsDeferred)
 					{
-						ColumnMap LColumnMap = 
+						ColumnMap columnMap = 
 							new ColumnMap
 							(
-								DataType.Columns[LIndex], 
-								LSelectExpression.SelectClause.Columns[LIndex], 
-								LIndex
+								DataType.Columns[index], 
+								selectExpression.SelectClause.Columns[index], 
+								index
 							);
 							
-						LSelectExpression.SelectClause.Columns[LIndex] = 
+						selectExpression.SelectClause.Columns[index] = 
 							new ColumnExpression
 							(
 								new CaseExpression
@@ -4655,68 +4743,68 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 									{
 										new CaseItemExpression
 										(
-											new UnaryExpression("iIsNull", LColumnMap.ColumnExpression.Expression),
+											new UnaryExpression("iIsNull", columnMap.ColumnExpression.Expression),
 											new ValueExpression(0)
 										)
 									},
 									new CaseElseExpression(new ValueExpression(1))
 								),
-								LColumnMap.ColumnExpression.ColumnAlias
+								columnMap.ColumnExpression.ColumnAlias
 							);
 							
-						FDeferredColumns.Add(LColumnMap);
+						_deferredColumns.Add(columnMap);
 					}
 					else
-						FMainColumns.Add(new ColumnMap(DataType.Columns[LIndex], LSelectExpression.SelectClause.Columns[LIndex], LIndex));
+						_mainColumns.Add(new ColumnMap(DataType.Columns[index], selectExpression.SelectClause.Columns[index], index));
 			}
 			
-			SQLParameters LParameters = new SQLParameters();
-			LParameters.AddRange(FParameters);
+			SQLParameters parameters = new SQLParameters();
+			parameters.AddRange(_parameters);
 			
-			SQLParameters LKeyParameters = new SQLParameters();
-			int[] LKeyIndexes = new int[Node.Order == null ? 0 : Node.Order.Columns.Count];
-			SQLScalarType[] LKeyTypes = new SQLScalarType[LKeyIndexes.Length];
-			TableVarColumn LKeyColumn;
-			for (int LIndex = 0; LIndex < LKeyIndexes.Length; LIndex++)
+			SQLParameters keyParameters = new SQLParameters();
+			int[] keyIndexes = new int[Node.Order == null ? 0 : Node.Order.Columns.Count];
+			SQLScalarType[] keyTypes = new SQLScalarType[keyIndexes.Length];
+			TableVarColumn keyColumn;
+			for (int index = 0; index < keyIndexes.Length; index++)
 			{
-				LKeyColumn = Node.Order.Columns[LIndex].Column;
-				LKeyIndexes[LIndex] = DataType.Columns.IndexOfName(LKeyColumn.Name);
-				LKeyTypes[LIndex] = (SQLScalarType)FSQLColumns[LKeyIndexes[LIndex]].ScalarType;
-				LKeyParameters.Add
+				keyColumn = Node.Order.Columns[index].Column;
+				keyIndexes[index] = DataType.Columns.IndexOfName(keyColumn.Name);
+				keyTypes[index] = (SQLScalarType)_sQLColumns[keyIndexes[index]].ScalarType;
+				keyParameters.Add
 				(
 					new SQLParameter
 					(
-						LSelectExpression.SelectClause.Columns[LKeyIndexes[LIndex]].ColumnAlias, 
-						LKeyTypes[LIndex].GetSQLParameterType(LKeyColumn),
+						selectExpression.SelectClause.Columns[keyIndexes[index]].ColumnAlias, 
+						keyTypes[index].GetSQLParameterType(keyColumn),
 						null,
 						SQLDirection.In,
-						DeviceSession.Device.GetParameterMarker(LKeyTypes[LIndex], LKeyColumn)
+						DeviceSession.Device.GetParameterMarker(keyTypes[index], keyColumn)
 					)
 				);
 			}
 			
-			SelectStatement LStatement = new SelectStatement();
-			LStatement.Modifiers = FStatement.Modifiers;
-			LStatement.QueryExpression = new QueryExpression();
-			LStatement.QueryExpression.SelectExpression = new SelectExpression();
-			LStatement.QueryExpression.SelectExpression.SelectClause = FStatement.QueryExpression.SelectExpression.SelectClause;
-			LStatement.QueryExpression.SelectExpression.FromClause = FStatement.QueryExpression.SelectExpression.FromClause;
-			if (FStatement.QueryExpression.SelectExpression.WhereClause != null)
-				LStatement.QueryExpression.SelectExpression.WhereClause = new WhereClause(FStatement.QueryExpression.SelectExpression.WhereClause.Expression);
-			LStatement.QueryExpression.SelectExpression.GroupClause = FStatement.QueryExpression.SelectExpression.GroupClause;
-			LStatement.QueryExpression.SelectExpression.HavingClause = FStatement.QueryExpression.SelectExpression.HavingClause;
-			LStatement.OrderClause = FStatement.OrderClause;
+			SelectStatement statement = new SelectStatement();
+			statement.Modifiers = _statement.Modifiers;
+			statement.QueryExpression = new QueryExpression();
+			statement.QueryExpression.SelectExpression = new SelectExpression();
+			statement.QueryExpression.SelectExpression.SelectClause = _statement.QueryExpression.SelectExpression.SelectClause;
+			statement.QueryExpression.SelectExpression.FromClause = _statement.QueryExpression.SelectExpression.FromClause;
+			if (_statement.QueryExpression.SelectExpression.WhereClause != null)
+				statement.QueryExpression.SelectExpression.WhereClause = new WhereClause(_statement.QueryExpression.SelectExpression.WhereClause.Expression);
+			statement.QueryExpression.SelectExpression.GroupClause = _statement.QueryExpression.SelectExpression.GroupClause;
+			statement.QueryExpression.SelectExpression.HavingClause = _statement.QueryExpression.SelectExpression.HavingClause;
+			statement.OrderClause = _statement.OrderClause;
 
 			return 
 				new SQLDeviceCursor
 				(
-					FDeviceSession, 
-					LStatement, 
-					FIsAggregate, 
-					LParameters, 
-					LKeyIndexes, 
-					LKeyTypes, 
-					LKeyParameters, 
+					_deviceSession, 
+					statement, 
+					_isAggregate, 
+					parameters, 
+					keyIndexes, 
+					keyTypes, 
+					keyParameters, 
 					CursorCapabilitiesToSQLLockType(Capabilities, CursorIsolationToIsolationLevel(Isolation, DeviceSession.ServerProcess.CurrentIsolationLevel())), 
 					CursorTypeToSQLCursorType(Node.RequestedCursorType), 
 					CursorIsolationToSQLIsolationLevel(Isolation, DeviceSession.ServerProcess.CurrentIsolationLevel())
@@ -4725,201 +4813,201 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		
 		// Returns a SQLCommand for accessing the deferred read data for the given column index.  
 		// The deferred column is guaranteed to be the last column in the Cursor opened from the command.
-		private void GetDeferredStatement(Row AKey, int AColumnIndex, out string AStatement, out SQLParameters AParameters)
+		private void GetDeferredStatement(Row key, int columnIndex, out string statement, out SQLParameters parameters)
 		{
-			AParameters = new SQLParameters();
-			AParameters.AddRange(FParameters);
+			parameters = new SQLParameters();
+			parameters.AddRange(_parameters);
 
-			SelectStatement LStatement = new SelectStatement();
-			LStatement.Modifiers = FStatement.Modifiers;
-			LStatement.QueryExpression = new QueryExpression();
-			LStatement.QueryExpression.SelectExpression = new SelectExpression();
-			LStatement.QueryExpression.SelectExpression.SelectClause = new SelectClause();
-			Expression LKeyCondition = null;
-			for (int LIndex = 0; LIndex < AKey.DataType.Columns.Count; LIndex++)
+			SelectStatement localStatement = new SelectStatement();
+			localStatement.Modifiers = _statement.Modifiers;
+			localStatement.QueryExpression = new QueryExpression();
+			localStatement.QueryExpression.SelectExpression = new SelectExpression();
+			localStatement.QueryExpression.SelectExpression.SelectClause = new SelectClause();
+			Expression keyCondition = null;
+			for (int index = 0; index < key.DataType.Columns.Count; index++)
 			{
-				ColumnMap LColumnMap = FMainColumns.ColumnMapByIndex(DataType.Columns.IndexOfName(AKey.DataType.Columns[LIndex].Name));
-				SQLScalarType LScalarType = (SQLScalarType)FSQLColumns[LColumnMap.Index].ScalarType;
-				TableVarColumn LTableVarColumn = Node.TableVar.Columns[AKey.DataType.Columns[LIndex].Name];
-				LStatement.QueryExpression.SelectExpression.SelectClause.Columns.Add(LColumnMap.ColumnExpression);
-				SQLParameter LParameter = 
+				ColumnMap columnMap = _mainColumns.ColumnMapByIndex(DataType.Columns.IndexOfName(key.DataType.Columns[index].Name));
+				SQLScalarType scalarType = (SQLScalarType)_sQLColumns[columnMap.Index].ScalarType;
+				TableVarColumn tableVarColumn = Node.TableVar.Columns[key.DataType.Columns[index].Name];
+				localStatement.QueryExpression.SelectExpression.SelectClause.Columns.Add(columnMap.ColumnExpression);
+				SQLParameter parameter = 
 					new SQLParameter
 					(
-						LColumnMap.ColumnExpression.ColumnAlias, 
-						LScalarType.GetSQLParameterType(LTableVarColumn), 
-						AKey.HasValue(LIndex) ? 
-							LScalarType.ParameterFromScalar(Manager, AKey[LIndex]) : 
+						columnMap.ColumnExpression.ColumnAlias, 
+						scalarType.GetSQLParameterType(tableVarColumn), 
+						key.HasValue(index) ? 
+							scalarType.ParameterFromScalar(Manager, key[index]) : 
 							null,
 						SQLDirection.In,
-						DeviceSession.Device.GetParameterMarker(LScalarType, LTableVarColumn),
-						DeviceSession.Device.UseParametersForCursors ? null : LScalarType.ToLiteral(Manager, AKey[LIndex])
+						DeviceSession.Device.GetParameterMarker(scalarType, tableVarColumn),
+						DeviceSession.Device.UseParametersForCursors ? null : scalarType.ToLiteral(Manager, key[index])
 					);
-				AParameters.Add(LParameter);
-				Expression LCondition =	
+				parameters.Add(parameter);
+				Expression condition =	
 					new BinaryExpression
 					(
-						LColumnMap.ColumnExpression.Expression,
+						columnMap.ColumnExpression.Expression,
 						"iEqual",
-						new QueryParameterExpression(LParameter.Name)
+						new QueryParameterExpression(parameter.Name)
 					);
 					
-				if (LKeyCondition != null)
-					LKeyCondition = new BinaryExpression(LKeyCondition, "iAnd", LCondition);
+				if (keyCondition != null)
+					keyCondition = new BinaryExpression(keyCondition, "iAnd", condition);
 				else
-					LKeyCondition = LCondition;
+					keyCondition = condition;
 			}
 			
-			LStatement.QueryExpression.SelectExpression.SelectClause.Columns.Add(FDeferredColumns.ColumnMapByIndex(AColumnIndex).ColumnExpression);
-			LStatement.QueryExpression.SelectExpression.FromClause = FStatement.QueryExpression.SelectExpression.FromClause;
-			if ((LKeyCondition != null) || (FStatement.QueryExpression.SelectExpression.WhereClause != null))
+			localStatement.QueryExpression.SelectExpression.SelectClause.Columns.Add(_deferredColumns.ColumnMapByIndex(columnIndex).ColumnExpression);
+			localStatement.QueryExpression.SelectExpression.FromClause = _statement.QueryExpression.SelectExpression.FromClause;
+			if ((keyCondition != null) || (_statement.QueryExpression.SelectExpression.WhereClause != null))
 			{
-				LStatement.QueryExpression.SelectExpression.WhereClause = new WhereClause();
-				if ((LKeyCondition != null) && (FStatement.QueryExpression.SelectExpression.WhereClause != null))
-					LStatement.QueryExpression.SelectExpression.WhereClause.Expression = new BinaryExpression(FStatement.QueryExpression.SelectExpression.WhereClause.Expression, "iAnd", LKeyCondition);
-				else if (LKeyCondition != null)
-					LStatement.QueryExpression.SelectExpression.WhereClause.Expression = LKeyCondition;
+				localStatement.QueryExpression.SelectExpression.WhereClause = new WhereClause();
+				if ((keyCondition != null) && (_statement.QueryExpression.SelectExpression.WhereClause != null))
+					localStatement.QueryExpression.SelectExpression.WhereClause.Expression = new BinaryExpression(_statement.QueryExpression.SelectExpression.WhereClause.Expression, "iAnd", keyCondition);
+				else if (keyCondition != null)
+					localStatement.QueryExpression.SelectExpression.WhereClause.Expression = keyCondition;
 				else
-					LStatement.QueryExpression.SelectExpression.WhereClause.Expression = FStatement.QueryExpression.SelectExpression.WhereClause.Expression;
+					localStatement.QueryExpression.SelectExpression.WhereClause.Expression = _statement.QueryExpression.SelectExpression.WhereClause.Expression;
 			}
 				
-			LStatement.QueryExpression.SelectExpression.GroupClause = FStatement.QueryExpression.SelectExpression.GroupClause;
-			LStatement.QueryExpression.SelectExpression.HavingClause = FStatement.QueryExpression.SelectExpression.HavingClause;
+			localStatement.QueryExpression.SelectExpression.GroupClause = _statement.QueryExpression.SelectExpression.GroupClause;
+			localStatement.QueryExpression.SelectExpression.HavingClause = _statement.QueryExpression.SelectExpression.HavingClause;
 			
-			AStatement = FDeviceSession.Device.Emitter.Emit(LStatement);
+			statement = _deviceSession.Device.Emitter.Emit(localStatement);
 		}
 		
 		protected override void InternalOpen()
 		{
-			if (!FDeviceSession.ServerProcess.IsOpeningInsertCursor)
+			if (!_deviceSession.ServerProcess.IsOpeningInsertCursor)
 			{
-				FCursor = GetMainCursor();
-				FBOF = true;
-				FEOF = !FCursor.Next();
+				_cursor = GetMainCursor();
+				_bOF = true;
+				_eOF = !_cursor.Next();
 			}
 			else
 			{
-				FBOF = true;
-				FEOF = true;
+				_bOF = true;
+				_eOF = true;
 			}
 		}
 		
 		protected override void InternalClose()
 		{
-			if (FCursor != null)
+			if (_cursor != null)
 			{
-				FCursor.Dispose();
-				FCursor = null;
+				_cursor.Dispose();
+				_cursor = null;
 			}
 		}
 		
-		protected void InternalSelect(Row ARow, bool AAllowDeferred)
+		protected void InternalSelect(Row row, bool allowDeferred)
 		{
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
 			{
-				int LColumnIndex = DataType.Columns.IndexOfName(ARow.DataType.Columns[LIndex].Name);
-				if (LColumnIndex >= 0)
+				int columnIndex = DataType.Columns.IndexOfName(row.DataType.Columns[index].Name);
+				if (columnIndex >= 0)
 				{
-					if (FSQLColumns[LColumnIndex].IsDeferred)
+					if (_sQLColumns[columnIndex].IsDeferred)
 					{
-						if (!AAllowDeferred)
+						if (!allowDeferred)
 							throw new SQLException(SQLException.Codes.InvalidDeferredContext);
 							
-						if ((int)FCursor[LColumnIndex] == 0)
-							ARow.ClearValue(LIndex);
+						if ((int)_cursor[columnIndex] == 0)
+							row.ClearValue(index);
 						else
 						{
 							// set up a deferred read stream using the device session as the provider
-							StreamID LStreamID = Program.ServerProcess.Register(FDeviceSession);
-							string LStatement;
-							SQLParameters LParameters;
-							GetDeferredStatement(InternalGetKey(), LColumnIndex, out LStatement, out LParameters);
-							FDeviceSession.Create
+							StreamID streamID = Program.ServerProcess.Register(_deviceSession);
+							string statement;
+							SQLParameters parameters;
+							GetDeferredStatement(InternalGetKey(), columnIndex, out statement, out parameters);
+							_deviceSession.Create
 							(
-								LStreamID, 
-								DataType.Columns[LColumnIndex].Name, 
-								FSQLColumns[LColumnIndex].ScalarType, 
-								LStatement,
-								LParameters,
+								streamID, 
+								DataType.Columns[columnIndex].Name, 
+								_sQLColumns[columnIndex].ScalarType, 
+								statement,
+								parameters,
 								CursorTypeToSQLCursorType(Node.RequestedCursorType), 
 								CursorIsolationToSQLIsolationLevel(Isolation, DeviceSession.ServerProcess.CurrentIsolationLevel())
 							);
-							ARow[LIndex] = LStreamID;
+							row[index] = streamID;
 						}
 					}
 					else
 					{
-						if (FCursor.IsNull(LColumnIndex))
-							ARow.ClearValue(LIndex);
+						if (_cursor.IsNull(columnIndex))
+							row.ClearValue(index);
 						else
-							ARow[LIndex] = FSQLColumns[LColumnIndex].ScalarType.ToScalar(Manager, FCursor[LColumnIndex]);
+							row[index] = _sQLColumns[columnIndex].ScalarType.ToScalar(Manager, _cursor[columnIndex]);
 					}
 				}
 			}
 		}
 		
-		protected override void InternalSelect(Row ARow)
+		protected override void InternalSelect(Row row)
 		{
-			InternalSelect(ARow, true);
+			InternalSelect(row, true);
 		}
 		
 		protected override Row InternalGetKey()
 		{
-			Row LRow = new Row(Manager, new RowType(Program.FindClusteringKey(Node.TableVar).Columns));
-			InternalSelect(LRow, false);
-			return LRow;
+			Row row = new Row(Manager, new RowType(Program.FindClusteringKey(Node.TableVar).Columns));
+			InternalSelect(row, false);
+			return row;
 		}
 		
 		protected override bool InternalNext()
 		{
-			if (FBOF)
+			if (_bOF)
 			{
-				FBOF = FEOF;
+				_bOF = _eOF;
 			}
 			else
 			{
-				FEOF = !FCursor.Next();
-				FBOF = FBOF && FEOF;
+				_eOF = !_cursor.Next();
+				_bOF = _bOF && _eOF;
 			}
-			return !FEOF;
+			return !_eOF;
 		}
 		
 		protected override bool InternalBOF()
 		{
-			return FBOF;
+			return _bOF;
 		}
 		
 		protected override bool InternalEOF()
 		{
-			return FEOF;
+			return _eOF;
 		}
 	}
 
     public static class SQLDeviceUtility
     {
-		public static SQLDevice ResolveSQLDevice(Plan APlan, string ADeviceName)
+		public static SQLDevice ResolveSQLDevice(Plan plan, string deviceName)
 		{
-			Device LDevice = Compiler.ResolveCatalogIdentifier(APlan, ADeviceName, true) as Schema.Device;
-			if (LDevice == null)
+			Device device = Compiler.ResolveCatalogIdentifier(plan, deviceName, true) as Schema.Device;
+			if (device == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 
-			SQLDevice LSQLDevice = LDevice as SQLDevice;
-			if (LSQLDevice == null)
+			SQLDevice sQLDevice = device as SQLDevice;
+			if (sQLDevice == null)
 				throw new SQLException(SQLException.Codes.SQLDeviceExpected);
 
-			return LSQLDevice;
+			return sQLDevice;
 		}
 
-		public static ReconcileOptions ResolveReconcileOptions(ListValue AList)
+		public static ReconcileOptions ResolveReconcileOptions(ListValue list)
 		{
-			StringBuilder LList = new StringBuilder();
-			for (int LIndex = 0; LIndex < AList.Count(); LIndex++)
+			StringBuilder localList = new StringBuilder();
+			for (int index = 0; index < list.Count(); index++)
 			{
-				if (LIndex > 0)
-					LList.Append(", ");
-				LList.Append((string)AList[LIndex]);
+				if (index > 0)
+					localList.Append(", ");
+				localList.Append((string)list[index]);
 			}
 			
-			return (ReconcileOptions)Enum.Parse(typeof(ReconcileOptions), LList.ToString());
+			return (ReconcileOptions)Enum.Parse(typeof(ReconcileOptions), localList.ToString());
 		}
 	}
     
@@ -4927,61 +5015,61 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     // operator D4ToSQL(ADeviceName : System.Name, AQuery : System.String) : System.String;
     public class D4ToSQLNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			string LStatementString;
-			Schema.Device LDevice = null;
-			SQLDevice LSQLDevice = null;
-			if (AArguments.Length == 1)
-				LStatementString = (string)AArguments[0];
+			string statementString;
+			Schema.Device device = null;
+			SQLDevice sQLDevice = null;
+			if (arguments.Length == 1)
+				statementString = (string)arguments[0];
 			else
 			{
-				LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProgram.Plan, (string)AArguments[0]);
-				LDevice = LSQLDevice;
-				LStatementString = (string)AArguments[1];
+				sQLDevice = SQLDeviceUtility.ResolveSQLDevice(program.Plan, (string)arguments[0]);
+				device = sQLDevice;
+				statementString = (string)arguments[1];
 			}
 
-			string LSQLQuery = String.Empty;
-			Plan LPlan = new Plan(AProgram.ServerProcess);
+			string sQLQuery = String.Empty;
+			Plan plan = new Plan(program.ServerProcess);
 			try
 			{
-				ParserMessages LParserMessages = new ParserMessages();
-				Statement LStatement = new D4.Parser().ParseStatement(LStatementString, LParserMessages);
-				LPlan.Messages.AddRange(LParserMessages);
-				PlanNode LNode = Compiler.Compile(LPlan, LStatement);
-				if (LPlan.Messages.HasErrors)
-					throw new ServerException(ServerException.Codes.UncompiledPlan, LPlan.Messages.ToString(CompilerErrorLevel.NonFatal));
+				ParserMessages parserMessages = new ParserMessages();
+				Statement statement = new D4.Parser().ParseStatement(statementString, parserMessages);
+				plan.Messages.AddRange(parserMessages);
+				PlanNode node = Compiler.Compile(plan, statement);
+				if (plan.Messages.HasErrors)
+					throw new ServerException(ServerException.Codes.UncompiledPlan, plan.Messages.ToString(CompilerErrorLevel.NonFatal));
 
-				if (LNode is FrameNode)
-					LNode = LNode.Nodes[0];
-				if ((LNode is ExpressionStatementNode) || (LNode is CursorNode))
-					LNode = LNode.Nodes[0];
+				if (node is FrameNode)
+					node = node.Nodes[0];
+				if ((node is ExpressionStatementNode) || (node is CursorNode))
+					node = node.Nodes[0];
 					
-				if (LDevice == null)
-					LDevice = LNode.Device;
+				if (device == null)
+					device = node.Device;
 					
-				if ((LDevice != null) && LNode.DeviceSupported)
+				if ((device != null) && node.DeviceSupported)
 				{
-					if (LSQLDevice == null)
-						LSQLDevice = LDevice as SQLDevice;
+					if (sQLDevice == null)
+						sQLDevice = device as SQLDevice;
 						
-					if (LSQLDevice == null)
-						throw new SQLException(SQLException.Codes.QuerySupportedByNonSQLDevice, LDevice.Name);
+					if (sQLDevice == null)
+						throw new SQLException(SQLException.Codes.QuerySupportedByNonSQLDevice, device.Name);
 
-					if (LNode.Device == LSQLDevice)
-						LSQLQuery = LSQLDevice.Emitter.Emit(((SQLDevicePlan)LPlan.GetDevicePlan(LNode)).DevicePlanNode.Statement);
+					if (node.Device == sQLDevice)
+						sQLQuery = sQLDevice.Emitter.Emit(((SQLDevicePlan)plan.GetDevicePlan(node)).DevicePlanNode.Statement);
 					else
-						throw new SQLException(SQLException.Codes.QuerySupportedByDifferentDevice, LNode.Device.Name, LSQLDevice.Name);
+						throw new SQLException(SQLException.Codes.QuerySupportedByDifferentDevice, node.Device.Name, sQLDevice.Name);
 				}
 				else
 					throw new SQLException(SQLException.Codes.QueryUnsupported);
 			}
 			finally
 			{
-				LPlan.Dispose();
+				plan.Dispose();
 			}
 
-			return LSQLQuery;
+			return sQLQuery;
 		}
     }
 
@@ -4993,206 +5081,206 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// operator SQLExecute(const ADeviceName : Name, const AStatement : String, const AInValues : row, var AOutValues : row);    
     public class SQLExecuteNode : InstructionNode
     {
-		private static bool IsValidIdentifierCharacter(char AChar)
+		private static bool IsValidIdentifierCharacter(char charValue)
 		{
-			return (AChar == '_') || Char.IsLetterOrDigit(AChar);
+			return (charValue == '_') || Char.IsLetterOrDigit(charValue);
 		}
 
-		private static bool HandleParameter(Plan APlan, SQLDevice ADevice, SQLParameters AParams, PlanNode[] AConversionNodes, Schema.IRowType AInRowType, Schema.IRowType AOutRowType, string AParameterName)
+		private static bool HandleParameter(Plan plan, SQLDevice device, SQLParameters paramsValue, PlanNode[] conversionNodes, Schema.IRowType inRowType, Schema.IRowType outRowType, string parameterName)
 		{
-			int LInIndex = AInRowType != null ? AInRowType.Columns.IndexOf(AParameterName) : -1;
-			int LOutIndex = AOutRowType != null ? AOutRowType.Columns.IndexOf(AParameterName) : -1;
-			if ((LInIndex >= 0) || (LOutIndex >= 0))
+			int inIndex = inRowType != null ? inRowType.Columns.IndexOf(parameterName) : -1;
+			int outIndex = outRowType != null ? outRowType.Columns.IndexOf(parameterName) : -1;
+			if ((inIndex >= 0) || (outIndex >= 0))
 			{
-				Schema.ScalarType LValueType;
+				Schema.ScalarType valueType;
 				
-				if (LOutIndex >= 0)
-					LValueType = (Schema.ScalarType)AOutRowType.Columns[LOutIndex].DataType;
+				if (outIndex >= 0)
+					valueType = (Schema.ScalarType)outRowType.Columns[outIndex].DataType;
 				else
-					LValueType = (Schema.ScalarType)AInRowType.Columns[LInIndex].DataType;
+					valueType = (Schema.ScalarType)inRowType.Columns[inIndex].DataType;
 
-				if (LInIndex >= 0)
+				if (inIndex >= 0)
 				{
 					//if (AInValues.HasValue(LInIndex))
 					//	LValue = (Scalar)AInValues[LInIndex];
 
-					if (!AInRowType.Columns[LInIndex].DataType.Equals(LValueType))
+					if (!inRowType.Columns[inIndex].DataType.Equals(valueType))
 					{
-						ValueNode LValueNode = new DAE.Runtime.Instructions.ValueNode();
+						ValueNode valueNode = new DAE.Runtime.Instructions.ValueNode();
 						//LValueNode.Value = LValue;
-						LValueNode.DataType = LValueType;
-						PlanNode LSourceNode = LValueNode;
+						valueNode.DataType = valueType;
+						PlanNode sourceNode = valueNode;
 
-						if (!AInRowType.Columns[LInIndex].DataType.Is(LValueType))
+						if (!inRowType.Columns[inIndex].DataType.Is(valueType))
 						{
-							ConversionContext LContext = Compiler.FindConversionPath(APlan, AInRowType.Columns[LInIndex].DataType, LValueType);
-							Compiler.CheckConversionContext(APlan, LContext);
-							LSourceNode = Compiler.ConvertNode(APlan, LSourceNode, LContext);
+							ConversionContext context = Compiler.FindConversionPath(plan, inRowType.Columns[inIndex].DataType, valueType);
+							Compiler.CheckConversionContext(plan, context);
+							sourceNode = Compiler.ConvertNode(plan, sourceNode, context);
 						}
 						
-						LSourceNode = Compiler.Upcast(APlan, LSourceNode, LValueType);
-						AConversionNodes[LInIndex] = LSourceNode;
+						sourceNode = Compiler.Upcast(plan, sourceNode, valueType);
+						conversionNodes[inIndex] = sourceNode;
 							
 						//LValue = (Scalar)Compiler.Upcast(AProcess.Plan, LSourceNode, LValueType).Execute(AProcess).Value;
 					}
 				}
 				
-				SQLScalarType LScalarType = ADevice.ResolveDeviceScalarType(APlan, LValueType) as SQLScalarType;
-				if (LScalarType == null)
-					throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, LValueType.Name);
+				SQLScalarType scalarType = device.ResolveDeviceScalarType(plan, valueType) as SQLScalarType;
+				if (scalarType == null)
+					throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, valueType.Name);
 
-				AParams.Add(new SQLParameter(AParameterName, LScalarType.GetSQLParameterType(), null, ((LInIndex >= 0) && (LOutIndex >= 0)) ? SQLDirection.InOut : LInIndex >= 0 ? SQLDirection.In : SQLDirection.Out, ADevice.GetParameterMarker(LScalarType)));
+				paramsValue.Add(new SQLParameter(parameterName, scalarType.GetSQLParameterType(), null, ((inIndex >= 0) && (outIndex >= 0)) ? SQLDirection.InOut : inIndex >= 0 ? SQLDirection.In : SQLDirection.Out, device.GetParameterMarker(scalarType)));
 				return true;  // return true if the parameter was handled
 			}
 			return false; // return false since the parameter was not handled
 		}
 		
-		public static SQLParameters PrepareParameters(Plan APlan, SQLDevice ADevice, string AStatement, Schema.IRowType AInRowType, Schema.IRowType AOutRowType, PlanNode[] AConversionNodes)
+		public static SQLParameters PrepareParameters(Plan plan, SQLDevice device, string statement, Schema.IRowType inRowType, Schema.IRowType outRowType, PlanNode[] conversionNodes)
 		{
-			SQLParameters LParameters = new SQLParameters();
-			StringBuilder LParameterName = null;
-			bool LInParameter = false;
-			char LQuoteChar = '\0';
-			for (int LIndex = 0; LIndex < AStatement.Length; LIndex++)
+			SQLParameters parameters = new SQLParameters();
+			StringBuilder parameterName = null;
+			bool inParameter = false;
+			char quoteChar = '\0';
+			for (int index = 0; index < statement.Length; index++)
 			{
-				if (LInParameter && !IsValidIdentifierCharacter(AStatement[LIndex]))
+				if (inParameter && !IsValidIdentifierCharacter(statement[index]))
 				{
-					if (HandleParameter(APlan, ADevice, LParameters, AConversionNodes, AInRowType, AOutRowType, LParameterName.ToString()))
-						LInParameter = false;
+					if (HandleParameter(plan, device, parameters, conversionNodes, inRowType, outRowType, parameterName.ToString()))
+						inParameter = false;
 				}
 					
-				switch (AStatement[LIndex])
+				switch (statement[index])
 				{
 					case '@' :
-						if (LQuoteChar == '\0') // if not inside of a string
+						if (quoteChar == '\0') // if not inside of a string
 						{
-							LParameterName = new StringBuilder();
-							LInParameter = true;
+							parameterName = new StringBuilder();
+							inParameter = true;
 						}
 					break;
 					
 					case '\'' :
 					case '"' :
-						if (LQuoteChar != '\0')
+						if (quoteChar != '\0')
 						{
-							if (((LIndex + 1) >= AStatement.Length) || (AStatement[LIndex + 1] != LQuoteChar))
-								LQuoteChar = '\0';
+							if (((index + 1) >= statement.Length) || (statement[index + 1] != quoteChar))
+								quoteChar = '\0';
 						}
 						else
-							LQuoteChar = AStatement[LIndex];
+							quoteChar = statement[index];
 					break;
 					default:
-						if (LInParameter)
-							LParameterName.Append(AStatement[LIndex]);
+						if (inParameter)
+							parameterName.Append(statement[index]);
 					break;
 				}
 			}
 			
 			// handle the param if it's the last thing on the statement
-			if (LInParameter)
-				HandleParameter(APlan, ADevice, LParameters, AConversionNodes, AInRowType, AOutRowType, LParameterName.ToString());
+			if (inParameter)
+				HandleParameter(plan, device, parameters, conversionNodes, inRowType, outRowType, parameterName.ToString());
 
-			return LParameters;
+			return parameters;
 		}
 		
-		private static void SetValueNode(PlanNode APlanNode, DataValue AValue)
+		private static void SetValueNode(PlanNode planNode, DataValue tempValue)
 		{
-			if (APlanNode is ValueNode)
-				((ValueNode)APlanNode).Value = AValue.IsNil ? null : AValue.AsNative;
+			if (planNode is ValueNode)
+				((ValueNode)planNode).Value = tempValue.IsNil ? null : tempValue.AsNative;
 			else
-				SetValueNode(APlanNode.Nodes[0], AValue);
+				SetValueNode(planNode.Nodes[0], tempValue);
 		}
 		
-		public static void GetParameters(Program AProgram, SQLDevice ADevice, SQLParameters AParameters, Row AInValues, PlanNode[] AConversionNodes)
+		public static void GetParameters(Program program, SQLDevice device, SQLParameters parameters, Row inValues, PlanNode[] conversionNodes)
 		{
-			for (int LIndex = 0; LIndex < AParameters.Count; LIndex++)
+			for (int index = 0; index < parameters.Count; index++)
 			{
-				switch (AParameters[LIndex].Direction)
+				switch (parameters[index].Direction)
 				{
 					case SQLDirection.InOut :
 					case SQLDirection.In :
-						int LInIndex = AInValues.DataType.Columns.IndexOf(AParameters[LIndex].Name);
-						PlanNode LConversionNode = AConversionNodes[LInIndex];
-						Schema.ScalarType LValueType = (Schema.ScalarType)(LConversionNode == null ? AInValues.DataType.Columns[LInIndex].DataType : LConversionNode.DataType);
-						SQLScalarType LScalarType = ADevice.ResolveDeviceScalarType(AProgram.Plan, LValueType) as SQLScalarType;
-						if (LScalarType == null)
-							throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, LValueType.Name);
+						int inIndex = inValues.DataType.Columns.IndexOf(parameters[index].Name);
+						PlanNode conversionNode = conversionNodes[inIndex];
+						Schema.ScalarType valueType = (Schema.ScalarType)(conversionNode == null ? inValues.DataType.Columns[inIndex].DataType : conversionNode.DataType);
+						SQLScalarType scalarType = device.ResolveDeviceScalarType(program.Plan, valueType) as SQLScalarType;
+						if (scalarType == null)
+							throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, valueType.Name);
 
-						if (AInValues.HasValue(LInIndex))
-							if (LConversionNode == null)
-								AParameters[LIndex].Value = LScalarType.ParameterFromScalar(AProgram.ValueManager, AInValues[LInIndex]);
+						if (inValues.HasValue(inIndex))
+							if (conversionNode == null)
+								parameters[index].Value = scalarType.ParameterFromScalar(program.ValueManager, inValues[inIndex]);
 							else
 							{
-								SetValueNode(LConversionNode, AInValues.GetValue(LInIndex));
-								AParameters[LIndex].Value = LScalarType.ParameterFromScalar(AProgram.ValueManager, LConversionNode.Execute(AProgram));
+								SetValueNode(conversionNode, inValues.GetValue(inIndex));
+								parameters[index].Value = scalarType.ParameterFromScalar(program.ValueManager, conversionNode.Execute(program));
 							}
 					break;
 				}
 			}
 		}
 		
-		public static void SetParameters(Program AProgram, SQLDevice ADevice, SQLParameters AParameters, Row AOutValues)
+		public static void SetParameters(Program program, SQLDevice device, SQLParameters parameters, Row outValues)
 		{
-			for (int LIndex = 0; LIndex < AParameters.Count; LIndex++)
-				switch (AParameters[LIndex].Direction)
+			for (int index = 0; index < parameters.Count; index++)
+				switch (parameters[index].Direction)
 				{
 					case SQLDirection.InOut :
 					case SQLDirection.Out :
-						int LOutIndex = AOutValues.DataType.Columns.IndexOf(AParameters[LIndex].Name);
-						Schema.ScalarType LValueType = (Schema.ScalarType)AOutValues.DataType.Columns[LOutIndex].DataType;
-						SQLScalarType LScalarType = ADevice.ResolveDeviceScalarType(AProgram.Plan, LValueType) as SQLScalarType;
-						if (LScalarType == null)
-							throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, LValueType.Name);
+						int outIndex = outValues.DataType.Columns.IndexOf(parameters[index].Name);
+						Schema.ScalarType valueType = (Schema.ScalarType)outValues.DataType.Columns[outIndex].DataType;
+						SQLScalarType scalarType = device.ResolveDeviceScalarType(program.Plan, valueType) as SQLScalarType;
+						if (scalarType == null)
+							throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, valueType.Name);
 
-						if (AParameters[LIndex].Value != null)
-							AOutValues[LOutIndex] = LScalarType.ParameterToScalar(AProgram.ValueManager, AParameters[LIndex].Value);
+						if (parameters[index].Value != null)
+							outValues[outIndex] = scalarType.ParameterToScalar(program.ValueManager, parameters[index].Value);
 						else
-							AOutValues.ClearValue(LOutIndex);
+							outValues.ClearValue(outIndex);
 					break;
 				}
 		}
 
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			try
 			{
-				string LDeviceName = String.Empty;
-				string LStatement = String.Empty;
-				Row LInValues = null;
-				Row LOutValues = null;
+				string deviceName = String.Empty;
+				string statement = String.Empty;
+				Row inValues = null;
+				Row outValues = null;
 				
-				if (Operator.Operands[0].DataType.Is(Compiler.ResolveCatalogIdentifier(AProgram.Plan, "System.Name") as IDataType))
+				if (Operator.Operands[0].DataType.Is(Compiler.ResolveCatalogIdentifier(program.Plan, "System.Name") as IDataType))
 				{
-					LDeviceName = (string)AArguments[0];
-					LStatement = (string)AArguments[1];
-					if (AArguments.Length >= 3)
-						LInValues = (Row)AArguments[2];
-					if (AArguments.Length == 4)
-						LOutValues = (Row)AArguments[3];
+					deviceName = (string)arguments[0];
+					statement = (string)arguments[1];
+					if (arguments.Length >= 3)
+						inValues = (Row)arguments[2];
+					if (arguments.Length == 4)
+						outValues = (Row)arguments[3];
 				}
 				else
 				{
-					LDeviceName = AProgram.Plan.DefaultDeviceName;
-					LStatement = (string)AArguments[0];
-					if (AArguments.Length >= 2)
-						LInValues = (Row)AArguments[1];
-					if (AArguments.Length == 3)
-						LOutValues = (Row)AArguments[2];
+					deviceName = program.Plan.DefaultDeviceName;
+					statement = (string)arguments[0];
+					if (arguments.Length >= 2)
+						inValues = (Row)arguments[1];
+					if (arguments.Length == 3)
+						outValues = (Row)arguments[2];
 				}
 
-				SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProgram.Plan, LDeviceName);
-				SQLDeviceSession LDeviceSession = AProgram.DeviceConnect(LSQLDevice) as SQLDeviceSession;				
-				PlanNode[] LConversionNodes = LInValues == null ? new PlanNode[0] : new PlanNode[LInValues.DataType.Columns.Count];
-				SQLParameters LParameters = PrepareParameters(AProgram.Plan, LSQLDevice, LStatement, LInValues == null ? null : LInValues.DataType, LOutValues == null ? null : LOutValues.DataType, LConversionNodes);
-				GetParameters(AProgram, LSQLDevice, LParameters, LInValues, LConversionNodes);
-				LDeviceSession.SQLExecute(LStatement, LParameters);
-				SetParameters(AProgram, LSQLDevice, LParameters, LOutValues);
+				SQLDevice sQLDevice = SQLDeviceUtility.ResolveSQLDevice(program.Plan, deviceName);
+				SQLDeviceSession deviceSession = program.DeviceConnect(sQLDevice) as SQLDeviceSession;				
+				PlanNode[] conversionNodes = inValues == null ? new PlanNode[0] : new PlanNode[inValues.DataType.Columns.Count];
+				SQLParameters parameters = PrepareParameters(program.Plan, sQLDevice, statement, inValues == null ? null : inValues.DataType, outValues == null ? null : outValues.DataType, conversionNodes);
+				GetParameters(program, sQLDevice, parameters, inValues, conversionNodes);
+				deviceSession.SQLExecute(statement, parameters);
+				SetParameters(program, sQLDevice, parameters, outValues);
 				return null;
 			}
 			finally
 			{
-				AProgram.Statistics.DeviceExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				program.Statistics.DeviceExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 		}
     }
@@ -5214,361 +5302,361 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row, var AOutValues : row, const ATableType : String, const AKeyInfo : String) : table
     public class SQLQueryNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
+			DetermineModifiers(plan);
 			
 			// determine the table type from the CLI call
-			string LDeviceName = String.Empty;
-			FStatement = String.Empty;
-			Schema.RowType LInRowType = null;
-			Schema.RowType LOutRowType = null;
-			string LTableType = String.Empty;
-			string LKeyDefinition = String.Empty;
+			string deviceName = String.Empty;
+			_statement = String.Empty;
+			Schema.RowType inRowType = null;
+			Schema.RowType outRowType = null;
+			string tableType = String.Empty;
+			string keyDefinition = String.Empty;
 			
-			if (APlan.IsEngine && (Modifiers != null))
+			if (plan.IsEngine && (Modifiers != null))
 			{
-				LTableType = LanguageModifiers.GetModifier(Modifiers, "TableType", LTableType);
-				LKeyDefinition = LanguageModifiers.GetModifier(Modifiers, "KeyInfo", LKeyDefinition);
+				tableType = LanguageModifiers.GetModifier(Modifiers, "TableType", tableType);
+				keyDefinition = LanguageModifiers.GetModifier(Modifiers, "KeyInfo", keyDefinition);
 			}
 
 			// ADeviceName and AStatement must be literal
-			if (Nodes[0].DataType.Is(APlan.DataTypes.SystemName))
+			if (Nodes[0].DataType.Is(plan.DataTypes.SystemName))
 			{
 				// NOTE: We are deliberately not using APlan.ExecuteLiteralArgument here because we want to throw the SQLException, not the CompilerException.
 				if (!Nodes[0].IsLiteral)
 					throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "ADeviceName");
-				LDeviceName = (string)APlan.ExecuteNode(Nodes[0]);
+				deviceName = (string)plan.ExecuteNode(Nodes[0]);
 					
 				if (!Nodes[1].IsLiteral)
 					throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AStatement");
-				FStatement = (string)APlan.ExecuteNode(Nodes[1]);
+				_statement = (string)plan.ExecuteNode(Nodes[1]);
 				
 				if (Nodes.Count >= 3)
 				{
-					if (Nodes[2].DataType.Is(APlan.DataTypes.SystemString))
+					if (Nodes[2].DataType.Is(plan.DataTypes.SystemString))
 					{
 						if (!Nodes[2].IsLiteral)
 							throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-						LKeyDefinition = (string)APlan.ExecuteNode(Nodes[2]);
+						keyDefinition = (string)plan.ExecuteNode(Nodes[2]);
 					}
 					else
-						LInRowType = Nodes[2].DataType as Schema.RowType;
+						inRowType = Nodes[2].DataType as Schema.RowType;
 				}	
 					
 				if (Nodes.Count >= 4)
 				{
-					if (Nodes[3].DataType.Is(APlan.DataTypes.SystemString))
+					if (Nodes[3].DataType.Is(plan.DataTypes.SystemString))
 					{
 						if (!Nodes[3].IsLiteral)
 							throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-						LKeyDefinition = (string)APlan.ExecuteNode(Nodes[3]);
+						keyDefinition = (string)plan.ExecuteNode(Nodes[3]);
 					}
 					else
-						LOutRowType = Nodes[3].DataType as Schema.RowType;
+						outRowType = Nodes[3].DataType as Schema.RowType;
 				}
 				
 				if (Nodes.Count == 5)
 				{
 					if (!Nodes[4].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-					LKeyDefinition = (string)APlan.ExecuteNode(Nodes[4]);
+					keyDefinition = (string)plan.ExecuteNode(Nodes[4]);
 				}
 				else if (Nodes.Count == 6)
 				{
 					if (!Nodes[4].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "ATableType");
-					LTableType = (string)APlan.ExecuteNode(Nodes[4]);
+					tableType = (string)plan.ExecuteNode(Nodes[4]);
 					
 					if (!Nodes[5].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-					LKeyDefinition = (string)APlan.ExecuteNode(Nodes[5]);
+					keyDefinition = (string)plan.ExecuteNode(Nodes[5]);
 				}
 			}
 			else
 			{
-				LDeviceName = APlan.DefaultDeviceName;
+				deviceName = plan.DefaultDeviceName;
 				if (!Nodes[0].IsLiteral)
 					throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AStatement");
-				FStatement = (string)APlan.ExecuteNode(Nodes[0]);
+				_statement = (string)plan.ExecuteNode(Nodes[0]);
 				
 				if (Nodes.Count >= 2)
 				{
-					if (Nodes[1].DataType.Is(APlan.DataTypes.SystemString))
+					if (Nodes[1].DataType.Is(plan.DataTypes.SystemString))
 					{
 						if (!Nodes[1].IsLiteral)
 							throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-						LKeyDefinition = (string)APlan.ExecuteNode(Nodes[1]);
+						keyDefinition = (string)plan.ExecuteNode(Nodes[1]);
 					}
 					else
-						LInRowType = Nodes[1].DataType as Schema.RowType;
+						inRowType = Nodes[1].DataType as Schema.RowType;
 				}	
 					
 				if (Nodes.Count >= 3)
 				{
-					if (Nodes[2].DataType.Is(APlan.DataTypes.SystemString))
+					if (Nodes[2].DataType.Is(plan.DataTypes.SystemString))
 					{
 						if (!Nodes[2].IsLiteral)
 							throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-						LKeyDefinition = (string)APlan.ExecuteNode(Nodes[2]);
+						keyDefinition = (string)plan.ExecuteNode(Nodes[2]);
 					}
 					else
-						LOutRowType = Nodes[2].DataType as Schema.RowType;
+						outRowType = Nodes[2].DataType as Schema.RowType;
 				}
 				
 				if (Nodes.Count == 4)
 				{
 					if (!Nodes[3].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-					LKeyDefinition = (string)APlan.ExecuteNode(Nodes[3]);
+					keyDefinition = (string)plan.ExecuteNode(Nodes[3]);
 				}
 				else if (Nodes.Count == 5)
 				{
 					if (!Nodes[3].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "ATableType");
-					LTableType = (string)APlan.ExecuteNode(Nodes[3]);
+					tableType = (string)plan.ExecuteNode(Nodes[3]);
 					
 					if (!Nodes[4].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-					LKeyDefinition = (string)APlan.ExecuteNode(Nodes[4]);
+					keyDefinition = (string)plan.ExecuteNode(Nodes[4]);
 				}
 			}
 			
-			CursorCapabilities = APlan.CursorContext.CursorCapabilities;
-			CursorIsolation = APlan.CursorContext.CursorIsolation;
-			CursorType = APlan.CursorContext.CursorType;
+			CursorCapabilities = plan.CursorContext.CursorCapabilities;
+			CursorIsolation = plan.CursorContext.CursorIsolation;
+			CursorType = plan.CursorContext.CursorType;
 
-			SQLDeviceSession LDeviceSession = null;
-			if (!APlan.IsEngine)
+			SQLDeviceSession deviceSession = null;
+			if (!plan.IsEngine)
 			{			
-				FSQLDevice = SQLDeviceUtility.ResolveSQLDevice(APlan, LDeviceName);
-				LDeviceSession = APlan.DeviceConnect(FSQLDevice) as SQLDeviceSession;
-				FConversionNodes = LInRowType == null ? new PlanNode[0] : new PlanNode[LInRowType.Columns.Count];
-				FParameters = SQLExecuteNode.PrepareParameters(APlan, FSQLDevice, FStatement, LInRowType, LOutRowType, FConversionNodes);
+				_sQLDevice = SQLDeviceUtility.ResolveSQLDevice(plan, deviceName);
+				deviceSession = plan.DeviceConnect(_sQLDevice) as SQLDeviceSession;
+				_conversionNodes = inRowType == null ? new PlanNode[0] : new PlanNode[inRowType.Columns.Count];
+				_parameters = SQLExecuteNode.PrepareParameters(plan, _sQLDevice, _statement, inRowType, outRowType, _conversionNodes);
 			}
 			
-			if (LTableType == String.Empty)
+			if (tableType == String.Empty)
 			{
-				SQLCursor LCursor = 
-					LDeviceSession.Connection.Open
+				SQLCursor cursor = 
+					deviceSession.Connection.Open
 					(
-						FStatement, 
-						FParameters, 
+						_statement, 
+						_parameters, 
 						SQLTable.CursorTypeToSQLCursorType(CursorType), 
 						SQLIsolationLevel.ReadUncommitted,
-						SQLCommandBehavior.SchemaOnly | (LKeyDefinition == String.Empty ? SQLCommandBehavior.KeyInfo : SQLCommandBehavior.Default)
+						SQLCommandBehavior.SchemaOnly | (keyDefinition == String.Empty ? SQLCommandBehavior.KeyInfo : SQLCommandBehavior.Default)
 					);
 				try
 				{
-					bool LMessageReported = false;
-					SQLTableSchema LSchema = null;
+					bool messageReported = false;
+					SQLTableSchema schema = null;
 					try
 					{
-						LSchema = LCursor.Schema;
+						schema = cursor.Schema;
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
 						// An error here should be ignored, just get as much schema information as possible from the actual cursor...
 						// Not as efficient, but the warning lets them know that.
-						APlan.Messages.Add(new CompilerException(CompilerException.Codes.CompilerMessage, CompilerErrorLevel.Warning, LException, "Compile-time schema retrieval failed, attempting run-time schema retrieval."));
-						LMessageReported = true;
+						plan.Messages.Add(new CompilerException(CompilerException.Codes.CompilerMessage, CompilerErrorLevel.Warning, exception, "Compile-time schema retrieval failed, attempting run-time schema retrieval."));
+						messageReported = true;
 					}
 					
-					if ((LSchema == null) || (LSchema.Columns.Count == 0))
+					if ((schema == null) || (schema.Columns.Count == 0))
 					{
-						if (!LMessageReported)
-							APlan.Messages.Add(new CompilerException(CompilerException.Codes.CompilerMessage, CompilerErrorLevel.Warning, "Compile-time schema retrieval failed, attempting run-time schema retrieval."));
+						if (!messageReported)
+							plan.Messages.Add(new CompilerException(CompilerException.Codes.CompilerMessage, CompilerErrorLevel.Warning, "Compile-time schema retrieval failed, attempting run-time schema retrieval."));
 
-						if (LCursor != null)
+						if (cursor != null)
 						{
-							LCursor.Dispose();
-							LCursor = null;
+							cursor.Dispose();
+							cursor = null;
 						}
 						
-						LCursor = 
-							LDeviceSession.Connection.Open
+						cursor = 
+							deviceSession.Connection.Open
 							(
-								FStatement,
-								FParameters,
+								_statement,
+								_parameters,
 								SQLTable.CursorTypeToSQLCursorType(CursorType),
 								SQLIsolationLevel.ReadUncommitted,
 								SQLCommandBehavior.Default
 							);
 							
-						LSchema = LCursor.Schema;
+						schema = cursor.Schema;
 					}
 					
-					FDataType = new Schema.TableType();
-					FTableVar = new Schema.ResultTableVar(this);
-					FTableVar.Owner = APlan.User;
-					FSQLColumns = new SQLTableColumns();
-					foreach (SQLColumn LSQLColumn in LSchema.Columns)
+					_dataType = new Schema.TableType();
+					_tableVar = new Schema.ResultTableVar(this);
+					_tableVar.Owner = plan.User;
+					_sQLColumns = new SQLTableColumns();
+					foreach (SQLColumn sQLColumn in schema.Columns)
 					{
-						Schema.Column LColumn = new Schema.Column(LSQLColumn.Name, FSQLDevice.FindScalarType(APlan, LSQLColumn.Domain));
-						DataType.Columns.Add(LColumn);
-						FTableVar.Columns.Add(new Schema.TableVarColumn(LColumn, Schema.TableVarColumnType.Stored));
+						Schema.Column column = new Schema.Column(sQLColumn.Name, _sQLDevice.FindScalarType(plan, sQLColumn.Domain));
+						DataType.Columns.Add(column);
+						_tableVar.Columns.Add(new Schema.TableVarColumn(column, Schema.TableVarColumnType.Stored));
 					}
 					
-					FSQLDevice.CheckSupported(APlan, FTableVar);
-					foreach (Schema.TableVarColumn LTableVarColumn in FTableVar.Columns)
-						FSQLColumns.Add(new SQLTableColumn(LTableVarColumn, (Schema.DeviceScalarType)FSQLDevice.ResolveDeviceScalarType(APlan, (Schema.ScalarType)LTableVarColumn.Column.DataType)));
+					_sQLDevice.CheckSupported(plan, _tableVar);
+					foreach (Schema.TableVarColumn tableVarColumn in _tableVar.Columns)
+						_sQLColumns.Add(new SQLTableColumn(tableVarColumn, (Schema.DeviceScalarType)_sQLDevice.ResolveDeviceScalarType(plan, (Schema.ScalarType)tableVarColumn.Column.DataType)));
 						
-					if (LKeyDefinition == String.Empty)
+					if (keyDefinition == String.Empty)
 					{
-						foreach (SQLIndex LSQLIndex in LSchema.Indexes)
+						foreach (SQLIndex sQLIndex in schema.Indexes)
 						{
-							if (LSQLIndex.IsUnique)
+							if (sQLIndex.IsUnique)
 							{
-								Schema.Key LKey = new Schema.Key();
-								foreach (SQLIndexColumn LSQLIndexColumn in LSQLIndex.Columns)
-									LKey.Columns.Add(FTableVar.Columns[LSQLIndexColumn.Name]);
+								Schema.Key key = new Schema.Key();
+								foreach (SQLIndexColumn sQLIndexColumn in sQLIndex.Columns)
+									key.Columns.Add(_tableVar.Columns[sQLIndexColumn.Name]);
 									
-								FTableVar.Keys.Add(LKey);
+								_tableVar.Keys.Add(key);
 							}
 						}
 					}
 					else
 					{
-						FTableVar.Keys.Add(Compiler.CompileKeyDefinition(APlan, FTableVar, new D4.Parser().ParseKeyDefinition(LKeyDefinition)));
+						_tableVar.Keys.Add(Compiler.CompileKeyDefinition(plan, _tableVar, new D4.Parser().ParseKeyDefinition(keyDefinition)));
 					}
 				}
 				finally
 				{
-					LCursor.Dispose();
+					cursor.Dispose();
 				}
 			}
 			else
 			{
-				FDataType = Compiler.CompileTypeSpecifier(APlan, new D4.Parser().ParseTypeSpecifier(LTableType)) as Schema.TableType;
-				if (FDataType == null)
+				_dataType = Compiler.CompileTypeSpecifier(plan, new D4.Parser().ParseTypeSpecifier(tableType)) as Schema.TableType;
+				if (_dataType == null)
 					throw new CompilerException(CompilerException.Codes.TableTypeExpected);
-				FTableVar = new Schema.ResultTableVar(this);
-				FTableVar.Owner = APlan.User;
-				FSQLColumns = new SQLTableColumns();
+				_tableVar = new Schema.ResultTableVar(this);
+				_tableVar.Owner = plan.User;
+				_sQLColumns = new SQLTableColumns();
 
-				foreach (Schema.Column LColumn in DataType.Columns)
-					TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+				foreach (Schema.Column column in DataType.Columns)
+					TableVar.Columns.Add(new Schema.TableVarColumn(column));
 
-				if (!APlan.IsEngine)
+				if (!plan.IsEngine)
 				{				
-					FSQLDevice.CheckSupported(APlan, FTableVar);
-					foreach (Schema.TableVarColumn LTableVarColumn in FTableVar.Columns)
-						FSQLColumns.Add(new SQLTableColumn(LTableVarColumn, (Schema.DeviceScalarType)FSQLDevice.ResolveDeviceScalarType(APlan, (Schema.ScalarType)LTableVarColumn.Column.DataType)));
+					_sQLDevice.CheckSupported(plan, _tableVar);
+					foreach (Schema.TableVarColumn tableVarColumn in _tableVar.Columns)
+						_sQLColumns.Add(new SQLTableColumn(tableVarColumn, (Schema.DeviceScalarType)_sQLDevice.ResolveDeviceScalarType(plan, (Schema.ScalarType)tableVarColumn.Column.DataType)));
 				}
 					
-				FTableVar.Keys.Add(Compiler.CompileKeyDefinition(APlan, FTableVar, new D4.Parser().ParseKeyDefinition(LKeyDefinition)));
+				_tableVar.Keys.Add(Compiler.CompileKeyDefinition(plan, _tableVar, new D4.Parser().ParseKeyDefinition(keyDefinition)));
 			}
 			
-			Compiler.EnsureKey(APlan, FTableVar);
+			Compiler.EnsureKey(plan, _tableVar);
 			
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 				
-			if (!APlan.IsEngine)
+			if (!plan.IsEngine)
 			{
 				if (Modifiers == null)
 					Modifiers = new LanguageModifiers();
-				D4.D4TextEmitter LEmitter = new D4.D4TextEmitter();
-				Modifiers.AddOrUpdate("TableType", LEmitter.Emit(FTableVar.DataType.EmitSpecifier(D4.EmitMode.ForCopy)));
-				Modifiers.AddOrUpdate("KeyInfo", LEmitter.Emit(Compiler.FindClusteringKey(APlan, FTableVar).EmitStatement(D4.EmitMode.ForCopy)));
+				D4.D4TextEmitter emitter = new D4.D4TextEmitter();
+				Modifiers.AddOrUpdate("TableType", emitter.Emit(_tableVar.DataType.EmitSpecifier(D4.EmitMode.ForCopy)));
+				Modifiers.AddOrUpdate("KeyInfo", emitter.Emit(Compiler.FindClusteringKey(plan, _tableVar).EmitStatement(D4.EmitMode.ForCopy)));
 			}
 		}
 
-		private SQLDevice FSQLDevice;
-		private string FStatement;		
-		private PlanNode[] FConversionNodes;
-		private SQLParameters FParameters;
-		private SQLTableColumns FSQLColumns;
+		private SQLDevice _sQLDevice;
+		private string _statement;		
+		private PlanNode[] _conversionNodes;
+		private SQLParameters _parameters;
+		private SQLTableColumns _sQLColumns;
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			try
 			{
-				Row LInValues = null;
-				Row LOutValues = null;
+				Row inValues = null;
+				Row outValues = null;
 				
-				if (Nodes[0].DataType.Is(Compiler.ResolveCatalogIdentifier(AProgram.Plan, "System.Name", true) as IDataType))
+				if (Nodes[0].DataType.Is(Compiler.ResolveCatalogIdentifier(program.Plan, "System.Name", true) as IDataType))
 				{
 					if ((Nodes.Count >= 3) && (Nodes[2].DataType is Schema.IRowType))
-						LInValues = (Row)Nodes[2].Execute(AProgram);
+						inValues = (Row)Nodes[2].Execute(program);
 					
 					if ((Nodes.Count >= 4) && (Nodes[3].DataType is Schema.IRowType))
-						LOutValues = (Row)Nodes[3].Execute(AProgram);
+						outValues = (Row)Nodes[3].Execute(program);
 				}
 				else
 				{
 					if ((Nodes.Count >= 2) && (Nodes[1].DataType is Schema.IRowType))
-						LInValues = (Row)Nodes[1].Execute(AProgram);
+						inValues = (Row)Nodes[1].Execute(program);
 						
 					if ((Nodes.Count == 3) && (Nodes[2].DataType is Schema.IRowType))
-						LOutValues = (Row)Nodes[2].Execute(AProgram);
+						outValues = (Row)Nodes[2].Execute(program);
 				}
 
-				SQLDeviceSession LDeviceSession = AProgram.DeviceConnect(FSQLDevice) as SQLDeviceSession;				
-				SQLExecuteNode.GetParameters(AProgram, FSQLDevice, FParameters, LInValues, FConversionNodes);
+				SQLDeviceSession deviceSession = program.DeviceConnect(_sQLDevice) as SQLDeviceSession;				
+				SQLExecuteNode.GetParameters(program, _sQLDevice, _parameters, inValues, _conversionNodes);
 				
-				LocalTable LResult = new LocalTable(this, AProgram);
+				LocalTable result = new LocalTable(this, program);
 				try
 				{
-					LResult.Open();
+					result.Open();
 
 					// Populate the result
-					Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+					Row row = new Row(program.ValueManager, result.DataType.RowType);
 					try
 					{
-						LRow.ValuesOwned = false;
+						row.ValuesOwned = false;
 						using 
 						(
-							SQLCursor LCursor = 
-								LDeviceSession.Connection.Open
+							SQLCursor cursor = 
+								deviceSession.Connection.Open
 								(
-									FStatement, 
-									FParameters, 
+									_statement, 
+									_parameters, 
 									SQLTable.CursorTypeToSQLCursorType(CursorType), 
-									SQLTable.CursorIsolationToSQLIsolationLevel(CursorIsolation, AProgram.ServerProcess.CurrentIsolationLevel()), 
+									SQLTable.CursorIsolationToSQLIsolationLevel(CursorIsolation, program.ServerProcess.CurrentIsolationLevel()), 
 									SQLCommandBehavior.Default
 								)
 						)
 						{
-							SQLExecuteNode.SetParameters(AProgram, FSQLDevice, FParameters, LOutValues);
+							SQLExecuteNode.SetParameters(program, _sQLDevice, _parameters, outValues);
 							
-							while (LCursor.Next())
+							while (cursor.Next())
 							{
-								for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
+								for (int index = 0; index < DataType.Columns.Count; index++)
 								{
-									if (LCursor.IsNull(LIndex))
-										LRow.ClearValue(LIndex);
+									if (cursor.IsNull(index))
+										row.ClearValue(index);
 									else
-										LRow[LIndex] = FSQLColumns[LIndex].ScalarType.ToScalar(AProgram.ValueManager, LCursor[LIndex]);
+										row[index] = _sQLColumns[index].ScalarType.ToScalar(program.ValueManager, cursor[index]);
 								}
 								
-								LResult.Insert(LRow);
+								result.Insert(row);
 							}
 						}
 					}
 					finally
 					{
-						LRow.Dispose();
+						row.Dispose();
 					}
 					
-					LResult.First();
+					result.First();
 					
-					return LResult;
+					return result;
 				}
 				catch
 				{
-					LResult.Dispose();
+					result.Dispose();
 					throw;
 				}
 			}
 			finally
 			{
-				AProgram.Statistics.DeviceExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				program.Statistics.DeviceExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 		}
     }
@@ -5577,73 +5665,73 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     // operator AvailableTables(const ADeviceName : System.Name) : table { Name : Name, StorageName : String };
     public class AvailableTablesNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Name", APlan.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("StorageName", APlan.DataTypes.SystemString));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("StorageName", plan.DataTypes.SystemString));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Name"]}));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		private void PopulateAvailableTables(Program AProgram, SQLDevice ADevice, Table ATable, Row ARow)
+		private void PopulateAvailableTables(Program program, SQLDevice device, Table table, Row row)
 		{
-			Schema.Catalog LServerCatalog = ADevice.GetServerCatalog(AProgram.ServerProcess, null);
-			Schema.Catalog LCatalog = new Schema.Catalog();
-			ADevice.GetDeviceTables(AProgram.Plan, LServerCatalog, LCatalog, null);
-			foreach (Schema.Object LObject in LCatalog)
+			Schema.Catalog serverCatalog = device.GetServerCatalog(program.ServerProcess, null);
+			Schema.Catalog catalog = new Schema.Catalog();
+			device.GetDeviceTables(program.Plan, serverCatalog, catalog, null);
+			foreach (Schema.Object objectValue in catalog)
 			{
-				Schema.BaseTableVar LTableVar = LObject as Schema.BaseTableVar;
-				if (LTableVar != null)
+				Schema.BaseTableVar tableVar = objectValue as Schema.BaseTableVar;
+				if (tableVar != null)
 				{
-					ARow[0] = LTableVar.Name;
-					ARow[1] = LTableVar.MetaData.Tags["Storage.Name"].Value;
-					ATable.Insert(ARow);
+					row[0] = tableVar.Name;
+					row[1] = tableVar.MetaData.Tags["Storage.Name"].Value;
+					table.Insert(row);
 				}
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			string LDeviceName = (Nodes.Count == 0) ? AProgram.Plan.DefaultDeviceName : (string)Nodes[0].Execute(AProgram);
-			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProgram.Plan, LDeviceName);
-			LocalTable LResult = new LocalTable(this, AProgram);
+			string deviceName = (Nodes.Count == 0) ? program.Plan.DefaultDeviceName : (string)Nodes[0].Execute(program);
+			SQLDevice sQLDevice = SQLDeviceUtility.ResolveSQLDevice(program.Plan, deviceName);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
-					PopulateAvailableTables(AProgram, LSQLDevice, LResult, LRow);
+					row.ValuesOwned = false;
+					PopulateAvailableTables(program, sQLDevice, result, row);
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 				
-				LResult.First();
+				result.First();
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -5653,73 +5741,73 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     // operator AvailableReferences(const ADeviceName : System.Name) : table { Name : Name, StorageName : String };
     public class AvailableReferencesNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Name", APlan.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("StorageName", APlan.DataTypes.SystemString));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("StorageName", plan.DataTypes.SystemString));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Name"]}));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		private void PopulateAvailableReferences(Program AProgram, SQLDevice ADevice, Table ATable, Row ARow)
+		private void PopulateAvailableReferences(Program program, SQLDevice device, Table table, Row row)
 		{
-			Schema.Catalog LServerCatalog = ADevice.GetServerCatalog(AProgram.ServerProcess, null);
-			Schema.Catalog LCatalog = new Schema.Catalog();
-			ADevice.GetDeviceForeignKeys(AProgram.Plan, LServerCatalog, LCatalog, null);
-			foreach (Schema.Object LObject in LCatalog)
+			Schema.Catalog serverCatalog = device.GetServerCatalog(program.ServerProcess, null);
+			Schema.Catalog catalog = new Schema.Catalog();
+			device.GetDeviceForeignKeys(program.Plan, serverCatalog, catalog, null);
+			foreach (Schema.Object objectValue in catalog)
 			{
-				Schema.Reference LReference = LObject as Schema.Reference;
-				if (LReference != null)
+				Schema.Reference reference = objectValue as Schema.Reference;
+				if (reference != null)
 				{
-					ARow[0] = LReference.Name;
-					ARow[1] = LReference.MetaData.Tags["Storage.Name"].Value;
-					ATable.Insert(ARow);
+					row[0] = reference.Name;
+					row[1] = reference.MetaData.Tags["Storage.Name"].Value;
+					table.Insert(row);
 				}
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			string LDeviceName = (Nodes.Count == 0) ? AProgram.Plan.DefaultDeviceName : (string)Nodes[0].Execute(AProgram);
-			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProgram.Plan, LDeviceName);
-			LocalTable LResult = new LocalTable(this, AProgram);
+			string deviceName = (Nodes.Count == 0) ? program.Plan.DefaultDeviceName : (string)Nodes[0].Execute(program);
+			SQLDevice sQLDevice = SQLDeviceUtility.ResolveSQLDevice(program.Plan, deviceName);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
-					PopulateAvailableReferences(AProgram, LSQLDevice, LResult, LRow);
+					row.ValuesOwned = false;
+					PopulateAvailableReferences(program, sQLDevice, result, row);
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 				
-				LResult.First();
+				result.First();
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -5730,33 +5818,33 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     // operator DeviceReconciliationScript(const ADeviceName : Name, const ATableName : Name, const AOptions : list(String)) : String;
     public class DeviceReconciliationScriptNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProgram.Plan, (string)AArguments[0]);
-			string LTableName = String.Empty;
-			ReconcileOptions LOptions = ReconcileOptions.All;
-			switch (AArguments.Length)
+			SQLDevice sQLDevice = SQLDeviceUtility.ResolveSQLDevice(program.Plan, (string)arguments[0]);
+			string tableName = String.Empty;
+			ReconcileOptions options = ReconcileOptions.All;
+			switch (arguments.Length)
 			{
 				case 2 :
-					if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemName))
-						LTableName = (string)AArguments[1];
+					if (Operator.Operands[1].DataType.Is(program.DataTypes.SystemName))
+						tableName = (string)arguments[1];
 					else
-						LOptions = SQLDeviceUtility.ResolveReconcileOptions(AArguments[1] as ListValue);
+						options = SQLDeviceUtility.ResolveReconcileOptions(arguments[1] as ListValue);
 				break;
 				
 				case 3 :
-					LTableName = (string)AArguments[1];
-					LOptions = SQLDeviceUtility.ResolveReconcileOptions(AArguments[2] as ListValue);
+					tableName = (string)arguments[1];
+					options = SQLDeviceUtility.ResolveReconcileOptions(arguments[2] as ListValue);
 				break;
 			}
 			
-			Batch LBatch;
-			if (LTableName == String.Empty)
-				LBatch = LSQLDevice.DeviceReconciliationScript(AProgram.ServerProcess, LOptions);
+			Batch batch;
+			if (tableName == String.Empty)
+				batch = sQLDevice.DeviceReconciliationScript(program.ServerProcess, options);
 			else
-				LBatch = LSQLDevice.DeviceReconciliationScript(AProgram.ServerProcess, Compiler.ResolveCatalogIdentifier(AProgram.Plan, LTableName, true) as Schema.TableVar, LOptions);
+				batch = sQLDevice.DeviceReconciliationScript(program.ServerProcess, Compiler.ResolveCatalogIdentifier(program.Plan, tableName, true) as Schema.TableVar, options);
 				
-			return LSQLDevice.Emitter.Emit(LBatch);
+			return sQLDevice.Emitter.Emit(batch);
 		}
     }
 }

@@ -17,17 +17,17 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			get { return (NotebookItem)FrameworkElement; }
 		}
 
-		private bool FIsSelected;
+		private bool _isSelected;
 		
 		public virtual void Selected()
 		{
-			FIsSelected = true;
+			_isSelected = true;
 			UpdateFrameInterface(false);
 		}
 
 		public virtual void Unselected()
 		{
-			FIsSelected = false;
+			_isSelected = false;
 			UpdateFrameInterface(false);
 		}
 
@@ -37,21 +37,21 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			AddBinding(NotebookItem.HeaderProperty, new Func<object>(UIGetHeader));
 		}
 		
-		protected string FTitle = String.Empty;
+		protected string _title = String.Empty;
 		[DefaultValue("")]
 		public string Title
 		{
-			get	{ return FTitle; }
+			get	{ return _title; }
 			set
 			{
-				FTitle = value;
+				_title = value;
 				UpdateBinding(NotebookItem.HeaderProperty);
 			}
 		}
 		
 		protected virtual string GetTitle()
 		{
-			return String.IsNullOrEmpty(FTitle) ? Strings.CDefaultNotebookPageTitle : FTitle;
+			return String.IsNullOrEmpty(_title) ? Strings.CDefaultNotebookPageTitle : _title;
 		}
 		
 		private object UIGetHeader()
@@ -59,12 +59,12 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return GetTitle();
 		}
 
-		public override bool IsValidOwner(Type AOwnerType)
+		public override bool IsValidOwner(Type ownerType)
 		{
-			return typeof(INotebook).IsAssignableFrom(AOwnerType);
+			return typeof(INotebook).IsAssignableFrom(ownerType);
 		}
 
-		protected override void UpdateFrameInterface(bool AForce)
+		protected override void UpdateFrameInterface(bool force)
 		{
 			// If the frame should be loaded and it is not, or vise versa... then fix it
 			if 
@@ -72,7 +72,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				Active && 
 				(
 					(ShouldLoad() == (FrameInterfaceNode == null)) || 
-					AForce
+					force
 				)
 			)
 				ResetFrameInterfaceNode(Active);
@@ -80,29 +80,29 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		protected override bool ShouldLoad()
 		{
-			return base.ShouldLoad() && (FIsSelected || !FLoadAsSelected);
+			return base.ShouldLoad() && (_isSelected || !_loadAsSelected);
 		}
 
 		// LoadAsSelected
 
-		private bool FLoadAsSelected = true;
+		private bool _loadAsSelected = true;
 		[DefaultValue(true)]
 		public bool LoadAsSelected
 		{
-			get { return FLoadAsSelected; }
+			get { return _loadAsSelected; }
 			set
 			{
-				if (FLoadAsSelected != value)
+				if (_loadAsSelected != value)
 				{
 					try
 					{
 						// Set the property before updating so the update function appropriately
-						FLoadAsSelected = value;
+						_loadAsSelected = value;
 						UpdateFrameInterface(false);
 					}
 					catch
 					{
-						FLoadAsSelected = !value;
+						_loadAsSelected = !value;
 						throw;
 					}
 				}

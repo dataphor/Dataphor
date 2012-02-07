@@ -9,135 +9,135 @@ namespace Alphora.Dataphor
 	///  but there are extra bounds checks done by BitConverter that are avoided here. </remarks>
 	public static class ByteArrayUtility
 	{
-		public static void WriteInt32(byte[] ABuffer, int AOffset, int AValue)
+		public static void WriteInt32(byte[] buffer, int offset, int value)
 		{
-			ABuffer[AOffset] = (byte)AValue;
-			ABuffer[AOffset + 1] = (byte)(AValue >> 0x08);
-			ABuffer[AOffset + 2] = (byte)(AValue >> 0x10);
-			ABuffer[AOffset + 3] = (byte)(AValue >> 0x18);
+			buffer[offset] = (byte)value;
+			buffer[offset + 1] = (byte)(value >> 0x08);
+			buffer[offset + 2] = (byte)(value >> 0x10);
+			buffer[offset + 3] = (byte)(value >> 0x18);
 		}
 
-		public static int ReadInt32(byte[] ABuffer, int AOffset)
+		public static int ReadInt32(byte[] buffer, int offset)
 		{
-			return ABuffer[AOffset] | (ABuffer[AOffset + 1] << 0x8) | (ABuffer[AOffset + 2] << 0x10) | (ABuffer[AOffset + 3] << 0x18);
+			return buffer[offset] | (buffer[offset + 1] << 0x8) | (buffer[offset + 2] << 0x10) | (buffer[offset + 3] << 0x18);
 		}
 
-		public static void WriteInt64(byte[] ABuffer, int AOffset, long Value)
+		public static void WriteInt64(byte[] buffer, int offset, long Value)
 		{
-			ABuffer[AOffset] = (byte)Value;
-			ABuffer[AOffset + 1] = (byte)(Value >> 0x08);
-			ABuffer[AOffset + 2] = (byte)(Value >> 0x10);
-			ABuffer[AOffset + 3] = (byte)(Value >> 0x18);
-			ABuffer[AOffset + 4] = (byte)(Value >> 0x20);
-			ABuffer[AOffset + 5] = (byte)(Value >> 0x28);
-			ABuffer[AOffset + 6] = (byte)(Value >> 0x30);
-			ABuffer[AOffset + 7] = (byte)(Value >> 0x38);
+			buffer[offset] = (byte)Value;
+			buffer[offset + 1] = (byte)(Value >> 0x08);
+			buffer[offset + 2] = (byte)(Value >> 0x10);
+			buffer[offset + 3] = (byte)(Value >> 0x18);
+			buffer[offset + 4] = (byte)(Value >> 0x20);
+			buffer[offset + 5] = (byte)(Value >> 0x28);
+			buffer[offset + 6] = (byte)(Value >> 0x30);
+			buffer[offset + 7] = (byte)(Value >> 0x38);
 		}
 
-		public static long ReadInt64(byte[] ABuffer, int AOffset)
+		public static long ReadInt64(byte[] buffer, int offset)
 		{
 			return 
-				((long)(((ABuffer[AOffset + 4] | (ABuffer[AOffset + 5] << 0x08)) | (ABuffer[AOffset + 6] << 0x10)) | (ABuffer[AOffset + 7] << 0x18)) << 0x20) 
-					| (uint)(((ABuffer[AOffset + 0] | (ABuffer[AOffset + 1] << 0x08)) | (ABuffer[AOffset + 2] << 0x10)) | (ABuffer[AOffset + 3] << 0x18));
+				((long)(((buffer[offset + 4] | (buffer[offset + 5] << 0x08)) | (buffer[offset + 6] << 0x10)) | (buffer[offset + 7] << 0x18)) << 0x20) 
+					| (uint)(((buffer[offset + 0] | (buffer[offset + 1] << 0x08)) | (buffer[offset + 2] << 0x10)) | (buffer[offset + 3] << 0x18));
 		}
 
-		public static short ReadInt16(byte[] ABuffer, int AOffset)
+		public static short ReadInt16(byte[] buffer, int offset)
 		{
-			return (short)(ABuffer[AOffset] | (ABuffer[AOffset + 1] << 0x08));
+			return (short)(buffer[offset] | (buffer[offset + 1] << 0x08));
 		}
 
-		public static void WriteInt16(byte[] ABuffer, int AOffset, short AValue)
+		public static void WriteInt16(byte[] buffer, int offset, short value)
 		{
-			ABuffer[AOffset] = (byte)AValue;
-			ABuffer[AOffset + 1] = (byte)(AValue >> 0x08);
+			buffer[offset] = (byte)value;
+			buffer[offset + 1] = (byte)(value >> 0x08);
 		}
 
-		public static decimal ReadDecimal(byte[] ABuffer, int AOffset)
+		public static decimal ReadDecimal(byte[] buffer, int offset)
 		{
-			int LFlags = ((ABuffer[AOffset + 12] | (ABuffer[AOffset + 13] << 0x08)) | (ABuffer[AOffset + 14] << 0x10)) | (ABuffer[AOffset + 15] << 0x18);
+			int flags = ((buffer[offset + 12] | (buffer[offset + 13] << 0x08)) | (buffer[offset + 14] << 0x10)) | (buffer[offset + 15] << 0x18);
 			return 
 				new Decimal
 				(
-					((ABuffer[AOffset + 0] | (ABuffer[AOffset + 1] << 0x08)) | (ABuffer[AOffset + 2] << 0x10)) | (ABuffer[AOffset + 3] << 0x18),
-					((ABuffer[AOffset + 4] | (ABuffer[AOffset + 5] << 0x08)) | (ABuffer[AOffset + 6] << 0x10)) | (ABuffer[AOffset + 7] << 0x18), 
-					((ABuffer[AOffset + 8] | (ABuffer[AOffset + 9] << 0x08)) | (ABuffer[AOffset + 10] << 0x10)) | (ABuffer[AOffset + 11] << 0x18),
-					(LFlags & Int32.MinValue) != 0,
-					(byte)(LFlags >> 0x10)
+					((buffer[offset + 0] | (buffer[offset + 1] << 0x08)) | (buffer[offset + 2] << 0x10)) | (buffer[offset + 3] << 0x18),
+					((buffer[offset + 4] | (buffer[offset + 5] << 0x08)) | (buffer[offset + 6] << 0x10)) | (buffer[offset + 7] << 0x18), 
+					((buffer[offset + 8] | (buffer[offset + 9] << 0x08)) | (buffer[offset + 10] << 0x10)) | (buffer[offset + 11] << 0x18),
+					(flags & Int32.MinValue) != 0,
+					(byte)(flags >> 0x10)
 				);
 		}
 
-		public static void WriteDecimal(byte[] ABuffer, int AOffset, decimal AValue)
+		public static void WriteDecimal(byte[] buffer, int offset, decimal value)
 		{
-			var LBits = Decimal.GetBits(AValue);
-			ABuffer[AOffset + 0] = (byte)LBits[0];
-			ABuffer[AOffset + 1] = (byte)(LBits[0] >> 0x08);
-			ABuffer[AOffset + 2] = (byte)(LBits[0] >> 0x10);
-			ABuffer[AOffset + 3] = (byte)(LBits[0] >> 0x18);
-			ABuffer[AOffset + 4] = (byte)LBits[1];
-			ABuffer[AOffset + 5] = (byte)(LBits[1] >> 0x08);
-			ABuffer[AOffset + 6] = (byte)(LBits[1] >> 0x10);
-			ABuffer[AOffset + 7] = (byte)(LBits[1] >> 0x18);
-			ABuffer[AOffset + 8] = (byte)LBits[2];
-			ABuffer[AOffset + 9] = (byte)(LBits[2] >> 0x08);
-			ABuffer[AOffset + 10] = (byte)(LBits[2] >> 0x10);
-			ABuffer[AOffset + 11] = (byte)(LBits[2] >> 0x18);
-			ABuffer[AOffset + 12] = (byte)LBits[3];
-			ABuffer[AOffset + 13] = (byte)(LBits[3] >> 0x08);
-			ABuffer[AOffset + 14] = (byte)(LBits[3] >> 0x10);
-			ABuffer[AOffset + 15] = (byte)(LBits[3] >> 0x18);
+			var bits = Decimal.GetBits(value);
+			buffer[offset + 0] = (byte)bits[0];
+			buffer[offset + 1] = (byte)(bits[0] >> 0x08);
+			buffer[offset + 2] = (byte)(bits[0] >> 0x10);
+			buffer[offset + 3] = (byte)(bits[0] >> 0x18);
+			buffer[offset + 4] = (byte)bits[1];
+			buffer[offset + 5] = (byte)(bits[1] >> 0x08);
+			buffer[offset + 6] = (byte)(bits[1] >> 0x10);
+			buffer[offset + 7] = (byte)(bits[1] >> 0x18);
+			buffer[offset + 8] = (byte)bits[2];
+			buffer[offset + 9] = (byte)(bits[2] >> 0x08);
+			buffer[offset + 10] = (byte)(bits[2] >> 0x10);
+			buffer[offset + 11] = (byte)(bits[2] >> 0x18);
+			buffer[offset + 12] = (byte)bits[3];
+			buffer[offset + 13] = (byte)(bits[3] >> 0x08);
+			buffer[offset + 14] = (byte)(bits[3] >> 0x10);
+			buffer[offset + 15] = (byte)(bits[3] >> 0x18);
 		}
 
-		public static Guid ReadGuid(byte[] ABuffer, int AOffset)
+		public static Guid ReadGuid(byte[] buffer, int offset)
 		{
 			return
 				new Guid
 				(
-					ReadInt32(ABuffer, AOffset),
-					ReadInt16(ABuffer, AOffset + 4),
-					ReadInt16(ABuffer, AOffset + 6),
-					ABuffer[AOffset + 8],
-					ABuffer[AOffset + 9],
-					ABuffer[AOffset + 10],
-					ABuffer[AOffset + 11],
-					ABuffer[AOffset + 12],
-					ABuffer[AOffset + 13],
-					ABuffer[AOffset + 14],
-					ABuffer[AOffset + 15]
+					ReadInt32(buffer, offset),
+					ReadInt16(buffer, offset + 4),
+					ReadInt16(buffer, offset + 6),
+					buffer[offset + 8],
+					buffer[offset + 9],
+					buffer[offset + 10],
+					buffer[offset + 11],
+					buffer[offset + 12],
+					buffer[offset + 13],
+					buffer[offset + 14],
+					buffer[offset + 15]
 				);
 		}
 
-		public static void WriteGuid(byte[] ABuffer, int AOffset, Guid AValue)
+		public static void WriteGuid(byte[] buffer, int offset, Guid value)
 		{
-			var LBytes = AValue.ToByteArray();
-			for (int i = 0; i < LBytes.Length; i++)
-				ABuffer[AOffset + i] = LBytes[i];
+			var bytes = value.ToByteArray();
+			for (int i = 0; i < bytes.Length; i++)
+				buffer[offset + i] = bytes[i];
 		}
 
-		public static string ReadString(byte[] ABuffer, int AOffset)
+		public static string ReadString(byte[] buffer, int offset)
 		{
-			int LLength = ReadInt32(ABuffer, AOffset);
+			int length = ReadInt32(buffer, offset);
 
-			if (LLength > 0)
+			if (length > 0)
 			{
-				AOffset += sizeof(int);
-				StringBuilder LBuilder = new StringBuilder(LLength, LLength);
-				for (int i = 0; i < LLength; i++)
-					LBuilder.Append((char)((ushort)ReadInt16(ABuffer, AOffset + i * 2)));
-				return LBuilder.ToString();
+				offset += sizeof(int);
+				StringBuilder builder = new StringBuilder(length, length);
+				for (int i = 0; i < length; i++)
+					builder.Append((char)((ushort)ReadInt16(buffer, offset + i * 2)));
+				return builder.ToString();
 			}
 			else
 				return String.Empty;
 		}
 
-		public static void WriteString(byte[] ABuffer, int AOffset, string AValue)
+		public static void WriteString(byte[] buffer, int offset, string value)
 		{
-			ByteArrayUtility.WriteInt32(ABuffer, AOffset, AValue.Length);
+			ByteArrayUtility.WriteInt32(buffer, offset, value.Length);
 
-			if (AValue.Length > 0)
+			if (value.Length > 0)
 			{
-				AOffset += sizeof(int);
-				for (int i = 0; i < AValue.Length; i++)
-					ByteArrayUtility.WriteInt16(ABuffer, AOffset + i * 2, (short)AValue[i]);
+				offset += sizeof(int);
+				for (int i = 0; i < value.Length; i++)
+					ByteArrayUtility.WriteInt16(buffer, offset + i * 2, (short)value[i]);
 			}
 		}
 	}

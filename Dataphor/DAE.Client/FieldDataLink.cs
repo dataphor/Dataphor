@@ -19,30 +19,30 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get
 			{
-				if ((DataSet != null) && DataSet.Active && !DataSet.IsEmpty() && (FColumnName != String.Empty) && (FColumnName != null))
-					return DataSet.Fields[FColumnName];
+				if ((DataSet != null) && DataSet.Active && !DataSet.IsEmpty() && (_columnName != String.Empty) && (_columnName != null))
+					return DataSet.Fields[_columnName];
 				else
 					return null;
 			}
 		}
 
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
+			get { return _columnName; }
 			set
 			{
-				if (FColumnName != value)
+				if (_columnName != value)
 				{
 					if (Active && (value != String.Empty) && (DataSet.Fields[value] == null))
 						throw new ClientException(ClientException.Codes.ColumnNotFound, value);
-					FColumnName = value;
+					_columnName = value;
 					FieldChanged(null);
 				}
 			}
 		}
 
-		private bool FReadOnly;
+		private bool _readOnly;
 		
 		/// <summary> Indicates whether the DataView for this link can be modified. </summary>
 		/// <remarks>
@@ -53,19 +53,19 @@ namespace Alphora.Dataphor.DAE.Client
 		/// </remarks>
 		public bool ReadOnly
 		{
-			get { return FReadOnly; }
+			get { return _readOnly; }
 			set
 			{
-				if (FReadOnly != value)
+				if (_readOnly != value)
 				{
-					FReadOnly = value;
+					_readOnly = value;
 					UpdateReadOnly();
 				}
 			}
 		}
 
-		private bool FInUpdate;
-		public bool InUpdate { get { return FInUpdate; } }
+		private bool _inUpdate;
+		public bool InUpdate { get { return _inUpdate; } }
 
 		public event EventHandler OnUpdateReadOnly;
 		protected virtual void UpdateReadOnly()
@@ -75,10 +75,10 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 
 		public event DataLinkFieldHandler OnFieldChanged;
-		protected virtual void FieldChanged(DataField AField)
+		protected virtual void FieldChanged(DataField field)
 		{
 			if (!Modified && !InUpdate && (OnFieldChanged != null))
-				OnFieldChanged(this, DataSet, AField);
+				OnFieldChanged(this, DataSet, field);
 		}
 
 		protected override void DataChanged()
@@ -87,11 +87,11 @@ namespace Alphora.Dataphor.DAE.Client
 			FieldChanged(null);
 		}
 
-		protected internal override void RowChanged(DataField AField)
+		protected internal override void RowChanged(DataField field)
 		{
-			base.RowChanged(AField);
-			if ((AField == null) || (AField == DataField))
-				FieldChanged(AField);
+			base.RowChanged(field);
+			if ((field == null) || (field == DataField))
+				FieldChanged(field);
 		}
 
 		protected internal override void StateChanged()
@@ -103,12 +103,12 @@ namespace Alphora.Dataphor.DAE.Client
 
 		private void BeginUpdate()
 		{
-			FInUpdate = true;
+			_inUpdate = true;
 		}
 
 		private void EndUpdate()
 		{
-			FInUpdate = false;
+			_inUpdate = false;
 		}
 
 		public override void SaveRequested()

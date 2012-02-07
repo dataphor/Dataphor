@@ -5,7 +5,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
     public class D4DocumentNode : DocumentNode
     {
-        public D4DocumentNode(DocumentListNode AParent, string ADocumentName, string ADocumentType) : base(AParent, ADocumentName, ADocumentType) 
+        public D4DocumentNode(DocumentListNode parent, string documentName, string documentType) : base(parent, documentName, documentType) 
         {
             ImageIndex = 9;
             SelectedImageIndex = ImageIndex;
@@ -13,18 +13,18 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
         protected override ContextMenu GetContextMenu()
         {
-            ContextMenu LMenu = base.GetContextMenu();
+            ContextMenu menu = base.GetContextMenu();
 			
-            LMenu.MenuItems.Add(2, new MenuItem(Strings.ObjectTree_ExecuteMenuText, new EventHandler(ExecuteClicked), Shortcut.F9));
+            menu.MenuItems.Add(2, new MenuItem(Strings.ObjectTree_ExecuteMenuText, new EventHandler(ExecuteClicked), Shortcut.F9));
 
-            return LMenu;
+            return menu;
         }
 
-        private void ExecuteClicked(object ASender, EventArgs AArgs)
+        private void ExecuteClicked(object sender, EventArgs args)
         {
             using 
 			(
-				DAE.Runtime.Data.Scalar LScript = 
+				DAE.Runtime.Data.Scalar script = 
 					Dataphoria.FrontendSession.Pipe.RequestDocument
 					(
 						String.Format
@@ -36,7 +36,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 					)
 			)
             {
-                Dataphoria.ExecuteScript(LScript.AsString);
+                Dataphoria.ExecuteScript(script.AsString);
             }
         }
     }

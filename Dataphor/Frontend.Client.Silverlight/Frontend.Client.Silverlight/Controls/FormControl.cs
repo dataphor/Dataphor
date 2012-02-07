@@ -5,6 +5,7 @@ using System.ComponentModel;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
+	[TemplatePart(Name = "Menu", Type = typeof(Menu))]
 	public class FormControl : ContentControl
 	{
 		public FormControl()
@@ -32,10 +33,25 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		public event CloseHandler CloseRequested;
 		
-		public void RequestClose(CloseBehavior ABehavior)
+		public void RequestClose(CloseBehavior behavior)
 		{
 			if (CloseRequested != null)
-				CloseRequested(this, ABehavior);
+				CloseRequested(this, behavior);
+		}
+		
+		private Menu _menu;
+		
+		public Menu Menu
+		{
+			get { return _menu; }
+			set { _menu = value; }
+		}
+
+		public override void OnApplyTemplate()
+		{
+			Menu = GetTemplateChild("Menu") as Menu;
+			
+			base.OnApplyTemplate();
 		}
 	}
 	

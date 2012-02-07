@@ -31,11 +31,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			ResumeLayout(false);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 			finally
 			{
@@ -45,38 +45,38 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Button
 
-		private BitmapButton FButton;
+		private BitmapButton _button;
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public BitmapButton Button 
 		{ 
-			get { return FButton; } 
+			get { return _button; } 
 		}
 
 		protected virtual void InitializeButton()
 		{
-			FButton = new SpeedButton();
-			FButton.Image = SpeedButton.ResourceBitmap(typeof(LookupPanel), "Alphora.Dataphor.DAE.Client.Controls.Images.Lookup.bmp");
-			FButton.Parent = this;
-			FButton.Size = MinButtonSize();
-			FButton.Click += new EventHandler(LookupButtonClick);
+			_button = new SpeedButton();
+			_button.Image = SpeedButton.ResourceBitmap(typeof(LookupPanel), "Alphora.Dataphor.DAE.Client.Controls.Images.Lookup.bmp");
+			_button.Parent = this;
+			_button.Size = MinButtonSize();
+			_button.Click += new EventHandler(LookupButtonClick);
 		}
 
 		protected virtual void DisposeButton()
 		{
-			if (FButton != null)
+			if (_button != null)
 			{
-				FButton.Click -= new EventHandler(LookupButtonClick);
-				FButton.Dispose();
-				FButton = null;
+				_button.Click -= new EventHandler(LookupButtonClick);
+				_button.Dispose();
+				_button = null;
 			}
 		}
 
-		private bool FInButtonClick;
+		private bool _inButtonClick;
 
-		private void LookupButtonClick(object ASender, EventArgs AArgs)
+		private void LookupButtonClick(object sender, EventArgs args)
 		{
-			FInButtonClick = true;
+			_inButtonClick = true;
 			try
 			{
 				if (FocusControl())		// Don't proceed unless we take focus (in case another control fails validation)
@@ -84,13 +84,13 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 			finally
 			{
-				FInButtonClick = false;
+				_inButtonClick = false;
 			}
 		}
 
 		protected Size MinButtonSize()
 		{
-			return FButton.Image.Size + new Size(5, 5);
+			return _button.Image.Size + new Size(5, 5);
 		}
 
 		#endregion
@@ -99,10 +99,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		public event LookupEventHandler Lookup;
 
-		protected virtual void OnLookup(LookupEventArgs AArgs)
+		protected virtual void OnLookup(LookupEventArgs args)
 		{
 			if (Enabled && (Lookup != null))
-				Lookup(this, AArgs);
+				Lookup(this, args);
 		}
 
 		private void PerformLookup()
@@ -114,29 +114,29 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region AutoLookup
 
-		private bool FAutoLookup;
+		private bool _autoLookup;
 		[DefaultValue(false)]
 		[Category("Behavior")]
 		public bool AutoLookup
 		{
-			get { return FAutoLookup; }
-			set { FAutoLookup = value; }
+			get { return _autoLookup; }
+			set { _autoLookup = value; }
 		}
 
-		private bool FAutoLookupPerformed = false;	// Only perform auto lookup once per instance
+		private bool _autoLookupPerformed = false;	// Only perform auto lookup once per instance
 
 		/// <summary> Resets the auto-lookup feature, allowing auto-lookup to take place when focus is navigated to the control again. </summary>
 		public void ResetAutoLookup()
 		{
-			FAutoLookupPerformed = false;
+			_autoLookupPerformed = false;
 		}
 
-		protected override void OnEnter(EventArgs AArgs)
+		protected override void OnEnter(EventArgs args)
 		{
-			base.OnEnter(AArgs);
-			if (FAutoLookup && !FInButtonClick && !FAutoLookupPerformed && OnQueryAutoLookupEnabled())
+			base.OnEnter(args);
+			if (_autoLookup && !_inButtonClick && !_autoLookupPerformed && OnQueryAutoLookupEnabled())
 			{
-				FAutoLookupPerformed = true;
+				_autoLookupPerformed = true;
 				PerformLookup();
 			}
 		}
@@ -155,30 +155,30 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Keyboard
 
-		private Keys FLookupKey = Keys.Insert;
+		private Keys _lookupKey = Keys.Insert;
 		[Category("Behavior")]
 		[DefaultValue(Keys.Insert)]
 		[Description("Shortcut key to exec lookup.")]
 		public virtual Keys LookupKey
 		{
-			get { return FLookupKey; }
-			set { FLookupKey = value; }
+			get { return _lookupKey; }
+			set { _lookupKey = value; }
 		}
 
-		protected virtual bool IsLookupKey(Keys AKey)
+		protected virtual bool IsLookupKey(Keys key)
 		{
-			return (AKey == FLookupKey) || (AKey == (Keys.Alt | Keys.Down));
+			return (key == _lookupKey) || (key == (Keys.Alt | Keys.Down));
 		}
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
-			if (IsLookupKey(AKey))
+			if (IsLookupKey(key))
 			{
 				OnLookup(new LookupEventArgs());
 				return true;
 			}
 			else
-				return base.ProcessDialogKey(AKey);
+				return base.ProcessDialogKey(key);
 		}
 
 		#endregion
@@ -202,76 +202,76 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	{
 		public LookupEventArgs() {}
 
-		public LookupEventArgs(Keys AKeyData)
+		public LookupEventArgs(Keys keyData)
 		{
-			FKeyData = AKeyData;
+			_keyData = keyData;
 		}
 
-		private Keys FKeyData = Keys.None;
+		private Keys _keyData = Keys.None;
 		/// <summary> The key that invoked the lookup. </summary>
 		public Keys KeyData
 		{
-			get { return FKeyData; }
+			get { return _keyData; }
 		}
 	}
 
 	public class LookupBoundsUtility
 	{
-		public static void ConstrainMin(ref int AValue, int AMin)
+		public static void ConstrainMin(ref int value, int min)
 		{
-			if (AValue < AMin)
-				AValue = AMin;
+			if (value < min)
+				value = min;
 		}
 
-		public static void ConstrainMax(ref int AValue, int AMax)
+		public static void ConstrainMax(ref int value, int max)
 		{
-			if (AValue > AMax)
-				AValue = AMax;
+			if (value > max)
+				value = max;
 		}
 
 		// Returns delta
-		private static int CalcOffset(ref int AUsed, int AMin, int AMax)
+		private static int CalcOffset(ref int used, int min, int max)
 		{
-			int LOriginal = AUsed;
-			if (AUsed < AMin)
-				AUsed = AMin;
-			if (AUsed > AMax)
-				AUsed = AMax;
-			return LOriginal - AUsed;
+			int original = used;
+			if (used < min)
+				used = min;
+			if (used > max)
+				used = max;
+			return original - used;
 		}
 
-		public static Rectangle DetermineBounds(Size ANatural, Size AMin, Control ALookupControl)
+		public static Rectangle DetermineBounds(Size natural, Size min, Control lookupControl)
 		{
-			int LAbove;
-			int LBelow;
-			int LUsed;
+			int above;
+			int below;
+			int used;
 
-			Rectangle LResult = new Rectangle(ALookupControl.PointToScreen(Point.Empty), ALookupControl.Size);
-			Rectangle LWorking = Screen.FromRectangle(LResult).WorkingArea;
+			Rectangle result = new Rectangle(lookupControl.PointToScreen(Point.Empty), lookupControl.Size);
+			Rectangle working = Screen.FromRectangle(result).WorkingArea;
 
 			// Figure the horizonal component
-			LUsed = LWorking.Right - LResult.Left;
-			LResult.X += Math.Min(0, CalcOffset(ref LUsed, AMin.Width, ANatural.Width));
-			LResult.Width = LUsed;
+			used = working.Right - result.Left;
+			result.X += Math.Min(0, CalcOffset(ref used, min.Width, natural.Width));
+			result.Width = used;
 
 			// Figure the vertical component
-			LBelow = LWorking.Bottom - LResult.Bottom;
-			LAbove = LResult.Top - LWorking.Top;
-			if ((LBelow < ANatural.Height) && (LAbove > ANatural.Height))
+			below = working.Bottom - result.Bottom;
+			above = result.Top - working.Top;
+			if ((below < natural.Height) && (above > natural.Height))
 			{
 				// Arrange above control
-				LUsed = LAbove;
-				LResult.Y = LWorking.Top + Math.Max(0, CalcOffset(ref LUsed, AMin.Height, ANatural.Height));
+				used = above;
+				result.Y = working.Top + Math.Max(0, CalcOffset(ref used, min.Height, natural.Height));
 			}
 			else
 			{
 				// Arrange below control
-				LUsed = LBelow;
-				LResult.Y += LResult.Height + Math.Min(0, CalcOffset(ref LUsed, AMin.Height, ANatural.Height));
+				used = below;
+				result.Y += result.Height + Math.Min(0, CalcOffset(ref used, min.Height, natural.Height));
 			}
-			LResult.Height = LUsed;
+			result.Height = used;
 
-			return LResult;
+			return result;
 		}
 	}
 }

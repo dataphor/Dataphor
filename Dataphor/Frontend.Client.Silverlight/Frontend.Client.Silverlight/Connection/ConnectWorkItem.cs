@@ -13,23 +13,23 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	/// <summary> Manages the connection work-flow. </summary>
 	public class ConnectWorkItem  : INotifyPropertyChanged
 	{
-		public ConnectWorkItem(ContentControl AContainer)
+		public ConnectWorkItem(ContentControl container)
 		{
-			FContainer = AContainer;
+			_container = container;
 		}
 		
-		private ContentControl FContainer;
+		private ContentControl _container;
 		
-		private ConnectStatus FStatus;
+		private ConnectStatus _status;
 
 		public ConnectStatus Status
 		{
-			get { return FStatus; }
+			get { return _status; }
 			set
 			{
-				if (FStatus != value)
+				if (_status != value)
 				{
-					FStatus = value;
+					_status = value;
 					Exception = null;
 					NotifyPropertyChanged("Status");
 				}
@@ -51,46 +51,46 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 		
-		private Exception FException;
+		private Exception _exception;
 		
 		public Exception Exception
 		{
-			get { return FException; }
+			get { return _exception; }
 			set
 			{
-				if (value != FException)
+				if (value != _exception)
 				{
-					FException = value;
+					_exception = value;
 					NotifyPropertyChanged("Exception");
 				}
 			}
 		}
 		
-		private string FHostName;
+		private string _hostName;
 		
 		public string HostName
 		{
-			get { return FHostName; }
+			get { return _hostName; }
 			set
 			{
-				if (FHostName != value)
+				if (_hostName != value)
 				{
-					FHostName = value;
+					_hostName = value;
 					NotifyPropertyChanged("HostName");
 				}
 			}
 		}
 		
-		private string[] FInstances;
+		private string[] _instances;
 		
 		public string[] Instances
 		{
-			get { return FInstances; }
+			get { return _instances; }
 			set 
 			{ 
-				if (FInstances != value)
+				if (_instances != value)
 				{
-					FInstances = value; 
+					_instances = value; 
 					NotifyPropertyChanged("Instances");
 				}
 			}
@@ -101,7 +101,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			Status = ConnectStatus.LoadingInstances;
 			Session.Invoke<string[]>
 			(
-				() => { return ListenerFactory.EnumerateInstances(FHostName); }, // TODO: This will need to be changed to use the listener connectivity override overload
+				() => { return ListenerFactory.EnumerateInstances(_hostName); }, // TODO: This will need to be changed to use the listener connectivity override overload
 				(Exception AException) => 
 				{ 
 					Status = ConnectStatus.SelectHost;
@@ -115,46 +115,46 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			);
 		}
 		
-		private string FInstanceName;
+		private string _instanceName;
 		
 		public string InstanceName
 		{
-			get { return FInstanceName; }
+			get { return _instanceName; }
 			set
 			{
-				if (FInstanceName != value)
+				if (_instanceName != value)
 				{
-					FInstanceName = value;
+					_instanceName = value;
 					NotifyPropertyChanged("InstanceName");
 				}
 			}
 		}
 
-		private string FUserName = "Admin";
+		private string _userName = "Admin";
 		
 		public string UserName
 		{
-			get { return FUserName; }
+			get { return _userName; }
 			set
 			{
-				if (value != FUserName)
+				if (value != _userName)
 				{
-					FUserName = value;
+					_userName = value;
 					NotifyPropertyChanged("UserName");
 				}
 			}
 		}
 
-		private string FPassword;
+		private string _password;
 		
 		public string Password
 		{
-			get { return FPassword; }
+			get { return _password; }
 			set
 			{
-				if (value != FPassword)
+				if (value != _password)
 				{
-					FPassword = value;
+					_password = value;
 					NotifyPropertyChanged("Password");
 				}
 			}
@@ -174,33 +174,33 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
     		(
     			() =>
     			{
-    				var LDataSession = 
+    				var dataSession = 
     					new DataSession()
     					{
     						Alias = 
     							new ConnectionAlias()
     							{
-    								HostName = FHostName,
-    								InstanceName = FInstanceName
+    								HostName = _hostName,
+    								InstanceName = _instanceName
     							}
     					};
-    				LDataSession.Alias.SessionInfo.UserID = FUserName;
-    				LDataSession.Alias.SessionInfo.Password = FPassword == null ? "" : FPassword;
-    				LDataSession.Alias.SessionInfo.Environment = "SilverlightClient";
-    				LDataSession.Open();
+    				dataSession.Alias.SessionInfo.UserID = _userName;
+    				dataSession.Alias.SessionInfo.Password = _password == null ? "" : _password;
+    				dataSession.Alias.SessionInfo.Environment = "SilverlightClient";
+    				dataSession.Open();
     				try
     				{
-    					var LApplicationRows = new List<object[]>();
-    					using (var LApplications = LDataSession.OpenReadOnlyDataView(".Frontend.Applications"))
+    					var applicationRows = new List<object[]>();
+    					using (var applications = dataSession.OpenReadOnlyDataView(".Frontend.Applications"))
     					{
-    						foreach (DAE.Runtime.Data.Row LRow in LApplications)
-    							LApplicationRows.Add((object[])((NativeRow)LRow.AsNative).Values.Clone());
+    						foreach (DAE.Runtime.Data.Row row in applications)
+    							applicationRows.Add((object[])((NativeRow)row.AsNative).Values.Clone());
     					}
-    					return new LoginResult() { Applications = LApplicationRows, DataSession = LDataSession };
+    					return new LoginResult() { Applications = applicationRows, DataSession = dataSession };
     				}
     				catch
     				{
-    					LDataSession.Dispose();
+    					dataSession.Dispose();
     					throw;
     				}
     			}, 
@@ -226,46 +226,46 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
     		);
 		}
 
-		private DataSession FDataSession;
+		private DataSession _dataSession;
 		
 		public DataSession DataSession
 		{
-			get { return FDataSession; }
+			get { return _dataSession; }
 			set
 			{
-				if (FDataSession != value)
+				if (_dataSession != value)
 				{
-					FDataSession = value;
+					_dataSession = value;
 					NotifyPropertyChanged("DataSession");
 				}
 			}
 		}
 		
-		private List<object[]> FApplications;
+		private List<object[]> _applications;
 		
 		public List<object[]> Applications
 		{
-			get { return FApplications; }
+			get { return _applications; }
 			set
 			{
-				if (FApplications != value)
+				if (_applications != value)
 				{
-					FApplications = value;
+					_applications = value;
 					NotifyPropertyChanged("Applications");
 				}
 			}
 		}
 		
-		private string FApplicationID;
+		private string _applicationID;
 		
 		public string ApplicationID
 		{
-			get { return FApplicationID; }
+			get { return _applicationID; }
 			set
 			{
-				if (FApplicationID != value)
+				if (_applicationID != value)
 				{
-					FApplicationID = value;
+					_applicationID = value;
 					NotifyPropertyChanged("ApplicationID");
 				}
 			}
@@ -278,10 +278,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			(
 				() =>
 				{
-					var LSession = new Silverlight.Session(DataSession, true);
-					var LStartingDocument = LSession.SetApplication(FApplicationID);
-					LSession.Start(LStartingDocument, FContainer);
-					return LSession;
+					var session = new Silverlight.Session(DataSession, true);
+					var startingDocument = session.SetApplication(_applicationID);
+					session.Start(startingDocument, _container);
+					return session;
 				},
 				(Exception AException) =>
 				{
@@ -296,16 +296,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			);
 		}
 		
-		private Silverlight.Session FSession;
+		private Silverlight.Session _session;
 		
 		public Silverlight.Session Session
 		{
-			get { return FSession; }
+			get { return _session; }
 			set
 			{
-				if (FSession != value)
+				if (_session != value)
 				{
-					FSession = value;
+					_session = value;
 					NotifyPropertyChanged("Session");
 				}
 			}
@@ -313,10 +313,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		public event PropertyChangedEventHandler PropertyChanged;
 	
-		public void NotifyPropertyChanged(string AName)
+		public void NotifyPropertyChanged(string name)
 		{
 			if (PropertyChanged != null)
-				PropertyChanged(this, new PropertyChangedEventArgs(AName));
+				PropertyChanged(this, new PropertyChangedEventArgs(name));
 		}
 	}
 	

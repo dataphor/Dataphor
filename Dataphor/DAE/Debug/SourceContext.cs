@@ -17,16 +17,16 @@ namespace Alphora.Dataphor.DAE.Debug
 	/// </remarks>
 	public class SourceContext
 	{
-		public SourceContext(string AScript, DebugLocator ALocator) : base()
+		public SourceContext(string script, DebugLocator locator) : base()
 		{
-			FScript = AScript;
-			FLocator = ALocator;
+			_script = script;
+			_locator = locator;
 		}
 		
-		private string FScript;
-		public string Script { get { return FScript; } }
+		private string _script;
+		public string Script { get { return _script; } }
 		
-		private DebugLocator FLocator;
+		private DebugLocator _locator;
 		/// <summary>
 		/// Provides a locator that is used to determine the location for the given script. May be null.
 		/// </summary>
@@ -34,7 +34,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// If the locator is not specified, the source context is used to allow debugging
 		/// of dynamic or ad-hoc scripts.
 		/// </remarks>
-		public DebugLocator Locator { get { return FLocator; } }
+		public DebugLocator Locator { get { return _locator; } }
 	}
 	
 	public class SourceContexts : System.Collections.Generic.Stack<SourceContext> { }

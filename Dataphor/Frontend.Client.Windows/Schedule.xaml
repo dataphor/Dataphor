@@ -9,7 +9,8 @@
 
 	<local:FullDateToStringConverter x:Key="FullDateToStringConverter" />
 	<client:ScheduleTimeBlockTimeConverter x:Key="TimeConverter" />
-	<local:BooleanToBorderBrushConverter x:Key="BooleanToBorderBrushConverter" />
+    <local:BooleanToBorderBrushConverter x:Key="BooleanToBorderBrushConverter" />
+    <local:StringToBorderBackgroundBrushConverter x:Key="StringToBorderBackgroundBrushConverter" />
 	<client:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
 
 	<Style x:Key="HeaderTextBlockStyle" TargetType="{x:Type TextBlock}">
@@ -48,16 +49,8 @@
 		<Setter Property="AppointmentItemTemplate">
 			<Setter.Value>
 				<DataTemplate>
-					<Border BorderThickness="1" CornerRadius="4" SnapsToDevicePixels="True" BorderBrush="{Binding IsSelected, Converter={StaticResource BooleanToBorderBrushConverter}, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}">
-						<Border BorderBrush="#FF4F4F4F" BorderThickness="1" CornerRadius="3">
-							<Border.Background>
-								<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-									<GradientStop Color="#FF9BA5DA" Offset="1"/>
-									<GradientStop Color="#FFBCC1E8"/>
-									<GradientStop Color="#FFB0B8E4" Offset="0.935"/>
-									<GradientStop Color="#FFAAB4E6" Offset="0.069"/>
-								</LinearGradientBrush>
-							</Border.Background>
+                    <Border BorderThickness="1" CornerRadius="4" SnapsToDevicePixels="True" Background="{Binding BackgroundColor, Converter={StaticResource StringToBorderBackgroundBrushConverter}}" BorderBrush="{Binding IsSelected, Converter={StaticResource BooleanToBorderBrushConverter}, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}">
+						<Border BorderBrush="#FF4F4F4F" BorderThickness="1" CornerRadius="3" >							
 							<Border.ToolTip>
 								<Grid>
 									<Grid.ColumnDefinitions>

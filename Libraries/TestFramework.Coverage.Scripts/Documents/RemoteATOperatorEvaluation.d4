@@ -1,0 +1,10 @@
+create table tempTable { ID : Integer, key { ID }};
+create operator tempTableInsert() : Integer
+begin
+ insert row { 1 ID } into tempTable;
+ result := 1;
+end;
+
+var id := BeginApplicationTransaction(true, false);
+select list(Integer){tempTableInsert()};
+RollbackApplicationTransaction(id);

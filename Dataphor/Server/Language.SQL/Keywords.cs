@@ -103,34 +103,34 @@ namespace Alphora.Dataphor.DAE.Language.SQL
         public const string Default = "default";
         public const string Clustered = "clustered";
         
-        private static string[] FKeywords;
+        private static string[] _keywords;
         
         private static void PopulateKeywords()
         {
-			FieldInfo[] LFields = typeof(Keywords).GetFields();
+			FieldInfo[] fields = typeof(Keywords).GetFields();
 
-			int LFieldCount = 0;
-			foreach (FieldInfo LField in LFields)
-				if (LField.FieldType.Equals(typeof(string)) && LField.IsLiteral)
-					LFieldCount++;
+			int fieldCount = 0;
+			foreach (FieldInfo field in fields)
+				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
+					fieldCount++;
 
-			FKeywords = new string[LFieldCount];
+			_keywords = new string[fieldCount];
 
-			int LFieldCounter = 0;
-			foreach (FieldInfo LField in LFields)
-				if (LField.FieldType.Equals(typeof(string)) && LField.IsLiteral)
+			int fieldCounter = 0;
+			foreach (FieldInfo field in fields)
+				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 				{
-					FKeywords[LFieldCounter] = (string)LField.GetValue(null);
-					LFieldCounter++;
+					_keywords[fieldCounter] = (string)field.GetValue(null);
+					fieldCounter++;
 				}
         }
         
-        public static bool Contains(string AIdentifier)
+        public static bool Contains(string identifier)
         {
-			if (FKeywords == null)
+			if (_keywords == null)
 				PopulateKeywords();
 				
-			return ((IList)FKeywords).Contains(AIdentifier);
+			return ((IList)_keywords).Contains(identifier);
         }
     }
 }

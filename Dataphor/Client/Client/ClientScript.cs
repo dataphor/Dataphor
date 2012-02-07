@@ -14,56 +14,56 @@ namespace Alphora.Dataphor.DAE.Client
 {
 	public class ClientScript : ClientObject, IRemoteServerScript
 	{
-		public ClientScript(ClientProcess AClientProcess, ScriptDescriptor AScriptDescriptor)
+		public ClientScript(ClientProcess clientProcess, ScriptDescriptor scriptDescriptor)
 		{
-			FClientProcess = AClientProcess;
-			FScriptDescriptor = AScriptDescriptor;
+			_clientProcess = clientProcess;
+			_scriptDescriptor = scriptDescriptor;
 			
-			FMessages = new Exception[FScriptDescriptor.Messages.Count];
-			for (int LIndex = 0; LIndex < FScriptDescriptor.Messages.Count; LIndex++)
-				FMessages[LIndex] = DataphorFaultUtility.FaultToException(FScriptDescriptor.Messages[LIndex]);
+			_messages = new Exception[_scriptDescriptor.Messages.Count];
+			for (int index = 0; index < _scriptDescriptor.Messages.Count; index++)
+				_messages[index] = DataphorFaultUtility.FaultToException(_scriptDescriptor.Messages[index]);
 			
-			foreach (BatchDescriptor LBatchDescriptor in FScriptDescriptor.Batches)
-				FClientBatches.Add(new ClientBatch(this, LBatchDescriptor));
+			foreach (BatchDescriptor batchDescriptor in _scriptDescriptor.Batches)
+				_clientBatches.Add(new ClientBatch(this, batchDescriptor));
 		}
 		
-		private ClientProcess FClientProcess;
-		public ClientProcess ClientProcess { get { return FClientProcess; } }
+		private ClientProcess _clientProcess;
+		public ClientProcess ClientProcess { get { return _clientProcess; } }
 		
 		private IClientDataphorService GetServiceInterface()
 		{
-			return FClientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
+			return _clientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
 		}	
 		
-		private ScriptDescriptor FScriptDescriptor;
+		private ScriptDescriptor _scriptDescriptor;
 		
-		public int ScriptHandle { get { return FScriptDescriptor.Handle; } }
+		public int ScriptHandle { get { return _scriptDescriptor.Handle; } }
 		
-		private Exception[] FMessages;
+		private Exception[] _messages;
 		
-		private ClientBatches FClientBatches = new ClientBatches();
+		private ClientBatches _clientBatches = new ClientBatches();
 		
 		#region IRemoteServerScript Members
 
 		public IRemoteServerProcess Process
 		{
-			get { return FClientProcess; }
+			get { return _clientProcess; }
 		}
 
-		public void Execute(ref RemoteParamData AParams, ProcessCallInfo ACallInfo)
+		public void Execute(ref RemoteParamData paramsValue, ProcessCallInfo callInfo)
 		{
-			foreach (ClientBatch LBatch in FClientBatches)
-				LBatch.Execute(ref AParams, ACallInfo);
+			foreach (ClientBatch batch in _clientBatches)
+				batch.Execute(ref paramsValue, callInfo);
 		}
 
 		public Exception[] Messages
 		{
-			get { return FMessages; }
+			get { return _messages; }
 		}
 
 		public IRemoteServerBatches Batches
 		{
-			get { return FClientBatches; }
+			get { return _clientBatches; }
 		}
 
 		#endregion

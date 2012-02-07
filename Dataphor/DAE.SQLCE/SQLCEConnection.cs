@@ -12,14 +12,14 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public class SQLCEConnection : DotNetConnection
 	{
-		public SQLCEConnection(string AConnection) : base(AConnection) 
+		public SQLCEConnection(string connection) : base(connection) 
 		{
-			FSupportsMARS = true;
+			_supportsMARS = true;
 		}
 		
-		protected override IDbConnection CreateDbConnection(string AConnectionString)
+		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			return new SqlCeConnection(AConnectionString);
+			return new SqlCeConnection(connectionString);
 		}
 		
 		protected override SQLCommand InternalCreateCommand()
@@ -27,46 +27,46 @@ namespace Alphora.Dataphor.DAE.Connection
 			return new SQLCECommand(this, CreateDbCommand());
 		}
 		
-		protected bool FInReadUncommittedTransaction;
+		protected bool _inReadUncommittedTransaction;
 
-		protected override void InternalBeginTransaction(SQLIsolationLevel AIsolationLevel)
+		protected override void InternalBeginTransaction(SQLIsolationLevel isolationLevel)
 		{
-			if (AIsolationLevel == SQLIsolationLevel.ReadUncommitted)
-				FInReadUncommittedTransaction = true;
+			if (isolationLevel == SQLIsolationLevel.ReadUncommitted)
+				_inReadUncommittedTransaction = true;
 			else
-				base.InternalBeginTransaction(AIsolationLevel);
+				base.InternalBeginTransaction(isolationLevel);
 		}
 
 		protected override void InternalCommitTransaction()
 		{
-			if (FInReadUncommittedTransaction)
-				FInReadUncommittedTransaction = false;
+			if (_inReadUncommittedTransaction)
+				_inReadUncommittedTransaction = false;
 			else
 				base.InternalCommitTransaction();
 		}
 
 		protected override void InternalRollbackTransaction()
 		{
-			if (FInReadUncommittedTransaction)
-				FInReadUncommittedTransaction = false;
+			if (_inReadUncommittedTransaction)
+				_inReadUncommittedTransaction = false;
 			else
 				base.InternalRollbackTransaction();
 		}
 		
-		protected override bool IsTransactionFailure(Exception AException)
+		protected override bool IsTransactionFailure(Exception exception)
 		{
-			SqlCeException LException = AException as SqlCeException;
-			if (LException != null)
-				foreach (SqlCeError LError in LException.Errors)
-					if (IsTransactionFailure(LError.NativeError))
+			SqlCeException localException = exception as SqlCeException;
+			if (localException != null)
+				foreach (SqlCeError error in localException.Errors)
+					if (IsTransactionFailure(error.NativeError))
 						return true;
 
 			return false;
 		}
 		
-		protected bool IsTransactionFailure(int AErrorCode)
+		protected bool IsTransactionFailure(int errorCode)
 		{
-			switch (AErrorCode)
+			switch (errorCode)
 			{
 				case 1205 : return true; // Transaction was deadlocked
 				case 1211 : return true; // Process was chosen as deadlock victim
@@ -78,12 +78,12 @@ namespace Alphora.Dataphor.DAE.Connection
 			return false;
 		}
 		
-		protected bool IsUserCorrectableError(int AErrorCode)
+		protected bool IsUserCorrectableError(int errorCode)
 		{
-			if (AErrorCode >= 50000)
+			if (errorCode >= 50000)
 				return true;
 			
-			switch (AErrorCode)
+			switch (errorCode)
 			{
 				case 3621 : return true; // The statement has been terminated.
 				case 2601 : return true; // Cannot insert duplicate key row...
@@ -99,22 +99,22 @@ namespace Alphora.Dataphor.DAE.Connection
 			}
 		}
 		
-		protected override Exception InternalWrapException(Exception AException, string AStatement)
+		protected override Exception InternalWrapException(Exception exception, string statement)
 		{
-			ErrorSeverity LSeverity = GetExceptionSeverity(AException);
-			if (LSeverity == ErrorSeverity.User)
-				return new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, AException.Message);
-			return base.InternalWrapException(AException, AStatement);
+			ErrorSeverity severity = GetExceptionSeverity(exception);
+			if (severity == ErrorSeverity.User)
+				return new DataphorException(ErrorSeverity.User, DataphorException.ApplicationError, exception.Message);
+			return base.InternalWrapException(exception, statement);
 		}
 
-		private ErrorSeverity GetExceptionSeverity(Exception AException)
+		private ErrorSeverity GetExceptionSeverity(Exception exception)
 		{
 			// If the error code indicates an integrity constraint violation or other user-correctable message, severity is user, otherwise, severity is application
-			SqlCeException LException = AException as SqlCeException;
-			if (LException != null)
+			SqlCeException localException = exception as SqlCeException;
+			if (localException != null)
 			{
-				foreach (SqlCeError LError in LException.Errors)
-					if (!IsUserCorrectableError(LError.NativeError))
+				foreach (SqlCeError error in localException.Errors)
+					if (!IsUserCorrectableError(error.NativeError))
 						return ErrorSeverity.Application;
 				return ErrorSeverity.User;
 			}

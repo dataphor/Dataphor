@@ -1,0 +1,4 @@
+netsh http add urlacl url=http://+:8060/ user=SARLACC\bryn
+netsh http add urlacl url=https://+:8600/ user=SARLACC\bryn
+netsh http add urlacl url=http://+:8062/ user=SARLACC\bryn
+netsh http add urlacl url=https://+:8602/ user=SARLACC\bryn

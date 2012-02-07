@@ -1,0 +1,50 @@
+/*
+	Transition Constraints With Named Row Variables
+	
+	This reproduction verifies that row context for a row constraint is accessible
+	as a variable, rather than only as an unnamed row context, within the constraint
+	expression. 
+	
+	This behavior is controlled by the USENAMEDROWVARIABLES compiler define.
+	It appears that this change also eliminates the need for the USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+	compiler define, but I cannot be 100% certain, because I don't have any test cases
+	that reproduce the problem that the USEROOTEDIDENTIFIERSINKEYEXPRESSIONS compiler
+	define was introduced to resolve.
+*/
+
+create table ContactNameDuring
+{
+	Contact_ID : Integer,
+	NameDuring_from : DateTime,
+	NameDuring_to : DateTime,
+	Name : String,
+	key { Contact_ID, NameDuring_from },
+	key { Contact_ID, NameDuring_to }
+};
+
+create operator Evaluate_ContactNameDuring_NoOverlap_NameDuring(const ARow : typeof(ContactNameDuring[])) : Boolean begin
+	result := not exists(ContactNameDuring where
+		Contact_ID = ARow.Contact_ID and
+		NameDuring_from <= ARow.NameDuring_to and
+		NameDuring_to >= ARow.NameDuring_from
+	);
+end;
+
+alter table ContactNameDuring {
+	create transition constraint ContactNameDuring_NoOverlap_NameDuring
+		on insert Evaluate_ContactNameDuring_NoOverlap_NameDuring(new)
+		on update Evaluate_ContactNameDuring_NoOverlap_NameDuring(new)
+		tags { DAE.IsDeferred = "False" }
+};
+
+insert row { 1 Contact_ID, Date(2010, 1, 1) NameDuring_from, Date(2011, 1, 1) NameDuring_to, 'Carlos' Name } into ContactNameDuring;
+
+NegativeTest("insert row { 1 Contact_ID, Date(2010, 2, 1) NameDuring_from, Date(2010, 3, 1) NameDuring_to, 'Carlos' Name } into ContactNameDuring;", "Overlapping name during allowed");
+
+NegativeTest("insert row { 1 Contact_ID, Date(2009, 1, 1) NameDuring_from, Date(2010, 2, 1) NameDuring_to, 'Carlos' Name } into ContactNameDuring;", "Overlapping name during allowed");
+
+NegativeTest("insert row { 1 Contact_ID, Date(2010, 11, 1) NameDuring_from, Date(2011, 3, 1) NameDuring_to, 'Carlos' Name } into ContactNameDuring;", "Overlapping name during allowed");
+
+insert row { 1 Contact_ID, Date(2011, 1, 2) NameDuring_from, Date(2011, 2, 1) NameDuring_to, 'Carlos' Name } into ContactNameDuring;
+
+SafeDrop('ContactNameDuring');

@@ -26,33 +26,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	public class Scan : Disposable
 	{
 		/// <remarks> Scan range keys are inclusive. </remarks>		
-		public Scan(IValueManager AManager, NativeTable ATable, NativeRowTree AAccessPath, ScanDirection ADirection, Row AFirstKey, Row ALastKey)
+		public Scan(IValueManager manager, NativeTable table, NativeRowTree accessPath, ScanDirection direction, Row firstKey, Row lastKey)
 		{
-			FManager = AManager;
-			FTable = ATable;
-			FAccessPath = AAccessPath;
-			FDirection = ADirection;
-			FFirstKey = AFirstKey;
-			FLastKey = ALastKey;
+			_manager = manager;
+			_table = table;
+			_accessPath = accessPath;
+			_direction = direction;
+			_firstKey = firstKey;
+			_lastKey = lastKey;
 		}
 
-		private IValueManager FManager;
-		private NativeTable FTable;
-		private NativeRowTree FAccessPath;
-		private ScanDirection FDirection;
-		private Row FFirstKey;
-		private Row FLastKey;
-		private bool FBOF;
-		private bool FEOF;
-		private RowTreeNode FIndexNode;
-		private int FEntryNumber;
+		private IValueManager _manager;
+		private NativeTable _table;
+		private NativeRowTree _accessPath;
+		private ScanDirection _direction;
+		private Row _firstKey;
+		private Row _lastKey;
+		private bool _bOF;
+		private bool _eOF;
+		private RowTreeNode _indexNode;
+		private int _entryNumber;
 
-		private void SetIndexNode(RowTreeNode AIndexNode)
+		private void SetIndexNode(RowTreeNode indexNode)
 		{
 			// This implements crabbing, because the new node is locked before the old node lock is released
-			if (FIndexNode != null)
-				FIndexNode.Dispose();
-			FIndexNode = AIndexNode;
+			if (_indexNode != null)
+				_indexNode.Dispose();
+			_indexNode = indexNode;
 		}
 		
 		public void Open()
@@ -65,21 +65,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Active = false;
 		}
 		
-		private bool FActive;
+		private bool _active;
 		public bool Active
 		{
-			get { return FActive; }
+			get { return _active; }
 			set
 			{
-				if (value && !FActive)
+				if (value && !_active)
 				{
-					FActive = true;
+					_active = true;
 					InternalOpen();
 				}
-				else if (!value && FActive)
+				else if (!value && _active)
 				{
 					InternalClose();
-					FActive = false;
+					_active = false;
 				}
 			}
 		}
@@ -92,21 +92,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		private void CheckNotCrack()
 		{
-			if (FBOF || FEOF)
+			if (_bOF || _eOF)
 				throw new ScanException(ScanException.Codes.NoActiveRow);
 		}
 		
 		private void InternalOpen()
 		{
-			FAccessPath.OnRowsMoved += new NativeRowTreeRowsMovedHandler(RowTreeRowsMoved);
-			FAccessPath.OnRowDeleted += new NativeRowTreeRowDeletedHandler(RowTreeRowDeleted);
+			_accessPath.OnRowsMoved += new NativeRowTreeRowsMovedHandler(RowTreeRowsMoved);
+			_accessPath.OnRowDeleted += new NativeRowTreeRowDeletedHandler(RowTreeRowDeleted);
 			First();
 		}
 		
 		private void InternalClose()
 		{
-			FAccessPath.OnRowDeleted -= new NativeRowTreeRowDeletedHandler(RowTreeRowDeleted);
-			FAccessPath.OnRowsMoved -= new NativeRowTreeRowsMovedHandler(RowTreeRowsMoved);
+			_accessPath.OnRowDeleted -= new NativeRowTreeRowDeletedHandler(RowTreeRowDeleted);
+			_accessPath.OnRowsMoved -= new NativeRowTreeRowsMovedHandler(RowTreeRowsMoved);
 			SetIndexNode(null);
 		}
 		
@@ -119,48 +119,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			First();
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			Close();
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
 		private void UpdateScanPointer()
 		{
-			FEntryNumber += FDirection == ScanDirection.Forward ? -1 : 1;
+			_entryNumber += _direction == ScanDirection.Forward ? -1 : 1;
 			Next();
 		}
 		
-		private void RowTreeRowsMoved(NativeRowTree ARowTree, NativeRowTreeNode AOldNode, int AOldEntryNumberMin, int AOldEntryNumberMax, NativeRowTreeNode ANewNode, int AEntryNumberDelta)
+		private void RowTreeRowsMoved(NativeRowTree rowTree, NativeRowTreeNode oldNode, int oldEntryNumberMin, int oldEntryNumberMax, NativeRowTreeNode newNode, int entryNumberDelta)
 		{
-			if ((FIndexNode.Node == AOldNode) && (FEntryNumber >= AOldEntryNumberMin) && (FEntryNumber <= AOldEntryNumberMax))
+			if ((_indexNode.Node == oldNode) && (_entryNumber >= oldEntryNumberMin) && (_entryNumber <= oldEntryNumberMax))
 			{
-				if (AOldNode != ANewNode)
-					SetIndexNode(new RowTreeNode(FManager, FIndexNode.Tree, ANewNode, LockMode.Shared));
+				if (oldNode != newNode)
+					SetIndexNode(new RowTreeNode(_manager, _indexNode.Tree, newNode, LockMode.Shared));
 					
-				FEntryNumber += AEntryNumberDelta;
+				_entryNumber += entryNumberDelta;
 				UpdateScanPointer();
 			}
 		}
 		
-		private void RowTreeRowDeleted(NativeRowTree ARowTree, NativeRowTreeNode ANode, int AEntryNumber)
+		private void RowTreeRowDeleted(NativeRowTree rowTree, NativeRowTreeNode node, int entryNumber)
 		{
-			if ((FIndexNode.Node == ANode) && (FEntryNumber == AEntryNumber))
+			if ((_indexNode.Node == node) && (_entryNumber == entryNumber))
 				UpdateScanPointer();
 		}
 		
-		private bool FindIndexKey(Schema.IRowType AKeyRowType, NativeRow AKey, out RowTreeNode AIndexNode, out int AEntryNumber)
+		private bool FindIndexKey(Schema.IRowType keyRowType, NativeRow key, out RowTreeNode indexNode, out int entryNumber)
 		{
-			RowTreeSearchPath LSearchPath = new RowTreeSearchPath();
+			RowTreeSearchPath searchPath = new RowTreeSearchPath();
 			try
 			{
-				bool LResult = FAccessPath.FindKey(FManager, AKeyRowType, AKey, LSearchPath, out AEntryNumber);
-				AIndexNode = LSearchPath.DisownAt(LSearchPath.Count - 1);
-				return LResult;
+				bool result = _accessPath.FindKey(_manager, keyRowType, key, searchPath, out entryNumber);
+				indexNode = searchPath.DisownAt(searchPath.Count - 1);
+				return result;
 			}
 			finally
 			{
-				LSearchPath.Dispose();
+				searchPath.Dispose();
 			}
 		}
 
@@ -168,14 +168,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			while (true)
 			{
-				if (FIndexNode.Node.NextNode == null)
+				if (_indexNode.Node.NextNode == null)
 					return false;
 				else
 				{
-					SetIndexNode(new RowTreeNode(FManager, FIndexNode.Tree, FIndexNode.Node.NextNode, LockMode.Shared));
-					if (FIndexNode.Node.EntryCount > 0)
+					SetIndexNode(new RowTreeNode(_manager, _indexNode.Tree, _indexNode.Node.NextNode, LockMode.Shared));
+					if (_indexNode.Node.EntryCount > 0)
 					{
-						FEntryNumber = 0;
+						_entryNumber = 0;
 						return true;
 					}
 				}
@@ -186,14 +186,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			while (true)
 			{
-				if (FIndexNode.Node.PriorNode == null)
+				if (_indexNode.Node.PriorNode == null)
 					return false;
 				else
 				{
-					SetIndexNode(new RowTreeNode(FManager, FIndexNode.Tree, FIndexNode.Node.PriorNode, LockMode.Shared));
-					if (FIndexNode.Node.EntryCount > 0)
+					SetIndexNode(new RowTreeNode(_manager, _indexNode.Tree, _indexNode.Node.PriorNode, LockMode.Shared));
+					if (_indexNode.Node.EntryCount > 0)
 					{
-						FEntryNumber = FIndexNode.Node.EntryCount - 1;
+						_entryNumber = _indexNode.Node.EntryCount - 1;
 						return true;
 					}
 				}
@@ -206,38 +206,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			CheckActive();
 			#endif
 
-			FBOF = true;
-			FEOF = false;
-			bool LResult = false;
-			if (FFirstKey != null)
+			_bOF = true;
+			_eOF = false;
+			bool result = false;
+			if (_firstKey != null)
 			{
-				RowTreeNode LIndexNode;
-				LResult = FindIndexKey(FFirstKey.DataType, (NativeRow)FFirstKey.AsNative, out LIndexNode, out FEntryNumber);
-				SetIndexNode(LIndexNode);
+				RowTreeNode indexNode;
+				result = FindIndexKey(_firstKey.DataType, (NativeRow)_firstKey.AsNative, out indexNode, out _entryNumber);
+				SetIndexNode(indexNode);
 			}
 			else
 			{
-				if (FDirection == ScanDirection.Forward)
+				if (_direction == ScanDirection.Forward)
 				{
-					SetIndexNode(new RowTreeNode(FManager, FAccessPath, FAccessPath.Head, LockMode.Shared));
-					FEntryNumber = 0;
+					SetIndexNode(new RowTreeNode(_manager, _accessPath, _accessPath.Head, LockMode.Shared));
+					_entryNumber = 0;
 				}
 				else
 				{
-					SetIndexNode(new RowTreeNode(FManager, FAccessPath, FAccessPath.Tail, LockMode.Shared));
-					FEntryNumber = FIndexNode.Node.EntryCount - 1;
+					SetIndexNode(new RowTreeNode(_manager, _accessPath, _accessPath.Tail, LockMode.Shared));
+					_entryNumber = _indexNode.Node.EntryCount - 1;
 				}
 			}
 			
-			if (!LResult)
+			if (!result)
 			{
 				// Determine FEOF
-				RowTreeNode LSaveIndexNode = new RowTreeNode(FManager, FIndexNode.Tree, FIndexNode.Node, LockMode.Shared);
-				int LSaveEntryNumber = FEntryNumber;
+				RowTreeNode saveIndexNode = new RowTreeNode(_manager, _indexNode.Tree, _indexNode.Node, LockMode.Shared);
+				int saveEntryNumber = _entryNumber;
 				Next();
-				FBOF = true;
-				SetIndexNode(LSaveIndexNode);
-				FEntryNumber = LSaveEntryNumber;
+				_bOF = true;
+				SetIndexNode(saveIndexNode);
+				_entryNumber = saveEntryNumber;
 			}
 		}		
 		
@@ -247,49 +247,49 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			CheckActive();
 			#endif
 
-			bool LEOF = FEOF;
+			bool eOF = _eOF;
 			
-			if (FDirection == ScanDirection.Forward)
+			if (_direction == ScanDirection.Forward)
 			{
-				if (FEOF)
-					FEOF = false;
+				if (_eOF)
+					_eOF = false;
 				else
-					FEntryNumber--;
+					_entryNumber--;
 					
-				if (((FEntryNumber < 0) || (FIndexNode.Node.EntryCount == 0)) && !PriorNode())
+				if (((_entryNumber < 0) || (_indexNode.Node.EntryCount == 0)) && !PriorNode())
 				{
-					FEntryNumber = 0;
-					FBOF = true;
+					_entryNumber = 0;
+					_bOF = true;
 				}
 
 				// Make sure that the entry is >= FFirstKey
-				if (!FBOF && (FFirstKey != null) && (FAccessPath.Compare(FManager, FIndexNode.Tree.KeyRowType, FIndexNode.Node.Keys[FEntryNumber], FFirstKey.DataType, (NativeRow)FFirstKey.AsNative) < 0))
+				if (!_bOF && (_firstKey != null) && (_accessPath.Compare(_manager, _indexNode.Tree.KeyRowType, _indexNode.Node.Keys[_entryNumber], _firstKey.DataType, (NativeRow)_firstKey.AsNative) < 0))
 					First();
 			}
 			else
 			{
-				if (FEOF)
-					FEOF = false;
+				if (_eOF)
+					_eOF = false;
 				else
-					FEntryNumber++;
+					_entryNumber++;
 
-				if ((FEntryNumber >= FIndexNode.Node.EntryCount) && !NextNode())
+				if ((_entryNumber >= _indexNode.Node.EntryCount) && !NextNode())
 				{
-					FEntryNumber = FIndexNode.Node.EntryCount - 1;
-					FEntryNumber = FEntryNumber < 0 ? 0 : FEntryNumber;
-					FBOF = true;
+					_entryNumber = _indexNode.Node.EntryCount - 1;
+					_entryNumber = _entryNumber < 0 ? 0 : _entryNumber;
+					_bOF = true;
 				}
 					
 				// Make sure that the entry is <= FFirstKey
-				if (!FBOF && (FFirstKey != null) && (FAccessPath.Compare(FManager, FIndexNode.Tree.KeyRowType, FIndexNode.Node.Keys[FEntryNumber], FFirstKey.DataType, (NativeRow)FFirstKey.AsNative) > 0))
+				if (!_bOF && (_firstKey != null) && (_accessPath.Compare(_manager, _indexNode.Tree.KeyRowType, _indexNode.Node.Keys[_entryNumber], _firstKey.DataType, (NativeRow)_firstKey.AsNative) > 0))
 					First();
 			}
 			
 			// Make sure that if the scan is empty, the EOF flag is still true
-			if (LEOF && FBOF)
-				FEOF = true;
+			if (eOF && _bOF)
+				_eOF = true;
 				
-			return !FBOF;
+			return !_bOF;
 		}
 		
 		public bool Next()
@@ -298,49 +298,49 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			CheckActive();
 			#endif
 			
-			bool LBOF = FBOF;
+			bool bOF = _bOF;
 
-			if (FDirection == ScanDirection.Forward)
+			if (_direction == ScanDirection.Forward)
 			{
-				if (FBOF)
-					FBOF = false;
+				if (_bOF)
+					_bOF = false;
 				else
-					FEntryNumber++;
+					_entryNumber++;
 
-				if ((FEntryNumber >= FIndexNode.Node.EntryCount) && !NextNode())
+				if ((_entryNumber >= _indexNode.Node.EntryCount) && !NextNode())
 				{
-					FEntryNumber = FIndexNode.Node.EntryCount - 1;
-					FEntryNumber = FEntryNumber < 0 ? 0 : FEntryNumber;
-					FEOF = true;
+					_entryNumber = _indexNode.Node.EntryCount - 1;
+					_entryNumber = _entryNumber < 0 ? 0 : _entryNumber;
+					_eOF = true;
 				}
 					
 				// Make sure that the entry is <= LLastKey
-				if (!FEOF && (FLastKey != null) && (FAccessPath.Compare(FManager, FIndexNode.Tree.KeyRowType, FIndexNode.Node.Keys[FEntryNumber], FLastKey.DataType, (NativeRow)FLastKey.AsNative) > 0))
+				if (!_eOF && (_lastKey != null) && (_accessPath.Compare(_manager, _indexNode.Tree.KeyRowType, _indexNode.Node.Keys[_entryNumber], _lastKey.DataType, (NativeRow)_lastKey.AsNative) > 0))
 					Last();
 			}
 			else
 			{
-				if (FBOF)
-					FBOF = false;
+				if (_bOF)
+					_bOF = false;
 				else
-					FEntryNumber--;
+					_entryNumber--;
 					
-				if (((FEntryNumber < 0) || (FIndexNode.Node.EntryCount == 0)) && !PriorNode())
+				if (((_entryNumber < 0) || (_indexNode.Node.EntryCount == 0)) && !PriorNode())
 				{
-					FEntryNumber = 0;
-					FEOF = true;
+					_entryNumber = 0;
+					_eOF = true;
 				}
 				
 				// Make sure that the entry is >= LLastKey
-				if (!FEOF && (FLastKey != null) && (FAccessPath.Compare(FManager, FIndexNode.Tree.KeyRowType, FIndexNode.Node.Keys[FEntryNumber], FLastKey.DataType, (NativeRow)FLastKey.AsNative) < 0))
+				if (!_eOF && (_lastKey != null) && (_accessPath.Compare(_manager, _indexNode.Tree.KeyRowType, _indexNode.Node.Keys[_entryNumber], _lastKey.DataType, (NativeRow)_lastKey.AsNative) < 0))
 					Last();
 			}
 				
 			// Make sure that if the scan is empty, the BOF flag is still true
-			if (LBOF && FEOF)
-				FBOF = true;
+			if (bOF && _eOF)
+				_bOF = true;
 				
-			return !FEOF;
+			return !_eOF;
 		}
 		
 		public void Last()
@@ -349,40 +349,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			CheckActive();
 			#endif
 			
-			FEOF = true;
-			FBOF = false;
-			bool LResult = false;
-			if (FLastKey != null)
+			_eOF = true;
+			_bOF = false;
+			bool result = false;
+			if (_lastKey != null)
 			{
-				RowTreeNode LIndexNode;
-				LResult = FindIndexKey(FLastKey.DataType, (NativeRow)FLastKey.AsNative, out LIndexNode, out FEntryNumber);
-				SetIndexNode(LIndexNode);
+				RowTreeNode indexNode;
+				result = FindIndexKey(_lastKey.DataType, (NativeRow)_lastKey.AsNative, out indexNode, out _entryNumber);
+				SetIndexNode(indexNode);
 			}
 			else
 			{
-				if (FDirection == ScanDirection.Forward)
+				if (_direction == ScanDirection.Forward)
 				{
-					SetIndexNode(new RowTreeNode(FManager, FAccessPath, FAccessPath.Tail, LockMode.Shared));
-					FEntryNumber = FIndexNode.Node.EntryCount - 1;
+					SetIndexNode(new RowTreeNode(_manager, _accessPath, _accessPath.Tail, LockMode.Shared));
+					_entryNumber = _indexNode.Node.EntryCount - 1;
 				}
 				else
 				{
-					SetIndexNode(new RowTreeNode(FManager, FAccessPath, FAccessPath.Head, LockMode.Shared));
-					FEntryNumber = 0;
+					SetIndexNode(new RowTreeNode(_manager, _accessPath, _accessPath.Head, LockMode.Shared));
+					_entryNumber = 0;
 				}
 			}
 			
-			if (!LResult)
+			if (!result)
 			{
 				// Determine FBOF
-				RowTreeNode LSaveIndexNode = new RowTreeNode(FManager, FIndexNode.Tree, FIndexNode.Node, LockMode.Shared);
-				int LSaveEntryNumber = FEntryNumber;
+				RowTreeNode saveIndexNode = new RowTreeNode(_manager, _indexNode.Tree, _indexNode.Node, LockMode.Shared);
+				int saveEntryNumber = _entryNumber;
 				Prior();
-				FEOF = true;
-				if (FIndexNode != null)
-					FIndexNode.Dispose();
-				FIndexNode = LSaveIndexNode;
-				FEntryNumber = LSaveEntryNumber;
+				_eOF = true;
+				if (_indexNode != null)
+					_indexNode.Dispose();
+				_indexNode = saveIndexNode;
+				_entryNumber = saveEntryNumber;
 			}
 		}
 		
@@ -391,7 +391,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			#if SAFETABLES
 			CheckActive();
 			#endif
-			return FBOF;
+			return _bOF;
 		}
 		
 		public bool EOF()
@@ -399,79 +399,79 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			#if SAFETABLES
 			CheckActive();
 			#endif
-			return FEOF;
+			return _eOF;
 		}
 		
 		public Row GetRow()
 		{
-			Row LRow = new Row(FManager, FTable.RowType);
-			GetRow(LRow);
-			return LRow;
+			Row row = new Row(_manager, _table.RowType);
+			GetRow(row);
+			return row;
 		}
 		
-		private bool IsSubset(Row ARow, NativeRowTree AIndex)
+		private bool IsSubset(Row row, NativeRowTree index)
 		{
-			foreach (Schema.Column LColumn in ARow.DataType.Columns)
-				if (!AIndex.KeyRowType.Columns.ContainsName(LColumn.Name) && !AIndex.DataRowType.Columns.Contains(LColumn.Name))
+			foreach (Schema.Column column in row.DataType.Columns)
+				if (!index.KeyRowType.Columns.ContainsName(column.Name) && !index.DataRowType.Columns.Contains(column.Name))
 					return false;
 			return true;
 		}
 		
-		public void GetRow(Row ARow)
+		public void GetRow(Row row)
 		{
 			#if SAFETABLES
 			CheckActive();
 			#endif
 			CheckNotCrack();
 			
-			if ((FAccessPath.IsClustered) || IsSubset(ARow, FAccessPath))
+			if ((_accessPath.IsClustered) || IsSubset(row, _accessPath))
 			{
-				Row LRow = new Row(FManager, FAccessPath.KeyRowType, FIndexNode.Node.Keys[FEntryNumber]);
+				Row localRow = new Row(_manager, _accessPath.KeyRowType, _indexNode.Node.Keys[_entryNumber]);
 				try
 				{
-					LRow.CopyTo(ARow);
+					localRow.CopyTo(row);
 				}
 				finally
 				{
-					LRow.Dispose();
+					localRow.Dispose();
 				}
 				
-				LRow = new Row(FManager, FAccessPath.DataRowType, FIndexNode.DataNode.Rows[FEntryNumber]);
+				localRow = new Row(_manager, _accessPath.DataRowType, _indexNode.DataNode.Rows[_entryNumber]);
 				try
 				{ 
-					LRow.CopyTo(ARow); 
+					localRow.CopyTo(row); 
 				}
 				finally
 				{
-					LRow.Dispose();
+					localRow.Dispose();
 				}
 			}
 			else
 			{
-				using (RowTreeSearchPath LSearchPath = new RowTreeSearchPath())
+				using (RowTreeSearchPath searchPath = new RowTreeSearchPath())
 				{
-					int LEntryNumber;
-					bool LResult = FTable.ClusteredIndex.FindKey(FManager, FTable.ClusteredIndex.KeyRowType, FIndexNode.DataNode.Rows[FEntryNumber], LSearchPath, out LEntryNumber);
-					if (LResult)
+					int entryNumber;
+					bool result = _table.ClusteredIndex.FindKey(_manager, _table.ClusteredIndex.KeyRowType, _indexNode.DataNode.Rows[_entryNumber], searchPath, out entryNumber);
+					if (result)
 					{
-						Row LRow = new Row(FManager, FTable.ClusteredIndex.KeyRowType, LSearchPath.DataNode.Node.Keys[LEntryNumber]);
+						Row localRow = new Row(_manager, _table.ClusteredIndex.KeyRowType, searchPath.DataNode.Node.Keys[entryNumber]);
 						try
 						{
-							LRow.CopyTo(ARow);
+							localRow.CopyTo(row);
 						}
 						finally
 						{
-							LRow.Dispose();
+							localRow.Dispose();
 						}
 
-						LRow = new Row(FManager, FTable.ClusteredIndex.DataRowType, LSearchPath.DataNode.DataNode.Rows[LEntryNumber]);
+						localRow = new Row(_manager, _table.ClusteredIndex.DataRowType, searchPath.DataNode.DataNode.Rows[entryNumber]);
 						try
 						{ 
-							LRow.CopyTo(ARow); 
+							localRow.CopyTo(row); 
 						}
 						finally
 						{
-							LRow.Dispose();
+							localRow.Dispose();
 						}
 					}
 					else
@@ -486,7 +486,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			CheckActive();
 			#endif
 			CheckNotCrack();
-			return new Row(FManager, FAccessPath.KeyRowType, FIndexNode.Node.Keys[FEntryNumber]);
+			return new Row(_manager, _accessPath.KeyRowType, _indexNode.Node.Keys[_entryNumber]);
 		}
 		
 		public Row GetData()
@@ -495,93 +495,93 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			CheckActive();
 			#endif
 			CheckNotCrack();
-			return new Row(FManager, FAccessPath.DataRowType, FIndexNode.Node.Keys[FEntryNumber]);
+			return new Row(_manager, _accessPath.DataRowType, _indexNode.Node.Keys[_entryNumber]);
 		}
 		
-		private Row EnsureKeyRow(Row AKey)
+		private Row EnsureKeyRow(Row key)
 		{
-			Row LKey = AKey;
-			bool LIsKeyRow = AKey.DataType.Columns.Count <= FAccessPath.KeyRowType.Columns.Count;
-			for (int LIndex = 0; LIndex < FAccessPath.KeyRowType.Columns.Count; LIndex++)
+			Row localKey = key;
+			bool isKeyRow = key.DataType.Columns.Count <= _accessPath.KeyRowType.Columns.Count;
+			for (int index = 0; index < _accessPath.KeyRowType.Columns.Count; index++)
 			{
-				if (LIndex >= AKey.DataType.Columns.Count)
+				if (index >= key.DataType.Columns.Count)
 					break;
 				else
 				{
-					if (!Schema.Object.NamesEqual(AKey.DataType.Columns[LIndex].Name, FAccessPath.KeyRowType.Columns[LIndex].Name))
+					if (!Schema.Object.NamesEqual(key.DataType.Columns[index].Name, _accessPath.KeyRowType.Columns[index].Name))
 					{
-						LIsKeyRow = false;
+						isKeyRow = false;
 						break;
 					}
 				}
 			}
 			
-			if (!LIsKeyRow)
+			if (!isKeyRow)
 			{
-				LKey = new Row(FManager, FAccessPath.KeyRowType);
-				AKey.CopyTo(LKey);
+				localKey = new Row(_manager, _accessPath.KeyRowType);
+				key.CopyTo(localKey);
 			}
 
-			return LKey;
+			return localKey;
 		}
 		
-		public bool FindKey(Row AKey)
+		public bool FindKey(Row key)
 		{
 			#if SAFETABLES
 			CheckActive();
 			#endif
-			int LEntryNumber;
-			RowTreeNode LIndexNode;
-			Row LKey = EnsureKeyRow(AKey);
+			int entryNumber;
+			RowTreeNode indexNode;
+			Row localKey = EnsureKeyRow(key);
 			try
 			{
-				if (FFirstKey != null)
+				if (_firstKey != null)
 				{
-					int LCompareResult = FAccessPath.Compare(FManager, FFirstKey.DataType, (NativeRow)FFirstKey.AsNative, LKey.DataType, (NativeRow)LKey.AsNative);
-					if (((FDirection == ScanDirection.Forward) && (LCompareResult > 0)) || ((FDirection == ScanDirection.Backward) && (LCompareResult < 0)))
+					int compareResult = _accessPath.Compare(_manager, _firstKey.DataType, (NativeRow)_firstKey.AsNative, localKey.DataType, (NativeRow)localKey.AsNative);
+					if (((_direction == ScanDirection.Forward) && (compareResult > 0)) || ((_direction == ScanDirection.Backward) && (compareResult < 0)))
 						return false;
 				}
 				
-				if (FLastKey != null)
+				if (_lastKey != null)
 				{
-					int LCompareResult = FAccessPath.Compare(FManager, FLastKey.DataType, (NativeRow)FLastKey.AsNative, LKey.DataType, (NativeRow)LKey.AsNative);
-					if (((FDirection == ScanDirection.Forward) && (LCompareResult < 0)) || ((FDirection == ScanDirection.Backward) && (LCompareResult < 0)))
+					int compareResult = _accessPath.Compare(_manager, _lastKey.DataType, (NativeRow)_lastKey.AsNative, localKey.DataType, (NativeRow)localKey.AsNative);
+					if (((_direction == ScanDirection.Forward) && (compareResult < 0)) || ((_direction == ScanDirection.Backward) && (compareResult < 0)))
 						return false;
 				}
 
-				bool LResult = FindIndexKey(LKey.DataType, (NativeRow)LKey.AsNative, out LIndexNode, out LEntryNumber);
-				if (LResult)
+				bool result = FindIndexKey(localKey.DataType, (NativeRow)localKey.AsNative, out indexNode, out entryNumber);
+				if (result)
 				{
-					SetIndexNode(LIndexNode);
-					FEntryNumber = LEntryNumber;
-					FBOF = false;
-					FEOF = false;
+					SetIndexNode(indexNode);
+					_entryNumber = entryNumber;
+					_bOF = false;
+					_eOF = false;
 				}
 				else
-					LIndexNode.Dispose();
-				return LResult;
+					indexNode.Dispose();
+				return result;
 			}
 			finally
 			{
-				if (!ReferenceEquals(AKey, LKey))
-					LKey.Dispose();
+				if (!ReferenceEquals(key, localKey))
+					localKey.Dispose();
 			}
 		}
 		
-		public bool FindNearest(Row AKey)
+		public bool FindNearest(Row key)
 		{
 			#if SAFETABLES
 			CheckActive();
 			#endif
-			int LEntryNumber;
-			RowTreeNode LIndexNode;
-			Row LKey = EnsureKeyRow(AKey);
+			int entryNumber;
+			RowTreeNode indexNode;
+			Row localKey = EnsureKeyRow(key);
 			try
 			{
-				if (FFirstKey != null)
+				if (_firstKey != null)
 				{
-					int LCompareResult = FAccessPath.Compare(FManager, FFirstKey.DataType, (NativeRow)FFirstKey.AsNative, LKey.DataType, (NativeRow)LKey.AsNative);
-					if (((FDirection == ScanDirection.Forward) && (LCompareResult > 0)) || ((FDirection == ScanDirection.Backward) && (LCompareResult < 0)))
+					int compareResult = _accessPath.Compare(_manager, _firstKey.DataType, (NativeRow)_firstKey.AsNative, localKey.DataType, (NativeRow)localKey.AsNative);
+					if (((_direction == ScanDirection.Forward) && (compareResult > 0)) || ((_direction == ScanDirection.Backward) && (compareResult < 0)))
 					{
 						First();
 						Next();
@@ -589,10 +589,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 				}
 				
-				if (FLastKey != null)
+				if (_lastKey != null)
 				{
-					int LCompareResult = FAccessPath.Compare(FManager, FLastKey.DataType, (NativeRow)FLastKey.AsNative, LKey.DataType, (NativeRow)LKey.AsNative);
-					if (((FDirection == ScanDirection.Forward) && (LCompareResult < 0)) || ((FDirection == ScanDirection.Backward) && (LCompareResult < 0)))
+					int compareResult = _accessPath.Compare(_manager, _lastKey.DataType, (NativeRow)_lastKey.AsNative, localKey.DataType, (NativeRow)localKey.AsNative);
+					if (((_direction == ScanDirection.Forward) && (compareResult < 0)) || ((_direction == ScanDirection.Backward) && (compareResult < 0)))
 					{
 						Last();
 						Prior();
@@ -600,14 +600,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 				}
 					
-				bool LResult = FindIndexKey(LKey.DataType, (NativeRow)LKey.AsNative, out LIndexNode, out LEntryNumber);
-				SetIndexNode(LIndexNode);
-				FEntryNumber = LEntryNumber;
+				bool result = FindIndexKey(localKey.DataType, (NativeRow)localKey.AsNative, out indexNode, out entryNumber);
+				SetIndexNode(indexNode);
+				_entryNumber = entryNumber;
 				
-				if (FEntryNumber >= FIndexNode.Node.EntryCount)
+				if (_entryNumber >= _indexNode.Node.EntryCount)
 				{
 					Next();
-					if (FEOF)
+					if (_eOF)
 					{
 						Last();
 						Prior();
@@ -615,26 +615,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
 				else
 				{
-					FBOF = false;
-					FEOF = false;
+					_bOF = false;
+					_eOF = false;
 				}
 
-				return LResult;
+				return result;
 			}
 			finally
 			{
-				if (!ReferenceEquals(AKey, LKey))
-					LKey.Dispose();
+				if (!ReferenceEquals(key, localKey))
+					localKey.Dispose();
 			}
 		}
 
 		/// <remarks>The keys passed to this function must be of the same row type as the key for the accesspath for the scan</remarks>		
-		public int CompareKeys(Row AKey1, Row AKey2)
+		public int CompareKeys(Row key1, Row key2)
 		{
 			#if SAFETABLES
 			CheckActive();
 			#endif
-			return FAccessPath.Compare(FManager, AKey1.DataType, (NativeRow)AKey1.AsNative, AKey2.DataType, (NativeRow)AKey2.AsNative);
+			return _accessPath.Compare(_manager, key1.DataType, (NativeRow)key1.AsNative, key2.DataType, (NativeRow)key2.AsNative);
 		}
 	}
 }

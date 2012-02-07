@@ -39,58 +39,58 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	*/
 	public class ValueInListNode : BinaryInstructionNode
 	{
-		private PlanNode FEqualNode;
+		private PlanNode _equalNode;
 		public PlanNode EqualNode
 		{
-			get { return FEqualNode; }
-			set { FEqualNode = value; }
+			get { return _equalNode; }
+			set { _equalNode = value; }
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			base.DetermineDataType(APlan);
-			FEqualNode = Compiler.EmitBinaryNode(APlan, new StackReferenceNode(Nodes[0].DataType, 1, true), Instructions.Equal, new StackReferenceNode(((Schema.ListType)Nodes[1].DataType).ElementType, 0, true));
+			base.DetermineDataType(plan);
+			_equalNode = Compiler.EmitBinaryNode(plan, new StackReferenceNode(Nodes[0].DataType, 1, true), Instructions.Equal, new StackReferenceNode(((Schema.ListType)Nodes[1].DataType).ElementType, 0, true));
 		}
 		
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			ListValue LList = (ListValue)AArgument2;
+			ListValue list = (ListValue)argument2;
 			#if NILPROPOGATION
-			if ((LList == null) || (AArgument1 == null))
+			if ((list == null) || (argument1 == null))
 				return null;
 			#endif
 			
-			AProgram.Stack.Push(AArgument1);
+			program.Stack.Push(argument1);
 			try
 			{
-				AProgram.Stack.Push(null);
+				program.Stack.Push(null);
 				try
 				{
-					object LResult = false;
-					for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
+					object result = false;
+					for (int index = 0; index < list.Count(); index++)
 					{
-						AProgram.Stack.Poke(0, LList[LIndex]);
-						object LValue = FEqualNode.Execute(AProgram);
+						program.Stack.Poke(0, list[index]);
+						object tempValue = _equalNode.Execute(program);
 						#if NILPROPOGATION
-						if (LValue == null)
+						if (tempValue == null)
 						{
-							LResult = null;
+							result = null;
 							continue;
 						}
 						#endif
-						if ((bool)LValue)
-							return LValue;
+						if ((bool)tempValue)
+							return tempValue;
 					}
-					return LResult;
+					return result;
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			finally
 			{
-				AProgram.Stack.Pop();
+				program.Stack.Pop();
 			}
 		}
 	}
@@ -101,21 +101,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator iIn(AEntry : entry, APresentation : presentation) : boolean;
 	public class InTableNode : BinaryInstructionNode
 	{
-		private PlanNode FEqualNode;
+		private PlanNode _equalNode;
 		public PlanNode EqualNode
 		{
-			get { return FEqualNode; }
-			set { FEqualNode = value; }
+			get { return _equalNode; }
+			set { _equalNode = value; }
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			base.DetermineDataType(APlan);
+			base.DetermineDataType(plan);
 			if (Nodes[0].DataType is Schema.ScalarType)
 			{
-				Schema.TableType LTableType = (Schema.TableType)Nodes[1].DataType;
-				if (LTableType.Columns.Count != 1)
-					throw new CompilerException(CompilerException.Codes.InvalidMembershipOperand, APlan.CurrentStatement(), Nodes[0].DataType.Name, Nodes[1].DataType.Name);
+				Schema.TableType tableType = (Schema.TableType)Nodes[1].DataType;
+				if (tableType.Columns.Count != 1)
+					throw new CompilerException(CompilerException.Codes.InvalidMembershipOperand, plan.CurrentStatement(), Nodes[0].DataType.Name, Nodes[1].DataType.Name);
 				#if USECOLUMNLOCATIONBINDING
 				FEqualNode = 
 					Compiler.EmitBinaryNode
@@ -123,69 +123,69 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						APlan, 
 						new StackReferenceNode(Nodes[0].DataType, 1, true), 
 						Instructions.Equal, 
-						new StackColumnReferenceNode(LTableType.Columns[0].DataType, 0, 0)
+						new StackColumnReferenceNode(tableType.Columns[0].DataType, 0, 0)
 					);
 				#else
-				FEqualNode = 
+				_equalNode = 
 					Compiler.EmitBinaryNode
 					(
-						APlan, 
+						plan, 
 						new StackReferenceNode(Nodes[0].DataType, 1, true), 
 						Instructions.Equal, 
-						new StackColumnReferenceNode(LTableType.Columns[0].Name, LTableType.Columns[0].DataType, 0)
+						new StackColumnReferenceNode(tableType.Columns[0].Name, tableType.Columns[0].DataType, 0)
 					);
 				#endif
 			}
 			else
-				FEqualNode = Compiler.EmitBinaryNode(APlan, new StackReferenceNode(Nodes[0].DataType, 1, true), Instructions.Equal, new StackReferenceNode(((Schema.TableType)Nodes[1].DataType).RowType, 0, true));
+				_equalNode = Compiler.EmitBinaryNode(plan, new StackReferenceNode(Nodes[0].DataType, 1, true), Instructions.Equal, new StackReferenceNode(((Schema.TableType)Nodes[1].DataType).RowType, 0, true));
 		}
 		
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			Table LTable = (Table)AArgument2;
+			Table table = (Table)argument2;
 			#if NILPROPOGATION
-			if ((LTable == null) || (AArgument1 == null))
+			if ((table == null) || (argument1 == null))
 				return null;
 			#endif
-			AProgram.Stack.Push(AArgument1);
+			program.Stack.Push(argument1);
 			try
 			{
-				Row LRow = new Row(AProgram.ValueManager, LTable.DataType.RowType);
+				Row row = new Row(program.ValueManager, table.DataType.RowType);
 				try
 				{
-					AProgram.Stack.Push(LRow);
+					program.Stack.Push(row);
 					try
 					{
-						object LResult = false;
-						while (LTable.Next())
+						object result = false;
+						while (table.Next())
 						{
-							LTable.Select(LRow);
-							object LValue = FEqualNode.Execute(AProgram);
+							table.Select(row);
+							object tempValue = _equalNode.Execute(program);
 							#if NILPROPOGATION
-							if (LValue == null)
+							if (tempValue == null)
 							{
-								LResult = LValue;
+								result = tempValue;
 								continue;
 							}
 							#endif
-							if ((bool)LValue)
-								return LValue;
+							if ((bool)tempValue)
+								return tempValue;
 						}
-						return LResult;
+						return result;
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 			}
 			finally
 			{
-				AProgram.Stack.Pop();
+				program.Stack.Pop();
 			}
 		}
 	}

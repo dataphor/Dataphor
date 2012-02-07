@@ -13,23 +13,23 @@ namespace Alphora.Dataphor.DAE.Language.TSQL
 	public class TableExpression : SQL.TableExpression
 	{
 		public TableExpression() : base(){}
-		public TableExpression(string ATableName) : base(ATableName){}
-		public TableExpression(string ATableName, string AOptimizerHints) : base(ATableName)
+		public TableExpression(string tableName) : base(tableName){}
+		public TableExpression(string tableName, string optimizerHints) : base(tableName)
 		{
-			FOptimizerHints = AOptimizerHints;
+			_optimizerHints = optimizerHints;
 		}
 		
-		public TableExpression(string ATableSchema, string ATableName, string AOptimizerHints) : base(ATableSchema, ATableName)
+		public TableExpression(string tableSchema, string tableName, string optimizerHints) : base(tableSchema, tableName)
 		{
-			FOptimizerHints = AOptimizerHints;
+			_optimizerHints = optimizerHints;
 		}
 
         // OptimizerHints
-        protected string FOptimizerHints = String.Empty;
+        protected string _optimizerHints = String.Empty;
         public virtual string OptimizerHints
         {
-			get { return FOptimizerHints; }
-			set { FOptimizerHints = value == null ? String.Empty : value; }
+			get { return _optimizerHints; }
+			set { _optimizerHints = value == null ? String.Empty : value; }
         }
 	}
 	
@@ -38,19 +38,19 @@ namespace Alphora.Dataphor.DAE.Language.TSQL
 		public DropIndexStatement() : base(){}
 		
 		// TableSchema
-		protected string FTableSchema = String.Empty;
+		protected string _tableSchema = String.Empty;
 		public string TableSchema
 		{
-			get { return FTableSchema; }
-			set { FTableSchema = value == null ? String.Empty : value; }
+			get { return _tableSchema; }
+			set { _tableSchema = value == null ? String.Empty : value; }
 		}
 
 		// TableName
-		protected string FTableName = String.Empty;
+		protected string _tableName = String.Empty;
 		public string TableName
 		{
-			get { return FTableName; }
-			set { FTableName = value == null ? String.Empty : value; }
+			get { return _tableName; }
+			set { _tableName = value == null ? String.Empty : value; }
 		}
 	}
 }

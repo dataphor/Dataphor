@@ -9,6 +9,7 @@ using System.Resources;
 
 using Alphora.Dataphor.DAE;
 using System.Collections.Generic;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Language
 {
@@ -111,20 +112,20 @@ namespace Alphora.Dataphor.DAE.Language
 		}
 
 		// Resource manager for this exception class
-		private static ResourceManager FResourceManager = new ResourceManager("Alphora.Dataphor.DAE.Language.ParserException", typeof(ParserException).Assembly);
+		private static ResourceManager _resourceManager = new ResourceManager("Alphora.Dataphor.DAE.Language.ParserException", typeof(ParserException).Assembly);
 
 		// Constructors
-		public ParserException(Codes AErrorCode) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) {}
-		public ParserException(Codes AErrorCode, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) {}
-		public ParserException(Codes AErrorCode, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) {}
-		public ParserException(Codes AErrorCode, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) {}
-		public ParserException(Codes AErrorCode, ErrorSeverity ASeverity) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null) {}
-		public ParserException(Codes AErrorCode, ErrorSeverity ASeverity, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) {}
-		public ParserException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) {}
-		public ParserException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
+		public ParserException(Codes errorCode) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null) {}
+		public ParserException(Codes errorCode, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, paramsValue) {}
+		public ParserException(Codes errorCode, Exception innerException) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, null) {}
+		public ParserException(Codes errorCode, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, paramsValue) {}
+		public ParserException(Codes errorCode, ErrorSeverity severity) : base(_resourceManager, (int)errorCode, severity, null, null) {}
+		public ParserException(Codes errorCode, ErrorSeverity severity, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) {}
+		public ParserException(Codes errorCode, ErrorSeverity severity, Exception innerException) : base(_resourceManager, (int)errorCode, severity, innerException, null) {}
+		public ParserException(Codes errorCode, ErrorSeverity severity, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) {}
 		
-		public ParserException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, DataphorException AInnerException) 
-			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		public ParserException(ErrorSeverity severity, int code, string message, string details, string serverContext, DataphorException innerException) 
+			: base(severity, code, message, details, serverContext, innerException)
 		{
 		}
 	}
@@ -150,12 +151,37 @@ namespace Alphora.Dataphor.DAE.Language
 			return Count > 0;
 		}
 		
+		public Exception FirstError
+		{
+			get { return this[0]; }
+		}
+		
 		public override string ToString()
 		{
-			StringBuilder LBuilder = new StringBuilder();
-			foreach (Exception LException in this)
-				ExceptionUtility.AppendMessage(LBuilder, 0, LException);
-			return LBuilder.ToString();
+			StringBuilder builder = new StringBuilder();
+			foreach (Exception exception in this)
+				ExceptionUtility.AppendMessage(builder, 0, exception);
+			return builder.ToString();
+		}
+
+		/// <summary> Sets the locator and increments the offsets for all locator exceptions that don't have one. </summary>
+		public void SetLocator(DebugLocator locator)
+		{
+			foreach (Exception exception in this)
+			{
+				ILocatorException locatorException = exception as ILocatorException;
+				if (locatorException != null && String.IsNullOrEmpty(locatorException.Locator))
+				{
+					if (locator != null)
+					{
+						locatorException.Locator = locator.Locator;
+						locatorException.Line += locator.Line - 1;
+						locatorException.LinePos += locator.LinePos - 1;
+					}
+					else
+						locatorException.Locator = null;
+				}
+			}
 		}
 	}
 }

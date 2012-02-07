@@ -18,16 +18,16 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	
 	public abstract class Element : System.Object
 	{
-		public Element(string AName) : base()
+		public Element(string name) : base()
 		{
-			if ((AName == null) || (AName == String.Empty))
+			if ((name == null) || (name == String.Empty))
 				throw new ServerException(ServerException.Codes.ElementNameRequired);
 				
-			FName = AName;
+			_name = name;
 		}
 		
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 
 		public string Title;
 		public string Hint;
@@ -38,9 +38,9 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 		public bool FlowBreak;
 		public bool Break;
 		
-		public virtual Element FindElement(string AName)
+		public virtual Element FindElement(string name)
 		{
-			if (Name == AName)
+			if (Name == name)
 				return this;
 			else
 				return null;
@@ -54,7 +54,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	
 	public class ColumnElement : Element
 	{
-		public ColumnElement(string AName) : base(AName) {}
+		public ColumnElement(string name) : base(name) {}
 		
 		public string Source;
 		public string ColumnName;
@@ -62,17 +62,17 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	
 	public abstract class ContainerElement : Element
 	{
-		public ContainerElement(string AName) : base(AName) {}
+		public ContainerElement(string name) : base(name) {}
 		
-		private Elements FElements = new Elements();
-		public Elements Elements { get { return FElements; } }
+		private Elements _elements = new Elements();
+		public Elements Elements { get { return _elements; } }
 		
-		public override Element FindElement(string AName)
+		public override Element FindElement(string name)
 		{
-			Element LElement = base.FindElement(AName);
-			if (LElement == null)
-				LElement = FElements.FindElement(AName);
-			return LElement;
+			Element element = base.FindElement(name);
+			if (element == null)
+				element = _elements.FindElement(name);
+			return element;
 		}
 		
 		public override bool ContainsMultipleElements()
@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	
 	public class GridElement : ContainerElement
 	{
-		public GridElement(string AName) : base(AName) {}
+		public GridElement(string name) : base(name) {}
 		
 		public string Source;
 		
@@ -95,7 +95,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	
 	public class GridColumnElement : Element
 	{
-		public GridColumnElement(string AName) : base(AName) {}
+		public GridColumnElement(string name) : base(name) {}
 		
 		public string ColumnName;
 		public int Width;
@@ -103,7 +103,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	
 	public class SearchElement : ContainerElement
 	{
-		public SearchElement(string AName) : base(AName) {}
+		public SearchElement(string name) : base(name) {}
 		
 		public string Source;
 		
@@ -115,7 +115,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	
 	public class SearchColumnElement : Element
 	{
-		public SearchColumnElement(string AName) : base(AName) {}
+		public SearchColumnElement(string name) : base(name) {}
 		
 		public string ColumnName;
 		public int Width;
@@ -123,7 +123,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	
 	public class GroupElement : ContainerElement
 	{
-		public GroupElement(string AName) : base(AName) {}
+		public GroupElement(string name) : base(name) {}
 		
 		/// <summary>Determines whether a group will be eliminated if it contains only one element.</summary>
 		public bool EliminateGroup = true;
@@ -139,7 +139,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	
 	public class LookupColumnElement : GroupElement
 	{
-		public LookupColumnElement(string AName) : base(AName) {}
+		public LookupColumnElement(string name) : base(name) {}
 		
 		public string Source;		
 		public string ColumnName;
@@ -156,7 +156,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 
 	public class LookupGroupElement : GroupElement
 	{
-		public LookupGroupElement(string AName) : base(AName) 
+		public LookupGroupElement(string name) : base(name) 
 		{
 			EliminateGroup = false;
 		}
@@ -176,102 +176,102 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	
 	public class Elements : System.Object
 	{
-		private const int CDefaultCapacity = 20;
-		private const int CDefaultGrowth = 20;
+		private const int DefaultCapacity = 20;
+		private const int DefaultGrowth = 20;
 	
 		public Elements() : base()
 		{
-			FElements = new Element[CDefaultCapacity];
+			_elements = new Element[DefaultCapacity];
 		}
 
-		private int FCount;		
-		public int Count { get { return FCount; } }
+		private int _count;		
+		public int Count { get { return _count; } }
 
-		private Element[] FElements;
-		public Element this[int AIndex] 
+		private Element[] _elements;
+		public Element this[int index] 
 		{ 
 			get 
 			{
-				if ((AIndex < 0) || AIndex >= FCount)
+				if ((index < 0) || index >= _count)
 					throw new IndexOutOfRangeException();
-				return FElements[AIndex]; 
+				return _elements[index]; 
 			} 
 		}
 		
-		public void Add(Element AElement)
+		public void Add(Element element)
 		{
-			if (AElement == null)
+			if (element == null)
 				throw new ServerException(ServerException.Codes.ElementRequired);
 				
-			if (FindElement(AElement.Name) != null)
-				throw new ServerException(ServerException.Codes.DuplicateElementName, AElement.Name);
+			if (FindElement(element.Name) != null)
+				throw new ServerException(ServerException.Codes.DuplicateElementName, element.Name);
 				
-			EnsureSize(FCount + 1);
-			bool LInserted = false;
-			for (int LIndex = 0; LIndex < FCount; LIndex++)
-				if (FElements[LIndex].Priority > AElement.Priority)
+			EnsureSize(_count + 1);
+			bool inserted = false;
+			for (int index = 0; index < _count; index++)
+				if (_elements[index].Priority > element.Priority)
 				{
-					InsertAt(AElement, LIndex);
-					LInserted = true;
+					InsertAt(element, index);
+					inserted = true;
 					break;
 				}
-			if (!LInserted)
-				InsertAt(AElement, FCount);
-			FCount++;
+			if (!inserted)
+				InsertAt(element, _count);
+			_count++;
 		}
 		
-		public void Remove(Element AElement)
+		public void Remove(Element element)
 		{
-			RemoveAt(IndexOf(AElement));
+			RemoveAt(IndexOf(element));
 		}
 		
-		public int IndexOf(Element AElement)
+		public int IndexOf(Element element)
 		{
-			for (int LIndex = 0; LIndex < FCount; LIndex++)
-				if (Object.ReferenceEquals(FElements[LIndex], AElement))
-					return LIndex;
+			for (int index = 0; index < _count; index++)
+				if (Object.ReferenceEquals(_elements[index], element))
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(Element AElement)
+		public bool Contains(Element element)
 		{
-			return IndexOf(AElement) >= 0;
+			return IndexOf(element) >= 0;
 		}
 		
-		public Element FindElement(string AName)
+		public Element FindElement(string name)
 		{
-			Element LElement;
-			for (int LIndex = 0; LIndex < FCount; LIndex++)
+			Element element;
+			for (int index = 0; index < _count; index++)
 			{
-				LElement = FElements[LIndex].FindElement(AName);
-				if (LElement != null)
-					return LElement;
+				element = _elements[index].FindElement(name);
+				if (element != null)
+					return element;
 			}
 			return null;
 		}
 		
-		private void InsertAt(Element AElement, int AIndex)
+		private void InsertAt(Element element, int index)
 		{
-			for (int LIndex = FCount - 1; LIndex >= AIndex; LIndex--)
-				FElements[LIndex + 1] = FElements[LIndex];
-			FElements[AIndex] = AElement;
+			for (int localIndex = _count - 1; localIndex >= index; localIndex--)
+				_elements[localIndex + 1] = _elements[localIndex];
+			_elements[index] = element;
 		}
 		
-		private void RemoveAt(int AIndex)
+		private void RemoveAt(int index)
 		{
-			for (int LIndex = AIndex; LIndex < FCount - 1; LIndex++)
-				FElements[LIndex] = FElements[LIndex + 1];
-			FElements[FCount - 1] = null;
+			for (int localIndex = index; localIndex < _count - 1; localIndex++)
+				_elements[localIndex] = _elements[localIndex + 1];
+			_elements[_count - 1] = null;
 		}
 		
-		private void EnsureSize(int ACount)
+		private void EnsureSize(int count)
 		{
-			if (FElements.Length < ACount)
+			if (_elements.Length < count)
 			{
-				Element[] LNewElements = new Element[FElements.Length + CDefaultGrowth];
-				for (int LIndex = 0; LIndex < FCount; LIndex++)
-					LNewElements[LIndex] = FElements[LIndex];
-				FElements = LNewElements;
+				Element[] newElements = new Element[_elements.Length + DefaultGrowth];
+				for (int index = 0; index < _count; index++)
+					newElements[index] = _elements[index];
+				_elements = newElements;
 			}
 		}
 	}

@@ -21,9 +21,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class ScheduleDayGrouped : Element
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			AppointmentSource = null;
 			ShiftSource = null;
 			GroupSource = null;
@@ -31,17 +31,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// StartDate
 
-		private DateTime FStartDate = DateTime.MinValue;
+		private DateTime _startDate = DateTime.MinValue;
 		[Alphora.Dataphor.BOP.DefaultValueMember("StartDateDefault")]
 		[Description("The date of the first day shown in the schedule.")]
 		public DateTime StartDate
 		{
-			get { return FStartDate; }
+			get { return _startDate; }
 			set
 			{
-				if (FStartDate != value)
+				if (_startDate != value)
 				{
-					FStartDate = value;
+					_startDate = value;
 					if (Active)
 						InternalUpdateStartDate();
 				}
@@ -55,94 +55,94 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void InternalUpdateStartDate()
 		{
-			FControl.StartDate = FStartDate;
+			_control.StartDate = _startDate;
 		}
 
 		// AppointmentSource
 
-		private ISource FAppointmentSource;
+		private ISource _appointmentSource;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("Specifies the AppointmentSource node the control will be attached to.")]
 		public ISource AppointmentSource
 		{
-			get { return FAppointmentSource; }
+			get { return _appointmentSource; }
 			set
 			{
-				if (FAppointmentSource != value)
+				if (_appointmentSource != value)
 					SetAppointmentSource(value);
 			}
 		}
 
-		protected virtual void SetAppointmentSource(ISource AAppointmentSource)
+		protected virtual void SetAppointmentSource(ISource appointmentSource)
 		{
-			if (FAppointmentSource != null)
-				FAppointmentSource.Disposed -= new EventHandler(AppointmentSourceDisposed);
-			FAppointmentSource = AAppointmentSource;
-			if (FAppointmentSource != null)
-				FAppointmentSource.Disposed += new EventHandler(AppointmentSourceDisposed);
+			if (_appointmentSource != null)
+				_appointmentSource.Disposed -= new EventHandler(AppointmentSourceDisposed);
+			_appointmentSource = appointmentSource;
+			if (_appointmentSource != null)
+				_appointmentSource.Disposed += new EventHandler(AppointmentSourceDisposed);
 			if (Active)
 				InternalUpdateAppointmentSource();
 		}
 
-		protected virtual void AppointmentSourceDisposed(object ASender, EventArgs AArgs)
+		protected virtual void AppointmentSourceDisposed(object sender, EventArgs args)
 		{
 			AppointmentSource = null;
 		}
 
-		private DataLink FAppointmentSourceLink;
+		private DataLink _appointmentSourceLink;
 
 		protected virtual void InternalUpdateAppointmentSource()
 		{
-			FAppointmentSourceLink.Source = AppointmentSource == null ? null : AppointmentSource.DataSource;
+			_appointmentSourceLink.Source = AppointmentSource == null ? null : AppointmentSource.DataSource;
 		}
 
-		private void AppointmentSourceLinkRowChanged(DataLink ALInk, DataSet ADataSet, DataField AField)
+		private void AppointmentSourceLinkRowChanged(DataLink lInk, DataSet dataSet, DataField field)
 		{
 			UpdateAppointmentData();
 		}
 
-		private void AppointmentSourceLinkChanged(DataLink ALink, DataSet ADataSet)
+		private void AppointmentSourceLinkChanged(DataLink link, DataSet dataSet)
 		{
-			if (!FNavigatingSelection)
+			if (!_navigatingSelection)
 				UpdateAppointmentData();
 		}
 
-		private bool FSettingSelection;
-		private bool FNavigatingSelection;
+		private bool _settingSelection;
+		private bool _navigatingSelection;
 		
-		private void SelectedAppointmentChanged(object ASender, EventArgs AArgs)
+		private void SelectedAppointmentChanged(object sender, EventArgs args)
 		{
-			if (!FSettingSelection && FAppointmentSourceLink != null && FAppointmentSourceLink.Active)
+			if (!_settingSelection && _appointmentSourceLink != null && _appointmentSourceLink.Active)
 			{
-				FNavigatingSelection = true;
+				_navigatingSelection = true;
 				try
 				{
-					var LNewOffset = Array.IndexOf<ScheduleData>((ScheduleData[])FControl.AppointmentSource, (ScheduleData)FControl.SelectedAppointment);
-					if (LNewOffset >= 0)
-						FAppointmentSourceLink.DataSet.MoveBy(LNewOffset - FAppointmentSourceLink.ActiveOffset);
+					var newOffset = Array.IndexOf<ScheduleData>((ScheduleData[])_control.AppointmentSource, (ScheduleData)_control.SelectedAppointment);
+					if (newOffset >= 0)
+						_appointmentSourceLink.DataSet.MoveBy(newOffset - _appointmentSourceLink.ActiveOffset);
 				}
 				finally
 				{
-					FNavigatingSelection = false;
+					_navigatingSelection = false;
 				}
 			}
 		}
 		
 		// AppointmentDateColumn
 
-		private string FAppointmentDateColumn = String.Empty;
+		private string _appointmentDateColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("AppointmentSource")]
 		[Description("The column in the appointment source that represents the date.")]
 		public string AppointmentDateColumn
 		{
-			get { return FAppointmentDateColumn; }
+			get { return _appointmentDateColumn; }
 			set
 			{
-				if (FAppointmentDateColumn != value)
+				if (_appointmentDateColumn != value)
 				{
-					FAppointmentDateColumn = value;
+					_appointmentDateColumn = value;
 					UpdateAppointmentData();
 				}
 			}
@@ -150,19 +150,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// AppointmentStartTimeColumn
 
-		private string FAppointmentStartTimeColumn = String.Empty;
+		private string _appointmentStartTimeColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("AppointmentSource")]
 		[Description("The column in the appointment source that represents the StartTime.")]
 		public string AppointmentStartTimeColumn
 		{
-			get { return FAppointmentStartTimeColumn; }
+			get { return _appointmentStartTimeColumn; }
 			set
 			{
-				if (FAppointmentStartTimeColumn != value)
+				if (_appointmentStartTimeColumn != value)
 				{
-					FAppointmentStartTimeColumn = value;
+					_appointmentStartTimeColumn = value;
 					UpdateAppointmentData();
 				}
 			}
@@ -170,19 +170,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// AppointmentEndTimeColumn
 
-		private string FAppointmentEndTimeColumn = String.Empty;
+		private string _appointmentEndTimeColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("AppointmentSource")]
 		[Description("The column in the appointment source that represents the EndTime.")]
 		public string AppointmentEndTimeColumn
 		{
-			get { return FAppointmentEndTimeColumn; }
+			get { return _appointmentEndTimeColumn; }
 			set
 			{
-				if (FAppointmentEndTimeColumn != value)
+				if (_appointmentEndTimeColumn != value)
 				{
-					FAppointmentEndTimeColumn = value;
+					_appointmentEndTimeColumn = value;
 					UpdateAppointmentData();
 				}
 			}
@@ -190,19 +190,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// AppointmentGroupColumn
 
-		private string FAppointmentGroupColumn = String.Empty;
+		private string _appointmentGroupColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("AppointmentSource")]
 		[Description("The column in the appointment source that represents the Group.")]
 		public string AppointmentGroupColumn
 		{
-			get { return FAppointmentGroupColumn; }
+			get { return _appointmentGroupColumn; }
 			set
 			{
-				if (FAppointmentGroupColumn != value)
+				if (_appointmentGroupColumn != value)
 				{
-					FAppointmentGroupColumn = value;
+					_appointmentGroupColumn = value;
 					UpdateAppointmentData();
 				}
 			}
@@ -210,19 +210,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// AppointmentDescriptionColumn
 
-		private string FAppointmentDescriptionColumn = String.Empty;
+		private string _appointmentDescriptionColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("AppointmentSource")]
 		[Description("The column in the appointment source that represents the Description.")]
 		public string AppointmentDescriptionColumn
 		{
-			get { return FAppointmentDescriptionColumn; }
+			get { return _appointmentDescriptionColumn; }
 			set
 			{
-				if (FAppointmentDescriptionColumn != value)
+				if (_appointmentDescriptionColumn != value)
 				{
-					FAppointmentDescriptionColumn = value;
+					_appointmentDescriptionColumn = value;
 					UpdateAppointmentData();
 				}
 			}
@@ -230,19 +230,39 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// AppointmentImageColumn
 
-		private string FAppointmentImageColumn = String.Empty;
+		private string _appointmentImageColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("AppointmentSource")]
 		[Description("The column in the appointment source that represents the Image.")]
 		public string AppointmentImageColumn
 		{
-			get { return FAppointmentImageColumn; }
+			get { return _appointmentImageColumn; }
 			set
 			{
-				if (FAppointmentImageColumn != value)
+				if (_appointmentImageColumn != value)
 				{
-					FAppointmentImageColumn = value;
+					_appointmentImageColumn = value;
+					UpdateAppointmentData();
+				}
+			}
+		}
+
+		// AppointmentBackgroundColorColumn
+
+		private string _appointmentBackgroundColorColumn = String.Empty;
+		[DefaultValue("")]
+		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("AppointmentSource")]
+		[Description("The column in the appointment source that represents the BackgroundColor.")]
+		public string AppointmentBackgroundColorColumn
+		{
+			get { return _appointmentBackgroundColorColumn; }
+			set
+			{
+				if (_appointmentBackgroundColorColumn != value)
+				{
+					_appointmentBackgroundColorColumn = value;
 					UpdateAppointmentData();
 				}
 			}
@@ -254,142 +274,145 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			if 
 			(
-				Active && FAppointmentSourceLink.Active && !FAppointmentSourceLink.DataSet.IsEmpty()
-					&& !String.IsNullOrEmpty(FAppointmentDateColumn) && !String.IsNullOrEmpty(FAppointmentStartTimeColumn)
-					&& !String.IsNullOrEmpty(FAppointmentEndTimeColumn) && !String.IsNullOrEmpty(FAppointmentDescriptionColumn)
+				Active && _appointmentSourceLink.Active && !_appointmentSourceLink.DataSet.IsEmpty()
+					&& !String.IsNullOrEmpty(_appointmentDateColumn) && !String.IsNullOrEmpty(_appointmentStartTimeColumn)
+					&& !String.IsNullOrEmpty(_appointmentEndTimeColumn) && !String.IsNullOrEmpty(_appointmentDescriptionColumn)
 			)
 				ReconcileAppointmentData();
 			else
-				if (FControl != null)
-					FControl.AppointmentSource = null;
+				if (_control != null)
+					_control.AppointmentSource = null;
 		}
 
 		private void ReconcileAppointmentData()
 		{
-			if (FControl != null)
+			if (_control != null)
 			{
 				// Expand the buffer to capture all rows in the set
-				while (FAppointmentSourceLink.LastOffset == FAppointmentSourceLink.BufferCount - 1)
-					FAppointmentSourceLink.BufferCount++;
+				while (_appointmentSourceLink.LastOffset == _appointmentSourceLink.BufferCount - 1)
+					_appointmentSourceLink.BufferCount++;
 
 				// Replace the appointment source
-				ScheduleData LActiveItem = null;
-				var LItems = new ScheduleAppointmentData[FAppointmentSourceLink.LastOffset + 1];
-				for (int i = 0; i <= FAppointmentSourceLink.LastOffset; i++)
+				ScheduleData activeItem = null;
+				var items = new ScheduleAppointmentData[_appointmentSourceLink.LastOffset + 1];
+				for (int i = 0; i <= _appointmentSourceLink.LastOffset; i++)
 				{
-					var LRow = FAppointmentSourceLink.Buffer(i);
-					var LItem =
+					var row = _appointmentSourceLink.Buffer(i);
+					var item =
 						new ScheduleAppointmentData
 						{
-							Date = ((Scalar)LRow.GetValue(FAppointmentDateColumn)).AsDateTime,
-							StartTime = ((Scalar)LRow.GetValue(FAppointmentStartTimeColumn)).AsDateTime,
-							EndTime = ((Scalar)LRow.GetValue(FAppointmentEndTimeColumn)).AsDateTime,
-							Description = ((Scalar)LRow.GetValue(FAppointmentDescriptionColumn)).AsString,
-							Group = (String.IsNullOrEmpty(FAppointmentGroupColumn) ? null : ((Scalar)LRow.GetValue(FAppointmentGroupColumn)).AsNative),
-							Image = (String.IsNullOrEmpty(FAppointmentImageColumn) || !LRow.HasValue(FAppointmentImageColumn) 
+							Date = ((Scalar)row.GetValue(_appointmentDateColumn)).AsDateTime,
+							StartTime = ((Scalar)row.GetValue(_appointmentStartTimeColumn)).AsDateTime,
+							EndTime = ((Scalar)row.GetValue(_appointmentEndTimeColumn)).AsDateTime,
+							Description = ((Scalar)row.GetValue(_appointmentDescriptionColumn)).AsString,
+							Group = (String.IsNullOrEmpty(_appointmentGroupColumn) ? null : ((Scalar)row.GetValue(_appointmentGroupColumn)).AsNative),
+							Image = (String.IsNullOrEmpty(_appointmentImageColumn) || !row.HasValue(_appointmentImageColumn) 
 								? null 
-								: LoadImage((Scalar)LRow.GetValue(FAppointmentImageColumn)))
+								: LoadImage((Scalar)row.GetValue(_appointmentImageColumn))),
+							BackgroundColor = (String.IsNullOrEmpty(_appointmentBackgroundColorColumn) || !row.HasValue(_appointmentBackgroundColorColumn)
+								? String.Empty
+								: ((Scalar)row.GetValue(_appointmentBackgroundColorColumn)).AsString)
 						};
-					LItems[i] = LItem;
-					if (i == FAppointmentSourceLink.ActiveOffset)
-						LActiveItem = LItem;
+					items[i] = item;
+					if (i == _appointmentSourceLink.ActiveOffset)
+						activeItem = item;
 				}
-				FControl.AppointmentSource = LItems;
-				FSettingSelection = true;
+				_control.AppointmentSource = items;
+				_settingSelection = true;
 				try
 				{
-					FControl.SelectedAppointment = LActiveItem;
+					_control.SelectedAppointment = activeItem;
 				}
 				finally
 				{
-					FSettingSelection = false;
+					_settingSelection = false;
 				}
 			}
 		}
 		
 		// Appointment Image Loading
 		
-		private ImageSource LoadImage(Scalar AValue)
+		private ImageSource LoadImage(Scalar value)
 		{
-			Stream LStream = AValue.OpenStream();
+			Stream stream = value.OpenStream();
 			try
 			{
-				var LImage = new BitmapImage();
-				LImage.BeginInit();
-				LImage.CacheOption = BitmapCacheOption.OnLoad;
-				LImage.StreamSource = LStream;
-				LImage.EndInit();
-				return LImage;
+				var image = new BitmapImage();
+				image.BeginInit();
+				image.CacheOption = BitmapCacheOption.OnLoad;
+				image.StreamSource = stream;
+				image.EndInit();
+				return image;
 			}
 			finally
 			{
-				LStream.Close();
+				stream.Close();
 			}
 		}
 
 		// ShiftSource
 
-		private ISource FShiftSource;
+		private ISource _shiftSource;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("Specifies the ShiftSource node the control will be attached to.")]
 		public ISource ShiftSource
 		{
-			get { return FShiftSource; }
+			get { return _shiftSource; }
 			set
 			{
-				if (FShiftSource != value)
+				if (_shiftSource != value)
 					SetShiftSource(value);
 			}
 		}
 
-		protected virtual void SetShiftSource(ISource AShiftSource)
+		protected virtual void SetShiftSource(ISource shiftSource)
 		{
-			if (FShiftSource != null)
-				FShiftSource.Disposed -= new EventHandler(ShiftSourceDisposed);
-			FShiftSource = AShiftSource;
-			if (FShiftSource != null)
-				FShiftSource.Disposed += new EventHandler(ShiftSourceDisposed);
+			if (_shiftSource != null)
+				_shiftSource.Disposed -= new EventHandler(ShiftSourceDisposed);
+			_shiftSource = shiftSource;
+			if (_shiftSource != null)
+				_shiftSource.Disposed += new EventHandler(ShiftSourceDisposed);
 			if (Active)
 				InternalUpdateShiftSource();
 		}
 
-		protected virtual void ShiftSourceDisposed(object ASender, EventArgs AArgs)
+		protected virtual void ShiftSourceDisposed(object sender, EventArgs args)
 		{
 			ShiftSource = null;
 		}
 
-		private DataLink FShiftSourceLink;
+		private DataLink _shiftSourceLink;
 
 		protected virtual void InternalUpdateShiftSource()
 		{
-			FShiftSourceLink.Source = ShiftSource == null ? null : ShiftSource.DataSource;
+			_shiftSourceLink.Source = ShiftSource == null ? null : ShiftSource.DataSource;
 		}
 
-		private void ShiftSourceLinkRowChanged(DataLink ALInk, DataSet ADataSet, DataField AField)
+		private void ShiftSourceLinkRowChanged(DataLink lInk, DataSet dataSet, DataField field)
 		{
 			UpdateShiftData();
 		}
 
-		private void ShiftSourceLinkChanged(DataLink ALink, DataSet ADataSet)
+		private void ShiftSourceLinkChanged(DataLink link, DataSet dataSet)
 		{
 			UpdateShiftData();
 		}
 
 		// ShiftDateColumn
 
-		private string FShiftDateColumn = String.Empty;
+		private string _shiftDateColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("ShiftSource")]
 		[Description("The column in the Shift source that represents the date.")]
 		public string ShiftDateColumn
 		{
-			get { return FShiftDateColumn; }
+			get { return _shiftDateColumn; }
 			set
 			{
-				if (FShiftDateColumn != value)
+				if (_shiftDateColumn != value)
 				{
-					FShiftDateColumn = value;
+					_shiftDateColumn = value;
 					UpdateShiftData();
 				}
 			}
@@ -397,19 +420,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ShiftStartTimeColumn
 
-		private string FShiftStartTimeColumn = String.Empty;
+		private string _shiftStartTimeColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("ShiftSource")]
 		[Description("The column in the Shift source that represents the Time.")]
 		public string ShiftStartTimeColumn
 		{
-			get { return FShiftStartTimeColumn; }
+			get { return _shiftStartTimeColumn; }
 			set
 			{
-				if (FShiftStartTimeColumn != value)
+				if (_shiftStartTimeColumn != value)
 				{
-					FShiftStartTimeColumn = value;
+					_shiftStartTimeColumn = value;
 					UpdateShiftData();
 				}
 			}
@@ -417,19 +440,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ShiftEndTimeColumn
 
-		private string FShiftEndTimeColumn = String.Empty;
+		private string _shiftEndTimeColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("ShiftSource")]
 		[Description("The column in the Shift source that represents the Time.")]
 		public string ShiftEndTimeColumn
 		{
-			get { return FShiftEndTimeColumn; }
+			get { return _shiftEndTimeColumn; }
 			set
 			{
-				if (FShiftEndTimeColumn != value)
+				if (_shiftEndTimeColumn != value)
 				{
-					FShiftEndTimeColumn = value;
+					_shiftEndTimeColumn = value;
 					UpdateShiftData();
 				}
 			}
@@ -437,19 +460,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ShiftGroupColumn
 
-		private string FShiftGroupColumn = String.Empty;
+		private string _shiftGroupColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("ShiftSource")]
 		[Description("The column in the Shift source that represents the Group.")]
 		public string ShiftGroupColumn
 		{
-			get { return FShiftGroupColumn; }
+			get { return _shiftGroupColumn; }
 			set
 			{
-				if (FShiftGroupColumn != value)
+				if (_shiftGroupColumn != value)
 				{
-					FShiftGroupColumn = value;
+					_shiftGroupColumn = value;
 					UpdateShiftData();
 				}
 			}
@@ -457,19 +480,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ShiftDescriptionColumn
 
-		private string FShiftDescriptionColumn = String.Empty;
+		private string _shiftDescriptionColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("ShiftSource")]
 		[Description("The column in the Shift source that represents the Description.")]
 		public string ShiftDescriptionColumn
 		{
-			get { return FShiftDescriptionColumn; }
+			get { return _shiftDescriptionColumn; }
 			set
 			{
-				if (FShiftDescriptionColumn != value)
+				if (_shiftDescriptionColumn != value)
 				{
-					FShiftDescriptionColumn = value;
+					_shiftDescriptionColumn = value;
 					UpdateShiftData();
 				}
 			}
@@ -477,19 +500,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// ShiftHighlightIntervalColumn
 
-		private string FShiftHighlightIntervalColumn = String.Empty;
+		private string _shiftHighlightIntervalColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("ShiftSource")]
 		[Description("The column in the Shift source that represents the highlighting interval.")]
 		public string ShiftHighlightIntervalColumn
 		{
-			get { return FShiftHighlightIntervalColumn; }
+			get { return _shiftHighlightIntervalColumn; }
 			set
 			{
-				if (FShiftHighlightIntervalColumn != value)
+				if (_shiftHighlightIntervalColumn != value)
 				{
-					FShiftHighlightIntervalColumn = value;
+					_shiftHighlightIntervalColumn = value;
 					UpdateShiftData();
 				}
 			}
@@ -501,118 +524,118 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			if 
 			(
-				Active && FShiftSourceLink.Active && !FShiftSourceLink.DataSet.IsEmpty()
-					&& !String.IsNullOrEmpty(FShiftDateColumn) && !String.IsNullOrEmpty(FShiftStartTimeColumn)
-					&& !String.IsNullOrEmpty(FShiftEndTimeColumn) && !String.IsNullOrEmpty(FShiftDescriptionColumn)
+				Active && _shiftSourceLink.Active && !_shiftSourceLink.DataSet.IsEmpty()
+					&& !String.IsNullOrEmpty(_shiftDateColumn) && !String.IsNullOrEmpty(_shiftStartTimeColumn)
+					&& !String.IsNullOrEmpty(_shiftEndTimeColumn) && !String.IsNullOrEmpty(_shiftDescriptionColumn)
 			)
 				ReconcileShiftData();
 			else
-				if (FControl != null)
-					FControl.ShiftSource = null;
+				if (_control != null)
+					_control.ShiftSource = null;
 		}
 
 		private void ReconcileShiftData()
 		{
-			if (FControl != null)
+			if (_control != null)
 			{
 				// Expand the buffer to capture all rows in the set
-				while (FShiftSourceLink.LastOffset == FShiftSourceLink.BufferCount - 1)
-					FShiftSourceLink.BufferCount++;
+				while (_shiftSourceLink.LastOffset == _shiftSourceLink.BufferCount - 1)
+					_shiftSourceLink.BufferCount++;
 
-				var LData = new List<ScheduleData>(FShiftSourceLink.LastOffset + 1);
-				for (int i = 0; i <= FShiftSourceLink.LastOffset; i++)
+				var data = new List<ScheduleData>(_shiftSourceLink.LastOffset + 1);
+				for (int i = 0; i <= _shiftSourceLink.LastOffset; i++)
 				{
-					var LRow = FShiftSourceLink.Buffer(i);
-					LData.Add
+					var row = _shiftSourceLink.Buffer(i);
+					data.Add
 					(
 						new ScheduleShiftData
 						{
-							Date = ((Scalar)LRow.GetValue(FShiftDateColumn)).AsDateTime,
-							StartTime = ((Scalar)LRow.GetValue(FShiftStartTimeColumn)).AsDateTime,
-							EndTime = ((Scalar)LRow.GetValue(FShiftEndTimeColumn)).AsDateTime,
-							Description = ((Scalar)LRow.GetValue(FShiftDescriptionColumn)).AsString,
-							Group = (String.IsNullOrEmpty(FShiftGroupColumn) ? null : ((Scalar)LRow.GetValue(FShiftGroupColumn)).AsNative),
+							Date = ((Scalar)row.GetValue(_shiftDateColumn)).AsDateTime,
+							StartTime = ((Scalar)row.GetValue(_shiftStartTimeColumn)).AsDateTime,
+							EndTime = ((Scalar)row.GetValue(_shiftEndTimeColumn)).AsDateTime,
+							Description = ((Scalar)row.GetValue(_shiftDescriptionColumn)).AsString,
+							Group = (String.IsNullOrEmpty(_shiftGroupColumn) ? null : ((Scalar)row.GetValue(_shiftGroupColumn)).AsNative),
 							HighlightInterval = 
 							(
-								String.IsNullOrEmpty(FShiftHighlightIntervalColumn) 
+								String.IsNullOrEmpty(_shiftHighlightIntervalColumn) 
 									? (int?)null 
 									: 
 									(
-										LRow.HasValue(FShiftHighlightIntervalColumn) 
-											? ((Scalar)LRow.GetValue(FShiftHighlightIntervalColumn)).AsInt32
+										row.HasValue(_shiftHighlightIntervalColumn) 
+											? ((Scalar)row.GetValue(_shiftHighlightIntervalColumn)).AsInt32
 											: (int?)null
 									)
 							)
 						}
 					);
 				}
-				FControl.ShiftSource = LData;
+				_control.ShiftSource = data;
 			}
 		}
 
 		// GroupSource
 
-		private ISource FGroupSource;
+		private ISource _groupSource;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("Specifies the GroupSource node the control will be attached to.")]
 		public ISource GroupSource
 		{
-			get { return FGroupSource; }
+			get { return _groupSource; }
 			set
 			{
-				if (FGroupSource != value)
+				if (_groupSource != value)
 					SetGroupSource(value);
 			}
 		}
 
-		protected virtual void SetGroupSource(ISource AGroupSource)
+		protected virtual void SetGroupSource(ISource groupSource)
 		{
-			if (FGroupSource != null)
-				FGroupSource.Disposed -= new EventHandler(GroupSourceDisposed);
-			FGroupSource = AGroupSource;
-			if (FGroupSource != null)
-				FGroupSource.Disposed += new EventHandler(GroupSourceDisposed);
+			if (_groupSource != null)
+				_groupSource.Disposed -= new EventHandler(GroupSourceDisposed);
+			_groupSource = groupSource;
+			if (_groupSource != null)
+				_groupSource.Disposed += new EventHandler(GroupSourceDisposed);
 			if (Active)
 				InternalUpdateGroupSource();
 		}
 
-		protected virtual void GroupSourceDisposed(object ASender, EventArgs AArgs)
+		protected virtual void GroupSourceDisposed(object sender, EventArgs args)
 		{
 			GroupSource = null;
 		}
 
-		private DataLink FGroupSourceLink;
+		private DataLink _groupSourceLink;
 
 		protected virtual void InternalUpdateGroupSource()
 		{
-			FGroupSourceLink.Source = GroupSource == null ? null : GroupSource.DataSource;
+			_groupSourceLink.Source = GroupSource == null ? null : GroupSource.DataSource;
 		}
 
-		private void GroupSourceLinkRowChanged(DataLink ALInk, DataSet ADataSet, DataField AField)
+		private void GroupSourceLinkRowChanged(DataLink lInk, DataSet dataSet, DataField field)
 		{
 			UpdateGroupData();
 		}
 
-		private void GroupSourceLinkChanged(DataLink ALink, DataSet ADataSet)
+		private void GroupSourceLinkChanged(DataLink link, DataSet dataSet)
 		{
 			UpdateGroupData();
 		}
 
 		// GroupColumn
 
-		private string FGroupColumn = String.Empty;
+		private string _groupColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("GroupSource")]
 		[Description("The column in the Group source that represents the Group.")]
 		public string GroupColumn
 		{
-			get { return FGroupColumn; }
+			get { return _groupColumn; }
 			set
 			{
-				if (FGroupColumn != value)
+				if (_groupColumn != value)
 				{
-					FGroupColumn = value;
+					_groupColumn = value;
 					UpdateGroupData();
 				}
 			}
@@ -620,19 +643,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// GroupDescriptionColumn
 
-		private string FGroupDescriptionColumn = String.Empty;
+		private string _groupDescriptionColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("GroupSource")]
 		[Description("The column in the Group source that represents the Description.")]
 		public string GroupDescriptionColumn
 		{
-			get { return FGroupDescriptionColumn; }
+			get { return _groupDescriptionColumn; }
 			set
 			{
-				if (FGroupDescriptionColumn != value)
+				if (_groupDescriptionColumn != value)
 				{
-					FGroupDescriptionColumn = value;
+					_groupDescriptionColumn = value;
 					UpdateGroupData();
 				}
 			}
@@ -640,19 +663,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// GroupConditionColumn
 
-		private string FGroupConditionColumn = String.Empty;
+		private string _groupConditionColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[ColumnNameSourceProperty("GroupSource")]
 		[Description("The optional column in the Group source that represents the Condition.")]
 		public string GroupConditionColumn
 		{
-			get { return FGroupConditionColumn; }
+			get { return _groupConditionColumn; }
 			set
 			{
-				if (FGroupConditionColumn != value)
+				if (_groupConditionColumn != value)
 				{
-					FGroupConditionColumn = value;
+					_groupConditionColumn = value;
 					UpdateGroupData();
 				}
 			}
@@ -660,57 +683,57 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void UpdateGroupData()
 		{
-			var LActive = Active
-				&& (FGroupSourceLink != null) && FGroupSourceLink.Active && !FGroupSourceLink.DataSet.IsEmpty()
-				&& !String.IsNullOrEmpty(FGroupColumn);
-			if (LActive)
+			var active = Active
+				&& (_groupSourceLink != null) && _groupSourceLink.Active && !_groupSourceLink.DataSet.IsEmpty()
+				&& !String.IsNullOrEmpty(_groupColumn);
+			if (active)
 				ReconcileGroupData();
 			else
-				if (FControl != null)
-					FControl.GroupSource = null;
+				if (_control != null)
+					_control.GroupSource = null;
 		}
 
 		private void ReconcileGroupData()
 		{
-			if (FControl != null)
+			if (_control != null)
 			{
 				// Expand the buffer to capture all rows in the set
-				while (FGroupSourceLink.LastOffset == FGroupSourceLink.BufferCount - 1)
-					FGroupSourceLink.BufferCount++;
+				while (_groupSourceLink.LastOffset == _groupSourceLink.BufferCount - 1)
+					_groupSourceLink.BufferCount++;
 
-				var LData = new List<ScheduleGroupData>(FGroupSourceLink.LastOffset + 1);
-				for (int i = 0; i <= FGroupSourceLink.LastOffset; i++)
+				var data = new List<ScheduleGroupData>(_groupSourceLink.LastOffset + 1);
+				for (int i = 0; i <= _groupSourceLink.LastOffset; i++)
 				{
-					var LRow = FGroupSourceLink.Buffer(i);
-					if (String.IsNullOrEmpty(FGroupConditionColumn) || ((Scalar)LRow.GetValue(FGroupConditionColumn)).AsBoolean)
-						LData.Add
+					var row = _groupSourceLink.Buffer(i);
+					if (String.IsNullOrEmpty(_groupConditionColumn) || ((Scalar)row.GetValue(_groupConditionColumn)).AsBoolean)
+						data.Add
 						(
 							new ScheduleGroupData
 							{
-								Group = (LRow.HasValue(FGroupColumn) ? ((Scalar)LRow.GetValue(FGroupColumn)).AsNative : null),
+								Group = (row.HasValue(_groupColumn) ? ((Scalar)row.GetValue(_groupColumn)).AsNative : null),
 								Description = 
 								(
-									String.IsNullOrEmpty(FGroupDescriptionColumn) 
+									String.IsNullOrEmpty(_groupDescriptionColumn) 
 										? null 
-										: (LRow.HasValue(FGroupDescriptionColumn) ? ((Scalar)LRow.GetValue(FGroupDescriptionColumn)).AsString : null)
+										: (row.HasValue(_groupDescriptionColumn) ? ((Scalar)row.GetValue(_groupDescriptionColumn)).AsString : null)
 								),
 							}
 						);
 				}
-				FControl.GroupSource = LData;
+				_control.GroupSource = data;
 			}
 		}
 
 		// Control
 
-		private Scheduler FControl;
-		private ElementHost FElementHost;
+		private Scheduler _control;
+		private ElementHost _elementHost;
 
 		// Element
 		
-		protected override void InternalLayout(System.Drawing.Rectangle ABounds)
+		protected override void InternalLayout(System.Drawing.Rectangle bounds)
 		{
-			FElementHost.Bounds = ABounds;                                          
+			_elementHost.Bounds = bounds;                                          
 		}
 
 		// Node
@@ -725,26 +748,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				Application.Current.DispatcherUnhandledException += new System.Windows.Threading.DispatcherUnhandledExceptionEventHandler(HandleUnhandledWPFException);
 			}
 
-			FControl = CreateControl();
-			FControl.Style = Application.Current.Resources[GetStyle()] as Style;
-			FControl.AddHandler(System.Windows.Controls.ContextMenuService.ContextMenuOpeningEvent, new RoutedEventHandler(ContextMenuOpened));
-			DependencyPropertyDescriptor.FromProperty(Scheduler.SelectedAppointmentProperty, typeof(Scheduler)).AddValueChanged(FControl, new EventHandler(SelectedAppointmentChanged));
-			FControl.MouseDoubleClick += new System.Windows.Input.MouseButtonEventHandler(ControlDoubleClicked);
-			FControl.KeyDown += new System.Windows.Input.KeyEventHandler(ControlKeyDown);
+			_control = CreateControl();
+			_control.Style = Application.Current.Resources[GetStyle()] as Style;
+			_control.AddHandler(System.Windows.Controls.ContextMenuService.ContextMenuOpeningEvent, new RoutedEventHandler(ContextMenuOpened));
+			DependencyPropertyDescriptor.FromProperty(Scheduler.SelectedAppointmentProperty, typeof(Scheduler)).AddValueChanged(_control, new EventHandler(SelectedAppointmentChanged));
+			_control.MouseDoubleClick += new System.Windows.Input.MouseButtonEventHandler(ControlDoubleClicked);
+			_control.KeyDown += new System.Windows.Input.KeyEventHandler(ControlKeyDown);
 			InternalUpdateStartDate();
 						
-			FAppointmentSourceLink = new DataLink();
-			FAppointmentSourceLink.OnDataChanged += new DataLinkHandler(AppointmentSourceLinkChanged);
-			FAppointmentSourceLink.OnRowChanged += new DataLinkFieldHandler(AppointmentSourceLinkRowChanged);
-			FAppointmentSourceLink.OnActiveChanged += new DataLinkHandler(AppointmentSourceLinkChanged);
-			FShiftSourceLink = new DataLink();
-			FShiftSourceLink.OnDataChanged += new DataLinkHandler(ShiftSourceLinkChanged);
-			FShiftSourceLink.OnRowChanged += new DataLinkFieldHandler(ShiftSourceLinkRowChanged);
-			FShiftSourceLink.OnActiveChanged += new DataLinkHandler(ShiftSourceLinkChanged);
-			FGroupSourceLink = new DataLink();
-			FGroupSourceLink.OnDataChanged += new DataLinkHandler(GroupSourceLinkChanged);
-			FGroupSourceLink.OnRowChanged += new DataLinkFieldHandler(GroupSourceLinkRowChanged);
-			FGroupSourceLink.OnActiveChanged += new DataLinkHandler(GroupSourceLinkChanged);
+			_appointmentSourceLink = new DataLink();
+			_appointmentSourceLink.OnDataChanged += new DataLinkHandler(AppointmentSourceLinkChanged);
+			_appointmentSourceLink.OnRowChanged += new DataLinkFieldHandler(AppointmentSourceLinkRowChanged);
+			_appointmentSourceLink.OnActiveChanged += new DataLinkHandler(AppointmentSourceLinkChanged);
+			_shiftSourceLink = new DataLink();
+			_shiftSourceLink.OnDataChanged += new DataLinkHandler(ShiftSourceLinkChanged);
+			_shiftSourceLink.OnRowChanged += new DataLinkFieldHandler(ShiftSourceLinkRowChanged);
+			_shiftSourceLink.OnActiveChanged += new DataLinkHandler(ShiftSourceLinkChanged);
+			_groupSourceLink = new DataLink();
+			_groupSourceLink.OnDataChanged += new DataLinkHandler(GroupSourceLinkChanged);
+			_groupSourceLink.OnRowChanged += new DataLinkFieldHandler(GroupSourceLinkRowChanged);
+			_groupSourceLink.OnActiveChanged += new DataLinkHandler(GroupSourceLinkChanged);
 			
 			InternalUpdateGroupSource();
 			InternalUpdateAppointmentSource();
@@ -754,17 +777,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			UpdateShiftData();
 			UpdateAppointmentData();
 			
-			FElementHost = new ElementHost();
-			FElementHost.Parent = ((IWindowsContainerElement)Parent).Control;
-			FElementHost.Child = FControl;
+			_elementHost = new ElementHost();
+			_elementHost.Parent = ((IWindowsContainerElement)Parent).Control;
+			_elementHost.Child = _control;
 			
 			base.Activate();
 		}
 
-		private void HandleUnhandledWPFException(object ASender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs AArgs)
+		private void HandleUnhandledWPFException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs args)
 		{
-			AArgs.Handled = true;
-			Session.HandleException(AArgs.Exception);
+			args.Handled = true;
+			Session.HandleException(args.Exception);
 		}
 
 		protected virtual Scheduler CreateControl()
@@ -777,58 +800,58 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return "DefaultSchedulerStyle";
 		}
 
-		private void ContextMenuOpened(object ASender, RoutedEventArgs AArgs)
+		private void ContextMenuOpened(object sender, RoutedEventArgs args)
 		{
-			var LItem = AArgs.OriginalSource as DependencyObject;
-			if (LItem != null)
+			var item = args.OriginalSource as DependencyObject;
+			if (item != null)
 			{
-				FrameworkElement LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>(LItem);
-				if (LElement != null)
+				FrameworkElement element = Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>(item);
+				if (element != null)
 				{
-					AArgs.Handled = true;
-					var LMenu = new ContextMenu();
-					BuildMenu(LMenu, typeof(ScheduleTimeBlockVerb), LElement);
-					if (LMenu.Items.Count > 0)
+					args.Handled = true;
+					var menu = new ContextMenu();
+					BuildMenu(menu, typeof(ScheduleTimeBlockVerb), element);
+					if (menu.Items.Count > 0)
 					{
-						LElement.ContextMenu = LMenu;
-						LMenu.IsOpen = true;
+						element.ContextMenu = menu;
+						menu.IsOpen = true;
 					}
 				}
 				else
 				{
-					LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleAppointment>(LItem);
-					if (LElement != null)
+					element = Utilities.GetAncestorOfTypeInVisualTree<ScheduleAppointment>(item);
+					if (element != null)
 					{
-						AArgs.Handled = true;
-						var LMenu = new ContextMenu();
-						BuildMenu(LMenu, typeof(ScheduleAppointmentVerb), LElement);
-						if (LMenu.Items.Count > 0)
+						args.Handled = true;
+						var menu = new ContextMenu();
+						BuildMenu(menu, typeof(ScheduleAppointmentVerb), element);
+						if (menu.Items.Count > 0)
 						{
-							LElement.ContextMenu = LMenu;
-							LMenu.IsOpen = true;
+							element.ContextMenu = menu;
+							menu.IsOpen = true;
 						}
 					}
 				}
 			}
 		}
 
-		protected virtual void BuildMenu(ContextMenu AMenu, Type AType, object AOwner)
+		protected virtual void BuildMenu(ContextMenu menu, Type type, object owner)
 		{
-			var LFirst = true;
-			foreach (INode LChild in Children)
+			var first = true;
+			foreach (INode child in Children)
 			{
-				if (AType.IsAssignableFrom(LChild.GetType()))
+				if (type.IsAssignableFrom(child.GetType()))
 				{
-					var LVerb = LChild as BaseVerb;
-					if (LVerb != null)
+					var verb = child as BaseVerb;
+					if (verb != null)
 					{
-						var LMenuItem = LVerb.BuildMenuItem(AOwner);
-						if (LFirst)
+						var menuItem = verb.BuildMenuItem(owner);
+						if (first)
 						{
-							LMenuItem.FontWeight = FontWeights.Bold;
-							LFirst = false;
+							menuItem.FontWeight = FontWeights.Bold;
+							first = false;
 						}
-						AMenu.Items.Add(LMenuItem);
+						menu.Items.Add(menuItem);
 					}
 				}
 			}
@@ -836,119 +859,119 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected override void Deactivate()
 		{
-			if (FAppointmentSourceLink != null)
+			if (_appointmentSourceLink != null)
 			{
-				FAppointmentSourceLink.Dispose();
-				FAppointmentSourceLink = null;
+				_appointmentSourceLink.Dispose();
+				_appointmentSourceLink = null;
 			}
-			if (FShiftSourceLink != null)
+			if (_shiftSourceLink != null)
 			{
-				FShiftSourceLink.Dispose();
-				FShiftSourceLink = null;
+				_shiftSourceLink.Dispose();
+				_shiftSourceLink = null;
 			}
-			if (FGroupSourceLink != null)
+			if (_groupSourceLink != null)
 			{
-				FGroupSourceLink.Dispose();
-				FGroupSourceLink = null;
+				_groupSourceLink.Dispose();
+				_groupSourceLink = null;
 			}
-			if (FElementHost != null)
+			if (_elementHost != null)
 			{
-				DependencyPropertyDescriptor.FromProperty(Scheduler.SelectedAppointmentProperty, typeof(Scheduler)).RemoveValueChanged(FControl, new EventHandler(SelectedAppointmentChanged));
-				FElementHost.Dispose();
-				FElementHost = null;
-				FControl = null;
+				DependencyPropertyDescriptor.FromProperty(Scheduler.SelectedAppointmentProperty, typeof(Scheduler)).RemoveValueChanged(_control, new EventHandler(SelectedAppointmentChanged));
+				_elementHost.Dispose();
+				_elementHost = null;
+				_control = null;
 			}
 			base.Deactivate();
 		}
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			return typeof(BaseVerb).IsAssignableFrom(AChildType)
-				|| base.IsValidChild(AChildType);
+			return typeof(BaseVerb).IsAssignableFrom(childType)
+				|| base.IsValidChild(childType);
 		}
 
-		private void ControlDoubleClicked(object ASender, System.Windows.Input.MouseButtonEventArgs AArgs)
+		private void ControlDoubleClicked(object sender, System.Windows.Input.MouseButtonEventArgs args)
 		{
 			// Double click executes the enabled appointment verb if on an appointment, or block verb if on a block
-			var LItem = AArgs.OriginalSource as DependencyObject;
-			if (LItem != null)
+			var item = args.OriginalSource as DependencyObject;
+			if (item != null)
 			{
-				FrameworkElement LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>(LItem);
-				if (LElement != null)
+				FrameworkElement element = Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>(item);
+				if (element != null)
 				{
-					AArgs.Handled = true;
-					var LVerb = FindFirstVerb(typeof(ScheduleTimeBlockVerb));
-					if (LVerb != null && LVerb.GetEnabled())
-						LVerb.Execute(AArgs.OriginalSource);
+					args.Handled = true;
+					var verb = FindFirstVerb(typeof(ScheduleTimeBlockVerb));
+					if (verb != null && verb.GetEnabled())
+						verb.Execute(args.OriginalSource);
 				}
 				else
 				{
-					LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleAppointment>(LItem);
-					if (LElement != null)
+					element = Utilities.GetAncestorOfTypeInVisualTree<ScheduleAppointment>(item);
+					if (element != null)
 					{
-						AArgs.Handled = true;
-						var LVerb = FindFirstVerb(typeof(ScheduleAppointmentVerb));
-						if (LVerb != null && LVerb.GetEnabled())
-							LVerb.Execute(AArgs.OriginalSource);
+						args.Handled = true;
+						var verb = FindFirstVerb(typeof(ScheduleAppointmentVerb));
+						if (verb != null && verb.GetEnabled())
+							verb.Execute(args.OriginalSource);
 					}
 				}
 			}
 		}
 
-		private BaseVerb FindFirstVerb(Type AType)
+		private BaseVerb FindFirstVerb(Type type)
 		{
-			foreach (INode LChild in Children)
+			foreach (INode child in Children)
 			{
-				if (AType.IsAssignableFrom(LChild.GetType()))
+				if (type.IsAssignableFrom(child.GetType()))
 				{
-					var LVerb = LChild as BaseVerb;
-					if (LVerb != null && LVerb.Enabled)
-						return LVerb;
+					var verb = child as BaseVerb;
+					if (verb != null && verb.Enabled)
+						return verb;
 				}
 			}
 			return null;
 		}
 
-		private void ControlKeyDown(object ASender, System.Windows.Input.KeyEventArgs AArgs)
+		private void ControlKeyDown(object sender, System.Windows.Input.KeyEventArgs args)
 		{
-			var LItem = AArgs.OriginalSource as DependencyObject;
-			if (LItem != null)
+			var item = args.OriginalSource as DependencyObject;
+			if (item != null)
 			{
-				FrameworkElement LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>(LItem);
-				if (LElement != null)
+				FrameworkElement element = Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>(item);
+				if (element != null)
 				{
-					var LVerb = FindVerbForKey(typeof(ScheduleTimeBlockVerb), AArgs.Key);
-					if (LVerb != null && LVerb.GetEnabled())
+					var verb = FindVerbForKey(typeof(ScheduleTimeBlockVerb), args.Key);
+					if (verb != null && verb.GetEnabled())
 					{
-						AArgs.Handled = true;
-						LVerb.Execute(AArgs.OriginalSource);
+						args.Handled = true;
+						verb.Execute(args.OriginalSource);
 					}
 				}
 				else
 				{
-					LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleAppointment>(LItem);
-					if (LElement != null)
+					element = Utilities.GetAncestorOfTypeInVisualTree<ScheduleAppointment>(item);
+					if (element != null)
 					{
-						var LVerb = FindVerbForKey(typeof(ScheduleAppointmentVerb), AArgs.Key);
-						if (LVerb != null && LVerb.GetEnabled())
+						var verb = FindVerbForKey(typeof(ScheduleAppointmentVerb), args.Key);
+						if (verb != null && verb.GetEnabled())
 						{
-							AArgs.Handled = true;
-							LVerb.Execute(AArgs.OriginalSource);
+							args.Handled = true;
+							verb.Execute(args.OriginalSource);
 						}
 					}
 				}
 			}
 		}
 
-		private BaseVerb FindVerbForKey(Type AType, System.Windows.Input.Key AKey)
+		private BaseVerb FindVerbForKey(Type type, System.Windows.Input.Key key)
 		{
-			foreach (INode LChild in Children)
+			foreach (INode child in Children)
 			{
-				if (AType.IsAssignableFrom(LChild.GetType()))
+				if (type.IsAssignableFrom(child.GetType()))
 				{
-					var LVerb = LChild as BaseVerb;
-					if (LVerb != null && LVerb.Enabled && LVerb.KeyboardShortcut != null && LVerb.KeyboardShortcut.Key == AKey && LVerb.KeyboardShortcut.Modifiers == Keyboard.Modifiers)
-						return LVerb;
+					var verb = child as BaseVerb;
+					if (verb != null && verb.Enabled && verb.KeyboardShortcut != null && verb.KeyboardShortcut.Key == key && verb.KeyboardShortcut.Modifiers == Keyboard.Modifiers)
+						return verb;
 				}
 			}
 			return null;
@@ -957,67 +980,67 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public abstract class BaseVerb : Node
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Action = null;
 		}
 		
 		// Action
 
-		protected IAction FAction;
+		protected IAction _action;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("An action that will be executed when this control is pressed.")]
 		public IAction Action
 		{
-			get { return FAction; }
+			get { return _action; }
 			set
 			{
-				if (FAction != value)
+				if (_action != value)
 				{
-					if (FAction != null)
-						FAction.Disposed -= new EventHandler(ActionDisposed);
-					FAction = value;
-					if (FAction != null)
-						FAction.Disposed += new EventHandler(ActionDisposed);
+					if (_action != null)
+						_action.Disposed -= new EventHandler(ActionDisposed);
+					_action = value;
+					if (_action != null)
+						_action.Disposed += new EventHandler(ActionDisposed);
 				}
 			}
 		}
 
-		protected void ActionDisposed(object ASender, EventArgs AArgs)
+		protected void ActionDisposed(object sender, EventArgs args)
 		{
 			Action = null;
 		}
 
 		// Text
 
-		private string FText = String.Empty;
+		private string _text = String.Empty;
 		[Publish(PublishMethod.Value)]
 		[DefaultValue("")]
 		[Description("A text string that will be used on the context menu.  If this is not set the text property of the action will be used.")]
 		public string Text
 		{
-			get { return FText; }
-			set { FText = value; }
+			get { return _text; }
+			set { _text = value; }
 		}
 
 		public string GetText()
 		{
-			if ((Action != null) && (FText == String.Empty))
+			if ((Action != null) && (_text == String.Empty))
 				return Action.Text;
 			else
-				return FText;
+				return _text;
 		}
 
 		// Enabled
 
-		private bool FEnabled = true;
+		private bool _enabled = true;
 		[DefaultValue(true)]
 		[Description("When this is set to false this context menu item will be disabled.  This control will also be disabled if the action is disabled.")]
 		public bool Enabled
 		{
-			get { return FEnabled; }
-			set { FEnabled = value; }
+			get { return _enabled; }
+			set { _enabled = value; }
 		}
 
 		/// <summary> Gets whether the node is actuall enabled (accounting for action). </summary>
@@ -1027,65 +1050,65 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		///	</remarks>
 		public bool GetEnabled()
 		{
-			return (Action == null ? false : Action.GetEnabled()) && FEnabled;
+			return (Action == null ? false : Action.GetEnabled()) && _enabled;
 		}
 		
 		// KeyboardShortcut
 		
-		private KeyGesture FKeyboardShortcut = null;
+		private KeyGesture _keyboardShortcut = null;
 		public KeyGesture KeyboardShortcut
 		{
-			get { return FKeyboardShortcut; }
-			set { FKeyboardShortcut = value; }
+			get { return _keyboardShortcut; }
+			set { _keyboardShortcut = value; }
 		}
 		
-		protected internal virtual MenuItem BuildMenuItem(object AOwner)
+		protected internal virtual MenuItem BuildMenuItem(object owner)
 		{
-			var LItem = 
+			var item = 
 				new MenuItem
 				{
 					Header = GetText().Replace('&', '_'),
 					IsEnabled = GetEnabled(),
 					Icon = (Action == null ? null : new System.Windows.Controls.Image() { Source = WPFInteropUtility.ImageToBitmapSource(((Action)Action).LoadedImage) }),
-					Tag = AOwner,
-					InputGestureText = FKeyboardShortcut == null  ? "" : new KeyGestureConverter().ConvertToString(FKeyboardShortcut)
+					Tag = owner,
+					InputGestureText = _keyboardShortcut == null  ? "" : new KeyGestureConverter().ConvertToString(_keyboardShortcut)
 				};
-			LItem.Click += new RoutedEventHandler(ItemClicked);
-			return LItem;
+			item.Click += new RoutedEventHandler(ItemClicked);
+			return item;
 		}
 		
-		protected virtual void ItemClicked(object ASender, RoutedEventArgs AArgs)
+		protected virtual void ItemClicked(object sender, RoutedEventArgs args)
 		{
 			if (Action != null)
 			{
-				AArgs.Handled = true;
-				Execute((FrameworkElement)((MenuItem)ASender).Tag);
+				args.Handled = true;
+				Execute((FrameworkElement)((MenuItem)sender).Tag);
 			}
 		}
 
-		public abstract void Execute(object ASender);
+		public abstract void Execute(object sender);
 	}
 
 	[DesignerImage("Image('Frontend', 'Nodes.Schedule')")]
 	[DesignerCategory("Data Controls")]
 	public class ScheduleAppointmentVerb : BaseVerb
 	{
-		public override void Execute(object ASender)
+		public override void Execute(object sender)
 		{
-			var LAppointment = WPF.Utilities.GetAncestorOfTypeInVisualTree<ListBoxItem>((DependencyObject)ASender);
-			var LDay = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleDay>((DependencyObject)ASender);
-			var LParams = new EventParams();
-			if (LAppointment != null)
+			var appointment = WPF.Utilities.GetAncestorOfTypeInVisualTree<ListBoxItem>((DependencyObject)sender);
+			var day = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleDay>((DependencyObject)sender);
+			var paramsValue = new EventParams();
+			if (appointment != null)
 			{
-				LParams.Add("AStartTime", ScheduleDayAppointments.GetStart(LAppointment));
-				LParams.Add("AEndTime", ScheduleDayAppointments.GetEnd(LAppointment));
+				paramsValue.Add("AStartTime", ScheduleDayAppointments.GetStart(appointment));
+				paramsValue.Add("AEndTime", ScheduleDayAppointments.GetEnd(appointment));
 			}
-			if (LDay != null)
+			if (day != null)
 			{
-				LParams.Add("ADate", LDay.Date);
-				LParams.Add("AGroup", LDay.GroupID);
+				paramsValue.Add("ADate", day.Date);
+				paramsValue.Add("AGroup", day.GroupID);
 			}
-			Action.Execute(this, LParams);
+			Action.Execute(this, paramsValue);
 		}
 	}
 
@@ -1093,19 +1116,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class ScheduleTimeBlockVerb : BaseVerb
 	{
-		public override void Execute(object ASender)
+		public override void Execute(object sender)
 		{
-			var LTimeBlock = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>((DependencyObject)ASender);
-			var LDay = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleDay>((DependencyObject)ASender);
-			var LParams = new EventParams();
-			if (LTimeBlock != null)
-				LParams.Add("ATime", LTimeBlock.Time);
-			if (LDay != null)
+			var timeBlock = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>((DependencyObject)sender);
+			var day = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleDay>((DependencyObject)sender);
+			var paramsValue = new EventParams();
+			if (timeBlock != null)
+				paramsValue.Add("ATime", timeBlock.Time);
+			if (day != null)
 			{
-				LParams.Add("ADate", LDay.Date);
-				LParams.Add("AGroup", LDay.GroupID);
+				paramsValue.Add("ADate", day.Date);
+				paramsValue.Add("AGroup", day.GroupID);
 			}
-			Action.Execute(this, LParams);
+			Action.Execute(this, paramsValue);
 		}
 	}
 
@@ -1120,30 +1143,30 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public class ScheduleGroupData : INotifyPropertyChanged
 	{
-		private object FGroup;
+		private object _group;
 		/// <summary> Gets and sets the object data used to group items under this grouping. </summary>
 		public object Group
 		{
-			get { return FGroup; }
+			get { return _group; }
 			set
 			{
-				if (FGroup != value)
+				if (_group != value)
 				{
-					FGroup = value;
+					_group = value;
 					NotifyPropertyChanged("Group");
 				}
 			}
 		}
 
-		private string FDescription;
+		private string _description;
 		public string Description
 		{
-			get { return FDescription; }
+			get { return _description; }
 			set
 			{
-				if (FDescription != value)
+				if (_description != value)
 				{
-					FDescription = value;
+					_description = value;
 					NotifyPropertyChanged("Description");
 				}
 			}
@@ -1151,82 +1174,82 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		protected void NotifyPropertyChanged(string APropertyName)
+		protected void NotifyPropertyChanged(string propertyName)
 		{
 			if (PropertyChanged != null)
-				PropertyChanged(this, new PropertyChangedEventArgs(APropertyName));
+				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 
 	public class ScheduleData : INotifyPropertyChanged
 	{
-		private DateTime FDate;
+		private DateTime _date;
 		public DateTime Date
 		{
-			get { return FDate; }
+			get { return _date; }
 			set
 			{
-				if (FDate != value)
+				if (_date != value)
 				{
-					FDate = value;
+					_date = value;
 					NotifyPropertyChanged("Date");
 				}
 			}
 		}
 
-		private DateTime FStartTime;
+		private DateTime _startTime;
 		public DateTime StartTime
 		{
-			get { return FStartTime; }
+			get { return _startTime; }
 			set
 			{
-				if (FStartTime != value)
+				if (_startTime != value)
 				{
-					FStartTime = value;
+					_startTime = value;
 					NotifyPropertyChanged("StartTime");
 				}
 			}
 		}
 
-		private DateTime FEndTime;
+		private DateTime _endTime;
 		public DateTime EndTime
 		{
-			get { return FEndTime; }
+			get { return _endTime; }
 			set
 			{
-				if (FEndTime != value)
+				if (_endTime != value)
 				{
-					FEndTime = value;
+					_endTime = value;
 					NotifyPropertyChanged("EndTime");
 				}
 			}
 		}
 
-		private object FGroup;
+		private object _group;
 		/// <summary> Gets and sets the object data used to group this item. </summary>
 		public object Group
 		{
-			get { return FGroup; }
+			get { return _group; }
 			set
 			{
-				if (FGroup != value)
+				if (_group != value)
 				{
-					FGroup = value;
+					_group = value;
 					NotifyPropertyChanged("Group");
 				}
 			}
 		}
 
-		private string FDescription;
+		private string _description;
 		/// <summary> Gets and sets the textual description of the item. </summary>
 		public string Description
 		{
-			get { return FDescription; }
+			get { return _description; }
 			set
 			{
-				if (FDescription != value)
+				if (_description != value)
 				{
-					FDescription = value;
+					_description = value;
 					NotifyPropertyChanged("Description");
 				}
 			}
@@ -1234,25 +1257,39 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		protected void NotifyPropertyChanged(string APropertyName)
+		protected void NotifyPropertyChanged(string propertyName)
 		{
 			if (PropertyChanged != null)
-				PropertyChanged(this, new PropertyChangedEventArgs(APropertyName));
+				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 	
 	public class ScheduleAppointmentData : ScheduleData
 	{
-		private ImageSource FImage;
+		private ImageSource _image;
 		public ImageSource Image
 		{
-			get { return FImage; }
+			get { return _image; }
 			set
 			{
-				if (FImage != value)
+				if (_image != value)
 				{
-					FImage = value;
+					_image = value;
 					NotifyPropertyChanged("Image");
+				}
+			}
+		}
+
+		private string _backgroundColor;
+		public string BackgroundColor
+		{
+			get { return _backgroundColor; }
+			set
+			{
+				if (_backgroundColor != value)
+				{
+					_backgroundColor = value;
+					NotifyPropertyChanged("BackgroundColor");
 				}
 			}
 		}
@@ -1260,15 +1297,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	
 	public class ScheduleShiftData : ScheduleData
 	{
-		private int? FHighlightInterval;
+		private int? _highlightInterval;
 		public int? HighlightInterval
 		{
-			get { return FHighlightInterval; }
+			get { return _highlightInterval; }
 			set
 			{
-				if (FHighlightInterval != value)
+				if (_highlightInterval != value)
 				{
-					FHighlightInterval = value;
+					_highlightInterval = value;
 					NotifyPropertyChanged("HighlightInterval");
 				}
 			}
@@ -1289,13 +1326,66 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	}
 
 	public class BooleanToBorderBrushConverter : IValueConverter
-	{
+	{  	
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			var LBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x55, 0x55, 0xFF));
+			//TODO: investigate programmatically creating the Binding so the BackgroundColor can be passed as the parameter and the Border can be set to an opacity of the BackgroundColor.
+			SolidColorBrush brush = new SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0x00, 0x00));
 			if (!(bool)value)
-				LBrush.Opacity = 0d;
-			return LBrush;
+				brush.Opacity = 0d;
+			return brush;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}	   
+	} 
+	
+	public class StringToBorderBackgroundBrushConverter : IValueConverter
+	{
+		public const string DefaultBrush = "#9BA5DA";
+		static StringToBorderBackgroundBrushConverter()
+		{
+		   Brushes.Add(DefaultBrush, GetBrush(DefaultBrush));
+		}
+
+		public static LinearGradientBrush GetBrush(string color)
+		{
+			LinearGradientBrush brush = new LinearGradientBrush(); 
+			try
+			{
+				byte red = System.Convert.ToByte(color.Substring(1, 2), 16);
+				byte green = System.Convert.ToByte(color.Substring(3, 2), 16);
+				byte blue = System.Convert.ToByte(color.Substring(5, 2), 16);					
+				
+				brush.EndPoint = new Point(0.5, 1);
+				brush.StartPoint = new Point(0.5, 0);
+				brush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, red, green, blue), 1)); 			
+				//TODO: investigate putting three gradients back in.  The default color example is below:
+				//brush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xBC, 0xC1, 0xE8), 0));
+				//brush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xB0, 0xB8, 0xE4), 0.935));
+				//brush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xAA, 0xB4, 0xE6), 0.069));
+
+			}
+			catch
+			{
+				return GetBrush(DefaultBrush);
+			}
+			return brush;
+		}	 
+		
+		private static Dictionary<string, LinearGradientBrush> Brushes = new Dictionary<string, LinearGradientBrush>();
+	
+		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{  			
+			string color = (String)value;
+			if (!Brushes.ContainsKey(color))
+			{
+				Brushes.Add(color, GetBrush(color));
+			}	  		           
+
+			return Brushes[color]; 
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

@@ -26,22 +26,22 @@ namespace Alphora.Dataphor.BOP
 		public bool RemoveReferencesToObjectsNotSerialized = true;
 
 		/// <summary> Stores an instance of an object as an XML stream. </summary>
-		public void Serialize(Stream AStream, object AObject)
+		public void Serialize(Stream stream, object objectValue)
 		{
-			XDocument LDocument = new XDocument();
+			XDocument document = new XDocument();
 
-			Serialize(LDocument, AObject);
+			Serialize(document, objectValue);
 
-			XmlWriter LWriter = XmlWriter.Create(AStream, new XmlWriterSettings { Indent = true, IndentChars = "\t" });
+			XmlWriter writer = XmlWriter.Create(stream, new XmlWriterSettings { Indent = true, IndentChars = "\t" });
 
-			LDocument.WriteTo(LWriter);
-			LWriter.Flush();
+			document.WriteTo(writer);
+			writer.Flush();
 			
 			// Don't call LWriter.Close() or the AStream will be closed and will not acessable after this function is called.
 		}
  
 		/// <summary> Stores an instance of an object as an XML document. </summary>
-		public virtual void Serialize(XDocument ADocument, object AObject)
+		public virtual void Serialize(XDocument document, object objectValue)
 		{
 			Errors.Clear();
 
@@ -49,13 +49,13 @@ namespace Alphora.Dataphor.BOP
 			try
 			{
 				// Create root object
-				Type LType = AObject.GetType();
-				XElement LRoot = CreateElement(ADocument, String.Empty, LType);
+				Type type = objectValue.GetType();
+				XElement root = CreateElement(document, String.Empty, type);
 
 				// Specify BOP namespace
-				LRoot.SetAttributeValue(XNamespace.Xmlns + CBOPNamespacePrefix, CBOPNamespaceURI);
+				root.SetAttributeValue(XNamespace.Xmlns + BOPNamespacePrefix, BOPNamespaceURI);
 
-				WriteMembers(String.Empty, LRoot, AObject, LType);
+				WriteMembers(String.Empty, root, objectValue, type);
 			}
 			finally
 			{
@@ -63,20 +63,20 @@ namespace Alphora.Dataphor.BOP
 			}
 		}
 
-		protected Set<object> FInstances;
+		protected Set<object> _instances;
 		public Set<object> Instances
 		{
-			get { return FInstances; }
+			get { return _instances; }
 		}
 
-		private List<Reference> FReferences;
+		private List<Reference> _references;
 
 		private class Reference
 		{
-			public Reference(object AInstance, XAttribute AAttribute)
+			public Reference(object instance, XAttribute attribute)
 			{
-				Instance = AInstance;
-				Attribute = AAttribute;
+				Instance = instance;
+				Attribute = attribute;
 			}
 			public object Instance;
 			public XAttribute Attribute;
@@ -84,44 +84,44 @@ namespace Alphora.Dataphor.BOP
 
 		private void BeginFixups()
 		{
-			FInstances = new Set<object>();
-			FReferences = new List<Reference>();
+			_instances = new Set<object>();
+			_references = new List<Reference>();
 		}
 
 		private void EndFixups()
 		{
 			// Remove all attributes that reference instances that were not written
 			if (RemoveReferencesToObjectsNotSerialized)
-				foreach (Reference LReference in FReferences)
-					if (!Instances.Contains(LReference.Instance))
-						LReference.Attribute.Remove();
-			FReferences = null;
-			FInstances = null;
+				foreach (Reference reference in _references)
+					if (!Instances.Contains(reference.Instance))
+						reference.Attribute.Remove();
+			_references = null;
+			_instances = null;
 		}
 
 		/// <summary> Determines the element namespace to use when writing the specified type. </summary>
-		protected virtual string GetElementNamespace(Type AType)
+		protected virtual string GetElementNamespace(Type type)
 		{
-			return String.Format("{0},{1}", AType.Namespace, AssemblyNameUtility.GetName(AType.Assembly.FullName));
+			return String.Format("{0},{1}", type.Namespace, AssemblyNameUtility.GetName(type.Assembly.FullName));
 		}
 
 		/// <summary> Determines if the specified property should be serialized. </summary>
-		private bool ShouldPersist(MemberInfo AMember, object AValue, object AInstance)
+		private bool ShouldPersist(MemberInfo member, object tempValue, object instance)
 		{
-			DefaultValueAttribute LDefaultValues = (DefaultValueAttribute)ReflectionUtility.GetAttribute(AMember, typeof(DefaultValueAttribute));
-			if (LDefaultValues != null)
-				return !Object.Equals(AValue, LDefaultValues.Value);
+			DefaultValueAttribute defaultValues = (DefaultValueAttribute)ReflectionUtility.GetAttribute(member, typeof(DefaultValueAttribute));
+			if (defaultValues != null)
+				return !Object.Equals(tempValue, defaultValues.Value);
 
-			DefaultValueMemberAttribute LDefaultMember = (DefaultValueMemberAttribute)ReflectionUtility.GetAttribute(AMember, typeof(DefaultValueMemberAttribute));
-			if (LDefaultMember != null)
+			DefaultValueMemberAttribute defaultMember = (DefaultValueMemberAttribute)ReflectionUtility.GetAttribute(member, typeof(DefaultValueMemberAttribute));
+			if (defaultMember != null)
 				return 
 					!Object.Equals
 					(
-						AValue,
+						tempValue,
 						ReflectionUtility.GetMemberValue
 						(
-							ReflectionUtility.FindSimpleMember(AInstance.GetType(), LDefaultMember.MemberName), 
-							AInstance
+							ReflectionUtility.FindSimpleMember(instance.GetType(), defaultMember.MemberName), 
+							instance
 						)
 					);
 			
@@ -129,85 +129,85 @@ namespace Alphora.Dataphor.BOP
 		}
 
 		/// <summary> Writes a member value to an XML attribute. </summary>
-		private void WriteValue(XName AName, XElement ANode, MemberInfo AMember, object AValue, object AInstance)
+		private void WriteValue(XName name, XElement node, MemberInfo member, object tempValue, object instance)
 		{
-			if (ShouldPersist(AMember, AValue, AInstance))
+			if (ShouldPersist(member, tempValue, instance))
 			{
-				bool LIsReference = false;
-				Type LType = ReflectionUtility.GetMemberType(AMember);
+				bool isReference = false;
+				Type type = ReflectionUtility.GetMemberType(member);
 
-				string LValue;
-				if (IsValueType(LType)) 
-					LValue = ReflectionUtility.ValueToString(AValue, LType);
-				else if (typeof(Delegate).IsAssignableFrom(LType))
+				string localTempValue;
+				if (IsValueType(type)) 
+					localTempValue = ReflectionUtility.ValueToString(tempValue, type);
+				else if (typeof(Delegate).IsAssignableFrom(type))
 					throw new BOPException(BOPException.Codes.DelegatesNotSupported);		// TODO: Write delegates
-				else if (AValue != null)
-					LValue = ReferenceToString(AValue, out LIsReference);
+				else if (tempValue != null)
+					localTempValue = ReferenceToString(tempValue, out isReference);
 				else
 					return;
 				
-				XAttribute LAttribute = new XAttribute(AName, LValue);
-				ANode.Add(LAttribute);
+				XAttribute attribute = new XAttribute(name, localTempValue);
+				node.Add(attribute);
 
 				// Add a reference fixup if needed
-				if (LIsReference && !Instances.Contains(AValue))
-					FReferences.Add(new Reference(AValue, LAttribute));		
+				if (isReference && !Instances.Contains(tempValue))
+					_references.Add(new Reference(tempValue, attribute));		
 			}
 		}
 
 		/// <summary> Builds a list of names of the specified type's members that are arguments to the constructor. </summary>
-		private List<string> BuildConstructorParamSources(Type AType)
+		private List<string> BuildConstructorParamSources(Type type)
 		{
-			PublishDefaultConstructorAttribute LConstructorAttribute = (PublishDefaultConstructorAttribute)ReflectionUtility.GetAttribute(AType, typeof(PublishDefaultConstructorAttribute));
-			if ((LConstructorAttribute != null) && (LConstructorAttribute.ConstructorSignature != String.Empty)) 
+			PublishDefaultConstructorAttribute constructorAttribute = (PublishDefaultConstructorAttribute)ReflectionUtility.GetAttribute(type, typeof(PublishDefaultConstructorAttribute));
+			if ((constructorAttribute != null) && (constructorAttribute.ConstructorSignature != String.Empty)) 
 			{
-				List<string> LResult = new List<string>();
-				ParameterInfo[] LParameters = ReflectionUtility.FindConstructor(LConstructorAttribute.ConstructorSignature, AType).GetParameters();
-				PublishSourceAttribute LSource;
-				foreach (ParameterInfo LParameter in LParameters)
+				List<string> result = new List<string>();
+				ParameterInfo[] parameters = ReflectionUtility.FindConstructor(constructorAttribute.ConstructorSignature, type).GetParameters();
+				PublishSourceAttribute source;
+				foreach (ParameterInfo parameter in parameters)
 				{
-					LSource = (PublishSourceAttribute)ReflectionUtility.GetAttribute(LParameter, typeof(PublishSourceAttribute));
-					if ((LSource != null) && (LSource.MemberName != String.Empty))
-						LResult.Add(LSource.MemberName);
+					source = (PublishSourceAttribute)ReflectionUtility.GetAttribute(parameter, typeof(PublishSourceAttribute));
+					if ((source != null) && (source.MemberName != String.Empty))
+						result.Add(source.MemberName);
 				}
-				return LResult;
+				return result;
 			}
 			else
 				return null;
 		}
 
 		/// <summary> Determines what publish method to use for the specified member. </summary>
-		private PublishMethod GetPublishMethod(MemberInfo AMember, List<string> ASources)
+		private PublishMethod GetPublishMethod(MemberInfo member, List<string> sources)
 		{
 			// Check for an explicit publish method
-			PublishAttribute LPublishAttribute = (PublishAttribute)ReflectionUtility.GetAttribute(AMember, typeof(PublishAttribute));
+			PublishAttribute publishAttribute = (PublishAttribute)ReflectionUtility.GetAttribute(member, typeof(PublishAttribute));
 
 			// Figure out the true publish method
-			if (LPublishAttribute != null) 
-				return LPublishAttribute.Method;
+			if (publishAttribute != null) 
+				return publishAttribute.Method;
 			else
 			{
-				Type LMemberType = ReflectionUtility.GetMemberType(AMember);
-				if (IsValueType(LMemberType))
+				Type memberType = ReflectionUtility.GetMemberType(member);
+				if (IsValueType(memberType))
 					if 
 					(
-						(AMember is PropertyInfo) &&
+						(member is PropertyInfo) &&
 						(
 							(
-								!((PropertyInfo)AMember).CanWrite &&
-								((ASources == null) || !ASources.Contains(AMember.Name))
+								!((PropertyInfo)member).CanWrite &&
+								((sources == null) || !sources.Contains(member.Name))
 							) ||
-							((PropertyInfo)AMember).GetIndexParameters().Length > 0
+							((PropertyInfo)member).GetIndexParameters().Length > 0
 						)
 					)																		// read-only or indexed values
 						return PublishMethod.None;
 					else																	// writable (or constructor source) values
 						return PublishMethod.Value;
-				else if (typeof(IList).IsAssignableFrom(LMemberType))						// IList implementors
+				else if (typeof(IList).IsAssignableFrom(memberType))						// IList implementors
 					return PublishMethod.List;
-				else if (typeof(Delegate).IsAssignableFrom(LMemberType))
+				else if (typeof(Delegate).IsAssignableFrom(memberType))
 					return PublishMethod.None;
-				else if ((AMember is PropertyInfo) && !((PropertyInfo)AMember).CanWrite)	// read-only references
+				else if ((member is PropertyInfo) && !((PropertyInfo)member).CanWrite)	// read-only references
 					return PublishMethod.None;
 				else																		// writable references
 					return PublishMethod.Value;									
@@ -215,46 +215,46 @@ namespace Alphora.Dataphor.BOP
 		}
 
 		/// <summary> Appends a name qualifier to another name. </summary>
-		private string AppendQualifier(string AOriginal, string AQualifier)
+		private string AppendQualifier(string original, string qualifier)
 		{
-			if (AQualifier == String.Empty)
-				return AOriginal;
+			if (qualifier == String.Empty)
+				return original;
 			else
-				return String.Format("{0}.{1}", AQualifier, AOriginal);
+				return String.Format("{0}.{1}", qualifier, original);
 		}
 
 		/// <summary> Creates an appends a new XML element. </summary>
-		private XElement CreateElement(XContainer AParentNode, string ANameQualifier, Type AType)
+		private XElement CreateElement(XContainer parentNode, string nameQualifier, Type type)
 		{
-			XElement LResult = 
+			XElement result = 
 				new XElement
 				(
-					XName.Get(AppendQualifier(GetElementName(AType), ANameQualifier), 
-					GetElementNamespace(AType))
+					XName.Get(AppendQualifier(GetElementName(type), nameQualifier), 
+					GetElementNamespace(type))
 				);
-			AParentNode.Add(LResult);
-			return LResult;
+			parentNode.Add(result);
+			return result;
 		}
 
 		/// <summary> Determines an attribute string for the given instance reference. </summary>
-		private string ReferenceToString(object AValue, out bool AReference)
+		private string ReferenceToString(object tempValue, out bool reference)
 		{
-			AReference = true;
-			if (AValue == null)
+			reference = true;
+			if (tempValue == null)
 				return String.Empty;
 			else
 			{
-				Type LType = AValue.GetType();
-				PublishNameAttribute LAttribute = ((PublishNameAttribute)ReflectionUtility.GetAttribute(LType, typeof(PublishNameAttribute)));
-				if (LAttribute != null)
-					return (string)ReflectionUtility.GetMemberValue(ReflectionUtility.FindSimpleMember(LType, LAttribute.MemberName), AValue);
+				Type type = tempValue.GetType();
+				PublishNameAttribute attribute = ((PublishNameAttribute)ReflectionUtility.GetAttribute(type, typeof(PublishNameAttribute)));
+				if (attribute != null)
+					return (string)ReflectionUtility.GetMemberValue(ReflectionUtility.FindSimpleMember(type, attribute.MemberName), tempValue);
 				else
 				{
-					var LConverter = Persistence.GetTypeConverter(LType);
-					if (LConverter != null)
+					var converter = Persistence.GetTypeConverter(type);
+					if (converter != null)
 					{
-						AReference = false;
-						return LConverter.ConvertToString(AValue);
+						reference = false;
+						return converter.ConvertToString(tempValue);
 					}
 				}
 				return String.Empty;
@@ -262,80 +262,80 @@ namespace Alphora.Dataphor.BOP
 		}
 
 		/// <summary> Writes all of the members for the given instance to the specified XML element. </summary>
-		private void WriteMembers(string ANameQualifier, XElement ANode, object AInstance, Type AType)
+		private void WriteMembers(string nameQualifier, XElement node, object instance, Type type)
 		{
-			if (AInstance is IBOPSerializationEvents)
-				((IBOPSerializationEvents)AInstance).BeforeSerialize(this);
+			if (instance is IBOPSerializationEvents)
+				((IBOPSerializationEvents)instance).BeforeSerialize(this);
 
-			List<string> LConstructorSources = BuildConstructorParamSources(AType);
-			string LNameMemberName = GetNameMemberName(AType);
-			string LDefaultListMemberName = GetDefaultListMemberName(AType);
-			PublishMethod LPublishMethod;
-			object LValue;
+			List<string> constructorSources = BuildConstructorParamSources(type);
+			string nameMemberName = GetNameMemberName(type);
+			string defaultListMemberName = GetDefaultListMemberName(type);
+			PublishMethod publishMethod;
+			object tempValue;
 
-			foreach (MemberInfo LMember in AType.FindMembers(MemberTypes.Property | MemberTypes.Field, BindingFlags.Instance | BindingFlags.Public, null, null))
+			foreach (MemberInfo member in type.FindMembers(MemberTypes.Property | MemberTypes.Field, BindingFlags.Instance | BindingFlags.Public, null, null))
 			{
 				try
 				{
-					LPublishMethod = GetPublishMethod(LMember, LConstructorSources);
+					publishMethod = GetPublishMethod(member, constructorSources);
 
-					if (LPublishMethod != PublishMethod.None)
+					if (publishMethod != PublishMethod.None)
 					{
-						LValue = ReflectionUtility.GetMemberValue(LMember, AInstance);
+						tempValue = ReflectionUtility.GetMemberValue(member, instance);
 
-						switch (LPublishMethod)
+						switch (publishMethod)
 						{
 							case PublishMethod.Value :
-								var LName = 
+								var name = 
 									(	// is the member the name (bop:name)
-										(ANameQualifier == String.Empty) && 
-										String.Equals(LNameMemberName, LMember.Name, StringComparison.OrdinalIgnoreCase)
+										(nameQualifier == String.Empty) && 
+										String.Equals(nameMemberName, member.Name, StringComparison.OrdinalIgnoreCase)
 									)
-										? XName.Get(CBOPName, CBOPNamespaceURI)
-										: XName.Get(AppendQualifier(LMember.Name.ToLower(), ANameQualifier));
-								WriteValue(LName, ANode, LMember, LValue, AInstance);
+										? XName.Get(BOPName, BOPNamespaceURI)
+										: XName.Get(AppendQualifier(member.Name.ToLower(), nameQualifier));
+								WriteValue(name, node, member, tempValue, instance);
 								break;
 							case PublishMethod.Inline :
-								if (LValue != null)
+								if (tempValue != null)
 									WriteMembers
 									(
-										AppendQualifier(LMember.Name.ToLower(), ANameQualifier),
-										ANode, 
-										LValue,
-										LValue.GetType()
+										AppendQualifier(member.Name.ToLower(), nameQualifier),
+										node, 
+										tempValue,
+										tempValue.GetType()
 									);
 								break;
 							case PublishMethod.List :
-								IList LList = (IList)LValue;
-								if (LList != null)
+								IList list = (IList)tempValue;
+								if (list != null)
 								{
-									string LNameQualifier = ANameQualifier;
+									string localNameQualifier = nameQualifier;
 									
 									// If not the default list, qualify
-									if (!String.Equals(LDefaultListMemberName, LMember.Name, StringComparison.OrdinalIgnoreCase))
-										LNameQualifier = AppendQualifier(LMember.Name.ToLower(), LNameQualifier);
+									if (!String.Equals(defaultListMemberName, member.Name, StringComparison.OrdinalIgnoreCase))
+										localNameQualifier = AppendQualifier(member.Name.ToLower(), localNameQualifier);
 
-									Type LItemType;
-									foreach (object LItem in LList)
+									Type itemType;
+									foreach (object item in list)
 									{
 										try
 										{
-											LItemType = LItem.GetType();
-											var LElement = CreateElement(ANode, LNameQualifier, LItemType);
-											if (!IsValueType(LItemType))
+											itemType = item.GetType();
+											var element = CreateElement(node, localNameQualifier, itemType);
+											if (!IsValueType(itemType))
 												WriteMembers
 												(
 													String.Empty,
-													LElement,
-													LItem,
-													LItemType
+													element,
+													item,
+													itemType
 												);
 											else
-												LElement.SetAttributeValue("value", LItem.ToString());
+												element.SetAttributeValue("value", item.ToString());
 										}
-										catch (Exception LException)
+										catch (Exception exception)
 										{
-											Errors.Add(LException);
+											Errors.Add(exception);
 										}
 									}
 								}
@@ -343,16 +343,16 @@ namespace Alphora.Dataphor.BOP
 						}
 					}
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					Errors.Add(LException);
+					Errors.Add(exception);
 				}				
 			}
 
-			Instances.Add(AInstance);
+			Instances.Add(instance);
 
-			if (AInstance is IBOPSerializationEvents)
-				((IBOPSerializationEvents)AInstance).AfterSerialize(this);
+			if (instance is IBOPSerializationEvents)
+				((IBOPSerializationEvents)instance).AfterSerialize(this);
 		}
 	}
 }

@@ -25,229 +25,229 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Rename(table) : table
 	public class RenameNode : UnaryTableNode
 	{
-		private string FTableAlias;
+		private string _tableAlias;
 		public string TableAlias
 		{
-			get { return FTableAlias; }
-			set { FTableAlias = value; }
+			get { return _tableAlias; }
+			set { _tableAlias = value; }
 		}
 		
-		private MetaData FMetaData;
+		private MetaData _metaData;
 		public MetaData MetaData
 		{
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
 		}
 
-		private RenameColumnExpressions FExpressions;		
+		private RenameColumnExpressions _expressions;		
 		public RenameColumnExpressions Expressions
 		{
-			get { return FExpressions; }
-			set { FExpressions = value; }
+			get { return _expressions; }
+			set { _expressions = value; }
 		}
 		
-		private void DetermineOrder(Plan APlan)
+		private void DetermineOrder(Plan plan)
 		{
 			Order = null;
 			if (SourceNode.Order != null)
 			{
-				Schema.Order LNewOrder = new Schema.Order();
-				Schema.OrderColumn LOrderColumn;
-				Schema.OrderColumn LNewOrderColumn;
-				LNewOrder.InheritMetaData(SourceNode.Order.MetaData);
-				LNewOrder.IsInherited = true;
-				for (int LIndex = 0; LIndex < SourceNode.Order.Columns.Count; LIndex++)
+				Schema.Order newOrder = new Schema.Order();
+				Schema.OrderColumn orderColumn;
+				Schema.OrderColumn newOrderColumn;
+				newOrder.InheritMetaData(SourceNode.Order.MetaData);
+				newOrder.IsInherited = true;
+				for (int index = 0; index < SourceNode.Order.Columns.Count; index++)
 				{
-					LOrderColumn = SourceNode.Order.Columns[LIndex];
-					LNewOrderColumn =
+					orderColumn = SourceNode.Order.Columns[index];
+					newOrderColumn =
 						new Schema.OrderColumn
 						(
-							TableVar.Columns[SourceTableVar.Columns.IndexOfName(LOrderColumn.Column.Name)],
-							LOrderColumn.Ascending,
-							LOrderColumn.IncludeNils
+							TableVar.Columns[SourceTableVar.Columns.IndexOfName(orderColumn.Column.Name)],
+							orderColumn.Ascending,
+							orderColumn.IncludeNils
 						);
-					LNewOrderColumn.Sort = LOrderColumn.Sort;
-					LNewOrderColumn.IsDefaultSort = LOrderColumn.IsDefaultSort;
-					Error.AssertWarn(LNewOrderColumn.Sort != null, "Sort is null");
-					if (LNewOrderColumn.Sort.HasDependencies())
-						APlan.AttachDependencies(LNewOrderColumn.Sort.Dependencies);
-					LNewOrder.Columns.Add(LNewOrderColumn);
+					newOrderColumn.Sort = orderColumn.Sort;
+					newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
+					Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");
+					if (newOrderColumn.Sort.HasDependencies())
+						plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+					newOrder.Columns.Add(newOrderColumn);
 				}
-				Order = LNewOrder;
+				Order = newOrder;
 			}
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(SourceTableVar.MetaData);
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 			
-			if (FExpressions == null)
+			if (_expressions == null)
 			{
 				// This is a rename all expression, merge metadata and inherit columns
-				FTableVar.MergeMetaData(FMetaData);
+				_tableVar.MergeMetaData(_metaData);
 
 				// Inherit columns
-				Schema.TableVarColumn LNewColumn;
-				foreach (Schema.TableVarColumn LColumn in SourceTableVar.Columns)
+				Schema.TableVarColumn newColumn;
+				foreach (Schema.TableVarColumn column in SourceTableVar.Columns)
 				{
-					LNewColumn = LColumn.Inherit(FTableAlias);
-					DataType.Columns.Add(LNewColumn.Column);
-					TableVar.Columns.Add(LNewColumn);
+					newColumn = column.Inherit(_tableAlias);
+					DataType.Columns.Add(newColumn.Column);
+					TableVar.Columns.Add(newColumn);
 				}
 			}
 			else
 			{
-				bool LColumnAdded;
-				Schema.TableVarColumn LColumn;
-				int LRenameColumnIndex;
-				for (int LIndex = 0; LIndex < SourceTableVar.Columns.Count; LIndex++)
+				bool columnAdded;
+				Schema.TableVarColumn column;
+				int renameColumnIndex;
+				for (int index = 0; index < SourceTableVar.Columns.Count; index++)
 				{
-					LColumnAdded = false;
-					foreach (RenameColumnExpression LRenameColumn in FExpressions)
+					columnAdded = false;
+					foreach (RenameColumnExpression renameColumn in _expressions)
 					{
-						LRenameColumnIndex = SourceTableVar.Columns.IndexOf(LRenameColumn.ColumnName);
-						if (LRenameColumnIndex < 0)
-							throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, LRenameColumn.ColumnName);
-						else if (LRenameColumnIndex == LIndex)
+						renameColumnIndex = SourceTableVar.Columns.IndexOf(renameColumn.ColumnName);
+						if (renameColumnIndex < 0)
+							throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, renameColumn.ColumnName);
+						else if (renameColumnIndex == index)
 						{
-							LColumn = SourceTableVar.Columns[LIndex].InheritAndRename(LRenameColumn.ColumnAlias);
-							LColumn.MergeMetaData(LRenameColumn.MetaData);
-							DataType.Columns.Add(LColumn.Column);
-							TableVar.Columns.Add(LColumn);
-							LColumnAdded = true;
+							column = SourceTableVar.Columns[index].InheritAndRename(renameColumn.ColumnAlias);
+							column.MergeMetaData(renameColumn.MetaData);
+							DataType.Columns.Add(column.Column);
+							TableVar.Columns.Add(column);
+							columnAdded = true;
 							break;
 						}
 					}
-					if (!LColumnAdded)
+					if (!columnAdded)
 					{
-						LColumn = SourceTableVar.Columns[LIndex].Inherit();
-						DataType.Columns.Add(LColumn.Column);
-						TableVar.Columns.Add(LColumn);
+						column = SourceTableVar.Columns[index].Inherit();
+						DataType.Columns.Add(column.Column);
+						TableVar.Columns.Add(column);
 					}
 				}
 			}
 
-			DetermineRemotable(APlan);
+			DetermineRemotable(plan);
 
 			// Inherit keys
-			Schema.Key LNewKey;
-			foreach (Schema.Key LKey in SourceTableVar.Keys)
+			Schema.Key newKey;
+			foreach (Schema.Key key in SourceTableVar.Keys)
 			{
-				LNewKey = new Schema.Key();
-				LNewKey.InheritMetaData(LKey.MetaData);
-				LNewKey.IsInherited = true;
-				LNewKey.IsSparse = LKey.IsSparse;
-				foreach (Schema.TableVarColumn LKeyColumn in LKey.Columns)
-					LNewKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(LKeyColumn.Name)]);
-				TableVar.Keys.Add(LNewKey);
+				newKey = new Schema.Key();
+				newKey.InheritMetaData(key.MetaData);
+				newKey.IsInherited = true;
+				newKey.IsSparse = key.IsSparse;
+				foreach (Schema.TableVarColumn keyColumn in key.Columns)
+					newKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(keyColumn.Name)]);
+				TableVar.Keys.Add(newKey);
 			}
 			
 			// Inherit orders
-			Schema.Order LNewOrder;
-			Schema.OrderColumn LOrderColumn;
-			Schema.OrderColumn LNewOrderColumn;
-			foreach (Schema.Order LOrder in SourceTableVar.Orders)
+			Schema.Order newOrder;
+			Schema.OrderColumn orderColumn;
+			Schema.OrderColumn newOrderColumn;
+			foreach (Schema.Order order in SourceTableVar.Orders)
 			{
-				LNewOrder = new Schema.Order();
-				LNewOrder.InheritMetaData(LOrder.MetaData);
-				LNewOrder.IsInherited = true;
-				for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
+				newOrder = new Schema.Order();
+				newOrder.InheritMetaData(order.MetaData);
+				newOrder.IsInherited = true;
+				for (int index = 0; index < order.Columns.Count; index++)
 				{
-					LOrderColumn = LOrder.Columns[LIndex];
-					LNewOrderColumn =
+					orderColumn = order.Columns[index];
+					newOrderColumn =
 						new Schema.OrderColumn
 						(
-							TableVar.Columns[SourceTableVar.Columns.IndexOfName(LOrderColumn.Column.Name)],
-							LOrderColumn.Ascending,
-							LOrderColumn.IncludeNils
+							TableVar.Columns[SourceTableVar.Columns.IndexOfName(orderColumn.Column.Name)],
+							orderColumn.Ascending,
+							orderColumn.IncludeNils
 						);
-					LNewOrderColumn.Sort = LOrderColumn.Sort;
-					LNewOrderColumn.IsDefaultSort = LOrderColumn.IsDefaultSort;
-					Error.AssertWarn(LNewOrderColumn.Sort != null, "Sort is null");
-					if (LNewOrderColumn.Sort.HasDependencies())
-						APlan.AttachDependencies(LNewOrderColumn.Sort.Dependencies);
-					LNewOrder.Columns.Add(LNewOrderColumn);
+					newOrderColumn.Sort = orderColumn.Sort;
+					newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
+					Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");
+					if (newOrderColumn.Sort.HasDependencies())
+						plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+					newOrder.Columns.Add(newOrderColumn);
 				}
-				TableVar.Orders.Add(LNewOrder);
+				TableVar.Orders.Add(newOrder);
 			}
 			
-			DetermineOrder(APlan);
+			DetermineOrder(plan);
 			
 			#if UseReferenceDerivation
 			// Copy source references
-			foreach (Schema.Reference LReference in SourceTableVar.SourceReferences)
+			foreach (Schema.Reference reference in SourceTableVar.SourceReferences)
 			{
-				Schema.JoinKey LSourceKey = new Schema.JoinKey();
-				foreach (Schema.TableVarColumn LColumn in LReference.SourceKey.Columns)
-					LSourceKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(LColumn.Name)]);
+				Schema.JoinKey sourceKey = new Schema.JoinKey();
+				foreach (Schema.TableVarColumn column in reference.SourceKey.Columns)
+					sourceKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(column.Name)]);
 					
-				int LNewReferenceID = Schema.Object.GetNextObjectID();
-				string LNewReferenceName = DeriveSourceReferenceName(LReference, LNewReferenceID, LSourceKey);
+				int newReferenceID = Schema.Object.GetNextObjectID();
+				string newReferenceName = DeriveSourceReferenceName(reference, newReferenceID, sourceKey);
 
-				Schema.Reference LNewReference = new Schema.Reference(LNewReferenceID, LNewReferenceName);
-				LNewReference.ParentReference = LReference;
-				LNewReference.IsExcluded = LReference.IsExcluded;
-				LNewReference.InheritMetaData(LReference.MetaData);
-				LNewReference.SourceTable = FTableVar;
-				LNewReference.AddDependency(FTableVar);
-				LNewReference.TargetTable = LReference.TargetTable;
-				LNewReference.AddDependency(LReference.TargetTable);
-				LNewReference.SourceKey.IsUnique = LReference.SourceKey.IsUnique;
-				foreach (Schema.TableVarColumn LColumn in LSourceKey.Columns)
-					LNewReference.SourceKey.Columns.Add(LColumn);
-				LNewReference.TargetKey.IsUnique = LReference.TargetKey.IsUnique;
-				foreach (Schema.TableVarColumn LColumn in LReference.TargetKey.Columns)
-					LNewReference.TargetKey.Columns.Add(LColumn);
-				LNewReference.UpdateReferenceAction = LReference.UpdateReferenceAction;
-				LNewReference.DeleteReferenceAction = LReference.DeleteReferenceAction;
-				FTableVar.SourceReferences.Add(LNewReference);
-				FTableVar.DerivedReferences.Add(LNewReference);
+				Schema.Reference newReference = new Schema.Reference(newReferenceID, newReferenceName);
+				newReference.ParentReference = reference;
+				newReference.IsExcluded = reference.IsExcluded;
+				newReference.InheritMetaData(reference.MetaData);
+				newReference.SourceTable = _tableVar;
+				newReference.AddDependency(_tableVar);
+				newReference.TargetTable = reference.TargetTable;
+				newReference.AddDependency(reference.TargetTable);
+				newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
+				foreach (Schema.TableVarColumn column in sourceKey.Columns)
+					newReference.SourceKey.Columns.Add(column);
+				newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
+				foreach (Schema.TableVarColumn column in reference.TargetKey.Columns)
+					newReference.TargetKey.Columns.Add(column);
+				newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+				newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+				_tableVar.SourceReferences.Add(newReference);
+				_tableVar.DerivedReferences.Add(newReference);
 			}
 			
 			// Copy target references
-			foreach (Schema.Reference LReference in SourceNode.TableVar.TargetReferences)
+			foreach (Schema.Reference reference in SourceNode.TableVar.TargetReferences)
 			{
-				Schema.JoinKey LTargetKey = new Schema.JoinKey();
-				foreach (Schema.TableVarColumn LColumn in LReference.TargetKey.Columns)
-					LTargetKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(LColumn.Name)]);
+				Schema.JoinKey targetKey = new Schema.JoinKey();
+				foreach (Schema.TableVarColumn column in reference.TargetKey.Columns)
+					targetKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(column.Name)]);
 				
-				int LNewReferenceID = Schema.Object.GetNextObjectID();
-				string LNewReferenceName = DeriveTargetReferenceName(LReference, LNewReferenceID, LTargetKey);
+				int newReferenceID = Schema.Object.GetNextObjectID();
+				string newReferenceName = DeriveTargetReferenceName(reference, newReferenceID, targetKey);
 				
-				Schema.Reference LNewReference = new Schema.Reference(LNewReferenceID, LNewReferenceName);
-				LNewReference.ParentReference = LReference;
-				LNewReference.IsExcluded = LReference.IsExcluded;
-				LNewReference.InheritMetaData(LReference.MetaData);
-				LNewReference.SourceTable = LReference.SourceTable;
-				LNewReference.AddDependency(LReference.SourceTable);
-				LNewReference.TargetTable = FTableVar;
-				LNewReference.AddDependency(FTableVar);
-				LNewReference.SourceKey.IsUnique = LReference.SourceKey.IsUnique;
-				foreach (Schema.TableVarColumn LColumn in LReference.SourceKey.Columns)
-					LNewReference.SourceKey.Columns.Add(LColumn);
-				LNewReference.TargetKey.IsUnique = LReference.TargetKey.IsUnique;
-				foreach (Schema.TableVarColumn LColumn in LTargetKey.Columns)
-					LNewReference.TargetKey.Columns.Add(LColumn);
-				LNewReference.UpdateReferenceAction = LReference.UpdateReferenceAction;
-				LNewReference.DeleteReferenceAction = LReference.DeleteReferenceAction;
-				FTableVar.TargetReferences.Add(LNewReference);
-				FTableVar.DerivedReferences.Add(LNewReference);
+				Schema.Reference newReference = new Schema.Reference(newReferenceID, newReferenceName);
+				newReference.ParentReference = reference;
+				newReference.IsExcluded = reference.IsExcluded;
+				newReference.InheritMetaData(reference.MetaData);
+				newReference.SourceTable = reference.SourceTable;
+				newReference.AddDependency(reference.SourceTable);
+				newReference.TargetTable = _tableVar;
+				newReference.AddDependency(_tableVar);
+				newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
+				foreach (Schema.TableVarColumn column in reference.SourceKey.Columns)
+					newReference.SourceKey.Columns.Add(column);
+				newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
+				foreach (Schema.TableVarColumn column in targetKey.Columns)
+					newReference.TargetKey.Columns.Add(column);
+				newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+				newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+				_tableVar.TargetReferences.Add(newReference);
+				_tableVar.DerivedReferences.Add(newReference);
 			}
 			#endif
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = SourceNode.CursorType;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = 
+			_cursorType = SourceNode.CursorType;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = 
 				CursorCapability.Navigable | 
 				(
-					(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
 				) |
 				(
@@ -257,329 +257,329 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						CursorCapability.Searchable
 					)
 				);
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 
-			DetermineOrder(APlan);
+			DetermineOrder(plan);
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
 			if (DataType.Columns.Count > 0)
 			{
-				RenameExpression LExpression = new RenameExpression();
-				LExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-				for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-					LExpression.Expressions.Add
+				RenameExpression expression = new RenameExpression();
+				expression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+				for (int index = 0; index < DataType.Columns.Count; index++)
+					expression.Expressions.Add
 					(
 						new RenameColumnExpression
 						(
-							Schema.Object.EnsureRooted(SourceTableType.Columns[LIndex].Name), 
-							DataType.Columns[LIndex].Name, 
-							TableVar.Columns[LIndex].MetaData == null ? 
+							Schema.Object.EnsureRooted(SourceTableType.Columns[index].Name), 
+							DataType.Columns[index].Name, 
+							TableVar.Columns[index].MetaData == null ? 
 								null : 
-								TableVar.Columns[LIndex].MetaData.Copy()
+								TableVar.Columns[index].MetaData.Copy()
 						)
 					);
-				LExpression.Modifiers = Modifiers;
-				return LExpression;
+				expression.Modifiers = Modifiers;
+				return expression;
 			}
 			else
-				return Nodes[0].EmitStatement(AMode);
+				return Nodes[0].EmitStatement(mode);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			RenameTable LTable = new RenameTable(this, AProgram);
+			RenameTable table = new RenameTable(this, program);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 		
-		public override void DetermineRemotable(Plan APlan)
+		public override void DetermineRemotable(Plan plan)
 		{
-			Schema.ResultTableVar LTableVar = (Schema.ResultTableVar)TableVar;
-			LTableVar.InferredIsDefaultRemotable = !PropagateDefault || SourceTableVar.IsDefaultRemotable;
-			LTableVar.InferredIsChangeRemotable = !PropagateChange || SourceTableVar.IsChangeRemotable;
-			LTableVar.InferredIsValidateRemotable = !PropagateValidate || SourceTableVar.IsValidateRemotable;
-			LTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
+			Schema.ResultTableVar tableVar = (Schema.ResultTableVar)TableVar;
+			tableVar.InferredIsDefaultRemotable = !PropagateDefault || SourceTableVar.IsDefaultRemotable;
+			tableVar.InferredIsChangeRemotable = !PropagateChange || SourceTableVar.IsChangeRemotable;
+			tableVar.InferredIsValidateRemotable = !PropagateValidate || SourceTableVar.IsValidateRemotable;
+			tableVar.DetermineRemotable(plan.CatalogDeviceSession);
 			
-			LTableVar.ShouldChange = PropagateChange && (LTableVar.ShouldChange || SourceTableVar.ShouldChange);
-			LTableVar.ShouldDefault = PropagateDefault && (LTableVar.ShouldDefault || SourceTableVar.ShouldDefault);
-			LTableVar.ShouldValidate = PropagateValidate && (LTableVar.ShouldValidate || SourceTableVar.ShouldValidate);
+			tableVar.ShouldChange = PropagateChange && (tableVar.ShouldChange || SourceTableVar.ShouldChange);
+			tableVar.ShouldDefault = PropagateDefault && (tableVar.ShouldDefault || SourceTableVar.ShouldDefault);
+			tableVar.ShouldValidate = PropagateValidate && (tableVar.ShouldValidate || SourceTableVar.ShouldValidate);
 			
-			for (int LIndex = 0; LIndex < LTableVar.Columns.Count; LIndex++)
+			for (int index = 0; index < tableVar.Columns.Count; index++)
 			{
-				Schema.TableVarColumn LColumn = LTableVar.Columns[LIndex];
-				Schema.TableVarColumn LSourceColumn = SourceTableVar.Columns[LIndex];
+				Schema.TableVarColumn column = tableVar.Columns[index];
+				Schema.TableVarColumn sourceColumn = SourceTableVar.Columns[index];
 
-				LColumn.ShouldChange = PropagateChange && (LColumn.ShouldChange || LSourceColumn.ShouldChange);
-				LTableVar.ShouldChange = LTableVar.ShouldChange || LColumn.ShouldChange;
+				column.ShouldChange = PropagateChange && (column.ShouldChange || sourceColumn.ShouldChange);
+				tableVar.ShouldChange = tableVar.ShouldChange || column.ShouldChange;
 
-				LColumn.ShouldDefault = PropagateDefault && (LColumn.ShouldDefault || LSourceColumn.ShouldDefault);
-				LTableVar.ShouldDefault = LTableVar.ShouldDefault || LColumn.ShouldDefault;
+				column.ShouldDefault = PropagateDefault && (column.ShouldDefault || sourceColumn.ShouldDefault);
+				tableVar.ShouldDefault = tableVar.ShouldDefault || column.ShouldDefault;
 
-				LColumn.ShouldValidate = PropagateValidate && (LColumn.ShouldValidate || LSourceColumn.ShouldValidate);
-				LTableVar.ShouldValidate = LTableVar.ShouldValidate || LColumn.ShouldValidate;
+				column.ShouldValidate = PropagateValidate && (column.ShouldValidate || sourceColumn.ShouldValidate);
+				tableVar.ShouldValidate = tableVar.ShouldValidate || column.ShouldValidate;
 			}
 		}
 		
 		// Validate
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if (AIsDescending && PropagateValidate)
+			if (isDescending && PropagateValidate)
 			{
-				Row LOldRow;
-				if (!(AOldRow.DataType.Columns.Equivalent(DataType.Columns)))
+				Row localOldRow;
+				if (!(oldRow.DataType.Columns.Equivalent(DataType.Columns)))
 				{
-					LOldRow = new Row(AProgram.ValueManager, DataType.RowType);
-					AOldRow.CopyTo(LOldRow);
+					localOldRow = new Row(program.ValueManager, DataType.RowType);
+					oldRow.CopyTo(localOldRow);
 				}
 				else
-					LOldRow = AOldRow;
+					localOldRow = oldRow;
 				try
 				{
-					Row LNewRow;
-					if (!(ANewRow.DataType.Columns.Equivalent(DataType.Columns)))
+					Row localNewRow;
+					if (!(newRow.DataType.Columns.Equivalent(DataType.Columns)))
 					{
-						LNewRow = new Row(AProgram.ValueManager, DataType.RowType);
-						ANewRow.CopyTo(LNewRow);
+						localNewRow = new Row(program.ValueManager, DataType.RowType);
+						newRow.CopyTo(localNewRow);
 					}
 					else
-						LNewRow = ANewRow;
+						localNewRow = newRow;
 					try
 					{
-						Row LOldSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType, (NativeRow)LOldRow.AsNative);
+						Row oldSourceRow = new Row(program.ValueManager, SourceNode.DataType.RowType, (NativeRow)localOldRow.AsNative);
 						try
 						{
-							LOldSourceRow.ValuesOwned = false;
+							oldSourceRow.ValuesOwned = false;
 							
-							Row LNewSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType, (NativeRow)LNewRow.AsNative);
+							Row newSourceRow = new Row(program.ValueManager, SourceNode.DataType.RowType, (NativeRow)localNewRow.AsNative);
 							try
 							{
-								LNewSourceRow.ValuesOwned = false;
+								newSourceRow.ValuesOwned = false;
 								
-								bool LChanged = SourceNode.Validate(AProgram, LOldSourceRow, LNewSourceRow, AValueFlags, AColumnName == String.Empty ? String.Empty : LNewSourceRow.DataType.Columns[LNewRow.DataType.Columns.IndexOfName(AColumnName)].Name);
+								bool changed = SourceNode.Validate(program, oldSourceRow, newSourceRow, valueFlags, columnName == String.Empty ? String.Empty : newSourceRow.DataType.Columns[localNewRow.DataType.Columns.IndexOfName(columnName)].Name);
 								
-								if (LChanged && !ReferenceEquals(ANewRow, LNewRow))
-									LNewRow.CopyTo(ANewRow);
-								return LChanged;
+								if (changed && !ReferenceEquals(newRow, localNewRow))
+									localNewRow.CopyTo(newRow);
+								return changed;
 							}
 							finally
 							{
-								LNewSourceRow.Dispose();
+								newSourceRow.Dispose();
 							}
 						}
 						finally
 						{
-							LOldSourceRow.Dispose();
+							oldSourceRow.Dispose();
 						}
 					}
 					finally
 					{
-						if (!ReferenceEquals(ANewRow, LNewRow))
-							LNewRow.Dispose();
+						if (!ReferenceEquals(newRow, localNewRow))
+							localNewRow.Dispose();
 					}
 				}
 				finally
 				{
-					if (!ReferenceEquals(AOldRow, LOldRow))
-						LOldRow.Dispose();
+					if (!ReferenceEquals(oldRow, localOldRow))
+						localOldRow.Dispose();
 				}
 			}
 			return false;
 		}
 		
 		// Default
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			if (AIsDescending && PropagateDefault)
+			if (isDescending && PropagateDefault)
 			{
-				TableNode LSourceNode = SourceNode;
+				TableNode sourceNode = SourceNode;
 				
-				Row LOldRow;
-				if (!(AOldRow.DataType.Columns.Equivalent(DataType.Columns)))
+				Row localOldRow;
+				if (!(oldRow.DataType.Columns.Equivalent(DataType.Columns)))
 				{
-					LOldRow = new Row(AProgram.ValueManager, DataType.RowType);
-					AOldRow.CopyTo(LOldRow);
+					localOldRow = new Row(program.ValueManager, DataType.RowType);
+					oldRow.CopyTo(localOldRow);
 				}
 				else
-					LOldRow = AOldRow;
+					localOldRow = oldRow;
 				try
 				{
-					Row LNewRow;
-					if (!(ANewRow.DataType.Columns.Equivalent(DataType.Columns)))
+					Row localNewRow;
+					if (!(newRow.DataType.Columns.Equivalent(DataType.Columns)))
 					{
-						LNewRow = new Row(AProgram.ValueManager, DataType.RowType);
-						ANewRow.CopyTo(LNewRow);
+						localNewRow = new Row(program.ValueManager, DataType.RowType);
+						newRow.CopyTo(localNewRow);
 					}
 					else
-						LNewRow = ANewRow;
+						localNewRow = newRow;
 					try
 					{
-						Row LOldSourceRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)LOldRow.AsNative);
+						Row oldSourceRow = new Row(program.ValueManager, sourceNode.DataType.RowType, (NativeRow)localOldRow.AsNative);
 						try
 						{
-							LOldSourceRow.ValuesOwned = false;
+							oldSourceRow.ValuesOwned = false;
 							
-							Row LNewSourceRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)LNewRow.AsNative);
+							Row newSourceRow = new Row(program.ValueManager, sourceNode.DataType.RowType, (NativeRow)localNewRow.AsNative);
 							try
 							{
-								LNewSourceRow.ValuesOwned = false;
+								newSourceRow.ValuesOwned = false;
 
-								bool LChanged = LSourceNode.Default(AProgram, LOldSourceRow, LNewSourceRow, AValueFlags, AColumnName == String.Empty ? String.Empty : LNewSourceRow.DataType.Columns[LNewRow.DataType.Columns.IndexOfName(AColumnName)].Name);
+								bool changed = sourceNode.Default(program, oldSourceRow, newSourceRow, valueFlags, columnName == String.Empty ? String.Empty : newSourceRow.DataType.Columns[localNewRow.DataType.Columns.IndexOfName(columnName)].Name);
 								
-								if (LChanged && (ANewRow != LNewRow))
-									LNewRow.CopyTo(ANewRow);
-								return LChanged;
+								if (changed && (newRow != localNewRow))
+									localNewRow.CopyTo(newRow);
+								return changed;
 							}
 							finally
 							{
-								LNewSourceRow.Dispose();
+								newSourceRow.Dispose();
 							}
 						}
 						finally
 						{
-							LOldSourceRow.Dispose();
+							oldSourceRow.Dispose();
 						}
 					}
 					finally
 					{
-						if (!ReferenceEquals(ANewRow, LNewRow))
-							LNewRow.Dispose();
+						if (!ReferenceEquals(newRow, localNewRow))
+							localNewRow.Dispose();
 					}
 				}
 				finally
 				{
-					if (!ReferenceEquals(AOldRow, LOldRow))
-						LOldRow.Dispose();
+					if (!ReferenceEquals(oldRow, localOldRow))
+						localOldRow.Dispose();
 				}
 			}
 			return false;
 		}
 		
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
+		public override void JoinApplicationTransaction(Program program, Row row)
 		{
-			Schema.RowType LRowType = new Schema.RowType();
-			foreach (Schema.Column LColumn in ARow.DataType.Columns)
-				LRowType.Columns.Add(SourceNode.DataType.Columns[DataType.Columns.IndexOfName(LColumn.Name)].Copy());
+			Schema.RowType rowType = new Schema.RowType();
+			foreach (Schema.Column column in row.DataType.Columns)
+				rowType.Columns.Add(SourceNode.DataType.Columns[DataType.Columns.IndexOfName(column.Name)].Copy());
 				
-			Row LRow = new Row(AProgram.ValueManager, LRowType, (NativeRow)ARow.AsNative);
+			Row localRow = new Row(program.ValueManager, rowType, (NativeRow)row.AsNative);
 			try
 			{
-				SourceNode.JoinApplicationTransaction(AProgram, LRow);
+				SourceNode.JoinApplicationTransaction(program, localRow);
 			}
 			finally
 			{
-				LRow.Dispose();
+				localRow.Dispose();
 			}
 		}
 		
 		// Change
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
 			if (PropagateChange)
 			{
-				TableNode LSourceNode = SourceNode;
+				TableNode sourceNode = SourceNode;
 
-				Row LOldRow;
-				if (!(AOldRow.DataType.Columns.Equivalent(DataType.Columns)))
+				Row localOldRow;
+				if (!(oldRow.DataType.Columns.Equivalent(DataType.Columns)))
 				{
-					LOldRow = new Row(AProgram.ValueManager, DataType.RowType);
-					AOldRow.CopyTo(LOldRow);
+					localOldRow = new Row(program.ValueManager, DataType.RowType);
+					oldRow.CopyTo(localOldRow);
 				}
 				else
-					LOldRow = AOldRow;
+					localOldRow = oldRow;
 				try
 				{
-					Row LNewRow;
-					if (!(ANewRow.DataType.Columns.Equivalent(DataType.Columns)))
+					Row localNewRow;
+					if (!(newRow.DataType.Columns.Equivalent(DataType.Columns)))
 					{
-						LNewRow = new Row(AProgram.ValueManager, DataType.RowType);
-						ANewRow.CopyTo(LNewRow);
+						localNewRow = new Row(program.ValueManager, DataType.RowType);
+						newRow.CopyTo(localNewRow);
 					}
 					else
-						LNewRow = ANewRow;
+						localNewRow = newRow;
 					try
 					{
-						Row LOldSourceRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)LOldRow.AsNative);
+						Row oldSourceRow = new Row(program.ValueManager, sourceNode.DataType.RowType, (NativeRow)localOldRow.AsNative);
 						try
 						{
-							LOldSourceRow.ValuesOwned = false;
+							oldSourceRow.ValuesOwned = false;
 
-							Row LNewSourceRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)LNewRow.AsNative);
+							Row newSourceRow = new Row(program.ValueManager, sourceNode.DataType.RowType, (NativeRow)localNewRow.AsNative);
 							try
 							{
-								LNewSourceRow.ValuesOwned = false;
+								newSourceRow.ValuesOwned = false;
 
-								bool LChanged = LSourceNode.Change(AProgram, LOldSourceRow, LNewSourceRow, AValueFlags, AColumnName == String.Empty ? String.Empty : LNewSourceRow.DataType.Columns[LNewRow.DataType.Columns.IndexOfName(AColumnName)].Name);
+								bool changed = sourceNode.Change(program, oldSourceRow, newSourceRow, valueFlags, columnName == String.Empty ? String.Empty : newSourceRow.DataType.Columns[localNewRow.DataType.Columns.IndexOfName(columnName)].Name);
 								
-								if (LChanged && (ANewRow != LNewRow))
-									LNewRow.CopyTo(ANewRow);
+								if (changed && (newRow != localNewRow))
+									localNewRow.CopyTo(newRow);
 								
-								return LChanged;
+								return changed;
 							}
 							finally
 							{
-								LNewSourceRow.Dispose();
+								newSourceRow.Dispose();
 							}
 						}
 						finally
 						{
-							LOldSourceRow.Dispose();
+							oldSourceRow.Dispose();
 						}
 					}
 					finally
 					{
-						if (!ReferenceEquals(ANewRow, LNewRow))
-							LNewRow.Dispose();
+						if (!ReferenceEquals(newRow, localNewRow))
+							localNewRow.Dispose();
 					}
 				}
 				finally
 				{
-					if (!ReferenceEquals(AOldRow, LOldRow))
-						LOldRow.Dispose();
+					if (!ReferenceEquals(oldRow, localOldRow))
+						localOldRow.Dispose();
 				}
 			}
 			return false;
 		}
 		
 		// Insert
-		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsert)
 			{
 				case PropagateAction.True :
-					using (Row LInsertRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType, (NativeRow)ANewRow.AsNative))
+					using (Row insertRow = new Row(program.ValueManager, SourceNode.DataType.RowType, (NativeRow)newRow.AsNative))
 					{
-						LInsertRow.ValuesOwned = false;
-						SourceNode.Insert(AProgram, AOldRow, LInsertRow, AValueFlags, AUnchecked);
+						insertRow.ValuesOwned = false;
+						SourceNode.Insert(program, oldRow, insertRow, valueFlags, uncheckedValue);
 					}
 				break;
 				
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LInsertRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType, (NativeRow)ANewRow.AsNative))
+					using (Row insertRow = new Row(program.ValueManager, SourceNode.DataType.RowType, (NativeRow)newRow.AsNative))
 					{
-						LInsertRow.ValuesOwned = false;
-						using (Row LSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType))
+						insertRow.ValuesOwned = false;
+						using (Row sourceRow = new Row(program.ValueManager, SourceNode.DataType.RowType))
 						{
-							LInsertRow.CopyTo(LSourceRow);
-							using (Row LCurrentRow = SourceNode.Select(AProgram, LSourceRow))
+							insertRow.CopyTo(sourceRow);
+							using (Row currentRow = SourceNode.Select(program, sourceRow))
 							{
-								if (LCurrentRow != null)
+								if (currentRow != null)
 								{
 									if (PropagateInsert == PropagateAction.Ensure)
-										SourceNode.Update(AProgram, LCurrentRow, LInsertRow, AValueFlags, false, AUnchecked);
+										SourceNode.Update(program, currentRow, insertRow, valueFlags, false, uncheckedValue);
 								}
 								else
-									SourceNode.Insert(AProgram, AOldRow, LInsertRow, AValueFlags, AUnchecked);
+									SourceNode.Insert(program, oldRow, insertRow, valueFlags, uncheckedValue);
 							}
 						}
 					}
@@ -588,48 +588,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Update
-		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateUpdate)
 			{
-				TableNode LSourceNode = SourceNode;
-				Row LOldRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)AOldRow.AsNative);
+				TableNode sourceNode = SourceNode;
+				Row localOldRow = new Row(program.ValueManager, sourceNode.DataType.RowType, (NativeRow)oldRow.AsNative);
 				try
 				{
-					LOldRow.ValuesOwned = false;
-					Row LNewRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)ANewRow.AsNative);
+					localOldRow.ValuesOwned = false;
+					Row localNewRow = new Row(program.ValueManager, sourceNode.DataType.RowType, (NativeRow)newRow.AsNative);
 					try
 					{
-						LNewRow.ValuesOwned = false;
-						LSourceNode.Update(AProgram, LOldRow, LNewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+						localNewRow.ValuesOwned = false;
+						sourceNode.Update(program, localOldRow, localNewRow, valueFlags, checkConcurrency, uncheckedValue);
 					}
 					finally
 					{
-						LNewRow.Dispose();
+						localNewRow.Dispose();
 					}
 				}
 				finally
 				{
-					LOldRow.Dispose();
+					localOldRow.Dispose();
 				}
 			}
 		}
 		
 		// Delete
-		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateDelete)
 			{
-				TableNode LSourceNode = SourceNode;
-				Row LRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)ARow.AsNative);
+				TableNode sourceNode = SourceNode;
+				Row localRow = new Row(program.ValueManager, sourceNode.DataType.RowType, (NativeRow)row.AsNative);
 				try
 				{
-					LRow.ValuesOwned = false;
-					LSourceNode.Delete(AProgram, LRow, ACheckConcurrency, AUnchecked);
+					localRow.ValuesOwned = false;
+					sourceNode.Delete(program, localRow, checkConcurrency, uncheckedValue);
 				}
 				finally
 				{
-					LRow.Dispose();
+					localRow.Dispose();
 				}
 			}
 		}

@@ -12,98 +12,98 @@ namespace Alphora.Dataphor.DAE.Connection
 {
     public class SQLiteCommand : DotNetCommand
     {
-        public SQLiteCommand(SQLiteConnection AConnection, IDbCommand ACommand) : base(AConnection, ACommand) 
+        public SQLiteCommand(SQLiteConnection connection, IDbCommand command) : base(connection, command) 
         {
-            FUseOrdinalBinding = true;
+            _useOrdinalBinding = true;
         }
 		
         protected override void PrepareParameters()
         {
             // Prepare parameters
-            SQLParameter LParameter;
-            for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+            SQLParameter parameter;
+            for (int index = 0; index < _parameterIndexes.Length; index++)
             {
-                LParameter = Parameters[FParameterIndexes[LIndex]];
-                SQLiteParameter LSQLiteParameter = (SQLiteParameter)FCommand.CreateParameter();
-                LSQLiteParameter.ParameterName = String.Format("@{0}", LParameter.Name);
-                switch (LParameter.Direction)
+                parameter = Parameters[_parameterIndexes[index]];
+                SQLiteParameter sQLiteParameter = (SQLiteParameter)_command.CreateParameter();
+                sQLiteParameter.ParameterName = String.Format("@{0}", parameter.Name);
+                switch (parameter.Direction)
                 {
-                    case SQLDirection.Out : LSQLiteParameter.Direction = System.Data.ParameterDirection.Output; break;
-                    case SQLDirection.InOut : LSQLiteParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
-                    case SQLDirection.Result : LSQLiteParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
-                    default : LSQLiteParameter.Direction = System.Data.ParameterDirection.Input; break;
+                    case SQLDirection.Out : sQLiteParameter.Direction = System.Data.ParameterDirection.Output; break;
+                    case SQLDirection.InOut : sQLiteParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
+                    case SQLDirection.Result : sQLiteParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
+                    default : sQLiteParameter.Direction = System.Data.ParameterDirection.Input; break;
                 }
 
-                if (LParameter.Type is SQLStringType)
+                if (parameter.Type is SQLStringType)
                 {
-                    LSQLiteParameter.DbType = DbType.String;
-                    LSQLiteParameter.Size = ((SQLStringType)LParameter.Type).Length;
+                    sQLiteParameter.DbType = DbType.String;
+                    sQLiteParameter.Size = ((SQLStringType)parameter.Type).Length;
                 }
-                else if (LParameter.Type is SQLBooleanType)
+                else if (parameter.Type is SQLBooleanType)
                 {
-                    LSQLiteParameter.DbType = DbType.Boolean;
+                    sQLiteParameter.DbType = DbType.Boolean;
                 }
-                else if (LParameter.Type is SQLByteArrayType)
+                else if (parameter.Type is SQLByteArrayType)
                 {
-                    LSQLiteParameter.DbType = DbType.Binary;
-                    LSQLiteParameter.Size = ((SQLByteArrayType)LParameter.Type).Length;
+                    sQLiteParameter.DbType = DbType.Binary;
+                    sQLiteParameter.Size = ((SQLByteArrayType)parameter.Type).Length;
                 }
-                else if (LParameter.Type is SQLIntegerType)
+                else if (parameter.Type is SQLIntegerType)
                 {
-                    switch (((SQLIntegerType)LParameter.Type).ByteCount)
+                    switch (((SQLIntegerType)parameter.Type).ByteCount)
                     {
-                        case 1 : LSQLiteParameter.DbType = DbType.Byte; break;
-                        case 2 : LSQLiteParameter.DbType = DbType.Int16; break;
-                        case 8 : LSQLiteParameter.DbType = DbType.Int64; break;
-                        default : LSQLiteParameter.DbType = DbType.Int32; break;
+                        case 1 : sQLiteParameter.DbType = DbType.Byte; break;
+                        case 2 : sQLiteParameter.DbType = DbType.Int16; break;
+                        case 8 : sQLiteParameter.DbType = DbType.Int64; break;
+                        default : sQLiteParameter.DbType = DbType.Int32; break;
                     }
                 }
-                else if (LParameter.Type is SQLNumericType)
+                else if (parameter.Type is SQLNumericType)
                 {
-                    SQLNumericType LType = (SQLNumericType)LParameter.Type;
-                    LSQLiteParameter.DbType = DbType.Decimal;
+                    SQLNumericType type = (SQLNumericType)parameter.Type;
+                    sQLiteParameter.DbType = DbType.Decimal;
                     //LSQLiteParameter.Scale = LType.Scale;
                     //LSQLiteParameter.Precision = LType.Precision;
                 }
-                else if (LParameter.Type is SQLFloatType)
+                else if (parameter.Type is SQLFloatType)
                 {
-                    SQLFloatType LType = (SQLFloatType)LParameter.Type;
-                    if (LType.Width == 1)
-                        LSQLiteParameter.DbType = DbType.Single;
+                    SQLFloatType type = (SQLFloatType)parameter.Type;
+                    if (type.Width == 1)
+                        sQLiteParameter.DbType = DbType.Single;
                     else
-                        LSQLiteParameter.DbType = DbType.Double;
+                        sQLiteParameter.DbType = DbType.Double;
                 }
-                else if (LParameter.Type is SQLBinaryType)
+                else if (parameter.Type is SQLBinaryType)
                 {
-                    LSQLiteParameter.DbType = DbType.Binary;
+                    sQLiteParameter.DbType = DbType.Binary;
                 }
-                else if (LParameter.Type is SQLTextType)
+                else if (parameter.Type is SQLTextType)
                 {
-                    LSQLiteParameter.DbType = DbType.String;
+                    sQLiteParameter.DbType = DbType.String;
                 }
-                else if (LParameter.Type is SQLDateType)
+                else if (parameter.Type is SQLDateType)
                 {
-                    LSQLiteParameter.DbType = DbType.Date;
+                    sQLiteParameter.DbType = DbType.Date;
                 }
-                else if (LParameter.Type is SQLTimeType)
+                else if (parameter.Type is SQLTimeType)
                 {
-                    LSQLiteParameter.DbType = DbType.Time;
+                    sQLiteParameter.DbType = DbType.Time;
                 }
-                else if (LParameter.Type is SQLDateTimeType)
+                else if (parameter.Type is SQLDateTimeType)
                 {
-                    LSQLiteParameter.DbType = DbType.DateTime;
+                    sQLiteParameter.DbType = DbType.DateTime;
                 }
-                else if (LParameter.Type is SQLGuidType)
+                else if (parameter.Type is SQLGuidType)
                 {
-                    LSQLiteParameter.DbType = DbType.Guid;
+                    sQLiteParameter.DbType = DbType.Guid;
                 }
-                else if (LParameter.Type is SQLMoneyType)
+                else if (parameter.Type is SQLMoneyType)
                 {
-                    LSQLiteParameter.DbType = DbType.Currency;
+                    sQLiteParameter.DbType = DbType.Currency;
                 }
                 else
-                    throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-                FCommand.Parameters.Add(LSQLiteParameter);
+                    throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+                _command.Parameters.Add(sQLiteParameter);
             }
         }
     }

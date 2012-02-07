@@ -9,7 +9,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 {
 	public class ShowLinkAction : Client.ShowLinkAction
 	{
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
 			System.Diagnostics.Process.Start(URL);
 		}
@@ -17,7 +17,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public class EditFilterAction : DataAction, IEditFilterAction
 	{
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
 			if (Source != null)
 			{

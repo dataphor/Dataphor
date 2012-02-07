@@ -20,62 +20,62 @@ namespace Alphora.Dataphor.DAE.Debug
 	/// </summary>
 	public class Debugger : IDisposable
 	{
-		public Debugger(ServerSession ASession)
+		public Debugger(ServerSession session)
 		{
-			SetSession(ASession);
-			FWaitSignal = new AutoResetEvent(false);
-			FPauseSignal = new ManualResetEvent(true);
-			FProcesses = new ServerProcesses();
-			FSessions = new ServerSessions();
+			SetSession(session);
+			_waitSignal = new AutoResetEvent(false);
+			_pauseSignal = new ManualResetEvent(true);
+			_processes = new ServerProcesses();
+			_sessions = new ServerSessions();
 		}
 
 		#region IDisposable Members
 		
-		private bool FDisposed;
+		private bool _disposed;
 		
 		public void Dispose()
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
-				FDisposed = true;
+				_disposed = true;
 				
 				InternalRun();
 
-				if (FSessions != null)
+				if (_sessions != null)
 				{
-					while (FSessions.Count > 0)
-						DetachSession(FSessions[FSessions.Count - 1]);
-					FSessions.Dispose();
-					FSessions = null;
+					while (_sessions.Count > 0)
+						DetachSession(_sessions[_sessions.Count - 1]);
+					_sessions.Dispose();
+					_sessions = null;
 				}
 
-				if (FProcesses != null)
+				if (_processes != null)
 				{
-					while (FProcesses.Count > 0)
-						Detach(FProcesses[FProcesses.Count - 1]);
-					FProcesses.Dispose();
-					FProcesses = null;
+					while (_processes.Count > 0)
+						Detach(_processes[_processes.Count - 1]);
+					_processes.Dispose();
+					_processes = null;
 				}
 				
-				if (FBrokenProcesses != null)
+				if (_brokenProcesses != null)
 				{
-					FBrokenProcesses.DisownAll();
-					FBrokenProcesses.Dispose();
-					FBrokenProcesses = null;
+					_brokenProcesses.DisownAll();
+					_brokenProcesses.Dispose();
+					_brokenProcesses = null;
 				}
 				
-				if (FWaitSignal != null)
+				if (_waitSignal != null)
 				{
-					FWaitSignal.Set();
-					FWaitSignal.Close();
-					FWaitSignal = null;
+					_waitSignal.Set();
+					_waitSignal.Close();
+					_waitSignal = null;
 				}
 				
-				if (FPauseSignal != null)
+				if (_pauseSignal != null)
 				{
-					FPauseSignal.Set();
-					FPauseSignal.Close();
-					FPauseSignal = null;
+					_pauseSignal.Set();
+					_pauseSignal.Close();
+					_pauseSignal = null;
 				}
 				
 				SetSession(null);
@@ -84,76 +84,76 @@ namespace Alphora.Dataphor.DAE.Debug
 
 		#endregion
 		
-		public int DebuggerID { get { return FSession.SessionID; } }
+		public int DebuggerID { get { return _session.SessionID; } }
 
-		private ServerSession FSession;
-		public ServerSession Session { get { return FSession; } }
+		private ServerSession _session;
+		public ServerSession Session { get { return _session; } }
 		
-		private void SetSession(ServerSession ASession)
+		private void SetSession(ServerSession session)
 		{
-			if (FSession != null)
+			if (_session != null)
 			{
-				FSession.Disposed -= new EventHandler(SessionDisposed);
-				FSession.SetDebugger(null);
-				FSession = null;
+				_session.Disposed -= new EventHandler(SessionDisposed);
+				_session.SetDebugger(null);
+				_session = null;
 			}
 			
-			if (ASession != null)
+			if (session != null)
 			{
-				FSession = ASession;
-				FSession.SetDebugger(this);
-				FSession.Disposed += new EventHandler(SessionDisposed);
+				_session = session;
+				_session.SetDebugger(this);
+				_session.Disposed += new EventHandler(SessionDisposed);
 			}
 		}
 
-		private void SessionDisposed(object ASender, EventArgs AArgs)
+		private void SessionDisposed(object sender, EventArgs args)
 		{
 			SetSession(null);
 		}
 		
-		private AutoResetEvent FWaitSignal;
-		private ManualResetEvent FPauseSignal;
-		private object FSyncHandle = new object();
+		private AutoResetEvent _waitSignal;
+		private ManualResetEvent _pauseSignal;
+		private object _syncHandle = new object();
 
-		private bool FIsPauseRequested;
-		public bool IsPauseRequested { get { return FIsPauseRequested; } }
+		private bool _isPauseRequested;
+		public bool IsPauseRequested { get { return _isPauseRequested; } }
 		
-		private int FPausedCount;
+		private int _pausedCount;
 		public bool IsPaused 
 		{ 
 			get 
 			{ 
-				lock (FSyncHandle) 
+				lock (_syncHandle) 
 				{ 
-					return FIsPauseRequested && (GetRunningCount() == FPausedCount); 
+					return _isPauseRequested && (GetRunningCount() == _pausedCount); 
 				} 
 			} 
 		}
 		
-		private bool FBreakOnStart;
+		private bool _breakOnStart;
 		public bool BreakOnStart
 		{
-			get { return FBreakOnStart; }
-			set { FBreakOnStart = value; }
+			get { return _breakOnStart; }
+			set { _breakOnStart = value; }
 		}
 		
-		private bool FBreakOnException;
+		private bool _breakOnException;
 		public bool BreakOnException
 		{
-			get { return FBreakOnException; }
-			set { FBreakOnException = value; }
+			get { return _breakOnException; }
+			set { _breakOnException = value; }
 		}
 		
-		private Breakpoints FBreakpoints = new Breakpoints();
-		public Breakpoints Breakpoints { get { return FBreakpoints; } }
+		private Breakpoints _breakpoints = new Breakpoints();
+		public Breakpoints Breakpoints { get { return _breakpoints; } }
 		
-		private ServerSessions FSessions;
+		private ServerSessions _sessions;
 		//public ServerSessions Sessions { get { return FSessions; } }
 		
-		private ServerProcesses FProcesses;
+		private ServerProcesses _processes;
 		//public ServerProcesses Processes { get { return FProcesses; } }
 
-		private ServerProcesses FBrokenProcesses = new ServerProcesses();
+		private ServerProcesses _brokenProcesses = new ServerProcesses();
 		//public ServerProcesses BrokenProcesses { get { return FBrokenProcesses; } }
 		
 		/// <summary>
@@ -167,25 +167,25 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// <summary>
 		/// Attaches the debugger to a process
 		/// </summary>
-		public void Attach(ServerProcess AProcess)
+		public void Attach(ServerProcess process)
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
-				AProcess.SetDebuggedBy(this);
-				FProcesses.Add(AProcess);
+				process.SetDebuggedBy(this);
+				_processes.Add(process);
 			}
 		}
 
 		/// <summary>
 		/// Detaches the debugger from a process.
 		/// </summary>
-		public void Detach(ServerProcess AProcess)
+		public void Detach(ServerProcess process)
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
-				FProcesses.Disown(AProcess);
-				FBrokenProcesses.SafeDisown(AProcess);
-				AProcess.SetDebuggedBy(null);
+				_processes.Disown(process);
+				_brokenProcesses.SafeDisown(process);
+				process.SetDebuggedBy(null);
 			}
 			
 			Pulse();
@@ -199,29 +199,29 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// are attached to the debugger. In addition, any processes subsequently started
 		/// on that session are automatically attached to the debugger.
 		/// </remarks>
-		public void AttachSession(ServerSession ASession)
+		public void AttachSession(ServerSession session)
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
-				ASession.SetDebuggedByID(DebuggerID);
-				FSessions.Add(ASession);
-				lock (ASession.Processes)
-					foreach (ServerProcess LProcess in ASession.Processes)
-						Attach(LProcess);
+				session.SetDebuggedByID(DebuggerID);
+				_sessions.Add(session);
+				lock (session.Processes)
+					foreach (ServerProcess process in session.Processes)
+						Attach(process);
 			}
 		}
 		
-		public void DetachSession(ServerSession ASession)
+		public void DetachSession(ServerSession session)
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
-				lock (ASession.Processes)
-					foreach (ServerProcess LProcess in ASession.Processes)
-						if (LProcess.DebuggedBy == this)
-							Detach(LProcess);
+				lock (session.Processes)
+					foreach (ServerProcess process in session.Processes)
+						if (process.DebuggedBy == this)
+							Detach(process);
 							
-				FSessions.Disown(ASession);
-				ASession.SetDebuggedByID(0);
+				_sessions.Disown(session);
+				session.SetDebuggedByID(0);
 			}
 		}
 		
@@ -233,37 +233,37 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </remarks>
 		private int GetRunningCount()
 		{
-			int LRunningCount = 0;
-			for (int LIndex = 0; LIndex < FProcesses.Count; LIndex++)
-				if (FProcesses[LIndex].IsRunning)
-					LRunningCount++;
-			return LRunningCount;
+			int runningCount = 0;
+			for (int index = 0; index < _processes.Count; index++)
+				if (_processes[index].IsRunning)
+					runningCount++;
+			return runningCount;
 		}
 		
 		/// <summary>
 		/// Waits for the debugger to pause
 		/// </summary>
-		public void WaitForPause(Program AProgram, PlanNode ANode)
+		public void WaitForPause(Program program, PlanNode node)
 		{
 			while (true)
 			{
 				if (IsPaused)
 					return;
 					
-				if (FDisposed)
+				if (_disposed)
 					return;
 				
-				FWaitSignal.WaitOne(500);
-				AProgram.Yield(ANode, false);
+				_waitSignal.WaitOne(500);
+				program.Yield(node, false);
 			}
 		}
 		
 		private void InternalPause()
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
-				FIsPauseRequested = true;
-				FPauseSignal.Reset();
+				_isPauseRequested = true;
+				_pauseSignal.Reset();
 			}
 		}
 		
@@ -273,16 +273,16 @@ namespace Alphora.Dataphor.DAE.Debug
 		public void Pause()
 		{
 			InternalPause();
-			FWaitSignal.Set();
+			_waitSignal.Set();
 		}
 		
 		private void InternalRun()
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
-				FIsPauseRequested = false;
-				FBrokenProcesses.DisownAll();
-				FPauseSignal.Set();
+				_isPauseRequested = false;
+				_brokenProcesses.DisownAll();
+				_pauseSignal.Set();
 			}
 		}
 		
@@ -299,12 +299,12 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		public void Pulse()
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
-				if (FIsPauseRequested)
+				if (_isPauseRequested)
 				{
-					FPauseSignal.Set();
-					FPauseSignal.Reset();
+					_pauseSignal.Set();
+					_pauseSignal.Reset();
 				}
 			}
 		}
@@ -315,51 +315,51 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 */
 		
-		public void StepOver(int AProcessID)
+		public void StepOver(int processID)
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
 				if (IsPaused)
 				{
-					FProcesses.GetProcess(AProcessID).SetStepOver();
+					_processes.GetProcess(processID).SetStepOver();
 					InternalRun();
 				}
 			}
 		}
 		
-		public void StepInto(int AProcessID)
+		public void StepInto(int processID)
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
 				if (IsPaused)
 				{
-					FProcesses.GetProcess(AProcessID).SetStepInto();
+					_processes.GetProcess(processID).SetStepInto();
 					InternalRun();
 				}
 			}
 		}
 		
-		private bool ShouldBreak(ServerProcess AProcess, PlanNode ANode)
+		private bool ShouldBreak(ServerProcess process, PlanNode node)
 		{
-			if (FDisposed)
+			if (_disposed)
 				return false;
 				
-			if (AProcess.ShouldBreak())
+			if (process.ShouldBreak())
 				return true;
 				
-			if (FBreakpoints.Count > 0)
+			if (_breakpoints.Count > 0)
 			{
-				DebugLocator LCurrentLocation = AProcess.ExecutingProgram.GetCurrentLocation();
+				DebugLocator currentLocation = process.ExecutingProgram.GetCurrentLocation();
 				
 				// Determine whether or not a breakpoint has been hit
-				for (int LIndex = 0; LIndex < FBreakpoints.Count; LIndex++)
+				for (int index = 0; index < _breakpoints.Count; index++)
 				{
-					Breakpoint LBreakpoint = FBreakpoints[LIndex];
+					Breakpoint breakpoint = _breakpoints[index];
 					if 
 					(
-						(LBreakpoint.Locator == LCurrentLocation.Locator) 
-							&& (LBreakpoint.Line == LCurrentLocation.Line) 
-							&& ((LBreakpoint.LinePos == -1) || (LBreakpoint.LinePos == LCurrentLocation.LinePos))
+						(breakpoint.Locator == currentLocation.Locator) 
+							&& (breakpoint.Line == currentLocation.Line) 
+							&& ((breakpoint.LinePos == -1) || (breakpoint.LinePos == currentLocation.LinePos))
 					)
 						return true;
 				}
@@ -379,13 +379,13 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		public List<DebugSessionInfo> GetSessions()
 		{
-			List<DebugSessionInfo> LSessions = new List<DebugSessionInfo>();
-			lock (FSyncHandle)
+			List<DebugSessionInfo> sessions = new List<DebugSessionInfo>();
+			lock (_syncHandle)
 			{
-				foreach (ServerSession LSession in FSessions)
-					LSessions.Add(new DebugSessionInfo { SessionID = LSession.SessionID });
+				foreach (ServerSession session in _sessions)
+					sessions.Add(new DebugSessionInfo { SessionID = session.SessionID });
 			}
-			return LSessions;
+			return sessions;
 		}
 		
 		/// <summary>
@@ -393,193 +393,205 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		public List<DebugProcessInfo> GetProcesses()
 		{
-			List<DebugProcessInfo> LProcesses = new List<DebugProcessInfo>();
-			lock (FSyncHandle)
+			List<DebugProcessInfo> processes = new List<DebugProcessInfo>();
+			lock (_syncHandle)
 			{
-				bool LIsPaused = IsPaused;
-				foreach (ServerProcess LProcess in FProcesses)
-					LProcesses.Add
+				bool isPaused = IsPaused;
+				foreach (ServerProcess process in _processes)
+					processes.Add
 					(
 						new DebugProcessInfo
 						{
-							ProcessID = LProcess.ProcessID,
-							IsPaused = LProcess.IsRunning && LIsPaused,
-							Location = (LProcess.IsRunning && LIsPaused) ? LProcess.ExecutingProgram.SafeGetCurrentLocation() : null,
-							DidBreak = FBrokenProcesses.Contains(LProcess),
-							Error = (LProcess.IsRunning && LIsPaused) ? LProcess.ExecutingProgram.Stack.ErrorVar as Exception : null
+							ProcessID = process.ProcessID,
+							IsPaused = process.IsRunning && isPaused,
+							Location = (process.IsRunning && isPaused) ? process.ExecutingProgram.SafeGetCurrentLocation() : null,
+							DidBreak = _brokenProcesses.Contains(process),
+							Error = (process.IsRunning && isPaused) ? process.ExecutingProgram.Stack.ErrorVar as Exception : null
 						}
 					);
 			}
-			return LProcesses;
+			return processes;
 		}
 		
 		/// <summary>
 		/// Returns the current call stack of a process.
 		/// </summary>
-		public CallStack GetCallStack(int AProcessID)
+		public CallStack GetCallStack(int processID)
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
 				CheckPaused();
 			
-				ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
+				ServerProcess process = _processes.GetProcess(processID);
 					
-				CallStack LCallStack = new CallStack();
+				CallStack callStack = new CallStack();
 				
-				if (LProcess.IsRunning)
+				if (process.IsRunning)
 				{
-					for (int LProgramIndex = LProcess.ExecutingPrograms.Count - 1; LProgramIndex > 0; LProgramIndex--)
+					for (int programIndex = process.ExecutingPrograms.Count - 1; programIndex > 0; programIndex--)
 					{
-						Program LProgram = LProcess.ExecutingPrograms[LProgramIndex];
-						PlanNode LCurrentNode = LProgram.CurrentNode;
-						bool LAfterNode = LProgram.AfterNode;
+						Program program = process.ExecutingPrograms[programIndex];
+						PlanNode currentNode = program.CurrentNode;
+						bool afterNode = program.AfterNode;
 						
-						foreach (RuntimeStackWindow LWindow in LProgram.Stack.GetCallStack())
+						foreach (RuntimeStackWindow window in program.Stack.GetCallStack())
 						{
-							LCallStack.Add
+							callStack.Add
 							(
 								new CallStackEntry
 								(
-									LCallStack.Count, 
-									LWindow.Originator != null 
-										? LWindow.Originator.Description 
+									callStack.Count, 
+									window.Originator != null 
+										? window.Originator.Description 
 										: 
 										(
-											LProgram.Code != null
-												? LProgram.Code.Description
-												: LWindow.Locator.Locator
+											program.Code != null
+												? program.Code.Description
+												: window.Locator.Locator
 										), 
-									LCurrentNode != null 
+									currentNode != null 
 										? 
 											new DebugLocator
 											(
-												LWindow.Locator, 
-												LAfterNode ? LCurrentNode.EndLine : LCurrentNode.Line, 
-												(LAfterNode && LCurrentNode.Line != LCurrentNode.EndLine) ? LCurrentNode.EndLinePos : LCurrentNode.LinePos
+												window.Locator, 
+												afterNode ? currentNode.EndLine : currentNode.Line, 
+												(afterNode && currentNode.Line != currentNode.EndLine) ? currentNode.EndLinePos : currentNode.LinePos
 											) 
-										: new DebugLocator(LWindow.Locator, -1, -1),
-									LWindow.Originator != null
-										? DebugLocator.OperatorLocator(LWindow.GetOriginatingOperator().DisplayName)
-										: DebugLocator.ProgramLocator(LProgram.ID),
-									LCurrentNode != null
-										? LCurrentNode.SafeEmitStatementAsString()
+										: new DebugLocator(window.Locator, -1, -1),
+									window.Originator != null
+										? DebugLocator.OperatorLocator(window.GetOriginatingOperator().DisplayName)
+										: DebugLocator.ProgramLocator(program.ID),
+									currentNode != null
+										? currentNode.SafeEmitStatementAsString()
 										: 
 										(
-											LProgram.Code != null 
-												? LProgram.Code.SafeEmitStatementAsString() 
+											program.Code != null 
+												? program.Code.SafeEmitStatementAsString() 
 												: "<no statement available>"
 										)
 								)
 							);
 								
-							LCurrentNode = LWindow.Originator;
-							LAfterNode = false;
+							currentNode = window.Originator;
+							afterNode = false;
 						}
 					}
 				}
 				
-				return LCallStack;
+				return callStack;
 			}
 		}
 		
-		public Program FindProgram(Guid AProgramID)
+		public Program FindProgram(Guid programID)
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
 				CheckPaused();
 			
-				foreach (ServerProcess LProcess in FProcesses)
-					foreach (Program LProgram in LProcess.ExecutingPrograms)
-						if (LProgram.ID == AProgramID)
-							return LProgram;
+				foreach (ServerProcess process in _processes)
+					foreach (Program program in process.ExecutingPrograms)
+						if (program.ID == programID)
+							return program;
 							
 				return null;
 			}
 		}
 		
-		public Program GetProgram(Guid AProgramID)
+		public Program GetProgram(Guid programID)
 		{
-			Program LProgram = FindProgram(AProgramID);
-			if (LProgram == null)
-				throw new ServerException(ServerException.Codes.ProgramNotFound, AProgramID);
+			Program program = FindProgram(programID);
+			if (program == null)
+				throw new ServerException(ServerException.Codes.ProgramNotFound, programID);
 				
-			return LProgram;
+			return program;
 		}
 		
 		/// <summary>
 		/// Returns the current stack of a process within a specific window.
 		/// </summary>
-		public List<StackEntry> GetStack(int AProcessID, int AWindowIndex)
+		public List<StackEntry> GetStack(int processID, int windowIndex)
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
 				CheckPaused();
 				
-				ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
+				ServerProcess process = _processes.GetProcess(processID);
 
-				List<StackEntry> LStack = new List<StackEntry>();
+				List<StackEntry> stack = new List<StackEntry>();
 				
-				if (LProcess.IsRunning)
+				if (process.IsRunning)
 				{
-					for (int LProgramIndex = LProcess.ExecutingPrograms.Count - 1; LProgramIndex > 0; LProgramIndex--)
+					for (int programIndex = process.ExecutingPrograms.Count - 1; programIndex > 0; programIndex--)
 					{
-						Program LProgram = LProcess.ExecutingPrograms[LProgramIndex];
-						PlanNode LCurrentNode = LProgram.CurrentNode;
-						
-						if (AWindowIndex < 0)
-							break;
-						
-						if (AWindowIndex < LProgram.Stack.CallDepth)
-						{
-							object[] LStackWindow = LProgram.Stack.GetStack(AWindowIndex);
-							for (int LIndex = 0; LIndex < LStackWindow.Length; LIndex++)
-							{
-								LStack.Add
-								(
-									new StackEntry
-									{
-										Index = LIndex,
-										Name = String.Format("Location{0}", LIndex),
-										Type = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].GetType().FullName,
-										Value = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].ToString()
-									}
-								);
-							}
+						Program program = process.ExecutingPrograms[programIndex];
+						PlanNode currentNode = program.CurrentNode;
+						// temporarily clear the debugger so we can evaluate against the target process without yielding
+						Debugger debugger = program.ServerProcess.DebuggedBy;
+						program.ServerProcess.SetDebuggedBy(null);					
+						try
+						{							
+							if (windowIndex < 0)
+								break;
 							
-							break;
+							if (windowIndex < program.Stack.CallDepth)
+							{
+								object[] stackWindow = program.Stack.GetStack(windowIndex);
+								int index;
+								for (int stackWindowIndex = stackWindow.Length - 1; stackWindowIndex >= 0; stackWindowIndex--)
+								{
+									// reverse the index of the entries
+									index = stackWindow.Length - (stackWindowIndex + 1);
+									stack.Add
+									(
+										new StackEntry
+										{
+											Index = index,
+											Name = String.Format("Location{0}", index),
+											Type = stackWindow[stackWindowIndex] == null ? "<no value>" : stackWindow[stackWindowIndex].GetType().FullName,
+											Value = stackWindow[stackWindowIndex] == null ? "<no value>" : stackWindow[stackWindowIndex].ToString()
+										}
+									);
+								}
+								
+								break;
+							}
+							else
+							{
+								windowIndex -= program.Stack.CallDepth;
+							}	  
 						}
-						else
+						finally
 						{
-							AWindowIndex -= LProgram.Stack.CallDepth;
+							program.ServerProcess.SetDebuggedBy(debugger);
 						}
 					}
 				}
 
-				return LStack;
+				return stack;
 			}
 		}
 		
 		/// <summary>
 		/// Toggles a breakpoint, returning true if the breakpoint was set, and false if it was cleared.
 		/// </summary>
-		/// <param name="ALocator">A locator identifying the document or operator in which the breakpoint is set.</param>
-		/// <param name="ALine">The line on which the breakpoint is set.</param>
-		/// <param name="ALinePos">The line position, -1 for no line position.</param>
+		/// <param name="locator">A locator identifying the document or operator in which the breakpoint is set.</param>
+		/// <param name="line">The line on which the breakpoint is set.</param>
+		/// <param name="linePos">The line position, -1 for no line position.</param>
 		/// <returns>True if the breakpoint was set, false if it was cleared.</returns>
-		public bool ToggleBreakpoint(string ALocator, int ALine, int ALinePos)
+		public bool ToggleBreakpoint(string locator, int line, int linePos)
 		{
-			lock (FSyncHandle)
+			lock (_syncHandle)
 			{
-				Breakpoint LBreakpoint = new Breakpoint(ALocator, ALine, ALinePos);
-				int LIndex = FBreakpoints.IndexOf(LBreakpoint);
-				if (LIndex >= 0)
+				Breakpoint breakpoint = new Breakpoint(locator, line, linePos);
+				int index = _breakpoints.IndexOf(breakpoint);
+				if (index >= 0)
 				{
-					FBreakpoints.Remove(LBreakpoint);
+					_breakpoints.Remove(breakpoint);
 					return false;
 				}
 				else
 				{
-					FBreakpoints.Add(LBreakpoint);
+					_breakpoints.Add(breakpoint);
 					return true;
 				}
 			}
@@ -588,41 +600,41 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// <summary>
 		/// Yields the current program to the debugger if a breakpoint or break condition is satisfied.
 		/// </summary>
-		public void Yield(ServerProcess AProcess, PlanNode ANode)
+		public void Yield(ServerProcess process, PlanNode node)
 		{
-			if (!AProcess.IsLoading())
+			if (!process.IsLoading())
 			{
 				try
 				{
-					Monitor.Enter(FSyncHandle);
+					Monitor.Enter(_syncHandle);
 					try
 					{
-						if (ShouldBreak(AProcess, ANode))
+						if (ShouldBreak(process, node))
 						{
-							FBrokenProcesses.Add(AProcess);
+							_brokenProcesses.Add(process);
 							InternalPause();
 						}
 
-						while (FIsPauseRequested && FProcesses.Contains(AProcess))
+						while (_isPauseRequested && _processes.Contains(process))
 						{
-							FPausedCount++;
-							Monitor.Exit(FSyncHandle);
+							_pausedCount++;
+							Monitor.Exit(_syncHandle);
 							try
 							{
 								#if !SILVERLIGHT
-								WaitHandle.SignalAndWait(FWaitSignal, FPauseSignal);
+								WaitHandle.SignalAndWait(_waitSignal, _pauseSignal);
 								#endif
 							}
 							finally
 							{
-								Monitor.Enter(FSyncHandle);
-								FPausedCount--;
+								Monitor.Enter(_syncHandle);
+								_pausedCount--;
 							}
 						}
 					}
 					finally
 					{
-						Monitor.Exit(FSyncHandle);
+						Monitor.Exit(_syncHandle);
 					}
 				}
 				catch

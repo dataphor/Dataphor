@@ -7,6 +7,7 @@
 #define REMOVESUPERKEYS
 #define WRAPRUNTIMEEXCEPTIONS // Determines whether or not runtime exceptions are wrapped
 //#define TRACKCALLDEPTH // Determines whether or not call depth tracking is enabled
+#define USENAMEDROWVARIABLES
 
 using System;
 using System.IO;
@@ -211,85 +212,85 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = false; // TODO: Debug table nodes? 
 		}
 		
-		protected Schema.TableVarColumn CopyTableVarColumn(Schema.TableVarColumn AColumn)
+		protected Schema.TableVarColumn CopyTableVarColumn(Schema.TableVarColumn column)
 		{
-			return AColumn.Inherit();
+			return column.Inherit();
 		}
 		
-		protected Schema.TableVarColumn CopyTableVarColumn(Schema.TableVarColumn AColumn, string AColumnName)
+		protected Schema.TableVarColumn CopyTableVarColumn(Schema.TableVarColumn column, string columnName)
 		{
-			return AColumn.InheritAndRename(AColumnName);
+			return column.InheritAndRename(columnName);
 		}
 		
-		protected void CopyTableVarColumns(Schema.TableVarColumns AColumns)
+		protected void CopyTableVarColumns(Schema.TableVarColumns columns)
 		{
-			CopyTableVarColumns(AColumns, false);
+			CopyTableVarColumns(columns, false);
 		}
 		
-        protected void CopyTableVarColumns(Schema.TableVarColumns AColumns, bool AIsNilable)
+        protected void CopyTableVarColumns(Schema.TableVarColumns columns, bool isNilable)
         {
 			// Columns
-			Schema.TableVarColumn LNewTableVarColumn;
-			foreach (Schema.TableVarColumn LTableVarColumn in AColumns)
+			Schema.TableVarColumn newTableVarColumn;
+			foreach (Schema.TableVarColumn tableVarColumn in columns)
 			{
-				LNewTableVarColumn = CopyTableVarColumn(LTableVarColumn);
-				LNewTableVarColumn.IsNilable = LNewTableVarColumn.IsNilable || AIsNilable;
-				DataType.Columns.Add(LNewTableVarColumn.Column);
-				TableVar.Columns.Add(LNewTableVarColumn);
+				newTableVarColumn = CopyTableVarColumn(tableVarColumn);
+				newTableVarColumn.IsNilable = newTableVarColumn.IsNilable || isNilable;
+				DataType.Columns.Add(newTableVarColumn.Column);
+				TableVar.Columns.Add(newTableVarColumn);
 			}
 		}
 		
-		protected Schema.Key CopyKey(Schema.Key AKey, bool AIsSparse)	  
+		protected Schema.Key CopyKey(Schema.Key key, bool isSparse)	  
 		{
-			Schema.Key LKey = new Schema.Key();
-			LKey.InheritMetaData(AKey.MetaData);
-			LKey.IsInherited = true;
-			LKey.IsSparse = AKey.IsSparse || AIsSparse;
-			foreach (Schema.TableVarColumn LColumn in AKey.Columns)
-				LKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
-			return LKey;
+			Schema.Key localKey = new Schema.Key();
+			localKey.InheritMetaData(key.MetaData);
+			localKey.IsInherited = true;
+			localKey.IsSparse = key.IsSparse || isSparse;
+			foreach (Schema.TableVarColumn column in key.Columns)
+				localKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
+			return localKey;
 		}
         
-		protected Schema.Key CopyKey(Schema.Key AKey)
+		protected Schema.Key CopyKey(Schema.Key key)
 		{
-			return CopyKey(AKey, false);
+			return CopyKey(key, false);
 		}
 		
-        protected void CopyKeys(Schema.Keys AKeys, bool AIsSparse)
+        protected void CopyKeys(Schema.Keys keys, bool isSparse)
         {
-            foreach (Schema.Key LKey in AKeys)
-				if (!(TableVar.Keys.Contains(LKey)))
-					TableVar.Keys.Add(CopyKey(LKey, AIsSparse));
+            foreach (Schema.Key key in keys)
+				if (!(TableVar.Keys.Contains(key)))
+					TableVar.Keys.Add(CopyKey(key, isSparse));
         }
         
-        protected void CopyKeys(Schema.Keys AKeys)
+        protected void CopyKeys(Schema.Keys keys)
         {
-			CopyKeys(AKeys, false);
+			CopyKeys(keys, false);
         }
         
-        protected void CopyPreservedKeys(Schema.Keys AKeys, bool AIsSparse, bool APreserveSparse)
+        protected void CopyPreservedKeys(Schema.Keys keys, bool isSparse, bool preserveSparse)
         {
-			bool LAddKey;
-			foreach (Schema.Key LKey in AKeys)
+			bool addKey;
+			foreach (Schema.Key key in keys)
 			{
-				if (APreserveSparse || !LKey.IsSparse)
+				if (preserveSparse || !key.IsSparse)
 				{
-					LAddKey = true;
-					foreach (Schema.TableVarColumn LKeyColumn in LKey.Columns)
+					addKey = true;
+					foreach (Schema.TableVarColumn keyColumn in key.Columns)
 					{
-						LAddKey = TableVar.Columns.ContainsName(LKeyColumn.Name);
-						if (!LAddKey)
+						addKey = TableVar.Columns.ContainsName(keyColumn.Name);
+						if (!addKey)
 							break;
 					}
-					if (LAddKey && !TableVar.Keys.Contains(LKey))
-						TableVar.Keys.Add(CopyKey(LKey, AIsSparse));
+					if (addKey && !TableVar.Keys.Contains(key))
+						TableVar.Keys.Add(CopyKey(key, isSparse));
 				}
 			}
         }
         
-        protected void CopyPreservedKeys(Schema.Keys AKeys)
+        protected void CopyPreservedKeys(Schema.Keys keys)
         {
-			CopyPreservedKeys(AKeys, false, true);
+			CopyPreservedKeys(keys, false, true);
         }
         
         protected void RemoveSuperKeys()
@@ -298,248 +299,248 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// Remove super keys
 			// BTR 10/4/2006 ->	I am a little concerned that this change will negatively impact elaboration, derivation, and
 			// A/T enlistment so I've included it with a define.
-			int LIndex = FTableVar.Keys.Count - 1;
-			while (LIndex >= 0)
+			int index = _tableVar.Keys.Count - 1;
+			while (index >= 0)
 			{
-				Schema.Key LCurrentKey = FTableVar.Keys[LIndex];
-				int LKeyIndex = 0;
-				while (LKeyIndex < LIndex)
+				Schema.Key currentKey = _tableVar.Keys[index];
+				int keyIndex = 0;
+				while (keyIndex < index)
 				{
-					if (LCurrentKey.Columns.IsSupersetOf(FTableVar.Keys[LKeyIndex].Columns) && (LCurrentKey.IsSparse || (!LCurrentKey.IsSparse && !FTableVar.Keys[LKeyIndex].IsSparse)))
+					if (currentKey.Columns.IsSupersetOf(_tableVar.Keys[keyIndex].Columns) && (currentKey.IsSparse || (!currentKey.IsSparse && !_tableVar.Keys[keyIndex].IsSparse)))
 					{
 						// if LCurrentKey is sparse, then FTableVar.Keys[LKeyIndex] may or may not be sparse
 						// if LCurrentKey is not sparse, FTableVar.Keys[LKeyIndex] must be non-sparse
-						FTableVar.Keys.RemoveAt(LIndex);
+						_tableVar.Keys.RemoveAt(index);
 						break;
 					}
-					else if (FTableVar.Keys[LKeyIndex].Columns.IsSupersetOf(LCurrentKey.Columns) && (FTableVar.Keys[LKeyIndex].IsSparse || (!FTableVar.Keys[LKeyIndex].IsSparse && !LCurrentKey.IsSparse)))
+					else if (_tableVar.Keys[keyIndex].Columns.IsSupersetOf(currentKey.Columns) && (_tableVar.Keys[keyIndex].IsSparse || (!_tableVar.Keys[keyIndex].IsSparse && !currentKey.IsSparse)))
 					{
 						// if FTableVar.Keys[LKeyIndex] is sparse, then LCurrentKey may or may not be sparse
 						// if FTableVar.Keys[LKeyIndex] is not sparse, FTableVar.Keys[LKeyIndex] must be non-sparse
-						FTableVar.Keys.RemoveAt(LKeyIndex);
-						LIndex--;
+						_tableVar.Keys.RemoveAt(keyIndex);
+						index--;
 						continue;
 					}
 					
-					LKeyIndex++;
+					keyIndex++;
 				}
 				
-				LIndex--;
+				index--;
 			}
 			#else			
 			// Remove duplicate keys
-			for (int LIndex = FTableVar.Keys.Count - 1; LIndex >= 0; LIndex--)
+			for (int index = FTableVar.Keys.Count - 1; index >= 0; index--)
 			{
-				Schema.Key LCurrentKey = FTableVar.Keys[LIndex];
-				for (int LKeyIndex = 0; LKeyIndex < LIndex; LKeyIndex++)
-					if (FTableVar.Keys[LKeyIndex].Equals(LCurrentKey))
+				Schema.Key currentKey = FTableVar.Keys[index];
+				for (int keyIndex = 0; keyIndex < index; keyIndex++)
+					if (FTableVar.Keys[keyIndex].Equals(currentKey))
 					{
-						FTableVar.Keys.RemoveAt(LIndex);
+						FTableVar.Keys.RemoveAt(index);
 						break;
 					}
 			}
 			#endif
         }
         
-        protected Schema.Order CopyOrder(Schema.Order AOrder)
+        protected Schema.Order CopyOrder(Schema.Order order)
         {
-			Schema.Order LOrder = new Schema.Order();
-			LOrder.InheritMetaData(AOrder.MetaData);
-			LOrder.IsInherited = true;
-			Schema.OrderColumn LNewOrderColumn;
-			Schema.OrderColumn LOrderColumn;
-			for (int LIndex = 0; LIndex < AOrder.Columns.Count; LIndex++)
+			Schema.Order localOrder = new Schema.Order();
+			localOrder.InheritMetaData(order.MetaData);
+			localOrder.IsInherited = true;
+			Schema.OrderColumn newOrderColumn;
+			Schema.OrderColumn orderColumn;
+			for (int index = 0; index < order.Columns.Count; index++)
 			{
-				LOrderColumn = AOrder.Columns[LIndex];
-				LNewOrderColumn = new Schema.OrderColumn(TableVar.Columns[LOrderColumn.Column], LOrderColumn.Ascending, LOrderColumn.IncludeNils);
-				LNewOrderColumn.Sort = LOrderColumn.Sort;
-				LNewOrderColumn.IsDefaultSort = LOrderColumn.IsDefaultSort;
-				Error.AssertWarn(LNewOrderColumn.Sort != null, "Sort is null");
-				LOrder.Columns.Add(LNewOrderColumn);
+				orderColumn = order.Columns[index];
+				newOrderColumn = new Schema.OrderColumn(TableVar.Columns[orderColumn.Column], orderColumn.Ascending, orderColumn.IncludeNils);
+				newOrderColumn.Sort = orderColumn.Sort;
+				newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
+				Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");
+				localOrder.Columns.Add(newOrderColumn);
 			}
-			return LOrder;
+			return localOrder;
 		}
 		
-        protected void CopyOrders(Schema.Orders AOrders)
+        protected void CopyOrders(Schema.Orders orders)
         {
-			foreach (Schema.Order LOrder in AOrders)
-				TableVar.Orders.Add(CopyOrder(LOrder));
+			foreach (Schema.Order order in orders)
+				TableVar.Orders.Add(CopyOrder(order));
         }
         
-        protected void CopyPreservedOrders(Schema.Orders AOrders)
+        protected void CopyPreservedOrders(Schema.Orders orders)
         {
-			bool LAddOrder;
-			foreach (Schema.Order LOrder in AOrders)
+			bool addOrder;
+			foreach (Schema.Order order in orders)
 			{
-				LAddOrder = true;
-				Schema.OrderColumn LOrderColumn;
-				for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
+				addOrder = true;
+				Schema.OrderColumn orderColumn;
+				for (int index = 0; index < order.Columns.Count; index++)
 				{
-					LOrderColumn = LOrder.Columns[LIndex];
-					LAddOrder = TableVar.Columns.ContainsName(LOrderColumn.Column.Name);
-					if (!LAddOrder)
+					orderColumn = order.Columns[index];
+					addOrder = TableVar.Columns.ContainsName(orderColumn.Column.Name);
+					if (!addOrder)
 						break;
 				}
-				if (LAddOrder && !TableVar.Orders.Contains(LOrder))
-					TableVar.Orders.Add(CopyOrder(LOrder));
+				if (addOrder && !TableVar.Orders.Contains(order))
+					TableVar.Orders.Add(CopyOrder(order));
 			}
         }
         
-        protected string DeriveSourceReferenceName(Schema.Reference AReference, int AReferenceID)
+        protected string DeriveSourceReferenceName(Schema.Reference reference, int referenceID)
         {
-			return DeriveSourceReferenceName(AReference, AReferenceID, AReference.SourceKey);
+			return DeriveSourceReferenceName(reference, referenceID, reference.SourceKey);
         }
         
-        protected string DeriveSourceReferenceName(Schema.Reference AReference, int AReferenceID, Schema.JoinKey ASourceKey)
+        protected string DeriveSourceReferenceName(Schema.Reference reference, int referenceID, Schema.JoinKey sourceKey)
         {
-			StringBuilder LName = new StringBuilder(AReference.OriginatingReferenceName());
-			LName.AppendFormat("_{0}", Keywords.Source);
-			for (int LIndex = 0; LIndex < ASourceKey.Columns.Count; LIndex++)
-				LName.AppendFormat("_{0}", ASourceKey.Columns[LIndex].Column.Name);
-			if (LName.Length > Schema.Object.CMaxObjectNameLength)
-				return Schema.Object.GetGeneratedName(LName.ToString(), AReferenceID);
-			return LName.ToString();
+			StringBuilder name = new StringBuilder(reference.OriginatingReferenceName());
+			name.AppendFormat("_{0}", Keywords.Source);
+			for (int index = 0; index < sourceKey.Columns.Count; index++)
+				name.AppendFormat("_{0}", sourceKey.Columns[index].Column.Name);
+			if (name.Length > Schema.Object.MaxObjectNameLength)
+				return Schema.Object.GetGeneratedName(name.ToString(), referenceID);
+			return name.ToString();
         }
         
-        protected string DeriveTargetReferenceName(Schema.Reference AReference, int AReferenceID)
+        protected string DeriveTargetReferenceName(Schema.Reference reference, int referenceID)
         {
-			return DeriveTargetReferenceName(AReference, AReferenceID, AReference.TargetKey);
+			return DeriveTargetReferenceName(reference, referenceID, reference.TargetKey);
         }
         
-        protected string DeriveTargetReferenceName(Schema.Reference AReference, int AReferenceID, Schema.JoinKey ATargetKey)
+        protected string DeriveTargetReferenceName(Schema.Reference reference, int referenceID, Schema.JoinKey targetKey)
         {
-			StringBuilder LName = new StringBuilder(AReference.OriginatingReferenceName());
-			LName.AppendFormat("_{0}", Keywords.Target);
-			for (int LIndex = 0; LIndex < ATargetKey.Columns.Count; LIndex++)
-				LName.AppendFormat("_{0}", ATargetKey.Columns[LIndex].Column.Name);
-			if (LName.Length > Schema.Object.CMaxObjectNameLength)
-				return Schema.Object.GetGeneratedName(LName.ToString(), AReferenceID);
-			return LName.ToString();
+			StringBuilder name = new StringBuilder(reference.OriginatingReferenceName());
+			name.AppendFormat("_{0}", Keywords.Target);
+			for (int index = 0; index < targetKey.Columns.Count; index++)
+				name.AppendFormat("_{0}", targetKey.Columns[index].Column.Name);
+			if (name.Length > Schema.Object.MaxObjectNameLength)
+				return Schema.Object.GetGeneratedName(name.ToString(), referenceID);
+			return name.ToString();
         }
         
-        protected void CopySourceReference(Plan APlan, Schema.Reference AReference)
+        protected void CopySourceReference(Plan plan, Schema.Reference reference)
         {
-			CopySourceReference(APlan, AReference, AReference.IsExcluded);
+			CopySourceReference(plan, reference, reference.IsExcluded);
         }
         
-        protected void CopySourceReference(Plan APlan, Schema.Reference AReference, bool AIsExcluded)
+        protected void CopySourceReference(Plan plan, Schema.Reference reference, bool isExcluded)
         {
-			int LNewReferenceID = Schema.Object.GetNextObjectID();
-			string LNewReferenceName = DeriveSourceReferenceName(AReference, LNewReferenceID);
-			Schema.Reference LNewReference = new Schema.Reference(LNewReferenceID, LNewReferenceName);
-			LNewReference.ParentReference = AReference;
-			LNewReference.IsExcluded = AIsExcluded;
-			LNewReference.InheritMetaData(AReference.MetaData);
-			LNewReference.UpdateReferenceAction = AReference.UpdateReferenceAction;
-			LNewReference.DeleteReferenceAction = AReference.DeleteReferenceAction;
-			LNewReference.SourceTable = FTableVar;
-			LNewReference.AddDependency(FTableVar);
-			int LColumnIndex;
-			bool LPreserved = true;
-			foreach (Schema.TableVarColumn LColumn in AReference.SourceKey.Columns)
+			int newReferenceID = Schema.Object.GetNextObjectID();
+			string newReferenceName = DeriveSourceReferenceName(reference, newReferenceID);
+			Schema.Reference newReference = new Schema.Reference(newReferenceID, newReferenceName);
+			newReference.ParentReference = reference;
+			newReference.IsExcluded = isExcluded;
+			newReference.InheritMetaData(reference.MetaData);
+			newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+			newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+			newReference.SourceTable = _tableVar;
+			newReference.AddDependency(_tableVar);
+			int columnIndex;
+			bool preserved = true;
+			foreach (Schema.TableVarColumn column in reference.SourceKey.Columns)
 			{
-				LColumnIndex = TableVar.Columns.IndexOfName(LColumn.Name);
-				if (LColumnIndex >= 0)
-					LNewReference.SourceKey.Columns.Add(TableVar.Columns[LColumnIndex]);
+				columnIndex = TableVar.Columns.IndexOfName(column.Name);
+				if (columnIndex >= 0)
+					newReference.SourceKey.Columns.Add(TableVar.Columns[columnIndex]);
 				else
 				{
-					LPreserved = false;
+					preserved = false;
 					break;
 				}
 			}
 
-			if (LPreserved)
+			if (preserved)
 			{
-				foreach (Schema.Key LKey in TableVar.Keys)
-					if (LKey.Columns.IsSubsetOf(LNewReference.SourceKey.Columns))
+				foreach (Schema.Key key in TableVar.Keys)
+					if (key.Columns.IsSubsetOf(newReference.SourceKey.Columns))
 					{
-						LNewReference.SourceKey.IsUnique = true;
+						newReference.SourceKey.IsUnique = true;
 						break;
 					}
 
-				LNewReference.TargetTable = AReference.TargetTable;
-				LNewReference.AddDependency(AReference.TargetTable);
-				LNewReference.TargetKey.IsUnique = AReference.TargetKey.IsUnique;
-				foreach (Schema.TableVarColumn LColumn in AReference.TargetKey.Columns)
-					LNewReference.TargetKey.Columns.Add(LColumn);
+				newReference.TargetTable = reference.TargetTable;
+				newReference.AddDependency(reference.TargetTable);
+				newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
+				foreach (Schema.TableVarColumn column in reference.TargetKey.Columns)
+					newReference.TargetKey.Columns.Add(column);
 
-				if (!FTableVar.SourceReferences.ContainsSourceReference(LNewReference)) // This would only be true for unions and joins where both sides contain the same reference
+				if (!_tableVar.SourceReferences.ContainsSourceReference(newReference)) // This would only be true for unions and joins where both sides contain the same reference
 				{
-					FTableVar.SourceReferences.Add(LNewReference);
-					FTableVar.DerivedReferences.Add(LNewReference);
+					_tableVar.SourceReferences.Add(newReference);
+					_tableVar.DerivedReferences.Add(newReference);
 				}
 			}
         }
         
-        protected void CopySourceReferences(Plan APlan, Schema.References AReferences)
+        protected void CopySourceReferences(Plan plan, Schema.References references)
         {
-			foreach (Schema.Reference LReference in AReferences)
-				CopySourceReference(APlan, LReference);
+			foreach (Schema.Reference reference in references)
+				CopySourceReference(plan, reference);
         }
         
-        protected void CopyTargetReference(Plan APlan, Schema.Reference AReference)
+        protected void CopyTargetReference(Plan plan, Schema.Reference reference)
         {
-			CopyTargetReference(APlan, AReference, AReference.IsExcluded);
+			CopyTargetReference(plan, reference, reference.IsExcluded);
         }
         
-        protected void CopyTargetReference(Plan APlan, Schema.Reference AReference, bool AIsExcluded)
+        protected void CopyTargetReference(Plan plan, Schema.Reference reference, bool isExcluded)
         {
-			int LNewReferenceID = Schema.Object.GetNextObjectID();
-			string LNewReferenceName = DeriveTargetReferenceName(AReference, LNewReferenceID);
-			Schema.Reference LNewReference = new Schema.Reference(LNewReferenceID, LNewReferenceName);
-			LNewReference.ParentReference = AReference;
-			LNewReference.IsExcluded = AIsExcluded;
-			LNewReference.InheritMetaData(AReference.MetaData);
-			LNewReference.UpdateReferenceAction = AReference.UpdateReferenceAction;
-			LNewReference.DeleteReferenceAction = AReference.DeleteReferenceAction;
-			LNewReference.SourceTable = AReference.SourceTable;
-			LNewReference.AddDependency(AReference.SourceTable);
-			LNewReference.SourceKey.IsUnique = AReference.SourceKey.IsUnique;
-			foreach (Schema.TableVarColumn LColumn in AReference.SourceKey.Columns)
-				LNewReference.SourceKey.Columns.Add(LColumn);
-			LNewReference.TargetTable = FTableVar;
-			LNewReference.AddDependency(FTableVar);
-			int LColumnIndex;
-			bool LPreserved = true;
-			foreach (Schema.TableVarColumn LColumn in AReference.TargetKey.Columns)
+			int newReferenceID = Schema.Object.GetNextObjectID();
+			string newReferenceName = DeriveTargetReferenceName(reference, newReferenceID);
+			Schema.Reference newReference = new Schema.Reference(newReferenceID, newReferenceName);
+			newReference.ParentReference = reference;
+			newReference.IsExcluded = isExcluded;
+			newReference.InheritMetaData(reference.MetaData);
+			newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+			newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+			newReference.SourceTable = reference.SourceTable;
+			newReference.AddDependency(reference.SourceTable);
+			newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
+			foreach (Schema.TableVarColumn column in reference.SourceKey.Columns)
+				newReference.SourceKey.Columns.Add(column);
+			newReference.TargetTable = _tableVar;
+			newReference.AddDependency(_tableVar);
+			int columnIndex;
+			bool preserved = true;
+			foreach (Schema.TableVarColumn column in reference.TargetKey.Columns)
 			{
-				LColumnIndex = TableVar.Columns.IndexOfName(LColumn.Name);
-				if (LColumnIndex >= 0)
-					LNewReference.TargetKey.Columns.Add(TableVar.Columns[LColumnIndex]);
+				columnIndex = TableVar.Columns.IndexOfName(column.Name);
+				if (columnIndex >= 0)
+					newReference.TargetKey.Columns.Add(TableVar.Columns[columnIndex]);
 				else
 				{
-					LPreserved = false;
+					preserved = false;
 					break;
 				}
 			}
 			
-			if (LPreserved)
+			if (preserved)
 			{
-				foreach (Schema.Key LKey in TableVar.Keys)
+				foreach (Schema.Key key in TableVar.Keys)
 				{
-					if (LKey.Columns.IsSubsetOf(LNewReference.TargetKey.Columns))
+					if (key.Columns.IsSubsetOf(newReference.TargetKey.Columns))
 					{
-						LNewReference.TargetKey.IsUnique = true;
+						newReference.TargetKey.IsUnique = true;
 						break;
 					}
 				}
 
-				if (LNewReference.TargetKey.IsUnique && !FTableVar.TargetReferences.ContainsTargetReference(LNewReference)) // This would only be true for unions and joins where both sides contain the same reference
+				if (newReference.TargetKey.IsUnique && !_tableVar.TargetReferences.ContainsTargetReference(newReference)) // This would only be true for unions and joins where both sides contain the same reference
 				{
-					FTableVar.TargetReferences.Add(LNewReference);
-					FTableVar.DerivedReferences.Add(LNewReference);
+					_tableVar.TargetReferences.Add(newReference);
+					_tableVar.DerivedReferences.Add(newReference);
 				}
 			}
         }
         
-        protected void CopyTargetReferences(Plan APlan, Schema.References AReferences)
+        protected void CopyTargetReferences(Plan plan, Schema.References references)
         {
-			foreach (Schema.Reference LReference in AReferences)
-				CopyTargetReference(APlan, LReference);
+			foreach (Schema.Reference reference in references)
+				CopyTargetReference(plan, reference);
         }
         
 		// DataType
-		public new virtual Schema.ITableType DataType { get { return (Schema.ITableType)FDataType; } }
+		public new virtual Schema.ITableType DataType { get { return (Schema.ITableType)_dataType; } }
 		
 		// Cursor Behaviors:
 		// The current CursorContext for the plan contains the requested cursor behaviors.
@@ -549,92 +550,92 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// values after the chunking has been determined for this node.
 		
 		// TableVar
-		protected Schema.TableVar FTableVar;
+		protected Schema.TableVar _tableVar;
 		public virtual Schema.TableVar TableVar
 		{
-			get { return FTableVar; }
+			get { return _tableVar; }
 			set
 			{
-				FTableVar = value;
-				if (FTableVar != null)
-					FDataType = FTableVar.DataType;
+				_tableVar = value;
+				if (_tableVar != null)
+					_dataType = _tableVar.DataType;
 			}
 		}
 
 		// Order
-		private Schema.Order FOrder;
+		private Schema.Order _order;
 		public Schema.Order Order
 		{
-			get { return FOrder; }
-			set { FOrder = value; }
+			get { return _order; }
+			set { _order = value; }
 		}
 		
 		// CursorType
-		protected CursorType FCursorType;
+		protected CursorType _cursorType;
 		public CursorType CursorType
 		{
-			get { return FCursorType; }
-			set { FCursorType = value; }
+			get { return _cursorType; }
+			set { _cursorType = value; }
 		}
 		
-		protected CursorType FRequestedCursorType;
+		protected CursorType _requestedCursorType;
 		public CursorType RequestedCursorType
 		{
-			get { return FRequestedCursorType; }
-			set { FRequestedCursorType = value; }
+			get { return _requestedCursorType; }
+			set { _requestedCursorType = value; }
 		}
 		
 		// CursorCapabilities
-		protected CursorCapability FCursorCapabilities;
+		protected CursorCapability _cursorCapabilities;
 		public CursorCapability CursorCapabilities
 		{
-			get { return FCursorCapabilities; }
-			set { FCursorCapabilities = value; }
+			get { return _cursorCapabilities; }
+			set { _cursorCapabilities = value; }
 		}
 		
-        public bool Supports(CursorCapability ACapability)
+        public bool Supports(CursorCapability capability)
         {
-			return ((ACapability & CursorCapabilities) != 0);
+			return ((capability & CursorCapabilities) != 0);
         }
         
-        public void CheckCapability(CursorCapability ACapability)
+        public void CheckCapability(CursorCapability capability)
         {
-			if (!Supports(ACapability))
-				throw new RuntimeException(RuntimeException.Codes.CapabilityNotSupported, Enum.GetName(typeof(CursorCapability), ACapability));
+			if (!Supports(capability))
+				throw new RuntimeException(RuntimeException.Codes.CapabilityNotSupported, Enum.GetName(typeof(CursorCapability), capability));
         }
         
-        public static string CursorCapabilitiesToString(CursorCapability ACursorCapabilities)
+        public static string CursorCapabilitiesToString(CursorCapability cursorCapabilities)
         {
-			StringBuilder LResult = new StringBuilder();
-			bool LFirst = true;
-			CursorCapability LCapability;
-			for (int LIndex = 0; LIndex < 7; LIndex++)
+			StringBuilder result = new StringBuilder();
+			bool first = true;
+			CursorCapability capability;
+			for (int index = 0; index < 7; index++)
 			{
-				LCapability = (CursorCapability)Math.Pow(2, LIndex);
-				if ((ACursorCapabilities & LCapability) != 0)
+				capability = (CursorCapability)Math.Pow(2, index);
+				if ((cursorCapabilities & capability) != 0)
 				{
-					if (!LFirst)
-						LResult.Append(", ");
+					if (!first)
+						result.Append(", ");
 					else
-						LFirst = false;
+						first = false;
 						
-					LResult.Append(LCapability.ToString().ToLower());
+					result.Append(capability.ToString().ToLower());
 				}
 			}
-			return LResult.ToString();
+			return result.ToString();
         }
 		
 		// CursorIsolation
-		protected CursorIsolation FCursorIsolation;
+		protected CursorIsolation _cursorIsolation;
 		public CursorIsolation CursorIsolation
 		{
-			get { return FCursorIsolation; }
-			set { FCursorIsolation = value; }
+			get { return _cursorIsolation; }
+			set { _cursorIsolation = value; }
 		}
 		
-		protected override void DetermineModifiers(Plan APlan)
+		protected override void DetermineModifiers(Plan plan)
 		{
-			base.DetermineModifiers(APlan);
+			base.DetermineModifiers(plan);
 
 			if (Modifiers != null)
 			{			
@@ -643,132 +644,132 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void DetermineDevice(Plan APlan)
+		public override void DetermineDevice(Plan plan)
 		{
-			PrepareJoinApplicationTransaction(APlan);
-			base.DetermineDevice(APlan);
-			if (!FDeviceSupported)
-				DetermineCursorBehavior(APlan);
-			FSymbols = Compiler.SnapshotSymbols(APlan);
-			if ((FCursorCapabilities & CursorCapability.Updateable) != 0)
-				DetermineModifySupported(APlan);
+			PrepareJoinApplicationTransaction(plan);
+			base.DetermineDevice(plan);
+			if (!_deviceSupported)
+				DetermineCursorBehavior(plan);
+			_symbols = Compiler.SnapshotSymbols(plan);
+			if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
+				DetermineModifySupported(plan);
 		}
 		
-		public override void DetermineBinding(Plan APlan)
+		public override void DetermineBinding(Plan plan)
 		{
-			base.DetermineBinding(APlan);
-			if (FPopulateNode != null)
+			base.DetermineBinding(plan);
+			if (_populateNode != null)
 			{
-				ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
+				ApplicationTransaction transaction = plan.GetApplicationTransaction();
 				try
 				{
-					LTransaction.PushGlobalContext();
+					transaction.PushGlobalContext();
 					try
 					{
-						FPopulateNode.DetermineBinding(APlan);
+						_populateNode.DetermineBinding(plan);
 					}
 					finally
 					{
-						LTransaction.PopGlobalContext();
+						transaction.PopGlobalContext();
 					}
 				}
 				finally
 				{
-					Monitor.Exit(LTransaction);
+					Monitor.Exit(transaction);
 				}
 			}
 		}
 		
-		public virtual void DetermineRemotable(Plan APlan)
+		public virtual void DetermineRemotable(Plan plan)
 		{
-			FTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
+			_tableVar.DetermineRemotable(plan.CatalogDeviceSession);
 		}
 		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
-			base.DetermineCharacteristics(APlan);
+			base.DetermineCharacteristics(plan);
 			//FTableVar.DetermineRemotable();
 		}
 		
-		public virtual void DetermineCursorBehavior(Plan APlan) 
+		public virtual void DetermineCursorBehavior(Plan plan) 
 		{
-			FCursorType = CursorType.Dynamic;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = CursorCapability.Navigable;
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorType = CursorType.Dynamic;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = CursorCapability.Navigable;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 		}
 		
 		// ModifySupported, true if the device supports modification statements for this node
-		protected bool FModifySupported;
+		protected bool _modifySupported;
 		public bool ModifySupported
 		{
-			get { return FModifySupported; }
-			set { FModifySupported = value; }
+			get { return _modifySupported; }
+			set { _modifySupported = value; }
 		}
 	
 		// ShouldSupportModify, true if the DAE should try to support the modification at this level
-		private bool FShouldSupportModify = true;
+		private bool _shouldSupportModify = true;
 		public bool ShouldSupportModify
 		{
-			get { return FShouldSupportModify; }
-			set { FShouldSupportModify = value; }
+			get { return _shouldSupportModify; }
+			set { _shouldSupportModify = value; }
 		}
 		
-		public virtual void DetermineModifySupported(Plan APlan)
+		public virtual void DetermineModifySupported(Plan plan)
 		{
-			if ((TableVar.Keys.Count > 0) && FDeviceSupported && ShouldSupportModify)
+			if ((TableVar.Keys.Count > 0) && _deviceSupported && ShouldSupportModify)
 			{
 				// if any child node is a tabletype and not a tablenode  
 				//	or is a table node and does not support modification, modification is not supported
 				if (NodeCount > 0)
-					foreach (PlanNode LNode in Nodes)
+					foreach (PlanNode node in Nodes)
 						if 
 						(
-							((LNode.DataType is Schema.TableType) && !(LNode is TableNode)) || 
-							((LNode is TableNode) && !((TableNode)LNode).FModifySupported)
+							((node.DataType is Schema.TableType) && !(node is TableNode)) || 
+							((node is TableNode) && !((TableNode)node)._modifySupported)
 						)
 						{
-							FModifySupported = false;
+							_modifySupported = false;
 							return;
 						}
 				
-				FModifySupported = false;
+				_modifySupported = false;
 				// TODO: Build modification binding cache
 				#if USEMODIFICATIONBINDING
 				// Use an update to determine whether any modification would be supported against this expression
-				UpdateNode LUpdateNode = new UpdateNode();
+				UpdateNode updateNode = new UpdateNode();
 				LNode.IsBreakable = false;
-				LUpdateNode.Nodes.Add(this);
-				FModifySupported = FDevice.Supports(APlan, LUpdateNode);
+				updateNode.Nodes.Add(this);
+				FModifySupported = FDevice.Supports(APlan, updateNode);
 				#endif
 			}
 			else
-				FModifySupported = false;
+				_modifySupported = false;
 		}
 		
 		protected void CheckModifySupported()
 		{
-			if (!FModifySupported)
+			if (!_modifySupported)
 				throw new RuntimeException(RuntimeException.Codes.NoSupportingModificationDevice, EmitStatementAsString());
 		}
 
 		// Used to snapshot the stack to allow for run-time compilation of the concurrency and update nodes
-		protected Symbols FSymbols;
+		protected Symbols _symbols;
 		
-		protected void PushSymbols(Plan APlan, Symbols ASymbols)
+		protected void PushSymbols(Plan plan, Symbols symbols)
 		{
-			APlan.Symbols.PushWindow(0);
-			APlan.EnterRowContext();
-			for (int LIndex = ASymbols.Count - 1; LIndex >= 0; LIndex--)
-				APlan.Symbols.Push(ASymbols.Peek(LIndex));
+			plan.Symbols.PushWindow(0);
+			plan.EnterRowContext();
+			for (int index = symbols.Count - 1; index >= 0; index--)
+				plan.Symbols.Push(symbols.Peek(index));
 		}
 		
-		protected void PopSymbols(Plan APlan, Symbols ASymbols)
+		protected void PopSymbols(Plan plan, Symbols symbols)
 		{
-			for (int LIndex = ASymbols.Count - 1; LIndex >= 0; LIndex--)
-				APlan.Symbols.Pop();
-			APlan.ExitRowContext();
-			APlan.Symbols.PopWindow();
+			for (int index = symbols.Count - 1; index >= 0; index--)
+				plan.Symbols.Pop();
+			plan.ExitRowContext();
+			plan.Symbols.PopWindow();
 		}
 
 		#if !USENATIVECONCURRENCYCOMPARE		
@@ -807,64 +808,64 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		#endif
 		
-		protected PlanNode CompileSelectNode(Program AProgram, bool AFullSelect)
+		protected PlanNode CompileSelectNode(Program program, bool fullSelect)
 		{
-			ApplicationTransaction LTransaction = null;
-			if (AProgram.ServerProcess.ApplicationTransactionID != Guid.Empty)
-				LTransaction = AProgram.ServerProcess.GetApplicationTransaction();
+			ApplicationTransaction transaction = null;
+			if (program.ServerProcess.ApplicationTransactionID != Guid.Empty)
+				transaction = program.ServerProcess.GetApplicationTransaction();
 			try
 			{
-				if (LTransaction != null)
-					LTransaction.PushGlobalContext();
+				if (transaction != null)
+					transaction.PushGlobalContext();
 				try
 				{
-					Plan LPlan = new Plan(AProgram.ServerProcess);
+					Plan plan = new Plan(program.ServerProcess);
 					try
 					{
-						LPlan.PushATCreationContext();
+						plan.PushATCreationContext();
 						try
 						{
-							PushSymbols(LPlan, FSymbols);
+							PushSymbols(plan, _symbols);
 							try
 							{
 								// Generate a select statement for use in optimistic concurrency checks
-								LPlan.EnterRowContext();
+								plan.EnterRowContext();
 								try
 								{
-									LPlan.Symbols.Push(new Symbol("ASelectRow", DataType.RowType));
+									plan.Symbols.Push(new Symbol("ASelectRow", DataType.RowType));
 									try
 									{
-										LPlan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable | (CursorCapabilities & CursorCapability.Updateable), ((CursorCapabilities & CursorCapability.Updateable) != 0) ? CursorIsolation.Isolated : CursorIsolation.None));
+										plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable | (CursorCapabilities & CursorCapability.Updateable), ((CursorCapabilities & CursorCapability.Updateable) != 0) ? CursorIsolation.Isolated : CursorIsolation.None));
 										try
 										{
 											if (TableVar.Owner != null)
-												LPlan.PushSecurityContext(new SecurityContext(TableVar.Owner));
+												plan.PushSecurityContext(new SecurityContext(TableVar.Owner));
 											try
 											{
-												Schema.Columns LColumns;
-												if (AFullSelect)
-													LColumns = DataType.RowType.Columns;
+												Schema.Columns columns;
+												if (fullSelect)
+													columns = DataType.RowType.Columns;
 												else
 												{
-													LColumns = new Schema.Columns();
-													Schema.Key LKey = Compiler.FindClusteringKey(LPlan, TableVar);
-													foreach (Schema.TableVarColumn LColumn in LKey.Columns)
-														LColumns.Add(LColumn.Column);
+													columns = new Schema.Columns();
+													Schema.Key key = Compiler.FindClusteringKey(plan, TableVar);
+													foreach (Schema.TableVarColumn column in key.Columns)
+														columns.Add(column.Column);
 												}
 												return
 													Compiler.Bind
 													(
-														LPlan,
+														plan,
 														Compiler.EmitRestrictNode
 														(
-															LPlan,
-															Compiler.CompileExpression(LPlan, (Expression)EmitStatement(EmitMode.ForCopy)),
+															plan,
+															Compiler.CompileExpression(plan, (Expression)EmitStatement(EmitMode.ForCopy)),
 															Compiler.BuildOptimisticRowEqualExpression
 															(
-																LPlan, 
+																plan, 
 																"",
 																"ASelectRow",
-																LColumns
+																columns
 															)
 														)
 													);
@@ -872,126 +873,126 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 											finally
 											{
 												if (TableVar.Owner != null)
-													LPlan.PopSecurityContext();
+													plan.PopSecurityContext();
 											}
 										}
 										finally
 										{
-											LPlan.PopCursorContext();
+											plan.PopCursorContext();
 										}
 									}
 									finally
 									{
-										LPlan.Symbols.Pop();
+										plan.Symbols.Pop();
 									}
 								}
 								finally
 								{
-									LPlan.ExitRowContext();
+									plan.ExitRowContext();
 								}
 							}
 							finally
 							{
-								PopSymbols(LPlan, FSymbols);
+								PopSymbols(plan, _symbols);
 							}
 						}
 						finally
 						{
-							LPlan.PopATCreationContext();
+							plan.PopATCreationContext();
 						}
 					}
 					finally
 					{
-						LPlan.Dispose();
+						plan.Dispose();
 					}
 				}
 				finally
 				{
-					if (LTransaction != null)
-						LTransaction.PopGlobalContext();
+					if (transaction != null)
+						transaction.PopGlobalContext();
 				}
 			}
 			finally
 			{
-				if (LTransaction != null)
-					Monitor.Exit(LTransaction);
+				if (transaction != null)
+					Monitor.Exit(transaction);
 			}
 		}
 		
-		protected void EnsureSelectNode(Program AProgram)
+		protected void EnsureSelectNode(Program program)
 		{
 			lock (this)
 			{
-				if (FSelectNode == null)
+				if (_selectNode == null)
 				{
-					FSelectNode = CompileSelectNode(AProgram, false);
+					_selectNode = CompileSelectNode(program, false);
 				}
 			}
 		}
 		
-		protected void EnsureFullSelectNode(Program AProgram)
+		protected void EnsureFullSelectNode(Program program)
 		{
 			lock (this)
 			{
-				if (FFullSelectNode == null)
+				if (_fullSelectNode == null)
 				{
-					FFullSelectNode = CompileSelectNode(AProgram, true);
+					_fullSelectNode = CompileSelectNode(program, true);
 				}
 			}
 		}
 		
-		protected void EnsureModifyNodes(Plan APlan)
+		protected void EnsureModifyNodes(Plan plan)
 		{
 			lock (this)
 			{
-				if (FInsertNode == null)
+				if (_insertNode == null)
 				{
 					// Generate template modification instructions
-					APlan.EnterRowContext();
+					plan.EnterRowContext();
 					try
 					{
-						APlan.Symbols.Push(new Symbol(DataType.OldRowType));
+						plan.Symbols.Push(new Symbol(String.Empty, DataType.OldRowType));
 						try
 						{
-							APlan.Symbols.Push(new Symbol(DataType.RowType));
+							plan.Symbols.Push(new Symbol(String.Empty, DataType.RowType));
 							try
 							{
 								if (TableVar.Owner != null)
-									APlan.PushSecurityContext(new SecurityContext(TableVar.Owner));
+									plan.PushSecurityContext(new SecurityContext(TableVar.Owner));
 								try
 								{
-									Schema.RowType LOldKey = new Schema.RowType(Compiler.FindClusteringKey(APlan, TableVar).Columns, Keywords.Old);
-									Schema.RowType LKey = new Schema.RowType(Compiler.FindClusteringKey(APlan, TableVar).Columns);
-									FInsertNode = new InsertNode();
-									FInsertNode.IsBreakable = false;
-									FUpdateNode = new UpdateNode();
-									FUpdateNode.IsBreakable = false;
-									FUpdateNode.Nodes.Add(Compiler.EmitUpdateConditionNode(APlan, this, Compiler.CompileExpression(APlan, Compiler.BuildKeyEqualExpression(APlan, LOldKey.Columns, LKey.Columns))));
-									FUpdateNode.TargetNode = FUpdateNode.Nodes[0].Nodes[0];
-									FUpdateNode.ConditionNode = FUpdateNode.Nodes[0].Nodes[1];
-									FDeleteNode = new DeleteNode();
-									FDeleteNode.IsBreakable = false;
-									FDeleteNode.Nodes.Add(Compiler.EmitRestrictNode(APlan, this, Compiler.CompileExpression(APlan, Compiler.BuildKeyEqualExpression(APlan, LOldKey.Columns, LKey.Columns))));
+									Schema.RowType oldKey = new Schema.RowType(Compiler.FindClusteringKey(plan, TableVar).Columns, Keywords.Old);
+									Schema.RowType key = new Schema.RowType(Compiler.FindClusteringKey(plan, TableVar).Columns);
+									_insertNode = new InsertNode();
+									_insertNode.IsBreakable = false;
+									_updateNode = new UpdateNode();
+									_updateNode.IsBreakable = false;
+									_updateNode.Nodes.Add(Compiler.EmitUpdateConditionNode(plan, this, Compiler.CompileExpression(plan, Compiler.BuildKeyEqualExpression(plan, oldKey.Columns, key.Columns))));
+									_updateNode.TargetNode = _updateNode.Nodes[0].Nodes[0];
+									_updateNode.ConditionNode = _updateNode.Nodes[0].Nodes[1];
+									_deleteNode = new DeleteNode();
+									_deleteNode.IsBreakable = false;
+									_deleteNode.Nodes.Add(Compiler.EmitRestrictNode(plan, this, Compiler.CompileExpression(plan, Compiler.BuildKeyEqualExpression(plan, oldKey.Columns, key.Columns))));
 								}
 								finally
 								{
 									if (TableVar.Owner != null)
-										APlan.PopSecurityContext();
+										plan.PopSecurityContext();
 								}
 							}
 							finally
 							{
-								APlan.Symbols.Pop();
+								plan.Symbols.Pop();
 							}
 						}
 						finally
 						{
-							APlan.Symbols.Pop();
+							plan.Symbols.Pop();
 						}
 					}
 					finally
 					{
-						APlan.ExitRowContext();
+						plan.ExitRowContext();
 					}
 				}
 			}
@@ -1215,72 +1216,80 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// of columns in the type is the same, where this is not necessarily true for row types
 		/// which are Equal.
 		/// </remarks>
-		public virtual Row PrepareNewRow(Program AProgram, Row AOldRow, Row ANewRow, ref BitArray AValueFlags)
+		public virtual Row PrepareNewRow(Program program, Row oldRow, Row newRow, ref BitArray valueFlags)
 		{
-			if (!ANewRow.DataType.Columns.Equivalent(DataType.Columns))
+			if (!newRow.DataType.Columns.Equivalent(DataType.Columns))
 			{
-				Row LRow = new Row(AProgram.ValueManager, DataType.RowType);
-				BitArray LValueFlags = AValueFlags != null ? new BitArray(LRow.DataType.Columns.Count) : null;
-				int LColumnIndex;
-				for (int LIndex = 0; LIndex < LRow.DataType.Columns.Count; LIndex++)
+				Row row = new Row(program.ValueManager, DataType.RowType);
+				BitArray localValueFlags = valueFlags != null ? new BitArray(row.DataType.Columns.Count) : null;
+				int columnIndex;
+				for (int index = 0; index < row.DataType.Columns.Count; index++)
 				{
-					LColumnIndex = ANewRow.DataType.Columns.IndexOfName(LRow.DataType.Columns[LIndex].Name);
-					if (LColumnIndex >= 0)
+					columnIndex = newRow.DataType.Columns.IndexOfName(row.DataType.Columns[index].Name);
+					if (columnIndex >= 0)
 					{
-						if (ANewRow.HasValue(LColumnIndex))
-							LRow[LIndex] = ANewRow[LColumnIndex];
+						if (newRow.HasValue(columnIndex))
+							row[index] = newRow[columnIndex];
 
-						if (LValueFlags != null)
-							LValueFlags[LIndex] = AValueFlags[LColumnIndex];
+						if (localValueFlags != null)
+							localValueFlags[index] = valueFlags[columnIndex];
 					}
 					else
 					{
-						if (AOldRow != null)
+						if (oldRow != null)
 						{
-							LColumnIndex = AOldRow.DataType.Columns.IndexOfName(LRow.DataType.Columns[LIndex].Name);
-							if ((LColumnIndex >= 0) && AOldRow.HasValue(LColumnIndex))
-								LRow[LIndex] = AOldRow[LColumnIndex];
+							columnIndex = oldRow.DataType.Columns.IndexOfName(row.DataType.Columns[index].Name);
+							if ((columnIndex >= 0) && oldRow.HasValue(columnIndex))
+								row[index] = oldRow[columnIndex];
 						}
 						
-						if (LValueFlags != null)
-							LValueFlags[LIndex] = false;
+						if (localValueFlags != null)
+							localValueFlags[index] = false;
 					}
 				}
-				ANewRow = LRow;
-				AValueFlags = LValueFlags;
+				newRow = row;
+				valueFlags = localValueFlags;
 			}
 
-			return ANewRow;
+			return newRow;
 		}
 		
-		public void PushRow(Program AProgram, Row ARow)
+		public void PushRow(Program program, Row row)
 		{
-			if (ARow != null)
+			if (row != null)
 			{
-				Row LRow = new Row(AProgram.ValueManager, DataType.RowType, (NativeRow)ARow.AsNative);
-				AProgram.Stack.Push(LRow);
+				Row localRow = new Row(program.ValueManager, DataType.RowType, (NativeRow)row.AsNative);
+				program.Stack.Push(localRow);
 			}
 			else
-				AProgram.Stack.Push(null);
+				program.Stack.Push(null);
 		}
 		
-		public void PushNewRow(Program AProgram, Row ARow)
+		public void PushNewRow(Program program, Row row)
 		{
-			Row LRow = new Row(AProgram.ValueManager, DataType.NewRowType, (NativeRow)ARow.AsNative);
-			AProgram.Stack.Push(LRow);
+			#if USENAMEDROWVARIABLES
+			Row localRow = new Row(program.ValueManager, DataType.RowType, (NativeRow)row.AsNative);
+			#else
+			Row localRow = new Row(AProgram.ValueManager, DataType.NewRowType, (NativeRow)ARow.AsNative);
+			#endif
+			program.Stack.Push(localRow);
 		}
 		
-		public void PushOldRow(Program AProgram, Row ARow)
+		public void PushOldRow(Program program, Row row)
 		{
-			Row LOldRow = new Row(AProgram.ValueManager, DataType.OldRowType, (NativeRow)ARow.AsNative);
-			AProgram.Stack.Push(LOldRow);
+			#if USENAMEDROWVARIABLES
+			Row oldRow = new Row(program.ValueManager, DataType.RowType, (NativeRow)row.AsNative);
+			#else
+			Row oldRow = new Row(AProgram.ValueManager, DataType.OldRowType, (NativeRow)ARow.AsNative);
+			#endif
+			program.Stack.Push(oldRow);
 		}
 
-		public void PopRow(Program AProgram)
+		public void PopRow(Program program)
 		{
-			Row LRow = (Row)AProgram.Stack.Pop();
-			if (LRow != null)
-				LRow.Dispose();
+			Row localRow = (Row)program.Stack.Pop();
+			if (localRow != null)
+				localRow.Dispose();
 		}
 		
 		/// <summary>Selects a row based on the node and the given values, will return null if no row is found.</summary>
@@ -1288,27 +1297,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// Select restricts the result set based on the clustering key of the node, whereas FullSelect restricts
 		/// the result set based on all columns declared of a type that has an equality operator defined.
 		/// </remarks>
-		public Row Select(Program AProgram, Row ARow)
+		public Row Select(Program program, Row row)
 		{
 			// Symbols will only be null if this node is not bound
 			// The node will not be bound if it is functioning in a local server context evaluating change proposals in the client
-			if (FSymbols != null)
+			if (_symbols != null)
 			{
-				EnsureSelectNode(AProgram);
-				AProgram.Stack.Push(ARow);
+				EnsureSelectNode(program);
+				program.Stack.Push(row);
 				try
 				{
-					using (Table LTable = (Table)FSelectNode.Execute(AProgram))
+					using (Table table = (Table)_selectNode.Execute(program))
 					{
-						if (LTable.Next())
-							return LTable.Select();
+						if (table.Next())
+							return table.Select();
 						else
 							return null;
 					}
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			return null;
@@ -1319,37 +1328,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// Select restricts the result set based on the clustering key of the node, whereas FullSelect restricts
 		/// the result set based on all columns declared of a type that has an equality operator defined.
 		/// </remarks>
-		public Row FullSelect(Program AProgram, Row ARow)
+		public Row FullSelect(Program program, Row row)
 		{
 			// Symbols will only be null if this node is not bound
 			// The node will not be bound if it is functioning in a local server context evaluating change proposals in the client
-			if (FSymbols != null)
+			if (_symbols != null)
 			{
-				EnsureFullSelectNode(AProgram);
-				AProgram.Stack.Push(ARow);
+				EnsureFullSelectNode(program);
+				program.Stack.Push(row);
 				try
 				{
-					using (Table LTable = (Table)FFullSelectNode.Execute(AProgram))
+					using (Table table = (Table)_fullSelectNode.Execute(program))
 					{
-						if (LTable.Next())
-							return LTable.Select();
+						if (table.Next())
+							return table.Select();
 						else
 							return null;
 					}
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			return null;
 		}
 
-		private bool FShouldCheckConcurrency = false;
+		private bool _shouldCheckConcurrency = false;
 		public bool ShouldCheckConcurrency
 		{
-			get { return FShouldCheckConcurrency; }
-			set { FShouldCheckConcurrency = value; }
+			get { return _shouldCheckConcurrency; }
+			set { _shouldCheckConcurrency = value; }
 		}
 		
 		/// <summary>Performs an optimistic concurrency check for the given row.</summary>
@@ -1358,36 +1367,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// but ACurrentRow will always be a row type with the same heading as the table type
 		/// for this node.
 		/// </remarks>
-		protected void CheckConcurrency(Program AProgram, Row AOldRow, Row ACurrentRow)
+		protected void CheckConcurrency(Program program, Row oldRow, Row currentRow)
 		{
 			#if !USENATIVECONCURRENCYCOMPARE
 			EnsureConcurrencyNodes(AProcess);
 			#endif
-			object LOldValue;
-			object LCurrentValue;
+			object oldValue;
+			object currentValue;
 			
-			bool LRowsEqual = true;
-			int LColumnIndex;
-			for (int LIndex = 0; LIndex < AOldRow.DataType.Columns.Count; LIndex++)
+			bool rowsEqual = true;
+			int columnIndex;
+			for (int index = 0; index < oldRow.DataType.Columns.Count; index++)
 			{
-				LColumnIndex = ACurrentRow.DataType.Columns.IndexOfName(AOldRow.DataType.Columns[LIndex].Name);
-				if (LColumnIndex >= 0)
+				columnIndex = currentRow.DataType.Columns.IndexOfName(oldRow.DataType.Columns[index].Name);
+				if (columnIndex >= 0)
 				{
-					if (AOldRow.HasValue(LIndex))
+					if (oldRow.HasValue(index))
 					{
-						if (ACurrentRow.HasValue(LColumnIndex))
+						if (currentRow.HasValue(columnIndex))
 						{
-							LOldValue = AOldRow[LIndex];
-							LCurrentValue = ACurrentRow[LColumnIndex];
+							oldValue = oldRow[index];
+							currentValue = currentRow[columnIndex];
 							#if USENATIVECONCURRENCYCOMPARE
-							LRowsEqual = DataValue.NativeValuesEqual(AProgram.ValueManager, LOldValue, LCurrentValue);
+							rowsEqual = DataValue.NativeValuesEqual(program.ValueManager, oldValue, currentValue);
 							#else
-							AProcess.Context.Push(LOldValue);
-							AProcess.Context.Push(LCurrentValue);
+							AProcess.Context.Push(oldValue);
+							AProcess.Context.Push(currentValue);
 							try
 							{
-								object LResult = FConcurrencyNodes[LColumnIndex].Execute(AProcess);
-								LRowsEqual = (LResult != null) && (bool)LResult;
+								object result = FConcurrencyNodes[columnIndex].Execute(AProcess);
+								rowsEqual = (result != null) && (bool)result;
 							}
 							finally
 							{
@@ -1397,20 +1406,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							#endif
 						}
 						else
-							LRowsEqual = false;
+							rowsEqual = false;
 					}
 					else
 					{
-						if (ACurrentRow.HasValue(LColumnIndex))
-							LRowsEqual = false;
+						if (currentRow.HasValue(columnIndex))
+							rowsEqual = false;
 					}
 				}
 				
-				if (!LRowsEqual)
+				if (!rowsEqual)
 					break;
 			}
 			
-			if (!LRowsEqual)
+			if (!rowsEqual)
 				throw new RuntimeException(RuntimeException.Codes.OptimisticConcurrencyCheckFailed, ErrorSeverity.Environment);
 		}
 
@@ -1426,526 +1435,526 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// stronger than Equality in that the order of columns in the type is the same, 
 		/// where this is not necessarily true for row types which are Equal.
 		/// </remarks>
-		public virtual Row PrepareOldRow(Program AProgram, Row ARow, bool ACheckConcurrency)
+		public virtual Row PrepareOldRow(Program program, Row row, bool checkConcurrency)
 		{
-			if ((ACheckConcurrency && ShouldCheckConcurrency) || !ARow.DataType.Columns.Equivalent(DataType.Columns))
+			if ((checkConcurrency && ShouldCheckConcurrency) || !row.DataType.Columns.Equivalent(DataType.Columns))
 			{
 				// reselect the full row buffer for this row
-				bool LSelectRowReturned = false;
-				Row LSelectRow = new Row(AProgram.ValueManager, DataType.RowType);
+				bool selectRowReturned = false;
+				Row selectRow = new Row(program.ValueManager, DataType.RowType);
 				try
 				{
-					ARow.CopyTo(LSelectRow);
-					if (((ACheckConcurrency && ShouldCheckConcurrency) || LSelectRow.DataType.Columns.IsProperSupersetOf(ARow.DataType.Columns)) && !AProgram.ServerProcess.ServerSession.Server.IsEngine)
+					row.CopyTo(selectRow);
+					if (((checkConcurrency && ShouldCheckConcurrency) || selectRow.DataType.Columns.IsProperSupersetOf(row.DataType.Columns)) && !program.ServerProcess.ServerSession.Server.IsEngine)
 					{
-						Row LRow = Select(AProgram, LSelectRow);
-						if (LRow != null)
+						Row localRow = Select(program, selectRow);
+						if (localRow != null)
 						{
-							if (ACheckConcurrency && ShouldCheckConcurrency)
-								CheckConcurrency(AProgram, ARow, LRow);
+							if (checkConcurrency && ShouldCheckConcurrency)
+								CheckConcurrency(program, row, localRow);
 							else
-								ARow.CopyTo(LRow);
+								row.CopyTo(localRow);
 
-							return LRow;
+							return localRow;
 						}
 						else
 						{
-							if (ACheckConcurrency && ShouldCheckConcurrency)
+							if (checkConcurrency && ShouldCheckConcurrency)
 								throw new RuntimeException(RuntimeException.Codes.OptimisticConcurrencyCheckRowNotFound, ErrorSeverity.Environment);
 								
-							LSelectRowReturned = true;
-							return LSelectRow;
+							selectRowReturned = true;
+							return selectRow;
 						}
 					}
 					else
 					{
-						LSelectRowReturned = true;
-						return LSelectRow;
+						selectRowReturned = true;
+						return selectRow;
 					}
 				}
 				finally
 				{
-					if (!LSelectRowReturned)
-						LSelectRow.Dispose();
+					if (!selectRowReturned)
+						selectRow.Dispose();
 				}
 			}
 
-			return ARow;
+			return row;
 		}
 
 		// If AValueFlags are specified, they indicate whether or not each column of ANewRow was specified as part of the insert.
-		public virtual void Insert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		public virtual void Insert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			Row LNewPreparedRow;
-			Row LOldPreparedRow = null;
-			if (AOldRow != null)
-				LOldPreparedRow = PrepareOldRow(AProgram, AOldRow, false);
+			Row newPreparedRow;
+			Row oldPreparedRow = null;
+			if (oldRow != null)
+				oldPreparedRow = PrepareOldRow(program, oldRow, false);
 			try
 			{
-				LNewPreparedRow = PrepareNewRow(AProgram, LOldPreparedRow, ANewRow, ref AValueFlags);
+				newPreparedRow = PrepareNewRow(program, oldPreparedRow, newRow, ref valueFlags);
 			}
 			catch
 			{
-				if (!Object.ReferenceEquals(AOldRow, LOldPreparedRow))
-					LOldPreparedRow.Dispose();
+				if (!Object.ReferenceEquals(oldRow, oldPreparedRow))
+					oldPreparedRow.Dispose();
 				throw;
 			}
 			
 			try
 			{
-				if (AUnchecked || ((AOldRow == null) && BeforeInsert(AProgram, LNewPreparedRow, AValueFlags)) || ((AOldRow != null) && BeforeUpdate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags)))
+				if (uncheckedValue || ((oldRow == null) && BeforeInsert(program, newPreparedRow, valueFlags)) || ((oldRow != null) && BeforeUpdate(program, oldPreparedRow, newPreparedRow, valueFlags)))
 				{
-					ExecuteInsert(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, AUnchecked);
-					if (!AUnchecked)
-						if (AOldRow == null)
-							AfterInsert(AProgram, LNewPreparedRow, AValueFlags);
+					ExecuteInsert(program, oldPreparedRow, newPreparedRow, valueFlags, uncheckedValue);
+					if (!uncheckedValue)
+						if (oldRow == null)
+							AfterInsert(program, newPreparedRow, valueFlags);
 						else
-							AfterUpdate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags);
+							AfterUpdate(program, oldPreparedRow, newPreparedRow, valueFlags);
 				}
 			}
 			finally
 			{
-				if (!Object.ReferenceEquals(ANewRow, LNewPreparedRow))
-					LNewPreparedRow.Dispose();
-				if (!Object.ReferenceEquals(AOldRow, LOldPreparedRow))
-					LOldPreparedRow.Dispose();
+				if (!Object.ReferenceEquals(newRow, newPreparedRow))
+					newPreparedRow.Dispose();
+				if (!Object.ReferenceEquals(oldRow, oldPreparedRow))
+					oldPreparedRow.Dispose();
 			}
 		}
 
-		protected internal bool BeforeInsert(Program AProgram, Row ARow, BitArray AValueFlags)
+		protected internal bool BeforeInsert(Program program, Row row, BitArray valueFlags)
 		{
 			#if USEPROPOSALEVENTS
 			DoBeforeInsert(ARow, AProgram);
 			#endif
-			PreparedDefault(AProgram, null, ARow, AValueFlags, String.Empty, false);
-			bool LPerform = true;
+			PreparedDefault(program, null, row, valueFlags, String.Empty, false);
+			bool perform = true;
 			if (TableVar.HasHandlers(EventType.BeforeInsert))
 			{
-				PushRow(AProgram, ARow);
+				PushRow(program, row);
 				try
 				{
-					object LPerformVar = LPerform;
-					AProgram.Stack.Push(LPerformVar);
+					object performVar = perform;
+					program.Stack.Push(performVar);
 					try
 					{
-						if (AValueFlags != null)
-							ARow.BeginModifiedContext();
+						if (valueFlags != null)
+							row.BeginModifiedContext();
 						try
 						{
-							ExecuteHandlers(AProgram, EventType.BeforeInsert);
+							ExecuteHandlers(program, EventType.BeforeInsert);
 						}
 						finally
 						{
-							if (AValueFlags != null)
+							if (valueFlags != null)
 							{
-								BitArray LModifiedFlags = ARow.EndModifiedContext();
-								for (int LIndex = 0; LIndex < LModifiedFlags.Count; LIndex++)
-									if (LModifiedFlags[LIndex])
-										AValueFlags[LIndex] = true;
+								BitArray modifiedFlags = row.EndModifiedContext();
+								for (int index = 0; index < modifiedFlags.Count; index++)
+									if (modifiedFlags[index])
+										valueFlags[index] = true;
 							}
 						}
 					}
 					finally
 					{
-						LPerformVar = AProgram.Stack.Pop();
+						performVar = program.Stack.Pop();
 					}
-					LPerform = (LPerformVar != null) && (bool)LPerformVar;
+					perform = (performVar != null) && (bool)performVar;
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
 			
-			if (LPerform)
+			if (perform)
 			{
-				PreparedValidate(AProgram, null, ARow, AValueFlags, String.Empty, false, false);
-				InternalBeforeInsert(AProgram, ARow, AValueFlags);
-				if ((TableVar.InsertConstraints.Count > 0) || (TableVar.RowConstraints.Count > 0) || (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
+				PreparedValidate(program, null, row, valueFlags, String.Empty, false, false);
+				InternalBeforeInsert(program, row, valueFlags);
+				if ((TableVar.InsertConstraints.Count > 0) || (TableVar.RowConstraints.Count > 0) || (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
 				{
-					PushNewRow(AProgram, ARow);
+					PushNewRow(program, row);
 					try
 					{
-						ValidateInsertConstraints(AProgram);
+						ValidateInsertConstraints(program);
 					}
 					finally
 					{
-						PopRow(AProgram);
+						PopRow(program);
 					}
 				}
 			}
 
-			return LPerform;
+			return perform;
 		}
 		
-		protected internal void ExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected internal void ExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			InternalExecuteInsert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+			InternalExecuteInsert(program, oldRow, newRow, valueFlags, uncheckedValue);
 		}
 		
-		protected internal void AfterInsert(Program AProgram, Row ARow, BitArray AValueFlags)
+		protected internal void AfterInsert(Program program, Row row, BitArray valueFlags)
 		{
 			if (TableVar.HasHandlers(EventType.AfterInsert))
 			{
-				PushRow(AProgram, ARow);
+				PushRow(program, row);
 				try
 				{
-					ExecuteHandlers(AProgram, EventType.AfterInsert);
+					ExecuteHandlers(program, EventType.AfterInsert);
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
-			ValidateCatalogConstraints(AProgram);
-			InternalAfterInsert(AProgram, ARow, AValueFlags);
+			ValidateCatalogConstraints(program);
+			InternalAfterInsert(program, row, valueFlags);
 			#if USEPROPOSALEVENTS
 			DoAfterInsert(ARow, AProgram);
 			#endif
 		}
 		
-		public virtual void Update(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		public virtual void Update(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
-			Row LNewPreparedRow;
-			Row LOldPreparedRow = PrepareOldRow(AProgram, AOldRow, ACheckConcurrency);
+			Row newPreparedRow;
+			Row oldPreparedRow = PrepareOldRow(program, oldRow, checkConcurrency);
 			try
 			{
-				LNewPreparedRow = PrepareNewRow(AProgram, LOldPreparedRow, ANewRow, ref AValueFlags);
+				newPreparedRow = PrepareNewRow(program, oldPreparedRow, newRow, ref valueFlags);
 			}
 			catch
 			{
-				if (!Object.ReferenceEquals(AOldRow, LOldPreparedRow))
-					LOldPreparedRow.Dispose();
+				if (!Object.ReferenceEquals(oldRow, oldPreparedRow))
+					oldPreparedRow.Dispose();
 				throw;
 			}
 			
 			try
 			{
-				if (AUnchecked || BeforeUpdate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags))
+				if (uncheckedValue || BeforeUpdate(program, oldPreparedRow, newPreparedRow, valueFlags))
 				{
-					ExecuteUpdate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, ACheckConcurrency, AUnchecked);
-					if (!AUnchecked)
-						AfterUpdate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags);
+					ExecuteUpdate(program, oldPreparedRow, newPreparedRow, valueFlags, checkConcurrency, uncheckedValue);
+					if (!uncheckedValue)
+						AfterUpdate(program, oldPreparedRow, newPreparedRow, valueFlags);
 				}
 			}
 			finally
 			{
-				if (!Object.ReferenceEquals(ANewRow, LNewPreparedRow))
-					LNewPreparedRow.Dispose();
-				if (!Object.ReferenceEquals(AOldRow, LOldPreparedRow))
-					LOldPreparedRow.Dispose();
+				if (!Object.ReferenceEquals(newRow, newPreparedRow))
+					newPreparedRow.Dispose();
+				if (!Object.ReferenceEquals(oldRow, oldPreparedRow))
+					oldPreparedRow.Dispose();
 			}
 		}
 		
-		protected internal bool BeforeUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected internal bool BeforeUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags)
 		{
 			#if USEPROPOSALEVENTS
 			DoBeforeUpdate(AOldRow, ANewRow, AProgram);
 			#endif
-			bool LPerform = true;
+			bool perform = true;
 			if (TableVar.HasHandlers(EventType.BeforeUpdate))
 			{
-				PushRow(AProgram, AOldRow);
+				PushRow(program, oldRow);
 				try
 				{
-					PushRow(AProgram, ANewRow);
+					PushRow(program, newRow);
 					try
 					{
-						object LPerformVar = LPerform;
-						AProgram.Stack.Push(LPerformVar);
+						object performVar = perform;
+						program.Stack.Push(performVar);
 						try
 						{
-							if (AValueFlags != null)
-								ANewRow.BeginModifiedContext();
+							if (valueFlags != null)
+								newRow.BeginModifiedContext();
 							try
 							{
-								ExecuteHandlers(AProgram, EventType.BeforeUpdate);
+								ExecuteHandlers(program, EventType.BeforeUpdate);
 							}
 							finally
 							{
-								if (AValueFlags != null)
+								if (valueFlags != null)
 								{
-									BitArray LModifiedFlags = ANewRow.EndModifiedContext();
-									for (int LIndex = 0; LIndex < LModifiedFlags.Count; LIndex++)
-										if (LModifiedFlags[LIndex])
-											AValueFlags[LIndex] = true;
+									BitArray modifiedFlags = newRow.EndModifiedContext();
+									for (int index = 0; index < modifiedFlags.Count; index++)
+										if (modifiedFlags[index])
+											valueFlags[index] = true;
 								}
 							}
 						}
 						finally
 						{
-							LPerformVar = AProgram.Stack.Pop();
+							performVar = program.Stack.Pop();
 						}
-						LPerform = (LPerformVar != null) && (bool)LPerformVar;
+						perform = (performVar != null) && (bool)performVar;
 					}
 					finally
 					{
-						PopRow(AProgram);
+						PopRow(program);
 					}
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
 			
-			if (LPerform)
+			if (perform)
 			{
-				PreparedValidate(AProgram, AOldRow, ANewRow, AValueFlags, String.Empty, false, false);
-				InternalBeforeUpdate(AProgram, AOldRow, ANewRow, AValueFlags);
-				if ((TableVar.UpdateConstraints.Count > 0) || (TableVar.RowConstraints.Count > 0) || (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
+				PreparedValidate(program, oldRow, newRow, valueFlags, String.Empty, false, false);
+				InternalBeforeUpdate(program, oldRow, newRow, valueFlags);
+				if ((TableVar.UpdateConstraints.Count > 0) || (TableVar.RowConstraints.Count > 0) || (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
 				{
-					PushOldRow(AProgram, AOldRow);
+					PushOldRow(program, oldRow);
 					try
 					{
-						PushNewRow(AProgram, ANewRow);
+						PushNewRow(program, newRow);
 						try
 						{
-							ValidateUpdateConstraints(AProgram, AValueFlags);
+							ValidateUpdateConstraints(program, valueFlags);
 						}
 						finally
 						{
-							PopRow(AProgram);
+							PopRow(program);
 						}
 					}
 					finally
 					{
-						PopRow(AProgram);
+						PopRow(program);
 					}
 				}
 			}
 
-			return LPerform;
+			return perform;
 		}
 		
-		protected internal void ExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected internal void ExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
-			InternalExecuteUpdate(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+			InternalExecuteUpdate(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 		}
 		
-		protected internal void AfterUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected internal void AfterUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags)
 		{
 			if (TableVar.HasHandlers(EventType.AfterUpdate))
 			{
-				PushRow(AProgram, AOldRow);
+				PushRow(program, oldRow);
 				try
 				{
-					PushRow(AProgram, ANewRow);
+					PushRow(program, newRow);
 					try
 					{
-						ExecuteHandlers(AProgram, EventType.AfterUpdate);
+						ExecuteHandlers(program, EventType.AfterUpdate);
 					}
 					finally
 					{
-						PopRow(AProgram);
+						PopRow(program);
 					}
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
 
-			ValidateCatalogConstraints(AProgram);
-			InternalAfterUpdate(AProgram, AOldRow, ANewRow, AValueFlags);
+			ValidateCatalogConstraints(program);
+			InternalAfterUpdate(program, oldRow, newRow, valueFlags);
 			#if USEPROPOSALEVENTS
 			DoAfterUpdate(AOldRow, ANewRow, AProgram);
 			#endif
 		}
 		
-		public virtual void Delete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		public virtual void Delete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
-			Row LPreparedRow = PrepareOldRow(AProgram, ARow, false);
+			Row preparedRow = PrepareOldRow(program, row, false);
 			try
 			{
-				if (AUnchecked || BeforeDelete(AProgram, LPreparedRow))
+				if (uncheckedValue || BeforeDelete(program, preparedRow))
 				{
-					ExecuteDelete(AProgram, LPreparedRow, ACheckConcurrency, AUnchecked);
-					if (!AUnchecked)
-						AfterDelete(AProgram, LPreparedRow);
+					ExecuteDelete(program, preparedRow, checkConcurrency, uncheckedValue);
+					if (!uncheckedValue)
+						AfterDelete(program, preparedRow);
 				}
 			}
 			finally
 			{
-				if (!Object.ReferenceEquals(LPreparedRow, ARow))
-					LPreparedRow.Dispose();
+				if (!Object.ReferenceEquals(preparedRow, row))
+					preparedRow.Dispose();
 			}
 		}
 		
-		protected internal bool BeforeDelete(Program AProgram, Row ARow)
+		protected internal bool BeforeDelete(Program program, Row row)
 		{
 			#if USEPROPOSALEVENTS
 			DoBeforeDelete(ARow, AProgram);
 			#endif
-			bool LPerform = true;
+			bool perform = true;
 			if (TableVar.HasHandlers(EventType.BeforeDelete))
 			{
-				PushRow(AProgram, ARow);
+				PushRow(program, row);
 				try
 				{
-					object LPerformVar = LPerform;
-					AProgram.Stack.Push(LPerformVar);
+					object performVar = perform;
+					program.Stack.Push(performVar);
 					try
 					{
-						ExecuteHandlers(AProgram, EventType.BeforeDelete);
+						ExecuteHandlers(program, EventType.BeforeDelete);
 					}
 					finally
 					{
-						LPerformVar = AProgram.Stack.Pop();
+						performVar = program.Stack.Pop();
 					}
-					LPerform = (LPerformVar != null) && (bool)LPerformVar;
+					perform = (performVar != null) && (bool)performVar;
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
 			
-			if (LPerform)
+			if (perform)
 			{
-				InternalBeforeDelete(AProgram, ARow);
-				if ((TableVar.DeleteConstraints.Count > 0) || (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
+				InternalBeforeDelete(program, row);
+				if ((TableVar.DeleteConstraints.Count > 0) || (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
 				{
-					PushOldRow(AProgram, ARow);
+					PushOldRow(program, row);
 					try
 					{
-						ValidateDeleteConstraints(AProgram);
+						ValidateDeleteConstraints(program);
 					}
 					finally
 					{
-						PopRow(AProgram);
+						PopRow(program);
 					}
 				}
 			}
 
-			return LPerform;
+			return perform;
 		}
 		
-		protected internal void ExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected internal void ExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
-			InternalExecuteDelete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+			InternalExecuteDelete(program, row, checkConcurrency, uncheckedValue);
 		}
 		
-		protected internal void AfterDelete(Program AProgram, Row ARow)
+		protected internal void AfterDelete(Program program, Row row)
 		{
 			if (TableVar.HasHandlers(EventType.AfterDelete))
 			{
-				PushRow(AProgram, ARow);
+				PushRow(program, row);
 				try
 				{
-					ExecuteHandlers(AProgram, EventType.AfterDelete);
+					ExecuteHandlers(program, EventType.AfterDelete);
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
-			ValidateCatalogConstraints(AProgram);
-			InternalAfterDelete(AProgram, ARow);
+			ValidateCatalogConstraints(program);
+			InternalAfterDelete(program, row);
 			#if USEPROPOSALEVENTS
 			DoAfterDelete(ARow, AProgram);
 			#endif
 		}
 		
-		public bool ShouldValidate(string AColumnName)
+		public bool ShouldValidate(string columnName)
 		{
-			if (AColumnName == String.Empty)
-				return FTableVar.ShouldValidate;
-			return FTableVar.ShouldValidate || FTableVar.Columns[FTableVar.Columns.IndexOfName(AColumnName)].ShouldValidate;
+			if (columnName == String.Empty)
+				return _tableVar.ShouldValidate;
+			return _tableVar.ShouldValidate || _tableVar.Columns[_tableVar.Columns.IndexOfName(columnName)].ShouldValidate;
 		}
 		
-		public virtual bool Validate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public virtual bool Validate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			if (ShouldValidate(AColumnName))
+			if (ShouldValidate(columnName))
 			{
-				Row LOldPreparedRow = AOldRow == null ? null : PrepareOldRow(AProgram, AOldRow, false);
+				Row oldPreparedRow = oldRow == null ? null : PrepareOldRow(program, oldRow, false);
 				try
 				{
-					BitArray LValueFlags = AValueFlags;
-					Row LNewPreparedRow = PrepareNewRow(AProgram, AOldRow, ANewRow, ref LValueFlags);
+					BitArray localValueFlags = valueFlags;
+					Row newPreparedRow = PrepareNewRow(program, oldRow, newRow, ref localValueFlags);
 					try
 					{
-						bool LChanged = PreparedValidate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName, true, true);
-						if (LChanged && !Object.ReferenceEquals(LNewPreparedRow, ANewRow))
-							LNewPreparedRow.CopyTo(ANewRow);
-						return LChanged;
+						bool changed = PreparedValidate(program, oldPreparedRow, newPreparedRow, valueFlags, columnName, true, true);
+						if (changed && !Object.ReferenceEquals(newPreparedRow, newRow))
+							newPreparedRow.CopyTo(newRow);
+						return changed;
 					}
 					finally
 					{
-						if (!Object.ReferenceEquals(ANewRow, LNewPreparedRow))
-							LNewPreparedRow.Dispose();
+						if (!Object.ReferenceEquals(newRow, newPreparedRow))
+							newPreparedRow.Dispose();
 					}
 				}
 				finally
 				{
-					if (!Object.ReferenceEquals(AOldRow, LOldPreparedRow))
-						LOldPreparedRow.Dispose();
+					if (!Object.ReferenceEquals(oldRow, oldPreparedRow))
+						oldPreparedRow.Dispose();
 				}
 			}
 
 			return false;
 		}
 		
-		protected bool PreparedValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected bool PreparedValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
 			#if USEPROPOSALEVENTS
 			DoValidateRow(ANewRow, AColumnName, AProgram);
 			#endif
-			bool LChanged = ExecuteValidateHandlers(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
-			LChanged = ValidateColumns(AProgram, TableVar, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable) || LChanged;
-			LChanged = InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable) || LChanged;
-			if ((AColumnName == String.Empty) && (TableVar.RowConstraints.Count > 0) && !AIsProposable)
+			bool changed = ExecuteValidateHandlers(program, oldRow, newRow, valueFlags, columnName);
+			changed = ValidateColumns(program, TableVar, oldRow, newRow, valueFlags, columnName, isDescending, isProposable) || changed;
+			changed = InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable) || changed;
+			if ((columnName == String.Empty) && (TableVar.RowConstraints.Count > 0) && !isProposable)
 			{
-				PushRow(AProgram, ANewRow);
+				PushRow(program, newRow);
 				try
 				{
 					// If this is an insert (AOldRow == null) then the constraints must be validated regardless of whether or not a value was specified in the insert
-					ValidateImmediateConstraints(AProgram, AIsDescending, AOldRow == null ? null : AValueFlags);
+					ValidateImmediateConstraints(program, isDescending, oldRow == null ? null : valueFlags);
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
-			return LChanged;
+			return changed;
 		}
 		
-		protected bool InternalPreparedValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AIsDescending, bool AIsProposable)
+		protected bool InternalPreparedValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool isDescending, bool isProposable)
 		{
 			// Given AOldRow and ANewRow, propagate a validate if necessary based on the difference between the row values
 			#if !USENATIVECONCURRENCYCOMPARE
 			EnsureConcurrencyNodes(AProgram);
 			#endif
 			
-			int LDifferentColumnIndex = -1;
-			bool LRowsEqual = true;
-			int LColumnIndex;
-			for (int LIndex = 0; LIndex < AOldRow.DataType.Columns.Count; LIndex++)
+			int differentColumnIndex = -1;
+			bool rowsEqual = true;
+			int columnIndex;
+			for (int index = 0; index < oldRow.DataType.Columns.Count; index++)
 			{
-				LColumnIndex = ANewRow.DataType.Columns.IndexOfName(AOldRow.DataType.Columns[LIndex].Name);
-				if (LColumnIndex >= 0)
+				columnIndex = newRow.DataType.Columns.IndexOfName(oldRow.DataType.Columns[index].Name);
+				if (columnIndex >= 0)
 				{
-					if (AOldRow.HasValue(LIndex))
+					if (oldRow.HasValue(index))
 					{
-						if (ANewRow.HasValue(LColumnIndex))
+						if (newRow.HasValue(columnIndex))
 						{
 							#if USENATIVECONCURRENCYCOMPARE
-							if (!(DataValue.NativeValuesEqual(AProgram.ValueManager, AOldRow[LIndex], ANewRow[LColumnIndex])))
-								if (LDifferentColumnIndex >= 0)
-									LRowsEqual = false;
+							if (!(DataValue.NativeValuesEqual(program.ValueManager, oldRow[index], newRow[columnIndex])))
+								if (differentColumnIndex >= 0)
+									rowsEqual = false;
 								else
-									LDifferentColumnIndex = LColumnIndex;
+									differentColumnIndex = columnIndex;
 							#else
-							AProgram.Context.Push(AOldRow[LIndex]);
-							AProgram.Context.Push(ANewRow[LColumnIndex]);
+							AProgram.Context.Push(AOldRow[index]);
+							AProgram.Context.Push(ANewRow[columnIndex]);
 							try
 							{
-								object LResult = FConcurrencyNodes[LColumnIndex].Execute(AProgram);
-								if (!((LResult != null) && (bool)LResult))
-									if (LDifferentColumnIndex >= 0)
-										LRowsEqual = false;
+								object result = FConcurrencyNodes[columnIndex].Execute(AProgram);
+								if (!((result != null) && (bool)result))
+									if (differentColumnIndex >= 0)
+										rowsEqual = false;
 									else
-										LDifferentColumnIndex = LColumnIndex;
+										differentColumnIndex = columnIndex;
 							}
 							finally
 							{
@@ -1955,237 +1964,237 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							#endif
 						}
 						else
-							if (LDifferentColumnIndex >= 0)
-								LRowsEqual = false;
+							if (differentColumnIndex >= 0)
+								rowsEqual = false;
 							else
-								LDifferentColumnIndex = LColumnIndex;
+								differentColumnIndex = columnIndex;
 					}
 					else
 					{
-						if (ANewRow.HasValue(LColumnIndex))
-							if (LDifferentColumnIndex >= 0)
-								LRowsEqual = false;
+						if (newRow.HasValue(columnIndex))
+							if (differentColumnIndex >= 0)
+								rowsEqual = false;
 							else
-								LDifferentColumnIndex = LColumnIndex;
+								differentColumnIndex = columnIndex;
 					}
 				}
 			}
 			
-			if (!LRowsEqual)
-				return PreparedValidate(AProgram, AOldRow, ANewRow, AValueFlags, String.Empty, AIsDescending, AIsProposable);
+			if (!rowsEqual)
+				return PreparedValidate(program, oldRow, newRow, valueFlags, String.Empty, isDescending, isProposable);
 			else
-				if (LDifferentColumnIndex >= 0)
-					return PreparedValidate(AProgram, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LDifferentColumnIndex].Name, AIsDescending, AIsProposable);
+				if (differentColumnIndex >= 0)
+					return PreparedValidate(program, oldRow, newRow, valueFlags, newRow.DataType.Columns[differentColumnIndex].Name, isDescending, isProposable);
 					
 			return false;
 		}
 		
-		public bool ShouldChange(string AColumnName)
+		public bool ShouldChange(string columnName)
 		{
-			if (AColumnName == String.Empty)
-				return FTableVar.ShouldChange;
-			return FTableVar.ShouldChange || FTableVar.Columns[FTableVar.Columns.IndexOfName(AColumnName)].ShouldChange;
+			if (columnName == String.Empty)
+				return _tableVar.ShouldChange;
+			return _tableVar.ShouldChange || _tableVar.Columns[_tableVar.Columns.IndexOfName(columnName)].ShouldChange;
 		}
 		
-		public virtual bool Change(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public virtual bool Change(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			if (ShouldChange(AColumnName))
+			if (ShouldChange(columnName))
 			{
-				Row LOldPreparedRow = PrepareOldRow(AProgram, AOldRow, false);
+				Row oldPreparedRow = PrepareOldRow(program, oldRow, false);
 				try
 				{
-					BitArray LValueFlags = AValueFlags;
-					Row LNewPreparedRow = PrepareNewRow(AProgram, AOldRow, ANewRow, ref LValueFlags);
+					BitArray localValueFlags = valueFlags;
+					Row newPreparedRow = PrepareNewRow(program, oldRow, newRow, ref localValueFlags);
 					try
 					{
 						#if USEPROPOSALEVENTS
-						bool LChanged = DoChangeRow(LRow, AColumnName, AProgram);
+						bool changed = DoChangeRow(LRow, AColumnName, AProgram);
 						#endif
-						bool LChanged = ExecuteChangeHandlers(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName);
-						LChanged = InternalChange(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName) || LChanged;
-						LChanged = ChangeColumns(AProgram, TableVar, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName) || LChanged;
-						if (LChanged)
-							InternalPreparedValidate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, false, true);
-						if (LChanged && !Object.ReferenceEquals(LNewPreparedRow, ANewRow))
-							LNewPreparedRow.CopyTo(ANewRow);
-						return LChanged;
+						bool changed = ExecuteChangeHandlers(program, oldPreparedRow, newPreparedRow, valueFlags, columnName);
+						changed = InternalChange(program, oldPreparedRow, newPreparedRow, valueFlags, columnName) || changed;
+						changed = ChangeColumns(program, TableVar, oldPreparedRow, newPreparedRow, valueFlags, columnName) || changed;
+						if (changed)
+							InternalPreparedValidate(program, oldPreparedRow, newPreparedRow, valueFlags, false, true);
+						if (changed && !Object.ReferenceEquals(newPreparedRow, newRow))
+							newPreparedRow.CopyTo(newRow);
+						return changed;
 					}
 					finally
 					{
-						if (!Object.ReferenceEquals(ANewRow, LNewPreparedRow))
+						if (!Object.ReferenceEquals(newRow, newPreparedRow))
 						{
-							if (AValueFlags != null)
-								for (int LIndex = 0; LIndex < LValueFlags.Count; LIndex++)
-									if (LValueFlags[LIndex])
-										AValueFlags[ANewRow.DataType.Columns.IndexOfName(LNewPreparedRow.DataType.Columns[LIndex].Name)] = LValueFlags[LIndex];
+							if (valueFlags != null)
+								for (int index = 0; index < localValueFlags.Count; index++)
+									if (localValueFlags[index])
+										valueFlags[newRow.DataType.Columns.IndexOfName(newPreparedRow.DataType.Columns[index].Name)] = localValueFlags[index];
 			
-							LNewPreparedRow.Dispose();
+							newPreparedRow.Dispose();
 						}
 					}
 				}
 				finally
 				{
-					if (!Object.ReferenceEquals(AOldRow, LOldPreparedRow))
-						LOldPreparedRow.Dispose();
+					if (!Object.ReferenceEquals(oldRow, oldPreparedRow))
+						oldPreparedRow.Dispose();
 				}
 			}
 			
 			return false;
 		}
 		
-		public bool ShouldDefault(string AColumnName)
+		public bool ShouldDefault(string columnName)
 		{
-			if (AColumnName == String.Empty)
-				return FTableVar.ShouldDefault;
-			return FTableVar.ShouldDefault || FTableVar.Columns[FTableVar.Columns.IndexOfName(AColumnName)].ShouldDefault;
+			if (columnName == String.Empty)
+				return _tableVar.ShouldDefault;
+			return _tableVar.ShouldDefault || _tableVar.Columns[_tableVar.Columns.IndexOfName(columnName)].ShouldDefault;
 		}
 		
-		public virtual bool Default(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public virtual bool Default(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			if (ShouldDefault(AColumnName))
+			if (ShouldDefault(columnName))
 			{
-				Row LOldRow;
-				BitArray LValueFlags = null;
-				if (AOldRow == null)
-					LOldRow = new Row(AProgram.ValueManager, DataType.RowType);
+				Row tempRow;
+				BitArray localValueFlags = null;
+				if (oldRow == null)
+					tempRow = new Row(program.ValueManager, DataType.RowType);
 				else
-					LOldRow = PrepareNewRow(AProgram, null, AOldRow, ref LValueFlags);
+					tempRow = PrepareNewRow(program, null, oldRow, ref localValueFlags);
 				try
 				{
-					Row LNewRow = PrepareNewRow(AProgram, null, ANewRow, ref AValueFlags);
+					Row localNewRow = PrepareNewRow(program, null, newRow, ref valueFlags);
 					try
 					{
-						bool LChanged = PreparedDefault(AProgram, LOldRow, LNewRow, AValueFlags, AColumnName, true);
-						if (LChanged && !Object.ReferenceEquals(LNewRow, ANewRow))
-							LNewRow.CopyTo(ANewRow);
-						return LChanged;
+						bool changed = PreparedDefault(program, tempRow, localNewRow, valueFlags, columnName, true);
+						if (changed && !Object.ReferenceEquals(localNewRow, newRow))
+							localNewRow.CopyTo(newRow);
+						return changed;
 					}
 					finally
 					{
-						if (!Object.ReferenceEquals(ANewRow, LNewRow))
-							LNewRow.Dispose();
+						if (!Object.ReferenceEquals(newRow, localNewRow))
+							localNewRow.Dispose();
 					}
 				}
 				finally
 				{
-					if (!Object.ReferenceEquals(AOldRow, LOldRow))
-						LOldRow.Dispose();
+					if (!Object.ReferenceEquals(oldRow, tempRow))
+						tempRow.Dispose();
 				}
 			}
 			
 			return false;
 		}
 		
-		protected bool PreparedDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected bool PreparedDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			Row LOldRow;
-			if ((AOldRow == null) && AIsDescending)
-				LOldRow = new Row(AProgram.ValueManager, DataType.RowType);
+			Row localOldRow;
+			if ((oldRow == null) && isDescending)
+				localOldRow = new Row(program.ValueManager, DataType.RowType);
 			else
-				LOldRow = AOldRow;
+				localOldRow = oldRow;
 			try
 			{
 				#if USEPROPOSALEVENTS
-				bool LChanged = DoDefaultRow(ARow, AColumnName, AProgram);
+				bool changed = DoDefaultRow(ARow, AColumnName, AProgram);
 				#endif
-				bool LChanged = ExecuteDefaultHandlers(AProgram, ANewRow, AValueFlags, AColumnName);
-				LChanged = InternalDefault(AProgram, LOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
-				return LChanged;
+				bool changed = ExecuteDefaultHandlers(program, newRow, valueFlags, columnName);
+				changed = InternalDefault(program, localOldRow, newRow, valueFlags, columnName, isDescending) || changed;
+				return changed;
 			}
 			finally
 			{
-				if (!ReferenceEquals(AOldRow, LOldRow) && (LOldRow != null))
-					LOldRow.Dispose();
+				if (!ReferenceEquals(oldRow, localOldRow) && (localOldRow != null))
+					localOldRow.Dispose();
 			}
 		}
 		
 		// DefaultColumns
-		public static bool DefaultColumns(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags, string AColumnName)
+		public static bool DefaultColumns(Program program, Schema.TableVar tableVar, Row row, BitArray valueFlags, string columnName)
 		{
-			if (AColumnName != String.Empty)
-				return DefaultColumn(AProgram, ATableVar, ARow, AValueFlags, AColumnName);
+			if (columnName != String.Empty)
+				return DefaultColumn(program, tableVar, row, valueFlags, columnName);
 			else
 			{
-				bool LChanged = false;
-				for (int LIndex = 0; LIndex < ATableVar.Columns.Count; LIndex++)
-					LChanged = DefaultColumn(AProgram, ATableVar, ARow, AValueFlags, ATableVar.Columns[LIndex].Name) || LChanged;
-				return LChanged;
+				bool changed = false;
+				for (int index = 0; index < tableVar.Columns.Count; index++)
+					changed = DefaultColumn(program, tableVar, row, valueFlags, tableVar.Columns[index].Name) || changed;
+				return changed;
 			}
 		}
 		
 		// DefaultColumn
-		public static bool DefaultColumn(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags, string AColumnName)
+		public static bool DefaultColumn(Program program, Schema.TableVar tableVar, Row row, BitArray valueFlags, string columnName)
 		{
-			int LRowIndex = ARow.DataType.Columns.IndexOfName(AColumnName);
-			if (LRowIndex >= 0)
+			int rowIndex = row.DataType.Columns.IndexOfName(columnName);
+			if (rowIndex >= 0)
 			{
-				int LIndex = ATableVar.Columns.IndexOfName(AColumnName);
-				if (!ARow.HasValue(LRowIndex) && ((AValueFlags == null) || !AValueFlags[LRowIndex]))
+				int index = tableVar.Columns.IndexOfName(columnName);
+				if (!row.HasValue(rowIndex) && ((valueFlags == null) || !valueFlags[rowIndex]))
 				{
 					// Column level default trigger handlers
-					AProgram.Stack.Push(null);
+					program.Stack.Push(null);
 					try
 					{
-						if (ATableVar.Columns[LIndex].HasHandlers())
-							foreach (Schema.EventHandler LHandler in ATableVar.Columns[LIndex].EventHandlers)
-								if ((LHandler.EventType & EventType.Default) != 0)
+						if (tableVar.Columns[index].HasHandlers())
+							foreach (Schema.EventHandler handler in tableVar.Columns[index].EventHandlers)
+								if ((handler.EventType & EventType.Default) != 0)
 								{
-									object LResult = LHandler.PlanNode.Execute(AProgram);
-									if ((LResult != null) && (bool)LResult)
+									object result = handler.PlanNode.Execute(program);
+									if ((result != null) && (bool)result)
 									{
-										ARow[LRowIndex] = AProgram.Stack.Peek(0);
-										if (AValueFlags != null)
-											AValueFlags[LRowIndex] = true;
+										row[rowIndex] = program.Stack.Peek(0);
+										if (valueFlags != null)
+											valueFlags[rowIndex] = true;
 										return true;
 									}
 								}
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
 					
 					// Column level default
-					if (ATableVar.Columns[LIndex].Default != null)
+					if (tableVar.Columns[index].Default != null)
 					{
-						ARow[LRowIndex] = ATableVar.Columns[LIndex].Default.Node.Execute(AProgram);
-						if (AValueFlags != null)
-							AValueFlags[LRowIndex] = true;
+						row[rowIndex] = tableVar.Columns[index].Default.Node.Execute(program);
+						if (valueFlags != null)
+							valueFlags[rowIndex] = true;
 						return true;
 					} 
 
 					// Scalar type level default trigger handlers
-					Schema.ScalarType LScalarType = ATableVar.Columns[LIndex].DataType as Schema.ScalarType;
-					if (LScalarType != null)
+					Schema.ScalarType scalarType = tableVar.Columns[index].DataType as Schema.ScalarType;
+					if (scalarType != null)
 					{
-						AProgram.Stack.Push(null);
+						program.Stack.Push(null);
 						try
 						{
-							if (LScalarType.HasHandlers())
-								foreach (Schema.EventHandler LHandler in LScalarType.EventHandlers)
-									if ((LHandler.EventType & EventType.Default) != 0)
+							if (scalarType.HasHandlers())
+								foreach (Schema.EventHandler handler in scalarType.EventHandlers)
+									if ((handler.EventType & EventType.Default) != 0)
 									{
-										object LResult = LHandler.PlanNode.Execute(AProgram);
-										if ((LResult != null) && (bool)LResult)
+										object result = handler.PlanNode.Execute(program);
+										if ((result != null) && (bool)result)
 										{
-											ARow[LRowIndex] = AProgram.Stack.Peek(0);
-											if (AValueFlags != null)
-												AValueFlags[LRowIndex] = true;
+											row[rowIndex] = program.Stack.Peek(0);
+											if (valueFlags != null)
+												valueFlags[rowIndex] = true;
 											return true;
 										}
 									}
 						}
 						finally
 						{
-							AProgram.Stack.Pop();
+							program.Stack.Pop();
 						}
 
 						// Scalar type level default													   
-						if (LScalarType.Default != null)
+						if (scalarType.Default != null)
 						{
-							ARow[LRowIndex] = LScalarType.Default.Node.Execute(AProgram);
-							if (AValueFlags != null)
-								AValueFlags[LRowIndex] = true;
+							row[rowIndex] = scalarType.Default.Node.Execute(program);
+							if (valueFlags != null)
+								valueFlags[rowIndex] = true;
 							return true;
 						}
 					}
@@ -2194,290 +2203,290 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
-		public static bool ExecuteChangeHandlers(Program AProgram, Schema.EventHandlers AHandlers)
+		public static bool ExecuteChangeHandlers(Program program, Schema.EventHandlers handlers)
 		{
-			bool LChanged = false;
-			foreach (Schema.EventHandler LEventHandler in AHandlers)
-				if ((LEventHandler.EventType & EventType.Change) != 0)
+			bool changed = false;
+			foreach (Schema.EventHandler eventHandler in handlers)
+				if ((eventHandler.EventType & EventType.Change) != 0)
 				{
-					object LResult = LEventHandler.PlanNode.Execute(AProgram);
-					LChanged = ((LResult != null) && (bool)LResult) || LChanged;
+					object result = eventHandler.PlanNode.Execute(program);
+					changed = ((result != null) && (bool)result) || changed;
 				}
-			return LChanged;
+			return changed;
 		}
 		
-		public static bool ExecuteScalarTypeChangeHandlers(Program AProgram, Schema.ScalarType AScalarType)
+		public static bool ExecuteScalarTypeChangeHandlers(Program program, Schema.ScalarType scalarType)
 		{
-			bool LChanged = false;
-			if (AScalarType.HasHandlers())
-				LChanged = ExecuteChangeHandlers(AProgram, AScalarType.EventHandlers);
+			bool changed = false;
+			if (scalarType.HasHandlers())
+				changed = ExecuteChangeHandlers(program, scalarType.EventHandlers);
 			#if USETYPEINHERITANCE
-			foreach (Schema.ScalarType LParentType in AScalarType.ParentTypes)
-				LChanged = ExecuteScalarTypeChangeHandlers(AProgram, LParentType) || LChanged;
+			foreach (Schema.ScalarType parentType in AScalarType.ParentTypes)
+				changed = ExecuteScalarTypeChangeHandlers(AProgram, parentType) || changed;
 			#endif
-			return LChanged;
+			return changed;
 		}
 		
 		// ChangeColumns
-		public static bool ChangeColumns(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public static bool ChangeColumns(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			if (AColumnName != String.Empty)
+			if (columnName != String.Empty)
 			{
-				int LRowIndex = ANewRow.DataType.Columns.IndexOfName(AColumnName);
-				AProgram.Stack.Push(AOldRow);
+				int rowIndex = newRow.DataType.Columns.IndexOfName(columnName);
+				program.Stack.Push(oldRow);
 				try
 				{
-					AProgram.Stack.Push(ANewRow);
+					program.Stack.Push(newRow);
 					try
 					{
-						bool LChanged = false;
-						if (AValueFlags != null)
-							ANewRow.BeginModifiedContext();
+						bool changed = false;
+						if (valueFlags != null)
+							newRow.BeginModifiedContext();
 						try
 						{
-							if (ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].HasHandlers())
-								if (ExecuteChangeHandlers(AProgram, ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].EventHandlers))
-									LChanged = true;
+							if (tableVar.Columns[tableVar.Columns.IndexOfName(columnName)].HasHandlers())
+								if (ExecuteChangeHandlers(program, tableVar.Columns[tableVar.Columns.IndexOfName(columnName)].EventHandlers))
+									changed = true;
 								
-							if (LChanged && (!Object.ReferenceEquals(ANewRow, AProgram.Stack.Peek(0))))
+							if (changed && (!Object.ReferenceEquals(newRow, program.Stack.Peek(0))))
 							{
-								Row LRow = (Row)AProgram.Stack.Peek(0);
-								LRow.CopyTo(ANewRow);
-								LRow.ValuesOwned = false;
-								LRow.Dispose();
-								AProgram.Stack.Poke(0, ANewRow);
+								Row row = (Row)program.Stack.Peek(0);
+								row.CopyTo(newRow);
+								row.ValuesOwned = false;
+								row.Dispose();
+								program.Stack.Poke(0, newRow);
 							}
 						}
 						finally
 						{
-							if (AValueFlags != null)
+							if (valueFlags != null)
 							{
-								BitArray LModifiedFlags = ANewRow.EndModifiedContext();
-								for (int LIndex = 0; LIndex < LModifiedFlags.Length; LIndex++)
-									if (LModifiedFlags[LIndex])
-										AValueFlags[LIndex] = true;
+								BitArray modifiedFlags = newRow.EndModifiedContext();
+								for (int index = 0; index < modifiedFlags.Length; index++)
+									if (modifiedFlags[index])
+										valueFlags[index] = true;
 							}
 						}
 
-						if (ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].DataType is Schema.ScalarType)
+						if (tableVar.Columns[tableVar.Columns.IndexOfName(columnName)].DataType is Schema.ScalarType)
 						{
-							AProgram.Stack.Push(AOldRow[LRowIndex]);
+							program.Stack.Push(oldRow[rowIndex]);
 							try
 							{
-								AProgram.Stack.Push(ANewRow[LRowIndex]);
+								program.Stack.Push(newRow[rowIndex]);
 								try
 								{
-									bool LColumnChanged = ExecuteScalarTypeChangeHandlers(AProgram, (Schema.ScalarType)ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].DataType);
-									if (LColumnChanged)
+									bool columnChanged = ExecuteScalarTypeChangeHandlers(program, (Schema.ScalarType)tableVar.Columns[tableVar.Columns.IndexOfName(columnName)].DataType);
+									if (columnChanged)
 									{
-										ANewRow[LRowIndex] = AProgram.Stack.Peek(0);
-										if (AValueFlags != null)
-											AValueFlags[LRowIndex] = true;
-										LChanged = true;
+										newRow[rowIndex] = program.Stack.Peek(0);
+										if (valueFlags != null)
+											valueFlags[rowIndex] = true;
+										changed = true;
 									}
 
-									return LChanged;
+									return changed;
 								}
 								finally
 								{
-									AProgram.Stack.Pop();
+									program.Stack.Pop();
 								}
 							}
 							finally
 							{
-								AProgram.Stack.Pop();
+								program.Stack.Pop();
 							}
 						}
-						return LChanged;
+						return changed;
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			else
 			{
-				int LRowIndex;
-				bool LChanged = false;
-				AProgram.Stack.Push(ANewRow);
+				int rowIndex;
+				bool changed = false;
+				program.Stack.Push(newRow);
 				try
 				{
-					foreach (Schema.TableVarColumn LColumn in ATableVar.Columns)
+					foreach (Schema.TableVarColumn column in tableVar.Columns)
 					{
-						LRowIndex = ANewRow.DataType.Columns.IndexOfName(LColumn.Name);
-						if (LRowIndex >= 0)
+						rowIndex = newRow.DataType.Columns.IndexOfName(column.Name);
+						if (rowIndex >= 0)
 						{
-							bool LColumnChanged = false;
-							if (AValueFlags != null)
-								ANewRow.BeginModifiedContext();
+							bool columnChanged = false;
+							if (valueFlags != null)
+								newRow.BeginModifiedContext();
 							try
 							{
-								if (LColumn.HasHandlers())
-									LColumnChanged = ExecuteChangeHandlers(AProgram, LColumn.EventHandlers);
+								if (column.HasHandlers())
+									columnChanged = ExecuteChangeHandlers(program, column.EventHandlers);
 
-								if (LColumnChanged)
+								if (columnChanged)
 								{
-									LChanged = true;
-									if (!Object.ReferenceEquals(ANewRow, AProgram.Stack.Peek(0)))
+									changed = true;
+									if (!Object.ReferenceEquals(newRow, program.Stack.Peek(0)))
 									{
-										Row LRow = (Row)AProgram.Stack.Peek(0);
-										LRow.CopyTo(ANewRow);
-										LRow.ValuesOwned = false;
-										LRow.Dispose();
-										AProgram.Stack.Poke(0, ANewRow);
+										Row row = (Row)program.Stack.Peek(0);
+										row.CopyTo(newRow);
+										row.ValuesOwned = false;
+										row.Dispose();
+										program.Stack.Poke(0, newRow);
 									}
 								}
 							}
 							finally
 							{
-								if (AValueFlags != null)
+								if (valueFlags != null)
 								{
-									BitArray LModifiedFlags = ANewRow.EndModifiedContext();
-									for (int LIndex = 0; LIndex < LModifiedFlags.Length; LIndex++)
-										if (LModifiedFlags[LIndex])
-											AValueFlags[LIndex] = true;
+									BitArray modifiedFlags = newRow.EndModifiedContext();
+									for (int index = 0; index < modifiedFlags.Length; index++)
+										if (modifiedFlags[index])
+											valueFlags[index] = true;
 								}
 							}
 
-							if (LColumn.DataType is Schema.ScalarType)
+							if (column.DataType is Schema.ScalarType)
 							{
-								AProgram.Stack.Push(AOldRow[LRowIndex]);
+								program.Stack.Push(oldRow[rowIndex]);
 								try
 								{
-									AProgram.Stack.Push(ANewRow[LRowIndex]);
+									program.Stack.Push(newRow[rowIndex]);
 									try
 									{
-										LColumnChanged = ExecuteScalarTypeChangeHandlers(AProgram, (Schema.ScalarType)LColumn.DataType);
+										columnChanged = ExecuteScalarTypeChangeHandlers(program, (Schema.ScalarType)column.DataType);
 											
-										if (LColumnChanged)
+										if (columnChanged)
 										{
-											ANewRow[LRowIndex] = AProgram.Stack.Peek(0);
-											if (AValueFlags != null)
-												AValueFlags[LRowIndex] = true;
-											LChanged = true;
+											newRow[rowIndex] = program.Stack.Peek(0);
+											if (valueFlags != null)
+												valueFlags[rowIndex] = true;
+											changed = true;
 										}
 									}
 									finally
 									{
-										AProgram.Stack.Pop();
+										program.Stack.Pop();
 									}
 								}
 								finally
 								{
-									AProgram.Stack.Pop();
+									program.Stack.Pop();
 								}
 							}
 						}
 					}
-					return LChanged;
+					return changed;
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 		}
 		
-		public static bool ExecuteValidateHandlers(Program AProgram, Schema.EventHandlers AHandlers)
+		public static bool ExecuteValidateHandlers(Program program, Schema.EventHandlers handlers)
 		{
-			return ExecuteValidateHandlers(AProgram, AHandlers, null);
+			return ExecuteValidateHandlers(program, handlers, null);
 		}
 		
-		public static bool ExecuteValidateHandlers(Program AProgram, Schema.EventHandlers AHandlers, Schema.Operator AFromOperator)
+		public static bool ExecuteValidateHandlers(Program program, Schema.EventHandlers handlers, Schema.Operator fromOperator)
 		{
-			bool LChanged = false;
-			foreach (Schema.EventHandler LEventHandler in AHandlers)
-				if (((LEventHandler.EventType & EventType.Validate) != 0) && ((AFromOperator == null) || (AFromOperator.Name != LEventHandler.Operator.Name)))
+			bool changed = false;
+			foreach (Schema.EventHandler eventHandler in handlers)
+				if (((eventHandler.EventType & EventType.Validate) != 0) && ((fromOperator == null) || (fromOperator.Name != eventHandler.Operator.Name)))
 				{
-					object LResult = LEventHandler.PlanNode.Execute(AProgram);
-					LChanged = ((LResult != null) && (bool)LResult) || LChanged;
+					object result = eventHandler.PlanNode.Execute(program);
+					changed = ((result != null) && (bool)result) || changed;
 				}
-			return LChanged;
+			return changed;
 		}
 		
-		public static bool ExecuteScalarTypeValidateHandlers(Program AProgram, Schema.ScalarType AScalarType)
+		public static bool ExecuteScalarTypeValidateHandlers(Program program, Schema.ScalarType scalarType)
 		{
-			return ExecuteScalarTypeValidateHandlers(AProgram, AScalarType, null);
+			return ExecuteScalarTypeValidateHandlers(program, scalarType, null);
 		}
 		
-		public static bool ExecuteScalarTypeValidateHandlers(Program AProgram, Schema.ScalarType AScalarType, Schema.Operator AFromOperator)
+		public static bool ExecuteScalarTypeValidateHandlers(Program program, Schema.ScalarType scalarType, Schema.Operator fromOperator)
 		{
-			bool LChanged = false;
-			if (AScalarType.HasHandlers())
-				LChanged = ExecuteValidateHandlers(AProgram, AScalarType.EventHandlers, AFromOperator);
+			bool changed = false;
+			if (scalarType.HasHandlers())
+				changed = ExecuteValidateHandlers(program, scalarType.EventHandlers, fromOperator);
 			#if USETYPEINHERITANCE
-			foreach (Schema.ScalarType LParentType in AScalarType.ParentTypes)
-				LChanged = ExecuteScalarTypeValidateHandlers(AProgram, LParentType) || LChanged;
+			foreach (Schema.ScalarType parentType in AScalarType.ParentTypes)
+				changed = ExecuteScalarTypeValidateHandlers(AProgram, parentType) || changed;
 			#endif
-			return LChanged;
+			return changed;
 		}
 		
 		// ValidateColumns
-		public static bool ValidateColumns(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		public static bool ValidateColumns(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if (AColumnName != String.Empty)
+			if (columnName != String.Empty)
 			{
 				// if the call is made for a specific column, the validation is coming in from a proposable call and should be allowed to be empty
-				int LRowIndex = ANewRow.DataType.Columns.IndexOfName(AColumnName);
-				if (ANewRow.HasValue(LRowIndex))
+				int rowIndex = newRow.DataType.Columns.IndexOfName(columnName);
+				if (newRow.HasValue(rowIndex))
 				{
-					AProgram.Stack.Push(AOldRow);
+					program.Stack.Push(oldRow);
 					try
 					{
-						AProgram.Stack.Push(ANewRow);
+						program.Stack.Push(newRow);
 						try
 						{
-							bool LChanged = false;
-							Schema.TableVarColumn LColumn = ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)];
-							if (LColumn.HasHandlers())
-								LChanged = ExecuteValidateHandlers(AProgram, LColumn.EventHandlers);
-							int LOldRowIndex = AOldRow == null ? -1 : AOldRow.DataType.Columns.IndexOfName(AColumnName);
-							AProgram.Stack.Push(LOldRowIndex >= 0 ? AOldRow[LOldRowIndex] : null);
+							bool changed = false;
+							Schema.TableVarColumn column = tableVar.Columns[tableVar.Columns.IndexOfName(columnName)];
+							if (column.HasHandlers())
+								changed = ExecuteValidateHandlers(program, column.EventHandlers);
+							int oldRowIndex = oldRow == null ? -1 : oldRow.DataType.Columns.IndexOfName(columnName);
+							program.Stack.Push(oldRowIndex >= 0 ? oldRow[oldRowIndex] : null);
 							try
 							{
-								AProgram.Stack.Push(ANewRow[LRowIndex]);
+								program.Stack.Push(newRow[rowIndex]);
 								try
 								{
-									bool LColumnChanged;
-									if (LColumn.DataType is Schema.ScalarType)
-										LColumnChanged = ExecuteScalarTypeValidateHandlers(AProgram, (Schema.ScalarType)LColumn.DataType);
+									bool columnChanged;
+									if (column.DataType is Schema.ScalarType)
+										columnChanged = ExecuteScalarTypeValidateHandlers(program, (Schema.ScalarType)column.DataType);
 									else
-										LColumnChanged = false;
+										columnChanged = false;
 
-									if (LColumnChanged)
+									if (columnChanged)
 									{
-										ANewRow[LRowIndex] = AProgram.Stack.Peek(0);
-										LChanged = true;
+										newRow[rowIndex] = program.Stack.Peek(0);
+										changed = true;
 									}
 
-									ValidateColumnConstraints(AProgram, LColumn, AIsDescending);
-									if (LColumn.DataType is Schema.ScalarType)
-										ValidateScalarTypeConstraints(AProgram, (Schema.ScalarType)LColumn.DataType, AIsDescending);
-									return LChanged;
+									ValidateColumnConstraints(program, column, isDescending);
+									if (column.DataType is Schema.ScalarType)
+										ValidateScalarTypeConstraints(program, (Schema.ScalarType)column.DataType, isDescending);
+									return changed;
 								}
 								finally
 								{
-									AProgram.Stack.Pop();
+									program.Stack.Pop();
 								}
 							}
 							finally
 							{
-								AProgram.Stack.Pop();
+								program.Stack.Pop();
 							}
 						}
 						finally
 						{
-							AProgram.Stack.Pop();
+							program.Stack.Pop();
 						}
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
 				}
 				return false;
@@ -2485,158 +2494,158 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			{
 				// If there is no column name, this call is the validation for an insert, and should only be allowed to have no value if the column is nilable
-				int LRowIndex;
-				AProgram.Stack.Push(AOldRow);
+				int rowIndex;
+				program.Stack.Push(oldRow);
 				try
 				{
-					AProgram.Stack.Push(ANewRow);
+					program.Stack.Push(newRow);
 					try
 					{
-						bool LChanged = false;
-						bool LColumnChanged;
-						foreach (Schema.TableVarColumn LColumn in ATableVar.Columns)
+						bool changed = false;
+						bool columnChanged;
+						foreach (Schema.TableVarColumn column in tableVar.Columns)
 						{
-							LRowIndex = ANewRow.DataType.Columns.IndexOfName(LColumn.Name);
-							if (LRowIndex >= 0)
+							rowIndex = newRow.DataType.Columns.IndexOfName(column.Name);
+							if (rowIndex >= 0)
 							{
- 								if (ANewRow.HasValue(LRowIndex) || ((AValueFlags == null) || AValueFlags[LRowIndex]))
+ 								if (newRow.HasValue(rowIndex) || ((valueFlags == null) || valueFlags[rowIndex]))
 								{
-									if (LColumn.HasHandlers())
+									if (column.HasHandlers())
 									{
-										if (AValueFlags != null)
-											ANewRow.BeginModifiedContext();
+										if (valueFlags != null)
+											newRow.BeginModifiedContext();
 										try
 										{
-											if (ExecuteValidateHandlers(AProgram, LColumn.EventHandlers))
-												LChanged = true;
+											if (ExecuteValidateHandlers(program, column.EventHandlers))
+												changed = true;
 										}
 										finally
 										{
-											if (AValueFlags != null)
+											if (valueFlags != null)
 											{
-												BitArray LModifiedFlags = ANewRow.EndModifiedContext();
-												for (int LIndex = 0; LIndex < LModifiedFlags.Length; LIndex++)
-													if (LModifiedFlags[LIndex])
-														AValueFlags[LIndex] = true;
+												BitArray modifiedFlags = newRow.EndModifiedContext();
+												for (int index = 0; index < modifiedFlags.Length; index++)
+													if (modifiedFlags[index])
+														valueFlags[index] = true;
 											}
 										}
 									}
 
-									int LOldRowIndex = AOldRow == null ? -1 : AOldRow.DataType.Columns.IndexOfName(LColumn.Name);
-									AProgram.Stack.Push(LOldRowIndex >= 0 ? AOldRow[LOldRowIndex] : null);
+									int oldRowIndex = oldRow == null ? -1 : oldRow.DataType.Columns.IndexOfName(column.Name);
+									program.Stack.Push(oldRowIndex >= 0 ? oldRow[oldRowIndex] : null);
 									try
 									{
-										AProgram.Stack.Push(ANewRow[LRowIndex]);
+										program.Stack.Push(newRow[rowIndex]);
 										try
 										{
-											if (LColumn.DataType is Schema.ScalarType)
-												LColumnChanged = ExecuteScalarTypeValidateHandlers(AProgram, (Schema.ScalarType)LColumn.DataType);
+											if (column.DataType is Schema.ScalarType)
+												columnChanged = ExecuteScalarTypeValidateHandlers(program, (Schema.ScalarType)column.DataType);
 											else
-												LColumnChanged = false;
+												columnChanged = false;
 
-											if (LColumnChanged)
+											if (columnChanged)
 											{
-												ANewRow[LRowIndex] = AProgram.Stack.Peek(0);
-												if (AValueFlags != null)
-													AValueFlags[LRowIndex] = true;
-												LChanged = true;
+												newRow[rowIndex] = program.Stack.Peek(0);
+												if (valueFlags != null)
+													valueFlags[rowIndex] = true;
+												changed = true;
 											}
 
-											ValidateColumnConstraints(AProgram, LColumn, AIsDescending);
-											if (LColumn.DataType is Schema.ScalarType)
-												ValidateScalarTypeConstraints(AProgram, (Schema.ScalarType)LColumn.DataType, AIsDescending);
+											ValidateColumnConstraints(program, column, isDescending);
+											if (column.DataType is Schema.ScalarType)
+												ValidateScalarTypeConstraints(program, (Schema.ScalarType)column.DataType, isDescending);
 										}
 										finally
 										{
-											AProgram.Stack.Pop();
+											program.Stack.Pop();
 										}
 									}
 									finally
 									{
-										AProgram.Stack.Pop();
+										program.Stack.Pop();
 									}
 								}
 
-								if (!ANewRow.HasValue(LRowIndex) && !AIsProposable && (ATableVar is Schema.BaseTableVar) && !LColumn.IsNilable)
-									throw new RuntimeException(RuntimeException.Codes.ColumnValueRequired, ErrorSeverity.User, LColumn.Name);
+								if (!newRow.HasValue(rowIndex) && !isProposable && (tableVar is Schema.BaseTableVar) && !column.IsNilable)
+									throw new RuntimeException(RuntimeException.Codes.ColumnValueRequired, ErrorSeverity.User, column.Name);
 							}
 						}
-						return LChanged;
+						return changed;
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}	 
 		}
 		
 		// ValidateScalarTypeConstraints
-		public static void ValidateScalarTypeConstraints(Program AProgram, Schema.ScalarType AScalarType, bool AIsDescending)
+		public static void ValidateScalarTypeConstraints(Program program, Schema.ScalarType scalarType, bool isDescending)
 		{
-			Schema.ScalarTypeConstraint LConstraint;
-			for (int LIndex = 0; LIndex < AScalarType.Constraints.Count; LIndex++)
+			Schema.ScalarTypeConstraint constraint;
+			for (int index = 0; index < scalarType.Constraints.Count; index++)
 			{
-				LConstraint = AScalarType.Constraints[LIndex];
-				if (AIsDescending || LConstraint.Enforced)
-					LConstraint.Validate(AProgram, Schema.Transition.Insert);
+				constraint = scalarType.Constraints[index];
+				if (isDescending || constraint.Enforced)
+					constraint.Validate(program, Schema.Transition.Insert);
 			}
 			
 			#if USETYPEINHERITANCE	
-			foreach (Schema.ScalarType LParentType in AScalarType.ParentTypes)
-				ValidateScalarTypeConstraints(AProgram, LParentType, AIsDescending);
+			foreach (Schema.ScalarType parentType in AScalarType.ParentTypes)
+				ValidateScalarTypeConstraints(AProgram, parentType, AIsDescending);
 			#endif
 		}
 		
 		// ValidateColumnConstraints
 		// This method expects that the value of the column to be validated is at location 0 on the stack
-		public static void ValidateColumnConstraints(Program AProgram, Schema.TableVarColumn AColumn, bool AIsDescending)
+		public static void ValidateColumnConstraints(Program program, Schema.TableVarColumn column, bool isDescending)
 		{
-			foreach (Schema.TableVarColumnConstraint LConstraint in AColumn.Constraints)
-				if (AIsDescending || LConstraint.Enforced)
-					LConstraint.Validate(AProgram, Schema.Transition.Insert);
+			foreach (Schema.TableVarColumnConstraint constraint in column.Constraints)
+				if (isDescending || constraint.Enforced)
+					constraint.Validate(program, Schema.Transition.Insert);
 		}
 		
 		// ValidateImmediateConstraints
 		// This method expects that the row to be validated is at location 0 on the stack
-		protected virtual void ValidateImmediateConstraints(Program AProgram, bool AIsDescending, BitArray AValueFlags)
+		protected virtual void ValidateImmediateConstraints(Program program, bool isDescending, BitArray valueFlags)
 		{
-			Schema.RowConstraint LConstraint;
-			for (int LIndex = 0; LIndex < TableVar.RowConstraints.Count; LIndex++)
+			Schema.RowConstraint constraint;
+			for (int index = 0; index < TableVar.RowConstraints.Count; index++)
 			{
-				LConstraint = TableVar.RowConstraints[LIndex];
-				if ((LConstraint.ConstraintType != Schema.ConstraintType.Database) && (AIsDescending || LConstraint.Enforced) && LConstraint.ShouldValidate(AValueFlags, Schema.Transition.Insert))
-					LConstraint.Validate(AProgram, Schema.Transition.Insert);
+				constraint = TableVar.RowConstraints[index];
+				if ((constraint.ConstraintType != Schema.ConstraintType.Database) && (isDescending || constraint.Enforced) && constraint.ShouldValidate(valueFlags, Schema.Transition.Insert))
+					constraint.Validate(program, Schema.Transition.Insert);
 			}
 		} 
 		
 		// ValidateCatalogConstraints
 		// This method does not have any expectations for the stack
-		protected virtual void ValidateCatalogConstraints(Program AProgram)
+		protected virtual void ValidateCatalogConstraints(Program program)
 		{
-			foreach (Schema.CatalogConstraint LConstraint in TableVar.CatalogConstraints)
+			foreach (Schema.CatalogConstraint constraint in TableVar.CatalogConstraints)
 			{
-				if (LConstraint.Enforced)
+				if (constraint.Enforced)
 				{
-					if (LConstraint.IsDeferred && AProgram.ServerProcess.InTransaction)
+					if (constraint.IsDeferred && program.ServerProcess.InTransaction)
 					{
-						bool LHasCheck = false;
-						for (int LIndex = 0; LIndex < AProgram.ServerProcess.Transactions.Count; LIndex++)
-							if (AProgram.ServerProcess.Transactions[LIndex].CatalogConstraints.Contains(LConstraint.Name))
+						bool hasCheck = false;
+						for (int index = 0; index < program.ServerProcess.Transactions.Count; index++)
+							if (program.ServerProcess.Transactions[index].CatalogConstraints.Contains(constraint.Name))
 							{
-								LHasCheck = true;
+								hasCheck = true;
 								break;
 							}
 							
-						if (!LHasCheck)
-							AProgram.ServerProcess.CurrentTransaction.CatalogConstraints.Add(LConstraint);
+						if (!hasCheck)
+							program.ServerProcess.CurrentTransaction.CatalogConstraints.Add(constraint);
 					}
 					else
-						LConstraint.Validate(AProgram);
+						constraint.Validate(program);
 				}
 			}
 		}
@@ -2644,135 +2653,143 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// ShouldValidateKeyConstraints
 		// Allows descendent nodes to indicate whether or not key constraints should be checked.
 		// Ths method is overridden by the TableVarNode to indicate that key constraints should not be checked if propagation is not occurring.
-		protected virtual bool ShouldValidateKeyConstraints(Schema.Transition ATransition)
+		protected virtual bool ShouldValidateKeyConstraints(Schema.Transition transition)
 		{
 			return true;
 		}
 		
 		// ValidateInsertConstraints
 		// This method expects that the stack contains the new row at location 0 on the stack
-		protected virtual void ValidateInsertConstraints(Program AProgram)
+		protected virtual void ValidateInsertConstraints(Program program)
 		{
-			if (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints())
-				AProgram.ServerProcess.AddInsertTableVarCheck(TableVar, (Row)AProgram.Stack.Peek(0));
+			if (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints())
+				program.ServerProcess.AddInsertTableVarCheck(TableVar, (Row)program.Stack.Peek(0));
 
+			#if !USENAMEDROWVARIABLES
 			PushRow(AProgram, (Row)AProgram.Stack.Peek(0));
 			try
-			{			
-				Schema.RowConstraint LConstraint;
-				for (int LIndex = 0; LIndex < TableVar.RowConstraints.Count; LIndex++)
+			#endif		
+			{	
+				Schema.RowConstraint constraint;
+				for (int index = 0; index < TableVar.RowConstraints.Count; index++)
 				{
-					LConstraint = TableVar.RowConstraints[LIndex];
-					if (LConstraint.Enforced && (!AProgram.ServerProcess.InTransaction || !LConstraint.IsDeferred))
-						LConstraint.Validate(AProgram, Schema.Transition.Insert);
+					constraint = TableVar.RowConstraints[index];
+					if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred))
+						constraint.Validate(program, Schema.Transition.Insert);
 				}
 			}
+			#if !USENAMEDROWVARIABLES
 			finally
 			{
 				PopRow(AProgram);
 			}
+			#endif
 	
 			if (TableVar.InsertConstraints.Count > 0)
 			{
-				Schema.TransitionConstraint LConstraint;
-				bool LShouldValidateKeyConstraints = ShouldValidateKeyConstraints(Schema.Transition.Insert);
-				for (int LIndex = 0; LIndex < TableVar.InsertConstraints.Count; LIndex++)
+				Schema.TransitionConstraint constraint;
+				bool shouldValidateKeyConstraints = ShouldValidateKeyConstraints(Schema.Transition.Insert);
+				for (int index = 0; index < TableVar.InsertConstraints.Count; index++)
 				{
-					LConstraint = TableVar.InsertConstraints[LIndex];
-					if (LConstraint.Enforced && (!AProgram.ServerProcess.InTransaction || !LConstraint.IsDeferred) && ((LConstraint.ConstraintType != Schema.ConstraintType.Table) || LShouldValidateKeyConstraints))
-						LConstraint.Validate(AProgram, Schema.Transition.Insert);
+					constraint = TableVar.InsertConstraints[index];
+					if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred) && ((constraint.ConstraintType != Schema.ConstraintType.Table) || shouldValidateKeyConstraints))
+						constraint.Validate(program, Schema.Transition.Insert);
 				}
 			}
 		}
 		
 		// ValidateUpdateConstraints
 		// This method expects that the stack contain the old row in location 1, and the new row in location 0
-		protected virtual void ValidateUpdateConstraints(Program AProgram, BitArray AValueFlags)
+		protected virtual void ValidateUpdateConstraints(Program program, BitArray valueFlags)
 		{
-			if (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints(AValueFlags, Schema.Transition.Update))
-				AProgram.ServerProcess.AddUpdateTableVarCheck(TableVar, (Row)AProgram.Stack.Peek(1), (Row)AProgram.Stack.Peek(0));
+			if (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints(valueFlags, Schema.Transition.Update))
+				program.ServerProcess.AddUpdateTableVarCheck(TableVar, (Row)program.Stack.Peek(1), (Row)program.Stack.Peek(0), valueFlags);
 			
+			#if !USENAMEDROWVARIABLES
 			PushRow(AProgram, (Row)AProgram.Stack.Peek(0));
 			try
+			#endif
 			{
-				Schema.RowConstraint LConstraint;
-				for (int LIndex = 0; LIndex < TableVar.RowConstraints.Count; LIndex++)
+				Schema.RowConstraint constraint;
+				for (int index = 0; index < TableVar.RowConstraints.Count; index++)
 				{
-					LConstraint = TableVar.RowConstraints[LIndex];
-					if (LConstraint.Enforced && (!AProgram.ServerProcess.InTransaction || !LConstraint.IsDeferred) && LConstraint.ShouldValidate(AValueFlags, Schema.Transition.Insert))
-						LConstraint.Validate(AProgram, Schema.Transition.Insert);
+					constraint = TableVar.RowConstraints[index];
+					if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred) && constraint.ShouldValidate(valueFlags, Schema.Transition.Insert))
+						constraint.Validate(program, Schema.Transition.Insert);
 				}
 			}
+			#if !USENAMEDROWVARIABLES
 			finally
 			{
 				PopRow(AProgram);
 			}
+			#endif
 	
 			if (TableVar.UpdateConstraints.Count > 0)
 			{
-				bool LShouldValidateKeyConstraints = ShouldValidateKeyConstraints(Schema.Transition.Update);
-				Schema.TransitionConstraint LConstraint;
-				for (int LIndex = 0; LIndex < TableVar.UpdateConstraints.Count; LIndex++)
+				bool shouldValidateKeyConstraints = ShouldValidateKeyConstraints(Schema.Transition.Update);
+				Schema.TransitionConstraint constraint;
+				for (int index = 0; index < TableVar.UpdateConstraints.Count; index++)
 				{
-					LConstraint = TableVar.UpdateConstraints[LIndex];
-					if (LConstraint.Enforced && (!AProgram.ServerProcess.InTransaction || !LConstraint.IsDeferred) && ((LConstraint.ConstraintType != Schema.ConstraintType.Table) || LShouldValidateKeyConstraints) && LConstraint.ShouldValidate(AValueFlags, Schema.Transition.Update))
-						LConstraint.Validate(AProgram, Schema.Transition.Update);
+					constraint = TableVar.UpdateConstraints[index];
+					if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred) && ((constraint.ConstraintType != Schema.ConstraintType.Table) || shouldValidateKeyConstraints) && constraint.ShouldValidate(valueFlags, Schema.Transition.Update))
+						constraint.Validate(program, Schema.Transition.Update);
 				}
 			}
 		}
 		
 		// ValidateDeleteConstraints
 		// This method expects that the stack contain the old row in location 0
-		protected virtual void ValidateDeleteConstraints(Program AProgram)
+		protected virtual void ValidateDeleteConstraints(Program program)
 		{
-			if (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints())
-				AProgram.ServerProcess.AddDeleteTableVarCheck(TableVar, (Row)AProgram.Stack.Peek(0));
+			if (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints())
+				program.ServerProcess.AddDeleteTableVarCheck(TableVar, (Row)program.Stack.Peek(0));
 
-			foreach (Schema.Constraint LConstraint in TableVar.DeleteConstraints)
-				if (LConstraint.Enforced && (!AProgram.ServerProcess.InTransaction || !LConstraint.IsDeferred))
-					LConstraint.Validate(AProgram, Schema.Transition.Delete);
+			foreach (Schema.Constraint constraint in TableVar.DeleteConstraints)
+				if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred))
+					constraint.Validate(program, Schema.Transition.Delete);
 		}
 
 		// ExecuteHandlers executes each handler associated with the given event type
-		protected virtual void ExecuteHandlers(Program AProgram, EventType AEventType)
+		protected virtual void ExecuteHandlers(Program program, EventType eventType)
 		{
 			// If the process is in an application transaction, and this is an AT table
 				// if we are populating source tables
 					// do not fire any handlers, 
 				// If we are in an AT replay context, do not invoke any handler that was invoked within the AT
 				// otherwise record that the handler was invoked in this AT
-			ApplicationTransaction LTransaction = null;
-			if (AProgram.ServerProcess.ApplicationTransactionID != Guid.Empty)
-				LTransaction = AProgram.ServerProcess.GetApplicationTransaction();
+			ApplicationTransaction transaction = null;
+			if (program.ServerProcess.ApplicationTransactionID != Guid.Empty)
+				transaction = program.ServerProcess.GetApplicationTransaction();
 			try
 			{
-				if ((LTransaction == null) || !LTransaction.IsPopulatingSource)
+				if ((transaction == null) || !transaction.IsPopulatingSource)
 				{
-					foreach (Schema.TableVarEventHandler LHandler in TableVar.EventHandlers)
-						if (LHandler.EventType == AEventType)
+					foreach (Schema.TableVarEventHandler handler in TableVar.EventHandlers)
+						if (handler.EventType == eventType)
 						{
-							bool LInvoked = false;
-							if ((LTransaction == null) || !LTransaction.InATReplayContext || !LTransaction.WasInvoked(LHandler))
+							bool invoked = false;
+							if ((transaction == null) || !transaction.InATReplayContext || !transaction.WasInvoked(handler))
 							{
-								if (LHandler.IsDeferred && AProgram.ServerProcess.InTransaction)
-									switch (AEventType)
+								if (handler.IsDeferred && program.ServerProcess.InTransaction)
+									switch (eventType)
 									{
-										case EventType.AfterInsert : AProgram.ServerProcess.CurrentTransaction.AddInsertHandler(LHandler, (Row)AProgram.Stack.Peek(0)); LInvoked = true; break;
-										case EventType.AfterUpdate : AProgram.ServerProcess.CurrentTransaction.AddUpdateHandler(LHandler, (Row)AProgram.Stack.Peek(1), (Row)AProgram.Stack.Peek(0)); LInvoked = true; break;
-										case EventType.AfterDelete : AProgram.ServerProcess.CurrentTransaction.AddDeleteHandler(LHandler, (Row)AProgram.Stack.Peek(0)); LInvoked = true; break;
+										case EventType.AfterInsert : program.ServerProcess.CurrentTransaction.AddInsertHandler(handler, (Row)program.Stack.Peek(0)); invoked = true; break;
+										case EventType.AfterUpdate : program.ServerProcess.CurrentTransaction.AddUpdateHandler(handler, (Row)program.Stack.Peek(1), (Row)program.Stack.Peek(0)); invoked = true; break;
+										case EventType.AfterDelete : program.ServerProcess.CurrentTransaction.AddDeleteHandler(handler, (Row)program.Stack.Peek(0)); invoked = true; break;
 										default : break; // only after handlers should be deferred to transaction commit
 									}
 
-								if (!LInvoked)
+								if (!invoked)
 								{
-									AProgram.ServerProcess.PushHandler();
+									program.ServerProcess.PushHandler();
 									try
 									{
-										LHandler.PlanNode.Execute(AProgram);
+										handler.PlanNode.Execute(program);
 									}
 									finally
 									{
-										AProgram.ServerProcess.PopHandler();
+										program.ServerProcess.PopHandler();
 									}
 								}
 								
@@ -2782,391 +2799,391 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								// or not an event handler was invoked from within another event handler.  If the handler is invoked during an A/T, it should
 								// be recorded as invoked, and not invoked during the replay, end of story.
 								//if ((LTransaction != null) && !LTransaction.InATReplayContext && !AProgram.InHandler && !LTransaction.InvokedHandlers.Contains(LHandler))
-								if ((LTransaction != null) && !LTransaction.InATReplayContext && !LTransaction.InvokedHandlers.Contains(LHandler))
-									LTransaction.InvokedHandlers.Add(LHandler);
+								if ((transaction != null) && !transaction.InATReplayContext && !transaction.InvokedHandlers.Contains(handler))
+									transaction.InvokedHandlers.Add(handler);
 							}
 						}
 				}
 			}
 			finally
 			{
-				if (LTransaction != null)
-					Monitor.Exit(LTransaction);
+				if (transaction != null)
+					Monitor.Exit(transaction);
 			}
 		}
 		
 		// ExecuteValidateHandlers prepares the stack and executes each handler associated with the validate event
-		protected virtual bool ExecuteValidateHandlers(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected virtual bool ExecuteValidateHandlers(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
 			if (TableVar.HasHandlers(EventType.Validate))
 			{
-				PushRow(AProgram, AOldRow);
+				PushRow(program, oldRow);
 				try
 				{
-					PushRow(AProgram, ANewRow);
+					PushRow(program, newRow);
 					try
 					{
-						AProgram.Stack.Push(AColumnName);
+						program.Stack.Push(columnName);
 						try
 						{
-							bool LChanged = false;
-							foreach (Schema.EventHandler LHandler in TableVar.EventHandlers)
-								if ((LHandler.EventType & EventType.Validate) != 0)
+							bool changed = false;
+							foreach (Schema.EventHandler handler in TableVar.EventHandlers)
+								if ((handler.EventType & EventType.Validate) != 0)
 								{
-									if (AValueFlags != null)
-										ANewRow.BeginModifiedContext();
+									if (valueFlags != null)
+										newRow.BeginModifiedContext();
 									try
 									{
-										object LObject = LHandler.PlanNode.Execute(AProgram);
-										if ((LObject != null) && (bool)LObject)
-											LChanged = true;
+										object objectValue = handler.PlanNode.Execute(program);
+										if ((objectValue != null) && (bool)objectValue)
+											changed = true;
 									}
 									finally
 									{
-										if (AValueFlags != null)
+										if (valueFlags != null)
 										{
-											BitArray LModifiedFlags = ANewRow.EndModifiedContext();
-											for (int LIndex = 0; LIndex < LModifiedFlags.Length; LIndex++)
-												if (LModifiedFlags[LIndex])
-													AValueFlags[LIndex] = true;
+											BitArray modifiedFlags = newRow.EndModifiedContext();
+											for (int index = 0; index < modifiedFlags.Length; index++)
+												if (modifiedFlags[index])
+													valueFlags[index] = true;
 										}
 									}
 								}
-							return LChanged;
+							return changed;
 						}
 						finally
 						{
-							AProgram.Stack.Pop();
+							program.Stack.Pop();
 						}
 					}
 					finally
 					{
-						PopRow(AProgram);
+						PopRow(program);
 					}
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
 			return false;
 		}
 		
 		// ExecuteDefaultHandlers prepares the stack and executes each handler associated with the default event
-		protected virtual bool ExecuteDefaultHandlers(Program AProgram, Row ARow, BitArray AValueFlags, string AColumnName)
+		protected virtual bool ExecuteDefaultHandlers(Program program, Row row, BitArray valueFlags, string columnName)
 		{
 			if (TableVar.HasHandlers(EventType.Default))
 			{
-				PushRow(AProgram, ARow);
+				PushRow(program, row);
 				try
 				{
-					AProgram.Stack.Push(AColumnName);
+					program.Stack.Push(columnName);
 					try
 					{
-						bool LChanged = false;
-						foreach (Schema.EventHandler LHandler in TableVar.EventHandlers)
-							if ((LHandler.EventType & EventType.Default) != 0)
+						bool changed = false;
+						foreach (Schema.EventHandler handler in TableVar.EventHandlers)
+							if ((handler.EventType & EventType.Default) != 0)
 							{
-								if (AValueFlags != null)
-									ARow.BeginModifiedContext();
+								if (valueFlags != null)
+									row.BeginModifiedContext();
 								try
 								{
-									object LResult = LHandler.PlanNode.Execute(AProgram);
-									if ((LResult != null) && (bool)LResult)
-										LChanged = true;
+									object result = handler.PlanNode.Execute(program);
+									if ((result != null) && (bool)result)
+										changed = true;
 								}
 								finally
 								{
-									if (AValueFlags != null)
+									if (valueFlags != null)
 									{
-										BitArray LModifiedFlags = ARow.EndModifiedContext();
-										for (int LIndex = 0; LIndex < LModifiedFlags.Length; LIndex++)
-											if (LModifiedFlags[LIndex])
-												AValueFlags[LIndex] = true;
+										BitArray modifiedFlags = row.EndModifiedContext();
+										for (int index = 0; index < modifiedFlags.Length; index++)
+											if (modifiedFlags[index])
+												valueFlags[index] = true;
 									}
 								}
 							}
 
-						return LChanged;
+						return changed;
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
 			return false;
 		}
 		
-		protected virtual bool ExecuteChangeHandlers(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected virtual bool ExecuteChangeHandlers(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
 			if (TableVar.HasHandlers(EventType.Change))
 			{
-				PushRow(AProgram, AOldRow);
+				PushRow(program, oldRow);
 				try
 				{
-					PushRow(AProgram, ANewRow);
+					PushRow(program, newRow);
 					try
 					{
-						AProgram.Stack.Push(AColumnName);
+						program.Stack.Push(columnName);
 						try
 						{
-							bool LChanged = false;
-							foreach (Schema.EventHandler LHandler in TableVar.EventHandlers)
-								if ((LHandler.EventType & EventType.Change) != 0)
+							bool changed = false;
+							foreach (Schema.EventHandler handler in TableVar.EventHandlers)
+								if ((handler.EventType & EventType.Change) != 0)
 								{
-									if (AValueFlags != null)
-										ANewRow.BeginModifiedContext();
+									if (valueFlags != null)
+										newRow.BeginModifiedContext();
 									try
 									{
-										object LResult = LHandler.PlanNode.Execute(AProgram);
-										if ((LResult != null) && (bool)LResult)
-											LChanged = true;
+										object result = handler.PlanNode.Execute(program);
+										if ((result != null) && (bool)result)
+											changed = true;
 									}
 									finally
 									{
-										if (AValueFlags != null)
+										if (valueFlags != null)
 										{
-											BitArray LModifiedFlags = ANewRow.EndModifiedContext();
-											for (int LIndex = 0; LIndex < LModifiedFlags.Length; LIndex++)
-												if (LModifiedFlags[LIndex])
-													AValueFlags[LIndex] = true;
+											BitArray modifiedFlags = newRow.EndModifiedContext();
+											for (int index = 0; index < modifiedFlags.Length; index++)
+												if (modifiedFlags[index])
+													valueFlags[index] = true;
 										}
 									}
 								}
 
-							return LChanged;
+							return changed;
 						}
 						finally
 						{
-							AProgram.Stack.Pop();
+							program.Stack.Pop();
 						}
 					}
 					finally
 					{
-						PopRow(AProgram);
+						PopRow(program);
 					}
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
 			return false;
 		}
 		
-		protected InsertNode FInsertNode;
+		protected InsertNode _insertNode;
 		/// <summary>Used as a compiled insert statement to be executed against the device if ModifySupported is true.</summary>		
 		public InsertNode InsertNode
 		{
-			get { return FInsertNode; }
-			set { FInsertNode = value; }
+			get { return _insertNode; }
+			set { _insertNode = value; }
 		}
 
-		protected UpdateNode FUpdateNode;
+		protected UpdateNode _updateNode;
 		/// <summary>Used as a compiled update statement to be executed against the device if ModifySupported is true.</summary>		
 		public UpdateNode UpdateNode
 		{
-			get { return FUpdateNode; }
-			set { FUpdateNode = value; }
+			get { return _updateNode; }
+			set { _updateNode = value; }
 		}
 
-		protected DeleteNode FDeleteNode;
+		protected DeleteNode _deleteNode;
 		/// <summary>Used as a compiled delete statement to be executed against the device if ModifySupported is true.</summary>		
 		public DeleteNode DeleteNode
 		{
-			get { return FDeleteNode; }
-			set { FDeleteNode = value; }
+			get { return _deleteNode; }
+			set { _deleteNode = value; }
 		}
 		
-		protected PlanNode FSelectNode;
+		protected PlanNode _selectNode;
 		/// <summary>Used to perform an optimistic concurrency check for processor handled updates.</summary>
 		public PlanNode SelectNode
 		{
-			get { return FSelectNode; }
-			set { FSelectNode = value; }
+			get { return _selectNode; }
+			set { _selectNode = value; }
 		}
 		
-		protected PlanNode FFullSelectNode;
+		protected PlanNode _fullSelectNode;
 		/// <summary>Used to select the row with a restriction on the entire row (at least columns of a type that has an equality operator), not just the key columns.</summary>
 		public PlanNode FullSelectNode
 		{
-			get { return FFullSelectNode; }
-			set { FFullSelectNode = value; }
+			get { return _fullSelectNode; }
+			set { _fullSelectNode = value; }
 		}
 		
         // Insert
-        protected virtual void ExecuteDeviceInsert(Program AProgram, Row ARow)
+        protected virtual void ExecuteDeviceInsert(Program program, Row row)
         {
 			CheckModifySupported();
-			EnsureModifyNodes(AProgram.Plan);
+			EnsureModifyNodes(program.Plan);
 			
 			// Create a table constructor node to serve as the source for the insert
-			TableSelectorNode LSourceNode = new TableSelectorNode(new Schema.TableType());
-			RowSelectorNode LRowNode = new RowSelectorNode(ARow.DataType);
-			LSourceNode.Nodes.Add(LRowNode);
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
+			TableSelectorNode sourceNode = new TableSelectorNode(new Schema.TableType());
+			RowSelectorNode rowNode = new RowSelectorNode(row.DataType);
+			sourceNode.Nodes.Add(rowNode);
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
 			{
-				if (ARow.HasValue(LIndex))
-					LRowNode.Nodes.Add(new ValueNode(ARow.DataType.Columns[LIndex].DataType, ARow[LIndex]));
+				if (row.HasValue(index))
+					rowNode.Nodes.Add(new ValueNode(row.DataType.Columns[index].DataType, row[index]));
 				else
-					LRowNode.Nodes.Add(new ValueNode(ARow.DataType.Columns[LIndex].DataType, null));
-				LSourceNode.DataType.Columns.Add(ARow.DataType.Columns[LIndex].Copy());
+					rowNode.Nodes.Add(new ValueNode(row.DataType.Columns[index].DataType, null));
+				sourceNode.DataType.Columns.Add(row.DataType.Columns[index].Copy());
 			}
 
 			// Insert the table constructor as the source node for the insert template
-			FInsertNode.Nodes.Add(LSourceNode);
-			FInsertNode.Nodes.Add(this);
+			_insertNode.Nodes.Add(sourceNode);
+			_insertNode.Nodes.Add(this);
 			try
 			{	
-				AProgram.DeviceExecute(FDevice, FInsertNode);
+				program.DeviceExecute(_device, _insertNode);
 			}
 			finally
 			{
 				// Remove the table constructor
-				FInsertNode.Nodes.Remove(this);
-				FInsertNode.Nodes.Remove(LSourceNode);
+				_insertNode.Nodes.Remove(this);
+				_insertNode.Nodes.Remove(sourceNode);
 			}
         }
         
 		// Update
-		protected virtual void ExecuteDeviceUpdate(Program AProgram, Row AOldRow, Row ANewRow)
+		protected virtual void ExecuteDeviceUpdate(Program program, Row oldRow, Row newRow)
 		{
 			CheckModifySupported();
-			EnsureModifyNodes(AProgram.Plan);
+			EnsureModifyNodes(program.Plan);
 			
 			// Add update column nodes for each row to be updated
-			for (int LColumnIndex = 0; LColumnIndex < ANewRow.DataType.Columns.Count; LColumnIndex++)
+			for (int columnIndex = 0; columnIndex < newRow.DataType.Columns.Count; columnIndex++)
 			{
 				#if USECOLUMNLOCATIONBINDING
 				FUpdateNode.Nodes.Add
 					(
 						new UpdateColumnNode
 						(
-							ANewRow.DataType.Columns[LColumnIndex].DataType,
-							DataType.Columns.IndexOf(ANewRow.DataType.Columns[LColumnIndex].Name),
-							new ValueNode(ANewRow.DataType.Columns[LColumnIndex].DataType, ANewRow.HasValue(LColumnIndex) ? ANewRow[LColumnIndex] : null)
+							ANewRow.DataType.Columns[columnIndex].DataType,
+							DataType.Columns.IndexOf(ANewRow.DataType.Columns[columnIndex].Name),
+							new ValueNode(ANewRow.DataType.Columns[columnIndex].DataType, ANewRow.HasValue(columnIndex) ? ANewRow[columnIndex] : null)
 						)
 					);
 				#else
-				FUpdateNode.Nodes.Add
+				_updateNode.Nodes.Add
 					(
 						new UpdateColumnNode
 						(
-							ANewRow.DataType.Columns[LColumnIndex].DataType,
-							ANewRow.DataType.Columns[LColumnIndex].Name,
-							new ValueNode(ANewRow.DataType.Columns[LColumnIndex].DataType, ANewRow.HasValue(LColumnIndex) ? ANewRow[LColumnIndex] : null)
+							newRow.DataType.Columns[columnIndex].DataType,
+							newRow.DataType.Columns[columnIndex].Name,
+							new ValueNode(newRow.DataType.Columns[columnIndex].DataType, newRow.HasValue(columnIndex) ? newRow[columnIndex] : null)
 						)
 					);
 				#endif
 			}
 			try
 			{
-				AProgram.Stack.Push(AOldRow);
+				program.Stack.Push(oldRow);
 				try
 				{
 					// Execute the Update Statement
-					AProgram.DeviceExecute(FDevice, FUpdateNode);
+					program.DeviceExecute(_device, _updateNode);
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			finally
 			{
 				// Remove all the update column nodes
-				for (int LColumnIndex = 0; LColumnIndex < ANewRow.DataType.Columns.Count; LColumnIndex++)
-					FUpdateNode.Nodes.RemoveAt(FUpdateNode.Nodes.Count - 1);
+				for (int columnIndex = 0; columnIndex < newRow.DataType.Columns.Count; columnIndex++)
+					_updateNode.Nodes.RemoveAt(_updateNode.Nodes.Count - 1);
 			}
 		}
         
 		// Delete
-		protected virtual void ExecuteDeviceDelete(Program AProgram, Row ARow)
+		protected virtual void ExecuteDeviceDelete(Program program, Row row)
 		{
 			CheckModifySupported();
-			EnsureModifyNodes(AProgram.Plan);
+			EnsureModifyNodes(program.Plan);
 			
-			AProgram.Stack.Push(ARow);
+			program.Stack.Push(row);
 			try
 			{
-				AProgram.DeviceExecute(FDevice, FDeleteNode);
+				program.DeviceExecute(_device, _deleteNode);
 			}
 			finally
 			{
-				AProgram.Stack.Pop();
+				program.Stack.Pop();
 			}
 		}
         
-		protected virtual void InternalBeforeInsert(Program AProgram, Row ARow, BitArray AValueFlags) {}
-		protected virtual void InternalAfterInsert(Program AProgram, Row ARow, BitArray AValueFlags) {}
-		protected virtual void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected virtual void InternalBeforeInsert(Program program, Row row, BitArray valueFlags) {}
+		protected virtual void InternalAfterInsert(Program program, Row row, BitArray valueFlags) {}
+		protected virtual void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			throw new RuntimeException(RuntimeException.Codes.UnableToPerformInsert);
 		}
 
-		protected virtual void InternalBeforeUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags) {}
-		protected virtual void InternalAfterUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags) {}
-		protected virtual void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected virtual void InternalBeforeUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags) {}
+		protected virtual void InternalAfterUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags) {}
+		protected virtual void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 			throw new RuntimeException(RuntimeException.Codes.UnableToPerformUpdate);
 		}
 		
-		protected virtual void InternalBeforeDelete(Program AProgram, Row ARow) {}
-		protected virtual void InternalAfterDelete(Program AProgram, Row ARow) {}
-		protected virtual void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected virtual void InternalBeforeDelete(Program program, Row row) {}
+		protected virtual void InternalAfterDelete(Program program, Row row) {}
+		protected virtual void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
 			throw new RuntimeException(RuntimeException.Codes.UnableToPerformDelete);
 		}
 		
-		protected virtual bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable) { return false; }
-		protected virtual bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending) { return false; }
-		protected virtual bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName) { return false; }
+		protected virtual bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable) { return false; }
+		protected virtual bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending) { return false; }
+		protected virtual bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName) { return false; }
 		
 		// PopulateNode
-		protected TableNode FPopulateNode;
-		public TableNode PopulateNode { get { return FPopulateNode; } }
+		protected TableNode _populateNode;
+		public TableNode PopulateNode { get { return _populateNode; } }
 
 		// PrepareJoinApplicationTransaction
-		protected virtual void PrepareJoinApplicationTransaction(Plan APlan)
+		protected virtual void PrepareJoinApplicationTransaction(Plan plan)
 		{
 			// If this process is joined to an application transaction and we are not within a table-valued context
 				// join the expression for this node to the application transaction
-			if ((APlan.ApplicationTransactionID != Guid.Empty) && !APlan.InTableTypeContext())
+			if ((plan.ApplicationTransactionID != Guid.Empty) && !plan.InTableTypeContext())
 			{
-				ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
+				ApplicationTransaction transaction = plan.GetApplicationTransaction();
 				try
 				{
-					if (!LTransaction.IsGlobalContext)
+					if (!transaction.IsGlobalContext)
 					{
 						ApplicationTransactionUtility.PrepareJoinExpression
 						(
-							APlan, 
+							plan, 
 							this,
-							out FPopulateNode
+							out _populateNode
 						);
 					}
 				}
 				finally
 				{
-					Monitor.Exit(LTransaction);
+					Monitor.Exit(transaction);
 				}
 			}
 		}
 		
-		public virtual void InferPopulateNode(Plan APlan) { }
+		public virtual void InferPopulateNode(Plan plan) { }
 
-		protected override void InternalBeforeExecute(Program AProgram)
+		protected override void InternalBeforeExecute(Program program)
 		{
-			if ((FPopulateNode != null) && !AProgram.ServerProcess.IsInsert)
-				ApplicationTransactionUtility.JoinExpression(AProgram, FPopulateNode, this);
+			if ((_populateNode != null) && !program.ServerProcess.IsInsert)
+				ApplicationTransactionUtility.JoinExpression(program, _populateNode, this);
 		}
 		
-		public virtual void JoinApplicationTransaction(Program AProgram, Row ARow) {}
+		public virtual void JoinApplicationTransaction(Program program, Row row) {}
 
 		#region ShowPlan
 
@@ -3175,161 +3192,161 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return "Table"; }
 		}
 
-		protected override void WritePlanAttributes(System.Xml.XmlWriter AWriter)
+		protected override void WritePlanAttributes(System.Xml.XmlWriter writer)
 		{
-			base.WritePlanAttributes(AWriter);
-			AWriter.WriteAttributeString("ShouldChange", TableVar.ShouldChange.ToString().ToLower());
-			AWriter.WriteAttributeString("ShouldValidate", TableVar.ShouldValidate.ToString().ToLower());
-			AWriter.WriteAttributeString("ShouldDefault", TableVar.ShouldDefault.ToString().ToLower());
-			AWriter.WriteAttributeString("IsChangeRemotable", TableVar.IsChangeRemotable.ToString().ToLower());
-			AWriter.WriteAttributeString("IsValidateRemotable", TableVar.IsValidateRemotable.ToString().ToLower());
-			AWriter.WriteAttributeString("IsDefaultRemotable", TableVar.IsDefaultRemotable.ToString().ToLower());
-			AWriter.WriteAttributeString("CursorCapabilities", CursorCapabilitiesToString(CursorCapabilities));
-			AWriter.WriteAttributeString("CursorType", CursorType.ToString().ToLower());
-			AWriter.WriteAttributeString("RequestedCursorType", RequestedCursorType.ToString().ToLower());
-			AWriter.WriteAttributeString("CursorIsolation", CursorIsolation.ToString());
+			base.WritePlanAttributes(writer);
+			writer.WriteAttributeString("ShouldChange", TableVar.ShouldChange.ToString().ToLower());
+			writer.WriteAttributeString("ShouldValidate", TableVar.ShouldValidate.ToString().ToLower());
+			writer.WriteAttributeString("ShouldDefault", TableVar.ShouldDefault.ToString().ToLower());
+			writer.WriteAttributeString("IsChangeRemotable", TableVar.IsChangeRemotable.ToString().ToLower());
+			writer.WriteAttributeString("IsValidateRemotable", TableVar.IsValidateRemotable.ToString().ToLower());
+			writer.WriteAttributeString("IsDefaultRemotable", TableVar.IsDefaultRemotable.ToString().ToLower());
+			writer.WriteAttributeString("CursorCapabilities", CursorCapabilitiesToString(CursorCapabilities));
+			writer.WriteAttributeString("CursorType", CursorType.ToString().ToLower());
+			writer.WriteAttributeString("RequestedCursorType", RequestedCursorType.ToString().ToLower());
+			writer.WriteAttributeString("CursorIsolation", CursorIsolation.ToString());
 			if (Order != null)
-				AWriter.WriteAttributeString("Order", Order.Name);
+				writer.WriteAttributeString("Order", Order.Name);
 		}
 
-		protected override void WritePlanNodes(System.Xml.XmlWriter AWriter)
+		protected override void WritePlanNodes(System.Xml.XmlWriter writer)
 		{
-			WritePlanTags(AWriter, TableVar.MetaData);
-			WritePlanKeys(AWriter);
-			WritePlanOrders(AWriter);
-			WritePlanConstraints(AWriter);
-			WritePlanReferences(AWriter);
-			WritePlanColumns(AWriter);
-			base.WritePlanNodes(AWriter);
+			WritePlanTags(writer, TableVar.MetaData);
+			WritePlanKeys(writer);
+			WritePlanOrders(writer);
+			WritePlanConstraints(writer);
+			WritePlanReferences(writer);
+			WritePlanColumns(writer);
+			base.WritePlanNodes(writer);
 		}
 
-		protected virtual void WritePlanKeys(System.Xml.XmlWriter AWriter)
+		protected virtual void WritePlanKeys(System.Xml.XmlWriter writer)
 		{
-			foreach (Schema.Key LKey in TableVar.Keys)
+			foreach (Schema.Key key in TableVar.Keys)
 			{
-				AWriter.WriteStartElement("Keys.Key");
-				AWriter.WriteAttributeString("Name", LKey.Name);
-				AWriter.WriteAttributeString("IsSparse", Convert.ToString(LKey.IsSparse));
-				WritePlanTags(AWriter, LKey.MetaData);
-				AWriter.WriteEndElement();
+				writer.WriteStartElement("Keys.Key");
+				writer.WriteAttributeString("Name", key.Name);
+				writer.WriteAttributeString("IsSparse", Convert.ToString(key.IsSparse));
+				WritePlanTags(writer, key.MetaData);
+				writer.WriteEndElement();
 			}
 		}
 
-		protected virtual void WritePlanOrders(System.Xml.XmlWriter AWriter)
+		protected virtual void WritePlanOrders(System.Xml.XmlWriter writer)
 		{
-			foreach (Schema.Order LOrder in TableVar.Orders)
+			foreach (Schema.Order order in TableVar.Orders)
 			{
-				AWriter.WriteStartElement("Orders.Order");
-				AWriter.WriteAttributeString("Name", LOrder.Name);
-				WritePlanTags(AWriter, LOrder.MetaData);
-				AWriter.WriteEndElement();
+				writer.WriteStartElement("Orders.Order");
+				writer.WriteAttributeString("Name", order.Name);
+				WritePlanTags(writer, order.MetaData);
+				writer.WriteEndElement();
 			}
 		}
 
-		protected virtual void WritePlanConstraints(System.Xml.XmlWriter AWriter)
+		protected virtual void WritePlanConstraints(System.Xml.XmlWriter writer)
 		{
-			foreach (Schema.TableVarConstraint LConstraint in TableVar.Constraints)
+			foreach (Schema.TableVarConstraint constraint in TableVar.Constraints)
 			{
-				if (!LConstraint.IsGenerated)
+				if (!constraint.IsGenerated)
 				{
-					if (LConstraint is Schema.RowConstraint)
+					if (constraint is Schema.RowConstraint)
 					{
-						AWriter.WriteStartElement("Constraints.RowConstraint");
-						AWriter.WriteAttributeString("Expression", ((Schema.RowConstraint)LConstraint).Node.SafeEmitStatementAsString());
+						writer.WriteStartElement("Constraints.RowConstraint");
+						writer.WriteAttributeString("Expression", ((Schema.RowConstraint)constraint).Node.SafeEmitStatementAsString());
 					}
 					else
 					{
-						Schema.TransitionConstraint LTransitionConstraint = (Schema.TransitionConstraint)LConstraint;
-						AWriter.WriteStartElement("Constraints.TransitionConstraint");
-						if (LTransitionConstraint.OnInsertNode != null)
-							AWriter.WriteAttributeString("OnInsert", LTransitionConstraint.OnInsertNode.SafeEmitStatementAsString());
-						if (LTransitionConstraint.OnUpdateNode != null)
-							AWriter.WriteAttributeString("OnUpdate", LTransitionConstraint.OnUpdateNode.SafeEmitStatementAsString());
-						if (LTransitionConstraint.OnDeleteNode != null)
-							AWriter.WriteAttributeString("OnDelete", LTransitionConstraint.OnDeleteNode.SafeEmitStatementAsString());
+						Schema.TransitionConstraint transitionConstraint = (Schema.TransitionConstraint)constraint;
+						writer.WriteStartElement("Constraints.TransitionConstraint");
+						if (transitionConstraint.OnInsertNode != null)
+							writer.WriteAttributeString("OnInsert", transitionConstraint.OnInsertNode.SafeEmitStatementAsString());
+						if (transitionConstraint.OnUpdateNode != null)
+							writer.WriteAttributeString("OnUpdate", transitionConstraint.OnUpdateNode.SafeEmitStatementAsString());
+						if (transitionConstraint.OnDeleteNode != null)
+							writer.WriteAttributeString("OnDelete", transitionConstraint.OnDeleteNode.SafeEmitStatementAsString());
 					}
-					AWriter.WriteAttributeString("Name", LConstraint.Name);
-					WritePlanTags(AWriter, LConstraint.MetaData);
-					AWriter.WriteEndElement();
+					writer.WriteAttributeString("Name", constraint.Name);
+					WritePlanTags(writer, constraint.MetaData);
+					writer.WriteEndElement();
 				}
 			}
 		}
 
-		protected static string EmitColumnList(Schema.Key AKey)
+		protected static string EmitColumnList(Schema.Key key)
 		{
-			StringBuilder LResult = new StringBuilder();
-			LResult.Append("{ ");
-			for (int LIndex = 0; LIndex < AKey.Columns.Count; LIndex++)
+			StringBuilder result = new StringBuilder();
+			result.Append("{ ");
+			for (int index = 0; index < key.Columns.Count; index++)
 			{
-				if (LIndex > 0)
-					LResult.Append(", ");
-				LResult.AppendFormat("{0}", AKey.Columns[LIndex].Name);
+				if (index > 0)
+					result.Append(", ");
+				result.AppendFormat("{0}", key.Columns[index].Name);
 			}
-			if (AKey.Columns.Count > 0)
-				LResult.Append(" ");
-			LResult.Append("}");
-			return LResult.ToString();
+			if (key.Columns.Count > 0)
+				result.Append(" ");
+			result.Append("}");
+			return result.ToString();
 		}
 		
-		protected virtual void WritePlanReference(System.Xml.XmlWriter AWriter, Schema.Reference AReference, bool AIsSource)
+		protected virtual void WritePlanReference(System.Xml.XmlWriter writer, Schema.Reference reference, bool isSource)
 		{
-			if (AIsSource)
+			if (isSource)
 			{
-				AWriter.WriteStartElement("SourceReferences.Reference");
-				AWriter.WriteAttributeString("Target", AReference.TargetTable.Name);
+				writer.WriteStartElement("SourceReferences.Reference");
+				writer.WriteAttributeString("Target", reference.TargetTable.Name);
 			}
 			else
 			{
-				AWriter.WriteStartElement("TargetReferences.Reference");
-				AWriter.WriteAttributeString("Source", AReference.SourceTable.Name);
+				writer.WriteStartElement("TargetReferences.Reference");
+				writer.WriteAttributeString("Source", reference.SourceTable.Name);
 			}
-			AWriter.WriteAttributeString("IsDerived", Convert.ToString(AReference.ParentReference != null));
-			AWriter.WriteAttributeString("Name", AReference.Name);
-			AWriter.WriteAttributeString("SourceColumns", EmitColumnList(AReference.SourceKey));
-			AWriter.WriteAttributeString("TargetColumns", EmitColumnList(AReference.TargetKey));
-			AWriter.WriteAttributeString("IsExcluded", Convert.ToString(AReference.IsExcluded));
-			AWriter.WriteAttributeString("OriginatingReferenceName", AReference.OriginatingReferenceName());
-			WritePlanTags(AWriter, AReference.MetaData);
-			AWriter.WriteEndElement();
+			writer.WriteAttributeString("IsDerived", Convert.ToString(reference.ParentReference != null));
+			writer.WriteAttributeString("Name", reference.Name);
+			writer.WriteAttributeString("SourceColumns", EmitColumnList(reference.SourceKey));
+			writer.WriteAttributeString("TargetColumns", EmitColumnList(reference.TargetKey));
+			writer.WriteAttributeString("IsExcluded", Convert.ToString(reference.IsExcluded));
+			writer.WriteAttributeString("OriginatingReferenceName", reference.OriginatingReferenceName());
+			WritePlanTags(writer, reference.MetaData);
+			writer.WriteEndElement();
 		}
 		
-		protected virtual void WritePlanReferences(System.Xml.XmlWriter AWriter)
+		protected virtual void WritePlanReferences(System.Xml.XmlWriter writer)
 		{
-			foreach (Schema.Reference LReference in TableVar.SourceReferences)
-				WritePlanReference(AWriter, LReference, true);
+			foreach (Schema.Reference reference in TableVar.SourceReferences)
+				WritePlanReference(writer, reference, true);
 			
-			foreach (Schema.Reference LReference in TableVar.TargetReferences)
-				WritePlanReference(AWriter, LReference, false);
+			foreach (Schema.Reference reference in TableVar.TargetReferences)
+				WritePlanReference(writer, reference, false);
 		}
 
-		protected virtual void WritePlanColumns(System.Xml.XmlWriter AWriter)
+		protected virtual void WritePlanColumns(System.Xml.XmlWriter writer)
 		{
-			foreach (Schema.TableVarColumn LColumn in TableVar.Columns)
+			foreach (Schema.TableVarColumn column in TableVar.Columns)
 			{
-				AWriter.WriteStartElement("Columns.Column");
-				AWriter.WriteAttributeString("Name", LColumn.Name);
-				AWriter.WriteAttributeString("Type", LColumn.DataType.Name);
-				if (LColumn.IsNilable)
-					AWriter.WriteAttributeString("Nilable", "true");
-				if (LColumn.ReadOnly)
-					AWriter.WriteAttributeString("ReadOnly", "true");
-				if (LColumn.IsComputed)
-					AWriter.WriteAttributeString("Computed", "true");
-				if (!LColumn.ShouldChange)
-					AWriter.WriteAttributeString("ShouldChange", "false");
-				if (!LColumn.ShouldValidate)
-					AWriter.WriteAttributeString("ShouldValidate", "false");
-				if (!LColumn.ShouldDefault)
-					AWriter.WriteAttributeString("ShouldDefault", "false");
-				if (LColumn.Default != null)
+				writer.WriteStartElement("Columns.Column");
+				writer.WriteAttributeString("Name", column.Name);
+				writer.WriteAttributeString("Type", column.DataType.Name);
+				if (column.IsNilable)
+					writer.WriteAttributeString("Nilable", "true");
+				if (column.ReadOnly)
+					writer.WriteAttributeString("ReadOnly", "true");
+				if (column.IsComputed)
+					writer.WriteAttributeString("Computed", "true");
+				if (!column.ShouldChange)
+					writer.WriteAttributeString("ShouldChange", "false");
+				if (!column.ShouldValidate)
+					writer.WriteAttributeString("ShouldValidate", "false");
+				if (!column.ShouldDefault)
+					writer.WriteAttributeString("ShouldDefault", "false");
+				if (column.Default != null)
 				{
-					AWriter.WriteStartElement("Default.Default");
-					AWriter.WriteAttributeString("Expression", LColumn.Default.Node.SafeEmitStatementAsString());
-					WritePlanTags(AWriter, LColumn.MetaData);
-					AWriter.WriteEndElement();
+					writer.WriteStartElement("Default.Default");
+					writer.WriteAttributeString("Expression", column.Default.Node.SafeEmitStatementAsString());
+					WritePlanTags(writer, column.MetaData);
+					writer.WriteEndElement();
 				}
-				WritePlanTags(AWriter, LColumn.MetaData);
-				AWriter.WriteEndElement();
+				WritePlanTags(writer, column.MetaData);
+				writer.WriteEndElement();
 			}
 		}
 

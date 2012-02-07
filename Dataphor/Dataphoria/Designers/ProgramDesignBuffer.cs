@@ -8,8 +8,8 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 	public class ProgramDesignBuffer : DesignBuffer
 	{
-		public ProgramDesignBuffer(IDataphoria ADataphoria, DebugLocator ALocator) 
-			: base(ADataphoria, ALocator)
+		public ProgramDesignBuffer(IDataphoria dataphoria, DebugLocator locator) 
+			: base(dataphoria, locator)
 		{
 		}
 		
@@ -18,13 +18,13 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			return Locator.Locator;
 		}
 
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			ProgramDesignBuffer LBuffer = AObject as ProgramDesignBuffer;
-			if ((LBuffer != null) && (LBuffer.Locator.Locator == Locator.Locator))
+			ProgramDesignBuffer buffer = objectValue as ProgramDesignBuffer;
+			if ((buffer != null) && (buffer.Locator.Locator == Locator.Locator))
 				return true;
 			else
-				return base.Equals(AObject);
+				return base.Equals(objectValue);
 		}
 
 		public override int GetHashCode()
@@ -32,12 +32,12 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			return Locator.Locator.GetHashCode();
 		}
 
-		public override void SaveData(string AData)
+		public override void SaveData(string data)
 		{
 			throw new NotImplementedException();
 		}
 
-		public override void SaveBinaryData(System.IO.Stream AData)
+		public override void SaveBinaryData(System.IO.Stream data)
 		{
 			throw new NotImplementedException();
 		}
@@ -47,19 +47,19 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			return ((Scalar)Dataphoria.EvaluateQuery(String.Format(".System.Debug.GetSource('{0}')", Locator.Locator.Replace("'", "''")))).AsString;
 		}
 
-		public override void LoadData(System.IO.Stream AData)
+		public override void LoadData(System.IO.Stream data)
 		{
 			Error.Fail("LoadData(Stream) is not supported for ProgramDesignBuffer");
 		}
 
-		public override bool LocatorNameMatches(string AName)
+		public override bool LocatorNameMatches(string name)
 		{
-			return AName != null && String.Equals(AName, Locator.Locator);
+			return name != null && String.Equals(name, Locator.Locator);
 		}
 		
-		public static bool IsProgramLocator(string AName)
+		public static bool IsProgramLocator(string name)
 		{
-			return DebugLocator.IsProgramLocator(AName) || DebugLocator.IsOperatorLocator(AName);
+			return DebugLocator.IsProgramLocator(name) || DebugLocator.IsOperatorLocator(name);
 		}
 	}
 }

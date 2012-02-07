@@ -26,12 +26,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator SetDefaultDeviceName(ALibraryName : Name, ADeviceName : Name);</remarks>
     public class SystemSetDefaultDeviceNameNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			if (AArguments.Length == 2)
-				SystemSetLibraryDescriptorNode.SetLibraryDefaultDeviceName(AProgram, (string)AArguments[0], (string)AArguments[1], true);
+			if (arguments.Length == 2)
+				SystemSetLibraryDescriptorNode.SetLibraryDefaultDeviceName(program, (string)arguments[0], (string)arguments[1], true);
 			else
-				SystemSetLibraryDescriptorNode.SetLibraryDefaultDeviceName(AProgram, AProgram.ServerProcess.ServerSession.CurrentLibrary.Name, (string)AArguments[0], true);
+				SystemSetLibraryDescriptorNode.SetLibraryDefaultDeviceName(program, program.ServerProcess.ServerSession.CurrentLibrary.Name, (string)arguments[0], true);
 			return null;
 		}
     }
@@ -40,69 +40,69 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.Diagnostics.ShowLog(const ALogIndex : Integer) : String
 	public class SystemShowLogNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return ((Server)AProgram.ServerProcess.ServerSession.Server).ShowLog(AArguments.Length == 0 ? 0 : (int)AArguments[0]);
+			return ((Server)program.ServerProcess.ServerSession.Server).ShowLog(arguments.Length == 0 ? 0 : (int)arguments[0]);
 		}
 	}
 	
 	// operator System.Diagnostics.ListLogs() : table { Sequence : Integer, LogName : String }
     public class SystemListLogsNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("LogName", APlan.DataTypes.SystemString));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("LogName", plan.DataTypes.SystemString));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
-					List<string> LLogs = AProgram.ServerProcess.ServerSession.Server.ListLogs();
-					for (int LIndex = 0; LIndex < LLogs.Count; LIndex++)
+					row.ValuesOwned = false;
+					List<string> logs = program.ServerProcess.ServerSession.Server.ListLogs();
+					for (int index = 0; index < logs.Count; index++)
 					{
-						LRow[0] = LIndex;
-						LRow[1] = LLogs[LIndex];
-						LResult.Insert(LRow);
+						row[0] = index;
+						row[1] = logs[index];
+						result.Insert(row);
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 				
-				LResult.First();
+				result.First();
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -111,10 +111,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.SetMaxConcurrentProcesses(const AMaxConcurrentProcesses : System.Integer);
 	public class SystemSetMaxConcurrentProcessesNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			AProgram.ServerProcess.ServerSession.Server.MaxConcurrentProcesses = (int)AArguments[0];
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SaveServerSettings(AProgram.ServerProcess.ServerSession.Server);
+			program.ServerProcess.ServerSession.Server.MaxConcurrentProcesses = (int)arguments[0];
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SaveServerSettings(program.ServerProcess.ServerSession.Server);
 			return null;
 		}
 	}
@@ -122,10 +122,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.SetProcessWaitTimeout(const AProcessWaitTimeout : System.TimeSpan);
 	public class SystemSetProcessWaitTimeoutNode: InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			AProgram.ServerProcess.ServerSession.Server.ProcessWaitTimeout = ((TimeSpan)AArguments[0]);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SaveServerSettings(AProgram.ServerProcess.ServerSession.Server);
+			program.ServerProcess.ServerSession.Server.ProcessWaitTimeout = ((TimeSpan)arguments[0]);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SaveServerSettings(program.ServerProcess.ServerSession.Server);
 			return null;
 		}
 	}
@@ -133,7 +133,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator MachineName() : String;</remarks>
 	public class SystemMachineNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			return System.Environment.MachineName;
 		}
@@ -142,9 +142,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator HostName() : String;</remarks>
 	public class SystemHostNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return AProgram.ServerProcess.ServerSession.SessionInfo.HostName;
+			return program.ServerProcess.ServerSession.SessionInfo.HostName;
 		}
 	}
 }

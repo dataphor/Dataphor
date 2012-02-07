@@ -7,6 +7,8 @@
 		<nodetype name="userstateargument"/>
 		<nodetype name="setpropertyaction"/>
 		<nodetype name="blockaction"/>
+		<nodetype name="dataconditionalaction"/>
+		<nodetype name="conditionalaction"/>
 		<nodetype name="formaction"/>
 		<nodetype name="findaction"/>
 		<nodetype name="setnextrequestaction"/>

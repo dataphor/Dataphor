@@ -26,112 +26,112 @@ namespace Alphora.Dataphor.DAE.Client
 
 			public bool LastTryFailed = false;
 
-			public ServerInfo(ServerAlias AAlias, string ALogin, string APassword)
+			public ServerInfo(ServerAlias alias, string login, string password)
 			{
-				Alias = AAlias;
-				Login = ALogin;
-				Password = APassword;
+				Alias = alias;
+				Login = login;
+				Password = password;
 			}
 		}
 
 		private List<ServerInfo> ServerList = new List<ServerInfo>();
 		private Dictionary<string, ServerInfo> ServerHash = new Dictionary<string, ServerInfo>();
 
-		public void AddServer(ServerAlias AAlias, string ALogin, string APassword)
+		public void AddServer(ServerAlias alias, string login, string password)
 		{
-			if (ServerHash.ContainsKey(AAlias.Name))
-				throw new ClientException(ClientException.Codes.DuplicateAlias, AAlias.Name);
+			if (ServerHash.ContainsKey(alias.Name))
+				throw new ClientException(ClientException.Codes.DuplicateAlias, alias.Name);
 
-			ServerInfo LServerInfo = new ServerInfo(AAlias, ALogin, APassword);
-			ServerList.Add(LServerInfo);
-			ServerHash.Add(LServerInfo.Alias.Name, LServerInfo);
+			ServerInfo serverInfo = new ServerInfo(alias, login, password);
+			ServerList.Add(serverInfo);
+			ServerHash.Add(serverInfo.Alias.Name, serverInfo);
 		}
 
-		private Random FRandom = new Random();
+		private Random _random = new Random();
 
 		public DataSession GetConnection()
 		{
-			int LStartIndex = FRandom.Next(ServerList.Count);
+			int startIndex = _random.Next(ServerList.Count);
 
 			// only try to hit a down server every once in a while so that there isn't a 2 second delay on half the pages requests when a server is down.
-			if ((ServerList[LStartIndex]).LastTryFailed)
+			if ((ServerList[startIndex]).LastTryFailed)
 			{
-				LStartIndex = FRandom.Next(ServerList.Count);
-				if ((ServerList[LStartIndex]).LastTryFailed)
+				startIndex = _random.Next(ServerList.Count);
+				if ((ServerList[startIndex]).LastTryFailed)
 				{
-					LStartIndex = FRandom.Next(ServerList.Count);
-					if ((ServerList[LStartIndex]).LastTryFailed)
+					startIndex = _random.Next(ServerList.Count);
+					if ((ServerList[startIndex]).LastTryFailed)
 					{
-						LStartIndex = FRandom.Next(ServerList.Count);
+						startIndex = _random.Next(ServerList.Count);
 					}
 				}
 			}
 			
-			int LServerIndex = LStartIndex;
-			ServerInfo LServerInfo = ServerList[LServerIndex];
+			int serverIndex = startIndex;
+			ServerInfo serverInfo = ServerList[serverIndex];
 			while (true)
 			{
 				try
 				{
-					if (!IsServerAlive(LServerInfo.ServerConnection))
-						LServerInfo.ServerConnection = new ServerConnection(LServerInfo.Alias);
+					if (!IsServerAlive(serverInfo.ServerConnection))
+						serverInfo.ServerConnection = new ServerConnection(serverInfo.Alias);
 				
-					DataSession LDataphorConnection = new DataSession();
-					LDataphorConnection.Alias = LServerInfo.Alias;
-					LDataphorConnection.SessionInfo.UserID = LServerInfo.Login;
-					LDataphorConnection.SessionInfo.Password = LServerInfo.Password;
-					LDataphorConnection.ServerConnection = LServerInfo.ServerConnection;
-					LDataphorConnection.Open();
-					return LDataphorConnection;
+					DataSession dataphorConnection = new DataSession();
+					dataphorConnection.Alias = serverInfo.Alias;
+					dataphorConnection.SessionInfo.UserID = serverInfo.Login;
+					dataphorConnection.SessionInfo.Password = serverInfo.Password;
+					dataphorConnection.ServerConnection = serverInfo.ServerConnection;
+					dataphorConnection.Open();
+					return dataphorConnection;
 				} 
 				catch (Exception E)
 				{
-					LServerInfo.LastTryFailed = true;
+					serverInfo.LastTryFailed = true;
 
 					//  Try next server until all exhausted
-					LServerIndex++;
-					LServerIndex %= ServerList.Count;
-					if (LServerIndex != LStartIndex)
-						LServerInfo = ServerList[LServerIndex];
+					serverIndex++;
+					serverIndex %= ServerList.Count;
+					if (serverIndex != startIndex)
+						serverInfo = ServerList[serverIndex];
 					else
 						throw E;
 				}
 			}
 		}
 
-		public void EnsureConnection(ref DataSession AConnection)
+		public void EnsureConnection(ref DataSession connection)
 		{
-			if ((AConnection != null) && !IsServerAlive(AConnection.ServerConnection))
+			if ((connection != null) && !IsServerAlive(connection.ServerConnection))
 			{
-				ServerHash[AConnection.Alias.Name].ServerConnection = null;
+				ServerHash[connection.Alias.Name].ServerConnection = null;
 
 				try
 				{
-					AConnection.Dispose();
+					connection.Dispose();
 				}
 				catch {} // throw any exception away since we are already trying to clean up a bad state
 
-				AConnection = null;
+				connection = null;
 			}
 		}
 
-		private bool IsServerAlive(ServerConnection AServerConnection)
+		private bool IsServerAlive(ServerConnection serverConnection)
 		{
-			if (AServerConnection == null)
+			if (serverConnection == null)
 				return false;
 				
-			if (AServerConnection.Server == null)
+			if (serverConnection.Server == null)
 				return false;
 			
 			try
 			{
-				long LCacheTimestamp = AServerConnection.Server.CacheTimeStamp;
+				long cacheTimestamp = serverConnection.Server.CacheTimeStamp;
 			} 
 			catch
 			{
 				try
 				{
-					AServerConnection.Dispose();
+					serverConnection.Dispose();
 				}
 				catch {} // throw any exception away since we are already trying to clean up a bad state
 

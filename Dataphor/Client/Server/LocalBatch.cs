@@ -18,104 +18,104 @@ namespace Alphora.Dataphor.DAE.Server
 {
     public class LocalBatch : LocalServerChildObject, IServerBatch
     {
-		public LocalBatch(LocalScript AScript, IRemoteServerBatch ABatch) : base()
+		public LocalBatch(LocalScript script, IRemoteServerBatch batch) : base()
 		{
-			FScript = AScript;
-			FBatch = ABatch;
+			_script = script;
+			_batch = batch;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			FBatch = null;
-			FScript = null;
-			base.Dispose(ADisposing);
+			_batch = null;
+			_script = null;
+			base.Dispose(disposing);
 		}
 
-		protected IRemoteServerBatch FBatch;
-		public IRemoteServerBatch RemoteBatch { get { return FBatch; } }
+		protected IRemoteServerBatch _batch;
+		public IRemoteServerBatch RemoteBatch { get { return _batch; } }
 		
-		protected internal LocalScript FScript;
-		public IServerScript ServerScript { get { return FScript; } }
+		protected internal LocalScript _script;
+		public IServerScript ServerScript { get { return _script; } }
 		
-		public IServerProcess ServerProcess { get { return FScript.Process; } }
+		public IServerProcess ServerProcess { get { return _script.Process; } }
 		
-		public void Execute(DataParams AParams)
+		public void Execute(DataParams paramsValue)
 		{
-			RemoteParamData LParams = FScript.FProcess.DataParamsToRemoteParamData(AParams);
-			FBatch.Execute(ref LParams, FScript.FProcess.GetProcessCallInfo());
-			FScript.FProcess.RemoteParamDataToDataParams(AParams, LParams);
+			RemoteParamData localParamsValue = _script._process.DataParamsToRemoteParamData(paramsValue);
+			_batch.Execute(ref localParamsValue, _script._process.GetProcessCallInfo());
+			_script._process.RemoteParamDataToDataParams(paramsValue, localParamsValue);
 		}
 		
 		public bool IsExpression()
 		{
-			return FBatch.IsExpression();
+			return _batch.IsExpression();
 		}
 		
 		public string GetText()
 		{
-			return FBatch.GetText();
+			return _batch.GetText();
 		}
 		
-		public int Line { get { return FBatch.Line; } }
+		public int Line { get { return _batch.Line; } }
 
-		public IServerPlan Prepare(DataParams AParams)
+		public IServerPlan Prepare(DataParams paramsValue)
 		{
 			if (IsExpression())
-				return PrepareExpression(AParams);
+				return PrepareExpression(paramsValue);
 			else
-				return PrepareStatement(AParams);
+				return PrepareStatement(paramsValue);
 		}
 		
-		public void Unprepare(IServerPlan APlan)
+		public void Unprepare(IServerPlan plan)
 		{
-			if (APlan is IServerExpressionPlan)
-				UnprepareExpression((IServerExpressionPlan)APlan);
+			if (plan is IServerExpressionPlan)
+				UnprepareExpression((IServerExpressionPlan)plan);
 			else
-				UnprepareStatement((IServerStatementPlan)APlan);
+				UnprepareStatement((IServerStatementPlan)plan);
 		}
 		
-		public IServerExpressionPlan PrepareExpression(DataParams AParams)
+		public IServerExpressionPlan PrepareExpression(DataParams paramsValue)
 		{
 			#if LOGCACHEEVENTS
 			FScript.FProcess.FSession.FServer.FInternalServer.LogMessage(String.Format("Thread {0} preparing batched expression '{1}'.", Thread.CurrentThread.GetHashCode(), GetText()));
 			#endif
 			
-			PlanDescriptor LPlanDescriptor;
-			IRemoteServerExpressionPlan LPlan = FBatch.PrepareExpression(((LocalProcess)ServerProcess).DataParamsToRemoteParams(AParams), out LPlanDescriptor);
-			return new LocalExpressionPlan(FScript.FProcess, LPlan, LPlanDescriptor, AParams);
+			PlanDescriptor planDescriptor;
+			IRemoteServerExpressionPlan plan = _batch.PrepareExpression(((LocalProcess)ServerProcess).DataParamsToRemoteParams(paramsValue), out planDescriptor);
+			return new LocalExpressionPlan(_script._process, plan, planDescriptor, paramsValue);
 		}
 		
-		public void UnprepareExpression(IServerExpressionPlan APlan)
+		public void UnprepareExpression(IServerExpressionPlan plan)
 		{
 			try
 			{
-				FBatch.UnprepareExpression(((LocalExpressionPlan)APlan).RemotePlan);
+				_batch.UnprepareExpression(((LocalExpressionPlan)plan).RemotePlan);
 			}
 			catch
 			{
 				// ignore exceptions here
 			}
-			((LocalExpressionPlan)APlan).Dispose();
+			((LocalExpressionPlan)plan).Dispose();
 		}
 		
-		public IServerStatementPlan PrepareStatement(DataParams AParams)
+		public IServerStatementPlan PrepareStatement(DataParams paramsValue)
 		{
-			PlanDescriptor LPlanDescriptor;
-			IRemoteServerStatementPlan LPlan = FBatch.PrepareStatement(((LocalProcess)ServerProcess).DataParamsToRemoteParams(AParams), out LPlanDescriptor);
-			return new LocalStatementPlan(FScript.FProcess, LPlan, LPlanDescriptor);
+			PlanDescriptor planDescriptor;
+			IRemoteServerStatementPlan plan = _batch.PrepareStatement(((LocalProcess)ServerProcess).DataParamsToRemoteParams(paramsValue), out planDescriptor);
+			return new LocalStatementPlan(_script._process, plan, planDescriptor);
 		}
 		
-		public void UnprepareStatement(IServerStatementPlan APlan)
+		public void UnprepareStatement(IServerStatementPlan plan)
 		{
 			try
 			{
-				FBatch.UnprepareStatement(((LocalStatementPlan)APlan).RemotePlan);
+				_batch.UnprepareStatement(((LocalStatementPlan)plan).RemotePlan);
 			}
 			catch
 			{
 				// ignore exceptions here
 			}
-			((LocalStatementPlan)APlan).Dispose();
+			((LocalStatementPlan)plan).Dispose();
 		}
     }
     
@@ -123,10 +123,10 @@ namespace Alphora.Dataphor.DAE.Server
     {
 		public LocalBatches() : base() {}
 		
-		IServerBatch IServerBatches.this[int AIndex]
+		IServerBatch IServerBatches.this[int index]
 		{
-			get { return base[AIndex]; }
-			set { base[AIndex] = (LocalBatch)value; }
+			get { return base[index]; }
+			set { base[index] = (LocalBatch)value; }
 		}
     }
 }

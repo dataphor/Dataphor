@@ -20,15 +20,15 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 	public class ElementDesignerData : DataObject
 	{
-		public ElementDesignerData(object AElement)
+		public ElementDesignerData(object element)
 		{
-			FElement = AElement;
+			_element = element;
 		}
 
-		private object FElement;
+		private object _element;
 		public object Element
 		{
-			get { return FElement; }
+			get { return _element; }
 		}
 	}
 }

@@ -22,159 +22,159 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class RenameTable : Table
     {
-		public RenameTable(RenameNode ANode, Program AProgram) : base(ANode, AProgram){}
+		public RenameTable(RenameNode node, Program program) : base(node, program){}
 
-        public new RenameNode Node { get { return (RenameNode)FNode; } }
+        public new RenameNode Node { get { return (RenameNode)_node; } }
         
-		protected Table FSourceTable;
-		protected Row FSourceRow;
-		protected Schema.RowType FKeyRowType;
+		protected Table _sourceTable;
+		protected Row _sourceRow;
+		protected Schema.RowType _keyRowType;
         
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Program);
-			FSourceRow = new Row(Manager, FSourceTable.DataType.RowType);
+			_sourceTable = (Table)Node.Nodes[0].Execute(Program);
+			_sourceRow = new Row(Manager, _sourceTable.DataType.RowType);
         }
         
         protected override void InternalClose()
         {
-            if (FSourceRow != null)
+            if (_sourceRow != null)
             {
-				FSourceRow.Dispose();
-                FSourceRow = null;
+				_sourceRow.Dispose();
+                _sourceRow = null;
             }
             
-			if (FSourceTable != null)
+			if (_sourceTable != null)
 			{
-				FSourceTable.Dispose();
-				FSourceTable = null;
+				_sourceTable.Dispose();
+				_sourceTable = null;
 			}
         }
         
         protected override void InternalReset()
         {
-            FSourceTable.Reset();
+            _sourceTable.Reset();
         }
         
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
 			// alternative rename algorithm could construct a row of the source type first
-			FSourceTable.Select(FSourceRow);
+			_sourceTable.Select(_sourceRow);
             
-            int LColumnIndex;
-            for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
+            int columnIndex;
+            for (int index = 0; index < row.DataType.Columns.Count; index++)
 			{
-				LColumnIndex = DataType.Columns.IndexOfName(ARow.DataType.Columns[LIndex].Name);
-				if (LColumnIndex >= 0)
-					if (FSourceRow.HasValue(LColumnIndex))
-						ARow[LIndex] = FSourceRow[LColumnIndex];
+				columnIndex = DataType.Columns.IndexOfName(row.DataType.Columns[index].Name);
+				if (columnIndex >= 0)
+					if (_sourceRow.HasValue(columnIndex))
+						row[index] = _sourceRow[columnIndex];
 					else
-						ARow.ClearValue(LIndex);
+						row.ClearValue(index);
 			}
         }
         
         protected override bool InternalNext()
         {
-            return FSourceTable.Next();
+            return _sourceTable.Next();
         }
         
         protected override void InternalLast()
         {
-			FSourceTable.Last();
+			_sourceTable.Last();
         }
         
         protected override bool InternalBOF()
         {
-            return FSourceTable.BOF();
+            return _sourceTable.BOF();
         }
         
         protected override bool InternalEOF()
         {
-            return FSourceTable.EOF();
+            return _sourceTable.EOF();
         }
         
         protected override bool InternalPrior()
         {
-			return FSourceTable.Prior();
+			return _sourceTable.Prior();
         }
         
         protected override void InternalFirst()
         {
-			FSourceTable.First();
+			_sourceTable.First();
         }
         
         protected override Row InternalGetKey()
         {
-			Row LKey = FSourceTable.GetKey();
+			Row key = _sourceTable.GetKey();
 			try
 			{
-				if (FKeyRowType == null)
+				if (_keyRowType == null)
 				{
-					FKeyRowType = new Schema.RowType();
-					for (int LIndex = 0; LIndex < LKey.DataType.Columns.Count; LIndex++)
-						FKeyRowType.Columns.Add(DataType.Columns[FSourceTable.DataType.Columns.IndexOfName(LKey.DataType.Columns[LIndex].Name)].Copy());
+					_keyRowType = new Schema.RowType();
+					for (int index = 0; index < key.DataType.Columns.Count; index++)
+						_keyRowType.Columns.Add(DataType.Columns[_sourceTable.DataType.Columns.IndexOfName(key.DataType.Columns[index].Name)].Copy());
 				}
-				Row LRow = new Row(Manager, FKeyRowType);
-				for (int LIndex = 0; LIndex < LKey.DataType.Columns.Count; LIndex++)
-					if (LKey.HasValue(LIndex))
-						LRow[LIndex] = LKey[LIndex];
-				return LRow;
+				Row row = new Row(Manager, _keyRowType);
+				for (int index = 0; index < key.DataType.Columns.Count; index++)
+					if (key.HasValue(index))
+						row[index] = key[index];
+				return row;
 			}
 			finally
 			{
-				LKey.Dispose();
+				key.Dispose();
 			}
         }
         
-        protected Row BuildSourceKey(Row AKey)
+        protected Row BuildSourceKey(Row key)
         {
-			Schema.RowType LRowType = new Schema.RowType();
-			for (int LIndex = 0; LIndex < AKey.DataType.Columns.Count; LIndex++)
-				LRowType.Columns.Add(FSourceTable.DataType.Columns[DataType.Columns.IndexOfName(AKey.DataType.Columns[LIndex].Name)].Copy());
-			Row LKey = new Row(Manager, LRowType);
-			for (int LIndex = 0; LIndex < AKey.DataType.Columns.Count; LIndex++)
-				if (AKey.HasValue(LIndex))
-					LKey[LIndex] = AKey[LIndex];
-			return LKey;
+			Schema.RowType rowType = new Schema.RowType();
+			for (int index = 0; index < key.DataType.Columns.Count; index++)
+				rowType.Columns.Add(_sourceTable.DataType.Columns[DataType.Columns.IndexOfName(key.DataType.Columns[index].Name)].Copy());
+			Row localKey = new Row(Manager, rowType);
+			for (int index = 0; index < key.DataType.Columns.Count; index++)
+				if (key.HasValue(index))
+					localKey[index] = key[index];
+			return localKey;
         }
 
-		protected override bool InternalRefresh(Row AKey)
+		protected override bool InternalRefresh(Row key)
 		{
-			Row LRow = BuildSourceKey(AKey);
+			Row row = BuildSourceKey(key);
 			try
 			{
-				return FSourceTable.Refresh(LRow);
+				return _sourceTable.Refresh(row);
 			}
 			finally
 			{
-				LRow.Dispose();
+				row.Dispose();
 			}
 		}
 
-		protected override bool InternalFindKey(Row AKey, bool AForward)
+		protected override bool InternalFindKey(Row key, bool forward)
         {
-			Row LKey = BuildSourceKey(AKey);
+			Row localKey = BuildSourceKey(key);
 			try
 			{
-				return FSourceTable.FindKey(LKey, AForward);
+				return _sourceTable.FindKey(localKey, forward);
 			}
 			finally
 			{
-				LKey.Dispose();
+				localKey.Dispose();
 			}
 				
         }
         
-        protected override void InternalFindNearest(Row AKey)
+        protected override void InternalFindNearest(Row key)
         {
-			Row LKey = BuildSourceKey(AKey);
+			Row localKey = BuildSourceKey(key);
 			try
 			{
-				FSourceTable.FindNearest(LKey);
+				_sourceTable.FindNearest(localKey);
 			}
 			finally
 			{
-				LKey.Dispose();
+				localKey.Dispose();
 			}
         }
     }

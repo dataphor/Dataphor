@@ -16,93 +16,93 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// <summary> For use on a property of a node, which refers to another node. </summary>
 	public class NodeReferenceConverter : TypeConverter
 	{
-		public override bool CanConvertFrom(ITypeDescriptorContext AContext, Type ASourceType) 
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) 
 		{
-			if (ASourceType == typeof(string))
+			if (sourceType == typeof(string))
 				return true;
-			return base.CanConvertFrom(AContext, ASourceType);
+			return base.CanConvertFrom(context, sourceType);
 		}
 
-		public override object ConvertFrom(ITypeDescriptorContext AContext, CultureInfo ACulture, object AValue)
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (AValue == null)
+			if (value == null)
 				return null;
 			else
 			{
-				string s = AValue as string;
+				string s = value as string;
 				if (s != null)
 				{
 					if (s == "(None)")
 						return null;
 					else
-						return ((INode)AContext.Instance).HostNode.FindNode(s);
+						return ((INode)context.Instance).HostNode.FindNode(s);
 				}
 				else
-					return base.ConvertFrom(AContext, ACulture, AValue);
+					return base.ConvertFrom(context, culture, value);
 			}
 		}
 
-		public override object ConvertTo(ITypeDescriptorContext AContext, CultureInfo ACulture, object AValue, Type ADestinationType) 
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) 
 		{
-			if (ADestinationType == typeof(string))
+			if (destinationType == typeof(string))
 			{
-				if (AValue == null)
+				if (value == null)
 					return "(None)";
-				if(AValue is String && (String)AValue == "(None)")
-					return AValue;
+				if(value is String && (String)value == "(None)")
+					return value;
 
-                return ((INode)AValue).Name;
+                return ((INode)value).Name;
 			}
 			else
-				return base.ConvertTo(AContext, ACulture, AValue, ADestinationType);
+				return base.ConvertTo(context, culture, value, destinationType);
 		}
 
-		public override bool GetStandardValuesSupported(ITypeDescriptorContext AContext)
+		public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
 		{
 			return true;
 		}
 
-		public override bool GetStandardValuesExclusive(ITypeDescriptorContext AContext)
+		public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
 		{
 			return true;
 		}
 
-		public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext AContext)
+		public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
 		{
-			List<INode> LCollection = new List<INode>();
-			if (AContext != null)
+			List<INode> collection = new List<INode>();
+			if (context != null)
 			{
-				foreach (INode LNode in ((INode)AContext.Instance).HostNode.Children[0].Children) 
-					WalkNode(LCollection, LNode, AContext);
+				foreach (INode node in ((INode)context.Instance).HostNode.Children[0].Children) 
+					WalkNode(collection, node, context);
 
-				LCollection.Sort(new NodeReferenceComparer(this));
+				collection.Sort(new NodeReferenceComparer(this));
 			}
-			LCollection.Insert(0, null);
-			return new TypeConverter.StandardValuesCollection(LCollection);
+			collection.Insert(0, null);
+			return new TypeConverter.StandardValuesCollection(collection);
 		}
 
 		// checks a node and recurses to each of it's children.
-		private void WalkNode(List<INode> ACollection, INode ANode, ITypeDescriptorContext AContext) 
+		private void WalkNode(List<INode> collection, INode node, ITypeDescriptorContext context) 
 		{
-			if (AContext.PropertyDescriptor.PropertyType.IsAssignableFrom(ANode.GetType()) && ANode.Name != String.Empty)
-				ACollection.Add(ANode);
+			if (context.PropertyDescriptor.PropertyType.IsAssignableFrom(node.GetType()) && node.Name != String.Empty)
+				collection.Add(node);
 
-			foreach (Node LNode in ANode.Children)
-				WalkNode(ACollection, LNode, AContext);
+			foreach (Node localNode in node.Children)
+				WalkNode(collection, localNode, context);
 		}
 
 		protected class NodeReferenceComparer : IComparer<INode>
 		{
-			public NodeReferenceComparer(NodeReferenceConverter AConverter)
+			public NodeReferenceComparer(NodeReferenceConverter converter)
 			{
-				FConverter = AConverter;
+				_converter = converter;
 			}
 
-			private NodeReferenceConverter FConverter;
+			private NodeReferenceConverter _converter;
 
-			public int Compare(INode AItem1, INode AItem2)
+			public int Compare(INode item1, INode item2)
 			{
-				return String.Compare(FConverter.ConvertToString(AItem1), FConverter.ConvertToString(AItem2));
+				return String.Compare(_converter.ConvertToString(item1), _converter.ConvertToString(item2));
 			}
 		}
 	}
@@ -111,71 +111,71 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// <remarks> The member's class must implement INodeReference. </remarks>
 	public class MemberNameConverter : StringConverter
 	{
-		public override bool GetStandardValuesSupported(ITypeDescriptorContext AContext)
+		public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
 		{
 			return true;
 		}
 
-		public override bool GetStandardValuesExclusive(ITypeDescriptorContext AContext)
+		public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
 		{
 			return true;
 		}
 
-		public override object ConvertFrom(ITypeDescriptorContext AContext, CultureInfo ACulture, object AValue)
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			string s = AValue as string;
+			string s = value as string;
 			if (s != null && s == "(None)")
 				return null;
 			else
-				return base.ConvertFrom(AContext, ACulture, AValue);
+				return base.ConvertFrom(context, culture, value);
 		}
 
-		public override object ConvertTo(ITypeDescriptorContext AContext, CultureInfo ACulture, object AValue, Type ADestinationType) 
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) 
 		{
-			if (ADestinationType == typeof(string) && AValue == null)
+			if (destinationType == typeof(string) && value == null)
 				return "(None)";
-			return base.ConvertTo(AContext, ACulture, AValue, ADestinationType);
+			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
-		public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext AContext)
+		public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
 		{
-			ArrayList LCollection = new ArrayList();
-			if (AContext != null)
+			ArrayList collection = new ArrayList();
+			if (context != null)
 			{
-				INodeReference LNode = AContext.Instance as INodeReference;
-				if ((LNode != null) && (LNode.Node != null)) 
+				INodeReference node = context.Instance as INodeReference;
+				if ((node != null) && (node.Node != null)) 
 				{
-					foreach (PropertyInfo LPropertyInfo in LNode.Node.GetType().GetProperties()) 
+					foreach (PropertyInfo propertyInfo in node.Node.GetType().GetProperties()) 
 					{
-						if (LPropertyInfo.CanRead && LPropertyInfo.CanWrite) 
+						if (propertyInfo.CanRead && propertyInfo.CanWrite) 
 						{
-							bool LBrowseableFlag = true;
-							Object[] LAttributes = (Object[])LPropertyInfo.GetCustomAttributes(true);
-							foreach (Attribute LAttribute in LAttributes) 
+							bool browseableFlag = true;
+							Object[] attributes = (Object[])propertyInfo.GetCustomAttributes(true);
+							foreach (Attribute attribute in attributes) 
 							{
-								if ((LAttribute is BrowsableAttribute) && (((BrowsableAttribute)LAttribute).Browsable == false))
+								if ((attribute is BrowsableAttribute) && (((BrowsableAttribute)attribute).Browsable == false))
 								{
-									LBrowseableFlag = false;
+									browseableFlag = false;
 									break;
 								}
 							}
-							if (LBrowseableFlag) 
-								LCollection.Add(LPropertyInfo.Name);
+							if (browseableFlag) 
+								collection.Add(propertyInfo.Name);
 						}
 					}
 				}
-				LCollection.Sort(CaseInsensitiveComparer.Default);
+				collection.Sort(CaseInsensitiveComparer.Default);
 			}
-			LCollection.Insert(0, null);
-			return new TypeConverter.StandardValuesCollection(LCollection);
+			collection.Insert(0, null);
+			return new TypeConverter.StandardValuesCollection(collection);
 		}
 	}
 	
 	public class ColumnNameSourcePropertyAttribute : Attribute
 	{
-		public ColumnNameSourcePropertyAttribute(string APropertyName)
+		public ColumnNameSourcePropertyAttribute(string propertyName)
 		{
-			PropertyName = APropertyName;
+			PropertyName = propertyName;
 		}
 		
 		public string PropertyName { get; set; }
@@ -184,47 +184,47 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// <summary> For use on a property of an ISourceReference implementing node, which refers to a column within the data source. </summary>
 	public class ColumnNameConverter : TypeConverter
 	{
-		public override bool GetStandardValuesSupported(ITypeDescriptorContext AContext)
+		public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
 		{
 			return true;
 		}
 
-		public override bool GetStandardValuesExclusive(ITypeDescriptorContext AContext)
+		public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
 		{
 			return true;
 		}
 
-		public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext AContext)
+		public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
 		{
-			ArrayList LCollection = new ArrayList();
-			if (AContext != null)
+			ArrayList collection = new ArrayList();
+			if (context != null)
 			{
-				ISource LSource;
-				if (AContext.Instance is ISourceChild) 
-					LSource = ((ISource)((INode)AContext.Instance).Parent);
-				else if (AContext.Instance is ISourceReference) 
-					LSource = ((ISourceReference)AContext.Instance).Source;
-				else if (AContext.Instance is ISourceReferenceChild)
-					LSource = ((ISourceReference)((INode)((ISourceReferenceChild)AContext.Instance)).Parent).Source;
+				ISource source;
+				if (context.Instance is ISourceChild) 
+					source = ((ISource)((INode)context.Instance).Parent);
+				else if (context.Instance is ISourceReference) 
+					source = ((ISourceReference)context.Instance).Source;
+				else if (context.Instance is ISourceReferenceChild)
+					source = ((ISourceReference)((INode)((ISourceReferenceChild)context.Instance)).Parent).Source;
 				else
 				{
-					var LPropertyNameAttribute = AContext.PropertyDescriptor.Attributes[typeof(ColumnNameSourcePropertyAttribute)] as ColumnNameSourcePropertyAttribute;
-					if (LPropertyNameAttribute != null)
-						LSource = AContext.Instance.GetType().GetProperty(LPropertyNameAttribute.PropertyName).GetValue(AContext.Instance, new object[] {}) as ISource;
+					var propertyNameAttribute = context.PropertyDescriptor.Attributes[typeof(ColumnNameSourcePropertyAttribute)] as ColumnNameSourcePropertyAttribute;
+					if (propertyNameAttribute != null)
+						source = context.Instance.GetType().GetProperty(propertyNameAttribute.PropertyName).GetValue(context.Instance, new object[] {}) as ISource;
 					else
-						LSource = null;
+						source = null;
 				}
 
-				if (LSource != null) 
+				if (source != null) 
 				{
-					if ((LSource != null) && (LSource.DataView != null))
-						foreach (DAE.Schema.Column LColumn in LSource.DataView.TableType.Columns) 
-							LCollection.Add(LColumn.Name);
-					LCollection.Sort(CaseInsensitiveComparer.Default);
+					if ((source != null) && (source.DataView != null))
+						foreach (DAE.Schema.Column column in source.DataView.TableType.Columns) 
+							collection.Add(column.Name);
+					collection.Sort(CaseInsensitiveComparer.Default);
 				}
 			}
-			LCollection.Insert(0, "");
-			return new TypeConverter.StandardValuesCollection(LCollection);
+			collection.Insert(0, "");
+			return new TypeConverter.StandardValuesCollection(collection);
 		}
 	}
 }

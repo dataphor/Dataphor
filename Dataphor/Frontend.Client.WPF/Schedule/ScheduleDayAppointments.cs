@@ -15,15 +15,15 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			DependencyProperty.RegisterAttached("Start", typeof(DateTime), typeof(ScheduleDayAppointments), new FrameworkPropertyMetadata(DateTime.MinValue, new PropertyChangedCallback(OnTimesChanged)));
 
 		/// <summary> Gets the Start property.  This dependency property specifies the time position of child elements of this panel. </summary>
-		public static DateTime GetStart(DependencyObject AObject)
+		public static DateTime GetStart(DependencyObject objectValue)
 		{
-			return (DateTime)AObject.GetValue(StartProperty);
+			return (DateTime)objectValue.GetValue(StartProperty);
 		}
 
 		/// <summary> Sets the Start property.  This dependency property specifies the time position of child elements of this panel. </summary>
-		public static void SetStart(DependencyObject AObject, DateTime value)
+		public static void SetStart(DependencyObject objectValue, DateTime value)
 		{
-			AObject.SetValue(StartProperty, value);
+			objectValue.SetValue(StartProperty, value);
 		}
 
 		// End
@@ -33,26 +33,26 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			DependencyProperty.RegisterAttached("End", typeof(DateTime), typeof(ScheduleDayAppointments), new FrameworkPropertyMetadata(DateTime.MinValue, new PropertyChangedCallback(OnTimesChanged)));
 
 		/// <summary> Gets the End property.  This dependency property specifies the time position of child elements of this panel. </summary>
-		public static DateTime GetEnd(DependencyObject AObject)
+		public static DateTime GetEnd(DependencyObject objectValue)
 		{
-			return (DateTime)AObject.GetValue(EndProperty);
+			return (DateTime)objectValue.GetValue(EndProperty);
 		}
 
 		/// <summary> Sets the End property.  This dependency property specifies the time position of child elements of this panel. </summary>
-		public static void SetEnd(DependencyObject AObject, DateTime value)
+		public static void SetEnd(DependencyObject objectValue, DateTime value)
 		{
-			AObject.SetValue(EndProperty, value);
+			objectValue.SetValue(EndProperty, value);
 		}
 
 		/// <summary> Handles changes to the StartTime property. </summary>
-		private static void OnTimesChanged(DependencyObject AObject, DependencyPropertyChangedEventArgs AArgs)
+		private static void OnTimesChanged(DependencyObject objectValue, DependencyPropertyChangedEventArgs args)
 		{
-			var LElement = AObject as UIElement;
-			if (LElement != null)
+			var element = objectValue as UIElement;
+			if (element != null)
 			{
-				var LPanel = VisualTreeHelper.GetParent(LElement) as ScheduleDayAppointments;
-				if (LPanel != null)
-					LPanel.InvalidateMeasure();
+				var panel = VisualTreeHelper.GetParent(element) as ScheduleDayAppointments;
+				if (panel != null)
+					panel.InvalidateMeasure();
 			}
 		}
 
@@ -80,9 +80,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(GranularityProperty, value); }
 		}
 
-		private static object CoerceGranularity(DependencyObject ASender, object AValue)
+		private static object CoerceGranularity(DependencyObject sender, object tempValue)
 		{
-			return Math.Max(1, Math.Min(60, (int)AValue));
+			return Math.Max(1, Math.Min(60, (int)tempValue));
 		}
 
 		// BlockHeight
@@ -102,76 +102,76 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			((ScheduleDayAppointments)d).InvalidateMeasure();
 		}
 
-		protected override Size MeasureOverride(Size AAvailableSize)
+		protected override Size MeasureOverride(Size availableSize)
 		{
-			var LMaxWidth = 0d;
-			foreach (UIElement LChild in Children)
+			var maxWidth = 0d;
+			foreach (UIElement child in Children)
 			{
-				var LDuration = Math.Max((int)new TimeSpan(GetEnd(LChild).Ticks).TotalMinutes - (int)new TimeSpan(GetStart(LChild).Ticks).TotalMinutes, 0);
-				LChild.Measure
+				var duration = Math.Max((int)new TimeSpan(GetEnd(child).Ticks).TotalMinutes - (int)new TimeSpan(GetStart(child).Ticks).TotalMinutes, 0);
+				child.Measure
 				(
 					new Size
 					(
-						AAvailableSize.Width,
-						Math.Max(LDuration / Granularity, 1) * BlockHeight
+						availableSize.Width,
+						Math.Max(duration / Granularity, 1) * BlockHeight
 					)
 				);
-				LMaxWidth = Math.Max(LMaxWidth, LChild.DesiredSize.Width);
+				maxWidth = Math.Max(maxWidth, child.DesiredSize.Width);
 			}
 				
 			return 
 				new Size
 				(
-					LMaxWidth,
+					maxWidth,
 					BlockHeight * (1440 / Granularity)
 				);
 		}
 		
 		private class Appointment
 		{
-			public Appointment(UIElement AChild, int AStart, int AEnd)
+			public Appointment(UIElement child, int start, int end)
 			{
-				FChild = AChild;
-				FStart = AStart;
-				FEnd = AEnd;
+				_child = child;
+				_start = start;
+				_end = end;
 			}
 			
-			private UIElement FChild;
-			public UIElement Child { get { return FChild; } }
+			private UIElement _child;
+			public UIElement Child { get { return _child; } }
 			
-			private int FStart;
-			public int Start { get { return FStart; } }
+			private int _start;
+			public int Start { get { return _start; } }
 			
-			private int FEnd;
-			public int End { get { return FEnd; } }
+			private int _end;
+			public int End { get { return _end; } }
 		}
 		
 		private class Slot
 		{
-			private List<Appointment> FAppointments = new List<Appointment>();
-			public List<Appointment> Appointments { get { return FAppointments; } }
+			private List<Appointment> _appointments = new List<Appointment>();
+			public List<Appointment> Appointments { get { return _appointments; } }
 			
 			/// <summary>
 			/// Determines the index at which the appointment could be inserted if it will fit in the slot, -1 otherwise.
 			/// </summary>
-			/// <param name="AAppointment">The appointment to be tested.</param>
+			/// <param name="appointment">The appointment to be tested.</param>
 			/// <returns>The index at which the appointment could be inserted if it will fit in the slot, -1 otherwise.</returns>
-			public int FitIndex(Appointment AAppointment)
+			public int FitIndex(Appointment appointment)
 			{
-				var LLastEnd = 0;
-				for (int LIndex = 0; LIndex < FAppointments.Count; LIndex++)
+				var lastEnd = 0;
+				for (int index = 0; index < _appointments.Count; index++)
 				{
-					if ((AAppointment.Start >= LLastEnd) && (AAppointment.End <= FAppointments[LIndex].Start))
-						return LIndex;
+					if ((appointment.Start >= lastEnd) && (appointment.End <= _appointments[index].Start))
+						return index;
 					
-					if (LLastEnd > AAppointment.Start)
+					if (lastEnd > appointment.Start)
 						break;
 					
-					LLastEnd = FAppointments[LIndex].End;
+					lastEnd = _appointments[index].End;
 				}
 				
-				if (AAppointment.Start >= LLastEnd)
-					return FAppointments.Count;
+				if (appointment.Start >= lastEnd)
+					return _appointments.Count;
 				
 				return -1;
 			}
@@ -179,65 +179,65 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			/// <summary>
 			/// Inserts an appointment in the slot if there is an available time-slot.
 			/// </summary>
-			/// <param name="AAppointment">The appointment to be inserted.</param>
+			/// <param name="appointment">The appointment to be inserted.</param>
 			/// <returns>The index of the appointment in the list if it could be inserted, -1 otherwise.</returns>
-			public int Add(Appointment AAppointment)
+			public int Add(Appointment appointment)
 			{
-				int LIndex = FitIndex(AAppointment);
-				if (LIndex >= 0)
-					FAppointments.Insert(LIndex, AAppointment);
+				int index = FitIndex(appointment);
+				if (index >= 0)
+					_appointments.Insert(index, appointment);
 					
-				return LIndex;
+				return index;
 			}
 		}
 		
-		protected override Size ArrangeOverride(Size AFinalSize)
+		protected override Size ArrangeOverride(Size finalSize)
 		{
-			var LSlots = new List<Slot>();
-			LSlots.Add(new Slot());
+			var slots = new List<Slot>();
+			slots.Add(new Slot());
 			
-			foreach (UIElement LChild in Children)
+			foreach (UIElement child in Children)
 			{
-				var LAppointment = 
+				var appointment = 
 					new Appointment
 					(
-						LChild,
-						(int)new TimeSpan(GetStart(LChild).Ticks).TotalMinutes,
-						(int)new TimeSpan(GetEnd(LChild).Ticks).TotalMinutes
+						child,
+						(int)new TimeSpan(GetStart(child).Ticks).TotalMinutes,
+						(int)new TimeSpan(GetEnd(child).Ticks).TotalMinutes
 					);
 					
-				var LSlotIndex = 0;
-				while (LSlots[LSlotIndex].Add(LAppointment) < 0)
+				var slotIndex = 0;
+				while (slots[slotIndex].Add(appointment) < 0)
 				{
-					LSlotIndex++;
-					if (LSlots.Count <= LSlotIndex)
-						LSlots.Add(new Slot());
+					slotIndex++;
+					if (slots.Count <= slotIndex)
+						slots.Add(new Slot());
 				}
 			}
 			
-			var LDefaultWidth = AFinalSize.Width / LSlots.Count;
-			for (int LSlotIndex = 0; LSlotIndex < LSlots.Count; LSlotIndex++)
+			var defaultWidth = finalSize.Width / slots.Count;
+			for (int slotIndex = 0; slotIndex < slots.Count; slotIndex++)
 			{
-				foreach (Appointment LAppointment in LSlots[LSlotIndex].Appointments)
+				foreach (Appointment appointment in slots[slotIndex].Appointments)
 				{
-					int LNextSlotIndex = LSlotIndex + 1;
-					while ((LNextSlotIndex < LSlots.Count) && (LSlots[LNextSlotIndex].FitIndex(LAppointment) >= 0))
-						LNextSlotIndex++;
+					int nextSlotIndex = slotIndex + 1;
+					while ((nextSlotIndex < slots.Count) && (slots[nextSlotIndex].FitIndex(appointment) >= 0))
+						nextSlotIndex++;
 						
-					LAppointment.Child.Arrange
+					appointment.Child.Arrange
 					(
 						new Rect
 						(
-							LDefaultWidth * LSlotIndex,
-							(LAppointment.Start - (int)new TimeSpan(StartTime.Ticks).TotalMinutes) / Granularity * BlockHeight,
-							LDefaultWidth * (LNextSlotIndex - LSlotIndex),
-							Math.Max((LAppointment.End - LAppointment.Start) / Granularity, 1) * BlockHeight
+							defaultWidth * slotIndex,
+							(appointment.Start - (int)new TimeSpan(StartTime.Ticks).TotalMinutes) / Granularity * BlockHeight,
+							defaultWidth * (nextSlotIndex - slotIndex),
+							Math.Max((appointment.End - appointment.Start) / Granularity, 1) * BlockHeight
 						)
 					);
 				}
 			}
 			
-			return AFinalSize;
+			return finalSize;
 		}
 	}
 }

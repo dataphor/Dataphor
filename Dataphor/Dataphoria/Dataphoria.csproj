@@ -1,4 +1,5 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
     <ProductVersion>9.0.30729</ProductVersion>
@@ -37,7 +38,11 @@
     <ManifestKeyFile>Dataphoria_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
     <SignManifests>false</SignManifests>
-    <OldToolsVersion>2.0</OldToolsVersion>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetZone>LocalIntranet</TargetZone>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+    <TargetFrameworkProfile />
     <PublishUrl>\\ibas\Dataphoria\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Unc</InstallFrom>
@@ -55,11 +60,6 @@
     <ApplicationVersion>2.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <TargetFrameworkSubset>
-    </TargetFrameworkSubset>
-    <TargetZone>LocalIntranet</TargetZone>
-    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\bin\</OutputPath>
@@ -84,7 +84,7 @@
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>..\bin\</OutputPath>
@@ -108,7 +108,7 @@
     <WarningLevel>3</WarningLevel>
     <DebugType>none</DebugType>
     <ErrorReport>prompt</ErrorReport>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ascend, Version=1.0.0.6, Culture=neutral, PublicKeyToken=25c7a393ba3f37cd, processorArchitecture=MSIL">
@@ -126,10 +126,9 @@
       <HintPath>.\Ascend.Windows.Forms.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ICSharpCode.TextEditor, Version=2.1.0.2429, Culture=neutral, PublicKeyToken=4d61825e8dd49f1a, processorArchitecture=MSIL">
+    <Reference Include="ICSharpCode.TextEditor, Version=3.2.1.6466, Culture=neutral, PublicKeyToken=4d61825e8dd49f1a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Frontend.Client.Windows\ICSharpCode.TextEditor.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\External\ICSharpCode.TextEditor.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>
@@ -417,6 +416,13 @@
       <DependentUpon>Strings.cs</DependentUpon>
     </Compile>
     <Compile Include="TextEditor\BlockActions\BaseBlockAction.cs" />
+    <Compile Include="TextEditor\D4CompletionData.cs" />
+    <Compile Include="TextEditor\D4CompletionDataProvider.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="TextEditor\D4CompletionDataProvider.Designer.cs">
+      <DependentUpon>D4CompletionDataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="TextEditor\D4Editor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -547,6 +553,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>MenuImages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="TextEditor\D4CompletionDataProvider.resx">
+      <DependentUpon>D4CompletionDataProvider.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="TextEditor\D4Editor.resx">
       <DependentUpon>D4Editor.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -579,6 +588,11 @@
     <Service Include="{CF845C55-C321-4742-B673-E6212D061ED9}" />
   </ItemGroup>
   <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
       <Visible>False</Visible>
       <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
@@ -592,6 +606,11 @@
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>

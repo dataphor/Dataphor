@@ -45,6 +45,8 @@ namespace Alphora.Dataphor.Dataphoria
 
         IServerCursor OpenCursor(string AQuery);
 
+        void Execute(string AQuery, DataParams AParams, Action<DAE.Runtime.Data.Row> AAction);
+
         IServerCursor OpenCursor(String AQuery, DataParams AParams);
 
         void CloseCursor(IServerCursor ACursor);
@@ -102,6 +104,8 @@ namespace Alphora.Dataphor.Dataphoria
         void CheckNotRegistered(DesignBuffer ABuffer);
 
 		object Invoke(Delegate method);
-		object Invoke(Delegate method, params object[] args);        
+		object Invoke(Delegate method, params object[] args);       
+		
+		bool LocateToError(Exception AException); 
     }
 }

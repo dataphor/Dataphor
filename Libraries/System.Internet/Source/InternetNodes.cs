@@ -27,27 +27,27 @@ namespace Alphora.Dataphor.Libraries.System.Internet
     // operator System.Internet.SendEmail(const ASmtpServer: System.String, const AFromEmailAddress: System.String, const AToEmailAddress: System.String, const ASubject: System.String, const AMessage: System.String, const AHtmlAlternateView : String);
     public class SendEmailNode : InstructionNode
 	{
-        public override object InternalExecute(Program AProgram, object[] AArguments)
+        public override object InternalExecute(Program program, object[] arguments)
         {       
             //MailMessage constructor does not support semi-colon seperated list of "To" addresses
-            MailMessage LMailMessage = new MailMessage();       
-            LMailMessage.From = new MailAddress((string)AArguments[1]);
-            foreach (string LEmailAddress in ((string)AArguments[2]).Split(';'))
-                LMailMessage.To.Add(new MailAddress(LEmailAddress.Trim()));
-            LMailMessage.Subject = (string)AArguments[3];
+            MailMessage mailMessage = new MailMessage();       
+            mailMessage.From = new MailAddress((string)arguments[1]);
+            foreach (string emailAddress in ((string)arguments[2]).Split(';'))
+                mailMessage.To.Add(new MailAddress(emailAddress.Trim()));
+            mailMessage.Subject = (string)arguments[3];
             
             //if using AlternateView don't set Body properties (this and the order of the addition of the AlternateViews has an effect on what some clients display).
-            if ((AArguments.Length == 6) && (!Operator.Operands[5].DataType.Is(AProgram.DataTypes.SystemBoolean)))
+            if ((arguments.Length == 6) && (!Operator.Operands[5].DataType.Is(program.DataTypes.SystemBoolean)))
             {        
-                LMailMessage.AlternateViews.Add(AlternateView.CreateAlternateViewFromString((string)AArguments[4], null, MediaTypeNames.Text.Plain));   
-                LMailMessage.AlternateViews.Add(AlternateView.CreateAlternateViewFromString((string)AArguments[5], null, MediaTypeNames.Text.Html));               
+                mailMessage.AlternateViews.Add(AlternateView.CreateAlternateViewFromString((string)arguments[4], null, MediaTypeNames.Text.Plain));   
+                mailMessage.AlternateViews.Add(AlternateView.CreateAlternateViewFromString((string)arguments[5], null, MediaTypeNames.Text.Html));               
             }          
             else
             {
-                LMailMessage.Body = (string)AArguments[4];
-                LMailMessage.IsBodyHtml = (AArguments.Length == 6) ? (bool)AArguments[5] : false;
+                mailMessage.Body = (string)arguments[4];
+                mailMessage.IsBodyHtml = (arguments.Length == 6) ? (bool)arguments[5] : false;
             }
-            new SmtpClient((string)AArguments[0]).Send(LMailMessage);
+            new SmtpClient((string)arguments[0]).Send(mailMessage);
             return null;
         }
 	}
@@ -55,336 +55,336 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator HTMLAttributeEncode(const AValue : String) : String
 	public class HTMLAttributeEncodeNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			// I would have thought that the framework implementation of HtmlAttributeEncode would,
 			// well, encode html attributes. However, it does not seem to replace carriage-returns
 			// or line feeds, so I'm doing that here.
-			string LEncodedString = HttpUtility.HtmlAttributeEncode((string)AArguments[0]);
-			StringBuilder LResult = new StringBuilder(LEncodedString.Length);
-			for (int LIndex = 0; LIndex < LEncodedString.Length; LIndex++)
-				switch (LEncodedString[LIndex])
+			string encodedString = HttpUtility.HtmlAttributeEncode((string)arguments[0]);
+			StringBuilder result = new StringBuilder(encodedString.Length);
+			for (int index = 0; index < encodedString.Length; index++)
+				switch (encodedString[index])
 				{
-					case '\r': LResult.Append("&#xD;"); break;
-					case '\n': LResult.Append("&#xA;"); break;
-					default : LResult.Append(LEncodedString[LIndex]); break;
+					case '\r': result.Append("&#xD;"); break;
+					case '\n': result.Append("&#xA;"); break;
+					default : result.Append(encodedString[index]); break;
 				}
-			return LResult.ToString();
+			return result.ToString();
 		}
 	}
 
 	// operator HTMLEncode(const AValue : String) : String
 	public class HTMLEncodeNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{			
-			return HttpUtility.HtmlEncode((string)AArguments[0]);
+			return HttpUtility.HtmlEncode((string)arguments[0]);
 		}
 	}
 
 	// operator HTMLDecode(const AValue : String) : String
 	public class HTMLDecodeNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{			
-			return HttpUtility.HtmlDecode((string)AArguments[0]);
+			return HttpUtility.HtmlDecode((string)arguments[0]);
 		}
 	}
 
 	// operator URLEncode(const AValue : String) : String
 	public class URLEncodeNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{			
-			return HttpUtility.UrlEncode((string)AArguments[0]);
+			return HttpUtility.UrlEncode((string)arguments[0]);
 		}
 	}
 
 	// operator URLDecode(const AValue : String) : String
 	public class URLDecodeNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{			
-			return HttpUtility.UrlDecode((string)AArguments[0]);
+			return HttpUtility.UrlDecode((string)arguments[0]);
 		}
 	}
 
 	// operator PostHTTP(const AURL : String, AFields : table { FieldName : String, Value : String }) : String
 	public class PostHTTPNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{			
-			string LResult;
+			string result;
 			
-			string LURL = (string)AArguments[0];
-			Table LFields = (Table)AArguments[1];
+			string uRL = (string)arguments[0];
+			Table fields = (Table)arguments[1];
 
 			// Build the URL encoding for the body
-			StringBuilder LBody = new StringBuilder();
-			using (Row LRow = new Row(AProgram.ValueManager, LFields.DataType.RowType))
+			StringBuilder body = new StringBuilder();
+			using (Row row = new Row(program.ValueManager, fields.DataType.RowType))
 			{
-				while (LFields.Next())
+				while (fields.Next())
 				{
-					LFields.Select(LRow);
+					fields.Select(row);
 					
-					if (LBody.Length > 0)
-						LBody.Append("&");
+					if (body.Length > 0)
+						body.Append("&");
 					
-					LBody.Append(HttpUtility.UrlEncode((string)LRow["FieldName"]));
-					LBody.Append("=");
-					LBody.Append(HttpUtility.UrlEncode((string)LRow["Value"]));
+					body.Append(HttpUtility.UrlEncode((string)row["FieldName"]));
+					body.Append("=");
+					body.Append(HttpUtility.UrlEncode((string)row["Value"]));
 				}
 			}
 			
 			// Prepare the request
-			HttpWebRequest LRequest = (HttpWebRequest)WebRequest.Create(LURL);
-			LRequest.Method = "POST";
-			LRequest.ProtocolVersion = new Version(1, 1);
-			LRequest.KeepAlive = false;
-			LRequest.ContentType = "application/x-www-form-urlencoded";
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uRL);
+			request.Method = "POST";
+			request.ProtocolVersion = new Version(1, 1);
+			request.KeepAlive = false;
+			request.ContentType = "application/x-www-form-urlencoded";
 
 			// Write the body
-			using (StreamWriter LWriter = new StreamWriter(LRequest.GetRequestStream()))
-				LWriter.Write(LBody.ToString());
+			using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
+				writer.Write(body.ToString());
 
 			// Get and read the response
-			HttpWebResponse LResponse = (HttpWebResponse)LRequest.GetResponse();
-			using (Stream LResponseStream = LResponse.GetResponseStream())
+			HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+			using (Stream responseStream = response.GetResponseStream())
 			{
-				StreamReader LReader = new StreamReader(LResponseStream);
-				LResult = LReader.ReadToEnd();
-				LReader.Close();
+				StreamReader reader = new StreamReader(responseStream);
+				result = reader.ReadToEnd();
+				reader.Close();
 			}
 
-			return LResult;
+			return result;
 		}
 	}
 
 	// operator LoadXML(ADocument : String) : XMLDocumentID
 	public class LoadXMLNode : InstructionNode
 	{
-		private static void WriteContent(IServerProcess AProcess, Guid AElementID, string AContent, int AChildSequence, byte AType)
+		private static void WriteContent(IServerProcess process, Guid elementID, string content, int childSequence, byte type)
 		{
-			DataParams LParams = new DataParams();
-			LParams.Add(DataParam.Create(AProcess, "AElementID", AElementID));
-			LParams.Add(DataParam.Create(AProcess, "ASequence", AChildSequence));
-			LParams.Add(DataParam.Create(AProcess, "AContent", AContent));
-			LParams.Add(DataParam.Create(AProcess, "AType", AType));
-			AProcess.Execute
+			DataParams paramsValue = new DataParams();
+			paramsValue.Add(DataParam.Create(process, "AElementID", elementID));
+			paramsValue.Add(DataParam.Create(process, "ASequence", childSequence));
+			paramsValue.Add(DataParam.Create(process, "AContent", content));
+			paramsValue.Add(DataParam.Create(process, "AType", type));
+			process.Execute
 			(
 				"insert table { row { AElementID Element_ID, ASequence Sequence, AContent Content, AType Type }, key { } } into .System.Internet.XMLContent",
-				LParams
+				paramsValue
 			);
 		}
 
 
-		private static Guid InsertElement(IServerProcess AProcess, Guid ADocumentID, XmlTextReader AReader, Guid AParentID, int ASequence)
+		private static Guid InsertElement(IServerProcess process, Guid documentID, XmlTextReader reader, Guid parentID, int sequence)
 		{
-			Guid LElementID = Guid.NewGuid();
-			DataParams LParams = new DataParams();
+			Guid elementID = Guid.NewGuid();
+			DataParams paramsValue = new DataParams();
 
 			// Insert the element
-			LParams.Add(DataParam.Create(AProcess, "AElementID", LElementID));
-			LParams.Add(DataParam.Create(AProcess, "ADocumentID", ADocumentID));
-			LParams.Add(DataParam.Create(AProcess, "ANamespaceAlias", AReader.Prefix));
-			LParams.Add(DataParam.Create(AProcess, "AName", AReader.LocalName));
-			AProcess.Execute
+			paramsValue.Add(DataParam.Create(process, "AElementID", elementID));
+			paramsValue.Add(DataParam.Create(process, "ADocumentID", documentID));
+			paramsValue.Add(DataParam.Create(process, "ANamespaceAlias", reader.Prefix));
+			paramsValue.Add(DataParam.Create(process, "AName", reader.LocalName));
+			process.Execute
 			(
 				"insert table { row { AElementID ID, ADocumentID Document_ID, ANamespaceAlias NamespaceAlias, "
 					+ "AName Name }, key { } } into .System.Internet.XMLElement",
-				LParams
+				paramsValue
 			);
 
 			// Attach to parent
-			if (AParentID != Guid.Empty)
+			if (parentID != Guid.Empty)
 			{
-				LParams.Clear();
-				LParams.Add(DataParam.Create(AProcess, "AElementID", LElementID));
-				LParams.Add(DataParam.Create(AProcess, "AParentElementID", AParentID));
-				LParams.Add(DataParam.Create(AProcess, "ASequence", ASequence));
-				AProcess.Execute
+				paramsValue.Clear();
+				paramsValue.Add(DataParam.Create(process, "AElementID", elementID));
+				paramsValue.Add(DataParam.Create(process, "AParentElementID", parentID));
+				paramsValue.Add(DataParam.Create(process, "ASequence", sequence));
+				process.Execute
 				(
 					"insert table { row { AElementID Element_ID, AParentElementID Parent_Element_ID, ASequence Sequence }, key { } } into .System.Internet.XMLElementParent",
-					LParams
+					paramsValue
 				);
 			}
 
 			// Add attributes
-			while (AReader.MoveToNextAttribute())
+			while (reader.MoveToNextAttribute())
 			{
-				LParams.Clear();
-				LParams.Add(DataParam.Create(AProcess, "AElementID", LElementID));
-				LParams.Add(DataParam.Create(AProcess, "AValue", AReader.Value));
-				if (String.Compare(AReader.Name, "xmlns", true) == 0)	// Default namespace
-					AProcess.Execute
+				paramsValue.Clear();
+				paramsValue.Add(DataParam.Create(process, "AElementID", elementID));
+				paramsValue.Add(DataParam.Create(process, "AValue", reader.Value));
+				if (String.Compare(reader.Name, "xmlns", true) == 0)	// Default namespace
+					process.Execute
 					(
 						"insert table { row { AElementID Element_ID, AValue URI }, key { } } into .System.Internet.XMLDefaultNamespace",
-						LParams
+						paramsValue
 					);
-				else if (String.Compare(AReader.Prefix, "xmlns", true) == 0)	// Namespace alias
+				else if (String.Compare(reader.Prefix, "xmlns", true) == 0)	// Namespace alias
 				{
-					LParams.Add(DataParam.Create(AProcess, "ANamespaceAlias", AReader.LocalName));
-					AProcess.Execute
+					paramsValue.Add(DataParam.Create(process, "ANamespaceAlias", reader.LocalName));
+					process.Execute
 					(
 						"insert table { row { AElementID Element_ID, ANamespaceAlias NamespaceAlias, AValue URI }, key { } } into .System.Internet.XMLNamespaceAlias",
-						LParams
+						paramsValue
 					);
 				}
 				else	// regular attribute
 				{
-					LParams.Add(DataParam.Create(AProcess, "ANamespaceAlias", AReader.Prefix));
-					LParams.Add(DataParam.Create(AProcess, "AName", AReader.LocalName));
-					AProcess.Execute
+					paramsValue.Add(DataParam.Create(process, "ANamespaceAlias", reader.Prefix));
+					paramsValue.Add(DataParam.Create(process, "AName", reader.LocalName));
+					process.Execute
 					(
 						"insert table { row { AElementID Element_ID, ANamespaceAlias NamespaceAlias, AName Name, AValue Value }, key { } } into .System.Internet.XMLAttribute",
-						LParams
+						paramsValue
 					);
 				}
 			}
 
-			AReader.MoveToElement();
-			if (!AReader.IsEmptyElement)
+			reader.MoveToElement();
+			if (!reader.IsEmptyElement)
 			{
-				int LChildSequence = 0;
-				XmlNodeType LNodeType;
+				int childSequence = 0;
+				XmlNodeType nodeType;
 
 				// Add child elements
 				do {
-					AReader.Read();
-					LNodeType = AReader.NodeType;
-					switch (LNodeType)
+					reader.Read();
+					nodeType = reader.NodeType;
+					switch (nodeType)
 					{
-						case XmlNodeType.Text :	WriteContent(AProcess, LElementID, AReader.Value, LChildSequence++, 0); break;
-						case XmlNodeType.CDATA : WriteContent(AProcess, LElementID, AReader.Value, LChildSequence++, 1); break;
-						case XmlNodeType.Element : InsertElement(AProcess, ADocumentID, AReader, LElementID, LChildSequence++); break;
+						case XmlNodeType.Text :	WriteContent(process, elementID, reader.Value, childSequence++, 0); break;
+						case XmlNodeType.CDATA : WriteContent(process, elementID, reader.Value, childSequence++, 1); break;
+						case XmlNodeType.Element : InsertElement(process, documentID, reader, elementID, childSequence++); break;
 					}
-				} while (LNodeType != XmlNodeType.EndElement);
+				} while (nodeType != XmlNodeType.EndElement);
 			}
 
-			return LElementID;
+			return elementID;
 		}
 
-		private static void InsertDocument(IServerProcess AProcess, Guid ADocumentID, Guid ARootElementID)
+		private static void InsertDocument(IServerProcess process, Guid documentID, Guid rootElementID)
 		{
-			DataParams LParams = new DataParams();
-			LParams.Add(DataParam.Create(AProcess, "ADocumentID", ADocumentID));
-			LParams.Add(DataParam.Create(AProcess, "AElementID", ARootElementID));
-			AProcess.Execute
+			DataParams paramsValue = new DataParams();
+			paramsValue.Add(DataParam.Create(process, "ADocumentID", documentID));
+			paramsValue.Add(DataParam.Create(process, "AElementID", rootElementID));
+			process.Execute
 			(
 				"insert table { row { ADocumentID ID, AElementID Root_Element_ID }, key { } } into .System.Internet.XMLDocument",
-				LParams
+				paramsValue
 			);
 		}
 
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{	
-			XmlTextReader LReader = new XmlTextReader(new StringReader((string)AArguments[0]));
-			LReader.WhitespaceHandling = WhitespaceHandling.None;
+			XmlTextReader reader = new XmlTextReader(new StringReader((string)arguments[0]));
+			reader.WhitespaceHandling = WhitespaceHandling.None;
 			
 			// Move to the root element
-			LReader.MoveToContent();
+			reader.MoveToContent();
 
-			Guid LDocumentID = Guid.NewGuid();
+			Guid documentID = Guid.NewGuid();
 			
-			AProgram.ServerProcess.BeginTransaction(IsolationLevel.Isolated);
+			program.ServerProcess.BeginTransaction(IsolationLevel.Isolated);
 			try
 			{
-				InsertDocument(AProgram.ServerProcess, LDocumentID, InsertElement(AProgram.ServerProcess, LDocumentID, LReader, Guid.Empty, 0));
-				AProgram.ServerProcess.CommitTransaction();
+				InsertDocument(program.ServerProcess, documentID, InsertElement(program.ServerProcess, documentID, reader, Guid.Empty, 0));
+				program.ServerProcess.CommitTransaction();
 			}
 			catch
 			{
-				AProgram.ServerProcess.RollbackTransaction();
+				program.ServerProcess.RollbackTransaction();
 				throw;
 			}
 			
-			return LDocumentID;
+			return documentID;
 		}
 	}
 
 	// operator SaveXML(ADocumentID : XMLDocumentID) : String
 	public class SaveXMLNode : InstructionNode
 	{
-		private void WriteElement(Program AProgram, XmlTextWriter AWriter, Guid AElementID)
+		private void WriteElement(Program program, XmlTextWriter writer, Guid elementID)
 		{
 			// Write the element header
-			DataParams LParams = new DataParams();
-			LParams.Add(DataParam.Create(AProgram.ServerProcess, "AElementID", AElementID));
+			DataParams paramsValue = new DataParams();
+			paramsValue.Add(DataParam.Create(program.ServerProcess, "AElementID", elementID));
 			using 
 			(
-				Row LElement = 
-					(Row)((IServerProcess)AProgram.ServerProcess).Evaluate
+				Row element = 
+					(Row)((IServerProcess)program.ServerProcess).Evaluate
 					(
 						"row from (XMLElement where ID = AElementID)",
-						LParams
+						paramsValue
 					)
 			)
 			{
-				string LNamespaceAlias = (string)LElement["NamespaceAlias"];
-				if (LNamespaceAlias != String.Empty)
-					LNamespaceAlias = LNamespaceAlias + ":";
+				string namespaceAlias = (string)element["NamespaceAlias"];
+				if (namespaceAlias != String.Empty)
+					namespaceAlias = namespaceAlias + ":";
 
-				AWriter.WriteStartElement(LNamespaceAlias + (string)LElement["Name"]);
+				writer.WriteStartElement(namespaceAlias + (string)element["Name"]);
 			}
 
 			// Write any default namespace changes
-			Scalar LDefault =
-				(Scalar)((IServerProcess)AProgram.ServerProcess).Evaluate
+			Scalar defaultValue =
+				(Scalar)((IServerProcess)program.ServerProcess).Evaluate
 				(
 					"URI from row from (XMLDefaultNamespace where Element_ID = AElementID)",
-					LParams
+					paramsValue
 				);
-			if (LDefault != null)
-				AWriter.WriteAttributeString("xmlns", LDefault.AsString);
+			if (defaultValue != null)
+				writer.WriteAttributeString("xmlns", defaultValue.AsString);
 
 			// Write namespace aliases
-			IServerCursor LAliases = 
-				(IServerCursor)((IServerProcess)AProgram.ServerProcess).OpenCursor
+			IServerCursor aliases = 
+				(IServerCursor)((IServerProcess)program.ServerProcess).OpenCursor
 				(
 					"XMLNamespaceAlias where Element_ID = AElementID",
-					LParams
+					paramsValue
 				);
 			try
 			{
-				while (LAliases.Next())
+				while (aliases.Next())
 				{
-					using (Row LRow = LAliases.Select())
-						AWriter.WriteAttributeString("xmlns:" + (string)LRow["NamespaceAlias"], (string)LRow["URI"]);
+					using (Row row = aliases.Select())
+						writer.WriteAttributeString("xmlns:" + (string)row["NamespaceAlias"], (string)row["URI"]);
 				}
 			}
 			finally
 			{
-				((IServerProcess)AProgram.ServerProcess).CloseCursor(LAliases);
+				((IServerProcess)program.ServerProcess).CloseCursor(aliases);
 			}
 
 			// Write the attributes
-			IServerCursor LAttributes = 
-				(IServerCursor)((IServerProcess)AProgram.ServerProcess).OpenCursor
+			IServerCursor attributes = 
+				(IServerCursor)((IServerProcess)program.ServerProcess).OpenCursor
 				(
 					"XMLAttribute where Element_ID = AElementID",
-					LParams
+					paramsValue
 				);
 			try
 			{
-				while (LAttributes.Next())
+				while (attributes.Next())
 				{
-					using (Row LRow = LAttributes.Select())
+					using (Row row = attributes.Select())
 					{
-						string LAlias = (string)LRow["NamespaceAlias"];
-						if (LAlias != String.Empty)
-							LAlias = LAlias + ":";
-						AWriter.WriteAttributeString(LAlias + (string)LRow["Name"], (string)LRow["Value"]);
+						string alias = (string)row["NamespaceAlias"];
+						if (alias != String.Empty)
+							alias = alias + ":";
+						writer.WriteAttributeString(alias + (string)row["Name"], (string)row["Value"]);
 					}
 				}
 			}
 			finally
 			{
-				((IServerProcess)AProgram.ServerProcess).CloseCursor(LAttributes);
+				((IServerProcess)program.ServerProcess).CloseCursor(attributes);
 			}
 
 			// Write the child content and elements
-			IServerCursor LChildren = 
-				(IServerCursor)((IServerProcess)AProgram.ServerProcess).OpenCursor
+			IServerCursor children = 
+				(IServerCursor)((IServerProcess)program.ServerProcess).OpenCursor
 				(
 					@"
 						(XMLContent where Element_ID = AElementID over { Element_ID, Sequence })
@@ -397,60 +397,60 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 							left join (XMLElementParent rename { Element_ID Child_Element_ID, Sequence Child_Sequence }) by Element_ID = Parent_Element_ID and Sequence = Child_Sequence
 							order by { Element_ID, Sequence }
 					",
-					LParams
+					paramsValue
 				);
 			try
 			{
-				while (LChildren.Next())
+				while (children.Next())
 				{
-					using (Row LRow = LChildren.Select())
+					using (Row row = children.Select())
 					{
-						if (LRow.HasValue("Content_Element_ID"))	// Content
+						if (row.HasValue("Content_Element_ID"))	// Content
 						{
-							if ((byte)LRow["Type"] == 0)
-								AWriter.WriteString((string)LRow["Content"]);
+							if ((byte)row["Type"] == 0)
+								writer.WriteString((string)row["Content"]);
 							else
-								AWriter.WriteCData((string)LRow["Content"]);
+								writer.WriteCData((string)row["Content"]);
 						}
 						else	// Child element
 						{
-							WriteElement(AProgram, AWriter, (Guid)LRow["Child_Element_ID"]);
+							WriteElement(program, writer, (Guid)row["Child_Element_ID"]);
 						}
 					}
 				}
 			}
 			finally
 			{
-				((IServerProcess)AProgram.ServerProcess).CloseCursor(LChildren);
+				((IServerProcess)program.ServerProcess).CloseCursor(children);
 			}
 
 			// Write the end element
-			AWriter.WriteEndElement();
+			writer.WriteEndElement();
 		}
 
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{			
-			StringWriter LText = new StringWriter();
-			XmlTextWriter LWriter = new XmlTextWriter(LText);
-			LWriter.Formatting = Formatting.Indented;
+			StringWriter text = new StringWriter();
+			XmlTextWriter writer = new XmlTextWriter(text);
+			writer.Formatting = Formatting.Indented;
 
 			// Find the root element
-			DataParams LParams = new DataParams();
-			LParams.Add(DataParam.Create(AProgram.ServerProcess, "ADocumentID", (Guid)AArguments[0]));
-			Guid LRootElementID =
+			DataParams paramsValue = new DataParams();
+			paramsValue.Add(DataParam.Create(program.ServerProcess, "ADocumentID", (Guid)arguments[0]));
+			Guid rootElementID =
 				((Scalar)
-					((IServerProcess)AProgram.ServerProcess).Evaluate
+					((IServerProcess)program.ServerProcess).Evaluate
 					(
 						"Root_Element_ID from row from (XMLDocument where ID = ADocumentID)",
-						LParams
+						paramsValue
 					)
 				).AsGuid;
 
 			// Write the root element
-			WriteElement(AProgram, LWriter, LRootElementID);
+			WriteElement(program, writer, rootElementID);
 
-			LWriter.Flush();
-			return LText.ToString();
+			writer.Flush();
+			return text.ToString();
 		}
 	}
 }

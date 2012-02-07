@@ -45,7 +45,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
             set { SetValue(HeaderTemplateProperty, value); }
         }
 
-		private void BaseIsEnabledChanged(object ASender, DependencyPropertyChangedEventArgs AArgs)
+		private void BaseIsEnabledChanged(object sender, DependencyPropertyChangedEventArgs args)
 		{
 			UpdateVisualStates(true);
 		}
@@ -56,17 +56,17 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			UpdateVisualStates(false);
 		}
 
-		private void UpdateVisualStates(bool AUseTransitions)
+		private void UpdateVisualStates(bool useTransitions)
 		{
 			if (IsEnabled)
-				VisualStateManager.GoToState(this, "Enabled", AUseTransitions);
+				VisualStateManager.GoToState(this, "Enabled", useTransitions);
 			else
-				VisualStateManager.GoToState(this, "Disabled", AUseTransitions);
+				VisualStateManager.GoToState(this, "Disabled", useTransitions);
 			
 			if (Header == null)
-				VisualStateManager.GoToState(this, "HeaderNull", AUseTransitions);
+				VisualStateManager.GoToState(this, "HeaderNull", useTransitions);
 			else
-				VisualStateManager.GoToState(this, "HeaderNotNull", AUseTransitions);
+				VisualStateManager.GoToState(this, "HeaderNotNull", useTransitions);
 		}
 		
 	}

@@ -4,6 +4,8 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+//#define USESTRICTNAMERESOLUTIONCACHECLEARING
+
 using System;
 using System.IO;
 using System.Text;
@@ -31,65 +33,85 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	public class NameResolutionCache : System.Object
 	{
-		public NameResolutionCache(int ACacheSize)
+		public NameResolutionCache(int cacheSize)
 		{
-			FSize = ACacheSize;
-			if (FSize > 0)
-				FCache = new FixedSizeCache<string, Schema.CatalogObjectHeaders>(FSize);
+			_size = cacheSize;
+			if (_size > 0)
+				_cache = new FixedSizeCache<string, Schema.CatalogObjectHeaders>(_size);
 		}
 
-		private int FSize;
-		public int Size { get { return FSize; } }
+		private int _size;
+		public int Size { get { return _size; } }
 		
-		public void Resize(int ACacheSize)
+		public void Resize(int cacheSize)
 		{
 			lock (this)
 			{
-				if (FSize != ACacheSize)
+				if (_size != cacheSize)
 				{
-					FSize = ACacheSize;
-					FCache = null;
-					if (FSize > 0)
-						FCache = new FixedSizeCache<string, Schema.CatalogObjectHeaders>(FSize);
+					_size = cacheSize;
+					_cache = null;
+					if (_size > 0)
+						_cache = new FixedSizeCache<string, Schema.CatalogObjectHeaders>(_size);
 				}
 			}
 		}
 		
-		private FixedSizeCache<string, Schema.CatalogObjectHeaders> FCache; 
+		private FixedSizeCache<string, Schema.CatalogObjectHeaders> _cache; 
 		
-		public void Add(string AName, Schema.CatalogObjectHeaders AHeaders)
+		public void Add(string name, Schema.CatalogObjectHeaders headers)
 		{
 			lock (this)
 			{
-				if (FCache != null)
-					FCache.Reference(AName, AHeaders);
+				if (_cache != null)
+					_cache.Reference(name, headers);
 			}
 		}
 		
-		public Schema.CatalogObjectHeaders Resolve(string AName)
+		public Schema.CatalogObjectHeaders Resolve(string name)
 		{
 			lock (this)
 			{
-				if (FCache != null)
+				if (_cache != null)
 				{
-					Schema.CatalogObjectHeaders LHeaders;
-					if (FCache.TryGetValue(AName, out LHeaders))
-						FCache.Reference(AName, LHeaders);
-					return LHeaders;
+					Schema.CatalogObjectHeaders headers;
+					if (_cache.TryGetValue(name, out headers))
+						_cache.Reference(name, headers);
+					return headers;
 				}
 			}
 			
 			return null;
 		}
-		
+
+		/// <summary> Remove all entries from the cache. </summary>
 		public void Clear()
 		{
 			lock (this)
 			{
-				// TODO: Could potentially only remove affected entries?
-				if (FCache != null)
-					FCache.Clear();
+				if (_cache != null)
+					_cache.Clear();
 			}
+		}
+
+		/// <summary> Removes entries that could potentially be affected by the given object name. </summary>
+		public void Clear(string name)
+		{
+			#if !USESTRICTNAMERESOLUTIONCACHECLEARING 
+			Clear();
+			#else
+			lock (this)
+			{
+				while (true)
+				{
+					FCache.Remove(AName);
+					if (Schema.Object.IsQualified(AName))
+						AName = Schema.Object.Dequalify(AName);
+					else
+						break;
+				}
+			}
+			#endif
 		}
 	}
 }

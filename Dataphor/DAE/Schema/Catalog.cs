@@ -22,920 +22,920 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		public Catalog() : base() 
 		{
-			FDataTypes = new DataTypes(this);
+			_dataTypes = new DataTypes(this);
 		}
 		
 		// Used by serializer
 		public Objects Objects { get { return this; } }
 		
 		// Libraries
-		private Libraries FLibraries;
+		private Libraries _libraries;
 		public Libraries Libraries 
 		{ 
 			get 
 			{
-				if (FLibraries == null)
-					FLibraries = new Libraries(); 
-				return FLibraries; 
+				if (_libraries == null)
+					_libraries = new Libraries(); 
+				return _libraries; 
 			} 
 		}
 		
 		// LoadedLibraries
-		private LoadedLibraries FLoadedLibraries;
+		private LoadedLibraries _loadedLibraries;
 		public LoadedLibraries LoadedLibraries 
 		{ 
 			get 
 			{ 
-				if (FLoadedLibraries == null)
-					FLoadedLibraries = new LoadedLibraries();
-				return FLoadedLibraries; 
+				if (_loadedLibraries == null)
+					_loadedLibraries = new LoadedLibraries();
+				return _loadedLibraries; 
 			} 
 		}
 		
 		// ClassLoader
-		private ClassLoader FClassLoader;
+		private ClassLoader _classLoader;
 		public ClassLoader ClassLoader
 		{
 			get
 			{
-				if (FClassLoader == null)
-					FClassLoader = new ClassLoader();
-				return FClassLoader;
+				if (_classLoader == null)
+					_classLoader = new ClassLoader();
+				return _classLoader;
 			}
 		}
 		
         // Operators
-        private OperatorMaps FOperatorMaps = new OperatorMaps();
-        public OperatorMaps OperatorMaps { get { return FOperatorMaps; } }
+        private OperatorMaps _operatorMaps = new OperatorMaps();
+        public OperatorMaps OperatorMaps { get { return _operatorMaps; } }
         
 		// DataTypes
-        private DataTypes FDataTypes;
-        public DataTypes DataTypes { get { return FDataTypes; } }
+        private DataTypes _dataTypes;
+        public DataTypes DataTypes { get { return _dataTypes; } }
 
 		// TimeStamp
-		protected long FTimeStamp = 0;
+		protected long _timeStamp = 0;
 		/// <summary>This time stamp is used to coordinate the catalog device cache tables with the actual system catalog.</summary>
 		/// <remarks>
 		/// This time stamp is incremented whenever any catalog changing event takes place.
 		/// </remarks>
-		public long TimeStamp { get { return FTimeStamp; } }
+		public long TimeStamp { get { return _timeStamp; } }
 
 		/// <summary>Updates the catalog device cache coordination timestamp for this catalog.</summary>		
 		public void UpdateTimeStamp()
 		{
 			lock (this)
 			{
-				FTimeStamp += 1;
+				_timeStamp += 1;
 			}
 		}
 		
 		// CacheTimeStamp
-		protected long FCacheTimeStamp = 0;
+		protected long _cacheTimeStamp = 0;
 		/// <summary>This timestamp is used to coordinate client-side catalog caches.</summary>
 		/// <remarks>
 		/// This timestamp is incremented whenever a change is made to an existing object that is potentially stored in a client-side cache.
 		/// For a more complete description of this property, refer to the CLI documentation.
 		/// </remarks>
-		public long CacheTimeStamp { get { return FCacheTimeStamp; } }
+		public long CacheTimeStamp { get { return _cacheTimeStamp; } }
 		
 		/// <summary>Updates the client-side cache coordination timestamp for this catalog.</summary>
 		public void UpdateCacheTimeStamp()
 		{
 			lock (this)
 			{
-				FCacheTimeStamp += 1;
+				_cacheTimeStamp += 1;
 			}
 		}
 		
 		// PlanCacheTimeStamp
-		protected long FPlanCacheTimeStamp = 0;
+		protected long _planCacheTimeStamp = 0;
 		/// <summary>This timestamp is used to coordinate the server-side plan cache.</summary>
 		/// <remarks>
 		/// This timestamp is incremented whenever a change is made to an existing object that is potentially referenced by a cached plan.
 		/// </remarks>
-		public long PlanCacheTimeStamp { get { return FPlanCacheTimeStamp; } }
+		public long PlanCacheTimeStamp { get { return _planCacheTimeStamp; } }
 		
 		/// <summary>Updates the server-side plan cache coordination timestamp for this catalog.</summary>
 		public void UpdatePlanCacheTimeStamp()
 		{
 			lock (this)
 			{
-				FPlanCacheTimeStamp += 1;
+				_planCacheTimeStamp += 1;
 			}
 		}
 
 		// DerivationTimeStamp
-		protected long FDerivationTimeStamp = 0;
+		protected long _derivationTimeStamp = 0;
 		/// <summary>This timestamp is used to coordinate the derivation cache maintained by the Frontend server.</summary>
 		/// <remarks>
 		/// This timestamp is incremented whenever a change is made that could affect a derived paged stored in the Frontend server derivation cache.
 		/// For a more complete description of this property, refer to the CLI documentation.
 		/// </remarks>
-		public long DerivationTimeStamp { get { return FDerivationTimeStamp; } }
+		public long DerivationTimeStamp { get { return _derivationTimeStamp; } }
 
 		/// <summary>Updates the derivation cache coordination timestamp for this catalog.</summary>
 		public void UpdateDerivationTimeStamp()
 		{
 			lock (this)
 			{
-				FDerivationTimeStamp += 1;
+				_derivationTimeStamp += 1;
 			}
 		}
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
         {
             if 
                 (
                     !(
-						(AItem is ScalarType) ||
-                        (AItem is Operator) ||
-                        (AItem is Device) ||
-                        (AItem is ServerLink) ||
-                        (AItem is TableVar) ||
-                        (AItem is Reference) || 
-                        (AItem is CatalogConstraint) ||
-                        (AItem is Role) ||
-                        (AItem is Sort) ||
-                        (AItem is EventHandler) ||
-						(AItem is Conversion) ||
-						(AItem is DeviceObject)
+						(item is ScalarType) ||
+                        (item is Operator) ||
+                        (item is Device) ||
+                        (item is ServerLink) ||
+                        (item is TableVar) ||
+                        (item is Reference) || 
+                        (item is CatalogConstraint) ||
+                        (item is Role) ||
+                        (item is Sort) ||
+                        (item is EventHandler) ||
+						(item is Conversion) ||
+						(item is DeviceObject)
                     )
                 )
             {
                 throw new SchemaException(SchemaException.Codes.TopLevelContainer);
             }
             
-            if ((AItem.Name == null) || (AItem.Name == String.Empty))
+            if ((item.Name == null) || (item.Name == String.Empty))
 				throw new SchemaException(SchemaException.Codes.ObjectNameRequired);
 				
-			Error.AssertFail(AItem.ID > 0, "Object '{0}' does not have an ID and cannot be tracked in a catalog.", AItem.Name);
+			Error.AssertFail(item.ID > 0, "Object '{0}' does not have an ID and cannot be tracked in a catalog.", item.Name);
 			
-			if ((AItem is Operator) && (FOperatorMaps.ContainsOperator((Operator)AItem)))
-				throw new SchemaException(SchemaException.Codes.DuplicateOperator, AItem.ToString());
-            base.Validate(AItem);
+			if ((item is Operator) && (_operatorMaps.ContainsOperator((Operator)item)))
+				throw new SchemaException(SchemaException.Codes.DuplicateOperator, item.ToString());
+            base.Validate(item);
         }
         #endif
 
-        protected override void Adding(Object AItem, int AIndex)
+        protected override void Adding(Object item, int index)
         {
-			base.Adding(AItem, AIndex);
-			if (AItem is Operator)
+			base.Adding(item, index);
+			if (item is Operator)
 			{
 				try
 				{
-					FOperatorMaps.AddOperator((Operator)AItem);
+					_operatorMaps.AddOperator((Operator)item);
 				}
 				catch
 				{
-					RemoveAt(AIndex);
+					RemoveAt(index);
 					throw;
 				}
 			}
         }
         
-        protected override void Removing(Object AItem, int AIndex)
+        protected override void Removing(Object item, int index)
         {
-			if ((AItem is Operator) && (FOperatorMaps.ContainsOperator((Operator)AItem)))
-				FOperatorMaps.RemoveOperator((Operator)AItem);
-			base.Removing(AItem, AIndex);
+			if ((item is Operator) && (_operatorMaps.ContainsOperator((Operator)item)))
+				_operatorMaps.RemoveOperator((Operator)item);
+			base.Removing(item, index);
         }
         
         // Scalar Conversion Path Cache
-        private ScalarConversionPathCache FConversionPathCache;
+        private ScalarConversionPathCache _conversionPathCache;
         public ScalarConversionPathCache ConversionPathCache 
         {
 			get 
 			{
-				if (FConversionPathCache == null)
-					FConversionPathCache = new ScalarConversionPathCache();
-				return FConversionPathCache; 
+				if (_conversionPathCache == null)
+					_conversionPathCache = new ScalarConversionPathCache();
+				return _conversionPathCache; 
 			} 
 		}
 		
 		// Operator Resolution Cache
-		private OperatorResolutionCache FOperatorResolutionCache;
+		private OperatorResolutionCache _operatorResolutionCache;
 		public OperatorResolutionCache OperatorResolutionCache
 		{
 			get
 			{
-				if (FOperatorResolutionCache == null)
-					FOperatorResolutionCache = new OperatorResolutionCache();
-				return FOperatorResolutionCache;
+				if (_operatorResolutionCache == null)
+					_operatorResolutionCache = new OperatorResolutionCache();
+				return _operatorResolutionCache;
 			}
 		}
 		
-        public string ShowMap(string AOperatorName)
+        public string ShowMap(string operatorName)
         {
-			return FOperatorMaps[FOperatorMaps.IndexOf(AOperatorName)].ShowMap();
+			return _operatorMaps[_operatorMaps.IndexOf(operatorName)].ShowMap();
         }
         
         public string ShowMaps()
         {
-			return FOperatorMaps.ShowMaps();
+			return _operatorMaps.ShowMaps();
         }
         
-        public void IncludeDependencies(CatalogDeviceSession ASession, Schema.Catalog ASourceCatalog, Schema.Object AObject, EmitMode AMode)
+        public void IncludeDependencies(CatalogDeviceSession session, Schema.Catalog sourceCatalog, Schema.Object objectValue, EmitMode mode)
         {
-			AObject.IncludeDependencies(ASession, ASourceCatalog, this, AMode);
-			foreach (Object LObject in this)
-				LObject.IncludeHandlers(ASession, ASourceCatalog, this, AMode);
+			objectValue.IncludeDependencies(session, sourceCatalog, this, mode);
+			foreach (Object localObjectValue in this)
+				localObjectValue.IncludeHandlers(session, sourceCatalog, this, mode);
         }
         
-        public void IncludeDependencies(CatalogDeviceSession ASession, Schema.Catalog ASourceCatalog, Schema.IDataType ADataType, EmitMode AMode)
+        public void IncludeDependencies(CatalogDeviceSession session, Schema.Catalog sourceCatalog, Schema.IDataType dataType, EmitMode mode)
         {
-			ADataType.IncludeDependencies(ASession, ASourceCatalog, this, AMode);
+			dataType.IncludeDependencies(session, sourceCatalog, this, mode);
         }
 
         // Catalog Emission
-        private void EmitDependencies(EmissionContext AContext, Object AObject)
+        private void EmitDependencies(EmissionContext context, Object objectValue)
         {
-			if (AObject.HasDependencies())
-				for (int LIndex = 0; LIndex < AObject.Dependencies.Count; LIndex++)
-					EmitObject(AContext, AObject.Dependencies.ResolveObject(AContext.Session, LIndex));
+			if (objectValue.HasDependencies())
+				for (int index = 0; index < objectValue.Dependencies.Count; index++)
+					EmitObject(context, objectValue.Dependencies.ResolveObject(context.Session, index));
         }
         
-        private void EmitTableVarChildDependencies(EmissionContext AContext, TableVar ATableVar)
+        private void EmitTableVarChildDependencies(EmissionContext context, TableVar tableVar)
         {
-			foreach (TableVarColumn LColumn in ATableVar.Columns)
+			foreach (TableVarColumn column in tableVar.Columns)
 			{
-				if ((LColumn.Default != null) && LColumn.Default.IsRemotable)
-					EmitDependencies(AContext, LColumn.Default);
+				if ((column.Default != null) && column.Default.IsRemotable)
+					EmitDependencies(context, column.Default);
 						
-				foreach (Constraint LConstraint in LColumn.Constraints)
-					EmitDependencies(AContext, LConstraint);
+				foreach (Constraint constraint in column.Constraints)
+					EmitDependencies(context, constraint);
 			}
 
-			foreach (Constraint LConstraint in ATableVar.Constraints)
-				if ((LConstraint.ConstraintType == ConstraintType.Row) && ((AContext.Mode != EmitMode.ForRemote) || LConstraint.IsRemotable))
-					EmitDependencies(AContext, LConstraint);
+			foreach (Constraint constraint in tableVar.Constraints)
+				if ((constraint.ConstraintType == ConstraintType.Row) && ((context.Mode != EmitMode.ForRemote) || constraint.IsRemotable))
+					EmitDependencies(context, constraint);
 
-			foreach (Order LOrder in ATableVar.Orders)
+			foreach (Order order in tableVar.Orders)
 			{
-				OrderColumn LOrderColumn;
-				for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
+				OrderColumn orderColumn;
+				for (int index = 0; index < order.Columns.Count; index++)
 				{
-					LOrderColumn = LOrder.Columns[LIndex];
-					if ((LOrderColumn.Sort != null) && ((AContext.Mode != EmitMode.ForRemote) || LOrderColumn.Sort.IsRemotable))
-						EmitDependencies(AContext, LOrderColumn.Sort);
+					orderColumn = order.Columns[index];
+					if ((orderColumn.Sort != null) && ((context.Mode != EmitMode.ForRemote) || orderColumn.Sort.IsRemotable))
+						EmitDependencies(context, orderColumn.Sort);
 				}
 			}
         }
         
-        private void EmitChildDependencies(EmissionContext AContext, Object AObject)
+        private void EmitChildDependencies(EmissionContext context, Object objectValue)
         {
-			if (AObject is ScalarType)
+			if (objectValue is ScalarType)
 			{
 				// Emit Dependencies of representations
-				ScalarType LScalarType = (ScalarType)AObject;
+				ScalarType scalarType = (ScalarType)objectValue;
 				
-				foreach (Representation LRepresentation in LScalarType.Representations)
+				foreach (Representation representation in scalarType.Representations)
 				{
 					if 
 					(
-						(!LRepresentation.IsGenerated || AContext.IncludeGenerated || (AContext.Mode == EmitMode.ForStorage)) && 
-							!LRepresentation.HasExternalDependencies()
+						(!representation.IsGenerated || context.IncludeGenerated || (context.Mode == EmitMode.ForStorage)) && 
+							!representation.HasExternalDependencies()
 					)
 					{
-						EmitDependencies(AContext, LRepresentation);
+						EmitDependencies(context, representation);
 						
-						if (LRepresentation.Selector.HasDependencies())
-							for (int LIndex = 0; LIndex < LRepresentation.Selector.Dependencies.Count; LIndex++)
-								if (LRepresentation.Selector.Dependencies.IDs[LIndex] != AObject.ID)
-									EmitObject(AContext, LRepresentation.Selector.Dependencies.ResolveObject(AContext.Session, LIndex));
+						if (representation.Selector.HasDependencies())
+							for (int index = 0; index < representation.Selector.Dependencies.Count; index++)
+								if (representation.Selector.Dependencies.IDs[index] != objectValue.ID)
+									EmitObject(context, representation.Selector.Dependencies.ResolveObject(context.Session, index));
 						
-						foreach (Property LProperty in LRepresentation.Properties)
+						foreach (Property property in representation.Properties)
 						{
-							EmitDependencies(AContext, LProperty);
-							if (LProperty.ReadAccessor.HasDependencies())
-								for (int LIndex = 0; LIndex < LProperty.ReadAccessor.Dependencies.Count; LIndex++)
-									if (LProperty.ReadAccessor.Dependencies.IDs[LIndex] != AObject.ID)
-										EmitObject(AContext, LProperty.ReadAccessor.Dependencies.ResolveObject(AContext.Session, LIndex));
-							if (LProperty.WriteAccessor.HasDependencies())
-								for (int LIndex = 0; LIndex < LProperty.WriteAccessor.Dependencies.Count; LIndex++)
-									if (LProperty.WriteAccessor.Dependencies.IDs[LIndex] != AObject.ID)
-										EmitObject(AContext, LProperty.WriteAccessor.Dependencies.ResolveObject(AContext.Session, LIndex));
+							EmitDependencies(context, property);
+							if (property.ReadAccessor.HasDependencies())
+								for (int index = 0; index < property.ReadAccessor.Dependencies.Count; index++)
+									if (property.ReadAccessor.Dependencies.IDs[index] != objectValue.ID)
+										EmitObject(context, property.ReadAccessor.Dependencies.ResolveObject(context.Session, index));
+							if (property.WriteAccessor.HasDependencies())
+								for (int index = 0; index < property.WriteAccessor.Dependencies.Count; index++)
+									if (property.WriteAccessor.Dependencies.IDs[index] != objectValue.ID)
+										EmitObject(context, property.WriteAccessor.Dependencies.ResolveObject(context.Session, index));
 						}
 					}
 				}
 			}
-			else if (AObject is TableVar)
+			else if (objectValue is TableVar)
 			{
-				EmitTableVarChildDependencies(AContext, (TableVar)AObject);
+				EmitTableVarChildDependencies(context, (TableVar)objectValue);
 			}
         }
         
-        private void EmitChildren(EmissionContext AContext, Object AObject)
+        private void EmitChildren(EmissionContext context, Object objectValue)
         {
-			if (AContext.Mode != EmitMode.ForStorage)
+			if (context.Mode != EmitMode.ForStorage)
 			{
-				ScalarType LScalarType = AObject as ScalarType;
-				if (LScalarType != null)
+				ScalarType scalarType = objectValue as ScalarType;
+				if (scalarType != null)
 				{
 					// Emit the default, constraints, non-system representations, and specials for this scalar type
-					foreach (Schema.Representation LRepresentation in LScalarType.Representations)
+					foreach (Schema.Representation representation in scalarType.Representations)
 					{
 						if 
 						(
-							(!LRepresentation.IsGenerated || AContext.IncludeGenerated || (AContext.Mode == EmitMode.ForStorage)) && 
-								LRepresentation.HasExternalDependencies()
+							(!representation.IsGenerated || context.IncludeGenerated || (context.Mode == EmitMode.ForStorage)) && 
+								representation.HasExternalDependencies()
 						)
 						{
-							EmitDependencies(AContext, LRepresentation);
-							foreach (Property LProperty in LRepresentation.Properties)
-								EmitDependencies(AContext, LProperty);
-							if (!AContext.EmittedObjects.ContainsKey(LRepresentation.ID))
+							EmitDependencies(context, representation);
+							foreach (Property property in representation.Properties)
+								EmitDependencies(context, property);
+							if (!context.EmittedObjects.ContainsKey(representation.ID))
 							{
-								AContext.Block.Statements.Add(LRepresentation.EmitStatement(AContext.Mode));
-								AContext.EmittedObjects.Add(LRepresentation.ID, LRepresentation);
+								context.Block.Statements.Add(representation.EmitStatement(context.Mode));
+								context.EmittedObjects.Add(representation.ID, representation);
 							}
 						}
 					}
 					
-					EmitDependencies(AContext, LScalarType.IsSpecialOperator);
-					foreach (Schema.Special LSpecial in LScalarType.Specials)
+					EmitDependencies(context, scalarType.IsSpecialOperator);
+					foreach (Schema.Special special in scalarType.Specials)
 					{
-						if ((!LSpecial.IsGenerated || AContext.IncludeGenerated || (AContext.Mode == EmitMode.ForStorage)) && AContext.ShouldEmitWithLibrary(LSpecial))
+						if ((!special.IsGenerated || context.IncludeGenerated || (context.Mode == EmitMode.ForStorage)) && context.ShouldEmitWithLibrary(special))
 						{
-							EmitDependencies(AContext, LSpecial);
-							EmitDependencies(AContext, LSpecial.Selector);
-							EmitDependencies(AContext, LSpecial.Comparer);
-							if (!AContext.EmittedObjects.ContainsKey(LSpecial.ID))
+							EmitDependencies(context, special);
+							EmitDependencies(context, special.Selector);
+							EmitDependencies(context, special.Comparer);
+							if (!context.EmittedObjects.ContainsKey(special.ID))
 							{
-								AContext.Block.Statements.Add(LSpecial.EmitStatement(AContext.Mode));
-								AContext.EmittedObjects.Add(LSpecial.ID, LSpecial);
+								context.Block.Statements.Add(special.EmitStatement(context.Mode));
+								context.EmittedObjects.Add(special.ID, special);
 							}
 						}
 					}
 					
 					if 
 					(
-						(LScalarType.Default != null) && 
-						((AContext.Mode != EmitMode.ForRemote) || LScalarType.Default.IsRemotable) && 
-						(!LScalarType.Default.IsGenerated || AContext.IncludeGenerated || (AContext.Mode == EmitMode.ForStorage)) && 
-						AContext.ShouldEmitWithLibrary(LScalarType.Default)
+						(scalarType.Default != null) && 
+						((context.Mode != EmitMode.ForRemote) || scalarType.Default.IsRemotable) && 
+						(!scalarType.Default.IsGenerated || context.IncludeGenerated || (context.Mode == EmitMode.ForStorage)) && 
+						context.ShouldEmitWithLibrary(scalarType.Default)
 					)
 					{
-						EmitDependencies(AContext, LScalarType.Default);
-						if (!AContext.EmittedObjects.ContainsKey(LScalarType.Default.ID))
+						EmitDependencies(context, scalarType.Default);
+						if (!context.EmittedObjects.ContainsKey(scalarType.Default.ID))
 						{
-							AContext.Block.Statements.Add(LScalarType.Default.EmitStatement(AContext.Mode));
-							AContext.EmittedObjects.Add(LScalarType.Default.ID, LScalarType.Default);
+							context.Block.Statements.Add(scalarType.Default.EmitStatement(context.Mode));
+							context.EmittedObjects.Add(scalarType.Default.ID, scalarType.Default);
 						}
 					}
 
-					foreach (Constraint LConstraint in LScalarType.Constraints)
+					foreach (Constraint constraint in scalarType.Constraints)
 						if 
 						(
-							((AContext.Mode != EmitMode.ForRemote) || LConstraint.IsRemotable) && 
-							(!LConstraint.IsGenerated || AContext.IncludeGenerated || (AContext.Mode == EmitMode.ForStorage)) && 
-							AContext.ShouldEmitWithLibrary(LConstraint)
+							((context.Mode != EmitMode.ForRemote) || constraint.IsRemotable) && 
+							(!constraint.IsGenerated || context.IncludeGenerated || (context.Mode == EmitMode.ForStorage)) && 
+							context.ShouldEmitWithLibrary(constraint)
 						)
 						{
-							EmitDependencies(AContext, LConstraint);
-							if (!AContext.EmittedObjects.ContainsKey(LConstraint.ID))
+							EmitDependencies(context, constraint);
+							if (!context.EmittedObjects.ContainsKey(constraint.ID))
 							{
-								AContext.Block.Statements.Add(LConstraint.EmitStatement(AContext.Mode));
-								AContext.EmittedObjects.Add(LConstraint.ID, LConstraint);
+								context.Block.Statements.Add(constraint.EmitStatement(context.Mode));
+								context.EmittedObjects.Add(constraint.ID, constraint);
 							}
 						}
 				}
 				
-				TableVar LTableVar = AObject as TableVar;
-				if (LTableVar != null)
+				TableVar tableVar = objectValue as TableVar;
+				if (tableVar != null)
 				{
-					foreach (TableVarColumn LColumn in LTableVar.Columns)
+					foreach (TableVarColumn column in tableVar.Columns)
 					{
 						if 
 						(
-							(AObject is BaseTableVar) && 
-							(LColumn.Default != null) && 
-							!LColumn.Default.IsRemotable && 
-							(AContext.Mode != EmitMode.ForRemote) && 
-							(!LColumn.Default.IsGenerated || AContext.IncludeGenerated || (AContext.Mode == EmitMode.ForStorage)) && 
-							AContext.ShouldEmitWithLibrary(LColumn.Default)
+							(objectValue is BaseTableVar) && 
+							(column.Default != null) && 
+							!column.Default.IsRemotable && 
+							(context.Mode != EmitMode.ForRemote) && 
+							(!column.Default.IsGenerated || context.IncludeGenerated || (context.Mode == EmitMode.ForStorage)) && 
+							context.ShouldEmitWithLibrary(column.Default)
 						)
 						{
-							EmitDependencies(AContext, LColumn.Default);
-							if (!AContext.EmittedObjects.ContainsKey(LColumn.Default.ID))
+							EmitDependencies(context, column.Default);
+							if (!context.EmittedObjects.ContainsKey(column.Default.ID))
 							{
-								AContext.Block.Statements.Add(LColumn.Default.EmitStatement(AContext.Mode));
-								AContext.EmittedObjects.Add(LColumn.Default.ID, LColumn.Default);
+								context.Block.Statements.Add(column.Default.EmitStatement(context.Mode));
+								context.EmittedObjects.Add(column.Default.ID, column.Default);
 							}
 						}
 					}
 
-					foreach (Constraint LConstraint in LTableVar.Constraints)
-						if ((!LConstraint.IsGenerated || AContext.IncludeGenerated || (AContext.Mode == EmitMode.ForStorage)) && (LConstraint.ConstraintType == ConstraintType.Database) && ((AContext.Mode != EmitMode.ForRemote) || LConstraint.IsRemotable) && AContext.ShouldEmitWithLibrary(LConstraint))
+					foreach (Constraint constraint in tableVar.Constraints)
+						if ((!constraint.IsGenerated || context.IncludeGenerated || (context.Mode == EmitMode.ForStorage)) && (constraint.ConstraintType == ConstraintType.Database) && ((context.Mode != EmitMode.ForRemote) || constraint.IsRemotable) && context.ShouldEmitWithLibrary(constraint))
 						{
-							EmitDependencies(AContext, LConstraint);
-							if (!AContext.EmittedObjects.ContainsKey(LConstraint.ID))
+							EmitDependencies(context, constraint);
+							if (!context.EmittedObjects.ContainsKey(constraint.ID))
 							{
-								AContext.Block.Statements.Add(LConstraint.EmitStatement(AContext.Mode));
-								AContext.EmittedObjects.Add(LConstraint.ID, LConstraint);
+								context.Block.Statements.Add(constraint.EmitStatement(context.Mode));
+								context.EmittedObjects.Add(constraint.ID, constraint);
 							}
 						}
 				}				
 			}
         }
 
-        private void EmitObject(EmissionContext AContext, Object AObject)
+        private void EmitObject(EmissionContext context, Object objectValue)
         {
-			if (AContext.ShouldEmit(AObject))
+			if (context.ShouldEmit(objectValue))
 			{
-				if (AContext.ShouldEmitWithLibrary(AObject))
+				if (context.ShouldEmitWithLibrary(objectValue))
 				{
-					if (!AContext.EmittedObjects.ContainsKey(AObject.ID))
+					if (!context.EmittedObjects.ContainsKey(objectValue.ID))
 					{
-						EmitDependencies(AContext, AObject);
-						EmitChildDependencies(AContext, AObject);
+						EmitDependencies(context, objectValue);
+						EmitChildDependencies(context, objectValue);
 					}
 					
-					if (!AContext.EmittedObjects.ContainsKey(AObject.ID))
+					if (!context.EmittedObjects.ContainsKey(objectValue.ID))
 					{
-						AContext.Block.Statements.Add(AObject.EmitStatement(AContext.Mode));
-						AContext.EmittedObjects.Add(AObject.ID, AObject);
-						EmitChildren(AContext, AObject);
+						context.Block.Statements.Add(objectValue.EmitStatement(context.Mode));
+						context.EmittedObjects.Add(objectValue.ID, objectValue);
+						EmitChildren(context, objectValue);
 					}
 				}
 				else
 				{
-					if (!AContext.EmittedObjects.ContainsKey(AObject.ID))
+					if (!context.EmittedObjects.ContainsKey(objectValue.ID))
 					{
-						AContext.EmittedObjects.Add(AObject.ID, AObject);
-						EmitChildren(AContext, AObject);
+						context.EmittedObjects.Add(objectValue.ID, objectValue);
+						EmitChildren(context, objectValue);
 					}
 				}
 			}
         }
         
-        public void EmitLibrary(EmissionContext AContext, LoadedLibrary ALibrary)
+        public void EmitLibrary(EmissionContext context, LoadedLibrary library)
         {
-			if (!AContext.EmittedLibraries.Contains(ALibrary.Name))
+			if (!context.EmittedLibraries.Contains(library.Name))
 			{
-				foreach (LoadedLibrary LLibrary in ALibrary.RequiredLibraries)
-					EmitLibrary(AContext, LLibrary);
+				foreach (LoadedLibrary localLibrary in library.RequiredLibraries)
+					EmitLibrary(context, localLibrary);
 
-				if (ALibrary.Name != Engine.CSystemLibraryName)
+				if (library.Name != Engine.SystemLibraryName)
 				{
-					ExpressionStatement LStatement = new ExpressionStatement();
-					LStatement.Expression = new CallExpression("LoadLibrary", new Expression[]{new ValueExpression(ALibrary.Name)});
-					AContext.Block.Statements.Add(LStatement);
+					ExpressionStatement statement = new ExpressionStatement();
+					statement.Expression = new CallExpression("LoadLibrary", new Expression[]{new ValueExpression(library.Name)});
+					context.Block.Statements.Add(statement);
 				}
-				AContext.EmittedLibraries.Add(ALibrary);
+				context.EmittedLibraries.Add(library);
 			}
         }
         
-        public void EmitLibraries(EmissionContext AContext, Schema.Objects ALibraries)
+        public void EmitLibraries(EmissionContext context, Schema.Objects libraries)
         {
-			foreach (LoadedLibrary LLibrary in ALibraries)
-				EmitLibrary(AContext, LLibrary);
+			foreach (LoadedLibrary library in libraries)
+				EmitLibrary(context, library);
         }
         
-        private void GatherDependents(CatalogDeviceSession ASession, Schema.Object AObject, ObjectList ADependents)
+        private void GatherDependents(CatalogDeviceSession session, Schema.Object objectValue, ObjectList dependents)
         {
-			List<Schema.DependentObjectHeader> LHeaders = ASession.SelectObjectDependents(AObject.ID, true);
-			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
-				if (!ADependents.Contains(LHeaders[LIndex].ID))
+			List<Schema.DependentObjectHeader> headers = session.SelectObjectDependents(objectValue.ID, true);
+			for (int index = 0; index < headers.Count; index++)
+				if (!dependents.Contains(headers[index].ID))
 				{
-					Schema.Object LObject = ASession.ResolveObject(LHeaders[LIndex].ID);
-					ADependents.Add(LObject.ID, LObject);
+					Schema.Object localObjectValue = session.ResolveObject(headers[index].ID);
+					dependents.Add(localObjectValue.ID, localObjectValue);
 				}
         }
         
 		/// <summary>Emits a statement to reconstruct the catalog based on the given parameters.</summary>
-		/// <param name="AMode">Specifies the mode for statement emission.</param>
-		/// <param name="ARequestedObjectNames">Specifies a list of object names to be serialized.  If this list is empty, the entire catalog is emitted.</param>
-		/// <param name="ALibraryName">Specifies the name of the library to be emitted.  If this is the empty string, the system library will be emitted.</param>
-		/// <param name="AIncludeSystem">Specifies whether system objects should be included in the emitted catalog.</param>
-		/// <param name="AIncludeDependents">Specifies whether the dependents of the objects should be included in the emitted catalog.</param>
-		/// <param name="AIncludeObject">Specifies whether the object itself should be included in the emitted catalog.</param>
+		/// <param name="mode">Specifies the mode for statement emission.</param>
+		/// <param name="requestedObjectNames">Specifies a list of object names to be serialized.  If this list is empty, the entire catalog is emitted.</param>
+		/// <param name="libraryName">Specifies the name of the library to be emitted.  If this is the empty string, the system library will be emitted.</param>
+		/// <param name="includeSystem">Specifies whether system objects should be included in the emitted catalog.</param>
+		/// <param name="includeDependents">Specifies whether the dependents of the objects should be included in the emitted catalog.</param>
+		/// <param name="includeObject">Specifies whether the object itself should be included in the emitted catalog.</param>
 		/// <remarks>
 		///	This is the main EmitStatement overload which all other EmitStatement overloads call.
 		/// </remarks>
         public Statement EmitStatement
         (
-			CatalogDeviceSession ASession,
-			EmitMode AMode, 
-			string[] ARequestedObjectNames, 
-			string ALibraryName, 
-			bool AIncludeSystem, 
-			bool AIncludeGenerated, 
-			bool AIncludeDependents, 
-			bool AIncludeObject
+			CatalogDeviceSession session,
+			EmitMode mode, 
+			string[] requestedObjectNames, 
+			string libraryName, 
+			bool includeSystem, 
+			bool includeGenerated, 
+			bool includeDependents, 
+			bool includeObject
 		)
         {
-			ObjectList LRequestedObjects = new ObjectList();
+			ObjectList requestedObjects = new ObjectList();
 			
-			for (int LIndex = 0; LIndex < ARequestedObjectNames.Length; LIndex++)
+			for (int index = 0; index < requestedObjectNames.Length; index++)
 			{
-				int LObjectIndex = IndexOf(ARequestedObjectNames[LIndex]);
-				if (LObjectIndex >= 0)
+				int objectIndex = IndexOf(requestedObjectNames[index]);
+				if (objectIndex >= 0)
 				{
-					Schema.Object LObject = this[LObjectIndex];
-					if ((AIncludeObject) && !LRequestedObjects.Contains(LObject.ID))
-						LRequestedObjects.Add(LObject.ID, LObject);
-					if (AIncludeDependents)
-						GatherDependents(ASession, LObject, LRequestedObjects);
+					Schema.Object objectValue = this[objectIndex];
+					if ((includeObject) && !requestedObjects.Contains(objectValue.ID))
+						requestedObjects.Add(objectValue.ID, objectValue);
+					if (includeDependents)
+						GatherDependents(session, objectValue, requestedObjects);
 				}
 			}
 			
-			EmissionContext LContext = new EmissionContext(ASession, this, AMode, LRequestedObjects, ALibraryName, AIncludeSystem, AIncludeGenerated, AIncludeDependents, AIncludeObject);
-			if (LRequestedObjects.Count == 0)
+			EmissionContext context = new EmissionContext(session, this, mode, requestedObjects, libraryName, includeSystem, includeGenerated, includeDependents, includeObject);
+			if (requestedObjects.Count == 0)
 			{
-				if (ALibraryName == String.Empty)
-					EmitLibraries(LContext, FLoadedLibraries);
+				if (libraryName == String.Empty)
+					EmitLibraries(context, _loadedLibraries);
 			}
 
-			if (LRequestedObjects.Count > 0)
+			if (requestedObjects.Count > 0)
 			{
-				for (int LIndex = 0; LIndex < LRequestedObjects.Count; LIndex++)
-					EmitObject(LContext, LRequestedObjects.ResolveObject(ASession, LIndex));
+				for (int index = 0; index < requestedObjects.Count; index++)
+					EmitObject(context, requestedObjects.ResolveObject(session, index));
 			}
 			else
 			{
-				foreach (CatalogObjectHeader LHeader in ASession.SelectLibraryCatalogObjects(ALibraryName))
-					EmitObject(LContext, ASession.ResolveCatalogObject(LHeader.ID));
+				foreach (CatalogObjectHeader header in session.SelectLibraryCatalogObjects(libraryName))
+					EmitObject(context, session.ResolveCatalogObject(header.ID));
 			}
 
-			return LContext.Block;
+			return context.Block;
         }
         
 		/// <summary>Emits a statement to reconstruct the entire catalog.</summary>
-        public Statement EmitStatement(CatalogDeviceSession ASession, EmitMode AMode, bool AIncludeSystem)
+        public Statement EmitStatement(CatalogDeviceSession session, EmitMode mode, bool includeSystem)
         {
-			return EmitStatement(ASession, AMode, new string[0], String.Empty, AIncludeSystem, false, false, true);
+			return EmitStatement(session, mode, new string[0], String.Empty, includeSystem, false, false, true);
         }
 
 		/// <summary>Emits a statement to reconstruct the catalog for the given library.</summary>        
-        public Statement EmitStatement(CatalogDeviceSession ASession, EmitMode AMode, string ALibraryName, bool AIncludeSystem)
+        public Statement EmitStatement(CatalogDeviceSession session, EmitMode mode, string libraryName, bool includeSystem)
         {
-			return EmitStatement(ASession, AMode, new string[0], ALibraryName, AIncludeSystem, false, false, true);
+			return EmitStatement(session, mode, new string[0], libraryName, includeSystem, false, false, true);
         }
 
 		/// <summary>Emits a statement to reconstruct the specified list of catalog objects.</summary>        
-        public Statement EmitStatement(CatalogDeviceSession ASession, EmitMode AMode, string[] ARequestedObjectNames)
+        public Statement EmitStatement(CatalogDeviceSession session, EmitMode mode, string[] requestedObjectNames)
         {
-			return EmitStatement(ASession, AMode, ARequestedObjectNames, String.Empty, true, false, false, true);
+			return EmitStatement(session, mode, requestedObjectNames, String.Empty, true, false, false, true);
         }
         
-        protected void ReportDroppedObject(EmissionContext AContext, Schema.Object AObject)
+        protected void ReportDroppedObject(EmissionContext context, Schema.Object objectValue)
         {
-			if (!AContext.EmittedObjects.ContainsKey(AObject.ID))
-				AContext.EmittedObjects.Add(AObject.ID, AObject);
+			if (!context.EmittedObjects.ContainsKey(objectValue.ID))
+				context.EmittedObjects.Add(objectValue.ID, objectValue);
         }
         
-        protected void ReportDroppedObjects(EmissionContext AContext, Schema.Object AObject)
+        protected void ReportDroppedObjects(EmissionContext context, Schema.Object objectValue)
         {
-			if (AObject is ScalarType)
+			if (objectValue is ScalarType)
 			{
-				ScalarType LScalarType = (ScalarType)AObject;
-				if (LScalarType.Default != null)
-					ReportDroppedObject(AContext, LScalarType.Default);
+				ScalarType scalarType = (ScalarType)objectValue;
+				if (scalarType.Default != null)
+					ReportDroppedObject(context, scalarType.Default);
 					
-				foreach (Constraint LConstraint in LScalarType.Constraints)
-					ReportDroppedObject(AContext, LConstraint);
+				foreach (Constraint constraint in scalarType.Constraints)
+					ReportDroppedObject(context, constraint);
 					
-				foreach (Special LSpecial in LScalarType.Specials)
-					ReportDroppedObject(AContext, LSpecial);
+				foreach (Special special in scalarType.Specials)
+					ReportDroppedObject(context, special);
 					
-				if (LScalarType.EqualityOperator != null)
-					ReportDroppedObject(AContext, LScalarType.EqualityOperator);
+				if (scalarType.EqualityOperator != null)
+					ReportDroppedObject(context, scalarType.EqualityOperator);
 					
-				if (LScalarType.ComparisonOperator != null)
-					ReportDroppedObject(AContext, LScalarType.ComparisonOperator);
+				if (scalarType.ComparisonOperator != null)
+					ReportDroppedObject(context, scalarType.ComparisonOperator);
 					
-				foreach (Schema.Representation LRepresentation in LScalarType.Representations)
-					ReportDroppedObjects(AContext, LRepresentation);
+				foreach (Schema.Representation representation in scalarType.Representations)
+					ReportDroppedObjects(context, representation);
 			}
-			else if (AObject is Representation)
+			else if (objectValue is Representation)
 			{
-				Schema.Representation LRepresentation = (Schema.Representation)AObject;
+				Schema.Representation representation = (Schema.Representation)objectValue;
 
-				foreach (Schema.Property LProperty in LRepresentation.Properties)
+				foreach (Schema.Property property in representation.Properties)
 				{
-					if (LProperty.ReadAccessor != null)
-						ReportDroppedObject(AContext, LProperty.ReadAccessor);
+					if (property.ReadAccessor != null)
+						ReportDroppedObject(context, property.ReadAccessor);
 					
-					if (LProperty.WriteAccessor != null)
-						ReportDroppedObject(AContext, LProperty.WriteAccessor);
+					if (property.WriteAccessor != null)
+						ReportDroppedObject(context, property.WriteAccessor);
 				}
 				
-				if (LRepresentation.Selector != null)
-					ReportDroppedObject(AContext, LRepresentation.Selector);
+				if (representation.Selector != null)
+					ReportDroppedObject(context, representation.Selector);
 			}
-			else if (AObject is TableVarColumn)
+			else if (objectValue is TableVarColumn)
 			{
-				TableVarColumn LTableVarColumn = (TableVarColumn)AObject;
-				if (LTableVarColumn.Default != null)
-					ReportDroppedObject(AContext, LTableVarColumn.Default);
+				TableVarColumn tableVarColumn = (TableVarColumn)objectValue;
+				if (tableVarColumn.Default != null)
+					ReportDroppedObject(context, tableVarColumn.Default);
 					
-				foreach (Constraint LConstraint in LTableVarColumn.Constraints)
-					ReportDroppedObject(AContext, LConstraint);
+				foreach (Constraint constraint in tableVarColumn.Constraints)
+					ReportDroppedObject(context, constraint);
 			}
-			else if (AObject is TableVar)
+			else if (objectValue is TableVar)
 			{	
-				TableVar LTableVar = (TableVar)AObject;
-				foreach (TableVarColumn LColumn in LTableVar.Columns)
-					ReportDroppedObjects(AContext, LColumn);
+				TableVar tableVar = (TableVar)objectValue;
+				foreach (TableVarColumn column in tableVar.Columns)
+					ReportDroppedObjects(context, column);
 					
-				foreach (Constraint LConstraint in LTableVar.Constraints)
-					ReportDroppedObject(AContext, LConstraint);
+				foreach (Constraint constraint in tableVar.Constraints)
+					ReportDroppedObject(context, constraint);
 			}
-			else if (AObject is Reference)
+			else if (objectValue is Reference)
 			{
-				Reference LReference = (Reference)AObject;
-				if (LReference.SourceConstraint != null)
-					ReportDroppedObject(AContext, LReference.SourceConstraint);
-				if (LReference.TargetConstraint != null)
-					ReportDroppedObject(AContext, LReference.TargetConstraint);
+				Reference reference = (Reference)objectValue;
+				if (reference.SourceConstraint != null)
+					ReportDroppedObject(context, reference.SourceConstraint);
+				if (reference.TargetConstraint != null)
+					ReportDroppedObject(context, reference.TargetConstraint);
 			}
-			else if (AObject is DeviceScalarType)
+			else if (objectValue is DeviceScalarType)
 			{
-				Schema.CatalogObjectHeaders LHeaders = AContext.Session.SelectGeneratedObjects(AObject.ID);
-				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
-					ReportDroppedObject(AContext, AContext.Session.ResolveCatalogObject(LHeaders[LIndex].ID));
+				Schema.CatalogObjectHeaders headers = context.Session.SelectGeneratedObjects(objectValue.ID);
+				for (int index = 0; index < headers.Count; index++)
+					ReportDroppedObject(context, context.Session.ResolveCatalogObject(headers[index].ID));
 			}
         }
         
-        public void EmitDropObject(EmissionContext AContext, Schema.Object AObject)
+        public void EmitDropObject(EmissionContext context, Schema.Object objectValue)
         {
-			if (AContext.ShouldEmitDrop(AObject))
+			if (context.ShouldEmitDrop(objectValue))
 			{
-				if (AContext.IncludeObject || !AContext.RequestedObjects.Contains(AObject.ID))
+				if (context.IncludeObject || !context.RequestedObjects.Contains(objectValue.ID))
 				{
 					// Should be a safe drop if the object is an AT or session object
-					Statement LStatement = AObject.EmitDropStatement(AContext.Mode);
-					if (((AObject.IsATObject || AObject.IsSessionObject)) && ((AObject is Schema.TableVar) || (AObject is Schema.Operator)))
-						LStatement = 
+					Statement statement = objectValue.EmitDropStatement(context.Mode);
+					if (((objectValue.IsATObject || objectValue.IsSessionObject)) && ((objectValue is Schema.TableVar) || (objectValue is Schema.Operator)))
+						statement = 
 							new IfStatement
 							(
 								new CallExpression
 								(
 									".System.ObjectExists", 
-									new Expression[]{new CallExpression(".System.Name", new Expression[]{new ValueExpression(Schema.Object.EnsureRooted(AObject.Name), TokenType.String)})}
+									new Expression[]{new CallExpression(".System.Name", new Expression[]{new ValueExpression(Schema.Object.EnsureRooted(objectValue.Name), TokenType.String)})}
 								),
 								new ExpressionStatement
 								(
 									new CallExpression
 									(
 										".System.Execute",
-										new Expression[]{new ValueExpression(new D4TextEmitter().Emit(LStatement), TokenType.String)}
+										new Expression[]{new ValueExpression(new D4TextEmitter().Emit(statement), TokenType.String)}
 									)
 								),
 								null
 							);
 						
-					if (AObject.IsATObject)
+					if (objectValue.IsATObject)
 					{
-						Schema.TableVar LTableVar = null;
-						if (AObject is Schema.TableVarColumnDefault)
-							LTableVar = ((Schema.TableVarColumnDefault)AObject).TableVarColumn.TableVar;
+						Schema.TableVar tableVar = null;
+						if (objectValue is Schema.TableVarColumnDefault)
+							tableVar = ((Schema.TableVarColumnDefault)objectValue).TableVarColumn.TableVar;
 							
-						if (AObject is Schema.TableVarColumnConstraint)
-							LTableVar = ((Schema.TableVarColumnConstraint)AObject).TableVarColumn.TableVar;
+						if (objectValue is Schema.TableVarColumnConstraint)
+							tableVar = ((Schema.TableVarColumnConstraint)objectValue).TableVarColumn.TableVar;
 							
-						if (AObject is Schema.TableVarConstraint)
-							LTableVar = ((Schema.TableVarConstraint)AObject).TableVar;
+						if (objectValue is Schema.TableVarConstraint)
+							tableVar = ((Schema.TableVarConstraint)objectValue).TableVar;
 							
-						if (AObject is Schema.TableVarEventHandler)
-							LTableVar = ((Schema.TableVarEventHandler)AObject).TableVar;
+						if (objectValue is Schema.TableVarEventHandler)
+							tableVar = ((Schema.TableVarEventHandler)objectValue).TableVar;
 							
-						if (AObject is Schema.TableVarColumnEventHandler)
-							LTableVar = ((Schema.TableVarColumnEventHandler)AObject).TableVarColumn.TableVar;
+						if (objectValue is Schema.TableVarColumnEventHandler)
+							tableVar = ((Schema.TableVarColumnEventHandler)objectValue).TableVarColumn.TableVar;
 							
-						if (AObject.IsATObject && (LTableVar != null))
-							LStatement = 
+						if (objectValue.IsATObject && (tableVar != null))
+							statement = 
 								new IfStatement
 								(
 									new CallExpression
 									(
 										".System.ObjectExists", 
-										new Expression[]{new CallExpression(".System.Name", new Expression[]{new ValueExpression(Schema.Object.EnsureRooted(LTableVar.Name), TokenType.String)})}
+										new Expression[]{new CallExpression(".System.Name", new Expression[]{new ValueExpression(Schema.Object.EnsureRooted(tableVar.Name), TokenType.String)})}
 									), 
 									new ExpressionStatement
 									(
 										new CallExpression
 										(
 											".System.Execute",
-											new Expression[]{new ValueExpression(new D4TextEmitter().Emit(LStatement), TokenType.String)}
+											new Expression[]{new ValueExpression(new D4TextEmitter().Emit(statement), TokenType.String)}
 										)
 									),
 									null
 								);
 					}
 
-					AContext.Block.Statements.Add(LStatement);
+					context.Block.Statements.Add(statement);
 				}
 			}
         }
         
-        public void EmitUnregisterLibrary(EmissionContext AContext, LoadedLibrary ALibrary)
+        public void EmitUnregisterLibrary(EmissionContext context, LoadedLibrary library)
         {
-			if (!AContext.EmittedLibraries.Contains(ALibrary) && !ALibrary.IsSystem)
+			if (!context.EmittedLibraries.Contains(library) && !library.IsSystem)
 			{
 				// Unregister all requiredby libraries
-				foreach (LoadedLibrary LLibrary in ALibrary.RequiredByLibraries)
-					EmitUnregisterLibrary(AContext, LLibrary);
+				foreach (LoadedLibrary localLibrary in library.RequiredByLibraries)
+					EmitUnregisterLibrary(context, localLibrary);
 	
 				// Unregister the library				
-				AContext.Block.Statements.Add(new ExpressionStatement(new CallExpression("UnregisterLibrary", new Expression[]{new ValueExpression(ALibrary.Name)})));
-				AContext.EmittedLibraries.Add(ALibrary);
+				context.Block.Statements.Add(new ExpressionStatement(new CallExpression("UnregisterLibrary", new Expression[]{new ValueExpression(library.Name)})));
+				context.EmittedLibraries.Add(library);
 			}
         }
         
         public Statement EmitDropStatement
         (
-			CatalogDeviceSession ASession,
-			string[] ARequestedObjectNames, 
-			string ALibraryName, 
-			bool AIncludeSystem, 
-			bool AIncludeGenerated, 
-			bool AIncludeDependents, 
-			bool AIncludeObject
+			CatalogDeviceSession session,
+			string[] requestedObjectNames, 
+			string libraryName, 
+			bool includeSystem, 
+			bool includeGenerated, 
+			bool includeDependents, 
+			bool includeObject
 		)
         {
-			ObjectList LRequestedObjects = new ObjectList();
-			foreach (string LObjectName in ARequestedObjectNames)
+			ObjectList requestedObjects = new ObjectList();
+			foreach (string objectName in requestedObjectNames)
 			{
-				int LObjectIndex = IndexOf(LObjectName);
-				if (LObjectIndex >= 0)
-					LRequestedObjects.Add(this[LObjectIndex].ID, this[LObjectIndex]);
+				int objectIndex = IndexOf(objectName);
+				if (objectIndex >= 0)
+					requestedObjects.Add(this[objectIndex].ID, this[objectIndex]);
 				else
 				{
-					Schema.CatalogObject LObject = ASession.ResolveName(LObjectName, ASession.ServerProcess.ServerSession.NameResolutionPath, new List<string>());
-					if (LObject != null)
-						LRequestedObjects.Add(LObject.ID, LObject);
+					Schema.CatalogObject objectValue = session.ResolveName(objectName, session.ServerProcess.ServerSession.NameResolutionPath, new List<string>());
+					if (objectValue != null)
+						requestedObjects.Add(objectValue.ID, objectValue);
 				}
 			}
 			
-			EmissionContext LContext = new EmissionContext(ASession, this, EmitMode.ForCopy, LRequestedObjects, ALibraryName, AIncludeSystem, AIncludeGenerated, AIncludeDependents, AIncludeObject);
+			EmissionContext context = new EmissionContext(session, this, EmitMode.ForCopy, requestedObjects, libraryName, includeSystem, includeGenerated, includeDependents, includeObject);
 			
-			ObjectList LDropList = ((ARequestedObjectNames.Length > 0) && (LRequestedObjects.Count == 0)) ? new ObjectList() : BuildDropList(LContext);
+			ObjectList dropList = ((requestedObjectNames.Length > 0) && (requestedObjects.Count == 0)) ? new ObjectList() : BuildDropList(context);
 			
-			for (int LIndex = 0; LIndex < LDropList.Count; LIndex++)
-				EmitDropObject(LContext, LDropList.ResolveObject(ASession, LIndex));
+			for (int index = 0; index < dropList.Count; index++)
+				EmitDropObject(context, dropList.ResolveObject(session, index));
 			
-			if (ARequestedObjectNames.Length == 0)
+			if (requestedObjectNames.Length == 0)
 			{
-				if (ALibraryName == String.Empty)
+				if (libraryName == String.Empty)
 				{			
 					// UnregisterLibraries
-					foreach (LoadedLibrary LLibrary in FLoadedLibraries)
-						EmitUnregisterLibrary(LContext, LLibrary);
+					foreach (LoadedLibrary library in _loadedLibraries)
+						EmitUnregisterLibrary(context, library);
 				}
 			}
 			
-			return LContext.Block;
+			return context.Block;
         }
 
 		private ObjectList BuildDropList(EmissionContext LContext)
 		{
-			ObjectList LDropList = new ObjectList();
+			ObjectList dropList = new ObjectList();
 			
 			if (LContext.RequestedObjects.Count == 0) 
 			{
-				foreach (CatalogObjectHeader LHeader in LContext.Session.SelectLibraryCatalogObjects(LContext.LibraryName))
-					BuildObjectDropList(LContext, LDropList, LContext.Session.ResolveCatalogObject(LHeader.ID));
+				foreach (CatalogObjectHeader header in LContext.Session.SelectLibraryCatalogObjects(LContext.LibraryName))
+					BuildObjectDropList(LContext, dropList, LContext.Session.ResolveCatalogObject(header.ID));
 			}
 			else
 			{
-				for (int LIndex = 0; LIndex < LContext.RequestedObjects.Count; LIndex++)
-					BuildObjectDropList(LContext, LDropList, LContext.RequestedObjects.ResolveObject(LContext.Session, LIndex));
+				for (int index = 0; index < LContext.RequestedObjects.Count; index++)
+					BuildObjectDropList(LContext, dropList, LContext.RequestedObjects.ResolveObject(LContext.Session, index));
 			}
 
-			return LDropList;
+			return dropList;
 		}
 
-		private void BuildObjectDropList(EmissionContext AContext, ObjectList ADropList, Schema.Object AObject)
+		private void BuildObjectDropList(EmissionContext context, ObjectList dropList, Schema.Object objectValue)
 		{
-			if (!AContext.EmittedObjects.ContainsKey(AObject.ID))
+			if (!context.EmittedObjects.ContainsKey(objectValue.ID))
 			{
-				AContext.EmittedObjects.Add(AObject.ID, AObject);
+				context.EmittedObjects.Add(objectValue.ID, objectValue);
 
 				// Add each dependent
-				if (AContext.IncludeDependents)
-					BuildDependentDropList(AContext, ADropList, AObject);
+				if (context.IncludeDependents)
+					BuildDependentDropList(context, dropList, objectValue);
 				
-				ADropList.Ensure(AObject);
+				dropList.Ensure(objectValue);
 				
-				ReportDroppedObjects(AContext, AObject);
+				ReportDroppedObjects(context, objectValue);
 			}
 		}
 		
-		private void BuildDependentDropList(EmissionContext AContext, ObjectList ADropList, Schema.Object AObject)
+		private void BuildDependentDropList(EmissionContext context, ObjectList dropList, Schema.Object objectValue)
 		{
-			List<Schema.DependentObjectHeader> LHeaders = AContext.Session.SelectObjectDependents(AObject.ID, false);
-			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
+			List<Schema.DependentObjectHeader> headers = context.Session.SelectObjectDependents(objectValue.ID, false);
+			for (int index = 0; index < headers.Count; index++)
 			{
-				Schema.Object LObject = AContext.Session.ResolveObject(LHeaders[LIndex].ID);
-				if ((LObject is Schema.Representation) && LObject.IsGenerated)
-					BuildObjectDropList(AContext, ADropList, ((Schema.Representation)LObject).ScalarType);
-				else if (LObject is Schema.Property)
+				Schema.Object localObjectValue = context.Session.ResolveObject(headers[index].ID);
+				if ((localObjectValue is Schema.Representation) && localObjectValue.IsGenerated)
+					BuildObjectDropList(context, dropList, ((Schema.Representation)localObjectValue).ScalarType);
+				else if (localObjectValue is Schema.Property)
 				{
-					if (((Schema.Property)LObject).Representation.IsGenerated)
-						BuildObjectDropList(AContext, ADropList, ((Schema.Property)LObject).Representation.ScalarType);
+					if (((Schema.Property)localObjectValue).Representation.IsGenerated)
+						BuildObjectDropList(context, dropList, ((Schema.Property)localObjectValue).Representation.ScalarType);
 					else
-						BuildObjectDropList(AContext, ADropList, ((Schema.Property)LObject).Representation);
+						BuildObjectDropList(context, dropList, ((Schema.Property)localObjectValue).Representation);
 				}
-				else if ((LHeaders[LIndex].GeneratorObjectID >= 0) && !AContext.IncludeGenerated)
+				else if ((headers[index].GeneratorObjectID >= 0) && !context.IncludeGenerated)
 				{
-					Schema.Object LGeneratorObject = AContext.Session.ResolveObject(LHeaders[LIndex].GeneratorObjectID);
-					if ((LGeneratorObject is Schema.Representation) && LGeneratorObject.IsGenerated)
-						BuildObjectDropList(AContext, ADropList, ((Schema.Representation)LGeneratorObject).ScalarType);
-					else if (LGeneratorObject is Schema.Property)
+					Schema.Object generatorObject = context.Session.ResolveObject(headers[index].GeneratorObjectID);
+					if ((generatorObject is Schema.Representation) && generatorObject.IsGenerated)
+						BuildObjectDropList(context, dropList, ((Schema.Representation)generatorObject).ScalarType);
+					else if (generatorObject is Schema.Property)
 					{
-						if (((Schema.Property)LGeneratorObject).Representation.IsGenerated)
-							BuildObjectDropList(AContext, ADropList, ((Schema.Property)LGeneratorObject).Representation.ScalarType);
+						if (((Schema.Property)generatorObject).Representation.IsGenerated)
+							BuildObjectDropList(context, dropList, ((Schema.Property)generatorObject).Representation.ScalarType);
 						else
-							BuildObjectDropList(AContext, ADropList, ((Schema.Property)LGeneratorObject).Representation);
+							BuildObjectDropList(context, dropList, ((Schema.Property)generatorObject).Representation);
 					}
 					else
-						BuildObjectDropList(AContext, ADropList, LGeneratorObject);
+						BuildObjectDropList(context, dropList, generatorObject);
 				}
 				else
-					BuildObjectDropList(AContext, ADropList, LObject);
+					BuildObjectDropList(context, dropList, localObjectValue);
 			}
 				
 			// Drop child object depenendents
-			BuildChildDependentDropList(AContext, ADropList, AObject);
+			BuildChildDependentDropList(context, dropList, objectValue);
 		}
 		
-		private void BuildChildDependentDropList(EmissionContext AContext, ObjectList ADropList, Schema.Object AObject)
+		private void BuildChildDependentDropList(EmissionContext context, ObjectList dropList, Schema.Object objectValue)
 		{
-			if (AObject is Schema.ScalarType)
+			if (objectValue is Schema.ScalarType)
 			{
-				ScalarType LScalarType = (ScalarType)AObject;
+				ScalarType scalarType = (ScalarType)objectValue;
 				
-				if (LScalarType.Default != null)
-					BuildDependentDropList(AContext, ADropList, LScalarType.Default);
+				if (scalarType.Default != null)
+					BuildDependentDropList(context, dropList, scalarType.Default);
 					
-				foreach (Constraint LConstraint in LScalarType.Constraints)
-					BuildDependentDropList(AContext, ADropList, LConstraint);
+				foreach (Constraint constraint in scalarType.Constraints)
+					BuildDependentDropList(context, dropList, constraint);
 					
-				foreach (Special LSpecial in LScalarType.Specials)
-					BuildDependentDropList(AContext, ADropList, LSpecial);
+				foreach (Special special in scalarType.Specials)
+					BuildDependentDropList(context, dropList, special);
 					
-				if (LScalarType.EqualityOperator != null)
-					BuildDependentDropList(AContext, ADropList, LScalarType.EqualityOperator);
+				if (scalarType.EqualityOperator != null)
+					BuildDependentDropList(context, dropList, scalarType.EqualityOperator);
 					
-				if (LScalarType.ComparisonOperator != null)
-					BuildDependentDropList(AContext, ADropList, LScalarType.ComparisonOperator);
+				if (scalarType.ComparisonOperator != null)
+					BuildDependentDropList(context, dropList, scalarType.ComparisonOperator);
 					
-				foreach (Representation LRepresentation in LScalarType.Representations)
+				foreach (Representation representation in scalarType.Representations)
 				{
-					BuildDependentDropList(AContext, ADropList, LRepresentation);
-					foreach (Property LProperty in LRepresentation.Properties)
+					BuildDependentDropList(context, dropList, representation);
+					foreach (Property property in representation.Properties)
 					{
-						BuildDependentDropList(AContext, ADropList, LProperty);
-						if (LProperty.ReadAccessor != null)
-							BuildDependentDropList(AContext, ADropList, LProperty.ReadAccessor);
+						BuildDependentDropList(context, dropList, property);
+						if (property.ReadAccessor != null)
+							BuildDependentDropList(context, dropList, property.ReadAccessor);
 							
-						if (LProperty.WriteAccessor != null)
-							BuildDependentDropList(AContext, ADropList, LProperty.WriteAccessor);
+						if (property.WriteAccessor != null)
+							BuildDependentDropList(context, dropList, property.WriteAccessor);
 					}
 					
-					if (LRepresentation.Selector != null)
-						BuildDependentDropList(AContext, ADropList, LRepresentation.Selector);
+					if (representation.Selector != null)
+						BuildDependentDropList(context, dropList, representation.Selector);
 				}
 			}
-			else if (AObject is TableVarColumn)
+			else if (objectValue is TableVarColumn)
 			{
-				TableVarColumn LTableVarColumn = (TableVarColumn)AObject;
-				if (LTableVarColumn.Default != null)
-					BuildDependentDropList(AContext, ADropList, LTableVarColumn.Default);
+				TableVarColumn tableVarColumn = (TableVarColumn)objectValue;
+				if (tableVarColumn.Default != null)
+					BuildDependentDropList(context, dropList, tableVarColumn.Default);
 					
-				foreach (Constraint LConstraint in LTableVarColumn.Constraints)
-					BuildDependentDropList(AContext, ADropList, LConstraint);
+				foreach (Constraint constraint in tableVarColumn.Constraints)
+					BuildDependentDropList(context, dropList, constraint);
 			}
-			else if (AObject is TableVar)
+			else if (objectValue is TableVar)
 			{
-				TableVar LTableVar = (TableVar)AObject;
+				TableVar tableVar = (TableVar)objectValue;
 				
-				foreach (TableVarColumn LColumn in LTableVar.Columns)
-					BuildDependentDropList(AContext, ADropList, LColumn);
+				foreach (TableVarColumn column in tableVar.Columns)
+					BuildDependentDropList(context, dropList, column);
 					
-				foreach (Constraint LConstraint in LTableVar.Constraints)
-					if (LConstraint.ConstraintType == ConstraintType.Database)
-						BuildDependentDropList(AContext, ADropList, LConstraint);
+				foreach (Constraint constraint in tableVar.Constraints)
+					if (constraint.ConstraintType == ConstraintType.Database)
+						BuildDependentDropList(context, dropList, constraint);
 					else
-						BuildDependentDropList(AContext, ADropList, LConstraint);
+						BuildDependentDropList(context, dropList, constraint);
 			}
 		}
         
-        public Statement EmitDropStatement(CatalogDeviceSession ASession, string[] ARequestedObjectNames, string ALibraryName)
+        public Statement EmitDropStatement(CatalogDeviceSession session, string[] requestedObjectNames, string libraryName)
         {
-			return EmitDropStatement(ASession, ARequestedObjectNames, ALibraryName, false, false, true, true);
+			return EmitDropStatement(session, requestedObjectNames, libraryName, false, false, true, true);
         }
         
-        public Statement EmitDropStatement(CatalogDeviceSession ASession, string ALibraryName)
+        public Statement EmitDropStatement(CatalogDeviceSession session, string libraryName)
         {
-			return EmitDropStatement(ASession, new string[]{}, ALibraryName, false, false, true, true);
+			return EmitDropStatement(session, new string[]{}, libraryName, false, false, true, true);
         }
         
-        public Statement EmitDropStatement(CatalogDeviceSession ASession)
+        public Statement EmitDropStatement(CatalogDeviceSession session)
         {
-			return EmitDropStatement(ASession, new string[]{}, String.Empty, false, false, true, true);
+			return EmitDropStatement(session, new string[]{}, String.Empty, false, false, true, true);
         }
 	}
     
@@ -943,59 +943,59 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class DataTypes : System.Object
     {
-		public DataTypes(Catalog ACatalog) : base()
+		public DataTypes(Catalog catalog) : base()
 		{
-			FCatalog = ACatalog;
+			_catalog = catalog;
 		}
 		
 		[Reference]
-		private Catalog FCatalog;
+		private Catalog _catalog;
 		
 		public event CatalogLookupFailedEvent OnCatalogLookupFailed;
-		protected void DoCatalogLookupFailed(string AName)
+		protected void DoCatalogLookupFailed(string name)
 		{
 			if (OnCatalogLookupFailed != null)
-				OnCatalogLookupFailed(FCatalog, AName);
+				OnCatalogLookupFailed(_catalog, name);
 		}
 		
-		protected Object CatalogLookup(string AName)
+		protected Object CatalogLookup(string name)
 		{
-			int LIndex = FCatalog.IndexOf(AName);
-			if (LIndex < 0)
+			int index = _catalog.IndexOf(name);
+			if (index < 0)
 			{
-				DoCatalogLookupFailed(AName);
-				return FCatalog[AName];
+				DoCatalogLookupFailed(name);
+				return _catalog[name];
 			}
-			return FCatalog[LIndex];
+			return _catalog[index];
 		}
 
 		// do not localize
-		public const string CSystemGeneric = "System.Generic";
+		public const string SystemGenericName = "System.Generic";
 		#if USETYPEINHERITANCE
 		public const string CSystemAlpha = "System.Alpha";
 		public const string CSystemOmega = "System.Omega";
 		#endif
-		public const string CSystemScalar = "System.Scalar";
-		public const string CSystemBoolean = "System.Boolean";
-		public const string CSystemDecimal = "System.Decimal";
-		public const string CSystemLong = "System.Long";
-		public const string CSystemInteger = "System.Integer";
-		public const string CSystemShort = "System.Short";
-		public const string CSystemByte = "System.Byte";
-		public const string CSystemString = "System.String";
+		public const string SystemScalarName = "System.Scalar";
+		public const string SystemBooleanName = "System.Boolean";
+		public const string SystemDecimalName = "System.Decimal";
+		public const string SystemLongName = "System.Long";
+		public const string SystemIntegerName = "System.Integer";
+		public const string SystemShortName = "System.Short";
+		public const string SystemByteName = "System.Byte";
+		public const string SystemStringName = "System.String";
 		#if USEISTRING
-		public const string CSystemIString = "System.IString";
+		public const string SystemIStringName = "System.IString";
 		#endif
-		public const string CSystemMoney = "System.Money";
-		public const string CSystemGuid = "System.Guid";
-		public const string CSystemTimeSpan = "System.TimeSpan";
-		public const string CSystemDateTime = "System.DateTime";
-		public const string CSystemDate = "System.Date";
-		public const string CSystemTime = "System.Time";
-		public const string CSystemBinary = "System.Binary";
-		public const string CSystemGraphic = "System.Graphic";
-		public const string CSystemError = "System.Error";
-		public const string CSystemName = "System.Name";
+		public const string SystemMoneyName = "System.Money";
+		public const string SystemGuidName = "System.Guid";
+		public const string SystemTimeSpanName = "System.TimeSpan";
+		public const string SystemDateTimeName = "System.DateTime";
+		public const string SystemDateName = "System.Date";
+		public const string SystemTimeName = "System.Time";
+		public const string SystemBinaryName = "System.Binary";
+		public const string SystemGraphicName = "System.Graphic";
+		public const string SystemErrorName = "System.Error";
+		public const string SystemNameName = "System.Name";
 
 		#if USETYPEINHERITANCE
 		private ScalarType FSystemAlpha;
@@ -1022,107 +1022,107 @@ namespace Alphora.Dataphor.DAE.Schema
 		#endif
 		
 		[Reference]
-		private ScalarType FSystemScalar;
+		private ScalarType _systemScalar;
 		public ScalarType SystemScalar
 		{
 			get
 			{
-				if (FSystemScalar == null)
-					FSystemScalar = (ScalarType)CatalogLookup(CSystemScalar);
-				return FSystemScalar;
+				if (_systemScalar == null)
+					_systemScalar = (ScalarType)CatalogLookup(SystemScalarName);
+				return _systemScalar;
 			}
-			set { FSystemScalar = value; }
+			set { _systemScalar = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemBoolean;
+		private ScalarType _systemBoolean;
 		public ScalarType SystemBoolean
 		{
 			get
 			{
-				if (FSystemBoolean == null)
-					FSystemBoolean = (ScalarType)CatalogLookup(CSystemBoolean);
-				return FSystemBoolean;
+				if (_systemBoolean == null)
+					_systemBoolean = (ScalarType)CatalogLookup(SystemBooleanName);
+				return _systemBoolean;
 			}
-			set { FSystemBoolean = value; }
+			set { _systemBoolean = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemDecimal;
+		private ScalarType _systemDecimal;
 		public ScalarType SystemDecimal
 		{
 			get
 			{
-				if (FSystemDecimal == null)
-					FSystemDecimal = (ScalarType)CatalogLookup(CSystemDecimal);
-				return FSystemDecimal;
+				if (_systemDecimal == null)
+					_systemDecimal = (ScalarType)CatalogLookup(SystemDecimalName);
+				return _systemDecimal;
 			}
-			set { FSystemDecimal = value; }
+			set { _systemDecimal = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemLong;
+		private ScalarType _systemLong;
 		public ScalarType SystemLong
 		{
 			get
 			{
-				if (FSystemLong == null)
-					FSystemLong = (ScalarType)CatalogLookup(CSystemLong);
-				return FSystemLong;
+				if (_systemLong == null)
+					_systemLong = (ScalarType)CatalogLookup(SystemLongName);
+				return _systemLong;
 			}
-			set { FSystemLong = value; }
+			set { _systemLong = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemInteger;
+		private ScalarType _systemInteger;
 		public ScalarType SystemInteger
 		{
 			get
 			{
-				if (FSystemInteger == null)
-					FSystemInteger = (ScalarType)CatalogLookup(CSystemInteger);
-				return FSystemInteger;
+				if (_systemInteger == null)
+					_systemInteger = (ScalarType)CatalogLookup(SystemIntegerName);
+				return _systemInteger;
 			}
-			set { FSystemInteger = value; }
+			set { _systemInteger = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemShort;
+		private ScalarType _systemShort;
 		public ScalarType SystemShort
 		{
 			get
 			{
-				if (FSystemShort == null)
-					FSystemShort = (ScalarType)CatalogLookup(CSystemShort);
-				return FSystemShort;
+				if (_systemShort == null)
+					_systemShort = (ScalarType)CatalogLookup(SystemShortName);
+				return _systemShort;
 			}
-			set { FSystemShort = value; }
+			set { _systemShort = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemByte;
+		private ScalarType _systemByte;
 		public ScalarType SystemByte
 		{
 			get
 			{
-				if (FSystemByte == null)
-					FSystemByte = (ScalarType)CatalogLookup(CSystemByte);
-				return FSystemByte;
+				if (_systemByte == null)
+					_systemByte = (ScalarType)CatalogLookup(SystemByteName);
+				return _systemByte;
 			}
-			set { FSystemByte = value; }
+			set { _systemByte = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemString;
+		private ScalarType _systemString;
 		public ScalarType SystemString
 		{
 			get
 			{
-				if (FSystemString == null)
-					FSystemString = (ScalarType)CatalogLookup(CSystemString);
-				return FSystemString;
+				if (_systemString == null)
+					_systemString = (ScalarType)CatalogLookup(SystemStringName);
+				return _systemString;
 			}
-			set { FSystemString = value; }
+			set { _systemString = value; }
 		}
 		
 		#if USEISTRING
@@ -1140,210 +1140,210 @@ namespace Alphora.Dataphor.DAE.Schema
 		#endif
 		
 		[Reference]
-		private ScalarType FSystemMoney;
+		private ScalarType _systemMoney;
 		public ScalarType SystemMoney
 		{
 			get
 			{
-				if (FSystemMoney == null)
-					FSystemMoney = (ScalarType)CatalogLookup(CSystemMoney);
-				return FSystemMoney;
+				if (_systemMoney == null)
+					_systemMoney = (ScalarType)CatalogLookup(SystemMoneyName);
+				return _systemMoney;
 			}
-			set { FSystemMoney = value; }
+			set { _systemMoney = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemGuid;
+		private ScalarType _systemGuid;
 		public ScalarType SystemGuid
 		{
 			get
 			{
-				if (FSystemGuid == null)
-					FSystemGuid = (ScalarType)CatalogLookup(CSystemGuid);
-				return FSystemGuid;
+				if (_systemGuid == null)
+					_systemGuid = (ScalarType)CatalogLookup(SystemGuidName);
+				return _systemGuid;
 			}
-			set { FSystemGuid = value; }
+			set { _systemGuid = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemTimeSpan;
+		private ScalarType _systemTimeSpan;
 		public ScalarType SystemTimeSpan
 		{
 			get
 			{
-				if (FSystemTimeSpan == null)
-					FSystemTimeSpan = (ScalarType)CatalogLookup(CSystemTimeSpan);
-				return FSystemTimeSpan;
+				if (_systemTimeSpan == null)
+					_systemTimeSpan = (ScalarType)CatalogLookup(SystemTimeSpanName);
+				return _systemTimeSpan;
 			}
-			set { FSystemTimeSpan = value; }
+			set { _systemTimeSpan = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemDateTime;
+		private ScalarType _systemDateTime;
 		public ScalarType SystemDateTime
 		{
 			get
 			{
-				if (FSystemDateTime == null)
-					FSystemDateTime = (ScalarType)CatalogLookup(CSystemDateTime);
-				return FSystemDateTime;
+				if (_systemDateTime == null)
+					_systemDateTime = (ScalarType)CatalogLookup(SystemDateTimeName);
+				return _systemDateTime;
 			}
-			set { FSystemDateTime = value; }
+			set { _systemDateTime = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemDate;
+		private ScalarType _systemDate;
 		public ScalarType SystemDate
 		{
 			get
 			{
-				if (FSystemDate == null)
-					FSystemDate = (ScalarType)CatalogLookup(CSystemDate);
-				return FSystemDate;
+				if (_systemDate == null)
+					_systemDate = (ScalarType)CatalogLookup(SystemDateName);
+				return _systemDate;
 			}
-			set { FSystemDate = value; }
+			set { _systemDate = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemTime;
+		private ScalarType _systemTime;
 		public ScalarType SystemTime
 		{
 			get
 			{
-				if (FSystemTime == null)
-					FSystemTime = (ScalarType)CatalogLookup(CSystemTime);
-				return FSystemTime;
+				if (_systemTime == null)
+					_systemTime = (ScalarType)CatalogLookup(SystemTimeName);
+				return _systemTime;
 			}
-			set { FSystemTime = value; }
+			set { _systemTime = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemBinary;
+		private ScalarType _systemBinary;
 		public ScalarType SystemBinary
 		{
 			get
 			{
-				if (FSystemBinary == null)
-					FSystemBinary = (ScalarType)CatalogLookup(CSystemBinary);
-				return FSystemBinary;
+				if (_systemBinary == null)
+					_systemBinary = (ScalarType)CatalogLookup(SystemBinaryName);
+				return _systemBinary;
 			}
-			set { FSystemBinary = value; }
+			set { _systemBinary = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemGraphic;
+		private ScalarType _systemGraphic;
 		public ScalarType SystemGraphic
 		{
 			get
 			{
-				if (FSystemGraphic == null)
-					FSystemGraphic = (ScalarType)CatalogLookup(CSystemGraphic);
-				return FSystemGraphic;
+				if (_systemGraphic == null)
+					_systemGraphic = (ScalarType)CatalogLookup(SystemGraphicName);
+				return _systemGraphic;
 			}
-			set { FSystemGraphic = value; }
+			set { _systemGraphic = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemError;
+		private ScalarType _systemError;
 		public ScalarType SystemError
 		{
 			get
 			{
-				if (FSystemError == null)
-					FSystemError = (ScalarType)CatalogLookup(CSystemError);
-				return FSystemError;
+				if (_systemError == null)
+					_systemError = (ScalarType)CatalogLookup(SystemErrorName);
+				return _systemError;
 			}
-			set { FSystemError = value; }
+			set { _systemError = value; }
 		}
 		
 		[Reference]
-		private ScalarType FSystemName;
+		private ScalarType _systemName;
 		public ScalarType SystemName
 		{
 			get
 			{
-				if (FSystemName == null)
-					FSystemName = (ScalarType)CatalogLookup(CSystemName);
-				return FSystemName;
+				if (_systemName == null)
+					_systemName = (ScalarType)CatalogLookup(SystemNameName);
+				return _systemName;
 			}
-			set { FSystemName = value; }
+			set { _systemName = value; }
 		}
 		
-		private IGenericType FSystemGeneric;
+		private IGenericType _systemGeneric;
 		public IGenericType SystemGeneric
 		{
 			get
 			{
-				if (FSystemGeneric == null)
-					FSystemGeneric = new GenericType();
-				return FSystemGeneric;
+				if (_systemGeneric == null)
+					_systemGeneric = new GenericType();
+				return _systemGeneric;
 			}
 		}
 		
-		private IGenericType FSystemNilGeneric;
+		private IGenericType _systemNilGeneric;
 		public IGenericType SystemNilGeneric
 		{
 			get
 			{
-				if (FSystemNilGeneric == null)
-					FSystemNilGeneric = new GenericType(true);
-				return FSystemNilGeneric;
+				if (_systemNilGeneric == null)
+					_systemNilGeneric = new GenericType(true);
+				return _systemNilGeneric;
 			}
 		}
 
-		private IRowType FSystemRow;
+		private IRowType _systemRow;
 		public IRowType SystemRow
 		{
 			get 
 			{
-				if (FSystemRow == null)
+				if (_systemRow == null)
 				{
-					FSystemRow = new RowType();
-					FSystemRow.IsGeneric = true;
+					_systemRow = new RowType();
+					_systemRow.IsGeneric = true;
 				}
-				return FSystemRow;
+				return _systemRow;
 			}
 		}
 		
-		private ITableType FSystemTable;
+		private ITableType _systemTable;
 		public ITableType SystemTable
 		{
 			get
 			{
-				if (FSystemTable == null)
+				if (_systemTable == null)
 				{
-					FSystemTable = new TableType();
-					FSystemTable.IsGeneric = true;
+					_systemTable = new TableType();
+					_systemTable.IsGeneric = true;
 				}
-				return FSystemTable;
+				return _systemTable;
 			}
 		}
 
-		private IListType FSystemList;
+		private IListType _systemList;
 		public IListType SystemList
 		{
 			get
 			{
-				if (FSystemList == null)
+				if (_systemList == null)
 				{
-					FSystemList = new ListType(SystemGeneric);
-					FSystemList.IsGeneric = true;
+					_systemList = new ListType(SystemGeneric);
+					_systemList.IsGeneric = true;
 				}
-				return FSystemList;
+				return _systemList;
 			}
 		}
 		
-		private ICursorType FSystemCursor;
+		private ICursorType _systemCursor;
 		public ICursorType SystemCursor
 		{
 			get
 			{
-				if (FSystemCursor == null)
+				if (_systemCursor == null)
 				{
-					FSystemCursor = new CursorType(SystemTable);
-					FSystemCursor.IsGeneric = true;
+					_systemCursor = new CursorType(SystemTable);
+					_systemCursor.IsGeneric = true;
 				}
-				return FSystemCursor;
+				return _systemCursor;
 			}
 		}
     }

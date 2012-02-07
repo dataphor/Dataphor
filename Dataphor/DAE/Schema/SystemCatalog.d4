@@ -1,4 +1,4 @@
-/*
+﻿/*
 	System Catalog Registration Script - Excluding Native Data Types
 	 © Copyright 2000-2008 Alphora
 	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -23,7 +23,7 @@ begin
 	create operator ToBoolean(const AValue : Short) : Boolean class "System.ShortToBooleanNode";
 	create operator ToBoolean(const AValue : Integer) : Boolean class "System.IntegerToBooleanNode";
 	create operator ToBoolean(const AValue : Long) : Boolean class "System.LongToBooleanNode";
-	create operator ToString(const AValue : generic) : String class "System.ObjectToStringNode";
+	create operator GenericToString(const AValue : generic) : String class "System.ObjectToStringNode";
 	create operator ToString(const AValue : Boolean) : String class "System.BooleanToStringNode" static tags { DAE.IsOrderPreserving = "True" };
 	create operator ToString(const AValue : Byte) : String class "System.ByteToStringNode";
 	create operator ToString(const AValue : Short) : String class "System.ShortToStringNode";
@@ -36,6 +36,8 @@ begin
 	create operator ToString(const AValue : Date) : String class "System.DateToStringNode";
 	create operator ToString(const AValue : TimeSpan) : String class "System.TimeSpanToStringNode";
 	create operator ToString(const AValue : Time) : String class "System.TimeToStringNode";
+	create operator ToBase64String(const AValue : Binary) : String class "System.BinaryToBase64StringNode";
+	create operator ToBase64String(const AValue : Graphic) : String class "System.BinaryToBase64StringNode";
 	create operator ToByte(const AValue : Boolean) : Byte class "System.BooleanToByteNode" static tags { DAE.IsOrderPreserving = "True" };
 	create operator ToByte(const AValue : String) : Byte class "System.StringToByteNode";
 	create operator ToByte(const AValue : Short) : Byte class "System.ShortToByteNode" static tags { DAE.IsOrderPreserving = "True" };
@@ -789,6 +791,7 @@ begin
 	create operator CommitApplicationTransaction(const AID : Guid) class "System.CommitApplicationTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator RollbackApplicationTransaction(const AID : Guid) class "System.RollbackApplicationTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator SaveLibraryCatalog(const ALibraryName : Name) class "System.SystemSaveLibraryCatalogNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+	create operator Diagnostics.ToDebugString(const AValue : generic) : String class "System.ObjectToStringNode";
 	create operator Diagnostics.EnableErrorLogging() class "System.SystemEnableErrorLoggingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.DisableErrorLogging() class "System.SystemDisableErrorLoggingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.LogError(const AError : Error) class "System.SystemLogErrorNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
@@ -1950,6 +1953,33 @@ begin
 		end;
 	end;
 
+	create operator Columns(const ARow : row) : table class "System.RowColumnsNode";
+	create operator Columns(const ATable : table) : table class "System.TableColumnsNode";
+	create operator ColumnDefaults(const ATable : table) : table class "System.ColumnDefaultsNode";
+	create operator ColumnConstraints(const ATable : table) : table class "System.ColumnConstraintsNode";
+	create operator ColumnEventHandlers(const ATable : table) : table class "System.ColumnEventHandlersNode";
+	create operator Keys(const ATable : table) : table class "System.KeysNode";
+	create operator KeyColumns(const ATable : table) : table class "System.KeyColumnsNode";
+	create operator Orders(const ATable : table) : table class "System.OrdersNode";
+	create operator OrderColumns(const ATable : table) : table class "System.OrderColumnsNode";
+	create operator Constraints(const ATable : table) : table class "System.ConstraintsNode";
+	create operator EventHandlers(const ATable : table) : table class "System.EventHandlersNode";
+	create operator References(const ATable : table) : table class "System.ReferencesNode";
+	create operator ReferenceColumns(const ATable : table) : table class "System.ReferenceColumnsNode";
+	grant usage on Columns(row) to role User;
+	grant usage on Columns(table) to role User;
+	grant usage on ColumnDefaults(table) to role User;
+	grant usage on ColumnConstraints(table) to role User;
+	grant usage on ColumnEventHandlers(table) to role User;
+	grant usage on Keys(table) to role User;
+	grant usage on KeyColumns(table) to role User;
+	grant usage on Orders(table) to role User;
+	grant usage on OrderColumns(table) to role User;
+	grant usage on Constraints(table) to role User;
+	grant usage on EventHandlers(table) to role User;
+	grant usage on References(table) to role User;
+	grant usage on ReferenceColumns(table) to role User;
+
 	grant usage on Abs(Decimal) to role User;                                                                                            
 	grant usage on Abs(Integer) to role User;                                                                                            
 	grant usage on Abs(Money) to role User;                                                                                            
@@ -2593,7 +2623,7 @@ begin
 	grant usage on ToShort(Integer) to role User;                                                                                        
 	grant usage on ToShort(Long) to role User;                                                                                           
 	grant usage on ToShort(String) to role User;                                                                                         
-	grant usage on ToString(generic) to role User;                                                                                       
+	grant usage on GenericToString(generic) to role User;                                                                                    
 	grant usage on ToString(Boolean) to role User;                                                                                       
 	grant usage on ToString(Byte) to role User;                                                                                          
 	grant usage on ToString(Date) to role User;                                                                                          
@@ -2607,6 +2637,8 @@ begin
 	grant usage on ToString(Time) to role User;                                                                                          
 	grant usage on ToString(TimeSpan) to role User;                                                                                      
 	grant usage on ToString(VersionNumber) to role User;                                                                                 
+	grant usage on ToBase64String(Binary) to role User;
+	grant usage on ToBase64String(Graphic) to role User;                                                                              
 	grant usage on ToTable(list) to role User;
 	grant usage on ToTable(list, Name) to role User;                                                                                     
 	grant usage on ToTable(list, Name, Name) to role User;

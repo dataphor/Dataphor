@@ -38,14 +38,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 			FIsModified = false;
 		}
 		
-		public Symbol(Schema.IDataType ADataType)
-		{
-			FName = String.Empty;
-			FDataType = ADataType;
-			FIsConstant = false;
-			FIsModified = false;
-		}
-		
 		public Symbol(Symbol ASymbol)
 		{
 			FName = ASymbol.Name;
@@ -90,42 +82,42 @@ namespace Alphora.Dataphor.DAE.Compiling
 			PushWindow(0);
 		}
 		
-		public Symbols(int AMaxStackDepth, int AMaxCallDepth) : base(AMaxStackDepth, AMaxCallDepth) 
+		public Symbols(int maxStackDepth, int maxCallDepth) : base(maxStackDepth, maxCallDepth) 
 		{ 
 			// Push an empty window onto the stack
 			PushWindow(0);
 		}
 		
-		public void SetIsModified(int AOffset)
+		public void SetIsModified(int offset)
 		{
 			#if DEBUG 
-			int LIndex = FCount - 1 - AOffset;
-			if ((LIndex >= FCount) || (!AllowExtraWindowAccess && (LIndex < Base)))
-				throw new BaseException(BaseException.Codes.InvalidStackIndex, AOffset.ToString());
-			FStack[LIndex].FIsModified = true;
+			int index = _count - 1 - offset;
+			if ((index >= _count) || (!AllowExtraWindowAccess && (index < Base)))
+				throw new BaseException(BaseException.Codes.InvalidStackIndex, offset.ToString());
+			_stack[index].FIsModified = true;
 			#else
-			FStack[FCount - 1 - AOffset].FIsModified = true;
+			_stack[_count - 1 - offset].FIsModified = true;
 			#endif
 		}
 
-		public bool IsValidVariableIdentifier(string AIdentifier, List<string> ANames)
+		public bool IsValidVariableIdentifier(string identifier, List<string> names)
 		{
 			// Returns true if the given identifier is a valid identifier in the current stack window.
 			// If the return value is false, ANames will contain the offending identifier.
 			// This only validates top-level variable names.  It is legitimate to declare a row variable
 			// that contains a column name that effectively hides a variable further down the stack.
-			for (int LIndex = FCount - 1; LIndex >= (AllowExtraWindowAccess ? 0 : Base); LIndex--)
+			for (int index = _count - 1; index >= (AllowExtraWindowAccess ? 0 : Base); index--)
 			{
 				#if DISALLOWAMBIGUOUSNAMES
-				if (Schema.Object.NamesEqual(FStack[LIndex].Name, AIdentifier) || Schema.Object.NamesEqual(AIdentifier, FStack[LIndex].Name))
+				if (Schema.Object.NamesEqual(_stack[index].Name, AIdentifier) || Schema.Object.NamesEqual(AIdentifier, _stack[index].Name))
 				{
-					ANames.Add(FStack[LIndex].Name);
+					ANames.Add(_stack[index].Name);
 					return false;
 				}
 				#else
-				if (String.Compare(FStack[LIndex].Name, AIdentifier) == 0)
+				if (String.Compare(_stack[index].Name, identifier) == 0)
 				{
-					ANames.Add(FStack[LIndex].Name);
+					names.Add(_stack[index].Name);
 					return false;
 				}
 				#endif
@@ -134,40 +126,40 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return true;
 		}
 
-		public int ResolveVariableIdentifier(string AIdentifier, out int AColumnIndex, List<string> ANames)
+		public int ResolveVariableIdentifier(string identifier, out int columnIndex, List<string> names)
 		{
-			AColumnIndex = -1;
-			int LVariableIndex = -1;
-			int LRowBase = AllowExtraWindowAccess ? FWindows.FrameRowBase : FWindows.CurrentStackWindow.FrameRowBase;
-			if (LRowBase < 0)
-				LRowBase = FCount;
-			for (int LIndex = FCount - 1; LIndex >= (AllowExtraWindowAccess ? 0 : Base); LIndex--)
+			columnIndex = -1;
+			int variableIndex = -1;
+			int rowBase = AllowExtraWindowAccess ? _windows.FrameRowBase : _windows.CurrentStackWindow.FrameRowBase;
+			if (rowBase < 0)
+				rowBase = _count;
+			for (int index = _count - 1; index >= (AllowExtraWindowAccess ? 0 : Base); index--)
 			{
 				// if it's a row type check each of the columns
-				if ((LIndex >= LRowBase) && (FStack[LIndex].DataType is Schema.RowType))
+				if ((index >= rowBase) && (_stack[index].DataType is Schema.RowType))
 				{
-					AColumnIndex = ((Schema.RowType)FStack[LIndex].DataType).Columns.IndexOf(AIdentifier, ANames);
-					if (AColumnIndex >= 0)
+					columnIndex = ((Schema.RowType)_stack[index].DataType).Columns.IndexOf(identifier, names);
+					if (columnIndex >= 0)
 					{
-						LVariableIndex = FCount - 1 - LIndex;
+						variableIndex = _count - 1 - index;
 						break;
 					}
 					else
-						if (ANames.Count > 0)
+						if (names.Count > 0)
 							break;
 				}
 
 				// check the object itself
-				if (Schema.Object.NamesEqual(FStack[LIndex].Name, AIdentifier))
+				if (Schema.Object.NamesEqual(_stack[index].Name, identifier))
 				{
-					if (LVariableIndex >= 0)
+					if (variableIndex >= 0)
 					{
-						ANames.Add(this[LVariableIndex].Name);
-						ANames.Add(FStack[LIndex].Name);
-						LVariableIndex = -1;
+						names.Add(this[variableIndex].Name);
+						names.Add(_stack[index].Name);
+						variableIndex = -1;
 						break;
 					}
-					LVariableIndex = FCount - 1 - LIndex;
+					variableIndex = _count - 1 - index;
 
 					// If AllowExtraWindowAccess is true, we are binding a known good aggregate call, so allow variable hiding.
 					if (AllowExtraWindowAccess)
@@ -175,13 +167,13 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 			}
 
-			return LVariableIndex;
+			return variableIndex;
 		}
 		
 		public bool HasCursorTypeVariables()
 		{
-			for (int LIndex = FCount - 1; LIndex >= (AllowExtraWindowAccess ? 0 : Base); LIndex--)
-				if (FStack[LIndex].DataType is Schema.ICursorType)
+			for (int index = _count - 1; index >= (AllowExtraWindowAccess ? 0 : Base); index--)
+				if (_stack[index].DataType is Schema.ICursorType)
 					return true;
 			return false;
 		}

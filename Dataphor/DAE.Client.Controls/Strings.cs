@@ -10,18 +10,18 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 {
 	public sealed class Strings
 	{
-		public const string CBaseName = "Alphora.Dataphor.DAE.Client.Controls.Strings";
+		public const string BaseName = "Alphora.Dataphor.DAE.Client.Controls.Strings";
 
-		public static string Get(string AResourceName, params object[] AArgs)
+		public static string Get(string resourceName, params object[] args)
 		{
-			return String.Format(Get(AResourceName), AArgs);
+			return String.Format(Get(resourceName), args);
 		}
 
-		private static ResourceManager FManager = new ResourceManager(CBaseName, typeof(Strings).Assembly);
+		private static ResourceManager _manager = new ResourceManager(BaseName, typeof(Strings).Assembly);
 
-		public static string Get(string AResourceName)
+		public static string Get(string resourceName)
 		{
-			return FManager.GetString(AResourceName);
+			return _manager.GetString(resourceName);
 		}
 	}
 }

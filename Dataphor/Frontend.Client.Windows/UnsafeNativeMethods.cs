@@ -12,45 +12,45 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[System.Security.SuppressUnmanagedCodeSecurity()]
 	internal class UnsafeNativeMethods
 	{
-		public const string CDLLUSER32 = "user32.dll";
+		public const string DLLUSER32 = "user32.dll";
 
-		public const string CEPPostMessage = "PostMessage";
-		public const string CEPSendMessage = "SendMessage";
-		public const string CEPEnableWindow = "EnableWindow";
-		public const string CEPGetSystemMenu = "GetSystemMenu";
-		public const string CEPEnableMenuItem = "EnableMenuItem";
-		public const string CEPInsertMenuItem = "InsertMenuItem";
-		public const string CEPDrawMenuBar = "DrawMenuBar";
-		public const string CEPGetFocus = "GetFocus";
+		public const string EPPostMessage = "PostMessage";
+		public const string EPSendMessage = "SendMessage";
+		public const string EPEnableWindow = "EnableWindow";
+		public const string EPGetSystemMenu = "GetSystemMenu";
+		public const string EPEnableMenuItem = "EnableMenuItem";
+		public const string EPInsertMenuItem = "InsertMenuItem";
+		public const string EPDrawMenuBar = "DrawMenuBar";
+		public const string EPGetFocus = "GetFocus";
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPPostMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPPostMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int PostMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPPostMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPPostMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int PostMessage(IntPtr hWnd, int msg, bool wParam, IntPtr lParam);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPEnableWindow, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPEnableWindow, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int EnableWindow(IntPtr hWnd, bool bEnable);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPDrawMenuBar, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPDrawMenuBar, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern bool DrawMenuBar(IntPtr hwnd);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPInsertMenuItem, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPInsertMenuItem, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern bool InsertMenuItem(IntPtr hMenu, int uItem, bool fByPosition, ref NativeMethods.MenuItemInfo lpmii);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPEnableMenuItem, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPEnableMenuItem, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern bool EnableMenuItem(IntPtr hMenu, int uID, int uEnabled);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPGetSystemMenu, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPGetSystemMenu, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPSendMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPSendMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPSendMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPSendMessage, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern int SendMessage(IntPtr hWnd, int msg, bool wParam, IntPtr lParam);
 
-		[DllImport(CDLLUSER32, EntryPoint = CEPGetFocus, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		[DllImport(DLLUSER32, EntryPoint = EPGetFocus, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern IntPtr GetFocus();
 	}
 }

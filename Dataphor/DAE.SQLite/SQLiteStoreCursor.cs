@@ -17,30 +17,30 @@ namespace Alphora.Dataphor.DAE.Store.SQLite
 {
     public class SQLiteStoreCursor : SQLStoreCursor
     {
-        public SQLiteStoreCursor(SQLiteStoreConnection AConnection, string ATableName, SQLIndex AIndex, bool AIsUpdatable) 
-            : base(AConnection, ATableName, AIndex, AIsUpdatable)
+        public SQLiteStoreCursor(SQLiteStoreConnection connection, string tableName, SQLIndex index, bool isUpdatable) 
+            : base(connection, tableName, index, isUpdatable)
         { 
             
         }
 
-		public SQLiteStoreCursor(SQLiteStoreConnection AConnection, string ATableName, List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
-			: base(AConnection, ATableName, AColumns, AIndex, AIsUpdatable)
+		public SQLiteStoreCursor(SQLiteStoreConnection connection, string tableName, List<string> columns, SQLIndex index, bool isUpdatable)
+			: base(connection, tableName, columns, index, isUpdatable)
         {	
 			
         }
 
-		public override object NativeToStoreValue(object AValue)
+		public override object NativeToStoreValue(object tempValue)
 		{
-			if (AValue is bool)
-				return (byte)((bool)AValue ? 1 : 0);
-			return base.NativeToStoreValue(AValue);
+			if (tempValue is bool)
+				return (byte)((bool)tempValue ? 1 : 0);
+			return base.NativeToStoreValue(tempValue);
 		}
 
-		public override object StoreToNativeValue(object AValue)
+		public override object StoreToNativeValue(object tempValue)
 		{
-			if (AValue is byte)
-				return ((byte)AValue) == 1;
-			return base.StoreToNativeValue(AValue);
+			if (tempValue is byte)
+				return ((byte)tempValue) == 1;
+			return base.StoreToNativeValue(tempValue);
 		}
         
         

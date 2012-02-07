@@ -16,131 +16,131 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 {
 	public class NativeSession
 	{
-		public NativeSession(NativeSessionInfo ANativeSessionInfo)
+		public NativeSession(NativeSessionInfo nativeSessionInfo)
 		{
-			FID = Guid.NewGuid();
-			FNativeSessionInfo = ANativeSessionInfo;
+			_iD = Guid.NewGuid();
+			_nativeSessionInfo = nativeSessionInfo;
 		}
 		
-		private Guid FID;
-		public Guid ID { get { return FID; } }
+		private Guid _iD;
+		public Guid ID { get { return _iD; } }
 		
-		private NativeSessionInfo FNativeSessionInfo;
-		public NativeSessionInfo NativeSessionInfo { get { return FNativeSessionInfo; } }
+		private NativeSessionInfo _nativeSessionInfo;
+		public NativeSessionInfo NativeSessionInfo { get { return _nativeSessionInfo; } }
 		
-		private SessionInfo FSessionInfo;
+		private SessionInfo _sessionInfo;
 		public SessionInfo SessionInfo
 		{
 			get
 			{
-				if (FSessionInfo == null)
-					FSessionInfo = NativeCLIUtility.NativeSessionInfoToSessionInfo(FNativeSessionInfo);
-				return FSessionInfo;
+				if (_sessionInfo == null)
+					_sessionInfo = NativeCLIUtility.NativeSessionInfoToSessionInfo(_nativeSessionInfo);
+				return _sessionInfo;
 			}
 		}
 		
-		private IServerSession FSession;
+		private IServerSession _session;
 		public IServerSession Session 
 		{ 
-			get { return FSession; } 
-			set { FSession = value; }
+			get { return _session; } 
+			set { _session = value; }
 		}
 		
-		private IServerProcess FProcess;
+		private IServerProcess _process;
 		public IServerProcess Process 
 		{ 
-			get { return FProcess; } 
-			set { FProcess = value; }
+			get { return _process; } 
+			set { _process = value; }
 		}
 		
-		public NativeResult Execute(string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
+		public NativeResult Execute(string statement, NativeParam[] paramsValue, NativeExecutionOptions options)
 		{
-			IServerScript LScript = FProcess.PrepareScript(AStatement);
+			IServerScript script = _process.PrepareScript(statement);
 			try
 			{
-				if (LScript.Batches.Count != 1)
+				if (script.Batches.Count != 1)
 					throw new ArgumentException("Execution statement must contain one, and only one, batch.");
 					
-				IServerBatch LBatch = LScript.Batches[0];
-				DataParams LDataParams = NativeMarshal.NativeParamsToDataParams(FProcess, AParams);
-				NativeResult LResult = new NativeResult();
-				LResult.Params = AParams;
+				IServerBatch batch = script.Batches[0];
+				DataParams dataParams = NativeMarshal.NativeParamsToDataParams(_process, paramsValue);
+				NativeResult result = new NativeResult();
+				result.Params = paramsValue;
 
-				if (LBatch.IsExpression())
+				if (batch.IsExpression())
 				{
-					IServerExpressionPlan LExpressionPlan = LBatch.PrepareExpression(LDataParams);
+					IServerExpressionPlan expressionPlan = batch.PrepareExpression(dataParams);
 					try
 					{
-						if (LExpressionPlan.DataType is Schema.TableType)
+						if (expressionPlan.DataType is Schema.TableType)
 						{
-							if (AOptions != NativeExecutionOptions.SchemaOnly)
+							if (options != NativeExecutionOptions.SchemaOnly)
 							{
-								IServerCursor LCursor = LExpressionPlan.Open(LDataParams);
+								IServerCursor cursor = expressionPlan.Open(dataParams);
 								try
 								{
-									LResult.Value = NativeMarshal.ServerCursorToNativeValue(FProcess, LCursor);
+									result.Value = NativeMarshal.ServerCursorToNativeValue(_process, cursor);
 								}
 								finally
 								{
-									LExpressionPlan.Close(LCursor);
+									expressionPlan.Close(cursor);
 								}
 							}
 							else
 							{
-								LResult.Value = NativeMarshal.TableVarToNativeTableValue(FProcess, LExpressionPlan.TableVar);
+								result.Value = NativeMarshal.TableVarToNativeTableValue(_process, expressionPlan.TableVar);
 							}
 						}
 						else
 						{
-							if (AOptions != NativeExecutionOptions.SchemaOnly)
+							if (options != NativeExecutionOptions.SchemaOnly)
 							{
-								using (DataValue LValue = LExpressionPlan.Evaluate(LDataParams))
+								using (DataValue tempValue = expressionPlan.Evaluate(dataParams))
 								{
-									LResult.Value = NativeMarshal.DataValueToNativeValue(FProcess, LValue);
+									result.Value = NativeMarshal.DataValueToNativeValue(_process, tempValue);
 								}
 							}
 							else
 							{
-								LResult.Value = NativeMarshal.DataTypeToNativeValue(FProcess, LExpressionPlan.DataType);
+								result.Value = NativeMarshal.DataTypeToNativeValue(_process, expressionPlan.DataType);
 							}
 						}
 					}
 					finally
 					{
-						LBatch.UnprepareExpression(LExpressionPlan);
+						batch.UnprepareExpression(expressionPlan);
 					}
 				}
 				else
 				{
-					IServerStatementPlan LStatementPlan = LBatch.PrepareStatement(LDataParams);
+					IServerStatementPlan statementPlan = batch.PrepareStatement(dataParams);
 					try
 					{
-						if (AOptions != NativeExecutionOptions.SchemaOnly)
-							LStatementPlan.Execute(LDataParams);
+						if (options != NativeExecutionOptions.SchemaOnly)
+							statementPlan.Execute(dataParams);
 					}
 					finally
 					{
-						LBatch.UnprepareStatement(LStatementPlan);
+						batch.UnprepareStatement(statementPlan);
 					}
 				}
 
-				if (AOptions != NativeExecutionOptions.SchemaOnly)
-					NativeMarshal.SetNativeOutputParams(FProcess, LResult.Params, LDataParams);
-				return LResult;
+				if (options != NativeExecutionOptions.SchemaOnly)
+					NativeMarshal.SetNativeOutputParams(_process, result.Params, dataParams);
+				return result;
 			}
 			finally
 			{
-				FProcess.UnprepareScript(LScript);
+				_process.UnprepareScript(script);
 			}
 		}
 		
-		public NativeResult[] Execute(NativeExecuteOperation[] AOperations)
+		public NativeResult[] Execute(NativeExecuteOperation[] operations)
 		{
-			NativeResult[] LResults = new NativeResult[AOperations.Length];
-			for (int LIndex = 0; LIndex < AOperations.Length; LIndex++)
-				LResults[LIndex] = Execute(AOperations[LIndex].Statement, AOperations[LIndex].Params, AOperations[LIndex].Options);
+			NativeResult[] results = new NativeResult[operations.Length];
+			for (int index = 0; index < operations.Length; index++)
+				results[index] = Execute(operations[index].Statement, operations[index].Params, operations[index].Options);
 				
-			return LResults;
+			return results;
 		}
 	}
 }

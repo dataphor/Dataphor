@@ -14,92 +14,92 @@ namespace Alphora.Dataphor.DAE.Service
 {
 	public class HandleManager
 	{
-		private int FNextHandle = Int32.MaxValue / 2;
+		private int _nextHandle = Int32.MaxValue / 2;
 
-		private object FHandleSync = new object();
+		private object _handleSync = new object();
 
-		private Dictionary<int, object> FHandles = new Dictionary<int, object>();
+		private Dictionary<int, object> _handles = new Dictionary<int, object>();
 		
-		private Dictionary<object, int> FHandleIndex = new Dictionary<object, int>(new ReferenceEqualityComparer());
+		private Dictionary<object, int> _handleIndex = new Dictionary<object, int>(new ReferenceEqualityComparer());
 
 		/// <summary>
 		/// Gets a handle for the given object and registers it in the handle dictionary.
 		/// </summary>
-		/// <param name="AObject"></param>
+		/// <param name="objectValue"></param>
 		/// <returns></returns>
-		public int GetHandle(object AObject)
+		public int GetHandle(object objectValue)
 		{
-			lock (FHandleSync)
+			lock (_handleSync)
 			{
-				int LResult = FNextHandle;
-				FNextHandle++;
-				FHandles.Add(LResult, AObject);
+				int result = _nextHandle;
+				_nextHandle++;
+				_handles.Add(result, objectValue);
 
-				IDisposableNotify LDisposableNotify = AObject as IDisposableNotify;
-				if (LDisposableNotify != null)
+				IDisposableNotify disposableNotify = objectValue as IDisposableNotify;
+				if (disposableNotify != null)
 				{
-					LDisposableNotify.Disposed += new EventHandler(ObjectDisposed);
-					FHandleIndex.Add(LDisposableNotify, LResult);
+					disposableNotify.Disposed += new EventHandler(ObjectDisposed);
+					_handleIndex.Add(disposableNotify, result);
 				}
 
-				return LResult;
+				return result;
 			}
 		}
 
-		private void ObjectDisposed(object ASender, EventArgs AArgs)
+		private void ObjectDisposed(object sender, EventArgs args)
 		{
-			((IDisposableNotify)ASender).Disposed -= new EventHandler(ObjectDisposed);
+			((IDisposableNotify)sender).Disposed -= new EventHandler(ObjectDisposed);
 
-			lock (FHandleSync)
+			lock (_handleSync)
 			{
-				int LHandle;
-				if (FHandleIndex.TryGetValue(ASender, out LHandle))
+				int handle;
+				if (_handleIndex.TryGetValue(sender, out handle))
 				{
-					FHandles.Remove(LHandle);
-					FHandleIndex.Remove(ASender);
+					_handles.Remove(handle);
+					_handleIndex.Remove(sender);
 				}
 			}
 		}
 		
-		private object GetObject(int AHandle)
+		private object GetObject(int handle)
 		{
-			lock (FHandleSync)
+			lock (_handleSync)
 			{
-				object LObject;
-				if (!FHandles.TryGetValue(AHandle, out LObject))
+				object objectValue;
+				if (!_handles.TryGetValue(handle, out objectValue))
 					throw new ServerException(ServerException.Codes.UnknownObjectHandle, ErrorSeverity.System);
-				return LObject;
+				return objectValue;
 			}
 		}
 		
-		public T GetObject<T>(int AHandle)
+		public T GetObject<T>(int handle)
 		{
-			return (T)GetObject(AHandle);
+			return (T)GetObject(handle);
 		}
 		
-		private object ReleaseObject(int AHandle)
+		private object ReleaseObject(int handle)
 		{
-			lock (FHandleSync)
+			lock (_handleSync)
 			{
-				object LObject;
-				if (!FHandles.TryGetValue(AHandle, out LObject))
+				object objectValue;
+				if (!_handles.TryGetValue(handle, out objectValue))
 					throw new ServerException(ServerException.Codes.UnknownObjectHandle, ErrorSeverity.System);
-				FHandles.Remove(AHandle);
+				_handles.Remove(handle);
 
-				IDisposableNotify LDisposableNotify = LObject as IDisposableNotify;
-				if (LDisposableNotify != null)
+				IDisposableNotify disposableNotify = objectValue as IDisposableNotify;
+				if (disposableNotify != null)
 				{
-					LDisposableNotify.Disposed -= new EventHandler(ObjectDisposed);
-					FHandleIndex.Remove(LDisposableNotify);
+					disposableNotify.Disposed -= new EventHandler(ObjectDisposed);
+					_handleIndex.Remove(disposableNotify);
 				}
 
-				return LObject;
+				return objectValue;
 			}
 		}
 		
-		public T ReleaseObject<T>(int AHandle)
+		public T ReleaseObject<T>(int handle)
 		{
-			return (T)ReleaseObject(AHandle);
+			return (T)ReleaseObject(handle);
 		}
 	}
 }

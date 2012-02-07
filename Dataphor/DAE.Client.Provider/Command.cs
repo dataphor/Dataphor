@@ -30,96 +30,96 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			Initialize(String.Empty, null, null);
 		}
 
-		public DAECommand(IContainer AContainer)
+		public DAECommand(IContainer container)
 		{
 			Initialize(String.Empty, null, null);
-			if (AContainer != null)
-				AContainer.Add(this);
+			if (container != null)
+				container.Add(this);
 		}
 
-		public DAECommand(string ACommandText)
+		public DAECommand(string commandText)
 		{
-			Initialize(ACommandText, null, null);
+			Initialize(commandText, null, null);
 		}
 
-		public DAECommand(string ACommandText, DAEConnection AConnection)
+		public DAECommand(string commandText, DAEConnection connection)
 		{
-			Initialize(ACommandText, AConnection, null);
+			Initialize(commandText, connection, null);
 		}
 
-		public DAECommand(string ACommandText, DAEConnection AConnection, DAETransaction ATransaction)
+		public DAECommand(string commandText, DAEConnection connection, DAETransaction transaction)
 		{
-			Initialize(ACommandText, AConnection, ATransaction);
+			Initialize(commandText, connection, transaction);
 		}
 
-		private void Initialize(string ACommandText, DAEConnection AConnection, DAETransaction ATransaction)
+		private void Initialize(string commandText, DAEConnection connection, DAETransaction transaction)
 		{
-			FCommandText = ACommandText;
-			Connection = AConnection;
-			FTransaction = ATransaction;
-			FParameters = new DAEParameterCollection(this);
-			FCommandType = CommandType.Text;
-			FUpdatedRowSource = UpdateRowSource.Both;
+			_commandText = commandText;
+			Connection = connection;
+			_transaction = transaction;
+			_parameters = new DAEParameterCollection(this);
+			_commandType = CommandType.Text;
+			_updatedRowSource = UpdateRowSource.Both;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			Cancel();
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
-		private bool FDesignTimeVisible;
+		private bool _designTimeVisible;
 		public override bool DesignTimeVisible
 		{
-			get { return FDesignTimeVisible; }
-			set { FDesignTimeVisible = value; }
+			get { return _designTimeVisible; }
+			set { _designTimeVisible = value; }
 		}
 
-		private bool FDataAdapterInUpdate;
+		private bool _dataAdapterInUpdate;
 		internal protected bool DataAdapterInUpdate
 		{
-			get { return FDataAdapterInUpdate; }
+			get { return _dataAdapterInUpdate; }
 			set 
 			{
-				if (FDataAdapterInUpdate != value)
-					FDataAdapterInUpdate = value;
+				if (_dataAdapterInUpdate != value)
+					_dataAdapterInUpdate = value;
 			}
 		}
 
-		private string FPreparedCommandText = String.Empty;
+		private string _preparedCommandText = String.Empty;
 		protected string PreparedCommandText
 		{
-			get { return FPreparedCommandText; }
-			set { FPreparedCommandText = value; }
+			get { return _preparedCommandText; }
+			set { _preparedCommandText = value; }
 		}
 
-		private string FCommandText;
+		private string _commandText;
 		[Category("Command")]
 		public override string CommandText
 		{
-			get { return FCommandText; }
+			get { return _commandText; }
 			set
 			{ 
 				CheckNotPrepared();
-				FCommandText = value;
+				_commandText = value;
 			}
 		}
 
-		private int FCommandTimeout;
+		private int _commandTimeout;
 		[Description("Not implemented")]
 		[Category("Command")]
 		[Browsable(false)]
 		public override int CommandTimeout
 		{
-			get { return FCommandTimeout; }
+			get { return _commandTimeout; }
 			set
 			{
 				CheckNotPrepared();
-				FCommandTimeout = value;
+				_commandTimeout = value;
 			}
 		}
 
-		private CommandType FCommandType;
+		private CommandType _commandType;
 		/// <summary>
 		/// When CommandType is TableDirect multiple tables are not supported.
 		/// CommandType StoredProcedure is not supported, use CommandType Text instead.
@@ -128,80 +128,80 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		[DefaultValue(CommandType.Text)]
 		public override CommandType CommandType
 		{
-			get { return FCommandType; }
+			get { return _commandType; }
 			set
 			{
 				CheckNotPrepared();
 				if ((value != CommandType.Text) && (value != CommandType.TableDirect))
 					throw new ProviderException(ProviderException.Codes.UnsupportedCommandType, CommandType.ToString());
-				FCommandType = value;
+				_commandType = value;
 			}
 		}
 
-		protected void ConnectionClose(object ASender, EventArgs AArgs)
+		protected void ConnectionClose(object sender, EventArgs args)
 		{
 			Cancel();
 		}
 
-		private DAEConnection FConnection;
+		private DAEConnection _connection;
 		[Category("Command")]
 		protected override DbConnection DbConnection
 		{
-			get { return FConnection; }
+			get { return _connection; }
 			set
 			{
 				CheckNotPrepared();
-				if (FConnection != null)
-					FConnection.BeforeClose -= new EventHandler(ConnectionClose);
+				if (_connection != null)
+					_connection.BeforeClose -= new EventHandler(ConnectionClose);
 				if (value != null)
 				{
-					FConnection = (DAEConnection)value;
-					FConnection.BeforeClose += new EventHandler(ConnectionClose);
+					_connection = (DAEConnection)value;
+					_connection.BeforeClose += new EventHandler(ConnectionClose);
 				}
 				else
-					FConnection = null;
+					_connection = null;
 			}
 		}
 
-		private DAEParameterCollection FParameters;
+		private DAEParameterCollection _parameters;
 
 		[Category("Command")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.DAEParameterCollectionEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public DAEParameterCollection DAEParameters
 		{
-			get { return FParameters; }
+			get { return _parameters; }
 		}
 
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		protected override DbParameterCollection DbParameterCollection
 		{
-			get { return FParameters; }
+			get { return _parameters; }
 		}
 
-		private DAETransaction FTransaction;
+		private DAETransaction _transaction;
 		[Category("Command")]
 		protected override DbTransaction DbTransaction
 		{
-			get { return FTransaction; }
+			get { return _transaction; }
 			set
 			{ 
 				CheckNotPrepared();
-				FTransaction = (DAETransaction)value;
+				_transaction = (DAETransaction)value;
 			}
 		}
 
-		private UpdateRowSource FUpdatedRowSource = UpdateRowSource.None;
+		private UpdateRowSource _updatedRowSource = UpdateRowSource.None;
 		[Category("Command")]
 		[DefaultValue(UpdateRowSource.Both)]
 		public override UpdateRowSource UpdatedRowSource
 		{
-			get { return FUpdatedRowSource; }
+			get { return _updatedRowSource; }
 			set
 			{
 				CheckNotPrepared();
-				FUpdatedRowSource = value;
+				_updatedRowSource = value;
 			}
 		}
 
@@ -214,7 +214,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		[Browsable(false)]
 		public bool IsPrepared
 		{
-			get { return FPreparedCommandText != String.Empty; }
+			get { return _preparedCommandText != String.Empty; }
 		}
 
 		public override void Cancel()
@@ -227,25 +227,25 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			return new DAEParameter();
 		}
 
-		private DataParams FDAERuntimeParams = null;
+		private DataParams _dAERuntimeParams = null;
 		internal protected DataParams DAERuntimeParams
 		{
-			get { return FDAERuntimeParams; }
+			get { return _dAERuntimeParams; }
 		}
 
-		internal protected IServerPlan FPlan;
+		internal protected IServerPlan _plan;
 
 		[Browsable(false)]
 		public Schema.TableType TableType
 		{
 			get
 			{
-				if (FPlan == null)
+				if (_plan == null)
 				{
 					Prepare();
-					FPlan = FConnection.ServerProcess.PrepareExpression(PreparedCommandText, FDAERuntimeParams);
+					_plan = _connection.ServerProcess.PrepareExpression(PreparedCommandText, _dAERuntimeParams);
 				}
-				return (FPlan is IServerExpressionPlan) ? (Schema.TableType)((IServerExpressionPlan)FPlan).DataType : null;
+				return (_plan is IServerExpressionPlan) ? (Schema.TableType)((IServerExpressionPlan)_plan).DataType : null;
 			}
 		}
 
@@ -254,8 +254,8 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			Prepare();
 			try
 			{
-				if (FPlan == null)
-					FPlan = FConnection.ServerProcess.PrepareStatement(PreparedCommandText, FDAERuntimeParams);
+				if (_plan == null)
+					_plan = _connection.ServerProcess.PrepareStatement(PreparedCommandText, _dAERuntimeParams);
 			}
 			catch (Exception AException)
 			{
@@ -264,25 +264,25 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			
 			try
 			{
-				((IServerStatementPlan)FPlan).Execute(FDAERuntimeParams);
+				((IServerStatementPlan)_plan).Execute(_dAERuntimeParams);
 			}
 			catch (Exception AException)
 			{
 				throw new Exception(String.Format("Error Executing statement {0}. Details ({1})", PreparedCommandText, ExceptionUtility.BriefDescription(AException)), AException);
 			}
 
-			FParameters.UpdateParams(FDAERuntimeParams);
+			_parameters.UpdateParams(_dAERuntimeParams);
 			return 0;	// Return 0 because Dataphor doesn't report modified rows
 		}
 
-		private CommandBehavior FBehavior;
+		private CommandBehavior _behavior;
 		[Browsable(false)]
 		public CommandBehavior Behavior
 		{
-			get { return FBehavior; }
+			get { return _behavior; }
 		}
 
-		protected override DbDataReader ExecuteDbDataReader(CommandBehavior ABehavior)
+		protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
 		{
 			//This if statement fixes a problem in DbDataAdapter Update abstraction. 
 			//The ExecuteReader method calls ExecuteNonQuery if the the DAEDataAdapter is performing an Update.
@@ -290,256 +290,256 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			//This satisfies the DbDataAdapter.Update abstraction requirements.
 			//Without this if statement there is a lot of code to reproduce.
 			//To remove this if statement, override DbDataAdapter.Update(DataRow[] ADataRows, DataTableMapping ATableMapping).
-			if (FDataAdapterInUpdate)
+			if (_dataAdapterInUpdate)
 			{
 				ExecuteNonQuery();
 				return new DAEDataReader(this);
 			}
 			Prepare();
-			FBehavior = ABehavior;
-			if (FPlan == null)
-				FPlan = FConnection.ServerProcess.PrepareExpression(PreparedCommandText, FDAERuntimeParams);
+			_behavior = behavior;
+			if (_plan == null)
+				_plan = _connection.ServerProcess.PrepareExpression(PreparedCommandText, _dAERuntimeParams);
 			try
 			{
-				IServerCursor LCursor = ((IServerExpressionPlan)FPlan).Open(FDAERuntimeParams);
+				IServerCursor cursor = ((IServerExpressionPlan)_plan).Open(_dAERuntimeParams);
 				try
 				{
-					FParameters.UpdateParams(FDAERuntimeParams);
-					return new DAEDataReader(LCursor, this);
+					_parameters.UpdateParams(_dAERuntimeParams);
+					return new DAEDataReader(cursor, this);
 				}
 				catch
 				{
-					((IServerExpressionPlan)FPlan).Close(LCursor);
+					((IServerExpressionPlan)_plan).Close(cursor);
 					throw;
 				}
 			}
 			catch
 			{
-				if (FPlan != null)
-					FConnection.ServerProcess.UnprepareExpression((IServerExpressionPlan)FPlan);
+				if (_plan != null)
+					_connection.ServerProcess.UnprepareExpression((IServerExpressionPlan)_plan);
 				throw;
 			}
 		}
 
 		public override object ExecuteScalar()
 		{
-			using (IDataReader LReader = ExecuteReader())
+			using (IDataReader reader = ExecuteReader())
 			{
-				if (!LReader.Read())
+				if (!reader.Read())
 					return DBNull.Value;
 				else
-					return LReader.GetValue(0);
+					return reader.GetValue(0);
 			}
 		}
 
-		protected string PrepareCommand(string ACommand)
+		protected string PrepareCommand(string command)
 		{
-			string LResult = ACommand;
-			if (FParameters.Count > 0)
+			string result = command;
+			if (_parameters.Count > 0)
 			{
-				if (FDAERuntimeParams == null)
-					FDAERuntimeParams = new DataParams();
-				foreach (DAEParameter LParameter in FParameters)
-					LResult = LParameter.Prepare(LResult, this);
+				if (_dAERuntimeParams == null)
+					_dAERuntimeParams = new DataParams();
+				foreach (DAEParameter parameter in _parameters)
+					result = parameter.Prepare(result, this);
 			}
 			else
-				FDAERuntimeParams = null;
+				_dAERuntimeParams = null;
 
-			return LResult;
+			return result;
 		}
 
 		public void UnPrepare()
 		{
-			FPreparedCommandText = String.Empty;
-			FDAERuntimeParams = null;
-			if (FPlan != null)
+			_preparedCommandText = String.Empty;
+			_dAERuntimeParams = null;
+			if (_plan != null)
 			{
-				IServerProcess LPlanProcess = FPlan.Process;
-				if (LPlanProcess != null)
+				IServerProcess planProcess = _plan.Process;
+				if (planProcess != null)
 				{
-					if (FPlan is IServerExpressionPlan)
-						LPlanProcess.UnprepareExpression((IServerExpressionPlan)FPlan);
+					if (_plan is IServerExpressionPlan)
+						planProcess.UnprepareExpression((IServerExpressionPlan)_plan);
 					else
-						LPlanProcess.UnprepareStatement((IServerStatementPlan)FPlan);
+						planProcess.UnprepareStatement((IServerStatementPlan)_plan);
 				}
-				FPlan = null;
+				_plan = null;
 			}
 		}
 
 		public override void Prepare()
 		{
-			string LCommand = FCommandText;
-			if (FPreparedCommandText == String.Empty)
+			string command = _commandText;
+			if (_preparedCommandText == String.Empty)
 			{
-				if (FConnection == null)
+				if (_connection == null)
 					throw new ProviderException(ProviderException.Codes.ConnectionRequired);
 
 				if (CommandType == CommandType.TableDirect)
-					LCommand = "select " + FCommandText + ';';
+					command = "select " + _commandText + ';';
 			}
-			FPreparedCommandText = PrepareCommand(LCommand);
+			_preparedCommandText = PrepareCommand(command);
 		}
 
 		public virtual object Clone()
 		{
-			DAECommand LNewInstance = new DAECommand();
-			LNewInstance.CommandText = FCommandText;
-			LNewInstance.CommandType = FCommandType;
-			LNewInstance.UpdatedRowSource = FUpdatedRowSource;
-			foreach(DAEParameter LParam in FParameters)
-				LNewInstance.Parameters.Add(LParam.Clone());
-			LNewInstance.Connection = FConnection;
-			LNewInstance.Transaction = FTransaction;
-			LNewInstance.CommandTimeout = FCommandTimeout;
-			return LNewInstance;
+			DAECommand newInstance = new DAECommand();
+			newInstance.CommandText = _commandText;
+			newInstance.CommandType = _commandType;
+			newInstance.UpdatedRowSource = _updatedRowSource;
+			foreach(DAEParameter param in _parameters)
+				newInstance.Parameters.Add(param.Clone());
+			newInstance.Connection = _connection;
+			newInstance.Transaction = _transaction;
+			newInstance.CommandTimeout = _commandTimeout;
+			return newInstance;
 		}
 	}
 
 	public class DAEParameterCollection : DbParameterCollection, IDataParameterCollection
 	{
-		public DAEParameterCollection(DAECommand ACommand) : base()
+		public DAEParameterCollection(DAECommand command) : base()
 		{
-			FCommand = ACommand;
-			FItems = new List<DAEParameter>();
+			_command = command;
+			_items = new List<DAEParameter>();
 		}
 
-		private List<DAEParameter> FItems;
+		private List<DAEParameter> _items;
 
-		private DAECommand FCommand;
+		private DAECommand _command;
 
 		public DAEParameter[] All
 		{
 			get
 			{
-				DAEParameter[] LParameters = new DAEParameter[Count];
+				DAEParameter[] parameters = new DAEParameter[Count];
 				for(int i = 0; i < Count; i++)
-					LParameters[i] = FItems[i];
-				return LParameters;
+					parameters[i] = _items[i];
+				return parameters;
 			}
 		}
 
-		public override bool Contains(string AParameterName)
+		public override bool Contains(string parameterName)
 		{
-			return IndexOf(AParameterName) > -1;
+			return IndexOf(parameterName) > -1;
 		}
 
-		public override int IndexOf(string AParameterName)
+		public override int IndexOf(string parameterName)
 		{
 			int index = 0;
-			foreach(DAEParameter LParameter in this) 
+			foreach(DAEParameter parameter in this) 
 			{
-				if (0 == CultureAwareCompare(LParameter.ParameterName, AParameterName))
+				if (0 == CultureAwareCompare(parameter.ParameterName, parameterName))
 					return index;
 				index++;
 			}
 			return -1;
 		}
 
-		public override int Count { get { return FItems.Count; } }
+		public override int Count { get { return _items.Count; } }
 		public override bool IsFixedSize { get { return false; } }
 		public override bool IsReadOnly { get { return false; } }
 		public override bool IsSynchronized { get { return false; } }
 		public override object SyncRoot { get { return this; } }
-		public override int Add(object AValue)
+		public override int Add(object value)
 		{
-			DAEParameter LValue = (DAEParameter)AValue;
-			FItems.Add(LValue);
-			return IndexOf(LValue);
+			DAEParameter localValue = (DAEParameter)value;
+			_items.Add(localValue);
+			return IndexOf(localValue);
 		}
-		public override void AddRange(Array AValues)
+		public override void AddRange(Array values)
 		{
-			foreach (DAEParameter LParam in AValues)
-				Add(LParam);
+			foreach (DAEParameter param in values)
+				Add(param);
 		}
 		public override void Clear()
 		{
-			FItems.Clear();
+			_items.Clear();
 		}
-		public override bool Contains(object AValue)
+		public override bool Contains(object value)
 		{
-			return FItems.Contains((DAEParameter)AValue);
+			return _items.Contains((DAEParameter)value);
 		}
-		public override void CopyTo(Array AArray, int AIndex)
+		public override void CopyTo(Array array, int index)
 		{
-			foreach (DAEParameter LParam in FItems)
+			foreach (DAEParameter param in _items)
 			{
-				AArray.SetValue(LParam, AIndex);
-				AIndex++;
+				array.SetValue(param, index);
+				index++;
 			}
 		}
 		public override IEnumerator GetEnumerator()
 		{
-			return FItems.GetEnumerator();
+			return _items.GetEnumerator();
 		}
-		protected override DbParameter GetParameter(int AIndex)
+		protected override DbParameter GetParameter(int index)
 		{
-			return FItems[AIndex];
+			return _items[index];
 		}
-		protected override DbParameter GetParameter(string AName)
+		protected override DbParameter GetParameter(string name)
 		{
-			return FItems[IndexOf(AName)];
+			return _items[IndexOf(name)];
 		}
-		public override int IndexOf(object AValue)
+		public override int IndexOf(object value)
 		{
-			return FItems.IndexOf((DAEParameter)AValue);
+			return _items.IndexOf((DAEParameter)value);
 		}
-		public override void Insert(int AIndex, object AValue)
+		public override void Insert(int index, object value)
 		{
-			FItems.Insert(AIndex, (DAEParameter)AValue);
+			_items.Insert(index, (DAEParameter)value);
 		}
-		public override void Remove(object AValue)
+		public override void Remove(object value)
 		{
-			FItems.Remove((DAEParameter)AValue);
+			_items.Remove((DAEParameter)value);
 		}
-		public override void RemoveAt(int AIndex)
+		public override void RemoveAt(int index)
 		{
-			FItems.RemoveAt(AIndex);
+			_items.RemoveAt(index);
 		}
-		public override void RemoveAt(string AName)
+		public override void RemoveAt(string name)
 		{
-			FItems.RemoveAt(IndexOf(AName));
+			_items.RemoveAt(IndexOf(name));
 		}
-		protected override void SetParameter(int AIndex, DbParameter AValue)
+		protected override void SetParameter(int index, DbParameter value)
 		{
-			FItems[AIndex] = (DAEParameter)AValue;
+			_items[index] = (DAEParameter)value;
 		}
-		protected override void SetParameter(string AName, DbParameter AValue)
+		protected override void SetParameter(string name, DbParameter value)
 		{
-			int LIndex = IndexOf(AName);
-			if (LIndex >= 0)
-				FItems.RemoveAt(LIndex);
-			FItems.Add((DAEParameter)AValue);
-		}
-
-		public int Add(string AParameterName, DAEDbType AType)
-		{
-			return Add(new DAEParameter(AParameterName, AType));
+			int index = IndexOf(name);
+			if (index >= 0)
+				_items.RemoveAt(index);
+			_items.Add((DAEParameter)value);
 		}
 
-		public int Add(string AParameterName, object AValue)
+		public int Add(string parameterName, DAEDbType type)
 		{
-			return Add(new DAEParameter(AParameterName, AValue));
+			return Add(new DAEParameter(parameterName, type));
 		}
 
-		public int Add(string AParameterName, DAEDbType AType, string ASourceColumnName)
+		public int Add(string parameterName, object value)
 		{
-			return Add(new DAEParameter(AParameterName, AType, ASourceColumnName));
+			return Add(new DAEParameter(parameterName, value));
 		}
 
-		public void UpdateParams(DataParams ADAERuntimeParams)
+		public int Add(string parameterName, DAEDbType type, string sourceColumnName)
 		{
-			if (ADAERuntimeParams == null)
+			return Add(new DAEParameter(parameterName, type, sourceColumnName));
+		}
+
+		public void UpdateParams(DataParams dAERuntimeParams)
+		{
+			if (dAERuntimeParams == null)
 				return;
-			foreach (DataParam LDAERuntimeParam in ADAERuntimeParams)
+			foreach (DataParam dAERuntimeParam in dAERuntimeParams)
 			{
-				if ((LDAERuntimeParam.Modifier == Language.Modifier.Out) || (LDAERuntimeParam.Modifier == Language.Modifier.Var))
-					((DAEParameter)this[LDAERuntimeParam.Name]).Value = LDAERuntimeParam.Value;
+				if ((dAERuntimeParam.Modifier == Language.Modifier.Out) || (dAERuntimeParam.Modifier == Language.Modifier.Var))
+					((DAEParameter)this[dAERuntimeParam.Name]).Value = dAERuntimeParam.Value;
 			}
 		}
 
-		private static int CultureAwareCompare(string AStringA, string AStringB)
+		private static int CultureAwareCompare(string stringA, string stringB)
 		{
-			return CultureInfo.CurrentCulture.CompareInfo.Compare(AStringA, AStringB, CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.IgnoreCase);
+			return CultureInfo.CurrentCulture.CompareInfo.Compare(stringA, stringB, CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.IgnoreCase);
 		}
 	}
 
@@ -572,51 +572,51 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 	public class DAEParameterConverter : TypeConverter
 	{
 		public DAEParameterConverter() : base() {}
-		public override bool CanConvertTo(ITypeDescriptorContext AContext, Type ADestinationType)
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			if (ADestinationType == typeof(InstanceDescriptor))
+			if (destinationType == typeof(InstanceDescriptor))
 				return true;
-			return base.CanConvertTo(AContext, ADestinationType);
+			return base.CanConvertTo(context, destinationType);
 		}
 
-		protected virtual int ShouldSerializeSignature(DAEParameter AParameter)
+		protected virtual int ShouldSerializeSignature(DAEParameter parameter)
 		{
-			PropertyDescriptorCollection LPropertyDescriptors = TypeDescriptor.GetProperties(AParameter);
-			int LSerializeSignature = 0;
-			if (LPropertyDescriptors["ParameterName"].ShouldSerializeValue(AParameter))
-				LSerializeSignature |= 1;
+			PropertyDescriptorCollection propertyDescriptors = TypeDescriptor.GetProperties(parameter);
+			int serializeSignature = 0;
+			if (propertyDescriptors["ParameterName"].ShouldSerializeValue(parameter))
+				serializeSignature |= 1;
 
-			if (LPropertyDescriptors["DAEDbType"].ShouldSerializeValue(AParameter))
-				LSerializeSignature |= 2;
+			if (propertyDescriptors["DAEDbType"].ShouldSerializeValue(parameter))
+				serializeSignature |= 2;
 			
-			if (LPropertyDescriptors["SourceColumn"].ShouldSerializeValue(AParameter))
-				LSerializeSignature |= 4;
+			if (propertyDescriptors["SourceColumn"].ShouldSerializeValue(parameter))
+				serializeSignature |= 4;
 
 			if 
 				(
-				LPropertyDescriptors["Size"].ShouldSerializeValue(AParameter) ||
-				LPropertyDescriptors["Direction"].ShouldSerializeValue(AParameter) ||
-				LPropertyDescriptors["IsNullable"].ShouldSerializeValue(AParameter) ||
-				LPropertyDescriptors["Precision"].ShouldSerializeValue(AParameter) ||
-				LPropertyDescriptors["Scale"].ShouldSerializeValue(AParameter) ||
-				LPropertyDescriptors["SourceVersion"].ShouldSerializeValue(AParameter)
+				propertyDescriptors["Size"].ShouldSerializeValue(parameter) ||
+				propertyDescriptors["Direction"].ShouldSerializeValue(parameter) ||
+				propertyDescriptors["IsNullable"].ShouldSerializeValue(parameter) ||
+				propertyDescriptors["Precision"].ShouldSerializeValue(parameter) ||
+				propertyDescriptors["Scale"].ShouldSerializeValue(parameter) ||
+				propertyDescriptors["SourceVersion"].ShouldSerializeValue(parameter)
 				)
-				LSerializeSignature |= 8;
+				serializeSignature |= 8;
 
-			return LSerializeSignature;
+			return serializeSignature;
 		}
 
-		protected virtual InstanceDescriptor GetInstanceDescriptor(DAEParameter AParameter)
+		protected virtual InstanceDescriptor GetInstanceDescriptor(DAEParameter parameter)
 		{
-			ConstructorInfo LInfo;
-			Type LType = AParameter.GetType();
-			switch (ShouldSerializeSignature(AParameter))
+			ConstructorInfo info;
+			Type type = parameter.GetType();
+			switch (ShouldSerializeSignature(parameter))
 			{
 				case 0:
 				case 1:
 				case 2:
 				case 3:
-					LInfo = LType.GetConstructor
+					info = type.GetConstructor
 						(
 						new Type[] 
 							{
@@ -626,18 +626,18 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 						);
 					return new InstanceDescriptor
 						(
-						LInfo,
+						info,
 						new object[]
 							{
-								AParameter.ParameterName,
-								AParameter.DAEDbType
+								parameter.ParameterName,
+								parameter.DAEDbType
 							}
 						);
 				case 4:
 				case 5:
 				case 6:
 				case 7:
-					LInfo = LType.GetConstructor
+					info = type.GetConstructor
 						(
 						new Type[] 
 							{
@@ -648,16 +648,16 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 						);
 					return new InstanceDescriptor
 						(
-						LInfo,
+						info,
 						new object[]
 							{
-								AParameter.ParameterName,
-								AParameter.DAEDbType,
-								AParameter.SourceColumn
+								parameter.ParameterName,
+								parameter.DAEDbType,
+								parameter.SourceColumn
 							}
 						);
 				default:
-					LInfo = LType.GetConstructor
+					info = type.GetConstructor
 						(
 						new Type[] 
 							{
@@ -675,34 +675,34 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 						);
 					return new InstanceDescriptor
 						(
-						LInfo,
+						info,
 						new object[]
 							{
-								AParameter.ParameterName,
-								AParameter.DAEDbType,
-								AParameter.Size,
-								AParameter.Direction,
-								AParameter.IsNullable,
-								AParameter.Precision,
-								AParameter.Scale,
-								AParameter.SourceColumn,
-								AParameter.SourceVersion,
-								AParameter.Value
+								parameter.ParameterName,
+								parameter.DAEDbType,
+								parameter.Size,
+								parameter.Direction,
+								parameter.IsNullable,
+								parameter.Precision,
+								parameter.Scale,
+								parameter.SourceColumn,
+								parameter.SourceVersion,
+								parameter.Value
 							}
 						);
 			}
 		}
 
-		public override object ConvertTo(ITypeDescriptorContext AContext, System.Globalization.CultureInfo ACulture, object AValue, Type ADestinationType)
+		public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
 		{
-			DAEParameter LParameter = AValue as DAEParameter;
+			DAEParameter parameter = value as DAEParameter;
 			if 
 				(
-				(ADestinationType == typeof(InstanceDescriptor)) &&
-				(LParameter != null)
+				(destinationType == typeof(InstanceDescriptor)) &&
+				(parameter != null)
 				)
-				return GetInstanceDescriptor(LParameter);	
-			return base.ConvertTo(AContext, ACulture, AValue, ADestinationType);
+				return GetInstanceDescriptor(parameter);	
+			return base.ConvertTo(context, culture, value, destinationType);
 		}
 	}
 
@@ -714,76 +714,76 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			Initialize(String.Empty, DAEDbType.String, ParameterDirection.Input, true, "");
 		}
 
-		public DAEParameter(string AName, DAEDbType AType)
+		public DAEParameter(string name, DAEDbType type)
 		{
-			Initialize(AName, AType, ParameterDirection.Input, true, String.Empty);
+			Initialize(name, type, ParameterDirection.Input, true, String.Empty);
 		}
 
-		public DAEParameter(string AName, DAEDbType AType, string ASourceColumnName)
+		public DAEParameter(string name, DAEDbType type, string sourceColumnName)
 		{
-			Initialize(AName, AType, ParameterDirection.Input, true, ASourceColumnName);
+			Initialize(name, type, ParameterDirection.Input, true, sourceColumnName);
 		}
 
-		public DAEParameter(string AName, DAEDbType AType, ParameterDirection ADirection)
+		public DAEParameter(string name, DAEDbType type, ParameterDirection direction)
 		{
-			Initialize(AName, AType, ADirection, true, String.Empty);
+			Initialize(name, type, direction, true, String.Empty);
 		}
 
-		public DAEParameter(string AName, object AValue)
+		public DAEParameter(string name, object value)
 		{
-			FName = AName;
-			FValue = AValue;
+			_name = name;
+			_value = value;
 		}
 
 		public DAEParameter
 			(
-			string AName,
-			DAEDbType AType,
-			int ASize,
-			ParameterDirection ADirection,
-			bool AIsNullable,
-			byte APrecision,
-			byte AScale,
-			string ASourceColumnName,
-			DataRowVersion ASrcVersion,
-			object AValue
+			string name,
+			DAEDbType type,
+			int size,
+			ParameterDirection direction,
+			bool isNullable,
+			byte precision,
+			byte scale,
+			string sourceColumnName,
+			DataRowVersion srcVersion,
+			object value
 			)
 		{
-			FName = AName;
-			DAEDbType = AType;
-			FSize = ASize;
-			FDirection = ADirection;
-			FIsNullable = AIsNullable;
-			FPrecision = APrecision;
-			FScale = AScale;
-			SourceColumn = ASourceColumnName;
-			FSourceVersion = ASrcVersion;
-			FValue = AValue;
+			_name = name;
+			DAEDbType = type;
+			_size = size;
+			_direction = direction;
+			_isNullable = isNullable;
+			_precision = precision;
+			_scale = scale;
+			SourceColumn = sourceColumnName;
+			_sourceVersion = srcVersion;
+			_value = value;
 		}
 
-		private void Initialize(string AName, DAEDbType AType, ParameterDirection ADirection, bool AIsNullable, string ASourceColumn)
+		private void Initialize(string name, DAEDbType type, ParameterDirection direction, bool isNullable, string sourceColumn)
 		{
-			FName = AName;
-			DAEDbType = AType;
-			FDirection = ADirection;
-			FIsNullable = AIsNullable;
-			SourceColumn = ASourceColumn;
+			_name = name;
+			DAEDbType = type;
+			_direction = direction;
+			_isNullable = isNullable;
+			SourceColumn = sourceColumn;
 		}
 
 		/// <summary> Maps a DAEDbType to an Dataphor Schema.DataType </summary>
-		public static Schema.IDataType DataTypeFromDAEDbType(DAEDbType ADAEDbType, DAEConnection AConnection)
+		public static Schema.IDataType DataTypeFromDAEDbType(DAEDbType dAEDbType, DAEConnection connection)
 		{
-			switch (ADAEDbType)
+			switch (dAEDbType)
 			{
-				case DAEDbType.String : return AConnection.ServerProcess.DataTypes.SystemString;
-				case DAEDbType.Boolean : return AConnection.ServerProcess.DataTypes.SystemBoolean;
-				case DAEDbType.Byte : return AConnection.ServerProcess.DataTypes.SystemByte;
-				case DAEDbType.Short : return AConnection.ServerProcess.DataTypes.SystemShort;
-				case DAEDbType.Integer : return AConnection.ServerProcess.DataTypes.SystemInteger;
-				case DAEDbType.Long : return AConnection.ServerProcess.DataTypes.SystemLong;
-				case DAEDbType.Decimal : return AConnection.ServerProcess.DataTypes.SystemDecimal;
-				case DAEDbType.GUID : return AConnection.ServerProcess.DataTypes.SystemGuid;
-				case DAEDbType.Money : return AConnection.ServerProcess.DataTypes.SystemMoney;
+				case DAEDbType.String : return connection.ServerProcess.DataTypes.SystemString;
+				case DAEDbType.Boolean : return connection.ServerProcess.DataTypes.SystemBoolean;
+				case DAEDbType.Byte : return connection.ServerProcess.DataTypes.SystemByte;
+				case DAEDbType.Short : return connection.ServerProcess.DataTypes.SystemShort;
+				case DAEDbType.Integer : return connection.ServerProcess.DataTypes.SystemInteger;
+				case DAEDbType.Long : return connection.ServerProcess.DataTypes.SystemLong;
+				case DAEDbType.Decimal : return connection.ServerProcess.DataTypes.SystemDecimal;
+				case DAEDbType.GUID : return connection.ServerProcess.DataTypes.SystemGuid;
+				case DAEDbType.Money : return connection.ServerProcess.DataTypes.SystemMoney;
 				#if UseUnsignedIntegers
 				case DAEDbType.PByte : return AConnection.ServerProcess.DataTypes.SystemPByte;
 				case DAEDbType.PShort : return AConnection.ServerProcess.DataTypes.SystemPShort;
@@ -794,17 +794,17 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 				case DAEDbType.ULong : return AConnection.ServerProcess.DataTypes.SystemULong;
 				case DAEDbType.UShort : return AConnection.ServerProcess.DataTypes.SystemUShort;
 				#endif
-				case DAEDbType.TimeSpan : return AConnection.ServerProcess.DataTypes.SystemTimeSpan;
-				case DAEDbType.DateTime : return AConnection.ServerProcess.DataTypes.SystemDateTime;
-				case DAEDbType.Raw : return AConnection.ServerProcess.DataTypes.SystemBinary;
-				default : return AConnection.ServerProcess.DataTypes.SystemBinary;
+				case DAEDbType.TimeSpan : return connection.ServerProcess.DataTypes.SystemTimeSpan;
+				case DAEDbType.DateTime : return connection.ServerProcess.DataTypes.SystemDateTime;
+				case DAEDbType.Raw : return connection.ServerProcess.DataTypes.SystemBinary;
+				default : return connection.ServerProcess.DataTypes.SystemBinary;
 			}
 		}
 
 		/// <summary> Maps a DAEDbType to a DBType. </summary>
-		private DbType DbTypeFromDAEDbType(DAEDbType ADAEDbType)
+		private DbType DbTypeFromDAEDbType(DAEDbType dAEDbType)
 		{
-			switch (ADAEDbType)
+			switch (dAEDbType)
 			{
 				case DAEDbType.Boolean : return DbType.Boolean;
 				case DAEDbType.Byte : return DbType.Byte;
@@ -833,10 +833,10 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			}
 		}
 
-		private DAEDbType DAEDbTypeFromDbType(DbType ADbType)
+		private DAEDbType DAEDbTypeFromDbType(DbType dbType)
 		{
 
-			switch (ADbType)
+			switch (dbType)
 			{
 				case DbType.String : 
 				case DbType.StringFixedLength :
@@ -874,34 +874,34 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			}
 		}
 
-		private DAEDbType FType = DAEDbType.String;
+		private DAEDbType _type = DAEDbType.String;
 		[DefaultValue(DAEDbType.String)]
 		[Description("The Dataphor DAE type.")]
 		[Category("Data")]
 		[RefreshProperties(RefreshProperties.All)]
 		public DAEDbType DAEDbType
 		{
-			get { return FType; }
+			get { return _type; }
 			set
 			{
-				if (FType != value)
+				if (_type != value)
 				{
-					FDbType = DbTypeFromDAEDbType(value);
-					FType = value;
+					_dbType = DbTypeFromDAEDbType(value);
+					_type = value;
 				}
 			}
 		}
 
-		private DbType FDbType = DbType.String;
+		private DbType _dbType = DbType.String;
 		public override DbType DbType
 		{
-			get { return FDbType; }
+			get { return _dbType; }
 			set
 			{
-				if (FDbType != value)
+				if (_dbType != value)
 				{
-					FType = DAEDbTypeFromDbType(value);
-					FDbType = value;
+					_type = DAEDbTypeFromDbType(value);
+					_dbType = value;
 				}
 			}
 		}
@@ -911,87 +911,87 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			DbType = DbType.String;
 		}
 
-		private ParameterDirection FDirection = ParameterDirection.Input;
+		private ParameterDirection _direction = ParameterDirection.Input;
 		public override ParameterDirection Direction
 		{
-			get { return FDirection; }
-			set { FDirection = value; }
+			get { return _direction; }
+			set { _direction = value; }
 		}
 
-		private bool FIsNullable;
+		private bool _isNullable;
 		public override bool IsNullable
 		{
-			get { return FIsNullable; }
-			set { FIsNullable = value; }
+			get { return _isNullable; }
+			set { _isNullable = value; }
 		}
 
-		private bool FSourceColumnNullMapping;
+		private bool _sourceColumnNullMapping;
 		public override bool SourceColumnNullMapping 
 		{
-			get { return FSourceColumnNullMapping; }
-			set { FSourceColumnNullMapping = value; }
+			get { return _sourceColumnNullMapping; }
+			set { _sourceColumnNullMapping = value; }
 		}
 
-		private string FName;
+		private string _name;
 		public override string ParameterName
 		{
-			get { return FName; }
-			set { FName = value; }
+			get { return _name; }
+			set { _name = value; }
 		}
 
-		private string FSourceColumn;
+		private string _sourceColumn;
 		public override string SourceColumn
 		{
-			get { return FSourceColumn; }
-			set { FSourceColumn = value; }
+			get { return _sourceColumn; }
+			set { _sourceColumn = value; }
 		}
 
-		private DataRowVersion FSourceVersion = DataRowVersion.Current;
+		private DataRowVersion _sourceVersion = DataRowVersion.Current;
 		public override DataRowVersion SourceVersion
 		{
-			get { return FSourceVersion; }
-			set { FSourceVersion = value; }
+			get { return _sourceVersion; }
+			set { _sourceVersion = value; }
 		}
 
-		private object FValue;
+		private object _value;
 		public override object Value
 		{
-			get { return FValue; }
-			set { FValue = value; }
+			get { return _value; }
+			set { _value = value; }
 		}
 
-		private byte FPrecision = 0;
+		private byte _precision = 0;
 		[DefaultValue(0)]
 		[Category("Data")]
 		public byte Precision
 		{
-			get { return FPrecision; }
-			set { FPrecision = value; }
+			get { return _precision; }
+			set { _precision = value; }
 		}
 
-		private byte FScale = 0;
+		private byte _scale = 0;
 		[DefaultValue(0)]
 		[Category("Data")]
 		public byte Scale
 		{
-			get { return FScale; }
-			set { FScale = value; }
+			get { return _scale; }
+			set { _scale = value; }
 		}
 
-		private int FSize;
+		private int _size;
 		/// <summary>
 		/// Size is no-op for DAE.
 		/// </summary>
 		[DefaultValue(0)]
 		public override int Size
 		{
-			get { return FSize; }
-			set { FSize = value; }
+			get { return _size; }
+			set { _size = value; }
 		}
 
-		public static Language.Modifier Modifier(ParameterDirection ADirection)
+		public static Language.Modifier Modifier(ParameterDirection direction)
 		{
-			switch (ADirection)
+			switch (direction)
 			{
 				case ParameterDirection.Input : return Language.Modifier.In;
 				case ParameterDirection.InputOutput : return Language.Modifier.Var;
@@ -1001,9 +1001,9 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			}
 		}
 
-		public static object NativeValue(Alphora.Dataphor.DAE.Runtime.Data.DataValue AValue, DAEConnection AConnection)
+		public static object NativeValue(Alphora.Dataphor.DAE.Runtime.Data.DataValue value, DAEConnection connection)
 		{
-			return AValue.AsNative;
+			return value.AsNative;
 		}
 
 /*
@@ -1016,32 +1016,32 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		}
 */
 
-		internal string Prepare(string ACommandText, DAECommand ACommand)
+		internal string Prepare(string commandText, DAECommand command)
 		{
-			if (ACommandText.IndexOf(ParameterName) > -1)
+			if (commandText.IndexOf(ParameterName) > -1)
 			{
-				DataParam LRuntimeParam = null;
-				if (ACommand.DAERuntimeParams.IndexOf(ParameterName) < 0)
+				DataParam runtimeParam = null;
+				if (command.DAERuntimeParams.IndexOf(ParameterName) < 0)
 				{
 					if ((Direction == ParameterDirection.Output) || (Direction == ParameterDirection.ReturnValue))
-						LRuntimeParam = new DataParam(ParameterName, DataTypeFromDAEDbType(FType, (DAEConnection)ACommand.Connection), Modifier(Direction));
+						runtimeParam = new DataParam(ParameterName, DataTypeFromDAEDbType(_type, (DAEConnection)command.Connection), Modifier(Direction));
 					else
-						LRuntimeParam = new DataParam(ParameterName, DataTypeFromDAEDbType(FType, (DAEConnection)ACommand.Connection), Modifier(Direction), FValue);
-					ACommand.DAERuntimeParams.Add(LRuntimeParam);
+						runtimeParam = new DataParam(ParameterName, DataTypeFromDAEDbType(_type, (DAEConnection)command.Connection), Modifier(Direction), _value);
+					command.DAERuntimeParams.Add(runtimeParam);
 				}
 				else
 				{
-					LRuntimeParam = ACommand.DAERuntimeParams[ParameterName];
+					runtimeParam = command.DAERuntimeParams[ParameterName];
 					if ((Direction != ParameterDirection.Output) && (Direction != ParameterDirection.ReturnValue))
-						LRuntimeParam.Value = FValue;
+						runtimeParam.Value = _value;
 				}
 			}
-			return ACommandText;
+			return commandText;
 		}
 
 		public virtual object Clone()
 		{
-			return new DAEParameter(FName, FType, FSize, FDirection, FIsNullable, FPrecision, FScale, FSourceColumn, FSourceVersion, FValue);
+			return new DAEParameter(_name, _type, _size, _direction, _isNullable, _precision, _scale, _sourceColumn, _sourceVersion, _value);
 		}
 	}
 }

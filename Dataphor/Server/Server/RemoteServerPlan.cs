@@ -20,102 +20,102 @@ namespace Alphora.Dataphor.DAE.Server
 	// RemoteServerPlan	
 	public abstract class RemoteServerPlan : RemoteServerChildObject, IServerPlanBase, IRemoteServerPlan
 	{
-		protected internal RemoteServerPlan(RemoteServerProcess AProcess, ServerPlan AServerPlan)
+		protected internal RemoteServerPlan(RemoteServerProcess process, ServerPlan serverPlan)
 		{
-			FProcess = AProcess;
-			FServerPlan = AServerPlan;
+			_process = process;
+			_serverPlan = serverPlan;
 			AttachServerPlan();
 		}
 		
 		private void AttachServerPlan()
 		{
-			FServerPlan.Disposed += new EventHandler(FServerPlanDisposed);
-			FServerPlan.Released += new EventHandler(FServerPlanDisposed);
+			_serverPlan.Disposed += new EventHandler(FServerPlanDisposed);
+			_serverPlan.Released += new EventHandler(FServerPlanDisposed);
 		}
 		
-		private void FServerPlanDisposed(object ASender, EventArgs AArgs)
+		private void FServerPlanDisposed(object sender, EventArgs args)
 		{
 			Dispose();
 		}
 		
 		private void DetachServerPlan()
 		{
-			FServerPlan.Disposed -= new EventHandler(FServerPlanDisposed);
-			FServerPlan.Released -= new EventHandler(FServerPlanDisposed);
+			_serverPlan.Disposed -= new EventHandler(FServerPlanDisposed);
+			_serverPlan.Released -= new EventHandler(FServerPlanDisposed);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FServerPlan != null)
+			if (_serverPlan != null)
 			{
 				DetachServerPlan();
 				//FServerPlan.Dispose(); // Do not dispose the base plan, disposal will be handled by the server (it may be cached)
-				FServerPlan = null;
+				_serverPlan = null;
 			}
 			
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		protected RemoteServerProcess FProcess;
-		public RemoteServerProcess Process { get { return FProcess; } }
+		protected RemoteServerProcess _process;
+		public RemoteServerProcess Process { get { return _process; } }
 		
-		IRemoteServerProcess IRemoteServerPlan.Process { get { return FProcess; } }
+		IRemoteServerProcess IRemoteServerPlan.Process { get { return _process; } }
 		
-		protected ServerPlan FServerPlan;
-		internal ServerPlan ServerPlan { get { return FServerPlan; } }
+		protected ServerPlan _serverPlan;
+		internal ServerPlan ServerPlan { get { return _serverPlan; } }
 		
 		public abstract void Unprepare();
 		
 		// Execution
-		internal Exception WrapException(Exception AException)
+		internal Exception WrapException(Exception exception)
 		{
-			return RemoteServer.WrapException(AException);
+			return RemoteServer.WrapException(exception);
 		}
 
 		public Exception[] Messages
 		{
 			get
 			{
-				Exception[] LMessages = new Exception[FServerPlan.Messages.Count];
-				for (int LIndex = 0; LIndex < FServerPlan.Messages.Count; LIndex++)
-					LMessages[LIndex] = FServerPlan.Messages[LIndex];
-				return LMessages;
+				Exception[] messages = new Exception[_serverPlan.Messages.Count];
+				for (int index = 0; index < _serverPlan.Messages.Count; index++)
+					messages[index] = _serverPlan.Messages[index];
+				return messages;
 			}
 		}
 		
-		public PlanStatistics PlanStatistics { get { return FServerPlan.PlanStatistics; } }
+		public PlanStatistics PlanStatistics { get { return _serverPlan.PlanStatistics; } }
 		
-		public ProgramStatistics ProgramStatistics { get { return FServerPlan.ProgramStatistics; } }
+		public ProgramStatistics ProgramStatistics { get { return _serverPlan.ProgramStatistics; } }
 		
 		public void CheckCompiled()
 		{
-			FServerPlan.CheckCompiled();
+			_serverPlan.CheckCompiled();
 		}
 		
-		public Guid ID { get { return FServerPlan.ID; } }
+		public Guid ID { get { return _serverPlan.ID; } }
 	}
 
 	// RemoteServerStatementPlan	
 	public class RemoteServerStatementPlan : RemoteServerPlan, IRemoteServerStatementPlan
 	{
-		protected internal RemoteServerStatementPlan(RemoteServerProcess AProcess, ServerStatementPlan APlan) : base(AProcess, APlan) { }
+		protected internal RemoteServerStatementPlan(RemoteServerProcess process, ServerStatementPlan plan) : base(process, plan) { }
 		
-		internal ServerStatementPlan ServerStatementPlan { get { return (ServerStatementPlan)FServerPlan; } }
+		internal ServerStatementPlan ServerStatementPlan { get { return (ServerStatementPlan)_serverPlan; } }
 		
 		public override void Unprepare()
 		{
-			FProcess.UnprepareStatement(this);
+			_process.UnprepareStatement(this);
 		}
 		
-		public void Execute(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
+		public void Execute(ref RemoteParamData paramsValue, out ProgramStatistics executeTime, ProcessCallInfo callInfo)
 		{
-			FProcess.ProcessCallInfo(ACallInfo);
+			_process.ProcessCallInfo(callInfo);
 			try
 			{
-				DataParams LParams = FProcess.RemoteParamDataToDataParams(AParams);
-				ServerStatementPlan.Execute(LParams);
-				FProcess.DataParamsToRemoteParamData(LParams, ref AParams);
-				AExecuteTime = ServerStatementPlan.ProgramStatistics;
+				DataParams localParamsValue = _process.RemoteParamDataToDataParams(paramsValue);
+				ServerStatementPlan.Execute(localParamsValue);
+				_process.DataParamsToRemoteParamData(localParamsValue, ref paramsValue);
+				executeTime = ServerStatementPlan.ProgramStatistics;
 			}
 			catch (Exception E)
 			{
@@ -127,11 +127,11 @@ namespace Alphora.Dataphor.DAE.Server
 	// RemoteServerExpressionPlan
 	public class RemoteServerExpressionPlan : RemoteServerPlan, IRemoteServerExpressionPlan
 	{
-		protected internal RemoteServerExpressionPlan(RemoteServerProcess AProcess, ServerExpressionPlan AExpressionPlan) : base(AProcess, AExpressionPlan) {}
+		protected internal RemoteServerExpressionPlan(RemoteServerProcess process, ServerExpressionPlan expressionPlan) : base(process, expressionPlan) {}
 		
-		internal ServerExpressionPlan ServerExpressionPlan { get { return (ServerExpressionPlan)FServerPlan; } }
+		internal ServerExpressionPlan ServerExpressionPlan { get { return (ServerExpressionPlan)_serverPlan; } }
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -139,29 +139,29 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
 		public override void Unprepare()
 		{
-			FProcess.UnprepareExpression(this);
+			_process.UnprepareExpression(this);
 		}
 		
-		public byte[] Evaluate(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
+		public byte[] Evaluate(ref RemoteParamData paramsValue, out ProgramStatistics executeTime, ProcessCallInfo callInfo)
 		{
-			FProcess.ProcessCallInfo(ACallInfo);
+			_process.ProcessCallInfo(callInfo);
 			try
 			{
-				DataParams LParams = FProcess.RemoteParamDataToDataParams(AParams);
-				DataValue LValue = ServerExpressionPlan.Evaluate(LParams);
-				FProcess.DataParamsToRemoteParamData(LParams, ref AParams);
-				AExecuteTime = ServerExpressionPlan.ProgramStatistics;
-				if (LValue == null)
+				DataParams localParamsValue = _process.RemoteParamDataToDataParams(paramsValue);
+				DataValue tempValue = ServerExpressionPlan.Evaluate(localParamsValue);
+				_process.DataParamsToRemoteParamData(localParamsValue, ref paramsValue);
+				executeTime = ServerExpressionPlan.ProgramStatistics;
+				if (tempValue == null)
 					return null;
-				if (ServerExpressionPlan.DataType.Equivalent(LValue.DataType))
-					return LValue.AsPhysical;
-				return LValue.CopyAs(ServerExpressionPlan.DataType).AsPhysical;
+				if (ServerExpressionPlan.DataType.Equivalent(tempValue.DataType))
+					return tempValue.AsPhysical;
+				return tempValue.CopyAs(ServerExpressionPlan.DataType).AsPhysical;
 			}
 			catch (Exception E)
 			{
@@ -171,25 +171,25 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		/// <summary> Opens a remote, server-side cursor based on the prepared statement this plan represents. </summary>        
 		/// <returns> An <see cref="IRemoteServerCursor"/> instance for the prepared statement. </returns>
-		public IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
+		public IRemoteServerCursor Open(ref RemoteParamData paramsValue, out ProgramStatistics executeTime, ProcessCallInfo callInfo)
 		{
-			FProcess.ProcessCallInfo(ACallInfo);
+			_process.ProcessCallInfo(callInfo);
 			
 			try
 			{
-				DataParams LParams = FProcess.RemoteParamDataToDataParams(AParams);
-				IServerCursor LServerCursor = ServerExpressionPlan.Open(LParams);
-				RemoteServerCursor LCursor = new RemoteServerCursor(this, (ServerCursor)LServerCursor);
+				DataParams localParamsValue = _process.RemoteParamDataToDataParams(paramsValue);
+				IServerCursor serverCursor = ServerExpressionPlan.Open(localParamsValue);
+				RemoteServerCursor cursor = new RemoteServerCursor(this, (ServerCursor)serverCursor);
 				try
 				{
-					LCursor.Open();
-					FProcess.DataParamsToRemoteParamData(LParams, ref AParams);
-					AExecuteTime = ServerExpressionPlan.ProgramStatistics;
-					return LCursor;
+					cursor.Open();
+					_process.DataParamsToRemoteParamData(localParamsValue, ref paramsValue);
+					executeTime = ServerExpressionPlan.ProgramStatistics;
+					return cursor;
 				}
 				catch
 				{
-					Close(LCursor, FProcess.EmptyCallInfo());
+					Close(cursor, _process.EmptyCallInfo());
 					throw;
 				}
 			}
@@ -199,21 +199,21 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, ProcessCallInfo ACallInfo)
+		public IRemoteServerCursor Open(ref RemoteParamData paramsValue, out ProgramStatistics executeTime, out Guid[] bookmarks, int count, out RemoteFetchData fetchData, ProcessCallInfo callInfo)
 		{
-			IRemoteServerCursor LServerCursor = Open(ref AParams, out AExecuteTime, ACallInfo);
-			AFetchData = LServerCursor.Fetch(out ABookmarks, ACount, FProcess.EmptyCallInfo());
-			return LServerCursor;
+			IRemoteServerCursor serverCursor = Open(ref paramsValue, out executeTime, callInfo);
+			fetchData = serverCursor.Fetch(out bookmarks, count, true, _process.EmptyCallInfo());
+			return serverCursor;
 		}
 		
 		/// <summary> Closes a remote, server-side cursor previously created using Open. </summary>
-		/// <param name="ACursor"> The cursor to close. </param>
-		public void Close(IRemoteServerCursor ACursor, ProcessCallInfo ACallInfo)
+		/// <param name="cursor"> The cursor to close. </param>
+		public void Close(IRemoteServerCursor cursor, ProcessCallInfo callInfo)
 		{
-			FProcess.ProcessCallInfo(ACallInfo);
+			_process.ProcessCallInfo(callInfo);
 			try
 			{
-				ServerExpressionPlan.Close(((RemoteServerCursor)ACursor).ServerCursor);
+				ServerExpressionPlan.Close(((RemoteServerCursor)cursor).ServerCursor);
 			}
 			catch (Exception E)
 			{
@@ -221,77 +221,77 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		private bool ContainsParam(RemoteParam[] AParams, string AParamName)
+		private bool ContainsParam(RemoteParam[] paramsValue, string paramName)
 		{
-			if (AParams == null)
+			if (paramsValue == null)
 				return false;
 				
-			for (int LIndex = 0; LIndex < AParams.Length; LIndex++)
-				if (AParams[LIndex].Name == AParamName)
+			for (int index = 0; index < paramsValue.Length; index++)
+				if (paramsValue[index].Name == paramName)
 					return true;
 			return false;
 		}
 
-		public string GetCatalog(RemoteParam[] AParams, out string ACatalogObjectName, out long ACacheTimeStamp, out long AClientCacheTimeStamp, out bool ACacheChanged)
+		public string GetCatalog(RemoteParam[] paramsValue, out string catalogObjectName, out long cacheTimeStamp, out long clientCacheTimeStamp, out bool cacheChanged)
 		{
 			ServerExpressionPlan.CheckCompiled();
 
 			if (ServerExpressionPlan.ActualDataType is Schema.ICursorType)
 			{
-				FCacheObjectName = Schema.Object.NameFromGuid(ID);
-				ACatalogObjectName = FCacheObjectName;
+				_cacheObjectName = Schema.Object.NameFromGuid(ID);
+				catalogObjectName = _cacheObjectName;
 			}
 			else
-				ACatalogObjectName = ServerExpressionPlan.DataType.Name;
+				catalogObjectName = ServerExpressionPlan.DataType.Name;
 				
 			#if LOGCACHEEVENTS
 			ServerProcess.ServerSession.Server.LogMessage(String.Format("Getting catalog for expression '{0}'.", Header.Statement));
 			#endif
 
-			ACacheChanged = true;
-			ACacheTimeStamp = ServerExpressionPlan.ServerProcess.ServerSession.Server.CacheTimeStamp;
-			string[] LRequiredObjects = FProcess.Session.Server.CatalogCaches.GetRequiredObjects(FProcess.Session, ServerExpressionPlan.Plan.PlanCatalog, ACacheTimeStamp, out AClientCacheTimeStamp);
-			if (LRequiredObjects.Length > 0)
+			cacheChanged = true;
+			cacheTimeStamp = ServerExpressionPlan.ServerProcess.ServerSession.Server.CacheTimeStamp;
+			string[] requiredObjects = _process.Session.Server.CatalogCaches.GetRequiredObjects(_process.Session, ServerExpressionPlan.Plan.PlanCatalog, cacheTimeStamp, out clientCacheTimeStamp);
+			if (requiredObjects.Length > 0)
 			{
 				if (ServerExpressionPlan.ActualDataType is Schema.ICursorType)
 				{
-					string[] LAllButCatalogObject = new string[LRequiredObjects.Length - 1];
-					int LTargetIndex = 0;
-					for (int LIndex = 0; LIndex < LRequiredObjects.Length; LIndex++)
-						if (LRequiredObjects[LIndex] != ACatalogObjectName)
+					string[] allButCatalogObject = new string[requiredObjects.Length - 1];
+					int targetIndex = 0;
+					for (int index = 0; index < requiredObjects.Length; index++)
+						if (requiredObjects[index] != catalogObjectName)
 						{
-							LAllButCatalogObject[LTargetIndex] = LRequiredObjects[LIndex];
-							LTargetIndex++;
+							allButCatalogObject[targetIndex] = requiredObjects[index];
+							targetIndex++;
 						}
 						
-					Block LStatement = LAllButCatalogObject.Length > 0 ? (Block)ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess.CatalogDeviceSession, EmitMode.ForRemote, LAllButCatalogObject) : new Block();
+					Block statement = allButCatalogObject.Length > 0 ? (Block)ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess.CatalogDeviceSession, EmitMode.ForRemote, allButCatalogObject) : new Block();
 					
 					// Add variable declaration statements for any process context that may be being referenced by the plan
-					for (int LIndex = ServerExpressionPlan.ServerProcess.ProcessLocals.Count - 1; LIndex >= 0; LIndex--)
-						if (!ContainsParam(AParams, ServerExpressionPlan.ServerProcess.ProcessLocals[LIndex].Name))
-							LStatement.Statements.Add(new VariableStatement(ServerExpressionPlan.ServerProcess.ProcessLocals[LIndex].Name, ServerExpressionPlan.ServerProcess.ProcessLocals[LIndex].DataType.EmitSpecifier(EmitMode.ForRemote)));
+					for (int index = ServerExpressionPlan.ServerProcess.ProcessLocals.Count - 1; index >= 0; index--)
+						if (!ContainsParam(paramsValue, ServerExpressionPlan.ServerProcess.ProcessLocals[index].Name))
+							statement.Statements.Add(new VariableStatement(ServerExpressionPlan.ServerProcess.ProcessLocals[index].Name, ServerExpressionPlan.ServerProcess.ProcessLocals[index].DataType.EmitSpecifier(EmitMode.ForRemote)));
 					
-					Block LCatalogObjectStatement = (Block)ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess.CatalogDeviceSession, EmitMode.ForRemote, new string[]{ ACatalogObjectName });
-					LStatement.Statements.AddRange(LCatalogObjectStatement.Statements);
-					string LCatalogString = new D4TextEmitter(EmitMode.ForRemote).Emit(LStatement);
-					return LCatalogString;
+					Block catalogObjectStatement = (Block)ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess.CatalogDeviceSession, EmitMode.ForRemote, new string[]{ catalogObjectName });
+					statement.Statements.AddRange(catalogObjectStatement.Statements);
+					string catalogString = new D4TextEmitter(EmitMode.ForRemote).Emit(statement);
+					return catalogString;
 				}
 				else
 				{
-					string LCatalogString = new D4TextEmitter(EmitMode.ForRemote).Emit(ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess.CatalogDeviceSession, EmitMode.ForRemote, LRequiredObjects));
-					return LCatalogString;
+					string catalogString = new D4TextEmitter(EmitMode.ForRemote).Emit(ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess.CatalogDeviceSession, EmitMode.ForRemote, requiredObjects));
+					return catalogString;
 				}
 			}
 			return String.Empty;
 		}
 		
-		private string FCacheObjectName;
+		private string _cacheObjectName;
 
 		public void RemoveCacheReference()
 		{
 			// Remove the cache object describing the result set for the plan
-			if (!String.IsNullOrEmpty(FCacheObjectName))
-				FProcess.Session.Server.CatalogCaches.RemovePlanDescriptor(FProcess.Session, FCacheObjectName);
+			if (!String.IsNullOrEmpty(_cacheObjectName))
+				_process.Session.Server.CatalogCaches.RemovePlanDescriptor(_process.Session, _cacheObjectName);
 		}
 		
 		// Isolation
@@ -303,9 +303,9 @@ namespace Alphora.Dataphor.DAE.Server
 		// Capabilities		
 		public CursorCapability Capabilities { get { return ServerExpressionPlan.Capabilities; } }
 
-		public bool Supports(CursorCapability ACapability)
+		public bool Supports(CursorCapability capability)
 		{
-			return ServerExpressionPlan.Supports(ACapability);
+			return ServerExpressionPlan.Supports(capability);
 		}
 	}
 }

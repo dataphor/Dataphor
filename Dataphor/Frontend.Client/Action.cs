@@ -28,11 +28,11 @@ namespace Alphora.Dataphor.Frontend.Client
 	{
 		public EventParams() : base() {}
 		
-		public EventParams(params object[] AParameters) : base()
+		public EventParams(params object[] parameters) : base()
 		{
-			for (int LIndex = 0; LIndex < AParameters.Length; LIndex++)
-				if ((LIndex % 2) != 0)
-					Add((string)AParameters[LIndex - 1], AParameters[LIndex]);
+			for (int index = 0; index < parameters.Length; index++)
+				if ((index % 2) != 0)
+					Add((string)parameters[index - 1], parameters[index]);
 		}
 	}
 	
@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	[DesignerCategory("Actions")]
 	public abstract partial class Action : Node, IAction
     {
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -49,7 +49,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
@@ -58,49 +58,49 @@ namespace Alphora.Dataphor.Frontend.Client
 			Execute(this, new EventParams());
 		}
 		
-		public void Execute(INode ASender, EventParams AParams)
+		public void Execute(INode sender, EventParams paramsValue)
 		{
 			if (GetEnabled()) 
 			{
-				ILayoutDisableable LLayoutDisableable = (ILayoutDisableable)FindParent(typeof(ILayoutDisableable));
-				if (LLayoutDisableable != null)
-					LLayoutDisableable.DisableLayout();
+				ILayoutDisableable layoutDisableable = (ILayoutDisableable)FindParent(typeof(ILayoutDisableable));
+				if (layoutDisableable != null)
+					layoutDisableable.DisableLayout();
 				try 
 				{
-					if (DoBeforeExecute(ASender, AParams))
-						FinishExecute(ASender, AParams);
+					if (DoBeforeExecute(sender, paramsValue))
+						FinishExecute(sender, paramsValue);
 				}
 				finally
 				{
-					if (LLayoutDisableable != null)
-						LLayoutDisableable.EnableLayout();
+					if (layoutDisableable != null)
+						layoutDisableable.EnableLayout();
 				}
 			}
 		}
 
-		protected abstract void InternalExecute(INode ASender, EventParams AParams);
+		protected abstract void InternalExecute(INode sender, EventParams paramsValue);
 
 		// BeforeExecute		
-		private IAction FBeforeExecute;
+		private IAction _beforeExecute;
 		[Description("Action to be called before the execute.")]
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		public IAction BeforeExecute
 		{
-			get { return FBeforeExecute; }
+			get { return _beforeExecute; }
 			set
 			{
-				if (FBeforeExecute != value)
+				if (_beforeExecute != value)
 				{
-					if (FBeforeExecute != null)
-						FBeforeExecute.Disposed -= new EventHandler(BeforeExecuteDisposed);
-					FBeforeExecute = value;
-					if (FBeforeExecute != null)
-						FBeforeExecute.Disposed += new EventHandler(BeforeExecuteDisposed);
+					if (_beforeExecute != null)
+						_beforeExecute.Disposed -= new EventHandler(BeforeExecuteDisposed);
+					_beforeExecute = value;
+					if (_beforeExecute != null)
+						_beforeExecute.Disposed += new EventHandler(BeforeExecuteDisposed);
 				}
 			}
 		}
 
-		private void BeforeExecuteDisposed(object ASender, EventArgs AArgs)
+		private void BeforeExecuteDisposed(object sender, EventArgs args)
 		{
 			BeforeExecute = null;
 		}
@@ -108,86 +108,86 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary>
 		/// Returns true if the before execute action is not a Blockable node, meaning that the FinishExecute should be called immediately.
 		/// </summary>
-		/// <param name="AParams"></param>
+		/// <param name="paramsValue"></param>
 		/// <returns></returns>
-		private bool DoBeforeExecute(INode ASender, EventParams AParams)
+		private bool DoBeforeExecute(INode sender, EventParams paramsValue)
 		{
-			if (FBeforeExecute != null)
+			if (_beforeExecute != null)
 			{
-				IBlockable LBlockable = FBeforeExecute as IBlockable;
-				if (LBlockable != null)
-					LBlockable.OnCompleted += new NodeEventHandler(BeforeExecuteCompleted);
+				IBlockable blockable = _beforeExecute as IBlockable;
+				if (blockable != null)
+					blockable.OnCompleted += new NodeEventHandler(BeforeExecuteCompleted);
 
-				FBeforeExecute.Execute(this, AParams);
+				_beforeExecute.Execute(this, paramsValue);
 				
 				// return true to indicate the FinishExecute should be called immediately
 				// return false to indicate the FinishExecute should be called on the ExecuteCompleted of the BeforeExecute action
-				return LBlockable == null;
+				return blockable == null;
 			}
 			
 			return true;
 		}
 
-		private void BeforeExecuteCompleted(INode ASender, EventParams AParams)
+		private void BeforeExecuteCompleted(INode sender, EventParams paramsValue)
 		{
-			IBlockable LBlockable = FBeforeExecute as IBlockable;
-			if (LBlockable != null)
-				LBlockable.OnCompleted -= new NodeEventHandler(BeforeExecuteCompleted);
-			FinishExecute(ASender, AParams);
+			IBlockable blockable = _beforeExecute as IBlockable;
+			if (blockable != null)
+				blockable.OnCompleted -= new NodeEventHandler(BeforeExecuteCompleted);
+			FinishExecute(sender, paramsValue);
 		}
 
-		private void FinishExecute(INode ASender, EventParams AParams)
+		private void FinishExecute(INode sender, EventParams paramsValue)
 		{
-			InternalExecute(ASender, AParams);
-			DoAfterExecute(AParams);
+			InternalExecute(sender, paramsValue);
+			DoAfterExecute(paramsValue);
 		}
 
 		// AfterExecute		
-		private IAction FAfterExecute;
+		private IAction _afterExecute;
 		[Description("Action to be called after the execute.")]
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		public IAction AfterExecute
 		{
-			get { return FAfterExecute; }
+			get { return _afterExecute; }
 			set
 			{
-				if (FAfterExecute != value)
+				if (_afterExecute != value)
 				{
-					if (FAfterExecute != null)
-						FAfterExecute.Disposed -= new EventHandler(AfterExecuteDisposed);
-					FAfterExecute = value;
-					if (FAfterExecute != null)
-						FAfterExecute.Disposed += new EventHandler(AfterExecuteDisposed);
+					if (_afterExecute != null)
+						_afterExecute.Disposed -= new EventHandler(AfterExecuteDisposed);
+					_afterExecute = value;
+					if (_afterExecute != null)
+						_afterExecute.Disposed += new EventHandler(AfterExecuteDisposed);
 				}
 			}
 		}
 
-		private void AfterExecuteDisposed(object ASender, EventArgs AArgs)
+		private void AfterExecuteDisposed(object sender, EventArgs args)
 		{
 			AfterExecute = null;
 		}
 		
-		private void DoAfterExecute(EventParams AParams)
+		private void DoAfterExecute(EventParams paramsValue)
 		{
-			if (FAfterExecute != null)
-				FAfterExecute.Execute(this, AParams);
+			if (_afterExecute != null)
+				_afterExecute.Execute(this, paramsValue);
 		}
 
 		// Text
 
 		public event EventHandler OnTextChanged;
 
-		private string FText = String.Empty;
+		private string _text = String.Empty;
 		[DefaultValue("")]
 		[Description("Text that can be used by visible controls that hook to this action.")]
 		public string Text
 		{
-			get { return FText; }
+			get { return _text; }
 			set
 			{
-				if (FText != value)
+				if (_text != value)
 				{
-					FText = value;
+					_text = value;
 					TextChanged();
 				}
 			}
@@ -195,12 +195,12 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public virtual string GetText()
 		{
-			return FText;
+			return _text;
 		}
 
 		public virtual string GetDescription()
 		{
-			return FText.Replace(".", "").Replace("&", "");
+			return _text.Replace(".", "").Replace("&", "");
 		}
 
 		protected virtual void TextChanged()
@@ -213,32 +213,32 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public event EventHandler OnEnabledChanged;
 		
-		private bool FEnabled = true;
+		private bool _enabled = true;
 		[DefaultValue(true)]
 		[Description("When this is false the action should not be executed and any controls hooking to this action should be disabled.")]
 		public bool Enabled
 		{
-			get { return FEnabled; }
+			get { return _enabled; }
 			set
 			{
-				if (FEnabled != value)
+				if (_enabled != value)
 				{
-					FEnabled = value;
+					_enabled = value;
 					EnabledChanged();
 				}
 			}
 		}
 
 		/// <summary> Remembers the value of GetEnabled so we know whether it has actually changed. </summary>
-		private bool FActualEnabled;
+		private bool _actualEnabled;
 
 		/// <summary> Called when the value of GetEnabled() may have changed. </summary>
 		protected virtual void EnabledChanged()
 		{
-			bool LEnabled = GetEnabled();
-			if (FActualEnabled != LEnabled)
+			bool enabled = GetEnabled();
+			if (_actualEnabled != enabled)
 			{
-				FActualEnabled = LEnabled;
+				_actualEnabled = enabled;
 				if (OnEnabledChanged != null)
 					OnEnabledChanged(this, EventArgs.Empty);
 			}
@@ -246,24 +246,24 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public virtual bool GetEnabled()
 		{
-			return FEnabled;
+			return _enabled;
 		}
 
 		// Hint
 
 		public event EventHandler OnHintChanged;
 
-		private string FHint = String.Empty;
+		private string _hint = String.Empty;
 		[DefaultValue("")]
 		[Description("A text string that will be shown in tooltips, etc.")]
 		public string Hint
 		{
-			get { return FHint; }
+			get { return _hint; }
 			set
 			{
-				if (FHint != value)
+				if (_hint != value)
 				{
-					FHint = value;
+					_hint = value;
 					if (OnHintChanged != null)
 						OnHintChanged(this, EventArgs.Empty);
 				}
@@ -272,17 +272,17 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// Visible
 
-		private bool FVisible = true;
+		private bool _visible = true;
 		[Description("Determines whether the controls that are associated with this action are visible.")]
 		[DefaultValue(true)]
 		public bool Visible
 		{
-			get { return FVisible; }
+			get { return _visible; }
 			set 
 			{ 
-				if (FVisible != value)
+				if (_visible != value)
 				{
-					FVisible = value; 
+					_visible = value; 
 					if (OnVisibleChanged != null)
 						OnVisibleChanged(this, EventArgs.Empty);
 				}
@@ -296,7 +296,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		protected override void Activate()
 		{
 			base.Activate();
-			FActualEnabled = GetEnabled();
+			_actualEnabled = GetEnabled();
 		}
 
 		/// <remarks> Clears the image. </remarks>
@@ -333,49 +333,49 @@ namespace Alphora.Dataphor.Frontend.Client
 	{
 		public event NodeEventHandler OnCompleted;
 		
-		protected void DoCompleted(EventParams AParams)
+		protected void DoCompleted(EventParams paramsValue)
 		{
 			if (OnCompleted != null)
-				OnCompleted(this, AParams);
+				OnCompleted(this, paramsValue);
 		}
 		
 		/// <summary>
 		/// Executes the given action, hooking the OnCompleted if it is a Blockable action.
 		/// </summary>
-		/// <param name="AAction"></param>
-		protected void BlockableExecute(IAction AAction, EventParams AParams)
+		/// <param name="action"></param>
+		protected void BlockableExecute(IAction action, EventParams paramsValue)
 		{
-			IBlockable LBlockable = AAction as IBlockable;
-			if (LBlockable != null)
+			IBlockable blockable = action as IBlockable;
+			if (blockable != null)
 			{
-				LBlockable.OnCompleted += new NodeEventHandler(BlockableCompleted);
-				LBlockable.Disposed += new EventHandler(BlockableDisposed);
+				blockable.OnCompleted += new NodeEventHandler(BlockableCompleted);
+				blockable.Disposed += new EventHandler(BlockableDisposed);
 			}
 				
-			AAction.Execute(this, AParams);
+			action.Execute(this, paramsValue);
 			
-			if (LBlockable == null)
-				DoCompleted(AParams);
+			if (blockable == null)
+				DoCompleted(paramsValue);
 		}
 		
-		protected void DetachBlockable(IBlockable ABlockable)
+		protected void DetachBlockable(IBlockable blockable)
 		{
-			if (ABlockable != null)
+			if (blockable != null)
 			{
-				ABlockable.OnCompleted -= new NodeEventHandler(BlockableCompleted);
-				ABlockable.Disposed -= new EventHandler(BlockableDisposed);
+				blockable.OnCompleted -= new NodeEventHandler(BlockableCompleted);
+				blockable.Disposed -= new EventHandler(BlockableDisposed);
 			}
 		}
 		
-		private void BlockableCompleted(INode ASender, EventParams AParams)
+		private void BlockableCompleted(INode sender, EventParams paramsValue)
 		{
-			DetachBlockable(ASender as IBlockable);
-			DoCompleted(AParams);
+			DetachBlockable(sender as IBlockable);
+			DoCompleted(paramsValue);
 		}
 		
-		private void BlockableDisposed(object ASender, EventArgs AArgs)
+		private void BlockableDisposed(object sender, EventArgs args)
 		{
-			DetachBlockable(ASender as IBlockable);
+			DetachBlockable(sender as IBlockable);
 		}
 	}
     
@@ -383,19 +383,19 @@ namespace Alphora.Dataphor.Frontend.Client
 	public class BlockAction : Action, IBlockAction
 	{
 		/// <remarks> Only actions are allowed as children. </remarks>
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(IAction).IsAssignableFrom(AChildType))
+			if (typeof(IAction).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
 
 		/// <summary> Executes each child action sequentially. </summary>
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
 			// Don't use a foreach here to avoid the possibility that the action changes the form and throws the enumerator changed error
-			for(int LCount = 0; LCount < (Children != null ? Children.Count : 0); LCount++) 
-				((IAction)Children[LCount]).Execute(this, AParams);
+			for(int count = 0; count < (Children != null ? Children.Count : 0); count++) 
+				((IAction)Children[count]).Execute(this, paramsValue);
 		}
 	}
 
@@ -403,7 +403,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	public class CallAction : Action, ICallAction
 	{
 		/// <remarks> Dereferences the referenced action. </remarks>
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -411,79 +411,106 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
-		private IAction FAction;
+		private IAction _action;
 		[Description("Action to be called upon executing.")]
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		public IAction Action
 		{
-			get { return FAction; }
+			get { return _action; }
 			set
 			{
 				if (value == this)
 					throw new ClientException(ClientException.Codes.RecursiveActionReference, ToString());
-				if (FAction != value)
+				if (_action != value)
 				{
-					if (FAction != null)
-						FAction.Disposed -= new EventHandler(ActionDisposed);
-					FAction = value;
-					if (FAction != null)
-						FAction.Disposed += new EventHandler(ActionDisposed);
+					if (_action != null)
+						_action.Disposed -= new EventHandler(ActionDisposed);
+					_action = value;
+					if (_action != null)
+						_action.Disposed += new EventHandler(ActionDisposed);
 				}
 			}
 		}
 
-		private void ActionDisposed(object ASender, EventArgs AArgs)
+		private void ActionDisposed(object sender, EventArgs args)
 		{
 			Action = null;
 		}
 
 		/// <summary> Calls the other action. </summary>
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
-			if (FAction != null)
-				FAction.Execute(this, AParams);
+			if (_action != null)
+				_action.Execute(this, paramsValue);
 		}
 	}
 
 	public class HelpAction : Action, IHelpAction
 	{
-		private string FHelpKeyword = String.Empty;
+		private string _helpKeyword = String.Empty;
 		[DefaultValue("")]
 		[Description("The keyword to use to navigate within the help.")]
 		public string HelpKeyword
 		{
-			get { return FHelpKeyword; }
-			set { FHelpKeyword = (value == null ? String.Empty : value); }
+			get { return _helpKeyword; }
+			set { _helpKeyword = (value == null ? String.Empty : value); }
 		}
 
-		private HelpKeywordBehavior FHelpKeywordBehavior = HelpKeywordBehavior.KeywordIndex;
+		private HelpKeywordBehavior _helpKeywordBehavior = HelpKeywordBehavior.KeywordIndex;
 		[DefaultValue(HelpKeywordBehavior.KeywordIndex)]
 		[Description("Specifies the type of initial help navigation to perform based on the HelpKeyword.")]
 		public HelpKeywordBehavior HelpKeywordBehavior
 		{
-			get { return FHelpKeywordBehavior; }
-			set { FHelpKeywordBehavior = value; }
+			get { return _helpKeywordBehavior; }
+			set { _helpKeywordBehavior = value; }
 		}
 
-		private string FHelpString = String.Empty;
+		private string _helpString = String.Empty;
 		[DefaultValue("")]
 		[Description("The help text to display (if HelpKeyword is not specified).")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("txt")]
 		public string HelpString
 		{
-			get { return FHelpString; }
-			set { FHelpString = (value == null ? String.Empty : value); }
+			get { return _helpString; }
+			set { _helpString = (value == null ? String.Empty : value); }
 		}
 
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
-			HostNode.Session.InvokeHelp((ASender == null ? this : ASender), FHelpKeyword, FHelpKeywordBehavior, FHelpString);
+			HostNode.Session.InvokeHelp((sender == null ? this : sender), _helpKeyword, _helpKeywordBehavior, _helpString);
 		}
-	}  	
+	}
+
+	public abstract class BaseConditionalAction : Action, IConditionalAction
+	{
+		// Condition
+		private string _condition = String.Empty;
+		public virtual string Condition
+		{
+			get { return _condition; }
+			set
+			{
+				if (_condition != value)
+				{
+					_condition = (value == null ? String.Empty : value);
+				}
+			}
+		}
+
+		/// <summary> Executes the IAction child conditionally. </summary>
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
+		{
+			foreach (Node localNode in Children)
+				if (localNode is IAction && EvaluateCondition())
+					((IAction)localNode).Execute(this, paramsValue);
+		}
+
+		protected abstract bool EvaluateCondition(); 		
+	}	
 }
 

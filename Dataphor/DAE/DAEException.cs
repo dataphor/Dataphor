@@ -14,9 +14,9 @@ namespace Alphora.Dataphor.DAE
 	public abstract class DAEException : DataphorException
 	{
 		// Constructors
-		protected DAEException(ResourceManager AResourceManager, int AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(AResourceManager, AErrorCode, ASeverity, AInnerException, AParams) {}
-		protected DAEException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, DataphorException AInnerException) 
-			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		protected DAEException(ResourceManager resourceManager, int errorCode, ErrorSeverity severity, Exception innerException, params object[] paramsValue) : base(resourceManager, errorCode, severity, innerException, paramsValue) {}
+		protected DAEException(ErrorSeverity severity, int code, string message, string details, string serverContext, DataphorException innerException) 
+			: base(severity, code, message, details, serverContext, innerException)
 		{
 		}
 	}

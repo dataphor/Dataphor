@@ -22,17 +22,17 @@ namespace Alphora.Dataphor
 	/// </remarks>
 	public static class AssemblyNameUtility
 	{
-		public static string GetName(string AFullName)
+		public static string GetName(string fullName)
 		{
-			return AFullName.Split(',')[0];
+			return fullName.Split(',')[0];
 		}
 		
-		public static Version GetVersion(string AFullName)
+		public static Version GetVersion(string fullName)
 		{
-			string[] LParts = AFullName.Split(',');
-			for (int LIndex = 0; LIndex < LParts.Length; LIndex++)
-				if (LParts[LIndex].Trim().StartsWith("Version"))
-					return new Version(LParts[LIndex].Split('=')[1]);
+			string[] parts = fullName.Split(',');
+			for (int index = 0; index < parts.Length; index++)
+				if (parts[index].Trim().StartsWith("Version"))
+					return new Version(parts[index].Split('=')[1]);
 					
 			throw new ArgumentException("Invalid Assembly Name Format");
 		}

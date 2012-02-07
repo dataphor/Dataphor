@@ -22,89 +22,89 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class AdornTable : Table
     {
-        public AdornTable(AdornNode ANode, Program AProgram) : base(ANode, AProgram){}
+        public AdornTable(AdornNode node, Program program) : base(node, program){}
         
-        public new AdornNode Node { get { return (AdornNode)FNode; } }
+        public new AdornNode Node { get { return (AdornNode)_node; } }
         
-		protected Table FSourceTable;
-		protected Row FSourceRow;
-		protected bool FBOF;
+		protected Table _sourceTable;
+		protected Row _sourceRow;
+		protected bool _bOF;
         
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Program);
+			_sourceTable = (Table)Node.Nodes[0].Execute(Program);
 			try
 			{
-				FSourceRow = new Row(Manager, FSourceTable.DataType.RowType);
+				_sourceRow = new Row(Manager, _sourceTable.DataType.RowType);
 			}
 			catch
 			{
-				FSourceTable.Dispose();
+				_sourceTable.Dispose();
 				throw;
 			}
-			FBOF = true;
+			_bOF = true;
         }
         
         protected override void InternalClose()
         {
-			if (FSourceTable != null)
+			if (_sourceTable != null)
 			{
-				FSourceTable.Dispose();
-				FSourceTable = null;
+				_sourceTable.Dispose();
+				_sourceTable = null;
 			}
 
-            if (FSourceRow != null)
+            if (_sourceRow != null)
             {
-				FSourceRow.Dispose();
-				FSourceRow = null;
+				_sourceRow.Dispose();
+				_sourceRow = null;
             }
         }
         
         protected override void InternalReset()
         {
-            FSourceTable.Reset();
-            FBOF = true;
+            _sourceTable.Reset();
+            _bOF = true;
         }
         
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-            FSourceTable.Select(ARow);
+            _sourceTable.Select(row);
         }
         
         protected override bool InternalNext()
         {
-			if (FSourceTable.Next())
+			if (_sourceTable.Next())
 			{
-				FBOF = false;
+				_bOF = false;
 				return true;
 			}
-			FBOF = FSourceTable.BOF();
+			_bOF = _sourceTable.BOF();
 			return false;
         }
         
         protected override bool InternalBOF()
         {
-			return FBOF;
+			return _bOF;
         }
         
         protected override bool InternalEOF()
         {
-			if (FBOF)
+			if (_bOF)
 			{
 				InternalNext();
-				if (FSourceTable.EOF())
+				if (_sourceTable.EOF())
 					return true;
 				else
 				{
-					if (FSourceTable.Supports(CursorCapability.BackwardsNavigable))
-						FSourceTable.First();
+					if (_sourceTable.Supports(CursorCapability.BackwardsNavigable))
+						_sourceTable.First();
 					else
-						FSourceTable.Reset();
-					FBOF = true;
+						_sourceTable.Reset();
+					_bOF = true;
 					return false;
 				}
 			}
-			return FSourceTable.EOF();
+			return _sourceTable.EOF();
         }
     }
 }

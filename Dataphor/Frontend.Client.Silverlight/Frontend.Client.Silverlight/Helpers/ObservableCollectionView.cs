@@ -25,38 +25,38 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			get { return false; }
 		}
 
-		public bool Contains(object AItem)
+		public bool Contains(object item)
 		{
-			return AItem is T && base.Contains((T)AItem);
+			return item is T && base.Contains((T)item);
 		}
 
-		private System.Globalization.CultureInfo FCulture;
+		private System.Globalization.CultureInfo _culture;
 		
 		public System.Globalization.CultureInfo Culture
 		{
-			get { return FCulture; }
+			get { return _culture; }
 			set
 			{
-				if (FCulture != value)
+				if (_culture != value)
 				{
-					FCulture = value;
+					_culture = value;
 					OnPropertyChanged(new PropertyChangedEventArgs("Culture"));
 				}
 			}
 		}
 
-		private object FCurrentItem;
+		private object _currentItem;
 		
 		public object CurrentItem
 		{
-			get { return FCurrentItem; }
+			get { return _currentItem; }
 		}
 
-		private int FCurrentPosition;
+		private int _currentPosition;
 		
 		public int CurrentPosition
 		{
-			get { return FCurrentPosition; }
+			get { return _currentPosition; }
 		}
 
 		public Predicate<object> Filter
@@ -114,9 +114,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 		
-		private bool IsInView(int AIndex)
+		private bool IsInView(int index)
 		{
-			return AIndex >= 0 && AIndex < Count;
+			return index >= 0 && index < Count;
 		}
 
 		public bool IsEmpty
@@ -124,13 +124,13 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			get { return Count == 0; }
 		}
 
-		public bool MoveCurrentTo(object AItem)
+		public bool MoveCurrentTo(object item)
 		{
-			if (AItem is T && AItem != null)
+			if (item is T && item != null)
 			{
-				if (Object.Equals(AItem, CurrentItem))
+				if (Object.Equals(item, CurrentItem))
 					return true;
-				return MoveCurrentToPosition(IndexOf((T)AItem));
+				return MoveCurrentToPosition(IndexOf((T)item));
 			}
 			else
 				return false;
@@ -156,36 +156,36 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return CurrentPosition >= 0 && MoveCurrentToPosition(CurrentPosition - 1);
 		}
 
-		public bool MoveCurrentToPosition(int APosition)
+		public bool MoveCurrentToPosition(int position)
 		{
-			if ((APosition < -1) || (APosition > Count)) 
+			if ((position < -1) || (position > Count)) 
 				throw new ArgumentOutOfRangeException("APosition");
 			
-			if ((APosition != CurrentPosition || !IsCurrentInSync) && OnCurrentChanging()) 
+			if ((position != CurrentPosition || !IsCurrentInSync) && OnCurrentChanging()) 
 			{ 
-				var LOldIsCurrentAfterLast = IsCurrentAfterLast; 
-				var LOldIsCurrentBeforeFirst = IsCurrentBeforeFirst;
+				var oldIsCurrentAfterLast = IsCurrentAfterLast; 
+				var oldIsCurrentBeforeFirst = IsCurrentBeforeFirst;
 
-				if (APosition < 0)
+				if (position < 0)
 				{
-					FCurrentItem = null;
-					FCurrentPosition = -1;
+					_currentItem = null;
+					_currentPosition = -1;
 				}
-				else if (APosition >= Count)
+				else if (position >= Count)
 				{
-					FCurrentItem = null;
-					FCurrentPosition = Count;
+					_currentItem = null;
+					_currentPosition = Count;
 				}
 				else
 				{
-					FCurrentItem = base[APosition];
-					FCurrentPosition = APosition;
+					_currentItem = base[position];
+					_currentPosition = position;
 				}
 
 				OnCurrentChanged(); 
-				if (IsCurrentAfterLast != LOldIsCurrentAfterLast)
+				if (IsCurrentAfterLast != oldIsCurrentAfterLast)
 					OnPropertyChanged(new PropertyChangedEventArgs("IsCurrentAfterLast"));
-				if (IsCurrentBeforeFirst != LOldIsCurrentBeforeFirst) 
+				if (IsCurrentBeforeFirst != oldIsCurrentBeforeFirst) 
 					OnPropertyChanged(new PropertyChangedEventArgs("IsCurrentBeforeFirst"));
 				OnPropertyChanged(new PropertyChangedEventArgs("CurrentPosition"));
 				OnPropertyChanged(new PropertyChangedEventArgs("CurrentItem"));
@@ -208,10 +208,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		protected virtual bool OnCurrentChanging()
 		{
-			var LArgs = new CurrentChangingEventArgs();
+			var args = new CurrentChangingEventArgs();
 			if (CurrentChanging != null)
-				CurrentChanging(this, LArgs);
-			return !LArgs.Cancel;
+				CurrentChanging(this, args);
+			return !args.Cancel;
 		}
 
 		protected override void ClearItems()
@@ -220,39 +220,39 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			base.ClearItems();
 		}
 
-		protected override void RemoveItem(int AIndex)
+		protected override void RemoveItem(int index)
 		{
-			base.RemoveItem(AIndex);
-			if (AIndex == FCurrentPosition)
-				if (AIndex > 0)
-					MoveCurrentToPosition(AIndex - 1);
+			base.RemoveItem(index);
+			if (index == _currentPosition)
+				if (index > 0)
+					MoveCurrentToPosition(index - 1);
 				else
-					MoveCurrentToPosition(AIndex);
+					MoveCurrentToPosition(index);
 		}
 		
 		private class DeferTarget : IDisposable
 		{
-			internal DeferTarget(ObservableCollectionView<T> ASource)
+			internal DeferTarget(ObservableCollectionView<T> source)
 			{
-				FSource = ASource;
-				FSource.FDeferCount++;
+				_source = source;
+				_source._deferCount++;
 			}
 
 			public void Dispose()
 			{
-				FSource.FDeferCount--;
-				if (FSource.FDeferCount == 0 && FSource.FDeferredRefresh)
+				_source._deferCount--;
+				if (_source._deferCount == 0 && _source._deferredRefresh)
 				{
-					FSource.FDeferredRefresh = false;
-					FSource.InternalRefresh();
+					_source._deferredRefresh = false;
+					_source.InternalRefresh();
 				}
 			}
 			
-			private ObservableCollectionView<T> FSource;
+			private ObservableCollectionView<T> _source;
 		}
 		
-		private bool FDeferredRefresh;
-		private int FDeferCount;
+		private bool _deferredRefresh;
+		private int _deferCount;
 		
 		public IDisposable DeferRefresh()
 		{
@@ -261,8 +261,8 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		public void Refresh()
 		{
-			if (FDeferCount > 0)
-				FDeferredRefresh = true;
+			if (_deferCount > 0)
+				_deferredRefresh = true;
 			else
 				InternalRefresh();
 		}

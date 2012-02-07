@@ -22,17 +22,17 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 	public class MainForm : System.Windows.Forms.Form
 	{
 		// Localize these strings
-		public const string CCatalogBrowseTitle = "Catalog Directory";
-		public const string CLibraryBrowseTitle = "Library Directory";
-		public const string CStartupScriptBrowseTitle = "Open Startup Script";
-		public const string CStartupScriptBrowseFilter = "D4 Script Files (*.d4)|*.d4|All Files (*.*)|*.*";
-		public const string CRestartToApply = "The new settings will not apply until the service has been re-started.";
+		public const string CatalogBrowseTitle = "Catalog Directory";
+		public const string LibraryBrowseTitle = "Library Directory";
+		public const string StartupScriptBrowseTitle = "Open Startup Script";
+		public const string StartupScriptBrowseFilter = "D4 Script Files (*.d4)|*.d4|All Files (*.*)|*.*";
+		public const string RestartToApply = "The new settings will not apply until the service has been re-started.";
 
 		// Do not localize
-		public const string CWindowIconName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.ConfigUtil-big.ico";
-		public const string CStartupScriptDefaultExtension = ".d4";
-		public const string CAppAutoStartRegKeyName = @"Software\Microsoft\Windows\CurrentVersion\Run";
-		public const string CAppAutoStartRegValueName = "Dataphor Service Manager";
+		public const string WindowIconName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.ConfigUtil-big.ico";
+		public const string StartupScriptDefaultExtension = ".d4";
+		public const string AppAutoStartRegKeyName = @"Software\Microsoft\Windows\CurrentVersion\Run";
+		public const string AppAutoStartRegValueName = "Dataphor Service Manager";
 
 		public System.Windows.Forms.CheckBox ServiceAutoStart;
 		public System.Windows.Forms.PictureBox ServerStatusPicture;
@@ -213,7 +213,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 		}
 		#endregion
 
-		private ApplicationForm FAppForm;
+		private ApplicationForm _appForm;
 
 		public MainForm(ApplicationForm LAppForm)
 		{
@@ -222,39 +222,39 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			//
 			InitializeComponent();
 
-			FAppForm = LAppForm;
+			_appForm = LAppForm;
 
 			LoadInstances(InstanceManager.LoadConfiguration());
-			cbInstance.Text = FAppForm.SelectedInstanceName;
-			ShowTrayIcon.Checked = FAppForm.FConfigurationUtilitySettings.ShowTrayIcon;
-			AppAutoStart.Checked = FAppForm.FConfigurationUtilitySettings.AppAutoStart;
+			cbInstance.Text = _appForm.SelectedInstanceName;
+			ShowTrayIcon.Checked = _appForm._configurationUtilitySettings.ShowTrayIcon;
+			AppAutoStart.Checked = _appForm._configurationUtilitySettings.AppAutoStart;
 		}
 	
-		private void ShowTrayIcon_Click(object sender, System.EventArgs AArgs)
+		private void ShowTrayIcon_Click(object sender, System.EventArgs args)
 		{
-			FAppForm.FConfigurationUtilitySettings.ShowTrayIcon = !FAppForm.FConfigurationUtilitySettings.ShowTrayIcon;
-			ShowTrayIcon.Checked = FAppForm.FConfigurationUtilitySettings.ShowTrayIcon;
+			_appForm._configurationUtilitySettings.ShowTrayIcon = !_appForm._configurationUtilitySettings.ShowTrayIcon;
+			ShowTrayIcon.Checked = _appForm._configurationUtilitySettings.ShowTrayIcon;
 
-			FAppForm.Serialize();
+			_appForm.Serialize();
 
-			FAppForm.FTrayIcon.Visible = ShowTrayIcon.Checked;
+			_appForm._trayIcon.Visible = ShowTrayIcon.Checked;
 		}
 
-		private void AppAutoStart_Click(object sender, System.EventArgs AArgs)
+		private void AppAutoStart_Click(object sender, System.EventArgs args)
 		{
 			try
 			{
-				FAppForm.FConfigurationUtilitySettings.AppAutoStart = !FAppForm.FConfigurationUtilitySettings.AppAutoStart;
-				AppAutoStart.Checked = FAppForm.FConfigurationUtilitySettings.AppAutoStart;
+				_appForm._configurationUtilitySettings.AppAutoStart = !_appForm._configurationUtilitySettings.AppAutoStart;
+				AppAutoStart.Checked = _appForm._configurationUtilitySettings.AppAutoStart;
 
-				FAppForm.Serialize();
+				_appForm.Serialize();
 
-				using (Microsoft.Win32.RegistryKey LRegKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(CAppAutoStartRegKeyName, true))
+				using (Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(AppAutoStartRegKeyName, true))
 				{
 					if (AppAutoStart.Checked)
-                        LRegKey.SetValue(CAppAutoStartRegValueName, Application.ExecutablePath + " " + Program.SilentMode);
+                        regKey.SetValue(AppAutoStartRegValueName, Application.ExecutablePath + " " + Program.SilentMode);
 					else
-						LRegKey.DeleteValue(CAppAutoStartRegValueName, false);
+						regKey.DeleteValue(AppAutoStartRegValueName, false);
 				}
 			}
 			catch(Exception e)
@@ -263,14 +263,14 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			}
 		}
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
-			FAppForm.FMainFormIsShowing = false;
+			_appForm._mainFormIsShowing = false;
 
-			if (FAppForm.FConfigurationUtilitySettings.ShowTrayIcon == false)
+			if (_appForm._configurationUtilitySettings.ShowTrayIcon == false)
 				Application.Exit();
 
-			base.OnClosing(AArgs);
+			base.OnClosing(args);
 		}
 
 		protected override void Dispose( bool disposing )
@@ -286,11 +286,11 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			base.Dispose( disposing );
 		}
 		
-		private void ServiceAutoStart_Click(object sender, System.EventArgs AArgs)
+		private void ServiceAutoStart_Click(object sender, System.EventArgs args)
 		{
 			try
 			{
-				ServiceUtility.SetServiceAutoStart(FAppForm.SelectedInstanceName, ServiceAutoStart.Checked);
+				ServiceUtility.SetServiceAutoStart(_appForm.SelectedInstanceName, ServiceAutoStart.Checked);
 			}
 			catch(Exception e)
 			{
@@ -300,7 +300,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 
 		private void StartStopButton_Click(object sender, System.EventArgs e)
 		{
-			if (FAppForm.FServiceStatus == DAE.Service.ServiceStatus.Stopped)
+			if (_appForm._serviceStatus == DAE.Service.ServiceStatus.Stopped)
 				StartService();
 			else
 				StopService();
@@ -308,21 +308,21 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 
 		private void StartService()
 		{
-			if ((FAppForm.FServiceStatus == DAE.Service.ServiceStatus.Running) || (FAppForm.FServiceStatus == DAE.Service.ServiceStatus.Unavailable))
+			if ((_appForm._serviceStatus == DAE.Service.ServiceStatus.Running) || (_appForm._serviceStatus == DAE.Service.ServiceStatus.Unavailable))
 				return;
 
-			System.ServiceProcess.ServiceController LServiceController = new System.ServiceProcess.ServiceController(ServiceUtility.GetServiceName(FAppForm.SelectedInstanceName));
+			System.ServiceProcess.ServiceController serviceController = new System.ServiceProcess.ServiceController(ServiceUtility.GetServiceName(_appForm.SelectedInstanceName));
 			try
 			{				
-				using(StatusForm LStatusForm = new StatusForm("Starting...", this))
+				using(StatusForm statusForm = new StatusForm("Starting...", this))
 				{
 					// Start the service
 					Cursor.Current = Cursors.WaitCursor;
-					FAppForm.FTimer.Stop();
-					LServiceController.Start(new string[] { "-n", FAppForm.SelectedInstanceName });
+					_appForm._timer.Stop();
+					serviceController.Start(new string[] { "-n", _appForm.SelectedInstanceName });
 					// Wait for the service to start...give it 30 seconds
-					LServiceController.WaitForStatus(System.ServiceProcess.ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));
-					FAppForm.CheckServiceStatus();
+					serviceController.WaitForStatus(System.ServiceProcess.ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));
+					_appForm.CheckServiceStatus();
 				}
 			}
 			catch (Exception AException)
@@ -332,28 +332,28 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			finally
 			{
 				Cursor.Current = Cursors.Default;
-				FAppForm.FTimer.Start();
+				_appForm._timer.Start();
 			}		
 		}
 
 		private void StopService()
 		{
-			if ((FAppForm.FServiceStatus == DAE.Service.ServiceStatus.Stopped) || (FAppForm.FServiceStatus == DAE.Service.ServiceStatus.Unavailable))
+			if ((_appForm._serviceStatus == DAE.Service.ServiceStatus.Stopped) || (_appForm._serviceStatus == DAE.Service.ServiceStatus.Unavailable))
 				return;
 
-			System.ServiceProcess.ServiceController LServiceController = new System.ServiceProcess.ServiceController(ServiceUtility.GetServiceName(FAppForm.SelectedInstanceName));
+			System.ServiceProcess.ServiceController serviceController = new System.ServiceProcess.ServiceController(ServiceUtility.GetServiceName(_appForm.SelectedInstanceName));
 
 			try
 			{
-				using(StatusForm LStatusForm = new StatusForm("Stopping...", this))
+				using(StatusForm statusForm = new StatusForm("Stopping...", this))
 				{
 					// Stop the service
 					Cursor.Current = Cursors.WaitCursor;
-					FAppForm.FTimer.Stop();
-					LServiceController.Stop();
+					_appForm._timer.Stop();
+					serviceController.Stop();
 					// Wait for the service to start...give it 30 seconds
-					LServiceController.WaitForStatus(System.ServiceProcess.ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
-					FAppForm.CheckServiceStatus();
+					serviceController.WaitForStatus(System.ServiceProcess.ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
+					_appForm.CheckServiceStatus();
 				}
 			}
 			catch (Exception AException)
@@ -363,48 +363,48 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			finally
 			{
 				Cursor.Current = Cursors.Default;
-				FAppForm.FTimer.Start();
+				_appForm._timer.Start();
 			}		
 		}
 		
-		private void LoadInstances(InstanceConfiguration AConfiguration)
+		private void LoadInstances(InstanceConfiguration configuration)
 		{
 			cbInstance.Items.Clear();
-			foreach (ServerConfiguration LInstance in AConfiguration.Instances.Values)
-				cbInstance.Items.Add(LInstance.Name);
+			foreach (ServerConfiguration instance in configuration.Instances.Values)
+				cbInstance.Items.Add(instance.Name);
 		}
 
 		private void NewInstanceButton_Click(object sender, EventArgs e)
 		{
-			InstanceConfiguration LConfiguration = InstanceManager.LoadConfiguration();
+			InstanceConfiguration configuration = InstanceManager.LoadConfiguration();
 			try
 			{
-				ServerConfiguration LInstance = EditInstanceForm.ExecuteAdd();
-				LConfiguration.Instances.Add(LInstance);
-				InstanceManager.SaveConfiguration(LConfiguration);
-				LoadInstances(LConfiguration);
-				cbInstance.SelectedItem = LInstance.Name;
+				ServerConfiguration instance = EditInstanceForm.ExecuteAdd();
+				configuration.Instances.Add(instance);
+				InstanceManager.SaveConfiguration(configuration);
+				LoadInstances(configuration);
+				cbInstance.SelectedItem = instance.Name;
 			}
 			catch (AbortException)
 			{
 			}
 		}
 
-		private void configureButton_Click(object sender, System.EventArgs AArgs)
+		private void configureButton_Click(object sender, System.EventArgs args)
 		{
-			InstanceConfiguration LConfiguration = InstanceManager.LoadConfiguration();
-			ServerConfiguration LInstance = LConfiguration.Instances[cbInstance.Text];
-			if (LInstance == null)
-				LInstance = ServerConfiguration.DefaultInstance(cbInstance.Text);
+			InstanceConfiguration configuration = InstanceManager.LoadConfiguration();
+			ServerConfiguration instance = configuration.Instances[cbInstance.Text];
+			if (instance == null)
+				instance = ServerConfiguration.DefaultInstance(cbInstance.Text);
 			else
-				LConfiguration.Instances.Remove(LInstance.Name);
+				configuration.Instances.Remove(instance.Name);
 			try
 			{
-				LInstance = EditInstanceForm.ExecuteEdit(LInstance);
-				LConfiguration.Instances.Add(LInstance);
-				InstanceManager.SaveConfiguration(LConfiguration);
-				LoadInstances(LConfiguration);
-				cbInstance.SelectedItem = LInstance.Name;
+				instance = EditInstanceForm.ExecuteEdit(instance);
+				configuration.Instances.Add(instance);
+				InstanceManager.SaveConfiguration(configuration);
+				LoadInstances(configuration);
+				cbInstance.SelectedItem = instance.Name;
 			}
 			catch (AbortException)
 			{
@@ -413,13 +413,13 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 
 		private void cbInstance_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			FAppForm.SelectedInstanceName = cbInstance.SelectedItem as String;
-			FAppForm.Serialize();
+			_appForm.SelectedInstanceName = cbInstance.SelectedItem as String;
+			_appForm.Serialize();
 		}
 
 		private void InstallButton_Click(object sender, EventArgs e)
 		{
-			switch (FAppForm.FServiceStatus)
+			switch (_appForm._serviceStatus)
 			{
 				case DAE.Service.ServiceStatus.Running:
 					MessageBox.Show("Service must be stopped before it can be uninstalled.", "Service Running", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -431,18 +431,18 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 						Cursor.Current = Cursors.WaitCursor;
 						try
 						{
-							FAppForm.FTimer.Stop();
-							ServiceUtility.Uninstall(FAppForm.SelectedInstanceName);
-							FAppForm.CheckServiceStatus();
+							_appForm._timer.Stop();
+							ServiceUtility.Uninstall(_appForm.SelectedInstanceName);
+							_appForm.CheckServiceStatus();
 						}
-						catch (Exception LException)
+						catch (Exception exception)
 						{
-							Application.OnThreadException(LException);
+							Application.OnThreadException(exception);
 						}
 						finally
 						{
 							Cursor.Current = Cursors.Default;
-							FAppForm.FTimer.Start();
+							_appForm._timer.Start();
 						}
 					}
 				break;
@@ -453,18 +453,18 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 						Cursor.Current = Cursors.WaitCursor;
 						try
 						{
-							FAppForm.FTimer.Stop();
-							ServiceUtility.Install(FAppForm.SelectedInstanceName);
-							FAppForm.CheckServiceStatus();
+							_appForm._timer.Stop();
+							ServiceUtility.Install(_appForm.SelectedInstanceName);
+							_appForm.CheckServiceStatus();
 						}
-						catch (Exception LException)
+						catch (Exception exception)
 						{
-							Application.OnThreadException(LException);
+							Application.OnThreadException(exception);
 						}
 						finally
 						{
 							Cursor.Current = Cursors.Default;
-							FAppForm.FTimer.Start();
+							_appForm._timer.Start();
 						}
 					}
 				break;

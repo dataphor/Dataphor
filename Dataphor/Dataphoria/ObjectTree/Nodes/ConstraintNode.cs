@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class ConstraintListNode : SchemaListNode
 	{
-		public ConstraintListNode(string ALibraryName) : base (ALibraryName)
+		public ConstraintListNode(string libraryName) : base (libraryName)
 		{
 			Text = "Constraints";
 			ImageIndex = 20;
@@ -22,21 +22,21 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override string GetChildExpression()
 		{
-			return ".System.CatalogConstraints " + CSchemaListFilter + " over { Name }";
+			return ".System.CatalogConstraints " + SchemaListFilter + " over { Name }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
 		{
-			return new ConstraintNode(this, (string)ARow["Name"]);
+			return new ConstraintNode(this, (string)row["Name"]);
 		}
 	}
 
 	public class ConstraintNode : SchemaItemNode
 	{
-		public ConstraintNode(ConstraintListNode ANode, string AConstraintName) : base()
+		public ConstraintNode(ConstraintListNode node, string constraintName) : base()
 		{
-			ParentSchemaList = ANode;
-			ObjectName = AConstraintName;
+			ParentSchemaList = node;
+			ObjectName = constraintName;
 			ImageIndex = 21;
 			SelectedImageIndex = ImageIndex;
 		}

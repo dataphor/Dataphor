@@ -21,48 +21,48 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public event EventHandler OnImageChanged;
 
-		private string FImage = String.Empty;
+		private string _image = String.Empty;
 		[DefaultValue("")]
 		[Description("An image used by this action's controls as an icon.")]
 		public string Image
 		{
-			get { return FImage; }
+			get { return _image; }
 			set
 			{
-				if (FImage != value)
+				if (_image != value)
 				{
-					FImage = value;
+					_image = value;
 					if (Active)
 						InternalUpdateImage();
 				}
 			}
 		}
 
-		private System.Drawing.Image FLoadedImage;
+		private System.Drawing.Image _loadedImage;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public System.Drawing.Image LoadedImage
 		{
-			get { return FLoadedImage; }
+			get { return _loadedImage; }
 		}
 
-		private void SetImage(System.Drawing.Image AValue)
+		private void SetImage(System.Drawing.Image value)
 		{
-			if (FLoadedImage != null)
-				FLoadedImage.Dispose();
-			FLoadedImage = AValue;
+			if (_loadedImage != null)
+				_loadedImage.Dispose();
+			_loadedImage = value;
 			if (OnImageChanged != null)
 				OnImageChanged(this, EventArgs.Empty);
 		}
 
-		private PipeRequest FImageRequest;
+		private PipeRequest _imageRequest;
 
 		private void CancelImageRequest()
 		{
-			if (FImageRequest != null)
+			if (_imageRequest != null)
 			{
-				HostNode.Pipe.CancelRequest(FImageRequest);
-				FImageRequest = null;
+				HostNode.Pipe.CancelRequest(_imageRequest);
+				_imageRequest = null;
 			}
 		}
 
@@ -79,33 +79,33 @@ namespace Alphora.Dataphor.Frontend.Client
 				else
 				{
 					// Queue up an asynchronous request
-					FImageRequest = new PipeRequest(Image, new PipeResponseHandler(ImageRead), new PipeErrorHandler(ImageError));
-					HostNode.Pipe.QueueRequest(FImageRequest);
+					_imageRequest = new PipeRequest(Image, new PipeResponseHandler(ImageRead), new PipeErrorHandler(ImageError));
+					HostNode.Pipe.QueueRequest(_imageRequest);
 				}
 			}
 			else
 				SetImage(null);
 		}
 
-		private void ImageRead(PipeRequest ARequest, Pipe APipe)
+		private void ImageRead(PipeRequest request, Pipe pipe)
 		{
 			if (Active)
 			{
-				FImageRequest = null;
+				_imageRequest = null;
 				try
 				{
-					if (ARequest.Result.IsNative)
+					if (request.Result.IsNative)
 					{
-						byte[] LResultBytes = ARequest.Result.AsByteArray;
-						SetImage(System.Drawing.Image.FromStream(new MemoryStream(LResultBytes, 0, LResultBytes.Length, false, true)));
+						byte[] resultBytes = request.Result.AsByteArray;
+						SetImage(System.Drawing.Image.FromStream(new MemoryStream(resultBytes, 0, resultBytes.Length, false, true)));
 					}
 					else
 					{
-						using (Stream LStream = ARequest.Result.OpenStream())
+						using (Stream stream = request.Result.OpenStream())
 						{
-							MemoryStream LCopyStream = new MemoryStream();
-							StreamUtility.CopyStream(LStream, LCopyStream);
-							SetImage(System.Drawing.Image.FromStream(LCopyStream));
+							MemoryStream copyStream = new MemoryStream();
+							StreamUtility.CopyStream(stream, copyStream);
+							SetImage(System.Drawing.Image.FromStream(copyStream));
 						}
 					}
 				}
@@ -116,9 +116,9 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 
-		private void ImageError(PipeRequest ARequest, Pipe APipe, Exception AException)
+		private void ImageError(PipeRequest request, Pipe pipe, Exception exception)
 		{
-			FImageRequest = null;
+			_imageRequest = null;
 			SetImage(ImageUtility.GetErrorImage());
 		}
 

@@ -23,15 +23,15 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 	/// <summary> In-memory storage device. </summary>
 	public class MemoryDevice : Schema.Device
 	{
-		public MemoryDevice(int AID, string AName) : base(AID, AName) 
+		public MemoryDevice(int iD, string name) : base(iD, name) 
 		{
 			IgnoreUnsupported = true;
 			RequiresAuthentication = false;
 		}
 		
-		protected override Schema.DeviceSession InternalConnect(ServerProcess AServerProcess, Schema.DeviceSessionInfo ADeviceSessionInfo)
+		protected override Schema.DeviceSession InternalConnect(ServerProcess serverProcess, Schema.DeviceSessionInfo deviceSessionInfo)
 		{
-			return new MemoryDeviceSession(this, AServerProcess, ADeviceSessionInfo);
+			return new MemoryDeviceSession(this, serverProcess, deviceSessionInfo);
 		}
 		
 		public override Schema.DeviceCapability Capabilities 
@@ -47,159 +47,159 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 		}
 		
 		// MaxRowCount
-		private int FMaxRowCount = -1;
+		private int _maxRowCount = -1;
 		public int MaxRowCount
 		{
-			get { return FMaxRowCount; }
-			set { FMaxRowCount = value; }
+			get { return _maxRowCount; }
+			set { _maxRowCount = value; }
 		}
 		
-		protected override DevicePlanNode InternalPrepare(Schema.DevicePlan APlan, PlanNode APlanNode)
+		protected override DevicePlanNode InternalPrepare(Schema.DevicePlan plan, PlanNode planNode)
 		{
-			if (APlanNode is BaseTableVarNode)
+			if (planNode is BaseTableVarNode)
 			{
-				BaseTableVarNode LNode = (BaseTableVarNode)APlanNode;
-				LNode.CursorType = CursorType.Dynamic;
-				LNode.RequestedCursorType = APlan.Plan.CursorContext.CursorType;
-				LNode.CursorCapabilities =
+				BaseTableVarNode node = (BaseTableVarNode)planNode;
+				node.CursorType = CursorType.Dynamic;
+				node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
+				node.CursorCapabilities =
 					CursorCapability.Navigable |
 					CursorCapability.BackwardsNavigable |
 					CursorCapability.Bookmarkable |
 					CursorCapability.Searchable |
-					(APlan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
-				LNode.CursorIsolation = APlan.Plan.CursorContext.CursorIsolation;
-				LNode.Order = Compiler.OrderFromKey(APlan.Plan, Compiler.FindClusteringKey(APlan.Plan, LNode.TableVar));
-				return new DevicePlanNode(LNode);
+					(plan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
+				node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
+				node.Order = Compiler.OrderFromKey(plan.Plan, Compiler.FindClusteringKey(plan.Plan, node.TableVar));
+				return new DevicePlanNode(node);
 			}
-			else if ((APlanNode is OrderNode) && (APlanNode.Nodes[0] is BaseTableVarNode) && (APlan.Plan.CursorContext.CursorType != CursorType.Static))
+			else if ((planNode is OrderNode) && (planNode.Nodes[0] is BaseTableVarNode) && (plan.Plan.CursorContext.CursorType != CursorType.Static))
 			{
-				OrderNode LNode = (OrderNode)APlanNode;
-				BaseTableVarNode LTableVarNode = (BaseTableVarNode)APlanNode.Nodes[0];
-				Schema.Order LTableOrder;
+				OrderNode node = (OrderNode)planNode;
+				BaseTableVarNode tableVarNode = (BaseTableVarNode)planNode.Nodes[0];
+				Schema.Order tableOrder;
 
-				bool LIsSupported = false;
-				foreach (Schema.Key LKey in LTableVarNode.TableVar.Keys)
+				bool isSupported = false;
+				foreach (Schema.Key key in tableVarNode.TableVar.Keys)
 				{
-					LTableOrder = Compiler.OrderFromKey(APlan.Plan, LKey);
-					if (LNode.RequestedOrder.Equivalent(LTableOrder))
+					tableOrder = Compiler.OrderFromKey(plan.Plan, key);
+					if (node.RequestedOrder.Equivalent(tableOrder))
 					{
-						LNode.PhysicalOrder = LTableOrder;
-						LNode.ScanDirection = ScanDirection.Forward;
-						LIsSupported = true;
+						node.PhysicalOrder = tableOrder;
+						node.ScanDirection = ScanDirection.Forward;
+						isSupported = true;
 						break;
 					}
-					else if (LNode.RequestedOrder.Equivalent(new Schema.Order(LTableOrder, true)))
+					else if (node.RequestedOrder.Equivalent(new Schema.Order(tableOrder, true)))
 					{
-						LNode.PhysicalOrder = LTableOrder;
-						LNode.ScanDirection = ScanDirection.Backward;
-						LIsSupported = true;
+						node.PhysicalOrder = tableOrder;
+						node.ScanDirection = ScanDirection.Backward;
+						isSupported = true;
 						break;
 					}
 				}
 
-				if (!LIsSupported)
-					foreach (Schema.Order LOrder in LTableVarNode.TableVar.Orders)
-						if (LNode.RequestedOrder.Equivalent(LOrder))
+				if (!isSupported)
+					foreach (Schema.Order order in tableVarNode.TableVar.Orders)
+						if (node.RequestedOrder.Equivalent(order))
 						{
-							LNode.PhysicalOrder = LOrder;
-							LNode.ScanDirection = ScanDirection.Forward;
-							LIsSupported = true;
+							node.PhysicalOrder = order;
+							node.ScanDirection = ScanDirection.Forward;
+							isSupported = true;
 							break;
 						}
-						else if (LNode.RequestedOrder.Equivalent(new Schema.Order(LOrder, true)))
+						else if (node.RequestedOrder.Equivalent(new Schema.Order(order, true)))
 						{
-							LNode.PhysicalOrder = LOrder;
-							LNode.ScanDirection = ScanDirection.Backward;
-							LIsSupported = true;
+							node.PhysicalOrder = order;
+							node.ScanDirection = ScanDirection.Backward;
+							isSupported = true;
 							break;
 						}
 
-				if (LIsSupported)
+				if (isSupported)
 				{
-					LNode.Order = new Schema.Order();
-					LNode.Order.MergeMetaData(LNode.RequestedOrder.MetaData);
-					LNode.Order.IsInherited = false;
-					Schema.OrderColumn LOrderColumn;
-					Schema.OrderColumn LNewOrderColumn;
-					for (int LIndex = 0; LIndex < LNode.PhysicalOrder.Columns.Count; LIndex++)
+					node.Order = new Schema.Order();
+					node.Order.MergeMetaData(node.RequestedOrder.MetaData);
+					node.Order.IsInherited = false;
+					Schema.OrderColumn orderColumn;
+					Schema.OrderColumn newOrderColumn;
+					for (int index = 0; index < node.PhysicalOrder.Columns.Count; index++)
 					{
-						LOrderColumn = LNode.PhysicalOrder.Columns[LIndex];
-						LNewOrderColumn = 
+						orderColumn = node.PhysicalOrder.Columns[index];
+						newOrderColumn = 
 							new Schema.OrderColumn
 							(
-								LNode.TableVar.Columns[LOrderColumn.Column], 
-								LNode.ScanDirection == ScanDirection.Forward ? 
-									LOrderColumn.Ascending : 
-									!LOrderColumn.Ascending
+								node.TableVar.Columns[orderColumn.Column], 
+								node.ScanDirection == ScanDirection.Forward ? 
+									orderColumn.Ascending : 
+									!orderColumn.Ascending
 							);
-						LNewOrderColumn.Sort = LOrderColumn.Sort;
-						LNewOrderColumn.IsDefaultSort = LOrderColumn.IsDefaultSort;
-						Error.AssertWarn(LNewOrderColumn.Sort != null, "Sort is null");
-						LNode.Order.Columns.Add(LNewOrderColumn);
+						newOrderColumn.Sort = orderColumn.Sort;
+						newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
+						Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");
+						node.Order.Columns.Add(newOrderColumn);
 					}
-					if (!LNode.TableVar.Orders.Contains(LNode.Order))
-						LNode.TableVar.Orders.Add(LNode.Order);
+					if (!node.TableVar.Orders.Contains(node.Order))
+						node.TableVar.Orders.Add(node.Order);
 
-					LNode.CursorType = CursorType.Dynamic;
-					LNode.RequestedCursorType = APlan.Plan.CursorContext.CursorType;
-					LNode.CursorCapabilities =
+					node.CursorType = CursorType.Dynamic;
+					node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
+					node.CursorCapabilities =
 						CursorCapability.Navigable |
 						CursorCapability.BackwardsNavigable |
 						CursorCapability.Bookmarkable |
 						CursorCapability.Searchable |
-						(APlan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
-					LNode.CursorIsolation = APlan.Plan.CursorContext.CursorIsolation;
+						(plan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
+					node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
 					
-					return new DevicePlanNode(LNode);
+					return new DevicePlanNode(node);
 				}
 			}
-			else if (APlanNode is CreateTableVarBaseNode)
+			else if (planNode is CreateTableVarBaseNode)
 			{
-				APlan.Plan.CheckRight(GetRight(Schema.RightNames.CreateStore));
-				return new DevicePlanNode(APlanNode);
+				plan.Plan.CheckRight(GetRight(Schema.RightNames.CreateStore));
+				return new DevicePlanNode(planNode);
 			}
-			else if (APlanNode is AlterTableNode)
+			else if (planNode is AlterTableNode)
 			{
-				APlan.Plan.CheckRight(GetRight(Schema.RightNames.AlterStore));
-				AlterTableNode LAlterTableNode = (AlterTableNode)APlanNode;
-				if (LAlterTableNode.AlterTableStatement.CreateColumns.Count > 0)
+				plan.Plan.CheckRight(GetRight(Schema.RightNames.AlterStore));
+				AlterTableNode alterTableNode = (AlterTableNode)planNode;
+				if (alterTableNode.AlterTableStatement.CreateColumns.Count > 0)
 					throw new RuntimeException(RuntimeException.Codes.UnimplementedCreateCommand, "Columns in a memory device");
-				if (LAlterTableNode.AlterTableStatement.DropColumns.Count > 0)
+				if (alterTableNode.AlterTableStatement.DropColumns.Count > 0)
 					throw new RuntimeException(RuntimeException.Codes.UnimplementedDropCommand, "Columns in a memory device");
-				return new DevicePlanNode(APlanNode);
+				return new DevicePlanNode(planNode);
 			}
-			else if (APlanNode is DropTableNode)
+			else if (planNode is DropTableNode)
 			{
-				APlan.Plan.CheckRight(GetRight(Schema.RightNames.DropStore));
-				return new DevicePlanNode(APlanNode);
+				plan.Plan.CheckRight(GetRight(Schema.RightNames.DropStore));
+				return new DevicePlanNode(planNode);
 			}
-			APlan.IsSupported = false;
+			plan.IsSupported = false;
 			return null;
 		}
 		
-		protected override void InternalStart(ServerProcess AProcess)
+		protected override void InternalStart(ServerProcess process)
 		{
-			base.InternalStart(AProcess);
-			FTables = new NativeTables();
+			base.InternalStart(process);
+			_tables = new NativeTables();
 		}
 		
-		protected override void InternalStop(ServerProcess AProcess)
+		protected override void InternalStop(ServerProcess process)
 		{
-			if (FTables != null)
+			if (_tables != null)
 			{
-				while (FTables.Count > 0)
+				while (_tables.Count > 0)
 				{
-					FTables[0].Drop(AProcess.ValueManager);
-					FTables.RemoveAt(0);
+					_tables[0].Drop(process.ValueManager);
+					_tables.RemoveAt(0);
 				}
 
-				FTables = null;
+				_tables = null;
 			}
-			base.InternalStop(AProcess);
+			base.InternalStop(process);
 		}
 		
-		private NativeTables FTables;
-		public NativeTables Tables { get { return FTables; } }
+		private NativeTables _tables;
+		public NativeTables Tables { get { return _tables; } }
 	}
 	
 	#if USEMEMORYDEVICETRANSACTIONS
@@ -288,12 +288,12 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 	{
 		protected internal MemoryDeviceSession
 		(
-			Schema.Device ADevice, 
-			ServerProcess AServerProcess, 
-			Schema.DeviceSessionInfo ADeviceSessionInfo
-		) : base(ADevice, AServerProcess, ADeviceSessionInfo){}
+			Schema.Device device, 
+			ServerProcess serverProcess, 
+			Schema.DeviceSessionInfo deviceSessionInfo
+		) : base(device, serverProcess, deviceSessionInfo){}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -308,19 +308,19 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
 		public new MemoryDevice Device { get { return (MemoryDevice)base.Device; } }
 		
-		private NativeTables FTables;
+		private NativeTables _tables;
 
-		public virtual NativeTables GetTables(Schema.TableVarScope AScope) 
+		public virtual NativeTables GetTables(Schema.TableVarScope scope) 
 		{
-			switch (AScope)
+			switch (scope)
 			{
-				case Schema.TableVarScope.Process : return FTables == null ? FTables = new NativeTables() : FTables;
+				case Schema.TableVarScope.Process : return _tables == null ? _tables = new NativeTables() : _tables;
 				case Schema.TableVarScope.Session : return ServerProcess.ServerSession.Tables;
 				case Schema.TableVarScope.Database :
 				default : return Device.Tables;
@@ -332,7 +332,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 		public MemoryDeviceTransactions Transactions { get { return FTransactions; } }
 		#endif
 		
-		protected override void InternalBeginTransaction(IsolationLevel AIsolationLevel)
+		protected override void InternalBeginTransaction(IsolationLevel isolationLevel)
 		{
 			#if USEMEMORYDEVICETRANSACTIONS
 			FTransactions.BeginTransaction(AIsolationLevel);
@@ -411,99 +411,99 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			#endif
 		}
 		
-		protected NativeTable EnsureNativeTable(Schema.TableVar ATableVar)
+		protected NativeTable EnsureNativeTable(Schema.TableVar tableVar)
 		{
-			if (!ATableVar.IsSessionObject && !ATableVar.IsATObject)
-				ATableVar.Scope = (Schema.TableVarScope)Enum.Parse(typeof(Schema.TableVarScope), MetaData.GetTag(ATableVar.MetaData, "Storage.Scope", "Database"), false);
+			if (!tableVar.IsSessionObject && !tableVar.IsATObject)
+				tableVar.Scope = (Schema.TableVarScope)Enum.Parse(typeof(Schema.TableVarScope), MetaData.GetTag(tableVar.MetaData, "Storage.Scope", "Database"), false);
 
-			NativeTables LTables = GetTables(ATableVar.Scope);
-			lock (LTables)
+			NativeTables tables = GetTables(tableVar.Scope);
+			lock (tables)
 			{
-				int LIndex = LTables.IndexOf(ATableVar);
-				if (LIndex < 0)
-					LIndex = LTables.Add(new NativeTable(ServerProcess.ValueManager, ATableVar));
-				return LTables[LIndex];
+				int index = tables.IndexOf(tableVar);
+				if (index < 0)
+					index = tables.Add(new NativeTable(ServerProcess.ValueManager, tableVar));
+				return tables[index];
 			}
 		}
 
-		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Program program, Schema.DevicePlan devicePlan)
 		{
-			PlanNode LPlanNode = ADevicePlan.Node;
-			if (LPlanNode is BaseTableVarNode)
+			PlanNode planNode = devicePlan.Node;
+			if (planNode is BaseTableVarNode)
 			{
-				MemoryScan LScan = new MemoryScan(AProgram, this, (BaseTableVarNode)LPlanNode);
+				MemoryScan scan = new MemoryScan(program, this, (BaseTableVarNode)planNode);
 				try
 				{
-					LScan.NativeTable = EnsureNativeTable(((BaseTableVarNode)LPlanNode).TableVar);
-					LScan.Key = LScan.NativeTable.ClusteredIndex.Key;
-					LScan.Open();
-					return LScan;
+					scan.NativeTable = EnsureNativeTable(((BaseTableVarNode)planNode).TableVar);
+					scan.Key = scan.NativeTable.ClusteredIndex.Key;
+					scan.Open();
+					return scan;
 				}
 				catch
 				{
-					LScan.Dispose();
+					scan.Dispose();
 					throw;
 				}
 			}
-			else if (LPlanNode is OrderNode)
+			else if (planNode is OrderNode)
 			{
-				MemoryScan LScan = new MemoryScan(AProgram, this, (BaseTableVarNode)LPlanNode.Nodes[0]);
+				MemoryScan scan = new MemoryScan(program, this, (BaseTableVarNode)planNode.Nodes[0]);
 				try
 				{
-					LScan.NativeTable = EnsureNativeTable(((BaseTableVarNode)LPlanNode.Nodes[0]).TableVar);
-					LScan.Key = ((OrderNode)LPlanNode).PhysicalOrder;
-					LScan.Direction = ((OrderNode)LPlanNode).ScanDirection;
-					LScan.Node.Order = ((OrderNode)LPlanNode).Order;
-					LScan.Open();
-					return LScan;
+					scan.NativeTable = EnsureNativeTable(((BaseTableVarNode)planNode.Nodes[0]).TableVar);
+					scan.Key = ((OrderNode)planNode).PhysicalOrder;
+					scan.Direction = ((OrderNode)planNode).ScanDirection;
+					scan.Node.Order = ((OrderNode)planNode).Order;
+					scan.Open();
+					return scan;
 				}
 				catch
 				{
-					LScan.Dispose();
+					scan.Dispose();
 					throw;
 				}
 			}
-			else if (LPlanNode is CreateTableVarBaseNode)
+			else if (planNode is CreateTableVarBaseNode)
 			{
-				EnsureNativeTable(((CreateTableVarBaseNode)LPlanNode).GetTableVar());
+				EnsureNativeTable(((CreateTableVarBaseNode)planNode).GetTableVar());
 				return null;
 			}
-			else if (LPlanNode is AlterTableNode)
+			else if (planNode is AlterTableNode)
 			{
 				// TODO: Memory device alter table support
 				return null;
 			}
-			else if (LPlanNode is DropTableNode)
+			else if (planNode is DropTableNode)
 			{
-				Schema.TableVar LTableVar = ((DropTableNode)LPlanNode).Table;
-				NativeTables LTables = GetTables(LTableVar.Scope);
-				lock (LTables)
+				Schema.TableVar tableVar = ((DropTableNode)planNode).Table;
+				NativeTables tables = GetTables(tableVar.Scope);
+				lock (tables)
 				{
-					int LTableIndex = LTables.IndexOf(LTableVar);
-					if (LTableIndex >= 0)
+					int tableIndex = tables.IndexOf(tableVar);
+					if (tableIndex >= 0)
 					{
-						NativeTable LNativeTable = LTables[LTableIndex];
+						NativeTable nativeTable = tables[tableIndex];
 						#if USEMEMORYDEVICETRANSACTIONS
-						RemoveTransactionReferences(LNativeTable.TableVar);
+						RemoveTransactionReferences(nativeTable.TableVar);
 						#endif
-						LNativeTable.Drop(AProgram.ValueManager);
-						LTables.RemoveAt(LTableIndex);
+						nativeTable.Drop(program.ValueManager);
+						tables.RemoveAt(tableIndex);
 					}
 				}
 				return null;
 			}
 			else
-				throw new DeviceException(DeviceException.Codes.InvalidExecuteRequest, Device.Name, LPlanNode.ToString());
+				throw new DeviceException(DeviceException.Codes.InvalidExecuteRequest, Device.Name, planNode.ToString());
 		}
 		
-		protected override void InternalInsertRow(Program AProgram, Schema.TableVar ATable, Row ARow, BitArray AValueFlags)
+		protected override void InternalInsertRow(Program program, Schema.TableVar table, Row row, BitArray valueFlags)
 		{
-			NativeTable LTable = GetTables(ATable.Scope)[ATable];
+			NativeTable localTable = GetTables(table.Scope)[table];
 			
-			if ((Device.MaxRowCount >= 0) && (LTable.RowCount >= Device.MaxRowCount) && (!InTransaction || !ServerProcess.CurrentTransaction.InRollback))
-				throw new DeviceException(DeviceException.Codes.MaxRowCountExceeded, Device.MaxRowCount.ToString(), ATable.DisplayName, Device.DisplayName);
+			if ((Device.MaxRowCount >= 0) && (localTable.RowCount >= Device.MaxRowCount) && (!InTransaction || !ServerProcess.CurrentTransaction.InRollback))
+				throw new DeviceException(DeviceException.Codes.MaxRowCountExceeded, Device.MaxRowCount.ToString(), table.DisplayName, Device.DisplayName);
 
-			LTable.Insert(ServerProcess.ValueManager, ARow);
+			localTable.Insert(ServerProcess.ValueManager, row);
 
 			#if USEMEMORYDEVICETRANSACTIONS
 			if (InTransaction && !ServerProcess.NonLogged && !ServerProcess.CurrentTransaction.InRollback)
@@ -511,18 +511,18 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			#endif
 		}
 		
-		protected override void InternalUpdateRow(Program AProgram, Schema.TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalUpdateRow(Program program, Schema.TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
 		{
-			GetTables(ATable.Scope)[ATable].Update(ServerProcess.ValueManager, AOldRow, ANewRow);
+			GetTables(table.Scope)[table].Update(ServerProcess.ValueManager, oldRow, newRow);
 			#if USEMEMORYDEVICETRANSACTIONS
 			if (InTransaction && !ServerProcess.NonLogged && !ServerProcess.CurrentTransaction.InRollback)
 				Transactions.CurrentTransaction().Operations.Add(new UpdateOperation(ATable, (Row)ANewRow.Copy(), (Row)AOldRow.Copy()));
 			#endif
 		}
 		
-		protected override void InternalDeleteRow(Program AProgram, Schema.TableVar ATable, Row ARow)
+		protected override void InternalDeleteRow(Program program, Schema.TableVar table, Row row)
 		{
-			GetTables(ATable.Scope)[ATable].Delete(ServerProcess.ValueManager, ARow);
+			GetTables(table.Scope)[table].Delete(ServerProcess.ValueManager, row);
 			#if USEMEMORYDEVICETRANSACTIONS
 			if (InTransaction && !ServerProcess.NonLogged && !ServerProcess.CurrentTransaction.InRollback)
 				Transactions.CurrentTransaction().Operations.Add(new InsertOperation(ATable, (Row)ARow.Copy()));
@@ -532,13 +532,13 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 	
 	public class MemoryScan : TableScan
 	{
-		public MemoryScan(Program AProgram, MemoryDeviceSession ASession, TableNode ANode) : base(ANode, AProgram)
+		public MemoryScan(Program program, MemoryDeviceSession session, TableNode node) : base(node, program)
 		{
-			FSession = ASession;
+			_session = session;
 		}
 		
-		private MemoryDeviceSession FSession; 
-		public MemoryDeviceSession Session { get { return FSession; } }
+		private MemoryDeviceSession _session; 
+		public MemoryDeviceSession Session { get { return _session; } }
 	}
 }
 

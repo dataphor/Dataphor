@@ -14,19 +14,19 @@ namespace Alphora.Dataphor.DAE.Language.PGSQL
 		public DropIndexStatement() : base(){}
 		
 		// TableSchema
-		protected string FTableSchema = String.Empty;
+		protected string _tableSchema = String.Empty;
 		public string TableSchema
 		{
-			get { return FTableSchema; }
-			set { FTableSchema = value == null ? String.Empty : value; }
+			get { return _tableSchema; }
+			set { _tableSchema = value == null ? String.Empty : value; }
 		}
 
 		// TableName
-		protected string FTableName = String.Empty;
+		protected string _tableName = String.Empty;
 		public string TableName
 		{
-			get { return FTableName; }
-			set { FTableName = value == null ? String.Empty : value; }
+			get { return _tableName; }
+			set { _tableName = value == null ? String.Empty : value; }
 		}
 	}
 }

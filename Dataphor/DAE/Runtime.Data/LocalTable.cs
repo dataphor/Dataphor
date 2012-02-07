@@ -15,146 +15,146 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class LocalTable : Table
     {
-		public LocalTable(TableNode ATableNode, Program AProgram, TableValue ATableValue) : base(ATableNode, AProgram)
+		public LocalTable(TableNode tableNode, Program program, TableValue tableValue) : base(tableNode, program)
 		{
-			FNativeTable = (NativeTable)ATableValue.AsNative;
-			FKey = AProgram.OrderFromKey(AProgram.FindClusteringKey(FNativeTable.TableVar));
+			_nativeTable = (NativeTable)tableValue.AsNative;
+			_key = program.OrderFromKey(program.FindClusteringKey(_nativeTable.TableVar));
 		}
 		
-		public LocalTable(TableNode ATableNode, Program AProgram) : base(ATableNode, AProgram)
+		public LocalTable(TableNode tableNode, Program program) : base(tableNode, program)
 		{
-			FNativeTable = new NativeTable(AProgram.ValueManager, ATableNode.TableVar);
-			FKey = AProgram.OrderFromKey(AProgram.FindClusteringKey(ATableNode.TableVar));
+			_nativeTable = new NativeTable(program.ValueManager, tableNode.TableVar);
+			_key = program.OrderFromKey(program.FindClusteringKey(tableNode.TableVar));
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			Close();
-			if (FNativeTable != null)
+			if (_nativeTable != null)
 			{
-				FNativeTable.Drop(Program.ValueManager);
-				FNativeTable = null;
+				_nativeTable.Drop(Program.ValueManager);
+				_nativeTable = null;
 			}
 		}
 		
-		public new TableNode Node { get { return (TableNode)FNode; } }
+		public new TableNode Node { get { return (TableNode)_node; } }
 		
-		protected internal NativeTable FNativeTable;
-		private Schema.Order FKey;
-		private Scan FScan;
+		protected internal NativeTable _nativeTable;
+		private Schema.Order _key;
+		private Scan _scan;
 
 		protected override void InternalOpen()
 		{
-			if (FNativeTable.ClusteredIndex.Key.Equivalent(FKey))
-				FScan = new Scan(Manager, FNativeTable, FNativeTable.ClusteredIndex, ScanDirection.Forward, null, null);
+			if (_nativeTable.ClusteredIndex.Key.Equivalent(_key))
+				_scan = new Scan(Manager, _nativeTable, _nativeTable.ClusteredIndex, ScanDirection.Forward, null, null);
 			else
-				FScan = new Scan(Manager, FNativeTable, FNativeTable.NonClusteredIndexes[FKey], ScanDirection.Forward, null, null);
-			FScan.Open();
+				_scan = new Scan(Manager, _nativeTable, _nativeTable.NonClusteredIndexes[_key], ScanDirection.Forward, null, null);
+			_scan.Open();
 		}
 		
 		protected override void InternalClose()
 		{
-			FScan.Dispose();
-			FScan = null;
+			_scan.Dispose();
+			_scan = null;
 		}
 		
 		protected override void InternalReset()
 		{
-			FScan.Reset();
+			_scan.Reset();
 		}
 		
-		protected override void InternalSelect(Row ARow)
+		protected override void InternalSelect(Row row)
 		{
-			FScan.GetRow(ARow);
+			_scan.GetRow(row);
 		}
 		
 		protected override void InternalFirst()
 		{
-			FScan.First();
+			_scan.First();
 		}
 		
 		protected override bool InternalPrior()
 		{
-			return FScan.Prior();
+			return _scan.Prior();
 		}
 		
 		protected override bool InternalNext()
 		{
-			return FScan.Next();
+			return _scan.Next();
 		}
 		
 		protected override void InternalLast()
 		{
-			FScan.Last();
+			_scan.Last();
 		}
 		
 		protected override bool InternalBOF()
 		{
-			return FScan.BOF();
+			return _scan.BOF();
 		}
 		
 		protected override bool InternalEOF()
 		{
-			return FScan.EOF();
+			return _scan.EOF();
 		}
 
 		// Bookmarkable
 
 		protected override Row InternalGetBookmark()
 		{
-			return FScan.GetKey();
+			return _scan.GetKey();
 		}
 
-		protected override bool InternalGotoBookmark(Row ABookmark, bool AForward)
+		protected override bool InternalGotoBookmark(Row bookmark, bool forward)
 		{
-			return FScan.FindKey(ABookmark);
+			return _scan.FindKey(bookmark);
 		}
         
-		protected override int InternalCompareBookmarks(Row ABookmark1, Row ABookmark2)
+		protected override int InternalCompareBookmarks(Row bookmark1, Row bookmark2)
 		{
-			return FScan.CompareKeys(ABookmark1, ABookmark2);
+			return _scan.CompareKeys(bookmark1, bookmark2);
 		}
 
 		// Searchable
 
 		protected override Schema.Order InternalGetOrder()
 		{
-			return FKey;
+			return _key;
 		}
 		
 		protected override Row InternalGetKey()
 		{
-			return FScan.GetKey();
+			return _scan.GetKey();
 		}
 
-		protected override bool InternalFindKey(Row AKey, bool AForward)
+		protected override bool InternalFindKey(Row key, bool forward)
 		{
-			return FScan.FindKey(AKey);
+			return _scan.FindKey(key);
 		}
 		
-		protected override void InternalFindNearest(Row AKey)
+		protected override void InternalFindNearest(Row key)
 		{
-			FScan.FindNearest(AKey);
+			_scan.FindNearest(key);
 		}
 		
-		protected override bool InternalRefresh(Row AKey)
+		protected override bool InternalRefresh(Row key)
 		{
-			return FScan.FindNearest(AKey);
+			return _scan.FindNearest(key);
 		}
 
-		protected override void InternalInsert(Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalInsert(Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			FNativeTable.Insert(Manager, ANewRow);
+			_nativeTable.Insert(Manager, newRow);
 		}
 		
-		protected override void InternalUpdate(Row ARow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalUpdate(Row row, BitArray valueFlags, bool uncheckedValue)
 		{
-			FNativeTable.Update(Manager, Select(), ARow);
+			_nativeTable.Update(Manager, Select(), row);
 		}
 		
-		protected override void InternalDelete(bool AUnchecked)
+		protected override void InternalDelete(bool uncheckedValue)
 		{
-			FNativeTable.Delete(Manager, Select());
+			_nativeTable.Delete(Manager, Select());
 		}
     }
 }

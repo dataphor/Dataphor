@@ -18,83 +18,83 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 	{
 		public DataTree() {}
 
-		private IDataphoria FDataphoria;
+		private IDataphoria _dataphoria;
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public IDataphoria Dataphoria
 		{
-			get { return FDataphoria; }
-			set { FDataphoria = value; }
+			get { return _dataphoria; }
+			set { _dataphoria = value; }
 		}
 
-		public DataNode GetNodeAtPoint(Point APoint)
+		public DataNode GetNodeAtPoint(Point point)
 		{
-			return (DataNode)GetNodeAt(APoint.X, APoint.Y);
+			return (DataNode)GetNodeAt(point.X, point.Y);
 		}
 
-		protected override void OnMouseMove(MouseEventArgs AArgs)
+		protected override void OnMouseMove(MouseEventArgs args)
 		{
-			base.OnMouseMove(AArgs);
-			if ((AArgs.Button != MouseButtons.None) && (SelectedNode != null))
+			base.OnMouseMove(args);
+			if ((args.Button != MouseButtons.None) && (SelectedNode != null))
 			{
-				TreeNode LNode = GetNodeAt(AArgs.X, AArgs.Y);
-				if (LNode != null)
+				TreeNode node = GetNodeAt(args.X, args.Y);
+				if (node != null)
 					((DataNode)SelectedNode).ItemDrag();
 			}
 		}
 
-		protected override void OnDragDrop(DragEventArgs AArgs)
+		protected override void OnDragDrop(DragEventArgs args)
 		{
 			try
 			{
-				base.OnDragDrop(AArgs);
-				DataNode LNode = GetNodeAtScreen(new Point(AArgs.X, AArgs.Y)) as DataNode;
-				if (LNode != null)
-					LNode.DragDrop(AArgs);
+				base.OnDragDrop(args);
+				DataNode node = GetNodeAtScreen(new Point(args.X, args.Y)) as DataNode;
+				if (node != null)
+					node.DragDrop(args);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
 				// must show exceptions because the framework ignores them
-				Frontend.Client.Windows.Session.HandleException(LException);
+				Frontend.Client.Windows.Session.HandleException(exception);
 			}
 		}
 
-		private DataNode FDragTarget;
+		private DataNode _dragTarget;
 
-		private void InternalEnterOrOver(DragEventArgs AArgs)
+		private void InternalEnterOrOver(DragEventArgs args)
 		{
-			DataNode LNode = (DataNode)GetNodeAtScreen(new Point(AArgs.X, AArgs.Y));
-			if (FDragTarget != LNode)
+			DataNode node = (DataNode)GetNodeAtScreen(new Point(args.X, args.Y));
+			if (_dragTarget != node)
 			{
-				if (FDragTarget != null)
-					FDragTarget.DragLeave();
-				FDragTarget = LNode;
+				if (_dragTarget != null)
+					_dragTarget.DragLeave();
+				_dragTarget = node;
 			}
-			if (LNode != null)
-				LNode.DragOver(AArgs);
+			if (node != null)
+				node.DragOver(args);
 			else
-				AArgs.Effect = DragDropEffects.None;
+				args.Effect = DragDropEffects.None;
 		}
 
-		protected override void OnDragOver(DragEventArgs AArgs)
+		protected override void OnDragOver(DragEventArgs args)
 		{
-			base.OnDragOver(AArgs);
-			InternalEnterOrOver(AArgs);
+			base.OnDragOver(args);
+			InternalEnterOrOver(args);
 		}
 
-		protected override void OnDragEnter(DragEventArgs AArgs)
+		protected override void OnDragEnter(DragEventArgs args)
 		{
-			base.OnDragEnter(AArgs);
-			InternalEnterOrOver(AArgs);
+			base.OnDragEnter(args);
+			InternalEnterOrOver(args);
 		}
 
-		protected override void OnDragLeave(EventArgs AArgs)
+		protected override void OnDragLeave(EventArgs args)
 		{
-			base.OnDragLeave(AArgs);
-			if (FDragTarget != null)
+			base.OnDragLeave(args);
+			if (_dragTarget != null)
 			{
-				FDragTarget.DragLeave();
-				FDragTarget = null;
+				_dragTarget.DragLeave();
+				_dragTarget = null;
 			}
 		}
 	}

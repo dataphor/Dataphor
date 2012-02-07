@@ -25,16 +25,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		// Height
 
-		private int FHeight = 1;
+		private int _height = 1;
 		[DefaultValue(1)]
 		public int Height
 		{
-			get { return FHeight; }
+			get { return _height; }
 			set 
 			{ 
-				if (FHeight != value)
+				if (_height != value)
 				{
-					FHeight = value; 
+					_height = value; 
 					UpdateLayout();
 				}
 			}
@@ -74,7 +74,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override int GetControlNaturalHeight()
 		{
-			return FHeight * TextControl.Font.Height;
+			return _height * TextControl.Font.Height;
 		}
 
 	}
@@ -83,8 +83,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class CheckBox : ColumnElement, ICheckBox
 	{
-		public const int CDefaultWidth = 10;
-		public const int CMinCheckBoxWidth = 20;
+		public const int DefaultWidth = 10;
+		public const int MinCheckBoxWidth = 20;
 		
 		// CheckBoxControl
 
@@ -97,26 +97,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// TODO: Remove Width when common properties are better handled
 		// This is only here because it is a common property
-		private int FWidth = 0;
+		private int _width = 0;
 		[DefaultValue(0)]
 		[Description("Width has no affect for the CheckBox control.")]
 		public int Width
 		{
-			get { return FWidth; }
-			set { FWidth = value; }
+			get { return _width; }
+			set { _width = value; }
 		}
 		
 		// AutoUpdate
 		
-		private bool FAutoUpdate = true;
+		private bool _autoUpdate = true;
 		[DefaultValue(true)]
 		[Description("Determines whether or not the control will automatically update the underlying data value.")]
 		public bool AutoUpdate
 		{
-			get { return FAutoUpdate; }
+			get { return _autoUpdate; }
 			set
 			{
-				FAutoUpdate = value;
+				_autoUpdate = value;
 				if (Active)
 					InternalUpdateAutoUpdate();
 			}
@@ -124,15 +124,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// TrueFirst
 
-		private bool FTrueFirst = true;
+		private bool _trueFirst = true;
 		[DefaultValue(true)]
 		[Description("Determines the CheckState transition sequence for CheckBoxes with three-states.")]
 		public bool TrueFirst
 		{
-			get { return FTrueFirst; }
+			get { return _trueFirst; }
 			set
 			{
-					FTrueFirst = value;
+					_trueFirst = value;
 					if (Active)
 						InternalUpdateTrueFirst();
 			}
@@ -140,25 +140,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void InternalUpdateTrueFirst()
 		{
-			CheckBoxControl.TrueFirst = FTrueFirst;
+			CheckBoxControl.TrueFirst = _trueFirst;
 		}
 
 		private void InternalUpdateAutoUpdate()
 		{
-			CheckBoxControl.AutoUpdate = FAutoUpdate;
+			CheckBoxControl.AutoUpdate = _autoUpdate;
 		}
 		
 		// AutoUpdateInterval
 		
-		private int FAutoUpdateInterval = 200;
+		private int _autoUpdateInterval = 200;
 		[DefaultValue(200)]
 		[Description("Specifies the amount of time to wait before updating the underlying data value.")]
 		public int AutoUpdateInterval
 		{
-			get { return FAutoUpdateInterval; }
+			get { return _autoUpdateInterval; }
 			set
 			{
-				FAutoUpdateInterval = value;
+				_autoUpdateInterval = value;
 				if (Active)
 					InternalUpdateAutoUpdateInterval();
 			}
@@ -166,7 +166,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		private void InternalUpdateAutoUpdateInterval()
 		{
-			CheckBoxControl.AutoUpdateInterval = FAutoUpdateInterval;
+			CheckBoxControl.AutoUpdateInterval = _autoUpdateInterval;
 		}
 		
 		// DataColumnElement
@@ -176,13 +176,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return new DAE.Client.Controls.DBCheckBox();
 		}
 
-		private static int FCheckBoxHeight = 0;
+		private static int _checkBoxHeight = 0;
 
-		private static int GetCheckBoxHeight(WinForms.Control AControl)
+		private static int GetCheckBoxHeight(WinForms.Control control)
 		{
-			if (FCheckBoxHeight == 0)
-				FCheckBoxHeight = Element.GetPixelHeight(AControl);
-			return FCheckBoxHeight;
+			if (_checkBoxHeight == 0)
+				_checkBoxHeight = Element.GetPixelHeight(control);
+			return _checkBoxHeight;
 		}
 
 		protected override void InitializeControl()
@@ -197,15 +197,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Element
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
-			int LOffset = ABounds.Height - InternalNaturalSize.Height;
-			if (LOffset > 0)
+			int offset = bounds.Height - InternalNaturalSize.Height;
+			if (offset > 0)
 			{
-				ABounds.Y += LOffset;
-				ABounds.Height -= LOffset;
+				bounds.Y += offset;
+				bounds.Height -= offset;
 			}
-			base.InternalLayout(ABounds);
+			base.InternalLayout(bounds);
 		}
 		
 		protected override Size InternalNaturalSize
@@ -222,8 +222,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class Choice : ColumnElement, IChoice
 	{
-		public const int CDefaultWidth = 10;
-		public const int CMinWidth = 16;
+		public const int DefaultWidth = 10;
+		public const int MinWidth = 16;
 
 		// RadioControl
 
@@ -235,28 +235,28 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		// Width
 
 		// TODO: Width in Choice because it is a common derivation prop.  Remove w/ better derivation system.
-		private int FWidth = 0;
+		private int _width = 0;
 		[DefaultValue(0)]
 		[Description("Width has no affect for the Choice control.")]
 		public int Width
 		{
-			get { return FWidth; }
-			set { FWidth = value; }
+			get { return _width; }
+			set { _width = value; }
 		}
 
 		// Columns
 
-		private int FColumns = 1;
+		private int _columns = 1;
 		[DefaultValue(1)]
 		[Description("The number of columns to display radio buttons in.")]
 		public int Columns
 		{
-			get { return FColumns; }
+			get { return _columns; }
 			set
 			{
-				if (value != FColumns)
+				if (value != _columns)
 				{
-					FColumns = Math.Max(1, value);
+					_columns = Math.Max(1, value);
 					if (Active)
 					{
 						InternalUpdateColumns();
@@ -268,23 +268,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected void InternalUpdateColumns()
 		{
-			RadioControl.Columns = FColumns;
+			RadioControl.Columns = _columns;
 		}
 
 		// Items
 
-		private string FItems = String.Empty;
+		private string _items = String.Empty;
 		[DefaultValue("")]
 		[Description("Comma or semicolon separated list of available name-value pairs to be listed as choices. (First=1, Second=2)")]
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string Items
 		{
-			get { return FItems; }
+			get { return _items; }
 			set
 			{
-				if (FItems != value)
+				if (_items != value)
 				{
-					FItems = value;
+					_items = value;
 					if (Active)
 					{
 						InternalUpdateItems();
@@ -296,40 +296,40 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected void InternalUpdateItems()
 		{
-			DAE.Client.Controls.DBRadioButtonGroup LControl = RadioControl;
-			LControl.Items = new string[0];
-			LControl.Values = new string[0];
-			if (FItems != String.Empty)
+			DAE.Client.Controls.DBRadioButtonGroup control = RadioControl;
+			control.Items = new string[0];
+			control.Values = new string[0];
+			if (_items != String.Empty)
 			{
-				string[] LNamesWithValues = FItems.Split(new char[] {';', ','});
-				string[] LNameThenValue;
-				string[] LNames = new string[LNamesWithValues.Length];
-				string[] LValues = new string[LNamesWithValues.Length];
-				for (int i = 0; i < LNamesWithValues.Length; i++)
+				string[] namesWithValues = _items.Split(new char[] {';', ','});
+				string[] nameThenValue;
+				string[] names = new string[namesWithValues.Length];
+				string[] values = new string[namesWithValues.Length];
+				for (int i = 0; i < namesWithValues.Length; i++)
 				{
-					LNameThenValue = LNamesWithValues[i].Split('=');
-					if (LNameThenValue.Length != 2)
+					nameThenValue = namesWithValues[i].Split('=');
+					if (nameThenValue.Length != 2)
 						throw new ClientException(ClientException.Codes.InvalidChoiceItems, Name);
 
-					LNames[i] = LNameThenValue[0].Trim();
-					LValues[i] = LNameThenValue[1].Trim();		
+					names[i] = nameThenValue[0].Trim();
+					values[i] = nameThenValue[1].Trim();		
 				}
-				LControl.Items = LNames;
-				LControl.Values = LValues;
+				control.Items = names;
+				control.Values = values;
 			};
 		}
 
 		// AutoUpdate
 		
-		private bool FAutoUpdate;
+		private bool _autoUpdate;
 		[DefaultValue(false)]
 		[Description("Determines whether or not the control will automatically update the underlying data value.")]
 		public bool AutoUpdate
 		{
-			get { return FAutoUpdate; }
+			get { return _autoUpdate; }
 			set
 			{
-				FAutoUpdate = value;
+				_autoUpdate = value;
 				if (Active)
 					InternalUpdateAutoUpdate();
 			}
@@ -337,20 +337,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		private void InternalUpdateAutoUpdate()
 		{
-			RadioControl.AutoUpdate = FAutoUpdate;
+			RadioControl.AutoUpdate = _autoUpdate;
 		}
 		
 		// AutoUpdateInterval
 		
-		private int FAutoUpdateInterval = 200;
+		private int _autoUpdateInterval = 200;
 		[DefaultValue(200)]
 		[Description("Specifies the amount of time to wait before updating the underlying data value.")]
 		public int AutoUpdateInterval
 		{
-			get { return FAutoUpdateInterval; }
+			get { return _autoUpdateInterval; }
 			set
 			{
-				FAutoUpdateInterval = value;
+				_autoUpdateInterval = value;
 				if (Active)
 					InternalUpdateAutoUpdateInterval();
 			}
@@ -358,7 +358,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		private void InternalUpdateAutoUpdateInterval()
 		{
-			RadioControl.AutoUpdateInterval = FAutoUpdateInterval;
+			RadioControl.AutoUpdateInterval = _autoUpdateInterval;
 		}
 		
 		// DataColumnElement
@@ -403,30 +403,30 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class Image : TitledElement, IImage
 	{
-		public const int CMinImageWidth = 20;
-		public const int CDefaultImageHeight = 90;
-		public const int CDefaultImageWidth = 90;
+		public const int MinImageWidth = 20;
+		public const int DefaultImageHeight = 90;
+		public const int DefaultImageWidth = 90;
 
 		// Width - unused common property
 
-		private int FWidth = 0;
+		private int _width = 0;
 		[DefaultValue(0)]
 		[Browsable(false)]
-		public int Width { get { return FWidth; } set { FWidth = value; } }
+		public int Width { get { return _width; } set { _width = value; } }
 
 		// ImageWidth
 
-		private int FImageWidth = -1;
+		private int _imageWidth = -1;
 		[DefaultValue(-1)]
 		[Description("The width, in pixels, that the image will be show as.  If set to -1 then the image's width will be used.")]
 		public int ImageWidth
 		{
-			get { return FImageWidth; }
+			get { return _imageWidth; }
 			set
 			{
-				if (FImageWidth != value)
+				if (_imageWidth != value)
 				{
-					FImageWidth = value;
+					_imageWidth = value;
 					UpdateLayout();
 				}
 			}
@@ -434,17 +434,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ImageHeight
 
-		private int FImageHeight = -1;
+		private int _imageHeight = -1;
 		[DefaultValue(-1)]
 		[Description("The height, in pixels, that the image will be show as.  If set to -1 then the image's height will be used.")]
 		public int ImageHeight
 		{
-			get { return FImageHeight; }
+			get { return _imageHeight; }
 			set
 			{
-				if (FImageHeight != value)
+				if (_imageHeight != value)
 				{
-					FImageHeight = value;
+					_imageHeight = value;
 					UpdateLayout();
 				}
 			}
@@ -459,17 +459,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// StretchStyle
 
-		private StretchStyles FStretchStyle = StretchStyles.StretchRatio;
+		private StretchStyles _stretchStyle = StretchStyles.StretchRatio;
 		[DefaultValue(DAE.Client.Controls.StretchStyles.StretchRatio)]
 		[Description("The method to use to scale the image.  Ratio will preserve the aspect ratio of the image.  Fill will not.  NoStretch will crop the image appropriatly.")]
 		public StretchStyles StretchStyle
 		{
-			get { return FStretchStyle; }
+			get { return _stretchStyle; }
 			set
 			{
-				if (FStretchStyle != value)
+				if (_stretchStyle != value)
 				{
-					FStretchStyle = value;
+					_stretchStyle = value;
 					if (Active)
 						InternalUpdateStretchStyle();
 				}
@@ -478,24 +478,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected virtual void InternalUpdateStretchStyle()
 		{
-			ImageControl.StretchStyle = (DAE.Client.Controls.StretchStyles)FStretchStyle;
+			ImageControl.StretchStyle = (DAE.Client.Controls.StretchStyles)_stretchStyle;
 			UpdateLayout();
 		}
 
 
 		// Center
 
-		private bool FCenter = true;
+		private bool _center = true;
 		[DefaultValue(true)]
 		[Description("When set to true the image will be centered in it's own area..")]
 		public bool Center
 		{
-			get { return FCenter; }
+			get { return _center; }
 			set
 			{
-				if (FCenter != value)
+				if (_center != value)
 				{
-					FCenter = value;
+					_center = value;
 					if (Active)
 						InternalUpdateCenter();
 				}
@@ -504,7 +504,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected virtual void InternalUpdateCenter()
 		{
-			ImageControl.Center = FCenter;
+			ImageControl.Center = _center;
 		}
 
 		// DataColumnElement
@@ -514,16 +514,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return new DAE.Client.Controls.DBImageAspect();
 		}
 
-		private IImageSource FImageSource;
+		private IImageSource _imageSource;
 		public IImageSource ImageSource
 		{
 			get 
 			{ 
-				if (FImageSource == null)
-					FImageSource = new ImageCaptureForm();
-				return FImageSource; 
+				if (_imageSource == null)
+					_imageSource = new ImageCaptureForm();
+				return _imageSource; 
 			}
-			set { FImageSource = value; }
+			set { _imageSource = value; }
 		}
 
 		protected void LoadImage()
@@ -535,15 +535,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					 ImageSource.LoadImage();
 					 if (ImageSource.Stream != null)
 					 {
-						 using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(ImageControl.Source.DataSet.Process.ValueManager, ImageControl.Source.DataSet.Process.DataTypes.SystemGraphic))
+						 using (DAE.Runtime.Data.Scalar newValue = new DAE.Runtime.Data.Scalar(ImageControl.Source.DataSet.Process.ValueManager, ImageControl.Source.DataSet.Process.DataTypes.SystemGraphic))
 						 {
-							 using (Stream LStream = LNewValue.OpenStream())
+							 using (Stream stream = newValue.OpenStream())
 							 {
 								 using (ImageSource.Stream)
 								 {
 									 ImageSource.Stream.Position = 0;
-									 StreamUtility.CopyStream(ImageSource.Stream, LStream);
-									 ImageControl.DataField.Value = LNewValue;
+									 StreamUtility.CopyStream(ImageSource.Stream, stream);
+									 ImageControl.DataField.Value = newValue;
 									 ImageControl.LoadImage();
 								 }
 							 }						 
@@ -562,8 +562,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			ImageControl.BackColor = ((Session)HostNode.Session).Theme.ContainerColor;
 			ImageControl.NoValueBackColor = ((Session)HostNode.Session).Theme.NoValueBackColor;
-			ImageControl.Height = CDefaultImageHeight;
-			ImageControl.Width = CDefaultImageWidth;
+			ImageControl.Height = DefaultImageHeight;
+			ImageControl.Width = DefaultImageWidth;
 			InternalUpdateStretchStyle();
 			InternalUpdateCenter();
 			ImageControl.OnImageRequested += LoadImage;
@@ -574,29 +574,29 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override int GetControlNaturalHeight()
 		{
-			if ((FStretchStyle == StretchStyles.NoStretch) && (ImageControl.Image != null))
+			if ((_stretchStyle == StretchStyles.NoStretch) && (ImageControl.Image != null))
 				return ImageControl.Image.Height;
-			if (FImageHeight > 0)
-				return FImageHeight;
+			if (_imageHeight > 0)
+				return _imageHeight;
 			else
-				return CDefaultImageHeight;
+				return DefaultImageHeight;
 		}
 
 		protected override int GetControlNaturalWidth()
 		{
-			if ((FStretchStyle == StretchStyles.NoStretch) && (ImageControl.Image != null))
+			if ((_stretchStyle == StretchStyles.NoStretch) && (ImageControl.Image != null))
 				return ImageControl.Image.Width;
-			if (FImageWidth > 0)
-				return FImageWidth;
+			if (_imageWidth > 0)
+				return _imageWidth;
 			else
-				return CDefaultImageWidth;
+				return DefaultImageWidth;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			if (ImageControl != null)
 				ImageControl.OnImageRequested -= new Alphora.Dataphor.DAE.Client.Controls.RequestImageHandler(LoadImage);
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 	}
 }

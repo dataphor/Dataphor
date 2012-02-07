@@ -25,45 +25,45 @@ namespace Alphora.Dataphor.DAE.Schema
 
 	public class Operand : System.Object
     {
-		public Operand(Operator AOperator, string AName, IDataType ADataType) : base()
+		public Operand(Operator operatorValue, string name, IDataType dataType) : base()
 		{
-			FName = AName;
-			FOperator = AOperator;
-			FDataType = ADataType;
+			_name = name;
+			_operator = operatorValue;
+			_dataType = dataType;
 		}
 
-		public Operand(Operator AOperator, string AName, IDataType ADataType, Modifier AModifier) : base()
+		public Operand(Operator operatorValue, string name, IDataType dataType, Modifier modifier) : base()
 		{				
-			FName = AName;
-			FOperator = AOperator;
-			FDataType = ADataType;
-			FModifier = AModifier;
+			_name = name;
+			_operator = operatorValue;
+			_dataType = dataType;
+			_modifier = modifier;
 		}
 		
 		// Name
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 		
 		// Operator
 		[Reference]
-		private Operator FOperator;
-		public Operator Operator { get { return FOperator; } }
+		private Operator _operator;
+		public Operator Operator { get { return _operator; } }
 
 		// Modifier
-		private Modifier FModifier;
+		private Modifier _modifier;
 		public Modifier Modifier
 		{
-			get { return FModifier; }
-			set { FModifier = value; }
+			get { return _modifier; }
+			set { _modifier = value; }
 		}
 		
         // DataType
 		[Reference]
-        private IDataType FDataType;
+        private IDataType _dataType;
         public IDataType DataType
         {
-			get { return FDataType; }
-			set { FDataType = value; }
+			get { return _dataType; }
+			set { _dataType = value; }
 		}
     }
     
@@ -74,125 +74,125 @@ namespace Alphora.Dataphor.DAE.Schema
     public class OperatorBlock : System.Object
     {
 		// LineInfo
-		protected LineInfo FLineInfo;
-		public LineInfo LineInfo { get { return FLineInfo; } }
+		protected LineInfo _lineInfo;
+		public LineInfo LineInfo { get { return _lineInfo; } }
 		
-		public void SetLineInfo(Plan APlan, LineInfo ALineInfo)
+		public void SetLineInfo(Plan plan, LineInfo lineInfo)
 		{
-			if (ALineInfo != null)
+			if (lineInfo != null)
 			{
-				if (FLineInfo == null)
-					FLineInfo = new LineInfo();
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
 				
-				FLineInfo.Line = ALineInfo.Line - APlan.CompilingOffset.Line;
-				FLineInfo.LinePos = ALineInfo.LinePos - ((APlan.CompilingOffset.Line == ALineInfo.Line) ? APlan.CompilingOffset.LinePos : 0);
-				FLineInfo.EndLine = ALineInfo.EndLine - APlan.CompilingOffset.Line;
-				FLineInfo.EndLinePos = ALineInfo.EndLinePos - ((APlan.CompilingOffset.Line == ALineInfo.EndLine) ? APlan.CompilingOffset.LinePos : 0);
+				_lineInfo.Line = lineInfo.Line - plan.CompilingOffset.Line;
+				_lineInfo.LinePos = lineInfo.LinePos - ((plan.CompilingOffset.Line == lineInfo.Line) ? plan.CompilingOffset.LinePos : 0);
+				_lineInfo.EndLine = lineInfo.EndLine - plan.CompilingOffset.Line;
+				_lineInfo.EndLinePos = lineInfo.EndLinePos - ((plan.CompilingOffset.Line == lineInfo.EndLine) ? plan.CompilingOffset.LinePos : 0);
 			}
 		}
 
 		// StackDisplacement
-		protected int FStackDisplacement = 0;
+		protected int _stackDisplacement = 0;
 		public int StackDisplacement
 		{
-			get { return FStackDisplacement; }
-			set { FStackDisplacement = value; }
+			get { return _stackDisplacement; }
+			set { _stackDisplacement = value; }
 		}
 
         // ClassDefinition
-        protected ClassDefinition FClassDefinition;
+        protected ClassDefinition _classDefinition;
         public ClassDefinition ClassDefinition
         {
-			get { return FClassDefinition; }
-			set { FClassDefinition = value; }
+			get { return _classDefinition; }
+			set { _classDefinition = value; }
         }
         
         // BlockNode
-        protected PlanNode FBlockNode;
+        protected PlanNode _blockNode;
         public PlanNode BlockNode
         {
-			get { return FBlockNode; }
-			set { FBlockNode = value; }
+			get { return _blockNode; }
+			set { _blockNode = value; }
         }
         
-        public void EmitStatement(EmitMode AMode, D4.OperatorBlock ABlock)
+        public void EmitStatement(EmitMode mode, D4.OperatorBlock block)
         {
 			if (ClassDefinition != null)
-				ABlock.ClassDefinition = (ClassDefinition)ClassDefinition.Clone();
+				block.ClassDefinition = (ClassDefinition)ClassDefinition.Clone();
 			else
-				ABlock.Block = BlockNode.EmitStatement(AMode);
+				block.Block = BlockNode.EmitStatement(mode);
         }
         
-        public AccessorBlock EmitAccessorBlock(EmitMode AMode)
+        public AccessorBlock EmitAccessorBlock(EmitMode mode)
         {
-			AccessorBlock LBlock = new AccessorBlock();
+			AccessorBlock block = new AccessorBlock();
 			if (ClassDefinition != null)
-				LBlock.ClassDefinition = (ClassDefinition)ClassDefinition.Clone();
+				block.ClassDefinition = (ClassDefinition)ClassDefinition.Clone();
 			else
-				LBlock.Block = BlockNode.EmitStatement(AMode);
-			return LBlock;
+				block.Block = BlockNode.EmitStatement(mode);
+			return block;
         }
     }
     
 	public class Operator : CatalogObject
     {
-		public Operator(string AName) : base(AName)
+		public Operator(string name) : base(name)
 		{
-			OperatorName = AName;
+			OperatorName = name;
 			InternalInitialize();
 		}
 		
-		public Operator(int AID, string AName) : base(AID, AName)
+		public Operator(int iD, string name) : base(iD, name)
 		{
-			OperatorName = AName;
+			OperatorName = name;
 			InternalInitialize();
 		}
 
-		public Operator(int AID, string AName, Operand[] AOperands, IDataType AReturnType) : base(AID, AName)
+		public Operator(int iD, string name, Operand[] operands, IDataType returnType) : base(iD, name)
 		{
-			OperatorName = AName;
-			FReturnDataType = AReturnType;
-			FOperands.AddRange(AOperands);
+			OperatorName = name;
+			_returnDataType = returnType;
+			_operands.AddRange(operands);
 			InternalInitialize();
 			OperandsChanged();
 		}
 
-		public Operator(int AID, string AName, string AClassName, IDataType AReturnType, Operand[] AOperands) 
-			: this(AID, AName, AClassName, AReturnType, AOperands, false)
+		public Operator(int iD, string name, string className, IDataType returnType, Operand[] operands) 
+			: this(iD, name, className, returnType, operands, false)
 		{ }
 		
-		public Operator(int AID, string AName, string AClassName, IDataType AReturnType, Operand[] AOperands, bool AIsBuiltin) 
-			: this(AID, AName, AClassName, AReturnType, AOperands, AIsBuiltin, true)
+		public Operator(int iD, string name, string className, IDataType returnType, Operand[] operands, bool isBuiltin) 
+			: this(iD, name, className, returnType, operands, isBuiltin, true)
 		{ }
 		
-		public Operator(int AID, string AName, string AClassName, IDataType AReturnType, Operand[] AOperands, bool AIsBuiltin, bool AIsRemotable) 
-			: base(AID, AName)
+		public Operator(int iD, string name, string className, IDataType returnType, Operand[] operands, bool isBuiltin, bool isRemotable) 
+			: base(iD, name)
 		{
-			OperatorName = AName;
-			FBlock.ClassDefinition = new ClassDefinition(AClassName);
-			FReturnDataType = AReturnType;
-			FOperands.AddRange(AOperands);
+			OperatorName = name;
+			_block.ClassDefinition = new ClassDefinition(className);
+			_returnDataType = returnType;
+			_operands.AddRange(operands);
 			InternalInitialize();
 			OperandsChanged();
-			IsBuiltin = AIsBuiltin;
-			IsRemotable = AIsRemotable;
+			IsBuiltin = isBuiltin;
+			IsRemotable = isRemotable;
 		}
 
 		private void InternalInitialize()
 		{
-			FIsLiteral = true;
-			FIsFunctional = true;
-			FIsDeterministic = true;
-			FIsRepeatable = true;
-			FIsNilable = false;
-			FOperands.Changed += OperandsChanged;
+			_isLiteral = true;
+			_isFunctional = true;
+			_isDeterministic = true;
+			_isRepeatable = true;
+			_isNilable = false;
+			_operands.Changed += OperandsChanged;
 		}
 		
-		public override string DisplayName { get { return String.Format("{0}{1}", FOperatorName, FSignature.ToString()); } }
+		public override string DisplayName { get { return String.Format("{0}{1}", _operatorName, _signature.ToString()); } }
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Operator"), OperatorName, Signature.ToString()); } }
 
-		private void OperandsChanged(NotifyingBaseList<Operand> ASender, bool AIsAdded, Operand AItem, int AIndex)
+		private void OperandsChanged(NotifyingBaseList<Operand> sender, bool isAdded, Operand item, int index)
 		{
 			OperandsChanged();
 		}
@@ -200,7 +200,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Forces the signature to be recreated.</summary>
 		public void OperandsChanged()
 		{
-			FNameReset = true;
+			_nameReset = true;
 		}
 
 		public override string[] GetRights()
@@ -213,24 +213,24 @@ namespace Alphora.Dataphor.DAE.Schema
 			};
 		}
 
-		public static string EnsureValidIdentifier(string AString)
+		public static string EnsureValidIdentifier(string stringValue)
 		{
-			StringBuilder LResult = new StringBuilder();
-			for (int LIndex = 0; LIndex < AString.Length; LIndex++)
-				if (Char.IsLetterOrDigit(AString[LIndex]) || (AString[LIndex] == '_'))
-					LResult.Append(AString[LIndex]);
-				else if (AString[LIndex] != ' ')
-					LResult.Append('_');
-			return LResult.ToString();
+			StringBuilder result = new StringBuilder();
+			for (int index = 0; index < stringValue.Length; index++)
+				if (Char.IsLetterOrDigit(stringValue[index]) || (stringValue[index] == '_'))
+					result.Append(stringValue[index]);
+				else if (stringValue[index] != ' ')
+					result.Append('_');
+			return result.ToString();
 		}
 		
 		private void EnsureNameReset()
 		{
-			if (FNameReset)
+			if (_nameReset)
 			{
-				FSignature = new Signature(FOperands);
-				Name = GetGeneratedName(FOperatorName, ID);
-				FNameReset = false;
+				_signature = new Signature(_operands);
+				Name = GetGeneratedName(_operatorName, ID);
+				_nameReset = false;
 			}
 		}
 		
@@ -240,9 +240,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// Because the mangled name may exceed the maximum identifier length, this is only useful for
 		/// in-memory resolution, it is not used as a persistent reference to the operator.
 		/// </remarks>
-		public string MangledName { get { return String.Format("{0}{1}", FOperatorName, EnsureValidIdentifier(FSignature.ToString())); } }
+		public string MangledName { get { return String.Format("{0}{1}", _operatorName, EnsureValidIdentifier(_signature.ToString())); } }
 		
-		private bool FNameReset = true;
+		private bool _nameReset = true;
 		public override string Name
 		{
 			get
@@ -254,64 +254,64 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// OperatorName
-		private string FOperatorName = String.Empty;
+		private string _operatorName = String.Empty;
 		public string OperatorName
 		{
-			get { return FOperatorName; }
+			get { return _operatorName; }
 			set
 			{
-				if (FOperatorName != value)
+				if (_operatorName != value)
 				{
-					FOperatorName = (value == null ? String.Empty : value);
-					Name = String.Format("{0}_{1}", FOperatorName.Length > Schema.Object.CMaxGeneratedNameLength ? FOperatorName.Substring(0, Schema.Object.CMaxGeneratedNameLength) : FOperatorName, ID.ToString().PadLeft(Schema.Object.CMaxObjectIDLength, '0'));
+					_operatorName = (value == null ? String.Empty : value);
+					Name = String.Format("{0}_{1}", _operatorName.Length > Schema.Object.MaxGeneratedNameLength ? _operatorName.Substring(0, Schema.Object.MaxGeneratedNameLength) : _operatorName, ID.ToString().PadLeft(Schema.Object.MaxObjectIDLength, '0'));
 					OperandsChanged();
 				}
 			}
 		}
 		
 		// DeclarationText
-		private string FDeclarationText;
+		private string _declarationText;
 		public string DeclarationText
 		{
-			get { return FDeclarationText; }
-			set { FDeclarationText = value; }
+			get { return _declarationText; }
+			set { _declarationText = value; }
 		}
 		
 		// BodyText
-		private string FBodyText;
+		private string _bodyText;
 		public string BodyText
 		{
-			get { return FBodyText; }
-			set { FBodyText = value; }
+			get { return _bodyText; }
+			set { _bodyText = value; }
 		}
 		
 		// Locator
-		private DebugLocator FLocator;
+		private DebugLocator _locator;
 		public DebugLocator Locator
 		{
-			get { return FLocator; }
-			set { FLocator = value; }
+			get { return _locator; }
+			set { _locator = value; }
 		}
 		
 		/// <summary>
 		/// Parses the DebugLocator from the DAE.Locator tag, if present.
 		/// </summary>
-		public static DebugLocator GetLocator(MetaData AMetaData)
+		public static DebugLocator GetLocator(MetaData metaData)
 		{
-			Tag LTag = MetaData.RemoveTag(AMetaData, "DAE.Locator");
-			if (LTag != Tag.None)
-				return DebugLocator.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(metaData, "DAE.Locator");
+			if (tag != Tag.None)
+				return DebugLocator.Parse(tag.Value);
 				
 			return null;
 		}
 
 		public void SaveLocator()
 		{
-			if (FLocator != null)
+			if (_locator != null)
 			{
 				if (MetaData == null)
 					MetaData = new MetaData();
-				MetaData.Tags.AddOrUpdate("DAE.Locator", FLocator.ToString(), true);
+				MetaData.Tags.AddOrUpdate("DAE.Locator", _locator.ToString(), true);
 			}
 		}
 		
@@ -322,61 +322,61 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		// ATOperatorName
-		private string FSourceOperatorName;
+		private string _sourceOperatorName;
 		public string SourceOperatorName
 		{
-			get { return FSourceOperatorName; }
-			set { FSourceOperatorName = value; }
+			get { return _sourceOperatorName; }
+			set { _sourceOperatorName = value; }
 		}
 		
 		public override bool IsATObject { get { return (SourceOperatorName != null); } }
 		
         // IsLiteral - Indicates that the operator is literal, in other words, compile-time evaluable
-        protected bool FIsLiteral;
+        protected bool _isLiteral;
         public bool IsLiteral
         {
-			get { return FIsLiteral; }
-			set { FIsLiteral = value; }
+			get { return _isLiteral; }
+			set { _isLiteral = value; }
         }
         
         // IsFunctional - Indicates that the operator makes no changes to its arguments, or the global state of the system
-        protected bool FIsFunctional;
+        protected bool _isFunctional;
         public bool IsFunctional
         {
-			get { return FIsFunctional; }
-			set { FIsFunctional = value; }
+			get { return _isFunctional; }
+			set { _isFunctional = value; }
         }
         
         // IsDeterministic - Indicates whether repeated invocations of the operator with the same arguments return the same result
-        protected bool FIsDeterministic;
+        protected bool _isDeterministic;
         public bool IsDeterministic
         {
-			get { return FIsDeterministic; }
-			set { FIsDeterministic = value; }
+			get { return _isDeterministic; }
+			set { _isDeterministic = value; }
         }
         
         // IsRepeatable - Indicates whether repeated invocations of the operator with the same arguments return the same result within the same transaction
-        protected bool FIsRepeatable;
+        protected bool _isRepeatable;
         public bool IsRepeatable
         {
-			get { return FIsRepeatable; }
-			set { FIsRepeatable = value; }
+			get { return _isRepeatable; }
+			set { _isRepeatable = value; }
         }
         
         // IsNilable - Indicates whether the operator could return a nil
-        protected bool FIsNilable;
+        protected bool _isNilable;
         public bool IsNilable
         {
-			get { return FIsNilable; }
-			set { FIsNilable = value; }
+			get { return _isNilable; }
+			set { _isNilable = value; }
 		}
         
 		// IsBuiltin - True if this is a builtin operator (i.e. +, -, *, / etc, (parser recognized operator))
-		private bool FIsBuiltin;
+		private bool _isBuiltin;
 		public bool IsBuiltin 
 		{ 
-			get { return FIsBuiltin; } 
-			set { FIsBuiltin = value; } 
+			get { return _isBuiltin; } 
+			set { _isBuiltin = value; } 
 		}
 		
 		// ShouldTranslate
@@ -397,34 +397,34 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// ShouldRecompile - True if this operator should be recompiled when it is next invoked
-		private bool FShouldRecompile;
+		private bool _shouldRecompile;
 		public bool ShouldRecompile
 		{
-			get { return FShouldRecompile; }
-			set { FShouldRecompile = value; }
+			get { return _shouldRecompile; }
+			set { _shouldRecompile = value; }
 		}
 		
         // Operands
-        private Operands FOperands = new Operands();
-        public Operands Operands { get { return FOperands; } }
+        private Operands _operands = new Operands();
+        public Operands Operands { get { return _operands; } }
         
         // Signature
-        private Signature FSignature = new Signature(new SignatureElement[]{});
+        private Signature _signature = new Signature(new SignatureElement[]{});
         public Signature Signature 
         { 
 			get 
 			{ 
 				EnsureNameReset();
-				return FSignature; 
+				return _signature; 
 			} 
 		}
 
         // OperatorSignature
-        private OperatorSignature FOperatorSignature;
+        private OperatorSignature _operatorSignature;
         public OperatorSignature OperatorSignature
         {
-			get { return FOperatorSignature; }
-			set { FOperatorSignature = value; }
+			get { return _operatorSignature; }
+			set { _operatorSignature = value; }
         }
 
 		#if USEVIRTUAL        
@@ -469,47 +469,50 @@ namespace Alphora.Dataphor.DAE.Schema
 		
         // ReturnDataType
 		[Reference]
-        private IDataType FReturnDataType;
+        private IDataType _returnDataType;
 		public IDataType ReturnDataType
         {
-			get { return FReturnDataType; }
-			set { FReturnDataType = value; }
+			get { return _returnDataType; }
+			set { _returnDataType = value; }
         }
 
 		// Block        
-        private OperatorBlock FBlock = new OperatorBlock();
-        public OperatorBlock Block { get { return FBlock; } }
+        private OperatorBlock _block = new OperatorBlock();
+        public OperatorBlock Block { get { return _block; } }
 
-		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
 		{
-			if ((SourceOperatorName != null) && (AMode == EmitMode.ForRemote))
-				ASourceCatalog[SourceOperatorName].IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			if ((SourceOperatorName != null) && (mode == EmitMode.ForRemote))
+			{
+				var sourceObjectName = MetaData.GetTag(MetaData, "DAE.SourceObjectName", SourceOperatorName);
+				sourceCatalog[sourceObjectName].IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+			}
 			else
 			{
-				if (!ATargetCatalog.Contains(this))
+				if (!targetCatalog.Contains(this))
 				{
-					ATargetCatalog.Add(this);
-					base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
-					foreach (Operand LOperand in Operands)
-						LOperand.DataType.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+					targetCatalog.Add(this);
+					base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+					foreach (Operand operand in Operands)
+						operand.DataType.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 					if (ReturnDataType != null)
-						ReturnDataType.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+						ReturnDataType.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 				}
 			}
 		}
 		
 		public virtual Statement EmitHeader()
 		{
-			CreateOperatorStatement LStatement = (CreateOperatorStatement)EmitStatement(EmitMode.ForCopy);
-			LStatement.Block.ClassDefinition = null;
-			LStatement.Block.Block = null;
-			LStatement.MetaData = null;
-			return LStatement;
+			CreateOperatorStatement statement = (CreateOperatorStatement)EmitStatement(EmitMode.ForCopy);
+			statement.Block.ClassDefinition = null;
+			statement.Block.Block = null;
+			statement.MetaData = null;
+			return statement;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 			{
 				SaveObjectID();
 				SaveGeneratorID();
@@ -522,97 +525,97 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveLocator();
 			}
 			
-			IMetaData LResult;
-			if ((AMode != EmitMode.ForRemote) && (FDeclarationText != null))
+			IMetaData result;
+			if ((mode != EmitMode.ForRemote) && (_declarationText != null))
 			{
-				SourceStatement LStatement = new SourceStatement();
-				LStatement.Source = FDeclarationText + FBodyText;
-				LResult = LStatement;
+				SourceStatement statement = new SourceStatement();
+				statement.Source = _declarationText + _bodyText;
+				result = statement;
 			}
 			else
 			{
-				CreateOperatorStatement LStatement = new CreateOperatorStatement();
-				LStatement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
-				foreach (Operand LOperand in Operands)
+				CreateOperatorStatement statement = new CreateOperatorStatement();
+				statement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
+				foreach (Operand operand in Operands)
 				{
-					FormalParameter LFormalParameter = new FormalParameter();
-					LFormalParameter.Identifier = LOperand.Name;
-					LFormalParameter.TypeSpecifier = LOperand.DataType.EmitSpecifier(AMode);
-					LFormalParameter.Modifier = LOperand.Modifier;
-					LStatement.FormalParameters.Add(LFormalParameter);
+					FormalParameter formalParameter = new FormalParameter();
+					formalParameter.Identifier = operand.Name;
+					formalParameter.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
+					formalParameter.Modifier = operand.Modifier;
+					statement.FormalParameters.Add(formalParameter);
 				}
 				if (ReturnDataType != null)
-					LStatement.ReturnType = ReturnDataType.EmitSpecifier(AMode);
+					statement.ReturnType = ReturnDataType.EmitSpecifier(mode);
 				#if USEVIRTUAL
-				LStatement.IsVirtual = IsVirtual;
-				LStatement.IsAbstract = IsAbstract;
-				LStatement.IsOverride = IsOverride;
-				LStatement.IsReintroduced = IsReintroduced;
+				statement.IsVirtual = IsVirtual;
+				statement.IsAbstract = IsAbstract;
+				statement.IsOverride = IsOverride;
+				statement.IsReintroduced = IsReintroduced;
 				#endif
-				if ((AMode == EmitMode.ForRemote) && !IsRemotable)
-					LStatement.Block.Block = new Block();
+				if ((mode == EmitMode.ForRemote) && !IsRemotable)
+					statement.Block.Block = new Block();
 				else
-					Block.EmitStatement(AMode, LStatement.Block);
-				LResult = LStatement;
+					Block.EmitStatement(mode, statement.Block);
+				result = statement;
 			}
 
-			LResult.MetaData = MetaData == null ? null : MetaData.Copy();
+			result.MetaData = MetaData == null ? null : MetaData.Copy();
 			if (SessionObjectName != null)
 			{
-				if (LResult.MetaData == null)
-					LResult.MetaData = new MetaData();
-				LResult.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
+				if (result.MetaData == null)
+					result.MetaData = new MetaData();
+				result.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
 			}
-			return (Statement)LResult;
+			return (Statement)result;
 		}
 		
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DropOperatorStatement LStatement = new DropOperatorStatement();
-			LStatement.ObjectName = Schema.Object.EnsureRooted(OperatorName);
-			foreach (Operand LOperand in Operands)
+			DropOperatorStatement statement = new DropOperatorStatement();
+			statement.ObjectName = Schema.Object.EnsureRooted(OperatorName);
+			foreach (Operand operand in Operands)
 			{
-				FormalParameterSpecifier LSpecifier = new FormalParameterSpecifier();
-				LSpecifier.Modifier = LOperand.Modifier;
-				LSpecifier.TypeSpecifier = LOperand.DataType.EmitSpecifier(AMode);
-				LStatement.FormalParameterSpecifiers.Add(LSpecifier);
+				FormalParameterSpecifier specifier = new FormalParameterSpecifier();
+				specifier.Modifier = operand.Modifier;
+				specifier.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
+				statement.FormalParameterSpecifiers.Add(specifier);
 			}
-			return LStatement;
+			return statement;
 		}
     }
     
     public class AggregateOperator : Operator
     {
-		public AggregateOperator(string AName) : base(AName) {}
-		public AggregateOperator(int AID, string AName) : base(AID, AName) {}
+		public AggregateOperator(string name) : base(name) {}
+		public AggregateOperator(int iD, string name) : base(iD, name) {}
 
 		// System constructor -> any operator created with this constructor will have IsSystem set to true
-		public AggregateOperator(int AID, string AName, Operand[] AOperands, IDataType AReturnType, ClassDefinition AInitialization, ClassDefinition AAggregation, ClassDefinition AFinalization) : base(AID, AName, AOperands, AReturnType)
+		public AggregateOperator(int iD, string name, Operand[] operands, IDataType returnType, ClassDefinition initialization, ClassDefinition aggregation, ClassDefinition finalization) : base(iD, name, operands, returnType)
 		{
-			Initialization.ClassDefinition = AInitialization;
-			Aggregation.ClassDefinition = AAggregation;
-			Finalization.ClassDefinition = AFinalization;
+			Initialization.ClassDefinition = initialization;
+			Aggregation.ClassDefinition = aggregation;
+			Finalization.ClassDefinition = finalization;
 		}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.AggregateOperator"), OperatorName, Signature.ToString()); } }
 
 		// Initialization
-        private OperatorBlock FInitialization = new OperatorBlock();
-        public OperatorBlock Initialization { get { return FInitialization; } }
+        private OperatorBlock _initialization = new OperatorBlock();
+        public OperatorBlock Initialization { get { return _initialization; } }
         
         // Aggregation (same as Operator.Block)
         public OperatorBlock Aggregation { get { return Block; } }
 
 		// Finalization
-        private OperatorBlock FFinalization = new OperatorBlock();
-        public OperatorBlock Finalization { get { return FFinalization; } }
+        private OperatorBlock _finalization = new OperatorBlock();
+        public OperatorBlock Finalization { get { return _finalization; } }
         
 		// InitializationText
-		private string FInitializationText;
+		private string _initializationText;
 		public string InitializationText
 		{
-			get { return FInitializationText; }
-			set { FInitializationText = value; }
+			get { return _initializationText; }
+			set { _initializationText = value; }
 		}
 		
 		public string AggregationText
@@ -622,24 +625,24 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// FinalizationText
-		private string FFinalizationText;
+		private string _finalizationText;
 		public string FinalizationText
 		{
-			get { return FFinalizationText; }
-			set { FFinalizationText = value; }
+			get { return _finalizationText; }
+			set { _finalizationText = value; }
 		}
 		
         // IsOrderDependent
-        private bool FIsOrderDependent;
+        private bool _isOrderDependent;
         public bool IsOrderDependent
         {
-			get { return FIsOrderDependent; }
-			set { FIsOrderDependent = value; }
+			get { return _isOrderDependent; }
+			set { _isOrderDependent = value; }
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 			{
 				SaveObjectID();
 				SaveLocator();
@@ -650,69 +653,69 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveLocator();
 			}
 				
-			IMetaData LResult;
+			IMetaData result;
 			
-			if ((AMode != EmitMode.ForRemote) && (DeclarationText != null))
+			if ((mode != EmitMode.ForRemote) && (DeclarationText != null))
 			{
-				SourceStatement LStatement = new SourceStatement();
-				LStatement.Source = DeclarationText + InitializationText + AggregationText + FinalizationText;
-				LResult = LStatement;
+				SourceStatement statement = new SourceStatement();
+				statement.Source = DeclarationText + InitializationText + AggregationText + FinalizationText;
+				result = statement;
 			}
 			else
 			{
-				CreateAggregateOperatorStatement LStatement = new CreateAggregateOperatorStatement();
-				LStatement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
-				foreach (Operand LOperand in Operands)
+				CreateAggregateOperatorStatement statement = new CreateAggregateOperatorStatement();
+				statement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
+				foreach (Operand operand in Operands)
 				{
-					FormalParameter LFormalParameter = new FormalParameter();
-					LFormalParameter.Identifier = LOperand.Name;
-					LFormalParameter.TypeSpecifier = LOperand.DataType.EmitSpecifier(AMode);
-					LFormalParameter.Modifier = LOperand.Modifier;
-					LStatement.FormalParameters.Add(LFormalParameter);
+					FormalParameter formalParameter = new FormalParameter();
+					formalParameter.Identifier = operand.Name;
+					formalParameter.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
+					formalParameter.Modifier = operand.Modifier;
+					statement.FormalParameters.Add(formalParameter);
 				}
-				LStatement.ReturnType = ReturnDataType.EmitSpecifier(AMode);
+				statement.ReturnType = ReturnDataType.EmitSpecifier(mode);
 				#if USEVIRTUAL
-				LStatement.IsVirtual = IsVirtual;
-				LStatement.IsAbstract = IsAbstract;
-				LStatement.IsOverride = IsOverride;
-				LStatement.IsReintroduced = IsReintroduced;
+				statement.IsVirtual = IsVirtual;
+				statement.IsAbstract = IsAbstract;
+				statement.IsOverride = IsOverride;
+				statement.IsReintroduced = IsReintroduced;
 				#endif
-				if ((AMode == EmitMode.ForRemote) && !IsRemotable)
+				if ((mode == EmitMode.ForRemote) && !IsRemotable)
 				{
-					LStatement.Initialization.Block = new Block();
-					LStatement.Aggregation.Block = new Block();
-					LStatement.Finalization.Block = new Block();
+					statement.Initialization.Block = new Block();
+					statement.Aggregation.Block = new Block();
+					statement.Finalization.Block = new Block();
 				}
 				else
 				{
-					Initialization.EmitStatement(AMode, LStatement.Initialization);
-					Aggregation.EmitStatement(AMode, LStatement.Aggregation);
-					Finalization.EmitStatement(AMode, LStatement.Finalization);
+					Initialization.EmitStatement(mode, statement.Initialization);
+					Aggregation.EmitStatement(mode, statement.Aggregation);
+					Finalization.EmitStatement(mode, statement.Finalization);
 				}
-				LResult = LStatement;
+				result = statement;
 			}
 
-			LResult.MetaData = MetaData == null ? null : MetaData.Copy();
+			result.MetaData = MetaData == null ? null : MetaData.Copy();
 			if (SessionObjectName != null)
 			{
-				if (LResult.MetaData == null)
-					LResult.MetaData = new MetaData();
-				LResult.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
+				if (result.MetaData == null)
+					result.MetaData = new MetaData();
+				result.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
 			}
-			return (Statement)LResult;
+			return (Statement)result;
 		}
 
 		public override Statement EmitHeader()
 		{
-			CreateAggregateOperatorStatement LStatement = (CreateAggregateOperatorStatement)EmitStatement(EmitMode.ForCopy);
-			LStatement.Initialization.ClassDefinition = null;
-			LStatement.Initialization.Block = null;
-			LStatement.Aggregation.ClassDefinition = null;
-			LStatement.Aggregation.Block = null;
-			LStatement.Finalization.ClassDefinition = null;
-			LStatement.Finalization.Block = null;
-			LStatement.MetaData = null;
-			return LStatement;
+			CreateAggregateOperatorStatement statement = (CreateAggregateOperatorStatement)EmitStatement(EmitMode.ForCopy);
+			statement.Initialization.ClassDefinition = null;
+			statement.Initialization.Block = null;
+			statement.Aggregation.ClassDefinition = null;
+			statement.Aggregation.Block = null;
+			statement.Finalization.ClassDefinition = null;
+			statement.Finalization.Block = null;
+			statement.MetaData = null;
+			return statement;
 		}
     }
 }

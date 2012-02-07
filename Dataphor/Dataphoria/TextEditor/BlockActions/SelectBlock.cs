@@ -5,26 +5,26 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
 {
     public class SelectBlock : BaseBlockAction
     {
-        public override void Execute(TextArea ATextArea)
+        public override void Execute(TextArea textArea)
         {
-            if (!ATextArea.SelectionManager.HasSomethingSelected && (ATextArea.Document.TextLength > 0))
+            if (!textArea.SelectionManager.HasSomethingSelected && (textArea.Document.TextLength > 0))
             {
-                int LCurrentOffset = ATextArea.Caret.Offset;
-                bool LAtBlockStart;
-                int LEndOffset = GetNextBlockOffset(ATextArea, out LAtBlockStart);
-                int LStartOffset;
-                if (LAtBlockStart)
-                    LStartOffset = LCurrentOffset;
+                int currentOffset = textArea.Caret.Offset;
+                bool atBlockStart;
+                int endOffset = GetNextBlockOffset(textArea, out atBlockStart);
+                int startOffset;
+                if (atBlockStart)
+                    startOffset = currentOffset;
                 else
-                    LStartOffset = GetPriorBlockOffset(ATextArea);
+                    startOffset = GetPriorBlockOffset(textArea);
 
-                ATextArea.SelectionManager.SetSelection
+                textArea.SelectionManager.SetSelection
                     (
                     new DefaultSelection
                         (
-                        ATextArea.Document,
-                        ATextArea.Document.OffsetToPosition(LStartOffset),
-                        ATextArea.Document.OffsetToPosition(LEndOffset)
+                        textArea.Document,
+                        textArea.Document.OffsetToPosition(startOffset),
+                        textArea.Document.OffsetToPosition(endOffset)
                         )
                     );
             }

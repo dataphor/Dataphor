@@ -17,11 +17,11 @@ namespace Alphora.Dataphor
 	public class NonNullList<T> : ValidatingBaseList<T> where T : class
 	{
 		public NonNullList() : base() { }
-		public NonNullList(int ACapacity) : base(ACapacity) { }
+		public NonNullList(int capacity) : base(capacity) { }
 
-		protected override void Validate(T AValue)
+		protected override void Validate(T value)
 		{
-			if (AValue == null)
+			if (value == null)
 				throw new BaseException(BaseException.Codes.CannotAddNull);
 			//base.Validate(AValue); // Base doesn't do anything, change this if that ever changes
 		}

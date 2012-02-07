@@ -6,36 +6,36 @@ namespace Alphora.Dataphor.DAE.Debug
 {
 	public class Breakpoint
 	{
-		public Breakpoint(string ALocator, int ALine, int ALinePos)
+		public Breakpoint(string locator, int line, int linePos)
 		{
-			FLocator = ALocator;
-			FLine = ALine;
-			FLinePos = ALinePos;
+			_locator = locator;
+			_line = line;
+			_linePos = linePos;
 		}
 		
-		private string FLocator;
-		public string Locator { get { return FLocator; } }
+		private string _locator;
+		public string Locator { get { return _locator; } }
 		
-		private int FLine;
-		public int Line { get { return FLine; } }
+		private int _line;
+		public int Line { get { return _line; } }
 		
-		private int FLinePos;
-		public int LinePos { get { return FLinePos; } }
+		private int _linePos;
+		public int LinePos { get { return _linePos; } }
 
 		public override int GetHashCode()
 		{
-			return FLocator.GetHashCode() ^ FLine.GetHashCode() ^ FLinePos.GetHashCode();
+			return _locator.GetHashCode() ^ _line.GetHashCode() ^ _linePos.GetHashCode();
 		}
 
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			Breakpoint LBreakpoint = AObject as Breakpoint;
-			return (LBreakpoint != null) && (FLocator == LBreakpoint.Locator) && (FLine == LBreakpoint.Line) && (FLinePos == LBreakpoint.LinePos);
+			Breakpoint breakpoint = objectValue as Breakpoint;
+			return (breakpoint != null) && (_locator == breakpoint.Locator) && (_line == breakpoint.Line) && (_linePos == breakpoint.LinePos);
 		}
 
 		public override string ToString()
 		{
-			return String.Format("in {0} at {1}:{2}.", FLocator, FLine, FLinePos);
+			return String.Format("in {0} at {1}:{2}.", _locator, _line, _linePos);
 		}
 	}
 	

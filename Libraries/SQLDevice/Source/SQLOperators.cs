@@ -3,6 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+#define USENAMEDROWVARIABLES
+
 namespace Alphora.Dataphor.DAE.Device.SQL
 {
 	using System;
@@ -20,9 +23,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public abstract class SQLDeviceOperator : DeviceOperator
 	{
-		public SQLDeviceOperator(int AID, string AName) : base(AID, AName)
+		public SQLDeviceOperator(int iD, string name) : base(iD, name)
 		{
-			FIsTruthValued = GetIsTruthValued();
+			_isTruthValued = GetIsTruthValued();
 		}
 		
 		/// <summary>
@@ -35,7 +38,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return false;
 		}
 		
-		protected bool FIsTruthValued = false;
+		protected bool _isTruthValued = false;
 		/// <summary>
 		///	A given operator is SQL truth valued if it results in an actual SQL boolean value.
 		/// In a typical SQL system, only built-in operators such as AND, OR and LIKE can return an actual boolean value.
@@ -46,52 +49,52 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		/// </summary>
 		public bool IsTruthValued
 		{
-			get { return FIsTruthValued; }
-			set { FIsTruthValued = value; }
+			get { return _isTruthValued; }
+			set { _isTruthValued = value; }
 		}
 		
-		private bool[] FIsParameterContextLiteral;
+		private bool[] _isParameterContextLiteral;
 		/// <summary>
 		/// Indicates whether or not the given operand is required to be context literal.
 		/// </summary>
-		public bool IsParameterContextLiteral(int AParameterIndex)
+		public bool IsParameterContextLiteral(int parameterIndex)
 		{
-			if (FIsParameterContextLiteral == null)
+			if (_isParameterContextLiteral == null)
 			{
-				FIsParameterContextLiteral = new bool[Operator.Operands.Count];
+				_isParameterContextLiteral = new bool[Operator.Operands.Count];
 				ReadIsParameterContextLiteral();
 			}
 			
-			return FIsParameterContextLiteral[AParameterIndex];
+			return _isParameterContextLiteral[parameterIndex];
 		}
 		
 		public void ReadIsParameterContextLiteral()
 		{
-			for (int LIndex = 0; LIndex < FIsParameterContextLiteral.Length; LIndex++)
-				FIsParameterContextLiteral[LIndex] = false;
+			for (int index = 0; index < _isParameterContextLiteral.Length; index++)
+				_isParameterContextLiteral[index] = false;
 				
-			if (FContextLiteralParameterIndexes != String.Empty)
-				foreach (string LStringIndex in FContextLiteralParameterIndexes.Split(';'))
+			if (_contextLiteralParameterIndexes != String.Empty)
+				foreach (string stringIndex in _contextLiteralParameterIndexes.Split(';'))
 				{
-					int LIndex = Convert.ToInt32(LStringIndex);
-					if ((LIndex >= 0) && (LIndex < Operator.Operands.Count))
-						FIsParameterContextLiteral[LIndex] = true;
+					int index = Convert.ToInt32(stringIndex);
+					if ((index >= 0) && (index < Operator.Operands.Count))
+						_isParameterContextLiteral[index] = true;
 				}
 		}
 
-		private string FContextLiteralParameterIndexes = String.Empty;
+		private string _contextLiteralParameterIndexes = String.Empty;
 		/// <summary>
 		/// A semi-colon separated list of indexes indicating which operands of the operator are required to be context literal
 		/// </summary>
 		public string ContextLiteralParameterIndexes
 		{
-			get { return FContextLiteralParameterIndexes; }
+			get { return _contextLiteralParameterIndexes; }
 			set 
 			{ 
-				if (FContextLiteralParameterIndexes != value)
+				if (_contextLiteralParameterIndexes != value)
 				{
-					FContextLiteralParameterIndexes = value == null ? String.Empty : value;
-					if (FIsParameterContextLiteral != null)
+					_contextLiteralParameterIndexes = value == null ? String.Empty : value;
+					if (_isParameterContextLiteral != null)
 						ReadIsParameterContextLiteral();
 				}
 			}
@@ -100,164 +103,164 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
     public class SQLRetrieve : SQLDeviceOperator
     {
-		public SQLRetrieve(int AID, string AName) : base(AID, AName) {}
+		public SQLRetrieve(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			TableVar LTableVar = ((TableVarNode)APlanNode).TableVar;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			TableVar tableVar = ((TableVarNode)planNode).TableVar;
 
-			if (LTableVar is BaseTableVar)
+			if (tableVar is BaseTableVar)
 			{
-				SQLRangeVar LRangeVar = new SQLRangeVar(LDevicePlan.GetNextTableAlias());
-				LDevicePlan.CurrentQueryContext().RangeVars.Add(LRangeVar);
-				SelectExpression LSelectExpression = new SelectExpression();
-				LSelectExpression.FromClause = new AlgebraicFromClause(new TableSpecifier(new TableExpression(D4.MetaData.GetTag(LTableVar.MetaData, "Storage.Schema", LDevicePlan.Device.Schema), LDevicePlan.Device.ToSQLIdentifier(LTableVar)), LRangeVar.Name));
-				LSelectExpression.SelectClause = new SelectClause();
-				foreach (TableVarColumn LColumn in LTableVar.Columns)
+				SQLRangeVar rangeVar = new SQLRangeVar(localDevicePlan.GetNextTableAlias());
+				localDevicePlan.CurrentQueryContext().RangeVars.Add(rangeVar);
+				SelectExpression selectExpression = new SelectExpression();
+				selectExpression.FromClause = new AlgebraicFromClause(new TableSpecifier(new TableExpression(D4.MetaData.GetTag(tableVar.MetaData, "Storage.Schema", localDevicePlan.Device.Schema), localDevicePlan.Device.ToSQLIdentifier(tableVar)), rangeVar.Name));
+				selectExpression.SelectClause = new SelectClause();
+				foreach (TableVarColumn column in tableVar.Columns)
 				{
-					SQLRangeVarColumn LRangeVarColumn = new SQLRangeVarColumn(LColumn, LRangeVar.Name, LDevicePlan.Device.ToSQLIdentifier(LColumn), LDevicePlan.Device.ToSQLIdentifier(LColumn.Name));
-					LRangeVar.Columns.Add(LRangeVarColumn);
-					LSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
+					SQLRangeVarColumn rangeVarColumn = new SQLRangeVarColumn(column, rangeVar.Name, localDevicePlan.Device.ToSQLIdentifier(column), localDevicePlan.Device.ToSQLIdentifier(column.Name));
+					rangeVar.Columns.Add(rangeVarColumn);
+					selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
 				}
 
-				LSelectExpression.SelectClause.Distinct = 
-					(LTableVar.Keys.Count == 1) && 
-					Convert.ToBoolean(D4.MetaData.GetTag(LTableVar.Keys[0].MetaData, "Storage.IsImposedKey", "false"));
+				selectExpression.SelectClause.Distinct = 
+					(tableVar.Keys.Count == 1) && 
+					Convert.ToBoolean(D4.MetaData.GetTag(tableVar.Keys[0].MetaData, "Storage.IsImposedKey", "false"));
 				
-				return LSelectExpression;
+				return selectExpression;
 			}
 			else
-				return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
+				return localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
 		}
     }
     
     public class SQLAdorn : SQLDeviceOperator
     {
-		public SQLAdorn(int AID, string AName) : base(AID, AName) {}
+		public SQLAdorn(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			Statement LStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-			return LStatement;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			Statement statement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+			return statement;
 		}
     }
 
     public class SQLRestrict : SQLDeviceOperator
     {
-		public SQLRestrict(int AID, string AName) : base(AID, AName) {}
+		public SQLRestrict(int iD, string name) : base(iD, name) {}
 
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			Statement LStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-			if (LDevicePlan.IsSupported)
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			Statement statement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+			if (localDevicePlan.IsSupported)
 			{
-				SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, true);
-				LStatement = LSelectExpression;
+				SelectExpression selectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)planNode.Nodes[0]).TableVar, statement, true);
+				statement = selectExpression;
 
-				LDevicePlan.PushScalarContext();
+				localDevicePlan.PushScalarContext();
 				try
 				{
-					LDevicePlan.CurrentQueryContext().IsWhereClause = true;
+					localDevicePlan.CurrentQueryContext().IsWhereClause = true;
 
-					LDevicePlan.Stack.Push(new Symbol(((TableNode)APlanNode).DataType.CreateRowType()));
+					localDevicePlan.Stack.Push(new Symbol(String.Empty, ((TableNode)planNode).DataType.RowType));
 					try
 					{
-						LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
+						localDevicePlan.CurrentQueryContext().ResetReferenceFlags();
 						
-						Expression LExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], true);
+						Expression expression = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], true);
 						
-						FilterClause LClause = null;
-						if ((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasAggregateExpressions) != 0)
+						FilterClause clause = null;
+						if ((localDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasAggregateExpressions) != 0)
 						{
-							if (LSelectExpression.HavingClause == null)
-								LSelectExpression.HavingClause = new HavingClause();
-							LClause = LSelectExpression.HavingClause;
+							if (selectExpression.HavingClause == null)
+								selectExpression.HavingClause = new HavingClause();
+							clause = selectExpression.HavingClause;
 							
-							if (((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0) && !LDevicePlan.Device.SupportsSubSelectInHavingClause)
+							if (((localDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0) && !localDevicePlan.Device.SupportsSubSelectInHavingClause)
 							{
-								LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the having clause contains sub-select expressions and the device does not support sub-selects in the having clause.", APlanNode));
-								LDevicePlan.IsSupported = false;
+								localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the having clause contains sub-select expressions and the device does not support sub-selects in the having clause.", planNode));
+								localDevicePlan.IsSupported = false;
 							}
 						}
 						else
 						{
-							if (LSelectExpression.WhereClause == null)
-								LSelectExpression.WhereClause = new WhereClause();
-							LClause = LSelectExpression.WhereClause;
+							if (selectExpression.WhereClause == null)
+								selectExpression.WhereClause = new WhereClause();
+							clause = selectExpression.WhereClause;
 							
-							if (((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0) && !LDevicePlan.Device.SupportsSubSelectInWhereClause)
+							if (((localDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0) && !localDevicePlan.Device.SupportsSubSelectInWhereClause)
 							{
-								LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the where clause contains sub-select expressions and the device does not support sub-selects in the where clause.", APlanNode));
-								LDevicePlan.IsSupported = false;
+								localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the where clause contains sub-select expressions and the device does not support sub-selects in the where clause.", planNode));
+								localDevicePlan.IsSupported = false;
 							}
 						}
 							
-						if (LClause.Expression == null)				
-							LClause.Expression = LExpression;
+						if (clause.Expression == null)				
+							clause.Expression = expression;
 						else
-							LClause.Expression = new BinaryExpression(LClause.Expression, "iAnd", LExpression);
+							clause.Expression = new BinaryExpression(clause.Expression, "iAnd", expression);
 
-						return LStatement;
+						return statement;
 					}
 					finally
 					{
-						LDevicePlan.Stack.Pop();
+						localDevicePlan.Stack.Pop();
 					}
 				}
 				finally
 				{
-					LDevicePlan.PopScalarContext();
+					localDevicePlan.PopScalarContext();
 				}
 			}
 			
-			return LStatement;
+			return statement;
 		}
     }
 
     public class SQLProject : SQLDeviceOperator
     {
-		public SQLProject(int AID, string AName) : base(AID, AName) {}
+		public SQLProject(int iD, string name) : base(iD, name) {}
 
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
 			
 			// Project where distinct is required is only supported if the device supports iEqual or iCompare for the data types of each column involved in the projection
-			ProjectNodeBase LProjectNode = (ProjectNodeBase)APlanNode;
+			ProjectNodeBase projectNode = (ProjectNodeBase)planNode;
 			
-			if (LProjectNode.DistinctRequired)
-				foreach (Schema.TableVarColumn LColumn in LProjectNode.TableVar.Columns)
-					if (!LDevicePlan.Device.SupportsEqual(ADevicePlan.Plan, LColumn.Column.DataType))
+			if (projectNode.DistinctRequired)
+				foreach (Schema.TableVarColumn column in projectNode.TableVar.Columns)
+					if (!localDevicePlan.Device.SupportsEqual(devicePlan.Plan, column.Column.DataType))
 					{
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not support equality comparison for values of type ""{0}"" which is the type of column ""{1}"" included in the projection.", LColumn.Column.DataType.Name, LColumn.Column.Name), APlanNode));
-						LDevicePlan.IsSupported = false;
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not support equality comparison for values of type ""{0}"" which is the type of column ""{1}"" included in the projection.", column.Column.DataType.Name, column.Column.Name), planNode));
+						localDevicePlan.IsSupported = false;
 						break;
 					}
 			
-			if (LDevicePlan.IsSupported)
+			if (localDevicePlan.IsSupported)
 			{
-				Statement LStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-				if (LDevicePlan.IsSupported)
+				Statement statement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+				if (localDevicePlan.IsSupported)
 				{
-					SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, false);
-					LStatement = LSelectExpression;
+					SelectExpression selectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)planNode.Nodes[0]).TableVar, statement, false);
+					statement = selectExpression;
 
-					if (LProjectNode.DistinctRequired)
-						LSelectExpression.SelectClause.Distinct = true;
+					if (projectNode.DistinctRequired)
+						selectExpression.SelectClause.Distinct = true;
 						
-					LSelectExpression.SelectClause.Columns.Clear();
-					foreach (TableVarColumn LColumn in ((TableNode)APlanNode).TableVar.Columns)
-						LSelectExpression.SelectClause.Columns.Add(LDevicePlan.GetRangeVarColumn(LColumn.Name, true).GetColumnExpression());
+					selectExpression.SelectClause.Columns.Clear();
+					foreach (TableVarColumn column in ((TableNode)planNode).TableVar.Columns)
+						selectExpression.SelectClause.Columns.Add(localDevicePlan.GetRangeVarColumn(column.Name, true).GetColumnExpression());
 						
-					LDevicePlan.CurrentQueryContext().ProjectColumns(((TableNode)APlanNode).TableVar.Columns);
+					localDevicePlan.CurrentQueryContext().ProjectColumns(((TableNode)planNode).TableVar.Columns);
 					
-					if (LSelectExpression.SelectClause.Columns.Count == 0)
-						LSelectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(1), "dummy"));
+					if (selectExpression.SelectClause.Columns.Count == 0)
+						selectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(1), "dummy"));
 						
-					return LStatement;
+					return statement;
 				}
 			}
 
@@ -269,45 +272,45 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     //		select c_id as c_id, c_name as c_name from (select id as c_id, name as c_name from customer) as T1
     public class SQLRename : SQLDeviceOperator
     {
-		public SQLRename(int AID, string AName) : base(AID, AName) {}
+		public SQLRename(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{									
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			Statement LStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-			if (LDevicePlan.IsSupported)
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			Statement statement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+			if (localDevicePlan.IsSupported)
 			{
-				SelectExpression LSelectExpression = 
-						APlanNode is RowRenameNode ? 
-							LDevicePlan.Device.FindSelectExpression(LStatement) : 
-							LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, false);
-				LStatement = LSelectExpression;
-				SQLRangeVarColumn LRangeVarColumn;
-				LSelectExpression.SelectClause.Columns.Clear();
+				SelectExpression selectExpression = 
+						planNode is RowRenameNode ? 
+							localDevicePlan.Device.FindSelectExpression(statement) : 
+							localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)planNode.Nodes[0]).TableVar, statement, false);
+				statement = selectExpression;
+				SQLRangeVarColumn rangeVarColumn;
+				selectExpression.SelectClause.Columns.Clear();
 				
-				if (APlanNode is RowRenameNode)
+				if (planNode is RowRenameNode)
 				{
-					Schema.IRowType LSourceRowType = APlanNode.Nodes[0].DataType as Schema.IRowType;
-					Schema.IRowType LTargetRowType = APlanNode.DataType as Schema.IRowType;
-					for (int LIndex = 0; LIndex < LSourceRowType.Columns.Count; LIndex++)
+					Schema.IRowType sourceRowType = planNode.Nodes[0].DataType as Schema.IRowType;
+					Schema.IRowType targetRowType = planNode.DataType as Schema.IRowType;
+					for (int index = 0; index < sourceRowType.Columns.Count; index++)
 					{
-						LRangeVarColumn = LDevicePlan.CurrentQueryContext().RenameColumn(LDevicePlan, new Schema.TableVarColumn(LSourceRowType.Columns[LIndex]), new Schema.TableVarColumn(LTargetRowType.Columns[LIndex]));
-						LSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
+						rangeVarColumn = localDevicePlan.CurrentQueryContext().RenameColumn(localDevicePlan, new Schema.TableVarColumn(sourceRowType.Columns[index]), new Schema.TableVarColumn(targetRowType.Columns[index]));
+						selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
 					}
 				} 
-				else if (APlanNode is RenameNode)
+				else if (planNode is RenameNode)
 				{
-					TableVar LSourceTableVar = ((RenameNode)APlanNode).SourceTableVar;
-					TableVar LTableVar = ((TableNode)APlanNode).TableVar;
-					for (int LIndex = 0; LIndex < LTableVar.Columns.Count; LIndex++)
+					TableVar sourceTableVar = ((RenameNode)planNode).SourceTableVar;
+					TableVar tableVar = ((TableNode)planNode).TableVar;
+					for (int index = 0; index < tableVar.Columns.Count; index++)
 					{
-						LRangeVarColumn = LDevicePlan.CurrentQueryContext().RenameColumn(LDevicePlan, LSourceTableVar.Columns[LIndex], LTableVar.Columns[LIndex]);
-						LSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
+						rangeVarColumn = localDevicePlan.CurrentQueryContext().RenameColumn(localDevicePlan, sourceTableVar.Columns[index], tableVar.Columns[index]);
+						selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
 					}
 				}
 			}
 
-			return LStatement;
+			return statement;
 		}
     }
 
@@ -317,57 +320,57 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	*/    
     public class SQLExtend : SQLDeviceOperator
     {
-		public SQLExtend(int AID, string AName) : base(AID, AName) {}
+		public SQLExtend(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			ExtendNode LExtendNode = (ExtendNode)APlanNode;
-			TableVar LTableVar = LExtendNode.TableVar;
-			Statement LStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-			if (LDevicePlan.IsSupported)
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			ExtendNode extendNode = (ExtendNode)planNode;
+			TableVar tableVar = extendNode.TableVar;
+			Statement statement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+			if (localDevicePlan.IsSupported)
 			{
-				SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, true);
-				LStatement = LSelectExpression;
+				SelectExpression selectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)planNode.Nodes[0]).TableVar, statement, true);
+				statement = selectExpression;
 
-				LDevicePlan.Stack.Push(new Symbol(LExtendNode.DataType.CreateRowType()));
+				localDevicePlan.Stack.Push(new Symbol(String.Empty, extendNode.DataType.RowType));
 				try
 				{
-					LDevicePlan.CurrentQueryContext().IsExtension = true;
-					LDevicePlan.PushScalarContext();
+					localDevicePlan.CurrentQueryContext().IsExtension = true;
+					localDevicePlan.PushScalarContext();
 					try
 					{
-						LDevicePlan.CurrentQueryContext().IsSelectClause = true;
-						int LExtendColumnIndex = 1;
-						for (int LIndex = LExtendNode.ExtendColumnOffset; LIndex < LExtendNode.DataType.Columns.Count; LIndex++)
+						localDevicePlan.CurrentQueryContext().IsSelectClause = true;
+						int extendColumnIndex = 1;
+						for (int index = extendNode.ExtendColumnOffset; index < extendNode.DataType.Columns.Count; index++)
 						{
-							LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
-							SQLRangeVarColumn LRangeVarColumn = 
+							localDevicePlan.CurrentQueryContext().ResetReferenceFlags();
+							SQLRangeVarColumn rangeVarColumn = 
 								new SQLRangeVarColumn
 								(
-									LTableVar.Columns[LIndex], 
-									LDevicePlan.Device.TranslateExpression(LDevicePlan, LExtendNode.Nodes[LExtendColumnIndex], false), 
-									LDevicePlan.Device.ToSQLIdentifier(LTableVar.Columns[LIndex])
+									tableVar.Columns[index], 
+									localDevicePlan.Device.TranslateExpression(localDevicePlan, extendNode.Nodes[extendColumnIndex], false), 
+									localDevicePlan.Device.ToSQLIdentifier(tableVar.Columns[index])
 								);
-							LRangeVarColumn.ReferenceFlags = LDevicePlan.CurrentQueryContext().ReferenceFlags;
-							LDevicePlan.CurrentQueryContext().ParentContext.AddedColumns.Add(LRangeVarColumn);
-							LDevicePlan.CurrentQueryContext().ParentContext.ReferenceFlags |= LRangeVarColumn.ReferenceFlags;
-							LSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
-							LExtendColumnIndex++;
+							rangeVarColumn.ReferenceFlags = localDevicePlan.CurrentQueryContext().ReferenceFlags;
+							localDevicePlan.CurrentQueryContext().ParentContext.AddedColumns.Add(rangeVarColumn);
+							localDevicePlan.CurrentQueryContext().ParentContext.ReferenceFlags |= rangeVarColumn.ReferenceFlags;
+							selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
+							extendColumnIndex++;
 						}
 					}
 					finally
 					{
-						LDevicePlan.PopScalarContext();
+						localDevicePlan.PopScalarContext();
 					}
 				}
 				finally
 				{
-					LDevicePlan.Stack.Pop();
+					localDevicePlan.Stack.Pop();
 				}
 			}
 				
-			return LStatement;
+			return statement;
 		}
     }
 
@@ -377,53 +380,53 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	*/    
     public class SQLRedefine : SQLDeviceOperator
     {
-		public SQLRedefine(int AID, string AName) : base(AID, AName) {}
+		public SQLRedefine(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			RedefineNode LRedefineNode = (RedefineNode)APlanNode;
-			TableVar LTableVar = LRedefineNode.TableVar;
-			Statement LStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-			if (LDevicePlan.IsSupported)
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			RedefineNode redefineNode = (RedefineNode)planNode;
+			TableVar tableVar = redefineNode.TableVar;
+			Statement statement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+			if (localDevicePlan.IsSupported)
 			{
-				SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, true);
-				LStatement = LSelectExpression;
+				SelectExpression selectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)planNode.Nodes[0]).TableVar, statement, true);
+				statement = selectExpression;
 
-				LDevicePlan.Stack.Push(new Symbol(LRedefineNode.DataType.CreateRowType()));
+				localDevicePlan.Stack.Push(new Symbol(String.Empty, redefineNode.DataType.RowType));
 				try
 				{
-					LDevicePlan.CurrentQueryContext().IsExtension = true;
-					LDevicePlan.PushScalarContext();
+					localDevicePlan.CurrentQueryContext().IsExtension = true;
+					localDevicePlan.PushScalarContext();
 					try
 					{
-						LDevicePlan.CurrentQueryContext().IsSelectClause = true;
-						for (int LColumnIndex = 0; LColumnIndex < LTableVar.Columns.Count; LColumnIndex++)
+						localDevicePlan.CurrentQueryContext().IsSelectClause = true;
+						for (int columnIndex = 0; columnIndex < tableVar.Columns.Count; columnIndex++)
 						{
-							int LRedefineIndex = ((IList)LRedefineNode.RedefineColumnOffsets).IndexOf(LColumnIndex);
-							if (LRedefineIndex >= 0)
+							int redefineIndex = ((IList)redefineNode.RedefineColumnOffsets).IndexOf(columnIndex);
+							if (redefineIndex >= 0)
 							{
-								SQLRangeVarColumn LRangeVarColumn = LDevicePlan.GetRangeVarColumn(LTableVar.Columns[LColumnIndex].Name, true);
-								LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
-								LRangeVarColumn.Expression = LDevicePlan.Device.TranslateExpression(LDevicePlan, LRedefineNode.Nodes[LRedefineIndex + 1], false);
-								LRangeVarColumn.ReferenceFlags = LDevicePlan.CurrentQueryContext().ReferenceFlags;
-								LDevicePlan.CurrentQueryContext().ParentContext.ReferenceFlags |= LRangeVarColumn.ReferenceFlags;
-								LSelectExpression.SelectClause.Columns[LColumnIndex].Expression = LRangeVarColumn.Expression;
+								SQLRangeVarColumn rangeVarColumn = localDevicePlan.GetRangeVarColumn(tableVar.Columns[columnIndex].Name, true);
+								localDevicePlan.CurrentQueryContext().ResetReferenceFlags();
+								rangeVarColumn.Expression = localDevicePlan.Device.TranslateExpression(localDevicePlan, redefineNode.Nodes[redefineIndex + 1], false);
+								rangeVarColumn.ReferenceFlags = localDevicePlan.CurrentQueryContext().ReferenceFlags;
+								localDevicePlan.CurrentQueryContext().ParentContext.ReferenceFlags |= rangeVarColumn.ReferenceFlags;
+								selectExpression.SelectClause.Columns[columnIndex].Expression = rangeVarColumn.Expression;
 							}
 						}
 					}
 					finally
 					{
-						LDevicePlan.PopScalarContext();
+						localDevicePlan.PopScalarContext();
 					}
 				}
 				finally
 				{
-					LDevicePlan.Stack.Pop();
+					localDevicePlan.Stack.Pop();
 				}
 			}
 
-			return LStatement;
+			return statement;
 		}
     }
     
@@ -436,205 +439,205 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	*/
     public class SQLAggregate : SQLDeviceOperator
     {
-		public SQLAggregate(int AID, string AName) : base(AID, AName) {}
+		public SQLAggregate(int iD, string name) : base(iD, name) {}
 
-		protected AggregateCallExpression FindAggregateCallExpression(Expression AExpression)
+		protected AggregateCallExpression FindAggregateCallExpression(Expression expression)
 		{
-			AggregateCallExpression LCallExpression = AExpression as AggregateCallExpression;
-			if (LCallExpression == null)
+			AggregateCallExpression callExpression = expression as AggregateCallExpression;
+			if (callExpression == null)
 			{
-				CaseExpression LCaseExpression = AExpression as CaseExpression;
-				if (LCaseExpression != null)
-					LCallExpression = ((BinaryExpression)LCaseExpression.CaseItems[0].WhenExpression).LeftExpression as AggregateCallExpression;
+				CaseExpression caseExpression = expression as CaseExpression;
+				if (caseExpression != null)
+					callExpression = ((BinaryExpression)caseExpression.CaseItems[0].WhenExpression).LeftExpression as AggregateCallExpression;
 			}
-			return LCallExpression;
+			return callExpression;
 		}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			AggregateNode LAggregateNode = (AggregateNode)APlanNode;
-			TableVar LTableVar = LAggregateNode.TableVar;
-			Statement LStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, LAggregateNode.OriginalSourceNode, false);
-			if (LDevicePlan.IsSupported)
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			AggregateNode aggregateNode = (AggregateNode)planNode;
+			TableVar tableVar = aggregateNode.TableVar;
+			Statement statement = localDevicePlan.Device.TranslateExpression(localDevicePlan, aggregateNode.OriginalSourceNode, false);
+			if (localDevicePlan.IsSupported)
 			{
-				SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)LAggregateNode.OriginalSourceNode).TableVar, LStatement, true);
-				LStatement = LSelectExpression;
+				SelectExpression selectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)aggregateNode.OriginalSourceNode).TableVar, statement, true);
+				statement = selectExpression;
 
-				string LNestingReason = String.Empty;
-				bool LNest = LDevicePlan.CurrentQueryContext().IsAggregate || LSelectExpression.SelectClause.Distinct || ((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0);
-				if (LNest)
-					if (LDevicePlan.CurrentQueryContext().IsAggregate)
-						LNestingReason = "The argument to the aggregate operator must be nested because it contains aggregation.";
-					else if (LSelectExpression.SelectClause.Distinct)
-						LNestingReason = "The argument to the aggregate operator must be nested because it contains a distinct specification.";
+				string nestingReason = String.Empty;
+				bool nest = localDevicePlan.CurrentQueryContext().IsAggregate || selectExpression.SelectClause.Distinct || ((localDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0);
+				if (nest)
+					if (localDevicePlan.CurrentQueryContext().IsAggregate)
+						nestingReason = "The argument to the aggregate operator must be nested because it contains aggregation.";
+					else if (selectExpression.SelectClause.Distinct)
+						nestingReason = "The argument to the aggregate operator must be nested because it contains a distinct specification.";
 					else
-						LNestingReason = "The argument to the aggregate operator must be nested because it contains sub-select expressions.";
+						nestingReason = "The argument to the aggregate operator must be nested because it contains sub-select expressions.";
 				else
 				{
 					// If the group by columns are not literals in SQL, we must nest
-					for (int LIndex = 0; LIndex < LAggregateNode.AggregateColumnOffset; LIndex++)
-						if ((LDevicePlan.GetRangeVarColumn(LTableVar.Columns[LIndex].Name, true).ReferenceFlags & SQLReferenceFlags.HasParameters) != 0)
+					for (int index = 0; index < aggregateNode.AggregateColumnOffset; index++)
+						if ((localDevicePlan.GetRangeVarColumn(tableVar.Columns[index].Name, true).ReferenceFlags & SQLReferenceFlags.HasParameters) != 0)
 						{
-							LNest = true;
+							nest = true;
 							break;
 						}
 						
-					if (LNest)
-						LNestingReason = "The argument to the aggregate operator must be nested because it contains expressions which reference parameters.";
+					if (nest)
+						nestingReason = "The argument to the aggregate operator must be nested because it contains expressions which reference parameters.";
 				}
 
-				if (LNest)
+				if (nest)
 				{
-					LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(LNestingReason, APlanNode));
-					LStatement = LDevicePlan.Device.NestQueryExpression(LDevicePlan, ((TableNode)LAggregateNode.OriginalSourceNode).TableVar, LStatement);
-					LSelectExpression = LDevicePlan.Device.FindSelectExpression(LStatement);				
+					localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(nestingReason, planNode));
+					statement = localDevicePlan.Device.NestQueryExpression(localDevicePlan, ((TableNode)aggregateNode.OriginalSourceNode).TableVar, statement);
+					selectExpression = localDevicePlan.Device.FindSelectExpression(statement);				
 				}
 
-				LDevicePlan.CurrentQueryContext().IsAggregate = true;			
-				LSelectExpression.SelectClause = new SelectClause();
-				for (int LIndex = 0; LIndex < LAggregateNode.AggregateColumnOffset; LIndex++)
+				localDevicePlan.CurrentQueryContext().IsAggregate = true;			
+				selectExpression.SelectClause = new SelectClause();
+				for (int index = 0; index < aggregateNode.AggregateColumnOffset; index++)
 				{
-					SQLRangeVarColumn LGroupByColumn = LDevicePlan.GetRangeVarColumn(LTableVar.Columns[LIndex].Name, true);
-					LSelectExpression.SelectClause.Columns.Add(LGroupByColumn.GetColumnExpression());
-					if (LSelectExpression.GroupClause == null)
-						LSelectExpression.GroupClause = new GroupClause();
-					LSelectExpression.GroupClause.Columns.Add(LGroupByColumn.GetExpression());
+					SQLRangeVarColumn groupByColumn = localDevicePlan.GetRangeVarColumn(tableVar.Columns[index].Name, true);
+					selectExpression.SelectClause.Columns.Add(groupByColumn.GetColumnExpression());
+					if (selectExpression.GroupClause == null)
+						selectExpression.GroupClause = new GroupClause();
+					selectExpression.GroupClause.Columns.Add(groupByColumn.GetExpression());
 				}
 
-				for (int LIndex = LAggregateNode.AggregateColumnOffset; LIndex < LAggregateNode.DataType.Columns.Count; LIndex++)
+				for (int index = aggregateNode.AggregateColumnOffset; index < aggregateNode.DataType.Columns.Count; index++)
 				{
-					LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
-					Expression LExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, LAggregateNode.Nodes[(LIndex - LAggregateNode.AggregateColumnOffset) + 1], false);
-					FindAggregateCallExpression(LExpression).IsDistinct = LAggregateNode.ComputeColumns[LIndex - LAggregateNode.AggregateColumnOffset].Distinct;
-					SQLRangeVarColumn LRangeVarColumn = 
+					localDevicePlan.CurrentQueryContext().ResetReferenceFlags();
+					Expression expression = localDevicePlan.Device.TranslateExpression(localDevicePlan, aggregateNode.Nodes[(index - aggregateNode.AggregateColumnOffset) + 1], false);
+					FindAggregateCallExpression(expression).IsDistinct = aggregateNode.ComputeColumns[index - aggregateNode.AggregateColumnOffset].Distinct;
+					SQLRangeVarColumn rangeVarColumn = 
 						new SQLRangeVarColumn
 						(
-							LTableVar.Columns[LIndex],
-							LExpression,
-							LDevicePlan.Device.ToSQLIdentifier(LTableVar.Columns[LIndex])
+							tableVar.Columns[index],
+							expression,
+							localDevicePlan.Device.ToSQLIdentifier(tableVar.Columns[index])
 						);
-					LRangeVarColumn.ReferenceFlags = LDevicePlan.CurrentQueryContext().ReferenceFlags | SQLReferenceFlags.HasAggregateExpressions;
-					LDevicePlan.CurrentQueryContext().AddedColumns.Add(LRangeVarColumn);
-					LSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
+					rangeVarColumn.ReferenceFlags = localDevicePlan.CurrentQueryContext().ReferenceFlags | SQLReferenceFlags.HasAggregateExpressions;
+					localDevicePlan.CurrentQueryContext().AddedColumns.Add(rangeVarColumn);
+					selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
 				}
 			}
 			
-			return LStatement;
+			return statement;
 		}
     }
     
     public class SQLAggregateOperator : SQLDeviceOperator
     {
-		public SQLAggregateOperator(int AID, string AName) : base(AID, AName) {}
+		public SQLAggregateOperator(int iD, string name) : base(iD, name) {}
 		
-		private string FOperatorName;
+		private string _operatorName;
 		public string OperatorName
 		{
-			get { return FOperatorName; }
-			set { FOperatorName = value; }
+			get { return _operatorName; }
+			set { _operatorName = value; }
 		}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
 			// If this is a scalar invocation, it must be translated as a subselect
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			AggregateCallNode LNode = (AggregateCallNode)APlanNode;
-			TableVar LSourceTableVar = ((TableNode)LNode.Nodes[0]).TableVar;
-			AggregateCallExpression LExpression = new AggregateCallExpression();
-			LExpression.Identifier = FOperatorName;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			AggregateCallNode node = (AggregateCallNode)planNode;
+			TableVar sourceTableVar = ((TableNode)node.Nodes[0]).TableVar;
+			AggregateCallExpression expression = new AggregateCallExpression();
+			expression.Identifier = _operatorName;
 			
-			if (!LDevicePlan.CurrentQueryContext().IsScalarContext)
+			if (!localDevicePlan.CurrentQueryContext().IsScalarContext)
 			{
-				if (LNode.AggregateColumnIndexes.Length > 0)
-					for (int LIndex = 0; LIndex < LNode.AggregateColumnIndexes.Length; LIndex++)
+				if (node.AggregateColumnIndexes.Length > 0)
+					for (int index = 0; index < node.AggregateColumnIndexes.Length; index++)
 					{
-						SQLRangeVarColumn LRangeVarColumn = LDevicePlan.FindRangeVarColumn(LSourceTableVar.Columns[LNode.AggregateColumnIndexes[LIndex]].Name, true);
-						if (LRangeVarColumn == null)
-							LExpression.Expressions.Add(new QualifiedFieldExpression("*")); // If we don't find the column, we are being evaluated out of context, and must return true in order to prevent the overall aggregate from being incorrectly unsupported
+						SQLRangeVarColumn rangeVarColumn = localDevicePlan.FindRangeVarColumn(sourceTableVar.Columns[node.AggregateColumnIndexes[index]].Name, true);
+						if (rangeVarColumn == null)
+							expression.Expressions.Add(new QualifiedFieldExpression("*")); // If we don't find the column, we are being evaluated out of context, and must return true in order to prevent the overall aggregate from being incorrectly unsupported
 						else
-							LExpression.Expressions.Add(LRangeVarColumn.GetExpression());
+							expression.Expressions.Add(rangeVarColumn.GetExpression());
 					}
 				else	
-					LExpression.Expressions.Add(new QualifiedFieldExpression("*")); 
+					expression.Expressions.Add(new QualifiedFieldExpression("*")); 
 					
-				return LExpression;
+				return expression;
 			}
 			else
 			{
-				LDevicePlan.CurrentQueryContext().ReferenceFlags |= SQLReferenceFlags.HasSubSelectExpressions;
-				bool LIsSupported = LDevicePlan.IsSubSelectSupported();
-				if (!LIsSupported)
-					LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(LDevicePlan.GetSubSelectNotSupportedReason(), APlanNode));
-				LDevicePlan.IsSupported = LDevicePlan.IsSupported && LIsSupported;
-				LDevicePlan.Stack.Push(new Symbol(D4.Keywords.Result, LNode.DataType));
+				localDevicePlan.CurrentQueryContext().ReferenceFlags |= SQLReferenceFlags.HasSubSelectExpressions;
+				bool isSupported = localDevicePlan.IsSubSelectSupported();
+				if (!isSupported)
+					localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(localDevicePlan.GetSubSelectNotSupportedReason(), planNode));
+				localDevicePlan.IsSupported = localDevicePlan.IsSupported && isSupported;
+				localDevicePlan.Stack.Push(new Symbol(D4.Keywords.Result, node.DataType));
 				try
 				{
-					for (int LIndex = 0; LIndex < LNode.Operator.Initialization.StackDisplacement; LIndex++)
-						LDevicePlan.Stack.Push(new Symbol(String.Empty, ADevicePlan.Plan.Catalog.DataTypes.SystemScalar));
+					for (int index = 0; index < node.Operator.Initialization.StackDisplacement; index++)
+						localDevicePlan.Stack.Push(new Symbol(String.Empty, devicePlan.Plan.Catalog.DataTypes.SystemScalar));
 						
-					for (int LIndex = 0; LIndex < LNode.AggregateColumnIndexes.Length; LIndex++)
-						LDevicePlan.Stack.Push(new Symbol(LNode.ValueNames[LIndex], LSourceTableVar.Columns[LNode.AggregateColumnIndexes[LIndex]].DataType));
+					for (int index = 0; index < node.AggregateColumnIndexes.Length; index++)
+						localDevicePlan.Stack.Push(new Symbol(node.ValueNames[index], sourceTableVar.Columns[node.AggregateColumnIndexes[index]].DataType));
 					try
 					{
-						LDevicePlan.PushQueryContext();
+						localDevicePlan.PushQueryContext();
 						try
 						{
-							Statement LStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-							if (LDevicePlan.IsSupported)
+							Statement statement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+							if (localDevicePlan.IsSupported)
 							{
-								SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, false);
-								LStatement = LSelectExpression;
+								SelectExpression selectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)planNode.Nodes[0]).TableVar, statement, false);
+								statement = selectExpression;
 									
-								string LNestingReason = String.Empty;
-								bool LNest = 
-									LDevicePlan.CurrentQueryContext().IsAggregate 
-										|| LSelectExpression.SelectClause.Distinct 
-										|| ((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0);
+								string nestingReason = String.Empty;
+								bool nest = 
+									localDevicePlan.CurrentQueryContext().IsAggregate 
+										|| selectExpression.SelectClause.Distinct 
+										|| ((localDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0);
 
-								if (LNest)
+								if (nest)
 								{
-									if (LDevicePlan.CurrentQueryContext().IsAggregate)
-										LNestingReason = "The argument to the aggregate operator must be nested because it contains aggregation.";
-									else if ((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasAggregateExpressions) != 0)
-										LNestingReason = "The argument to the aggregate operator must be nested because it contains subselect expressions.";
+									if (localDevicePlan.CurrentQueryContext().IsAggregate)
+										nestingReason = "The argument to the aggregate operator must be nested because it contains aggregation.";
+									else if ((localDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasAggregateExpressions) != 0)
+										nestingReason = "The argument to the aggregate operator must be nested because it contains subselect expressions.";
 									else
-										LNestingReason = "The argument to the aggregate operator must be nested because it contains a distinct specification.";
+										nestingReason = "The argument to the aggregate operator must be nested because it contains a distinct specification.";
 
-									LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(LNestingReason, APlanNode));
-									LStatement = LDevicePlan.Device.NestQueryExpression(LDevicePlan, LSourceTableVar, LStatement);
-									LSelectExpression = LDevicePlan.Device.FindSelectExpression(LStatement);				
+									localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(nestingReason, planNode));
+									statement = localDevicePlan.Device.NestQueryExpression(localDevicePlan, sourceTableVar, statement);
+									selectExpression = localDevicePlan.Device.FindSelectExpression(statement);				
 								}
 									
-								if (LNode.AggregateColumnIndexes.Length > 0)
-									for (int LIndex = 0; LIndex < LNode.AggregateColumnIndexes.Length; LIndex++)
-										LExpression.Expressions.Add(LDevicePlan.CurrentQueryContext().GetRangeVarColumn(LSourceTableVar.Columns[LNode.AggregateColumnIndexes[LIndex]].Name).GetExpression());
+								if (node.AggregateColumnIndexes.Length > 0)
+									for (int index = 0; index < node.AggregateColumnIndexes.Length; index++)
+										expression.Expressions.Add(localDevicePlan.CurrentQueryContext().GetRangeVarColumn(sourceTableVar.Columns[node.AggregateColumnIndexes[index]].Name).GetExpression());
 								else	
-									LExpression.Expressions.Add(new QualifiedFieldExpression("*"));
+									expression.Expressions.Add(new QualifiedFieldExpression("*"));
 
-								LSelectExpression.SelectClause = new SelectClause();
-								LSelectExpression.SelectClause.Columns.Add(new ColumnExpression(LExpression, "dummy1"));
+								selectExpression.SelectClause = new SelectClause();
+								selectExpression.SelectClause.Columns.Add(new ColumnExpression(expression, "dummy1"));
 							}
 
-							return LStatement;
+							return statement;
 						}
 						finally
 						{
-							LDevicePlan.PopQueryContext();
+							localDevicePlan.PopQueryContext();
 						}
 					}
 					finally
 					{
-						for (int LIndex = 0; LIndex < LNode.AggregateColumnIndexes.Length; LIndex++)
-							LDevicePlan.Stack.Pop();
+						for (int index = 0; index < node.AggregateColumnIndexes.Length; index++)
+							localDevicePlan.Stack.Pop();
 
-						for (int LIndex = 0; LIndex < LNode.Operator.Initialization.StackDisplacement; LIndex++)
-							LDevicePlan.Stack.Pop();
+						for (int index = 0; index < node.Operator.Initialization.StackDisplacement; index++)
+							localDevicePlan.Stack.Pop();
 					}
 				}
 				finally
 				{
-					LDevicePlan.Stack.Pop();
+					localDevicePlan.Stack.Pop();
 				}
 			}
 		}
@@ -642,233 +645,233 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLOrder : SQLDeviceOperator
     {
-		public SQLOrder(int AID, string AName) : base(AID, AName) {}
+		public SQLOrder(int iD, string name) : base(iD, name) {}
 		
 		// Order is ignored until the very last order in the expression, which is translated in the device
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			return ADevicePlan.Device.Translate(ADevicePlan, APlanNode.Nodes[0]);
+			return devicePlan.Device.Translate(devicePlan, planNode.Nodes[0]);
 		}
     }
 
     public class SQLUnion : SQLDeviceOperator
     {
-		public SQLUnion(int AID, string AName) : base(AID, AName) {}
+		public SQLUnion(int iD, string name) : base(iD, name) {}
 		
-		public static void NormalizeSelectClause(DevicePlan ADevicePlan, ColumnExpressions ANormalColumns, ColumnExpressions ANonNormalColumns)
+		public static void NormalizeSelectClause(DevicePlan devicePlan, ColumnExpressions normalColumns, ColumnExpressions nonNormalColumns)
 		{
-			ColumnExpressions LNonNormalColumns = new ColumnExpressions();
-			LNonNormalColumns.AddRange(ANonNormalColumns);
-			ANonNormalColumns.Clear();
-			foreach (ColumnExpression LColumnExpression in ANormalColumns)
-				ANonNormalColumns.Add(LNonNormalColumns[LColumnExpression.ColumnAlias]);
+			ColumnExpressions localNonNormalColumns = new ColumnExpressions();
+			localNonNormalColumns.AddRange(nonNormalColumns);
+			nonNormalColumns.Clear();
+			foreach (ColumnExpression columnExpression in normalColumns)
+				nonNormalColumns.Add(localNonNormalColumns[columnExpression.ColumnAlias]);
 		}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			LDevicePlan.PushQueryContext();
-			Statement LLeftStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-			LDevicePlan.PopQueryContext();
-			LDevicePlan.PushQueryContext();
-			Statement LRightStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-			LDevicePlan.PopQueryContext();
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			localDevicePlan.PushQueryContext();
+			Statement leftStatement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+			localDevicePlan.PopQueryContext();
+			localDevicePlan.PushQueryContext();
+			Statement rightStatement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+			localDevicePlan.PopQueryContext();
 			
-			if (LDevicePlan.IsSupported)
+			if (localDevicePlan.IsSupported)
 			{
-				SQLRangeVar LRangeVar = new SQLRangeVar(LDevicePlan.GetNextTableAlias());
-				LDevicePlan.CurrentQueryContext().RangeVars.Add(LRangeVar);
-				Schema.TableVar LTableVar = ((TableNode)APlanNode).TableVar;
-				foreach (Schema.TableVarColumn LColumn in LTableVar.Columns)
-					LRangeVar.Columns.Add(new SQLRangeVarColumn(LColumn, LRangeVar.Name, LDevicePlan.Device.ToSQLIdentifier(LColumn.Name)));
+				SQLRangeVar rangeVar = new SQLRangeVar(localDevicePlan.GetNextTableAlias());
+				localDevicePlan.CurrentQueryContext().RangeVars.Add(rangeVar);
+				Schema.TableVar tableVar = ((TableNode)planNode).TableVar;
+				foreach (Schema.TableVarColumn column in tableVar.Columns)
+					rangeVar.Columns.Add(new SQLRangeVarColumn(column, rangeVar.Name, localDevicePlan.Device.ToSQLIdentifier(column.Name)));
 				
-				if (LLeftStatement is QueryExpression)
+				if (leftStatement is QueryExpression)
 				{
-					QueryExpression LLeftQueryExpression = (QueryExpression)LLeftStatement;
-					if (!LLeftQueryExpression.IsCompatibleWith(TableOperator.Union))
+					QueryExpression leftQueryExpression = (QueryExpression)leftStatement;
+					if (!leftQueryExpression.IsCompatibleWith(TableOperator.Union))
 					{
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("The left argument to the union operator must be nested because it contains non-union table operations.", APlanNode));
-						LLeftStatement = LDevicePlan.Device.NestQueryExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[1]).TableVar, LLeftStatement);
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("The left argument to the union operator must be nested because it contains non-union table operations.", planNode));
+						leftStatement = localDevicePlan.Device.NestQueryExpression(localDevicePlan, ((TableNode)planNode.Nodes[1]).TableVar, leftStatement);
 					}
 				}
 				
-				if (!(LLeftStatement is QueryExpression))
+				if (!(leftStatement is QueryExpression))
 				{
-					QueryExpression LQueryExpression = new QueryExpression();
-					LQueryExpression.SelectExpression = (SelectExpression)LLeftStatement;
-					LLeftStatement = LQueryExpression;
+					QueryExpression queryExpression = new QueryExpression();
+					queryExpression.SelectExpression = (SelectExpression)leftStatement;
+					leftStatement = queryExpression;
 				}
 				
-				ColumnExpressions LNormalColumns = LDevicePlan.Device.FindSelectExpression(LLeftStatement).SelectClause.Columns;
+				ColumnExpressions normalColumns = localDevicePlan.Device.FindSelectExpression(leftStatement).SelectClause.Columns;
 				
-				if (LRightStatement is QueryExpression)
+				if (rightStatement is QueryExpression)
 				{
-					QueryExpression LRightQueryExpression = (QueryExpression)LRightStatement;
-					if (!LRightQueryExpression.IsCompatibleWith(TableOperator.Union))
+					QueryExpression rightQueryExpression = (QueryExpression)rightStatement;
+					if (!rightQueryExpression.IsCompatibleWith(TableOperator.Union))
 					{
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("The right argument to the union operator must be nested because it contains non-union table operations.", APlanNode));
-						LRightStatement = LDevicePlan.Device.NestQueryExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[1]).TableVar, LRightStatement);
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("The right argument to the union operator must be nested because it contains non-union table operations.", planNode));
+						rightStatement = localDevicePlan.Device.NestQueryExpression(localDevicePlan, ((TableNode)planNode.Nodes[1]).TableVar, rightStatement);
 					}
 					else
-						foreach (TableOperatorExpression LTableOperatorExpression in LRightQueryExpression.TableOperators)
-							NormalizeSelectClause(ADevicePlan, LNormalColumns, LTableOperatorExpression.SelectExpression.SelectClause.Columns);
+						foreach (TableOperatorExpression tableOperatorExpression in rightQueryExpression.TableOperators)
+							NormalizeSelectClause(devicePlan, normalColumns, tableOperatorExpression.SelectExpression.SelectClause.Columns);
 				}
 				
-				NormalizeSelectClause(ADevicePlan, LNormalColumns, LDevicePlan.Device.FindSelectExpression(LRightStatement).SelectClause.Columns);
+				NormalizeSelectClause(devicePlan, normalColumns, localDevicePlan.Device.FindSelectExpression(rightStatement).SelectClause.Columns);
 				
-				if (LRightStatement is QueryExpression)
-					LRightStatement = ((QueryExpression)LRightStatement).SelectExpression;
+				if (rightStatement is QueryExpression)
+					rightStatement = ((QueryExpression)rightStatement).SelectExpression;
 					
-				((QueryExpression)LLeftStatement).TableOperators.Add(new TableOperatorExpression(TableOperator.Union, true, (SelectExpression)LRightStatement));
+				((QueryExpression)leftStatement).TableOperators.Add(new TableOperatorExpression(TableOperator.Union, true, (SelectExpression)rightStatement));
 			}
 			
-			return LLeftStatement;
+			return leftStatement;
 		}
     }
     
     public class SQLDifference : SQLDeviceOperator
     {
-		public SQLDifference(int AID, string AName) : base(AID, AName) {}
+		public SQLDifference(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			LDevicePlan.PushQueryContext();
-			Statement LLeftStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-			LDevicePlan.PopQueryContext();
-			LDevicePlan.PushQueryContext();
-			Statement LRightStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-			LDevicePlan.PopQueryContext();
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			localDevicePlan.PushQueryContext();
+			Statement leftStatement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+			localDevicePlan.PopQueryContext();
+			localDevicePlan.PushQueryContext();
+			Statement rightStatement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+			localDevicePlan.PopQueryContext();
 			
-			if (LDevicePlan.IsSupported)
+			if (localDevicePlan.IsSupported)
 			{
-				SQLRangeVar LRangeVar = new SQLRangeVar(LDevicePlan.GetNextTableAlias());
-				LDevicePlan.CurrentQueryContext().RangeVars.Add(LRangeVar);
-				Schema.TableVar LTableVar = ((TableNode)APlanNode).TableVar;
-				foreach (Schema.TableVarColumn LColumn in LTableVar.Columns)
-					LRangeVar.Columns.Add(new SQLRangeVarColumn(LColumn, LRangeVar.Name, LDevicePlan.Device.ToSQLIdentifier(LColumn.Name)));
+				SQLRangeVar rangeVar = new SQLRangeVar(localDevicePlan.GetNextTableAlias());
+				localDevicePlan.CurrentQueryContext().RangeVars.Add(rangeVar);
+				Schema.TableVar tableVar = ((TableNode)planNode).TableVar;
+				foreach (Schema.TableVarColumn column in tableVar.Columns)
+					rangeVar.Columns.Add(new SQLRangeVarColumn(column, rangeVar.Name, localDevicePlan.Device.ToSQLIdentifier(column.Name)));
 				
-				if (LLeftStatement is QueryExpression)
+				if (leftStatement is QueryExpression)
 				{
-					QueryExpression LLeftQueryExpression = (QueryExpression)LLeftStatement;
-					if (!LLeftQueryExpression.IsCompatibleWith(TableOperator.Difference))
+					QueryExpression leftQueryExpression = (QueryExpression)leftStatement;
+					if (!leftQueryExpression.IsCompatibleWith(TableOperator.Difference))
 					{
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("The left argument to the difference operator must be nested because it contains non-difference table operations.", APlanNode));
-						LLeftStatement = LDevicePlan.Device.NestQueryExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[1]).TableVar, LLeftStatement);
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("The left argument to the difference operator must be nested because it contains non-difference table operations.", planNode));
+						leftStatement = localDevicePlan.Device.NestQueryExpression(localDevicePlan, ((TableNode)planNode.Nodes[1]).TableVar, leftStatement);
 					}
 				}
 				
-				if (!(LLeftStatement is QueryExpression))
+				if (!(leftStatement is QueryExpression))
 				{
-					QueryExpression LQueryExpression = new QueryExpression();
-					LQueryExpression.SelectExpression = (SelectExpression)LLeftStatement;
-					LLeftStatement = LQueryExpression;
+					QueryExpression queryExpression = new QueryExpression();
+					queryExpression.SelectExpression = (SelectExpression)leftStatement;
+					leftStatement = queryExpression;
 				}
 				
-				ColumnExpressions LNormalColumns = LDevicePlan.Device.FindSelectExpression(LLeftStatement).SelectClause.Columns;
+				ColumnExpressions normalColumns = localDevicePlan.Device.FindSelectExpression(leftStatement).SelectClause.Columns;
 				
-				if (LRightStatement is QueryExpression)
+				if (rightStatement is QueryExpression)
 				{
-					QueryExpression LRightQueryExpression = (QueryExpression)LRightStatement;
-					if (!LRightQueryExpression.IsCompatibleWith(TableOperator.Union))
+					QueryExpression rightQueryExpression = (QueryExpression)rightStatement;
+					if (!rightQueryExpression.IsCompatibleWith(TableOperator.Union))
 					{
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("The right argument to the difference operator must be nested because it contains non-difference table operations.", APlanNode));
-						LRightStatement = LDevicePlan.Device.NestQueryExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[1]).TableVar, LRightStatement);
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("The right argument to the difference operator must be nested because it contains non-difference table operations.", planNode));
+						rightStatement = localDevicePlan.Device.NestQueryExpression(localDevicePlan, ((TableNode)planNode.Nodes[1]).TableVar, rightStatement);
 					}
 					else
-						foreach (TableOperatorExpression LTableOperatorExpression in LRightQueryExpression.TableOperators)
-							SQLUnion.NormalizeSelectClause(ADevicePlan, LNormalColumns, LTableOperatorExpression.SelectExpression.SelectClause.Columns);
+						foreach (TableOperatorExpression tableOperatorExpression in rightQueryExpression.TableOperators)
+							SQLUnion.NormalizeSelectClause(devicePlan, normalColumns, tableOperatorExpression.SelectExpression.SelectClause.Columns);
 				}
 				
-				SQLUnion.NormalizeSelectClause(ADevicePlan, LNormalColumns, LDevicePlan.Device.FindSelectExpression(LRightStatement).SelectClause.Columns);
+				SQLUnion.NormalizeSelectClause(devicePlan, normalColumns, localDevicePlan.Device.FindSelectExpression(rightStatement).SelectClause.Columns);
 				
-				if (LRightStatement is QueryExpression)
-					LRightStatement = ((QueryExpression)LRightStatement).SelectExpression;
+				if (rightStatement is QueryExpression)
+					rightStatement = ((QueryExpression)rightStatement).SelectExpression;
 					
-				((QueryExpression)LLeftStatement).TableOperators.Add(new TableOperatorExpression(TableOperator.Difference, true, (SelectExpression)LRightStatement));
+				((QueryExpression)leftStatement).TableOperators.Add(new TableOperatorExpression(TableOperator.Difference, true, (SelectExpression)rightStatement));
 			}
 			
-			return LLeftStatement;
+			return leftStatement;
 		}
     }
     
     public class SQLJoin : SQLDeviceOperator
     {
-		public SQLJoin(int AID, string AName) : base(AID, AName) {}
+		public SQLJoin(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
 
 			// Translate left operand
-			LDevicePlan.PushQueryContext();
-			Statement LLeftStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-			if (LDevicePlan.IsSupported)
+			localDevicePlan.PushQueryContext();
+			Statement leftStatement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+			if (localDevicePlan.IsSupported)
 			{
-				SelectExpression LLeftSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LLeftStatement, false);
-				LLeftStatement = LLeftSelectExpression;
-				TableVar LLeftTableVar = ((TableNode)APlanNode.Nodes[0]).TableVar;
+				SelectExpression leftSelectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)planNode.Nodes[0]).TableVar, leftStatement, false);
+				leftStatement = leftSelectExpression;
+				TableVar leftTableVar = ((TableNode)planNode.Nodes[0]).TableVar;
 
-				ConditionedTableNode LConditionedTableNode = (ConditionedTableNode)APlanNode;
+				ConditionedTableNode conditionedTableNode = (ConditionedTableNode)planNode;
 
 				// if any column in the left join key is a computed column in the current query context, the left argument must nested
-				bool LIsLeftKeyColumnComputed = false;
-				foreach (TableVarColumn LLeftKeyColumn in LConditionedTableNode.LeftKey.Columns)
-					if (LDevicePlan.GetRangeVarColumn(LLeftKeyColumn.Name, true).Expression != null)
+				bool isLeftKeyColumnComputed = false;
+				foreach (TableVarColumn leftKeyColumn in conditionedTableNode.LeftKey.Columns)
+					if (localDevicePlan.GetRangeVarColumn(leftKeyColumn.Name, true).Expression != null)
 					{
-						LIsLeftKeyColumnComputed = true;
+						isLeftKeyColumnComputed = true;
 						break;
 					}
 				
 				if 
 				(
-					LDevicePlan.CurrentQueryContext().IsAggregate || 
-					LLeftSelectExpression.SelectClause.Distinct || 
-					LIsLeftKeyColumnComputed ||
+					localDevicePlan.CurrentQueryContext().IsAggregate || 
+					leftSelectExpression.SelectClause.Distinct || 
+					isLeftKeyColumnComputed ||
 					(
-						(APlanNode is RightOuterJoinNode) && 
+						(planNode is RightOuterJoinNode) && 
 						(
-							LDevicePlan.CurrentQueryContext().IsExtension ||
-							(((RightOuterJoinNode)APlanNode).IsNatural && (LDevicePlan.CurrentQueryContext().AddedColumns.Count > 0)) ||
-							(LLeftSelectExpression.WhereClause != null) || 
-							LLeftSelectExpression.FromClause.HasJoins()
+							localDevicePlan.CurrentQueryContext().IsExtension ||
+							(((RightOuterJoinNode)planNode).IsNatural && (localDevicePlan.CurrentQueryContext().AddedColumns.Count > 0)) ||
+							(leftSelectExpression.WhereClause != null) || 
+							leftSelectExpression.FromClause.HasJoins()
 						)
 					)
 				)
 				{
-					string LNestingReason = "The left argument to the join operator must be nested because ";
-					if (LIsLeftKeyColumnComputed)
-						LNestingReason += "the join condition columns in the left argument are computed.";
-					else if (APlanNode is RightOuterJoinNode)
+					string nestingReason = "The left argument to the join operator must be nested because ";
+					if (isLeftKeyColumnComputed)
+						nestingReason += "the join condition columns in the left argument are computed.";
+					else if (planNode is RightOuterJoinNode)
 					{
-						if (LLeftSelectExpression.WhereClause != null)
-							LNestingReason += "the join is right outer and the left argument has a where clause.";
-						else if (LDevicePlan.CurrentQueryContext().IsExtension)
-							LNestingReason += "the join is right outer and the left argument has computed columns.";
-						else if (LDevicePlan.CurrentQueryContext().AddedColumns.Count > 0)
-							LNestingReason += "the join is a natural right outer and the left argument has renamed columns.";
-						else if (LLeftSelectExpression.FromClause.HasJoins())
-							LNestingReason += "the join is right outer and the left argument contains at least one join.";
+						if (leftSelectExpression.WhereClause != null)
+							nestingReason += "the join is right outer and the left argument has a where clause.";
+						else if (localDevicePlan.CurrentQueryContext().IsExtension)
+							nestingReason += "the join is right outer and the left argument has computed columns.";
+						else if (localDevicePlan.CurrentQueryContext().AddedColumns.Count > 0)
+							nestingReason += "the join is a natural right outer and the left argument has renamed columns.";
+						else if (leftSelectExpression.FromClause.HasJoins())
+							nestingReason += "the join is right outer and the left argument contains at least one join.";
 					}
-					else if (LDevicePlan.CurrentQueryContext().IsAggregate)
-						LNestingReason += "it contains aggregation.";
+					else if (localDevicePlan.CurrentQueryContext().IsAggregate)
+						nestingReason += "it contains aggregation.";
 					else
-						LNestingReason += "it contains a distinct specification.";
-					LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(LNestingReason, APlanNode));
-					LLeftStatement = LDevicePlan.Device.NestQueryExpression(LDevicePlan, LLeftTableVar, LLeftStatement);
-					LLeftSelectExpression = LDevicePlan.Device.FindSelectExpression(LLeftStatement);
+						nestingReason += "it contains a distinct specification.";
+					localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(nestingReason, planNode));
+					leftStatement = localDevicePlan.Device.NestQueryExpression(localDevicePlan, leftTableVar, leftStatement);
+					leftSelectExpression = localDevicePlan.Device.FindSelectExpression(leftStatement);
 				}
-				SQLQueryContext LLeftContext = LDevicePlan.CurrentQueryContext();
-				LDevicePlan.PopQueryContext();
+				SQLQueryContext leftContext = localDevicePlan.CurrentQueryContext();
+				localDevicePlan.PopQueryContext();
 				
 				// Translate right operand
-				LDevicePlan.PushQueryContext();
-				Statement LRightStatement = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-				if (LDevicePlan.IsSupported)
+				localDevicePlan.PushQueryContext();
+				Statement rightStatement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+				if (localDevicePlan.IsSupported)
 				{
-					SelectExpression LRightSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[1]).TableVar, LRightStatement, false);
-					LRightStatement = LRightSelectExpression;
-					TableVar LRightTableVar = ((TableNode)APlanNode.Nodes[1]).TableVar;
+					SelectExpression rightSelectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)planNode.Nodes[1]).TableVar, rightStatement, false);
+					rightStatement = rightSelectExpression;
+					TableVar rightTableVar = ((TableNode)planNode.Nodes[1]).TableVar;
 					
 					/*
 						If the join is inner
@@ -888,213 +891,221 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					*/
 
 					// if any column in the left join key is a computed column in the current query context, the left argument must nested
-					bool LIsRightKeyColumnComputed = false;
-					foreach (TableVarColumn LRightKeyColumn in LConditionedTableNode.RightKey.Columns)
-						if (LDevicePlan.GetRangeVarColumn(LRightKeyColumn.Name, true).Expression != null)
+					bool isRightKeyColumnComputed = false;
+					foreach (TableVarColumn rightKeyColumn in conditionedTableNode.RightKey.Columns)
+						if (localDevicePlan.GetRangeVarColumn(rightKeyColumn.Name, true).Expression != null)
 						{
-							LIsRightKeyColumnComputed = true;
+							isRightKeyColumnComputed = true;
 							break;
 						}
 					
-					bool LIsRightDeep = (!(APlanNode is OuterJoinNode) && !(APlanNode is WithoutNode) && !LLeftSelectExpression.FromClause.HasJoins() && LRightSelectExpression.FromClause.HasJoins());
-					bool LIsBushy = (!(APlanNode is OuterJoinNode) && LLeftSelectExpression.FromClause.HasJoins() && LRightSelectExpression.FromClause.HasJoins());
+					bool isRightDeep = (!(planNode is OuterJoinNode) && !(planNode is WithoutNode) && !leftSelectExpression.FromClause.HasJoins() && rightSelectExpression.FromClause.HasJoins());
+					bool isBushy = (!(planNode is OuterJoinNode) && leftSelectExpression.FromClause.HasJoins() && rightSelectExpression.FromClause.HasJoins());
 					if 
 					(
-						LDevicePlan.CurrentQueryContext().IsAggregate || 
-						LRightSelectExpression.SelectClause.Distinct || 
-						LIsRightKeyColumnComputed ||
+						localDevicePlan.CurrentQueryContext().IsAggregate || 
+						rightSelectExpression.SelectClause.Distinct || 
+						isRightKeyColumnComputed ||
 						(
-							((APlanNode is LeftOuterJoinNode) || (APlanNode is WithoutNode)) && 
+							((planNode is LeftOuterJoinNode) || (planNode is WithoutNode)) && 
 							(
-								LDevicePlan.CurrentQueryContext().IsExtension ||
-								(((ConditionedTableNode)APlanNode).IsNatural && (LDevicePlan.CurrentQueryContext().AddedColumns.Count > 0)) ||
-								(LRightSelectExpression.WhereClause != null) || 
-								LRightSelectExpression.FromClause.HasJoins()
+								localDevicePlan.CurrentQueryContext().IsExtension ||
+								(((ConditionedTableNode)planNode).IsNatural && (localDevicePlan.CurrentQueryContext().AddedColumns.Count > 0)) ||
+								(rightSelectExpression.WhereClause != null) || 
+								rightSelectExpression.FromClause.HasJoins()
 							)
 						) || 
-						LIsBushy
+						isBushy
 					)
 					{
-						string LNestingReason = "The right argument to the join operator must be nested because ";
-						if (LIsRightKeyColumnComputed)
-							LNestingReason += "the join condition columns in the right argument are computed.";
-						else if ((APlanNode is LeftOuterJoinNode) || (APlanNode is WithoutNode))
+						string nestingReason = "The right argument to the join operator must be nested because ";
+						if (isRightKeyColumnComputed)
+							nestingReason += "the join condition columns in the right argument are computed.";
+						else if ((planNode is LeftOuterJoinNode) || (planNode is WithoutNode))
 						{
-							if (LRightSelectExpression.WhereClause != null)
-								LNestingReason += "the join is left outer and the right argument has a where clause.";
-							else if (LDevicePlan.CurrentQueryContext().IsExtension)
-								LNestingReason += "the join is left outer and the right argument has computed columns.";
-							else if (LDevicePlan.CurrentQueryContext().AddedColumns.Count > 0)
-								LNestingReason += "the join is a natural left outer and the right argument has renamed columns.";
-							else if (LRightSelectExpression.FromClause.HasJoins())
-								LNestingReason += "the join is left outer and the right argument has at least one join.";
+							if (rightSelectExpression.WhereClause != null)
+								nestingReason += "the join is left outer and the right argument has a where clause.";
+							else if (localDevicePlan.CurrentQueryContext().IsExtension)
+								nestingReason += "the join is left outer and the right argument has computed columns.";
+							else if (localDevicePlan.CurrentQueryContext().AddedColumns.Count > 0)
+								nestingReason += "the join is a natural left outer and the right argument has renamed columns.";
+							else if (rightSelectExpression.FromClause.HasJoins())
+								nestingReason += "the join is left outer and the right argument has at least one join.";
 						}
-						else if (LDevicePlan.CurrentQueryContext().IsAggregate)
-							LNestingReason += "it contains aggregation.";
-						else if (LIsBushy)
-							LNestingReason += "both the left and right join arguments contain joins.";
+						else if (localDevicePlan.CurrentQueryContext().IsAggregate)
+							nestingReason += "it contains aggregation.";
+						else if (isBushy)
+							nestingReason += "both the left and right join arguments contain joins.";
 						else
-							LNestingReason += "it contains a distinct specification.";
-						LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(LNestingReason, APlanNode));
-						LRightStatement = LDevicePlan.Device.NestQueryExpression(LDevicePlan, LRightTableVar, LRightStatement);
-						LRightSelectExpression = LDevicePlan.Device.FindSelectExpression(LRightStatement);
+							nestingReason += "it contains a distinct specification.";
+						localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(nestingReason, planNode));
+						rightStatement = localDevicePlan.Device.NestQueryExpression(localDevicePlan, rightTableVar, rightStatement);
+						rightSelectExpression = localDevicePlan.Device.FindSelectExpression(rightStatement);
 					}
-					SQLQueryContext LRightContext = LDevicePlan.CurrentQueryContext();
-					LDevicePlan.PopQueryContext();
+					SQLQueryContext rightContext = localDevicePlan.CurrentQueryContext();
+					localDevicePlan.PopQueryContext();
 					
 					// Merge the query contexts
-					LDevicePlan.CurrentQueryContext().RangeVars.AddRange(LLeftContext.RangeVars);
-					LDevicePlan.CurrentQueryContext().AddedColumns.AddRange(LLeftContext.AddedColumns);
-					if ((APlanNode is WithoutNode) || (APlanNode is HavingNode))
+					localDevicePlan.CurrentQueryContext().RangeVars.AddRange(leftContext.RangeVars);
+					localDevicePlan.CurrentQueryContext().AddedColumns.AddRange(leftContext.AddedColumns);
+					if ((planNode is WithoutNode) || (planNode is HavingNode))
 					{
 						// If this is a Without or Having then the non-join columns of the right argument are not relevant and should not be available in the query context
-						foreach (SQLRangeVar LRangeVar in LRightContext.RangeVars)
+						foreach (SQLRangeVar rangeVar in rightContext.RangeVars)
 						{
-							SQLRangeVar LNewRangeVar = new SQLRangeVar(LRangeVar.Name);
-							foreach (SQLRangeVarColumn LRangeVarColumn in LRangeVar.Columns)
-								if (LConditionedTableNode.RightKey.Columns.ContainsName(LRangeVarColumn.TableVarColumn.Name))
-									LNewRangeVar.Columns.Add(LRangeVarColumn);
-							LDevicePlan.CurrentQueryContext().RangeVars.Add(LNewRangeVar);
+							SQLRangeVar newRangeVar = new SQLRangeVar(rangeVar.Name);
+							foreach (SQLRangeVarColumn rangeVarColumn in rangeVar.Columns)
+								if (conditionedTableNode.RightKey.Columns.ContainsName(rangeVarColumn.TableVarColumn.Name))
+									newRangeVar.Columns.Add(rangeVarColumn);
+							localDevicePlan.CurrentQueryContext().RangeVars.Add(newRangeVar);
 						}
 						
-						foreach (SQLRangeVarColumn LRangeVarColumn in LRightContext.AddedColumns)
-							if (LConditionedTableNode.RightKey.Columns.ContainsName(LRangeVarColumn.TableVarColumn.Name))
-								LDevicePlan.CurrentQueryContext().AddedColumns.Add(LRangeVarColumn);
+						foreach (SQLRangeVarColumn rangeVarColumn in rightContext.AddedColumns)
+							if (conditionedTableNode.RightKey.Columns.ContainsName(rangeVarColumn.TableVarColumn.Name))
+								localDevicePlan.CurrentQueryContext().AddedColumns.Add(rangeVarColumn);
 					}
 					else
 					{
-						LDevicePlan.CurrentQueryContext().RangeVars.AddRange(LRightContext.RangeVars);
-						LDevicePlan.CurrentQueryContext().AddedColumns.AddRange(LRightContext.AddedColumns);
+						localDevicePlan.CurrentQueryContext().RangeVars.AddRange(rightContext.RangeVars);
+						localDevicePlan.CurrentQueryContext().AddedColumns.AddRange(rightContext.AddedColumns);
 					}
 					
-					JoinClause LJoinClause = new JoinClause();
-					if (LIsRightDeep)
+					JoinClause joinClause = new JoinClause();
+					if (isRightDeep)
 					{
-						LJoinClause.FromClause = (AlgebraicFromClause)LLeftSelectExpression.FromClause;
-						LLeftSelectExpression.FromClause = LRightSelectExpression.FromClause;
+						joinClause.FromClause = (AlgebraicFromClause)leftSelectExpression.FromClause;
+						leftSelectExpression.FromClause = rightSelectExpression.FromClause;
 					}
 					else
-						LJoinClause.FromClause = (AlgebraicFromClause)LRightSelectExpression.FromClause;
+						joinClause.FromClause = (AlgebraicFromClause)rightSelectExpression.FromClause;
 
-					LDevicePlan.PushJoinContext(new SQLJoinContext(LLeftContext, LRightContext));
+					localDevicePlan.PushJoinContext(new SQLJoinContext(leftContext, rightContext));
 					try
 					{
-						LeftOuterJoinNode LLeftOuterJoinNode = APlanNode as LeftOuterJoinNode;
-						RightOuterJoinNode LRightOuterJoinNode = APlanNode as RightOuterJoinNode;
-						SemiTableNode LSemiTableNode = APlanNode as SemiTableNode;
-						HavingNode LHavingNode = APlanNode as HavingNode;
-						WithoutNode LWithoutNode = APlanNode as WithoutNode;
+						LeftOuterJoinNode leftOuterJoinNode = planNode as LeftOuterJoinNode;
+						RightOuterJoinNode rightOuterJoinNode = planNode as RightOuterJoinNode;
+						SemiTableNode semiTableNode = planNode as SemiTableNode;
+						HavingNode havingNode = planNode as HavingNode;
+						WithoutNode withoutNode = planNode as WithoutNode;
 
-						if (LLeftOuterJoinNode != null)
-							LJoinClause.JoinType = JoinType.Left;
-						else if (LRightOuterJoinNode != null)
-							LJoinClause.JoinType = JoinType.Right;
+						if (leftOuterJoinNode != null)
+							joinClause.JoinType = JoinType.Left;
+						else if (rightOuterJoinNode != null)
+							joinClause.JoinType = JoinType.Right;
 						else
 						{
-							if (LWithoutNode != null)
-								LJoinClause.JoinType = JoinType.Left;
+							if (withoutNode != null)
+								joinClause.JoinType = JoinType.Left;
 							else
-								LJoinClause.JoinType = JoinType.Inner;
+								joinClause.JoinType = JoinType.Inner;
 						}
 
-						LDevicePlan.Stack.Push(new Symbol(new Schema.RowType(((TableNode)APlanNode.Nodes[0]).DataType.Columns, Keywords.Left)));
+						#if USENAMEDROWVARIABLES
+						localDevicePlan.Stack.Push(new Symbol(Keywords.Left, ((TableNode)planNode.Nodes[0]).DataType.RowType));
+						#else
+						localDevicePlan.Stack.Push(new Symbol(String.Empty, new Schema.RowType(((TableNode)APlanNode.Nodes[0]).DataType.Columns, Keywords.Left)));
+						#endif
 						try
 						{
-							LDevicePlan.Stack.Push(new Symbol(new Schema.RowType(((TableNode)APlanNode.Nodes[1]).DataType.Columns, Keywords.Right)));
+							#if USENAMEDROWVARIABLES
+							localDevicePlan.Stack.Push(new Symbol(Keywords.Right, ((TableNode)planNode.Nodes[1]).DataType.RowType));
+							#else
+							localDevicePlan.Stack.Push(new Symbol(String.Empty, new Schema.RowType(((TableNode)APlanNode.Nodes[1]).DataType.Columns, Keywords.Right)));
+							#endif
 							try
 							{
-								LJoinClause.JoinExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[2], true);
+								joinClause.JoinExpression = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[2], true);
 							}
 							finally
 							{
-								LDevicePlan.Stack.Pop();
+								localDevicePlan.Stack.Pop();
 							}
 						}
 						finally
 						{
-							LDevicePlan.Stack.Pop();
+							localDevicePlan.Stack.Pop();
 						}
 							
 						// Translate rowexists column
-						if ((APlanNode is OuterJoinNode) && (((OuterJoinNode)APlanNode).RowExistsColumnIndex >= 0))
+						if ((planNode is OuterJoinNode) && (((OuterJoinNode)planNode).RowExistsColumnIndex >= 0))
 						{
-							OuterJoinNode LOuterJoinNode = (OuterJoinNode)APlanNode;
-							TableVarColumn LRowExistsColumn = LOuterJoinNode.TableVar.Columns[LOuterJoinNode.RowExistsColumnIndex];
-							Expression LRowExistsExpression = null;
-							if (LOuterJoinNode.LeftKey.Columns.Count == 0)
-								LRowExistsExpression = new ValueExpression(1);
+							OuterJoinNode outerJoinNode = (OuterJoinNode)planNode;
+							TableVarColumn rowExistsColumn = outerJoinNode.TableVar.Columns[outerJoinNode.RowExistsColumnIndex];
+							Expression rowExistsExpression = null;
+							if (outerJoinNode.LeftKey.Columns.Count == 0)
+								rowExistsExpression = new ValueExpression(1);
 							else
 							{
-								CaseExpression LCaseExpression = new CaseExpression();
-								CaseItemExpression LCaseItem = new CaseItemExpression();
-								if (LLeftOuterJoinNode != null)
-									LCaseItem.WhenExpression = new UnaryExpression("iIsNull", LDevicePlan.CurrentJoinContext().RightQueryContext.GetRangeVarColumn(LOuterJoinNode.RightKey.Columns[0].Name).GetExpression());
+								CaseExpression caseExpression = new CaseExpression();
+								CaseItemExpression caseItem = new CaseItemExpression();
+								if (leftOuterJoinNode != null)
+									caseItem.WhenExpression = new UnaryExpression("iIsNull", localDevicePlan.CurrentJoinContext().RightQueryContext.GetRangeVarColumn(outerJoinNode.RightKey.Columns[0].Name).GetExpression());
 								else
-									LCaseItem.WhenExpression = new UnaryExpression("iIsNull", LDevicePlan.CurrentJoinContext().LeftQueryContext.GetRangeVarColumn(LOuterJoinNode.LeftKey.Columns[0].Name).GetExpression());
-								LCaseItem.ThenExpression = new ValueExpression(0);
-								LCaseExpression.CaseItems.Add(LCaseItem);
-								LCaseExpression.ElseExpression = new CaseElseExpression(new ValueExpression(1));
-								LRowExistsExpression = LCaseExpression;
+									caseItem.WhenExpression = new UnaryExpression("iIsNull", localDevicePlan.CurrentJoinContext().LeftQueryContext.GetRangeVarColumn(outerJoinNode.LeftKey.Columns[0].Name).GetExpression());
+								caseItem.ThenExpression = new ValueExpression(0);
+								caseExpression.CaseItems.Add(caseItem);
+								caseExpression.ElseExpression = new CaseElseExpression(new ValueExpression(1));
+								rowExistsExpression = caseExpression;
 							}
-							SQLRangeVarColumn LRangeVarColumn = new SQLRangeVarColumn(LRowExistsColumn, LRowExistsExpression, LDevicePlan.Device.ToSQLIdentifier(LRowExistsColumn));
-							LDevicePlan.CurrentQueryContext().AddedColumns.Add(LRangeVarColumn);
-							LLeftSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
+							SQLRangeVarColumn rangeVarColumn = new SQLRangeVarColumn(rowExistsColumn, rowExistsExpression, localDevicePlan.Device.ToSQLIdentifier(rowExistsColumn));
+							localDevicePlan.CurrentQueryContext().AddedColumns.Add(rangeVarColumn);
+							leftSelectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
 						}
 
-						((AlgebraicFromClause)LLeftSelectExpression.FromClause).Joins.Add(LJoinClause);
+						((AlgebraicFromClause)leftSelectExpression.FromClause).Joins.Add(joinClause);
 						
 						// Build select clause
-						LLeftSelectExpression.SelectClause = new SelectClause();
-						foreach (TableVarColumn LColumn in ((TableNode)APlanNode).TableVar.Columns)
-							if ((LLeftOuterJoinNode != null) && LLeftOuterJoinNode.LeftKey.Columns.ContainsName(LColumn.Name))
-								LLeftSelectExpression.SelectClause.Columns.Add(LLeftContext.GetRangeVarColumn(LColumn.Name).GetColumnExpression());
-							else if ((LRightOuterJoinNode != null) && LRightOuterJoinNode.RightKey.Columns.ContainsName(LColumn.Name))
-								LLeftSelectExpression.SelectClause.Columns.Add(LRightContext.GetRangeVarColumn(LColumn.Name).GetColumnExpression());
-							else if ((LWithoutNode != null) && LWithoutNode.LeftKey.Columns.ContainsName(LColumn.Name))
-								LLeftSelectExpression.SelectClause.Columns.Add(LLeftContext.GetRangeVarColumn(LColumn.Name).GetColumnExpression());
+						leftSelectExpression.SelectClause = new SelectClause();
+						foreach (TableVarColumn column in ((TableNode)planNode).TableVar.Columns)
+							if ((leftOuterJoinNode != null) && leftOuterJoinNode.LeftKey.Columns.ContainsName(column.Name))
+								leftSelectExpression.SelectClause.Columns.Add(leftContext.GetRangeVarColumn(column.Name).GetColumnExpression());
+							else if ((rightOuterJoinNode != null) && rightOuterJoinNode.RightKey.Columns.ContainsName(column.Name))
+								leftSelectExpression.SelectClause.Columns.Add(rightContext.GetRangeVarColumn(column.Name).GetColumnExpression());
+							else if ((withoutNode != null) && withoutNode.LeftKey.Columns.ContainsName(column.Name))
+								leftSelectExpression.SelectClause.Columns.Add(leftContext.GetRangeVarColumn(column.Name).GetColumnExpression());
 							else
-								LLeftSelectExpression.SelectClause.Columns.Add(LDevicePlan.GetRangeVarColumn(LColumn.Name, true).GetColumnExpression());
+								leftSelectExpression.SelectClause.Columns.Add(localDevicePlan.GetRangeVarColumn(column.Name, true).GetColumnExpression());
 							
 						// Merge where clauses
-						if (LRightSelectExpression.WhereClause != null)
-							if (LLeftSelectExpression.WhereClause == null)
-								LLeftSelectExpression.WhereClause = LRightSelectExpression.WhereClause;
+						if (rightSelectExpression.WhereClause != null)
+							if (leftSelectExpression.WhereClause == null)
+								leftSelectExpression.WhereClause = rightSelectExpression.WhereClause;
 							else
-								LLeftSelectExpression.WhereClause.Expression = new BinaryExpression(LLeftSelectExpression.WhereClause.Expression, "iAnd", LRightSelectExpression.WhereClause.Expression);
+								leftSelectExpression.WhereClause.Expression = new BinaryExpression(leftSelectExpression.WhereClause.Expression, "iAnd", rightSelectExpression.WhereClause.Expression);
 								
 						// Distinct if necessary
-						if ((LSemiTableNode != null) && !LSemiTableNode.RightKey.IsUnique)
-							LLeftSelectExpression.SelectClause.Distinct = true;
+						if ((semiTableNode != null) && !semiTableNode.RightKey.IsUnique)
+							leftSelectExpression.SelectClause.Distinct = true;
 								
 						// Add without where clause
-						if (LWithoutNode != null)
+						if (withoutNode != null)
 						{
-							Expression LWithoutExpression = null;
+							Expression withoutExpression = null;
 							
-							foreach (TableVarColumn LColumn in LWithoutNode.RightKey.Columns.Count > 0 ? (TableVarColumnsBase)LWithoutNode.RightKey.Columns : (TableVarColumnsBase)LRightTableVar.Columns)
+							foreach (TableVarColumn column in withoutNode.RightKey.Columns.Count > 0 ? (TableVarColumnsBase)withoutNode.RightKey.Columns : (TableVarColumnsBase)rightTableVar.Columns)
 							{
-								Expression LColumnExpression = new UnaryExpression("iIsNull", LDevicePlan.CurrentJoinContext().RightQueryContext.GetRangeVarColumn(LColumn.Name).GetExpression());
+								Expression columnExpression = new UnaryExpression("iIsNull", localDevicePlan.CurrentJoinContext().RightQueryContext.GetRangeVarColumn(column.Name).GetExpression());
 								
-								if (LWithoutExpression == null)
-									LWithoutExpression = LColumnExpression;
+								if (withoutExpression == null)
+									withoutExpression = columnExpression;
 								else
-									LWithoutExpression = new BinaryExpression(LWithoutExpression, "iAnd", LColumnExpression);
+									withoutExpression = new BinaryExpression(withoutExpression, "iAnd", columnExpression);
 							}
 							
-							if (LWithoutExpression != null)
+							if (withoutExpression != null)
 							{
-								if (LLeftSelectExpression.WhereClause == null)
-									LLeftSelectExpression.WhereClause = new WhereClause(LWithoutExpression);
+								if (leftSelectExpression.WhereClause == null)
+									leftSelectExpression.WhereClause = new WhereClause(withoutExpression);
 								else
-									LLeftSelectExpression.WhereClause.Expression = new BinaryExpression(LLeftSelectExpression.WhereClause.Expression, "iAnd", LWithoutExpression);
+									leftSelectExpression.WhereClause.Expression = new BinaryExpression(leftSelectExpression.WhereClause.Expression, "iAnd", withoutExpression);
 							}
 						}
 						
-						return LLeftStatement;
+						return leftStatement;
 					}
 					finally
 					{
-						LDevicePlan.PopJoinContext();
+						localDevicePlan.PopJoinContext();
 					}
 				}
 			}
@@ -1105,47 +1116,47 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLScalarSelector : SQLDeviceOperator
     {
-		public SQLScalarSelector(int AID, string AName) : base(AID, AName) {}
+		public SQLScalarSelector(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			return localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
 		}
     }
     
     public class SQLScalarReadAccessor : SQLDeviceOperator
     {
-		public SQLScalarReadAccessor(int AID, string AName) : base(AID, AName) {}
+		public SQLScalarReadAccessor(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			return localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
 		}
     }
     
     public class SQLScalarWriteAccessor : SQLDeviceOperator
     {
-		public SQLScalarWriteAccessor(int AID, string AName) : base(AID, AName) {}
+		public SQLScalarWriteAccessor(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			return localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
 		}
     }
     
     public class SQLScalarIsSpecialOperator : SQLDeviceOperator
     {
-		public SQLScalarIsSpecialOperator(int AID, string AName) : base(AID, AName) {}
+		public SQLScalarIsSpecialOperator(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
 			return true;
 		}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
 			return new BinaryExpression(new ValueExpression(1, TokenType.Integer), "iEqual", new ValueExpression(0, TokenType.Integer));
 		}
@@ -1185,24 +1196,24 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLVersionNumberIsUndefinedOperator : SQLDeviceOperator
     {
-		public SQLVersionNumberIsUndefinedOperator(int AID, string AName) : base(AID, AName)  {}
+		public SQLVersionNumberIsUndefinedOperator(int iD, string name) : base(iD, name)  {}
 		
 		protected override bool GetIsTruthValued()
 		{
 			return true;
 		}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			Expression LVersionNumber = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-			return new BinaryExpression(LVersionNumber, "iEqual", new ValueExpression("****************************************", TokenType.String));
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			Expression versionNumber = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+			return new BinaryExpression(versionNumber, "iEqual", new ValueExpression("****************************************", TokenType.String));
 		}
     }
     
     public abstract class SQLOperator : SQLDeviceOperator
     {
-		public SQLOperator(int AID, string AName) : base(AID, AName) {}
+		public SQLOperator(int iD, string name) : base(iD, name) {}
 		
 		public abstract string GetInstruction();
 		public abstract bool GetIsBooleanContext();
@@ -1210,111 +1221,111 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public abstract class SQLUnaryOperator : SQLOperator
     {
-		public SQLUnaryOperator(int AID, string AName) : base(AID, AName) {}
+		public SQLUnaryOperator(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			return new UnaryExpression(GetInstruction(), LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], GetIsBooleanContext()));
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			return new UnaryExpression(GetInstruction(), localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], GetIsBooleanContext()));
 		}
     }
     
     public abstract class SQLBinaryOperator : SQLOperator
     {
-		public SQLBinaryOperator(int AID, string AName) : base(AID, AName) {}
+		public SQLBinaryOperator(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
 			return new BinaryExpression
 			(
-				LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], GetIsBooleanContext()), 
+				localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], GetIsBooleanContext()), 
 				GetInstruction(), 
-				LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], GetIsBooleanContext())
+				localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], GetIsBooleanContext())
 			);
 		}
     }
     
     public class SQLCallOperator : SQLDeviceOperator
     {
-		public SQLCallOperator(int AID, string AName) : base(AID, AName) {}
+		public SQLCallOperator(int iD, string name) : base(iD, name) {}
 	
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			Expression[] LExpressions = new Expression[APlanNode.Nodes.Count];
-			for (int LIndex = 0; LIndex < LExpressions.Length; LIndex++)
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			Expression[] expressions = new Expression[planNode.Nodes.Count];
+			for (int index = 0; index < expressions.Length; index++)
 			{
-				if (IsParameterContextLiteral(LIndex) && !APlanNode.Nodes[LIndex].IsContextLiteral(0))
+				if (IsParameterContextLiteral(index) && !planNode.Nodes[index].IsContextLiteral(0))
 				{
-					LDevicePlan.IsSupported = false;
-					LDevicePlan.TranslationMessages.Add(new TranslationMessage(String.Format(@"Plan is not supported because argument ({0}) to operator ""{1}"" is not context literal", LIndex.ToString(), Operator.OperatorName), APlanNode));
+					localDevicePlan.IsSupported = false;
+					localDevicePlan.TranslationMessages.Add(new TranslationMessage(String.Format(@"Plan is not supported because argument ({0}) to operator ""{1}"" is not context literal", index.ToString(), Operator.OperatorName), planNode));
 					return null;
 				}
-				LExpressions[LIndex] = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[LIndex], false);
+				expressions[index] = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[index], false);
 			}
 
-			return new CallExpression(FOperatorName, LExpressions);
+			return new CallExpression(_operatorName, expressions);
 		}
 
-		private string FOperatorName;		
+		private string _operatorName;		
 		public string OperatorName
 		{
-			get { return FOperatorName; }
-			set { FOperatorName = value; }
+			get { return _operatorName; }
+			set { _operatorName = value; }
 		}
     }
     
     public class SQLUserOperator : SQLDeviceOperator
     {
-		public SQLUserOperator(int AID, string AName) : base(AID, AName) {}
+		public SQLUserOperator(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			Expression[] LExpressions = new Expression[APlanNode.Nodes.Count];
-			for (int LIndex = 0; LIndex < LExpressions.Length; LIndex++)
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			Expression[] expressions = new Expression[planNode.Nodes.Count];
+			for (int index = 0; index < expressions.Length; index++)
 			{
-				if (IsParameterContextLiteral(LIndex) && !APlanNode.Nodes[LIndex].IsContextLiteral(0))
+				if (IsParameterContextLiteral(index) && !planNode.Nodes[index].IsContextLiteral(0))
 				{
-					LDevicePlan.IsSupported = false;
-					LDevicePlan.TranslationMessages.Add(new TranslationMessage(String.Format(@"Plan is not supported because argument ({0}) to operator ""{1}"" is not context literal", LIndex.ToString(), Operator.OperatorName), APlanNode));
+					localDevicePlan.IsSupported = false;
+					localDevicePlan.TranslationMessages.Add(new TranslationMessage(String.Format(@"Plan is not supported because argument ({0}) to operator ""{1}"" is not context literal", index.ToString(), Operator.OperatorName), planNode));
 					return null;
 				}
-				LExpressions[LIndex] = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[LIndex], false);
+				expressions[index] = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[index], false);
 			}
 				
-			return new UserExpression(FTranslationString, LExpressions);
+			return new UserExpression(_translationString, expressions);
 		}
 
-		private string FTranslationString = String.Empty;
+		private string _translationString = String.Empty;
 		public string TranslationString
 		{
-			get { return FTranslationString; }
-			set { FTranslationString = value == null ? String.Empty : value; }
+			get { return _translationString; }
+			set { _translationString = value == null ? String.Empty : value; }
 		}
     }
     
     public class SQLIntegerDivision : SQLDeviceOperator
     {
-		public SQLIntegerDivision(int AID, string AName) : base(AID, AName) {}
+		public SQLIntegerDivision(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
 			return 
 				new BinaryExpression
 				(
 					new CastExpression
 					(
-						LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
-						((SQLScalarType)LDevicePlan.Device.ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType)).DomainName()
+						localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
+						((SQLScalarType)localDevicePlan.Device.ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType)).DomainName()
 					),
 					"iDivision", 
 					new CastExpression
 					(
-						LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
-						((SQLScalarType)LDevicePlan.Device.ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType)).DomainName()
+						localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false),
+						((SQLScalarType)localDevicePlan.Device.ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType)).DomainName()
 					)
 				);
 		}
@@ -1322,21 +1333,21 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLDecimalDiv : SQLDeviceOperator
     {
-		public SQLDecimalDiv(int AID, string AName) : base(AID, AName) {}
+		public SQLDecimalDiv(int iD, string name) : base(iD, name) {}
 
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
 			return 
 				new CastExpression
 				(
 					new BinaryExpression
 					(
-						LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false), 
+						localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false), 
 						"iDivision", 
-						LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false)
+						localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false)
 					),
-					((SQLScalarType)ADevicePlan.Device.ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)APlanNode.DataType)).DomainName()
+					((SQLScalarType)devicePlan.Device.ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planNode.DataType)).DomainName()
 				);
 		}
     }
@@ -1344,7 +1355,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// Comparison operators    
     public class SQLEqual : SQLBinaryOperator 
     { 
-		public SQLEqual(int AID, string AName) : base(AID, AName) {}
+		public SQLEqual(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1357,7 +1368,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
     public class SQLNotEqual : SQLBinaryOperator 
     { 
-		public SQLNotEqual(int AID, string AName) : base(AID, AName) {}
+		public SQLNotEqual(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1370,7 +1381,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLLess : SQLBinaryOperator 
     { 
-		public SQLLess(int AID, string AName) : base(AID, AName) {}
+		public SQLLess(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1383,7 +1394,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLInclusiveLess : SQLBinaryOperator 
     { 
-		public SQLInclusiveLess(int AID, string AName) : base(AID, AName) {}
+		public SQLInclusiveLess(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1396,7 +1407,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLGreater : SQLBinaryOperator 
     { 
-		public SQLGreater(int AID, string AName) : base(AID, AName) {}
+		public SQLGreater(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1409,7 +1420,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLInclusiveGreater : SQLBinaryOperator 
     { 
-		public SQLInclusiveGreater(int AID, string AName) : base(AID, AName) {}
+		public SQLInclusiveGreater(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1422,7 +1433,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
     public class SQLLike : SQLBinaryOperator 
     { 
-		public SQLLike(int AID, string AName) : base(AID, AName) {}
+		public SQLLike(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1435,7 +1446,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
     public class SQLMatches : SQLBinaryOperator 
     { 
-		public SQLMatches(int AID, string AName) : base(AID, AName) {}
+		public SQLMatches(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1449,11 +1460,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// Left ?= Right ::= case when Left = Right then 0 when Left < Right then -1 else 1 end
 	public class SQLCompare : SQLDeviceOperator
 	{
-		public SQLCompare(int AID, string AName) : base(AID, AName) {}
+		public SQLCompare(int iD, string name) : base(iD, name) {}
 
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
 			return 
 				new CaseExpression
 				(
@@ -1463,9 +1474,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						(
 							new BinaryExpression
 							(
-								LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+								localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
 								"iEqual",
-								LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false)
+								localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false)
 							), 
 							new ValueExpression(0)
 						),
@@ -1473,9 +1484,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						(
 							new BinaryExpression
 							(
-								LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+								localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
 								"iLess",
-								LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false)
+								localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false)
 							),
 							new ValueExpression(-1)
 						)
@@ -1487,22 +1498,22 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
 	public class SQLBetween : SQLDeviceOperator
 	{
-		public SQLBetween(int AID, string AName) : base(AID, AName) {}
+		public SQLBetween(int iD, string name) : base(iD, name) {}
 
 		protected override bool GetIsTruthValued()
 		{
 			return true;
 		}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
 			return 
 				new BetweenExpression
 				(
-					LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
-					LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
-					LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[2], false)
+					localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
+					localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false),
+					localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[2], false)
 				);
 		}
 	}
@@ -1512,11 +1523,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// ToString(AValue) ::= case when AValue = 0 then 'False' else 'True' end
 	public class SQLBooleanToString : SQLDeviceOperator
 	{
-		public SQLBooleanToString(int AID, string AName) : base(AID, AName) {}
+		public SQLBooleanToString(int iD, string name) : base(iD, name) {}
 	
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
 			return
 				new CaseExpression
 				(
@@ -1526,7 +1537,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						(
 							new BinaryExpression
 							(
-								LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+								localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
 								"iEqual",
 								new ValueExpression(0, TokenType.Integer)
 							),
@@ -1541,7 +1552,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// Null handling operators
 	public class SQLIsNull : SQLUnaryOperator
 	{
-		public SQLIsNull(int AID, string AName) : base(AID, AName) {}
+		public SQLIsNull(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1551,25 +1562,25 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public override string GetInstruction() { return "iIsNull"; }
 		public override bool GetIsBooleanContext() { return false; }
 
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			if (APlanNode.Nodes[0].DataType is Schema.IScalarType)
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			if (planNode.Nodes[0].DataType is Schema.IScalarType)
 			{
-				if (APlanNode.Nodes[0].DataType.Is(ADevicePlan.Plan.ServerProcess.DataTypes.SystemBoolean))
+				if (planNode.Nodes[0].DataType.Is(devicePlan.Plan.ServerProcess.DataTypes.SystemBoolean) && !((planNode.Nodes[0] is StackReferenceNode || planNode.Nodes[0] is StackColumnReferenceNode)))
 				{
-					LDevicePlan.IsSupported = false;
-					LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because there is no SQL equivalent of IsNil() for a boolean-valued expression. Consider rewriting the D4 using a conditional expression.", APlanNode));
+					localDevicePlan.IsSupported = false;
+					localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because there is no SQL equivalent of IsNil() for a boolean-valued expression. Consider rewriting the D4 using a conditional expression.", planNode));
 					return new SelectExpression();
 				}
-				return new UnaryExpression(GetInstruction(), LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], GetIsBooleanContext()));
+				return new UnaryExpression(GetInstruction(), localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], GetIsBooleanContext()));
 			}
-			else if (APlanNode.Nodes[0].DataType is Schema.IRowType)
-				return new UnaryExpression("iNot", new UnaryExpression("iExists", LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], GetIsBooleanContext())));
+			else if (planNode.Nodes[0].DataType is Schema.IRowType)
+				return new UnaryExpression("iNot", new UnaryExpression("iExists", localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], GetIsBooleanContext())));
 			else
 			{
-				LDevicePlan.IsSupported = false;
-				LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because invocation of IsNil for non-scalar- or row-valued expressions is not supported.", APlanNode));
+				localDevicePlan.IsSupported = false;
+				localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because invocation of IsNil for non-scalar- or row-valued expressions is not supported.", planNode));
 				return new SelectExpression();
 			}
 		}
@@ -1578,7 +1589,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// Null handling operators
 	public class SQLIsNotNull : SQLUnaryOperator
 	{
-		public SQLIsNotNull(int AID, string AName) : base(AID, AName) {}
+		public SQLIsNotNull(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1588,25 +1599,25 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public override string GetInstruction() { return "iIsNotNull"; }
 		public override bool GetIsBooleanContext() { return false; }
 
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			if (APlanNode.Nodes[0].DataType is Schema.IScalarType)
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			if (planNode.Nodes[0].DataType is Schema.IScalarType)
 			{
-				if (APlanNode.Nodes[0].DataType.Is(ADevicePlan.Plan.ServerProcess.DataTypes.SystemBoolean))
+				if (planNode.Nodes[0].DataType.Is(devicePlan.Plan.ServerProcess.DataTypes.SystemBoolean))
 				{
-					LDevicePlan.IsSupported = false;
-					LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because there is no SQL equivalent of IsNotNil() for a boolean-valued expression. Consider rewriting the D4 using a conditional expression.", APlanNode));
+					localDevicePlan.IsSupported = false;
+					localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because there is no SQL equivalent of IsNotNil() for a boolean-valued expression. Consider rewriting the D4 using a conditional expression.", planNode));
 					return new SelectExpression();
 				}
-				return new UnaryExpression(GetInstruction(), LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], GetIsBooleanContext()));
+				return new UnaryExpression(GetInstruction(), localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], GetIsBooleanContext()));
 			}
-			else if (APlanNode.Nodes[0].DataType is Schema.IRowType)
-				return new UnaryExpression("iExists", LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], GetIsBooleanContext()));
+			else if (planNode.Nodes[0].DataType is Schema.IRowType)
+				return new UnaryExpression("iExists", localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], GetIsBooleanContext()));
 			else
 			{
-				LDevicePlan.IsSupported = false;
-				LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because invocation of IsNotNil for non-scalar- or row-valued expressions is not supported.", APlanNode));
+				localDevicePlan.IsSupported = false;
+				localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because invocation of IsNotNil for non-scalar- or row-valued expressions is not supported.", planNode));
 				return new SelectExpression();
 			}
 		}
@@ -1614,34 +1625,34 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
 	public class SQLIfNull : SQLBinaryOperator
 	{
-		public SQLIfNull(int AID, string AName) : base(AID, AName) {}
+		public SQLIfNull(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iNullValue"; }
 		public override bool GetIsBooleanContext() { return false; }
 
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			if ((APlanNode.Nodes[0].DataType is Schema.IScalarType) && (APlanNode.Nodes[1].DataType is Schema.IScalarType))
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			if ((planNode.Nodes[0].DataType is Schema.IScalarType) && (planNode.Nodes[1].DataType is Schema.IScalarType))
 			{
-				if ((APlanNode.Nodes[0].DataType.Is(ADevicePlan.Plan.ServerProcess.DataTypes.SystemBoolean)))
+				if ((planNode.Nodes[0].DataType.Is(devicePlan.Plan.ServerProcess.DataTypes.SystemBoolean)))
 				{
-					LDevicePlan.IsSupported = false;
-					LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because there is no SQL equivalent of IfNil() for a boolean-valued expression. Consider rewriting the D4 using a conditional expression.", APlanNode));
+					localDevicePlan.IsSupported = false;
+					localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because there is no SQL equivalent of IfNil() for a boolean-valued expression. Consider rewriting the D4 using a conditional expression.", planNode));
 					return new SelectExpression();
 				}
 				
 				return new BinaryExpression
 				(
-					LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], GetIsBooleanContext()), 
+					localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], GetIsBooleanContext()), 
 					GetInstruction(), 
-					LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], GetIsBooleanContext())
+					localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], GetIsBooleanContext())
 				);
 			}
 			else
 			{
-				LDevicePlan.IsSupported = false;
-				LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because invocation of IfNil for non-scalar valued expressions is not supported.", APlanNode));
+				localDevicePlan.IsSupported = false;
+				localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because invocation of IfNil for non-scalar valued expressions is not supported.", planNode));
 				return new SelectExpression();
 			}
 		}
@@ -1650,26 +1661,26 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     // Logical operators
     public class SQLNot : SQLDeviceOperator
     { 
-		public SQLNot(int AID, string AName) : base(AID, AName) {}
+		public SQLNot(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
 			return true;
 		}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			if (LDevicePlan.IsBooleanContext())
-				return new UnaryExpression("iNot", LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], true));
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			if (localDevicePlan.IsBooleanContext())
+				return new UnaryExpression("iNot", localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], true));
 			else
-				return new CaseExpression(new CaseItemExpression[]{new CaseItemExpression(LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], true), new ValueExpression(0))}, new CaseElseExpression(new ValueExpression(1)));
+				return new CaseExpression(new CaseItemExpression[]{new CaseItemExpression(localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], true), new ValueExpression(0))}, new CaseElseExpression(new ValueExpression(1)));
 		}
 	}
     
     public class SQLAnd : SQLBinaryOperator 
     { 
-		public SQLAnd(int AID, string AName) : base(AID, AName) {}
+		public SQLAnd(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1682,7 +1693,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLOr : SQLBinaryOperator 
     { 
-		public SQLOr(int AID, string AName) : base(AID, AName) {}
+		public SQLOr(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1695,7 +1706,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLXor : SQLBinaryOperator 
     { 
-		public SQLXor(int AID, string AName) : base(AID, AName) {}
+		public SQLXor(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1705,24 +1716,24 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public override string GetInstruction() { return "iXor"; } 
 		public override bool GetIsBooleanContext() { return true; }
 
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			Expression LExpression1 = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], true);
-			Expression LExpression2 = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], true);
-			Expression LFirst = new BinaryExpression(LExpression1, "iOr", LExpression2);
-			LExpression1 = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], true);
-			LExpression2 = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], true);
-			Expression LSecond = new BinaryExpression(LExpression1, "iAnd", LExpression2);
-			Expression LThird = new UnaryExpression("iNot", LSecond);
-			return new BinaryExpression(LFirst, "iAnd", LThird);
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			Expression expression1 = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], true);
+			Expression expression2 = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], true);
+			Expression first = new BinaryExpression(expression1, "iOr", expression2);
+			expression1 = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], true);
+			expression2 = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], true);
+			Expression second = new BinaryExpression(expression1, "iAnd", expression2);
+			Expression third = new UnaryExpression("iNot", second);
+			return new BinaryExpression(first, "iAnd", third);
 		}
 	}
     
     // Arithmetic operators
     public class SQLNegate : SQLUnaryOperator 
     { 
-		public SQLNegate(int AID, string AName) : base(AID, AName) {}
+		public SQLNegate(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iNegate"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1730,7 +1741,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
 	public class SQLConcatenation : SQLBinaryOperator
 	{
-		public SQLConcatenation(int AID, string AName) : base(AID, AName) {}
+		public SQLConcatenation(int iD, string name) : base(iD, name) {}
 
 		public override string GetInstruction() { return "iConcatenation"; }
 		public override bool GetIsBooleanContext() { return false; }
@@ -1738,7 +1749,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLAddition : SQLBinaryOperator 
     { 
-		public SQLAddition(int AID, string AName) : base(AID, AName) {}
+		public SQLAddition(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iAddition"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1746,7 +1757,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLSubtraction : SQLBinaryOperator 
     { 
-		public SQLSubtraction(int AID, string AName) : base(AID, AName) {}
+		public SQLSubtraction(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iSubtraction"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1754,7 +1765,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLMultiplication : SQLBinaryOperator 
     { 
-		public SQLMultiplication(int AID, string AName) : base(AID, AName) {}
+		public SQLMultiplication(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iMultiplication"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1762,7 +1773,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLDivision : SQLBinaryOperator 
     { 
-		public SQLDivision(int AID, string AName) : base(AID, AName) {}
+		public SQLDivision(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iDivision"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1770,7 +1781,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLMod : SQLBinaryOperator 
     { 
-		public SQLMod(int AID, string AName) : base(AID, AName) {}
+		public SQLMod(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iMod"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1778,7 +1789,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLPower : SQLBinaryOperator 
     { 
-		public SQLPower(int AID, string AName) : base(AID, AName) {}
+		public SQLPower(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iPower"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1787,7 +1798,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     // Bitwise operators
     public class SQLBitwiseNot : SQLUnaryOperator 
     { 
-		public SQLBitwiseNot(int AID, string AName) : base(AID, AName) {}
+		public SQLBitwiseNot(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iBitwiseNot"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1795,7 +1806,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLBitwiseAnd : SQLBinaryOperator 
     { 
-		public SQLBitwiseAnd(int AID, string AName) : base(AID, AName) {}
+		public SQLBitwiseAnd(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iBitwiseAnd"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1803,7 +1814,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLBitwiseOr : SQLBinaryOperator 
     { 
-		public SQLBitwiseOr(int AID, string AName) : base(AID, AName) {}
+		public SQLBitwiseOr(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iBitwiseOr"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1811,7 +1822,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLBitwiseXor : SQLBinaryOperator 
     { 
-		public SQLBitwiseXor(int AID, string AName) : base(AID, AName) {}
+		public SQLBitwiseXor(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iBitwiseXor"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1819,7 +1830,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLLeftShift : SQLBinaryOperator 
     { 
-		public SQLLeftShift(int AID, string AName) : base(AID, AName) {}
+		public SQLLeftShift(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iShiftLeft"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1827,7 +1838,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLRightShift : SQLBinaryOperator 
     { 
-		public SQLRightShift(int AID, string AName) : base(AID, AName) {}
+		public SQLRightShift(int iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iShiftRight"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1836,66 +1847,66 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// Existential
     public class SQLExists : SQLDeviceOperator
     { 
-		public SQLExists(int AID, string AName) : base(AID, AName) {}
+		public SQLExists(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
 			return true;
 		}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			LDevicePlan.PushQueryContext(); // Push a query context to get us out of the scalar context
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			localDevicePlan.PushQueryContext(); // Push a query context to get us out of the scalar context
 			try
 			{
-				Expression LExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-				if (LDevicePlan.IsSupported)
+				Expression expression = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+				if (localDevicePlan.IsSupported)
 				{
-					SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LExpression, false);
-					LSelectExpression.SelectClause.Columns.Clear();
-					LSelectExpression.SelectClause.NonProject = true;
-					return new UnaryExpression("iExists", LSelectExpression);
+					SelectExpression selectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)planNode.Nodes[0]).TableVar, expression, false);
+					selectExpression.SelectClause.Columns.Clear();
+					selectExpression.SelectClause.NonProject = true;
+					return new UnaryExpression("iExists", selectExpression);
 				}
-				return LExpression; // not supported so it doesn't matter what gets returned
+				return expression; // not supported so it doesn't matter what gets returned
 			}
 			finally
 			{
-				LDevicePlan.PopQueryContext();
+				localDevicePlan.PopQueryContext();
 			}
 		}
 	}
     
     public class SQLIn : SQLBinaryOperator 
     { 
-		public SQLIn(int AID, string AName) : base(AID, AName) {}
+		public SQLIn(int iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
 			return true;
 		}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			Expression LLeftExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], GetIsBooleanContext());
-			Expression LRightExpression = null;
-			LDevicePlan.PushQueryContext();
-			if (APlanNode.Nodes[1].DataType is Schema.ListType)
-				LDevicePlan.CurrentQueryContext().IsListContext = true;
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			Expression leftExpression = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], GetIsBooleanContext());
+			Expression rightExpression = null;
+			localDevicePlan.PushQueryContext();
+			if (planNode.Nodes[1].DataType is Schema.ListType)
+				localDevicePlan.CurrentQueryContext().IsListContext = true;
 			try
 			{
-				LRightExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], GetIsBooleanContext());
+				rightExpression = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], GetIsBooleanContext());
 			}
 			finally
 			{
-				LDevicePlan.PopQueryContext();
+				localDevicePlan.PopQueryContext();
 			}
 			return new BinaryExpression
 			(
-				LLeftExpression, 
+				leftExpression, 
 				GetInstruction(), 
-				LRightExpression
+				rightExpression
 			);
 		}
 
@@ -1905,12 +1916,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLDoNothing : SQLDeviceOperator
 	{
-		public SQLDoNothing(int AID, string AName) : base(AID, AName) {}
+		public SQLDoNothing(int iD, string name) : base(iD, name) {}
 
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
+			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			return localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
 		}
 	}
 }

@@ -15,53 +15,53 @@ namespace Alphora.Dataphor.DAE.Listener
 {
 	public class ListenerClient : ServiceClient<IClientListenerService>
 	{
-		public ListenerClient(string AHostName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode) : base(DataphorServiceUtility.BuildListenerURI(AHostName, AOverridePortNumber, ASecurityMode)) 
+		public ListenerClient(string hostName, int overridePortNumber) : base(DataphorServiceUtility.BuildListenerURI(hostName, overridePortNumber)) 
 		{ 
-			FHostName = AHostName;
+			_hostName = hostName;
 		}
 		
-		private string FHostName;
-		public string HostName { get { return FHostName; } }
+		private string _hostName;
+		public string HostName { get { return _hostName; } }
 		
 		public string[] EnumerateInstances()
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginEnumerateInstances(null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndEnumerateInstances(LResult);
+				IAsyncResult result = GetInterface().BeginEnumerateInstances(null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndEnumerateInstances(result);
 			}
-			catch (FaultException<ListenerFault> LException)
+			catch (FaultException<ListenerFault> exception)
 			{
-				throw ListenerFaultUtility.FaultToException(LException.Detail);
-			}
-		}
-		
-		public string GetInstanceURI(string AInstanceName, ConnectionSecurityMode ASecurityMode)
-		{
-			try
-			{
-				IAsyncResult LResult = GetInterface().BeginGetInstanceURI(FHostName, AInstanceName, ASecurityMode, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndGetInstanceURI(LResult);
-			}
-			catch (FaultException<ListenerFault> LException)
-			{
-				throw ListenerFaultUtility.FaultToException(LException.Detail);
+				throw ListenerFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 		
-		public string GetNativeInstanceURI(string AInstanceName, ConnectionSecurityMode ASecurityMode)
+		public string GetInstanceURI(string instanceName)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginGetNativeInstanceURI(FHostName, AInstanceName, ASecurityMode, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndGetNativeInstanceURI(LResult);
+				IAsyncResult result = GetInterface().BeginGetInstanceURI(_hostName, instanceName, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndGetInstanceURI(result);
 			}
-			catch (FaultException<ListenerFault> LException)
+			catch (FaultException<ListenerFault> exception)
 			{
-				throw ListenerFaultUtility.FaultToException(LException.Detail);
+				throw ListenerFaultUtility.FaultToException(exception.Detail);
+			}
+		}
+		
+		public string GetNativeInstanceURI(string instanceName)
+		{
+			try
+			{
+				IAsyncResult result = GetInterface().BeginGetNativeInstanceURI(_hostName, instanceName, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndGetNativeInstanceURI(result);
+			}
+			catch (FaultException<ListenerFault> exception)
+			{
+				throw ListenerFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 	}

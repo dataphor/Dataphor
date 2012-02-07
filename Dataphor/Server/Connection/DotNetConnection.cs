@@ -18,90 +18,90 @@ namespace Alphora.Dataphor.DAE.Connection
 		protected DotNetConnection() : base()
 		{ }
 		
-		public DotNetConnection(string AConnectionString) : base()
+		public DotNetConnection(string connectionString) : base()
 		{
-			InternalConnect(AConnectionString);
+			InternalConnect(connectionString);
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				if (FConnection != null)
+				if (_connection != null)
 				{
 					try
 					{
-						FConnection.Dispose();
+						_connection.Dispose();
 					}
 					finally
 					{
 						SetState(SQLConnectionState.Closed);
-						FConnection = null;
+						_connection = null;
 					}
 				}
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
-		protected void InternalConnect(string AConnectionString)
+		protected void InternalConnect(string connectionString)
 		{
-			FConnection = CreateDbConnection(AConnectionString);
+			_connection = CreateDbConnection(connectionString);
 			try
 			{
-				FConnection.Open();
+				_connection.Open();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				WrapException(LException, "connect", false);
+				WrapException(exception, "connect", false);
 			}
 			SetState(SQLConnectionState.Idle);
 		}
 		
-		protected abstract IDbConnection CreateDbConnection(string AConnectionString);
+		protected abstract IDbConnection CreateDbConnection(string connectionString);
 		
 		protected IDbCommand CreateDbCommand()
 		{
-			IDbCommand LCommand = FConnection.CreateCommand();
-			if (FTransaction != null)
-				LCommand.Transaction = FTransaction;
-			return LCommand;
+			IDbCommand command = _connection.CreateCommand();
+			if (_transaction != null)
+				command.Transaction = _transaction;
+			return command;
 		}
 		
-		protected IDbConnection FConnection;
-		protected IDbTransaction FTransaction;
-		protected System.Data.IsolationLevel FIsolationLevel;
+		protected IDbConnection _connection;
+		protected IDbTransaction _transaction;
+		protected System.Data.IsolationLevel _isolationLevel;
 		
-		protected override void InternalBeginTransaction(SQLIsolationLevel AIsolationLevel)
+		protected override void InternalBeginTransaction(SQLIsolationLevel isolationLevel)
 		{
-			FIsolationLevel = System.Data.IsolationLevel.Unspecified;
-			switch (AIsolationLevel)
+			_isolationLevel = System.Data.IsolationLevel.Unspecified;
+			switch (isolationLevel)
 			{
-				case SQLIsolationLevel.ReadUncommitted : FIsolationLevel = System.Data.IsolationLevel.ReadUncommitted; break;
-				case SQLIsolationLevel.ReadCommitted : FIsolationLevel = System.Data.IsolationLevel.ReadCommitted; break;
-				case SQLIsolationLevel.RepeatableRead : FIsolationLevel = System.Data.IsolationLevel.RepeatableRead; break;
-				case SQLIsolationLevel.Serializable : FIsolationLevel = System.Data.IsolationLevel.Serializable; break;
+				case SQLIsolationLevel.ReadUncommitted : _isolationLevel = System.Data.IsolationLevel.ReadUncommitted; break;
+				case SQLIsolationLevel.ReadCommitted : _isolationLevel = System.Data.IsolationLevel.ReadCommitted; break;
+				case SQLIsolationLevel.RepeatableRead : _isolationLevel = System.Data.IsolationLevel.RepeatableRead; break;
+				case SQLIsolationLevel.Serializable : _isolationLevel = System.Data.IsolationLevel.Serializable; break;
 			}
-			FTransaction = FConnection.BeginTransaction(FIsolationLevel);
+			_transaction = _connection.BeginTransaction(_isolationLevel);
 		}
 
 		protected override void InternalCommitTransaction()
 		{
-			FTransaction.Commit();
-			FTransaction = null;
+			_transaction.Commit();
+			_transaction = null;
 		}
 
 		protected override void InternalRollbackTransaction()
 		{
 			try
 			{
-				FTransaction.Rollback();
+				_transaction.Rollback();
 			}
 			finally
 			{
-				FTransaction = null;			
+				_transaction = null;			
 			}
 		}
 		
@@ -109,7 +109,7 @@ namespace Alphora.Dataphor.DAE.Connection
 		{
 			try
 			{
-				return (FConnection != null) && (FConnection.State != ConnectionState.Closed);
+				return (_connection != null) && (_connection.State != ConnectionState.Closed);
 			}
 			catch 
 			{

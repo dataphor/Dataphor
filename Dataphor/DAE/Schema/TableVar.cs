@@ -20,281 +20,281 @@ namespace Alphora.Dataphor.DAE.Schema
 	/// <remarks> Provides the representation for a column header (Name:DataType) </remarks>
 	public class TableVarColumn : Object
     {
-		public TableVarColumn(Column AColumn) : base(AColumn.Name)
+		public TableVarColumn(Column column) : base(column.Name)
 		{
-			SetColumn(AColumn);
+			SetColumn(column);
 		}
 		
-		public TableVarColumn(Column AColumn, TableVarColumnType AColumnType) : base(AColumn.Name)
+		public TableVarColumn(Column column, TableVarColumnType columnType) : base(column.Name)
 		{
-			SetColumn(AColumn);
-			FColumnType = AColumnType;
-			FReadOnly = !((FColumnType == TableVarColumnType.Stored) || (FColumnType == TableVarColumnType.RowExists));
+			SetColumn(column);
+			_columnType = columnType;
+			_readOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists));
 		}
 		
-		public TableVarColumn(Column AColumn, MetaData AMetaData) : base(AColumn.Name)
+		public TableVarColumn(Column column, MetaData metaData) : base(column.Name)
 		{
-			SetColumn(AColumn);
-			MergeMetaData(AMetaData);
-			FIsComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (FColumnType != TableVarColumnType.Stored).ToString()));
-			FReadOnly = !((FColumnType == TableVarColumnType.Stored) || (FColumnType == TableVarColumnType.RowExists) || !IsComputed);
+			SetColumn(column);
+			MergeMetaData(metaData);
+			_isComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (_columnType != TableVarColumnType.Stored).ToString()));
+			_readOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists) || !IsComputed);
 		}
 		
-		public TableVarColumn(Column AColumn, MetaData AMetaData, TableVarColumnType AColumnType) : base(AColumn.Name)
+		public TableVarColumn(Column column, MetaData metaData, TableVarColumnType columnType) : base(column.Name)
 		{
-			SetColumn(AColumn);
-			MergeMetaData(AMetaData);
-			FColumnType = AColumnType;
-			FIsComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (FColumnType != TableVarColumnType.Stored).ToString()));
-			FReadOnly = !((FColumnType == TableVarColumnType.Stored) || (FColumnType == TableVarColumnType.RowExists) || !IsComputed);
+			SetColumn(column);
+			MergeMetaData(metaData);
+			_columnType = columnType;
+			_isComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (_columnType != TableVarColumnType.Stored).ToString()));
+			_readOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists) || !IsComputed);
 		}
 		
-		public TableVarColumn(int AID, Column AColumn, MetaData AMetaData, TableVarColumnType AColumnType) : base(AID, AColumn.Name)
+		public TableVarColumn(int iD, Column column, MetaData metaData, TableVarColumnType columnType) : base(iD, column.Name)
 		{
-			SetColumn(AColumn);
-			MergeMetaData(AMetaData);
-			FColumnType = AColumnType;
-			FIsComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (FColumnType != TableVarColumnType.Stored).ToString()));
-			FReadOnly = !((FColumnType == TableVarColumnType.Stored) || (FColumnType == TableVarColumnType.RowExists) || !IsComputed);
+			SetColumn(column);
+			MergeMetaData(metaData);
+			_columnType = columnType;
+			_isComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (_columnType != TableVarColumnType.Stored).ToString()));
+			_readOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists) || !IsComputed);
 		}
 		
-		private bool FIsNilable;
+		private bool _isNilable;
 		public bool IsNilable
 		{
-			get { return FIsNilable; }
-			set { FIsNilable = value; }
+			get { return _isNilable; }
+			set { _isNilable = value; }
 		}
 		
-		private bool FIsComputed;
+		private bool _isComputed;
 		public bool IsComputed
 		{
-			get { return FIsComputed; }
-			set { FIsComputed = value; }
+			get { return _isComputed; }
+			set { _isComputed = value; }
 		}
 		
-		public void DetermineShouldCallProposables(bool AReset)
+		public void DetermineShouldCallProposables(bool reset)
 		{
-			if (AReset)
+			if (reset)
 			{
-				FShouldChange = false;
-				FShouldDefault = false;
-				FShouldValidate = false;
+				_shouldChange = false;
+				_shouldDefault = false;
+				_shouldValidate = false;
 			}
 
 			if (HasHandlers(EventType.Change))
-				FShouldChange = true;
+				_shouldChange = true;
 				
-			if (HasHandlers(EventType.Default) || (FDefault != null))
-				FShouldDefault = true;
+			if (HasHandlers(EventType.Default) || (_default != null))
+				_shouldDefault = true;
 				
 			if (HasHandlers(EventType.Validate) || HasConstraints())
-				FShouldValidate = true;
+				_shouldValidate = true;
 				
-			Schema.ScalarType LScalarType = DataType as Schema.ScalarType;
-			if (LScalarType != null) 
+			Schema.ScalarType scalarType = DataType as Schema.ScalarType;
+			if (scalarType != null) 
 			{
-				if (LScalarType.HasHandlers(EventType.Change))
-					FShouldChange = true;
+				if (scalarType.HasHandlers(EventType.Change))
+					_shouldChange = true;
 					
-				if (LScalarType.HasHandlers(EventType.Default) || (LScalarType.Default != null))
-					FShouldDefault = true;
+				if (scalarType.HasHandlers(EventType.Default) || (scalarType.Default != null))
+					_shouldDefault = true;
 					
-				if (LScalarType.HasHandlers(EventType.Validate) || (LScalarType.Constraints.Count > 0))
-					FShouldValidate = true;
+				if (scalarType.HasHandlers(EventType.Validate) || (scalarType.Constraints.Count > 0))
+					_shouldValidate = true;
 			}
 		}
 		
-		private void SetIsValidateRemotable(ScalarType ADataType)
+		private void SetIsValidateRemotable(ScalarType dataType)
 		{	
-			foreach (Constraint LConstraint in ADataType.Constraints)
+			foreach (Constraint constraint in dataType.Constraints)
 			{
-				FIsValidateRemotable = FIsValidateRemotable && LConstraint.IsRemotable;
-				if (!FIsValidateRemotable)
+				_isValidateRemotable = _isValidateRemotable && constraint.IsRemotable;
+				if (!_isValidateRemotable)
 					break;
 			}
 
-			if (FIsValidateRemotable)
+			if (_isValidateRemotable)
 			{
-				foreach (EventHandler LHandler in ADataType.EventHandlers)
-					if ((LHandler.EventType & EventType.Validate) != 0)
+				foreach (EventHandler handler in dataType.EventHandlers)
+					if ((handler.EventType & EventType.Validate) != 0)
 					{
-						FIsValidateRemotable = FIsValidateRemotable && LHandler.IsRemotable;
-						if (!FIsValidateRemotable)
+						_isValidateRemotable = _isValidateRemotable && handler.IsRemotable;
+						if (!_isValidateRemotable)
 							break;
 					}
 
 				#if USETYPEINHERITANCE
 				if (FIsValidateRemotable)			
-					foreach (ScalarType LParentType in ADataType.ParentTypes)
+					foreach (ScalarType parentType in ADataType.ParentTypes)
 						if (FIsValidateRemotable)
-							SetIsValidateRemotable(LParentType);
+							SetIsValidateRemotable(parentType);
 				#endif
 			}
 		}
 		
 		private void SetIsValidateRemotable()
 		{
-			FIsValidateRemotable = true;
-			if (FConstraints != null)
-				foreach (Constraint LConstraint in Constraints)
+			_isValidateRemotable = true;
+			if (_constraints != null)
+				foreach (Constraint constraint in Constraints)
 				{
-					FIsValidateRemotable = FIsValidateRemotable && LConstraint.IsRemotable;
-					if (!FIsValidateRemotable)
+					_isValidateRemotable = _isValidateRemotable && constraint.IsRemotable;
+					if (!_isValidateRemotable)
 						break;
 				}
 			
-			if (FIsValidateRemotable)
+			if (_isValidateRemotable)
 			{
-				if (FEventHandlers != null)
-					foreach (EventHandler LHandler in FEventHandlers)
-						if ((LHandler.EventType & EventType.Validate) != 0)
+				if (_eventHandlers != null)
+					foreach (EventHandler handler in _eventHandlers)
+						if ((handler.EventType & EventType.Validate) != 0)
 						{
-							FIsValidateRemotable = FIsValidateRemotable && LHandler.IsRemotable;
-							if (!FIsValidateRemotable)
+							_isValidateRemotable = _isValidateRemotable && handler.IsRemotable;
+							if (!_isValidateRemotable)
 								break;
 						}
 					
-				if (FIsValidateRemotable && (DataType is ScalarType))
+				if (_isValidateRemotable && (DataType is ScalarType))
 					SetIsValidateRemotable((ScalarType)DataType);
 			}
 		}
 		
-		private void SetIsChangeRemotable(ScalarType ADataType)
+		private void SetIsChangeRemotable(ScalarType dataType)
 		{
-			if (FEventHandlers != null)
-				foreach (EventHandler LHandler in FEventHandlers)
-					if ((LHandler.EventType & EventType.Change) != 0)
+			if (_eventHandlers != null)
+				foreach (EventHandler handler in _eventHandlers)
+					if ((handler.EventType & EventType.Change) != 0)
 					{
-						FIsChangeRemotable = FIsChangeRemotable && LHandler.IsRemotable;
-						if (!FIsChangeRemotable)
+						_isChangeRemotable = _isChangeRemotable && handler.IsRemotable;
+						if (!_isChangeRemotable)
 							break;
 					}
 
 			#if USETYPEINHERITANCE				
 			if (FIsChangeRemotable)
-				foreach (ScalarType LParentType in ADataType.ParentTypes)
+				foreach (ScalarType parentType in ADataType.ParentTypes)
 					if (FIsChangeRemotable)
-						SetIsChangeRemotable(LParentType);
+						SetIsChangeRemotable(parentType);
 			#endif
 		}
 		
 		private void SetIsChangeRemotable()
 		{
-			FIsChangeRemotable = true;
-			if (FEventHandlers != null)
-				foreach (EventHandler LHandler in FEventHandlers)
-					if ((LHandler.EventType & EventType.Change) != 0)
+			_isChangeRemotable = true;
+			if (_eventHandlers != null)
+				foreach (EventHandler handler in _eventHandlers)
+					if ((handler.EventType & EventType.Change) != 0)
 					{
-						FIsChangeRemotable = FIsChangeRemotable && LHandler.IsRemotable;
-						if (!FIsChangeRemotable)
+						_isChangeRemotable = _isChangeRemotable && handler.IsRemotable;
+						if (!_isChangeRemotable)
 							break;
 					}
 				
-			if (FIsChangeRemotable && (DataType is ScalarType))
+			if (_isChangeRemotable && (DataType is ScalarType))
 				SetIsChangeRemotable((ScalarType)DataType);
 		}
 		
         private void SetIsDefaultRemotable()
         {
-			FIsDefaultRemotable = FIsChangeRemotable;
+			_isDefaultRemotable = _isChangeRemotable;
 			
-			if (FIsDefaultRemotable)
+			if (_isDefaultRemotable)
 			{
-				if (FEventHandlers != null)
-					foreach (EventHandler LHandler in FEventHandlers)
-						if ((LHandler.EventType & EventType.Default) != 0)
+				if (_eventHandlers != null)
+					foreach (EventHandler handler in _eventHandlers)
+						if ((handler.EventType & EventType.Default) != 0)
 						{
-							FIsDefaultRemotable = FIsDefaultRemotable && LHandler.IsRemotable;
-							if (!FIsDefaultRemotable)
+							_isDefaultRemotable = _isDefaultRemotable && handler.IsRemotable;
+							if (!_isDefaultRemotable)
 								break;
 						}
 			}
 			
-			if (FIsDefaultRemotable)
+			if (_isDefaultRemotable)
 			{
-				if (FDefault != null)
-					FIsDefaultRemotable = FIsDefaultRemotable && FDefault.IsRemotable;
+				if (_default != null)
+					_isDefaultRemotable = _isDefaultRemotable && _default.IsRemotable;
 				else
 				{
-					ScalarType LScalarType = DataType as ScalarType;
-					if (LScalarType != null)
+					ScalarType scalarType = DataType as ScalarType;
+					if (scalarType != null)
 					{
-						foreach (EventHandler LHandler in LScalarType.EventHandlers)
-							if ((LHandler.EventType & EventType.Default) != 0)
+						foreach (EventHandler handler in scalarType.EventHandlers)
+							if ((handler.EventType & EventType.Default) != 0)
 							{
-								FIsDefaultRemotable = FIsDefaultRemotable && LHandler.IsRemotable;
-								if (!FIsDefaultRemotable)
+								_isDefaultRemotable = _isDefaultRemotable && handler.IsRemotable;
+								if (!_isDefaultRemotable)
 									break;
 							}
 						
-						if (FIsDefaultRemotable && (LScalarType.Default != null))
-							FIsDefaultRemotable = FIsDefaultRemotable && LScalarType.Default.IsRemotable;
+						if (_isDefaultRemotable && (scalarType.Default != null))
+							_isDefaultRemotable = _isDefaultRemotable && scalarType.Default.IsRemotable;
 					}
 				}
 			}
         }
         
-        protected void SetColumn(Column AColumn)
+        protected void SetColumn(Column column)
         {
-			FColumn = AColumn;
-			if (FColumn.DataType is Schema.ScalarType)
-				InheritMetaData(((Schema.ScalarType)FColumn.DataType).MetaData);
+			_column = column;
+			if (_column.DataType is Schema.ScalarType)
+				InheritMetaData(((Schema.ScalarType)_column.DataType).MetaData);
 
 			SetIsValidateRemotable();
 			SetIsDefaultRemotable();
 			SetIsChangeRemotable();
         }
         
-		internal void ConstraintsAdding(object ASender, Object AObject)
+		internal void ConstraintsAdding(object sender, Object objectValue)
 		{
-			FIsValidateRemotable = FIsValidateRemotable && AObject.IsRemotable;
+			_isValidateRemotable = _isValidateRemotable && objectValue.IsRemotable;
 		}
 		
-		internal void ConstraintsRemoving(object ASender, Object AObject)
+		internal void ConstraintsRemoving(object sender, Object objectValue)
 		{
 			SetIsValidateRemotable();
 		}
 		
-		internal void EventHandlersAdding(object ASender, Object AObject)
+		internal void EventHandlersAdding(object sender, Object objectValue)
 		{
-			EventHandler LObject = (EventHandler)AObject;
-			if ((LObject.EventType & EventType.Default) != 0)
-				FIsDefaultRemotable = FIsDefaultRemotable && LObject.IsRemotable;
-			if ((LObject.EventType & EventType.Validate) != 0)
-				FIsValidateRemotable = FIsValidateRemotable && LObject.IsRemotable;
-			if ((LObject.EventType & EventType.Change) != 0)
-				FIsChangeRemotable = FIsChangeRemotable && LObject.IsRemotable;
+			EventHandler localObjectValue = (EventHandler)objectValue;
+			if ((localObjectValue.EventType & EventType.Default) != 0)
+				_isDefaultRemotable = _isDefaultRemotable && localObjectValue.IsRemotable;
+			if ((localObjectValue.EventType & EventType.Validate) != 0)
+				_isValidateRemotable = _isValidateRemotable && localObjectValue.IsRemotable;
+			if ((localObjectValue.EventType & EventType.Change) != 0)
+				_isChangeRemotable = _isChangeRemotable && localObjectValue.IsRemotable;
 		}
 		
-		internal void EventHandlersRemoving(object ASender, Object AObject)
+		internal void EventHandlersRemoving(object sender, Object objectValue)
 		{
-			EventHandler LObject = (EventHandler)AObject;
-			if ((LObject.EventType & EventType.Default) != 0)
+			EventHandler localObjectValue = (EventHandler)objectValue;
+			if ((localObjectValue.EventType & EventType.Default) != 0)
 				SetIsDefaultRemotable();
-			if ((LObject.EventType & EventType.Validate) != 0)
+			if ((localObjectValue.EventType & EventType.Validate) != 0)
 				SetIsValidateRemotable();
-			if ((LObject.EventType & EventType.Change) != 0)
+			if ((localObjectValue.EventType & EventType.Change) != 0)
 				SetIsChangeRemotable();
 		}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.TableVarColumn"), DisplayName, TableVar.DisplayName); } }
 
-		public override int CatalogObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
+		public override int CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 
-		public override int ParentObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
+		public override int ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 		
-		public override bool IsATObject { get { return FTableVar == null ? false : FTableVar.IsATObject; } }
+		public override bool IsATObject { get { return _tableVar == null ? false : _tableVar.IsATObject; } }
 
 		// TableVar
 		[Reference]
-		internal TableVar FTableVar;
+		internal TableVar _tableVar;
 		public TableVar TableVar 
 		{ 
-			get { return FTableVar; } 
+			get { return _tableVar; } 
 			set
 			{
-				if (FTableVar != null)
-					FTableVar.Columns.Remove(this);
+				if (_tableVar != null)
+					_tableVar.Columns.Remove(this);
 				if (value != null)
 					value.Columns.Add(this);
 			}
@@ -302,132 +302,132 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		// Column
 		[Reference]
-		private Column FColumn;
-		public Column Column { get { return FColumn; } }
+		private Column _column;
+		public Column Column { get { return _column; } }
 
 		// DataType
-		public IDataType DataType { get { return FColumn.DataType; } }
+		public IDataType DataType { get { return _column.DataType; } }
         
         // ColumnType
-        private TableVarColumnType FColumnType;
-		public TableVarColumnType ColumnType { get { return FColumnType; } }
+        private TableVarColumnType _columnType;
+		public TableVarColumnType ColumnType { get { return _columnType; } }
 		
         // ReadOnly
-        private bool FReadOnly;
+        private bool _readOnly;
         public bool ReadOnly
         {
-			get { return FReadOnly; }
-			set { FReadOnly = value; }
+			get { return _readOnly; }
+			set { _readOnly = value; }
         }
         
         // Default
-        private TableVarColumnDefault FDefault;
+        private TableVarColumnDefault _default;
         public TableVarColumnDefault Default
         {
-			get { return FDefault; }
+			get { return _default; }
 			set 
 			{
-				if (FDefault != null)
-					FDefault.FTableVarColumn = null; 
-				FDefault = value; 
-				if (FDefault != null)
-					FDefault.FTableVarColumn = this;
+				if (_default != null)
+					_default._tableVarColumn = null; 
+				_default = value; 
+				if (_default != null)
+					_default._tableVarColumn = this;
 				SetIsDefaultRemotable();
 			}
         }
         
         public bool HasConstraints()
         {
-			return (FConstraints != null) && (FConstraints.Count > 0);
+			return (_constraints != null) && (_constraints.Count > 0);
         }
         
 		// Constraints
-		private TableVarColumnConstraints FConstraints;
+		private TableVarColumnConstraints _constraints;
 		public TableVarColumnConstraints Constraints 
 		{ 
 			get 
 			{ 
-				if (FConstraints == null)
-					FConstraints = new TableVarColumnConstraints(this);			
-				return FConstraints; 
+				if (_constraints == null)
+					_constraints = new TableVarColumnConstraints(this);			
+				return _constraints; 
 			} 
 		}
 		
 		public bool HasHandlers()
 		{
-			return (FEventHandlers != null) && (FEventHandlers.Count > 0);
+			return (_eventHandlers != null) && (_eventHandlers.Count > 0);
 		}
 		
-		public bool HasHandlers(EventType AEventType)
+		public bool HasHandlers(EventType eventType)
 		{
-			return (FEventHandlers != null) && FEventHandlers.HasHandlers(AEventType);
+			return (_eventHandlers != null) && _eventHandlers.HasHandlers(eventType);
 		}
 		
 		// EventHandlers
-		private TableVarColumnEventHandlers FEventHandlers;
+		private TableVarColumnEventHandlers _eventHandlers;
 		public TableVarColumnEventHandlers EventHandlers 
 		{ 
 			get 
 			{ 
-				if (FEventHandlers == null)
-					FEventHandlers = new TableVarColumnEventHandlers(this);
-				return FEventHandlers; 
+				if (_eventHandlers == null)
+					_eventHandlers = new TableVarColumnEventHandlers(this);
+				return _eventHandlers; 
 			} 
 		}
 
         // IsDefaultRemotable
-        private bool FIsDefaultRemotable = true;
+        private bool _isDefaultRemotable = true;
         public bool IsDefaultRemotable
         {
-			get { return FIsDefaultRemotable; }
-			set { FIsDefaultRemotable = value; }
+			get { return _isDefaultRemotable; }
+			set { _isDefaultRemotable = value; }
         }
         
         // IsValidateRemotable
-        private bool FIsValidateRemotable = true;
+        private bool _isValidateRemotable = true;
         public bool IsValidateRemotable
         {
-			get { return FIsValidateRemotable; }
-			set { FIsValidateRemotable = value; }
+			get { return _isValidateRemotable; }
+			set { _isValidateRemotable = value; }
         }
         
         // IsChangeRemotable
-        private bool FIsChangeRemotable = true;
+        private bool _isChangeRemotable = true;
         public bool IsChangeRemotable
         {
-			get { return FIsChangeRemotable; }
-			set { FIsChangeRemotable = value; }
+			get { return _isChangeRemotable; }
+			set { _isChangeRemotable = value; }
         }
         
         // ShouldDefault
-        private bool FShouldDefault = true;
+        private bool _shouldDefault = true;
         public bool ShouldDefault
         {
-			get { return FShouldDefault; }
-			set { FShouldDefault = value; } 
+			get { return _shouldDefault; }
+			set { _shouldDefault = value; } 
 		}
 
         // ShouldValidate
-        private bool FShouldValidate = true;
+        private bool _shouldValidate = true;
         public bool ShouldValidate
         {
-			get { return FShouldValidate; }
-			set { FShouldValidate = value; } 
+			get { return _shouldValidate; }
+			set { _shouldValidate = value; } 
 		}
 
         // ShouldChange
-        private bool FShouldChange = true;
+        private bool _shouldChange = true;
         public bool ShouldChange
         {
-			get { return FShouldChange; }
-			set { FShouldChange = value; } 
+			get { return _shouldChange; }
+			set { _shouldChange = value; } 
 		}
         
 		// Equals
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			TableVarColumn LColumn = AObject as TableVarColumn;
-			return (LColumn != null) && (String.Compare(Name, LColumn.Name) == 0);
+			TableVarColumn column = objectValue as TableVarColumn;
+			return (column != null) && (String.Compare(Name, column.Name) == 0);
 		}
 
 		// GetHashCode
@@ -439,48 +439,48 @@ namespace Alphora.Dataphor.DAE.Schema
         // ToString
         public override string ToString()
         {
-			StringBuilder LBuilder = new StringBuilder(Name);
+			StringBuilder builder = new StringBuilder(Name);
 			if (DataType != null)
 			{
-				LBuilder.Append(Keywords.TypeSpecifier);
-				LBuilder.Append(DataType.Name);
+				builder.Append(Keywords.TypeSpecifier);
+				builder.Append(DataType.Name);
 			}
-			return LBuilder.ToString();
+			return builder.ToString();
         }
 
 		// Copying a column does not copy static tags, cloning a column does        
         public TableVarColumn Inherit()
         {
-			TableVarColumn LColumn = new TableVarColumn(FColumn.Copy(), MetaData == null ? null : MetaData.Inherit(), FColumnType);
-			InternalCopy(LColumn);
-			return LColumn;
+			TableVarColumn column = new TableVarColumn(_column.Copy(), MetaData == null ? null : MetaData.Inherit(), _columnType);
+			InternalCopy(column);
+			return column;
         }
         
-        public TableVarColumn Inherit(string APrefix)
+        public TableVarColumn Inherit(string prefix)
         {
-			TableVarColumn LColumn = new TableVarColumn(FColumn.Copy(APrefix), MetaData == null ? null : MetaData.Inherit(), FColumnType);
-			InternalCopy(LColumn);
-			return LColumn;
+			TableVarColumn column = new TableVarColumn(_column.Copy(prefix), MetaData == null ? null : MetaData.Inherit(), _columnType);
+			InternalCopy(column);
+			return column;
         }
 
-		public TableVarColumn InheritAndRename(string AName)
+		public TableVarColumn InheritAndRename(string name)
 		{
-			TableVarColumn LColumn = new TableVarColumn(FColumn.CopyAndRename(AName), MetaData == null ? null : MetaData.Inherit(), FColumnType);
-			InternalCopy(LColumn);
-			return LColumn;
+			TableVarColumn column = new TableVarColumn(_column.CopyAndRename(name), MetaData == null ? null : MetaData.Inherit(), _columnType);
+			InternalCopy(column);
+			return column;
 		}
 		
         public TableVarColumn Copy()
         {
-			TableVarColumn LColumn = new TableVarColumn(FColumn.Copy(), MetaData == null ? null : MetaData.Copy(), FColumnType);
-			InternalCopy(LColumn);
-			return LColumn;
+			TableVarColumn column = new TableVarColumn(_column.Copy(), MetaData == null ? null : MetaData.Copy(), _columnType);
+			InternalCopy(column);
+			return column;
 		}
 
 		protected void InternalCopy(TableVarColumn LColumn)
         {
 			LColumn.IsNilable = IsNilable;
-			LColumn.ReadOnly = FReadOnly;
+			LColumn.ReadOnly = _readOnly;
 			LColumn.IsRemotable = IsRemotable;
 			LColumn.IsDefaultRemotable = IsDefaultRemotable;
 			LColumn.IsValidateRemotable = IsValidateRemotable;
@@ -490,69 +490,69 @@ namespace Alphora.Dataphor.DAE.Schema
 			LColumn.ShouldValidate = ShouldValidate;
         }
         
-		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
 		{
-			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
-			DataType.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+			DataType.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 
-			if ((FDefault != null) && ((AMode != EmitMode.ForRemote) || FDefault.IsRemotable))
-				FDefault.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			if ((_default != null) && ((mode != EmitMode.ForRemote) || _default.IsRemotable))
+				_default.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 		
-			if (FConstraints != null)
-				foreach (Constraint LConstraint in Constraints)
-					if ((AMode != EmitMode.ForRemote) || LConstraint.IsRemotable)
-						LConstraint.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			if (_constraints != null)
+				foreach (Constraint constraint in Constraints)
+					if ((mode != EmitMode.ForRemote) || constraint.IsRemotable)
+						constraint.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 		}
 		
-		public override void IncludeHandlers(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeHandlers(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
 		{
-			if (FEventHandlers != null)
-				foreach (EventHandler LHandler in FEventHandlers)
-					if ((AMode != EmitMode.ForRemote) || LHandler.IsRemotable)
-						LHandler.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			if (_eventHandlers != null)
+				foreach (EventHandler handler in _eventHandlers)
+					if ((mode != EmitMode.ForRemote) || handler.IsRemotable)
+						handler.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			ColumnDefinition LColumn = new ColumnDefinition();
-			LColumn.ColumnName = Name;
-			LColumn.TypeSpecifier = DataType.EmitSpecifier(AMode);
-			LColumn.IsNilable = IsNilable;
-			if ((Default != null) && Default.IsRemotable && ((AMode != EmitMode.ForStorage) || !Default.IsPersistent))
-				LColumn.Default = (DefaultDefinition)Default.EmitDefinition(AMode);
+			ColumnDefinition column = new ColumnDefinition();
+			column.ColumnName = Name;
+			column.TypeSpecifier = DataType.EmitSpecifier(mode);
+			column.IsNilable = IsNilable;
+			if ((Default != null) && Default.IsRemotable && ((mode != EmitMode.ForStorage) || !Default.IsPersistent))
+				column.Default = (DefaultDefinition)Default.EmitDefinition(mode);
 		
-			if (FConstraints != null)	
-				foreach (TableVarColumnConstraint LConstraint in Constraints)
-					if (((AMode != EmitMode.ForRemote) || LConstraint.IsRemotable) && ((AMode != EmitMode.ForStorage) || !LConstraint.IsPersistent))
-						LColumn.Constraints.Add(LConstraint.EmitDefinition(AMode));
+			if (_constraints != null)	
+				foreach (TableVarColumnConstraint constraint in Constraints)
+					if (((mode != EmitMode.ForRemote) || constraint.IsRemotable) && ((mode != EmitMode.ForStorage) || !constraint.IsPersistent))
+						column.Constraints.Add(constraint.EmitDefinition(mode));
 
-			LColumn.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LColumn;
+			column.MetaData = MetaData == null ? null : MetaData.Copy();
+			return column;
 		}
 		
-		public override Object GetObjectFromHeader(ObjectHeader AHeader)
+		public override Object GetObjectFromHeader(ObjectHeader header)
 		{
-			switch (AHeader.ObjectType)
+			switch (header.ObjectType)
 			{
 				case "TableVarColumnConstraint" :
-					if (FConstraints != null)
-						foreach (Constraint LConstraint in FConstraints)
-							if (AHeader.ID == LConstraint.ID)
-								return LConstraint;
+					if (_constraints != null)
+						foreach (Constraint constraint in _constraints)
+							if (header.ID == constraint.ID)
+								return constraint;
 				break;
 								
 				case "TableVarColumnDefault" :
-					if ((FDefault != null) && (AHeader.ID == FDefault.ID))
-						return FDefault;
+					if ((_default != null) && (header.ID == _default.ID))
+						return _default;
 				break;
 			}
 			
-			return base.GetObjectFromHeader(AHeader);
+			return base.GetObjectFromHeader(header);
 		}
 	}
 
@@ -561,13 +561,13 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		// Column lists are equal if they contain the same number of columns and all columns in the left
 		// list are also in the right list
-        public override bool Equals(object AObject)
+        public override bool Equals(object objectValue)
         {
-			TableVarColumnsBase LColumns = AObject as TableVarColumnsBase;
-			if ((LColumns != null) && (Count == LColumns.Count))
+			TableVarColumnsBase columns = objectValue as TableVarColumnsBase;
+			if ((columns != null) && (Count == columns.Count))
 			{
-				foreach (TableVarColumn LColumn in this)
-					if (!LColumns.Contains(LColumn))
+				foreach (TableVarColumn column in this)
+					if (!columns.Contains(column))
 						return false;
 				return true;
 			}
@@ -579,21 +579,21 @@ namespace Alphora.Dataphor.DAE.Schema
         {
 			get
 			{
-				string[] LResult = new string[Count];
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					LResult[LIndex] = this[LIndex].Name;
-				return LResult;
+				string[] result = new string[Count];
+				for (int index = 0; index < Count; index++)
+					result[index] = this[index].Name;
+				return result;
 			}
         }
 
 		// Column lists are equivalent if they contain the same number of columns and the columns are equal, left to right
 		// This is an internal notion for use in physical contexts only
-        public bool Equivalent(TableVarColumnsBase AColumns)
+        public bool Equivalent(TableVarColumnsBase columns)
         {
-			if (Count == AColumns.Count)
+			if (Count == columns.Count)
 			{
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					if (!this[LIndex].Equals(AColumns[LIndex]))
+				for (int index = 0; index < Count; index++)
+					if (!this[index].Equals(columns[index]))
 						return false;
 				return true;
 			}
@@ -602,31 +602,31 @@ namespace Alphora.Dataphor.DAE.Schema
 
         public override int GetHashCode()
         {
-			int LHashCode = 0;
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				LHashCode ^= this[LIndex].GetHashCode();
-			return LHashCode;
+			int hashCode = 0;
+			for (int index = 0; index < Count; index++)
+				hashCode ^= this[index].GetHashCode();
+			return hashCode;
         }
 
-        public bool Compatible(object AObject)
+        public bool Compatible(object objectValue)
         {
-			return Is(AObject) || ((AObject is TableVarColumnsBase) && ((TableVarColumnsBase)AObject).Is(this));
+			return Is(objectValue) || ((objectValue is TableVarColumnsBase) && ((TableVarColumnsBase)objectValue).Is(this));
         }
 
-        public bool Is(object AObject)
+        public bool Is(object objectValue)
         {
 			// A column list is another column list if they both have the same number of columns
 			// and the is of the datatypes for all columns evaluates to true by name
-			TableVarColumnsBase LColumns = AObject as TableVarColumnsBase;
-			if ((LColumns != null) && (Count == LColumns.Count))
+			TableVarColumnsBase columns = objectValue as TableVarColumnsBase;
+			if ((columns != null) && (Count == columns.Count))
 			{
-				int LColumnIndex;
-				for (int LIndex = 0; LIndex < Count; LIndex++)
+				int columnIndex;
+				for (int index = 0; index < Count; index++)
 				{
-					LColumnIndex = LColumns.IndexOfName(this[LIndex].Name);
-					if (LColumnIndex >= 0)
+					columnIndex = columns.IndexOfName(this[index].Name);
+					if (columnIndex >= 0)
 					{
-						if (!this[LIndex].DataType.Is(LColumns[LColumnIndex].DataType))
+						if (!this[index].DataType.Is(columns[columnIndex].DataType))
 							return false;
 					}
 					else
@@ -638,494 +638,494 @@ namespace Alphora.Dataphor.DAE.Schema
 				return false;
         }
 
-		public bool IsSubsetOf(TableVarColumnsBase AColumns)
+		public bool IsSubsetOf(TableVarColumnsBase columns)
 		{
 			// true if every column in this set of columns is in AColumns
-			foreach (TableVarColumn LColumn in this)
-				if (!AColumns.ContainsName(LColumn.Name))
+			foreach (TableVarColumn column in this)
+				if (!columns.ContainsName(column.Name))
 					return false;
 			return true;
 		}
 		
-		public bool IsProperSubsetOf(TableVarColumnsBase AColumns)
+		public bool IsProperSubsetOf(TableVarColumnsBase columns)
 		{
 			// true if every column in this set of columns is in AColumns and AColumns is strictly larger
-			return IsSubsetOf(AColumns) && (Count < AColumns.Count);
+			return IsSubsetOf(columns) && (Count < columns.Count);
 		}
 
-		public bool IsSupersetOf(TableVarColumnsBase AColumns)
+		public bool IsSupersetOf(TableVarColumnsBase columns)
 		{
 			// true if every column in AColumnNames is in this set of columns
-			foreach (TableVarColumn LColumn in AColumns)
-				if (!ContainsName(LColumn.Name))
+			foreach (TableVarColumn column in columns)
+				if (!ContainsName(column.Name))
 					return false;
 			return true;
 		}
 		
-		public bool IsProperSupersetOf(TableVarColumnsBase AColumns)
+		public bool IsProperSupersetOf(TableVarColumnsBase columns)
 		{
 			// true if every column in AColumnNames is in this set of columns and this set of columns is strictly larger
-			return IsSupersetOf(AColumns) && (Count > AColumns.Count);
+			return IsSupersetOf(columns) && (Count > columns.Count);
 		}
 		
-		public Key Intersect(TableVarColumnsBase AColumns)
+		public Key Intersect(TableVarColumnsBase columns)
 		{
-			Key LKey = new Key();
-			foreach (TableVarColumn LColumn in AColumns)
-				if (ContainsName(LColumn.Name))
-					LKey.Columns.Add(LColumn);
+			Key key = new Key();
+			foreach (TableVarColumn column in columns)
+				if (ContainsName(column.Name))
+					key.Columns.Add(column);
 					
-			return LKey;
+			return key;
 		}
 		
-		public Key Difference(TableVarColumnsBase AColumns)
+		public Key Difference(TableVarColumnsBase columns)
 		{
-			Key LKey = new Key();
-			foreach (TableVarColumn LColumn in this)
-				if (!AColumns.ContainsName(LColumn.Name))
-					LKey.Columns.Add(LColumn);
+			Key key = new Key();
+			foreach (TableVarColumn column in this)
+				if (!columns.ContainsName(column.Name))
+					key.Columns.Add(column);
 					
-			return LKey;
+			return key;
 		}
 		
-		public Key Union(TableVarColumnsBase AColumns)
+		public Key Union(TableVarColumnsBase columns)
 		{
-			Key LKey = new Key();
-			foreach (TableVarColumn LColumn in this)
-				LKey.Columns.Add(LColumn);
+			Key key = new Key();
+			foreach (TableVarColumn column in this)
+				key.Columns.Add(column);
 				
-			foreach (TableVarColumn LColumn in AColumns)
-				if (!LKey.Columns.ContainsName(LColumn.Name))
-					LKey.Columns.Add(LColumn);
+			foreach (TableVarColumn column in columns)
+				if (!key.Columns.ContainsName(column.Name))
+					key.Columns.Add(column);
 			
-			return LKey;
+			return key;
 		}
 		
-        public new TableVarColumn this[int AIndex]
+        public new TableVarColumn this[int index]
         {
-            get { return (TableVarColumn)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (TableVarColumn)(base[index]); }
+            set { base[index] = value; }
         }
 
-        public new TableVarColumn this[string AColumnName]
+        public new TableVarColumn this[string columnName]
         {
-			get { return (TableVarColumn)base[AColumnName]; }
-            set { base[AColumnName] = value; }
+			get { return (TableVarColumn)base[columnName]; }
+            set { base[columnName] = value; }
         }
         
-        public TableVarColumn this[TableVarColumn AColumn]
+        public TableVarColumn this[TableVarColumn column]
         {
-			get { return this[IndexOfName(AColumn.Name)]; }
-			set { this[IndexOfName(AColumn.Name)] = value; }
+			get { return this[IndexOfName(column.Name)]; }
+			set { this[IndexOfName(column.Name)] = value; }
         }
 
 		#if USEOBJECTVALIDATE
-        protected override void Validate(Object AObject)
+        protected override void Validate(Object objectValue)
         {
-            if (!(AObject is TableVarColumn))
+            if (!(objectValue is TableVarColumn))
                 throw new SchemaException(SchemaException.Codes.InvalidContainer, "TableVarColumn");
-            base.Validate(AObject);
+            base.Validate(objectValue);
         }
         #endif
 
         // ToString
         public override string ToString()
         {
-			StringBuilder LString = new StringBuilder();
-			foreach (TableVarColumn LColumn in this)
+			StringBuilder stringValue = new StringBuilder();
+			foreach (TableVarColumn column in this)
 			{
-				if (LString.Length != 0)
+				if (stringValue.Length != 0)
 				{
-					LString.Append(Keywords.ListSeparator);
-					LString.Append(" ");
+					stringValue.Append(Keywords.ListSeparator);
+					stringValue.Append(" ");
 				}
-				LString.Append(LColumn.ToString());
+				stringValue.Append(column.ToString());
 			}
-			LString.Insert(0, Keywords.BeginList);
-			LString.Append(Keywords.EndList);
-			return LString.ToString();
+			stringValue.Insert(0, Keywords.BeginList);
+			stringValue.Append(Keywords.EndList);
+			return stringValue.ToString();
         }
     }
     
     public class TableVarColumns : TableVarColumnsBase
     {
-		public TableVarColumns(TableVar ATableVar) : base()
+		public TableVarColumns(TableVar tableVar) : base()
 		{
-			FTableVar = ATableVar;
+			_tableVar = tableVar;
 		}
 		
 		[Reference]
-		private TableVar FTableVar;
-		public TableVar TableVar { get { return FTableVar; } }
+		private TableVar _tableVar;
+		public TableVar TableVar { get { return _tableVar; } }
 
-		protected override void Validate(Object AObject)
+		protected override void Validate(Object objectValue)
 		{
-			base.Validate(AObject);
-			FTableVar.ValidateChildObjectName(AObject.Name);
+			base.Validate(objectValue);
+			_tableVar.ValidateChildObjectName(objectValue.Name);
 		}
 		
-		protected override void Adding(Object AItem, int AIndex)
+		protected override void Adding(Object item, int index)
 		{
-			base.Adding(AItem, AIndex);
-			((TableVarColumn)AItem).FTableVar = FTableVar;
+			base.Adding(item, index);
+			((TableVarColumn)item)._tableVar = _tableVar;
 		}
 		
-		protected override void Removing(Object AItem, int AIndex)
+		protected override void Removing(Object item, int index)
 		{
-			((TableVarColumn)AItem).FTableVar = null;
-			base.Removing(AItem, AIndex);
+			((TableVarColumn)item)._tableVar = null;
+			base.Removing(item, index);
 		}
     }
     
     public class KeyColumns : TableVarColumnsBase 
     {
 		//public KeyColumns() : base() { }
-		public KeyColumns(Key AKey) : base()
+		public KeyColumns(Key key) : base()
 		{
-			FKey = AKey;
+			_key = key;
 		}
 		
-		private Key FKey;
-		public Key Key { get { return FKey; } }
+		private Key _key;
+		public Key Key { get { return _key; } }
 
-		protected override void Adding(Object AObject, int AIndex)
+		protected override void Adding(Object objectValue, int index)
 		{
-			base.Adding(AObject, AIndex);
-			if (FKey != null)
-				FKey.UpdateKeyName();
+			base.Adding(objectValue, index);
+			if (_key != null)
+				_key.UpdateKeyName();
 		}
 
-		protected override void Removing(Object AObject, int AIndex)
+		protected override void Removing(Object objectValue, int index)
 		{
-			base.Removing(AObject, AIndex);
-			if (FKey != null)
-				FKey.UpdateKeyName();
+			base.Removing(objectValue, index);
+			if (_key != null)
+				_key.UpdateKeyName();
 		}
     }
     
 	public class OrderColumn : System.Object, ICloneable
     {
 		public OrderColumn() : base(){}
-		public OrderColumn(TableVarColumn AColumn, bool AAscending) : base()
+		public OrderColumn(TableVarColumn column, bool ascending) : base()
 		{
-			Column = AColumn;
-			FAscending = AAscending;
+			Column = column;
+			_ascending = ascending;
 		}
 		
-		public OrderColumn(TableVarColumn AColumn, bool AAscending, bool AIncludeNils) : base()
+		public OrderColumn(TableVarColumn column, bool ascending, bool includeNils) : base()
 		{
-			Column = AColumn;
-			FAscending = AAscending;
-			FIncludeNils = AIncludeNils;
+			Column = column;
+			_ascending = ascending;
+			_includeNils = includeNils;
 		}
 		
 		// Compare expression for this column in the order
-		private Sort FSort;
+		private Sort _sort;
 		public Sort Sort
 		{
-			get { return FSort; }
-			set { FSort = value; }
+			get { return _sort; }
+			set { _sort = value; }
 		}
 		
 		// IsDefaultSort
-		private bool FIsDefaultSort = true;
+		private bool _isDefaultSort = true;
 		public bool IsDefaultSort
 		{
-			get { return FIsDefaultSort; }
-			set { FIsDefaultSort = value; }
+			get { return _isDefaultSort; }
+			set { _isDefaultSort = value; }
 		}
 		
 		// Column
 		[Reference]
-		protected TableVarColumn FColumn;
+		protected TableVarColumn _column;
 		public TableVarColumn Column
 		{
-			get { return FColumn; }
-			set { FColumn = value; }
+			get { return _column; }
+			set { _column = value; }
 		}
 
 		// Ascending
-		protected bool FAscending = true;
+		protected bool _ascending = true;
 		public bool Ascending
 		{
-			get { return FAscending; }
-			set { FAscending = value; }
+			get { return _ascending; }
+			set { _ascending = value; }
 		}
 		
 		// IncludeNils
-		protected bool FIncludeNils;
+		protected bool _includeNils;
 		public bool IncludeNils
 		{
-			get { return FIncludeNils; }
-			set { FIncludeNils = value; }
+			get { return _includeNils; }
+			set { _includeNils = value; }
 		}
 
 		// ICloneable
 		public virtual object Clone()
 		{
-			return new OrderColumn(FColumn, FAscending, FIncludeNils);
+			return new OrderColumn(_column, _ascending, _includeNils);
 		}
 		
-		public object Clone(bool AReverse)
+		public object Clone(bool reverse)
 		{
-			return new OrderColumn(FColumn, AReverse ? !FAscending : FAscending, FIncludeNils);
+			return new OrderColumn(_column, reverse ? !_ascending : _ascending, _includeNils);
 		}
 		
 		public override string ToString()
 		{
-			StringBuilder LString = new StringBuilder(FColumn.Name);
-			LString.Append(" ");
+			StringBuilder stringValue = new StringBuilder(_column.Name);
+			stringValue.Append(" ");
 			if (!IsDefaultSort)
-				LString.AppendFormat("{0} {1} ", Keywords.Sort, FSort.CompareNode.EmitStatementAsString());
-			LString.Append(FAscending ? Keywords.Asc : Keywords.Desc);
-			if (FIncludeNils)
-				LString.AppendFormat(" {0} {1}", Keywords.Include, Keywords.Nil);
-			return LString.ToString();
+				stringValue.AppendFormat("{0} {1} ", Keywords.Sort, _sort.CompareNode.EmitStatementAsString());
+			stringValue.Append(_ascending ? Keywords.Asc : Keywords.Desc);
+			if (_includeNils)
+				stringValue.AppendFormat(" {0} {1}", Keywords.Include, Keywords.Nil);
+			return stringValue.ToString();
 		}
 		
-		public Statement EmitStatement(EmitMode AMode)
+		public Statement EmitStatement(EmitMode mode)
 		{
-			OrderColumnDefinition LDefinition = new OrderColumnDefinition(Schema.Object.EnsureRooted(Column.Name), Ascending, IncludeNils);
+			OrderColumnDefinition definition = new OrderColumnDefinition(Schema.Object.EnsureRooted(Column.Name), Ascending, IncludeNils);
 			if (!IsDefaultSort)
-				LDefinition.Sort = FSort.EmitDefinition(AMode);
-			return LDefinition;
+				definition.Sort = _sort.EmitDefinition(mode);
+			return definition;
 		}
 
 		public override int GetHashCode()
 		{
-			int LResult = FColumn.Name.GetHashCode();
+			int result = _column.Name.GetHashCode();
 			if (!IsDefaultSort)
-				LResult ^= FSort.CompareNode.EmitStatementAsString().GetHashCode();
-			if (FAscending)
-				LResult = (LResult << 1) | (LResult >> 31);
-			if (FIncludeNils)
-				LResult = (LResult << 2) | (LResult >> 30);
-			return LResult;
+				result ^= _sort.CompareNode.EmitStatementAsString().GetHashCode();
+			if (_ascending)
+				result = (result << 1) | (result >> 31);
+			if (_includeNils)
+				result = (result << 2) | (result >> 30);
+			return result;
 		}
 
-		public bool Equivalent(OrderColumn AOrderColumn)
+		public bool Equivalent(OrderColumn orderColumn)
 		{
 			return 
-				(AOrderColumn != null) 
-					&& (AOrderColumn.Column.Name == Column.Name) 
-					&& (AOrderColumn.Ascending == FAscending) 
+				(orderColumn != null) 
+					&& (orderColumn.Column.Name == Column.Name) 
+					&& (orderColumn.Ascending == _ascending) 
 					//&& (AOrderColumn.IncludeNils == FIncludeNils) // Should be here, but can't be yet (breaks existing code, and doesn't actually do anything in the physical layer yet, so doesn't matter)
-					&& ((AOrderColumn.Sort == null) == (FSort == null))
-					&& ((AOrderColumn.Sort == null) || AOrderColumn.Sort.Equivalent(FSort));
+					&& ((orderColumn.Sort == null) == (_sort == null))
+					&& ((orderColumn.Sort == null) || orderColumn.Sort.Equivalent(_sort));
 		}
     }
 
 	public class OrderColumns : System.Object
     {
-		private List<OrderColumn> FOrderColumns = new List<OrderColumn>();
+		private List<OrderColumn> _orderColumns = new List<OrderColumn>();
 		
-		public void Add(OrderColumn AOrderColumn)
+		public void Add(OrderColumn orderColumn)
 		{
-			if (Contains(AOrderColumn))
-				throw new SchemaException(SchemaException.Codes.DuplicateOrderColumnDefinition, AOrderColumn.ToString());
-			FOrderColumns.Add(AOrderColumn);
-			FVersion++;
+			if (Contains(orderColumn))
+				throw new SchemaException(SchemaException.Codes.DuplicateOrderColumnDefinition, orderColumn.ToString());
+			_orderColumns.Add(orderColumn);
+			_version++;
 		}
 		
-		public int IndexOf(OrderColumn AOrderColumn)
+		public int IndexOf(OrderColumn orderColumn)
 		{
-			for (int LIndex = 0; LIndex < FOrderColumns.Count; LIndex++)
-				if (FOrderColumns[LIndex].Equivalent(AOrderColumn))
-					return LIndex;
+			for (int index = 0; index < _orderColumns.Count; index++)
+				if (_orderColumns[index].Equivalent(orderColumn))
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(OrderColumn AOrderColumn)
+		public bool Contains(OrderColumn orderColumn)
 		{
-			return IndexOf(AOrderColumn) >= 0;
+			return IndexOf(orderColumn) >= 0;
 		}
 		
-		public int Count { get { return FOrderColumns.Count; } }
+		public int Count { get { return _orderColumns.Count; } }
 		
-		public OrderColumn this[int AIndex] { get { return FOrderColumns[AIndex]; } }
+		public OrderColumn this[int index] { get { return _orderColumns[index]; } }
 
 		/// <summary>Returns the first column in the order referencing the given name, without name resolution</summary>		
-		public OrderColumn this[string AColumnName]
+		public OrderColumn this[string columnName]
 		{
 			get
 			{
-				int LIndex = IndexOf(AColumnName);
-				if (LIndex < 0)
-					throw new SchemaException(SchemaException.Codes.ObjectNotFound, AColumnName);
-				return FOrderColumns[LIndex];
+				int index = IndexOf(columnName);
+				if (index < 0)
+					throw new SchemaException(SchemaException.Codes.ObjectNotFound, columnName);
+				return _orderColumns[index];
 			}
 		}
 		
 		/// <summary>Returns the index of the first reference in the order to the given column name, without name resolution</summary>
-		public int IndexOf(string AColumnName)
+		public int IndexOf(string columnName)
 		{
-			for (int LIndex = 0; LIndex < FOrderColumns.Count; LIndex++)
-				if (FOrderColumns[LIndex].Column.Name == AColumnName)
-					return LIndex;
+			for (int index = 0; index < _orderColumns.Count; index++)
+				if (_orderColumns[index].Column.Name == columnName)
+					return index;
 			return -1;
 		}
 		
 		/// <summary>Returns true if the order contains any reference to the given column name, without name resolution</summary>
-		public bool Contains(string AColumnName)
+		public bool Contains(string columnName)
 		{
-			return IndexOf(AColumnName) >= 0;
+			return IndexOf(columnName) >= 0;
 		}
 		
 		/// <summary>Returns the index of the first reference in the order to the given column name, without name resolution, and using a sort equivalent to the given sort.</summary>
-		public int IndexOf(string AColumnName, Schema.Sort ASort)
+		public int IndexOf(string columnName, Schema.Sort sort)
 		{
-			for (int LIndex = 0; LIndex < FOrderColumns.Count; LIndex++)
-				if ((FOrderColumns[LIndex].Column.Name == AColumnName) && FOrderColumns[LIndex].Sort.Equivalent(ASort))
-					return LIndex;
+			for (int index = 0; index < _orderColumns.Count; index++)
+				if ((_orderColumns[index].Column.Name == columnName) && _orderColumns[index].Sort.Equivalent(sort))
+					return index;
 			return -1;
 		}
 		
 		/// <summary>Returns true if the order contains any reference to the given column name, without name resolution, and using a sort equivalent to the given sort.</summary>
-		public bool Contains(string AColumnName, Schema.Sort ASort)
+		public bool Contains(string columnName, Schema.Sort sort)
 		{
-			return IndexOf(AColumnName, ASort) >= 0;
+			return IndexOf(columnName, sort) >= 0;
 		}
 		
-		private int FVersion;
+		private int _version;
 		/// <summary>Returns the version of the order columns list. Beginning at zero, this number is incremented each time a column is added or removed from the order columns.</summary>
 		/// <remarks>This number is used to coordinate changes to the column list with properties of the order that are dependent on the set of columns in the order, such as Name.</remarks>
-		public int Version { get { return FVersion; } }
+		public int Version { get { return _version; } }
 		
 		public List<OrderColumn>.Enumerator GetEnumerator()
 		{
-			return FOrderColumns.GetEnumerator();
+			return _orderColumns.GetEnumerator();
 		}
 		
 		public override string ToString()
 		{
-			StringBuilder LString = new StringBuilder();
-			for (int LIndex = 0; LIndex < Count; LIndex++)
+			StringBuilder stringValue = new StringBuilder();
+			for (int index = 0; index < Count; index++)
 			{
-				if (LString.Length != 0)
+				if (stringValue.Length != 0)
 				{
-					LString.Append(Keywords.ListSeparator);
-					LString.Append(" ");
+					stringValue.Append(Keywords.ListSeparator);
+					stringValue.Append(" ");
 				}
-				LString.Append(FOrderColumns[LIndex].ToString());
+				stringValue.Append(_orderColumns[index].ToString());
 			}
-			LString.Insert(0, Keywords.BeginList);
-			LString.Append(Keywords.EndList);
-			return LString.ToString();
+			stringValue.Insert(0, Keywords.BeginList);
+			stringValue.Append(Keywords.EndList);
+			return stringValue.ToString();
 		}
 
-		public bool IsSubsetOf(Columns AColumns)
+		public bool IsSubsetOf(Columns columns)
 		{
 			// true if every column in this set of columns is in AColumns
-			for (int LIndex = 0; LIndex < FOrderColumns.Count; LIndex++)
-				if (!AColumns.ContainsName(FOrderColumns[LIndex].Column.Name))
+			for (int index = 0; index < _orderColumns.Count; index++)
+				if (!columns.ContainsName(_orderColumns[index].Column.Name))
 					return false;
 			return true;
 		}
 		
-		public bool IsSubsetOf(TableVarColumnsBase AColumns)
+		public bool IsSubsetOf(TableVarColumnsBase columns)
 		{
 			// true if every column in this set of columns is in AColumns
-			for (int LIndex = 0; LIndex < FOrderColumns.Count; LIndex++)
-				if (!AColumns.ContainsName(FOrderColumns[LIndex].Column.Name))
+			for (int index = 0; index < _orderColumns.Count; index++)
+				if (!columns.ContainsName(_orderColumns[index].Column.Name))
 					return false;
 			return true;
 		}
 		
-		public bool IsSubsetOf(OrderColumns AColumns)
+		public bool IsSubsetOf(OrderColumns columns)
 		{
 			// true if every column in this set of columns is in AColumns
-			for (int LIndex = 0; LIndex < FOrderColumns.Count; LIndex++)
-				if (!AColumns.Contains(FOrderColumns[LIndex].Column.Name))
+			for (int index = 0; index < _orderColumns.Count; index++)
+				if (!columns.Contains(_orderColumns[index].Column.Name))
 					return false;
 			return true;
 		}
 
-		public bool IsProperSubsetOf(Columns AColumns)
+		public bool IsProperSubsetOf(Columns columns)
 		{
 			// true if every column in this set of columns is in AColumns and AColumns is strictly larger
-			return IsSubsetOf(AColumns) && (Count < AColumns.Count);
+			return IsSubsetOf(columns) && (Count < columns.Count);
 		}
 		
-		public bool IsProperSubsetOf(TableVarColumnsBase AColumns)
+		public bool IsProperSubsetOf(TableVarColumnsBase columns)
 		{
-			return IsSubsetOf(AColumns) && (Count < AColumns.Count);
+			return IsSubsetOf(columns) && (Count < columns.Count);
 		}
 
-		public bool IsProperSubsetOf(OrderColumns AColumns)
+		public bool IsProperSubsetOf(OrderColumns columns)
 		{
-			return IsSubsetOf(AColumns) && (Count < AColumns.Count);
+			return IsSubsetOf(columns) && (Count < columns.Count);
 		}
     }
 
 	public class Order : Object
     {		
 		public Order() : base(String.Empty) {}
-		public Order(int AID) : base(AID, String.Empty) {}
+		public Order(int iD) : base(iD, String.Empty) {}
 
-		public Order(MetaData AMetaData) : base(String.Empty)
+		public Order(MetaData metaData) : base(String.Empty)
 		{
-			MetaData = AMetaData;
+			MetaData = metaData;
 		}
 		
-		public Order(int AID, MetaData AMetaData) : base(AID, String.Empty)
+		public Order(int iD, MetaData metaData) : base(iD, String.Empty)
 		{
-			MetaData = AMetaData;
+			MetaData = metaData;
 		}
 		
-		public Order(Order AOrder) : base(String.Empty)
+		public Order(Order order) : base(String.Empty)
 		{
-			OrderColumn LNewOrderColumn;
-			OrderColumn LColumn;
-			for (int LIndex = 0; LIndex < AOrder.Columns.Count; LIndex++)
+			OrderColumn newOrderColumn;
+			OrderColumn column;
+			for (int index = 0; index < order.Columns.Count; index++)
 			{
-				LColumn = AOrder.Columns[LIndex];
-				LNewOrderColumn = new OrderColumn(LColumn.Column, LColumn.Ascending, LColumn.IncludeNils);
-				LNewOrderColumn.Sort = LColumn.Sort;
-				LNewOrderColumn.IsDefaultSort = LColumn.IsDefaultSort;
-				FColumns.Add(LNewOrderColumn);
+				column = order.Columns[index];
+				newOrderColumn = new OrderColumn(column.Column, column.Ascending, column.IncludeNils);
+				newOrderColumn.Sort = column.Sort;
+				newOrderColumn.IsDefaultSort = column.IsDefaultSort;
+				_columns.Add(newOrderColumn);
 			}
 		}
 		
-		public Order(Order AOrder, bool AReverse) : base(String.Empty)
+		public Order(Order order, bool reverse) : base(String.Empty)
 		{
-			OrderColumn LNewOrderColumn;
-			OrderColumn LColumn;
-			for (int LIndex = 0; LIndex < AOrder.Columns.Count; LIndex++)
+			OrderColumn newOrderColumn;
+			OrderColumn column;
+			for (int index = 0; index < order.Columns.Count; index++)
 			{
-				LColumn = AOrder.Columns[LIndex];
-				LNewOrderColumn = new OrderColumn(LColumn.Column, AReverse ? !LColumn.Ascending : LColumn.Ascending, LColumn.IncludeNils);
-				LNewOrderColumn.Sort = LColumn.Sort;
-				LNewOrderColumn.IsDefaultSort = LColumn.IsDefaultSort;
-				FColumns.Add(LNewOrderColumn);
+				column = order.Columns[index];
+				newOrderColumn = new OrderColumn(column.Column, reverse ? !column.Ascending : column.Ascending, column.IncludeNils);
+				newOrderColumn.Sort = column.Sort;
+				newOrderColumn.IsDefaultSort = column.IsDefaultSort;
+				_columns.Add(newOrderColumn);
 			}
 		}
 		
-		public Order(Key AKey) : base(String.Empty)
+		public Order(Key key) : base(String.Empty)
 		{
-			for (int LIndex = 0; LIndex < AKey.Columns.Count; LIndex++)
-				FColumns.Add(new OrderColumn(AKey.Columns[LIndex], true, true));
+			for (int index = 0; index < key.Columns.Count; index++)
+				_columns.Add(new OrderColumn(key.Columns[index], true, true));
 		}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Order"), DisplayName); } }
 
-		public override int CatalogObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
+		public override int CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 
-		public override int ParentObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
+		public override int ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 		
 		/// <summary>Returns the full name of the order, a guaranteed parsable D4 order definition.</summary>
 		/// <remarks>The Name property, in contrast, returns the full name limited to the max object name length of 200 characters.</remarks>
 		private string GetFullName()
 		{
-			StringBuilder LName = new StringBuilder();
-			LName.AppendFormat("{0} {1} ", Keywords.Order, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < FColumns.Count; LIndex++)
+			StringBuilder name = new StringBuilder();
+			name.AppendFormat("{0} {1} ", Keywords.Order, Keywords.BeginList);
+			for (int index = 0; index < _columns.Count; index++)
 			{
-				if (LIndex > 0)
-					LName.AppendFormat("{0} ", Keywords.ListSeparator);
-				LName.Append(FColumns[LIndex].ToString());
+				if (index > 0)
+					name.AppendFormat("{0} ", Keywords.ListSeparator);
+				name.Append(_columns[index].ToString());
 			}
-			LName.AppendFormat("{0}{1}", FColumns.Count > 0 ? " " : "", Keywords.EndList);
-			return LName.ToString();
+			name.AppendFormat("{0}{1}", _columns.Count > 0 ? " " : "", Keywords.EndList);
+			return name.ToString();
 		}
 
 		public override string Name
@@ -1138,34 +1138,34 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { base.Name = value; }
 		}
 
-		private int FColumnsVersion = -1; // Initialize to -1 to ensure name is set the first time
+		private int _columnsVersion = -1; // Initialize to -1 to ensure name is set the first time
 		private void EnsureOrderName()
 		{
-			if (FColumnsVersion < FColumns.Version)
+			if (_columnsVersion < _columns.Version)
 			{
 				Name = GetFullName();
-				FColumnsVersion = FColumns.Version;
+				_columnsVersion = _columns.Version;
 			}
 		}
 
 		// TableVar
 		[Reference]
-		internal TableVar FTableVar;
+		internal TableVar _tableVar;
 		public TableVar TableVar 
 		{ 
-			get { return FTableVar; } 
+			get { return _tableVar; } 
 			set
 			{
-				if (FTableVar != null)
-					FTableVar.Orders.Remove(this);
+				if (_tableVar != null)
+					_tableVar.Orders.Remove(this);
 				if (value != null)
 					value.Orders.Add(this);
 			}
 		}
 		
 		// Columns
-		private OrderColumns FColumns = new OrderColumns();
-		public OrderColumns Columns { get { return FColumns; } }
+		private OrderColumns _columns = new OrderColumns();
+		public OrderColumns Columns { get { return _columns; } }
 		
 		// IsAscending
 		/// <summary>Returns true if all the columns in this order are in ascending order, false if any are descending.</summary>
@@ -1173,8 +1173,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		{ 
 			get 
 			{
-				for (int LIndex = 0; LIndex < FColumns.Count; LIndex++)
-					if (!FColumns[LIndex].Ascending)
+				for (int index = 0; index < _columns.Count; index++)
+					if (!_columns[index].Ascending)
 						return false;
 				return true;
 			}
@@ -1186,51 +1186,51 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			get
 			{
-				for (int LIndex = 0; LIndex < FColumns.Count; LIndex++)
-					if (FColumns[LIndex].Ascending)
+				for (int index = 0; index < _columns.Count; index++)
+					if (_columns[index].Ascending)
 						return false;
 				return true;
 			}
 		}
 
 		// IsInherited
-		private bool FIsInherited;
+		private bool _isInherited;
 		public bool IsInherited
 		{
-			get { return FIsInherited; }
-			set { FIsInherited = value; }
+			get { return _isInherited; }
+			set { _isInherited = value; }
 		}
 
 		/// <summary>Returns true if AOrder can be used to satisfy an ordering by this order.</summary>		
-		public bool Equivalent(Order AOrder)
+		public bool Equivalent(Order order)
 		{
-			if (Columns.Count > AOrder.Columns.Count)
+			if (Columns.Count > order.Columns.Count)
 				return false;
 				
-			for (int LIndex = 0; LIndex < Columns.Count; LIndex++)
-				if (!Columns[LIndex].Equivalent(AOrder.Columns[LIndex]))
+			for (int index = 0; index < Columns.Count; index++)
+				if (!Columns[index].Equivalent(order.Columns[index]))
 					return false;
 			
 			return true;		
 		}
 
-        public override bool Equals(object AObject)
+        public override bool Equals(object objectValue)
         {
             // An order is equal to another order if it contains the same columns (by order and ascending)
-            Order LOrder = AObject as Order;
-            if (LOrder != null)
-				return (Columns.Count == LOrder.Columns.Count) && Equivalent(LOrder);
+            Order order = objectValue as Order;
+            if (order != null)
+				return (Columns.Count == order.Columns.Count) && Equivalent(order);
 
-            return base.Equals(AObject);
+            return base.Equals(objectValue);
         }
 
         // GetHashCode
         public override int GetHashCode()
         {
-			int LHashCode = 0;
-			for (int LIndex = 0; LIndex < FColumns.Count; LIndex++)
-				LHashCode ^= FColumns[LIndex].GetHashCode();
-			return LHashCode;
+			int hashCode = 0;
+			for (int index = 0; index < _columns.Count; index++)
+				hashCode ^= _columns[index].GetHashCode();
+			return hashCode;
         }
 
         public override string ToString()
@@ -1238,38 +1238,38 @@ namespace Alphora.Dataphor.DAE.Schema
 			return Name;
         }
         
-        public override Statement EmitStatement(EmitMode AMode)
+        public override Statement EmitStatement(EmitMode mode)
         {
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			OrderDefinition LOrder = new OrderDefinition();
-			for (int LIndex = 0; LIndex < Columns.Count; LIndex++)
-				LOrder.Columns.Add(Columns[LIndex].EmitStatement(AMode));
-			LOrder.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LOrder;
+			OrderDefinition order = new OrderDefinition();
+			for (int index = 0; index < Columns.Count; index++)
+				order.Columns.Add(Columns[index].EmitStatement(mode));
+			order.MetaData = MetaData == null ? null : MetaData.Copy();
+			return order;
         }
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DropOrderDefinition LOrder = new DropOrderDefinition();
-			for (int LIndex = 0; LIndex < Columns.Count; LIndex++)
-				LOrder.Columns.Add(Columns[LIndex].EmitStatement(AMode));
-			return LOrder;
+			DropOrderDefinition order = new DropOrderDefinition();
+			for (int index = 0; index < Columns.Count; index++)
+				order.Columns.Add(Columns[index].EmitStatement(mode));
+			return order;
 		}
         
-        public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
         {
-			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 			
-			OrderColumn LColumn;
-			for (int LIndex = 0; LIndex < Columns.Count; LIndex++)
+			OrderColumn column;
+			for (int index = 0; index < Columns.Count; index++)
 			{
-				LColumn = Columns[LIndex];
-				if (LColumn.Sort != null)
-					LColumn.Sort.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+				column = Columns[index];
+				if (column.Sort != null)
+					column.Sort.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 			}
         }
     }
@@ -1288,14 +1288,14 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 	#endif
 		public Orders() : base() { }
-		public Orders(TableVar ATableVar) : base()
+		public Orders(TableVar tableVar) : base()
 		{
-			FTableVar = ATableVar;
+			_tableVar = tableVar;
 		}
 		
 		[Reference]
-		private TableVar FTableVar;
-		public TableVar TableVar { get { return FTableVar; } }
+		private TableVar _tableVar;
+		public TableVar TableVar { get { return _tableVar; } }
 		
 		#if USETYPEDLIST
 		protected override void Adding(object AItem, int AIndex)
@@ -1316,15 +1316,15 @@ namespace Alphora.Dataphor.DAE.Schema
             set { base[AIndex] = value; }
         }
         #else
-        protected override void Adding(Order AValue, int AIndex)
+        protected override void Adding(Order tempValue, int index)
 		{
  			 //base.Adding(AValue, AIndex);
-			 AValue.FTableVar = FTableVar;
+			 tempValue._tableVar = _tableVar;
 		}
 		
-		protected override void Removing(Order AValue, int AIndex)
+		protected override void Removing(Order tempValue, int index)
 		{
- 			 AValue.FTableVar = null;
+ 			 tempValue._tableVar = null;
  			 //base.Removing(AValue, AIndex);
 		}
         #endif
@@ -1332,17 +1332,17 @@ namespace Alphora.Dataphor.DAE.Schema
         // ToString
         public override string ToString()
         {
-			StringBuilder LString = new StringBuilder();
-			foreach (Order LOrder in this)
+			StringBuilder stringValue = new StringBuilder();
+			foreach (Order order in this)
 			{
-				if (LString.Length != 0)
+				if (stringValue.Length != 0)
 				{
-					LString.Append(Keywords.ListSeparator);
-					LString.Append(" ");
+					stringValue.Append(Keywords.ListSeparator);
+					stringValue.Append(" ");
 				}
-				LString.Append(LOrder.ToString());
+				stringValue.Append(order.ToString());
 			}
-			return LString.ToString();
+			return stringValue.ToString();
         }
     }
     
@@ -1354,80 +1354,80 @@ namespace Alphora.Dataphor.DAE.Schema
 			UpdateKeyName();
 		}
 		
-		public Key(int AID) : base(AID, String.Empty)
+		public Key(int iD) : base(iD, String.Empty)
 		{
 			InternalInitialize();
 			UpdateKeyName();
 		}
 		
-        public Key(MetaData AMetaData) : base(String.Empty)
+        public Key(MetaData metaData) : base(String.Empty)
         {
-			MetaData = AMetaData;
+			MetaData = metaData;
 			InternalInitialize();
 			UpdateKeyName();
         }
         
-        public Key(int AID, MetaData AMetaData) : base(AID, String.Empty)
+        public Key(int iD, MetaData metaData) : base(iD, String.Empty)
         {
-			MetaData = AMetaData;
+			MetaData = metaData;
 			InternalInitialize();
 			UpdateKeyName();
         }
         
-        public Key(TableVarColumn[] AColumns) : base(String.Empty)
+        public Key(TableVarColumn[] columns) : base(String.Empty)
         {
 			InternalInitialize();
-			if (AColumns.Length > 0)
-				foreach (TableVarColumn LColumn in AColumns)
-					FColumns.Add(LColumn);
+			if (columns.Length > 0)
+				foreach (TableVarColumn column in columns)
+					_columns.Add(column);
 			else
 				UpdateKeyName();
         }
         
-        public Key(MetaData AMetaData, TableVarColumn[] AColumns) : base(String.Empty)
+        public Key(MetaData metaData, TableVarColumn[] columns) : base(String.Empty)
         {
-			MetaData = AMetaData;
+			MetaData = metaData;
 			InternalInitialize();
-			if (AColumns.Length > 0)
-				foreach (TableVarColumn LColumn in AColumns)
-					FColumns.Add(LColumn);
+			if (columns.Length > 0)
+				foreach (TableVarColumn column in columns)
+					_columns.Add(column);
 			else
 				UpdateKeyName();
         }
 
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Key"), DisplayName); } }
 
-		public override int CatalogObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
+		public override int CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 
-		public override int ParentObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
+		public override int ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 
         private void InternalInitialize()
         {
-			FColumns = new KeyColumns(this);
+			_columns = new KeyColumns(this);
         }
         
-        private bool FNameCurrent = false;
+        private bool _nameCurrent = false;
 
         internal void UpdateKeyName()
         {
-			FNameCurrent = false;
+			_nameCurrent = false;
         }
         
         private void EnsureKeyName()
         {
-			if (!FNameCurrent)
+			if (!_nameCurrent)
 			{
-				StringBuilder LName = new StringBuilder();
-				LName.AppendFormat("{0} {1} ", Keywords.Key, Keywords.BeginList);
-				for (int LIndex = 0; LIndex < FColumns.Count; LIndex++)
+				StringBuilder name = new StringBuilder();
+				name.AppendFormat("{0} {1} ", Keywords.Key, Keywords.BeginList);
+				for (int index = 0; index < _columns.Count; index++)
 				{
-					if (LIndex > 0)
-						LName.AppendFormat("{0} ", Keywords.ListSeparator);
-					LName.Append(FColumns[LIndex].Name);
+					if (index > 0)
+						name.AppendFormat("{0} ", Keywords.ListSeparator);
+					name.Append(_columns[index].Name);
 				}
-				LName.AppendFormat("{0}{1}", FColumns.Count > 0 ? " " : "", Keywords.EndList);
-				Name = LName.ToString();
-				FNameCurrent = true;
+				name.AppendFormat("{0}{1}", _columns.Count > 0 ? " " : "", Keywords.EndList);
+				Name = name.ToString();
+				_nameCurrent = true;
 			}
         }
         
@@ -1441,19 +1441,19 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { base.Name = value; }
 		}
         
-        public override bool Equals(object AObject)
+        public override bool Equals(object objectValue)
         {
-			Key LKey = AObject as Key;
-			return (LKey != null) && FColumns.Equals(LKey.Columns) && (FIsSparse == LKey.IsSparse);
+			Key key = objectValue as Key;
+			return (key != null) && _columns.Equals(key.Columns) && (_isSparse == key.IsSparse);
         }
         
         // GetHashCode
         public override int GetHashCode()
         {
-			int LHashCode = 0;
-			for (int LIndex = 0; LIndex < FColumns.Count; LIndex++)
-				LHashCode ^= FColumns[LIndex].Name.GetHashCode();
-			return LHashCode;
+			int hashCode = 0;
+			for (int index = 0; index < _columns.Count; index++)
+				hashCode ^= _columns[index].Name.GetHashCode();
+			return hashCode;
         }
         
         // Equivalent
@@ -1461,40 +1461,40 @@ namespace Alphora.Dataphor.DAE.Schema
         /// <remarks>
         /// This is different than equality in that equality also considers sparseness of the key.
         /// </remarks>
-        public bool Equivalent(Key AKey)
+        public bool Equivalent(Key key)
         {
-			return FColumns.Equals(AKey.Columns);
+			return _columns.Equals(key.Columns);
         }
         
 		// TableVar
 		[Reference]
-		internal TableVar FTableVar;
+		internal TableVar _tableVar;
 		public TableVar TableVar 
 		{ 
-			get { return FTableVar; } 
+			get { return _tableVar; } 
 			set
 			{
-				if (FTableVar != null)
-					FTableVar.Keys.Remove(this);
+				if (_tableVar != null)
+					_tableVar.Keys.Remove(this);
 				if (value != null)
 					value.Keys.Add(this);
 			}
 		}
 		
         // Columns
-        private KeyColumns FColumns;
-		public KeyColumns Columns { get { return FColumns; } }
+        private KeyColumns _columns;
+		public KeyColumns Columns { get { return _columns; } }
         
         // IsInherited
-        private bool FIsInherited;
+        private bool _isInherited;
         public bool IsInherited
         {
-			get { return FIsInherited; }
-			set { FIsInherited = value; }
+			get { return _isInherited; }
+			set { _isInherited = value; }
         }
         
         // IsSparse
-        private bool FIsSparse;
+        private bool _isSparse;
         /// <summary>Indicates whether or not the key will consider rows with nils for the purpose of duplicate detection</summary>
         /// <remarks>
         /// Sparse keys do not consider rows with nils, allowing multiple rows with nils for the columns of the key.
@@ -1503,8 +1503,8 @@ namespace Alphora.Dataphor.DAE.Schema
         /// </remarks>
         public bool IsSparse
         {
-			get { return FIsSparse; }
-			set { FIsSparse = value; }
+			get { return _isSparse; }
+			set { _isSparse = value; }
 		}
 		
 		// IsNilable
@@ -1512,28 +1512,28 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			get
 			{
-				for (int LIndex = 0; LIndex < FColumns.Count; LIndex++)
-					if (FColumns[LIndex].IsNilable)
+				for (int index = 0; index < _columns.Count; index++)
+					if (_columns[index].IsNilable)
 						return true;
 				return false;
 			}
 		}
 
 		// Enforced
-		private bool FEnforced = true;
+		private bool _enforced = true;
 		/// <summary>Indicates whether or not the constraint is enforced.</summary>
 		/// <remarks>Set by the DAE.Enforced tag when the constraint is created.</remarks>
 		public bool Enforced
 		{
-			get { return FEnforced; }
-			set { FEnforced = value; }
+			get { return _enforced; }
+			set { _enforced = value; }
 		}
 		
-		private TransitionConstraint FConstraint;
+		private TransitionConstraint _constraint;
 		public TransitionConstraint Constraint
 		{
-			get { return FConstraint; }
-			set { FConstraint = value; }
+			get { return _constraint; }
+			set { _constraint = value; }
 		}
 		
         // ToString
@@ -1542,41 +1542,41 @@ namespace Alphora.Dataphor.DAE.Schema
 			return Name;
         }
         
-        public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
         {
-			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 			
-			TableVarColumn LColumn;
-			for (int LIndex = 0; LIndex < Columns.Count; LIndex++)
+			TableVarColumn column;
+			for (int index = 0; index < Columns.Count; index++)
 			{
-				LColumn = Columns[LIndex];
+				column = Columns[index];
 				// TODO: Fix this boundary-cross
-				Schema.Sort LSort = ASession.ServerProcess.ValueManager.GetUniqueSort(LColumn.DataType);
-				if (LSort != null)
-					LSort.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+				Schema.Sort sort = session.ServerProcess.ValueManager.GetUniqueSort(column.DataType);
+				if (sort != null)
+					sort.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 			}
         }
 
-        public override Statement EmitStatement(EmitMode AMode)
+        public override Statement EmitStatement(EmitMode mode)
         {
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			KeyDefinition LKey = new KeyDefinition();
-			foreach (TableVarColumn LColumn in Columns)
-				LKey.Columns.Add(new KeyColumnDefinition(Schema.Object.EnsureRooted(LColumn.Name)));
-			LKey.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LKey;
+			KeyDefinition key = new KeyDefinition();
+			foreach (TableVarColumn column in Columns)
+				key.Columns.Add(new KeyColumnDefinition(Schema.Object.EnsureRooted(column.Name)));
+			key.MetaData = MetaData == null ? null : MetaData.Copy();
+			return key;
         }
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DropKeyDefinition LDefinition = new DropKeyDefinition();
-			foreach (TableVarColumn LColumn in Columns)
-				LDefinition.Columns.Add(new KeyColumnDefinition(Schema.Object.EnsureRooted(LColumn.Name)));
-			return LDefinition;
+			DropKeyDefinition definition = new DropKeyDefinition();
+			foreach (TableVarColumn column in Columns)
+				definition.Columns.Add(new KeyColumnDefinition(Schema.Object.EnsureRooted(column.Name)));
+			return definition;
 		}
     }
     
@@ -1584,11 +1584,11 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		public JoinKey() : base() {}
 		
-		private bool FIsUnique;
+		private bool _isUnique;
 		public bool IsUnique
 		{
-			get { return FIsUnique; }
-			set { FIsUnique = value; }
+			get { return _isUnique; }
+			set { _isUnique = value; }
 		}
     }
     
@@ -1605,15 +1605,15 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class Keys : ValidatingBaseList<Key>
 	{
 		public Keys() : base() { }
-		public Keys(TableVar ATableVar) : base()
+		public Keys(TableVar tableVar) : base()
 		{
-			FTableVar = ATableVar;
+			_tableVar = tableVar;
 		}
 	#endif
 		
 		[Reference]
-		private TableVar FTableVar;
-		public TableVar TableVar { get { return FTableVar; } }
+		private TableVar _tableVar;
+		public TableVar TableVar { get { return _tableVar; } }
 		
 		#if USETYPEDLIST
 		protected override void Adding(object AItem, int AIndex)
@@ -1634,86 +1634,129 @@ namespace Alphora.Dataphor.DAE.Schema
             set { base[AIndex] = value; }
         }
 		#else
-        protected override void Adding(Key AValue, int AIndex)
+        protected override void Adding(Key tempValue, int index)
 		{
  			 //base.Adding(AValue, AIndex);
-			 AValue.FTableVar = FTableVar;
+			 tempValue._tableVar = _tableVar;
 		}
 		
-		protected override void Removing(Key AValue, int AIndex)
+		protected override void Removing(Key tempValue, int index)
 		{
- 			 AValue.FTableVar = null;
+ 			 tempValue._tableVar = null;
  			 //base.Removing(AValue, AIndex);
 		}
 		#endif
 
-        public bool IsKeyColumnName(string AColumnName)
+        public bool IsKeyColumnName(string columnName)
         {
-			foreach (Schema.Key LKey in this)
-				if (LKey.Columns.ContainsName(AColumnName))
+			foreach (Schema.Key key in this)
+				if (key.Columns.ContainsName(columnName))
 					return true;
 			return false;
         }
-        
-        public Key MinimumKey(bool AAllowSparse, bool AAllowNilable)
-        {
-			Key LMinimumKey = null;
-			for (int LIndex = Count - 1; LIndex >= 0; LIndex--)
+
+		public Key SuperKey(bool allowSparse, bool allowNilable)
+		{
+			var isValid = false;
+			var superKey = new Key();
+
+			for (int index = 0; index < Count; index++)
 			{
-				if ((AAllowNilable || !this[LIndex].IsNilable) && (AAllowSparse || !this[LIndex].IsSparse))
-					if (LMinimumKey == null)
-						LMinimumKey = this[LIndex];
-					else
-						if (this[LIndex].Columns.Count < LMinimumKey.Columns.Count)
-							LMinimumKey = this[LIndex];
+				if ((allowNilable || !this[index].IsNilable) && (allowSparse || !this[index].IsSparse))
+				{
+					isValid = true;
+
+					for (int columnIndex = 0; columnIndex < this[index].Columns.Count; columnIndex++)
+					{
+						if (!superKey.Columns.ContainsName(this[index].Columns[columnIndex].Name))
+							superKey.Columns.Add(this[index].Columns[columnIndex]);
+					}
+				}
 			}
 
-			if (LMinimumKey == null)
-				if (AAllowSparse && AAllowNilable)
-					throw new SchemaException(SchemaException.Codes.NoKeysAvailable, FTableVar == null ? "<unknown>" : FTableVar.DisplayName);
-				else if (AAllowNilable)
-					throw new SchemaException(SchemaException.Codes.NoNonSparseKeysAvailable, FTableVar == null ? "<unknown>" : FTableVar.DisplayName);
+			if (!isValid)
+			{
+				if (allowSparse && allowNilable)
+					throw new SchemaException(SchemaException.Codes.NoKeysAvailable, _tableVar == null ? "<unknown>" : _tableVar.DisplayName);
+				else if (allowNilable)
+					throw new SchemaException(SchemaException.Codes.NoNonSparseKeysAvailable, _tableVar == null ? "<unknown>" : _tableVar.DisplayName);
 				else
-					throw new SchemaException(SchemaException.Codes.NoNonNilableKeysAvailable, FTableVar == null ? "<unknown>" : FTableVar.DisplayName);
-
-			return LMinimumKey;
-        }
-        
-        public Key MinimumKey(bool AAllowSparse)
-        {
-			return MinimumKey(AAllowSparse, true);
-        }
-        
-        public Key MinimumSubsetKey(TableVarColumnsBase AColumns)
-        {
-			Key LMinimumKey = null;
-			for (int LIndex = Count - 1; LIndex >= 0; LIndex--)
-			{
-				if (this[LIndex].Columns.IsSubsetOf(AColumns))
-					if (LMinimumKey == null)
-						LMinimumKey = this[LIndex];
-					else
-						if (this[LIndex].Columns.Count < LMinimumKey.Columns.Count)
-							LMinimumKey = this[LIndex];
+					throw new SchemaException(SchemaException.Codes.NoNonNilableKeysAvailable, _tableVar == null ? "<unknown>" : _tableVar.DisplayName);
 			}
 
-			return LMinimumKey;
+			return superKey;
+		}
+        
+        public Key MinimumKey(bool allowSparse, bool allowNilable)
+        {
+			Key minimumKey = null;
+			for (int index = Count - 1; index >= 0; index--)
+			{
+				if ((allowNilable || !this[index].IsNilable) && (allowSparse || !this[index].IsSparse))
+					if (minimumKey == null)
+						minimumKey = this[index];
+					else
+						if (this[index].Columns.Count < minimumKey.Columns.Count)
+							minimumKey = this[index];
+			}
+
+			if (minimumKey == null)
+				if (allowSparse && allowNilable)
+					throw new SchemaException(SchemaException.Codes.NoKeysAvailable, _tableVar == null ? "<unknown>" : _tableVar.DisplayName);
+				else if (allowNilable)
+					throw new SchemaException(SchemaException.Codes.NoNonSparseKeysAvailable, _tableVar == null ? "<unknown>" : _tableVar.DisplayName);
+				else
+					throw new SchemaException(SchemaException.Codes.NoNonNilableKeysAvailable, _tableVar == null ? "<unknown>" : _tableVar.DisplayName);
+
+			return minimumKey;
         }
+        
+        public Key MinimumKey(bool allowSparse)
+        {
+			return MinimumKey(allowSparse, true);
+        }
+        
+        public Key MinimumSubsetKey(TableVarColumnsBase columns, bool allowSparse, bool allowNilable)
+        {
+			Key minimumKey = null;
+			for (int index = Count - 1; index >= 0; index--)
+			{
+				if ((allowNilable || !this[index].IsNilable) && (allowSparse || !this[index].IsSparse))
+					if (this[index].Columns.IsSubsetOf(columns))
+						if (minimumKey == null)
+							minimumKey = this[index];
+						else
+							if (this[index].Columns.Count < minimumKey.Columns.Count)
+								minimumKey = this[index];
+			}
+
+			return minimumKey;
+        }
+
+		public Key MinimumSubsetKey(TableVarColumnsBase columns, bool allowSparse)
+		{
+			return MinimumSubsetKey(columns, allowSparse, true);
+		}
+
+		public Key MinimumSubsetKey(TableVarColumnsBase columns)
+		{
+			return MinimumSubsetKey(columns, true, true);
+		}
         
         // ToString
         public override string ToString()
         {
-			StringBuilder LString = new StringBuilder();
-			foreach (Key LKey in this)
+			StringBuilder stringValue = new StringBuilder();
+			foreach (Key key in this)
 			{
-				if (LString.Length != 0)
+				if (stringValue.Length != 0)
 				{
-					LString.Append(Keywords.ListSeparator);
-					LString.Append(" ");
+					stringValue.Append(Keywords.ListSeparator);
+					stringValue.Append(" ");
 				}
-				LString.Append(LKey.ToString());
+				stringValue.Append(key.ToString());
 			}
-			return LString.ToString();
+			return stringValue.ToString();
         }
     }
     
@@ -1722,13 +1765,13 @@ namespace Alphora.Dataphor.DAE.Schema
     /// <summary> Base class for data table definitions </summary>
 	public abstract class TableVar : CatalogObject
     {
-		public TableVar(string AName) : base(AName)
+		public TableVar(string name) : base(name)
 		{
 			IsRemotable = false;
 			InternalInitialize();
 		}
 		
-		public TableVar(int AID, string AName) : base(AID, AName)
+		public TableVar(int iD, string name) : base(iD, name)
 		{
 			IsRemotable = false;
 			InternalInitialize();
@@ -1750,46 +1793,46 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// DataType
-		protected ITableType FDataType;
+		protected ITableType _dataType;
 		public ITableType DataType
 		{
-			get { return FDataType; }
-			set { FDataType = value; }
+			get { return _dataType; }
+			set { _dataType = value; }
 		}
 		
 		private void InternalInitialize()
 		{
-			FColumns = new TableVarColumns(this);
-			FKeys = new Keys(this);
-			FOrders = new Orders(this);
-			FConstraints = new TableVarConstraints(this);
-			FRowConstraints = new RowConstraints();
+			_columns = new TableVarColumns(this);
+			_keys = new Keys(this);
+			_orders = new Orders(this);
+			_constraints = new TableVarConstraints(this);
+			_rowConstraints = new RowConstraints();
 		}
 		
 		public void ResetHasDeferredConstraintsComputed()
 		{
-			FHasDeferredConstraintsComputed = false;
+			_hasDeferredConstraintsComputed = false;
 		}
 		
-		public void ValidateChildObjectName(string AName)
+		public void ValidateChildObjectName(string name)
 		{
 			if 
 				(
-					(FColumns.IndexOfName(AName) >= 0) ||
-					(FConstraints.IndexOfName(AName) >= 0)
+					(_columns.IndexOfName(name) >= 0) ||
+					(_constraints.IndexOfName(name) >= 0)
 				)
 			{
-				throw new SchemaException(SchemaException.Codes.DuplicateChildObjectName, AName);
+				throw new SchemaException(SchemaException.Codes.DuplicateChildObjectName, name);
 			}
 		}
 		
 		// Columns
-		private TableVarColumns FColumns;
-		public TableVarColumns Columns { get { return FColumns; } }
+		private TableVarColumns _columns;
+		public TableVarColumns Columns { get { return _columns; } }
 		
 		// Keys
-		private Keys FKeys;
-		public Keys Keys { get { return FKeys; } }
+		private Keys _keys;
+		public Keys Keys { get { return _keys; } }
 		
 		/// <summary>Returns the index of the key with the same columns as the given key.</summary>
 		/// <remarks>
@@ -1797,41 +1840,41 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// which includes the sparseness of the key. This method is used to find a key by columns only,
 		/// and will return the first key with the same columns.
 		/// </remarks>
-		public int IndexOfKey(Key AKey)
+		public int IndexOfKey(Key key)
 		{
-			for (int LIndex = 0; LIndex < FKeys.Count; LIndex++)
-				if (Keys[LIndex].Equivalent(AKey))
-					return LIndex;
+			for (int index = 0; index < _keys.Count; index++)
+				if (Keys[index].Equivalent(key))
+					return index;
 			return -1;
 		}
 		
 		// EnsureTableVarColumns()
 		public void EnsureTableVarColumns()
 		{
-			foreach (Schema.Column LColumn in DataType.Columns)
-				if (!FColumns.ContainsName(LColumn.Name))
-					FColumns.Add(new Schema.TableVarColumn(LColumn));
+			foreach (Schema.Column column in DataType.Columns)
+				if (!_columns.ContainsName(column.Name))
+					_columns.Add(new Schema.TableVarColumn(column));
 		}
 		
 		// Orders
-		private Orders FOrders;
-		public Orders Orders { get { return FOrders; } }
+		private Orders _orders;
+		public Orders Orders { get { return _orders; } }
 		
-		public int IndexOfOrder(Order AOrder)
+		public int IndexOfOrder(Order order)
 		{
-			for (int LIndex = 0; LIndex < Orders.Count; LIndex++)
-				if (Orders[LIndex].Equals(AOrder))
-					return LIndex;
+			for (int index = 0; index < Orders.Count; index++)
+				if (Orders[index].Equals(order))
+					return index;
 					
 			return -1;
 		}
 		
 		// Constraints
-		private TableVarConstraints FConstraints;
-		public TableVarConstraints Constraints { get { return FConstraints; } }
+		private TableVarConstraints _constraints;
+		public TableVarConstraints Constraints { get { return _constraints; } }
 		
-		private RowConstraints FRowConstraints;
-		public RowConstraints RowConstraints { get { return FRowConstraints; } }
+		private RowConstraints _rowConstraints;
+		public RowConstraints RowConstraints { get { return _rowConstraints; } }
 		
 		public bool IsConstant;
 		public bool IsModified;
@@ -1841,221 +1884,221 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		// List of references in which this table variable is involved as a source
 		[Reference]
-		private References FSourceReferences = new References();
-		public References SourceReferences { get { return FSourceReferences; } }
+		private References _sourceReferences = new References();
+		public References SourceReferences { get { return _sourceReferences; } }
 		
 		// List of references in which this table variable is involved as a target
 		[Reference]
-		private References FTargetReferences = new References();
-		public References TargetReferences { get { return FTargetReferences; } }
+		private References _targetReferences = new References();
+		public References TargetReferences { get { return _targetReferences; } }
 
 		// List of references derived by type inference, not actually present in the catalog.
 		[Reference]
-		private References FDerivedReferences = new References();
-		public References DerivedReferences { get { return FDerivedReferences; } }
+		private References _derivedReferences = new References();
+		public References DerivedReferences { get { return _derivedReferences; } }
 		
 		public bool HasHandlers()
 		{
-			return (FEventHandlers != null) && (FEventHandlers.Count > 0);
+			return (_eventHandlers != null) && (_eventHandlers.Count > 0);
 		}
 		
-		public bool HasHandlers(EventType AEventType)
+		public bool HasHandlers(EventType eventType)
 		{
-			return (FEventHandlers != null) && FEventHandlers.HasHandlers(AEventType);
+			return (_eventHandlers != null) && _eventHandlers.HasHandlers(eventType);
 		}
 		
 		// List of EventHandlers associated with this table variable
-		private TableVarEventHandlers FEventHandlers;
+		private TableVarEventHandlers _eventHandlers;
 		public TableVarEventHandlers EventHandlers 
 		{ 
 			get 
 			{ 
-				if (FEventHandlers == null)
-					FEventHandlers = new TableVarEventHandlers(this);
-				return FEventHandlers; 
+				if (_eventHandlers == null)
+					_eventHandlers = new TableVarEventHandlers(this);
+				return _eventHandlers; 
 			} 
 		}
 		
         // ShouldDefault
-        private bool FShouldDefault = true;
+        private bool _shouldDefault = true;
         public bool ShouldDefault
         {
-			get { return FShouldDefault; }
-			set { FShouldDefault = value; } 
+			get { return _shouldDefault; }
+			set { _shouldDefault = value; } 
 		}
 
         // ShouldValidate
-        private bool FShouldValidate = true;
+        private bool _shouldValidate = true;
         public bool ShouldValidate
         {
-			get { return FShouldValidate; }
-			set { FShouldValidate = value; } 
+			get { return _shouldValidate; }
+			set { _shouldValidate = value; } 
 		}
 
         // ShouldChange
-        private bool FShouldChange = true;
+        private bool _shouldChange = true;
         public bool ShouldChange
         {
-			get { return FShouldChange; }
-			set { FShouldChange = value; } 
+			get { return _shouldChange; }
+			set { _shouldChange = value; } 
 		}
         
         // IsDefaultRemotable
-        private bool FIsDefaultRemotable = true;
+        private bool _isDefaultRemotable = true;
         public bool IsDefaultRemotable
         {
-			get { return FIsDefaultRemotable; }
-			set { FIsDefaultRemotable = value; }
+			get { return _isDefaultRemotable; }
+			set { _isDefaultRemotable = value; }
         }
 
-		private bool FAllDefaultsRemotable = true;
-        public bool IsDefaultCallRemotable(string AColumnName)
+		private bool _allDefaultsRemotable = true;
+        public bool IsDefaultCallRemotable(string columnName)
         {
 			// A default call is remotable if the table level default is remotable, 
 			// and either a column is specified and that column level default is remotable, 
 			// or no column name is specified and all column level defaults are remotable
 			return
-				FIsDefaultRemotable &&
+				_isDefaultRemotable &&
 					(
-						(AColumnName == String.Empty) ? 
-							FAllDefaultsRemotable : 
-							Columns[AColumnName].IsDefaultRemotable
+						(columnName == String.Empty) ? 
+							_allDefaultsRemotable : 
+							Columns[columnName].IsDefaultRemotable
 					);
         }
         
         // IsValidateRemotable
-        private bool FIsValidateRemotable = true;
+        private bool _isValidateRemotable = true;
         public bool IsValidateRemotable
         {
-			get { return FIsValidateRemotable; }
-			set { FIsValidateRemotable = value; }
+			get { return _isValidateRemotable; }
+			set { _isValidateRemotable = value; }
         }
         
-		private bool FAllValidatesRemotable = true;
-        public bool IsValidateCallRemotable(string AColumnName)
+		private bool _allValidatesRemotable = true;
+        public bool IsValidateCallRemotable(string columnName)
         {
 			// A Validate call is remotable if the table level Validate is remotable, 
 			// and either a column is specified and that column level Validate is remotable, 
 			// or no column name is specified and all column level Validates are remotable
 			return
-				FIsValidateRemotable &&
+				_isValidateRemotable &&
 					(
-						(AColumnName == String.Empty) ? 
-							FAllValidatesRemotable : 
-							Columns[AColumnName].IsValidateRemotable
+						(columnName == String.Empty) ? 
+							_allValidatesRemotable : 
+							Columns[columnName].IsValidateRemotable
 					);
         }
         
         // IsChangeRemotable
-        private bool FIsChangeRemotable = true;
+        private bool _isChangeRemotable = true;
         public bool IsChangeRemotable
         {
-			get { return FIsChangeRemotable; }
-			set { FIsChangeRemotable = value; }
+			get { return _isChangeRemotable; }
+			set { _isChangeRemotable = value; }
         }
         
-		private bool FAllChangesRemotable = true;
-        public bool IsChangeCallRemotable(string AColumnName)
+		private bool _allChangesRemotable = true;
+        public bool IsChangeCallRemotable(string columnName)
         {
 			// A Change call is remotable if the table level Change is remotable, 
 			// and either a column is specified and that column level Change is remotable, 
 			// or no column name is specified and all column level Changes are remotable
 			return
-				FIsChangeRemotable &&
+				_isChangeRemotable &&
 					(
-						(AColumnName == String.Empty) ? 
-							FAllChangesRemotable : 
-							Columns[AColumnName].IsChangeRemotable
+						(columnName == String.Empty) ? 
+							_allChangesRemotable : 
+							Columns[columnName].IsChangeRemotable
 					);
         }
         
-        public virtual void DetermineShouldCallProposables(bool AReset)
+        public virtual void DetermineShouldCallProposables(bool reset)
         {
-			if (AReset)
+			if (reset)
 			{
-				FShouldChange = false;
-				FShouldDefault = false;
-				FShouldValidate = false;
+				_shouldChange = false;
+				_shouldDefault = false;
+				_shouldValidate = false;
 			}
 			
-			foreach (TableVarColumn LColumn in Columns)
+			foreach (TableVarColumn column in Columns)
 			{
-				LColumn.DetermineShouldCallProposables(AReset);
-				FShouldChange = FShouldChange || LColumn.ShouldChange;
-				FShouldDefault = FShouldDefault || LColumn.ShouldDefault;
-				FShouldValidate = FShouldValidate || LColumn.ShouldValidate;
+				column.DetermineShouldCallProposables(reset);
+				_shouldChange = _shouldChange || column.ShouldChange;
+				_shouldDefault = _shouldDefault || column.ShouldDefault;
+				_shouldValidate = _shouldValidate || column.ShouldValidate;
 			}
 			
-			if (FRowConstraints.Count > 0)
-				FShouldValidate = true;
+			if (_rowConstraints.Count > 0)
+				_shouldValidate = true;
 			
 			if (HasHandlers())
 			{
-				foreach (EventHandler LHandler in FEventHandlers)
+				foreach (EventHandler handler in _eventHandlers)
 				{
-					if ((LHandler.EventType & EventType.Default) != 0)
-						FShouldDefault = true;
+					if ((handler.EventType & EventType.Default) != 0)
+						_shouldDefault = true;
 					
-					if ((LHandler.EventType & EventType.Validate) != 0)
-						FShouldValidate = true;
+					if ((handler.EventType & EventType.Validate) != 0)
+						_shouldValidate = true;
 					
-					if ((LHandler.EventType & EventType.Change) != 0)
-						FShouldChange = true;
+					if ((handler.EventType & EventType.Change) != 0)
+						_shouldChange = true;
 				}
 			}
         }
         
-		public override void DetermineRemotable(CatalogDeviceSession ASession)
+		public override void DetermineRemotable(CatalogDeviceSession session)
 		{
 			IsDefaultRemotable = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsDefaultRemotable", "true"));
 			IsValidateRemotable = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsValidateRemotable", "true"));
 			IsChangeRemotable = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsChangeRemotable", "true"));
 			
-			foreach (TableVarColumn LColumn in Columns)
+			foreach (TableVarColumn column in Columns)
 			{
-				FAllDefaultsRemotable = FAllDefaultsRemotable && LColumn.IsDefaultRemotable;
-				FAllValidatesRemotable = FAllValidatesRemotable && LColumn.IsValidateRemotable;
-				FAllChangesRemotable = FAllChangesRemotable && LColumn.IsChangeRemotable;
+				_allDefaultsRemotable = _allDefaultsRemotable && column.IsDefaultRemotable;
+				_allValidatesRemotable = _allValidatesRemotable && column.IsValidateRemotable;
+				_allChangesRemotable = _allChangesRemotable && column.IsChangeRemotable;
 			}
 			
-			FAllDefaultsRemotable = FAllChangesRemotable && FAllDefaultsRemotable;
+			_allDefaultsRemotable = _allChangesRemotable && _allDefaultsRemotable;
 			IsDefaultRemotable = IsChangeRemotable && IsDefaultRemotable;
 			
-			if (FEventHandlers != null)
+			if (_eventHandlers != null)
 			{
-				foreach (EventHandler LHandler in FEventHandlers)
+				foreach (EventHandler handler in _eventHandlers)
 				{
-					if ((LHandler.EventType & EventType.Default) != 0)
-						IsDefaultRemotable = IsDefaultRemotable && LHandler.IsRemotable;
+					if ((handler.EventType & EventType.Default) != 0)
+						IsDefaultRemotable = IsDefaultRemotable && handler.IsRemotable;
 					
-					if ((LHandler.EventType & EventType.Validate) != 0)
-						IsValidateRemotable = IsValidateRemotable && LHandler.IsRemotable;
+					if ((handler.EventType & EventType.Validate) != 0)
+						IsValidateRemotable = IsValidateRemotable && handler.IsRemotable;
 					
-					if ((LHandler.EventType & EventType.Change) != 0)
-						IsChangeRemotable = IsChangeRemotable && LHandler.IsRemotable;
+					if ((handler.EventType & EventType.Change) != 0)
+						IsChangeRemotable = IsChangeRemotable && handler.IsRemotable;
 				}
 			}
 		}
 		
 		// SourceTableName
-		private string FSourceTableName = null;
+		private string _sourceTableName = null;
 		/// <summary>The name of the application transaction table variable.</summary>
 		public string SourceTableName
 		{
-			get { return FSourceTableName; }
-			set { FSourceTableName = value; }
+			get { return _sourceTableName; }
+			set { _sourceTableName = value; }
 		}
 		
-		private bool FIsDeletedTable;
+		private bool _isDeletedTable;
 		/// <summary>Indicates whether or not this is the deleted tracking table for a translated table variable.</summary>
 		/// <remarks>This property will only be set if SourceTableName is not null.</remarks>
 		public bool IsDeletedTable
 		{
-			get { return FIsDeletedTable; }
-			set { FIsDeletedTable = value; }
+			get { return _isDeletedTable; }
+			set { _isDeletedTable = value; }
 		}
 		
-		public override bool IsATObject { get { return FSourceTableName != null; } }
+		public override bool IsATObject { get { return _sourceTableName != null; } }
 		
 		// ShouldTranslate
 		/// <summary>Indicates whether or not this table variable should be included in an application transaction.</summary>
@@ -2113,411 +2156,411 @@ namespace Alphora.Dataphor.DAE.Schema
 		#endif
 
 		// Transition Constraints which have an OnInsertNode		
-		private TransitionConstraints FInsertConstraints = new TransitionConstraints();
-		public TransitionConstraints InsertConstraints { get { return FInsertConstraints; } }
+		private TransitionConstraints _insertConstraints = new TransitionConstraints();
+		public TransitionConstraints InsertConstraints { get { return _insertConstraints; } }
 
 		// Transition constraints which have an OnUpdateNode
-		private TransitionConstraints FUpdateConstraints = new TransitionConstraints();
-		public TransitionConstraints UpdateConstraints { get { return FUpdateConstraints; } }
+		private TransitionConstraints _updateConstraints = new TransitionConstraints();
+		public TransitionConstraints UpdateConstraints { get { return _updateConstraints; } }
 
 		// Transition constraints which have an OnDeleteNode
-		private TransitionConstraints FDeleteConstraints = new TransitionConstraints();
-		public TransitionConstraints DeleteConstraints { get { return FDeleteConstraints; } }
+		private TransitionConstraints _deleteConstraints = new TransitionConstraints();
+		public TransitionConstraints DeleteConstraints { get { return _deleteConstraints; } }
 
 		// List of database-wide constraints that reference this table		
 		[Reference]
-		private CatalogConstraints FCatalogConstraints = new CatalogConstraints(); 
-		public CatalogConstraints CatalogConstraints { get { return FCatalogConstraints; } }
+		private CatalogConstraints _catalogConstraints = new CatalogConstraints(); 
+		public CatalogConstraints CatalogConstraints { get { return _catalogConstraints; } }
 		
 		// HasDeferredConstraints
-		private bool FHasDeferredConstraints;
-		private bool FHasDeferredConstraintsComputed;
+		private bool _hasDeferredConstraints;
+		private bool _hasDeferredConstraintsComputed;
 		
 		/// <summary>Indicates whether this table variable has any enforced deferred constraints defined.</summary>
 		public bool HasDeferredConstraints()
 		{
-			if (!FHasDeferredConstraintsComputed)
+			if (!_hasDeferredConstraintsComputed)
 			{
-				FHasDeferredConstraints = false;
-				foreach (TableVarConstraint LConstraint in FConstraints)
-					if (LConstraint.Enforced && LConstraint.IsDeferred)
+				_hasDeferredConstraints = false;
+				foreach (TableVarConstraint constraint in _constraints)
+					if (constraint.Enforced && constraint.IsDeferred)
 					{
-						FHasDeferredConstraints = true;
+						_hasDeferredConstraints = true;
 						break;
 					}
-				FHasDeferredConstraintsComputed = true;
+				_hasDeferredConstraintsComputed = true;
 			}
 			
-			return FHasDeferredConstraints;
+			return _hasDeferredConstraints;
 		}
 		
 		/// <summary>Indicates whether this table variable has any enforced deferred constraints defined that would need validation based on the given value flags</summary>
-		public bool HasDeferredConstraints(BitArray AValueFlags, Schema.Transition ATransition)
+		public bool HasDeferredConstraints(BitArray valueFlags, Schema.Transition transition)
 		{
 			// TODO: Potential cache point, this only needs to be computed once per ValueFlags combination.
-			for (int LIndex = 0; LIndex < FConstraints.Count; LIndex++)
-				if (FConstraints[LIndex].Enforced && FConstraints[LIndex].IsDeferred && FConstraints[LIndex].ShouldValidate(AValueFlags, ATransition))
+			for (int index = 0; index < _constraints.Count; index++)
+				if (_constraints[index].Enforced && _constraints[index].IsDeferred && _constraints[index].ShouldValidate(valueFlags, transition))
 					return true;
 			return false;
 		}
 		
-		public void CopyTableVar(TableNode ASourceNode)
+		public void CopyTableVar(TableNode sourceNode)
 		{
-			CopyTableVar(ASourceNode, false);
+			CopyTableVar(sourceNode, false);
 		}
 		
 		// IsInference indicates whether this copy should be an inference, as in the case of a table var inference on a view
-		public void CopyTableVar(TableNode ASourceNode, bool AIsInference)
+		public void CopyTableVar(TableNode sourceNode, bool isInference)
 		{
 			// create datatype
 			DataType = new Schema.TableType();
 				
 			// Copy MetaData for the table variable
-			if (AIsInference)
-				InheritMetaData(ASourceNode.TableVar.MetaData);
+			if (isInference)
+				InheritMetaData(sourceNode.TableVar.MetaData);
 			else
-				MergeMetaData(ASourceNode.TableVar.MetaData);
+				MergeMetaData(sourceNode.TableVar.MetaData);
 
 			// Copy columns
-			Schema.TableVarColumn LNewColumn;
-			foreach (Schema.TableVarColumn LColumn in ASourceNode.TableVar.Columns)
+			Schema.TableVarColumn newColumn;
+			foreach (Schema.TableVarColumn column in sourceNode.TableVar.Columns)
 			{
-				if (AIsInference)
-					LNewColumn = LColumn.Inherit();
+				if (isInference)
+					newColumn = column.Inherit();
 				else
-					LNewColumn = LColumn.Copy();
-				DataType.Columns.Add(LNewColumn.Column);
-				Columns.Add(LNewColumn);
+					newColumn = column.Copy();
+				DataType.Columns.Add(newColumn.Column);
+				Columns.Add(newColumn);
 			}
 			
-			ShouldChange = ASourceNode.TableVar.ShouldChange;
-			ShouldDefault = ASourceNode.TableVar.ShouldDefault;
-			ShouldValidate = ASourceNode.TableVar.ShouldValidate;
+			ShouldChange = sourceNode.TableVar.ShouldChange;
+			ShouldDefault = sourceNode.TableVar.ShouldDefault;
+			ShouldValidate = sourceNode.TableVar.ShouldValidate;
 			
-			if (!ASourceNode.TableVar.IsChangeRemotable || !ASourceNode.TableVar.IsDefaultRemotable || !ASourceNode.TableVar.IsValidateRemotable)
+			if (!sourceNode.TableVar.IsChangeRemotable || !sourceNode.TableVar.IsDefaultRemotable || !sourceNode.TableVar.IsValidateRemotable)
 			{
 				if (MetaData == null)
 					MetaData = new MetaData();
 					
-				if (!ASourceNode.TableVar.IsChangeRemotable)
+				if (!sourceNode.TableVar.IsChangeRemotable)
 					MetaData.Tags.AddOrUpdate("DAE.IsChangeRemotable", "false", true);
 					
-				if (!ASourceNode.TableVar.IsDefaultRemotable)
+				if (!sourceNode.TableVar.IsDefaultRemotable)
 					MetaData.Tags.AddOrUpdate("DAE.IsDefaultRemotable", "false", true);
 					
-				if (!ASourceNode.TableVar.IsValidateRemotable)
+				if (!sourceNode.TableVar.IsValidateRemotable)
 					MetaData.Tags.AddOrUpdate("DAE.IsValidateRemotable", "false", true);
 			}
 			
 			// Copy keys
-			Schema.Key LNewKey;
-			foreach (Schema.Key LKey in ASourceNode.TableVar.Keys)
+			Schema.Key newKey;
+			foreach (Schema.Key key in sourceNode.TableVar.Keys)
 			{
-				LNewKey = new Schema.Key();
-				LNewKey.IsInherited = true;
-				LNewKey.IsSparse = LKey.IsSparse;
-				if (AIsInference)
-					LNewKey.InheritMetaData(LKey.MetaData);
+				newKey = new Schema.Key();
+				newKey.IsInherited = true;
+				newKey.IsSparse = key.IsSparse;
+				if (isInference)
+					newKey.InheritMetaData(key.MetaData);
 				else
-					LNewKey.MergeMetaData(LKey.MetaData);
-				foreach (Schema.TableVarColumn LColumn in LKey.Columns)
-					LNewKey.Columns.Add(Columns[LColumn]);
-				Keys.Add(LNewKey);
+					newKey.MergeMetaData(key.MetaData);
+				foreach (Schema.TableVarColumn column in key.Columns)
+					newKey.Columns.Add(Columns[column]);
+				Keys.Add(newKey);
 			}
 			
 			// Copy orders
-			Schema.Order LNewOrder;
-			Schema.OrderColumn LNewOrderColumn;
-			foreach (Schema.Order LOrder in ASourceNode.TableVar.Orders)
+			Schema.Order newOrder;
+			Schema.OrderColumn newOrderColumn;
+			foreach (Schema.Order order in sourceNode.TableVar.Orders)
 			{
-				LNewOrder = new Schema.Order();
-				LNewOrder.IsInherited = true;
-				if (AIsInference)
-					LNewOrder.InheritMetaData(LOrder.MetaData);
+				newOrder = new Schema.Order();
+				newOrder.IsInherited = true;
+				if (isInference)
+					newOrder.InheritMetaData(order.MetaData);
 				else
-					LNewOrder.MergeMetaData(LOrder.MetaData);
-				Schema.OrderColumn LOrderColumn;
-				for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
+					newOrder.MergeMetaData(order.MetaData);
+				Schema.OrderColumn orderColumn;
+				for (int index = 0; index < order.Columns.Count; index++)
 				{
-					LOrderColumn = LOrder.Columns[LIndex];
-					LNewOrderColumn = new Schema.OrderColumn(Columns[LOrderColumn.Column], LOrderColumn.Ascending, LOrderColumn.IncludeNils);
-					LNewOrderColumn.Sort = LOrderColumn.Sort;
-					LNewOrderColumn.IsDefaultSort = LOrderColumn.IsDefaultSort;
-					LNewOrder.Columns.Add(LNewOrderColumn);
-					Error.AssertWarn(LNewOrderColumn.Sort != null, "Sort is null");
+					orderColumn = order.Columns[index];
+					newOrderColumn = new Schema.OrderColumn(Columns[orderColumn.Column], orderColumn.Ascending, orderColumn.IncludeNils);
+					newOrderColumn.Sort = orderColumn.Sort;
+					newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
+					newOrder.Columns.Add(newOrderColumn);
+					Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");
 				}
-				Orders.Add(LNewOrder);
+				Orders.Add(newOrder);
 			}
 		}
 		
-		protected void EmitColumns(EmitMode AMode, TableTypeSpecifier ASpecifier)
+		protected void EmitColumns(EmitMode mode, TableTypeSpecifier specifier)
 		{
-			NamedTypeSpecifier LColumnSpecifier;
-			foreach (TableVarColumn LColumn in Columns)
+			NamedTypeSpecifier columnSpecifier;
+			foreach (TableVarColumn column in Columns)
 			{
-				LColumnSpecifier = new NamedTypeSpecifier();
-				LColumnSpecifier.Identifier = LColumn.Name;
-				LColumnSpecifier.TypeSpecifier = LColumn.DataType.EmitSpecifier(AMode);
-				ASpecifier.Columns.Add(LColumnSpecifier);
+				columnSpecifier = new NamedTypeSpecifier();
+				columnSpecifier.Identifier = column.Name;
+				columnSpecifier.TypeSpecifier = column.DataType.EmitSpecifier(mode);
+				specifier.Columns.Add(columnSpecifier);
 			}
 		}
 		
-		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
 		{
-			if ((SourceTableName != null) && (AMode == EmitMode.ForRemote))
-				ASourceCatalog[ASourceCatalog.IndexOfName(SourceTableName)].IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			if ((SourceTableName != null) && (mode == EmitMode.ForRemote))
+				sourceCatalog[sourceCatalog.IndexOfName(SourceTableName)].IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 			else
 			{
-				if (!ATargetCatalog.Contains(Name))
+				if (!targetCatalog.Contains(Name))
 				{
-					ATargetCatalog.Add(this);		// this needs to be added before tracing dependencies to avoid recursion
+					targetCatalog.Add(this);		// this needs to be added before tracing dependencies to avoid recursion
 
-					base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+					base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 
-					foreach (TableVarColumn LColumn in Columns)
-						LColumn.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+					foreach (TableVarColumn column in Columns)
+						column.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 						
-					foreach (Key LKey in Keys)
-						LKey.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+					foreach (Key key in Keys)
+						key.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 						
-					foreach (Order LOrder in Orders)
-						LOrder.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+					foreach (Order order in Orders)
+						order.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 						
-					foreach (Constraint LConstraint in Constraints)
-						if ((AMode != EmitMode.ForRemote) || LConstraint.IsRemotable)
-							LConstraint.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);	
+					foreach (Constraint constraint in Constraints)
+						if ((mode != EmitMode.ForRemote) || constraint.IsRemotable)
+							constraint.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);	
 				}
 			}
 		}
 		
-		public override void IncludeHandlers(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeHandlers(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
 		{
-			foreach (TableVarColumn LColumn in Columns)
+			foreach (TableVarColumn column in Columns)
 			{
-				if (LColumn.DataType is Schema.ScalarType)
-					((Schema.ScalarType)LColumn.DataType).IncludeHandlers(ASession, ASourceCatalog, ATargetCatalog, AMode);
-				LColumn.IncludeHandlers(ASession, ASourceCatalog, ATargetCatalog, AMode);
+				if (column.DataType is Schema.ScalarType)
+					((Schema.ScalarType)column.DataType).IncludeHandlers(session, sourceCatalog, targetCatalog, mode);
+				column.IncludeHandlers(session, sourceCatalog, targetCatalog, mode);
 			}
 
-			if (FEventHandlers != null)
-				foreach (EventHandler LHandler in FEventHandlers)
-					if ((AMode != EmitMode.ForRemote) || LHandler.IsRemotable)
-						LHandler.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			if (_eventHandlers != null)
+				foreach (EventHandler handler in _eventHandlers)
+					if ((mode != EmitMode.ForRemote) || handler.IsRemotable)
+						handler.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 		}
 		
-		public void IncludeLookupAndDetailReferences(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog)
+		public void IncludeLookupAndDetailReferences(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog)
 		{
-			foreach (Reference LReference in SourceReferences)
-				if ((LReference.ParentReference == null) && !LReference.SourceKey.IsUnique && !ATargetCatalog.Contains(LReference.Name))
+			foreach (Reference reference in SourceReferences)
+				if ((reference.ParentReference == null) && !reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
 				{
-					LReference.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
-					LReference.TargetTable.IncludeReferences(ASession, ASourceCatalog, ATargetCatalog);
+					reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
+					reference.TargetTable.IncludeReferences(session, sourceCatalog, targetCatalog);
 				}
 
-			foreach (Reference LReference in TargetReferences)
-				if ((LReference.ParentReference == null) && !LReference.SourceKey.IsUnique && !ATargetCatalog.Contains(LReference.Name))
-					LReference.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
+			foreach (Reference reference in TargetReferences)
+				if ((reference.ParentReference == null) && !reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
+					reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
 		}
 		
-		public void IncludeParentReferences(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog)
+		public void IncludeParentReferences(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog)
 		{
-			IncludeLookupAndDetailReferences(ASession, ASourceCatalog, ATargetCatalog);
-			foreach (Reference LReference in SourceReferences)
-				if ((LReference.ParentReference == null) && LReference.SourceKey.IsUnique && !ATargetCatalog.Contains(LReference.Name))
+			IncludeLookupAndDetailReferences(session, sourceCatalog, targetCatalog);
+			foreach (Reference reference in SourceReferences)
+				if ((reference.ParentReference == null) && reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
 				{
-					LReference.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
-					LReference.TargetTable.IncludeParentReferences(ASession, ASourceCatalog, ATargetCatalog);
+					reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
+					reference.TargetTable.IncludeParentReferences(session, sourceCatalog, targetCatalog);
 				}
 		}
 		
-		public void IncludeExtensionReferences(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog)
+		public void IncludeExtensionReferences(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog)
 		{
-			foreach (Reference LReference in TargetReferences)
-				if ((LReference.ParentReference == null) && LReference.SourceKey.IsUnique && !ATargetCatalog.Contains(LReference.Name))
+			foreach (Reference reference in TargetReferences)
+				if ((reference.ParentReference == null) && reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
 				{
-					LReference.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
-					LReference.SourceTable.IncludeLookupAndDetailReferences(ASession, ASourceCatalog, ATargetCatalog);
+					reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
+					reference.SourceTable.IncludeLookupAndDetailReferences(session, sourceCatalog, targetCatalog);
 				}
 		}
 		
-		public void IncludeReferences(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog)
+		public void IncludeReferences(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog)
 		{
-			IncludeParentReferences(ASession, ASourceCatalog, ATargetCatalog);
-			IncludeExtensionReferences(ASession, ASourceCatalog, ATargetCatalog);
+			IncludeParentReferences(session, sourceCatalog, targetCatalog);
+			IncludeExtensionReferences(session, sourceCatalog, targetCatalog);
 		}
 
-		protected void EmitTableVarStatement(EmitMode AMode, CreateTableVarStatement AStatement)
+		protected void EmitTableVarStatement(EmitMode mode, CreateTableVarStatement statement)
 		{
 			// The session view created to describe the results of a select statement through the CLI should not be created as a session view
 			// in the remote host catalog. The session object name for this view is the same as the object name for the view, and this is
 			// the only way that a given catalog object can have the same name in both the session and global catalogs.
 			//if ((SessionObjectName != null) && (AMode != EmitMode.ForRemote) && (Schema.Object.EnsureRooted(SessionObjectName) != AStatement.TableVarName))
-			if ((SessionObjectName != null) && (Schema.Object.EnsureRooted(SessionObjectName) != AStatement.TableVarName))
+			if ((SessionObjectName != null) && (Schema.Object.EnsureRooted(SessionObjectName) != statement.TableVarName))
 			{
-				AStatement.IsSession = true;
-				AStatement.TableVarName = Schema.Object.EnsureRooted(SessionObjectName);
+				statement.IsSession = true;
+				statement.TableVarName = Schema.Object.EnsureRooted(SessionObjectName);
 			}
 			
-			if ((SourceTableName != null) && (AMode == EmitMode.ForCopy))
-				AStatement.TableVarName = Schema.Object.EnsureRooted(SourceTableName);
+			if ((SourceTableName != null) && (mode == EmitMode.ForCopy))
+				statement.TableVarName = Schema.Object.EnsureRooted(SourceTableName);
 
-			for (int LIndex = 0; LIndex < Keys.Count; LIndex++)
-				if (!Keys[LIndex].IsInherited || (AStatement is CreateTableStatement))
-					AStatement.Keys.Add(Keys[LIndex].EmitStatement(AMode));
+			for (int index = 0; index < Keys.Count; index++)
+				if (!Keys[index].IsInherited || (statement is CreateTableStatement))
+					statement.Keys.Add(Keys[index].EmitStatement(mode));
 					
-			for (int LIndex = 0; LIndex < Orders.Count; LIndex++)
-				if (!Orders[LIndex].IsInherited || (AStatement is CreateTableStatement))
-					AStatement.Orders.Add(Orders[LIndex].EmitStatement(AMode));
+			for (int index = 0; index < Orders.Count; index++)
+				if (!Orders[index].IsInherited || (statement is CreateTableStatement))
+					statement.Orders.Add(Orders[index].EmitStatement(mode));
 					
-			for (int LIndex = 0; LIndex < Constraints.Count; LIndex++)
-				if ((Constraints[LIndex].ConstraintType == ConstraintType.Row) && ((AMode != EmitMode.ForRemote) || Constraints[LIndex].IsRemotable) && ((AMode != EmitMode.ForStorage) || !Constraints[LIndex].IsPersistent))
-					AStatement.Constraints.Add(Constraints[LIndex].EmitDefinition(AMode));
+			for (int index = 0; index < Constraints.Count; index++)
+				if ((Constraints[index].ConstraintType == ConstraintType.Row) && ((mode != EmitMode.ForRemote) || Constraints[index].IsRemotable) && ((mode != EmitMode.ForStorage) || !Constraints[index].IsPersistent))
+					statement.Constraints.Add(Constraints[index].EmitDefinition(mode));
 
-			AStatement.MetaData = MetaData == null ? new MetaData() : MetaData.Copy();
+			statement.MetaData = MetaData == null ? new MetaData() : MetaData.Copy();
 			if (SessionObjectName != null)
-				AStatement.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", Name, true);
+				statement.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", Name, true);
 		}
 
-		public Statement EmitDefinition(EmitMode AMode)
+		public Statement EmitDefinition(EmitMode mode)
 		{
-			CreateTableStatement LStatement = new CreateTableStatement();
-			LStatement.TableVarName = Schema.Object.EnsureRooted(Name);
-			EmitTableVarStatement(AMode, LStatement);
-			foreach (TableVarColumn LColumn in Columns)
-				LStatement.Columns.Add(LColumn.EmitStatement(AMode));
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			if (AMode == EmitMode.ForRemote)
+			CreateTableStatement statement = new CreateTableStatement();
+			statement.TableVarName = Schema.Object.EnsureRooted(Name);
+			EmitTableVarStatement(mode, statement);
+			foreach (TableVarColumn column in Columns)
+				statement.Columns.Add(column.EmitStatement(mode));
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			if (mode == EmitMode.ForRemote)
 			{
-				if (LStatement.MetaData == null)
-					LStatement.MetaData = new MetaData();
-				LStatement.MetaData.Tags.Add(new Tag("DAE.IsDefaultRemotable", IsDefaultRemotable.ToString()));
-				LStatement.MetaData.Tags.Add(new Tag("DAE.IsChangeRemotable", IsChangeRemotable.ToString()));
-				LStatement.MetaData.Tags.Add(new Tag("DAE.IsValidateRemotable", IsValidateRemotable.ToString()));
+				if (statement.MetaData == null)
+					statement.MetaData = new MetaData();
+				statement.MetaData.Tags.Add(new Tag("DAE.IsDefaultRemotable", IsDefaultRemotable.ToString()));
+				statement.MetaData.Tags.Add(new Tag("DAE.IsChangeRemotable", IsChangeRemotable.ToString()));
+				statement.MetaData.Tags.Add(new Tag("DAE.IsValidateRemotable", IsValidateRemotable.ToString()));
 			}
-			return LStatement;
+			return statement;
 		}
 		
-		public override Object GetObjectFromHeader(ObjectHeader AHeader)
+		public override Object GetObjectFromHeader(ObjectHeader header)
 		{
-			switch (AHeader.ObjectType)
+			switch (header.ObjectType)
 			{
 				case "TableVarColumn" :
-					foreach (TableVarColumn LColumn in Columns)
-						if (AHeader.ID == LColumn.ID)
-							return LColumn;
+					foreach (TableVarColumn column in Columns)
+						if (header.ID == column.ID)
+							return column;
 				break;
 							
 				case "TableVarColumnDefault" :
 				case "TableVarColumnConstraint" :
 				//case "TableVarColumnEventHandler" :
-					foreach (TableVarColumn LColumn in Columns)
-						if (AHeader.ParentObjectID == LColumn.ID)
-							return LColumn.GetObjectFromHeader(AHeader);
+					foreach (TableVarColumn column in Columns)
+						if (header.ParentObjectID == column.ID)
+							return column.GetObjectFromHeader(header);
 				break;
 
 				case "Key" :
-					foreach (Key LKey in Keys)
-						if (AHeader.ID == LKey.ID)
-							return LKey;
+					foreach (Key key in Keys)
+						if (header.ID == key.ID)
+							return key;
 				break;
 							
 				case "Order" :
-					foreach (Order LOrder in Orders)
-						if (AHeader.ID == LOrder.ID)
-							return LOrder;
+					foreach (Order order in Orders)
+						if (header.ID == order.ID)
+							return order;
 				break;
 							
 				case "RowConstraint" :
 				case "TransitionConstraint" :
-					foreach (Constraint LConstraint in FConstraints)
-						if (LConstraint.ID == AHeader.ID)
-							return LConstraint;
+					foreach (Constraint constraint in _constraints)
+						if (constraint.ID == header.ID)
+							return constraint;
 				break;
 			}
 			
-			return base.GetObjectFromHeader(AHeader);
+			return base.GetObjectFromHeader(header);
 		}
 
-		public void SetShouldReinferReferences(CatalogDeviceSession ASession)
+		public void SetShouldReinferReferences(CatalogDeviceSession session)
 		{
-			List<Schema.DependentObjectHeader> LHeaders = ASession.SelectObjectDependents(ID, false);
-			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
-				if (LHeaders[LIndex].ObjectType == "DerivedTableVar")
-					ASession.MarkViewForRecompile(LHeaders[LIndex].ID);
+			List<Schema.DependentObjectHeader> headers = session.SelectObjectDependents(ID, false);
+			for (int index = 0; index < headers.Count; index++)
+				if (headers[index].ObjectType == "DerivedTableVar")
+					session.MarkViewForRecompile(headers[index].ID);
 		}
 	}
     
 	public class BaseTableVar : TableVar
     {
-		public BaseTableVar(string AName) : base(AName) {}
-		public BaseTableVar(int AID, string AName) : base(AID, AName) {}
-		public BaseTableVar(string AName, ITableType ATableType) : base(AName)
+		public BaseTableVar(string name) : base(name) {}
+		public BaseTableVar(int iD, string name) : base(iD, name) {}
+		public BaseTableVar(string name, ITableType tableType) : base(name)
 		{
-			DataType = ATableType;
+			DataType = tableType;
 		}
 		
-		public BaseTableVar(string AName, ITableType ATableType, Device ADevice) : base(AName)
+		public BaseTableVar(string name, ITableType tableType, Device device) : base(name)
 		{
-			DataType = ATableType;
-			Device = ADevice;
+			DataType = tableType;
+			Device = device;
 		}
 		
-		public BaseTableVar(string AName, ITableType ATableType, Device ADevice, bool AIsConstant) : base(AName)
+		public BaseTableVar(string name, ITableType tableType, Device device, bool isConstant) : base(name)
 		{
-			DataType = ATableType;
-			Device = ADevice;
-			IsConstant = AIsConstant;
+			DataType = tableType;
+			Device = device;
+			IsConstant = isConstant;
 		}
 		
-		public BaseTableVar(ITableType ATableType) : base(Schema.Object.GetUniqueName())
+		public BaseTableVar(ITableType tableType) : base(Schema.Object.GetUniqueName())
 		{
-			DataType = ATableType;
+			DataType = tableType;
 		}
 		
-		public BaseTableVar(ITableType ATableType, Device ADevice) : base(Schema.Object.GetUniqueName())
+		public BaseTableVar(ITableType tableType, Device device) : base(Schema.Object.GetUniqueName())
 		{
-			DataType = ATableType;
-			Device = ADevice;
+			DataType = tableType;
+			Device = device;
 		}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.BaseTableVar"), DisplayName); } }
 
 		// Device
 		[Reference]
-		private Device FDevice;
+		private Device _device;
 		public Device Device
 		{
-			get { return FDevice; }
-			set { FDevice = value; }
+			get { return _device; }
+			set { _device = value; }
 		}
 		
-		public override void DetermineRemotable(CatalogDeviceSession ASession)
+		public override void DetermineRemotable(CatalogDeviceSession session)
 		{
-			base.DetermineRemotable(ASession);
+			base.DetermineRemotable(session);
 			DetermineShouldCallProposables(true);
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			CreateTableStatement LStatement = new CreateTableStatement();
-			LStatement.TableVarName = Schema.Object.EnsureRooted(Name);
-			EmitTableVarStatement(AMode, LStatement);
-			LStatement.DeviceName = new IdentifierExpression(Device == null ? String.Empty : Device.Name);
-			foreach (TableVarColumn LColumn in Columns)
-				LStatement.Columns.Add(LColumn.EmitStatement(AMode));
-			return LStatement;
+			CreateTableStatement statement = new CreateTableStatement();
+			statement.TableVarName = Schema.Object.EnsureRooted(Name);
+			EmitTableVarStatement(mode, statement);
+			statement.DeviceName = new IdentifierExpression(Device == null ? String.Empty : Device.Name);
+			foreach (TableVarColumn column in Columns)
+				statement.Columns.Add(column.EmitStatement(mode));
+			return statement;
 		}
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DropTableStatement LStatement = new DropTableStatement();
-			LStatement.ObjectName = Schema.Object.EnsureRooted(Name);
-			return LStatement;
+			DropTableStatement statement = new DropTableStatement();
+			statement.ObjectName = Schema.Object.EnsureRooted(Name);
+			return statement;
 		}
 	}
 
@@ -2525,46 +2568,46 @@ namespace Alphora.Dataphor.DAE.Schema
 	// These are not persisted in the catalog, they only exist in the context of a compiled plan.
 	public class ResultTableVar : TableVar
 	{
-		public ResultTableVar(TableNode ANode) : base(Schema.Object.GetNextObjectID(), Schema.Object.GetUniqueName())
+		public ResultTableVar(TableNode node) : base(Schema.Object.GetNextObjectID(), Schema.Object.GetUniqueName())
 		{
-			FNode = ANode;
-			DataType = ANode.DataType;
+			_node = node;
+			DataType = node.DataType;
 		}
 
 		// Node
-		private PlanNode FNode;
+		private PlanNode _node;
 		public PlanNode Node
 		{
-			get { return FNode; }
-			set { FNode = value; }
+			get { return _node; }
+			set { _node = value; }
 		}
 
 		public override string DisplayName { get { return "<intermediate result>"; } }
 
-		private bool FInferredIsDefaultRemotable = true;
+		private bool _inferredIsDefaultRemotable = true;
 		public bool InferredIsDefaultRemotable
 		{
-			get { return FInferredIsDefaultRemotable; }
-			set { FInferredIsDefaultRemotable = value; }
+			get { return _inferredIsDefaultRemotable; }
+			set { _inferredIsDefaultRemotable = value; }
 		}
 
-		private bool FInferredIsValidateRemotable = true;
+		private bool _inferredIsValidateRemotable = true;
 		public bool InferredIsValidateRemotable
 		{
-			get { return FInferredIsValidateRemotable; }
-			set { FInferredIsValidateRemotable = value; }
+			get { return _inferredIsValidateRemotable; }
+			set { _inferredIsValidateRemotable = value; }
 		}
 
-		private bool FInferredIsChangeRemotable = true;
+		private bool _inferredIsChangeRemotable = true;
 		public bool InferredIsChangeRemotable
 		{
-			get { return FInferredIsChangeRemotable; }
-			set { FInferredIsChangeRemotable = value; }
+			get { return _inferredIsChangeRemotable; }
+			set { _inferredIsChangeRemotable = value; }
 		}
 		
-		public override void DetermineRemotable(CatalogDeviceSession ASession)
+		public override void DetermineRemotable(CatalogDeviceSession session)
 		{
-			base.DetermineRemotable(ASession);
+			base.DetermineRemotable(session);
 			
 			IsDefaultRemotable = IsDefaultRemotable && InferredIsDefaultRemotable;
 			IsValidateRemotable = IsValidateRemotable && InferredIsValidateRemotable;
@@ -2574,26 +2617,26 @@ namespace Alphora.Dataphor.DAE.Schema
 
 	public class DerivedTableVar : TableVar
     {	
-		public DerivedTableVar(string AName) : base(AName) {}
-		public DerivedTableVar(int AID, string AName) : base(AID, AName) {}
-		public DerivedTableVar(string AName, ITableType ATableType) : base(AName)
+		public DerivedTableVar(string name) : base(name) {}
+		public DerivedTableVar(int iD, string name) : base(iD, name) {}
+		public DerivedTableVar(string name, ITableType tableType) : base(name)
 		{
-			DataType = ATableType;
+			DataType = tableType;
 		}
 
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.DerivedTableVar"), DisplayName); } }
 		
 		// ShouldReinferReferences - True if the references for this view should be reinferred when it is next referenced
-		private bool FShouldReinferReferences;
+		private bool _shouldReinferReferences;
 		public bool ShouldReinferReferences
 		{
-			get { return FShouldReinferReferences; }
-			set { FShouldReinferReferences = value; }
+			get { return _shouldReinferReferences; }
+			set { _shouldReinferReferences = value; }
 		}
 		
-		public override void DetermineRemotable(CatalogDeviceSession ASession)
+		public override void DetermineRemotable(CatalogDeviceSession session)
 		{
-			base.DetermineRemotable(ASession);
+			base.DetermineRemotable(session);
 			DetermineShouldCallProposables(false);
 		}
 		
@@ -2617,80 +2660,80 @@ namespace Alphora.Dataphor.DAE.Schema
 		#endif
 		
 		// InvocationExpression is the expression to be in-line compiled into the expression referencing this view
-		protected Expression FInvocationExpression;
+		protected Expression _invocationExpression;
 		public Expression InvocationExpression
 		{
-			get { return FInvocationExpression; }
-			set { FInvocationExpression = value; }
+			get { return _invocationExpression; }
+			set { _invocationExpression = value; }
 		}
 
-		public void CopyReferences(TableNode ASourceNode)
+		public void CopyReferences(TableNode sourceNode)
 		{
-			foreach (Schema.Reference LReference in ASourceNode.TableVar.SourceReferences)
+			foreach (Schema.Reference reference in sourceNode.TableVar.SourceReferences)
 			{
-				Schema.Reference LNewReference = new Schema.Reference(LReference.Name);
-				LNewReference.ParentReference = LReference;
-				LNewReference.IsExcluded = LReference.IsExcluded;
-				LNewReference.InheritMetaData(LReference.MetaData);
-				LNewReference.UpdateReferenceAction = LReference.UpdateReferenceAction;
-				LNewReference.DeleteReferenceAction = LReference.DeleteReferenceAction;
-				LNewReference.AddDependencies(LReference.Dependencies);
-				LNewReference.SourceTable = this;
-				LNewReference.SourceKey.IsUnique = LReference.SourceKey.IsUnique;
-				LNewReference.SourceKey.Columns.AddRange(LReference.SourceKey.Columns);
-				LNewReference.TargetTable = LReference.TargetTable;
-				LNewReference.TargetKey.IsUnique = LReference.TargetKey.IsUnique;
-				LNewReference.TargetKey.Columns.AddRange(LReference.TargetKey.Columns);
-				SourceReferences.Add(LNewReference);
-				DerivedReferences.Add(LNewReference);
+				Schema.Reference newReference = new Schema.Reference(reference.Name);
+				newReference.ParentReference = reference;
+				newReference.IsExcluded = reference.IsExcluded;
+				newReference.InheritMetaData(reference.MetaData);
+				newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+				newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+				newReference.AddDependencies(reference.Dependencies);
+				newReference.SourceTable = this;
+				newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
+				newReference.SourceKey.Columns.AddRange(reference.SourceKey.Columns);
+				newReference.TargetTable = reference.TargetTable;
+				newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
+				newReference.TargetKey.Columns.AddRange(reference.TargetKey.Columns);
+				SourceReferences.Add(newReference);
+				DerivedReferences.Add(newReference);
 			}
 			
-			foreach (Schema.Reference LReference in ASourceNode.TableVar.TargetReferences)
+			foreach (Schema.Reference reference in sourceNode.TableVar.TargetReferences)
 			{
-				if (!DerivedReferences.Contains(LReference.Name))
+				if (!DerivedReferences.Contains(reference.Name))
 				{
-					Schema.Reference LNewReference = new Schema.Reference(LReference.Name);
-					LNewReference.ParentReference = LReference;
-					LNewReference.IsExcluded = LReference.IsExcluded;
-					LNewReference.InheritMetaData(LReference.MetaData);
-					LNewReference.UpdateReferenceAction = LReference.UpdateReferenceAction;
-					LNewReference.DeleteReferenceAction = LReference.DeleteReferenceAction;
-					LNewReference.AddDependencies(LReference.Dependencies);
-					LNewReference.SourceTable = LReference.SourceTable;
-					LNewReference.SourceKey.IsUnique = LReference.SourceKey.IsUnique;
-					LNewReference.SourceKey.Columns.AddRange(LReference.SourceKey.Columns);
-					LNewReference.TargetTable = this;
-					LNewReference.TargetKey.IsUnique = LReference.TargetKey.IsUnique;
-					LNewReference.TargetKey.Columns.AddRange(LReference.TargetKey.Columns);
-					TargetReferences.Add(LNewReference);
-					DerivedReferences.Add(LNewReference);
+					Schema.Reference newReference = new Schema.Reference(reference.Name);
+					newReference.ParentReference = reference;
+					newReference.IsExcluded = reference.IsExcluded;
+					newReference.InheritMetaData(reference.MetaData);
+					newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+					newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+					newReference.AddDependencies(reference.Dependencies);
+					newReference.SourceTable = reference.SourceTable;
+					newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
+					newReference.SourceKey.Columns.AddRange(reference.SourceKey.Columns);
+					newReference.TargetTable = this;
+					newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
+					newReference.TargetKey.Columns.AddRange(reference.TargetKey.Columns);
+					TargetReferences.Add(newReference);
+					DerivedReferences.Add(newReference);
 				}
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			CreateViewStatement LStatement = new CreateViewStatement();
-			LStatement.TableVarName = Schema.Object.EnsureRooted(Name);
-			EmitTableVarStatement(AMode, LStatement);
+			CreateViewStatement statement = new CreateViewStatement();
+			statement.TableVarName = Schema.Object.EnsureRooted(Name);
+			EmitTableVarStatement(mode, statement);
 			#if USEORIGINALEXPRESSION
-			LStatement.Expression = FOriginalExpression;
+			statement.Expression = FOriginalExpression;
 			#else
-			LStatement.Expression = FInvocationExpression;
+			statement.Expression = _invocationExpression;
 			#endif
-			return LStatement;
+			return statement;
 		}
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DropViewStatement LStatement = new DropViewStatement();
-			LStatement.ObjectName = Schema.Object.EnsureRooted(Name);
-			return LStatement;
+			DropViewStatement statement = new DropViewStatement();
+			statement.ObjectName = Schema.Object.EnsureRooted(Name);
+			return statement;
 		}
     }
 }

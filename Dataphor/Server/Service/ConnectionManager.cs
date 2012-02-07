@@ -15,11 +15,11 @@ namespace Alphora.Dataphor.DAE.Service
 {
 	public class ConnectionManager : IDisposable
 	{
-		public const int CIdleTimeInSeconds = 300; // 5 minutes
+		public const int IdleTimeInSeconds = 300; // 5 minutes
 		
-		public ConnectionManager(RemoteServer ARemoteServer)
+		public ConnectionManager(RemoteServer remoteServer)
 		{
-			FRemoteServer = ARemoteServer;
+			_remoteServer = remoteServer;
 			StartLifetimeWatcher();
 		}
 		
@@ -33,18 +33,18 @@ namespace Alphora.Dataphor.DAE.Service
 
 		#endregion
 
-		private RemoteServer FRemoteServer;
+		private RemoteServer _remoteServer;
 		
-		private ManualResetEvent FLifetimeSignal;
-		private object FLifetimeSyncHandle = new object();
+		private ManualResetEvent _lifetimeSignal;
+		private object _lifetimeSyncHandle = new object();
 		
 		private void StartLifetimeWatcher()
 		{
-			lock (FLifetimeSyncHandle)
+			lock (_lifetimeSyncHandle)
 			{
-				if (FLifetimeSignal != null)
+				if (_lifetimeSignal != null)
 					Error.Fail("Lifetime manager started more than once.");
-				FLifetimeSignal = new ManualResetEvent(false);
+				_lifetimeSignal = new ManualResetEvent(false);
 			}
 			new Thread(new ThreadStart(LifetimeWatcher)).Start();
 		}
@@ -53,38 +53,38 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try
 			{
-				bool LSignaled = false;
-				while (!LSignaled)
+				bool signaled = false;
+				while (!signaled)
 				{
 					// Wait for either a signal or a time-out
-					LSignaled = FLifetimeSignal.WaitOne(CIdleTimeInSeconds * 1000);
+					signaled = _lifetimeSignal.WaitOne(IdleTimeInSeconds * 1000);
 					
-					if (!LSignaled)
+					if (!signaled)
 					{
-						DateTime LOldestActivityTime = DateTime.Now.AddSeconds(-CIdleTimeInSeconds);
+						DateTime oldestActivityTime = DateTime.Now.AddSeconds(-IdleTimeInSeconds);
 						
-						RemoteServerConnection[] LConnections = FRemoteServer.GetCurrentConnections();
-						for (int LIndex = 0; LIndex < LConnections.Length; LIndex++)
-							if (LConnections[LIndex].LastActivityTime < LOldestActivityTime)
+						RemoteServerConnection[] connections = _remoteServer.GetCurrentConnections();
+						for (int index = 0; index < connections.Length; index++)
+							if (connections[index].LastActivityTime < oldestActivityTime)
 							{
 								try
 								{
 									// Connection has been idle for longer than the activity time, kill it
-									FRemoteServer.Relinquish(LConnections[LIndex]);
+									_remoteServer.Relinquish(connections[index]);
 								}
-								catch (Exception LException)
+								catch (Exception exception)
 								{
-									FRemoteServer.Server.LogError(LException);
+									_remoteServer.Server.LogError(exception);
 								}
 							}
 						}
 				}
 
 				// The keep alive processing is complete.  Clean up...
-				lock (FLifetimeSyncHandle)
+				lock (_lifetimeSyncHandle)
 				{
-					FLifetimeSignal.Close();
-					FLifetimeSignal = null;
+					_lifetimeSignal.Close();
+					_lifetimeSignal = null;
 				}
 			}
 			catch
@@ -95,10 +95,10 @@ namespace Alphora.Dataphor.DAE.Service
 		
 		private void StopLifetimeWatcher()
 		{
-			lock (FLifetimeSyncHandle)
+			lock (_lifetimeSyncHandle)
 			{
-				if (FLifetimeSignal != null)
-					FLifetimeSignal.Set();
+				if (_lifetimeSignal != null)
+					_lifetimeSignal.Set();
 			}
 		}
 	}

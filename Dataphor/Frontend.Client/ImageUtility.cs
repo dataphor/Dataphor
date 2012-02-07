@@ -15,111 +15,111 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Returns an error image icon. </summary>
 		public static System.Drawing.Image GetErrorImage()
 		{
-			Bitmap LBitmap = new Bitmap(11, 14);
+			Bitmap bitmap = new Bitmap(11, 14);
 			try
 			{
-				using (Graphics LGraphics = Graphics.FromImage(LBitmap))
+				using (Graphics graphics = Graphics.FromImage(bitmap))
 				{
-					LGraphics.Clear(Color.White);
-					using (SolidBrush LBrush = new SolidBrush(Color.Red))
+					graphics.Clear(Color.White);
+					using (SolidBrush brush = new SolidBrush(Color.Red))
 					{
-						using (Font LFont = new Font("Arial", 9, FontStyle.Bold))
+						using (Font font = new Font("Arial", 9, FontStyle.Bold))
 						{
-							LGraphics.DrawString("X", LFont, LBrush, 0, 0);
+							graphics.DrawString("X", font, brush, 0, 0);
 						}
 					}
 				}
 			}
 			catch
 			{
-				LBitmap.Dispose();
+				bitmap.Dispose();
 				throw;
 			}
-			return LBitmap;
+			return bitmap;
 		}
 	}
 
 	public class AsyncImageRequest
 	{
-		private PipeRequest FImageRequest = null;
-		private Node FRequester;
-		private string FImageExpression;
+		private PipeRequest _imageRequest = null;
+		private Node _requester;
+		private string _imageExpression;
 		private event EventHandler FCallBack;
 		
-		private Image FImage;
+		private Image _image;
 		public Image Image
 		{
-			get { return FImage; }
+			get { return _image; }
 		}
 
-		public AsyncImageRequest(Node ARequester, string AImageExpression, EventHandler ACallback) 
+		public AsyncImageRequest(Node requester, string imageExpression, EventHandler callback) 
 		{
-			FRequester = ARequester;
-			FImageExpression = AImageExpression;
-			FCallBack += ACallback;
+			_requester = requester;
+			_imageExpression = imageExpression;
+			FCallBack += callback;
 			UpdateImage();
 		}
 
 		private void CancelImageRequest()
 		{
-			if (FImageRequest != null)
+			if (_imageRequest != null)
 			{
-				FRequester.HostNode.Pipe.CancelRequest(FImageRequest);
-				FImageRequest = null;
+				_requester.HostNode.Pipe.CancelRequest(_imageRequest);
+				_imageRequest = null;
 			}
 		}
 
 		private void UpdateImage()
 		{
 			CancelImageRequest();
-			if (FImageExpression == String.Empty)
+			if (_imageExpression == String.Empty)
 				ClearImage();
 			else
 			{
 				// Queue up an asynchronous request
-				FImageRequest = new PipeRequest(FImageExpression, new PipeResponseHandler(ImageRead), new PipeErrorHandler(ImageError));
-				FRequester.HostNode.Pipe.QueueRequest(FImageRequest);
+				_imageRequest = new PipeRequest(_imageExpression, new PipeResponseHandler(ImageRead), new PipeErrorHandler(ImageError));
+				_requester.HostNode.Pipe.QueueRequest(_imageRequest);
 			}
 		}
 
 		private void ClearImage()
 		{
-			if (FImage != null)
-				FImage.Dispose();
-			FImage = null;
+			if (_image != null)
+				_image.Dispose();
+			_image = null;
 		}
 
-		protected void ImageRead(PipeRequest ARequest, Pipe APipe)
+		protected void ImageRead(PipeRequest request, Pipe pipe)
 		{
-			FImageRequest = null;
+			_imageRequest = null;
 			try
 			{
-				if (ARequest.Result.IsNative)
+				if (request.Result.IsNative)
 				{
-					byte[] LResultBytes = ARequest.Result.AsByteArray;
-					FImage = System.Drawing.Image.FromStream(new MemoryStream(LResultBytes, 0, LResultBytes.Length, false, true));
+					byte[] resultBytes = request.Result.AsByteArray;
+					_image = System.Drawing.Image.FromStream(new MemoryStream(resultBytes, 0, resultBytes.Length, false, true));
 				}
 				else
 				{
-					using (Stream LStream = ARequest.Result.OpenStream())
+					using (Stream stream = request.Result.OpenStream())
 					{
-						MemoryStream LCopyStream = new MemoryStream();
-						StreamUtility.CopyStream(LStream, LCopyStream);
-						FImage = System.Drawing.Image.FromStream(LCopyStream);
+						MemoryStream copyStream = new MemoryStream();
+						StreamUtility.CopyStream(stream, copyStream);
+						_image = System.Drawing.Image.FromStream(copyStream);
 					}
 				}
 			}
 			catch
 			{
-				FImage = ImageUtility.GetErrorImage();
+				_image = ImageUtility.GetErrorImage();
 			}
 			FCallBack(this, new EventArgs());
 		}
 
-		protected void ImageError(PipeRequest ARequest, Pipe APipe, Exception AException)
+		protected void ImageError(PipeRequest request, Pipe pipe, Exception exception)
 		{
-			FImageRequest = null;
-			FImage = ImageUtility.GetErrorImage();
+			_imageRequest = null;
+			_image = ImageUtility.GetErrorImage();
 			FCallBack(this, new EventArgs());
 		}
 	}

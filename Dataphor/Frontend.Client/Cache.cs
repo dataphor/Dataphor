@@ -28,75 +28,75 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// </remarks>
 	public class DocumentCache : IDisposable, IDocumentCache
 	{
-		public const string CIndexFileName = "Index.dfi";
-		public const string CCacheFileExtension = ".dfc";
-		public const string CCRC32FileName = "CRC32s.dfcrc";
-		public const string CLockFileName = "LockFile";
+		public const string IndexFileName = "Index.dfi";
+		public const string CacheFileExtension = ".dfc";
+		public const string RC32FileName = "CRC32s.dfcrc";
+		public const string LockFileName = "LockFile";
 
 		/// <summary> Instantiates a new DocumentCache. </summary>
-		/// <param name="ACachePath"> Specifies the path to use to store cached items.  </param>
-		public DocumentCache(string ACachePath, int ASize)
+		/// <param name="cachePath"> Specifies the path to use to store cached items.  </param>
+		public DocumentCache(string cachePath, int size)
 		{
 			// Prepare the folder
-			FCachePath = ACachePath;
+			_cachePath = cachePath;
 
 			// Prepare the structures
-			FIdentifiers = new IdentifierIndex();
-			FCRC32s = new Dictionary<string, uint>(ASize);
-			FCache = new FixedSizeCache<string, string>(ASize);
+			_identifiers = new IdentifierIndex();
+			_cRC32s = new Dictionary<string, uint>(size);
+			_cache = new FixedSizeCache<string, string>(size);
 
 			LockDirectory();
 			try
 			{
 				try
 				{
-					DateTime LIndexFileTime = DateTime.MinValue;	// Init as invalid
-					string LIndexFileName = Path.Combine(FCachePath, CIndexFileName);
-					string[] LCacheFiles = Directory.GetFiles(FCachePath, "*" + CCacheFileExtension);
+					DateTime indexFileTime = DateTime.MinValue;	// Init as invalid
+					string indexFileName = Path.Combine(_cachePath, IndexFileName);
+					string[] cacheFiles = Directory.GetFiles(_cachePath, "*" + CacheFileExtension);
 
 					// Load the identifier index
-					if (File.Exists(LIndexFileName))
+					if (File.Exists(indexFileName))
 					{
-						LIndexFileTime = File.GetLastWriteTimeUtc(LIndexFileName);
-						using (Stream LStream = new FileStream(LIndexFileName, FileMode.Open, FileAccess.Read))
+						indexFileTime = File.GetLastWriteTimeUtc(indexFileName);
+						using (Stream stream = new FileStream(indexFileName, FileMode.Open, FileAccess.Read))
 						{
-							FIdentifiers.Load(LStream);
+							_identifiers.Load(stream);
 						}
 
 						// Initialize the CRC32s
-						string LCRC32TableFileName = Path.Combine(FCachePath, CCRC32FileName);
-						if (File.Exists(LCRC32TableFileName))
+						string cRC32TableFileName = Path.Combine(_cachePath, RC32FileName);
+						if (File.Exists(cRC32TableFileName))
 						{
-							if (File.GetLastWriteTimeUtc(LCRC32TableFileName) == LIndexFileTime)
-								using (FileStream LStream = new FileStream(LCRC32TableFileName, FileMode.Open, FileAccess.Read))
+							if (File.GetLastWriteTimeUtc(cRC32TableFileName) == indexFileTime)
+								using (FileStream stream = new FileStream(cRC32TableFileName, FileMode.Open, FileAccess.Read))
 								{
-									StreamUtility.LoadDictionary(LStream, FCRC32s, typeof(String), typeof(UInt32));
+									StreamUtility.LoadDictionary(stream, _cRC32s, typeof(String), typeof(UInt32));
 								}
 							else
-								LIndexFileTime = DateTime.MinValue;	// CRC32 and Index file times doen't match.  Invalid index.
+								indexFileTime = DateTime.MinValue;	// CRC32 and Index file times doen't match.  Invalid index.
 						}
 						else
-							LIndexFileTime = DateTime.MinValue;	// No CRC32 table.  Invalid index.
+							indexFileTime = DateTime.MinValue;	// No CRC32 table.  Invalid index.
 
 						// Verify that ther are no cache files newer than the index
-						foreach (string LFileName in LCacheFiles)
-							if (File.GetLastWriteTimeUtc(LFileName) > LIndexFileTime)
+						foreach (string fileName in cacheFiles)
+							if (File.GetLastWriteTimeUtc(fileName) > indexFileTime)
 							{
-								LIndexFileTime = DateTime.MinValue;
+								indexFileTime = DateTime.MinValue;
 								break;
 							}
 					}
 
-					if (LIndexFileTime == DateTime.MinValue)	// If cache invalid, delete the files and clear cache
+					if (indexFileTime == DateTime.MinValue)	// If cache invalid, delete the files and clear cache
 					{
 						// Delete any existing cache files in the cache directory and clear the Identifiers
-						foreach (string LFileName in Directory.GetFiles(FCachePath, "*." + CCacheFileExtension))
+						foreach (string fileName in Directory.GetFiles(_cachePath, "*." + CacheFileExtension))
 						{
-							if (File.GetLastWriteTimeUtc(LFileName) > LIndexFileTime)
-								File.Delete(LFileName);
+							if (File.GetLastWriteTimeUtc(fileName) > indexFileTime)
+								File.Delete(fileName);
 						}
-						FIdentifiers.Clear();
-						FCRC32s.Clear();
+						_identifiers.Clear();
+						_cRC32s.Clear();
 					}
 					// Don't bother initializing the fixed sized cache.  We'll let it be populated as requests come in.  As a result, if the cache size has been reduced, it 
 					//  will not be effective until the new cache size limit has been reached.
@@ -104,155 +104,173 @@ namespace Alphora.Dataphor.Frontend.Client
 				catch
 				{
 					//Prevent future problems by clearing the directory
-					foreach (string LFileName in Directory.GetFiles(FCachePath, "*.*"))
-					{
-						if (!String.Equals(Path.GetFileName(LFileName), CLockFileName, StringComparison.OrdinalIgnoreCase))
-							File.Delete(LFileName);
-					}
+					EmptyCacheDirectory();
 					throw;
 				}
 			}
 			catch
 			{
-				UnlockDirectory();
+				UnlockDirectory(false);
 				throw;
+			}
+		}
+
+		private void EmptyCacheDirectory()
+		{
+			foreach (string fileName in Directory.GetFiles(_cachePath, "*.*"))
+			{
+				if (!String.Equals(Path.GetFileName(fileName), LockFileName, StringComparison.OrdinalIgnoreCase))
+					File.Delete(fileName);
 			}
 		}
 
 		public void Dispose()
 		{
+			var success = false;
 			try
 			{
-				string LIndexFileName = Path.Combine(FCachePath, CIndexFileName);
-				using (FileStream LStream = new FileStream(LIndexFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+				string indexFileName = Path.Combine(_cachePath, IndexFileName);
+				using (FileStream stream = new FileStream(indexFileName, FileMode.Create, FileAccess.Write, FileShare.None))
 				{
-					FIdentifiers.Save(LStream);
+					_identifiers.Save(stream);
 				}
 
-				string LCRC32FileName = Path.Combine(FCachePath, CCRC32FileName);
-				using (FileStream LStream = new FileStream(LCRC32FileName, FileMode.Create, FileAccess.Write, FileShare.None))
+				string cRC32FileName = Path.Combine(_cachePath, RC32FileName);
+				using (FileStream stream = new FileStream(cRC32FileName, FileMode.Create, FileAccess.Write, FileShare.None))
 				{
-					StreamUtility.SaveDictionary(LStream, FCRC32s);
+					StreamUtility.SaveDictionary(stream, _cRC32s);
 				}
 
 				// Synchronize the index and CRC3 file times so that we know they were saved properly
-				File.SetLastWriteTimeUtc(LIndexFileName, File.GetLastWriteTimeUtc(LCRC32FileName));
+				File.SetLastWriteTimeUtc(indexFileName, File.GetLastWriteTimeUtc(cRC32FileName));
+				
+				success = true;
 			}
 			finally
 			{
-				UnlockDirectory();
+				UnlockDirectory(success);
 			}
 		}
 
-		private string FCachePath;
-		public string CachePath { get { return FCachePath; } }
+		private string _cachePath;
+		public string CachePath { get { return _cachePath; } }
 
-		private FileStream FLockFile;
-		private bool FUsingPrivatePath = false;
+		private FileStream _lockFile;
+		private bool _usingPrivatePath = false;
 
 		private void LockDirectory()
 		{
-			if (FLockFile == null)
+			if (_lockFile == null)
 			{
-				if (!Directory.Exists(FCachePath))
-					Directory.CreateDirectory(FCachePath);
+				if (!Directory.Exists(_cachePath))
+					Directory.CreateDirectory(_cachePath);
 				try
 				{
-					FLockFile = new FileStream(Path.Combine(FCachePath, CLockFileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+					_lockFile = new FileStream(Path.Combine(_cachePath, LockFileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+					var lockValue = _lockFile.Length > 0 ? _lockFile.ReadByte() : 1;
+					_lockFile.Position = 0;
+					_lockFile.WriteByte(1);
+					_lockFile.Flush();
+					
+					// The cache may not have been shut-down properly... must clear cache to be safe
+					if (lockValue != 0)
+						EmptyCacheDirectory();
 				}
 				catch (IOException)
 				{
-					if (FUsingPrivatePath)	// Only go one level deep... if we can't get a guid based private folder throw
+					if (_usingPrivatePath)	// Only go one level deep... if we can't get a guid based private folder throw
 						throw;
 					else
 					{
-						FUsingPrivatePath = true;
-						FCachePath = Path.Combine(FCachePath, Guid.NewGuid().ToString());
+						_usingPrivatePath = true;
+						_cachePath = Path.Combine(_cachePath, Guid.NewGuid().ToString());
 						LockDirectory();
 					}
 				}
 			}
 		}
 
-		private void UnlockDirectory()
+		private void UnlockDirectory(bool succeeded)
 		{
-			if (FLockFile != null)
+			if (_lockFile != null)
 			{
-				FLockFile.Close();
-				FLockFile = null;
+				_lockFile.Position = 0;
+				_lockFile.WriteByte(succeeded ? (byte)0 : (byte)1);
+				_lockFile.Close();
+				_lockFile = null;
 
-				if (FUsingPrivatePath)
-					Directory.Delete(FCachePath, true);
+				if (_usingPrivatePath)
+					Directory.Delete(_cachePath, true);
 			}
 		}
 
-		private string BuildFileName(string AIdentifier)
+		private string BuildFileName(string identifier)
 		{
-			return Path.Combine(FCachePath, AIdentifier + CCacheFileExtension);
+			return Path.Combine(_cachePath, identifier + CacheFileExtension);
 		}
 
-		private IdentifierIndex FIdentifiers;
-		private FixedSizeCache<string, string> FCache;
+		private IdentifierIndex _identifiers;
+		private FixedSizeCache<string, string> _cache;
 
-		private void ReferenceName(string AName)
+		private void ReferenceName(string name)
 		{
-			Remove(FCache.Reference(AName, null));
+			Remove(_cache.Reference(name, null));
 		}
 
-		private void Remove(string AName)
+		private void Remove(string name)
 		{
-			if (AName != null)
+			if (name != null)
 			{
-				string LIdentifier = FIdentifiers[AName];
-				if (LIdentifier != null)
+				string identifier = _identifiers[name];
+				if (identifier != null)
 				{
-					FIdentifiers.Remove(AName);
-					FCRC32s.Remove(LIdentifier);
-					File.Delete(BuildFileName(LIdentifier));
+					_identifiers.Remove(name);
+					_cRC32s.Remove(identifier);
+					File.Delete(BuildFileName(identifier));
 				}
 			}
 		}
 
-		private Dictionary<string, uint> FCRC32s;
+		private Dictionary<string, uint> _cRC32s;
 
-		private uint GetIdentifierCRC32(string AIdentifier)
+		private uint GetIdentifierCRC32(string identifier)
 		{
-			using (Stream LStream = File.OpenRead(BuildFileName(AIdentifier)))
+			using (Stream stream = File.OpenRead(BuildFileName(identifier)))
 			{
-				return CRC32Utility.GetCRC32(LStream);
+				return CRC32Utility.GetCRC32(stream);
 			}
 		}
 
-		public uint GetCRC32(string AName)
+		public uint GetCRC32(string name)
 		{
-			string LIdentifier = FIdentifiers[AName];
-			if (LIdentifier != null)
-				return FCRC32s[LIdentifier];
+			string identifier = _identifiers[name];
+			if (identifier != null)
+				return _cRC32s[identifier];
 			else
 				return 0;
 		}
 
-		public Stream Reference(string AName)
+		public Stream Reference(string name)
 		{
-			string LIdentifier = FIdentifiers[AName];
-			if (LIdentifier != null)
+			string identifier = _identifiers[name];
+			if (identifier != null)
 			{
-				ReferenceName(AName);
-				return new FileStream(BuildFileName(LIdentifier), FileMode.Open, FileAccess.Read, FileShare.Read);
+				ReferenceName(name);
+				return new FileStream(BuildFileName(identifier), FileMode.Open, FileAccess.Read, FileShare.Read);
 			}
 			else
 				return null;
 		}
 
-		public Stream Freshen(string AName, uint ACRC32)
+		public Stream Freshen(string name, uint cRC32)
 		{
-			string LIdentifier = FIdentifiers[AName];
-            if (LIdentifier == null)
-                LIdentifier = FIdentifiers.Add(AName);
-            FCRC32s[LIdentifier] = ACRC32;
-			ReferenceName(AName);
+			string identifier = _identifiers[name];
+            if (identifier == null)
+                identifier = _identifiers.Add(name);
+            _cRC32s[identifier] = cRC32;
+			ReferenceName(name);
 
-			return new FileStream(BuildFileName(LIdentifier), FileMode.Create, FileAccess.Write, FileShare.None);
+			return new FileStream(BuildFileName(identifier), FileMode.Create, FileAccess.Write, FileShare.None);
 		}
 	}
 }

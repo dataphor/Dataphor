@@ -26,63 +26,63 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			set { SetValue(CanVerticallyScrollProperty, value); }
 		}
 
-		private static void CanScrollPropertyChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void CanScrollPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			((ScrollPresenter)ASender).InvalidateMeasure();
+			((ScrollPresenter)sender).InvalidateMeasure();
 		}
 				
-		private Size FExtent = new Size(0d, 0d);
+		private Size _extent = new Size(0d, 0d);
 		
 		public double ExtentHeight
 		{
-			get { return FExtent.Height; }
+			get { return _extent.Height; }
 		}
 		
 		public double ExtentWidth
 		{
-			get { return FExtent.Width; }
+			get { return _extent.Width; }
 		}
 		
-		private Size FViewport = new Size(0d, 0d);
+		private Size _viewport = new Size(0d, 0d);
 
 		public double ViewportHeight
 		{
-			get { return FViewport.Height; }
+			get { return _viewport.Height; }
 		}
 		
 		public double ViewportWidth
 		{
-			get { return FViewport.Width; }
+			get { return _viewport.Width; }
 		}
 
 		/// <summary> Raised when the extent or viewport changes. </summary>
 		public event EventHandler MeasurementsChanged;
 		
-		protected override Size MeasureOverride(Size AAvailableSize)
+		protected override Size MeasureOverride(Size availableSize)
 		{
-			var LInner = AAvailableSize;
+			var inner = availableSize;
 			if (CanHorizontallyScroll)
-				LInner.Width = Double.PositiveInfinity;
+				inner.Width = Double.PositiveInfinity;
 			if (CanVerticallyScroll)
-				LInner.Height = Double.PositiveInfinity;
+				inner.Height = Double.PositiveInfinity;
 			
-			UIElement LContent = (VisualTreeHelper.GetChildrenCount(this) == 0) ? null : (VisualTreeHelper.GetChild(this, 0) as UIElement);
-			if (LContent != null)
-				LContent.Measure(LInner);
+			UIElement content = (VisualTreeHelper.GetChildrenCount(this) == 0) ? null : (VisualTreeHelper.GetChild(this, 0) as UIElement);
+			if (content != null)
+				content.Measure(inner);
 			
-			var LExtent = LContent == null ? new Size(0d, 0d) : LContent.DesiredSize;
-			var LViewport = AAvailableSize;
-			if (LExtent != FExtent || LViewport != FViewport)
+			var extent = content == null ? new Size(0d, 0d) : content.DesiredSize;
+			var viewport = availableSize;
+			if (extent != _extent || viewport != _viewport)
 			{
-				FExtent = LExtent;
-				FViewport = LViewport;
-				HorizontalOffset = Math.Max(0d, Math.Min(FExtent.Width - FViewport.Width, HorizontalOffset));
-				VerticalOffset = Math.Max(0d, Math.Min(FExtent.Height - FViewport.Height, VerticalOffset));
+				_extent = extent;
+				_viewport = viewport;
+				HorizontalOffset = Math.Max(0d, Math.Min(_extent.Width - _viewport.Width, HorizontalOffset));
+				VerticalOffset = Math.Max(0d, Math.Min(_extent.Height - _viewport.Height, VerticalOffset));
 				if (MeasurementsChanged != null)
 					MeasurementsChanged(this, EventArgs.Empty);
 			}
 			
-			return new Size(Math.Min(AAvailableSize.Width, FExtent.Width), Math.Min(AAvailableSize.Height, FExtent.Height));
+			return new Size(Math.Min(availableSize.Width, _extent.Width), Math.Min(availableSize.Height, _extent.Height));
 		}
 
 		public static readonly DependencyProperty HorizontalOffsetProperty = DependencyProperty.Register("HorizontalOffset", typeof(double), typeof(ScrollPresenter), new PropertyMetadata(0d, new PropertyChangedCallback(OffsetPropertyChanged)));
@@ -94,9 +94,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			set { SetValue(HorizontalOffsetProperty, value); }
 		}
 
-		public void ScrollToHorizontalOffset(double ATarget)
+		public void ScrollToHorizontalOffset(double target)
 		{
-			HorizontalOffset = Math.Max(0d, Math.Min(ATarget, FExtent.Width - FViewport.Width));
+			HorizontalOffset = Math.Max(0d, Math.Min(target, _extent.Width - _viewport.Width));
 		}
 		
 		public static readonly DependencyProperty VerticalOffsetProperty = DependencyProperty.Register("VerticalOffset", typeof(double), typeof(ScrollPresenter), new PropertyMetadata(0d, new PropertyChangedCallback(OffsetPropertyChanged)));
@@ -108,9 +108,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			set { SetValue(VerticalOffsetProperty, value); }
 		}
 
-		public void ScrollToVerticalOffset(double ATarget)
+		public void ScrollToVerticalOffset(double target)
 		{
-			VerticalOffset = Math.Max(0d, Math.Min(ATarget, FExtent.Height - FViewport.Height));
+			VerticalOffset = Math.Max(0d, Math.Min(target, _extent.Height - _viewport.Height));
 		}
 		
 		public event EventHandler OffsetsChanged;
@@ -121,41 +121,41 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				OffsetsChanged(this, EventArgs.Empty);
 		}
 		
-		private static void OffsetPropertyChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void OffsetPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			var LSender = (ScrollPresenter)ASender;
-			LSender.InvalidateArrange();
-			LSender.OnOffsetsChanged();
+			var localSender = (ScrollPresenter)sender;
+			localSender.InvalidateArrange();
+			localSender.OnOffsetsChanged();
 		}
 
-		protected override Size ArrangeOverride(Size AFinalSize)
+		protected override Size ArrangeOverride(Size finalSize)
 		{
-		    UpdateClip(AFinalSize);
-		    UIElement LContent = (VisualTreeHelper.GetChildrenCount(this) == 0) ? null : (VisualTreeHelper.GetChild(this, 0) as UIElement);
-		    if (LContent != null)
-		        LContent.Arrange
+		    UpdateClip(finalSize);
+		    UIElement content = (VisualTreeHelper.GetChildrenCount(this) == 0) ? null : (VisualTreeHelper.GetChild(this, 0) as UIElement);
+		    if (content != null)
+		        content.Arrange
 		        (
 		            new Rect
 		            (
 		                -HorizontalOffset,
 		                -VerticalOffset,
-		                Math.Max(LContent.DesiredSize.Width, AFinalSize.Width),
-		                Math.Max(LContent.DesiredSize.Height, AFinalSize.Height)
+		                Math.Max(content.DesiredSize.Width, finalSize.Width),
+		                Math.Max(content.DesiredSize.Height, finalSize.Height)
 		            )
 		        );
-		    return AFinalSize;
+		    return finalSize;
 		}
 
-		private RectangleGeometry FClippingRectangle;
+		private RectangleGeometry _clippingRectangle;
 		
-		private void UpdateClip(Size AArrangeSize)
+		private void UpdateClip(Size arrangeSize)
 		{
-			if (FClippingRectangle == null)
+			if (_clippingRectangle == null)
 			{
-				FClippingRectangle = new RectangleGeometry();
-				Clip = FClippingRectangle;
+				_clippingRectangle = new RectangleGeometry();
+				Clip = _clippingRectangle;
 			}
-			FClippingRectangle.Rect = new Rect(0d, 0d, AArrangeSize.Width, AArrangeSize.Height);
+			_clippingRectangle.Rect = new Rect(0d, 0d, arrangeSize.Width, arrangeSize.Height);
 		}
 	}
 }

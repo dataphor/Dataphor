@@ -21,27 +21,27 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.Controls.DBTreeView),"Icons.DBTreeView.bmp")]
 	public class DBTreeView : TreeView, IDataSourceReference, IReadOnly, IColumnNameReference
 	{
-		public const string CNoValueText = "<no value>";
+		public const string NoValueText = "<no value>";
 		
 		/// <summary> Initializes a new instance of a DBTreeView. </summary>
 		public DBTreeView() : base()
 		{
 			SetStyle(ControlStyles.SupportsTransparentBackColor, true);
 			CausesValidation = false;
-			FParser = new Parser();
+			_parser = new Parser();
 			HideSelection = false;
-			FLink = new FieldDataLink();
-			FLink.OnDataChanged += new DataLinkHandler(DataChanged);
-			FLink.OnFieldChanged += new DataLinkFieldHandler(FieldChanged);
-			FLink.OnRowChanged += new DataLinkFieldHandler(RowChanged);
-			FLink.OnUpdateReadOnly += new System.EventHandler(UpdateReadOnly);
-			FLink.OnStateChanged += new DataLinkHandler(StateChanged);
-			FLink.OnFocusControl += new DataLinkFieldHandler(FocusControl);
+			_link = new FieldDataLink();
+			_link.OnDataChanged += new DataLinkHandler(DataChanged);
+			_link.OnFieldChanged += new DataLinkFieldHandler(FieldChanged);
+			_link.OnRowChanged += new DataLinkFieldHandler(RowChanged);
+			_link.OnUpdateReadOnly += new System.EventHandler(UpdateReadOnly);
+			_link.OnStateChanged += new DataLinkHandler(StateChanged);
+			_link.OnFocusControl += new DataLinkFieldHandler(FocusControl);
 			UpdateReadOnly(this, EventArgs.Empty);
-			FAutoRefresh = true;
+			_autoRefresh = true;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			if (!IsDisposed)
 			{
@@ -51,49 +51,49 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				}
 				finally
 				{
-					FLink.OnDataChanged -= new DataLinkHandler(DataChanged);
-					FLink.OnFieldChanged -= new DataLinkFieldHandler(FieldChanged);
-					FLink.OnRowChanged -= new DataLinkFieldHandler(RowChanged);
-					FLink.OnUpdateReadOnly -= new System.EventHandler(UpdateReadOnly);
-					FLink.OnStateChanged -= new DataLinkHandler(StateChanged);
-					FLink.OnFocusControl -= new DataLinkFieldHandler(FocusControl);
-					FLink.Dispose();
-					FLink = null;
-					FParser = null;
+					_link.OnDataChanged -= new DataLinkHandler(DataChanged);
+					_link.OnFieldChanged -= new DataLinkFieldHandler(FieldChanged);
+					_link.OnRowChanged -= new DataLinkFieldHandler(RowChanged);
+					_link.OnUpdateReadOnly -= new System.EventHandler(UpdateReadOnly);
+					_link.OnStateChanged -= new DataLinkHandler(StateChanged);
+					_link.OnFocusControl -= new DataLinkFieldHandler(FocusControl);
+					_link.Dispose();
+					_link = null;
+					_parser = null;
 				}
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		internal IServerProcess FProcess;
-		private bool FATJoined;
-		private Parser FParser;
+		internal IServerProcess _process;
+		private bool _aTJoined;
+		private Parser _parser;
 		
 		private void StartProcess()
 		{
-			DataSession LSession = ((DAEDataSet)FLink.DataSet).Session;
-			FProcess = LSession.ServerSession.StartProcess(new ProcessInfo(LSession.ServerSession.SessionInfo));
-			DataView LATServer = FLink.DataSet is DataView ? ((DataView)FLink.DataSet).ApplicationTransactionServer : null;
-			if (LATServer != null)
+			DataSession session = ((DAEDataSet)_link.DataSet).Session;
+			_process = session.ServerSession.StartProcess(new ProcessInfo(session.ServerSession.SessionInfo));
+			DataView aTServer = _link.DataSet is DataView ? ((DataView)_link.DataSet).ApplicationTransactionServer : null;
+			if (aTServer != null)
 			{
-				FProcess.JoinApplicationTransaction(LATServer.ApplicationTransactionID, false);
-				FATJoined = true;
+				_process.JoinApplicationTransaction(aTServer.ApplicationTransactionID, false);
+				_aTJoined = true;
 			}
 			else
-				FATJoined = false;
+				_aTJoined = false;
 		}
 		
 		private void StopProcess()
 		{
-			if (FProcess != null)
+			if (_process != null)
 			{
 				UnprepareParentPlan();
 				UnprepareChildPlan();
 				UnprepareRootPlan();
 				UnprepareParams();
 				ClearTree();
-				FProcess.Session.StopProcess(FProcess);
-				FProcess = null;
+				_process.Session.StopProcess(_process);
+				_process = null;
 			}
 		}
 		
@@ -111,8 +111,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 		
-		private FieldDataLink FLink;
-		protected internal FieldDataLink Link { get { return FLink; } }
+		private FieldDataLink _link;
+		protected internal FieldDataLink Link { get { return _link; } }
 
 		[Category("Data")]
 		[DefaultValue(null)]
@@ -120,18 +120,18 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Description("The DataSource for this control")]
 		public DataSource Source
 		{
-			get { return FLink.Source; }
+			get { return _link.Source; }
 			set
 			{
-				if (FLink.Source != value)
+				if (_link.Source != value)
 				{
-					FLink.Source = value;
+					_link.Source = value;
 					UpdateTree();
 				}
 			}
 		}
 		
-		private string FRootExpression;
+		private string _rootExpression;
 		[DefaultValue("")]
 		[Category("Data")]
 		[Description("The expression defining the root set of nodes to display. The columns in this result must include the order columns for the data source of the tree, and the ColumnName.  The master key and other parameters of the associated DataView are available as variables such as MasterDataViewXXX (where XXX is the name of the master column with '.'s changed to '_'s). ")]
@@ -139,18 +139,18 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string RootExpression
 		{
-			get { return FRootExpression; }
+			get { return _rootExpression; }
 			set 
 			{ 
-				if (FRootExpression != value)
+				if (_rootExpression != value)
 				{
-					FRootExpression = (value == null) ? String.Empty : value; 
+					_rootExpression = (value == null) ? String.Empty : value; 
 					UpdateTree();
 				}
 			}
 		}
 
-		private string FChildExpression;
+		private string _childExpression;
 		[DefaultValue("")]
 		[Category("Data")]
 		[Description("The expression defining the set of child nodes for a given parent node. The values for the current key are available as variables named ACurrentXXX, where XXX is the name of the key column, within this expression. The columns in this result must include the order columns for the data source of the tree, and the ColumnName.")]
@@ -158,18 +158,18 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string ChildExpression
 		{
-			get { return FChildExpression; }
+			get { return _childExpression; }
 			set 
 			{ 
-				if (FChildExpression != value)
+				if (_childExpression != value)
 				{
-					FChildExpression = (value == null) ? String.Empty : value; 
+					_childExpression = (value == null) ? String.Empty : value; 
 					UpdateTree();
 				}
 			}
 		}
 		
-		private string FParentExpression;
+		private string _parentExpression;
 		[DefaultValue("")]
 		[Category("Data")]
 		[Description("The expression defining the parent node for a given child node. The values for the current key are available as variables named ACurrentXXX, where XXX is the name of the key column, within this expression. The columns in this result must include the order columns for the data source of the tree, and the ColumnName. If this result returns more than one row, only the first row will be used.")]
@@ -177,12 +177,12 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string ParentExpression
 		{
-			get { return FParentExpression; }
+			get { return _parentExpression; }
 			set 
 			{ 
-				if (FParentExpression != value)
+				if (_parentExpression != value)
 				{
-					FParentExpression = (value == null) ? String.Empty : value; 
+					_parentExpression = (value == null) ? String.Empty : value; 
 					UpdateTree();
 				}
 			}
@@ -194,12 +194,12 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.ColumnNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string ColumnName
 		{
-			get { return FLink.ColumnName; }
+			get { return _link.ColumnName; }
 			set
 			{ 
-				if (FLink.ColumnName != value)
+				if (_link.ColumnName != value)
 				{
-					FLink.ColumnName = value;
+					_link.ColumnName = value;
 					UpdateTree();
 				}
 			}
@@ -209,8 +209,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[DefaultValue(false)]
 		public bool ReadOnly
 		{
-			get { return FLink.ReadOnly; }
-			set { FLink.ReadOnly = value; }
+			get { return _link.ReadOnly; }
+			set { _link.ReadOnly = value; }
 		}
 
 		[DefaultValue(false)]
@@ -225,28 +225,28 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
 		public new TreeNodeCollection Nodes	{ get { return base.Nodes; } }
 
-		private bool FAutoRefresh;
+		private bool _autoRefresh;
 		/// <summary> If true the TreeView is rebuilt on DataChanged. </summary>
 		[Category("Data")]
 		[DefaultValue(true)]
 		public bool AutoRefresh
 		{
-			get { return FAutoRefresh; }
-			set	{ FAutoRefresh = value; }
+			get { return _autoRefresh; }
+			set	{ _autoRefresh = value; }
 		}
 
-		protected void UpdateReadOnly(object ASender, EventArgs AArgs)
+		protected void UpdateReadOnly(object sender, EventArgs args)
 		{
 			if (!DesignMode)
-				base.Enabled = FLink.Active && !FLink.ReadOnly;
+				base.Enabled = _link.Active && !_link.ReadOnly;
 		}
 
-		protected virtual void FieldChanged(DataLink ADataLink, DataSet ADataSet, DataField AField)
+		protected virtual void FieldChanged(DataLink dataLink, DataSet dataSet, DataField field)
 		{
-			if (ADataLink.Active && !FLink.Modified && !ADataSet.IsEmpty() && IsSetup())
-				using (Row LKey = ADataSet.GetKey())
+			if (dataLink.Active && !_link.Modified && !dataSet.IsEmpty() && IsSetup())
+				using (Row key = dataSet.GetKey())
 				{
-					SelectNode(LKey);
+					SelectNode(key);
 				}
 		}
 
@@ -257,55 +257,55 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			return 
 				(ColumnName != String.Empty) && 
-				(FRootExpression != String.Empty) && 
-				(FChildExpression != String.Empty) &&
-				(FParentExpression != String.Empty);
+				(_rootExpression != String.Empty) && 
+				(_childExpression != String.Empty) &&
+				(_parentExpression != String.Empty);
 		}
 
-		protected virtual void DataChanged(DataLink ADataLink, DataSet ADataSet)
+		protected virtual void DataChanged(DataLink dataLink, DataSet dataSet)
 		{
-			if (FLink.Active)
+			if (_link.Active)
 			{
-				if ((ADataSet is DataView) && (!FATJoined ^ (((DataView)ADataSet).ApplicationTransactionServer == null)))
+				if ((dataSet is DataView) && (!_aTJoined ^ (((DataView)dataSet).ApplicationTransactionServer == null)))
 				{
 					StopProcess();
 					StartProcess();
 				}
 
-				if (!FLink.Modified && FAutoRefresh)
+				if (!_link.Modified && _autoRefresh)
 					UpdateTree();
 			}
 		}
 
-		protected virtual void RowChanged(DataLink ADataLink, DataSet ADataSet, DataField AField)
+		protected virtual void RowChanged(DataLink dataLink, DataSet dataSet, DataField field)
 		{
-			if (((AField == null) || (AField == FLink.DataField)) && !FLink.Modified && IsSetup())
+			if (((field == null) || (field == _link.DataField)) && !_link.Modified && IsSetup())
 			{
-				if ((AField != null) && (AField.ColumnName == ColumnName))
+				if ((field != null) && (field.ColumnName == ColumnName))
 				{
-					using (Row LKey = ADataSet.GetKey())
+					using (Row key = dataSet.GetKey())
 					{
-						DBTreeNode LNode = FindNode(LKey);
-						if (LNode != null)
-							LNode.Update(ADataSet);
+						DBTreeNode node = FindNode(key);
+						if (node != null)
+							node.Update(dataSet);
 						else
-							DataChanged(ADataLink, ADataSet);
+							DataChanged(dataLink, dataSet);
 					}
 				}
 				else
-					DataChanged(ADataLink, ADataSet);
+					DataChanged(dataLink, dataSet);
 			}
 		}
 		
-		protected virtual void StateChanged(DataLink ALink, DataSet ADataSet)
+		protected virtual void StateChanged(DataLink link, DataSet dataSet)
 		{
-			if (FLink.Active)
+			if (_link.Active)
 			{
-				if (FProcess == null)
+				if (_process == null)
 					StartProcess();
 				else
 				{
-					if ((ADataSet is DataView) && (!FATJoined ^ (((DataView)ADataSet).ApplicationTransactionServer == null)))
+					if ((dataSet is DataView) && (!_aTJoined ^ (((DataView)dataSet).ApplicationTransactionServer == null)))
 					{
 						StopProcess();
 						StartProcess();
@@ -315,53 +315,53 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			else
 				StopProcess();
 
-			if (!FAutoRefresh)
+			if (!_autoRefresh)
 				UpdateTree();
 		}
 
 		/// <summary> Returns a root DBTreeNode given its key. </summary>
-		protected DBTreeNode FindChild(Row AKey)
+		protected DBTreeNode FindChild(Row key)
 		{
-			foreach (DBTreeNode LNode in Nodes)
-				if (LNode.KeyEquals(AKey))
-					return LNode;
+			foreach (DBTreeNode node in Nodes)
+				if (node.KeyEquals(key))
+					return node;
 			return null;
 		}
 
 		/// <summary> Returns a tree node given a key, recursive. </summary>
-		protected internal DBTreeNode FindNode(Row AKey)
+		protected internal DBTreeNode FindNode(Row key)
 		{
-			DBTreeNode LResult = null;
-			foreach (DBTreeNode LNode in Nodes)
+			DBTreeNode result = null;
+			foreach (DBTreeNode node in Nodes)
 			{
-				LResult = LNode.FindNode(AKey);
-				if (LResult != null)
+				result = node.FindNode(key);
+				if (result != null)
 					break;
 			}
-			return LResult;
+			return result;
 		}
 
-		private bool FUpdatingTree;
-		protected bool UpdatingTree { get { return FUpdatingTree; } }
+		private bool _updatingTree;
+		protected bool UpdatingTree { get { return _updatingTree; } }
 
 		/// <summary> Rebuilds the entire tree. Property UpdatingTree is true during this operation. </summary>
 		public virtual void UpdateTree()
 		{
-			if (!FFindingKey)
+			if (!_findingKey)
 			{
 				BeginUpdate();
 				try
 				{
-					FUpdatingTree = true;
+					_updatingTree = true;
 					try
 					{
-						if (!FLink.Active || FLink.DataSet.State != DataSetState.Insert)
+						if (!_link.Active || _link.DataSet.State != DataSetState.Insert)
 							ClearNodes();
 						BuildTree();
 					}
 					finally
 					{
-						FUpdatingTree = false;
+						_updatingTree = false;
 					}
 				}
 				finally
@@ -371,118 +371,118 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 		
-		protected string GetExpression(string AExpression)
+		protected string GetExpression(string expression)
 		{
-			CursorDefinition LDefinition = (CursorDefinition)FParser.ParseCursorDefinition(AExpression);
-			LDefinition.Capabilities = CursorCapability.Navigable;
-			LDefinition.CursorType = DAE.CursorType.Dynamic;
-			LDefinition.Isolation = CursorIsolation.Browse;
-			return new D4TextEmitter().Emit(LDefinition);
+			CursorDefinition definition = (CursorDefinition)_parser.ParseCursorDefinition(expression);
+			definition.Capabilities = CursorCapability.Navigable;
+			definition.CursorType = DAE.CursorType.Dynamic;
+			definition.Isolation = CursorIsolation.Browse;
+			return new D4TextEmitter().Emit(definition);
 		}
 		
-		protected IServerExpressionPlan FRootPlan;
-		protected Runtime.DataParams FRootParams;
-		protected IServerExpressionPlan FChildPlan;
-		protected IServerExpressionPlan FParentPlan;
+		protected IServerExpressionPlan _rootPlan;
+		protected Runtime.DataParams _rootParams;
+		protected IServerExpressionPlan _childPlan;
+		protected IServerExpressionPlan _parentPlan;
 		
 		protected IServerExpressionPlan PrepareRootPlan()
 		{
-			if (FRootPlan == null)
+			if (_rootPlan == null)
 			{
-				FRootParams = new Runtime.DataParams();
-				((DAEDataSet)FLink.DataSet).GetAllParams(FRootParams);
-				FRootPlan = FProcess.PrepareExpression(GetExpression(FRootExpression), FRootParams);
+				_rootParams = new Runtime.DataParams();
+				((DAEDataSet)_link.DataSet).GetAllParams(_rootParams);
+				_rootPlan = _process.PrepareExpression(GetExpression(_rootExpression), _rootParams);
 			}
-			return FRootPlan;
+			return _rootPlan;
 		}
 		
 		protected void UnprepareRootPlan()
 		{
-			if (FRootPlan != null)
+			if (_rootPlan != null)
 			{
-				FProcess.UnprepareExpression(FRootPlan);
-				FRootParams = null;
-				FRootPlan = null;
+				_process.UnprepareExpression(_rootPlan);
+				_rootParams = null;
+				_rootPlan = null;
 			}
 		}
 		
 		protected IServerExpressionPlan PrepareChildPlan()
 		{
 			PrepareParams();
-			if (FChildPlan == null)
-				FChildPlan = FProcess.PrepareExpression(GetExpression(FChildExpression), FParams);
-			return FChildPlan;
+			if (_childPlan == null)
+				_childPlan = _process.PrepareExpression(GetExpression(_childExpression), _params);
+			return _childPlan;
 		}
 		
 		protected void UnprepareChildPlan()
 		{
-			if (FChildPlan != null)
+			if (_childPlan != null)
 			{
-				FProcess.UnprepareExpression(FChildPlan);
-				FChildPlan = null;
+				_process.UnprepareExpression(_childPlan);
+				_childPlan = null;
 			}
 		}
 		
-		protected internal IServerCursor OpenChildCursor(Row AKey)
+		protected internal IServerCursor OpenChildCursor(Row key)
 		{
 			PrepareChildPlan();
-			SetParams(AKey);
-			return FChildPlan.Open(FParams);
+			SetParams(key);
+			return _childPlan.Open(_params);
 		}
 		
-		protected internal void CloseChildCursor(IServerCursor ACursor)
+		protected internal void CloseChildCursor(IServerCursor cursor)
 		{
-			FChildPlan.Close(ACursor);
+			_childPlan.Close(cursor);
 			ClearParams();
 		}
 		
 		protected IServerExpressionPlan PrepareParentPlan()
 		{
 			PrepareParams();
-			if (FParentPlan == null)
-				FParentPlan = FProcess.PrepareExpression(GetExpression(FParentExpression), FParams);
-			return FParentPlan;
+			if (_parentPlan == null)
+				_parentPlan = _process.PrepareExpression(GetExpression(_parentExpression), _params);
+			return _parentPlan;
 		}
 		
 		protected void UnprepareParentPlan()
 		{
-			if (FParentPlan != null)
+			if (_parentPlan != null)
 			{
-				FProcess.UnprepareExpression(FParentPlan);
-				FParentPlan = null;
+				_process.UnprepareExpression(_parentPlan);
+				_parentPlan = null;
 			}
 		}
 		
-		protected  internal IServerCursor OpenParentCursor(Row AKey)
+		protected  internal IServerCursor OpenParentCursor(Row key)
 		{
 			PrepareParentPlan();
-			SetParams(AKey);
-			return FParentPlan.Open(FParams);
+			SetParams(key);
+			return _parentPlan.Open(_params);
 		}
 		
-		protected internal void CloseParentCursor(IServerCursor ACursor)
+		protected internal void CloseParentCursor(IServerCursor cursor)
 		{
-			FParentPlan.Close(ACursor);
+			_parentPlan.Close(cursor);
 			ClearParams();
 		}
 
-		Runtime.DataParams FParams;		
+		Runtime.DataParams _params;		
 		protected void PrepareParams()
 		{
-			if (FParams == null)
+			if (_params == null)
 			{
-				FParams = new Runtime.DataParams();
-				foreach (Schema.OrderColumn LOrderColumn in ((TableDataSet)FLink.DataSet).Order.Columns)
-					FParams.Add(new Runtime.DataParam("ACurrent" + LOrderColumn.Column.Name, LOrderColumn.Column.DataType, Modifier.Const));
+				_params = new Runtime.DataParams();
+				foreach (Schema.OrderColumn orderColumn in ((TableDataSet)_link.DataSet).Order.Columns)
+					_params.Add(new Runtime.DataParam("ACurrent" + orderColumn.Column.Name, orderColumn.Column.DataType, Modifier.Const));
 			}
 		}
 		
 		protected void EnsureParamsValid()
 		{
-			if (FParams != null)
+			if (_params != null)
 			{
-				for (int LIndex = 0; LIndex < ((TableDataSet)FLink.DataSet).Order.Columns.Count; LIndex++)
-					if ((FParams.Count >= LIndex) || (FParams[LIndex].Name != "ACurrent" + ((TableDataSet)FLink.DataSet).Order.Columns[LIndex].Column.Name))
+				for (int index = 0; index < ((TableDataSet)_link.DataSet).Order.Columns.Count; index++)
+					if ((_params.Count >= index) || (_params[index].Name != "ACurrent" + ((TableDataSet)_link.DataSet).Order.Columns[index].Column.Name))
 					{
 						UnprepareParams();
 						break;
@@ -492,55 +492,55 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		
 		protected void UnprepareParams()
 		{
-			if (FParams != null)
+			if (_params != null)
 			{
 				ClearParams();
-				FParams = null;
+				_params = null;
 			}
 		}
 		
-		protected void SetParams(Row AKey)
+		protected void SetParams(Row key)
 		{
-			for (int LIndex = 0; LIndex < ((TableDataSet)FLink.DataSet).Order.Columns.Count; LIndex++)
-				if (AKey.HasValue(LIndex))
-					FParams[LIndex].Value = AKey[LIndex];
+			for (int index = 0; index < ((TableDataSet)_link.DataSet).Order.Columns.Count; index++)
+				if (key.HasValue(index))
+					_params[index].Value = key[index];
 		}
 		
 		protected void ClearParams()
 		{
-			foreach (Runtime.DataParam LParam in FParams)
-				LParam.Value = null;
+			foreach (Runtime.DataParam param in _params)
+				param.Value = null;
 		}
 		
-		private bool FClearingNodes;
+		private bool _clearingNodes;
 
 		protected void ClearNodes()
 		{
-			foreach (DBTreeNode LNode in Nodes)
+			foreach (DBTreeNode node in Nodes)
 			{
-				LNode.ClearChildren();
-				LNode.DisposeKey();
+				node.ClearChildren();
+				node.DisposeKey();
 			}
 			// this is here because OnBeforeExpand is being called for Nodes.Clear()
-			FClearingNodes = true;
+			_clearingNodes = true;
 			try
 			{
 				Nodes.Clear();
 			}
 			finally
 			{
-				FClearingNodes = false;
+				_clearingNodes = false;
 			}
 		}
 		
 		/// <summary> Creates root nodes and their immediate children. </summary>
 		protected void BuildTree()
 		{
-			if ((!FLink.Active) || FLink.DataSet.IsEmpty() || !IsSetup())
+			if ((!_link.Active) || _link.DataSet.IsEmpty() || !IsSetup())
 				ClearTree();
 			else
 			{
-				if (FLink.DataSet.State != DataSetState.Insert)
+				if (_link.DataSet.State != DataSetState.Insert)
 				{
 					BeginUpdate();
 					try
@@ -549,42 +549,42 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 						// Open a dynamic navigable browse cursor on the root expression
 						PrepareRootPlan();
-						IServerCursor LCursor = FRootPlan.Open(FRootParams);
+						IServerCursor cursor = _rootPlan.Open(_rootParams);
 						try
 						{
-							Row LKey;
-							int LColumnIndex;
-							string LText;
-							while (LCursor.Next())
+							Row key;
+							int columnIndex;
+							string text;
+							while (cursor.Next())
 							{
-								LKey = new Row(FProcess.ValueManager, new Schema.RowType(((TableDataSet)FLink.DataSet).Order.Columns));
+								key = new Row(_process.ValueManager, new Schema.RowType(((TableDataSet)_link.DataSet).Order.Columns));
 								try
 								{
-									using (Row LRow = LCursor.Select())
+									using (Row row = cursor.Select())
 									{
-										LRow.CopyTo(LKey);
-										LColumnIndex = LRow.DataType.Columns.IndexOf(ColumnName);
-										if (LRow.HasValue(LColumnIndex))
-											LText = ((Scalar)LRow.GetValue(LColumnIndex)).AsDisplayString;
+										row.CopyTo(key);
+										columnIndex = row.DataType.Columns.IndexOf(ColumnName);
+										if (row.HasValue(columnIndex))
+											text = ((Scalar)row.GetValue(columnIndex)).AsDisplayString;
 										else
-											LText = CNoValueText;
+											text = NoValueText;
 									}
-									Nodes.Add(new DBTreeNode(LText, LKey));
+									Nodes.Add(new DBTreeNode(text, key));
 								}
 								catch
 								{
-									LKey.Dispose();
+									key.Dispose();
 									throw;
 								}
 							}
 						}
 						finally
 						{
-							FRootPlan.Close(LCursor);
+							_rootPlan.Close(cursor);
 						}
 						
-						foreach (DBTreeNode LNode in Nodes)
-							LNode.BuildChildren();
+						foreach (DBTreeNode node in Nodes)
+							node.BuildChildren();
 					}
 					finally
 					{
@@ -594,22 +594,22 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		private bool FDataSettingSelected;
+		private bool _dataSettingSelected;
 		/// <summary> True when the DataView causes the treeview to change the selected node.</summary>
-		protected bool DataSettingSelected { get { return FDataSettingSelected; } }
+		protected bool DataSettingSelected { get { return _dataSettingSelected; } }
 
-		private bool CompareKeys(Row AKey1, Row AKey2)
+		private bool CompareKeys(Row key1, Row key2)
 		{
-			if (AKey2.DataType.Equals(AKey1.DataType))
+			if (key2.DataType.Equals(key1.DataType))
 			{
-				string LCompareValue;
-				for (int LIndex = 0; LIndex < AKey2.DataType.Columns.Count; LIndex++)
+				string compareValue;
+				for (int index = 0; index < key2.DataType.Columns.Count; index++)
 				{
-					LCompareValue = String.Empty;
-					if (AKey1.HasValue(AKey2.DataType.Columns[LIndex].Name))
-						LCompareValue = ((Scalar)AKey1.GetValue(AKey2.DataType.Columns[LIndex].Name)).AsDisplayString;
+					compareValue = String.Empty;
+					if (key1.HasValue(key2.DataType.Columns[index].Name))
+						compareValue = ((Scalar)key1.GetValue(key2.DataType.Columns[index].Name)).AsDisplayString;
 					
-					if (((Scalar)AKey2.GetValue(LIndex)).AsDisplayString != LCompareValue)
+					if (((Scalar)key2.GetValue(index)).AsDisplayString != compareValue)
 						return false;
 				}
 				return true;
@@ -617,90 +617,90 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			return false;
 		}
 
-		protected void BuildParentPath(Row AKey, ArrayList APath)
+		protected void BuildParentPath(Row key, ArrayList path)
 		{
-			foreach (Row LKey in APath)
+			foreach (Row localKey in path)
 			{
-				if (CompareKeys(AKey, LKey))
+				if (CompareKeys(key, localKey))
 					throw new ControlsException(ControlsException.Codes.TreeViewInfiniteLoop);
 			}
-			APath.Add(AKey);
-			IServerCursor LCursor = OpenParentCursor(AKey);
+			path.Add(key);
+			IServerCursor cursor = OpenParentCursor(key);
 			try
 			{
-				if (LCursor.Next())
+				if (cursor.Next())
 				{
-					AKey = new Row(FProcess.ValueManager, new RowType(((TableDataSet)Source.DataSet).Order.Columns));
-					LCursor.Select().CopyTo(AKey);
+					key = new Row(_process.ValueManager, new RowType(((TableDataSet)Source.DataSet).Order.Columns));
+					cursor.Select().CopyTo(key);
 				}
 				else
-					AKey = null;
+					key = null;
 			}
 			finally
 			{
-				CloseParentCursor(LCursor);
+				CloseParentCursor(cursor);
 			}
 			
-			if (AKey != null)
-				if (FindChild(AKey) == null)
-					BuildParentPath(AKey, APath);
+			if (key != null)
+				if (FindChild(key) == null)
+					BuildParentPath(key, path);
 				else
-					APath.Add(AKey);
+					path.Add(key);
 		}
 		
-		private bool FSelecting;
+		private bool _selecting;
 
-		protected void SelectNode(Row AKey)
+		protected void SelectNode(Row key)
 		{
-			if (FFindingKey || (FLink.DataSet.State == DataSetState.Insert) || ((SelectedNode != null) && ((DBTreeNode)SelectedNode).KeyEquals(AKey)))
+			if (_findingKey || (_link.DataSet.State == DataSetState.Insert) || ((SelectedNode != null) && ((DBTreeNode)SelectedNode).KeyEquals(key)))
 				return;
 
-			FDataSettingSelected = true;
+			_dataSettingSelected = true;
 			try
 			{
 				// Given a key value, build only that portion of the tree required to discover the location of the node
-				DBTreeNode LNode = FindNode(AKey);
-				if (LNode != null)
-					SelectedNode = LNode;
+				DBTreeNode node = FindNode(key);
+				if (node != null)
+					SelectedNode = node;
 				else
 				{
-					ArrayList LPath = new ArrayList();
-					BuildParentPath((Row)AKey.Copy(), LPath);
+					ArrayList path = new ArrayList();
+					BuildParentPath((Row)key.Copy(), path);
 					try
 					{
 						BeginUpdate();
 						try
 						{
-							for (int LIndex = LPath.Count - 1; LIndex >= 0; LIndex--)
+							for (int index = path.Count - 1; index >= 0; index--)
 							{
-								if (LIndex == LPath.Count - 1)
+								if (index == path.Count - 1)
 								{
-									LNode = FindChild((Row)LPath[LIndex]);
-									if ((LNode == null) && !FSelecting)
+									node = FindChild((Row)path[index]);
+									if ((node == null) && !_selecting)
 									{
 										UpdateTree();
-										FSelecting = true;
+										_selecting = true;
 										try
 										{
-											SelectNode(AKey);
+											SelectNode(key);
 										}
 										finally
 										{
-											FSelecting = false;
+											_selecting = false;
 										}
 										return;
 									}
 								}
 								else
-									LNode = LNode.FindChild((Row)LPath[LIndex]);
+									node = node.FindChild((Row)path[index]);
 
-								if (LNode == null)
+								if (node == null)
 									throw new ControlsException(ControlsException.Codes.TreeViewUnconnected);
 
-								if (LIndex == 0)
-									SelectedNode = LNode;
+								if (index == 0)
+									SelectedNode = node;
 								else							
-									LNode.BuildChildren();
+									node.BuildChildren();
 							}
 						}
 						finally
@@ -710,65 +710,65 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 					}
 					finally
 					{
-						for (int LIndex = 0; LIndex < LPath.Count; LIndex++)
-							((Row)LPath[LIndex]).Dispose();
+						for (int index = 0; index < path.Count; index++)
+							((Row)path[index]).Dispose();
 					}
 				}
 			}
 			finally
 			{
-				FDataSettingSelected = false;
+				_dataSettingSelected = false;
 			}
 		}
 		
-		protected override void OnBeforeExpand(TreeViewCancelEventArgs AArgs)
+		protected override void OnBeforeExpand(TreeViewCancelEventArgs args)
 		{
-			base.OnBeforeExpand(AArgs);
+			base.OnBeforeExpand(args);
 			// HACK: The check for FKey != null was added because this method is being called as a result of Nodes.Clear.
-			if (!AArgs.Cancel && (AArgs.Node != null) && !FClearingNodes)
+			if (!args.Cancel && (args.Node != null) && !_clearingNodes)
 			{
-				foreach (DBTreeNode LNode in AArgs.Node.Nodes)
-					LNode.BuildChildren();
+				foreach (DBTreeNode node in args.Node.Nodes)
+					node.BuildChildren();
 			}
 		}
 
-		protected override void OnBeforeSelect(TreeViewCancelEventArgs AArgs)
+		protected override void OnBeforeSelect(TreeViewCancelEventArgs args)
 		{
-			base.OnBeforeSelect(AArgs);
-			if (!AArgs.Cancel && (AArgs.Node != null) && !FUpdatingTree && !FDataSettingSelected && FLink.Active)
+			base.OnBeforeSelect(args);
+			if (!args.Cancel && (args.Node != null) && !_updatingTree && !_dataSettingSelected && _link.Active)
 				try
 				{
-					AArgs.Cancel = !FindRow((DBTreeNode)AArgs.Node);
+					args.Cancel = !FindRow((DBTreeNode)args.Node);
 				}
 				catch
 				{
-					AArgs.Cancel = true;
+					args.Cancel = true;
 					throw;
 				}
 		}
 
-		private bool FFindingKey;
+		private bool _findingKey;
 		/// <summary> True when the TreeView is updating the active row in the DataView. </summary>
-		public bool FindingKey { get { return FFindingKey; } }
+		public bool FindingKey { get { return _findingKey; } }
 
 		/// <summary> Positions the DataView on the row given a node.
 		/// </summary>
-		/// <param name="ANode"></param>
+		/// <param name="node"></param>
 		/// <returns></returns>
-		protected bool FindRow(DBTreeNode ANode)
+		protected bool FindRow(DBTreeNode node)
 		{
-			FFindingKey = true;
+			_findingKey = true;
 			try
 			{
-				return FLink.DataSet.FindKey(ANode.Key);
+				return _link.DataSet.FindKey(node.Key);
 			}
 			finally
 			{
-				FFindingKey = false;
+				_findingKey = false;
 			}
 		}
 
-		private void FocusControl(DataLink ALink, DataSet ADataSet, DataField AField)
+		private void FocusControl(DataLink link, DataSet dataSet, DataField field)
 		{
 			Focus();
 		}
@@ -777,33 +777,33 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	/// <summary> Not all nodes are added to the tree. Nodes are added by the DBTreeView as they are needed. </summary>
 	public class DBTreeNode : TreeNode
 	{
-		public DBTreeNode(string AText, Row AKey)
+		public DBTreeNode(string text, Row key)
 		{
-			Text = AText.Trim();
-			FKey = AKey;
+			Text = text.Trim();
+			_key = key;
 		}
 
-		private Row FKey;
+		private Row _key;
 		/// <summary> The Key which this node represents. </summary>
-		public Row Key { get { return FKey; } }
+		public Row Key { get { return _key; } }
 
 		public DBTreeView DBTreeView { get { return (DBTreeView)TreeView; } }
 
 		public int Depth { get { return Parent != null ? ((DBTreeNode)Parent).Depth + 1 : 0; } }
 
 		/// <summary> True if the key for this node is the same as the given key. </summary>
-		public bool KeyEquals(Row AKey)
+		public bool KeyEquals(Row key)
 		{
-			if (FKey.DataType.Equals(AKey.DataType))
+			if (_key.DataType.Equals(key.DataType))
 			{
-				string LCompareValue;
-				for (int LIndex = 0; LIndex < FKey.DataType.Columns.Count; LIndex++)
+				string compareValue;
+				for (int index = 0; index < _key.DataType.Columns.Count; index++)
 				{
-					LCompareValue = String.Empty;
-					if (AKey.HasValue(FKey.DataType.Columns[LIndex].Name))
-						LCompareValue = ((Scalar)AKey.GetValue(FKey.DataType.Columns[LIndex].Name)).AsDisplayString;
+					compareValue = String.Empty;
+					if (key.HasValue(_key.DataType.Columns[index].Name))
+						compareValue = ((Scalar)key.GetValue(_key.DataType.Columns[index].Name)).AsDisplayString;
 					
-					if (((Scalar)FKey.GetValue(LIndex)).AsDisplayString != LCompareValue)
+					if (((Scalar)_key.GetValue(index)).AsDisplayString != compareValue)
 						return false;
 				}
 				return true;
@@ -812,66 +812,66 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		}
 
 		/// <summary> Returns the immediate child that matches the key. </summary>
-		public DBTreeNode FindChild(Row AKey)
+		public DBTreeNode FindChild(Row key)
 		{
-			foreach (DBTreeNode LNode in Nodes)
-				if (LNode.KeyEquals(AKey))
-					return LNode;
+			foreach (DBTreeNode node in Nodes)
+				if (node.KeyEquals(key))
+					return node;
 			return null;
 		}
 		
 		/// <summary> Returns this node or any child, recursively, matching the key. </summary>
-		public DBTreeNode FindNode(Row AKey)
+		public DBTreeNode FindNode(Row key)
 		{
-			DBTreeNode LResult = null;
-			if (KeyEquals(AKey))
-				LResult = this;
+			DBTreeNode result = null;
+			if (KeyEquals(key))
+				result = this;
 			else
-				foreach (DBTreeNode LNode in Nodes)
+				foreach (DBTreeNode node in Nodes)
 				{
-					LResult = LNode.FindNode(AKey);
-					if (LResult != null)
+					result = node.FindNode(key);
+					if (result != null)
 						break;
 				}
-			return LResult;
+			return result;
 		}
 
 		/// <summary> Updates data values for this node from the current row of the DataView. </summary>
 		/// <param name="AView"></param>
-		protected internal virtual void Update(DataSet ADataSet)
+		protected internal virtual void Update(DataSet dataSet)
 		{
-			DataField LField = ADataSet.Fields[DBTreeView.ColumnName];
-			Text = LField.HasValue() ? LField.AsDisplayString : DBTreeView.CNoValueText;
+			DataField field = dataSet.Fields[DBTreeView.ColumnName];
+			Text = field.HasValue() ? field.AsDisplayString : DBTreeView.NoValueText;
 			Text = Text.Trim();
-			using (Row LKey = DBTreeView.Source.DataSet.GetKey())
+			using (Row key = DBTreeView.Source.DataSet.GetKey())
 			{
-				FKey.ClearValues();
-				LKey.CopyTo(FKey);
+				_key.ClearValues();
+				key.CopyTo(_key);
 			}
 		}
 
 		public void ClearChildren()
 		{
-			foreach (DBTreeNode LNode in Nodes)
+			foreach (DBTreeNode node in Nodes)
 			{
-				LNode.ClearChildren();
-				LNode.DisposeKey();
+				node.ClearChildren();
+				node.DisposeKey();
 			}
 			Nodes.Clear();
 		}
 		
-		public void SetKey(Row AKey)
+		public void SetKey(Row key)
 		{
 			DisposeKey();
-			FKey = AKey;
+			_key = key;
 		}
 		
 		public void DisposeKey()
 		{
-			if (FKey != null)
+			if (_key != null)
 			{
-				FKey.Dispose();
-				FKey = null;
+				_key.Dispose();
+				_key = null;
 			}
 		}
 
@@ -879,52 +879,52 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		public void BuildChildren()
 		{
 			// Open a dynamic navigable browse cursor on the child expression
-			IServerCursor LCursor = DBTreeView.OpenChildCursor(FKey);
+			IServerCursor cursor = DBTreeView.OpenChildCursor(_key);
 			try
 			{
-				DBTreeNode LExistingNode;
-				Row LKey;
-				string LText;
-				int LIndex = 0;
-				int LColumnIndex;
-				while (LCursor.Next())
+				DBTreeNode existingNode;
+				Row key;
+				string text;
+				int index = 0;
+				int columnIndex;
+				while (cursor.Next())
 				{
-					LKey = new Row(DBTreeView.FProcess.ValueManager, new Schema.RowType(((TableDataSet)DBTreeView.Source.DataSet).Order.Columns));
+					key = new Row(DBTreeView._process.ValueManager, new Schema.RowType(((TableDataSet)DBTreeView.Source.DataSet).Order.Columns));
 					try
 					{
-						using (Row LRow = LCursor.Select())
+						using (Row row = cursor.Select())
 						{
-							LRow.CopyTo(LKey);
-							LColumnIndex = LRow.DataType.Columns.IndexOf(DBTreeView.ColumnName);
-							if (LColumnIndex < 0)
+							row.CopyTo(key);
+							columnIndex = row.DataType.Columns.IndexOf(DBTreeView.ColumnName);
+							if (columnIndex < 0)
 								throw new ControlsException(ControlsException.Codes.DataColumnNotFound, DBTreeView.ColumnName);
-							if (LRow.HasValue(LColumnIndex))
-								LText = ((Scalar)LRow.GetValue(LColumnIndex)).AsDisplayString;
+							if (row.HasValue(columnIndex))
+								text = ((Scalar)row.GetValue(columnIndex)).AsDisplayString;
 							else
-								LText = DBTreeView.CNoValueText;
+								text = DBTreeView.NoValueText;
 								
-							LExistingNode = FindChild(LKey);
-							if (LExistingNode != null)
+							existingNode = FindChild(key);
+							if (existingNode != null)
 							{
-								LExistingNode.Text = LText;
-								LExistingNode.SetKey(LKey);
-								LIndex = LExistingNode.Index;
+								existingNode.Text = text;
+								existingNode.SetKey(key);
+								index = existingNode.Index;
 							}
 							else
-								Nodes.Insert(LIndex, new DBTreeNode(LText, LKey));
-							LIndex++;
+								Nodes.Insert(index, new DBTreeNode(text, key));
+							index++;
 						}
 					}
 					catch
 					{
-						LKey.Dispose();
+						key.Dispose();
 						throw;
 					}
 				}
 			}
 			finally
 			{
-				DBTreeView.CloseChildCursor(LCursor);
+				DBTreeView.CloseChildCursor(cursor);
 			}
 		}
 	}

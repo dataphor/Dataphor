@@ -10,24 +10,24 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	public class Trigger : Element, ITrigger 
     {		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Action = null;
 		}
 		
 		// IVerticalAlignedElement
 
-		private VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		private VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		[DefaultValue(VerticalAlignment.Top)]
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
+			get { return _verticalAlignment; }
 			set
 			{
-				if (FVerticalAlignment != value)
+				if (_verticalAlignment != value)
 				{
-					FVerticalAlignment = value;
+					_verticalAlignment = value;
 					UpdateBinding(FrameworkElement.VerticalAlignmentProperty);
 				}
 			}
@@ -35,7 +35,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		protected override object UIGetVerticalAlignment()
 		{
-			return ConvertVerticalAlignment(FVerticalAlignment);
+			return ConvertVerticalAlignment(_verticalAlignment);
 		}
 
 		// Button
@@ -91,32 +91,32 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		// Action
 
-		protected IAction FAction;
+		protected IAction _action;
 		public IAction Action
 		{
-			get { return FAction; }
+			get { return _action; }
 			set
 			{
-				if (FAction != value)
+				if (_action != value)
 				{
-					if (FAction != null)
+					if (_action != null)
 					{
-						FAction.OnEnabledChanged -= new EventHandler(ActionEnabledChanged);
-						FAction.OnTextChanged -= new EventHandler(ActionTextChanged);
-						FAction.OnImageChanged -= new EventHandler(ActionImageChanged);
-						FAction.OnHintChanged -= new EventHandler(ActionHintChanged);
-						FAction.OnVisibleChanged -= new EventHandler(ActionVisibleChanged);
-						FAction.Disposed -= new EventHandler(ActionDisposed);
+						_action.OnEnabledChanged -= new EventHandler(ActionEnabledChanged);
+						_action.OnTextChanged -= new EventHandler(ActionTextChanged);
+						_action.OnImageChanged -= new EventHandler(ActionImageChanged);
+						_action.OnHintChanged -= new EventHandler(ActionHintChanged);
+						_action.OnVisibleChanged -= new EventHandler(ActionVisibleChanged);
+						_action.Disposed -= new EventHandler(ActionDisposed);
 					}
-					FAction = value;
-					if (FAction != null)
+					_action = value;
+					if (_action != null)
 					{
-						FAction.OnEnabledChanged += new EventHandler(ActionEnabledChanged);
-						FAction.OnTextChanged += new EventHandler(ActionTextChanged);
-						FAction.OnImageChanged += new EventHandler(ActionImageChanged);
-						FAction.OnHintChanged += new EventHandler(ActionHintChanged);
-						FAction.OnVisibleChanged += new EventHandler(ActionVisibleChanged);
-						FAction.Disposed += new EventHandler(ActionDisposed);
+						_action.OnEnabledChanged += new EventHandler(ActionEnabledChanged);
+						_action.OnTextChanged += new EventHandler(ActionTextChanged);
+						_action.OnImageChanged += new EventHandler(ActionImageChanged);
+						_action.OnHintChanged += new EventHandler(ActionHintChanged);
+						_action.OnVisibleChanged += new EventHandler(ActionVisibleChanged);
+						_action.Disposed += new EventHandler(ActionDisposed);
 					}
 					if (Active)
 					{
@@ -136,14 +136,14 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 		
-		protected void ActionDisposed(object ASender, EventArgs AArgs)
+		protected void ActionDisposed(object sender, EventArgs args)
 		{
 			Action = null;
 		}
 		
 		// Image
 
-		private void ActionImageChanged(object ASender, EventArgs AArgs)
+		private void ActionImageChanged(object sender, EventArgs args)
 		{
 			UpdateBinding(TriggerControl.ImageProperty);
 		}
@@ -155,16 +155,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		// ImageWidth
 		
-		protected int FImageWidth = 0;
+		protected int _imageWidth = 0;
 		[DefaultValue(0)]
 		public int ImageWidth
 		{
-			get { return FImageWidth; }
+			get { return _imageWidth; }
 			set
 			{
-				if (FImageWidth != value)
+				if (_imageWidth != value)
 				{
-					FImageWidth = value;
+					_imageWidth = value;
 					UpdateBinding(TriggerControl.ImageWidthProperty);
 				}
 			}
@@ -172,19 +172,19 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private object UIGetImageWidth()
 		{
-			return (double)FImageWidth;
+			return (double)_imageWidth;
 		}
 		
-		protected int FImageHeight = 0;
+		protected int _imageHeight = 0;
 		[DefaultValue(0)]
 		public int ImageHeight
 		{
-			get { return FImageHeight; }
+			get { return _imageHeight; }
 			set
 			{
-				if (FImageHeight != value)
+				if (_imageHeight != value)
 				{
-					FImageHeight = value;
+					_imageHeight = value;
 					UpdateBinding(TriggerControl.ImageHeightProperty);
 				}
 			}
@@ -192,38 +192,38 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private object UIGetImageHeight()
 		{
-			return (double)FImageHeight;
+			return (double)_imageHeight;
 		}
 		
 		// Text
 
-		private string FText = String.Empty;
+		private string _text = String.Empty;
 		[DefaultValue("")]
 		public string Text
 		{
-			get { return FText; }
+			get { return _text; }
 			set
 			{
-				if (FText != value)
+				if (_text != value)
 				{
-					FText = value;
+					_text = value;
 					UpdateBinding(ContentControl.ContentProperty);
 				}
 			}
 		}
 
-		private void ActionTextChanged(object ASender, EventArgs AArgs)
+		private void ActionTextChanged(object sender, EventArgs args)
 		{
-			if (FText == String.Empty)
+			if (_text == String.Empty)
 				UpdateBinding(ContentControl.ContentProperty);
 		}
 
 		public virtual string GetText()
 		{
 			return 
-				(Action != null) && (FText == String.Empty)
+				(Action != null) && (_text == String.Empty)
 					? Action.Text
-					: FText;
+					: _text;
 		}
 
 		private object UIGetContent()
@@ -233,16 +233,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		// Enabled
 
-		private bool FEnabled = true;
+		private bool _enabled = true;
 		[DefaultValue(true)]
 		public bool Enabled
 		{
-			get { return FEnabled; }
+			get { return _enabled; }
 			set
 			{
-				if (FEnabled != value)
+				if (_enabled != value)
 				{
-					FEnabled = value;
+					_enabled = value;
 					UpdateBinding(Control.IsEnabledProperty);
 				}
 			}
@@ -255,10 +255,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		///	</remarks>
 		public override bool GetEnabled()
 		{
-			return ( Action == null ? false : Action.GetEnabled() ) && FEnabled && base.GetEnabled();
+			return ( Action == null ? false : Action.GetEnabled() ) && _enabled && base.GetEnabled();
 		}
 
-		private void ActionEnabledChanged(object ASender, EventArgs AArgs)
+		private void ActionEnabledChanged(object sender, EventArgs args)
 		{
 			UpdateBinding(Control.IsEnabledProperty);
 		}
@@ -275,7 +275,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				return String.Empty;
 		}
 
-		private void ActionHintChanged(object ASender, EventArgs AArgs)
+		private void ActionHintChanged(object sender, EventArgs args)
 		{
 			UpdateBinding(ToolTipService.ToolTipProperty);
 		}
@@ -287,7 +287,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return base.GetVisible() && ((Action == null) || Action.Visible);
 		}
 
-		private void ActionVisibleChanged(object ASender, EventArgs AArgs)
+		private void ActionVisibleChanged(object sender, EventArgs args)
 		{
 			UpdateBinding(FrameworkElement.VisibilityProperty);
 		}

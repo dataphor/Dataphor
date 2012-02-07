@@ -54,38 +54,38 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 
 	public class LinterDevice : SQLDevice
 	{
-		public LinterDevice(int AID, string AName) : base(AID, AName){}
+		public LinterDevice(int iD, string name) : base(iD, name){}
 		
-		protected override void RegisterSystemObjectMaps(ServerProcess AProcess)
+		protected override void RegisterSystemObjectMaps(ServerProcess process)
 		{
-			base.RegisterSystemObjectMaps(AProcess);
+			base.RegisterSystemObjectMaps(process);
 
 			// Perform system type and operator mapping registration
-			ResourceManager LResourceManager = new ResourceManager("SystemCatalog", GetType().Assembly);
+			ResourceManager resourceManager = new ResourceManager("SystemCatalog", GetType().Assembly);
 			#if USEISTRING
-			RunScript(AProcess, String.Format(LResourceManager.GetString("SystemObjectMaps"), Name, IsCaseSensitive.ToString().ToLower()));
+			RunScript(AProcess, String.Format(resourceManager.GetString("SystemObjectMaps"), Name, IsCaseSensitive.ToString().ToLower()));
 			#else
-			RunScript(AProcess, String.Format(LResourceManager.GetString("SystemObjectMaps"), Name, "false"));
+			RunScript(process, String.Format(resourceManager.GetString("SystemObjectMaps"), Name, "false"));
 			#endif
 		}
 
-		protected override DeviceSession InternalConnect(ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo)
+		protected override DeviceSession InternalConnect(ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo)
 		{
-			return new LinterDeviceSession(this, AServerProcess, ADeviceSessionInfo);
+			return new LinterDeviceSession(this, serverProcess, deviceSessionInfo);
 		}
 
 		// DataSource		
-		protected string FDataSource = String.Empty;
+		protected string _dataSource = String.Empty;
 		public string DataSource
 		{
-			get { return FDataSource; }
-			set { FDataSource = value == null ? String.Empty : value; }
+			get { return _dataSource; }
+			set { _dataSource = value == null ? String.Empty : value; }
 		}
 		
 		// ShouldIncludeColumn
-		public override bool ShouldIncludeColumn(Plan APlan, string ATableName, string AColumnName, string ADomainName)
+		public override bool ShouldIncludeColumn(Plan plan, string tableName, string columnName, string domainName)
 		{
-			switch (ADomainName.ToLower())
+			switch (domainName.ToLower())
 			{
 				case "byte":
 				case "smallint":
@@ -109,39 +109,39 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 		}
 		
 		// FindScalarType
-        public override ScalarType FindScalarType(Plan APlan, string ADomainName, int ALength, D4.MetaData AMetaData)
+        public override ScalarType FindScalarType(Plan plan, string domainName, int length, D4.MetaData metaData)
         {
-			switch (ADomainName.ToLower())
+			switch (domainName.ToLower())
 			{
-				case "byte": return APlan.DataTypes.SystemByte;
-				case "smallint": return APlan.DataTypes.SystemShort;
+				case "byte": return plan.DataTypes.SystemByte;
+				case "smallint": return plan.DataTypes.SystemShort;
 				case "int":
-				case "integer": return APlan.DataTypes.SystemInteger;
-				case "bigint": return APlan.DataTypes.SystemLong;
+				case "integer": return plan.DataTypes.SystemInteger;
+				case "bigint": return plan.DataTypes.SystemLong;
 				case "decimal":
 				case "numeric":
 				case "double":
-				case "float": return APlan.DataTypes.SystemDecimal;
-				case "date": return APlan.DataTypes.SystemDateTime;
-				case "money": return APlan.DataTypes.SystemMoney;
+				case "float": return plan.DataTypes.SystemDecimal;
+				case "date": return plan.DataTypes.SystemDateTime;
+				case "money": return plan.DataTypes.SystemMoney;
 				case "char":
 				case "character":
 				case "varchar":
 				case "nchar":
 				case "nvarchar": 
-					AMetaData.Tags.Add(new D4.Tag("Storage.Length", ALength.ToString()));
+					metaData.Tags.Add(new D4.Tag("Storage.Length", length.ToString()));
 					#if USEISTRING
 					return IsCaseSensitive ? APlan.DataTypes.SystemString : APlan.DataTypes.SystemIString;
 					#else
-					return APlan.DataTypes.SystemString;
+					return plan.DataTypes.SystemString;
 					#endif
 				#if USEISTRING
 				case "clob": return (ScalarType)(IsCaseSensitive ? APlan.Catalog[CSQLTextScalarType] : APlan.Catalog[CSQLITextScalarType]);
 				#else
-				case "clob": return (ScalarType)Compiler.ResolveCatalogIdentifier(APlan, CSQLTextScalarType, true);
+				case "clob": return (ScalarType)Compiler.ResolveCatalogIdentifier(plan, SQLTextScalarType, true);
 				#endif
-				case "blob": return APlan.DataTypes.SystemBinary;
-				default: throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);
+				case "blob": return plan.DataTypes.SystemBinary;
+				default: throw new SQLException(SQLException.Codes.UnsupportedImportType, domainName);
 			}
         }
 
@@ -149,11 +149,11 @@ namespace Alphora.Dataphor.DAE.Device.Linter
         
         public override TableSpecifier GetDummyTableSpecifier()
         {
-			SelectExpression LSelectExpression = new SelectExpression();
-			LSelectExpression.SelectClause = new SelectClause();
-			LSelectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(0), "dummy"));
-			LSelectExpression.FromClause = new CalculusFromClause(new TableSpecifier(new TableExpression("tables")));
-			LSelectExpression.WhereClause = 
+			SelectExpression selectExpression = new SelectExpression();
+			selectExpression.SelectClause = new SelectClause();
+			selectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(0), "dummy"));
+			selectExpression.FromClause = new CalculusFromClause(new TableSpecifier(new TableExpression("tables")));
+			selectExpression.WhereClause = 
 				new WhereClause
 				(
 					new BinaryExpression
@@ -173,10 +173,10 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 						)
 					)
 				);
-			return new TableSpecifier(LSelectExpression, "dummy");
+			return new TableSpecifier(selectExpression, "dummy");
         }
         
-        protected override string GetDeviceTablesExpression(TableVar ATableVar)
+        protected override string GetDeviceTablesExpression(TableVar tableVar)
         {
 			return
 				String.Format
@@ -200,11 +200,11 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 							where (t.table_type = 'TABLE' or t.table_type = 'VIEW') {0}
 							order by t.table_name, c.ordinal_position
 					",
-					ATableVar == null ? String.Empty : String.Format("and t.table_name = '{0}'", ToSQLIdentifier(ATableVar))
+					tableVar == null ? String.Empty : String.Format("and t.table_name = '{0}'", ToSQLIdentifier(tableVar))
 				);
         }
         
-        protected override string GetDeviceIndexesExpression(TableVar ATableVar)
+        protected override string GetDeviceIndexesExpression(TableVar tableVar)
         {
 			return
 				String.Format
@@ -222,14 +222,14 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 							where t.table_type = 'TABLE' and i.index_name is not null {0}
 							order by t.table_name, i.index_name, i.ordinal_position;
 					",
-					ATableVar == null ? String.Empty : String.Format("and t.table_name = '{0}'", ToSQLIdentifier(ATableVar))
+					tableVar == null ? String.Empty : String.Format("and t.table_name = '{0}'", ToSQLIdentifier(tableVar))
 				);
         }
 	}
 	
 	public class LinterDeviceSession : SQLDeviceSession
 	{
-		public LinterDeviceSession(LinterDevice ADevice, ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo) : base(ADevice, AServerProcess, ADeviceSessionInfo){}
+		public LinterDeviceSession(LinterDevice device, ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo) : base(device, serverProcess, deviceSessionInfo){}
 		
 		public new LinterDevice Device { get { return (LinterDevice)base.Device; } }
 		
@@ -240,32 +240,32 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 			// ConnectionStringBuilderClass
 				// LinterADOConnectionStringBuilder (default)
 
-			D4.ClassDefinition LClassDefinition = 
+			D4.ClassDefinition classDefinition = 
 				new D4.ClassDefinition
 				(
 					Device.ConnectionClass == String.Empty ? 
 						"ODBCConnection.ODBCConnection" : 
 						Device.ConnectionClass
 				);
-			D4.ClassDefinition LBuilderClass = 
+			D4.ClassDefinition builderClass = 
 				new D4.ClassDefinition
 				(
 					Device.ConnectionStringBuilderClass == String.Empty ?
 						"LinterDevice.LinterODBCConnectionStringBuilder" :
 						Device.ConnectionStringBuilderClass
 				);
-			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.CreateObject(LBuilderClass, new object[]{});
+			ConnectionStringBuilder connectionStringBuilder = (ConnectionStringBuilder)ServerProcess.CreateObject(builderClass, new object[]{});
 
-			D4.Tags LTags = new D4.Tags();
-			LTags.AddOrUpdate("DataSource", Device.DataSource);
-			LTags.AddOrUpdate("UserName", DeviceSessionInfo.UserName);
-			LTags.AddOrUpdate("Password", DeviceSessionInfo.Password);
+			D4.Tags tags = new D4.Tags();
+			tags.AddOrUpdate("DataSource", Device.DataSource);
+			tags.AddOrUpdate("UserName", DeviceSessionInfo.UserName);
+			tags.AddOrUpdate("Password", DeviceSessionInfo.Password);
 				
-			LTags = LConnectionStringBuilder.Map(LTags);
-			Device.GetConnectionParameters(LTags, DeviceSessionInfo);
-			string LConnectionString = SQLDevice.TagsToString(LTags);
+			tags = connectionStringBuilder.Map(tags);
+			Device.GetConnectionParameters(tags, DeviceSessionInfo);
+			string connectionString = SQLDevice.TagsToString(tags);
 				
-			return (SQLConnection)ServerProcess.CreateObject(LClassDefinition, new object[]{LConnectionString});
+			return (SQLConnection)ServerProcess.CreateObject(classDefinition, new object[]{connectionString});
 		}
 	}
 
@@ -273,9 +273,9 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 	{
 		public LinterODBCConnectionStringBuilder()
 		{
-			FLegend.AddOrUpdate("DataSource", "DSN");
-			FLegend.AddOrUpdate("UserName", "UID");
-			FLegend.AddOrUpdate("Password", "PWD");
+			_legend.AddOrUpdate("DataSource", "DSN");
+			_legend.AddOrUpdate("UserName", "UID");
+			_legend.AddOrUpdate("Password", "PWD");
 		}
 	}
 }

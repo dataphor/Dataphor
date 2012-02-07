@@ -15,34 +15,34 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	public partial class ConnectApplication : UserControl
 	{
-		public ConnectApplication(ConnectWorkItem AWorkItem)
+		public ConnectApplication(ConnectWorkItem workItem)
 		{
 			InitializeComponent();
 			
-			FWorkItem = AWorkItem;
-			DataContext = AWorkItem;
+			_workItem = workItem;
+			DataContext = workItem;
 		}
 		
-		private ConnectWorkItem FWorkItem;
+		private ConnectWorkItem _workItem;
 
 		private void StartButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
 			if (ApplicationsGrid.SelectedItem != null)
-				FWorkItem.ApplicationID = (string)((object[])ApplicationsGrid.SelectedItem)[0];
-			FWorkItem.BeginStartApplication();
+				_workItem.ApplicationID = (string)((object[])ApplicationsGrid.SelectedItem)[0];
+			_workItem.BeginStartApplication();
 		}
 
 		private void BackClicked(object sender, System.Windows.RoutedEventArgs e)
 		{
-			FWorkItem.Back();
+			_workItem.Back();
 		}
 
-		private void ApplicationsGridLoadingRow(object ASender, System.Windows.Controls.DataGridRowEventArgs AArgs)
+		private void ApplicationsGridLoadingRow(object sender, System.Windows.Controls.DataGridRowEventArgs args)
 		{
-			var LColumn = ApplicationsGrid.Columns[0];
-			var LCell = LColumn.GetCellContent(AArgs.Row).Parent as DataGridCell;
-			if (LCell != null)
-			    LCell.DataContext = ((object[])AArgs.Row.DataContext)[1];
+			var column = ApplicationsGrid.Columns[0];
+			var cell = column.GetCellContent(args.Row).Parent as DataGridCell;
+			if (cell != null)
+			    cell.DataContext = ((object[])args.Row.DataContext)[1];
 		}
 	}
 }

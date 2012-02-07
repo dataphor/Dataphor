@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	/// <summary> Displays a list of exceptions contained in an <see cref="ErrorList"/>. </summary>
 	public class ErrorListForm : System.Windows.Forms.Form
 	{
-		private Alphora.Dataphor.Frontend.Client.Windows.ErrorListView FErrorListView;
+		private Alphora.Dataphor.Frontend.Client.Windows.ErrorListView _errorListView;
 
 		public ErrorListForm()
 		{
@@ -45,21 +45,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private void InitializeComponent()
 		{
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ErrorListForm));
-            this.FErrorListView = new Alphora.Dataphor.Frontend.Client.Windows.ErrorListView();
+            this._errorListView = new Alphora.Dataphor.Frontend.Client.Windows.ErrorListView();
             this.SuspendLayout();
             // 
             // FErrorListView
             // 
-            this.FErrorListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.FErrorListView.Location = new System.Drawing.Point(0, 0);
-            this.FErrorListView.Name = "FErrorListView";
-            this.FErrorListView.Size = new System.Drawing.Size(584, 254);
-            this.FErrorListView.TabIndex = 0;
+            this._errorListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._errorListView.Location = new System.Drawing.Point(0, 0);
+            this._errorListView.Name = "FErrorListView";
+            this._errorListView.Size = new System.Drawing.Size(584, 254);
+            this._errorListView.TabIndex = 0;
             // 
             // ErrorListForm
             // 
             this.ClientSize = new System.Drawing.Size(584, 254);
-            this.Controls.Add(this.FErrorListView);
+            this.Controls.Add(this._errorListView);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ErrorListForm";
             this.Text = "Errors";
@@ -68,27 +68,27 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 		#endregion
 
-		public static void ShowErrorList(ErrorList AList, bool AWarning)
+		public static void ShowErrorList(ErrorList list, bool warning)
 		{
-			if ((AList != null) && (AList.Count > 0))
+			if ((list != null) && (list.Count > 0))
 			{
-				using (ErrorListForm LForm = new ErrorListForm())
+				using (ErrorListForm form = new ErrorListForm())
 				{
-					LForm.FErrorListView.AppendErrors(null, AList, AWarning);
-					LForm.ShowDialog();
+					form._errorListView.AppendErrors(null, list, warning);
+					form.ShowDialog();
 				}
 			}
 		}
 
-		protected override bool ProcessDialogKey(Keys AKeyData)
+		protected override bool ProcessDialogKey(Keys keyData)
 		{
-			if (AKeyData == Keys.Escape)
+			if (keyData == Keys.Escape)
 			{
 				Close();
 				return true;
 			}
 			else
-				return base.ProcessDialogKey(AKeyData);
+				return base.ProcessDialogKey(keyData);
 		}
 	}
 }

@@ -25,354 +25,354 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator iRedefine(table{}, object) : table{}
 	public class RedefineNode : UnaryTableNode
 	{
-		protected int[] FRedefineColumnOffsets;		
+		protected int[] _redefineColumnOffsets;		
 		public int[] RedefineColumnOffsets
 		{
-			get { return FRedefineColumnOffsets; }
-			set { FRedefineColumnOffsets = value; }
+			get { return _redefineColumnOffsets; }
+			set { _redefineColumnOffsets = value; }
 		}
 		
-		private NamedColumnExpressions FExpressions;
+		private NamedColumnExpressions _expressions;
 		public NamedColumnExpressions Expressions
 		{
-			get { return FExpressions; }
-			set { FExpressions = value; }
+			get { return _expressions; }
+			set { _expressions = value; }
 		}
 		
-		private bool FDistinctRequired;
+		private bool _distinctRequired;
 		public bool DistinctRequired
 		{
-			get { return FDistinctRequired; }
-			set { FDistinctRequired = value; }
+			get { return _distinctRequired; }
+			set { _distinctRequired = value; }
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(SourceTableVar.MetaData);
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 			CopyTableVarColumns(SourceTableVar.Columns);
 
-			int LIndex = 0;			
-			FRedefineColumnOffsets = new int[FExpressions.Count];
-			ApplicationTransaction LTransaction = null;
-			if (APlan.ApplicationTransactionID != Guid.Empty)
-				LTransaction = APlan.GetApplicationTransaction();
+			int index = 0;			
+			_redefineColumnOffsets = new int[_expressions.Count];
+			ApplicationTransaction transaction = null;
+			if (plan.ApplicationTransactionID != Guid.Empty)
+				transaction = plan.GetApplicationTransaction();
 			try
 			{
-				if (LTransaction != null)
-					LTransaction.PushLookup();
+				if (transaction != null)
+					transaction.PushLookup();
 				try
 				{
-					APlan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.None));
+					plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.None));
 					try
 					{
-						APlan.EnterRowContext();
+						plan.EnterRowContext();
 						try
 						{
-							APlan.Symbols.Push(new Symbol(SourceTableType.RowType));
+							plan.Symbols.Push(new Symbol(String.Empty, SourceTableType.RowType));
 							try
 							{
 								// Add a column for each expression
-								PlanNode LPlanNode;
-								Schema.TableVarColumn LSourceColumn;
-								Schema.TableVarColumn LTempColumn;
-								Schema.TableVarColumn LNewColumn;
-								foreach (NamedColumnExpression LColumn in FExpressions)
+								PlanNode planNode;
+								Schema.TableVarColumn sourceColumn;
+								Schema.TableVarColumn tempColumn;
+								Schema.TableVarColumn newColumn;
+								foreach (NamedColumnExpression column in _expressions)
 								{
-									int LSourceColumnIndex = TableVar.Columns.IndexOf(LColumn.ColumnAlias);
-									if (LSourceColumnIndex < 0)
-										throw new CompilerException(CompilerException.Codes.UnknownIdentifier, LColumn, LColumn.ColumnAlias);
+									int sourceColumnIndex = TableVar.Columns.IndexOf(column.ColumnAlias);
+									if (sourceColumnIndex < 0)
+										throw new CompilerException(CompilerException.Codes.UnknownIdentifier, column, column.ColumnAlias);
 										
-									LSourceColumn = TableVar.Columns[LSourceColumnIndex];
-									LTempColumn = CopyTableVarColumn(LSourceColumn);
+									sourceColumn = TableVar.Columns[sourceColumnIndex];
+									tempColumn = CopyTableVarColumn(sourceColumn);
 
-									APlan.PushCreationObject(LTempColumn);
+									plan.PushCreationObject(tempColumn);
 									try
 									{
-										LPlanNode = Compiler.CompileExpression(APlan, LColumn.Expression);
+										planNode = Compiler.CompileExpression(plan, column.Expression);
 									}
 									finally
 									{
-										APlan.PopCreationObject();
+										plan.PopCreationObject();
 									}
 									
-									LNewColumn = CopyTableVarColumn(LSourceColumn);
-									LNewColumn.Column.DataType = LPlanNode.DataType;
-									if (LTempColumn.HasDependencies())
-										LNewColumn.AddDependencies(LTempColumn.Dependencies);
-									Schema.Object LObject;
-									if (LNewColumn.HasDependencies())
-										for (int LDependencyIndex = 0; LIndex < LNewColumn.Dependencies.Count; LIndex++)
+									newColumn = CopyTableVarColumn(sourceColumn);
+									newColumn.Column.DataType = planNode.DataType;
+									if (tempColumn.HasDependencies())
+										newColumn.AddDependencies(tempColumn.Dependencies);
+									Schema.Object objectValue;
+									if (newColumn.HasDependencies())
+										for (int dependencyIndex = 0; index < newColumn.Dependencies.Count; index++)
 										{
-											LObject = LNewColumn.Dependencies.ResolveObject(APlan.CatalogDeviceSession, LDependencyIndex);
-											APlan.AttachDependency(LObject);
-											LNewColumn.IsNilable = LPlanNode.IsNilable;
-											LNewColumn.IsChangeRemotable = LNewColumn.IsChangeRemotable && LObject.IsRemotable;
-											LNewColumn.IsDefaultRemotable = LNewColumn.IsDefaultRemotable && LObject.IsRemotable;
+											objectValue = newColumn.Dependencies.ResolveObject(plan.CatalogDeviceSession, dependencyIndex);
+											plan.AttachDependency(objectValue);
+											newColumn.IsNilable = planNode.IsNilable;
+											newColumn.IsChangeRemotable = newColumn.IsChangeRemotable && objectValue.IsRemotable;
+											newColumn.IsDefaultRemotable = newColumn.IsDefaultRemotable && objectValue.IsRemotable;
 										}
 
-									DataType.Columns[LSourceColumnIndex] = LNewColumn.Column;
-									TableVar.Columns[LSourceColumnIndex] = LNewColumn;
-									FRedefineColumnOffsets[LIndex] = LSourceColumnIndex;
-									Nodes.Add(LPlanNode);
-									LIndex++;
+									DataType.Columns[sourceColumnIndex] = newColumn.Column;
+									TableVar.Columns[sourceColumnIndex] = newColumn;
+									_redefineColumnOffsets[index] = sourceColumnIndex;
+									Nodes.Add(planNode);
+									index++;
 								}
 
-								DetermineRemotable(APlan);
+								DetermineRemotable(plan);
 							}
 							finally
 							{
-								APlan.Symbols.Pop();
+								plan.Symbols.Pop();
 							}
 						}
 						finally
 						{
-							APlan.ExitRowContext();
+							plan.ExitRowContext();
 						}
 					}
 					finally
 					{
-						APlan.PopCursorContext();
+						plan.PopCursorContext();
 					}
 				}
 				finally
 				{
-					if (LTransaction != null)
-						LTransaction.PopLookup();
+					if (transaction != null)
+						transaction.PopLookup();
 				}
 			}
 			finally
 			{
-				if (LTransaction != null)
-					Monitor.Exit(LTransaction);
+				if (transaction != null)
+					Monitor.Exit(transaction);
 			}
 			
-			foreach (Schema.Key LKey in SourceTableVar.Keys)
+			foreach (Schema.Key key in SourceTableVar.Keys)
 			{
-				bool LAdd = true;
-				foreach (Schema.TableVarColumn LColumn in LKey.Columns)
-					if (((IList)FRedefineColumnOffsets).Contains(TableVar.Columns.IndexOfName(LColumn.Name)))
+				bool add = true;
+				foreach (Schema.TableVarColumn column in key.Columns)
+					if (((IList)_redefineColumnOffsets).Contains(TableVar.Columns.IndexOfName(column.Name)))
 					{
-						LAdd = false;
+						add = false;
 						break;
 					}
 					
-				if (LAdd)
-					TableVar.Keys.Add(CopyKey(LKey));
+				if (add)
+					TableVar.Keys.Add(CopyKey(key));
 			}
 			
-			FDistinctRequired = TableVar.Keys.Count == 0;
-			if (FDistinctRequired)
+			_distinctRequired = TableVar.Keys.Count == 0;
+			if (_distinctRequired)
 			{
-				Schema.Key LNewKey = new Schema.Key();
-				foreach (Schema.TableVarColumn LColumn in TableVar.Columns)
-					LNewKey.Columns.Add(LColumn);
-				LNewKey.IsInherited = true;
-				TableVar.Keys.Add(LNewKey);
+				Schema.Key newKey = new Schema.Key();
+				foreach (Schema.TableVarColumn column in TableVar.Columns)
+					newKey.Columns.Add(column);
+				newKey.IsInherited = true;
+				TableVar.Keys.Add(newKey);
 			}
 			
-			foreach (Schema.Order LOrder in SourceTableVar.Orders)
+			foreach (Schema.Order order in SourceTableVar.Orders)
 			{
-				bool LAdd = true;
-				for (int LColumnIndex = 0; LColumnIndex < LOrder.Columns.Count; LColumnIndex++)
-					if (((IList)FRedefineColumnOffsets).Contains(TableVar.Columns.IndexOfName(LOrder.Columns[LColumnIndex].Column.Name)))
+				bool add = true;
+				for (int columnIndex = 0; columnIndex < order.Columns.Count; columnIndex++)
+					if (((IList)_redefineColumnOffsets).Contains(TableVar.Columns.IndexOfName(order.Columns[columnIndex].Column.Name)))
 					{
-						LAdd = false;
+						add = false;
 						break;
 					}
 					
-				if (LAdd)
-					TableVar.Orders.Add(CopyOrder(LOrder));
+				if (add)
+					TableVar.Orders.Add(CopyOrder(order));
 			}
 			
-			DetermineOrder(APlan);
+			DetermineOrder(plan);
 			
 			#if UseReferenceDerivation
 			// TODO: Reference derivation on a redefine should exclude affected references
-			CopySourceReferences(APlan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(APlan, SourceTableVar.TargetReferences);
+			CopySourceReferences(plan, SourceTableVar.SourceReferences);
+			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
 			#endif
 		}
 		
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
+		public override void JoinApplicationTransaction(Program program, Row row)
 		{
 			// Exclude any columns from AKey which were included by this node
-			Schema.RowType LRowType = new Schema.RowType();
-			foreach (Schema.Column LColumn in ARow.DataType.Columns)
-				if (!((IList)FRedefineColumnOffsets).Contains(FTableVar.DataType.Columns.IndexOfName(LColumn.Name)))
-					LRowType.Columns.Add(LColumn.Copy());
+			Schema.RowType rowType = new Schema.RowType();
+			foreach (Schema.Column column in row.DataType.Columns)
+				if (!((IList)_redefineColumnOffsets).Contains(_tableVar.DataType.Columns.IndexOfName(column.Name)))
+					rowType.Columns.Add(column.Copy());
 
-			Row LRow = new Row(AProgram.ValueManager, LRowType);
+			Row localRow = new Row(program.ValueManager, rowType);
 			try
 			{
-				ARow.CopyTo(LRow);
-				SourceNode.JoinApplicationTransaction(AProgram, LRow);
+				row.CopyTo(localRow);
+				SourceNode.JoinApplicationTransaction(program, localRow);
 			}
 			finally
 			{
-				LRow.Dispose();
+				localRow.Dispose();
 			}
 		}
 
-		public void DetermineOrder(Plan APlan)
+		public void DetermineOrder(Plan plan)
 		{
 			Order = null;
 			if (SourceNode.Order != null)
 			{
-				bool LAdd = true;
-				for (int LIndex = 0; LIndex < SourceNode.Order.Columns.Count; LIndex++)
-					if (((IList)FRedefineColumnOffsets).Contains(TableVar.Columns.IndexOfName(SourceNode.Order.Columns[LIndex].Column.Name)))
+				bool add = true;
+				for (int index = 0; index < SourceNode.Order.Columns.Count; index++)
+					if (((IList)_redefineColumnOffsets).Contains(TableVar.Columns.IndexOfName(SourceNode.Order.Columns[index].Column.Name)))
 					{
-						LAdd = false;
+						add = false;
 						break;
 					}
 				
-				if (LAdd)
+				if (add)
 					Order = CopyOrder(SourceNode.Order);
 			}
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = SourceNode.CursorType;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = 
+			_cursorType = SourceNode.CursorType;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = 
 				CursorCapability.Navigable | 
 				(
-					(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
 				);
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 			
-			DetermineOrder(APlan);
+			DetermineOrder(plan);
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			RedefineExpression LExpression = new RedefineExpression();
-			LExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			for (int LIndex = 0; LIndex < FRedefineColumnOffsets.Length; LIndex++)
-				LExpression.Expressions.Add(new NamedColumnExpression((Expression)Nodes[LIndex + 1].EmitStatement(AMode), DataType.Columns[FRedefineColumnOffsets[LIndex]].Name));
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			RedefineExpression expression = new RedefineExpression();
+			expression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			for (int index = 0; index < _redefineColumnOffsets.Length; index++)
+				expression.Expressions.Add(new NamedColumnExpression((Expression)Nodes[index + 1].EmitStatement(mode), DataType.Columns[_redefineColumnOffsets[index]].Name));
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
-			APlan.EnterRowContext();
+			Nodes[0].DetermineBinding(plan);
+			plan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(SourceTableType.RowType));
+				plan.Symbols.Push(new Symbol(String.Empty, SourceTableType.RowType));
 				try
 				{
-					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
-						Nodes[LIndex].DetermineBinding(APlan);
+					for (int index = 1; index < Nodes.Count; index++)
+						Nodes[index].DetermineBinding(plan);
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			RedefineTable LTable = new RedefineTable(this, AProgram);
+			RedefineTable table = new RedefineTable(this, program);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 		
-		public override void DetermineRemotable(Plan APlan)
+		public override void DetermineRemotable(Plan plan)
 		{
-			base.DetermineRemotable(APlan);
+			base.DetermineRemotable(plan);
 			
-			FTableVar.ShouldChange = true;
-			FTableVar.ShouldDefault = true;
-			foreach (Schema.TableVarColumn LColumn in FTableVar.Columns)
+			_tableVar.ShouldChange = true;
+			_tableVar.ShouldDefault = true;
+			foreach (Schema.TableVarColumn column in _tableVar.Columns)
 			{
-				LColumn.ShouldChange = true;
-				LColumn.ShouldDefault = true;
+				column.ShouldChange = true;
+				column.ShouldDefault = true;
 			}
 		}
 		
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			bool LChanged = false;
-			if ((AColumnName == String.Empty) || (SourceNode.DataType.Columns.ContainsName(AColumnName)))
-				LChanged = base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
-			return InternalInternalChange(ANewRow, AColumnName, AProgram, true) || LChanged;
+			bool changed = false;
+			if ((columnName == String.Empty) || (SourceNode.DataType.Columns.ContainsName(columnName)))
+				changed = base.InternalDefault(program, oldRow, newRow, valueFlags, columnName, isDescending);
+			return InternalInternalChange(newRow, columnName, program, true) || changed;
 		}
 		
-		protected bool InternalInternalChange(Row ARow, string AColumnName, Program AProgram, bool AIsDefault)
+		protected bool InternalInternalChange(Row row, string columnName, Program program, bool isDefault)
 		{
-			bool LChanged = false;
-			PushRow(AProgram, ARow);
+			bool changed = false;
+			PushRow(program, row);
 			try
 			{
 				// Evaluate the Redefined columns
 				// TODO: This change code should only run if the column changing can be determined to affect the extended columns...
-				int LColumnIndex;
-				for (int LIndex = 0; LIndex < FRedefineColumnOffsets.Length; LIndex++)
+				int columnIndex;
+				for (int index = 0; index < _redefineColumnOffsets.Length; index++)
 				{
-					Schema.TableVarColumn LColumn = TableVar.Columns[FRedefineColumnOffsets[LIndex]];
-					if ((AIsDefault || LColumn.IsComputed) && (!AProgram.ServerProcess.ServerSession.Server.IsEngine || LColumn.IsChangeRemotable))
+					Schema.TableVarColumn column = TableVar.Columns[_redefineColumnOffsets[index]];
+					if ((isDefault || column.IsComputed) && (!program.ServerProcess.ServerSession.Server.IsEngine || column.IsChangeRemotable))
 					{
-						LColumnIndex = ARow.DataType.Columns.IndexOfName(LColumn.Name);
-						if (LColumnIndex >= 0)
+						columnIndex = row.DataType.Columns.IndexOfName(column.Name);
+						if (columnIndex >= 0)
 						{
-							if (!AIsDefault || !ARow.HasValue(LColumnIndex))
+							if (!isDefault || !row.HasValue(columnIndex))
 							{
-								ARow[LColumnIndex] = Nodes[LIndex + 1].Execute(AProgram);
-								LChanged = true;
+								row[columnIndex] = Nodes[index + 1].Execute(program);
+								changed = true;
 							}
 						}
 					}
 				}
-				return LChanged;
+				return changed;
 			}
 			finally
 			{
-				PopRow(AProgram);
+				PopRow(program);
 			}
 		}
 		
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			bool LChanged = false;
-			if ((AColumnName == String.Empty) || (SourceNode.DataType.Columns.ContainsName(AColumnName)))
-				LChanged = base.InternalChange(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return InternalInternalChange(ANewRow, AColumnName, AProgram, false) || LChanged;
+			bool changed = false;
+			if ((columnName == String.Empty) || (SourceNode.DataType.Columns.ContainsName(columnName)))
+				changed = base.InternalChange(program, oldRow, newRow, valueFlags, columnName);
+			return InternalInternalChange(newRow, columnName, program, false) || changed;
 		}
 		
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if ((AColumnName == String.Empty) || SourceTableVar.Columns.ContainsName(AColumnName))
-				return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+			if ((columnName == String.Empty) || SourceTableVar.Columns.ContainsName(columnName))
+				return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 			return false;
 		}
 
-		public override bool IsContextLiteral(int ALocation)
+		public override bool IsContextLiteral(int location)
 		{
-			if (!Nodes[0].IsContextLiteral(ALocation))
+			if (!Nodes[0].IsContextLiteral(location))
 				return false;
-			for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
-				if (!Nodes[LIndex].IsContextLiteral(ALocation + 1))
+			for (int index = 1; index < Nodes.Count; index++)
+				if (!Nodes[index].IsContextLiteral(location + 1))
 					return false;
 			return true;
 		}

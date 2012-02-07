@@ -12,32 +12,32 @@ namespace Alphora.Dataphor.DAE
 	public sealed class DAEUtility 
 	{
 		/// <summary> Executes a D4 script. </summary>
-		public static void ExecuteScript(string AScript, IServer AServer, SessionInfo ASessionInfo) 
+		public static void ExecuteScript(string script, IServer server, SessionInfo sessionInfo) 
 		{
-			IServerSession LSession = AServer.Connect(ASessionInfo);
+			IServerSession session = server.Connect(sessionInfo);
 			try
 			{
-				IServerProcess LProcess = LSession.StartProcess(new ProcessInfo(ASessionInfo));
+				IServerProcess process = session.StartProcess(new ProcessInfo(sessionInfo));
 				try
 				{
-					IServerScript LScript = LProcess.PrepareScript(AScript);
+					IServerScript localScript = process.PrepareScript(script);
 					try
 					{
-						LScript.Execute(null);
+						localScript.Execute(null);
 					}
 					finally
 					{
-						LProcess.UnprepareScript(LScript);
+						process.UnprepareScript(localScript);
 					}
 				}
 				finally
 				{
-					LSession.StopProcess(LProcess);
+					session.StopProcess(process);
 				}
 			}
 			finally
 			{
-				AServer.Disconnect(LSession);
+				server.Disconnect(session);
 			}
 		}
 	}

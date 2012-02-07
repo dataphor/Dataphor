@@ -13,70 +13,70 @@ namespace Alphora.Dataphor.DAE.Language.TSQL
 	
 	public class TSQLTextEmitter : SQL.SQLTextEmitter
 	{
-		protected override void EmitBinaryExpression(BinaryExpression AExpression)
+		protected override void EmitBinaryExpression(BinaryExpression expression)
 		{
-			if (AExpression.Instruction == "iNullValue")
+			if (expression.Instruction == "iNullValue")
 			{
 				Append("IsNull(");
-				EmitExpression(AExpression.LeftExpression);
+				EmitExpression(expression.LeftExpression);
 				Append(", ");
-				EmitExpression(AExpression.RightExpression);
+				EmitExpression(expression.RightExpression);
 				Append(")");
 			}
 			else
-				base.EmitBinaryExpression(AExpression);
+				base.EmitBinaryExpression(expression);
 		}
 
 		
-		protected override void EmitTableSpecifier(SQL.TableSpecifier ATableSpecifier)
+		protected override void EmitTableSpecifier(SQL.TableSpecifier tableSpecifier)
 		{
-			base.EmitTableSpecifier(ATableSpecifier);
-			if (ATableSpecifier.TableExpression is TableExpression)
-				AppendFormat(" {0}", ((TableExpression)ATableSpecifier.TableExpression).OptimizerHints);
+			base.EmitTableSpecifier(tableSpecifier);
+			if (tableSpecifier.TableExpression is TableExpression)
+				AppendFormat(" {0}", ((TableExpression)tableSpecifier.TableExpression).OptimizerHints);
 		}
 		
-		protected override void EmitSelectStatement(Alphora.Dataphor.DAE.Language.SQL.SelectStatement ASelectStatement)
+		protected override void EmitSelectStatement(Alphora.Dataphor.DAE.Language.SQL.SelectStatement selectStatement)
 		{
-			base.EmitSelectStatement(ASelectStatement);
+			base.EmitSelectStatement(selectStatement);
 			
-			if ((ASelectStatement.Modifiers != null) && ASelectStatement.Modifiers.Contains("OptimizerHints"))
+			if ((selectStatement.Modifiers != null) && selectStatement.Modifiers.Contains("OptimizerHints"))
 			{
 				NewLine();
 				Indent();
-				Append(ASelectStatement.Modifiers["OptimizerHints"].Value);
+				Append(selectStatement.Modifiers["OptimizerHints"].Value);
 			}
 		}
 
 		
-		protected override void EmitDropIndexStatement(SQL.DropIndexStatement AStatement)
+		protected override void EmitDropIndexStatement(SQL.DropIndexStatement statement)
 		{
-			if (AStatement is DropIndexStatement)
+			if (statement is DropIndexStatement)
 			{
 				Indent();
 				AppendFormat("{0} {1} ", SQL.Keywords.Drop, SQL.Keywords.Index);
-				if (((DropIndexStatement)AStatement).TableSchema != String.Empty)
+				if (((DropIndexStatement)statement).TableSchema != String.Empty)
 				{
-					EmitIdentifier(((DropIndexStatement)AStatement).TableSchema);
+					EmitIdentifier(((DropIndexStatement)statement).TableSchema);
 					Append(SQL.Keywords.Qualifier);
 				}
-				EmitIdentifier(((DropIndexStatement)AStatement).TableName);
+				EmitIdentifier(((DropIndexStatement)statement).TableName);
 				Append(SQL.Keywords.Qualifier);
-				EmitIdentifier(AStatement.IndexName);
+				EmitIdentifier(statement.IndexName);
 			}
 			else
-				base.EmitDropIndexStatement(AStatement);
+				base.EmitDropIndexStatement(statement);
 		}
 
-		protected override string GetInstructionKeyword(string AInstruction)
+		protected override string GetInstructionKeyword(string instruction)
 		{
-			if (AInstruction == "iConcatenation")
+			if (instruction == "iConcatenation")
 				return "+";
 				
-			else if (AInstruction == "iMod")
+			else if (instruction == "iMod")
 				return "%";
 
 			else 
-				return base.GetInstructionKeyword(AInstruction);
+				return base.GetInstructionKeyword(instruction);
 		}
 	}
 }

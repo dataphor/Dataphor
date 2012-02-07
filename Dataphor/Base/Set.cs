@@ -13,37 +13,37 @@ namespace Alphora.Dataphor
 	public class Set<T> : ICollection<T>, IEnumerable<T>, IEnumerable
 	{
 		public Set() { }
-		public Set(IEnumerable<T> AEnumerable)
+		public Set(IEnumerable<T> enumerable)
 		{
-			foreach (T LItem in AEnumerable)
-				Add(LItem);
+			foreach (T item in enumerable)
+				Add(item);
 		}
 		
-		private Dictionary<T, bool> FDictionary = new Dictionary<T,bool>();
+		private Dictionary<T, bool> _dictionary = new Dictionary<T,bool>();
 		
-		public void Add(T AItem)
+		public void Add(T item)
 		{
-			FDictionary.Add(AItem, false);
+			_dictionary.Add(item, false);
 		}
 
 		public void Clear()
 		{
-			FDictionary.Clear();
+			_dictionary.Clear();
 		}
 
-		public bool Contains(T AItem)
+		public bool Contains(T item)
 		{
-			return FDictionary.ContainsKey(AItem);
+			return _dictionary.ContainsKey(item);
 		}
 
-		public void CopyTo(T[] AArray, int AIndex)
+		public void CopyTo(T[] array, int index)
 		{
-			FDictionary.Keys.CopyTo(AArray, AIndex);
+			_dictionary.Keys.CopyTo(array, index);
 		}
 
 		public int Count
 		{
-			get { return FDictionary.Count; }
+			get { return _dictionary.Count; }
 		}
 
 		public bool IsReadOnly
@@ -51,54 +51,54 @@ namespace Alphora.Dataphor
 			get { return false; }
 		}
 
-		public bool Remove(T AItem)
+		public bool Remove(T item)
 		{
-			return FDictionary.Remove(AItem);
+			return _dictionary.Remove(item);
 		}
 
 		public IEnumerator<T> GetEnumerator()
 		{
-			return FDictionary.Keys.GetEnumerator();
+			return _dictionary.Keys.GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return FDictionary.Keys.GetEnumerator();
+			return _dictionary.Keys.GetEnumerator();
 		}
 
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
-			return FDictionary.Keys.GetEnumerator();
+			return _dictionary.Keys.GetEnumerator();
 		}
 
 		public T[] ToArray()
 		{
-			T[] LResult = new T[Count];
-			var LIndex = 0;
-			foreach (T LItem in FDictionary.Keys)
+			T[] result = new T[Count];
+			var index = 0;
+			foreach (T item in _dictionary.Keys)
 			{
-				LResult[LIndex] = LItem;
-				LIndex++;
+				result[index] = item;
+				index++;
 			}
-			return LResult;
+			return result;
 		}
 	}
 
 	internal class SetDebugView<T>
 	{
-		public SetDebugView(Set<T> ASet)
+		public SetDebugView(Set<T> set)
 		{
-			if (ASet == null)
+			if (set == null)
 				throw new ArgumentNullException("set");
-			FSet = ASet;
+			_set = set;
 		}
 
-		private Set<T> FSet;
+		private Set<T> _set;
 
 		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		public T[] Items
 		{
-			get { return FSet.ToArray(); }
+			get { return _set.ToArray(); }
 		}
 	}
 }

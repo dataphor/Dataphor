@@ -28,31 +28,31 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		}
 
 		/// <summary> Recognizes the Enter key as an input key. </summary>
-		/// <param name="AKeyData">A <see cref="System.Windows.Forms.Keys"/> member.</param>
+		/// <param name="keyData">A <see cref="System.Windows.Forms.Keys"/> member.</param>
 		/// <returns> True if the Enter key is pressed, otherwise returns default <see cref="System.Windows.Forms.Control.IsInputKey"/>. </returns>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\BitmapButton.dxd"/>
-		protected override bool IsInputKey(Keys AKeyData)
+		protected override bool IsInputKey(Keys keyData)
 		{
-			switch (AKeyData) 
+			switch (keyData) 
 			{
 				case Keys.Enter: return true;
-				default : return base.IsInputKey(AKeyData);
+				default : return base.IsInputKey(keyData);
 			}
 		}
 
 		/// <summary> Raises the <c>Click</c> event when the Enter key is pressed. </summary>
-		/// <param name="AArgs">A <see cref="System.Windows.Forms.KeyEventArgs"/> </param>
+		/// <param name="args">A <see cref="System.Windows.Forms.KeyEventArgs"/> </param>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\BitmapButton.dxd"/>
-		protected override void OnKeyDown(KeyEventArgs AArgs)
+		protected override void OnKeyDown(KeyEventArgs args)
 		{
-			switch (AArgs.KeyData)
+			switch (args.KeyData)
 			{
 				case Keys.Enter :
 					PerformClick();
-					AArgs.Handled = true;
+					args.Handled = true;
 					break;
 			}
-			base.OnKeyDown(AArgs);
+			base.OnKeyDown(args);
 		}
 	}
 
@@ -69,29 +69,29 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		}
 
 		/// <summary> Retrievs an embedded resource as a bitmap. </summary>
-		/// <param name="AType"> An <c>System.Type</c> who's <c>Assembly</c> contains the resource. </param>
-		/// <param name="AResourceName"> Name of the resource containing a bitmap. </param>
+		/// <param name="type"> An <c>System.Type</c> who's <c>Assembly</c> contains the resource. </param>
+		/// <param name="resourceName"> Name of the resource containing a bitmap. </param>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\BitmapButton.dxd"/>
-		public static Bitmap ResourceBitmap(System.Type AType, string AResourceName)
+		public static Bitmap ResourceBitmap(System.Type type, string resourceName)
 		{
-			Stream LBitmapStream = AType.Assembly.GetManifestResourceStream(AResourceName);
+			Stream bitmapStream = type.Assembly.GetManifestResourceStream(resourceName);
 			try
 			{
-				Bitmap LBitmap = new Bitmap(LBitmapStream);
+				Bitmap bitmap = new Bitmap(bitmapStream);
 				try
 				{
-					LBitmap.MakeTransparent();
-					return LBitmap;
+					bitmap.MakeTransparent();
+					return bitmap;
 				}
 				catch
 				{
-					LBitmap.Dispose();
+					bitmap.Dispose();
 					throw;
 				}
 			}
 			catch
 			{
-				LBitmapStream.Close();
+				bitmapStream.Close();
 				throw;
 			}
 		}
@@ -106,15 +106,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			TabStop = false;
 		}
 
-		protected override bool ProcessMnemonic(char ACharCode)
+		protected override bool ProcessMnemonic(char charCode)
 		{
-			if (Button.IsMnemonic(ACharCode, this.Text))	// Process regardless of focusability
+			if (Button.IsMnemonic(charCode, this.Text))	// Process regardless of focusability
 			{
 				PerformClick();
 				return true;
 			}
 			else
-				return base.ProcessMnemonic(ACharCode);
+				return base.ProcessMnemonic(charCode);
 		}
 	}
 }

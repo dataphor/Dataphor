@@ -12,16 +12,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	{
 		// IVerticalAlignedElement
 
-		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		protected VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		[DefaultValue(VerticalAlignment.Top)]
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
+			get { return _verticalAlignment; }
 			set
 			{
-				if (FVerticalAlignment != value)
+				if (_verticalAlignment != value)
 				{
-					FVerticalAlignment = value;
+					_verticalAlignment = value;
 					UpdateBinding(FrameworkElement.VerticalAlignmentProperty);
 				}
 			}
@@ -29,21 +29,21 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		protected override object UIGetVerticalAlignment()
 		{
-			return ConvertVerticalAlignment(FVerticalAlignment);
+			return ConvertVerticalAlignment(_verticalAlignment);
 		}
 
 		// IHorizontalAlignedElement
 
-		protected HorizontalAlignment FHorizontalAlignment = HorizontalAlignment.Left;
+		protected HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Left;
 		[DefaultValue(HorizontalAlignment.Left)]
 		public HorizontalAlignment HorizontalAlignment
 		{
-			get { return FHorizontalAlignment; }
+			get { return _horizontalAlignment; }
 			set
 			{
-				if (FHorizontalAlignment != value)
+				if (_horizontalAlignment != value)
 				{
-					FHorizontalAlignment = value;
+					_horizontalAlignment = value;
 					UpdateBinding(FrameworkElement.HorizontalAlignmentProperty);
 				}
 			}
@@ -51,19 +51,19 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		protected override object UIGetHorizontalAlignment()
 		{
-			return ConvertHorizontalAlignment(FHorizontalAlignment);
+			return ConvertHorizontalAlignment(_horizontalAlignment);
 		}
 
-		private int FImageWidth = -1;
+		private int _imageWidth = -1;
 		[DefaultValue(-1)]
 		public int ImageWidth
 		{
-			get { return FImageWidth; }
+			get { return _imageWidth; }
 			set
 			{
-				if (FImageWidth != value)
+				if (_imageWidth != value)
 				{
-					FImageWidth = value;
+					_imageWidth = value;
 					UpdateBinding(FrameworkElement.WidthProperty);
 				}
 			}
@@ -71,22 +71,22 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		private object UIGetWidth()
 		{
-			if (FImageWidth >= 0)
-				return (double)FImageWidth;
+			if (_imageWidth >= 0)
+				return (double)_imageWidth;
 			else 
-				return (double)FLoadedImageWidth;
+				return (double)_loadedImageWidth;
 		}
 
-		private int FImageHeight = -1;
+		private int _imageHeight = -1;
 		[DefaultValue(-1)]
 		public int ImageHeight
 		{
-			get { return FImageHeight; }
+			get { return _imageHeight; }
 			set
 			{
-				if (FImageHeight != value)
+				if (_imageHeight != value)
 				{
-					FImageHeight = value;
+					_imageHeight = value;
 					UpdateBinding(FrameworkElement.HeightProperty);
 				}
 			}
@@ -94,24 +94,24 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private object UIGetHeight()
 		{
-			if (FImageHeight >= 0)
-				return (double)FImageHeight;
+			if (_imageHeight >= 0)
+				return (double)_imageHeight;
 			else
-				return (double)FLoadedImageHeight;
+				return (double)_loadedImageHeight;
 		}
 
 		// StretchStyle
 		
-		private StretchStyles FStretchStyle = StretchStyles.StretchRatio;
+		private StretchStyles _stretchStyle = StretchStyles.StretchRatio;
 		[DefaultValue(StretchStyles.StretchRatio)]
 		public StretchStyles StretchStyle
 		{
-			get { return FStretchStyle; }
+			get { return _stretchStyle; }
 			set 
 			{ 
-				if (FStretchStyle != value)
+				if (_stretchStyle != value)
 				{
-					FStretchStyle = value; 
+					_stretchStyle = value; 
 					UpdateBinding(System.Windows.Controls.Image.StretchProperty);
 				}
 			}
@@ -119,7 +119,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		private object UIGetStretch()
 		{
-			switch (FStretchStyle)
+			switch (_stretchStyle)
 			{
 				case StretchStyles.NoStretch : return Stretch.None;
 				case StretchStyles.StretchFill : return Stretch.Fill;
@@ -127,16 +127,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 
-		private string FImage = String.Empty;
+		private string _image = String.Empty;
 		[DefaultValue("")]
 		public string Image
 		{
-			get { return FImage; }
+			get { return _image; }
 			set
 			{
-				if (FImage != value)
+				if (_image != value)
 				{
-					FImage = value;
+					_image = value;
 					if (Active)
 						UpdateLoadedImage();
 				}
@@ -145,16 +145,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		// LoadedImage
 		
-		private ImageSource FLoadedImage;
+		private ImageSource _loadedImage;
 		
 		public ImageSource LoadedImage
 		{
-			get { return FLoadedImage; }
+			get { return _loadedImage; }
 			private set
 			{
-				if (FLoadedImage != value)
+				if (_loadedImage != value)
 				{
-					FLoadedImage = value;
+					_loadedImage = value;
 
 					StoreBitmapDimensions();
 					UpdateBinding(System.Windows.Controls.Image.SourceProperty);
@@ -173,66 +173,66 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				(
 					() =>
 					{
-						var LLoadedBitmap = FLoadedImage as BitmapImage;
-						if (LLoadedBitmap != null)
+						var loadedBitmap = _loadedImage as BitmapImage;
+						if (loadedBitmap != null)
 						{
-							FLoadedImageWidth = LLoadedBitmap.PixelWidth;
-							FLoadedImageHeight = LLoadedBitmap.PixelHeight;
+							_loadedImageWidth = loadedBitmap.PixelWidth;
+							_loadedImageHeight = loadedBitmap.PixelHeight;
 						}
 						else
 						{
-							FLoadedImageWidth = 0;
-							FLoadedImageHeight = 0;
+							_loadedImageWidth = 0;
+							_loadedImageHeight = 0;
 						}
 					}
 				)
 			);
 		}
 		
-		private int FLoadedImageWidth;
-		private int FLoadedImageHeight;
+		private int _loadedImageWidth;
+		private int _loadedImageHeight;
 
 		private object UIGetSource()
 		{
-			return FLoadedImage;
+			return _loadedImage;
 		}
 
-		protected PipeRequest FImageRequest;
+		protected PipeRequest _imageRequest;
 
 		private void CancelImageRequest()
 		{
-			if (FImageRequest != null)
+			if (_imageRequest != null)
 			{
-				HostNode.Pipe.CancelRequest(FImageRequest);
-				FImageRequest = null;
+				HostNode.Pipe.CancelRequest(_imageRequest);
+				_imageRequest = null;
 			}
 		}
 
 		private void UpdateLoadedImage()
 		{
 			CancelImageRequest();
-			if (FImage == String.Empty || !Active)
+			if (_image == String.Empty || !Active)
 				LoadedImage = null;
 			else
 			{
 				// Queue up an asynchronous request
-				FImageRequest = new PipeRequest(FImage, new PipeResponseHandler(ImageRead), new PipeErrorHandler(ImageError));
-				HostNode.Pipe.QueueRequest(FImageRequest);
+				_imageRequest = new PipeRequest(_image, new PipeResponseHandler(ImageRead), new PipeErrorHandler(ImageError));
+				HostNode.Pipe.QueueRequest(_imageRequest);
 			}
 		}
 
-		protected void ImageRead(PipeRequest ARequest, Pipe APipe)
+		protected void ImageRead(PipeRequest request, Pipe pipe)
 		{
 			if (Active)
 			{
-				FImageRequest = null;
+				_imageRequest = null;
 				try
 				{
-					if (ARequest.Result.IsNative)
-						LoadedImage = ImageUtility.BitmapImageFromBytes(ARequest.Result.AsByteArray);
+					if (request.Result.IsNative)
+						LoadedImage = ImageUtility.BitmapImageFromBytes(request.Result.AsByteArray);
 					else
-						using (Stream LStream = ARequest.Result.OpenStream())
-							LoadedImage = ImageUtility.BitmapImageFromStream(LStream);
+						using (Stream stream = request.Result.OpenStream())
+							LoadedImage = ImageUtility.BitmapImageFromStream(stream);
 				}
 				catch
 				{
@@ -241,11 +241,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 
-		protected void ImageError(PipeRequest ARequest, Pipe APipe, Exception AException)
+		protected void ImageError(PipeRequest request, Pipe pipe, Exception exception)
 		{
-			FImageRequest = null;
+			_imageRequest = null;
 			LoadedImage = ImageUtility.GetErrorImage();
-			this.HandleException(AException);
+			this.HandleException(exception);
 		}
 
 		public override bool GetDefaultTabStop()

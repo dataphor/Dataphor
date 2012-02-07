@@ -20,93 +20,93 @@ namespace Alphora.Dataphor.DAE.Server
 {
 	public abstract class ServerPlan : ServerChildObject, IServerPlanBase, IServerPlan
 	{        
-		protected internal ServerPlan(ServerProcess AProcess) : base()
+		protected internal ServerPlan(ServerProcess process) : base()
 		{
-			FProcess = AProcess;
-			FPlan = new Plan(AProcess);
-			FProgram = new Program(AProcess, FID);
-			FProgram.ShouldPushLocals = true;
+			_process = process;
+			_plan = new Plan(process);
+			_program = new Program(process, _iD);
+			_program.ShouldPushLocals = true;
 		}
 		
-		private bool FDisposed;
+		private bool _disposed;
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
 				try
 				{
-					if (FActiveCursor != null)
-						FActiveCursor.Dispose();
+					if (_activeCursor != null)
+						_activeCursor.Dispose();
 				}
 				finally
 				{
-					if (FPlan != null)
+					if (_plan != null)
 					{
-						FPlan.Dispose();
-						FPlan = null;
+						_plan.Dispose();
+						_plan = null;
 					}
 					
-					if (!FDisposed)
-						FDisposed = true;
+					if (!_disposed)
+						_disposed = true;
 				}
 			}
 			finally
 			{
-				FProgram = null;
-				FProcess = null;
+				_program = null;
+				_process = null;
 	            
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
 		// ID		
-		private Guid FID = Guid.NewGuid();
-		public Guid ID { get { return FID; } }
+		private Guid _iD = Guid.NewGuid();
+		public Guid ID { get { return _iD; } }
 		
 		// CachedPlanHeader
-		private CachedPlanHeader FHeader;
+		private CachedPlanHeader _header;
 		public CachedPlanHeader Header
 		{ 
-			get { return FHeader; } 
-			set { FHeader = value; }
+			get { return _header; } 
+			set { _header = value; }
 		}
 		
 		// PlanCacheTimeStamp
 		public long PlanCacheTimeStamp; // Server.PlanCacheTimeStamp when the plan was compiled
 
 		// Plan		
-		protected Plan FPlan;
-		public Plan Plan { get { return FPlan; } }
+		protected Plan _plan;
+		public Plan Plan { get { return _plan; } }
 		
 		// Program
-		protected Program FProgram;
-		public Program Program { get { return FProgram; } }
+		protected Program _program;
+		public Program Program { get { return _program; } }
 		
 		// Statistics
-		public PlanStatistics PlanStatistics { get { return FPlan.Statistics; } }
-		public ProgramStatistics ProgramStatistics { get { return FProgram.Statistics; } }
+		public PlanStatistics PlanStatistics { get { return _plan.Statistics; } }
+		public ProgramStatistics ProgramStatistics { get { return _program.Statistics; } }
 		
 		// Process        
-		protected ServerProcess FProcess;
-		public ServerProcess ServerProcess { get { return FProcess; } }
+		protected ServerProcess _process;
+		public ServerProcess ServerProcess { get { return _process; } }
 		
-		public IServerProcess Process  { get { return (IServerProcess)FProcess; } }
+		public IServerProcess Process  { get { return (IServerProcess)_process; } }
 		
-		public CompilerMessages Messages { get { return FPlan.Messages; } }
+		public CompilerMessages Messages { get { return _plan.Messages; } }
 
-		public void BindToProcess(ServerProcess AProcess)
+		public void BindToProcess(ServerProcess process)
 		{
-			FProcess = AProcess;
-			FPlan.BindToProcess(AProcess);
-			FProgram.BindToProcess(AProcess, FPlan);
+			_process = process;
+			_plan.BindToProcess(process);
+			_program.BindToProcess(process, _plan);
 		}
 		
 		public void UnbindFromProcess()
 		{
-			FProcess = null;
-			FPlan.UnbindFromProcess();
-			FProgram.UnbindFromProcess();
+			_process = null;
+			_plan.UnbindFromProcess();
+			_program.UnbindFromProcess();
 		}
 		
 		// Released
@@ -127,82 +127,82 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// ActiveCursor
-		protected ServerCursor FActiveCursor;
-		public ServerCursor ActiveCursor { get { return FActiveCursor; } }
+		protected ServerCursor _activeCursor;
+		public ServerCursor ActiveCursor { get { return _activeCursor; } }
 		
-		public void SetActiveCursor(ServerCursor AActiveCursor)
+		public void SetActiveCursor(ServerCursor activeCursor)
 		{
-			if (FActiveCursor != null)
+			if (_activeCursor != null)
 				throw new ServerException(ServerException.Codes.PlanCursorActive);
-			FActiveCursor = AActiveCursor;
+			_activeCursor = activeCursor;
 			//FProcess.SetActiveCursor(FActiveCursor);
 		}
 		
 		public void ClearActiveCursor()
 		{
-			FActiveCursor = null;
+			_activeCursor = null;
 			//FProcess.ClearActiveCursor();
 		}
 		
 		public virtual Statement EmitStatement()
 		{
 			CheckCompiled();
-			return FProgram.Code.EmitStatement(EmitMode.ForCopy);
+			return _program.Code.EmitStatement(EmitMode.ForCopy);
 		}
 
-		public void WritePlan(System.Xml.XmlWriter AWriter)
+		public void WritePlan(System.Xml.XmlWriter writer)
 		{
 			CheckCompiled();
-			FProgram.Code.WritePlan(AWriter);
+			_program.Code.WritePlan(writer);
 		}
 		
-		protected Exception WrapException(Exception AException)
+		protected Exception WrapException(Exception exception)
 		{
-			return FProcess.ServerSession.WrapException(AException);
+			return _process.ServerSession.WrapException(exception);
 		}
 		
 		public void CheckCompiled()
 		{
-			FPlan.CheckCompiled();
+			_plan.CheckCompiled();
 		}
 	}
 	
 	// ServerPlans    
 	public class ServerPlans : ServerChildObjects
 	{		
-		protected override void Validate(ServerChildObject AObject)
+		protected override void Validate(ServerChildObject objectValue)
 		{
-			if (!(AObject is ServerPlan))
+			if (!(objectValue is ServerPlan))
 				throw new ServerException(ServerException.Codes.ServerPlanContainer);
 		}
 		
-		public new ServerPlan this[int AIndex]
+		public new ServerPlan this[int index]
 		{
-			get { return (ServerPlan)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ServerPlan)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public int IndexOf(Guid APlanID)
+		public int IndexOf(Guid planID)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].ID == APlanID)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (this[index].ID == planID)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(Guid APlanID)
+		public bool Contains(Guid planID)
 		{
-			return IndexOf(APlanID) >= 0;
+			return IndexOf(planID) >= 0;
 		}
 		
-		public ServerPlan this[Guid APlanID]
+		public ServerPlan this[Guid planID]
 		{
 			get
 			{
-				int LIndex = IndexOf(APlanID);
-				if (LIndex >= 0)
-					return this[LIndex];
-				throw new ServerException(ServerException.Codes.PlanNotFound, APlanID);
+				int index = IndexOf(planID);
+				if (index >= 0)
+					return this[index];
+				throw new ServerException(ServerException.Codes.PlanNotFound, planID);
 			}
 		}
 	}
@@ -210,25 +210,25 @@ namespace Alphora.Dataphor.DAE.Server
 	// ServerStatementPlan	
 	public class ServerStatementPlan : ServerPlan, IServerStatementPlan
 	{
-		public ServerStatementPlan(ServerProcess AProcess) : base(AProcess) {}
+		public ServerStatementPlan(ServerProcess process) : base(process) {}
 		
-		public void Execute(DataParams AParams)
+		public void Execute(DataParams paramsValue)
 		{
-			Exception LException = null;
-			int LNestingLevel = FProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _process.BeginTransactionalCall();
 			try
 			{
 				CheckCompiled();
-				FProgram.Execute(AParams);
+				_program.Execute(paramsValue);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FProcess.EndTransactionalCall(LNestingLevel, LException);
+				_process.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 	}
@@ -236,14 +236,14 @@ namespace Alphora.Dataphor.DAE.Server
 	// ServerExpressionPlan
 	public class ServerExpressionPlan : ServerPlan, IServerExpressionPlan
 	{
-		protected internal ServerExpressionPlan(ServerProcess AProcess) : base(AProcess) {}
+		protected internal ServerExpressionPlan(ServerProcess process) : base(process) {}
 		
 		public Schema.IDataType DataType
 		{
 			get
 			{
 				CheckCompiled();
-				return FProgram.DataType;
+				return _program.DataType;
 			}
 		}
 		
@@ -252,61 +252,61 @@ namespace Alphora.Dataphor.DAE.Server
 			get
 			{
 				CheckCompiled();
-				return FProgram.Code.DataType;
+				return _program.Code.DataType;
 			}
 		}
 		
-		public DataValue Evaluate(DataParams AParams)
+		public DataValue Evaluate(DataParams paramsValue)
 		{
-			Exception LException = null;
-			int LNestingLevel = FProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _process.BeginTransactionalCall();
 			try
 			{
 				CheckCompiled();
-				object LResult = FProgram.Execute(AParams);
-				DataValue LDataValue = LResult as DataValue;
-				if (LDataValue != null)
-					return LDataValue;
+				object result = _program.Execute(paramsValue);
+				DataValue dataValue = result as DataValue;
+				if (dataValue != null)
+					return dataValue;
 
-				return DataValue.FromNative(FProgram.ValueManager, FProgram.DataType, LResult);
+				return DataValue.FromNative(_program.ValueManager, _program.DataType, result);
 			}
 			catch (Exception E)
 			{
-				LException = E;
-				throw WrapException(LException);
+				exception = E;
+				throw WrapException(exception);
 			}
 			finally
 			{
-				FProcess.EndTransactionalCall(LNestingLevel, LException);
+				_process.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 
-		public IServerCursor Open(DataParams AParams)
+		public IServerCursor Open(DataParams paramsValue)
 		{
-			IServerCursor LServerCursor;
+			IServerCursor serverCursor;
 			//ServerProcess.RaiseTraceEvent(TraceCodes.BeginOpenCursor, "Begin Open Cursor");
-			Exception LException = null;
-			int LNestingLevel = FProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _process.BeginTransactionalCall();
 			try
 			{
 				CheckCompiled();
 
 				#if TIMING
-				DateTime LStartTime = DateTime.Now;
+				DateTime startTime = DateTime.Now;
 				System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerExpressionPlan.Open", DateTime.Now.ToString("hh:mm:ss.ffff")));
 				#endif
-				ServerCursor LCursor = new ServerCursor(this, FProgram, AParams);
+				ServerCursor cursor = new ServerCursor(this, _program, paramsValue);
 				try
 				{
-					LCursor.Open();
+					cursor.Open();
 					#if TIMING
-					System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerExpressionPlan.Open -- Open Time: {1}", DateTime.Now.ToString("hh:mm:ss.ffff"), (DateTime.Now - LStartTime).ToString()));
+					System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerExpressionPlan.Open -- Open Time: {1}", DateTime.Now.ToString("hh:mm:ss.ffff"), (DateTime.Now - startTime).ToString()));
 					#endif
-					LServerCursor = (IServerCursor)LCursor;
+					serverCursor = (IServerCursor)cursor;
 				}
 				catch
 				{
-					Close((IServerCursor)LCursor);
+					Close((IServerCursor)cursor);
 					throw;
 				}
 			}
@@ -315,72 +315,72 @@ namespace Alphora.Dataphor.DAE.Server
 				if (Header != null)
 					Header.IsInvalidPlan = true;
 
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FProcess.EndTransactionalCall(LNestingLevel, LException);
+				_process.EndTransactionalCall(nestingLevel, exception);
 			}
 			//ServerProcess.RaiseTraceEvent(TraceCodes.EndOpenCursor, "End Open Cursor");
-			return LServerCursor;
+			return serverCursor;
 		}
 		
-		public void Close(IServerCursor ACursor)
+		public void Close(IServerCursor cursor)
 		{
-			Exception LException = null;
-			int LNestingLevel = FProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _process.BeginTransactionalCall();
 			try
 			{
-				((ServerCursor)ACursor).Dispose();
+				((ServerCursor)cursor).Dispose();
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FProcess.EndTransactionalCall(LNestingLevel, LException);
+				_process.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		private Schema.TableVar FTableVar;
+		private Schema.TableVar _tableVar;
 		Schema.TableVar IServerExpressionPlan.TableVar 
 		{ 
 			get 
 			{ 
 				CheckCompiled();
-				if (FTableVar == null)
-					FTableVar = (Schema.TableVar)FPlan.PlanCatalog[Schema.Object.NameFromGuid(ID)];
-				return FTableVar; 
+				if (_tableVar == null)
+					_tableVar = (Schema.TableVar)_plan.PlanCatalog[Schema.Object.NameFromGuid(ID)];
+				return _tableVar; 
 			} 
 		}
 		
-		Schema.Catalog IServerExpressionPlan.Catalog { get { return FPlan.PlanCatalog; } }
+		Schema.Catalog IServerExpressionPlan.Catalog { get { return _plan.PlanCatalog; } }
 		
 		public Row RequestRow()
 		{
 			CheckCompiled();
-			return new Row(FProcess.ValueManager, SourceNode.DataType.RowType);
+			return new Row(_process.ValueManager, SourceNode.DataType.RowType);
 		}
 		
-		public void ReleaseRow(Row ARow)
+		public void ReleaseRow(Row row)
 		{
 			CheckCompiled();
-			ARow.Dispose();
+			row.Dispose();
 		}
 		
 		public override Statement EmitStatement()
 		{
 			CheckCompiled();
-			return FProgram.Code.EmitStatement(EmitMode.ForRemote);
+			return _program.Code.EmitStatement(EmitMode.ForRemote);
 		}
 
 		// SourceNode
-		internal TableNode SourceNode { get { return (TableNode)FProgram.Code.Nodes[0]; } }
+		internal TableNode SourceNode { get { return (TableNode)_program.Code.Nodes[0]; } }
 		
-		internal CursorNode CursorNode { get { return (CursorNode)FProgram.Code; } }
+		internal CursorNode CursorNode { get { return (CursorNode)_program.Code; } }
         
 		// Isolation
 		public CursorIsolation Isolation 
@@ -412,9 +412,9 @@ namespace Alphora.Dataphor.DAE.Server
 			} 
 		}
 
-		public bool Supports(CursorCapability ACapability)
+		public bool Supports(CursorCapability capability)
 		{
-			return (Capabilities & ACapability) != 0;
+			return (Capabilities & capability) != 0;
 		}
 		
 		// Order

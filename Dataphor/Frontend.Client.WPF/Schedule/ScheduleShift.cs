@@ -32,9 +32,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(GranularityProperty, value); }
 		}
 
-		private static object CoerceGranularity(DependencyObject ASender, object AValue)
+		private static object CoerceGranularity(DependencyObject sender, object tempValue)
 		{
-			return Math.Max(1, Math.Min(60, (int)AValue));
+			return Math.Max(1, Math.Min(60, (int)tempValue));
 		}
 
 		// HighlightInterval
@@ -61,50 +61,50 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(HighlightStyleProperty, value); }
 		}
 
-		protected override Size MeasureOverride(Size AAvailableSize)
+		protected override Size MeasureOverride(Size availableSize)
 		{
 			const double CMaxHeight = 15000d;	// Keep the number of highlights finite
 			
 			if (HighlightInterval != null && HighlightInterval.HasValue)
 			{
-				var LIndex = 0;
-				var LYOffset = 0d;
-				var LInterval = HighlightInterval;
-				while (LYOffset < Math.Min(CMaxHeight, AAvailableSize.Height))
+				var index = 0;
+				var yOffset = 0d;
+				var interval = HighlightInterval;
+				while (yOffset < Math.Min(CMaxHeight, availableSize.Height))
 				{
-					if (LIndex >= Children.Count)
+					if (index >= Children.Count)
 					{
-						var LHighlight = new Rectangle();
+						var highlight = new Rectangle();
 						if (HighlightStyle != null)
-							LHighlight.Style = HighlightStyle;
-						Children.Add(LHighlight);
+							highlight.Style = HighlightStyle;
+						Children.Add(highlight);
 					}
-					Children[LIndex].Measure(AAvailableSize);
-					LYOffset += BlockHeight * ((double)LInterval / Granularity);
-					LIndex++;
+					Children[index].Measure(availableSize);
+					yOffset += BlockHeight * ((double)interval / Granularity);
+					index++;
 				}
 				return new Size(0d, 0d);
 			}
 			else
-				return base.MeasureOverride(AAvailableSize);
+				return base.MeasureOverride(availableSize);
 		}
 
-		protected override Size ArrangeOverride(Size AFinalSize)
+		protected override Size ArrangeOverride(Size finalSize)
 		{
 			if (HighlightInterval != null && HighlightInterval.HasValue)
 			{
-				var LYOffset = 0d;
-				for (int LIndex = 0; LIndex < Children.Count; LIndex++)
+				var yOffset = 0d;
+				for (int index = 0; index < Children.Count; index++)
 				{
-					var LHighlightHeight = BlockHeight * ((double)HighlightInterval / Granularity);
-					var LChild = Children[LIndex];
-					LChild.Arrange(new Rect(0d, LYOffset, AFinalSize.Width, LHighlightHeight));
-					LYOffset += LHighlightHeight;
+					var highlightHeight = BlockHeight * ((double)HighlightInterval / Granularity);
+					var child = Children[index];
+					child.Arrange(new Rect(0d, yOffset, finalSize.Width, highlightHeight));
+					yOffset += highlightHeight;
 				}
-				return AFinalSize;
+				return finalSize;
 			}
 			else
-				return base.ArrangeOverride(AFinalSize);
+				return base.ArrangeOverride(finalSize);
 		}
 	}
 }

@@ -16,114 +16,116 @@ namespace Alphora.Dataphor.DAE.Server
 {
 	public class ServerScript : ServerChildObject, IServerScript
 	{
-		internal ServerScript(ServerProcess AProcess, string AScript, DebugLocator ALocator) : base()
+		internal ServerScript(ServerProcess process, string script, DebugLocator locator) : base()
 		{
-			FProcess = AProcess;
-			FBatches = new ServerBatches();
-			FMessages = new ParserMessages();
-			FSourceContext = new SourceContext(AScript, ALocator);
-			FScript = FProcess.ParseScript(AScript, FMessages);
-			if ((FScript is Block) && (((Block)FScript).Statements.Count > 0))
+			_process = process;
+			_batches = new ServerBatches();
+			_messages = new ParserMessages();
+			_sourceContext = new SourceContext(script, locator);
+			_script = _process.ParseScript(script, _messages);
+			_messages.SetLocator(locator);
+			if ((_script is Block) && (((Block)_script).Statements.Count > 0))
 			{
-				Block LBlock = (Block)FScript;
+				Block block = (Block)_script;
 						
-				for (int LIndex = 0; LIndex < LBlock.Statements.Count; LIndex++)
-					FBatches.Add(new ServerBatch(this, LBlock.Statements[LIndex]));
+				for (int index = 0; index < block.Statements.Count; index++)
+					_batches.Add(new ServerBatch(this, block.Statements[index]));
 			}
 			else
-				FBatches.Add(new ServerBatch(this, FScript));
+				_batches.Add(new ServerBatch(this, _script));
 		}
 		
 		protected void UnprepareBatches()
 		{
-			Exception LException = null;
-			while (FBatches.Count > 0)
+			Exception exception = null;
+			while (_batches.Count > 0)
 			{
 				try
 				{
-					FBatches.DisownAt(0).Dispose();
+					_batches.DisownAt(0).Dispose();
 				}
 				catch (Exception E)
 				{
-					LException = E;
+					exception = E;
 				}			
 			}
-			if (LException != null)
-				throw LException;
+			if (exception != null)
+				throw exception;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				if (FBatches != null)
+				if (_batches != null)
 				{
 					UnprepareBatches();
-					FBatches.Dispose();
-					FBatches = null;
+					_batches.Dispose();
+					_batches = null;
 				}
 			}
 			finally
 			{
-				FScript = null;
-				FMessages = null;
-				FProcess = null;
+				_script = null;
+				_messages = null;
+				_process = null;
 			
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
-		private Statement FScript;
+		private Statement _script;
 		
-		private SourceContext FSourceContext;
-		public SourceContext SourceContext { get { return FSourceContext; } }
+		private SourceContext _sourceContext;
+		public SourceContext SourceContext { get { return _sourceContext; } }
 		
 		// Process        
-		private ServerProcess FProcess;
-		public ServerProcess Process { get { return FProcess; } }
+		private ServerProcess _process;
+		public ServerProcess Process { get { return _process; } }
 		
-		IServerProcess IServerScript.Process { get { return FProcess; } }
+		IServerProcess IServerScript.Process { get { return _process; } }
 		
 		// Used by the ExecuteAsync node to indicate whether the process was implicitly created to run this script
-		private bool FShouldCleanupProcess = false;
-		public bool ShouldCleanupProcess { get { return FShouldCleanupProcess; } set { FShouldCleanupProcess = value; } }
+		private bool _shouldCleanupProcess = false;
+		public bool ShouldCleanupProcess { get { return _shouldCleanupProcess; } set { _shouldCleanupProcess = value; } }
 
 		// Messages
-		private ParserMessages FMessages;
-		public ParserMessages Messages { get { return FMessages; } }
+		private ParserMessages _messages;
+		public ParserMessages Messages { get { return _messages; } }
 		
 		public void CheckParsed()
 		{
-			if (FMessages.HasErrors())
-				throw new ServerException(ServerException.Codes.UnparsedScript, FMessages.ToString());
+			if (_messages.HasErrors())
+				throw _messages.FirstError;
+			// TODO: throw an AggregateException if there is more than 1 error
 		}
 		
 		// Batches
-		private ServerBatches FBatches; 
-		public ServerBatches Batches { get { return FBatches; } }
+		private ServerBatches _batches; 
+		public ServerBatches Batches { get { return _batches; } }
 
-		IServerBatches IServerScript.Batches { get { return FBatches; } }
+		IServerBatches IServerScript.Batches { get { return _batches; } }
 		
-		public void Execute(DataParams AParams)
+		public void Execute(DataParams paramsValue)
 		{
-			foreach (ServerBatch LBatch in FBatches)
-				LBatch.Execute(AParams);
+			foreach (ServerBatch batch in _batches)
+				batch.Execute(paramsValue);
 		}
 	}
 	
 	// ServerScripts
 	public class ServerScripts : ServerChildObjects
 	{		
-		protected override void Validate(ServerChildObject AObject)
+		protected override void Validate(ServerChildObject objectValue)
 		{
-			if (!(AObject is ServerScript))
+			if (!(objectValue is ServerScript))
 				throw new ServerException(ServerException.Codes.ServerScriptContainer);
 		}
 		
-		public new ServerScript this[int AIndex]
+		public new ServerScript this[int index]
 		{
-			get { return (ServerScript)base[AIndex]; } 
-			set { base[AIndex] = value; }
+			get { return (ServerScript)base[index]; } 
+			set { base[index] = value; }
 		}
 	}
 }

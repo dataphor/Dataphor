@@ -65,22 +65,22 @@ namespace Alphora.Dataphor
 	{
 		private class ObjectContext
 		{
-			private Dictionary<Object, Object> FVisitedObjects = new Dictionary<Object, Object>(new ReferenceEqualityComparer());
+			private Dictionary<Object, Object> _visitedObjects = new Dictionary<Object, Object>(new ReferenceEqualityComparer());
 			
-			public bool Visit(Object AObject)
+			public bool Visit(Object objectValue)
 			{
-				if (AObject == null)
+				if (objectValue == null)
 					return false;
 					
 				#if !SILVERLIGHT					
-				if (AObject is System.Reflection.Pointer)
+				if (objectValue is System.Reflection.Pointer)
 					return false; // Unmanaged pointer, do not follow
 				#endif
-				Object LVisitedObject;
-				if (FVisitedObjects.TryGetValue(AObject, out LVisitedObject))
+				Object visitedObject;
+				if (_visitedObjects.TryGetValue(objectValue, out visitedObject))
 					return false;
 					
-				FVisitedObjects.Add(AObject, AObject);
+				_visitedObjects.Add(objectValue, objectValue);
 				return true;
 			}
 		}
@@ -88,11 +88,11 @@ namespace Alphora.Dataphor
 		/// <summary>
 		/// Returns the estimated allocation size in bytes of an object of the given type.
 		/// </summary>
-		/// <param name="AType"></param>
+		/// <param name="type"></param>
 		/// <returns></returns>
-		public static int SizeOf(Type AType)
+		public static int SizeOf(Type type)
 		{
-			switch (AType.FullName)
+			switch (type.FullName)
 			{
 				case "System.Boolean" : return 1;
 				case "System.Byte" : return 1;
@@ -110,12 +110,12 @@ namespace Alphora.Dataphor
 			}
 			
 			// This is a user-defined struct, determine size of each field
-			if (AType.IsValueType)
+			if (type.IsValueType)
 			{
-				int LResult = 0;
-				foreach (FieldInfo LFieldInfo in AType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
-					LResult += SizeOf(LFieldInfo.FieldType);
-				return LResult;
+				int result = 0;
+				foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
+					result += SizeOf(fieldInfo.FieldType);
+				return result;
 			}
 			
 			// This is a reference type, return the size of a pointer
@@ -125,9 +125,9 @@ namespace Alphora.Dataphor
 		/// <summary>
 		/// Returns true if the given type is a simple type (built-in .NET type such as bool, byte, or int), false otherwise.
 		/// </summary>
-		public static bool IsSimpleType(Type AType)
+		public static bool IsSimpleType(Type type)
 		{
-			switch (AType.FullName)
+			switch (type.FullName)
 			{
 				case "System.Boolean" : 
 				case "System.Byte" : 
@@ -147,14 +147,14 @@ namespace Alphora.Dataphor
 			return false;
 		}
 		
-		private static int InternalSizeOf(object AObject, TraversalMode ATraversalMode, ObjectContext AObjectContext)
+		private static int InternalSizeOf(object objectValue, TraversalMode traversalMode, ObjectContext objectContext)
 		{
-			if (AObject == null)
+			if (objectValue == null)
 				return 0;
 				
-			Type LType = AObject.GetType();
+			Type type = objectValue.GetType();
 				
-			switch (LType.FullName)
+			switch (type.FullName)
 			{
 				case "System.Boolean" : return 1;
 				case "System.Byte" : return 1;
@@ -169,125 +169,125 @@ namespace Alphora.Dataphor
 				case "System.UInt64" : return 8;
 				case "System.Int16" : return 2;
 				case "System.UInt16" : return 2;
-				case "System.String" : return ((string)AObject).Length * 2 + 16; // Interned strings?
+				case "System.String" : return ((string)objectValue).Length * 2 + 16; // Interned strings?
 			}
 			
-			if (LType.IsArray)
+			if (type.IsArray)
 			{
-				Array LArray = (Array)AObject;
+				Array array = (Array)objectValue;
 				
-				if (LArray.Rank > 1)
+				if (array.Rank > 1)
 					throw new NotSupportedException("Multi-dimension arrays not supported");
 				
-				Type LElementType = LType.GetElementType();
-				if (IsSimpleType(LElementType))
-					return LArray.Length * SizeOf(LElementType) + 32;
+				Type elementType = type.GetElementType();
+				if (IsSimpleType(elementType))
+					return array.Length * SizeOf(elementType) + 32;
 				
-				int LResult = LArray.Length * SizeOf(LElementType) + 32; // Size of array itself
+				int result = array.Length * SizeOf(elementType) + 32; // Size of array itself
 
-				if (ATraversalMode != TraversalMode.Shallow)
+				if (traversalMode != TraversalMode.Shallow)
 				{
 					// Traverse the array elements
-					for (int LIndex = 0; LIndex < LArray.Length; LIndex++)
+					for (int index = 0; index < array.Length; index++)
 					{
-						object LValue = LArray.GetValue(LIndex);
-						if (LValue != null)
+						object value = array.GetValue(index);
+						if (value != null)
 						{
-							Type LValueType = LValue.GetType();
-							if (LValueType.IsValueType)
+							Type valueType = value.GetType();
+							if (valueType.IsValueType)
 							{
-								if (!IsSimpleType(LValueType))
-									LResult += InternalSizeOf(LValue, ATraversalMode, AObjectContext);
+								if (!IsSimpleType(valueType))
+									result += InternalSizeOf(value, traversalMode, objectContext);
 							}
 							else
 							{
-								if (AObjectContext.Visit(LValue))
-									LResult += InternalSizeOf(LValue, ATraversalMode, AObjectContext);
+								if (objectContext.Visit(value))
+									result += InternalSizeOf(value, traversalMode, objectContext);
 							}
 						}
 					}
 				}
 
-				return LResult;
+				return result;
 			}
 			
 			{
-				int LResult = 12; // base object size
-				while (LType != null)
+				int result = 12; // base object size
+				while (type != null)
 				{
-					FieldInfo[] LFieldInfos = LType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-					foreach (FieldInfo LFieldInfo in LFieldInfos)
+					FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+					foreach (FieldInfo fieldInfo in fieldInfos)
 					{
-						LResult += SizeOf(LFieldInfo.FieldType);
+						result += SizeOf(fieldInfo.FieldType);
 						
-						bool LShouldTraverse = (ATraversalMode == TraversalMode.Deep) || ((ATraversalMode == TraversalMode.Default) && !LFieldInfo.IsDefined(typeof(ReferenceAttribute), false));
+						bool shouldTraverse = (traversalMode == TraversalMode.Deep) || ((traversalMode == TraversalMode.Default) && !fieldInfo.IsDefined(typeof(ReferenceAttribute), false));
 						
-						object LFieldValue = LFieldInfo.GetValue(AObject);
-						if (LFieldValue != null)
+						object fieldValue = fieldInfo.GetValue(objectValue);
+						if (fieldValue != null)
 						{
-							Type LFieldValueType = LFieldValue.GetType();
-							if (LFieldValueType.IsValueType)
+							Type fieldValueType = fieldValue.GetType();
+							if (fieldValueType.IsValueType)
 							{
-								if (!IsSimpleType(LFieldValueType) && LShouldTraverse)
-									LResult += InternalSizeOf(LFieldValue, ATraversalMode, AObjectContext);
+								if (!IsSimpleType(fieldValueType) && shouldTraverse)
+									result += InternalSizeOf(fieldValue, traversalMode, objectContext);
 							}
-							else if ((LFieldValueType.IsArray || (LFieldValueType.GetInterface("IEnumerable", false) != null)) && AObjectContext.Visit(LFieldValue))
+							else if ((fieldValueType.IsArray || (fieldValueType.GetInterface("IEnumerable", false) != null)) && objectContext.Visit(fieldValue))
 							{
-								LResult += InternalSizeOf(LFieldValue, LShouldTraverse ? ATraversalMode : TraversalMode.Shallow, AObjectContext);
+								result += InternalSizeOf(fieldValue, shouldTraverse ? traversalMode : TraversalMode.Shallow, objectContext);
 							}
 							else
 							{	
-								if (LShouldTraverse && AObjectContext.Visit(LFieldValue))
-									LResult += InternalSizeOf(LFieldValue, ATraversalMode, AObjectContext);
+								if (shouldTraverse && objectContext.Visit(fieldValue))
+									result += InternalSizeOf(fieldValue, traversalMode, objectContext);
 							}
 						}
 					}
 					
-					LType = LType.BaseType;
+					type = type.BaseType;
 				}
-				return LResult;
+				return result;
 			}
 		}
 		
-		public static int SizeOf(object AObject, TraversalMode ATraversalMode)
+		public static int SizeOf(object objectValue, TraversalMode traversalMode)
 		{
-			ObjectContext LObjectContext = new ObjectContext();
-			LObjectContext.Visit(AObject);
-			return InternalSizeOf(AObject, ATraversalMode, LObjectContext);
+			ObjectContext objectContext = new ObjectContext();
+			objectContext.Visit(objectValue);
+			return InternalSizeOf(objectValue, traversalMode, objectContext);
 		}
 		
-		public static List<FieldSizeInfo> SizesOf(object AObject, TraversalMode ATraversalMode)
+		public static List<FieldSizeInfo> SizesOf(object objectValue, TraversalMode traversalMode)
 		{
-			if (AObject == null)
+			if (objectValue == null)
 				return new List<FieldSizeInfo>();
 				
-			Type LType = AObject.GetType();
+			Type type = objectValue.GetType();
 			
-			if (IsSimpleType(LType) || (LType.FullName == "System.String") || LType.IsArray)
-				return new List<FieldSizeInfo>() { new FieldSizeInfo(LType.FullName, "<object>", LType.FullName, SizeOf(AObject, ATraversalMode)) };
+			if (IsSimpleType(type) || (type.FullName == "System.String") || type.IsArray)
+				return new List<FieldSizeInfo>() { new FieldSizeInfo(type.FullName, "<object>", type.FullName, SizeOf(objectValue, traversalMode)) };
 			
-			List<FieldSizeInfo> LResult = new List<FieldSizeInfo>();
-			ObjectContext LObjectContext = new ObjectContext();
-			LObjectContext.Visit(AObject);
-			while (LType != null)
+			List<FieldSizeInfo> result = new List<FieldSizeInfo>();
+			ObjectContext objectContext = new ObjectContext();
+			objectContext.Visit(objectValue);
+			while (type != null)
 			{
-				FieldInfo[] LFieldInfos = LType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-				foreach (FieldInfo LFieldInfo in LFieldInfos)
-					LResult.Add
+				FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+				foreach (FieldInfo fieldInfo in fieldInfos)
+					result.Add
 					(
 						new FieldSizeInfo
 						(
-							LType.FullName, 
-							LFieldInfo.Name, 
-							LFieldInfo.FieldType.FullName, 
-							((ATraversalMode == TraversalMode.Shallow) || ((ATraversalMode == TraversalMode.Default) && LFieldInfo.IsDefined(typeof(ReferenceAttribute), false)))
-								? SizeOf(LFieldInfo.FieldType)
-								: InternalSizeOf(LFieldInfo.GetValue(AObject), ATraversalMode, LObjectContext)
+							type.FullName, 
+							fieldInfo.Name, 
+							fieldInfo.FieldType.FullName, 
+							((traversalMode == TraversalMode.Shallow) || ((traversalMode == TraversalMode.Default) && fieldInfo.IsDefined(typeof(ReferenceAttribute), false)))
+								? SizeOf(fieldInfo.FieldType)
+								: InternalSizeOf(fieldInfo.GetValue(objectValue), traversalMode, objectContext)
 						)
 					);
-				LType = LType.BaseType;
+				type = type.BaseType;
 			}
-			return LResult;
+			return result;
 		}
 	}
 }

@@ -12,46 +12,46 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 {
 	public class SingleElementSurface : Surface
 	{
-		public SingleElementSurface(object AElement, IElementDesigner ADesigner)
+		public SingleElementSurface(object element, IElementDesigner designer)
 		{
 			SuspendLayout();
 
-			FElement = AElement;
-			FDesigner = ADesigner;
-			Controls.Add((Control)ADesigner);
+			_element = element;
+			_designer = designer;
+			Controls.Add((Control)designer);
 
 			ResumeLayout(false);
 		}
 
-		private object FElement;
-		public object Element { get { return FElement; } }
+		private object _element;
+		public object Element { get { return _element; } }
 
-		private IElementDesigner FDesigner;
-		public IElementDesigner Designer { get { return FDesigner; } }
+		private IElementDesigner _designer;
+		public IElementDesigner Designer { get { return _designer; } }
 
-		private int FBorderSize = 10;
+		private int _borderSize = 10;
 		public int BorderSize
 		{
-			get { return FBorderSize; }
+			get { return _borderSize; }
 			set 
 			{
 				if (value < 0)
 					value = 0;
-				if (FBorderSize == value)
+				if (_borderSize == value)
 				{
-					FBorderSize = value;
+					_borderSize = value;
 					PerformLayout();
 				}
 			}
 		}
 
-		protected override void OnLayout(System.Windows.Forms.LayoutEventArgs AArgs)
+		protected override void OnLayout(System.Windows.Forms.LayoutEventArgs args)
 		{
-			Rectangle LBounds = DisplayRectangle;
-			LBounds.Inflate(-FBorderSize, -FBorderSize);
-			FDesigner.Bounds = LBounds;
+			Rectangle bounds = DisplayRectangle;
+			bounds.Inflate(-_borderSize, -_borderSize);
+			_designer.Bounds = bounds;
 
-			base.OnLayout(AArgs);
+			base.OnLayout(args);
 		}
 	}
 }

@@ -42,36 +42,36 @@ namespace Alphora.Dataphor.DAE.Schema
 		private void InternalInitialize()
 		{
 			IsDisposable = true;
-			FColumns = new Columns();
+			_columns = new Columns();
 		}
 		
-		public IRowType CreateRowType(string APrefix, bool AIncludeColumns)
+		public IRowType CreateRowType(string prefix, bool includeColumns)
 		{
 			if (IsGeneric)
 			{
-				Schema.RowType LRowType = new RowType();
-				LRowType.IsGeneric = true;
-				return LRowType;
+				Schema.RowType rowType = new RowType();
+				rowType.IsGeneric = true;
+				return rowType;
 			}
 
-			if ((APrefix == null) || (APrefix == String.Empty))
+			if ((prefix == null) || (prefix == String.Empty))
 			{
-				if (AIncludeColumns)
+				if (includeColumns)
 					return new RowType(Columns);
 				return new RowType();
 			}
 			
-			return new RowType(Columns, APrefix);
+			return new RowType(Columns, prefix);
 		}
 
-		public IRowType CreateRowType(string APrefix)
+		public IRowType CreateRowType(string prefix)
 		{
-			return CreateRowType(APrefix, false);
+			return CreateRowType(prefix, false);
 		}
 		
-		public IRowType CreateRowType(bool AIncludeColumns)
+		public IRowType CreateRowType(bool includeColumns)
 		{
-			return CreateRowType(null, AIncludeColumns);
+			return CreateRowType(null, includeColumns);
 		}
 		
 		public IRowType CreateRowType()
@@ -81,41 +81,41 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void ResetRowType()
 		{
-			FRowType = null;
-			FNewRowType = null;
-			FOldRowType = null;
+			_rowType = null;
+			_newRowType = null;
+			_oldRowType = null;
 		}
 		
-		private IRowType FRowType;
+		private IRowType _rowType;
 		public IRowType RowType
 		{
 			get
 			{
-				if (FRowType == null)
-					FRowType = CreateRowType();
-				return FRowType;
+				if (_rowType == null)
+					_rowType = CreateRowType();
+				return _rowType;
 			}
 		}
 		
-		private IRowType FNewRowType;
+		private IRowType _newRowType;
 		public IRowType NewRowType
 		{
 			get
 			{
-				if (FNewRowType == null)
-					FNewRowType = CreateRowType(Keywords.New);
-				return FNewRowType;
+				if (_newRowType == null)
+					_newRowType = CreateRowType(Keywords.New);
+				return _newRowType;
 			}
 		}
 		
-		private IRowType FOldRowType;
+		private IRowType _oldRowType;
 		public IRowType OldRowType
 		{
 			get
 			{
-				if (FOldRowType == null)
-					FOldRowType = CreateRowType(Keywords.Old);
-				return FOldRowType;
+				if (_oldRowType == null)
+					_oldRowType = CreateRowType(Keywords.Old);
+				return _oldRowType;
 			}
 		}
 		
@@ -126,52 +126,52 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// StaticByteSize		
-		private int FStaticByteSize = 8; // sizeof(StreamID)
+		private int _staticByteSize = 8; // sizeof(StreamID)
 		public int StaticByteSize
 		{
-			get { return FStaticByteSize; }
+			get { return _staticByteSize; }
 			set { }
 		}
 		
 		// IsGeneric
 		// Indicates whether this data type is a generic data type (i.e. table, not table{})
-		private bool FIsGeneric;
+		private bool _isGeneric;
 		public bool IsGeneric
 		{
-			get { return FIsGeneric; }
-			set { FIsGeneric = value; }
+			get { return _isGeneric; }
+			set { _isGeneric = value; }
 		}
 		
 		public bool IsNil { get { return false; } }
 		
 		// IsDisposable
 		// Indicates whether the host representation for this data type must be disposed
-		private bool FIsDisposable = false;
+		private bool _isDisposable = false;
 		public bool IsDisposable
 		{
-			get { return FIsDisposable; }
-			set { FIsDisposable = value; }
+			get { return _isDisposable; }
+			set { _isDisposable = value; }
 		}
 
 		// Columns
-		private Columns FColumns;
-		public Columns Columns { get { return FColumns; } }
+		private Columns _columns;
+		public Columns Columns { get { return _columns; } }
 		
-		protected void EmitColumns(EmitMode AMode, TableTypeSpecifier ASpecifier)
+		protected void EmitColumns(EmitMode mode, TableTypeSpecifier specifier)
 		{
-			NamedTypeSpecifier LColumnSpecifier;
-			foreach (Column LColumn in Columns)
+			NamedTypeSpecifier columnSpecifier;
+			foreach (Column column in Columns)
 			{
-				LColumnSpecifier = new NamedTypeSpecifier();
-				LColumnSpecifier.Identifier = LColumn.Name;
-				LColumnSpecifier.TypeSpecifier = LColumn.DataType.EmitSpecifier(AMode);
-				ASpecifier.Columns.Add(LColumnSpecifier);
+				columnSpecifier = new NamedTypeSpecifier();
+				columnSpecifier.Identifier = column.Name;
+				columnSpecifier.TypeSpecifier = column.DataType.EmitSpecifier(mode);
+				specifier.Columns.Add(columnSpecifier);
 			}
 		}
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			return (AObject is IDataType) && Equals((IDataType)AObject);
+			return (objectValue is IDataType) && Equals((IDataType)objectValue);
 		}
 		
 		public override int GetHashCode()
@@ -180,27 +180,27 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// Equivalent
-		public bool Equivalent(IDataType ADataType)
+		public bool Equivalent(IDataType dataType)
 		{
-			return (ADataType is ITableType) && Columns.Equivalent(((ITableType)ADataType).Columns);
+			return (dataType is ITableType) && Columns.Equivalent(((ITableType)dataType).Columns);
 		}
 
 		// Equals
-		public bool Equals(IDataType ADataType)
+		public bool Equals(IDataType dataType)
 		{
-			return (ADataType is ITableType) && (Columns.Equals(((ITableType)ADataType).Columns));
+			return (dataType is ITableType) && (Columns.Equals(((ITableType)dataType).Columns));
 		}
 		
 		// Is
-		public bool Is(IDataType ADataType)
+		public bool Is(IDataType dataType)
 		{
 			return
-				(ADataType is IGenericType) ||
+				(dataType is IGenericType) ||
 				(
-					(ADataType is ITableType) &&
+					(dataType is ITableType) &&
 					(
-						ADataType.IsGeneric ||
-						Columns.Is(((ITableType)ADataType).Columns)
+						dataType.IsGeneric ||
+						Columns.Is(((ITableType)dataType).Columns)
 					)
 				);
 		}
@@ -211,23 +211,23 @@ namespace Alphora.Dataphor.DAE.Schema
 			return Keywords.Table + (IsGeneric ? String.Empty : Columns.ToString());
 		}
 		
-        public TypeSpecifier EmitSpecifier(EmitMode AMode)
+        public TypeSpecifier EmitSpecifier(EmitMode mode)
         {
-			TableTypeSpecifier LSpecifier = new TableTypeSpecifier();
-			LSpecifier.IsGeneric = IsGeneric;
-			EmitColumns(AMode, LSpecifier);
-			return LSpecifier;
+			TableTypeSpecifier specifier = new TableTypeSpecifier();
+			specifier.IsGeneric = IsGeneric;
+			EmitColumns(mode, specifier);
+			return specifier;
         }
 
-		public bool Compatible(IDataType ADataType)
+		public bool Compatible(IDataType dataType)
 		{
-			return Is(ADataType) || ADataType.Is(this);
+			return Is(dataType) || dataType.Is(this);
 		}
 
-        public void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
         {
-			foreach (Column LColumn in Columns)
-				LColumn.DataType.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			foreach (Column column in Columns)
+				column.DataType.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
         }
     }
 }

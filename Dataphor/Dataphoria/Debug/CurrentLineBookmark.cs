@@ -9,8 +9,8 @@ namespace Alphora.Dataphor.Dataphoria
 {
 	public class CurrentLineBookmark : DebugBookmark
 	{
-		public CurrentLineBookmark(IDocument ADocument, TextLocation ALocation, DebugLocator ALocator)
-			: base(ADocument, ALocation, ALocator)
+		public CurrentLineBookmark(IDocument document, TextLocation location, DebugLocator locator)
+			: base(document, location, locator)
 		{
 		}
 
@@ -21,10 +21,10 @@ namespace Alphora.Dataphor.Dataphoria
 
 		protected override TextMarker CreateMarker()
 		{
-			LineSegment LLineSeg = Document.GetLineSegment(LineNumber);
-			TextMarker LMarker = new TextMarker(LLineSeg.Offset + ColumnNumber, LLineSeg.Length - ColumnNumber, TextMarkerType.SolidBlock, Color.Yellow, Color.Blue);
-			Document.MarkerStrategy.InsertMarker(0, LMarker);
-			return LMarker;
+			LineSegment lineSeg = Document.GetLineSegment(LineNumber);
+			TextMarker marker = new TextMarker(lineSeg.Offset + ColumnNumber, lineSeg.Length - ColumnNumber, TextMarkerType.SolidBlock, Color.Yellow, Color.Blue);
+			Document.MarkerStrategy.InsertMarker(0, marker);
+			return marker;
 		}
 	}
 }

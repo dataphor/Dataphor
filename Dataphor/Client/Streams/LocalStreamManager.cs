@@ -14,36 +14,36 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 	public class LocalStreamHeader : Disposable
 	{
-		public LocalStreamHeader(StreamID AStreamID) : base()
+		public LocalStreamHeader(StreamID streamID) : base()
 		{
-			FStreamID = AStreamID;
+			_streamID = streamID;
 		}
 		
-		public LocalStreamHeader(StreamID AStreamID, LocalStream AStream) : base()
+		public LocalStreamHeader(StreamID streamID, LocalStream stream) : base()
 		{
-			FStreamID = AStreamID;
-			FStream = AStream;
+			_streamID = streamID;
+			_stream = stream;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FStream != null)
+			if (_stream != null)
 			{
-				FStream.Close();
-				FStream = null;
+				_stream.Close();
+				_stream = null;
 			}
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		private StreamID FStreamID;
-		public StreamID StreamID { get { return FStreamID; } }
+		private StreamID _streamID;
+		public StreamID StreamID { get { return _streamID; } }
 
-		private LocalStream FStream;
+		private LocalStream _stream;
 		public LocalStream Stream 
 		{ 
-			get { return FStream; } 
-			set { FStream = value; }
+			get { return _stream; } 
+			set { _stream = value; }
 		}
 	}
 	
@@ -70,41 +70,41 @@ namespace Alphora.Dataphor.DAE.Streams
 			Dispose(true);
 		}
 		
-		protected void Dispose(bool ADisposing)
+		protected void Dispose(bool disposing)
 		{
-			foreach (KeyValuePair<StreamID, LocalStreamHeader> LEntry in this)
-				LEntry.Value.Dispose();
+			foreach (KeyValuePair<StreamID, LocalStreamHeader> entry in this)
+				entry.Value.Dispose();
 			Clear();
 		}
 
-		public void Add(LocalStreamHeader AStream)
+		public void Add(LocalStreamHeader stream)
 		{
-			Add(AStream.StreamID, AStream);
+			Add(stream.StreamID, stream);
 		}
 	}
 	
 	public class LocalStreamManager : Disposable, IStreamManager
 	{
-		public LocalStreamManager(IStreamManager ASourceStreamManager)
+		public LocalStreamManager(IStreamManager sourceStreamManager)
 		{
-			FSourceStreamManager = ASourceStreamManager;
+			_sourceStreamManager = sourceStreamManager;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FHeaders != null)
+			if (_headers != null)
 			{
-				foreach (LocalStreamHeader LHeader in FHeaders.Values)
+				foreach (LocalStreamHeader header in _headers.Values)
 				{
-					if (LHeader.Stream != null)
+					if (header.Stream != null)
 					{
 						try
 						{
-							LHeader.Stream.Reset();
+							header.Stream.Reset();
 							#if UNMANAGEDSTREAM
-							FSourceStreamManager.Close(LHeader.StreamID);
+							FSourceStreamManager.Close(header.StreamID);
 							#else
-							LHeader.Stream.Close();
+							header.Stream.Close();
 							#endif
 						}
 						catch
@@ -112,158 +112,158 @@ namespace Alphora.Dataphor.DAE.Streams
 							// ignore exceptions here, the stream is disposed and we don't care
 						}
 
-						LHeader.Stream = null;
+						header.Stream = null;
 					}
 				}
-				FHeaders.Dispose();
-				FHeaders = null;
+				_headers.Dispose();
+				_headers = null;
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		private IStreamManager FSourceStreamManager;
-		public IStreamManager SourceStreamManager { get { return FSourceStreamManager; } }
+		private IStreamManager _sourceStreamManager;
+		public IStreamManager SourceStreamManager { get { return _sourceStreamManager; } }
 
-		private LocalStreamHeaders FHeaders = new LocalStreamHeaders();
+		private LocalStreamHeaders _headers = new LocalStreamHeaders();
 
 		// IStreamManager
 		public StreamID Allocate()
 		{
 			// Allocates a new stream in the source stream manager, and saves the header and local cache for it locally
-			StreamID LStreamID = FSourceStreamManager.Allocate();
-			LocalStreamHeader LHeader = new LocalStreamHeader(LStreamID);
-			FHeaders.Add(LHeader);
-			return LStreamID;
+			StreamID streamID = _sourceStreamManager.Allocate();
+			LocalStreamHeader header = new LocalStreamHeader(streamID);
+			_headers.Add(header);
+			return streamID;
 		}
 		
-		public StreamID Reference(StreamID AStreamID)
+		public StreamID Reference(StreamID streamID)
 		{
-			LocalStreamHeader LTargetHeader;
-			if (FHeaders.TryGetValue(AStreamID, out LTargetHeader) && (LTargetHeader.Stream != null) && LTargetHeader.Stream.Modified)
+			LocalStreamHeader targetHeader;
+			if (_headers.TryGetValue(streamID, out targetHeader) && (targetHeader.Stream != null) && targetHeader.Stream.Modified)
 			{
-				StreamID LStreamID = Allocate();
-				Stream LStream = Open(LStreamID, LockMode.Exclusive);
+				StreamID localStreamID = Allocate();
+				Stream stream = Open(localStreamID, LockMode.Exclusive);
 				try
 				{
-					Stream LTargetStream = new CoverStream(LTargetHeader.Stream);
+					Stream targetStream = new CoverStream(targetHeader.Stream);
 					try
 					{
-						StreamUtility.CopyStream(LTargetStream, LStream);
-						return LStreamID;
+						StreamUtility.CopyStream(targetStream, stream);
+						return localStreamID;
 					}
 					finally
 					{
-						LTargetStream.Close();
+						targetStream.Close();
 					}
 				}
 				finally
 				{
-					LStream.Close();
-					Close(LStreamID);
+					stream.Close();
+					Close(localStreamID);
 				}
 			}
 			else
 			{
-				StreamID LStreamID = FSourceStreamManager.Reference(AStreamID);
-				LocalStreamHeader LHeader = new LocalStreamHeader(LStreamID);
-				FHeaders.Add(LHeader);
-				return LStreamID;
+				StreamID localStreamID = _sourceStreamManager.Reference(streamID);
+				LocalStreamHeader header = new LocalStreamHeader(localStreamID);
+				_headers.Add(header);
+				return localStreamID;
 			}
 		}
 		
-		public void Deallocate(StreamID AStreamID)
+		public void Deallocate(StreamID streamID)
 		{
 			// Deallocates the given stream in the source stream manager, and removes the header and local cache for it locally, without flushing
-			LocalStreamHeader LHeader;
-			if (FHeaders.TryGetValue(AStreamID, out LHeader))
+			LocalStreamHeader header;
+			if (_headers.TryGetValue(streamID, out header))
 			{
-				if (LHeader.Stream != null)
+				if (header.Stream != null)
 				{
-					LHeader.Stream.Reset();
+					header.Stream.Reset();
 					#if UNMANAGEDSTREAM
-					FSourceStreamManager.Close(LHeader.StreamID);
+					FSourceStreamManager.Close(header.StreamID);
 					#else
-					LHeader.Stream.Close();
+					header.Stream.Close();
 					#endif
-					LHeader.Stream = null;
+					header.Stream = null;
 				}
-				FSourceStreamManager.Deallocate(LHeader.StreamID);
-				FHeaders.Remove(LHeader.StreamID);
-				LHeader.Dispose();
+				_sourceStreamManager.Deallocate(header.StreamID);
+				_headers.Remove(header.StreamID);
+				header.Dispose();
 			}
 			else
-				FSourceStreamManager.Deallocate(AStreamID);
+				_sourceStreamManager.Deallocate(streamID);
 		}
 		
-		public Stream Open(StreamID AStreamID, LockMode AMode)
+		public Stream Open(StreamID streamID, LockMode mode)
 		{
 			// Ensures that the given stream is supported by a local cache and returns a stream accessing it
-			LocalStreamHeader LHeader;
-			if (!FHeaders.TryGetValue(AStreamID, out LHeader))
+			LocalStreamHeader header;
+			if (!_headers.TryGetValue(streamID, out header))
 			{
-				LHeader = new LocalStreamHeader(AStreamID, new LocalStream(this, AStreamID, AMode)); //FSourceStreamManager.Open(AStreamID, AMode)));
-				FHeaders.Add(LHeader);
+				header = new LocalStreamHeader(streamID, new LocalStream(this, streamID, mode)); //FSourceStreamManager.Open(AStreamID, AMode)));
+				_headers.Add(header);
 			}
-			else if (LHeader.Stream == null)
-				LHeader.Stream = new LocalStream(this, AStreamID, AMode); //, FSourceStreamManager.Open(AStreamID, AMode));
-			return new CoverStream(LHeader.Stream);
+			else if (header.Stream == null)
+				header.Stream = new LocalStream(this, streamID, mode); //, FSourceStreamManager.Open(AStreamID, AMode));
+			return new CoverStream(header.Stream);
 		}
 
-		public IRemoteStream OpenRemote(StreamID AStreamID, LockMode AMode)
+		public IRemoteStream OpenRemote(StreamID streamID, LockMode mode)
 		{
-			Stream LStream = Open(AStreamID, AMode);
-			IRemoteStream LResult = LStream as IRemoteStream;
-			if (LResult != null)
-				return LResult;
-			return new CoverStream(LStream);
+			Stream stream = Open(streamID, mode);
+			IRemoteStream result = stream as IRemoteStream;
+			if (result != null)
+				return result;
+			return new CoverStream(stream);
 		}
 		
-		public void Close(StreamID AStreamID)
+		public void Close(StreamID streamID)
 		{
 			// Close takes no action, the local cache is still maintained, so the remote stream is kept open
 			// a call to flush is required to force the data back to the remote stream manager
 		}
 
 		// FlushStreams -- called by the local cursors to ensure that the overflow for a row is consistent
-		public void FlushStreams(StreamID[] AStreamIDs)
+		public void FlushStreams(StreamID[] streamIDs)
 		{
-			foreach (StreamID LStreamID in AStreamIDs)
-				Flush(LStreamID);
+			foreach (StreamID streamID in streamIDs)
+				Flush(streamID);
 		}
 		
-		public void Flush(StreamID AStreamID)
+		public void Flush(StreamID streamID)
 		{
 			// Ensures that the given local cache is flushed to the source stream manager
-			LocalStreamHeader LHeader;
-			if (FHeaders.TryGetValue(AStreamID, out LHeader) && (LHeader.Stream != null))
-				LHeader.Stream.Flush();
+			LocalStreamHeader header;
+			if (_headers.TryGetValue(streamID, out header) && (header.Stream != null))
+				header.Stream.Flush();
 		}
 
-		public void Release(StreamID AStreamID)
+		public void Release(StreamID streamID)
 		{
 			// Ensures that the given local cache is flushed and closes the stream obtained from the source stream manager
-			LocalStreamHeader LHeader;
-			if (FHeaders.TryGetValue(AStreamID, out LHeader))
+			LocalStreamHeader header;
+			if (_headers.TryGetValue(streamID, out header))
 			{
-				if (LHeader.Stream != null)
+				if (header.Stream != null)
 				{
-					LHeader.Stream.Flush();
+					header.Stream.Flush();
 					#if UNMANAGEDSTREAM
 					FSourceStreamManager.Close(AStreamID);
 					#else
-					LHeader.Stream.Close();
+					header.Stream.Close();
 					#endif
-					LHeader.Stream = null;
+					header.Stream = null;
 				}
-				FHeaders.Remove(LHeader.StreamID);
-				LHeader.Dispose();
+				_headers.Remove(header.StreamID);
+				header.Dispose();
 			}
 		}
 
-		public void ReleaseStreams(StreamID[] AStreamIDs)
+		public void ReleaseStreams(StreamID[] streamIDs)
 		{
-			foreach (StreamID LStreamID in AStreamIDs)
-				Release(LStreamID);
+			foreach (StreamID streamID in streamIDs)
+				Release(streamID);
 		}
 	}
 }

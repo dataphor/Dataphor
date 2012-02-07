@@ -8,111 +8,111 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	public class LayoutBuilder : System.Object
 	{
 		/// <summary> Puts the specified node into a properly flowing container (if it isn't already). </summary>
-		protected virtual LayoutNode PrepareLayout(LayoutNode ACurrentNode, Flow AFlow)
+		protected virtual LayoutNode PrepareLayout(LayoutNode currentNode, Flow flow)
 		{
 			// Ensures that the node is ready to accept a new node, and returns the parent into which the new node should be inserted
-			LayoutNode LParent = ACurrentNode.Parent;
-			switch (AFlow)
+			LayoutNode parent = currentNode.Parent;
+			switch (flow)
 			{
 				case Flow.Horizontal :
-					if (!(LParent is RowNode))
+					if (!(parent is RowNode))
 					{
-						RowNode LRowNode = new RowNode();
-						LRowNode.Children.Add(ACurrentNode);
-						if (LParent != null)
-							LParent.Children.Add(LRowNode);
-						return LRowNode;
+						RowNode rowNode = new RowNode();
+						rowNode.Children.Add(currentNode);
+						if (parent != null)
+							parent.Children.Add(rowNode);
+						return rowNode;
 					}
-					return LParent;
+					return parent;
 				
 				default :
-					if (!(LParent is ColumnNode))
+					if (!(parent is ColumnNode))
 					{
-						ColumnNode LColumnNode = new ColumnNode();
-						LColumnNode.Children.Add(ACurrentNode);
-						if (LParent != null)
-							LParent.Children.Add(LColumnNode);
-						return LColumnNode;
+						ColumnNode columnNode = new ColumnNode();
+						columnNode.Children.Add(currentNode);
+						if (parent != null)
+							parent.Children.Add(columnNode);
+						return columnNode;
 					}
-					return LParent;
+					return parent;
 			}
 		}
 		
-		protected Flow ReverseFlow(Flow AFlow)
+		protected Flow ReverseFlow(Flow flow)
 		{
-			return ((AFlow == Flow.Horizontal) ? Flow.Vertical : Flow.Horizontal);
+			return ((flow == Flow.Horizontal) ? Flow.Vertical : Flow.Horizontal);
 		}
 		
-		protected virtual LayoutNode LayoutElement(LayoutNode ACurrentNode, Element AElement)
+		protected virtual LayoutNode LayoutElement(LayoutNode currentNode, Element element)
 		{
 			// Eliminate empty groups, and groups with only one element
-			GroupElement LGroupElement = AElement as GroupElement;
-			if (LGroupElement != null)
+			GroupElement groupElement = element as GroupElement;
+			if (groupElement != null)
 			{
-				if (LGroupElement.Elements.Count == 0)
-					return ACurrentNode;
+				if (groupElement.Elements.Count == 0)
+					return currentNode;
 					
-				if (!LGroupElement.ContainsMultipleElements())
-					return LayoutElement(ACurrentNode, LGroupElement.Elements[0]);
+				if (!groupElement.ContainsMultipleElements())
+					return LayoutElement(currentNode, groupElement.Elements[0]);
 			}
 			
-			ElementNode LElementNode = new ElementNode(AElement);
+			ElementNode elementNode = new ElementNode(element);
 
-			if ((AElement is GroupElement) && (((GroupElement)AElement).Elements.Count > 0))
+			if ((element is GroupElement) && (((GroupElement)element).Elements.Count > 0))
 			{
-				LayoutNode LNewNode = new LayoutBuilder().Layout(((GroupElement)AElement).Elements);
-				if (LNewNode != null)
-					LElementNode.Children.Add(LNewNode);
+				LayoutNode newNode = new LayoutBuilder().Layout(((GroupElement)element).Elements);
+				if (newNode != null)
+					elementNode.Children.Add(newNode);
 			}
 			
-			if (ACurrentNode != null)
+			if (currentNode != null)
 			{
-				LayoutNode LParent;
+				LayoutNode parent;
 				
-				if (FFlowBreak || FReturn)
-					LParent = PrepareLayout(ACurrentNode, ReverseFlow(FFlow));
+				if (_flowBreak || _return)
+					parent = PrepareLayout(currentNode, ReverseFlow(_flow));
 				else
-					LParent = PrepareLayout(ACurrentNode, FFlow);
+					parent = PrepareLayout(currentNode, _flow);
 				
-				if (FBreak)
-					PrepareLayout(LParent, ReverseFlow(FFlow)).Children.Add(PrepareLayout(LElementNode, FFlow));
-				else if (FReturn)
-					PrepareLayout(LParent, FFlow).Children.Add(LElementNode);
+				if (_break)
+					PrepareLayout(parent, ReverseFlow(_flow)).Children.Add(PrepareLayout(elementNode, _flow));
+				else if (_return)
+					PrepareLayout(parent, _flow).Children.Add(elementNode);
 				else
-					LParent.Children.Add(LElementNode);
+					parent.Children.Add(elementNode);
 			}
 			
-			switch (AElement.Flow)
+			switch (element.Flow)
 			{
 				case Flow.Horizontal:
-				case Flow.Vertical : FFlow = AElement.Flow; break;
+				case Flow.Vertical : _flow = element.Flow; break;
 			}
 			
-			FReturn = FFlowBreak && !AElement.FlowBreak;
-			FBreak = AElement.Break;
-			FFlowBreak = AElement.FlowBreak;
+			_return = _flowBreak && !element.FlowBreak;
+			_break = element.Break;
+			_flowBreak = element.FlowBreak;
 			
-			return LElementNode;
+			return elementNode;
 		}
 		
-		public virtual LayoutNode Layout(Elements AElements)
+		public virtual LayoutNode Layout(Elements elements)
 		{
-			FFlow = Flow.Vertical;
-			FFlowBreak = false;
-			FBreak = false;
-			FReturn = false;
-			LayoutNode LCurrentNode = null;
+			_flow = Flow.Vertical;
+			_flowBreak = false;
+			_break = false;
+			_return = false;
+			LayoutNode currentNode = null;
 			
-			for (int LIndex = 0; LIndex < AElements.Count; LIndex++)
-				LCurrentNode = LayoutElement(LCurrentNode, AElements[LIndex]);
+			for (int index = 0; index < elements.Count; index++)
+				currentNode = LayoutElement(currentNode, elements[index]);
 				
-			return LCurrentNode != null ? LCurrentNode.Root : null;
+			return currentNode != null ? currentNode.Root : null;
 		}
 		
-		protected Flow FFlow;
-		protected bool FFlowBreak;
-		protected bool FBreak;
-		protected bool FReturn;
+		protected Flow _flow;
+		protected bool _flowBreak;
+		protected bool _break;
+		protected bool _return;
 	}
 }
 

@@ -9,29 +9,29 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
     public partial class ConnectInstances : UserControl
     {
-        public ConnectInstances(ConnectWorkItem AWorkItem)
+        public ConnectInstances(ConnectWorkItem workItem)
         {
-			FWorkItem = AWorkItem;
-			DataContext = FWorkItem;
+			_workItem = workItem;
+			DataContext = _workItem;
             InitializeComponent();
             
             // TODO: update button enabled
         }
 
-		private ConnectWorkItem FWorkItem;
+		private ConnectWorkItem _workItem;
 				
 		private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
 			if (InstanceListBox.SelectedIndex >= 0)
 			{
-				FWorkItem.InstanceName = FWorkItem.Instances[InstanceListBox.SelectedIndex];
-				FWorkItem.Status = ConnectStatus.Login;
+				_workItem.InstanceName = _workItem.Instances[InstanceListBox.SelectedIndex];
+				_workItem.Status = ConnectStatus.Login;
 			}
 		}
 
 		private void BackClicked(object sender, System.Windows.RoutedEventArgs e)
 		{
-        	FWorkItem.Back();
+        	_workItem.Back();
 		}  
 	}
 }

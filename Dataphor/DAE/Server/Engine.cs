@@ -84,31 +84,31 @@ namespace Alphora.Dataphor.DAE.Server
 	public class Engine : ServerObject, IDisposable, IServer
 	{
 		// Do not localize
-		public const string CDefaultServerName = "Dataphor";
-		public const string CServerLogName = @"Dataphor";											 
-		public const string CServerSourceName = @"Dataphor Server";
-		public const string CUserRoleName = "System.User";
-		public const string CSystemUserID = "System";
-		public const string CAdminUserID = "Admin";
-		public const int CCatalogDeviceID = 1;
-		public const string CCatalogDeviceName = "System.Catalog";
-		public const string CTempDeviceName = "System.Temp";
-		public const string CATDeviceName = "System.ApplicationTransactionDevice";
-		public const int CTempDeviceMaxRowCount = 1000;
-		public const int CATDeviceMaxRowCount = 100;
-		public const int CMaxLogs = 9;
-		public const int CSystemSessionID = 0;
-		public const int CDefaultMaxConcurrentProcesses = 200;
-		public const int CDefaultMaxStackDepth = 32767; // Also specified in the base stack
-		public const int CDefaultMaxCallDepth = 1024; // Also specified in the base window stack
-		public const int CDefaultProcessWaitTimeout = 30;
-		public const int CDefaultProcessTerminationTimeout = 30;
-		public const int CDefaultPlanCacheSize = 1000;
+		public const string DefaultServerName = "Dataphor";
+		public const string ServerLogName = @"Dataphor";											 
+		public const string ServerSourceName = @"Dataphor Server";
+		public const string UserRoleName = "System.User";
+		public const string SystemUserID = "System";
+		public const string AdminUserID = "Admin";
+		public const int CatalogDeviceID = 1;
+		public const string CatalogDeviceName = "System.Catalog";
+		public const string TempDeviceName = "System.Temp";
+		public const string ATDeviceName = "System.ApplicationTransactionDevice";
+		public const int TempDeviceMaxRowCount = 1000;
+		public const int ATDeviceMaxRowCount = 100;
+		public const int MaxLogs = 9;
+		public const int SystemSessionID = 0;
+		public const int DefaultMaxConcurrentProcesses = 200;
+		public const int DefaultMaxStackDepth = 32767; // Also specified in the base stack
+		public const int DefaultMaxCallDepth = 1024; // Also specified in the base window stack
+		public const int DefaultProcessWaitTimeout = 30;
+		public const int DefaultProcessTerminationTimeout = 30;
+		public const int DefaultPlanCacheSize = 100;
 		
 		// constructor		
 		public Engine() : base()
 		{
-			FSessions = new ServerSessions();
+			_sessions = new ServerSessions();
 		}
         
 		public void Dispose()
@@ -116,7 +116,7 @@ namespace Alphora.Dataphor.DAE.Server
 			Dispose(true);
 		}
         
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -126,30 +126,30 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					if (FSessions != null)
+					if (_sessions != null)
 					{
-						FSessions.Dispose();
-						FSessions = null;
+						_sessions.Dispose();
+						_sessions = null;
 					}
 				}
 			}
 			finally
 			{
-				FCatalog = null;
+				_catalog = null;
             
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
 		// Name 
-		private string FName = CDefaultServerName;
+		private string _name = DefaultServerName;
 		public virtual string Name
 		{
-			get { return FName; } 
+			get { return _name; } 
 			set 
 			{ 
 				CheckState(ServerState.Stopped);
-				FName = (value == null ? CDefaultServerName : value); 
+				_name = (value == null ? DefaultServerName : value); 
 			}
 		}
 
@@ -162,97 +162,97 @@ namespace Alphora.Dataphor.DAE.Server
 		#region Devices
 		
 		// TempDevice		
-		protected MemoryDevice FTempDevice;
+		protected MemoryDevice _tempDevice;
 		public MemoryDevice TempDevice 
 		{ 
 			get 
 			{ 
-				if (FTempDevice == null)
+				if (_tempDevice == null)
 					throw new ServerException(ServerException.Codes.InvalidServerState, ServerState.Started.ToString());
-				return FTempDevice; 
+				return _tempDevice; 
 			} 
 		}
 
 		// CatalogDevice
-		protected CatalogDevice FCatalogDevice;
+		protected CatalogDevice _catalogDevice;
 		public CatalogDevice CatalogDevice 
 		{ 
 			get 
 			{
-				if (FCatalogDevice == null)
+				if (_catalogDevice == null)
 					throw new ServerException(ServerException.Codes.InvalidServerState, ServerState.Started.ToString());
-				return FCatalogDevice; 
+				return _catalogDevice; 
 			} 
 		}
 
 		// ATDevice		
-		protected ApplicationTransactionDevice FATDevice;
+		protected ApplicationTransactionDevice _aTDevice;
 		public ApplicationTransactionDevice ATDevice 
 		{ 
 			get 
 			{ 
-				if (FATDevice == null)
+				if (_aTDevice == null)
 					throw new ServerException(ServerException.Codes.InvalidServerState, ServerState.Started.ToString());
-				return FATDevice; 
+				return _aTDevice; 
 			} 
 		}
 		
 		// DeviceSettings
-		private Schema.DeviceSettings FDeviceSettings = new Schema.DeviceSettings();
+		private Schema.DeviceSettings _deviceSettings = new Schema.DeviceSettings();
 		public Schema.DeviceSettings DeviceSettings
 		{
-			get { return FDeviceSettings; }
+			get { return _deviceSettings; }
 		}
 
 		public event DeviceNotifyEvent OnDeviceStarting;
 
-		private void DoDeviceStarting(Schema.Device ADevice)
+		private void DoDeviceStarting(Schema.Device device)
 		{
 			if (OnDeviceStarting != null)
-				OnDeviceStarting(this, ADevice);
+				OnDeviceStarting(this, device);
 		}
 
 		public event DeviceNotifyEvent OnDeviceStarted;
 
-		private void DoDeviceStarted(Schema.Device ADevice)
+		private void DoDeviceStarted(Schema.Device device)
 		{
 			if (OnDeviceStarted != null)
-				OnDeviceStarted(this, ADevice);
+				OnDeviceStarted(this, device);
 		}
 
-		public void StartDevice(ServerProcess AProcess, Schema.Device ADevice)
+		public void StartDevice(ServerProcess process, Schema.Device device)
 		{
-			if (!ADevice.Running)
+			if (!device.Running)
 			{
 				// TODO: It's not at all clear that this would have had any effect.
 				// 
 				//AProcess.Plan.PushSecurityContext(new SecurityContext(ADevice.Owner));
 				//try
 				//{
-				DoDeviceStarting(ADevice);
+				DoDeviceStarting(device);
 				try
 				{
-					AProcess.CatalogDeviceSession.StartDevice(ADevice);
-					AProcess.CatalogDeviceSession.RegisterDevice(ADevice);
+					process.CatalogDeviceSession.StartDevice(device);
+					process.CatalogDeviceSession.RegisterDevice(device);
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					throw new ServerException(ServerException.Codes.DeviceStartupError, LException, ADevice.Name);
+					throw new ServerException(ServerException.Codes.DeviceStartupError, exception, device.Name);
 				}
 
-				if ((ADevice.ReconcileMode & ReconcileMode.Startup) != 0)
+				if ((device.ReconcileMode & ReconcileMode.Startup) != 0)
 				{
 					try
 					{
-						ADevice.Reconcile(AProcess);
+						device.Reconcile(process);
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						throw new ServerException(ServerException.Codes.StartupReconciliationError, LException, ADevice.Name);
+						throw new ServerException(ServerException.Codes.StartupReconciliationError, exception, device.Name);
 					}
 				}
 
-				DoDeviceStarted(ADevice);
+				DoDeviceStarted(device);
 				//}
 				//finally
 				//{
@@ -264,37 +264,37 @@ namespace Alphora.Dataphor.DAE.Server
 		private void StartDevices()
 		{
 			// Perform startup reconciliation as configured for each device
-			foreach (Schema.Object LObject in FCatalog)
-				if (LObject is Schema.Device)
+			foreach (Schema.Object objectValue in _catalog)
+				if (objectValue is Schema.Device)
 					try
 					{
-						StartDevice(FSystemProcess, (Schema.Device)LObject);
+						StartDevice(_systemProcess, (Schema.Device)objectValue);
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						LogError(LException);
+						LogError(exception);
 					}
 		}
 
 		private void StopDevices()
 		{
 			// Perform shutdown processing as configured for each device
-			if (FCatalog != null)
+			if (_catalog != null)
 			{
-				Schema.Device LDevice;
-				foreach (Schema.Object LObject in FCatalog)
+				Schema.Device device;
+				foreach (Schema.Object objectValue in _catalog)
 				{
-					if (LObject is Schema.Device)
+					if (objectValue is Schema.Device)
 					{
-						LDevice = (Schema.Device)LObject;
+						device = (Schema.Device)objectValue;
 						try
 						{
-							if (LDevice.Running)
-								LDevice.Stop(FSystemProcess);
+							if (device.Running)
+								device.Stop(_systemProcess);
 						}
-						catch (Exception LException)
+						catch (Exception exception)
 						{
-							LogError(new ServerException(ServerException.Codes.DeviceShutdownError, LException, LDevice.Name));
+							LogError(new ServerException(ServerException.Codes.DeviceShutdownError, exception, device.Name));
 						}
 					}
 				}
@@ -306,33 +306,33 @@ namespace Alphora.Dataphor.DAE.Server
 		#region Plan Cache
 		
 		// PlanCache
-		private PlanCache FPlanCache;
-		public PlanCache PlanCache { get { return FPlanCache; } }
+		private PlanCache _planCache;
+		public PlanCache PlanCache { get { return _planCache; } }
 		
 		public int PlanCacheCount
 		{
-			get { return FPlanCache.Count; }
+			get { return _planCache.Count; }
 		}
 		
 		// PlanCacheSize
 		public int PlanCacheSize
 		{
-			get { return FPlanCache.Size; }
-			set { FPlanCache.Resize(FSystemProcess, value); }
+			get { return _planCache.Size; }
+			set { _planCache.Resize(_systemProcess, value); }
 		}
 
 		#endregion
 		
 		#region StreamManager
 		
-		private ServerStreamManager FStreamManager;
+		private ServerStreamManager _streamManager;
 		public ServerStreamManager StreamManager 
 		{ 
 			get 
 			{
-				if (FStreamManager == null)
+				if (_streamManager == null)
 					throw new ServerException(ServerException.Codes.InvalidServerState, ServerState.Started.ToString());
-				return FStreamManager; 
+				return _streamManager; 
 			} 
 		}
 
@@ -341,224 +341,224 @@ namespace Alphora.Dataphor.DAE.Server
 		#region Security
 		
 		// User Role
-		protected Schema.Role FUserRole;
+		protected Schema.Role _userRole;
 		public Schema.Role UserRole
 		{
 			get
 			{
-				if (FUserRole == null)
+				if (_userRole == null)
 					throw new ServerException(ServerException.Codes.InvalidServerState, ServerState.Started.ToString());
-				return FUserRole;
+				return _userRole;
 			}
 		}
 
 		// System User
-		protected Schema.User FSystemUser;
+		protected Schema.User _systemUser;
 		public Schema.User SystemUser
 		{
 			get
 			{
-				if (FSystemUser == null)
+				if (_systemUser == null)
 					throw new ServerException(ServerException.Codes.InvalidServerState, ServerState.Started.ToString());
-				return FSystemUser;
+				return _systemUser;
 			}
 		}
 
 		// Admin User
-		protected Schema.User FAdminUser;
+		protected Schema.User _adminUser;
 		public Schema.User AdminUser
 		{
 			get
 			{
-				if (FAdminUser == null)
+				if (_adminUser == null)
 					throw new ServerException(ServerException.Codes.InvalidServerState, ServerState.Started.ToString());
-				return FAdminUser;
+				return _adminUser;
 			}
 		}
 
-		protected virtual Schema.User ValidateLogin(int ASessionID, SessionInfo ASessionInfo)
+		protected virtual Schema.User ValidateLogin(int sessionID, SessionInfo sessionInfo)
 		{
-			return FSystemUser;
+			return _systemUser;
 		}
 
 		#endregion
 		
 		#region Execution
 		
-		private object FSyncHandle = new System.Object();
+		private object _syncHandle = new System.Object();
 		private void BeginCall()
 		{
-			Monitor.Enter(FSyncHandle);
+			Monitor.Enter(_syncHandle);
 		}
 		
 		private void EndCall()
 		{
-			Monitor.Exit(FSyncHandle);
+			Monitor.Exit(_syncHandle);
 		}
 		
 		#endregion
 		
 		#region Processes
 
-		internal protected ServerProcess FSystemProcess;
+		internal protected ServerProcess _systemProcess;
 
-		private int FMaxConcurrentProcesses = CDefaultMaxConcurrentProcesses;
+		private int _maxConcurrentProcesses = DefaultMaxConcurrentProcesses;
 		public int MaxConcurrentProcesses
 		{
-			get { return FMaxConcurrentProcesses; }
-			set { FMaxConcurrentProcesses = value; }
+			get { return _maxConcurrentProcesses; }
+			set { _maxConcurrentProcesses = value; }
 		}
 		
-		private TimeSpan FProcessWaitTimeout = TimeSpan.FromSeconds((double)CDefaultProcessWaitTimeout);
+		private TimeSpan _processWaitTimeout = TimeSpan.FromSeconds((double)DefaultProcessWaitTimeout);
 		public TimeSpan ProcessWaitTimeout
 		{
-			get { return FProcessWaitTimeout; }
-			set { FProcessWaitTimeout = value; }
+			get { return _processWaitTimeout; }
+			set { _processWaitTimeout = value; }
 		}
 
-		private TimeSpan FProcessTerminationTimeout = TimeSpan.FromSeconds((double)CDefaultProcessTerminationTimeout);
+		private TimeSpan _processTerminationTimeout = TimeSpan.FromSeconds((double)DefaultProcessTerminationTimeout);
 		public TimeSpan ProcessTerminationTimeout
 		{
-			get { return FProcessTerminationTimeout; }
-			set { FProcessTerminationTimeout = value; }
+			get { return _processTerminationTimeout; }
+			set { _processTerminationTimeout = value; }
 		}
 		
-		private int FRunningProcesses = 0;
-		private AutoResetEvent FProcessWaitEvent = new AutoResetEvent(true);
+		private int _runningProcesses = 0;
+		private AutoResetEvent _processWaitEvent = new AutoResetEvent(true);
 		
-		internal void BeginProcessCall(ServerProcess AProcess)
+		internal void BeginProcessCall(ServerProcess process)
 		{
-			int LRunningProcesses = Interlocked.Increment(ref FRunningProcesses);
-			if (LRunningProcesses > FMaxConcurrentProcesses)
-				if (!FProcessWaitEvent.WaitOne(FProcessWaitTimeout))
+			int runningProcesses = Interlocked.Increment(ref _runningProcesses);
+			if (runningProcesses > _maxConcurrentProcesses)
+				if (!_processWaitEvent.WaitOne(_processWaitTimeout))
 				{
-					Interlocked.Decrement(ref FRunningProcesses);
+					Interlocked.Decrement(ref _runningProcesses);
 					throw new ServerException(ServerException.Codes.ProcessWaitTimeout);
 				}
 		}
 		
-		internal void EndProcessCall(ServerProcess AProcess)
+		internal void EndProcessCall(ServerProcess process)
 		{
-			int LRunningProcesses = Interlocked.Decrement(ref FRunningProcesses);
-			if (LRunningProcesses >= FMaxConcurrentProcesses)
-				FProcessWaitEvent.Set();
+			int runningProcesses = Interlocked.Decrement(ref _runningProcesses);
+			if (runningProcesses >= _maxConcurrentProcesses)
+				_processWaitEvent.Set();
 		}
 		
-		public ServerProcess FindProcess(int AProcessID)
+		public ServerProcess FindProcess(int processID)
 		{
-			foreach (ServerSession LSession in Sessions)
+			foreach (ServerSession session in Sessions)
 			{
-				lock (LSession.Processes)
+				lock (session.Processes)
 				{
-					foreach (ServerProcess LProcess in LSession.Processes)
-						if (LProcess.ProcessID == AProcessID)
-							return LProcess;
+					foreach (ServerProcess process in session.Processes)
+						if (process.ProcessID == processID)
+							return process;
 				}
 			}
 			
 			return null;
 		}
 		
-		public ServerProcess GetProcess(int AProcessID)
+		public ServerProcess GetProcess(int processID)
 		{
-			ServerProcess LProcess = FindProcess(AProcessID);
-			if (LProcess != null)
-				return LProcess;
+			ServerProcess process = FindProcess(processID);
+			if (process != null)
+				return process;
 
-			throw new ServerException(ServerException.Codes.ProcessNotFound, AProcessID);
+			throw new ServerException(ServerException.Codes.ProcessNotFound, processID);
 		}
 		
-		public void StopProcess(int AProcessID)
+		public void StopProcess(int processID)
 		{
-			TerminateProcess(GetProcess(AProcessID));
+			TerminateProcess(GetProcess(processID));
 		}
 
-		public void TerminateProcessThread(ServerProcess AProcess)
+		public void TerminateProcessThread(ServerProcess process)
 		{
-			bool LHandleReleased = false;
-			Monitor.Enter(AProcess.ExecutionSyncHandle);
+			bool handleReleased = false;
+			Monitor.Enter(process.ExecutionSyncHandle);
 			try
 			{
-				if (AProcess.ExecutingThread != null)
+				if (process.ExecutingThread != null)
 				{
-					AProcess.IsAborted = true;
-					Monitor.Exit(AProcess.ExecutionSyncHandle);
-					LHandleReleased = true;
+					process.IsAborted = true;
+					Monitor.Exit(process.ExecutionSyncHandle);
+					handleReleased = true;
 					
-					DateTime LEndTime = DateTime.Now.AddTicks(ProcessTerminationTimeout.Ticks / 2);
+					DateTime endTime = DateTime.Now.AddTicks(ProcessTerminationTimeout.Ticks / 2);
 					while (true)
 					{
-						Debug.Debugger LDebugger = null;
-						Monitor.Enter(AProcess.ExecutionSyncHandle);
+						Debug.Debugger debugger = null;
+						Monitor.Enter(process.ExecutionSyncHandle);
 						try
 						{
-							if ((AProcess.ExecutingThread == null) || !AProcess.ExecutingThread.IsAlive)
+							if ((process.ExecutingThread == null) || !process.ExecutingThread.IsAlive)
 								return;
 								
-							if (AProcess.DebuggedBy != null)
-								LDebugger = AProcess.DebuggedBy;
+							if (process.DebuggedBy != null)
+								debugger = process.DebuggedBy;
 						}
 						finally
 						{
-							Monitor.Exit(AProcess.ExecutionSyncHandle);
+							Monitor.Exit(process.ExecutionSyncHandle);
 						}
 						
-						if ((LDebugger != null) && LDebugger.IsPaused)
-							LDebugger.Detach(AProcess);
+						if ((debugger != null) && debugger.IsPaused)
+							debugger.Detach(process);
 
 						System.Threading.Thread.SpinWait(100);
-						if (DateTime.Now > LEndTime)
+						if (DateTime.Now > endTime)
 							throw new ServerException(ServerException.Codes.ProcessNotResponding);
 					}
 				}
 			}
 			finally
 			{
-				if (!LHandleReleased)
-					Monitor.Exit(AProcess.ExecutionSyncHandle);
+				if (!handleReleased)
+					Monitor.Exit(process.ExecutionSyncHandle);
 			}
 		}
 		
-		public void TerminateProcess(ServerProcess AProcess)
+		public void TerminateProcess(ServerProcess process)
 		{
-			TerminateProcessThread(AProcess);
-			((IServerSession)AProcess.ServerSession).StopProcess(AProcess);
+			TerminateProcessThread(process);
+			((IServerSession)process.ServerSession).StopProcess(process);
 		}
 		
 		#endregion
 
 		#region Sessions
 
-		internal protected ServerSession FSystemSession;
+		internal protected ServerSession _systemSession;
 
-		private ServerSessions FSessions;
-		public ServerSessions Sessions { get { return FSessions; } }
+		private ServerSessions _sessions;
+		public ServerSessions Sessions { get { return _sessions; } }
 
-		private int FNextSessionID = 1;
+		private int _nextSessionID = 1;
 		private int GetNextSessionID()
 		{
-			return Interlocked.Increment(ref FNextSessionID);
+			return Interlocked.Increment(ref _nextSessionID);
 		}
 
-		public ServerSession GetSession(int ASessionID)
+		public ServerSession GetSession(int sessionID)
 		{
-			return FSessions.GetSession(ASessionID);
+			return _sessions.GetSession(sessionID);
 		}
 
-		public void CloseSession(int ASessionID)
+		public void CloseSession(int sessionID)
 		{
-			GetSession(ASessionID).Dispose();
+			GetSession(sessionID).Dispose();
 		}
 
 		private void CloseSessions()
 		{
-			if (FSessions != null)
+			if (_sessions != null)
 			{
-				while (FSessions.Count > 0)
+				while (_sessions.Count > 0)
 				{
 					try
 					{
-						InternalDisconnect(FSessions[0]);
+						InternalDisconnect(_sessions[0]);
 					}
 					catch (Exception E)
 					{
@@ -568,77 +568,77 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public void DropSessionObject(Schema.CatalogObject AObject)
+		public void DropSessionObject(Schema.CatalogObject objectValue)
 		{
-			ServerSession LSession = Sessions.GetSession(AObject.SessionID);
-			lock (LSession.SessionObjects)
+			ServerSession session = Sessions.GetSession(objectValue.SessionID);
+			lock (session.SessionObjects)
 			{
-				int LObjectIndex = LSession.SessionObjects.IndexOf(AObject.SessionObjectName);
-				if ((LObjectIndex >= 0) && (((Schema.SessionObject)LSession.SessionObjects[LObjectIndex]).GlobalName == AObject.Name))
-					LSession.SessionObjects.RemoveAt(LObjectIndex); 				
+				int objectIndex = session.SessionObjects.IndexOf(objectValue.SessionObjectName);
+				if ((objectIndex >= 0) && (((Schema.SessionObject)session.SessionObjects[objectIndex]).GlobalName == objectValue.Name))
+					session.SessionObjects.RemoveAt(objectIndex); 				
 			}
 		}
 		
-		public void DropSessionOperator(Schema.Operator AOperator)
+		public void DropSessionOperator(Schema.Operator operatorValue)
 		{
-			if (!Catalog.OperatorMaps.ContainsName(AOperator.OperatorName))
+			if (!Catalog.OperatorMaps.ContainsName(operatorValue.OperatorName))
 			{
-				ServerSession LSession = Sessions.GetSession(AOperator.SessionID);
-				lock (LSession.SessionOperators)
+				ServerSession session = Sessions.GetSession(operatorValue.SessionID);
+				lock (session.SessionOperators)
 				{
-					int LOperatorIndex = LSession.SessionOperators.IndexOf(AOperator.SessionObjectName);
-					if ((LOperatorIndex >= 0) && (((Schema.SessionObject)LSession.SessionOperators[LOperatorIndex]).GlobalName == AOperator.OperatorName))
-						LSession.SessionOperators.RemoveAt(LOperatorIndex); 						
+					int operatorIndex = session.SessionOperators.IndexOf(operatorValue.SessionObjectName);
+					if ((operatorIndex >= 0) && (((Schema.SessionObject)session.SessionOperators[operatorIndex]).GlobalName == operatorValue.OperatorName))
+						session.SessionOperators.RemoveAt(operatorIndex); 						
 				}
 			}
 		}
 
-		internal void RemoveDeferredConstraintChecks(Schema.TableVar ATableVar)
+		internal void RemoveDeferredConstraintChecks(Schema.TableVar tableVar)
 		{
-			foreach (ServerSession LSession in Sessions)
-				LSession.RemoveDeferredConstraintChecks(ATableVar);
+			foreach (ServerSession session in Sessions)
+				session.RemoveDeferredConstraintChecks(tableVar);
 		}
 
-		internal void RemoveDeferredHandlers(Schema.EventHandler AHandler)
+		internal void RemoveDeferredHandlers(Schema.EventHandler handler)
 		{
-			foreach (ServerSession LSession in Sessions)
-				LSession.RemoveDeferredHandlers(AHandler);
+			foreach (ServerSession session in Sessions)
+				session.RemoveDeferredHandlers(handler);
 		}
 
-		internal void RemoveCatalogConstraintCheck(Schema.CatalogConstraint AConstraint)
+		internal void RemoveCatalogConstraintCheck(Schema.CatalogConstraint constraint)
 		{
-			foreach (ServerSession LSession in Sessions)
-				LSession.RemoveCatalogConstraintCheck(AConstraint);
+			foreach (ServerSession session in Sessions)
+				session.RemoveCatalogConstraintCheck(constraint);
 		}
 
 		#endregion
 
 		#region Exceptions
 		
-		public Exception WrapException(Exception AException)
+		public Exception WrapException(Exception exception)
 		{
-			if (FLogErrors)
-				LogError(AException);
+			if (_logErrors)
+				LogError(exception);
 				
-			return AException;
+			return exception;
 		}
 
 		#endregion
 
 		#region State
 
-		private ServerState FState;
-		public ServerState State { get { return FState; } }
+		private ServerState _state;
+		public ServerState State { get { return _state; } }
 
-		private void SetState(ServerState ANewState)
+		private void SetState(ServerState newState)
 		{
-			FState = ANewState;
+			_state = newState;
 		}
 
-		protected void CheckState(ServerState AState)
+		protected void CheckState(ServerState state)
 		{
-			if (FState != AState)
-				throw new ServerException(ServerException.Codes.InvalidServerState, AState.ToString());
+			if (_state != state)
+				throw new ServerException(ServerException.Codes.InvalidServerState, state.ToString());
 		}
 
 		#endregion
@@ -650,13 +650,13 @@ namespace Alphora.Dataphor.DAE.Server
 			BeginCall();
 			try
 			{
-				if (FState == ServerState.Stopped)
+				if (_state == ServerState.Stopped)
 				{
 					try
 					{
 						SetState(ServerState.Starting);
 						StartLog();
-						FNextSessionID = 0;
+						_nextSessionID = 0;
 						InternalStart();
 						SetState(ServerState.Started);
 						LogEvent(DAE.Server.LogEvent.ServerStarted);
@@ -669,9 +669,9 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-                throw WrapException(LException);
+                throw WrapException(exception);
 			}
 			finally
 			{
@@ -691,7 +691,7 @@ namespace Alphora.Dataphor.DAE.Server
 			InitializeCatalog();
 			RegisterCatalog();
 
-			if (!FFirstRun)
+			if (!_firstRun)
 				LoadServerState(); // Load server state from the persistent store
 		}
 
@@ -705,16 +705,16 @@ namespace Alphora.Dataphor.DAE.Server
 			// Creates and registers the core system objects required to compile and execute any D4 statements
 			// This will only be called if this is a repository, or if this is a first-time startup for a new server
 
-			FSystemProcess.BeginTransaction(IsolationLevel.Isolated);
+			_systemProcess.BeginTransaction(IsolationLevel.Isolated);
 			try
 			{
 				InternalRegisterCoreSystemObjects();
 
-				FSystemProcess.CommitTransaction();
+				_systemProcess.CommitTransaction();
 			}
 			catch
 			{
-				FSystemProcess.RollbackTransaction();
+				_systemProcess.RollbackTransaction();
 				throw;
 			}
 		}
@@ -722,41 +722,41 @@ namespace Alphora.Dataphor.DAE.Server
 		protected virtual void InternalRegisterCoreSystemObjects()
 		{
 			// Create the Admin user
-			FAdminUser = new Schema.User(CAdminUserID, "Administrator", String.Empty);
+			_adminUser = new Schema.User(AdminUserID, "Administrator", String.Empty);
 
 			// Register the System and Admin users
-			FSystemProcess.CatalogDeviceSession.InsertUser(FSystemUser);
-			FSystemProcess.CatalogDeviceSession.InsertUser(FAdminUser);
+			_systemProcess.CatalogDeviceSession.InsertUser(_systemUser);
+			_systemProcess.CatalogDeviceSession.InsertUser(_adminUser);
 
-			FUserRole = new Schema.Role(CUserRoleName);
-			FUserRole.Owner = FSystemUser;
-			FUserRole.Library = FSystemLibrary;
-			FSystemProcess.CatalogDeviceSession.InsertRole(FUserRole);
+			_userRole = new Schema.Role(UserRoleName);
+			_userRole.Owner = _systemUser;
+			_userRole.Library = _systemLibrary;
+			_systemProcess.CatalogDeviceSession.InsertRole(_userRole);
 
 			// Register the Catalog device
-			FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FCatalogDevice);
+			_systemProcess.CatalogDeviceSession.InsertCatalogObject(_catalogDevice);
 
 			// Create the Temp Device
-			FTempDevice = new MemoryDevice(Schema.Object.GetNextObjectID(), CTempDeviceName);
-			FTempDevice.Owner = FSystemUser;
-			FTempDevice.Library = FSystemLibrary;
-			FTempDevice.ClassDefinition = new ClassDefinition("System.MemoryDevice");
-			FTempDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", CTempDeviceMaxRowCount.ToString()));
-			FTempDevice.MaxRowCount = CTempDeviceMaxRowCount;
-			FTempDevice.Start(FSystemProcess);
-			FTempDevice.Register(FSystemProcess);
-			FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FTempDevice);
+			_tempDevice = new MemoryDevice(Schema.Object.GetNextObjectID(), TempDeviceName);
+			_tempDevice.Owner = _systemUser;
+			_tempDevice.Library = _systemLibrary;
+			_tempDevice.ClassDefinition = new ClassDefinition("System.MemoryDevice");
+			_tempDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", TempDeviceMaxRowCount.ToString()));
+			_tempDevice.MaxRowCount = TempDeviceMaxRowCount;
+			_tempDevice.Start(_systemProcess);
+			_tempDevice.Register(_systemProcess);
+			_systemProcess.CatalogDeviceSession.InsertCatalogObject(_tempDevice);
 
 			// Create the A/T Device
-			FATDevice = new ApplicationTransactionDevice(Schema.Object.GetNextObjectID(), CATDeviceName);
-			FATDevice.Owner = FSystemUser;
-			FATDevice.Library = FSystemLibrary;
-			FATDevice.ClassDefinition = new ClassDefinition("System.ApplicationTransactionDevice");
-			FATDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", CATDeviceMaxRowCount.ToString()));
-			FATDevice.MaxRowCount = CATDeviceMaxRowCount;
-			FATDevice.Start(FSystemProcess);
-			FATDevice.Register(FSystemProcess);
-			FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FATDevice);
+			_aTDevice = new ApplicationTransactionDevice(Schema.Object.GetNextObjectID(), ATDeviceName);
+			_aTDevice.Owner = _systemUser;
+			_aTDevice.Library = _systemLibrary;
+			_aTDevice.ClassDefinition = new ClassDefinition("System.ApplicationTransactionDevice");
+			_aTDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", ATDeviceMaxRowCount.ToString()));
+			_aTDevice.MaxRowCount = ATDeviceMaxRowCount;
+			_aTDevice.Start(_systemProcess);
+			_aTDevice.Register(_systemProcess);
+			_systemProcess.CatalogDeviceSession.InsertCatalogObject(_aTDevice);
 		}
 
 		#endregion
@@ -768,7 +768,7 @@ namespace Alphora.Dataphor.DAE.Server
 			BeginCall();
 			try
 			{
-				if ((FState == ServerState.Starting) || (FState == ServerState.Started))
+				if ((_state == ServerState.Starting) || (_state == ServerState.Started))
 				{
 					try
 					{
@@ -784,9 +784,9 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
 			finally
 			{
@@ -806,10 +806,10 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						try
 						{
-							if (FPlanCache != null)
+							if (_planCache != null)
 							{
-								FPlanCache.Clear(FSystemProcess);
-								FPlanCache = null;
+								_planCache.Clear(_systemProcess);
+								_planCache = null;
 							}
 						}
 						finally
@@ -824,13 +824,13 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FSystemSession = null;
-					FSystemProcess = null;
+					_systemSession = null;
+					_systemProcess = null;
 
-					if (FStreamManager != null)
+					if (_streamManager != null)
 					{
-						FStreamManager.Dispose();
-						FStreamManager = null;
+						_streamManager.Dispose();
+						_streamManager = null;
 					}
 				}
 			}
@@ -845,7 +845,7 @@ namespace Alphora.Dataphor.DAE.Server
 		#region Connect / disconnect
 				
 		// Connect
-		public IServerSession Connect(SessionInfo ASessionInfo)
+		public IServerSession Connect(SessionInfo sessionInfo)
 		{
 			BeginCall();
 			try
@@ -855,10 +855,10 @@ namespace Alphora.Dataphor.DAE.Server
 				#endif
 				CheckState(ServerState.Started);
 				#if !SILVERLIGHT
-				if (String.IsNullOrEmpty(ASessionInfo.HostName))
-					ASessionInfo.HostName = System.Environment.MachineName;
+				if (String.IsNullOrEmpty(sessionInfo.HostName))
+					sessionInfo.HostName = System.Environment.MachineName;
 				#endif
-				return (IServerSession)InternalConnect(GetNextSessionID(), ASessionInfo);
+				return (IServerSession)InternalConnect(GetNextSessionID(), sessionInfo);
 			}
 			catch (Exception E)
 			{
@@ -871,14 +871,14 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// Disconnect
-		public void Disconnect(IServerSession ASession)
+		public void Disconnect(IServerSession session)
 		{
 			try
 			{
 				try
 				{
 					// Clean up any session resources
-					InternalDisconnect((ServerSession)ASession);
+					InternalDisconnect((ServerSession)session);
 				}
 				catch (Exception E)
 				{
@@ -891,7 +891,7 @@ namespace Alphora.Dataphor.DAE.Server
 				try
 				{
 					// Remove the session from the sessions list
-					FSessions.SafeDisown((ServerSession)ASession);
+					_sessions.SafeDisown((ServerSession)session);
 				}
 				finally
 				{
@@ -900,45 +900,45 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		protected internal IServerSession ConnectAs(SessionInfo ASessionInfo)
+		protected internal IServerSession ConnectAs(SessionInfo sessionInfo)
 		{
-			ASessionInfo.Password = Schema.SecurityUtility.DecryptPassword(FSystemProcess.CatalogDeviceSession.ResolveUser(ASessionInfo.UserID).Password);
-			return ((IServer)this).Connect(ASessionInfo);
+			sessionInfo.Password = Schema.SecurityUtility.DecryptPassword(_systemProcess.CatalogDeviceSession.ResolveUser(sessionInfo.UserID).Password);
+			return ((IServer)this).Connect(sessionInfo);
 		}
 		
-		private ServerSession InternalConnect(int ASessionID, SessionInfo ASessionInfo)
+		private ServerSession InternalConnect(int sessionID, SessionInfo sessionInfo)
 		{
-			Schema.User LUser = ValidateLogin(ASessionID, ASessionInfo);
-			ServerSession LSession = new ServerSession(this, ASessionID, ASessionInfo, LUser);
+			Schema.User user = ValidateLogin(sessionID, sessionInfo);
+			ServerSession session = new ServerSession(this, sessionID, sessionInfo, user);
 			try
 			{
-				Schema.LoadedLibrary LCurrentLibrary = null;
-				if (ASessionInfo.DefaultLibraryName != String.Empty)
+				Schema.LoadedLibrary currentLibrary = null;
+				if (sessionInfo.DefaultLibraryName != String.Empty)
 				{
-					if (FSystemProcess == null)
-						LCurrentLibrary = FCatalog.LoadedLibraries[ASessionInfo.DefaultLibraryName];
+					if (_systemProcess == null)
+						currentLibrary = _catalog.LoadedLibraries[sessionInfo.DefaultLibraryName];
 					else
-						LCurrentLibrary = FSystemProcess.CatalogDeviceSession.ResolveLoadedLibrary(ASessionInfo.DefaultLibraryName, false);
+						currentLibrary = _systemProcess.CatalogDeviceSession.ResolveLoadedLibrary(sessionInfo.DefaultLibraryName, false);
 				}
 				
-				if (LCurrentLibrary == null)
-					LCurrentLibrary = FCatalog.LoadedLibraries[CGeneralLibraryName];
+				if (currentLibrary == null)
+					currentLibrary = _catalog.LoadedLibraries[GeneralLibraryName];
 					
-				LSession.CurrentLibrary = LCurrentLibrary;
+				session.CurrentLibrary = currentLibrary;
 
-				FSessions.Add(LSession);
-				return LSession;
+				_sessions.Add(session);
+				return session;
 			}
 			catch
 			{
-				LSession.Dispose();
+				session.Dispose();
 				throw;
 			}
 		}
         
-		private void InternalDisconnect(ServerSession ASession)
+		private void InternalDisconnect(ServerSession session)
 		{
-			ASession.Dispose();
+			session.Dispose();
 		}
 		
 		#endregion
@@ -953,12 +953,12 @@ namespace Alphora.Dataphor.DAE.Server
 			BeginCall();
 			try
 			{
-				List<Debug.Debugger> LResult = new List<Debug.Debugger>();
-				foreach (ServerSession LSession in FSessions)
-					if (LSession.Debugger != null)
-						LResult.Add(LSession.Debugger);
+				List<Debug.Debugger> result = new List<Debug.Debugger>();
+				foreach (ServerSession session in _sessions)
+					if (session.Debugger != null)
+						result.Add(session.Debugger);
 
-				return LResult;
+				return result;
 			}
 			finally
 			{
@@ -966,12 +966,12 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public Debug.Debugger GetDebugger(int ADebuggerID)
+		public Debug.Debugger GetDebugger(int debuggerID)
 		{
 			BeginCall();
 			try
 			{
-				return FSessions.GetSession(ADebuggerID).CheckedDebugger;
+				return _sessions.GetSession(debuggerID).CheckedDebugger;
 			}
 			finally
 			{
@@ -983,42 +983,42 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		#region Logging
 				
-		private bool FLoggingEnabled = true;
+		private bool _loggingEnabled = true;
 		/// <summary>Determines whether the DAE instance will create and manage a log for writing events and errors.</summary>
 		public bool LoggingEnabled
 		{
-			get { return FLoggingEnabled; }
+			get { return _loggingEnabled; }
 			set
 			{
 				CheckState(ServerState.Stopped);
-				FLoggingEnabled = value;
+				_loggingEnabled = value;
 			}
 		}
 		
-		private bool FLogErrors = false;
+		private bool _logErrors = false;
 		/// <summary>Determines whether the server will use the Dataphor event log to report errors that are returned to clients.</summary>
 		public bool LogErrors
 		{
-			get { return FLogErrors; }
-			set { FLogErrors = value; }
+			get { return _logErrors; }
+			set { _logErrors = value; }
 		}
 		
-		public void LogError(Exception AException)
+		public void LogError(Exception exception)
 		{
-			LogMessage(LogEntryType.Error, ExceptionUtility.DetailedDescription(AException));
+			LogMessage(LogEntryType.Error, ExceptionUtility.DetailedDescription(exception));
 		}
 		
-		public void LogMessage(string ADescription)
+		public void LogMessage(string description)
 		{
-			LogMessage(LogEntryType.Information, ADescription);
+			LogMessage(LogEntryType.Information, description);
 		}
 		
-		public void LogEvent(LogEvent AEvent)
+		public void LogEvent(LogEvent eventValue)
 		{
-			LogMessage(LogEntryType.Information, String.Format("Event: {0}", AEvent.ToString()));
+			LogMessage(LogEntryType.Information, String.Format("Event: {0}", eventValue.ToString()));
 		}
 
-		public virtual void LogMessage(LogEntryType AEntryType, string ADescription)
+		public virtual void LogMessage(LogEntryType entryType, string description)
 		{
 			// abstract
 		}
@@ -1042,35 +1042,35 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		#region Internal API calls
 
-		public void RunScript(string AScript)
+		public void RunScript(string script)
 		{
-			RunScript(FSystemProcess, AScript, String.Empty, null);
+			RunScript(_systemProcess, script, String.Empty, null);
 		}
 
 		/// <summary> Runs the given script as the specified library. </summary>
 		/// <remarks> LibraryName may be the empty string. </remarks>
-		public void RunScript(string AScript, string ALibraryName)
+		public void RunScript(string script, string libraryName)
 		{
-			RunScript(FSystemProcess, AScript, ALibraryName, null);
+			RunScript(_systemProcess, script, libraryName, null);
 		}
 
-		public void RunScript(ServerProcess AProcess, string AScript)
+		public void RunScript(ServerProcess process, string script)
 		{
-			RunScript(AProcess, AScript, String.Empty, null);
+			RunScript(process, script, String.Empty, null);
 		}
 
-		public void RunScript(ServerProcess AProcess, string AScript, string ALibraryName, DAE.Debug.DebugLocator ALocator)
+		public void RunScript(ServerProcess process, string script, string libraryName, DAE.Debug.DebugLocator locator)
 		{
-			if (ALibraryName != String.Empty)
-				AProcess.ServerSession.CurrentLibrary = AProcess.CatalogDeviceSession.ResolveLoadedLibrary(ALibraryName);
-			IServerScript LScript = ((IServerProcess)AProcess).PrepareScript(AScript, ALocator);
+			if (libraryName != String.Empty)
+				process.ServerSession.CurrentLibrary = process.CatalogDeviceSession.ResolveLoadedLibrary(libraryName);
+			IServerScript localScript = ((IServerProcess)process).PrepareScript(script, locator);
 			try
 			{
-				LScript.Execute(null);
+				localScript.Execute(null);
 			}
 			finally
 			{
-				((IServerProcess)AProcess).UnprepareScript(LScript);
+				((IServerProcess)process).UnprepareScript(localScript);
 			}
 		}
 
@@ -1078,44 +1078,44 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		#region Libraries
 
-		public const string CSystemLibraryName = @"System";
-		public const string CGeneralLibraryName = @"General";
+		public const string SystemLibraryName = @"System";
+		public const string GeneralLibraryName = @"General";
 
 		// SystemLibrary		
-		protected Schema.LoadedLibrary FSystemLibrary;
+		protected Schema.LoadedLibrary _systemLibrary;
 		public Schema.LoadedLibrary SystemLibrary
 		{
 			get
 			{
-				if (FSystemLibrary == null)
+				if (_systemLibrary == null)
 					throw new ServerException(ServerException.Codes.InvalidServerState, ServerState.Started.ToString());
-				return FSystemLibrary;
+				return _systemLibrary;
 			}
 		}
 
-		public void LibraryUnloaded(string ALibraryName)
+		public void LibraryUnloaded(string libraryName)
 		{
-			foreach (ServerSession LSession in Sessions)
-				if (LSession.CurrentLibrary.Name == ALibraryName)
-					LSession.CurrentLibrary = Catalog.LoadedLibraries[Engine.CGeneralLibraryName];
+			foreach (ServerSession session in Sessions)
+				if (session.CurrentLibrary.Name == libraryName)
+					session.CurrentLibrary = Catalog.LoadedLibraries[Engine.GeneralLibraryName];
 		}
 
 		/// <summary>Event that is fired whenever a library begins loading.</summary>		
 		public event LibraryNotifyEvent OnLibraryLoading;
 
-		public void DoLibraryLoading(string ALibraryName)
+		public void DoLibraryLoading(string libraryName)
 		{
 			if (OnLibraryLoading != null)
-				OnLibraryLoading(this, ALibraryName);
+				OnLibraryLoading(this, libraryName);
 		}
 
 		/// <summary>Event that is fired whenever a library is done being loaded.</summary>
 		public event LibraryNotifyEvent OnLibraryLoaded;
 
-		public void DoLibraryLoaded(string ALibraryName)
+		public void DoLibraryLoaded(string libraryName)
 		{
 			if (OnLibraryLoaded != null)
-				OnLibraryLoaded(this, ALibraryName);
+				OnLibraryLoaded(this, libraryName);
 		}
 
 		private void InitializeAvailableLibraries()
@@ -1128,18 +1128,18 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public virtual void LoadAvailableLibraries()
 		{
-			lock (FCatalog.Libraries)
+			lock (_catalog.Libraries)
 			{
-				FCatalog.UpdateTimeStamp();
+				_catalog.UpdateTimeStamp();
 				InternalLoadAvailableLibraries();
 
 				// Create the implicit system library
-				Schema.Library LSystemLibrary = new Schema.Library(CSystemLibraryName);
-				LSystemLibrary.Files.Add(new Schema.FileReference("Alphora.Dataphor.DAE.dll", true));
-				Version LVersion = AssemblyNameUtility.GetVersion(typeof(Engine).Assembly.FullName); // HACK: Have to use this instead of Assembly.GetName() to work around Silverlight security
-				LSystemLibrary.Version = new VersionNumber(LVersion.Major, LVersion.Minor, LVersion.Build, LVersion.Revision);
-				LSystemLibrary.DefaultDeviceName = CTempDeviceName;
-				FCatalog.Libraries.Add(LSystemLibrary);
+				Schema.Library systemLibrary = new Schema.Library(SystemLibraryName);
+				systemLibrary.Files.Add(new Schema.FileReference("Alphora.Dataphor.DAE.dll", true));
+				Version version = AssemblyNameUtility.GetVersion(typeof(Engine).Assembly.FullName); // HACK: Have to use this instead of Assembly.GetName() to work around Silverlight security
+				systemLibrary.Version = new VersionNumber(version.Major, version.Minor, version.Build, version.Revision);
+				systemLibrary.DefaultDeviceName = TempDeviceName;
+				_catalog.Libraries.Add(systemLibrary);
 			}
 		}
 
@@ -1153,45 +1153,39 @@ namespace Alphora.Dataphor.DAE.Server
 		#region Catalog
 
 		// Catalog
-		private Schema.Catalog FCatalog;
-		public Schema.Catalog Catalog { get { return FCatalog; } }
+		private Schema.Catalog _catalog;
+		public Schema.Catalog Catalog { get { return _catalog; } }
 
 		private void InternalCreateCatalog()
 		{
-			FCatalog = new Schema.Catalog();
-			FPlanCache = new PlanCache(CDefaultPlanCacheSize);
-			if (FStreamManager == null)
-				FStreamManager = new ServerStreamManager(this);
+			_catalog = new Schema.Catalog();
+			_planCache = new PlanCache(DefaultPlanCacheSize);
+			if (_streamManager == null)
+				_streamManager = new ServerStreamManager(this);
 		}
 
-		private bool FCatalogRegistered;
 		private void RegisterCatalog()
 		{
 			// Startup the catalog
-			if (!FCatalogRegistered)
+			if (!IsEngine && _firstRun)
 			{
-				FCatalogRegistered = true;
-
-				if (!IsEngine && FFirstRun)
+				LogMessage("Registering system catalog...");
+				using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.SystemCatalog.d4"))
 				{
-					LogMessage("Registering system catalog...");
-					using (Stream LStream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.SystemCatalog.d4"))
-					{
-						RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
-					}
-					LogMessage("System catalog registered.");
-					LogMessage("Registering debug operators...");
-					using (Stream LStream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Debug.Debug.d4"))
-					{
-						RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
-					}
-					LogMessage("Debug operators registered.");
+					RunScript(new StreamReader(stream).ReadToEnd(), SystemLibraryName);
 				}
+				LogMessage("System catalog registered.");
+				LogMessage("Registering debug operators...");
+				using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Debug.Debug.d4"))
+				{
+					RunScript(new StreamReader(stream).ReadToEnd(), SystemLibraryName);
+				}
+				LogMessage("Debug operators registered.");
 			}
 		}
 
-		protected bool FFirstRun; // Indicates whether or not this is the first time this server has run on the configured store
-		private bool FCatalogInitialized;
+		protected bool _firstRun; // Indicates whether or not this is the first time this server has run on the configured store
+
 		/*
 			Catalog Startup ->
 				Catalog startup occurs in 5 phases
@@ -1213,69 +1207,64 @@ namespace Alphora.Dataphor.DAE.Server
 		*/
 		private void InitializeCatalog()
 		{
-			if (!FCatalogInitialized)
+			LogMessage("Initializing Catalog...");
+			
+			// Create the Catalog device
+			// Note that this must be the first object created to avoid the ID being different on subsequent loads
+			Schema.Object.SetNextObjectID(0);
+			_catalogDevice = CreateCatalogDevice();
+
+			// Create the system user
+			_systemUser = new Schema.User(SystemUserID, "System User", String.Empty);
+
+			// Create the system library
+			_systemLibrary = new Schema.LoadedLibrary(SystemLibraryName);
+			_systemLibrary.Owner = _systemUser;
+			LoadSystemAssemblies();
+			_catalog.LoadedLibraries.Add(_systemLibrary);
+
+			// Load available libraries
+			LoadAvailableLibraries();
+
+			// Connect the System Session
+			if (_systemSession != null)
 			{
-				LogMessage("Initializing Catalog...");
-				
-				// Create the Catalog device
-				// Note that this must be the first object created to avoid the ID being different on subsequent loads
-				Schema.Object.SetNextObjectID(0);
-				FCatalogDevice = CreateCatalogDevice();
-
-				// Create the system user
-				FSystemUser = new Schema.User(CSystemUserID, "System User", String.Empty);
-
-				// Create the system library
-				FSystemLibrary = new Schema.LoadedLibrary(CSystemLibraryName);
-				FSystemLibrary.Owner = FSystemUser;
-				LoadSystemAssemblies();
-				FCatalog.LoadedLibraries.Add(FSystemLibrary);
-
-				// Load available libraries
-				LoadAvailableLibraries();
-
-				// Connect the System Session
-				if (FSystemSession != null)
-				{
-					FSystemSession.Dispose();
-					FSystemProcess = null;
-				}
-				FSystemSession = (ServerSession)InternalConnect(CSystemSessionID, new SessionInfo(FSystemUser.ID, FSystemUser.Password, CSystemLibraryName));
-				FSystemSession.SessionInfo.UsePlanCache = false;
-				FSystemProcess = (ServerProcess)((IServerSession)FSystemSession).StartProcess(new ProcessInfo(FSystemSession.SessionInfo));
-				FSystemProcess.SuppressWarnings = true;
-
-				// Register the Catalog device
-				FCatalogDevice.Owner = FSystemUser;
-				FCatalogDevice.Library = FSystemLibrary;
-				FCatalogDevice.ClassDefinition = new ClassDefinition("System.CatalogDevice");
-				FCatalogDevice.Start(FSystemProcess);
-				FCatalogDevice.Register(FSystemProcess);
-
-				FFirstRun = DetermineFirstRun();
-
-				// If this is a repository or there are no objects in the catalog, register, else resolve
-				InternalInitializeCatalog();
-
-				// Bind the native type references to the system data types
-				BindNativeTypes();
-				
-				LogMessage("Catalog Initialized.");
-				
-				FCatalogInitialized = true;
+				_systemSession.Dispose();
+				_systemProcess = null;
 			}
+			_systemSession = (ServerSession)InternalConnect(SystemSessionID, new SessionInfo(_systemUser.ID, _systemUser.Password, SystemLibraryName));
+			_systemSession.SessionInfo.UsePlanCache = false;
+			_systemProcess = (ServerProcess)((IServerSession)_systemSession).StartProcess(new ProcessInfo(_systemSession.SessionInfo));
+			_systemProcess.SuppressWarnings = true;
+
+			// Register the Catalog device
+			_catalogDevice.Owner = _systemUser;
+			_catalogDevice.Library = _systemLibrary;
+			_catalogDevice.ClassDefinition = new ClassDefinition("System.CatalogDevice");
+			_catalogDevice.Start(_systemProcess);
+			_catalogDevice.Register(_systemProcess);
+
+			_firstRun = DetermineFirstRun();
+
+			// If this is a repository or there are no objects in the catalog, register, else resolve
+			InternalInitializeCatalog();
+
+			// Bind the native type references to the system data types
+			BindNativeTypes();
+			
+			LogMessage("Catalog Initialized.");
 		}
 		
 		protected virtual CatalogDevice CreateCatalogDevice()
 		{
-			return new CatalogDevice(Schema.Object.GetNextObjectID(), CCatalogDeviceName);
+			return new CatalogDevice(Schema.Object.GetNextObjectID(), CatalogDeviceName);
 		}
 		
 		protected virtual void LoadSystemAssemblies()
 		{
-			Assembly LDAEAssembly = typeof(Engine).Assembly;
-			FSystemLibrary.Assemblies.Add(LDAEAssembly);
-			FCatalog.ClassLoader.RegisterAssembly(FSystemLibrary, LDAEAssembly);
+			Assembly dAEAssembly = typeof(Engine).Assembly;
+			_systemLibrary.Assemblies.Add(dAEAssembly);
+			_catalog.ClassLoader.RegisterAssembly(_systemLibrary, dAEAssembly);
 		}
 
 		protected virtual void InternalInitializeCatalog()
@@ -1302,74 +1291,72 @@ namespace Alphora.Dataphor.DAE.Server
 
 		private void RegisterSystemDataTypes()
 		{
-			using (Stream LStream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.DataTypes.d4"))
+			using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.DataTypes.d4"))
 			{
-				RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
+				RunScript(new StreamReader(stream).ReadToEnd(), SystemLibraryName);
 			}
 		}
 
 		private void BindNativeTypes()
 		{
-			FCatalog.DataTypes.SystemBoolean.NativeType = typeof(bool);
-			FCatalog.DataTypes.SystemByte.NativeType = typeof(byte);
-			FCatalog.DataTypes.SystemShort.NativeType = typeof(short);
-			FCatalog.DataTypes.SystemInteger.NativeType = typeof(int);
-			FCatalog.DataTypes.SystemLong.NativeType = typeof(long);
-			FCatalog.DataTypes.SystemDecimal.NativeType = typeof(decimal);
-			FCatalog.DataTypes.SystemMoney.NativeType = typeof(decimal);
-			FCatalog.DataTypes.SystemTimeSpan.NativeType = typeof(TimeSpan);
-			FCatalog.DataTypes.SystemDateTime.NativeType = typeof(DateTime);
-			FCatalog.DataTypes.SystemDate.NativeType = typeof(DateTime);
-			FCatalog.DataTypes.SystemTime.NativeType = typeof(DateTime);
-			FCatalog.DataTypes.SystemGuid.NativeType = typeof(Guid);
-			FCatalog.DataTypes.SystemString.NativeType = typeof(string);
-			FCatalog.DataTypes.SystemName.NativeType = typeof(string);
+			_catalog.DataTypes.SystemBoolean.NativeType = typeof(bool);
+			_catalog.DataTypes.SystemByte.NativeType = typeof(byte);
+			_catalog.DataTypes.SystemShort.NativeType = typeof(short);
+			_catalog.DataTypes.SystemInteger.NativeType = typeof(int);
+			_catalog.DataTypes.SystemLong.NativeType = typeof(long);
+			_catalog.DataTypes.SystemDecimal.NativeType = typeof(decimal);
+			_catalog.DataTypes.SystemMoney.NativeType = typeof(decimal);
+			_catalog.DataTypes.SystemTimeSpan.NativeType = typeof(TimeSpan);
+			_catalog.DataTypes.SystemDateTime.NativeType = typeof(DateTime);
+			_catalog.DataTypes.SystemDate.NativeType = typeof(DateTime);
+			_catalog.DataTypes.SystemTime.NativeType = typeof(DateTime);
+			_catalog.DataTypes.SystemGuid.NativeType = typeof(Guid);
+			_catalog.DataTypes.SystemString.NativeType = typeof(string);
+			_catalog.DataTypes.SystemName.NativeType = typeof(string);
 			#if USEISTRING
 			FCatalog.DataTypes.SystemIString.NativeType = typeof(string);
 			#endif
-			FCatalog.DataTypes.SystemError.NativeType = typeof(Exception);
-			FCatalog.DataTypes.SystemBinary.NativeType = typeof(byte[]);
-			FCatalog.DataTypes.SystemGraphic.NativeType = typeof(byte[]);
+			_catalog.DataTypes.SystemError.NativeType = typeof(Exception);
+			_catalog.DataTypes.SystemBinary.NativeType = typeof(byte[]);
+			_catalog.DataTypes.SystemGraphic.NativeType = typeof(byte[]);
 		}
 		
 		public virtual void ClearCatalog()
 		{
 			InternalCreateCatalog();
-			FCatalogInitialized = false;
 			InitializeCatalog();
-			FCatalogRegistered = false;
 			RegisterCatalog();
 			LoadServerState();
 		}
 
 		// CacheTimeStamp
-		public long CacheTimeStamp { get { return FCatalog.CacheTimeStamp; } }
+		public long CacheTimeStamp { get { return _catalog.CacheTimeStamp; } }
 
 		// PlanCacheTimeStamp
-		public long PlanCacheTimeStamp { get { return FCatalog.PlanCacheTimeStamp; } }
+		public long PlanCacheTimeStamp { get { return _catalog.PlanCacheTimeStamp; } }
 
 		// DerivationTimeStamp
-		public long DerivationTimeStamp { get { return FCatalog.DerivationTimeStamp; } }
+		public long DerivationTimeStamp { get { return _catalog.DerivationTimeStamp; } }
 
 		/// <summary> Emits the creation script for the catalog and returns it as a string. </summary>
-		public string ScriptCatalog(CatalogDeviceSession ASession)
+		public string ScriptCatalog(CatalogDeviceSession session)
 		{
-			return new D4TextEmitter().Emit(FCatalog.EmitStatement(ASession, EmitMode.ForCopy, false));
+			return new D4TextEmitter().Emit(_catalog.EmitStatement(session, EmitMode.ForCopy, false));
 		}
 
-		public string ScriptLibrary(CatalogDeviceSession ASession, string ALibraryName)
+		public string ScriptLibrary(CatalogDeviceSession session, string libraryName)
 		{
-			return new D4TextEmitter().Emit(FCatalog.EmitStatement(ASession, EmitMode.ForCopy, ALibraryName, false));
+			return new D4TextEmitter().Emit(_catalog.EmitStatement(session, EmitMode.ForCopy, libraryName, false));
 		}
 
-		public string ScriptDropCatalog(CatalogDeviceSession ASession)
+		public string ScriptDropCatalog(CatalogDeviceSession session)
 		{
-			return new D4TextEmitter().Emit(FCatalog.EmitDropStatement(ASession));
+			return new D4TextEmitter().Emit(_catalog.EmitDropStatement(session));
 		}
 
-		public string ScriptDropLibrary(CatalogDeviceSession ASession, string ALibraryName)
+		public string ScriptDropLibrary(CatalogDeviceSession session, string libraryName)
 		{
-			return new D4TextEmitter().Emit(FCatalog.EmitDropStatement(ASession, new string[] { }, ALibraryName, false, false, true, true));
+			return new D4TextEmitter().Emit(_catalog.EmitDropStatement(session, new string[] { }, libraryName, false, false, true, true));
 		}
 
 		#endregion

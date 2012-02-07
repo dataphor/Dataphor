@@ -20,7 +20,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		// TODO: Tooltips on exposed
 
-		private void ControlClicked(object ASender, EventArgs AArgs)
+		private void ControlClicked(object sender, EventArgs args)
 		{
 			try
 			{
@@ -35,56 +35,56 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// Control
 
-		private IWindowsBarButton FControl;
+		private IWindowsBarButton _control;
 		protected IWindowsBarButton Control
 		{
-			get	{ return FControl; }
+			get	{ return _control; }
 		}
 
 		// ActionNode
 
 		protected override void InternalUpdateVisible()
 		{
-			FControl.Visible = GetVisible();
+			_control.Visible = GetVisible();
 		}
 
 		protected override void InternalUpdateEnabled()
 		{
-			FControl.Enabled = GetEnabled();
+			_control.Enabled = GetEnabled();
 		}
 
-		protected override void InternalSetImage(System.Drawing.Image AImage)
+		protected override void InternalSetImage(System.Drawing.Image image)
 		{
-			FControl.Image = AImage;
+			_control.Image = image;
 		}
 
-		private string FAllocatedText;
+		private string _allocatedText;
 
 		protected void DeallocateAccelerator()
 		{
-			if (FAllocatedText != null)
+			if (_allocatedText != null)
 			{
-				((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Deallocate(FAllocatedText);
-				FAllocatedText = null;
+				((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Deallocate(_allocatedText);
+				_allocatedText = null;
 			}
 		}
 
 		protected override void InternalUpdateText()
 		{
 			DeallocateAccelerator();
-			FAllocatedText = ((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Allocate(GetText(), true);
-			FControl.Text = FAllocatedText;
+			_allocatedText = ((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Allocate(GetText(), true);
+			_control.Text = _allocatedText;
 		}
 
 		// Node
 
 		protected override void Activate()
 		{
-			IWindowsExposedHost LHost = (IWindowsExposedHost)FindParent(typeof(IWindowsExposedHost));
-			if (LHost != null)
+			IWindowsExposedHost host = (IWindowsExposedHost)FindParent(typeof(IWindowsExposedHost));
+			if (host != null)
 			{
-				FControl = LHost.ExposedContainer.CreateMenuItem(new EventHandler(ControlClicked));
-				LHost.ExposedContainer.AddBarItem(FControl, null);
+				_control = host.ExposedContainer.CreateMenuItem(new EventHandler(ControlClicked));
+				host.ExposedContainer.AddBarItem(_control, null);
 			}
 			try
 			{
@@ -92,8 +92,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			catch
 			{
-				FControl.Dispose();
-				FControl = null;
+				_control.Dispose();
+				_control = null;
 				throw;
 			}
 		}
@@ -112,10 +112,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				}
 				finally
 				{
-					if (FControl != null)
+					if (_control != null)
 					{
-						FControl.Dispose();
-						FControl = null;
+						_control.Dispose();
+						_control = null;
 					}
 				}
 			}

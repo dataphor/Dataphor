@@ -14,23 +14,23 @@ namespace Alphora.Dataphor.DAE.Contracts
 	[DataContract]
 	public class ScriptDescriptor
 	{
-		public ScriptDescriptor(int AHandle) : base()
+		public ScriptDescriptor(int handle) : base()
 		{
-			FHandle = AHandle;
-			FBatches = new List<BatchDescriptor>();
-			FMessages = new List<DataphorFault>();
+			_handle = handle;
+			_batches = new List<BatchDescriptor>();
+			_messages = new List<DataphorFault>();
 		}
 		
 		[DataMember]
-		internal int FHandle;
-		public int Handle { get { return FHandle; } }
+		internal int _handle;
+		public int Handle { get { return _handle; } }
 		
 		[DataMember]
-		internal List<BatchDescriptor> FBatches;
-		public List<BatchDescriptor> Batches { get { return FBatches; } }
+		internal List<BatchDescriptor> _batches;
+		public List<BatchDescriptor> Batches { get { return _batches; } }
 		
 		[DataMember]
-		internal List<DataphorFault> FMessages;
-		public List<DataphorFault> Messages { get { return FMessages; } }
+		internal List<DataphorFault> _messages;
+		public List<DataphorFault> Messages { get { return _messages; } }
 	}
 }

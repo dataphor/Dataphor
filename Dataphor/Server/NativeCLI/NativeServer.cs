@@ -15,235 +15,235 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	/// </summary>
 	public class NativeServer
 	{
-		public NativeServer(IServer AServer)
+		public NativeServer(IServer server)
 		{
-			FServer = AServer;
+			_server = server;
 		}
 		
-		private IServer FServer;
-		public IServer Server { get { return FServer; } }
+		private IServer _server;
+		public IServer Server { get { return _server; } }
 		
-		private NativeSession StartNativeSession(NativeSessionInfo ASessionInfo)
+		private NativeSession StartNativeSession(NativeSessionInfo sessionInfo)
 		{
-			NativeSession LNativeSession = new NativeSession(ASessionInfo);
-			LNativeSession.Session = FServer.Connect(LNativeSession.SessionInfo);
+			NativeSession nativeSession = new NativeSession(sessionInfo);
+			nativeSession.Session = _server.Connect(nativeSession.SessionInfo);
 			try
 			{
-				LNativeSession.Process = LNativeSession.Session.StartProcess(new ProcessInfo(LNativeSession.SessionInfo));
-				return LNativeSession;
+				nativeSession.Process = nativeSession.Session.StartProcess(new ProcessInfo(nativeSession.SessionInfo));
+				return nativeSession;
 			}
 			catch
 			{
-				StopNativeSession(LNativeSession);
+				StopNativeSession(nativeSession);
 				throw;
 			}
 		}
 		
-		private void StopNativeSession(NativeSession ASession)
+		private void StopNativeSession(NativeSession session)
 		{
-			if (ASession.Process != null)
+			if (session.Process != null)
 			{
-				ASession.Session.StopProcess(ASession.Process);
-				ASession.Process = null;
+				session.Session.StopProcess(session.Process);
+				session.Process = null;
 			}
 			
-			if (ASession.Session != null)
+			if (session.Session != null)
 			{
-				FServer.Disconnect(ASession.Session);
-				ASession.Session = null;
+				_server.Disconnect(session.Session);
+				session.Session = null;
 			}
 		}
 		
-		private Dictionary<Guid, NativeSession> FNativeSessions = new Dictionary<Guid, NativeSession>();
+		private Dictionary<Guid, NativeSession> _nativeSessions = new Dictionary<Guid, NativeSession>();
 		
-		private NativeSessionHandle AddNativeSession(NativeSession ANativeSession)
+		private NativeSessionHandle AddNativeSession(NativeSession nativeSession)
 		{
-			lock (FNativeSessions)
+			lock (_nativeSessions)
 			{
-				FNativeSessions.Add(ANativeSession.ID, ANativeSession);
+				_nativeSessions.Add(nativeSession.ID, nativeSession);
 			}
 			
-			return new NativeSessionHandle(ANativeSession.ID);
+			return new NativeSessionHandle(nativeSession.ID);
 		}
 		
-		private NativeSession GetNativeSession(NativeSessionHandle ASessionHandle)
+		private NativeSession GetNativeSession(NativeSessionHandle sessionHandle)
 		{
-			NativeSession LNativeSession;
-			if (FNativeSessions.TryGetValue(ASessionHandle.ID, out LNativeSession))
-				return LNativeSession;
+			NativeSession nativeSession;
+			if (_nativeSessions.TryGetValue(sessionHandle.ID, out nativeSession))
+				return nativeSession;
 			
-			throw new ArgumentException(String.Format("Invalid session handle: \"{0}\".", ASessionHandle.ID.ToString()));
+			throw new ArgumentException(String.Format("Invalid session handle: \"{0}\".", sessionHandle.ID.ToString()));
 		}
 		
-		private NativeSession RemoveNativeSession(NativeSessionHandle ASessionHandle)
+		private NativeSession RemoveNativeSession(NativeSessionHandle sessionHandle)
 		{
-			lock (FNativeSessions)
+			lock (_nativeSessions)
 			{
-				NativeSession LNativeSession;
-				if (FNativeSessions.TryGetValue(ASessionHandle.ID, out LNativeSession))
+				NativeSession nativeSession;
+				if (_nativeSessions.TryGetValue(sessionHandle.ID, out nativeSession))
 				{
-					FNativeSessions.Remove(ASessionHandle.ID);
-					return LNativeSession;
+					_nativeSessions.Remove(sessionHandle.ID);
+					return nativeSession;
 				}
 			}
 
-			throw new ArgumentException(String.Format("Invalid session handle: \"{0}\".", ASessionHandle.ID.ToString()));
+			throw new ArgumentException(String.Format("Invalid session handle: \"{0}\".", sessionHandle.ID.ToString()));
 		}
 		
-		public NativeSessionHandle StartSession(NativeSessionInfo ASessionInfo)
+		public NativeSessionHandle StartSession(NativeSessionInfo sessionInfo)
 		{
 			try
 			{
-				NativeSession LNativeSession = StartNativeSession(ASessionInfo);
+				NativeSession nativeSession = StartNativeSession(sessionInfo);
 				try
 				{
-					return AddNativeSession(LNativeSession);
+					return AddNativeSession(nativeSession);
 				}
 				catch
 				{
-					StopNativeSession(LNativeSession);
+					StopNativeSession(nativeSession);
 					throw;
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw NativeCLIUtility.WrapException(exception);
 			}
 		}
 
-		public void StopSession(NativeSessionHandle ASessionHandle)
+		public void StopSession(NativeSessionHandle sessionHandle)
 		{
 			try
 			{
-				StopNativeSession(RemoveNativeSession(ASessionHandle));
+				StopNativeSession(RemoveNativeSession(sessionHandle));
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw NativeCLIUtility.WrapException(exception);
 			}
 		}
 
-		public void BeginTransaction(NativeSessionHandle ASessionHandle, NativeIsolationLevel AIsolationLevel)
+		public void BeginTransaction(NativeSessionHandle sessionHandle, NativeIsolationLevel isolationLevel)
 		{
 			try
 			{
-				GetNativeSession(ASessionHandle).Process.BeginTransaction(NativeCLIUtility.NativeIsolationLevelToIsolationLevel(AIsolationLevel));
+				GetNativeSession(sessionHandle).Process.BeginTransaction(NativeCLIUtility.NativeIsolationLevelToIsolationLevel(isolationLevel));
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw NativeCLIUtility.WrapException(exception);
 			}
 		}
 
-		public void PrepareTransaction(NativeSessionHandle ASessionHandle)
+		public void PrepareTransaction(NativeSessionHandle sessionHandle)
 		{
 			try
 			{
-				GetNativeSession(ASessionHandle).Process.PrepareTransaction();
+				GetNativeSession(sessionHandle).Process.PrepareTransaction();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw NativeCLIUtility.WrapException(exception);
 			}
 		}
 
-		public void CommitTransaction(NativeSessionHandle ASessionHandle)
+		public void CommitTransaction(NativeSessionHandle sessionHandle)
 		{
 			try
 			{
-				GetNativeSession(ASessionHandle).Process.CommitTransaction();
+				GetNativeSession(sessionHandle).Process.CommitTransaction();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw NativeCLIUtility.WrapException(exception);
 			}
 		}
 
-		public void RollbackTransaction(NativeSessionHandle ASessionHandle)
+		public void RollbackTransaction(NativeSessionHandle sessionHandle)
 		{
 			try
 			{
-				GetNativeSession(ASessionHandle).Process.RollbackTransaction();
+				GetNativeSession(sessionHandle).Process.RollbackTransaction();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw NativeCLIUtility.WrapException(exception);
 			}
 		}
 
-		public int GetTransactionCount(NativeSessionHandle ASessionHandle)
+		public int GetTransactionCount(NativeSessionHandle sessionHandle)
 		{
 			try
 			{
-				return GetNativeSession(ASessionHandle).Process.TransactionCount;
+				return GetNativeSession(sessionHandle).Process.TransactionCount;
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw NativeCLIUtility.WrapException(exception);
 			}
 		}
 
-		public NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
+		public NativeResult Execute(NativeSessionInfo sessionInfo, string statement, NativeParam[] paramsValue, NativeExecutionOptions options)
 		{
 			try
 			{
-				NativeSession LNativeSession = StartNativeSession(ASessionInfo);
+				NativeSession nativeSession = StartNativeSession(sessionInfo);
 				try
 				{
-					return LNativeSession.Execute(AStatement, AParams, AOptions);
+					return nativeSession.Execute(statement, paramsValue, options);
 				}
 				finally
 				{
-					StopNativeSession(LNativeSession);
+					StopNativeSession(nativeSession);
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw NativeCLIUtility.WrapException(exception);
 			}
 		}
 
-		public NativeResult[] Execute(NativeSessionInfo ASessionInfo, NativeExecuteOperation[] AOperations)
+		public NativeResult[] Execute(NativeSessionInfo sessionInfo, NativeExecuteOperation[] operations)
 		{
 			try
 			{
-				NativeSession LNativeSession = StartNativeSession(ASessionInfo);
+				NativeSession nativeSession = StartNativeSession(sessionInfo);
 				try
 				{
-					return LNativeSession.Execute(AOperations);
+					return nativeSession.Execute(operations);
 				}
 				finally
 				{
-					StopNativeSession(LNativeSession);
+					StopNativeSession(nativeSession);
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw NativeCLIUtility.WrapException(exception);
 			}
 		}
 
-		public NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
+		public NativeResult Execute(NativeSessionHandle sessionHandle, string statement, NativeParam[] paramsValue, NativeExecutionOptions options)
 		{
 			try
 			{
-				return GetNativeSession(ASessionHandle).Execute(AStatement, AParams, AOptions);
+				return GetNativeSession(sessionHandle).Execute(statement, paramsValue, options);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw NativeCLIUtility.WrapException(exception);
 			}
 		}
 
-		public NativeResult[] Execute(NativeSessionHandle ASessionHandle, NativeExecuteOperation[] AOperations)
+		public NativeResult[] Execute(NativeSessionHandle sessionHandle, NativeExecuteOperation[] operations)
 		{
 			try
 			{
-				return GetNativeSession(ASessionHandle).Execute(AOperations);
+				return GetNativeSession(sessionHandle).Execute(operations);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw NativeCLIUtility.WrapException(exception);
 			}
 		}
 	}
