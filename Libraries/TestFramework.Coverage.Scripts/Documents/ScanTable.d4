@@ -3,6 +3,8 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+SafeDrop('TestScan');
+
 create table TestScan in Temp
 {
 	X : Integer,
@@ -23,370 +25,372 @@ insert
 // Test Single Conditions
 
 // Test key 2
-TestRestriction("TestScan where Y = 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 2", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y < 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y <= 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
+select table of { X : Integer, Y : Integer } { };
+
+TestRestriction("TestScan where Y = 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 2", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y < 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 2", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test key 3
-TestRestriction("TestScan where Y = 3", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y < 3", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y <= 3", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y = 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
 
 // Test key 4
-TestRestriction("TestScan where Y = 4", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 4", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y < 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y <= 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y = 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 4", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
 
 // Test key 5
-TestRestriction("TestScan where Y = 5", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 5", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y < 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 5", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y <= 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y = 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
 
 // Test key 6
-TestRestriction("TestScan where Y = 6", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 6", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y < 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 6", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y <= 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y = 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 6", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
 
 // Test key 7
-TestRestriction("TestScan where Y = 7", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 7", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y < 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 7", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y <= 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y = 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
 
 // Test key 8
-TestRestriction("TestScan where Y = 8", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 8", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y < 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 8", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y <= 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y = 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Double Conditions
 
 // Test Key Pair 1, 1
-TestRestriction("TestScan where Y between 1 and 1", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y <= 1", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y <= 1", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y < 1", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y < 1", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 1 and 1", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 1", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 1", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 1", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 1", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 1, 2
-TestRestriction("TestScan where Y between 1 and 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y <= 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y <= 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y < 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y < 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 1 and 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 1, 3
-TestRestriction("TestScan where Y between 1 and 3", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y <= 3", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y <= 3", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y < 3", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y < 3", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 1 and 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 1, 4
-TestRestriction("TestScan where Y between 1 and 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y <= 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y <= 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y < 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y < 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 1 and 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
 
 // Test Key Pair 1, 5
-TestRestriction("TestScan where Y between 1 and 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y <= 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y <= 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y < 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y < 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 1 and 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
 
 // Test Key Pair 1, 6
-TestRestriction("TestScan where Y between 1 and 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y <= 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y <= 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y < 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y < 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 1 and 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
 
 // Test Key Pair 1, 7
-TestRestriction("TestScan where Y between 1 and 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y < 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y < 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 1 and 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
 
 // Test Key Pair 1, 8
-TestRestriction("TestScan where Y between 1 and 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y < 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y < 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 1 and 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 1, 9
-TestRestriction("TestScan where Y between 1 and 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 1 and Y < 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 1 and Y < 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 1 and 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 2, 9
-TestRestriction("TestScan where Y between 2 and 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y < 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y < 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 2 and 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 3, 9
-TestRestriction("TestScan where Y between 3 and 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y < 9", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y < 9", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 3 and 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 4, 9
-TestRestriction("TestScan where Y between 4 and 9", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y < 9", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y < 9", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 4 and 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 5, 9
-TestRestriction("TestScan where Y between 5 and 9", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 5 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 5 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 5 and Y < 9", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 5 and Y < 9", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 5 and 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y < 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y < 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 6, 9
-TestRestriction("TestScan where Y between 6 and 9", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 6 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 6 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 6 and Y < 9", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 6 and Y < 9", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 6 and 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y < 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y < 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 7, 9
-TestRestriction("TestScan where Y between 7 and 9", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 7 and Y <= 9", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 7 and Y <= 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 7 and Y < 9", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 7 and Y < 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 7 and 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y <= 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y < 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y < 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 8, 9
-TestRestriction("TestScan where Y between 8 and 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 8 and Y <= 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 8 and Y <= 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 8 and Y < 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 8 and Y < 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 8 and 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 8 and Y <= 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 8 and Y <= 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 8 and Y < 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 8 and Y < 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 9, 9
-TestRestriction("TestScan where Y between 9 and 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 9 and Y <= 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 9 and Y <= 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 9 and Y < 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 9 and Y < 9", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 9 and 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 9 and Y <= 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 9 and Y <= 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 9 and Y < 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 9 and Y < 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 2, 2
-TestRestriction("TestScan where Y between 2 and 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y <= 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y <= 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y < 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y < 2", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 2 and 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 2, 3
-TestRestriction("TestScan where Y between 2 and 3", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y <= 3", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y <= 3", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y < 3", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y < 3", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 2 and 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 2, 4
-TestRestriction("TestScan where Y between 2 and 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y <= 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y <= 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y < 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y < 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 2 and 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
 
 // Test Key Pair 2, 5
-TestRestriction("TestScan where Y between 2 and 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y <= 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y <= 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y < 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y < 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 2 and 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
 
 // Test Key Pair 2, 6
-TestRestriction("TestScan where Y between 2 and 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y <= 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y <= 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y < 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y < 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 2 and 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
 
 // Test Key Pair 2, 7
-TestRestriction("TestScan where Y between 2 and 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y < 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y < 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 2 and 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
 
 // Test Key Pair 2, 8
-TestRestriction("TestScan where Y between 2 and 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 2 and Y < 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 2 and Y < 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 2 and 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 3, 8
-TestRestriction("TestScan where Y between 3 and 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y < 8", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y < 8", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 3 and 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 4, 8
-TestRestriction("TestScan where Y between 4 and 8", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y < 8", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y < 8", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 4 and 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 5, 8
-TestRestriction("TestScan where Y between 5 and 8", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 5 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 5 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 5 and Y < 8", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 5 and Y < 8", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 5 and 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y < 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y < 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 6, 8
-TestRestriction("TestScan where Y between 6 and 8", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 6 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 6 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 6 and Y < 8", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 6 and Y < 8", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 6 and 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y < 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y < 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
 
 // Test Key Pair 7, 8
-TestRestriction("TestScan where Y between 7 and 8", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 7 and Y <= 8", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 7 and Y <= 8", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 7 and Y < 8", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 7 and Y < 8", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 7 and 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y <= 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y < 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y < 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 8, 8
-TestRestriction("TestScan where Y between 8 and 8", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 8 and Y <= 8", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 8 and Y <= 8", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 8 and Y < 8", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 8 and Y < 8", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 8 and 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 8 and Y <= 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 8 and Y <= 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 8 and Y < 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 8 and Y < 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 3, 3
-TestRestriction("TestScan where Y between 3 and 3", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y <= 3", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y <= 3", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y < 3", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y < 3", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 3 and 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 3, 4
-TestRestriction("TestScan where Y between 3 and 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y <= 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y <= 4", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y < 4", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y < 4", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 3 and 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 3, 5
-TestRestriction("TestScan where Y between 3 and 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y <= 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y <= 5", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y < 5", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y < 5", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 3 and 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 3, 6
-TestRestriction("TestScan where Y between 3 and 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y <= 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y <= 6", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y < 6", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y < 6", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 3 and 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
 
 // Test Key Pair 3, 7
-TestRestriction("TestScan where Y between 3 and 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 3 and Y < 7", "table { { X : Integer, Y : Integer }, row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 3 and Y < 7", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 3 and 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
 
 // Test Key Pair 4, 7
-TestRestriction("TestScan where Y between 4 and 7", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y < 7", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y < 7", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 4 and 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
 
 // Test Key Pair 5, 7
-TestRestriction("TestScan where Y between 5 and 7", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 5 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 5 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 5 and Y < 7", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 5 and Y < 7", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 5 and 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y < 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y < 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 6, 7
-TestRestriction("TestScan where Y between 6 and 7", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 6 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 6 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 6 and Y < 7", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 6 and Y < 7", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 6 and 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y < 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y < 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 7, 7
-TestRestriction("TestScan where Y between 7 and 7", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 7 and Y <= 7", "table { { X : Integer, Y : Integer }, row { 3 X, 7 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 7 and Y <= 7", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 7 and Y < 7", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 7 and Y < 7", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 7 and 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y <= 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y < 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y < 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 4, 4
-TestRestriction("TestScan where Y between 4 and 4", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y <= 4", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y <= 4", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y < 4", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y < 4", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 4 and 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 4, 5
-TestRestriction("TestScan where Y between 4 and 5", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y <= 5", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y <= 5", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y < 5", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y < 5", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 4 and 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 4, 6
-TestRestriction("TestScan where Y between 4 and 6", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y <= 6", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y <= 6", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 4 and Y < 6", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 4 and Y < 6", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y between 4 and 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
 
 // Test Key Pair 5, 6
-TestRestriction("TestScan where Y between 5 and 6", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 5 and Y <= 6", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 5 and Y <= 6", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 5 and Y < 6", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 5 and Y < 6", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 5 and 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y <= 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y < 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y < 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 6, 6
-TestRestriction("TestScan where Y between 6 and 6", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 6 and Y <= 6", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 6 and Y <= 6", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 6 and Y < 6", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 6 and Y < 6", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 6 and 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y <= 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y <= 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y < 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y < 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 // Test Key Pair 5, 5
-TestRestriction("TestScan where Y between 5 and 5", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y >= 5 and Y <= 5", "table { { X : Integer, Y : Integer }, row { 2 X, 5 Y } }", "ScanTable");
-TestRestriction("TestScan where Y > 5 and Y <= 5", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y >= 5 and Y < 5", "table { { X : Integer, Y : Integer } }", "ScanTable");
-TestRestriction("TestScan where Y > 5 and Y < 5", "table { { X : Integer, Y : Integer } }", "ScanTable");
+TestRestriction("TestScan where Y between 5 and 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y <= 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y < 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y < 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
 
 drop table TestScan;
 

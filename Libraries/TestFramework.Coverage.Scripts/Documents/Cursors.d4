@@ -277,6 +277,9 @@ drop table UpRepro;
 		NonUniqueSearchedRightJoinTable -> Navigable, BackwardsNavigable if left and right supported
 */
 
+SafeDrop('A');
+SafeDrop('B');
+
 // Tables
 create table A
 {
@@ -985,6 +988,10 @@ TestBackwardsNavigable('A minus (B where X <> 1 or Y <> 1)', 'table { row { 1 X,
 
 drop table A;
 drop table B;
+
+SafeDrop('R');
+SafeDrop('S');
+SafeDrop('T');
 
 // Join
 create table R { ID : String, Name : String, key { ID } };

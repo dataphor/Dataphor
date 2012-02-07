@@ -4,6 +4,9 @@
 
 // TODO: More node coverage, specifically bound cases on seek and scan tables.
 
+SafeDrop('A');
+SafeDrop('B');
+
 // Tables
 create table A
 {
@@ -103,6 +106,10 @@ drop table B;
 drop table A;
 
 // Join
+
+SafeDrop('R');
+SafeDrop('S');
+SafeDrop('T');
 
 create table R { ID : String, Name : String, key { ID } };
 create table S { ID : String, R_ID : String, Name : String, key { ID } };
