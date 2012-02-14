@@ -830,7 +830,7 @@ namespace Alphora.Dataphor.DAE.Schema
         
         // Translate
         public virtual Statement Translate(DevicePlan devicePlan, PlanNode planNode) { return null; }
-        
+
         // Reconcile
         public virtual ErrorList Reconcile(ServerProcess process, Catalog serverCatalog, Catalog deviceCatalog) { return new ErrorList(); }
         
@@ -1566,18 +1566,20 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         
         // Execute
-        protected virtual object InternalExecute(Program program, DevicePlan devicePlan)
+        protected virtual object InternalExecute(Program program, PlanNode planNode)
         {
-			throw new DAE.Device.DeviceException(DAE.Device.DeviceException.Codes.InvalidExecuteRequest, Device.Name, devicePlan.Node.GetType().Name);
+			throw new DAE.Device.DeviceException(DAE.Device.DeviceException.Codes.InvalidExecuteRequest, Device.Name, planNode.GetType().Name);
         }
         
-        public object Execute(Program program, DevicePlan devicePlan)
+        public object Execute(Program program, PlanNode planNode)
         {
-			if (devicePlan.Node is DropTableNode)
-				RemoveTransactionReferences(((DropTableNode)devicePlan.Node).Table);
+			var dropTableNode = planNode as DropTableNode;
+			if (dropTableNode != null)
+				RemoveTransactionReferences(dropTableNode.Table);
+
 			try
 			{
-				return InternalExecute(program, devicePlan);
+				return InternalExecute(program, planNode);
 			}
 			catch (Exception exception)
 			{

@@ -506,7 +506,34 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		protected override DevicePlanNode InternalPrepare(DevicePlan plan, PlanNode planNode)
 		{
 			SQLDevicePlan devicePlan = (SQLDevicePlan)plan;
-			devicePlan.DevicePlanNode = new SQLDevicePlanNode(planNode);
+
+			if (planNode is TableNode)
+			{
+				devicePlan.DevicePlanNode = new TableSQLDevicePlanNode(planNode);
+			}
+			else if (planNode.DataType is Schema.IRowType)
+			{
+				var rowDeviceNode = new RowSQLDevicePlanNode(planNode);
+
+				var rowType = (Schema.IRowType)planNode.DataType;
+				for (var index = 0; index < rowType.Columns.Count; index++)
+				{
+					rowDeviceNode.MappedTypes.Add((SQLScalarType)ResolveDeviceScalarType(devicePlan.Plan, (ScalarType)rowType.Columns[index].DataType));
+				}
+
+				devicePlan.DevicePlanNode = rowDeviceNode;
+			}
+			else if (planNode.DataType is Schema.IScalarType)
+			{
+				var scalarDeviceNode = new ScalarSQLDevicePlanNode(planNode);
+				scalarDeviceNode.MappedType = (SQLScalarType)ResolveDeviceScalarType(devicePlan.Plan, (ScalarType)planNode.DataType);
+				devicePlan.DevicePlanNode = scalarDeviceNode;
+			}
+			else
+			{
+				devicePlan.DevicePlanNode = new SQLDevicePlanNode(planNode);
+			}
+
 			if (!((planNode is TableNode) || (planNode.DataType is Schema.IRowType)))
 			{
 				devicePlan.PushScalarContext();
@@ -571,6 +598,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							if (planNode is TableNode)
 							{
 								devicePlan.DevicePlanNode.Statement = TranslateOrder(devicePlan, (TableNode)planNode, (SelectStatement)devicePlan.DevicePlanNode.Statement);
+								((TableSQLDevicePlanNode)devicePlan.DevicePlanNode).IsAggregate = devicePlan.CurrentQueryContext().IsAggregate;
 								if (!devicePlan.IsSupported)
 									return null;
 							}
@@ -589,6 +617,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 			finally
 			{
+				// TODO: This condition is different than the push context above, is this intentional?
 				if (!(planNode is TableNode))
 					devicePlan.PopScalarContext();
 			}
@@ -840,7 +869,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							SQLDirection.In, 
 							GetParameterMarker(scalarType)
 						), 
-						planNode
+						planNode,
+						scalarType
 					);
 				devicePlan.DevicePlanNode.PlanParameters.Add(planParameter);
 				devicePlan.CurrentQueryContext().ReferenceFlags |= SQLReferenceFlags.HasParameters;
@@ -3461,13 +3491,46 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		private SQLPlanParameters _planParameters = new SQLPlanParameters();
 		public SQLPlanParameters PlanParameters { get { return _planParameters; } }
     }
+
+	public class TableSQLDevicePlanNode : SQLDevicePlanNode
+	{
+		public TableSQLDevicePlanNode(PlanNode planNode) : base(planNode) {}
+
+		private bool _isAggregate;
+		public bool IsAggregate
+		{
+			get { return _isAggregate; }
+			set { _isAggregate = value; }
+		}
+	}
+
+	public class ScalarSQLDevicePlanNode : SQLDevicePlanNode
+	{
+		public ScalarSQLDevicePlanNode(PlanNode planNode) : base(planNode) {}
+
+		private SQLScalarType _mappedType;
+		public SQLScalarType MappedType
+		{
+			get { return _mappedType; }
+			set { _mappedType = value; }
+		}
+	}
+
+	public class RowSQLDevicePlanNode : SQLDevicePlanNode
+	{
+		public RowSQLDevicePlanNode(PlanNode planNode) : base(planNode) {}
+		
+		private List<SQLScalarType> _mappedTypes = new List<SQLScalarType>();
+		public List<SQLScalarType> MappedTypes { get { return _mappedTypes; } }
+	}
     
 	public class SQLPlanParameter  : System.Object
 	{
-		public SQLPlanParameter(SQLParameter sQLParameter, PlanNode planNode) : base()
+		public SQLPlanParameter(SQLParameter sQLParameter, PlanNode planNode, SQLScalarType scalarType) : base()
 		{	
 			_sQLParameter = sQLParameter;
 			_planNode = planNode; 
+			_scalarType = scalarType;
 		}
 		
 		private SQLParameter _sQLParameter;
@@ -3475,6 +3538,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 		private PlanNode _planNode;
 		public PlanNode PlanNode { get { return _planNode; } }
+
+		private SQLScalarType _scalarType;
+		public SQLScalarType ScalarType { get { return _scalarType; } }
 	}
 
 	#if USETYPEDLIST
@@ -3887,16 +3953,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
                 parameterType.Length = stringParamValue.Length <= 20 ? 20 : stringParamValue.Length;
         }
 
-		protected void PrepareSQLParameters(SQLDevicePlan devicePlan, Program program, bool isCursor, SQLParameters parameters)
+		protected void PrepareSQLParameters(Program program, SQLDevicePlanNode devicePlanNode, bool isCursor, SQLParameters parameters)
 		{
 			object paramValue;
 			object nativeParamValue;
-            SQLScalarType paramType;
-			foreach (SQLPlanParameter planParameter in devicePlan.DevicePlanNode.PlanParameters)
+			foreach (SQLPlanParameter planParameter in devicePlanNode.PlanParameters)
 			{
 				paramValue = planParameter.PlanNode.Execute(program);
-				paramType = (SQLScalarType)Device.ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)planParameter.PlanNode.DataType);
-                nativeParamValue = (paramValue == null) ? null : paramType.ParameterFromScalar(program.ValueManager, paramValue);
+                nativeParamValue = (paramValue == null) ? null : planParameter.ScalarType.ParameterFromScalar(program.ValueManager, paramValue);
                 if (nativeParamValue != null)
                     SetParameterValueLength(nativeParamValue, planParameter);
 
@@ -3909,26 +3973,25 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						nativeParamValue,
 						planParameter.SQLParameter.Direction,
 						planParameter.SQLParameter.Marker,
-						Device.UseParametersForCursors && isCursor ? null : paramType.ToLiteral(program.ValueManager, paramValue)
+						Device.UseParametersForCursors && isCursor ? null : planParameter.ScalarType.ToLiteral(program.ValueManager, paramValue)
 					)
 				);
 			}
 		}
 
 		// Execute
-		protected override object InternalExecute(Program program, Schema.DevicePlan devicePlan)
+		protected override object InternalExecute(Program program, PlanNode planNode)
 		{
-			SQLDevicePlan plan = (SQLDevicePlan)devicePlan;			
-			plan.DevicePlanNode = (SQLDevicePlanNode)plan.Node.DeviceNode;
-			if (plan.Node is DMLNode)
+			var devicePlanNode = (SQLDevicePlanNode)planNode.DeviceNode;
+			if (planNode is DMLNode)
 			{
 				SQLConnectionHeader header = RequestConnection(false);                             
 				try
 				{
 					using (SQLCommand command = header.Connection.CreateCommand(false))
 					{
-						command.Statement = Device.Emitter.Emit(plan.DevicePlanNode.Statement);						
-						PrepareSQLParameters(plan, program, false, command.Parameters);
+						command.Statement = Device.Emitter.Emit(devicePlanNode.Statement);						
+						PrepareSQLParameters(program, devicePlanNode, false, command.Parameters);
 						command.Execute();
 						return null;
 					}
@@ -3939,14 +4002,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					throw;
 				}
 			}
-			else if (plan.Node is DDLNode)
+			else if (planNode is DDLNode)
 			{
 				SQLConnectionHeader header = RequestConnection(false);
 				try
 				{
 					if ((!ServerProcess.IsLoading()) && ((Device.ReconcileMode & D4.ReconcileMode.Command) != 0))
 					{
-						Statement dDLStatement = plan.DevicePlanNode.Statement;
+						Statement dDLStatement = devicePlanNode.Statement;
 						if (dDLStatement is Batch)
 						{
 							// If this is a batch, split it into separate statements for execution.  This is required because the Oracle ODBC driver does
@@ -3966,13 +4029,13 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						}
 						else
 						{
-							string statement = Device.Emitter.Emit(plan.DevicePlanNode.Statement);
+							string statement = Device.Emitter.Emit(devicePlanNode.Statement);
 							if (statement != String.Empty)
 							{
 								using (SQLCommand command = header.Connection.CreateCommand(false))
 								{
 									command.Statement = statement;									
-									PrepareSQLParameters(plan, program, false, command.Parameters);
+									PrepareSQLParameters(program, devicePlanNode, false, command.Parameters);
 									command.Execute();
 								}
 							}
@@ -3988,11 +4051,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 			else
 			{
-				if (plan.Node is TableNode)
+				if (planNode is TableNode)
 				{
 					SQLParameters parameters = new SQLParameters();
-					PrepareSQLParameters(plan, program, true, parameters);
-					SQLTable table = CreateSQLTable(program, (TableNode)plan.Node, (SelectStatement)plan.DevicePlanNode.Statement, parameters, plan.CurrentQueryContext().IsAggregate);
+					PrepareSQLParameters(program, devicePlanNode, true, parameters);
+					SQLTable table = CreateSQLTable(program, (TableNode)planNode, (SelectStatement)devicePlanNode.Statement, parameters, ((TableSQLDevicePlanNode)planNode.DeviceNode).IsAggregate);
 					try
 					{
 						table.Open();
@@ -4011,26 +4074,27 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					{
 						using (SQLCommand command = header.Connection.CreateCommand(true))
 						{
-							command.Statement = Device.Emitter.Emit(plan.DevicePlanNode.Statement);							
-							PrepareSQLParameters(plan, program, true, command.Parameters);
+							command.Statement = Device.Emitter.Emit(devicePlanNode.Statement);							
+							PrepareSQLParameters(program, devicePlanNode, true, command.Parameters);
 							SQLCursor cursor = command.Open(SQLCursorType.Dynamic, IsolationLevelToSQLIsolationLevel(ServerProcess.CurrentIsolationLevel())); //SQLIsolationLevel.ReadCommitted);
 							try
 							{
 								if (cursor.Next())
 								{
-									if (plan.Node.DataType is Schema.IScalarType)
+									if (planNode.DataType is Schema.IScalarType)
 									{
 										if (cursor.IsNull(0))
 											return null;
 										else
-											return Device.ResolveDeviceScalarType(devicePlan.Plan, (ScalarType)plan.Node.DataType).ToScalar(ServerProcess.ValueManager, cursor[0]);	
+											return ((ScalarSQLDevicePlanNode)planNode.DeviceNode).MappedType.ToScalar(ServerProcess.ValueManager, cursor[0]);
 									}
 									else
 									{
-										Row row = new Row(program.ValueManager, (Schema.IRowType)plan.Node.DataType);
+										Row row = new Row(program.ValueManager, (Schema.IRowType)planNode.DataType);
+										var rowDeviceNode = planNode.DeviceNode as RowSQLDevicePlanNode;
 										for (int index = 0; index < row.DataType.Columns.Count; index++)
 											if (!cursor.IsNull(index))
-												row[index] = Device.ResolveDeviceScalarType(devicePlan.Plan, (ScalarType)row.DataType.Columns[index].DataType).ToScalar(ServerProcess.ValueManager, cursor[index]);
+												row[index] = rowDeviceNode.MappedTypes[index].ToScalar(ServerProcess.ValueManager, cursor[index]);
 												
 										if (cursor.Next())
 											throw new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression);

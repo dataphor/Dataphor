@@ -2260,18 +2260,18 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		
 		public override NativeTables GetTables(Schema.TableVarScope scope) { return Transaction.Tables; }
 		
-		protected override object InternalExecute(Program program, DevicePlan devicePlan)
+		protected override object InternalExecute(Program program, PlanNode planNode)
 		{
-			if (devicePlan.Node is CreateTableVarBaseNode)
+			if (planNode is CreateTableVarBaseNode)
 			{
 				return null; // Actual storage will be allocated by the application transaction
 			}
-			else if (devicePlan.Node is DropTableNode)
+			else if (planNode is DropTableNode)
 			{
 				return null; // Actual storage will be deallocated by the application transaction
 			}
 			else
-				return base.InternalExecute(program, devicePlan);
+				return base.InternalExecute(program, planNode);
 		}
 
 		protected override void InternalInsertRow(Program program, TableVar tableVar, Row row, BitArray valueFlags)

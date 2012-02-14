@@ -426,9 +426,8 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			}
 		}
 
-		protected override object InternalExecute(Program program, Schema.DevicePlan devicePlan)
+		protected override object InternalExecute(Program program, PlanNode planNode)
 		{
-			PlanNode planNode = devicePlan.Node;
 			if (planNode is BaseTableVarNode)
 			{
 				MemoryScan scan = new MemoryScan(program, this, (BaseTableVarNode)planNode);

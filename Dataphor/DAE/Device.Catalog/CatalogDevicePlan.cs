@@ -19,8 +19,5 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public new CatalogDevice Device { get { return (CatalogDevice)base.Device; } }
 		
 		public Schema.TableVar TableContext;
-		
-		/// <summary>Indicates whether or not this plan is an expression against a store table.</summary>
-		public bool IsStorePlan = false;
 	}
 }

@@ -84,8 +84,8 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			#if USEPROCESSUNBIND
 			SetServerProcess(null);
-			if (FPlan != null)
-				FPlan.UnbindFromProcess();
+			if (_plan != null)
+				_plan.UnbindFromProcess();
 			#endif
 		}
 		
@@ -215,7 +215,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return DeviceConnect(device).Execute(this, Plan.GetDevicePlan(planNode));
+					return DeviceConnect(device).Execute(this, planNode);
 				}
 				finally
 				{

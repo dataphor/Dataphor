@@ -84,20 +84,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				TranslateOrder(localDevicePlan, devicePlanNode, (TableNode)planNode);
 			
 			if (localDevicePlan.IsSupported)
-			{
-				localDevicePlan.IsStorePlan = true;
 				return devicePlanNode;
-			}
 			else
 				return base.InternalPrepare(devicePlan, planNode);
-		}
-		
-		protected override DevicePlan CreateDevicePlan(Plan plan, PlanNode planNode)
-		{
-			var devicePlan = base.CreateDevicePlan(plan, planNode);
-			if (planNode.DeviceNode is CatalogDevicePlanNode)
-				((CatalogDevicePlan)devicePlan).IsStorePlan = true;
-			return devicePlan;
 		}
 		
 		private void PopulateServerSettings(Program program, NativeTable nativeTable, Row row)

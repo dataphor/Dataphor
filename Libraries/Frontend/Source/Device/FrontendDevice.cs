@@ -1285,22 +1285,22 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		protected override object InternalExecute(Program program, Schema.DevicePlan devicePlan)
+		protected override object InternalExecute(Program program, PlanNode planNode)
 		{
-			if ((devicePlan.Node is BaseTableVarNode) || (devicePlan.Node is OrderNode))
+			if ((planNode is BaseTableVarNode) || (planNode is OrderNode))
 			{
 				Schema.TableVar tableVar = null;
-				if (devicePlan.Node is BaseTableVarNode)
-					tableVar = ((BaseTableVarNode)devicePlan.Node).TableVar;
-				else if (devicePlan.Node is OrderNode)
-					tableVar = ((BaseTableVarNode)devicePlan.Node.Nodes[0]).TableVar;
+				if (planNode is BaseTableVarNode)
+					tableVar = ((BaseTableVarNode)planNode).TableVar;
+				else if (planNode is OrderNode)
+					tableVar = ((BaseTableVarNode)planNode.Nodes[0]).TableVar;
 				if (tableVar != null)
 					PopulateTableVar(program, tableVar);
 			}
-			object result = base.InternalExecute(program, devicePlan);
-			if (devicePlan.Node is CreateTableNode)
+			object result = base.InternalExecute(program, planNode);
+			if (planNode is CreateTableNode)
 			{
-				Schema.TableVar tableVar = ((CreateTableNode)devicePlan.Node).Table;
+				Schema.TableVar tableVar = ((CreateTableNode)planNode).Table;
 				if (!ServerProcess.IsLoading() && ((Device.ReconcileMode & ReconcileMode.Command) != 0))
 				{
 					switch (tableVar.Name)

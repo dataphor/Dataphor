@@ -42,12 +42,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Execute
 		
-		protected override object InternalExecute(Program program, Schema.DevicePlan devicePlan)
+		protected override object InternalExecute(Program program, PlanNode planNode)
 		{
-			CatalogDevicePlan localDevicePlan = (CatalogDevicePlan)devicePlan;
-			if (localDevicePlan.IsStorePlan)
+			var catalogDevicePlanNode = planNode.DeviceNode as CatalogDevicePlanNode;
+			if (catalogDevicePlanNode != null)
 			{
-				CatalogDeviceTable table = new CatalogDeviceTable(localDevicePlan.Node.DeviceNode as CatalogDevicePlanNode, program, this);
+				CatalogDeviceTable table = new CatalogDeviceTable(catalogDevicePlanNode, program, this);
 				try
 				{
 					table.Open();
@@ -60,7 +60,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 			}
 			else
-				return base.InternalExecute(program, devicePlan);
+				return base.InternalExecute(program, planNode);
 		}
 		
 		#endregion
