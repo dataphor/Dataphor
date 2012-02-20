@@ -46,32 +46,20 @@ namespace Alphora.Dataphor.DAE.Compiling
 				{
 					try
 					{
-						try
-						{
-							if (_statementContexts.Count > 0)
-								PopStatementContext();
+						if (_statementContexts.Count > 0)
+							PopStatementContext();
 								
-						}
-						finally
-						{
-							if (_securityContexts.Count > 0)
-								PopSecurityContext();
-						}
 					}
 					finally
 					{
-						if (_symbols != null)
-							_symbols = null;
+						if (_securityContexts.Count > 0)
+							PopSecurityContext();
 					}
 				}
 				finally
 				{
-					if (_devicePlans != null)
-					{
-						foreach (KeyValuePair<PlanNode, Schema.DevicePlan> entry in _devicePlans)
-							entry.Value.Device.Unprepare(entry.Value);
-						_devicePlans = null;
-					}
+					if (_symbols != null)
+						_symbols = null;
 				}
 			}
 			finally
@@ -106,37 +94,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 			SetServerProcess(null);
 		}
 		
-		private Program _internalProgram;
-		protected Program InternalProgram
-		{
-			get
-			{
-				if (_internalProgram == null)
-					_internalProgram = new Program(_serverProcess);
-				return _internalProgram;
-			}
-		}
-		
 		public void BindToProcess(ServerProcess process)
 		{
 			PopSecurityContext();
 			PushSecurityContext(new SecurityContext(process.ServerSession.User));
 			
 			SetServerProcess(process);
-			if (_internalProgram != null)
-				_internalProgram.BindToProcess(process, this);
-			
-			// Reset execution statistics
-			//FStatistics.ExecuteTime = TimeSpan.Zero;
-			//FStatistics.DeviceExecuteTime = TimeSpan.Zero;
 		}
 		
 		public void UnbindFromProcess()
 		{
 			#if USEPROCESSUNBIND
 			SetServerProcess(null);
-			if (FInternalProgram != null)
-				FInternalProgram.UnbindFromProcess();
 			#endif
 		}
 		
@@ -150,30 +119,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// Statistics
 		private PlanStatistics _statistics = new PlanStatistics();
 		public PlanStatistics Statistics { get { return _statistics; } }
-		
-		// DevicePlans
-		private Dictionary<PlanNode, Schema.DevicePlan> _devicePlans = new Dictionary<PlanNode, Schema.DevicePlan>();
-
-		// GetDevicePlan
-		public Schema.DevicePlan GetDevicePlan(PlanNode planNode)
-		{
-			Schema.DevicePlan devicePlan;
-			if (!_devicePlans.TryGetValue(planNode, out devicePlan))
-			{
-				EnsureDeviceStarted(planNode.Device);
-				Schema.DevicePlan newDevicePlan = planNode.Device.Prepare(this, planNode);
-				AddDevicePlan(newDevicePlan);
-				return newDevicePlan;
-			}
-			return devicePlan;
-		}
-		
-		// AddDevicePlan
-		public void AddDevicePlan(Schema.DevicePlan devicePlan)
-		{
-			if (!_devicePlans.ContainsKey(devicePlan.Node))
-				_devicePlans.Add(devicePlan.Node, devicePlan);
-		}
 		
 		public void EnsureDeviceStarted(Schema.Device device)
 		{
@@ -202,9 +147,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			if (!node.IsLiteral)
 				throw new CompilerException(CompilerException.Codes.LiteralArgumentRequired, CompilerErrorLevel.NonFatal, argumentName);
-				
-			InternalProgram.Code = node;
-			return InternalProgram.Execute(null);
+
+			return ExecuteNode(node);
 		}
 		
 		/// <summary>
@@ -212,8 +156,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// </summary>
 		public object ExecuteNode(PlanNode node)
 		{
-			InternalProgram.Code = node;
-			return InternalProgram.Execute(null);
+			var program = new Program(_serverProcess);
+			program.Code = node;
+			return program.Execute(null);
 		}
 		
 		// Symbols        

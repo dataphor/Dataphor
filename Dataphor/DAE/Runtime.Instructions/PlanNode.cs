@@ -305,7 +305,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// and setting the device supported to false ensures that if this node is actually executed, the
 						// device will not be asked to perform a useless parameterization.
 						_deviceSupported = !_couldSupport;
-						plan.AddDevicePlan(devicePlan);
 					}
 					else
 					{
@@ -1003,6 +1002,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
+    /// <summary>
+    /// Represents compiled information for a given node relevant to execution on a specific device.
+    /// </summary>
 	public class DevicePlanNode : System.Object
 	{
 		public DevicePlanNode(PlanNode node) : base()

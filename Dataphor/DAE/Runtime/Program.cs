@@ -153,7 +153,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		// Source
 		protected string _source;
 		/// <summary>
-		/// Contains the source text for the plan. Only present if no debug locator is provided.
+		/// Contains the source text for the program. Only present if no debug locator is provided.
 		/// </summary>
 		public string Source
 		{ 
@@ -172,7 +172,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		// Locator
 		protected DebugLocator _locator;
 		/// <summary>
-		/// Provides a reference for identifying the source text for the plan. May be null for dynamic or ad-hoc execution.
+		/// Provides a reference for identifying the source text for the program. May be null for dynamic or ad-hoc execution.
 		/// </summary>
 		public DebugLocator Locator 
 		{ 
@@ -185,7 +185,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		}
 		
 		/// <summary>
-		/// Sets the source context for the plan.
+		/// Sets the source context for the program.
 		/// </summary>
 		public void SetSourceContext(SourceContext sourceContext)
 		{
@@ -244,7 +244,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 			}
 		}
 		
-		public Schema.LoadedLibrary CurrentLibrary { get { return Plan.CurrentLibrary; } }
+		public Schema.LoadedLibrary CurrentLibrary { get { return _serverProcess.ServerSession.CurrentLibrary; } }
 		
 		public Schema.User User { get { return Plan.User; } }
 		

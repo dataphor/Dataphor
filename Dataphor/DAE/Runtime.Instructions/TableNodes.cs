@@ -1827,7 +1827,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (!devicePlan.IsSupported)
 					throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice, _device.Name, _tableVar.DisplayName);
 
-				plan.AddDevicePlan(devicePlan);
 				_deviceSupported = true;
 				SurrogateExecute = InternalDeviceExecute;
 				CheckDeviceRights(plan);

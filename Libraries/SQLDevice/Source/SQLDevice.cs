@@ -5121,7 +5121,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						throw new SQLException(SQLException.Codes.QuerySupportedByNonSQLDevice, device.Name);
 
 					if (node.Device == sQLDevice)
-						sQLQuery = sQLDevice.Emitter.Emit(((SQLDevicePlan)plan.GetDevicePlan(node)).DevicePlanNode.Statement);
+						sQLQuery = sQLDevice.Emitter.Emit(((SQLDevicePlanNode)node.DeviceNode).Statement);
 					else
 						throw new SQLException(SQLException.Codes.QuerySupportedByDifferentDevice, node.Device.Name, sQLDevice.Name);
 				}
