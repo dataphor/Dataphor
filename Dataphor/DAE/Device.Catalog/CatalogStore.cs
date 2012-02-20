@@ -219,7 +219,23 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					_store.MaxConnections = value; 
 			}
 		}
-		
+
+        private int _maxNameIndexDepth = -1;
+        public int GetMaxNameIndexDepth()
+        {
+            return _maxNameIndexDepth;
+        }
+
+        public void SetMaxNameIndexDepth(int maxDepth)
+        {
+            _maxNameIndexDepth = maxDepth;
+        }
+
+        public void ClearMaxNameIndexDepth()
+        {
+            _maxNameIndexDepth = -1;
+        }
+
 		#region Connection
 		
 		// TODO: I'm not happy with this but without a major re-architecture of the crap-wrapper layer, I'm not sure what else to do...
@@ -1867,28 +1883,31 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		int _maxCatalogObjectNamesIndexCache = -1;
-		
-		private int GetMaxCatalogObjectNamesIndexDepth()
+        private int GetMaxCatalogObjectNamesIndexDepth()
+        {
+            var maxDepth = Store.GetMaxNameIndexDepth();
+            if (maxDepth < 0)
+            {
+                maxDepth = InternalGetMaxCatalogObjectNamesIndexDepth();
+                Store.SetMaxNameIndexDepth(maxDepth);
+            }
+            return maxDepth;
+        }
+
+		private int InternalGetMaxCatalogObjectNamesIndexDepth()
 		{
-			if (_maxCatalogObjectNamesIndexCache >= 0)
-				return _maxCatalogObjectNamesIndexCache;
-			else
+			SQLStoreCursor cursor = OpenCursor("PK_DAECatalogObjectNames", false);
+			try
 			{
-				SQLStoreCursor cursor = OpenCursor("PK_DAECatalogObjectNames", false);
-				try
-				{
-					int max = 0; 
-					cursor.Last();
-					if (cursor.Prior())
-						max = (int)cursor[0];
-					_maxCatalogObjectNamesIndexCache = max;
-					return max;
-				}
-				finally
-				{
-					CloseCursor(cursor);
-				}
+				int max = 0; 
+				cursor.Last();
+				if (cursor.Prior())
+					max = (int)cursor[0];
+				return max;
+			}
+			finally
+			{
+				CloseCursor(cursor);
 			}
 		}
 
@@ -2213,8 +2232,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 				
 					// Set if depth of clearing name is greater than cached value
-					if (_maxCatalogObjectNamesIndexCache >= 0 && _maxCatalogObjectNamesIndexCache < depth)
-						_maxCatalogObjectNamesIndexCache = depth;
+                    if (Store.GetMaxNameIndexDepth() < depth)
+                    {
+                        Store.ClearMaxNameIndexDepth();
+                    }
 				}
 				finally
 				{
@@ -2459,12 +2480,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (objectValue is Schema.CatalogObject)
 			{
 				// Maintain the max names depth cache
-				if (_maxCatalogObjectNamesIndexCache >= 0)
-				{
-					var depth = Schema.Object.GetQualifierCount(objectValue.Name);
-					if (depth >= _maxCatalogObjectNamesIndexCache)
-						_maxCatalogObjectNamesIndexCache = -1;
-				}
+				var depth = Schema.Object.GetQualifierCount(objectValue.Name);
+				if (depth >= Store.GetMaxNameIndexDepth())
+					Store.ClearMaxNameIndexDepth();
 				
 				// Delete the DAECatalogObjectNames rows
 				DeleteRows("IDX_DAECatalogObjectNames_ID", objectValue.ID);
