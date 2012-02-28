@@ -485,20 +485,20 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 			LookupColumnElement lookupGroup = new LookupColumnElement(String.Format("{0}Column{1}_Lookup", _derivationInfo.MainSourceName, column.ElaboratedName));
 			lookupGroup.ElementType = DerivationUtility.GetTag(reference.Reference.MetaData, "ElementType", pageType, reference.ReferenceType.ToString(), "QuickLookup");
 			DerivationUtility.ExtractProperties(reference.Reference.MetaData, lookupGroup.ElementType, pageType, lookupGroup.Properties);
-			lookupGroup.Source = _derivationInfo.MainSourceName;
-			lookupGroup.Properties.Add(new Tag("Source", lookupGroup.Source));
-			lookupGroup.ColumnName = Schema.Object.Qualify(column.Column.Name, column.ElaboratedTableVar.ElaboratedName);
-			lookupGroup.Properties.Add(new Tag("ColumnName", lookupGroup.ColumnName));
-			lookupGroup.LookupColumnName = Schema.Object.Qualify(reference.Reference.TargetKey.Columns[reference.Reference.SourceKey.Columns.IndexOf(column.Column.Name)].Name, DerivationUtility.MainElaboratedTableName);
-			lookupGroup.Properties.Add(new Tag("LookupColumnName", lookupGroup.LookupColumnName));
-			lookupGroup.LookupDocument = GetLookupDocument(reference, masterKeyNames, detailKeyNames);
-			lookupGroup.Properties.Add(new Tag("Document", lookupGroup.LookupDocument));
+			lookupGroup.Properties.SafeAdd(new Tag("Source", _derivationInfo.MainSourceName));
+            lookupGroup.Source = lookupGroup.Properties.GetTag("Source").Value;
+			lookupGroup.Properties.SafeAdd(new Tag("ColumnName", Schema.Object.Qualify(column.Column.Name, column.ElaboratedTableVar.ElaboratedName)));
+            lookupGroup.ColumnName = lookupGroup.Properties.GetTag("ColumnName").Value;
+			lookupGroup.Properties.SafeAdd(new Tag("LookupColumnName", Schema.Object.Qualify(reference.Reference.TargetKey.Columns[reference.Reference.SourceKey.Columns.IndexOf(column.Column.Name)].Name, DerivationUtility.MainElaboratedTableName)));
+            lookupGroup.LookupColumnName = lookupGroup.Properties.GetTag("LookupColumnName").Value;
+			lookupGroup.Properties.SafeAdd(new Tag("Document", GetLookupDocument(reference, masterKeyNames, detailKeyNames)));
+            lookupGroup.LookupDocument = lookupGroup.Properties.GetTag("Document").Value;
 			if (masterKeyNames.Length > 0)
 			{
-				lookupGroup.MasterKeyNames = StringArrayToNames(masterKeyNames);
-				lookupGroup.Properties.Add(new Tag("MasterKeyNames", lookupGroup.MasterKeyNames));
-				lookupGroup.DetailKeyNames = StringArrayToNames(detailKeyNames);
-				lookupGroup.Properties.Add(new Tag("DetailKeyNames", lookupGroup.DetailKeyNames));
+				lookupGroup.Properties.SafeAdd(new Tag("MasterKeyNames", StringArrayToNames(masterKeyNames)));
+				lookupGroup.MasterKeyNames = lookupGroup.Properties.GetTag("MasterKeyNames").Value;
+				lookupGroup.Properties.SafeAdd(new Tag("DetailKeyNames", StringArrayToNames(detailKeyNames)));
+				lookupGroup.DetailKeyNames = lookupGroup.Properties.GetTag("DetailKeyNames").Value;
 			}
 
 			if (column.ReadOnly || readOnly || Convert.ToBoolean(DerivationUtility.GetTag(column.Column.MetaData, "ReadOnly", pageType, "False")))
@@ -557,20 +557,20 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 					MetaData metaData = DerivationUtility.ExtractTags(reference.Reference.MetaData.Tags, lookupGroupElement.ElementType, pageType, reference.ReferenceType.ToString());
 					PrepareElement(lookupGroupElement, metaData, reference.Reference.MetaData, titleSeed, pageType, reference.ReferenceType.ToString(), readOnly);
 
-					lookupGroupElement.Source = _derivationInfo.MainSourceName;
-					lookupGroupElement.Properties.Add(new Tag("Source", lookupGroupElement.Source));
-					lookupGroupElement.ColumnNames = StringArrayToNames(columnNames);
-					lookupGroupElement.Properties.Add(new Tag("ColumnNames", lookupGroupElement.ColumnNames));
-					lookupGroupElement.LookupColumnNames = StringArrayToNames(lookupColumnNames);
-					lookupGroupElement.Properties.Add(new Tag("LookupColumnNames", lookupGroupElement.LookupColumnNames));
-					lookupGroupElement.LookupDocument = GetLookupDocument(reference, masterKeyNames, detailKeyNames);
-					lookupGroupElement.Properties.Add(new Tag("Document", lookupGroupElement.LookupDocument));
+					lookupGroupElement.Properties.SafeAdd(new Tag("Source", _derivationInfo.MainSourceName));
+                    lookupGroupElement.Source = lookupGroupElement.Properties.GetTag("Source").Value;
+					lookupGroupElement.Properties.SafeAdd(new Tag("ColumnNames", StringArrayToNames(columnNames)));
+                    lookupGroupElement.ColumnNames = lookupGroupElement.Properties.GetTag("ColumnNames").Value;
+					lookupGroupElement.Properties.SafeAdd(new Tag("LookupColumnNames", StringArrayToNames(lookupColumnNames)));
+                    lookupGroupElement.LookupColumnNames = lookupGroupElement.Properties.GetTag("LookupColumnNames").Value;
+					lookupGroupElement.Properties.SafeAdd(new Tag("Document", GetLookupDocument(reference, masterKeyNames, detailKeyNames)));
+                    lookupGroupElement.LookupDocument = lookupGroupElement.Properties.GetTag("LookupDocument").Value;
 					if (masterKeyNames.Length > 0)
 					{
-						lookupGroupElement.MasterKeyNames = StringArrayToNames(masterKeyNames);
-						lookupGroupElement.Properties.Add(new Tag("MasterKeyNames", lookupGroupElement.MasterKeyNames));
-						lookupGroupElement.DetailKeyNames = StringArrayToNames(detailKeyNames);
-						lookupGroupElement.Properties.Add(new Tag("DetailKeyNames", lookupGroupElement.DetailKeyNames));
+						lookupGroupElement.Properties.SafeAdd(new Tag("MasterKeyNames", StringArrayToNames(masterKeyNames)));
+                        lookupGroupElement.MasterKeyNames = lookupGroupElement.Properties.GetTag("MasterKeyNames").Value;
+						lookupGroupElement.Properties.Add(new Tag("DetailKeyNames", StringArrayToNames(detailKeyNames)));
+                        lookupGroupElement.DetailKeyNames = lookupGroupElement.Properties.GetTag("DetailKeyNames").Value;
 					}
 					AddElement(lookupGroupElement, GetParentGroupName(lookupGroupName), titleSeed, pageType, readOnly);
 				}
