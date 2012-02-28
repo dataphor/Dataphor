@@ -220,6 +220,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				return tag.Value;
 			return defaultValue;
 		}
+
+        /// <summary>Adds the given tag if it is not already present.</summary>
+        /// <param name="tag">The tag to be added.</param>
+        public void SafeAdd(Tag tag)
+        {
+            if (!Contains(tag))
+                Add(tag);
+        }
 		
 		/// <summary>Adds the given tag, replacing a reference or inherited tag of the same name.</summary>
 		/// <remarks>If a tag already exists of the same name as the tag being added, the tag will be removed if it is a reference or inherited tag. Otherwise, an error will be raised.</remarks>
