@@ -569,7 +569,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 					{
 						lookupGroupElement.Properties.SafeAdd(new Tag("MasterKeyNames", StringArrayToNames(masterKeyNames)));
                         lookupGroupElement.MasterKeyNames = lookupGroupElement.Properties.GetTag("MasterKeyNames").Value;
-						lookupGroupElement.Properties.Add(new Tag("DetailKeyNames", StringArrayToNames(detailKeyNames)));
+						lookupGroupElement.Properties.SafeAdd(new Tag("DetailKeyNames", StringArrayToNames(detailKeyNames)));
                         lookupGroupElement.DetailKeyNames = lookupGroupElement.Properties.GetTag("DetailKeyNames").Value;
 					}
 					AddElement(lookupGroupElement, GetParentGroupName(lookupGroupName), titleSeed, pageType, readOnly);
