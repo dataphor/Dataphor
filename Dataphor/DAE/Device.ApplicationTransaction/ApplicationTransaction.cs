@@ -711,13 +711,18 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		}
 		
 		private ServerProcess _populatingProcess;
+		private int _populatingCount;
 		public void BeginPopulateSource(ServerProcess process)
 		{
 			lock (this)
 			{
-				if (_populatingProcess != null)
-					throw new ApplicationTransactionException(ApplicationTransactionException.Codes.SourceAlreadyPopulating, ID.ToString());
-				_populatingProcess = process;
+				if (_populatingProcess != process)
+				{
+					if (_populatingProcess != null)
+						throw new ApplicationTransactionException(ApplicationTransactionException.Codes.SourceAlreadyPopulating, ID.ToString());
+					_populatingProcess = process;
+				}
+				_populatingCount++;
 			}
 		}
 		
@@ -725,7 +730,13 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		{
 			lock (this)
 			{
-				_populatingProcess = null;
+				if (IsPopulatingSource)
+				{
+					_populatingCount--;
+
+					if (_populatingCount == 0)
+						_populatingProcess = null;
+				}
 			}
 		}
 		
