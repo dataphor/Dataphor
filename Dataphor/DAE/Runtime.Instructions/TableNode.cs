@@ -12,6 +12,7 @@
 using System;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Reflection;
@@ -807,8 +808,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		#endif
+
+		protected Expression GetExpression(bool outsideAT)
+		{
+			if (outsideAT)
+				ApplicationTransactionUtility.ClearExplicitBind(this);
+			try
+			{
+				return (Expression)EmitStatement(EmitMode.ForCopy);
+			}
+			finally
+			{
+				if (outsideAT)
+					ApplicationTransactionUtility.SetExplicitBind(this);
+			}
+		}
 		
-		protected PlanNode CompileSelectNode(Program program, bool fullSelect)
+		protected PlanNode CompileSelectNode(Program program, bool fullSelect, bool outsideAT)
 		{
 			ApplicationTransaction transaction = null;
 			if (program.ServerProcess.ApplicationTransactionID != Guid.Empty)
@@ -859,7 +875,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 														Compiler.EmitRestrictNode
 														(
 															plan,
-															Compiler.CompileExpression(plan, (Expression)EmitStatement(EmitMode.ForCopy)),
+															Compiler.CompileExpression(plan, GetExpression(outsideAT)),
 															Compiler.BuildOptimisticRowEqualExpression
 															(
 																plan, 
@@ -925,7 +941,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (_selectNode == null)
 				{
-					_selectNode = CompileSelectNode(program, false);
+					_selectNode = CompileSelectNode(program, false, false);
 				}
 			}
 		}
@@ -936,7 +952,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (_fullSelectNode == null)
 				{
-					_fullSelectNode = CompileSelectNode(program, true);
+					_fullSelectNode = CompileSelectNode(program, true, false);
+				}
+			}
+		}
+
+		protected void EnsureSelectAllNode(Program program)
+		{
+			lock (this)
+			{
+				if (_selectAllNode == null)
+				{
+					_selectAllNode = CompileSelectNode(program, false, true);
 				}
 			}
 		}
@@ -1321,6 +1348,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 			return null;
+		}
+
+		public List<Row> SelectAll(Program program, Row row)
+		{
+			var result = new List<Row>();
+
+			// Symbols will only be null if this node is not bound
+			// The node will not be bound if it is functioning in a local server context evaluating change proposals in the client
+			if (_symbols != null)
+			{
+				EnsureSelectAllNode(program);
+				program.Stack.Push(row);
+				try
+				{
+					using (Table table = (Table)_selectAllNode.Execute(program))
+					{
+						while (table.Next())
+							result.Add(table.Select());
+					}
+				}
+				finally
+				{
+					program.Stack.Pop();
+				}
+			}
+
+			return result;
 		}
 
 		/// <summary>Selects a row based on the node and the given values, will return null if no row is found.</summary>
@@ -3014,6 +3068,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			get { return _fullSelectNode; }
 			set { _fullSelectNode = value; }
+		}
+
+		protected PlanNode _selectAllNode;
+		/// <summary>Used to select the row with a restriction on the key columns, and source outside of any A/T.</summary>
+		public PlanNode SelectAllNode
+		{
+			get { return _selectAllNode; }
+			set { _selectAllNode = value; }
 		}
 		
         // Insert

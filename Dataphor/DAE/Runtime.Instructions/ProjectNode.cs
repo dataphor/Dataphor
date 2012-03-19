@@ -290,7 +290,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 				row.CopyTo(localRow);
-				base.JoinApplicationTransaction(program, localRow);
+
+				// Get the SourceNode select set for this row, and join on each result
+				foreach (var sourceRow in SourceNode.SelectAll(program, localRow))
+				{
+					try
+					{
+						base.JoinApplicationTransaction(program, sourceRow);
+					}
+					finally
+					{
+						sourceRow.Dispose();
+					}
+				}
 			}
 			finally
 			{

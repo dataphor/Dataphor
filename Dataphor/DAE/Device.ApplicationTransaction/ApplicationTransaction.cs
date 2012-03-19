@@ -167,16 +167,27 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				}
 			}
 		}
-		
+
 		public static void SetExplicitBind(PlanNode node)
 		{
-			if ((node is TableVarNode) && (((TableVarNode)node).TableVar.IsATObject))
-				((TableVarNode)node).ExplicitBind = true;
-				
-			for (int index = 0; index < node.NodeCount; index++)
-				SetExplicitBind(node.Nodes[index]);
+			SetExplicitBind(node, true);
+		}
+
+		public static void ClearExplicitBind(PlanNode node)
+		{
+			SetExplicitBind(node, false);
 		}
 		
+		public static void SetExplicitBind(PlanNode node, bool shouldBind)
+		{
+			var tableVarNode = node as TableVarNode;
+			if (tableVarNode != null && tableVarNode.TableVar.IsATObject)
+				tableVarNode.ExplicitBind = shouldBind;
+				
+			for (int index = 0; index < node.NodeCount; index++)
+				SetExplicitBind(node.Nodes[index], shouldBind);
+		}
+
 		public static TableNode PrepareJoinExpression(Plan plan, TableNode sourceNode, out TableNode populateNode)
 		{
 			ApplicationTransaction transaction = plan.GetApplicationTransaction();
