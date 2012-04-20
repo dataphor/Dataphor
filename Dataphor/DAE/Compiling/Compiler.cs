@@ -14157,6 +14157,24 @@ indicative of other problems, a reference will never be attached as an explicit 
 			return columnName;
 		}
 		
+		private static void AddTemporaryColumn(NamedColumnExpressions addExpressions, RenameColumnExpressions renameExpressions, ColumnExpressions projectExpressions, List<string> projectNames, NamedColumnExpression localExpression)
+		{
+			string columnAlias = Schema.Object.GetUniqueName();
+			NamedColumnExpression addExpression = new NamedColumnExpression(localExpression.Expression, columnAlias, localExpression.MetaData);
+			addExpression.Line = localExpression.Line;
+			addExpression.LinePos = localExpression.LinePos;
+			addExpressions.Add(addExpression);
+			ColumnExpression projectExpression = new ColumnExpression(columnAlias);
+			projectExpression.Line = localExpression.Line;
+			projectExpression.LinePos = localExpression.LinePos;
+			projectExpressions.Add(projectExpression);
+			projectNames.Add(columnAlias);
+			RenameColumnExpression renameExpression = new RenameColumnExpression(columnAlias, localExpression.ColumnAlias);
+			renameExpression.Line = localExpression.Line;
+			renameExpression.LinePos = localExpression.LinePos;
+			renameExpressions.Add(renameExpression);
+		}
+		
 		public static PlanNode CompileSpecifyExpression(Plan plan, SpecifyExpression expression)
 		{
 			PlanNode node = null;
@@ -14225,18 +14243,34 @@ indicative of other problems, a reference will never be attached as an explicit 
 				{
 					if ((localExpression.ColumnAlias == String.Empty) || (identifierExpression.Identifier == localExpression.ColumnAlias))
 					{
-						projectExpressions.Add(new ColumnExpression(identifierExpression.Identifier));
-						projectNames.Add(sourceColumns[identifierExpression.Identifier].Name);
+						if (projectNames.Contains(sourceColumns[identifierExpression.Identifier].Name))
+						{
+							AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression);
+						}
+						else
+						{
+							projectExpressions.Add(new ColumnExpression(identifierExpression.Identifier));
+							projectNames.Add(sourceColumns[identifierExpression.Identifier].Name);
+						}
 					}
 					else
 					{
-						if (resultNames.Contains(identifierExpression.Identifier) || projectNames.Contains(sourceColumns[identifierExpression.Identifier].Name))
+						//if (resultNames.Contains(identifierExpression.Identifier) || projectNames.Contains(sourceColumns[identifierExpression.Identifier].Name))
+						if (projectNames.Contains(sourceColumns[identifierExpression.Identifier].Name))
 						{
-							addExpressions.Add(localExpression);
-							ColumnExpression projectExpression = new ColumnExpression(localExpression.ColumnAlias);
-							projectExpression.Line = localExpression.Line;
-							projectExpression.LinePos = localExpression.LinePos;
-							projectExpressions.Add(projectExpression);
+							if (sourceColumns.ContainsName(localExpression.ColumnAlias))
+							{
+								AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression);
+							}
+							else
+							{
+								addExpressions.Add(localExpression);
+								ColumnExpression projectExpression = new ColumnExpression(localExpression.ColumnAlias);
+								projectExpression.Line = localExpression.Line;
+								projectExpression.LinePos = localExpression.LinePos;
+								projectExpressions.Add(projectExpression);
+								projectNames.Add(localExpression.ColumnAlias);
+							}
 						}
 						else
 						{
@@ -14257,19 +14291,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				{
 					if (sourceColumns.ContainsName(localExpression.ColumnAlias))
 					{
-						string columnAlias = Schema.Object.GetUniqueName();
-						NamedColumnExpression addExpression = new NamedColumnExpression(localExpression.Expression, columnAlias, localExpression.MetaData);
-						addExpression.Line = localExpression.Line;
-						addExpression.LinePos = localExpression.LinePos;
-						addExpressions.Add(addExpression);
-						ColumnExpression projectExpression = new ColumnExpression(columnAlias);
-						projectExpression.Line = localExpression.Line;
-						projectExpression.LinePos = localExpression.LinePos;
-						projectExpressions.Add(projectExpression);
-						RenameColumnExpression renameExpression = new RenameColumnExpression(columnAlias, localExpression.ColumnAlias);
-						renameExpression.Line = localExpression.Line;
-						renameExpression.LinePos = localExpression.LinePos;
-						renameExpressions.Add(renameExpression);
+						AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression);
 					}
 					else
 					{
@@ -14278,6 +14300,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						projectExpression.Line = localExpression.Line;
 						projectExpression.LinePos = localExpression.LinePos;
 						projectExpressions.Add(projectExpression);
+						projectNames.Add(localExpression.ColumnAlias);
 					}
 				}
 			}
@@ -14292,7 +14315,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 			return node;
 		}
-		
+
 		public static PlanNode EmitRenameNode(Plan plan, PlanNode sourceNode, string tableAlias)
 		{
 			return EmitRenameNode(plan, sourceNode, tableAlias, null);

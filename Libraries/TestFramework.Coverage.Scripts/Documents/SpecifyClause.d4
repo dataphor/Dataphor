@@ -30,5 +30,12 @@ if (TestSpecify { ID, Data, Data + "One" NewData }) <> (TestSpecify add { Data +
 // Specify as all of the above
 if (TestSpecify { ID ID1, ID ID2, Data, Data + "One" NewData }) <> (TestSpecify add { ID ID2, Data + "One" NewData } rename { ID ID1 }) then
 	raise Error('Test specify as all three failed');
+	
+// Specify as a replacing rename
+if (TestSpecify { ID Data, Data ID }) <> (TestSpecify rename { ID Data, Data ID }) then
+	raise Error('Test specify with replacing rename failed');
+
+if (TestSpecify { Data ID, Data Data }) <> (TestSpecify add { Data X } over { X, Data } rename { X ID }) then
+	raise Error('Test specify with duplicate source column rename failed');
 
 drop table TestSpecify;
