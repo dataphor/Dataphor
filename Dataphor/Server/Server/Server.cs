@@ -498,9 +498,6 @@ namespace Alphora.Dataphor.DAE.Server
 			// Load server configuration settings
 			catalogDeviceSession.LoadServerSettings(this);
 
-			// Attaches any libraries that were attached from an explicit library directory
-			catalogDeviceSession.AttachLibraries();
-
 			// Set the object ID generator				
 			Schema.Object.SetNextObjectID(catalogDeviceSession.GetMaxObjectID() + 1);
 
@@ -822,6 +819,9 @@ namespace Alphora.Dataphor.DAE.Server
 				base.InternalInitializeCatalog();
 			else
 			{
+				// Attaches any libraries that were attached from an explicit library directory
+				((ServerCatalogDeviceSession)_systemProcess.CatalogDeviceSession).AttachLibraries();
+
 			    // resolve the core system objects
 			    ResolveCoreSystemObjects();
 				
