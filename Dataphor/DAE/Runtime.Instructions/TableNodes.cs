@@ -1861,7 +1861,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// Execute		
 		public override object InternalExecute(Program program)
 		{
-			throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice);
+			throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice, _device == null ? "<no device>" : _device.Name, _tableVar == null ? "<no table>" : _tableVar.DisplayName);
 		}
 		
 		protected void InternalInsert(Program program, Row row, BitArray valueFlags)
@@ -1991,11 +1991,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							plan.PushSecurityContext(new SecurityContext(_tableVar.Owner));
 							try
 							{
-								#if !USECOMPILERBIND
 								_joinATNode = Compiler.Compile(plan, statement);
-								#else
-								_joinATNode = Compiler.BindNode(plan, Compiler.CompileStatement(plan, statement));
-								#endif
 								plan.CheckCompiled();
 							}
 							finally

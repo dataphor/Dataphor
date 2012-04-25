@@ -82,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			if (quotaOrderIncludesKey)
 			{
-				if ((Nodes[1].IsLiteral) && ((int)plan.EvaluateLiteralArgument(Compiler.BindNode(plan, Nodes[1]), "quota") == 1))
+				if ((Nodes[1].IsLiteral) && ((int)plan.EvaluateLiteralArgument(Nodes[1], "quota") == 1))
 				{
 					Schema.Key key = new Schema.Key();
 					key.IsInherited = true;
@@ -254,11 +254,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					QuotaExpression quotaExpression = (QuotaExpression)EmitStatement(EmitMode.ForCopy);
 					quotaExpression.Expression = new UnionExpression(new TableSelectorExpression(new Expression[]{new IdentifierExpression("ARow")}), quotaExpression.Expression);
 					Expression validateExpression = new BinaryExpression(new IdentifierExpression("ARow"), Instructions.In, quotaExpression);
-					#if !USECOMPILERBIND
 					_validateNode = Compiler.Compile(plan, validateExpression).ExtractNode<ExpressionStatementNode>().Nodes[0];
-					#else
-					_validateNode = Compiler.BindNode(plan, Compiler.OptimizeNode(plan, Compiler.CompileExpression(plan, validateExpression)));
-					#endif
 				}
 				finally
 				{

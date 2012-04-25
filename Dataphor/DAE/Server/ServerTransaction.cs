@@ -699,11 +699,7 @@ namespace Alphora.Dataphor.DAE.Server
 								Process.PushLoadingContext(new LoadingContext(Process.ServerSession.User, true));
 								try
 								{
-									#if !USECOMPILERBIND
 									PlanNode planNode = Compiler.Compile(plan, new DropTableStatement(_checkTableName));
-									#else
-									PlanNode planNode = Compiler.BindNode(plan, Compiler.CompileStatement(plan, new DropTableStatement(_checkTableName)));
-									#endif
 									plan.CheckCompiled();
 									Program program = new Program(Process);
 									program.Code = planNode;

@@ -7,6 +7,7 @@
 #define UseReferenceDerivation
 	
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Collections;
@@ -412,6 +413,90 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if the current order column does not include nulls
 						[and] current order column is not null
 		*/
+
+		protected Expression EmitBrowseColumnExpression(Schema.OrderColumn column, string instruction)
+		{
+			Expression expression = 
+				new BinaryExpression
+				(
+					new IdentifierExpression(column.Column.Name),
+					instruction, 
+					new IdentifierExpression(Schema.Object.Qualify(column.Column.Name, Keywords.Origin))
+				);
+				
+			if (column.Column.IsNilable && column.IncludeNils)
+			{
+				switch (instruction)
+				{
+					case Instructions.Equal :
+						expression =
+							new BinaryExpression
+							(
+								new BinaryExpression
+								(
+									EmitBrowseNilExpression(column.Column, true),
+									Instructions.And,
+									EmitOriginNilExpression(column.Column, true)
+								),
+								Instructions.Or,
+								expression
+							);
+					break;
+					
+					case Instructions.InclusiveGreater :
+						expression =
+							new BinaryExpression
+							(
+								EmitOriginNilExpression(column.Column, true),
+								Instructions.Or,
+								expression
+							);
+					break;
+					
+					case Instructions.Greater :
+						expression =
+							new BinaryExpression
+							(
+								new BinaryExpression
+								(
+									EmitOriginNilExpression(column.Column, true),
+									Instructions.And,
+									EmitBrowseNilExpression(column.Column, false)
+								),
+								Instructions.Or,
+								expression
+							);
+					break;
+					
+					case Instructions.InclusiveLess :
+						expression =
+							new BinaryExpression
+							(
+								EmitBrowseNilExpression(column.Column, true),
+								Instructions.Or,
+								expression
+							);
+					break;
+
+					case Instructions.Less :
+						expression =
+							new BinaryExpression
+							(
+								new BinaryExpression
+								(
+									EmitBrowseNilExpression(column.Column, true),
+									Instructions.And,
+									EmitOriginNilExpression(column.Column, false)
+								),
+								Instructions.Or,
+								expression
+							);
+					break;
+				}
+			}
+			
+			return expression;
+		}
 		
 		protected PlanNode EmitBrowseColumnNode(Plan plan, Schema.OrderColumn column, string instruction)
 		{
@@ -506,6 +591,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return node;
 		}
 
+		protected Expression EmitBrowseNilExpression(Schema.TableVarColumn column, bool isNil)
+		{
+			if (isNil)
+			{
+				return new CallExpression("IsNil", new Expression[] { new IdentifierExpression(column.Name) });
+			}
+			else
+			{
+				return new UnaryExpression(Instructions.Not, EmitBrowseNilExpression(column, true));
+			}
+		}
+
 		protected PlanNode EmitBrowseNilNode(Plan plan, Schema.TableVarColumn column, bool isNil)
 		{
 			if (isNil)
@@ -529,6 +626,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 			}
 		}
+
+		protected Expression EmitOriginNilExpression(Schema.TableVarColumn column, bool isNil)
+		{
+			if (isNil)
+				return new CallExpression("IsNil", new Expression[] { new IdentifierExpression(Schema.Object.Qualify(column.Name, Keywords.Origin)) });
+			else
+				return new UnaryExpression(Instructions.Not, EmitOriginNilExpression(column, true));
+		}
 		
 		protected PlanNode EmitOriginNilNode(Plan plan, Schema.TableVarColumn column, bool isNil)
 		{
@@ -548,6 +653,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						Instructions.Not,
 						EmitOriginNilNode(plan, column, true)
 					);
+		}
+
+		protected Expression EmitBrowseComparisonExpression
+		(
+			Schema.Order order,
+			bool forward,
+			bool inclusive,
+			int originIndex
+		)
+		{
+			Expression expression = null;
+			Schema.OrderColumn originColumn = order.Columns[originIndex];
+			if (originColumn.Ascending != forward)
+			{
+				if (inclusive && (originIndex == order.Columns.Count - 1))
+					expression = EmitBrowseColumnExpression(originColumn, Instructions.InclusiveLess);
+				else
+					expression = EmitBrowseColumnExpression(originColumn, Instructions.Less);
+			}
+			else
+			{
+				if (inclusive && (originIndex == order.Columns.Count - 1))
+					expression = EmitBrowseColumnExpression(originColumn, Instructions.InclusiveGreater);
+				else
+					expression = EmitBrowseColumnExpression(originColumn, Instructions.Greater);
+			}
+
+			return expression;
 		}
         
 		protected PlanNode EmitBrowseComparisonNode
@@ -576,6 +709,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					node = EmitBrowseColumnNode(plan, originColumn, Instructions.Greater);
 			}
 			return node;
+		}
+
+		protected Expression EmitBrowseOriginExpression
+		(
+			Schema.Order order,
+			bool forward,
+			bool inclusive,
+			int originIndex
+		)
+		{
+			Expression expression = null;
+			for (int index = 0; index < originIndex; index++)
+			{
+				Expression equalExpression = EmitBrowseColumnExpression(order.Columns[index], Instructions.Equal);
+						
+				expression = AppendExpression(expression, Instructions.And, equalExpression);
+			}
+			
+			expression = 
+				AppendExpression
+				(
+					expression, 
+					Instructions.And, 
+					EmitBrowseComparisonExpression(order, forward, inclusive, originIndex)
+				);
+			
+			for (int index = originIndex + 1; index < order.Columns.Count; index++)
+				if (order.Columns[index].Column.IsNilable && !order.Columns[index].IncludeNils)
+					expression = 
+						AppendExpression
+						(
+							expression, 
+							Instructions.And, 
+							EmitBrowseNilExpression(order.Columns[index].Column, false)
+						);
+
+			return expression;
 		}
         
 		protected PlanNode EmitBrowseOriginNode
@@ -615,6 +785,58 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							EmitBrowseNilNode(plan, order.Columns[index].Column, false)
 						);
 			return node;
+		}
+
+		protected Expression EmitBrowseConditionExpression
+		(
+			Schema.Order order,
+			Schema.IRowType origin,
+			bool forward,
+			bool inclusive
+		)
+		{
+			Expression expression = null;
+			for (int orderIndex = order.Columns.Count - 1; orderIndex >= 0; orderIndex--)
+			{
+				if ((origin != null) && (orderIndex < origin.Columns.Count))
+					expression = 
+						AppendExpression
+						(
+							expression, 
+							Instructions.Or, 
+							EmitBrowseOriginExpression(order, forward, inclusive, orderIndex)
+						);
+				else
+					#if USEINCLUDENILSWITHBROWSE
+					if (order.Columns[orderIndex].Column.IsNilable && !order.Columns[orderIndex].IncludeNils)
+					#endif
+					{
+						expression = 
+							AppendExpression
+							(
+								expression, 
+								Instructions.And, 
+								EmitBrowseNilExpression(order.Columns[orderIndex].Column, false)
+							);
+					}
+			}
+
+			if (expression == null)
+				expression = new ValueExpression(inclusive, TokenType.Boolean);
+			
+			return expression;
+		}
+
+		protected Expression AppendExpression(Expression leftExpression, string instruction, Expression rightExpression)
+		{
+			if (leftExpression != null)
+			{
+				return new BinaryExpression(leftExpression, instruction, rightExpression);
+			}
+			else
+			{
+				return rightExpression;
+			}
 		}
         
 		protected PlanNode EmitBrowseConditionNode
@@ -659,59 +881,51 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			return node;
 		}
+
+		protected Expression EmitBrowseVariantExpression(Schema.Order originOrder, Schema.IRowType origin, int originIndex, bool forward, bool inclusive)
+		{
+			return 
+				new OrderExpression
+				(
+					new RestrictExpression
+					(
+						_sourceExpression, 
+						EmitBrowseConditionExpression(originIndex < 0 ? Order : originOrder, originIndex < 0 ? null : origin, forward, inclusive)
+					), 
+					(from c in (new Schema.Order(Order, !forward)).Columns select (OrderColumnDefinition)c.EmitStatement(EmitMode.ForCopy)).ToArray()
+				);
+		}
 		
 		protected BrowseVariants _browseVariants = new BrowseVariants();
 		public BrowseVariants BrowseVariants { get { return _browseVariants; } }
-		
+
 		protected PlanNode EmitBrowseVariantNode(Plan plan, int originIndex, bool forward, bool inclusive)
 		{
 			Schema.Order originOrder = new Schema.Order();
 			for (int index = 0; index <= originIndex; index++)
 				originOrder.Columns.Add(new Schema.OrderColumn(Order.Columns[index].Column, Order.Columns[index].Ascending, Order.Columns[index].IncludeNils));
 			Schema.IRowType origin = new Schema.RowType(originOrder.Columns, Keywords.Origin);
-			plan.PushCursorContext(new CursorContext(CursorType, CursorCapabilities & ~(CursorCapability.BackwardsNavigable | CursorCapability.Bookmarkable | CursorCapability.Searchable | CursorCapability.Countable), CursorIsolation));
-			try
-			{
+			//plan.PushCursorContext(new CursorContext(CursorType, CursorCapabilities & ~(CursorCapability.BackwardsNavigable | CursorCapability.Bookmarkable | CursorCapability.Searchable | CursorCapability.Countable), CursorIsolation));
+			//try
+			//{
 				plan.EnterRowContext();
 				try
 				{
 					plan.Symbols.Push(new Symbol(String.Empty, origin));
 					try
 					{
-						PlanNode resultNode;
-						PlanNode sourceNode = GetSourceNode(plan);
-						plan.Symbols.Push(new Symbol(String.Empty, DataType.RowType));
-						try
-						{
-							resultNode =
-								Compiler.EmitOrderNode
-								(
-									plan,
-									Compiler.EmitRestrictNode
-									(
-										plan,
-										sourceNode,
-										EmitBrowseConditionNode
-										(
-											plan,
-											originIndex < 0 ? Order : originOrder,
-											originIndex < 0 ? null : origin,
-											forward,
-											inclusive
-										)
-									),
-									new Schema.Order(Order, !forward),
-									true
-								);
-						}
-						finally
-						{
-							plan.Symbols.Pop();
-						}
+						var cursorExpression = EmitBrowseVariantExpression(originOrder, origin, originIndex, forward, inclusive);
+						var cursorDefinition = 
+							new CursorDefinition
+							(
+								cursorExpression, 
+								CursorCapabilities & ~(CursorCapability.BackwardsNavigable | CursorCapability.Bookmarkable | CursorCapability.Searchable | CursorCapability.Countable), 
+								CursorIsolation, 
+								CursorType
+							);
+						var resultNode = Compiler.Compile(plan, cursorDefinition, true);
 
-						resultNode = Compiler.OptimizeNode(plan, resultNode);
-						resultNode = Compiler.BindNode(plan, resultNode);
-						return resultNode;
+						return resultNode.ExtractNode<TableNode>();
 					}
 					finally
 					{
@@ -722,11 +936,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					plan.ExitRowContext();
 				}
-			}
-			finally
-			{
-				plan.PopCursorContext();
-			}
+			//}
+			//finally
+			//{
+			//	plan.PopCursorContext();
+			//}
 		}
 		
 		private Expression _sourceExpression;

@@ -1429,6 +1429,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
     public class OrderExpression : BaseOrderExpression
     {
 		public OrderExpression() : base() {}
+		public OrderExpression(Expression expression, OrderColumnDefinition[] columns) : base()
+		{
+			Expression = expression;
+			Columns.AddRange(columns);
+		}
 		public OrderExpression(Expression expression, OrderColumnDefinitions columns) : base()
 		{
 			Expression = expression;

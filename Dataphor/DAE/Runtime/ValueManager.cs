@@ -149,11 +149,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				plan.Symbols.Push(new Symbol("AValue", representation.ScalarType));
 				try
 				{
-					#if !USECOMPILERBIND
 					representation.ReadNode = Compiler.Compile(plan, new QualifierExpression(new IdentifierExpression("AValue"), new IdentifierExpression(representation.Properties[0].Name)));
-					#else
-					representation.ReadNode = Compiler.Bind(plan, Compiler.EmitPropertyReadNode(plan, new StackReferenceNode("AValue", representation.ScalarType, 0, true), representation.ScalarType, representation.Properties[0]));
-					#endif
 				}
 				finally
 				{
@@ -205,11 +201,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 					plan.Symbols.Push(new Symbol("ANewValue", representation.Properties[0].DataType));
 					try
 					{
-						#if !USECOMPILERBIND
 						representation.WriteNode = Compiler.Compile(plan, new AssignmentStatement(new QualifierExpression(new IdentifierExpression("AValue"), new IdentifierExpression(representation.Properties[0].Name)), new IdentifierExpression("ANewValue"))).Nodes[1];
-						#else
-						representation.WriteNode = Compiler.Bind(plan, Compiler.EmitPropertyWriteNode(plan, null, representation.Properties[0], new StackReferenceNode("ANewValue", representation.Properties[0].DataType, 0, true), new StackReferenceNode("AValue", representation.ScalarType, 1, true))).Nodes[1];
-						#endif
 					}
 					finally
 					{

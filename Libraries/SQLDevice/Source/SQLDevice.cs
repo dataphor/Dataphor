@@ -404,11 +404,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						// changes the dependency reporting for scalar type maps, and causes some catalog dependency errors,
 						// so I cannot justify making this change in this version. Perhaps at some point, but not now...
 						statement.CreateDeviceScalarTypeMaps.Add(new D4.DeviceScalarTypeMap(column.DataType.Name));
-						#if !USECOMPILERBIND
 						plan.ExecuteNode(Compiler.Compile(plan, statement));
-						#else
-						plan.ExecuteNode(Compiler.BindNode(plan, Compiler.CompileAlterDeviceStatement(plan, statement)));
-						#endif
 						ResolveDeviceScalarType(plan, (Schema.ScalarType)column.DataType); // Reresolve to attach a dependency to the generated map
 					}
 					else

@@ -34,11 +34,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] dependentNames = new string[dependents.Count];
 				dependents.CopyTo(dependentNames, 0);
-				#if !USECOMPILERBIND
 				Compiler.Compile(program.Plan, program.Catalog.EmitDropStatement(program.CatalogDeviceSession, dependentNames, String.Empty, false, true, false, true)).Execute(program);
-				#else
-				Compiler.BindNode(program.Plan, Compiler.Compile(program.Plan, program.Catalog.EmitDropStatement(program.CatalogDeviceSession, dependentNames, String.Empty, false, true, false, true))).Execute(program);
-				#endif
 			}
 		}
 		
@@ -1105,12 +1101,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				// Ensure that all data in the given table var satisfies the new constraint
 				// if exists (table rename new where not (expression)) then raise
-				#if USECOMPILERBIND
-				PlanNode planNode = Compiler.EmitTableVarNode(program.Plan, tableVar);
-				planNode = Compiler.EmitRestrictNode(program.Plan, planNode, new UnaryExpression(Instructions.Not, (Expression)rowConstraint.Node.EmitStatement(EmitMode.ForCopy)));
-				planNode = Compiler.EmitUnaryNode(program.Plan, Instructions.Exists, planNode);
-				planNode = Compiler.BindNode(program.Plan, Compiler.OptimizeNode(program.Plan, planNode));
-				#else
 				var planNode = 
 					Compiler.Compile
 					(
@@ -1125,7 +1115,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							)
 						)
 					);
-				#endif
 
 				object objectValue;
 				try
@@ -1378,7 +1367,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Expression constraintExpression = new UnaryExpression(Instructions.Not, (Expression)constraint.Node.EmitStatement(EmitMode.ForCopy));
 			RestoreValueNodes(valueNodes);
 			PlanNode planNode = 
-				#if !USECOMPILERBIND
 				Compiler.Compile
 				(
 					program.Plan,
@@ -1396,37 +1384,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						)
 					)
 				);
-				#else
-				Compiler.Bind
-				(
-					program.Plan, 
-					Compiler.Optimize
-					(
-						program.Plan, 
-						Compiler.EmitUnaryNode
-						(
-							program.Plan, 
-							Instructions.Exists, 
-							Compiler.EmitRestrictNode
-							(
-								program.Plan, 
-								Compiler.EmitProjectNode
-								(
-									program.Plan, 
-									Compiler.EmitBaseTableVarNode
-									(
-										program.Plan, 
-										table
-									), 
-									new string[]{column.Name}, 
-									true
-								), 
-								constraintExpression
-							)
-						)
-					)
-				);
-				#endif
 				
 			object objectValue;
 
@@ -1501,7 +1458,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						// verify that no data exists in the column that is nil
 						PlanNode node = 
-							#if !USECOMPILERBIND
 							Compiler.Compile
 							(
 								program.Plan,
@@ -1515,29 +1471,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									)
 								)
 							);
-							#else
-							Compiler.Bind
-							(
-								program.Plan, 
-								Compiler.Bind
-								(
-									program.Plan, 
-									Compiler.CompileExpression
-									(
-										program.Plan, 
-										new UnaryExpression
-										(
-											Language.D4.Instructions.Exists, 
-											new RestrictExpression
-											(
-												new IdentifierExpression(table.Name), 
-												new UnaryExpression("IsNil", new IdentifierExpression(column.Name))
-											)
-										)
-									)
-								)
-							);
-							#endif
 							
 						object result;
 						try
@@ -1658,11 +1591,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				foreach (Schema.TableVarColumn column in _defaultColumns)
 					updateStatement.Columns.Add(new UpdateColumnExpression(new IdentifierExpression(column.Name), (Expression)column.Default.Node.EmitStatement(EmitMode.ForCopy)));
 					
-				#if !USECOMPILERBIND
 				Compiler.Compile(program.Plan, updateStatement).Execute(program);
-				#else
-				Compiler.BindNode(program.Plan, Compiler.CompileUpdateStatement(program.Plan, updateStatement)).Execute(program);
-				#endif
 				
 				// Set the nilable for each column that is not nil
 				// alter table <table name> { alter column <column name> { not nil } };
@@ -1677,11 +1606,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					alterStatement.AlterColumns.Add(alterColumn);
 				}
 				
-				#if !USECOMPILERBIND
 				Compiler.Compile(program.Plan, alterStatement).Execute(program);
-				#else
-				Compiler.BindNode(program.Plan, Compiler.CompileAlterTableStatement(program.Plan, alterStatement)).Execute(program);
-				#endif
 			}
 		}
 		
@@ -1874,7 +1799,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							Expression constraintExpression = new UnaryExpression(Instructions.Not, (Expression)constraint.Node.EmitStatement(EmitMode.ForCopy));
 							AlterTableNode.RestoreValueNodes(valueNodes);
 
-							#if !USECOMPILERBIND
 							var planNode = 
 								Compiler.Compile
 								(
@@ -1893,13 +1817,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										)
 									)
 								);
-							#else
-							PlanNode planNode = Compiler.EmitBaseTableVarNode(program.Plan, baseTableVar);
-							planNode = Compiler.EmitProjectNode(program.Plan, planNode, new string[]{column.Name}, true);
-							planNode = Compiler.EmitRestrictNode(program.Plan, planNode, constraintExpression);
-							planNode = Compiler.EmitUnaryNode(program.Plan, Instructions.Exists, planNode);
-							planNode = Compiler.BindNode(program.Plan, planNode);
-							#endif
 
 							object result;
 							try
@@ -2533,11 +2450,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.Plan.PushCreationObject(tempConstraint);
 				try
 				{
-					#if !USECOMPILERBIND
 					tempConstraint.Node = Compiler.Compile(program.Plan, _alterConstraintStatement.Expression);
-					#else
-					tempConstraint.Node = Compiler.OptimizeNode(program.Plan, Compiler.BindNode(program.Plan, Compiler.CompileBooleanExpression(program.Plan, _alterConstraintStatement.Expression)));
-					#endif
 					
 					// Validate the new constraint
 					if (tempConstraint.Enforced && !program.ServerProcess.IsLoading() && program.ServerProcess.IsReconciliationEnabled())

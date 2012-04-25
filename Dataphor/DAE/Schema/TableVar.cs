@@ -915,7 +915,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
     }
 
-	public class OrderColumns : System.Object
+	public class OrderColumns : System.Object, IList<OrderColumn>
     {
 		private List<OrderColumn> _orderColumns = new List<OrderColumn>();
 		
@@ -927,6 +927,16 @@ namespace Alphora.Dataphor.DAE.Schema
 			_version++;
 		}
 		
+		public void Insert(int index, OrderColumn item)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void RemoveAt(int index)
+		{
+			throw new NotImplementedException();
+		}
+
 		public int IndexOf(OrderColumn orderColumn)
 		{
 			for (int index = 0; index < _orderColumns.Count; index++)
@@ -942,7 +952,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public int Count { get { return _orderColumns.Count; } }
 		
-		public OrderColumn this[int index] { get { return _orderColumns[index]; } }
+		public OrderColumn this[int index] 
+		{ 
+			get { return _orderColumns[index]; } 
+			set { throw new NotImplementedException(); }
+		}
 
 		/// <summary>Returns the first column in the order referencing the given name, without name resolution</summary>		
 		public OrderColumn this[string columnName]
@@ -1055,7 +1069,49 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			return IsSubsetOf(columns) && (Count < columns.Count);
 		}
-    }
+
+		#region ICollection<OrderColumn> Members
+
+		public void Clear()
+		{
+			throw new NotImplementedException();
+		}
+
+		public void CopyTo(OrderColumn[] array, int arrayIndex)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool IsReadOnly
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		public bool Remove(OrderColumn item)
+		{
+			throw new NotImplementedException();
+		}
+
+		#endregion
+
+		#region IEnumerable<OrderColumn> Members
+
+		IEnumerator<OrderColumn> IEnumerable<OrderColumn>.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		#endregion
+
+		#region IEnumerable Members
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		#endregion
+	}
 
 	public class Order : Object
     {		
