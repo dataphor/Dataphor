@@ -1375,7 +1375,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 								PlanNode planNode = null;
 								try
 								{
+									#if !USECOMPILERBIND
+									planNode = Compiler.Compile(plan, statement);
+									#else
 									planNode = Compiler.Bind(plan, Compiler.CompileStatement(plan, statement));
+									#endif
 								}
 								finally
 								{

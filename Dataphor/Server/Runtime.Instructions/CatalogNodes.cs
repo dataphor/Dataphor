@@ -437,7 +437,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			D4TextEmitter emitter = new D4TextEmitter();
 		
 			string expression = (string)arguments[0];
+			#if !USECOMPILERBIND
+			CursorNode node = Compiler.Compile(program.Plan, expression, true).ExtractNode<CursorNode>();
+			#else
 			CursorNode node = (CursorNode)Compiler.BindNode(program.Plan, Compiler.OptimizeNode(program.Plan, Compiler.CompileCursor(program.Plan, new Parser().ParseCursorDefinition(expression))));
+			#endif
 			TableSelectorExpressionBase selector = node.SourceNode.DataType is Schema.TableType ? (TableSelectorExpressionBase)new TableSelectorExpression() : new PresentationSelectorExpression();
 			selector.TypeSpecifier = node.SourceNode.DataType.EmitSpecifier(EmitMode.ForCopy);
 			selector.Keys.Add(program.FindClusteringKey(node.SourceNode.TableVar).EmitStatement(EmitMode.ForCopy));

@@ -213,9 +213,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         {
 			get { return _device; }
 			set { _device = value; }
-        }
-        
-        // DeviceNode
+		}
+
+		[Reference]
+		protected Schema.Device _potentialDevice;
+		public Schema.Device PotentialDevice
+		{
+			get { return _potentialDevice; }
+			set { _potentialDevice = value; }
+		}
+
+		// DeviceNode
         protected DevicePlanNode _deviceNode;
         public DevicePlanNode DeviceNode
         {
@@ -252,7 +260,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         // Will be null if this node has not been prepared, so test all access to this reference.
         protected Schema.TranslationMessages _deviceMessages;
         public Schema.TranslationMessages DeviceMessages { get { return _deviceMessages; } }
-        
+
 		// DetermineDevice
 		public virtual void DetermineDevice(Plan plan)
 		{
@@ -842,6 +850,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         }
 
 		#endregion
+
+		public T ExtractNode<T>() where T : PlanNode
+		{
+			var planNode = this;
+
+			while (!(planNode is T) && planNode.Nodes.Count == 1)
+			{
+				planNode = planNode.Nodes[0];
+			}
+
+			return (T)planNode;
+		}
 	}
 	
 	public class PlanNodes : System.Object, IList<PlanNode>, IEnumerable<PlanNode>

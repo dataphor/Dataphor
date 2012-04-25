@@ -1991,7 +1991,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							plan.PushSecurityContext(new SecurityContext(_tableVar.Owner));
 							try
 							{
+								#if !USECOMPILERBIND
+								_joinATNode = Compiler.Compile(plan, statement);
+								#else
 								_joinATNode = Compiler.BindNode(plan, Compiler.CompileStatement(plan, statement));
+								#endif
 								plan.CheckCompiled();
 							}
 							finally

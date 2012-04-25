@@ -676,7 +676,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return planNode;
 		}
 		
+		#if USECOMPILERBIND
 		public static PlanNode Bind(Plan plan, PlanNode planNode)
+		#else
+		private static PlanNode Bind(Plan plan, PlanNode planNode)
+		#endif
 		{
 			plan.Symbols.PushFrame();
 			try

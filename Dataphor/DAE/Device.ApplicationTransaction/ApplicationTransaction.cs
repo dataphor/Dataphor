@@ -1225,7 +1225,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					try
 					{
 						Program program = new Program(process);
+						#if !USECOMPILERBIND
+						program.Code = Compiler.Compile(plan, block);
+						#else
 						program.Code = Compiler.Bind(plan, Compiler.CompileStatement(plan, block));
+						#endif
 						plan.CheckCompiled();
 						program.Execute(null);
 					}
@@ -1308,7 +1312,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						try
 						{
 							Program program = new Program(process);
+							#if !USECOMPILERBIND
+							program.Code = Compiler.Compile(plan, block);
+							#else
 							program.Code = Compiler.Bind(plan, Compiler.CompileStatement(plan, block));
+							#endif
 							plan.CheckCompiled();
 							program.Execute(null);
 						}
@@ -1408,7 +1416,23 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 								try
 								{
 									Program program = new Program(process);
-									program.Code = 
+									program.Code =
+										#if !USECOMPILERBIND
+										Compiler.Compile
+										(
+											plan,
+											process.Catalog.EmitDropStatement
+											(
+												process.CatalogDeviceSession,
+												objectNameArray,
+												String.Empty,
+												true,
+												false,
+												true,
+												true
+											)
+										);
+										#else
 										Compiler.Bind
 										(
 											plan, 
@@ -1427,6 +1451,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 												)
 											)
 										);
+										#endif
 									plan.CheckCompiled();
 									program.Execute(null);
 								}
@@ -1545,7 +1570,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 								try
 								{
 									Program program = new Program(process);
+									#if !USECOMPILERBIND
+									program.Code = Compiler.Compile(plan, process.Catalog.EmitDropStatement(process.CatalogDeviceSession, objectNameArray, String.Empty));
+									#else
 									program.Code = Compiler.Bind(plan, Compiler.Compile(plan, process.Catalog.EmitDropStatement(process.CatalogDeviceSession, objectNameArray, String.Empty)));
+									#endif
 									plan.CheckCompiled();
 									program.Execute(null);
 								}
@@ -1605,7 +1634,12 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 									try							 
 									{
 										Program program = new Program(process);
+										#if !USECOMPILERBIND
+										program.Code = Compiler.Compile(plan, process.Catalog.EmitDropStatement(process.CatalogDeviceSession, new string[] { deletedTableVar.Name }, String.Empty));
+										plan.CheckCompiled();
+										#else
 										program.Code = Compiler.Bind(plan, new DropTableNode(deletedTableVar, false));
+										#endif
 										program.Execute(null);
 									}
 									finally
@@ -1621,7 +1655,12 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 								try							 
 								{
 									Program program = new Program(process);
+									#if !USECOMPILERBIND
+									program.Code = Compiler.Compile(plan, process.Catalog.EmitDropStatement(process.CatalogDeviceSession, new string[] { targetTableVar.Name }, String.Empty));
+									plan.CheckCompiled();
+									#else
 									program.Code = Compiler.Bind(plan, new DropTableNode(targetTableVar, false));
+									#endif
 									program.Execute(null);
 								}
 								finally
@@ -1651,6 +1690,118 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			ApplicationTransactions[process.ApplicationTransactionID].PushGlobalContext();
 			try
 			{
+				#if !USECOMPILERBIND
+
+				// RetrieveNode
+				using (var plan = new Plan(process))
+				{
+					plan.PushSecurityContext(new SecurityContext(sourceTableVar.Owner));
+					try
+					{
+						var planNode = Compiler.Compile(plan, new CursorDefinition(new IdentifierExpression(sourceTableVar.Name), CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated, DAE.CursorType.Static));
+						plan.CheckCompiled();
+						tableMap.RetrieveNode = planNode.ExtractNode<BaseTableVarNode>();
+					}
+					finally
+					{
+						plan.PopSecurityContext();
+					}
+				}
+
+				// DeletedRetrieveNode
+				using (var plan = new Plan(process))
+				{
+					plan.PushSecurityContext(new SecurityContext(sourceTableVar.Owner));
+					try
+					{
+						var planNode = Compiler.Compile(plan, new CursorDefinition(new IdentifierExpression(Object.EnsureRooted(tableMap.DeletedTableVar.Name)), CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated, DAE.CursorType.Static));
+						plan.CheckCompiled();
+						tableMap.DeletedRetrieveNode = planNode.ExtractNode<BaseTableVarNode>();
+					}
+					finally
+					{
+						plan.PopSecurityContext();
+					}
+				}
+
+				// HasRowNode/HasDeletedRowNode
+				using (var plan = new Plan(process))
+				{
+					Schema.Key clusteringKey = Compiler.FindClusteringKey(plan, tableMap.TableVar);
+					#if !USENAMEDROWVARIABLES
+					Schema.RowType oldRowType = new Schema.RowType(ATableMap.TableVar.DataType.Columns, Keywords.Old);
+					Schema.RowType oldKeyType = new Schema.RowType(clusteringKey.Columns, Keywords.Old);
+					Schema.RowType keyType = new Schema.RowType(clusteringKey.Columns);
+					#endif
+					plan.EnterRowContext();
+					try
+					{
+						#if USENAMEDROWVARIABLES
+						plan.Symbols.Push(new Symbol(Keywords.Old, tableMap.TableVar.DataType.RowType));
+						#else
+						plan.Symbols.Push(new Symbol(String.Empty, oldRowType));
+						#endif
+						try
+						{
+							var deletedRowNodeExpression =
+								new UnaryExpression
+								(
+									Instructions.Exists,
+									new RestrictExpression
+									(
+										new IdentifierExpression(Object.EnsureRooted(tableMap.DeletedTableVar.Name)),
+										#if USENAMEDROWVARIABLES
+										Compiler.BuildKeyEqualExpression(plan, Keywords.Old, String.Empty, clusteringKey.Columns, clusteringKey.Columns)
+										#else
+										Compiler.BuildKeyEqualExpression(LPlan, LOldKeyType.Columns, LKeyType.Columns)
+										#endif
+									)
+								);
+							
+							var planNode = Compiler.Compile(plan, deletedRowNodeExpression);
+							plan.CheckCompiled();
+
+							tableMap.HasDeletedRowNode = planNode;
+
+							planNode =
+								Compiler.Compile
+								(
+									plan,
+									new BinaryExpression
+									(
+										new UnaryExpression
+										(
+											Instructions.Exists,
+											new RestrictExpression
+											(
+												new IdentifierExpression(Object.EnsureRooted(tableMap.TableVar.Name)),
+												#if USENAMEDROWVARIABLES
+												Compiler.BuildKeyEqualExpression(plan, Keywords.Old, String.Empty, clusteringKey.Columns, clusteringKey.Columns)
+												#else
+												Compiler.BuildKeyEqualExpression(LPlan, LOldKeyType.Columns, LKeyType.Columns)
+												#endif
+											)
+										),
+										Instructions.Or,
+										deletedRowNodeExpression
+									)
+								);
+
+							plan.CheckCompiled();
+							tableMap.HasRowNode = planNode;
+						}
+						finally
+						{
+							plan.Symbols.Pop();
+						}
+					}
+					finally
+					{
+						plan.ExitRowContext();
+					}
+				}
+
+				#else
 				Plan plan = new Plan(process);
 				try
 				{
@@ -1751,6 +1902,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				{
 					plan.Dispose();
 				}
+				#endif
 			}
 			finally
 			{
@@ -1818,7 +1970,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 								try
 								{
 									Program program = new Program(process);
+									#if !USECOMPILERBIND
+									program.Code = Compiler.Compile(plan, statement);
+									#else
 									program.Code = Compiler.Bind(plan, Compiler.CompileStatement(plan, statement));
+									#endif
 									plan.CheckCompiled();
 									program.Execute(null);
 									Schema.Operator localOperatorValue = ((CreateOperatorNode)program.Code).CreateOperator;

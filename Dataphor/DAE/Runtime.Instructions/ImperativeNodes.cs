@@ -1123,6 +1123,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				plan.Symbols.Pop();
 			}
+
+			DetermineDevice(plan);
 		}
 
 		public override object InternalExecute(Program program)
@@ -2221,6 +2223,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// Do not bind node 1, it will fail (it contains nameless stack references)
 			for (int index = 2; index < Nodes.Count; index++)
 				Nodes[index].DetermineBinding(plan);
+
+			DetermineDevice(plan);
 		}
 
 		public override object InternalExecute(Program program)

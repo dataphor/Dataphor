@@ -1060,13 +1060,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Plan plan = new Plan(program.ServerProcess);
 			try
 			{
-				PlanNode node = Compiler.CompileExpression(plan, new Parser().ParseExpression((string)arguments[0]));
-				plan.CheckCompiled();
+				PlanNode node = Compiler.Compile(plan, (string)arguments[0]);
 
-				node = Compiler.BindNode(plan, node);
-
-				if (!(node is RestrictNode))
-					throw new Exception("Restrict expression expected");
+				node = node.ExtractNode<RestrictNode>();
 			
 				return ((RestrictNode)node).RestrictionAlgorithm.Name;
 			}
@@ -1085,13 +1081,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Plan plan = new Plan(program.ServerProcess);
 			try
 			{
-				PlanNode node = Compiler.CompileExpression(plan, new Parser().ParseExpression((string)arguments[0]));
-				if (plan.Messages.HasErrors)
-					throw new ServerException(ServerException.Codes.UncompiledPlan, plan.Messages.ToString(CompilerErrorLevel.NonFatal));
-					
-				node = Compiler.BindNode(plan, node);
-				if (!(node is JoinNode))
-					throw new Exception("Join expression expected");
+				PlanNode node = Compiler.Compile(plan, (string)arguments[0]);
+
+				node = node.ExtractNode<JoinNode>();
 			
 				return ((JoinNode)node).JoinAlgorithm.Name;
 			}
@@ -2328,9 +2320,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Plan plan = new Plan(program.ServerProcess);
 			try
 			{
-				PlanNode node = Compiler.Compile(plan, new Parser().ParseScript((string)arguments[0], null));
-				node = Compiler.OptimizeNode(plan, node);
-				node = Compiler.BindNode(plan, node);
+				PlanNode node = Compiler.Compile(plan, (string)arguments[0]);
 				#if ACCUMULATOR
 				accumulator = plan.Accumulator;
 				#endif

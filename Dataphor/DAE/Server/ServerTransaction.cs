@@ -507,20 +507,16 @@ namespace Alphora.Dataphor.DAE.Server
 					try
 					{
 						var equalNode =
-							Compiler.BindNode
+							Compiler.CompileExpression
 							(
 								plan, 
-								Compiler.CompileExpression
+								Compiler.BuildKeyEqualExpression
 								(
 									plan, 
-									Compiler.BuildKeyEqualExpression
-									(
-										plan, 
-										Keywords.Old, 
-										Keywords.New, 
-										_checkTableKey.Columns, 
-										_checkTableKey.Columns
-									)
+									Keywords.Old, 
+									Keywords.New, 
+									_checkTableKey.Columns, 
+									_checkTableKey.Columns
 								)
 							);
 						plan.CheckCompiled();
@@ -703,7 +699,11 @@ namespace Alphora.Dataphor.DAE.Server
 								Process.PushLoadingContext(new LoadingContext(Process.ServerSession.User, true));
 								try
 								{
+									#if !USECOMPILERBIND
+									PlanNode planNode = Compiler.Compile(plan, new DropTableStatement(_checkTableName));
+									#else
 									PlanNode planNode = Compiler.BindNode(plan, Compiler.CompileStatement(plan, new DropTableStatement(_checkTableName)));
+									#endif
 									plan.CheckCompiled();
 									Program program = new Program(Process);
 									program.Code = planNode;

@@ -1682,7 +1682,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						Program program = new Program(ServerProcess);
 						foreach (Statement statement in block.Statements)
 						{
+							#if !USECOMPILERBIND
+							program.Code = Compiler.Compile(plan, statement);
+							#else
 							program.Code = Compiler.Bind(plan, Compiler.Compile(plan, statement));
+							#endif
 							program.Execute(null);
 						}
 					}

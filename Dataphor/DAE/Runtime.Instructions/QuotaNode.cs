@@ -254,7 +254,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					QuotaExpression quotaExpression = (QuotaExpression)EmitStatement(EmitMode.ForCopy);
 					quotaExpression.Expression = new UnionExpression(new TableSelectorExpression(new Expression[]{new IdentifierExpression("ARow")}), quotaExpression.Expression);
 					Expression validateExpression = new BinaryExpression(new IdentifierExpression("ARow"), Instructions.In, quotaExpression);
+					#if !USECOMPILERBIND
+					_validateNode = Compiler.Compile(plan, validateExpression).ExtractNode<ExpressionStatementNode>().Nodes[0];
+					#else
 					_validateNode = Compiler.BindNode(plan, Compiler.OptimizeNode(plan, Compiler.CompileExpression(plan, validateExpression)));
+					#endif
 				}
 				finally
 				{

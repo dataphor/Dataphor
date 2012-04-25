@@ -171,7 +171,11 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 					try
 					{
 						Program program = new Program(process);
+						#if !USECOMPILERBIND
+						program.Code = Compiler.Compile(plan, new IdentifierExpression(tableVar.Name), true).ExtractNode<BaseTableVarNode>();
+						#else
 						program.Code = Compiler.BindNode(plan, Compiler.EmitBaseTableVarNode(plan, tableVar));
+						#endif
 						program.Start(null);
 						try
 						{

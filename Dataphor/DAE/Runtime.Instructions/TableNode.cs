@@ -869,6 +869,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 														columns.Add(column.Column);
 												}
 												return
+													#if !USECOMPILERBIND
+													Compiler.Compile
+													(
+														plan,
+														new RestrictExpression
+														(
+															(Expression)EmitStatement(EmitMode.ForCopy),
+															Compiler.BuildOptimisticRowEqualExpression
+															(
+																plan, 
+																"",
+																"ASelectRow",
+																columns
+															)
+														)
+													);
+													#else
 													Compiler.Bind
 													(
 														plan,
@@ -885,6 +902,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 															)
 														)
 													);
+													#endif
 											}
 											finally
 											{

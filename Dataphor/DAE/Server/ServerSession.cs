@@ -254,8 +254,7 @@ namespace Alphora.Dataphor.DAE.Server
 						{
 							for (int index = 0; index < block.Statements.Count; index++)
 							{
-								plan.Program.Code = Compiler.BindNode(plan.Plan, Compiler.CompileStatement(plan.Plan, block.Statements[index]));
-								plan.Plan.CheckCompiled();
+								plan.Program.Code = Compiler.Compile(plan.Plan, block.Statements[index]);
 								plan.Program.Execute(null);
 							}
 						}

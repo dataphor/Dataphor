@@ -341,6 +341,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										try
 										{
 											_leftExistsNode =
+												#if !USECOMPILERBIND
+												Compiler.Compile
+												(
+													plan,
+													new UnaryExpression
+													(
+														Instructions.Exists,
+														new RestrictExpression
+														(
+															(Expression)LeftNode.EmitStatement(EmitMode.ForCopy),
+															#if USENAMEDROWVARIABLES
+															Compiler.BuildKeyEqualExpression
+															(
+																plan,
+																String.Empty,
+																Keywords.New,
+																_leftKey.Columns,
+																_leftKey.Columns
+															)
+															#else
+															Compiler.BuildKeyEqualExpression
+															(
+																APlan,
+																new Schema.RowType(FLeftKey.Columns).Columns,
+																new Schema.RowType(FLeftKey.Columns, Keywords.New).Columns
+															)
+															#endif
+														)
+													)
+												);
+												#else
 												Compiler.Bind
 												(
 													plan,
@@ -372,6 +403,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 														)
 													)
 												);
+												#endif
 										}
 										finally
 										{
@@ -445,6 +477,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										try
 										{
 											_rightExistsNode =
+												#if !USECOMPILERBIND
+												Compiler.Compile
+												(
+													plan,
+													new UnaryExpression
+													(
+														Instructions.Exists,
+														new RestrictExpression
+														(
+															(Expression)RightNode.EmitStatement(EmitMode.ForCopy),
+															#if USENAMEDROWVARIABLES
+															Compiler.BuildKeyEqualExpression
+															(
+																plan,
+																String.Empty,
+																Keywords.New,
+																_rightKey.Columns,
+																_rightKey.Columns
+															)
+															#else
+															Compiler.BuildKeyEqualExpression
+															(
+																APlan,
+																new Schema.RowType(FRightKey.Columns).Columns,
+																new Schema.RowType(FRightKey.Columns, Keywords.New).Columns
+															)
+															#endif
+														)
+													)
+												);
+												#else
 												Compiler.Bind
 												(
 													plan,
@@ -476,6 +539,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 														)
 													)
 												);
+												#endif
 										}
 										finally
 										{
@@ -2114,6 +2178,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										try
 										{
 											_leftSelectNode =
+												#if !USECOMPILERBIND
+												Compiler.Compile
+												(
+													plan,
+													new RestrictExpression
+													(
+														(Expression)LeftNode.EmitStatement(EmitMode.ForCopy),
+														#if USENAMEDROWVARIABLES
+														Compiler.BuildKeyEqualExpression
+														(
+															plan,
+															String.Empty,
+															Keywords.New,
+															_leftKey.Columns,
+															_rightKey.Columns
+														)
+														#else
+														Compiler.BuildKeyEqualExpression
+														(
+															APlan,
+															new Schema.RowType(FLeftKey.Columns).Columns,
+															new Schema.RowType(FRightKey.Columns, Keywords.New).Columns
+														)
+														#endif
+													)
+												);
+												#else
 												Compiler.Bind
 												(
 													plan,
@@ -2140,6 +2231,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 														#endif
 													)
 												);
+												#endif
 										}
 										finally
 										{
@@ -2213,6 +2305,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										try
 										{
 											_rightSelectNode =
+												#if !USECOMPILERBIND
+												Compiler.Compile
+												(
+													plan,
+													new RestrictExpression
+													(
+														(Expression)RightNode.EmitStatement(EmitMode.ForCopy),
+														#if USENAMEDROWVARIABLES
+														Compiler.BuildKeyEqualExpression
+														(
+															plan,
+															String.Empty,
+															Keywords.New,
+															_rightKey.Columns,
+															_leftKey.Columns
+														)
+														#else
+														Compiler.BuildKeyEqualExpression
+														(
+															APlan,
+															new Schema.RowType(FRightKey.Columns).Columns,
+															new Schema.RowType(FLeftKey.Columns, Keywords.New).Columns
+														)
+														#endif
+													)
+												);
+												#else
 												Compiler.Bind
 												(	
 													plan,
@@ -2239,6 +2358,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 														#endif
 													)
 												);
+												#endif
 										}
 										finally
 										{

@@ -164,7 +164,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							
 							if (expression.HasByClause)
 								sourceNode = Compiler.EmitOrderNode(plan, (TableNode)sourceNode, Compiler.CompileOrderColumnDefinitions(plan, ((TableNode)sourceNode).TableVar, expression.OrderColumns, null, false), false);
-							aggregateNode.Nodes[0] = sourceNode; //Compiler.BindNode(APlan, Compiler.OptimizeNode(APlan, LSourceNode));
+							aggregateNode.Nodes[0] = sourceNode;
 						}
 						finally
 						{
