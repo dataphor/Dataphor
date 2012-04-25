@@ -69,9 +69,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginStartSession(sessionInfo, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginStartSession(sessionInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndStartSession(result);
+				return channel.EndStartSession(result);
 			}
 			catch (FaultException<NativeCLIFault> exception)
 			{
@@ -83,9 +84,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginStopSession(sessionHandle, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginStopSession(sessionHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetInterface().EndStopSession(result);
+				channel.EndStopSession(result);
 			}
 			catch (FaultException<NativeCLIFault> exception)
 			{
@@ -97,9 +99,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginBeginTransaction(sessionHandle, isolationLevel, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginBeginTransaction(sessionHandle, isolationLevel, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetInterface().EndBeginTransaction(result);
+				channel.EndBeginTransaction(result);
 			}
 			catch (FaultException<NativeCLIFault> exception)
 			{
@@ -111,9 +114,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginPrepareTransaction(sessionHandle, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginPrepareTransaction(sessionHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetInterface().EndPrepareTransaction(result);
+				channel.EndPrepareTransaction(result);
 			}
 			catch (FaultException<NativeCLIFault> exception)
 			{
@@ -125,9 +129,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginCommitTransaction(sessionHandle, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginCommitTransaction(sessionHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetInterface().EndCommitTransaction(result);
+				channel.EndCommitTransaction(result);
 			}
 			catch (FaultException<NativeCLIFault> exception)
 			{
@@ -139,9 +144,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginRollbackTransaction(sessionHandle, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginRollbackTransaction(sessionHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetInterface().EndRollbackTransaction(result);
+				channel.EndRollbackTransaction(result);
 			}
 			catch (FaultException<NativeCLIFault> exception)
 			{
@@ -153,9 +159,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginGetTransactionCount(sessionHandle, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginGetTransactionCount(sessionHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndGetTransactionCount(result);
+				return channel.EndGetTransactionCount(result);
 			}
 			catch (FaultException<NativeCLIFault> exception)
 			{
@@ -167,9 +174,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginSessionExecuteStatement(sessionHandle, statement, paramsValue, options, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginSessionExecuteStatement(sessionHandle, statement, paramsValue, options, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndSessionExecuteStatement(result);
+				return channel.EndSessionExecuteStatement(result);
 			}
 			catch (FaultException<NativeCLIFault> exception)
 			{
@@ -181,9 +189,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginSessionExecuteStatements(sessionHandle, operations, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginSessionExecuteStatements(sessionHandle, operations, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndSessionExecuteStatements(result);
+				return channel.EndSessionExecuteStatements(result);
 			}
 			catch (FaultException<NativeCLIFault> exception)
 			{
@@ -203,9 +212,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginExecuteStatement(sessionInfo, statement, paramsValue, options, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginExecuteStatement(sessionInfo, statement, paramsValue, options, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndExecuteStatement(result);
+				return channel.EndExecuteStatement(result);
 			}
 			catch (FaultException<NativeCLIFault> exception)
 			{
@@ -217,9 +227,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginExecuteStatements(sessionInfo, operations, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginExecuteStatements(sessionInfo, operations, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndExecuteStatements(result);
+				return channel.EndExecuteStatements(result);
 			}
 			catch (FaultException<NativeCLIFault> exception)
 			{

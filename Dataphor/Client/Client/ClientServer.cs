@@ -221,9 +221,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginOpenConnection(connectionName, hostName, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginOpenConnection(connectionName, hostName, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return new ClientConnection(this, connectionName, hostName, GetServiceInterface().EndOpenConnection(result));
+				return new ClientConnection(this, connectionName, hostName, channel.EndOpenConnection(result));
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -235,9 +236,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginCloseConnection(((ClientConnection)connection).ConnectionHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginCloseConnection(((ClientConnection)connection).ConnectionHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndCloseConnection(result);
+				channel.EndCloseConnection(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -255,9 +257,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{ 
 				try
 				{
-					IAsyncResult result = GetServiceInterface().BeginGetServerName(null, null);
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginGetServerName(null, null);
 					result.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetServerName(result);
+					return channel.EndGetServerName(result);
 				}
 				catch (FaultException<DataphorFault> fault)
 				{
@@ -290,9 +293,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{ 
 				try
 				{
-					IAsyncResult result = GetServiceInterface().BeginGetCacheTimeStamp(null, null);
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginGetCacheTimeStamp(null, null);
 					result.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetCacheTimeStamp(result);
+					return channel.EndGetCacheTimeStamp(result);
 				}
 				catch (FaultException<DataphorFault> fault)
 				{
@@ -307,9 +311,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{ 
 				try
 				{
-					IAsyncResult result = GetServiceInterface().BeginGetDerivationTimeStamp(null, null);
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginGetDerivationTimeStamp(null, null);
 					result.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetDerivationTimeStamp(result);
+					return channel.EndGetDerivationTimeStamp(result);
 				}
 				catch (FaultException<DataphorFault> fault)
 				{

@@ -27,9 +27,10 @@ namespace Alphora.Dataphor.DAE.Listener
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginEnumerateInstances(null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginEnumerateInstances(null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndEnumerateInstances(result);
+				return channel.EndEnumerateInstances(result);
 			}
 			catch (FaultException<ListenerFault> exception)
 			{
@@ -41,9 +42,10 @@ namespace Alphora.Dataphor.DAE.Listener
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginGetInstanceURI(_hostName, instanceName, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginGetInstanceURI(_hostName, instanceName, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndGetInstanceURI(result);
+				return channel.EndGetInstanceURI(result);
 			}
 			catch (FaultException<ListenerFault> exception)
 			{
@@ -55,9 +57,10 @@ namespace Alphora.Dataphor.DAE.Listener
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginGetNativeInstanceURI(_hostName, instanceName, null, null);
+				var channel = GetInterface();
+				IAsyncResult result = channel.BeginGetNativeInstanceURI(_hostName, instanceName, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndGetNativeInstanceURI(result);
+				return channel.EndGetNativeInstanceURI(result);
 			}
 			catch (FaultException<ListenerFault> exception)
 			{

@@ -47,9 +47,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginStartProcess(_sessionDescriptor.Handle, processInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginStartProcess(_sessionDescriptor.Handle, processInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				ProcessDescriptor processDescriptor = GetServiceInterface().EndStartProcess(result);
+				ProcessDescriptor processDescriptor = channel.EndStartProcess(result);
 				processID = processDescriptor.ID;
 				return new ClientProcess(this, processInfo, processDescriptor);
 			}
@@ -63,9 +64,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginStopProcess(((ClientProcess)process).ProcessHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginStopProcess(((ClientProcess)process).ProcessHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndStopProcess(result);
+				channel.EndStopProcess(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{

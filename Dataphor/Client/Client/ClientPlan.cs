@@ -87,9 +87,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginExecutePlan(PlanHandle, callInfo, paramsValue, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginExecutePlan(PlanHandle, callInfo, paramsValue, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				ExecuteResult executeResult = GetServiceInterface().EndExecutePlan(result);
+				ExecuteResult executeResult = channel.EndExecutePlan(result);
 				executeTime = executeResult.ExecuteTime;
 				paramsValue.Data = executeResult.ParamData;
 			}
@@ -112,9 +113,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginEvaluatePlan(PlanHandle, callInfo, paramsValue, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginEvaluatePlan(PlanHandle, callInfo, paramsValue, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				EvaluateResult evaluateResult = GetServiceInterface().EndEvaluatePlan(result);
+				EvaluateResult evaluateResult = channel.EndEvaluatePlan(result);
 				executeTime = evaluateResult.ExecuteTime;
 				_programStatistics = executeTime;
 				paramsValue.Data = evaluateResult.ParamData;
@@ -130,9 +132,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginOpenPlanCursor(PlanHandle, callInfo, paramsValue, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginOpenPlanCursor(PlanHandle, callInfo, paramsValue, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				CursorResult cursorResult = GetServiceInterface().EndOpenPlanCursor(result);
+				CursorResult cursorResult = channel.EndOpenPlanCursor(result);
 				executeTime = cursorResult.ExecuteTime;
 				_programStatistics = executeTime;
 				paramsValue.Data = cursorResult.ParamData;
@@ -148,9 +151,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginOpenPlanCursorWithFetch(PlanHandle, callInfo, paramsValue, count, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginOpenPlanCursorWithFetch(PlanHandle, callInfo, paramsValue, count, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				CursorWithFetchResult cursorResult = GetServiceInterface().EndOpenPlanCursorWithFetch(result);
+				CursorWithFetchResult cursorResult = channel.EndOpenPlanCursorWithFetch(result);
 				executeTime = cursorResult.ExecuteTime;
 				_programStatistics = executeTime;
 				paramsValue.Data = cursorResult.ParamData;
@@ -168,9 +172,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginCloseCursor(((ClientCursor)cursor).CursorHandle, callInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginCloseCursor(((ClientCursor)cursor).CursorHandle, callInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndCloseCursor(result);
+				channel.EndCloseCursor(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{

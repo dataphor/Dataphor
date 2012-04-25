@@ -45,9 +45,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginSelectSpecific(CursorHandle, callInfo, header, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginSelectSpecific(CursorHandle, callInfo, header, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndSelectSpecific(result);
+				return channel.EndSelectSpecific(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -59,9 +60,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginSelect(CursorHandle, callInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginSelect(CursorHandle, callInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndSelect(result);
+				return channel.EndSelect(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -73,9 +75,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginFetchSpecific(CursorHandle, callInfo, header, count, skipCurrent, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginFetchSpecific(CursorHandle, callInfo, header, count, skipCurrent, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				FetchResult fetchResult = GetServiceInterface().EndFetchSpecific(result);
+				FetchResult fetchResult = channel.EndFetchSpecific(result);
 				bookmarks = fetchResult.Bookmarks;
 				return fetchResult.FetchData;
 			}
@@ -89,9 +92,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginFetch(CursorHandle, callInfo, count, skipCurrent, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginFetch(CursorHandle, callInfo, count, skipCurrent, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				FetchResult fetchResult = GetServiceInterface().EndFetch(result);
+				FetchResult fetchResult = channel.EndFetch(result);
 				bookmarks = fetchResult.Bookmarks;
 				return fetchResult.FetchData;
 			}
@@ -105,9 +109,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginGetFlags(CursorHandle, callInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginGetFlags(CursorHandle, callInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetFlags(result);
+				return channel.EndGetFlags(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -119,9 +124,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginMoveBy(CursorHandle, callInfo, delta, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginMoveBy(CursorHandle, callInfo, delta, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndMoveBy(result);
+				return channel.EndMoveBy(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -133,9 +139,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginFirst(CursorHandle, callInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginFirst(CursorHandle, callInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndFirst(result);
+				return channel.EndFirst(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -147,9 +154,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginLast(CursorHandle, callInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginLast(CursorHandle, callInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndLast(result);
+				return channel.EndLast(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -161,9 +169,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginReset(CursorHandle, callInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginReset(CursorHandle, callInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndReset(result);
+				return channel.EndReset(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -175,9 +184,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginInsert(CursorHandle, callInfo, row, valueFlags, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginInsert(CursorHandle, callInfo, row, valueFlags, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndInsert(result);
+				channel.EndInsert(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -189,9 +199,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginUpdate(CursorHandle, callInfo, row, valueFlags, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginUpdate(CursorHandle, callInfo, row, valueFlags, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndUpdate(result);
+				channel.EndUpdate(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -203,9 +214,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginDelete(CursorHandle, callInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginDelete(CursorHandle, callInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndDelete(result);
+				channel.EndDelete(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -217,9 +229,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginGetBookmark(CursorHandle, callInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginGetBookmark(CursorHandle, callInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetBookmark(result);
+				return channel.EndGetBookmark(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -231,9 +244,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginGotoBookmark(CursorHandle, callInfo, bookmark, forward, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginGotoBookmark(CursorHandle, callInfo, bookmark, forward, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGotoBookmark(result);
+				return channel.EndGotoBookmark(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -245,9 +259,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginCompareBookmarks(CursorHandle, callInfo, bookmark1, bookmark2, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginCompareBookmarks(CursorHandle, callInfo, bookmark1, bookmark2, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndCompareBookmarks(result);
+				return channel.EndCompareBookmarks(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -259,9 +274,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginDisposeBookmark(CursorHandle, callInfo, bookmark, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginDisposeBookmark(CursorHandle, callInfo, bookmark, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndDisposeBookmark(result);
+				channel.EndDisposeBookmark(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -273,9 +289,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginDisposeBookmarks(CursorHandle, callInfo, bookmarks, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginDisposeBookmarks(CursorHandle, callInfo, bookmarks, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndDisposeBookmarks(result);
+				channel.EndDisposeBookmarks(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -289,9 +306,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{ 
 				try
 				{
-					IAsyncResult result = GetServiceInterface().BeginGetOrder(CursorHandle, null, null);
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginGetOrder(CursorHandle, null, null);
 					result.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetOrder(result);
+					return channel.EndGetOrder(result);
 				}
 				catch (FaultException<DataphorFault> fault)
 				{
@@ -304,9 +322,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginGetKey(CursorHandle, callInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginGetKey(CursorHandle, callInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetKey(result);
+				return channel.EndGetKey(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -318,9 +337,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginFindKey(CursorHandle, callInfo, key, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginFindKey(CursorHandle, callInfo, key, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndFindKey(result);
+				return channel.EndFindKey(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -332,9 +352,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginFindNearest(CursorHandle, callInfo, key, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginFindNearest(CursorHandle, callInfo, key, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndFindNearest(result);
+				return channel.EndFindNearest(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -346,9 +367,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginRefresh(CursorHandle, callInfo, row, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginRefresh(CursorHandle, callInfo, row, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndRefresh(result);
+				return channel.EndRefresh(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -360,9 +382,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginGetRowCount(CursorHandle, callInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginGetRowCount(CursorHandle, callInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetRowCount(result);
+				return channel.EndGetRowCount(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -422,9 +445,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginDefault(CursorHandle, callInfo, row, column, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginDefault(CursorHandle, callInfo, row, column, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndDefault(result);
+				return channel.EndDefault(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -436,9 +460,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginChange(CursorHandle, callInfo, oldRow, newRow, column, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginChange(CursorHandle, callInfo, oldRow, newRow, column, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndChange(result);
+				return channel.EndChange(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -450,9 +475,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginValidate(CursorHandle, callInfo, oldRow, newRow, column, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginValidate(CursorHandle, callInfo, oldRow, newRow, column, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndValidate(result);
+				return channel.EndValidate(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{

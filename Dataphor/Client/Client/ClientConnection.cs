@@ -47,9 +47,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginConnect(_connectionHandle, sessionInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginConnect(_connectionHandle, sessionInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return new ClientSession(this, sessionInfo, GetServiceInterface().EndConnect(result));
+				return new ClientSession(this, sessionInfo, channel.EndConnect(result));
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -61,9 +62,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginDisconnect(((ClientSession)session).SessionHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginDisconnect(((ClientSession)session).SessionHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndDisconnect(result);
+				channel.EndDisconnect(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -79,9 +81,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginPingConnection(_connectionHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginPingConnection(_connectionHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndPingConnection(result);
+				channel.EndPingConnection(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
