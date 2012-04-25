@@ -82,14 +82,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_isNilable = Operator.IsNilable;
 			}
 
-			for (int index = 0; index < Operator.Operands.Count; index++)
-			{
-				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
-				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
-				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
-				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
-				_isNilable = _isNilable || Nodes[index].IsNilable;
-			} 
+			// Characteristics of an aggregate operator, unless overridden, are always based on the source node, rather than the
+			// actual operands to the operator.
+			_isLiteral = _isLiteral && Nodes[0].IsLiteral;
+			_isFunctional = _isFunctional && Nodes[0].IsFunctional;
+			_isDeterministic = _isDeterministic && Nodes[0].IsDeterministic;
+			_isRepeatable = _isRepeatable && Nodes[0].IsRepeatable;
+			_isNilable = _isNilable || Nodes[0].IsNilable;
 		}
 		
 		public override void InternalDetermineBinding(Plan plan)
