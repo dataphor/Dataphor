@@ -88,6 +88,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	}
 	
 	[DataContract]
+	[KnownType(typeof(NativeScalarValue))]
+	[KnownType(typeof(NativeListValue))]
+	[KnownType(typeof(NativeRowValue))]
+	[KnownType(typeof(NativeTableValue))]
 	public abstract class NativeValue { }
 	
 	[DataContract]
