@@ -44,9 +44,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginPrepareBatch(BatchHandle, paramsValue, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginPrepareBatch(BatchHandle, paramsValue, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				PlanDescriptor planDescriptor = GetServiceInterface().EndPrepareBatch(result);
+				PlanDescriptor planDescriptor = channel.EndPrepareBatch(result);
 				if (IsExpression())
 					return new ClientExpressionPlan(_clientScript.ClientProcess, planDescriptor);
 				else
@@ -62,9 +63,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginUnprepareBatch(((ClientPlan)plan).PlanHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginUnprepareBatch(((ClientPlan)plan).PlanHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndUnprepareBatch(result);
+				channel.EndUnprepareBatch(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -118,9 +120,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginGetBatchText(BatchHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginGetBatchText(BatchHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetBatchText(result);
+				return channel.EndGetBatchText(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{

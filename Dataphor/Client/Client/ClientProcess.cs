@@ -51,9 +51,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginBeginApplicationTransaction(ProcessHandle, callInfo, shouldJoin, isInsert, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginBeginApplicationTransaction(ProcessHandle, callInfo, shouldJoin, isInsert, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndBeginApplicationTransaction(result);
+				return channel.EndBeginApplicationTransaction(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -65,9 +66,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginPrepareApplicationTransaction(ProcessHandle, callInfo, iD, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginPrepareApplicationTransaction(ProcessHandle, callInfo, iD, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndPrepareApplicationTransaction(result);
+				channel.EndPrepareApplicationTransaction(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -79,9 +81,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginCommitApplicationTransaction(ProcessHandle, callInfo, iD, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginCommitApplicationTransaction(ProcessHandle, callInfo, iD, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndCommitApplicationTransaction(result);
+				channel.EndCommitApplicationTransaction(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -93,9 +96,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginRollbackApplicationTransaction(ProcessHandle, callInfo, iD, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginRollbackApplicationTransaction(ProcessHandle, callInfo, iD, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndRollbackApplicationTransaction(result);
+				channel.EndRollbackApplicationTransaction(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -109,9 +113,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{ 
 				try
 				{
-					IAsyncResult result = GetServiceInterface().BeginGetApplicationTransactionID(ProcessHandle, null, null);
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginGetApplicationTransactionID(ProcessHandle, null, null);
 					result.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetApplicationTransactionID(result);
+					return channel.EndGetApplicationTransactionID(result);
 				}
 				catch (FaultException<DataphorFault> fault)
 				{
@@ -124,9 +129,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginJoinApplicationTransaction(ProcessHandle, callInfo, iD, isInsert, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginJoinApplicationTransaction(ProcessHandle, callInfo, iD, isInsert, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndJoinApplicationTransaction(result);
+				channel.EndJoinApplicationTransaction(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -138,9 +144,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginLeaveApplicationTransaction(ProcessHandle, callInfo, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginLeaveApplicationTransaction(ProcessHandle, callInfo, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndLeaveApplicationTransaction(result);
+				channel.EndLeaveApplicationTransaction(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -168,9 +175,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginPrepareStatement(ProcessHandle, GetCleanupInfo(cleanupInfo), statement, paramsValue, locator, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginPrepareStatement(ProcessHandle, GetCleanupInfo(cleanupInfo), statement, paramsValue, locator, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				planDescriptor = GetServiceInterface().EndPrepareStatement(result);
+				planDescriptor = channel.EndPrepareStatement(result);
 				return new ClientStatementPlan(this, planDescriptor);
 			}
 			catch (FaultException<DataphorFault> fault)
@@ -183,9 +191,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginUnprepareStatement(((ClientPlan)plan).PlanHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginUnprepareStatement(((ClientPlan)plan).PlanHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndUnprepareStatement(result);
+				channel.EndUnprepareStatement(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -197,9 +206,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginExecuteStatement(ProcessHandle, GetCleanupInfo(cleanupInfo), callInfo, statement, paramsValue, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginExecuteStatement(ProcessHandle, GetCleanupInfo(cleanupInfo), callInfo, statement, paramsValue, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				ExecuteResult executeResult = GetServiceInterface().EndExecuteStatement(result);
+				ExecuteResult executeResult = channel.EndExecuteStatement(result);
 				paramsValue.Data = executeResult.ParamData;
 			}
 			catch (FaultException<DataphorFault> fault)
@@ -212,9 +222,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginPrepareExpression(ProcessHandle, GetCleanupInfo(cleanupInfo), expression, paramsValue, locator, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginPrepareExpression(ProcessHandle, GetCleanupInfo(cleanupInfo), expression, paramsValue, locator, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				planDescriptor = GetServiceInterface().EndPrepareExpression(result);
+				planDescriptor = channel.EndPrepareExpression(result);
 				return new ClientExpressionPlan(this, planDescriptor);
 			}
 			catch (FaultException<DataphorFault> fault)
@@ -227,9 +238,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginUnprepareExpression(((ClientPlan)plan).PlanHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginUnprepareExpression(((ClientPlan)plan).PlanHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndUnprepareExpression(result);
+				channel.EndUnprepareExpression(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -241,9 +253,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginEvaluateExpression(ProcessHandle, GetCleanupInfo(cleanupInfo), callInfo, expression, paramsValue, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginEvaluateExpression(ProcessHandle, GetCleanupInfo(cleanupInfo), callInfo, expression, paramsValue, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				DirectEvaluateResult evaluateResult = GetServiceInterface().EndEvaluateExpression(result);
+				DirectEvaluateResult evaluateResult = channel.EndEvaluateExpression(result);
 				paramsValue.Data = evaluateResult.ParamData;
 				planDescriptor = evaluateResult.PlanDescriptor;
 				executeTime = evaluateResult.ExecuteTime;
@@ -260,9 +273,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginOpenCursor(ProcessHandle, GetCleanupInfo(cleanupInfo), callInfo, expression, paramsValue, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginOpenCursor(ProcessHandle, GetCleanupInfo(cleanupInfo), callInfo, expression, paramsValue, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				DirectCursorResult cursorResult = GetServiceInterface().EndOpenCursor(result);
+				DirectCursorResult cursorResult = channel.EndOpenCursor(result);
 				paramsValue.Data = cursorResult.ParamData;
 				planDescriptor = cursorResult.PlanDescriptor;
 				executeTime = cursorResult.ExecuteTime;
@@ -279,9 +293,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginOpenCursorWithFetch(ProcessHandle, GetCleanupInfo(cleanupInfo), callInfo, expression, paramsValue, count, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginOpenCursorWithFetch(ProcessHandle, GetCleanupInfo(cleanupInfo), callInfo, expression, paramsValue, count, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				DirectCursorWithFetchResult cursorResult = GetServiceInterface().EndOpenCursorWithFetch(result);
+				DirectCursorWithFetchResult cursorResult = channel.EndOpenCursorWithFetch(result);
 				paramsValue.Data = cursorResult.ParamData;
 				planDescriptor = cursorResult.PlanDescriptor;
 				executeTime = cursorResult.ExecuteTime;
@@ -307,9 +322,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginPrepareScript(ProcessHandle, script, locator, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginPrepareScript(ProcessHandle, script, locator, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return new ClientScript(this, GetServiceInterface().EndPrepareScript(result));
+				return new ClientScript(this, channel.EndPrepareScript(result));
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -321,9 +337,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginUnprepareScript(((ClientScript)script).ScriptHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginUnprepareScript(((ClientScript)script).ScriptHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndUnprepareScript(result);
+				channel.EndUnprepareScript(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -335,9 +352,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginExecuteScript(ProcessHandle, callInfo, script, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginExecuteScript(ProcessHandle, callInfo, script, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndExecuteScript(result);
+				channel.EndExecuteScript(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -349,9 +367,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginGetCatalog(ProcessHandle, name, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginGetCatalog(ProcessHandle, name, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				CatalogResult catalogResult = GetServiceInterface().EndGetCatalog(result);
+				CatalogResult catalogResult = channel.EndGetCatalog(result);
 				cacheTimeStamp = catalogResult.CacheTimeStamp;
 				clientCacheTimeStamp = catalogResult.ClientCacheTimeStamp;
 				cacheChanged = catalogResult.CacheChanged;
@@ -367,9 +386,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginGetClassName(ProcessHandle, className, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginGetClassName(ProcessHandle, className, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetClassName(result);
+				return channel.EndGetClassName(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -381,9 +401,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginGetFileNames(ProcessHandle, className, environment, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginGetFileNames(ProcessHandle, className, environment, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetFileNames(result);
+				return channel.EndGetFileNames(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -395,9 +416,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginGetFile(ProcessHandle, libraryName, fileName, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginGetFile(ProcessHandle, libraryName, fileName, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return new ClientStream(this, GetServiceInterface().EndGetFile(result));
+				return new ClientStream(this, channel.EndGetFile(result));
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -423,9 +445,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginBeginTransaction(ProcessHandle, isolationLevel, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginBeginTransaction(ProcessHandle, isolationLevel, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndBeginTransaction(result);
+				channel.EndBeginTransaction(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -437,9 +460,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginPrepareTransaction(ProcessHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginPrepareTransaction(ProcessHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndPrepareTransaction(result);
+				channel.EndPrepareTransaction(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -451,9 +475,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginCommitTransaction(ProcessHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginCommitTransaction(ProcessHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndCommitTransaction(result);
+				channel.EndCommitTransaction(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -465,9 +490,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginRollbackTransaction(ProcessHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginRollbackTransaction(ProcessHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndRollbackTransaction(result);
+				channel.EndRollbackTransaction(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -481,9 +507,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{ 
 				try
 				{
-					IAsyncResult result = GetServiceInterface().BeginGetTransactionCount(ProcessHandle, null, null);
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginGetTransactionCount(ProcessHandle, null, null);
 					result.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetTransactionCount(result) > 0;
+					return channel.EndGetTransactionCount(result) > 0;
 				}
 				catch (FaultException<DataphorFault> fault)
 				{
@@ -498,9 +525,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{ 
 				try
 				{
-					IAsyncResult result = GetServiceInterface().BeginGetTransactionCount(ProcessHandle, null, null);
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginGetTransactionCount(ProcessHandle, null, null);
 					result.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetTransactionCount(result);
+					return channel.EndGetTransactionCount(result);
 				}
 				catch (FaultException<DataphorFault> fault)
 				{
@@ -517,9 +545,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginAllocateStream(ProcessHandle, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginAllocateStream(ProcessHandle, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndAllocateStream(result);
+				return channel.EndAllocateStream(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -531,9 +560,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginReferenceStream(ProcessHandle, streamID, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginReferenceStream(ProcessHandle, streamID, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndReferenceStream(result);
+				return channel.EndReferenceStream(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -545,9 +575,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginDeallocateStream(ProcessHandle, streamID, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginDeallocateStream(ProcessHandle, streamID, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndDeallocateStream(result);
+				channel.EndDeallocateStream(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -559,9 +590,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginOpenStream(ProcessHandle, streamID, mode, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginOpenStream(ProcessHandle, streamID, mode, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				return new ClientStream(this, GetServiceInterface().EndOpenStream(result));
+				return new ClientStream(this, channel.EndOpenStream(result));
 			}
 			catch (FaultException<DataphorFault> fault)
 			{

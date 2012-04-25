@@ -42,9 +42,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				try
 				{
-					IAsyncResult result = GetServiceInterface().BeginGetStreamLength(_streamHandle, null, null);
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginGetStreamLength(_streamHandle, null, null);
 					result.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetStreamLength(result);
+					return channel.EndGetStreamLength(result);
 				}
 				catch (FaultException<DataphorFault> fault)
 				{
@@ -57,9 +58,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginSetStreamLength(_streamHandle, tempValue, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginSetStreamLength(_streamHandle, tempValue, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndSetStreamLength(result);
+				channel.EndSetStreamLength(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -73,9 +75,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				try
 				{
-					IAsyncResult result = GetServiceInterface().BeginGetStreamPosition(_streamHandle, null, null);
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginGetStreamPosition(_streamHandle, null, null);
 					result.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetStreamPosition(result);
+					return channel.EndGetStreamPosition(result);
 				}
 				catch (FaultException<DataphorFault> fault)
 				{
@@ -86,9 +89,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				try
 				{
-					IAsyncResult result = GetServiceInterface().BeginSetStreamPosition(_streamHandle, value, null, null);
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginSetStreamPosition(_streamHandle, value, null, null);
 					result.AsyncWaitHandle.WaitOne();
-					GetServiceInterface().EndSetStreamPosition(result);
+					channel.EndSetStreamPosition(result);
 				}
 				catch (FaultException<DataphorFault> fault)
 				{
@@ -101,9 +105,10 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult result = GetServiceInterface().BeginReadStream(_streamHandle, count, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginReadStream(_streamHandle, count, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				byte[] bytes = GetServiceInterface().EndReadStream(result);
+				byte[] bytes = channel.EndReadStream(result);
 				Array.Copy(bytes, 0, buffer, offset, bytes.Length); // ?? Should the buffer bytes beyond the read bytes be cleared?
 				return bytes.Length;
 			}
@@ -119,9 +124,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				byte[] bytes = new byte[count];
 				Array.Copy(buffer, offset, bytes, 0, count);
-				IAsyncResult result = GetServiceInterface().BeginWriteStream(_streamHandle, bytes, null, null);
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginWriteStream(_streamHandle, bytes, null, null);
 				result.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndWriteStream(result);
+				channel.EndWriteStream(result);
 			}
 			catch (FaultException<DataphorFault> fault)
 			{
@@ -135,9 +141,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				try
 				{
-					IAsyncResult result = GetServiceInterface().BeginCloseStream(_streamHandle, null, null);
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginCloseStream(_streamHandle, null, null);
 					result.AsyncWaitHandle.WaitOne();
-					GetServiceInterface().EndCloseStream(result);
+					channel.EndCloseStream(result);
 				}
 				catch (FaultException<DataphorFault> fault)
 				{
