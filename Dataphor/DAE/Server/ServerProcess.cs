@@ -576,14 +576,14 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		internal string RemoteSessionClassName = "Alphora.Dataphor.DAE.Server.RemoteSessionImplementation,Alphora.Dataphor.Server";
+		internal string RemoteSessionClassName = "Alphora.Dataphor.DAE.Server.RemoteSessionImplementation,AlphoraDataphorServer";
 		
 		internal RemoteSession RemoteConnect(Schema.ServerLink serverLink)
 		{
 			int index = RemoteSessions.IndexOf(serverLink);
 			if (index < 0)
 			{
-				RemoteSession session = (RemoteSession)Activator.CreateInstance(Type.GetType(RemoteSessionClassName), this, serverLink);
+				RemoteSession session = (RemoteSession)Activator.CreateInstance(Type.GetType(RemoteSessionClassName, true), this, serverLink);
 				try
 				{
 					while (session.TransactionCount < _transactions.Count)

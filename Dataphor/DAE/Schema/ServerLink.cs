@@ -122,9 +122,10 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// </remarks>
 		public ServerLinkUser GetUser(string userID)
 		{
-			ServerLinkUser user = _users[userID];
+			ServerLinkUser user = null;
+			_users.TryGetValue(userID, out user);
 			if (user == null)
-				user = _users[DefaultUserID];
+				_users.TryGetValue(DefaultUserID, out user);
 			if (user == null)
 				user = new ServerLinkUser(DefaultUserID, this, Server.Engine.AdminUserID, SecurityUtility.EncryptPassword(String.Empty));
 
