@@ -953,6 +953,26 @@ begin
 		aggregation class "System.IntegerAvgAggregationNode"
 		finalization class "System.IntegerAvgFinalizationNode"
 		static tags { DAE.Initialization.StackDisplacement = "1", DAE.IsNilable = "True" };
+	create aggregate operator Sum(AValue : Long) : Long
+		initialization class "System.LongInitializationNode"
+		aggregation class "System.LongSumAggregationNode"
+		finalization class "System.EmptyFinalizationNode"
+		static tags { DAE.IsNilable = "True" };
+	create aggregate operator Min(AValue : Long) : Long
+		initialization class "System.LongInitializationNode"
+		aggregation class "System.LongMinAggregationNode"
+		finalization class "System.EmptyFinalizationNode"
+		static tags { DAE.IsNilable = "True" };
+	create aggregate operator Max(AValue : Long) : Long
+		initialization class "System.LongInitializationNode"
+		aggregation class "System.LongMaxAggregationNode"
+		finalization class "System.EmptyFinalizationNode"
+		static tags { DAE.IsNilable = "True" };
+	create aggregate operator Avg(AValue : Long) : Decimal
+		initialization class "System.LongAvgInitializationNode"
+		aggregation class "System.LongAvgAggregationNode"
+		finalization class "System.LongAvgFinalizationNode"
+		static tags { DAE.Initialization.StackDisplacement = "1", DAE.IsNilable = "True" };
 	create aggregate operator Sum(AValue : Decimal) : Decimal
 		initialization class "System.DecimalInitializationNode"
 		aggregation class "System.DecimalSumAggregationNode"
