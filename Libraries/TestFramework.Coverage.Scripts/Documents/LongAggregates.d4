@@ -2,6 +2,8 @@
 //	 © Copyright 2000-2008 Alphora
 //	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 
+alter device System.Temp alter class { alter "MaxRowCount" = "-1" };
+ 
 // Test Table
 SafeDrop('LongAggregateTest');
 create table LongAggregateTest { ID : Long, key { ID } };
