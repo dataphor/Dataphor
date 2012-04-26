@@ -439,8 +439,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.Stack[1] =
 					checked
 					(
-						(int)program.Stack[0] +
-						(program.Stack[1] == null ? 0 : (int)program.Stack[1])
+						(long)program.Stack[0] +
+						(program.Stack[1] == null ? 0 : (long)program.Stack[1])
 					);
 			return null;
 		}
@@ -484,13 +484,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override void InternalDetermineBinding(Plan plan)
 		{
-			plan.Symbols.Push(new Symbol("LCounter", plan.DataTypes.SystemLong));
+			plan.Symbols.Push(new Symbol("LCounter", plan.DataTypes.SystemInteger));
 		}
 
 		public override object InternalExecute(Program program)
 		{
 			program.Stack.Push(0);
-			program.Stack[1] = 0;
+			program.Stack[1] = (long)0;
 			return null;
 		}
 	}
@@ -501,7 +501,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (program.Stack[0] != null)
 			{
-				program.Stack[1] = checked((long)program.Stack[1] + 1);
+				program.Stack[1] = checked((int)program.Stack[1] + 1);
 				program.Stack[2] = checked((long)program.Stack[2] + (long)program.Stack[0]);
 			}
 			return null;
@@ -515,7 +515,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((int)program.Stack[0] == 0)
 				program.Stack[1] = null;
 			else
-				program.Stack[1] = (decimal)(long)program.Stack[1] / (decimal)(long)program.Stack[0];
+				program.Stack[1] = (decimal)(long)program.Stack[1] / (decimal)(int)program.Stack[0];
 			return null;
 		}
 	}
