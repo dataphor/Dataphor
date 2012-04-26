@@ -1,0 +1,201 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// Test Table
+SafeDrop('LongAggregateTest');
+create table LongAggregateTest { ID : Long, key { ID } };
+
+/***********************Max(System.Long Tests*********************************/	
+
+// Test Max(Long) at negative Long boundary
+for LIndex : Long := -9223372036854775807 to -9223372036854774808 do
+	insert table { row { LIndex ID } } into LongAggregateTest;
+
+if Max(ID from LongAggregateTest) <> -9223372036854774808 then
+	raise Error("Max(System.Long) aggregate failed around negative Long boundary.");
+
+// Test Max(Long) at negative Integer boundary	
+delete LongAggregateTest;
+	
+for LIndex : Long := ToLong(-2147484148) to ToLong(-2147483149) do
+	insert table { row { LIndex ID } } into LongAggregateTest;
+	
+if Max(ID from LongAggregateTest) <> ToLong(-2147483149) then
+	raise Error("Max(System.Long) aggregate failed around negative Integer boundary.");
+
+// Test Max(Long) at positive Integer boundary
+delete LongAggregateTest;
+for LIndex : Long := ToLong(2147482647) to ToLong(2147483647) do
+	insert table { row { LIndex ID } } into LongAggregateTest;
+
+if Max(ID from LongAggregateTest) <> ToLong(2147483647) then
+	raise Error("Max(System.Long) aggregate failed around positive Integer boundary.");
+
+// Test Max(Long) at positive Long boundary
+delete LongAggregateTest;
+for LIndex : Long := 9223372036854774808 to 9223372036854775806 do
+	insert table { row { LIndex ID } } into LongAggregateTest;
+
+if Max(ID from LongAggregateTest) <> 9223372036854775806 then
+	raise Error("Max(System.Long) aggregate failed around positive Long boundary.");
+	
+	
+/***********************Min(System.Long Tests*********************************/	
+
+// Test Min(Long) at negative Long boundary
+delete LongAggregateTest;
+for LIndex : Long := -9223372036854775807 to -9223372036854774808 do
+	insert table { row { LIndex ID } } into LongAggregateTest;
+
+if Min(ID from LongAggregateTest) <> -9223372036854775807 then
+	raise Error("Min(System.Long) aggregate failed around negative Long boundary.");
+
+// Test Min(Long) at negative Integer boundary	
+delete LongAggregateTest;
+	
+for LIndex : Long := ToLong(-2147484148) to ToLong(-2147483149) do
+	insert table { row { LIndex ID } } into LongAggregateTest;
+	
+if Min(ID from LongAggregateTest) <> ToLong(-2147484148) then
+	raise Error("Min(System.Long) aggregate failed around negative Integer boundary.");
+
+// Test Min(Long) at positive Integer boundary
+delete LongAggregateTest;
+for LIndex : Long := ToLong(2147482647) to ToLong(2147483647) do
+	insert table { row { LIndex ID } } into LongAggregateTest;
+
+if Min(ID from LongAggregateTest) <> ToLong(2147482647) then
+	raise Error("Min(System.Long) aggregate failed around positive Integer boundary.");
+
+// Test Min(Long) at positive Long boundary
+delete LongAggregateTest;
+for LIndex : Long := 9223372036854774808 to 9223372036854775806 do
+	insert table { row { LIndex ID } } into LongAggregateTest;
+
+if Min(ID from LongAggregateTest) <> 9223372036854774808 then
+	raise Error("Min(System.Long) aggregate failed around positive Long boundary.");
+	
+/***********************Sum(System.Long Tests*********************************/	
+
+// Test Sum(Long) at negative Long boundary
+delete LongAggregateTest;
+insert 
+	table 
+	{ 
+		row { ToLong(-1317624576693539398) ID },
+		row { ToLong(-1317624576693539399) ID },
+		row { ToLong(-1317624576693539400) ID },
+		row { ToLong(-1317624576693539401) ID },
+		row { ToLong(-1317624576693539402) ID },
+		row { ToLong(-1317624576693539403) ID },
+		row { ToLong(-1317624576693539404) ID }
+	} into LongAggregateTest;
+
+if Sum(ID from LongAggregateTest) <> -9223372036854775807 then
+	raise Error("Sum(System.Long) aggregate failed around negative Long boundary.");
+
+// Test Sum(Long) at negative Integer boundary	
+delete LongAggregateTest;
+insert 
+	table 
+	{ 
+		row { ToLong(-429496827) ID },
+		row { ToLong(-429496828) ID },
+		row { ToLong(-429496829) ID },
+		row { ToLong(-429496830) ID },
+		row { ToLong(-429496834) ID }
+	} into LongAggregateTest;
+	
+if Sum(ID from LongAggregateTest) <> ToLong(-2147484148) then
+	raise Error("Sum(System.Long) aggregate failed around negative Integer boundary.");
+
+// Test Sum(Long) at positive Integer boundary
+delete LongAggregateTest;
+insert 
+	table 
+	{ 
+		row { ToLong(429496733) ID },
+		row { ToLong(429496730) ID },
+		row { ToLong(429496729) ID },
+		row { ToLong(429496728) ID },
+		row { ToLong(429496727) ID }
+	} into LongAggregateTest;
+	
+if Sum(ID from LongAggregateTest) <> ToLong(2147483647) then
+	raise Error("Sum(System.Long) aggregate failed around positive Integer boundary.");
+
+// Test Sum(Long) at positive Long boundary
+delete LongAggregateTest;
+insert 
+	table 
+	{ 
+		row { ToLong(-3074457345618258601) ID },
+		row { ToLong(-3074457345618258602) ID },
+		row { ToLong(-3074457345618258603) ID }
+	} into LongAggregateTest;
+
+if Sum(ID from LongAggregateTest) <> -9223372036854775806 then
+	raise Error("Sum(System.Long) aggregate failed around negative Long boundary.");
+
+/***********************Avg(System.Long Tests*********************************/		
+
+// Test Avg(Long) at negative Long boundary
+delete LongAggregateTest;
+insert 
+	table 
+	{ 
+		row { ToLong(-9223372036854775807) ID },
+		row { ToLong(-9223372036854775806) ID },
+		row { ToLong(-9223372036854775805) ID },
+		row { ToLong(-9223372036854775804) ID },
+		row { ToLong(-9223372036854775803) ID },
+		row { ToLong(-9223372036854775802) ID },
+		row { ToLong(-9223372036854775801) ID }
+	} into LongAggregateTest;
+
+if Avg(ID from LongAggregateTest) <> -9223372036854775804.0 then
+	raise Error("Avg(System.Long) aggregate failed around negative Long boundary.");
+
+// Test Avg(Long) at negative Integer boundary	
+delete LongAggregateTest;
+insert 
+	table 
+	{ 
+		row { ToLong(-2147484148) ID },
+		row { ToLong(-2147484147) ID },
+		row { ToLong(-2147484146) ID },
+		row { ToLong(-2147484145) ID },
+		row { ToLong(-2147484144) ID }
+	} into LongAggregateTest;
+	
+if Avg(ID from LongAggregateTest) <> -2147484146.0 then
+	raise Error("Avg(System.Long) aggregate failed around negative Integer boundary.");
+
+// Test Avg(Long) at positive Integer boundary
+delete LongAggregateTest;
+insert 
+	table 
+	{ 
+		row { ToLong(2147482647) ID },
+		row { ToLong(2147482646) ID },
+		row { ToLong(2147482645) ID },
+		row { ToLong(2147482644) ID },
+		row { ToLong(2147482643) ID }
+	} into LongAggregateTest;
+		
+if Avg(ID from LongAggregateTest) <> 2147482645.0 then
+	raise Error("Avg(System.Long) aggregate failed around positive Integer boundary.");
+
+// Test Avg(Long) at positive Long boundary
+delete LongAggregateTest;
+insert 
+	table 
+	{ 
+		row { ToLong(-9223372036854775804) ID },
+		row { ToLong(-9223372036854775805) ID },
+		row { ToLong(-9223372036854775806) ID }
+	} into LongAggregateTest;
+
+if Avg(ID from LongAggregateTest) <> -9223372036854775805.0 then
+	raise Error("Avg(System.Long) aggregate failed around negative Long boundary.");
