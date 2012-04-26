@@ -147,16 +147,16 @@ delete LongAggregateTest;
 insert 
 	table 
 	{ 
-		row { ToLong(-9223372036854775807) ID },
-		row { ToLong(-9223372036854775806) ID },
-		row { ToLong(-9223372036854775805) ID },
-		row { ToLong(-9223372036854775804) ID },
-		row { ToLong(-9223372036854775803) ID },
-		row { ToLong(-9223372036854775802) ID },
-		row { ToLong(-9223372036854775801) ID }
+		row { ToLong(-1317624576693539398) ID },
+		row { ToLong(-1317624576693539399) ID },
+		row { ToLong(-1317624576693539400) ID },
+		row { ToLong(-1317624576693539401) ID },
+		row { ToLong(-1317624576693539402) ID },
+		row { ToLong(-1317624576693539403) ID },
+		row { ToLong(-1317624576693539404) ID }
 	} into LongAggregateTest;
 
-if Avg(ID from LongAggregateTest) <> -9223372036854775804.0 then
+if Avg(ID from LongAggregateTest) <> -1317624576693539401.0 then
 	raise Error("Avg(System.Long) aggregate failed around negative Long boundary.");
 
 // Test Avg(Long) at negative Integer boundary	
@@ -194,10 +194,14 @@ delete LongAggregateTest;
 insert 
 	table 
 	{ 
-		row { ToLong(-9223372036854775804) ID },
-		row { ToLong(-9223372036854775805) ID },
-		row { ToLong(-9223372036854775806) ID }
+		row { ToLong(1317624576693539404) ID },
+		row { ToLong(1317624576693539403) ID },
+		row { ToLong(1317624576693539402) ID },
+		row { ToLong(1317624576693539401) ID },
+		row { ToLong(1317624576693539400) ID },
+		row { ToLong(1317624576693539399) ID },
+		row { ToLong(1317624576693539398) ID }
 	} into LongAggregateTest;
-
-if Avg(ID from LongAggregateTest) <> -9223372036854775805.0 then
+	
+if Avg(ID from LongAggregateTest) <> 1317624576693539401.0 then
 	raise Error("Avg(System.Long) aggregate failed around negative Long boundary.");
