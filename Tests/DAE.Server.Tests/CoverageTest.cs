@@ -29,6 +29,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test] public void ExecuteShortLibrary() { ExecuteScript("Coverage.Scripts", "ShortLibrary"); }
 		[Test] public void ExecuteIntegerLibrary() { ExecuteScript("Coverage.Scripts", "IntegerLibrary"); }
 		[Test] public void ExecuteLongLibrary() { ExecuteScript("Coverage.Scripts", "LongLibrary"); }
+		[Test] public void ExecuteLongAggregates() { ExecuteScript("Coverage.Scripts", "LongAggregates"); }
 		[Test] public void ExecuteDecimalLibrary() { ExecuteScript("Coverage.Scripts", "DecimalLibrary"); }
 		[Test] public void ExecuteMoneyLibrary() { ExecuteScript("Coverage.Scripts", "MoneyLibrary"); }
 		[Test] public void ExecuteGuidLibrary() { ExecuteScript("Coverage.Scripts", "GuidLibrary"); }

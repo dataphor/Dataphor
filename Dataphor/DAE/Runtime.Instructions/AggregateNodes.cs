@@ -422,6 +422,104 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
     }
 
+	public class LongInitializationNode : PlanNode
+	{
+		public override object InternalExecute(Program program)
+		{
+			program.Stack[0] = null;
+			return null;
+		}
+	}
+
+	public class LongSumAggregationNode : PlanNode
+	{
+		public override object InternalExecute(Program program)
+		{
+			if (program.Stack[0] != null)
+				program.Stack[1] =
+					checked
+					(
+						(int)program.Stack[0] +
+						(program.Stack[1] == null ? 0 : (int)program.Stack[1])
+					);
+			return null;
+		}
+	}
+
+	public class LongMinAggregationNode : PlanNode
+	{
+		public override object InternalExecute(Program program)
+		{
+			if
+			(
+				program.Stack[0] != null &&
+				(
+					program.Stack[1] == null ||
+					((long)program.Stack[0] < (long)program.Stack[1])
+				)
+			)
+				program.Stack[1] = program.Stack[0];
+			return null;
+		}
+	}
+
+	public class LongMaxAggregationNode : PlanNode
+	{
+		public override object InternalExecute(Program program)
+		{
+			if
+			(
+				program.Stack[0] != null &&
+				(
+					program.Stack[1] == null ||
+					((long)program.Stack[0] > (long)program.Stack[1])
+				)
+			)
+				program.Stack[1] = program.Stack[0];
+			return null;
+		}
+	}
+
+	public class LongAvgInitializationNode : PlanNode
+	{
+		public override void InternalDetermineBinding(Plan plan)
+		{
+			plan.Symbols.Push(new Symbol("LCounter", plan.DataTypes.SystemLong));
+		}
+
+		public override object InternalExecute(Program program)
+		{
+			program.Stack.Push(0);
+			program.Stack[1] = 0;
+			return null;
+		}
+	}
+
+	public class LongAvgAggregationNode : PlanNode
+	{
+		public override object InternalExecute(Program program)
+		{
+			if (program.Stack[0] != null)
+			{
+				program.Stack[1] = checked((long)program.Stack[1] + 1);
+				program.Stack[2] = checked((long)program.Stack[2] + (long)program.Stack[0]);
+			}
+			return null;
+		}
+	}
+
+	public class LongAvgFinalizationNode : PlanNode
+	{
+		public override object InternalExecute(Program program)
+		{
+			if ((int)program.Stack[0] == 0)
+				program.Stack[1] = null;
+			else
+				program.Stack[1] = (decimal)(long)program.Stack[1] / (decimal)(long)program.Stack[0];
+			return null;
+		}
+	}
+
 	#if USEDOUBLE    
     public class DoubleInitializationNode : PlanNode
     {
