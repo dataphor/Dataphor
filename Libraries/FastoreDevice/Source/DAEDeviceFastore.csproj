@@ -39,17 +39,11 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FastoreDevice.cs" />
+    <Compile Include="Device.Fastore\FastoreDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -69,6 +63,28 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Dataphor\Base\Base.csproj">
+      <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
+      <Name>Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Dataphor\DAE\Engine.csproj">
+      <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
+      <Name>Engine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Dataphor\Server\Server.csproj">
+      <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
+      <Name>Server %28Server\Server%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">
+      <Project>{8CBB779F-64D4-455F-9E4F-70719408A7CA}</Project>
+      <Name>DAE.Connection</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SQLDevice\Source\DAE.Device.SQL.csproj">
+      <Project>{13A5D21C-63C4-4C56-97F4-6D921C4BA373}</Project>
+      <Name>DAE.Device.SQL</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

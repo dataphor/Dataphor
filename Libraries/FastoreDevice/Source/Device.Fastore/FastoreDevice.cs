@@ -20,7 +20,6 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Device.Memory;
 using Schema = Alphora.Dataphor.DAE.Schema;
-using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Device.Fastore
 {
