@@ -20,7 +20,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		
 		public NativeCLIClient(string hostName) : this(hostName, DefaultInstanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
 		public NativeCLIClient(string hostName, string instanceName) : this(hostName, instanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
-		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode) : this(hostName, instanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
+		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode) : this(hostName, instanceName, overridePortNumber, ConnectionSecurityMode.Default, 0, securityMode) { }
 		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode) : base(GetNativeServerURI(hostName, instanceName, overridePortNumber, overrideListenerPortNumber))
 		{
 			_hostName = hostName;
