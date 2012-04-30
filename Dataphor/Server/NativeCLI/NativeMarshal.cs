@@ -343,33 +343,35 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public static DataParams NativeParamsToDataParams(IServerProcess process, NativeParam[] nativeParams)
 		{
 			DataParams dataParams = new DataParams();
-			for (int index = 0; index < nativeParams.Length; index++)
-			{
-				NativeParam nativeParam = nativeParams[index];
-				DataParam dataParam = 
-					new DataParam
-					(
-						nativeParam.Name, 
-						DataTypeNameToScalarType(process.DataTypes, nativeParam.DataTypeName), 
-						NativeCLIUtility.NativeModifierToModifier(nativeParam.Modifier), 
-						nativeParam.Value
-					);
-				dataParams.Add(dataParam);
-			}
+			if (nativeParams != null)
+				for (int index = 0; index < nativeParams.Length; index++)
+				{
+					NativeParam nativeParam = nativeParams[index];
+					DataParam dataParam = 
+						new DataParam
+						(
+							nativeParam.Name, 
+							DataTypeNameToScalarType(process.DataTypes, nativeParam.DataTypeName), 
+							NativeCLIUtility.NativeModifierToModifier(nativeParam.Modifier), 
+							nativeParam.Value
+						);
+					dataParams.Add(dataParam);
+				}
 			return dataParams;
 		}
 		
 		public static void SetNativeOutputParams(IServerProcess process, NativeParam[] nativeParams, DataParams dataParams)
 		{
-			for (int index = 0; index < nativeParams.Length; index++)
-			{
-				NativeParam nativeParam = nativeParams[index];
-				if ((nativeParam.Modifier == NativeModifier.Var) || (nativeParam.Modifier == NativeModifier.Out))
+			if (nativeParams != null)
+				for (int index = 0; index < nativeParams.Length; index++)
 				{
-					DataParam dataParam = dataParams[index];
-					nativeParam.Value = dataParam.Value;
+					NativeParam nativeParam = nativeParams[index];
+					if ((nativeParam.Modifier == NativeModifier.Var) || (nativeParam.Modifier == NativeModifier.Out))
+					{
+						DataParam dataParam = dataParams[index];
+						nativeParam.Value = dataParam.Value;
+					}
 				}
-			}
 		}
 		
 		public static NativeParam[] DataParamsToNativeParams(IServerProcess process, DataParams dataParams)
