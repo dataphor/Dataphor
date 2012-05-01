@@ -58,12 +58,14 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             }
         }
 
+        //Fire up Fastore, create a host, connect to a session.
         protected override void InternalStart(ServerProcess process)
         {
             base.InternalStart(process);
             _tables = new NativeTables();
         }
 
+        //Free all fastore memory.
         protected override void InternalStop(ServerProcess process)
         {
             if (_tables != null)
@@ -80,7 +82,8 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             base.InternalStop(process);
         }
 
-        //TODO: Figure this out.
+        //TODO: Figure this out. This decides whether this device can support a given plan.
+        //What does each node mean? 
         protected override DevicePlanNode InternalPrepare(Schema.DevicePlan plan, PlanNode planNode)
         {
             if (planNode is BaseTableVarNode)
@@ -206,7 +209,6 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 	}
 
     //TODO: Transactions
-
 	public class FastoreDeviceSession : Schema.DeviceSession
 	{
 		protected internal FastoreDeviceSession
@@ -223,9 +225,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         public new FastoreDevice Device { get { return (FastoreDevice)base.Device; } }
 
+        //Native tables appeaer to be simple in-memory tables. Are they used to represent cached tables?
+        //If so, does fastore need to cache as well?
         private NativeTables _tables;
         
-        //TODO: Scope? Huh?
+        //TODO: Scope? Huh? What are the Tables used for?
         public virtual NativeTables GetTables(Schema.TableVarScope scope)
         {
             switch (scope)
@@ -237,13 +241,14 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             }
         }
 
-        //TODO: Transactions
+        //TODO: Transactions - Not in V1
         protected override void InternalBeginTransaction(IsolationLevel isolationLevel) { }
         protected override void InternalPrepareTransaction() { }
         protected override void InternalCommitTransaction() { }
         protected override void InternalRollbackTransaction() { }
 
         //TODO: FastoreTable? This function is used internally to make sure tables exist
+        //In the case of Fastore, this means reading the tableVar, deciding what the columns will look like, and creating them.
         protected NativeTable EnsureNativeTable(Schema.TableVar tableVar)
         {
             if (!tableVar.IsSessionObject && !tableVar.IsATObject)
@@ -259,6 +264,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             }
         }
 
+        //Execute is what actually returns a value? Plan is executed which return a scan.
         protected override object InternalExecute(Program program, PlanNode planNode)
         {
             if (planNode is BaseTableVarNode)
@@ -325,10 +331,10 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 throw new DeviceException(DeviceException.Codes.InvalidExecuteRequest, Device.Name, planNode.ToString());
         }
 
+        //Row level operations. I don't see where these are called.
         protected override void InternalInsertRow(Program program, Schema.TableVar table, Row row, BitArray valueFlags)
         {
-            NativeTable localTable = GetTables(table.Scope)[table];
-            localTable.Insert(ServerProcess.ValueManager, row);
+            GetTables(table.Scope)[table].Insert(ServerProcess.ValueManager, row);
         }
 
         protected override void InternalUpdateRow(Program program, Schema.TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
