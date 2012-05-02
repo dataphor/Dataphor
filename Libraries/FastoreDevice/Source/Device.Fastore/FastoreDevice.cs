@@ -20,6 +20,8 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Device.Memory;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using System.Collections.Generic;
+using Wrapper;
 
 namespace Alphora.Dataphor.DAE.Device.Fastore
 {
@@ -30,9 +32,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 	{
         //TODO: RowID Generators, Table Groupings, etc.
         
-        //TODO: FastoreTables?
-        private NativeTables _tables;
-        public NativeTables Tables { get { return _tables; } }
+        private FastoreTables _tables;
+        public FastoreTables Tables { get { return _tables; } }
+
+        private ManagedHost _host;
+        public ManagedHost Host { get { return _host; } }
 
         public FastoreDevice(int iD, string name)
             : base(iD, name)
@@ -62,7 +66,12 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         protected override void InternalStart(ServerProcess process)
         {
             base.InternalStart(process);
-            _tables = new NativeTables();
+
+            ManagedHostFactory hf = new ManagedHostFactory();
+            ManagedTopology topo = new ManagedTopology();
+            _host = hf.Create(topo);
+
+            _tables = new FastoreTables();
         }
 
         //Free all fastore memory.
@@ -79,11 +88,13 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 _tables = null;
             }
 
+            //TODO: Kill db, Free resources, etc.
+
             base.InternalStop(process);
         }
 
         //TODO: Figure this out. This decides whether this device can support a given plan.
-        //What does each node mean? 
+        //What does each node mean? And What do we support? Leave as is for now.
         protected override DevicePlanNode InternalPrepare(Schema.DevicePlan plan, PlanNode planNode)
         {
             if (planNode is BaseTableVarNode)
@@ -216,7 +227,12 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			Schema.Device device, 
 			ServerProcess serverProcess, 
 			Schema.DeviceSessionInfo deviceSessionInfo
-		) : base(device, serverProcess, deviceSessionInfo){}
+		) : base(device, serverProcess, deviceSessionInfo)
+        {
+            Session = new ManagedDatabase(((FastoreDevice)device).Host).Start();
+        }
+
+        public ManagedSession Session;
 
         protected override void Dispose(bool disposing)
         {
@@ -225,17 +241,17 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         public new FastoreDevice Device { get { return (FastoreDevice)base.Device; } }
 
-        //Native tables appeaer to be simple in-memory tables. Are they used to represent cached tables?
-        //If so, does fastore need to cache as well?
-        private NativeTables _tables;
+        //FastoreTables are Table MetaData
+        private FastoreTables _tables;
         
-        //TODO: Scope? Huh? What are the Tables used for?
-        public virtual NativeTables GetTables(Schema.TableVarScope scope)
+        //TODO: Scope? Hmm... Our scope is tied explicitly to session for now.
+        public virtual FastoreTables GetTables(Schema.TableVarScope scope)
         {
             switch (scope)
             {
-                case Schema.TableVarScope.Process: return _tables == null ? _tables = new NativeTables() : _tables;
-                case Schema.TableVarScope.Session: return ServerProcess.ServerSession.Tables;
+                case Schema.TableVarScope.Process: return _tables == null ? _tables = new FastoreTables() : _tables;
+                //case Schema.TableVarScope.Session: return ServerProcess.ServerSession.Tables;
+                case Schema.TableVarScope.Session: return _tables == null ? _tables = new FastoreTables() : _tables;
                 case Schema.TableVarScope.Database:
                 default: return Device.Tables;
             }
@@ -249,17 +265,17 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         //TODO: FastoreTable? This function is used internally to make sure tables exist
         //In the case of Fastore, this means reading the tableVar, deciding what the columns will look like, and creating them.
-        protected NativeTable EnsureNativeTable(Schema.TableVar tableVar)
+        protected FastoreTable EnsureFastoreTable(Schema.TableVar tableVar)
         {
             if (!tableVar.IsSessionObject && !tableVar.IsATObject)
                 tableVar.Scope = (Schema.TableVarScope)Enum.Parse(typeof(Schema.TableVarScope), MetaData.GetTag(tableVar.MetaData, "Storage.Scope", "Database"), false);
 
-            NativeTables tables = GetTables(tableVar.Scope);
+            FastoreTables tables = GetTables(tableVar.Scope);
             lock (tables)
             {
                 int index = tables.IndexOf(tableVar);
                 if (index < 0)
-                    index = tables.Add(new NativeTable(ServerProcess.ValueManager, tableVar));
+                    index = tables.Add(new FastoreTable(ServerProcess.ValueManager, tableVar, this));
                 return tables[index];
             }
         }
@@ -272,8 +288,8 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 FastoreScan scan = new FastoreScan(program, this, (BaseTableVarNode)planNode);
                 try
                 {
-                    scan.NativeTable = EnsureNativeTable(((BaseTableVarNode)planNode).TableVar);
-                    scan.Key = scan.NativeTable.ClusteredIndex.Key;
+                    scan.FastoreTable = EnsureFastoreTable(((BaseTableVarNode)planNode).TableVar);
+                    //scan.Key = scan.NativeTable.ClusteredIndex.Key;
                     scan.Open();
                     return scan;
                 }
@@ -288,9 +304,9 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 FastoreScan scan = new FastoreScan(program, this, (BaseTableVarNode)planNode.Nodes[0]);
                 try
                 {
-                    scan.NativeTable = EnsureNativeTable(((BaseTableVarNode)planNode.Nodes[0]).TableVar);
-                    scan.Key = ((OrderNode)planNode).PhysicalOrder;
-                    scan.Direction = ((OrderNode)planNode).ScanDirection;
+                    scan.FastoreTable = EnsureFastoreTable(((BaseTableVarNode)planNode.Nodes[0]).TableVar);
+                    //scan.Key = ((OrderNode)planNode).PhysicalOrder;
+                    //scan.Direction = ((OrderNode)planNode).ScanDirection;
                     scan.Node.Order = ((OrderNode)planNode).Order;
                     scan.Open();
                     return scan;
@@ -303,7 +319,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             }
             else if (planNode is CreateTableVarBaseNode)
             {
-                EnsureNativeTable(((CreateTableVarBaseNode)planNode).GetTableVar());
+                EnsureFastoreTable(((CreateTableVarBaseNode)planNode).GetTableVar());
                 return null;
             }
             else if (planNode is AlterTableNode)
@@ -314,13 +330,13 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             else if (planNode is DropTableNode)
             {
                 Schema.TableVar tableVar = ((DropTableNode)planNode).Table;
-                NativeTables tables = GetTables(tableVar.Scope);
+                FastoreTables tables = GetTables(tableVar.Scope);
                 lock (tables)
                 {
                     int tableIndex = tables.IndexOf(tableVar);
                     if (tableIndex >= 0)
                     {
-                        NativeTable nativeTable = tables[tableIndex];
+                        FastoreTable nativeTable = tables[tableIndex];
                         nativeTable.Drop(program.ValueManager);
                         tables.RemoveAt(tableIndex);
                     }
@@ -348,7 +364,8 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         }
 	}
 
-    public class FastoreScan : TableScan
+    //This will have to be a buffered read of the FastoreStorage engine
+    public class FastoreScan : Table
     {
         public FastoreScan(Program program, FastoreDeviceSession session, TableNode node)
             : base(node, program)
@@ -356,7 +373,197 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             _session = session;
         }
 
+        public FastoreTable FastoreTable;
+
         private FastoreDeviceSession _session;
         public FastoreDeviceSession Session { get { return _session; } }
+
+        protected override void InternalOpen()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void InternalClose()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void InternalSelect(Row row)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override bool InternalNext()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override bool InternalBOF()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override bool InternalEOF()
+        {
+            throw new NotImplementedException();
+        }
     }
+
+    //TODO: FIX NASTY ASSUMPTIONS! (First column is ID column -- This is clearly wrong, but I"m just getting things up and running)
+    public class FastoreTable : System.Object
+    {
+        //Tied Directly to device for time being...
+        public FastoreTable(IValueManager manager, Schema.TableVar tableVar, FastoreDeviceSession session)
+        {
+            TableVar = tableVar;
+            DeviceSession = session;
+
+            EnsureColumns();
+        }
+
+        public FastoreDeviceSession DeviceSession;
+        public Schema.TableVar TableVar;
+
+        private int[] columns;
+
+        protected void EnsureColumns()
+        {
+            List<int> columnIds = new List<int>();
+
+            for (int i = 0; i < TableVar.DataType.Columns.Count; i++)
+            {
+                var col = TableVar.DataType.Columns[i];
+                ManagedColumnDef def = new ManagedColumnDef();
+
+                columnIds.Add(col.ID);
+
+                def.ColumnID = col.ID;
+                def.ValueType = col.DataType.Name;
+                def.Name = col.Description;
+                def.RowIDType = "Int";
+
+                //Unique? Required?
+                if (i == 1)
+                {
+                    def.IsUnique = true;
+                    def.IsRequired = true;
+                }
+                else
+                {
+                    def.IsUnique = false;
+                    def.IsRequired = false;
+                }              
+
+                if (!DeviceSession.Device.Host.ExistsColumn(col.ID))
+                {
+                    DeviceSession.Device.Host.CreateColumn(def);
+                }
+            }
+
+            columns = columnIds.ToArray();
+        }
+
+        public void Insert(IValueManager manager, Row row)
+        {
+            if (row.HasValue(0))
+            {
+                List<object> items = new List<object>();
+
+                for (int i = 0; i < row.DataType.Columns.Count; i++)
+                {
+                    items.Add(row[i]);
+                }
+
+                DeviceSession.Session.Include(row[0], items.ToArray(), columns);
+            }
+        }
+
+        public void Update(IValueManager manager, Row oldrow, Row newrow)
+        {
+            if (oldrow.HasValue(0))
+            {
+                var id = oldrow[0];
+                for (int i = 0; i < columns.Length; i++)
+                {
+                    //TODO: Fix Api.. Exclude and Include and not symmetrical (multiple rows on exclude?)
+                    DeviceSession.Session.Exclude(new object[] { id }, columns);
+                }
+            }
+
+            if (newrow.HasValue(0))
+            {
+                List<object> items = new List<object>();
+
+                for (int i = 0; i < newrow.DataType.Columns.Count; i++)
+                {
+                    items.Add(newrow[i]);
+                }
+
+                DeviceSession.Session.Include(newrow[0], items.ToArray(), columns);
+            }
+        }
+
+        public void Delete(IValueManager manager, Row row)
+        {
+            //If no value at zero, no ID (Based on our wrong assumptions)
+            if (row.HasValue(0))
+            {
+                var id = row[0];
+                for (int i = 0; i < columns.Length; i++)
+                {
+                    //TODO: Fix Api.. Exclude and Include and not symmetrical (multiple rows on exclude?)
+                    DeviceSession.Session.Exclude(new object[] { id }, columns);
+                }
+            }
+        }
+
+        public void Drop(IValueManager manager)
+        {
+            foreach (var col in columns)
+            {
+                DeviceSession.Device.Host.DeleteColumn(col);
+            }
+        }
+    }
+
+    public class FastoreTables : List
+    {
+        public FastoreTables() : base() { }
+
+        public new FastoreTable this[int index]
+        {
+            get { lock (this) { return (FastoreTable)base[index]; } }
+            set { lock (this) { base[index] = value; } }
+        }
+
+        public int IndexOf(Schema.TableVar tableVar)
+        {
+            lock (this)
+            {
+                for (int index = 0; index < Count; index++)
+                    if (this[index].TableVar == tableVar)
+                        return index;
+                return -1;
+            }
+        }
+
+        public bool Contains(Schema.TableVar tableVar)
+        {
+            return IndexOf(tableVar) >= 0;
+        }
+
+        public FastoreTable this[Schema.TableVar tableVar]
+        {
+            get
+            {
+                lock (this)
+                {
+                    int index = IndexOf(tableVar);
+                    if (index < 0)
+                        throw new RuntimeException(RuntimeException.Codes.NativeTableNotFound, tableVar.DisplayName);
+                    return this[index];
+                }
+            }
+        }
+    }    
 }
