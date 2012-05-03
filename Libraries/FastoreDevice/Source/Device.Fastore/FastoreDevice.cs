@@ -32,11 +32,14 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 	{
         //TODO: RowID Generators, Table Groupings, etc.
         
-        private FastoreTables _tables;
+        private static FastoreTables _tables;
         public FastoreTables Tables { get { return _tables; } }
 
-        private ManagedHost _host;
+        private static ManagedHost _host;
         public ManagedHost Host { get { return _host; } }
+
+        private static ManagedSession _msession;
+        public ManagedSession MSession { get { return _msession; } }
 
         public FastoreDevice(int iD, string name)
             : base(iD, name)
@@ -70,7 +73,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             ManagedHostFactory hf = new ManagedHostFactory();
             ManagedTopology topo = new ManagedTopology();
             _host = hf.Create(topo);
-
+            _msession = new ManagedDatabase(_host).Start();
             _tables = new FastoreTables();
         }
 
@@ -103,96 +106,97 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 node.CursorType = CursorType.Dynamic;
                 node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
                 node.CursorCapabilities =
-                    CursorCapability.Navigable |
-                    CursorCapability.BackwardsNavigable |
-                    CursorCapability.Bookmarkable |
-                    CursorCapability.Searchable |
-                    (plan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
+                    CursorCapability.Navigable;
                 node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
                 node.Order = Compiler.OrderFromKey(plan.Plan, Compiler.FindClusteringKey(plan.Plan, node.TableVar));
                 return new DevicePlanNode(node);
             }
             else if ((planNode is OrderNode) && (planNode.Nodes[0] is BaseTableVarNode) && (plan.Plan.CursorContext.CursorType != CursorType.Static))
             {
-                OrderNode node = (OrderNode)planNode;
-                BaseTableVarNode tableVarNode = (BaseTableVarNode)planNode.Nodes[0];
-                Schema.Order tableOrder;
+                //Wah Wah... Ordering not supported at all!! For now...
 
-                bool isSupported = false;
-                foreach (Schema.Key key in tableVarNode.TableVar.Keys)
-                {
-                    tableOrder = Compiler.OrderFromKey(plan.Plan, key);
-                    if (node.RequestedOrder.Equivalent(tableOrder))
-                    {
-                        node.PhysicalOrder = tableOrder;
-                        node.ScanDirection = ScanDirection.Forward;
-                        isSupported = true;
-                        break;
-                    }
-                    else if (node.RequestedOrder.Equivalent(new Schema.Order(tableOrder, true)))
-                    {
-                        node.PhysicalOrder = tableOrder;
-                        node.ScanDirection = ScanDirection.Backward;
-                        isSupported = true;
-                        break;
-                    }
-                }
 
-                if (!isSupported)
-                    foreach (Schema.Order order in tableVarNode.TableVar.Orders)
-                        if (node.RequestedOrder.Equivalent(order))
-                        {
-                            node.PhysicalOrder = order;
-                            node.ScanDirection = ScanDirection.Forward;
-                            isSupported = true;
-                            break;
-                        }
-                        else if (node.RequestedOrder.Equivalent(new Schema.Order(order, true)))
-                        {
-                            node.PhysicalOrder = order;
-                            node.ScanDirection = ScanDirection.Backward;
-                            isSupported = true;
-                            break;
-                        }
+                //OrderNode node = (OrderNode)planNode;
+                //BaseTableVarNode tableVarNode = (BaseTableVarNode)planNode.Nodes[0];
+                //Schema.Order tableOrder;
 
-                if (isSupported)
-                {
-                    node.Order = new Schema.Order();
-                    node.Order.MergeMetaData(node.RequestedOrder.MetaData);
-                    node.Order.IsInherited = false;
-                    Schema.OrderColumn orderColumn;
-                    Schema.OrderColumn newOrderColumn;
-                    for (int index = 0; index < node.PhysicalOrder.Columns.Count; index++)
-                    {
-                        orderColumn = node.PhysicalOrder.Columns[index];
-                        newOrderColumn =
-                            new Schema.OrderColumn
-                            (
-                                node.TableVar.Columns[orderColumn.Column],
-                                node.ScanDirection == ScanDirection.Forward ?
-                                    orderColumn.Ascending :
-                                    !orderColumn.Ascending
-                            );
-                        newOrderColumn.Sort = orderColumn.Sort;
-                        newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
-                        Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");
-                        node.Order.Columns.Add(newOrderColumn);
-                    }
-                    if (!node.TableVar.Orders.Contains(node.Order))
-                        node.TableVar.Orders.Add(node.Order);
+                //bool isSupported = false;
 
-                    node.CursorType = CursorType.Dynamic;
-                    node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
-                    node.CursorCapabilities =
-                        CursorCapability.Navigable |
-                        CursorCapability.BackwardsNavigable |
-                        CursorCapability.Bookmarkable |
-                        CursorCapability.Searchable |
-                        (plan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
-                    node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
+                //var fastTable = Tables[tableVarNode.TableVar];
+                //foreach (Schema.Key key in tableVarNode.TableVar.Keys)
+                //{
+                //    tableOrder = Compiler.OrderFromKey(plan.Plan, key);
+                //    if (node.RequestedOrder.Equivalent(tableOrder))
+                //    {
+                //        node.PhysicalOrder = tableOrder;
+                //        node.ScanDirection = ScanDirection.Forward;
+                //        isSupported = true;
+                //        break;
+                //    }
+                //    else if (node.RequestedOrder.Equivalent(new Schema.Order(tableOrder, true)))
+                //    {
+                //        node.PhysicalOrder = tableOrder;
+                //        node.ScanDirection = ScanDirection.Backward;
+                //        isSupported = true;
+                //        break;
+                //    }
+                //}
 
-                    return new DevicePlanNode(node);
-                }
+                //if (!isSupported)
+                //    foreach (Schema.Order order in tableVarNode.TableVar.Orders)
+                //        if (node.RequestedOrder.Equivalent(order))
+                //        {
+                //            node.PhysicalOrder = order;
+                //            node.ScanDirection = ScanDirection.Forward;
+                //            isSupported = true;
+                //            break;
+                //        }
+                //        else if (node.RequestedOrder.Equivalent(new Schema.Order(order, true)))
+                //        {
+                //            node.PhysicalOrder = order;
+                //            node.ScanDirection = ScanDirection.Backward;
+                //            isSupported = true;
+                //            break;
+                //        }
+
+                //if (isSupported)
+                //{
+                //    node.Order = new Schema.Order();
+                //    node.Order.MergeMetaData(node.RequestedOrder.MetaData);
+                //    node.Order.IsInherited = false;
+                //    Schema.OrderColumn orderColumn;
+                //    Schema.OrderColumn newOrderColumn;
+                //    for (int index = 0; index < node.PhysicalOrder.Columns.Count; index++)
+                //    {
+                //        orderColumn = node.PhysicalOrder.Columns[index];
+                //        newOrderColumn =
+                //            new Schema.OrderColumn
+                //            (
+                //                node.TableVar.Columns[orderColumn.Column],
+                //                node.ScanDirection == ScanDirection.Forward ?
+                //                    orderColumn.Ascending :
+                //                    !orderColumn.Ascending
+                //            );
+                //        newOrderColumn.Sort = orderColumn.Sort;
+                //        newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
+                //        Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");
+                //        node.Order.Columns.Add(newOrderColumn);
+                //    }
+                //    if (!node.TableVar.Orders.Contains(node.Order))
+                //        node.TableVar.Orders.Add(node.Order);
+
+                //    node.CursorType = CursorType.Dynamic;
+                //    node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
+                //    node.CursorCapabilities =
+                //        CursorCapability.Navigable |
+                //        CursorCapability.BackwardsNavigable |
+                //        CursorCapability.Bookmarkable |
+                //        CursorCapability.Searchable |
+                //        (plan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
+                //    node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
+
+                //    return new DevicePlanNode(node);
+                //}
             }
             else if (planNode is CreateTableVarBaseNode)
             {
@@ -229,32 +233,24 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			Schema.DeviceSessionInfo deviceSessionInfo
 		) : base(device, serverProcess, deviceSessionInfo)
         {
-            Session = new ManagedDatabase(((FastoreDevice)device).Host).Start();
+            _fdevice = (FastoreDevice)device;
+            if (device == null)
+                throw new Exception("Device is null");
         }
-
-        public ManagedSession Session;
 
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
         }
 
-        public new FastoreDevice Device { get { return (FastoreDevice)base.Device; } }
+        private FastoreDevice _fdevice;
 
-        //FastoreTables are Table MetaData
-        private FastoreTables _tables;
+        public new FastoreDevice Device { get { return _fdevice; } }
         
         //TODO: Scope? Hmm... Our scope is tied explicitly to session for now.
         public virtual FastoreTables GetTables(Schema.TableVarScope scope)
         {
-            switch (scope)
-            {
-                case Schema.TableVarScope.Process: return _tables == null ? _tables = new FastoreTables() : _tables;
-                //case Schema.TableVarScope.Session: return ServerProcess.ServerSession.Tables;
-                case Schema.TableVarScope.Session: return _tables == null ? _tables = new FastoreTables() : _tables;
-                case Schema.TableVarScope.Database:
-                default: return Device.Tables;
-            }
+            return Device.Tables;
         }
 
         //TODO: Transactions - Not in V1
@@ -275,7 +271,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             {
                 int index = tables.IndexOf(tableVar);
                 if (index < 0)
-                    index = tables.Add(new FastoreTable(ServerProcess.ValueManager, tableVar, this));
+                    index = tables.Add(new FastoreTable(ServerProcess.ValueManager, tableVar, this.Device));
                 return tables[index];
             }
         }
@@ -299,24 +295,24 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                     throw;
                 }
             }
-            else if (planNode is OrderNode)
-            {
-                FastoreScan scan = new FastoreScan(program, this, (BaseTableVarNode)planNode.Nodes[0]);
-                try
-                {
-                    scan.FastoreTable = EnsureFastoreTable(((BaseTableVarNode)planNode.Nodes[0]).TableVar);
-                    //scan.Key = ((OrderNode)planNode).PhysicalOrder;
-                    //scan.Direction = ((OrderNode)planNode).ScanDirection;
-                    scan.Node.Order = ((OrderNode)planNode).Order;
-                    scan.Open();
-                    return scan;
-                }
-                catch
-                {
-                    scan.Dispose();
-                    throw;
-                }
-            }
+            //else if (planNode is OrderNode)
+            //{
+            //    FastoreScan scan = new FastoreScan(program, this, (BaseTableVarNode)planNode.Nodes[0]);
+            //    try
+            //    {
+            //        scan.FastoreTable = EnsureFastoreTable(((BaseTableVarNode)planNode.Nodes[0]).TableVar);
+            //        //scan.Key = ((OrderNode)planNode).PhysicalOrder;
+            //        //scan.Direction = ((OrderNode)planNode).ScanDirection;
+            //        scan.Node.Order = ((OrderNode)planNode).Order;
+            //        scan.Open();
+            //        return scan;
+            //    }
+            //    catch
+            //    {
+            //        scan.Dispose();
+            //        throw;
+            //    }
+            //}
             else if (planNode is CreateTableVarBaseNode)
             {
                 EnsureFastoreTable(((CreateTableVarBaseNode)planNode).GetTableVar());
@@ -347,7 +343,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 throw new DeviceException(DeviceException.Codes.InvalidExecuteRequest, Device.Name, planNode.ToString());
         }
 
-        //Row level operations. I don't see where these are called.
+        //Row level operations. Called from base class which calls internal functions.
         protected override void InternalInsertRow(Program program, Schema.TableVar table, Row row, BitArray valueFlags)
         {
             GetTables(table.Scope)[table].Insert(ServerProcess.ValueManager, row);
@@ -378,34 +374,49 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         private FastoreDeviceSession _session;
         public FastoreDeviceSession Session { get { return _session; } }
 
+        private ManagedDataSet _set;
+        private int _currow = -1;
+
         protected override void InternalOpen()
         {
-            throw new NotImplementedException();
+            _set = new ManagedDatabase(Session.Device.Host).Start().GetRange(FastoreTable.Columns, new ManagedOrder[0], new ManagedRange[0]);
         }
 
         protected override void InternalClose()
         {
-            throw new NotImplementedException();
+            _set = null;
         }
 
         protected override void InternalSelect(Row row)
         {
-            throw new NotImplementedException();
+                object[] managedRow = _set.Row(_currow);
+
+                NativeRow nRow = new NativeRow(FastoreTable.TableVar.Columns.Count);
+                for (int i = 0; i < FastoreTable.TableVar.Columns.Count; i++)
+                {
+                    nRow.Values[i] = managedRow[i]; 
+                }
+
+                Row localRow = new Row(Manager, FastoreTable.TableVar.DataType.RowType, nRow);               
+
+                localRow.CopyTo(row);
         }
 
         protected override bool InternalNext()
         {
-            throw new NotImplementedException();
+            _currow++;
+
+            return _currow < _set.Size();
         }
 
         protected override bool InternalBOF()
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         protected override bool InternalEOF()
         {
-            throw new NotImplementedException();
+            return _currow == _set.Size();
         }
     }
 
@@ -413,18 +424,46 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
     public class FastoreTable : System.Object
     {
         //Tied Directly to device for time being...
-        public FastoreTable(IValueManager manager, Schema.TableVar tableVar, FastoreDeviceSession session)
+        public FastoreTable(IValueManager manager, Schema.TableVar tableVar, FastoreDevice device)
         {
             TableVar = tableVar;
-            DeviceSession = session;
+            Device = device;
 
+            _keys = new Schema.Keys();
+            _orders = new Schema.Orders();
             EnsureColumns();
         }
 
-        public FastoreDeviceSession DeviceSession;
+        public FastoreDevice Device;
         public Schema.TableVar TableVar;
 
-        private int[] columns;
+        private Keys _keys;
+        public Keys Keys { get { return _keys; } }
+
+        private Orders _orders;
+        public Orders Orders { get { return _orders; } }
+
+        private int[] _columns;
+        public int[] Columns { get { return _columns; } }
+
+
+        protected string MapTypeNames(string tname)
+        {
+            string name = "";
+            switch (tname)
+            {
+                case "System.String":
+                    name = "WString";
+                    break;
+                case "System.Integer":
+                    name = "Int";
+                    break;
+                default:
+                    break;
+            }
+
+            return name;
+        }
 
         protected void EnsureColumns()
         {
@@ -438,7 +477,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 columnIds.Add(col.ID);
 
                 def.ColumnID = col.ID;
-                def.ValueType = col.DataType.Name;
+                def.ValueType = MapTypeNames(col.DataType.Name);
                 def.Name = col.Description;
                 def.RowIDType = "Int";
 
@@ -454,13 +493,13 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                     def.IsRequired = false;
                 }              
 
-                if (!DeviceSession.Device.Host.ExistsColumn(col.ID))
+                if (!Device.Host.ExistsColumn(col.ID))
                 {
-                    DeviceSession.Device.Host.CreateColumn(def);
+                    Device.Host.CreateColumn(def);
                 }
             }
 
-            columns = columnIds.ToArray();
+            _columns = columnIds.ToArray();
         }
 
         public void Insert(IValueManager manager, Row row)
@@ -474,7 +513,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                     items.Add(row[i]);
                 }
 
-                DeviceSession.Session.Include(row[0], items.ToArray(), columns);
+                new ManagedDatabase(Device.Host).Start().Include(items[0], items.ToArray(), _columns);
             }
         }
 
@@ -483,10 +522,10 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             if (oldrow.HasValue(0))
             {
                 var id = oldrow[0];
-                for (int i = 0; i < columns.Length; i++)
+                for (int i = 0; i < _columns.Length; i++)
                 {
                     //TODO: Fix Api.. Exclude and Include and not symmetrical (multiple rows on exclude?)
-                    DeviceSession.Session.Exclude(new object[] { id }, columns);
+                    new ManagedDatabase(Device.Host).Start().Exclude(new object[] { id }, _columns);
                 }
             }
 
@@ -499,7 +538,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                     items.Add(newrow[i]);
                 }
 
-                DeviceSession.Session.Include(newrow[0], items.ToArray(), columns);
+                new ManagedDatabase(Device.Host).Start().Include(newrow[0], items.ToArray(), _columns);
             }
         }
 
@@ -509,19 +548,18 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             if (row.HasValue(0))
             {
                 var id = row[0];
-                for (int i = 0; i < columns.Length; i++)
+                for (int i = 0; i < _columns.Length; i++)
                 {
-                    //TODO: Fix Api.. Exclude and Include and not symmetrical (multiple rows on exclude?)
-                    DeviceSession.Session.Exclude(new object[] { id }, columns);
+                    new ManagedDatabase(Device.Host).Start().Exclude(id, _columns);
                 }
             }
         }
 
         public void Drop(IValueManager manager)
         {
-            foreach (var col in columns)
+            foreach (var col in _columns)
             {
-                DeviceSession.Device.Host.DeleteColumn(col);
+                Device.Host.DeleteColumn(col);
             }
         }
     }
