@@ -32,10 +32,13 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 	{
         //TODO: RowID Generators, Table Groupings, etc.
         
-        private static FastoreTables _tables;
+        //TableVar Mappings
+        private FastoreTables _tables;
         public FastoreTables Tables { get { return _tables; } }
 
-        private static ManagedHost _host;
+        //Hosting Fastore in process. Tied to the device.
+        //If the device dies, it's game over.
+        private ManagedHost _host;
         public ManagedHost Host { get { return _host; } }
 
         public FastoreDevice(int iD, string name)
@@ -67,6 +70,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         {
             base.InternalStart(process);
 
+            //Create the host (will eventually connect to host)
             ManagedHostFactory hf = new ManagedHostFactory();
             ManagedTopology topo = new ManagedTopology();
             _host = hf.Create(topo);
@@ -243,7 +247,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         public new FastoreDevice Device { get { return (FastoreDevice)base.Device; } }
         
-        //TODO: Scope? Hmm... Our scope is tied explicitly to session for now.
+        //TODO: Scope? Hmm... Our scope is tied explicitly to device for now. Once it disappears, it's gone.
         public virtual FastoreTables GetTables(Schema.TableVarScope scope)
         {
             return Device.Tables;
@@ -372,6 +376,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         private ManagedDataSet _set;
         private int _currow = -1;
 
+        //TODO: set parameters before opening. Start and end range, Orders, etc.
         protected override void InternalOpen()
         {
             _set = _session.GetRange(FastoreTable.Columns, new ManagedOrder[0], new ManagedRange[0]);
@@ -415,7 +420,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         }
     }
 
-    //TODO: FIX NASTY ASSUMPTIONS! (First column is ID column -- This is clearly wrong, but I"m just getting things up and running)
+    //TODO: FIX NASTY ASSUMPTIONS! (First column is ID column -- This is clearly wrong, but I'm just getting things up and running)
     public class FastoreTable : System.Object
     {
         //Tied Directly to device for time being...
