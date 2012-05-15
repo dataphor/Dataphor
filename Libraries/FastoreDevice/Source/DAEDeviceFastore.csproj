@@ -37,9 +37,8 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FastoreWrapper, Version=1.0.4506.41116, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>FastoreWrapper\FastoreWrapper.dll</HintPath>
+    <Reference Include="Fastore.Client">
+      <HintPath>Fastore.Client\Fastore.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

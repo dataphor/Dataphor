@@ -21,7 +21,7 @@ using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Device.Memory;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using System.Collections.Generic;
-using Wrapper;
+using Alphora.Fastore.Client;
 
 namespace Alphora.Dataphor.DAE.Device.Fastore
 {
@@ -38,8 +38,8 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         //Hosting Fastore in process. Tied to the device.
         //If the device dies, it's game over.
-        private ManagedHost _host;
-        public ManagedHost Host { get { return _host; } }
+        private Database _db = null;
+        public Database Database { get { return _db; } }
 
         public FastoreDevice(int iD, string name)
             : base(iD, name)
@@ -50,7 +50,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         protected override DeviceSession InternalConnect(ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo)
         {
-            return new FastoreDeviceSession(this, serverProcess, deviceSessionInfo, new ManagedDatabase(Host).Start());
+            return new FastoreDeviceSession(this, serverProcess, deviceSessionInfo, Database.Start());
         }
 
         public override DeviceCapability Capabilities
@@ -70,10 +70,12 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         {
             base.InternalStart(process);
 
+            //Start the fastore service
+            //Connect to the service. For now this is just one "Host"
             //Create the host (will eventually connect to host)
-            ManagedHostFactory hf = new ManagedHostFactory();
-            ManagedTopology topo = new ManagedTopology();
-            _host = hf.Create(topo);
+           // ManagedHostFactory hf = new ManagedHostFactory();
+            //ManagedTopology topo = new ManagedTopology();
+            //_host = hf.Create(topo);
 
             _tables = new FastoreTables();
         }
@@ -232,7 +234,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			Schema.Device device, 
 			ServerProcess serverProcess, 
 			Schema.DeviceSessionInfo deviceSessionInfo,
-            ManagedSession session
+            Session session
 		) : base(device, serverProcess, deviceSessionInfo)
         {
             _session = session;
@@ -243,7 +245,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             base.Dispose(disposing);
         }
 
-        private ManagedSession _session;
+        private Session _session;
 
         public new FastoreDevice Device { get { return (FastoreDevice)base.Device; } }
         
@@ -363,7 +365,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
     //This will have to be a buffered read of the FastoreStorage engine
     public class FastoreScan : Table
     {
-        public FastoreScan(Program program, ManagedSession session, TableNode node)
+        public FastoreScan(Program program, Session session, TableNode node)
             : base(node, program)
         {
             _session = session;
@@ -371,15 +373,22 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         public FastoreTable FastoreTable;
 
-        private ManagedSession _session;  
+        private Session _session;  
 
-        private ManagedDataSet _set;
+        private DataSet _set;
         private int _currow = -1;
+
+        public Orders Orders = new Orders();
+
+        private Alphora.Fastore.Client.Order[] OrdersToFastoreOrders()
+        {
+            return new Alphora.Fastore.Client.Order[0];
+        }
 
         //TODO: set parameters before opening. Start and end range, Orders, etc.
         protected override void InternalOpen()
         {
-            _set = _session.GetRange(FastoreTable.Columns, new ManagedOrder[0], new ManagedRange[0]);
+            _set = _session.GetRange(FastoreTable.Columns, OrdersToFastoreOrders(), new Range[0]);
         }
 
         protected override void InternalClose()
@@ -389,7 +398,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         protected override void InternalSelect(Row row)
         {
-                object[] managedRow = _set.Row(_currow);
+                object[] managedRow = _set[_currow];
 
                 NativeRow nRow = new NativeRow(FastoreTable.TableVar.Columns.Count);
                 for (int i = 0; i < FastoreTable.TableVar.Columns.Count; i++)
@@ -406,7 +415,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         {
             _currow++;
 
-            return _currow < _set.Size();
+            return _currow < _set.Count;
         }
 
         protected override bool InternalBOF()
@@ -416,7 +425,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         protected override bool InternalEOF()
         {
-            return _currow == _set.Size();
+            return _currow == _set.Count;
         }
     }
 
@@ -478,86 +487,69 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             for (int i = 0; i < TableVar.DataType.Columns.Count; i++)
             {
                 var col = TableVar.DataType.Columns[i];
-                ManagedColumnDef def = new ManagedColumnDef();
+                ColumnDef def = new ColumnDef();
 
                 columnIds.Add(col.ID);
 
                 def.ColumnID = col.ID;
-                def.ValueType = MapTypeNames(col.DataType.Name);
+                def.Type = MapTypeNames(col.DataType.Name);
                 def.Name = col.Description;
-                def.RowIDType = "Int";
+                def.IDType = "Int";
 
                 //Unique? Required?
                 if (i == 1)
                 {
                     def.IsUnique = true;
-                    def.IsRequired = true;
+
                 }
                 else
                 {
                     def.IsUnique = false;
-                    def.IsRequired = false;
                 }              
 
-                if (!Device.Host.ExistsColumn(col.ID))
+                if (!Device.Database.ExistsColumn(col.ID))
                 {
-                    Device.Host.CreateColumn(def);
+                    Device.Database.CreateColumn(def);
                 }
             }
 
             _columns = columnIds.ToArray();
         }
 
-        public void Insert(IValueManager manager, Row row, ManagedSession session)
+        public void Insert(IValueManager manager, Row row, Session session)
         {
             if (row.HasValue(0))
             {
-                List<object> items = new List<object>();
+                object[] items = ((NativeRow)row.AsNative).Values;
 
-                for (int i = 0; i < row.DataType.Columns.Count; i++)
-                {
-                    items.Add(row[i]);
-                }
-
-                session.Include(items[0], items.ToArray(), _columns);
+                session.Include(_columns, items[0], items);
             }
         }
 
-        public void Update(IValueManager manager, Row oldrow, Row newrow, ManagedSession session)
+        public void Update(IValueManager manager, Row oldrow, Row newrow, Session session)
         {
             if (oldrow.HasValue(0))
             {
                 var id = oldrow[0];
                 for (int i = 0; i < _columns.Length; i++)
                 {
-                    //TODO: Fix Api.. Exclude and Include and not symmetrical (multiple rows on exclude?)
-                    session.Exclude(new object[] { id }, _columns);
+                    session.Exclude(_columns, id);
                 }
             }
 
             if (newrow.HasValue(0))
             {
-                List<object> items = new List<object>();
-
-                for (int i = 0; i < newrow.DataType.Columns.Count; i++)
-                {
-                    items.Add(newrow[i]);
-                }
-
-                session.Include(newrow[0], items.ToArray(), _columns);
+                object[] items = ((NativeRow)newrow.AsNative).Values;
+                session.Include(_columns, items[0], items);
             }
         }
 
-        public void Delete(IValueManager manager, Row row, ManagedSession session)
+        public void Delete(IValueManager manager, Row row, Session session)
         {
             //If no value at zero, no ID (Based on our wrong assumptions)
             if (row.HasValue(0))
             {
-                var id = row[0];
-                for (int i = 0; i < _columns.Length; i++)
-                {
-                    session.Exclude(id, _columns);
-                }
+                session.Exclude(_columns, row[0]);
             }
         }
 
@@ -565,9 +557,9 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         {
             foreach (var col in _columns)
             {
-                if (Device.Host.ExistsColumn(col))
+                if (Device.Database.ExistsColumn(col))
                 {
-                    Device.Host.DeleteColumn(col);
+                    Device.Database.DeleteColumn(col);
                 }
             }
         }
