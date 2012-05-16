@@ -270,7 +270,12 @@ namespace Alphora.Dataphor.DAE.Language.SQL
 			AppendFormat("{0}{1}", expression.Identifier, Keywords.BeginGroup);
 			if (expression.IsDistinct)
 				AppendFormat("{0} ", Keywords.Distinct);
-			EmitExpression(expression.Expressions[0]);
+            for (int index = 0; index < expression.Expressions.Count; index++)
+            {
+                if (index > 0)
+                    EmitListSeparator();
+                EmitExpression(expression.Expressions[index]);
+            }         
 			Append(Keywords.EndGroup);
 		}
 		
