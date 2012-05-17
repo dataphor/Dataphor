@@ -3277,7 +3277,21 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				if (rangeVar.Columns.Contains(column))
 					rangeVar.Columns.Remove(column);
 		}
-		
+
+		/// <summary>
+		/// Renames the given column and returns the new column.
+		/// </summary>
+		/// <param name="devicePlan">The device plan supporting the translation.</param>
+		/// <param name="oldColumn">The column to be renamed.</param>
+		/// <param name="newColumn">The new column.</param>
+		/// <returns>The renamed SQLRangeVarColumn instance.</returns>
+		/// <remarks>
+		/// Note that this method removes the old column from the query context and DOES NOT add the new column.
+		/// The returned column must be added to the query context by the caller. This is done because a rename
+		/// operation may in general contain name exchanges, so the columns must all be removed and then re-added
+		/// to the query context after all columns have been renamed to avoid the possibility of a subsequent
+		/// column rename finding the newly added column for a rename in the same operation.
+		/// </remarks>
 		public SQLRangeVarColumn RenameColumn(SQLDevicePlan devicePlan, Schema.TableVarColumn oldColumn, Schema.TableVarColumn newColumn)
 		{
 			SQLRangeVarColumn localOldColumn = GetRangeVarColumn(oldColumn.Name);
@@ -3288,7 +3302,6 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				localNewColumn = new SQLRangeVarColumn(newColumn, localOldColumn.Expression, localOldColumn.Alias);
 			
 			RemoveColumn(localOldColumn);
-			_addedColumns.Add(localNewColumn);
 			
 			localNewColumn.ReferenceFlags = localOldColumn.ReferenceFlags;
 			localNewColumn.Alias = devicePlan.Device.ToSQLIdentifier(newColumn.Name);

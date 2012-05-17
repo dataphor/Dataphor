@@ -288,6 +288,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				SQLRangeVarColumn rangeVarColumn;
 				selectExpression.SelectClause.Columns.Clear();
 				
+				var renamedColumns = new SQLRangeVarColumns();
+
 				if (planNode is RowRenameNode)
 				{
 					Schema.IRowType sourceRowType = planNode.Nodes[0].DataType as Schema.IRowType;
@@ -296,6 +298,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					{
 						rangeVarColumn = localDevicePlan.CurrentQueryContext().RenameColumn(localDevicePlan, new Schema.TableVarColumn(sourceRowType.Columns[index]), new Schema.TableVarColumn(targetRowType.Columns[index]));
 						selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
+						renamedColumns.Add(rangeVarColumn);
 					}
 				} 
 				else if (planNode is RenameNode)
@@ -306,8 +309,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					{
 						rangeVarColumn = localDevicePlan.CurrentQueryContext().RenameColumn(localDevicePlan, sourceTableVar.Columns[index], tableVar.Columns[index]);
 						selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
+						renamedColumns.Add(rangeVarColumn);
 					}
 				}
+
+				localDevicePlan.CurrentQueryContext().AddedColumns.AddRange(renamedColumns);
 			}
 
 			return statement;
