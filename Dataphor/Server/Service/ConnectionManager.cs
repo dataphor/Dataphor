@@ -70,7 +70,8 @@ namespace Alphora.Dataphor.DAE.Service
 								try
 								{
 									// Connection has been idle for longer than the activity time, kill it
-									_remoteServer.Relinquish(connections[index]);
+                                    _remoteServer.Server.LogMessage(String.Format("Connection relinquished due to inactivity: ConnectionName={0}, HostName={1}, LastActivity={2}", connections[index].ConnectionName, connections[index].HostName, connections[index].LastActivityTime.ToShortTimeString()));
+									_remoteServer.Relinquish(connections[index]);                                   
 								}
 								catch (Exception exception)
 								{
