@@ -791,7 +791,6 @@ begin
 	create operator CommitApplicationTransaction(const AID : Guid) class "System.CommitApplicationTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator RollbackApplicationTransaction(const AID : Guid) class "System.RollbackApplicationTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator SaveLibraryCatalog(const ALibraryName : Name) class "System.SystemSaveLibraryCatalogNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
-	create operator Diagnostics.ToDebugString(const AValue : generic) : String class "System.ObjectToStringNode";
 	create operator Diagnostics.EnableErrorLogging() class "System.SystemEnableErrorLoggingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.DisableErrorLogging() class "System.SystemDisableErrorLoggingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.LogError(const AError : Error) class "System.SystemLogErrorNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
