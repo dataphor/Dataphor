@@ -29,15 +29,15 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 	//This will have to be a buffered read of the FastoreStorage engine
 	public class FastoreScan : Table
 	{
-		public FastoreScan(Program program, Session session, TableNode node)
+		public FastoreScan(Program program, Database db, TableNode node)
 			: base(node, program)
 		{
-			_session = session;
+			_db = db;
 		}
 
 		public FastoreTable FastoreTable;
 
-		private Session _session;
+		private Database _db;
 
 		private DataSet _set;
 		private int _currow = -1;
@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 		//TODO: set parameters before opening. Start and end range, Orders, etc.
 		protected override void InternalOpen()
 		{
-			_set = _session.GetRange(FastoreTable.Columns, OrdersToFastoreOrders(), new Range[0]);
+			_set = _db.GetRange(FastoreTable.Columns, OrdersToFastoreOrders(), new Range[0]);
 		}
 
 		protected override void InternalClose()

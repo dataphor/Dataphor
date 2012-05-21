@@ -34,11 +34,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			Schema.Device device,
 			ServerProcess serverProcess,
 			Schema.DeviceSessionInfo deviceSessionInfo,
-			Session session
+			Database db
 		)
 			: base(device, serverProcess, deviceSessionInfo)
 		{
-			_session = session;
+			_db = db;
 		}
 
 		protected override void Dispose(bool disposing)
@@ -46,7 +46,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			base.Dispose(disposing);
 		}
 
-		private Session _session;
+		private Database _db;
 
 		public new FastoreDevice Device { get { return (FastoreDevice)base.Device; } }
 
@@ -84,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 		{
 			if (planNode is BaseTableVarNode)
 			{
-				FastoreScan scan = new FastoreScan(program, _session, (BaseTableVarNode)planNode);
+				FastoreScan scan = new FastoreScan(program, _db, (BaseTableVarNode)planNode);
 				try
 				{
 					scan.FastoreTable = EnsureFastoreTable(((BaseTableVarNode)planNode).TableVar);
@@ -149,17 +149,17 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 		//Row level operations. Called from base class which calls internal functions.
 		protected override void InternalInsertRow(Program program, Schema.TableVar table, Row row, BitArray valueFlags)
 		{
-			GetTables(table.Scope)[table].Insert(ServerProcess.ValueManager, row, _session);
+			GetTables(table.Scope)[table].Insert(ServerProcess.ValueManager, row, _db);
 		}
 
 		protected override void InternalUpdateRow(Program program, Schema.TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
 		{
-			GetTables(table.Scope)[table].Update(ServerProcess.ValueManager, oldRow, newRow, _session);
+			GetTables(table.Scope)[table].Update(ServerProcess.ValueManager, oldRow, newRow, _db);
 		}
 
 		protected override void InternalDeleteRow(Program program, Schema.TableVar table, Row row)
 		{
-			GetTables(table.Scope)[table].Delete(ServerProcess.ValueManager, row, _session);
+			GetTables(table.Scope)[table].Delete(ServerProcess.ValueManager, row, _db);
 		}
 	}
 }

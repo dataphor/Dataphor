@@ -84,69 +84,64 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			for (int i = 0; i < TableVar.DataType.Columns.Count; i++)
 			{
 				var col = TableVar.DataType.Columns[i];
-				ColumnDef def = new ColumnDef();
 
 				columnIds.Add(col.ID);
 
-				def.ColumnID = col.ID;
-				def.Type = MapTypeNames(col.DataType.Name);
-				def.Name = col.Description;
-				def.IDType = "Int";
+                Range query = new Range();
+                query.ColumnID = 0;
+                query.Start = new RangeBound() { Bound = col.ID, Inclusive = true };
+                query.End = new RangeBound() { Bound = col.ID, Inclusive = true };
 
-				//Unique? Required?
-				if (i == 1)
-				{
-					def.IsUnique = true;
+                var result = Device.Database.GetRange(new int[] { 0 }, new Alphora.Fastore.Client.Order[] {}, new Range[] { query });
 
-				}
-				else
-				{
-					def.IsUnique = false;
-				}
-
-				if (!Device.Database.ExistsColumn(col.ID))
-				{
-					Device.Database.CreateColumn(def);
-				}
+                if (result.Count == 0)
+                {
+                    Device.Database.Include
+                    (
+                        new int[] { 0, 1, 2, 3, 4 },
+                        col.ID,
+                        new object[] { col.ID, col.Description, MapTypeNames(col.DataType.Name), "Int", i == 1 }
+                    );
+                }
 			}
 
 			_columns = columnIds.ToArray();
 		}
 
-		public void Insert(IValueManager manager, Row row, Session session)
+		public void Insert(IValueManager manager, Row row, Database db)
 		{
 			if (row.HasValue(0))
 			{
 				object[] items = ((NativeRow)row.AsNative).Values;
 
-				session.Include(_columns, items[0], items);
+				db.Include(_columns, items[0], items);
 			}
 		}
 
-		public void Update(IValueManager manager, Row oldrow, Row newrow, Session session)
+		public void Update(IValueManager manager, Row oldrow, Row newrow, Database db)
 		{
 			if (oldrow.HasValue(0))
 			{
 				var id = oldrow[0];
 				for (int i = 0; i < _columns.Length; i++)
 				{
-					session.Exclude(_columns, id);
+					db.Exclude(_columns, id);
 				}
 			}
 
 			if (newrow.HasValue(0))
 			{
 				object[] items = ((NativeRow)newrow.AsNative).Values;
-				session.Include(_columns, items[0], items);
+				db.Include(_columns, items[0], items);
 			}
 		}
 
-		public void Delete(IValueManager manager, Row row, Session session)
+		public void Delete(IValueManager manager, Row row, Database db)
 		{
 			//If no value at zero, no ID (Based on our wrong assumptions)
 			if (row.HasValue(0))
 			{
-				session.Exclude(_columns, row[0]);
+				db.Exclude(_columns, row[0]);
 			}
 		}
 
@@ -154,10 +149,17 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 		{
 			foreach (var col in _columns)
 			{
-				if (Device.Database.ExistsColumn(col))
-				{
-					Device.Database.DeleteColumn(col);
-				}
+				Range query = new Range();
+                query.ColumnID = 0;
+                query.Start = new RangeBound() { Bound = col, Inclusive = true };
+                query.End = new RangeBound() { Bound = col, Inclusive = true };
+
+                var result = Device.Database.GetRange(new int[] { 0 }, new Alphora.Fastore.Client.Order[] {}, new Range[] { query });
+
+                if (result.Count > 0)
+                {
+                    Device.Database.Exclude(new int[] { 0, 1, 2, 3, 4 }, col);
+                }
 			}
 		}
 	}

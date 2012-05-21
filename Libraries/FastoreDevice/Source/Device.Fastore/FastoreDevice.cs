@@ -50,7 +50,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         protected override DeviceSession InternalConnect(ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo)
         {
-            return new FastoreDeviceSession(this, serverProcess, deviceSessionInfo, Database.Start());
+            return new FastoreDeviceSession(this, serverProcess, deviceSessionInfo, Database);
         }
 
         public override DeviceCapability Capabilities
@@ -70,12 +70,8 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         {
             base.InternalStart(process);
 
-            //Start the fastore service
-            //Connect to the service. For now this is just one "Host"
-            //Create the host (will eventually connect to host)
-           // ManagedHostFactory hf = new ManagedHostFactory();
-            //ManagedTopology topo = new ManagedTopology();
-            //_host = hf.Create(topo);
+            //Connect to the Fastore Service
+            _db = Client.Connect("localhost", 8064);
 
             _tables = new FastoreTables();
         }
