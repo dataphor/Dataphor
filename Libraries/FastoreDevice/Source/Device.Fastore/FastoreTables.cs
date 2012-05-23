@@ -23,7 +23,6 @@ using Schema = Alphora.Dataphor.DAE.Schema;
 using System.Collections.Generic;
 using Alphora.Fastore.Client;
 
-
 namespace Alphora.Dataphor.DAE.Device.Fastore
 {
 	public class FastoreTables : List

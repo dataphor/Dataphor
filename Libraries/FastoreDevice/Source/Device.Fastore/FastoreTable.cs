@@ -59,7 +59,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			switch (tname)
 			{
 				case "System.String":
-					name = "WString";
+					name = "String";
 					break;
 				case "System.Integer":
 					name = "Int";

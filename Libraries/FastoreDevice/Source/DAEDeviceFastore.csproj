@@ -11,7 +11,8 @@
     <RootNamespace>Alphora.Dataphor.DAE</RootNamespace>
     <AssemblyName>AlphoraFastoreDevice</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup>
@@ -54,10 +55,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\External\Fastore.Client.dll</HintPath>
     </Reference>
+    <Reference Include="Fastore.Communication, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\External\Fastore.Communication.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
+    <Reference Include="Thrift">
+      <HintPath>..\..\..\External\Thrift.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Device.Fastore\FastoreDevice.cs" />
