@@ -35,19 +35,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			TableVar = tableVar;
 			Device = device;
 
-			_keys = new Schema.Keys();
-			_orders = new Schema.Orders();
 			EnsureColumns();
 		}
 
 		public FastoreDevice Device;
 		public Schema.TableVar TableVar;
-
-		private Keys _keys;
-		public Keys Keys { get { return _keys; } }
-
-		private Orders _orders;
-		public Orders Orders { get { return _orders; } }
 
 		private int[] _columns;
 		public int[] Columns { get { return _columns; } }
@@ -102,6 +94,17 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                         col.ID,
                         new object[] { col.ID, col.Description, MapTypeNames(col.DataType.Name), "Int", i == 1 }
                     );
+
+
+                    Schema.Order order = new Schema.Order();
+                    Schema.TableVarColumn tvc = new TableVarColumn(TableVar.DataType.Columns[i]);
+                    Schema.OrderColumn ordercolumn = new OrderColumn(tvc, true);
+                    order.Columns.Add(ordercolumn);
+
+                    if (!TableVar.Orders.Contains(order))
+                    {
+                        TableVar.Orders.Add(order);
+                    }
                 }
 			}
 

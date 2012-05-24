@@ -33,63 +33,236 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			: base(node, program)
 		{
 			_db = db;
+            _trivialBOF = true;
 		}
-
-		public FastoreTable FastoreTable;
 
 		private Database _db;
 
-		private DataSet _set;
-		private int _currow = -1;
+        public Schema.Order Key;
+        public ScanDirection Direction;
 
-		public Orders Orders = new Orders();
+        protected bool BufferActive()
+        {
+            return _bufferFull;
+        }
 
-		private Alphora.Fastore.Client.Order[] OrdersToFastoreOrders()
-		{
-			return new Alphora.Fastore.Client.Order[0];
-		}
+        protected void ClearBuffer()
+        {
+            _buffer = null;
+            _bufferIndex = -1;
+            _bufferFull = false;
+           // _sourceCursorIndex = SourceCursorIndexUnknown;
+        }
 
-		//TODO: set parameters before opening. Start and end range, Orders, etc.
+        protected DataSet _buffer;
+        protected int _bufferIndex = -1;
+        protected bool _bufferFull;
+        //protected bool FBufferFirst;
+
+        /// <summary> Index of FCursor relative to the buffer or CSourceCursorIndexUnknown if unknown. </summary>
+        protected int _sourceCursorIndex;
+
+        protected bool _trivialBOF;
+        protected bool _serverEOF;
+        protected bool _serverBOF = true;
+        // TrivialEOF unneccesary because Last returns flags
+
+        private Alphora.Fastore.Client.Order[] GetFastoreOrders()
+        {
+            if (Key == null || Key.Columns.Count == 0)
+                return new Alphora.Fastore.Client.Order[0];
+            else
+            {
+                Alphora.Fastore.Client.Order order = new Alphora.Fastore.Client.Order();
+                order.ColumnID = Key.Columns[0].Column.ID;
+                order.Ascending = Direction == ScanDirection.Forward;
+
+                return new Alphora.Fastore.Client.Order[] { order };
+            }
+        }
+
+        private int[] TableNodeColumns()
+        {
+            List<int> ids = new List<int>();
+            foreach (var col in Node.DataType.Columns)
+            {
+                ids.Add(col.ID);
+            }
+
+            return ids.ToArray();
+        }
+
 		protected override void InternalOpen()
 		{
-			_set = _db.GetRange(FastoreTable.Columns, OrdersToFastoreOrders(), new Range[0]);
+           // _set = _db.GetRange(TableNodeColumns(), GetFastoreOrders(), new Range[0]);
 		}
 
 		protected override void InternalClose()
 		{
-			_set = null;
+            if (BufferActive())
+                ClearBuffer();
 		}
 
 		protected override void InternalSelect(Row row)
 		{
-			object[] managedRow = _set[_currow];
-
-			NativeRow nRow = new NativeRow(FastoreTable.TableVar.Columns.Count);
-			for (int i = 0; i < FastoreTable.TableVar.Columns.Count; i++)
-			{
-				nRow.Values[i] = managedRow[i];
-			}
-
-			Row localRow = new Row(Manager, FastoreTable.TableVar.DataType.RowType, nRow);
-
-			localRow.CopyTo(row);
+            if (BufferActive())
+                BufferSelect(row);
+            else
+            {                
+                SourceFetch(false);
+                BufferSelect(row);               
+            }            
 		}
+
+        private void BufferSelect(Row row)
+        {
+            object[] managedRow = _buffer[_bufferIndex];
+
+            NativeRow nRow = new NativeRow(Node.TableVar.Columns.Count);
+            for (int i = 0; i < Node.TableVar.Columns.Count; i++)
+            {
+                nRow.Values[i] = managedRow[i];
+            }
+
+            Row localRow = new Row(Manager, Node.TableVar.DataType.RowType, nRow);
+
+            localRow.CopyTo(row);
+        }
+
+        protected void SourceFetch(bool isFirst)
+        {
+            SourceFetch(isFirst, new Range[0]);
+        }
+
+        protected void SourceFetch(bool isFirst, Range[] ranges, object startId = null)
+        {
+
+            _buffer = _db.GetRange(TableNodeColumns(), GetFastoreOrders(), ranges, startId);
+
+            if ((_buffer.Count > 0) && !isFirst)
+                _bufferIndex = 0;
+            else
+                _bufferIndex = -1;
+
+            //TODO: Backwards Navigable will need better logic...
+            _serverBOF = false;
+            _serverEOF = _buffer.EndOfRange;
+            _bufferFull = true;
+        }
 
 		protected override bool InternalNext()
 		{
-			_currow++;
+            if (!BufferActive())
+                SourceFetch(SourceBOF());
 
-			return _currow < _set.Count;
+            if (_bufferIndex >= _buffer.Count - 1)
+            {
+                if (SourceEOF())
+                {
+                    _bufferIndex++;
+                    return false;
+                }
+
+                Range range = CreateRange();
+                object rowID = _buffer[_bufferIndex][_buffer[_bufferIndex].Length - 1];
+
+                ClearBuffer();
+                SourceFetch(false, new Range[] { range }, rowID);
+                return !EOF();
+            }
+
+            _bufferIndex++;
+            return true;            
 		}
+
+        protected Range CreateRange()
+        {           
+            Range range = new Range();
+            int columnID;
+            //If no order is present, use the first column in the TableType for resume
+            if (Key == null || Key.Columns.Count == 0)
+            {
+                columnID = Node.TableVar.Columns[0].Column.ID;
+            }
+            //Otherwise, use the order column to range by
+            else
+            {
+                columnID = Order.Columns[0].Column.ID;
+                int idindex = 0;
+
+                //Find which column in the dataset corresponds to the order column (ordercolumn must equal rangecolumn if both are present)
+                for (int i = 0; i < Node.TableVar.Columns.Count; i++)
+                {
+                    if (Node.TableVar.Columns[i].Column.ID == columnID)
+                    {
+                        idindex = i;
+                        break;
+                    }
+                }       
+                
+                RangeBound start = new RangeBound();
+                start.Bound = _buffer[_buffer.Count - 1][idindex];
+                start.Inclusive = true;
+
+                range.Start = start;
+            }           
+
+            range.ColumnID = columnID;
+
+            return range;
+        }
 
 		protected override bool InternalBOF()
 		{
-			return false;
+            if (BufferActive())
+                return SourceBOF() && ((_buffer.Count == 0) || (_bufferIndex < 0));
+            else
+                return SourceBOF();
 		}
+
+        protected bool SourceBOF()
+        {
+            return _trivialBOF || _serverBOF;
+        }
 
 		protected override bool InternalEOF()
 		{
-			return _currow == _set.Count;
+            if (BufferActive())
+                return SourceEOF() && ((_buffer.Count == 0) || (_bufferIndex >= _buffer.Count));
+            else
+                return SourceEOF();
 		}
+
+        protected bool SourceEOF()
+        {
+            return _serverEOF;
+        }
+
+        protected override bool InternalFindKey(Row row, bool forward)
+        {
+            return base.InternalFindKey(row, forward);
+        }
+
+        protected override void InternalFindNearest(Row row)
+        {
+            base.InternalFindNearest(row);
+        }
 	}
+
+#if USETYPEDLIST
+    public class LocalRows : DisposableTypedList
+    {
+		public LocalRows() : base(typeof(LocalRow), true, false){}
+
+		public new LocalRow this[int AIndex]
+		{
+			get { return (LocalRow)base[AIndex]; }
+			set { base[AIndex] = value; }
+		}
+		
+#else
+    public class LocalRows : DisposableList<Row>
+    {
+#endif
+    }
 }

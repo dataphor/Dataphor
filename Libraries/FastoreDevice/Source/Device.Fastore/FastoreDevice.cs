@@ -111,16 +111,13 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 return new DevicePlanNode(node);
             }
             else if ((planNode is OrderNode) && (planNode.Nodes[0] is BaseTableVarNode) && (plan.Plan.CursorContext.CursorType != CursorType.Static))
-            {
-                //Wah Wah... Ordering not supported at all!! For now...
+            {              
+                OrderNode node = (OrderNode)planNode;
+                BaseTableVarNode tableVarNode = (BaseTableVarNode)planNode.Nodes[0];
 
+                bool isSupported = false;
 
-                //OrderNode node = (OrderNode)planNode;
-                //BaseTableVarNode tableVarNode = (BaseTableVarNode)planNode.Nodes[0];
-                //Schema.Order tableOrder;
-
-                //bool isSupported = false;
-
+                //No key support for the time being...
                 //var fastTable = Tables[tableVarNode.TableVar];
                 //foreach (Schema.Key key in tableVarNode.TableVar.Keys)
                 //{
@@ -141,61 +138,65 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 //    }
                 //}
 
-                //if (!isSupported)
-                //    foreach (Schema.Order order in tableVarNode.TableVar.Orders)
-                //        if (node.RequestedOrder.Equivalent(order))
-                //        {
-                //            node.PhysicalOrder = order;
-                //            node.ScanDirection = ScanDirection.Forward;
-                //            isSupported = true;
-                //            break;
-                //        }
-                //        else if (node.RequestedOrder.Equivalent(new Schema.Order(order, true)))
-                //        {
-                //            node.PhysicalOrder = order;
-                //            node.ScanDirection = ScanDirection.Backward;
-                //            isSupported = true;
-                //            break;
-                //        }
+                if (!isSupported)
+                {
+                    foreach (Schema.Order order in tableVarNode.TableVar.Orders)
+                    {
+                        if (order.Columns.Count > 1)
+                            break;
 
-                //if (isSupported)
-                //{
-                //    node.Order = new Schema.Order();
-                //    node.Order.MergeMetaData(node.RequestedOrder.MetaData);
-                //    node.Order.IsInherited = false;
-                //    Schema.OrderColumn orderColumn;
-                //    Schema.OrderColumn newOrderColumn;
-                //    for (int index = 0; index < node.PhysicalOrder.Columns.Count; index++)
-                //    {
-                //        orderColumn = node.PhysicalOrder.Columns[index];
-                //        newOrderColumn =
-                //            new Schema.OrderColumn
-                //            (
-                //                node.TableVar.Columns[orderColumn.Column],
-                //                node.ScanDirection == ScanDirection.Forward ?
-                //                    orderColumn.Ascending :
-                //                    !orderColumn.Ascending
-                //            );
-                //        newOrderColumn.Sort = orderColumn.Sort;
-                //        newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
-                //        Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");
-                //        node.Order.Columns.Add(newOrderColumn);
-                //    }
-                //    if (!node.TableVar.Orders.Contains(node.Order))
-                //        node.TableVar.Orders.Add(node.Order);
+                        if (node.RequestedOrder.Equivalent(order))
+                        {
+                            node.PhysicalOrder = order;
+                            node.ScanDirection = ScanDirection.Forward;
+                            isSupported = true;
+                            break;
+                        }
+                        else if (node.RequestedOrder.Equivalent(new Schema.Order(order, true)))
+                        {
+                            node.PhysicalOrder = order;
+                            node.ScanDirection = ScanDirection.Backward;
+                            isSupported = true;
+                            break;
+                        }
+                    }
+                }
 
-                //    node.CursorType = CursorType.Dynamic;
-                //    node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
-                //    node.CursorCapabilities =
-                //        CursorCapability.Navigable |
-                //        CursorCapability.BackwardsNavigable |
-                //        CursorCapability.Bookmarkable |
-                //        CursorCapability.Searchable |
-                //        (plan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
-                //    node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
+                if (isSupported)
+                {
+                    node.Order = new Schema.Order();
+                    node.Order.MergeMetaData(node.RequestedOrder.MetaData);
+                    node.Order.IsInherited = false;
+                    Schema.OrderColumn orderColumn;
+                    Schema.OrderColumn newOrderColumn;
+                    for (int index = 0; index < node.PhysicalOrder.Columns.Count; index++)
+                    {
+                        orderColumn = node.PhysicalOrder.Columns[index];
+                        newOrderColumn =
+                            new Schema.OrderColumn
+                            (
+                                node.TableVar.Columns[orderColumn.Column],
+                                node.ScanDirection == ScanDirection.Forward ?
+                                    orderColumn.Ascending :
+                                    !orderColumn.Ascending
+                            );
+                        newOrderColumn.Sort = orderColumn.Sort;
+                        newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
+                        Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");
+                        node.Order.Columns.Add(newOrderColumn);
+                    }
+                    if (!node.TableVar.Orders.Contains(node.Order))
+                        node.TableVar.Orders.Add(node.Order);
 
-                //    return new DevicePlanNode(node);
-                //}
+                    node.CursorType = CursorType.Dynamic;
+                    node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
+                    node.CursorCapabilities =
+                        CursorCapability.Navigable |
+                        (plan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
+                    node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
+
+                    return new DevicePlanNode(node);
+                }
             }
             else if (planNode is CreateTableVarBaseNode)
             {

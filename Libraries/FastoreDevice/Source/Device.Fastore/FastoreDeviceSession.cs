@@ -87,8 +87,6 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 				FastoreScan scan = new FastoreScan(program, _db, (BaseTableVarNode)planNode);
 				try
 				{
-					scan.FastoreTable = EnsureFastoreTable(((BaseTableVarNode)planNode).TableVar);
-					//scan.Key = scan.NativeTable.ClusteredIndex.Key;
 					scan.Open();
 					return scan;
 				}
@@ -98,24 +96,23 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 					throw;
 				}
 			}
-			//else if (planNode is OrderNode)
-			//{
-			//    FastoreScan scan = new FastoreScan(program, this, (BaseTableVarNode)planNode.Nodes[0]);
-			//    try
-			//    {
-			//        scan.FastoreTable = EnsureFastoreTable(((BaseTableVarNode)planNode.Nodes[0]).TableVar);
-			//        //scan.Key = ((OrderNode)planNode).PhysicalOrder;
-			//        //scan.Direction = ((OrderNode)planNode).ScanDirection;
-			//        scan.Node.Order = ((OrderNode)planNode).Order;
-			//        scan.Open();
-			//        return scan;
-			//    }
-			//    catch
-			//    {
-			//        scan.Dispose();
-			//        throw;
-			//    }
-			//}
+			else if (planNode is OrderNode)
+			{
+			    FastoreScan scan = new FastoreScan(program, _db, (BaseTableVarNode)planNode.Nodes[0]);
+			    try
+                {
+			        scan.Key = ((OrderNode)planNode).PhysicalOrder;
+			        scan.Direction = ((OrderNode)planNode).ScanDirection;
+			        scan.Node.Order = ((OrderNode)planNode).Order;
+			        scan.Open();
+			        return scan;
+			    }
+			    catch
+			    {
+			        scan.Dispose();
+			        throw;
+			    }
+			}
 			else if (planNode is CreateTableVarBaseNode)
 			{
 				EnsureFastoreTable(((CreateTableVarBaseNode)planNode).GetTableVar());
