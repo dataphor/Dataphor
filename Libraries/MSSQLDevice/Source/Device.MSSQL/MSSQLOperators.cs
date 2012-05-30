@@ -12,6 +12,19 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
     #region Operators
 
+    public class MSSQLAggregateOperator : SQLAggregateOperator
+    {
+        public MSSQLAggregateOperator(int iD, string name) : base(iD, name) { }
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
+        {
+            SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+			AggregateCallNode node = (AggregateCallNode)planNode;
+            if (node.SourceNode.GetType() == typeof(OrderNode))
+                localDevicePlan.IsSupported = false;
+            return base.Translate(devicePlan, planNode);
+        }
+    }
+
     public class MSSQLRetrieve : SQLDeviceOperator
     {
         public MSSQLRetrieve(int iD, string name)
