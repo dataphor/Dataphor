@@ -56,9 +56,6 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			try
 			{
-				if (!String.IsNullOrEmpty(CatalogCacheName) && (_server != null) && (_server.CatalogCaches != null))			
-					_server.CatalogCaches.RemoveSession(this);
-
 				if (_serverSession != null)
 				{
 					DetachServerSession();
@@ -66,7 +63,12 @@ namespace Alphora.Dataphor.DAE.Server
 					_serverSession = null;
 				}
 
-                _catalogCacheName = null;
+                if (!String.IsNullOrEmpty(CatalogCacheName) && (_server != null) && (_server.CatalogCaches != null))
+                {
+                    _server.CatalogCaches.RemoveSession(this);
+                    _catalogCacheName = null;
+                }
+
 				_server = null;
 			}
 			finally

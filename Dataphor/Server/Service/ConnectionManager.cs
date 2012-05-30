@@ -78,7 +78,7 @@ namespace Alphora.Dataphor.DAE.Service
 									_remoteServer.Server.LogError(exception);
 								}
 							}
-						}
+					}
 				}
 
 				// The keep alive processing is complete.  Clean up...
