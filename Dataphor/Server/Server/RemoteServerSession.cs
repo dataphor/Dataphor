@@ -56,19 +56,19 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			try
 			{
-				if (!String.IsNullOrEmpty(CatalogCacheName) && (_server != null) && (_server.CatalogCaches != null))
-				{
-					_server.CatalogCaches.RemoveSession(this);
-					_catalogCacheName = null;
-				}
-
 				if (_serverSession != null)
 				{
 					DetachServerSession();
 					_serverSession.Dispose();
 					_serverSession = null;
 				}
-				
+
+                if (!String.IsNullOrEmpty(CatalogCacheName) && (_server != null) && (_server.CatalogCaches != null))
+                {
+                    _server.CatalogCaches.RemoveSession(this);
+                    _catalogCacheName = null;
+                }
+
 				_server = null;
 			}
 			finally
