@@ -1999,6 +1999,36 @@ begin
 	grant usage on References(table) to role User;
 	grant usage on ReferenceColumns(table) to role User;
 
+	grant usage on CreateRight(Name) to role CatalogUser;
+	grant usage on CreateRight(Name, UserID) to role CatalogUser;
+	grant usage on DropRight(Name) to role CatalogUser;
+	grant usage on CreateUser(UserID, String, String) to role CatalogUser;
+	grant usage on SetPassword(UserID, String) to role CatalogUser;
+	grant usage on SetUserName(UserID, String) to role CatalogUser;
+	grant usage on DropUser(UserID) to role CatalogUser;
+	grant usage on CreateRole(Name) to role CatalogUser;
+	grant usage on DropRole(Name) to role CatalogUser;
+	grant usage on AddUserToRole(UserID, Name) to role CatalogUser;
+	grant usage on RemoveUserFromRole(UserID, Name) to role CatalogUser;
+	grant usage on GrantRightToRole(Name, Name) to role CatalogUser;
+	grant usage on SafeGrantRightToRole(Name, Name) to role CatalogUser;
+	grant usage on GrantRightToUser(Name, UserID) to role CatalogUser;
+	grant usage on SafeGrantRightToUser(Name, UserID) to role CatalogUser;
+	grant usage on RevokeRightFromRole(Name, Name) to role CatalogUser;
+	grant usage on SafeRevokeRightFromRole(Name, Name) to role CatalogUser;
+	grant usage on RevokeRightFromUser(Name, UserID) to role CatalogUser;
+	grant usage on SafeRevokeRightFromUser(Name, UserID) to role CatalogUser;
+	grant usage on RevertRightForRole(Name, Name) to role CatalogUser;
+	grant usage on RevertRightForUser(Name, UserID) to role CatalogUser;
+	grant usage on SetObjectOwner(Name, UserID) to role CatalogUser;
+	grant usage on SetRightOwner(Name, UserID) to role CatalogUser;
+	grant usage on CreateDeviceUser(UserID, Name, String, String) to role CatalogUser;
+	grant usage on CreateDeviceUser(UserID, Name, String, String, String) to role CatalogUser;
+	grant usage on SetDeviceUserPassword(UserID, Name, String) to role CatalogUser;
+	grant usage on SetDeviceUserID(UserID, Name, String) to role CatalogUser;
+	grant usage on SetDeviceUserConnectionParameters(UserID, Name, String) to role CatalogUser;
+	grant usage on DropDeviceUser(UserID, Name) to role CatalogUser;
+
 	grant usage on Abs(Decimal) to role User;                                                                                            
 	grant usage on Abs(Integer) to role User;                                                                                            
 	grant usage on Abs(Money) to role User;                                                                                            

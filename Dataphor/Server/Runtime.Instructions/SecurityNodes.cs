@@ -245,7 +245,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
 				
 			program.Plan.CheckAuthorized(user.ID);
-			program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
+			// BTR 5/30/2012 -> This isn't really altering the role, so I'm removing this check
+			//program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
 			((ServerCatalogDeviceSession)program.CatalogDeviceSession).InsertUserRole(user.ID, role.ID);
 			return null;
 		}
@@ -262,7 +263,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
 				
 			program.Plan.CheckAuthorized(user.ID);
-			program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
+			// BTR 5/30/2012 -> This isn't really altering the role, so I'm removing this check
+			//program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
 			((ServerCatalogDeviceSession)program.CatalogDeviceSession).DeleteUserRole(user.ID, role.ID);
 			return null;
 		}
@@ -284,7 +286,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public static void GrantRight(Program program, string rightName, Schema.Role role)
 		{
-			program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
+			// BTR 5/30/2012 -> This isn't really altering the role, so I'm removing this check
+			//program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
 			program.Plan.CheckRight(rightName);
 			((ServerCatalogDeviceSession)program.CatalogDeviceSession).GrantRightToRole(rightName, role.ID);
 		}
@@ -362,7 +365,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public static void RevokeRight(Program program, string rightName, Schema.Role role)
 		{
-			program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
+			// BTR 5/30/2012 -> This isn't really altering the role, so I'm removing this check
+			//program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
 			program.Plan.CheckRight(rightName);
 			((ServerCatalogDeviceSession)program.CatalogDeviceSession).RevokeRightFromRole(rightName, role.ID);
 		}
@@ -435,7 +439,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (role == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
 
-			program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
+			// BTR 5/30/2012 -> This isn't really altering the role, so I'm removing this check
+			//program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
 			program.Plan.CheckRight(rightName);
 			((ServerCatalogDeviceSession)program.CatalogDeviceSession).RevertRightForRole(rightName, role.ID);
 			return null;
