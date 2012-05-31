@@ -1,4 +1,4 @@
-﻿/*
+/*
 	Frontend Server Registration Script
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -18,6 +18,27 @@ grant usage on UnregisterLibrary(Name, Boolean) to role Developer;
 grant usage on EnsureLibraryRegistered(Name) to role Developer;
 grant usage on UpgradeLibrary(Name) to role Developer;
 grant usage on RefreshLibraries() to role Developer;
+grant usage on Debug.AttachProcess(Integer) to role Developer;
+grant usage on Debug.AttachSession(Integer) to role Developer;
+grant usage on Debug.DetachProcess(Integer) to role Developer;
+grant usage on Debug.DetachSession(Integer) to role Developer;
+grant usage on Debug.GetBreakpoints() to role Developer;
+grant usage on Debug.GetCallStack(Integer) to role Developer;
+grant usage on Debug.GetDebuggers() to role Developer;
+grant usage on Debug.GetProcesses() to role Developer;
+grant usage on Debug.GetSessions() to role Developer;
+grant usage on Debug.GetSource(String) to role Developer;
+grant usage on Debug.GetStack(Integer, Integer) to role Developer;
+grant usage on Debug.Pause() to role Developer;
+grant usage on Debug.Run() to role Developer;
+grant usage on Debug.SetBreakOnException(Boolean) to role Developer;
+grant usage on Debug.SetBreakOnStart(Boolean) to role Developer;
+grant usage on Debug.Start() to role Developer;
+grant usage on Debug.StepInto(Integer) to role Developer;
+grant usage on Debug.StepOver(Integer) to role Developer;
+grant usage on Debug.Stop() to role Developer;
+grant usage on Debug.ToggleBreakpoint(String, Integer, Integer) to role Developer;
+grant usage on Debug.WaitForPause() to role Developer;
 
 //* Device: Server
 create device Server
