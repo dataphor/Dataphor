@@ -84,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 		{
 			if (planNode is BaseTableVarNode)
 			{
-				FastoreScan scan = new FastoreScan(program, _db, (BaseTableVarNode)planNode);
+				FastoreCursor scan = new FastoreCursor(program, _db, (BaseTableVarNode)planNode);
 				try
 				{
 					scan.Open();
@@ -98,7 +98,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			}
 			else if (planNode is OrderNode)
 			{
-			    FastoreScan scan = new FastoreScan(program, _db, (BaseTableVarNode)planNode.Nodes[0]);
+			    FastoreCursor scan = new FastoreCursor(program, _db, (BaseTableVarNode)planNode.Nodes[0]);
 			    try
                 {
 			        scan.Key = ((OrderNode)planNode).PhysicalOrder;

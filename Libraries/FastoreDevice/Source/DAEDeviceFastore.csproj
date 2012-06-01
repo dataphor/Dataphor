@@ -70,7 +70,7 @@
   <ItemGroup>
     <Compile Include="Device.Fastore\FastoreDevice.cs" />
     <Compile Include="Device.Fastore\FastoreDeviceSession.cs" />
-    <Compile Include="Device.Fastore\FastoreScan.cs" />
+    <Compile Include="Device.Fastore\FastoreCursor.cs" />
     <Compile Include="Device.Fastore\FastoreTable.cs" />
     <Compile Include="Device.Fastore\FastoreTables.cs" />
     <Compile Include="Device.Fastore\Register.cs" />
@@ -100,6 +100,10 @@
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Name>Base</Name>
       <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Dataphor\Client\Client.csproj">
+      <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
+      <Name>Client %28Client\Client%29</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\DAE\Engine.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
