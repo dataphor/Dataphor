@@ -25,13 +25,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
         protected override SQLConnection InternalCreateConnection()
         {
         	string connectionClassName = Device.ConnectionClass == String.Empty
-        	            	?"Connection.PostgreSQLConnection": Device.ConnectionClass;
+        		? "PostgreSQLConnection.PostgreSQLConnection"
+				: Device.ConnectionClass;
         	
 			var classDefinition = new ClassDefinition(connectionClassName);
 
         	string connectionStringBuilderClassName = Device.ConnectionStringBuilderClass == String.Empty
-        	               	?
-								"PostgreSQLDevice.PostgreSQLConnectionStringBuilder" : Device.ConnectionStringBuilderClass;
+        		? "PostgreSQLDevice.PostgreSQLConnectionStringBuilder" 
+				: Device.ConnectionStringBuilderClass;
         	
 			var builderClassDefinition =new ClassDefinition(connectionStringBuilderClassName);
 
@@ -47,15 +48,8 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
             tags.AddOrUpdate("Port", Device.Port);
             tags.AddOrUpdate("Database", Device.Database);
             tags.AddOrUpdate("SearchPath", Device.SearchPath);            
-            if (Device.UseIntegratedSecurity)
-                tags.AddOrUpdate("Integrated Security", "true");
-            else
-            {
-                tags.AddOrUpdate("User Id", DeviceSessionInfo.UserName);
-                tags.AddOrUpdate("Password", DeviceSessionInfo.Password);
-            }
-
-            
+            tags.AddOrUpdate("User Id", DeviceSessionInfo.UserName);
+            tags.AddOrUpdate("Password", DeviceSessionInfo.Password);
             
 
             tags = connectionStringBuilder.Map(tags);
@@ -63,10 +57,10 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
             string connectionString = SQLDevice.TagsToString(tags);
             SQLConnection connection;
             connection = (SQLConnection)ServerProcess.CreateObject
-                (
+            (
                 classDefinition,
                 new object[] { connectionString }
-                );
+            );
             return connection;
         }
     }

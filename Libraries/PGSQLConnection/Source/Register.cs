@@ -15,7 +15,7 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
 
 	class DAERegister
 	{
-        protected const string D4ClassDefinitionNameSpace = "PGSQLConnection";
+        protected const string D4ClassDefinitionNameSpace = "PostgreSQLConnection";
 
 		public static SettingsList GetClasses()
 		{

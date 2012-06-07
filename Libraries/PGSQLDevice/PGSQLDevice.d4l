@@ -3,4 +3,5 @@
 	<files.filereference filename="AlphoraPGSQLDevice.dll" isassembly="True" />
 	<libraries.libraryreference name="System" version="*" />
 	<libraries.libraryreference name="SQLDevice" version="*" />
+	<libraries.libraryreference name="PGSQLConnection" version="*" />
 </library>
