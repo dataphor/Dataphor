@@ -24,19 +24,18 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
         public static string CEnsureDatabase =
 			@"select count(*) from pg_database where datname = '{0}'";
         public static string CCreateDatabase =
-            @"create database '{0}'";
+            @"create database ""{0}""";
         
         protected string _database = String.Empty;
         protected string _port = "5432";
 
-        private int _majorVersion = 8; // default to Postgresql 8 (pending detection)
+        private int _majorVersion = 9; // default to Postgresql 9 (pending detection)
         protected string _server = String.Empty;
-        protected bool _shouldDetermineVersion = true;
+        protected bool _shouldDetermineVersion = false;
         protected bool _shouldEnsureDatabase = true;
         protected bool _shouldEnsureOperators = true;
         protected bool _shouldReconcileRowGUIDCol;        
         protected string _searchPath;
-        protected bool _useIntegratedSecurity;
         
 
         public PostgreSQLDevice(int iD, string name)
@@ -96,12 +95,6 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
             set { _searchPath = value; }
         }
 
-        public bool UseIntegratedSecurity
-        {
-            get { return _useIntegratedSecurity; }
-            set { _useIntegratedSecurity = value; }
-        }
-
         public string Port
         {
             get { return _port; }
@@ -143,35 +136,61 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 if (stream != null)
                 {
                     var script = new StreamReader(stream).ReadToEnd();
-#if USEISTRING
-				RunScript(AProcess, String.Format(script, Name, IsCaseSensitive.ToString().ToLower(), IsPostgreSQL70.ToString().ToLower(), IsAccess.ToString().ToLower()));
-#else
-                    RunScript(process,
-                              String.Format(script, Name, "false",
-                                            false.ToString().ToLower(), false.ToString().ToLower()));
-#endif
+                    RunScript
+					(
+						process,
+                        String.Format(script, Name, "false", false.ToString().ToLower(), false.ToString().ToLower())
+					);
                 }
             }
         }
 
         protected void EnsureDatabase(ServerProcess process)
         {
-           /* string LDatabaseName = Database;
-            Database = "postgres";
-            try
-            {*/
             var deviceSession = (SQLDeviceSession)Connect(process, process.ServerSession.SessionInfo);
+			var database = Database;
+			Database = "";
             try
             {
-                SQLCursor cursor = deviceSession.Connection.Open(String.Format(CEnsureDatabase, Database));
+				// Detect if the database exists
+				bool exists;
+                SQLCursor cursor = deviceSession.Connection.Open(String.Format(CEnsureDatabase, database));
                 try
                 {
                     cursor.Next();
-                    var count = (long)cursor[0];
-                    var exists = count > 0;
-                    if (!exists) {
-                        deviceSession.Connection.Execute(String.Format(CCreateDatabase, Database));
-                    }   
+                    exists = (long)cursor[0] > 0;
+                }
+                finally
+                {
+                    cursor.Command.Connection.Close(cursor);
+                }
+
+				// If not, attempt to create it
+				if (!exists)
+					deviceSession.Connection.Execute(String.Format(CCreateDatabase, database));
+			}
+            finally
+            {
+                Disconnect(deviceSession);
+				Database = database;
+            }
+        }
+
+        protected void DetermineVersion(ServerProcess process)
+        {
+            var deviceSession = (SQLDeviceSession)Connect(process, process.ServerSession.SessionInfo);
+            try
+            {
+				SQLCursor cursor = deviceSession.Connection.Open("SELECT version()");
+                try
+                {
+                    string version = String.Empty;
+                    cursor.Next();
+                    var rawVersion = (string) cursor[0];
+					version  = rawVersion.Split(' ')[1];                    	                        
+
+                    if (version.Length > 0)
+                        _majorVersion = Convert.ToInt32(version.Substring(0, version.IndexOf('.')));
                 }
                 finally
                 {
@@ -182,47 +201,6 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
             {
                 Disconnect(deviceSession);
             }
-            /*}
-            finally
-            {
-                Database = LDatabaseName;
-            }*/
-        }
-
-        protected void DetermineVersion(ServerProcess process)
-        {
-           /* string LDatabaseName = Database;
-			Database = "postgres";
-            try
-            {*/
-                var deviceSession = (SQLDeviceSession)Connect(process, process.ServerSession.SessionInfo);
-                try
-                {
-					SQLCursor cursor = deviceSession.Connection.Open("SELECT version()");
-                    try
-                    {
-                        string version = String.Empty;
-                        cursor.Next();
-                        var rawVersion = (string) cursor[0];
-						version  = rawVersion.Split(' ')[1];                    	                        
-
-                        if (version.Length > 0)
-                            _majorVersion = Convert.ToInt32(version.Substring(0, version.IndexOf('.')));
-                    }
-                    finally
-                    {
-                        cursor.Command.Connection.Close(cursor);
-                    }
-                }
-                finally
-                {
-                    Disconnect(deviceSession);
-                }
-           /* }
-            finally
-            {
-                Database = LDatabaseName;
-            }*/
         }
 
         protected void InitializeDatabase(ServerProcess process)
@@ -317,8 +295,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
         }
 
         // ShouldIncludeColumn
-        public override bool ShouldIncludeColumn(Plan plan, string tableName, string columnName,
-                                                 string domainName)
+        public override bool ShouldIncludeColumn(Plan plan, string tableName, string columnName, string domainName)
         {
             switch (domainName.ToLower())
             {
@@ -384,19 +361,10 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "nchar":
                 case "nvarchar":
                     metaData.Tags.Add(new Tag("Storage.Length", length.ToString()));
-#if USEISTRING
-					return IsCaseSensitive ? APlan.DataTypes.SystemString : APlan.DataTypes.SystemIString;
-#else
                     return plan.DataTypes.SystemString;
-#endif
-#if USEISTRING
-				case "text":
-				case "ntext": return (ScalarType)(IsCaseSensitive ? APlan.ServerSession.Server.Catalog[CSQLTextScalarType] : APlan.ServerSession.Server.Catalog[CSQLITextScalarType]);
-#else
                 case "text":
                 case "ntext":
                     return (ScalarType)Compiler.ResolveCatalogIdentifier(plan, SQLTextScalarType, true);
-#endif
                 case "binary":
                 case "timestamp":
                     metaData.Tags.Add(new Tag("Storage.Length", length.ToString()));
@@ -421,7 +389,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
         {
 			return
 				String.Format
-					(
+				(
 					DeviceTablesExpression == String.Empty
 						?
 							@"
@@ -451,14 +419,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 					tableVar == null
 						? String.Empty
 						: String.Format("and table_name = '{0}'", ToSQLIdentifier(tableVar).ToLower())
-					);
+				);
         }
 
         protected override string GetDeviceIndexesExpression(TableVar tableVar)
         {
 			return
 				String.Format
-					(
+				(
 					DeviceIndexesExpression == String.Empty
 						?
 							@"
@@ -484,14 +452,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 					tableVar == null
 						? String.Empty
 						: String.Format("and pg_statio_all_indexes.relname = '{0}'", ToSQLIdentifier(tableVar).ToLower())
-					);
+				);
         }
 
         protected override string GetDeviceForeignKeysExpression(TableVar tableVar)
         {
 			return
 				String.Format
-					(
+				(
 					DeviceForeignKeysExpression == String.Empty
 						?
 							@"
@@ -522,15 +490,10 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 					tableVar == null
 						? String.Empty
 						: String.Format("and tc.table_name = '{0}'", ToSQLIdentifier(tableVar).ToLower())
-					);
+				);
         }
 
-       
-
-        // ServerName		
-
-        public override SelectStatement TranslateOrder(DevicePlan devicePlan, TableNode node,
-                                                       SelectStatement statement)
+        public override SelectStatement TranslateOrder(DevicePlan devicePlan, TableNode node, SelectStatement statement)
         {
             if (statement.Modifiers == null)
                 statement.Modifiers = new LanguageModifiers();
