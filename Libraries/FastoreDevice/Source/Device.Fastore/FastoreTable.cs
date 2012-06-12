@@ -84,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 query.Start = new RangeBound() { Bound = col.ID, Inclusive = true };
                 query.End = new RangeBound() { Bound = col.ID, Inclusive = true };
 
-                var result = Device.Database.GetRange(new int[] { 0 }, new Alphora.Fastore.Client.Order[] {}, new Range[] { query });
+                var result = Device.Database.GetRange(new int[] { 0 }, query , int.MaxValue);
 
                 if (result.Count == 0)
                 {
@@ -157,7 +157,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 query.Start = new RangeBound() { Bound = col, Inclusive = true };
                 query.End = new RangeBound() { Bound = col, Inclusive = true };
 
-                var result = Device.Database.GetRange(new int[] { 0 }, new Alphora.Fastore.Client.Order[] {}, new Range[] { query });
+                var result = Device.Database.GetRange(new int[] { 0 }, query, int.MaxValue);
 
                 if (result.Count > 0)
                 {
