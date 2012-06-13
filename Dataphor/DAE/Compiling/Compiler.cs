@@ -9540,6 +9540,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 
 			AlterScalarTypeStatement localStatement = (AlterScalarTypeStatement)statement;
 			AlterScalarTypeNode node = new AlterScalarTypeNode();
+			node.ShouldAffectDerivationTimeStamp = plan.ShouldAffectTimeStamp;
 			node.AlterScalarTypeStatement = localStatement;
 			Schema.Object objectValue = ResolveCatalogIdentifier(plan, localStatement.ScalarTypeName, true);
 			if (!(objectValue is Schema.IScalarType))
@@ -9556,6 +9557,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 
 			AlterOperatorStatement localStatement = (AlterOperatorStatement)statement;
 			AlterOperatorNode node = new AlterOperatorNode();
+			node.ShouldAffectDerivationTimeStamp = plan.ShouldAffectTimeStamp;
 			node.AlterOperatorStatement = localStatement;
 			Schema.Operator operatorValue = ResolveOperatorSpecifier(plan, localStatement.OperatorSpecifier);
 			plan.CheckRight(operatorValue.GetRight(Schema.RightNames.Alter));
@@ -9570,6 +9572,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 
 			AlterAggregateOperatorStatement localStatement = (AlterAggregateOperatorStatement)statement;
 			AlterAggregateOperatorNode node = new AlterAggregateOperatorNode();
+			node.ShouldAffectDerivationTimeStamp = plan.ShouldAffectTimeStamp;
 			node.AlterAggregateOperatorStatement = localStatement;
 			Schema.Operator operatorValue = ResolveOperatorSpecifier(plan, localStatement.OperatorSpecifier);
 			plan.CheckRight(operatorValue.GetRight(Schema.RightNames.Alter));
@@ -9705,6 +9708,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 
 			DropScalarTypeStatement localStatement = (DropScalarTypeStatement)statement;
 			DropScalarTypeNode node = new DropScalarTypeNode();
+			node.ShouldAffectDerivationTimeStamp = plan.ShouldAffectTimeStamp;
 			Schema.Object objectValue = ResolveCatalogIdentifier(plan, localStatement.ObjectName, true);
 			Schema.ScalarType scalarType = objectValue as Schema.ScalarType;
 			if (scalarType == null)
@@ -9817,6 +9821,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 
 			DropReferenceStatement localStatement = (DropReferenceStatement)statement;
 			DropReferenceNode node = new DropReferenceNode();
+			node.ShouldAffectDerivationTimeStamp = plan.ShouldAffectTimeStamp;
 			Schema.Object objectValue = ResolveCatalogIdentifier(plan, localStatement.ReferenceName, true);
 			if (!(objectValue is Schema.Reference))
 				throw new CompilerException(CompilerException.Codes.ReferenceIdentifierExpected, statement);
