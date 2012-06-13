@@ -1678,7 +1678,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (ShouldAffectDerivationTimeStamp)
 			{
 				program.Catalog.UpdateCacheTimeStamp();
-				program.Catalog.UpdatePlanCacheTimeStamp();
+                program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: alter table {1}", program.Catalog.CacheTimeStamp.ToString(), _alterTableVarStatement.TableVarName));
+                program.Catalog.UpdatePlanCacheTimeStamp();
 				program.Catalog.UpdateDerivationTimeStamp();
 			}
 
@@ -1747,7 +1748,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (ShouldAffectDerivationTimeStamp)
 			{
 				program.Catalog.UpdateCacheTimeStamp();
-				program.Catalog.UpdatePlanCacheTimeStamp();
+                program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: alter view {1}", program.Catalog.CacheTimeStamp.ToString(), _alterTableVarStatement.TableVarName));
+                program.Catalog.UpdatePlanCacheTimeStamp();
 				program.Catalog.UpdateDerivationTimeStamp();
 			}
 			
@@ -2238,7 +2240,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				scalarType.ResetNativeRepresentationCache();
 			
 			program.Catalog.UpdateCacheTimeStamp();
-			program.Catalog.UpdatePlanCacheTimeStamp();
+            program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: alter scalar {1}", program.Catalog.CacheTimeStamp.ToString(), _alterScalarTypeStatement.ScalarTypeName));
+            program.Catalog.UpdatePlanCacheTimeStamp();
 			program.Catalog.UpdateDerivationTimeStamp();
 			
 			program.CatalogDeviceSession.UpdateCatalogObject(scalarType);
@@ -2304,7 +2307,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			program.CatalogDeviceSession.AlterMetaData(operatorValue, _alterOperatorStatement.AlterMetaData);
 			program.Catalog.UpdateCacheTimeStamp();
-			program.Catalog.UpdatePlanCacheTimeStamp();
+            program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: alter operator {1}", program.Catalog.CacheTimeStamp.ToString(), _alterOperatorStatement.OperatorSpecifier));
+            program.Catalog.UpdatePlanCacheTimeStamp();
 			program.CatalogDeviceSession.UpdateCatalogObject(operatorValue);
 			
 			return null;
@@ -2403,7 +2407,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			program.CatalogDeviceSession.AlterMetaData(aggregateOperator, _alterAggregateOperatorStatement.AlterMetaData);
 			program.Catalog.UpdateCacheTimeStamp();
-			program.Catalog.UpdatePlanCacheTimeStamp();
+            program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: alter aggregate operator {1}", program.Catalog.CacheTimeStamp.ToString(), _alterAggregateOperatorStatement.OperatorSpecifier));
+            program.Catalog.UpdatePlanCacheTimeStamp();
 			program.CatalogDeviceSession.UpdateCatalogObject(aggregateOperator);
 
 			return null;
@@ -2818,6 +2823,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (ShouldAffectDerivationTimeStamp)
 				{
 					program.Catalog.UpdateCacheTimeStamp();
+                    program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: drop table {1}", program.Catalog.CacheTimeStamp.ToString(), _table.Name));
 					program.Catalog.UpdatePlanCacheTimeStamp();
 					program.Catalog.UpdateDerivationTimeStamp();
 				}
@@ -2870,6 +2876,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (ShouldAffectDerivationTimeStamp)
 				{
 					program.Catalog.UpdateCacheTimeStamp();
+                    program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: drop view {1}", program.Catalog.CacheTimeStamp.ToString(), _derivedTableVar.Name));
 					program.Catalog.UpdatePlanCacheTimeStamp();
 					program.Catalog.UpdateDerivationTimeStamp();
 				}
@@ -2930,6 +2937,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.Catalog.OperatorResolutionCache.Clear(_scalarType, _scalarType);					
 				
 				program.Catalog.UpdateCacheTimeStamp();
+                program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: drop scalar {1}", program.Catalog.CacheTimeStamp.ToString(), _scalarType.Name));					
 				program.Catalog.UpdatePlanCacheTimeStamp();
 				program.Catalog.UpdateDerivationTimeStamp();
 				return null;
@@ -2992,6 +3000,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (ShouldAffectDerivationTimeStamp)
 			{
 				program.Catalog.UpdateCacheTimeStamp();
+                program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: drop operator {1}", program.Catalog.CacheTimeStamp.ToString(), _operatorSpecifier));					
 				program.Catalog.UpdatePlanCacheTimeStamp();
 			}
 			return null;
@@ -3067,6 +3076,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.CatalogDeviceSession.DropReference(_reference);
 
 				program.Catalog.UpdateCacheTimeStamp();
+                program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: drop  reference {1}", program.Catalog.CacheTimeStamp.ToString(), _referenceName));					
 				program.Catalog.UpdatePlanCacheTimeStamp();
 				program.Catalog.UpdateDerivationTimeStamp();
 				return null;
