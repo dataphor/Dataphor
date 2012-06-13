@@ -413,7 +413,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 								where table_schema not in ('information_schema','pg_catalog','pg_toast')
 									{0} {1}
 								order by table_schema, table_name, ordinal_position
-						"
+							"
 						:
 							DeviceTablesExpression,
 					Schema == String.Empty ? String.Empty : String.Format("and table_schema = '{0}'", Schema),
