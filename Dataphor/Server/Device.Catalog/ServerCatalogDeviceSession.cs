@@ -1351,68 +1351,76 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			ServerProcess.PushLoadingContext(new LoadingContext(user, libraryName));
 			try
 			{
-				ApplicationTransaction.ApplicationTransaction aT = null;
-				if (!isATObject && (ServerProcess.ApplicationTransactionID != Guid.Empty))
-				{
-					aT = ServerProcess.GetApplicationTransaction();
-					aT.PushGlobalContext();
-				}
+				ServerProcess.EnterTimeStampSafeContext();
 				try
 				{
-					ParserMessages parserMessages = new ParserMessages();
-					Statement statement = new Parser().ParseScript(script, parserMessages);
-					Plan plan = new Plan(ServerProcess);
+					ApplicationTransaction.ApplicationTransaction aT = null;
+					if (!isATObject && (ServerProcess.ApplicationTransactionID != Guid.Empty))
+					{
+						aT = ServerProcess.GetApplicationTransaction();
+						aT.PushGlobalContext();
+					}
 					try
 					{
-						plan.PushSourceContext(new Debug.SourceContext(script, null));
+						ParserMessages parserMessages = new ParserMessages();
+						Statement statement = new Parser().ParseScript(script, parserMessages);
+						Plan plan = new Plan(ServerProcess);
 						try
 						{
-							//LPlan.PlanCatalog.AddRange(LCurrentPlan.PlanCatalog); // add the set of objects currently being compiled
-							plan.Messages.AddRange(parserMessages);
-							plan.PushSecurityContext(new SecurityContext(user));
+							plan.PushSourceContext(new Debug.SourceContext(script, null));
 							try
 							{
-								PlanNode planNode = null;
+								//LPlan.PlanCatalog.AddRange(LCurrentPlan.PlanCatalog); // add the set of objects currently being compiled
+								plan.Messages.AddRange(parserMessages);
+								plan.PushSecurityContext(new SecurityContext(user));
 								try
 								{
-									planNode = Compiler.Compile(plan, statement);
+									PlanNode planNode = null;
+									try
+									{
+										planNode = Compiler.Compile(plan, statement);
+									}
+									finally
+									{
+										//LCurrentPlan.Messages.AddRange(LPlan.Messages); // Propagate compiler exceptions to the outer plan
+									}
+									try
+									{
+										plan.CheckCompiled();
+										planNode.Execute(program);
+									}
+									catch (Exception E)
+									{
+										throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogDeserializationError, ErrorSeverity.System, E, objectID);
+									}
 								}
 								finally
 								{
-									//LCurrentPlan.Messages.AddRange(LPlan.Messages); // Propagate compiler exceptions to the outer plan
-								}
-								try
-								{
-									plan.CheckCompiled();
-									planNode.Execute(program);
-								}
-								catch (Exception E)
-								{
-									throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogDeserializationError, ErrorSeverity.System, E, objectID);
+									plan.PopSecurityContext();
 								}
 							}
 							finally
 							{
-								plan.PopSecurityContext();
+								plan.PopSourceContext();
 							}
 						}
 						finally
 						{
-							plan.PopSourceContext();
+							plan.Dispose();
 						}
 					}
 					finally
 					{
-						plan.Dispose();
+						if (aT != null)
+						{
+							aT.PopGlobalContext();
+							Monitor.Exit(aT);
+						}
 					}
 				}
 				finally
 				{
-					if (aT != null)
-					{
-						aT.PopGlobalContext();
-						Monitor.Exit(aT);
-					}
+					ServerProcess.ExitTimeStampSafeContext();
 				}
 			}
 			finally
