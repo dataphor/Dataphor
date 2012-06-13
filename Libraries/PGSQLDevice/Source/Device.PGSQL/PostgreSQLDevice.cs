@@ -393,24 +393,25 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 					DeviceTablesExpression == String.Empty
 						?
 							@"
-								select
-								table_schema as TableSchema,
-								table_name as TableName,
-								column_name as ColumnName,
-								ordinal_position as OrdinalPosition,
-								table_name as TableTitle,
-								column_name as ColumnTitle,
-								data_type as NativeDomainName,
-								data_type as DomainName,
-								case when character_maximum_length is not null then character_maximum_length
-									when numeric_precision is not null then numeric_precision
-									when datetime_precision is not null then datetime_precision
-									else 0
-								end as Length,
-								case when is_nullable = 'NO' then 0 else 1 end as IsNullable,
-								case when data_type in ('text', 'bytea') then 1 else 0 end as IsDeferred
+							select
+									table_schema as TableSchema,
+									table_name as TableName,
+									column_name as ColumnName,
+									ordinal_position as OrdinalPosition,
+									table_name as TableTitle,
+									column_name as ColumnTitle,
+									data_type as NativeDomainName,
+									data_type as DomainName,
+									case when character_maximum_length is not null then character_maximum_length
+										when numeric_precision is not null then numeric_precision
+										when datetime_precision is not null then datetime_precision
+										else 0
+									end as Length,
+									case when is_nullable = 'NO' then 0 else 1 end as IsNullable,
+									case when data_type in ('text', 'bytea') then 1 else 0 end as IsDeferred
 								from information_schema.columns
-								where true {0} {1}
+								where table_schema not in ('information_schema','pg_catalog','pg_toast')
+									{0} {1}
 								order by table_schema, table_name, ordinal_position
 						"
 						:
@@ -431,21 +432,21 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 						?
 							@"
 							select
-								pg_statio_all_indexes.schemaname as TableSchema,
-								pg_statio_all_indexes.relname as TableName,
-								pg_statio_all_indexes.indexrelname IndexName,
-								pg_attribute.attname as ColumnName,
-								pg_attribute.attnum as OrdinalPosition,
-								pg_index.indisunique as IsUnique,
-								case when indoption[0]=3  then TRUE else FALSE end as IsDescending
+									pg_statio_all_indexes.schemaname as TableSchema,
+									pg_statio_all_indexes.relname as TableName,
+									pg_statio_all_indexes.indexrelname IndexName,
+									pg_attribute.attname as ColumnName,
+									pg_attribute.attnum as OrdinalPosition,
+									pg_index.indisunique as IsUnique,
+									case when indoption[0]=3  then TRUE else FALSE end as IsDescending
 								from pg_attribute,pg_statio_all_indexes,pg_index
 								where pg_attribute.attrelid = pg_statio_all_indexes.relid
-								and pg_index.indexrelid=pg_statio_all_indexes.indexrelid
-								and pg_statio_all_indexes.schemaname <> 'pg_toast'
+									and pg_index.indexrelid=pg_statio_all_indexes.indexrelid
+									and pg_statio_all_indexes.schemaname not in ('information_schema','pg_catalog','pg_toast')
 									{0}
 									{1}
 								order by pg_statio_all_indexes.schemaname, pg_statio_all_indexes.relname, pg_statio_all_indexes.indexrelname, pg_attribute.attname
-						"
+							"
 						:
 							DeviceIndexesExpression,
 					Schema == String.Empty ? String.Empty : String.Format("and pg_statio_all_indexes.schemaname = '{0}'", Schema),
@@ -463,27 +464,28 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 					DeviceForeignKeysExpression == String.Empty
 						?
 							@"
-							SELECT
-							tc.table_schema as ConstraintSchema,
-							tc.constraint_name as ConstraintName, 
-							tc.table_name as SourceTableName, 
-							kcu.column_name as SourceColumnName, 
-							ccu.table_schema as TargetTableSchema,
-							ccu.table_name as TargetTableName,
-							ccu.column_name as TargetColumnName,
-							c.ordinal_position as OrdinalPosition
-							FROM 
-								information_schema.table_constraints AS tc 
-								JOIN information_schema.key_column_usage AS kcu ON tc.constraint_name = kcu.constraint_name
-								JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = tc.constraint_name
-								JOIN information_schema.columns as c ON 
-								c.table_schema = ccu.table_schema and ccu.table_name = c.table_name
-								and c.column_name = ccu.column_name
-							WHERE constraint_type = 'FOREIGN KEY' 
+							select
+									tc.table_schema as ConstraintSchema,
+									tc.constraint_name as ConstraintName, 
+									tc.table_name as SourceTableName, 
+									kcu.column_name as SourceColumnName, 
+									ccu.table_schema as TargetTableSchema,
+									ccu.table_name as TargetTableName,
+									ccu.column_name as TargetColumnName,
+									c.ordinal_position as OrdinalPosition
+								from information_schema.table_constraints tc 
+									join information_schema.key_column_usage kcu on tc.constraint_name = kcu.constraint_name
+									join information_schema.constraint_column_usage ccu on ccu.constraint_name = tc.constraint_name
+									join information_schema.columns c on
+										c.table_schema = ccu.table_schema
+										and ccu.table_name = c.table_name
+										and c.column_name = ccu.column_name
+								where constraint_type = 'FOREIGN KEY'
+									and c.table_schema not in ('information_schema','pg_catalog','pg_toast')
 									{0}
 									{1}
 								order by tc.table_schema, tc.constraint_name, c.ordinal_position
-						"
+							"
 						:
 							DeviceForeignKeysExpression,
 					Schema == String.Empty ? String.Empty : String.Format("and tc.table_schema = '{0}'", Schema),
