@@ -400,9 +400,18 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 									ordinal_position as OrdinalPosition,
 									table_name as TableTitle,
 									column_name as ColumnTitle,
-									data_type as NativeDomainName,
-									data_type as DomainName,
-									case when character_maximum_length is not null then character_maximum_length
+									case
+										when data_type = 'character varying' then 'varchar'
+										when data_type = 'date' then 'datetime'
+										else data_type
+									end as NativeDomainName,
+									case
+										when data_type = 'character varying' then 'varchar'
+										when data_type = 'date' then 'datetime'
+										else data_type
+									end as DomainName,
+									case 
+										when character_maximum_length is not null then character_maximum_length
 										when numeric_precision is not null then numeric_precision
 										when datetime_precision is not null then datetime_precision
 										else 0
