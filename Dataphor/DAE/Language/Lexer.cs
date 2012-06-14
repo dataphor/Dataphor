@@ -60,7 +60,7 @@ namespace Alphora.Dataphor.DAE.Language
 			get
 			{
 				CheckType(TokenType.Integer);
-				return Int64.Parse(Token, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture);
+				return Int64.Parse(Token, System.Globalization.NumberStyles.AllowLeadingSign, System.Globalization.CultureInfo.InvariantCulture);
 			}
 		}
 		
@@ -515,149 +515,21 @@ namespace Alphora.Dataphor.DAE.Language
 									break;
 								}
 							break;
+
+						case '-':
+							if (Char.IsDigit(_next))
+							{
+								Advance();
+								ProcessNumber();
+							}
+							break;
 					}
 					_token = _builder.ToString();
 				}
 				else if	(Char.IsDigit(_next) || (_next == '$'))		// Numbers
 				{
 					Advance();
-
-					bool digitSatisfied = false;	// at least one digit required
-
-					if (_current == '$')
-						_tokenType = TokenType.Money;
-					else
-					{
-						if ((_current == '0') && (!_nextEOF && ((_next == 'x') || (_next == 'X'))))
-						{
-							_tokenType = TokenType.Hex;
-							Advance();
-						}
-						else
-						{
-							digitSatisfied = true;
-							_builder.Append(_current);
-							_tokenType = TokenType.Integer;
-						}
-					}
-
-					bool done = false;
-					bool hitPeriod = false;
-					bool hitScalar = false;
-
-					while (!done && !_nextEOF)
-					{
-						switch (_next)
-						{
-							case '0':
-							case '1':
-							case '2':
-							case '3':
-							case '4':
-							case '5':
-							case '6':
-							case '7':
-							case '8':
-							case '9':
-								Advance();
-								digitSatisfied = true;
-								_builder.Append(_current);
-								break;
-
-							case 'A':
-							case 'a':
-							case 'B':
-							case 'b':
-							case 'C':
-							case 'c':
-								if (_tokenType != TokenType.Hex)
-									throw new LexerException(LexerException.Codes.InvalidNumericValue);
-								Advance();
-								digitSatisfied = true;
-								_builder.Append(_current);
-								break;
-								
-							case 'D':
-							case 'd':
-								Advance();
-								if (_tokenType == TokenType.Hex)
-								{
-									digitSatisfied = true;
-									_builder.Append(_current);
-								}
-								else if (_tokenType != TokenType.Money)
-								{
-									_tokenType = TokenType.Decimal;
-									done = true;
-								}
-								else
-									throw new LexerException(LexerException.Codes.InvalidNumericValue);
-								break;
-
-							case 'E':
-							case 'e':
-								Advance();
-								if (_tokenType == TokenType.Hex)
-								{
-									digitSatisfied = true;
-									_builder.Append(_current);
-								}
-								else if (!hitScalar && digitSatisfied)
-								{
-									hitScalar = true;
-									digitSatisfied = false;
-									_tokenType = TokenType.Float;
-									_builder.Append(_current);
-									if ((_next == '-') || (_next == '+'))
-									{
-										Advance();
-										_builder.Append(_current);
-									}
-								}
-								else
-									throw new LexerException(LexerException.Codes.InvalidNumericValue);
-								break;
-
-							case 'f':
-							case 'F':
-								Advance();
-								if (_tokenType == TokenType.Hex)
-								{
-									digitSatisfied = true;
-									_builder.Append(_current);
-								}
-								else if (_tokenType != TokenType.Money)
-								{
-									_tokenType = TokenType.Float;
-									done = true;
-								}
-								else
-									throw new LexerException(LexerException.Codes.InvalidNumericValue);
-								break;
-
-							case '.':
-								if (!hitPeriod)
-								{
-									Advance();
-									if (_tokenType == TokenType.Hex)
-										throw new LexerException(LexerException.Codes.InvalidNumericValue);
-									if (_tokenType == TokenType.Integer)
-										_tokenType = TokenType.Decimal;
-									hitPeriod = true;
-									digitSatisfied = false;
-									_builder.Append(_current);
-								}
-								else
-									done = true;	// a dot, not a point
-								break;
-
-							default:
-								done = true;
-								break;
-						}
-					}
-					if (!digitSatisfied)
-						throw new LexerException(LexerException.Codes.InvalidNumericValue);
+					ProcessNumber();
 					_token = _builder.ToString();
 				}	
 				else if ((_next == '\'') || (_next == '"'))
@@ -686,6 +558,146 @@ namespace Alphora.Dataphor.DAE.Language
 				_tokenType = TokenType.EOF;
 
 			return _tokenType;
+		}
+
+		private void ProcessNumber()
+		{
+			bool digitSatisfied = false;	// at least one digit required
+
+			if (_current == '$')
+				_tokenType = TokenType.Money;
+			else
+			{
+				if ((_current == '0') && (!_nextEOF && ((_next == 'x') || (_next == 'X'))))
+				{
+					_tokenType = TokenType.Hex;
+					Advance();
+				}
+				else
+				{
+					digitSatisfied = true;
+					_builder.Append(_current);
+					_tokenType = TokenType.Integer;
+				}
+			}
+
+			bool done = false;
+			bool hitPeriod = false;
+			bool hitScalar = false;
+
+			while (!done && !_nextEOF)
+			{
+				switch (_next)
+				{
+					case '0':
+					case '1':
+					case '2':
+					case '3':
+					case '4':
+					case '5':
+					case '6':
+					case '7':
+					case '8':
+					case '9':
+						Advance();
+						digitSatisfied = true;
+						_builder.Append(_current);
+						break;
+
+					case 'A':
+					case 'a':
+					case 'B':
+					case 'b':
+					case 'C':
+					case 'c':
+						if (_tokenType != TokenType.Hex)
+							throw new LexerException(LexerException.Codes.InvalidNumericValue);
+						Advance();
+						digitSatisfied = true;
+						_builder.Append(_current);
+						break;
+
+					case 'D':
+					case 'd':
+						Advance();
+						if (_tokenType == TokenType.Hex)
+						{
+							digitSatisfied = true;
+							_builder.Append(_current);
+						}
+						else if (_tokenType != TokenType.Money)
+						{
+							_tokenType = TokenType.Decimal;
+							done = true;
+						}
+						else
+							throw new LexerException(LexerException.Codes.InvalidNumericValue);
+						break;
+
+					case 'E':
+					case 'e':
+						Advance();
+						if (_tokenType == TokenType.Hex)
+						{
+							digitSatisfied = true;
+							_builder.Append(_current);
+						}
+						else if (!hitScalar && digitSatisfied)
+						{
+							hitScalar = true;
+							digitSatisfied = false;
+							_tokenType = TokenType.Float;
+							_builder.Append(_current);
+							if ((_next == '-') || (_next == '+'))
+							{
+								Advance();
+								_builder.Append(_current);
+							}
+						}
+						else
+							throw new LexerException(LexerException.Codes.InvalidNumericValue);
+						break;
+
+					case 'f':
+					case 'F':
+						Advance();
+						if (_tokenType == TokenType.Hex)
+						{
+							digitSatisfied = true;
+							_builder.Append(_current);
+						}
+						else if (_tokenType != TokenType.Money)
+						{
+							_tokenType = TokenType.Float;
+							done = true;
+						}
+						else
+							throw new LexerException(LexerException.Codes.InvalidNumericValue);
+						break;
+
+					case '.':
+						if (!hitPeriod)
+						{
+							Advance();
+							if (_tokenType == TokenType.Hex)
+								throw new LexerException(LexerException.Codes.InvalidNumericValue);
+							if (_tokenType == TokenType.Integer)
+								_tokenType = TokenType.Decimal;
+							hitPeriod = true;
+							digitSatisfied = false;
+							_builder.Append(_current);
+						}
+						else
+							done = true;	// a dot, not a point
+						break;
+
+					default:
+						done = true;
+						break;
+				}
+			}
+			if (!digitSatisfied)
+				throw new LexerException(LexerException.Codes.InvalidNumericValue);
 		}
     }
 }
