@@ -182,7 +182,7 @@ namespace Alphora.Dataphor.DAE.Language
 				case TokenType.Decimal: Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}d", expression.Value)); break;
 				case TokenType.Money : Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "${0}", expression.Value)); break;
 				case TokenType.Boolean : Append(((bool)expression.Value ? "true" : "false")); break;
-				case TokenType.Hex : ((long)expression.Value).ToString("X"); break;
+				case TokenType.Hex: ((long)expression.Value).ToString("X"); break;
 				default : Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", expression.Value)); break;
 			}
 		}
