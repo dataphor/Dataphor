@@ -309,6 +309,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "float":
                 case "real":
                 case "datetime":
+				case "date":
                 case "smalldatetime":
                 case "money":
                 case "smallmoney":
@@ -317,6 +318,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "varchar":
                 case "nchar":
                 case "nvarchar":
+				case "character varying":
                 case "text":
                 case "ntext":
                 case "image":
@@ -349,6 +351,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "real":
                     return plan.DataTypes.SystemDecimal;
                 case "datetime":
+				case "date":
                 case "smalldatetime":
                     return plan.DataTypes.SystemDateTime;
                 case "money":
@@ -359,6 +362,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "char":
                 case "varchar":
                 case "nchar":
+				case "character varying":
                 case "nvarchar":
                     metaData.Tags.Add(new Tag("Storage.Length", length.ToString()));
                     return plan.DataTypes.SystemString;
@@ -400,16 +404,8 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 									ordinal_position as OrdinalPosition,
 									table_name as TableTitle,
 									column_name as ColumnTitle,
-									case
-										when data_type = 'character varying' then 'varchar'
-										when data_type = 'date' then 'datetime'
-										else data_type
-									end as NativeDomainName,
-									case
-										when data_type = 'character varying' then 'varchar'
-										when data_type = 'date' then 'datetime'
-										else data_type
-									end as DomainName,
+									data_type as NativeDomainName,
+									data_type as DomainName,
 									case 
 										when character_maximum_length is not null then character_maximum_length
 										when numeric_precision is not null then numeric_precision
