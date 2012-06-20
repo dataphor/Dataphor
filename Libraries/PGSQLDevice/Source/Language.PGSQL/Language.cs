@@ -8,7 +8,18 @@ using System;
 
 namespace Alphora.Dataphor.DAE.Language.PGSQL
 {
-			
+	public enum ForSpecifier
+	{
+		None,
+		Update,
+		Share
+	}
+
+	public class SelectExpression : SQL.SelectExpression
+	{
+		public ForSpecifier ForSpecifier { get; set; }
+	}
+				
 	public class DropIndexStatement : SQL.DropIndexStatement
 	{
 		public DropIndexStatement() : base(){}
