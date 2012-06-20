@@ -107,6 +107,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	[DataContract]
 	public class NativeListValue : NativeValue
 	{
+		[DataMember]
 		public NativeValue[] Elements;
 	}
 	

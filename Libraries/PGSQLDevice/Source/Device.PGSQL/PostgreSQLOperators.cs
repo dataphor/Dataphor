@@ -5,7 +5,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Language.SQL;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Schema;
-//using TableExpression = Alphora.Dataphor.DAE.Language.PGSQL.TableExpression;
+using Alphora.Dataphor.DAE.Language.PGSQL;
 using D4 = Alphora.Dataphor.DAE.Language.D4;
 
 namespace Alphora.Dataphor.DAE.Device.PGSQL
@@ -17,16 +17,17 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
             SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
-            TableVar tableVar = ((TableVarNode)planNode).TableVar;
+            var tableVarNode = (TableVarNode)planNode;
+            var tableVar = (tableVarNode).TableVar;
 
             if (tableVar is BaseTableVar)
             {
                 SQLRangeVar rangeVar = new SQLRangeVar(localDevicePlan.GetNextTableAlias());
                 localDevicePlan.CurrentQueryContext().RangeVars.Add(rangeVar);
-                var selectExpression = new SelectExpression();
-                string sQLIdentifier = localDevicePlan.Device.ToSQLIdentifier(tableVar);
+                var selectExpression = new Language.PGSQL.SelectExpression();
+                string sqlIdentifier = localDevicePlan.Device.ToSQLIdentifier(tableVar);
                 string tag = D4.MetaData.GetTag(tableVar.MetaData, "Storage.Schema", localDevicePlan.Device.Schema);
-                var tableExpression = new TableExpression(tag,sQLIdentifier);
+                var tableExpression = new TableExpression(tag,sqlIdentifier);
                 var tableSpecifier = new TableSpecifier(tableExpression, rangeVar.Name);
                 selectExpression.FromClause = new AlgebraicFromClause(tableSpecifier);
                 selectExpression.SelectClause = new SelectClause();
@@ -36,6 +37,16 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     rangeVar.Columns.Add(rangeVarColumn);
                     selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
                 }
+				if 
+				(
+					tableVarNode.Supports(CursorCapability.Updateable) 
+						&&
+                        (
+							SQLTable.CursorIsolationToIsolationLevel(tableVarNode.CursorIsolation, devicePlan.Plan.ServerProcess.CurrentIsolationLevel()) 
+								== IsolationLevel.Isolated
+                        )
+				)
+					selectExpression.ForSpecifier = ForSpecifier.Update;
 
                 selectExpression.SelectClause.Distinct =
                     (tableVar.Keys.Count == 1) &&

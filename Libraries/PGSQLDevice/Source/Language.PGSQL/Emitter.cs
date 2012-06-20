@@ -13,6 +13,44 @@ namespace Alphora.Dataphor.DAE.Language.PGSQL
 	
 	public class TSQLTextEmitter : SQL.SQLTextEmitter
 	{
+		protected override void EmitSelectExpression(SQL.SelectExpression expression)
+		{
+			AppendFormat("{0} ", Alphora.Dataphor.DAE.Language.SQL.Keywords.Select);
+			IncreaseIndent();
+			EmitSelectClause(expression.SelectClause);
+			EmitFromClause(expression.FromClause);
+			EmitWhereClause(expression.WhereClause);
+			EmitGroupClause(expression.GroupClause);
+			EmitHavingClause(expression.HavingClause);
+
+			// Add the "for" clause
+			var pgSelect = expression as SelectExpression;
+			if (pgSelect != null)
+				EmitForClause(pgSelect.ForSpecifier);
+
+			DecreaseIndent();
+		}
+
+		protected override void EmitAlgebraicFromClause(Alphora.Dataphor.DAE.Language.SQL.AlgebraicFromClause clause)
+		{
+			// The "from" clause is optional for PG, omit the dummy from
+			if (clause.TableSpecifier.TableAlias != "dummy1")
+				base.EmitAlgebraicFromClause(clause);
+		}
+
+		protected virtual void EmitForClause(ForSpecifier forSpecifier)
+		{
+			if (forSpecifier != ForSpecifier.None)
+			{
+				NewLine();
+				Indent();
+				Append("for ");
+				if (forSpecifier == ForSpecifier.Update)
+					Append("update ");
+				else
+					Append("share ");
+			}
+		}
 
         protected override void EmitCreateIndexStatement(SQL.CreateIndexStatement statement)
         {

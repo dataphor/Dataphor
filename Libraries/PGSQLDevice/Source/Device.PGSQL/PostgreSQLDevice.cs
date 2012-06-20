@@ -288,10 +288,10 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
         public override TableSpecifier GetDummyTableSpecifier()
         {
-            var selectExpression = new SelectExpression();
-            selectExpression.SelectClause = new SelectClause();
-            selectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(0), "dummy1"));
-            return new TableSpecifier(selectExpression, "dummy1");
+			var selectExpression = new Language.PGSQL.SelectExpression();
+			selectExpression.SelectClause = new SelectClause();
+			selectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(0), "dummy1"));
+			return new TableSpecifier(selectExpression, "dummy1");
         }
 
         // ShouldIncludeColumn
