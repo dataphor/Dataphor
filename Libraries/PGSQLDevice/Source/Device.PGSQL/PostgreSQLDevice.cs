@@ -325,6 +325,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "binary":
                 case "varbinary":
                 case "timestamp":
+				case "timestamp without time zone":
                     return true;
                 default:
                     return false;
@@ -353,6 +354,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "datetime":
 				case "date":
                 case "smalldatetime":
+				case "timestamp without time zone":
                     return plan.DataTypes.SystemDateTime;
                 case "money":
                 case "smallmoney":
