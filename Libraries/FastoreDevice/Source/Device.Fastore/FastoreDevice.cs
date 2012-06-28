@@ -71,7 +71,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             base.InternalStart(process);
 
             //Connect to the Fastore Service
-            _db = Alphora.Fastore.Client.Client.Connect("localhost", 8064);
+            ServiceAddress serviceAddress = new ServiceAddress();
+            serviceAddress.Name = "localhost";
+            serviceAddress.Port = 8765;
+
+            _db = Alphora.Fastore.Client.Client.Connect(new ServiceAddress[] { serviceAddress });
 
             _tables = new FastoreTables();
         }

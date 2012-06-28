@@ -139,7 +139,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         protected bool _flagsCached;
         protected CursorGetFlags _flags;
         protected bool _trivialBOF;
-        // TrivialEOF unneccesary because Last returns flags
+        // TrivialEOF unnecessary because Last returns flags
 
         protected void SetFlags(CursorGetFlags flags)
         {
@@ -245,9 +245,9 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         private CursorGetFlags GetCursorFlags(DataSet ds)
         {
             CursorGetFlags flags = CursorGetFlags.None;
-            if (ds.BeginOfRange)
+            if (ds.Bof)
                 flags |= CursorGetFlags.BOF;
-            if (ds.EndOfRange)
+            if (ds.Eof)
                 flags |= CursorGetFlags.EOF;
 
             return flags;
