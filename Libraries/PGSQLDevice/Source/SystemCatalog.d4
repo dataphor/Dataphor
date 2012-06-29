@@ -555,7 +555,7 @@ end;
 begin
 		alter device {0}
 		{{
-			create type System.String class "SQLDevice.SQLString" static tags {{ DAE.IsSystem = "true" }}, 
+			create type System.String class "PostgreSQLDevice.PostgreSQLString" static tags {{ DAE.IsSystem = "true" }}, 
 			create operator System.String(System.String) class "SQLDevice.SQLScalarSelector" static tags {{ DAE.IsSystem = "true" }}, 
 			create operator System.String.ReadValue(System.String) class "SQLDevice.SQLScalarReadAccessor" static tags {{ DAE.IsSystem = "true" }},
 			create operator System.String.WriteValue(System.String, System.String) class "SQLDevice.SQLScalarWriteAccessor" static tags {{ DAE.IsSystem = "true" }},
@@ -629,7 +629,7 @@ begin
 		    create operator System.UserID.ReadValue(System.UserID) class "SQLDevice.SQLScalarReadAccessor" static tags {{ DAE.IsSystem = "true" }}, 
 		    create operator System.UserID.WriteValue(System.UserID, System.String) class "SQLDevice.SQLScalarWriteAccessor" static tags {{ DAE.IsSystem = "true" }}, 
 
-		    create type System.Name class "SQLDevice.SQLString" static tags {{ DAE.IsSystem = "true" }},
+		    create type System.Name class "PostgreSQLDevice.PostgreSQLString" static tags {{ DAE.IsSystem = "true" }},
             create operator System.Name(System.String) class "SQLDevice.SQLScalarSelector" static tags {{ DAE.IsSystem = "true" }}, 
 		    create operator System.Name.ReadValue(System.Name) class "SQLDevice.SQLScalarReadAccessor" static tags {{ DAE.IsSystem = "true" }}, 
 		    create operator System.Name.WriteValue(System.Name, System.String) class "SQLDevice.SQLScalarWriteAccessor" static tags {{ DAE.IsSystem = "true" }} 

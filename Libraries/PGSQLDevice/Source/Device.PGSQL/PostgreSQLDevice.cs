@@ -438,28 +438,30 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 					DeviceIndexesExpression == String.Empty
 						?
 							@"
-							select
-									pg_statio_all_indexes.schemaname as TableSchema,
-									pg_statio_all_indexes.relname as TableName,
-									pg_statio_all_indexes.indexrelname IndexName,
-									pg_attribute.attname as ColumnName,
-									pg_attribute.attnum as OrdinalPosition,
-									pg_index.indisunique as IsUnique,
-									case when indoption[0]=3  then TRUE else FALSE end as IsDescending
-								from pg_attribute,pg_statio_all_indexes,pg_index
-								where pg_attribute.attrelid = pg_statio_all_indexes.relid
-									and pg_index.indexrelid=pg_statio_all_indexes.indexrelid
-									and pg_statio_all_indexes.schemaname not in ('information_schema','pg_catalog','pg_toast')
+								select
+										tn.nspname as TableSchema,
+										tc.relname as TableName,
+										ic.relname as IndexName,
+										ca.attname as ColumnName,
+										ca.attnum as OrdinalPosition,
+										i.indisunique as IsUnique,
+										case when i.indoption[0]=3  then TRUE else FALSE end as IsDescending
+									from pg_index i 
+										join pg_class tc on tc.oid = i.indrelid
+										join pg_class ic on ic.oid = i.indexrelid
+										join pg_attribute ca on ca.attrelid = ic.oid
+										join pg_namespace tn on tn.oid = tc.relnamespace
+									where tn.nspname not in ('information_schema','pg_catalog','pg_toast')
 									{0}
 									{1}
-								order by pg_statio_all_indexes.schemaname, pg_statio_all_indexes.relname, pg_statio_all_indexes.indexrelname, pg_attribute.attname
+									order by tn.nspname, tc.relname, ic.relname, ca.attname
 							"
 						:
 							DeviceIndexesExpression,
-					Schema == String.Empty ? String.Empty : String.Format("and pg_statio_all_indexes.schemaname = '{0}'", Schema),
+					Schema == String.Empty ? String.Empty : String.Format("and tn.nspname = '{0}'", Schema),
 					tableVar == null
 						? String.Empty
-						: String.Format("and pg_statio_all_indexes.relname = '{0}'", ToSQLIdentifier(tableVar).ToLower())
+						: String.Format("and tc.relname = '{0}'", ToSQLIdentifier(tableVar).ToLower())
 				);
         }
 
