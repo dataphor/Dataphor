@@ -399,4 +399,13 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 		}
 	}
 
+	public class PostgreSQLString : SQLString
+	{
+		public PostgreSQLString(int id, string name) : base(id, name) { }
+
+		protected override string InternalNativeDomainName(MetaData metaData)
+		{
+			return String.Format("varying character({0})", GetLength(metaData).ToString());
+		}
+	}
 }

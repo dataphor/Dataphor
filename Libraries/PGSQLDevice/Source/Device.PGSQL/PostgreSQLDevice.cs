@@ -309,6 +309,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "float":
                 case "real":
                 case "datetime":
+				case "date":
                 case "smalldatetime":
                 case "money":
                 case "smallmoney":
@@ -317,12 +318,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "varchar":
                 case "nchar":
                 case "nvarchar":
+				case "character varying":
                 case "text":
                 case "ntext":
                 case "image":
                 case "binary":
                 case "varbinary":
                 case "timestamp":
+				case "timestamp without time zone":
                     return true;
                 default:
                     return false;
@@ -349,7 +352,9 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "real":
                     return plan.DataTypes.SystemDecimal;
                 case "datetime":
+				case "date":
                 case "smalldatetime":
+				case "timestamp without time zone":
                     return plan.DataTypes.SystemDateTime;
                 case "money":
                 case "smallmoney":
@@ -359,6 +364,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "char":
                 case "varchar":
                 case "nchar":
+				case "character varying":
                 case "nvarchar":
                     metaData.Tags.Add(new Tag("Storage.Length", length.ToString()));
                     return plan.DataTypes.SystemString;
@@ -393,26 +399,28 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 					DeviceTablesExpression == String.Empty
 						?
 							@"
-								select
-								table_schema as TableSchema,
-								table_name as TableName,
-								column_name as ColumnName,
-								ordinal_position as OrdinalPosition,
-								table_name as TableTitle,
-								column_name as ColumnTitle,
-								data_type as NativeDomainName,
-								data_type as DomainName,
-								case when character_maximum_length is not null then character_maximum_length
-									when numeric_precision is not null then numeric_precision
-									when datetime_precision is not null then datetime_precision
-									else 0
-								end as Length,
-								case when is_nullable = 'NO' then 0 else 1 end as IsNullable,
-								case when data_type in ('text', 'bytea') then 1 else 0 end as IsDeferred
+							select
+									table_schema as TableSchema,
+									table_name as TableName,
+									column_name as ColumnName,
+									ordinal_position as OrdinalPosition,
+									table_name as TableTitle,
+									column_name as ColumnTitle,
+									data_type as NativeDomainName,
+									data_type as DomainName,
+									case 
+										when character_maximum_length is not null then character_maximum_length
+										when numeric_precision is not null then numeric_precision
+										when datetime_precision is not null then datetime_precision
+										else 0
+									end as Length,
+									case when is_nullable = 'NO' then 0 else 1 end as IsNullable,
+									case when data_type in ('text', 'bytea') then 1 else 0 end as IsDeferred
 								from information_schema.columns
-								where true {0} {1}
+								where table_schema not in ('information_schema','pg_catalog','pg_toast')
+									{0} {1}
 								order by table_schema, table_name, ordinal_position
-						"
+							"
 						:
 							DeviceTablesExpression,
 					Schema == String.Empty ? String.Empty : String.Format("and table_schema = '{0}'", Schema),
@@ -430,43 +438,30 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 					DeviceIndexesExpression == String.Empty
 						?
 							@"
-							select
-									table_schema as TableSchema,
-									table_name as TableName,
-									column_name as ColumnName,
-									ordinal_position as OrdinalPosition,
-									table_name as TableTitle,
-									column_name as ColumnTitle,
-									case
-										when data_type = 'character varying' then 'varchar'
-										when data_type = 'date' then 'datetime'
-										else data_type
-									end as NativeDomainName,
-									case
-										when data_type = 'character varying' then 'varchar'
-										when data_type = 'date' then 'datetime'
-										else data_type
-									end as DomainName,
-									case 
-										when character_maximum_length is not null then character_maximum_length
-										when numeric_precision is not null then numeric_precision
-										when datetime_precision is not null then datetime_precision
-										else 0
-									end as Length,
-									case when is_nullable = 'NO' then 0 else 1 end as IsNullable,
-									case when data_type in ('text', 'bytea') then 1 else 0 end as IsDeferred
-								from information_schema.columns
-								where table_schema not in ('information_schema','pg_catalog','pg_toast')
-									{0} {1}
-								order by table_schema, table_name, ordinal_position
-							"
+								select
+										tn.nspname as TableSchema,
+										tc.relname as TableName,
+										ic.relname as IndexName,
+										ca.attname as ColumnName,
+										ca.attnum as OrdinalPosition,
+										i.indisunique as IsUnique,
+										case when i.indoption[0]=3  then TRUE else FALSE end as IsDescending
+									from pg_index i 
+										join pg_class tc on tc.oid = i.indrelid
+										join pg_class ic on ic.oid = i.indexrelid
+										join pg_attribute ca on ca.attrelid = ic.oid
+										join pg_namespace tn on tn.oid = tc.relnamespace
+									where tn.nspname not in ('information_schema','pg_catalog','pg_toast')
+									{0}
+									{1}
+									order by tn.nspname, tc.relname, ic.relname, ca.attname
 							"
 						:
 							DeviceIndexesExpression,
-					Schema == String.Empty ? String.Empty : String.Format("and pg_statio_all_indexes.schemaname = '{0}'", Schema),
+					Schema == String.Empty ? String.Empty : String.Format("and tn.nspname = '{0}'", Schema),
 					tableVar == null
 						? String.Empty
-						: String.Format("and pg_statio_all_indexes.relname = '{0}'", ToSQLIdentifier(tableVar).ToLower())
+						: String.Format("and tc.relname = '{0}'", ToSQLIdentifier(tableVar).ToLower())
 				);
         }
 
