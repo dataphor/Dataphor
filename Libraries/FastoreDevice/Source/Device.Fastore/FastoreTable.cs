@@ -25,10 +25,14 @@ using Alphora.Fastore.Client;
 
 
 namespace Alphora.Dataphor.DAE.Device.Fastore
-{
+{ 
 	//TODO: FIX NASTY ASSUMPTIONS! (First column is ID column -- This is clearly wrong, but I'm just getting things up and running)
 	public class FastoreTable : System.Object
 	{
+        private static int[] PodIdColumn = { 300 };
+        private static int[] ColumnColumns = { 0, 1, 2, 3, 4 };
+        private static int[] PodColumnColumns = { 400, 401 };
+
 		//Tied Directly to device for time being...
 		public FastoreTable(IValueManager manager, Schema.TableVar tableVar, FastoreDevice device)
 		{
@@ -71,8 +75,23 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
 		protected void EnsureColumns()
 		{
-			List<int> columnIds = new List<int>();
+            //Pull a list of current pods so we know where to distribute new columns.
+            Range podQuery = new Range();
 
+            //300 is the pods column
+            podQuery.ColumnID = PodIdColumn[0];
+            podQuery.Ascending = true;
+
+            var podIds = Device.Database.GetRange(PodIdColumn, podQuery, int.MaxValue);
+            if (podIds.Count == 0)
+                throw new Exception("FastoreDevice can't create a new table. Hive has no workers. Hive must be initialized first.");
+
+            //Start distributing on a random pod. Otherwise, we will always start on the first pod
+            int startPod = new Random().Next(podIds.Count - 1);
+
+            //This is so we have quick access to all the ids (for queries). Otherwise, we have to iterate the 
+            //TableVar Columns and pull the id each time.
+            List<int> columnIds = new List<int>();
 			for (int i = 0; i < TableVar.DataType.Columns.Count; i++)
 			{
 				var col = TableVar.DataType.Columns[i];
@@ -80,21 +99,29 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 				columnIds.Add(col.ID);
 
                 Range query = new Range();
-                query.ColumnID = 0;
+                query.ColumnID = ColumnColumns[0];
                 query.Start = new RangeBound() { Bound = col.ID, Inclusive = true };
                 query.End = new RangeBound() { Bound = col.ID, Inclusive = true };
 
-                var result = Device.Database.GetRange(new int[] { 0 }, query , int.MaxValue);
+                var result = Device.Database.GetRange(new int[] { ColumnColumns[0] }, query , int.MaxValue);
 
                 if (result.Count == 0)
                 {
+                    //These two includes should probably happen in a transaction so no one see any columns that don't have
+                    //Repos.
                     Device.Database.Include
                     (
-                        new int[] { 0, 1, 2, 3, 4 },
+                        ColumnColumns,
                         col.ID,
                         new object[] { col.ID, col.Description, MapTypeNames(col.DataType.Name), "Int", i == 1 }
                     );
 
+                    Device.Database.Include
+                    (
+                        PodColumnColumns,
+                        0, /* need a unique rowId -- This is a many to many table, so it can't be either the podId or the ColumnId */ 
+                        new object[] { podIds[startPod++ % podIds.Count].Values[0], col.ID }
+                    );
 
                     Schema.Order order = new Schema.Order();
                     Schema.TableVarColumn tvc = new TableVarColumn(TableVar.DataType.Columns[i]);
@@ -152,16 +179,32 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 		{
 			foreach (var col in _columns)
 			{
+                //Pull a list of the current repos so we can drop them all.
+                Range repoQuery = new Range();
+
+                //401 is the column we want on the Pod-Column table
+                repoQuery.ColumnID = PodColumnColumns[1];
+                repoQuery.Ascending = true;
+                repoQuery.Start = new RangeBound() { Bound = col, Inclusive = true };
+                repoQuery.End = new RangeBound() { Bound = col, Inclusive = true };                
+
+                var repoIds = Device.Database.GetRange(new int[] { PodColumnColumns[1] }, repoQuery, int.MaxValue);
+
+                for (int i = 0; i < repoIds.Count; i++)
+                {
+                    Device.Database.Exclude(PodColumnColumns, repoIds[i].ID);
+                }
+
 				Range query = new Range();
                 query.ColumnID = 0;
                 query.Start = new RangeBound() { Bound = col, Inclusive = true };
                 query.End = new RangeBound() { Bound = col, Inclusive = true };
 
-                var result = Device.Database.GetRange(new int[] { 0 }, query, int.MaxValue);
+                var columnExists = Device.Database.GetRange(new int[] { ColumnColumns[0] }, query, int.MaxValue);
 
-                if (result.Count > 0)
+                if (columnExists.Count > 0)
                 {
-                    Device.Database.Exclude(new int[] { 0, 1, 2, 3, 4 }, col);
+                    Device.Database.Exclude(ColumnColumns, col);
                 }
 			}
 		}
