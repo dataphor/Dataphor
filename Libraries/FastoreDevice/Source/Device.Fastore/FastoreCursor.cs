@@ -6,6 +6,7 @@
 using System;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 
 using Alphora.Dataphor.BOP;
@@ -21,13 +22,14 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Device.Memory;
 using Schema = Alphora.Dataphor.DAE.Schema;
-using System.Collections.Generic;
-using Alphora.Fastore.Client;
 
+using Alphora.Fastore.Client;
 
 namespace Alphora.Dataphor.DAE.Device.Fastore
 {
-    //This will have to be a buffered read of the FastoreStorage engine
+	// This cursor should do nothing on InternalOpen. The assumption being that
+	// it will most often be used from a ScanTable or SeekTable.
+	// If access is attempted prior to a searched find, then open on the unbounded range.
     public class FastoreCursor : Table
     {
         public const int MaxLimit = 10;
@@ -38,95 +40,76 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             _db = db;
         }
 
-        private Database _db;
         public Schema.Order Key;
         public ScanDirection Direction;
 
+        private Database _db;
+		private DataSet _buffer;
+		private int _bufferIndex = -1; // current index of the cursor in the result set
+		private ScanDirection _bufferDirection; // indicates the order of rows in the result set
+
+		private int[] _tableNodeColumns;
         private int[] TableNodeColumns()
         {
-            List<int> ids = new List<int>();
-            foreach (var col in Node.DataType.Columns)
-            {
-                ids.Add(col.ID);
-            }
+			if (_tableNodeColumns == null)
+			{
+				_tableNodeColumns = new int[Node.DataType.Columns.Count];
+				for (int index = 0; index < _tableNodeColumns.Length; index++)
+					_tableNodeColumns[index] = Node.DataType.Columns[index].ID;
+			}
 
-            return ids.ToArray();
+			return _tableNodeColumns;
         }
 
-        protected Range CreateRange()
+		private Schema.TableVarColumn _orderColumn;
+		protected Schema.TableVarColumn GetOrderColumn()
+		{
+			if (_orderColumn == null)
+			{
+				//if order is present use it for ordering, if not, attempt to use key. If no key, use the first column.
+				_orderColumn =
+					Node.Order != null && Node.Order.Columns.Count > 0 
+						? Node.Order.Columns[0].Column
+						:
+							(Key != null && Key.Columns.Count > 0) 
+								? Key.Columns[0].Column
+								: Node.TableVar.Columns[0];            
+			}
+
+			return _orderColumn;
+		}
+
+		protected int GetOrderColumnID()
+		{
+			return GetOrderColumn().ID;
+		}
+
+        protected Range CreateRange(ScanDirection direction, RangeBound? start, RangeBound? end)
         {
-            //if order is present use it for ordering, if not, attempt to use key. If no key, use the first column.
-            int orderColumnId = Node.Order != null && Node.Order.Columns.Count > 0 ? Node.Order.Columns[0].Column.ID :
-                (Key != null && Key.Columns.Count > 0) ? Key.Columns[0].Column.ID :
-                Node.TableVar.Columns[0].Column.ID;            
-
-            //Find which column in the dataset corresponds to the order column
-            int orderColumnIndex = 0;
-            for (int i = 0; i < Node.TableVar.Columns.Count; i++)
-            {
-                if (Node.TableVar.Columns[i].Column.ID == orderColumnId)
-                {
-                    orderColumnIndex = i;
-                    break;
-                }
-            }
-
-            //if order is forward (asc) and the buffer is forward (getnext), use the last item as resume.
-            //if order is forward (asc) and the buffer is backward (getprior), use the first item as resume, and grab in reverse order
-            //if order is backward (desc) and the buffer is forward (getnext), use that last item as resume.
-            //if order is backward (desc) and the buffer is backward (getprior), use the first item as resume, and grab in reverse order
-            //Does the Scan Direction determine the order?
             Range range = new Range();
-            range.ColumnID = orderColumnId;      
+            range.ColumnID = GetOrderColumnID();      
 
-            range.Ascending = (_bufferDirection == BufferDirection.Forward && Direction == ScanDirection.Forward) ||
-              (_bufferDirection == BufferDirection.Backward && Direction == ScanDirection.Backward);  
-
-            if (BufferActive())
-            {
-                RangeBound bound = new RangeBound();
-                bound.Inclusive = true;
-
-                if (range.Ascending)
-                {
-                    bound.Bound = ((object[])_buffer[_buffer.Count - 1].Row.AsNative)[orderColumnIndex];
-                    range.Start = bound;
-                }
-                else
-                {
-                    bound.Bound = ((object[])_buffer[0].Row.AsNative)[orderColumnIndex];
-                    range.End = bound;
-                }
-            }         
+            range.Ascending = direction == ScanDirection.Forward; 
+			range.Start = start;
+			range.End = end;
          
             return range;
         }
 
-        protected LocalBuffer _buffer;
-        protected int _bufferIndex = -1;
-        protected bool _bufferFull;
-        protected BufferDirection _bufferDirection = BufferDirection.Forward;
-
         protected bool BufferActive()
         {
-            return _bufferFull;
+			return _buffer != null;
         }
 
         protected void ClearBuffer()
         {
-            _buffer.Clear();
-            _bufferIndex = -1;
-            _bufferFull = false;
-        }
-
-        protected void SetBufferDirection(BufferDirection bufferDirection)
-        {
-            _bufferDirection = bufferDirection;
+			_buffer = null;
+			_bufferIndex = -1;
         }
 
         protected override void InternalOpen()
         {
-            // _set = _db.GetRange(TableNodeColumns(), GetFastoreOrders(), new Range[0]);
+			// Do nothing on open
         }
 
         protected override void InternalClose()
@@ -135,34 +118,10 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 ClearBuffer();
         }
 
-        // Flags tracks the current status of the remote cursor, BOF, EOF, none, or both
-        protected bool _flagsCached;
-        protected CursorGetFlags _flags;
-        protected bool _trivialBOF;
-        // TrivialEOF unnecessary because Last returns flags
-
-        protected void SetFlags(CursorGetFlags flags)
-        {
-            _flags = flags;
-            _flagsCached = true;
-            _trivialBOF = false;
-        }
-
-        protected CursorGetFlags GetFlags()
-        {
-            if (!_flagsCached)
-            {
-                SetFlags(CursorGetFlags.None);
-            }
-            return _flags;
-        }
-
         public override void Reset()
         {
             if (BufferActive())
                 ClearBuffer();
-            SetFlags(CursorGetFlags.None);
-            SetBufferDirection(BufferDirection.Forward);
         }
 
         protected override void InternalSelect(Row row)
@@ -171,134 +130,254 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 BufferSelect(row);
             else
             {
-                SourceFetch(false);
+                SourceFetch(true, Direction);
                 BufferSelect(row);
             }
         }
 
         private void BufferSelect(Row row)
         {
-            _buffer[_bufferIndex].Row.CopyTo(row);
+			// TODO: This needs to be aware that row may not be of an equivalent type
+			row.AsNative = _buffer[_bufferIndex].Values;
         }
 
-        protected void SourceFetch(bool isFirst)
+		protected object GetStartId(ScanDirection direction)
+		{
+			// if current buffer direction is forward and a forward range is requested, use the row Id of the last row in the buffer
+			// If current buffer direction is forward and a backward range is requested, use the row Id of the first row in the buffer
+			// If current buffer direction is backward and a forward range is requested, use the row Id of the first row in the buffer
+			// If current buffer direction is backward and a backward range is requested, use the row Id of the last row in the buffer
+			if (_bufferDirection == direction)
+				return _buffer[_buffer.Count - 1].ID;
+			else
+				return _buffer[0].ID;
+		}
+
+        protected void SourceFetch(bool isFirst, ScanDirection direction)
         {
-            SourceFetch(isFirst, CreateRange());
+            SourceFetch(isFirst, direction, CreateRange(direction, null, null), !isFirst ? GetStartId(direction) : null);
         }
 
-        protected void SourceFetch(bool isFirst, Range range, object startId = null)
+        protected void SourceFetch(bool isFirst, ScanDirection direction, Range range, object startId = null)
         {
             //Grab data from current connection...
-            DataSet _set = _db.GetRange(TableNodeColumns(), range, MaxLimit, startId);
-            ProcessFetchData(_set, isFirst);
+            var set = _db.GetRange(TableNodeColumns(), range, MaxLimit, startId);
+            ProcessFetchData(set, isFirst, direction);
         }
 
-        public void ProcessFetchData(DataSet fetchData, bool isFirst)
+        public void ProcessFetchData(DataSet fetchData, bool isFirst, ScanDirection direction)
         {
             ClearBuffer();
-            _buffer.BufferDirection = _bufferDirection;
-            Schema.IRowType rowType = DataType.RowType;
-            CursorGetFlags flags = GetCursorFlags(fetchData);
 
-            if (_bufferDirection == BufferDirection.Forward)
-            {
-                for (int index = 0; index < fetchData.Count; index++)
-                {
-                    DataSetRow dsrow = fetchData[index];
-
-                    Row row = new Row(Manager, rowType);
-                    row.AsNative = dsrow.Values;
-
-                    FastoreRow frow = new FastoreRow(row, dsrow.ID);
-                    _buffer.Add(frow);
-                }
-
-                if ((fetchData.Count > 0) && !isFirst)
-                    _bufferIndex = 0;
-                else
-                    _bufferIndex = -1;
-            }
-            else
-            {
-                for (int index = 0; index < fetchData.Count; index++)
-                {
-                    DataSetRow dsrow = fetchData[index];
-
-                    Row row = new Row(Manager, rowType);
-                    row.AsNative = dsrow.Values;
-
-                    FastoreRow frow = new FastoreRow(row, dsrow.ID);
-                    _buffer.Insert(0, frow);
-                }
-
-                if ((fetchData.Count > 0) && !isFirst)
-                    _bufferIndex = _buffer.Count - 1;
-                else
-                    _bufferIndex = _buffer.Count;
-
-            }
-
-            SetFlags(flags);
-            _bufferFull = true;
-        }
-
-        private CursorGetFlags GetCursorFlags(DataSet ds)
-        {
-            CursorGetFlags flags = CursorGetFlags.None;
-            if (ds.Bof)
-                flags |= CursorGetFlags.BOF;
-            if (ds.Eof)
-                flags |= CursorGetFlags.EOF;
-
-            return flags;
-        }
-
-        protected override bool InternalNext()
-        {
-            SetBufferDirection(BufferDirection.Forward);
-          
-            if (!BufferActive())
-                SourceFetch(SourceBOF());
-
-            if (_bufferIndex >= _buffer.Count - 1)
-            {
-                if (SourceEOF())
-                {
-                    _bufferIndex++;
-                    return false;
-                }
-
-                SourceFetch(false);
-                return !EOF();
-            }
-            _bufferIndex++;
-            return true;
+			_buffer = fetchData;
+			_bufferDirection = direction;
+			if (Direction == _bufferDirection)
+			{
+				if (_buffer.Count > 0 && !isFirst)
+					_bufferIndex = 0;
+				else
+					_bufferIndex = -1;
+			}
+			else
+			{
+				if (_buffer.Count > 0 && !isFirst)
+					_bufferIndex = _buffer.Count - 1;
+				else
+					_bufferIndex = _buffer.Count;
+			}
         }
 
         protected bool SourceBOF()
         {
-            return _trivialBOF || ((GetFlags() & CursorGetFlags.BOF) != 0);
+			return _buffer.Bof;
         }
 
         protected override bool InternalBOF()
         {
-            if (BufferActive())
-                return SourceBOF() && ((_buffer.Count == 0) || (_bufferIndex < 0));
-            else
-                return SourceBOF();
+			if (!BufferActive())
+				SourceFetch(true, Direction);
+
+			return 
+				Direction == _bufferDirection 
+					? (SourceBOF() && ((_buffer.Count == 0) || (_bufferIndex < 0)))
+					: (SourceEOF() && ((_buffer.Count == 0) || (_bufferIndex >= _buffer.Count)));
         }
 
         protected bool SourceEOF()
         {
-            return (GetFlags() & CursorGetFlags.EOF) != 0;
+			return _buffer.Eof;
         }
 
         protected override bool InternalEOF()
         {
-            if (BufferActive())
-                return SourceEOF() && ((_buffer.Count == 0) || (_bufferIndex >= _buffer.Count));
-            else
-                return SourceEOF();
+			if (!BufferActive())
+				SourceFetch(true, Direction);
+
+			return
+				Direction == _bufferDirection
+					? (SourceEOF() && ((_buffer.Count == 0) || (_bufferIndex >= _buffer.Count)))
+					: (SourceBOF() && ((_buffer.Count == 0) || (_bufferIndex < 0)));
+        }
+
+        protected override bool InternalNext()
+        {
+            if (!BufferActive())
+                SourceFetch(true, Direction);
+
+			if (Direction == _bufferDirection)
+			{
+				if (_bufferIndex >= _buffer.Count - 1)
+				{
+					if ((Direction == _bufferDirection && SourceEOF()) || (Direction != _bufferDirection && SourceBOF()))
+					{
+						if (_bufferIndex == _buffer.Count - 1)
+							_bufferIndex++;
+						return false;
+					}
+
+					SourceFetch(false, Direction);
+					return !EOF();
+				}
+				_bufferIndex++;
+				return true;
+			}
+			else
+			{
+				if (_bufferIndex <= 0)
+				{
+					if ((Direction == _bufferDirection && SourceEOF()) || (Direction != _bufferDirection && SourceBOF()))
+					{
+						if (_bufferIndex == 0)
+							_bufferIndex--;
+						return false;
+					}
+
+					SourceFetch(false, Direction);
+					return !EOF();
+				}
+				_bufferIndex--;
+				return true;
+			}
+        }
+
+        protected override bool InternalPrior()
+        {
+			if (!BufferActive())
+				SourceFetch(true, Direction);
+
+			if (Direction == _bufferDirection)
+			{
+				if (_bufferIndex <= 0)
+				{
+					if ((Direction == _bufferDirection && SourceBOF()) || (Direction != _bufferDirection && SourceEOF()))
+					{
+						if (_bufferIndex == 0)
+							_bufferIndex--;
+						return false;
+					}
+
+					SourceFetch(false, Direction == ScanDirection.Forward ? ScanDirection.Backward : ScanDirection.Forward);
+					return !BOF();
+				}
+				_bufferIndex--;
+				return true;
+			}
+			else
+			{
+				if (_bufferIndex >= _buffer.Count - 1)
+				{
+					if ((Direction == _bufferDirection && SourceBOF()) || (Direction != _bufferDirection && SourceEOF()))
+					{
+						if (_bufferIndex == _buffer.Count - 1)
+							_bufferIndex++;
+						return false;
+					}
+
+					SourceFetch(false, _bufferDirection);
+					return !BOF();
+				}
+				_bufferIndex++;
+				return true;
+			}
+        }
+
+		protected override void InternalLast()
+		{
+			if (BufferActive() && !EOF())
+			{
+				if ((Direction == _bufferDirection && SourceEOF()) || (Direction != _bufferDirection && SourceEOF()))
+				{
+					while (!EOF())
+						Next();
+				}
+				else
+				{
+					ClearBuffer();
+					SourceFetch(true, Direction == ScanDirection.Forward ? ScanDirection.Backward : ScanDirection.Forward);
+				}
+			}
+		}
+
+        protected override void InternalFirst()
+        {
+			if (BufferActive() && !BOF())
+			{
+				if ((Direction == _bufferDirection && SourceBOF()) || (Direction != _bufferDirection && SourceEOF()))
+				{
+					while (!BOF())
+						Prior();
+				}
+				else
+				{
+					ClearBuffer();
+					SourceFetch(true, Direction);
+				}
+			}
+        }
+
+        protected override bool InternalFindKey(Row row, bool forward)
+        {
+			var keyRow = EnsureKeyRow(row);
+			try
+			{
+				// TODO: Expand this to work with multiple column searches
+				var rangeBound = new RangeBound { Bound = keyRow[0], Inclusive = true };
+				var direction = (Direction == ScanDirection.Forward && forward || Direction == ScanDirection.Backward && !forward) ? ScanDirection.Forward : ScanDirection.Backward;
+				var range = CreateRange(direction, rangeBound, null);
+				var set = _db.GetRange(TableNodeColumns(), range, MaxLimit);
+				if (set.Count > 0)
+				{
+					ProcessFetchData(set, true, direction);
+					return true; 
+				}
+				return false;
+			}
+			finally
+			{
+				if (!object.ReferenceEquals(row, keyRow))
+					keyRow.Dispose();
+			}
+        }
+
+        protected override void InternalFindNearest(Row row)
+        {
+			var keyRow = EnsurePartialKeyRow(row);
+			try
+			{
+				ClearBuffer();
+				if (keyRow != null)
+				{
+					// TODO: Expand this to work with multiple column searches
+					var rangeBound = new RangeBound { Bound = keyRow[0], Inclusive = true };
+					var range = CreateRange(Direction, rangeBound, null);
+					SourceFetch(true, Direction, range);
+				}
+			}
+			finally
+			{
+				if (keyRow != null && !object.ReferenceEquals(row, keyRow))
+					keyRow.Dispose();
+			}
         }
 
         protected override void InternalInsert(Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
@@ -311,7 +390,6 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
             if (BufferActive())
                 ClearBuffer();
-            SetBufferDirection(BufferDirection.Backward);
         }
 
         protected override void InternalUpdate(Row row, BitArray valueFlags, bool uncheckedValue)
@@ -324,7 +402,6 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
             if (BufferActive())
                 ClearBuffer();
-            SetBufferDirection(BufferDirection.Backward);
         }
 
         protected override void InternalDelete(bool uncheckedValue)
@@ -334,69 +411,6 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
             if (BufferActive())
                 ClearBuffer();
-            SetBufferDirection(BufferDirection.Backward);
-        }
-
-        protected override void  InternalFirst()
-        {
-            SetBufferDirection(BufferDirection.Forward);
-            if (BufferActive())
-                ClearBuffer();
-        }
-
-        protected override bool  InternalPrior()
-        {
-            SetBufferDirection(BufferDirection.Backward);
-            if (!BufferActive())
-                SourceFetch(SourceEOF());
-
-            if (_bufferIndex <= 0)
-            {
-                if (SourceBOF())
-                {
-                    _bufferIndex--;
-                    return false;
-                }
-
-                SourceFetch(false);
-                return !BOF();
-            }
-            _bufferIndex--;
-            return true;
-        }
-
-        protected override bool InternalFindKey(Row row, bool forward)
-        {
-            //TODO: Have to figure this out.. We need a way to determine the rowId for row being found
-            //and then load the buffer on that row in the correct order. Shouldn't be hard once we know
-            //how to pull a row id from a Dataphor row.
-            return base.InternalFindKey(row, forward);
-        }
-
-        protected override void InternalFindNearest(Row row)
-        {
-            //TODO: Same as above.
-            base.InternalFindNearest(row);
         }
     }
-}
-
-public class FastoreRow
-{
-    public FastoreRow(Row row, object id)
-    {
-        _row = row;
-        _id = id;
-    }
-
-    private Row _row;
-    public Row Row { get { return _row; } }
-
-    private object _id;
-    public object ID { get { return _id; } }
-}
-
-public class LocalBuffer : List<FastoreRow>
-{
-    public BufferDirection BufferDirection { get; set; }
 }
