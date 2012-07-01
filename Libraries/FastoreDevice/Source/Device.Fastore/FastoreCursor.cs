@@ -45,6 +45,8 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         private Database _db;
 		private DataSet _buffer;
+        private bool _sourceBof;
+        private bool _sourceEof;
 		private int _bufferIndex = -1; // current index of the cursor in the result set
 		private ScanDirection _bufferDirection; // indicates the order of rows in the result set
 
@@ -153,6 +155,12 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 				return _buffer[0].ID;
 		}
 
+        protected void SetSourceFlags(RangeSet set)
+        {
+            _sourceBof = set.Bof;
+            _sourceEof = set.Eof;
+        }
+
         protected void SourceFetch(bool isFirst, ScanDirection direction)
         {
             SourceFetch(isFirst, direction, CreateRange(direction, null, null), !isFirst ? GetStartId(direction) : null);
@@ -165,11 +173,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             ProcessFetchData(set, isFirst, direction);
         }
 
-        public void ProcessFetchData(DataSet fetchData, bool isFirst, ScanDirection direction)
+        public void ProcessFetchData(RangeSet fetchData, bool isFirst, ScanDirection direction)
         {
             ClearBuffer();
-
-			_buffer = fetchData;
+            SetSourceFlags(fetchData);
+			_buffer = fetchData.Data;
 			_bufferDirection = direction;
 			if (Direction == _bufferDirection)
 			{
@@ -189,7 +197,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         protected bool SourceBOF()
         {
-			return _buffer.Bof;
+			return _sourceBof;
         }
 
         protected override bool InternalBOF()
@@ -205,7 +213,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         protected bool SourceEOF()
         {
-			return _buffer.Eof;
+			return _sourceEof;
         }
 
         protected override bool InternalEOF()
@@ -345,8 +353,8 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 				var direction = (Direction == ScanDirection.Forward && forward || Direction == ScanDirection.Backward && !forward) ? ScanDirection.Forward : ScanDirection.Backward;
 				var range = CreateRange(direction, rangeBound, null);
 				var set = _db.GetRange(TableNodeColumns(), range, MaxLimit);
-				if (set.Count > 0)
-				{
+				if (set.Data.Count > 0)
+				{  
 					ProcessFetchData(set, true, direction);
 					return true; 
 				}

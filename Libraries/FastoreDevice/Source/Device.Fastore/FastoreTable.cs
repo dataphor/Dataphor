@@ -83,11 +83,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             podQuery.Ascending = true;
 
             var podIds = Device.Database.GetRange(PodIdColumn, podQuery, int.MaxValue);
-            if (podIds.Count == 0)
+            if (podIds.Data.Count == 0)
                 throw new Exception("FastoreDevice can't create a new table. Hive has no workers. Hive must be initialized first.");
 
             //Start distributing on a random pod. Otherwise, we will always start on the first pod
-            int startPod = new Random().Next(podIds.Count - 1);
+            int startPod = new Random().Next(podIds.Data.Count - 1);
 
             //This is so we have quick access to all the ids (for queries). Otherwise, we have to iterate the 
             //TableVar Columns and pull the id each time.
@@ -105,7 +105,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
                 var result = Device.Database.GetRange(new int[] { ColumnColumns[0] }, query , int.MaxValue);
 
-                if (result.Count == 0)
+                if (result.Data.Count == 0)
                 {
                     //These two includes should probably happen in a transaction so no one see any columns that don't have
                     //Repos.
@@ -120,7 +120,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                     (
                         PodColumnColumns,
                         0, /* need a unique rowId -- This is a many to many table, so it can't be either the podId or the ColumnId */ 
-                        new object[] { podIds[startPod++ % podIds.Count].Values[0], col.ID }
+                        new object[] { podIds.Data[startPod++ % podIds.Data.Count].Values[0], col.ID }
                     );
 
                     Schema.Order order = new Schema.Order();
@@ -190,9 +190,9 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
                 var repoIds = Device.Database.GetRange(new int[] { PodColumnColumns[1] }, repoQuery, int.MaxValue);
 
-                for (int i = 0; i < repoIds.Count; i++)
+                for (int i = 0; i < repoIds.Data.Count; i++)
                 {
-                    Device.Database.Exclude(PodColumnColumns, repoIds[i].ID);
+                    Device.Database.Exclude(PodColumnColumns, repoIds.Data[i].ID);
                 }
 
 				Range query = new Range();
@@ -202,7 +202,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
                 var columnExists = Device.Database.GetRange(new int[] { ColumnColumns[0] }, query, int.MaxValue);
 
-                if (columnExists.Count > 0)
+                if (columnExists.Data.Count > 0)
                 {
                     Device.Database.Exclude(ColumnColumns, col);
                 }
