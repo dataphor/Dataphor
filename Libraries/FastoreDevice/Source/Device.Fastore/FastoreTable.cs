@@ -38,7 +38,6 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 		{
 			TableVar = tableVar;
 			Device = device;
-
 			EnsureColumns();
 		}
 
@@ -47,7 +46,6 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
 		private int[] _columns;
 		public int[] Columns { get { return _columns; } }
-
 
 		protected string MapTypeNames(string tname)
 		{
@@ -113,13 +111,14 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                     (
                         ColumnColumns,
                         col.ID,
-                        new object[] { col.ID, col.Description, MapTypeNames(col.DataType.Name), "Int", i == 1 }
+                        //TODO: Instead of saying a column is not unique, detect its properties (such as being a key).
+                        new object[] { col.ID, col.Description, MapTypeNames(col.DataType.Name), "Int", false }
                     );
 
                     Device.Database.Include
                     (
                         PodColumnColumns,
-                        0, /* need a unique rowId -- This is a many to many table, so it can't be either the podId or the ColumnId */ 
+                        Device.Generator.Generate(PodColumnColumns[0]),
                         new object[] { podIds.Data[startPod++ % podIds.Data.Count].Values[0], col.ID }
                     );
 

@@ -36,10 +36,14 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         private FastoreTables _tables;
         public FastoreTables Tables { get { return _tables; } }
 
-        //Hosting Fastore in process. Tied to the device.
-        //If the device dies, it's game over.
+        //Database is still not persistent for now
         private Database _db = null;
         public Database Database { get { return _db; } }
+
+
+        //Generates new ids for a table.
+        private Generator _generator = null;
+        public Generator Generator { get { return _generator; } }
 
         public FastoreDevice(int iD, string name)
             : base(iD, name)
@@ -76,6 +80,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             serviceAddress.Port = 8765;
 
             _db = Alphora.Fastore.Client.Client.Connect(new ServiceAddress[] { serviceAddress });
+            _generator = new Alphora.Fastore.Client.Generator(_db);
 
             _tables = new FastoreTables();
         }
