@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 	// If access is attempted prior to a searched find, then open on the unbounded range.
     public class FastoreCursor : Table
     {
-        public const int MaxLimit = 10;
+        public const int MaxLimit = 500;
 
         public FastoreCursor(Program program, Database db, TableNode node)
             : base(node, program)
