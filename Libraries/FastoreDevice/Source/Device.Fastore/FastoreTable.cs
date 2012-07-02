@@ -112,7 +112,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                         ColumnColumns,
                         col.ID,
                         //TODO: Instead of saying a column is not unique, detect its properties (such as being a key).
-                        new object[] { col.ID, col.Description, MapTypeNames(col.DataType.Name), "Int", false }
+                        new object[] { col.ID, col.Description, MapTypeNames(col.DataType.Name), "Int", i == 0 }
                     );
 
                     Device.Database.Include
