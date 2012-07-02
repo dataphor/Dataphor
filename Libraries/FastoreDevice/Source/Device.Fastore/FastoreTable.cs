@@ -90,9 +90,9 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             //This is so we have quick access to all the ids (for queries). Otherwise, we have to iterate the 
             //TableVar Columns and pull the id each time.
             List<int> columnIds = new List<int>();
-			for (int i = 0; i < TableVar.DataType.Columns.Count; i++)
+			for (int i = 0; i < TableVar.Columns.Count; i++)
 			{
-				var col = TableVar.DataType.Columns[i];
+				var col = TableVar.Columns[i];
 
 				columnIds.Add(col.ID);
 

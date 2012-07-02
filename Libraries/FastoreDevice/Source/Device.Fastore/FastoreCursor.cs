@@ -55,9 +55,9 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         {
 			if (_tableNodeColumns == null)
 			{
-				_tableNodeColumns = new int[Node.DataType.Columns.Count];
+				_tableNodeColumns = new int[Node.TableVar.Columns.Count];
 				for (int index = 0; index < _tableNodeColumns.Length; index++)
-					_tableNodeColumns[index] = Node.DataType.Columns[index].ID;
+					_tableNodeColumns[index] = Node.TableVar.Columns[index].ID;
 			}
 
 			return _tableNodeColumns;
@@ -140,7 +140,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         private void BufferSelect(Row row)
         {
 			// TODO: This needs to be aware that row may not be of an equivalent type
-			row.AsNative = _buffer[_bufferIndex].Values;
+            object[] managedRow = _buffer[_bufferIndex].Values;
+            for (int i = 0; i < managedRow.Length; i++)
+            {
+                ((NativeRow)row.AsNative).Values[i] = managedRow[i];
+            }
         }
 
 		protected object GetStartId(ScanDirection direction)
