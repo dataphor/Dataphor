@@ -351,8 +351,12 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                 case "float":
                 case "real":
                     return plan.DataTypes.SystemDecimal;
-                case "datetime":
 				case "date":
+					return plan.DataTypes.SystemDate;
+				// TODO: Support time type
+				//case "time":
+				//    return plan.DataTypes.SystemTime;
+				case "datetime":
                 case "smalldatetime":
 				case "timestamp without time zone":
                     return plan.DataTypes.SystemDateTime;
@@ -454,7 +458,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 									where tn.nspname not in ('information_schema','pg_catalog','pg_toast')
 									{0}
 									{1}
-									order by tn.nspname, tc.relname, ic.relname, ca.attname
+									order by tn.nspname, tc.relname, ic.relname, ca.attnum
 							"
 						:
 							DeviceIndexesExpression,

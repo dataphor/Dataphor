@@ -84,5 +84,25 @@ namespace Alphora.Dataphor.DAE.Language.PGSQL
             Append(SQL.Keywords.EndGroup);
         }
 
+		protected override void EmitAlterColumnDefinition(SQL.AlterColumnDefinition column)
+		{
+			if (column.DomainName != null)
+			{
+				AppendFormat("{0} {1} ", SQL.Keywords.Alter, SQL.Keywords.Column);
+				EmitIdentifier(column.ColumnName);
+				AppendFormat(" type {0}", column.DomainName);
+				if (column.AlterNullable)
+					Append(", ");
+			}
+			if (column.AlterNullable)
+			{
+				AppendFormat("{0} {1} ", SQL.Keywords.Alter, SQL.Keywords.Column);
+				EmitIdentifier(column.ColumnName);
+				if (column.IsNullable)
+					AppendFormat(" set {0}", SQL.Keywords.Null);
+				else
+					AppendFormat(" set {0} {1}", SQL.Keywords.Not, SQL.Keywords.Null);
+			}
+		}
 	}
 }

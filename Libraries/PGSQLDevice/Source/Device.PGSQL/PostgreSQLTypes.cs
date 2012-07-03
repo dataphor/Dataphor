@@ -405,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 		protected override string InternalNativeDomainName(MetaData metaData)
 		{
-			return String.Format("varying character({0})", GetLength(metaData).ToString());
+			return String.Format("character varying({0})", GetLength(metaData).ToString());
 		}
 	}
 }
