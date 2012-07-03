@@ -88,17 +88,6 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         //Free all fastore memory.
         protected override void InternalStop(ServerProcess process)
         {
-            if (_tables != null)
-            {
-                while (_tables.Count > 0)
-                {
-                    _tables[0].Drop(process.ValueManager);
-                    _tables.RemoveAt(0);
-                }
-
-                _tables = null;
-            }
-
             //TODO: Kill db, Free resources, etc.
 
             base.InternalStop(process);
@@ -114,7 +103,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 node.CursorType = CursorType.Dynamic;
                 node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
                 node.CursorCapabilities =
-                    CursorCapability.Navigable;
+                    CursorCapability.Navigable |
+                    CursorCapability.BackwardsNavigable |
+                    CursorCapability.Searchable |
+                    CursorCapability.Updateable;
+
                 node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
                 node.Order = Compiler.OrderFromKey(plan.Plan, Compiler.FindClusteringKey(plan.Plan, node.TableVar));
                 return new DevicePlanNode(node);

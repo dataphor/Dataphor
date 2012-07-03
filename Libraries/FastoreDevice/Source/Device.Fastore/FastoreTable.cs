@@ -120,17 +120,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                         PodColumnColumns,
                         Device.Generator.Generate(PodColumnColumns[0]),
                         new object[] { podIds.Data[startPod++ % podIds.Data.Count].Values[0], col.ID }
-                    );
-
-                    Schema.Order order = new Schema.Order();
-                    Schema.TableVarColumn tvc = new TableVarColumn(TableVar.DataType.Columns[i]);
-                    Schema.OrderColumn ordercolumn = new OrderColumn(tvc, true);
-                    order.Columns.Add(ordercolumn);
-
-                    if (!TableVar.Orders.Contains(order))
-                    {
-                        TableVar.Orders.Add(order);
-                    }
+                    );                 
                 }
 			}
 

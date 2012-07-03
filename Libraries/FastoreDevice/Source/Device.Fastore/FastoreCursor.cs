@@ -141,9 +141,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         {
 			// TODO: This needs to be aware that row may not be of an equivalent type
             object[] managedRow = _buffer[_bufferIndex].Values;
-            for (int i = 0; i < managedRow.Length; i++)
+
+            var nrow = ((NativeRow)row.AsNative);
+            for (int i = 0; i < nrow.Values.Length; i++)
             {
-                ((NativeRow)row.AsNative).Values[i] = managedRow[i];
+                nrow.Values[i] = managedRow[i];
             }
         }
 
