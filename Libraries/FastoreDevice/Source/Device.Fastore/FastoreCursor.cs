@@ -71,7 +71,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 				//if order is present use it for ordering, if not, attempt to use key. If no key, use the first column.
 				_orderColumn =
 					Node.Order != null && Node.Order.Columns.Count > 0 
-						? Node.Order.Columns[0].Column
+						? Node.TableVar.Columns[Node.TableVar.Columns.IndexOfName(Node.Order.Columns[0].Column.Name)]
 						:
 							(Key != null && Key.Columns.Count > 0) 
 								? Key.Columns[0].Column
@@ -140,12 +140,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         private void BufferSelect(Row row)
         {
 			// TODO: This needs to be aware that row may not be of an equivalent type
-            object[] managedRow = _buffer[_bufferIndex].Values;
-
-            var nrow = ((NativeRow)row.AsNative);
-            for (int i = 0; i < nrow.Values.Length; i++)
+            object[] managedRow = _buffer[_bufferIndex].Values;            
+            for (int i = 0; i < row.DataType.Columns.Count; i++)
             {
-                nrow.Values[i] = managedRow[i];
+                var index = Node.TableVar.Columns.IndexOfName(row.DataType.Columns[i].Name);
+                ((NativeRow)row.AsNative).Values[i] = managedRow[index];
             }
         }
 

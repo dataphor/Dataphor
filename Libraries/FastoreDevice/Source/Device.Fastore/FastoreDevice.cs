@@ -113,32 +113,31 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 return new DevicePlanNode(node);
             }
             else if ((planNode is OrderNode) && (planNode.Nodes[0] is BaseTableVarNode) && (plan.Plan.CursorContext.CursorType != CursorType.Static))
-            {              
+            {
                 OrderNode node = (OrderNode)planNode;
                 BaseTableVarNode tableVarNode = (BaseTableVarNode)planNode.Nodes[0];
 
                 bool isSupported = false;
 
                 //No key support for the time being...
-                //var fastTable = Tables[tableVarNode.TableVar];
-                //foreach (Schema.Key key in tableVarNode.TableVar.Keys)
-                //{
-                //    tableOrder = Compiler.OrderFromKey(plan.Plan, key);
-                //    if (node.RequestedOrder.Equivalent(tableOrder))
-                //    {
-                //        node.PhysicalOrder = tableOrder;
-                //        node.ScanDirection = ScanDirection.Forward;
-                //        isSupported = true;
-                //        break;
-                //    }
-                //    else if (node.RequestedOrder.Equivalent(new Schema.Order(tableOrder, true)))
-                //    {
-                //        node.PhysicalOrder = tableOrder;
-                //        node.ScanDirection = ScanDirection.Backward;
-                //        isSupported = true;
-                //        break;
-                //    }
-                //}
+                foreach (Schema.Key key in tableVarNode.TableVar.Keys)
+                {
+                    var tableOrder = Compiler.OrderFromKey(plan.Plan, key);
+                    if (node.RequestedOrder.Equivalent(tableOrder))
+                    {
+                        node.PhysicalOrder = tableOrder;
+                        node.ScanDirection = ScanDirection.Forward;
+                        isSupported = true;
+                        break;
+                    }
+                    else if (node.RequestedOrder.Equivalent(new Schema.Order(tableOrder, true)))
+                    {
+                        node.PhysicalOrder = tableOrder;
+                        node.ScanDirection = ScanDirection.Backward;
+                        isSupported = true;
+                        break;
+                    }
+                }
 
                 if (!isSupported)
                 {
@@ -194,6 +193,8 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                     node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
                     node.CursorCapabilities =
                         CursorCapability.Navigable |
+                        CursorCapability.BackwardsNavigable |
+                        CursorCapability.Searchable |
                         (plan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
                     node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
 
@@ -207,13 +208,15 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             }
             else if (planNode is AlterTableNode)
             {
-                plan.Plan.CheckRight(GetRight(Schema.RightNames.AlterStore));
-                AlterTableNode alterTableNode = (AlterTableNode)planNode;
-                if (alterTableNode.AlterTableStatement.CreateColumns.Count > 0)
-                    throw new RuntimeException(RuntimeException.Codes.UnimplementedCreateCommand, "Columns in a memory device");
-                if (alterTableNode.AlterTableStatement.DropColumns.Count > 0)
-                    throw new RuntimeException(RuntimeException.Codes.UnimplementedDropCommand, "Columns in a memory device");
-                return new DevicePlanNode(planNode);
+                //Don't support altering tables in V1
+
+                //plan.Plan.CheckRight(GetRight(Schema.RightNames.AlterStore));
+                //AlterTableNode alterTableNode = (AlterTableNode)planNode;
+                //if (alterTableNode.AlterTableStatement.CreateColumns.Count > 0)
+                //    throw new RuntimeException(RuntimeException.Codes.UnimplementedCreateCommand, "Columns in a memory device");
+                //if (alterTableNode.AlterTableStatement.DropColumns.Count > 0)
+                //    throw new RuntimeException(RuntimeException.Codes.UnimplementedDropCommand, "Columns in a memory device");
+                //return new DevicePlanNode(planNode);
             }
             else if (planNode is DropTableNode)
             {
