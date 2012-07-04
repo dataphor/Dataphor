@@ -126,6 +126,18 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             }
         }
 
+        protected object GetStartId(ScanDirection direction)
+        {
+            // if current buffer direction is forward and a forward range is requested, use the row Id of the last row in the buffer
+            // If current buffer direction is forward and a backward range is requested, use the row Id of the first row in the buffer
+            // If current buffer direction is backward and a forward range is requested, use the row Id of the first row in the buffer
+            // If current buffer direction is backward and a backward range is requested, use the row Id of the last row in the buffer
+            if (_bufferDirection == direction)
+                return _buffer[_buffer.Count - 1].ID;
+            else
+                return _buffer[0].ID;
+        }
+
         protected Range CreateRange(ScanDirection direction, RangeBound? start, RangeBound? end)
         {
             Range range = new Range();
@@ -172,7 +184,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 BufferSelect(row);
             else
             {
-                SourceFetch(true, Direction);
+                SourceFetch(true, true, Direction);
                 BufferSelect(row);
             }
         }
@@ -186,19 +198,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 var index = Node.TableVar.Columns.IndexOfName(row.DataType.Columns[i].Name);
                 ((NativeRow)row.AsNative).Values[i] = managedRow[index];
             }
-        }
-
-		protected object GetStartId(ScanDirection direction)
-		{
-			// if current buffer direction is forward and a forward range is requested, use the row Id of the last row in the buffer
-			// If current buffer direction is forward and a backward range is requested, use the row Id of the first row in the buffer
-			// If current buffer direction is backward and a forward range is requested, use the row Id of the first row in the buffer
-			// If current buffer direction is backward and a backward range is requested, use the row Id of the last row in the buffer
-			if (_bufferDirection == direction)
-				return _buffer[_buffer.Count - 1].ID;
-			else
-				return _buffer[0].ID;
-		}
+        }		
 
         protected void SetSourceFlags(RangeSet set)
         {
@@ -206,44 +206,65 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             _sourceEof = set.Eof;
         }
 
-        protected void SourceFetch(bool isFirst, ScanDirection direction)
+        protected void SourceFetch(bool isFirst, bool isNext, ScanDirection direction)
         {
             SourceFetch
             (
-                isFirst, 
+                isFirst,
+                isNext,
                 direction,
                 CreateRange(direction, isFirst),
                 !isFirst ? GetStartId(direction) : null
             );
         }      
 
-        protected void SourceFetch(bool isFirst, ScanDirection direction, Range range, object startId = null)
+        protected void SourceFetch(bool isFirst, bool isNext, ScanDirection direction, Range range, object startId = null)
         {
             //Grab data from current connection...
             var set = _db.GetRange(TableNodeColumns(), range, MaxLimit, startId);
-            ProcessFetchData(set, isFirst, direction);
+            ProcessFetchData(set, isFirst, isNext, direction);
         }
 
-        public void ProcessFetchData(RangeSet fetchData, bool isFirst, ScanDirection direction)
+        public void ProcessFetchData(RangeSet fetchData, bool isFirst, bool isNext, ScanDirection direction)
         {
             ClearBuffer();
             SetSourceFlags(fetchData);
 			_buffer = fetchData.Data;
-			_bufferDirection = direction;
+            _bufferDirection = direction;
 			if (Direction == _bufferDirection)
 			{
-				if (_buffer.Count > 0 && !isFirst)
-					_bufferIndex = 0;
-				else
-					_bufferIndex = -1;
+                if (isNext)
+                {
+                    if (_buffer.Count > 0 && !isFirst)
+                        _bufferIndex = 0;
+                    else
+                        _bufferIndex = -1;
+                }
+                else
+                {
+                    if (_buffer.Count > 0 && !isFirst)
+                        _bufferIndex = _buffer.Count - 1;
+                    else
+                        _bufferIndex = _buffer.Count;
+                }
 			}
 			else
 			{
-				if (_buffer.Count > 0 && !isFirst)
-					_bufferIndex = _buffer.Count - 1;
-				else
-					_bufferIndex = _buffer.Count;
-			}
+                if (isNext)
+                {
+                    if (_buffer.Count > 0 && !isFirst)
+                        _bufferIndex = _buffer.Count - 1;
+                    else
+                        _bufferIndex = _buffer.Count;                 
+                }
+                else
+                {
+                    if (_buffer.Count > 0 && !isFirst)
+                        _bufferIndex = 0;
+                    else
+                        _bufferIndex = -1;
+                }
+			}            
         }
 
         protected bool SourceBOF()
@@ -254,7 +275,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         protected override bool InternalBOF()
         {
 			if (!BufferActive())
-				SourceFetch(true, Direction);
+				SourceFetch(true, true, Direction);
 
 			return 
 				Direction == _bufferDirection 
@@ -270,7 +291,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         protected override bool InternalEOF()
         {
 			if (!BufferActive())
-				SourceFetch(true, Direction);
+				SourceFetch(true, true, Direction);
 
 			return
 				Direction == _bufferDirection
@@ -281,7 +302,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         protected override bool InternalNext()
         {
             if (!BufferActive())
-                SourceFetch(true, Direction);
+                SourceFetch(true, true, Direction);
 
 			if (Direction == _bufferDirection)
 			{
@@ -294,7 +315,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 						return false;
 					}
 
-					SourceFetch(false, Direction);
+					SourceFetch(false, true, Direction);
 					return !EOF();
 				}
 				_bufferIndex++;
@@ -311,7 +332,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 						return false;
 					}
 
-					SourceFetch(false, Direction);
+					SourceFetch(false, true, Direction);
 					return !EOF();
 				}
 				_bufferIndex--;
@@ -322,7 +343,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         protected override bool InternalPrior()
         {
 			if (!BufferActive())
-				SourceFetch(true, Direction);
+				SourceFetch(true, true, Direction);
 
 			if (Direction == _bufferDirection)
 			{
@@ -335,7 +356,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 						return false;
 					}
 
-					SourceFetch(false, Direction == ScanDirection.Forward ? ScanDirection.Backward : ScanDirection.Forward);
+					SourceFetch(false, false, Direction == ScanDirection.Forward ? ScanDirection.Backward : ScanDirection.Forward);
 					return !BOF();
 				}
 				_bufferIndex--;
@@ -352,7 +373,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 						return false;
 					}
 
-					SourceFetch(false, _bufferDirection);
+					SourceFetch(false, false, _bufferDirection);
 					return !BOF();
 				}
 				_bufferIndex++;
@@ -363,13 +384,13 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 		protected override void InternalLast()
 		{
 			ClearBuffer();
-			SourceFetch(true, Direction == ScanDirection.Forward ? ScanDirection.Backward : ScanDirection.Forward);
+			SourceFetch(true, false, Direction == ScanDirection.Forward ? ScanDirection.Backward : ScanDirection.Forward);
 		}
 
         protected override void InternalFirst()
         {
 			ClearBuffer();
-            SourceFetch(true, Direction == ScanDirection.Forward ? ScanDirection.Forward : ScanDirection.Backward);
+            SourceFetch(true, true, Direction == ScanDirection.Forward ? ScanDirection.Forward : ScanDirection.Backward);
         }
 
         protected override bool InternalFindKey(Row row, bool forward)
@@ -384,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 				var set = _db.GetRange(TableNodeColumns(), range, MaxLimit);
 				if (set.Data.Count > 0)
 				{  
-					ProcessFetchData(set, true, direction);
+					ProcessFetchData(set, true, true, direction);
 					return true; 
 				}
 				return false;
@@ -398,9 +419,27 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         protected override Row InternalGetKey()
         {
-            Row row = new Row(Manager, new RowType(Node.Order.Columns));
+            Row row = new Row(Manager, new RowType(Key.Columns));
             InternalSelect(row);
             return row;
+        }
+
+        protected override bool InternalRefresh(Row row)
+        {
+            InternalReset();
+            if (row != null)
+            {
+                bool result = InternalFindKey(row, true);
+                if (!result)
+                    InternalFindNearest(row);
+                return result;
+            }
+            return false;
+        }
+
+        protected override Order InternalGetOrder()
+        {
+            return Key;
         }
 
         protected override void InternalFindNearest(Row row)
@@ -414,7 +453,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 					// TODO: Expand this to work with multiple column searches
 					var rangeBound = new RangeBound { Bound = keyRow[0], Inclusive = true };
 					var range = CreateRange(Direction, rangeBound, null);
-					SourceFetch(true, Direction, range);
+					SourceFetch(false, true, Direction, range);
 				}
 			}
 			finally
