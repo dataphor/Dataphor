@@ -86,6 +86,46 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			return GetOrderColumn().ID;
 		}
 
+        protected Range CreateRange(ScanDirection direction, bool isFirst)
+        {
+            if (!isFirst)
+            {
+                RangeBound bound = CreateRangeBound(direction);
+                if (direction == ScanDirection.Forward)
+                {
+                    return CreateRange(direction, bound, null);
+                }
+                else
+                {
+                    return CreateRange(direction, null, bound);
+                }
+            }
+            else
+                return CreateRange(direction, null, null);
+        }
+
+          protected RangeBound CreateRangeBound(ScanDirection direction)
+        {
+            RangeBound rangeBound = new RangeBound();
+            rangeBound.Bound = GetBoundValue(direction);
+            rangeBound.Inclusive = true;
+            return rangeBound;
+        }
+
+        protected object GetBoundValue(ScanDirection direction)
+        {
+            int orderColumnIndex = Node.TableVar.Columns.IndexOfName(GetOrderColumn().Name);
+
+            if (direction == _bufferDirection)
+            {
+                return _buffer[_buffer.Count - 1].Values[orderColumnIndex];
+            }
+            else
+            {
+                return _buffer[0].Values[orderColumnIndex];
+            }
+        }
+
         protected Range CreateRange(ScanDirection direction, RangeBound? start, RangeBound? end)
         {
             Range range = new Range();
@@ -168,8 +208,14 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         protected void SourceFetch(bool isFirst, ScanDirection direction)
         {
-            SourceFetch(isFirst, direction, CreateRange(direction, null, null), !isFirst ? GetStartId(direction) : null);
-        }
+            SourceFetch
+            (
+                isFirst, 
+                direction,
+                CreateRange(direction, isFirst),
+                !isFirst ? GetStartId(direction) : null
+            );
+        }      
 
         protected void SourceFetch(bool isFirst, ScanDirection direction, Range range, object startId = null)
         {
@@ -241,7 +287,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			{
 				if (_bufferIndex >= _buffer.Count - 1)
 				{
-					if ((Direction == _bufferDirection && SourceEOF()) || (Direction != _bufferDirection && SourceBOF()))
+                    if ((Direction == ScanDirection.Forward && SourceEOF()) || (Direction == ScanDirection.Backward && SourceBOF()))
 					{
 						if (_bufferIndex == _buffer.Count - 1)
 							_bufferIndex++;
@@ -258,7 +304,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			{
 				if (_bufferIndex <= 0)
 				{
-					if ((Direction == _bufferDirection && SourceEOF()) || (Direction != _bufferDirection && SourceBOF()))
+                    if ((Direction == ScanDirection.Forward && SourceEOF()) || (Direction == ScanDirection.Backward && SourceBOF()))
 					{
 						if (_bufferIndex == 0)
 							_bufferIndex--;
@@ -282,7 +328,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			{
 				if (_bufferIndex <= 0)
 				{
-					if ((Direction == _bufferDirection && SourceBOF()) || (Direction != _bufferDirection && SourceEOF()))
+					if ((Direction == ScanDirection.Backward && SourceBOF()) || (Direction == ScanDirection.Forward && SourceEOF()))
 					{
 						if (_bufferIndex == 0)
 							_bufferIndex--;
@@ -299,7 +345,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			{
 				if (_bufferIndex >= _buffer.Count - 1)
 				{
-					if ((Direction == _bufferDirection && SourceBOF()) || (Direction != _bufferDirection && SourceEOF()))
+					if ((Direction == ScanDirection.Backward && SourceBOF()) || (Direction == ScanDirection.Forward && SourceEOF()))
 					{
 						if (_bufferIndex == _buffer.Count - 1)
 							_bufferIndex++;
@@ -316,36 +362,14 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
 		protected override void InternalLast()
 		{
-			if (BufferActive() && !EOF())
-			{
-				if ((Direction == _bufferDirection && SourceEOF()) || (Direction != _bufferDirection && SourceEOF()))
-				{
-					while (!EOF())
-						Next();
-				}
-				else
-				{
-					ClearBuffer();
-					SourceFetch(true, Direction == ScanDirection.Forward ? ScanDirection.Backward : ScanDirection.Forward);
-				}
-			}
+			ClearBuffer();
+			SourceFetch(true, Direction == ScanDirection.Forward ? ScanDirection.Backward : ScanDirection.Forward);
 		}
 
         protected override void InternalFirst()
         {
-			if (BufferActive() && !BOF())
-			{
-				if ((Direction == _bufferDirection && SourceBOF()) || (Direction != _bufferDirection && SourceEOF()))
-				{
-					while (!BOF())
-						Prior();
-				}
-				else
-				{
-					ClearBuffer();
-					SourceFetch(true, Direction);
-				}
-			}
+			ClearBuffer();
+            SourceFetch(true, Direction == ScanDirection.Forward ? ScanDirection.Forward : ScanDirection.Backward);
         }
 
         protected override bool InternalFindKey(Row row, bool forward)
@@ -370,6 +394,13 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 				if (!object.ReferenceEquals(row, keyRow))
 					keyRow.Dispose();
 			}
+        }
+
+        protected override Row InternalGetKey()
+        {
+            Row row = new Row(Manager, new RowType(Node.Order.Columns));
+            InternalSelect(row);
+            return row;
         }
 
         protected override void InternalFindNearest(Row row)

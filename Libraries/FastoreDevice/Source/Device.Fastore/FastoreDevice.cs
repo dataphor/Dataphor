@@ -137,7 +137,6 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
                 bool isSupported = false;
 
-                //No key support for the time being...
                 foreach (Schema.Key key in tableVarNode.TableVar.Keys)
                 {
                     var tableOrder = Compiler.OrderFromKey(plan.Plan, key);
