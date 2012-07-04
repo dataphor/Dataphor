@@ -30,18 +30,20 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
     /// </summary>
 	public class FastoreDevice : Schema.Device
 	{
-        //TODO: RowID Generators, Table Groupings, etc.
+		private string _serviceAddresses = "localhost:8765";
+		/// <summary> Semicolon separated list of address:port pairs. </summary>
+		public string ServiceAddresses { get { return _serviceAddresses; } }
+
+		//TODO: Table Groupings, etc.
         
-        //TableVar Mappings
+        // TableVar Mappings
         private FastoreTables _tables;
         public FastoreTables Tables { get { return _tables; } }
 
-        //Database is still not persistent for now
         private Database _db = null;
         public Database Database { get { return _db; } }
 
-
-        //Generates new ids for a table.
+        // Generates new ids for a table.
         private Generator _generator = null;
         public Generator Generator { get { return _generator; } }
 
@@ -74,16 +76,32 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         {
             base.InternalStart(process);
 
-            //Connect to the Fastore Service
-            ServiceAddress serviceAddress = new ServiceAddress();
-            serviceAddress.Name = "localhost";
-            serviceAddress.Port = 8765;
+			var addresses = GetAddresses();
 
-            _db = Alphora.Fastore.Client.Client.Connect(new ServiceAddress[] { serviceAddress });
+            //Connect to the Fastore Service
+            _db = Alphora.Fastore.Client.Client.Connect(addresses);
             _generator = new Alphora.Fastore.Client.Generator(_db);
 
             _tables = new FastoreTables();
         }
+
+		private ServiceAddress[] GetAddresses()
+		{
+			var addresses = new List<ServiceAddress>();
+			foreach (var address in _serviceAddresses.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+			{
+				var items = address.Split(':');
+				if (items.Length < 1 || String.IsNullOrWhiteSpace(items[0]))
+					throw new Exception("Must specify a complete service address.");
+				int port = ServiceAddress.DefaultPort;
+				if (items.Length > 1)
+					Int32.TryParse(items[1], out port);
+				addresses.Add(new ServiceAddress { Name = items[0].Trim(), Port = port });
+			}
+			if (addresses.Count == 0)
+				throw new Exception("Must specify at least one service address.");
+			return addresses.ToArray();
+		}
 
         //Free all fastore memory.
         protected override void InternalStop(ServerProcess process)
