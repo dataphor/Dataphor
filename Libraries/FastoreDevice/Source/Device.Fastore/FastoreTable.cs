@@ -118,7 +118,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                     Device.Database.Include
                     (
                         PodColumnColumns,
-                        Device.Generator.Generate(PodColumnColumns[0]),
+                        Device.RowIDGenerator.Generate(PodColumnColumns[0]),
                         new object[] { podIds.Data[startPod++ % podIds.Data.Count].Values[0], col.ID }
                     );                 
                 }
