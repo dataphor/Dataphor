@@ -111,8 +111,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             base.InternalStop(process);
         }
 
-        //TODO: Figure this out. This decides whether this device can support a given plan.
-        //What does each node mean? And What do we support? Leave as is for now.
+        //TODO: Add support as we can.
         protected override DevicePlanNode InternalPrepare(Schema.DevicePlan plan, PlanNode planNode)
         {
             if (planNode is BaseTableVarNode)
@@ -160,6 +159,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 {
                     foreach (Schema.Order order in tableVarNode.TableVar.Orders)
                     {
+                        //We support one column (or one column plus a single-column key ordered in the same direction).
                         if (order.Columns.Count > 1)
                             break;
 
@@ -176,6 +176,30 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                             node.ScanDirection = ScanDirection.Backward;
                             isSupported = true;
                             break;
+                        }                       
+
+                        var rowIdKey = tableVarNode.TableVar.Keys.MinimumSubsetKey(tableVarNode.TableVar.Columns);
+                        var tableOrder = Compiler.OrderFromKey(plan.Plan, rowIdKey);
+                        //If we have a rowId key... Add it to the ordering and see if we match
+                        if (rowIdKey.Columns.Count == 1 && tableOrder.Columns.Count ==  1)
+                        {
+                            Order newOrder = new Order(order);
+                            newOrder.Columns.Add(tableOrder.Columns[0]);
+
+                            if (node.RequestedOrder.Equivalent(newOrder))
+                            {
+                                node.PhysicalOrder = newOrder;
+                                node.ScanDirection = ScanDirection.Forward;
+                                isSupported = true;
+                                break;
+                            }
+                            else if (node.RequestedOrder.Equivalent(new Schema.Order(newOrder, true)))
+                            {
+                                node.PhysicalOrder = newOrder;
+                                node.ScanDirection = ScanDirection.Backward;
+                                isSupported = true;
+                                break;
+                            }
                         }
                     }
                 }
