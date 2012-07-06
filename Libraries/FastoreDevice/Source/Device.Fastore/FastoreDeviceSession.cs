@@ -98,20 +98,39 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			}
 			else if (planNode is OrderNode)
 			{
-			    FastoreCursor scan = new FastoreCursor(program, _db, (BaseTableVarNode)planNode.Nodes[0]);
-			    try
+               
+                OrderNode orderNode = (OrderNode)planNode;
+                if (orderNode.Order.Columns.Count == 1)
                 {
-			        scan.Key = ((OrderNode)planNode).PhysicalOrder;
-			        scan.Direction = ((OrderNode)planNode).ScanDirection;
-			        scan.Node.Order = ((OrderNode)planNode).Order;
-			        scan.Open();
-			        return scan;
-			    }
-			    catch
-			    {
-			        scan.Dispose();
-			        throw;
-			    }
+                    FastoreCursor scan = new FastoreCursor(program, _db, (BaseTableVarNode)planNode.Nodes[0]);
+                    try
+                    {
+                        scan.Key = orderNode.PhysicalOrder;
+                        scan.Direction = orderNode.ScanDirection;
+                        scan.Node.Order = orderNode.Order;
+                        scan.Open();
+                        return scan;
+                    }
+                    catch
+                    {
+                        scan.Dispose();
+                        throw;
+                    }
+                }
+                else
+                {
+                    FastoreStackedCursor scan = new FastoreStackedCursor(program, _db, orderNode.Order, orderNode.PhysicalOrder, (BaseTableVarNode)planNode.Nodes[0]);
+                    try
+                    {
+                        scan.Open();
+                        return scan;
+                    }
+                    catch
+                    {
+                        scan.Dispose();
+                        throw;
+                    }
+                }
 			}
 			else if (planNode is CreateTableVarBaseNode)
 			{

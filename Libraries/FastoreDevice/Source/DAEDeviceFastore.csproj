@@ -73,6 +73,7 @@
     <Compile Include="Device.Fastore\FastoreCursor.cs" />
     <Compile Include="Device.Fastore\FastoreTable.cs" />
     <Compile Include="Device.Fastore\FastoreTables.cs" />
+    <Compile Include="Device.Fastore\FastoreStackedCursor.cs" />
     <Compile Include="Device.Fastore\Register.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

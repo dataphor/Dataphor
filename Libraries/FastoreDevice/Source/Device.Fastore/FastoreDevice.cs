@@ -156,7 +156,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 }
 
                 if (!isSupported)
-                {
+                {                  
                     foreach (Schema.Order order in tableVarNode.TableVar.Orders)
                     {
                         //We support one column (or one column plus a single-column key ordered in the same direction).
@@ -176,12 +176,12 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                             node.ScanDirection = ScanDirection.Backward;
                             isSupported = true;
                             break;
-                        }                       
+                        }
 
                         var rowIdKey = tableVarNode.TableVar.Keys.MinimumSubsetKey(tableVarNode.TableVar.Columns);
                         var tableOrder = Compiler.OrderFromKey(plan.Plan, rowIdKey);
                         //If we have a rowId key... Add it to the ordering and see if we match
-                        if (rowIdKey.Columns.Count == 1 && tableOrder.Columns.Count ==  1)
+                        if (rowIdKey.Columns.Count == 1 && tableOrder.Columns.Count == 1)
                         {
                             Order newOrder = new Order(order);
                             newOrder.Columns.Add(tableOrder.Columns[0]);
@@ -202,6 +202,14 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                             }
                         }
                     }
+                }
+
+                if (!isSupported)
+                {
+                    //Support every ordering... Use nestedFilterCursor to emulate support...
+                    node.PhysicalOrder = node.RequestedOrder;
+                    node.ScanDirection = ScanDirection.Forward;
+                    isSupported = true;
                 }
 
                 if (isSupported)
