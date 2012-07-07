@@ -31,6 +31,9 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         List<Row> _buffer;
         int _bufferIndex;
 
+        RowComparer _nestedComparer;
+        RowComparer _comparer;
+
         private void Stack(Program program, Database db, Order order, Order key, TableNode node)
         {
             _key = key;
@@ -47,11 +50,14 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 _nestedOrder.Columns.Add(order.Columns[i]);
             }
 
+            _nestedComparer = new RowComparer(_nestedOrder.Columns[_nestedOrder.Columns.Count - 1], Program.ValueManager);
+            _comparer = new RowComparer(_order.Columns[0], Program.ValueManager);
+
             if (_nestedOrder.Columns.Count == 1)
             {
                 FastoreCursor scan = new FastoreCursor(program, db, node);
                 scan.Key = key;
-                scan.Direction = ScanDirection.Forward;
+                scan.Direction = _nestedOrder.Columns[0].Ascending ? ScanDirection.Forward : ScanDirection.Backward;
                 scan.Node.Order = _nestedOrder;
                 _nestedTable = scan;
             }
@@ -94,27 +100,28 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         protected void GetGroup(bool isFirst, ScanDirection direction)
         {
-            _buffer = new List<Row>();
-            var nestedcomparer = new RowComparer(_nestedOrder.Columns[_nestedOrder.Columns.Count - 1], Program.ValueManager);
-
+            _buffer = new List<Row>();  
+      
             if (direction == ScanDirection.Forward)
             {
                 if (isFirst)
                 {
                     _nestedTable.First();
-                    bool result = _nestedTable.Next();
-                    if (!result)
-                        return;
                 }
-                var startRow = new Row(Program.ValueManager, Node.TableVar.DataType.RowType);
-                _nestedTable.Select(startRow);
-                _buffer.Add(startRow);
+                else
+                {
+                    _nestedTable.Prior();
+                }
 
                 while (_nestedTable.Next())
                 {
                     var row = new Row(Program.ValueManager, Node.TableVar.DataType.RowType);
                     _nestedTable.Select(row);
-                    if (nestedcomparer.Compare(startRow, row) == 0)
+                    if (_buffer.Count == 0)
+                    {
+                        _buffer.Add(row);
+                    }
+                    else if (_nestedComparer.Compare(_buffer[0], row) == 0)
                     {
                         _buffer.Add(row);
                     }
@@ -127,36 +134,30 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             else
             {
                 if (isFirst)
-                {
                     _nestedTable.Last();
-                    bool result = _nestedTable.Prior();
-                    if (!result)
-                        return;
-                }
-
-                //_nestedTable.Prior();
-                var startRow = new Row(Program.ValueManager, Node.TableVar.DataType.RowType);
-                _nestedTable.Select(startRow);
-                _buffer.Add(startRow);
 
                 while (_nestedTable.Prior())
                 {
                     var row = new Row(Program.ValueManager, Node.TableVar.DataType.RowType);
                     _nestedTable.Select(row);
-                    if (nestedcomparer.Compare(startRow, row) == 0)
+                    if (_buffer.Count == 0)
+                    {
+                        _buffer.Add(row);
+                    }
+                    else if (_nestedComparer.Compare(_buffer[0], row) == 0)
                     {
                         _buffer.Add(row);
                     }
                     else
                     {
-                        _nestedTable.Next();
                         break;
                     }
                 }
+
+                _nestedTable.Next();
             }
 
-            var comparer = new RowComparer(_order.Columns[0], Program.ValueManager);
-            _buffer.Sort(comparer);
+            _buffer.Sort(_comparer);
 
             if (isFirst)
             {
@@ -209,7 +210,10 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             if (_bufferIndex >= _buffer.Count() - 1)
             {
                 if (EOF())
+                {
+                    _bufferIndex++;
                     return false;
+                }
                 else
                 {
                     GetGroup(false, ScanDirection.Forward);
@@ -229,7 +233,10 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             if (_bufferIndex <= 0)
             {
                 if (BOF())
+                {
+                    _bufferIndex--;
                     return false;
+                }
                 else
                 {
                     GetGroup(false, ScanDirection.Backward);
@@ -258,18 +265,14 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         protected override bool InternalFindKey(Row row, bool forward)
         {
             ClearBuffer();
-            try
-            {
-                return _nestedTable.FindKey(row, forward);
-            }
-            catch
-            {
-                throw;
-            }
-            finally
+            var result = _nestedTable.FindKey(row, forward);
+            if (result)
             {
                 GetGroup(false, forward ? ScanDirection.Forward : ScanDirection.Backward);
+                SeekBuffer(row);
             }
+
+            return result;
         }
 
         protected override Row InternalGetKey()
@@ -308,7 +311,22 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             ClearBuffer();
             _nestedTable.FindNearest(row);
             GetGroup(false, ScanDirection.Forward);
+            SeekBuffer(row);
         }     
+
+        protected void SeekBuffer(Row row)
+        {
+            for (int i = 0; i < _buffer.Count; i++)
+            {
+                if (_comparer.Compare(row, _buffer[i]) <= 0)
+                {
+                    _bufferIndex = i;
+                    return;
+                }
+            }
+
+            _bufferIndex = _buffer.Count - 1;
+        }
     }
 
     class RowComparer : IComparer<Row>
