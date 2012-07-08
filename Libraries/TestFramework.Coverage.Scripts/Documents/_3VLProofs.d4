@@ -1,0 +1,382 @@
+/*
+	3VL Proofs
+	
+	Truth Tables ->
+	
+		Negation
+
+			p	~p
+			T	F
+			F	T
+			U	U
+			
+		And
+		
+			p	q	p & q
+			T	T	T
+			T	F	F
+			T	U	U
+			F	T	F
+			F	F	F
+			F	U	F
+			U	T	U
+			U	F	F
+			U	U	U
+			
+		Or
+		
+			p 	q	p | q
+			T	T	T
+			T	F	T
+			T	U	T
+			F	T	T
+			F	F	F
+			F	U	U
+			U	T	T
+			U	F	U
+			U	U	U
+	
+	Logical Equivalences ->
+	
+		Identity
+			p and true = p
+			p or false = p
+			
+		Domination
+			p or true = true
+			p and false = false
+			
+		Double-Negation
+			not(not p) = p
+			
+		Idempotence
+			p or p = p
+			p and p = p
+			
+		Tautology
+			p or not p = true
+			
+		Contradiction
+			p and not p = false
+			
+		Commutativity
+			p or q = q or p
+			p and q = q and p
+			
+		Associativity
+			(p or q) or r = p or (q or r)
+			(p and q) and r = p and (q and r)
+			
+		Distributivity
+			p and (q or r) = (p and q) or (p and r)
+			p or (q and r) = (p or q) and (p or r)
+
+		Simplification
+			p and (p or q) = p
+			p or (p and q) = p
+	
+		DeMorgan's Laws
+			not(p and q) = not(p) or not(q)
+			not(p or q) = not(p) and not(q)
+			
+*/
+
+/*
+	Create Domain table to contain Boolean domain values
+*/
+
+create table Domain { Value : Boolean nil, key { Value } };
+
+insert table { row { true Value }, row { false Value }, row { nil Value } } into Domain;
+
+/*
+	Create IsEquivalent Operator to support nilable comparison
+*/
+
+create operator IsEquivalent(ALeft : Boolean, ARight : Boolean) : Boolean
+begin
+	result := (ALeft.IsNil() and ARight.IsNil()) or IfNil(ALeft = ARight, false);
+end;
+
+create table Equivalence { Left : Boolean nil, Right : Boolean nil, Result : Boolean nil, key { Left, Right } };
+
+insert
+	table
+	{
+		row { true Left, true Right, true Result },
+		row { true Left, false Right, false Result },
+		row { true Left, nil Right, false Result },
+		row { false Left, true Right, false Result },
+		row { false Left, false Right, true Result },
+		row { false Left, nil Right, false Result },
+		row { nil Left, true Right, false Result },
+		row { nil Left, false Right, false Result },
+		row { nil Left, nil Right, true Result }
+	}
+	into Equivalence;
+	
+if exists (Equivalence where IsEquivalent(Left, Right).IsNil()) then
+	raise Error("Equivalence failed");
+if exists (Equivalence where not(IsEquivalent(Left, Right) = Result)) then
+	raise Error("Equivalence failed");
+
+/*
+	Negation
+*/
+
+create table Negation { Operand : Boolean nil, Result : Boolean nil, key { Operand } };
+
+insert 
+	table 
+	{ 
+		row { true Operand, false Result },
+		row { false Operand, true Result },
+		row { nil Operand, nil Result }
+	}
+	into Negation;
+	
+if exists (Negation where not(IsEquivalent(not(Operand), Result))) then
+	raise Error("Negation failed.");
+
+/*
+	And
+*/
+	
+create table And { Left : Boolean nil, Right : Boolean nil, Result : Boolean nil, key { Left, Right } };
+
+insert
+	table
+	{
+		row { true Left, true Right, true Result },
+		row { true Left, false Right, false Result },
+		row { true Left, nil Right, nil Result },
+		row { false Left, true Right, false Result },
+		row { false Left, false Right, false Result },
+		row { false Left, nil Right, false Result },
+		row { nil Left, true Right, nil Result },
+		row { nil Left, false Right, false Result },
+		row { nil Left, nil Right, nil Result }
+	}
+	into And;
+	
+if exists (And where not(IsEquivalent(Left and Right, Result))) then
+	raise Error("And failed");
+
+/*
+	Or
+*/
+
+create table Or { Left : Boolean nil, Right : Boolean nil, Result : Boolean nil, key { Left, Right } };
+
+insert
+	table
+	{
+		row { true Left, true Right, true Result },
+		row { true Left, false Right, true Result },
+		row { true Left, nil Right, true Result },
+		row { false Left, true Right, true Result },
+		row { false Left, false Right, false Result },
+		row { false Left, nil Right, nil Result },
+		row { nil Left, true Right, true Result },
+		row { nil Left, false Right, nil Result },
+		row { nil Left, nil Right, nil Result }
+	}
+	into Or;
+	
+if exists (Or where not(IsEquivalent(Left or Right, Result))) then
+	raise Error("Or failed");
+
+/*	
+	Identity
+		p and true = p
+		p or false = p
+*/
+
+if exists (And where Right = true and not(IsEquivalent(Left, Result))) then
+	raise Error("Identity over And failed");
+	
+if exists (Or where Right = false and not(IsEquivalent(Left, Result))) then
+	raise Error("Identity over Or failed");
+
+/*		
+	Domination
+		p or true = true
+		p and false = false
+*/
+
+if exists (Or where Right = true and not(IsEquivalent(Result, true))) then
+	raise Error("Domination over Or failed");
+	
+if exists (And where Right = false and not(IsEquivalent(Result, false))) then
+	raise Error("Domination over And failed");
+
+/*		
+	Double-Negation
+		not(not p) = p
+*/
+
+if exists (Negation where not(IsEquivalent(Operand, not(Result)))) then
+	raise Error("Double-negation failed");
+
+/*		
+	Idempotence
+		p or p = p
+		p and p = p
+*/
+
+if exists (Or where IsEquivalent(Left, Right) and not(IsEquivalent(Left, Result))) then
+	raise Error("Idempotence over Or failed");
+	
+if exists (And where IsEquivalent(Left, Right) and not(IsEquivalent(Left, Result))) then
+	raise Error("Idempotence over And failed");
+
+/*		
+	Tautology
+		p or not p = true
+		
+	Tautology does not hold for 3VL
+
+select Domain add { Value or not(Value) Result };
+*/
+
+/*		
+	Contradiction
+		p and not p = false
+		
+	Contradiction does not hold for 3VL
+
+select Domain add { Value and not(Value) Result };
+*/
+
+
+/*		
+	Commutativity
+		p or q = q or p
+		p and q = q and p
+*/
+
+if exists (Or where not(IsEquivalent(Right or Left, Result))) then
+	raise Error("Commutativity over Or failed");
+	
+if exists (And where not(IsEquivalent(Right and Left, Result))) then
+	raise Error("Commutativity over And failed");
+	
+/*		
+	Associativity
+		(p or q) or r = p or (q or r)
+		(p and q) and r = p and (q and r)
+*/
+
+if exists (Domain { Value P } times (Domain { Value Q }) times (Domain { Value R }) add { (P or Q) or R LeftResult, (P or (Q or R)) RightResult } where not(IsEquivalent(LeftResult, RightResult))) then
+	raise Error("Associativity over Or failed");
+	
+if exists (Domain { Value P } times (Domain { Value Q }) times (Domain { Value R }) add { (P and Q) and R LeftResult, (P and (Q and R)) RightResult } where not(IsEquivalent(LeftResult, RightResult))) then
+	raise Error("Associativity over And failed");
+	
+/*		
+	Distributivity
+		p and (q or r) = (p and q) or (p and r)
+		p or (q and r) = (p or q) and (p or r)
+*/
+
+if exists (Domain { Value P } times (Domain { Value Q }) times (Domain { Value R }) add { P and (Q or R) LeftResult, (P and Q) or (P and R) RightResult } where not(IsEquivalent(LeftResult, RightResult))) then
+	raise Error("Distributivity of And over Or failed");
+	
+if exists (Domain { Value P } times (Domain { Value Q }) times (Domain { Value R }) add { P or (Q and R) LeftResult, (P or Q) and (P or R) RightResult } where not(IsEquivalent(LeftResult, RightResult))) then
+	raise Error("Distributivity of Or over And failed");
+	
+/*
+	Simplification
+		p and (p or q) = p
+		p or (p and q) = p
+*/
+
+if exists (Domain { Value P } times (Domain { Value Q }) add { P and (P or Q) Result } where not(IsEquivalent(P, Result))) then
+	raise Error("Simplificiation over And failed");
+	
+if exists (Domain { Value P } times (Domain { Value Q }) add { P or (P and Q) Result } where not(IsEquivalent(P, Result))) then
+	raise Error("Simplification over Or failed");
+
+/*		
+	DeMorgan's Laws
+		not(p and q) = not(p) or not(q)
+		not(p or q) = not(p) and not(q)
+*/
+		
+if exists (Domain { Value P } times (Domain { Value Q }) add { not(P and Q) LeftResult, not(P) or not(Q) RightResult } where not(IsEquivalent(LeftResult, RightResult))) then
+	raise Error("DeMorgan's Law over And failed");
+	
+if exists (Domain { Value P } times (Domain { Value Q }) add { not(P or Q) LeftResult, not(P) and not(Q) RightResult } where not(IsEquivalent(LeftResult, RightResult))) then
+	raise Error("DeMorgan's Law over Or failed");
+
+/*
+	Conversion to Disjunctive Normal Form
+	
+A formula of the propositional calculus is said to be in disjunctive
+normal form (DNF) if it is a disjunction of elementary conjunctions. 
+An elementary conjunction is a conjunction of some combination of
+propositional variables and negations of propositional variables.
+
+ 1. Distribute negation (NOT) over any conjunctions or disjunctions
+according to deMorgan's laws:
+
+  ~(p & q) = ~p OR ~q
+
+  ~(p OR q) = ~p & ~q
+
+until negation is only applied to atomic propositions (propositional
+variables). Remove double negations where these arise.  A
+propositional variable or its negation will be called an elementary
+proposition below.
+
+ 2. The algorithm then proceeds recursively on the results of the
+first step.  The DNF of "P OR Q" is simply:
+
+  (DNF(P)) OR (DNF(Q))
+
+The DNF of "P & Q" is more complicated.  Start by finding the DNF of P, say:
+
+   P_1 OR P_2 OR ... OR P_m
+
+and the DNF of Q, say:
+
+   Q_1 OR Q_2 OR ... OR Q_n
+
+where each P_i, Q_j is a conjunction of elementary propositions.  Then
+the DNF of "P & Q" is obtained as the disjunction of all possible
+pairs of distributed conjunctions:
+
+   ... OR ( P_i & Q_j ) OR ...
+
+where I mean that the various elementary propositions of P_i and Q_j
+are now to be conjuncted to form a single disjunction of the DNF for
+"P & Q".
+
+3. Optionally you may remove "inner" conjunctions which happen to
+contain both an atomic proposition and its negation as these are
+"false".  You may also remove duplicates of elementary propositions in
+an "inner" conjunction.  Finally if the exact same "inner" conjunction
+appears more than once in the "outer" disjunction, that duplication
+can be eliminated by removing one copy.
+
+Further pruning of the DNF may be possible but is not necessary in
+order to satisfy the definition.  Such pruning is useful if one wishes
+to obtain a "canonical" form of a formula, ie. to recognize when two
+formulas are equivalent (in particular when a formula is tautologous),
+but I'm not sure if this is important for your application.
+
+Notes:  
+
+  The disjunctive normal form is "dual" to the conjunctive normal form
+(CNF), where the outer operation is a conjunction of elementary
+disjunctions.  Any WFF of the propositional calculus can be expressed
+in DNF or CNF.
+
+  An empty conjunction is considered "true", by analogy with an empty
+product being 1.  An empty disjunction is considered "false", by
+analogy with an empty sum being 0.  This is consistent with the
+proposed pruning/simplification rules above, as removing an obvious
+"false" term from a disjunction should be interpreted as finally
+"false" if all terms are removed.
+
+*/

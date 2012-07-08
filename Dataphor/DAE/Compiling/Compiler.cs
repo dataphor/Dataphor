@@ -99,25 +99,42 @@ namespace Alphora.Dataphor.DAE.Compiling
 		General Unification Theorem ->
 		
 			A -> B & C -> D => A U (C - B) -> B U D
-			
+
+		3VL Truth Tables ->
+
 		Propositional Logic Transformation Rules ->
-		
-			p & p == p
-			p | p == true
-			p & false == false
-			p | false == p
-			p & true == p
-			p | true == true
-			p & ~p == false
-			p | ~p == true
-			p & (p | q) == p
-			p | (p & q) == p
-			p & (q & r) == (p & q) & r
-			p | (q | r) == (p | q) | r
-			p & (q | r) == (p & q) | (p & r)
-			p | (q & r) == (p | q) & (p | r)
-			~(p & q) = ~p | ~q
-			~(p | q) = ~p & ~q
+
+			
+			Identity
+				p | false == p
+				p & true == p
+			Domination
+				p | true == true
+				p & false == false
+			Double-Negation
+				~(~p) == p
+			Idempotence
+				p & p == p
+				p | p == p
+			Contradiction (only holds for 2VL)
+				p & ~p == false
+			Tautology (only holds for 2VL)
+				p | ~p == true
+			Commutativity
+				p & q = q & p
+				p | q = q | p
+			Associativity
+				p & (q & r) == (p & q) & r
+				p | (q | r) == (p | q) | r
+			Distributivity
+				p & (q | r) == (p & q) | (p & r)
+				p | (q & r) == (p | q) & (p | r)
+			Simplification
+				p & (p | q) == p
+				p | (p & q) == p
+			DeMorgan's Laws
+				~(p & q) = ~p | ~q
+				~(p | q) = ~p & ~q
 			
 		Arithmetic Transformation Rules ->
 		
