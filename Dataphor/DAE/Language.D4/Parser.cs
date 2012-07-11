@@ -83,19 +83,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							if (_messages != null)
 							{
 								_messages.Add(new SyntaxException(_lexer, exception));
-								while (true)
-								{
-									if (_lexer[1].Type == TokenType.EOF)
-										break;
-									else if (_lexer[1].Type == TokenType.Symbol)
-									{
-										_lexer.NextToken();
-										if (_lexer[0].AsSymbol == Keywords.StatementTerminator)
-											break;
-									}
-									else
-										_lexer.NextToken();
-								}
+								break;
 							}
 							else
 								throw exception;

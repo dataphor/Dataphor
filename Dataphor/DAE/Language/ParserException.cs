@@ -168,20 +168,7 @@ namespace Alphora.Dataphor.DAE.Language
 		public void SetLocator(DebugLocator locator)
 		{
 			foreach (Exception exception in this)
-			{
-				ILocatorException locatorException = exception as ILocatorException;
-				if (locatorException != null && String.IsNullOrEmpty(locatorException.Locator))
-				{
-					if (locator != null)
-					{
-						locatorException.Locator = locator.Locator;
-						locatorException.Line += locator.Line - 1;
-						locatorException.LinePos += locator.LinePos - 1;
-					}
-					else
-						locatorException.Locator = null;
-				}
-			}
+				exception.SetLocator(locator);
 		}
 	}
 }
