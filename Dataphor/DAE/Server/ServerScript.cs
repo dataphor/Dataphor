@@ -22,7 +22,15 @@ namespace Alphora.Dataphor.DAE.Server
 			_batches = new ServerBatches();
 			_messages = new ParserMessages();
 			_sourceContext = new SourceContext(script, locator);
-			_script = _process.ParseScript(script, _messages);
+			try
+			{
+				_script = _process.ParseScript(script, _messages);
+			}
+			catch (SyntaxException e)
+			{
+				e.SetLocator(locator);
+				throw;
+			}
 			_messages.SetLocator(locator);
 			if ((_script is Block) && (((Block)_script).Statements.Count > 0))
 			{

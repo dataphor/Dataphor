@@ -434,6 +434,8 @@ namespace Alphora.Dataphor.DAE.Client
 			switch (type.Name)
 			{
 				case "Int32" : return process.DataTypes.SystemInteger;
+				case "Int64" : return process.DataTypes.SystemLong;
+				case "Int16" : return process.DataTypes.SystemShort;
 				case "Byte" : return process.DataTypes.SystemByte;
 				case "Boolean" : return process.DataTypes.SystemBoolean;
 				case "String" : return process.DataTypes.SystemString;

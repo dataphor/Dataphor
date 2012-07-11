@@ -55,13 +55,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public string Name;
 
 		[DataMember]
-		public string DataTypeName;
-
-		[DataMember]
 		public NativeModifier Modifier;
 
 		[DataMember]
-		public object Value;
+		public NativeValue Value;
 	}
 	
 	[DataContract]
@@ -108,6 +105,9 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	public class NativeListValue : NativeValue
 	{
 		[DataMember]
+		public string ElementDataTypeName;
+
+		[DataMember]
 		public NativeValue[] Elements;
 	}
 	
@@ -135,7 +135,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public NativeColumn[] Columns;
 
 		[DataMember]
-		public object[] Values;
+		public NativeValue[] Values;
 	}
 
 	[DataContract]

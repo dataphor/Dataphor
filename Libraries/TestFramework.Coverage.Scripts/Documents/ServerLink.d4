@@ -94,6 +94,7 @@ ExecuteOn('Test', 'insert row { AIsCool IsCool } into IsCool;', row { true AIsCo
 if not (EvaluateOn('Test', 'select IsCool where IsCool = AIsCool', row { true AIsCool }) as table { IsCool : Boolean })[].IsCool then
 	raise Error('EvaluateOn w/ In Params failed');
 ExecuteOn('Test', 'drop table IsCool;');
+ExecuteOn('Test', '5 = Five', row { 5 Five });
 drop server Test;
 
 // ExecuteOn/EvaluateOn w/ In/Out Params
@@ -126,6 +127,16 @@ begin
 end;
 
 ExecuteOn('Test', 'drop operator TestIsCool(Boolean, var Boolean)');
+drop server Test;
+
+// EvaluateOn w/ complex params
+create server Test;
+if (EvaluateOn('Test', 'select x.y * 5', row { row { 5 y } x }) as Integer) <> 25 then
+	raise Error("EvaluateOn w/ complex params (row) failed.");
+if (EvaluateOn('Test', 'select x[0] * 5', row { { 5 } x }) as Integer) <> 25 then
+	raise Error("EvaluateOn w/ complex params (list) failed.");
+if (EvaluateOn('Test', 'select x[0].y * 5', row { { row { 5 y } } x }) as Integer) <> 25 then
+	raise Error("EvaluateOn w/ complex params (list) failed.");
 drop server Test;
 
 // ServerLinks

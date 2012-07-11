@@ -29,7 +29,7 @@ namespace Alphora.Dataphor.DAE.Language
 		// Resource manager for this exception class
 		private static ResourceManager _resourceManager = new ResourceManager("Alphora.Dataphor.DAE.Language.SyntaxException", typeof(SyntaxException).Assembly);
 
-		public SyntaxException(Lexer lexer, Exception inner) : base(_resourceManager, (int)Codes.SyntaxError, ErrorSeverity.Application, inner, lexer[0].Token)
+		public SyntaxException(Lexer lexer, Exception inner) : base(_resourceManager, (int)Codes.SyntaxError, ErrorSeverity.Application, inner, lexer[0, false].Token)
 		{
 			_line = lexer[0, false].Line;
 			_linePos = lexer[0, false].LinePos;

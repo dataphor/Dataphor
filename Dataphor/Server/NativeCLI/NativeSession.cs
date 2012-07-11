@@ -62,7 +62,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 					throw new ArgumentException("Execution statement must contain one, and only one, batch.");
 					
 				IServerBatch batch = script.Batches[0];
-				DataParams dataParams = NativeMarshal.NativeParamsToDataParams(_process, paramsValue);
+				DataParams dataParams = NativeMarshal.NativeParamsToDataParams((Server.ServerProcess)_process, paramsValue);
 				NativeResult result = new NativeResult();
 				result.Params = paramsValue;
 
