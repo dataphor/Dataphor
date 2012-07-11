@@ -548,6 +548,7 @@ namespace Alphora.Dataphor.DAE.Language.SQL
 		
 		protected virtual void EmitAlterColumnDefinition(AlterColumnDefinition column)
 		{
+			AppendFormat("{0} {1} ", Keywords.Alter, Keywords.Column);
 			EmitIdentifier(column.ColumnName);
 			if (column.DomainName != null)
 				AppendFormat(" {0}", column.DomainName);
@@ -587,7 +588,6 @@ namespace Alphora.Dataphor.DAE.Language.SQL
 					AppendFormat("{0} ", Keywords.ListSeparator);
 				else
 					first = false;
-				AppendFormat("{0} {1} ", Keywords.Alter, Keywords.Column);
 				EmitAlterColumnDefinition(statement.AlterColumns[index]);
 			}
 			

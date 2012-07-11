@@ -55,8 +55,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
             tags = connectionStringBuilder.Map(tags);
             Device.GetConnectionParameters(tags, DeviceSessionInfo);
             string connectionString = SQLDevice.TagsToString(tags);
-            SQLConnection connection;
-            connection = (SQLConnection)ServerProcess.CreateObject
+            var connection = (SQLConnection)ServerProcess.CreateObject
             (
                 classDefinition,
                 new object[] { connectionString }
