@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	/// </summary>
 	public static class NativeMarshal
 	{
-		public static ScalarType DataTypeNameToScalarType(Schema.DataTypes dataTypes, string nativeDataTypeName)
+		public static IDataType NativeTypeNameToDataType(Schema.DataTypes dataTypes, string nativeDataTypeName)
 		{
 			switch (nativeDataTypeName.ToLower())
 			{
@@ -46,7 +46,15 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 				case "string" : return dataTypes.SystemString;
 				case "time" : return dataTypes.SystemTime;
 				case "timespan" : return dataTypes.SystemTimeSpan;
-				default: throw new ArgumentException(String.Format("Invalid native data type name: \"{0}\".", nativeDataTypeName));
+				default: 
+					if (nativeDataTypeName.EndsWith("[]"))
+					{
+						// Subtract off ending brackets
+						var arrayTypeName = nativeDataTypeName.Substring(0, nativeDataTypeName.Length - 2);
+						return new ListType(NativeTypeNameToDataType(dataTypes, arrayTypeName));
+					}
+					else
+						throw new ArgumentException(String.Format("Invalid native data type name: \"{0}\".", nativeDataTypeName));
 			}
 		}
 		
@@ -99,7 +107,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			Columns columns = new Columns();
 			for (int index = 0; index < nativeColumns.Length; index++)
-				columns.Add(new Column(nativeColumns[index].Name, DataTypeNameToScalarType(dataTypes, nativeColumns[index].DataTypeName)));
+				columns.Add(new Column(nativeColumns[index].Name, NativeTypeNameToDataType(dataTypes, nativeColumns[index].DataTypeName)));
 			return columns;
 		}
 		
@@ -137,15 +145,19 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			NativeScalarValue nativeScalar = nativeValue as NativeScalarValue;
 			if (nativeScalar != null)
-				return new Scalar(process.ValueManager, DataTypeNameToScalarType(process.DataTypes, nativeScalar.DataTypeName), nativeScalar.Value);
+				return new Scalar(process.ValueManager, (IScalarType)NativeTypeNameToDataType(process.DataTypes, nativeScalar.DataTypeName), nativeScalar.Value);
 			
 			NativeListValue nativeList = nativeValue as NativeListValue;
 			if (nativeList != null)
 			{
-				ListValue list = new ListValue(process.ValueManager, process.DataTypes.SystemList, nativeList.Elements == null ? null : new NativeList());
-				if (nativeList.Elements != null)
+				// Create and fill the list
+				ListValue list = new ListValue(process.ValueManager, (ListType)NativeValueToDataType(process, nativeValue), nativeList.Elements == null ? null : new NativeList());
+				if (nativeList.Elements != null && nativeList.Elements.Length > 0)
+				{
 					for (int index = 0; index < nativeList.Elements.Length; index++)
 						list.Add(NativeValueToDataValue(process, nativeList.Elements[index]));
+				}
+
 				return list;
 			}
 			
@@ -158,7 +170,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 				else
 				{
 					for (int index = 0; index < nativeRow.Values.Length; index++)
-						row[index] = nativeRow.Values[index];
+						row[index] = NativeValueToDataValue(process, nativeRow.Values[index]);
 				}
 				return row;
 			}
@@ -193,7 +205,46 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			
 			throw new NotSupportedException(String.Format("Unknown native value type: \"{0}\".", nativeValue.GetType().Name));
 		}
-		
+
+		private static IDataType NativeValueToDataType(ServerProcess process, NativeValue nativeValue)
+		{
+			NativeScalarValue nativeScalar = nativeValue as NativeScalarValue;
+			if (nativeScalar != null)
+				return NativeTypeNameToDataType(process.DataTypes, nativeScalar.DataTypeName);
+			
+			NativeListValue nativeList = nativeValue as NativeListValue;
+			if (nativeList != null)
+				return 
+					new ListType
+					(
+						// Use the element type name if given
+						!String.IsNullOrEmpty(nativeList.ElementDataTypeName) 
+							? NativeTypeNameToDataType(process.DataTypes, nativeList.ElementDataTypeName) 
+
+							// If not, try to use the type of the first element
+							: (nativeList.Elements != null && nativeList.Elements.Length > 0 && String.IsNullOrEmpty(nativeList.ElementDataTypeName))
+								? NativeValueToDataType(process, nativeList.Elements[0])
+
+								// If not, revert to generic list
+								: process.DataTypes.SystemGeneric
+					);
+			
+			NativeRowValue nativeRow = nativeValue as NativeRowValue;
+			if (nativeRow != null)
+				return new Schema.RowType(NativeColumnsToColumns(process.DataTypes, nativeRow.Columns));
+			
+			NativeTableValue nativeTable = nativeValue as NativeTableValue;
+			if (nativeTable != null)
+			{
+				TableType tableType = new TableType();
+				foreach (Column column in NativeColumnsToColumns(process.DataTypes, nativeTable.Columns))
+					tableType.Columns.Add(column);
+				return tableType;
+			}
+
+			throw new NotSupportedException(String.Format("Values of type \"{0}\" are not supported.", nativeTable.GetType().Name));
+		}
+
 		public static NativeValue DataTypeToNativeValue(IServerProcess process, IDataType dataType)
 		{
 			ScalarType scalarType = dataType as ScalarType;
@@ -232,6 +283,9 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		
 		public static NativeValue DataValueToNativeValue(IServerProcess process, DataValue dataValue)
 		{
+			if (dataValue == null)
+				return null;
+
 			Scalar scalar = dataValue as Scalar;
 			if (scalar != null)
 			{
@@ -262,9 +316,9 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 					
 				if (!row.IsNil)
 				{
-					nativeRow.Values = new object[nativeRow.Columns.Length];
+					nativeRow.Values = new NativeValue[nativeRow.Columns.Length];
 					for (int index = 0; index < nativeRow.Values.Length; index++)
-						nativeRow.Values[index] = row[index];
+						nativeRow.Values[index] = DataValueToNativeValue(process, row.GetValue(index));
 				}
 				return nativeRow;
 			}
@@ -339,27 +393,98 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			
 			return nativeTable;
 		}
+
+		public static NativeValue DataParamToNativeValue(IServerProcess process, DataParam dataParam)
+		{
+			var scalarType = dataParam.DataType as ScalarType;
+			if (scalarType != null)
+			{
+				NativeScalarValue nativeScalar = new NativeScalarValue();
+				nativeScalar.DataTypeName = ScalarTypeToDataTypeName(process.DataTypes, scalarType);
+				nativeScalar.Value = dataParam.Value;
+				return nativeScalar;
+			}
+
+			var listType = dataParam.DataType as IListType;
+			if (listType != null)
+			{
+				var listValue = dataParam.Value as ListValue;
+				NativeListValue nativeList = new NativeListValue();
+				if (listValue != null)
+				{
+					nativeList.Elements = new NativeValue[listValue.Count()];
+					for (int index = 0; index < listValue.Count(); index++)
+						nativeList.Elements[index] = DataValueToNativeValue(process, listValue.GetValue(index));
+				}
+				return nativeList;
+			}
+
+			var rowType = dataParam.DataType as IRowType;
+			if (rowType != null)
+			{
+				var rowValue = dataParam.Value as Row;
+				NativeRowValue nativeRow = new NativeRowValue();
+				nativeRow.Columns = ColumnsToNativeColumns(process.DataTypes, rowType.Columns);
+
+				if (rowValue != null)
+				{
+					nativeRow.Values = new NativeValue[nativeRow.Columns.Length];
+					for (int index = 0; index < nativeRow.Values.Length; index++)
+						nativeRow.Values[index] = DataValueToNativeValue(process, rowValue.GetValue(index));
+				}
+				return nativeRow;
+			}
+
+			var tableType = dataParam.DataType as ITableType;
+			if (tableType != null)
+			{
+				var tableValue = dataParam.Value as Table;
+				NativeTableValue nativeTable = new NativeTableValue();
+				nativeTable.Columns = ColumnsToNativeColumns(process.DataTypes, tableType.Columns);
+
+				List<object[]> nativeRows = new List<object[]>();
+
+				if (!tableValue.BOF())
+					tableValue.First();
+
+				while (tableValue.Next())
+				{
+					using (Row currentRow = tableValue.Select())
+					{
+						object[] nativeRow = new object[nativeTable.Columns.Length];
+						for (int index = 0; index < nativeTable.Columns.Length; index++)
+							nativeRow[index] = currentRow[index];
+						nativeRows.Add(nativeRow);
+					}
+				}
+
+				nativeTable.Rows = nativeRows.ToArray();
+				return nativeTable;
+			}
+
+			throw new NotSupportedException(String.Format("Values of type \"{0}\" are not supported.", dataParam.DataType.Name));
+		}
 		
-		public static DataParams NativeParamsToDataParams(IServerProcess process, NativeParam[] nativeParams)
+		public static DataParams NativeParamsToDataParams(ServerProcess process, NativeParam[] nativeParams)
 		{
 			DataParams dataParams = new DataParams();
 			if (nativeParams != null)
-				for (int index = 0; index < nativeParams.Length; index++)
+				foreach (var nativeParam in nativeParams)
 				{
-					NativeParam nativeParam = nativeParams[index];
+					var value = NativeValueToDataValue(process, nativeParam.Value);
 					DataParam dataParam = 
 						new DataParam
 						(
 							nativeParam.Name, 
-							DataTypeNameToScalarType(process.DataTypes, nativeParam.DataTypeName), 
+							value.DataType, 
 							NativeCLIUtility.NativeModifierToModifier(nativeParam.Modifier), 
-							nativeParam.Value
+							value.IsNil ? null : (value is Scalar ? value.AsNative : value)
 						);
 					dataParams.Add(dataParam);
 				}
 			return dataParams;
 		}
-		
+
 		public static void SetNativeOutputParams(IServerProcess process, NativeParam[] nativeParams, DataParams dataParams)
 		{
 			if (nativeParams != null)
@@ -367,10 +492,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 				{
 					NativeParam nativeParam = nativeParams[index];
 					if ((nativeParam.Modifier == NativeModifier.Var) || (nativeParam.Modifier == NativeModifier.Out))
-					{
-						DataParam dataParam = dataParams[index];
-						nativeParam.Value = dataParam.Value;
-					}
+						nativeParam.Value = DataParamToNativeValue(process, dataParams[index]);
 				}
 		}
 		
@@ -379,14 +501,14 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			NativeParam[] nativeParams = new NativeParam[dataParams.Count];
 			for (int index = 0; index < dataParams.Count; index++)
 			{
-				DataParam dataParam = dataParams[index];
+				var dataParam = dataParams[index];
+				var nativeValue = DataParamToNativeValue(process, dataParam);
 				nativeParams[index] =	
 					new NativeParam() 
 					{
 						Name = dataParam.Name, 
-						DataTypeName = DataTypeToDataTypeName(process.DataTypes, dataParam.DataType),
 						Modifier = NativeCLIUtility.ModifierToNativeModifier(dataParam.Modifier),
-						Value = dataParam.Value
+						Value = nativeValue
 					};
 			}
 			return nativeParams;
@@ -398,7 +520,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			{
 				DataParam dataParam = dataParams[index];
 				if ((dataParam.Modifier == Modifier.Var) || (dataParam.Modifier == Modifier.Out))
-					dataParam.Value = nativeParams[index].Value;
+				{
+					var dataValue = NativeValueToDataValue((ServerProcess)process, nativeParams[index].Value);
+					dataParam.Value = dataValue.IsNil ? null : dataValue.AsNative;
+				}
 			}
 		}
 	}
