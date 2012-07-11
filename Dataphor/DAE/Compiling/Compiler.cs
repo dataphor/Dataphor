@@ -12222,8 +12222,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 		{
 			ConditionNode node = new ConditionNode();
 			node.Nodes.Add(ifNode);
-			node.Nodes.Add(trueNode);
-			node.Nodes.Add(falseNode);
+			node.Nodes.Add(EnsureTableValueNode(plan, trueNode));
+			node.Nodes.Add(EnsureTableValueNode(plan, falseNode));
 			node.DetermineDataType(plan);
 			node.DetermineCharacteristics(plan);
 			return node;
@@ -12303,7 +12303,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						}
 					}
 
-					caseItemNode.Nodes.Add(CompileExpression(plan, caseItemExpression.ThenExpression));
+					caseItemNode.Nodes.Add(EnsureTableValueNode(plan, CompileExpression(plan, caseItemExpression.ThenExpression)));
 					caseItemNode.DetermineCharacteristics(plan);
 					node.Nodes.Add(caseItemNode);
 				}
@@ -12311,7 +12311,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				if (localExpression.ElseExpression != null)
 				{
 					ConditionedCaseItemNode caseItemNode = new ConditionedCaseItemNode();
-					caseItemNode.Nodes.Add(CompileExpression(plan, ((CaseElseExpression)localExpression.ElseExpression).Expression));
+					caseItemNode.Nodes.Add(EnsureTableValueNode(plan, CompileExpression(plan, ((CaseElseExpression)localExpression.ElseExpression).Expression)));
 					caseItemNode.DetermineCharacteristics(plan);
 					node.Nodes.Add(caseItemNode);
 				}
@@ -12328,7 +12328,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				{
 					ConditionedCaseItemNode caseItemNode = new ConditionedCaseItemNode();
 					caseItemNode.Nodes.Add(CompileBooleanExpression(plan, caseItemExpression.WhenExpression));
-					caseItemNode.Nodes.Add(CompileExpression(plan, caseItemExpression.ThenExpression));
+					caseItemNode.Nodes.Add(EnsureTableValueNode(plan, CompileExpression(plan, caseItemExpression.ThenExpression)));
 					caseItemNode.DetermineCharacteristics(plan);
 					node.Nodes.Add(caseItemNode);
 				}
@@ -12336,7 +12336,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				if (localExpression.ElseExpression != null)
 				{
 					ConditionedCaseItemNode caseItemNode = new ConditionedCaseItemNode();
-					caseItemNode.Nodes.Add(CompileExpression(plan, ((CaseElseExpression)localExpression.ElseExpression).Expression));
+					caseItemNode.Nodes.Add(EnsureTableValueNode(plan, CompileExpression(plan, ((CaseElseExpression)localExpression.ElseExpression).Expression)));
 					caseItemNode.DetermineCharacteristics(plan);
 					node.Nodes.Add(caseItemNode);
 				}
