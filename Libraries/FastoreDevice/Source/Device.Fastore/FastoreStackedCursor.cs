@@ -316,16 +316,35 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         protected void SeekBuffer(Row row)
         {
-            for (int i = 0; i < _buffer.Count; i++)
+            //Find matching value;
+            if (_buffer.Count > 0)
             {
-                if (_comparer.Compare(row, _buffer[i]) <= 0)
-                {
-                    _bufferIndex = i;
-                    return;
-                }
-            }
+                int lo = 0;
+                int hi = _buffer.Count - 1;
+                int split = 0;
+                int result = -1;
 
-            _bufferIndex = _buffer.Count - 1;
+                while (lo <= hi)
+                {
+                    split = (lo + hi) >> 1;
+                    result = _comparer.Compare(row, _buffer[split]);
+
+                    if (result == 0)
+                    {
+                        lo = split;
+                        break;
+                    }
+                    else if (result < 0)
+                        hi = split - 1;
+                    else
+                        lo = split + 1;
+                }
+
+                _bufferIndex = lo;
+
+                //Go to beginning of matching values.
+                while (_bufferIndex > 0 && _comparer.Compare(row, _buffer[_bufferIndex -1]) == 0) { --_bufferIndex; }
+            }
         }
     }
 
