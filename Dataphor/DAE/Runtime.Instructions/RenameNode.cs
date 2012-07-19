@@ -69,8 +69,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					newOrderColumn.Sort = orderColumn.Sort;
 					newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
 					Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");
-					if (newOrderColumn.Sort.HasDependencies())
-						plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+					if (newOrderColumn.IsDefaultSort)
+						plan.AttachDependency(newOrderColumn.Sort);
+					else
+					{
+						if (newOrderColumn.Sort.HasDependencies())
+							plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+					}
 					newOrder.Columns.Add(newOrderColumn);
 				}
 				Order = newOrder;
@@ -168,8 +173,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					newOrderColumn.Sort = orderColumn.Sort;
 					newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
 					Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");
-					if (newOrderColumn.Sort.HasDependencies())
-						plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+					if (newOrderColumn.IsDefaultSort)
+						plan.AttachDependency(newOrderColumn.Sort);
+					else
+					{
+						if (newOrderColumn.Sort.HasDependencies())
+							plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+					}
 					newOrder.Columns.Add(newOrderColumn);
 				}
 				TableVar.Orders.Add(newOrder);
