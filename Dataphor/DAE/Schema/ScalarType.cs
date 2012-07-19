@@ -544,6 +544,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			_dataType = dataType;
 		}
+
 		public Sort(int iD, string name, IDataType dataType, PlanNode compareNode) : base(iD, name) 
 		{
 			_dataType = dataType;
@@ -617,6 +618,15 @@ namespace Alphora.Dataphor.DAE.Schema
 				return Object.ReferenceEquals(_compareNode, sort.CompareNode) || (String.Compare(_compareNode.EmitStatementAsString(), sort.CompareNode.EmitStatementAsString()) == 0);
 			else
 				return false;
+		}
+
+		public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
+		{
+			if (!targetCatalog.Contains(this))
+			{
+				targetCatalog.Add(this);
+				base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+			}
 		}
     }
     

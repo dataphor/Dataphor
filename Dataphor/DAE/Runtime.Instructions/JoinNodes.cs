@@ -1159,8 +1159,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					column = _joinOrder.Columns[index];
 					column.Sort = Compiler.GetSort(plan, column.Column.DataType);
-					if (column.Sort.HasDependencies())
-						plan.AttachDependencies(column.Sort.Dependencies);
+					plan.AttachDependency(column.Sort);
 					column.IsDefaultSort = true;
 				}
 
@@ -3311,8 +3310,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					column = _joinOrder.Columns[index];
 					column.Sort = Compiler.GetSort(plan, column.Column.DataType);
-					if (column.Sort.HasDependencies())
-						plan.AttachDependencies(column.Sort.Dependencies);
+					plan.AttachDependency(column.Sort);
 					column.IsDefaultSort = true;
 				}
 
@@ -4136,8 +4134,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					column = _joinOrder.Columns[index];
 					column.Sort = Compiler.GetSort(plan, column.Column.DataType);
-					if (column.Sort.HasDependencies())
-						plan.AttachDependencies(column.Sort.Dependencies);
+					plan.AttachDependency(column.Sort);
 					column.IsDefaultSort = true;
 				}
 

@@ -3038,8 +3038,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						Schema.OrderColumn newColumn = new Schema.OrderColumn(column, !isDescending);
 						newColumn.Sort = uniqueSort;
 						newColumn.IsDefaultSort = true;
-						if (newColumn.Sort.HasDependencies())
-							plan.AttachDependencies(newColumn.Sort.Dependencies);
+						plan.AttachDependency(newColumn.Sort);
 						order.Columns.Add(newColumn);
 					}
 				}
@@ -3058,14 +3057,15 @@ namespace Alphora.Dataphor.DAE.Compiling
 				{
 					column.Sort = CompileSortDefinition(plan, column.Column.DataType, orderColumn.Sort, false);
 					column.IsDefaultSort = false;
+					if (column.Sort.HasDependencies())
+						plan.AttachDependencies(column.Sort.Dependencies);
 				}
 				else
 				{
 					column.Sort = GetSort(plan, column.Column.DataType);
 					column.IsDefaultSort = true;
+					plan.AttachDependency(column.Sort);
 				}
-				if (column.Sort.HasDependencies())
-					plan.AttachDependencies(column.Sort.Dependencies);
 				order.Columns.Add(column);
 			}
 			if (ensureUnique)
@@ -3128,8 +3128,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				else
 					orderColumn.Sort = CompileSortDefinition(plan, column.DataType);
 				orderColumn.IsDefaultSort = true;
-				if (orderColumn.Sort.HasDependencies())
-					plan.AttachDependencies(orderColumn.Sort.Dependencies);
+				plan.AttachDependency(orderColumn.Sort);
 				order.Columns.Add(orderColumn);
 			}
 			return order;
@@ -13629,8 +13628,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			{
 				orderColumn = new Schema.OrderColumn(sourceNode.TableVar.Columns[column], true);
 				orderColumn.Sort = GetUniqueSort(plan, orderColumn.Column.DataType);
-				if (orderColumn.Sort.HasDependencies())
-					plan.AttachDependencies(orderColumn.Sort.Dependencies);
+				plan.AttachDependency(orderColumn.Sort);
 				order.Columns.Add(orderColumn);
 			}
 
@@ -13676,8 +13674,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			{
 				orderColumn = new Schema.OrderColumn(sourceNode.TableVar.Columns[column], true);
 				orderColumn.Sort = GetUniqueSort(plan, orderColumn.Column.DataType);
-				if (orderColumn.Sort.HasDependencies())
-					plan.AttachDependencies(orderColumn.Sort.Dependencies);
+				plan.AttachDependency(orderColumn.Sort);
 				order.Columns.Add(orderColumn);
 			}
 
@@ -13773,8 +13770,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				Schema.OrderColumn newOrderColumn = new Schema.OrderColumn(sourceNode.TableVar.Columns[column], true);
 				newOrderColumn.IsDefaultSort = true;
 				newOrderColumn.Sort = GetSort(plan, newOrderColumn.Column.DataType);
-				if (newOrderColumn.Sort.HasDependencies())
-					plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+				plan.AttachDependency(newOrderColumn.Sort);
 				order.Columns.Add(newOrderColumn);
 			}
 

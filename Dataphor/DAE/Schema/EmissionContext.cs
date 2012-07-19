@@ -67,7 +67,12 @@ namespace Alphora.Dataphor.DAE.Schema
 					) && 
 					(IncludeSystem || !objectValue.IsSystem) &&
 					(!(objectValue is DeviceObject) || (Mode != EmitMode.ForRemote)) &&
-					(!objectValue.IsGenerated || IncludeGenerated || (objectValue.IsSessionObject) || (objectValue.IsATObject && RequestedObjects.Contains(objectValue.ID))) // an AT object will be generated, but must be emitted if specifically requested
+					(
+						!(objectValue.IsGenerated && (objectValue.GeneratorID > 0)) // A sort will be generated, but will not have a generator and so must be emitted
+							|| IncludeGenerated 
+							|| (objectValue.IsSessionObject) 
+							|| (objectValue.IsATObject && RequestedObjects.Contains(objectValue.ID))
+					) // an AT object will be generated, but must be emitted if specifically requested
 				);
 		}
 		

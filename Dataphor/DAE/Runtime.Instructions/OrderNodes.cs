@@ -98,8 +98,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				newColumn.Sort = column.Sort;
 				newColumn.IsDefaultSort = column.IsDefaultSort;
 				Error.AssertWarn(newColumn.Sort != null, "Sort is null");
-				if (newColumn.Sort.HasDependencies())
-					plan.AttachDependencies(newColumn.Sort.Dependencies);
+				if (newColumn.IsDefaultSort)
+					plan.AttachDependency(newColumn.Sort);
+				else
+				{
+					if (newColumn.Sort.HasDependencies())
+						plan.AttachDependencies(newColumn.Sort.Dependencies);
+				}
 				Order.Columns.Add(newColumn);
 			}
 			

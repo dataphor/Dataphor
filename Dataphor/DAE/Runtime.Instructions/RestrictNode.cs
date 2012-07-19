@@ -534,8 +534,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					newOrderColumn = new Schema.OrderColumn(_closedConditions[index].Column, true);
 					newOrderColumn.Sort = Compiler.GetUniqueSort(plan, newOrderColumn.Column.DataType);
-					if (newOrderColumn.Sort.HasDependencies())
-						plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+					plan.AttachDependency(newOrderColumn.Sort);
 					newOrder.Columns.Add(newOrderColumn);
 				}
 
@@ -544,8 +543,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					newOrderColumn = new Schema.OrderColumn(_openConditions[index].Column, true);
 					newOrderColumn.Sort = Compiler.GetUniqueSort(plan, newOrderColumn.Column.DataType);
-					if (newOrderColumn.Sort.HasDependencies())
-						plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+					plan.AttachDependency(newOrderColumn.Sort);
 					newOrder.Columns.Add(newOrderColumn);
 				}
 
@@ -553,8 +551,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				newOrderColumn = new Schema.OrderColumn(_scanCondition.Column, true);
 				newOrderColumn.Sort = Compiler.GetUniqueSort(plan, newOrderColumn.Column.DataType);
-				if (newOrderColumn.Sort.HasDependencies())
-					plan.AttachDependencies(newOrderColumn.Sort.Dependencies);
+				plan.AttachDependency(newOrderColumn.Sort);
 				newOrder.Columns.Add(newOrderColumn);
 			}
 
