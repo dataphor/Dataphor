@@ -169,7 +169,7 @@ namespace Alphora.Dataphor.DAE.Schema
             if ((item.Name == null) || (item.Name == String.Empty))
 				throw new SchemaException(SchemaException.Codes.ObjectNameRequired);
 				
-			Error.AssertFail(item.ID > 0, "Object '{0}' does not have an ID and cannot be tracked in a catalog.", item.Name);
+			Error.AssertFail(item.ID > 0, "Object '{0}' ({1}) does not have an ID and cannot be tracked in a catalog.", item.Name, item.Description);
 			
 			if ((item is Operator) && (_operatorMaps.ContainsOperator((Operator)item)))
 				throw new SchemaException(SchemaException.Codes.DuplicateOperator, item.ToString());
