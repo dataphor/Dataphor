@@ -45,7 +45,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
         // Generates new ids for a table.
         private Generator _generator = null;
-        public Generator RowIDGenerator { get { return _generator; } }
+        public Generator IDGenerator { get { return _generator; } }
 
         public FastoreDevice(int iD, string name)
             : base(iD, name)

@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Specialized;
+using System.Linq;
 
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Schema;
@@ -20,6 +21,7 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Device.Memory;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using D4 = Alphora.Dataphor.DAE.Language.D4;
 using System.Collections.Generic;
 using Alphora.Fastore.Client;
 
@@ -29,10 +31,6 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 	//TODO: FIX NASTY ASSUMPTIONS! (First column is ID column -- This is clearly wrong, but I'm just getting things up and running)
 	public class FastoreTable : System.Object
 	{
-        private static int[] PodIdColumn = { 300 };
-        private static int[] ColumnColumns = { 0, 1, 2, 3, 4 };
-        private static int[] PodColumnColumns = { 400, 401 };
-
 		//Tied Directly to device for time being...
 		public FastoreTable(IValueManager manager, Schema.TableVar tableVar, FastoreDevice device)
 		{
@@ -47,84 +45,142 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 		private int[] _columns;
 		public int[] Columns { get { return _columns; } }
 
-		protected string MapTypeNames(string tname)
+		protected string MapTypeNames(IDataType dataType)
 		{
-			string name = "";
-			switch (tname)
-			{
-				case "System.String":
-					name = "String";
-					break;
-				case "System.Integer":
-					name = "Int";
-					break;
-				case "System.Boolean":
-					name = "Bool";
-					break;
-				case "System.Long":
-					name = "Long";
-					break;
-				default:
-					break;
-			}
+			if (!(dataType is ScalarType))
+				throw new Exception(String.Format("Fastore only supports scalar column types; {0} is not supported.", dataType.Name));
 
-			return name;
+			var scalar = (ScalarType)dataType;
+
+			switch (scalar.NativeType.Name)
+			{
+				case "System.String": return "String";
+				case "System.Integer": return "Int";
+				case "System.Boolean": return "Bool";
+				case "System.Long": return "Long";
+				default:
+					throw new Exception(String.Format("Fastore doesn't support scalar type ({0}).", scalar.Name));
+			}
+		}
+
+		private bool RowIDCandidateType(IDataType dataType)
+		{
+			return dataType is ScalarType && ((ScalarType)dataType).NativeType.IsValueType;
 		}
 
 		protected void EnsureColumns()
 		{
-            //Pull a list of current pods so we know where to distribute new columns.
+            // Pull a list of candidate pods
             Range podQuery = new Range();
-
-            //300 is the pods column
-            podQuery.ColumnID = PodIdColumn[0];
+            podQuery.ColumnID = Dictionary.PodColumnPodID;
             podQuery.Ascending = true;
-
-            var podIds = Device.Database.GetRange(PodIdColumn, podQuery, int.MaxValue);
+            var podIds = Device.Database.GetRange(new[] { Dictionary.PodColumnPodID }, podQuery, int.MaxValue);
             if (podIds.Data.Count == 0)
-                throw new Exception("FastoreDevice can't create a new table. Hive has no workers. Hive must be initialized first.");
+                throw new Exception("FastoreDevice can't create a new table.  The hive has no pods.  The hive must be initialized first.");
 
-            //Start distributing on a random pod. Otherwise, we will always start on the first pod
-            int startPod = new Random().Next(podIds.Data.Count - 1);
+			var minKey = TableVar.Keys.MinimumKey(false, false);
+			if (minKey != null && minKey.Columns.Count != 1)
+				minKey = null;
+			var rowIDColumn = minKey != null && RowIDCandidateType(minKey.Columns[0].DataType) ? minKey.Columns[0] : null;
+			var rowIDmappedType = rowIDColumn == null ? "Int" : MapTypeNames(rowIDColumn.DataType);
+
+            // Start distributing columns on a random pod. Otherwise, we will always start on the first pod
+            int nextPod = new Random().Next(podIds.Data.Count - 1);
 
             //This is so we have quick access to all the ids (for queries). Otherwise, we have to iterate the 
             //TableVar Columns and pull the id each time.
             List<int> columnIds = new List<int>();
 			for (int i = 0; i < TableVar.Columns.Count; i++)
 			{
-				var col = TableVar.Columns[i];
+				var column = TableVar.Columns[i];
+				var columnId = 0;
+				var combinedName = Schema.Object.Qualify(column.Column.Name, TableVar.Name);
 
-				columnIds.Add(col.ID);
+				// Determine or generate a column ID
+				var columnIdTag = D4.MetaData.GetTag(column.MetaData, "Storage.ColumnID");
+				if (columnIdTag == null)
+				{
+					// Attempt to find the column by name
+					Range query = new Range();
+					query.ColumnID = Dictionary.ColumnName;
+					query.Start = new RangeBound() { Bound = combinedName, Inclusive = true };
+					query.End = new RangeBound() { Bound = combinedName, Inclusive = true };
+					var result = Device.Database.GetRange(new int[] { }, query);
 
-                Range query = new Range();
-                query.ColumnID = ColumnColumns[0];
-                query.Start = new RangeBound() { Bound = col.ID, Inclusive = true };
-                query.End = new RangeBound() { Bound = col.ID, Inclusive = true };
+					if (result.Data.Count > 0)
+						columnId = (int)result.Data[0].ID;
+					else
+					{
+						columnId = (int)Device.IDGenerator.Generate(Dictionary.ColumnID);
+						EnsureColumn(column, combinedName, rowIDColumn, rowIDmappedType, columnId, podIds, ref nextPod);
+					}
 
-                var result = Device.Database.GetRange(new int[] { ColumnColumns[0] }, query , int.MaxValue);
+					column.MetaData.Tags.AddOrUpdate("Storage.ColumnID", columnId.ToString());
+				}
+				else
+				{
+					columnId = Int32.Parse(columnIdTag.Value);
+					EnsureColumn(column, combinedName, rowIDColumn, rowIDmappedType, columnId, podIds, ref nextPod);
+				}
 
-                if (result.Data.Count == 0)
-                {
-                    //These two includes should probably happen in a transaction so no one see any columns that don't have
-                    //Repos.
-                    Device.Database.Include
-                    (
-                        ColumnColumns,
-                        col.ID,
-                        //TODO: Instead of saying a column is not unique, detect its properties (such as being a key).
-                        new object[] { col.ID, col.Column.Name, MapTypeNames(col.DataType.Name), "Int", i == 0 ? BufferType.Identity : BufferType.Multi }
-                    );
-
-                    Device.Database.Include
-                    (
-                        PodColumnColumns,
-                        Device.RowIDGenerator.Generate(PodColumnColumns[0]),
-                        new object[] { podIds.Data[startPod++ % podIds.Data.Count].Values[0], col.ID }
-                    );                 
-                }
+				columnIds.Add(columnId);
 			}
 
 			_columns = columnIds.ToArray();
+		}
+
+		private void EnsureColumn(TableVarColumn column, string combinedName, TableVarColumn rowIDColumn, string rowIDmappedType, int columnId, RangeSet podIds, ref int nextPod)
+		{
+			// Attempt to find the column by ID, determine if it is already created
+			Range query = new Range();
+			query.ColumnID = Dictionary.ColumnID;
+			query.Start = new RangeBound() { Bound = columnId, Inclusive = true };
+			query.End = new RangeBound() { Bound = columnId, Inclusive = true };
+			var result = Device.Database.GetRange(new int[] { }, query, int.MaxValue);
+
+			if (result.Data.Count == 0)
+			{
+				// Determine the storage pod - default, but let the user override
+				var defaultPodID = podIds.Data[nextPod++ % podIds.Data.Count].Values[0];
+				var podIDs = 
+				(
+					from p in D4.MetaData.GetTag(column.MetaData, "Storage.PodIDs", defaultPodID.ToString()).Split(',') 
+						select Int32.Parse(p)
+				).ToArray();
+				if (podIDs.Length == 0)
+					throw new Exception(String.Format("No Pod ID(s) given for column {0} of table {1}.", column.DisplayName, column.TableVar.DisplayName));
+
+				var mappedName = MapTypeNames(column.DataType);
+
+				using (var transaction = Device.Database.Begin(true, true))
+				{
+					transaction.Include
+					(
+						Dictionary.ColumnColumns,
+						columnId,
+						new object[] 
+						{ 
+							columnId, 
+							combinedName,
+							mappedName, 
+							rowIDmappedType,
+							(rowIDColumn == column) ? BufferType.Identity
+								: column.TableVar.Keys.Any(k => k.Columns.Count == 1 && k.Columns[0] == column) ? BufferType.Unique
+								: BufferType.Multi
+						}
+					);
+
+					foreach (var pod in podIDs)
+						transaction.Include
+						(
+							Dictionary.PodColumnColumns,
+							Device.IDGenerator.Generate(Dictionary.PodColumnPodID),
+							new object[] { pod, columnId }
+						);
+
+					transaction.Commit();
+				}
+			}
 		}
 
 		public void Insert(IValueManager manager, Row row, Database db)
@@ -168,20 +224,18 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 		{
 			foreach (var col in _columns)
 			{
-                //Pull a list of the current repos so we can drop them all.
+                // Pull a list of the current repos so we can drop them all.
                 Range repoQuery = new Range();
-
-                //401 is the column we want on the Pod-Column table
-                repoQuery.ColumnID = PodColumnColumns[1];
+                repoQuery.ColumnID = Dictionary.PodColumnColumnID;
                 repoQuery.Ascending = true;
                 repoQuery.Start = new RangeBound() { Bound = col, Inclusive = true };
-                repoQuery.End = new RangeBound() { Bound = col, Inclusive = true };                
+                repoQuery.End = new RangeBound() { Bound = col, Inclusive = true };
 
-                var repoIds = Device.Database.GetRange(new int[] { PodColumnColumns[1] }, repoQuery, int.MaxValue);
+				var repoIds = Device.Database.GetRange(new int[] { Dictionary.PodColumnColumnID }, repoQuery, int.MaxValue);
 
                 for (int i = 0; i < repoIds.Data.Count; i++)
                 {
-                    Device.Database.Exclude(PodColumnColumns, repoIds.Data[i].ID);
+                    Device.Database.Exclude(Dictionary.PodColumnColumns, repoIds.Data[i].ID);
                 }
 
 				Range query = new Range();
@@ -189,11 +243,11 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 query.Start = new RangeBound() { Bound = col, Inclusive = true };
                 query.End = new RangeBound() { Bound = col, Inclusive = true };
 
-                var columnExists = Device.Database.GetRange(new int[] { ColumnColumns[0] }, query, int.MaxValue);
+                var columnExists = Device.Database.GetRange(new int[] { Dictionary.ColumnID }, query, int.MaxValue);
 
                 if (columnExists.Data.Count > 0)
                 {
-                    Device.Database.Exclude(ColumnColumns, col);
+                    Device.Database.Exclude(Dictionary.ColumnColumns, col);
                 }
 			}
 		}
