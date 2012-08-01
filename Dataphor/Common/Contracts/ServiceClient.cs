@@ -87,10 +87,18 @@ namespace Alphora.Dataphor.DAE.Contracts
 		
 		private void CloseChannelFactory()
 		{
-			if (_channelFactory.State == CommunicationState.Opened)
-				_channelFactory.Close();
-			else
-				_channelFactory.Abort();
+			try
+			{
+				if (_channelFactory.State == CommunicationState.Opened)
+					_channelFactory.Close();
+				else
+					_channelFactory.Abort();
+			}
+			catch
+			{
+				// Don't let a shut-down error eat a more important error
+				// TODO: should we at least log this?
+			}
 		}
 		
 		protected T GetInterface()
