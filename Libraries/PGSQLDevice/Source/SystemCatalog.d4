@@ -543,7 +543,7 @@ begin
 		create operator System.iAdorn(table) class "SQLDevice.SQLAdorn" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iExtend(table) class "SQLDevice.SQLExtend" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iAggregate(table) class "SQLDevice.SQLAggregate" static tags {{ DAE.IsSystem = "true" }}, 
-		create operator System.iUnion(table, table) class "SQLDevice.SQLUnion" static tags {{ DAE.IsSystem = "true" }},
+		create operator System.iUnion(table, table) class "PostgreSQLDevice.PostgreSQLUnion" static tags {{ DAE.IsSystem = "true" }},
 		create operator System.iJoin(table, table) class "SQLDevice.SQLJoin" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iLeftJoin(table, table) class "SQLDevice.SQLJoin" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iRightJoin(table, table) class "SQLDevice.SQLJoin" static tags {{ DAE.IsSystem = "true" }}, 
