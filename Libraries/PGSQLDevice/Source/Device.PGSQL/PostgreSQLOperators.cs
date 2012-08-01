@@ -10,6 +10,32 @@ using D4 = Alphora.Dataphor.DAE.Language.D4;
 
 namespace Alphora.Dataphor.DAE.Device.PGSQL
 {
+	/// <summary> Works around the fact that as of PostgreSQL 9.1, UNION is not optimized at all, but UNION ALL is.</summary>
+    public class PostgreSQLUnion : SQLUnion
+    {
+		public PostgreSQLUnion(int iD, string name) : base(iD, name) {}
+
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
+		{
+			var localDevicePlan = (SQLDevicePlan)devicePlan;
+			var unionStatement = (QueryExpression)base.Translate(devicePlan, planNode);
+			if (localDevicePlan.IsSupported)
+			{
+				// Use "union all" rather than "union"
+				foreach (TableOperatorExpression tableOperatorExpression in unionStatement.TableOperators)
+					tableOperatorExpression.Distinct = false;
+				
+				// Nest union and make it distinct
+				var wrapper = localDevicePlan.Device.NestQueryExpression(localDevicePlan, ((TableNode)planNode.Nodes[0]).TableVar, unionStatement);
+				wrapper.SelectClause.Distinct = true;
+
+				return wrapper;
+			}
+			else
+				return unionStatement;
+		}
+	}
+
     public class PostgreSQLRetrieve : SQLRetrieve
     {
         public PostgreSQLRetrieve(int iD, string name) : base(iD, name) { }
