@@ -1067,7 +1067,26 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				{
 					case Keywords.Addition: return UnaryExpression();
 					case Keywords.Subtraction: 
-						expression = new UnaryExpression(Instructions.Negate, UnaryExpression());
+						var subExpression = UnaryExpression();
+
+						// If negation against a literal number, invert the value rather than add a negate operator
+						var valueSubExpression = subExpression as ValueExpression;
+						if (valueSubExpression != null)
+						{
+							switch (valueSubExpression.Token)
+							{
+								case TokenType.Decimal:
+								case TokenType.Float:
+								case TokenType.Money:
+									valueSubExpression.Value = -(Decimal)valueSubExpression.Value;
+									return valueSubExpression;
+								case TokenType.Integer:
+									valueSubExpression.Value = -(long)valueSubExpression.Value;
+									return valueSubExpression;
+							}
+						}
+
+						expression = new UnaryExpression(Instructions.Negate, subExpression);
 						expression.SetPosition(_lexer);
 						expression.SetEndPosition(_lexer);
 						return expression;

@@ -124,3 +124,8 @@ end;
 	",
 	"Invalid token allowed"
 );
+
+// Inversion vs. negation
+if 1234 - -1234-(1234- -1234) + (1234--1234) - (1234 -- 1234) <> 0 then
+	raise Error("Negation lexing/parsing error.");
+
