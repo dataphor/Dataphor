@@ -1,0 +1,306 @@
+/*
+	Dataphor
+	© Copyright 2000-2012 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+	Native CLI
+	Thrift IDL
+*/
+
+namespace *Alphora.Dataphor.DAE.NativeCLI.Thrift
+
+const i32 DefaultFetchCount = 20
+const string DefaultUserName = "Admin"
+const i32 DefaultDefaultMaxStackDepth = 32767
+const i32 DefaultDefaultMaxCallDepth = 1024
+
+enum NativeIsolationLevel 
+{ 
+	Browse, 
+	CursorStability, 
+	Isolated 
+}
+	
+/*		
+/// <summary>
+/// Contains settings relevant to a server session.
+/// </summary>
+*/
+struct NativeSessionInfo
+{
+    # // UserID
+    # /// <summary>The user ID used to login to the Dataphor Server.</summary>
+    # /// <remarks>The Dataphor Server user ID of the session.  The default login for the Dataphor Server is Admin with a blank password.</remarks>
+	required string UserID;
+
+	# // UnstructuredData
+	required string UnstructuredData;
+		
+	# // HostName
+	required string HostName;
+		
+    # // DefaultLibraryName
+	# /// <summary>Determines the default library for the session. If specified, the current library for the session is initially set to this value.</summary>
+	# /// <remarks>The current library is used when resolving or creating catalog objects. The default value is blank. </remarks>
+    required string DefaultLibraryName;
+
+	# // DefaultUseDTC
+	# /// <summary> Determines the default UseDTC setting for processes started on this session. Defaults to false.</summary>
+	# /// <remarks> Defaults to false. </remarks>
+	required bool DefaultUseDTC = false;
+		
+	# // DefaultUseImplicitTransactions
+	# /// <summary>Determines the default UseImplicitTransactions setting for processes started on this session. Defaults to true.</summary>
+	required bool DefaultUseImplicitTransactions = true;
+
+	# // DefaultIsolationLevel
+	# /// <summary>Determines the default isolation level setting for processes started on this session.</summary>
+	required NativeIsolationLevel DefaultIsolationLevel;
+		
+	# // DefaultMaxStackDepth
+	# /// <summary>Determines the default maximum stack depth for processes on this session.</summary>
+	required i32 DefaultMaxStackDepth = DefaultDefaultMaxStackDepth;
+		
+	# // DefaultMaxCallDepth
+	# /// <summary>Determines the default maximum call depth for processes on this session.</summary>
+	required i32 DefaultMaxCallDepth = DefaultDefaultMaxCallDepth;
+		
+	# // UsePlanCache
+	# /// <summary>Detetrmines whether or not to use the server plan cache on this session.</summary>
+	required bool UsePlanCache = true;
+		
+	# // ShouldEmitIL
+	# /// <summary>Detetrmines whether or not the compiler will emit IL instructions for the nodes that support IL compilation.</summary>
+	required bool ShouldEmitIL = false;
+}
+
+struct NativeSessionHandle
+{
+	required string ID;
+}
+
+struct NativeValue
+{
+	required binary Value;
+}
+	
+enum NativeModifier 
+{
+	In, 
+	Var, 
+	Out 
+}
+	
+struct NativeParam
+{
+	required string Name;
+	required NativeModifier Modifier;
+	required NativeValue Value;
+}
+	
+enum NativeExecutionOptions 
+{ 
+	Default, 
+	SchemaOnly 
+}
+	
+struct NativeExecuteOperation
+{
+	required string Statement;
+	required list<NativeParam> Params;
+	required NativeExecutionOptions Options;
+}
+	
+struct NativeResult
+{
+	required list<NativeParam> Params;
+	required NativeValue Value;
+}
+
+enum ErrorSeverity 
+{ 
+	# /// <summary>
+	# /// Indicates the severity is unknown, usually because the exception that occurred was not a Dataphor exception.
+	# /// </summary>
+	Unspecified, 
+		
+	# /// <summary>
+	# /// Indicates that the error is a user-correctable problem such as a constraint violation.
+	# /// </summary>
+	User, 
+		
+	# /// <summary>
+	# /// Indicates that the exception is a developer-correctable problem with the application.
+	# /// </summary>
+	Application, 
+
+	# /// <summary>
+	# /// Indicates that the exception is a system-level problem in the Dataphor server.
+	# /// </summary>
+	System, 
+
+	# /// <summary>
+	# /// Indicates that the exception is an environment-level problem such as a network connectivity issue.
+	# /// </summary>
+	Environment 
+}
+	
+exception NativeCLIFault
+{
+	required i32 Code;
+	required ErrorSeverity Severity;
+	required string Message;
+	optional string Details;
+	optional string ServerContext;
+	//optional NativeCLIFault InnerFault;
+}
+
+service NativeCLI
+{
+	# Session Management
+
+	/* 
+	/// <summary>
+	/// Starts a session
+	/// </summary>
+	/// <remarks>
+	/// Note that a session is only required if transaction control is necessary.
+	/// The Execute overloads that do not take a session will automatically
+	/// establish a connection as necessary.
+	/// </remarks>
+	/// <returns>A session handle that can be used in subsequent calls.</returns>
+	*/
+	NativeSessionHandle StartSession(required NativeSessionInfo sessionInfo)
+		throws (required NativeCLIFault fault);
+		
+	/* 
+	/// <summary>
+	/// Stops a session
+	/// </summary>
+	/// <remarks>
+	/// Once a session has been stopped, the session handle is no longer valid.
+	/// </remarks>
+	*/
+	void StopSession(required NativeSessionHandle sessionHandle)
+		throws (required NativeCLIFault fault);
+
+	# Transaction Management
+
+	/* 
+    /// <summary>
+	/// Begins a new transaction.
+	/// </summary>
+	*/
+    void BeginTransaction(required NativeSessionHandle sessionHandle, required NativeIsolationLevel isolationLevel)
+		throws (required NativeCLIFault fault);
+        
+	/* 
+    /// <summary>
+	/// Prepares a transaction for commit.
+	/// </summary>
+    /// <remarks>
+    /// Validates that all data within the transaction is consistent, and prepares the transaction for commit.
+    /// It is not necessary to call this to commit the transaction, it is exposed to allow the process to participate in
+    /// 2PC distributed transactions.
+    /// </remarks>
+	*/
+    void PrepareTransaction(required NativeSessionHandle sessionHandle)
+		throws (required NativeCLIFault fault);
+        
+	/* 
+    /// <summary>
+	/// Commits the currently active transaction.
+	/// </summary>
+    /// <remarks>
+    /// Commits the currently active transaction.  
+    /// Reduces the transaction nesting level by one.  
+    /// Will raise if no transaction is currently active.
+    /// </remarks>
+	*/
+    void CommitTransaction(required NativeSessionHandle sessionHandle)
+		throws (required NativeCLIFault fault);
+        
+	/* 
+    /// <summary>
+	/// Rolls back the currently active transaction.
+	/// </summary>
+    /// <remarks>
+    /// Reduces the transaction nesting level by one.
+    /// Will raise if no transaction is currently active.
+    /// </remarks>
+	*/
+    void RollbackTransaction(required NativeSessionHandle sessionHandle)
+		throws (required NativeCLIFault fault);
+        
+	/* 
+    /// <summary>
+	/// Returns the number of active transactions.
+	/// </summary>
+	*/
+    i32 GetTransactionCount(required NativeSessionHandle sessionHandle)
+		throws (required NativeCLIFault fault);
+
+	# Statement Execution
+
+	/* 
+	/// <summary>
+	/// Executes a D4 statement and returns the result, if any.
+	/// </summary>
+	/// <param name="AStatement">The D4 statement to be executed.</param>
+	/// <param name="AParams">The parameters to the statement, if any.</param>
+	/// <remarks>
+	/// <para>
+	/// If the statement is an expression, the result will be a NativeResult descendent corresponding to
+	/// the type of the expression, scalar, row, list, or table.
+	/// </para>
+	/// <para>
+	/// Note that this overload does not require a session and is a stateless call. If transactional
+	/// control is necessary, use the session-specific overload.
+	/// </para>
+	/// </remarks>
+	/// <returns>The result of the execution, if the statement is an expression, null otherwise.</returns>
+	*/
+	NativeResult ExecuteStatement(required NativeSessionInfo sessionInfo, required string statement, required list<NativeParam> params, required NativeExecutionOptions options)
+		throws (required NativeCLIFault fault);
+
+	/* 
+	/// <summary>
+	/// Executes a series of D4 statements and the returns the results, if any.
+	/// </summary>
+	/// <remarks>
+	/// Note that this overload does not require a session and is a stateless call. If transactional
+	/// control is necessary, use the session-specific overload.
+	/// </remarks>
+	/// <param name="AOperations">The operations to be executed.</param>
+	/// <returns>An array of NativeResult objects containing the results of the executions, if any.</returns>
+	*/
+	list<NativeResult> ExecuteStatements(required NativeSessionInfo sessionInfo, required list<NativeExecuteOperation> operations)
+		throws (required NativeCLIFault fault);
+		
+	/* 
+	/// <summary>
+	/// Executes a D4 statement and returns the result, if any.
+	/// </summary>
+	/// <param name="AStatement">The D4 statement to be executed.</param>
+	/// <param name="AParams">The parameters to the statement, if any.</param>
+	/// <remarks>
+	/// <para>
+	/// If the statement is an expression, the result will be a NativeResult descendent corresponding to
+	/// the type of the expression, scalar, row, list, or table.
+	/// </para>
+	/// </remarks>
+	/// <returns>The result of the execution, if the statement is an expression, null otherwise.</returns>
+	*/
+	NativeResult SessionExecuteStatement(required NativeSessionHandle sessionHandle, required string statement, required list<NativeParam> params, required NativeExecutionOptions options)
+		throws (required NativeCLIFault fault);
+
+	/* 
+	/// <summary>
+	/// Executes a series of D4 statements and returns the results, if any.
+	/// </summary>
+	/// <param name="AOperations">The operations to be executed.</param>
+	/// <returns>An array of NativeResult objects containing the results of the executions, if any.</returns>
+	*/
+	list<NativeResult> SessionExecuteStatements(required NativeSessionHandle sessionHandle, required list<NativeExecuteOperation> operations)
+		throws (required NativeCLIFault fault);
+}

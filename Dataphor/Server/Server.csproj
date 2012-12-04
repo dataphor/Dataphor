@@ -130,6 +130,7 @@
     <Content Include="clientaccesspolicy.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Contracts\Thrift_NativeCLI.idl" />
     <Content Include="Language.SQL\BNF.txt" />
     <Content Include="Language.SQL\BNFDifferences.txt" />
   </ItemGroup>
