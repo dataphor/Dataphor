@@ -13,14 +13,29 @@ using System.ServiceModel.Channels;
 
 namespace Alphora.Common.WCF
 {
-	class ChannelFactoryCache<TChannel>
+	/// <summary>
+	/// Implements a channel factory cache for a given service interface.
+	/// </summary>
+	/// <typeparam name="TChannel">The type of the service interface.</typeparam>
+	/// <remarks>
+	/// <para>
+	/// Caches channel factory instances for a specific service interface per endpoint, where
+	/// endpoint is defined per unique binding instance and endpoint address.
+	/// </para>
+	/// </remarks>
+	internal class ChannelFactoryCache<TChannel>
 	{
 		private static EndpointDescriptorComparer DefaultEndpointDescriptorComparer = new EndpointDescriptorComparer();
 
 		private object _syncHandle = new object();
 		private IDictionary<EndpointDescriptor, ChannelFactoryEntry<TChannel>> _cache = new Dictionary<EndpointDescriptor, ChannelFactoryEntry<TChannel>>(DefaultEndpointDescriptorComparer);
 
-		// Obtain a ChannelFactory for the given binding and address
+		/// <summary>
+		/// Gets a channel factory wrapper for the given binding and endpoint address.
+		/// </summary>
+		/// <param name="binding">The binding for the channel factory.</param>
+		/// <param name="endpointAddress">The endpoint address for the channel factory.</param>
+		/// <returns>A channel factory wrapper for a channel factory using the given binding and endpoint address.</returns>
 		public ChannelFactoryWrapper<TChannel> GetChannelFactory(Binding binding, EndpointAddress endpointAddress)
 		{
 			lock (_syncHandle)

@@ -13,8 +13,17 @@ using System.ServiceModel.Channels;
 
 namespace Alphora.Common.WCF
 {
+	/// <summary>
+	/// Provides a disposable wrapper for a channel factory and its associated endpoint descriptor.
+	/// </summary>
+	/// <typeparam name="TChannel">The type of the service interface.</typeparam>
 	internal class ChannelFactoryWrapper<TChannel> : IDisposable
 	{
+		/// <summary>
+		/// Initializes a new instance of the ChannelFactoryWrapper class.
+		/// </summary>
+		/// <param name="descriptor">The endpoint descriptor for the channel.</param>
+		/// <param name="channelFactory">The channel factory being wrapped.</param>
 		public ChannelFactoryWrapper(EndpointDescriptor descriptor, ChannelFactory<TChannel> channelFactory)
 		{
 			if (descriptor == null)
@@ -32,9 +41,15 @@ namespace Alphora.Common.WCF
 		}
 
 		private EndpointDescriptor _descriptor;
+		/// <summary>
+		/// Gets the endpoint descriptor for the channel factory.
+		/// </summary>
 		public EndpointDescriptor Descriptor { get { return _descriptor; } }
 
 		private ChannelFactory<TChannel> _channelFactory;
+		/// <summary>
+		/// Gets the wrapped channel factory.
+		/// </summary>
 		public ChannelFactory<TChannel> ChannelFactory { get { return _channelFactory; } }
 
 		private bool _disposed;
@@ -48,8 +63,14 @@ namespace Alphora.Common.WCF
 
 		#region IDisposable Members
 
+		/// <summary>
+		/// Fired when the wrapper is disposed.
+		/// </summary>
 		public event EventHandler Disposed;
-		 
+		
+		/// <summary>
+		/// Disposes the channel factory wrapper.
+		/// </summary>
 		public void Dispose()
 		{
 			if (!_disposed)
