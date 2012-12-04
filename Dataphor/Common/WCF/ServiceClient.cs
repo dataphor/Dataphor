@@ -11,17 +11,51 @@ using System.ServiceModel.Channels;
 
 namespace Alphora.Common.WCF
 {
+	/// <summary>
+	/// Provides a base service client implementation that offers the caching of configured endpoints for use with programmatic bindings.
+	/// </summary>
+	/// <typeparam name="T">The type of the service interface.</typeparam>
+	/// <remarks>
+	/// <para>
+	/// The default client base class provided with WCF (ClientBase[T]) provides a caching implementation
+	/// of the ChannelFactory that offers significant improvement in terms of performance and stability
+	/// over recreating a ChannelFactory for use with each client instance. However, this caching functionality
+	/// only works if the configuration files are used to build up endpoints. If programmatic binding is used
+	/// to create the ChannelFactory, the implementation does not use this caching mechanism.
+	/// </para>
+	/// <para>
+	/// This service client implementation provides caching of the ChannelFactory for programmatic binding 
+	/// configuration scenarios. In addition, this implementation automatically detects and attempts to 
+	/// recover from channel faults.
+	/// </para>
+	/// <para>
+	/// NOTE: Due to the difficulty of determining whether two binding instances describe the same binding,
+	/// the caching used here is based on reference comparison of bindings. This means that in order for the
+	/// caching to actually work, the same binding instance must be used per logical endpoint.
+	/// </para>
+	/// </remarks>
 	public abstract class ServiceClient<T> : IDisposable
 	{
 		private static ChannelFactoryCache<T> _channelFactoryCache = new ChannelFactoryCache<T>();
 
+		/// <summary>
+		/// Initializes a new instance of the ServiceClient class.
+		/// </summary>
+		/// <param name="binding">The binding to use for the connection.</param>
+		/// <param name="endpointAddress">The endpoint address to connect to.</param>
 		public ServiceClient(Binding binding, EndpointAddress endpointAddress)
 		{
 			_channelFactoryWrapper = _channelFactoryCache.GetChannelFactory(binding, endpointAddress);
 		}
-		
+
+		/// <summary>
+		/// Defines an internal disposal method that will be called when the Dispose method is called.
+		/// </summary>
 		protected virtual void InternalDispose() { }
 		
+		/// <summary>
+		/// Closes the service client and releases the underlying connection resources.
+		/// </summary>
 		public void Dispose()
 		{
 			try
@@ -30,14 +64,6 @@ namespace Alphora.Common.WCF
 			}
 			finally
 			{
-				// NOTE: Some sort of issue occurs when running with this service client
-				// such that when the CloseChannelFactory call is made, the channel is
-				// already in the faulted state. Despite concerted effort, I was unable
-				// to reproduce the issue under debug, and whatever exception is occurring
-				// to put the channel into the faulted state 1) Occurs only on the client,
-				// and 2) Does not result in any exception on the utilizing thread.
-				// Ignoring the exception seems the only rational thing to do at this point.
-
 				try
 				{
 					if (_channel != null)
@@ -104,7 +130,11 @@ namespace Alphora.Common.WCF
 				else
 					channel.Abort();
 		}
-		
+
+		/// <summary>
+		/// Returns the channel to be used to invoke service methods.
+		/// </summary>
+		/// <returns>The channel to be used to invoke service methods.</returns>
 		protected T GetInterface()
 		{
 			if ((_channel == null) || !IsChannelValid(_channel))

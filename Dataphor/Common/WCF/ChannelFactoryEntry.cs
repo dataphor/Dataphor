@@ -13,8 +13,16 @@ using System.ServiceModel.Channels;
 
 namespace Alphora.Common.WCF
 {
-	class ChannelFactoryEntry<TChannel> : IDisposable
+	/// <summary>
+	/// Represents a channel factory cache entry.
+	/// </summary>
+	/// <typeparam name="TChannel">The type of the channel being cached.</typeparam>
+	internal class ChannelFactoryEntry<TChannel> : IDisposable
 	{
+		/// <summary>
+		/// Initializes a new instance of the ChannelFactoryEntry class.
+		/// </summary>
+		/// <param name="descriptor">The endpoint descriptor for the cached channel entry.</param>
 		public ChannelFactoryEntry(EndpointDescriptor descriptor)
 		{
 			if (descriptor == null)
@@ -29,6 +37,9 @@ namespace Alphora.Common.WCF
 		}
 
 		private EndpointDescriptor _descriptor;
+		/// <summary>
+		/// Gets the endpoint descriptor for the entry.
+		/// </summary>
 		public EndpointDescriptor Descriptor { get { return _descriptor; } }
 
 		private ChannelFactory<TChannel> _channelFactory;
@@ -39,6 +50,9 @@ namespace Alphora.Common.WCF
 
 		#region IDisposable Members
 
+		/// <summary>
+		/// Disposes the channel factory entry, releasing the underlying channel factory.
+		/// </summary>
 		public void Dispose()
 		{
 			if (!_disposed)
@@ -78,7 +92,11 @@ namespace Alphora.Common.WCF
 				// TODO: should we at least log this?
 			}
 		}
-		
+
+		/// <summary>
+		/// Gets a channel factory wrapper for the cached channel factory.
+		/// </summary>
+		/// <returns>A channel factory wrapper for the cached channel factory.</returns>
 		public ChannelFactoryWrapper<TChannel> GetChannelFactory()
 		{
 			CheckNotDisposed();
@@ -88,6 +106,10 @@ namespace Alphora.Common.WCF
 			return wrapper;
 		}
 
+		/// <summary>
+		/// Releases a channel factory and returns whether or not any references are still active.
+		/// </summary>
+		/// <returns>True if there are no active references to the channel factory, false otherwise.</returns>
 		public bool ReleaseChannelFactory()
 		{
 			CheckNotDisposed();
