@@ -13,7 +13,7 @@ using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Listener
 {
-	public class ListenerClient : ServiceClient<IClientListenerService>
+	public class ListenerClient : DataphorServiceClient<IClientListenerService>
 	{
 		public ListenerClient(string hostName, int overridePortNumber) : base(DataphorServiceUtility.BuildListenerURI(hostName, overridePortNumber)) 
 		{ 
