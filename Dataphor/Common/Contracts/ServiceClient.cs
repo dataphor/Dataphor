@@ -9,13 +9,17 @@ using System.Collections.Generic;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 
+using Alphora.Dataphor.DAE.WCF;
+
 namespace Alphora.Dataphor.DAE.Contracts
 {
 	public abstract class ServiceClient<T> : IDisposable
 	{
+		private static ChannelFactoryCache<T> _channelFactoryCache = new ChannelFactoryCache<T>();
+
 		public ServiceClient(Binding binding, EndpointAddress endpointAddress)
 		{
-			_channelFactory = new ChannelFactory<T>(binding, endpointAddress);
+			_channelFactoryWrapper = _channelFactoryCache.GetChannelFactory(binding, endpointAddress);
 		}
 		
 		public ServiceClient(string endpointURI) 
@@ -31,22 +35,49 @@ namespace Alphora.Dataphor.DAE.Contracts
 		
 		public void Dispose()
 		{
-			InternalDispose();
-			
-			if (_channel != null)
+			try
 			{
-				CloseChannel();
-				SetChannel(default(T));
+				InternalDispose();
 			}
-			
-			if (_channelFactory != null)
+			finally
 			{
-				CloseChannelFactory();
-				_channelFactory = null;
+				// NOTE: Some sort of issue occurs when running with this service client
+				// such that when the CloseChannelFactory call is made, the channel is
+				// already in the faulted state. Despite concerted effort, I was unable
+				// to reproduce the issue under debug, and whatever exception is occurring
+				// to put the channel into the faulted state 1) Occurs only on the client,
+				// and 2) Does not result in any exception on the utilizing thread.
+				// Ignoring the exception seems the only rational thing to do at this point.
+
+				try
+				{
+					if (_channel != null)
+					{
+						CloseChannel();
+						SetChannel(default(T));
+					}
+				}
+				catch (Exception e)
+				{
+					// TODO: Log exception
+				}
+
+				try
+				{			
+					if (_channelFactoryWrapper != null)
+					{
+						_channelFactoryWrapper.Dispose();
+						_channelFactoryWrapper = null;
+					}
+				}
+				catch (Exception e)
+				{
+					// TODO: Log exception
+				}
 			}
 		}
 
-		private ChannelFactory<T> _channelFactory;
+		private ChannelFactoryWrapper<T> _channelFactoryWrapper;
 		private T _channel;
 
 		private bool IsChannelFaulted(T channel)
@@ -85,26 +116,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 					channel.Abort();
 		}
 		
-		private void CloseChannelFactory()
-		{
-			try
-			{
-				if (_channelFactory.State == CommunicationState.Opened)
-					_channelFactory.Close();
-				else
-					_channelFactory.Abort();
-			}
-			catch
-			{
-				// Don't let a shut-down error eat a more important error
-				// TODO: should we at least log this?
-			}
-		}
-		
 		protected T GetInterface()
 		{
 			if ((_channel == null) || !IsChannelValid(_channel))
-				SetChannel(_channelFactory.CreateChannel());
+				SetChannel(_channelFactoryWrapper.ChannelFactory.CreateChannel());
 			return _channel;
 		}
 	}
