@@ -1,4 +1,5 @@
-<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" name="Documentation" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
-    <files.filereference filename="C:\src\Alphora\Libraries\Documentation\Source\obj\Debug\DocSamples.dll" isassembly="True" />
-    <libraries.libraryreference name="MSSQLDevice" version="*" />
+﻿<?xml version="1.0" encoding="utf-8"?>
+<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" name="Documentation" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+	<files.filereference filename="DocSamples.dll" isassembly="True" />
+	<libraries.libraryreference name="MSSQLDevice" version="*" />
 </library>

@@ -5,6 +5,9 @@
 */
 // Note: All batches in this script must run on the same process, i.e. they must be run as a whole script.
 
+//select ApplicationTransactions
+//RollbackApplicationTransaction(ApplicationTransactions[].ID);
+
 create table Test { ID : Integer, key { ID } };
 
 create table ATID { ID : Guid, key { } };

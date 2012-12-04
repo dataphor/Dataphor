@@ -29,12 +29,23 @@
 // register the documentation operator moved to register script
 //create operator DocOperator ( const ATemplate: String, const ATitle: String, const AOutput: String, const AObjects: cursor(table {Name: System.Name}) ) class "DocOperator";
 
+/*
+select ListFiles("c:\users\bryn\documents\src\alphora\dataphor\documentation\docbookmanuals\operatordocs") { GetFileName(Path) FileName } order by { FileName }
+
+select 
+	Operators { OperatorName + '.xml' FileName } 
+		minus (ListFiles("c:\users\bryn\documents\src\alphora\dataphor\documentation\docbookmanuals\operatordocs") { GetFileName(Path) FileName }) 
+	order by { FileName }
+*/
+
+var LDocumentationRoot := ServerSettings[].LibraryDirectory.Split()[0] + '\..\Documentation\';
+
 // generate documentation for the system operators
 DocOperator
 (
 	"Docbook",
 	"System Library Operators",
-	"c:\DocBuild\Alphora\docbook\SystemLibrary.xml",
+	LDocumentationRoot + "\Docs2.0\SystemLibrary.xml",
 	cursor 
 	(
 		Operators over {Name} 
@@ -49,7 +60,7 @@ DocOperator
 (
 	"Docbook",
 	"System Tables",
-	"c:\docbuild\Alphora\docbook\SystemTables.xml",
+	LDocumentationRoot + "\tmp\SystemTables.xml",
 	cursor
 	(
 		TableVars over {Name} 

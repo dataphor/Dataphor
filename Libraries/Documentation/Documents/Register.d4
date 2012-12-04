@@ -11,13 +11,14 @@ create operator DocLibrary ( const ALibraryName: String, const AXMLTemplate: Str
 //****************************************
 
 create device DocumentationDevice
-	reconciliation { mode = { none }, master = device }
+	reconciliation { mode = { command }, master = device }
 	class "MSSQLDevice"
 		attributes
 		{
 			"ServerName" = ".",
 			"DatabaseName" = "Documentation",
-			"UserID" = "sa"
+			"UseIntegratedSecurity" = "true"
+			//"UserID" = "sa"
 			//"IsCaseSensitive" = "true"
 		};
 

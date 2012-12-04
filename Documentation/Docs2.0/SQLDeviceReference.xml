@@ -141,7 +141,7 @@
 								<para><ulink url="DRDB2DeviceLibrary-Settings.html"
 									 type="link">DB2 device settings</ulink></para> 
 						  </listitem> 
-					 </itemizedlist></para> <?DocLib ExtDoc outer droptags="abc" c:\src\Alphora\Docs\Docs2.0\SQLDeviceSettings.xml?>
+					 </itemizedlist></para> <?DocLib ExtDoc outer droptags="abc" SQLDeviceSettings.xml?>
 		  </section> 
 	 </section>
 	<!--DocLib D4ExpressionIf TableDee add{  Result} --><!-- todo: figure out how to skip this section -->
@@ -216,8 +216,8 @@
 					 </itemizedlist> </para> 
 		  </section>
 		<!--The following DocLib instruction includes the whole section level data of the SQLDevice ScalarTypes-->
-<?DocLib ExtDoc outer droptags="sectioninfo" c:\src\Alphora\Docs\Docs2.0\SQLDeviceTypes.xml?>
+<?DocLib ExtDoc outer droptags="sectioninfo" SQLDeviceTypes.xml?>
 <!--The following DocLib instruction includes the whole section level data of the System Operators-->
-<?DocLib ExtDoc outer droptags="sectioninfo" c:\src\Alphora\Docs\Docs2.0\SQLDeviceOperators.xml?>
+<?DocLib ExtDoc outer droptags="sectioninfo" SQLDeviceOperators.xml?>
 	 </section>
 </chapter>

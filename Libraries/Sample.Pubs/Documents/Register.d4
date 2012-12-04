@@ -17,7 +17,7 @@ create device Pubs
 	attributes
 	{
 		"UseIntegratedSecurity" = "True", // set this to false to use SQL Server Authentication
-		"ServerName" = ".",
+		"ServerName" = "MYNOCK\MYNOCK",
 		"DatabaseName" = "pubs"
 	};
 

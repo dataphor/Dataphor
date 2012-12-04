@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
-<?xml-stylesheet type="text/css" href="../../../../Program%20Files/SoftQuad/XMetaL%203/Display/DocBookx.css" ?>
-<!DOCTYPE set PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "../../../../Program%20Files/SoftQuad/XMetaL%203/Rules/DocBookx.dtd" [
+<!--?xml-stylesheet type="text/css" href="../../../../Program%20Files/SoftQuad/XMetaL%203/Display/DocBookx.css" ?-->
+<?xml-stylesheet type="text/css" href="DocBookx.css" ?>
+<!--set attribute was: set PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "../../../../Program%20Files/SoftQuad/XMetaL%203/Rules/DocBookx.dtd" -->
+<!DOCTYPE set PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "DocBookx.dtd" [
 	 <!ENTITY ADOConnectionLibraryReference SYSTEM "ADOConnectionLibraryReference.xml">
 	 <!ENTITY Bibliography SYSTEM "Bibliography.xml">
 	 <!ENTITY ComponentSamples SYSTEM "ComponentSamples.xml">

@@ -23,6 +23,7 @@ namespace DocSamples
 	using Alphora.Dataphor.DAE.Language.D4;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 	using Instructions = Alphora.Dataphor.DAE.Runtime.Instructions;
+	using System.Collections.Generic;
 	
 
 	/// <summary>
@@ -396,7 +397,11 @@ namespace DocSamples
 		protected override void WriteDocbookData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, Row row)
 		{
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object objectValue = process.Catalog.Objects[(string)row["Name"]];
+			var names = new List<String>();
+			Schema.Object objectValue = process.CatalogDeviceSession.ResolveName((string)row["Name"], process.ServerSession.NameResolutionPath, names);
+			if (objectValue == null)
+				throw new ArgumentException(String.Format("Could not resolve object name: {0}", (string)row["Name"]));
+
 			string filename = "c:\\src\\Alphora\\Docs\\DocbookManuals\\OperatorDocs\\" + GetJustName(objectValue) + ".xml";
 			
 			if (System.IO.File.Exists(filename))
@@ -615,6 +620,7 @@ namespace DocSamples
 
 				// new dataconnection
 				_dataSession = new DAEClient.DataSession();
+				_dataSession.Alias = new DAEClient.ConnectionAlias { Name = program.ServerProcess.ServerSession.Server.Name, InstanceName = program.ServerProcess.ServerSession.Server.Name };
 				_dataSession.SessionInfo.UserID = program.ServerProcess.ServerSession.SessionInfo.UserID;
 				_dataSession.SessionInfo.Password = program.ServerProcess.ServerSession.SessionInfo.Password;
 				//FDataSession.ServerConnection = new DAEClient.ServerConnection(AProgram.ServerProcess.ServerSession.Server);
@@ -635,9 +641,9 @@ namespace DocSamples
 
 		}
 
-		protected void UpdateParams(DAEClient.DataView LDataView, Row row, string paramsValue)
+		protected void UpdateParams(DAEClient.DataView LDataView, DAEClient.DataView sourceDataView, string paramsValue)
 		{
-			if (row != null && paramsValue != "")
+			if (sourceDataView != null && !sourceDataView.IsEmpty() && paramsValue != "")
 			{
 				DAEClient.DataSetParamGroup paramGroup = new DAEClient.DataSetParamGroup();
 				DAEClient.DataSetParam param;
@@ -665,8 +671,8 @@ namespace DocSamples
 					param = new DAEClient.DataSetParam();
 					param.Name = paramName;
 					param.Modifier =  Alphora.Dataphor.DAE.Language.Modifier.Const;
-					param.DataType = row.DataType.Columns[columnName].DataType;
-					param.Value = row[columnName];
+					param.DataType = sourceDataView.TableType.Columns[columnName].DataType;
+					param.Value = sourceDataView[columnName];
 					//LParam.ColumnName = LColumnName;
 					paramGroup.Params.Add(param);
 				}
@@ -674,7 +680,7 @@ namespace DocSamples
 			}
 		}
 
-		protected DAEClient.DataView GetParamDataView(string expression, Row row)
+		protected DAEClient.DataView GetParamDataView(string expression, DAEClient.DataView dataView)
 		{
 			string paramStr;
 			string localExpression = expression;
@@ -692,24 +698,24 @@ namespace DocSamples
 			// todo: how does getting a new process fit into this?
 			//ServerProcess LProcess = (ServerProcess)FDataphorConnection.ServerSession.StartProcess(new ProcessInfo(AProcess.ServerSession.SessionInfo));
 
-			DAEClient.DataView dataView = new DAEClient.DataView();
-			dataView.Session = _dataSession;
-			dataView.Expression = localExpression;
-			dataView.IsReadOnly = true;
-			dataView.CursorType = CursorType.Static;
+			DAEClient.DataView resultDataView = new DAEClient.DataView();
+			resultDataView.Session = _dataSession;
+			resultDataView.Expression = localExpression;
+			resultDataView.IsReadOnly = true;
+			resultDataView.CursorType = CursorType.Static;
 			// attach parameters from row to the new view
-			UpdateParams(dataView, row, paramStr);
-			dataView.Open(DAEClient.DataSetState.Browse);
+			UpdateParams(resultDataView, dataView, paramStr);
+			resultDataView.Open(DAEClient.DataSetState.Browse);
 
-			return (dataView);
+			return (resultDataView);
 		}
 
-		protected string D4ExpressionField(ServerProcess process, Row row, string paramsString)
+		protected string D4ExpressionField(ServerProcess process, DAEClient.DataView dataView, string paramsString)
 		{
 			// assumes the processing instruction is the current node
 			// AParamString should be this format: <fieldname> <expression>
 
-			DAEClient.DataView dataView;
+			DAEClient.DataView subDataView;
 			string expression;
 			string fieldName = paramsString;
 			int spacePos = fieldName.IndexOf(" ");
@@ -717,43 +723,43 @@ namespace DocSamples
 			fieldName = fieldName.Substring(0, spacePos);
 			
 
-			dataView = GetParamDataView(expression, row);
+			subDataView = GetParamDataView(expression, dataView);
 			try
 			{
-				dataView.First();
-				if (! dataView.EOF)
-					return D4Field(fieldName, dataView.ActiveRow);
+				subDataView.First();
+				if (! subDataView.EOF)
+					return D4Field(fieldName, subDataView);
 				else
 					return String.Format("Message: No data from D4ExpressionField: {0}", expression);
 
 			}
 			finally
 			{
-				dataView.Dispose();
+				subDataView.Dispose();
 			}
 		}
 
-		protected bool D4ExpressionIf(ServerProcess process, Row row, string paramsString)
+		protected bool D4ExpressionIf(ServerProcess process, DAEClient.DataView dataView, string paramsString)
 		{
 			// assumes the processing instruction is the current node
 			// AParamString should be this format: <expression>
 			//   where expression is of the form: TableDee add { <expression> Result }
 			//     and the result is boolean, True is required for the block to process
 
-			DAEClient.DataView dataView;
+			DAEClient.DataView localDataView;
 			
-			dataView = GetParamDataView(paramsString, row);
+			localDataView = GetParamDataView(paramsString, dataView);
 			try
 			{
-				dataView.First();
-				if (! dataView.EOF)
-					return D4Field("Result", dataView.ActiveRow) == "True";
+				localDataView.First();
+				if (! localDataView.EOF)
+					return D4Field("Result", localDataView) == "True";
 				else
 					return false;
 			}
 			finally
 			{
-				dataView.Dispose();
+				localDataView.Dispose();
 			}
 		}
 
@@ -768,7 +774,7 @@ namespace DocSamples
 			if (_traceOn)
 				_trace.WriteLine(String.Format("Process BlockNode Tag = {0} ContainsRowTag = {1}",template.LocalName, parentContainsRowTag.ToString()));
 
-			ProcessNode(process, template, output, dataView.ActiveRow, ! parentContainsRowTag);
+			ProcessNode(process, template, output, dataView, !parentContainsRowTag);
 
 			if (parentContainsRowTag)
 			{
@@ -789,7 +795,7 @@ namespace DocSamples
 								nav = template.Clone();
 								while(! dataView.EOF)
 								{
-									ProcessNode(process, nav, output, dataView.ActiveRow, true);
+									ProcessNode(process, nav, output, dataView, true);
 									dataView.Next();
 									nav.MoveTo(template); // move to the first tag of the fragment
 								}
@@ -798,7 +804,7 @@ namespace DocSamples
 								ProcessBlockNode(process, template, output, rowTag, dataView);
 						}
 						else
-							ProcessNode(process, template, output, dataView.ActiveRow, true);
+							ProcessNode(process, template, output, dataView, true);
 
 					} while(template.MoveToNext());
 
@@ -813,14 +819,14 @@ namespace DocSamples
 			return(true);
 		}
 
-		protected bool D4ExpressionBlock(ServerProcess process, XPathNavigator template, XmlTextWriter output, Row row, string paramsString)
+		protected bool D4ExpressionBlock(ServerProcess process, XPathNavigator template, XmlTextWriter output, DAEClient.DataView dataView, string paramsString)
 		{
 			// assumes the processing instruction is the current node
 			// AParamString should be this format: <rowtag> <expression>
 
 			
 			XPathNavigator nav;
-			DAEClient.DataView dataView;
+			DAEClient.DataView localDataView;
 			int spacePos;
 			string rowTag;
 			string expression = paramsString;
@@ -830,10 +836,10 @@ namespace DocSamples
 			rowTag = expression.Substring(0, spacePos);
 			expression =  expression.Substring(spacePos + 1);
 			
-			dataView = GetParamDataView(expression, row);
+			localDataView = GetParamDataView(expression, dataView);
 			try
 			{
-				dataView.First();
+				localDataView.First();
 				template.MoveToNext();
 
 				if (_traceOn)
@@ -847,23 +853,23 @@ namespace DocSamples
 				 * allows all libraries, for example, to be processed by a D4ExpressionBlock and a ExtDoc combination
 				 * of tags.
 				 */
-				if (! dataView.EOF)
+				if (! localDataView.EOF)
 				{
 					if (rowTag.Equals("*"))
 					{
 						nav = template.Clone();
-						dataView.First();
-						while(! dataView.EOF)
+						localDataView.First();
+						while(! localDataView.EOF)
 						{
 							// process the template
-							ProcessNode(process, nav, output, dataView.ActiveRow, true);
-							dataView.Next();
+							ProcessNode(process, nav, output, localDataView, true);
+							localDataView.Next();
 							nav.MoveTo(template); // move to the first tag of the fragment
 						}
 					}
 					else
 						if (((IHasXmlNode)template).GetNode().SelectNodes(String.Format(".//{0}",rowTag)).Count > 0)
-							ProcessBlockNode(process, template, output, rowTag, dataView);
+							ProcessBlockNode(process, template, output, rowTag, localDataView);
 						else
 						{
 							output.WriteComment(String.Format("Error: D4Expression Block missing row tag name [ {0} ]", rowTag));
@@ -876,23 +882,23 @@ namespace DocSamples
 			}
 			finally
 			{
-				dataView.Dispose();
+				localDataView.Dispose();
 			}
 			return (true);
 			
 		}
 
-		protected string D4Field(string paramString, Row row)
+		protected string D4Field(string paramString, DAEClient.DataView dataView)
 		{
 			// data assumed to be simple text to be inserted into the file
 			// AParamString should be this format: <fieldname>
-			if (row != null)
-				return((string)row[paramString]);
+			if (dataView != null && !dataView.IsEmpty())
+				return(dataView[paramString].AsString);
 			else
 				return(String.Empty);
 		}
 
-		protected bool D4ExtDoc(ServerProcess process, XPathNavigator template, XmlTextWriter output, string paramsString, Row row)
+		protected bool D4ExtDoc(ServerProcess process, XPathNavigator template, XmlTextWriter output, string paramsString, DAEClient.DataView dataView)
 		{
 			// assumes the processing instruction is the current node
 			// AParamString should be this format: <inner | outer> droptags="tag,tag,.." <fieldname> <expression>
@@ -919,7 +925,7 @@ namespace DocSamples
 			passThrough =  passThrough.Trim();
 			
 
-			string templateStr = D4ExpressionField(process, row, passThrough);
+			string templateStr = D4ExpressionField(process, dataView, passThrough);
 
 			if (templateStr != "")
 			{
@@ -970,17 +976,17 @@ namespace DocSamples
 					LxPathNavigator.MoveToFirstChild();
 					do 
 					{
-						ProcessNode(process, LxPathNavigator, output, row, true);
+						ProcessNode(process, LxPathNavigator, output, dataView, true);
 					} while(LxPathNavigator.MoveToNext());
 				}
 				else
-					ProcessNode(process, LxPathNavigator, output, row, true);
+					ProcessNode(process, LxPathNavigator, output, dataView, true);
 			}
 
 			return(true);
 		}
 
-		protected bool ExtDoc(ServerProcess process, XPathNavigator template, XmlTextWriter output, string paramsString, Row row)
+		protected bool ExtDoc(ServerProcess process, XPathNavigator template, XmlTextWriter output, string paramsString, DAEClient.DataView dataView)
 		{
 			// assumes the processing instruction is the current node
 			// AParamString should be this format: <inner | outer> droptags="tag,tag,.." <filename>
@@ -1064,11 +1070,11 @@ namespace DocSamples
 						LxPathNavigator.MoveToFirstChild();
 						do 
 						{
-							ProcessNode(process, LxPathNavigator, output, row, true);
+							ProcessNode(process, LxPathNavigator, output, dataView, true);
 						} while(LxPathNavigator.MoveToNext());
 					}
 					else
-						ProcessNode(process, LxPathNavigator, output, row, true);
+						ProcessNode(process, LxPathNavigator, output, dataView, true);
 				}
 				finally
 				{
@@ -1079,7 +1085,7 @@ namespace DocSamples
 			return(true);
 		}
 		
-		protected bool WriteNodeWithAttr(XPathNavigator template, XmlTextWriter output, Row row)
+		protected bool WriteNodeWithAttr(XPathNavigator template, XmlTextWriter output, DAEClient.DataView dataView)
 		{
 			XmlNode node = ((IHasXmlNode)template).GetNode();
 			output.WriteStartElement(node.LocalName);
@@ -1090,7 +1096,7 @@ namespace DocSamples
 				// todo: implement processing instructions with "parameters" (D4Field, D4ExpressionField) probably use ? ? as delimiter in Value rather than <? ?> illegal
 				if (attribute.Value.IndexOf("DocLib:D4Field_") == 0)
 				{
-					output.WriteAttributeString(attribute.LocalName, D4Field(attribute.Value.Substring(15), row));
+					output.WriteAttributeString(attribute.LocalName, D4Field(attribute.Value.Substring(15), dataView));
 				}
 				else
 					output.WriteAttributeString(attribute.LocalName, attribute.Value);
@@ -1098,7 +1104,7 @@ namespace DocSamples
 			return(true);
 		}
 
-		protected bool ProcessNode(ServerProcess process, XPathNavigator template, XmlTextWriter output, Row row, bool processChildren)
+		protected bool ProcessNode(ServerProcess process, XPathNavigator template, XmlTextWriter output, DAEClient.DataView dataView, bool processChildren)
 		{
 			XPathNodeType nodeType = template.NodeType;
 			XmlProcessingInstruction pI = null;
@@ -1128,14 +1134,14 @@ namespace DocSamples
 						switch(pICommand)
 						{
 							case "D4ExpressionField":
-								output.WriteString(D4ExpressionField(process, row, pIData));
+								output.WriteString(D4ExpressionField(process, dataView, pIData));
 								break;
 							case "D4ExpressionBlock":
-								D4ExpressionBlock(process, template, output, row, pIData);
+								D4ExpressionBlock(process, template, output, dataView, pIData);
 								break;
 							case "D4ExpressionIf":
 								// TableDee add { <expression> Result }
-								if (! D4ExpressionIf(process, row, pIData) )
+								if (! D4ExpressionIf(process, dataView, pIData) )
 								{
 									// skip to next
 									template.MoveToNext();
@@ -1150,13 +1156,13 @@ namespace DocSamples
 								}
 								break;
 							case "D4Field": // illegal at this point?
-								output.WriteString(D4Field(pIData, row));
+								output.WriteString(D4Field(pIData, dataView));
 								break;
 							case "D4ExtDoc":
-								D4ExtDoc(process, template, output, pIData, row);
+								D4ExtDoc(process, template, output, pIData, dataView);
 								break;
 							case "ExtDoc":
-								ExtDoc(process, template, output, pIData, row);
+								ExtDoc(process, template, output, pIData, dataView);
 								break;
 							default:
 								// passthrough unknown commands
@@ -1178,7 +1184,7 @@ namespace DocSamples
 					break;
 				case XPathNodeType.Element:
 					// write out regular nodes and process children
-					WriteNodeWithAttr(template, output, row);
+					WriteNodeWithAttr(template, output, dataView);
 					if (processChildren)
 					{
 						if (template.HasChildren)
@@ -1186,7 +1192,7 @@ namespace DocSamples
 							template.MoveToFirstChild();
 							do 
 							{
-								ProcessNode(process, template, output, row, true);
+								ProcessNode(process, template, output, dataView, true);
 							} while(template.MoveToNext());
 
 							template.MoveToParent();
