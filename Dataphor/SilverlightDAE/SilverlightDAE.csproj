@@ -262,6 +262,18 @@
     <Compile Include="..\Common\Listener\ListenerFactory.cs">
       <Link>Common\Listener\ListenerFactory.cs</Link>
     </Compile>
+    <Compile Include="..\Common\WCF\ChannelFactoryCache.cs">
+      <Link>Common\WCF\ChannelFactoryCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\WCF\ChannelFactoryEntry.cs">
+      <Link>Common\WCF\ChannelFactoryEntry.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\WCF\ChannelFactoryWrapper.cs">
+      <Link>Common\WCF\ChannelFactoryWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\WCF\EndpointDescriptor.cs">
+      <Link>Common\WCF\EndpointDescriptor.cs</Link>
+    </Compile>
     <Compile Include="..\DAE.Client\Alias.cs">
       <Link>DAE.Client\Alias.cs</Link>
     </Compile>
