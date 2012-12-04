@@ -1,6 +1,6 @@
 ﻿/*
 	Dataphor
-	© Copyright 2000-2009 Alphora
+	© Copyright 2000-2012 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
@@ -9,9 +9,7 @@ using System.Collections.Generic;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 
-using Alphora.Dataphor.DAE.WCF;
-
-namespace Alphora.Dataphor.DAE.Contracts
+namespace Alphora.Common.WCF
 {
 	public abstract class ServiceClient<T> : IDisposable
 	{
@@ -20,15 +18,6 @@ namespace Alphora.Dataphor.DAE.Contracts
 		public ServiceClient(Binding binding, EndpointAddress endpointAddress)
 		{
 			_channelFactoryWrapper = _channelFactoryCache.GetChannelFactory(binding, endpointAddress);
-		}
-		
-		public ServiceClient(string endpointURI) 
-			: this
-			(
-				DataphorServiceUtility.GetBinding(), 
-				new EndpointAddress(endpointURI)
-			)
-		{
 		}
 		
 		protected virtual void InternalDispose() { }

@@ -14,7 +14,7 @@ using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.NativeCLI
 {
-	public abstract class NativeCLIClient : ServiceClient<IClientNativeCLIService>
+	public abstract class NativeCLIClient : DataphorServiceClient<IClientNativeCLIService>
 	{
 		public const string DefaultInstanceName = "Dataphor";
 		

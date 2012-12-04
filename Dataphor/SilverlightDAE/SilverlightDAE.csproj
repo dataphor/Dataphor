@@ -241,6 +241,9 @@
     <Compile Include="..\Client\Streams\LocalStreamManager.cs">
       <Link>Client\Streams\LocalStreamManager.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Contracts\DataphorServiceClient.cs">
+      <Link>Common\Contracts\DataphorServiceClient.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Contracts\DataphorServiceUtility.cs">
       <Link>Common\Contracts\DataphorServiceUtility.cs</Link>
     </Compile>
@@ -252,9 +255,6 @@
     </Compile>
     <Compile Include="..\Common\Contracts\ListenerFaultUtility.cs">
       <Link>Common\Contracts\ListenerFaultUtility.cs</Link>
-    </Compile>
-    <Compile Include="..\Common\Contracts\ServiceClient.cs">
-      <Link>Common\Contracts\ServiceClient.cs</Link>
     </Compile>
     <Compile Include="..\Common\Listener\ListenerClient.cs">
       <Link>Common\Listener\ListenerClient.cs</Link>
@@ -273,6 +273,9 @@
     </Compile>
     <Compile Include="..\Common\WCF\EndpointDescriptor.cs">
       <Link>Common\WCF\EndpointDescriptor.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\WCF\ServiceClient.cs">
+      <Link>Common\WCF\ServiceClient.cs</Link>
     </Compile>
     <Compile Include="..\DAE.Client\Alias.cs">
       <Link>DAE.Client\Alias.cs</Link>

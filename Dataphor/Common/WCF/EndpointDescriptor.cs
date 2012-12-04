@@ -11,7 +11,7 @@ using System.Text;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 
-namespace Alphora.Dataphor.DAE.WCF
+namespace Alphora.Common.WCF
 {
 	class EndpointDescriptor
 	{
