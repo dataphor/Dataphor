@@ -612,16 +612,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Order = CopyOrder(SourceNode.Order);
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			Nodes[0].DetermineBinding(plan);
+			Nodes[0].BindingTraversal(plan, visitor);
 			plan.EnterRowContext();
 			try
 			{
 				plan.Symbols.Push(new Symbol(String.Empty, DataType.RowType));
 				try
 				{
-					Nodes[1].DetermineBinding(plan);
+					Nodes[1].BindingTraversal(plan, visitor);
 				}
 				finally
 				{
@@ -769,9 +769,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override void DetermineDevice(Plan plan)
+		public override void DetermineAccessPath(Plan plan)
 		{
-			base.DetermineDevice(plan);
+			base.DetermineAccessPath(plan);
 			if (!_deviceSupported)
 			{
 				DetermineRestrictionAlgorithm(plan);

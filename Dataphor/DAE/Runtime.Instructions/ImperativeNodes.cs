@@ -137,12 +137,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.Symbols.PushFrame();
 			try
 			{
-				base.InternalDetermineBinding(plan);
+				base.InternalBindingTraversal(plan, visitor);
 			}
 			finally
 			{
@@ -458,9 +458,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _location = value; }
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			Nodes[0].DetermineBinding(plan);
+			Nodes[0].BindingTraversal(plan, visitor);
 			if (_statement.VariableName == String.Empty)
 				plan.EnterRowContext();
 			try
@@ -480,7 +480,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							throw new CompilerException(CompilerException.Codes.InvalidColumnBinding, _statement.VariableName);
 					}
 
-					Nodes[1].DetermineBinding(plan);
+					Nodes[1].BindingTraversal(plan, visitor);
 				}
 				finally
 				{
@@ -817,14 +817,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _variableName = value == null ? String.Empty : value; }
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.Symbols.PushFrame();
 			try
 			{
 				if (_variableName != String.Empty)
 					plan.Symbols.Push(new Symbol(_variableName, _errorType));
-				base.InternalDetermineBinding(plan);
+				base.InternalBindingTraversal(plan, visitor);
 			}
 			finally
 			{
@@ -1108,23 +1108,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			IsBreakable = true;
 		}
-		
-		public override void DetermineBinding(Plan plan)
+
+		// TODO: Change the way this compiles so that it doesn't use nameless stack references so that this binding override can be removed
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			Nodes[0].DetermineBinding(plan);
+			Nodes[0].BindingTraversal(plan, visitor);
 			// Do not bind node 1, it will fail (it contains nameless stack references)
 			plan.Symbols.Push(new Symbol(String.Empty, Nodes[0].DataType));
 			try
 			{
 				for (int index = 2; index < Nodes.Count; index++)
-					Nodes[index].DetermineBinding(plan);
+					Nodes[index].BindingTraversal(plan, visitor);
 			}
 			finally
 			{
 				plan.Symbols.Pop();
 			}
-
-			DetermineDevice(plan);
 		}
 
 		public override object InternalExecute(Program program)
@@ -1343,13 +1342,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_dataType = Nodes[0].DataType;
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			if (Modifier == Modifier.Var)
 				plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 			try
 			{
-				base.InternalDetermineBinding(plan);
+				base.InternalBindingTraversal(plan, visitor);
 			}
 			finally
 			{
@@ -1420,13 +1419,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			bool saveIsInsert = plan.IsInsert;
 			plan.IsInsert = false;
 			try
 			{
-				base.InternalDetermineBinding(plan);
+				base.InternalBindingTraversal(plan, visitor);
 			}
 			finally
 			{
@@ -1440,7 +1439,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 				if (_allocateResultNode != null)
-					_allocateResultNode.DetermineBinding(plan);
+					_allocateResultNode.BindingTraversal(plan, visitor);
 			}
 			finally
 			{
@@ -1761,13 +1760,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _hasDefault = value; } 
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			if (NodeCount > 0)
 				plan.Symbols.Push(new Symbol(String.Empty, plan.DataTypes.SystemGeneric));
 			try
 			{
-				base.InternalDetermineBinding(plan);
+				base.InternalBindingTraversal(plan, visitor);
 			}
 			finally
 			{
@@ -1775,6 +1774,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					plan.Symbols.Pop();
 			}
 			plan.Symbols.Push(new Symbol(_variableName, _variableType));
+
+			// TODO: This is more of a DetermineBehavior type call
 			Schema.ScalarType scalarType = _variableType as Schema.ScalarType;
 			if (scalarType != null)
 				_hasDefault = ((scalarType.Default != null) || (scalarType.HasHandlers(EventType.Default)));
@@ -1891,7 +1892,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ShouldEmitIL = true;
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.Symbols.Pop();
 		}
@@ -2217,14 +2218,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void DetermineBinding(Plan plan)
+		// TODO: Change the way this compiles so that it doesn't use nameless stack references so that this binding override can be removed
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			Nodes[0].DetermineBinding(plan);
+			Nodes[0].BindingTraversal(plan, visitor);
 			// Do not bind node 1, it will fail (it contains nameless stack references)
 			for (int index = 2; index < Nodes.Count; index++)
-				Nodes[index].DetermineBinding(plan);
-
-			DetermineDevice(plan);
+				Nodes[index].BindingTraversal(plan, visitor);
 		}
 
 		public override object InternalExecute(Program program)
@@ -2387,7 +2387,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return new VariableIdentifierExpression(_identifier);
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			int columnIndex;
 			Location = Compiler.ResolveVariableIdentifier(plan, _identifier, out columnIndex);
@@ -2553,7 +2553,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return new ColumnIdentifierExpression(_resolvingIdentifier);
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			#if USECOLUMNLOCATIONBINDING
 			Location = Compiler.ResolveVariableIdentifier(APlan, Identifier, out ColumnLocation);

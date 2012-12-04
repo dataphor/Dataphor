@@ -1679,8 +1679,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								try
 								{
 									PlanNode node = Compiler.CompileExpression(plan.Plan, new D4.Parser(true).ParseExpression(instructionNode.EmitStatementAsString()));
-									node = Compiler.OptimizeNode(plan.Plan, node);
-									node.InternalDetermineBinding(plan.Plan); // Don't use the compiler bind here because we already know a determine device call on the top level node will fail
+									node.BindingTraversal(plan.Plan, null); // Don't use the compiler bind here because we already know a determine device call on the top level node will fail
 									planNode.CouldSupport = true; // Set this to indicate that support could be provided if it would be beneficial to do so
 									return FromScalar(localDevicePlan, node);
 								}
@@ -1907,7 +1906,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 									if (reconciliationRequired)
 									{
 										alterTableNode.AlterTableStatement = d4AlterTableStatement;
+										alterTableNode.DeterminePotentialDevice(devicePlan.Plan);
 										alterTableNode.DetermineDevice(devicePlan.Plan);
+										alterTableNode.DetermineAccessPath(devicePlan.Plan);
 										batch.Statements.Add(TranslateAlterTableNode(devicePlan, alterTableNode));
 									}
 								}

@@ -203,9 +203,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			Nodes[0].DetermineBinding(plan);
+			Nodes[0].BindingTraversal(plan, visitor);
 			
 			// Add the computed columns
 			plan.EnterRowContext();
@@ -215,7 +215,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					for (int index = 1; index < Nodes.Count; index++)	
-						Nodes[index].DetermineBinding(plan);
+						Nodes[index].BindingTraversal(plan, visitor);
 				}
 				finally
 				{

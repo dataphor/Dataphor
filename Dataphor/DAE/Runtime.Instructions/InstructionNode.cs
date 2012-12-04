@@ -167,14 +167,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			base.InternalDetermineBinding(plan);
+			base.InternalBindingTraversal(plan, visitor);
 			
 			#if USECLEANUPNODES
 			if (CleanupNodes != null)
 				foreach (PlanNode node in CleanupNodes)
-					node.DetermineBinding(APlan);
+					node.BindingTraversal(APlan, visitor);
 			#endif
 		}
 		

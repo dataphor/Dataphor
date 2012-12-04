@@ -420,12 +420,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable, CursorIsolation.None));
 			try
 			{
-				Nodes[0].DetermineBinding(plan);
+				Nodes[0].BindingTraversal(plan, visitor);
 			}
 			finally
 			{
@@ -439,7 +439,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.IsInsert = true;
 				try
 				{
-					Nodes[1].DetermineBinding(plan);
+					Nodes[1].BindingTraversal(plan, visitor);
 				}
 				finally
 				{
@@ -732,12 +732,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _conditionNode = value; }
 		}
 
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 			try
 			{
-				Nodes[0].DetermineBinding(plan);
+				Nodes[0].BindingTraversal(plan, visitor);
 				if (!(((TableNode)Nodes[0]).CursorType == CursorType.Static))
 				{
 					Nodes[0] = Compiler.EmitCopyNode(plan, (TableNode)Nodes[0]);
@@ -751,7 +751,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						try
 						{
 							((TableNode)Nodes[0]).InferPopulateNode(plan);
+							Nodes[0].DeterminePotentialDevice(plan);
 							Nodes[0].DetermineDevice(plan);
+							Nodes[0].DetermineAccessPath(plan);
 						}
 						finally
 						{
@@ -778,7 +780,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					for (int index = 1; index < Nodes.Count; index++)
-						Nodes[index].DetermineBinding(plan);
+						Nodes[index].BindingTraversal(plan, visitor);
 				}
 				finally
 				{
@@ -959,11 +961,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			if (!_isGeneric)
 			{
-				Nodes[0].DetermineBinding(plan);
+				Nodes[0].BindingTraversal(plan, visitor);
 				plan.EnterRowContext();
 				try
 				{
@@ -971,7 +973,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					try
 					{
 						for (int index = 1; index < Nodes.Count; index++)
-							Nodes[index].DetermineBinding(plan);
+							Nodes[index].BindingTraversal(plan, visitor);
 					}
 					finally
 					{
@@ -984,7 +986,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 			else
-				base.InternalDetermineBinding(plan);
+				base.InternalBindingTraversal(plan, visitor);
 		}
 
 		public override object InternalExecute(Program program)
@@ -1087,12 +1089,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DeleteNode : DMLNode
     {
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 			try
 			{
-				Nodes[0].DetermineBinding(plan);
+				Nodes[0].BindingTraversal(plan, visitor);
 				if (!(((TableNode)Nodes[0]).CursorType == CursorType.Static))
 				{
 					Nodes[0] = Compiler.EmitCopyNode(plan, (TableNode)Nodes[0]);
@@ -1106,7 +1108,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						try
 						{
 							((TableNode)Nodes[0]).InferPopulateNode(plan);
+							Nodes[0].DeterminePotentialDevice(plan);
 							Nodes[0].DetermineDevice(plan);
+							Nodes[0].DetermineAccessPath(plan);
 						}
 						finally
 						{
@@ -1810,34 +1814,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				break;
 			}
 		}
+
+		public override void DeterminePotentialDevice(Plan plan)
+		{
+			if (_tableVar is Schema.BaseTableVar)
+				_potentialDevice = ((Schema.BaseTableVar)_tableVar).Device;
+			else
+				throw new CompilerException(CompilerException.Codes.InvalidRetrieveTarget, plan.CurrentStatement());
+		}
 		
 		public override void DetermineDevice(Plan plan)
 		{
-			PrepareJoinApplicationTransaction(plan);
-
-			if (_tableVar is Schema.BaseTableVar)
-				_device = ((Schema.BaseTableVar)_tableVar).Device;
-			else
-				throw new CompilerException(CompilerException.Codes.InvalidRetrieveTarget, plan.CurrentStatement());
-
-			if (_device != null)
+			if (_potentialDevice != null)
 			{
+				_device = _potentialDevice;
 				plan.EnsureDeviceStarted(_device);
 				Schema.DevicePlan devicePlan = _device.Prepare(plan, this);
 				if (!devicePlan.IsSupported)
 					throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice, _device.Name, _tableVar.DisplayName);
 
-				_deviceSupported = true;
-				SurrogateExecute = InternalDeviceExecute;
-				CheckDeviceRights(plan);
-				if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
-				{
-					DetermineModifySupported(plan);
-					_symbols = Compiler.SnapshotSymbols(plan);
-				}
+				SetDevice(plan, _potentialDevice);
 			}
 			else
 				_noDevice = true;
+		}
+
+		public override void SetDevice(Plan plan, Schema.Device device)
+		{
+			base.SetDevice(plan, device);
+			CheckDeviceRights(plan);
+			if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
+			{
+				DetermineModifySupported(plan);
+				_symbols = Compiler.SnapshotSymbols(plan);
+			}
 		}
 		
 		protected void CheckDeviceRights(Plan plan)
@@ -2482,7 +2492,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar.IsRemotable = false;
 		}
 		
-		public override void DetermineDevice(Plan plan)
+		public override void DeterminePotentialDevice(Plan plan)
 		{
 			_noDevice = true;
 		}

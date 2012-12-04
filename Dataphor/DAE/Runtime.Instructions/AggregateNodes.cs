@@ -91,7 +91,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_isNilable = _isNilable || Nodes[0].IsNilable;
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.Symbols.PushWindow(0);
 			try
@@ -99,7 +99,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.Symbols.Push(new Symbol(Keywords.Result, _dataType));
 				try
 				{
-					Nodes[1].DetermineBinding(plan);
+					Nodes[1].BindingTraversal(plan, visitor);
 
 					for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
 						plan.Symbols.Push(new Symbol(_valueNames[index], SourceNode.DataType.Columns[_aggregateColumnIndexes[index]].DataType));
@@ -110,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						plan.Symbols.AllowExtraWindowAccess = true;
 						try
 						{
-							Nodes[0].DetermineBinding(plan);
+							Nodes[0].BindingTraversal(plan, visitor);
 						}
 						finally
 						{
@@ -120,7 +120,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						plan.Symbols.PushFrame();
 						try
 						{
-							Nodes[2].DetermineBinding(plan);
+							Nodes[2].BindingTraversal(plan, visitor);
 						}
 						finally
 						{
@@ -133,7 +133,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							plan.Symbols.Pop();
 					}
 
-					Nodes[3].DetermineBinding(plan);
+					Nodes[3].BindingTraversal(plan, visitor);
 				}
 				finally
 				{
@@ -384,7 +384,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class IntegerAvgInitializationNode : PlanNode
     {
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.Symbols.Push(new Symbol("LCounter", plan.DataTypes.SystemInteger));
 		}
@@ -482,7 +482,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 	public class LongAvgInitializationNode : PlanNode
 	{
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.Symbols.Push(new Symbol("LCounter", plan.DataTypes.SystemInteger));
 		}
@@ -579,7 +579,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DoubleAvgInitializationNode : PlanNode
     {
-		public override void InternalDetermineBinding(Plan APlan)
+		protected override void InternalBindingTraversal(Plan APlan, PlanNodeVisitor visitor)
 		{
 			APlan.Symbols.Push(new Symbol("LCounter", Schema.DataType.SystemInteger));
 		}
@@ -658,7 +658,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DecimalAvgInitializationNode : PlanNode
     {
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.Symbols.Push(new Symbol("LCounter", plan.DataTypes.SystemInteger));
 		}
@@ -742,7 +742,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class MoneyAvgInitializationNode : PlanNode
 	{
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.Symbols.Push(new Symbol("LCounter", plan.DataTypes.SystemInteger));
 		}

@@ -158,9 +158,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			base.InternalDetermineBinding(plan);
+			base.InternalBindingTraversal(plan, visitor);
 			if (_distinctRequired)
 			{
 				plan.EnterRowContext();
@@ -180,7 +180,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						#endif
 						try
 						{
-							_equalNode.DetermineBinding(plan);
+							_equalNode.BindingTraversal(plan, visitor);
 						}
 						finally
 						{

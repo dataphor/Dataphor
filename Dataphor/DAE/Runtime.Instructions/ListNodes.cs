@@ -198,16 +198,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			base.InternalDetermineBinding(plan);
+			base.InternalBindingTraversal(plan, visitor);
 			plan.Symbols.Push(new Symbol("AValue", Nodes[1].DataType));
 			try
 			{
 				plan.Symbols.Push(new Symbol("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
 				try
 				{
-					_equalNode.DetermineBinding(plan);
+					_equalNode.BindingTraversal(plan, visitor);
 				}
 				finally
 				{
@@ -374,16 +374,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			base.InternalDetermineBinding(plan);
+			base.InternalBindingTraversal(plan, visitor);
 			plan.Symbols.Push(new Symbol("AValue", Nodes[1].DataType));
 			try
 			{
 				plan.Symbols.Push(new Symbol("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
 				try
 				{
-					_equalNode.DetermineBinding(plan);
+					_equalNode.BindingTraversal(plan, visitor);
 				}
 				finally
 				{
@@ -458,16 +458,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			base.InternalDetermineBinding(plan);
+			base.InternalBindingTraversal(plan, visitor);
 			plan.Symbols.Push(new Symbol("ALeftValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
 			try
 			{
 				plan.Symbols.Push(new Symbol("ARightValue", ((Schema.ListType)Nodes[1].DataType).ElementType));
 				try
 				{
-					_equalNode.DetermineBinding(plan);
+					_equalNode.BindingTraversal(plan, visitor);
 				}
 				finally
 				{

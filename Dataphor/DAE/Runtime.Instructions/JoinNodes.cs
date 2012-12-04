@@ -681,13 +681,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			Nodes[0].DetermineBinding(plan);
+			Nodes[0].BindingTraversal(plan, visitor);
 			plan.PushCursorContext(new CursorContext(plan.CursorContext.CursorType, plan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, plan.CursorContext.CursorIsolation));
 			try
 			{
-				Nodes[1].DetermineBinding(plan);
+				Nodes[1].BindingTraversal(plan, visitor);
 			}
 			finally
 			{
@@ -711,7 +711,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					try
 					{
-						Nodes[2].DetermineBinding(plan);
+						Nodes[2].BindingTraversal(plan, visitor);
 					}
 					finally
 					{
@@ -729,9 +729,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void DetermineDevice(Plan plan)
+		public override void DetermineAccessPath(Plan plan)
 		{
-			base.DetermineDevice(plan);
+			base.DetermineAccessPath(plan);
 			if (!_deviceSupported)
 				DetermineSemiTableAlgorithm(plan);
 		}
@@ -1919,14 +1919,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			Nodes[0].DetermineBinding(plan);
+			Nodes[0].BindingTraversal(plan, visitor);
 			if (IsLookup && !IsDetailLookup)
 				plan.PushCursorContext(new CursorContext(plan.CursorContext.CursorType, plan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, plan.CursorContext.CursorIsolation));
 			try
 			{
-				Nodes[1].DetermineBinding(plan);
+				Nodes[1].BindingTraversal(plan, visitor);
 			}
 			finally
 			{
@@ -1951,7 +1951,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					try
 					{
-						Nodes[2].DetermineBinding(plan);
+						Nodes[2].BindingTraversal(plan, visitor);
 					}
 					finally
 					{
@@ -1969,9 +1969,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void DetermineDevice(Plan plan)
+		public override void DetermineAccessPath(Plan plan)
 		{
-			base.DetermineDevice(plan);
+			base.DetermineAccessPath(plan);
 			if (!_deviceSupported)
 				DetermineJoinAlgorithm(plan);
 		}
@@ -3310,10 +3310,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				// if no inputs are ordered by join keys, add an order node to the right side
 				if (!IsJoinOrder(plan, _rightKey, RightNode))
-				{
 					Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey);
-					Nodes[1].DetermineDevice(plan);
-				}
 
 				if (IsJoinOrder(plan, _leftKey, LeftNode) && IsJoinOrder(plan, _rightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (_leftKey.IsUnique || _rightKey.IsUnique))
 				{
@@ -4134,10 +4131,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				// if no inputs are ordered by join keys, add an order node to the left side
 				if (!IsJoinOrder(plan, _leftKey, LeftNode))
-				{
 					Nodes[0] = Compiler.EnsureSearchableNode(plan, LeftNode, _leftKey);
-					Nodes[0].DetermineDevice(plan);
-				}
 
 				// if both inputs are ordered by join keys and one or both join keys are unique
 				if (IsJoinOrder(plan, _leftKey, LeftNode) && IsJoinOrder(plan, _rightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (_leftKey.IsUnique || _rightKey.IsUnique))
@@ -4171,13 +4165,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			if (IsLookup && !IsDetailLookup)
 				plan.PushCursorContext(new CursorContext(plan.CursorContext.CursorType, plan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, plan.CursorContext.CursorIsolation));
 			try
 			{
-				Nodes[0].DetermineBinding(plan);
+				Nodes[0].BindingTraversal(plan, visitor);
 			}
 			finally
 			{
@@ -4185,7 +4179,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					plan.PopCursorContext();
 			}
 
-			Nodes[1].DetermineBinding(plan);
+			Nodes[1].BindingTraversal(plan, visitor);
 			
 			plan.EnterRowContext();
 			try
@@ -4204,7 +4198,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					try
 					{
-						Nodes[2].DetermineBinding(plan);
+						Nodes[2].BindingTraversal(plan, visitor);
 					}
 					finally
 					{

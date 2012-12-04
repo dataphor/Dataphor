@@ -2598,7 +2598,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
 	public class TimeSpanAvgInitializationNode : PlanNode
 	{
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			plan.Symbols.Push(new Symbol("LCounter", plan.DataTypes.SystemInteger));
 		}

@@ -262,7 +262,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			Optimize, compiler controlled analysis, Supports
 			
 		Binding ->
-			DetermineBinding 
+			BindingTraversal 
 			DetermineDevice
 			DetermineCursorBehavior
 			DetermineModifyBinding
@@ -656,14 +656,39 @@ namespace Alphora.Dataphor.DAE.Compiling
 			// Set the locators for the compiler exceptions
 			if (sourceContext != null && sourceContext.Locator != null)
 				plan.Messages.SetLocator(sourceContext.Locator.Locator);
-				
+
+			// Optimization and Chunking
+			//
+			// Phase I -
+			//		Improved Chunking
+			//			Depth-First Traversal to determine potential devices
+			//				Include operator support determination
+			//			Top-Down actual support determination, starting at
+			//				chunking boundaries
+			//
+			// Phase II -
+			//		Restriction Optimization
+			//			Before the actual support determination, identify restriction
+			//			predicates (including join predicates) that can be pushed
+			//			down in to a supported zone.
+			//
+			// Phase III -
+			//		Cardinality Estimation
+			//
+			// Phase IV -
+			//		Join Order/Rewrite
+			//
+			// Phase V -
+			//		Requested Order
+
 			if (!plan.Messages.HasErrors)
 			{
 				long startSubTicks = TimingUtility.CurrentTicks;
+				node = Chunk(plan, node);
 				node = Optimize(plan, node);
 				plan.Statistics.OptimizeTime = new TimeSpan((long)((((double)(TimingUtility.CurrentTicks - startSubTicks)) / TimingUtility.TicksPerSecond) * TimeSpan.TicksPerSecond));
 				startSubTicks = TimingUtility.CurrentTicks;
-				node = Bind(plan, node);
+				//node = Bind(plan, node);
 				plan.Statistics.BindingTime = new TimeSpan((long)((((double)(TimingUtility.CurrentTicks - startSubTicks)) / TimingUtility.TicksPerSecond) * TimeSpan.TicksPerSecond));
 			}
 
@@ -671,58 +696,102 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return node;
 		}
 
-		public static PlanNode Optimize(Plan plan, PlanNode planNode)
+		private static PlanNode Chunk(Plan plan, PlanNode planNode)
 		{
-			// This method is here for consistency with the Bind phase method, and for future expansion.
-			return OptimizeNode(plan, planNode);
+			return ChunkNode(plan, planNode);
 		}
-		
-		public static PlanNode OptimizeNode(Plan plan, PlanNode planNode)
-		{
-			try
-			{
-				if (plan.ShouldEmitIL)
-					planNode.EmitIL(plan, false);
-			}
-			catch (Exception exception)
-			{
-				plan.Messages.Add(exception);
-				//throw new CompilerException(CompilerException.Codes.OptimizationError, LException);
-			}
 
-			return planNode;
-		}
-		
-		#if USECOMPILERBIND
-		public static PlanNode Bind(Plan plan, PlanNode planNode)
-		#else
-		private static PlanNode Bind(Plan plan, PlanNode planNode)
-		#endif
+		private static void BindingTraversal(Plan plan, PlanNode planNode, PlanNodeVisitor visitor)
 		{
 			plan.Symbols.PushFrame();
 			try
 			{
-				return BindNode(plan, planNode);
+				planNode.BindingTraversal(plan, visitor);
 			}
 			finally
 			{
 				plan.Symbols.PopFrame();
 			}
 		}
-		
-		public static PlanNode BindNode(Plan plan, PlanNode planNode)
+
+		private static PlanNode ChunkNode(Plan plan, PlanNode planNode)
 		{
 			try
 			{
 				if (!plan.IsEngine)
-					planNode.DetermineBinding(plan);
+				{
+					// Prepare application transaction join plans
+					BindingTraversal(plan, planNode, new PrepareJoinApplicationTransactionVisitor());
+
+					// Determine potential device support for the entire plan
+					planNode.DeterminePotentialDevice(plan);
+
+					// Determine actual device support
+					BindingTraversal(plan, planNode, new DetermineDeviceVisitor());
+				}
 			}
 			catch (Exception exception)
 			{
 				plan.Messages.Add(exception);
-				//throw new CompilerException(CompilerException.Codes.BindingError, LException);
+			}
+
+			return planNode;
+		}
+
+		private static PlanNode Optimize(Plan plan, PlanNode planNode)
+		{
+			// This method is here for consistency with the Bind phase method, and for future expansion.
+			return OptimizeNode(plan, planNode);
+		}
+		
+		private static PlanNode OptimizeNode(Plan plan, PlanNode planNode)
+		{
+			try
+			{
+				if (plan.ShouldEmitIL)
+					planNode.EmitIL(plan, false);
+
+				if (!plan.IsEngine)
+				{
+					BindingTraversal(plan, planNode, new DetermineAccessPathVisitor());
+				}
+			}
+			catch (Exception exception)
+			{
+				plan.Messages.Add(exception);
+			}
+
+			return planNode;
+		}
+		
+		//private static PlanNode Bind(Plan plan, PlanNode planNode)
+		//{
+		//	return BindNode(plan, planNode);
+		//}
+		
+		private static PlanNode BindNode(Plan plan, PlanNode planNode)
+		{
+			try
+			{
+				if (!plan.IsEngine)
+				{
+					planNode.BindingTraversal(plan, null);
+				}
+			}
+			catch (Exception exception)
+			{
+				plan.Messages.Add(exception);
 			}
 			
+			return planNode;
+		}
+
+		private static PlanNode FinishNode(Plan plan, PlanNode planNode)
+		{
+			planNode = ChunkNode(plan, planNode);
+			planNode = OptimizeNode(plan, planNode);
+			// At this point the binding step is superfluous, the optimize pass should take care of it.
+			//planNode = BindNode(plan, planNode);
 			return planNode;
 		}
 
@@ -798,7 +867,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			StatementEntries.Add("EmptyStatement", new CompileStatementCallback(CompileEmptyStatement));
 		}
 		
-		public static PlanNode InternalCompileStatement(Plan APlan, Statement AStatement)
+		private static PlanNode InternalCompileStatement(Plan APlan, Statement AStatement)
 		{
 			CompileStatementCallback LRoutine = StatementEntries[];
 			if (StatementEntries.TryGetValue(AStatement.GetType().Name, out LRoutine))
@@ -806,7 +875,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			throw new CompilerException(CompilerException.Codes.UnknownStatementClass, AStatement, AStatement.GetType().FullName);
 		}
 		#else
-		public static PlanNode InternalCompileStatement(Plan plan, Statement statement)
+		private static PlanNode InternalCompileStatement(Plan plan, Statement statement)
 		{
 			plan.PushStatement(statement);
 			try
@@ -3248,8 +3317,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						if (!(constraintNode.IsFunctional && constraintNode.IsDeterministic))
 							throw new CompilerException(CompilerException.Codes.InvalidConstraintExpression, constraint.Expression);
 
-						constraintNode = OptimizeNode(plan, constraintNode);
-						constraintNode = BindNode(plan, constraintNode);							
+						constraintNode = FinishNode(plan, constraintNode);
 						newConstraint.Node = constraintNode;
 						
 						string customMessage = newConstraint.GetCustomMessage(Schema.Transition.Insert);
@@ -3258,8 +3326,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							try
 							{
 								PlanNode violationMessageNode = CompileTypedExpression(plan, new D4.Parser().ParseExpression(customMessage), plan.DataTypes.SystemString);
-								violationMessageNode = OptimizeNode(plan, violationMessageNode);
-								violationMessageNode = BindNode(plan, violationMessageNode);
+								violationMessageNode = FinishNode(plan, violationMessageNode);
 								newConstraint.ViolationMessageNode = violationMessageNode;
 							}
 							catch (Exception exception)
@@ -3299,8 +3366,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				try
 				{
 					PlanNode violationMessageNode = CompileTypedExpression(plan, new D4.Parser().ParseExpression(customMessage), plan.DataTypes.SystemString);
-					violationMessageNode = OptimizeNode(plan, violationMessageNode);
-					violationMessageNode = BindNode(plan, violationMessageNode);
+					violationMessageNode = FinishNode(plan, violationMessageNode);
 					return violationMessageNode;
 				}
 				catch (Exception exception)
@@ -3341,8 +3407,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							if (!(constraintNode.IsFunctional && constraintNode.IsRepeatable))
 								throw new CompilerException(CompilerException.Codes.InvalidTransitionConstraintExpression, constraint.OnInsertExpression);
 
-							constraintNode = OptimizeNode(plan, constraintNode);
-							constraintNode = BindNode(plan, constraintNode);							
+							constraintNode = FinishNode(plan, constraintNode);
 							newConstraint.OnInsertNode = constraintNode;
 							newConstraint.OnInsertViolationMessageNode = CompileTransitionConstraintViolationMessageNode(plan, newConstraint, Schema.Transition.Insert, constraint);
 						}
@@ -3372,8 +3437,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								if (!(constraintNode.IsFunctional && constraintNode.IsRepeatable))
 									throw new CompilerException(CompilerException.Codes.InvalidTransitionConstraintExpression, constraint.OnUpdateExpression);
 
-								constraintNode = OptimizeNode(plan, constraintNode);
-								constraintNode = BindNode(plan, constraintNode);							
+								constraintNode = FinishNode(plan, constraintNode);
 								newConstraint.OnUpdateNode = constraintNode;
 								newConstraint.OnUpdateViolationMessageNode = CompileTransitionConstraintViolationMessageNode(plan, newConstraint, Schema.Transition.Update, constraint);
 							}
@@ -3401,8 +3465,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							if (!(constraintNode.IsFunctional && constraintNode.IsRepeatable))
 								throw new CompilerException(CompilerException.Codes.InvalidTransitionConstraintExpression, constraint.OnDeleteExpression);
 
-							constraintNode = OptimizeNode(plan, constraintNode);
-							constraintNode = BindNode(plan, constraintNode);							
+							constraintNode = FinishNode(plan, constraintNode);
 							newConstraint.OnDeleteNode = constraintNode;
 							newConstraint.OnDeleteViolationMessageNode = CompileTransitionConstraintViolationMessageNode(plan, newConstraint, Schema.Transition.Delete, constraint);
 						}
@@ -3696,8 +3759,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				try
 				{
 					defaultValue.Node = CompileTypedExpression(plan, defaultDefinition.Expression, dataType);
-					defaultValue.Node = OptimizeNode(plan, defaultValue.Node);
-					defaultValue.Node = BindNode(plan, defaultValue.Node);
+					defaultValue.Node = FinishNode(plan, defaultValue.Node);
 					defaultValue.DetermineRemotable(plan.CatalogDeviceSession);
 				}
 				finally
@@ -4739,8 +4801,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						operatorValue.Block.BlockNode = new AssignmentNode(new StackReferenceNode(Keywords.Result, operatorValue.ReturnDataType, 0), anySpecialNode);
 						operatorValue.Block.BlockNode.Line = 1;
 						operatorValue.Block.BlockNode.LinePos = 1;
-						operatorValue.Block.BlockNode = OptimizeNode(plan, operatorValue.Block.BlockNode);
-						operatorValue.Block.BlockNode = BindNode(plan, operatorValue.Block.BlockNode);
+						operatorValue.Block.BlockNode = FinishNode(plan, operatorValue.Block.BlockNode);
 
 						// Attach the dependencies for each special comparer to the IsSpecial operator
 						foreach (Schema.Special newSpecial in scalarType.Specials)
@@ -4788,8 +4849,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					operatorValue.Block.BlockNode = new AssignmentNode(new StackReferenceNode(Keywords.Result, operatorValue.ReturnDataType, 0), valueNode);
 					operatorValue.Block.BlockNode.Line = 1;
 					operatorValue.Block.BlockNode.LinePos = 1;
-					operatorValue.Block.BlockNode = OptimizeNode(plan, operatorValue.Block.BlockNode);
-					operatorValue.Block.BlockNode = BindNode(plan, operatorValue.Block.BlockNode);
+					operatorValue.Block.BlockNode = FinishNode(plan, operatorValue.Block.BlockNode);
 					return operatorValue;
 				}
 				finally
@@ -4831,8 +4891,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						operatorValue.Block.BlockNode = new AssignmentNode(new StackReferenceNode(Keywords.Result, plan.DataTypes.SystemBoolean, 0), planNode);
 						operatorValue.Block.BlockNode.Line = 1;
 						operatorValue.Block.BlockNode.LinePos = 1;
-						operatorValue.Block.BlockNode = OptimizeNode(plan, operatorValue.Block.BlockNode);
-						operatorValue.Block.BlockNode = BindNode(plan, operatorValue.Block.BlockNode);
+						operatorValue.Block.BlockNode = FinishNode(plan, operatorValue.Block.BlockNode);
 						return operatorValue;
 					}
 					finally
@@ -5044,8 +5103,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					constraint.Node = CompileBooleanExpression(plan, constraintDefinition.Expression);
 					if (!(constraint.Node.IsFunctional && constraint.Node.IsDeterministic))
 						throw new CompilerException(CompilerException.Codes.InvalidConstraintExpression, constraintDefinition.Expression);
-					constraint.Node = OptimizeNode(plan, constraint.Node);
-					constraint.Node = BindNode(plan, constraint.Node);
+					constraint.Node = FinishNode(plan, constraint.Node);
 						
 					constraint.DetermineRemotable(plan.CatalogDeviceSession);
 					if (!constraint.IsRemotable)
@@ -5057,8 +5115,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						try
 						{
 							PlanNode violationMessageNode = CompileTypedExpression(plan, new D4.Parser().ParseExpression(customMessage), plan.DataTypes.SystemString);
-							violationMessageNode = OptimizeNode(plan, violationMessageNode);
-							violationMessageNode = BindNode(plan, violationMessageNode);
+							violationMessageNode = FinishNode(plan, violationMessageNode);
 							constraint.ViolationMessageNode = violationMessageNode;
 						}
 						catch (Exception exception)
@@ -5098,8 +5155,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				special.ValueNode = CompileTypedExpression(plan, specialDefinition.Value, scalarType);
 				if (!(special.ValueNode.IsFunctional && special.ValueNode.IsDeterministic))
 					throw new CompilerException(CompilerException.Codes.InvalidSpecialExpression, specialDefinition.Value);
-				special.ValueNode = OptimizeNode(plan, special.ValueNode);
-				special.ValueNode = BindNode(plan, special.ValueNode);
+				special.ValueNode = FinishNode(plan, special.ValueNode);
 				if (!plan.InLoadingContext())
 				{
 					special.Selector = CompileSpecialSelector(plan, scalarType, special, specialDefinition.Name, special.ValueNode);
@@ -5575,8 +5631,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								throw new CompilerException(CompilerException.Codes.IntegerExpressionExpected, sortDefinition.Expression);
 							if (!(node.IsFunctional && node.IsDeterministic))
 								throw new CompilerException(CompilerException.Codes.InvalidCompareExpression, sortDefinition.Expression);
-							node = OptimizeNode(plan, node);
-							node = BindNode(plan, node);
+							node = FinishNode(plan, node);
 							sort.CompareNode = node;
 						}
 						finally
@@ -5631,7 +5686,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									throw new CompilerException(CompilerException.Codes.IntegerExpressionExpected, plan.CurrentStatement());
 								if (!(node.IsFunctional && node.IsDeterministic))
 									throw new CompilerException(CompilerException.Codes.InvalidCompareExpression, plan.CurrentStatement());
-								node = BindNode(plan, node);
+								node = FinishNode(plan, node);
 								sort.CompareNode = node;
 							}
 							finally
@@ -5864,7 +5919,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 						
 				block = CompileStatement(plan, statement);
-				block = OptimizeNode(plan, block);
 
 				for (int index = 0; index < operatorValue.Operands.Count; index++)
 					if (!plan.Symbols[operatorValue.Operands.Count - 1 - index].IsModified && (operatorValue.Operands[index].Modifier == Modifier.In))
@@ -5915,8 +5969,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 					
 				if (operatorValue.ReturnDataType != null)
 					plan.Symbols.Push(new Symbol(Keywords.Result, operatorValue.ReturnDataType));
-						
-				return BindNode(plan, block);
+				
+				return FinishNode(plan, block);
 			}
 			finally
 			{
@@ -6359,6 +6413,31 @@ namespace Alphora.Dataphor.DAE.Compiling
 					);
 			}
 		}
+
+		private static void BindAggregateOperatorBlock(Plan plan, Schema.AggregateOperator operatorValue)
+		{
+			// Binding phase
+			// Create an AggregateCallNode to perform the binding
+			// targetNode must be a table with the same number of columns as the operator has operands
+			// columnNames is the names of the columns in the TargetNode
+			// orderColumns specifies the ordering of the columns to be used to feed the aggregate operator
+			var typeSpecifier = new TableTypeSpecifier();
+			var columnNames = new string[operatorValue.Operands.Count];
+			var orderColumns = new OrderColumnDefinitions();
+			for (int index = 0; index < operatorValue.Operands.Count; index++)
+			{
+				var operand = operatorValue.Operands[index];
+				columnNames[index] = operand.Name;
+				typeSpecifier.Columns.Add(new NamedTypeSpecifier { Identifier = operand.Name, TypeSpecifier = operand.DataType.IsGeneric ? new ScalarTypeSpecifier("System.Integer") : operand.DataType.EmitSpecifier(EmitMode.ForCopy) });
+				orderColumns.Add(new OrderColumnDefinition(operand.Name, true));
+			}
+
+			var tableSelector = new TableSelectorExpression(); 
+			tableSelector.TypeSpecifier = typeSpecifier;
+			var targetNode = CompileTableSelectorExpression(plan, tableSelector);
+			var aggregateCallNode = BuildAggregateCallNode(plan, null, operatorValue, targetNode, columnNames, orderColumns);
+			FinishNode(plan, aggregateCallNode);
+		}
 		
 		public static PlanNode CompileCreateAggregateOperatorStatement(Plan plan, Statement statement)
 		{
@@ -6493,18 +6572,16 @@ namespace Alphora.Dataphor.DAE.Compiling
 						{
 							plan.Symbols.PopWindow();
 						}
+
+						BindAggregateOperatorBlock(plan, operatorValue);
 						
-						// Binding phase
-						plan.Symbols.PushWindow(0);
+						/*plan.Symbols.PushWindow(0);
 						try
 						{
 							plan.Symbols.Push(new Symbol(Keywords.Result, operatorValue.ReturnDataType));
 							
 							if (localStatement.Initialization.ClassDefinition == null)
-							{
-								operatorValue.Initialization.BlockNode = OptimizeNode(plan, operatorValue.Initialization.BlockNode);
-								operatorValue.Initialization.BlockNode = BindNode(plan, operatorValue.Initialization.BlockNode);
-							}
+								operatorValue.Initialization.BlockNode = FinishNode(plan, operatorValue.Initialization.BlockNode, false);
 							
 							if (localStatement.Aggregation.ClassDefinition == null)
 							{
@@ -6514,8 +6591,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									foreach (Schema.Operand operand in operatorValue.Operands)
 										plan.Symbols.Push(new Symbol(operand.Name, operand.DataType, operand.Modifier == Modifier.Const));
 
-									operatorValue.Aggregation.BlockNode = OptimizeNode(plan, operatorValue.Aggregation.BlockNode);
-									operatorValue.Aggregation.BlockNode = BindNode(plan, operatorValue.Aggregation.BlockNode);
+									operatorValue.Aggregation.BlockNode = FinishNode(plan, operatorValue.Aggregation.BlockNode, false);
 								}
 								finally
 								{
@@ -6524,16 +6600,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 							}
 							
 							if (localStatement.Finalization.ClassDefinition == null)
-							{
-								operatorValue.Finalization.BlockNode = OptimizeNode(plan, operatorValue.Finalization.BlockNode);
-								operatorValue.Finalization.BlockNode = BindNode(plan, operatorValue.Finalization.BlockNode);
-							}
+								operatorValue.Finalization.BlockNode = FinishNode(plan, operatorValue.Finalization.BlockNode, false);
 						}
 						finally
 						{
 							plan.Symbols.PopWindow();
 						}
-						
+						*/
+
 						operatorValue.DetermineRemotable(plan.CatalogDeviceSession);
 						operatorValue.IsRemotable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsRemotable", operatorValue.IsRemotable.ToString()));
 						operatorValue.IsLiteral = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsLiteral", operatorValue.IsLiteral.ToString()));
@@ -6626,10 +6700,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 													localPlan.AttachDependency(objectValue);
 											}
 
-											PlanNode initializationNode = null;
 											int initializationDisplacement = 0;
-											PlanNode aggregationNode = null;
-											PlanNode finalizationNode = null;
 
 											localPlan.Symbols.PushWindow(0);
 											try
@@ -6645,7 +6716,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 													try
 													{
 														int symbolCount = localPlan.Symbols.Count;
-														initializationNode = CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.InitializationText, null)); //AOperator.Initialization.BlockNode.EmitStatement(EmitMode.ForCopy)); 
+														operatorValue.Initialization.BlockNode = CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.InitializationText, null)); //AOperator.Initialization.BlockNode.EmitStatement(EmitMode.ForCopy)); 
 														initializationDisplacement = localPlan.Symbols.Count - symbolCount;
 													}
 													finally
@@ -6668,7 +6739,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 															foreach (Schema.Operand operand in operatorValue.Operands)
 																localPlan.Symbols.Push(new Symbol(operand.Name, operand.DataType, operand.Modifier == Modifier.Const));
 
-															aggregationNode = CompileDeallocateFrameVariablesNode(localPlan, CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.AggregationText, null))); //AOperator.Aggregation.BlockNode.EmitStatement(EmitMode.ForCopy)));
+															operatorValue.Aggregation.BlockNode = CompileDeallocateFrameVariablesNode(localPlan, CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.AggregationText, null))); //AOperator.Aggregation.BlockNode.EmitStatement(EmitMode.ForCopy)));
 														}
 														finally
 														{
@@ -6689,7 +6760,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 													localPlan.CompilingOffset.LinePos = 0;
 													try
 													{
-														finalizationNode = CompileDeallocateVariablesNode(localPlan, CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.FinalizationText, null)), resultVar); //AOperator.Finalization.BlockNode.EmitStatement(EmitMode.ForCopy)), LResultVar);
+														operatorValue.Finalization.BlockNode = CompileDeallocateVariablesNode(localPlan, CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.FinalizationText, null)), resultVar); //AOperator.Finalization.BlockNode.EmitStatement(EmitMode.ForCopy)), LResultVar);
 													}
 													finally
 													{
@@ -6703,13 +6774,16 @@ namespace Alphora.Dataphor.DAE.Compiling
 												localPlan.Symbols.PopWindow();
 											}
 
+											BindAggregateOperatorBlock(plan, operatorValue);
+
+											/*
 											localPlan.Symbols.PushWindow(0);
 											try
 											{
 												localPlan.Symbols.Push(new Symbol(Keywords.Result, operatorValue.ReturnDataType));
 
 												if (operatorValue.Initialization.ClassDefinition == null)
-													initializationNode = BindNode(localPlan, OptimizeNode(localPlan, initializationNode));
+													initializationNode = FinishNode(localPlan, initializationNode, false);
 												
 												if (operatorValue.Aggregation.ClassDefinition == null)
 												{
@@ -6718,7 +6792,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 													{
 														foreach (Schema.Operand operand in operatorValue.Operands)
 															localPlan.Symbols.Push(new Symbol(operand.Name, operand.DataType, operand.Modifier == Modifier.Const));
-														aggregationNode = BindNode(localPlan, OptimizeNode(localPlan, aggregationNode));
+
+														aggregationNode = FinishNode(localPlan, aggregationNode, false);
 													}
 													finally
 													{
@@ -6727,27 +6802,21 @@ namespace Alphora.Dataphor.DAE.Compiling
 												}
 
 												if (operatorValue.Finalization.ClassDefinition == null)
-													finalizationNode = BindNode(localPlan, OptimizeNode(localPlan, finalizationNode));
+													finalizationNode = FinishNode(localPlan, finalizationNode, false);
 											}
 											finally
 											{
 												localPlan.Symbols.PopWindow();
 											}
+											*/
 
 											localPlan.CheckCompiled();
 
-											if (initializationNode != null)
+											if (operatorValue.Initialization.BlockNode != null)
 											{
-												operatorValue.Initialization.BlockNode = initializationNode;
 												operatorValue.Initialization.StackDisplacement = initializationDisplacement;
 											}
 											
-											if (aggregationNode != null)
-												operatorValue.Aggregation.BlockNode = aggregationNode;
-												
-											if (finalizationNode != null)
-												operatorValue.Finalization.BlockNode = finalizationNode;
-
 											operatorValue.DetermineRemotable(plan.CatalogDeviceSession);
 											operatorValue.IsRemotable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsRemotable", operatorValue.IsRemotable.ToString()));
 											operatorValue.IsLiteral = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsLiteral", operatorValue.IsLiteral.ToString()));
@@ -6854,8 +6923,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						if (!(node.Constraint.Node.IsFunctional && node.Constraint.Node.IsDeterministic))
 							throw new CompilerException(CompilerException.Codes.InvalidConstraintExpression, localStatement.Expression);
 
-						node.Constraint.Node = OptimizeNode(plan, node.Constraint.Node);						
-						node.Constraint.Node = BindNode(plan, node.Constraint.Node);						
+						node.Constraint.Node = FinishNode(plan, node.Constraint.Node);						
 
 						string customMessage = node.Constraint.GetCustomMessage();
 						if (!String.IsNullOrEmpty(customMessage))
@@ -6863,8 +6931,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							try
 							{
 								PlanNode violationMessageNode = CompileTypedExpression(plan, new D4.Parser().ParseExpression(customMessage), plan.DataTypes.SystemString);
-								violationMessageNode = OptimizeNode(plan, violationMessageNode);
-								violationMessageNode = BindNode(plan, violationMessageNode);
+								violationMessageNode = FinishNode(plan, violationMessageNode);
 								node.Constraint.ViolationMessageNode = violationMessageNode;
 							}
 							catch (Exception exception)
@@ -7172,7 +7239,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							)
 						);
 						
-					constraint.OnInsertNode = BindNode(plan, node);
+					constraint.OnInsertNode = FinishNode(plan, node);
 					constraint.OnInsertViolationMessageNode = CompileTransitionConstraintViolationMessageNode(plan, constraint, Schema.Transition.Insert, null);
 				}
 				finally
@@ -7288,7 +7355,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								)
 							);
 
-						constraint.OnUpdateNode = BindNode(plan, node);
+						constraint.OnUpdateNode = FinishNode(plan, node);
 						constraint.OnUpdateViolationMessageNode = CompileTransitionConstraintViolationMessageNode(plan, constraint, Schema.Transition.Update, null);
 					}
 					finally
@@ -7415,7 +7482,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								)
 							);
 
-						constraint.OnUpdateNode = BindNode(plan, node);
+						constraint.OnUpdateNode = FinishNode(plan, node);
 						constraint.OnUpdateViolationMessageNode = CompileTransitionConstraintViolationMessageNode(plan, constraint, Schema.Transition.Update, null);
 					}
 					finally
@@ -7485,7 +7552,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							)
 						);
 
-					constraint.OnDeleteNode = BindNode(plan, node);
+					constraint.OnDeleteNode = FinishNode(plan, node);
 					constraint.OnDeleteViolationMessageNode = CompileTransitionConstraintViolationMessageNode(plan, constraint, Schema.Transition.Delete, null);
 				}
 				finally
@@ -7569,7 +7636,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 							plan.Symbols.Pop();
 						}
 
-						return BindNode(plan, EmitIfNode(plan, null, conditionNode, updateNode, null));
+						var planNode = EmitIfNode(plan, null, conditionNode, updateNode, null);
+						planNode = FinishNode(plan, planNode);
+						return planNode;
 					}
 					finally
 					{
@@ -7592,7 +7661,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		//
 		// on delete from B ->
 		//		delete A where AKeys = BValues
-		public static DeleteNode CompileDeleteCascadeNodeForReference(Plan plan, PlanNode sourceNode, Schema.Reference reference)
+		public static PlanNode CompileDeleteCascadeNodeForReference(Plan plan, PlanNode sourceNode, Schema.Reference reference)
 		{
 			plan.EnterRowContext();
 			try
@@ -7622,8 +7691,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 					node.DetermineDataType(plan);
 					node.DetermineCharacteristics(plan);
-					node = (DeleteNode)BindNode(plan, node);
-					return node;
+					return FinishNode(plan, node);
 				}
 				finally
 				{
@@ -7654,7 +7722,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			RowSelectorNode rowNode = new RowSelectorNode(new Schema.RowType(reference.SourceKey.Columns));
 			for (int index = 0; index < rowNode.DataType.Columns.Count; index++)
 				rowNode.Nodes.Add(expressionNodes[index]);
-			varNode.Nodes.Add(BindNode(plan, rowNode));
+			varNode.Nodes.Add(FinishNode(plan, rowNode));
 			varNode.VariableName = "ARow";
 			varNode.VariableType = rowNode.DataType;
 			blockNode.Nodes.Add(varNode); // Do not bind the varnode, it is unnecessary and causes ARow to appear on the stack twice.
@@ -7675,7 +7743,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						{
 							ifNode.Nodes.Add
 							(
-								Bind
+								FinishNode
 								(
 									plan,
 									AppendNode
@@ -7716,25 +7784,28 @@ namespace Alphora.Dataphor.DAE.Compiling
 							RaiseNode raiseNode = new RaiseNode();
 							raiseNode.IsBreakable = false;
 							raiseNode.Nodes.Add(EmitUnaryNode(plan, "System.Error", new ValueNode(plan.DataTypes.SystemString, new RuntimeException(RuntimeException.Codes.InsertConstraintViolation, reference.Name, reference.TargetTable.Name, String.Empty).Message))); // Schema.Constraint.GetViolationMessage(AReference.MetaData)).Message))));
-							ifNode.Nodes.Add(BindNode(plan, raiseNode));
+							ifNode.Nodes.Add(FinishNode(plan, raiseNode));
+							ifNode.DeterminePotentialDevice(plan);
 							ifNode.DetermineDevice(plan);
+							ifNode.DetermineAccessPath(plan);
 							blockNode.Nodes.Add(ifNode);
-							blockNode.Nodes.Add(BindNode(plan, new DropVariableNode()));
-							if (isUpdate)
-							{
-								ifNode = new IfNode();
-								ifNode.IsBreakable = false;
-								ifNode.Nodes.Add(BindNode(plan, CompileExpression(plan, new UnaryExpression(Instructions.Not, BuildKeyEqualExpression(plan, "AOldRow", "ANewRow", reference.TargetKey.Columns, reference.TargetKey.Columns)))));
-								ifNode.Nodes.Add(blockNode);
-								return ifNode;
-							}
-							else
-								return blockNode;
+							blockNode.Nodes.Add(new DropVariableNode());
 						}
 						finally
 						{
-							// APlan.Symbols.Pop(); // This pop is done by the Bind of the DropVariableNode above
+							plan.Symbols.Pop();
 						}
+
+						if (isUpdate)
+						{
+							ifNode = new IfNode();
+							ifNode.IsBreakable = false;
+							ifNode.Nodes.Add(FinishNode(plan, CompileExpression(plan, new UnaryExpression(Instructions.Not, BuildKeyEqualExpression(plan, "AOldRow", "ANewRow", reference.TargetKey.Columns, reference.TargetKey.Columns)))));
+							ifNode.Nodes.Add(blockNode);
+							return ifNode;
+						}
+						else
+							return blockNode;
 					}
 					finally
 					{
@@ -7809,7 +7880,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 				node.DetermineDataType(plan);
 				node.DetermineCharacteristics(plan);
-				node = (UpdateNode)BindNode(plan, OptimizeNode(plan, node));
+				node = (UpdateNode)FinishNode(plan, node);
 				return node;
 			}
 			finally
@@ -7963,8 +8034,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							)
 						);
 				
-			constraint.Node = OptimizeNode(plan, constraint.Node);
-			constraint.Node = BindNode(plan, constraint.Node);
+			constraint.Node = FinishNode(plan, constraint.Node);
 			return constraint;
 		}
 		
@@ -8112,7 +8182,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									)
 								);
 
-							constraint.Node = BindNode(plan, constraint.Node);
+							constraint.Node = FinishNode(plan, constraint.Node);
 							return constraint;
 						}
 						finally
@@ -11725,7 +11795,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			
 			return new Schema.Signature(elements);
 		}
-		
+
 		public static AggregateCallNode BuildAggregateCallNode(Plan plan, Statement statement, Schema.AggregateOperator operatorValue, PlanNode targetNode, string[] columnNames, OrderColumnDefinitions orderColumns)
 		{
 			targetNode = EnsureTableNode(plan, targetNode);
@@ -13870,7 +13940,9 @@ indicative of other problems, a reference will never be attached as an explicit 
 						{
 							BaseOrderNode node = Compiler.EmitOrderNode(plan, sourceNode, searchOrder, true) as BaseOrderNode;
 							node.InferPopulateNode(plan); // The A/T populate node, if any, should be used from the source node for the order
+							node.DeterminePotentialDevice(plan);
 							node.DetermineDevice(plan); // doesn't call binding because the source for the order is already bound, only needs to determine the device for the newly created order node.
+							node.DetermineAccessPath(plan);
 							if (!node.Supports(CursorCapability.Searchable))
 							{
 								if (node.DeviceSupported)
@@ -13878,7 +13950,9 @@ indicative of other problems, a reference will never be attached as an explicit 
 								else
 									node = Compiler.EmitCopyNode(plan, sourceNode, searchOrder) as BaseOrderNode;
 								node.InferPopulateNode(plan);
+								node.DeterminePotentialDevice(plan);
 								node.DetermineDevice(plan);
+								node.DetermineAccessPath(plan);
 							}
 							
 							return node;

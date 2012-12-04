@@ -99,10 +99,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			Nodes[0].DetermineBinding(plan);
-			Nodes[1].DetermineBinding(plan);
+			Nodes[0].BindingTraversal(plan, visitor);
+			Nodes[1].BindingTraversal(plan, visitor);
 			if (_comparisonNode != null)
 			{
 				plan.EnterRowContext();
@@ -122,7 +122,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						#endif
 						try
 						{
-							_comparisonNode.DetermineBinding(plan);
+							_comparisonNode.BindingTraversal(plan, visitor);
 						}
 						finally
 						{
@@ -251,10 +251,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			Nodes[0].DetermineBinding(plan);
-			Nodes[1].DetermineBinding(plan);
+			Nodes[0].BindingTraversal(plan, visitor);
+			Nodes[1].BindingTraversal(plan, visitor);
 			plan.EnterRowContext();
 			try
 			{
@@ -272,7 +272,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					try
 					{
-						_comparisonNode.DetermineBinding(plan);
+						_comparisonNode.BindingTraversal(plan, visitor);
 					}
 					finally
 					{

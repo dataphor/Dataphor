@@ -10,6 +10,7 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -18,7 +19,6 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Server;	
 using Alphora.Dataphor.DAE.Runtime.Data;
-using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -60,6 +60,59 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	*/
 	
 	public delegate object ExecuteDelegate(Program program);
+
+	public abstract class PlanNodeVisitor
+	{
+		public virtual void PreOrderVisit(Plan plan, PlanNode node)
+		{
+			// base implementation does nothing
+		}
+
+		public virtual void PostOrderVisit(Plan plan, PlanNode node)
+		{
+			// base implementation does nothing
+		}
+	}
+
+	public class DetermineDeviceVisitor : PlanNodeVisitor
+	{
+		private PlanNode chunk;
+
+		public override void PreOrderVisit(Plan plan, PlanNode node)
+		{
+			if (chunk == null)
+			{
+				node.DetermineDevice(plan);
+				if (node.DeviceSupported)
+				{
+					chunk = node;
+				}
+			}
+		}
+
+		public override void PostOrderVisit(Plan plan, PlanNode node)
+		{
+			if (chunk != null)
+			{
+				if (chunk != node)
+				{
+					node.SetDevice(plan, chunk.Device);
+				}
+				else
+				{
+					chunk = null;
+				}
+			}
+		}
+	}
+
+	public class DetermineAccessPathVisitor : PlanNodeVisitor
+	{
+		public override void PostOrderVisit(Plan plan, PlanNode node)
+		{
+			node.DetermineAccessPath(plan);
+		}
+	}
         
 	/// <summary> PlanNode </summary>	
 	public abstract class PlanNode : System.Object
@@ -261,28 +314,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         protected Schema.TranslationMessages _deviceMessages;
         public Schema.TranslationMessages DeviceMessages { get { return _deviceMessages; } }
 
-		// DetermineDevice
-		public virtual void DetermineDevice(Plan plan)
+		// DeterminePotentialDevice
+		public virtual void DeterminePotentialDevice(Plan plan)
 		{
 			//	if child nodes are flagged with nodevice, or have more than one non-null device
 			//		this node is flagged as nodevice
 			//	otherwise
-			//		this node uses the same device as its children
-            Schema.Device childDevice = null;
-            Schema.Device currentChildDevice = null;
-            _noDevice = !ShouldSupport;
-            
-            if (_nodes != null)
+			//		this node uses the same potential device as its children
+			Schema.Device childDevice = null;
+			Schema.Device currentChildDevice = null;
+			_noDevice = !ShouldSupport;
+
+			if (_nodes != null)
+			{
 				for (int index = 0; index < Nodes.Count; index++)
 				{
+					Nodes[index].DeterminePotentialDevice(plan);
+
 					_noDevice = _noDevice || Nodes[index].NoDevice;
 					if (!_noDevice)
 					{
-						childDevice = Nodes[index].Device;
+						childDevice = Nodes[index].PotentialDevice;
 						if (childDevice != null)
 						{
 							if (currentChildDevice == null)
+							{
 								currentChildDevice = childDevice;
+							}
 							else if (currentChildDevice != childDevice)
 							{
 								_noDevice = true;
@@ -291,10 +349,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 					}
 				}
+			}
 
+			if (!_noDevice)
+			{
+				_potentialDevice = currentChildDevice;
+			}
+		}
+
+		// DetermineDevice
+		public virtual void DetermineDevice(Plan plan)
+		{
             if (!_noDevice)
             {
-				_device = currentChildDevice;
+				_device = _potentialDevice;
 				if (_device != null)
 				{							
 					Schema.DevicePlan devicePlan = null;
@@ -332,7 +400,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// Not sure why this is here, but it is preventing the translation of several otherwise translatable items.
 					// I will turn it off and see what happens.
 					//if (DataType is Schema.ITableType)
-					//	FNoDevice = true;
+					//	_noDevice = true;
 				}
 			}
 			else
@@ -342,6 +410,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				SurrogateExecute = InternalDeviceExecute;
 			}
+		}
+
+		public virtual void SetDevice(Plan plan, Schema.Device device)
+		{
+			_device = device;
+			_deviceSupported = true;
+			SurrogateExecute = InternalDeviceExecute;
+		}
+
+		// Base implementation does nothing, descendents override this to determine
+		// execution algorithms when the node is not device supported
+		public virtual void DetermineAccessPath(Plan plan)
+		{
 		}
 
 		#endregion
@@ -627,30 +708,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		#endregion
 
 		#region Binding
-        
-        // DetermineBinding
-        public virtual void DetermineBinding(Plan plan)
+
+        // BindingTraversal
+        public virtual void BindingTraversal(Plan plan, PlanNodeVisitor visitor)
         {
+			if (visitor != null)
+				visitor.PreOrderVisit(plan, this);
+
 			if (_dataType != null)
 				plan.PushTypeContext(_dataType);
 			try
 			{
-				InternalDetermineBinding(plan);
+				InternalBindingTraversal(plan, visitor);
 			}
 			finally
 			{
 				if (_dataType != null)
 					plan.PopTypeContext(_dataType);
 			}
-			
-			DetermineDevice(plan);
+
+			if (visitor != null)
+				visitor.PostOrderVisit(plan, this);
         }
 
-		public virtual void InternalDetermineBinding(Plan plan)
+		protected virtual void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			if (_nodes != null)
 				for (int index = 0; index < Nodes.Count; index++)
-					Nodes[index].DetermineBinding(plan);
+					Nodes[index].BindingTraversal(plan, visitor);
 		}
 		
 		/// <summary>Rechecks security for the plan using the given plan and associated security context.</summary>

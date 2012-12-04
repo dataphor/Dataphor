@@ -205,6 +205,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		Ignore 
 	}
 
+	public class PrepareJoinApplicationTransactionVisitor : PlanNodeVisitor
+	{
+		public override void PostOrderVisit(Plan plan, PlanNode node)
+		{
+			var tableNode = node as TableNode;
+			if (tableNode != null)
+			{
+				tableNode.PrepareJoinApplicationTransaction(plan);
+			}
+		}
+	}
+
 	public abstract class TableNode : InstructionNodeBase
 	{        
 		// constructor
@@ -645,20 +657,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void DetermineDevice(Plan plan)
+		public override void DetermineAccessPath(Plan plan)
 		{
-			PrepareJoinApplicationTransaction(plan);
-			base.DetermineDevice(plan);
+			base.DetermineAccessPath(plan);
 			if (!_deviceSupported)
 				DetermineCursorBehavior(plan);
 			_symbols = Compiler.SnapshotSymbols(plan);
 			if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
 				DetermineModifySupported(plan);
 		}
-		
-		public override void DetermineBinding(Plan plan)
+
+		public override void BindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			base.DetermineBinding(plan);
+			base.BindingTraversal(plan, visitor);
+
 			if (_populateNode != null)
 			{
 				ApplicationTransaction transaction = plan.GetApplicationTransaction();
@@ -667,7 +679,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					transaction.PushGlobalContext();
 					try
 					{
-						_populateNode.DetermineBinding(plan);
+						_populateNode.BindingTraversal(plan, visitor);
 					}
 					finally
 					{
@@ -3210,7 +3222,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public TableNode PopulateNode { get { return _populateNode; } }
 
 		// PrepareJoinApplicationTransaction
-		protected virtual void PrepareJoinApplicationTransaction(Plan plan)
+		public virtual void PrepareJoinApplicationTransaction(Plan plan)
 		{
 			// If this process is joined to an application transaction and we are not within a table-valued context
 				// join the expression for this node to the application transaction

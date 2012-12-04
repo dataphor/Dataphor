@@ -114,9 +114,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					column.IsNilable = isNilable;
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
-			base.InternalDetermineBinding(plan);
+			base.InternalBindingTraversal(plan, visitor);
 			#if UseScannedDifference
 			Schema.IRowType leftRowType = DataType.CreateRowType(Keywords.Left);
 			APlan.Symbols.Push(new Symbol(leftRowType));
@@ -126,7 +126,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.Symbols.Push(new Symbol(rightRowType));
 				try
 				{
-					FEqualNode.DetermineBinding(APlan);
+					FEqualNode.BindingTraversal(APlan, visitor);
 				}
 				finally
 				{
@@ -139,10 +139,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			#endif
 		}
-		
-		public override void DetermineDevice(Plan plan)
+
+		public override void DetermineAccessPath(Plan plan)
 		{
-			base.DetermineDevice(plan);
+			base.DetermineAccessPath(plan);
 			if (!_deviceSupported)
 			{
 				_differenceAlgorithm = typeof(SearchedDifferenceTable);

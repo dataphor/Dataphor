@@ -89,8 +89,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			plan.PushCursorContext(_cursorContext);
 			try
 			{
-				sourceNode.DetermineBinding(plan);
-				
 				ApplicationTransaction transaction = null;
 				if (plan.ApplicationTransactionID != Guid.Empty)
 					transaction = plan.GetApplicationTransaction();
@@ -105,7 +103,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						{
 							sourceNode = (TableNode)Compiler.EmitCopyNode(plan, sourceNode);
 							sourceNode.InferPopulateNode(plan);
+							sourceNode.DeterminePotentialDevice(plan);
 							sourceNode.DetermineDevice(plan);
+							sourceNode.DetermineAccessPath(plan);
 						}
 							
 						// Navigable
@@ -119,7 +119,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							{
 								sourceNode = (TableNode)Compiler.EmitCopyNode(plan, sourceNode);
 								sourceNode.InferPopulateNode(plan);
+								sourceNode.DeterminePotentialDevice(plan);
 								sourceNode.DetermineDevice(plan);
+								sourceNode.DetermineAccessPath(plan);
 							}
 						}
 
@@ -135,7 +137,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						{
 							sourceNode = (TableNode)Compiler.EmitBrowseNode(plan, sourceNode, true);
 							sourceNode.InferPopulateNode(plan);
+							sourceNode.DeterminePotentialDevice(plan);
 							sourceNode.DetermineDevice(plan);
+							sourceNode.DetermineAccessPath(plan);
 						}
 
 						// Updateable
@@ -165,8 +169,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return sourceNode;	
 		}
 		
-		public override void InternalDetermineBinding(Plan plan)
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
+			plan.PushCursorContext(_cursorContext);
+			try
+			{
+				SourceNode.BindingTraversal(plan, visitor);
+			}
+			finally
+			{
+				plan.PopCursorContext();
+			}
+		}
+
+		public override void DetermineAccessPath(Plan plan)
+		{
+			base.DetermineAccessPath(plan);
 			SourceNode = BindSourceNode(plan, SourceNode);
 		}
 		

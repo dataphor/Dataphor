@@ -200,7 +200,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override Schema.TableVar TableVar { get { return _table; } }
 		
-		public override void DetermineDevice(Plan plan)
+		public override void DeterminePotentialDevice(Plan plan)
 		{
 			_device = _table.Device;
 			_deviceSupported = false;
@@ -1566,7 +1566,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				table.AddDependencies(dummy.Dependencies);
 		}
 
-		public override void DetermineDevice(Plan plan)
+		public override void DeterminePotentialDevice(Plan plan)
 		{
 			_tableVar = (Schema.BaseTableVar)FindObject(plan, _alterTableVarStatement.TableVarName);
 			_device = _tableVar.Device;
@@ -1628,7 +1628,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			statement.CreateColumns.AddRange(AlterTableStatement.CreateColumns);
 			AlterTableNode node = new AlterTableNode();
 			node.AlterTableStatement = statement;
+			node.DeterminePotentialDevice(program.Plan);
 			node.DetermineDevice(program.Plan);
+			node.DetermineAccessPath(program.Plan);
 			program.DeviceExecute(_tableVar.Device, node);
 			UpdateDefaultColumns(program);
 
@@ -1639,7 +1641,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			statement.DropOrders.AddRange(AlterTableStatement.DropOrders);
 			node = new AlterTableNode();
 			node.AlterTableStatement = statement;
+			node.DeterminePotentialDevice(program.Plan);
 			node.DetermineDevice(program.Plan);
+			node.DetermineAccessPath(program.Plan);
 			program.DeviceExecute(_tableVar.Device, node);
 			DropKeys(program, _tableVar, _alterTableVarStatement.DropKeys);
 			DropOrders(program, _tableVar, _alterTableVarStatement.DropOrders);
@@ -1655,7 +1659,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			statement.CreateOrders.AddRange(AlterTableStatement.CreateOrders);
 			node = new AlterTableNode();
 			node.AlterTableStatement = statement;
+			node.DeterminePotentialDevice(program.Plan);
 			node.DetermineDevice(program.Plan);
+			node.DetermineAccessPath(program.Plan);
 			program.DeviceExecute(_tableVar.Device, node);
 
 			DropReferences(program, _tableVar, _alterTableVarStatement.DropReferences);
@@ -2828,7 +2834,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void DetermineDevice(Plan plan)
+		public override void DeterminePotentialDevice(Plan plan)
 		{
 			_device = _table.Device;
 			_deviceSupported = false;

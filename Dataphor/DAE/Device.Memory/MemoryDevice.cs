@@ -53,21 +53,26 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			get { return _maxRowCount; }
 			set { _maxRowCount = value; }
 		}
-		
+
+		protected void PrepareTableNode(Schema.DevicePlan plan, TableNode node)
+		{
+			node.CursorType = CursorType.Dynamic;
+			node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
+			node.CursorCapabilities =
+				CursorCapability.Navigable |
+				CursorCapability.BackwardsNavigable |
+				CursorCapability.Bookmarkable |
+				CursorCapability.Searchable |
+				(plan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
+			node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
+		}
+
 		protected override DevicePlanNode InternalPrepare(Schema.DevicePlan plan, PlanNode planNode)
 		{
 			if (planNode is BaseTableVarNode)
 			{
 				BaseTableVarNode node = (BaseTableVarNode)planNode;
-				node.CursorType = CursorType.Dynamic;
-				node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
-				node.CursorCapabilities =
-					CursorCapability.Navigable |
-					CursorCapability.BackwardsNavigable |
-					CursorCapability.Bookmarkable |
-					CursorCapability.Searchable |
-					(plan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
-				node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
+				PrepareTableNode(plan, node);
 				node.Order = Compiler.OrderFromKey(plan.Plan, Compiler.FindClusteringKey(plan.Plan, node.TableVar));
 				return new DevicePlanNode(node);
 			}
@@ -140,15 +145,8 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 					if (!node.TableVar.Orders.Contains(node.Order))
 						node.TableVar.Orders.Add(node.Order);
 
-					node.CursorType = CursorType.Dynamic;
-					node.RequestedCursorType = plan.Plan.CursorContext.CursorType;
-					node.CursorCapabilities =
-						CursorCapability.Navigable |
-						CursorCapability.BackwardsNavigable |
-						CursorCapability.Bookmarkable |
-						CursorCapability.Searchable |
-						(plan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
-					node.CursorIsolation = plan.Plan.CursorContext.CursorIsolation;
+					PrepareTableNode(plan, node);
+					PrepareTableNode(plan, tableVarNode);
 					
 					return new DevicePlanNode(node);
 				}

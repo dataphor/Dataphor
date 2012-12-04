@@ -377,9 +377,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_cursorIsolation = plan.CursorContext.CursorIsolation;
 		}
 		
-		public override void DetermineDevice(Plan plan)
+		public override void DetermineAccessPath(Plan plan)
 		{
-			base.DetermineDevice(plan);
+			base.DetermineAccessPath(plan);
 			if ((_cursorCapabilities & CursorCapability.Updateable) == 0)
 				_symbols = Compiler.SnapshotSymbols(plan);
 		}
