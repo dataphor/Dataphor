@@ -380,3 +380,48 @@ proposed pruning/simplification rules above, as removing an obvious
 "false" if all terms are removed.
 
 */
+
+/*
+	Test Conjunctive Normal Form
+*/
+
+create operator A() : Boolean
+begin
+	result := true;
+end;
+
+create operator B() : Boolean
+begin
+	result := false;
+end;
+
+create operator C() : Boolean
+begin
+	result := true;
+end;
+
+create operator D() : Boolean
+begin
+	result := false;
+end;
+
+select ConjunctiveNormalForm("true");
+select ConjunctiveNormalForm("not(true)");
+select ConjunctiveNormalForm("not(not(true))");
+select ConjunctiveNormalForm("A()");
+select ConjunctiveNormalForm("A() or B()");
+select ConjunctiveNormalForm("A() and B()");
+select ConjunctiveNormalForm("A() and B() or C()");
+select ConjunctiveNormalForm("A() or B() and C()");
+
+/*
+	Test Disjunctive Normal Form
+*/
+
+select DisjunctiveNormalForm("A()");
+select DisjunctiveNormalForm("not(A())");
+select DisjunctiveNormalForm("not(not(A()))");
+select DisjunctiveNormalForm("A() and B()");
+select DisjunctiveNormalForm("A() or B()");
+select DisjunctiveNormalForm("A() or B() and C()");
+select DisjunctiveNormalForm("A() and B() or C()");

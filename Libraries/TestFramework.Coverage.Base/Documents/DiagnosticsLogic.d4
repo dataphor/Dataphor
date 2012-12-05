@@ -27,6 +27,8 @@ create operator TestParserEmitter(const AScript : String) class "Alphora.Datapho
 create operator TestIsPlanCached() : Boolean class "Alphora.Dataphor.DAE.Diagnostics.TestIsPlanCachedNode,Alphora.Dataphor.DAE.Diagnostics";
 create operator TestOperatorText(const AObjectSpecifier : String) class "Alphora.Dataphor.DAE.Diagnostics.TestOperatorTextNode,Alphora.Dataphor.DAE.Diagnostics";
 create operator TestOperatorText(const AObjectName : Name) class "Alphora.Dataphor.DAE.Diagnostics.TestOperatorTextNode,Alphora.Dataphor.DAE.Diagnostics";
+create operator ConjunctiveNormalForm(const AExpression : String) : String class "Alphora.Dataphor.DAE.Diagnostics.ConjunctiveNormalFormNode,Alphora.Dataphor.DAE.Diagnostics";
+create operator DisjunctiveNormalForm(const AExpression : String) : String class "Alphora.Dataphor.DAE.Diagnostics.DisjunctiveNormalFormNode,Alphora.Dataphor.DAE.Diagnostics";
 //create operator CanonicalForm(const AScript : String) : String class "Alphora.Dataphor.DAE.Diagnostics.CanonicalFormNode,Alphora.Dataphor.DAE.Diagnostics";
 
 create operator RunNavigableTest(const AExpression : String) : String

@@ -10,6 +10,7 @@ using System;
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
 	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Compiling.Visitors;
 	using Alphora.Dataphor.DAE.Server;	
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;

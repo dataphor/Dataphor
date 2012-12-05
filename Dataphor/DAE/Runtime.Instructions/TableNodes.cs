@@ -18,6 +18,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Compiling.Visitors;
 	using Alphora.Dataphor.DAE.Server;	
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
@@ -1833,6 +1834,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (!devicePlan.IsSupported)
 					throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice, _device.Name, _tableVar.DisplayName);
 
+				_deviceSupported = true;
+				SurrogateExecute = InternalDeviceExecute;
 				SetDevice(plan, _potentialDevice);
 			}
 			else

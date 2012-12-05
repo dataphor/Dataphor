@@ -2272,5 +2272,47 @@ drop table Testing;
 			return program.IsCached;
 		}
 	}
+
+	// operator ConjunctiveNormalForm(AExpression : String) : String;
+	public class ConjunctiveNormalFormNode : UnaryInstructionNode
+	{
+		public override object InternalExecute(Program program, object argument1)
+		{
+			string expression = (string)argument1;
+			var statement = new Parser().ParseExpression(expression);
+			var plan = new Plan(program.ServerProcess);
+			try
+			{
+				var expressionNode = Compiler.CompileExpression(plan, statement);
+				var normalizedNode = Normalizer.ConjunctiveNormalize(plan, expressionNode);
+				return normalizedNode.SafeEmitStatementAsString();
+			}
+			finally
+			{
+				plan.Dispose();
+			}
+		}
+	}
+
+	// operator DisjunctiveNormalForm(AExpression : String) : String;
+	public class DisjunctiveNormalFormNode : UnaryInstructionNode
+	{
+		public override object InternalExecute(Program program, object argument1)
+		{
+			string expression = (string)argument1;
+			var statement = new Parser().ParseExpression(expression);
+			var plan = new Plan(program.ServerProcess);
+			try
+			{
+				var expressionNode = Compiler.CompileExpression(plan, statement);
+				var normalizedNode = Normalizer.DisjunctiveNormalize(plan, expressionNode);
+				return normalizedNode.SafeEmitStatementAsString();
+			}
+			finally
+			{
+				plan.Dispose();
+			}
+		}
+	}
 }
 

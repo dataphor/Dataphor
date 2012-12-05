@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Compiling.Visitors;
 using Alphora.Dataphor.DAE.Server;	
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;

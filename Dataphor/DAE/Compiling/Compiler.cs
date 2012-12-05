@@ -18,6 +18,7 @@ using System.Threading;
 
 namespace Alphora.Dataphor.DAE.Compiling
 {
+	using Alphora.Dataphor.DAE.Compiling.Visitors;
 	using Alphora.Dataphor.DAE.Debug;
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Alphora.Dataphor.DAE.Language;
@@ -104,7 +105,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 		Propositional Logic Transformation Rules ->
 
-			
 			Identity
 				p | false == p
 				p & true == p

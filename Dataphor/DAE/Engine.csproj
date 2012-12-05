@@ -117,6 +117,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compiling\Normalizer.cs" />
+    <Compile Include="Compiling\Visitors\DetermineAccessPathVisitor.cs" />
+    <Compile Include="Compiling\Visitors\DetermineDeviceVisitor.cs" />
+    <Compile Include="Compiling\Visitors\PlanNodeVisitor.cs" />
     <Compile Include="Contracts\BatchDescriptor.cs" />
     <Compile Include="Contracts\CursorDescriptor.cs" />
     <Compile Include="Contracts\DataphorFault.cs" />

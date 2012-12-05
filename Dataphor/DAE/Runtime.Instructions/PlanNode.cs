@@ -17,6 +17,7 @@ using System.Reflection.Emit;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Compiling.Visitors;
 using Alphora.Dataphor.DAE.Server;	
 using Alphora.Dataphor.DAE.Runtime.Data;
 
@@ -61,59 +62,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public delegate object ExecuteDelegate(Program program);
 
-	public abstract class PlanNodeVisitor
-	{
-		public virtual void PreOrderVisit(Plan plan, PlanNode node)
-		{
-			// base implementation does nothing
-		}
-
-		public virtual void PostOrderVisit(Plan plan, PlanNode node)
-		{
-			// base implementation does nothing
-		}
-	}
-
-	public class DetermineDeviceVisitor : PlanNodeVisitor
-	{
-		private PlanNode chunk;
-
-		public override void PreOrderVisit(Plan plan, PlanNode node)
-		{
-			if (chunk == null)
-			{
-				node.DetermineDevice(plan);
-				if (node.DeviceSupported)
-				{
-					chunk = node;
-				}
-			}
-		}
-
-		public override void PostOrderVisit(Plan plan, PlanNode node)
-		{
-			if (chunk != null)
-			{
-				if (chunk != node)
-				{
-					node.SetDevice(plan, chunk.Device);
-				}
-				else
-				{
-					chunk = null;
-				}
-			}
-		}
-	}
-
-	public class DetermineAccessPathVisitor : PlanNodeVisitor
-	{
-		public override void PostOrderVisit(Plan plan, PlanNode node)
-		{
-			node.DetermineAccessPath(plan);
-		}
-	}
-        
 	/// <summary> PlanNode </summary>	
 	public abstract class PlanNode : System.Object
 	{
@@ -414,9 +362,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public virtual void SetDevice(Plan plan, Schema.Device device)
 		{
-			_device = device;
-			_deviceSupported = true;
-			SurrogateExecute = InternalDeviceExecute;
+			//_device = device;
+			//_deviceSupported = true;
+			//SurrogateExecute = InternalDeviceExecute;
 		}
 
 		// Base implementation does nothing, descendents override this to determine
