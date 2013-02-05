@@ -606,7 +606,7 @@ namespace Alphora.Dataphor.DAE
 		[DataMember]
 		public TimeSpan OptimizeTime;
 
-		/// <summary>Returns the bind time for the plan.</summary>
+		/// <summary>Returns the bind time for the plan. (Binding time is no longer used, all time is reported to the OptimizeTime statistic)</summary>
 		[DataMember]
 		public TimeSpan BindingTime;
 
