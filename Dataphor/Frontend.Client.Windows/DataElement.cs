@@ -487,7 +487,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private bool _center = true;
 		[DefaultValue(true)]
-		[Description("When set to true the image will be centered in it's own area..")]
+		[Description("When set to true the image will be centered in it's own area.")]
 		public bool Center
 		{
 			get { return _center; }
