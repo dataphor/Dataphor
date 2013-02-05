@@ -128,7 +128,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(35, 13);
             this.label2.TabIndex = 9;
-            this.label2.Text = "Photo";
+            this.label2.Text = "Image";
             // 
             // FSettings
             // 

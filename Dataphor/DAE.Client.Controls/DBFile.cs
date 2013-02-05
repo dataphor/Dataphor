@@ -295,8 +295,16 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Painting
 
-		private Image _inactiveImage;
-		private Image _activeImage;
+		protected Image InactiveImage
+		{
+			get;
+			set;
+		}
+		protected Image ActiveImage
+		{
+			get;
+			set;
+		}
 
 		private void DeinitializeDBFileForm()
 		{
@@ -309,23 +317,23 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		private void InitializeImages()
+		protected virtual void InitializeImages()
 		{
-			_inactiveImage = new Bitmap(GetType().Assembly.GetManifestResourceStream(@"Alphora.Dataphor.DAE.Client.Controls.Images.File.png"));
-			_activeImage = new Bitmap(GetType().Assembly.GetManifestResourceStream(@"Alphora.Dataphor.DAE.Client.Controls.Images.FileActive.png"));
+			InactiveImage = new Bitmap(GetType().Assembly.GetManifestResourceStream(@"Alphora.Dataphor.DAE.Client.Controls.Images.File.png"));
+			ActiveImage = new Bitmap(GetType().Assembly.GetManifestResourceStream(@"Alphora.Dataphor.DAE.Client.Controls.Images.FileActive.png"));			
 		}
 
 		private void DeinitializeImages()
 		{
-			if (_inactiveImage != null)
+			if (InactiveImage != null)
 			{
-				_inactiveImage.Dispose();
-				_inactiveImage = null;
+				InactiveImage.Dispose();
+				InactiveImage = null;
 			}
-			if (_activeImage != null)
+			if (ActiveImage != null)
 			{
-				_activeImage.Dispose();
-				_activeImage = null;
+				ActiveImage.Dispose();
+				ActiveImage = null;
 			}
 		}
 
@@ -333,7 +341,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			if (Focused)
 				ControlPaint.DrawFocusRectangle(args.Graphics, new Rectangle(0, 0, Width - 1, Height - 1));
-			Image image = _hasValue ? _activeImage : _inactiveImage;
+			Image image = _hasValue ? ActiveImage : InactiveImage;
 			args.Graphics.DrawImage(image, 1, 1, image.Width - 1, image.Height - 1);
 		}
 
