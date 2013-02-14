@@ -362,9 +362,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public virtual void SetDevice(Plan plan, Schema.Device device)
 		{
-			//_device = device;
-			//_deviceSupported = true;
-			//SurrogateExecute = InternalDeviceExecute;
+			_device = device;
+			_deviceSupported = true;
+			SurrogateExecute = InternalDeviceExecute;
 		}
 
 		// Base implementation does nothing, descendents override this to determine

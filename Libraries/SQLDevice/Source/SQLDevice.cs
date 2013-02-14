@@ -3996,6 +3996,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		// Execute
 		protected override object InternalExecute(Program program, PlanNode planNode)
 		{
+            if (planNode.DeviceNode == null)
+            {
+                throw new DeviceException(DeviceException.Codes.UnpreparedDevicePlan, ErrorSeverity.System);
+            }
+
 			var devicePlanNode = (SQLDevicePlanNode)planNode.DeviceNode;
 			if (planNode is DMLNode)
 			{

@@ -3198,11 +3198,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private void CreateDeviceTable(Schema.BaseTableVar table)
 		{
-			Program program = new Program(ServerProcess);
+			var node = new CreateTableNode(table);
+            using (var plan = new Plan(ServerProcess))
+            {
+				table.Device.Prepare(plan, node);
+            }
+
+			var program = new Program(ServerProcess);
 			program.Start(null);
 			try
 			{
-				program.DeviceExecute(table.Device, new CreateTableNode(table));
+				program.DeviceExecute(table.Device, node);
 			}
 			finally
 			{
@@ -3212,11 +3218,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private void DropDeviceTable(Schema.BaseTableVar table)
 		{
-			Program program = new Program(ServerProcess);
+			var node = new DropTableNode(table);
+			using (var plan = new Plan(ServerProcess))
+			{
+				table.Device.Prepare(plan, node);
+			}
+
+			var program = new Program(ServerProcess);
 			program.Start(null);
 			try
 			{
-				program.DeviceExecute(table.Device, new DropTableNode(table));
+				program.DeviceExecute(table.Device, node);
 			}
 			finally
 			{

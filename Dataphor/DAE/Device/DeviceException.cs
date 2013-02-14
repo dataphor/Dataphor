@@ -41,8 +41,10 @@ namespace Alphora.Dataphor.DAE.Device
 			TransactionFailure = 114112,
 			
 			/// <summary>Error code 114113: "Maximum physical row count ({0}) exceeded for table "{1}" in device "{2}"; to enable unlimited rows (with possible performance implications) use: alter device {2} alter class {{ alter "MaxRowCount" = "-1" }};"</summary>
-			MaxRowCountExceeded = 114113
+			MaxRowCountExceeded = 114113,
 
+            /// <summary>Error code 114114: "Internal error: Device plan is not prepared for this plan."</summary>
+            UnpreparedDevicePlan = 114114
 		}
 
 		// Resource manager for this exception class
