@@ -6,7 +6,6 @@ using Alphora.Dataphor.DAE.Device.SQL;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 
-
 namespace Alphora.Dataphor.DAE.Device.PGSQL
 {
 
@@ -336,7 +335,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{
-            return "oid";
+            return "bytea";
 		}
 	}
 
@@ -353,7 +352,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{
-            return "oid";
+            return "bytea";
 		}
 	}
 
