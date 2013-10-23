@@ -160,8 +160,8 @@ begin
 		create type System.Binary class "PostgreSQLDevice.PostgreSQLBinary" static tags {{ DAE.IsSystem = "true" }},
 		create operator System.Binary(System.String) static tags {{ Storage.TranslationString = "({{0}})::bytea", DAE.IsSystem = "true" }}, // "Convert(varbinary, {{0}})", DAE.IsSystem = "true" }},
 
-        create operator System.Graphic(System.String) class "PostgreSQLDevice.PostgreSQLGraphic" static tags {{ DAE.IsSystem = "true" }}
-
+        create type System.Graphic class "PostgreSQLDevice.PostgreSQLGraphic" static tags {{ DAE.IsSystem = "true" }},
+        create operator System.Graphic(System.String) class "SQLDevice.SQLScalarSelector" static tags {{ DAE.IsSystem = "true" }}
 
 		}};
 		end;
