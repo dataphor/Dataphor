@@ -149,7 +149,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
         {
             var deviceSession = (SQLDeviceSession)Connect(process, process.ServerSession.SessionInfo);
 			var database = Database;
-			Database = "";
+			Database = "postgres"; // This assumes all PostgreSQL installations have a postgres db.
             try
             {
 				// Detect if the database exists
