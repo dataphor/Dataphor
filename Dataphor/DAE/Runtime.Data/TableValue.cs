@@ -866,7 +866,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			_firstKey = firstKey;
 			_lastKey = lastKey;
 		}
-		
+
 		protected NativeTable _nativeTable;
 		public NativeTable NativeTable
 		{
@@ -1009,6 +1009,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class TableValueScan : TableScan
 	{
+		public TableValueScan(TableValue tableValue) : base(tableValue.Manager, tableValue.AsNative as NativeTable, tableValue.Manager.FindClusteringOrder(((NativeTable)tableValue.AsNative).TableVar), ScanDirection.Forward, null, null) { }
 		public TableValueScan(TableNode node, TableValue tableValue) : base(tableValue.Manager, node)
 		{
 			_nativeTable = tableValue.AsNative as NativeTable;
