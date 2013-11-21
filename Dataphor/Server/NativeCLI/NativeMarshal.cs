@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	/// </summary>
 	public static class NativeMarshal
 	{
-		public static IDataType NativeTypeNameToDataType(Schema.DataTypes dataTypes, string nativeDataTypeName)
+		public static IDataType NativeScalarTypeNameToDataType(Schema.DataTypes dataTypes, string nativeDataTypeName)
 		{
 			switch (nativeDataTypeName.ToLower())
 			{
@@ -57,12 +57,116 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 						throw new ArgumentException(String.Format("Invalid native data type name: \"{0}\".", nativeDataTypeName));
 			}
 		}
+
+		public static Columns ParseColumnTypes(Schema.DataTypes dataTypes, string columnDefinitions)
+		{
+			var results = new Columns();
+
+			var current = 0;
+			var colon = columnDefinitions.IndexOf(':');
+			while (colon > 0)
+			{
+				var next = columnDefinitions.IndexOf(',', current);
+				if (next < 0)
+					next = columnDefinitions.Length;
+
+				results.Add
+				(
+					new Column
+					(
+						columnDefinitions.Substring(current, colon - current), 
+						NativeTypeNameToDataType(dataTypes, columnDefinitions.Substring(colon + 1, next - colon - 1))
+					)
+				);
+
+				current = next + 1;
+				if (current < columnDefinitions.Length)
+					colon = columnDefinitions.IndexOf(':', current);
+				else
+					colon = -1;
+			}
+
+			return results;
+		}
+
+		public static IDataType NativeTypeNameToDataType(Schema.DataTypes dataTypes, string nativeDataTypeName)
+		{
+			if (nativeDataTypeName.ToLower().StartsWith("row"))
+			{
+				var rowType = new RowType();
+
+				rowType.Columns.AddRange(ParseColumnTypes(dataTypes, nativeDataTypeName.Substring(4, nativeDataTypeName.Length - 5)));
+
+				return rowType;
+			}
+			else if (nativeDataTypeName.ToLower().StartsWith("table"))
+			{
+				var tableType = new TableType();
+
+				tableType.Columns.AddRange(ParseColumnTypes(dataTypes, nativeDataTypeName.Substring(6, nativeDataTypeName.Length - 7)));
+
+				return tableType;
+			}
+			else if (nativeDataTypeName.ToLower().StartsWith("list"))
+			{
+				var elementType = NativeTypeNameToDataType(dataTypes, nativeDataTypeName.Substring(5, nativeDataTypeName.Length - 6));
+				return new ListType(elementType);
+			}
+			else
+			{
+				return NativeScalarTypeNameToDataType(dataTypes, nativeDataTypeName);
+			}
+		}
 		
 		public static string DataTypeToDataTypeName(Schema.DataTypes dataTypes, IDataType dataType)
 		{
 			ScalarType scalarType = dataType as ScalarType;
 			if (scalarType != null)
 				return ScalarTypeToDataTypeName(dataTypes, scalarType);
+
+			ListType listType = dataType as ListType;
+			if (listType != null)
+				return String.Format("list({0})", DataTypeToDataTypeName(dataTypes, listType.ElementType));
+
+			RowType rowType = dataType as RowType;
+			if (rowType != null)
+			{
+				var sb = new StringBuilder();
+				sb.Append("row{");
+				bool first = true;
+				foreach (Column column in rowType.Columns)
+				{
+					if (!first)
+						sb.Append(",");
+					else
+						first = false;
+
+					sb.AppendFormat("{0}:{1}", column.Name, DataTypeToDataTypeName(dataTypes, column.DataType));
+				}
+				sb.Append("}");
+
+				return sb.ToString();
+			}
+
+			TableType tableType = dataType as TableType;
+			if (tableType != null)
+			{
+				var sb = new StringBuilder();
+				sb.Append("table{");
+				bool first = true;
+				foreach (Column column in tableType.Columns)
+				{
+					if (!first)
+						sb.Append(",");
+					else
+						first = false;
+
+					sb.AppendFormat("{0}:{1}", column.Name, DataTypeToDataTypeName(dataTypes, column.DataType));
+				}
+				sb.Append("}");
+
+				return sb.ToString();
+			}
 			
 			throw new NotSupportedException("Non-scalar-valued attributes are not supported.");
 		}
@@ -184,13 +288,21 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 					table.AsNative = null;
 				else
 				{
+					bool[] valueTypes = new bool[internalTable.TableType.Columns.Count];
+					for (int index = 0; index < internalTable.TableType.Columns.Count; index++)
+						valueTypes[index] = internalTable.TableType.Columns[index].DataType is IScalarType;
+
 					for (int index = 0; index < nativeTable.Rows.Length; index++)
 					{
 						Row row = new Row(process.ValueManager, internalTable.RowType);
 						try
 						{
 							for (int columnIndex = 0; columnIndex < nativeTable.Rows[index].Length; columnIndex++)
-								row[columnIndex] = nativeTable.Rows[index][columnIndex];
+								if (valueTypes[columnIndex])
+									row[columnIndex] = nativeTable.Rows[index][columnIndex];
+								else
+									row[columnIndex] = NativeValueToDataValue(process, (NativeValue)nativeTable.Rows[index][columnIndex]);
+
 							internalTable.Insert(process.ValueManager, row);
 						}
 						catch (Exception)
@@ -322,33 +434,58 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 				}
 				return nativeRow;
 			}
-			
-			Table table = dataValue as Table;
-			if (table != null)
-			{
-				NativeTableValue nativeTable = new NativeTableValue();
-				nativeTable.Columns = ColumnsToNativeColumns(process.DataTypes, table.DataType.Columns);
-					
-				List<object[]> nativeRows = new List<object[]>();
 
-				if (!table.BOF())
-					table.First();
-					
-				while (table.Next())
+			TableValue tableValue = dataValue as TableValue;
+			TableValueScan scan = null;
+			try
+			{
+				if (tableValue != null)
 				{
-					using (Row currentRow = table.Select())
-					{
-						object[] nativeRow = new object[nativeTable.Columns.Length];
-						for (int index = 0; index < nativeTable.Columns.Length; index++)
-							nativeRow[index] = currentRow[index];
-						nativeRows.Add(nativeRow);
-					}
+					scan = new TableValueScan(tableValue);
+					scan.Open();
+					dataValue = scan;
 				}
+
+				Table table = dataValue as Table;
+				if (table != null)
+				{
+					NativeTableValue nativeTable = new NativeTableValue();
+					nativeTable.Columns = ColumnsToNativeColumns(process.DataTypes, table.DataType.Columns);
+					
+					List<object[]> nativeRows = new List<object[]>();
+
+					if (!table.BOF())
+						table.First();
+					
+					bool[] valueTypes = new bool[nativeTable.Columns.Length];
+					for (int index = 0; index < nativeTable.Columns.Length; index++)
+						valueTypes[index] = table.DataType.Columns[index].DataType is IScalarType;
+
+					while (table.Next())
+					{
+						using (Row currentRow = table.Select())
+						{
+							object[] nativeRow = new object[nativeTable.Columns.Length];
+							for (int index = 0; index < nativeTable.Columns.Length; index++)
+								if (valueTypes[index])
+									nativeRow[index] = currentRow[index];
+								else
+									nativeRow[index] = DataValueToNativeValue(process, currentRow.GetValue(index));
+
+							nativeRows.Add(nativeRow);
+						}
+					}
 				
-				nativeTable.Rows = nativeRows.ToArray();
-				return nativeTable;
+					nativeTable.Rows = nativeRows.ToArray();
+					return nativeTable;
+				}
 			}
-			
+			finally
+			{
+				if (scan != null)
+					scan.Dispose();
+			}
+
 			throw new NotSupportedException(String.Format("Values of type \"{0}\" are not supported.", dataValue.DataType.Name));
 		}
 		
@@ -375,12 +512,20 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			Row currentRow = cursor.Plan.RequestRow();
 			try
 			{
+				bool[] valueTypes = new bool[nativeTable.Columns.Length];
+				for (int index = 0; index < nativeTable.Columns.Length; index++)
+					valueTypes[index] = currentRow.DataType.Columns[index].DataType is IScalarType;
+
 				while (cursor.Next())
 				{
 					cursor.Select(currentRow);
 					object[] nativeRow = new object[nativeTable.Columns.Length];
 					for (int index = 0; index < nativeTable.Columns.Length; index++)
-						nativeRow[index] = currentRow[index];
+						if (valueTypes[index])
+							nativeRow[index] = currentRow[index];
+						else
+							nativeRow[index] = DataValueToNativeValue(process, currentRow.GetValue(index));
+
 					nativeRows.Add(nativeRow);
 				}
 			}
@@ -447,13 +592,21 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 				if (!tableValue.BOF())
 					tableValue.First();
 
+				var valueTypes = new bool[tableType.Columns.Count];
+				for (int index = 0; index < tableType.Columns.Count; index++)
+					valueTypes[index] = tableType.Columns[index].DataType is IScalarType;
+
 				while (tableValue.Next())
 				{
 					using (Row currentRow = tableValue.Select())
 					{
 						object[] nativeRow = new object[nativeTable.Columns.Length];
 						for (int index = 0; index < nativeTable.Columns.Length; index++)
-							nativeRow[index] = currentRow[index];
+							if (valueTypes[index])
+								nativeRow[index] = currentRow[index];
+							else
+								nativeRow[index] = DataValueToNativeValue(process, currentRow.GetValue(index));
+		
 						nativeRows.Add(nativeRow);
 					}
 				}
