@@ -11929,13 +11929,16 @@ indicative of other problems, a reference will never be attached as an explicit 
 			PlanNode[] planNodes = new PlanNode[expression.Expressions.Count];
 			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
+				PlanNode elementNode;
 				if (listType != null)
-					planNodes[index] = CompileTypedExpression(plan, expression.Expressions[index], listType.ElementType);
+					elementNode = CompileTypedExpression(plan, expression.Expressions[index], listType.ElementType);
 				else
 				{
-					planNodes[index] = CompileExpression(plan, expression.Expressions[index]);
-					listType = new Schema.ListType(planNodes[index].DataType);
+					elementNode = CompileExpression(plan, expression.Expressions[index]);
+					listType = new Schema.ListType(elementNode.DataType);
 				}
+
+				planNodes[index] = EnsureTableValueNode(plan, elementNode);
 			}
 			
 			if (listType == null)
@@ -12710,6 +12713,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						planNode = ConvertNode(plan, planNode, context);
 					}
 			
+					planNode = EnsureTableValueNode(plan, planNode);
 					node.Nodes.Add(planNode);
 				}
 			}
@@ -12729,6 +12733,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 							planNode.DataType
 						)
 					);
+
+					planNode = EnsureTableValueNode(plan, planNode);
 					node.Nodes.Add(planNode);
 				}
 			}
@@ -12780,6 +12786,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 							)
 						);
 					}
+
+					planNode = EnsureTableValueNode(plan, planNode);
 					node.Nodes.Add(planNode);
 				}
 				node.DetermineCharacteristics(plan);
