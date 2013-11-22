@@ -9,7 +9,6 @@ create server Test;
 
 if (EvaluateOn('Test', 'select Count(TableDee)') as Integer) <> 1 then
 	raise Error("Evaluate On Default Server Link Failed");
-
 drop server Test;
 
 // Basic Server Link
@@ -214,4 +213,44 @@ drop server Test;
 // On Expression
 create server Test;
 select Devices on Test;
+drop server Test;
+
+// Non-Scalar-Valued Attributes
+create server Test
+// Test List Result
+select list(Integer) { 1, 2, 3, 4, 5 };
+select EvaluateOn("Test", "select (list(Integer) { 1, 2, 3, 4, 5 })") as list(Integer);
+// Test Row Result
+select row { 1 ID, "Blah" Name };
+select EvaluateOn("Test", "select row { 1 ID, 'Blah' Name }") as row { ID : Integer, Name : String };
+// Test Table Result
+select table { row { 1 ID, "Blah" Name };
+select EvaluateOn("Test", "select table { row { 1 ID, 'Blah' Name } }") as table { ID : Integer, Name : String };
+// Test Row of List, Row, and Table
+select row { list(Integer) { 1, 2, 3, 4, 5 } ListValue };
+select EvaluateOn("Test", "select row { list(Integer) { 1, 2, 3, 4, 5 } ListValue }") as row { ListValue : list(Integer) };
+select row { row { 1 ID, 'Blah' Name } RowValue };
+select EvaluateOn("Test", "select row { row { 1 ID, 'Blah' Name } RowValue }") as row { RowValue : row { ID : Integer, Name : String } };
+select row { table { row { 1 ID, 'Blah' Name } } TableValue };
+select EvaluateOn("Test", "select row { table { row { 1 ID, 'Blah' Name } } TableValue }") as row { TableValue : table { ID : Integer, Name : String } };
+// Test Table of List, Row, and Table
+select table { row { list(Integer) { 1, 2, 3, 4, 5 } IntegerList } };
+select (table { row { list(Integer) { 1, 2, 3, 4, 5 } IntegerList } }) on Test;
+select table { row { row { 1 ID, 'Blah' Name } RowValue } };
+select (table { row { row { 1 ID, 'Blah' Name } RowValue } }) on Test;
+select table { row { table { row { 1 ID, 'Blah' Name } } TableValue } };
+select (table { row { table { row { 1 ID, 'Blah' Name } } TableValue } }) on Test;
+// Test List of Row
+select list(row) { row { 1 ID, 'Blah' Name } };
+select EvaluateOn("Test", "select list(row) { row { 1 ID, 'Blah' Name } }") as list(row);
+// Test List of Table
+select list(table) { table { row { 1 ID, 'Blah' Name } } };
+select EvaluateOn("Test", "select list(table) { table { row { 1 ID, 'Blah' Name } } }") as list(table);
+// Test List of List
+select list(list(Integer)) { list(Integer) { 1, 2, 3 }, list(Integer) { 4, 5, 6 } };
+select EvaluateOn("Test", "select list(list(Integer)) { list(Integer) { 1, 2, 3 }, list(Integer) { 4, 5, 6 } }") as list(list(Integer));
+
+// Table of list of table with row valued attributes
+select (table { row { list(table) { table { row { 1 ID, 'Blah' Name, row { 'Inner' Inner } RowValue } } } ListValue } }) on Test;
+
 drop server Test;

@@ -592,7 +592,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				NativeTable newTable = new NativeTable(manager, nativeTable.TableVar);
 				using (Scan scan = new Scan(manager, nativeTable, nativeTable.ClusteredIndex, ScanDirection.Forward, null, null))
 				{
-					while (!scan.EOF())
+					scan.Open();
+					while (scan.Next())
 					{
 						using (Row row = scan.GetRow())
 						{
