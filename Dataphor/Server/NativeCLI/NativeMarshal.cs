@@ -178,9 +178,9 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			if (scalarType.NativeType == NativeAccessors.AsByteArray.NativeType) return "Byte[]";
 			if (scalarType.NativeType == NativeAccessors.AsDateTime.NativeType)
 			{
-				if (scalarType.Is(dataTypes.SystemDateTime)) return "DateTime";
-				if (scalarType.Is(dataTypes.SystemDate)) return "Date";
-				if (scalarType.Is(dataTypes.SystemTime)) return "Time";
+				if (scalarType.Is(dataTypes.SystemDateTime) || scalarType.IsLike(dataTypes.SystemDateTime)) return "DateTime";
+				if (scalarType.Is(dataTypes.SystemDate) || scalarType.IsLike(dataTypes.SystemDate)) return "Date";
+				if (scalarType.Is(dataTypes.SystemTime) || scalarType.IsLike(dataTypes.SystemTime)) return "Time";
 			}
 			if (scalarType.NativeType == NativeAccessors.AsDecimal.NativeType) return "Decimal";
 			if (scalarType.NativeType == NativeAccessors.AsException.NativeType) return "Exception";
