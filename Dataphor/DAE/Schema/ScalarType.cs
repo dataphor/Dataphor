@@ -1309,6 +1309,20 @@ namespace Alphora.Dataphor.DAE.Schema
 			return false;
 		}
 
+        // IsLike
+        public bool IsLike(IDataType dataType)
+        {
+            if (!this.Equals(dataType))
+            {
+                if (_likeType != null)
+                {
+                    return _likeType.IsLike(dataType);
+                }
+                return false;
+            }
+            return true;
+        }
+
 		// Compatible
 		// Compatible is A is B or B is A
 		public bool Compatible(IDataType dataType)

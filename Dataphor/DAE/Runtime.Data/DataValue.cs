@@ -388,9 +388,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// <summary>Returns the host representation of the given native value.  This is a by-reference operation.</summary>		
 		public static DataValue FromNative(IValueManager manager, Schema.IDataType dataType, object tempValue)
 		{
-			if (tempValue == null)
-				return null;
-				
 			// This code is duplicated in the Copy method and the FromNative overloads for performance
 			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
 			if (scalarType != null)
@@ -401,6 +398,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return new Scalar(manager, NativeTypeToScalarType(manager, tempValue.GetType()), tempValue);
 				return new Scalar(manager, scalarType, tempValue);
 			}
+				
+			if (tempValue == null)
+				return null;
 				
 			Schema.IRowType rowType = dataType as Schema.IRowType;
 			if (rowType != null)
