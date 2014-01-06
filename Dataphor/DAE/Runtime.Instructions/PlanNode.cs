@@ -411,7 +411,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// <returns>The DynamicMethod instance representing the Execute method being constructed.</returns>
 		protected DynamicMethod BeginEmitIL()
 		{
+            #if (SILVERLIGHT)
+            return new DynamicMethod(GetType().Name, typeof(object), new Type[] { typeof(PlanNode), typeof(ServerProcess) });
+            #else
 			return new DynamicMethod(GetType().Name, typeof(object), new Type[] { typeof(PlanNode), typeof(ServerProcess) }, GetType(), true);
+            #endif
 		}
 
 		/// <summary>
