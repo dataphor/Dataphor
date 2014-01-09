@@ -257,7 +257,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			#else
 			Nodes[0].BindingTraversal(plan, visitor);
+			#endif
 			plan.EnterRowContext();
 			try
 			{
@@ -265,7 +269,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					for (int index = 1; index < Nodes.Count; index++)
+						#if USEVISIT
+						Nodes[index] = visitor.Visit(plan, Nodes[index]);
+						#else
 						Nodes[index].BindingTraversal(plan, visitor);
+						#endif
 				}
 				finally
 				{

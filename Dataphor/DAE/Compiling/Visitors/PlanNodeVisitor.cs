@@ -13,8 +13,16 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 
 namespace Alphora.Dataphor.DAE.Compiling.Visitors
 {
-	public abstract class PlanNodeVisitor
+	public class PlanNodeVisitor
 	{
+		#if USEVISIT
+		public virtual PlanNode Visit(Plan plan, PlanNode node)
+		{
+			node.BindingTraversal(plan, this);
+			return node;
+		}
+		#endif
+
 		public virtual void PreOrderVisit(Plan plan, PlanNode node)
 		{
 			// base implementation does nothing

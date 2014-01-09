@@ -53,7 +53,7 @@
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
-    <DefineConstants>TRACE;DEBUG;USENATIVE;NATIVEROW;ACCUMULATOR;USEOBJECTVALIDATE;NILPROPOGATION</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;USENATIVE;NATIVEROW;ACCUMULATOR;USEOBJECTVALIDATE;NILPROPOGATION;USEVISIT</DefineConstants>
     <DocumentationFile>
     </DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
@@ -120,6 +120,7 @@
     <Compile Include="Compiling\Normalizer.cs" />
     <Compile Include="Compiling\Visitors\DetermineAccessPathVisitor.cs" />
     <Compile Include="Compiling\Visitors\DetermineDeviceVisitor.cs" />
+    <Compile Include="Compiling\Visitors\NormalizeRestrictionVisitor.cs" />
     <Compile Include="Compiling\Visitors\PlanNodeVisitor.cs" />
     <Compile Include="Contracts\BatchDescriptor.cs" />
     <Compile Include="Contracts\CursorDescriptor.cs" />

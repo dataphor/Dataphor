@@ -54,6 +54,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return _operator; }
 			set { _operator = value; }
 		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newInstructionNode = (InstructionNode)newNode;
+			newInstructionNode.Operator = _operator;
+		}
 		
 		public override Statement EmitStatement(EmitMode mode)
 		{		

@@ -461,7 +461,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			#else
 			Nodes[0].BindingTraversal(plan, visitor);
+			#endif
 			if (_statement.VariableName == String.Empty)
 				plan.EnterRowContext();
 			try
@@ -481,7 +485,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							throw new CompilerException(CompilerException.Codes.InvalidColumnBinding, _statement.VariableName);
 					}
 
+					#if USEVISIT
+					Nodes[1] = visitor.Visit(plan, Nodes[1]);
+					#else
 					Nodes[1].BindingTraversal(plan, visitor);
+					#endif
 				}
 				finally
 				{
@@ -1113,13 +1121,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// TODO: Change the way this compiles so that it doesn't use nameless stack references so that this binding override can be removed
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			#else
 			Nodes[0].BindingTraversal(plan, visitor);
+			#endif
 			// Do not bind node 1, it will fail (it contains nameless stack references)
 			plan.Symbols.Push(new Symbol(String.Empty, Nodes[0].DataType));
 			try
 			{
 				for (int index = 2; index < Nodes.Count; index++)
+					#if USEVISIT
+					Nodes[index] = visitor.Visit(plan, Nodes[index]);
+					#else
 					Nodes[index].BindingTraversal(plan, visitor);
+					#endif
 			}
 			finally
 			{
@@ -1309,6 +1325,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 				throw new RuntimeException(RuntimeException.Codes.UnsupportedValueType, _dataType.Name);
 		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newValueNode = (ValueNode)newNode;
+			newValueNode._value = _value;
+		}
     }																			
     
 	public class ParameterNode : PlanNode
@@ -1383,6 +1407,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			return Nodes[0].Execute(program);
 		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newParameterNode = (ParameterNode)newNode;
+			newParameterNode._modifier = _modifier;
+		}
 	}
 	
 	// The CallNode is responsible for preparing the stack with the given arguments.
@@ -1396,6 +1428,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		private PlanNode _allocateResultNode;
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newCallNode = (CallNode)newNode;
+			if (_allocateResultNode != null)
+			{
+				newCallNode._allocateResultNode = _allocateResultNode.Clone();
+			}
+		}
 		
 		public override void DetermineDataType(Plan plan)
 		{
@@ -2222,10 +2265,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// TODO: Change the way this compiles so that it doesn't use nameless stack references so that this binding override can be removed
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			#else
 			Nodes[0].BindingTraversal(plan, visitor);
+			#endif
 			// Do not bind node 1, it will fail (it contains nameless stack references)
 			for (int index = 2; index < Nodes.Count; index++)
+				#if USEVISIT
+				Nodes[index] = visitor.Visit(plan, Nodes[index]);
+				#else
 				Nodes[index].BindingTraversal(plan, visitor);
+				#endif
 		}
 
 		public override object InternalExecute(Program program)
@@ -2381,6 +2432,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		// ByReference
 		public bool ByReference;
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newStackReferenceNode = (StackReferenceNode)newNode;
+			newStackReferenceNode.Identifier = _identifier;
+			newStackReferenceNode.Location = Location;
+			newStackReferenceNode.ByReference = ByReference;
+		}
 		
 		// Statement
 		public override Statement EmitStatement(EmitMode mode)
@@ -2544,6 +2605,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		// ByReference
 		public bool ByReference;
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newStackColumnReferenceNode = (StackColumnReferenceNode)newNode;
+			newStackColumnReferenceNode.Identifier = Identifier;
+			newStackColumnReferenceNode._resolvingIdentifier = _resolvingIdentifier;
+			newStackColumnReferenceNode.Location = Location;
+			newStackColumnReferenceNode.ByReference = ByReference;
+		}
 		
 		// Statement
 		public override Statement EmitStatement(EmitMode mode)
@@ -2740,6 +2812,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			throw new RuntimeException(RuntimeException.Codes.PropertyRefNodeExecuted);
+		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newPropertyReferenceNode = (PropertyReferenceNode)newNode;
+			newPropertyReferenceNode.ScalarType = _scalarType;
+			newPropertyReferenceNode.RepresentationIndex = _representationIndex;
+			newPropertyReferenceNode.PropertyIndex = _propertyIndex;
 		}
     }
 }

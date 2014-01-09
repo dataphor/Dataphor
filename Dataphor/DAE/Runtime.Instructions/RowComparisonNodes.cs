@@ -102,8 +102,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			Nodes[1] = visitor.Visit(plan, Nodes[1]);
+			#else
 			Nodes[0].BindingTraversal(plan, visitor);
 			Nodes[1].BindingTraversal(plan, visitor);
+			#endif
 			if (_comparisonNode != null)
 			{
 				plan.EnterRowContext();
@@ -123,7 +128,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						#endif
 						try
 						{
+							#if USEVISIT
+							_comparisonNode = visitor.Visit(plan, _comparisonNode);
+							#else
 							_comparisonNode.BindingTraversal(plan, visitor);
+							#endif
 						}
 						finally
 						{
@@ -254,8 +263,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			Nodes[1] = visitor.Visit(plan, Nodes[1]);
+			#else
 			Nodes[0].BindingTraversal(plan, visitor);
 			Nodes[1].BindingTraversal(plan, visitor);
+			#endif
 			plan.EnterRowContext();
 			try
 			{
@@ -273,7 +287,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					try
 					{
+						#if USEVISIT
+						_comparisonNode = visitor.Visit(plan, _comparisonNode);
+						#else
 						_comparisonNode.BindingTraversal(plan, visitor);
+						#endif
 					}
 					finally
 					{

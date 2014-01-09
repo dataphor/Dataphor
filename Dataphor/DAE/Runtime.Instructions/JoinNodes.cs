@@ -684,11 +684,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			#else
 			Nodes[0].BindingTraversal(plan, visitor);
+			#endif
 			plan.PushCursorContext(new CursorContext(plan.CursorContext.CursorType, plan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, plan.CursorContext.CursorIsolation));
 			try
 			{
+				#if USEVISIT
+				Nodes[1] = visitor.Visit(plan, Nodes[1]);
+				#else
 				Nodes[1].BindingTraversal(plan, visitor);
+				#endif
 			}
 			finally
 			{
@@ -712,7 +720,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					try
 					{
+						#if USEVISIT
+						Nodes[2] = visitor.Visit(plan, Nodes[2]);
+						#else
 						Nodes[2].BindingTraversal(plan, visitor);
+						#endif
 					}
 					finally
 					{
@@ -1922,12 +1934,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			#else
 			Nodes[0].BindingTraversal(plan, visitor);
+			#endif
 			if (IsLookup && !IsDetailLookup)
 				plan.PushCursorContext(new CursorContext(plan.CursorContext.CursorType, plan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, plan.CursorContext.CursorIsolation));
 			try
 			{
+				#if USEVISIT
+				Nodes[1] = visitor.Visit(plan, Nodes[1]);
+				#else
 				Nodes[1].BindingTraversal(plan, visitor);
+				#endif
 			}
 			finally
 			{
@@ -1952,7 +1972,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					try
 					{
+						#if USEVISIT
+						Nodes[2] = visitor.Visit(plan, Nodes[2]);
+						#else
 						Nodes[2].BindingTraversal(plan, visitor);
+						#endif
 					}
 					finally
 					{
@@ -4172,7 +4196,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.PushCursorContext(new CursorContext(plan.CursorContext.CursorType, plan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, plan.CursorContext.CursorIsolation));
 			try
 			{
+				#if USEVISIT
+				Nodes[0] = visitor.Visit(plan, Nodes[0]);
+				#else
 				Nodes[0].BindingTraversal(plan, visitor);
+				#endif
 			}
 			finally
 			{
@@ -4180,7 +4208,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					plan.PopCursorContext();
 			}
 
+			#if USEVISIT
+			Nodes[1] = visitor.Visit(plan, Nodes[1]);
+			#else
 			Nodes[1].BindingTraversal(plan, visitor);
+			#endif
 			
 			plan.EnterRowContext();
 			try
@@ -4199,7 +4231,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					try
 					{
+						#if USEVISIT
+						Nodes[2] = visitor.Visit(plan, Nodes[2]);
+						#else
 						Nodes[2].BindingTraversal(plan, visitor);
+						#endif
 					}
 					finally
 					{

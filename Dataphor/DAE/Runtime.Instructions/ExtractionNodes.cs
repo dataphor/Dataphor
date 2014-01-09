@@ -130,6 +130,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return indexerExpression;
 			}
 		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newExtractRowNode = (ExtractRowNode)newNode;
+			newExtractRowNode.IndexerExpression = _indexerExpression;
+		}
 	}
 
 	//	Extract(row{}, ColumnName): scalar
@@ -264,6 +272,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			return new QualifierExpression((Expression)Nodes[0].EmitStatement(mode), new IdentifierExpression(Schema.Object.EnsureUnrooted(Identifier)));
+		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newExtractColumnNode = (ExtractColumnNode)newNode;
+			newExtractColumnNode.Identifier = Identifier;
+			newExtractColumnNode._shouldDisposeSource = _shouldDisposeSource;
 		}
 	}
 	

@@ -52,17 +52,30 @@ namespace Alphora.Dataphor.DAE.Compiling
 						var right = DisjunctiveNormalize(plan, instructionNode.Nodes[1]);
 						var leftClauses = CollectClauses(left, Instructions.Or);
 						var rightClauses = CollectClauses(right, Instructions.Or);
+						var clausesUsed = false;
 						PlanNode result = null;
 						foreach (var leftClause in leftClauses)
+						{
 							foreach (var rightClause in rightClauses)
+							{
 								result =
 									Compiler.AppendNode
 									(
 										plan, 
 										result, 
 										Instructions.Or, 
-										Compiler.AppendNode(plan, leftClause, Instructions.And, rightClause)
+										Compiler.AppendNode
+										(
+											plan, 
+											clausesUsed ? leftClause.Clone() : leftClause, 
+											Instructions.And, 
+											clausesUsed ? rightClause.Clone() : rightClause
+										)
 									);
+
+								clausesUsed = true;
+							}
+						}
 
 						return result;
 				}
@@ -107,17 +120,29 @@ namespace Alphora.Dataphor.DAE.Compiling
 						var right = ConjunctiveNormalize(plan, instructionNode.Nodes[1]);
 						var leftClauses = CollectClauses(left, Instructions.And);
 						var rightClauses = CollectClauses(right, Instructions.And);
+						var clausesUsed = false;
 						PlanNode result = null;
 						foreach (var leftClause in leftClauses)
+						{
 							foreach (var rightClause in rightClauses)
+							{
 								result =
 									Compiler.AppendNode
 									(
 										plan, 
 										result, 
 										Instructions.And, 
-										Compiler.EmitBinaryNode(plan, leftClause, Instructions.Or, rightClause)
+										Compiler.EmitBinaryNode
+										(
+											plan, 
+											clausesUsed ? leftClause.Clone() : leftClause, 
+											Instructions.Or, 
+											clausesUsed ? rightClause.Clone() : rightClause
+										)
 									);
+							}
+						}
+
 						return result;
 				}
 			}

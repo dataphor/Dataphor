@@ -371,7 +371,8 @@ namespace Alphora.Dataphor
 						}
 						#else
 						foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-							RegisterAssembly(assembly);
+                            if (!_assemblyByName.ContainsKey(AssemblyNameUtility.GetName(assembly.FullName)))
+    							RegisterAssembly(assembly);
 						#endif
 					}
 			}

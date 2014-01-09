@@ -46,6 +46,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return _valueNames; }
 			set { _valueNames = value; }
 		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newAggregateNode = (AggregateCallNode)newNode;
+			newAggregateNode.Operator = _operator;
+			newAggregateNode.AggregateColumnIndexes = _aggregateColumnIndexes;
+			newAggregateNode.ValueNames = _valueNames;
+		}
 		
 		public TableNode SourceNode { get { return (TableNode)Nodes[0]; } }
 		
@@ -100,7 +110,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.Symbols.Push(new Symbol(Keywords.Result, _dataType));
 				try
 				{
+					#if USEVISIT
+					Nodes[1] = visitor.Visit(plan, Nodes[1]);
+					#else
 					Nodes[1].BindingTraversal(plan, visitor);
+					#endif
 
 					for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
 						plan.Symbols.Push(new Symbol(_valueNames[index], SourceNode.DataType.Columns[_aggregateColumnIndexes[index]].DataType));
@@ -111,7 +125,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						plan.Symbols.AllowExtraWindowAccess = true;
 						try
 						{
+							#if USEVISIT
+							Nodes[0] = visitor.Visit(plan, Nodes[0]);
+							#else
 							Nodes[0].BindingTraversal(plan, visitor);
+							#endif
 						}
 						finally
 						{
@@ -121,7 +139,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						plan.Symbols.PushFrame();
 						try
 						{
+							#if USEVISIT
+							Nodes[2] = visitor.Visit(plan, Nodes[2]);
+							#else
 							Nodes[2].BindingTraversal(plan, visitor);
+							#endif
 						}
 						finally
 						{
@@ -134,7 +156,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							plan.Symbols.Pop();
 					}
 
+					#if USEVISIT
+					Nodes[3] = visitor.Visit(plan, Nodes[3]);
+					#else
 					Nodes[3].BindingTraversal(plan, visitor);
+					#endif
 				}
 				finally
 				{

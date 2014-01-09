@@ -71,6 +71,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return _cursorContext; }
 			set { _cursorContext = value; }
 		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newCursorNode = (CursorNode)newNode;
+
+			newCursorNode.CursorContext = _cursorContext;
+		}
 		
 		// SourceNode
 		public TableNode SourceNode
@@ -175,7 +184,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			plan.PushCursorContext(_cursorContext);
 			try
 			{
+				#if USEVISIT
+				Nodes[0] = visitor.Visit(plan, Nodes[0]);
+				#else
 				SourceNode.BindingTraversal(plan, visitor);
+				#endif
 			}
 			finally
 			{

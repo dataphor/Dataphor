@@ -138,6 +138,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return expression;
 			}
 		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newRowNode = (RowNode)newNode;
+			newRowNode.SpecifiedRowType = _specifiedRowType;
+		}
 	}
 
     public class RowSelectorNode : RowNode
@@ -164,7 +172,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return _expressions; }
 			set { _expressions = value; }
 		}
-		
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newRowExtendNode = (RowExtendNode)newNode;
+			newRowExtendNode._extendColumnOffset = _extendColumnOffset;
+			newRowExtendNode._expressions = _expressions;
+		}
+
 		public override void DetermineDataType(Plan plan)
 		{
 			DetermineModifiers(plan);
@@ -211,7 +228,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			#else
 			Nodes[0].BindingTraversal(plan, visitor);
+			#endif
 			plan.EnterRowContext();
 			try
 			{
@@ -219,7 +240,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					for (int index = 1; index < Nodes.Count; index++)
+						#if USEVISIT
+						Nodes[index] = visitor.Visit(plan, Nodes[index]);
+						#else
 						Nodes[index].BindingTraversal(plan, visitor);
+						#endif
 				}
 				finally
 				{
@@ -326,6 +351,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _expressions = value; }
 		}
 		
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newRowRedefineNode = (RowRedefineNode)newNode;
+			newRowRedefineNode._redefineColumnOffsets = (int[])_redefineColumnOffsets.Clone();
+			newRowRedefineNode._expressions = _expressions;
+		}
+
 		public override void DetermineDataType(Plan plan)
 		{
 			DetermineModifiers(plan);
@@ -384,7 +418,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			#else
 			Nodes[0].BindingTraversal(plan, visitor);
+			#endif
 			plan.EnterRowContext();
 			try
 			{
@@ -392,7 +430,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					for (int index = 1; index < Nodes.Count; index++)
+						#if USEVISIT
+						Nodes[index] = visitor.Visit(plan, Nodes[index]);
+						#else
 						Nodes[index].BindingTraversal(plan, visitor);
+						#endif
 				}
 				finally
 				{
@@ -520,6 +562,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _shouldEmit = value; }
 		}
 		
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newRowRenameNode = (RowRenameNode)newNode;
+			newRowRenameNode._rowAlias = _rowAlias;
+			newRowRenameNode._metaData = _metaData;
+			newRowRenameNode._expressions = _expressions;
+			newRowRenameNode._shouldEmit = _shouldEmit;
+		}
+
 		public override void DetermineDataType(Plan plan)
 		{
 			DetermineModifiers(plan);
@@ -611,6 +664,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public new Schema.RowType DataType { get { return (Schema.RowType)_dataType; } }
 		public Schema.RowType LeftRowType { get { return (Schema.RowType)Nodes[0].DataType; } }
 		public Schema.RowType RightRowType { get { return (Schema.RowType)Nodes[1].DataType; } }
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			if (_equalNode != null)
+			{
+				var newRowJoinNode = (RowJoinNode)newNode;
+				newRowJoinNode._equalNode = _equalNode.Clone();
+			}
+		}
 		
 		public override void DetermineDataType(Plan plan)
 		{
@@ -751,6 +815,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected BaseList<string> _columnNames = new BaseList<string>();
 		public BaseList<string> ColumnNames { get { return _columnNames; } }
 		#endif
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newRowProjectNodeBase = (RowProjectNodeBase)newNode;
+			newRowProjectNodeBase._columnNames = _columnNames;
+		}
 		
 		public override object InternalExecute(Program program, object argument)
 		{

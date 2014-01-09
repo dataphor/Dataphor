@@ -606,6 +606,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return _cursorCapabilities; }
 			set { _cursorCapabilities = value; }
 		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newTableNode = (TableNode)newNode;
+			newTableNode.TableVar = _tableVar; // BTR -> This is okay because if we ever actually rearrange, we'll need to redo the DetermineDataType call anyway
+			newTableNode._requestedCursorType = _requestedCursorType;
+			newTableNode._shouldCheckConcurrency = _shouldCheckConcurrency;
+			newTableNode._shouldSupportModify = _shouldSupportModify;
+			if (_order != null)
+			{
+				newTableNode._order = newTableNode.CopyOrder(_order);
+			}
+		}
 		
         public bool Supports(CursorCapability capability)
         {
@@ -680,7 +695,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					transaction.PushGlobalContext();
 					try
 					{
+						#if USEVISIT
+						_populateNode = (TableNode)visitor.Visit(plan, _populateNode);
+						#else
 						_populateNode.BindingTraversal(plan, visitor);
+						#endif
 					}
 					finally
 					{

@@ -392,7 +392,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         }
 
 		protected static FieldInfo _nodesFieldInfo = typeof(PlanNode).GetField("Nodes");
-		protected static FieldInfo _planNodesFieldInfo = typeof(PlanNodes).GetField("FNodes", BindingFlags.NonPublic | BindingFlags.Instance);        
+		protected static FieldInfo _planNodesFieldInfo = typeof(PlanNodes).GetField("_nodes", BindingFlags.NonPublic | BindingFlags.Instance);        
         protected static FieldInfo _executeFieldInfo = typeof(PlanNode).GetField("Execute");
         protected static MethodInfo _executeMethodInfo = typeof(ExecuteDelegate).GetMethod("Invoke", new Type[] { typeof(ServerProcess) });
         protected static MethodInfo _planNodesIndexerInfo = typeof(PlanNodes).GetMethod("get_Item", new Type[] { typeof(int) });
@@ -687,7 +687,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (_nodes != null)
 				for (int index = 0; index < Nodes.Count; index++)
+					#if USEVISIT
+					Nodes[index] = visitor.Visit(plan, Nodes[index]);
+					#else
 					Nodes[index].BindingTraversal(plan, visitor);
+					#endif
 		}
 		
 		/// <summary>Rechecks security for the plan using the given plan and associated security context.</summary>
@@ -898,6 +902,49 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 
 			return (T)planNode;
+		}
+
+		protected virtual void InternalClone(PlanNode newNode)
+		{
+			newNode.IsLiteral = _isLiteral;
+			newNode.IsFunctional = _isFunctional;
+			newNode.IsDeterministic = _isDeterministic;
+			newNode.IsRepeatable = _isRepeatable;
+			newNode.IsNilable = _isNilable;
+			newNode.IsOrderPreserving = _isOrderPreserving;
+			newNode.Modifiers = _modifiers;
+			newNode.IgnoreUnsupported = _ignoreUnsupported;
+			newNode.ShouldSupport = _shouldSupport;
+			newNode.ShouldEmitIL = _shouldEmitIL;
+			newNode.LineInfo = _lineInfo;
+			newNode.DataType = _dataType;
+			newNode.IsBreakable = _isBreakable;
+
+			if (_nodes != null)
+			{
+				for (int i = 0; i < _nodes.Count; i++)
+				{
+					newNode.Nodes.Add(_nodes[i].Clone());
+				}
+			}
+		}
+
+		/// <summary>
+		/// Copies the PlanNode. The method can only be used on pre-chunking plan nodes.
+		/// </summary>
+		/// <remarks>
+		/// This method provides a mechanism to copy nodes that have reached the compiled state,
+		/// but have not yet been chunked or planned. The copied nodes will have type and
+		/// characteristics determined.
+		/// </remarks>
+		/// <returns>A copy of the node of the same type.</returns>
+		public PlanNode Clone()
+		{
+			var newNode = (PlanNode)Activator.CreateInstance(GetType());
+
+			InternalClone(newNode);
+
+			return newNode;
 		}
 	}
 	

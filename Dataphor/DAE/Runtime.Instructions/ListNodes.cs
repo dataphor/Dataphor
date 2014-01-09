@@ -92,6 +92,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			expression.Modifiers = Modifiers;
 			return expression;
 		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newIndexerNode = (IndexerNode)newNode;
+			newIndexerNode.ByReference = ByReference;
+		}
 	}
 	
 	// operator Count(const AList : list) : integer;	
@@ -208,7 +216,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.Symbols.Push(new Symbol("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
 				try
 				{
+					#if USEVISIT
+					_equalNode = visitor.Visit(plan, _equalNode);
+					#else
 					_equalNode.BindingTraversal(plan, visitor);
+					#endif
 				}
 				finally
 				{
@@ -257,6 +269,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 
 			return -1;
+		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			if (_equalNode != null)
+			{
+				var newBaseListIndexOfNode = (BaseListIndexOfNode)newNode;
+				newBaseListIndexOfNode._equalNode = _equalNode.Clone();
+			}
 		}
 	}
 
@@ -384,7 +407,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.Symbols.Push(new Symbol("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
 				try
 				{
+					#if USEVISIT
+					_equalNode = visitor.Visit(plan, _equalNode);
+					#else
 					_equalNode.BindingTraversal(plan, visitor);
+					#endif
 				}
 				finally
 				{
@@ -430,6 +457,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			((ListValue)argument1).RemoveAt(listIndex);
 			return null;
 		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			if (_equalNode != null)
+			{
+				var newListRemoveNode = (ListRemoveNode)newNode;
+				newListRemoveNode._equalNode = _equalNode.Clone();
+			}
+		}
 	}
 	
 	// operator iEqual(const ALeftList : list, const ARightList : list) : Boolean;
@@ -468,7 +506,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.Symbols.Push(new Symbol("ARightValue", ((Schema.ListType)Nodes[1].DataType).ElementType));
 				try
 				{
+					#if USEVISIT
+					_equalNode = visitor.Visit(plan, _equalNode);
+					#else
 					_equalNode.BindingTraversal(plan, visitor);
+					#endif
 				}
 				finally
 				{
@@ -524,6 +566,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 
 			return listsEqual;
+		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			if (_equalNode != null)
+			{
+				var newListEqualNode = (ListEqualNode)newNode;
+				newListEqualNode._equalNode = _equalNode.Clone();
+			}
 		}
 	}
 

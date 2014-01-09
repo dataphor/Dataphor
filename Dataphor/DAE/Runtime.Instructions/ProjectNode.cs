@@ -181,7 +181,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						#endif
 						try
 						{
+							#if USEVISIT
+							_equalNode = visitor.Visit(plan, _equalNode);
+							#else
 							_equalNode.BindingTraversal(plan, visitor);
+							#endif
 						}
 						finally
 						{

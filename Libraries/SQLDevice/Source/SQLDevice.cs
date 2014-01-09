@@ -24,6 +24,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Streams;
 	using D4 = Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling.Visitors;
 	
 	/*
 		Meta Data tags controlling SQL translation and reconciliation ->
@@ -1679,7 +1680,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								try
 								{
 									PlanNode node = Compiler.CompileExpression(plan.Plan, new D4.Parser(true).ParseExpression(instructionNode.EmitStatementAsString()));
+									var visitor = new PlanNodeVisitor();
+									#if USEVISIT
+									node = visitor.Visit(plan.Plan, node);
+									#else
 									node.BindingTraversal(plan.Plan, null); // Don't use the compiler bind here because we already know a determine device call on the top level node will fail
+									#endif
 									planNode.CouldSupport = true; // Set this to indicate that support could be provided if it would be beneficial to do so
 									return FromScalar(localDevicePlan, node);
 								}

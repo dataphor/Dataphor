@@ -1311,7 +1311,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DataValue dataValue = program.RemoteConnect(serverLink).Evaluate(expression, paramsValue);
 			SystemEvaluateNode.UpdateRowFromParams(outRow, paramsValue);
 			
-			return dataValue is Scalar ? dataValue.AsNative : dataValue;
+			return dataValue.IsNil ? null : (dataValue is Scalar ? dataValue.AsNative : dataValue);
 		}
 	}
 	
@@ -2206,6 +2206,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			get { return _targetType; }
 			set { _targetType = value; }
+		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newIsNode = (IsNode)newNode;
+			newIsNode._targetType = _targetType;
 		}
 		
 		public override void DetermineDataType(Plan plan)

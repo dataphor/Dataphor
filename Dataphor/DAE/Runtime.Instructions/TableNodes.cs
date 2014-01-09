@@ -426,7 +426,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable, CursorIsolation.None));
 			try
 			{
+				#if USEVISIT
+				Nodes[0] = visitor.Visit(plan, Nodes[0]);
+				#else
 				Nodes[0].BindingTraversal(plan, visitor);
+				#endif
 			}
 			finally
 			{
@@ -440,7 +444,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.IsInsert = true;
 				try
 				{
+					#if USEVISIT
+					Nodes[1] = visitor.Visit(plan, Nodes[1]);
+					#else
 					Nodes[1].BindingTraversal(plan, visitor);
+					#endif
 				}
 				finally
 				{
@@ -738,7 +746,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 			try
 			{
+				#if USEVISIT
+				Nodes[0] = visitor.Visit(plan, Nodes[0]);
+				#else
 				Nodes[0].BindingTraversal(plan, visitor);
+				#endif
 				if (!(((TableNode)Nodes[0]).CursorType == CursorType.Static))
 				{
 					Nodes[0] = Compiler.EmitCopyNode(plan, (TableNode)Nodes[0]);
@@ -781,7 +793,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					for (int index = 1; index < Nodes.Count; index++)
+						#if USEVISIT
+						Nodes[index] = visitor.Visit(plan, Nodes[index]);
+						#else
 						Nodes[index].BindingTraversal(plan, visitor);
+						#endif
 				}
 				finally
 				{
@@ -966,7 +982,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (!_isGeneric)
 			{
+				#if USEVISIT
+				Nodes[0] = visitor.Visit(plan, Nodes[0]);
+				#else
 				Nodes[0].BindingTraversal(plan, visitor);
+				#endif
 				plan.EnterRowContext();
 				try
 				{
@@ -974,7 +994,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					try
 					{
 						for (int index = 1; index < Nodes.Count; index++)
+							#if USEVISIT
+							Nodes[index] = visitor.Visit(plan, Nodes[index]);
+							#else
 							Nodes[index].BindingTraversal(plan, visitor);
+							#endif
 					}
 					finally
 					{
@@ -1095,7 +1119,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 			try
 			{
+				#if USEVISIT
+				Nodes[0] = visitor.Visit(plan, Nodes[0]);
+				#else
 				Nodes[0].BindingTraversal(plan, visitor);
+				#endif
 				if (!(((TableNode)Nodes[0]).CursorType == CursorType.Static))
 				{
 					Nodes[0] = Compiler.EmitCopyNode(plan, (TableNode)Nodes[0]);
@@ -1653,6 +1681,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			get { return _shouldTranslate; }
 			set { _shouldTranslate = value; }
+		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newTableVarNode = (TableVarNode)newNode;
+			newTableVarNode.PropagateInsert = PropagateInsert;
+			newTableVarNode.PropagateUpdate = PropagateUpdate;
+			newTableVarNode.PropagateDelete = PropagateDelete;
+			newTableVarNode.PropagateDefault = PropagateDefault;
+			newTableVarNode.PropagateChange = PropagateChange;
+			newTableVarNode.PropagateValidate = PropagateValidate;
+			newTableVarNode.ShouldTranslate = ShouldTranslate;
 		}
 		
 		// ShouldValidateKeyConstraints
@@ -2324,6 +2366,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newUnaryTableNode = (UnaryTableNode)newNode;
+			newUnaryTableNode.PropagateInsert = PropagateInsert;
+			newUnaryTableNode.PropagateUpdate = PropagateUpdate;
+			newUnaryTableNode.PropagateDelete = PropagateDelete;
+			newUnaryTableNode.PropagateDefault = PropagateDefault;
+			newUnaryTableNode.PropagateChange = PropagateChange;
+			newUnaryTableNode.PropagateValidate = PropagateValidate;
+			newUnaryTableNode.ShouldTranslate = ShouldTranslate;
+		}
+		
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
@@ -2674,6 +2730,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				PropagateChangeRight = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "Right.PropagateChange", PropagateChangeRight.ToString()));
 				ShouldTranslateRight = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "Right.ShouldTranslate", ShouldTranslateRight.ToString()));
 			}
+		}
+		
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newBinaryTableNode = (BinaryTableNode)newNode;
+			newBinaryTableNode.PropagateInsertLeft = PropagateInsertLeft;
+			newBinaryTableNode.PropagateUpdateLeft = PropagateUpdateLeft;
+			newBinaryTableNode.PropagateDeleteLeft = PropagateDeleteLeft;
+			newBinaryTableNode.PropagateDefaultLeft = PropagateDefaultLeft;
+			newBinaryTableNode.PropagateChangeLeft = PropagateChangeLeft;
+			newBinaryTableNode.PropagateValidateLeft = PropagateValidateLeft;
+			newBinaryTableNode.ShouldTranslateLeft = ShouldTranslateLeft;
+			newBinaryTableNode.PropagateInsertRight = PropagateInsertRight;
+			newBinaryTableNode.PropagateUpdateRight = PropagateUpdateRight;
+			newBinaryTableNode.PropagateDeleteRight = PropagateDeleteRight;
+			newBinaryTableNode.PropagateDefaultRight = PropagateDefaultRight;
+			newBinaryTableNode.PropagateChangeRight = PropagateChangeRight;
+			newBinaryTableNode.PropagateValidateRight = PropagateValidateRight;
+			newBinaryTableNode.ShouldTranslateRight = ShouldTranslateRight;
 		}
 		
 		public override void DetermineRemotable(Plan plan)

@@ -701,12 +701,20 @@ namespace Alphora.Dataphor.DAE.Compiling
 		//	return ChunkNode(plan, planNode);
 		//}
 
+		#if USEVISIT
+		private static PlanNode BindingTraversal(Plan plan, PlanNode planNode, PlanNodeVisitor visitor)
+		#else
 		private static void BindingTraversal(Plan plan, PlanNode planNode, PlanNodeVisitor visitor)
+		#endif
 		{
 			plan.Symbols.PushFrame();
 			try
 			{
+				#if USEVISIT
+				return visitor.Visit(plan, planNode);
+				#else
 				planNode.BindingTraversal(plan, visitor);
+				#endif
 			}
 			finally
 			{
@@ -720,21 +728,37 @@ namespace Alphora.Dataphor.DAE.Compiling
 			{
 				if (!plan.IsEngine)
 				{
-					// Prepare application transaction join plans
-					BindingTraversal(plan, planNode, new PrepareJoinApplicationTransactionVisitor());
-
-					// TODO: Determine interplay between chunking and optimization
+					#if USEVISIT
+					planNode = BindingTraversal(plan, planNode, new NormalizeRestrictionVisitor());
+					#else
+					BindingTraversal(plan, planNode, new NormalizeRestrictionVisitor());
+					#endif
 
 					// Determine potential device support for the entire plan
 					// TODO: Add supported operator checking
 					planNode.DeterminePotentialDevice(plan);
 
+					// Prepare application transaction join plans
+					#if USEVISIT
+					planNode = BindingTraversal(plan, planNode, new PrepareJoinApplicationTransactionVisitor());
+					#else
+					BindingTraversal(plan, planNode, new PrepareJoinApplicationTransactionVisitor());
+					#endif
+
 					// Determine actual device support
 					// TODO: Add restriction rewrite
+					#if USEVISIT
+					planNode = BindingTraversal(plan, planNode, new DetermineDeviceVisitor());
+					#else
 					BindingTraversal(plan, planNode, new DetermineDeviceVisitor());
+					#endif
 
 					// Determine access paths
+					#if USEVISIT
+					planNode = BindingTraversal(plan, planNode, new DetermineAccessPathVisitor());
+					#else
 					BindingTraversal(plan, planNode, new DetermineAccessPathVisitor());
+					#endif
 				}
 
 				if (plan.ShouldEmitIL)
@@ -765,7 +789,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 		//        if (!plan.IsEngine)
 		//        {
-		//            BindingTraversal(plan, planNode, new DetermineAccessPathVisitor());
+		//            planNode = BindingTraversal(plan, planNode, new DetermineAccessPathVisitor());
 		//        }
 		//    }
 		//    catch (Exception exception)
@@ -12032,13 +12056,16 @@ indicative of other problems, a reference will never be attached as an explicit 
 			PlanNode[] planNodes = new PlanNode[expression.Expressions.Count];
 			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
+				PlanNode elementNode;
 				if (listType != null)
-					planNodes[index] = CompileTypedExpression(plan, expression.Expressions[index], listType.ElementType);
+					elementNode = CompileTypedExpression(plan, expression.Expressions[index], listType.ElementType);
 				else
 				{
-					planNodes[index] = CompileExpression(plan, expression.Expressions[index]);
-					listType = new Schema.ListType(planNodes[index].DataType);
+					elementNode = CompileExpression(plan, expression.Expressions[index]);
+					listType = new Schema.ListType(elementNode.DataType);
 				}
+
+				planNodes[index] = EnsureTableValueNode(plan, elementNode);
 			}
 			
 			if (listType == null)
@@ -12812,7 +12839,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 						CheckConversionContext(plan, context);
 						planNode = ConvertNode(plan, planNode, context);
 					}
-			
+
+					planNode = EnsureTableValueNode(plan, planNode);
 					node.Nodes.Add(planNode);
 				}
 			}
@@ -12832,6 +12860,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 							planNode.DataType
 						)
 					);
+
+					planNode = EnsureTableValueNode(plan, planNode);
 					node.Nodes.Add(planNode);
 				}
 			}
@@ -12883,6 +12913,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 							)
 						);
 					}
+
+					planNode = EnsureTableValueNode(plan, planNode);
 					node.Nodes.Add(planNode);
 				}
 				node.DetermineCharacteristics(plan);
