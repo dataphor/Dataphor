@@ -356,6 +356,9 @@
     <Compile Include="..\DAE\Compiling\Visitors\DetermineDeviceVisitor.cs">
       <Link>DAE\Compiling\Visitors\DetermineDeviceVisitor.cs</Link>
     </Compile>
+    <Compile Include="..\DAE\Compiling\Visitors\NormalizeRestrictionVisitor.cs">
+      <Link>DAE\Compiling\Visitors\NormalizeRestrictionVisitor.cs</Link>
+    </Compile>
     <Compile Include="..\DAE\Compiling\Visitors\PlanNodeVisitor.cs">
       <Link>DAE\Compiling\Visitors\PlanNodeVisitor.cs</Link>
     </Compile>
