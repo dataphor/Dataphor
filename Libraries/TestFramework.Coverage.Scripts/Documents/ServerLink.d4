@@ -216,7 +216,7 @@ select Devices on Test;
 drop server Test;
 
 // Non-Scalar-Valued Attributes
-create server Test
+create server Test;
 // Test List Result
 select list(Integer) { 1, 2, 3, 4, 5 };
 select EvaluateOn("Test", "select (list(Integer) { 1, 2, 3, 4, 5 })") as list(Integer);
@@ -224,7 +224,7 @@ select EvaluateOn("Test", "select (list(Integer) { 1, 2, 3, 4, 5 })") as list(In
 select row { 1 ID, "Blah" Name };
 select EvaluateOn("Test", "select row { 1 ID, 'Blah' Name }") as row { ID : Integer, Name : String };
 // Test Table Result
-select table { row { 1 ID, "Blah" Name };
+select table { row { 1 ID, "Blah" Name } };
 select EvaluateOn("Test", "select table { row { 1 ID, 'Blah' Name } }") as table { ID : Integer, Name : String };
 // Test Row of List, Row, and Table
 select row { list(Integer) { 1, 2, 3, 4, 5 } ListValue };
@@ -252,5 +252,27 @@ select EvaluateOn("Test", "select list(list(Integer)) { list(Integer) { 1, 2, 3 
 
 // Table of list of table with row valued attributes
 select (table { row { list(table) { table { row { 1 ID, 'Blah' Name, row { 'Inner' Inner } RowValue } } } ListValue } }) on Test;
+
+drop server Test;
+
+// Like types over server link
+create server Test;
+
+create type ID like String;
+
+select ID("Test");
+ExecuteOn("Test", "create type ID like String;");
+select EvaluateOn("Test", "select ID('Test');") as ID;
+ExecuteOn("Test", "drop type ID");
+
+drop type ID;
+
+ExecuteOn("Test", "create type DateTimeInMinutes like DateTime;");
+ExecuteOn("Test", "create table TestDateTime { ID : Integer, Data : DateTimeInMinutes, key { ID } };");
+ExecuteOn("Test", "insert row { 1 ID, DateTime() Data } into TestDateTime;");
+select EvaluateOn("Test", "select TestDateTime[].Data") as DateTime;
+select EvaluateOn("Test", "select DateTimeInMinutes(DateTime());") as DateTime;
+ExecuteOn("Test", "drop table TestDateTime;");
+ExecuteOn("Test", "drop type DateTimeInMinutes;");
 
 drop server Test;
