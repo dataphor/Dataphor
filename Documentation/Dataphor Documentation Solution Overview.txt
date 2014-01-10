@@ -1,0 +1,17 @@
+This document provides an overview of the Dataphor Documentation solution which is used to author and build the Dataphor documentation.
+
+Authoring:
+
+The Dataphor Documentation is authored in DocBook format, using the 4.3 version of the DocBook DTD.
+
+There is an XMetal rule set that can be used to provide WSYWIG editing on top of the content files, but for this round of updates,
+strict XML authoring is being used for simplicity.
+
+The root XML content document is DataphorSet.xml. This document lists all the sub-entities that are included in the documentation.
+
+Building:
+
+Building the Dataphor documentation is accomplished through a series of batch files, described in the DocBuild\bat\readme.txt file.
+
+
+
