@@ -1,0 +1,167 @@
+//*
+// Types & Values
+/////////////////
+
+//* Type: ContactID
+// ID type for contacts (customers and vendors are both contacts)
+create type ContactID like Integer 
+	tags { Frontend.Title = "Contact #", Frontend.Width = "10" };
+
+//* Type: Date
+create type Date
+{
+	representation Ticks
+	{
+		Ticks : Long
+			read class "System.SystemDateTicksReadTicksNode"
+			write class "System.SystemDateTicksWriteTicksNode"
+	} class "System.SystemDateTicksSelectorNode", 
+	representation Date
+	{
+		Year : Integer
+			read class "System.SystemDateTimeDateTimeReadYearNode"
+			write class "System.SystemDateTimeDateTimeWriteYearNode", 
+		Month : Integer
+			read class "System.SystemDateTimeDateTimeReadMonthNode"
+			write class "System.SystemDateTimeDateTimeWriteMonthNode", 
+		Day : Integer
+			read class "System.SystemDateTimeDateTimeReadDayNode"
+			write class "System.SystemDateTimeDateTimeWriteDayNode"
+	} class "System.SystemDateTimeDateTimeDaysSelectorNode",
+	representation AsString
+	{
+		AsString : String
+			read class "System.DateAsStringReadAccessorNode"
+			write class "System.DateAsStringWriteAccessorNode"
+	} class "System.DateAsStringSelectorNode"
+}
+	class "System.DateTimeConveyor"
+	static tags 
+	{ 
+		Catalog.Comment = "System Date", 
+		DAE.AsString = "AsString",
+		dynamic Frontend.Width = "11",
+		dynamic Frontend.DateTimeBox.MaxWidth = "11"
+	};
+
+//* Selectors for each representation
+var LDate1 := Date(2012, 2, 2);
+var LDate2 := Date.Ticks(634637376000000000);
+select LDate1;
+select LDate2;
+
+//* Accessors for each property of each representation
+var LDate1 := Date(2012, 2, 2);
+var LTicks := LDate1.Ticks;
+var LYear := LDate1.Year;
+LDate1.Year := 2011;
+select LDate1;
+
+//* List Types
+var LList : list(Integer);
+LList := { 1, 2, 3, 4, 5 };
+select LList;
+
+//* Row Types
+var LRow : row { ID : Integer };
+LRow := row { 1 ID };
+select LRow;
+
+//* Table Types
+var LTable : table { ID : Integer };
+LTable := table { row { 1 ID }, row { 2 ID } };
+select LTable;
+
+//* Initializer
+var LVariable := table { row { 1 ID, "Joe" Name }, row { 2, "Carlos" } };
+select LVariable;
+
+//*
+// Operators
+////////////
+
+create operator GetRow(ID : Integer) : row { ID : Integer }
+begin
+	result := row { ID ID };
+end;
+
+select GetRow(1);
+
+create operator TakesGetRow(ARow : typeof(GetRow(1))) : row { ID : Integer }
+begin
+	result := ARow;
+end;
+
+select TakesGetRow(GetRow(1));
+
+// Unary Table & Row
+// Retrieve
+select Devices;
+
+// Project
+select Devices over { ID, Name };
+select row { 1 ID, "Joe" Name } over { Name };
+
+// Remove
+select Devices remove { Library_Name };
+
+// Extend
+select Devices add { Library_Name + "." + Name NewColumn } over { NewColumn };
+
+// Rename
+select Devices rename { Library_Name DumbColumn };
+
+// Specify
+select Devices { ID, Name, Library_Name + "." + Name NewColumn };
+
+// Restrict
+select Devices where ID = 1 where not(IsGenerated);
+select Devices where ID = 1 and not(IsGenerated);
+
+// Quota
+select Devices return 1 by { Library_Name };
+
+// Group
+select Count(Devices);
+select Sum(X from (Libraries add { case when DefaultDeviceName.IsNotNil() then 1 else 0 end X }));
+select Devices group by { Library_Name } add { Count() Count } where Count > 1;
+
+// Binary Table & Row
+// Union
+select Devices where Library_Name = 'Frontend' union (Devices where Library_Name = 'System')
+
+select Devices where Library_Name in (Devices { Name })
+
+// Difference
+var x := Devices minus (Devices where Library_Name = 'System');
+select x;
+
+// Join
+select Objects join Devices;
+select (Libraries rename L) join (Devices rename D) by L.Name = D.Library_Name
+
+select (Libraries rename L) left join (Devices rename D) by L.Name = D.Library_Name include rowexists 
+
+select Libraries { Name Library_Name, DefaultDeviceName Device_Name }
+	left join (Devices { Name Device_Name })
+	include rowexists;
+
+	
+select Libraries where Name = 'Sample.Common'
+select Devices where Name = 'SampleDevice';
+
+
+select Devices rename { Library_Name Dumb_Library_Name }
+
+
+// Having
+select Libraries { Name Library_Name, DefaultDeviceName Device_Name } having (Devices { Name Device_Name });
+
+// Without
+select Libraries { Name Library_Name, DefaultDeviceName Device_Name } without (Devices { Name Device_Name });
+
+
+
+
+
+
