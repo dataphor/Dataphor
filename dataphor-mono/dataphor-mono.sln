@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{122D8BD4-5C24-4167-9FA7-86FD60477088}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{7B0EC755-E152-4843-B90B-E248C0BDB85E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base", "..\Dataphor\Base\Base.csproj", "{6EC1F378-510B-48D0-8D00-E36BEF214766}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "..\Dataphor\Common\Common.csproj", "{B488ECA3-95AD-4814-BC9B-69D062B7B333}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.NativeCLI", "..\Dataphor\DAE.NativeCLI\DAE.NativeCLI.csproj", "{7CCBA92D-BB78-49E3-8C11-4CC29B173296}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "..\Dataphor\DAE\Engine.csproj", "{8FA5FA37-DC03-4E24-900B-AA863CA9650F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{392B99D3-635F-4DD3-A93E-0F86B07433AF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{CE8FFF44-02B4-44A3-92CB-A33A61AD7F91}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{3C25A538-8420-44FF-A16E-86CD639DF39C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6EC1F378-510B-48D0-8D00-E36BEF214766}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EC1F378-510B-48D0-8D00-E36BEF214766}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EC1F378-510B-48D0-8D00-E36BEF214766}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EC1F378-510B-48D0-8D00-E36BEF214766}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CCBA92D-BB78-49E3-8C11-4CC29B173296}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CCBA92D-BB78-49E3-8C11-4CC29B173296}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CCBA92D-BB78-49E3-8C11-4CC29B173296}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CCBA92D-BB78-49E3-8C11-4CC29B173296}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FA5FA37-DC03-4E24-900B-AA863CA9650F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FA5FA37-DC03-4E24-900B-AA863CA9650F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FA5FA37-DC03-4E24-900B-AA863CA9650F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FA5FA37-DC03-4E24-900B-AA863CA9650F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B488ECA3-95AD-4814-BC9B-69D062B7B333}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B488ECA3-95AD-4814-BC9B-69D062B7B333}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B488ECA3-95AD-4814-BC9B-69D062B7B333}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B488ECA3-95AD-4814-BC9B-69D062B7B333}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6EC1F378-510B-48D0-8D00-E36BEF214766} = {7B0EC755-E152-4843-B90B-E248C0BDB85E}
+		{B488ECA3-95AD-4814-BC9B-69D062B7B333} = {7B0EC755-E152-4843-B90B-E248C0BDB85E}
+		{7CCBA92D-BB78-49E3-8C11-4CC29B173296} = {7B0EC755-E152-4843-B90B-E248C0BDB85E}
+		{8FA5FA37-DC03-4E24-900B-AA863CA9650F} = {7B0EC755-E152-4843-B90B-E248C0BDB85E}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = ..\Dataphor\Base\Base.csproj
+	EndGlobalSection
+EndGlobal
