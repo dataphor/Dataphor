@@ -169,44 +169,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AlterNode.AlterMetaData(newColumn, expression.AlterMetaData, true);
 				newColumn.ReadOnly = Convert.ToBoolean(MetaData.GetTag(newColumn.MetaData, "Frontend.ReadOnly", newColumn.ReadOnly.ToString()));
 
-				plan.Symbols.Push(new Symbol(Keywords.Value, newColumn.DataType));
-				try
+				foreach (ConstraintDefinition constraint in expression.Constraints)
 				{
-					foreach (ConstraintDefinition constraint in expression.Constraints)
+					_isRestrict = true;
+					Schema.TableVarColumnConstraint newConstraint = Compiler.CompileTableVarColumnConstraint(plan, TableVar, newColumn, constraint);
+
+					//Schema.TableVarColumnConstraint newConstraint = new Schema.TableVarColumnConstraint(Schema.Object.GetObjectID(constraint.MetaData), constraint.ConstraintName);
+					//newConstraint.ConstraintType = Schema.ConstraintType.Column;
+					//newConstraint.MergeMetaData(constraint.MetaData);
+					plan.PushCreationObject(newConstraint);
+					try
 					{
-						_isRestrict = true;
-						Schema.TableVarColumnConstraint newConstraint = new Schema.TableVarColumnConstraint(Schema.Object.GetObjectID(constraint.MetaData), constraint.ConstraintName);
-						newConstraint.ConstraintType = Schema.ConstraintType.Column;
-						newConstraint.MergeMetaData(constraint.MetaData);
-						plan.PushCreationObject(newConstraint);
+						plan.Symbols.Push(new Symbol(Keywords.Value, newColumn.DataType));
 						try
 						{
-							PlanNode node = Compiler.CompileBooleanExpression(plan, constraint.Expression);
-							newConstraint.Node = node;
-							newConstraint.IsRemotable = true;
-							if (newConstraint.HasDependencies())
-								for (int index = 0; index < newConstraint.Dependencies.Count; index++)
-								{
-									Schema.Object objectValue = newConstraint.Dependencies.Objects[index];
-									if (objectValue != null)
-									{
-										if (!objectValue.IsRemotable)
-										{
-											newConstraint.IsRemotable = false;
-											break;
-										}
-									}
-									else
-									{
-										Error.Fail("Missing object dependency in AdornNode.");
-										//Schema.ObjectHeader LHeader = APlan.CatalogDeviceSession.SelectObjectHeader(LNewConstraint.Dependencies.IDs[LIndex]);
-										//if (!LHeader.IsRemotable)
-										//{
-										//    LNewConstraint.IsRemotable = false;
-										//    break;
-										//}
-									}
-								}
+							//PlanNode node = Compiler.CompileBooleanExpression(plan, constraint.Expression);
+							//newConstraint.Node = node;
+							//newConstraint.IsRemotable = true;
+							//if (newConstraint.HasDependencies())
+							//	for (int index = 0; index < newConstraint.Dependencies.Count; index++)
+							//	{
+							//		Schema.Object objectValue = newConstraint.Dependencies.Objects[index];
+							//		if (objectValue != null)
+							//		{
+							//			if (!objectValue.IsRemotable)
+							//			{
+							//				newConstraint.IsRemotable = false;
+							//				break;
+							//			}
+							//		}
+							//		else
+							//		{
+							//			Error.Fail("Missing object dependency in AdornNode.");
+							//			//Schema.ObjectHeader LHeader = APlan.CatalogDeviceSession.SelectObjectHeader(LNewConstraint.Dependencies.IDs[LIndex]);
+							//			//if (!LHeader.IsRemotable)
+							//			//{
+							//			//    LNewConstraint.IsRemotable = false;
+							//			//    break;
+							//			//}
+							//		}
+							//	}
 
 							newColumn.Constraints.Add(newConstraint);
 							
@@ -219,16 +221,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
-							plan.PopCreationObject();
+							plan.Symbols.Pop();
 						}
-						
-						if (newConstraint.HasDependencies())
-							plan.AttachDependencies(newConstraint.Dependencies);
 					}
-				}
-				finally
-				{
-					plan.Symbols.Pop();
+					finally
+					{
+						plan.PopCreationObject();
+					}
+						
+					if (newConstraint.HasDependencies())
+						plan.AttachDependencies(newConstraint.Dependencies);
 				}
 				
 				// TODO: verify that the default satisfies the constraints
