@@ -531,33 +531,36 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			IWindowsFormInterface form = (IWindowsFormInterface)interfaceValue;
 
-			form.ClearCustomActions();
-
-			DocumentExpression expression = new DocumentExpression(interfaceValue.HostNode.Document);
-
-			if (expression.Type != DocumentType.None)
-				form.AddCustomAction
-				(
-					Strings.CustomizeMenuText, 
-					LoadBitmap("Alphora.Dataphor.Dataphoria.Images.Customize.bmp"), 
-					CustomizeForm
-				);
-
-			form.AddCustomAction
-			(
-				Strings.EditCopyMenuText, 
-				LoadBitmap("Alphora.Dataphor.Dataphoria.Images.EditCopy.bmp"), 
-				EditCopyForm
-			);
-
-			if (expression.Type == DocumentType.Document)
+			if (form.Active)
 			{
+				form.ClearCustomActions();
+
+				DocumentExpression expression = new DocumentExpression(interfaceValue.HostNode.Document);
+
+				if (expression.Type != DocumentType.None)
+					form.AddCustomAction
+					(
+						Strings.CustomizeMenuText,
+						LoadBitmap("Alphora.Dataphor.Dataphoria.Images.Customize.bmp"),
+						CustomizeForm
+					);
+
 				form.AddCustomAction
 				(
-					Strings.EditMenuText,  
-					LoadBitmap("Alphora.Dataphor.Dataphoria.Images.Edit.bmp"), 
-					EditForm
+					Strings.EditCopyMenuText,
+					LoadBitmap("Alphora.Dataphor.Dataphoria.Images.EditCopy.bmp"),
+					EditCopyForm
 				);
+
+				if (expression.Type == DocumentType.Document)
+				{
+					form.AddCustomAction
+					(
+						Strings.EditMenuText,
+						LoadBitmap("Alphora.Dataphor.Dataphoria.Images.Edit.bmp"),
+						EditForm
+					);
+				}
 			}
 		}
 
