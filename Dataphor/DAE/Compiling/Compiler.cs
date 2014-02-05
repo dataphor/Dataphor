@@ -599,7 +599,13 @@ namespace Alphora.Dataphor.DAE.Compiling
 			// Prepare the stack for compilation with the given context
 			if (paramsValue != null)
 				foreach (DataParam param in paramsValue)
+                {
 					plan.Symbols.Push(new Symbol(param.Name, param.DataType));
+                    Schema.Catalog dependencies = new Schema.Catalog();
+                    param.DataType.IncludeDependencies(plan.CatalogDeviceSession, plan.Catalog, dependencies, EmitMode.ForCopy);
+                    foreach (var dependency in dependencies)
+                        plan.AttachDependency(dependency);
+                }
 			
 			PlanNode node = null;
 			plan.PushSourceContext(sourceContext);
