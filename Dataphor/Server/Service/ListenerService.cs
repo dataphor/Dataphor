@@ -40,7 +40,13 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try
 			{
+				if (String.IsNullOrEmpty(instanceName))
+					throw new FaultException<ListenerFault>(new ListenerFault(), "Instance name is empty.  An instance name is required");
+
 				ServerConfiguration server = InstanceManager.LoadConfiguration().Instances[instanceName];
+
+				if (server == null)
+					throw new FaultException<ListenerFault>(new ListenerFault(), String.Format("Instance Name {0} not found", instanceName));
 					
 				if (useNative)
 					return DataphorServiceUtility.BuildNativeInstanceURI(hostName, server.PortNumber, server.Name);

@@ -1090,7 +1090,8 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 			finally
 			{
-				DataSource.DataSet = null;
+				if (DataSource != null)
+					DataSource.DataSet = null;
 			}
 		}
 		
