@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 
-namespace Fallstreak.Instance.Controllers
+namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
     public class ValuesController : ApiController
     {

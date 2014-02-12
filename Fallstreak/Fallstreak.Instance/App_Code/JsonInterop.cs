@@ -5,7 +5,7 @@ using System.Web;
 using Alphora.Dataphor.DAE.NativeCLI;
 using Newtonsoft.Json.Linq;
 
-namespace Fallstreak.Instance
+namespace Alphora.Dataphor.Dataphoria.Web
 {
 	public static class JsonInterop
 	{

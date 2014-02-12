@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace Fallstreak.Instance
+namespace Alphora.Dataphor.Dataphoria.Web
 {
     public class RouteConfig
     {

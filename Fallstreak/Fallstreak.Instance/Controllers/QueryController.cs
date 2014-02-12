@@ -6,10 +6,10 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Mvc;
 using Alphora.Dataphor.DAE.NativeCLI;
-using Fallstreak.Processing;
+using Alphora.Dataphor.Dataphoria.Processing;
 using Newtonsoft.Json.Linq;
 
-namespace Fallstreak.Instance.Controllers
+namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
     public class QueryController : Controller
     {

@@ -1,1 +1,1 @@
-﻿<%@ Application Codebehind="Global.asax.cs" Inherits="Fallstreak.Instance.WebApiApplication" Language="C#" %>
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="Alphora.Dataphor.Dataphoria.Web.WebApiApplication" Language="C#" %>

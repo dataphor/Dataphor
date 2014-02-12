@@ -4,7 +4,7 @@ using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
 
-namespace Fallstreak.Instance.Areas.HelpPage
+namespace Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage
 {
     /// <summary>
     /// Use this class to customize the Help Page.

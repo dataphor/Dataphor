@@ -13,7 +13,7 @@ using System.Web.Http.Description;
 using System.Xml.Linq;
 using Newtonsoft.Json;
 
-namespace Fallstreak.Instance.Areas.HelpPage
+namespace Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage
 {
     /// <summary>
     /// This class will generate the samples for the help page.

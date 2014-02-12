@@ -7,9 +7,9 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Description;
-using Fallstreak.Instance.Areas.HelpPage.Models;
+using Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage.Models;
 
-namespace Fallstreak.Instance.Areas.HelpPage
+namespace Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage
 {
     public static class HelpPageConfigurationExtensions
     {

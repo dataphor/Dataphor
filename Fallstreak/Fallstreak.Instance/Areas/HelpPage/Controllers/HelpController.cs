@@ -1,9 +1,9 @@
 using System;
 using System.Web.Http;
 using System.Web.Mvc;
-using Fallstreak.Instance.Areas.HelpPage.Models;
+using Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage.Models;
 
-namespace Fallstreak.Instance.Areas.HelpPage.Controllers
+namespace Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage.Controllers
 {
     /// <summary>
     /// The controller that will handle requests for the help page.

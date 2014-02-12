@@ -1,7 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9923DA0B-B157-41AA-AB27-E48F60EABD36}"
 	ProjectSection(SolutionItems) = preProject
 		CompilerDefines.txt = CompilerDefines.txt
@@ -148,7 +146,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fallstreak", "Fallstreak", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fallstreak.Processing", "..\Fallstreak\Fallstreak.Processing\Fallstreak.Processing.csproj", "{0ABADE9D-8700-4C29-ACEF-3BA3E6F3D757}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fallstreak.Instance", "..\Fallstreak\Fallstreak.Instance\Fallstreak.Instance.csproj", "{17A60F7F-17FF-4DBD-966D-FF096E59614F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Web", "..\Fallstreak\Fallstreak.Instance\Dataphoria.Web.csproj", "{17A60F7F-17FF-4DBD-966D-FF096E59614F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

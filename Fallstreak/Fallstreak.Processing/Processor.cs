@@ -7,7 +7,7 @@ using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.NativeCLI;
 using Alphora.Dataphor.DAE.Server;
 
-namespace Fallstreak.Processing
+namespace Alphora.Dataphor.Dataphoria.Processing
 {
     public class Processor : IDisposable
     {

@@ -3,7 +3,7 @@ using System.Text;
 using System.Web;
 using System.Web.Http.Description;
 
-namespace Fallstreak.Instance.Areas.HelpPage
+namespace Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage
 {
     public static class ApiDescriptionExtensions
     {

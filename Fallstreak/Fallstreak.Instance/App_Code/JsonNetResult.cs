@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using Newtonsoft.Json;
 
-namespace Fallstreak.Instance
+namespace Alphora.Dataphor.Dataphoria.Web
 {
 	public class JsonNetResult : JsonResult
 	{

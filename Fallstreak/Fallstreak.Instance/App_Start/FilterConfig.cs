@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Mvc;
 
-namespace Fallstreak.Instance
+namespace Alphora.Dataphor.Dataphoria.Web
 {
     public class FilterConfig
     {
