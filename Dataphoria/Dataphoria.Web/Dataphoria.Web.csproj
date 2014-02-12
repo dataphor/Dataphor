@@ -300,9 +300,9 @@
       <Project>{7ccba92d-bb78-49e3-8c11-4cc29b173296}</Project>
       <Name>DAE.NativeCLI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Fallstreak.Processing\Fallstreak.Processing.csproj">
+    <ProjectReference Include="..\Dataphoria.Processing\Dataphoria.Processing.csproj">
       <Project>{0abade9d-8700-4c29-acef-3ba3e6f3d757}</Project>
-      <Name>Fallstreak.Processing</Name>
+      <Name>Dataphoria.Processing</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
