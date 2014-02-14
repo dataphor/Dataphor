@@ -21,14 +21,14 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 {
 	public class Connect : System.Web.UI.Page
 	{
-		protected System.Web.UI.WebControls.Button _addButton;
-		protected System.Web.UI.WebControls.Button _editButton;
-		protected System.Web.UI.WebControls.Label Label1;
+		protected Button _addButton;
+		protected Button _editButton;
+		protected Label Label1;
 		protected System.Web.UI.WebControls.TextBox UserIDTextBox;
-		protected System.Web.UI.WebControls.Label Label2;
+		protected Label Label2;
 		protected System.Web.UI.WebControls.TextBox PasswordTextBox;
-		protected System.Web.UI.WebControls.Button _deleteButton;
-		protected System.Web.UI.WebControls.Button _login;
+		protected Button _deleteButton;
+		protected Button _login;
 
 		private string AliasConfigurationFileName
 		{
@@ -133,12 +133,11 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent()
-		{    
+		{
 			this._addButton.Click += new System.EventHandler(this.FAddButton_Click);
 			this._editButton.Click += new System.EventHandler(this.FEditButton_Click);
 			this._login.Click += new System.EventHandler(this.FLogin_Click);
 			this.Load += new System.EventHandler(this.Page_Load);
-
 		}
 		#endregion
 
