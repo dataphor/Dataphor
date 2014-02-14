@@ -107,18 +107,23 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		public bool IsAcceptReject
 		{
 			get 
-			{ 
+			{
 				return
-					ForceAcceptReject
-						|| (_mode != FormMode.None) 
+					AcceptEnabled
+					&&
+					(
+						ForceAcceptReject
+						|| (_mode != FormMode.None)
 						||
 						(
 							(MainSource != null) &&
+							(MainSource.DataView != null) &&
 							(
-								(MainSource.DataView.State == DAE.Client.DataSetState.Edit) || 
+								(MainSource.DataView.State == DAE.Client.DataSetState.Edit) ||
 								(MainSource.DataView.State == DAE.Client.DataSetState.Insert)
 							)
-						);
+						)
+					);
 			}
 		}
 
@@ -524,9 +529,9 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			UpdateAcceptReject();
 
 			_mainMenu.Render(context, writer);
-			_toolBar.Render(context, writer);
 
 			base.InternalRender(writer);
+			_toolBar.Render(context, writer);
 		}
 	}
 

@@ -603,6 +603,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			try
 			{
 				form.SupressCloseButton = true;
+				host.Close();
 				host.LoadNext(form);
 				host.Open();
 				form.Form.Closing += new System.ComponentModel.CancelEventHandler(MainFormClosing);

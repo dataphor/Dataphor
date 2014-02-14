@@ -35,9 +35,9 @@
 						</table>
 					</TD>
 					<TD>
-						<P align="center"><asp:button id="FAddButton" runat="server" Text="Add..." Width="100%" accessKey="A"></asp:button><BR>
-							<asp:button id="FEditButton" runat="server" Text="Edit..." Width="100%" accessKey="E"></asp:button><BR>
-							<asp:button id="FDeleteButton" accessKey="D" runat="server" Width="100%" Text="Delete"></asp:button>
+						<P align="center"><asp:button id="_addButton" runat="server" Text="Add..." Width="100%" accessKey="A"></asp:button><BR>
+							<asp:button id="_editButton" runat="server" Text="Edit..." Width="100%" accessKey="E"></asp:button><BR>
+							<asp:button id="_deleteButton" accessKey="D" runat="server" Width="100%" Text="Delete"></asp:button>
 							<BR>
 						</P>
 					</TD>
@@ -49,7 +49,7 @@
 							<asp:label id="Label2" runat="server">Password</asp:label><BR>
 							<asp:textbox id="PasswordTextBox" runat="server" Wrap="False" Columns="18" TextMode="Password"
 								Width="100%"></asp:textbox><BR>
-							<asp:button id="FLogin" runat="server" Text="Login" accessKey="L"></asp:button></P>
+							<asp:button id="_login" runat="server" Text="Login" accessKey="L"></asp:button></P>
 					</TD>
 				</TR>
 			</TABLE>

@@ -391,7 +391,7 @@ namespace Alphora.Dataphor
 		{
 			EnsureAssemblyByName();
 			lock (_assemblyByName)
-				_assemblyByName.Add(AssemblyNameUtility.GetName(assembly.FullName), assembly); 
+				_assemblyByName[AssemblyNameUtility.GetName(assembly.FullName)] = assembly;
 		}
 		
 		public static Assembly[] GetRegisteredAssemblies()

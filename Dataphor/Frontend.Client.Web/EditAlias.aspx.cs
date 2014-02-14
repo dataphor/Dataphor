@@ -56,6 +56,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (((_mode == null) || (_mode == String.Empty)) && (_mode != "edit"))
 				_mode = "add";
 
+			this.Form.Action = "EditAlias.aspx?Mode=" + _mode;
 			if (!IsPostBack)
 			{
 				if (_mode == "add")
