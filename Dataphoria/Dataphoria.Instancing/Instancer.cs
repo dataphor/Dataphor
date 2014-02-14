@@ -10,49 +10,54 @@ using System.Linq;
 using System.Text;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.Dataphoria.Instancing.Common;
 
 namespace Alphora.Dataphor.Dataphoria.Instancing
 {
-    public class Instancer
-    {
-        public IEnumerable<string> EnumerateInstances()
-        {
-            throw new NotImplementedException();
-        }
+	public class Instancer
+	{
+		public IEnumerable<string> EnumerateInstances()
+		{
+			InstanceConfiguration configuration = InstanceManager.LoadConfiguration();
+			string[] result = new string[configuration.Instances.Count];
+			for (int index = 0; index < configuration.Instances.Count; index++)
+				result[index] = configuration.Instances[index].Name;
+			return result;
+		}
 
-        public ServerConfiguration GetInstance(string instanceName)
-        {
-            throw new NotImplementedException();
-        }
+		public InstanceDescriptor GetInstance(string instanceName)
+		{
+			throw new NotImplementedException();
+		}
 
-        public void CreateInstance(ServerConfiguration instance)
-        {
-            throw new NotImplementedException();
-        }
+		public void CreateInstance(InstanceDescriptor instance)
+		{
+			throw new NotImplementedException();
+		}
 
-        public void DeleteInstance(string instanceName)
-        {
-            throw new NotImplementedException();
-        }
+		public void DeleteInstance(string instanceName)
+		{
+			throw new NotImplementedException();
+		}
 
-        public void StartInstance(string instanceName)
-        {
-            throw new NotImplementedException();
-        }
+		public void StartInstance(string instanceName)
+		{
+			throw new NotImplementedException();
+		}
 
-        public void StopInstance(string instanceName)
-        {
-            throw new NotImplementedException();
-        }
+		public void StopInstance(string instanceName)
+		{
+			throw new NotImplementedException();
+		}
 
-        public void KillInstance(string instanceName)
-        {
-            throw new NotImplementedException();
-        }
+		public void KillInstance(string instanceName)
+		{
+			throw new NotImplementedException();
+		}
 
-        public ServerState GetInstanceStatus(string instanceName)
-        {
-            throw new NotImplementedException();
-        }
-    }
+		public InstanceState GetInstanceStatus(string instanceName)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

@@ -43,6 +43,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Dataphor\Base.Windows\Base.Windows.csproj">
+      <Project>{24d70a7f-f43a-45a3-8c54-ea31764841c7}</Project>
+      <Name>Base.Windows</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Base\Base.csproj">
       <Project>{6ec1f378-510b-48d0-8d00-e36bef214766}</Project>
       <Name>Base</Name>

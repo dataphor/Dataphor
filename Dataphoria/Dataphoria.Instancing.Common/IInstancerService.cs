@@ -8,8 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.Dataphoria.Instancing.Common
 {
@@ -17,9 +15,9 @@ namespace Alphora.Dataphor.Dataphoria.Instancing.Common
     {
         string[] EnumerateInstances();
 
-        ServerConfiguration GetInstance(string instanceName);
+        InstanceDescriptor GetInstance(string instanceName);
 
-        void CreateInstance(ServerConfiguration instance);
+        void CreateInstance(InstanceDescriptor instance);
 
         void DeleteInstance(string instanceName);
 
@@ -29,6 +27,6 @@ namespace Alphora.Dataphor.Dataphoria.Instancing.Common
 
         void KillInstance(string instanceName);
 
-        ServerState GetInstanceStatus(string instanceName);
+        InstanceState GetInstanceStatus(string instanceName);
     }
 }

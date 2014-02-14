@@ -40,25 +40,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IInstancerService.cs" />
+    <Compile Include="InstanceDescriptor.cs" />
+    <Compile Include="InstanceStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Dataphor\Base\Base.csproj">
-      <Project>{6ec1f378-510b-48d0-8d00-e36bef214766}</Project>
-      <Name>Base</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\Common\Common.csproj">
-      <Project>{b488eca3-95ad-4814-bc9b-69d062b7b333}</Project>
-      <Name>Common %28Common\Common%29</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\DAE\Engine.csproj">
-      <Project>{8fa5fa37-dc03-4e24-900b-aa863ca9650f}</Project>
-      <Name>Engine</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\Server\Server.csproj">
-      <Project>{1db01c91-3f92-4094-a8ae-1f7ff01f2e1b}</Project>
-      <Name>Server %28Server\Server%29</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
