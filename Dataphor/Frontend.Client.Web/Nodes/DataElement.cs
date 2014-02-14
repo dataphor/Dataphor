@@ -360,6 +360,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (LHint != String.Empty)
 				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LHint, true);
 			AWriter.AddAttribute(HtmlTextWriterAttribute.Name, ID);
+			AWriter.AddAttribute(HtmlTextWriterAttribute.Id, ID);
 
 			bool LHasValue;
 			string LValue = GetFieldValue(out LHasValue);
@@ -424,6 +425,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				if (!LHasValue)
 				{
 					AWriter.AddAttribute(HtmlTextWriterAttribute.Name, FHasValueID);
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Id, FHasValueID);
 					AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
 					AWriter.AddAttribute(HtmlTextWriterAttribute.Value, "false");
 					AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
