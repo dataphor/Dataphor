@@ -158,6 +158,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Coordination", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Coordination.Common", "..\Dataphoria\Dataphoria.Coordination.Common\Dataphoria.Coordination.Common.csproj", "{1AC3A290-09F5-4EB6-805C-8ED597645271}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Instancer", "..\Dataphoria\Dataphoria.Instancer\Dataphoria.Instancer.csproj", "{98A0BF21-48C2-4C35-989B-CCD9AE39C271}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client.Browser", "Frontend.Client.Browser\Frontend.Client.Browser.csproj", "{89E4AC1E-BFC0-422D-9222-80C88D2F6499}"
 EndProject
 Global
@@ -912,6 +914,18 @@ Global
 		{1AC3A290-09F5-4EB6-805C-8ED597645271}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1AC3A290-09F5-4EB6-805C-8ED597645271}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{1AC3A290-09F5-4EB6-805C-8ED597645271}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.BaseDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.BaseDebug|Any CPU.Build.0 = Debug|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.BaseDebug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.BaseDebug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.BaseDebug|Any CPU.ActiveCfg = Debug|Any CPU
 		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.BaseDebug|Any CPU.Build.0 = Debug|Any CPU
 		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.BaseDebug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -995,5 +1009,6 @@ Global
 		{117A4731-BFF8-4012-A84C-9DEA96AC19D8} = {658579EE-4680-4E26-8BD7-6AB8C3B70252}
 		{79A6EDD5-32F9-4DE9-967A-3AACDE5937C4} = {658579EE-4680-4E26-8BD7-6AB8C3B70252}
 		{1AC3A290-09F5-4EB6-805C-8ED597645271} = {658579EE-4680-4E26-8BD7-6AB8C3B70252}
+		{98A0BF21-48C2-4C35-989B-CCD9AE39C271} = {658579EE-4680-4E26-8BD7-6AB8C3B70252}
 	EndGlobalSection
 EndGlobal
