@@ -1,5 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9923DA0B-B157-41AA-AB27-E48F60EABD36}"
 	ProjectSection(SolutionItems) = preProject
 		CompilerDefines.txt = CompilerDefines.txt
@@ -155,6 +157,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Coordination", "..\Dataphoria\Dataphoria.Coordination\Dataphoria.Coordination.csproj", "{79A6EDD5-32F9-4DE9-967A-3AACDE5937C4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Coordination.Common", "..\Dataphoria\Dataphoria.Coordination.Common\Dataphoria.Coordination.Common.csproj", "{1AC3A290-09F5-4EB6-805C-8ED597645271}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client.Browser", "Frontend.Client.Browser\Frontend.Client.Browser.csproj", "{89E4AC1E-BFC0-422D-9222-80C88D2F6499}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -908,6 +912,18 @@ Global
 		{1AC3A290-09F5-4EB6-805C-8ED597645271}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1AC3A290-09F5-4EB6-805C-8ED597645271}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{1AC3A290-09F5-4EB6-805C-8ED597645271}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.BaseDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.BaseDebug|Any CPU.Build.0 = Debug|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.BaseDebug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.BaseDebug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -928,6 +944,7 @@ Global
 		{DB513978-ACD1-4962-AFFF-BEB881907C0A} = {3232C77F-4816-48C6-B80D-761FF48AA282}
 		{F342F781-894F-4A6F-A59A-86080E1AC737} = {3232C77F-4816-48C6-B80D-761FF48AA282}
 		{057EFD5F-E1A7-43BB-AD4A-0F4B02C00E1A} = {3232C77F-4816-48C6-B80D-761FF48AA282}
+		{89E4AC1E-BFC0-422D-9222-80C88D2F6499} = {3232C77F-4816-48C6-B80D-761FF48AA282}
 		{788980F0-5A85-4F9A-9E6A-56746E7D37C7} = {673FFDA4-CE91-4D8C-8164-20E73F46C257}
 		{6D005BA9-2F0B-4EAA-B82F-039AFA11C425} = {673FFDA4-CE91-4D8C-8164-20E73F46C257}
 		{B7466206-120E-45BD-9FB0-F30A0C7971A4} = {673FFDA4-CE91-4D8C-8164-20E73F46C257}
