@@ -114,41 +114,41 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<type operator> ::=
 		is | as
 
-          <logical and expression> ::= 
+	<logical and expression> ::= 
 		<bitwise binary expression> {<logical and operator> <bitwise binary expression>}
 
-          <logical and operator> ::=
-              and
+	<logical and operator> ::=
+		and
 
-          <bitwise binary expression> ::= 
-              <comparison expression> {<bitwise binary operator> <comparison expression>}
+	<bitwise binary expression> ::= 
+		<comparison expression> {<bitwise binary operator> <comparison expression>}
 
-          <bitwise binary operator> ::=
-              ^ | & | "|" | "<<" | ">>"
+	<bitwise binary operator> ::=
+		^ | & | "|" | "<<" | ">>"
 
-          <comparison expression> ::= 
-              <additive expression> {<comparison operator> <additive expression>}
+	<comparison expression> ::= 
+		<additive expression> {<comparison operator> <additive expression>}
 
-          <comparison operator> ::=
-              = | "<>" | "<" | ">" | "<=" | ">=" | ?=
+	<comparison operator> ::=
+		= | "<>" | "<" | ">" | "<=" | ">=" | ?=
 
-          <additive expression> ::= 
-              <multiplicative expression> {<additive operator> <multiplicative expression>}
+	<additive expression> ::= 
+		<multiplicative expression> {<additive operator> <multiplicative expression>}
 
-          <additive operator> ::=
-              + | -
+	<additive operator> ::=
+		+ | -
 
-          <multiplicative expression> ::= 
-              <exponent expression> {<multiplicative operator> <exponent expression>}
+	<multiplicative expression> ::= 
+		<exponent expression> {<multiplicative operator> <exponent expression>}
 
-          <multiplicative operator> ::=
-              * | / | div | mod
+	<multiplicative operator> ::=
+		* | / | div | mod
 
-          <exponent expression> ::= 
-              <unary expression> {<exponent operator> <exponent expression>}
+	<exponent expression> ::= 
+		<unary expression> {<exponent operator> <exponent expression>}
 
-          <exponent operator> ::=
-              **
+	<exponent operator> ::=
+		**
 
 	<unary expression> ::=
 		{<unary operator>} <qualified factor>
@@ -156,13 +156,11 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<unary operator> ::=
 		+ | - | ~ | not | exists
 
-
 	<qualified factor> ::=			
-		<factor>[.<qualifier expression>]{"["<expression term>"]"[.<qualifier expression>]}
+		<factor>[.<qualifier expression>]{<indexer expression>[.<qualifier expression>]}
 
 	<qualifier expression> ::=
 		<identifier>[("("<actual parameter commalist>")") | (from <expression>)][.<qualifier expression>]
-
 
 	<indexer expression> ::=
 		"["<expression term>"]"
@@ -177,7 +175,7 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		<if expression> |
 		<case expression>
 
-          <selector expression> ::=
+    <selector expression> ::=
 		<table selector> |
 		<row selector> |
 		<cursor selector> |
