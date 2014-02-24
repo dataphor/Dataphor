@@ -30,6 +30,27 @@ namespace Alphora.Dataphor.DAE.Contracts
 		[FaultContract(typeof(DataphorFault))]
 		IAsyncResult BeginGetServerName(AsyncCallback ACallback, object AState);
 		string EndGetServerName(IAsyncResult AResult);
+
+		/// <summary>
+		/// Starts the server.
+		/// </summary>
+		[OperationContract(AsyncPattern = true)]
+		IAsyncResult BeginStart(AsyncCallback ACallback, object AState);
+		void EndStart(IAsyncResult AResult);
+
+		/// <summary>
+		/// Stops the server.
+		/// </summary>
+		[OperationContract(AsyncPattern = true)]
+		IAsyncResult BeginStop(AsyncCallback ACallback, object AState);
+		void EndStop(IAsyncResult AResult);
+
+		/// <summary>
+		/// Gets the current state of the server.
+		/// </summary>
+		[OperationContract(AsyncPattern = true)]
+		IAsyncResult BeginGetState(AsyncCallback ACallback, object AState);
+		ServerState EndGetState(IAsyncResult AResult);
 		
 		/// <summary>
 		/// Returns the current cache timestamp of the catalog.

@@ -29,6 +29,28 @@ namespace Alphora.Dataphor.DAE.Contracts
 		[OperationContract]
 		[FaultContract(typeof(DataphorFault))]
 		string GetServerName();
+
+		/// <summary>
+		/// Starts the server.
+		/// </summary>
+		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
+		void Start();
+
+		/// <summary>
+		/// Stops the server.
+		/// </summary>
+		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
+		void Stop();
+
+		/// <summary>
+		/// Gets the current state of the server.
+		/// </summary>
+		/// <returns></returns>
+		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
+		ServerState GetState();
 		
 		/// <summary>
 		/// Returns the current cache timestamp of the catalog.

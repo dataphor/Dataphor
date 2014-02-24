@@ -271,19 +271,49 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public void Start()
 		{
-			throw new NotImplementedException();
+			try
+			{
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginStart(null, null);
+				result.AsyncWaitHandle.WaitOne();
+				channel.EndStart(result);
+			}
+			catch (FaultException<DataphorFault> fault)
+			{
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
 		}
 
 		public void Stop()
 		{
-			throw new NotImplementedException();
+			try
+			{
+				var channel = GetServiceInterface();
+				IAsyncResult result = channel.BeginStop(null, null);
+				result.AsyncWaitHandle.WaitOne();
+				channel.EndStop(result);
+			}
+			catch (FaultException<DataphorFault> fault)
+			{
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
 		}
 
 		public ServerState State
 		{
 			get 
 			{ 
-				throw new NotImplementedException();
+				try
+				{
+					var channel = GetServiceInterface();
+					IAsyncResult result = channel.BeginGetState(null, null);
+					result.AsyncWaitHandle.WaitOne();
+					return channel.EndGetState(result);
+				}
+				catch (FaultException<DataphorFault> fault)
+				{
+					throw DataphorFaultUtility.FaultToException(fault.Detail);
+				}
 			}
 		}
 

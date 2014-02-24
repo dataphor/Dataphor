@@ -159,7 +159,7 @@ namespace Alphora.Dataphor.Dataphoria.Instancing
 		public int StartInstance(string instanceName)
 		{
 			// Start a DAEServer process with the given instance name
-			var si = new ProcessStartInfo(Path.Combine(BinDirectory, "DAEServer.exe", String.Format("-name {0}", instanceName)));
+			var si = new ProcessStartInfo(Path.Combine(BinDirectory, "DAEServer.exe"), String.Format("-name {0}", instanceName));
 			var p = Process.Start(si);
 
 			// Return the process Id
@@ -181,6 +181,7 @@ namespace Alphora.Dataphor.Dataphoria.Instancing
 			var p = Process.GetProcessById(processId);
 
 			p.Kill();
+			p.WaitForExit(30000);
 		}
 
 		private InstanceState ServerStateToInstanceState(ServerState state)

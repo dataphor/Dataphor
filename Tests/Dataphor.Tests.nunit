@@ -4,5 +4,6 @@
     <assembly path="DAE.Client.Tests\bin\Debug\DAE.Client.Tests.dll" />
     <assembly path="DAE.Server.Tests\bin\Debug\DAE.Server.Tests.dll" />
     <assembly path="Common.Tests\bin\Debug\Common.Tests.dll" />
+    <assembly path="Dataphoria.Instancer.Tests\bin\Debug\Dataphoria.Instancer.Tests.dll" />
   </Config>
 </NUnitProject>

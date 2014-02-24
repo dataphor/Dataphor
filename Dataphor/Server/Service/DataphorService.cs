@@ -81,7 +81,43 @@ namespace Alphora.Dataphor.DAE.Service
 				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
-		
+
+		public void Start()
+		{
+			try
+			{
+				_server.Start();
+			}
+			catch (DataphorException exception)
+			{
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
+			}
+		}
+
+		public void Stop()
+		{
+			try
+			{
+				_server.Stop();
+			}
+			catch (DataphorException exception)
+			{
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
+			}
+		}
+
+		public ServerState GetState()
+		{
+			try
+			{
+				return _server.State;
+			}
+			catch (DataphorException exception)
+			{
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(exception), exception.Message);
+			}
+		}
+
 		public long GetCacheTimeStamp()
 		{
 			try
