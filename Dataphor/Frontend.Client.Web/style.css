@@ -106,9 +106,12 @@ font.treenodeselected		{ background: #C0C0FF; color: #000000; font-size: 10pt; }
 body {
 	background-color: #eeeeee;
 }
+form.small {
+	width: 400px;
+	margin: 5em auto;
+}
 form 
 {
-	width: 300px;
 	background: #fff;
 	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fdfdfd',endColorstr='#dddddd',GradientType=0);
 	border-bottom: 1px solid #ccc;
@@ -118,8 +121,36 @@ form
 	box-shadow: 0px 0px 8px rgba(0,0,0,0.1);
 	border-radius: 4px;
 	padding: 2em;
-	margin: 5em auto;
 }
+
+td, table.group {
+	border: none;
+}
+
+
+table.group {
+  
+	min-height: 20px;
+  
+	border: 1px solid #e3e3e3;
+  
+	-webkit-border-radius: 4px;
+     
+	-moz-border-radius: 4px;
+          
+	border-radius: 4px;
+  
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+     
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+          
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+
+}
+table.group td {
+	padding: 10px;
+}
+
 table.statuspanel, 
 td.depthgauge  { background: transparent; margin-bottom: 1em;}
 font.depthgauge { color: #636363; font-size: 16pt; }
@@ -128,13 +159,14 @@ img.statusbutton { display: none; }
 table.toolbar {
 	background: transparent;
 	border: none;
-	width: 100%;
+	width: 300px;
 	text-align: center;
 }
 input.toolbarbutton {
 	width: 80%;
 	height: 2em;
 	margin-top: 1em;
+	max-width: 150px;
 }
 td {
 	font-size: 10pt;
@@ -198,4 +230,30 @@ input[type="color"],
 	line-height: 20px;
 	vertical-align: middle;
 	box-shadow: 0px 0px 6px -2px #8d8c8d;
+}
+
+div.errorlist {
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.3);
+	position: absolute;
+}
+
+.errorlist table {
+	padding: 20px;
+	background: white;
+	position: absolute;
+	top: 20%;
+	left: 30%;
+	width: 40%;
+	border-radius: 3px;
+	box-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+}
+.errorlist pre {
+	white-space: normal;
+}
+.errorlist .button {
+	display: none;
 }
