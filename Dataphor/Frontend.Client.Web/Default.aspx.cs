@@ -87,9 +87,12 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 			// handle repositioning of page to same scroll position after submit
 			Response.Write(@" onscroll=""document.getElementById('ScrollPosition').value = MainBody.scrollTop;""");
+
 			string position = Request.Form["ScrollPosition"];
-			if ((position != null) && (position != String.Empty))
-				Response.Write(String.Format(@" onload=""MainBody.scrollTop={0};""", Convert.ToInt32(position)));
+			if ((position == null) || (position == String.Empty))
+				position = "0";
+			
+			Response.Write(String.Format(@" onload=""OnLoad(document.getElementById('Default'), MainBody, {0});""", Convert.ToInt32(position)));
 		}
 	}
 }

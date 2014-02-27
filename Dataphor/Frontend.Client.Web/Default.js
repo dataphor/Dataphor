@@ -1,3 +1,20 @@
+function OnLoad(AForm, ABody, position)
+{
+	var maxWidth = 300;
+	for (var i = 0; i < AForm.children.length; i++)
+	{
+		if (AForm.children[i].className != "errorlist")
+		{
+			var width = AForm.children[i].offsetWidth;
+			maxWidth = width > maxWidth ? width : maxWidth;
+		}
+	};
+
+	AForm.setAttribute('style', "width:" + maxWidth + "px; margin:0 auto;");
+
+	ABody.scrollTop = position;
+}
+
 function Submit(AUri, AEvent)
 {
 	document.forms[0].action = AUri;
@@ -156,6 +173,11 @@ function ShowErrorDetail(AItem)
 {
 	AItem.previousSibling.style.display = ''; 
 	AItem.style.display = 'none';
+}
+
+function HideError(AItem)
+{
+	AItem.parentNode.removeChild(AItem);
 }
 
 /* Calendar */

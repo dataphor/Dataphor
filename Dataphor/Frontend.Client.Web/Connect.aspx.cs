@@ -189,6 +189,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			DataSession session = new DataSession();
 			session.Alias = _configuration.Aliases[_configuration.DefaultAliasName];
 			session.Active = true;
+			session.SessionInfo.Environment = "WindowsClient";
 			
 			Web.Session webSession = new Web.Session(session, true);
 			Session["WebSession"] = webSession;

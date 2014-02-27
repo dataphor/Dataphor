@@ -404,7 +404,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 						writer.AddAttribute(HtmlTextWriterAttribute.Class, "formtitle");
 						writer.RenderBeginTag(HtmlTextWriterTag.Font);
-
+						
 						writer.AddAttribute(HtmlTextWriterAttribute.Class, "formtitle");
 						writer.AddAttribute(HtmlTextWriterAttribute.Onclick, linkScript);
 						writer.RenderBeginTag(HtmlTextWriterTag.Div);
@@ -497,7 +497,6 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		protected virtual void RenderStatusPanel(HtmlTextWriter writer)
 		{
-			writer.AddAttribute(HtmlTextWriterAttribute.Width, "100%");
 			writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
 			writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
 			writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
@@ -527,7 +526,10 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (HasNonAborts(_errorList))
 			{
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "errorlist");
+				writer.AddAttribute(HtmlTextWriterAttribute.Id, "errorlist");
+				writer.AddAttribute(HtmlTextWriterAttribute.Onclick, "HideError(this)");
 				writer.RenderBeginTag(HtmlTextWriterTag.Div);
+
 
 				bool first = true;
 				foreach (Exception exception in _errorList)
@@ -757,6 +759,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
 				writer.AddAttribute(HtmlTextWriterAttribute.Type, "button");
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "button");
 				writer.AddAttribute(HtmlTextWriterAttribute.Value, Strings.Get("ErrorDetailsButtonText"), true);
 				writer.AddAttribute(HtmlTextWriterAttribute.Onclick, "ShowErrorDetail(GetParentTable(this))");
 				writer.RenderBeginTag(HtmlTextWriterTag.Input);
