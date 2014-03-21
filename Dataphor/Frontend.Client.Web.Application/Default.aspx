@@ -1,4 +1,4 @@
-<%@ Page language="c#" Codebehind="Default.aspx.cs" AutoEventWireup="false" Inherits="Alphora.Dataphor.Frontend.Client.Web.Default" %>
+<%@ Page language="c#" Codebehind="Default.aspx.cs" AutoEventWireup="false" Inherits="Alphora.Dataphor.Frontend.Client.Web.Application.Default" %>
 <html>
 	<head>
 		<title><% WebSession.GetTitle(); %></title>

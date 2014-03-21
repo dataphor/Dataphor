@@ -16,8 +16,9 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Web.UI.HtmlControls;
 using Alphora.Dataphor.DAE.Client;
+using Alphora.Dataphor.Frontend.Client.Web;
 
-namespace Alphora.Dataphor.Frontend.Client.Web
+namespace Alphora.Dataphor.Frontend.Client.Web.Application
 {
 	public class Connect : System.Web.UI.Page
 	{

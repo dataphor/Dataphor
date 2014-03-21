@@ -20,8 +20,9 @@ using System.Web.UI.HtmlControls;
 
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.Frontend.Client;
+using Alphora.Dataphor.Frontend.Client.Web;
 
-namespace Alphora.Dataphor.Frontend.Client.Web
+namespace Alphora.Dataphor.Frontend.Client.Web.Application
 {
 	// Do not put classes above WebClient
 

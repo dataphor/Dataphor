@@ -1,6 +1,6 @@
 <%@ Import namespace="Alphora.Dataphor.Frontend.Client.Web" %>
 <%@ Import namespace="Alphora.Dataphor.Frontend.Client" %>
-<%@ Page language="c#" Codebehind="Connect.aspx.cs" AutoEventWireup="false" Inherits="Alphora.Dataphor.Frontend.Client.Web.Connect" %>
+<%@ Page language="c#" Codebehind="Connect.aspx.cs" AutoEventWireup="false" Inherits="Alphora.Dataphor.Frontend.Client.Web.Application.Connect" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
 <HTML>
 	<HEAD>

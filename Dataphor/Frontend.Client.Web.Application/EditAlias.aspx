@@ -1,4 +1,4 @@
-<%@ Page language="c#" Codebehind="EditAlias.aspx.cs" AutoEventWireup="false" Inherits="Alphora.Dataphor.Frontend.Client.Web.EditAlias" validateRequest=false%>
+<%@ Page language="c#" Codebehind="EditAlias.aspx.cs" AutoEventWireup="false" Inherits="Alphora.Dataphor.Frontend.Client.Web.Application.EditAlias" validateRequest=false%>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
 <HTML>
 	<HEAD>

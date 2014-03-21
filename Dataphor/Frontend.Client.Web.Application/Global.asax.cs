@@ -13,8 +13,9 @@ using System.Web;
 using System.Web.SessionState;
 
 using Alphora.Dataphor.Frontend.Client;
+using Alphora.Dataphor.Frontend.Client.Web;
 
-namespace Alphora.Dataphor.Frontend.Client.Web
+namespace Alphora.Dataphor.Frontend.Client.Web.Application
 {
 
 	public class Global : System.Web.HttpApplication

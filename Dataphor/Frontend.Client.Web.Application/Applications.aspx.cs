@@ -16,8 +16,9 @@ using System.Web.UI.WebControls;
 using System.Web.UI.HtmlControls;
 
 using Alphora.Dataphor.DAE;
+using Alphora.Dataphor.Frontend.Client.Web;
 
-namespace Alphora.Dataphor.Frontend.Client.Web
+namespace Alphora.Dataphor.Frontend.Client.Web.Application
 {
 	/// <summary>
 	/// Summary description for Applications.
