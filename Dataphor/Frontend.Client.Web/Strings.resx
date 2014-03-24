@@ -157,7 +157,7 @@
     <value>Home</value>
   </data>
   <data name="CloseText" xml:space="preserve">
-    <value>Back</value>
+    <value>Home</value>
   </data>
   <data name="AcceptHint" xml:space="preserve">
     <value>Accept this form (with any changes)</value>
@@ -166,7 +166,7 @@
     <value>Go back to the beginning.</value>
   </data>
   <data name="CloseHint" xml:space="preserve">
-    <value>Go back</value>
+    <value>Go home</value>
   </data>
   <data name="DateTimeAlt" xml:space="preserve">
     <value>Press to choose a date from a calendar.</value>
