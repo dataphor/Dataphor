@@ -138,7 +138,7 @@ input.trigger:active {
 
 /* TextBox */
 input.textbox				{ border: navy 1px solid; }
-input.textboxnull			{ border: navy 1px solid; background: #EEFFEE; }
+input.textboxnull			{ border: navy 1px solid; background: #EEFFEE; display:block;}
 input.textboxfailed			{ border: navy 1px solid; background: #FFF5DF; }
 div.readonlytextbox			{ background: #EEEEEE; color: #000000; padding: 2px; border: inset 1px navy; cursor: default; }
 div.readonlytextboxnull		{ background: #DDEEDD; padding: 2px; border: inset 1px navy; }
@@ -159,7 +159,10 @@ input.readonlycheckbox		{ background: #DDDDDD; color: #FFFFFF; }
 table.group					{ margin-bottom: 3px; border: solid 1px; }
 
 /* Search */
-table.search				{ margin-bottom: 3px; border: solid 1px #000010; }
+table.search				{ 
+    margin: 10px 10px 10px 10px;
+   border-spacing:30px;
+}
 div.searchby				{ background: white; position: absolute; cursor: pointer; font-size: smaller; border: solid 1px #0F0000; width: 100%; }
 
 /* Grid */
@@ -263,10 +266,21 @@ table.toolbar {
 	text-align: center;
 }
 input.toolbarbutton {
-	width: 80%;
-	height: 2em;
-	margin-top: 1em;
-	max-width: 150px;
+	background-color:#176b28;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+	border-radius:4px;
+	border:1px solid #18ab29;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial, 'DejaVu Sans', 'Liberation Sans', Freesans, sans-serif;
+	font-size:12px;
+	font-weight:bold;
+	padding:7px 16px;
+	text-decoration:none;
+	text-shadow:0px 0px 0px #2f6627;
+    min-height: 30px;
 }
 td {
 	font-size: 10pt;

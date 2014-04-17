@@ -225,8 +225,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		// TitleAlignment
 
-		private TitleAlignment _titleAlignment = TitleAlignment.Left;
-		[DefaultValue(TitleAlignment.Left)]
+		private TitleAlignment _titleAlignment = TitleAlignment.Top;
+		[DefaultValue(TitleAlignment.Top)]
 		public TitleAlignment TitleAlignment
 		{
 			get { return _titleAlignment; }
@@ -461,131 +461,137 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		#region Rendering
 
 		protected override void InternalRender(HtmlTextWriter writer)
-		{
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "search");
-			writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-			writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
-			writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "2");
-			writer.AddAttribute(HtmlTextWriterAttribute.Width, "auto");
-			string hint = GetHint();
-			if (hint != String.Empty)
-				writer.AddAttribute(HtmlTextWriterAttribute.Title, hint, true);
-			writer.RenderBeginTag(HtmlTextWriterTag.Table);
+        {
+            writer.AddAttribute(HtmlTextWriterAttribute.Class, "search");
+            writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
+            writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "2");
+            writer.AddAttribute(HtmlTextWriterAttribute.Width, "auto");
+            string hint = GetHint();
+            if (hint != String.Empty)
+                writer.AddAttribute(HtmlTextWriterAttribute.Title, hint, true);
+            writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
-			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
+            writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			bool first = true;
-			foreach (SearchControl control in _searchControls)
-			{
-				if (first)
-					first = false;
-				else
-				{
-					writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
-					writer.RenderBeginTag(HtmlTextWriterTag.Td);
-					writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/searcharrow.gif");
-					writer.AddAttribute(HtmlTextWriterAttribute.Width, "16");
-					writer.AddAttribute(HtmlTextWriterAttribute.Height, "10");
-					writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-					writer.RenderBeginTag(HtmlTextWriterTag.Img);
-					writer.RenderEndTag();
-					writer.RenderEndTag();
-				}
+            bool first = true;
+            foreach (SearchControl control in _searchControls)
+            {
+                if (first)
+                    first = false;
+                else
+                {
+                    /*
+                    writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
+                    writer.RenderBeginTag(HtmlTextWriterTag.Td);
+                        writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/searcharrow.gif");
+                        writer.AddAttribute(HtmlTextWriterAttribute.Class, "searcharrow");
+                        writer.AddAttribute(HtmlTextWriterAttribute.Width, "16");
+                        writer.AddAttribute(HtmlTextWriterAttribute.Height, "10");
+                        writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+                        writer.RenderBeginTag(HtmlTextWriterTag.Img);
+                        writer.RenderEndTag();// IMG
+                    writer.RenderEndTag();// TD
+                    */
+                }
 
-				writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
-				writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
-				writer.RenderBeginTag(HtmlTextWriterTag.Td);
+                writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
+                writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+                writer.RenderBeginTag(HtmlTextWriterTag.Td);
+                { 
+                    if (_titleAlignment != TitleAlignment.None)
+                    {
+                        writer.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(control.GetTitle())));
+                        if (_titleAlignment != TitleAlignment.Top)
+                            Session.RenderDummyImage(writer, "10px", "0");
+                    }
 
-				if (_titleAlignment != TitleAlignment.None)
-				{
-					writer.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(control.GetTitle())));
-					if (_titleAlignment != TitleAlignment.Top)
-						Session.RenderDummyImage(writer, "4px", "0");
-				}
+                    if (_titleAlignment == TitleAlignment.Top)
+                        writer.Write("<br>");
 
-				if (_titleAlignment == TitleAlignment.Top)
-					writer.Write("<br>");
+                    control.Render(writer);
+                }
+                writer.RenderEndTag();//TD
+            }
 
-				control.Render(writer);
+            writer.AddAttribute(HtmlTextWriterAttribute.Align, "right");
+            writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
+            writer.RenderBeginTag(HtmlTextWriterTag.Td);
+                Session.RenderDummyImage(writer, "5", "1");
+                writer.AddAttribute(HtmlTextWriterAttribute.Type, "button");
+                writer.AddAttribute(HtmlTextWriterAttribute.Valign, "top");
+                writer.AddAttribute(HtmlTextWriterAttribute.Value, Strings.Get("FindButtonText"));
+                writer.AddAttribute(HtmlTextWriterAttribute.Class, "trigger");
+                writer.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, ID + "Search"));
+                
+                writer.RenderBeginTag(HtmlTextWriterTag.Input);
+                writer.RenderEndTag();// INPUT
 
-				writer.RenderEndTag();
-			}
+                Session.RenderDummyImage(writer, "5", "1");
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Align, "right");
-			writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
-			writer.RenderBeginTag(HtmlTextWriterTag.Td);
-			
-			Session.RenderDummyImage(writer, "5", "1");
-			
-			writer.AddAttribute(HtmlTextWriterAttribute.Type, "button");
-			writer.AddAttribute(HtmlTextWriterAttribute.Value, Strings.Get("FindButtonText"));
-			writer.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, ID + "Search"));
-			writer.RenderBeginTag(HtmlTextWriterTag.Input);
-			writer.RenderEndTag();
+            writer.RenderEndTag();	// TD
 
-			Session.RenderDummyImage(writer, "5", "1");
-			
-			writer.RenderEndTag();	// TD
+            writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
+            writer.AddAttribute(HtmlTextWriterAttribute.Align, "right");
+            if (Source != null)
+            {
+                writer.RenderBeginTag(HtmlTextWriterTag.Td);
+                {
+                    writer.AddAttribute(HtmlTextWriterAttribute.Class, "lookup");
+                    writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/lookup.png");
+                    writer.AddAttribute(HtmlTextWriterAttribute.Onclick, "ShowDropDown('" + ID + "SearchBy', GetParentTable(this))", true);
+                    writer.RenderBeginTag(HtmlTextWriterTag.Img);
+                    writer.RenderEndTag();
+                }
+                Session.RenderDummyImage(writer, "5", "1");
+                writer.RenderEndTag();	// TD
+            }
+            writer.RenderEndTag();	// TR
+            writer.RenderEndTag();	// TABLE
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
-			writer.AddAttribute(HtmlTextWriterAttribute.Align, "right");
-			writer.RenderBeginTag(HtmlTextWriterTag.Td);
-			
-			writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/lookup.png");
-			writer.AddAttribute(HtmlTextWriterAttribute.Onclick, "ShowDropDown('" + ID + "SearchBy', GetParentTable(this))", true);
-			writer.RenderBeginTag(HtmlTextWriterTag.Img);
-			writer.RenderEndTag();
+            // Render search-by drop-down
+            if (Source != null)
+            {
+                writer.AddAttribute(HtmlTextWriterAttribute.Class, "searchby");
+                writer.AddAttribute(HtmlTextWriterAttribute.Style, "display: none");
+                writer.AddAttribute(HtmlTextWriterAttribute.Id, ID + "SearchBy");
+                writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
-			Session.RenderDummyImage(writer, "5", "1");
-			
-			writer.RenderEndTag();	// TD
-			writer.RenderEndTag();	// TR
-			writer.RenderEndTag();	// TABLE
+                writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
+                writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+                writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+                writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
-			// Render search-by drop-down
-			if (Source != null)
-			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "searchby");
-				writer.AddAttribute(HtmlTextWriterAttribute.Style, "display: none");
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, ID + "SearchBy");
-				writer.RenderBeginTag(HtmlTextWriterTag.Div);
+                // Construct the a complete list of possible orderings including non-sparse keys
+                Orders orders = new Orders();
+                orders.AddRange(Source.TableVar.Orders);
+                DAE.Schema.Order orderForKey;
+                foreach (Key key in Source.TableVar.Keys)
+                    if (!key.IsSparse)
+                    {
+                        orderForKey = new Order(key);
+                        if (!orders.Contains(orderForKey))
+                            orders.Add(orderForKey);
+                    }
 
-				writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
-				writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
-				writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-				writer.RenderBeginTag(HtmlTextWriterTag.Table);
+                foreach (Order order in orders)
+                    if (IsOrderVisible(order) && !order.Equals(Source.Order))
+                    {
+                        writer.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('{0}?ActionID={1}&Sort={2}',event)", (string)Session.Get(this).Context.Session["DefaultPage"], ID + "SortBy", HttpUtility.UrlEncode(order.ToString())), true);
+                        writer.RenderBeginTag(HtmlTextWriterTag.Tr);
+                        writer.AddAttribute("onmouseover", @"className='highlightedmenuitem'");
+                        writer.AddAttribute("onmouseout", @"className=''");
+                        writer.RenderBeginTag(HtmlTextWriterTag.Td);
+                        writer.Write(HttpUtility.HtmlEncode(GetOrderTitle(order)));
+                        writer.RenderEndTag();	// TD
+                        writer.RenderEndTag();	// TR
+                    }
 
-				// Construct the a complete list of possible orderings including non-sparse keys
-				Orders orders = new Orders();
-				orders.AddRange(Source.TableVar.Orders);
-				DAE.Schema.Order orderForKey;
-				foreach (Key key in Source.TableVar.Keys)
-					if (!key.IsSparse)
-					{
-						orderForKey = new Order(key);
-						if (!orders.Contains(orderForKey))
-							orders.Add(orderForKey);
-					}
 
-				foreach (Order order in orders)
-					if (IsOrderVisible(order) && !order.Equals(Source.Order))
-					{
-						writer.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('{0}?ActionID={1}&Sort={2}',event)", (string)Session.Get(this).Context.Session["DefaultPage"], ID + "SortBy", HttpUtility.UrlEncode(order.ToString())), true);
-						writer.RenderBeginTag(HtmlTextWriterTag.Tr);
-						writer.AddAttribute("onmouseover", @"className='highlightedmenuitem'");
-						writer.AddAttribute("onmouseout", @"className=''");
-						writer.RenderBeginTag(HtmlTextWriterTag.Td);
-						writer.Write(HttpUtility.HtmlEncode(GetOrderTitle(order)));
-						writer.RenderEndTag();	// TD
-						writer.RenderEndTag();	// TR
-					}
-				
+                writer.RenderEndTag();	// TABLE
 
-				writer.RenderEndTag();	// TABLE
-
-				writer.RenderEndTag();	// DIV
-			}
-		}
+                writer.RenderEndTag();	// DIV
+            }
+        }
 
 		#endregion
 

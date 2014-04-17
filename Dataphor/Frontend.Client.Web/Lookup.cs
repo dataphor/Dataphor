@@ -264,6 +264,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		protected virtual void RenderElement(HtmlTextWriter writer)
 		{
 			base.InternalRender(writer);
+            writer.AddAttribute(HtmlTextWriterAttribute.Class, "lookup");
 			writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/lookup.png");
 			writer.AddAttribute(HtmlTextWriterAttribute.Width, "16");
 			writer.AddAttribute(HtmlTextWriterAttribute.Height, "15");
@@ -358,6 +359,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
 			writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
+            writer.AddAttribute(HtmlTextWriterAttribute.Class, "lookup");
 			writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/lookup.png");
 			writer.AddAttribute(HtmlTextWriterAttribute.Width, "16");
 			writer.AddAttribute(HtmlTextWriterAttribute.Height, "15");
