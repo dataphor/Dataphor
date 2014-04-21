@@ -532,8 +532,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
             writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
             writer.AddAttribute(HtmlTextWriterAttribute.Align, "right");
-            if (Source != null)
-            {
+            
                 writer.RenderBeginTag(HtmlTextWriterTag.Td);
                 {
                     writer.AddAttribute(HtmlTextWriterAttribute.Class, "lookup");
@@ -544,7 +543,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
                 }
                 Session.RenderDummyImage(writer, "5", "1");
                 writer.RenderEndTag();	// TD
-            }
+            
             writer.RenderEndTag();	// TR
             writer.RenderEndTag();	// TABLE
 
