@@ -9,6 +9,7 @@ using System.Resources;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE.Language;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Compiling
 {
@@ -968,14 +969,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 		/// <summary> Sets the locator for all locator exceptions that don't have one. </summary>
 		/// <remarks> Note: Doesn't update the offsets. </remarks>
-		public void SetLocator(string locator)
+		public void SetLocator(DebugLocator locator)
 		{
 			foreach (Exception exception in this)
-			{
-				ILocatorException locatorException = exception as ILocatorException;
-				if (locatorException != null && String.IsNullOrEmpty(locatorException.Locator))
-					locatorException.Locator = !String.IsNullOrEmpty(locator) ? locator : null;
-			}
+				exception.SetLocator(locator);
 		}
 	}
 }

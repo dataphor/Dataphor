@@ -644,7 +644,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 			// Set the locators for the compiler exceptions
 			if (sourceContext != null && sourceContext.Locator != null)
-				plan.Messages.SetLocator(sourceContext.Locator.Locator);
+				plan.Messages.SetLocator(sourceContext.Locator);
 				
 			if (!plan.Messages.HasErrors)
 			{
