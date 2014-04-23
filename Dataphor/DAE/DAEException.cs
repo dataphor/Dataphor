@@ -37,9 +37,9 @@ namespace Alphora.Dataphor.DAE
 		public static void SetLocator(this Exception exception, Alphora.Dataphor.DAE.Debug.DebugLocator locator)
 		{
 			ILocatorException locatorException = exception as ILocatorException;
-			if (locatorException != null && String.IsNullOrEmpty(locatorException.Locator))
+			if (locatorException != null)
 			{
-				if (locator != null)
+                if (String.IsNullOrEmpty(locatorException.Locator) || (locator != null && locatorException.Locator == locator.Locator))
 				{
 					locatorException.Locator = locator.Locator;
 					locatorException.Line += locator.Line - 1;

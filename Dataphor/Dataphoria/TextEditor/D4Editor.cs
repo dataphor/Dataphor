@@ -251,9 +251,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				else
 					isWarning = false;
 
-				// Adjust the offset of the exception to account for the current selection
-				ShiftException(offset, locatorLocator, exception);
-
 				Dataphoria.Warnings.AppendError(this, exception, isWarning);
 			}
 		}
