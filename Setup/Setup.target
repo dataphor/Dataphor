@@ -41,21 +41,21 @@
 
   <!-- Synchronize BinFiles -->
   <ItemGroup>
-    <BinFiles Include="..\Deploy\Dataphor\*.*" />
+    <BinFiles Include="..\Deploy\Dataphor\**\*.*" />
   </ItemGroup>
   <Target Name="SyncBin" >
     <Message Text="Synchronize Bin files with WiX." />
-    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="BinFiles" SourceFiles="@(BinFiles)" />
+    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="BinFiles" ComponentGroupID ="BinFilesGroup" SourceFiles="@(BinFiles)" />
   </Target>
   
     
   <!-- Synchronize WebClientFiles -->
   <ItemGroup>
-    <WebClientFiles Include="..\Deploy\WebClient\*\*.*" />
+    <WebClientFiles Include="..\Deploy\WebClient\**\*.*" />
   </ItemGroup>
   <Target Name="SyncWebClient" >
     <Message Text="Synchronize Web Client files with WiX." />
-    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="WebClientFiles" SourceFiles="@(WebClient)" />
+    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="WebClientFiles" ComponentGroupID ="WebClientFilesGroup" SourceFiles="@(WebClientFiles)" />
   </Target>
   
   
