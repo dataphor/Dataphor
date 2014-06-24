@@ -6,13 +6,14 @@ using System.Globalization;
 using System.Text;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+using Microsoft.Build.Utilities;    
 
 namespace Dataphor.Build
 {
 	/// <summary> Synchronizes WiX files and components with files in a given folder. </summary>
 	public class SyncWiXFiles : Task
 	{
+        public const int MaxIDLength = 37;
 		public const string CWiXNamespace = "http://schemas.microsoft.com/wix/2006/wi";
 		
 		private string FComponentId;
@@ -169,7 +170,7 @@ namespace Dataphor.Build
 				{
 					var LFileName = Path.GetFileName(LSourceFile);
 					XmlElement LFileElement = ADocument.CreateElement("File", CWiXNamespace);
-					LFileElement.SetAttribute("Id", LComponent.ParentNode.Attributes["Id"].Value + FileNameToID(LFileName));
+                    LFileElement.SetAttribute("Id", FileNameToID(LFileName, LComponent.ParentNode.Attributes["Id"].Value));
 					LFileElement.SetAttribute("Name", LFileName);
 					LFileElement.SetAttribute("Source", MakePathRelative(Path.GetFullPath(ARelativePath) + "\\", Path.GetFullPath(LSourceFile)));
 					LComponent.AppendChild(LFileElement);
@@ -192,7 +193,7 @@ namespace Dataphor.Build
 					{
 						// Add a directory element
 						var LDirectoryElement = ADocument.CreateElement("Directory", CWiXNamespace);
-						LDirectoryElement.SetAttribute("Id", LComponent.ParentNode.Attributes["Id"].Value + FileNameToID(LSubFolderName));
+                        LDirectoryElement.SetAttribute("Id", FileNameToID(LSubFolderName, LComponent.ParentNode.Attributes["Id"].Value));
 						LDirectoryElement.SetAttribute("Name", LSubFolderName);
 						LComponent.ParentNode.AppendChild(LDirectoryElement);
 
@@ -234,10 +235,15 @@ namespace Dataphor.Build
 			return String.Join(Path.DirectorySeparatorChar.ToString(), LLeftSplit, 0, i);
 		}
 
-		private string FileNameToID(string ASourceFile)
-		{
-			return ASourceFile.Replace('.', '_').Replace('-', '_').Replace(' ', '_');
-		}
+        private string FileNameToID(string ASourceFile, string AParent = null)
+        {
+            var baseName = 
+                (
+                    (AParent == null ? "" : AParent + "_") + ASourceFile
+                ).Replace('.', '_').Replace('-', '_').Replace(' ', '_');
+            var hash = ((UInt32)baseName.GetHashCode()).ToString();
+            return "id_" + baseName.Substring(Math.Max(0, baseName.Length - MaxIDLength - hash.Length)) + hash;
+        }
 
 		private static string MakePathRelative(string ABase, string APath)
 		{
