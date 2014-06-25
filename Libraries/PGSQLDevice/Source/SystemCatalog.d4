@@ -218,7 +218,7 @@ begin
 		//create operator System.ToBoolean(System.Long) class "PostgreSQLDevice.PostgreSQLToBit" static tags {{ DAE.IsSystem = "true" }}, 
 		//create operator System.ToBoolean(System.Byte) class "PostgreSQLDevice.PostgreSQLToBit" static tags {{ DAE.IsSystem = "true" }}, 
 		//create operator System.ToDecimal(System.Money) class "PostgreSQLDevice.PostgreSQLToDecimal288" static tags {{ DAE.IsSystem = "true" }}, 
-		//create operator System.ToDecimal(System.Integer) class "PostgreSQLDevice.PostgreSQLToDecimal288" static tags {{ DAE.IsSystem = "true" }}, 
+		create operator System.ToDecimal(System.Integer) static tags {{ Storage.TranslationString = "{{0}}", DAE.IsSystem = "true" }}, 
 		//create operator System.ToDecimal(System.Long) class "PostgreSQLDevice.PostgreSQLToDecimal288" static tags {{ DAE.IsSystem = "true" }}, 
 		//create operator System.ToLong(System.Boolean) class "PostgreSQLDevice.PostgreSQLToBigInt" static tags {{ DAE.IsSystem = "true" }}, 
 		//create operator System.ToLong(System.Integer) class "PostgreSQLDevice.PostgreSQLToBigInt" static tags {{ DAE.IsSystem = "true" }}, 
