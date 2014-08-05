@@ -1879,6 +1879,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_deviceSupported = true;
 				SurrogateExecute = InternalDeviceExecute;
 				SetDevice(plan, _potentialDevice);
+
+				_symbols = Compiler.SnapshotSymbols(plan);
 			}
 			else
 				_noDevice = true;
