@@ -1833,8 +1833,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
 				{
 					DetermineModifySupported(plan);
-					_symbols = Compiler.SnapshotSymbols(plan);
 				}
+
+				_symbols = Compiler.SnapshotSymbols(plan);
 			}
 			else
 				_noDevice = true;
