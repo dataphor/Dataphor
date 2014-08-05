@@ -2560,7 +2560,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public override Statement EmitStatement(EmitMode mode)
 		{
-			return _onExpression;
+			Statement result;
+
+			if (mode == EmitMode.ForRemote)
+			{
+				// Emit an empty typed table selector
+				var tableSelector = new TableSelectorExpression();
+				tableSelector.TypeSpecifier = _dataType.EmitSpecifier(mode);
+				foreach (var key in _tableVar.Keys)
+				{
+					tableSelector.Keys.Add(key.EmitStatement(mode));
+				}
+
+				result = tableSelector;
+
+				// Adorn orders if necessary
+				if (_tableVar.Orders.Count > 0)
+				{
+					var adornExpression = new AdornExpression();
+					adornExpression.Expression = tableSelector;
+
+					foreach (var order in _tableVar.Orders)
+					{
+						adornExpression.Orders.Add(order.EmitStatement(mode));
+					}
+
+					result = adornExpression;
+				}
+			}
+			else
+			{
+				result = _onExpression;
+			}
+
+			return result;
 		}
 		
 		public override object InternalExecute(Program program)
