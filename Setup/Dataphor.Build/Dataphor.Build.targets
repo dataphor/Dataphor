@@ -4,7 +4,7 @@
 		<DataphorBuildLib>$(DataphorBuildExtensionsPath)\Dataphor.Build.dll</DataphorBuildLib>
 	</PropertyGroup>
 
-	<UsingTask AssemblyFile="$(DataphorBuildLib)" TaskName="Dataphor.Build.SyncWiXFiles" />
+  	<UsingTask AssemblyFile="$(DataphorBuildLib)" TaskName="Dataphor.Build.SyncWiXFiles" />
 
 
 </Project>
