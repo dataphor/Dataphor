@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -40,7 +41,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ICoordinatorService.cs" />
+    <Compile Include="IntegerInterval.cs" />
+    <Compile Include="IntegerIntervalList.cs" />
+    <Compile Include="NodeDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Dataphor\Base\Base.csproj">
+      <Project>{6ec1f378-510b-48d0-8d00-e36bef214766}</Project>
+      <Name>Base</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -22,9 +22,6 @@ namespace Alphora.Dataphor.Dataphoria.Instancer
 {
     public partial class Service : ServiceBase
     {
-        public const int InstancerPortNumber = 8059;
-        public const string InstancerName = "instancer";
-
         private ServiceHost _host;
 
         public Service()
@@ -42,7 +39,7 @@ namespace Alphora.Dataphor.Dataphoria.Instancer
 		    (
 			    typeof(IInstancerService), 
 			    DataphorServiceUtility.GetBinding(), 
-			    DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, InstancerPortNumber, InstancerName)
+			    DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, Constants.InstancerPortNumber, Constants.InstancerName)
 		    );
 
 			_host.Open();

@@ -11,7 +11,17 @@ using System.Text;
 
 namespace Alphora.Dataphor.Dataphoria.Coordination.Common
 {
-    public interface ICoordinatorService
-    {
-    }
+	public class IntegerIntervalList : BaseList<IntegerInterval>
+	{
+		public IntegerIntervalList Copy()
+		{
+			var result = new IntegerIntervalList();
+			foreach (var i in this)
+			{
+				result.Add(i.Copy());
+			}
+
+            return result;
+		}
+	}
 }

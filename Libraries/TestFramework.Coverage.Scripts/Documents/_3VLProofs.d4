@@ -185,6 +185,33 @@ insert
 	
 if exists (Or where not(IsEquivalent(Left or Right, Result))) then
 	raise Error("Or failed");
+	
+/*
+	Xor
+*/
+
+create table Xor { Left : Boolean nil, Right : Boolean nil, Result : Boolean nil, key { Left, Right } };
+
+insert
+	table
+	{
+		row { true Left, true Right, false Result },
+		row { true Left, false Right, true Result },
+		row { true Left, nil Right, nil Result },
+		row { false Left, true Right, true Result },
+		row { false Left, false Right, false Result },
+		row { false Left, nil Right, nil Result },
+		row { nil Left, true Right, nil Result },
+		row { nil Left, false Right, nil Result },
+		row { nil Left, nil Right, nil Result }
+	}
+	into Xor;
+	
+if exists (Xor where not(IsEquivalent(Left xor Right, Result))) then
+	raise Error("Xor failed");
+	
+if exists (Xor where not(IsEquivalent((Left and not Right) or (not Left and Right), Result))) then
+	raise Error("Xor expansion failed");
 
 /*	
 	Identity

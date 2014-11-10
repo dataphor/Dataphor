@@ -7,11 +7,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace Alphora.Dataphor.Dataphoria.Coordination.Common
 {
-    public interface ICoordinatorService
-    {
-    }
+	[DataContract]
+	public class IntegerInterval
+	{
+		[DataMember]
+		public int Begin { get; set; }
+
+		[DataMember]
+		public int End { get; set; }
+
+		public IntegerInterval Copy()
+		{
+			return new IntegerInterval { Begin = this.Begin, End = this.End };
+		}
+	}
 }
