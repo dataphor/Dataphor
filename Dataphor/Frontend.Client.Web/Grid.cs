@@ -811,7 +811,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 	}
 
-	public class Grid : DataElement, IWebGrid
+	public class Grid : DataElement, IWebGrid, IWebPrehandler
 	{
 		public Grid() : base()
 		{
@@ -819,6 +819,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			_pageDownID = Session.GenerateID();
 			_firstID = Session.GenerateID();
 			_lastID = Session.GenerateID();
+			_hscrollbarID = Session.GenerateID();
 			_dataLink = new DAE.Client.DataLink();
 			_dataLink.OnActiveChanged += new DAE.Client.DataLinkHandler(DataLinkActiveChanged);
 		}
@@ -903,6 +904,16 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		private string _lastID;
 		public string LastID { get { return _lastID; } }
 
+		// HScrollbarID
+
+		private string _hscrollbarID;
+		public string HScrollbarID { get { return _hscrollbarID; } }
+
+		// HScrollbarValue
+
+		private float _hscrollbarValue;
+		public float HScrollbarValue { get { return _hscrollbarValue; } }
+
 		// DataElement
 
 		protected override void SourceChanged(ISource oldSource)
@@ -965,6 +976,20 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			RenderNavButton(writer, "images/last.png", _lastID, !eOF);
 			writer.RenderEndTag();
 
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			{
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "grid-hscrollbar");
+				writer.AddAttribute(HtmlTextWriterAttribute.Name, _hscrollbarID);
+				writer.AddAttribute(HtmlTextWriterAttribute.Id, _hscrollbarID);
+				writer.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
+				writer.AddAttribute(HtmlTextWriterAttribute.Value, _hscrollbarValue.ToString(System.Globalization.CultureInfo.InvariantCulture.NumberFormat));
+				writer.RenderBeginTag(HtmlTextWriterTag.Input);
+				writer.RenderEndTag();
+			}
+			writer.RenderEndTag();  // td
+			writer.RenderEndTag();  // tr
+
 			writer.RenderEndTag();	// TABLE
 		}
 
@@ -973,6 +998,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			writer.AddAttribute(HtmlTextWriterAttribute.Class, "innergrid");
 			writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
 			writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+			writer.AddAttribute("onscroll", String.Format("OnScroll(this, '{0}')", _hscrollbarID));
 			string hint = GetHint();
 			if (hint != String.Empty)
 				writer.AddAttribute(HtmlTextWriterAttribute.Title, hint, true);
@@ -1079,6 +1105,15 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		public void MoveTo(int index) 
 		{
 			_dataLink.DataSet.MoveBy(index - _dataLink.ActiveOffset);
+		}
+
+		// IWebPrehandler
+
+		public virtual void PreprocessRequest(HttpContext AContext)
+		{
+			var hscrollbarValue = AContext.Request.Form[_hscrollbarID] as string;
+			if (hscrollbarValue != null)
+				_hscrollbarValue = Single.Parse(hscrollbarValue, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		// IWebHandler
