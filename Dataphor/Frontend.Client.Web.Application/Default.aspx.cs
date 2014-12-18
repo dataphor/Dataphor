@@ -85,15 +85,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web.Application
 				if (imageID != String.Empty)
 					Response.Write(@" background='ViewImage.aspx?ImageID=" + imageID + "'");
 			}
-
-			// handle repositioning of page to same scroll position after submit
-			Response.Write(@" onscroll=""document.getElementById('ScrollPosition').value = MainBody.scrollTop;""");
-
-			string position = Request.Form["ScrollPosition"];
-			if ((position == null) || (position == String.Empty))
-				position = "0";
 			
-			Response.Write(String.Format(@" onload=""OnLoad(document.getElementById('Default'), MainBody, {0});""", Convert.ToInt32(position)));
+			Response.Write(@" onload=""OnLoad(document.getElementById('Default'), MainBody);""");
 		}
 	}
 }

@@ -8,7 +8,6 @@
 		<meta name="vs_defaultClientScript" content="JavaScript">
 		<meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
 		<LINK href="style.css" type="text/css" rel="stylesheet">
-		<script language="JavaScript" src="Default.js"></script>
 	</HEAD>
 	<body MS_POSITIONING="FlowLayout">
 		<form id="Applications" method="post" runat="server">
@@ -28,5 +27,7 @@
 				</tr>
 			</table>
 		</form>
+        <script type="text/javascript" src="jquery-2.1.1.js"></script>
+		<script type="text/javascript" src="Default.js"></script>
 	</body>
 </HTML>

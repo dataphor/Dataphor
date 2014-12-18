@@ -1,4 +1,4 @@
-function OnLoad(AForm, ABody, position)
+function OnLoad(AForm, ABody)
 {
 	var maxWidth = 300;
 	for (var i = 0; i < AForm.children.length; i++)
@@ -11,13 +11,67 @@ function OnLoad(AForm, ABody, position)
 	};
 
 	AForm.setAttribute('style', "width:" + maxWidth + "px; margin:0 auto;");
+	RestoreGridScrollbars();
+}
 
-	ABody.scrollTop = position;
+function RestoreGridScrollbars()
+{
+	$(".grid").each(function (index) {
+		var hscrollbar = $(this).find(".grid-hscrollbar").first();
+		var grid = $(this).find(".innergrid").first();
+		var hscrollbarValue = $(hscrollbar).val();
+		$(grid).scrollLeft(hscrollbarValue);
+	});
 }
 
 function Submit(AUri, AEvent)
 {
-	document.forms[0].action = AUri;
+	if (document.URL.indexOf("Default.aspx", 0) != -1) {
+		$.blockUI({
+			css: {
+				border: 'none',
+				padding: '15px',
+				backgroundColor: '#000',
+				'-webkit-border-radius': '10px',
+				'-moz-border-radius': '10px',
+				opacity: .5,
+				color: '#fff'
+			}
+		});
+
+		var formElement = document.getElementById("Default");
+		var data = new FormData(formElement);
+        $.ajax({
+            type: 'POST',
+            cache: false,
+            contentType: false,
+            processData: false,
+            url: AUri,
+            data: data,
+            success: function (msg, textStatus, jqXHR) {
+				var start = msg.indexOf("<form id=\"Default\"");
+				var end = msg.indexOf("</form>");
+				if (start != -1 && end != -1) {
+					$("#Default").html(msg.substring(start, end));
+					RestoreGridScrollbars();
+				}
+				// check if ajax request was redirected
+				else if (msg.indexOf('id=\"Connect\"') != -1 || msg.indexOf('id=\"Applications\"') != -1)
+					window.location.reload();
+                // set title
+				var titleSt = msg.indexOf("<title>");
+				var titleEnd = msg.indexOf("</title>");
+				if (titleSt != -1 && titleEnd != -1)
+					document.title = msg.substring(titleSt + "<title>".length, titleEnd);
+				$.unblockUI();
+			},
+			error: function (jqXHR, textStatus, errorThrown) {
+				$.unblockUI();
+			}
+		});
+		return;
+	}
+    document.forms[0].action = AUri;
 	if (AEvent != null)
 		AEvent.cancelBubble = true;
 	document.forms[0].submit();
@@ -30,6 +84,11 @@ function NotNull(AInput, AHasValueID, ANotNullClass)
 	AInput.className = ANotNullClass;
 	if (AHasValueID != null)
 		document.getElementById(AHasValueID).value='true'
+}
+
+function OnScroll(AElement, AValueID)
+{
+    document.getElementById(AValueID).value = AElement.scrollLeft;
 }
 
 /* Ratio stretched images */

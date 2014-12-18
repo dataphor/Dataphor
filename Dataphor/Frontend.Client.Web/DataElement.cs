@@ -374,7 +374,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (ReadOnly)
 			{
 				LClass = "readonlytextbox";
-				LStyle += "width: " + Width.ToString() + "ex;";
+				if (Width > 0)  // numeric textboxes have 0 width in View forms, fix it
+					LStyle += "width: " + Width.ToString() + "ex;";
 			}
 			else
 			{
@@ -396,6 +397,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			{
 				// HACK: IE does not recognize foreground colors for disabled controls, so we must use a div rather than a textbox control for read-only
 				AWriter.RenderBeginTag(HtmlTextWriterTag.Div);
+				if (String.IsNullOrEmpty(LValue))
+					AWriter.Write("&nbsp;");    // prevent FF from collapsing height of this div
 				AWriter.Write(HttpUtility.HtmlEncode(FWordWrap ? LValue.Replace("\r\n", " ") : LValue));
 				AWriter.RenderEndTag();
 			}

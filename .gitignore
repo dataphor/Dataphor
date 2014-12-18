@@ -1,0 +1,36 @@
+# Directories / files to exclude from version control
+Dataphor/bin
+Dataphor/*/obj
+Tests/*/obj
+Tests/*/bin
+Libraries/*/Source/obj
+Libraries/Frontend/*.config
+
+Dataphor/Frontend.Client.Web.Application/Aliases.config
+
+*.cache
+*.chw
+
+# files resulting from building
+*.exe
+*.idb
+*.ipch
+*.lastbuildstate
+*.lib
+*.log
+*.obj
+*.pch
+*.pdb
+*.res
+*.dll
+
+# Visual Studio editor files
+*.aps
+*.sdf
+*.tlog
+*.user
+*.ncb
+*.suo
+
+# Xamarin studio editor files
+*.userprefs

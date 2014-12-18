@@ -95,6 +95,8 @@
     <Content Include="images\truereadonly.gif" />
     <Content Include="images\uparrow.gif" />
     <Content Include="images\updateform.png" />
+    <Content Include="jquery-2.1.1.js" />
+    <Content Include="jquery.blockUI.js" />
     <Content Include="style.css" />
     <Content Include="ViewImage.aspx" />
     <Content Include="Web.config" />

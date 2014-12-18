@@ -178,11 +178,11 @@ tr.gridrowcurrent			{ background: #6060AA; }
 td.gridcellcurrent			{ color: white; border-bottom: solid 1px #EEEEEE; border-left: solid 1px #CCCCCC; border-top: solid 1px #EEEEEE; padding: 1px 3px; }
 td.gridcellcurrentnull		{ background: #D0C0FF; border-top: solid 1px #AAAAAA; border-right: solid 1px #000000; padding: 2px; padding-left: 9px; padding-right: 9px; }
 table.grid					{ border: none; color: Aqua; }
-table.innergrid				{ border-right: solid 1px #CCCCCC; }
+table.innergrid				{ max-width: 700px; overflow:auto; border-right: solid 1px #CCCCCC; }
 td.gridnav					{ background: buttonface; border: outset 1px; padding: 1px; cursor: pointer; }
 
 /* Notebook */
-table.notebook				{width:960px; max-width:960px; display:block;}
+table.notebook				{ max-width:960px; display:block;}
 td.notebooktabspacer		{ border-bottom: solid 1px #000000; }
 td.notebooktabspacerright	{ border-left: solid 1px #000000; border-bottom: solid 1px #000000; width: 100%; }
 td.notebooktab				{ cursor:pointer; border-top: solid 1px #000000; border-bottom: solid 1px #000000; border-left: solid 1px #000000; padding: 3px 3px 3px 3px; text-align:center }
