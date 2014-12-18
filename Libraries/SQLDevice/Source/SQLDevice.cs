@@ -5220,6 +5220,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, valueType.Name);
 
 						if (inValues.HasValue(inIndex))
+                        {
 							if (conversionNode == null)
 								parameters[index].Value = scalarType.ParameterFromScalar(program.ValueManager, inValues[inIndex]);
 							else
@@ -5227,6 +5228,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								SetValueNode(conversionNode, inValues.GetValue(inIndex));
 								parameters[index].Value = scalarType.ParameterFromScalar(program.ValueManager, conversionNode.Execute(program));
 							}
+                        }
+                        else
+                            parameters[index].Value = null;
 					break;
 				}
 			}
