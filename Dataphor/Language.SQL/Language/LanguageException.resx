@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="107100">
+		<value>Statement expected.</value>
+	</data>
+	<data name="107101">
+		<value>Expression expected.</value>
+	</data>
+	<data name="107102">
+		<value>Identifier expected.</value>
+	</data>
+	<data name="107103">
+		<value>Instruction expected.</value>
+	</data>
+	<data name="107104">
+		<value>Statement container.</value>
+	</data>
+	<data name="107105">
+		<value>Expression container.</value>
+	</data>
+	<data name="107106">
+		<value>Case item expected.</value>
+	</data>
+	<data name="107107">
+		<value>Else expression expected.</value>
+	</data>
+	<data name="107108">
+		<value>Case item expression container.</value>
+	</data>
+	<data name="107109">
+		<value>ErrorHandler container.</value>
+	</data>
+	<data name="107110">
+		<value>Target expected.</value>
+	</data>
+	<data name="107111">
+		<value>Update column expression container.</value>
+	</data>
+	<data name="107112">
+		<value>Server name expected.</value>
+	</data>
+	<data name="107113">
+		<value>Column expression container.</value>
+	</data>
+	<data name="107114">
+		<value>NamedColumn expression container.</value>
+	</data>
+	<data name="107115">
+		<value>Column name expected.</value>
+	</data>
+	<data name="107116">
+		<value>RenameColumn expression container.</value>
+	</data>
+	<data name="107117">
+		<value>Adorn column expression container.</value>
+	</data>
+	<data name="107118">
+		<value>AggregateColumn expression container.</value>
+	</data>
+	<data name="107119">
+		<value>Aggregate expression "{0}" may only contain expression, column, or aggregate column expressions.</value>
+	</data>
+	<data name="107120">
+		<value>Column name expected in element "{0}".</value>
+	</data>
+	<data name="107121">
+		<value>Table name expected.</value>
+	</data>
+	<data name="107122">
+		<value>Device name expected.</value>
+	</data>
+	<data name="107123">
+		<value>View name expected.</value>
+	</data>
+	<data name="107124">
+		<value>PropertyDefintion container.</value>
+	</data>
+	<data name="107125">
+		<value>PropertyDefintion container.</value>
+	</data>
+	<data name="107126">
+		<value>PropertyDefintion container.</value>
+	</data>
+	<data name="107127">
+		<value>RepresentationDefintion container.</value>
+	</data>
+	<data name="107128">
+		<value>RepresentationDefintion container.</value>
+	</data>
+	<data name="107129">
+		<value>RepresentationDefintion container.</value>
+	</data>
+	<data name="107130">
+		<value>ScalarType special value definition container.</value>
+	</data>
+	<data name="107131">
+		<value>ScalarType special value definition container.</value>
+	</data>
+	<data name="107132">
+		<value>ScalarType special value definition container.</value>
+	</data>
+	<data name="107133">
+		<value>ScalarType name definition container.</value>
+	</data>
+	<data name="107134">
+		<value>ScalarType name expected.</value>
+	</data>
+	<data name="107135">
+		<value>Class definition expected.</value>
+	</data>
+	<data name="107136">
+		<value>Operator name expected.</value>
+	</data>
+	<data name="107137">
+		<value>Type specifier expected.</value>
+	</data>
+	<data name="107138">
+		<value>Class definition expected.</value>
+	</data>
+	<data name="107139">
+		<value>Device map item container.</value>
+	</data>
+	<data name="107140">
+		<value>Device map item container.</value>
+	</data>
+	<data name="107141">
+		<value>Device map item container.</value>
+	</data>
+	<data name="107142">
+		<value>Device map item container.</value>
+	</data>
+	<data name="107143">
+		<value>Device map item container.</value>
+	</data>
+	<data name="107144">
+		<value>Device map item container.</value>
+	</data>
+	<data name="107145">
+		<value>ColumnDefinition container.</value>
+	</data>
+	<data name="107146">
+		<value>AlterColumnDefinition container.</value>
+	</data>
+	<data name="107147">
+		<value>DropColumnDefinition container.</value>
+	</data>
+	<data name="107148">
+		<value>KeyColumnDefinition container.</value>
+	</data>
+	<data name="107149">
+		<value>ReferenceColumnDefinition container.</value>
+	</data>
+	<data name="107150">
+		<value>OrderColumnDefinition container.</value>
+	</data>
+	<data name="107151">
+		<value>KeyDefinition container.</value>
+	</data>
+	<data name="107152">
+		<value>AlterKeyDefinition container.</value>
+	</data>
+	<data name="107153">
+		<value>DropKeyDefinition container.</value>
+	</data>
+	<data name="107154">
+		<value>ReferenceDefinition container.</value>
+	</data>
+	<data name="107155">
+		<value>AlterReferenceDefinition container.</value>
+	</data>
+	<data name="107156">
+		<value>DropReferenceDefinition container.</value>
+	</data>
+	<data name="107157">
+		<value>OrderDefinition container.</value>
+	</data>
+	<data name="107158">
+		<value>AlterOrderDefinition container.</value>
+	</data>
+	<data name="107159">
+		<value>DropOrderDefinition container.</value>
+	</data>
+	<data name="107160">
+		<value>ConstraintDefinition container.</value>
+	</data>
+	<data name="107161">
+		<value>AlterConstraintDefinition container.</value>
+	</data>
+	<data name="107162">
+		<value>DropConstraintDefinition container.</value>
+	</data>
+	<data name="107163">
+		<value>ClassAttributeDefinition container.</value>
+	</data>
+	<data name="107164">
+		<value>Class attribute "{0}" not found.</value>
+	</data>
+	<data name="107165">
+		<value>NamedTypeSpecifier container.</value>
+	</data>
+	<data name="107166">
+		<value>Formal parameter container.</value>
+	</data>
+	<data name="107167">
+		<value>Modified type specifier container.</value>
+	</data>
+	<data name="107168">
+		<value>Delete statement "{0}" may only contain delete, from, and where clauses.</value>
+	</data>
+	<data name="107169">
+		<value>Delete clause expected in delete statement "{0}".</value>
+	</data>
+	<data name="107170">
+		<value>From clause expected in delete statement "{0}".</value>
+	</data>
+	<data name="107171">
+		<value>Select clause "{0}" may only contain column expressions.</value>
+	</data>
+	<data name="107172">
+		<value>Join clause "{0}" may only contain a from clause and a join expression.</value>
+	</data>
+	<data name="107173">
+		<value>From clause expected in join clause "{0}".</value>
+	</data>
+	<data name="107174">
+		<value>From clause "{0}" may only contain join clauses.</value>
+	</data>
+	<data name="107175">
+		<value>Table expression expected in from clause "{0}".</value>
+	</data>
+	<data name="107176">
+		<value>Table alias expected in from clause "{0}".</value>
+	</data>
+	<data name="107177">
+		<value>Join expression expected in join clause "{0}".</value>
+	</data>
+	<data name="107178">
+		<value>Invalid join type in join clause "{0}".</value>
+	</data>
+	<data name="107179">
+		<value>Order clause "{0}" may only contain order field expressions.</value>
+	</data>
+	<data name="107180">
+		<value>Select expression "{0}" may only contain select, from, where, group or having clauses.</value>
+	</data>
+	<data name="107181">
+		<value>Select clause expected in select expression "{0}".</value>
+	</data>
+	<data name="107182">
+		<value>From clause expected in select expression "{0}".</value>
+	</data>
+	<data name="107183">
+		<value>Union expression "{0}" may only contain select expressions.</value>
+	</data>
+	<data name="107184">
+		<value>Select expression expected in union expression "{0}".</value>
+	</data>
+	<data name="107185">
+		<value>Query expression "{0}" may only contain select or union expressions.</value>
+	</data>
+	<data name="107186">
+		<value>Select expression expected in query expression "{0}".</value>
+	</data>
+	<data name="107187">
+		<value>Select statement "{0}" may only contain a query expression or order by clause.</value>
+	</data>
+	<data name="107188">
+		<value>Query expression expected in select statement "{0}".</value>
+	</data>
+	<data name="107189">
+		<value>Insert clause "{0}" may only contain a table expression and insert field expressions.</value>
+	</data>
+	<data name="107190">
+		<value>Insert statement "{0}" may only contain an insert clause and a values expression.</value>
+	</data>
+	<data name="107191">
+		<value>Insert clause expected in insert statement "{0}".</value>
+	</data>
+	<data name="107192">
+		<value>Expression expected in insert statement "{0}".</value>
+	</data>
+	<data name="107193">
+		<value>Update clause "{0}" may only contain a table expression and update field expressions.</value>
+	</data>
+	<data name="107194">
+		<value>Update statement "{0}" may only contain update, from, and where clauses.</value>
+	</data>
+	<data name="107195">
+		<value>Update clause expected in update statement "{0}".</value>
+	</data>
+	<data name="107196">
+		<value>From clause expected in update statement "{0}".</value>
+	</data>
+	<data name="107197">
+		<value>Delete clause "{0}" may only contain a table expression.</value>
+	</data>
+	<data name="107198">
+		<value>Dataphor exception: {0}</value>
+	</data>
+	<data name="107199">
+		<value>Unknown type specifier: "{0}".</value>
+	</data>
+	<data name="107200">
+		<value>Tag reference may not be null.</value>
+	</data>
+	<data name="107201">
+		<value>Invalid operand "{0}".</value>
+	</data>
+	<data name="107202">
+		<value>Unknown statement class "{0}".</value>
+	</data>
+	<data name="107203">
+		<value>Unknown expression class "{0}".</value>
+	</data>
+	<data name="107204">
+		<value>Unknown instruction "{0}".</value>
+	</data>
+	<data name="107205">
+		<value>Named expression "{0}" not found.</value>
+	</data>
+	<data name="107206">
+		<value>Unknown join type "{0}".</value>
+	</data>
+	<data name="107207">
+		<value>Table alias required.</value>
+	</data>
+	<data name="107208">
+		<value>An entry for the given expression was not found.</value>
+	</data>
+	<data name="107209"><value>{0} container.</value></data>
+	<data name="107210"><value>Duplicate language modifier "{0}".</value></data>
+	<data name="107211"><value>Language modifier "{0}" not found.</value></data>
+	<data name="107212"><value>Language modifier "{0}" is ambiguous.</value></data>
+	<data name="107213">
+		<value>Class definition already contains a definition for the attribute "{0}".</value>
+	</data>
+</root>
