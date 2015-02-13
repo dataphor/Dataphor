@@ -12,7 +12,7 @@
     <WixTasksPath>wixtasks.dll</WixTasksPath>
     <SupressIces>ICE45</SupressIces>
     <WixVariables>WixUILicenseRtf=license.rtf</WixVariables>
-    <OutputPath Condition=" '$(OutputPath)' == '' ">$(MSBuildProjectDirectory)\..\..\MSIs</OutputPath>
+    <OutputPath Condition=" '$(OutputPath)' == '' ">$(MSBuildProjectDirectory)\..\MSIs</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>True</DebugSymbols>
@@ -36,8 +36,5 @@
     </WixExtension>
     <Compile Include="Files.wxs" />
     <Compile Include="Setup.wxs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Strings1.wxl" />
   </ItemGroup>
 </Project>

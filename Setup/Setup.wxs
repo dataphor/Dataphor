@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
   <!-- Set Version based on build_number env. variable. -->
@@ -63,7 +63,18 @@
         <ComponentRef Id="WebClientFiles"/>
         <ComponentGroupRef Id="WebClientFilesGroup"/>
 
-        <Feature
+        <!--<Feature
+          Id="WebClientService"
+          Title="Web Client Service"
+          Description="Set Web Client Service to Automatic at System Startup"
+          Display="expand"
+          Level="1">
+
+          <ComponentRef Id="WebClientService"/>
+          </Feature>-->
+        
+
+        <!--<Feature
           Id="WebClientService"
           Title="Web Client Service"
           Description="Set Web Client Service to Automatic at System Startup"
@@ -72,7 +83,7 @@
 
           <ComponentRef Id="WebClientService"/>
           <ComponentRef Id="WebClientServiceNoStart"/>
-        </Feature>
+        </Feature>-->
 
         <!--<Feature
             Id="WebClientService2"
@@ -172,12 +183,6 @@
         <Control Id="Title" Type="Text" X="15" Y="6" Width="210" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.FeaturesDlgTitle)" />
         <Control Id="ItemDescription" Type="Text" X="20" Y="180" Width="330" Height="24" Transparent="yes" NoPrefix="yes" Text="!(loc.FeaturesDlgItemDescription)">
           <Subscribe Event="SelectionDescription" Attribute="Text" />
-        </Control>
-        <!--Service checkbox-->
-        <Control Id="START_SERVICE_BOX" Type="CheckBox" X="260" Y="180" Width="120" Height="10" Property="START_SERVICE" CheckBoxValue="#1" Text="Start Alphora Service"></Control>
-
-        <Control Id="ItemSize" Type="Text" X="20" Y="209" Width="330" Height="24" Transparent="yes" NoPrefix="yes" Text="!(loc.FeaturesDlgItemSize)">
-          <Subscribe Event="SelectionSize" Attribute="Text" />
         </Control>
       </Dialog>
 
