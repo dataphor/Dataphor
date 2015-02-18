@@ -24,6 +24,23 @@
           <Directory Id="Bin" Name="Dataphor">
             <Component Id="BinFiles" Guid="C94BE2EE-E916-4f32-B289-DEA9ED5DD009" DiskId="1">
             </Component>
+			            <Component Id="WebClientService" Guid="3C36E6AE-039B-42d8-8D62-451D612A868E" DiskId="1">
+              <Condition>
+                <![CDATA[START_SERVICE="#1"]]>
+              </Condition>
+              <File Id="id_Bin_DAEService_exe1951188443" Name="DAEService.exe" Source="..\Deploy\Dataphor\DAEService.exe" KeyPath="yes" />
+              <ServiceInstall Id="DataphorServiceInstall" Name="Alphora Dataphor [ShortVersion]" DisplayName="Alphora Dataphor Server [ProductVersion]" Type="ownProcess" Start="auto" ErrorControl="normal" Description="Alphora Dataphor Server" Account="[ServiceAccount]" />
+              <ServiceControl Id="DataphorServiceControl" Name="Alphora Dataphor [ShortVersion]" Start="install" Remove="uninstall" Wait="yes" />
+            </Component>
+
+            <Component Id="WebClientServiceNoStart" Guid="4C36E6AE-039B-42d8-8D62-451D612A868E" DiskId="1">
+              <Condition>
+                <![CDATA[START_SERVICE <> "#1"]]>
+              </Condition>
+              <File Id="id_Bin_DAEService_exe1951188444" Name="DAEService.exe" Source="..\Deploy\Dataphor\DAEService.exe" KeyPath="yes" />
+              <ServiceInstall Id="DataphorServiceInstallNoStart" Name="Alphora Dataphor [ShortVersion]" DisplayName="Alphora Dataphor Server [ProductVersion]" Type="ownProcess" Start="auto" ErrorControl="normal" Description="Alphora Dataphor Server" Account="[ServiceAccount]" />
+              <ServiceControl Id="DataphorServiceControlNoStart" Name="Alphora Dataphor [ShortVersion]" Remove="uninstall" Wait="yes" />
+            </Component>
           </Directory>
           <Directory Id="Libraries" Name="Libraries">
             <Component Id="LibraryFiles" Guid="B8AF005A-94BE-4d9e-8926-4CDD31CA5127" DiskId="1">
