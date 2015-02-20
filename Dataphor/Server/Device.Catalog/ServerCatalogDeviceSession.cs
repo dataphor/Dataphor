@@ -591,7 +591,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			// Search for a positive in the cache first
 			Schema.CatalogObjectHeaders result = Device.NameCache.Resolve(objectName);
 			if (result != null)
-				return true;
+				return result.Count > 0;
 			else
 			{
 				AcquireCatalogStoreConnection(false);
