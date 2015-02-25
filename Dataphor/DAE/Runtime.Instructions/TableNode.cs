@@ -3249,6 +3249,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		#region ShowPlan
 
+		public override Statement EmitStatement(EmitMode mode)
+		{
+			Statement statement = base.EmitStatement(mode);
+			CallExpression callExpression = statement as CallExpression;
+			if ((callExpression != null) && (mode == EmitMode.ForRemote) && (Operator != null) && (!Operator.IsRemotable))
+			{
+				// If we are emitting remote and the operator is not remotable, we have to encode the key information as modifiers
+				// These will be picked up on the client side catalog deserialization by the TableValueToTableVarNode.
+				if (callExpression.Modifiers == null)
+					callExpression.Modifiers = new LanguageModifiers();
+				D4TextEmitter emitter = new D4TextEmitter();
+				callExpression.Modifiers.AddOrUpdate("KeyInfo", emitter.Emit(Compiler.FindClusteringKey(null, _tableVar).EmitStatement(EmitMode.ForCopy)));
+			}
+			return statement;
+		}
+
 		public override string Category
 		{
 			get { return "Table"; }

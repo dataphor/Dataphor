@@ -1373,7 +1373,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (Nodes[0].Modifiers != null)
 			{
 				var keyDefinition = LanguageModifiers.GetModifier(Nodes[0].Modifiers, "KeyInfo", String.Empty);
-				if (keyDefinition != null)
+				if (!String.IsNullOrEmpty(keyDefinition))
 				{
 					_tableVar.Keys.Add(Compiler.CompileKeyDefinition(plan, _tableVar, new Parser().ParseKeyDefinition(keyDefinition)));
 				}
