@@ -6,15 +6,16 @@
   <Product Id="*"
 		Name="Dataphor"
 		Language="1033"
-		Version="3.0.5008"
+		Version="3.0.5534"
     UpgradeCode="B08DF609-D4F8-48CF-9620-A7F65D080EAB"
     Manufacturer="Alphora">
 
 
     <Package Description="Alphora Dataphor"
 			Comments="Installs Dataphor"
-			InstallerVersion="200"
-			Compressed="yes"/>
+			InstallerVersion="300"
+			Compressed="yes"
+      InstallScope="perMachine"/>
 
     <!-- Source media for the installation. Specifies a single cab file to be embedded in the installer's .msi. -->
     <Media Id="1" Cabinet="disk1.cab" EmbedCab="yes" CompressionLevel="high"/>
@@ -32,8 +33,7 @@
       Description="The Main Dataphor Feature"
       Display="expand"
       Level="1">
-
-
+      
       <ComponentRef Id="ConstantShortcuts"/>
       <ComponentRef Id="BinFiles"/>
       <ComponentGroupRef Id="BinFilesGroup"/>
@@ -55,48 +55,14 @@
 
       <Feature
         Id="WebClient"
-        Title="Web Client"
-        Description="Dataphor Web Client Application (Installs as an IIS application)"
+        Title="Dataphor Web Client"
+        Description="Dataphor Web Client Application Files (Does not install the actual site, just the files)"
         Display="expand"
         Level="1">
 
         <ComponentRef Id="WebClientFiles"/>
         <ComponentGroupRef Id="WebClientFilesGroup"/>
-
-        <Feature
-          Id="WebClientService"
-          Title="Web Client Service"
-          Description="Set Web Client Service to Automatic at System Startup"
-          Display="expand"
-          Level="1">
-
-          <ComponentRef Id="WebClientService"/>
-          <ComponentRef Id="WebClientServiceNoStart"/>
-        </Feature>
-
-        <!--<Feature
-            Id="WebClientService2"
-            Title="Web Client Service"
-            Description="Set Web Client Service to Automatic at System Startup"
-            Display="expand"
-            Level="1">
-          <Condition Level="1"><![CDATA[NOT START_SERVICE_BOX = 0]]></Condition>
-
-          <ComponentRef Id="WebClientService2"/>
-
-
-        </Feature>-->
-
       </Feature>
-
-      <!--<Feature
-        Id="WebRegistration"
-        Title="Online Registration"
-        Description="Allows user to register online"
-        Display="expand"
-        Level="1">
-
-      </Feature>-->
 
     </Feature>
 
@@ -117,7 +83,6 @@
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
         <Control Id="Description" Type="Text" X="135" Y="80" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.WelcomeDlgDescription)" />
         <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.WelcomeDlgTitle)" />
-        <Control Id="START_SERVICE_BOX" Type="CheckBox" X="20" Y="148" Width="80" Height="10" Property="START_SERVICE" CheckBoxValue="#1" Text="Start Alphora Service"></Control>
 
       </Dialog>-->
 
@@ -173,9 +138,6 @@
         <Control Id="ItemDescription" Type="Text" X="20" Y="180" Width="330" Height="24" Transparent="yes" NoPrefix="yes" Text="!(loc.FeaturesDlgItemDescription)">
           <Subscribe Event="SelectionDescription" Attribute="Text" />
         </Control>
-        <!--Service checkbox-->
-        <Control Id="START_SERVICE_BOX" Type="CheckBox" X="260" Y="180" Width="120" Height="10" Property="START_SERVICE" CheckBoxValue="#1" Text="Start Alphora Service"></Control>
-
         <Control Id="ItemSize" Type="Text" X="20" Y="209" Width="330" Height="24" Transparent="yes" NoPrefix="yes" Text="!(loc.FeaturesDlgItemSize)">
           <Subscribe Event="SelectionSize" Attribute="Text" />
         </Control>
@@ -198,7 +160,6 @@
       <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
       <Property Id="PIDTemplate" Value="####-####-####-####" />
       <Property Id="ARPNOMODIFY" Value="1" />
-      <!--<Property Id="START_SERVICE" Value="1" />-->
 
 
       <DialogRef Id="BrowseDlg" />
@@ -223,7 +184,6 @@
       <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
       <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
       <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="FeaturesDlg2" Order="2">1</Publish>
-      <!--<Publish Dialog="InstallDirDlg" Control="START_SERVICE_BOX" Event="NewDialog" Value="FeaturesDlg" Order="2">1</Publish>-->
 
       <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
       <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
