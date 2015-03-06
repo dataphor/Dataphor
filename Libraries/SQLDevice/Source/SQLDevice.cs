@@ -5449,7 +5449,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				_sQLDevice = SQLDeviceUtility.ResolveSQLDevice(plan, deviceName);
 				deviceSession = plan.DeviceConnect(_sQLDevice) as SQLDeviceSession;
 				_conversionNodes = inRowType == null ? new PlanNode[0] : new PlanNode[inRowType.Columns.Count];
-				_parameters = SQLExecuteNode.PrepareParameters(plan, _sQLDevice, _statement, inRowType, outRowType, _conversionNodes);
+				_planParameters = SQLExecuteNode.PrepareParameters(plan, _sQLDevice, _statement, inRowType, outRowType, _conversionNodes);
 			}
 			
 			if (tableType == String.Empty)
@@ -5458,7 +5458,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					deviceSession.Connection.Open
 					(
 						_statement, 
-						_parameters, 
+						_planParameters, 
 						SQLTable.CursorTypeToSQLCursorType(CursorType), 
 						SQLIsolationLevel.ReadUncommitted,
 						SQLCommandBehavior.SchemaOnly | (keyDefinition == String.Empty ? SQLCommandBehavior.KeyInfo : SQLCommandBehavior.Default)
@@ -5494,7 +5494,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							deviceSession.Connection.Open
 							(
 								_statement,
-								_parameters,
+								_planParameters,
 								SQLTable.CursorTypeToSQLCursorType(CursorType),
 								SQLIsolationLevel.ReadUncommitted,
 								SQLCommandBehavior.Default
@@ -5586,11 +5586,17 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		private SQLDevice _sQLDevice;
 		private string _statement;		
 		private PlanNode[] _conversionNodes;
-		private SQLParameters _parameters;
+		private SQLParameters _planParameters;
 		private SQLTableColumns _sQLColumns;
-		
+
 		public override object InternalExecute(Program program)
 		{
+			var parameters = new SQLParameters();
+			foreach (var parameter in _planParameters)
+			{
+				parameters.Add(new SQLParameter(parameter.Name, parameter.Type, parameter.Value, parameter.Direction, parameter.Marker, parameter.Literal));
+			}
+
 			long startTicks = TimingUtility.CurrentTicks;
 			try
 			{
@@ -5615,7 +5621,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				}
 
 				SQLDeviceSession deviceSession = program.DeviceConnect(_sQLDevice) as SQLDeviceSession;				
-				SQLExecuteNode.GetParameters(program, _sQLDevice, _parameters, inValues, _conversionNodes);
+				SQLExecuteNode.GetParameters(program, _sQLDevice, parameters, inValues, _conversionNodes);
 				
 				LocalTable result = new LocalTable(this, program);
 				try
@@ -5633,14 +5639,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								deviceSession.Connection.Open
 								(
 									_statement, 
-									_parameters, 
+									parameters, 
 									SQLTable.CursorTypeToSQLCursorType(CursorType), 
 									SQLTable.CursorIsolationToSQLIsolationLevel(CursorIsolation, program.ServerProcess.CurrentIsolationLevel()), 
 									SQLCommandBehavior.Default
 								)
 						)
 						{
-							SQLExecuteNode.SetParameters(program, _sQLDevice, _parameters, outValues);
+							SQLExecuteNode.SetParameters(program, _sQLDevice, parameters, outValues);
 							
 							while (cursor.Next())
 							{
