@@ -12,7 +12,7 @@ using System.Windows.Forms;
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
 	/// <summary> ApplicationListForm </summary>
-	public class ApplicationListForm : BaseForm
+	public class ApplicationListForm : DialogForm
 	{
 		private Alphora.Dataphor.DAE.Client.DataSource _dataSource;
 		private Label uriLabel;
