@@ -1261,9 +1261,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		{ 
 			get
 			{ 
-				if ((index < 0) || (index >= Count))
+				try
+				{
+					return _items[index];
+				}
+				catch (IndexOutOfRangeException e)
+				{
 					throw new SchemaException(SchemaException.Codes.IndexOutOfRange, index);
-				return _items[index];
+				}
 			} 
 			set
 			{ 
