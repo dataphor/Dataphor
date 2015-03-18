@@ -61,7 +61,7 @@
 
     <DirectoryRef Id="ApplicationProgramsFolder">
       <Component Id="ConstantShortcuts" Guid="2a133910-c2f3-4fbf-8458-f1e203744ac5">
-        <Shortcut Id="Dataphoria" Name="Dataphoria.exe" Target="[#id_Bin_Dataphoria_exe2087252942]" WorkingDirectory="APPLICATIONROOTDIRECTORY" />
+        <Shortcut Id="Dataphoria" Name="Dataphoria" Target="[#id_Bin_Dataphoria_exe2087252942]" WorkingDirectory="APPLICATIONROOTDIRECTORY" />
         <Shortcut Id="ServiceConfigurationUtility" Name="Service Configuration Utility" Target="[#id_Bin_DAEConfigUtil_exe3695071022]" WorkingDirectory="APPLICATIONROOTDIRECTORY" />
         <Shortcut Id="DataphorWindowsClient" Name="Dataphor Windows Client" Target="[#id_Bin_WindowsClient_exe1400490563]" WorkingDirectory="APPLICATIONROOTDIRECTORY" />
         <Shortcut Id="UninstallDataphor" Name="Uninstall Alphora Dataphor" Target="[SystemFolder]msiexec.exe" Arguments="/x [ProductCode]" />
