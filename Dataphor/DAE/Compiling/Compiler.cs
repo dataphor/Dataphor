@@ -14172,7 +14172,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			return columnName;
 		}
 		
-		private static void AddTemporaryColumn(NamedColumnExpressions addExpressions, RenameColumnExpressions renameExpressions, ColumnExpressions projectExpressions, List<string> projectNames, NamedColumnExpression localExpression)
+		private static void AddTemporaryColumn(NamedColumnExpressions addExpressions, RenameColumnExpressions renameExpressions, ColumnExpressions projectExpressions, List<string> projectNames, NamedColumnExpression localExpression, string resultColumnAlias)
 		{
 			string columnAlias = Schema.Object.GetUniqueName();
 			NamedColumnExpression addExpression = new NamedColumnExpression(localExpression.Expression, columnAlias, localExpression.MetaData);
@@ -14184,7 +14184,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			projectExpression.LinePos = localExpression.LinePos;
 			projectExpressions.Add(projectExpression);
 			projectNames.Add(columnAlias);
-			RenameColumnExpression renameExpression = new RenameColumnExpression(columnAlias, localExpression.ColumnAlias);
+			RenameColumnExpression renameExpression = new RenameColumnExpression(columnAlias, resultColumnAlias);
 			renameExpression.Line = localExpression.Line;
 			renameExpression.LinePos = localExpression.LinePos;
 			renameExpressions.Add(renameExpression);
@@ -14260,7 +14260,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 					{
 						if (projectNames.Contains(sourceColumns[identifierExpression.Identifier].Name))
 						{
-							AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression);
+							AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression, localExpression.ColumnAlias == String.Empty ? identifierExpression.Identifier : localExpression.ColumnAlias);
 						}
 						else
 						{
@@ -14275,7 +14275,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						{
 							if (sourceColumns.ContainsName(localExpression.ColumnAlias))
 							{
-								AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression);
+								AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression, localExpression.ColumnAlias);
 							}
 							else
 							{
@@ -14306,7 +14306,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				{
 					if (sourceColumns.ContainsName(localExpression.ColumnAlias))
 					{
-						AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression);
+						AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression, localExpression.ColumnAlias);
 					}
 					else
 					{
