@@ -15,11 +15,11 @@ namespace Alphora.Dataphor.DAE.Listener
 {
 	public class ListenerClient : DataphorServiceClient<IClientListenerService>
 	{
-		public ListenerClient(string hostName, int overridePortNumber) : base(DataphorServiceUtility.BuildListenerURI(hostName, overridePortNumber)) 
+		public ListenerClient(string hostName, int overridePortNumber) : base(new Uri(DataphorServiceUtility.BuildListenerURI(hostName, overridePortNumber))) 
 		{ 
 			_hostName = hostName;
 		}
-		
+
 		private string _hostName;
 		public string HostName { get { return _hostName; } }
 		

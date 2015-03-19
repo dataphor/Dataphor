@@ -19,18 +19,21 @@ namespace Alphora.Dataphor.DAE.Service
 {
 	public class ListenerServiceHost : IDisposable
 	{
-		public ListenerServiceHost(int overridePortNumber, bool requireSecureConnection, bool useCrossDomainService)
+		public ListenerServiceHost(int overridePortNumber, bool requireSecureConnection, bool useCrossDomainService, bool useServiceConfiguration)
 		{
 			int listenerPort = overridePortNumber == 0 ? DataphorServiceUtility.DefaultListenerPortNumber : overridePortNumber;
 				
 			_listenerHost = new ServiceHost(typeof(ListenerService));
-			
-			_listenerHost.AddServiceEndpoint
-			(
-				typeof(IListenerService), 
-				DataphorServiceUtility.GetBinding(), 
-				DataphorServiceUtility.BuildListenerURI(Environment.MachineName, listenerPort)
-			);	 
+
+			if (!useServiceConfiguration)
+			{
+				_listenerHost.AddServiceEndpoint
+				(
+					typeof(IListenerService), 
+					DataphorServiceUtility.GetBinding(), 
+					DataphorServiceUtility.BuildListenerURI(Environment.MachineName, listenerPort)
+				);	 
+			}
 
 			try
 			{

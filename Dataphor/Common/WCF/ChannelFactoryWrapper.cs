@@ -19,6 +19,22 @@ namespace Alphora.Common.WCF
 	/// <typeparam name="TChannel">The type of the service interface.</typeparam>
 	internal class ChannelFactoryWrapper<TChannel> : IDisposable
 	{
+		public ChannelFactoryWrapper(string endpointConfigurationName, ChannelFactory<TChannel> channelFactory)
+		{
+			if (String.IsNullOrEmpty(endpointConfigurationName))
+			{
+				throw new ArgumentNullException("endpointConfigurationName");
+			}
+
+			if (channelFactory == null)
+			{
+				throw new ArgumentNullException("channelFactory");
+			}
+
+			_endpointConfigurationName = endpointConfigurationName;
+			_channelFactory = channelFactory;
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the ChannelFactoryWrapper class.
 		/// </summary>
@@ -45,6 +61,12 @@ namespace Alphora.Common.WCF
 		/// Gets the endpoint descriptor for the channel factory.
 		/// </summary>
 		public EndpointDescriptor Descriptor { get { return _descriptor; } }
+
+		private String _endpointConfigurationName;
+		/// <summary>
+		/// Gets the name of the endpoint configuration used by the channel factory.
+		/// </summary>
+		public String EndpointConfigurationName { get { return _endpointConfigurationName; } }
 
 		private ChannelFactory<TChannel> _channelFactory;
 		/// <summary>

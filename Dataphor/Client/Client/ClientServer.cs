@@ -35,6 +35,30 @@ namespace Alphora.Dataphor.DAE.Client
 			
 			Open();
 		}
+
+		public ClientServer(string hostName, string clientConfigurationName)
+		{
+			_hostName = hostName;
+			_clientConfigurationName = clientConfigurationName;
+
+			#if SILVERLIGHT
+			System.Net.WebRequest.RegisterPrefix("http://", System.Net.Browser.WebRequestCreator.ClientHttp);
+			System.Net.WebRequest.RegisterPrefix("https://", System.Net.Browser.WebRequestCreator.ClientHttp);
+			#endif
+			
+			Open();
+		}
+
+		private string _clientConfigurationName;
+		public string ClientConfigurationName
+		{
+			get { return _clientConfigurationName; }
+			set
+			{
+				CheckInactive();
+				_clientConfigurationName = value;
+			}
+		}
 		
 		private string _hostName;
 		public string HostName
@@ -121,25 +145,34 @@ namespace Alphora.Dataphor.DAE.Client
 		public void Open()
 		{
 			if (!IsActive)
-				if (_overridePortNumber == 0)
+			{
+				if (!String.IsNullOrEmpty(_clientConfigurationName))
 				{
-					Uri uri = new Uri(ListenerFactory.GetInstanceURI(_hostName, _overrideListenerPortNumber, _instanceName));
-					_channelFactory =
-						new ChannelFactory<IClientDataphorService>
-						(
-							DataphorServiceUtility.GetBinding(), 
-							new EndpointAddress(uri)
-						);
+					_channelFactory = new ChannelFactory<IClientDataphorService>(_clientConfigurationName);
 				}
 				else
 				{
-					_channelFactory = 
-						new ChannelFactory<IClientDataphorService>
-						(
-							DataphorServiceUtility.GetBinding(), 
-							new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(_hostName, _overridePortNumber, _instanceName))
-						);
+					if (_overridePortNumber == 0)
+					{
+						Uri uri = new Uri(ListenerFactory.GetInstanceURI(_hostName, _overrideListenerPortNumber, _instanceName));
+						_channelFactory =
+							new ChannelFactory<IClientDataphorService>
+							(
+								DataphorServiceUtility.GetBinding(), 
+								new EndpointAddress(uri)
+							);
+					}
+					else
+					{
+						_channelFactory = 
+							new ChannelFactory<IClientDataphorService>
+							(
+								DataphorServiceUtility.GetBinding(), 
+								new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(_hostName, _overridePortNumber, _instanceName))
+							);
+					}
 				}
+			}
 		}
 		
 		public void Close()
