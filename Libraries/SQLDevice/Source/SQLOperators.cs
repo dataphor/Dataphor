@@ -820,15 +820,18 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 				ConditionedTableNode conditionedTableNode = (ConditionedTableNode)planNode;
 
-				// if any column in the left join key is a computed column in the current query context, the left argument must nested
+				// if any column in the left join key is a computed or renamed column in the current query context, the left argument must be nested
 				bool isLeftKeyColumnComputed = false;
 				foreach (TableVarColumn leftKeyColumn in conditionedTableNode.LeftKey.Columns)
-					if (localDevicePlan.GetRangeVarColumn(leftKeyColumn.Name, true).Expression != null)
+				{
+					var leftKeyRangeVarColumn = localDevicePlan.GetRangeVarColumn(leftKeyColumn.Name, true);
+					if (leftKeyRangeVarColumn.Expression != null || (leftKeyRangeVarColumn.Alias != null && leftKeyRangeVarColumn.Alias != leftKeyRangeVarColumn.ColumnName))
 					{
 						isLeftKeyColumnComputed = true;
 						break;
 					}
-				
+				}
+
 				if 
 				(
 					localDevicePlan.CurrentQueryContext().IsAggregate || 
@@ -847,7 +850,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				{
 					string nestingReason = "The left argument to the join operator must be nested because ";
 					if (isLeftKeyColumnComputed)
-						nestingReason += "the join condition columns in the left argument are computed.";
+						nestingReason += "the join condition columns in the left argument are computed or renamed.";
 					else if (planNode is RightOuterJoinNode)
 					{
 						if (leftSelectExpression.WhereClause != null)
@@ -896,14 +899,17 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							2. Or, the DAE could always produce left-deep join trees, resulting in correct translation in all cases.
 					*/
 
-					// if any column in the left join key is a computed column in the current query context, the left argument must nested
+					// if any column in the right join key is a computed or renamed column in the current query context, the right argument must be nested
 					bool isRightKeyColumnComputed = false;
 					foreach (TableVarColumn rightKeyColumn in conditionedTableNode.RightKey.Columns)
-						if (localDevicePlan.GetRangeVarColumn(rightKeyColumn.Name, true).Expression != null)
+					{
+						var rightKeyRangeVarColumn = localDevicePlan.GetRangeVarColumn(rightKeyColumn.Name, true);
+						if (rightKeyRangeVarColumn.Expression != null || (rightKeyRangeVarColumn.Alias != null && rightKeyRangeVarColumn.Alias != rightKeyRangeVarColumn.ColumnName))
 						{
 							isRightKeyColumnComputed = true;
 							break;
 						}
+					}
 					
 					bool isRightDeep = (!(planNode is OuterJoinNode) && !(planNode is WithoutNode) && !leftSelectExpression.FromClause.HasJoins() && rightSelectExpression.FromClause.HasJoins());
 					bool isBushy = (!(planNode is OuterJoinNode) && leftSelectExpression.FromClause.HasJoins() && rightSelectExpression.FromClause.HasJoins());
@@ -926,7 +932,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					{
 						string nestingReason = "The right argument to the join operator must be nested because ";
 						if (isRightKeyColumnComputed)
-							nestingReason += "the join condition columns in the right argument are computed.";
+							nestingReason += "the join condition columns in the right argument are computed or renamed.";
 						else if ((planNode is LeftOuterJoinNode) || (planNode is WithoutNode))
 						{
 							if (rightSelectExpression.WhereClause != null)
