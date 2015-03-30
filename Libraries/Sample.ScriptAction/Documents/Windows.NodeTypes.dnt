@@ -1,0 +1,6 @@
+	<namespace name="System.Xml" assembly="System.Xml">
+		<nodetype name="XmlReader"/>
+	</namespace>
+	<namespace name="System.Runtime.Serialization.Json" assembly="System.Runtime.Serialization">
+		<nodetype name="DataContractJsonSerializer"/>
+	</namespace>
