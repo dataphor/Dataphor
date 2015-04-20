@@ -183,6 +183,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         protected Schema.TranslationMessages _deviceMessages;
         public Schema.TranslationMessages DeviceMessages { get { return _deviceMessages; } }
         
+		public void ClearDeviceSubNodes()
+		{
+			if (_nodes != null)
+			{
+				for (int index = 0; index < _nodes.Count; index++)
+				{
+					_nodes[index].ClearDeviceNode();
+				}
+			}
+		}
+
+		public virtual void ClearDeviceNode()
+		{
+			this._deviceNode = null;
+		}
+
 		// DetermineDevice
 		public virtual void DetermineDevice(Plan plan)
 		{
@@ -195,12 +211,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
             _noDevice = !ShouldSupport;
             
             if (_nodes != null)
-				for (int index = 0; index < Nodes.Count; index++)
+				for (int index = 0; index < _nodes.Count; index++)
 				{
-					_noDevice = _noDevice || Nodes[index].NoDevice;
+					_noDevice = _noDevice || _nodes[index].NoDevice;
 					if (!_noDevice)
 					{
-						childDevice = Nodes[index].Device;
+						childDevice = _nodes[index].Device;
 						if (childDevice != null)
 						{
 							if (currentChildDevice == null)
@@ -236,6 +252,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// device will not be asked to perform a useless parameterization.
 						_deviceSupported = !_couldSupport;
 						plan.AddDevicePlan(devicePlan);
+
+						// Remove device plan nodes from prepared sub nodes to reduce memory usage of prepared plans
+						ClearDeviceSubNodes();
 					}
 					else
 					{
