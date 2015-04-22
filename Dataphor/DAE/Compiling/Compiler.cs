@@ -4593,7 +4593,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		protected static ClassDefinition DefaultSelector()
 		{
-			return new ClassDefinition("System.ScalarSelectorNode");
+			return new ClassDefinition("System.ValidatingScalarSelectorNode");
 		}
 		
 		protected static ClassDefinition DefaultCompoundSelector()
@@ -4613,7 +4613,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		protected static ClassDefinition DefaultWriteAccessor()
 		{
-			return new ClassDefinition("System.ScalarWriteAccessorNode");
+			return new ClassDefinition("System.ValidatingScalarWriteAccessorNode");
 		}
 		
 		protected static ClassDefinition DefaultCompoundWriteAccessor(string propertyName)
@@ -5343,6 +5343,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						
 						Schema.Operator operatorValue;
 
+						// Host-Implemented representations
 						foreach (RepresentationDefinition representationDefinition in localStatement.Representations)
 							if (!representationDefinition.HasD4ImplementedComponents())
 								CompileRepresentation(plan, node.ScalarType, operators, representationDefinition);
@@ -5442,7 +5443,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						plan.Catalog.OperatorResolutionCache.Clear(node.ScalarType, node.ScalarType);
 						try
 						{
-							// Host-Implemented representations
+							// D4-Implemented representations
 							foreach (RepresentationDefinition representationDefinition in localStatement.Representations)
 								if (representationDefinition.HasD4ImplementedComponents())
 									CompileRepresentation(plan, node.ScalarType, operators, representationDefinition);
