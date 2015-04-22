@@ -4663,9 +4663,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Operator CompileSpecialOperator(Plan plan, Schema.ScalarType scalarType)
 		{
-			// create an operator of the form <library name>.IsSpecial(AValue : <scalar type name>) : boolean
+			// create an operator of the form <scalar type name qualifier>.IsSpecial(AValue : <scalar type name>) : boolean
 			// Compile IsSpecial operator (result := Parent.IsSpecial(AValue) or AValue = Special1Value or AValue = Special2Value...)
-			Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(IsSpecialOperatorName, scalarType.Library.Name));
+			Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(IsSpecialOperatorName, Schema.Object.Qualifier(scalarType.Name)));
 			operatorValue.IsGenerated = true;
 			operatorValue.Generator = scalarType;
 			operatorValue.Operands.Add(new Schema.Operand(operatorValue, "AValue", scalarType, Modifier.Const));
@@ -4790,8 +4790,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Operator CompileSpecialComparer(Plan plan, Schema.ScalarType scalarType, Schema.Special special, string specialName, PlanNode valueNode)
 		{
-			// Create an operator of the form <library name>.Is<special name>(const AValue : <scalar type name>) : Boolean as a comparison operator for the given special
-			Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(String.Format("{0}{1}", IsSpecialComparerPrefix, specialName), scalarType.Library.Name));
+			// Create an operator of the form <scalar type name qualifier>.Is<special name>(const AValue : <scalar type name>) : Boolean as a comparison operator for the given special
+			Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(String.Format("{0}{1}", IsSpecialComparerPrefix, specialName), Schema.Object.Qualifier(scalarType.Name)));
 			operatorValue.IsGenerated = true;
 			operatorValue.Generator = special;
 			plan.PushCreationObject(operatorValue);
