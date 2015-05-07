@@ -143,7 +143,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDevice(Plan plan)
 		{
 			base.DetermineDevice(plan);
-			if (!_deviceSupported)
+			if (!DeviceSupported)
 			{
 				_differenceAlgorithm = typeof(SearchedDifferenceTable);
 				// ensure that the right side is a searchable node

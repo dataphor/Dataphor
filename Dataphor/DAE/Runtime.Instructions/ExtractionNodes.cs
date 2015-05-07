@@ -60,17 +60,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineCharacteristics(Plan plan)
 		{
-			_isLiteral = true;
-			_isFunctional = true;
-			_isDeterministic = true;
-			_isRepeatable = true;
-			_isNilable = true;
+			IsLiteral = true;
+			IsFunctional = true;
+			IsDeterministic = true;
+			IsRepeatable = true;
+			IsNilable = true;
 			for (int index = 0; index < NodeCount; index++)
 			{
-				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
-				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
-				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
-				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
+				IsLiteral = IsLiteral && Nodes[index].IsLiteral;
+				IsFunctional = IsFunctional && Nodes[index].IsFunctional;
+				IsDeterministic = IsDeterministic && Nodes[index].IsDeterministic;
+				IsRepeatable = IsRepeatable && Nodes[index].IsRepeatable;
 			} 
 		}
 		
@@ -138,17 +138,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{		
 		public override void DetermineCharacteristics(Plan plan)
 		{
-			_isLiteral = true;
-			_isFunctional = true;
-			_isDeterministic = true;
-			_isRepeatable = true;
-			_isNilable = true;
+			IsLiteral = true;
+			IsFunctional = true;
+			IsDeterministic = true;
+			IsRepeatable = true;
+			IsNilable = true;
 			for (int index = 0; index < NodeCount; index++)
 			{
-				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
-				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
-				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
-				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
+				IsLiteral = IsLiteral && Nodes[index].IsLiteral;
+				IsFunctional = IsFunctional && Nodes[index].IsFunctional;
+				IsDeterministic = IsDeterministic && Nodes[index].IsDeterministic;
+				IsRepeatable = IsRepeatable && Nodes[index].IsRepeatable;
 			} 
 		}
 		

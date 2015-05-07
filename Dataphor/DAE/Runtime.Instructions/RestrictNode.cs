@@ -772,7 +772,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDevice(Plan plan)
 		{
 			base.DetermineDevice(plan);
-			if (!_deviceSupported)
+			if (!DeviceSupported)
 			{
 				DetermineRestrictionAlgorithm(plan);
 				if (_restrictionAlgorithm.Equals(typeof(ScanTable)))

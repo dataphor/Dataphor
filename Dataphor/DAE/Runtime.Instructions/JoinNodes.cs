@@ -736,7 +736,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDevice(Plan plan)
 		{
 			base.DetermineDevice(plan);
-			if (!_deviceSupported)
+			if (!DeviceSupported)
 				DetermineSemiTableAlgorithm(plan);
 		}
 		
@@ -1976,7 +1976,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDevice(Plan plan)
 		{
 			base.DetermineDevice(plan);
-			if (!_deviceSupported)
+			if (!DeviceSupported)
 				DetermineJoinAlgorithm(plan);
 		}
 		

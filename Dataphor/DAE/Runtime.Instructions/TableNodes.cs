@@ -1195,16 +1195,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineCharacteristics(Plan plan)
 		{
-			_isLiteral = true;
-			_isFunctional = true;
-			_isDeterministic = true;
-			_isRepeatable = true;
+			IsLiteral = true;
+			IsFunctional = true;
+			IsDeterministic = true;
+			IsRepeatable = true;
 			for (int index = 0; index < NodeCount; index++)
 			{
-				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
-				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
-				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
-				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
+				IsLiteral = IsLiteral && Nodes[index].IsLiteral;
+				IsFunctional = IsFunctional && Nodes[index].IsFunctional;
+				IsDeterministic = IsDeterministic && Nodes[index].IsDeterministic;
+				IsRepeatable = IsRepeatable && Nodes[index].IsRepeatable;
 			} 
 			_tableVar.DetermineRemotable(plan.CatalogDeviceSession);
 			_tableVar.Owner = plan.User;
@@ -1457,10 +1457,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineCharacteristics(Plan plan)
 		{
-			_isLiteral = false;
-			_isFunctional = true;
-			_isDeterministic = true;
-			_isRepeatable = true;
+			IsLiteral = false;
+			IsFunctional = true;
+			IsDeterministic = true;
+			IsRepeatable = true;
 			_tableVar.DetermineRemotable(plan.CatalogDeviceSession);
 
 			/*
@@ -1828,7 +1828,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice, _device.Name, _tableVar.DisplayName);
 
 				plan.AddDevicePlan(devicePlan);
-				_deviceSupported = true;
+				DeviceSupported = true;
 				CheckDeviceRights(plan);
 				if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
 				{
@@ -1838,7 +1838,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_symbols = Compiler.SnapshotSymbols(plan);
 			}
 			else
-				_noDevice = true;
+				NoDevice = true;
 		}
 		
 		protected void CheckDeviceRights(Plan plan)
@@ -2485,7 +2485,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineDevice(Plan plan)
 		{
-			_noDevice = true;
+			NoDevice = true;
 		}
 
 		public override Statement EmitStatement(EmitMode mode)

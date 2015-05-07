@@ -494,7 +494,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public SystemBinaryReadAccessorNode() : base()
 		{
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
 		
 		public override object InternalExecute(Program program, object argument1)
@@ -520,7 +520,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
     }
     
@@ -561,13 +561,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public SystemGuidReadAccessorNode() : base()
 		{
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
 		
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
 
 		public override object InternalExecute(Program program, object argument1)
@@ -628,13 +628,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public ScalarReadAccessorNode() : base()
 		{
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
 		
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
 		
 		public override object InternalExecute(Program program, object argument1)
@@ -793,7 +793,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isNilable = false;
+			IsNilable = false;
 		}
 
 		public override object InternalExecute(Program program, object argument1)
@@ -808,7 +808,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isNilable = false;
+			IsNilable = false;
 		}
 
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -828,7 +828,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isNilable = false;
+			IsNilable = false;
 		}
 
 		public override object InternalExecute(Program program, object argument1)
@@ -843,7 +843,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isNilable = false;
+			IsNilable = false;
 		}
 
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -863,7 +863,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isNilable = Nodes[1].IsNilable;
+			IsNilable = Nodes[1].IsNilable;
 		}
 
 		public override void DetermineDataType(Plan plan)

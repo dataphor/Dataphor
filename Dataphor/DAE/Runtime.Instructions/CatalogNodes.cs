@@ -82,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public SystemNameReadAccessorNode() : base()
 		{
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
 		
 		public override object InternalExecute(Program program, object argument1)
@@ -98,7 +98,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
     }
     

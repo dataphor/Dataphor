@@ -30,42 +30,13 @@ using Schema = Alphora.Dataphor.DAE.Schema;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	public class TestNode : NilaryInstructionNode
-	{
-		public TestNode() : base()
-		{
-			ShouldEmitIL = true;
-		}
-		
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{
-			generator.Emit(OpCodes.Ldstr, "IL Generated exception");
-			generator.Emit(OpCodes.Newobj, typeof(Exception).GetConstructor(new Type[] { typeof(String) }));
-			generator.Emit(OpCodes.Throw);
-		}
-
-		public override object NilaryInternalExecute(Program program)
-		{
-			throw new NotImplementedException();
-		}
-	}
-
 	public class BlockNode : PlanNode
 	{
 		public BlockNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 		
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{	
-			int[] localExecutePath = PrepareExecutePath(plan, executePath);
-			
-			for (int index = 0; index < NodeCount; index++)
-				EmitExecute(plan, generator, localExecutePath, index);
-		}
-
 		public override object InternalExecute(Program program)
 		{
 			for (int index = 0; index < NodeCount; index++)
@@ -96,7 +67,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public DelimitedBlockNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 		
@@ -105,14 +75,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			for (int index = 0; index < NodeCount; index++)
 				Nodes[index].Execute(program);
 			return null;
-		}
-
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{	
-			int[] localExecutePath = PrepareExecutePath(plan, executePath);
-			
-			for (int index = 0; index < NodeCount; index++)
-				EmitExecute(plan, generator, localExecutePath, index);
 		}
 
 		public override Statement EmitStatement(EmitMode mode)
@@ -133,7 +95,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public FrameNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 		
@@ -150,27 +111,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{	
-			int[] localExecutePath = PrepareExecutePath(plan, executePath);
-			
-			// Call AProcess.Context.PushFrame();
-			generator.Emit(OpCodes.Ldarg_1);
-			generator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			generator.Emit(OpCodes.Call, typeof(Stack).GetMethod("PushFrame", new Type[] { }));
-			generator.BeginExceptionBlock();
-			
-			EmitExecute(plan, generator, localExecutePath, 0);
-
-			// Call AProcess.Context.PopFrame()				
-			generator.BeginFinallyBlock();
-			generator.Emit(OpCodes.Ldarg_1);
-			generator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			generator.Emit(OpCodes.Call, typeof(Stack).GetMethod("PopFrame"));
-				
-			generator.EndExceptionBlock();
-		}
-
 		public override object InternalExecute(Program program)
 		{
 			program.Stack.PushFrame();
@@ -195,22 +135,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public ExpressionStatementNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 		
 		public ExpressionStatementNode(PlanNode node) : base()
 		{
-			ShouldEmitIL = true;
 			Nodes.Add(node);
 		}
 		
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{	
-			int[] localExecutePath = PrepareExecutePath(plan, executePath);
-			EmitExecute(plan, generator, localExecutePath, 0);			
-		}
-
 		public override object InternalExecute(Program program)
 		{
 			object objectValue = Nodes[0].Execute(program);
@@ -238,14 +170,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public ExitNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
-		}
-
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{
-			generator.Emit(OpCodes.Newobj, typeof(ExitError).GetConstructor(new Type[] { }));
-			generator.Emit(OpCodes.Throw);
 		}
 
 		public override object InternalExecute(Program program)
@@ -263,57 +188,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public WhileNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 
-/*
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
-		{
-			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
-			
-			AGenerator.BeginExceptionBlock();
-			
-			Label LLoop = AGenerator.DefineLabel();
-			Label LAfterLoop = AGenerator.DefineLabel();
-			LocalBuilder LResult = AGenerator.DeclareLocal(typeof(DataValue));
-
-			AGenerator.MarkLabel(LLoop);
-			
-			AGenerator.BeginExceptionBlock();
-			
-			// Test the iteration condition
-			EmitEvaluate(APlan, AGenerator, LExecutePath, 0);
-			
-			AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-			AGenerator.Emit(OpCodes.Stloc, LResult);
-
-			AGenerator.Emit(OpCodes.Ldloc, LResult);
-			AGenerator.Emit(OpCodes.Brfalse, LAfterLoop);
-
-			AGenerator.Emit(OpCodes.Ldloc, LResult);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("IsNil").GetGetMethod());
-			AGenerator.Emit(OpCodes.Brtrue, LAfterLoop);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LResult);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("AsBoolean").GetGetMethod());
-			AGenerator.Emit(OpCodes.Brfalse, LAfterLoop);
-
-			// Execute the iterated statement				
-			EmitExecute(APlan, AGenerator, LExecutePath, 1);
-				
-			AGenerator.BeginCatchBlock(typeof(ContinueError));
-			AGenerator.EndExceptionBlock();
-			
-			AGenerator.Emit(OpCodes.Br, LLoop);
-				
-			AGenerator.BeginCatchBlock(typeof(BreakError));
-			AGenerator.EndExceptionBlock();
-			
-			AGenerator.MarkLabel(LAfterLoop);
-		}
-*/
-		
 		public override object InternalExecute(Program program)
 		{
 			try
@@ -348,56 +225,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public DoWhileNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 
-/*
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
-		{
-			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
-			
-			AGenerator.BeginExceptionBlock();
-			
-			Label LLoop = AGenerator.DefineLabel();
-			Label LAfterLoop = AGenerator.DefineLabel();
-			LocalBuilder LResult = AGenerator.DeclareLocal(typeof(DataValue));
-
-			AGenerator.MarkLabel(LLoop);
-			
-			AGenerator.BeginExceptionBlock();
-			
-			// Execute the iterated statement				
-			EmitExecute(APlan, AGenerator, LExecutePath, 0);
-				
-			// Test the iteration condition
-			EmitEvaluate(APlan, AGenerator, LExecutePath, 1);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-			AGenerator.Emit(OpCodes.Stloc, LResult);
-
-			AGenerator.Emit(OpCodes.Ldloc, LResult);
-			AGenerator.Emit(OpCodes.Brfalse, LAfterLoop);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LResult);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("IsNil").GetGetMethod());
-			AGenerator.Emit(OpCodes.Brtrue, LAfterLoop);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LResult);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("AsBoolean").GetGetMethod());
-			AGenerator.Emit(OpCodes.Brfalse, LAfterLoop);
-
-			AGenerator.BeginCatchBlock(typeof(ContinueError));
-			AGenerator.EndExceptionBlock();
-			
-			AGenerator.Emit(OpCodes.Br, LLoop);
-				
-			AGenerator.BeginCatchBlock(typeof(BreakError));
-			AGenerator.EndExceptionBlock();
-			
-			AGenerator.MarkLabel(LAfterLoop);
-		}
-*/
-		
 		public override object InternalExecute(Program program)
 		{
 			try
@@ -636,16 +466,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public BreakNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{
-			generator.Emit(OpCodes.Newobj, typeof(BreakError).GetConstructor(new Type[] { }));
-			generator.Emit(OpCodes.Throw);
-		}
-		
 		public override object InternalExecute(Program program)
 		{
 			throw new BreakError();
@@ -666,16 +489,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public ContinueNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{
-			generator.Emit(OpCodes.Newobj, typeof(ContinueError).GetConstructor(new Type[] { }));
-			generator.Emit(OpCodes.Throw);
-		}
-		
 		public override object InternalExecute(Program program)
 		{
 			throw new ContinueError();
@@ -691,37 +507,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public RaiseNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 
-/*
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
-		{
-			if (NodeCount > 0)
-			{
-				int[] LExecutePath = new int[AExecutePath.Length + 1];
-				AExecutePath.CopyTo(LExecutePath, 0);
-				
-				AGenerator.Emit(OpCodes.Ldarg_1);
-				AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-
-				// Evaluate the raise expression
-				LExecutePath[LExecutePath.Length - 1] = 0;
-				Nodes[0].EmitIL(APlan, AGenerator, LExecutePath);
-				
-				AGenerator.Emit(OpCodes.Call, typeof(Context).GetProperty("ErrorVar").GetSetMethod());
-			}
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetProperty("ErrorVar").GetGetMethod());
-			AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("AsException").GetGetMethod());
-			AGenerator.Emit(OpCodes.Throw);
-		}
-*/
-		
 		public override object InternalExecute(Program program)
 		{
 			if (NodeCount > 0)
@@ -745,27 +533,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public TryFinallyNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{
-			int[] localExecutePath = PrepareExecutePath(plan, executePath);
-			
-			generator.BeginExceptionBlock();
-
-			// Execute the protected statement
-			EmitExecute(plan, generator, localExecutePath, 0);
-				
-			generator.BeginFinallyBlock();
-
-			// Execute the finally statement
-			EmitExecute(plan, generator, localExecutePath, 1);
-				
-			generator.EndExceptionBlock();
-		}
-		
 		public override object InternalExecute(Program program)
 		{
 			try
@@ -792,8 +562,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public ErrorHandlerNode() : base()
 		{
-		    ShouldEmitIL = true;
-			IsBreakable = true;
+		    IsBreakable = true;
 		}
 		
 		protected bool _isGeneric;
@@ -832,46 +601,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		//public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
-		//{
-		//    int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
-		//    AGenerator.Emit(OpCodes.Ldarg_1);
-		//    AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-		//    AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("PushFrame", new Type[] { }));
-		//    AGenerator.BeginExceptionBlock();
-		//    if (FVariableName != String.Empty)
-		//    {
-		//        LocalBuilder LThis = EmitThis(APlan, AGeneratr, AExecutePath);
-		//        AGenerator.Emit(OpCodes.Ldarg_1);
-		//        AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-
-		//        AGenerator.Emit(OpCodes.Ldstr, FVariableName);
-
-		//        AGenerator.Emit(OpCodes.Ldloc, LThis);
-		//        AGenerator.Emit(OpCodes.Ldfld, typeof(ErrorHandlerNode).GetField("FErrorType"));
-
-		//        AGenerator.Emit(OpCodes.Ldarg_1);
-		//        AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-		//        AGenerator.Emit(OpCodes.Call, typeof(Context).GetProperty("ErrorVar").GetGetMethod());
-		//        AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-		//        AGenerator.Emit(OpCodes.Castclass, typeof(Scalar));
-		//        AGenerator.Emit(OpCodes.Call, typeof(DataValue).GetMethod("Copy", new Type[] { }));
-
-		//        AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(String), typeof(Schema.IDataType), typeof(DataValue) }));
-				
-		//        AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("Push", new Type[] { typeof(DataVar) }));
-		//    }
-			
-		//    EmitExecute(APlan, AGenerator, LExecutePath, 0);
-
-		//    AGenerator.BeginFinallyBlock();
-		//    AGenerator.Emit(OpCodes.Ldarg_1);
-		//    AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-		//    AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("PopFrame", new Type[] { }));
-
-		//    AGenerator.EndExceptionBlock();
-		//}
-		
 		public override object InternalExecute(Program program)
 		{
 			program.Stack.PushFrame();
@@ -971,50 +700,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public IfNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 
-/*
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
-		{
-			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
-			
-			Label LFalse = AGenerator.DefineLabel();
-			Label LEnd = AGenerator.DefineLabel();
-			LocalBuilder LResult = AGenerator.DeclareLocal(typeof(DataValue));
-			
-			// Evaluate the condition expression
-			EmitEvaluate(APlan, AGenerator, LExecutePath, 0);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-			AGenerator.Emit(OpCodes.Stloc, LResult);
-
-			AGenerator.Emit(OpCodes.Ldloc, LResult);
-			AGenerator.Emit(OpCodes.Brfalse, LFalse);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LResult);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("IsNil").GetGetMethod());
-			AGenerator.Emit(OpCodes.Brtrue, LFalse);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LResult);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("AsBoolean").GetGetMethod());
-			AGenerator.Emit(OpCodes.Brfalse, LFalse);
-
-			// Execute the true statement
-			EmitExecute(APlan, AGenerator, LExecutePath, 1);
-				
-			AGenerator.Emit(OpCodes.Br, LEnd);
-				
-			AGenerator.MarkLabel(LFalse);
-			
-			// Execute the false statement
-			if (Nodes.Count > 2)
-				EmitExecute(APlan, AGenerator, LExecutePath, 2);
-
-			AGenerator.MarkLabel(LEnd);			
-		}
-*/
-		
 		public override object InternalExecute(Program program)
 		{
 			object objectValue = Nodes[0].Execute(program);
@@ -1223,24 +911,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// constructor
 		public ValueNode() : base() 
 		{
-			_isLiteral = true;
-			_isFunctional = true;
-			_isDeterministic = true;
-			_isRepeatable = true;
-			_isNilable = false;
-			ShouldEmitIL = true;
+			IsLiteral = true;
+			IsFunctional = true;
+			IsDeterministic = true;
+			IsRepeatable = true;
+			IsNilable = false;
 		}
 
 		public ValueNode(Schema.IDataType dataType, object tempValue) : base()
 		{
 			_dataType = dataType;
 			_value = tempValue;
-			_isLiteral = true;
-			_isFunctional = true;
-			_isDeterministic = true;
-			_isRepeatable = true;
-			_isNilable = _value == null;
-			ShouldEmitIL = true;
+			IsLiteral = true;
+			IsFunctional = true;
+			IsDeterministic = true;
+			IsRepeatable = true;
+			IsNilable = _value == null;
 		}
 		
 		protected object _value;
@@ -1250,32 +936,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set 
 			{ 
 				_value = value; 
-				_isNilable = _value == null;
+				IsNilable = _value == null;
 			}
 		}
-
-/*
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
-		{
-			LocalBuilder LThis = EmitThis(APlan, AGenerator, AExecutePath);
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(PlanNode).GetField("FDataType", BindingFlags.Instance | BindingFlags.NonPublic));
-			
-			if (FValue == null)
-				AGenerator.Emit(OpCodes.Ldnull);
-			else
-			{
-				AGenerator.Emit(OpCodes.Ldarg_1);
-				AGenerator.Emit(OpCodes.Ldloc, LThis);
-				AGenerator.Emit(OpCodes.Ldfld, typeof(PlanNode).GetField("FDataType", BindingFlags.Instance | BindingFlags.NonPublic));
-				AGenerator.Emit(OpCodes.Ldloc, LThis);
-				AGenerator.Emit(OpCodes.Ldfld, typeof(ValueNode).GetField("FValue", BindingFlags.Instance | BindingFlags.NonPublic));
-				AGenerator.Emit(OpCodes.Call, typeof(DataValue).GetMethod("FromNative", BindingFlags.Static | BindingFlags.Public, null, new Type[] { typeof(IServerProcess), typeof(Schema.IDataType), typeof(object) }, null));
-			}	
-			
-			AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(Schema.IDataType), typeof(DataValue) }));
-		}
-*/
 
 		// Execute
 		public override object InternalExecute(Program program)
@@ -1313,14 +976,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public ParameterNode() : base()
 		{
-			ShouldEmitIL = true;
 		}
 
 		public ParameterNode(PlanNode node, Modifier modifier)
 		{
 			Nodes.Add(node);
 			_modifier = modifier;
-			ShouldEmitIL = true;
 		}
 		
 		private Modifier _modifier;
@@ -1371,12 +1032,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{
-			int[] localExecutePath = PrepareExecutePath(plan, executePath);
-			EmitEvaluate(plan, generator, localExecutePath, 0);
-		}
-		
 		public override object InternalExecute(Program program)
 		{
 			return Nodes[0].Execute(program);
@@ -1389,7 +1044,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public CallNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 		
@@ -1446,212 +1100,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-/*
-		protected override void EmitInstructionIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath, LocalBuilder AArguments)
-		{
-			LocalBuilder LThis = EmitThis(APlan, AGenerator, AExecutePath);
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetMethod("CheckAborted", new Type[] { }));
-			
-			for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
-			{
-				AGenerator.Emit(OpCodes.Ldarg_1);
-				AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-				AGenerator.Emit(OpCodes.Ldloc, AArguments);
-				AGenerator.Emit(OpCodes.Ldc_I4, LIndex);
-				AGenerator.Emit(OpCodes.Ldelem_Ref);
-				AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("Push", new Type[] { typeof(DataVar) }));
-			}
-			
-			LocalBuilder LResult = AGenerator.DeclareLocal(typeof(DataVar));
-			
-			AGenerator.Emit(OpCodes.Ldnull);
-			AGenerator.Emit(OpCodes.Stloc, LResult);
-
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Ldc_I4, Operator.Operands.Count);
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("PushWindow", new Type[] { typeof(int) }));
-			
-			AGenerator.BeginExceptionBlock();
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Plan").GetGetMethod());
-			
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(InstructionNodeBase).GetField("FOperator", BindingFlags.Instance | BindingFlags.NonPublic));
-			AGenerator.Emit(OpCodes.Call, typeof(Schema.Operator).GetProperty("Owner").GetGetMethod());
-			AGenerator.Emit(OpCodes.Newobj, typeof(SecurityContext).GetConstructor(new Type[] { typeof(Schema.User) }));
-			
-			AGenerator.Emit(OpCodes.Call, typeof(Plan).GetMethod("PushSecurityContext", new Type[] { typeof(SecurityContext) }));
-			
-			AGenerator.BeginExceptionBlock();
-			
-			LocalBuilder LSaveIsInsert = AGenerator.DeclareLocal(typeof(bool));
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("IsInsert").GetGetMethod());
-			AGenerator.Emit(OpCodes.Stloc, LSaveIsInsert);
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Ldc_I4_0);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("IsInsert").GetSetMethod());
-			
-			AGenerator.BeginExceptionBlock();
-			
-			LocalBuilder LTransaction = AGenerator.DeclareLocal(typeof(ApplicationTransaction));
-			
-			AGenerator.Emit(OpCodes.Ldnull);
-			AGenerator.Emit(OpCodes.Stloc, LTransaction);
-			
-			Label LNoTransaction = AGenerator.DefineLabel();
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("ApplicationTransactionID").GetGetMethod());
-			AGenerator.Emit(OpCodes.Ldfld, typeof(Guid).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
-			AGenerator.Emit(OpCodes.Beq, LNoTransaction);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(InstructionNodeBase).GetField("FOperator", BindingFlags.Instance | BindingFlags.NonPublic));
-			AGenerator.Emit(OpCodes.Call, typeof(Schema.Operator).GetProperty("ShouldTranslate").GetGetMethod());
-			AGenerator.Emit(OpCodes.Brtrue, LNoTransaction);
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetMethod("GetApplicationTransaction", new Type[] { }));
-			AGenerator.Emit(OpCodes.Stloc, LTransaction);
-			
-			AGenerator.MarkLabel(LNoTransaction);
-			
-			AGenerator.BeginExceptionBlock();
-			
-			Label LNoTransactionGlobal = AGenerator.DefineLabel();
-			
-			AGenerator.Emit(OpCodes.Ldloc, LTransaction);
-			AGenerator.Emit(OpCodes.Brfalse, LNoTransactionGlobal);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LTransaction);
-			AGenerator.Emit(OpCodes.Call, typeof(ApplicationTransaction).GetMethod("PushGlobalContext", new Type[] { }));
-			
-			AGenerator.MarkLabel(LNoTransactionGlobal);
-			
-			AGenerator.BeginExceptionBlock();
-
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("IncCallDepth", new Type[] { }));
-			
-			AGenerator.BeginExceptionBlock();
-			
-			if (FAllocateResultNode != null)
-			{
-				if (FAllocateResultNode.ShouldEmitIL)
-				{
-					FAllocateResultNode.EmitIL(APlan, AGenerator, AExecutePath);
-				}
-				else
-				{
-					AGenerator.Emit(OpCodes.Ldloc, LThis);
-					AGenerator.Emit(OpCodes.Ldfld, typeof(CallNode).GetField("FAllocateResultNode", BindingFlags.Instance | BindingFlags.NonPublic));
-					AGenerator.Emit(OpCodes.Ldfld, typeof(PlanNode).GetField("Execute"));
-					AGenerator.Emit(OpCodes.Ldarg_1);
-					AGenerator.Emit(OpCodes.Callvirt, typeof(ExecuteDelegate).GetMethod("Invoke", new Type[] { typeof(ServerProcess) }));
-				}
-				AGenerator.Emit(OpCodes.Ldarg_1);
-				AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-				AGenerator.Emit(OpCodes.Ldc_I4_0);
-				AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("Peek", new Type[] { typeof(int) }));
-				AGenerator.Emit(OpCodes.Stloc, LResult);
-			}
-			else
-			{
-				AGenerator.Emit(OpCodes.Ldarg_1);
-				AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("DataTypes").GetGetMethod());
-				AGenerator.Emit(OpCodes.Call, typeof(Schema.DataTypes).GetProperty("SystemScalar").GetGetMethod());
-				AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(Schema.IDataType) }));
-				AGenerator.Emit(OpCodes.Stloc, LResult);
-			}
-			
-			AGenerator.BeginExceptionBlock();
-			
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(InstructionNodeBase).GetField("FOperator", BindingFlags.Instance | BindingFlags.NonPublic));
-			AGenerator.Emit(OpCodes.Call, typeof(Schema.Operator).GetProperty("Block").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Schema.OperatorBlock).GetProperty("BlockNode").GetGetMethod());
-			AGenerator.Emit(OpCodes.Ldfld, typeof(PlanNode).GetField("Execute"));
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(ExecuteDelegate).GetMethod("Invoke", new Type[] { typeof(ServerProcess) }));
-			AGenerator.Emit(OpCodes.Pop);
-			
-			AGenerator.BeginCatchBlock(typeof(ExitError));
-			
-			AGenerator.EndExceptionBlock();
-			
-			if (DataType != null)
-				AGenerator.Emit(OpCodes.Ldloc, LResult);
-				
-			AGenerator.BeginFinallyBlock();
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("DecCallDepth", new Type[] { }));
-			
-			AGenerator.EndExceptionBlock();
-
-			AGenerator.BeginFinallyBlock();
-			
-			Label LNoTransactionGlobalFinally = AGenerator.DefineLabel();
-			
-			AGenerator.Emit(OpCodes.Ldloc, LTransaction);
-			AGenerator.Emit(OpCodes.Brfalse, LNoTransactionGlobalFinally);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LTransaction);
-			AGenerator.Emit(OpCodes.Call, typeof(ApplicationTransaction).GetMethod("PopGlobalContext", new Type[] { }));
-			
-			AGenerator.MarkLabel(LNoTransactionGlobalFinally);
-			
-			AGenerator.EndExceptionBlock();
-			
-			AGenerator.BeginFinallyBlock();
-			
-			Label LNoTransactionFinally = AGenerator.DefineLabel();
-			
-			AGenerator.Emit(OpCodes.Ldloc, LTransaction);
-			AGenerator.Emit(OpCodes.Brfalse, LNoTransactionFinally);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LTransaction);
-			AGenerator.Emit(OpCodes.Call, typeof(Monitor).GetMethod("Exit", BindingFlags.Static | BindingFlags.Public, null, new Type[] { typeof(object) }, null));
-			
-			AGenerator.MarkLabel(LNoTransactionFinally);
-			
-			AGenerator.EndExceptionBlock();
-			
-			AGenerator.BeginFinallyBlock();
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Ldloc, LSaveIsInsert);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("IsInsert").GetSetMethod());
-
-			AGenerator.EndExceptionBlock();
-			
-			AGenerator.BeginFinallyBlock();
-
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Plan").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Plan).GetMethod("PopSecurityContext", new Type[] { }));
-			
-			AGenerator.EndExceptionBlock();
-
-			AGenerator.BeginFinallyBlock();
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("PopWindow", new Type[] { }));
-
-			AGenerator.EndExceptionBlock();
-		}
-*/
-		
 		public override object InternalExecute(Program program, object[] arguments)
 		{
 			for (int index = 0; index < Operator.Operands.Count; index++)
@@ -1784,76 +1232,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_hasDefault = ((scalarType.Default != null) || (scalarType.HasHandlers(EventType.Default)));
 		}
 
-/*
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
-		{
-			LocalBuilder LThis = EmitThis(APlan, AGenerator, AExecutePath);
-			LocalBuilder LLocal = AGenerator.DeclareLocal(typeof(DataVar));
-			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
-			
-			// Create the new variable			
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(VariableNode).GetField("FVariableName", BindingFlags.Instance | BindingFlags.NonPublic));
-			
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(VariableNode).GetField("FVariableType", BindingFlags.Instance | BindingFlags.NonPublic));
-			
-			AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(String), typeof(Schema.IDataType) }));
-			AGenerator.Emit(OpCodes.Stloc, LLocal);
-			
-			// Push the new variable on to the stack
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Ldloc, LLocal);
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("Push", new Type[] { typeof(DataVar) }));
-			
-			if (NodeCount > 0)
-			{
-				LocalBuilder LResult = AGenerator.DeclareLocal(typeof(DataVar));
-				EmitEvaluate(APlan, AGenerator, LExecutePath, 0);
-				AGenerator.Emit(OpCodes.Stloc, LResult);
-				
-				if (FVariableType is Schema.IScalarType)
-				{
-					AGenerator.Emit(OpCodes.Ldloc, LResult);
-					AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("DataType"));
-					AGenerator.Emit(OpCodes.Ldarg_1);
-					AGenerator.Emit(OpCodes.Ldloc, LResult);
-					AGenerator.Emit(OpCodes.Call, typeof(Schema.ScalarType).GetMethod("ValidateValue", new Type[] { typeof(ServerProcess), typeof(DataVar) }));
-				}
-				
-				AGenerator.Emit(OpCodes.Ldloc, LLocal);
-				AGenerator.Emit(OpCodes.Ldloc, LResult);
-				AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-				AGenerator.Emit(OpCodes.Stfld, typeof(DataVar).GetField("Value"));
-			}
-			else
-			{
-				if (FHasDefault && (FVariableType is Schema.IScalarType))
-				{
-					LocalBuilder LResult = AGenerator.DeclareLocal(typeof(DataVar));
-					AGenerator.Emit(OpCodes.Ldloc, LLocal);
-					AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("DataType"));
-					AGenerator.Emit(OpCodes.Ldarg_1);
-					AGenerator.Emit(OpCodes.Call, typeof(Schema.ScalarType).GetMethod("DefaultValue", new Type[] { typeof(ServerProcess) }));
-					AGenerator.Emit(OpCodes.Stloc, LResult);
-					
-					Label LDone = AGenerator.DefineLabel();
-					
-					AGenerator.Emit(OpCodes.Ldloc, LResult);
-					AGenerator.Emit(OpCodes.Brfalse, LDone);
-					
-					AGenerator.Emit(OpCodes.Ldloc, LLocal);
-					AGenerator.Emit(OpCodes.Ldloc, LResult);
-					AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-					AGenerator.Emit(OpCodes.Stfld, typeof(DataVar).GetField("Value"));
-					
-					AGenerator.MarkLabel(LDone);
-				}
-			}
-		}
-*/
-		
 		// Note that initialization is more efficient than the equivalent declaration / assignment construct 
 		public override object InternalExecute(Program program)
 		{
@@ -1892,7 +1270,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public DropVariableNode() : base()
 		{
-			ShouldEmitIL = true;
 		}
 		
 		public override void InternalDetermineBinding(Plan plan)
@@ -1900,13 +1277,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			plan.Symbols.Pop();
 		}
 
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{
-			generator.Emit(OpCodes.Ldarg_1);
-			generator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			generator.Emit(OpCodes.Call, typeof(Stack).GetMethod("Pop", new Type[] { }));
-		}
-		
 		public override object InternalExecute(Program program)
 		{
 			program.Stack.Pop();
@@ -1918,42 +1288,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public DeallocateVariableNode() : base()
 		{
-			ShouldEmitIL = true;
 		}
 		
 		public DeallocateVariableNode(int location) : base()
 		{
 			Location = location;
-			ShouldEmitIL = true;
 		}
 		
 		public int Location;
 
-/*
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
-		{
-			LocalBuilder LThis = EmitThis(APlan, AGenerator, AExecutePath);
-			LocalBuilder LValue = AGenerator.DeclareLocal(typeof(DataValue));
-			Label LDone = AGenerator.DefineLabel();
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(DeallocateVariableNode).GetField("Location"));
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("get_Item", new Type[] { typeof(int) }));
-			AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-			AGenerator.Emit(OpCodes.Stloc, LValue);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LValue);
-			AGenerator.Emit(OpCodes.Brfalse, LDone);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LValue);
-			AGenerator.Emit(OpCodes.Call, typeof(IDisposable).GetMethod("Dispose", new Type[] { }));
-			
-			AGenerator.MarkLabel(LDone);
-		}
-*/
-		
 		public override object InternalExecute(Program program)
 		{
 			DataValue.DisposeValue(program.ValueManager, program.Stack[Location]);
@@ -1970,14 +1313,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public NoOpNode() : base()
 		{
-			ShouldEmitIL = true;
 		}
 
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{
-			generator.Emit(OpCodes.Nop);
-		}
-		
 		public override object InternalExecute(Program program)
 		{
 			return null;
@@ -1993,7 +1330,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public AssignmentNode() : base()
 		{
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 		
@@ -2001,7 +1337,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			Nodes.Add(targetNode);
 			Nodes.Add(valueNode);
-			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 
@@ -2014,34 +1349,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBeAssigned, plan.CurrentStatement(), symbol.Name);
 			plan.Symbols.SetIsModified(location);
 		}
-
-/*
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
-		{
-			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
-			LocalBuilder LValue = AGenerator.DeclareLocal(typeof(DataVar));
-			
-			EmitEvaluate(APlan, AGenerator, LExecutePath, 1);
-			AGenerator.Emit(OpCodes.Stloc, LValue);
-			
-			if (Nodes[1].DataType is Schema.ScalarType)
-			{
-				AGenerator.Emit(OpCodes.Ldloc, LValue);
-				AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("DataType"));
-				AGenerator.Emit(OpCodes.Ldarg_1);
-				AGenerator.Emit(OpCodes.Ldloc, LValue);
-				AGenerator.Emit(OpCodes.Call, typeof(Schema.ScalarType).GetMethod("ValidateValue", new Type[] { typeof(ServerProcess), typeof(DataVar) }));
-			}
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Ldc_I4, ((StackReferenceNode)Nodes[0]).Location);
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("Peek", new Type[] { typeof(int) }));
-			AGenerator.Emit(OpCodes.Ldloc, LValue);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-			AGenerator.Emit(OpCodes.Stfld, typeof(DataVar).GetField("Value"));
-		}
-*/
 
 		public override object InternalExecute(Program program)
 		{
@@ -2315,21 +1622,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public VarReferenceNode() : base()
 		{
-			_isLiteral = false;
-			_isFunctional = true;
-			_isDeterministic = true;
-			_isRepeatable = true;
-			_isOrderPreserving = true;
+			IsLiteral = false;
+			IsFunctional = true;
+			IsDeterministic = true;
+			IsRepeatable = true;
+			IsOrderPreserving = true;
 		}
 		
 		public VarReferenceNode(Schema.IDataType dataType) : base()
 		{
 			_dataType = dataType;
-			_isLiteral = false;
-			_isFunctional = true;
-			_isDeterministic = true;
-			_isRepeatable = true;
-			_isOrderPreserving = true;
+			IsLiteral = false;
+			IsFunctional = true;
+			IsDeterministic = true;
+			IsRepeatable = true;
+			IsOrderPreserving = true;
 		}
 	}
 	
@@ -2338,27 +1645,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// constructor
 		public StackReferenceNode() : base()
 		{
-			ShouldEmitIL = true;
 		}
 		
 		public StackReferenceNode(Schema.IDataType dataType, int location) : base(dataType)
 		{
 			Location = location;
-			ShouldEmitIL = true;
 		}
 		
 		public StackReferenceNode(Schema.IDataType dataType, int location, bool byReference) : base(dataType)
 		{
 			Location = location;
 			ByReference = byReference;
-			ShouldEmitIL = true;
 		}
 		
 		public StackReferenceNode(string identifier, Schema.IDataType dataType, int location) : base(dataType)
 		{
 			Identifier = identifier;
 			Location = location;
-			ShouldEmitIL = true;
 		}
 		
 		public StackReferenceNode(string identifier, Schema.IDataType dataType, int location, bool byReference) : base(dataType)
@@ -2366,7 +1669,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Identifier = identifier;
 			Location = location;
 			ByReference = byReference;
-			ShouldEmitIL = true;
 		}
 		
 		// Identifier
@@ -2400,54 +1702,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new CompilerException(CompilerException.Codes.InvalidColumnBinding, _identifier);
 		}
 
-/*
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
-		{
-			if (ByReference)
-			{
-				AGenerator.Emit(OpCodes.Ldarg_1);
-				AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-				AGenerator.Emit(OpCodes.Ldc_I4, Location);
-				AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("get_Item", new Type[] { typeof(int) }));
-			}
-			else
-			{
-				LocalBuilder LValue = AGenerator.DeclareLocal(typeof(DataVar));
-				
-				AGenerator.Emit(OpCodes.Ldarg_1);
-				AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-				AGenerator.Emit(OpCodes.Ldc_I4, Location);
-				AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("get_Item", new Type[] { typeof(int) }));
-				AGenerator.Emit(OpCodes.Stloc, LValue);
-				
-				Label LNull = AGenerator.DefineLabel();
-				Label LEnd = AGenerator.DefineLabel();
-				
-				AGenerator.Emit(OpCodes.Ldloc, LValue);
-				AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-				AGenerator.Emit(OpCodes.Brfalse, LNull);
-				
-				AGenerator.Emit(OpCodes.Ldloc, LValue);
-				AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("DataType"));
-				AGenerator.Emit(OpCodes.Ldloc, LValue);
-				AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-				AGenerator.Emit(OpCodes.Call, typeof(DataValue).GetMethod("Copy", new Type[] { }));
-				AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(Schema.IDataType), typeof(DataValue) }));
-				
-				AGenerator.Emit(OpCodes.Br, LEnd);
-				
-				AGenerator.MarkLabel(LNull);
-				
-				AGenerator.Emit(OpCodes.Ldloc, LValue);
-				AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("DataType"));
-				AGenerator.Emit(OpCodes.Ldnull);
-				AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(Schema.IDataType), typeof(DataValue) }));
-				
-				AGenerator.MarkLabel(LEnd);
-			}
-		}
-*/
-		
 		// Execute
 		public override object InternalExecute(Program program)
 		{
@@ -2493,14 +1747,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		#else
 		public StackColumnReferenceNode() : base()
 		{
-			ShouldEmitIL = true;
 		}
 		
 		public StackColumnReferenceNode(string identifier, Schema.IDataType dataType, int location) : base(dataType)
 		{
 			Identifier = identifier;
 			Location = location;
-			ShouldEmitIL = true;
 		}
 		#endif
 		
@@ -2569,91 +1821,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 
-/*
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
-		{
-			LocalBuilder LThis = EmitThis(APlan, AGenerator, AExecutePath);
-			LocalBuilder LRow = AGenerator.DeclareLocal(typeof(Row));
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Ldc_I4, Location);
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("get_Item", new Type[] { typeof(int) }));
-			AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-			AGenerator.Emit(OpCodes.Castclass, typeof(Row));
-			AGenerator.Emit(OpCodes.Stloc, LRow);
-			
-			Label LNull = AGenerator.DefineLabel();
-			Label LNotNull = AGenerator.DefineLabel();
-			Label LNoValue = AGenerator.DefineLabel();
-			Label LEnd = AGenerator.DefineLabel();
-			
-			AGenerator.Emit(OpCodes.Ldloc, LRow);
-			AGenerator.Emit(OpCodes.Brfalse, LNull);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LRow);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("IsNil").GetGetMethod());
-			AGenerator.Emit(OpCodes.Brtrue, LNull);
-			
-			AGenerator.Emit(OpCodes.Br, LNotNull);
-			
-			AGenerator.MarkLabel(LNull);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(PlanNode).GetField("FDataType", BindingFlags.NonPublic | BindingFlags.Instance));
-			AGenerator.Emit(OpCodes.Ldnull);
-			AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(Schema.IDataType), typeof(DataValue) }));
-			
-			AGenerator.Emit(OpCodes.Br, LEnd);
-			
-			AGenerator.MarkLabel(LNotNull);
-			
-			LocalBuilder LColumnIndex = AGenerator.DeclareLocal(typeof(int));
-			LocalBuilder LColumns = AGenerator.DeclareLocal(typeof(Schema.Columns));
-			
-			AGenerator.Emit(OpCodes.Ldloc, LRow);
-			AGenerator.Emit(OpCodes.Call, typeof(Row).GetProperty("DataType", BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance).GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Schema.RowType).GetProperty("Columns").GetGetMethod());
-			AGenerator.Emit(OpCodes.Stloc, LColumns);
-			AGenerator.Emit(OpCodes.Ldloc, LColumns);
-			AGenerator.Emit(OpCodes.Ldstr, FResolvingIdentifier);
-			AGenerator.Emit(OpCodes.Call, typeof(Schema.Columns).GetMethod("IndexOf", new Type[] { typeof(string) }));
-			AGenerator.Emit(OpCodes.Stloc, LColumnIndex);
-
-			AGenerator.Emit(OpCodes.Ldloc, LRow);
-			AGenerator.Emit(OpCodes.Ldloc, LColumnIndex);
-			AGenerator.Emit(OpCodes.Call, typeof(Row).GetMethod("HasValue", new Type[] { typeof(int) }));
-			AGenerator.Emit(OpCodes.Brfalse, LNoValue);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LColumns);
-			AGenerator.Emit(OpCodes.Ldloc, LColumnIndex);
-			AGenerator.Emit(OpCodes.Call, typeof(Schema.Columns).GetMethod("get_Item", new Type[] { typeof(int) }));
-			AGenerator.Emit(OpCodes.Call, typeof(Schema.Column).GetProperty("DataType").GetGetMethod());
-			
-			AGenerator.Emit(OpCodes.Ldloc, LRow);
-			AGenerator.Emit(OpCodes.Ldloc, LColumnIndex);
-			AGenerator.Emit(OpCodes.Call, typeof(Row).GetMethod("get_Item", new Type[] { typeof(int) } ));
-			if (!ByReference)
-				AGenerator.Emit(OpCodes.Call, typeof(DataValue).GetMethod("Copy", new Type[] { }));
-				
-			AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(Schema.IDataType), typeof(DataValue) }));
-			AGenerator.Emit(OpCodes.Br, LEnd);
-			
-			AGenerator.MarkLabel(LNoValue);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LColumns);
-			AGenerator.Emit(OpCodes.Ldloc, LColumnIndex);
-			AGenerator.Emit(OpCodes.Call, typeof(Schema.Columns).GetMethod("get_Item", new Type[] { typeof(int) }));
-			AGenerator.Emit(OpCodes.Call, typeof(Schema.Column).GetProperty("DataType").GetGetMethod());
-
-			AGenerator.Emit(OpCodes.Ldnull);
-
-			AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(Schema.IDataType), typeof(DataValue) }));
-
-			AGenerator.MarkLabel(LEnd);
-		}
-*/
-		
 		// Execute
 		public override object InternalExecute(Program program)
 		{

@@ -106,31 +106,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (Modifiers != null)
 			{
-				_isLiteral = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsLiteral", Operator.IsLiteral.ToString()));
-				_isFunctional = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsFunctional", Operator.IsFunctional.ToString()));
-				_isDeterministic = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsDeterministic", Operator.IsDeterministic.ToString()));
-				_isRepeatable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsRepeatable", Operator.IsRepeatable.ToString()));
-				_isNilable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsNilable", Operator.IsNilable.ToString()));
+				IsLiteral = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsLiteral", Operator.IsLiteral.ToString()));
+				IsFunctional = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsFunctional", Operator.IsFunctional.ToString()));
+				IsDeterministic = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsDeterministic", Operator.IsDeterministic.ToString()));
+				IsRepeatable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsRepeatable", Operator.IsRepeatable.ToString()));
+				IsNilable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsNilable", Operator.IsNilable.ToString()));
 			}
 			else
 			{
-				_isLiteral = Operator.IsLiteral;
-				_isFunctional = Operator.IsFunctional;
-				_isDeterministic = Operator.IsDeterministic;
-				_isRepeatable = Operator.IsRepeatable;
-				_isNilable = Operator.IsNilable;
+				IsLiteral = Operator.IsLiteral;
+				IsFunctional = Operator.IsFunctional;
+				IsDeterministic = Operator.IsDeterministic;
+				IsRepeatable = Operator.IsRepeatable;
+				IsNilable = Operator.IsNilable;
 			}
 
 			for (int index = 0; index < Operator.Operands.Count; index++)
 			{
-				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
-				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
-				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
-				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
-				_isNilable = _isNilable || Nodes[index].IsNilable;
+				IsLiteral = IsLiteral && Nodes[index].IsLiteral;
+				IsFunctional = IsFunctional && Nodes[index].IsFunctional;
+				IsDeterministic = IsDeterministic && Nodes[index].IsDeterministic;
+				IsRepeatable = IsRepeatable && Nodes[index].IsRepeatable;
+				IsNilable = IsNilable || Nodes[index].IsNilable;
 			} 
 			
-			_isOrderPreserving = Convert.ToBoolean(MetaData.GetTag(Operator.MetaData, "DAE.IsOrderPreserving", _isOrderPreserving.ToString()));
+			IsOrderPreserving = Convert.ToBoolean(MetaData.GetTag(Operator.MetaData, "DAE.IsOrderPreserving", IsOrderPreserving.ToString()));
 		}
 		
 		public override void DetermineDataType(Plan plan)
@@ -186,61 +186,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.EnsureApplicationTransactionOperator(Operator);
 			}
 			base.BindToProcess(plan);
-		}
-		
-		protected virtual void EmitInstructionIL(Plan plan, ILGenerator generator, int[] executePath, LocalBuilder arguments)
-		{
-		}
-
-		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{
-			if (ShouldEmitIL)
-			{
-				int[] localExecutePath = PrepareExecutePath(plan, executePath);
-				
-				LocalBuilder arguments = generator.DeclareLocal(typeof(object[]));
-				
-				generator.Emit(OpCodes.Ldc_I4, NodeCount);
-				generator.Emit(OpCodes.Newarr, typeof(object));
-				generator.Emit(OpCodes.Stloc, arguments);
-				
-				for (int index = 0; index < Nodes.Count; index++)
-				{
-					generator.Emit(OpCodes.Ldloc, arguments);
-					generator.Emit(OpCodes.Ldc_I4, index);
-
-					EmitEvaluate(plan, generator, localExecutePath, index);
-					
-					generator.Emit(OpCodes.Stelem_Ref);
-				}
-				
-				#if USECLEANUPNODES
-				if (FCleanupNodes != null)
-					AGenerator.BeginExceptionBlock();
-				#endif
-				
-				EmitInstructionIL(plan, generator, executePath, arguments);
-				
-				#if USECLEANUPNODES
-				if (FCleanupNodes != null)
-				{
-					AGenerator.BeginFinallyBlock();
-
-					for (int index = 0; index < FCleanupNodes.Count; index++)
-					{
-						FCleanupNodes[index].EmitIL(APlan, AGenerator, AExecutePath);
-						
-						// Pop the return value if necessary
-						if (FCleanupNodes[index].DataType != null)
-							AGenerator.Emit(OpCodes.Pop);
-					}
-
-					AGenerator.EndExceptionBlock();
-				}
-				#endif
-			}
-			else
-				base.EmitIL(plan, generator, executePath);
 		}
 		
 		// TODO: This should be compiled and added as cleanup nodes

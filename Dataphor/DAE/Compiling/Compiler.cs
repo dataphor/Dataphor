@@ -670,8 +670,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			try
 			{
-				if (plan.ShouldEmitIL)
-					planNode.EmitIL(plan, false);
+				// ...
 			}
 			catch (Exception exception)
 			{
@@ -2206,10 +2205,34 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// delete V;
 		// insert LV into V;
 		
+		protected static PlanNode CopyPlanNode(Plan plan, PlanNode node, bool isAssignment)
+		{
+			// Emit the node as a statement, then return the compile of that statement.
+			if (isAssignment)
+			{
+				plan.PushStatementContext(new StatementContext(StatementType.Assignment));
+			}
+			try
+			{
+				var statement = node.EmitStatement(EmitMode.ForCopy);
+				var nodeCopy = Compiler.CompileStatement(plan, statement);
+				return nodeCopy;
+			}
+			finally
+			{
+				if (isAssignment)
+				{
+					plan.PopStatementContext();
+				}
+			}
+		}
+		
 		protected static PlanNode EmitTableAssignmentNode(Plan plan, Statement statement, PlanNode sourceNode, TableNode targetNode)
 		{
 			if (!(sourceNode.DataType is Schema.ITableType))
 				throw new CompilerException(CompilerException.Codes.ExpressionTypeMismatch, statement, sourceNode.DataType.Name, targetNode.DataType.Name);
+
+			TableNode targetNodeCopy = (TableNode)CopyPlanNode(plan, targetNode, true);
 				
 			//Schema.BaseTableVar LTempTableVar;
 			FrameNode frameNode = new FrameNode();
@@ -2239,7 +2262,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				InsertNode insertNode = new InsertNode();
 				insertNode.SetLineInfo(plan, statement.LineInfo);
 				insertNode.Nodes.Add(EnsureTableNode(plan, EmitIdentifierNode(plan, node.VariableName)));
-				insertNode.Nodes.Add(EmitInsertConditionNode(plan, targetNode));
+				insertNode.Nodes.Add(EmitInsertConditionNode(plan, targetNodeCopy));
 				insertNode.DetermineDataType(plan);
 				insertNode.DetermineCharacteristics(plan);
 				blockNode.Nodes.Add(insertNode);

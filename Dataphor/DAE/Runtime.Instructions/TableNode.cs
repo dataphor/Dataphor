@@ -649,7 +649,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			PrepareJoinApplicationTransaction(plan);
 			base.DetermineDevice(plan);
-			if (!_deviceSupported)
+			if (!DeviceSupported)
 				DetermineCursorBehavior(plan);
 			_symbols = Compiler.SnapshotSymbols(plan);
 			if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
@@ -701,24 +701,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// ModifySupported, true if the device supports modification statements for this node
-		protected bool _modifySupported;
 		public bool ModifySupported
 		{
-			get { return _modifySupported; }
-			set { _modifySupported = value; }
+			get { return (_characteristics & ModifySupportedFlag) == ModifySupportedFlag; }
+			set { if (value) _characteristics |= ModifySupportedFlag; else _characteristics &= NotModifySupportedFlag; }
 		}
 	
 		// ShouldSupportModify, true if the DAE should try to support the modification at this level
-		private bool _shouldSupportModify = true;
 		public bool ShouldSupportModify
 		{
-			get { return _shouldSupportModify; }
-			set { _shouldSupportModify = value; }
+			get { return (_characteristics & ShouldSupportModifyFlag) == ShouldSupportModifyFlag; }
+			set { if (value) _characteristics |= ShouldSupportModifyFlag; else _characteristics &= NotShouldSupportModifyFlag; }
 		}
 		
 		public virtual void DetermineModifySupported(Plan plan)
 		{
-			if ((TableVar.Keys.Count > 0) && _deviceSupported && ShouldSupportModify)
+			if ((TableVar.Keys.Count > 0) && DeviceSupported && ShouldSupportModify)
 			{
 				// if any child node is a tabletype and not a tablenode  
 				//	or is a table node and does not support modification, modification is not supported
@@ -727,14 +725,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if 
 						(
 							((node.DataType is Schema.TableType) && !(node is TableNode)) || 
-							((node is TableNode) && !((TableNode)node)._modifySupported)
+							((node is TableNode) && !((TableNode)node).ModifySupported)
 						)
 						{
-							_modifySupported = false;
+							ModifySupported = false;
 							return;
 						}
 				
-				_modifySupported = false;
+				ModifySupported = false;
 				// TODO: Build modification binding cache
 				#if USEMODIFICATIONBINDING
 				// Use an update to determine whether any modification would be supported against this expression
@@ -745,12 +743,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				#endif
 			}
 			else
-				_modifySupported = false;
+				ModifySupported = false;
 		}
 		
 		protected void CheckModifySupported()
 		{
-			if (!_modifySupported)
+			if (!ModifySupported)
 				throw new RuntimeException(RuntimeException.Codes.NoSupportingModificationDevice, EmitStatementAsString());
 		}
 
@@ -1408,11 +1406,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 
-		private bool _shouldCheckConcurrency = false;
 		public bool ShouldCheckConcurrency
 		{
-			get { return _shouldCheckConcurrency; }
-			set { _shouldCheckConcurrency = value; }
+			get { return (_characteristics & ShouldCheckConcurrencyFlag) == ShouldCheckConcurrencyFlag; }
+			set { if (value) _characteristics |= ShouldCheckConcurrencyFlag; else _characteristics &= NotShouldCheckConcurrencyFlag; }
 		}
 		
 		/// <summary>Performs an optimistic concurrency check for the given row.</summary>

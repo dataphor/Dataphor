@@ -187,7 +187,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			_table = table;
 			_device = _table.Device;
-			_deviceSupported = false;
+			DeviceSupported = false;
 		}
 		
 		// Table
@@ -203,7 +203,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDevice(Plan plan)
 		{
 			_device = _table.Device;
-			_deviceSupported = false;
+			DeviceSupported = false;
 		}
 		
 		public override void BindToProcess(Plan plan)
@@ -1580,7 +1580,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			_tableVar = (Schema.BaseTableVar)FindObject(plan, _alterTableVarStatement.TableVarName);
 			_device = _tableVar.Device;
-			_deviceSupported = false;
+			DeviceSupported = false;
 		}
 		
 		public override void BindToProcess(Plan plan)
@@ -2827,7 +2827,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDevice(Plan plan)
 		{
 			_device = _table.Device;
-			_deviceSupported = false;
+			DeviceSupported = false;
 		}
 		
 		public override void BindToProcess(Plan plan)
