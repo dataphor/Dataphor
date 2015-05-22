@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml;
 
 namespace Alphora.Dataphor.BOP
@@ -117,9 +118,11 @@ namespace Alphora.Dataphor.BOP
 
 		public string Write()
 		{
-			StringWriter writer = new StringWriter();
+			// Use a stream because if we use a StringWriter it uses UTF16 encoding
+			var memoryStream = new MemoryStream();
+			var writer = new StreamWriter(memoryStream);
 			InternalWrite(XmlWriter.Create(writer, GetXmlWriterSettings()));
-			return writer.ToString();
+			return Encoding.UTF8.GetString(memoryStream.ToArray());
 		}
 
 		private void InternalWrite(XmlWriter writer)
