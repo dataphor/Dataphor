@@ -21,6 +21,8 @@ namespace Alphora.Dataphor.BOP
 		public const string AncestorDocumentAttributeName = "document";
 		public const string DocumentElementName = "document";
 
+		public const bool EmbedDocumentInCDATASection = false;
+
 		public DilxDocument()
 		{
 			_ancestors = new Ancestors();
@@ -51,11 +53,19 @@ namespace Alphora.Dataphor.BOP
 				)
 				{
 					reader.ReadStartElement();
+					// NOTE: This mechanism was added to prevent non-space whitespace from being converted to spaces by attribute normalization when reading the embedded document
+					// However, the use of a CDATA section makes the resulting DFDXs unreadable, so the writer will no longer write this way, but the reader must still be able to
+					// read content this way.
 					// Support either CDATA (new method) or direct embedding of the interface (for backwards compatability)
 					if (reader.MoveToContent() == XmlNodeType.CDATA)
 						_content = reader.ReadContentAsString();
 					else
+					{
 						_content = reader.ReadOuterXml();
+						// If we are reading as an Xml document, entities in attribute values will be converted to tab characters. 
+						// These must be converted back to entities or they will be normalized away by subsequent xml readers.
+						_content = ConvertSignificantWhitespaceToEntities(_content);
+					}
 
 					// Strip out the dilx namespace due to embedding of document withing outer document
 					// TODO: Refactor this to actually parse the arguments
@@ -63,7 +73,7 @@ namespace Alphora.Dataphor.BOP
 					int contentIndex = _content.IndexOf(defaultNamespace);
 					if (contentIndex >= 0)
 						_content = _content.Remove(contentIndex, defaultNamespace.Length);
-					
+
 					// Make sure there is nothing after the document node
 					reader.Skip();
 					while (reader.MoveToContent() == XmlNodeType.EndElement)
@@ -105,6 +115,12 @@ namespace Alphora.Dataphor.BOP
 			);
 		}
 
+		private static string ConvertSignificantWhitespaceToEntities(string content)
+		{
+			// NOTE: This is a naive implementation, a more sophisticated implementation should only replace these within attributes.
+			return content.Replace("\t", "&#x9;"); //.Replace("\n", "&#xa").Replace("\r", "&#xd");
+		}
+
 		private static XmlWriterSettings GetXmlWriterSettings()
 		{
 			return new XmlWriterSettings { Encoding = System.Text.Encoding.UTF8, Indent = true };
@@ -141,7 +157,16 @@ namespace Alphora.Dataphor.BOP
 
 			// Write document element
 			writer.WriteStartElement(DocumentElementName);
-			writer.WriteCData(_content);
+			if (EmbedDocumentInCDATASection)
+			{
+				writer.WriteCData(_content);
+			}
+			else
+			{
+				writer.WriteRaw(Environment.NewLine);
+				writer.WriteRaw(_content);
+				writer.WriteRaw(Environment.NewLine);
+			}
 			writer.WriteFullEndElement();
 
 			writer.WriteEndElement();
