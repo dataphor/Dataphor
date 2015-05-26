@@ -654,6 +654,7 @@ begin
 		create operator System.Avg(System.Decimal) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Avg" }} static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.Avg(System.Money) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Avg" }} static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.Avg(System.TimeSpan) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Avg" }} static tags {{ DAE.IsSystem = "true" }}, 
+		create operator System.Concat(System.String) class "OracleDevice.OracleAggregateOperator" attributes {{ "OperatorName" = "ListAgg" }} static tags {{ DAE.IsSystem = "true" }},
 
 		create operator System.iRetrieve() class "OracleDevice.OracleRetrieve" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iProject(table) class "SQLDevice.SQLProject" static tags {{ DAE.IsSystem = "true" }}, 

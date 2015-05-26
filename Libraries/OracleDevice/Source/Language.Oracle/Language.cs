@@ -27,4 +27,15 @@ namespace Alphora.Dataphor.DAE.Language.Oracle
 			set { _optimizerHints = value == null ? String.Empty : value; }
 		}
 	}
+
+	public class OracleAggregateCallExpression : SQL.AggregateCallExpression
+	{
+        // OrderClause
+        protected SQL.OrderClause _orderClause;
+        public SQL.OrderClause OrderClause
+        {
+            get { return _orderClause; }
+            set { _orderClause = value; }
+        }
+	}
 }

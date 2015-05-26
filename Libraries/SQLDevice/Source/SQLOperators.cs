@@ -543,6 +543,18 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			get { return _operatorName; }
 			set { _operatorName = value; }
 		}
+
+		protected virtual AggregateCallExpression CreateAggregateCallExpression(SQLDevicePlan devicePlan, PlanNode planNode)
+		{
+			AggregateCallExpression expression = new AggregateCallExpression();
+			expression.Identifier = _operatorName;
+			return expression;
+		}
+
+		protected virtual AggregateCallExpression TranslateOrderDependentAggregateCallExpression(SQLDevicePlan devicePlan, PlanNode planNode, AggregateCallExpression expression)
+		{
+			return expression;
+		}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -550,8 +562,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
 			AggregateCallNode node = (AggregateCallNode)planNode;
 			TableVar sourceTableVar = ((TableNode)node.Nodes[0]).TableVar;
-			AggregateCallExpression expression = new AggregateCallExpression();
-			expression.Identifier = _operatorName;
+			AggregateCallExpression expression = CreateAggregateCallExpression(localDevicePlan, planNode);
 			
 			if (!localDevicePlan.CurrentQueryContext().IsScalarContext)
 			{
@@ -566,6 +577,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					}
 				else	
 					expression.Expressions.Add(new QualifiedFieldExpression("*")); 
+
+				expression = TranslateOrderDependentAggregateCallExpression(localDevicePlan, planNode, expression);
 					
 				return expression;
 			}
@@ -620,6 +633,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 										expression.Expressions.Add(localDevicePlan.CurrentQueryContext().GetRangeVarColumn(sourceTableVar.Columns[node.AggregateColumnIndexes[index]].Name).GetExpression());
 								else	
 									expression.Expressions.Add(new QualifiedFieldExpression("*"));
+
+								expression = TranslateOrderDependentAggregateCallExpression(localDevicePlan, planNode, expression);
 
 								selectExpression.SelectClause = new SelectClause();
 								selectExpression.SelectClause.Columns.Add(new ColumnExpression(expression, "dummy1"));
