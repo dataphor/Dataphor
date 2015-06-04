@@ -600,13 +600,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		}
 	}
 	
-	public class TableMaps : Schema.Objects
+	public class TableMaps : Schema.Objects<TableMap>
 	{
 		public TableMap this[TableVar tableVar] { get { return this[tableVar.Name]; } }
-		
-		public new TableMap this[int index] { get { return (TableMap)base[index]; } }
-		
-		public new TableMap this[string tableName] { get { return (TableMap)base[tableName]; } }
 	}
 	
 	public class OperatorMap : Schema.Object
@@ -643,13 +639,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		}
 	}
 	
-	public class OperatorMaps : Schema.Objects
+	public class OperatorMaps : Schema.Objects<OperatorMap>
 	{
 		public OperatorMap this[Operator operatorValue] { get { return this[operatorValue.OperatorName]; } }
-		
-		public new OperatorMap this[int index] { get { return (OperatorMap)base[index]; } }
-		
-		public new OperatorMap this[string operatorName] { get { return (OperatorMap)base[operatorName]; } }
 	}
 	
 	public class ApplicationTransaction : System.Object

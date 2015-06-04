@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		// Used by serializer
 		public Objects Objects { get { return this; } }
-		
+
 		// Libraries
 		private Libraries _libraries;
 		public Libraries Libraries 
@@ -486,7 +486,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
         }
         
-        public void EmitLibraries(EmissionContext context, Schema.Objects libraries)
+        public void EmitLibraries(EmissionContext context, Schema.Objects<LoadedLibrary> libraries)
         {
 			foreach (LoadedLibrary library in libraries)
 				EmitLibrary(context, library);

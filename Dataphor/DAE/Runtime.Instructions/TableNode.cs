@@ -3347,17 +3347,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected static string EmitColumnList(Schema.Key key)
+		protected static string EmitColumnList(Schema.TableVarColumnsBase columns)
 		{
 			StringBuilder result = new StringBuilder();
 			result.Append("{ ");
-			for (int index = 0; index < key.Columns.Count; index++)
+			for (int index = 0; index < columns.Count; index++)
 			{
 				if (index > 0)
 					result.Append(", ");
-				result.AppendFormat("{0}", key.Columns[index].Name);
+				result.AppendFormat("{0}", columns[index].Name);
 			}
-			if (key.Columns.Count > 0)
+			if (columns.Count > 0)
 				result.Append(" ");
 			result.Append("}");
 			return result.ToString();
@@ -3377,8 +3377,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			writer.WriteAttributeString("IsDerived", Convert.ToString(reference.ParentReference != null));
 			writer.WriteAttributeString("Name", reference.Name);
-			writer.WriteAttributeString("SourceColumns", EmitColumnList(reference.SourceKey));
-			writer.WriteAttributeString("TargetColumns", EmitColumnList(reference.TargetKey));
+			writer.WriteAttributeString("SourceColumns", EmitColumnList(reference.SourceKey.Columns));
+			writer.WriteAttributeString("TargetColumns", EmitColumnList(reference.TargetKey.Columns));
 			writer.WriteAttributeString("IsExcluded", Convert.ToString(reference.IsExcluded));
 			writer.WriteAttributeString("OriginatingReferenceName", reference.OriginatingReferenceName());
 			WritePlanTags(writer, reference.MetaData);

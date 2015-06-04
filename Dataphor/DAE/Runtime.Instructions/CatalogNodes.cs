@@ -173,16 +173,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						row[0] = sequence;
 						sequence++;
 
-						row[1] = column.ID;
-						row[2] = column.ParentObjectID;
-						row[3] = column.CatalogObjectID;
+						row[1] = -1; //column.ID;
+						row[2] = -1; //column.ParentObjectID;
+						row[3] = -1; //column.CatalogObjectID;
 						row[4] = column.Name;
-						row[5] = column.DisplayName;
-						row[6] = column.Description;
+						row[5] = column.Name; //column.DisplayName;
+						row[6] = column.Name; //column.Description;
 						row[7] = column.DataType.Name;
-						row[8] = column.IsGenerated;
-						row[9] = column.IsSystem;
-						row[10] = column.IsRemotable;
+						row[8] = false; //column.IsGenerated;
+						row[9] = false; //column.IsSystem;
+						row[10] = true; //column.IsRemotable;
 						result.Insert(row);
 					}
 				}

@@ -25,7 +25,7 @@ using D4 = Alphora.Dataphor.DAE.Language.D4;
 namespace Alphora.Dataphor.DAE.Schema
 {
 	/// <remarks> Provides the representation for a column header (Name:DataType) </remarks>
-	public class Column : Schema.Object
+	public class Column : Schema.ObjectBase
     {
 		// constructor
 		public Column(string name, IDataType dataType) : base(name)
@@ -90,7 +90,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	}
 
 	/// <remarks> Provides a container for Column objects </remarks>
-	public class Columns : Schema.Objects
+	public class Columns : Schema.BaseObjects<Column>
     {
 		public Columns() : base() {}
 		
@@ -233,18 +233,6 @@ namespace Alphora.Dataphor.DAE.Schema
 			return IsSupersetOf(columns) && (Count > columns.Count);
 		}
 
-        public new Column this[int index]
-        {
-            get { return (Column)(base[index]); }
-            set { base[index] = value; }
-        }
-
-        public new Column this[string columnName]
-        {
-			get { return (Column)base[columnName]; }
-			set { base[columnName] = value; }
-        }
-        
         public Column this[Column column]
         {
 			get { return this[IndexOfName(column.Name)]; }

@@ -199,7 +199,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		protected bool IsJoinOrder(Plan plan, Schema.JoinKey joinKey, TableNode node)
 		{
-			return (node.Supports(CursorCapability.Searchable) && (node.Order != null) && (Compiler.OrderFromKey(plan, joinKey).Equivalent(node.Order)));
+			return (node.Supports(CursorCapability.Searchable) && (node.Order != null) && (Compiler.OrderFromKey(plan, joinKey.Columns).Equivalent(node.Order)));
 		}
 
 		protected Expression _expression;
@@ -1010,7 +1010,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_semiTableAlgorithm = typeof(SearchedHavingTable);
 
 			// ensure that the right side is a searchable node
-			Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, RightKey);
+			Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, RightKey.Columns);
 		}
 	}
 	
@@ -1053,7 +1053,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_semiTableAlgorithm = typeof(SearchedWithoutTable);
 
 			// ensure that the right side is a searchable node
-			Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, RightKey);
+			Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, RightKey.Columns);
 		}
 	}
 	
@@ -1153,7 +1153,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_joinAlgorithm = typeof(TimesTable);
 			else
 			{
-				_joinOrder = Compiler.OrderFromKey(plan, _leftKey);
+				_joinOrder = Compiler.OrderFromKey(plan, _leftKey.Columns);
 				Schema.OrderColumn column;
 				for (int index = 0; index < _joinOrder.Columns.Count; index++)
 				{
@@ -1170,11 +1170,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// else if the left side is unique, order it
 					// else order the right side (should be whichever side has the least cardinality)
 					if (_rightKey.IsUnique)
-						Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey);
+						Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey.Columns);
 					else if (_leftKey.IsUnique)
-						Nodes[0] = Compiler.EnsureSearchableNode(plan, LeftNode, _leftKey);
+						Nodes[0] = Compiler.EnsureSearchableNode(plan, LeftNode, _leftKey.Columns);
 					else
-						Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey);
+						Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey.Columns);
 				}
 
 				if (IsJoinOrder(plan, _leftKey, LeftNode) && IsJoinOrder(plan, _rightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (_leftKey.IsUnique || _rightKey.IsUnique))
@@ -2879,7 +2879,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _anyOfKey = value; }
 		}
 		
-		protected void DetermineKeyColumns(string columnNames, Schema.Key key)
+		protected void DetermineKeyColumns(string columnNames, Schema.JoinKey key)
 		{
 			if (columnNames != String.Empty)
 			{
@@ -2899,10 +2899,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return (_rowExistsColumnIndex >= 0) && (Schema.Object.NamesEqual(TableVar.Columns[_rowExistsColumnIndex].Name, columnName));
 		}
 		
-        protected bool HasAllValues(Row row, Schema.Key key)
+        protected bool HasAllValues(Row row, Schema.TableVarColumnsBase columns)
         {
 			int columnIndex;
-			foreach (Schema.TableVarColumn column in key.Columns)
+			foreach (Schema.TableVarColumn column in columns)
 			{
 				columnIndex = row.DataType.Columns.IndexOfName(column.Name);
 				if ((columnIndex >= 0) && !row.HasValue(columnIndex))
@@ -2911,10 +2911,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return true;
         }
         
-        protected bool HasAnyValues(Row row, Schema.Key key)
+        protected bool HasAnyValues(Row row, Schema.TableVarColumnsBase columns)
         {
 			int columnIndex;
-			foreach (Schema.TableVarColumn column in key.Columns)
+			foreach (Schema.TableVarColumn column in columns)
 			{
 				columnIndex = row.DataType.Columns.IndexOfName(column.Name);
 				if ((columnIndex >= 0) && row.HasValue(columnIndex))
@@ -2930,7 +2930,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected bool HasValues(Row row)
 		{
-			return HasAllValues(row, _allOfKey) && ((_anyOfKey.Columns.Count == 0) || HasAnyValues(row, _anyOfKey));
+			return HasAllValues(row, _allOfKey.Columns) && ((_anyOfKey.Columns.Count == 0) || HasAnyValues(row, _anyOfKey.Columns));
 		}
 		
         protected bool HasRow(Row row)
@@ -3304,7 +3304,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_joinAlgorithm = typeof(TimesTable);
 			else
 			{
-				_joinOrder = Compiler.OrderFromKey(plan, _leftKey);
+				_joinOrder = Compiler.OrderFromKey(plan, _leftKey.Columns);
 				Schema.OrderColumn column;
 				for (int index = 0; index < _joinOrder.Columns.Count; index++)
 				{
@@ -3317,7 +3317,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// if no inputs are ordered by join keys, add an order node to the right side
 				if (!IsJoinOrder(plan, _rightKey, RightNode))
 				{
-					Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey);
+					Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey.Columns);
 					Nodes[1].DetermineDevice(plan);
 				}
 
@@ -4128,7 +4128,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_joinAlgorithm = typeof(TimesTable);
 			else
 			{
-				_joinOrder = Compiler.OrderFromKey(plan, _leftKey);
+				_joinOrder = Compiler.OrderFromKey(plan, _leftKey.Columns);
 				Schema.OrderColumn column;
 				for (int index = 0; index < _joinOrder.Columns.Count; index++)
 				{
@@ -4141,7 +4141,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// if no inputs are ordered by join keys, add an order node to the left side
 				if (!IsJoinOrder(plan, _leftKey, LeftNode))
 				{
-					Nodes[0] = Compiler.EnsureSearchableNode(plan, LeftNode, _leftKey);
+					Nodes[0] = Compiler.EnsureSearchableNode(plan, LeftNode, _leftKey.Columns);
 					Nodes[0].DetermineDevice(plan);
 				}
 

@@ -2462,12 +2462,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			
 			if (((reference.UpdateReferenceAction == ReferenceAction.Cascade) || (reference.UpdateReferenceAction == ReferenceAction.Clear) || (reference.UpdateReferenceAction == ReferenceAction.Set)) && (reference.UpdateHandler != null))
 			{
-				reference.TargetTable.EventHandlers.SafeRemove(reference.UpdateHandler);
+				reference.TargetTable.EventHandlers.SafeRemove((TableVarEventHandler)reference.UpdateHandler);
 			}
 				
 			if (((reference.DeleteReferenceAction == ReferenceAction.Cascade) || (reference.DeleteReferenceAction == ReferenceAction.Clear) || (reference.DeleteReferenceAction == ReferenceAction.Set)) && (reference.DeleteHandler != null))
 			{
-				reference.TargetTable.EventHandlers.SafeRemove(reference.DeleteHandler);
+				reference.TargetTable.EventHandlers.SafeRemove((TableVarEventHandler)reference.DeleteHandler);
 			}
 				
 			reference.SourceTable.SourceReferences.SafeRemove(reference);
@@ -2527,13 +2527,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (tableVar != null)
 			{
 				if (eventSourceColumnIndex >= 0)
-					tableVar.Columns[eventSourceColumnIndex].EventHandlers.Add(eventHandler, beforeOperatorNames);
+					tableVar.Columns[eventSourceColumnIndex].EventHandlers.Add((TableVarColumnEventHandler)eventHandler, beforeOperatorNames);
 				else
-					tableVar.EventHandlers.Add(eventHandler, beforeOperatorNames);
+					tableVar.EventHandlers.Add((TableVarEventHandler)eventHandler, beforeOperatorNames);
 				tableVar.DetermineRemotable(this);
 			}
 			else
-				((Schema.ScalarType)eventSource).EventHandlers.Add(eventHandler);
+				((Schema.ScalarType)eventSource).EventHandlers.Add((ScalarTypeEventHandler)eventHandler);
 		}
 
 		private void MoveEventHandler(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex, List<string> beforeOperatorNames)
@@ -2542,13 +2542,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (tableVar != null)
 			{
 				if (eventSourceColumnIndex >= 0)
-					tableVar.Columns[eventSourceColumnIndex].EventHandlers.MoveBefore(eventHandler, beforeOperatorNames);
+					tableVar.Columns[eventSourceColumnIndex].EventHandlers.MoveBefore((TableVarColumnEventHandler)eventHandler, beforeOperatorNames);
 				else
-					tableVar.EventHandlers.MoveBefore(eventHandler, beforeOperatorNames);
+					tableVar.EventHandlers.MoveBefore((TableVarEventHandler)eventHandler, beforeOperatorNames);
 				tableVar.DetermineRemotable(this);
 			}
 			else
-				((Schema.ScalarType)eventSource).EventHandlers.MoveBefore(eventHandler, beforeOperatorNames);
+				((Schema.ScalarType)eventSource).EventHandlers.MoveBefore((ScalarTypeEventHandler)eventHandler, beforeOperatorNames);
 		}
 
 		private void DetachEventHandler(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex)
@@ -2557,13 +2557,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (tableVar != null)
 			{
 				if (eventSourceColumnIndex >= 0)
-					tableVar.Columns[eventSourceColumnIndex].EventHandlers.SafeRemove(eventHandler);
+					tableVar.Columns[eventSourceColumnIndex].EventHandlers.SafeRemove((TableVarColumnEventHandler)eventHandler);
 				else
-					tableVar.EventHandlers.SafeRemove(eventHandler);
+					tableVar.EventHandlers.SafeRemove((TableVarEventHandler)eventHandler);
 				tableVar.DetermineRemotable(this);
 			}
 			else
-				((Schema.ScalarType)eventSource).EventHandlers.SafeRemove(eventHandler);
+				((Schema.ScalarType)eventSource).EventHandlers.SafeRemove((ScalarTypeEventHandler)eventHandler);
 		}
 
 		private List<string> GetEventHandlerBeforeOperatorNames(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex)
@@ -2805,7 +2805,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			tableVar.Constraints.SafeRemove(constraint);
 			if (constraint is Schema.RowConstraint)
-				tableVar.RowConstraints.SafeRemove(constraint);
+				tableVar.RowConstraints.SafeRemove((Schema.RowConstraint)constraint);
 			else
 			{
 				Schema.TransitionConstraint transitionConstraint = (Schema.TransitionConstraint)constraint;

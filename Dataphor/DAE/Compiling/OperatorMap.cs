@@ -65,20 +65,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 		}
     }
     
-	public class OperatorMaps : Schema.Objects
+	public class OperatorMaps : Schema.Objects<OperatorMap>
     {		
-		public new OperatorMap this[int index]
-		{
-			get { return (OperatorMap)base[index]; }
-			set { base[index] = value; }
-		}
-		
-		public new OperatorMap this[string name]
-		{
-			get { return (OperatorMap)base[name]; }
-			set { base[name] = value; }
-		}
-		
 		#if SINGLENAMESPACE
 		public new OperatorMap this[string AName, string ANameSpace]
 		{
@@ -188,15 +176,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 			}
 		}
-		
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
-		{
-			if (!(item is OperatorMap))
-				throw new SchemaException(SchemaException.Codes.OperatorMapContainer);
-			base.Validate(item);
-		}
-		#endif
 		
 		public void AddOperator(Operator operatorValue)
 		{

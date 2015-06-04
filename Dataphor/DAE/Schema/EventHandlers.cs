@@ -336,39 +336,35 @@ namespace Alphora.Dataphor.DAE.Schema
     }
     
     /// <remarks> EventHandlers </remarks>
-	public class EventHandlers : Objects
+	public class EventHandlers<T> : Objects<T> where T : EventHandler
     {
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
+		protected override void Validate(T item)
 		{
-			if (!(item is EventHandler))
-				throw new SchemaException(SchemaException.Codes.EventHandlerContainer);
-			if (IndexOf((EventHandler)item) >= 0)
-				throw new SchemaException(SchemaException.Codes.DuplicateEventHandler, ((EventHandler)item).Operator.Name, ((EventHandler)item).EventType.ToString());
+			if (IndexOf(item) >= 0)
+				throw new SchemaException(SchemaException.Codes.DuplicateEventHandler, item.Operator.Name, item.EventType.ToString());
 			base.Validate(item);
 		}
 		#endif
 		
-		protected override void Adding(Object item, int index)
+		protected override void Adding(T item, int index)
 		{
 			base.Adding(item, index);
-			EventHandler handler = (EventHandler)item;
 			int count;
-			if (_hasHandlers.TryGetValue(handler.EventType, out count))
-				_hasHandlers[handler.EventType] = count + 1;
+			if (_hasHandlers.TryGetValue(item.EventType, out count))
+				_hasHandlers[item.EventType] = count + 1;
 			else
-				_hasHandlers.Add(handler.EventType, 1);
+				_hasHandlers.Add(item.EventType, 1);
 		}
 		
-		protected override void Removing(Object item, int index)
+		protected override void Removing(T item, int index)
 		{
 			base.Removing(item, index);
-			EventHandler handler = (EventHandler)item;
 			int count;
-			if (_hasHandlers.TryGetValue(handler.EventType, out count) && count == 1)
-				_hasHandlers.Remove(handler.EventType);
+			if (_hasHandlers.TryGetValue(item.EventType, out count) && count == 1)
+				_hasHandlers.Remove(item.EventType);
 			else
-				_hasHandlers[handler.EventType] = count - 1;
+				_hasHandlers[item.EventType] = count - 1;
 		}
 
 		private Dictionary<EventType, int> _hasHandlers = new Dictionary<EventType, int>(); // key - EventType, value - integer count of events of that type
@@ -379,18 +375,6 @@ namespace Alphora.Dataphor.DAE.Schema
 			return _hasHandlers.TryGetValue(eventType, out count) && count > 0;
 		}
 
-		public new EventHandler this[int index]
-		{
-			get { return (EventHandler)base[index]; }
-			set { base[index] = value; }
-		}
-
-		public new EventHandler this[string name]
-		{
-			get { return (EventHandler)base[name]; }
-			set { base[name] = value; }
-		}
-		
 		public EventHandler this[Operator operatorValue, EventType eventType]
 		{
 			get { return this[IndexOf(operatorValue, eventType)]; }
@@ -419,7 +403,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			return -1;
 		}
 		
-		public void Add(EventHandler handler, List<string> beforeOperatorNames)
+		public void Add(T handler, List<string> beforeOperatorNames)
 		{
 			int targetIndex = Count;
 			foreach (string operatorName in beforeOperatorNames)
@@ -431,7 +415,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			Insert(targetIndex, handler);
 		}
 		
-		public void MoveBefore(EventHandler handler, List<string> beforeOperatorNames)
+		public void MoveBefore(T handler, List<string> beforeOperatorNames)
 		{
 			int currentIndex = IndexOf(handler);
 			int targetIndex = currentIndex;
@@ -449,6 +433,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
     }
+
+	public class EventHandlers : EventHandlers<EventHandler>
+	{
+	}
     
     public class ScalarTypeEventHandlers : EventHandlers
     {
@@ -460,23 +448,21 @@ namespace Alphora.Dataphor.DAE.Schema
 		[Reference]
 		private ScalarType _scalarType;
 		public ScalarType ScalarType { get { return _scalarType; } }
-		
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
+
+		protected override void Validate(EventHandler item)
 		{
 			if (!(item is ScalarTypeEventHandler))
-				throw new SchemaException(SchemaException.Codes.InvalidContainer, "ScalarTypeEventHandler");
+				throw new SchemaException(SchemaException.Codes.EventHandlerContainer);
 			base.Validate(item);
 		}
-		#endif
-		
-		protected override void Adding(Object item, int index)
+
+		protected override void Adding(EventHandler item, int index)
 		{
 			base.Adding(item, index);
 			((ScalarTypeEventHandler)item)._scalarType = _scalarType;
 		}
 		
-		protected override void Removing(Object item, int index)
+		protected override void Removing(EventHandler item, int index)
 		{
 			((ScalarTypeEventHandler)item)._scalarType = null;
 			base.Removing(item, index);
@@ -493,24 +479,22 @@ namespace Alphora.Dataphor.DAE.Schema
 		[Reference]
 		private TableVarColumn _tableVarColumn;
 		public TableVarColumn TableVarColumn { get { return _tableVarColumn; } }
-		
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
+
+		protected override void Validate(EventHandler item)
 		{
 			if (!(item is TableVarColumnEventHandler))
-				throw new SchemaException(SchemaException.Codes.InvalidContainer, "TableVarColumnEventHandler");
+				throw new SchemaException(SchemaException.Codes.EventHandlerContainer);
 			base.Validate(item);
 		}
-		#endif
 		
-		protected override void Adding(Object item, int index)
+		protected override void Adding(EventHandler item, int index)
 		{
 			base.Adding(item, index);
 			((TableVarColumnEventHandler)item)._tableVarColumn = _tableVarColumn;
 			_tableVarColumn.EventHandlersAdding(this, item);
 		}
 		
-		protected override void Removing(Object item, int index)
+		protected override void Removing(EventHandler item, int index)
 		{
 			_tableVarColumn.EventHandlersRemoving(this, item);
 			((TableVarColumnEventHandler)item)._tableVarColumn = null;
@@ -528,23 +512,21 @@ namespace Alphora.Dataphor.DAE.Schema
 		[Reference]
 		private TableVar _tableVar;
 		public TableVar TableVar { get { return _tableVar; } }
-		
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
+
+		protected override void Validate(EventHandler item)
 		{
 			if (!(item is TableVarEventHandler))
-				throw new SchemaException(SchemaException.Codes.InvalidContainer, "TableVarEventHandler");
+				throw new SchemaException(SchemaException.Codes.EventHandlerContainer);
 			base.Validate(item);
 		}
-		#endif
 		
-		protected override void Adding(Object item, int index)
+		protected override void Adding(EventHandler item, int index)
 		{
 			base.Adding(item, index);
 			((TableVarEventHandler)item)._tableVar = _tableVar;
 		}
 		
-		protected override void Removing(Object item, int index)
+		protected override void Removing(EventHandler item, int index)
 		{
 			((TableVarEventHandler)item)._tableVar = null;
 			base.Removing(item, index);

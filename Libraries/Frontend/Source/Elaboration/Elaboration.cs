@@ -785,10 +785,10 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 				reference.Columns.Add(localColumn);
 		} 
 		
-		protected void ProcessKey(ElaboratedReference reference, Schema.Key key)
+		protected void ProcessKey(ElaboratedReference reference, Schema.TableVarColumnsBase columns)
 		{
 			foreach (ElaboratedTableVarColumn referenceColumn in reference.Columns)
-				if (key.Columns.Contains(referenceColumn.Column.Name))
+				if (columns.Contains(referenceColumn.Column.Name))
 				{
 					referenceColumn.IsMaster = true;
 					referenceColumn.Visible = false;
@@ -959,7 +959,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 						reference.IsDetailLookup = true;
 
 						// set the key lookup reference columns invisible
-						ProcessKey(reference, subsetKey);
+						ProcessKey(reference, subsetKey.Columns);
 					}
 					
 					foreach (Schema.Key key in TableVar.Keys)
@@ -970,13 +970,13 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 							reference.IsDetailLookup = true;
 							
 							// set the key lookup reference columns invisible
-							ProcessKey(reference, key);
+							ProcessKey(reference, key.Columns);
 						}
 					
 					// For every reference that is included in the current reference, mark the columns of that reference as master
 					foreach (ElaboratedReference otherReference in ElaboratedReferences)	
 						if (otherReference.IsEmbedded && (otherReference.ReferenceType == ReferenceType.Lookup) && !Object.ReferenceEquals(reference, otherReference) && reference.Reference.SourceKey.Columns.IsProperSupersetOf(otherReference.Reference.SourceKey.Columns))
-							ProcessKey(reference, otherReference.Reference.SourceKey);
+							ProcessKey(reference, otherReference.Reference.SourceKey.Columns);
 							
 					// If this is an extension table and the intersection of the extension reference and the current reference is non-empty
 					if 
@@ -997,7 +997,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 									
 								// Mark the columns of the included reference master
 								if (reference.Reference.SourceKey.Columns.IsProperSupersetOf(key.Columns))
-									ProcessKey(reference, key);
+									ProcessKey(reference, key.Columns);
 							}
 					}
 					

@@ -232,29 +232,8 @@ namespace Alphora.Dataphor.DAE.Schema
 	}
     
     /// <remarks> References </remarks>
-	public class References : Objects
+	public class References : Objects<Reference>
     {
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
-		{
-			if (!(item is Reference))
-				throw new SchemaException(SchemaException.Codes.ReferenceContainer);
-			base.Validate(item);
-		}
-		#endif
-
-		public new Reference this[int index]
-		{
-			get { return (Reference)base[index]; }
-			set { base[index] = value; }
-		}
-
-		public new Reference this[string name]
-		{
-			get { return (Reference)base[name]; }
-			set { base[name] = value; }
-		}
-		
 		public int IndexOfOriginatingReference(string originatingReferenceName)
 		{
 			for (int index = 0; index < Count; index++)

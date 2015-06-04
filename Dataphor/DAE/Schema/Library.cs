@@ -503,14 +503,12 @@ namespace Alphora.Dataphor.DAE.Schema
     /// <remarks> Libraries </remarks>
 	public class Libraries : Objects
     {
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
+		protected override void Validate(Object objectValue)
 		{
-			if (!(item is Library))
-				throw new SchemaException(SchemaException.Codes.InvalidContainer, "Library");
-			base.Validate(item);
+			if (!(objectValue is Library))
+				throw new SchemaException(SchemaException.Codes.ObjectContainer);
+			base.Validate(objectValue);
 		}
-		#endif
 
 		public new Library this[int index]
 		{
@@ -666,28 +664,8 @@ namespace Alphora.Dataphor.DAE.Schema
 	}
 
     /// <remarks> LoadedLibraries </remarks>
-	public class LoadedLibraries : Objects
+	public class LoadedLibraries : Objects<LoadedLibrary>
     {
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
-		{
-			if (!(item is LoadedLibrary))
-				throw new SchemaException(SchemaException.Codes.InvalidContainer, "LoadedLibrary");
-			base.Validate(item);
-		}
-		#endif
-
-		public new LoadedLibrary this[int index]
-		{
-			get { return (LoadedLibrary)base[index]; }
-			set { base[index] = value; }
-		}
-
-		public new LoadedLibrary this[string name]
-		{
-			get { return (LoadedLibrary)base[name]; }
-			set { base[name] = value; }
-		}
     }
 
 	/// <summary>

@@ -174,27 +174,15 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		#endregion
 	}
-    
-	/// <summary>The abstract base class for all schema objects in the catalog cache.</summary>
-	public abstract class Object : System.Object, IMetaData
-    {
-		public const int MaxObjectNameLength = 200; // Maximum length of an object name
-		public const int MaxDescriptionLength = 200; // Maximum length of the persisted description of an object
-		public const string Ellipsis = "..."; // Appended to a description that was truncated for persistence
-		public const int MaxObjectIDLength = 10; // Int32.MaxValue.ToString().Length;
-		public const int MaxGeneratedNameLength = MaxObjectNameLength - MaxObjectIDLength;
-		
-		public Object(int iD, string name) : base()
+
+	/// <summary>
+	/// Simple base object containing only a name.
+	/// </summary>
+	public abstract class ObjectBase : System.Object
+	{
+		public ObjectBase(string name) : base()
 		{
-			_iD = iD;
-			Name = name;
-		}
-		
-		public Object(string name) : base()
-		{
-			_iD = GetNextObjectID();
-			//FID = -1;
-			Name = name;
+			_name = name;
 		}
 
 		// Name
@@ -205,7 +193,45 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return _name; }
 			set { _name = value; }
 		}
+
+        public override bool Equals(object objectValue)
+        {
+			if ((objectValue is Object) && ((((Object)objectValue).Name != String.Empty) || Name != String.Empty))
+				return Object.NamesEqual(((Object)objectValue).Name, Name);
+			else
+				return base.Equals(objectValue);
+        }
+
+        public override int GetHashCode()
+        {
+			return Object.Unqualify(_name).GetHashCode();
+        }
+        
+        public override string ToString()
+        {
+			return _name == String.Empty ? base.ToString() : _name;
+        }
+	}
+    
+	/// <summary>The abstract base class for all schema objects in the catalog cache.</summary>
+	public abstract class Object : ObjectBase, IMetaData
+    {
+		public const int MaxObjectNameLength = 200; // Maximum length of an object name
+		public const int MaxDescriptionLength = 200; // Maximum length of the persisted description of an object
+		public const string Ellipsis = "..."; // Appended to a description that was truncated for persistence
+		public const int MaxObjectIDLength = 10; // Int32.MaxValue.ToString().Length;
+		public const int MaxGeneratedNameLength = MaxObjectNameLength - MaxObjectIDLength;
 		
+		public Object(int iD, string name) : base(name)
+		{
+			_iD = iD;
+		}
+		
+		public Object(string name) : base(name)
+		{
+			_iD = GetNextObjectID();
+		}
+
 		// ID
 		protected int _iD;
 		/// <summary>Auto generated surrogate key for the object.</summary>
@@ -738,24 +764,6 @@ namespace Alphora.Dataphor.DAE.Schema
 				_metaData.Tags.RemoveTag("DAE.ObjectID");
 		}
 
-        public override string ToString()
-        {
-			return _name == String.Empty ? base.ToString() : _name;
-        }
-
-        public override bool Equals(object objectValue)
-        {
-			if ((objectValue is Object) && ((((Object)objectValue).Name != String.Empty) || Name != String.Empty))
-				return NamesEqual(((Object)objectValue).Name, Name);
-			else
-				return base.Equals(objectValue);
-        }
-
-        public override int GetHashCode()
-        {
-			return Unqualify(_name).GetHashCode();
-        }
-        
         public virtual Statement EmitStatement(EmitMode mode)
         {
 			throw new SchemaException(SchemaException.Codes.StatementCannotBeEmitted, GetType().Name);
@@ -1237,27 +1245,27 @@ namespace Alphora.Dataphor.DAE.Schema
 
 	public class Hashtables : BaseList<Dictionary<string, IntegerList>> { }
 
-    public class Objects : System.Object, IList
+    public class BaseObjects<T> : System.Object, IList where T : ObjectBase
     {
 		private const int DefaultInitialCapacity = 0;
 		private const int DefaultLowerBoundGrowth = 1;
 		private const int DefaultRolloverCount = 100;
 		
-		private Object[] _items;
+		private T[] _items;
 		private int _count;
 		private int _initialCapacity;
 		
-		public Objects() : base()
+		public BaseObjects() : base()
 		{
 			_initialCapacity = DefaultInitialCapacity;
 		}
 		
-		public Objects(int initialCapacity) : base()
+		public BaseObjects(int initialCapacity) : base()
 		{
 			_initialCapacity = initialCapacity;
 		}
 		
-		public Object this[int index] 
+		public T this[int index] 
 		{ 
 			get
 			{ 
@@ -1313,7 +1321,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { this[AName, String.Empty] = value; }
 		}
 		#else
-		public Object this[string name]
+		public T this[string name]
 		{
 			get
 			{
@@ -1495,66 +1503,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		#endif
 		
-		public int ResolveName(string name, NameResolutionPath path, List<string> names)
-		{
-			lock (this)
-			{
-				IntegerList indexes = InternalIndexesOf(name);
-				
-				if (!Schema.Object.IsRooted(name))
-				{
-					IntegerList levelIndexes = new IntegerList();
-					Schema.Object objectValue;
-					
-					for (int levelIndex = 0; levelIndex < path.Count; levelIndex++)
-					{
-						if (levelIndex > 0)
-							levelIndexes.Clear();
-							
-						for (int index = 0; index < indexes.Count; index++)
-						{
-							objectValue = this[indexes[index]];
-							if ((objectValue.Library == null) || path[levelIndex].ContainsName(objectValue.Library.Name))
-								levelIndexes.Add(indexes[index]);
-						}
-						
-						if (levelIndexes.Count > 0)
-						{
-							for (int index = 0; index < levelIndexes.Count; index++)
-								names.Add(this[levelIndexes[index]].Name);
-								
-							return levelIndexes.Count == 1 ? levelIndexes[0] : -1;
-						}
-					}
-				}
-				
-				if (indexes.Count > 0)
-				{
-					for (int index = 0; index < indexes.Count; index++)
-						names.Add(this[indexes[index]].Name);
-						
-					return indexes.Count == 1 ? indexes[0] : -1;
-				}
-				
-				return -1;
-			}
-		}
-		
-		public int ResolveName(string name, NameResolutionPath path)
-		{
-			List<string> names = new List<string>();
-			int index = ResolveName(name, path, names);
-			if ((index < 0) && (names.Count > 1))
-				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, name, ExceptionUtility.StringsToCommaList(names));
-			return index;
-		}
-		
-		protected int InternalIndexOf(Object item)
+		protected int InternalIndexOf(T item)
 		{
 			return InternalIndexOfName(item.Name);
 		}
 
-		public int IndexOf(Object item)
+		public int IndexOf(T item)
 		{
 			lock (this)
 			{
@@ -1572,7 +1526,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			return (IndexOfName(name) >= 0);
 		}
 		
-		public bool Contains(Object item)
+		public bool Contains(T item)
 		{
 			return IndexOf(item) >= 0;
 		}
@@ -1595,7 +1549,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		protected void InternalInsert(int index, object item)
 		{
-			Object objectValue = item as Object;
+			T objectValue = item as T;
 			if (objectValue == null)
 				throw new SchemaException(SchemaException.Codes.ObjectContainer);
 
@@ -1604,7 +1558,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			#endif
 			
 			if (_items == null)
-				_items = new Object[_initialCapacity];
+				_items = new T[_initialCapacity];
 			
 			if (_count >= _items.Length)
 				InternalSetCapacity(_items.Length * 2);
@@ -1631,7 +1585,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				
 			if (_items.Length != tempValue)
 			{
-				Object[] newItems = new Object[tempValue];
+				T[] newItems = new T[tempValue];
 				for (int index = 0; index < ((_count > tempValue) ? tempValue : _count); index++)
 					newItems[index] = _items[index];
 
@@ -1651,7 +1605,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				lock (this)
 				{
 					if (_items == null)
-						_items = new Object[value];
+						_items = new T[value];
 					InternalSetCapacity(value);
 				}
 			}
@@ -1675,7 +1629,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public void Remove(Object tempValue)
+		public void Remove(T tempValue)
 		{
 			lock (this)
 			{
@@ -1683,7 +1637,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public void SafeRemove(Object tempValue)
+		public void SafeRemove(T tempValue)
 		{
 			if (tempValue != null)
 			{
@@ -1715,7 +1669,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		protected virtual void Validate(Object objectValue)
+		protected virtual void Validate(T objectValue)
 		{
 			#if USEOBJECTVALIDATE
 			if (objectValue.Name == String.Empty)
@@ -1785,7 +1739,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			return names.Count == 0;
 		}
 		
-		protected virtual void Adding(Object objectValue, int index)
+		protected virtual void Adding(T objectValue, int index)
 		{
 			if (IsRolledOver)
 			{
@@ -1797,7 +1751,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				CheckRollover();
 		}
 		
-		protected virtual void Removing(Object objectValue, int index)
+		protected virtual void Removing(T objectValue, int index)
 		{
 			if (IsRolledOver)
 			{
@@ -1863,7 +1817,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			return _nameIndex[depth];
 		}
 		
-		protected void IndexObject(Object objectValue, int index)
+		protected void IndexObject(T objectValue, int index)
 		{
 			// Add the object to the name index
 			string name = objectValue.Name;
@@ -1882,7 +1836,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		protected void UnindexObject(Object objectValue, int index)
+		protected void UnindexObject(T objectValue, int index)
 		{
 			// Remove the object from the name index
 			string name = objectValue.Name;
@@ -1900,7 +1854,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		protected void UpdateObjectIndex(Object objectValue, int oldIndex, int newIndex)
+		protected void UpdateObjectIndex(T objectValue, int oldIndex, int newIndex)
 		{
 			// Update the objects index in the Name index
 			string name = objectValue.Name;
@@ -1918,10 +1872,10 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// IList
-		object IList.this[int index] { get { return this[index]; } set { this[index] = (Object)value; } }
-		int IList.IndexOf(object item) { return (item is Object) ? IndexOf((Object)item) : -1; }
-		bool IList.Contains(object item) { return (item is Object) ? Contains((Object)item) : false; }
-		void IList.Remove(object item) { RemoveAt(IndexOf((Object)item)); }
+		object IList.this[int index] { get { return this[index]; } set { this[index] = (T)value; } }
+		int IList.IndexOf(object item) { return (item is T) ? IndexOf((T)item) : -1; }
+		bool IList.Contains(object item) { return (item is T) ? Contains((T)item) : false; }
+		void IList.Remove(object item) { RemoveAt(IndexOf((T)item)); }
 		bool IList.IsFixedSize { get { return false; } }
 		bool IList.IsReadOnly { get { return false; } }
 		
@@ -1949,15 +1903,15 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public class SchemaObjectEnumerator : IEnumerator
 		{
-			public SchemaObjectEnumerator(Objects objects) : base()
+			public SchemaObjectEnumerator(BaseObjects<T> objects) : base()
 			{
 				_objects = objects;
 			}
 			
-			private Objects _objects;
+			private BaseObjects<T> _objects;
 			private int _current =  -1;
 
-			public Object Current { get { return _objects[_current]; } }
+			public T Current { get { return _objects[_current]; } }
 			
 			object IEnumerator.Current { get { return Current; } }
 			
@@ -1973,6 +1927,72 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
     }
+
+	public class Objects<T> : BaseObjects<T> where T : Object
+	{
+		public Objects() : base() { }
+		public Objects(int initialCapacity) : base(initialCapacity) { }
+
+		public int ResolveName(string name, NameResolutionPath path, List<string> names)
+		{
+			lock (this)
+			{
+				IntegerList indexes = InternalIndexesOf(name);
+				
+				if (!Schema.Object.IsRooted(name))
+				{
+					IntegerList levelIndexes = new IntegerList();
+					T objectValue;
+					
+					for (int levelIndex = 0; levelIndex < path.Count; levelIndex++)
+					{
+						if (levelIndex > 0)
+							levelIndexes.Clear();
+							
+						for (int index = 0; index < indexes.Count; index++)
+						{
+							objectValue = this[indexes[index]];
+							if ((objectValue.Library == null) || path[levelIndex].ContainsName(objectValue.Library.Name))
+								levelIndexes.Add(indexes[index]);
+						}
+						
+						if (levelIndexes.Count > 0)
+						{
+							for (int index = 0; index < levelIndexes.Count; index++)
+								names.Add(this[levelIndexes[index]].Name);
+								
+							return levelIndexes.Count == 1 ? levelIndexes[0] : -1;
+						}
+					}
+				}
+				
+				if (indexes.Count > 0)
+				{
+					for (int index = 0; index < indexes.Count; index++)
+						names.Add(this[indexes[index]].Name);
+						
+					return indexes.Count == 1 ? indexes[0] : -1;
+				}
+				
+				return -1;
+			}
+		}
+		
+		public int ResolveName(string name, NameResolutionPath path)
+		{
+			List<string> names = new List<string>();
+			int index = ResolveName(name, path, names);
+			if ((index < 0) && (names.Count > 1))
+				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, name, ExceptionUtility.StringsToCommaList(names));
+			return index;
+		}
+	}
+
+	public class Objects : Objects<Object>
+	{
+		public Objects() : base() { }
+		public Objects(int initialCapacity) : base(initialCapacity) { }
+	}
 
 	public abstract class CatalogObject : Object
 	{

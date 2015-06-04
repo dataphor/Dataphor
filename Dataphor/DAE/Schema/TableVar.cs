@@ -20,6 +20,25 @@ namespace Alphora.Dataphor.DAE.Schema
 	/// <remarks> Provides the representation for a column header (Name:DataType) </remarks>
 	public class TableVarColumn : Object
     {
+		public const ushort IsNilableFlag = 0x0001;
+		public const ushort NotIsNilableFlag = 0xFFFE;
+		public const ushort IsComputedFlag = 0x0002;
+		public const ushort NotIsComputedFlag = 0xFFFD;
+		public const ushort ReadOnlyFlag = 0x0004;
+		public const ushort NotReadOnlyFlag = 0xFFFB;
+		public const ushort IsDefaultRemotableFlag = 0x0008;
+		public const ushort NotIsDefaultRemotableFlag = 0xFFF7;
+		public const ushort IsValidateRemotableFlag = 0x0010;
+		public const ushort NotIsValidateRemotableFlag = 0xFFEF;
+		public const ushort IsChangeRemotableFlag = 0x0020;
+		public const ushort NotIsChangeRemotableFlag = 0xFFDF;
+		public const ushort ShouldDefaultFlag = 0x0040;
+		public const ushort NotShouldDefaultFlag = 0xFFBF;
+		public const ushort ShouldValidateFlag = 0x0080;
+		public const ushort NotShouldValidateFlag = 0xFF7F;
+		public const ushort ShouldChangeFlag = 0x0100;
+		public const ushort NotShouldChangeFlag = 0xFEFF;
+
 		public TableVarColumn(Column column) : base(column.Name)
 		{
 			SetColumn(column);
@@ -29,15 +48,15 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			SetColumn(column);
 			_columnType = columnType;
-			_readOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists));
+			ReadOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists));
 		}
 		
 		public TableVarColumn(Column column, MetaData metaData) : base(column.Name)
 		{
 			SetColumn(column);
 			MergeMetaData(metaData);
-			_isComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (_columnType != TableVarColumnType.Stored).ToString()));
-			_readOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists) || !IsComputed);
+			IsComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (_columnType != TableVarColumnType.Stored).ToString()));
+			ReadOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists) || !IsComputed);
 		}
 		
 		public TableVarColumn(Column column, MetaData metaData, TableVarColumnType columnType) : base(column.Name)
@@ -45,8 +64,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			SetColumn(column);
 			MergeMetaData(metaData);
 			_columnType = columnType;
-			_isComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (_columnType != TableVarColumnType.Stored).ToString()));
-			_readOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists) || !IsComputed);
+			IsComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (_columnType != TableVarColumnType.Stored).ToString()));
+			ReadOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists) || !IsComputed);
 		}
 		
 		public TableVarColumn(int iD, Column column, MetaData metaData, TableVarColumnType columnType) : base(iD, column.Name)
@@ -54,53 +73,55 @@ namespace Alphora.Dataphor.DAE.Schema
 			SetColumn(column);
 			MergeMetaData(metaData);
 			_columnType = columnType;
-			_isComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (_columnType != TableVarColumnType.Stored).ToString()));
-			_readOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists) || !IsComputed);
+			IsComputed = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsComputed", (_columnType != TableVarColumnType.Stored).ToString()));
+			ReadOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists) || !IsComputed);
 		}
+
+		private ushort _characteristics = IsDefaultRemotableFlag | IsValidateRemotableFlag | IsChangeRemotableFlag | ShouldDefaultFlag | ShouldValidateFlag | ShouldChangeFlag;
 		
-		private bool _isNilable;
-		public bool IsNilable
-		{
-			get { return _isNilable; }
-			set { _isNilable = value; }
+        // IsNilable
+        public bool IsNilable
+        {
+			get { return (_characteristics & IsNilableFlag) == IsNilableFlag; }
+			set { if (value) _characteristics |= IsNilableFlag; else _characteristics &= NotIsNilableFlag; }
 		}
-		
-		private bool _isComputed;
-		public bool IsComputed
-		{
-			get { return _isComputed; }
-			set { _isComputed = value; }
+        
+        // IsComputed
+        public bool IsComputed
+        {
+			get { return (_characteristics & IsComputedFlag) == IsComputedFlag; }
+			set { if (value) _characteristics |= IsComputedFlag; else _characteristics &= NotIsComputedFlag; }
 		}
-		
+        
 		public void DetermineShouldCallProposables(bool reset)
 		{
 			if (reset)
 			{
-				_shouldChange = false;
-				_shouldDefault = false;
-				_shouldValidate = false;
+				ShouldChange = false;
+				ShouldDefault = false;
+				ShouldValidate = false;
 			}
 
 			if (HasHandlers(EventType.Change))
-				_shouldChange = true;
+				ShouldChange = true;
 				
 			if (HasHandlers(EventType.Default) || (_default != null))
-				_shouldDefault = true;
+				ShouldDefault = true;
 				
 			if (HasHandlers(EventType.Validate) || HasConstraints())
-				_shouldValidate = true;
+				ShouldValidate = true;
 				
 			Schema.ScalarType scalarType = DataType as Schema.ScalarType;
 			if (scalarType != null) 
 			{
 				if (scalarType.HasHandlers(EventType.Change))
-					_shouldChange = true;
+					ShouldChange = true;
 					
 				if (scalarType.HasHandlers(EventType.Default) || (scalarType.Default != null))
-					_shouldDefault = true;
+					ShouldDefault = true;
 					
 				if (scalarType.HasHandlers(EventType.Validate) || (scalarType.Constraints.Count > 0))
-					_shouldValidate = true;
+					ShouldValidate = true;
 			}
 		}
 		
@@ -108,18 +129,18 @@ namespace Alphora.Dataphor.DAE.Schema
 		{	
 			foreach (Constraint constraint in dataType.Constraints)
 			{
-				_isValidateRemotable = _isValidateRemotable && constraint.IsRemotable;
-				if (!_isValidateRemotable)
+				IsValidateRemotable = IsValidateRemotable && constraint.IsRemotable;
+				if (!IsValidateRemotable)
 					break;
 			}
 
-			if (_isValidateRemotable)
+			if (IsValidateRemotable)
 			{
 				foreach (EventHandler handler in dataType.EventHandlers)
 					if ((handler.EventType & EventType.Validate) != 0)
 					{
-						_isValidateRemotable = _isValidateRemotable && handler.IsRemotable;
-						if (!_isValidateRemotable)
+						IsValidateRemotable = IsValidateRemotable && handler.IsRemotable;
+						if (!IsValidateRemotable)
 							break;
 					}
 
@@ -134,27 +155,27 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		private void SetIsValidateRemotable()
 		{
-			_isValidateRemotable = true;
+			IsValidateRemotable = true;
 			if (_constraints != null)
 				foreach (Constraint constraint in Constraints)
 				{
-					_isValidateRemotable = _isValidateRemotable && constraint.IsRemotable;
-					if (!_isValidateRemotable)
+					IsValidateRemotable = IsValidateRemotable && constraint.IsRemotable;
+					if (!IsValidateRemotable)
 						break;
 				}
 			
-			if (_isValidateRemotable)
+			if (IsValidateRemotable)
 			{
 				if (_eventHandlers != null)
 					foreach (EventHandler handler in _eventHandlers)
 						if ((handler.EventType & EventType.Validate) != 0)
 						{
-							_isValidateRemotable = _isValidateRemotable && handler.IsRemotable;
-							if (!_isValidateRemotable)
+							IsValidateRemotable = IsValidateRemotable && handler.IsRemotable;
+							if (!IsValidateRemotable)
 								break;
 						}
 					
-				if (_isValidateRemotable && (DataType is ScalarType))
+				if (IsValidateRemotable && (DataType is ScalarType))
 					SetIsValidateRemotable((ScalarType)DataType);
 			}
 		}
@@ -165,8 +186,8 @@ namespace Alphora.Dataphor.DAE.Schema
 				foreach (EventHandler handler in _eventHandlers)
 					if ((handler.EventType & EventType.Change) != 0)
 					{
-						_isChangeRemotable = _isChangeRemotable && handler.IsRemotable;
-						if (!_isChangeRemotable)
+						IsChangeRemotable = IsChangeRemotable && handler.IsRemotable;
+						if (!IsChangeRemotable)
 							break;
 					}
 
@@ -180,40 +201,40 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		private void SetIsChangeRemotable()
 		{
-			_isChangeRemotable = true;
+			IsChangeRemotable = true;
 			if (_eventHandlers != null)
 				foreach (EventHandler handler in _eventHandlers)
 					if ((handler.EventType & EventType.Change) != 0)
 					{
-						_isChangeRemotable = _isChangeRemotable && handler.IsRemotable;
-						if (!_isChangeRemotable)
+						IsChangeRemotable = IsChangeRemotable && handler.IsRemotable;
+						if (!IsChangeRemotable)
 							break;
 					}
 				
-			if (_isChangeRemotable && (DataType is ScalarType))
+			if (IsChangeRemotable && (DataType is ScalarType))
 				SetIsChangeRemotable((ScalarType)DataType);
 		}
 		
         private void SetIsDefaultRemotable()
         {
-			_isDefaultRemotable = _isChangeRemotable;
+			IsDefaultRemotable = IsChangeRemotable;
 			
-			if (_isDefaultRemotable)
+			if (IsDefaultRemotable)
 			{
 				if (_eventHandlers != null)
 					foreach (EventHandler handler in _eventHandlers)
 						if ((handler.EventType & EventType.Default) != 0)
 						{
-							_isDefaultRemotable = _isDefaultRemotable && handler.IsRemotable;
-							if (!_isDefaultRemotable)
+							IsDefaultRemotable = IsDefaultRemotable && handler.IsRemotable;
+							if (!IsDefaultRemotable)
 								break;
 						}
 			}
 			
-			if (_isDefaultRemotable)
+			if (IsDefaultRemotable)
 			{
 				if (_default != null)
-					_isDefaultRemotable = _isDefaultRemotable && _default.IsRemotable;
+					IsDefaultRemotable = IsDefaultRemotable && _default.IsRemotable;
 				else
 				{
 					ScalarType scalarType = DataType as ScalarType;
@@ -222,13 +243,13 @@ namespace Alphora.Dataphor.DAE.Schema
 						foreach (EventHandler handler in scalarType.EventHandlers)
 							if ((handler.EventType & EventType.Default) != 0)
 							{
-								_isDefaultRemotable = _isDefaultRemotable && handler.IsRemotable;
-								if (!_isDefaultRemotable)
+								IsDefaultRemotable = IsDefaultRemotable && handler.IsRemotable;
+								if (!IsDefaultRemotable)
 									break;
 							}
 						
-						if (_isDefaultRemotable && (scalarType.Default != null))
-							_isDefaultRemotable = _isDefaultRemotable && scalarType.Default.IsRemotable;
+						if (IsDefaultRemotable && (scalarType.Default != null))
+							IsDefaultRemotable = IsDefaultRemotable && scalarType.Default.IsRemotable;
 					}
 				}
 			}
@@ -247,7 +268,7 @@ namespace Alphora.Dataphor.DAE.Schema
         
 		internal void ConstraintsAdding(object sender, Object objectValue)
 		{
-			_isValidateRemotable = _isValidateRemotable && objectValue.IsRemotable;
+			IsValidateRemotable = IsValidateRemotable && objectValue.IsRemotable;
 		}
 		
 		internal void ConstraintsRemoving(object sender, Object objectValue)
@@ -259,11 +280,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			EventHandler localObjectValue = (EventHandler)objectValue;
 			if ((localObjectValue.EventType & EventType.Default) != 0)
-				_isDefaultRemotable = _isDefaultRemotable && localObjectValue.IsRemotable;
+				IsDefaultRemotable = IsDefaultRemotable && localObjectValue.IsRemotable;
 			if ((localObjectValue.EventType & EventType.Validate) != 0)
-				_isValidateRemotable = _isValidateRemotable && localObjectValue.IsRemotable;
+				IsValidateRemotable = IsValidateRemotable && localObjectValue.IsRemotable;
 			if ((localObjectValue.EventType & EventType.Change) != 0)
-				_isChangeRemotable = _isChangeRemotable && localObjectValue.IsRemotable;
+				IsChangeRemotable = IsChangeRemotable && localObjectValue.IsRemotable;
 		}
 		
 		internal void EventHandlersRemoving(object sender, Object objectValue)
@@ -313,12 +334,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		public TableVarColumnType ColumnType { get { return _columnType; } }
 		
         // ReadOnly
-        private bool _readOnly;
         public bool ReadOnly
         {
-			get { return _readOnly; }
-			set { _readOnly = value; }
-        }
+			get { return (_characteristics & ReadOnlyFlag) == ReadOnlyFlag; }
+			set { if (value) _characteristics |= ReadOnlyFlag; else _characteristics &= NotReadOnlyFlag; }
+		}
         
         // Default
         private TableVarColumnDefault _default;
@@ -376,51 +396,45 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
         // IsDefaultRemotable
-        private bool _isDefaultRemotable = true;
         public bool IsDefaultRemotable
         {
-			get { return _isDefaultRemotable; }
-			set { _isDefaultRemotable = value; }
-        }
+			get { return (_characteristics & IsDefaultRemotableFlag) == IsDefaultRemotableFlag; }
+			set { if (value) _characteristics |= IsDefaultRemotableFlag; else _characteristics &= NotIsDefaultRemotableFlag; }
+		}
         
         // IsValidateRemotable
-        private bool _isValidateRemotable = true;
         public bool IsValidateRemotable
         {
-			get { return _isValidateRemotable; }
-			set { _isValidateRemotable = value; }
-        }
+			get { return (_characteristics & IsValidateRemotableFlag) == IsValidateRemotableFlag; }
+			set { if (value) _characteristics |= IsValidateRemotableFlag; else _characteristics &= NotIsValidateRemotableFlag; }
+		}
         
         // IsChangeRemotable
-        private bool _isChangeRemotable = true;
         public bool IsChangeRemotable
         {
-			get { return _isChangeRemotable; }
-			set { _isChangeRemotable = value; }
-        }
+			get { return (_characteristics & IsChangeRemotableFlag) == IsChangeRemotableFlag; }
+			set { if (value) _characteristics |= IsChangeRemotableFlag; else _characteristics &= NotIsChangeRemotableFlag; }
+		}
         
         // ShouldDefault
-        private bool _shouldDefault = true;
         public bool ShouldDefault
         {
-			get { return _shouldDefault; }
-			set { _shouldDefault = value; } 
+			get { return (_characteristics & ShouldDefaultFlag) == ShouldDefaultFlag; }
+			set { if (value) _characteristics |= ShouldDefaultFlag; else _characteristics &= NotShouldDefaultFlag; }
 		}
-
+        
         // ShouldValidate
-        private bool _shouldValidate = true;
         public bool ShouldValidate
         {
-			get { return _shouldValidate; }
-			set { _shouldValidate = value; } 
+			get { return (_characteristics & ShouldValidateFlag) == ShouldValidateFlag; }
+			set { if (value) _characteristics |= ShouldValidateFlag; else _characteristics &= NotShouldValidateFlag; }
 		}
-
+        
         // ShouldChange
-        private bool _shouldChange = true;
         public bool ShouldChange
         {
-			get { return _shouldChange; }
-			set { _shouldChange = value; } 
+			get { return (_characteristics & ShouldChangeFlag) == ShouldChangeFlag; }
+			set { if (value) _characteristics |= ShouldChangeFlag; else _characteristics &= NotShouldChangeFlag; }
 		}
         
 		// Equals
@@ -477,17 +491,17 @@ namespace Alphora.Dataphor.DAE.Schema
 			return column;
 		}
 
-		protected void InternalCopy(TableVarColumn LColumn)
+		protected void InternalCopy(TableVarColumn column)
         {
-			LColumn.IsNilable = IsNilable;
-			LColumn.ReadOnly = _readOnly;
-			LColumn.IsRemotable = IsRemotable;
-			LColumn.IsDefaultRemotable = IsDefaultRemotable;
-			LColumn.IsValidateRemotable = IsValidateRemotable;
-			LColumn.IsChangeRemotable = IsChangeRemotable;
-			LColumn.ShouldChange = ShouldChange;
-			LColumn.ShouldDefault = ShouldDefault;
-			LColumn.ShouldValidate = ShouldValidate;
+			column.IsNilable = IsNilable;
+			column.ReadOnly = ReadOnly;
+			column.IsRemotable = IsRemotable;
+			column.IsDefaultRemotable = IsDefaultRemotable;
+			column.IsValidateRemotable = IsValidateRemotable;
+			column.IsChangeRemotable = IsChangeRemotable;
+			column.ShouldChange = ShouldChange;
+			column.ShouldDefault = ShouldDefault;
+			column.ShouldValidate = ShouldValidate;
         }
         
 		public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
@@ -557,7 +571,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	}
 
 	/// <remarks> Provides a container for TableVarColumn objects </remarks>
-	public class TableVarColumnsBase : Objects
+	public class TableVarColumnsBase : Objects<TableVarColumn>
     {
 		// Column lists are equal if they contain the same number of columns and all columns in the left
 		// list are also in the right list
@@ -701,32 +715,11 @@ namespace Alphora.Dataphor.DAE.Schema
 			return key;
 		}
 		
-        public new TableVarColumn this[int index]
-        {
-            get { return (TableVarColumn)(base[index]); }
-            set { base[index] = value; }
-        }
-
-        public new TableVarColumn this[string columnName]
-        {
-			get { return (TableVarColumn)base[columnName]; }
-            set { base[columnName] = value; }
-        }
-        
         public TableVarColumn this[TableVarColumn column]
         {
 			get { return this[IndexOfName(column.Name)]; }
 			set { this[IndexOfName(column.Name)] = value; }
         }
-
-		#if USEOBJECTVALIDATE
-        protected override void Validate(Object objectValue)
-        {
-            if (!(objectValue is TableVarColumn))
-                throw new SchemaException(SchemaException.Codes.InvalidContainer, "TableVarColumn");
-            base.Validate(objectValue);
-        }
-        #endif
 
         // ToString
         public override string ToString()
@@ -758,21 +751,21 @@ namespace Alphora.Dataphor.DAE.Schema
 		private TableVar _tableVar;
 		public TableVar TableVar { get { return _tableVar; } }
 
-		protected override void Validate(Object objectValue)
+		protected override void Validate(TableVarColumn objectValue)
 		{
 			base.Validate(objectValue);
 			_tableVar.ValidateChildObjectName(objectValue.Name);
 		}
 		
-		protected override void Adding(Object item, int index)
+		protected override void Adding(TableVarColumn item, int index)
 		{
 			base.Adding(item, index);
-			((TableVarColumn)item)._tableVar = _tableVar;
+			item._tableVar = _tableVar;
 		}
 		
-		protected override void Removing(Object item, int index)
+		protected override void Removing(TableVarColumn item, int index)
 		{
-			((TableVarColumn)item)._tableVar = null;
+			item._tableVar = null;
 			base.Removing(item, index);
 		}
     }
@@ -788,20 +781,25 @@ namespace Alphora.Dataphor.DAE.Schema
 		private Key _key;
 		public Key Key { get { return _key; } }
 
-		protected override void Adding(Object objectValue, int index)
+		protected override void Adding(TableVarColumn objectValue, int index)
 		{
 			base.Adding(objectValue, index);
 			if (_key != null)
 				_key.UpdateKeyName();
 		}
 
-		protected override void Removing(Object objectValue, int index)
+		protected override void Removing(TableVarColumn objectValue, int index)
 		{
 			base.Removing(objectValue, index);
 			if (_key != null)
 				_key.UpdateKeyName();
 		}
     }
+
+	public class JoinKeyColumns : TableVarColumnsBase
+	{
+		public JoinKeyColumns() : base() { }
+	}
     
 	public class OrderColumn : System.Object, ICloneable
     {
@@ -1580,9 +1578,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
     }
     
-	public class JoinKey : Key
+	public class JoinKey : System.Object
     {
-		public JoinKey() : base() {}
+		public JoinKey() : base() { }
+
+		private JoinKeyColumns _columns = new JoinKeyColumns();
+		public JoinKeyColumns Columns { get { return _columns; } }
 		
 		private bool _isUnique;
 		public bool IsUnique
@@ -1590,6 +1591,42 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return _isUnique; }
 			set { _isUnique = value; }
 		}
+
+        public override bool Equals(object objectValue)
+        {
+			JoinKey joinKey = objectValue as JoinKey;
+			if (joinKey != null)
+				return _columns.Equals(joinKey.Columns);
+
+			Key key = objectValue as Key;
+			if (key != null)
+				return _columns.Equals(key.Columns);
+
+			return false;
+        }
+        
+        // GetHashCode
+        public override int GetHashCode()
+        {
+			int hashCode = 0;
+			for (int index = 0; index < _columns.Count; index++)
+				hashCode ^= _columns[index].Name.GetHashCode();
+			return hashCode;
+        }
+
+		public override string ToString()
+		{
+			StringBuilder name = new StringBuilder();
+			name.AppendFormat("{0} {1} {2} ", Keywords.Join, Keywords.Key, Keywords.BeginList);
+			for (int index = 0; index < _columns.Count; index++)
+			{
+				if (index > 0)
+					name.AppendFormat("{0} ", Keywords.ListSeparator);
+				name.Append(_columns[index].Name);
+			}
+			name.AppendFormat("{0}{1}", _columns.Count > 0 ? " " : "", Keywords.EndList);
+			return name.ToString();
+		}        
     }
     
     #if USETYPEDLIST

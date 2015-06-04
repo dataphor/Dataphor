@@ -106,15 +106,20 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 			//if (FDerivationInfo.PageType == DerivationUtility.CEdit)
 			//	LSource.SetAttribute("openstate", "Edit");
 		}
-		
+
 		protected static string GetColumnNames(Schema.Key key, string qualifier)
 		{
+			return GetColumnNames(key.Columns, qualifier);
+		}
+		
+		protected static string GetColumnNames(Schema.TableVarColumnsBase columns, string qualifier)
+		{
 			StringBuilder columnNames = new StringBuilder();
-			for (int index = 0; index < key.Columns.Count; index++)
+			for (int index = 0; index < columns.Count; index++)
 			{
 				if (index > 0)
 					columnNames.Append(",");
-				columnNames.Append(Schema.Object.Qualify(key.Columns[index].Name, qualifier));
+				columnNames.Append(Schema.Object.Qualify(columns[index].Name, qualifier));
 			}
 			return columnNames.ToString();
 		}
@@ -137,7 +142,7 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 							"MasterKeyNames",
 							"",
 							reference.ReferenceType.ToString(),
-							GetColumnNames(reference.Reference.TargetKey, reference.TargetElaboratedTableVar.ElaboratedName)
+							GetColumnNames(reference.Reference.TargetKey.Columns, reference.TargetElaboratedTableVar.ElaboratedName)
 						);
 
 					string detailKeyNames = 
@@ -147,7 +152,7 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 							"DetailKeyNames",
 							"",
 							reference.ReferenceType.ToString(),
-							GetColumnNames(reference.Reference.SourceKey, DerivationUtility.MainElaboratedTableName)
+							GetColumnNames(reference.Reference.SourceKey.Columns, DerivationUtility.MainElaboratedTableName)
 						);
 					
 					action = element.OwnerDocument.CreateElement("showformaction");
@@ -302,8 +307,8 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 							default: formMode = "None"; pageType = DerivationUtility.View; break;
 						}
 
-						string masterKeyNames = GetColumnNames(reference.Reference.TargetKey, reference.TargetElaboratedTableVar.ElaboratedName);
-						string detailKeyNames = GetColumnNames(reference.Reference.SourceKey, DerivationUtility.MainElaboratedTableName);
+						string masterKeyNames = GetColumnNames(reference.Reference.TargetKey.Columns, reference.TargetElaboratedTableVar.ElaboratedName);
+						string detailKeyNames = GetColumnNames(reference.Reference.SourceKey.Columns, DerivationUtility.MainElaboratedTableName);
 						
 						action = element.OwnerDocument.CreateElement("showformaction");
 						action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, reference.ElaboratedName);
@@ -419,8 +424,8 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 			{
 				if ((reference.ReferenceType == ReferenceType.Lookup) || (reference.ReferenceType == ReferenceType.Parent))
 				{
-					string masterKeyNames = GetColumnNames(reference.Reference.SourceKey, reference.SourceElaboratedTableVar.ElaboratedName);
-					string detailKeyNames = GetColumnNames(reference.Reference.TargetKey, DerivationUtility.MainElaboratedTableName);
+					string masterKeyNames = GetColumnNames(reference.Reference.SourceKey.Columns, reference.SourceElaboratedTableVar.ElaboratedName);
+					string detailKeyNames = GetColumnNames(reference.Reference.TargetKey.Columns, DerivationUtility.MainElaboratedTableName);
 					
 					action = element.OwnerDocument.CreateElement("showformaction");
 					action.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, reference.ElaboratedName);
@@ -577,8 +582,8 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 		
 		protected virtual void BuildEmbeddedDetail(XmlElement element, XmlElement notebook, ElaboratedReference reference)
 		{
-			string masterKeyNames = GetColumnNames(reference.Reference.TargetKey, reference.TargetElaboratedTableVar.ElaboratedName);
-			string detailKeyNames = GetColumnNames(reference.Reference.SourceKey, DerivationUtility.MainElaboratedTableName);
+			string masterKeyNames = GetColumnNames(reference.Reference.TargetKey.Columns, reference.TargetElaboratedTableVar.ElaboratedName);
+			string detailKeyNames = GetColumnNames(reference.Reference.SourceKey.Columns, DerivationUtility.MainElaboratedTableName);
 		
 			XmlElement notebookPage = element.OwnerDocument.CreateElement("notebookframepage");
 			notebookPage.SetAttribute("name", BOP.Serializer.BOPNamespaceURI, String.Format("{0}Frame", reference.Reference.OriginatingReferenceName()));
