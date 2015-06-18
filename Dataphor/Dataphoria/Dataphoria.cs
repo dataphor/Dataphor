@@ -187,6 +187,7 @@ namespace Alphora.Dataphor.Dataphoria
 		
 		public void RefreshDocuments(string libraryName)
 		{
+			libraryName = Alphora.Dataphor.DAE.Schema.Object.EnsureUnrooted(libraryName);
 			_serverNode.Build();
 			LibraryNode libraryNode = (LibraryNode)_serverNode.LibraryNode.FindByText(libraryName);
 			if ((libraryNode != null) && (libraryNode.DocumentListNode != null))
