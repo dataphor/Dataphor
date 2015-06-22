@@ -11,7 +11,6 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<ne XYZ commalist> ::= <XYZ>{,<XYZ>}
 	<ne XYZ semicolonlist> ::= <XYZ>{;<XYZ>}
 
-
 	<script> ::=
 		<statement semicolonlist>
 
@@ -114,41 +113,41 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<type operator> ::=
 		is | as
 
-          <logical and expression> ::= 
+	<logical and expression> ::= 
 		<bitwise binary expression> {<logical and operator> <bitwise binary expression>}
 
-          <logical and operator> ::=
-              and
+	<logical and operator> ::=
+		and
 
-          <bitwise binary expression> ::= 
-              <comparison expression> {<bitwise binary operator> <comparison expression>}
+	<bitwise binary expression> ::= 
+		<comparison expression> {<bitwise binary operator> <comparison expression>}
 
-          <bitwise binary operator> ::=
-              ^ | & | "|" | "<<" | ">>"
+	<bitwise binary operator> ::=
+		^ | & | "|" | "<<" | ">>"
 
-          <comparison expression> ::= 
-              <additive expression> {<comparison operator> <additive expression>}
+	<comparison expression> ::= 
+		<additive expression> {<comparison operator> <additive expression>}
 
-          <comparison operator> ::=
-              = | "<>" | "<" | ">" | "<=" | ">=" | ?=
+	<comparison operator> ::=
+		= | "<>" | "<" | ">" | "<=" | ">=" | ?=
 
-          <additive expression> ::= 
-              <multiplicative expression> {<additive operator> <multiplicative expression>}
+	<additive expression> ::= 
+		<multiplicative expression> {<additive operator> <multiplicative expression>}
 
-          <additive operator> ::=
-              + | -
+	<additive operator> ::=
+		+ | -
 
-          <multiplicative expression> ::= 
-              <exponent expression> {<multiplicative operator> <exponent expression>}
+	<multiplicative expression> ::= 
+		<exponent expression> {<multiplicative operator> <exponent expression>}
 
-          <multiplicative operator> ::=
-              * | / | div | mod
+	<multiplicative operator> ::=
+		* | / | div | mod
 
-          <exponent expression> ::= 
-              <unary expression> {<exponent operator> <exponent expression>}
+	<exponent expression> ::= 
+		<unary expression> {<exponent operator> <exponent expression>}
 
-          <exponent operator> ::=
-              **
+	<exponent operator> ::=
+		**
 
 	<unary expression> ::=
 		{<unary operator>} <qualified factor>
@@ -156,13 +155,11 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<unary operator> ::=
 		+ | - | ~ | not | exists
 
-
 	<qualified factor> ::=			
 		<factor>[.<qualifier expression>]{"["<expression term>"]"[.<qualifier expression>]}
 
 	<qualifier expression> ::=
 		<identifier>[("("<actual parameter commalist>")") | (from <expression>)][.<qualifier expression>]
-
 
 	<indexer expression> ::=
 		"["<expression term>"]"
@@ -177,7 +174,7 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		<if expression> |
 		<case expression>
 
-          <selector expression> ::=
+	<selector expression> ::=
 		<table selector> |
 		<row selector> |
 		<cursor selector> |
@@ -208,26 +205,26 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		(alter <tag definition>) | 
 		(drop <tag name>)
 
-          <list selector> ::=
-              [<list type specifier>]"{"<expression>"}"
+	<list selector> ::=
+		[<list type specifier>]"{"<expression>"}"
 
 	<multiple column extractor> ::=
 		"{"<column name commalist>"}" from <expression>
 
-          <if expression> ::=
-              if <expression term> then <expression term> else <expression term>
+	<if expression> ::=
+		if <expression term> then <expression term> else <expression term>
 
-          <case expression> ::=
-              case [<expression>]
-                  <ne case expression item list>
-                  else <expression>
-              end
+	<case expression> ::=
+		case [<expression>]
+			<ne case expression item list>
+			else <expression>
+		end
 
-          <case expression item> ::=
-              when <expression> then <expression>
+	<case expression item> ::=
+		when <expression> then <expression>
 
-          <qualified identifier> ::=
-              [.]{<identifier>.}<identifier>
+	<qualified identifier> ::=
+		[.]{<identifier>.}<identifier>
 
 	<table selector> ::=
 		table [of (("{"<named type specifier commalist>"}") | <typeof type specifier>)] "{"<table selector item commalist>"}"
@@ -272,14 +269,14 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<column extractor> ::=
 		<column name> from <expression>
 
-          <restrict clause> ::=
-              where <expression term> [<language modifiers>]
+	<restrict clause> ::=
+		where <expression term> [<language modifiers>]
 
-          <project clause> ::=
-              over "{"<column name commalist>"}" [<language modifiers>]
+	<project clause> ::=
+		over "{"<column name commalist>"}" [<language modifiers>]
 
-          <remove clause> ::=
-              remove "{"<column name commalist>"}" [<language modifiers>]
+	<remove clause> ::=
+		remove "{"<column name commalist>"}" [<language modifiers>]
 
 	<add clause> ::=
 		add "{"<ne named expression term commalist>"}" [<language modifiers>]
@@ -290,37 +287,37 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<named column name> ::=
 		<column name> <column name>
 
-          <aggregate clause> ::=
-              group [by "{"<ne column name commalist>"}"] add "{"<ne named aggregate expression commalist>"}" [<language modifiers>]
+	<aggregate clause> ::=
+		group [by "{"<ne column name commalist>"}"] add "{"<ne named aggregate expression commalist>"}" [<language modifiers>]
 
 	<named aggregate expression> ::=
 		<aggregate expression> <column name>
 
-          <aggregate expression> ::=
-              <operator name>"("[distinct] [<column name commalist>]")"
+	<aggregate expression> ::=
+		<operator name>"("[distinct] [<column name commalist>]")"
 
-          <order clause> ::=
-              order by 
+	<order clause> ::=
+		order by 
 			"{"<order column definition commalist>"}" 
 			[include sequence [<column name>] <metadata>] 
 			[<language modifiers>]
 
-          <browse clause> ::=
-              browse by 
+	<browse clause> ::=
+		browse by 
 			"{"<order column definition commalist>"}"
 			[<language modifiers>]
 
-          <quota clause> ::=
-              return <expression term> [by "{"<order column definition commalist>"}"] [<language modifiers>]
+	<quota clause> ::=
+		return <expression term> [by "{"<order column definition commalist>"}"] [<language modifiers>]
 
-          <explode clause> ::=
-              explode by <expression term> where <expression term> 
-              [include level [<column name>] <metadata>]
-              [include sequence [<column name>] <metadata>]
-              [<language modifiers>]
+	<explode clause> ::=
+		explode by <expression term> where <expression term> 
+			[include level [<column name>] <metadata>]
+			[include sequence [<column name>] <metadata>]
+			[<language modifiers>]
 
-          <on clause> ::=
-              on <server link name>
+	<on clause> ::=
+		on <server link name>
 
 	<adorn clause> ::=
 		adorn ["{"<ne adorn item definition commalist>"}"] <metadata> <alter metadata> [<language modifiers>]
@@ -354,39 +351,39 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<language modifier value> ::=
 		<string>
 
-          <binary table operator clause> ::=
-              <binary table operator> <expression term> [<language modifiers>]
+	<binary table operator clause> ::=
+		<binary table operator> <expression term> [<language modifiers>]
 
-          <binary table operator> ::=
-              union | intersect | minus | times | divide
+	<binary table operator> ::=
+		union | intersect | minus | times | divide
 
 	<join clause> ::=
 		(join | lookup) <join specifier> [<language modifiers>]
 
-          <outer join clause> ::=
+	<outer join clause> ::=
 		(left | right) (join | lookup) <join specifier>
 			[include rowexists [<column name>] <metadata>]
 			[<language modifiers>]
 
-          <join specifier> ::=
-              <expression term> [by <expression term>]
+	<join specifier> ::=
+		<expression term> [by <expression term>]
 
-          <insert statement> ::=
-              insert [<language modifiers>] <expression> into <expression>
+	<insert statement> ::=
+		insert [<language modifiers>] <expression> into <expression>
 
-          <update statement> ::=
-              update [<language modifiers>] <expression> 
+	<update statement> ::=
+		update [<language modifiers>] <expression> 
 			set "{"<ne update column commalist>"}" 
 			[where <expression term>]
 
-          <update column> ::=
+	<update column> ::=
 		<target> := <expression term>
 
 	<target> ::=
 		<expression>
 
-          <delete statement> ::=
-              delete [<language modifiers>] <expression>
+    <delete statement> ::=
+		delete [<language modifiers>] <expression>
 
 	<variable declaration statement> ::=
 		var <ne variable definition commalist>

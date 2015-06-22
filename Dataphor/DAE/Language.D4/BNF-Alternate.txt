@@ -1,0 +1,1100 @@
+﻿This is an alternate BNF that changes precedence levels to:
+
+. []
+~ +(unary) -(unary)
+**
+* / div mod
++ -
+^ & | << >>
+in like matches between is as
+= <> < > <= >= ?=
+not exists
+and
+or xor
+where over remove add rename {} group return explode adorn redefine union minus intersect join times having without 
+
+The following non terminals in the Lexer BNF are referenced by the D4 BNF with equivalent meaning:
+	<identifier>
+	<literal>
+	<string>
+
+The same conventions found in the The Third Manifesto are used here, namely:
+	<XYZ list> ::= {<XYZ>}
+	<XYZ commalist> ::= [<XYZ>{,<XYZ>}]
+	<XYZ semicolonlist> ::= [<XYZ>{;<XYZ>}]
+	<ne XYZ list> ::= <XYZ>{<XYZ>}
+	<ne XYZ commalist> ::= <XYZ>{,<XYZ>}
+	<ne XYZ semicolonlist> ::= <XYZ>{;<XYZ>}
+
+	<script> ::=
+		<statement semicolonlist>
+
+	<terminated statement> ::=
+		[<statement>];
+
+	<block> ::=
+		begin
+			<terminated statement list>
+		end
+
+	<statement> ::=
+		<dml statement> |
+		<ddl statement> |
+		<imperative statement>
+
+	<dml statement> ::=
+		<select statement> |
+		<insert statement> |
+		<update statement> |
+		<delete statement>
+
+	<ddl statement> ::=
+		<create statement> |
+		<alter statement> |
+		<drop statement> |
+		<attach statement> |
+		<invoke statement> |
+		<detach statement> |
+		<grant statement> |
+		<revoke statement> |
+		<revert statement>
+
+	<imperative statement> ::=
+		<block> |
+		<expression> |
+		<variable declaration statement> |
+		<assignment statement> |
+		<exit statement> |
+		<if statement> |
+		<while statement> |
+		<do while statement> |
+		<for statement> |
+		<repeat statement> |
+		<break statement> |
+		<continue statement> |
+		<case statement> |
+		<try finally statement> |
+		<try except statement> |
+		<try commit statement> |
+		<raise statement>
+
+	<select statement> ::=
+		select <cursor definition>
+
+	<expression> ::= 
+		<modified expression term> <table operator clause list>
+
+	<table operator clause> ::=
+		<restrict clause> |
+		<project clause> |
+		<add clause> |
+		<rename clause> |
+		<remove clause> |
+		<aggregate clause> |
+		<quota clause> |
+		<explode clause> |
+		<adorn clause> |
+		<redefine clause> |
+		<binary table operator clause> |
+		<join clause> |
+		<outer join clause>
+
+	<modified expression term> ::=
+		<expression term> [<language modifiers>]
+
+	<expression term> ::= 
+		<logical and expression> <logical disjunction clause list>
+
+	<logical disjunction clause> ::=
+		<logical disjunction operator> <logical and expression>
+
+	<logical disjunction operator> ::=
+		or | xor
+
+	<logical and expression> ::= 
+		<logical unary expression> {<logical and operator> <logical unary expression>}
+
+	<logical and operator> ::=
+		and
+
+	<logical unary expression> ::=
+		{<logical unary operator>} <comparison expression>
+
+	<logical unary operator> ::=
+		not | exists
+
+	<comparison expression> ::= 
+		<logical binary expression> {<comparison operator> <logical binary expression>}
+
+	<comparison operator> ::=
+		= | "<>" | "<" | ">" | "<=" | ">=" | ?=
+
+	<logical binary expression> ::=
+		<bitwise binary expression> <logical or type operator clause list>
+
+	<logical or type operator clause> ::=
+		<logical ternary clause> |
+		<logical binary clause> |
+		<type operator clause>
+
+	<logical ternary clause> ::=
+		<logical ternary operator> <additive expression> and <additive expression>
+
+	<logical ternary operator> ::=
+		between
+
+	<logical binary clause> ::=
+		<logical binary operator> <bitwise binary expression>
+
+	<logical binary operator> ::=
+		in | like | matches
+
+	<type operator clause> ::=
+		<type operator> <type specifier>
+
+	<type operator> ::=
+		is | as
+
+	<bitwise binary expression> ::= 
+		<additive expression> {<bitwise binary operator> <additive expression>}
+
+	<bitwise binary operator> ::=
+		^ | & | "|" | "<<" | ">>"
+
+	<additive expression> ::= 
+		<multiplicative expression> {<additive operator> <multiplicative expression>}
+
+	<additive operator> ::=
+		+ | -
+
+	<multiplicative expression> ::= 
+		<exponent expression> {<multiplicative operator> <exponent expression>}
+
+	<multiplicative operator> ::=
+		* | / | div | mod
+
+	<exponent expression> ::= 
+		<unary expression> {<exponent operator> <exponent expression>}
+
+	<exponent operator> ::=
+		**
+
+	<unary expression> ::=
+		{<unary operator>} <qualified factor>
+
+	<unary operator> ::=
+		+ | - | ~
+
+	<qualified factor> ::=			
+		<factor>[.<qualifier expression>]{"["<expression term>"]"[.<qualifier expression>]}
+
+	<qualifier expression> ::=
+		<identifier>[("("<actual parameter commalist>")") | (from <expression>)][.<qualifier expression>]
+
+	<indexer expression> ::=
+		"["<expression term>"]"
+
+	<factor> ::=
+		<literal> |
+		<selector expression> |
+		<extractor expression> |
+		([.]<identifier>[("("<actual parameter commalist>")") | (from <expression>)]) |
+		("("<expression>")") |
+		(parent <qualified identifier>) |
+		<if expression> |
+		<case expression>
+
+	<selector expression> ::=
+		<table selector> |
+		<row selector> |
+		<cursor selector> |
+		<list selector>
+
+	<extractor expression> ::=
+		<row extractor> |
+		<column extractor> |
+		<multiple column extractor>
+
+	<metadata> ::=
+		[<tags>] [<tags>]
+
+	<tags> ::=
+		[static] tags "{"<ne tag definition commalist>"}"
+
+	<tag definition> ::=
+		[static | dynamic] <tag name> = <string>
+
+	<tag name> ::=
+		<qualified identifier>
+
+	<alter metadata> ::=
+		[alter tags "{"<alter tag definition commalist>"}"]
+
+	<alter tag definition> ::=
+		(create <tag definition>) | 
+		(alter <tag definition>) | 
+		(drop <tag name>)
+
+	<list selector> ::=
+		[<list type specifier>]"{"<expression>"}"
+
+	<multiple column extractor> ::=
+		"{"<column name commalist>"}" from <expression>
+
+	<if expression> ::=
+		if <expression term> then <expression term> else <expression term>
+
+	<case expression> ::=
+		case [<expression>]
+			<ne case expression item list>
+			else <expression>
+		end
+
+	<case expression item> ::=
+		when <expression> then <expression>
+
+	<qualified identifier> ::=
+		[.]{<identifier>.}<identifier>
+
+	<table selector> ::=
+		table [of (("{"<named type specifier commalist>"}") | <typeof type specifier>)] "{"<table selector item commalist>"}"
+
+	<table selector item> ::=
+		<expression> |
+		<key definition>
+
+	<row selector> ::=
+		row"{"<named expression term commalist>"}"
+
+	<named expression term> ::=
+		<expression term> <column name> <metadata>
+
+	<cursor selector> ::=
+		cursor"("<cursor definition>")"
+
+	<cursor definition> ::=
+		<expression> [<order clause> | <browse clause>] [<cursor capabilities>] [<cursor isolation>] [<cursor type>]
+
+	<cursor capabilities> ::=
+		capabilities "{"<cursor capability commalist>"}"
+
+	<cursor capability> ::=
+		navigable | 
+		backwardsnavigable | 
+		bookmarkable | 
+		searchable | 
+		updateable | 
+		truncateable | 
+		countable
+
+	<cursor isolation> ::=
+		isolation (none | chaos | browse | stability | isolated)
+
+	<cursor type> ::=
+		type (static | dynamic)
+
+	<row extractor> ::=
+		row from <expression>
+
+	<column extractor> ::=
+		<column name> from <expression>
+
+	<restrict clause> ::=
+		where <expression term> [<language modifiers>]
+
+	<project clause> ::=
+		over "{"<column name commalist>"}" [<language modifiers>]
+
+	<remove clause> ::=
+		remove "{"<column name commalist>"}" [<language modifiers>]
+
+	<add clause> ::=
+		add "{"<ne named expression term commalist>"}" [<language modifiers>]
+
+	<rename clause> ::=
+		rename (("{"<ne named column name commalist>"}") | (<qualified identifier> <metadata>)) [<language modifiers>]
+
+	<named column name> ::=
+		<column name> <column name>
+
+	<aggregate clause> ::=
+		group [by "{"<ne column name commalist>"}"] add "{"<ne named aggregate expression commalist>"}" [<language modifiers>]
+
+	<named aggregate expression> ::=
+		<aggregate expression> <column name>
+
+	<aggregate expression> ::=
+		<operator name>"("[distinct] [<column name commalist>]")"
+
+	<order clause> ::=
+		order by 
+			"{"<order column definition commalist>"}" 
+			[include sequence [<column name>] <metadata>] 
+			[<language modifiers>]
+
+	<browse clause> ::=
+		browse by 
+			"{"<order column definition commalist>"}"
+			[<language modifiers>]
+
+	<quota clause> ::=
+		return <expression term> [by "{"<order column definition commalist>"}"] [<language modifiers>]
+
+	<explode clause> ::=
+		explode by <expression term> where <expression term> 
+			[include level [<column name>] <metadata>]
+			[include sequence [<column name>] <metadata>]
+			[<language modifiers>]
+
+	<on clause> ::=
+		on <server link name>
+
+	<adorn clause> ::=
+		adorn ["{"<ne adorn item definition commalist>"}"] <metadata> <alter metadata> [<language modifiers>]
+
+	<adorn item definition> ::=
+		<adorn column> |
+		<key definition> |
+		<order definition> |
+		<row constraint definition> |
+		<reference definition> |
+		(alter reference <reference name> <alter metadata>)
+
+	<adorn column> ::=
+		<column name> ["{"<ne column definition item commalist>"}"] <metadata> <alter metadata>
+
+	<redefine clause> ::=
+		redefine "{"<redefine column commalist>"}" [<language modifiers>]
+
+	<redefine column> ::=
+		<column name> := <expression term>
+
+	<language modifiers> ::=
+		with "{"<ne language modifier commalist>"}"
+
+	<language modifier> ::=
+		<language modifier name> = <language modifier value>
+
+	<language modifier name> ::=
+		<qualified identifier>
+
+	<language modifier value> ::=
+		<string>
+
+	<binary table operator clause> ::=
+		<binary table operator> <expression term> [<language modifiers>]
+
+	<binary table operator> ::=
+		union | intersect | minus | times | divide
+
+	<join clause> ::=
+		(join | lookup) <join specifier> [<language modifiers>]
+
+	<outer join clause> ::=
+		(left | right) (join | lookup) <join specifier>
+			[include rowexists [<column name>] <metadata>]
+			[<language modifiers>]
+
+	<join specifier> ::=
+		<expression term> [by <expression term>]
+
+	<insert statement> ::=
+		insert [<language modifiers>] <expression> into <expression>
+
+	<update statement> ::=
+		update [<language modifiers>] <expression> 
+			set "{"<ne update column commalist>"}" 
+			[where <expression term>]
+
+	<update column> ::=
+		<target> := <expression term>
+
+	<target> ::=
+		<expression>
+
+    <delete statement> ::=
+		delete [<language modifiers>] <expression>
+
+	<variable declaration statement> ::=
+		var <ne variable definition commalist>
+
+	<variable definition> ::=
+		<qualified identifier> [: <type specifier>] [:= <expression>]
+
+	<assignment statement> ::=
+		<target> := <expression>
+
+	<exit statement> ::=
+		exit
+
+	<if statement> ::=
+		if <expression> then
+			<statement>
+		[else <statement>]
+
+	<while statement> ::=
+		while <expression> do <statement>
+
+	<do while statement> ::=
+		do <terminated statement list> while <expression>
+
+	<for statement> ::=
+		for 
+			<qualified identifier> [: <type specifier>] 
+			:= <expression> (to | downto)
+			<expression> 
+			[step <expression>] 
+			do <statement>
+
+	<repeat statement> ::=
+		repeat <terminated statement list> until <condition>
+
+	<condition> ::=
+		<expression>
+
+	<break statement> ::=
+		break
+
+	<continue statement> ::=
+		continue
+
+	<case statement> ::=
+		case [<expression>]
+			<ne case statement item list>
+			[else <terminated statement>]
+		end
+
+	<case statement item> ::=
+		when <expression> then <terminated statement>
+
+	<try finally statement> ::=
+		try
+			<terminated statement list>
+		finally
+			<terminated statement list>
+		end
+
+	<try except statement> ::=
+		try
+			<terminated statement list>
+		except
+			<terminated statement list> | <exception handler list>
+		end
+
+	<exception handler> ::=
+		on [<exception variable> :] <type specifier> do 
+			<terminated statement>
+
+	<exception variable> ::=
+		<qualified identifier>
+
+	<try commit statement> ::=
+		try
+			<terminated statement list>
+		commit
+
+	<raise statement> ::=
+		raise [<expression>]
+
+	<actual parameter> ::=
+		[var] <expression>
+
+	<create statement> ::=
+		<create table statement> |
+		<create view statement> |
+		<create constraint statement> |
+		<create reference statement> |
+		<create scalar type statement> |
+		<create operator statement> |
+		<create aggregate operator statement> |
+		<create device statement> |
+		<create sort statement> |
+		<create conversion statement> |
+		<create role statement>
+
+	<create table statement> ::=
+		create [session] table <table name> 
+			[in <device name>]
+			(
+				(from <expression>) |
+				("{"<table definition item commalist>"}")
+			)
+			<metadata>
+
+	<table name> ::=
+		<qualified identifier>
+
+	<device name> ::=
+		<qualified identifier>
+
+	<table definition item> ::=
+		<column definition> |
+		<row constraint definition> |
+		<key definition> |
+		<reference definition> |
+		<order definition>
+
+          <column definition> ::=
+              <column name> : <type specifier>
+			["{"<ne column definition item commalist>"}"]
+			<metadata>
+
+	<column definition item> ::=
+		<default definition> |
+		<constraint definition> |
+		<nil definition>
+
+          <column name> ::=
+		<qualified identifier>
+
+	<scalar type name> ::=
+		<qualified identifier>
+
+	<nil definition> ::=
+		[[not] nil]                
+
+          <key definition> ::=
+              key "{"<column name commalist>"}" <metadata>
+
+	<reference definition> ::=
+	    reference <reference name> 
+	    "{"<column name commalist>"}" 
+	    <references definition>
+	    <metadata>
+
+	<reference name> ::=
+		<qualified identifier>
+
+	<references definition> ::=
+	    references <tablevar name> "{"<column name commalist>"}" 
+	    [update (require | cascade | clear | set "{"<expression commalist>"}")] 
+	    [delete (require | cascade | clear | set "{"<expression commalist>"}")]
+
+	<tablevar name> ::=
+		<qualified identifier>
+
+	<create constraint statement> ::=
+		create [session] <constraint definition>
+
+          <constraint definition> ::=
+              constraint <constraint name> <expression> <metadata>
+
+	<constraint name> ::=
+		<qualified identifier>
+
+          <create view statement> ::=
+              create [session] view <view name> 
+			<expression> 
+			["{"<ne view definition item commalist>"}"] 
+			<metadata>
+
+          <view name> ::=
+		<qualified identifier>
+
+	<view definition item> ::=
+		<row constraint definition> |
+		<key definition> |
+		<reference definition> |
+		<order definition>
+
+          <order definition> ::=
+              order "{"<order column definition commalist>"}" <metadata>
+
+          <order column definition> ::=
+		<column name> [sort <expression>] [asc | desc] [(include | exclude) nil]
+
+          <class definition> ::=
+		class <class name> [<attributes>]
+
+	<class name> ::=
+		<string>
+
+	<attributes> ::=
+		attributes "{"<ne attribute definition commalist>"}"
+
+	<attribute definition> ::=
+		<attribute name> = <attribute value>
+
+	<attribute name> ::=
+		<string>
+
+	<attribute value> ::=
+		<string>
+
+	<alter class definition> ::=
+		alter class [<class name>] ["{"<alter attribute definition commalist>"}"]
+
+	<alter attribute definition> ::=
+		(create <attribute definition>) | 
+		(alter <attribute definition>) | 
+		(drop <attribute name>)
+
+	<create scalar type statement> ::=
+		create type <scalar type name> 
+			[like <scalar type name>]
+			["{"<scalar type definition item commalist>"}"]
+			[<class definition>]
+			<metadata>
+
+	<scalar type definition item> ::=
+		<representation definition> |
+		<constraint definition> |
+		<default definition> |
+		<special definition>
+
+	<representation definition> ::=
+		representation <representation name>
+			"{"<ne property definition commalist>"}"
+			[<class definition> | (selector <accessor block>)]
+			<metadata>
+
+	<representation name> ::=
+		<qualified identifier>
+
+	<accessor block> ::=
+		<class definition> | <expression> | <block>
+
+	<property definition> ::=
+		<property name> : <type specifier> 
+			[read <accessor block>] 
+			[write <accessor block>] 
+			<metadata>
+
+	<property name> ::=
+		<qualified identifier>
+
+	<default definition> ::=
+		default <expression> <metadata>
+
+          <row constraint definition> ::=
+		<constraint definition> |
+		<transition constraint definition>
+
+	<transition constraint definition> ::=
+		transition constraint <constraint name>
+			[on insert <expression>]
+			[on update <expression>]
+			[on delete <expression>]
+			<metadata>
+
+	<special definition> ::=
+		special <special name> <expression> <metadata>
+
+	<special name> ::=
+		<qualified identifier>
+
+	<create reference statement> ::=
+		create [session] reference <reference name>
+			<tablevar name> "{"<column name commalist>"}" 
+			<references definition>
+			<metadata>
+
+	<create operator statement> ::=
+		create [session] operator
+			<operator name>
+			"("<formal parameter commalist>")"
+			[: <type specifier>]
+			(<class definition> | <block>)
+			<metadata>
+
+	<operator name> ::=
+		<qualified identifier>
+
+	<formal parameter> ::=
+		[<modifier>] <named type specifier>
+
+	<modifier> ::=
+		[var | const]
+
+	<named type specifier> ::=
+		<qualified identifier> : <type specifier>
+
+	<type specifier> ::=
+		<generic type specifier> |
+		<scalar type specifier> |
+		<row type specifier> |
+		<table type specifier> |
+		<list type specifier> |
+		<cursor type specifier> |
+		<typeof type specifier>
+
+	<generic type specifier> ::=
+		generic
+
+	<scalar type specifier> ::=
+		[generic] scalar | <scalar type name>
+
+	<list type specifier> ::=
+		[generic] list["("<type specifier>")"]
+
+	<row type specifier> ::=
+		[generic] row["{"<named type specifier commalist>"}"]
+
+	<table type specifier> ::=
+		[generic] table["{"<named type specifier commalist>"}"]
+
+	<cursor type specifier> ::=
+		[generic] cursor["("<type specifier>")"]
+
+	<typeof type specifier> ::=
+		typeof"("<expression>")"
+
+	<formal parameter specifier> ::=
+		[<modifier>] <type specifier>
+
+	<create aggregate operator statement> ::=
+		create [session] aggregate operator
+			<operator name>
+			"("<formal parameter commalist>")"
+			: <type specifier>
+			initialization (<class definition> | <block>)
+			aggregation (<class definition> | <block>)
+			finalization (<class definition> | <block>)
+			<metadata>
+
+	<create server link statement> ::=
+		create server <server link name> <metadata>
+
+	<server link name> ::=
+		<qualified identifier>
+
+	<create device statement> ::=
+		create device <device name>
+			["{"<device map item commalist>"}"]
+			<reconciliation settings>
+			<class definition>
+			<metadata>
+
+	<device map item> ::=
+		<device scalar type map> |
+		<device operator map> |
+		<device store definition>
+
+	<device scalar type map> ::=
+		type <scalar type name> [<class definition>] <metadata>
+
+	<device operator map> ::=
+		operator <operator specifier> [<class definition>] <metadata>
+
+	<operator specifier> ::=
+		<operator name>"("<formal parameter specifier commalist>")"
+
+	<device store definition> ::=
+		store <store name> 
+			[<expression>] 
+			by (default | ("{"<index column definition commalist>"}" <metadata>))
+			[indexes (default | "{"<ne index definition commalist>"}")]
+			<metadata>
+
+	<store name> ::=
+		<qualified identifier>
+
+	<index definition> ::=
+		index "{"<index column definition commalist>"}" <metadata>
+
+	<index column definition> ::=
+		<column name> [sort <expression>] [asc | desc]
+
+	<reconciliation settings> ::=
+		[reconciliation "{"<reconciliation settings item commalist>"}"]
+
+	<reconciliation settings item> ::=
+		<reconciliation mode definition> |
+		<reconciliation master>
+
+	<reconciliation mode definition> ::=
+		mode = "{"<reconciliation mode commalist>"}"
+
+	<reconciliation mode> ::=
+		none |
+		startup |
+		command |
+		automatic
+
+	<reconciliation master> ::=
+		master = (server | device | both)
+
+	<create sort statement> ::=
+		create sort <scalar type name> using <expression> <metadata>
+
+	<create conversion statement> ::=
+		create conversion <scalar type name> to <scalar type name> using <operator name> [widening | narrowing] <metadata>
+
+	<alter statement> ::=
+		<alter table statement> |
+		<alter view statement> |
+		<alter constraint statement> |
+		<alter reference statement> |
+		<alter scalar type statement> |
+		<alter operator statement> |
+		<alter aggregate operator statement> |
+		<alter device statement> |
+		<alter sort statement>
+
+	<alter table statement> ::=
+		alter table <table name> 
+			["{"<alter table definition item commalist>"}"]
+			<alter metadata>
+
+	<alter table definition item> ::=
+		<alter column definition> |
+		<alter row constraint definition> |
+		<alter key definition> |
+		<alter reference definition> |
+		<alter order definition>
+
+	<alter row constraint definition> ::=
+		(create <row constraint definition>) |
+		(alter constraint <constraint name> [<expression>] <alter metadata>) |
+		<alter transition constraint definition> |
+		(drop [transition] constraint <constraint name>)
+
+	<alter view statement> ::=
+		alter view <view name> 
+			["{"<alter view definition item commalist>"}"]
+			<alter metadata>
+
+	<alter view definition item> ::=
+		<alter row constraint definition> |
+		<alter key definition> |
+		<alter reference definition> |
+		<alter order definition>
+
+	<alter column definition> ::=
+		create column <column definition> |
+		alter column <column name> 
+			[: <type specifier>] 
+			["{"<ne alter column definition item>"}"] 
+			<alter metadata> |
+		drop column <column name>
+
+	<alter column definition item> ::=
+		<alter default definition> |
+		<alter constraint definition> |
+		<alter nilable definition>
+
+	<alter nilable definition> ::=
+		[[not] nil]
+
+	<alter constraint statement> ::=
+		alter constraint <constraint name> [<expression>] <alter metadata>
+
+	<alter constraint definition> ::=
+		(create <constraint definition>) |
+		(alter constraint <constraint name> [<expression>] <alter metadata>) |
+		(drop constraint <constraint name>)
+
+	<alter transition constraint definition> ::=
+		alter transition constraint <constraint name>
+			[<alter transition constraint definition item>]
+			[<alter transition constraint definition item>]
+			[<alter transition constraint definition item>]
+			<alter metadata>
+
+	<alter transition constraint definition item> ::=
+		(create on <transition> <expression>) |
+		(alter on <transition> <expression>) |
+		(drop on <transition>)
+
+	<transition> ::=
+		insert | update | delete
+
+	<alter key definition> ::=
+		(create <key definition>) |
+		(alter key "{"<column name commalist>"}" <alter metadata>) |
+		(drop key "{"<column name commalist>"}")
+
+	<alter reference statement> ::=
+		alter reference <reference name> <alter metadata>
+
+	<alter reference definition> ::=
+		(create <reference definition>) |
+		(alter reference <reference name> <alter metadata>) |
+		(drop <reference name>)
+
+	<alter order definition> ::=
+		(create <order definition>) |
+		(alter order "{"<order column definition commalist>"}" <alter metadata>) |
+		(drop order "{"<order column definition commalist>"}")
+
+	<alter scalar type statement> ::=
+		alter type <scalar type name> 
+			["{"<alter scalar type definition item commalist>"}"]
+			<alter class definition>
+			<alter metadata>
+
+	<alter scalar type definition item> ::=
+		<alter representation definition> |
+		<alter constraint definition> |
+		<alter default definition> |
+		<alter special definition>
+
+	<alter representation definition> ::=
+		(create <representation definition>) |
+		(
+			alter representation 
+				<representation name> 
+				["{"<ne alter property definition commalist>"}"] 
+				[alter selector <alter accessor block>]
+				<alter metadata>
+		) |
+		(drop representation <representation name>)
+
+	<alter accessor block> ::=
+		<alter class definition> | <expression> | <block>
+
+	<alter property definition> ::=
+		(create <property definition>) |
+		(
+			alter <property name>
+				[: <type specifier>]
+				[alter read <alter accessor block>]
+				[alter write <alter accessor block>]
+				<alter metadata>
+		) |
+		(drop <property name>)
+
+	<alter special definition> ::=
+		(create <special definition>) |
+		(alter special <special name> [<expression>] <alter metadata>) |
+		(drop special <special name>)
+
+	<alter default definition> ::=
+		(create <default definition>) |
+		(alter default [<expression>] <alter metadata>) |
+		(drop default)
+
+	<alter operator statement> ::=
+		alter operator <operator name>"("<formal parameter specifier commalist>")"
+			[(<alter class definition> | <block>)]
+			<alter metadata>
+
+	<alter aggregate operator statement> ::=
+		alter aggregate operator <operator name>"("<formal parameter specifier commalist>")"
+			[initialization (<alter class definition> | <block>)]
+			[aggregation (<alter class definition> | <block>)]
+			[finalization (<alter class definition> | <block>)]
+			<alter metadata>
+
+	<alter server link statement> ::=
+		alter server <server link name> <alter metadata>
+
+	<alter device statement> ::=
+		alter device <device name> 
+			["{"<alter device map item commalist>"}"]
+			<alter reconciliation settings>
+			<alter class definition> 
+			<alter metadata>
+
+	<alter reconciliation settings> ::=
+		[alter reconciliation "{"<reconciliation settings item commalist>"}"]
+
+	<alter device map item> ::=
+		<alter device scalar type map> |
+		<alter device operator map> |
+		<alter device store definition>
+
+	<alter device scalar type map> ::=
+		(create <device scalar type map>) | 
+		(alter type <scalar type name> [<alter class definition>] <alter metadata>) | 
+		(drop type <scalar type name>)
+
+	<alter device operator map> ::=
+		(create <device operator map>) |
+		(alter operator <operator specifier> [<alter class definition>] <alter metadata>) |
+		(drop operator <operator specifier>)
+
+	<alter device store definition> ::=
+		(create <device store definition>) |
+		(alter store <store name> 
+			[<expression>] 
+			[alter by (default | ("{"<index column definition commalist>"}" <metadata>))] 
+			[alter indexes (default | "{"<alter index definition commalist>"}")] 
+			<alter metadata>) |
+		(drop store <store name>)
+
+	<alter index definition> ::=
+		(create <index definition>) |
+		(alter index "{"<index definition commalist>"}" <alter metadata>) |
+		(drop index "{"<index definition commalist>"}")
+
+	<alter sort statement> ::=
+		alter sort <scalar type name> [using <expression>] <alter metadata>
+
+	<drop statement> ::=
+		(drop table <table name>) |
+		(drop view <view name>) |
+		(drop constraint <constraint name>) |
+		(drop reference <reference name>) |
+		(drop type <scalar type name>) |
+		(drop operator <operator name>"("<formal parameter specifier commalist>")") |
+		(drop aggregate operator <operator name>"("<formal parameter specifier commalist>")") |
+		(drop device <device name>) |
+		(drop server <server name>) |
+		(drop sort <scalar type name>) |
+		(drop conversion <scalar type name> to <scalar type name> using <operator name>)
+		
+	<attach statement> ::=
+		attach [operator] <operator name> 
+			to <event source specifier> 
+			<event specifier clause>
+			[before "{"<ne operator name commalist>"}"]
+			<metadata>
+
+	<event source specifier> ::=
+		<tablevar name> |
+		(<column name> in <tablevar name>) |
+		<scalar type name>
+
+	<event specifier clause> ::=
+		on "{"<ne event specifier commalist>"}"
+
+	<event specifier> ::=
+		((before | after) (insert | update | delete)) | 
+		(default | validate | change)
+
+	<detach statement> ::=
+		detach [operator] <operator name>
+			from <event source specifier>
+			<event specifier clause>
+
+	<invoke statement> ::=
+		invoke <operator name>
+			on <event source specifier>
+			<event specifier clause>
+			before "{"<ne operator name commalist>"}"
+
+	<grant statement> ::=
+		grant <right specifier>
+			[on <catalog object specifier>] 
+			to <security specifier>
+
+	<right specifier> ::=
+		all | usage | ("{"<right name commalist>"}")
+
+	<right name> ::=
+		<qualified identifier>
+
+	<catalog object specifier> ::=
+		<qualified identifier> | <operator specifier>
+
+	<user id> ::=
+		<string>
+
+	<group name> ::=
+		<string>
+
+	<role name> ::=
+		<qualified identifier>
+
+	<security specifier> ::=
+		(user <user id>) | 
+		(role <role name>) |
+		(group <group name> [inherited] [apply recursively] [include users])
+
+	<revoke statement> ::=
+		revoke <right specifier> [on <catalog object specifier>] from <security specifier>
+
+	<revert statement> ::=
+		revert <right specifier> [on <catalog object specifier>] for <security specifier>
+
