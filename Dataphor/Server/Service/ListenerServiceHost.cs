@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			int listenerPort = overridePortNumber == 0 ? DataphorServiceUtility.DefaultListenerPortNumber : overridePortNumber;
 				
-			_listenerHost = new ServiceHost(typeof(ListenerService));
+			_listenerHost = new CustomServiceHost(typeof(ListenerService));
 
 			if (!useServiceConfiguration)
 			{

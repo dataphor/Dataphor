@@ -100,6 +100,7 @@
     <Compile Include="Schema\LibraryUtility.cs" />
     <Compile Include="Server\CatalogCache.cs" />
     <Compile Include="Server\InstanceManager.cs" />
+    <Compile Include="Service\CustomServiceHost.cs" />
     <Compile Include="Service\ListenerService.cs" />
     <Compile Include="NativeCLI\NativeCLIUtility.cs" />
     <Compile Include="NativeCLI\NativeMarshal.cs" />

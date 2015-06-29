@@ -91,9 +91,8 @@ namespace Alphora.Dataphor.DAE.Service
 						_server.LogMessage("Creating Native CLI Service...");
 						_nativeService = new NativeCLIService(_nativeServer);
 
-						// TODO: Enable configuration of endpoints through instances or app.config files
 						_server.LogMessage("Configuring Service Host...");
-						_serviceHost = new ServiceHost(_service);
+						_serviceHost = new CustomServiceHost(_service);
 
 						if (!instance.UseServiceConfiguration)
 						{						
@@ -109,7 +108,7 @@ namespace Alphora.Dataphor.DAE.Service
 						_serviceHost.Open();
 						
 						_server.LogMessage("Configuring Native CLI Service Host...");
-						_nativeServiceHost = new ServiceHost(_nativeService);
+						_nativeServiceHost = new CustomServiceHost(_nativeService);
 
 						if (!instance.UseServiceConfiguration)
 						{						

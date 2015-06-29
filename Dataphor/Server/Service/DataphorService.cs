@@ -48,7 +48,7 @@ namespace Alphora.Dataphor.DAE.Service
 			_remoteServer = remoteServer;
 			_connectionManager = new ConnectionManager(_remoteServer);
 		}
-		
+
 		private Server _server;
 		private RemoteServer _remoteServer;
 
