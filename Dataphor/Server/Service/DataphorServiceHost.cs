@@ -92,7 +92,7 @@ namespace Alphora.Dataphor.DAE.Service
 						_nativeService = new NativeCLIService(_nativeServer);
 
 						_server.LogMessage("Configuring Service Host...");
-						_serviceHost = new CustomServiceHost(_service);
+						_serviceHost = instance.UseServiceConfiguration ? new CustomServiceHost(_service) : new ServiceHost(_service);
 
 						if (!instance.UseServiceConfiguration)
 						{						
@@ -108,7 +108,7 @@ namespace Alphora.Dataphor.DAE.Service
 						_serviceHost.Open();
 						
 						_server.LogMessage("Configuring Native CLI Service Host...");
-						_nativeServiceHost = new CustomServiceHost(_nativeService);
+						_nativeServiceHost = instance.UseServiceConfiguration ? new CustomServiceHost(_nativeService) : new ServiceHost(_nativeService);
 
 						if (!instance.UseServiceConfiguration)
 						{						
