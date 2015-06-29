@@ -14159,27 +14159,6 @@ indicative of other problems, a reference will never be attached as an explicit 
 			return EmitExtendNode(plan, expression, sourceNode, expression.Expressions);
 		}
 		
-		protected static IdentifierExpression CollapseQualifiedIdentifierExpression(Plan plan, Expression expression)
-		{
-			if (expression is IdentifierExpression)
-				return (IdentifierExpression)expression;
-			
-			if (expression is QualifierExpression)
-			{
-				IdentifierExpression leftExpression = CollapseQualifiedIdentifierExpression(plan, ((QualifierExpression)expression).LeftExpression);
-				IdentifierExpression rightExpression = CollapseQualifiedIdentifierExpression(plan, ((QualifierExpression)expression).RightExpression);
-				if ((leftExpression != null) && (rightExpression != null))
-				{
-					IdentifierExpression result = new IdentifierExpression(Schema.Object.Qualify(rightExpression.Identifier, leftExpression.Identifier));
-					result.Line = leftExpression.Line;
-					result.LinePos = rightExpression.Line;
-					return result;
-				}
-			}
-			
-			return null;
-		}
-
 		public static string GetUniqueColumnName(List<string> columnNames)
 		{
 			string columnName;
@@ -14249,7 +14228,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			// Compute the list of result column names
 			foreach (NamedColumnExpression localExpression in expression.Expressions)
 			{
-				IdentifierExpression identifierExpression = CollapseQualifiedIdentifierExpression(plan, localExpression.Expression);
+				IdentifierExpression identifierExpression = Parser.CollapseQualifiedIdentifierExpression(localExpression.Expression);
 				if ((identifierExpression != null) && sourceColumns.Contains(identifierExpression.Identifier))
 					localExpression.Expression = identifierExpression;
 					

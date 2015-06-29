@@ -5,6 +5,7 @@
 */
 
 #define ALTERNATIVEOPERATORPRECEDENCE
+#define ALLOWARBITRARYAGGREGATEEXPRESSIONS
 
 using System;
 using System.Text;
@@ -2694,11 +2695,34 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return localExpression;
 		}
 
+		public static IdentifierExpression CollapseQualifiedIdentifierExpression(Expression expression)
+		{
+			if (expression is IdentifierExpression)
+				return (IdentifierExpression)expression;
+			
+			if (expression is QualifierExpression)
+			{
+				IdentifierExpression leftExpression = CollapseQualifiedIdentifierExpression(((QualifierExpression)expression).LeftExpression);
+				IdentifierExpression rightExpression = CollapseQualifiedIdentifierExpression(((QualifierExpression)expression).RightExpression);
+				if ((leftExpression != null) && (rightExpression != null))
+				{
+					IdentifierExpression result = new IdentifierExpression(Schema.Object.Qualify(rightExpression.Identifier, leftExpression.Identifier));
+					result.Line = leftExpression.Line;
+					result.LinePos = rightExpression.LinePos;
+					return result;
+				}
+			}
+			
+			return null;
+		}
+
 		/* 
 			BNF:
             <aggregate clause> ::=
                 group [by "{"<ne column name commalist>"}"] add "{"<ne named aggregate expression commalist>"}" [<language modifiers>]
-        */        
+
+				group [by "{"<ne optionally named expression term commalist>"}"] add "{"<ne named aggregate expression commalist>"}" [<language modifiers>]
+		*/        
         protected AggregateExpression AggregateClause(Expression expression)
         {
             AggregateExpression aggregateExpression = new AggregateExpression();
@@ -2706,14 +2730,90 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			aggregateExpression.SetPosition(_lexer);
 			aggregateExpression.Expression = expression;
 
+			#if ALLOWARBITRARYAGGREGATEEXPRESSIONS
+			ExtendExpression extendExpression = null;
+			NamedColumnExpressions expressionColumns = new NamedColumnExpressions();
+			#endif
+
             if (_lexer.PeekTokenSymbol(1) == Keywords.By)
             {
                 _lexer.NextToken();
+
+				#if ALLOWARBITRARYAGGREGATEEXPRESSIONS
+				NamedColumnExpressions byColumns = new NamedColumnExpressions();
+				OptionallyNamedColumnList(byColumns);
+				foreach (NamedColumnExpression column in byColumns)
+				{
+					if (!String.IsNullOrEmpty(column.ColumnAlias))
+					{
+						expressionColumns.Add(column);
+						ColumnExpression byColumn = new ColumnExpression(column.ColumnAlias);
+						byColumn.SetLineInfo(column.LineInfo);
+						aggregateExpression.ByColumns.Add(byColumn);
+					}
+					else
+					{
+						IdentifierExpression identifier = CollapseQualifiedIdentifierExpression(column.Expression);
+						if (identifier != null)
+						{
+							ColumnExpression byColumn = new ColumnExpression(identifier.Identifier);
+							byColumn.SetLineInfo(column.LineInfo);
+							aggregateExpression.ByColumns.Add(byColumn);
+						}
+						else
+						{
+							// This will error when it gets to the compiler, as it should, the column must be named if an expression is provided
+							expressionColumns.Add(column);
+						}
+					}
+				}
+
+				#else
 				ColumnList(aggregateExpression.ByColumns);
+				#endif
 			}
         
             _lexer.NextToken().CheckSymbol(Keywords.Add);
             AggregateColumnList(aggregateExpression.ComputeColumns);
+
+			#if ALLOWARBITRARYAGGREGATEEXPRESSIONS
+			foreach (AggregateColumnExpression computeColumn in aggregateExpression.ComputeColumns)
+			{
+				foreach (Expression argument in computeColumn.Arguments)
+				{
+					IdentifierExpression identifier = CollapseQualifiedIdentifierExpression(argument);
+					if (identifier != null)
+					{
+						ColumnExpression columnArgument = new ColumnExpression();
+						columnArgument.ColumnName = identifier.Identifier;
+						columnArgument.SetLineInfo(identifier.LineInfo);
+						computeColumn.Columns.Add(columnArgument);
+					}
+					else
+					{
+						string argumentName = Schema.Object.GetUniqueName();
+						ColumnExpression columnArgument = new ColumnExpression(argumentName);
+						columnArgument.SetLineInfo(argument.LineInfo);
+						computeColumn.Columns.Add(columnArgument);
+
+						NamedColumnExpression argumentColumnExpression = new NamedColumnExpression(argument, argumentName);
+						argumentColumnExpression.SetLineInfo(argument.LineInfo);
+						expressionColumns.Add(argumentColumnExpression);
+					}
+				}
+
+				computeColumn.Arguments.Clear();
+			}
+
+			if (expressionColumns.Count > 0)
+			{
+				extendExpression = new ExtendExpression(expression);
+				extendExpression.Expressions.AddRange(expressionColumns);
+				extendExpression.SetLineInfo(expression.LineInfo);
+				aggregateExpression.Expression = extendExpression;
+			}
+			#endif
+
             LanguageModifiers(aggregateExpression);
 			aggregateExpression.SetEndPosition(_lexer);
             return aggregateExpression;
@@ -2747,7 +2847,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
             <aggregate expression> ::=
                 <operator name>"("[distinct] [<column name commalist>] [order by "{"<order column definition commalist>"}"]")" [<language modifiers>]
-        */        
+
+                <operator name>"("[distinct] [<expression term commalist>] [order by "{"<order column definition commalist>"}"]")" [<language modifiers>]
+		*/        
         protected AggregateColumnExpression AggregateColumn()
         {
             AggregateColumnExpression aggregateColumnExpression = new AggregateColumnExpression();
@@ -2765,11 +2867,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				bool done = false;
 				while (!done)
 				{
+					#if ALLOWARBITRARYAGGREGATEEXPRESSIONS
+					Expression argument = ExpressionTerm();
+					aggregateColumnExpression.Arguments.Add(argument);
+					#else
 					ColumnExpression expression = new ColumnExpression();
 					expression.ColumnName = QualifiedIdentifier();
 					expression.SetPosition(_lexer);
 					aggregateColumnExpression.Columns.Add(expression);
-					
+					#endif
+
 					switch (_lexer.NextToken().AsSymbol)
 					{
 						case Keywords.ListSeparator : break;

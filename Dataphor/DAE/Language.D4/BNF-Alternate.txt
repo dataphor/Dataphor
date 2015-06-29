@@ -90,6 +90,7 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		<add clause> |
 		<rename clause> |
 		<remove clause> |
+		<specify clause> |
 		<aggregate clause> |
 		<quota clause> |
 		<explode clause> |
@@ -317,14 +318,26 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<named column name> ::=
 		<column name> <column name>
 
+	<specify clause> ::=
+		"{"<optionally named expression term commalist>"}" [<language modifiers>]
+				
+	<optionally named expression term> ::=
+		<expression term> [<column name>] <metadata>
+
 	<aggregate clause> ::=
 		group [by "{"<ne column name commalist>"}"] add "{"<ne named aggregate expression commalist>"}" [<language modifiers>]
 
-	<named aggregate expression> ::=
-		<aggregate expression> <column name>
+		// Alternate aggregate expression syntax to allow arbitrary aggregate expressions
+		group [by "{"<ne optionally named expression term commalist>"}"] add "{"<ne named aggregate expression commalist>"}" [<language modifiers>]
 
-	<aggregate expression> ::=
-		<operator name>"("[distinct] [<column name commalist>]")"
+	<named aggregate expression> ::=
+		<aggregate expression> <column name> <metadata>
+
+    <aggregate expression> ::=
+        <operator name>"("[distinct] [<column name commalist>] [order by "{"<order column definition commalist>"}"]")" [<language modifiers>]
+
+		// Alternate agregate expression syntax to allow arbitrary aggregate expressions
+        <operator name>"("[distinct] [<expression term commalist>] [order by "{"<order column definition commalist>"}"]")" [<language modifiers>]
 
 	<order clause> ::=
 		order by 
@@ -534,8 +547,8 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		<reference definition> |
 		<order definition>
 
-          <column definition> ::=
-              <column name> : <type specifier>
+	<column definition> ::=
+		<column name> : <type specifier>
 			["{"<ne column definition item commalist>"}"]
 			<metadata>
 
@@ -544,7 +557,7 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		<constraint definition> |
 		<nil definition>
 
-          <column name> ::=
+	<column name> ::=
 		<qualified identifier>
 
 	<scalar type name> ::=
@@ -553,8 +566,8 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<nil definition> ::=
 		[[not] nil]                
 
-          <key definition> ::=
-              key "{"<column name commalist>"}" <metadata>
+	<key definition> ::=
+		key "{"<column name commalist>"}" <metadata>
 
 	<reference definition> ::=
 	    reference <reference name> 
@@ -576,19 +589,19 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<create constraint statement> ::=
 		create [session] <constraint definition>
 
-          <constraint definition> ::=
-              constraint <constraint name> <expression> <metadata>
+	<constraint definition> ::=
+		constraint <constraint name> <expression> <metadata>
 
 	<constraint name> ::=
 		<qualified identifier>
 
-          <create view statement> ::=
-              create [session] view <view name> 
-			<expression> 
-			["{"<ne view definition item commalist>"}"] 
-			<metadata>
+	<create view statement> ::=
+		create [session] view <view name> 
+		<expression> 
+		["{"<ne view definition item commalist>"}"] 
+		<metadata>
 
-          <view name> ::=
+	<view name> ::=
 		<qualified identifier>
 
 	<view definition item> ::=
@@ -597,13 +610,13 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		<reference definition> |
 		<order definition>
 
-          <order definition> ::=
-              order "{"<order column definition commalist>"}" <metadata>
+	<order definition> ::=
+		order "{"<order column definition commalist>"}" <metadata>
 
-          <order column definition> ::=
+	<order column definition> ::=
 		<column name> [sort <expression>] [asc | desc] [(include | exclude) nil]
 
-          <class definition> ::=
+	<class definition> ::=
 		class <class name> [<attributes>]
 
 	<class name> ::=
@@ -666,7 +679,7 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<default definition> ::=
 		default <expression> <metadata>
 
-          <row constraint definition> ::=
+    <row constraint definition> ::=
 		<constraint definition> |
 		<transition constraint definition>
 
