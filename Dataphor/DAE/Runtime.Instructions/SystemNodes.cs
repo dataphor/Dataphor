@@ -2158,8 +2158,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				TableVar.Orders.Add(Order);
 
 			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
+			CopyReferences(plan, SourceTableVar);
 			#endif
 		}
 

@@ -74,8 +74,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Order = CopyOrder(LeftNode.Order);
 
 			#if UseReferenceDerivation
-			CopySourceReferences(plan, LeftTableVar.SourceReferences);
-			CopyTargetReferences(plan, LeftTableVar.TargetReferences);
+			CopyReferences(plan, LeftTableVar);
 			#endif
 			
 			#if UseScannedDifference

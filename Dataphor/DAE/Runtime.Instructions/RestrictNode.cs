@@ -604,8 +604,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			CopyOrders(SourceTableVar.Orders);
 
 			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
+			CopyReferences(plan, SourceTableVar);
 			#endif
 
 			if ((Order == null) && (SourceNode.Order != null))

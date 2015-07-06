@@ -1035,9 +1035,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				for (index = 0; index < tableVar.Orders.Count; index++)
 					InsertObjectAndDependencies(tableVar.Orders[index]);
 
-				for (index = 0; index < tableVar.Constraints.Count; index++)
-					if (!tableVar.Constraints[index].IsGenerated && !tableVar.Constraints[index].IsPersistent) // Generated constraints are maintained internally
-						InsertObjectAndDependencies(tableVar.Constraints[index]);
+				if (tableVar.HasConstraints())
+					for (index = 0; index < tableVar.Constraints.Count; index++)
+						if (!tableVar.Constraints[index].IsGenerated && !tableVar.Constraints[index].IsPersistent) // Generated constraints are maintained internally
+							InsertObjectAndDependencies(tableVar.Constraints[index]);
 			}
 		}
 		

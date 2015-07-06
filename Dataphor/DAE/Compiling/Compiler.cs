@@ -4192,21 +4192,26 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			if (!plan.IsEngine && view.ShouldReinferReferences)
 			{
-				Schema.Objects saveSourceReferences = new Schema.Objects();
-				Schema.Objects saveTargetReferences = new Schema.Objects();
-				foreach (Schema.Reference reference in view.DerivedReferences)
+				Schema.Objects saveReferences = new Schema.Objects();
+				if (view.HasReferences())
 				{
-					if (view.SourceReferences.Contains(reference))
-						view.SourceReferences.Remove(reference);
-					if (!saveSourceReferences.Contains(reference))
-						saveSourceReferences.Add(reference);
-					if (view.TargetReferences.Contains(reference))
-						view.TargetReferences.Remove(reference);
-					if (!saveTargetReferences.Contains(reference))
-						saveTargetReferences.Add(reference);
+					foreach (Schema.ReferenceBase reference in view.References)
+					{
+						if (reference.IsDerived)
+						{
+							if (!saveReferences.Contains(reference))
+							{
+								saveReferences.Add(reference);
+							}
+						}
+					}
+
+					foreach (Schema.ReferenceBase reference in saveReferences)
+					{
+						view.References.SafeRemove(reference);
+					}
 				}
-				
-				view.DerivedReferences.Clear();
+
 				try
 				{
 					ApplicationTransaction transaction = null;
@@ -4266,24 +4271,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 				catch
 				{
-					view.DerivedReferences.Clear();
-					view.SourceReferences.Clear();
-					view.TargetReferences.Clear();
+					view.References.Clear();
 					
-					foreach (Schema.Reference reference in saveSourceReferences)
+					foreach (Schema.ReferenceBase reference in saveReferences)
 					{
-						if (!view.SourceReferences.Contains(reference))
-							view.SourceReferences.Add(reference);
-						if (!view.DerivedReferences.Contains(reference))
-							view.DerivedReferences.Add(reference);
-					}
-					
-					foreach (Schema.Reference reference in saveTargetReferences)
-					{
-						if (!view.TargetReferences.Contains(reference))
-							view.TargetReferences.Add(reference);
-						if (!view.DerivedReferences.Contains(reference))
-							view.DerivedReferences.Add(reference);
+						if (!view.References.Contains(reference))
+							view.References.Add(reference);
 					}
 					
 					throw;

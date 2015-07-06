@@ -638,8 +638,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Order = CopyOrder(LeftNode.Order);
 			
 			#if UseReferenceDerivation
-			CopySourceReferences(plan, LeftTableVar.SourceReferences);
-			CopyTargetReferences(plan, LeftTableVar.TargetReferences);
+			CopyReferences(plan, LeftTableVar);
 			#endif
 			
 			plan.EnterRowContext();
@@ -1866,17 +1865,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DetermineOrders(plan);
 
 			#if UseReferenceDerivation
-			foreach (Schema.Reference reference in LeftTableVar.SourceReferences)
-				CopySourceReference(plan, reference, reference.IsExcluded || RightTableVar.TargetReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && LeftKey.Columns.Equals(reference.SourceKey.Columns));
-					
-			foreach (Schema.Reference reference in LeftTableVar.TargetReferences)
-				CopyTargetReference(plan, reference, reference.IsExcluded || RightTableVar.SourceReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && LeftKey.Columns.Equals(reference.TargetKey.Columns));
-					
-			foreach (Schema.Reference reference in RightTableVar.SourceReferences)
-				CopySourceReference(plan, reference, reference.IsExcluded || LeftTableVar.TargetReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && RightKey.Columns.Equals(reference.SourceKey.Columns));
-			
-			foreach (Schema.Reference reference in RightTableVar.TargetReferences)
-				CopyTargetReference(plan, reference, reference.IsExcluded || LeftTableVar.SourceReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && RightKey.Columns.Equals(reference.TargetKey.Columns));
+			if (LeftTableVar.HasReferences())
+			{
+				foreach (Schema.ReferenceBase reference in LeftTableVar.References)
+				{
+					if (reference.SourceTable.Equals(LeftTableVar))
+					{
+						CopySourceReference(plan, reference, reference.IsExcluded 
+							|| (RightTableVar.HasReferences() && RightTableVar.References.ContainsOriginatingReference(reference.OriginatingReferenceName()) && LeftKey.Columns.Equals(reference.SourceKey.Columns)));
+					}
+					else if (reference.TargetTable.Equals(LeftTableVar))
+					{
+						CopyTargetReference(plan, reference, reference.IsExcluded 
+							|| (RightTableVar.HasReferences() && RightTableVar.References.ContainsOriginatingReference(reference.OriginatingReferenceName()) && LeftKey.Columns.Equals(reference.TargetKey.Columns)));
+					}
+				}
+			}
+
+			if (RightTableVar.HasReferences())
+			{
+				foreach (Schema.ReferenceBase reference in RightTableVar.References)
+				{
+					if (reference.SourceTable.Equals(RightTableVar))
+					{
+						CopySourceReference(plan, reference, reference.IsExcluded 
+							|| (LeftTableVar.HasReferences() && LeftTableVar.References.ContainsOriginatingReference(reference.OriginatingReferenceName()) && RightKey.Columns.Equals(reference.SourceKey.Columns)));
+					}
+					else if (reference.TargetTable.Equals(RightTableVar))
+					{
+						CopyTargetReference(plan, reference, reference.IsExcluded 
+							|| (LeftTableVar.HasReferences() && LeftTableVar.References.ContainsOriginatingReference(reference.OriginatingReferenceName()) && RightKey.Columns.Equals(reference.TargetKey.Columns)));
+					}
+				}
+			}
 			#endif
 			
 			plan.EnterRowContext();

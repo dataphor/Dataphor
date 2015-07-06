@@ -1308,27 +1308,33 @@ namespace Alphora.Dataphor.DAE.Server
 				_updateConstraints = new ServerConstraintKeys();
 				_deleteConstraints = new ServerConstraintKeys();
 
-				foreach (Schema.RowConstraint constraint in _tableVar.RowConstraints)
+				if (_tableVar.HasRowConstraints())
 				{
-					if (constraint.IsDeferred)
+					foreach (Schema.RowConstraint constraint in _tableVar.RowConstraints)
 					{
-						var constraintKey = DetermineConstraintKey(constraint, constraint.ColumnFlags);
-						_insertConstraints.AddConstraintToKey(constraintKey, constraint);
-						_updateConstraints.AddConstraintToKey(constraintKey, constraint);
+						if (constraint.IsDeferred)
+						{
+							var constraintKey = DetermineConstraintKey(constraint, constraint.ColumnFlags);
+							_insertConstraints.AddConstraintToKey(constraintKey, constraint);
+							_updateConstraints.AddConstraintToKey(constraintKey, constraint);
+						}
 					}
 				}
 
-				foreach (Schema.TransitionConstraint constraint in _tableVar.InsertConstraints)
-					if (constraint.IsDeferred)
-						_insertConstraints.AddConstraintToKey(DetermineConstraintKey(constraint, constraint.InsertColumnFlags), constraint);
+				if (_tableVar.HasInsertConstraints())
+					foreach (Schema.TransitionConstraint constraint in _tableVar.InsertConstraints)
+						if (constraint.IsDeferred)
+							_insertConstraints.AddConstraintToKey(DetermineConstraintKey(constraint, constraint.InsertColumnFlags), constraint);
 
-				foreach (Schema.TransitionConstraint constraint in _tableVar.UpdateConstraints)
-					if (constraint.IsDeferred)
-						_updateConstraints.AddConstraintToKey(DetermineConstraintKey(constraint, constraint.UpdateColumnFlags), constraint);
+				if (_tableVar.HasUpdateConstraints())
+					foreach (Schema.TransitionConstraint constraint in _tableVar.UpdateConstraints)
+						if (constraint.IsDeferred)
+							_updateConstraints.AddConstraintToKey(DetermineConstraintKey(constraint, constraint.UpdateColumnFlags), constraint);
 
-				foreach (Schema.TransitionConstraint constraint in _tableVar.DeleteConstraints)
-					if (constraint.IsDeferred)
-						_deleteConstraints.AddConstraintToKey(DetermineConstraintKey(constraint, constraint.DeleteColumnFlags), constraint);
+				if (_tableVar.HasDeleteConstraints())
+					foreach (Schema.TransitionConstraint constraint in _tableVar.DeleteConstraints)
+						if (constraint.IsDeferred)
+							_deleteConstraints.AddConstraintToKey(DetermineConstraintKey(constraint, constraint.DeleteColumnFlags), constraint);
 			}
 		}
 

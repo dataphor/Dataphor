@@ -321,9 +321,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 
 				// Persistent constraints
-				for (int index = 0; index < tableVar.Constraints.Count; index++)
-					if (tableVar.Constraints[index].IsPersistent && !tableVar.Constraints[index].IsGenerated)
-						InternalInsertPersistentObject(tableVar.Constraints[index]);
+				if (tableVar.HasConstraints())
+					for (int index = 0; index < tableVar.Constraints.Count; index++)
+						if (tableVar.Constraints[index].IsPersistent && !tableVar.Constraints[index].IsGenerated)
+							InternalInsertPersistentObject(tableVar.Constraints[index]);
 			}
 		}
 

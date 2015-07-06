@@ -914,39 +914,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					row.ValuesOwned = false;
 
-					foreach (Schema.TableVarConstraint constraint in ((TableNode)Nodes[0]).TableVar.Constraints)
+					TableVar tableVar = ((TableNode)Nodes[0]).TableVar;
+					if (tableVar.HasConstraints())
 					{
-						row[0] = constraint.ID;
-						row[1] = constraint.ParentObjectID;
-						row[2] = constraint.CatalogObjectID;
-						row[3] = constraint.Name;
-						row[4] = constraint.DisplayName;
-						row[5] = constraint.Description;
-						row[6] = constraint.ConstraintType.ToString();
-
-						var rowConstraint = constraint as Schema.RowConstraint;
-						var transitionConstraint = constraint as Schema.TransitionConstraint;
-
-						if (rowConstraint != null)
+						foreach (Schema.TableVarConstraint constraint in tableVar.Constraints)
 						{
-							row[7] = false;
-							row[8] = rowConstraint.Node.SafeEmitStatementAsString(true);
-						}
+							row[0] = constraint.ID;
+							row[1] = constraint.ParentObjectID;
+							row[2] = constraint.CatalogObjectID;
+							row[3] = constraint.Name;
+							row[4] = constraint.DisplayName;
+							row[5] = constraint.Description;
+							row[6] = constraint.ConstraintType.ToString();
 
-						if (transitionConstraint != null)
-						{
-							row[7] = true;
-							row[9] = transitionConstraint.OnInsertNode == null ? null : transitionConstraint.OnInsertNode.SafeEmitStatementAsString(true);
-							row[10] = transitionConstraint.OnUpdateNode == null ? null : transitionConstraint.OnUpdateNode.SafeEmitStatementAsString(true);
-							row[11] = transitionConstraint.OnDeleteNode == null ? null : transitionConstraint.OnDeleteNode.SafeEmitStatementAsString(true);
-						}
+							var rowConstraint = constraint as Schema.RowConstraint;
+							var transitionConstraint = constraint as Schema.TransitionConstraint;
 
-						row[12] = constraint.Enforced;
-						row[13] = constraint.IsDeferred;
-						row[14] = constraint.IsGenerated;
-						row[15] = constraint.IsSystem;
-						row[16] = constraint.IsRemotable;
-						result.Insert(row);
+							if (rowConstraint != null)
+							{
+								row[7] = false;
+								row[8] = rowConstraint.Node.SafeEmitStatementAsString(true);
+							}
+
+							if (transitionConstraint != null)
+							{
+								row[7] = true;
+								row[9] = transitionConstraint.OnInsertNode == null ? null : transitionConstraint.OnInsertNode.SafeEmitStatementAsString(true);
+								row[10] = transitionConstraint.OnUpdateNode == null ? null : transitionConstraint.OnUpdateNode.SafeEmitStatementAsString(true);
+								row[11] = transitionConstraint.OnDeleteNode == null ? null : transitionConstraint.OnDeleteNode.SafeEmitStatementAsString(true);
+							}
+
+							row[12] = constraint.Enforced;
+							row[13] = constraint.IsDeferred;
+							row[14] = constraint.IsGenerated;
+							row[15] = constraint.IsSystem;
+							row[16] = constraint.IsRemotable;
+							result.Insert(row);
+						}
 					}
 				}
 				finally
@@ -1104,50 +1108,60 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					row.ValuesOwned = false;
 
-					foreach (Schema.Reference reference in ((TableNode)Nodes[0]).TableVar.SourceReferences)
+					var tableVar = ((TableNode)Nodes[0]).TableVar;
+					if (tableVar.HasReferences())
 					{
-						row[0] = reference.ID;
-						row[1] = reference.ParentObjectID;
-						row[2] = reference.CatalogObjectID;
-						row[3] = reference.Name;
-						row[4] = reference.DisplayName;
-						row[5] = reference.Description;
-						row[6] = reference.SourceTable.Name;
-						row[7] = reference.TargetTable.Name;
-						row[8] = reference.Enforced;
-						row[9] = reference.IsDerived;
-						row[10] = true;
-						row[11] = reference.ParentReference == null ? null : reference.ParentReference.Name;
-						row[12] = reference.IsExcluded;
-						row[13] = reference.UpdateReferenceAction.ToString();
-						row[14] = reference.DeleteReferenceAction.ToString();
-						row[15] = reference.IsGenerated;
-						row[16] = reference.IsSystem;
-						row[17] = reference.IsRemotable;
-						result.Insert(row);
-					}
-
-					foreach (Schema.Reference reference in ((TableNode)Nodes[0]).TableVar.TargetReferences)
-					{
-						row[0] = reference.ID;
-						row[1] = reference.ParentObjectID;
-						row[2] = reference.CatalogObjectID;
-						row[3] = reference.Name;
-						row[4] = reference.DisplayName;
-						row[5] = reference.Description;
-						row[6] = reference.SourceTable.Name;
-						row[7] = reference.TargetTable.Name;
-						row[8] = reference.Enforced;
-						row[9] = reference.IsDerived;
-						row[10] = false;
-						row[11] = reference.ParentReference == null ? null : reference.ParentReference.Name;
-						row[12] = reference.IsExcluded;
-						row[13] = reference.UpdateReferenceAction.ToString();
-						row[14] = reference.DeleteReferenceAction.ToString();
-						row[15] = reference.IsGenerated;
-						row[16] = reference.IsSystem;
-						row[17] = reference.IsRemotable;
-						result.Insert(row);
+						foreach (Schema.ReferenceBase referenceBase in tableVar.References)
+						{
+							if (referenceBase.SourceTable.Equals(tableVar))
+							{
+								Schema.Reference reference = referenceBase as Schema.Reference;
+								Schema.DerivedReference derivedReference = referenceBase as Schema.DerivedReference;
+								row[0] = referenceBase.ID;
+								row[1] = referenceBase.ParentObjectID;
+								row[2] = referenceBase.CatalogObjectID;
+								row[3] = referenceBase.Name;
+								row[4] = referenceBase.DisplayName;
+								row[5] = referenceBase.Description;
+								row[6] = referenceBase.SourceTable.Name;
+								row[7] = referenceBase.TargetTable.Name;
+								row[8] = referenceBase.Enforced;
+								row[9] = referenceBase.IsDerived;
+								row[10] = true;
+								row[11] = derivedReference == null ? null : derivedReference.ParentReference.Name;
+								row[12] = derivedReference == null ? false : derivedReference.IsExcluded;
+								row[13] = reference == null ? null : reference.UpdateReferenceAction.ToString();
+								row[14] = reference == null ? null : reference.DeleteReferenceAction.ToString();
+								row[15] = referenceBase.IsGenerated;
+								row[16] = referenceBase.IsSystem;
+								row[17] = referenceBase.IsRemotable;
+								result.Insert(row);
+							}
+							else if (referenceBase.TargetTable.Equals(tableVar))
+							{
+								Schema.Reference reference = referenceBase as Schema.Reference;
+								Schema.DerivedReference derivedReference = referenceBase as Schema.DerivedReference;
+								row[0] = referenceBase.ID;
+								row[1] = referenceBase.ParentObjectID;
+								row[2] = referenceBase.CatalogObjectID;
+								row[3] = referenceBase.Name;
+								row[4] = referenceBase.DisplayName;
+								row[5] = referenceBase.Description;
+								row[6] = referenceBase.SourceTable.Name;
+								row[7] = referenceBase.TargetTable.Name;
+								row[8] = referenceBase.Enforced;
+								row[9] = referenceBase.IsDerived;
+								row[10] = false;
+								row[11] = derivedReference == null ? null : derivedReference.ParentReference.Name;
+								row[12] = derivedReference == null ? false : derivedReference.IsExcluded;
+								row[13] = reference == null ? null : reference.UpdateReferenceAction.ToString();
+								row[14] = reference == null ? null : reference.DeleteReferenceAction.ToString();
+								row[15] = referenceBase.IsGenerated;
+								row[16] = referenceBase.IsSystem;
+								row[17] = referenceBase.IsRemotable;
+								result.Insert(row);
+							}
+						}
 					}
 				}
 				finally
@@ -1209,34 +1223,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					row.ValuesOwned = false;
 
-					foreach (Schema.Reference reference in ((TableNode)Nodes[0]).TableVar.SourceReferences)
+					var tableVar = ((TableNode)Nodes[0]).TableVar;
+					if (tableVar.HasReferences())
 					{
-						for (int index = 0; index < reference.SourceKey.Columns.Count; index++)
+						foreach (Schema.ReferenceBase reference in tableVar.References)
 						{
-							row[0] = reference.ID;
-							row[1] = index;
-							row[2] = reference.SourceKey.Columns[index].ID;
-							row[3] = reference.SourceKey.Columns[index].Name;
-							row[4] = reference.TargetKey.Columns[index].ID;
-							row[5] = reference.TargetKey.Columns[index].Name;
+							if (reference.SourceTable.Equals(tableVar))
+							{
+								for (int index = 0; index < reference.SourceKey.Columns.Count; index++)
+								{
+									row[0] = reference.ID;
+									row[1] = index;
+									row[2] = reference.SourceKey.Columns[index].ID;
+									row[3] = reference.SourceKey.Columns[index].Name;
+									row[4] = reference.TargetKey.Columns[index].ID;
+									row[5] = reference.TargetKey.Columns[index].Name;
+								
+									result.Insert(row);
+								}
+							}
+							else if (reference.TargetTable.Equals(tableVar))
+							{
+								for (int index = 0; index < reference.SourceKey.Columns.Count; index++)
+								{
+									row[0] = reference.ID;
+									row[1] = index;
+									row[2] = reference.SourceKey.Columns[index].ID;
+									row[3] = reference.SourceKey.Columns[index].Name;
+									row[4] = reference.TargetKey.Columns[index].ID;
+									row[5] = reference.TargetKey.Columns[index].Name;
+
+									result.Insert(row);
+								}
+							}
 						}
-
-						result.Insert(row);
-					}
-
-					foreach (Schema.Reference reference in ((TableNode)Nodes[0]).TableVar.TargetReferences)
-					{
-						for (int index = 0; index < reference.SourceKey.Columns.Count; index++)
-						{
-							row[0] = reference.ID;
-							row[1] = index;
-							row[2] = reference.SourceKey.Columns[index].ID;
-							row[3] = reference.SourceKey.Columns[index].Name;
-							row[4] = reference.TargetKey.Columns[index].ID;
-							row[5] = reference.TargetKey.Columns[index].Name;
-						}
-
-						result.Insert(row);
 					}
 				}
 				finally

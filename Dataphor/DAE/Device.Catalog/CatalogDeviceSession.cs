@@ -2397,9 +2397,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						if (reference.UpdateReferenceAction == ReferenceAction.Require)
 							reference.TargetTable.UpdateConstraints.Add(reference.TargetConstraint);
 						if (reference.DeleteReferenceAction == ReferenceAction.Require)
-						{
 							reference.TargetTable.DeleteConstraints.Add(reference.TargetConstraint);
-						}
 					}
 				}
 				else
@@ -2421,8 +2419,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 			}
 					
-			reference.SourceTable.SourceReferences.AddInCreationOrder(reference);
-			reference.TargetTable.TargetReferences.AddInCreationOrder(reference);
+			//reference.SourceTable.SourceReferences.AddInCreationOrder(reference);
+			//reference.TargetTable.TargetReferences.AddInCreationOrder(reference);
+			reference.SourceTable.References.AddInCreationOrder(reference);
+			reference.TargetTable.References.AddInCreationOrder(reference);
 			
 			reference.SourceTable.SetShouldReinferReferences(this);
 			reference.TargetTable.SetShouldReinferReferences(this);
@@ -2470,8 +2470,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				reference.TargetTable.EventHandlers.SafeRemove((TableVarEventHandler)reference.DeleteHandler);
 			}
 				
-			reference.SourceTable.SourceReferences.SafeRemove(reference);
-			reference.TargetTable.TargetReferences.SafeRemove(reference);
+			//reference.SourceTable.SourceReferences.SafeRemove(reference);
+			//reference.TargetTable.TargetReferences.SafeRemove(reference);
+			reference.SourceTable.References.SafeRemove(reference);
+			reference.TargetTable.References.SafeRemove(reference);
 			
 			reference.SourceTable.SetShouldReinferReferences(this);	
 			reference.TargetTable.SetShouldReinferReferences(this);	

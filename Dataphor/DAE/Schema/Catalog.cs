@@ -266,9 +266,10 @@ namespace Alphora.Dataphor.DAE.Schema
 					EmitDependencies(context, constraint);
 			}
 
-			foreach (Constraint constraint in tableVar.Constraints)
-				if ((constraint.ConstraintType == ConstraintType.Row) && ((context.Mode != EmitMode.ForRemote) || constraint.IsRemotable))
-					EmitDependencies(context, constraint);
+			if (tableVar.HasConstraints())
+				foreach (Constraint constraint in tableVar.Constraints)
+					if ((constraint.ConstraintType == ConstraintType.Row) && ((context.Mode != EmitMode.ForRemote) || constraint.IsRemotable))
+						EmitDependencies(context, constraint);
 
 			foreach (Order order in tableVar.Orders)
 			{
@@ -425,16 +426,17 @@ namespace Alphora.Dataphor.DAE.Schema
 						}
 					}
 
-					foreach (Constraint constraint in tableVar.Constraints)
-						if ((!constraint.IsGenerated || context.IncludeGenerated || (context.Mode == EmitMode.ForStorage)) && (constraint.ConstraintType == ConstraintType.Database) && ((context.Mode != EmitMode.ForRemote) || constraint.IsRemotable) && context.ShouldEmitWithLibrary(constraint))
-						{
-							EmitDependencies(context, constraint);
-							if (!context.EmittedObjects.ContainsKey(constraint.ID))
+					if (tableVar.HasConstraints())
+						foreach (Constraint constraint in tableVar.Constraints)
+							if ((!constraint.IsGenerated || context.IncludeGenerated || (context.Mode == EmitMode.ForStorage)) && (constraint.ConstraintType == ConstraintType.Database) && ((context.Mode != EmitMode.ForRemote) || constraint.IsRemotable) && context.ShouldEmitWithLibrary(constraint))
 							{
-								context.Block.Statements.Add(constraint.EmitStatement(context.Mode));
-								context.EmittedObjects.Add(constraint.ID, constraint);
+								EmitDependencies(context, constraint);
+								if (!context.EmittedObjects.ContainsKey(constraint.ID))
+								{
+									context.Block.Statements.Add(constraint.EmitStatement(context.Mode));
+									context.EmittedObjects.Add(constraint.ID, constraint);
+								}
 							}
-						}
 				}				
 			}
         }
@@ -639,8 +641,9 @@ namespace Alphora.Dataphor.DAE.Schema
 				foreach (TableVarColumn column in tableVar.Columns)
 					ReportDroppedObjects(context, column);
 					
-				foreach (Constraint constraint in tableVar.Constraints)
-					ReportDroppedObject(context, constraint);
+				if (tableVar.HasConstraints())
+					foreach (Constraint constraint in tableVar.Constraints)
+						ReportDroppedObject(context, constraint);
 			}
 			else if (objectValue is Reference)
 			{
@@ -915,11 +918,12 @@ namespace Alphora.Dataphor.DAE.Schema
 				foreach (TableVarColumn column in tableVar.Columns)
 					BuildDependentDropList(context, dropList, column);
 					
-				foreach (Constraint constraint in tableVar.Constraints)
-					if (constraint.ConstraintType == ConstraintType.Database)
-						BuildDependentDropList(context, dropList, constraint);
-					else
-						BuildDependentDropList(context, dropList, constraint);
+				if (tableVar.HasConstraints())
+					foreach (Constraint constraint in tableVar.Constraints)
+						if (constraint.ConstraintType == ConstraintType.Database)
+							BuildDependentDropList(context, dropList, constraint);
+						else
+							BuildDependentDropList(context, dropList, constraint);
 			}
 		}
         

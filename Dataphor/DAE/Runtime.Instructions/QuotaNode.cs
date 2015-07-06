@@ -99,8 +99,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Order = CopyOrder(SourceNode.Order);
 
 			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
+			CopyReferences(plan, SourceTableVar);
 			#endif
 
 			plan.EnterRowContext();

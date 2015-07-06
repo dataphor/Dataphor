@@ -192,8 +192,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			#if UseReferenceDerivation
 			// TODO: Reference derivation on a redefine should exclude affected references
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
+			CopyReferences(plan, SourceTableVar);
 			#endif
 		}
 		

@@ -120,8 +120,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, TableVar));
 
 			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
+			CopyReferences(plan, SourceTableVar);
 			#endif
 		}
 		

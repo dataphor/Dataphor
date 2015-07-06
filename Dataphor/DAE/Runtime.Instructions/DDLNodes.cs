@@ -2771,9 +2771,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected void DropSourceReferences(Program program, Schema.TableVar tableVar)
 		{
 			BlockNode blockNode = new BlockNode();
-			foreach (Schema.Reference reference in tableVar.SourceReferences)
-				if (reference.ParentReference == null)
-					blockNode.Nodes.Add(Compiler.Compile(program.Plan, reference.EmitDropStatement(EmitMode.ForCopy)));
+			if (tableVar.HasReferences())
+				foreach (Schema.ReferenceBase reference in tableVar.References)
+					if (reference.SourceTable.Equals(tableVar) && !reference.IsDerived)
+						blockNode.Nodes.Add(Compiler.Compile(program.Plan, reference.EmitDropStatement(EmitMode.ForCopy)));
 				
 			blockNode.Execute(program);
 		}

@@ -25,13 +25,11 @@ using D4 = Alphora.Dataphor.DAE.Language.D4;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
-	// Reference	
-	public class Reference : CatalogObject
+	public class ReferenceBase : CatalogObject
 	{
-		// constructor
-		public Reference(string name) : base(name) {}
-		public Reference(int iD, string name) : base(iD, name) {}
-		public Reference(int iD, string name, MetaData metaData) : base(iD, name)
+		public ReferenceBase(string name) : base(name) {}
+		public ReferenceBase(int iD, string name) : base(iD, name) {}
+		public ReferenceBase(int iD, string name, MetaData metaData) : base(iD, name)
 		{
 			MetaData = metaData;
 		}
@@ -82,15 +80,52 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return _enforced; }
 			set { _enforced = value; }
 		}
-		
+
+		// IsDerived
+		public virtual bool IsDerived { get { return false; } }
+
+		/// <summary>For derived references, this is the base reference from which this reference was derived. Otherwise, this is the reference name.</summary>
+		public virtual string OriginatingReferenceName()
+		{
+			return Name;
+		}
+
+		public virtual bool IsExcluded { get { return false; } set { } }
+	}
+
+	public class DerivedReference : ReferenceBase
+	{
+		// constructor
+		public DerivedReference(string name, Schema.ReferenceBase parentReference) : base(name) 
+		{
+			ParentReference = parentReference;
+		}
+
+		public DerivedReference(int iD, string name, Schema.ReferenceBase parentReference) : base(iD, name)
+		{
+			ParentReference = parentReference;
+		}
+
+		public DerivedReference(int iD, string name, Schema.ReferenceBase parentReference, MetaData metaData) : base(iD, name, metaData)
+		{
+			ParentReference = parentReference;
+		}
+
 		// ParentReference		
 		[Reference]
-		private Schema.Reference _parentReference;
+		private Schema.ReferenceBase _parentReference;
 		/// <summary>For derived references, this is the reference from which this reference was derived.</summary>
-		public Schema.Reference ParentReference
+		public Schema.ReferenceBase ParentReference
 		{
 			get { return _parentReference; }
-			set { _parentReference = value; }
+			set 
+			{ 
+				if (value == null)
+				{
+					throw new Schema.SchemaException(SchemaException.Codes.ReferenceCannotBeNull, ErrorSeverity.System);
+				}
+				_parentReference = value;
+			}
 		}
 		
 		private bool _isExcluded;
@@ -100,23 +135,29 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// that the exclusion algorithm for joins works properly through multiple joins. Note that IsExcluded
 		/// is only valid for derived references.
 		/// </remarks>
-		public bool IsExcluded 
+		public override bool IsExcluded 
 		{ 
 			get { return _isExcluded; } 
 			set { _isExcluded = value; }
 		}
-		
-		// IsDerived
-		public bool IsDerived { get { return _parentReference != null; } }
+
+		public override bool IsDerived { get { return true; } }
 		
 		/// <summary>For derived references, this is the base reference from which this reference was derived. Otherwise, this is the reference name.</summary>
-		public string OriginatingReferenceName()
+		public override string OriginatingReferenceName()
 		{
-			if (IsDerived)
-				return ParentReference.OriginatingReferenceName();
-			return Name;
+			return ParentReference.OriginatingReferenceName();
 		}
-		
+	}
+
+	// Reference	
+	public class Reference : ReferenceBase
+	{
+		// constructor
+		public Reference(string name) : base(name) {}
+		public Reference(int iD, string name) : base(iD, name) {}
+		public Reference(int iD, string name, MetaData metaData) : base(iD, name, metaData) {}
+
 		// UpdateReferenceAction
 		private ReferenceAction _updateReferenceAction;
 		public ReferenceAction UpdateReferenceAction
@@ -126,8 +167,16 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// UpdateReferenceExpressions
-		private Expressions _updateReferenceExpressions = new Expressions();
-		public Expressions UpdateReferenceExpressions { get { return _updateReferenceExpressions; } }
+		private Expressions _updateReferenceExpressions;
+		public Expressions UpdateReferenceExpressions 
+		{ 
+			get 
+			{ 
+				if (_updateReferenceExpressions == null)
+					_updateReferenceExpressions = new Expressions();
+				return _updateReferenceExpressions; 
+			} 
+		}
 		
 		// DeleteReferenceAction
 		private ReferenceAction _deleteReferenceAction;
@@ -138,8 +187,16 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// DeleteReferenceExpressions
-		private Expressions _deleteReferenceExpressions = new Expressions();
-		public Expressions DeleteReferenceExpressions { get { return _deleteReferenceExpressions; } } 
+		private Expressions _deleteReferenceExpressions;
+		public Expressions DeleteReferenceExpressions 
+		{ 
+			get 
+			{ 
+				if (_deleteReferenceExpressions == null)
+					_deleteReferenceExpressions = new Expressions();
+				return _deleteReferenceExpressions; 
+			} 
+		} 
 		
         // The constraints used to enforce this reference (if necessary)
 		[Reference]
@@ -232,7 +289,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	}
     
     /// <remarks> References </remarks>
-	public class References : Objects<Reference>
+	public class References : Objects<ReferenceBase>
     {
 		public int IndexOfOriginatingReference(string originatingReferenceName)
 		{
@@ -247,23 +304,23 @@ namespace Alphora.Dataphor.DAE.Schema
 			return IndexOfOriginatingReference(originatingReferenceName) >= 0;
 		}
 		
-		public bool ContainsSourceReference(Schema.Reference reference)
+		public bool ContainsSourceReference(Schema.ReferenceBase reference)
 		{
-			foreach (Schema.Reference localReference in this)
+			foreach (Schema.ReferenceBase localReference in this)
 				if ((localReference.OriginatingReferenceName() == reference.OriginatingReferenceName()) && localReference.SourceKey.Equals(reference.SourceKey))
 					return true;
 			return false;
 		}
 		
-		public bool ContainsTargetReference(Schema.Reference reference)
+		public bool ContainsTargetReference(Schema.ReferenceBase reference)
 		{
-			foreach (Schema.Reference localReference in this)
+			foreach (Schema.ReferenceBase localReference in this)
 				if ((localReference.OriginatingReferenceName() == reference.OriginatingReferenceName()) && localReference.TargetKey.Equals(reference.TargetKey))
 					return true;
 			return false;
 		}
 		
-		public int AddInCreationOrder(Reference reference)
+		public int AddInCreationOrder(ReferenceBase reference)
 		{
 			for (int index = 0; index < Count; index++)
 				if (this[index].ID > reference.ID)

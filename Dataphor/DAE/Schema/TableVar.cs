@@ -1798,6 +1798,30 @@ namespace Alphora.Dataphor.DAE.Schema
     }
     
     public enum TableVarScope { Database, Session, Process }
+
+	[Flags]
+	public enum TableVarCharacteristics
+	{
+		None = 0,
+		IsConstant = 1,
+		IsModified = 2,
+		ShouldDefault = 4,
+		ShouldValidate = 8,
+		ShouldChange = 16,
+		IsDefaultRemotable = 32,
+		AllDefaultsRemotable = 64,
+		IsValidateRemotable = 128,
+		AllValidatesRemotable = 256,
+		IsChangeRemotable = 512,
+		AllChangesRemotable = 1024,
+		IsDeletedTable = 2048,
+		HasDeferredConstraints = 4096,
+		HasDeferredConstraintsComputed = 8192,
+		InferredIsDefaultRemotable = 16384,
+		InferredIsValidateRemotable = 32768,
+		InferredIsChangeRemotable = 65536,
+		ShouldReinferReferences = 131072
+	}
     
     /// <summary> Base class for data table definitions </summary>
 	public abstract class TableVar : CatalogObject
@@ -1836,19 +1860,24 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return _dataType; }
 			set { _dataType = value; }
 		}
+
+		protected TableVarCharacteristics _characteristics;
 		
-		private void InternalInitialize()
+		protected virtual void InternalInitialize()
 		{
 			_columns = new TableVarColumns(this);
 			_keys = new Keys(this);
 			_orders = new Orders(this);
-			_constraints = new TableVarConstraints(this);
-			_rowConstraints = new RowConstraints();
+			_characteristics =
+				TableVarCharacteristics.ShouldDefault | TableVarCharacteristics.ShouldValidate | TableVarCharacteristics.ShouldChange 
+					| TableVarCharacteristics.IsDefaultRemotable | TableVarCharacteristics.AllDefaultsRemotable 
+					| TableVarCharacteristics.IsValidateRemotable | TableVarCharacteristics.AllValidatesRemotable 
+					| TableVarCharacteristics.IsChangeRemotable | TableVarCharacteristics.AllChangesRemotable;
 		}
 		
 		public void ResetHasDeferredConstraintsComputed()
 		{
-			_hasDeferredConstraintsComputed = false;
+			hasDeferredConstraintsComputed = false;
 		}
 		
 		public void ValidateChildObjectName(string name)
@@ -1856,7 +1885,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			if 
 				(
 					(_columns.IndexOfName(name) >= 0) ||
-					(_constraints.IndexOfName(name) >= 0)
+					(_constraints != null && _constraints.IndexOfName(name) >= 0)
 				)
 			{
 				throw new SchemaException(SchemaException.Codes.DuplicateChildObjectName, name);
@@ -1905,34 +1934,126 @@ namespace Alphora.Dataphor.DAE.Schema
 					
 			return -1;
 		}
+
+		public bool HasConstraints()
+		{
+			return _constraints != null && _constraints.Count > 0;
+		}
 		
 		// Constraints
 		private TableVarConstraints _constraints;
-		public TableVarConstraints Constraints { get { return _constraints; } }
+		public TableVarConstraints Constraints 
+		{ 
+			get 
+			{ 
+				if (_constraints == null)
+					_constraints = new TableVarConstraints(this);
+				return _constraints; 
+			} 
+		}
 		
 		private RowConstraints _rowConstraints;
-		public RowConstraints RowConstraints { get { return _rowConstraints; } }
+		public RowConstraints RowConstraints 
+		{ 
+			get 
+			{ 
+				if (_rowConstraints == null)
+					_rowConstraints = new RowConstraints();
+				return _rowConstraints; 
+			} 
+		}
+
+		public bool HasRowConstraints()
+		{
+			return _rowConstraints != null && _rowConstraints.Count > 0;
+		}
 		
-		public bool IsConstant;
-		public bool IsModified;
+		public bool IsConstant 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.IsConstant) == TableVarCharacteristics.IsConstant; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.IsConstant; else _characteristics &= ~TableVarCharacteristics.IsConstant; }
+		}
+
+		public bool IsModified 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.IsModified) == TableVarCharacteristics.IsModified; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.IsModified; else _characteristics &= ~TableVarCharacteristics.IsModified; }
+		}
 		
 		/// <summary>Indicates whether this table variable is instanced at the database, session, or process level</summary>
 		public TableVarScope Scope;
 
-		// List of references in which this table variable is involved as a source
+		// List of references in which this table variable is involved as either a source or target table variable
 		[Reference]
-		private References _sourceReferences = new References();
-		public References SourceReferences { get { return _sourceReferences; } }
-		
-		// List of references in which this table variable is involved as a target
-		[Reference]
-		private References _targetReferences = new References();
-		public References TargetReferences { get { return _targetReferences; } }
+		private References _references;
+		public References References
+		{
+			get
+			{
+				if (_references == null)
+					_references = new References();
+				return _references;
+			}
+		}
 
-		// List of references derived by type inference, not actually present in the catalog.
-		[Reference]
-		private References _derivedReferences = new References();
-		public References DerivedReferences { get { return _derivedReferences; } }
+		public bool HasReferences()
+		{
+			return _references != null && _references.Count > 0;
+		}
+
+		//// List of references in which this table variable is involved as a source
+		//[Reference]
+		//private References _sourceReferences;
+		//public References SourceReferences 
+		//{ 
+		//	get 
+		//	{ 
+		//		if (_sourceReferences == null)
+		//			_sourceReferences = new References();
+		//		return _sourceReferences; 
+		//	} 
+		//}
+
+		//public bool HasSourceReferences()
+		//{
+		//	return _sourceReferences != null && _sourceReferences.Count > 0;
+		//}
+		
+		//// List of references in which this table variable is involved as a target
+		//[Reference]
+		//private References _targetReferences;
+		//public References TargetReferences 
+		//{ 
+		//	get 
+		//	{ 
+		//		if (_targetReferences == null)
+		//			_targetReferences = new References();
+		//		return _targetReferences; 
+		//	} 
+		//}
+
+		//public bool HasTargetReferences()
+		//{
+		//	return _targetReferences != null && _targetReferences.Count > 0;
+		//}
+
+		//// List of references derived by type inference, not actually present in the catalog.
+		//[Reference]
+		//private References _derivedReferences;
+		//public References DerivedReferences 
+		//{ 
+		//	get 
+		//	{ 
+		//		if (_derivedReferences == null)
+		//			_derivedReferences = new References();
+		//		return _derivedReferences; 
+		//	} 
+		//}
+
+		//public bool HasDerivedReferences()
+		//{
+		//	return _derivedReferences != null && _derivedReferences.Count > 0;
+		//}
 		
 		public bool HasHandlers()
 		{
@@ -1943,7 +2064,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			return (_eventHandlers != null) && _eventHandlers.HasHandlers(eventType);
 		}
-		
+
 		// List of EventHandlers associated with this table variable
 		private TableVarEventHandlers _eventHandlers;
 		public TableVarEventHandlers EventHandlers 
@@ -1957,94 +2078,103 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
         // ShouldDefault
-        private bool _shouldDefault = true;
-        public bool ShouldDefault
-        {
-			get { return _shouldDefault; }
-			set { _shouldDefault = value; } 
+		public bool ShouldDefault 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.ShouldDefault) == TableVarCharacteristics.ShouldDefault; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.ShouldDefault; else _characteristics &= ~TableVarCharacteristics.ShouldDefault; }
 		}
 
         // ShouldValidate
-        private bool _shouldValidate = true;
-        public bool ShouldValidate
-        {
-			get { return _shouldValidate; }
-			set { _shouldValidate = value; } 
+		public bool ShouldValidate 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.ShouldValidate) == TableVarCharacteristics.ShouldValidate; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.ShouldValidate; else _characteristics &= ~TableVarCharacteristics.ShouldValidate; }
 		}
 
         // ShouldChange
-        private bool _shouldChange = true;
-        public bool ShouldChange
-        {
-			get { return _shouldChange; }
-			set { _shouldChange = value; } 
+		public bool ShouldChange 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.ShouldChange) == TableVarCharacteristics.ShouldChange; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.ShouldChange; else _characteristics &= ~TableVarCharacteristics.ShouldChange; }
 		}
         
         // IsDefaultRemotable
-        private bool _isDefaultRemotable = true;
-        public bool IsDefaultRemotable
-        {
-			get { return _isDefaultRemotable; }
-			set { _isDefaultRemotable = value; }
-        }
+		public bool IsDefaultRemotable 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.IsDefaultRemotable) == TableVarCharacteristics.IsDefaultRemotable; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.IsDefaultRemotable; else _characteristics &= ~TableVarCharacteristics.IsDefaultRemotable; }
+		}
 
-		private bool _allDefaultsRemotable = true;
+		private bool allDefaultsRemotable 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.AllDefaultsRemotable) == TableVarCharacteristics.AllDefaultsRemotable; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.AllDefaultsRemotable; else _characteristics &= ~TableVarCharacteristics.AllDefaultsRemotable; }
+		}
+
         public bool IsDefaultCallRemotable(string columnName)
         {
 			// A default call is remotable if the table level default is remotable, 
 			// and either a column is specified and that column level default is remotable, 
 			// or no column name is specified and all column level defaults are remotable
 			return
-				_isDefaultRemotable &&
+				IsDefaultRemotable &&
 					(
 						(columnName == String.Empty) ? 
-							_allDefaultsRemotable : 
+							allDefaultsRemotable : 
 							Columns[columnName].IsDefaultRemotable
 					);
         }
         
         // IsValidateRemotable
-        private bool _isValidateRemotable = true;
-        public bool IsValidateRemotable
-        {
-			get { return _isValidateRemotable; }
-			set { _isValidateRemotable = value; }
-        }
+		public bool IsValidateRemotable 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.IsValidateRemotable) == TableVarCharacteristics.IsValidateRemotable; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.IsValidateRemotable; else _characteristics &= ~TableVarCharacteristics.IsValidateRemotable; }
+		}
         
-		private bool _allValidatesRemotable = true;
+		private bool allValidatesRemotable 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.AllValidatesRemotable) == TableVarCharacteristics.AllValidatesRemotable; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.AllValidatesRemotable; else _characteristics &= ~TableVarCharacteristics.AllValidatesRemotable; }
+		}
+
         public bool IsValidateCallRemotable(string columnName)
         {
 			// A Validate call is remotable if the table level Validate is remotable, 
 			// and either a column is specified and that column level Validate is remotable, 
 			// or no column name is specified and all column level Validates are remotable
 			return
-				_isValidateRemotable &&
+				IsValidateRemotable &&
 					(
 						(columnName == String.Empty) ? 
-							_allValidatesRemotable : 
+							allValidatesRemotable : 
 							Columns[columnName].IsValidateRemotable
 					);
         }
         
         // IsChangeRemotable
-        private bool _isChangeRemotable = true;
-        public bool IsChangeRemotable
-        {
-			get { return _isChangeRemotable; }
-			set { _isChangeRemotable = value; }
-        }
+		public bool IsChangeRemotable 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.IsChangeRemotable) == TableVarCharacteristics.IsChangeRemotable; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.IsChangeRemotable; else _characteristics &= ~TableVarCharacteristics.IsChangeRemotable; }
+		}
         
-		private bool _allChangesRemotable = true;
+		private bool allChangesRemotable 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.AllChangesRemotable) == TableVarCharacteristics.AllChangesRemotable; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.AllChangesRemotable; else _characteristics &= ~TableVarCharacteristics.AllChangesRemotable; }
+		}
+
         public bool IsChangeCallRemotable(string columnName)
         {
 			// A Change call is remotable if the table level Change is remotable, 
 			// and either a column is specified and that column level Change is remotable, 
 			// or no column name is specified and all column level Changes are remotable
 			return
-				_isChangeRemotable &&
+				IsChangeRemotable &&
 					(
 						(columnName == String.Empty) ? 
-							_allChangesRemotable : 
+							allChangesRemotable : 
 							Columns[columnName].IsChangeRemotable
 					);
         }
@@ -2053,34 +2183,34 @@ namespace Alphora.Dataphor.DAE.Schema
         {
 			if (reset)
 			{
-				_shouldChange = false;
-				_shouldDefault = false;
-				_shouldValidate = false;
+				ShouldChange = false;
+				ShouldDefault = false;
+				ShouldValidate = false;
 			}
 			
 			foreach (TableVarColumn column in Columns)
 			{
 				column.DetermineShouldCallProposables(reset);
-				_shouldChange = _shouldChange || column.ShouldChange;
-				_shouldDefault = _shouldDefault || column.ShouldDefault;
-				_shouldValidate = _shouldValidate || column.ShouldValidate;
+				ShouldChange = ShouldChange || column.ShouldChange;
+				ShouldDefault = ShouldDefault || column.ShouldDefault;
+				ShouldValidate = ShouldValidate || column.ShouldValidate;
 			}
 			
-			if (_rowConstraints.Count > 0)
-				_shouldValidate = true;
+			if (_rowConstraints != null && _rowConstraints.Count > 0)
+				ShouldValidate = true;
 			
 			if (HasHandlers())
 			{
 				foreach (EventHandler handler in _eventHandlers)
 				{
 					if ((handler.EventType & EventType.Default) != 0)
-						_shouldDefault = true;
+						ShouldDefault = true;
 					
 					if ((handler.EventType & EventType.Validate) != 0)
-						_shouldValidate = true;
+						ShouldValidate = true;
 					
 					if ((handler.EventType & EventType.Change) != 0)
-						_shouldChange = true;
+						ShouldChange = true;
 				}
 			}
         }
@@ -2093,12 +2223,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			
 			foreach (TableVarColumn column in Columns)
 			{
-				_allDefaultsRemotable = _allDefaultsRemotable && column.IsDefaultRemotable;
-				_allValidatesRemotable = _allValidatesRemotable && column.IsValidateRemotable;
-				_allChangesRemotable = _allChangesRemotable && column.IsChangeRemotable;
+				allDefaultsRemotable = allDefaultsRemotable && column.IsDefaultRemotable;
+				allValidatesRemotable = allValidatesRemotable && column.IsValidateRemotable;
+				allChangesRemotable = allChangesRemotable && column.IsChangeRemotable;
 			}
 			
-			_allDefaultsRemotable = _allChangesRemotable && _allDefaultsRemotable;
+			allDefaultsRemotable = allChangesRemotable && allDefaultsRemotable;
 			IsDefaultRemotable = IsChangeRemotable && IsDefaultRemotable;
 			
 			if (_eventHandlers != null)
@@ -2126,13 +2256,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { _sourceTableName = value; }
 		}
 		
-		private bool _isDeletedTable;
 		/// <summary>Indicates whether or not this is the deleted tracking table for a translated table variable.</summary>
 		/// <remarks>This property will only be set if SourceTableName is not null.</remarks>
-		public bool IsDeletedTable
-		{
-			get { return _isDeletedTable; }
-			set { _isDeletedTable = value; }
+		public bool IsDeletedTable 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.IsDeletedTable) == TableVarCharacteristics.IsDeletedTable; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.IsDeletedTable; else _characteristics &= ~TableVarCharacteristics.IsDeletedTable; }
 		}
 		
 		public override bool IsATObject { get { return _sourceTableName != null; } }
@@ -2193,51 +2322,116 @@ namespace Alphora.Dataphor.DAE.Schema
 		#endif
 
 		// Transition Constraints which have an OnInsertNode		
-		private TransitionConstraints _insertConstraints = new TransitionConstraints();
-		public TransitionConstraints InsertConstraints { get { return _insertConstraints; } }
+		private TransitionConstraints _insertConstraints;
+		public TransitionConstraints InsertConstraints 
+		{ 
+			get 
+			{ 
+				if (_insertConstraints == null)
+					_insertConstraints = new TransitionConstraints();
+				return _insertConstraints; 
+			} 
+		}
+
+		public bool HasInsertConstraints()
+		{
+			return _insertConstraints != null && _insertConstraints.Count > 0;
+		}
 
 		// Transition constraints which have an OnUpdateNode
-		private TransitionConstraints _updateConstraints = new TransitionConstraints();
-		public TransitionConstraints UpdateConstraints { get { return _updateConstraints; } }
+		private TransitionConstraints _updateConstraints;
+		public TransitionConstraints UpdateConstraints 
+		{ 
+			get 
+			{ 
+				if (_updateConstraints == null)
+					_updateConstraints = new TransitionConstraints();
+				return _updateConstraints; 
+			} 
+		}
+
+		public bool HasUpdateConstraints()
+		{
+			return _updateConstraints != null && _updateConstraints.Count > 0;
+		}
 
 		// Transition constraints which have an OnDeleteNode
-		private TransitionConstraints _deleteConstraints = new TransitionConstraints();
-		public TransitionConstraints DeleteConstraints { get { return _deleteConstraints; } }
+		private TransitionConstraints _deleteConstraints;
+		public TransitionConstraints DeleteConstraints 
+		{ 
+			get 
+			{ 
+				if (_deleteConstraints == null)
+					_deleteConstraints = new TransitionConstraints();
+				return _deleteConstraints; 
+			} 
+		}
+
+		public bool HasDeleteConstraints()
+		{
+			return _deleteConstraints != null && _deleteConstraints.Count > 0;
+		}
 
 		// List of database-wide constraints that reference this table		
 		[Reference]
-		private CatalogConstraints _catalogConstraints = new CatalogConstraints(); 
-		public CatalogConstraints CatalogConstraints { get { return _catalogConstraints; } }
+		private CatalogConstraints _catalogConstraints; 
+		public CatalogConstraints CatalogConstraints 
+		{ 
+			get 
+			{ 
+				if (_catalogConstraints == null)
+					_catalogConstraints = new CatalogConstraints();
+				return _catalogConstraints; 
+			} 
+		}
+
+		public bool HasCatalogConstraints()
+		{
+			return _catalogConstraints != null && _catalogConstraints.Count > 0;
+		}
 		
 		// HasDeferredConstraints
-		private bool _hasDeferredConstraints;
-		private bool _hasDeferredConstraintsComputed;
+		private bool hasDeferredConstraints 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.HasDeferredConstraints) == TableVarCharacteristics.HasDeferredConstraints; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.HasDeferredConstraints; else _characteristics &= ~TableVarCharacteristics.HasDeferredConstraints; }
+		}
+
+		private bool hasDeferredConstraintsComputed 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.HasDeferredConstraintsComputed) == TableVarCharacteristics.HasDeferredConstraintsComputed; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.HasDeferredConstraintsComputed; else _characteristics &= ~TableVarCharacteristics.HasDeferredConstraintsComputed; }
+		}
 		
 		/// <summary>Indicates whether this table variable has any enforced deferred constraints defined.</summary>
 		public bool HasDeferredConstraints()
 		{
-			if (!_hasDeferredConstraintsComputed)
+			if (!hasDeferredConstraintsComputed)
 			{
-				_hasDeferredConstraints = false;
-				foreach (TableVarConstraint constraint in _constraints)
-					if (constraint.Enforced && constraint.IsDeferred)
-					{
-						_hasDeferredConstraints = true;
-						break;
-					}
-				_hasDeferredConstraintsComputed = true;
+				hasDeferredConstraints = false;
+				if (_constraints != null)
+				{
+					foreach (TableVarConstraint constraint in _constraints)
+						if (constraint.Enforced && constraint.IsDeferred)
+						{
+							hasDeferredConstraints = true;
+							break;
+						}
+				}
+				hasDeferredConstraintsComputed = true;
 			}
 			
-			return _hasDeferredConstraints;
+			return hasDeferredConstraints;
 		}
 		
 		/// <summary>Indicates whether this table variable has any enforced deferred constraints defined that would need validation based on the given value flags</summary>
 		public bool HasDeferredConstraints(BitArray valueFlags, Schema.Transition transition)
 		{
 			// TODO: Potential cache point, this only needs to be computed once per ValueFlags combination.
-			for (int index = 0; index < _constraints.Count; index++)
-				if (_constraints[index].Enforced && _constraints[index].IsDeferred && _constraints[index].ShouldValidate(valueFlags, transition))
-					return true;
+			if (_constraints != null)
+				for (int index = 0; index < _constraints.Count; index++)
+					if (_constraints[index].Enforced && _constraints[index].IsDeferred && _constraints[index].ShouldValidate(valueFlags, transition))
+						return true;
 			return false;
 		}
 		
@@ -2363,9 +2557,10 @@ namespace Alphora.Dataphor.DAE.Schema
 					foreach (Order order in Orders)
 						order.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 						
-					foreach (Constraint constraint in Constraints)
-						if ((mode != EmitMode.ForRemote) || constraint.IsRemotable)
-							constraint.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);	
+					if (HasConstraints())
+						foreach (Constraint constraint in Constraints)
+							if ((mode != EmitMode.ForRemote) || constraint.IsRemotable)
+								constraint.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);	
 				}
 			}
 		}
@@ -2387,37 +2582,44 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void IncludeLookupAndDetailReferences(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog)
 		{
-			foreach (Reference reference in SourceReferences)
-				if ((reference.ParentReference == null) && !reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
+			if (HasReferences())
+			{
+				foreach (ReferenceBase reference in References)
 				{
-					reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
-					reference.TargetTable.IncludeReferences(session, sourceCatalog, targetCatalog);
-				}
+					if (reference.SourceTable.Equals(this) && !reference.IsDerived && !reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
+					{
+						reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
+						reference.TargetTable.IncludeReferences(session, sourceCatalog, targetCatalog);
+					}
 
-			foreach (Reference reference in TargetReferences)
-				if ((reference.ParentReference == null) && !reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
-					reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
+					if (reference.TargetTable.Equals(this) && !reference.IsDerived && !reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
+						reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
+				}
+			}
 		}
 		
 		public void IncludeParentReferences(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog)
 		{
 			IncludeLookupAndDetailReferences(session, sourceCatalog, targetCatalog);
-			foreach (Reference reference in SourceReferences)
-				if ((reference.ParentReference == null) && reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
-				{
-					reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
-					reference.TargetTable.IncludeParentReferences(session, sourceCatalog, targetCatalog);
-				}
+
+			if (HasReferences())
+				foreach (ReferenceBase reference in References)
+					if (reference.SourceTable.Equals(this) && !reference.IsDerived && reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
+					{
+						reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
+						reference.TargetTable.IncludeParentReferences(session, sourceCatalog, targetCatalog);
+					}
 		}
 		
 		public void IncludeExtensionReferences(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog)
 		{
-			foreach (Reference reference in TargetReferences)
-				if ((reference.ParentReference == null) && reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
-				{
-					reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
-					reference.SourceTable.IncludeLookupAndDetailReferences(session, sourceCatalog, targetCatalog);
-				}
+			if (HasReferences())
+				foreach (ReferenceBase reference in References)
+					if (reference.TargetTable.Equals(this) && !reference.IsDerived && reference.SourceKey.IsUnique && !targetCatalog.Contains(reference.Name))
+					{
+						reference.IncludeDependencies(session, sourceCatalog, targetCatalog, EmitMode.ForRemote);
+						reference.SourceTable.IncludeLookupAndDetailReferences(session, sourceCatalog, targetCatalog);
+					}
 		}
 		
 		public void IncludeReferences(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog)
@@ -2449,9 +2651,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				if (!Orders[index].IsInherited || (statement is CreateTableStatement))
 					statement.Orders.Add(Orders[index].EmitStatement(mode));
 					
-			for (int index = 0; index < Constraints.Count; index++)
-				if ((Constraints[index].ConstraintType == ConstraintType.Row) && ((mode != EmitMode.ForRemote) || Constraints[index].IsRemotable) && ((mode != EmitMode.ForStorage) || !Constraints[index].IsPersistent))
-					statement.Constraints.Add(Constraints[index].EmitDefinition(mode));
+			if (HasConstraints())
+				for (int index = 0; index < Constraints.Count; index++)
+					if ((Constraints[index].ConstraintType == ConstraintType.Row) && ((mode != EmitMode.ForRemote) || Constraints[index].IsRemotable) && ((mode != EmitMode.ForStorage) || !Constraints[index].IsPersistent))
+						statement.Constraints.Add(Constraints[index].EmitDefinition(mode));
 
 			statement.MetaData = MetaData == null ? new MetaData() : MetaData.Copy();
 			if (SessionObjectName != null)
@@ -2509,9 +2712,10 @@ namespace Alphora.Dataphor.DAE.Schema
 							
 				case "RowConstraint" :
 				case "TransitionConstraint" :
-					foreach (Constraint constraint in _constraints)
-						if (constraint.ID == header.ID)
-							return constraint;
+					if (_constraints != null)
+						foreach (Constraint constraint in _constraints)
+							if (constraint.ID == header.ID)
+								return constraint;
 				break;
 			}
 			
@@ -2621,25 +2825,28 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public override string DisplayName { get { return "<intermediate result>"; } }
 
-		private bool _inferredIsDefaultRemotable = true;
-		public bool InferredIsDefaultRemotable
+		protected override void InternalInitialize()
 		{
-			get { return _inferredIsDefaultRemotable; }
-			set { _inferredIsDefaultRemotable = value; }
+			base.InternalInitialize();
+			_characteristics |= TableVarCharacteristics.InferredIsDefaultRemotable | TableVarCharacteristics.InferredIsValidateRemotable | TableVarCharacteristics.InferredIsChangeRemotable;
 		}
 
-		private bool _inferredIsValidateRemotable = true;
-		public bool InferredIsValidateRemotable
-		{
-			get { return _inferredIsValidateRemotable; }
-			set { _inferredIsValidateRemotable = value; }
+		public bool InferredIsDefaultRemotable 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.InferredIsDefaultRemotable) == TableVarCharacteristics.InferredIsDefaultRemotable; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.InferredIsDefaultRemotable; else _characteristics &= ~TableVarCharacteristics.InferredIsDefaultRemotable; }
 		}
 
-		private bool _inferredIsChangeRemotable = true;
-		public bool InferredIsChangeRemotable
-		{
-			get { return _inferredIsChangeRemotable; }
-			set { _inferredIsChangeRemotable = value; }
+		public bool InferredIsValidateRemotable 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.InferredIsValidateRemotable) == TableVarCharacteristics.InferredIsValidateRemotable; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.InferredIsValidateRemotable; else _characteristics &= ~TableVarCharacteristics.InferredIsValidateRemotable; }
+		}
+
+		public bool InferredIsChangeRemotable 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.InferredIsChangeRemotable) == TableVarCharacteristics.InferredIsChangeRemotable; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.InferredIsChangeRemotable; else _characteristics &= ~TableVarCharacteristics.InferredIsChangeRemotable; }
 		}
 		
 		public override void DetermineRemotable(CatalogDeviceSession session)
@@ -2664,13 +2871,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.DerivedTableVar"), DisplayName); } }
 		
 		// ShouldReinferReferences - True if the references for this view should be reinferred when it is next referenced
-		private bool _shouldReinferReferences;
-		public bool ShouldReinferReferences
-		{
-			get { return _shouldReinferReferences; }
-			set { _shouldReinferReferences = value; }
+		public bool ShouldReinferReferences 
+		{ 
+			get { return (_characteristics & TableVarCharacteristics.ShouldReinferReferences) == TableVarCharacteristics.ShouldReinferReferences; } 
+			set { if (value) _characteristics |= TableVarCharacteristics.ShouldReinferReferences; else _characteristics &= ~TableVarCharacteristics.ShouldReinferReferences; }
 		}
-		
+
 		public override void DetermineRemotable(CatalogDeviceSession session)
 		{
 			base.DetermineRemotable(session);
@@ -2706,46 +2912,42 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public void CopyReferences(TableNode sourceNode)
 		{
-			foreach (Schema.Reference reference in sourceNode.TableVar.SourceReferences)
-			{
-				Schema.Reference newReference = new Schema.Reference(reference.Name);
-				newReference.ParentReference = reference;
-				newReference.IsExcluded = reference.IsExcluded;
-				newReference.InheritMetaData(reference.MetaData);
-				newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
-				newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
-				newReference.AddDependencies(reference.Dependencies);
-				newReference.SourceTable = this;
-				newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
-				newReference.SourceKey.Columns.AddRange(reference.SourceKey.Columns);
-				newReference.TargetTable = reference.TargetTable;
-				newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
-				newReference.TargetKey.Columns.AddRange(reference.TargetKey.Columns);
-				SourceReferences.Add(newReference);
-				DerivedReferences.Add(newReference);
-			}
-			
-			foreach (Schema.Reference reference in sourceNode.TableVar.TargetReferences)
-			{
-				if (!DerivedReferences.Contains(reference.Name))
+			if (sourceNode.TableVar.HasReferences())
+				foreach (Schema.ReferenceBase reference in sourceNode.TableVar.References)
 				{
-					Schema.Reference newReference = new Schema.Reference(reference.Name);
-					newReference.ParentReference = reference;
-					newReference.IsExcluded = reference.IsExcluded;
-					newReference.InheritMetaData(reference.MetaData);
-					newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
-					newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
-					newReference.AddDependencies(reference.Dependencies);
-					newReference.SourceTable = reference.SourceTable;
-					newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
-					newReference.SourceKey.Columns.AddRange(reference.SourceKey.Columns);
-					newReference.TargetTable = this;
-					newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
-					newReference.TargetKey.Columns.AddRange(reference.TargetKey.Columns);
-					TargetReferences.Add(newReference);
-					DerivedReferences.Add(newReference);
+					if (reference.SourceTable.Equals(sourceNode.TableVar))
+					{
+						Schema.DerivedReference newReference = new Schema.DerivedReference(reference.Name, reference);
+						newReference.IsExcluded = reference.IsExcluded;
+						newReference.InheritMetaData(reference.MetaData);
+						//newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+						//newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+						newReference.AddDependencies(reference.Dependencies);
+						newReference.SourceTable = this;
+						newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
+						newReference.SourceKey.Columns.AddRange(reference.SourceKey.Columns);
+						newReference.TargetTable = reference.TargetTable;
+						newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
+						newReference.TargetKey.Columns.AddRange(reference.TargetKey.Columns);
+						References.Add(newReference);
+					}
+					else if (reference.TargetTable.Equals(sourceNode.TableVar) && !References.Contains(reference.Name))
+					{
+						Schema.DerivedReference newReference = new Schema.DerivedReference(reference.Name, reference);
+						newReference.IsExcluded = reference.IsExcluded;
+						newReference.InheritMetaData(reference.MetaData);
+						//newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+						//newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+						newReference.AddDependencies(reference.Dependencies);
+						newReference.SourceTable = reference.SourceTable;
+						newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
+						newReference.SourceKey.Columns.AddRange(reference.SourceKey.Columns);
+						newReference.TargetTable = this;
+						newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
+						newReference.TargetKey.Columns.AddRange(reference.TargetKey.Columns);
+						References.Add(newReference);
+					}
 				}
-			}
 		}
 		
 		public override Statement EmitStatement(EmitMode mode)
