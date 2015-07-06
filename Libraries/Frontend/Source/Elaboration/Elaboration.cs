@@ -235,7 +235,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		protected virtual void BuildExtensionReferences(ElaboratedTableVar table)
 		{
 			if (table.TableVar.HasReferences())
-				foreach (Schema.Reference reference in table.TableVar.References)
+				foreach (Schema.ReferenceBase reference in table.TableVar.References)
 					if (reference.TargetTable.Equals(table.TableVar) && reference.SourceKey.IsUnique && !reference.IsExcluded && _program.Plan.HasRight(reference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(reference) && !IsCircularReference(table, reference) && IsIncludedReference(table, reference, ReferenceType.Extension))
 					{
 						ElaboratedReference elaboratedReference =
@@ -296,7 +296,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		protected virtual void BuildDetailReferences(ElaboratedTableVar table)
 		{
 			if (table.TableVar.HasReferences())
-				foreach (Schema.Reference reference in table.TableVar.References)
+				foreach (Schema.ReferenceBase reference in table.TableVar.References)
 					if (reference.TargetTable.Equals(table.TableVar) && !reference.SourceKey.IsUnique && !reference.IsExcluded && _program.Plan.HasRight(reference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(reference) && IsIncludedReference(table, reference, ReferenceType.Detail))
 					{
 						ElaboratedReference elaboratedReference =
