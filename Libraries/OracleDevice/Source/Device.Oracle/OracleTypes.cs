@@ -102,7 +102,27 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 		}
 	}
 
-	public class OracleInteger : SQLScalarType
+	public abstract class OracleWholeNumberType : SQLScalarType
+	{
+		public OracleWholeNumberType(int iD, string name)
+			: base(iD, name)
+		{
+		}
+
+		public abstract byte GetPrecision(MetaData metaData);
+
+		public override SQLType GetSQLType(MetaData metaData)
+		{
+			return new SQLNumericType(GetPrecision(metaData), 0);
+		}
+
+		protected override string InternalNativeDomainName(MetaData metaData)
+		{
+			return String.Format("number({0}, 0)", GetPrecision(metaData));
+		}
+	}
+
+	public class OracleInteger : OracleWholeNumberType
 	{
 		public OracleInteger(int iD, string name)
 			: base(iD, name)
@@ -119,14 +139,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			return (decimal)(int)tempValue;
 		}
 
-		public override SQLType GetSQLType(MetaData metaData)
+		public override byte GetPrecision(MetaData metaData)
 		{
-			return new SQLNumericType(10, 0);
-		}
-
-		protected override string InternalNativeDomainName(MetaData metaData)
-		{
-			return "number(10, 0)";
+			return Byte.Parse(GetTag("Storage.Precision", "10", metaData));
 		}
 	}
 
@@ -157,7 +172,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	}
 #endif
 
-	public class OracleShort : SQLScalarType
+	public class OracleShort : OracleWholeNumberType
 	{
 		public OracleShort(int iD, string name) : base(iD, name) { }
 
@@ -171,14 +186,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			return (decimal)(short)tempValue;
 		}
 
-		public override SQLType GetSQLType(MetaData metaData)
+		public override byte GetPrecision(MetaData metaData)
 		{
-			return new SQLNumericType(5, 0);
-		}
-
-		protected override string InternalNativeDomainName(MetaData metaData)
-		{
-			return "number(5, 0)";
+			return Byte.Parse(GetTag("Storage.Precision", "5", metaData));
 		}
 	}
 
@@ -209,7 +219,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	}
 #endif
 
-	public class OracleByte : SQLScalarType
+	public class OracleByte : OracleWholeNumberType
 	{
 		public OracleByte(int iD, string name) : base(iD, name) { }
 
@@ -223,14 +233,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			return (decimal)(byte)tempValue;
 		}
 
-		public override SQLType GetSQLType(MetaData metaData)
+		public override byte GetPrecision(MetaData metaData)
 		{
-			return new SQLNumericType(3, 0);
-		}
-
-		protected override string InternalNativeDomainName(MetaData metaData)
-		{
-			return "number(3, 0)";
+			return Byte.Parse(GetTag("Storage.Precision", "3", metaData));
 		}
 	}
 
@@ -261,7 +266,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	}
 #endif
 
-	public class OracleLong : SQLScalarType
+	public class OracleLong : OracleWholeNumberType
 	{
 		public OracleLong(int iD, string name) : base(iD, name) { }
 
@@ -275,14 +280,9 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			return (decimal)(long)tempValue;
 		}
 
-		public override SQLType GetSQLType(MetaData metaData)
+		public override byte GetPrecision(MetaData metaData)
 		{
-			return new SQLNumericType(20, 0);
-		}
-
-		protected override string InternalNativeDomainName(MetaData metaData)
-		{
-			return "number(20, 0)";
+			return Byte.Parse(GetTag("Storage.Precision", "20", metaData));
 		}
 	}
 
