@@ -463,25 +463,28 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		#region Embedded errors
 
 		private ErrorList _errorList;
+		private ToolStripButton _errorButton;
 		
 		public virtual void EmbedErrors(ErrorList errorList)
 		{
 			if (_errorList == null)
 			{
-				ToolStripButton button = new ToolStripButton();
+				_errorButton = new ToolStripButton();
 				using (Stream stream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.Frontend.Client.Windows.Images.Warning.ico"))
 				{
 					using (Icon icon = new Icon(stream, 16, 16))
-						button.Image = icon.ToBitmap();
+						_errorButton.Image = icon.ToBitmap();
 				}
-				button.ImageTransparentColor = Color.FromArgb(13, 11, 12);
-				button.AutoSize = true;
-				button.Click += new EventHandler(EmbeddedErrorsClicked);
-				FStatusBar.Items.Add(button);
+				_errorButton.ImageTransparentColor = Color.FromArgb(13, 11, 12);
+				_errorButton.AutoSize = true;
+				_errorButton.Click += new EventHandler(EmbeddedErrorsClicked);
+				FStatusBar.Items.Add(_errorButton);
 				_errorList = errorList;
 			}
 			else
 				_errorList.AddRange(errorList);
+
+			_errorButton.Visible = _errorList.Count > 0;
 		}
 
 		private void EmbeddedErrorsClicked(object sender, EventArgs args)
