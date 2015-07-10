@@ -1646,10 +1646,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				Plan plan = new Plan(process);
 				try
 				{
-					plan.PushCursorContext(new CursorContext(DAE.CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+					plan.PushSecurityContext(new SecurityContext(sourceTableVar.Owner));
 					try
 					{
-						plan.PushSecurityContext(new SecurityContext(sourceTableVar.Owner));
+						plan.PushCursorContext(new CursorContext(DAE.CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 						try
 						{
 							tableMap.RetrieveNode = (BaseTableVarNode)Compiler.Bind(plan, Compiler.EmitBaseTableVarNode(plan, sourceTableVar));
@@ -1657,56 +1657,27 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						}
 						finally
 						{
-							plan.PopSecurityContext();
+							plan.PopCursorContext();
 						}
-					}
-					finally
-					{
-						plan.PopCursorContext();
-					}
 
-					Schema.Key clusteringKey = Compiler.FindClusteringKey(plan, tableMap.TableVar);
-					#if !USENAMEDROWVARIABLES
-					Schema.RowType oldRowType = new Schema.RowType(ATableMap.TableVar.DataType.Columns, Keywords.Old);
-					Schema.RowType oldKeyType = new Schema.RowType(clusteringKey.Columns, Keywords.Old);
-					Schema.RowType keyType = new Schema.RowType(clusteringKey.Columns);
-					#endif
-					plan.EnterRowContext();
-					try
-					{
-						#if USENAMEDROWVARIABLES
-						plan.Symbols.Push(new Symbol(Keywords.Old, tableMap.TableVar.DataType.RowType));
-						#else
-						plan.Symbols.Push(new Symbol(String.Empty, oldRowType));
+						Schema.Key clusteringKey = Compiler.FindClusteringKey(plan, tableMap.TableVar);
+						#if !USENAMEDROWVARIABLES
+						Schema.RowType oldRowType = new Schema.RowType(ATableMap.TableVar.DataType.Columns, Keywords.Old);
+						Schema.RowType oldKeyType = new Schema.RowType(clusteringKey.Columns, Keywords.Old);
+						Schema.RowType keyType = new Schema.RowType(clusteringKey.Columns);
 						#endif
+						plan.EnterRowContext();
 						try
 						{
-							tableMap.HasDeletedRowNode =
-								Compiler.Bind
-								(
-									plan,
-									Compiler.EmitUnaryNode
-									(
-										plan,
-										Instructions.Exists,
-										Compiler.EmitRestrictNode
-										(
-											plan,
-											Compiler.EmitBaseTableVarNode(plan, tableMap.DeletedTableVar),
-											#if USENAMEDROWVARIABLES
-											Compiler.BuildKeyEqualExpression(plan, Keywords.Old, String.Empty, clusteringKey.Columns, clusteringKey.Columns)
-											#else
-											Compiler.BuildKeyEqualExpression(LPlan, LOldKeyType.Columns, LKeyType.Columns)
-											#endif
-										)
-									)
-								);
-
-							tableMap.HasRowNode =
-								Compiler.Bind
-								(
-									plan,
-									Compiler.EmitBinaryNode
+							#if USENAMEDROWVARIABLES
+							plan.Symbols.Push(new Symbol(Keywords.Old, tableMap.TableVar.DataType.RowType));
+							#else
+							plan.Symbols.Push(new Symbol(String.Empty, oldRowType));
+							#endif
+							try
+							{
+								tableMap.HasDeletedRowNode =
+									Compiler.Bind
 									(
 										plan,
 										Compiler.EmitUnaryNode
@@ -1716,27 +1687,56 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 											Compiler.EmitRestrictNode
 											(
 												plan,
-												Compiler.EmitBaseTableVarNode(plan, tableMap.TableVar),
+												Compiler.EmitBaseTableVarNode(plan, tableMap.DeletedTableVar),
 												#if USENAMEDROWVARIABLES
 												Compiler.BuildKeyEqualExpression(plan, Keywords.Old, String.Empty, clusteringKey.Columns, clusteringKey.Columns)
 												#else
 												Compiler.BuildKeyEqualExpression(LPlan, LOldKeyType.Columns, LKeyType.Columns)
 												#endif
 											)
-										),
-										Instructions.Or,
-										tableMap.HasDeletedRowNode
-									)
-								);
+										)
+									);
+
+								tableMap.HasRowNode =
+									Compiler.Bind
+									(
+										plan,
+										Compiler.EmitBinaryNode
+										(
+											plan,
+											Compiler.EmitUnaryNode
+											(
+												plan,
+												Instructions.Exists,
+												Compiler.EmitRestrictNode
+												(
+													plan,
+													Compiler.EmitBaseTableVarNode(plan, tableMap.TableVar),
+													#if USENAMEDROWVARIABLES
+													Compiler.BuildKeyEqualExpression(plan, Keywords.Old, String.Empty, clusteringKey.Columns, clusteringKey.Columns)
+													#else
+													Compiler.BuildKeyEqualExpression(LPlan, LOldKeyType.Columns, LKeyType.Columns)
+													#endif
+												)
+											),
+											Instructions.Or,
+											tableMap.HasDeletedRowNode
+										)
+									);
+							}
+							finally
+							{
+								plan.Symbols.Pop();
+							}
 						}
 						finally
 						{
-							plan.Symbols.Pop();
+							plan.ExitRowContext();
 						}
 					}
 					finally
 					{
-						plan.ExitRowContext();
+						plan.PopSecurityContext();
 					}
 				}
 				finally
