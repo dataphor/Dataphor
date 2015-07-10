@@ -100,7 +100,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public const int SystemSessionID = 0;
 		public const int DefaultMaxConcurrentProcesses = 200;
 		public const int DefaultMaxStackDepth = 32767; // Also specified in the base stack
-		public const int DefaultMaxCallDepth = 1024; // Also specified in the base window stack
+		public const int DefaultMaxCallDepth = 100; // Also specified in the base window stack
 		public const int DefaultProcessWaitTimeout = 30;
 		public const int DefaultProcessTerminationTimeout = 30;
 		public const int DefaultPlanCacheSize = 100;

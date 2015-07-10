@@ -41,7 +41,7 @@ namespace Alphora.Dataphor.DAE
 	public class StackWindowList
 	{
 		public const int InitialCapacity = 0;
-		public const int DefaultMaxCallDepth = 1024;
+		public const int DefaultMaxCallDepth = 100;
 		
 		public StackWindowList() : this(DefaultMaxCallDepth) { }
 		public StackWindowList(int maxCallDepth) : base()
