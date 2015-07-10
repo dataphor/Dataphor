@@ -1103,13 +1103,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program, object[] arguments)
 		{
 			for (int index = 0; index < Operator.Operands.Count; index++)
-			{
-				// It is okay if this throws because the stack imbalance will be corrected by the PopWindow in the parent instruction node execute
-				if (Operator.Operands[index].DataType is Schema.ScalarType)
-					arguments[index] = ValueUtility.ValidateValue(program, (Schema.ScalarType)Operator.Operands[index].DataType, arguments[index], Operator);
-
 				program.Stack.Push(arguments[index]);
-			}
 
 			// TODO: I am not sure this is necessary, the derived table var does not do this
 			// All rights checking should be being performed at compile-time, so there should
