@@ -94,17 +94,23 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				if (_session != value)
 				{
-					Close();
-					if (_session != null)
+					try
 					{
-						_session.OnClosing -= new EventHandler(SessionClosing);
-						_session.Disposed -= new EventHandler(SessionDisposed);
+						Close();
 					}
-					_session = value;
-					if (_session != null)
+					finally
 					{
-						_session.OnClosing += new EventHandler(SessionClosing);
-						_session.Disposed += new EventHandler(SessionDisposed);
+						if (_session != null)
+						{
+							_session.OnClosing -= new EventHandler(SessionClosing);
+							_session.Disposed -= new EventHandler(SessionDisposed);
+						}
+						_session = value;
+						if (_session != null)
+						{
+							_session.OnClosing += new EventHandler(SessionClosing);
+							_session.Disposed += new EventHandler(SessionDisposed);
+						}
 					}
 				}
 			}
@@ -253,18 +259,32 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if (_process != null)
 			{
-				if (_cursor != null)
+				try
 				{
-					_cursor.OnErrors -= new CursorErrorsOccurredHandler(CursorOnErrors);
-					_cursor.Dispose();
-					_cursor = null;
+					if (_cursor != null)
+					{
+						try
+						{
+							_cursor.OnErrors -= new CursorErrorsOccurredHandler(CursorOnErrors);
+							_cursor.Dispose();
+						}
+						catch
+						{
+							// Errors closing the cursor should not prevent the process from stopping
+							_cursor = null;
+						}
+					}
+
+					#if USEASYNCSTOPPROCESS
+					new StopProcessHandler(FSession.ServerSession.StopProcess).BeginInvoke(FProcess, null, null);
+					#else
+					_session.ServerSession.StopProcess(_process);
+					#endif
 				}
-				#if USEASYNCSTOPPROCESS
-				new StopProcessHandler(FSession.ServerSession.StopProcess).BeginInvoke(FProcess, null, null);
-				#else
-				_session.ServerSession.StopProcess(_process);
-				#endif
-				_process = null;
+				finally
+				{
+					_process = null;
+				}
 			}
 		}
 		
@@ -323,7 +343,15 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			catch
 			{
-				CloseCursor();
+				try
+				{
+					CloseCursor();
+				}
+				catch
+				{
+					// Errors closing the cursor if it errored on opening should be ignored
+				}
+
 				throw;
 			}
 		}

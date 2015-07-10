@@ -331,6 +331,9 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			/// <summary>Error code 106210: "Service must be active to perform this operation."</summary>
 			ServiceInactive = 106210,
+
+			/// <summary>Error code 106211: "An error occurred attempting to communicate with the service."</summary>
+			CommunicationFailure = 106211,
 			
 		}
 		

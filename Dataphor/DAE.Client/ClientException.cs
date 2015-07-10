@@ -117,6 +117,9 @@ namespace Alphora.Dataphor.DAE.Client
 			
 			/// <summary>Error code 121135: "An error occurred attempting to connect to the listener on "{0}"." </summary>
 			CouldNotDeterminePortNumber = 121135,
+
+			/// <summary>Error code 121136: "An error occurred attempting to communicate with the server."</summary>
+			CommunicationFailure = 121136
 		}
 
 		// Resource manager for this exception class

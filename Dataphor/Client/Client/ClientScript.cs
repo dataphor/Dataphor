@@ -34,6 +34,11 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			return _clientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
 		}	
+
+		private void ReportCommunicationError()
+		{
+			_clientProcess.ClientSession.ClientConnection.ClientServer.ReportCommunicationError();
+		}
 		
 		private ScriptDescriptor _scriptDescriptor;
 		

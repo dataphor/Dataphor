@@ -67,10 +67,14 @@ namespace Alphora.Dataphor
 	/// <summary> ErrorList is a list of exceptions that can be thrown in aggregate. </summary>
 	public class ErrorList : List<Exception>
 	{
-		public void Throw()
+		public Exception ToException()
 		{
-			if (Count > 0)
-				new AggregateException(this);
+			switch (Count)
+			{
+				case 0: return null;
+				case 1: return this[0];
+				default: return new AggregateException(this);
+			}
 		}
 
 		public override string ToString()

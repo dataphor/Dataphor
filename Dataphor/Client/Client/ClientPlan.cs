@@ -10,6 +10,7 @@ using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Contracts;
+using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -27,6 +28,11 @@ namespace Alphora.Dataphor.DAE.Client
 		protected IClientDataphorService GetServiceInterface()
 		{
 			return _clientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
+		}
+
+		protected void ReportCommunicationError()
+		{
+			_clientProcess.ClientSession.ClientConnection.ClientServer.ReportCommunicationError();
 		}
 		
 		protected PlanDescriptor _planDescriptor;
@@ -98,6 +104,11 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
+			}
 		}
 
 		#endregion
@@ -126,6 +137,11 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
+			}
 		}
 
 		public IRemoteServerCursor Open(ref RemoteParamData paramsValue, out ProgramStatistics executeTime, ProcessCallInfo callInfo)
@@ -144,6 +160,11 @@ namespace Alphora.Dataphor.DAE.Client
 			catch (FaultException<DataphorFault> fault)
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 			}
 		}
 
@@ -166,6 +187,11 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
+			}
 		}
 
 		public void Close(IRemoteServerCursor cursor, ProcessCallInfo callInfo)
@@ -180,6 +206,11 @@ namespace Alphora.Dataphor.DAE.Client
 			catch (FaultException<DataphorFault> fault)
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 			}
 		}
 

@@ -1006,7 +1006,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				_mode = mode;
 				if ((_mode != FormMode.None) && ((MainSource == null) || (MainSource.DataView == null)))
-					throw new ClientException(ClientException.Codes.MainSourceNotSpecified, mode.ToString());
+					throw new ClientException(ClientException.Codes.MainSourceNotSpecified, _errorList != null ? _errorList.ToException() : null, mode.ToString());
+
 				_form.EnterNavigates = (_mode == FormMode.Insert) || (_mode == FormMode.Edit);
 				switch (_mode)
 				{

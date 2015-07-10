@@ -10,6 +10,7 @@ using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Contracts;
+using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -27,6 +28,11 @@ namespace Alphora.Dataphor.DAE.Client
 		private IClientDataphorService GetServiceInterface()
 		{
 			return _clientScript.ClientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
+		}
+
+		private void ReportCommunicationError()
+		{
+			_clientScript.ClientProcess.ClientSession.ClientConnection.ClientServer.ReportCommunicationError();
 		}
 		
 		private BatchDescriptor _batchDescriptor;
@@ -57,6 +63,11 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
+			}
 		}
 
 		public void Unprepare(IRemoteServerPlan plan)
@@ -71,6 +82,11 @@ namespace Alphora.Dataphor.DAE.Client
 			catch (FaultException<DataphorFault> fault)
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 			}
 		}
 
@@ -128,6 +144,11 @@ namespace Alphora.Dataphor.DAE.Client
 			catch (FaultException<DataphorFault> fault)
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 			}
 		}
 

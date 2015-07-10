@@ -28,6 +28,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 			SetAcceptReject(true, false);
 			FStatusBar.Visible = false;
+			_grid.DoubleClick += FGrid_DoubleClick;
 		}
 
 		/// <summary>
@@ -65,18 +66,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.FContentPanel.Controls.Add(this._grid);
 			this.FContentPanel.Size = new System.Drawing.Size(444, 194);
 			// 
-			// FGrid
+			// _grid
 			// 
-			this._grid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._grid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._grid.BackColor = System.Drawing.Color.Transparent;
 			this._grid.CausesValidation = false;
-			this._grid.Columns.Add(new Alphora.Dataphor.DAE.Client.Controls.TextColumn("Description", "Description", 398, System.Windows.Forms.HorizontalAlignment.Left, System.Windows.Forms.HorizontalAlignment.Left, Alphora.Dataphor.DAE.Client.Controls.VerticalAlignment.Top, System.Drawing.Color.Transparent, true, System.Windows.Forms.Border3DStyle.RaisedInner, ((System.Windows.Forms.Border3DSide)((((System.Windows.Forms.Border3DSide.Left | System.Windows.Forms.Border3DSide.Top)
-								| System.Windows.Forms.Border3DSide.Right)
-								| System.Windows.Forms.Border3DSide.Bottom))), -1, -1, new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0))), System.Drawing.SystemColors.ControlText, false, false));
+			this._grid.Columns.Add(new Alphora.Dataphor.DAE.Client.Controls.TextColumn("Description", "Description", 398, System.Windows.Forms.HorizontalAlignment.Left, System.Windows.Forms.HorizontalAlignment.Left, Alphora.Dataphor.DAE.Client.Controls.VerticalAlignment.Top, System.Drawing.Color.Transparent, true, System.Windows.Forms.Border3DStyle.RaisedInner, ((System.Windows.Forms.Border3DSide)((((System.Windows.Forms.Border3DSide.Left | System.Windows.Forms.Border3DSide.Top) 
+                    | System.Windows.Forms.Border3DSide.Right) 
+                    | System.Windows.Forms.Border3DSide.Bottom))), -1, -1, new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0))), System.Drawing.SystemColors.ControlText, false, false));
 			this._grid.Location = new System.Drawing.Point(10, 27);
-			this._grid.Name = "FGrid";
+			this._grid.Name = "_grid";
 			this._grid.NoValueBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))), ((int)(((byte)(240)))));
 			this._grid.Size = new System.Drawing.Size(426, 158);
 			this._grid.Source = this._dataSource;
@@ -96,12 +97,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// ApplicationListForm
 			// 
 			this.ClientSize = new System.Drawing.Size(444, 265);
-			this.Location = new System.Drawing.Point(0, 0);
 			this.Name = "ApplicationListForm";
 			this.Text = "Select Application";
+			this.DoubleClick += new System.EventHandler(this.FGrid_DoubleClick);
 			this.FContentPanel.ResumeLayout(false);
 			this.FContentPanel.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 		#endregion

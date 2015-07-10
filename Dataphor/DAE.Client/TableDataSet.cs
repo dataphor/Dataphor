@@ -348,9 +348,16 @@ namespace Alphora.Dataphor.DAE.Client
 
 				Process.CommitTransaction();
 			}
-			catch
+			catch (Exception e)
 			{
-				Process.RollbackTransaction();
+				try
+				{
+					Process.RollbackTransaction();
+				}
+				catch (Exception rollbackException)
+				{
+					throw new DAE.Server.ServerException(DAE.Server.ServerException.Codes.RollbackError, e, rollbackException.ToString());
+				}
 				throw;
 			}
 		}
@@ -559,8 +566,14 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		protected override void InternalClose()
 		{
-			base.InternalClose();
-			ClearOrder();
+			try
+			{
+				base.InternalClose();
+			}
+			finally
+			{
+				ClearOrder();
+			}
 		}
 
 		#endregion

@@ -209,19 +209,33 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private void CloseChannel(IClientDataphorService channel)
 		{
-			ICommunicationObject localChannel = (ICommunicationObject)channel;
-			if (localChannel.State == CommunicationState.Opened)
-				localChannel.Close();
-			else
-				localChannel.Abort();
+			try
+			{
+				ICommunicationObject localChannel = (ICommunicationObject)channel;
+				if (localChannel.State == CommunicationState.Opened)
+					localChannel.Close();
+				else
+					localChannel.Abort();
+			}
+			catch
+			{
+				// Ignore exceptions here, there's nothing we can do about it anyway.
+			}
 		}
 		
 		private void CloseChannelFactory()
 		{
-			if (_channelFactory.State == CommunicationState.Opened)
-				_channelFactory.Close();
-			else
-				_channelFactory.Abort();
+			try
+			{
+				if (_channelFactory.State == CommunicationState.Opened)
+					_channelFactory.Close();
+				else
+					_channelFactory.Abort();
+			}
+			catch
+			{
+				// Ignore exceptions here, there's nothing we can do about it anyway.
+			}
 		}
 		
 		private void SetChannel(IClientDataphorService channel)
@@ -248,6 +262,16 @@ namespace Alphora.Dataphor.DAE.Client
 			return _channel;
 		}
 
+		public void ReportCommunicationError()
+		{
+			// A communication failure has occurred, reset the channel
+			// The communication object is supposed to be reporting Faulted, but in some cases, it still indicates it's open, even though any call will result in a CommunicationException
+			// If the server is gone, this is actually worse, because it attempts to reconnect and times out everytime, so unwinding takes ten times as long...
+			//if (_channel != null)
+			//	CloseChannel(_channel);
+			//SetChannel(null);
+		}
+
 		#region IRemoteServer Members
 
 		public IRemoteServerConnection Establish(string connectionName, string hostName)
@@ -263,6 +287,11 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
+			}
 		}
 
 		public void Relinquish(IRemoteServerConnection connection)
@@ -277,6 +306,11 @@ namespace Alphora.Dataphor.DAE.Client
 			catch (FaultException<DataphorFault> fault)
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 			}
 		}
 
@@ -298,6 +332,11 @@ namespace Alphora.Dataphor.DAE.Client
 				catch (FaultException<DataphorFault> fault)
 				{
 					throw DataphorFaultUtility.FaultToException(fault.Detail);
+				}
+				catch (CommunicationException ce)
+				{
+					ReportCommunicationError();
+					throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 				}
 			}
 		}
@@ -335,6 +374,11 @@ namespace Alphora.Dataphor.DAE.Client
 				{
 					throw DataphorFaultUtility.FaultToException(fault.Detail);
 				}
+				catch (CommunicationException ce)
+				{
+					ReportCommunicationError();
+					throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
+				}
 			}
 		}
 
@@ -352,6 +396,11 @@ namespace Alphora.Dataphor.DAE.Client
 				catch (FaultException<DataphorFault> fault)
 				{
 					throw DataphorFaultUtility.FaultToException(fault.Detail);
+				}
+				catch (CommunicationException ce)
+				{
+					ReportCommunicationError();
+					throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 				}
 			}
 		}
