@@ -26,6 +26,15 @@ namespace Alphora.Dataphor.DAE.Contracts
 {
 	public static class DataphorFaultUtility
 	{
+		public static DataphorFault ExceptionToFault(Exception exception)
+		{
+			DataphorException dataphorException = exception as DataphorException;
+			if (dataphorException == null)
+				dataphorException = new DataphorException(exception);
+
+			return ExceptionToFault(dataphorException);
+		}
+
 		public static DataphorFault ExceptionToFault(DataphorException exception)
 		{
 			DataphorFault fault = new DataphorFault();
@@ -37,7 +46,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 			fault.Details = exception.Details;
 			fault.ServerContext = exception.ServerContext;
 			if (exception.InnerException != null)
-				fault.InnerFault = ExceptionToFault((DataphorException)exception.InnerException);
+				fault.InnerFault = ExceptionToFault(exception.InnerException);
 				
 			#if !SILVERLIGHT
 			// Under Silverlight, a ConnectionException will come back as a DataphorException
