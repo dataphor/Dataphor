@@ -975,7 +975,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				return operatorMap;
 			}
 		}
-		
+
 		public void EnsureATOperatorMapped(ServerProcess process, Schema.Operator aTOperator)
 		{
 			OperatorMap deviceOperatorMap = Device.EnsureOperatorMap(process, aTOperator.SourceOperatorName, aTOperator.OperatorName);
@@ -1238,85 +1238,100 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 			if (isMainTableVar)
 			{
-				TableMap tableMap = TableMaps[sourceTableVar.Name];
-
-				block = new Block();
-
-				foreach (Schema.TableVarColumn column in sourceTableVar.Columns)
+				try
 				{
-					if ((column.Default != null) && !column.Default.IsRemotable)
+					TableMap tableMap = TableMaps[sourceTableVar.Name];
+
+					block = new Block();
+
+					foreach (Schema.TableVarColumn column in sourceTableVar.Columns)
 					{
-						AlterTableStatement alterStatement = new AlterTableStatement();
-						alterStatement.TableVarName = Schema.Object.EnsureRooted(tableMap.TableVar.Name);
-						AlterColumnDefinition definition = new AlterColumnDefinition();
-						definition.ColumnName = column.Name;
-						definition.Default = column.Default.EmitDefinition(EmitMode.ForCopy);
-						((DefaultDefinition)definition.Default).IsGenerated = true;
-						alterStatement.AlterColumns.Add(definition);
-						block.Statements.Add(alterStatement);
-					}
-				}
-				
-				if (sourceTableVar.HasHandlers())
-					foreach (Schema.EventHandler handler in sourceTableVar.EventHandlers)
-						if (!handler.IsGenerated && handler.ShouldTranslate)
+						if ((column.Default != null) && !column.Default.IsRemotable)
 						{
-							AttachStatement attachStatement = (AttachStatement)handler.EmitTableVarHandler(sourceTableVar, EmitMode.ForCopy);
-							if (attachStatement.MetaData == null)
-								attachStatement.MetaData = new MetaData();
-							attachStatement.MetaData.Tags.RemoveTag("DAE.ObjectID");
-							attachStatement.MetaData.Tags.AddOrUpdate("DAE.ATHandlerName", handler.Name, true);
-							((ObjectEventSourceSpecifier)attachStatement.EventSourceSpecifier).ObjectName = Schema.Object.EnsureRooted(tableMap.TableVar.Name);
-							if (handler.Operator.ShouldTranslate)
-								attachStatement.OperatorName = Schema.Object.EnsureRooted(EnsureOperator(process, handler.Operator).OperatorName);
-							attachStatement.IsGenerated = true;
-							block.Statements.Add(attachStatement);
+							AlterTableStatement alterStatement = new AlterTableStatement();
+							alterStatement.TableVarName = Schema.Object.EnsureRooted(tableMap.TableVar.Name);
+							AlterColumnDefinition definition = new AlterColumnDefinition();
+							definition.ColumnName = column.Name;
+							definition.Default = column.Default.EmitDefinition(EmitMode.ForCopy);
+							((DefaultDefinition)definition.Default).IsGenerated = true;
+							alterStatement.AlterColumns.Add(definition);
+							block.Statements.Add(alterStatement);
 						}
-					
-				foreach (Schema.TableVarColumn column in sourceTableVar.Columns)
-					if (column.HasHandlers())
-						foreach (Schema.EventHandler handler in column.EventHandlers)
+					}
+				
+					if (sourceTableVar.HasHandlers())
+						foreach (Schema.EventHandler handler in sourceTableVar.EventHandlers)
 							if (!handler.IsGenerated && handler.ShouldTranslate)
 							{
-								AttachStatement attachStatement = (AttachStatement)handler.EmitColumnHandler(sourceTableVar, column, EmitMode.ForCopy);
+								AttachStatement attachStatement = (AttachStatement)handler.EmitTableVarHandler(sourceTableVar, EmitMode.ForCopy);
 								if (attachStatement.MetaData == null)
 									attachStatement.MetaData = new MetaData();
 								attachStatement.MetaData.Tags.RemoveTag("DAE.ObjectID");
 								attachStatement.MetaData.Tags.AddOrUpdate("DAE.ATHandlerName", handler.Name, true);
-								((ColumnEventSourceSpecifier)attachStatement.EventSourceSpecifier).TableVarName = Schema.Object.EnsureRooted(tableMap.TableVar.Name);
+								((ObjectEventSourceSpecifier)attachStatement.EventSourceSpecifier).ObjectName = Schema.Object.EnsureRooted(tableMap.TableVar.Name);
 								if (handler.Operator.ShouldTranslate)
 									attachStatement.OperatorName = Schema.Object.EnsureRooted(EnsureOperator(process, handler.Operator).OperatorName);
 								attachStatement.IsGenerated = true;
 								block.Statements.Add(attachStatement);
 							}
+					
+					foreach (Schema.TableVarColumn column in sourceTableVar.Columns)
+						if (column.HasHandlers())
+							foreach (Schema.EventHandler handler in column.EventHandlers)
+								if (!handler.IsGenerated && handler.ShouldTranslate)
+								{
+									AttachStatement attachStatement = (AttachStatement)handler.EmitColumnHandler(sourceTableVar, column, EmitMode.ForCopy);
+									if (attachStatement.MetaData == null)
+										attachStatement.MetaData = new MetaData();
+									attachStatement.MetaData.Tags.RemoveTag("DAE.ObjectID");
+									attachStatement.MetaData.Tags.AddOrUpdate("DAE.ATHandlerName", handler.Name, true);
+									((ColumnEventSourceSpecifier)attachStatement.EventSourceSpecifier).TableVarName = Schema.Object.EnsureRooted(tableMap.TableVar.Name);
+									if (handler.Operator.ShouldTranslate)
+										attachStatement.OperatorName = Schema.Object.EnsureRooted(EnsureOperator(process, handler.Operator).OperatorName);
+									attachStatement.IsGenerated = true;
+									block.Statements.Add(attachStatement);
+								}
 
-				plan = new Plan(process);
-				try
-				{
-					plan.PushSecurityContext(new SecurityContext(sourceTableVar.Owner));
+					plan = new Plan(process);
 					try
 					{
-						plan.EnterTimeStampSafeContext();
+						plan.PushSecurityContext(new SecurityContext(sourceTableVar.Owner));
 						try
 						{
-							Program program = new Program(process);
-							program.Code = Compiler.Bind(plan, Compiler.CompileStatement(plan, block));
-							plan.CheckCompiled();
-							program.Execute(null);
+							plan.EnterTimeStampSafeContext();
+							try
+							{
+								Program program = new Program(process);
+								program.Code = Compiler.Bind(plan, Compiler.CompileStatement(plan, block));
+								plan.CheckCompiled();
+								program.Execute(null);
+							}
+							finally
+							{
+								plan.ExitTimeStampSafeContext();
+							}
 						}
 						finally
 						{
-							plan.ExitTimeStampSafeContext();
+							plan.PopSecurityContext();
 						}
 					}
 					finally
 					{
-						plan.PopSecurityContext();
+						plan.Dispose();
 					}
 				}
-				finally
+				catch (Exception e)
 				{
-					plan.Dispose();
+					try
+					{
+						ReportTableChange(process, sourceTableVar, false);
+					}
+					catch (Exception ne)
+					{
+						// Ignore errors here, this is cleanup code
+					}
+					throw;
 				}
 			}
 		}
@@ -1333,6 +1348,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				TableMap tableMap = new TableMap(sourceTableVarName);
 				tableMap.TableVar = tableVar;
 				tableMap.SourceTableVar = (TableVar)process.Catalog[sourceTableVarName];
+				tableMap.Library = tableMap.SourceTableVar.Library;
 				process.CatalogDeviceSession.AddTableMap(this, tableMap);
 			}
 			else
@@ -1351,8 +1367,13 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						throw new ApplicationTransactionException(ApplicationTransactionException.Codes.TableVariableParticipating, tableVar.Name);
 			}
 		}
-		
+
 		public void ReportTableChange(ServerProcess process, Schema.TableVar tableVar)
+		{
+			ReportTableChange(process, tableVar, true);
+		}
+		
+		public void ReportTableChange(ServerProcess process, Schema.TableVar tableVar, bool checkParticipants)
 		{
 			// If the table var is a source table var for an A/T table
 				// if there are active A/Ts for the table var
@@ -1372,7 +1393,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						int tableMapIndex = _tableMaps.IndexOfName(tableVar.Name);
 						if (tableMapIndex >= 0)
 						{
-							CheckNotParticipating(process, tableVar);
+							if (checkParticipants)
+							{
+								CheckNotParticipating(process, tableVar);
+							}
 							
 							// Drop the table var and deleted table var
 							TableMap tableMap = _tableMaps[tableMapIndex];
@@ -1766,86 +1790,99 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 			return operatorMap;
 		}
+
+		private void RemoveOperatorMap(ServerProcess process, OperatorMap operatorMap)
+		{
+			_operatorMaps.SafeRemove(operatorMap);
+		}
 		
 		public Schema.Operator AddOperator(ServerProcess process, Schema.Operator operatorValue)
 		{
 			// Recompile the operator in the application transaction process
 			OperatorMap operatorMap = EnsureOperatorMap(process, operatorValue.OperatorName, null);
-			Statement sourceStatement = operatorValue.EmitStatement(EmitMode.ForCopy);
-			SourceContext sourceContext = null;
-			CreateOperatorStatement statement = sourceStatement as CreateOperatorStatement;
-			if (statement == null)
-			{
-				sourceContext = new SourceContext(((SourceStatement)sourceStatement).Source, null);
-				statement = (CreateOperatorStatement)new Parser().ParseStatement(sourceContext.Script, null);
-			}
-			statement.OperatorName = String.Format(".{0}", operatorMap.TranslatedOperatorName);
-			statement.IsSession = false;
-			if (statement.MetaData == null)
-				statement.MetaData = new MetaData();
-			statement.MetaData.Tags.SafeRemove("DAE.GlobalObjectName");
-			statement.MetaData.Tags.AddOrUpdate("DAE.SourceOperatorName", operatorMap.Name, true);
-			statement.MetaData.Tags.AddOrUpdate("DAE.SourceObjectName", operatorValue.Name, true);
-
-			Plan plan = new Plan(process);
 			try
 			{
-				bool saveIsInsert = process.IsInsert;
-				process.IsInsert = false;
+				Statement sourceStatement = operatorValue.EmitStatement(EmitMode.ForCopy);
+				SourceContext sourceContext = null;
+				CreateOperatorStatement statement = sourceStatement as CreateOperatorStatement;
+				if (statement == null)
+				{
+					sourceContext = new SourceContext(((SourceStatement)sourceStatement).Source, null);
+					statement = (CreateOperatorStatement)new Parser().ParseStatement(sourceContext.Script, null);
+				}
+				statement.OperatorName = String.Format(".{0}", operatorMap.TranslatedOperatorName);
+				statement.IsSession = false;
+				if (statement.MetaData == null)
+					statement.MetaData = new MetaData();
+				statement.MetaData.Tags.SafeRemove("DAE.GlobalObjectName");
+				statement.MetaData.Tags.AddOrUpdate("DAE.SourceOperatorName", operatorMap.Name, true);
+				statement.MetaData.Tags.AddOrUpdate("DAE.SourceObjectName", operatorValue.Name, true);
+
+				Plan plan = new Plan(process);
 				try
 				{
-					if (sourceContext != null)
-						plan.PushSourceContext(sourceContext);
+					bool saveIsInsert = process.IsInsert;
+					process.IsInsert = false;
 					try
 					{
-						// A loading context is required because the operator text is using the original text
-						// so it must be bound with the original resolution path (the owning library).
-						plan.PushLoadingContext(new LoadingContext(operatorValue.Owner, operatorValue.Library.Name, false));
+						if (sourceContext != null)
+							plan.PushSourceContext(sourceContext);
 						try
 						{
-							plan.PushSecurityContext(new SecurityContext(operatorValue.Owner));
+							// A loading context is required because the operator text is using the original text
+							// so it must be bound with the original resolution path (the owning library).
+							plan.PushLoadingContext(new LoadingContext(operatorValue.Owner, operatorValue.Library.Name, false));
 							try
 							{
-								plan.PushATCreationContext();
+								plan.PushSecurityContext(new SecurityContext(operatorValue.Owner));
 								try
 								{
-									Program program = new Program(process);
-									program.Code = Compiler.Bind(plan, Compiler.CompileStatement(plan, statement));
-									plan.CheckCompiled();
-									program.Execute(null);
-									Schema.Operator localOperatorValue = ((CreateOperatorNode)program.Code).CreateOperator;
-									process.CatalogDeviceSession.AddOperatorMap(operatorMap, localOperatorValue);
-									return localOperatorValue;
+									plan.PushATCreationContext();
+									try
+									{
+										Program program = new Program(process);
+										program.Code = Compiler.Bind(plan, Compiler.CompileStatement(plan, statement));
+										plan.CheckCompiled();
+										program.Execute(null);
+										Schema.Operator localOperatorValue = ((CreateOperatorNode)program.Code).CreateOperator;
+										process.CatalogDeviceSession.AddOperatorMap(operatorMap, localOperatorValue);
+										return localOperatorValue;
+									}
+									finally
+									{
+										plan.PopATCreationContext();
+									}
 								}
 								finally
 								{
-									plan.PopATCreationContext();
+									plan.PopSecurityContext();
 								}
 							}
 							finally
 							{
-								plan.PopSecurityContext();
+								plan.PopLoadingContext();
 							}
 						}
 						finally
 						{
-							plan.PopLoadingContext();
+							if (sourceContext != null)
+								plan.PopSourceContext();
 						}
 					}
 					finally
 					{
-						if (sourceContext != null)
-							plan.PopSourceContext();
+						process.IsInsert = saveIsInsert;
 					}
 				}
 				finally
 				{
-					process.IsInsert = saveIsInsert;
+					plan.Dispose();
 				}
 			}
-			finally
+			catch (Exception e)
 			{
-				plan.Dispose();
+				RemoveOperatorMap(process, operatorMap);
+				throw;
 			}
 		}
 		
