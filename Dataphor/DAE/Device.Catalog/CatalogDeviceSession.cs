@@ -2422,7 +2422,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			//reference.SourceTable.SourceReferences.AddInCreationOrder(reference);
 			//reference.TargetTable.TargetReferences.AddInCreationOrder(reference);
 			reference.SourceTable.References.AddInCreationOrder(reference);
-			reference.TargetTable.References.AddInCreationOrder(reference);
+			if (!reference.SourceTable.Equals(reference.TargetTable))
+				reference.TargetTable.References.AddInCreationOrder(reference);
 			
 			reference.SourceTable.SetShouldReinferReferences(this);
 			reference.TargetTable.SetShouldReinferReferences(this);
