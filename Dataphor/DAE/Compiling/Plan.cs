@@ -446,7 +446,7 @@ namespace Alphora.Dataphor.DAE.Compiling
         
 		public CursorContext GetDefaultCursorContext()
 		{
-			return new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.None);
+			return new CursorContext(CursorType.Dynamic, CursorCapability.Navigable | (ServerProcess.ServerSession.SessionInfo.ShouldElaborate ? CursorCapability.Elaborable : CursorCapability.None), CursorIsolation.None);
 		}
         
 		public CursorContext CursorContext

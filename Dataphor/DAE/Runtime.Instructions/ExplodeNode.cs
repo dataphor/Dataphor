@@ -119,9 +119,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			CopyOrders(SourceTableVar.Orders);
 			Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, TableVar));
 
-			#if UseReferenceDerivation
-			CopyReferences(plan, SourceTableVar);
-			#endif
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, SourceTableVar);
 		}
 		
 		public override void InternalDetermineBinding(Plan plan)

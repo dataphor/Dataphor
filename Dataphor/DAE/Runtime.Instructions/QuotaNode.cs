@@ -98,9 +98,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (SourceNode.Order != null)
 				Order = CopyOrder(SourceNode.Order);
 
-			#if UseReferenceDerivation
-			CopyReferences(plan, SourceTableVar);
-			#endif
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, SourceTableVar);
 
 			plan.EnterRowContext();
 			try

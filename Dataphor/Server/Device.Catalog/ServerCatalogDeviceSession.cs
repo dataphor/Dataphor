@@ -2548,6 +2548,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 			if ((bool)oldRow["ShouldEmitIL"] ^ (bool)newRow["ShouldEmitIL"])
 				session.SessionInfo.ShouldEmitIL = (bool)newRow["ShouldEmitIL"];
+
+			if ((bool)oldRow["ShouldElaborate"] ^ (bool)newRow["ShouldElaborate"])
+				session.SessionInfo.ShouldElaborate = (bool)newRow["ShouldElaborate"];
 		}
 
 		protected void UpdateProcesses(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)

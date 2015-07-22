@@ -187,65 +187,66 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			DetermineOrder(plan);
 			
-			#if UseReferenceDerivation
 			// Copy references
-			if (SourceTableVar.HasReferences())
-				foreach (Schema.ReferenceBase reference in SourceTableVar.References)
-				{
-					if (reference.SourceTable.Equals(SourceTableVar))
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			{
+				if (SourceTableVar.HasReferences())
+					foreach (Schema.ReferenceBase reference in SourceTableVar.References)
 					{
-						Schema.JoinKey sourceKey = new Schema.JoinKey();
-						foreach (Schema.TableVarColumn column in reference.SourceKey.Columns)
-							sourceKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(column.Name)]);
+						if (reference.SourceTable.Equals(SourceTableVar))
+						{
+							Schema.JoinKey sourceKey = new Schema.JoinKey();
+							foreach (Schema.TableVarColumn column in reference.SourceKey.Columns)
+								sourceKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(column.Name)]);
 					
-						int newReferenceID = Schema.Object.GetNextObjectID();
-						string newReferenceName = DeriveSourceReferenceName(reference, newReferenceID, sourceKey);
+							int newReferenceID = Schema.Object.GetNextObjectID();
+							string newReferenceName = DeriveSourceReferenceName(reference, newReferenceID, sourceKey);
 
-						Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);
-						newReference.IsExcluded = reference.IsExcluded;
-						newReference.InheritMetaData(reference.MetaData);
-						newReference.SourceTable = _tableVar;
-						newReference.AddDependency(_tableVar);
-						newReference.TargetTable = reference.TargetTable;
-						newReference.AddDependency(reference.TargetTable);
-						newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
-						foreach (Schema.TableVarColumn column in sourceKey.Columns)
-							newReference.SourceKey.Columns.Add(column);
-						newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
-						foreach (Schema.TableVarColumn column in reference.TargetKey.Columns)
-							newReference.TargetKey.Columns.Add(column);
-						//newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
-						//newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
-						_tableVar.References.Add(newReference);
-					}
-					else if (reference.TargetTable.Equals(SourceTableVar))
-					{
-						Schema.JoinKey targetKey = new Schema.JoinKey();
-						foreach (Schema.TableVarColumn column in reference.TargetKey.Columns)
-							targetKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(column.Name)]);
+							Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);
+							newReference.IsExcluded = reference.IsExcluded;
+							newReference.InheritMetaData(reference.MetaData);
+							newReference.SourceTable = _tableVar;
+							newReference.AddDependency(_tableVar);
+							newReference.TargetTable = reference.TargetTable;
+							newReference.AddDependency(reference.TargetTable);
+							newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
+							foreach (Schema.TableVarColumn column in sourceKey.Columns)
+								newReference.SourceKey.Columns.Add(column);
+							newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
+							foreach (Schema.TableVarColumn column in reference.TargetKey.Columns)
+								newReference.TargetKey.Columns.Add(column);
+							//newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+							//newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+							_tableVar.References.Add(newReference);
+						}
+						else if (reference.TargetTable.Equals(SourceTableVar))
+						{
+							Schema.JoinKey targetKey = new Schema.JoinKey();
+							foreach (Schema.TableVarColumn column in reference.TargetKey.Columns)
+								targetKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(column.Name)]);
 				
-						int newReferenceID = Schema.Object.GetNextObjectID();
-						string newReferenceName = DeriveTargetReferenceName(reference, newReferenceID, targetKey);
+							int newReferenceID = Schema.Object.GetNextObjectID();
+							string newReferenceName = DeriveTargetReferenceName(reference, newReferenceID, targetKey);
 				
-						Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);
-						newReference.IsExcluded = reference.IsExcluded;
-						newReference.InheritMetaData(reference.MetaData);
-						newReference.SourceTable = reference.SourceTable;
-						newReference.AddDependency(reference.SourceTable);
-						newReference.TargetTable = _tableVar;
-						newReference.AddDependency(_tableVar);
-						newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
-						foreach (Schema.TableVarColumn column in reference.SourceKey.Columns)
-							newReference.SourceKey.Columns.Add(column);
-						newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
-						foreach (Schema.TableVarColumn column in targetKey.Columns)
-							newReference.TargetKey.Columns.Add(column);
-						//newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
-						//newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
-						_tableVar.References.Add(newReference);
+							Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);
+							newReference.IsExcluded = reference.IsExcluded;
+							newReference.InheritMetaData(reference.MetaData);
+							newReference.SourceTable = reference.SourceTable;
+							newReference.AddDependency(reference.SourceTable);
+							newReference.TargetTable = _tableVar;
+							newReference.AddDependency(_tableVar);
+							newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
+							foreach (Schema.TableVarColumn column in reference.SourceKey.Columns)
+								newReference.SourceKey.Columns.Add(column);
+							newReference.TargetKey.IsUnique = reference.TargetKey.IsUnique;
+							foreach (Schema.TableVarColumn column in targetKey.Columns)
+								newReference.TargetKey.Columns.Add(column);
+							//newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+							//newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+							_tableVar.References.Add(newReference);
+						}
 					}
-				}
-			#endif
+			}
 		}
 		
 		public override void DetermineCursorBehavior(Plan plan)

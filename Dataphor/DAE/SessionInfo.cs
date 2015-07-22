@@ -258,6 +258,17 @@ namespace Alphora.Dataphor.DAE
 			get { return _shouldEmitIL; }
 			set { _shouldEmitIL = value; }
 		}
+
+		private bool _shouldElaborate = true;
+		/// <summary>Determines whether or not the compiler will include elaboration information by default in prepared plans.</summary>
+		[System.ComponentModel.DefaultValue(true)]
+		[System.ComponentModel.Description("Determines whether or not the compiler will include elaboration information by default in prepared plans.")]
+		[DataMember]
+		public bool ShouldElaborate
+		{
+			get { return _shouldElaborate; }
+			set { _shouldElaborate = value; }
+		}
 		
 		public virtual object Clone()
 		{	
@@ -276,6 +287,7 @@ namespace Alphora.Dataphor.DAE
 			sessionInfo.DefaultMaxCallDepth = _defaultMaxCallDepth;
 			sessionInfo.UsePlanCache = _usePlanCache;
 			sessionInfo.ShouldEmitIL = _shouldEmitIL;
+			sessionInfo.ShouldElaborate = _shouldElaborate;
 			//LSessionInfo.PlanCacheSize = FPlanCacheSize;
 			return sessionInfo;
 		}

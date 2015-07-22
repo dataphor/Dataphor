@@ -2157,9 +2157,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((Order != null) && !TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 
-			#if UseReferenceDerivation
-			CopyReferences(plan, SourceTableVar);
-			#endif
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, SourceTableVar);
 		}
 
 		public override Statement EmitStatement(EmitMode mode)
