@@ -275,14 +275,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			if (_nodes != null)
 			{
-				for (int index = 0; index < Nodes.Count; index++)
+				for (int index = 0; index < _nodes.Count; index++)
 				{
-					Nodes[index].DeterminePotentialDevice(plan);
+					_nodes[index].DeterminePotentialDevice(plan);
 
-					_noDevice = _noDevice || Nodes[index].NoDevice;
+					_noDevice = _noDevice || _nodes[index].NoDevice;
 					if (!_noDevice)
 					{
-						childDevice = Nodes[index].PotentialDevice;
+						childDevice = _nodes[index].PotentialDevice;
 						if (childDevice != null)
 						{
 							if (currentChildDevice == null)
@@ -303,6 +303,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				_potentialDevice = currentChildDevice;
 			}
+		}
+
+		public void ClearDeviceSubNodes()
+		{
+			if (_nodes != null)
+			{
+				for (int index = 0; index < _nodes.Count; index++)
+				{
+					_nodes[index].ClearDeviceNode();
+				}
+			}
+		}
+
+		public virtual void ClearDeviceNode()
+		{
+			this._deviceNode = null;
 		}
 
 		// DetermineDevice
@@ -362,7 +378,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public virtual void SetDevice(Plan plan, Schema.Device device)
 		{
-            //_device = device;
+            _device = device;
             //_deviceSupported = true;
             //SurrogateExecute = InternalDeviceExecute;
 		}

@@ -186,8 +186,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public CreateTableNode(Schema.BaseTableVar table) : base()
 		{
 			_table = table;
-			_device = _table.Device;
-			_deviceSupported = false;
+			//_device = _table.Device;
+			//_deviceSupported = false;
 		}
 		
 		// Table
@@ -202,10 +202,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DeterminePotentialDevice(Plan plan)
 		{
-			_device = _table.Device;
-			_deviceSupported = false;
+			_potentialDevice = _table.Device;
 		}
-		
+
+		public override void DetermineDevice(Plan plan)
+		{
+			base.DetermineDevice(plan);
+			_deviceSupported = false;
+			SurrogateExecute = InternalExecute;
+		}
+
 		public override void BindToProcess(Plan plan)
 		{
 			if (_device != null)
@@ -997,45 +1003,45 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _shouldAffectDerivationTimeStamp = value; }
 		}
 		
-		protected void DropKeys(Program program, Schema.TableVar tableVar, DropKeyDefinitions dropKeys)
+		protected void DropKeys(Plan plan, Program program, Schema.TableVar tableVar, DropKeyDefinitions dropKeys)
 		{
 			if (dropKeys.Count > 0)
 				CheckNoDependents(program, tableVar);
 
 			foreach (DropKeyDefinition keyDefinition in dropKeys)
 			{
-				Schema.Key oldKey = Compiler.FindKey(program.Plan, tableVar, keyDefinition);
+				Schema.Key oldKey = Compiler.FindKey(plan, tableVar, keyDefinition);
 
 				if (oldKey.IsInherited)
 					throw new CompilerException(CompilerException.Codes.InheritedObject, oldKey.Name);
 				
-				program.CatalogDeviceSession.DropKey(tableVar, oldKey);
+				plan.CatalogDeviceSession.DropKey(tableVar, oldKey);
 			}
 		}
 		
-		protected void AlterKeys(Program program, Schema.TableVar tableVar, AlterKeyDefinitions alterKeys)
+		protected void AlterKeys(Plan plan, Program program, Schema.TableVar tableVar, AlterKeyDefinitions alterKeys)
 		{
 			foreach (AlterKeyDefinition keyDefinition in alterKeys)
 			{
-				Schema.Key oldKey = Compiler.FindKey(program.Plan, tableVar, keyDefinition);
+				Schema.Key oldKey = Compiler.FindKey(plan, tableVar, keyDefinition);
 					
 				program.CatalogDeviceSession.AlterMetaData(oldKey, keyDefinition.AlterMetaData);
 			}
 		}
 
-		protected void CreateKeys(Program program, Schema.TableVar tableVar, KeyDefinitions createKeys)
+		protected void CreateKeys(Plan plan, Program program, Schema.TableVar tableVar, KeyDefinitions createKeys)
 		{
 			foreach (KeyDefinition keyDefinition in createKeys)
 			{
-				Schema.Key newKey = Compiler.CompileKeyDefinition(program.Plan, tableVar, keyDefinition);
+				Schema.Key newKey = Compiler.CompileKeyDefinition(plan, tableVar, keyDefinition);
 				if (!tableVar.Keys.Contains(newKey))
 				{
 					if (newKey.Enforced)
 					{
 						// Validate that the key can be created
-						Compiler.CompileCatalogConstraintForKey(program.Plan, tableVar, newKey).Validate(program);
+						Compiler.CompileCatalogConstraintForKey(plan, tableVar, newKey).Validate(program);
 
-						newKey.Constraint = Compiler.CompileKeyConstraint(program.Plan, tableVar, newKey);
+						newKey.Constraint = Compiler.CompileKeyConstraint(plan, tableVar, newKey);
 					}
 					program.CatalogDeviceSession.CreateKey(tableVar, newKey);
 				}
@@ -1044,7 +1050,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void DropOrders(Program program, Schema.TableVar tableVar, DropOrderDefinitions dropOrders)
+		protected void DropOrders(Plan plan, Program program, Schema.TableVar tableVar, DropOrderDefinitions dropOrders)
 		{
 			if (dropOrders.Count > 0)
 				CheckNoDependents(program, tableVar);
@@ -1052,7 +1058,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (DropOrderDefinition orderDefinition in dropOrders)
 			{
 				
-				Schema.Order oldOrder = Compiler.FindOrder(program.Plan, tableVar, orderDefinition);
+				Schema.Order oldOrder = Compiler.FindOrder(plan, tableVar, orderDefinition);
 				if (oldOrder.IsInherited)
 					throw new CompilerException(CompilerException.Codes.InheritedObject, oldOrder.Name);
 					
@@ -1060,17 +1066,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void AlterOrders(Program program, Schema.TableVar tableVar, AlterOrderDefinitions alterOrders)
+		protected void AlterOrders(Plan plan, Program program, Schema.TableVar tableVar, AlterOrderDefinitions alterOrders)
 		{
 			foreach (AlterOrderDefinition orderDefinition in alterOrders)
-				program.CatalogDeviceSession.AlterMetaData(Compiler.FindOrder(program.Plan, tableVar, orderDefinition), orderDefinition.AlterMetaData);
+				program.CatalogDeviceSession.AlterMetaData(Compiler.FindOrder(plan, tableVar, orderDefinition), orderDefinition.AlterMetaData);
 		}
 
-		protected void CreateOrders(Program program, Schema.TableVar tableVar, OrderDefinitions createOrders)
+		protected void CreateOrders(Plan plan, Program program, Schema.TableVar tableVar, OrderDefinitions createOrders)
 		{
 			foreach (OrderDefinition orderDefinition in createOrders)
 			{
-				Schema.Order newOrder = Compiler.CompileOrderDefinition(program.Plan, tableVar, orderDefinition, false);
+				Schema.Order newOrder = Compiler.CompileOrderDefinition(plan, tableVar, orderDefinition, false);
 				if (!tableVar.Orders.Contains(newOrder))
 					program.CatalogDeviceSession.CreateOrder(tableVar, newOrder);
 				else
@@ -1078,7 +1084,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected void DropConstraints(Program program, Schema.TableVar tableVar, DropConstraintDefinitions dropConstraints)
+		protected void DropConstraints(Plan plan, Program program, Schema.TableVar tableVar, DropConstraintDefinitions dropConstraints)
 		{
 			foreach (DropConstraintDefinition constraintDefinition in dropConstraints)
 			{
@@ -1094,7 +1100,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void ValidateConstraint(Program program, Schema.TableVar tableVar, Schema.TableVarConstraint constraint)
+		protected void ValidateConstraint(Plan plan, Program program, Schema.TableVar tableVar, Schema.TableVarConstraint constraint)
 		{
 			Schema.RowConstraint rowConstraint = constraint as Schema.RowConstraint;
 			if (rowConstraint != null)
@@ -1104,7 +1110,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				var planNode = 
 					Compiler.Compile
 					(
-						program.Plan, 
+						plan, 
 						new UnaryExpression
 						(
 							Instructions.Exists, 
@@ -1131,7 +1137,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void AlterConstraints(Program program, Schema.TableVar tableVar, AlterConstraintDefinitions alterConstraints)
+		protected void AlterConstraints(Plan plan, Program program, Schema.TableVar tableVar, AlterConstraintDefinitions alterConstraints)
 		{
 			foreach (AlterConstraintDefinitionBase constraintDefinition in alterConstraints)
 			{
@@ -1150,11 +1156,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						newConstraintDefinition.ConstraintName = alterConstraintDefinition.ConstraintName;
 						newConstraintDefinition.MetaData = oldConstraint.MetaData.Copy();
 						newConstraintDefinition.Expression = alterConstraintDefinition.Expression;
-						Schema.TableVarConstraint newConstraint = Compiler.CompileTableVarConstraint(program.Plan, tableVar, newConstraintDefinition);
+						Schema.TableVarConstraint newConstraint = Compiler.CompileTableVarConstraint(plan, tableVar, newConstraintDefinition);
 							
 						// Validate LNewConstraint
 						if (newConstraint.Enforced && !program.ServerProcess.IsLoading() && program.ServerProcess.IsReconciliationEnabled())
-							ValidateConstraint(program, tableVar, newConstraint);
+							ValidateConstraint(plan, program, tableVar, newConstraint);
 							
 						program.CatalogDeviceSession.DropTableVarConstraint(tableVar, oldConstraint);
 						program.CatalogDeviceSession.CreateTableVarConstraint(tableVar, newConstraint);
@@ -1232,11 +1238,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								throw new Schema.SchemaException(Schema.SchemaException.Codes.NoDeleteTransition, oldTransitionConstraint.Name);
 						}
 						
-						Schema.TransitionConstraint newConstraint = (Schema.TransitionConstraint)Compiler.CompileTableVarConstraint(program.Plan, tableVar, newConstraintDefinition);
+						Schema.TransitionConstraint newConstraint = (Schema.TransitionConstraint)Compiler.CompileTableVarConstraint(plan, tableVar, newConstraintDefinition);
 							
 						// Validate LNewConstraint
 						if ((newConstraint.OnInsertNode != null) && newConstraint.Enforced && !program.ServerProcess.IsLoading() && program.ServerProcess.IsReconciliationEnabled())
-							ValidateConstraint(program, tableVar, newConstraint);
+							ValidateConstraint(plan, program, tableVar, newConstraint);
 							
 						program.CatalogDeviceSession.DropTableVarConstraint(tableVar, oldTransitionConstraint);
 						program.CatalogDeviceSession.CreateTableVarConstraint(tableVar, newConstraint);
@@ -1248,20 +1254,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void CreateConstraints(Program program, Schema.TableVar tableVar, CreateConstraintDefinitions createConstraints)
+		protected void CreateConstraints(Plan plan, Program program, Schema.TableVar tableVar, CreateConstraintDefinitions createConstraints)
 		{
 			foreach (CreateConstraintDefinition constraintDefinition in createConstraints)
 			{
 				Schema.TableVarConstraint newConstraint = Compiler.CompileTableVarConstraint(program.Plan, tableVar, constraintDefinition);
 				
 				if (((newConstraint is Schema.RowConstraint) || (((Schema.TransitionConstraint)newConstraint).OnInsertNode != null)) && newConstraint.Enforced && !program.ServerProcess.IsLoading() && program.ServerProcess.IsReconciliationEnabled())
-					ValidateConstraint(program, tableVar, newConstraint);
+					ValidateConstraint(plan, program, tableVar, newConstraint);
 					
 				program.CatalogDeviceSession.CreateTableVarConstraint(tableVar, newConstraint);
 			}
 		}
 
-		protected void DropReferences(Program program, Schema.TableVar tableVar, DropReferenceDefinitions dropReferences)
+		protected void DropReferences(Plan plan, Program program, Schema.TableVar tableVar, DropReferenceDefinitions dropReferences)
 		{
 			foreach (DropReferenceDefinition referenceDefinition in dropReferences)
 			{
@@ -1271,7 +1277,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected void AlterReferences(Program program, Schema.TableVar tableVar, AlterReferenceDefinitions alterReferences)
+		protected void AlterReferences(Plan plan, Program program, Schema.TableVar tableVar, AlterReferenceDefinitions alterReferences)
 		{
 			foreach (AlterReferenceDefinition referenceDefinition in alterReferences)
 			{
@@ -1281,7 +1287,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected void CreateReferences(Program program, Schema.TableVar tableVar, ReferenceDefinitions createReferences)
+		protected void CreateReferences(Plan plan, Program program, Schema.TableVar tableVar, ReferenceDefinitions createReferences)
 		{
 			foreach (ReferenceDefinition referenceDefinition in createReferences)
 			{
@@ -1320,7 +1326,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		private Schema.BaseTableVar _tableVar;
 		public Schema.BaseTableVar TableVar { get { return _tableVar; } }
 
-		protected void DropColumns(Program program, Schema.BaseTableVar table, DropColumnDefinitions dropColumns)
+		protected void DropColumns(Plan plan, Program program, Schema.BaseTableVar table, DropColumnDefinitions dropColumns)
 		{
 			if (dropColumns.Count > 0)
 				CheckNoDependents(program, table);
@@ -1359,7 +1365,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				((StackReferenceNode)valueNodes[index]).Identifier = Schema.Object.EnsureRooted(Keywords.Value);
 		}
 		
-		protected void ValidateConstraint(Program program, Schema.BaseTableVar table, Schema.TableVarColumn column, Schema.TableVarColumnConstraint constraint)
+		protected void ValidateConstraint(Plan plan, Program program, Schema.BaseTableVar table, Schema.TableVarColumn column, Schema.TableVarColumnConstraint constraint)
 		{
 			// Ensure that all values in the given column of the given base table variable satisfy the new constraint
 			List<PlanNode> valueNodes = new List<PlanNode>();
@@ -1369,7 +1375,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			PlanNode planNode = 
 				Compiler.Compile
 				(
-					program.Plan,
+					plan,
 					new UnaryExpression
 					(
 						Instructions.Exists,
@@ -1400,7 +1406,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new RuntimeException(RuntimeException.Codes.ConstraintViolation, constraint.Name);
 		}
 		
-		protected void DropColumnConstraints(Program program, Schema.BaseTableVar table, Schema.TableVarColumn column, DropConstraintDefinitions dropConstraints)
+		protected void DropColumnConstraints(Plan plan, Program program, Schema.BaseTableVar table, Schema.TableVarColumn column, DropConstraintDefinitions dropConstraints)
 		{
 			foreach (DropConstraintDefinition constraintDefinition in dropConstraints)
 			{
@@ -1410,7 +1416,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void AlterColumnConstraints(Program program, Schema.BaseTableVar table, Schema.TableVarColumn column, AlterConstraintDefinitions alterConstraints)
+		protected void AlterColumnConstraints(Plan plan, Program program, Schema.BaseTableVar table, Schema.TableVarColumn column, AlterConstraintDefinitions alterConstraints)
 		{
 			foreach (AlterConstraintDefinition constraintDefinition in alterConstraints)
 			{
@@ -1418,9 +1424,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				if (constraintDefinition.Expression != null)
 				{
-					Schema.TableVarColumnConstraint newConstraint = Compiler.CompileTableVarColumnConstraint(program.Plan, table, column, new ConstraintDefinition(constraintDefinition.ConstraintName, constraintDefinition.Expression, constraint.MetaData == null ? null : constraint.MetaData.Copy()));
+					Schema.TableVarColumnConstraint newConstraint = Compiler.CompileTableVarColumnConstraint(plan, table, column, new ConstraintDefinition(constraintDefinition.ConstraintName, constraintDefinition.Expression, constraint.MetaData == null ? null : constraint.MetaData.Copy()));
 					if (newConstraint.Enforced && !program.ServerProcess.IsLoading() && program.ServerProcess.IsReconciliationEnabled())
-						ValidateConstraint(program, table, column, newConstraint);
+						ValidateConstraint(plan, program, table, column, newConstraint);
 					program.CatalogDeviceSession.DropTableVarColumnConstraint(column, constraint);
 					program.CatalogDeviceSession.CreateTableVarColumnConstraint(column, newConstraint);
 					constraint = newConstraint;
@@ -1430,19 +1436,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void CreateColumnConstraints(Program program, Schema.BaseTableVar table, Schema.TableVarColumn column, ConstraintDefinitions createConstraints)
+		protected void CreateColumnConstraints(Plan plan, Program program, Schema.BaseTableVar table, Schema.TableVarColumn column, ConstraintDefinitions createConstraints)
 		{
 			foreach (ConstraintDefinition constraintDefinition in createConstraints)
 			{
-				Schema.TableVarColumnConstraint newConstraint = Compiler.CompileTableVarColumnConstraint(program.Plan, table, column, constraintDefinition);
+				Schema.TableVarColumnConstraint newConstraint = Compiler.CompileTableVarColumnConstraint(plan, table, column, constraintDefinition);
 				if (newConstraint.Enforced && !program.ServerProcess.IsLoading() && program.ServerProcess.IsReconciliationEnabled())
-					ValidateConstraint(program, table, column, newConstraint);
+					ValidateConstraint(plan, program, table, column, newConstraint);
 				program.CatalogDeviceSession.CreateTableVarColumnConstraint(column, newConstraint);
 			}
 		}
 		
 		// TODO: Alter table variable column scalar type
-		protected void AlterColumns(Program program, Schema.BaseTableVar table, AlterColumnDefinitions alterColumns)
+		protected void AlterColumns(Plan plan, Program program, Schema.BaseTableVar table, AlterColumnDefinitions alterColumns)
 		{
 			Schema.TableVarColumn column;
 			foreach (AlterColumnDefinition columnDefinition in alterColumns)
@@ -1460,7 +1466,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						PlanNode node = 
 							Compiler.Compile
 							(
-								program.Plan,
+								plan,
 								new UnaryExpression
 								(
 									Instructions.Exists,
@@ -1517,9 +1523,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					program.CatalogDeviceSession.SetTableVarColumnDefault(column, null);
 				}
 				
-				DropColumnConstraints(program, table, column, columnDefinition.DropConstraints);
-				AlterColumnConstraints(program, table, column, columnDefinition.AlterConstraints);
-				CreateColumnConstraints(program, table, column, columnDefinition.CreateConstraints);
+				DropColumnConstraints(plan, program, table, column, columnDefinition.DropConstraints);
+				AlterColumnConstraints(plan, program, table, column, columnDefinition.AlterConstraints);
+				CreateColumnConstraints(plan, program, table, column, columnDefinition.CreateConstraints);
 				
 				program.CatalogDeviceSession.AlterMetaData(column, columnDefinition.AlterMetaData);
 			}
@@ -1528,14 +1534,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected Schema.Objects _nonNilableColumns;
 		protected Schema.Objects _defaultColumns;
 
-		protected void CreateColumns(Program program, Schema.BaseTableVar table, ColumnDefinitions createColumns)
+		protected void CreateColumns(Plan plan, Program program, Schema.BaseTableVar table, ColumnDefinitions createColumns)
 		{
 			_nonNilableColumns = new Schema.Objects();
 			_defaultColumns = new Schema.Objects();
 			Schema.BaseTableVar dummy = new Schema.BaseTableVar(table.Name);
 			dummy.Library = table.Library;
 			dummy.IsGenerated = table.IsGenerated;
-			program.Plan.PushCreationObject(dummy);
+			plan.PushCreationObject(dummy);
 			try
 			{
 				if (createColumns.Count > 0)
@@ -1543,7 +1549,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				foreach (ColumnDefinition columnDefinition in createColumns)
 				{
-					Schema.TableVarColumn tableVarColumn = Compiler.CompileTableVarColumnDefinition(program.Plan, table, columnDefinition);
+					Schema.TableVarColumn tableVarColumn = Compiler.CompileTableVarColumnDefinition(plan, table, columnDefinition);
 					if (tableVarColumn.Default != null)
 						_defaultColumns.Add(tableVarColumn);
 					if (!tableVarColumn.IsNilable)
@@ -1560,7 +1566,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				program.Plan.PopCreationObject();
+				plan.PopCreationObject();
 			}
 			if (dummy.HasDependencies())
 				table.AddDependencies(dummy.Dependencies);
@@ -1569,8 +1575,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DeterminePotentialDevice(Plan plan)
 		{
 			_tableVar = (Schema.BaseTableVar)FindObject(plan, _alterTableVarStatement.TableVarName);
-			_device = _tableVar.Device;
+			_potentialDevice = _tableVar.Device;
+		}
+
+		public override void DetermineDevice(Plan plan)
+		{
+			base.DetermineDevice(plan);
 			_deviceSupported = false;
+			SurrogateExecute = InternalExecute;
 		}
 		
 		public override void BindToProcess(Plan plan)
@@ -1612,77 +1624,83 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program)
 		{
-			_tableVar = (Schema.BaseTableVar)FindObject(program.Plan, _alterTableVarStatement.TableVarName);
-			if (!program.ServerProcess.InLoadingContext())
-				program.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(program.ServerProcess, _tableVar);
-
-			DropColumns(program, _tableVar, AlterTableStatement.DropColumns);
-			AlterColumns(program, _tableVar, AlterTableStatement.AlterColumns);
-			CreateColumns(program, _tableVar, AlterTableStatement.CreateColumns);
-
-			// Change columns in the device			
-			AlterTableStatement statement = new AlterTableStatement();
-			statement.TableVarName = AlterTableStatement.TableVarName;
-			statement.DropColumns.AddRange(AlterTableStatement.DropColumns);
-			statement.AlterColumns.AddRange(AlterTableStatement.AlterColumns);
-			statement.CreateColumns.AddRange(AlterTableStatement.CreateColumns);
-			AlterTableNode node = new AlterTableNode();
-			node.AlterTableStatement = statement;
-			node.DeterminePotentialDevice(program.Plan);
-			node.DetermineDevice(program.Plan);
-			node.DetermineAccessPath(program.Plan);
-			program.DeviceExecute(_tableVar.Device, node);
-			UpdateDefaultColumns(program);
-
-			// Drop keys and orders
-			statement = new AlterTableStatement();
-			statement.TableVarName = AlterTableStatement.TableVarName;
-			statement.DropKeys.AddRange(AlterTableStatement.DropKeys);
-			statement.DropOrders.AddRange(AlterTableStatement.DropOrders);
-			node = new AlterTableNode();
-			node.AlterTableStatement = statement;
-			node.DeterminePotentialDevice(program.Plan);
-			node.DetermineDevice(program.Plan);
-			node.DetermineAccessPath(program.Plan);
-			program.DeviceExecute(_tableVar.Device, node);
-			DropKeys(program, _tableVar, _alterTableVarStatement.DropKeys);
-			DropOrders(program, _tableVar, _alterTableVarStatement.DropOrders);
-
-			AlterKeys(program, _tableVar, _alterTableVarStatement.AlterKeys);
-			AlterOrders(program, _tableVar, _alterTableVarStatement.AlterOrders);
-			CreateKeys(program, _tableVar, _alterTableVarStatement.CreateKeys);
-			CreateOrders(program, _tableVar, _alterTableVarStatement.CreateOrders);
-
-			statement = new AlterTableStatement();
-			statement.TableVarName = AlterTableStatement.TableVarName;
-			statement.CreateKeys.AddRange(AlterTableStatement.CreateKeys);
-			statement.CreateOrders.AddRange(AlterTableStatement.CreateOrders);
-			node = new AlterTableNode();
-			node.AlterTableStatement = statement;
-			node.DeterminePotentialDevice(program.Plan);
-			node.DetermineDevice(program.Plan);
-			node.DetermineAccessPath(program.Plan);
-			program.DeviceExecute(_tableVar.Device, node);
-
-			DropReferences(program, _tableVar, _alterTableVarStatement.DropReferences);
-			AlterReferences(program, _tableVar, _alterTableVarStatement.AlterReferences);
-			CreateReferences(program, _tableVar, _alterTableVarStatement.CreateReferences);
-			DropConstraints(program, _tableVar, _alterTableVarStatement.DropConstraints);
-			AlterConstraints(program, _tableVar, _alterTableVarStatement.AlterConstraints);
-			CreateConstraints(program, _tableVar, _alterTableVarStatement.CreateConstraints);
-			program.CatalogDeviceSession.AlterMetaData(_tableVar, _alterTableVarStatement.AlterMetaData);
-
-			if (ShouldAffectDerivationTimeStamp)
+			using (var plan = new Plan(program.ServerProcess))
 			{
-				program.Catalog.UpdateCacheTimeStamp();
-                program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: alter table {1}", program.Catalog.CacheTimeStamp.ToString(), _alterTableVarStatement.TableVarName));
-                program.Catalog.UpdatePlanCacheTimeStamp();
-				program.Catalog.UpdateDerivationTimeStamp();
-			}
+				_tableVar = (Schema.BaseTableVar)FindObject(plan, _alterTableVarStatement.TableVarName);
+				if (!program.ServerProcess.InLoadingContext())
+					program.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(program.ServerProcess, _tableVar);
 
-			program.CatalogDeviceSession.UpdateCatalogObject(_tableVar);
+				DropColumns(plan, program, _tableVar, AlterTableStatement.DropColumns);
+				AlterColumns(plan, program, _tableVar, AlterTableStatement.AlterColumns);
+				CreateColumns(plan, program, _tableVar, AlterTableStatement.CreateColumns);
+
+				// Change columns in the device			
+				AlterTableStatement statement = new AlterTableStatement();
+				statement.TableVarName = AlterTableStatement.TableVarName;
+				statement.DropColumns.AddRange(AlterTableStatement.DropColumns);
+				statement.AlterColumns.AddRange(AlterTableStatement.AlterColumns);
+				statement.CreateColumns.AddRange(AlterTableStatement.CreateColumns);
+				AlterTableNode node = new AlterTableNode();
+				node.AlterTableStatement = statement;
+				node.DeterminePotentialDevice(plan);
+				node.DetermineDevice(plan);
+				node.DetermineAccessPath(plan);
+				_tableVar.Device.Prepare(plan, node);
+				program.DeviceExecute(_tableVar.Device, node);
+				UpdateDefaultColumns(program);
+
+				// Drop keys and orders
+				statement = new AlterTableStatement();
+				statement.TableVarName = AlterTableStatement.TableVarName;
+				statement.DropKeys.AddRange(AlterTableStatement.DropKeys);
+				statement.DropOrders.AddRange(AlterTableStatement.DropOrders);
+				node = new AlterTableNode();
+				node.AlterTableStatement = statement;
+				node.DeterminePotentialDevice(plan);
+				node.DetermineDevice(plan);
+				node.DetermineAccessPath(plan);
+				_tableVar.Device.Prepare(plan, node);
+				program.DeviceExecute(_tableVar.Device, node);
+				DropKeys(plan, program, _tableVar, _alterTableVarStatement.DropKeys);
+				DropOrders(plan, program, _tableVar, _alterTableVarStatement.DropOrders);
+
+				AlterKeys(plan, program, _tableVar, _alterTableVarStatement.AlterKeys);
+				AlterOrders(plan, program, _tableVar, _alterTableVarStatement.AlterOrders);
+				CreateKeys(plan, program, _tableVar, _alterTableVarStatement.CreateKeys);
+				CreateOrders(plan, program, _tableVar, _alterTableVarStatement.CreateOrders);
+
+				statement = new AlterTableStatement();
+				statement.TableVarName = AlterTableStatement.TableVarName;
+				statement.CreateKeys.AddRange(AlterTableStatement.CreateKeys);
+				statement.CreateOrders.AddRange(AlterTableStatement.CreateOrders);
+				node = new AlterTableNode();
+				node.AlterTableStatement = statement;
+				node.DeterminePotentialDevice(plan);
+				node.DetermineDevice(plan);
+				node.DetermineAccessPath(plan);
+				_tableVar.Device.Prepare(plan, node);
+				program.DeviceExecute(_tableVar.Device, node);
+
+				DropReferences(plan, program, _tableVar, _alterTableVarStatement.DropReferences);
+				AlterReferences(plan, program, _tableVar, _alterTableVarStatement.AlterReferences);
+				CreateReferences(plan, program, _tableVar, _alterTableVarStatement.CreateReferences);
+				DropConstraints(plan, program, _tableVar, _alterTableVarStatement.DropConstraints);
+				AlterConstraints(plan, program, _tableVar, _alterTableVarStatement.AlterConstraints);
+				CreateConstraints(plan, program, _tableVar, _alterTableVarStatement.CreateConstraints);
+				program.CatalogDeviceSession.AlterMetaData(_tableVar, _alterTableVarStatement.AlterMetaData);
+
+				if (ShouldAffectDerivationTimeStamp)
+				{
+					program.Catalog.UpdateCacheTimeStamp();
+					program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: alter table {1}", program.Catalog.CacheTimeStamp.ToString(), _alterTableVarStatement.TableVarName));
+					program.Catalog.UpdatePlanCacheTimeStamp();
+					program.Catalog.UpdateDerivationTimeStamp();
+				}
+
+				program.CatalogDeviceSession.UpdateCatalogObject(_tableVar);
 			
-			return null;
+				return null;
+			}
 		}
     }
     
@@ -1724,35 +1742,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program)
 		{
-			Schema.DerivedTableVar view = (Schema.DerivedTableVar)FindObject(program.Plan, _alterTableVarStatement.TableVarName);
-			if (!program.ServerProcess.InLoadingContext())
-				program.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(program.ServerProcess, view);
-
-			DropKeys(program, view, _alterTableVarStatement.DropKeys);
-			AlterKeys(program, view, _alterTableVarStatement.AlterKeys);
-			CreateKeys(program, view, _alterTableVarStatement.CreateKeys);
-			DropOrders(program, view, _alterTableVarStatement.DropOrders);
-			AlterOrders(program, view, _alterTableVarStatement.AlterOrders);
-			CreateOrders(program, view, _alterTableVarStatement.CreateOrders);
-			DropReferences(program, view, _alterTableVarStatement.DropReferences);
-			AlterReferences(program, view, _alterTableVarStatement.AlterReferences);
-			CreateReferences(program, view, _alterTableVarStatement.CreateReferences);
-			DropConstraints(program, view, _alterTableVarStatement.DropConstraints);
-			AlterConstraints(program, view, _alterTableVarStatement.AlterConstraints);
-			CreateConstraints(program, view, _alterTableVarStatement.CreateConstraints);
-			program.CatalogDeviceSession.AlterMetaData(view, _alterTableVarStatement.AlterMetaData);
-
-			if (ShouldAffectDerivationTimeStamp)
+			using (var plan = new Plan(program.ServerProcess))
 			{
-				program.Catalog.UpdateCacheTimeStamp();
-                program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: alter view {1}", program.Catalog.CacheTimeStamp.ToString(), _alterTableVarStatement.TableVarName));
-                program.Catalog.UpdatePlanCacheTimeStamp();
-				program.Catalog.UpdateDerivationTimeStamp();
+				Schema.DerivedTableVar view = (Schema.DerivedTableVar)FindObject(plan, _alterTableVarStatement.TableVarName);
+				if (!program.ServerProcess.InLoadingContext())
+					program.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(program.ServerProcess, view);
+
+				DropKeys(plan, program, view, _alterTableVarStatement.DropKeys);
+				AlterKeys(plan, program, view, _alterTableVarStatement.AlterKeys);
+				CreateKeys(plan, program, view, _alterTableVarStatement.CreateKeys);
+				DropOrders(plan, program, view, _alterTableVarStatement.DropOrders);
+				AlterOrders(plan, program, view, _alterTableVarStatement.AlterOrders);
+				CreateOrders(plan, program, view, _alterTableVarStatement.CreateOrders);
+				DropReferences(plan, program, view, _alterTableVarStatement.DropReferences);
+				AlterReferences(plan, program, view, _alterTableVarStatement.AlterReferences);
+				CreateReferences(plan, program, view, _alterTableVarStatement.CreateReferences);
+				DropConstraints(plan, program, view, _alterTableVarStatement.DropConstraints);
+				AlterConstraints(plan, program, view, _alterTableVarStatement.AlterConstraints);
+				CreateConstraints(plan, program, view, _alterTableVarStatement.CreateConstraints);
+				program.CatalogDeviceSession.AlterMetaData(view, _alterTableVarStatement.AlterMetaData);
+
+				if (ShouldAffectDerivationTimeStamp)
+				{
+					program.Catalog.UpdateCacheTimeStamp();
+					program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: alter view {1}", program.Catalog.CacheTimeStamp.ToString(), _alterTableVarStatement.TableVarName));
+					program.Catalog.UpdatePlanCacheTimeStamp();
+					program.Catalog.UpdateDerivationTimeStamp();
+				}
+			
+				program.CatalogDeviceSession.UpdateCatalogObject(view);
+			
+				return null;
 			}
-			
-			program.CatalogDeviceSession.UpdateCatalogObject(view);
-			
-			return null;
 		}
     }
     
@@ -2836,10 +2857,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DeterminePotentialDevice(Plan plan)
 		{
-			_device = _table.Device;
-			_deviceSupported = false;
+			_potentialDevice = _table.Device;
 		}
-		
+
+		public override void DetermineDevice(Plan plan)
+		{
+			base.DetermineDevice(plan);
+			_deviceSupported = false;
+			SurrogateExecute = InternalExecute;
+		}
+
 		public override void BindToProcess(Plan plan)
 		{
 			plan.CheckRight(_table.GetRight(Schema.RightNames.Drop));

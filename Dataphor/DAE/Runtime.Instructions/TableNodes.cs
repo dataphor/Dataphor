@@ -1896,6 +1896,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_symbols = Compiler.SnapshotSymbols(plan);
 			}
 		}
+
+		public override void ClearDeviceNode()
+		{
+			base.ClearDeviceNode();
+		}
 		
 		protected void CheckDeviceRights(Plan plan)
 		{

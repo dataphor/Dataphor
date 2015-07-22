@@ -15,33 +15,41 @@ namespace Alphora.Dataphor.DAE.Compiling.Visitors
 {
 	public class DetermineDeviceVisitor : PlanNodeVisitor
 	{
-		private PlanNode chunk;
+		//private PlanNode chunk;
 
 		public override void PreOrderVisit(Plan plan, PlanNode node)
 		{
-			if (chunk == null)
-			{
-				node.DetermineDevice(plan);
-				if (node.DeviceSupported)
-				{
-					chunk = node;
-				}
-			}
+			//if (chunk == null)
+			//{
+			//	node.DetermineDevice(plan);
+			//	if (node.DeviceSupported)
+			//	{
+			//		chunk = node;
+			//	}
+			//}
 		}
 
 		public override void PostOrderVisit(Plan plan, PlanNode node)
 		{
-			if (chunk != null)
+			node.DetermineDevice(plan);
+
+			if (node.DeviceSupported)
 			{
-				if (chunk != node)
-				{
-					node.SetDevice(plan, chunk.Device);
-				}
-				else
-				{
-					chunk = null;
-				}
+				// Clear the device plan node from all subnodes
+				node.ClearDeviceSubNodes();
 			}
+
+			//if (chunk != null)
+			//{
+			//	if (chunk != node)
+			//	{
+			//		node.SetDevice(plan, chunk.Device);
+			//	}
+			//	else
+			//	{
+			//		chunk = null;
+			//	}
+			//}
 		}
 	}
 }

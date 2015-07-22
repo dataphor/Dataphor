@@ -519,7 +519,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				var rowType = (Schema.IRowType)planNode.DataType;
 				for (var index = 0; index < rowType.Columns.Count; index++)
 				{
-					rowDeviceNode.MappedTypes.Add((SQLScalarType)ResolveDeviceScalarType(devicePlan.Plan, (ScalarType)rowType.Columns[index].DataType));
+					if (rowType.Columns[index].DataType is ScalarType)
+					{
+						rowDeviceNode.MappedTypes.Add((SQLScalarType)ResolveDeviceScalarType(devicePlan.Plan, (ScalarType)rowType.Columns[index].DataType));
+					}
+					else
+					{
+						rowDeviceNode.MappedTypes.Add(null); // The expression will not be supported anyway, so report nothing for the type map.
+					}
 				}
 
 				devicePlan.DevicePlanNode = rowDeviceNode;
