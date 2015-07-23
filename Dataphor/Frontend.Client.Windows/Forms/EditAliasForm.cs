@@ -52,6 +52,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private Label label4;
 		private ComboBox cbListenerSecurityMode;
 		private System.Windows.Forms.TextBox tbOverrideListenerPortNumber;
+		private System.Windows.Forms.TextBox tbEndpointConfigurationName;
+		private Label label9;
+		private Label label12;
 		private System.Windows.Forms.CheckBox cbIsUserAlias;
 
 		public EditAliasForm()
@@ -100,6 +103,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.cbIsUserAlias = new System.Windows.Forms.CheckBox();
 			this.tcAliasType = new System.Windows.Forms.TabControl();
 			this.tpConnectionAlias = new System.Windows.Forms.TabPage();
+			this.label12 = new System.Windows.Forms.Label();
+			this.tbEndpointConfigurationName = new System.Windows.Forms.TextBox();
+			this.label9 = new System.Windows.Forms.Label();
+			this.label5 = new System.Windows.Forms.Label();
+			this.label4 = new System.Windows.Forms.Label();
+			this.cbListenerSecurityMode = new System.Windows.Forms.ComboBox();
+			this.tbOverrideListenerPortNumber = new System.Windows.Forms.TextBox();
 			this.label3 = new System.Windows.Forms.Label();
 			this.cbSecurityMode = new System.Windows.Forms.ComboBox();
 			this.tbOverridePortNumber = new System.Windows.Forms.TextBox();
@@ -117,10 +127,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this._cbInProcessInstanceName = new System.Windows.Forms.ComboBox();
 			this.label10 = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
-			this.cbListenerSecurityMode = new System.Windows.Forms.ComboBox();
-			this.tbOverrideListenerPortNumber = new System.Windows.Forms.TextBox();
-			this.label4 = new System.Windows.Forms.Label();
-			this.label5 = new System.Windows.Forms.Label();
 			this.FContentPanel.SuspendLayout();
 			this.tcAliasType.SuspendLayout();
 			this.tpConnectionAlias.SuspendLayout();
@@ -136,14 +142,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.FContentPanel.Controls.Add(this.tcAliasType);
 			this.FContentPanel.Controls.Add(this.tbAliasName);
 			this.FContentPanel.Controls.Add(this.SessionInfoPropertyGrid);
-			this.FContentPanel.Size = new System.Drawing.Size(325, 519);
+			this.FContentPanel.Size = new System.Drawing.Size(325, 625);
 			// 
 			// SessionInfoPropertyGrid
 			// 
 			this.SessionInfoPropertyGrid.LineColor = System.Drawing.SystemColors.ScrollBar;
-			this.SessionInfoPropertyGrid.Location = new System.Drawing.Point(8, 335);
+			this.SessionInfoPropertyGrid.Location = new System.Drawing.Point(13, 434);
 			this.SessionInfoPropertyGrid.Name = "SessionInfoPropertyGrid";
-			this.SessionInfoPropertyGrid.Size = new System.Drawing.Size(309, 181);
+			this.SessionInfoPropertyGrid.Size = new System.Drawing.Size(299, 181);
 			this.SessionInfoPropertyGrid.TabIndex = 8;
 			this.SessionInfoPropertyGrid.ToolbarVisible = false;
 			// 
@@ -167,7 +173,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// AdvancedButton
 			// 
 			this.AdvancedButton.BackColor = System.Drawing.Color.Transparent;
-			this.AdvancedButton.Location = new System.Drawing.Point(8, 306);
+			this.AdvancedButton.Location = new System.Drawing.Point(12, 405);
 			this.AdvancedButton.Name = "AdvancedButton";
 			this.AdvancedButton.Size = new System.Drawing.Size(88, 23);
 			this.AdvancedButton.TabIndex = 7;
@@ -177,7 +183,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// cbIsUserAlias
 			// 
 			this.cbIsUserAlias.AutoSize = true;
-			this.cbIsUserAlias.Location = new System.Drawing.Point(8, 283);
+			this.cbIsUserAlias.Location = new System.Drawing.Point(12, 382);
 			this.cbIsUserAlias.Name = "cbIsUserAlias";
 			this.cbIsUserAlias.Size = new System.Drawing.Size(225, 17);
 			this.cbIsUserAlias.TabIndex = 9;
@@ -191,11 +197,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.tcAliasType.Location = new System.Drawing.Point(12, 34);
 			this.tcAliasType.Name = "tcAliasType";
 			this.tcAliasType.SelectedIndex = 0;
-			this.tcAliasType.Size = new System.Drawing.Size(300, 243);
+			this.tcAliasType.Size = new System.Drawing.Size(300, 342);
 			this.tcAliasType.TabIndex = 6;
 			// 
 			// tpConnectionAlias
 			// 
+			this.tpConnectionAlias.Controls.Add(this.label12);
+			this.tpConnectionAlias.Controls.Add(this.tbEndpointConfigurationName);
+			this.tpConnectionAlias.Controls.Add(this.label9);
 			this.tpConnectionAlias.Controls.Add(this.label5);
 			this.tpConnectionAlias.Controls.Add(this.label4);
 			this.tpConnectionAlias.Controls.Add(this.cbListenerSecurityMode);
@@ -213,10 +222,73 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.tpConnectionAlias.Location = new System.Drawing.Point(4, 22);
 			this.tpConnectionAlias.Name = "tpConnectionAlias";
 			this.tpConnectionAlias.Padding = new System.Windows.Forms.Padding(3);
-			this.tpConnectionAlias.Size = new System.Drawing.Size(292, 217);
+			this.tpConnectionAlias.Size = new System.Drawing.Size(292, 316);
 			this.tpConnectionAlias.TabIndex = 0;
 			this.tpConnectionAlias.Text = "Connect";
 			this.tpConnectionAlias.UseVisualStyleBackColor = true;
+			// 
+			// label12
+			// 
+			this.label12.Location = new System.Drawing.Point(6, 197);
+			this.label12.Name = "label12";
+			this.label12.Size = new System.Drawing.Size(276, 57);
+			this.label12.TabIndex = 29;
+			this.label12.Text = "If a configuration name is specified, it will override all settings and the conne" +
+    "ction will be based on the information specified in the configuration file for t" +
+    "he named endpoint.";
+			// 
+			// tbEndpointConfigurationName
+			// 
+			this.tbEndpointConfigurationName.Location = new System.Drawing.Point(87, 261);
+			this.tbEndpointConfigurationName.Name = "tbEndpointConfigurationName";
+			this.tbEndpointConfigurationName.Size = new System.Drawing.Size(174, 20);
+			this.tbEndpointConfigurationName.TabIndex = 27;
+			// 
+			// label9
+			// 
+			this.label9.AutoSize = true;
+			this.label9.Location = new System.Drawing.Point(6, 264);
+			this.label9.Name = "label9";
+			this.label9.Size = new System.Drawing.Size(68, 13);
+			this.label9.TabIndex = 28;
+			this.label9.Text = "Config Name";
+			// 
+			// label5
+			// 
+			this.label5.AutoSize = true;
+			this.label5.Location = new System.Drawing.Point(102, 122);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(48, 13);
+			this.label5.TabIndex = 26;
+			this.label5.Text = "Instance";
+			// 
+			// label4
+			// 
+			this.label4.AutoSize = true;
+			this.label4.Location = new System.Drawing.Point(202, 122);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(44, 13);
+			this.label4.TabIndex = 25;
+			this.label4.Text = "Listener";
+			// 
+			// cbListenerSecurityMode
+			// 
+			this.cbListenerSecurityMode.FormattingEnabled = true;
+			this.cbListenerSecurityMode.Items.AddRange(new object[] {
+            "Default",
+            "None",
+            "Transport"});
+			this.cbListenerSecurityMode.Location = new System.Drawing.Point(184, 169);
+			this.cbListenerSecurityMode.Name = "cbListenerSecurityMode";
+			this.cbListenerSecurityMode.Size = new System.Drawing.Size(77, 21);
+			this.cbListenerSecurityMode.TabIndex = 24;
+			// 
+			// tbOverrideListenerPortNumber
+			// 
+			this.tbOverrideListenerPortNumber.Location = new System.Drawing.Point(184, 141);
+			this.tbOverrideListenerPortNumber.Name = "tbOverrideListenerPortNumber";
+			this.tbOverrideListenerPortNumber.Size = new System.Drawing.Size(77, 20);
+			this.tbOverrideListenerPortNumber.TabIndex = 23;
 			// 
 			// label3
 			// 
@@ -274,7 +346,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// 
 			// cbClientSideLogging
 			// 
-			this.cbClientSideLogging.Location = new System.Drawing.Point(9, 194);
+			this.cbClientSideLogging.Location = new System.Drawing.Point(9, 293);
 			this.cbClientSideLogging.Name = "cbClientSideLogging";
 			this.cbClientSideLogging.Size = new System.Drawing.Size(168, 17);
 			this.cbClientSideLogging.TabIndex = 16;
@@ -317,7 +389,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.tpInProcessAlias.Location = new System.Drawing.Point(4, 22);
 			this.tpInProcessAlias.Name = "tpInProcessAlias";
 			this.tpInProcessAlias.Padding = new System.Windows.Forms.Padding(3);
-			this.tpInProcessAlias.Size = new System.Drawing.Size(292, 217);
+			this.tpInProcessAlias.Size = new System.Drawing.Size(292, 316);
 			this.tpInProcessAlias.TabIndex = 1;
 			this.tpInProcessAlias.Text = "In-Process";
 			this.tpInProcessAlias.UseVisualStyleBackColor = true;
@@ -352,11 +424,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.NewInstanceButton.UseVisualStyleBackColor = true;
 			this.NewInstanceButton.Click += new System.EventHandler(this.NewInstanceButton_Click);
 			// 
-			// FCbInProcessInstanceName
+			// _cbInProcessInstanceName
 			// 
 			this._cbInProcessInstanceName.FormattingEnabled = true;
 			this._cbInProcessInstanceName.Location = new System.Drawing.Point(82, 45);
-			this._cbInProcessInstanceName.Name = "FCbInProcessInstanceName";
+			this._cbInProcessInstanceName.Name = "_cbInProcessInstanceName";
 			this._cbInProcessInstanceName.Size = new System.Drawing.Size(155, 21);
 			this._cbInProcessInstanceName.TabIndex = 47;
 			this._cbInProcessInstanceName.DropDown += new System.EventHandler(this.cbInProcessInstanceName_DropDown);
@@ -378,46 +450,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.label11.TabIndex = 32;
 			this.label11.Text = "Instance";
 			// 
-			// cbListenerSecurityMode
-			// 
-			this.cbListenerSecurityMode.FormattingEnabled = true;
-			this.cbListenerSecurityMode.Items.AddRange(new object[] {
-            "Default",
-            "None",
-            "Transport"});
-			this.cbListenerSecurityMode.Location = new System.Drawing.Point(184, 169);
-			this.cbListenerSecurityMode.Name = "cbListenerSecurityMode";
-			this.cbListenerSecurityMode.Size = new System.Drawing.Size(77, 21);
-			this.cbListenerSecurityMode.TabIndex = 24;
-			// 
-			// tbOverrideListenerPortNumber
-			// 
-			this.tbOverrideListenerPortNumber.Location = new System.Drawing.Point(184, 141);
-			this.tbOverrideListenerPortNumber.Name = "tbOverrideListenerPortNumber";
-			this.tbOverrideListenerPortNumber.Size = new System.Drawing.Size(77, 20);
-			this.tbOverrideListenerPortNumber.TabIndex = 23;
-			// 
-			// label4
-			// 
-			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(202, 122);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(44, 13);
-			this.label4.TabIndex = 25;
-			this.label4.Text = "Listener";
-			// 
-			// label5
-			// 
-			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(102, 122);
-			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(48, 13);
-			this.label5.TabIndex = 26;
-			this.label5.Text = "Instance";
-			// 
 			// EditAliasForm
 			// 
-			this.ClientSize = new System.Drawing.Size(325, 590);
+			this.ClientSize = new System.Drawing.Size(325, 696);
 			this.ControlBox = false;
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Location = new System.Drawing.Point(0, 0);
@@ -511,6 +546,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				SecurityMode = connection.SecurityMode;
 				OverrideListenerPortNumber = connection.OverrideListenerPortNumber;
 				ListenerSecurityMode = connection.ListenerSecurityMode;
+				tbEndpointConfigurationName.Text = connection.ClientConfigurationName;
 				cbClientSideLogging.Checked = connection.ClientSideLoggingEnabled;
 			}
 		}
@@ -534,6 +570,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				connection.SecurityMode = SecurityMode;
 				connection.OverrideListenerPortNumber = OverrideListenerPortNumber;
 				connection.ListenerSecurityMode = ListenerSecurityMode;
+				connection.ClientConfigurationName = tbEndpointConfigurationName.Text;
 				connection.ClientSideLoggingEnabled = cbClientSideLogging.Checked;
 				result = connection;
 			}

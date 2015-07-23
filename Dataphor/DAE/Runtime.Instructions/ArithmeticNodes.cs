@@ -44,7 +44,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public ShortNegateNode() : base()
 		{
-			ShouldEmitIL = true;
 		}
 
 /*

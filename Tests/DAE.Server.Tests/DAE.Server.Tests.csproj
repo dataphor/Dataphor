@@ -113,6 +113,10 @@
       <Project>{788980F0-5A85-4F9A-9E6A-56746E7D37C7}</Project>
       <Name>DAE.SQLCE</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Dataphor\DAE.SQLite\DAE.SQLite.csproj">
+      <Project>{6d005ba9-2f0b-4eaa-b82f-039afa11c425}</Project>
+      <Name>DAE.SQLite</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\DAE\Engine.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>Engine</Name>

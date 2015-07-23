@@ -11,7 +11,6 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<ne XYZ commalist> ::= <XYZ>{,<XYZ>}
 	<ne XYZ semicolonlist> ::= <XYZ>{;<XYZ>}
 
-
 	<script> ::=
 		<statement semicolonlist>
 
@@ -76,6 +75,7 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		<add clause> |
 		<rename clause> |
 		<remove clause> |
+		<specify clause> |
 		<aggregate clause> |
 		<quota clause> |
 		<explode clause> |
@@ -175,7 +175,7 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		<if expression> |
 		<case expression>
 
-    <selector expression> ::=
+	<selector expression> ::=
 		<table selector> |
 		<row selector> |
 		<cursor selector> |
@@ -288,14 +288,20 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<named column name> ::=
 		<column name> <column name>
 
+	<specify clause> ::=
+		"{"<optionally named expression term commalist>"}" [<language modifiers>]
+				
+	<optionally named expression term> ::=
+		<expression term> [<column name>] <metadata>
+
           <aggregate clause> ::=
               group [by "{"<ne column name commalist>"}"] add "{"<ne named aggregate expression commalist>"}" [<language modifiers>]
 
 	<named aggregate expression> ::=
-		<aggregate expression> <column name>
+		<aggregate expression> <column name> <metadata>
 
           <aggregate expression> ::=
-              <operator name>"("[distinct] [<column name commalist>]")"
+        <operator name>"("[distinct] [<column name commalist>] [order by "{"<order column definition commalist>"}"]")" [<language modifiers>]
 
           <order clause> ::=
               order by 

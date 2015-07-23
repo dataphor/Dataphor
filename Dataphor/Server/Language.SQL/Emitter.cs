@@ -157,16 +157,21 @@ namespace Alphora.Dataphor.DAE.Language.SQL
 			{
 				NewLine();
 				Indent();
-				AppendFormat("{0} {1} ", Keywords.Order, Keywords.By);
-				for (int index = 0; index < selectStatement.OrderClause.Columns.Count; index++)
-				{
-					if (index > 0)
-						EmitListSeparator();
-					EmitOrderFieldExpression(selectStatement.OrderClause.Columns[index]);
-				}
+				EmitOrderClause(selectStatement.OrderClause);
 			}
 		}
-		
+
+		protected virtual void EmitOrderClause(OrderClause orderClause)
+		{
+			AppendFormat("{0} {1} ", Keywords.Order, Keywords.By);
+			for (int index = 0; index < orderClause.Columns.Count; index++)
+			{
+				if (index > 0)
+					EmitListSeparator();
+				EmitOrderFieldExpression(orderClause.Columns[index]);
+			}
+		}
+
 		protected virtual void EmitOrderFieldExpression(OrderFieldExpression orderFieldExpression)
 		{
 			EmitQualifiedFieldExpression(orderFieldExpression);

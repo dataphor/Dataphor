@@ -321,6 +321,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 
 				// Persistent constraints
+				if (tableVar.HasConstraints())
 				for (int index = 0; index < tableVar.Constraints.Count; index++)
 					if (tableVar.Constraints[index].IsPersistent && !tableVar.Constraints[index].IsGenerated)
 						InternalInsertPersistentObject(tableVar.Constraints[index]);
@@ -591,7 +592,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			// Search for a positive in the cache first
 			Schema.CatalogObjectHeaders result = Device.NameCache.Resolve(objectName);
 			if (result != null)
-				return true;
+				return result.Count > 0;
 			else
 			{
 				AcquireCatalogStoreConnection(false);
@@ -2547,6 +2548,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 			if ((bool)oldRow["ShouldEmitIL"] ^ (bool)newRow["ShouldEmitIL"])
 				session.SessionInfo.ShouldEmitIL = (bool)newRow["ShouldEmitIL"];
+
+			if ((bool)oldRow["ShouldElaborate"] ^ (bool)newRow["ShouldElaborate"])
+				session.SessionInfo.ShouldElaborate = (bool)newRow["ShouldElaborate"];
 		}
 
 		protected void UpdateProcesses(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)

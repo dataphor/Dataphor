@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 	}
 	
-	public class RegisteredClasses : Schema.Objects
+	public class RegisteredClasses : Schema.Objects<RegisteredClass>
 	{
 		public RegisteredClasses() : base() {}
 		

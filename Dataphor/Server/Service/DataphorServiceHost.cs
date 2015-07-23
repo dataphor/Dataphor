@@ -91,29 +91,34 @@ namespace Alphora.Dataphor.DAE.Service
 						_server.LogMessage("Creating Native CLI Service...");
 						_nativeService = new NativeCLIService(_nativeServer);
 
-						// TODO: Enable configuration of endpoints through instances or app.config files
 						_server.LogMessage("Configuring Service Host...");
-						_serviceHost = new ServiceHost(_service);
-						
-						_serviceHost.AddServiceEndpoint
-						(
-							typeof(IDataphorService), 
-							DataphorServiceUtility.GetBinding(), 
-							DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, instance.PortNumber, instance.Name)
-						);
+						_serviceHost = instance.UseServiceConfiguration ? new CustomServiceHost(_service) : new ServiceHost(_service);
+
+						if (!instance.UseServiceConfiguration)
+						{						
+							_serviceHost.AddServiceEndpoint
+							(
+								typeof(IDataphorService), 
+								DataphorServiceUtility.GetBinding(), 
+								DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, instance.PortNumber, instance.Name)
+							);
+						}
 
 						_server.LogMessage("Opening Service Host...");
 						_serviceHost.Open();
 						
 						_server.LogMessage("Configuring Native CLI Service Host...");
-						_nativeServiceHost = new ServiceHost(_nativeService);
-						
-						_nativeServiceHost.AddServiceEndpoint
-						(
-							typeof(INativeCLIService),
-							DataphorServiceUtility.GetBinding(), 
-							DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, instance.PortNumber, instance.Name)
-						);
+						_nativeServiceHost = instance.UseServiceConfiguration ? new CustomServiceHost(_nativeService) : new ServiceHost(_nativeService);
+
+						if (!instance.UseServiceConfiguration)
+						{						
+							_nativeServiceHost.AddServiceEndpoint
+							(
+								typeof(INativeCLIService),
+								DataphorServiceUtility.GetBinding(), 
+								DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, instance.PortNumber, instance.Name)
+							);
+						}
 					
 						_server.LogMessage("Opening Native CLI Service Host...");
 						_nativeServiceHost.Open();
@@ -122,7 +127,7 @@ namespace Alphora.Dataphor.DAE.Service
 						if (instance.ShouldListen)
 						{
 							_server.LogMessage("Starting Listener Service...");
-							_listenerServiceHost = new ListenerServiceHost(instance.OverrideListenerPortNumber, instance.RequireSecureListenerConnection, instance.AllowSilverlightClients);
+							_listenerServiceHost = new ListenerServiceHost(instance.OverrideListenerPortNumber, instance.RequireSecureListenerConnection, instance.AllowSilverlightClients, instance.UseServiceConfiguration);
 						}							
 					}
 					catch (Exception exception)

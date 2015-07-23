@@ -182,10 +182,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (SourceNode.Order != null)
 				Order = CopyOrder(SourceNode.Order);
 
-			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
-			#endif
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, SourceTableVar);
 		}
 		
 		protected Schema.Keys KeyProduct(Schema.Keys keys, Schema.Key key)

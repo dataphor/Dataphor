@@ -494,7 +494,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public SystemBinaryReadAccessorNode() : base()
 		{
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
 		
 		public override object InternalExecute(Program program, object argument1)
@@ -520,7 +520,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
     }
     
@@ -561,13 +561,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public SystemGuidReadAccessorNode() : base()
 		{
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
 		
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
 
 		public override object InternalExecute(Program program, object argument1)
@@ -608,19 +608,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return DataValue.CopyValue(program.ValueManager, argument1);
 		}
     }
+
+	// ValidatingScalarSelectorNode
+	public class ValidatingScalarSelectorNode : UnaryInstructionNode
+	{
+		public override object InternalExecute(Program program, object argument1)
+		{
+			#if NILPROPOGATION
+			if (argument1 == null)
+				return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, null);
+			#endif
+
+			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, DataValue.CopyValue(program.ValueManager, argument1));
+		}
+	}
     
     // ScalarReadAccessorNode
     public class ScalarReadAccessorNode : UnaryInstructionNode
     {
 		public ScalarReadAccessorNode() : base()
 		{
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
 		
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isOrderPreserving = true;
+			IsOrderPreserving = true;
 		}
 		
 		public override object InternalExecute(Program program, object argument1)
@@ -647,6 +661,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return DataValue.CopyValue(program.ValueManager, argument2);
 		}
     }
+
+	// ValidatingScalarWriteAccessorNode
+	public class ValidatingScalarWriteAccessorNode : BinaryInstructionNode
+	{
+		public override object InternalExecute(Program program, object argument1, object argument2)
+		{
+			#if NILPROPOGATION
+			if (argument2 == null)
+				return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, null);
+			#endif
+			
+			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, DataValue.CopyValue(program.ValueManager, argument2));
+		}
+	}
     
     // CompoundScalarSelectorNode
     public class CompoundScalarSelectorNode : InstructionNode
@@ -656,14 +684,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#if NILPROPOGATION
 			for (int index = 0; index < arguments.Length; index++)
 				if (arguments[index] == null)
-					return null;
+					return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, null);
 			#endif
 			
 			Schema.IRowType rowType = ((Schema.ScalarType)_dataType).CompoundRowType;
 			Row row = new Row(program.ValueManager, rowType);
 			for (int index = 0; index < rowType.Columns.Count; index++)
 				row[index] = arguments[index];
-			return row.AsNative;
+
+			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, row.AsNative);
 		}
     }
     
@@ -731,7 +760,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			#if NILPROPOGATION
 			if (argument1 == null || argument2 == null)
-				return null;
+				return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, null);
 			#endif
 			
 			NativeRow result = (NativeRow)DataValue.CopyValue(program.ValueManager, argument1);
@@ -740,7 +769,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				row[_propertyIndex] = argument2;
 			}
 
-			return result;
+			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, result);
 		}
     }
     
@@ -764,7 +793,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isNilable = false;
+			IsNilable = false;
 		}
 
 		public override object InternalExecute(Program program, object argument1)
@@ -779,7 +808,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isNilable = false;
+			IsNilable = false;
 		}
 
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -799,7 +828,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isNilable = false;
+			IsNilable = false;
 		}
 
 		public override object InternalExecute(Program program, object argument1)
@@ -814,7 +843,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isNilable = false;
+			IsNilable = false;
 		}
 
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -834,7 +863,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			_isNilable = Nodes[1].IsNilable;
+			IsNilable = Nodes[1].IsNilable;
 		}
 
 		public override void DetermineDataType(Plan plan)
@@ -2120,10 +2149,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((Order != null) && !TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 
-			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
-			#endif
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, SourceTableVar);
 		}
 
 		public override Statement EmitStatement(EmitMode mode)

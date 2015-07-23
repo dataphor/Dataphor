@@ -30,6 +30,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		}
 		
 		private NativeServer _nativeServer;
+		public NativeServer NativeServer { get { return _nativeServer; } }
 		
 		#region INativeCLI Members
 

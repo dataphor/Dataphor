@@ -223,7 +223,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	}
 	
     /// <remarks> Properties </remarks>
-	public class Properties : Objects
+	public class Properties : Objects<Property>
     {
 		public Properties(Representation representation) : base()
 		{
@@ -234,37 +234,16 @@ namespace Alphora.Dataphor.DAE.Schema
 		private Representation _representation;
 		public Representation Representation { get { return _representation; } }
 		
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
-		{
-			if (!(item is Property))
-				throw new SchemaException(SchemaException.Codes.PropertyContainer);
-			base.Validate(item);
-		}
-		#endif
-		
-		protected override void Adding(Object item, int index)
+		protected override void Adding(Property item, int index)
 		{
 			base.Adding(item, index);
-			((Property)item)._representation = _representation;
+			item._representation = _representation;
 		}
 		
-		protected override void Removing(Object item, int index)
+		protected override void Removing(Property item, int index)
 		{
-			((Property)item)._representation = null;
+			item._representation = null;
 			base.Removing(item, index);
-		}
-
-		public new Property this[int index]
-		{
-			get { return (Property)base[index]; }
-			set { base[index] = value; }
-		}
-
-		public new Property this[string name]
-		{
-			get { return (Property)base[name]; }
-			set { base[name] = value; }
 		}
     }
 
@@ -492,7 +471,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	}
 
     /// <remarks> Representations </remarks>
-	public class Representations : Objects
+	public class Representations : Objects<Representation>
     {
 		public Representations(ScalarType scalarType) : base()
 		{
@@ -504,37 +483,23 @@ namespace Alphora.Dataphor.DAE.Schema
 		public ScalarType ScalarType { get { return _scalarType; } }
 	
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
+		protected override void Validate(Representation item)
 		{
-			if (!(item is Representation))
-				throw new SchemaException(SchemaException.Codes.RepresentationContainer);
 			base.Validate(item);
 			_scalarType.ValidateChildObjectName(item.Name);
 		}
 		#endif
 		
-		protected override void Adding(Object item, int index)
+		protected override void Adding(Representation item, int index)
 		{
 			base.Adding(item, index);
-			((Representation)item)._scalarType = _scalarType;
+			item._scalarType = _scalarType;
 		}
 		
-		protected override void Removing(Object item, int index)
+		protected override void Removing(Representation item, int index)
 		{
-			((Representation)item)._scalarType = null;
+			item._scalarType = null;
 			base.Removing(item, index);
-		}
-
-		public new Representation this[int index]
-		{
-			get { return (Representation)base[index]; }
-			set { base[index] = value; }
-		}
-
-		public new Representation this[string name]
-		{
-			get { return (Representation)base[name]; }
-			set { base[name] = value; }
 		}
     }
     
@@ -703,19 +668,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
     }
     
-    public class Conversions : Objects
+    public class Conversions : Objects<Conversion>
     {
-		public new Conversion this[int index]
-		{
-			get { return (Conversion)base[index]; }
-			set { base[index] = value; }
-		}
-		
-		public new Object this[string name]
-		{
-			get { return (Conversion)base[name]; }
-			set { base[name] = value; }
-		}
     }
     
 	public class ScalarConversionPath : Conversions
@@ -731,30 +685,23 @@ namespace Alphora.Dataphor.DAE.Schema
 			AddRange(path);
 		}
 
-		#if USEOBJECTVALIDATE		
-		protected override void Validate(Object objectValue)
-		{
-			// Don't validate, duplicates will never be added to a path
-		}
-		#endif
-		
 		/// <summary>The initial conversion for this conversion path.</summary>
 		public Schema.Conversion Conversion { get { return this[0]; } }
 
 		/// <summary>Indicates the degree of narrowing that will occur on this conversion path.  Each narrowing conversion encountered along the path decreases the narrowing score by 1.  If no narrowing conversions occur along this path, then this number is 0. </summary>
 		public int NarrowingScore;
 
-		protected override void Adding(Schema.Object objectValue, int index)
+		protected override void Adding(Schema.Conversion objectValue, int index)
 		{
 			base.Adding(objectValue, index);
-			if (((Conversion)objectValue).IsNarrowing)
+			if (objectValue.IsNarrowing)
 				NarrowingScore--;
 		}
 
-		protected override void Removing(Schema.Object objectValue, int index)
+		protected override void Removing(Schema.Conversion objectValue, int index)
 		{
 			base.Removing(objectValue, index);
-			if (((Conversion)objectValue).IsNarrowing)
+			if (objectValue.IsNarrowing)
 				NarrowingScore++;
 		}
 		
@@ -1149,7 +1096,7 @@ namespace Alphora.Dataphor.DAE.Schema
     }
 
     /// <remarks> Specials </remarks>
-	public class Specials : Objects
+	public class Specials : Objects<Special>
     {
 		public Specials(ScalarType scalarType) : base()
 		{
@@ -1160,37 +1107,16 @@ namespace Alphora.Dataphor.DAE.Schema
 		private ScalarType _scalarType;
 		public ScalarType ScalarType { get { return _scalarType; } }
 		
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
-		{
-			if (!(item is Special))
-				throw new SchemaException(SchemaException.Codes.SpecialContainer);
-			base.Validate(item);
-		}
-		#endif
-		
-		protected override void Adding(Object item, int index)
+		protected override void Adding(Special item, int index)
 		{
 			base.Adding(item, index);
-			((Special)item)._scalarType = _scalarType;
+			item._scalarType = _scalarType;
 		}
 		
-		protected override void Removing(Object item, int index)
+		protected override void Removing(Special item, int index)
 		{
-			((Special)item)._scalarType = null;
+			item._scalarType = null;
 			base.Removing(item, index);
-		}
-
-		public new Special this[int index]
-		{
-			get { return (Special)base[index]; }
-			set { base[index] = value; }
-		}
-
-		public new Special this[string name]
-		{
-			get { return (Special)base[name]; }
-			set { base[name] = value; }
 		}
     }
     
@@ -1957,27 +1883,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	}
 
     /// <remarks> ScalarTypes </remarks>
-	public class ScalarTypes : Objects
+	public class ScalarTypes : Objects<ScalarType>
     {
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
-		{
-			if (!(item is ScalarType))
-				throw new SchemaException(SchemaException.Codes.ScalarTypeContainer);
-			base.Validate(item);
-		}
-		#endif
-
-		public new ScalarType this[int index]
-		{
-			get { return (ScalarType)base[index]; }
-			set { base[index] = value; }
-		}
-
-		public new ScalarType this[string name]
-		{
-			get { return (ScalarType)base[name]; }
-			set { base[name] = value; }
-		}
     }
 } 

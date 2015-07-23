@@ -2354,6 +2354,28 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 		}
 		
+		protected static PlanNode CopyPlanNode(Plan plan, PlanNode node, bool isAssignment)
+		{
+			// Emit the node as a statement, then return the compile of that statement.
+			if (isAssignment)
+			{
+				plan.PushStatementContext(new StatementContext(StatementType.Assignment));
+			}
+			try
+			{
+				var statement = node.EmitStatement(EmitMode.ForCopy);
+				var nodeCopy = Compiler.CompileStatement(plan, statement);
+				return nodeCopy;
+			}
+			finally
+			{
+				if (isAssignment)
+				{
+					plan.PopStatementContext();
+				}
+			}
+		}
+		
 		protected static PlanNode EmitTableAssignmentNode(Plan plan, Statement statement, PlanNode sourceNode, TableNode targetNode)
 		{
 			if (!(sourceNode.DataType is Schema.ITableType))
@@ -3269,15 +3291,20 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 			}
 		}
-		
+
 		public static Schema.Order OrderFromKey(Plan plan, Schema.Key key)
+		{
+			return OrderFromKey(plan, key.Columns);
+		}
+		
+		public static Schema.Order OrderFromKey(Plan plan, Schema.TableVarColumnsBase columns)
 		{
 			Schema.Order order = new Schema.Order();
 			Schema.OrderColumn orderColumn;
 			Schema.TableVarColumn column;
-			for (int index = 0; index < key.Columns.Count; index++)
+			for (int index = 0; index < columns.Count; index++)
 			{
-				column = key.Columns[index];
+				column = columns[index];
 				orderColumn = new Schema.OrderColumn(column, true, true);
 				if (column.DataType is Schema.ScalarType)
 					orderColumn.Sort = GetUniqueSort(plan, column.DataType);
@@ -3650,11 +3677,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 		}
 		
-		public static bool CanBuildCustomMessageForKey(Plan plan, Schema.Key key)
+		public static bool CanBuildCustomMessageForKey(Plan plan, Schema.TableVarColumnsBase columns)
 		{
-			if (key.Columns.Count > 0)
+			if (columns.Count > 0)
 			{
-				foreach (Schema.TableVarColumn column in key.Columns)
+				foreach (Schema.TableVarColumn column in columns)
 					if (!(column.DataType is Schema.ScalarType) || !((Schema.ScalarType)column.DataType).HasRepresentation(NativeAccessors.AsDisplayString))
 						return false;
 				return true;
@@ -3662,25 +3689,25 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return false;
 		}
 		
-		public static string GetCustomMessageForKey(Plan plan, Schema.TableVar tableVar, Schema.Key key)
+		public static string GetCustomMessageForKey(Plan plan, Schema.TableVar tableVar, Schema.TableVarColumnsBase columns)
 		{
 			StringBuilder message = new StringBuilder();
 			message.AppendFormat("'The table {0} already has a row with ", Schema.Object.Unqualify(tableVar.DisplayName));
 			Schema.ScalarType scalarType;
 			Schema.Representation representation;
 			
-			for (int index = 0; index < key.Columns.Count; index++)
+			for (int index = 0; index < columns.Count; index++)
 			{
 				if (index > 0)
 					message.Append(" and ");
-				message.AppendFormat("{0} ", key.Columns[index].Name);
-				scalarType = (Schema.ScalarType)key.Columns[index].DataType;
+				message.AppendFormat("{0} ", columns[index].Name);
+				scalarType = (Schema.ScalarType)columns[index].DataType;
 				representation = scalarType.FindRepresentation(NativeAccessors.AsDisplayString);
 				bool isString = scalarType.NativeType == NativeAccessors.AsDisplayString.NativeType;
 				if (isString)
-					message.AppendFormat(@"""' + (if IsNil({0}{1}{2}) then ""<no value>"" else {0}{1}{2}{3}{4}) + '""", new object[]{ Keywords.New, Keywords.Qualifier, key.Columns[index].Name, Keywords.Qualifier, representation.Properties[0].Name });
+					message.AppendFormat(@"""' + (if IsNil({0}{1}{2}) then ""<no value>"" else {0}{1}{2}{3}{4}) + '""", new object[]{ Keywords.New, Keywords.Qualifier, columns[index].Name, Keywords.Qualifier, representation.Properties[0].Name });
 				else
-					message.AppendFormat(@"(' + (if IsNil({0}{1}{2}) then ""<no value>"" else {0}{1}{2}{3}{4}) + ')", new object[]{ Keywords.New, Keywords.Qualifier, key.Columns[index].Name, Keywords.Qualifier, representation.Properties[0].Name });
+					message.AppendFormat(@"(' + (if IsNil({0}{1}{2}) then ""<no value>"" else {0}{1}{2}{3}{4}) + ')", new object[]{ Keywords.New, Keywords.Qualifier, columns[index].Name, Keywords.Qualifier, representation.Properties[0].Name });
 			}
 			
 			message.Append(".'");
@@ -3701,8 +3728,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (definition.MetaData == null)
 				definition.MetaData = new MetaData();
 			definition.MetaData.Tags.SafeRemove("DAE.ObjectID");
-			if (!(definition.MetaData.Tags.Contains("DAE.Message") || definition.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, key))
-				definition.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForKey(plan, tableVar, key)));
+			if (!(definition.MetaData.Tags.Contains("DAE.Message") || definition.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, key.Columns))
+				definition.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForKey(plan, tableVar, key.Columns)));
 				
 			BitArray isNilable = new BitArray(key.Columns.Count);
 			for (int index = 0; index < key.Columns.Count; index++)
@@ -4307,21 +4334,26 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			if (!plan.IsEngine && view.ShouldReinferReferences)
 			{
-				Schema.Objects saveSourceReferences = new Schema.Objects();
-				Schema.Objects saveTargetReferences = new Schema.Objects();
-				foreach (Schema.Reference reference in view.DerivedReferences)
+				Schema.Objects saveReferences = new Schema.Objects();
+				if (view.HasReferences())
 				{
-					if (view.SourceReferences.Contains(reference))
-						view.SourceReferences.Remove(reference);
-					if (!saveSourceReferences.Contains(reference))
-						saveSourceReferences.Add(reference);
-					if (view.TargetReferences.Contains(reference))
-						view.TargetReferences.Remove(reference);
-					if (!saveTargetReferences.Contains(reference))
-						saveTargetReferences.Add(reference);
+					foreach (Schema.ReferenceBase reference in view.References)
+					{
+						if (reference.IsDerived)
+						{
+							if (!saveReferences.Contains(reference))
+							{
+								saveReferences.Add(reference);
 				}
-				
-				view.DerivedReferences.Clear();
+						}
+					}
+
+					foreach (Schema.ReferenceBase reference in saveReferences)
+					{
+						view.References.SafeRemove(reference);
+					}
+				}
+
 				try
 				{
 					ApplicationTransaction transaction = null;
@@ -4381,24 +4413,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 				catch
 				{
-					view.DerivedReferences.Clear();
-					view.SourceReferences.Clear();
-					view.TargetReferences.Clear();
+					view.References.Clear();
 					
-					foreach (Schema.Reference reference in saveSourceReferences)
+					foreach (Schema.ReferenceBase reference in saveReferences)
 					{
-						if (!view.SourceReferences.Contains(reference))
-							view.SourceReferences.Add(reference);
-						if (!view.DerivedReferences.Contains(reference))
-							view.DerivedReferences.Add(reference);
-					}
-					
-					foreach (Schema.Reference reference in saveTargetReferences)
-					{
-						if (!view.TargetReferences.Contains(reference))
-							view.TargetReferences.Add(reference);
-						if (!view.DerivedReferences.Contains(reference))
-							view.DerivedReferences.Add(reference);
+						if (!view.References.Contains(reference))
+							view.References.Add(reference);
 					}
 					
 					throw;
@@ -4736,7 +4756,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		protected static ClassDefinition DefaultSelector()
 		{
-			return new ClassDefinition("System.ScalarSelectorNode");
+			return new ClassDefinition("System.ValidatingScalarSelectorNode");
 		}
 		
 		protected static ClassDefinition DefaultCompoundSelector()
@@ -4756,7 +4776,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		protected static ClassDefinition DefaultWriteAccessor()
 		{
-			return new ClassDefinition("System.ScalarWriteAccessorNode");
+			return new ClassDefinition("System.ValidatingScalarWriteAccessorNode");
 		}
 		
 		protected static ClassDefinition DefaultCompoundWriteAccessor(string propertyName)
@@ -4806,9 +4826,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Operator CompileSpecialOperator(Plan plan, Schema.ScalarType scalarType)
 		{
-			// create an operator of the form <library name>.IsSpecial(AValue : <scalar type name>) : boolean
+			// create an operator of the form <scalar type name qualifier>.IsSpecial(AValue : <scalar type name>) : boolean
 			// Compile IsSpecial operator (result := Parent.IsSpecial(AValue) or AValue = Special1Value or AValue = Special2Value...)
-			Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(IsSpecialOperatorName, scalarType.Library.Name));
+			Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(IsSpecialOperatorName, Schema.Object.Qualifier(scalarType.Name)));
 			operatorValue.IsGenerated = true;
 			operatorValue.Generator = scalarType;
 			operatorValue.Operands.Add(new Schema.Operand(operatorValue, "AValue", scalarType, Modifier.Const));
@@ -4931,8 +4951,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Operator CompileSpecialComparer(Plan plan, Schema.ScalarType scalarType, Schema.Special special, string specialName, PlanNode valueNode)
 		{
-			// Create an operator of the form <library name>.Is<special name>(const AValue : <scalar type name>) : Boolean as a comparison operator for the given special
-			Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(String.Format("{0}{1}", IsSpecialComparerPrefix, specialName), scalarType.Library.Name));
+			// Create an operator of the form <scalar type name qualifier>.Is<special name>(const AValue : <scalar type name>) : Boolean as a comparison operator for the given special
+			Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(String.Format("{0}{1}", IsSpecialComparerPrefix, specialName), Schema.Object.Qualifier(scalarType.Name)));
 			operatorValue.IsGenerated = true;
 			operatorValue.Generator = special;
 			plan.PushCreationObject(operatorValue);
@@ -5480,6 +5500,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						
 						Schema.Operator operatorValue;
 
+						// Host-Implemented representations
 						foreach (RepresentationDefinition representationDefinition in localStatement.Representations)
 							if (!representationDefinition.HasD4ImplementedComponents())
 								CompileRepresentation(plan, node.ScalarType, operators, representationDefinition);
@@ -5579,7 +5600,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						plan.Catalog.OperatorResolutionCache.Clear(node.ScalarType, node.ScalarType);
 						try
 						{
-							// Host-Implemented representations
+							// D4-Implemented representations
 							foreach (RepresentationDefinition representationDefinition in localStatement.Representations)
 								if (representationDefinition.HasD4ImplementedComponents())
 									CompileRepresentation(plan, node.ScalarType, operators, representationDefinition);
@@ -7214,7 +7235,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			constraint.MergeMetaData(reference.MetaData);
 			if (constraint.MetaData == null)
 				constraint.MetaData = new MetaData();
-			if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.SourceKey))
+			if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.SourceKey.Columns))
 				constraint.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForSourceReference(plan, reference)));
 			constraint.IsGenerated = true;
 			constraint.ConstraintType = Schema.ConstraintType.Database;
@@ -7447,7 +7468,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			constraint.MergeMetaData(reference.MetaData);
 			if (constraint.MetaData == null)
 				constraint.MetaData = new MetaData();
-			if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.TargetKey))
+			if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.TargetKey.Columns))
 				constraint.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForTargetReference(plan, reference)));
 			constraint.IsGenerated = true;
 			constraint.ConstraintType = Schema.ConstraintType.Database;
@@ -12871,6 +12892,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 					}
 
 					planNode = EnsureTableValueNode(plan, planNode);
+					planNode = EnsureTableValueNode(plan, planNode);
 					node.Nodes.Add(planNode);
 				}
 			}
@@ -13982,6 +14004,11 @@ indicative of other problems, a reference will never be attached as an explicit 
 					false
 				);
 		}
+
+		public static PlanNode EnsureSearchableNode(Plan plan, TableNode sourceNode, Schema.TableVarColumnsBase columns)
+		{
+			return EnsureSearchableNode(plan, sourceNode, OrderFromKey(plan, columns));
+		}
 		
 		public static PlanNode EnsureSearchableNode(Plan plan, TableNode sourceNode, Schema.Key key)
 		{
@@ -14280,27 +14307,6 @@ indicative of other problems, a reference will never be attached as an explicit 
 			return EmitExtendNode(plan, expression, sourceNode, expression.Expressions);
 		}
 		
-		protected static IdentifierExpression CollapseQualifiedIdentifierExpression(Plan plan, Expression expression)
-		{
-			if (expression is IdentifierExpression)
-				return (IdentifierExpression)expression;
-			
-			if (expression is QualifierExpression)
-			{
-				IdentifierExpression leftExpression = CollapseQualifiedIdentifierExpression(plan, ((QualifierExpression)expression).LeftExpression);
-				IdentifierExpression rightExpression = CollapseQualifiedIdentifierExpression(plan, ((QualifierExpression)expression).RightExpression);
-				if ((leftExpression != null) && (rightExpression != null))
-				{
-					IdentifierExpression result = new IdentifierExpression(Schema.Object.Qualify(rightExpression.Identifier, leftExpression.Identifier));
-					result.Line = leftExpression.Line;
-					result.LinePos = rightExpression.Line;
-					return result;
-				}
-			}
-			
-			return null;
-		}
-
 		public static string GetUniqueColumnName(List<string> columnNames)
 		{
 			string columnName;
@@ -14327,7 +14333,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			return columnName;
 		}
 		
-		private static void AddTemporaryColumn(NamedColumnExpressions addExpressions, RenameColumnExpressions renameExpressions, ColumnExpressions projectExpressions, List<string> projectNames, NamedColumnExpression localExpression)
+		private static void AddTemporaryColumn(NamedColumnExpressions addExpressions, RenameColumnExpressions renameExpressions, ColumnExpressions projectExpressions, List<string> projectNames, NamedColumnExpression localExpression, string resultColumnAlias)
 		{
 			string columnAlias = Schema.Object.GetUniqueName();
 			NamedColumnExpression addExpression = new NamedColumnExpression(localExpression.Expression, columnAlias, localExpression.MetaData);
@@ -14339,7 +14345,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			projectExpression.LinePos = localExpression.LinePos;
 			projectExpressions.Add(projectExpression);
 			projectNames.Add(columnAlias);
-			RenameColumnExpression renameExpression = new RenameColumnExpression(columnAlias, localExpression.ColumnAlias);
+			RenameColumnExpression renameExpression = new RenameColumnExpression(columnAlias, resultColumnAlias);
 			renameExpression.Line = localExpression.Line;
 			renameExpression.LinePos = localExpression.LinePos;
 			renameExpressions.Add(renameExpression);
@@ -14370,7 +14376,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			// Compute the list of result column names
 			foreach (NamedColumnExpression localExpression in expression.Expressions)
 			{
-				IdentifierExpression identifierExpression = CollapseQualifiedIdentifierExpression(plan, localExpression.Expression);
+				IdentifierExpression identifierExpression = Parser.CollapseQualifiedIdentifierExpression(localExpression.Expression);
 				if ((identifierExpression != null) && sourceColumns.Contains(identifierExpression.Identifier))
 					localExpression.Expression = identifierExpression;
 					
@@ -14415,7 +14421,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 					{
 						if (projectNames.Contains(sourceColumns[identifierExpression.Identifier].Name))
 						{
-							AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression);
+							AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression, localExpression.ColumnAlias == String.Empty ? identifierExpression.Identifier : localExpression.ColumnAlias);
 						}
 						else
 						{
@@ -14430,7 +14436,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						{
 							if (sourceColumns.ContainsName(localExpression.ColumnAlias))
 							{
-								AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression);
+								AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression, localExpression.ColumnAlias);
 							}
 							else
 							{
@@ -14461,7 +14467,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				{
 					if (sourceColumns.ContainsName(localExpression.ColumnAlias))
 					{
-						AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression);
+						AddTemporaryColumn(addExpressions, renameExpressions, projectExpressions, projectNames, localExpression, localExpression.ColumnAlias);
 					}
 					else
 					{

@@ -114,7 +114,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             nextBlockToolStripMenuItem,
             toolStripMenuItem3,
             setBreakpointToolStripMenuItem});
-			this.FScriptMenuItem.MergeIndex = 30;
+			this.FScriptMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.FScriptMenuItem.MergeIndex = 3;
 			this.FScriptMenuItem.Name = "FScriptMenuItem";
 			this.FScriptMenuItem.Size = new System.Drawing.Size(49, 20);
 			this.FScriptMenuItem.Text = "&Script";
@@ -236,7 +237,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             schemaOnlyToolStripMenuItem,
             dataOnlyToolStripMenuItem,
             schemaAndDataToolStripMenuItem});
-			this.FExportMenuItem.MergeIndex = 100;
+			this.FExportMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.FExportMenuItem.MergeIndex = 4;
 			this.FExportMenuItem.Name = "FExportMenuItem";
 			this.FExportMenuItem.Size = new System.Drawing.Size(52, 20);
 			this.FExportMenuItem.Text = "E&xport";

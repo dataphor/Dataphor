@@ -93,9 +93,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			CopyOrders(SourceTableVar.Orders);
 			if (SourceNode.Order != null)
 				Order = CopyOrder(SourceNode.Order);
+			
 			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
+			CopyReferences(plan, SourceTableVar);
 			#endif
 			
 			_aggregateColumnOffset = TableVar.Columns.Count;

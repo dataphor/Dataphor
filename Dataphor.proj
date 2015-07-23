@@ -60,9 +60,9 @@
 	</Target>
 
 	<ItemGroup>
-		<WebClientBinFiles Include="Dataphor\Frontend.Client.Web\bin\*.dll" />
-		<WebClientImageFiles Include="Dataphor\Frontend.Client.Web\images\*.*" />
-		<WebClientMainFiles Include="Dataphor\Frontend.Client.Web\*.aspx;Dataphor\Frontend.Client.Web\*.asax;Dataphor\Frontend.Client.Web\*.config;Dataphor\Frontend.Client.Web\*.js;Dataphor\Frontend.Client.Web\*.css" />
+		<WebClientBinFiles Include="Dataphor\Frontend.Client.Web.Application\bin\*.dll" />
+		<WebClientImageFiles Include="Dataphor\Frontend.Client.Web.Application\images\*.*" />
+		<WebClientMainFiles Include="Dataphor\Frontend.Client.Web.Application\*.aspx;Dataphor\Frontend.Client.Web.Application\*.asax;Dataphor\Frontend.Client.Web.Application\*.config;Dataphor\Frontend.Client.Web.Application\*.js;Dataphor\Frontend.Client.Web.Application\*.css" />
 	</ItemGroup>
 	<Target Name="CopyWebClient">
 		<Message Text="Copying web client files into deploy..." />

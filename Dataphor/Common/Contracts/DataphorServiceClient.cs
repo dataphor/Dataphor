@@ -19,7 +19,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 	{
 		public DataphorServiceClient(Binding binding, EndpointAddress address) : base(binding, address) { }
 
-		public DataphorServiceClient(string endpointURI) 
+		public DataphorServiceClient(Uri endpointURI) 
 			: this
 			(
 				DataphorServiceUtility.GetBinding(), 
@@ -27,5 +27,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 			)
 		{
 		}
+
+		public DataphorServiceClient(String endpointConfigurationName) : base(endpointConfigurationName) { }
 	}
 }

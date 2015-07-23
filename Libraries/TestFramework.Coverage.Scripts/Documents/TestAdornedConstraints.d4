@@ -1,0 +1,31 @@
+create table TestConstraintTable
+{
+ ID : System.Integer, 
+ AltID : System.Integer, 
+ key { .ID }, 
+ key { .AltID }
+ 
+};
+
+create view TestConstraintView
+(
+ (
+  (
+   (
+    TestConstraintTable
+     add
+     {
+      '' ConstraintData
+     }
+   )
+    where (.System.Length(ConstraintData) = 4)
+  )
+   adorn
+   {
+    ConstraintData
+    {
+     constraint LengthValid ((Length(value) = 4)) tags { DAE.SimpleMessage = "Constraint data must be 4 digits" }
+    }
+   }
+ )
+);

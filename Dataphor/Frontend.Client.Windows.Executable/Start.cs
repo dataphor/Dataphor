@@ -94,7 +94,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows.Executable
 
 							// Prompt the user for the application if there is not exactly one row
 							if (count != 1)
+							{
+								view.First();
 								ApplicationListForm.Execute(view);
+							}
 
 							applicationID = view.Fields["ID"].AsString;
 						}

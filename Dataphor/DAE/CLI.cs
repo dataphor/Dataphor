@@ -746,6 +746,8 @@ namespace Alphora.Dataphor.DAE
 	[Flags]
     public enum CursorCapability : byte 
     { 
+		None = 0,
+
 		/// <summary>
 		/// Indicates that the cursor supports basic navigational access.
 		/// </summary>
@@ -821,7 +823,16 @@ namespace Alphora.Dataphor.DAE
 		///	The following methods are included in the Countable cursor capability:
 		///		RowCount
 		/// </remarks>
-		Countable = 64
+		Countable = 64,
+
+		///// <summary> Indicates that the cursor supports elaboration. </summary>
+		///// <remarks>
+		///// This capability determines whether or not the compiler will perform
+		///// reference inference and other U/I elaboration related functionality
+		///// to enable the resulting cursor definition to be used as the input
+		///// to a form derivation process.
+		///// </remarks>
+		Elaborable = 128
 	}
 	
     public enum CursorType 

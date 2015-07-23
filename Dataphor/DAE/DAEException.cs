@@ -39,7 +39,7 @@ namespace Alphora.Dataphor.DAE
 			ILocatorException locatorException = exception as ILocatorException;
 			if (locatorException != null)
 			{
-                if (String.IsNullOrEmpty(locatorException.Locator) || (locator != null && locatorException.Locator == locator.Locator))
+                if (locator != null && (String.IsNullOrEmpty(locatorException.Locator) || locatorException.Locator == locator.Locator))
 				{
 					locatorException.Locator = locator.Locator;
 					locatorException.Line += locator.Line - 1;

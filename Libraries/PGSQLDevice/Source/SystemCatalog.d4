@@ -598,7 +598,7 @@ begin
 			create operator System.ToByte(System.String) static tags {{ DAE.IsSystem = "true", Storage.TranslationString = "({{0}})::smallint" }},
 			create operator System.ToLong(System.String) static tags {{ DAE.IsSystem = "true", Storage.TranslationString = "({{0}})::bigint" }},
 			create operator System.ToShort(System.String) static tags {{ DAE.IsSystem = "true", Storage.TranslationString = "({{0}})::smallint" }},
-			create operator System.ToGuid(System.String) static tags {{ DAE.IsSystem = "true", Storage.TranslationString = "({{0}})" }},
+			create operator System.ToGuid(System.String) static tags {{ DAE.IsSystem = "true", Storage.TranslationString = "({{0}})::uuid" }},
 
 			create operator System.ToString(System.DateTime) static tags {{ DAE.IsSystem = "true", Storage.TranslationString = "({{0}})::varchar" }},
 			create operator System.ToString(System.Date) static tags {{ DAE.IsSystem = "true", Storage.TranslationString = "({{0}})::date::varchar" }},

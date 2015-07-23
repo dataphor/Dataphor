@@ -600,13 +600,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		}
 	}
 	
-	public class TableMaps : Schema.Objects
+	public class TableMaps : Schema.Objects<TableMap>
 	{
 		public TableMap this[TableVar tableVar] { get { return this[tableVar.Name]; } }
-		
-		public new TableMap this[int index] { get { return (TableMap)base[index]; } }
-		
-		public new TableMap this[string tableName] { get { return (TableMap)base[tableName]; } }
 	}
 	
 	public class OperatorMap : Schema.Object
@@ -643,13 +639,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		}
 	}
 	
-	public class OperatorMaps : Schema.Objects
+	public class OperatorMaps : Schema.Objects<OperatorMap>
 	{
 		public OperatorMap this[Operator operatorValue] { get { return this[operatorValue.OperatorName]; } }
-		
-		public new OperatorMap this[int index] { get { return (OperatorMap)base[index]; } }
-		
-		public new OperatorMap this[string operatorName] { get { return (OperatorMap)base[operatorName]; } }
 	}
 	
 	public class ApplicationTransaction : System.Object
@@ -983,7 +975,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				return operatorMap;
 			}
 		}
-		
+
 		public void EnsureATOperatorMapped(ServerProcess process, Schema.Operator aTOperator)
 		{
 			OperatorMap deviceOperatorMap = Device.EnsureOperatorMap(process, aTOperator.SourceOperatorName, aTOperator.OperatorName);
@@ -1246,6 +1238,8 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 			if (isMainTableVar)
 			{
+				try
+				{
 				TableMap tableMap = TableMaps[sourceTableVar.Name];
 
 				block = new Block();
@@ -1327,6 +1321,19 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					plan.Dispose();
 				}
 			}
+				catch (Exception e)
+				{
+					try
+					{
+						ReportTableChange(process, sourceTableVar, false);
+		}
+					catch (Exception ne)
+					{
+						// Ignore errors here, this is cleanup code
+					}
+					throw;
+				}
+			}
 		}
 		
 		public void AddTableMap(ServerProcess process, Schema.TableVar tableVar)
@@ -1341,6 +1348,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				TableMap tableMap = new TableMap(sourceTableVarName);
 				tableMap.TableVar = tableVar;
 				tableMap.SourceTableVar = (TableVar)process.Catalog[sourceTableVarName];
+				tableMap.Library = tableMap.SourceTableVar.Library;
 				process.CatalogDeviceSession.AddTableMap(this, tableMap);
 			}
 			else
@@ -1359,8 +1367,13 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						throw new ApplicationTransactionException(ApplicationTransactionException.Codes.TableVariableParticipating, tableVar.Name);
 			}
 		}
-		
+
 		public void ReportTableChange(ServerProcess process, Schema.TableVar tableVar)
+		{
+			ReportTableChange(process, tableVar, true);
+		}
+		
+		public void ReportTableChange(ServerProcess process, Schema.TableVar tableVar, bool checkParticipants)
 		{
 			// If the table var is a source table var for an A/T table
 				// if there are active A/Ts for the table var
@@ -1380,7 +1393,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						int tableMapIndex = _tableMaps.IndexOfName(tableVar.Name);
 						if (tableMapIndex >= 0)
 						{
+							if (checkParticipants)
+							{
 							CheckNotParticipating(process, tableVar);
+							}
 							
 							// Drop the table var and deleted table var
 							TableMap tableMap = _tableMaps[tableMapIndex];
@@ -1655,6 +1671,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					plan.PushSecurityContext(new SecurityContext(sourceTableVar.Owner));
 					try
 					{
+						plan.PushCursorContext(new CursorContext(DAE.CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+					try
+					{
 						var planNode = Compiler.Compile(plan, new CursorDefinition(new IdentifierExpression(sourceTableVar.Name), CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated, DAE.CursorType.Static));
 						plan.CheckCompiled();
 						tableMap.RetrieveNode = planNode.ExtractNode<BaseTableVarNode>();
@@ -1705,7 +1724,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 								(
 									Instructions.Exists,
 									new RestrictExpression
-									(
+											(
 										new IdentifierExpression(Object.EnsureRooted(tableMap.DeletedTableVar.Name)),
 										#if USENAMEDROWVARIABLES
 										Compiler.BuildKeyEqualExpression(plan, Keywords.Old, String.Empty, clusteringKey.Columns, clusteringKey.Columns)
@@ -1757,6 +1776,14 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						plan.ExitRowContext();
 					}
 				}
+					finally
+					{
+						plan.PopSecurityContext();
+					}
+				}
+				finally
+				{
+					plan.Dispose();
 			}
 			finally
 			{
@@ -1780,11 +1807,18 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 			return operatorMap;
 		}
+
+		private void RemoveOperatorMap(ServerProcess process, OperatorMap operatorMap)
+		{
+			_operatorMaps.SafeRemove(operatorMap);
+		}
 		
 		public Schema.Operator AddOperator(ServerProcess process, Schema.Operator operatorValue)
 		{
 			// Recompile the operator in the application transaction process
 			OperatorMap operatorMap = EnsureOperatorMap(process, operatorValue.OperatorName, null);
+			try
+			{
 			Statement sourceStatement = operatorValue.EmitStatement(EmitMode.ForCopy);
 			SourceContext sourceContext = null;
 			CreateOperatorStatement statement = sourceStatement as CreateOperatorStatement;
@@ -1860,6 +1894,12 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			finally
 			{
 				plan.Dispose();
+			}
+		}
+			catch (Exception e)
+			{
+				RemoveOperatorMap(process, operatorMap);
+				throw;
 			}
 		}
 		

@@ -1006,7 +1006,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				_mode = mode;
 				if ((_mode != FormMode.None) && ((MainSource == null) || (MainSource.DataView == null)))
-					throw new ClientException(ClientException.Codes.MainSourceNotSpecified, mode.ToString());
+					throw new ClientException(ClientException.Codes.MainSourceNotSpecified, _errorList != null ? _errorList.ToException() : null, mode.ToString());
+
 				_form.EnterNavigates = (_mode == FormMode.Insert) || (_mode == FormMode.Edit);
 				switch (_mode)
 				{
@@ -1402,9 +1403,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				}
 
 				// No accelerators were found, try to use an appended number
-				for (pos = 0; pos < 10; pos++)
-					if (Allocate((char)(pos + FirstAcceleratorOffset)))
-						return String.Format("{0} &{1}", text, (char)(pos + FirstAcceleratorOffset));
+				// Disabling this functionality, it confuses users....
+				//for (pos = 0; pos < 10; pos++)
+				//	if (Allocate((char)(pos + FirstAcceleratorOffset)))
+				//		return String.Format("{0} &{1}", text, (char)(pos + FirstAcceleratorOffset));
 			}
 
 			// Unable to accelerate, use plain text

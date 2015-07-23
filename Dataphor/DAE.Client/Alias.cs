@@ -221,6 +221,14 @@ namespace Alphora.Dataphor.DAE.Client
 			set { _clientSideLoggingEnabled = value; }
 		}
 
+		private String _clientConfigurationName;
+		[Description("Specifies the name of a configuration to be used for the underlying connection. If this setting is used, all the other connection information is effectively ignored. This means in particular that the host and instance names may not reflect the instance that is actually connected.")]
+		public String ClientConfigurationName
+		{
+			get { return _clientConfigurationName; }
+			set { _clientConfigurationName = value; }
+		}
+
 		public override string ToString()
 		{
 			return String.Format("{0} ({1} on {2})", Name, InstanceName ?? Name, _hostName.ToString());

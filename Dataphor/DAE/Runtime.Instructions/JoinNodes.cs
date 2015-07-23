@@ -200,7 +200,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		protected bool IsJoinOrder(Plan plan, Schema.JoinKey joinKey, TableNode node)
 		{
-			return (node.Supports(CursorCapability.Searchable) && (node.Order != null) && (Compiler.OrderFromKey(plan, joinKey).Equivalent(node.Order)));
+			return (node.Supports(CursorCapability.Searchable) && (node.Order != null) && (Compiler.OrderFromKey(plan, joinKey.Columns).Equivalent(node.Order)));
 		}
 
 		protected Expression _expression;
@@ -634,10 +634,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (LeftNode.Order != null)
 				Order = CopyOrder(LeftNode.Order);
 			
-			#if UseReferenceDerivation
-			CopySourceReferences(plan, LeftTableVar.SourceReferences);
-			CopyTargetReferences(plan, LeftTableVar.TargetReferences);
-			#endif
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, LeftTableVar);
 			
 			plan.EnterRowContext();
 			try
@@ -745,7 +743,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineAccessPath(Plan plan)
 		{
 			base.DetermineAccessPath(plan);
-			if (!_deviceSupported)
+			if (!DeviceSupported)
 				DetermineSemiTableAlgorithm(plan);
 		}
 		
@@ -1019,7 +1017,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_semiTableAlgorithm = typeof(SearchedHavingTable);
 
 			// ensure that the right side is a searchable node
-			Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, RightKey);
+			Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, RightKey.Columns);
 		}
 	}
 	
@@ -1062,7 +1060,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_semiTableAlgorithm = typeof(SearchedWithoutTable);
 
 			// ensure that the right side is a searchable node
-			Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, RightKey);
+			Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, RightKey.Columns);
 		}
 	}
 	
@@ -1162,7 +1160,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_joinAlgorithm = typeof(TimesTable);
 			else
 			{
-				_joinOrder = Compiler.OrderFromKey(plan, _leftKey);
+				_joinOrder = Compiler.OrderFromKey(plan, _leftKey.Columns);
 				Schema.OrderColumn column;
 				for (int index = 0; index < _joinOrder.Columns.Count; index++)
 				{
@@ -1179,11 +1177,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// else if the left side is unique, order it
 					// else order the right side (should be whichever side has the least cardinality)
 					if (_rightKey.IsUnique)
-						Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey);
+						Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey.Columns);
 					else if (_leftKey.IsUnique)
-						Nodes[0] = Compiler.EnsureSearchableNode(plan, LeftNode, _leftKey);
+						Nodes[0] = Compiler.EnsureSearchableNode(plan, LeftNode, _leftKey.Columns);
 					else
-						Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey);
+						Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey.Columns);
 				}
 
 				if (IsJoinOrder(plan, _leftKey, LeftNode) && IsJoinOrder(plan, _rightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (_leftKey.IsUnique || _rightKey.IsUnique))
@@ -1874,20 +1872,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// Determine orders			
 			DetermineOrders(plan);
 
-			#if UseReferenceDerivation
-			foreach (Schema.Reference reference in LeftTableVar.SourceReferences)
-				CopySourceReference(plan, reference, reference.IsExcluded || RightTableVar.TargetReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && LeftKey.Columns.Equals(reference.SourceKey.Columns));
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			{
+				if (LeftTableVar.HasReferences())
+				{
+					foreach (Schema.ReferenceBase reference in LeftTableVar.References)
+					{
+						if (reference.SourceTable.Equals(LeftTableVar))
+						{
+							CopySourceReference(plan, reference, reference.IsExcluded 
+								|| (RightTableVar.HasReferences() && RightTableVar.References.ContainsOriginatingReference(reference.OriginatingReferenceName()) && LeftKey.Columns.Equals(reference.SourceKey.Columns)));
+						}
+						else if (reference.TargetTable.Equals(LeftTableVar))
+						{
+							CopyTargetReference(plan, reference, reference.IsExcluded 
+								|| (RightTableVar.HasReferences() && RightTableVar.References.ContainsOriginatingReference(reference.OriginatingReferenceName()) && LeftKey.Columns.Equals(reference.TargetKey.Columns)));
+						}
+					}
+				}
+
+				if (RightTableVar.HasReferences())
+				{
+					foreach (Schema.ReferenceBase reference in RightTableVar.References)
+					{
+						if (reference.SourceTable.Equals(RightTableVar))
+						{
+							CopySourceReference(plan, reference, reference.IsExcluded 
+								|| (LeftTableVar.HasReferences() && LeftTableVar.References.ContainsOriginatingReference(reference.OriginatingReferenceName()) && RightKey.Columns.Equals(reference.SourceKey.Columns)));
+						}
+						else if (reference.TargetTable.Equals(RightTableVar))
+						{
+							CopyTargetReference(plan, reference, reference.IsExcluded 
+								|| (LeftTableVar.HasReferences() && LeftTableVar.References.ContainsOriginatingReference(reference.OriginatingReferenceName()) && RightKey.Columns.Equals(reference.TargetKey.Columns)));
+						}
+					}
+				}
+			}
 					
-			foreach (Schema.Reference reference in LeftTableVar.TargetReferences)
-				CopyTargetReference(plan, reference, reference.IsExcluded || RightTableVar.SourceReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && LeftKey.Columns.Equals(reference.TargetKey.Columns));
-					
-			foreach (Schema.Reference reference in RightTableVar.SourceReferences)
-				CopySourceReference(plan, reference, reference.IsExcluded || LeftTableVar.TargetReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && RightKey.Columns.Equals(reference.SourceKey.Columns));
-			
-			foreach (Schema.Reference reference in RightTableVar.TargetReferences)
-				CopyTargetReference(plan, reference, reference.IsExcluded || LeftTableVar.SourceReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && RightKey.Columns.Equals(reference.TargetKey.Columns));
-			#endif
-			
 			plan.EnterRowContext();
 			try
 			{			
@@ -1997,7 +2018,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineAccessPath(Plan plan)
 		{
 			base.DetermineAccessPath(plan);
-			if (!_deviceSupported)
+			if (!DeviceSupported)
 				DetermineJoinAlgorithm(plan);
 		}
 		
@@ -2898,7 +2919,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _anyOfKey = value; }
 		}
 		
-		protected void DetermineKeyColumns(string columnNames, Schema.Key key)
+		protected void DetermineKeyColumns(string columnNames, Schema.JoinKey key)
 		{
 			if (columnNames != String.Empty)
 			{
@@ -2918,10 +2939,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return (_rowExistsColumnIndex >= 0) && (Schema.Object.NamesEqual(TableVar.Columns[_rowExistsColumnIndex].Name, columnName));
 		}
 		
-        protected bool HasAllValues(Row row, Schema.Key key)
+        protected bool HasAllValues(Row row, Schema.TableVarColumnsBase columns)
         {
 			int columnIndex;
-			foreach (Schema.TableVarColumn column in key.Columns)
+			foreach (Schema.TableVarColumn column in columns)
 			{
 				columnIndex = row.DataType.Columns.IndexOfName(column.Name);
 				if ((columnIndex >= 0) && !row.HasValue(columnIndex))
@@ -2930,10 +2951,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return true;
         }
         
-        protected bool HasAnyValues(Row row, Schema.Key key)
+        protected bool HasAnyValues(Row row, Schema.TableVarColumnsBase columns)
         {
 			int columnIndex;
-			foreach (Schema.TableVarColumn column in key.Columns)
+			foreach (Schema.TableVarColumn column in columns)
 			{
 				columnIndex = row.DataType.Columns.IndexOfName(column.Name);
 				if ((columnIndex >= 0) && row.HasValue(columnIndex))
@@ -2949,7 +2970,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected bool HasValues(Row row)
 		{
-			return HasAllValues(row, _allOfKey) && ((_anyOfKey.Columns.Count == 0) || HasAnyValues(row, _anyOfKey));
+			return HasAllValues(row, _allOfKey.Columns) && ((_anyOfKey.Columns.Count == 0) || HasAnyValues(row, _anyOfKey.Columns));
 		}
 		
         protected bool HasRow(Row row)
@@ -3323,7 +3344,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_joinAlgorithm = typeof(TimesTable);
 			else
 			{
-				_joinOrder = Compiler.OrderFromKey(plan, _leftKey);
+				_joinOrder = Compiler.OrderFromKey(plan, _leftKey.Columns);
 				Schema.OrderColumn column;
 				for (int index = 0; index < _joinOrder.Columns.Count; index++)
 				{
@@ -3335,7 +3356,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				// if no inputs are ordered by join keys, add an order node to the right side
 				if (!IsJoinOrder(plan, _rightKey, RightNode))
-					Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey);
+					Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey.Columns);
 
 				if (IsJoinOrder(plan, _leftKey, LeftNode) && IsJoinOrder(plan, _rightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (_leftKey.IsUnique || _rightKey.IsUnique))
 				{
@@ -4144,7 +4165,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_joinAlgorithm = typeof(TimesTable);
 			else
 			{
-				_joinOrder = Compiler.OrderFromKey(plan, _leftKey);
+				_joinOrder = Compiler.OrderFromKey(plan, _leftKey.Columns);
 				Schema.OrderColumn column;
 				for (int index = 0; index < _joinOrder.Columns.Count; index++)
 				{
@@ -4156,7 +4177,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				// if no inputs are ordered by join keys, add an order node to the left side
 				if (!IsJoinOrder(plan, _leftKey, LeftNode))
-					Nodes[0] = Compiler.EnsureSearchableNode(plan, LeftNode, _leftKey);
+					Nodes[0] = Compiler.EnsureSearchableNode(plan, LeftNode, _leftKey.Columns);
 
 				// if both inputs are ordered by join keys and one or both join keys are unique
 				if (IsJoinOrder(plan, _leftKey, LeftNode) && IsJoinOrder(plan, _rightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (_leftKey.IsUnique || _rightKey.IsUnique))

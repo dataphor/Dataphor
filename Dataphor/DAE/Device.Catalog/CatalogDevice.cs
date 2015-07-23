@@ -114,6 +114,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				row[12] = session.SessionInfo.DefaultMaxCallDepth;
 				row[13] = session.SessionInfo.UsePlanCache;
 				row[14] = session.SessionInfo.ShouldEmitIL;
+				row[15] = session.SessionInfo.ShouldElaborate;
 				nativeTable.Insert(program.ValueManager, row);
 			}
 		}

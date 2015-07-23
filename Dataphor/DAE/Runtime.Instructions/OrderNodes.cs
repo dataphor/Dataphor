@@ -72,10 +72,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			CopyKeys(SourceTableVar.Keys);
 			CopyOrders(SourceTableVar.Orders);
-			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
-			#endif
+
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, SourceTableVar);
 			
 			DetermineOrder(plan);
 			

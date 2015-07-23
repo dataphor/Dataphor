@@ -408,7 +408,7 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		public override object Read(byte[] buffer, int offset)
 		{
-			return ByteArrayUtility.ReadInt64(buffer, offset);
+			return new TimeSpan(ByteArrayUtility.ReadInt64(buffer, offset));
 		}
 
 		public override void Write(object tempValue, byte[] buffer, int offset)

@@ -475,28 +475,8 @@ namespace Alphora.Dataphor.DAE.Schema
 	}
 
     /// <remarks> RowConstraints </remarks>
-	public class RowConstraints : Objects
+	public class RowConstraints : Objects<RowConstraint>
     {		
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
-		{
-			if (!(item is RowConstraint))
-				throw new SchemaException(SchemaException.Codes.InvalidContainer, "RowConstraint");
-			base.Validate(item);
-		}
-		#endif
-
-		public new RowConstraint this[int index]
-		{
-			get { return (RowConstraint)base[index]; }
-			set { base[index] = value; }
-		}
-
-		public new RowConstraint this[string name]
-		{
-			get { return (RowConstraint)base[name]; }
-			set { base[name] = value; }
-		}
     }
     
     public class TransitionConstraint : TableVarConstraint
@@ -736,56 +716,20 @@ namespace Alphora.Dataphor.DAE.Schema
     }
     
     /// <remarks> TransitionConstraints </remarks>
-	public class TransitionConstraints : Objects
+	public class TransitionConstraints : Objects<TransitionConstraint>
     {		
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
-		{
-			if (!(item is TransitionConstraint))
-				throw new SchemaException(SchemaException.Codes.InvalidContainer, "TransitionConstraint");
-			base.Validate(item);
-		}
-		#endif
-
-		public new TransitionConstraint this[int index]
-		{
-			get { return (TransitionConstraint)base[index]; }
-			set { base[index] = value; }
-		}
-
-		public new TransitionConstraint this[string name]
-		{
-			get { return (TransitionConstraint)base[name]; }
-			set { base[name] = value; }
-		}
     }
 
     /// <remarks> Constraints </remarks>
-	public class Constraints : Objects
+	public class Constraints<T> : Objects<T> where T : Constraint
     {		
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
-		{
-			if (!(item is Constraint))
-				throw new SchemaException(SchemaException.Codes.ConstraintContainer);
-			base.Validate(item);
-		}
-		#endif
-
-		public new Constraint this[int index]
-		{
-			get { return (Constraint)base[index]; }
-			set { base[index] = value; }
-		}
-
-		public new Constraint this[string name]
-		{
-			get { return (Constraint)base[name]; }
-			set { base[name] = value; }
-		}
     }
+
+	public class Constraints : Constraints<Constraint>
+	{
+	}
     
-    public class ScalarTypeConstraints : Objects
+    public class ScalarTypeConstraints : Constraints<ScalarTypeConstraint>
     {
 		public ScalarTypeConstraints(ScalarType scalarType) : base()
 		{
@@ -797,41 +741,27 @@ namespace Alphora.Dataphor.DAE.Schema
 		public ScalarType ScalarType { get { return _scalarType; } }
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
+		protected override void Validate(ScalarTypeConstraint item)
 		{
-			if (!(item is ScalarTypeConstraint))
-				throw new SchemaException(SchemaException.Codes.InvalidContainer, "ScalarTypeConstraint");
 			base.Validate(item);
 			_scalarType.ValidateChildObjectName(item.Name);
 		}
 		#endif
 		
-		protected override void Adding(Object item, int index)
+		protected override void Adding(ScalarTypeConstraint item, int index)
 		{
 			base.Adding(item, index);
-			((ScalarTypeConstraint)item)._scalarType = _scalarType;
+			item._scalarType = _scalarType;
 		}
 		
-		protected override void Removing(Object item, int index)
+		protected override void Removing(ScalarTypeConstraint item, int index)
 		{
-			((ScalarTypeConstraint)item)._scalarType = null;
+			item._scalarType = null;
 			base.Removing(item, index);
-		}
-		
-		public new ScalarTypeConstraint this[int index]
-		{
-			get { return (ScalarTypeConstraint)base[index]; }
-			set { base[index] = value; }
-		}
-		
-		public new ScalarTypeConstraint this[string name]
-		{
-			get { return (ScalarTypeConstraint)base[name]; }
-			set { base[name] = value; }
 		}
     }
 
-    public class TableVarColumnConstraints : Objects
+    public class TableVarColumnConstraints : Constraints<TableVarColumnConstraint>
     {
 		public TableVarColumnConstraints(TableVarColumn tableVarColumn) : base()
 		{
@@ -842,43 +772,22 @@ namespace Alphora.Dataphor.DAE.Schema
 		private TableVarColumn _tableVarColumn;
 		public TableVarColumn TableVarColumn { get { return _tableVarColumn; } }
 		
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
-		{
-			if (!(item is TableVarColumnConstraint))
-				throw new SchemaException(SchemaException.Codes.InvalidContainer, "TableVarColumnConstraint");
-			base.Validate(item);
-		}
-		#endif
-		
-		protected override void Adding(Object item, int index)
+		protected override void Adding(TableVarColumnConstraint item, int index)
 		{
 			base.Adding(item, index);
-			((TableVarColumnConstraint)item)._tableVarColumn = _tableVarColumn;
+			item._tableVarColumn = _tableVarColumn;
 			_tableVarColumn.ConstraintsAdding(this, item);
 		}
 		
-		protected override void Removing(Object item, int index)
+		protected override void Removing(TableVarColumnConstraint item, int index)
 		{
 			_tableVarColumn.ConstraintsRemoving(this, item);
-			((TableVarColumnConstraint)item)._tableVarColumn = null;
+			item._tableVarColumn = null;
 			base.Removing(item, index);
-		}
-		
-		public new TableVarColumnConstraint this[int index]
-		{
-			get { return (TableVarColumnConstraint)base[index]; }
-			set { base[index] = value; }
-		}
-		
-		public new TableVarColumnConstraint this[string name]
-		{
-			get { return (TableVarColumnConstraint)base[name]; }
-			set { base[name] = value; }
 		}
     }
 
-    public class TableVarConstraints : Objects
+    public class TableVarConstraints : Constraints<TableVarConstraint>
     {
 		public TableVarConstraints(TableVar tableVar) : base()
 		{
@@ -890,39 +799,25 @@ namespace Alphora.Dataphor.DAE.Schema
 		public TableVar TableVar { get { return _tableVar; } }
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
+		protected override void Validate(TableVarConstraint item)
 		{
-			if (!(item is TableVarConstraint))
-				throw new SchemaException(SchemaException.Codes.InvalidContainer, "TableVarConstraint");
 			base.Validate(item);
 			_tableVar.ValidateChildObjectName(item.Name);
 		}
 		#endif
 		
-		protected override void Adding(Object item, int index)
+		protected override void Adding(TableVarConstraint item, int index)
 		{
 			base.Adding(item, index);
-			((TableVarConstraint)item)._tableVar = _tableVar;
+			item._tableVar = _tableVar;
 			_tableVar.ResetHasDeferredConstraintsComputed();
 		}
 		
-		protected override void Removing(Object item, int index)
+		protected override void Removing(TableVarConstraint item, int index)
 		{
-			((TableVarConstraint)item)._tableVar = null;
+			item._tableVar = null;
 			base.Removing(item, index);
 			_tableVar.ResetHasDeferredConstraintsComputed();
-		}
-		
-		public new TableVarConstraint this[int index]
-		{
-			get { return (TableVarConstraint)base[index]; }
-			set { base[index] = value; }
-		}
-		
-		public new TableVarConstraint this[string name]
-		{
-			get { return (TableVarConstraint)base[name]; }
-			set { base[name] = value; }
 		}
     }
 
@@ -1090,27 +985,7 @@ namespace Alphora.Dataphor.DAE.Schema
     }
     
     /// <remarks> CatalogConstraints </remarks>
-	public class CatalogConstraints : Objects
+	public class CatalogConstraints : Objects<CatalogConstraint>
     {		
-		#if USEOBJECTVALIDATE
-		protected override void Validate(Object item)
-		{
-			if (!(item is CatalogConstraint))
-				throw new SchemaException(SchemaException.Codes.InvalidContainer, "CatalogConstraint");
-			base.Validate(item);
-		}
-		#endif
-
-		public new CatalogConstraint this[int index]
-		{
-			get { return (CatalogConstraint)base[index]; }
-			set { base[index] = value; }
-		}
-
-		public new CatalogConstraint this[string name]
-		{
-			get { return (CatalogConstraint)base[name]; }
-			set { base[name] = value; }
-		}
     }
 }

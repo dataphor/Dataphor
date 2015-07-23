@@ -58,15 +58,24 @@ namespace Alphora.Dataphor.DAE.Client
 				else
 				{
 					_clientServer = 
-						new ClientServer
-						(
-							connectionAlias.HostName, 
-							connectionAlias.InstanceName, 
-							connectionAlias.OverridePortNumber, 
-							connectionAlias.SecurityMode, 
-							connectionAlias.OverrideListenerPortNumber, 
-							connectionAlias.ListenerSecurityMode
-						);
+						String.IsNullOrEmpty(connectionAlias.ClientConfigurationName)
+							? 
+								new ClientServer
+								(
+									connectionAlias.HostName, 
+									connectionAlias.InstanceName, 
+									connectionAlias.OverridePortNumber, 
+									connectionAlias.SecurityMode, 
+									connectionAlias.OverrideListenerPortNumber, 
+									connectionAlias.ListenerSecurityMode
+								)
+							:
+								new ClientServer
+								(
+									connectionAlias.HostName, 
+									connectionAlias.ClientConfigurationName
+								);
+
 					_localServer = new LocalServer(_clientServer, connectionAlias.ClientSideLoggingEnabled, TerminalServiceUtility.ClientName);
 				}
 			}

@@ -10,11 +10,6 @@ namespace Alphora.Dataphor.DAE.Connection.Oracle
             _parameterDelimiter = ":";
         }
 
-        protected override string PrepareStatement(string statement)
-        {
-            return base.PrepareStatement(statement).Replace("@", ":");
-        }
-		
         protected override void PrepareParameters()
         {
             // Prepare parameters

@@ -112,6 +112,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.FRequireSecureConnectionComboBox = new System.Windows.Forms.CheckBox();
 			this.FGroupBox5 = new System.Windows.Forms.GroupBox();
+			this.FUseServiceConfigurationCheckBox = new System.Windows.Forms.CheckBox();
 			this.FAllowSilverlightClientsComboBox = new System.Windows.Forms.CheckBox();
 			this.FShouldListenComboBox = new System.Windows.Forms.CheckBox();
 			this.FLabel10 = new System.Windows.Forms.Label();
@@ -471,6 +472,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// 
 			// FGroupBox5
 			// 
+			this.FGroupBox5.Controls.Add(this.FUseServiceConfigurationCheckBox);
 			this.FGroupBox5.Controls.Add(this.FAllowSilverlightClientsComboBox);
 			this.FGroupBox5.Controls.Add(this.FShouldListenComboBox);
 			this.FGroupBox5.Controls.Add(this.FLabel10);
@@ -483,6 +485,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.FGroupBox5.TabIndex = 4;
 			this.FGroupBox5.TabStop = false;
 			this.FGroupBox5.Text = "Advanced Network Configuration";
+			// 
+			// FUseServiceConfigurationCheckBox
+			// 
+			this.FUseServiceConfigurationCheckBox.AutoSize = true;
+			this.FUseServiceConfigurationCheckBox.Location = new System.Drawing.Point(179, 19);
+			this.FUseServiceConfigurationCheckBox.Name = "FUseServiceConfigurationCheckBox";
+			this.FUseServiceConfigurationCheckBox.Size = new System.Drawing.Size(155, 17);
+			this.FUseServiceConfigurationCheckBox.TabIndex = 71;
+			this.FUseServiceConfigurationCheckBox.Text = "Use Service Configuration?";
+			this.FUseServiceConfigurationCheckBox.UseVisualStyleBackColor = true;
 			// 
 			// FAllowSilverlightClientsComboBox
 			// 
@@ -564,6 +576,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
         }
         #endregion
+
+		private System.Windows.Forms.CheckBox FUseServiceConfigurationCheckBox;
 
     }
 }

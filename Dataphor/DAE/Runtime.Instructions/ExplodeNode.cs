@@ -120,10 +120,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			CopyOrders(SourceTableVar.Orders);
 			Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, TableVar));
 
-			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
-			#endif
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, SourceTableVar);
 		}
 		
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)

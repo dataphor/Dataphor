@@ -3,6 +3,10 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+#define ALTERNATIVEOPERATORPRECEDENCE
+#define ALLOWARBITRARYAGGREGATEEXPRESSIONS
+
 using System;
 using System.Text;
 using System.Collections;
@@ -715,6 +719,303 @@ namespace Alphora.Dataphor.DAE.Language.D4
             #endif
             return expression;
         }
+
+        /*
+			BNF:
+			<modified expression term> ::=
+				<expression term> [<language modifiers>]
+		*/
+		protected Expression ModifiedExpressionTerm()
+		{
+			Expression expression = ExpressionTerm();
+			LanguageModifiers(expression);
+			expression.SetEndPosition(_lexer);
+			return expression;
+		}			
+
+		#if ALTERNATIVEOPERATORPRECEDENCE
+
+        protected bool IsLogicalOrTypeOperator(string operatorValue)
+        {
+            switch (operatorValue)
+            {
+                case Keywords.In: 
+                case Keywords.Like: 
+                case Keywords.Matches:
+                case Keywords.Between: 
+                case Keywords.Is:
+                case Keywords.As: return true;
+                default: return false;
+            }
+        }
+        
+		protected bool IsLogicalUnaryOperator(string operatorValue)
+		{
+			switch (operatorValue)
+			{
+				case Keywords.Not:
+				case Keywords.Exists: return true;
+				default: return false;
+			}
+		}
+
+		protected bool IsLogicalDisjunctionOperator(string operatorValue)
+		{
+			switch (operatorValue)
+			{
+				case Keywords.Or:
+				case Keywords.Xor: return true;
+				default: return false;
+			}
+		}
+
+		/* 
+			BNF:
+			<expression term> ::= 
+				<logical and expression> <logical disjunction clause list>
+
+			<logical disjunction clause> ::=
+				<logical disjunction operator> <logical and expression>
+
+			<logical disjunction operator> ::=
+				or | xor
+        */
+        protected Expression ExpressionTerm()
+        {
+            Expression expression = LogicalAndExpression();
+			while (IsLogicalDisjunctionOperator(_lexer.PeekTokenSymbol(1)))
+			{
+				BinaryExpression binaryExpression = new BinaryExpression();
+				binaryExpression.LeftExpression = expression;
+				switch (_lexer.NextToken().AsSymbol)
+				{
+					case Keywords.Or: binaryExpression.Instruction = Instructions.Or; break;
+					case Keywords.Xor: binaryExpression.Instruction = Instructions.Xor; break;
+				}
+				binaryExpression.SetPosition(_lexer);
+				binaryExpression.RightExpression = LogicalAndExpression();
+				expression = binaryExpression;
+			}
+			expression.SetEndPosition(_lexer);
+			return expression;
+        }
+
+		/*
+			BNF:
+			<logical and expression> ::= 
+				<logical unary expression> {<logical and operator> <logical unary expression>}
+
+			<logical and operator> ::=
+				and
+		*/
+        protected Expression LogicalAndExpression()
+        {
+            Expression expression = LogicalUnaryExpression();
+            while (_lexer.PeekTokenSymbol(1) == Keywords.And)
+            {
+				_lexer.NextToken();
+				BinaryExpression binaryExpression = new BinaryExpression();
+                binaryExpression.SetPosition(_lexer);
+                binaryExpression.LeftExpression = expression;
+                binaryExpression.Instruction = Instructions.And;
+                binaryExpression.RightExpression = LogicalUnaryExpression();
+                expression = binaryExpression;
+            }
+			expression.SetEndPosition(_lexer);
+            return expression;
+        }
+
+		/*
+			BNF:
+			<logical unary expression> ::=
+				{<logical unary operator>} <comparison expression>
+
+			<logical unary operator> ::=
+				not | exists
+		*/
+		protected Expression LogicalUnaryExpression()
+		{
+			if (IsLogicalUnaryOperator(_lexer.PeekTokenSymbol(1)))
+			{
+				UnaryExpression expression;
+				switch (_lexer.NextToken().AsSymbol)
+				{
+					case Keywords.Not: 
+						expression = new UnaryExpression(Instructions.Not, LogicalUnaryExpression());
+						expression.SetPosition(_lexer);
+						expression.SetEndPosition(_lexer);
+						return expression;
+					case Keywords.Exists: 
+						expression = new UnaryExpression(Instructions.Exists, LogicalUnaryExpression());
+						expression.SetPosition(_lexer);
+						expression.SetEndPosition(_lexer);
+						return expression;
+				}
+			}
+			return ComparisonExpression();
+		}
+        
+        protected bool IsComparisonOperator(string operatorValue)
+        {
+            switch (operatorValue)
+            {
+                case Keywords.Equal:
+                case Keywords.NotEqual:
+                case Keywords.Less:
+                case Keywords.Greater:
+                case Keywords.InclusiveLess:
+                case Keywords.InclusiveGreater: 
+                case Keywords.Compare: return true;
+                default: return false;
+            }
+        }
+
+		/*
+			BNF:
+			<comparison expression> ::= 
+				<logical binary expression> {<comparison operator> <logical binary expression>}
+
+			<comparison operator> ::=
+				= | "<>" | "<" | ">" | "<=" | ">=" | ?=
+		*/
+        protected Expression ComparisonExpression()
+        {
+            Expression expression = LogicalBinaryExpression();
+            while (IsComparisonOperator(_lexer.PeekTokenSymbol(1)))
+            {
+                BinaryExpression binaryExpression = new BinaryExpression();
+                binaryExpression.LeftExpression = expression;
+                switch (_lexer.NextToken().AsSymbol)
+                {
+					case Keywords.Equal: binaryExpression.Instruction = Instructions.Equal; break;
+					case Keywords.NotEqual: binaryExpression.Instruction = Instructions.NotEqual; break;
+					case Keywords.Less: binaryExpression.Instruction = Instructions.Less; break;
+					case Keywords.Greater: binaryExpression.Instruction = Instructions.Greater; break;
+					case Keywords.InclusiveLess: binaryExpression.Instruction = Instructions.InclusiveLess; break;
+					case Keywords.InclusiveGreater: binaryExpression.Instruction = Instructions.InclusiveGreater; break;
+					case Keywords.Compare: binaryExpression.Instruction = Instructions.Compare; break;
+                }
+				binaryExpression.SetPosition(_lexer);
+				binaryExpression.RightExpression = LogicalBinaryExpression();
+                expression = binaryExpression;
+            }
+			expression.SetEndPosition(_lexer);
+            return expression;
+        }
+
+		/*
+			BNF:
+			<logical binary expression> ::=
+				<bitwise binary expression> <logical or type operator clause list>
+
+			<logical or type operator clause> ::=
+				<logical ternary clause> |
+				<logical binary clause> |
+				<type operator clause>
+
+			<logical ternary clause> ::=
+				<logical ternary operator> <additive expression> and <additive expression>
+
+			<logical ternary operator> ::=
+				between
+
+			<logical binary clause> ::=
+				<logical binary operator> <bitwise binary expression>
+
+			<logical binary operator> ::=
+				in | like | matches
+
+			<type operator clause> ::=
+				<type operator> <type specifier>
+
+			<type operator> ::=
+				is | as
+		*/
+
+		protected Expression LogicalBinaryExpression()
+		{
+			Expression expression = BitwiseBinaryExpression();
+			while (IsLogicalOrTypeOperator(_lexer.PeekTokenSymbol(1)))
+			{
+				if (_lexer.PeekTokenSymbol(1) == Keywords.Between)
+				{
+					_lexer.NextToken();
+					BetweenExpression betweenExpression = new BetweenExpression();
+					betweenExpression.SetPosition(_lexer);
+					betweenExpression.Expression = expression;
+					betweenExpression.LowerExpression = AdditiveExpression();
+					_lexer.NextToken().CheckSymbol(Keywords.And);
+					betweenExpression.UpperExpression = AdditiveExpression();
+					expression = betweenExpression;
+				}
+				else if (_lexer.PeekTokenSymbol(1) == Keywords.Is)
+					expression = IsClause(expression);
+				else if (_lexer.PeekTokenSymbol(1) == Keywords.As)
+					expression = AsClause(expression);
+				else
+				{
+					BinaryExpression binaryExpression = new BinaryExpression();
+					binaryExpression.LeftExpression = expression;
+					switch (_lexer.NextToken().AsSymbol)
+					{
+						case Keywords.In: binaryExpression.Instruction = Instructions.In; break;
+						case Keywords.Like: binaryExpression.Instruction = Instructions.Like; break;
+						case Keywords.Matches: binaryExpression.Instruction = Instructions.Matches; break;
+					}
+					binaryExpression.SetPosition(_lexer);
+					binaryExpression.RightExpression = BitwiseBinaryExpression();
+					expression = binaryExpression;
+				}
+			}
+			expression.SetEndPosition(_lexer);
+			return expression;
+		}
+
+        protected bool IsBitwiseBinaryOperator(string operatorValue)
+        {
+            switch (operatorValue)
+            {
+                case Keywords.BitwiseOr:
+                case Keywords.BitwiseAnd:
+                case Keywords.BitwiseXor:
+                case Keywords.ShiftLeft:
+                case Keywords.ShiftRight: return true;
+                default: return false;
+            }
+        }
+
+		/* 
+			BNF:
+			<bitwise binary expression> ::= 
+				<additive expression> {<bitwise binary operator> <additive expression>}
+
+			<bitwise binary operator> ::=
+				^ | & | "|" | "<<" | ">>"
+        */
+        protected Expression BitwiseBinaryExpression()
+        {
+            Expression expression = AdditiveExpression();
+            while (IsBitwiseBinaryOperator(_lexer.PeekTokenSymbol(1)))
+            {
+                BinaryExpression binaryExpression = new BinaryExpression();
+                binaryExpression.LeftExpression = expression;
+                switch (_lexer.NextToken().AsSymbol)
+                {
+					case Keywords.BitwiseXor: binaryExpression.Instruction = Instructions.BitwiseXor; break;
+					case Keywords.BitwiseAnd: binaryExpression.Instruction = Instructions.BitwiseAnd; break;
+					case Keywords.BitwiseOr: binaryExpression.Instruction = Instructions.BitwiseOr; break;
+					case Keywords.ShiftLeft: binaryExpression.Instruction = Instructions.ShiftLeft; break;
+					case Keywords.ShiftRight: binaryExpression.Instruction = Instructions.ShiftRight; break;
+                }
+				binaryExpression.SetPosition(_lexer);
+				binaryExpression.RightExpression = AdditiveExpression();
+                expression = binaryExpression;
+            }
+			expression.SetEndPosition(_lexer);
+            return expression;
+        }
+        
+		#else
         
         protected bool IsLogicalOrTypeOperator(string operatorValue)
         {
@@ -731,19 +1032,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
                 default: return false;
             }
         }
-        
-        /*
-			BNF:
-			<modified expression term> ::=
-				<expression term> [<language modifiers>]
-		*/
-		protected Expression ModifiedExpressionTerm()
-		{
-			Expression expression = ExpressionTerm();
-			LanguageModifiers(expression);
-			expression.SetEndPosition(_lexer);
-			return expression;
-		}			
         
 		/* 
 			BNF:
@@ -930,6 +1218,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			expression.SetEndPosition(_lexer);
             return expression;
         }
+
+		#endif
        
         protected bool IsAdditiveOperator(string operatorValue)
         {
@@ -2405,11 +2695,34 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return localExpression;
 		}
 
+		public static IdentifierExpression CollapseQualifiedIdentifierExpression(Expression expression)
+		{
+			if (expression is IdentifierExpression)
+				return (IdentifierExpression)expression;
+			
+			if (expression is QualifierExpression)
+			{
+				IdentifierExpression leftExpression = CollapseQualifiedIdentifierExpression(((QualifierExpression)expression).LeftExpression);
+				IdentifierExpression rightExpression = CollapseQualifiedIdentifierExpression(((QualifierExpression)expression).RightExpression);
+				if ((leftExpression != null) && (rightExpression != null))
+				{
+					IdentifierExpression result = new IdentifierExpression(Schema.Object.Qualify(rightExpression.Identifier, leftExpression.Identifier));
+					result.Line = leftExpression.Line;
+					result.LinePos = rightExpression.LinePos;
+					return result;
+				}
+			}
+			
+			return null;
+		}
+
 		/* 
 			BNF:
             <aggregate clause> ::=
                 group [by "{"<ne column name commalist>"}"] add "{"<ne named aggregate expression commalist>"}" [<language modifiers>]
-        */        
+
+				group [by "{"<ne optionally named expression term commalist>"}"] add "{"<ne named aggregate expression commalist>"}" [<language modifiers>]
+		*/        
         protected AggregateExpression AggregateClause(Expression expression)
         {
             AggregateExpression aggregateExpression = new AggregateExpression();
@@ -2417,14 +2730,90 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			aggregateExpression.SetPosition(_lexer);
 			aggregateExpression.Expression = expression;
 
+			#if ALLOWARBITRARYAGGREGATEEXPRESSIONS
+			ExtendExpression extendExpression = null;
+			NamedColumnExpressions expressionColumns = new NamedColumnExpressions();
+			#endif
+
             if (_lexer.PeekTokenSymbol(1) == Keywords.By)
             {
                 _lexer.NextToken();
+
+				#if ALLOWARBITRARYAGGREGATEEXPRESSIONS
+				NamedColumnExpressions byColumns = new NamedColumnExpressions();
+				OptionallyNamedColumnList(byColumns);
+				foreach (NamedColumnExpression column in byColumns)
+				{
+					if (!String.IsNullOrEmpty(column.ColumnAlias))
+					{
+						expressionColumns.Add(column);
+						ColumnExpression byColumn = new ColumnExpression(column.ColumnAlias);
+						byColumn.SetLineInfo(column.LineInfo);
+						aggregateExpression.ByColumns.Add(byColumn);
+					}
+					else
+					{
+						IdentifierExpression identifier = CollapseQualifiedIdentifierExpression(column.Expression);
+						if (identifier != null)
+						{
+							ColumnExpression byColumn = new ColumnExpression(identifier.Identifier);
+							byColumn.SetLineInfo(column.LineInfo);
+							aggregateExpression.ByColumns.Add(byColumn);
+						}
+						else
+						{
+							// This will error when it gets to the compiler, as it should, the column must be named if an expression is provided
+							expressionColumns.Add(column);
+						}
+					}
+				}
+
+				#else
 				ColumnList(aggregateExpression.ByColumns);
+				#endif
 			}
         
             _lexer.NextToken().CheckSymbol(Keywords.Add);
             AggregateColumnList(aggregateExpression.ComputeColumns);
+
+			#if ALLOWARBITRARYAGGREGATEEXPRESSIONS
+			foreach (AggregateColumnExpression computeColumn in aggregateExpression.ComputeColumns)
+			{
+				foreach (Expression argument in computeColumn.Arguments)
+				{
+					IdentifierExpression identifier = CollapseQualifiedIdentifierExpression(argument);
+					if (identifier != null)
+					{
+						ColumnExpression columnArgument = new ColumnExpression();
+						columnArgument.ColumnName = identifier.Identifier;
+						columnArgument.SetLineInfo(identifier.LineInfo);
+						computeColumn.Columns.Add(columnArgument);
+					}
+					else
+					{
+						string argumentName = Schema.Object.GetUniqueName();
+						ColumnExpression columnArgument = new ColumnExpression(argumentName);
+						columnArgument.SetLineInfo(argument.LineInfo);
+						computeColumn.Columns.Add(columnArgument);
+
+						NamedColumnExpression argumentColumnExpression = new NamedColumnExpression(argument, argumentName);
+						argumentColumnExpression.SetLineInfo(argument.LineInfo);
+						expressionColumns.Add(argumentColumnExpression);
+					}
+				}
+
+				computeColumn.Arguments.Clear();
+			}
+
+			if (expressionColumns.Count > 0)
+			{
+				extendExpression = new ExtendExpression(expression);
+				extendExpression.Expressions.AddRange(expressionColumns);
+				extendExpression.SetLineInfo(expression.LineInfo);
+				aggregateExpression.Expression = extendExpression;
+			}
+			#endif
+
             LanguageModifiers(aggregateExpression);
 			aggregateExpression.SetEndPosition(_lexer);
             return aggregateExpression;
@@ -2458,7 +2847,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
             <aggregate expression> ::=
                 <operator name>"("[distinct] [<column name commalist>] [order by "{"<order column definition commalist>"}"]")" [<language modifiers>]
-        */        
+
+                <operator name>"("[distinct] [<expression term commalist>] [order by "{"<order column definition commalist>"}"]")" [<language modifiers>]
+		*/        
         protected AggregateColumnExpression AggregateColumn()
         {
             AggregateColumnExpression aggregateColumnExpression = new AggregateColumnExpression();
@@ -2476,11 +2867,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				bool done = false;
 				while (!done)
 				{
+					#if ALLOWARBITRARYAGGREGATEEXPRESSIONS
+					Expression argument = ExpressionTerm();
+					aggregateColumnExpression.Arguments.Add(argument);
+					#else
 					ColumnExpression expression = new ColumnExpression();
 					expression.ColumnName = QualifiedIdentifier();
 					expression.SetPosition(_lexer);
 					aggregateColumnExpression.Columns.Add(expression);
-					
+					#endif
+
 					switch (_lexer.NextToken().AsSymbol)
 					{
 						case Keywords.ListSeparator : break;

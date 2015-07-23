@@ -153,10 +153,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((Order != null) && !TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 
-			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
-			#endif
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, SourceTableVar);
 		}
 		
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)

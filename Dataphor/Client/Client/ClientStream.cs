@@ -14,6 +14,7 @@ using Alphora.Dataphor.DAE.Contracts;
 using Alphora.Dataphor.DAE.Debug;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -31,6 +32,11 @@ namespace Alphora.Dataphor.DAE.Client
 		private IClientDataphorService GetServiceInterface()
 		{
 			return _clientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
+		}
+
+		private void ReportCommunicationError()
+		{
+			_clientProcess.ClientSession.ClientConnection.ClientServer.ReportCommunicationError();
 		}
 		
 		private int _streamHandle;
@@ -51,6 +57,11 @@ namespace Alphora.Dataphor.DAE.Client
 				{
 					throw DataphorFaultUtility.FaultToException(fault.Detail);
 				}
+				catch (CommunicationException ce)
+				{
+					ReportCommunicationError();
+					throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
+				}
 			}
 		}
 		
@@ -66,6 +77,11 @@ namespace Alphora.Dataphor.DAE.Client
 			catch (FaultException<DataphorFault> fault)
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 			}
 		}
 		
@@ -84,6 +100,11 @@ namespace Alphora.Dataphor.DAE.Client
 				{
 					throw DataphorFaultUtility.FaultToException(fault.Detail);
 				}
+				catch (CommunicationException ce)
+				{
+					ReportCommunicationError();
+					throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
+				}
 			}
 			set
 			{
@@ -97,6 +118,11 @@ namespace Alphora.Dataphor.DAE.Client
 				catch (FaultException<DataphorFault> fault)
 				{
 					throw DataphorFaultUtility.FaultToException(fault.Detail);
+				}
+				catch (CommunicationException ce)
+				{
+					ReportCommunicationError();
+					throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 				}
 			}
 		}
@@ -116,6 +142,11 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
+			}
 		}
 		
 		public override void Write(byte[] buffer, int offset, int count)
@@ -133,6 +164,11 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
+			}
 		}
 
 		protected override void Dispose(bool disposing)
@@ -149,6 +185,11 @@ namespace Alphora.Dataphor.DAE.Client
 				catch (FaultException<DataphorFault> fault)
 				{
 					throw DataphorFaultUtility.FaultToException(fault.Detail);
+				}
+				catch (CommunicationException ce)
+				{
+					ReportCommunicationError();
+					throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 				}
 			}
 			finally

@@ -1228,16 +1228,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineCharacteristics(Plan plan)
 		{
-			_isLiteral = true;
-			_isFunctional = true;
-			_isDeterministic = true;
-			_isRepeatable = true;
+			IsLiteral = true;
+			IsFunctional = true;
+			IsDeterministic = true;
+			IsRepeatable = true;
 			for (int index = 0; index < NodeCount; index++)
 			{
-				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
-				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
-				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
-				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
+				IsLiteral = IsLiteral && Nodes[index].IsLiteral;
+				IsFunctional = IsFunctional && Nodes[index].IsFunctional;
+				IsDeterministic = IsDeterministic && Nodes[index].IsDeterministic;
+				IsRepeatable = IsRepeatable && Nodes[index].IsRepeatable;
 			} 
 			_tableVar.DetermineRemotable(plan.CatalogDeviceSession);
 			_tableVar.Owner = plan.User;
@@ -1406,7 +1406,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (Nodes[0].Modifiers != null)
 			{
 				var keyDefinition = LanguageModifiers.GetModifier(Nodes[0].Modifiers, "KeyInfo", String.Empty);
-				if (keyDefinition != null)
+				if (!String.IsNullOrEmpty(keyDefinition))
 				{
 					_tableVar.Keys.Add(Compiler.CompileKeyDefinition(plan, _tableVar, new Parser().ParseKeyDefinition(keyDefinition)));
 				}
@@ -1490,10 +1490,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineCharacteristics(Plan plan)
 		{
-			_isLiteral = false;
-			_isFunctional = true;
-			_isDeterministic = true;
-			_isRepeatable = true;
+			IsLiteral = false;
+			IsFunctional = true;
+			IsDeterministic = true;
+			IsRepeatable = true;
 			_tableVar.DetermineRemotable(plan.CatalogDeviceSession);
 
 			/*
@@ -1876,7 +1876,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (!devicePlan.IsSupported)
 					throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice, _device.Name, _tableVar.DisplayName);
 
-				_deviceSupported = true;
+				DeviceSupported = true;
 				SurrogateExecute = InternalDeviceExecute;
 				SetDevice(plan, _potentialDevice);
 
@@ -1893,13 +1893,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
 			{
 				DetermineModifySupported(plan);
+				}
+
 				_symbols = Compiler.SnapshotSymbols(plan);
 			}
-		}
-
-		public override void ClearDeviceNode()
-		{
-			base.ClearDeviceNode();
+			else
+				NoDevice = true;
 		}
 		
 		protected void CheckDeviceRights(Plan plan)
@@ -2560,7 +2559,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DeterminePotentialDevice(Plan plan)
 		{
-			_noDevice = true;
+			NoDevice = true;
 		}
 
 		public override Statement EmitStatement(EmitMode mode)

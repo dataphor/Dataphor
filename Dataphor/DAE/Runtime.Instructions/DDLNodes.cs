@@ -208,7 +208,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDevice(Plan plan)
 		{
 			base.DetermineDevice(plan);
-			_deviceSupported = false;
+			DeviceSupported = false;
 			SurrogateExecute = InternalExecute;
 		}
 
@@ -1531,13 +1531,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected Schema.Objects _nonNilableColumns;
-		protected Schema.Objects _defaultColumns;
+		protected Schema.Objects<Schema.TableVarColumn> _nonNilableColumns;
+		protected Schema.Objects<Schema.TableVarColumn> _defaultColumns;
 
 		protected void CreateColumns(Plan plan, Program program, Schema.BaseTableVar table, ColumnDefinitions createColumns)
 		{
-			_nonNilableColumns = new Schema.Objects();
-			_defaultColumns = new Schema.Objects();
+			_nonNilableColumns = new Schema.Objects<Schema.TableVarColumn>();
+			_defaultColumns = new Schema.Objects<Schema.TableVarColumn>();
 			Schema.BaseTableVar dummy = new Schema.BaseTableVar(table.Name);
 			dummy.Library = table.Library;
 			dummy.IsGenerated = table.IsGenerated;
@@ -1581,7 +1581,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDevice(Plan plan)
 		{
 			base.DetermineDevice(plan);
-			_deviceSupported = false;
+			DeviceSupported = false;
 			SurrogateExecute = InternalExecute;
 		}
 		
@@ -2802,8 +2802,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected void DropSourceReferences(Program program, Schema.TableVar tableVar)
 		{
 			BlockNode blockNode = new BlockNode();
-			foreach (Schema.Reference reference in tableVar.SourceReferences)
-				if (reference.ParentReference == null)
+			if (tableVar.HasReferences())
+				foreach (Schema.ReferenceBase reference in tableVar.References)
+					if (reference.SourceTable.Equals(tableVar) && !reference.IsDerived)
 					blockNode.Nodes.Add(Compiler.Compile(program.Plan, reference.EmitDropStatement(EmitMode.ForCopy)));
 				
 			blockNode.Execute(program);
@@ -2863,7 +2864,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDevice(Plan plan)
 		{
 			base.DetermineDevice(plan);
-			_deviceSupported = false;
+			DeviceSupported = false;
 			SurrogateExecute = InternalExecute;
 		}
 

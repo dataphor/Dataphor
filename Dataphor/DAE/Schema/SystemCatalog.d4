@@ -1445,6 +1445,7 @@ begin
 		DefaultMaxCallDepth : Integer,
 		UsePlanCache : Boolean,
 		ShouldEmitIL : Boolean,
+		ShouldElaborate : Boolean,
 		key { ID } static tags { DAE.Enforced = "False" },
 		reference Sessions_Connections { Connection_Name } references Connections { Name } static tags { DAE.Enforced = "False" },
 		reference Sessions_Users { User_ID } references Users { ID } static tags { DAE.Enforced = "False" },

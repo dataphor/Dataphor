@@ -191,11 +191,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			DetermineOrder(plan);
 			
-			#if UseReferenceDerivation
 			// TODO: Reference derivation on a redefine should exclude affected references
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
-			#endif
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, SourceTableVar);
 		}
 		
 		public override void JoinApplicationTransaction(Program program, Row row)

@@ -400,12 +400,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
         }
         
-        protected string DeriveSourceReferenceName(Schema.Reference reference, int referenceID)
+        protected string DeriveSourceReferenceName(Schema.ReferenceBase reference, int referenceID)
         {
 			return DeriveSourceReferenceName(reference, referenceID, reference.SourceKey);
         }
         
-        protected string DeriveSourceReferenceName(Schema.Reference reference, int referenceID, Schema.JoinKey sourceKey)
+        protected string DeriveSourceReferenceName(Schema.ReferenceBase reference, int referenceID, Schema.JoinKey sourceKey)
         {
 			StringBuilder name = new StringBuilder(reference.OriginatingReferenceName());
 			name.AppendFormat("_{0}", Keywords.Source);
@@ -416,12 +416,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return name.ToString();
         }
         
-        protected string DeriveTargetReferenceName(Schema.Reference reference, int referenceID)
+        protected string DeriveTargetReferenceName(Schema.ReferenceBase reference, int referenceID)
         {
 			return DeriveTargetReferenceName(reference, referenceID, reference.TargetKey);
         }
         
-        protected string DeriveTargetReferenceName(Schema.Reference reference, int referenceID, Schema.JoinKey targetKey)
+        protected string DeriveTargetReferenceName(Schema.ReferenceBase reference, int referenceID, Schema.JoinKey targetKey)
         {
 			StringBuilder name = new StringBuilder(reference.OriginatingReferenceName());
 			name.AppendFormat("_{0}", Keywords.Target);
@@ -432,21 +432,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return name.ToString();
         }
         
-        protected void CopySourceReference(Plan plan, Schema.Reference reference)
+        protected void CopySourceReference(Plan plan, Schema.ReferenceBase reference)
         {
 			CopySourceReference(plan, reference, reference.IsExcluded);
         }
         
-        protected void CopySourceReference(Plan plan, Schema.Reference reference, bool isExcluded)
+        protected void CopySourceReference(Plan plan, Schema.ReferenceBase reference, bool isExcluded)
         {
 			int newReferenceID = Schema.Object.GetNextObjectID();
 			string newReferenceName = DeriveSourceReferenceName(reference, newReferenceID);
-			Schema.Reference newReference = new Schema.Reference(newReferenceID, newReferenceName);
-			newReference.ParentReference = reference;
+			Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);
 			newReference.IsExcluded = isExcluded;
 			newReference.InheritMetaData(reference.MetaData);
-			newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
-			newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+			// BTR 2015-07-03 -> It's not clear this would ever do anything anyway, so I'm not sure why these were being set.
+			//newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+			//newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
 			newReference.SourceTable = _tableVar;
 			newReference.AddDependency(_tableVar);
 			int columnIndex;
@@ -478,35 +478,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				foreach (Schema.TableVarColumn column in reference.TargetKey.Columns)
 					newReference.TargetKey.Columns.Add(column);
 
-				if (!_tableVar.SourceReferences.ContainsSourceReference(newReference)) // This would only be true for unions and joins where both sides contain the same reference
+				if (!_tableVar.References.ContainsSourceReference(newReference)) // This would only be true for unions and joins where both sides contain the same reference
 				{
-					_tableVar.SourceReferences.Add(newReference);
-					_tableVar.DerivedReferences.Add(newReference);
+					_tableVar.References.Add(newReference);
 				}
 			}
         }
         
-        protected void CopySourceReferences(Plan plan, Schema.References references)
-        {
-			foreach (Schema.Reference reference in references)
-				CopySourceReference(plan, reference);
-        }
-        
-        protected void CopyTargetReference(Plan plan, Schema.Reference reference)
+        protected void CopyTargetReference(Plan plan, Schema.ReferenceBase reference)
         {
 			CopyTargetReference(plan, reference, reference.IsExcluded);
         }
         
-        protected void CopyTargetReference(Plan plan, Schema.Reference reference, bool isExcluded)
+        protected void CopyTargetReference(Plan plan, Schema.ReferenceBase reference, bool isExcluded)
         {
 			int newReferenceID = Schema.Object.GetNextObjectID();
 			string newReferenceName = DeriveTargetReferenceName(reference, newReferenceID);
-			Schema.Reference newReference = new Schema.Reference(newReferenceID, newReferenceName);
-			newReference.ParentReference = reference;
+			Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);
 			newReference.IsExcluded = isExcluded;
 			newReference.InheritMetaData(reference.MetaData);
-			newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
-			newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
+			//newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
+			//newReference.DeleteReferenceAction = reference.DeleteReferenceAction;
 			newReference.SourceTable = reference.SourceTable;
 			newReference.AddDependency(reference.SourceTable);
 			newReference.SourceKey.IsUnique = reference.SourceKey.IsUnique;
@@ -539,19 +531,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 				}
 
-				if (newReference.TargetKey.IsUnique && !_tableVar.TargetReferences.ContainsTargetReference(newReference)) // This would only be true for unions and joins where both sides contain the same reference
+				if (newReference.TargetKey.IsUnique && !_tableVar.References.ContainsTargetReference(newReference)) // This would only be true for unions and joins where both sides contain the same reference
 				{
-					_tableVar.TargetReferences.Add(newReference);
-					_tableVar.DerivedReferences.Add(newReference);
+					_tableVar.References.Add(newReference);
+					//_tableVar.DerivedReferences.Add(newReference);
 				}
 			}
         }
         
-        protected void CopyTargetReferences(Plan plan, Schema.References references)
+		protected void CopyReferences(Plan plan, Schema.TableVar tableVar)
         {
-			foreach (Schema.Reference reference in references)
+			if (tableVar.HasReferences())
+			{
+				foreach (Schema.ReferenceBase reference in tableVar.References)
+					if (reference.SourceTable.Equals(tableVar))
+						CopySourceReference(plan, reference);
+					else if (reference.TargetTable.Equals(tableVar))
 				CopyTargetReference(plan, reference);
         }
+		}
         
 		// DataType
 		public new virtual Schema.ITableType DataType { get { return (Schema.ITableType)_dataType; } }
@@ -676,7 +674,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineAccessPath(Plan plan)
 		{
 			base.DetermineAccessPath(plan);
-			if (!_deviceSupported)
+			if (!DeviceSupported)
 				DetermineCursorBehavior(plan);
 			_symbols = Compiler.SnapshotSymbols(plan);
 			if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
@@ -733,24 +731,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// ModifySupported, true if the device supports modification statements for this node
-		protected bool _modifySupported;
 		public bool ModifySupported
 		{
-			get { return _modifySupported; }
-			set { _modifySupported = value; }
+			get { return (_characteristics & ModifySupportedFlag) == ModifySupportedFlag; }
+			set { if (value) _characteristics |= ModifySupportedFlag; else _characteristics &= NotModifySupportedFlag; }
 		}
 	
 		// ShouldSupportModify, true if the DAE should try to support the modification at this level
-		private bool _shouldSupportModify = true;
 		public bool ShouldSupportModify
 		{
-			get { return _shouldSupportModify; }
-			set { _shouldSupportModify = value; }
+			get { return (_characteristics & ShouldSupportModifyFlag) == ShouldSupportModifyFlag; }
+			set { if (value) _characteristics |= ShouldSupportModifyFlag; else _characteristics &= NotShouldSupportModifyFlag; }
 		}
 		
 		public virtual void DetermineModifySupported(Plan plan)
 		{
-			if ((TableVar.Keys.Count > 0) && _deviceSupported && ShouldSupportModify)
+			if ((TableVar.Keys.Count > 0) && DeviceSupported && ShouldSupportModify)
 			{
 				// if any child node is a tabletype and not a tablenode  
 				//	or is a table node and does not support modification, modification is not supported
@@ -759,14 +755,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if 
 						(
 							((node.DataType is Schema.TableType) && !(node is TableNode)) || 
-							((node is TableNode) && !((TableNode)node)._modifySupported)
+							((node is TableNode) && !((TableNode)node).ModifySupported)
 						)
 						{
-							_modifySupported = false;
+							ModifySupported = false;
 							return;
 						}
 				
-				_modifySupported = false;
+				ModifySupported = false;
 				// TODO: Build modification binding cache
 				#if USEMODIFICATIONBINDING
 				// Use an update to determine whether any modification would be supported against this expression
@@ -777,12 +773,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				#endif
 			}
 			else
-				_modifySupported = false;
+				ModifySupported = false;
 		}
 		
 		protected void CheckModifySupported()
 		{
-			if (!_modifySupported)
+			if (!ModifySupported)
 				throw new RuntimeException(RuntimeException.Codes.NoSupportingModificationDevice, EmitStatementAsString());
 		}
 
@@ -906,7 +902,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 														plan,
 														new RestrictExpression
 														(
-															(Expression)EmitStatement(EmitMode.ForCopy),
+															plan,
+															Compiler.CompileExpression(plan, GetExpression(outsideAT)),
 															Compiler.BuildOptimisticRowEqualExpression
 															(
 																plan, 
@@ -1439,11 +1436,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 
-		private bool _shouldCheckConcurrency = false;
 		public bool ShouldCheckConcurrency
 		{
-			get { return _shouldCheckConcurrency; }
-			set { _shouldCheckConcurrency = value; }
+			get { return (_characteristics & ShouldCheckConcurrencyFlag) == ShouldCheckConcurrencyFlag; }
+			set { if (value) _characteristics |= ShouldCheckConcurrencyFlag; else _characteristics &= NotShouldCheckConcurrencyFlag; }
 		}
 		
 		/// <summary>Performs an optimistic concurrency check for the given row.</summary>
@@ -1655,7 +1651,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				PreparedValidate(program, null, row, valueFlags, String.Empty, false, false);
 				InternalBeforeInsert(program, row, valueFlags);
-				if ((TableVar.InsertConstraints.Count > 0) || (TableVar.RowConstraints.Count > 0) || (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
+				if ((TableVar.HasInsertConstraints()) || (TableVar.HasRowConstraints()) || (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
 				{
 					PushNewRow(program, row);
 					try
@@ -1787,7 +1783,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				PreparedValidate(program, oldRow, newRow, valueFlags, String.Empty, false, false);
 				InternalBeforeUpdate(program, oldRow, newRow, valueFlags);
-				if ((TableVar.UpdateConstraints.Count > 0) || (TableVar.RowConstraints.Count > 0) || (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
+				if ((TableVar.HasUpdateConstraints()) || (TableVar.HasRowConstraints()) || (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
 				{
 					PushOldRow(program, oldRow);
 					try
@@ -1898,7 +1894,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (perform)
 			{
 				InternalBeforeDelete(program, row);
-				if ((TableVar.DeleteConstraints.Count > 0) || (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
+				if ((TableVar.HasDeleteConstraints()) || (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
 				{
 					PushOldRow(program, row);
 					try
@@ -1988,7 +1984,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			bool changed = ExecuteValidateHandlers(program, oldRow, newRow, valueFlags, columnName);
 			changed = ValidateColumns(program, TableVar, oldRow, newRow, valueFlags, columnName, isDescending, isProposable) || changed;
 			changed = InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable) || changed;
-			if ((columnName == String.Empty) && (TableVar.RowConstraints.Count > 0) && !isProposable)
+			if ((columnName == String.Empty) && (TableVar.HasRowConstraints()) && !isProposable)
 			{
 				PushRow(program, newRow);
 				try
@@ -2699,6 +2695,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// This method expects that the row to be validated is at location 0 on the stack
 		protected virtual void ValidateImmediateConstraints(Program program, bool isDescending, BitArray valueFlags)
 		{
+			if (TableVar.HasRowConstraints())
+			{
 			Schema.RowConstraint constraint;
 			for (int index = 0; index < TableVar.RowConstraints.Count; index++)
 			{
@@ -2706,12 +2704,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if ((constraint.ConstraintType != Schema.ConstraintType.Database) && (isDescending || constraint.Enforced) && constraint.ShouldValidate(valueFlags, Schema.Transition.Insert))
 					constraint.Validate(program, Schema.Transition.Insert);
 			}
+			}
 		} 
 		
 		// ValidateCatalogConstraints
 		// This method does not have any expectations for the stack
 		protected virtual void ValidateCatalogConstraints(Program program)
 		{
+			if (TableVar.HasCatalogConstraints())
 			foreach (Schema.CatalogConstraint constraint in TableVar.CatalogConstraints)
 			{
 				if (constraint.Enforced)
@@ -2755,6 +2755,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			#endif		
 			{	
+				if (TableVar.HasRowConstraints())
+				{
 				Schema.RowConstraint constraint;
 				for (int index = 0; index < TableVar.RowConstraints.Count; index++)
 				{
@@ -2763,6 +2765,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						constraint.Validate(program, Schema.Transition.Insert);
 				}
 			}
+			}
 			#if !USENAMEDROWVARIABLES
 			finally
 			{
@@ -2770,7 +2773,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			#endif
 	
-			if (TableVar.InsertConstraints.Count > 0)
+			if (TableVar.HasInsertConstraints())
 			{
 				Schema.TransitionConstraint constraint;
 				bool shouldValidateKeyConstraints = ShouldValidateKeyConstraints(Schema.Transition.Insert);
@@ -2795,6 +2798,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			#endif
 			{
+				if (TableVar.HasRowConstraints())
+				{
 				Schema.RowConstraint constraint;
 				for (int index = 0; index < TableVar.RowConstraints.Count; index++)
 				{
@@ -2803,6 +2808,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						constraint.Validate(program, Schema.Transition.Insert);
 				}
 			}
+			}
 			#if !USENAMEDROWVARIABLES
 			finally
 			{
@@ -2810,7 +2816,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			#endif
 	
-			if (TableVar.UpdateConstraints.Count > 0)
+			if (TableVar.HasUpdateConstraints())
 			{
 				bool shouldValidateKeyConstraints = ShouldValidateKeyConstraints(Schema.Transition.Update);
 				Schema.TransitionConstraint constraint;
@@ -2830,6 +2836,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints())
 				program.ServerProcess.AddDeleteTableVarCheck(TableVar, (Row)program.Stack.Peek(0));
 
+			if (TableVar.HasDeleteConstraints())
 			foreach (Schema.Constraint constraint in TableVar.DeleteConstraints)
 				if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred))
 					constraint.Validate(program, Schema.Transition.Delete);
@@ -3280,6 +3287,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		#region ShowPlan
 
+		public override Statement EmitStatement(EmitMode mode)
+		{
+			Statement statement = base.EmitStatement(mode);
+			CallExpression callExpression = statement as CallExpression;
+			if ((callExpression != null) && (mode == EmitMode.ForRemote) && (Operator != null) && (!Operator.IsRemotable))
+			{
+				// If we are emitting remote and the operator is not remotable, we have to encode the key information as modifiers
+				// These will be picked up on the client side catalog deserialization by the TableValueToTableVarNode.
+				if (callExpression.Modifiers == null)
+					callExpression.Modifiers = new LanguageModifiers();
+				D4TextEmitter emitter = new D4TextEmitter();
+				callExpression.Modifiers.AddOrUpdate("KeyInfo", emitter.Emit(Compiler.FindClusteringKey(null, _tableVar).EmitStatement(EmitMode.ForCopy)));
+			}
+			return statement;
+		}
+
 		public override string Category
 		{
 			get { return "Table"; }
@@ -3338,6 +3361,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		protected virtual void WritePlanConstraints(System.Xml.XmlWriter writer)
 		{
+			if (TableVar.HasConstraints())
+			{
 			foreach (Schema.TableVarConstraint constraint in TableVar.Constraints)
 			{
 				if (!constraint.IsGenerated)
@@ -3364,24 +3389,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 		}
+		}
 
-		protected static string EmitColumnList(Schema.Key key)
+		protected static string EmitColumnList(Schema.TableVarColumnsBase columns)
 		{
 			StringBuilder result = new StringBuilder();
 			result.Append("{ ");
-			for (int index = 0; index < key.Columns.Count; index++)
+			for (int index = 0; index < columns.Count; index++)
 			{
 				if (index > 0)
 					result.Append(", ");
-				result.AppendFormat("{0}", key.Columns[index].Name);
+				result.AppendFormat("{0}", columns[index].Name);
 			}
-			if (key.Columns.Count > 0)
+			if (columns.Count > 0)
 				result.Append(" ");
 			result.Append("}");
 			return result.ToString();
 		}
 		
-		protected virtual void WritePlanReference(System.Xml.XmlWriter writer, Schema.Reference reference, bool isSource)
+		protected virtual void WritePlanReference(System.Xml.XmlWriter writer, Schema.ReferenceBase reference, bool isSource)
 		{
 			if (isSource)
 			{
@@ -3393,10 +3419,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				writer.WriteStartElement("TargetReferences.Reference");
 				writer.WriteAttributeString("Source", reference.SourceTable.Name);
 			}
-			writer.WriteAttributeString("IsDerived", Convert.ToString(reference.ParentReference != null));
+			writer.WriteAttributeString("IsDerived", Convert.ToString(reference.IsDerived));
 			writer.WriteAttributeString("Name", reference.Name);
-			writer.WriteAttributeString("SourceColumns", EmitColumnList(reference.SourceKey));
-			writer.WriteAttributeString("TargetColumns", EmitColumnList(reference.TargetKey));
+			writer.WriteAttributeString("SourceColumns", EmitColumnList(reference.SourceKey.Columns));
+			writer.WriteAttributeString("TargetColumns", EmitColumnList(reference.TargetKey.Columns));
 			writer.WriteAttributeString("IsExcluded", Convert.ToString(reference.IsExcluded));
 			writer.WriteAttributeString("OriginatingReferenceName", reference.OriginatingReferenceName());
 			WritePlanTags(writer, reference.MetaData);
@@ -3405,11 +3431,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected virtual void WritePlanReferences(System.Xml.XmlWriter writer)
 		{
-			foreach (Schema.Reference reference in TableVar.SourceReferences)
-				WritePlanReference(writer, reference, true);
-			
-			foreach (Schema.Reference reference in TableVar.TargetReferences)
-				WritePlanReference(writer, reference, false);
+			if (TableVar.HasReferences())
+				foreach (Schema.ReferenceBase reference in TableVar.References)
+					WritePlanReference(writer, reference, reference.SourceTable.Equals(TableVar));
 		}
 
 		protected virtual void WritePlanColumns(System.Xml.XmlWriter writer)

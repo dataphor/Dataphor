@@ -1363,7 +1363,15 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			catch
 			{
-				Cancel();
+				try
+				{
+					Cancel();
+				}
+				catch
+				{
+					// Ignore exceptions here, we're trying to clean up
+				}
+
 				throw;
 			}
 		}

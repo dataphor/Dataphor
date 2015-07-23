@@ -8,8 +8,7 @@
     <Minor Condition=" '$(Minor)' == '' ">0</Minor>
     <Release Condition=" '$(Release)' == '' ">0</Release>
     <Revision Condition=" '$(Revision)' == '' ">0</Revision>
-
-
+    
   </PropertyGroup>
 	<Import Project="$(MSBuildProjectDirectory)\Dataphor.Build\Dataphor.Build.targets" />
   
@@ -46,6 +45,7 @@
   <Target Name="SyncBin" >
     <Message Text="Synchronize Bin files with WiX." />
     <SyncWiXFiles WiXFile="Files.wxs" ComponentID="BinFiles" ComponentGroupID ="BinFilesGroup" SourceFiles="@(BinFiles)" />
+    
   </Target>
   
     

@@ -78,28 +78,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (Modifiers != null)
 			{
-				_isLiteral = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsLiteral", Operator.IsLiteral.ToString()));
-				_isFunctional = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsFunctional", Operator.IsFunctional.ToString()));
-				_isDeterministic = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsDeterministic", Operator.IsDeterministic.ToString()));
-				_isRepeatable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsRepeatable", Operator.IsRepeatable.ToString()));
-				_isNilable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsNilable", Operator.IsNilable.ToString()));
+				IsLiteral = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsLiteral", Operator.IsLiteral.ToString()));
+				IsFunctional = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsFunctional", Operator.IsFunctional.ToString()));
+				IsDeterministic = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsDeterministic", Operator.IsDeterministic.ToString()));
+				IsRepeatable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsRepeatable", Operator.IsRepeatable.ToString()));
+				IsNilable = Convert.ToBoolean(LanguageModifiers.GetModifier(Modifiers, "IsNilable", Operator.IsNilable.ToString()));
 			}
 			else
 			{
-				_isLiteral = Operator.IsLiteral;
-				_isFunctional = Operator.IsFunctional;
-				_isDeterministic = Operator.IsDeterministic;
-				_isRepeatable = Operator.IsRepeatable;
-				_isNilable = Operator.IsNilable;
+				IsLiteral = Operator.IsLiteral;
+				IsFunctional = Operator.IsFunctional;
+				IsDeterministic = Operator.IsDeterministic;
+				IsRepeatable = Operator.IsRepeatable;
+				IsNilable = Operator.IsNilable;
 			}
 
 			// Characteristics of an aggregate operator, unless overridden, are always based on the source node, rather than the
 			// actual operands to the operator.
-			_isLiteral = _isLiteral && Nodes[0].IsLiteral;
-			_isFunctional = _isFunctional && Nodes[0].IsFunctional;
-			_isDeterministic = _isDeterministic && Nodes[0].IsDeterministic;
-			_isRepeatable = _isRepeatable && Nodes[0].IsRepeatable;
-			_isNilable = _isNilable || Nodes[0].IsNilable;
+			IsLiteral = IsLiteral && Nodes[0].IsLiteral;
+			IsFunctional = IsFunctional && Nodes[0].IsFunctional;
+			IsDeterministic = IsDeterministic && Nodes[0].IsDeterministic;
+			IsRepeatable = IsRepeatable && Nodes[0].IsRepeatable;
+			IsNilable = IsNilable || Nodes[0].IsNilable;
 		}
 		
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)

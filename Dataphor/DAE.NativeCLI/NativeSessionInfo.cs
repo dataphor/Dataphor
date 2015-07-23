@@ -18,7 +18,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public const int DefaultFetchCount = 20;
 		public const string DefaultUserName = "Admin";
 		public const int DefaultDefaultMaxStackDepth = 32767;
-		public const int DefaultDefaultMaxCallDepth = 1024;
+		public const int DefaultDefaultMaxCallDepth = 100;
 		
 		public NativeSessionInfo() { }
 		

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Contracts;
+using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -28,6 +29,11 @@ namespace Alphora.Dataphor.DAE.Client
 		private IClientDataphorService GetServiceInterface()
 		{
 			return _clientConnection.ClientServer.GetServiceInterface();
+		}
+
+		private void ReportCommunicationError()
+		{
+			_clientConnection.ClientServer.ReportCommunicationError();
 		}
 		
 		private SessionInfo _sessionInfo;
@@ -58,6 +64,11 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
+			}
 		}
 
 		public void StopProcess(IRemoteServerProcess process)
@@ -72,6 +83,11 @@ namespace Alphora.Dataphor.DAE.Client
 			catch (FaultException<DataphorFault> fault)
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 			}
 		}
 

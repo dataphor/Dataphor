@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{715EB620-77B4-490F-A1BF-4CD857AA7110}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Language.SQL</RootNamespace>
+    <AssemblyName>Language.SQL</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DAEException.cs" />
+    <Compile Include="DebugLocator.cs" />
+    <Compile Include="Language.DB2\Emitter.cs" />
+    <Compile Include="Language.DB2\Keywords.cs" />
+    <Compile Include="Language.MySQL\Emitter.cs" />
+    <Compile Include="Language.MySQL\Language.cs" />
+    <Compile Include="Language.Oracle\Emitter.cs" />
+    <Compile Include="Language.Oracle\Language.cs" />
+    <Compile Include="Language.PGSQL\Emitter.cs" />
+    <Compile Include="Language.PGSQL\Language.cs" />
+    <Compile Include="Language.SQL\Emitter.cs" />
+    <Compile Include="Language.SQL\Keywords.cs" />
+    <Compile Include="Language.SQL\Language.cs" />
+    <Compile Include="Language.TSQL\Emitter.cs" />
+    <Compile Include="Language.TSQL\Language.cs" />
+    <Compile Include="Language\Emitter.cs" />
+    <Compile Include="Language\Keywords.cs" />
+    <Compile Include="Language\Language.cs" />
+    <Compile Include="Language\LanguageException.cs" />
+    <Compile Include="Language\Lexer.cs" />
+    <Compile Include="Language\LexerException.cs" />
+    <Compile Include="Language\Modifiers.cs" />
+    <Compile Include="Language\ParserException.cs" />
+    <Compile Include="Language\SyntaxException.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Language.Oracle\BNF.txt" />
+    <Content Include="Language.SQL\BNF.txt" />
+    <Content Include="Language.SQL\BNFDifferences.txt" />
+    <Content Include="Language.TSQL\BNF.txt" />
+    <Content Include="Language.TSQL\UnsupportedOperators.txt" />
+    <Content Include="Language\BNF.txt" />
+    <Content Include="Language\ManifestoCompliance.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Language\LanguageException.resx">
+      <DependentUpon>LanguageException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Language\LexerException.resx">
+      <DependentUpon>LexerException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Language\ParserException.resx">
+      <DependentUpon>ParserException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Language\SyntaxException.resx">
+      <DependentUpon>SyntaxException.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Base\Base.csproj">
+      <Project>{6ec1f378-510b-48d0-8d00-e36bef214766}</Project>
+      <Name>Base</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Object.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -302,27 +302,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// Constraints
 			Compiler.CompileTableVarConstraints(plan, _tableVar, _constraints);
 
-			foreach (Schema.TableVarConstraint constraint in _tableVar.Constraints)
+			if (_tableVar.HasConstraints())
 			{
-				if (restrictNode == null)
+				foreach (Schema.TableVarConstraint constraint in _tableVar.Constraints)
 				{
-					if (constraint is Schema.RowConstraint)
+					if (restrictNode == null)
 					{
-						restrictNode = ((Schema.RowConstraint)constraint).Node;
-						_isRestrict = true;
+						if (constraint is Schema.RowConstraint)
+						{
+							restrictNode = ((Schema.RowConstraint)constraint).Node;
+							_isRestrict = true;
+						}
 					}
-				}
-				else
-				{
-					if (constraint is Schema.RowConstraint)
+					else
 					{
-						restrictNode = Compiler.EmitBinaryNode(plan, restrictNode, Instructions.And, ((Schema.RowConstraint)constraint).Node);
-						_isRestrict = true;
+						if (constraint is Schema.RowConstraint)
+						{
+							restrictNode = Compiler.EmitBinaryNode(plan, restrictNode, Instructions.And, ((Schema.RowConstraint)constraint).Node);
+							_isRestrict = true;
+						}
 					}
-				}
 				
-				if (constraint.HasDependencies())			
-					plan.AttachDependencies(constraint.Dependencies);
+					if (constraint.HasDependencies())			
+						plan.AttachDependencies(constraint.Dependencies);
+				}
 			}
 				
 			if (_isRestrict)
@@ -372,10 +375,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((Order != null) && !TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 			
-			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceNode.TableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceNode.TableVar.TargetReferences);
-			#endif
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, SourceTableVar);
 			
 			foreach (ReferenceDefinition referenceDefinition in _references)
 			{
@@ -419,16 +420,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (reference.SourceKey.Columns.Count != reference.TargetKey.Columns.Count)
 					throw new CompilerException(CompilerException.Codes.InvalidReferenceColumnCount, referenceDefinition, referenceDefinition.ReferenceName);
 
-				TableVar.SourceReferences.Add(reference);
-				TableVar.DerivedReferences.Add(reference);					
+				TableVar.References.Add(reference);
 			}
 
 			if (!plan.IsEngine)
 				foreach (AlterReferenceDefinition alterReference in _alterReferences)
 				{
-					int referenceIndex = TableVar.DerivedReferences.IndexOf(alterReference.ReferenceName);
+					int referenceIndex = TableVar.References.IndexOf(alterReference.ReferenceName);
 					if (referenceIndex < 0)
-						referenceIndex = TableVar.DerivedReferences.IndexOfOriginatingReference(alterReference.ReferenceName);
+						referenceIndex = TableVar.References.IndexOfOriginatingReference(alterReference.ReferenceName);
 						
 					if 
 					(
@@ -440,11 +440,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						)
 					)
 					{
-						Schema.Reference referenceToAlter;
+						Schema.ReferenceBase referenceToAlter;
 						if (referenceIndex < 0)
-							referenceToAlter = TableVar.DerivedReferences[alterReference.ReferenceName]; // This is just to throw the object not found error
+							referenceToAlter = TableVar.References[alterReference.ReferenceName]; // This is just to throw the object not found error
 						else
-							referenceToAlter = TableVar.DerivedReferences[referenceIndex];
+							referenceToAlter = TableVar.References[referenceIndex];
 						AlterNode.AlterMetaData(referenceToAlter, alterReference.AlterMetaData);
 						Schema.Object originatingReference = Compiler.ResolveCatalogIdentifier(plan, referenceToAlter.OriginatingReferenceName(), false);
 						if (originatingReference != null)
@@ -454,29 +454,49 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			foreach (DropReferenceDefinition dropReference in _dropReferences)
 			{
-				int referenceIndex = TableVar.DerivedReferences.IndexOf(dropReference.ReferenceName);
-				if (referenceIndex >= 0)
-					TableVar.DerivedReferences.RemoveAt(referenceIndex);
+				//if (TableVar.HasDerivedReferences())
+				//{
+				//	int referenceIndex = TableVar.DerivedReferences.IndexOf(dropReference.ReferenceName);
+				//	if (referenceIndex >= 0)
+				//		TableVar.DerivedReferences.RemoveAt(referenceIndex);
 					
-				referenceIndex = TableVar.DerivedReferences.IndexOfOriginatingReference(dropReference.ReferenceName);
-				if (referenceIndex >= 0)
-					TableVar.DerivedReferences.RemoveAt(referenceIndex);
+				//	referenceIndex = TableVar.DerivedReferences.IndexOfOriginatingReference(dropReference.ReferenceName);
+				//	if (referenceIndex >= 0)
+				//		TableVar.DerivedReferences.RemoveAt(referenceIndex);
+				//}
 					
-				referenceIndex = TableVar.SourceReferences.IndexOf(dropReference.ReferenceName);
-				if (referenceIndex >= 0)
-					TableVar.SourceReferences.RemoveAt(referenceIndex);
+				//if (TableVar.HasSourceReferences())
+				//{
+				//	int referenceIndex = TableVar.SourceReferences.IndexOf(dropReference.ReferenceName);
+				//	if (referenceIndex >= 0)
+				//		TableVar.SourceReferences.RemoveAt(referenceIndex);
 
-				referenceIndex = TableVar.SourceReferences.IndexOfOriginatingReference(dropReference.ReferenceName);
-				if (referenceIndex >= 0)
-					TableVar.SourceReferences.RemoveAt(referenceIndex);
+				//	referenceIndex = TableVar.SourceReferences.IndexOfOriginatingReference(dropReference.ReferenceName);
+				//	if (referenceIndex >= 0)
+				//		TableVar.SourceReferences.RemoveAt(referenceIndex);
+				//}
 
-				referenceIndex = TableVar.TargetReferences.IndexOf(dropReference.ReferenceName);
-				if (referenceIndex >= 0)
-					TableVar.TargetReferences.RemoveAt(referenceIndex);
+				//if (TableVar.HasTargetReferences())
+				//{
+				//	int referenceIndex = TableVar.TargetReferences.IndexOf(dropReference.ReferenceName);
+				//	if (referenceIndex >= 0)
+				//		TableVar.TargetReferences.RemoveAt(referenceIndex);
 
-				referenceIndex = TableVar.TargetReferences.IndexOfOriginatingReference(dropReference.ReferenceName);
-				if (referenceIndex >= 0)
-					TableVar.TargetReferences.RemoveAt(referenceIndex);
+				//	referenceIndex = TableVar.TargetReferences.IndexOfOriginatingReference(dropReference.ReferenceName);
+				//	if (referenceIndex >= 0)
+				//		TableVar.TargetReferences.RemoveAt(referenceIndex);
+				//}
+
+				if (TableVar.HasReferences())
+				{
+					int referenceIndex = TableVar.References.IndexOf(dropReference.ReferenceName);
+					if (referenceIndex >= 0)
+						TableVar.References.RemoveAt(referenceIndex);
+
+					referenceIndex = TableVar.References.IndexOfOriginatingReference(dropReference.ReferenceName);
+					if (referenceIndex >= 0)
+						TableVar.References.RemoveAt(referenceIndex);
+				}
 			}
 		}
 		

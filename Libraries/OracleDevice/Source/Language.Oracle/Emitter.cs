@@ -7,8 +7,8 @@ namespace Alphora.Dataphor.DAE.Language.Oracle
 {
 	using System;
 	using System.Text;
-	
 	using Alphora.Dataphor.DAE.Language;
+	using Language.Oracle;
 	using SQL = Alphora.Dataphor.DAE.Language.SQL;
 	
 	public class OracleTextEmitter : SQL.SQLTextEmitter
@@ -121,6 +121,20 @@ namespace Alphora.Dataphor.DAE.Language.Oracle
 				EmitOrderColumnDefinition(statement.Columns[index]);
 			}
 			Append(SQL.Keywords.EndGroup);
+		}
+
+		protected override void EmitAggregateCallExpression(SQL.AggregateCallExpression expression)
+		{
+			base.EmitAggregateCallExpression(expression);
+
+			var ace = expression as OracleAggregateCallExpression;
+			if (ace != null && ace.OrderClause != null)
+			{
+				AppendFormat(" {0} {1}", Keywords.Within, SQL.Keywords.Group);
+				Append(SQL.Keywords.BeginGroup);
+				EmitOrderClause(ace.OrderClause);
+				Append(SQL.Keywords.EndGroup);
+			}
 		}
 	}
 }

@@ -153,7 +153,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 			In the case that this is a nested expression, the inclusion reference is simply the reference that was used to arrive at this expression;
 			otherwise any reference that terminates as a subset of the detail columns is an inclusion reference.
 		*/		
-		protected bool IsInclusionReference(Schema.Reference reference)
+		protected bool IsInclusionReference(Schema.ReferenceBase reference)
 		{
 			if (_parentExpression == null)
 				return
@@ -169,7 +169,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 				return (MainElaboratedTableVar.ElaboratedReference != null) && (MainElaboratedTableVar.ElaboratedReference.Reference.OriginatingReferenceName() == reference.OriginatingReferenceName());
 		}
 				
-		protected virtual bool IsCircularReference(ElaboratedTableVar tableVar, Schema.Reference reference)
+		protected virtual bool IsCircularReference(ElaboratedTableVar tableVar, Schema.ReferenceBase reference)
 		{
 			// A reference is circular if the source tablevar = target tablevar of the atablevar.derivedreference
 			return
@@ -194,7 +194,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 				);
 		}
 		
-		protected virtual bool IsIncludedReference(ElaboratedTableVar tableVar, Schema.Reference reference, ReferenceType referenceType)
+		protected virtual bool IsIncludedReference(ElaboratedTableVar tableVar, Schema.ReferenceBase reference, ReferenceType referenceType)
 		{
 			// A reference is included if all the columns in the reference key are included in the table variable
 			foreach (Schema.TableVarColumn column in ((referenceType == ReferenceType.Parent) || (referenceType == ReferenceType.Lookup)) ? reference.SourceKey.Columns : reference.TargetKey.Columns)
@@ -206,82 +206,85 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		
 		protected bool _treatParentAsLookup = true;
 		
-		protected virtual bool ShouldTreatParentAsLookup(Schema.Reference reference)
+		protected virtual bool ShouldTreatParentAsLookup(Schema.ReferenceBase reference)
 		{
 			return Convert.ToBoolean(DerivationUtility.GetTag(reference.MetaData, "TreatAsLookup", _pageType, ReferenceType.Parent.ToString(), _treatParentAsLookup.ToString()));
 		}
 		
 		protected virtual void BuildParentReferences(ElaboratedTableVar table)
 		{
-			foreach (Schema.Reference reference in table.TableVar.SourceReferences)
-				if (reference.SourceKey.IsUnique && !reference.IsExcluded && _program.Plan.HasRight(reference.TargetTable.GetRight(Schema.RightNames.Select)) && !ShouldTreatParentAsLookup(reference) && !IsInclusionReference(reference) && !IsCircularReference(table, reference) && IsIncludedReference(table, reference, ReferenceType.Parent))
-				{
-					ElaboratedReference elaboratedReference = 
-						new ElaboratedReference
-						(
-							this, 
-							reference, 
-							ReferenceType.Parent, 
-							table, 
-							new ElaboratedTableVar(this, reference.TargetTable, DerivationUtility.View)
-						);
-					table.ElaboratedReferences.Add(elaboratedReference);
-					elaboratedReference.TargetElaboratedTableVar.ElaboratedReference = elaboratedReference;
-					BuildParentReferences(elaboratedReference.TargetElaboratedTableVar);
-				}
+			if (table.TableVar.HasReferences())
+				foreach (Schema.ReferenceBase reference in table.TableVar.References)
+					if (reference.SourceTable.Equals(table.TableVar) && reference.SourceKey.IsUnique && !reference.IsExcluded && _program.Plan.HasRight(reference.TargetTable.GetRight(Schema.RightNames.Select)) && !ShouldTreatParentAsLookup(reference) && !IsInclusionReference(reference) && !IsCircularReference(table, reference) && IsIncludedReference(table, reference, ReferenceType.Parent))
+					{
+						ElaboratedReference elaboratedReference = 
+							new ElaboratedReference
+							(
+								this, 
+								reference, 
+								ReferenceType.Parent, 
+								table, 
+								new ElaboratedTableVar(this, reference.TargetTable, DerivationUtility.View)
+							);
+						table.ElaboratedReferences.Add(elaboratedReference);
+						elaboratedReference.TargetElaboratedTableVar.ElaboratedReference = elaboratedReference;
+						BuildParentReferences(elaboratedReference.TargetElaboratedTableVar);
+					}
 		}
 		
 		protected virtual void BuildExtensionReferences(ElaboratedTableVar table)
 		{
-			foreach (Schema.Reference reference in table.TableVar.TargetReferences)
-				if (reference.SourceKey.IsUnique && !reference.IsExcluded && _program.Plan.HasRight(reference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(reference) && !IsCircularReference(table, reference) && IsIncludedReference(table, reference, ReferenceType.Extension))
-				{
-					ElaboratedReference elaboratedReference =
-						new ElaboratedReference
-						(
-							this,
-							reference,
-							ReferenceType.Extension,
-							new ElaboratedTableVar(this, reference.SourceTable, DerivationUtility.IsReadOnlyPageType(_pageType) ? DerivationUtility.View : DerivationUtility.Edit),
-							table
-						);
-					elaboratedReference.SourceElaboratedTableVar.ElaboratedReference = elaboratedReference;
-					table.ElaboratedReferences.Add(elaboratedReference);
-				}
+			if (table.TableVar.HasReferences())
+				foreach (Schema.ReferenceBase reference in table.TableVar.References)
+					if (reference.TargetTable.Equals(table.TableVar) && reference.SourceKey.IsUnique && !reference.IsExcluded && _program.Plan.HasRight(reference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(reference) && !IsCircularReference(table, reference) && IsIncludedReference(table, reference, ReferenceType.Extension))
+					{
+						ElaboratedReference elaboratedReference =
+							new ElaboratedReference
+							(
+								this,
+								reference,
+								ReferenceType.Extension,
+								new ElaboratedTableVar(this, reference.SourceTable, DerivationUtility.IsReadOnlyPageType(_pageType) ? DerivationUtility.View : DerivationUtility.Edit),
+								table
+							);
+						elaboratedReference.SourceElaboratedTableVar.ElaboratedReference = elaboratedReference;
+						table.ElaboratedReferences.Add(elaboratedReference);
+					}
 		}
 		
 		protected virtual void BuildLookupReferences(Schema.Catalog catalog, ElaboratedTableVar table)
 		{
-			foreach (Schema.Reference reference in table.TableVar.SourceReferences)
-				if ((ShouldTreatParentAsLookup(reference) || !reference.SourceKey.IsUnique) && !reference.IsExcluded && _program.Plan.HasRight(reference.TargetTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(reference) && !IsCircularReference(table, reference) && IsIncludedReference(table, reference, ReferenceType.Lookup))
-				{
-					string elaboratedName = AddTableName(reference.TargetTable.Name);
-					ElaboratedExpression lookupExpression = 
-						new ElaboratedExpression
-						(
-							_program,
-							this, 
-							Convert.ToBoolean(DerivationUtility.GetTag(reference.MetaData, "Elaborate", DerivationUtility.Preview, ReferenceType.Lookup.ToString(), DerivationUtility.GetTag(reference.TargetTable.MetaData, "Elaborate", DerivationUtility.Preview, "False"))),
-							catalog, 
-							reference.TargetTable.Name, 
-							QualifyNames(reference.TargetKey.Columns.ColumnNames, elaboratedName),
-							elaboratedName,
-							DerivationUtility.Preview
-						);
+			if (table.TableVar.HasReferences())
+				foreach (Schema.ReferenceBase reference in table.TableVar.References)
+					if (reference.SourceTable.Equals(table.TableVar) && (ShouldTreatParentAsLookup(reference) || !reference.SourceKey.IsUnique) && !reference.IsExcluded && _program.Plan.HasRight(reference.TargetTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(reference) && !IsCircularReference(table, reference) && IsIncludedReference(table, reference, ReferenceType.Lookup))
+					{
+						string elaboratedName = AddTableName(reference.TargetTable.Name);
+						ElaboratedExpression lookupExpression = 
+							new ElaboratedExpression
+							(
+								_program,
+								this, 
+								Convert.ToBoolean(DerivationUtility.GetTag(reference.MetaData, "Elaborate", DerivationUtility.Preview, ReferenceType.Lookup.ToString(), DerivationUtility.GetTag(reference.TargetTable.MetaData, "Elaborate", DerivationUtility.Preview, "False"))),
+								catalog, 
+								reference.TargetTable.Name, 
+								QualifyNames(reference.TargetKey.Columns.ColumnNames, elaboratedName),
+								elaboratedName,
+								DerivationUtility.Preview
+							);
 
-					ElaboratedReference elaboratedReference =
-						new ElaboratedReference
-						(
-							this,
-							reference,
-							ReferenceType.Lookup,
-							table,
-							lookupExpression.MainElaboratedTableVar
-						);
+						ElaboratedReference elaboratedReference =
+							new ElaboratedReference
+							(
+								this,
+								reference,
+								ReferenceType.Lookup,
+								table,
+								lookupExpression.MainElaboratedTableVar
+							);
 
-					elaboratedReference.TargetElaboratedTableVar.ElaboratedReference = elaboratedReference;
-					table.ElaboratedReferences.Add(elaboratedReference);
-				}
+						elaboratedReference.TargetElaboratedTableVar.ElaboratedReference = elaboratedReference;
+						table.ElaboratedReferences.Add(elaboratedReference);
+					}
 
 			foreach (ElaboratedReference reference in table.ElaboratedReferences)
 				if (reference.ReferenceType == ReferenceType.Parent)
@@ -292,21 +295,22 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		
 		protected virtual void BuildDetailReferences(ElaboratedTableVar table)
 		{
-			foreach (Schema.Reference reference in table.TableVar.TargetReferences)
-				if (!reference.SourceKey.IsUnique && !reference.IsExcluded && _program.Plan.HasRight(reference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(reference) && IsIncludedReference(table, reference, ReferenceType.Detail))
-				{
-					ElaboratedReference elaboratedReference =
-						new ElaboratedReference
-						(
-							this,
-							reference,
-							ReferenceType.Detail,
-							new ElaboratedTableVar(this, reference.SourceTable, DerivationUtility.IsSingularPageType(_pageType) ? (DerivationUtility.IsReadOnlyPageType(_pageType) ? DerivationUtility.List : DerivationUtility.Browse) : _pageType),
-							table
-						);
-					elaboratedReference.SourceElaboratedTableVar.ElaboratedReference = elaboratedReference;
-					table.ElaboratedReferences.Add(elaboratedReference);
-				}
+			if (table.TableVar.HasReferences())
+				foreach (Schema.ReferenceBase reference in table.TableVar.References)
+					if (reference.TargetTable.Equals(table.TableVar) && !reference.SourceKey.IsUnique && !reference.IsExcluded && _program.Plan.HasRight(reference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(reference) && IsIncludedReference(table, reference, ReferenceType.Detail))
+					{
+						ElaboratedReference elaboratedReference =
+							new ElaboratedReference
+							(
+								this,
+								reference,
+								ReferenceType.Detail,
+								new ElaboratedTableVar(this, reference.SourceTable, DerivationUtility.IsSingularPageType(_pageType) ? (DerivationUtility.IsReadOnlyPageType(_pageType) ? DerivationUtility.List : DerivationUtility.Browse) : _pageType),
+								table
+							);
+						elaboratedReference.SourceElaboratedTableVar.ElaboratedReference = elaboratedReference;
+						table.ElaboratedReferences.Add(elaboratedReference);
+					}
 			
 			foreach (ElaboratedReference reference in table.ElaboratedReferences)
 				if (reference.ReferenceType == ReferenceType.Parent)
@@ -785,10 +789,10 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 				reference.Columns.Add(localColumn);
 		} 
 		
-		protected void ProcessKey(ElaboratedReference reference, Schema.Key key)
+		protected void ProcessKey(ElaboratedReference reference, Schema.TableVarColumnsBase columns)
 		{
 			foreach (ElaboratedTableVarColumn referenceColumn in reference.Columns)
-				if (key.Columns.Contains(referenceColumn.Column.Name))
+				if (columns.Contains(referenceColumn.Column.Name))
 				{
 					referenceColumn.IsMaster = true;
 					referenceColumn.Visible = false;
@@ -959,7 +963,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 						reference.IsDetailLookup = true;
 
 						// set the key lookup reference columns invisible
-						ProcessKey(reference, subsetKey);
+						ProcessKey(reference, subsetKey.Columns);
 					}
 					
 					foreach (Schema.Key key in TableVar.Keys)
@@ -970,13 +974,13 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 							reference.IsDetailLookup = true;
 							
 							// set the key lookup reference columns invisible
-							ProcessKey(reference, key);
+							ProcessKey(reference, key.Columns);
 						}
 					
 					// For every reference that is included in the current reference, mark the columns of that reference as master
 					foreach (ElaboratedReference otherReference in ElaboratedReferences)	
 						if (otherReference.IsEmbedded && (otherReference.ReferenceType == ReferenceType.Lookup) && !Object.ReferenceEquals(reference, otherReference) && reference.Reference.SourceKey.Columns.IsProperSupersetOf(otherReference.Reference.SourceKey.Columns))
-							ProcessKey(reference, otherReference.Reference.SourceKey);
+							ProcessKey(reference, otherReference.Reference.SourceKey.Columns);
 							
 					// If this is an extension table and the intersection of the extension reference and the current reference is non-empty
 					if 
@@ -997,7 +1001,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 									
 								// Mark the columns of the included reference master
 								if (reference.Reference.SourceKey.Columns.IsProperSupersetOf(key.Columns))
-									ProcessKey(reference, key);
+									ProcessKey(reference, key.Columns);
 							}
 					}
 					
@@ -1341,7 +1345,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		public ElaboratedReference
 		(
 			ElaboratedExpression expression, 
-			Schema.Reference reference, 
+			Schema.ReferenceBase reference, 
 			ReferenceType referenceType, 
 			ElaboratedTableVar sourceTable, 
 			ElaboratedTableVar targetTable
@@ -1461,8 +1465,8 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		public ElaboratedExpression ElaboratedExpression { get { return _elaboratedExpression; } }
 		
 		// Reference
-		protected Schema.Reference _reference;
-		public Schema.Reference Reference { get { return _reference; } }
+		protected Schema.ReferenceBase _reference;
+		public Schema.ReferenceBase Reference { get { return _reference; } }
 
 		// Columns		
 		protected ElaboratedTableVarColumns _columns = new ElaboratedTableVarColumns();

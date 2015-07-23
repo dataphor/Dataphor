@@ -1,0 +1,29 @@
+/*
+Sample Library demonstrating the use of .NET Framework dependencies within a ScriptAction.
+
+The BCLAccess form contains a script action with a snippet that deserializes a Json string into a defined
+class using the DataContractJsonSerializer.
+
+The code snippet uses the System.Runtime.Serialization.Json namespace, contained in the System.Runtime.Serialization
+assembly which is not a typical dependency of the Frontend nodes. To declare this dependency, the library
+registers the Windows.NodeTypes file, declaring the System.Runtime.Serialization.Json namespace and the DataContractJsonSerializer
+class within it.
+
+In addition, because the serializer uses System.Xml.XmlReader, the assembly must be declared as a reference in order
+for the snippet to compile, so this class is declared as an entry in the node types table for the library as well.
+
+With these node type registrations in place, the script compiles and executes successfully.
+
+Note that it still will not work within a designer session because the designer host does not automatically load
+the windows node types files for the libraries. The Sample.ScriptAction library would have to be added to the
+Form Designer libraries for Dataphoria in order for the script to compile in a design-time session.
+
+*/
+
+insert
+	row { System.Name("BCLAccess") ID, "BCLAccess" Description, ".Frontend.Form('Sample.ScriptAction', 'BCLAccess')" StartDocument }
+	into Applications;
+
+insert
+	row { System.Name("BCLAccess") Application_ID, System.Name("Sample.ScriptAction") Library_Name }
+	into ApplicationLibraries;

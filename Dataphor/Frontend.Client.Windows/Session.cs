@@ -674,7 +674,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return (IWindowsFormInterface)base.LoadForm(node, document, beforeActivate);
 		}
 
-		/// <remarks> If this event is set, then the default behavior will not be invoked. </remarks>
 		public event DeserializationErrorsHandler OnDeserializationErrors;
 
 		private bool HasErrors(ErrorList errorList)
@@ -697,26 +696,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			if (OnDeserializationErrors != null)
 				OnDeserializationErrors(host, errorList);
-			else
+
+			if ((host != null) && (host.Children.Count > 0))
 			{
-				if ((host != null) && (host.Children.Count > 0))
+				IFormInterface formInterface = host.Children[0] as IFormInterface;
+				if (formInterface == null)
+					formInterface = (IFormInterface)host.Children[0].FindParent(typeof(IFormInterface));
+
+				if (formInterface != null)
 				{
-					IFormInterface formInterface = host.Children[0] as IFormInterface;
-					if (formInterface == null)
-						formInterface = (IFormInterface)host.Children[0].FindParent(typeof(IFormInterface));
-
-					if (formInterface != null)
-					{
-						formInterface.EmbedErrors(errorList);
-						return;
-					}
+					formInterface.EmbedErrors(errorList);
+					return;
 				}
-
-				#if (DEBUG)
-				if (HasErrors(errorList))
-					ErrorListForm.ShowErrorList(errorList, true);
-				#endif
 			}
+
+			#if (DEBUG)
+			if (HasErrors(errorList))
+				ErrorListForm.ShowErrorList(errorList, true);
+			#endif
 		}
 
 		protected override void InitializePipe()

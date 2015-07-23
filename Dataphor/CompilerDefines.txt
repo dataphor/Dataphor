@@ -1,3 +1,5 @@
+#define ALTERNATIVEOPERATORPRECEDENCE in Parser.cs // Indicates whether operator precedence is original or new (not and exists after comparison, in, like, matches, between, is, and as before comparison)
+#define ALLOWARBITRARYAGGREGATEEXPRESSIONS in Parser.cs and D4\Language.cs // Indicates whether or not to allow arbitrary expressions in the by and compute clauses of an aggregate expression
 //#define CHECKCLASSDEPENDENCY in Alphora.Dataphor.DAE (currently disabled) // Indicates whether or not class dependencies will be checked
 #define DATAVIEWBOOKMARKS in Alphora.Dataphor.DAE.Client to enable the bookmark capabilities of the DataView
 //#define DISALLOWAMBIGUOUSNAMES in Alphora.Dataphor.DAE (currently disabled) // To prevent the compiler from allowing ambiguous names to be defined

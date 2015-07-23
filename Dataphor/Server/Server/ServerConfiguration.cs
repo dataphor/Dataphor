@@ -69,6 +69,14 @@ namespace Alphora.Dataphor.DAE.Server
 			get { return _requireSecureListenerConnection; }
 			set { _requireSecureListenerConnection = value; }
 		}
+
+		private bool _useServiceConfiguration;
+		[DefaultValue(false)]
+		public bool UseServiceConfiguration
+		{
+			get { return _useServiceConfiguration; }
+			set { _useServiceConfiguration = value; }
+		}
 		
 		private bool _allowSilverlightClients = true;
 		[DefaultValue(true)]

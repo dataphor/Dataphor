@@ -1,137 +1,204 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
   <!-- Set Version based on build_number env. variable. -->
-  
+
   <Product Id="*"
 		Name="Dataphor"
 		Language="1033"
-		Version="3.0.0000"
-		UpgradeCode="B08DF609-D4F8-48CF-9620-A7F65D080EAB"
-		Manufacturer="Alphora">
-		
-		<Package Description="Alphora Dataphor"
-			Comments="Installs Dataphor"
-			InstallerVersion="200"
-			Compressed="yes"/>
+		Version="3.0.5534"
+    UpgradeCode="B08DF609-D4F8-48CF-9620-A7F65D080EAB"
+    Manufacturer="Alphora">
 
-		<!-- Source media for the installation. Specifies a single cab file to be embedded in the installer's .msi. -->
-		<Media Id="1" Cabinet="disk1.cab" EmbedCab="yes" CompressionLevel="high"/>
-		
-		<!-- Installation directory and files are defined in Files.wxs -->
-		<Directory Id="TARGETDIR" Name="SourceDir"/>
+
+    <Package Description="Alphora Dataphor"
+			Comments="Installs Dataphor"
+			InstallerVersion="300"
+			Compressed="yes"
+      InstallScope="perMachine"/>
+
+    <!-- Source media for the installation. Specifies a single cab file to be embedded in the installer's .msi. -->
+    <Media Id="1" Cabinet="disk1.cab" EmbedCab="yes" CompressionLevel="high"/>
+
+    <!-- Installation directory and files are defined in Files.wxs -->
+    <Directory Id="TARGETDIR" Name="SourceDir"/>
     <CustomAction Id="SET_SHORTCUTDIR" Property="SHORTCUTDIR" Value="[ProgramMenuFolder][Manufacturer] [ProductName]" Execute="firstSequence" />
-    
-    
+
+
     <!-- Features -->
-    
+
     <Feature
       Id="DataphorCore"
       Title="Dataphor Core"
       Description="The Main Dataphor Feature"
       Display="expand"
       Level="1">
-
+      
+      <ComponentRef Id="ConstantShortcuts"/>
       <ComponentRef Id="BinFiles"/>
       <ComponentGroupRef Id="BinFilesGroup"/>
       <ComponentGroupRef Id="LibraryFilesGroup"/>
-            
+
       <Feature
-        Id="DataphoreDocumentation"
-        Title="Dataphore Documentation"
-        Description="Dataphore Documentation in CHM and PDF Formats"
+        Id="DataphorDocumentation"
+        Title="Dataphor Documentation"
+        Description="Dataphor Documentation in CHM and PDF Formats"
         Level="1">
-        
+
         <ComponentRef Id="DocumentationFiles"/>
-        
+
+        <!--Shortcut ref-->
+
+        <ComponentRef Id="ApplicationShortcut"/>
+
       </Feature>
 
       <Feature
         Id="WebClient"
-        Title="Web Client"
-        Description="Dataphor Web Client Application (Installs as an IIS application)"
+        Title="Dataphor Web Client"
+        Description="Dataphor Web Client Application Files (Does not install the actual site, just the files)"
         Display="expand"
         Level="1">
-        
+
         <ComponentRef Id="WebClientFiles"/>
         <ComponentGroupRef Id="WebClientFilesGroup"/>
-
-        <Feature
-          Id="WebClientService"
-          Title="Web Client Service"
-          Description="Set Web Client Service to Automatic at System Startup"
-          Display="expand"
-          Level="1">
-
-          <ComponentRef Id="WebClientService"/>
-          
-
-        </Feature>
-
-      </Feature>
-
-      <Feature
-        Id="WebRegistration"
-        Title="Online Registration"
-        Description="Allows user to register online"
-        Display="expand"
-        Level="1">
-        
       </Feature>
 
     </Feature>
-    
 
-		<UIRef Id="WixUI_Common" />
 
-    <!--<Control Id="START_SERVICE_BOX" Type="CheckBox" X="20" Y="148" Width="80" Height="10" Property="START_SERVICE" CheckBoxValue="#1" Text="Start Alphora Service"></Control>-->
+    <UIRef Id="WixUI_Common" />
+
 
 
     <UI>
-			<Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
-			<TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
-			<TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
-			<TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
-			
-			<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
-			<Property Id="PIDTemplate" Value="####-####-####-####" />
-			<Property Id="ARPNOMODIFY" Value="1" />
-      <!--<Property Id="START_SERVICE" Value="1" />-->
 
-      
-			<DialogRef Id="BrowseDlg" />
-			<DialogRef Id="DiskCostDlg" />
-			<DialogRef Id="ErrorDlg" />
-			<DialogRef Id="FatalError" />
-			<DialogRef Id="FilesInUse" />
-			<DialogRef Id="MsiRMFilesInUse" />
-			<DialogRef Id="PrepareDlg" />
-			<DialogRef Id="ProgressDlg" />
-			<DialogRef Id="ResumeDlg" />
-			<DialogRef Id="UserExit" />
-			
-			<Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
-			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">1</Publish>
-			
-			<Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
-			<Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
-			<Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="FeaturesDlg" Order="2">1</Publish>
-      <!--<Publish Dialog="InstallDirDlg" Control="START_SERVICE_BOX" Event="NewDialog" Value="FeaturesDlg" Order="2">1</Publish>-->
-      
+      <!--<Dialog Id="WelcomeDlg2" Width="370" Height="270" Title="!(loc.WelcomeDlg_Title)">
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="Forward" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+        <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="!(loc.WelcomeDlgBitmap)" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Disabled="yes" Text="!(loc.WixUIBack)" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Description" Type="Text" X="135" Y="80" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.WelcomeDlgDescription)" />
+        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.WelcomeDlgTitle)" />
+
+      </Dialog>-->
+
+      <Dialog Id="FeaturesDlg2" Width="370" Height="270" Title="!(loc.FeaturesDlg_Title)" TrackDiskSpace="yes">
+        <Control Id="Tree" Type="SelectionTree" X="20" Y="55" Width="330" Height="121" Property="_BrowseProperty" TabSkip="no" Text="!(loc.FeaturesDlgTree)" />
+        <Control Id="Back" Type="PushButton" X="156" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+        <Control Id="Install" Type="PushButton" ElevationShield="yes" X="212" Y="243" Width="80" Height="17" Hidden="yes" Text="!(loc.FeaturesDlgInstall)">
+          <Condition Action="show">NOT Installed AND ALLUSERS</Condition>
+          <Condition Action="default">NOT Installed</Condition>
+          <Publish Event="SpawnWaitDialog" Value="WaitForCostingDlg">!(wix.WixUICostingPopupOptOut) OR CostingComplete = 1</Publish>
+          <Publish Event="EndDialog" Value="Return"><![CDATA[OutOfDiskSpace <> 1]]></Publish>
+          <Publish Event="SpawnDialog" Value="OutOfRbDiskDlg">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND (PROMPTROLLBACKCOST="P" OR NOT PROMPTROLLBACKCOST)</Publish>
+          <Publish Event="EndDialog" Value="Return">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND PROMPTROLLBACKCOST="D"</Publish>
+          <Publish Event="EnableRollback" Value="False">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND PROMPTROLLBACKCOST="D"</Publish>
+          <Publish Event="SpawnDialog" Value="OutOfDiskDlg">(OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 1) OR (OutOfDiskSpace = 1 AND PROMPTROLLBACKCOST="F")</Publish>
+        </Control>
+        <Control Id="InstallNoShield" Type="PushButton" ElevationShield="no" X="212" Y="243" Width="80" Height="17" Hidden="yes" Text="!(loc.FeaturesDlgInstall)">
+          <Condition Action="show">NOT Installed AND NOT ALLUSERS</Condition>
+          <Condition Action="default">NOT Installed</Condition>
+          <Publish Event="SpawnWaitDialog" Value="WaitForCostingDlg">!(wix.WixUICostingPopupOptOut) OR CostingComplete = 1</Publish>
+          <Publish Event="EndDialog" Value="Return"><![CDATA[OutOfDiskSpace <> 1]]></Publish>
+          <Publish Event="SpawnDialog" Value="OutOfRbDiskDlg">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND (PROMPTROLLBACKCOST="P" OR NOT PROMPTROLLBACKCOST)</Publish>
+          <Publish Event="EndDialog" Value="Return">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND PROMPTROLLBACKCOST="D"</Publish>
+          <Publish Event="EnableRollback" Value="False">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND PROMPTROLLBACKCOST="D"</Publish>
+          <Publish Event="SpawnDialog" Value="OutOfDiskDlg">(OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 1) OR (OutOfDiskSpace = 1 AND PROMPTROLLBACKCOST="F")</Publish>
+        </Control>
+        <Control Id="Change" Type="PushButton" ElevationShield="yes" X="212" Y="243" Width="80" Height="17" Hidden="yes" Text="!(loc.FeaturesDlgChange)">
+          <Condition Action="show">Installed AND ALLUSERS AND (ADDLOCAL OR REMOVE)</Condition>
+          <Condition Action="default">Installed</Condition>
+          <Publish Event="EndDialog" Value="Return"><![CDATA[OutOfDiskSpace <> 1]]></Publish>
+          <Publish Event="SpawnDialog" Value="OutOfRbDiskDlg">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND (PROMPTROLLBACKCOST="P" OR NOT PROMPTROLLBACKCOST)</Publish>
+          <Publish Event="EndDialog" Value="Return">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND PROMPTROLLBACKCOST="D"</Publish>
+          <Publish Event="EnableRollback" Value="False">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND PROMPTROLLBACKCOST="D"</Publish>
+          <Publish Event="SpawnDialog" Value="OutOfDiskDlg">(OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 1) OR (OutOfDiskSpace = 1 AND PROMPTROLLBACKCOST="F")</Publish>
+        </Control>
+        <Control Id="ChangeNoShield" Type="PushButton" ElevationShield="no" X="212" Y="243" Width="80" Height="17" Hidden="yes" Text="!(loc.FeaturesDlgChange)">
+          <Condition Action="show">Installed AND (NOT ALLUSERS OR (NOT ADDLOCAL AND NOT REMOVE))</Condition>
+          <Condition Action="default">Installed</Condition>
+          <Publish Event="EndDialog" Value="Return"><![CDATA[OutOfDiskSpace <> 1]]></Publish>
+          <Publish Event="SpawnDialog" Value="OutOfRbDiskDlg">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND (PROMPTROLLBACKCOST="P" OR NOT PROMPTROLLBACKCOST)</Publish>
+          <Publish Event="EndDialog" Value="Return">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND PROMPTROLLBACKCOST="D"</Publish>
+          <Publish Event="EnableRollback" Value="False">OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 0 AND PROMPTROLLBACKCOST="D"</Publish>
+          <Publish Event="SpawnDialog" Value="OutOfDiskDlg">(OutOfDiskSpace = 1 AND OutOfNoRbDiskSpace = 1) OR (OutOfDiskSpace = 1 AND PROMPTROLLBACKCOST="F")</Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.FeaturesDlgBannerBitmap)" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.FeaturesDlgDescription)" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="210" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.FeaturesDlgTitle)" />
+        <Control Id="ItemDescription" Type="Text" X="20" Y="180" Width="330" Height="24" Transparent="yes" NoPrefix="yes" Text="!(loc.FeaturesDlgItemDescription)">
+          <Subscribe Event="SelectionDescription" Attribute="Text" />
+        </Control>
+        <Control Id="ItemSize" Type="Text" X="20" Y="209" Width="330" Height="24" Transparent="yes" NoPrefix="yes" Text="!(loc.FeaturesDlgItemSize)">
+          <Subscribe Event="SelectionSize" Attribute="Text" />
+        </Control>
+      </Dialog>
+
+
+
+
+
+
+      <!--<InstallUISequence>
+        <Show Dialog="WelcomeDlg2" Before="ProgressDlg">NOT Installed</Show>
+      </InstallUISequence>-->
+
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+
+      <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+      <Property Id="PIDTemplate" Value="####-####-####-####" />
+      <Property Id="ARPNOMODIFY" Value="1" />
+
+
+      <DialogRef Id="BrowseDlg" />
+      <DialogRef Id="DiskCostDlg" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="UserExit" />
+
+
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">1</Publish>
+      <!--<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="WelcomeDlg2">1</Publish>
+      <Publish Dialog="WelcomeDlg2" Control="Next" Event="NewDialog" Value="InstallDirDlg">1</Publish>-->
+
+
+
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="FeaturesDlg2" Order="2">1</Publish>
+
       <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
-			<Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
-			
-			<Publish Dialog="FeaturesDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="1">1</Publish>
-			<!-- Publish Dialog="FeaturesDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="1">1</Publish-->
+      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
 
-			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="FeaturesDlg" Order="1">NOT Installed</Publish>
-			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed</Publish>
-			
-			<Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+      <Publish Dialog="FeaturesDlg2" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="1">1</Publish>
+      <!--<Publish Dialog="FeaturesDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="1">1</Publish>-->
 
-			<Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-			<Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-			<Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
-		</UI>
-	</Product>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="FeaturesDlg2" Order="1">NOT Installed</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed</Publish>
+
+      <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+
+      <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+    </UI>
+  </Product>
 </Wix>

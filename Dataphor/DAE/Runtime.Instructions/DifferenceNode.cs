@@ -75,8 +75,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Order = CopyOrder(LeftNode.Order);
 
 			#if UseReferenceDerivation
-			CopySourceReferences(plan, LeftTableVar.SourceReferences);
-			CopyTargetReferences(plan, LeftTableVar.TargetReferences);
+			CopyReferences(plan, LeftTableVar);
 			#endif
 			
 			#if UseScannedDifference
@@ -144,7 +143,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineAccessPath(Plan plan)
 		{
 			base.DetermineAccessPath(plan);
-			if (!_deviceSupported)
+			if (!DeviceSupported)
 			{
 				_differenceAlgorithm = typeof(SearchedDifferenceTable);
 				// ensure that the right side is a searchable node

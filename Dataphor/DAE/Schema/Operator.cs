@@ -560,6 +560,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 
 			result.MetaData = MetaData == null ? null : MetaData.Copy();
+
 			if (SessionObjectName != null)
 			{
 				if (result.MetaData == null)

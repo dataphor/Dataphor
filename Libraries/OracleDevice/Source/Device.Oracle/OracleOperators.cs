@@ -13,6 +13,7 @@ using Alphora.Dataphor.DAE.Language.SQL;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Schema;
 using SelectExpression=Alphora.Dataphor.DAE.Language.Oracle.SelectExpression;
+using SelectStatement=Alphora.Dataphor.DAE.Language.SQL.SelectStatement;
 
 namespace Alphora.Dataphor.DAE.Device.Oracle
 {
@@ -2074,4 +2075,41 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                     );
         }
     }
+
+	public class OracleAggregateOperator : SQLAggregateOperator
+	{
+		public OracleAggregateOperator(int iD, string name) : base(iD, name) {}
+
+		protected override AggregateCallExpression CreateAggregateCallExpression(SQLDevicePlan devicePlan, PlanNode planNode)
+		{
+			OracleAggregateCallExpression expression = new OracleAggregateCallExpression();
+			expression.Identifier = OperatorName;
+			return expression;
+		}
+
+		protected override AggregateCallExpression TranslateOrderDependentAggregateCallExpression(SQLDevicePlan devicePlan, PlanNode planNode, AggregateCallExpression expression)
+		{
+			expression = base.TranslateOrderDependentAggregateCallExpression(devicePlan, planNode, expression);
+			AggregateCallNode node = (AggregateCallNode)planNode;
+			TableVar sourceTableVar = ((TableNode)node.Nodes[0]).TableVar;
+			OracleAggregateCallExpression ace = expression as OracleAggregateCallExpression;
+			if (ace != null && node.Operator.IsOrderDependent)
+			{
+				OrderNode sourceNode = node.SourceNode as OrderNode;
+				if (sourceNode == null)
+				{
+					devicePlan.IsSupported = false;
+					devicePlan.TranslationMessages.Add(new TranslationMessage(String.Format("Aggregate operator {0} is not supported by this device because the operator is order dependent and the argument is not ordered.", node.Operator.Name, node)));
+				}
+				else
+				{
+					SelectStatement selectStatement = new SelectStatement();
+					selectStatement = devicePlan.Device.TranslateOrder(devicePlan, sourceNode, selectStatement);
+					ace.OrderClause = selectStatement.OrderClause;
+				}
+			}
+
+			return expression;
+		}
+	}
 }

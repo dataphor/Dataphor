@@ -65,10 +65,45 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <summary> PlanNode </summary>	
 	public abstract class PlanNode : System.Object
 	{
+		public const ushort IsLiteralFlag = 0x0001;
+		public const ushort NotIsLiteralFlag = 0xFFFE;
+		public const ushort IsFunctionalFlag = 0x0002;
+		public const ushort NotIsFunctionalFlag = 0xFFFD;
+		public const ushort IsDeterministicFlag = 0x0004;
+		public const ushort NotIsDeterministicFlag = 0xFFFB;
+		public const ushort IsRepeatableFlag = 0x0008;
+		public const ushort NotIsRepeatableFlag = 0xFFF7;
+		public const ushort IsNilableFlag = 0x0010;
+		public const ushort NotIsNilableFlag = 0xFFEF;
+		public const ushort IsOrderPreservingFlag = 0x0020;
+		public const ushort NotIsOrderPreservingFlag = 0xFFDF;
+		public const ushort NoDeviceFlag = 0x0040;
+		public const ushort NotNoDeviceFlag = 0xFFBF;
+		public const ushort DeviceSupportedFlag = 0x0080;
+		public const ushort NotDeviceSupportedFlag = 0xFF7F;
+		public const ushort IgnoreUnsupportedFlag = 0x0100;
+		public const ushort NotIgnoreUnsupportedFlag = 0xFEFF;
+		public const ushort CouldSupportFlag = 0x0200;
+		public const ushort NotCouldSupportFlag = 0xFDFF;
+		public const ushort ShouldSupportFlag = 0x0400;
+		public const ushort NotShouldSupportFlag = 0xFBFF;
+		public const ushort IsBreakableFlag = 0x0800;
+		public const ushort NotIsBreakableFlag = 0xF7FF;
+
+		public const ushort ModifySupportedFlag = 0x1000;
+		public const ushort NotModifySupportedFlag = 0xEFFF;
+		public const ushort ShouldSupportModifyFlag = 0x2000;
+		public const ushort NotShouldSupportModifyFlag = 0xDFFF;
+		public const ushort ShouldCheckConcurrencyFlag = 0x4000;
+		public const ushort NotShouldCheckConcurrencyFlag = 0xBFFF;
+
 		public PlanNode() : base()
 		{
 			SurrogateExecute = InternalExecute;
  		}
+
+		// Use a ushort because an enum will be an integer
+		protected ushort _characteristics = IsLiteralFlag | IsFunctionalFlag | IsDeterministicFlag | IsRepeatableFlag | ShouldSupportFlag | ShouldSupportModifyFlag;
 		
         // Nodes
         private PlanNodes _nodes;
@@ -87,43 +122,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         #region Characteristics
 
         // IsLiteral
-        protected bool _isLiteral = true;
         public bool IsLiteral
         {
-			get { return _isLiteral; }
-			set { _isLiteral = value; }
+			get { return (_characteristics & IsLiteralFlag) == IsLiteralFlag; }
+			// NOTE: Using if rather than ternary formulation because the assignment operators perform better in release, the accessor seems to be in-lined anyway, so the cast that
+			// would be required with the ternary operator performs worse. Note also that performance using bitwise storage under release is comparable to a dedicated boolean field.
+			set { if (value) _characteristics |= IsLiteralFlag; else _characteristics &= NotIsLiteralFlag; }
         }
         
         // IsFunctional
-        protected bool _isFunctional = true;
         public bool IsFunctional
         {
-			get { return _isFunctional; }
-			set { _isFunctional = value; }
+			get { return (_characteristics & IsFunctionalFlag) == IsFunctionalFlag; }
+			set { if (value) _characteristics |= IsFunctionalFlag; else _characteristics &= NotIsFunctionalFlag; }
         }
         
         // IsDeterministic
-        protected bool _isDeterministic = true;
         public bool IsDeterministic
         {
-			get { return _isDeterministic; }
-			set { _isDeterministic = value; }
+			get { return (_characteristics & IsDeterministicFlag) == IsDeterministicFlag; }
+			set { if (value) _characteristics |= IsDeterministicFlag; else _characteristics &= NotIsDeterministicFlag; }
         }
         
         // IsRepeatable
-        protected bool _isRepeatable = true;
         public bool IsRepeatable
         {
-			get { return _isRepeatable; }
-			set { _isRepeatable = value; }
+			get { return (_characteristics & IsRepeatableFlag) == IsRepeatableFlag; }
+			set { if (value) _characteristics |= IsRepeatableFlag; else _characteristics &= NotIsRepeatableFlag; }
         }
 
         // IsNilable
-        protected bool _isNilable = false;
         public bool IsNilable
         {
-			get { return _isNilable; }
-			set { _isNilable = value; }
+			get { return (_characteristics & IsNilableFlag) == IsNilableFlag; }
+			set { if (value) _characteristics |= IsNilableFlag; else _characteristics &= NotIsNilableFlag; }
 		}
         
 		public static string CharacteristicsToString(PlanNode node)
@@ -138,11 +170,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 
 		// IsOrderPreserving (see the sargability discussion in RestrictNode.cs for a description of this characteristic)
-		protected bool _isOrderPreserving = false;
 		public bool IsOrderPreserving
 		{
-			get { return _isOrderPreserving; }
-			set { _isOrderPreserving = value; }
+			get { return (_characteristics & IsOrderPreservingFlag) != 0; }
+			set { if (value) _characteristics |= IsOrderPreservingFlag; else _characteristics &= NotIsOrderPreservingFlag; }
 		}
 		
 		// IsContextLiteral (see the sargability discussion in RestrictNode.cs for a description of this characteristic)
@@ -233,19 +264,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
         
         // NoDevice
-        protected bool _noDevice;
         public bool NoDevice
         {
-			get { return _noDevice; }
-			set { _noDevice = value; }
+			get { return (_characteristics & NoDeviceFlag) == NoDeviceFlag; }
+			set { if (value) _characteristics |= NoDeviceFlag; else _characteristics &= NotNoDeviceFlag; }
         }
         
         // DeviceSupported
-        protected bool _deviceSupported;
         public bool DeviceSupported
         {
-			get { return _deviceSupported; }
-			set { _deviceSupported = value; }
+			get { return (_characteristics & DeviceSupportedFlag) == DeviceSupportedFlag; }
+			set { if (value) _characteristics |= DeviceSupportedFlag; else _characteristics &= NotDeviceSupportedFlag; }
         }
         
 		private bool _couldSupport = false;
@@ -261,6 +290,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         // Will be null if this node has not been prepared, so test all access to this reference.
         protected Schema.TranslationMessages _deviceMessages;
         public Schema.TranslationMessages DeviceMessages { get { return _deviceMessages; } }
+        
+		public void ClearDeviceSubNodes()
+		{
+			if (_nodes != null)
+			{
+				for (int index = 0; index < _nodes.Count; index++)
+				{
+					_nodes[index].ClearDeviceNode();
+				}
+			}
+		}
+
+		public virtual void ClearDeviceNode()
+		{
+			this._deviceNode = null;
+			this._deviceMessages = null;
+		}
+
+		// DetermineDevice
+		public virtual void DetermineDevice(Plan plan)
 
 		// DeterminePotentialDevice
 		public virtual void DeterminePotentialDevice(Plan plan)
@@ -271,9 +320,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			//		this node uses the same potential device as its children
 			Schema.Device childDevice = null;
 			Schema.Device currentChildDevice = null;
-			_noDevice = !ShouldSupport;
+            NoDevice = !ShouldSupport;
 
 			if (_nodes != null)
+				for (int index = 0; index < _nodes.Count; index++)
 			{
 				for (int index = 0; index < _nodes.Count; index++)
 				{
@@ -291,7 +341,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							else if (currentChildDevice != childDevice)
 							{
-								_noDevice = true;
+								NoDevice = true;
 								break;
 							}
 						}
@@ -299,7 +349,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 
-			if (!_noDevice)
+            if (!NoDevice)
 			{
 				_potentialDevice = currentChildDevice;
 			}
@@ -344,7 +394,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// If the plan could be supported via parameterization, it is not actually supported by the device
 						// and setting the device supported to false ensures that if this node is actually executed, the
 						// device will not be asked to perform a useless parameterization.
-						_deviceSupported = !_couldSupport;
+						DeviceSupported = !CouldSupport;
+
+						// Remove device plan nodes from prepared sub nodes to reduce memory usage of prepared plans
+						ClearDeviceSubNodes();
 					}
 					else
 					{
@@ -353,13 +406,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							if ((devicePlan != null) && !plan.SuppressWarnings)
 								plan.Messages.Add(new CompilerException(CompilerException.Codes.UnsupportedPlan, CompilerErrorLevel.Warning, _device.Name, SafeEmitStatementAsString(), devicePlan.TranslationMessages.ToString()));
 						}
-						_deviceSupported = false;
-						_noDevice = true;
+						DeviceSupported = false;
+						NoDevice = true;
 					}
 				}
 				else
 				{
-					_deviceSupported = false;
+					DeviceSupported = false;
 					// BTR 4/28/2005 ->
 					// Not sure why this is here, but it is preventing the translation of several otherwise translatable items.
 					// I will turn it off and see what happens.
@@ -368,168 +421,70 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 			else
-				_deviceSupported = false;
-
-			if (_deviceSupported)
+				DeviceSupported = false;
+		}
+		
+		// IgnoreUnsupported -- only applies if DataType is not null
+		public bool IgnoreUnsupported
 			{
-				SurrogateExecute = InternalDeviceExecute;
+			get { return (_characteristics & IgnoreUnsupportedFlag) == IgnoreUnsupportedFlag; }
+			set { if (value) _characteristics |= IgnoreUnsupportedFlag; else _characteristics &= NotIgnoreUnsupportedFlag; }
 			}
-		}
-
-		public virtual void SetDevice(Plan plan, Schema.Device device)
+		
+		/// <summary>Set by the device to indicate that the node could be supported if necessary, but only by parameterization.</summary>
+		public bool CouldSupport
 		{
-            _device = device;
-            //_deviceSupported = true;
-            //SurrogateExecute = InternalDeviceExecute;
+			get { return (_characteristics & CouldSupportFlag) == CouldSupportFlag; }
+			set { if (value) _characteristics |= CouldSupportFlag; else _characteristics &= NotCouldSupportFlag; }
 		}
-
-		// Base implementation does nothing, descendents override this to determine
-		// execution algorithms when the node is not device supported
-		public virtual void DetermineAccessPath(Plan plan)
+		
+		public bool ShouldSupport
 		{
+			get { return (_characteristics & ShouldSupportFlag) == ShouldSupportFlag; }
+			set { if (value) _characteristics |= ShouldSupportFlag; else _characteristics &= NotShouldSupportFlag; }
+		}
+		
+		public bool IsBreakable
+		{
+			get { return (_characteristics & IsBreakableFlag) == IsBreakableFlag; }
+			set { if (value) _characteristics |= IsBreakableFlag; else _characteristics &= NotIsBreakableFlag; }
+		}
+		
+		private LineInfo _lineInfo;
+		public LineInfo LineInfo
+		{
+			get { return _lineInfo; }
+			set { _lineInfo = value; }
+		}
+		
+		public void SetLineInfo(Plan plan, LineInfo lineInfo)
+		{
+			if (lineInfo != null)
+			{
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				
+				if (plan.CompilingOffset != null)
+				{
+					_lineInfo.Line = lineInfo.Line - plan.CompilingOffset.Line;
+					_lineInfo.LinePos = lineInfo.LinePos - ((plan.CompilingOffset.Line == lineInfo.Line) ? plan.CompilingOffset.LinePos : 0);
+					_lineInfo.EndLine = lineInfo.EndLine - plan.CompilingOffset.Line;
+					_lineInfo.EndLinePos = lineInfo.EndLinePos - ((plan.CompilingOffset.Line == lineInfo.EndLine) ? plan.CompilingOffset.LinePos : 0);
+				}
+				else
+				{
+					_lineInfo.SetFromLineInfo(lineInfo);
+				}
+			}
 		}
 
 		#endregion
 		
 		#region Generation
 		
-		// IL Generation        
-        public void EmitIL(Plan plan, bool parentEmitted) 
-        {
-			if (!_deviceSupported)
-			{
-				if (!parentEmitted)
-					InternalEmitIL(plan);
-
-				if (_nodes != null)				
-					for (int index = 0; index < Nodes.Count; index++)
-						Nodes[index].EmitIL(plan, _shouldEmitIL);
-			}
-        }
-
-		protected static FieldInfo _nodesFieldInfo = typeof(PlanNode).GetField("Nodes");
-		protected static FieldInfo _planNodesFieldInfo = typeof(PlanNodes).GetField("_nodes", BindingFlags.NonPublic | BindingFlags.Instance);        
-        protected static FieldInfo _executeFieldInfo = typeof(PlanNode).GetField("Execute");
-        protected static MethodInfo _executeMethodInfo = typeof(ExecuteDelegate).GetMethod("Invoke", new Type[] { typeof(ServerProcess) });
-        protected static MethodInfo _planNodesIndexerInfo = typeof(PlanNodes).GetMethod("get_Item", new Type[] { typeof(int) });
-
-		/// <summary>
-		/// Prepares a dynamic method for use in generating the IL for a node.
-		/// </summary>
-		/// <returns>The DynamicMethod instance representing the Execute method being constructed.</returns>
-		protected DynamicMethod BeginEmitIL()
-		{
-            #if (SILVERLIGHT)
-            return new DynamicMethod(GetType().Name, typeof(object), new Type[] { typeof(PlanNode), typeof(ServerProcess) });
-            #else
-			return new DynamicMethod(GetType().Name, typeof(object), new Type[] { typeof(PlanNode), typeof(ServerProcess) }, GetType(), true);
-            #endif
-		}
-
-		/// <summary>
-		/// If AExecute is not null, calls the CreateDelegate of the DynamicMethod and sets the execute field of the node to the value returned.
-		/// </summary>
-		/// <param name="execute">The DynamicMethod instance returned by a previous call to BeginEmitIL.</param>
-		protected void EndEmitIL(DynamicMethod execute, ILGenerator generator)
-		{
-			if (DataType == null)
-				generator.Emit(OpCodes.Ldnull);
-			generator.Emit(OpCodes.Ret);
-			SurrogateExecute = (ExecuteDelegate)execute.CreateDelegate(typeof(ExecuteDelegate), this);
-		}
-		
 		public object TestExecute(Program program)
 		{
 			return Nodes[0].Execute(program);
-		}
-		
-		public LocalBuilder EmitThis(Plan plan, ILGenerator generator, int[] executePath)
-		{
-			// Declare a local variable to store the "this" pointer for the method (This is a path to the PlanNode for this node from the root IL generation node)
-			LocalBuilder thisValue = generator.DeclareLocal(typeof(PlanNode));
-			
-			// Load this of root plan node
-			generator.Emit(OpCodes.Ldarg_0);
-
-			// for each index in the execute path, load the node reference in the Nodes list for that node
-			for (int index = 0; index < executePath.Length; index++)
-			{
-			    generator.Emit(OpCodes.Ldfld, _nodesFieldInfo);
-				generator.Emit(OpCodes.Ldfld, _planNodesFieldInfo);
-				generator.Emit(OpCodes.Ldc_I4, executePath[index]);
-				generator.Emit(OpCodes.Ldelem_Ref);
-			}
-			
-			// Store it in the "this" local
-			generator.Emit(OpCodes.Stloc, thisValue);
-
-			return thisValue;			
-		}
-		
-		public int[] PrepareExecutePath(Plan plan, int[] executePath)
-		{
-			int[] localExecutePath = new int[executePath.Length + 1];
-			executePath.CopyTo(localExecutePath, 0);
-			return localExecutePath;
-		}
-		
-		public void EmitExecute(Plan plan, ILGenerator generator, int[] executePath, int nodeIndex)
-		{
-			executePath[executePath.Length - 1] = nodeIndex;
-			Nodes[nodeIndex].EmitIL(plan, generator, executePath);
-			
-			// Pop the return value if necessary
-			if (Nodes[nodeIndex].DataType != null)
-				generator.Emit(OpCodes.Pop);
-		}
-		
-		public void EmitEvaluate(Plan plan, ILGenerator generator, int[] executePath, int nodeIndex)
-		{
-			executePath[executePath.Length - 1] = nodeIndex;
-			Nodes[nodeIndex].EmitIL(plan, generator, executePath);
-		}
-		
-		public virtual void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
-		{
-			// Generate a call to the Execute delegate for this node
-			
-			LocalBuilder thisValue = EmitThis(plan, generator, executePath);
-			
-			// Load the address of the execute delegate for the "this" node
-			generator.Emit(OpCodes.Ldloc, thisValue);
-			generator.Emit(OpCodes.Ldfld, _executeFieldInfo);
-			
-			// Prepare the execute call arguments
-			generator.Emit(OpCodes.Ldarg_1);		 // AProcess
-			
-			// Invoke Execute
-			generator.EmitCall(OpCodes.Callvirt, _executeMethodInfo, null);
-			
-			// If no return value, eat the null
-			if (DataType == null)
-				generator.Emit(OpCodes.Pop);
-		}
-		
-		protected virtual void InternalEmitIL(Plan plan) 
-		{
-			if (_shouldEmitIL)
-			{
-				DynamicMethod execute = BeginEmitIL();
-				ILGenerator generator = execute.GetILGenerator();
-				EmitIL(plan, generator, new int[]{});
-				EndEmitIL(execute, generator);
-			} 
-		}
-
-		#endregion
-
-		#region Line info
-
-		private LineInfo _lineInfo;
-		public LineInfo LineInfo
-		{
-			get { return _lineInfo; }
-			set { _lineInfo = value; }
 		}
 		
 		public void SetLineInfo(Plan plan, LineInfo lineInfo)
@@ -680,6 +635,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         // BindingTraversal
         public virtual void BindingTraversal(Plan plan, PlanNodeVisitor visitor)
         {
+			if (Modifiers != null)
+			{
+				IgnoreUnsupported = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "IgnoreUnsupported", IgnoreUnsupported.ToString()));
+				ShouldSupport = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldSupport", ShouldSupport.ToString()));
+			}
+        }
 			if (visitor != null)
 				visitor.PreOrderVisit(plan, this);
 
@@ -722,12 +683,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		#region Execution
 		
-		private bool _isBreakable = false;
-		public bool IsBreakable
-		{
-			get { return _isBreakable; }
-			set { _isBreakable = value; }
-		}
+        // ILExecute
+        //protected ExecuteDelegate ILExecute;
 
         // SurrogateExecute
         protected ExecuteDelegate SurrogateExecute;
@@ -747,6 +704,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				else
 					program.CheckAborted();
 
+				//if (ILExecute != null)
+				//	return ILExecute(program);
 				// TODO: Compile this call, the TableNode is the only node that uses this hook
 				InternalBeforeExecute(program);
 				return SurrogateExecute(program);
@@ -890,10 +849,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			writer.WriteAttributeString("DeviceSupported", Convert.ToString(DeviceSupported));
 			if (DeviceSupported)
 				writer.WriteAttributeString("Device", _device.DisplayName);
-			writer.WriteAttributeString("CouldSupport", Convert.ToString(_couldSupport));
-			writer.WriteAttributeString("ShouldSupport", Convert.ToString(_shouldSupport));
-			writer.WriteAttributeString("IgnoreUnsupported", Convert.ToString(_ignoreUnsupported));
-			writer.WriteAttributeString("DeviceAssociative", Convert.ToString((_device == null) && !_noDevice));
+			writer.WriteAttributeString("CouldSupport", Convert.ToString(CouldSupport));
+			writer.WriteAttributeString("ShouldSupport", Convert.ToString(ShouldSupport));
+			writer.WriteAttributeString("IgnoreUnsupported", Convert.ToString(IgnoreUnsupported));
+			writer.WriteAttributeString("DeviceAssociative", Convert.ToString((_device == null) && !NoDevice));
 			if (_deviceMessages != null)
 				writer.WriteAttributeString("DeviceMessages", _deviceMessages.ToString());
 		}

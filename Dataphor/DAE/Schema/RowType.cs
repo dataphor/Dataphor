@@ -52,14 +52,14 @@ namespace Alphora.Dataphor.DAE.Schema
 				_columns.Add(column.Copy(prefix));
 		}
 		
-		public RowType(KeyColumns columns) : base()
+		public RowType(TableVarColumnsBase columns) : base()
 		{
 			InternalInitialize();
 			foreach (TableVarColumn column in columns)
 				_columns.Add(column.Column.Copy());
 		}
 		
-		public RowType(KeyColumns columns, string prefix) : base()
+		public RowType(TableVarColumnsBase columns, string prefix) : base()
 		{
 			InternalInitialize();
 			foreach (TableVarColumn column in columns)

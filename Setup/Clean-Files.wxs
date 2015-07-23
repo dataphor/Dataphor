@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <ComponentGroup Id="BinFilesGroup">
+    </ComponentGroup>
+    <ComponentGroup Id="WebClientFilesGroup">
+    </ComponentGroup>
+    <ComponentGroup Id="LibraryFilesGroup">
+    </ComponentGroup>    
+    <DirectoryRef Id="TARGETDIR">
+	
+	 <!--Directory Structure for Shortcuts-->
+
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Alphora Dataphor"/>
+      </Directory>
+	
+      <Directory Id="ProgramFilesFolder" Name="PFiles">
+        <Directory Id="INSTALLDIR" Name="Dataphor">
+          <Directory Id="Documentation" Name="Documentation">
+            <Component Id="DocumentationFiles" Guid="0F9B9D65-4CC3-47B7-96D5-D30C1BF40F8C" DiskId="1">
+            </Component>
+          </Directory>
+          <Directory Id="Bin" Name="Dataphor">
+            <Component Id="BinFiles" Guid="C94BE2EE-E916-4f32-B289-DEA9ED5DD009" DiskId="1">
+            </Component>
+          </Directory>
+          <Directory Id="Libraries" Name="Libraries">
+            <Component Id="LibraryFiles" Guid="B8AF005A-94BE-4d9e-8926-4CDD31CA5127" DiskId="1">
+            </Component>
+          </Directory>
+          <Directory Id="WebClient" Name="Web Client">
+            <Component Id="WebClientFiles" Guid="33C2127E-AD18-478a-BE0E-318D531E2CA3" DiskId="1">
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+    </DirectoryRef>
+	    <!--Start menu shortcuts, also need line in setup.wxs-->
+
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="60b2453d-377b-4924-b1c5-40b46824d44e">
+        <Shortcut Id="DocumentationChm"
+                  Name="Dataphor Documentation (chm)"
+                  Target="[#id_Documentation_Dataphor_chm2111629724]"
+                  WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+        <Shortcut Id="DocumentationPdf"
+                  Name="Dataphor Documentation (pdf)"
+                  Target="[#id_Documentation_DataphorSet_pdf217265682]"
+                  WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+
+
+        <RegistryValue Root="HKCU" Key="Software\Microsoft\MyApplicationName" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <!--<DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="DataphoriaShortcut" Guid="2a133910-c2f3-4fbf-8458-f1e203744ac6">
+      </Component>
+    </DirectoryRef>-->
+
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ConstantShortcuts" Guid="2a133910-c2f3-4fbf-8458-f1e203744ac5">
+        <Shortcut Id="Dataphoria" Name="Dataphoria" Target="[#id_Bin_Dataphoria_exe2087252942]" WorkingDirectory="APPLICATIONROOTDIRECTORY" />
+        <Shortcut Id="ServiceConfigurationUtility" Name="Service Configuration Utility" Target="[#id_Bin_DAEConfigUtil_exe3695071022]" WorkingDirectory="APPLICATIONROOTDIRECTORY" />
+        <Shortcut Id="DataphorWindowsClient" Name="Dataphor Windows Client" Target="[#id_Bin_WindowsClient_exe1400490563]" WorkingDirectory="APPLICATIONROOTDIRECTORY" />
+        <Shortcut Id="UninstallDataphor" Name="Uninstall Alphora Dataphor" Target="[SystemFolder]msiexec.exe" Arguments="/x [ProductCode]" />
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\Microsoft\MyApplicationName" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+
+
+    </DirectoryRef>
+  </Fragment>
+</Wix>

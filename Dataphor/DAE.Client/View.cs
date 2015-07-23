@@ -183,9 +183,17 @@ namespace Alphora.Dataphor.DAE.Client
 
 				Process.CommitTransaction();
 			}
-			catch
+			catch (Exception e)
 			{
-				Process.RollbackTransaction();
+				try
+				{
+					Process.RollbackTransaction();
+				}
+				catch (Exception rollbackException)
+				{
+					throw new DAE.Server.ServerException(DAE.Server.ServerException.Codes.RollbackError, e, rollbackException.ToString());
+				}
+
 				throw;
 			}
 		}
@@ -373,7 +381,7 @@ namespace Alphora.Dataphor.DAE.Client
 						{
 							CursorSetChanged(row, true);
 						}
-						catch
+						catch (Exception e)
 						{
 							_filter = oldFilter;
 							Open();
@@ -646,13 +654,27 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			catch
 			{
-				if (IsApplicationTransactionServer)
+				try
 				{
-					RollbackApplicationTransaction();
-					UnprepareApplicationTransactionServer();
+					if (IsApplicationTransactionServer)
+					{
+						try
+						{
+							RollbackApplicationTransaction();
+						}
+						finally
+						{
+							UnprepareApplicationTransactionServer();
+						}
+					}
+					else if (IsApplicationTransactionClient && _isJoined)
+						LeaveApplicationTransaction();
 				}
-				else if (IsApplicationTransactionClient && _isJoined)
-					LeaveApplicationTransaction();
+				catch
+				{
+					// ignore errors here
+				}
+
 				throw;
 			}
 		}
@@ -676,7 +698,15 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 				catch
 				{
-					Close();
+					try
+					{
+						Close();
+					}
+					catch
+					{
+						// Ignore close errors here
+					}
+
 					throw;
 				}
 			}
@@ -696,8 +726,14 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				if (IsApplicationTransactionServer)
 				{
-					RollbackApplicationTransaction();
-					UnprepareApplicationTransactionServer();
+					try
+					{
+						RollbackApplicationTransaction();
+					}
+					finally
+					{
+						UnprepareApplicationTransactionServer();
+					}
 				}
 				else if (IsApplicationTransactionClient && _isJoined)
 					LeaveApplicationTransaction();

@@ -49,6 +49,15 @@ namespace Alphora.Common.WCF
 		}
 
 		/// <summary>
+		/// Initializes a new instance of the ServiceClient class using the given endpoint configuration name.
+		/// </summary>
+		/// <param name="endpointConfigurationName">The name of the endpoint configuration to be used to connect.</param>
+		public ServiceClient(string endpointConfigurationName)
+		{
+			_channelFactoryWrapper = new ChannelFactoryWrapper<T>(endpointConfigurationName, new ChannelFactory<T>(endpointConfigurationName));
+		}
+
+		/// <summary>
 		/// Defines an internal disposal method that will be called when the Dispose method is called.
 		/// </summary>
 		protected virtual void InternalDispose() { }
@@ -135,7 +144,7 @@ namespace Alphora.Common.WCF
 		/// Returns the channel to be used to invoke service methods.
 		/// </summary>
 		/// <returns>The channel to be used to invoke service methods.</returns>
-		protected T GetInterface()
+		protected internal T GetInterface()
 		{
 			if ((_channel == null) || !IsChannelValid(_channel))
 				SetChannel(_channelFactoryWrapper.ChannelFactory.CreateChannel());

@@ -96,12 +96,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (!TableVar.Orders.Contains(order))
 					TableVar.Orders.Add(CopyOrder(order));
 					
-			#if UseReferenceDerivation
-			CopySourceReferences(plan, LeftTableVar.SourceReferences);
-			CopySourceReferences(plan, RightTableVar.SourceReferences);
-			CopyTargetReferences(plan, LeftTableVar.TargetReferences);
-			CopyTargetReferences(plan, RightTableVar.TargetReferences);
-			#endif
+			// NOTE: This isn't exactly the same, as the previous logic would copy source references from both tables, then target references from both tables. Shouldn't be an issue but....
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			{
+				CopyReferences(plan, LeftTableVar);
+				CopyReferences(plan, RightTableVar);
+			}
 		}
 		
 		private void DetermineOrder(Plan plan)

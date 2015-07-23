@@ -604,10 +604,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						
 			CopyOrders(SourceTableVar.Orders);
 
-			#if UseReferenceDerivation
-			CopySourceReferences(plan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
-			#endif
+			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+				CopyReferences(plan, SourceTableVar);
 
 			if ((Order == null) && (SourceNode.Order != null))
 				Order = CopyOrder(SourceNode.Order);
@@ -781,7 +779,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineAccessPath(Plan plan)
 		{
 			base.DetermineAccessPath(plan);
-			if (!_deviceSupported)
+			if (!DeviceSupported)
 			{
 				DetermineRestrictionAlgorithm(plan);
 				if (_restrictionAlgorithm.Equals(typeof(ScanTable)))

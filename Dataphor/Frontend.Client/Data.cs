@@ -1167,7 +1167,15 @@ namespace Alphora.Dataphor.Frontend.Client
 					}
 					catch
 					{
-						Enabled = false;
+						try
+						{
+							Enabled = false;
+						}
+						catch
+						{
+							// Ignore closing errors here
+						}
+
 						throw;
 					}
 				}

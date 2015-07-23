@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="109100">
+		<value>Statement expected.</value>
+	</data>
+	<data name="109101">
+		<value>Unknown token type "{0}".</value>
+	</data>
+	<data name="109102">
+		<value>"," or "}" expected.</value>
+	</data>
+	<data name="109103">
+		<value>"," or ")" expected.</value>
+	</data>
+	<data name="109104">
+		<value>";" or EOF expected.</value>
+	</data>
+	<data name="109105">
+		<value>Case item expression expected.</value>
+	</data>
+	<data name="109106">
+		<value>Unknown create directive "{0}".</value>
+	</data>
+	<data name="109107">
+		<value>Unknown create type directive "{0}".</value>
+	</data>
+	<data name="109108">
+		<value>Unknown alter directive "{0}".</value>
+	</data>
+	<data name="109109">
+		<value>Unknown alter type directive "{0}".</value>
+	</data>
+	<data name="109110">
+		<value>Unknown drop directive "{0}".</value>
+	</data>
+	<data name="109111">
+		<value>Unknown reference action "{0}".</value>
+	</data>
+	<data name="109112">
+		<value>Default definition already specified.</value>
+	</data>
+	<data name="109113">
+		<value>Override directive not allowed after reintroduce.</value>
+	</data>
+	<data name="109114">
+		<value>Operator marked as abstract cannot have a method body.</value>
+	</data>
+	<data name="109115">
+		<value>Operator must have either a class definition or a body defined.</value>
+	</data>
+	<data name="109116">
+		<value>Invalid parameter modifier.</value>
+	</data>
+	<data name="109117">
+		<value>"{0}" is not a valid identifier.</value>
+	</data>
+	<data name="109118">
+		<value>"{0}" is a reserved word and may not be used as an identifier.</value>
+	</data>
+	<data name="109119">
+		<value>finally or except expected.</value>
+	</data>
+	<data name="109120">
+		<value>Schema definition directive expected.</value>
+	</data>
+	<data name="109121">
+		<value>Type specifier already set for selector expression.</value>
+	</data>
+	<data name="109122">
+		<value>Unknown event specifier "{0}".</value>
+	</data>
+	<data name="109123">
+		<value>Event specifier list contains incompatible event specifiers.</value>
+	</data>
+	<data name="109124">
+		<value>Sort definition already specified.</value>
+	</data>
+	<data name="109125">
+		<value>Invalid right specifier ('all', 'usage', or '{&lt;list of rights&gt;}' expected).</value>
+	</data>
+	<data name="109126">
+		<value>Invalid security specifier.</value>
+	</data>
+	<data name="109127">
+		<value>Unknown constraint target.</value>
+	</data>
+	<data name="109128">
+		<value>Column extractor expression must reference a single column unless invoking an aggregate operator.</value>
+	</data>
+</root>

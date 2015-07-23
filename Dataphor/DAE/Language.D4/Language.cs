@@ -3,6 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+#define ALLOWARBITRARYAGGREGATEEXPRESSIONS
+
 namespace Alphora.Dataphor.DAE.Language.D4
 {
 	using System;
@@ -1327,6 +1330,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _distinct; }
 			set { _distinct = value; }
         }
+
+		#if ALLOWARBITRARYAGGREGATEEXPRESSIONS
+		// Arguments
+		protected Expressions _arguments = new Expressions();
+		public Expressions Arguments { get { return _arguments; } }
+		#endif
 
         // Columns
         protected ColumnExpressions _columns = new ColumnExpressions();
