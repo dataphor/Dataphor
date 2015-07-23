@@ -766,11 +766,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 					BindingTraversal(plan, planNode, new DetermineAccessPathVisitor());
 					#endif
 				}
-
-				if (plan.ShouldEmitIL)
-				{
-					planNode.EmitIL(plan, false);
-				}
 			}
 			catch (Exception exception)
 			{
@@ -2332,28 +2327,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// delete V;
 		// insert LV into V;
 
-		protected static PlanNode CopyPlanNode(Plan plan, PlanNode node, bool isAssignment)
-		{
-			// Emit the node as a statement, then return the compile of that statement.
-			if (isAssignment)
-			{
-				plan.PushStatementContext(new StatementContext(StatementType.Assignment));
-			}
-			try
-			{
-				var statement = node.EmitStatement(EmitMode.ForCopy);
-				var nodeCopy = Compiler.CompileStatement(plan, statement);
-				return nodeCopy;
-			}
-			finally
-			{
-				if (isAssignment)
-				{
-					plan.PopStatementContext();
-				}
-			}
-		}
-		
 		protected static PlanNode CopyPlanNode(Plan plan, PlanNode node, bool isAssignment)
 		{
 			// Emit the node as a statement, then return the compile of that statement.

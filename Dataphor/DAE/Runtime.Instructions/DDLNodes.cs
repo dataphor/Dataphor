@@ -209,7 +209,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			base.DetermineDevice(plan);
 			DeviceSupported = false;
-			SurrogateExecute = InternalExecute;
 		}
 
 		public override void BindToProcess(Plan plan)
@@ -1582,7 +1581,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			base.DetermineDevice(plan);
 			DeviceSupported = false;
-			SurrogateExecute = InternalExecute;
 		}
 		
 		public override void BindToProcess(Plan plan)
@@ -2865,7 +2863,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			base.DetermineDevice(plan);
 			DeviceSupported = false;
-			SurrogateExecute = InternalExecute;
 		}
 
 		public override void BindToProcess(Plan plan)

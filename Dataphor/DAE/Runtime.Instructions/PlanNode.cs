@@ -99,7 +99,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public PlanNode() : base()
 		{
-			SurrogateExecute = InternalExecute;
  		}
 
 		// Use a ushort because an enum will be an integer
@@ -202,25 +201,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
         
 		// IgnoreUnsupported -- only applies if DataType is not null
-		private bool _ignoreUnsupported;
 		public bool IgnoreUnsupported
 		{
-			get { return _ignoreUnsupported; }
-			set { _ignoreUnsupported = value; }
+			get { return (_characteristics & IgnoreUnsupportedFlag) == IgnoreUnsupportedFlag; }
+			set { if (value) _characteristics |= IgnoreUnsupportedFlag; else _characteristics &= NotIgnoreUnsupportedFlag; }
 		}
-		
-		private bool _shouldSupport = true;
+
+		// ShouldSupport		
 		public bool ShouldSupport
 		{
-			get { return _shouldSupport; }
-			set { _shouldSupport = value; }
-		}
-		
-		private bool _shouldEmitIL = false;
-		public bool ShouldEmitIL
-		{
-			get { return _shouldEmitIL; }
-			set { _shouldEmitIL = value; }
+			get { return (_characteristics & ShouldSupportFlag) == ShouldSupportFlag; }
+			set { if (value) _characteristics |= ShouldSupportFlag; else _characteristics &= NotShouldSupportFlag; }
 		}
 		
         // DetermineModifiers
@@ -230,7 +221,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				IgnoreUnsupported = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "IgnoreUnsupported", IgnoreUnsupported.ToString()));
 				ShouldSupport = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldSupport", ShouldSupport.ToString()));
-				ShouldEmitIL = _shouldEmitIL && (Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldEmitIL", ShouldEmitIL.ToString())));
 			}
         }
 
@@ -277,12 +267,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { if (value) _characteristics |= DeviceSupportedFlag; else _characteristics &= NotDeviceSupportedFlag; }
         }
         
-		private bool _couldSupport = false;
 		/// <summary>Set by the device to indicate that the node could be supported if necessary, but only by parameterization.</summary>
 		public bool CouldSupport
 		{
-			get { return _couldSupport; }
-			set { _couldSupport = value; }
+			get { return (_characteristics & CouldSupportFlag) == CouldSupportFlag; }
+			set { if (value) _characteristics |= CouldSupportFlag; else _characteristics &= NotCouldSupportFlag; }
 		}
 		
         // DeviceMessages
@@ -308,9 +297,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			this._deviceMessages = null;
 		}
 
-		// DetermineDevice
-		public virtual void DetermineDevice(Plan plan)
-
 		// DeterminePotentialDevice
 		public virtual void DeterminePotentialDevice(Plan plan)
 		{
@@ -323,14 +309,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
             NoDevice = !ShouldSupport;
 
 			if (_nodes != null)
-				for (int index = 0; index < _nodes.Count; index++)
 			{
 				for (int index = 0; index < _nodes.Count; index++)
 				{
 					_nodes[index].DeterminePotentialDevice(plan);
 
-					_noDevice = _noDevice || _nodes[index].NoDevice;
-					if (!_noDevice)
+					NoDevice = NoDevice || _nodes[index].NoDevice;
+					if (!NoDevice)
 					{
 						childDevice = _nodes[index].PotentialDevice;
 						if (childDevice != null)
@@ -355,26 +340,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public void ClearDeviceSubNodes()
-		{
-			if (_nodes != null)
-			{
-				for (int index = 0; index < _nodes.Count; index++)
-				{
-					_nodes[index].ClearDeviceNode();
-				}
-			}
-		}
-
-		public virtual void ClearDeviceNode()
-		{
-			this._deviceNode = null;
-		}
-
 		// DetermineDevice
 		public virtual void DetermineDevice(Plan plan)
 		{
-            if (!_noDevice)
+            if (!NoDevice)
             {
 				_device = _potentialDevice;
 				if (_device != null)
@@ -417,74 +386,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// Not sure why this is here, but it is preventing the translation of several otherwise translatable items.
 					// I will turn it off and see what happens.
 					//if (DataType is Schema.ITableType)
-					//	_noDevice = true;
+					//	NoDevice = true;
 				}
 			}
 			else
 				DeviceSupported = false;
 		}
 		
-		// IgnoreUnsupported -- only applies if DataType is not null
-		public bool IgnoreUnsupported
-			{
-			get { return (_characteristics & IgnoreUnsupportedFlag) == IgnoreUnsupportedFlag; }
-			set { if (value) _characteristics |= IgnoreUnsupportedFlag; else _characteristics &= NotIgnoreUnsupportedFlag; }
-			}
-		
-		/// <summary>Set by the device to indicate that the node could be supported if necessary, but only by parameterization.</summary>
-		public bool CouldSupport
+		public virtual void SetDevice(Plan plan, Schema.Device device)
 		{
-			get { return (_characteristics & CouldSupportFlag) == CouldSupportFlag; }
-			set { if (value) _characteristics |= CouldSupportFlag; else _characteristics &= NotCouldSupportFlag; }
+            _device = device;
+            //_deviceSupported = true;
 		}
-		
-		public bool ShouldSupport
+
+		// Base implementation does nothing, descendents override this to determine
+		// execution algorithms when the node is not device supported
+		public virtual void DetermineAccessPath(Plan plan)
 		{
-			get { return (_characteristics & ShouldSupportFlag) == ShouldSupportFlag; }
-			set { if (value) _characteristics |= ShouldSupportFlag; else _characteristics &= NotShouldSupportFlag; }
 		}
-		
-		public bool IsBreakable
-		{
-			get { return (_characteristics & IsBreakableFlag) == IsBreakableFlag; }
-			set { if (value) _characteristics |= IsBreakableFlag; else _characteristics &= NotIsBreakableFlag; }
-		}
-		
+
+		#endregion
+
+		#region Line Info
+
 		private LineInfo _lineInfo;
 		public LineInfo LineInfo
 		{
 			get { return _lineInfo; }
 			set { _lineInfo = value; }
-		}
-		
-		public void SetLineInfo(Plan plan, LineInfo lineInfo)
-		{
-			if (lineInfo != null)
-			{
-				if (_lineInfo == null)
-					_lineInfo = new LineInfo();
-				
-				if (plan.CompilingOffset != null)
-				{
-					_lineInfo.Line = lineInfo.Line - plan.CompilingOffset.Line;
-					_lineInfo.LinePos = lineInfo.LinePos - ((plan.CompilingOffset.Line == lineInfo.Line) ? plan.CompilingOffset.LinePos : 0);
-					_lineInfo.EndLine = lineInfo.EndLine - plan.CompilingOffset.Line;
-					_lineInfo.EndLinePos = lineInfo.EndLinePos - ((plan.CompilingOffset.Line == lineInfo.EndLine) ? plan.CompilingOffset.LinePos : 0);
-				}
-				else
-				{
-					_lineInfo.SetFromLineInfo(lineInfo);
-				}
-			}
-		}
-
-		#endregion
-		
-		#region Generation
-		
-		public object TestExecute(Program program)
-		{
-			return Nodes[0].Execute(program);
 		}
 		
 		public void SetLineInfo(Plan plan, LineInfo lineInfo)
@@ -635,12 +564,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         // BindingTraversal
         public virtual void BindingTraversal(Plan plan, PlanNodeVisitor visitor)
         {
-			if (Modifiers != null)
-			{
-				IgnoreUnsupported = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "IgnoreUnsupported", IgnoreUnsupported.ToString()));
-				ShouldSupport = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldSupport", ShouldSupport.ToString()));
-			}
-        }
 			if (visitor != null)
 				visitor.PreOrderVisit(plan, this);
 
@@ -663,11 +586,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected virtual void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			if (_nodes != null)
-				for (int index = 0; index < Nodes.Count; index++)
+				for (int index = 0; index < _nodes.Count; index++)
 					#if USEVISIT
-					Nodes[index] = visitor.Visit(plan, Nodes[index]);
+					_nodes[index] = visitor.Visit(plan, Nodes[index]);
 					#else
-					Nodes[index].BindingTraversal(plan, visitor);
+					_nodes[index].BindingTraversal(plan, visitor);
 					#endif
 		}
 		
@@ -675,20 +598,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public virtual void BindToProcess(Plan plan)
 		{
 			if (_nodes != null)
-				for (int index = 0; index < Nodes.Count; index++)
-					Nodes[index].BindToProcess(plan);
+				for (int index = 0; index < _nodes.Count; index++)
+					_nodes[index].BindToProcess(plan);
 		}
 
 		#endregion
 
 		#region Execution
 		
-        // ILExecute
-        //protected ExecuteDelegate ILExecute;
-
-        // SurrogateExecute
-        protected ExecuteDelegate SurrogateExecute;
-
+		public bool IsBreakable
+		{
+			get { return (_characteristics & IsBreakableFlag) == IsBreakableFlag; }
+			set { if (value) _characteristics |= IsBreakableFlag; else _characteristics &= NotIsBreakableFlag; }
+		}
+		
+		public object TestExecute(Program program)
+		{
+			return Nodes[0].Execute(program);
+		}
+		
 		// BeforeExecute        
         protected virtual void InternalBeforeExecute(Program program) { }
         
@@ -704,11 +632,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				else
 					program.CheckAborted();
 
-				//if (ILExecute != null)
-				//	return ILExecute(program);
 				// TODO: Compile this call, the TableNode is the only node that uses this hook
 				InternalBeforeExecute(program);
-				return SurrogateExecute(program);
+				if (DeviceSupported)
+					return program.DeviceExecute(_device, this);
+				return InternalExecute(program);
 
 			#if WRAPRUNTIMEEXCEPTIONS
 			}
@@ -776,11 +704,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
         public abstract object InternalExecute(Program program);
-
-		public virtual object InternalDeviceExecute(Program program)
-		{
-			return program.DeviceExecute(_device, this);
-		}
 
 		#endregion
         
@@ -881,19 +804,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		protected virtual void InternalClone(PlanNode newNode)
 		{
-			newNode.IsLiteral = _isLiteral;
-			newNode.IsFunctional = _isFunctional;
-			newNode.IsDeterministic = _isDeterministic;
-			newNode.IsRepeatable = _isRepeatable;
-			newNode.IsNilable = _isNilable;
-			newNode.IsOrderPreserving = _isOrderPreserving;
+			newNode.IsLiteral = IsLiteral;
+			newNode.IsFunctional = IsFunctional;
+			newNode.IsDeterministic = IsDeterministic;
+			newNode.IsRepeatable = IsRepeatable;
+			newNode.IsNilable = IsNilable;
+			newNode.IsOrderPreserving = IsOrderPreserving;
 			newNode.Modifiers = _modifiers;
-			newNode.IgnoreUnsupported = _ignoreUnsupported;
-			newNode.ShouldSupport = _shouldSupport;
-			newNode.ShouldEmitIL = _shouldEmitIL;
-			newNode.LineInfo = _lineInfo;
+			newNode.IgnoreUnsupported = IgnoreUnsupported;
+			newNode.ShouldSupport = ShouldSupport;
+			newNode.LineInfo = LineInfo;
 			newNode.DataType = _dataType;
-			newNode.IsBreakable = _isBreakable;
+			newNode.IsBreakable = IsBreakable;
 
 			if (_nodes != null)
 			{

@@ -534,7 +534,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (newReference.TargetKey.IsUnique && !_tableVar.References.ContainsTargetReference(newReference)) // This would only be true for unions and joins where both sides contain the same reference
 				{
 					_tableVar.References.Add(newReference);
-					//_tableVar.DerivedReferences.Add(newReference);
 				}
 			}
         }
@@ -547,8 +546,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if (reference.SourceTable.Equals(tableVar))
 						CopySourceReference(plan, reference);
 					else if (reference.TargetTable.Equals(tableVar))
-				CopyTargetReference(plan, reference);
-        }
+						CopyTargetReference(plan, reference);
+	        }
 		}
         
 		// DataType
@@ -612,8 +611,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			var newTableNode = (TableNode)newNode;
 			newTableNode.TableVar = _tableVar; // BTR -> This is okay because if we ever actually rearrange, we'll need to redo the DetermineDataType call anyway
 			newTableNode._requestedCursorType = _requestedCursorType;
-			newTableNode._shouldCheckConcurrency = _shouldCheckConcurrency;
-			newTableNode._shouldSupportModify = _shouldSupportModify;
+			newTableNode.ShouldCheckConcurrency = ShouldCheckConcurrency;
+			newTableNode.ShouldSupportModify = ShouldSupportModify;
 			if (_order != null)
 			{
 				newTableNode._order = newTableNode.CopyOrder(_order);
@@ -902,8 +901,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 														plan,
 														new RestrictExpression
 														(
-															plan,
-															Compiler.CompileExpression(plan, GetExpression(outsideAT)),
+															GetExpression(outsideAT),
 															Compiler.BuildOptimisticRowEqualExpression
 															(
 																plan, 
@@ -2697,13 +2695,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (TableVar.HasRowConstraints())
 			{
-			Schema.RowConstraint constraint;
-			for (int index = 0; index < TableVar.RowConstraints.Count; index++)
-			{
-				constraint = TableVar.RowConstraints[index];
-				if ((constraint.ConstraintType != Schema.ConstraintType.Database) && (isDescending || constraint.Enforced) && constraint.ShouldValidate(valueFlags, Schema.Transition.Insert))
-					constraint.Validate(program, Schema.Transition.Insert);
-			}
+				Schema.RowConstraint constraint;
+				for (int index = 0; index < TableVar.RowConstraints.Count; index++)
+				{
+					constraint = TableVar.RowConstraints[index];
+					if ((constraint.ConstraintType != Schema.ConstraintType.Database) && (isDescending || constraint.Enforced) && constraint.ShouldValidate(valueFlags, Schema.Transition.Insert))
+						constraint.Validate(program, Schema.Transition.Insert);
+				}
 			}
 		} 
 		
@@ -2712,27 +2710,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected virtual void ValidateCatalogConstraints(Program program)
 		{
 			if (TableVar.HasCatalogConstraints())
-			foreach (Schema.CatalogConstraint constraint in TableVar.CatalogConstraints)
-			{
-				if (constraint.Enforced)
+				foreach (Schema.CatalogConstraint constraint in TableVar.CatalogConstraints)
 				{
-					if (constraint.IsDeferred && program.ServerProcess.InTransaction)
+					if (constraint.Enforced)
 					{
-						bool hasCheck = false;
-						for (int index = 0; index < program.ServerProcess.Transactions.Count; index++)
-							if (program.ServerProcess.Transactions[index].CatalogConstraints.Contains(constraint.Name))
-							{
-								hasCheck = true;
-								break;
-							}
+						if (constraint.IsDeferred && program.ServerProcess.InTransaction)
+						{
+							bool hasCheck = false;
+							for (int index = 0; index < program.ServerProcess.Transactions.Count; index++)
+								if (program.ServerProcess.Transactions[index].CatalogConstraints.Contains(constraint.Name))
+								{
+									hasCheck = true;
+									break;
+								}
 							
-						if (!hasCheck)
-							program.ServerProcess.CurrentTransaction.CatalogConstraints.Add(constraint);
+							if (!hasCheck)
+								program.ServerProcess.CurrentTransaction.CatalogConstraints.Add(constraint);
+						}
+						else
+							constraint.Validate(program);
 					}
-					else
-						constraint.Validate(program);
 				}
-			}
 		}
 		
 		// ShouldValidateKeyConstraints
@@ -2757,14 +2755,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{	
 				if (TableVar.HasRowConstraints())
 				{
-				Schema.RowConstraint constraint;
-				for (int index = 0; index < TableVar.RowConstraints.Count; index++)
-				{
-					constraint = TableVar.RowConstraints[index];
-					if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred))
-						constraint.Validate(program, Schema.Transition.Insert);
+					Schema.RowConstraint constraint;
+					for (int index = 0; index < TableVar.RowConstraints.Count; index++)
+					{
+						constraint = TableVar.RowConstraints[index];
+						if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred))
+							constraint.Validate(program, Schema.Transition.Insert);
+					}
 				}
-			}
 			}
 			#if !USENAMEDROWVARIABLES
 			finally
@@ -2800,14 +2798,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (TableVar.HasRowConstraints())
 				{
-				Schema.RowConstraint constraint;
-				for (int index = 0; index < TableVar.RowConstraints.Count; index++)
-				{
-					constraint = TableVar.RowConstraints[index];
-					if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred) && constraint.ShouldValidate(valueFlags, Schema.Transition.Insert))
-						constraint.Validate(program, Schema.Transition.Insert);
+					Schema.RowConstraint constraint;
+					for (int index = 0; index < TableVar.RowConstraints.Count; index++)
+					{
+						constraint = TableVar.RowConstraints[index];
+						if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred) && constraint.ShouldValidate(valueFlags, Schema.Transition.Insert))
+							constraint.Validate(program, Schema.Transition.Insert);
+					}
 				}
-			}
 			}
 			#if !USENAMEDROWVARIABLES
 			finally
@@ -2837,9 +2835,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.ServerProcess.AddDeleteTableVarCheck(TableVar, (Row)program.Stack.Peek(0));
 
 			if (TableVar.HasDeleteConstraints())
-			foreach (Schema.Constraint constraint in TableVar.DeleteConstraints)
-				if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred))
-					constraint.Validate(program, Schema.Transition.Delete);
+				foreach (Schema.Constraint constraint in TableVar.DeleteConstraints)
+					if (constraint.Enforced && (!program.ServerProcess.InTransaction || !constraint.IsDeferred))
+						constraint.Validate(program, Schema.Transition.Delete);
 		}
 
 		// ExecuteHandlers executes each handler associated with the given event type

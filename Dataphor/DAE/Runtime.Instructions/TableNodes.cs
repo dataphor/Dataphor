@@ -1877,13 +1877,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice, _device.Name, _tableVar.DisplayName);
 
 				DeviceSupported = true;
-				SurrogateExecute = InternalDeviceExecute;
 				SetDevice(plan, _potentialDevice);
 
 				_symbols = Compiler.SnapshotSymbols(plan);
 			}
 			else
-				_noDevice = true;
+				NoDevice = true;
 		}
 
 		public override void SetDevice(Plan plan, Schema.Device device)
@@ -1893,12 +1892,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
 			{
 				DetermineModifySupported(plan);
-				}
-
 				_symbols = Compiler.SnapshotSymbols(plan);
 			}
-			else
-				NoDevice = true;
 		}
 		
 		protected void CheckDeviceRights(Plan plan)
