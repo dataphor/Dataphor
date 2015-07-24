@@ -740,16 +740,16 @@ namespace Alphora.Dataphor.DAE.Compiling
 					BindingTraversal(plan, planNode, new NormalizeRestrictionVisitor());
 					#endif
 
-					// Determine potential device support for the entire plan
-					// TODO: Add supported operator checking
-					planNode.DeterminePotentialDevice(plan);
-
 					// Prepare application transaction join plans
 					#if USEVISIT
 					planNode = BindingTraversal(plan, planNode, new PrepareJoinApplicationTransactionVisitor());
 					#else
 					BindingTraversal(plan, planNode, new PrepareJoinApplicationTransactionVisitor());
 					#endif
+
+					// Determine potential device support for the entire plan
+					// TODO: Add supported operator checking
+					planNode.DeterminePotentialDevice(plan);
 
 					// Determine actual device support
 					// TODO: Add restriction rewrite

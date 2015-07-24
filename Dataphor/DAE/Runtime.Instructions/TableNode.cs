@@ -669,6 +669,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ShouldCheckConcurrency = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldCheckConcurrency", ShouldCheckConcurrency.ToString()));
 			}
 		}
+
+		public override void DeterminePotentialDevice(Plan plan)
+		{
+			base.DeterminePotentialDevice(plan);
+
+			if (_populateNode != null)
+			{
+				_populateNode.DeterminePotentialDevice(plan);
+			}
+		}
 		
 		public override void DetermineAccessPath(Plan plan)
 		{

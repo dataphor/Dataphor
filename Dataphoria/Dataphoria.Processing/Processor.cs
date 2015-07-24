@@ -11,7 +11,9 @@ namespace Alphora.Dataphor.Dataphoria.Processing
 {
     public class Processor : IDisposable
     {
-        public Processor() : this(InstanceManager.DefaultInstanceName)
+		public const string DefaultProcessorInstanceName = "Processor";
+
+        public Processor() : this(DefaultProcessorInstanceName)
         {
         }
 
