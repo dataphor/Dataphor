@@ -64,6 +64,17 @@
         <ComponentGroupRef Id="WebClientFilesGroup"/>
       </Feature>
 
+      <Feature
+        Id="DataphoriaWeb"
+        Title="Dataphoria Web"
+        Description="Dataphoria Web Application Files (Does not install the site, just the files)"
+        Display="expand"
+        Level="1">
+
+        <ComponentRef Id="DataphoriaWebFiles"/>
+        <ComponentGroupRef Id="DataphoriaWebFilesGroup"/>
+      </Feature>
+
     </Feature>
 
 

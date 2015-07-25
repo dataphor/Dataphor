@@ -1,5 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<library xmlns:bop="www.alphora.com/schemas/bop" version="3.0.0.0" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" name="PGSQLConnection" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+<library xmlns:bop="www.alphora.com/schemas/bop" version="3.0.0.0" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" name="PGSQLConnection" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
 	<files.filereference filename="Alphora.Dataphor.DAE.Connection.PGSQL.dll" isassembly="True" />
+	<files.filereference filename="Npgsql.dll" isassembly="False">
+		<environments.string value="WindowsServer" xmlns="System,mscorlib" />
+	</files.filereference>
+	<files.filereference filename="Mono.Security.dll" isassembly="False">
+		<environments.string value="WindowsServer" xmlns="System,mscorlib" />
+	</files.filereference>
 	<libraries.libraryreference name="Connection" version="*" />
 </library>

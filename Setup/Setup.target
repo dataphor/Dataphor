@@ -5,7 +5,7 @@
 		<DataphorBuildExtensionsPath>$(MSBuildProjectDirectory)\Dataphor.Build</DataphorBuildExtensionsPath>
 		<WixToolPath Condition=" '$(WixToolPath)' == '' ">$(MSBuildProjectDirectory)\..\3rdParty\Wix</WixToolPath>
     <Major Condition=" '$(Major)' == '' ">3</Major>
-    <Minor Condition=" '$(Minor)' == '' ">0</Minor>
+    <Minor Condition=" '$(Minor)' == '' ">1</Minor>
     <Release Condition=" '$(Release)' == '' ">0</Release>
     <Revision Condition=" '$(Revision)' == '' ">0</Revision>
     
@@ -47,8 +47,8 @@
     <SyncWiXFiles WiXFile="Files.wxs" ComponentID="BinFiles" ComponentGroupID ="BinFilesGroup" SourceFiles="@(BinFiles)" />
     
   </Target>
-  
     
+
   <!-- Synchronize WebClientFiles -->
   <ItemGroup>
     <WebClientFiles Include="..\Deploy\WebClient\**\*.*" />
@@ -57,8 +57,17 @@
     <Message Text="Synchronize Web Client files with WiX." />
     <SyncWiXFiles WiXFile="Files.wxs" ComponentID="WebClientFiles" ComponentGroupID ="WebClientFilesGroup" SourceFiles="@(WebClientFiles)" />
   </Target>
-  
-  
+
+
+  <!-- Synchronize DataphoriaWebFiles -->
+  <ItemGroup>
+    <DataphoriaWebFiles Include="..\Deploy\Dataphoria.Web\**\*.*" />
+  </ItemGroup>
+  <Target Name="SyncDataphoriaWeb" >
+    <Message Text="Synchronize Dataphoria Web Client files with WiX." />
+    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="DataphoriaWebFiles" ComponentGroupID ="DataphoriaWebFilesGroup" SourceFiles="@(DataphoriaWebFiles)" />
+  </Target>
+
   
 	<!-- Build Dataphor Client Setup -->
 	<Target Name="BuildDataphorSetup" >
@@ -67,5 +76,5 @@
 	</Target>
 
 	<!-- Main Build -->
-	<Target Name="Build" DependsOnTargets="SyncDocumentation; SyncBin; SyncLibraries; SyncWebClient" />
+	<Target Name="Build" DependsOnTargets="SyncDocumentation; SyncBin; SyncLibraries; SyncWebClient; SyncDataphoriaWeb" />
 </Project>

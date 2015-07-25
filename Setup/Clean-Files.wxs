@@ -5,6 +5,8 @@
     </ComponentGroup>
     <ComponentGroup Id="WebClientFilesGroup">
     </ComponentGroup>
+    <ComponentGroup Id="DataphoriaWebFilesGroup">
+    </ComponentGroup>
     <ComponentGroup Id="LibraryFilesGroup">
     </ComponentGroup>    
     <DirectoryRef Id="TARGETDIR">
@@ -31,6 +33,10 @@
           </Directory>
           <Directory Id="WebClient" Name="Web Client">
             <Component Id="WebClientFiles" Guid="33C2127E-AD18-478a-BE0E-318D531E2CA3" DiskId="1">
+            </Component>
+          </Directory>
+          <Directory Id="DataphoriaWeb" Name="Dataphoria Web">
+            <Component Id="DataphoriaWebFiles" Guid="279AB028-F88D-477D-B05E-928B05A46E5E" DiskId="1">
             </Component>
           </Directory>
         </Directory>

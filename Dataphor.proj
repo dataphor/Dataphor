@@ -72,6 +72,24 @@
 	</Target>
 
 	<ItemGroup>
+		<DataphoriaWebBinFiles Include="Dataphoria\Dataphoria.Web\bin\*.dll;Dataphoria\Dataphoria.Web\bin\amd64\*.*;Dataphoria\Dataphoria.Web\bin\x86\*.*" />
+		<DataphoriaWebContentFiles Include="Dataphoria\Dataphoria.Web\Content\**\*.*"/>
+		<DataphoriaWebImageFiles Include="Dataphoria\Dataphoria.Web\Images\**\*.*"/>
+		<DataphoriaWebScriptFiles Include="Dataphoria\Dataphoria.Web\Scripts\**\*.*"/>
+		<DataphoriaWebViewFiles Include="Dataphoria\Dataphoria.Web\Views\**\*.*"/>
+		<DataphoriaWebMainFiles Include="Dataphoria\Dataphoria.Web\*.asax;Dataphoria\Dataphoria.Web\Web.Config"/>
+	</ItemGroup>
+	<Target Name="CopyDataphoriaWeb">
+		<Message Text="Copying Dataphoria.Web files into deploy..." />
+		<Copy SourceFiles="@(DataphoriaWebMainFiles)" DestinationFolder="Deploy\Dataphoria.Web" />
+		<Copy SourceFiles="@(DataphoriaWebBinFiles)" DestinationFolder="Deploy\Dataphoria.Web\bin\%(RecursiveDir)" />
+		<Copy SourceFiles="@(DataphoriaWebContentFiles)" DestinationFolder="Deploy\Dataphoria.Web\Content\%(RecursiveDir)" />
+		<Copy SourceFiles="@(DataphoriaWebImageFiles)" DestinationFolder="Deploy\Dataphoria.Web\Images\%(RecursiveDir)" />
+		<Copy SourceFiles="@(DataphoriaWebScriptFiles)" DestinationFolder="Deploy\Dataphoria.Web\Scripts\%(RecursiveDir)" />
+		<Copy SourceFiles="@(DataphoriaWebViewFiles)" DestinationFolder="Deploy\Dataphoria.Web\Views\%(RecursiveDir)" />
+	</Target>
+
+	<ItemGroup>
 		<DocumentationFiles Include="Documentation\*.chm;Documentation\*.pdf" />
 	</ItemGroup>
 	<Target Name="CopyDocumentation">
@@ -79,10 +97,10 @@
 		<Copy SourceFiles="@(DocumentationFiles)" DestinationFolder="Deploy\Documentation" />
 	</Target>
 
-	<Target Name="Build" DependsOnTargets="BuildDataphor; DeleteDeploy; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
+	<Target Name="Build" DependsOnTargets="BuildDataphor; DeleteDeploy; CopyDataphor; CopyLibraries; CopyWebClient; CopyDataphoriaWeb; CopyDocumentation">
 	</Target>
 
-	<Target Name="Rebuild" DependsOnTargets="RebuildDataphor; DeleteDeploy; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
+	<Target Name="Rebuild" DependsOnTargets="RebuildDataphor; DeleteDeploy; CopyDataphor; CopyLibraries; CopyWebClient; CopyDataphoriaWeb; CopyDocumentation">
 	</Target>
 
 	<Target Name="Clean" DependsOnTargets="DeleteBinFiles; CleanDataphor; DeleteDeploy">
