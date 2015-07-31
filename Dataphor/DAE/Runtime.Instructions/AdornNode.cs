@@ -4,6 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 #define UseReferenceDerivation
+#define UseElaborable
 	
 using System;
 using System.Text;
@@ -375,8 +376,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((Order != null) && !TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 			
-			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#if UseReferenceDerivation
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
 				CopyReferences(plan, SourceTableVar);
+			#endif
 			
 			foreach (ReferenceDefinition referenceDefinition in _references)
 			{
@@ -509,6 +514,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				(
 					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
+				) |
+				(
+					plan.CursorContext.CursorCapabilities & SourceNode.CursorCapabilities & CursorCapability.Elaborable
 				);
 			_cursorIsolation = plan.CursorContext.CursorIsolation;
 			if (SourceNode.Order != null)

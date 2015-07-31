@@ -5,6 +5,7 @@
 */
 
 #define UseReferenceDerivation
+#define UseElaborable
 #define NILPROPOGATION
 
 using System;
@@ -2157,8 +2158,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((Order != null) && !TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 
-			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#if UseReferenceDerivation
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
 				CopyReferences(plan, SourceTableVar);
+			#endif
 		}
 
 		public override Statement EmitStatement(EmitMode mode)

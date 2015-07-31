@@ -5,6 +5,7 @@
 */
 #define USEINCLUDENILSWITHBROWSE
 #define UseReferenceDerivation
+#define UseElaborable
 	
 using System;
 using System.Text;
@@ -72,8 +73,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			CopyKeys(SourceTableVar.Keys);
 			CopyOrders(SourceTableVar.Orders);
 
-			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#if UseReferenceDerivation
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
 				CopyReferences(plan, SourceTableVar);
+			#endif
 			
 			DetermineOrder(plan);
 			
@@ -183,6 +188,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					(
 						(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 						(SourceNode.CursorCapabilities & CursorCapability.Updateable)
+					) |
+					(
+						plan.CursorContext.CursorCapabilities & SourceNode.CursorCapabilities & CursorCapability.Elaborable
 					);
 			}
 			else
@@ -276,6 +284,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				(
 					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
+				) |
+				(
+					plan.CursorContext.CursorCapabilities & SourceNode.CursorCapabilities & CursorCapability.Elaborable
 				);
 			_cursorIsolation = plan.CursorContext.CursorIsolation;
 		}
@@ -371,6 +382,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				(
 					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
+				) |
+				(
+					plan.CursorContext.CursorCapabilities & SourceNode.CursorCapabilities & CursorCapability.Elaborable
 				);
 			_cursorIsolation = plan.CursorContext.CursorIsolation;
 		}

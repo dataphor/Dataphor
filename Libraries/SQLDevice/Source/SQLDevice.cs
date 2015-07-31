@@ -600,7 +600,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			tableNode.CursorType = plan.CursorContext.CursorType;
 			tableNode.CursorCapabilities = 
 				CursorCapability.Navigable | 
-				(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
+				(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) |
+				(plan.CursorContext.CursorCapabilities & CursorCapability.Elaborable);
 			tableNode.CursorIsolation = plan.CursorContext.CursorIsolation;
 			
 			// Ensure that the node has an order that is a superset of some key

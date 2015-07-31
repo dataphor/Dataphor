@@ -256,7 +256,8 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		searchable | 
 		updateable | 
 		truncateable | 
-		countable
+		countable |
+		elaborable
 
 	<cursor isolation> ::=
 		isolation (none | chaos | browse | stability | isolated)

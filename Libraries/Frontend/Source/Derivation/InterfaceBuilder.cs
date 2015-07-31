@@ -56,7 +56,7 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 			}
 			else
 			{
-				IServerExpressionPlan plan = ((IServerProcess)_process).PrepareExpression(String.Format(@"select {0}", _seed.Query), null);
+				IServerExpressionPlan plan = ((IServerProcess)_process).PrepareExpression(String.Format(@"select {0}{1}", _seed.Query, _seed.Query.IndexOf(Keywords.Capabilities) > 0 || !_seed.Elaborate ? "" : String.Format(" {0} {{ elaborable }}", Keywords.Capabilities)), null);
 				try
 				{
 					_elaborableTableVarName = plan.TableVar.Name;

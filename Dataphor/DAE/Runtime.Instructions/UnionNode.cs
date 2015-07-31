@@ -4,6 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 #define UseReferenceDerivation
+#define UseElaborable
 	
 using System;
 using System.Text;
@@ -95,13 +96,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Order order in RightTableVar.Orders)
 				if (!TableVar.Orders.Contains(order))
 					TableVar.Orders.Add(CopyOrder(order));
-					
+			
+			#if UseReferenceDerivation		
 			// NOTE: This isn't exactly the same, as the previous logic would copy source references from both tables, then target references from both tables. Shouldn't be an issue but....
-			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
 			{
 				CopyReferences(plan, LeftTableVar);
 				CopyReferences(plan, RightTableVar);
 			}
+			#endif
 		}
 		
 		private void DetermineOrder(Plan plan)
@@ -140,6 +145,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(LeftNode.CursorCapabilities & CursorCapability.Updateable) |
 						(RightNode.CursorCapabilities & CursorCapability.Updateable)
 					)
+				) |
+				(
+					plan.CursorContext.CursorCapabilities & (LeftNode.CursorCapabilities | RightNode.CursorCapabilities) & CursorCapability.Elaborable
 				);
 
 			_cursorIsolation = plan.CursorContext.CursorIsolation;

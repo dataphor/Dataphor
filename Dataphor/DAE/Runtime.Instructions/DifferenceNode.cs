@@ -169,6 +169,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(LeftNode.CursorCapabilities & CursorCapability.Updateable) &
 					(RightNode.CursorCapabilities & CursorCapability.Updateable)
+				) |
+				(
+					plan.CursorContext.CursorCapabilities & (LeftNode.CursorCapabilities | RightNode.CursorCapabilities) & CursorCapability.Elaborable
 				);
 
 			_cursorIsolation = plan.CursorContext.CursorIsolation;

@@ -5,6 +5,7 @@
 */
 
 #define UseReferenceDerivation
+#define UseElaborable
 //#define ENFORCERESTRICTIONPREDICATE
 	
 using System;
@@ -603,8 +604,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						
 			CopyOrders(SourceTableVar.Orders);
 
-			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#if UseReferenceDerivation
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
 				CopyReferences(plan, SourceTableVar);
+			#endif
 
 			if ((Order == null) && (SourceNode.Order != null))
 				Order = CopyOrder(SourceNode.Order);
@@ -825,6 +830,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				(
 					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
+				) |
+				(
+					plan.CursorContext.CursorCapabilities & SourceNode.CursorCapabilities & CursorCapability.Elaborable
 				);
 			_cursorIsolation = plan.CursorContext.CursorIsolation;
 		}
