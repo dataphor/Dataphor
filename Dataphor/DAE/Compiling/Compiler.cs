@@ -3445,10 +3445,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.TableVarConstraint CompileTableVarConstraint(Plan plan, Schema.TableVar tableVar, CreateConstraintDefinition constraint)
 		{
-			if (constraint is ConstraintDefinition)
-				return Compiler.CompileRowConstraint(plan, tableVar, (ConstraintDefinition)constraint);
-			else
-				return Compiler.CompileTransitionConstraint(plan, tableVar, (TransitionConstraintDefinition)constraint);
+			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+			try
+			{
+				if (constraint is ConstraintDefinition)
+					return Compiler.CompileRowConstraint(plan, tableVar, (ConstraintDefinition)constraint);
+				else
+					return Compiler.CompileTransitionConstraint(plan, tableVar, (TransitionConstraintDefinition)constraint);
+			}
+			finally
+			{
+				plan.PopCursorContext();
+			}
 		}
 		
 		public static void CompileTableVarConstraints(Plan plan, Schema.TableVar tableVar, CreateConstraintDefinitions constraints)
@@ -6857,32 +6865,40 @@ namespace Alphora.Dataphor.DAE.Compiling
 					plan.PushCreationObject(node.Constraint);
 					try
 					{
-						node.Constraint.Node = CompileBooleanExpression(plan, localStatement.Expression);
-						if (!(node.Constraint.Node.IsFunctional && node.Constraint.Node.IsDeterministic))
-							throw new CompilerException(CompilerException.Codes.InvalidConstraintExpression, localStatement.Expression);
-
-						node.Constraint.Node = OptimizeNode(plan, node.Constraint.Node);						
-						node.Constraint.Node = BindNode(plan, node.Constraint.Node);						
-
-						string customMessage = node.Constraint.GetCustomMessage();
-						if (!String.IsNullOrEmpty(customMessage))
+						plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+						try
 						{
-							try
+							node.Constraint.Node = CompileBooleanExpression(plan, localStatement.Expression);
+							if (!(node.Constraint.Node.IsFunctional && node.Constraint.Node.IsDeterministic))
+								throw new CompilerException(CompilerException.Codes.InvalidConstraintExpression, localStatement.Expression);
+
+							node.Constraint.Node = OptimizeNode(plan, node.Constraint.Node);						
+							node.Constraint.Node = BindNode(plan, node.Constraint.Node);						
+
+							string customMessage = node.Constraint.GetCustomMessage();
+							if (!String.IsNullOrEmpty(customMessage))
 							{
-								PlanNode violationMessageNode = CompileTypedExpression(plan, new D4.Parser().ParseExpression(customMessage), plan.DataTypes.SystemString);
-								violationMessageNode = OptimizeNode(plan, violationMessageNode);
-								violationMessageNode = BindNode(plan, violationMessageNode);
-								node.Constraint.ViolationMessageNode = violationMessageNode;
+								try
+								{
+									PlanNode violationMessageNode = CompileTypedExpression(plan, new D4.Parser().ParseExpression(customMessage), plan.DataTypes.SystemString);
+									violationMessageNode = OptimizeNode(plan, violationMessageNode);
+									violationMessageNode = BindNode(plan, violationMessageNode);
+									node.Constraint.ViolationMessageNode = violationMessageNode;
+								}
+								catch (Exception exception)
+								{
+									throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, localStatement.Expression, exception, node.Constraint.Name);
+								}
 							}
-							catch (Exception exception)
-							{
-								throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, localStatement.Expression, exception, node.Constraint.Name);
-							}
+						
+							node.Constraint.DetermineRemotable(plan.CatalogDeviceSession);
+						
+							return node;
 						}
-						
-						node.Constraint.DetermineRemotable(plan.CatalogDeviceSession);
-						
-						return node;
+						finally
+						{
+							plan.PopCursorContext();
+						}
 					}
 					finally
 					{
@@ -7083,22 +7099,30 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.TransitionConstraint CompileSourceReferenceConstraint(Plan plan, Schema.Reference reference)
 		{
-			Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Source", reference.Name));
-			constraint.Library = reference.Library;
-			constraint.MergeMetaData(reference.MetaData);
-			if (constraint.MetaData == null)
-				constraint.MetaData = new MetaData();
-			if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.SourceKey.Columns))
-				constraint.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForSourceReference(plan, reference)));
-			constraint.IsGenerated = true;
-			constraint.ConstraintType = Schema.ConstraintType.Database;
-			CompileSourceInsertConstraintNodeForReference(plan, reference, constraint);
-			constraint.InsertColumnFlags = new BitArray(reference.SourceTable.DataType.Columns.Count);
-			for (int index = 0; index < constraint.InsertColumnFlags.Length; index++)
-				constraint.InsertColumnFlags[index] = reference.SourceKey.Columns.ContainsName(reference.SourceTable.DataType.Columns[index].Name);
-			CompileSourceUpdateConstraintNodeForReference(plan, reference, constraint);
-			constraint.UpdateColumnFlags = (BitArray)constraint.InsertColumnFlags.Clone();
-			return constraint;
+			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+			try
+			{
+				Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Source", reference.Name));
+				constraint.Library = reference.Library;
+				constraint.MergeMetaData(reference.MetaData);
+				if (constraint.MetaData == null)
+					constraint.MetaData = new MetaData();
+				if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.SourceKey.Columns))
+					constraint.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForSourceReference(plan, reference)));
+				constraint.IsGenerated = true;
+				constraint.ConstraintType = Schema.ConstraintType.Database;
+				CompileSourceInsertConstraintNodeForReference(plan, reference, constraint);
+				constraint.InsertColumnFlags = new BitArray(reference.SourceTable.DataType.Columns.Count);
+				for (int index = 0; index < constraint.InsertColumnFlags.Length; index++)
+					constraint.InsertColumnFlags[index] = reference.SourceKey.Columns.ContainsName(reference.SourceTable.DataType.Columns[index].Name);
+				CompileSourceUpdateConstraintNodeForReference(plan, reference, constraint);
+				constraint.UpdateColumnFlags = (BitArray)constraint.InsertColumnFlags.Clone();
+				return constraint;
+			}
+			finally
+			{
+				plan.PopCursorContext();
+			}
 		}
 		
 		// Construct an insert constraint to validate rows inserted into the source table of the reference
@@ -7316,33 +7340,41 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.TransitionConstraint CompileTargetReferenceConstraint(Plan plan, Schema.Reference reference)
 		{
-			Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Target", reference.Name));
-			constraint.Library = reference.Library;
-			constraint.MergeMetaData(reference.MetaData);
-			if (constraint.MetaData == null)
-				constraint.MetaData = new MetaData();
-			if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.TargetKey.Columns))
-				constraint.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForTargetReference(plan, reference)));
-			constraint.IsGenerated = true;
-			constraint.ConstraintType = Schema.ConstraintType.Database;
+			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+			try
+			{
+				Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Target", reference.Name));
+				constraint.Library = reference.Library;
+				constraint.MergeMetaData(reference.MetaData);
+				if (constraint.MetaData == null)
+					constraint.MetaData = new MetaData();
+				if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.TargetKey.Columns))
+					constraint.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForTargetReference(plan, reference)));
+				constraint.IsGenerated = true;
+				constraint.ConstraintType = Schema.ConstraintType.Database;
 			
-			if (reference.UpdateReferenceAction == ReferenceAction.Require)
-			{
-				CompileTargetUpdateConstraintNodeForReference(plan, reference, constraint);
-				constraint.UpdateColumnFlags = new BitArray(reference.TargetTable.DataType.Columns.Count);
-				for (int index = 0; index < constraint.UpdateColumnFlags.Length; index++)
-					constraint.UpdateColumnFlags[index] = reference.TargetKey.Columns.ContainsName(reference.TargetTable.DataType.Columns[index].Name);
-			}
+				if (reference.UpdateReferenceAction == ReferenceAction.Require)
+				{
+					CompileTargetUpdateConstraintNodeForReference(plan, reference, constraint);
+					constraint.UpdateColumnFlags = new BitArray(reference.TargetTable.DataType.Columns.Count);
+					for (int index = 0; index < constraint.UpdateColumnFlags.Length; index++)
+						constraint.UpdateColumnFlags[index] = reference.TargetKey.Columns.ContainsName(reference.TargetTable.DataType.Columns[index].Name);
+				}
 				
-			if (reference.DeleteReferenceAction == ReferenceAction.Require)
-			{
-				CompileTargetDeleteConstraintNodeForReference(plan, reference, constraint);
-				constraint.DeleteColumnFlags = new BitArray(reference.TargetTable.DataType.Columns.Count);
-				for (int index = 0; index < constraint.DeleteColumnFlags.Length; index++)
-					constraint.DeleteColumnFlags[index] = reference.TargetKey.Columns.ContainsName(reference.TargetTable.DataType.Columns[index].Name);
-			}
+				if (reference.DeleteReferenceAction == ReferenceAction.Require)
+				{
+					CompileTargetDeleteConstraintNodeForReference(plan, reference, constraint);
+					constraint.DeleteColumnFlags = new BitArray(reference.TargetTable.DataType.Columns.Count);
+					for (int index = 0; index < constraint.DeleteColumnFlags.Length; index++)
+						constraint.DeleteColumnFlags[index] = reference.TargetKey.Columns.ContainsName(reference.TargetTable.DataType.Columns[index].Name);
+				}
 				
-			return constraint;
+				return constraint;
+			}
+			finally
+			{
+				plan.PopCursorContext();
+			}
 		}
 		
 		// Construct an update constraint to validate rows updated in the target table of the reference
@@ -7903,76 +7935,84 @@ namespace Alphora.Dataphor.DAE.Compiling
 			constraint.ConstraintType = Schema.ConstraintType.Database;
 			constraint.IsDeferred = false;
 			constraint.IsGenerated = true;
-			
-			constraint.Node = 
-				key.IsSparse 
-					?
-						CompileBooleanExpression
-						(
-							plan, 
-							new BinaryExpression
+
+			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+			try
+			{
+				constraint.Node = 
+					key.IsSparse 
+						?
+							CompileBooleanExpression
 							(
-								new CallExpression
+								plan, 
+								new BinaryExpression
 								(
-									"System.Count", 
-									new Expression[]
-									{
-										new ProjectExpression
-										(
+									new CallExpression
+									(
+										"System.Count", 
+										new Expression[]
+										{
+											new ProjectExpression
+											(
+												new RestrictExpression
+												(
+													new IdentifierExpression(tableVar.Name),
+													BuildKeyIsNotNilExpression(plan, key.Columns)
+												),
+												key.Columns.ColumnNames
+											)
+										}
+									), 
+									Instructions.Equal, 
+									new CallExpression
+									(
+										"System.Count", 
+										new Expression[]
+										{
 											new RestrictExpression
 											(
 												new IdentifierExpression(tableVar.Name),
 												BuildKeyIsNotNilExpression(plan, key.Columns)
-											),
-											key.Columns.ColumnNames
-										)
-									}
-								), 
-								Instructions.Equal, 
-								new CallExpression
-								(
-									"System.Count", 
-									new Expression[]
-									{
-										new RestrictExpression
-										(
-											new IdentifierExpression(tableVar.Name),
-											BuildKeyIsNotNilExpression(plan, key.Columns)
-										)
-									}
+											)
+										}
+									)
 								)
 							)
-						)
-					:
-						CompileBooleanExpression
-						(
-							plan, 
-							new BinaryExpression
+						:
+							CompileBooleanExpression
 							(
-								new CallExpression
+								plan, 
+								new BinaryExpression
 								(
-									"System.Count", 
-									new Expression[]
-									{
-										new ProjectExpression
-										(
-											new IdentifierExpression(tableVar.Name), 
-											key.Columns.ColumnNames
-										)
-									}
-								), 
-								Instructions.Equal, 
-								new CallExpression
-								(
-									"System.Count", 
-									new Expression[]{new IdentifierExpression(tableVar.Name)}
+									new CallExpression
+									(
+										"System.Count", 
+										new Expression[]
+										{
+											new ProjectExpression
+											(
+												new IdentifierExpression(tableVar.Name), 
+												key.Columns.ColumnNames
+											)
+										}
+									), 
+									Instructions.Equal, 
+									new CallExpression
+									(
+										"System.Count", 
+										new Expression[]{new IdentifierExpression(tableVar.Name)}
+									)
 								)
-							)
-						);
+							);
 				
-			constraint.Node = OptimizeNode(plan, constraint.Node);
-			constraint.Node = BindNode(plan, constraint.Node);
-			return constraint;
+				constraint.Node = OptimizeNode(plan, constraint.Node);
+				constraint.Node = BindNode(plan, constraint.Node);
+				return constraint;
+			}
+			finally
+			{
+				plan.PopCursorContext();
+			}
 		}
 		
 		// Constructs a catalog constraint to enforce the reference
@@ -7988,6 +8028,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 			constraint.MergeMetaData(reference.MetaData);
 			constraint.ConstraintType = Schema.ConstraintType.Database;
 			constraint.IsGenerated = true;
+
+			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+			try
+			{
 //			if (AReference.IsSessionObject)
 //				LConstraint.SessionObjectName = LConstraint.Name; // This is to allow the constraint to reference session-specific objects if necessary
 //			APlan.PushCreationObject(LConstraint);
@@ -8142,6 +8186,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 //			{
 //				APlan.PopCreationObject();
 //			}
+			}
+			finally
+			{
+				plan.PopCursorContext();
+			}
 		}
 		
 		protected static void AddSpecialsForScalarType(Schema.ScalarType scalarType, Schema.Objects specials)
@@ -8280,279 +8329,287 @@ namespace Alphora.Dataphor.DAE.Compiling
 									node.Reference
 								);
 
-							// Construct UpdateReferenceAction nodes if necessary			
-							PlanNode[] expressionNodes;
-							PlanNode sourceNode;
-							switch (node.Reference.UpdateReferenceAction)
+							plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+							try
 							{
-								case ReferenceAction.Cascade:
-									node.Reference.UpdateHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
-									node.Reference.UpdateHandler.Owner = node.Reference.Owner;
-									node.Reference.UpdateHandler.Library = node.Reference.Library;
-									node.Reference.UpdateHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
-									node.Reference.UpdateHandler.EventType = EventType.AfterUpdate;
-									node.Reference.UpdateHandler.IsGenerated = true;
-									node.Reference.UpdateHandler.Operator.IsGenerated = true;
-									node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "AOldRow", new Schema.RowType(true)));
-									node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "ANewRow", new Schema.RowType(true)));
-									node.Reference.UpdateHandler.Operator.Owner = node.Reference.Owner;
-									node.Reference.UpdateHandler.Operator.Library = node.Reference.Library;
-									node.Reference.UpdateHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.UpdateHandler.Operator.DisplayName), 0, 1);
-									node.Reference.UpdateHandler.Operator.SessionObjectName = node.Reference.UpdateHandler.Operator.OperatorName;
-									node.Reference.UpdateHandler.Operator.SessionID = plan.SessionID;
-									plan.PushStatementContext(new StatementContext(StatementType.Update));
-									try
-									{
-										sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
-									}
-									finally
-									{
-										plan.PopStatementContext();
-									}
-									node.Reference.UpdateHandler.Operator.Block.BlockNode = CompileUpdateCascadeNodeForReference(plan, sourceNode, node.Reference);
-									node.Reference.UpdateHandler.PlanNode = node.Reference.UpdateHandler.Operator.Block.BlockNode;
-								break;
-								
-								case ReferenceAction.Clear:
-									expressionNodes = new PlanNode[node.Reference.SourceKey.Columns.Count];
-									for (int index = 0; index < node.Reference.SourceKey.Columns.Count; index++)
-									{
-										Schema.ScalarType scalarType = node.Reference.SourceKey.Columns[index].DataType as Schema.ScalarType;
-										if (scalarType != null)
-										{
-											Schema.Special special = Compiler.FindDefaultSpecialForScalarType(plan, scalarType);
-											if (special != null)
-												expressionNodes[index] = EmitCallNode(plan, special.Selector.OperatorName, new PlanNode[]{});
-										}
-										
-										if (expressionNodes[index] == null)
-										{
-											if (!node.Reference.SourceKey.Columns[index].IsNilable)
-												throw new CompilerException(CompilerException.Codes.CannotClearSourceColumn, statement, node.Reference.SourceKey.Columns[index].Name);
-											expressionNodes[index] = EmitNilNode(plan);
-										}
-									}
-
-									node.Reference.UpdateHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
-									node.Reference.UpdateHandler.Owner = node.Reference.Owner;
-									node.Reference.UpdateHandler.Library = node.Reference.Library;
-									node.Reference.UpdateHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
-									node.Reference.UpdateHandler.EventType = EventType.AfterUpdate;
-									node.Reference.UpdateHandler.IsGenerated = true;
-									node.Reference.UpdateHandler.Operator.IsGenerated = true;
-									node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "AOldRow", new Schema.RowType(true)));
-									node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "ANewRow", new Schema.RowType(true)));
-									node.Reference.UpdateHandler.Operator.Owner = node.Reference.Owner;
-									node.Reference.UpdateHandler.Operator.Library = node.Reference.Library;
-									node.Reference.UpdateHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.UpdateHandler.Operator.DisplayName), 0, 1);
-									node.Reference.UpdateHandler.Operator.SessionObjectName = node.Reference.UpdateHandler.Operator.OperatorName;
-									node.Reference.UpdateHandler.Operator.SessionID = plan.SessionID;
-									plan.PushStatementContext(new StatementContext(StatementType.Update));
-									try
-									{
-										sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
-									}
-									finally
-									{
-										plan.PopStatementContext();
-									}
-									node.Reference.UpdateHandler.Operator.Block.BlockNode = CompileUpdateSetNodeForReference(plan, sourceNode, node.Reference, expressionNodes);
-									node.Reference.UpdateHandler.PlanNode = node.Reference.UpdateHandler.Operator.Block.BlockNode;
-								break;
-
-								case ReferenceAction.Set:
-									node.Reference.UpdateReferenceExpressions.AddRange(localStatement.ReferencesDefinition.UpdateReferenceExpressions);
-									expressionNodes = new PlanNode[node.Reference.SourceKey.Columns.Count];
-									for (int index = 0; index < localStatement.ReferencesDefinition.UpdateReferenceExpressions.Count; index++)
-										expressionNodes[index] = CompileExpression(plan, localStatement.ReferencesDefinition.UpdateReferenceExpressions[index]);
-
-									node.Reference.UpdateHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
-									node.Reference.UpdateHandler.Owner = node.Reference.Owner;
-									node.Reference.UpdateHandler.Library = node.Reference.Library;
-									node.Reference.UpdateHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
-									node.Reference.UpdateHandler.EventType = EventType.AfterUpdate;
-									node.Reference.UpdateHandler.IsGenerated = true;
-									node.Reference.UpdateHandler.Operator.IsGenerated = true;
-									node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "AOldRow", new Schema.RowType(true)));
-									node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "ANewRow", new Schema.RowType(true)));
-									node.Reference.UpdateHandler.Operator.Owner = node.Reference.Owner;
-									node.Reference.UpdateHandler.Operator.Library = node.Reference.Library;
-									node.Reference.UpdateHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.UpdateHandler.Operator.DisplayName), 0, 1);
-									node.Reference.UpdateHandler.Operator.SessionObjectName = node.Reference.UpdateHandler.Operator.OperatorName;
-									node.Reference.UpdateHandler.Operator.SessionID = plan.SessionID;
-									plan.PushStatementContext(new StatementContext(StatementType.Update));
-									try
-									{
-										sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
-									}
-									finally
-									{
-										plan.PopStatementContext();
-									}
-									node.Reference.UpdateHandler.Operator.Block.BlockNode =
-										CompileUpdateNodeForReference
-										(
-											plan, 
-											sourceNode,
-											node.Reference,
-											expressionNodes,
-											true // IsUpdate
-										);
-									node.Reference.UpdateHandler.PlanNode = node.Reference.UpdateHandler.Operator.Block.BlockNode;
-								break;
-							}
-
-							// Construct DeleteReferenceAction nodes if necessary			
-							switch (node.Reference.DeleteReferenceAction)
-							{
-								case ReferenceAction.Cascade:
-									node.Reference.DeleteHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
-									node.Reference.DeleteHandler.Owner = node.Reference.Owner;
-									node.Reference.DeleteHandler.Library = node.Reference.Library;
-									node.Reference.DeleteHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
-									node.Reference.DeleteHandler.EventType = EventType.AfterDelete;
-									node.Reference.DeleteHandler.IsGenerated = true;
-									node.Reference.DeleteHandler.Operator.IsGenerated = true;
-									node.Reference.DeleteHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.DeleteHandler.Operator, "ARow", new Schema.RowType(true)));
-									node.Reference.DeleteHandler.Operator.Owner = node.Reference.Owner;
-									node.Reference.DeleteHandler.Operator.Library = node.Reference.Library;
-									node.Reference.DeleteHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.DeleteHandler.Operator.DisplayName), 0, 1);
-									node.Reference.DeleteHandler.Operator.SessionObjectName = node.Reference.DeleteHandler.Operator.OperatorName;
-									node.Reference.DeleteHandler.Operator.SessionID = plan.SessionID;
-									plan.PushStatementContext(new StatementContext(StatementType.Delete));
-									try
-									{
-										sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
-									}
-									finally
-									{
-										plan.PopStatementContext();
-									}
-									node.Reference.DeleteHandler.Operator.Block.BlockNode =
-										CompileDeleteCascadeNodeForReference
-										(
-											plan, 
-											sourceNode,
-											node.Reference
-										);
-									node.Reference.DeleteHandler.PlanNode = node.Reference.DeleteHandler.Operator.Block.BlockNode;
-								break;
-
-								case ReferenceAction.Clear:
-									expressionNodes = new PlanNode[node.Reference.SourceKey.Columns.Count];
-									for (int index = 0; index < node.Reference.SourceKey.Columns.Count; index++)
-									{
-										Schema.ScalarType scalarType = node.Reference.SourceKey.Columns[index].DataType as Schema.ScalarType;
-										if (scalarType != null)
-										{
-											Schema.Special special = Compiler.FindDefaultSpecialForScalarType(plan, scalarType);
-											if (special != null)
-												expressionNodes[index] = EmitCallNode(plan, special.Selector.OperatorName, new PlanNode[]{});
-										}
-										
-										if (expressionNodes[index] == null)
-										{
-											if (!node.Reference.SourceKey.Columns[index].IsNilable)
-												throw new CompilerException(CompilerException.Codes.CannotClearSourceColumn, statement, node.Reference.SourceKey.Columns[index].Name);
-											expressionNodes[index] = EmitNilNode(plan);
-										}
-									}
-
-									node.Reference.DeleteHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
-									node.Reference.DeleteHandler.Owner = node.Reference.Owner;
-									node.Reference.DeleteHandler.Library = node.Reference.Library;
-									node.Reference.DeleteHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
-									node.Reference.DeleteHandler.EventType = EventType.AfterDelete;
-									node.Reference.DeleteHandler.IsGenerated = true;
-									node.Reference.DeleteHandler.Operator.IsGenerated = true;
-									node.Reference.DeleteHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.DeleteHandler.Operator, "ARow", new Schema.RowType(true)));
-									node.Reference.DeleteHandler.Operator.Owner = node.Reference.Owner;
-									node.Reference.DeleteHandler.Operator.Library = node.Reference.Library;
-									node.Reference.DeleteHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.DeleteHandler.Operator.DisplayName), 0, 1);
-									node.Reference.DeleteHandler.Operator.SessionObjectName = node.Reference.DeleteHandler.Operator.OperatorName;
-									node.Reference.DeleteHandler.Operator.SessionID = plan.SessionID;
-									plan.PushStatementContext(new StatementContext(StatementType.Update));
-									try
-									{
-										sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
-									}
-									finally
-									{
-										plan.PopStatementContext();
-									}
-									node.Reference.DeleteHandler.Operator.Block.BlockNode =
-										CompileDeleteSetNodeForReference
-										(
-											plan, 
-											sourceNode,
-											node.Reference,
-											expressionNodes
-										);
-									node.Reference.DeleteHandler.PlanNode = node.Reference.DeleteHandler.Operator.Block.BlockNode;
-								break;
-
-								case ReferenceAction.Set:
-									node.Reference.DeleteReferenceExpressions.AddRange(localStatement.ReferencesDefinition.DeleteReferenceExpressions);
-									expressionNodes = new PlanNode[node.Reference.SourceKey.Columns.Count];
-									for (int index = 0; index < localStatement.ReferencesDefinition.DeleteReferenceExpressions.Count; index++)
-										expressionNodes[index] = CompileExpression(plan, localStatement.ReferencesDefinition.DeleteReferenceExpressions[index]);
-									
-									node.Reference.DeleteHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
-									node.Reference.DeleteHandler.Owner = node.Reference.Owner;
-									node.Reference.DeleteHandler.Library = node.Reference.Library;
-									node.Reference.DeleteHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
-									node.Reference.DeleteHandler.EventType = EventType.AfterDelete;
-									node.Reference.DeleteHandler.IsGenerated = true;
-									node.Reference.DeleteHandler.Operator.IsGenerated = true;
-									node.Reference.DeleteHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.DeleteHandler.Operator, "ARow", new Schema.RowType(true)));
-									node.Reference.DeleteHandler.Operator.Owner = node.Reference.Owner;
-									node.Reference.DeleteHandler.Operator.Library = node.Reference.Library;
-									node.Reference.DeleteHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.DeleteHandler.Operator.DisplayName), 0, 1);
-									node.Reference.DeleteHandler.Operator.SessionObjectName = node.Reference.DeleteHandler.Operator.OperatorName;
-									node.Reference.DeleteHandler.Operator.SessionID = plan.SessionID;
-									plan.PushStatementContext(new StatementContext(StatementType.Update));
-									try
-									{
-										sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
-									}
-									finally
-									{
-										plan.PopStatementContext();
-									}
-									node.Reference.DeleteHandler.Operator.Block.BlockNode =
-										CompileUpdateNodeForReference
-										(
-											plan,
-											sourceNode,
-											node.Reference,
-											expressionNodes,
-											false // IsUpdate
-										);
-									node.Reference.DeleteHandler.PlanNode = node.Reference.DeleteHandler.Operator.Block.BlockNode;
-								break;
-							}
-
-/*
- BTR 5/14/2006 -> This will not be necessary to check any longer, it is indeed the case that this is an error condition, but it would be
-indicative of other problems, a reference will never be attached as an explicit dependency of a reference.
-							// This should be an error condition as I cannot manufacture a case where a reference would be a dependency of a reference
-							// Reference inference used to attach references as dependencies of references to get views to serialize, but it no longer does
-							// because view serialization is done much more correctly now, and I think this is a by-product of that hack. BTR
-							if (LNode.Reference.HasDependencies())
-								for (int LIndex = 0; LIndex < LNode.Reference.Dependencies.Count; LIndex++)
+								// Construct UpdateReferenceAction nodes if necessary			
+								PlanNode[] expressionNodes;
+								PlanNode sourceNode;
+								switch (node.Reference.UpdateReferenceAction)
 								{
-									Schema.Object LObject = LNode.Reference.Dependencies.Objects[LIndex];
-									if ((LObject is Schema.Reference) || ((LObject == null) && APlan.Catalog.GetObjectHeaderByID(LNode.Reference.Dependencies.IDs[LIndex]).ObjectType == "Reference"))
-										Error.Fail("Invalid reference dependency");
+									case ReferenceAction.Cascade:
+										node.Reference.UpdateHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
+										node.Reference.UpdateHandler.Owner = node.Reference.Owner;
+										node.Reference.UpdateHandler.Library = node.Reference.Library;
+										node.Reference.UpdateHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
+										node.Reference.UpdateHandler.EventType = EventType.AfterUpdate;
+										node.Reference.UpdateHandler.IsGenerated = true;
+										node.Reference.UpdateHandler.Operator.IsGenerated = true;
+										node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "AOldRow", new Schema.RowType(true)));
+										node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "ANewRow", new Schema.RowType(true)));
+										node.Reference.UpdateHandler.Operator.Owner = node.Reference.Owner;
+										node.Reference.UpdateHandler.Operator.Library = node.Reference.Library;
+										node.Reference.UpdateHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.UpdateHandler.Operator.DisplayName), 0, 1);
+										node.Reference.UpdateHandler.Operator.SessionObjectName = node.Reference.UpdateHandler.Operator.OperatorName;
+										node.Reference.UpdateHandler.Operator.SessionID = plan.SessionID;
+										plan.PushStatementContext(new StatementContext(StatementType.Update));
+										try
+										{
+											sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
+										}
+										finally
+										{
+											plan.PopStatementContext();
+										}
+										node.Reference.UpdateHandler.Operator.Block.BlockNode = CompileUpdateCascadeNodeForReference(plan, sourceNode, node.Reference);
+										node.Reference.UpdateHandler.PlanNode = node.Reference.UpdateHandler.Operator.Block.BlockNode;
+									break;
+								
+									case ReferenceAction.Clear:
+										expressionNodes = new PlanNode[node.Reference.SourceKey.Columns.Count];
+										for (int index = 0; index < node.Reference.SourceKey.Columns.Count; index++)
+										{
+											Schema.ScalarType scalarType = node.Reference.SourceKey.Columns[index].DataType as Schema.ScalarType;
+											if (scalarType != null)
+											{
+												Schema.Special special = Compiler.FindDefaultSpecialForScalarType(plan, scalarType);
+												if (special != null)
+													expressionNodes[index] = EmitCallNode(plan, special.Selector.OperatorName, new PlanNode[]{});
+											}
+										
+											if (expressionNodes[index] == null)
+											{
+												if (!node.Reference.SourceKey.Columns[index].IsNilable)
+													throw new CompilerException(CompilerException.Codes.CannotClearSourceColumn, statement, node.Reference.SourceKey.Columns[index].Name);
+												expressionNodes[index] = EmitNilNode(plan);
+											}
+										}
+
+										node.Reference.UpdateHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
+										node.Reference.UpdateHandler.Owner = node.Reference.Owner;
+										node.Reference.UpdateHandler.Library = node.Reference.Library;
+										node.Reference.UpdateHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
+										node.Reference.UpdateHandler.EventType = EventType.AfterUpdate;
+										node.Reference.UpdateHandler.IsGenerated = true;
+										node.Reference.UpdateHandler.Operator.IsGenerated = true;
+										node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "AOldRow", new Schema.RowType(true)));
+										node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "ANewRow", new Schema.RowType(true)));
+										node.Reference.UpdateHandler.Operator.Owner = node.Reference.Owner;
+										node.Reference.UpdateHandler.Operator.Library = node.Reference.Library;
+										node.Reference.UpdateHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.UpdateHandler.Operator.DisplayName), 0, 1);
+										node.Reference.UpdateHandler.Operator.SessionObjectName = node.Reference.UpdateHandler.Operator.OperatorName;
+										node.Reference.UpdateHandler.Operator.SessionID = plan.SessionID;
+										plan.PushStatementContext(new StatementContext(StatementType.Update));
+										try
+										{
+											sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
+										}
+										finally
+										{
+											plan.PopStatementContext();
+										}
+										node.Reference.UpdateHandler.Operator.Block.BlockNode = CompileUpdateSetNodeForReference(plan, sourceNode, node.Reference, expressionNodes);
+										node.Reference.UpdateHandler.PlanNode = node.Reference.UpdateHandler.Operator.Block.BlockNode;
+									break;
+
+									case ReferenceAction.Set:
+										node.Reference.UpdateReferenceExpressions.AddRange(localStatement.ReferencesDefinition.UpdateReferenceExpressions);
+										expressionNodes = new PlanNode[node.Reference.SourceKey.Columns.Count];
+										for (int index = 0; index < localStatement.ReferencesDefinition.UpdateReferenceExpressions.Count; index++)
+											expressionNodes[index] = CompileExpression(plan, localStatement.ReferencesDefinition.UpdateReferenceExpressions[index]);
+
+										node.Reference.UpdateHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
+										node.Reference.UpdateHandler.Owner = node.Reference.Owner;
+										node.Reference.UpdateHandler.Library = node.Reference.Library;
+										node.Reference.UpdateHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
+										node.Reference.UpdateHandler.EventType = EventType.AfterUpdate;
+										node.Reference.UpdateHandler.IsGenerated = true;
+										node.Reference.UpdateHandler.Operator.IsGenerated = true;
+										node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "AOldRow", new Schema.RowType(true)));
+										node.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.UpdateHandler.Operator, "ANewRow", new Schema.RowType(true)));
+										node.Reference.UpdateHandler.Operator.Owner = node.Reference.Owner;
+										node.Reference.UpdateHandler.Operator.Library = node.Reference.Library;
+										node.Reference.UpdateHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.UpdateHandler.Operator.DisplayName), 0, 1);
+										node.Reference.UpdateHandler.Operator.SessionObjectName = node.Reference.UpdateHandler.Operator.OperatorName;
+										node.Reference.UpdateHandler.Operator.SessionID = plan.SessionID;
+										plan.PushStatementContext(new StatementContext(StatementType.Update));
+										try
+										{
+											sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
+										}
+										finally
+										{
+											plan.PopStatementContext();
+										}
+										node.Reference.UpdateHandler.Operator.Block.BlockNode =
+											CompileUpdateNodeForReference
+											(
+												plan, 
+												sourceNode,
+												node.Reference,
+												expressionNodes,
+												true // IsUpdate
+											);
+										node.Reference.UpdateHandler.PlanNode = node.Reference.UpdateHandler.Operator.Block.BlockNode;
+									break;
 								}
-*/
+
+								// Construct DeleteReferenceAction nodes if necessary			
+								switch (node.Reference.DeleteReferenceAction)
+								{
+									case ReferenceAction.Cascade:
+										node.Reference.DeleteHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
+										node.Reference.DeleteHandler.Owner = node.Reference.Owner;
+										node.Reference.DeleteHandler.Library = node.Reference.Library;
+										node.Reference.DeleteHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
+										node.Reference.DeleteHandler.EventType = EventType.AfterDelete;
+										node.Reference.DeleteHandler.IsGenerated = true;
+										node.Reference.DeleteHandler.Operator.IsGenerated = true;
+										node.Reference.DeleteHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.DeleteHandler.Operator, "ARow", new Schema.RowType(true)));
+										node.Reference.DeleteHandler.Operator.Owner = node.Reference.Owner;
+										node.Reference.DeleteHandler.Operator.Library = node.Reference.Library;
+										node.Reference.DeleteHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.DeleteHandler.Operator.DisplayName), 0, 1);
+										node.Reference.DeleteHandler.Operator.SessionObjectName = node.Reference.DeleteHandler.Operator.OperatorName;
+										node.Reference.DeleteHandler.Operator.SessionID = plan.SessionID;
+										plan.PushStatementContext(new StatementContext(StatementType.Delete));
+										try
+										{
+											sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
+										}
+										finally
+										{
+											plan.PopStatementContext();
+										}
+										node.Reference.DeleteHandler.Operator.Block.BlockNode =
+											CompileDeleteCascadeNodeForReference
+											(
+												plan, 
+												sourceNode,
+												node.Reference
+											);
+										node.Reference.DeleteHandler.PlanNode = node.Reference.DeleteHandler.Operator.Block.BlockNode;
+									break;
+
+									case ReferenceAction.Clear:
+										expressionNodes = new PlanNode[node.Reference.SourceKey.Columns.Count];
+										for (int index = 0; index < node.Reference.SourceKey.Columns.Count; index++)
+										{
+											Schema.ScalarType scalarType = node.Reference.SourceKey.Columns[index].DataType as Schema.ScalarType;
+											if (scalarType != null)
+											{
+												Schema.Special special = Compiler.FindDefaultSpecialForScalarType(plan, scalarType);
+												if (special != null)
+													expressionNodes[index] = EmitCallNode(plan, special.Selector.OperatorName, new PlanNode[]{});
+											}
+										
+											if (expressionNodes[index] == null)
+											{
+												if (!node.Reference.SourceKey.Columns[index].IsNilable)
+													throw new CompilerException(CompilerException.Codes.CannotClearSourceColumn, statement, node.Reference.SourceKey.Columns[index].Name);
+												expressionNodes[index] = EmitNilNode(plan);
+											}
+										}
+
+										node.Reference.DeleteHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
+										node.Reference.DeleteHandler.Owner = node.Reference.Owner;
+										node.Reference.DeleteHandler.Library = node.Reference.Library;
+										node.Reference.DeleteHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
+										node.Reference.DeleteHandler.EventType = EventType.AfterDelete;
+										node.Reference.DeleteHandler.IsGenerated = true;
+										node.Reference.DeleteHandler.Operator.IsGenerated = true;
+										node.Reference.DeleteHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.DeleteHandler.Operator, "ARow", new Schema.RowType(true)));
+										node.Reference.DeleteHandler.Operator.Owner = node.Reference.Owner;
+										node.Reference.DeleteHandler.Operator.Library = node.Reference.Library;
+										node.Reference.DeleteHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.DeleteHandler.Operator.DisplayName), 0, 1);
+										node.Reference.DeleteHandler.Operator.SessionObjectName = node.Reference.DeleteHandler.Operator.OperatorName;
+										node.Reference.DeleteHandler.Operator.SessionID = plan.SessionID;
+										plan.PushStatementContext(new StatementContext(StatementType.Update));
+										try
+										{
+											sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
+										}
+										finally
+										{
+											plan.PopStatementContext();
+										}
+										node.Reference.DeleteHandler.Operator.Block.BlockNode =
+											CompileDeleteSetNodeForReference
+											(
+												plan, 
+												sourceNode,
+												node.Reference,
+												expressionNodes
+											);
+										node.Reference.DeleteHandler.PlanNode = node.Reference.DeleteHandler.Operator.Block.BlockNode;
+									break;
+
+									case ReferenceAction.Set:
+										node.Reference.DeleteReferenceExpressions.AddRange(localStatement.ReferencesDefinition.DeleteReferenceExpressions);
+										expressionNodes = new PlanNode[node.Reference.SourceKey.Columns.Count];
+										for (int index = 0; index < localStatement.ReferencesDefinition.DeleteReferenceExpressions.Count; index++)
+											expressionNodes[index] = CompileExpression(plan, localStatement.ReferencesDefinition.DeleteReferenceExpressions[index]);
+									
+										node.Reference.DeleteHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
+										node.Reference.DeleteHandler.Owner = node.Reference.Owner;
+										node.Reference.DeleteHandler.Library = node.Reference.Library;
+										node.Reference.DeleteHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
+										node.Reference.DeleteHandler.EventType = EventType.AfterDelete;
+										node.Reference.DeleteHandler.IsGenerated = true;
+										node.Reference.DeleteHandler.Operator.IsGenerated = true;
+										node.Reference.DeleteHandler.Operator.Operands.Add(new Schema.Operand(node.Reference.DeleteHandler.Operator, "ARow", new Schema.RowType(true)));
+										node.Reference.DeleteHandler.Operator.Owner = node.Reference.Owner;
+										node.Reference.DeleteHandler.Operator.Library = node.Reference.Library;
+										node.Reference.DeleteHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(node.Reference.DeleteHandler.Operator.DisplayName), 0, 1);
+										node.Reference.DeleteHandler.Operator.SessionObjectName = node.Reference.DeleteHandler.Operator.OperatorName;
+										node.Reference.DeleteHandler.Operator.SessionID = plan.SessionID;
+										plan.PushStatementContext(new StatementContext(StatementType.Update));
+										try
+										{
+											sourceNode = EmitIdentifierNode(plan, node.Reference.SourceTable.Name);
+										}
+										finally
+										{
+											plan.PopStatementContext();
+										}
+										node.Reference.DeleteHandler.Operator.Block.BlockNode =
+											CompileUpdateNodeForReference
+											(
+												plan,
+												sourceNode,
+												node.Reference,
+												expressionNodes,
+												false // IsUpdate
+											);
+										node.Reference.DeleteHandler.PlanNode = node.Reference.DeleteHandler.Operator.Block.BlockNode;
+									break;
+								}
+
+	/*
+	 BTR 5/14/2006 -> This will not be necessary to check any longer, it is indeed the case that this is an error condition, but it would be
+	indicative of other problems, a reference will never be attached as an explicit dependency of a reference.
+								// This should be an error condition as I cannot manufacture a case where a reference would be a dependency of a reference
+								// Reference inference used to attach references as dependencies of references to get views to serialize, but it no longer does
+								// because view serialization is done much more correctly now, and I think this is a by-product of that hack. BTR
+								if (LNode.Reference.HasDependencies())
+									for (int LIndex = 0; LIndex < LNode.Reference.Dependencies.Count; LIndex++)
+									{
+										Schema.Object LObject = LNode.Reference.Dependencies.Objects[LIndex];
+										if ((LObject is Schema.Reference) || ((LObject == null) && APlan.Catalog.GetObjectHeaderByID(LNode.Reference.Dependencies.IDs[LIndex]).ObjectType == "Reference"))
+											Error.Fail("Invalid reference dependency");
+									}
+	*/
 							
-							#if REMOVEREFERENCEDEPENDENCIES
-							// Remove references which are dependencies of this reference, they are not necessary and screw up reference inclusion for derivation
-							for (int index = node.Reference.Dependencies.Count - 1; index >= 0; index--)
-								if (node.Reference.Dependencies[index] is Schema.Reference)
-									node.Reference.Dependencies.RemoveAt(index);
-							#endif
+								#if REMOVEREFERENCEDEPENDENCIES
+								// Remove references which are dependencies of this reference, they are not necessary and screw up reference inclusion for derivation
+								for (int index = node.Reference.Dependencies.Count - 1; index >= 0; index--)
+									if (node.Reference.Dependencies[index] is Schema.Reference)
+										node.Reference.Dependencies.RemoveAt(index);
+								#endif
+							}
+							finally
+							{
+								plan.PopCursorContext();
+							}
 						}
 						
 						return node;
