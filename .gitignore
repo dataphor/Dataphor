@@ -1,9 +1,15 @@
+*.dll
+*.dll.config
+*.pdb
 *.suo
 *.user
+
+*.DS_Store
 
 [Bb]in/
 [Oo]bj/
 [Dd]eploy
 [Mm][Ss][Ii][Ss]
+
 Sandbox
 Dataphor/packages
