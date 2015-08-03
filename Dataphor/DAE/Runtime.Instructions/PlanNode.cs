@@ -364,9 +364,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// and setting the device supported to false ensures that if this node is actually executed, the
 						// device will not be asked to perform a useless parameterization.
 						DeviceSupported = !CouldSupport;
-
-						// Remove device plan nodes from prepared sub nodes to reduce memory usage of prepared plans
-						ClearDeviceSubNodes();
 					}
 					else
 					{
