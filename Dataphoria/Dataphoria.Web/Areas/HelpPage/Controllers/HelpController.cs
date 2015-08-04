@@ -1,15 +1,18 @@
 using System;
 using System.Web.Http;
 using System.Web.Mvc;
-using Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage.Models;
+using Dataphoria.Web.Areas.HelpPage.ModelDescriptions;
+using Dataphoria.Web.Areas.HelpPage.Models;
 
-namespace Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage.Controllers
+namespace Dataphoria.Web.Areas.HelpPage.Controllers
 {
     /// <summary>
     /// The controller that will handle requests for the help page.
     /// </summary>
     public class HelpController : Controller
     {
+        private const string ErrorViewName = "Error";
+
         public HelpController()
             : this(GlobalConfiguration.Configuration)
         {
@@ -24,6 +27,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage.Controllers
 
         public ActionResult Index()
         {
+            ViewBag.DocumentationProvider = Configuration.Services.GetDocumentationProvider();
             return View(Configuration.Services.GetApiExplorer().ApiDescriptions);
         }
 
@@ -38,7 +42,22 @@ namespace Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage.Controllers
                 }
             }
 
-            return View("Error");
+            return View(ErrorViewName);
+        }
+
+        public ActionResult ResourceModel(string modelName)
+        {
+            if (!String.IsNullOrEmpty(modelName))
+            {
+                ModelDescriptionGenerator modelDescriptionGenerator = Configuration.GetModelDescriptionGenerator();
+                ModelDescription modelDescription;
+                if (modelDescriptionGenerator.GeneratedModels.TryGetValue(modelName, out modelDescription))
+                {
+                    return View(modelDescription);
+                }
+            }
+
+            return View(ErrorViewName);
         }
     }
 }

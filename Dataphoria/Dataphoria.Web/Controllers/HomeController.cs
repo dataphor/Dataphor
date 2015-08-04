@@ -6,11 +6,13 @@ using System.Web.Mvc;
 
 namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
-    public class HomeController : Controller
-    {
-        public ActionResult Index()
-        {
-            return View();
-        }
-    }
+	public class HomeController : Controller
+	{
+		public ActionResult Index()
+		{
+			ViewBag.Title = "Home Page";
+
+			return View();
+		}
+	}
 }

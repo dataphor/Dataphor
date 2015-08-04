@@ -7,6 +7,7 @@ using System.Web.Http;
 
 namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
+    [Authorize]
     public class ValuesController : ApiController
     {
         // GET api/values

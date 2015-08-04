@@ -1,7 +1,7 @@
 using System.Web.Http;
 using System.Web.Mvc;
 
-namespace Alphora.Dataphor.Dataphoria.Web.Areas.HelpPage
+namespace Dataphoria.Web.Areas.HelpPage
 {
     public class HelpPageAreaRegistration : AreaRegistration
     {

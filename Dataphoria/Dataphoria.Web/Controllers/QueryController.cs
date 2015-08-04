@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Mvc;
 using Alphora.Dataphor.DAE.NativeCLI;
+using Alphora.Dataphor.Dataphoria.Web;
 using Alphora.Dataphor.Dataphoria.Processing;
 using Newtonsoft.Json.Linq;
 
