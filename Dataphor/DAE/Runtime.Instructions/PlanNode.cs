@@ -343,6 +343,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// DetermineDevice
 		public virtual void DetermineDevice(Plan plan)
 		{
+			// Recheck the NoDevice flag, as it will be set directly when a device-painted node has indicated not supported
+			if (_nodes != null)
+				for (int index = 0; index < _nodes.Count; index++)
+					if (_nodes[index].NoDevice)
+					{
+						NoDevice = true;
+						break;
+					}
+
             if (!NoDevice)
             {
 				_device = _potentialDevice;
@@ -379,15 +388,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				else
 				{
 					DeviceSupported = false;
-					// BTR 4/28/2005 ->
-					// Not sure why this is here, but it is preventing the translation of several otherwise translatable items.
-					// I will turn it off and see what happens.
-					//if (DataType is Schema.ITableType)
-					//	NoDevice = true;
 				}
 			}
 			else
+			{
 				DeviceSupported = false;
+			}
 		}
 		
 		public virtual void SetDevice(Plan plan, Schema.Device device)
