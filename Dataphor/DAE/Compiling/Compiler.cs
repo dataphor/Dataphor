@@ -3561,10 +3561,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.TableVarConstraint CompileTableVarConstraint(Plan plan, Schema.TableVar tableVar, CreateConstraintDefinition constraint)
 		{
+			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+			try
+			{
 			if (constraint is ConstraintDefinition)
 				return Compiler.CompileRowConstraint(plan, tableVar, (ConstraintDefinition)constraint);
 			else
 				return Compiler.CompileTransitionConstraint(plan, tableVar, (TransitionConstraintDefinition)constraint);
+		}
+			finally
+			{
+				plan.PopCursorContext();
+			}
 		}
 		
 		public static void CompileTableVarConstraints(Plan plan, Schema.TableVar tableVar, CreateConstraintDefinitions constraints)
@@ -6979,6 +6987,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 					plan.PushCreationObject(node.Constraint);
 					try
 					{
+						plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+						try
+						{
 						node.Constraint.Node = CompileBooleanExpression(plan, localStatement.Expression);
 						if (!(node.Constraint.Node.IsFunctional && node.Constraint.Node.IsDeterministic))
 							throw new CompilerException(CompilerException.Codes.InvalidConstraintExpression, localStatement.Expression);
@@ -7003,6 +7014,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 						node.Constraint.DetermineRemotable(plan.CatalogDeviceSession);
 						
 						return node;
+					}
+					finally
+					{
+							plan.PopCursorContext();
+						}
 					}
 					finally
 					{
@@ -7203,6 +7219,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.TransitionConstraint CompileSourceReferenceConstraint(Plan plan, Schema.Reference reference)
 		{
+			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+			try
+			{
 			Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Source", reference.Name));
 			constraint.Library = reference.Library;
 			constraint.MergeMetaData(reference.MetaData);
@@ -7219,6 +7238,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 			CompileSourceUpdateConstraintNodeForReference(plan, reference, constraint);
 			constraint.UpdateColumnFlags = (BitArray)constraint.InsertColumnFlags.Clone();
 			return constraint;
+		}
+			finally
+			{
+				plan.PopCursorContext();
+			}
 		}
 		
 		// Construct an insert constraint to validate rows inserted into the source table of the reference
@@ -7436,6 +7460,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.TransitionConstraint CompileTargetReferenceConstraint(Plan plan, Schema.Reference reference)
 		{
+			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+			try
+			{
 			Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Target", reference.Name));
 			constraint.Library = reference.Library;
 			constraint.MergeMetaData(reference.MetaData);
@@ -7463,6 +7490,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 				
 			return constraint;
+		}
+			finally
+			{
+				plan.PopCursorContext();
+			}
 		}
 		
 		// Construct an update constraint to validate rows updated in the target table of the reference
@@ -8027,7 +8059,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 			constraint.ConstraintType = Schema.ConstraintType.Database;
 			constraint.IsDeferred = false;
 			constraint.IsGenerated = true;
-			
+
+			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+			try
+			{
 			constraint.Node = 
 				key.IsSparse 
 					?
@@ -8097,6 +8132,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 			constraint.Node = OptimizeNode(plan, constraint.Node);
 			return constraint;
 		}
+			finally
+			{
+				plan.PopCursorContext();
+			}
+		}
 		
 		// Constructs a catalog constraint to enforce the reference
 		//
@@ -8111,6 +8151,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 			constraint.MergeMetaData(reference.MetaData);
 			constraint.ConstraintType = Schema.ConstraintType.Database;
 			constraint.IsGenerated = true;
+
+			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+			try
+			{
 //			if (AReference.IsSessionObject)
 //				LConstraint.SessionObjectName = LConstraint.Name; // This is to allow the constraint to reference session-specific objects if necessary
 //			APlan.PushCreationObject(LConstraint);
@@ -8266,6 +8310,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 //				APlan.PopCreationObject();
 //			}
 		}
+			finally
+			{
+				plan.PopCursorContext();
+			}
+		}
 		
 		protected static void AddSpecialsForScalarType(Schema.ScalarType scalarType, Schema.Objects specials)
 		{
@@ -8403,6 +8452,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 									node.Reference
 								);
 
+							plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+							try
+							{
 							// Construct UpdateReferenceAction nodes if necessary			
 							PlanNode[] expressionNodes;
 							PlanNode sourceNode;
@@ -8655,9 +8707,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 								break;
 							}
 
-/*
+	/*
  BTR 5/14/2006 -> This will not be necessary to check any longer, it is indeed the case that this is an error condition, but it would be
-indicative of other problems, a reference will never be attached as an explicit dependency of a reference.
+	indicative of other problems, a reference will never be attached as an explicit dependency of a reference.
 							// This should be an error condition as I cannot manufacture a case where a reference would be a dependency of a reference
 							// Reference inference used to attach references as dependencies of references to get views to serialize, but it no longer does
 							// because view serialization is done much more correctly now, and I think this is a by-product of that hack. BTR
@@ -8668,7 +8720,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 									if ((LObject is Schema.Reference) || ((LObject == null) && APlan.Catalog.GetObjectHeaderByID(LNode.Reference.Dependencies.IDs[LIndex]).ObjectType == "Reference"))
 										Error.Fail("Invalid reference dependency");
 								}
-*/
+	*/
 							
 							#if REMOVEREFERENCEDEPENDENCIES
 							// Remove references which are dependencies of this reference, they are not necessary and screw up reference inclusion for derivation
@@ -8676,6 +8728,11 @@ indicative of other problems, a reference will never be attached as an explicit 
 								if (node.Reference.Dependencies[index] is Schema.Reference)
 									node.Reference.Dependencies.RemoveAt(index);
 							#endif
+						}
+							finally
+							{
+								plan.PopCursorContext();
+							}
 						}
 						
 						return node;

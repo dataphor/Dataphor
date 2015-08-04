@@ -4,6 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 #define UseReferenceDerivation
+#define UseElaborable
 	
 using System;
 using System.Text;
@@ -187,8 +188,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			DetermineOrder(plan);
 			
+			#if UseReferenceDerivation
 			// Copy references
-			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
 			{
 				if (SourceTableVar.HasReferences())
 					foreach (Schema.ReferenceBase reference in SourceTableVar.References)
@@ -247,6 +251,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 					}
 			}
+			#endif
 		}
 		
 		public override void DetermineCursorBehavior(Plan plan)
@@ -265,6 +270,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						CursorCapability.BackwardsNavigable | 
 						CursorCapability.Searchable
 					)
+				) |
+				(
+					plan.CursorContext.CursorCapabilities & SourceNode.CursorCapabilities & CursorCapability.Elaborable
 				);
 			_cursorIsolation = plan.CursorContext.CursorIsolation;
 

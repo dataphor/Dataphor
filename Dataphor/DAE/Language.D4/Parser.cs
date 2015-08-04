@@ -2325,7 +2325,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				searchable | 
 				updateable | 
 				truncateable | 
-				countable
+				countable |
+				elaborable
 		*/
 		protected void CursorCapabilities(CursorDefinition LExpression)
 		{

@@ -1249,7 +1249,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			_cursorType = CursorType.Static;
 			_requestedCursorType = plan.CursorContext.CursorType;
-			_cursorCapabilities = CursorCapability.Navigable | CursorCapability.BackwardsNavigable | CursorCapability.Searchable | CursorCapability.Bookmarkable;
+			_cursorCapabilities = CursorCapability.Navigable | CursorCapability.BackwardsNavigable | CursorCapability.Searchable | CursorCapability.Bookmarkable | (plan.CursorContext.CursorCapabilities & CursorCapability.Elaborable);
 			_cursorIsolation = CursorIsolation.None;
 			Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, _tableVar));
 		}
@@ -1419,7 +1419,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			_cursorType = CursorType.Static;
 			_requestedCursorType = plan.CursorContext.CursorType;
-			_cursorCapabilities = CursorCapability.Navigable | CursorCapability.BackwardsNavigable | CursorCapability.Searchable | CursorCapability.Bookmarkable;
+			_cursorCapabilities = CursorCapability.Navigable | CursorCapability.BackwardsNavigable | CursorCapability.Searchable | CursorCapability.Bookmarkable | (plan.CursorContext.CursorCapabilities & CursorCapability.Elaborable);
 			if (Nodes[0] is StackReferenceNode)
 				_cursorCapabilities |= CursorCapability.Updateable;
 			_cursorIsolation = CursorIsolation.None;

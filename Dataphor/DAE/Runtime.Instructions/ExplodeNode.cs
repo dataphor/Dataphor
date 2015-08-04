@@ -5,6 +5,7 @@
 */
 
 #define UseReferenceDerivation
+#define UseElaborable
 #define USENAMEDROWVARIABLES
 	
 using System;
@@ -120,8 +121,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			CopyOrders(SourceTableVar.Orders);
 			Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, TableVar));
 
-			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#if UseReferenceDerivation
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
 				CopyReferences(plan, SourceTableVar);
+			#endif
 		}
 		
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
@@ -170,6 +175,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				(
 					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
+				) |
+				(
+					plan.CursorContext.CursorCapabilities & SourceNode.CursorCapabilities & CursorCapability.Elaborable
 				);
 			_cursorIsolation = plan.CursorContext.CursorIsolation;
 

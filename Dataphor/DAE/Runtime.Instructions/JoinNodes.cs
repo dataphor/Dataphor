@@ -4,6 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 #define UseReferenceDerivation
+#define UseElaborable
 #define USEUNIFIEDJOINKEYINFERENCE // Unified join key inference uses the same algorithm for all joins. See InferJoinKeys for more information.
 //#define DISALLOWMANYTOMANYOUTERJOINS
 #define USENAMEDROWVARIABLES
@@ -634,8 +635,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (LeftNode.Order != null)
 				Order = CopyOrder(LeftNode.Order);
 			
-			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#if UseReferenceDerivation
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
 				CopyReferences(plan, LeftTableVar);
+			#endif
 			
 			plan.EnterRowContext();
 			try
@@ -761,6 +766,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					plan.CursorContext.CursorCapabilities &
 					LeftNode.CursorCapabilities &
 					CursorCapability.Updateable
+				) |
+				(
+					plan.CursorContext.CursorCapabilities &
+					(LeftNode.CursorCapabilities | RightNode.CursorCapabilities) &
+					CursorCapability.Elaborable
+				) |
+				(
+					plan.CursorContext.CursorCapabilities &
+					(LeftNode.CursorCapabilities | RightNode.CursorCapabilities) &
+					CursorCapability.Elaborable
 				);
 		}
 
@@ -1872,7 +1887,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// Determine orders			
 			DetermineOrders(plan);
 
-			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#if UseReferenceDerivation
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
 			{
 				if (LeftTableVar.HasReferences())
 				{
@@ -1908,6 +1926,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 				}
 			}
+			#endif
 					
 			plan.EnterRowContext();
 			try
@@ -2036,6 +2055,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LeftNode.CursorCapabilities &
 					((IsLookup && !IsDetailLookup) ? CursorCapability.Updateable : RightNode.CursorCapabilities) & 
 					CursorCapability.Updateable
+				) |
+				(
+					plan.CursorContext.CursorCapabilities &
+					(LeftNode.CursorCapabilities | RightNode.CursorCapabilities) &
+					CursorCapability.Elaborable
 				);
 		}
 
@@ -3886,6 +3910,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						CursorCapability.Updateable
 					) &
 					((_isLookup && !_isDetailLookup) ? CursorCapability.Updateable : (RightNode.CursorCapabilities & CursorCapability.Updateable))
+				) |
+				(
+					plan.CursorContext.CursorCapabilities &
+					(LeftNode.CursorCapabilities | RightNode.CursorCapabilities) &
+					CursorCapability.Elaborable
 				);
 		}
 
@@ -4762,6 +4791,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						CursorCapability.Updateable
 					) &
 					((_isLookup && !_isDetailLookup) ? CursorCapability.Updateable : (LeftNode.CursorCapabilities & CursorCapability.Updateable))
+				) |
+				(
+					plan.CursorContext.CursorCapabilities &
+					(LeftNode.CursorCapabilities | RightNode.CursorCapabilities) &
+					CursorCapability.Elaborable
 				);
 		}
 

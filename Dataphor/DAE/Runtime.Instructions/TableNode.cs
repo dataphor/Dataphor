@@ -735,7 +735,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			_cursorType = CursorType.Dynamic;
 			_requestedCursorType = plan.CursorContext.CursorType;
-			_cursorCapabilities = CursorCapability.Navigable;
+			_cursorCapabilities = CursorCapability.Navigable | (plan.CursorContext.CursorCapabilities & CursorCapability.Elaborable);
 			_cursorIsolation = plan.CursorContext.CursorIsolation;
 		}
 		

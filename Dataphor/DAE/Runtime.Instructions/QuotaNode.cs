@@ -5,6 +5,7 @@
 */
 
 #define UseReferenceDerivation
+#define UseElaborable
 #define USENAMEDROWVARIABLES
 	
 using System;
@@ -99,8 +100,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (SourceNode.Order != null)
 				Order = CopyOrder(SourceNode.Order);
 
-			//if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#if UseReferenceDerivation
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
 				CopyReferences(plan, SourceTableVar);
+			#endif
 
 			plan.EnterRowContext();
 			try
@@ -196,6 +201,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				(
 					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
+				) |
+				(
+					plan.CursorContext.CursorCapabilities & SourceNode.CursorCapabilities & CursorCapability.Elaborable
 				);
 			_cursorIsolation = plan.CursorContext.CursorIsolation;
 			if (SourceNode.Order != null)
