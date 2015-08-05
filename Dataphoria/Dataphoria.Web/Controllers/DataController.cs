@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using Alphora.Dataphor.DAE.NativeCLI;
+using Newtonsoft.Json.Linq;
 
 namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
@@ -14,7 +15,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
     public class DataController : ApiController
     {
 		[HttpGet, Route("{table}")]
-		public JsonNetResult Get(string table)
+		public JToken Get(string table)
 		{
 			// Filter?
 			// Order By?
@@ -24,14 +25,14 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 			// Paging?
 			// Functions?
             var result = ProcessorInstance.Instance.Evaluate(String.Format("select Get('{0}')", table), null);
-            return new JsonNetResult { Data = JsonInterop.NativeResultToJson((NativeResult)result), JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet };
+            return JsonInterop.NativeResultToJson((NativeResult)result);
 		}
 
 		[HttpGet, Route("{table}/{key}")]
-		public JsonNetResult Get(string table, string key)
+		public JToken Get(string table, string key)
 		{
 			var result = ProcessorInstance.Instance.Evaluate(String.Format("select GetByKey('{0}', '{1}')", table, key), null);
-			return new JsonNetResult { Data = JsonInterop.NativeResultToJson((NativeResult)result), JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet };
+			return JsonInterop.NativeResultToJson((NativeResult)result);
 		}
 
 		[HttpPost, Route("{table}")]

@@ -135,7 +135,7 @@ namespace Alphora.Dataphor.Dataphoria.Web
                 return NativeTableValueToJson(table);
             }
 
-            throw new NotSupportedException(String.Format("Unsupported native type {0}", value == null ? "<null>" : value.GetType().Name));
+			return null;
         }
 
         public static JToken NativeResultToJson(NativeResult result)

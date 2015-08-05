@@ -14,10 +14,10 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
     public class QueryController : Controller
     {
-        public JsonNetResult Index(string e, string a = null)
+        public object Index(string e, string a = null)
         {
             var result = ProcessorInstance.Instance.Evaluate(e, a == null ? null : JsonInterop.JsonArgsToNative(JObject.Parse(a)));
-            return new JsonNetResult { Data = JsonInterop.NativeResultToJson((NativeResult)result), JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            return JsonInterop.NativeResultToJson((NativeResult)result);
         }
     }
 }
