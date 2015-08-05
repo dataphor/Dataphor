@@ -4,11 +4,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using Alphora.Dataphor.DAE.NativeCLI;
 
 namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
 	[RoutePrefix("data")]
+	[EnableCors("*", "*", "*")]
     public class DataController : ApiController
     {
 		[HttpGet, Route("{table}")]
