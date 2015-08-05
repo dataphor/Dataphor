@@ -8,6 +8,7 @@ using Alphora.Dataphor.DAE.NativeCLI;
 
 namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
+	[RoutePrefix("data")]
     public class DataController : ApiController
     {
 		[HttpGet, Route("{table}")]
@@ -20,46 +21,44 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 			// Includes?
 			// Paging?
 			// Functions?
-            var result = ProcessorInstance.Instance.Evaluate(String.Format("select {0}", table), null);
+            var result = ProcessorInstance.Instance.Evaluate(String.Format("select Get('{0}')", table), null);
             return new JsonNetResult { Data = JsonInterop.NativeResultToJson((NativeResult)result), JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet };
 		}
 
 		[HttpGet, Route("{table}/{key}")]
 		public JsonNetResult Get(string table, string key)
 		{
-			// How to determine the key?
-			throw new NotImplementedException();
+			var result = ProcessorInstance.Instance.Evaluate(String.Format("select GetByKey('{0}', '{1}')", table, key), null);
+			return new JsonNetResult { Data = JsonInterop.NativeResultToJson((NativeResult)result), JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet };
 		}
 
 		[HttpPost, Route("{table}")]
-		public void Post(string table, [FromBody]dynamic value)
+		public void Post(string table, [FromBody]object value)
 		{
-			// Construct an insert statement
-			throw new NotImplementedException();
+			// TODO: Upsert conditions...
+			ProcessorInstance.Instance.Evaluate(String.Format("Post('{0}', ARow)", table), new Dictionary<string, object> { { "ARow", value } });
 		}
 
 		[HttpPut, Route("{table}/{key}")]
-		public void Put(string table, string key, [FromBody]dynamic value)
+		public void Put(string table, string key, [FromBody]object value)
 		{
-			// Construct an update statement
-			// How to test concurrency?
-			throw new NotImplementedException();
+			// TODO: Concurrency using ETags...
+			// TODO: if-match conditions?
+			ProcessorInstance.Instance.Evaluate(String.Format("Put('{0}', '{1}', ARow)", table, key), new Dictionary<string, object> { { "ARow", value } });
 		}
 
 		[HttpPatch, Route("{table}/{key}")]
-		public void Patch(string table, string key, [FromBody]dynamic updatedValues)
+		public void Patch(string table, string key, [FromBody]object updatedValues)
 		{
-			// Construct an update statement
-			// How to test concurrency?
-			throw new NotImplementedException();
+			// TODO: Concurrency using ETags...
+			// TODO: if-match conditions?
+			ProcessorInstance.Instance.Evaluate(String.Format("Patch('{0}', '{1}', ARow)", table, key), new Dictionary<string, object> { { "ARow", updatedValues } });
 		}
 
 		[HttpDelete, Route("{table}/{key}")]
 		public void Delete(string table, string key)
 		{
-			// Construct a delete statement
-			// How to determine the key?
-			throw new NotImplementedException();
+			ProcessorInstance.Instance.Evaluate(String.Format("Delete('{0}', '{1}')", table, key), null);
 		}
     }
 }

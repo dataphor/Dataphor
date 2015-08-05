@@ -247,3 +247,20 @@ create operator FTPRemoveDirectory(AURL : String, AUser : String, APassword : St
 grant usage on FTPRemoveDirectory(String) to role User;
 grant usage on FTPRemoveDirectory(String, String, String) to role User;
 
+//* Operator: GetByKey
+create operator GetByKey(ATableName : Name, AKey : String) : row class "Internet.GetByKeyNode" static tags { DAE.IsRemotable = "False" };
+
+//* Operator: Get
+create operator Get(ATableName : Name) : table class "Internet.GetNode" static tags { DAE.IsRemotable = "False" };
+
+//* Operator: Post
+create operator Post(ATableName : Name, ARow : row) class "Internet.PostNode" static tags { DAE.IsRemotable = "False" };
+
+//* Operator: Put
+create operator Put(ATableName : Name, AKey : String, ARow : row) class "Internet.PutNode" static tags { DAE.IsRemotable = "False" };
+
+//* Operator: Patch
+create operator Patch(ATableName : Name, AKey : String, ARow : row) class "Internet.PutNode" static tags { DAE.IsRemotable = "False" };
+
+//* Operator: Delete
+create operator Delete(ATableName : Name, AKey : String) class "Internet.DeleteNode" static tags { DAE.IsRemotable = "False" };

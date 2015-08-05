@@ -116,6 +116,7 @@
     <Compile Include="Register.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="RESTNodes.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Dataphor\Base\Base.csproj">
