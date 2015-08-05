@@ -1,0 +1,13 @@
+﻿<div>
+	<div class="col-sm-2">
+		<span>{{ row.Id }}</span>
+	</div>
+	<div class="col-sm-8">
+		<div ng-hide="isEditing">
+			<span><a ng-click="edit()">{{ row.Description }}</a></span>
+		</div>
+		<div ng-show="isEditing">
+			<input ng-model="row.Description" type="text" /><button ng-click="save()">Save</button>
+		</div>
+	</div>
+</div>

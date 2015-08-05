@@ -1,0 +1,25 @@
+﻿<div ng-controller="HomeCtrl">
+	<div class="container">
+		<div ng-repeat="row in rows" class="row">
+			<home-edit row="row"></home-edit>
+			<div class="col-sm-2">
+				<input ng-click="delete(row)" type="checkbox" /> Done
+			</div>
+		</div>
+
+		<div ng-show="isAdding">
+			<div class="form-group">
+				<label>Id</label>
+				<input ng-model="newRow.Id" class="form-control" type="text" />
+			</div>
+			<div class="form-group">
+				<label>Description</label>
+				<input ng-model="newRow.Description" class="form-control" type="text" />
+			</div>
+			<div class="form-group">
+				<button ng-click="save(newRow)">Save</button>
+			</div>
+		</div>
+		<button ng-click="new()">New Row</button>
+	</div>
+</div>
