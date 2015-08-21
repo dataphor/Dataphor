@@ -60,6 +60,8 @@ namespace Alphora.Dataphor.DAE.Contracts
 	
 		public const int MaxMessageLength = 2147483647;
 
+		public static Func<Binding> BuildBindingCall = BuildBinding;
+
 		private static Binding BuildBinding()
 		{
 			var messageEncodingElement = new BinaryMessageEncodingBindingElement();
@@ -91,7 +93,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 				{
 					if (_binding == null)
 					{
-						_binding = BuildBinding();
+						_binding = BuildBindingCall();
 					}
 				}
 			}
