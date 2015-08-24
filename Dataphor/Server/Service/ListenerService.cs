@@ -20,11 +20,21 @@ namespace Alphora.Dataphor.DAE.Service
 	[ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = false)]
 	public class ListenerService : IListenerService
 	{
+		private object syncHandle = new object();
+
+		private InstanceConfiguration GetConfiguration()
+		{
+			lock (syncHandle)
+			{
+				return InstanceManager.LoadConfiguration();
+			}
+		}
+
 		public string[] EnumerateInstances()
 		{
 			try
 			{
-				InstanceConfiguration configuration = InstanceManager.LoadConfiguration();
+				InstanceConfiguration configuration = GetConfiguration();
 				string[] result = new string[configuration.Instances.Count];
 				for (int index = 0; index < configuration.Instances.Count; index++)
 					result[index] = configuration.Instances[index].Name;
@@ -43,7 +53,7 @@ namespace Alphora.Dataphor.DAE.Service
 				if (String.IsNullOrEmpty(instanceName))
 					throw new FaultException<ListenerFault>(new ListenerFault(), "Instance name is empty.  An instance name is required");
 
-				ServerConfiguration server = InstanceManager.LoadConfiguration().Instances[instanceName];
+				ServerConfiguration server = GetConfiguration().Instances[instanceName];
 
 				if (server == null)
 					throw new FaultException<ListenerFault>(new ListenerFault(), String.Format("Instance Name {0} not found", instanceName));
