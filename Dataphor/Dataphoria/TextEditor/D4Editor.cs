@@ -217,6 +217,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				);
 		}
 
+		private QueryLanguage GetQueryLanguage()
+		{
+			return DesignerID == "SQL" ? QueryLanguage.RealSQL : QueryLanguage.D4;
+		}
+
 		private void SwitchToSQL()
 		{
 			Dataphoria.ExecuteScript("SetLanguage('RealSQL');");
@@ -491,6 +496,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				(
 					DataSession.ServerSession, 
 					GetTextToExecute(),
+					GetQueryLanguage(),
 					ExecutorProgress,
 					ExecutorFinished,
 					GetExecuteLocator()

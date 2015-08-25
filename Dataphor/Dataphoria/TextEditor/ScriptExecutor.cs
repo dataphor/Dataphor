@@ -21,6 +21,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		private IServerSession _session;
 		private string _script;
+		private QueryLanguage _language;
 		private ExecuteFinishedHandler _executeFinished;
 		private ReportScriptProgressHandler _executeProgress;
 		private DebugLocator _locator;
@@ -29,6 +30,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		(
 			IServerSession session, 
 			String script, 
+			QueryLanguage language,
 			ReportScriptProgressHandler executeProgress,
 			ExecuteFinishedHandler executeFinished,
 			DebugLocator locator
@@ -36,6 +38,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
 			_session = session;
 			_script = script;
+			_language = language;
 			_executeFinished = executeFinished;
 			_executeProgress = executeProgress;
 			_locator = locator;
@@ -51,7 +54,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			if (!_isRunning)
 			{
 				CleanupProcess();
-				_process = _session.StartProcess(new ProcessInfo(_session.SessionInfo));
+				var processInfo = new ProcessInfo(_session.SessionInfo);
+				processInfo.Language = _language;
+				_process = _session.StartProcess(processInfo);
 				_processID = _process.ProcessID;
 				_isRunning = true;
 				_asyncThread = new Thread(ExecuteAsync);

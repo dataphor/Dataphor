@@ -91,9 +91,6 @@
     <Compile Include="Register.cs" />
     <Compile Include="Runtime.Instructions\CatalogNodes.cs" />
     <Compile Include="Runtime.Instructions\LibraryNodes.cs" />
-    <Compile Include="Language.SQL\Emitter.cs" />
-    <Compile Include="Language.SQL\Keywords.cs" />
-    <Compile Include="Language.SQL\Language.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runtime.Instructions\SecurityNodes.cs" />
     <Compile Include="Runtime.Instructions\SystemNodes.cs" />
@@ -132,8 +129,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Contracts\Thrift_NativeCLI.idl" />
-    <Content Include="Language.SQL\BNF.txt" />
-    <Content Include="Language.SQL\BNFDifferences.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">

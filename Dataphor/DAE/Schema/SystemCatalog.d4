@@ -829,6 +829,7 @@ begin
 	create operator Diagnostics.GetInstanceSize(const AReference : String, const AMode : String) : Integer class "System.SystemGetInstanceSizeNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "True", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 	create operator Diagnostics.GetInstanceSizes(const AReference : String, const AMode : String) : table { DeclaringType : Name, FieldName : Name, FieldType : Name, FieldSize : Integer } class "System.SystemGetInstanceSizesNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "True", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 	create operator Diagnostics.GetPlanCount() : Integer class "System.SystemGetPlanCountNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "True", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+	create operator RealSQLToD4(const ARealSQLStatement : String) : String class "System.RealSQLToD4Node" static tags { DAE.IsRemotable = "false" };
 	create operator SetLanguage(const ALanguage : String) class "System.SystemSetLanguageNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator SetIsolationLevel(const AIsolationLevel : String) class "System.SystemSetIsolationLevelNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator SetDefaultIsolationLevel(const AIsolationLevel : String) class "System.SystemSetDefaultIsolationLevelNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
@@ -1440,7 +1441,6 @@ begin
 		DefaultUseDTC : Boolean,
 		DefaultUseImplicitTransactions : Boolean,
 		Language : String,
-		FetchCount : Integer,
 		DefaultMaxStackDepth : Integer,
 		DefaultMaxCallDepth : Integer,
 		UsePlanCache : Boolean,
@@ -1461,6 +1461,7 @@ begin
 		DefaultIsolationLevel : String,
 		UseDTC : Boolean,
 		UseImplicitTransactions : Boolean,
+		Language : String,
 		MaxStackDepth : Integer, 
 		MaxNestingLevel : Integer,
 		IsRunning : Boolean,
@@ -2555,6 +2556,7 @@ begin
 	grant usage on Prior(cursor) to role User;                                                                                                  
 	grant usage on ProcessID() to role User;                                                                                                    
 	grant usage on PushNonLoggedContext() to role User;                                                                                         
+	grant usage on RealSQLToD4(String) to role User;
 	grant usage on Refresh(cursor) to role User;                                                                                                
 	grant usage on Refresh(cursor, row) to role User;                                                                                           
 	grant usage on Remove(String, Integer, Integer) to role User;                                                          

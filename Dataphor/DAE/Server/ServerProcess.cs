@@ -23,6 +23,7 @@ namespace Alphora.Dataphor.DAE.Server
 	using Alphora.Dataphor.DAE.Device.Catalog;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
+	using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
@@ -320,25 +321,58 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		// Parsing
 		private Parser _parser;		
+		private RealSQL.Parser _sqlParser;
+		private RealSQL.Compiler _sqlCompiler;
+
+		private void EnsureSQLCompiler()
+		{
+			if (_sqlParser == null)
+			{
+				_sqlParser = new RealSQL.Parser();
+				_sqlCompiler = new RealSQL.Compiler();
+			}
+		}
 		
 		public Statement ParseScript(string script, ParserMessages messages)
 		{
 			Statement statement;								  
-			statement = _parser.ParseScript(script, messages);
+			if (_processInfo.Language == QueryLanguage.RealSQL)
+			{
+				EnsureSQLCompiler();
+				statement = _sqlCompiler.Compile(_sqlParser.ParseScript(script));
+			}
+			else
+				statement = _parser.ParseScript(script, messages);
 			return statement;
 		}
 		
 		public Statement ParseStatement(string statement, ParserMessages messages)
 		{
 			Statement localStatement;
-			localStatement = _parser.ParseStatement(statement, messages);
+			if (_processInfo.Language == QueryLanguage.RealSQL)
+			{
+				EnsureSQLCompiler();
+				localStatement = _sqlCompiler.Compile(_sqlParser.ParseStatement(statement));
+			}
+			else
+				localStatement = _parser.ParseStatement(statement, messages);
 			return localStatement;
 		}
 		
 		public Expression ParseExpression(string expression)
 		{
 			Expression localExpression;
-			localExpression = _parser.ParseCursorDefinition(expression);
+			if (_processInfo.Language == QueryLanguage.RealSQL)
+			{
+				EnsureSQLCompiler();
+				Statement localStatement = _sqlCompiler.Compile(_sqlParser.ParseStatement(expression));
+				if (localStatement is SelectStatement)
+					localExpression = ((SelectStatement)localStatement).CursorDefinition;
+				else
+					throw new CompilerException(CompilerException.Codes.TableExpressionExpected);
+			}
+			else
+				localExpression = _parser.ParseCursorDefinition(expression);
 			return localExpression;
 		}
 

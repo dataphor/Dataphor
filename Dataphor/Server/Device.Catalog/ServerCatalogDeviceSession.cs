@@ -2571,6 +2571,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if ((bool)oldRow["UseImplicitTransactions"] ^ (bool)newRow["UseImplicitTransactions"])
 				process.UseImplicitTransactions = (bool)newRow["UseImplicitTransactions"];
 
+			if ((string)oldRow["Language"] != (string)newRow["Language"])
+				process.ProcessInfo.Language = (QueryLanguage)Enum.Parse(typeof(QueryLanguage), (string)newRow["Language"], true);
+
 			if ((int)oldRow["MaxStackDepth"] != (int)newRow["MaxStackDepth"])
 				process.MaxStackDepth = (int)newRow["MaxStackDepth"];
 

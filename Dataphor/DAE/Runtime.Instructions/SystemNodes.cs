@@ -1954,7 +1954,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program program, object[] arguments)
 		{
-			program.ServerProcess.ServerSession.SessionInfo.Language = (QueryLanguage)Enum.Parse(typeof(QueryLanguage), (string)arguments[0], true);
+			program.ServerProcess.ProcessInfo.Language = (QueryLanguage)Enum.Parse(typeof(QueryLanguage), (string)arguments[0], true);
 			return null;
 		}
 	}

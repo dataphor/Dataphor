@@ -129,9 +129,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					row[2] = process.DefaultIsolationLevel.ToString();
 					row[3] = process.UseDTC;
 					row[4] = process.UseImplicitTransactions;
-					row[5] = process.MaxStackDepth;
-					row[6] = process.MaxCallDepth;
-					row[7] = process.ExecutingThread != null;
+					row[5] = process.ProcessInfo.Language.ToString();
+					row[6] = process.MaxStackDepth;
+					row[7] = process.MaxCallDepth;
+					row[8] = process.ExecutingThread != null;
 					nativeTable.Insert(program.ValueManager, row);
 				}
 		}

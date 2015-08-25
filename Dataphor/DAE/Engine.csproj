@@ -129,6 +129,13 @@
     <Compile Include="Contracts\ProcessDescriptor.cs" />
     <Compile Include="Contracts\ScriptDescriptor.cs" />
     <Compile Include="Contracts\SessionDescriptor.cs" />
+    <Compile Include="Language.RealSQL\RealSQLCompiler.cs" />
+    <Compile Include="Language.RealSQL\RealSQLInstructions.cs" />
+    <Compile Include="Language.RealSQL\RealSQLKeywords.cs" />
+    <Compile Include="Language.RealSQL\RealSQLParser.cs" />
+    <Compile Include="Language.SQL\Emitter.cs" />
+    <Compile Include="Language.SQL\Keywords.cs" />
+    <Compile Include="Language.SQL\Language.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -676,6 +683,9 @@
     </EmbeddedResource>
     <Content Include="Language.D4\BNF-Alternate.txt" />
     <Content Include="Language.D4\BNF.txt" />
+    <Content Include="Language.RealSQL\BNF.txt" />
+    <Content Include="Language.SQL\BNF.txt" />
+    <Content Include="Language.SQL\BNFDifferences.txt" />
     <Content Include="Language\BNF.txt" />
     <Content Include="Language\ManifestoCompliance.txt" />
     <EmbeddedResource Include="Debug\Debug.d4" />

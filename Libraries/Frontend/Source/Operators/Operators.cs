@@ -306,20 +306,33 @@ namespace Alphora.Dataphor.Frontend.Server
 			FrontendDevice device = FrontendDevice.GetFrontendDevice(program);
 			
 			string documentType = device.GetDocumentType(program, libraryName, documentName);
-			
-			SystemExecuteNode.ExecuteScript
-			(
-				program.ServerProcess,
-				program, 
-				this,
-				device.LoadDocument
+
+			QueryLanguage saveLanguage = program.ServerProcess.ProcessInfo.Language;
+
+			if (documentType == "sql")
+				program.ServerProcess.ProcessInfo.Language = QueryLanguage.RealSQL;
+
+			try
+			{
+				SystemExecuteNode.ExecuteScript
 				(
+					program.ServerProcess,
 					program, 
-					libraryName,
-					documentName
-				),
-				new DAE.Debug.DebugLocator("doc:" + libraryName + ":" + documentName, 1, 1)
-			);
+					this,
+					device.LoadDocument
+					(
+						program, 
+						libraryName,
+						documentName
+					),
+					new DAE.Debug.DebugLocator("doc:" + libraryName + ":" + documentName, 1, 1)
+				);
+			}
+			finally
+			{
+				if (documentType == "sql")
+					program.ServerProcess.ProcessInfo.Language = saveLanguage;
+			}
 
 			return null;
 		}

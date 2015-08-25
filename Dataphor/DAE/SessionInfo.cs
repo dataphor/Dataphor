@@ -305,6 +305,7 @@ namespace Alphora.Dataphor.DAE
 			_useDTC = sessionInfo.DefaultUseDTC;
 			_useImplicitTransactions = sessionInfo.DefaultUseImplicitTransactions;
 			_defaultIsolationLevel = sessionInfo.DefaultIsolationLevel;
+			_language = sessionInfo.Language;
 			_fetchCount = sessionInfo.FetchCount;
 			_fetchAtOpen = sessionInfo.FetchAtOpen;
 		}
@@ -329,7 +330,7 @@ namespace Alphora.Dataphor.DAE
 		/// for a complete discussion of distributed transaction support in the Dataphor Server.  The default value for this setting is false.
 		/// </remarks>
 		[System.ComponentModel.DefaultValue(false)]
-		[System.ComponentModel.Description("Determines whether the Microsoft Distributed Transaction Coordinator will be used to control distributed transactions for this session.")]
+		[System.ComponentModel.Description("Determines whether the Microsoft Distributed Transaction Coordinator will be used to control distributed transactions for this process.")]
 		[DataMember]
 		public bool UseDTC
 		{
@@ -346,6 +347,21 @@ namespace Alphora.Dataphor.DAE
 		{
 			get { return _defaultIsolationLevel; }
 			set { _defaultIsolationLevel = value; }
+		}
+		
+		private QueryLanguage _language = QueryLanguage.D4;
+		/// <summary> Determines which query language will be used to interpret statements and expressions prepared on the process. </summary>
+		[System.ComponentModel.Browsable(false)]
+		[System.ComponentModel.DefaultValue(QueryLanguage.D4)]
+		[System.ComponentModel.Description("Determines which query language will be used to interpret statements and expressions prepared on the process.")]
+		#if DAC
+		[System.ComponentModel.Browsable(false)]
+		#endif
+		[DataMember]
+		public QueryLanguage Language
+		{
+			get { return _language; }
+			set { _language = value; }
 		}
 		
 		private int _fetchCount = SessionInfo.DefaultFetchCount;
@@ -387,6 +403,7 @@ namespace Alphora.Dataphor.DAE
 			processInfo.UseDTC = _useDTC;
 			processInfo.UseImplicitTransactions = _useImplicitTransactions;
 			processInfo.DefaultIsolationLevel = _defaultIsolationLevel;
+			processInfo.Language = _language;
 			processInfo.FetchCount = _fetchCount;
 			processInfo.FetchAtOpen = _fetchAtOpen;
 			processInfo.SuppressWarnings = _suppressWarnings;

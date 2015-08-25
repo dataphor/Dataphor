@@ -524,7 +524,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public Schema.DataTypes DataTypes { get { return _serverProcess.DataTypes; } }
 		
-		public QueryLanguage Language { get { return _serverProcess.ServerSession.SessionInfo.Language; } }
+		public QueryLanguage Language { get { return _serverProcess.ProcessInfo.Language; } }
 		
 		public bool ShouldEmitIL { get { return _serverProcess.ServerSession.SessionInfo.ShouldEmitIL; } }
 		
