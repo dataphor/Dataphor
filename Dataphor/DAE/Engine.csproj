@@ -407,6 +407,7 @@
     <Compile Include="Runtime.Instructions\NativeAccessorNodes.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime.Instructions\ObjectNodes.cs" />
     <Compile Include="Runtime.Instructions\OrderNodes.cs">
       <SubType>Code</SubType>
     </Compile>
