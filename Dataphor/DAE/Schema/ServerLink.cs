@@ -135,45 +135,48 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			if (mode == EmitMode.ForStorage)
-			{
 				SaveObjectID();
-			}
 			else
-			{
 				RemoveObjectID();
-			}
-			
-			CreateServerStatement statement = new CreateServerStatement();
-			statement.ServerName = Schema.Object.EnsureRooted(Name);
-			statement.MetaData = MetaData == null ? null : MetaData.Copy();
-
-			if (_users.Count > 0)
+			try
 			{
-				Block block = new Block();
-				block.Statements.Add(statement);
-				foreach (ServerLinkUser user in _users.Values)
-					block.Statements.Add
-					(
-						new ExpressionStatement
-						(
-							new CallExpression
-							(
-								"CreateServerLinkUserWithEncryptedPassword", 
-								new Expression[]
-								{
-									new ValueExpression(user.UserID), 
-									new CallExpression("Name", new Expression[]{new ValueExpression(user.ServerLink.Name)}), 
-									new ValueExpression(user.ServerLinkUserID), 
-									new ValueExpression(user.ServerLinkPassword)
-								}
-							)
-						)
-					);
-				
-				return block;
-			}
+				CreateServerStatement statement = new CreateServerStatement();
+				statement.ServerName = Schema.Object.EnsureRooted(Name);
+				statement.MetaData = MetaData == null ? null : MetaData.Copy();
 
-			return statement;
+				if (_users.Count > 0)
+				{
+					Block block = new Block();
+					block.Statements.Add(statement);
+					foreach (ServerLinkUser user in _users.Values)
+						block.Statements.Add
+						(
+							new ExpressionStatement
+							(
+								new CallExpression
+								(
+									"CreateServerLinkUserWithEncryptedPassword", 
+									new Expression[]
+									{
+										new ValueExpression(user.UserID), 
+										new CallExpression("Name", new Expression[]{new ValueExpression(user.ServerLink.Name)}), 
+										new ValueExpression(user.ServerLinkUserID), 
+										new ValueExpression(user.ServerLinkPassword)
+									}
+								)
+							)
+						);
+				
+					return block;
+				}
+
+				return statement;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 	}
 

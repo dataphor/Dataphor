@@ -327,7 +327,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void LoadGeneratorID()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.GeneratorID");
+			Tag tag = RemoveMetaDataTag("DAE.GeneratorID");
 			if (tag != Tag.None)
 				_generatorID = Int32.Parse(tag.Value);
 		}
@@ -335,18 +335,17 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void SaveGeneratorID()
 		{
 			if (_generatorID >= 0)
-				MetaData.Tags.AddOrUpdate("DAE.GeneratorID", _generatorID.ToString(), true);
+				AddMetaDataTag("DAE.GeneratorID", _generatorID.ToString(), true);
 		}
 
 		public void RemoveGeneratorID()
 		{
-			if (_metaData != null)
-				_metaData.Tags.RemoveTag("DAE.GeneratorID");
+			RemoveMetaDataTag("DAE.GeneratorID");
 		}
 
 		public void LoadIsGenerated()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.IsGenerated");
+			Tag tag = RemoveMetaDataTag("DAE.IsGenerated");
 			if (tag != Tag.None)
 				_isGenerated = Boolean.Parse(tag.Value);
 		}
@@ -354,13 +353,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void SaveIsGenerated()
 		{
 			if (_isGenerated)
-				MetaData.Tags.AddOrUpdate("DAE.IsGenerated", _isGenerated.ToString(), true);
+				AddMetaDataTag("DAE.IsGenerated", _isGenerated.ToString(), true);
 		}
 		
 		public void RemoveIsGenerated()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.IsGenerated");
+			RemoveMetaDataTag("DAE.IsGenerated");
 		}
 
 		// IsGenerated
@@ -432,10 +430,39 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { _metaData = value; }
 		}
 		
+		public void AddMetaDataTag(string tagName, string tagValue, bool isStatic)
+		{
+			if (_metaData == null)
+				_metaData = new MetaData();
+			_metaData.Tags.AddOrUpdate(tagName, tagValue, isStatic);
+		}
+
+		public Tag RemoveMetaDataTag(string tagName)
+		{
+			if (_metaData != null)
+			{
+				Tag result = _metaData.Tags.RemoveTag(tagName);
+				if (_metaData.Tags.Count == 0)
+					_metaData = null;
+				return result;
+			}
+			return Tag.None;
+		}
+
+		public Tag GetMetaDataTag(string tagName)
+		{
+			if (_metaData != null && _metaData.HasTags())
+			{
+				return _metaData.Tags.GetTag(tagName);
+			}
+
+			return Tag.None;
+		}
+
 		/// <summary>Merges all tags from the given MetaData into the metadata for this object.</summary>
 		public void MergeMetaData(MetaData metaData)
 		{
-			if (metaData != null)
+			if (metaData != null && metaData.HasTags())
 			{
 				if (_metaData == null)
 					_metaData = new MetaData();
@@ -447,36 +474,42 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>References each dynamic tag in the given metadata, if the metadata for this object does not already contain it.</summary>
 		public void InheritMetaData(MetaData metaData)
 		{
-			if (metaData != null)
+			if (metaData != null && metaData.HasTags())
 			{
 				if (_metaData == null)
-					_metaData = new MetaData();
-					
-				_metaData.Inherit(metaData);
+					_metaData = metaData.Inherit();
+				else
+					_metaData.Inherit(metaData);
 			}
 		}
 		
 		/// <summary>Joins each dynamic tag in the given meatadata to the metadata for this object, using copy semantics.</summary>
 		public void JoinMetaData(MetaData metaData)
 		{
-			if (metaData != null)
+			if (metaData != null && metaData.HasTags())
 			{
 				if (_metaData == null)
 					_metaData = new MetaData();
 					
 				_metaData.Join(metaData);
+
+				if (_metaData.Tags.Count == 0)
+					_metaData = null;
 			}
 		}
 		
 		/// <summary>Joins each dynamic tag in the given metadata to the metadata for this object, using reference semantics.</summary>
 		public void JoinInheritMetaData(MetaData metaData)
 		{
-			if (metaData != null)
+			if (metaData != null && metaData.HasTags())
 			{
 				if (_metaData == null)
 					_metaData = new MetaData();
 					
 				_metaData.JoinInherit(metaData);
+
+				if (_metaData.Tags.Count == 0)
+					_metaData = null;
 			}
 		}
 		
@@ -753,15 +786,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Ensures that the object has metadata and a DAE.ObjectID tag with the id of the object.</summary>		
 		public void SaveObjectID()
 		{
-			if (_metaData == null)
-				_metaData = new MetaData();
-			_metaData.Tags.AddOrUpdate("DAE.ObjectID", _iD.ToString(), true);
+			AddMetaDataTag("DAE.ObjectID", _iD.ToString(), true);
 		}
 		
 		public void RemoveObjectID()
 		{
-			if (_metaData != null)
-				_metaData.Tags.RemoveTag("DAE.ObjectID");
+			RemoveMetaDataTag("DAE.ObjectID");
 		}
 
         public virtual Statement EmitStatement(EmitMode mode)

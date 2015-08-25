@@ -22,6 +22,26 @@ using Alphora.Dataphor.DAE.Schema;
 
 namespace Alphora.Dataphor.DAE.Language.D4
 {
+	// NOTE: This was an attempt to reduce the amount of tag name storage in memory, but the savings were negligible (100K out of 70MB)
+	// If it is turned on, it would of course need to be made threadsafe before being production ready
+	#if USETAGNAMECACHE
+	public static class TagNameCache
+	{
+		private static Dictionary<String, String> _tagNames = new Dictionary<String, String>();
+
+		public static string GetTagName(string tagName)
+		{
+			String result;
+			if (!_tagNames.TryGetValue(tagName, out result))
+			{
+				result = tagName;
+				_tagNames.Add(result, result);
+			}
+			return result;
+		}
+	}
+	#endif
+
 	#if USESTRUCTTAG
 	public struct Tag
 	{
@@ -32,12 +52,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			//if ((AName == null) || (AName == String.Empty))
 			//	throw new SchemaException(SchemaException.Codes.TagNameRequired);
+			#if USETAGNAMECACHE
+			FName = AName == null ? null : TagNameCache.GetTagName(AName);
+			#else
 			FName = AName;
+			#endif
 			FValue = AValue;
 			FIsInherited = AIsInherited;
 			FIsStatic = AIsStatic;
 		}
-		
+
 		private string FName;
 		public string Name { get { return FName; } }
 		
@@ -1442,27 +1466,49 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
 		public MetaData(Tag[] tags) : base()
 		{
-			_tags.AddRange(tags);
+			if (tags != null && tags.Length > 0)
+			{
+				_tags = new Tags();
+				_tags.AddRange(tags);
+			}
 		}
 		
 		public MetaData(Tags tags) : base()
 		{
-			_tags.AddRange(tags);
+			if (tags != null && tags.Count > 0)
+			{
+				_tags = new Tags();
+				_tags.AddRange(tags);
+			}
 		}
 		
 		public int Line = -1;
 		public int LinePos = -1;
 		
 		// Tags
-		protected Tags _tags = new Tags();
-		public Tags Tags { get { return _tags; } }
+		protected Tags _tags; // = new Tags();
+		public Tags Tags 
+		{ 
+			get 
+			{ 
+				if (_tags == null)
+					_tags = new Tags();
+				return _tags; 
+			} 
+		}
+
+		public bool HasTags()
+		{
+			return _tags != null && _tags.Count > 0;
+		}
 
 		// Copy
 		/// <summary>Creates a copy of the metadata, with tag references copied as inherited tags.</summary>
 		public MetaData Copy()
 		{
 			MetaData metaData = new MetaData();
-			_tags.CopyTo(metaData.Tags);
+			if (HasTags())
+				Tags.CopyTo(metaData.Tags);
 			return metaData;
 		}
 		
@@ -1470,20 +1516,31 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// <summary>Inherits all dynamic tags, with tag references inherited.</summary>
 		public MetaData Inherit()
 		{
-			MetaData metaData = new MetaData();
-			#if USEHASHTABLEFORTAGS
-			foreach (Tag tag in FTags)
-				if (!tag.IsStatic)
-					metaData.Tags.Add(tag.Inherit());
-			#else
-			Tag tag;
-			for (int index = 0; index < _tags.Count; index++)
+			MetaData metaData = null;
+			if (HasTags())
 			{
-				tag = _tags[index];
-				if (!tag.IsStatic)
-					metaData.Tags.Add(tag.Inherit());
+				#if USEHASHTABLEFORTAGS
+				foreach (Tag tag in _tags)
+					if (!tag.IsStatic)
+					{
+						if (metaData == null)
+							metaData = new MetaData();
+						metaData.Tags.Add(tag.Inherit());
+					}
+				#else
+				Tag tag;
+				for (int index = 0; index < _tags.Count; index++)
+				{
+					tag = _tags[index];
+					if (!tag.IsStatic)
+					{
+						if (metaData == null)
+							metaData = new MetaData();
+						metaData.Tags.Add(tag.Inherit());
+					}
+				}
+				#endif
 			}
-			#endif
 			return metaData;
 		}
 		
@@ -1491,82 +1548,92 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// <summary>Merges all tags from the given metadata into this metadata.</summary>
 		public void Merge(MetaData metaData)
 		{
-			Tags.AddOrUpdateRange(metaData.Tags);
+			if (metaData != null && metaData.HasTags())
+				Tags.AddOrUpdateRange(metaData.Tags);
 		}
 		
 		// Inherit
 		/// <summary>Inherits all dynamic tags from the given metadata into this metadata.</summary>
 		public void Inherit(MetaData metaData)
 		{
-			#if USEHASHTABLEFORTAGS
-			foreach (Tag tag in AMetaData.Tags)
-				if (!tag.IsStatic)
-					Tags.Inherit(tag);
-			#else
-			Tag tag;
-			for (int index = 0; index < metaData.Tags.Count; index++)
+			if (metaData != null && metaData.HasTags())
 			{
-				tag = metaData.Tags[index];
-				if (!tag.IsStatic)
-					Tags.Inherit(tag);
+				#if USEHASHTABLEFORTAGS
+				foreach (Tag tag in AMetaData.Tags)
+					if (!tag.IsStatic)
+						Tags.Inherit(tag);
+				#else
+				Tag tag;
+				for (int index = 0; index < metaData.Tags.Count; index++)
+				{
+					tag = metaData.Tags[index];
+					if (!tag.IsStatic)
+						Tags.Inherit(tag);
+				}
+				#endif
 			}
-			#endif
 		}
 		
 		// Join
 		/// <summary>Joins each dynamic tag from the given metadata to the tags for this metadata using copy semantics.</summary>
 		public void Join(MetaData metaData)
 		{
-			#if USEHASHTABLEFORTAGS
-			foreach (Tag tag in AMetaData.Tags)
-				if (!tag.IsStatic)
-					Tags.Join(tag);
-			#else
-			Tag tag;
-			for (int index = 0; index < metaData.Tags.Count; index++)
+			if (metaData != null && metaData.HasTags())
 			{
-				tag = metaData.Tags[index];
-				if (!tag.IsStatic)
-					Tags.Join(tag);
+				#if USEHASHTABLEFORTAGS
+				foreach (Tag tag in AMetaData.Tags)
+					if (!tag.IsStatic)
+						Tags.Join(tag);
+				#else
+				Tag tag;
+				for (int index = 0; index < metaData.Tags.Count; index++)
+				{
+					tag = metaData.Tags[index];
+					if (!tag.IsStatic)
+						Tags.Join(tag);
+				}
+				#endif
 			}
-			#endif
 		}
 		
 		// JoinInherit
 		/// <summary>Joins each dynamic tag from the given metadata to the tags for this metadata using reference semantics.</summary>
 		public void JoinInherit(MetaData metaData)
 		{
-			#if USEHASHTABLEFORTAGS
-			foreach (Tag tag in AMetaData.Tags)
-				if (!tag.IsStatic)
-					Tags.JoinInherit(tag);
-			#else
-			Tag tag;
-			for (int index = 0; index < metaData.Tags.Count; index++)
+			if (metaData != null && metaData.HasTags())
 			{
-				tag = metaData.Tags[index];
-				if (!tag.IsStatic)
-					Tags.JoinInherit(tag);
+				#if USEHASHTABLEFORTAGS
+				foreach (Tag tag in AMetaData.Tags)
+					if (!tag.IsStatic)
+						Tags.JoinInherit(tag);
+				#else
+				Tag tag;
+				for (int index = 0; index < metaData.Tags.Count; index++)
+				{
+					tag = metaData.Tags[index];
+					if (!tag.IsStatic)
+						Tags.JoinInherit(tag);
+				}
+				#endif
 			}
-			#endif
 		}
 		
 		/// <summary>Retrives the tag of the given name from the given metadata, if the tag exists. Otherwise, null is returned.</summary>
 		public static Tag GetTag(MetaData metaData, string tagName)
 		{
-			return metaData == null ? Tag.None : metaData.Tags.GetTag(tagName);
+			return (metaData == null || !metaData.HasTags()) ? Tag.None : metaData.Tags.GetTag(tagName);
 		}
 		
 		/// <summary>Removes the tag of the given name from the given metadata and returns it, if it exists. Otherwise, null is returned.</summary>
 		public static Tag RemoveTag(MetaData metaData, string tagName)
 		{
-			return metaData == null ? Tag.None : metaData.Tags.RemoveTag(tagName);
+			return (metaData == null || !metaData.HasTags()) ? Tag.None : metaData.Tags.RemoveTag(tagName);
 		}
 		
 		/// <summary>Retrieves the value of the given tag from the given metadata, defaulted to the value of the default tag, or the given default value, if neither tag exists.</summary>
 		public static string GetTag(MetaData metaData, string tagName, string defaultTagName, string defaultValue)
 		{
-			if (metaData == null)
+			if (metaData == null || !metaData.HasTags())
 				return defaultValue;
 			else
 				return metaData.Tags.GetTagValue(tagName, defaultTagName, defaultValue);
@@ -1575,7 +1642,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// <summary>Retrieves the value of the given tag from the given metadata, defaulted to the given default value if no tag of that name exists.</summary>
 		public static string GetTag(MetaData metaData, string tagName, string defaultValue)
 		{
-			if (metaData == null)
+			if (metaData == null || !metaData.HasTags())
 				return defaultValue;
 			else
 				return metaData.Tags.GetTagValue(tagName, defaultValue);

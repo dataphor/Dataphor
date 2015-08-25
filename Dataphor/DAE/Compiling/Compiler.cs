@@ -3967,7 +3967,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				newTableVarColumn.Default = CompileTableVarColumnDefault(plan, tableVar, newTableVarColumn, column.Default);
 				
 			// if the default is not remotable, make sure that the DAE.IsDefaultRemotable tag is false, if it exists
-			Tag tag = newTableVarColumn.MetaData.Tags.GetTag("DAE.IsDefaultRemotable");
+			Tag tag = newTableVarColumn.GetMetaDataTag("DAE.IsDefaultRemotable");
 			if (tag != Tag.None)
 			{
 				bool remotable = Boolean.Parse(tag.Value);
@@ -3977,7 +3977,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			
 			// if the change is not remotable, make sure that the DAE.IsChangeRemotable tag is false, if it exists
-			tag = newTableVarColumn.MetaData.Tags.GetTag("DAE.IsChangeRemotable");
+			tag = newTableVarColumn.GetMetaDataTag("DAE.IsChangeRemotable");
 			if (tag != Tag.None)
 			{
 				bool remotable = Boolean.Parse(tag.Value);
@@ -3987,7 +3987,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			
 			// if the validate is not remotable, make sure that the DAE.IsValidateRemotable tag is false, if it exists
-			tag = newTableVarColumn.MetaData.Tags.GetTag("DAE.IsValidateRemotable");
+			tag = newTableVarColumn.GetMetaDataTag("DAE.IsValidateRemotable");
 			if (tag != Tag.None)
 			{
 				bool remotable = Boolean.Parse(tag.Value);
@@ -4100,7 +4100,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								throw new CompilerException(CompilerException.Codes.KeyRequired, statement);
 
 							node.Table.DetermineRemotable(plan.CatalogDeviceSession);
-							tag = node.Table.MetaData.Tags.GetTag("DAE.IsDefaultRemotable");
+							tag = node.Table.GetMetaDataTag("DAE.IsDefaultRemotable");
 							if (tag != Tag.None)
 							{
 								bool remotable = Boolean.Parse(tag.Value);
@@ -4109,7 +4109,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									node.Table.MetaData.Tags.Update("DAE.IsDefaultRemotable", node.Table.IsDefaultRemotable.ToString());
 							}
 
-							tag = node.Table.MetaData.Tags.GetTag("DAE.IsChangeRemotable");
+							tag = node.Table.GetMetaDataTag("DAE.IsChangeRemotable");
 							if (tag != Tag.None)
 							{
 								bool remotable = Boolean.Parse(tag.Value);
@@ -4118,7 +4118,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									node.Table.MetaData.Tags.Update("DAE.IsChangeRemotable", node.Table.IsChangeRemotable.ToString());
 							}
 
-							tag = node.Table.MetaData.Tags.GetTag("DAE.IsValidateRemotable");
+							tag = node.Table.GetMetaDataTag("DAE.IsValidateRemotable");
 							if (tag != Tag.None)
 							{
 								bool remotable = Boolean.Parse(tag.Value);
@@ -7226,23 +7226,23 @@ namespace Alphora.Dataphor.DAE.Compiling
 			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
 			try
 			{
-			Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Source", reference.Name));
-			constraint.Library = reference.Library;
-			constraint.MergeMetaData(reference.MetaData);
-			if (constraint.MetaData == null)
-				constraint.MetaData = new MetaData();
-			if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.SourceKey.Columns))
-				constraint.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForSourceReference(plan, reference)));
-			constraint.IsGenerated = true;
-			constraint.ConstraintType = Schema.ConstraintType.Database;
-			CompileSourceInsertConstraintNodeForReference(plan, reference, constraint);
-			constraint.InsertColumnFlags = new BitArray(reference.SourceTable.DataType.Columns.Count);
-			for (int index = 0; index < constraint.InsertColumnFlags.Length; index++)
-				constraint.InsertColumnFlags[index] = reference.SourceKey.Columns.ContainsName(reference.SourceTable.DataType.Columns[index].Name);
-			CompileSourceUpdateConstraintNodeForReference(plan, reference, constraint);
-			constraint.UpdateColumnFlags = (BitArray)constraint.InsertColumnFlags.Clone();
-			return constraint;
-		}
+				Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Source", reference.Name));
+				constraint.Library = reference.Library;
+				constraint.MergeMetaData(reference.MetaData);
+				if (constraint.MetaData == null)
+					constraint.MetaData = new MetaData();
+				if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.SourceKey.Columns))
+					constraint.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForSourceReference(plan, reference)));
+				constraint.IsGenerated = true;
+				constraint.ConstraintType = Schema.ConstraintType.Database;
+				CompileSourceInsertConstraintNodeForReference(plan, reference, constraint);
+				constraint.InsertColumnFlags = new BitArray(reference.SourceTable.DataType.Columns.Count);
+				for (int index = 0; index < constraint.InsertColumnFlags.Length; index++)
+					constraint.InsertColumnFlags[index] = reference.SourceKey.Columns.ContainsName(reference.SourceTable.DataType.Columns[index].Name);
+				CompileSourceUpdateConstraintNodeForReference(plan, reference, constraint);
+				constraint.UpdateColumnFlags = (BitArray)constraint.InsertColumnFlags.Clone();
+				return constraint;
+			}
 			finally
 			{
 				plan.PopCursorContext();
@@ -7467,34 +7467,34 @@ namespace Alphora.Dataphor.DAE.Compiling
 			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
 			try
 			{
-			Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Target", reference.Name));
-			constraint.Library = reference.Library;
-			constraint.MergeMetaData(reference.MetaData);
-			if (constraint.MetaData == null)
-				constraint.MetaData = new MetaData();
-			if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.TargetKey.Columns))
-				constraint.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForTargetReference(plan, reference)));
-			constraint.IsGenerated = true;
-			constraint.ConstraintType = Schema.ConstraintType.Database;
+				Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Target", reference.Name));
+				constraint.Library = reference.Library;
+				constraint.MergeMetaData(reference.MetaData);
+				if (constraint.MetaData == null)
+					constraint.MetaData = new MetaData();
+				if (!(constraint.MetaData.Tags.Contains("DAE.Message") || constraint.MetaData.Tags.Contains("DAE.SimpleMessage")) && CanBuildCustomMessageForKey(plan, reference.TargetKey.Columns))
+					constraint.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForTargetReference(plan, reference)));
+				constraint.IsGenerated = true;
+				constraint.ConstraintType = Schema.ConstraintType.Database;
 			
-			if (reference.UpdateReferenceAction == ReferenceAction.Require)
-			{
-				CompileTargetUpdateConstraintNodeForReference(plan, reference, constraint);
-				constraint.UpdateColumnFlags = new BitArray(reference.TargetTable.DataType.Columns.Count);
-				for (int index = 0; index < constraint.UpdateColumnFlags.Length; index++)
-					constraint.UpdateColumnFlags[index] = reference.TargetKey.Columns.ContainsName(reference.TargetTable.DataType.Columns[index].Name);
-			}
+				if (reference.UpdateReferenceAction == ReferenceAction.Require)
+				{
+					CompileTargetUpdateConstraintNodeForReference(plan, reference, constraint);
+					constraint.UpdateColumnFlags = new BitArray(reference.TargetTable.DataType.Columns.Count);
+					for (int index = 0; index < constraint.UpdateColumnFlags.Length; index++)
+						constraint.UpdateColumnFlags[index] = reference.TargetKey.Columns.ContainsName(reference.TargetTable.DataType.Columns[index].Name);
+				}
 				
-			if (reference.DeleteReferenceAction == ReferenceAction.Require)
-			{
-				CompileTargetDeleteConstraintNodeForReference(plan, reference, constraint);
-				constraint.DeleteColumnFlags = new BitArray(reference.TargetTable.DataType.Columns.Count);
-				for (int index = 0; index < constraint.DeleteColumnFlags.Length; index++)
-					constraint.DeleteColumnFlags[index] = reference.TargetKey.Columns.ContainsName(reference.TargetTable.DataType.Columns[index].Name);
-			}
+				if (reference.DeleteReferenceAction == ReferenceAction.Require)
+				{
+					CompileTargetDeleteConstraintNodeForReference(plan, reference, constraint);
+					constraint.DeleteColumnFlags = new BitArray(reference.TargetTable.DataType.Columns.Count);
+					for (int index = 0; index < constraint.DeleteColumnFlags.Length; index++)
+						constraint.DeleteColumnFlags[index] = reference.TargetKey.Columns.ContainsName(reference.TargetTable.DataType.Columns[index].Name);
+				}
 				
-			return constraint;
-		}
+				return constraint;
+			}
 			finally
 			{
 				plan.PopCursorContext();
@@ -12833,14 +12833,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (node is CursorNode)
 			{
 				Schema.TableVar tableVar = ((TableNode)node.Nodes[0]).TableVar;
-				foreach (Schema.TableVarColumn column in tableVar.Columns)
-				{
-					if (column.MetaData == null)
-						column.MetaData = new MetaData();
-					column.MetaData.Tags.AddOrUpdate("DAE.IsDefaultRemotable", column.IsDefaultRemotable.ToString());
-					column.MetaData.Tags.AddOrUpdate("DAE.IsChangeRemotable", column.IsChangeRemotable.ToString());
-					column.MetaData.Tags.AddOrUpdate("DAE.IsValidateRemotable", column.IsValidateRemotable.ToString());
-				}
+
+				// This is wrong for at least two reasons
+					// 1. It doesn't need to be here because the CopyDataType code in the process will manage communicating proposable remotable information
+					// 2. Even if it did need to be passed over the wire, it's wrong to add these tags to the base table variable definition, just because it was the target of a select
+				//foreach (Schema.TableVarColumn column in tableVar.Columns)
+				//{
+				//	if (column.MetaData == null)
+				//		column.MetaData = new MetaData();
+				//	column.MetaData.Tags.AddOrUpdate("DAE.IsDefaultRemotable", column.IsDefaultRemotable.ToString());
+				//	column.MetaData.Tags.AddOrUpdate("DAE.IsChangeRemotable", column.IsChangeRemotable.ToString());
+				//	column.MetaData.Tags.AddOrUpdate("DAE.IsValidateRemotable", column.IsValidateRemotable.ToString());
+				//}
 			}
 			else if (node.DataType is Schema.ITableType)
 			{	

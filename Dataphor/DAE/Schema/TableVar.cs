@@ -462,7 +462,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			return builder.ToString();
         }
 
-		// Copying a column does not copy static tags, cloning a column does        
+		// Inheriting a column does not copy static tags, copying a column does        
         public TableVarColumn Inherit()
         {
 			TableVarColumn column = new TableVarColumn(_column.Copy(), MetaData == null ? null : MetaData.Inherit(), _columnType);
@@ -532,21 +532,28 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			ColumnDefinition column = new ColumnDefinition();
-			column.ColumnName = Name;
-			column.TypeSpecifier = DataType.EmitSpecifier(mode);
-			column.IsNilable = IsNilable;
-			if ((Default != null) && Default.IsRemotable && ((mode != EmitMode.ForStorage) || !Default.IsPersistent))
-				column.Default = (DefaultDefinition)Default.EmitDefinition(mode);
+			try
+			{
+				ColumnDefinition column = new ColumnDefinition();
+				column.ColumnName = Name;
+				column.TypeSpecifier = DataType.EmitSpecifier(mode);
+				column.IsNilable = IsNilable;
+				if ((Default != null) && Default.IsRemotable && ((mode != EmitMode.ForStorage) || !Default.IsPersistent))
+					column.Default = (DefaultDefinition)Default.EmitDefinition(mode);
 		
-			if (_constraints != null)	
-				foreach (TableVarColumnConstraint constraint in Constraints)
-					if (((mode != EmitMode.ForRemote) || constraint.IsRemotable) && ((mode != EmitMode.ForStorage) || !constraint.IsPersistent))
-						column.Constraints.Add(constraint.EmitDefinition(mode));
+				if (_constraints != null)	
+					foreach (TableVarColumnConstraint constraint in Constraints)
+						if (((mode != EmitMode.ForRemote) || constraint.IsRemotable) && ((mode != EmitMode.ForStorage) || !constraint.IsPersistent))
+							column.Constraints.Add(constraint.EmitDefinition(mode));
 
-			column.MetaData = MetaData == null ? null : MetaData.Copy();
-			return column;
+				column.MetaData = MetaData == null ? null : MetaData.Copy();
+				return column;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 		
 		public override Object GetObjectFromHeader(ObjectHeader header)
@@ -1298,12 +1305,19 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			OrderDefinition order = new OrderDefinition();
-			for (int index = 0; index < Columns.Count; index++)
-				order.Columns.Add(Columns[index].EmitStatement(mode));
-			order.MetaData = MetaData == null ? null : MetaData.Copy();
-			return order;
+			try
+			{
+				OrderDefinition order = new OrderDefinition();
+				for (int index = 0; index < Columns.Count; index++)
+					order.Columns.Add(Columns[index].EmitStatement(mode));
+				order.MetaData = MetaData == null ? null : MetaData.Copy();
+				return order;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
         }
 
 		public override Statement EmitDropStatement(EmitMode mode)
@@ -1617,12 +1631,19 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			KeyDefinition key = new KeyDefinition();
-			foreach (TableVarColumn column in Columns)
-				key.Columns.Add(new KeyColumnDefinition(Schema.Object.EnsureRooted(column.Name)));
-			key.MetaData = MetaData == null ? null : MetaData.Copy();
-			return key;
+			try
+			{
+				KeyDefinition key = new KeyDefinition();
+				foreach (TableVarColumn column in Columns)
+					key.Columns.Add(new KeyColumnDefinition(Schema.Object.EnsureRooted(column.Name)));
+				key.MetaData = MetaData == null ? null : MetaData.Copy();
+				return key;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
         }
 
 		public override Statement EmitDropStatement(EmitMode mode)
@@ -2524,18 +2545,15 @@ namespace Alphora.Dataphor.DAE.Schema
 			ShouldDefault = sourceNode.TableVar.ShouldDefault;
 			ShouldValidate = sourceNode.TableVar.ShouldValidate;
 			
-			if (!sourceNode.TableVar.IsChangeRemotable || !sourceNode.TableVar.IsDefaultRemotable || !sourceNode.TableVar.IsValidateRemotable)
+			if ((!sourceNode.TableVar.IsChangeRemotable || !sourceNode.TableVar.IsDefaultRemotable || !sourceNode.TableVar.IsValidateRemotable) && MetaData != null)
 			{
-				if (MetaData == null)
-					MetaData = new MetaData();
-					
-				if (!sourceNode.TableVar.IsChangeRemotable)
+				if (!sourceNode.TableVar.IsChangeRemotable && MetaData.Tags.Contains("DAE.IsChangeRemotable"))
 					MetaData.Tags.AddOrUpdate("DAE.IsChangeRemotable", "false", true);
 					
-				if (!sourceNode.TableVar.IsDefaultRemotable)
+				if (!sourceNode.TableVar.IsDefaultRemotable && MetaData.Tags.Contains("DAE.IsDefaultRemotable"))
 					MetaData.Tags.AddOrUpdate("DAE.IsDefaultRemotable", "false", true);
 					
-				if (!sourceNode.TableVar.IsValidateRemotable)
+				if (!sourceNode.TableVar.IsValidateRemotable && MetaData.Tags.Contains("DAE.IsValidateRemotable"))
 					MetaData.Tags.AddOrUpdate("DAE.IsValidateRemotable", "false", true);
 			}
 			
@@ -2843,14 +2861,21 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			CreateTableStatement statement = new CreateTableStatement();
-			statement.TableVarName = Schema.Object.EnsureRooted(Name);
-			EmitTableVarStatement(mode, statement);
-			statement.DeviceName = new IdentifierExpression(Device == null ? String.Empty : Device.Name);
-			foreach (TableVarColumn column in Columns)
-				statement.Columns.Add(column.EmitStatement(mode));
-			return statement;
+			try
+			{
+				CreateTableStatement statement = new CreateTableStatement();
+				statement.TableVarName = Schema.Object.EnsureRooted(Name);
+				EmitTableVarStatement(mode, statement);
+				statement.DeviceName = new IdentifierExpression(Device == null ? String.Empty : Device.Name);
+				foreach (TableVarColumn column in Columns)
+					statement.Columns.Add(column.EmitStatement(mode));
+				return statement;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 
 		public override Statement EmitDropStatement(EmitMode mode)
@@ -3012,16 +3037,23 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			CreateViewStatement statement = new CreateViewStatement();
-			statement.TableVarName = Schema.Object.EnsureRooted(Name);
-			EmitTableVarStatement(mode, statement);
-			#if USEORIGINALEXPRESSION
-			statement.Expression = FOriginalExpression;
-			#else
-			statement.Expression = _invocationExpression;
-			#endif
-			return statement;
+			try
+			{
+				CreateViewStatement statement = new CreateViewStatement();
+				statement.TableVarName = Schema.Object.EnsureRooted(Name);
+				EmitTableVarStatement(mode, statement);
+				#if USEORIGINALEXPRESSION
+				statement.Expression = FOriginalExpression;
+				#else
+				statement.Expression = _invocationExpression;
+				#endif
+				return statement;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 
 		public override Statement EmitDropStatement(EmitMode mode)

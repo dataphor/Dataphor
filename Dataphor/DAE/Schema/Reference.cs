@@ -254,30 +254,37 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			CreateReferenceStatement statement = new CreateReferenceStatement();
-			if (SessionObjectName != null)
+			try
 			{
-				statement.IsSession = true;
-				statement.ReferenceName = Schema.Object.EnsureRooted(SessionObjectName);
+				CreateReferenceStatement statement = new CreateReferenceStatement();
+				if (SessionObjectName != null)
+				{
+					statement.IsSession = true;
+					statement.ReferenceName = Schema.Object.EnsureRooted(SessionObjectName);
+				}
+				else
+					statement.ReferenceName = Schema.Object.EnsureRooted(Name);
+				statement.TableVarName = SourceTable.Name;
+				foreach (TableVarColumn column in SourceKey.Columns)
+					statement.Columns.Add(new ReferenceColumnDefinition(column.Name));
+				statement.MetaData = MetaData == null ? new MetaData() : MetaData.Copy();
+				if (SessionObjectName != null)
+					statement.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", Name, true);
+				statement.ReferencesDefinition = new ReferencesDefinition();
+				statement.ReferencesDefinition.TableVarName = TargetTable.Name;
+				foreach (TableVarColumn column in TargetKey.Columns)
+					statement.ReferencesDefinition.Columns.Add(new ReferenceColumnDefinition(column.Name));
+				statement.ReferencesDefinition.UpdateReferenceAction = UpdateReferenceAction;
+				statement.ReferencesDefinition.UpdateReferenceExpressions.AddRange(UpdateReferenceExpressions);
+				statement.ReferencesDefinition.DeleteReferenceAction = DeleteReferenceAction;
+				statement.ReferencesDefinition.DeleteReferenceExpressions.AddRange(DeleteReferenceExpressions);
+				return statement;
 			}
-			else
-				statement.ReferenceName = Schema.Object.EnsureRooted(Name);
-			statement.TableVarName = SourceTable.Name;
-			foreach (TableVarColumn column in SourceKey.Columns)
-				statement.Columns.Add(new ReferenceColumnDefinition(column.Name));
-			statement.MetaData = MetaData == null ? new MetaData() : MetaData.Copy();
-			if (SessionObjectName != null)
-				statement.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", Name, true);
-			statement.ReferencesDefinition = new ReferencesDefinition();
-			statement.ReferencesDefinition.TableVarName = TargetTable.Name;
-			foreach (TableVarColumn column in TargetKey.Columns)
-				statement.ReferencesDefinition.Columns.Add(new ReferenceColumnDefinition(column.Name));
-			statement.ReferencesDefinition.UpdateReferenceAction = UpdateReferenceAction;
-			statement.ReferencesDefinition.UpdateReferenceExpressions.AddRange(UpdateReferenceExpressions);
-			statement.ReferencesDefinition.DeleteReferenceAction = DeleteReferenceAction;
-			statement.ReferencesDefinition.DeleteReferenceExpressions.AddRange(DeleteReferenceExpressions);
-			return statement;
+			finally
+			{
+				 if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 		
 		public override Statement EmitDropStatement(EmitMode mode)

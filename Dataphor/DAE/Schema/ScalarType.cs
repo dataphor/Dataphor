@@ -80,20 +80,19 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public void LoadReadAccessorID()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.ReadAccessorID");
+			Tag tag = RemoveMetaDataTag("DAE.ReadAccessorID");
 			if (tag != Tag.None)
 				_readAccessorID = Int32.Parse(tag.Value);
 		}
 		
 		public void SaveReadAccessorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.ReadAccessorID", _readAccessorID.ToString(), true);
+			AddMetaDataTag("DAE.ReadAccessorID", _readAccessorID.ToString(), true);
 		}
 		
 		public void RemoveReadAccessorID()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.ReadAccessorID");
+			RemoveMetaDataTag("DAE.ReadAccessorID");
 		}
 
 		public void ResolveReadAccessor(CatalogDeviceSession session)
@@ -131,20 +130,19 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public void LoadWriteAccessorID()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.WriteAccessorID");
+			Tag tag = RemoveMetaDataTag("DAE.WriteAccessorID");
 			if (tag != Tag.None)
 				_writeAccessorID = Int32.Parse(tag.Value);
 		}
 		
 		public void SaveWriteAccessorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.WriteAccessorID", _writeAccessorID.ToString(), true);
+			AddMetaDataTag("DAE.WriteAccessorID", _writeAccessorID.ToString(), true);
 		}
 		
 		public void RemoveWriteAccessorID()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.WriteAccessorID");
+			RemoveMetaDataTag("DAE.WriteAccessorID");
 		}
 
 		public void ResolveWriteAccessor(CatalogDeviceSession session)
@@ -180,16 +178,27 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveReadAccessorID();
 				RemoveWriteAccessorID();
 			}
+			try
+			{
+				PropertyDefinition property = new PropertyDefinition(Name, DataType.EmitSpecifier(mode));
+				if (!_isDefaultReadAccessor)
+					property.ReadAccessorBlock = _readAccessor.Block.EmitAccessorBlock(mode);
 			
-			PropertyDefinition property = new PropertyDefinition(Name, DataType.EmitSpecifier(mode));
-			if (!_isDefaultReadAccessor)
-				property.ReadAccessorBlock = _readAccessor.Block.EmitAccessorBlock(mode);
+				if (!_isDefaultWriteAccessor)
+					property.WriteAccessorBlock = _writeAccessor.Block.EmitAccessorBlock(mode);
 			
-			if (!_isDefaultWriteAccessor)
-				property.WriteAccessorBlock = _writeAccessor.Block.EmitAccessorBlock(mode);
-			
-			property.MetaData = MetaData == null ? null : MetaData.Copy();
-			return property;
+				property.MetaData = MetaData == null ? null : MetaData.Copy();
+				return property;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+				{
+					RemoveObjectID();
+					RemoveReadAccessorID();
+					RemoveWriteAccessorID();
+				}
+			}
 		}
 
 		public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
@@ -290,20 +299,19 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void LoadSelectorID()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.SelectorID");
+			Tag tag = RemoveMetaDataTag("DAE.SelectorID");
 			if (tag != Tag.None)
 				_selectorID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveSelectorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.SelectorID", _selectorID.ToString(), true);
+			AddMetaDataTag("DAE.SelectorID", _selectorID.ToString(), true);
 		}
 		
 		public void RemoveSelectorID()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.SelectorID");
+			RemoveMetaDataTag("DAE.SelectorID");
 		}
 
 		public void ResolveSelector(CatalogDeviceSession session)
@@ -345,15 +353,27 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveIsGenerated();
 				RemoveGeneratorID();
 			}
+			try
+			{
+				RepresentationDefinition representation = new RepresentationDefinition(Name);
+				foreach (Property property in Properties)
+					representation.Properties.Add(property.EmitStatement(mode));
+				if (!IsDefaultSelector)
+					representation.SelectorAccessorBlock = Selector.Block.EmitAccessorBlock(mode);
 			
-			RepresentationDefinition representation = new RepresentationDefinition(Name);
-			foreach (Property property in Properties)
-				representation.Properties.Add(property.EmitStatement(mode));
-			if (!IsDefaultSelector)
-				representation.SelectorAccessorBlock = Selector.Block.EmitAccessorBlock(mode);
-			
-			representation.MetaData = MetaData == null ? null : MetaData.Copy();
-			return representation;
+				representation.MetaData = MetaData == null ? null : MetaData.Copy();
+				return representation;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+				{
+					RemoveObjectID();
+					RemoveSelectorID();
+					RemoveIsGenerated();
+					RemoveGeneratorID();
+				}
+			}
 		}
 		
 		public override Statement EmitStatement(EmitMode mode)
@@ -550,11 +570,18 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			SortDefinition sortDefinition = new SortDefinition();
-			sortDefinition.Expression = (Expression)_compareNode.EmitStatement(mode);
-			sortDefinition.MetaData = MetaData == null ? null : MetaData.Copy();
-			return sortDefinition;
+			try
+			{
+				SortDefinition sortDefinition = new SortDefinition();
+				sortDefinition.Expression = (Expression)_compareNode.EmitStatement(mode);
+				sortDefinition.MetaData = MetaData == null ? null : MetaData.Copy();
+				return sortDefinition;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 		
 		public override Statement EmitStatement(EmitMode mode)
@@ -563,12 +590,19 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			CreateSortStatement statement = new CreateSortStatement(); 
-			statement.ScalarTypeName = Schema.Object.EnsureRooted(DataType.Name);
-			statement.Expression = (Expression)_compareNode.EmitStatement(mode);
-			statement.MetaData = MetaData == null ? null : MetaData.Copy();
-			return statement;
+			try
+			{
+				CreateSortStatement statement = new CreateSortStatement(); 
+				statement.ScalarTypeName = Schema.Object.EnsureRooted(DataType.Name);
+				statement.Expression = (Expression)_compareNode.EmitStatement(mode);
+				statement.MetaData = MetaData == null ? null : MetaData.Copy();
+				return statement;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 		
 		public override Statement EmitDropStatement(EmitMode mode)
@@ -634,20 +668,30 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveObjectID();
 				RemoveGeneratorID();
 			}
-
-			CreateConversionStatement statement = new CreateConversionStatement();
-			statement.SourceScalarTypeName = SourceScalarType.EmitSpecifier(mode);
-			statement.TargetScalarTypeName = TargetScalarType.EmitSpecifier(mode);
-			statement.OperatorName = new IdentifierExpression(Schema.Object.EnsureRooted(Operator.OperatorName));
-			statement.IsNarrowing = IsNarrowing;
-			statement.MetaData = MetaData == null ? null : MetaData.Copy();
-			if (mode == EmitMode.ForRemote)
+			try
 			{
-				if (statement.MetaData == null)
-					statement.MetaData = new MetaData();
-				statement.MetaData.Tags.AddOrUpdate("DAE.RootedIdentifier", Schema.Object.EnsureRooted(Name));
+				CreateConversionStatement statement = new CreateConversionStatement();
+				statement.SourceScalarTypeName = SourceScalarType.EmitSpecifier(mode);
+				statement.TargetScalarTypeName = TargetScalarType.EmitSpecifier(mode);
+				statement.OperatorName = new IdentifierExpression(Schema.Object.EnsureRooted(Operator.OperatorName));
+				statement.IsNarrowing = IsNarrowing;
+				statement.MetaData = MetaData == null ? null : MetaData.Copy();
+				if (mode == EmitMode.ForRemote)
+				{
+					if (statement.MetaData == null)
+						statement.MetaData = new MetaData();
+					statement.MetaData.Tags.AddOrUpdate("DAE.RootedIdentifier", Schema.Object.EnsureRooted(Name));
+				}
+				return statement;
 			}
-			return statement;
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+				{
+					RemoveObjectID();
+					RemoveGeneratorID();
+				}
+			}
 		}
 		
 		public override Statement EmitDropStatement(EmitMode mode)
@@ -967,20 +1011,19 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void LoadSelectorID()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.SelectorID");
+			Tag tag = RemoveMetaDataTag("DAE.SelectorID");
 			if (tag != Tag.None)
 				_selectorID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveSelectorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.SelectorID", _selectorID.ToString(), true);
+			AddMetaDataTag("DAE.SelectorID", _selectorID.ToString(), true);
 		}
 		
 		public void RemoveSelectorID()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.SelectorID");
+			RemoveMetaDataTag("DAE.SelectorID");
 		}
 
 		public void ResolveSelector(CatalogDeviceSession session)
@@ -1010,20 +1053,19 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void LoadComparerID()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.ComparerID");
+			Tag tag = RemoveMetaDataTag("DAE.ComparerID");
 			if (tag != Tag.None)
 				_comparerID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveComparerID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.ComparerID", _comparerID.ToString(), true);
+			AddMetaDataTag("DAE.ComparerID", _comparerID.ToString(), true);
 		}
 		
 		public void RemoveComparerID()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.ComparerID");
+			RemoveMetaDataTag("DAE.ComparerID");
 		}
 
 		public void ResolveComparer(CatalogDeviceSession session)
@@ -1062,12 +1104,25 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveSelectorID();
 				RemoveComparerID();
 			}
-			
-			SpecialDefinition special = new SpecialDefinition();
-			special.Name = Name;
-			special.Value = (Expression)ValueNode.EmitStatement(mode);
-			special.MetaData = MetaData == null ? null : MetaData.Copy();
-			return special;
+			try
+			{
+				SpecialDefinition special = new SpecialDefinition();
+				special.Name = Name;
+				special.Value = (Expression)ValueNode.EmitStatement(mode);
+				special.MetaData = MetaData == null ? null : MetaData.Copy();
+				return special;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+				{
+					RemoveObjectID();
+					RemoveIsGenerated();
+					RemoveGeneratorID();
+					RemoveSelectorID();
+					RemoveComparerID();
+				}
+			}
 		}
 		
 		public override Statement EmitStatement(EmitMode mode)
@@ -1439,20 +1494,19 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void LoadIsSpecialOperatorID()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.IsSpecialOperatorID");
+			Tag tag = RemoveMetaDataTag("DAE.IsSpecialOperatorID");
 			if (tag != Tag.None)
 				_isSpecialOperatorID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveIsSpecialOperatorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.IsSpecialOperatorID", _isSpecialOperatorID.ToString(), true);
+			AddMetaDataTag("DAE.IsSpecialOperatorID", _isSpecialOperatorID.ToString(), true);
 		}
 		
 		public void RemoveIsSpecialOperatorID()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.IsSpecialOperatorID");
+			RemoveMetaDataTag("DAE.IsSpecialOperatorID");
 		}
 		
 		public void ResolveIsSpecialOperator(CatalogDeviceSession session)
@@ -1483,20 +1537,19 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void LoadEqualityOperatorID()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.EqualityOperatorID");
+			Tag tag = RemoveMetaDataTag("DAE.EqualityOperatorID");
 			if (tag != Tag.None)
 				_equalityOperatorID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveEqualityOperatorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.EqualityOperatorID", _equalityOperatorID.ToString(), true);
+			AddMetaDataTag("DAE.EqualityOperatorID", _equalityOperatorID.ToString(), true);
 		}
 
 		public void RemoveEqualityOperatorID()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.EqualityOperatorID");
+			RemoveMetaDataTag("DAE.EqualityOperatorID");
 		}
 		
 		public void ResolveEqualityOperator(CatalogDeviceSession session)
@@ -1527,20 +1580,19 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void LoadComparisonOperatorID()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.ComparisonOperatorID");
+			Tag tag = RemoveMetaDataTag("DAE.ComparisonOperatorID");
 			if (tag != Tag.None)
 				_comparisonOperatorID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveComparisonOperatorID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.ComparisonOperatorID", _comparisonOperatorID.ToString(), true);
+			AddMetaDataTag("DAE.ComparisonOperatorID", _comparisonOperatorID.ToString(), true);
 		}
 
 		public void RemoveComparisonOperatorID()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.ComparisonOperatorID");
+			RemoveMetaDataTag("DAE.ComparisonOperatorID");
 		}
 		
 		public void ResolveComparisonOperator(CatalogDeviceSession session)
@@ -1601,20 +1653,19 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void LoadSortID()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.SortID");
+			Tag tag = RemoveMetaDataTag("DAE.SortID");
 			if (tag != Tag.None)
 			_sortID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveSortID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.SortID", _sortID.ToString(), true);
+			AddMetaDataTag("DAE.SortID", _sortID.ToString(), true);
 		}
 		
 		public void RemoveSortID()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.SortID");
+			RemoveMetaDataTag("DAE.SortID");
 		}
 		
 		[Reference]
@@ -1638,20 +1689,19 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void LoadUniqueSortID()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.UniqueSortID");
+			Tag tag = RemoveMetaDataTag("DAE.UniqueSortID");
 			if (tag != Tag.None)
 				_uniqueSortID = Int32.Parse(tag.Value);
 		}
 
 		public void SaveUniqueSortID()
 		{
-			MetaData.Tags.AddOrUpdate("DAE.UniqueSortID", _uniqueSortID.ToString(), true);
+			AddMetaDataTag("DAE.UniqueSortID", _uniqueSortID.ToString(), true);
 		}
 
 		public void RemoveUniqueSortID()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.UniqueSortID");
+			RemoveMetaDataTag("DAE.UniqueSortID");
 		}
 		
 		[Reference]
@@ -1784,26 +1834,41 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveSortID();
 				RemoveUniqueSortID();
 			}
-
-			CreateScalarTypeStatement statement = new CreateScalarTypeStatement();
-			statement.ScalarTypeName = Schema.Object.EnsureRooted(Name);
-			#if USETYPEINHERITANCE
-			foreach (ScalarType parentType in ParentTypes)
-				statement.ParentScalarTypes.Add(new ScalarTypeNameDefinition(parentType.Name));
-			#endif
+			try
+			{
+				CreateScalarTypeStatement statement = new CreateScalarTypeStatement();
+				statement.ScalarTypeName = Schema.Object.EnsureRooted(Name);
+				#if USETYPEINHERITANCE
+				foreach (ScalarType parentType in ParentTypes)
+					statement.ParentScalarTypes.Add(new ScalarTypeNameDefinition(parentType.Name));
+				#endif
 			
-			if (LikeType != null)
-				statement.LikeScalarTypeName = LikeType.Name;
+				if (LikeType != null)
+					statement.LikeScalarTypeName = LikeType.Name;
 
-			foreach (Representation representation in Representations)
-				if ((!representation.IsGenerated || (mode == EmitMode.ForStorage)) && !representation.HasExternalDependencies())
-					statement.Representations.Add(representation.EmitDefinition(mode));
+				foreach (Representation representation in Representations)
+					if ((!representation.IsGenerated || (mode == EmitMode.ForStorage)) && !representation.HasExternalDependencies())
+						statement.Representations.Add(representation.EmitDefinition(mode));
 					
-			// specials, representations w/dependencies, constraints and defaults are emitted by the catalog as alter statements because they may have dependencies on operators that are undefined when the create scalar type statement is executed.
+				// specials, representations w/dependencies, constraints and defaults are emitted by the catalog as alter statements because they may have dependencies on operators that are undefined when the create scalar type statement is executed.
 
-			statement.ClassDefinition = IsDefaultConveyor || (_classDefinition == null) ? null : (ClassDefinition)_classDefinition.Clone();
-			statement.MetaData = MetaData == null ? null : MetaData.Copy();
-			return statement;
+				statement.ClassDefinition = IsDefaultConveyor || (_classDefinition == null) ? null : (ClassDefinition)_classDefinition.Clone();
+				statement.MetaData = MetaData == null ? null : MetaData.Copy();
+				return statement;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+				{
+					RemoveObjectID();
+					RemoveIsSpecialOperatorID();
+					RemoveEqualityOperatorID();
+					RemoveComparisonOperatorID();
+					RemoveSortID();
+					RemoveUniqueSortID();
+				}
+
+			}
         }
         
 		public override Statement EmitDropStatement(EmitMode mode)

@@ -197,14 +197,21 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			AttachStatement statement = new AttachStatement();
-			statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
-			statement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(_scalarType.Name));
-			statement.EventSpecifier = new EventSpecifier();
-			statement.EventSpecifier.EventType = _eventType;
-			statement.MetaData = MetaData == null ? null : MetaData.Copy();
-			return statement;
+			try
+			{
+				AttachStatement statement = new AttachStatement();
+				statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
+				statement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(_scalarType.Name));
+				statement.EventSpecifier = new EventSpecifier();
+				statement.EventSpecifier.EventType = _eventType;
+				statement.MetaData = MetaData == null ? null : MetaData.Copy();
+				return statement;
+			}
+			finally
+			{
+				 if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 		
 		public override Statement EmitDropStatement(EmitMode mode)
@@ -255,14 +262,21 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			AttachStatement statement = new AttachStatement();
-			statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
-			statement.EventSourceSpecifier = new ColumnEventSourceSpecifier(Schema.Object.EnsureRooted(_tableVarColumn.TableVar.Name), _tableVarColumn.Name);
-			statement.EventSpecifier = new EventSpecifier();
-			statement.EventSpecifier.EventType = _eventType;
-			statement.MetaData = MetaData == null ? null : MetaData.Copy();
-			return statement;
+			try
+			{
+				AttachStatement statement = new AttachStatement();
+				statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
+				statement.EventSourceSpecifier = new ColumnEventSourceSpecifier(Schema.Object.EnsureRooted(_tableVarColumn.TableVar.Name), _tableVarColumn.Name);
+				statement.EventSpecifier = new EventSpecifier();
+				statement.EventSpecifier.EventType = _eventType;
+				statement.MetaData = MetaData == null ? null : MetaData.Copy();
+				return statement;
+			}
+			finally
+			{
+				 if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 		
 		public override Statement EmitDropStatement(EmitMode mode)
@@ -314,14 +328,21 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			AttachStatement statement = new AttachStatement();
-			statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
-			statement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(_tableVar.Name));
-			statement.EventSpecifier = new EventSpecifier();
-			statement.EventSpecifier.EventType = _eventType;
-			statement.MetaData = MetaData == null ? null : MetaData.Copy();
-			return statement;
+			try
+			{
+				AttachStatement statement = new AttachStatement();
+				statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
+				statement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(_tableVar.Name));
+				statement.EventSpecifier = new EventSpecifier();
+				statement.EventSpecifier.EventType = _eventType;
+				statement.MetaData = MetaData == null ? null : MetaData.Copy();
+				return statement;
+			}
+			finally
+			{
+				 if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 
 		public override Statement EmitDropStatement(EmitMode mode)

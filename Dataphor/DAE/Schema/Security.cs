@@ -387,11 +387,18 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			CreateRoleStatement statement = new CreateRoleStatement();
-			statement.RoleName = Schema.Object.EnsureRooted(Name);
-			statement.MetaData = MetaData == null ? null : MetaData.Copy();
-			return statement;
+			try
+			{
+				CreateRoleStatement statement = new CreateRoleStatement();
+				statement.RoleName = Schema.Object.EnsureRooted(Name);
+				statement.MetaData = MetaData == null ? null : MetaData.Copy();
+				return statement;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 		
 		public override Statement EmitDropStatement(EmitMode mode)

@@ -157,12 +157,19 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			DeviceOperatorMap operatorMap = new DeviceOperatorMap();
-			EmitOperatorSpecifier(operatorMap, mode);
-			operatorMap.ClassDefinition = ClassDefinition == null ? null : (ClassDefinition)ClassDefinition.Clone();
-			operatorMap.MetaData = MetaData == null ? null : MetaData.Copy();
-			return operatorMap;
+			try
+			{
+				DeviceOperatorMap operatorMap = new DeviceOperatorMap();
+				EmitOperatorSpecifier(operatorMap, mode);
+				operatorMap.ClassDefinition = ClassDefinition == null ? null : (ClassDefinition)ClassDefinition.Clone();
+				operatorMap.MetaData = MetaData == null ? null : MetaData.Copy();
+				return operatorMap;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 		
 		public DropDeviceOperatorMap EmitDropDefinition(EmitMode mode)
@@ -248,12 +255,19 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			DeviceScalarTypeMap scalarTypeMap = new DeviceScalarTypeMap();
-			scalarTypeMap.ScalarTypeName = Schema.Object.EnsureRooted(ScalarType.Name);
-			scalarTypeMap.ClassDefinition = (IsDefaultClassDefinition || (ClassDefinition == null)) ? null : (ClassDefinition)ClassDefinition.Clone();
-			scalarTypeMap.MetaData = MetaData == null ? null : MetaData.Copy();
-			return scalarTypeMap;
+			try
+			{
+				DeviceScalarTypeMap scalarTypeMap = new DeviceScalarTypeMap();
+				scalarTypeMap.ScalarTypeName = Schema.Object.EnsureRooted(ScalarType.Name);
+				scalarTypeMap.ClassDefinition = (IsDefaultClassDefinition || (ClassDefinition == null)) ? null : (ClassDefinition)ClassDefinition.Clone();
+				scalarTypeMap.MetaData = MetaData == null ? null : MetaData.Copy();
+				return scalarTypeMap;
+			}
+			finally
+			{
+				 if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
 		
 		public DropDeviceScalarTypeMap EmitDropDefinition(EmitMode mode)
@@ -723,7 +737,7 @@ namespace Alphora.Dataphor.DAE.Schema
         
 		public void LoadRegistered()
 		{
-			Tag tag = MetaData.RemoveTag(MetaData, "DAE.Registered");
+			Tag tag = RemoveMetaDataTag("DAE.Registered");
 			if (tag != Tag.None)
 				_registered = Boolean.Parse(tag.Value);
 		}
@@ -731,13 +745,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void SaveRegistered()
 		{
 			if (_registered)
-				MetaData.Tags.AddOrUpdate("DAE.Registered", _registered.ToString(), true);
+				AddMetaDataTag("DAE.Registered", _registered.ToString(), true);
 		}
 		
 		public void RemoveRegistered()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.Registered");
+			RemoveMetaDataTag("DAE.Registered");
 		}
 		
 		/// <summary>Used for backwards compatibility only</summary>
@@ -1094,16 +1107,26 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveObjectID();
 				RemoveRegistered();
 			}
+			try
+			{
+				CreateDeviceStatement statement = new CreateDeviceStatement();
+				statement.DeviceName = Schema.Object.EnsureRooted(Name);
+				statement.ClassDefinition = ClassDefinition == null ? null : (ClassDefinition)ClassDefinition.Clone();
+				statement.MetaData = MetaData == null ? null : MetaData.Copy();
+				statement.ReconciliationSettings = new ReconciliationSettings();
+				statement.ReconciliationSettings.ReconcileMaster = ReconcileMaster;
+				statement.ReconciliationSettings.ReconcileMode = ReconcileMode;
 
-			CreateDeviceStatement statement = new CreateDeviceStatement();
-			statement.DeviceName = Schema.Object.EnsureRooted(Name);
-			statement.ClassDefinition = ClassDefinition == null ? null : (ClassDefinition)ClassDefinition.Clone();
-			statement.MetaData = MetaData == null ? null : MetaData.Copy();
-			statement.ReconciliationSettings = new ReconciliationSettings();
-			statement.ReconciliationSettings.ReconcileMaster = ReconcileMaster;
-			statement.ReconciliationSettings.ReconcileMode = ReconcileMode;
-
-			return statement;
+				return statement;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+				{
+					RemoveObjectID();
+					RemoveRegistered();
+				}
+			}
         }
         
 		public override Statement EmitDropStatement(EmitMode mode)

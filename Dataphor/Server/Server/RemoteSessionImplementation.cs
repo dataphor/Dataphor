@@ -87,56 +87,56 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				Tag tag;
 				
-				tag = ServerLink.MetaData.Tags.GetTag("DefaultIsolationLevel");
+				tag = ServerLink.GetMetaDataTag("DefaultIsolationLevel");
 				if (tag != Tag.None)
 				{
 					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
 					nativeSessionInfo.DefaultIsolationLevel = (NativeIsolationLevel)Enum.Parse(typeof(NativeIsolationLevel), tag.Value);
 				}
 					
-				tag = ServerLink.MetaData.Tags.GetTag("DefaultLibraryName");
+				tag = ServerLink.GetMetaDataTag("DefaultLibraryName");
 				if (tag != Tag.None)
 				{
 					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
 					nativeSessionInfo.DefaultLibraryName = tag.Value;
 				}
 					
-				tag = ServerLink.MetaData.Tags.GetTag("DefaultMaxCallDepth");
+				tag = ServerLink.GetMetaDataTag("DefaultMaxCallDepth");
 				if (tag != Tag.None)
 				{
 					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
 					nativeSessionInfo.DefaultMaxCallDepth = Convert.ToInt32(tag.Value);
 				}
 					
-				tag = ServerLink.MetaData.Tags.GetTag("DefaultMaxStackDepth");
+				tag = ServerLink.GetMetaDataTag("DefaultMaxStackDepth");
 				if (tag != Tag.None)
 				{
 					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
 					nativeSessionInfo.DefaultMaxStackDepth = Convert.ToInt32(tag.Value);
 				}
 
-				tag = ServerLink.MetaData.Tags.GetTag("DefaultUseDTC");
+				tag = ServerLink.GetMetaDataTag("DefaultUseDTC");
 				if (tag != Tag.None)
 				{
 					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
 					nativeSessionInfo.DefaultUseDTC = Convert.ToBoolean(tag.Value);
 				}
 
-				tag = ServerLink.MetaData.Tags.GetTag("DefaultUseImplicitTransactions");
+				tag = ServerLink.GetMetaDataTag("DefaultUseImplicitTransactions");
 				if (tag != Tag.None)
 				{
 					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
 					nativeSessionInfo.DefaultUseImplicitTransactions = Convert.ToBoolean(tag.Value);
 				}
 				
-				tag = ServerLink.MetaData.Tags.GetTag("ShouldEmitIL");
+				tag = ServerLink.GetMetaDataTag("ShouldEmitIL");
 				if (tag != Tag.None)
 				{
 					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
 					nativeSessionInfo.ShouldEmitIL = Convert.ToBoolean(tag.Value);
 				}
 				
-				tag = ServerLink.MetaData.Tags.GetTag("UsePlanCache");
+				tag = ServerLink.GetMetaDataTag("UsePlanCache");
 				if (tag != Tag.None)
 				{
 					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();

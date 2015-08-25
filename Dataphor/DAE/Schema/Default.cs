@@ -46,11 +46,18 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveObjectID();
 			else
 				RemoveObjectID();
-
-			DefaultDefinition statement = new DefaultDefinition();
-			statement.MetaData = MetaData == null ? null : MetaData.Copy();
-			statement.Expression = (Expression)Node.EmitStatement(mode);
-			return statement;
+			try
+			{
+				DefaultDefinition statement = new DefaultDefinition();
+				statement.MetaData = MetaData == null ? null : MetaData.Copy();
+				statement.Expression = (Expression)Node.EmitStatement(mode);
+				return statement;
+			}
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+					RemoveObjectID();
+			}
 		}
     }
     

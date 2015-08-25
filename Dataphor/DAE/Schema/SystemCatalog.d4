@@ -609,9 +609,9 @@ create type VersionNumber
 	{ 
 		Storage.Length = "14",
 		DAE.AsString = "AsString",
-		Frontend.Width = "15",
-		Frontend.TextBox.MaxLength = "14",
-		Frontend.TextBox.MaxWidth = "15"
+		dynamic Frontend.Width = "15",
+		dynamic Frontend.TextBox.MaxLength = "14",
+		dynamic Frontend.TextBox.MaxWidth = "15"
 	};
 	
 create operator iCompare(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Integer class "System.VersionNumberCompareNode";

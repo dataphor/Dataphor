@@ -116,7 +116,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		public static Type GetNativeType(IDataType dataType, TableVarColumn column, Schema.DataTypes dataTypes)
 		{
-			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.NativeType");
+			DAE.Language.D4.Tag tag = column.GetMetaDataTag("DAEDataReader.NativeType");
             if (tag != Tag.None)
 				return Type.GetType(tag.Value, true, true);
 			else
@@ -174,7 +174,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		private int GetColumnSize(TableVarColumn column)
 		{
-			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.ColumnSize");
+			DAE.Language.D4.Tag tag = column.GetMetaDataTag("DAEDataReader.ColumnSize");
 			if (tag != null)
 				return System.Convert.ToInt32(tag.Value);
 			else
@@ -183,7 +183,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		private bool GetIsLong(TableVarColumn column, Schema.DataTypes dataTypes)
 		{
-			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.IsLong");
+			DAE.Language.D4.Tag tag = column.GetMetaDataTag("DAEDataReader.IsLong");
 			if (tag != null)
 				return tag.Value.ToLower() == "true";
 			else
@@ -192,7 +192,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		private bool GetIsReadOnly(TableVarColumn column)
 		{
-			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.IsReadOnly");
+			DAE.Language.D4.Tag tag = column.GetMetaDataTag("DAEDataReader.IsReadOnly");
 			if (tag != null)
 				return tag.Value.ToLower() == "true";
 			else
@@ -201,7 +201,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		private bool GetIsAutoIncrement(TableVarColumn column)
 		{
-			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.IsAutoIncrement");
+			DAE.Language.D4.Tag tag = column.GetMetaDataTag("DAEDataReader.IsAutoIncrement");
 			if (tag != null)
 				return tag.Value.ToLower() == "true";
 			else
@@ -210,7 +210,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		private int GetNumericPrecision(TableVarColumn column)
 		{
-			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.NumericPrecision");
+			DAE.Language.D4.Tag tag = column.GetMetaDataTag("DAEDataReader.NumericPrecision");
 			if (tag != null)
 				return System.Convert.ToInt32(tag.Value);
 			else
@@ -219,7 +219,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		private int GetNumericScale(TableVarColumn column)
 		{
-			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.NumericScale");
+			DAE.Language.D4.Tag tag = column.GetMetaDataTag("DAEDataReader.NumericScale");
 			if (tag != null)
 				return System.Convert.ToInt32(tag.Value);
 			else

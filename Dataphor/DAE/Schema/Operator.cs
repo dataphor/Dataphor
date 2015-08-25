@@ -308,17 +308,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void SaveLocator()
 		{
 			if (_locator != null)
-			{
-				if (MetaData == null)
-					MetaData = new MetaData();
-				MetaData.Tags.AddOrUpdate("DAE.Locator", _locator.ToString(), true);
-			}
+				AddMetaDataTag("DAE.Locator", _locator.ToString(), true);
 		}
 		
 		public void RemoveLocator()
 		{
-			if (MetaData != null)
-				MetaData.Tags.RemoveTag("DAE.Locator");
+			RemoveMetaDataTag("DAE.Locator");
 		}
 
 		// ATOperatorName
@@ -524,50 +519,61 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveGeneratorID();
 				RemoveLocator();
 			}
-			
-			IMetaData result;
-			if ((mode != EmitMode.ForRemote) && (_declarationText != null))
+			try
 			{
-				SourceStatement statement = new SourceStatement();
-				statement.Source = _declarationText + _bodyText;
-				result = statement;
-			}
-			else
-			{
-				CreateOperatorStatement statement = new CreateOperatorStatement();
-				statement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
-				foreach (Operand operand in Operands)
+				IMetaData result;
+				if ((mode != EmitMode.ForRemote) && (_declarationText != null))
 				{
-					FormalParameter formalParameter = new FormalParameter();
-					formalParameter.Identifier = operand.Name;
-					formalParameter.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
-					formalParameter.Modifier = operand.Modifier;
-					statement.FormalParameters.Add(formalParameter);
+					SourceStatement statement = new SourceStatement();
+					statement.Source = _declarationText + _bodyText;
+					result = statement;
 				}
-				if (ReturnDataType != null)
-					statement.ReturnType = ReturnDataType.EmitSpecifier(mode);
-				#if USEVIRTUAL
-				statement.IsVirtual = IsVirtual;
-				statement.IsAbstract = IsAbstract;
-				statement.IsOverride = IsOverride;
-				statement.IsReintroduced = IsReintroduced;
-				#endif
-				if ((mode == EmitMode.ForRemote) && !IsRemotable)
-					statement.Block.Block = new Block();
 				else
-					Block.EmitStatement(mode, statement.Block);
-				result = statement;
+				{
+					CreateOperatorStatement statement = new CreateOperatorStatement();
+					statement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
+					foreach (Operand operand in Operands)
+					{
+						FormalParameter formalParameter = new FormalParameter();
+						formalParameter.Identifier = operand.Name;
+						formalParameter.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
+						formalParameter.Modifier = operand.Modifier;
+						statement.FormalParameters.Add(formalParameter);
+					}
+					if (ReturnDataType != null)
+						statement.ReturnType = ReturnDataType.EmitSpecifier(mode);
+					#if USEVIRTUAL
+					statement.IsVirtual = IsVirtual;
+					statement.IsAbstract = IsAbstract;
+					statement.IsOverride = IsOverride;
+					statement.IsReintroduced = IsReintroduced;
+					#endif
+					if ((mode == EmitMode.ForRemote) && !IsRemotable)
+						statement.Block.Block = new Block();
+					else
+						Block.EmitStatement(mode, statement.Block);
+					result = statement;
+				}
+
+				result.MetaData = MetaData == null ? null : MetaData.Copy();
+
+				if (SessionObjectName != null)
+				{
+					if (result.MetaData == null)
+						result.MetaData = new MetaData();
+					result.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
+				}
+				return (Statement)result;
 			}
-
-			result.MetaData = MetaData == null ? null : MetaData.Copy();
-
-			if (SessionObjectName != null)
+			finally
 			{
-				if (result.MetaData == null)
-					result.MetaData = new MetaData();
-				result.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
+				if (mode == EmitMode.ForStorage)
+				{
+					RemoveObjectID();
+					RemoveGeneratorID();
+					RemoveLocator();
+				}
 			}
-			return (Statement)result;
 		}
 		
 		public override Statement EmitDropStatement(EmitMode mode)
@@ -653,57 +659,67 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveObjectID();
 				RemoveLocator();
 			}
-				
-			IMetaData result;
+			try
+			{
+				IMetaData result;
 			
-			if ((mode != EmitMode.ForRemote) && (DeclarationText != null))
-			{
-				SourceStatement statement = new SourceStatement();
-				statement.Source = DeclarationText + InitializationText + AggregationText + FinalizationText;
-				result = statement;
-			}
-			else
-			{
-				CreateAggregateOperatorStatement statement = new CreateAggregateOperatorStatement();
-				statement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
-				foreach (Operand operand in Operands)
+				if ((mode != EmitMode.ForRemote) && (DeclarationText != null))
 				{
-					FormalParameter formalParameter = new FormalParameter();
-					formalParameter.Identifier = operand.Name;
-					formalParameter.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
-					formalParameter.Modifier = operand.Modifier;
-					statement.FormalParameters.Add(formalParameter);
-				}
-				statement.ReturnType = ReturnDataType.EmitSpecifier(mode);
-				#if USEVIRTUAL
-				statement.IsVirtual = IsVirtual;
-				statement.IsAbstract = IsAbstract;
-				statement.IsOverride = IsOverride;
-				statement.IsReintroduced = IsReintroduced;
-				#endif
-				if ((mode == EmitMode.ForRemote) && !IsRemotable)
-				{
-					statement.Initialization.Block = new Block();
-					statement.Aggregation.Block = new Block();
-					statement.Finalization.Block = new Block();
+					SourceStatement statement = new SourceStatement();
+					statement.Source = DeclarationText + InitializationText + AggregationText + FinalizationText;
+					result = statement;
 				}
 				else
 				{
-					Initialization.EmitStatement(mode, statement.Initialization);
-					Aggregation.EmitStatement(mode, statement.Aggregation);
-					Finalization.EmitStatement(mode, statement.Finalization);
+					CreateAggregateOperatorStatement statement = new CreateAggregateOperatorStatement();
+					statement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
+					foreach (Operand operand in Operands)
+					{
+						FormalParameter formalParameter = new FormalParameter();
+						formalParameter.Identifier = operand.Name;
+						formalParameter.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
+						formalParameter.Modifier = operand.Modifier;
+						statement.FormalParameters.Add(formalParameter);
+					}
+					statement.ReturnType = ReturnDataType.EmitSpecifier(mode);
+					#if USEVIRTUAL
+					statement.IsVirtual = IsVirtual;
+					statement.IsAbstract = IsAbstract;
+					statement.IsOverride = IsOverride;
+					statement.IsReintroduced = IsReintroduced;
+					#endif
+					if ((mode == EmitMode.ForRemote) && !IsRemotable)
+					{
+						statement.Initialization.Block = new Block();
+						statement.Aggregation.Block = new Block();
+						statement.Finalization.Block = new Block();
+					}
+					else
+					{
+						Initialization.EmitStatement(mode, statement.Initialization);
+						Aggregation.EmitStatement(mode, statement.Aggregation);
+						Finalization.EmitStatement(mode, statement.Finalization);
+					}
+					result = statement;
 				}
-				result = statement;
-			}
 
-			result.MetaData = MetaData == null ? null : MetaData.Copy();
-			if (SessionObjectName != null)
-			{
-				if (result.MetaData == null)
-					result.MetaData = new MetaData();
-				result.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
+				result.MetaData = MetaData == null ? null : MetaData.Copy();
+				if (SessionObjectName != null)
+				{
+					if (result.MetaData == null)
+						result.MetaData = new MetaData();
+					result.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
+				}
+				return (Statement)result;
 			}
-			return (Statement)result;
+			finally
+			{
+				if (mode == EmitMode.ForStorage)
+				{
+					RemoveObjectID();
+					RemoveLocator();
+				}
+			}
 		}
 
 		public override Statement EmitHeader()
