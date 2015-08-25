@@ -1,0 +1,87 @@
+/*
+	TODO: Support update through add using an "assignment" metaphor
+	
+*/
+
+create table Employee
+{
+	ID : Integer,
+	Name : String,
+	key { ID }
+};
+
+create table EmployeeAddress
+{
+	EmployeeID : Integer,
+	Lines : list(String),
+	City : String,
+	State : String,
+	Zip : String,
+	key { EmployeeID }
+};
+
+create table EmployeePhone
+{
+	EmployeeID : Integer,
+	Phone : String,
+	key { EmployeeID, Phone }
+};
+
+select 
+	Employee 
+	{ 
+		ID, 
+		Name, 
+		EmployeeAddress where EmployeeID = ID { Lines, City, State, Zip }[] Address, 
+		EmployeePhone where EmployeeID = ID { Phone } Phones
+	};
+
+// Effectively, the update to EmployeeAddress becomes:
+
+EmployeeAddress where EmployeeID = old.ID := table { new.Address add { new.ID EmployeeID } };
+
+// And the update to EmployeePhone becomes:
+
+EmployeePhone where EmployeeID = old.ID := new.Phones add { ID EmployeeID }
+
+// Of course, assignment would need to be generalized to be more intelligent, right now it's a total replacement, it needs to be a smarter update
+// And it needs to take into account concurrency checking
+// And the update through the add would need to have some way of knowing how to correlate the key back to the source table.
+// A fairly tricky thing to get right, but it is possible, and it would result in a very nice API
+	// Actually, it is possible to infer it from the restriction
+// And implementations could pick and choose how much of a given structure they wanted to persist directly, versus column-by-column
+
+EmployeePhone nest { Phone } Phones unnest Phones
+
+// Nest/Unnest operators would give a nice way to correlate the key back to the source
+// Warp/Unwrap
+
+select 
+	Employee { ID, Name } rename E 
+		left join (EmployeeAddress wrap { Lines, City, State, Zip } as Address) rename EA by E.ID = EA.EmployeeID
+		left join (EmployeePhone nest { Phone } as Phones) rename EP by E.ID = EP.EmployeeID
+		
+// Of course, this would not be a supported operation, so restrict optimization would be essential, but only for the seek optimization, really
+
+// Could you map a recursive structure this way?
+
+Action.title: string,
+Action.number : integer,
+Action.resource : reference,
+Action.actions : list(Action)
+	
+create table Action
+{
+	id : integer,
+	parent_id : integer,
+	title : string,
+	number : integer,
+	resource : reference,
+	key { id }
+};
+
+// First, you'd have to ensure a unique identifier was available
+
+select Action { id, title, number, resource, Action where parent_id = id actions }
+
+// Hmmm......

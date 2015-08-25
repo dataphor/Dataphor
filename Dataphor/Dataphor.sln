@@ -164,6 +164,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Web", "..\Dataph
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Web.Client", "..\Dataphoria\Dataphoria.Web.Client\Dataphoria.Web.Client.csproj", "{23565EEF-87F4-4FAA-AEEC-C507FA51FC57}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHIR.Core", "..\Libraries\FHIR.Core\Source\FHIR.Core\FHIR.Core.csproj", "{737DEDCB-669D-4962-8DB9-894009FD1DC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		BaseDebug|Any CPU = BaseDebug|Any CPU
@@ -937,6 +939,18 @@ Global
 		{23565EEF-87F4-4FAA-AEEC-C507FA51FC57}.Release|Any CPU.Build.0 = Release|Any CPU
 		{23565EEF-87F4-4FAA-AEEC-C507FA51FC57}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{23565EEF-87F4-4FAA-AEEC-C507FA51FC57}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.BaseDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.BaseDebug|Any CPU.Build.0 = Debug|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.BaseDebug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.BaseDebug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1010,5 +1024,6 @@ Global
 		{F342F781-894F-4A6F-A59A-86080E1AC737} = {3232C77F-4816-48C6-B80D-761FF48AA282}
 		{C5CA2316-6595-49A4-A9FD-F567FB97C35D} = {658579EE-4680-4E26-8BD7-6AB8C3B70252}
 		{23565EEF-87F4-4FAA-AEEC-C507FA51FC57} = {658579EE-4680-4E26-8BD7-6AB8C3B70252}
+		{737DEDCB-669D-4962-8DB9-894009FD1DC9} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
 	EndGlobalSection
 EndGlobal
