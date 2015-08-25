@@ -4817,6 +4817,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			BNF:
 			<create scalar type statement> ::=
 				create type <scalar type name> 
+					[is "{"<ne scalar type name commalist>"}"]
 					[like <scalar type name>]
 					["{"<scalar type definition item commalist>"}"]
 					[<class definition>]
@@ -4828,17 +4829,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				<default definition> |
 				<special definition>
 		*/
-
-		/*
-			!BNF:
-			<create scalar type statement> ::=
-				create type <scalar type name>
-					[is "{"<ne scalar type name commalist>"}"]
-					[like <scalar type name>]
-					["{"<scalar type definition item commalist>"}"]
-					[<class definition>]
-					<metadata>
-		*/		
         protected CreateScalarTypeStatement CreateScalarTypeStatement(int line, int linePos)
         {
 			CreateScalarTypeStatement statement = new CreateScalarTypeStatement();
@@ -4846,13 +4836,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			statement.LinePos = linePos;
 			statement.ScalarTypeName = QualifiedIdentifier();
 			
-			#if ALLOWSUBTYPES
-			if (FLexer.PeekTokenSymbol(1) == Keywords.Is)
+			if (_lexer.PeekTokenSymbol(1) == Keywords.Is)
 			{
-				FLexer.NextToken();
+				_lexer.NextToken();
 				ScalarTypeNameList(statement.ParentScalarTypes);
 			}
-			#endif
 
 			if (_lexer.PeekTokenSymbol(1) == Keywords.Like)
 			{

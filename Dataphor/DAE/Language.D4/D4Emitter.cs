@@ -2219,19 +2219,17 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Type, statement.ScalarTypeName);
 
-			#if ALLOWSUBTYPES
-			if (AStatement.ParentScalarTypes.Count > 0)
+			if (statement.ParentScalarTypes.Count > 0)
 			{
 				AppendFormat(" {0} {1} ", Keywords.Is, Keywords.BeginList);
-				for (int index = 0; index < AStatement.ParentScalarTypes.Count; index++)
+				for (int index = 0; index < statement.ParentScalarTypes.Count; index++)
 				{
 					if (index > 0)
 						EmitListSeparator();
-					EmitScalarTypeNameDefinition(AStatement.ParentScalarTypes[index]);
+					EmitScalarTypeNameDefinition(statement.ParentScalarTypes[index]);
 				}
 				AppendFormat(" {0}", Keywords.EndList);
 			}
-			#endif
 
 			if (statement.LikeScalarTypeName != String.Empty)
 				AppendFormat(" {0} {1}", Keywords.Like, statement.LikeScalarTypeName);

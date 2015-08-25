@@ -644,7 +644,8 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		(drop <attribute name>)
 
 	<create scalar type statement> ::=
-		create type <scalar type name> 
+		create type <scalar type name>
+			[is "{"<ne scalar type name commalist>"}"]
 			[like <scalar type name>]
 			["{"<scalar type definition item commalist>"}"]
 			[<class definition>]
