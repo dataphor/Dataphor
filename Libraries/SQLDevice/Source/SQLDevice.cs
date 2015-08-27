@@ -2194,7 +2194,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			// TODO: Replace an imposed key if a new key is added
 			foreach (Schema.Key key in sourceTableVar.Keys)
 				if (Convert.ToBoolean(D4.MetaData.GetTag(key.MetaData, "Storage.ShouldReconcile", "true")))
-					if (!targetTableVar.Keys.Contains(key))
+					if (!targetTableVar.Keys.Contains(key) && (!key.IsSparse || !targetTableVar.Orders.Contains(CreateOrderFromSparseKey(plan, key))))
 					{
 						// Add the key to the target table var
 						statement.CreateKeys.Add(key.EmitStatement(D4.EmitMode.ForCopy));
@@ -2218,7 +2218,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				if (Convert.ToBoolean(D4.MetaData.GetTag(order.MetaData, "Storage.ShouldReconcile", "true")))
 					if (!(targetTableVar.Orders.Contains(order)))
 					{
-						// Add the key to the target table var
+						// Add the order to the target table var
 						statement.CreateOrders.Add(order.EmitStatement(D4.EmitMode.ForCopy));
 						reconciliationRequired = true;
 					}
@@ -2230,13 +2230,28 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			// Ensure ATargetTableVar.Orders is a subset of ASourceTableVar.Orders
 			if ((options & ReconcileOptions.ShouldDropOrders) != 0)
 				foreach (Schema.Order order in targetTableVar.Orders)
-					if (!sourceTableVar.Orders.Contains(order))
+					if (!sourceTableVar.Orders.Contains(order) && !sourceTableVar.Keys.Contains(CreateSparseKeyFromOrder(order)))
 					{
 						statement.DropOrders.Add(new SchemaLevelDropOrderDefinition(order));
 						reconciliationRequired = true;
 					}
 
 			return statement;
+		}
+
+		private Schema.Order CreateOrderFromSparseKey(Plan plan, Schema.Key key )
+		{
+			return Compiler.OrderFromKey(plan, key);
+		}
+
+		private Schema.Key CreateSparseKeyFromOrder(Schema.Order order)
+		{
+			TableVarColumn[] orderColumns = new TableVarColumn[order.Columns.Count];
+			for (int i = 0; i < order.Columns.Count; i++)
+				orderColumns[i] = order.Columns[i].Column;
+			Schema.Key key = new Schema.Key(orderColumns);
+			key.IsSparse = true;
+			return key;
 		}
         
 		public override void ReconcileTable(ServerProcess process, TableVar serverTableVar, TableVar deviceTableVar, D4.ReconcileMaster master)
@@ -2529,6 +2544,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 									TableVarColumnType.Stored
 								);
 								
+							if (column.MetaData == null)
+								column.MetaData = new D4.MetaData();
 							column.MetaData.Tags.Add(new D4.Tag("Storage.Name", nativeColumnName));
 							if (nativeDomainName != domainName)
 								column.MetaData.Tags.Add(new D4.Tag("Storage.DomainName", domainName));
