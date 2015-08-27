@@ -79,6 +79,14 @@ if not exists (select * from sysdatabases where name = '{0}')
             ShouldNormalizeWhitespace = false;
         }
 
+		// SQL Server Versions:
+			// 7 - 7.0
+			// 2000 - 8
+			// 2005 - 9
+			// 2008 - 10
+			// 2008 R2 - 10.50
+			// 2012 - 11
+			// 2014 - 12
         public int MajorVersion
         {
             get { return _majorVersion; }
@@ -368,6 +376,10 @@ if not exists (select * from sysdatabases where name = '{0}')
                 case "binary":
                 case "varbinary":
                 case "timestamp":
+				case "date": // 2008 (majorVersion >= 10)
+				case "time": // 2008
+				//case "datetime2": // 2008
+				//case "datetimeoffset": // 2008
                     return true;
                 default:
                     return false;
@@ -395,8 +407,14 @@ if not exists (select * from sysdatabases where name = '{0}')
                 case "float":
                 case "real":
                     return plan.DataTypes.SystemDecimal;
+				case "date":
+					return plan.DataTypes.SystemDate;
+				case "time":
+					return plan.DataTypes.SystemTime;
                 case "datetime":
                 case "smalldatetime":
+				//case "datetime2":
+				//case "datetimeoffset":
                     return plan.DataTypes.SystemDateTime;
                 case "money":
                 case "smallmoney":

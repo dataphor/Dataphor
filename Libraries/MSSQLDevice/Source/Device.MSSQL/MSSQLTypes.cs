@@ -44,7 +44,23 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
             Binary		|	image															|	MSSQLBinary
             SQLText		|	text															|	MSSQLText
             MSSQLBinary |	binary(Storage.Length)											|	MSSQLMSSQLBinary
+
     */
+
+	// TODO: Support for date and time:
+		// The current mapping for System.Date uses MSSQLDate, which uses a native representation in the target system as datetime
+		// The current mapping for System.Time uses MSSQLTime, which uses a native representation in the target system as datetime
+		// We need a solution that would use the new date and time types, as well as potentially maintain functionality for systems that still use the datetime type
+		// For now, if the underlying system uses a date/time type, the reconciliation will accept that type as a valid type mapping for System.Date/System.Time
+
+	// TODO: Support for datetime2
+		// The new datetime2 type is still a datetime, but has greater scale and precision, so we need an MSSQLDateTime2 mapping to support it
+
+	// TODO: Support for datetimeoffset type
+		// We should look at supporting this type directly in D4? There is a C# DateTimeOffset type as well, though I'm not 100% sure I understand why it exists...
+
+	// TODO: Support for varchar(max) and varbinary(max)
+	// TODO: Support for xml type?
 
 	/// <summary>
 	/// MSSQL type : bit
