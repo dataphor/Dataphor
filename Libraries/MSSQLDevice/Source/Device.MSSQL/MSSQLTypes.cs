@@ -57,7 +57,8 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 		// The new datetime2 type is still a datetime, but has greater scale and precision, so we need an MSSQLDateTime2 mapping to support it
 
 	// TODO: Support for datetimeoffset type
-		// We should look at supporting this type directly in D4? There is a C# DateTimeOffset type as well, though I'm not 100% sure I understand why it exists...
+		// We should look at supporting this type directly in D4? There is a C# DateTimeOffset type as well
+		// We should actually just change our DateTime to use DateTimeOffset (exposing a timezone offset property), although I'm not sure how that would map in other systems
 
 	// TODO: Support for varchar(max) and varbinary(max)
 	// TODO: Support for xml type?
