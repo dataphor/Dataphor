@@ -213,7 +213,7 @@ namespace Alphora.Dataphor.DAE.Language.RealSQL
 			public NamedExpression(string name, Expression expression)
 			{
 				this.name = name;
-				expression = expression;
+				this.expression = expression;
 			}
 			
 			private string name;
