@@ -174,18 +174,6 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			as necessary by descendent devices to provide support for database specific catalog features.
 	*/
 	
-	[Flags]
-	public enum ReconcileOptions 
-	{ 
-		None = 0,
-		ShouldReconcileColumns = 1, 
-		ShouldDropTables = 2,
-		ShouldDropColumns = 4, 
-		ShouldDropKeys = 8, 
-		ShouldDropOrders = 16, 
-		All = ShouldReconcileColumns | ShouldDropTables | ShouldDropColumns | ShouldDropKeys | ShouldDropOrders
-	}
-	
 	public abstract class SQLDevice : Device
 	{
 		public const string SQLDateTimeScalarType = "SQLDevice.SQLDateTime";
@@ -1953,153 +1941,29 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			
 			return batch;
         }
-        
-		public override ErrorList Reconcile(ServerProcess process, Catalog serverCatalog, Catalog deviceCatalog)
-		{
-			ErrorList errors = base.Reconcile(process, serverCatalog, deviceCatalog);
 
-			if ((ReconcileMaster == D4.ReconcileMaster.Server) || (ReconcileMaster == D4.ReconcileMaster.Both))
-				foreach (Schema.Object objectValue in serverCatalog)
-					if (objectValue is Schema.BaseTableVar)
+		protected override void CreateServerTableInDevice(ServerProcess process, TableVar tableVar)
+		{
+			using (Plan plan = new Plan(process))
+			{
+				using (SQLDevicePlan devicePlan = new SQLDevicePlan(plan, this, null))
+				{
+					Statement statement = TranslateCreateTable(devicePlan, tableVar);
+					SQLDeviceSession deviceSession = (SQLDeviceSession)plan.DeviceConnect(this);
 					{
-						try
+						Batch batch = statement as Batch;
+						if (batch != null)
 						{
-							Schema.BaseTableVar tableVar = (Schema.BaseTableVar)objectValue;
-							if (Convert.ToBoolean(D4.MetaData.GetTag(tableVar.MetaData, "Storage.ShouldReconcile", "true")))
-							{
-								int objectIndex = deviceCatalog.IndexOf(tableVar.Name);
-								if (objectIndex < 0)
-									CreateTable(process, tableVar, D4.ReconcileMaster.Server);
-								else
-									ReconcileTable(process, tableVar, (Schema.BaseTableVar)deviceCatalog[objectIndex], D4.ReconcileMaster.Server);
-							}
+							foreach (Statement singleStatement in batch.Statements)
+								deviceSession.Connection.Execute(Emitter.Emit(singleStatement));
 						}
-						catch (Exception exception)
-						{
-							errors.Add(exception);
-						}
+						else
+							deviceSession.Connection.Execute(Emitter.Emit(statement));
 					}
-			
-			if ((ReconcileMaster == D4.ReconcileMaster.Device) || (ReconcileMaster == D4.ReconcileMaster.Both))
-				foreach (Schema.Object objectValue in deviceCatalog)
-					if (objectValue is Schema.BaseTableVar)
-					{
-						try
-						{
-							Schema.BaseTableVar tableVar = (Schema.BaseTableVar)objectValue;
-							if (Convert.ToBoolean(D4.MetaData.GetTag(tableVar.MetaData, "Storage.ShouldReconcile", "true")))
-							{
-								int objectIndex = serverCatalog.IndexOf(tableVar.Name);
-								if ((objectIndex < 0) || (serverCatalog[objectIndex].Library == null)) // Library will be null if this table was created only to specify a name for the table to reconcile
-									CreateTable(process, tableVar, D4.ReconcileMaster.Device);
-								else
-									ReconcileTable(process, (Schema.BaseTableVar)serverCatalog[objectIndex], tableVar, D4.ReconcileMaster.Device);
-							}
-						}
-						catch (Exception exception)
-						{
-							errors.Add(exception);
-						}
-					}
-					else if (objectValue is Schema.Reference)
-					{
-						try
-						{
-							Schema.Reference reference = (Schema.Reference)objectValue;
-							if (Convert.ToBoolean(D4.MetaData.GetTag(reference.MetaData, "Storage.ShouldReconcile", "true")))
-							{
-								int objectIndex = serverCatalog.IndexOf(reference.Name);
-								if (objectIndex < 0)
-									CreateReference(process, reference, D4.ReconcileMaster.Device);
-								else
-									ReconcileReference(process, (Schema.Reference)serverCatalog[objectIndex], reference, D4.ReconcileMaster.Device);
-							}
-						}
-						catch (Exception exception)
-						{
-							errors.Add(exception);
-						}
-					}
-					
-			return errors;
+				}
+			}
 		}
         
-		public override void CreateTable(ServerProcess process, TableVar tableVar, D4.ReconcileMaster master)
-		{
-			if (master == D4.ReconcileMaster.Server)
-			{
-				using (Plan plan = new Plan(process))
-				{
-					using (SQLDevicePlan devicePlan = new SQLDevicePlan(plan, this, null))
-					{
-						Statement statement = TranslateCreateTable(devicePlan, tableVar);
-						SQLDeviceSession deviceSession = (SQLDeviceSession)plan.DeviceConnect(this);
-						{
-							Batch batch = statement as Batch;
-							if (batch != null)
-							{
-								foreach (Statement singleStatement in batch.Statements)
-									deviceSession.Connection.Execute(Emitter.Emit(singleStatement));
-							}
-							else
-								deviceSession.Connection.Execute(Emitter.Emit(statement));
-						}
-					}
-				}
-			}
-			else if (master == D4.ReconcileMaster.Device)
-			{
-				// Add the TableVar to the Catalog
-				// Note that this does not call the usual CreateTable method because there is no need to request device storage.
-				Plan plan = new Plan(process);
-				try
-				{
-					plan.PlanCatalog.Add(tableVar);
-					try
-					{
-						plan.PushCreationObject(tableVar);
-						try
-						{
-							CheckSupported(plan, tableVar);
-							if (!process.ServerSession.Server.IsEngine)
-								Compiler.CompileTableVarKeyConstraints(plan, tableVar);
-						}
-						finally
-						{
-							plan.PopCreationObject();
-						}
-					}
-					finally
-					{
-						plan.PlanCatalog.Remove(tableVar);
-					}
-				}
-				finally
-				{
-					plan.Dispose();
-				}
-
-				process.CatalogDeviceSession.InsertCatalogObject(tableVar);
-			}
-		}
-		
-		public virtual void CreateReference(ServerProcess process, Reference reference, D4.ReconcileMaster master)
-		{
-			if (master == D4.ReconcileMaster.Server)
-			{
-				Error.Fail("Reconciliation of foreign keys to the target device is not yet implemented");
-			}
-			else if (master == D4.ReconcileMaster.Device)
-			{
-				using (Plan plan = new Plan(process))
-				{
-					Program program = new Program(process);
-					program.Code = Compiler.CompileCreateReferenceStatement(plan, reference.EmitStatement(D4.EmitMode.ForCopy));
-					program.Execute(null);
-				}
-			}
-		}
-		
 		public class SchemaLevelDropColumnDefinition : D4.DropColumnDefinition
 		{
 			public SchemaLevelDropColumnDefinition(Schema.TableVarColumn column) : base()
@@ -2133,7 +1997,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			public Schema.Order Order { get { return _order; } }
 		}
 		
-		public virtual D4.AlterTableStatement ReconcileTable(Plan plan, TableVar sourceTableVar, TableVar targetTableVar, ReconcileOptions options, out bool reconciliationRequired)
+		protected override D4.AlterTableStatement ReconcileTable(Plan plan, TableVar sourceTableVar, TableVar targetTableVar, ReconcileOptions options, out bool reconciliationRequired)
 		{
 			reconciliationRequired = false;
 			D4.AlterTableStatement statement = new D4.AlterTableStatement();
@@ -2252,80 +2116,6 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			Schema.Key key = new Schema.Key(orderColumns);
 			key.IsSparse = true;
 			return key;
-		}
-        
-		public override void ReconcileTable(ServerProcess process, TableVar serverTableVar, TableVar deviceTableVar, D4.ReconcileMaster master)
-		{
-			if ((master == D4.ReconcileMaster.Server) || (master == D4.ReconcileMaster.Both))
-			{
-				using (Plan plan = new Plan(process))
-				{
-					bool reconciliationRequired;
-					D4.AlterTableStatement statement = ReconcileTable(plan, serverTableVar, deviceTableVar, ReconcileOptions.All, out reconciliationRequired);
-					if (reconciliationRequired)
-					{
-						D4.ReconcileMode saveMode = ReconcileMode;
-						try
-						{
-							ReconcileMode = D4.ReconcileMode.None; // turn off reconciliation to avoid a command being re-issued to the target system
-							Program program = new Program(process);
-							program.Code = Compiler.Compile(plan, statement);
-							plan.CheckCompiled();
-							program.Start(null);
-							try
-							{
-								program.DeviceExecute(this, program.Code);
-							}
-							finally
-							{
-								program.Stop(null);
-							}
-						}
-						finally
-						{
-							ReconcileMode = saveMode;
-						}
-					}
-				}
-			}
-			
-			if ((master == D4.ReconcileMaster.Device) || (master == D4.ReconcileMaster.Both))
-			{
-				using (Plan plan = new Plan(process))
-				{
-					bool reconciliationRequired;
-					D4.AlterTableStatement statement = ReconcileTable(plan, deviceTableVar, serverTableVar, ReconcileOptions.None, out reconciliationRequired);
-					if (reconciliationRequired)
-					{
-						D4.ReconcileMode saveMode = ReconcileMode;
-						try
-						{
-							ReconcileMode = D4.ReconcileMode.None; // turn off reconciliation to avoid a command being re-issued to the target system
-							Program program = new Program(process);
-							program.Code = Compiler.Compile(plan, statement);
-							plan.CheckCompiled();
-							program.Execute(null);
-						}
-						finally
-						{
-							ReconcileMode = saveMode;
-						}
-					}
-				}
-			}
-		}
-		
-		public virtual void ReconcileReference(ServerProcess process, Reference serverReference, Reference deviceReference, D4.ReconcileMaster master)
-		{
-			if ((master == D4.ReconcileMaster.Server) || (master == D4.ReconcileMaster.Both))
-			{
-				// TODO: Reference reconciliation
-			}
-			
-			if ((master == D4.ReconcileMaster.Device) || (master == D4.ReconcileMaster.Both))
-			{
-				// TODO: Reference reconciliation
-			}
 		}
         
 		public virtual bool ShouldIncludeColumn(Plan plan, string tableName, string columnName, string domainName)
