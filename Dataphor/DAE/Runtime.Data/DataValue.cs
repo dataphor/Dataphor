@@ -464,23 +464,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (dataType == null)
 				dataType = listType.ElementType;
 
-			Schema.IScalarType scalarType = nativeList.DataTypes[nativeListIndex] as Schema.IScalarType;
+			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
 			if (scalarType != null)
 				return new ListInternedScalar(manager, scalarType, nativeList, nativeListIndex);
 				
-			Schema.IRowType rowType = nativeList.DataTypes[nativeListIndex] as Schema.IRowType;
+			Schema.IRowType rowType = dataType as Schema.IRowType;
 			if (rowType != null)
 				return new Row(manager, rowType, (NativeRow)nativeList.Values[nativeListIndex]);
 			
-			Schema.IListType localListType = nativeList.DataTypes[nativeListIndex] as Schema.IListType;
+			Schema.IListType localListType = dataType as Schema.IListType;
 			if (localListType != null)
 				return new ListValue(manager, localListType, (NativeList)nativeList.Values[nativeListIndex]);
 				
-			Schema.ITableType tableType = nativeList.DataTypes[nativeListIndex] as Schema.ITableType;
+			Schema.ITableType tableType = dataType as Schema.ITableType;
 			if (tableType != null)
 				return new TableValue(manager, (NativeTable)nativeList.Values[nativeListIndex]);
 				
-			Schema.ICursorType cursorType = nativeList.DataTypes[nativeListIndex] as Schema.ICursorType;
+			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
 			if (cursorType != null)
 				return new CursorValue(manager, cursorType, (int)nativeList.Values[nativeListIndex]);
 				
@@ -681,7 +681,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
 				return newList;
 			}
-			
+
 			return value;
 		}
 		
@@ -706,6 +706,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				for (int index = 0; index < nativeRow.Values.Length; index++)
 					DisposeValue(manager, nativeRow.Values[index]);
 				return;
+			}
+
+			NativeList nativeList = tempValue as NativeList;
+			if (nativeList != null)
+			{
+				for (int index = 0; index < nativeList.Values.Count; index++)
+					DisposeValue(manager, nativeList.Values[index]);
 			}
 		}
 		
