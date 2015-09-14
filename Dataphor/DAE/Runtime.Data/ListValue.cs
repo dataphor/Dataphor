@@ -42,9 +42,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			_dataTypes.RemoveAt(index);
 		}
+
+		public void Clear()
+		{
+			_dataTypes.Clear();
+		}
 	}
 	
-	public class NativeList : System.Object
+	public class NativeList : System.Object, IList
 	{
 		public NativeList() : base() {}
 		
@@ -53,9 +58,99 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		private List<object> _values = new List<object>();
 		public List<object> Values { get { return _values; } }
+
+		int IList.Add(object value)
+		{
+			_dataTypes.Add(null);
+			_values.Add(value);
+			return _values.Count - 1;
+		}
+
+		void IList.Clear()
+		{
+			_dataTypes.Clear();
+			_values.Clear();
+		}
+
+		bool IList.Contains(object value)
+		{
+			return _values.Contains(value);
+		}
+
+		int IList.IndexOf(object value)
+		{
+			return _values.IndexOf(value);
+		}
+
+		void IList.Insert(int index, object value)
+		{
+			_dataTypes.Insert(index, null);
+			_values.Insert(index, value);
+		}
+
+		bool IList.IsFixedSize
+		{
+			get { return false; }
+		}
+
+		bool IList.IsReadOnly
+		{
+			get { return false; }
+		}
+
+		void IList.Remove(object value)
+		{
+			int index = ((IList)this).IndexOf(value);
+			if (index >= 0)
+				((IList)this).RemoveAt(index);
+		}
+
+		void IList.RemoveAt(int index)
+		{
+			_dataTypes.RemoveAt(index);
+			_values.RemoveAt(index);
+		}
+
+		object IList.this[int index]
+		{
+			get
+			{
+				return _values[index];
+			}
+			set
+			{
+				_dataTypes[index] = null;
+				_values[index] = value;
+			}
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			throw new NotImplementedException();
+		}
+
+		int ICollection.Count
+		{
+			get { return _values.Count; }
+		}
+
+		bool ICollection.IsSynchronized
+		{
+			get { return false; }
+		}
+
+		object ICollection.SyncRoot
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return _values.GetEnumerator();
+		}
 	}
 	
-	public class ListValue : DataValue
+	public class ListValue : DataValue, IList
 	{
 		public ListValue(IValueManager manager, Schema.IListType dataType) : base(manager, dataType) 
 		{
@@ -675,6 +770,88 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				result.Append(" ");
 			result.Append("}");
 			return result.ToString();
+		}
+
+		int IList.Add(object value)
+		{
+			return Add(value);
+		}
+
+		void IList.Clear()
+		{
+			Clear();
+		}
+
+		bool IList.Contains(object value)
+		{
+			throw new NotImplementedException();
+		}
+
+		int IList.IndexOf(object value)
+		{
+			throw new NotImplementedException();
+		}
+
+		void IList.Insert(int index, object value)
+		{
+			this.Insert(index, value);
+		}
+
+		bool IList.IsFixedSize
+		{
+			get { return false; }
+		}
+
+		bool IList.IsReadOnly
+		{
+			get { return false; }
+		}
+
+		void IList.Remove(object value)
+		{
+			throw new NotImplementedException();
+		}
+
+		void IList.RemoveAt(int index)
+		{
+			this.RemoveAt(index);
+		}
+
+		object IList.this[int index]
+		{
+			get
+			{
+				return this[index];
+			}
+			set
+			{
+				this[index] = value;
+			}
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			throw new NotImplementedException();
+		}
+
+		int ICollection.Count
+		{
+			get { return this.Count(); }
+		}
+
+		bool ICollection.IsSynchronized
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		object ICollection.SyncRoot
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			throw new NotImplementedException();
 		}
 	}
 }
