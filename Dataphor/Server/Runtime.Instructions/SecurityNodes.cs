@@ -466,40 +466,47 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		private void ChangeObjectOwner(Program program, Schema.CatalogObject objectValue, Schema.User user)
 		{
-			objectValue.Owner = user;
-			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetCatalogObjectOwner(objectValue.ID, user.ID);
-
-			if (objectValue is Schema.ScalarType)
+			if (objectValue != null)
 			{
-				Schema.ScalarType scalarType = (Schema.ScalarType)objectValue;
-				
-				if (scalarType.EqualityOperator != null)
-					ChangeObjectOwner(program, scalarType.EqualityOperator, user);
-					
-				if (scalarType.ComparisonOperator != null)
-					ChangeObjectOwner(program, scalarType.ComparisonOperator, user);
-				
-				if (scalarType.IsSpecialOperator != null)
-					ChangeObjectOwner(program, scalarType.IsSpecialOperator, user);
-					
-				foreach (Schema.Special special in scalarType.Specials)
+				objectValue.Owner = user;
+				((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetCatalogObjectOwner(objectValue.ID, user.ID);
+
+				if (objectValue is Schema.ScalarType)
 				{
-					ChangeObjectOwner(program, special.Selector, user);
-					ChangeObjectOwner(program, special.Comparer, user);
-				}
+					Schema.ScalarType scalarType = (Schema.ScalarType)objectValue;
 				
-				#if USETYPEINHERITANCE	
-				foreach (Schema.Operator operatorValue in scalarType.ExplicitCastOperators)
-					ChangeObjectOwner(AProgram, operatorValue, AUser);
-				#endif
+					if (scalarType.EqualityOperator != null)
+						ChangeObjectOwner(program, scalarType.EqualityOperator, user);
 					
-				foreach (Schema.Representation representation in scalarType.Representations)
-				{
-					ChangeObjectOwner(program, representation.Selector, user);
-					foreach (Schema.Property property in representation.Properties)
+					if (scalarType.ComparisonOperator != null)
+						ChangeObjectOwner(program, scalarType.ComparisonOperator, user);
+				
+					if (scalarType.IsSpecialOperator != null)
+						ChangeObjectOwner(program, scalarType.IsSpecialOperator, user);
+					
+					foreach (Schema.Special special in scalarType.Specials)
 					{
-						ChangeObjectOwner(program, property.ReadAccessor, user);
-						ChangeObjectOwner(program, property.WriteAccessor, user);
+						ChangeObjectOwner(program, special.Selector, user);
+						ChangeObjectOwner(program, special.Comparer, user);
+					}
+				
+					#if USETYPEINHERITANCE	
+					foreach (Schema.Operator operatorValue in scalarType.ExplicitCastOperators)
+						ChangeObjectOwner(AProgram, operatorValue, AUser);
+					#endif
+					
+					foreach (Schema.Representation representation in scalarType.Representations)
+					{
+						if (representation.Selector != null)
+							ChangeObjectOwner(program, representation.Selector, user);
+
+						foreach (Schema.Property property in representation.Properties)
+						{
+							if (property.ReadAccessor != null)
+								ChangeObjectOwner(program, property.ReadAccessor, user);
+							if (property.WriteAccessor != null)
+								ChangeObjectOwner(program, property.WriteAccessor, user);
+						}
 					}
 				}
 			}

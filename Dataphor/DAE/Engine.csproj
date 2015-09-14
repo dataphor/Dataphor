@@ -285,6 +285,7 @@
     <Compile Include="Runtime.Data\NativeTable.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime.Data\ObjectMarshal.cs" />
     <Compile Include="Runtime.Data\Operation.cs">
       <SubType>Code</SubType>
     </Compile>

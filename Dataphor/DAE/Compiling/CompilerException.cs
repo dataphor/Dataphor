@@ -594,7 +594,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 			CouldNotConvertSargableArgument = 105286,
 			
 			/// <summary>Error code 105287: "Custom message may only reference global table variables for database-wide and transition constraints."</summary>
-			NonRemotableCustomConstraintMessage = 105287
+			NonRemotableCustomConstraintMessage = 105287,
+
+			/// <summary>Error code 105388: "Conveyor for type "{0}" is ambiguous between "{1}" and "{2}"."</summary>
+			AmbiguousConveyor = 105288,
 		}
 		
 		// Resource manager for this exception class

@@ -300,7 +300,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					{
 						EmitDependencies(context, representation);
 						
-						if (representation.Selector.HasDependencies())
+						if (representation.Selector != null && representation.Selector.HasDependencies())
 							for (int index = 0; index < representation.Selector.Dependencies.Count; index++)
 								if (representation.Selector.Dependencies.IDs[index] != objectValue.ID)
 									EmitObject(context, representation.Selector.Dependencies.ResolveObject(context.Session, index));
@@ -308,11 +308,11 @@ namespace Alphora.Dataphor.DAE.Schema
 						foreach (Property property in representation.Properties)
 						{
 							EmitDependencies(context, property);
-							if (property.ReadAccessor.HasDependencies())
+							if (property.ReadAccessor != null && property.ReadAccessor.HasDependencies())
 								for (int index = 0; index < property.ReadAccessor.Dependencies.Count; index++)
 									if (property.ReadAccessor.Dependencies.IDs[index] != objectValue.ID)
 										EmitObject(context, property.ReadAccessor.Dependencies.ResolveObject(context.Session, index));
-							if (property.WriteAccessor.HasDependencies())
+							if (property.WriteAccessor != null && property.WriteAccessor.HasDependencies())
 								for (int index = 0; index < property.WriteAccessor.Dependencies.Count; index++)
 									if (property.WriteAccessor.Dependencies.IDs[index] != objectValue.ID)
 										EmitObject(context, property.WriteAccessor.Dependencies.ResolveObject(context.Session, index));

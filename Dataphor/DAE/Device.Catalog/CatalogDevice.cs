@@ -270,20 +270,18 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 		}
 
-		#if USETYPEINHERITANCE
-		private void PopulateScalarTypeParentScalarTypes(Program AProgram, NativeTable ANativeTable, Row ARow)
+		private void PopulateScalarTypeParentScalarTypes(Program program, NativeTable nativeTable, Row row)
 		{
-			foreach (Schema.Object LObject in AProgram.Catalog)
-				if (LObject is Schema.ScalarType)
-					foreach (Schema.ScalarType LParentScalarType in ((Schema.ScalarType)LObject).ParentTypes)
+			foreach (Schema.Object localObject in program.Catalog)
+				if (localObject is Schema.ScalarType)
+					foreach (Schema.ScalarType parentScalarType in ((Schema.ScalarType)localObject).ParentTypes)
 					{
-						ARow[0] = LObject.Name;
-						ARow[1] = LParentScalarType.Name;
-						ANativeTable.Insert(AProgram.ValueManager, ARow);
+						row[0] = localObject.Name;
+						row[1] = parentScalarType.Name;
+						nativeTable.Insert(program.ValueManager, row);
 					}
 			
 		}
-		#endif
 		
 		#if USETYPEINHERITANCE		
 		private void PopulateScalarTypeExplicitCastFunctions(Program AProgram, NativeTable ANativeTable, Row ARow)
@@ -397,8 +395,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				case "System.RegisteredAssemblies" : PopulateRegisteredAssemblies(program, header.NativeTable, row); break;
 				case "System.RegisteredClasses" : PopulateRegisteredClasses(program, header.NativeTable, row); break;
 				case "System.SessionCatalogObjects" : PopulateSessionCatalogObjects(program, header.NativeTable, row); break;
+				case "System.ScalarTypeParentScalarTypes" : PopulateScalarTypeParentScalarTypes(program, header.NativeTable, row); break;
 				#if USETYPEINHERITANCE
-				case "System.ScalarTypeParentScalarTypes" : PopulateScalarTypeParentScalarTypes(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.ScalarTypeExplicitCastFunctions" : PopulateScalarTypeExplicitCastFunctions(AProgram, AHeader.NativeTable, ARow); break;
 				#endif
 				case "System.DeviceSessions" : PopulateDeviceSessions(program, header.NativeTable, row); break;

@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="105100" xml:space="preserve">
     <value>Unknown statement class "{0}".</value>
@@ -675,5 +675,11 @@
   </data>
   <data name="105286" xml:space="preserve">
     <value>Restriction is not sargable because the argument for column "{0}" could not be converted from type "{1}" to type "{2}", resulting in a potential reduction in performance.</value>
+  </data>
+  <data name="105287" xml:space="preserve">
+    <value>Custom message may only reference global table variables for database-wide and transition constraints.</value>
+  </data>
+  <data name="105288" xml:space="preserve">
+    <value>Conveyor for type "{0}" is ambiguous between "{1}" and "{2}".</value>
   </data>
 </root>

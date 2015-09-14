@@ -181,10 +181,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			try
 			{
 				PropertyDefinition property = new PropertyDefinition(Name, DataType.EmitSpecifier(mode));
-				if (!_isDefaultReadAccessor)
+				if (!_isDefaultReadAccessor && _readAccessor != null)
 					property.ReadAccessorBlock = _readAccessor.Block.EmitAccessorBlock(mode);
 			
-				if (!_isDefaultWriteAccessor)
+				if (!_isDefaultWriteAccessor && _writeAccessor != null)
 					property.WriteAccessorBlock = _writeAccessor.Block.EmitAccessorBlock(mode);
 			
 				property.MetaData = MetaData == null ? null : MetaData.Copy();
@@ -205,8 +205,10 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 			
-			ReadAccessor.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
-			WriteAccessor.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+			if (ReadAccessor != null)
+				ReadAccessor.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+			if (WriteAccessor != null)
+				WriteAccessor.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 		}
 
 		public bool HasExternalDependencies(Schema.ScalarType LSystemType)
@@ -289,7 +291,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return _isDefaultSelector; }
 			set { _isDefaultSelector = value; }
 		}
-		
+
 		private int _selectorID = -1;
 		public int SelectorID
 		{
@@ -333,6 +335,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
         }
 
+		private bool _isDefaultRepresentation;
+		public bool IsDefaultRepresentation
+		{
+			get { return _isDefaultRepresentation; }
+			set { _isDefaultRepresentation = value; }
+		}
+
 		// Properties
 		private Properties _properties;
 		public Properties Properties { get { return _properties; } } 
@@ -358,7 +367,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				RepresentationDefinition representation = new RepresentationDefinition(Name);
 				foreach (Property property in Properties)
 					representation.Properties.Add(property.EmitStatement(mode));
-				if (!IsDefaultSelector)
+				if (!IsDefaultSelector && Selector != null)
 					representation.SelectorAccessorBlock = Selector.Block.EmitAccessorBlock(mode);
 			
 				representation.MetaData = MetaData == null ? null : MetaData.Copy();
@@ -396,7 +405,8 @@ namespace Alphora.Dataphor.DAE.Schema
         {
 			base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 			
-			Selector.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+			if (Selector != null)
+				Selector.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 				
 			foreach (Property property in Properties)
 				property.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
@@ -1178,9 +1188,8 @@ namespace Alphora.Dataphor.DAE.Schema
     public interface IScalarType : IDataType
     {
 		ScalarTypeConstraints Constraints { get; }
-		#if USETYPEINHERITANCE
 		ScalarTypes ParentTypes { get; }
-		#endif
+		Type NativeType { get; }
     }
     
 	/// <remarks> Implements the representation of scalar data types. </remarks>
@@ -1195,10 +1204,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		private void InternalInitialize()
 		{
 			_isDisposable = true;
-			#if USETYPEINHERITANCE
-			FParentTypes = new ScalarTypes();
+			_parentTypes = new ScalarTypes();
 			//FParentTypes.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
-			#endif
 			_representations = new Representations(this);
 			//FRepresentations.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
 			_specials = new Specials(this);
@@ -1276,12 +1283,13 @@ namespace Alphora.Dataphor.DAE.Schema
 				{
 					if (dataType.IsGeneric)
 						return true;
-					
-					#if USETYPEINHERITANCE	
-					foreach (IScalarType parentType in FParentTypes)
-						if (parentType.Is(ADataType))
+
+					//if (_nativeType != null && ((IScalarType)dataType).NativeType != null)
+					//	return _nativeType.IsSubclassOf(((IScalarType)dataType).NativeType);
+
+					foreach (IScalarType parentType in _parentTypes)
+						if (parentType.Is(dataType))
 							return true;
-					#endif
 
 					return false;
 				}
@@ -1328,8 +1336,30 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		#endif
 
+		// From Class Definition
+		private ClassDefinition _fromClassDefinition;
+		/// <summary>
+		/// Gets or sets the class definition describing the native type representation for an imported scalar type.
+		/// </summary>
+		public ClassDefinition FromClassDefinition
+		{
+			get { return _fromClassDefinition; }
+			set { _fromClassDefinition = value; }
+		}
+
+		// IsClassType
+		private bool _isClassType;
+		public bool IsClassType
+		{
+			get { return _isClassType; }
+			set { _isClassType = value; }
+		}
+
         // Class Definition
         private ClassDefinition _classDefinition;
+		/// <summary>
+		/// Gets or sets the class definition describing the conveyor class for the type.
+		/// </summary>
 		public ClassDefinition ClassDefinition
         {
 			get { return _classDefinition; }
@@ -1424,10 +1454,17 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (representationIndex >= 0)
 				return new NativeRepresentation(_representations[representationIndex], true);
 
+			foreach (Schema.ScalarType parentType in _parentTypes)
+			{
+				NativeRepresentation parentRepresentation = parentType.FindNativeRepresentation(nativeAccessor);
+				if (parentRepresentation != null)
+					return parentRepresentation;
+			}
+			
 			foreach (Schema.Representation representation in _representations)
 				if ((representation.Properties.Count == 1) && (representation.Properties[0].DataType is Schema.ScalarType) && (((Schema.ScalarType)representation.Properties[0].DataType).NativeType == nativeAccessor.NativeType))
 					return new NativeRepresentation(representation, false);
-			
+
 			return new NativeRepresentation(null, false);
 		}
 		
@@ -1458,11 +1495,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			return representation;
 		}
 		
-		#if USETYPEINHERITANCE
         // ParentTypes
-        private ScalarTypes FParentTypes;
-		public ScalarTypes ParentTypes { get { return FParentTypes; } }
-		#endif
+        private ScalarTypes _parentTypes;
+		public ScalarTypes ParentTypes { get { return _parentTypes; } }
 		
 		// LikeType
 		[Reference]
@@ -1838,10 +1873,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				CreateScalarTypeStatement statement = new CreateScalarTypeStatement();
 				statement.ScalarTypeName = Schema.Object.EnsureRooted(Name);
-				#if USETYPEINHERITANCE
+
+				if (_fromClassDefinition != null)
+					statement.FromClassDefinition = (ClassDefinition)_fromClassDefinition.Clone();
+
 				foreach (ScalarType parentType in ParentTypes)
 					statement.ParentScalarTypes.Add(new ScalarTypeNameDefinition(parentType.Name));
-				#endif
 			
 				if (LikeType != null)
 					statement.LikeScalarTypeName = LikeType.Name;

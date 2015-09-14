@@ -2593,6 +2593,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _scalarTypeName; }
 			set { _scalarTypeName = value == null ? String.Empty : value; }
 		}
+
+		// FromClassDefinition
+		protected ClassDefinition _fromClassDefinition;
+		public ClassDefinition FromClassDefinition
+		{
+			get { return _fromClassDefinition; }
+			set { _fromClassDefinition = value; }
+		}
 		
 		// LikeScalarTypeName
 		protected string _likeScalarTypeName = String.Empty;

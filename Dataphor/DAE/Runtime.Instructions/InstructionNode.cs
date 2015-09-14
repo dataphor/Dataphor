@@ -145,33 +145,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDataType(Plan plan)
 		{
 			DetermineModifiers(plan);
-			_dataType = Operator.ReturnDataType;
-			
-			for (int index = 0; index < Operator.Operands.Count; index++)
+			if (Operator != null)
 			{
-				switch (Operator.Operands[index].Modifier)
+				_dataType = Operator.ReturnDataType;
+			
+				for (int index = 0; index < Operator.Operands.Count; index++)
 				{
-					case Modifier.In : break;
+					switch (Operator.Operands[index].Modifier)
+					{
+						case Modifier.In : break;
 					
-					case Modifier.Var :
-						if (Nodes[index] is ParameterNode)
-							Nodes[index] = Nodes[index].Nodes[0];
+						case Modifier.Var :
+							if (Nodes[index] is ParameterNode)
+								Nodes[index] = Nodes[index].Nodes[0];
 							
-						if (!(Nodes[index] is StackReferenceNode) || plan.Symbols[((StackReferenceNode)Nodes[index]).Location].IsConstant)
-							throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBePassedByReference, plan.CurrentStatement(), Operator.Operands[index].Name);
+							if (!(Nodes[index] is StackReferenceNode) || plan.Symbols[((StackReferenceNode)Nodes[index]).Location].IsConstant)
+								throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBePassedByReference, plan.CurrentStatement(), Operator.Operands[index].Name);
 
-						((StackReferenceNode)Nodes[index]).ByReference = true;
-					break;
-
-					case Modifier.Const :
-						if (Nodes[index] is ParameterNode)
-							Nodes[index] = Nodes[index].Nodes[0];
-							
-						if (Nodes[index] is StackReferenceNode)
 							((StackReferenceNode)Nodes[index]).ByReference = true;
-						else if (Nodes[index] is StackColumnReferenceNode)
-							((StackColumnReferenceNode)Nodes[index]).ByReference = true;
-					break;
+						break;
+
+						case Modifier.Const :
+							if (Nodes[index] is ParameterNode)
+								Nodes[index] = Nodes[index].Nodes[0];
+							
+							if (Nodes[index] is StackReferenceNode)
+								((StackReferenceNode)Nodes[index]).ByReference = true;
+							else if (Nodes[index] is StackColumnReferenceNode)
+								((StackColumnReferenceNode)Nodes[index]).ByReference = true;
+						break;
+					}
 				}
 			}
 		}

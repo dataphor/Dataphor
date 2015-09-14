@@ -1932,19 +1932,17 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 			}
 
-			#if USETYPEINHERITANCE
 			Schema.Property property;
-			for (int index = 0; index < AScalarType.ParentTypes.Count; index++)
+			for (int index = 0; index < scalarType.ParentTypes.Count; index++)
 			{
-				Schema.ScalarType parentType = (Schema.ScalarType)AScalarType.ParentTypes[index];
-				property = ResolvePropertyReference(APlan, ref parentType, AIdentifier, out ARepresentationIndex, out APropertyIndex);
+				Schema.ScalarType parentType = (Schema.ScalarType)scalarType.ParentTypes[index];
+				property = ResolvePropertyReference(plan, ref parentType, identifier, out representationIndex, out propertyIndex);
 				if (property != null)
 				{
-					AScalarType = parentType;
+					scalarType = parentType;
 					return property;
 				}
 			}			
-			#endif
 
 			representationIndex = -1;
 			propertyIndex = -1;			
@@ -1981,10 +1979,26 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static PlanNode EmitPropertyReadNode(Plan plan, PlanNode planNode, Schema.ScalarType scalarType, Schema.Property property)
 		{
 			property.ResolveReadAccessor(plan.CatalogDeviceSession);
-			PlanNode node = BuildCallNode(plan, null, property.ReadAccessor, new PlanNode[]{planNode});
-			node.DetermineDataType(plan);
-			node.DetermineCharacteristics(plan);
-			return node;
+			if (property.ReadAccessor == null)
+			{
+				if (scalarType.IsClassType && property.Representation.IsDefaultRepresentation)
+				{
+					PlanNode node = plan.CreateObject(DefaultObjectPropertyReadNode(property.Name), null) as PlanNode;
+					node.Nodes.Add(planNode);
+					node.DataType = property.DataType;
+					node.DetermineCharacteristics(plan);
+					return node;
+				}
+				else
+					throw new CompilerException(CompilerException.Codes.DefaultReadAccessorCannotBeProvided, property.Name, property.Representation.Name, scalarType.Name);
+			}
+			else
+			{
+				PlanNode node = BuildCallNode(plan, null, property.ReadAccessor, new PlanNode[]{ planNode });
+				node.DetermineDataType(plan);
+				node.DetermineCharacteristics(plan);
+				return node;
+			}
 		}
 		
 		protected static PlanNode EmitPropertyReadNode(Plan plan, PropertyReferenceNode node)
@@ -2460,7 +2474,22 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static PlanNode EmitPropertyWriteNode(Plan plan, Statement statement, Schema.Property property, PlanNode sourceNode, PlanNode targetNode)
 		{
 			property.ResolveWriteAccessor(plan.CatalogDeviceSession);
-			PlanNode node = BuildCallNode(plan, statement, property.WriteAccessor, new PlanNode[]{targetNode, sourceNode});
+			PlanNode node = null;
+			if (property.WriteAccessor == null)
+			{
+				if (property.Representation.ScalarType.IsClassType && property.Representation.IsDefaultRepresentation)
+				{
+					node = plan.CreateObject(Compiler.DefaultObjectPropertyWriteNode(property.Name), null) as PlanNode;
+					node.DataType = property.Representation.ScalarType;
+					node.Nodes.Add(targetNode);
+					node.Nodes.Add(sourceNode);
+				}
+				else
+					throw new CompilerException(CompilerException.Codes.DefaultWriteAccessorCannotBeProvided, property.Name, property.Representation.Name, property.Representation.ScalarType.Name);
+			}
+			else
+				node = BuildCallNode(plan, statement, property.WriteAccessor, new PlanNode[] { targetNode, sourceNode });
+
 			node.Nodes.Clear();
 			if (!sourceNode.DataType.Is(property.DataType))
 			{
@@ -4412,14 +4441,17 @@ namespace Alphora.Dataphor.DAE.Compiling
 				view.SetShouldReinferReferences(plan.CatalogDeviceSession);
 			}
 		}
-		
+
 		public static Schema.Operator CompileRepresentationSelector(Plan plan, Schema.ScalarType scalarType, Schema.Representation representation, AccessorBlock selector)
 		{
 			// Selector
 			// operator <type name>[.<representation name>](const <property name> : <property type>[, ...]) : <type>
+			// If this is the default representation for a fromClass scalar type, use the following selector signature:
+			// operator <type name>(const AValues : row) : <type>
 			string operatorName = scalarType.Name;
-			if (!Schema.Object.NamesEqual(operatorName, representation.Name))
+			if (!representation.IsDefaultRepresentation)
 				operatorName = Schema.Object.Qualify(representation.Name, operatorName);
+
 			Schema.Operator operatorValue = new Schema.Operator(operatorName);
 			operatorValue.IsGenerated = true;
 			operatorValue.Generator = representation;
@@ -4431,14 +4463,21 @@ namespace Alphora.Dataphor.DAE.Compiling
 			{
 				plan.AttachDependency(scalarType);
 
-				foreach (Schema.Property property in representation.Properties)
+				if (representation.IsDefaultRepresentation && scalarType.IsClassType)
 				{
-					operatorValue.Operands.Add(new Schema.Operand(operatorValue, property.Name, property.DataType, Modifier.Const));
-					plan.AttachDependencies(property.Dependencies);
+					operatorValue.Operands.Add(new Schema.Operand(operatorValue, "AValues", plan.DataTypes.SystemRow, Modifier.Const));
+				}
+				else
+				{
+					foreach (Schema.Property property in representation.Properties)
+					{
+						operatorValue.Operands.Add(new Schema.Operand(operatorValue, property.Name, property.DataType, Modifier.Const));
+						plan.AttachDependencies(property.Dependencies);
+					}
 				}
 				
 				operatorValue.Locator = new DebugLocator(DebugLocator.OperatorLocator(operatorValue.DisplayName), 0, 1);
-				
+
 				if (selector.ClassDefinition != null)
 				{
 					if (!representation.IsDefaultSelector)
@@ -4589,15 +4628,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 				// Build a default read accessor for the property
 				if (readAccessorBlock == null)
 				{
-					if (!representation.IsDefaultSelector)
-						throw new CompilerException(CompilerException.Codes.DefaultReadAccessorCannotBeProvided, propertyDefinition, property.Name, representation.Name, scalarType.Name);
+					if (!scalarType.IsClassType)
+					{
+						if (!representation.IsDefaultSelector)
+							throw new CompilerException(CompilerException.Codes.DefaultReadAccessorCannotBeProvided, propertyDefinition, property.Name, representation.Name, scalarType.Name);
 						
-					property.IsDefaultReadAccessor = true;
-					readAccessorBlock = new AccessorBlock();
-					if (!scalarType.IsCompound)
-						readAccessorBlock.ClassDefinition = DefaultReadAccessor();
-					else
-						readAccessorBlock.ClassDefinition = DefaultCompoundReadAccessor(property.Name);
+						property.IsDefaultReadAccessor = true;
+						readAccessorBlock = new AccessorBlock();
+						if (!scalarType.IsCompound)
+							readAccessorBlock.ClassDefinition = DefaultReadAccessor();
+						else
+							readAccessorBlock.ClassDefinition = DefaultCompoundReadAccessor(property.Name);
+					}
 				}
 
 				// Compile the read accessor
@@ -4608,11 +4650,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 				else
 				{
-					property.ReadAccessor = CompilePropertyReadAccessor(plan, scalarType, representation, property, readAccessorBlock);
-					plan.PlanCatalog.Add(property.ReadAccessor);
-					plan.AttachDependencies(property.ReadAccessor.Dependencies);
-					operators.Add(property.ReadAccessor);
-					plan.Catalog.OperatorResolutionCache.Clear(property.ReadAccessor.OperatorName);
+					if (readAccessorBlock != null)
+					{
+						property.ReadAccessor = CompilePropertyReadAccessor(plan, scalarType, representation, property, readAccessorBlock);
+						plan.PlanCatalog.Add(property.ReadAccessor);
+						plan.AttachDependencies(property.ReadAccessor.Dependencies);
+						operators.Add(property.ReadAccessor);
+						plan.Catalog.OperatorResolutionCache.Clear(property.ReadAccessor.OperatorName);
+					}
 				}
 
 				AccessorBlock writeAccessorBlock = propertyDefinition.WriteAccessorBlock;
@@ -4620,15 +4665,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 				// Build a default write accessor for the property
 				if (writeAccessorBlock == null)
 				{
-					if (!representation.IsDefaultSelector)
-						throw new CompilerException(CompilerException.Codes.DefaultWriteAccessorCannotBeProvided, propertyDefinition, property.Name, representation.Name, scalarType.Name);
+					if (!scalarType.IsClassType)
+					{
+						if (!representation.IsDefaultSelector)
+							throw new CompilerException(CompilerException.Codes.DefaultWriteAccessorCannotBeProvided, propertyDefinition, property.Name, representation.Name, scalarType.Name);
 						
-					property.IsDefaultWriteAccessor = true;
-					writeAccessorBlock = new AccessorBlock();
-					if (!scalarType.IsCompound)
-						writeAccessorBlock.ClassDefinition = DefaultWriteAccessor();
-					else
-						writeAccessorBlock.ClassDefinition = DefaultCompoundWriteAccessor(property.Name);
+						property.IsDefaultWriteAccessor = true;
+						writeAccessorBlock = new AccessorBlock();
+						if (!scalarType.IsCompound)
+							writeAccessorBlock.ClassDefinition = DefaultWriteAccessor();
+						else
+							writeAccessorBlock.ClassDefinition = DefaultCompoundWriteAccessor(property.Name);
+					}
 				}
 				
 				if (plan.InLoadingContext())
@@ -4637,11 +4685,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 				else
 				{
-					property.WriteAccessor = CompilePropertyWriteAccessor(plan, scalarType, representation, property, writeAccessorBlock);
-					plan.PlanCatalog.Add(property.WriteAccessor);
-					plan.AttachDependencies(property.WriteAccessor.Dependencies);
-					operators.Add(property.WriteAccessor);
-					plan.Catalog.OperatorResolutionCache.Clear(property.WriteAccessor.OperatorName);
+					if (writeAccessorBlock != null)
+					{
+						property.WriteAccessor = CompilePropertyWriteAccessor(plan, scalarType, representation, property, writeAccessorBlock);
+						plan.PlanCatalog.Add(property.WriteAccessor);
+						plan.AttachDependencies(property.WriteAccessor.Dependencies);
+						operators.Add(property.WriteAccessor);
+						plan.Catalog.OperatorResolutionCache.Clear(property.WriteAccessor.OperatorName);
+					}
 				}
 
 				property.RemoveDependency(property.Representation.ScalarType); // Remove the dependencies for native types to prevent recursion.
@@ -4659,6 +4710,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (representation.IsGenerated)
 				representation.Generator = scalarType;
 			representation.Library = plan.CurrentLibrary;
+			representation.IsDefaultRepresentation = Schema.Object.NamesEqual(scalarType.Name, representation.Name);
 			plan.PushCreationObject(representation);
 			try
 			{
@@ -4676,34 +4728,46 @@ namespace Alphora.Dataphor.DAE.Compiling
 					// Build a default selector for the representation
 					if (selectorBlock == null)
 					{
-						if (scalarType.IsDefaultConveyor)
-							throw new CompilerException(CompilerException.Codes.MultipleSystemProvidedRepresentations, definition, representation.Name, scalarType.Name);
-							
-						selectorBlock = new AccessorBlock();
-						if ((representation.Properties.Count == 1) && (representation.Properties[0].DataType is Schema.ScalarType) && !((Schema.ScalarType)representation.Properties[0].DataType).IsCompound)
+						if (scalarType.IsClassType)
 						{
-							selectorBlock.ClassDefinition = DefaultSelector();
-							
-							// Use the native representation of the single simple scalar property
-							scalarType.ClassDefinition = (ClassDefinition)((Schema.ScalarType)representation.Properties[0].DataType).ClassDefinition.Clone();
-							scalarType.NativeType = ((Schema.ScalarType)representation.Properties[0].DataType).NativeType;
+							if (representation.IsDefaultRepresentation)
+							{
+								selectorBlock = new AccessorBlock();
+								selectorBlock.ClassDefinition = DefaultObjectSelector(scalarType.NativeType.FullName);
+								representation.IsDefaultSelector = true;
+							}
 						}
-						else
+						else 
 						{
-							if (scalarType.ClassDefinition != null)
-								throw new CompilerException(CompilerException.Codes.InvalidConveyorForCompoundScalar, definition, representation.Name, scalarType.Name);
-
-							selectorBlock.ClassDefinition = DefaultCompoundSelector();
-							scalarType.IsCompound = true;
+							selectorBlock = new AccessorBlock();
+							if (scalarType.IsDefaultConveyor)
+								throw new CompilerException(CompilerException.Codes.MultipleSystemProvidedRepresentations, definition, representation.Name, scalarType.Name);
 							
-							// Compile the row type for the native representation
-							scalarType.CompoundRowType = new Schema.RowType();
-							foreach (Schema.Property property in representation.Properties)
-								scalarType.CompoundRowType.Columns.Add(new Schema.Column(property.Name, property.DataType));
-						}
+							if ((representation.Properties.Count == 1) && (representation.Properties[0].DataType is Schema.ScalarType) && !((Schema.ScalarType)representation.Properties[0].DataType).IsCompound)
+							{
+								selectorBlock.ClassDefinition = DefaultSelector();
+							
+								// Use the native representation of the single simple scalar property
+								scalarType.ClassDefinition = (ClassDefinition)((Schema.ScalarType)representation.Properties[0].DataType).ClassDefinition.Clone();
+								scalarType.NativeType = ((Schema.ScalarType)representation.Properties[0].DataType).NativeType;
+							}
+							else
+							{
+								if (scalarType.ClassDefinition != null)
+									throw new CompilerException(CompilerException.Codes.InvalidConveyorForCompoundScalar, definition, representation.Name, scalarType.Name);
 
-						representation.IsDefaultSelector = true;
-						scalarType.IsDefaultConveyor = true;
+								selectorBlock.ClassDefinition = DefaultCompoundSelector();
+								scalarType.IsCompound = true;
+							
+								// Compile the row type for the native representation
+								scalarType.CompoundRowType = new Schema.RowType();
+								foreach (Schema.Property property in representation.Properties)
+									scalarType.CompoundRowType.Columns.Add(new Schema.Column(property.Name, property.DataType));
+							}
+
+							representation.IsDefaultSelector = true;
+							scalarType.IsDefaultConveyor = true;
+						}
 					}
 					
 					if (plan.InLoadingContext())
@@ -4713,11 +4777,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 					}
 					else
 					{
-						representation.Selector = CompileRepresentationSelector(plan, scalarType, representation, selectorBlock);
-						plan.PlanCatalog.Add(representation.Selector);
-						plan.AttachDependencies(representation.Selector.Dependencies);
-						operators.Add(representation.Selector);
-						plan.Catalog.OperatorResolutionCache.Clear(representation.Selector.OperatorName);
+						if (selectorBlock != null)
+						{
+							representation.Selector = CompileRepresentationSelector(plan, scalarType, representation, selectorBlock);
+							plan.PlanCatalog.Add(representation.Selector);
+							plan.AttachDependencies(representation.Selector.Dependencies);
+							operators.Add(representation.Selector);
+							plan.Catalog.OperatorResolutionCache.Clear(representation.Selector.OperatorName);
+						}
 					}
 
 					representation.RemoveDependency(scalarType);
@@ -4748,6 +4815,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			return new ClassDefinition("System.CompoundScalarSelectorNode");
 		}
+
+		protected static ClassDefinition DefaultObjectSelector(string className)
+		{
+			return new ClassDefinition("System.ObjectSelectorNode", new ClassAttributeDefinition[] { new ClassAttributeDefinition("ClassName", className) });
+		}
 		
 		protected static ClassDefinition DefaultReadAccessor()
 		{
@@ -4757,6 +4829,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 		protected static ClassDefinition DefaultCompoundReadAccessor(string propertyName)
 		{
 			return new ClassDefinition("System.CompoundScalarReadAccessorNode", new ClassAttributeDefinition[]{new ClassAttributeDefinition("PropertyName", propertyName)});
+		}
+
+		protected static ClassDefinition DefaultObjectPropertyReadNode(string propertyName)
+		{
+			return new ClassDefinition("System.ObjectPropertyReadNode", new ClassAttributeDefinition[] { new ClassAttributeDefinition("PropertyName", propertyName) });
 		}
 		
 		protected static ClassDefinition DefaultWriteAccessor()
@@ -4769,6 +4846,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return new ClassDefinition("System.CompoundScalarWriteAccessorNode", new ClassAttributeDefinition[]{new ClassAttributeDefinition("PropertyName", propertyName)});
 		}
 
+		protected static ClassDefinition DefaultObjectPropertyWriteNode(string propertyName)
+		{
+			return new ClassDefinition("System.ObjectPropertyWriteNode", new ClassAttributeDefinition[] { new ClassAttributeDefinition("PropertyName", propertyName) });
+		}
+		
 		#if USETYPEINHERITANCE		
 		protected static Schema.ScalarType FindBaseSystemType(Schema.ScalarType AScalarType, Schema.ScalarType AParentType)
 		{
@@ -5299,7 +5381,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			// The default representation is the representation with the same name as the scalar type
 			foreach (Schema.Representation representation in scalarType.Representations)
-				if (String.Compare(representation.Name, Schema.Object.Unqualify(scalarType.Name)) == 0)
+				if (representation.IsDefaultRepresentation)
 					return representation;
 			return null;
 		}
@@ -5321,15 +5403,15 @@ namespace Alphora.Dataphor.DAE.Compiling
 			plan.CheckRight(Schema.RightNames.CreateType);
 
 			CreateScalarTypeStatement localStatement = (CreateScalarTypeStatement)statement;
+			string scalarTypeName = Schema.Object.Qualify(localStatement.ScalarTypeName, plan.CurrentLibrary.Name);
+			CheckValidCatalogObjectName(plan, statement, scalarTypeName);
+
 			CreateScalarTypeNode node = new CreateScalarTypeNode();
 			node.SetLineInfo(plan, localStatement.LineInfo);
 			BlockNode blockNode = new BlockNode();
 			blockNode.SetLineInfo(plan, localStatement.LineInfo);
 			blockNode.Nodes.Add(node);
 
-			string scalarTypeName = Schema.Object.Qualify(localStatement.ScalarTypeName, plan.CurrentLibrary.Name);
-			CheckValidCatalogObjectName(plan, statement, scalarTypeName);
-			
 			plan.Symbols.PushWindow(0); // make sure the create scalar type statement is evaluated in a private context
 			try
 			{
@@ -5346,27 +5428,55 @@ namespace Alphora.Dataphor.DAE.Compiling
 					plan.PushCreationObject(node.ScalarType);
 					try
 					{
-						#if USETYPEINHERITANCE
 						if (localStatement.ParentScalarTypes.Count > 0)
 							foreach (ScalarTypeNameDefinition parentScalarType in localStatement.ParentScalarTypes)
 							{
-								Schema.ScalarType parentType = (Schema.ScalarType)Compiler.CompileScalarTypeSpecifier(APlan, new ScalarTypeSpecifier(parentScalarType.ScalarTypeName));
+								Schema.ScalarType parentType = (Schema.ScalarType)Compiler.CompileScalarTypeSpecifier(plan, new ScalarTypeSpecifier(parentScalarType.ScalarTypeName));
 								node.ScalarType.ParentTypes.Add(parentType);
 								node.ScalarType.InheritMetaData(parentType.MetaData);
-								APlan.AttachDependency(parentType);
+								plan.AttachDependency(parentType);
 							}
-						else
+						//else
+						//{
+						//	// Check first to see if the catalog contains the alpha data type, if it does not, the system is starting up and we are creating the alpha scalar type, so it is allowed to be parentless.
+						//	if (APlan.Catalog.Contains(Schema.DataTypes.CSystemScalar))
+						//	{
+						//		Schema.ScalarType parentType = APlan.DataTypes.SystemScalar;
+						//		node.ScalarType.ParentTypes.Add(parentType);
+						//		node.ScalarType.InheritMetaData(parentType.MetaData);
+						//		APlan.AttachDependency(parentType);
+						//	}
+						//}
+
+						if (localStatement.FromClassDefinition != null)
 						{
-							// Check first to see if the catalog contains the alpha data type, if it does not, the system is starting up and we are creating the alpha scalar type, so it is allowed to be parentless.
-							if (APlan.Catalog.Contains(Schema.DataTypes.CSystemScalar))
+							plan.CheckRight(Schema.RightNames.HostImplementation);
+							plan.CheckClassDependency(node.ScalarType.Library, localStatement.FromClassDefinition);
+							Type type = plan.CreateType(localStatement.FromClassDefinition);
+							node.ScalarType.NativeType = type;
+							node.ScalarType.IsDisposable = type.GetInterface("IDisposable") != null;
+							node.ScalarType.FromClassDefinition = localStatement.FromClassDefinition;
+							node.ScalarType.IsClassType = true;
+
+							// For class types, if there is no conveyor class specified, use the parent conveyor class.
+							if (localStatement.ClassDefinition == null)
 							{
-								Schema.ScalarType parentType = APlan.DataTypes.SystemScalar;
-								node.ScalarType.ParentTypes.Add(parentType);
-								node.ScalarType.InheritMetaData(parentType.MetaData);
-								APlan.AttachDependency(parentType);
+								ClassDefinition parentClassDefinition = null;
+								foreach (Schema.ScalarType parentType in node.ScalarType.ParentTypes)
+								{
+									if (parentType.ClassDefinition != null)
+									{
+										if (parentClassDefinition != null)
+											throw new CompilerException(CompilerException.Codes.AmbiguousConveyor, localStatement, node.ScalarType.Name, parentType.ClassDefinition.ClassName, parentClassDefinition.ClassName);
+
+										parentClassDefinition = parentType.ClassDefinition;
+									}
+								}
+
+								if (parentClassDefinition != null)
+									localStatement.ClassDefinition = (ClassDefinition)parentClassDefinition.Clone();
 							}
 						}
-						#endif
 
 						if (localStatement.LikeScalarTypeName != String.Empty)
 						{
@@ -9918,9 +10028,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 				throw new CompilerException(CompilerException.Codes.DDLStatementInOperator, statement);
 
 			DropScalarTypeStatement localStatement = (DropScalarTypeStatement)statement;
+			Schema.Object objectValue = ResolveCatalogIdentifier(plan, localStatement.ObjectName, true);
 			DropScalarTypeNode node = new DropScalarTypeNode();
 			node.ShouldAffectDerivationTimeStamp = plan.ShouldAffectTimeStamp;
-			Schema.Object objectValue = ResolveCatalogIdentifier(plan, localStatement.ObjectName, true);
 			Schema.ScalarType scalarType = objectValue as Schema.ScalarType;
 			if (scalarType == null)
 				throw new CompilerException(CompilerException.Codes.ScalarTypeIdentifierExpected, statement);
@@ -9972,7 +10082,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if ((special.Comparer != null) && plan.PlanCatalog.Contains(special.Comparer.Name))
 					plan.PlanCatalog.Remove(special.Comparer);
 			}
-			
+
 			plan.Catalog.OperatorResolutionCache.Clear();
 			
 			return node;
@@ -10661,9 +10771,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static void EmitAllRightNodes(Plan plan, RightStatementBase statement, Schema.CatalogObject objectValue, BlockNode node)
 		{
-			string[] rights = objectValue.GetRights();
-			for (int index = 0; index < rights.Length; index++)
-				node.Nodes.Add(EmitRightNode(plan, statement, rights[index]));
+			if (objectValue != null)
+			{
+				string[] rights = objectValue.GetRights();
+				for (int index = 0; index < rights.Length; index++)
+					node.Nodes.Add(EmitRightNode(plan, statement, rights[index]));
+			}
 		}
 		
 		public static void EmitUsageRightNodes(Plan plan, RightStatementBase statement, Schema.CatalogObject objectValue, BlockNode node)
@@ -10726,12 +10839,15 @@ namespace Alphora.Dataphor.DAE.Compiling
 						
 					foreach (Schema.Representation representation in scalarType.Representations)
 					{
-						EmitAllRightNodes(plan, localStatement, representation.Selector, node);
+						if (representation.Selector != null)
+							EmitAllRightNodes(plan, localStatement, representation.Selector, node);
 
 						foreach (Schema.Property property in representation.Properties)
 						{
-							EmitAllRightNodes(plan, localStatement, property.ReadAccessor, node);
-							EmitAllRightNodes(plan, localStatement, property.WriteAccessor, node);
+							if (property.ReadAccessor != null)
+								EmitAllRightNodes(plan, localStatement, property.ReadAccessor, node);
+							if (property.WriteAccessor != null)
+								EmitAllRightNodes(plan, localStatement, property.WriteAccessor, node);
 						}
 					}						
 				}
@@ -10769,12 +10885,15 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 					foreach (Schema.Representation representation in scalarType.Representations)
 					{
-						EmitUsageRightNodes(plan, localStatement, representation.Selector, node);
+						if (representation.Selector != null)
+							EmitUsageRightNodes(plan, localStatement, representation.Selector, node);
 						
 						foreach (Schema.Property property in representation.Properties)
 						{
-							EmitUsageRightNodes(plan, localStatement, property.ReadAccessor, node);
-							EmitUsageRightNodes(plan, localStatement, property.WriteAccessor, node);
+							if (property.ReadAccessor != null)
+								EmitUsageRightNodes(plan, localStatement, property.ReadAccessor, node);
+							if (property.WriteAccessor != null)
+								EmitUsageRightNodes(plan, localStatement, property.WriteAccessor, node);
 						}
 					}						
 				}

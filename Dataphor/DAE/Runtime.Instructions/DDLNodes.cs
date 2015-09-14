@@ -538,7 +538,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
     }
-    
+
     public class CreateScalarTypeNode : CreateObjectNode
     {
 		// ScalarType
@@ -548,11 +548,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return _scalarType; }
 			set { _scalarType = value; }
 		}
-		
+
 		public override void BindToProcess(Plan plan)
 		{
 			plan.CheckRight(Schema.RightNames.CreateType);
-			
+
 			if ((_scalarType.ClassDefinition != null) && !_scalarType.IsDefaultConveyor)
 				plan.CheckRight(Schema.RightNames.HostImplementation);
 
@@ -2028,11 +2028,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				representation = scalarType.Representations[representationDefinition.RepresentationName];
 				foreach (Schema.Property property in representation.Properties)
 				{
-					new DropOperatorNode(property.ReadAccessor).Execute(program);
-					new DropOperatorNode(property.WriteAccessor).Execute(program);
+					if (property.ReadAccessor != null)
+						new DropOperatorNode(property.ReadAccessor).Execute(program);
+					if (property.WriteAccessor != null)
+						new DropOperatorNode(property.WriteAccessor).Execute(program);
 				}
-				
-				new DropOperatorNode(representation.Selector).Execute(program);
+
+				if (representation.Selector != null)				
+					new DropOperatorNode(representation.Selector).Execute(program);
 				program.CatalogDeviceSession.DropRepresentation(scalarType, representation);
 				scalarType.ResetNativeRepresentationCache();
 			}
@@ -2952,6 +2955,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
     }
+
 
     public class DropScalarTypeNode : DropObjectNode
 	{		

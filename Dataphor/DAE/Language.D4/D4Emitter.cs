@@ -2219,6 +2219,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Type, statement.ScalarTypeName);
 
+			if (statement.FromClassDefinition != null)
+			{
+				AppendFormat(" {0}", Keywords.From);
+				EmitClassDefinition(statement.FromClassDefinition);
+			}
+
 			if (statement.ParentScalarTypes.Count > 0)
 			{
 				AppendFormat(" {0} {1} ", Keywords.Is, Keywords.BeginList);

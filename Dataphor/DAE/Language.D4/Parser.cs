@@ -4817,6 +4817,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			BNF:
 			<create scalar type statement> ::=
 				create type <scalar type name> 
+					[from <class definition>]
 					[is "{"<ne scalar type name commalist>"}"]
 					[like <scalar type name>]
 					["{"<scalar type definition item commalist>"}"]
@@ -4835,6 +4836,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			statement.Line = line;
 			statement.LinePos = linePos;
 			statement.ScalarTypeName = QualifiedIdentifier();
+
+			if (_lexer.PeekTokenSymbol(1) == Keywords.From)
+			{
+				_lexer.NextToken();
+				statement.FromClassDefinition = ClassDefinition();
+			}
 			
 			if (_lexer.PeekTokenSymbol(1) == Keywords.Is)
 			{
