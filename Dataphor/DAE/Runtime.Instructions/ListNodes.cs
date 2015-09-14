@@ -9,6 +9,7 @@ using System;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
+	using System.Collections;
 	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Compiling.Visitors;
 	using Alphora.Dataphor.DAE.Language;
@@ -79,9 +80,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			
 			if (ByReference)
-				return ((ListValue)argument1)[(int)argument2];
+				return ((IList)argument1)[(int)argument2];
 
-			return DataValue.CopyValue(program.ValueManager, ((ListValue)argument1)[(int)argument2]);
+			return DataValue.CopyValue(program.ValueManager, ((IList)argument1)[(int)argument2]);
 		}
 
 		public override Statement EmitStatement(EmitMode mode)
@@ -112,7 +113,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			return ((ListValue)argument1).Count();
+			return ((IList)argument1).Count;
 		}
 	}
 	
@@ -121,7 +122,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program program, object argument1)
 		{
-			((ListValue)argument1).Clear();
+			((IList)argument1).Clear();
 			return null;
 		}
 	}
@@ -144,7 +145,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			return ((ListValue)argument1).Add(argument2);
+			return ((IList)argument1).Add(argument2);
 		}
 	}
 	
@@ -166,7 +167,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
-			((ListValue)argument1).Insert((int)argument3, argument2);
+			((IList)argument1).Insert((int)argument3, argument2);
 			return null;
 		}
 	}
@@ -176,7 +177,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			((ListValue)argument1).RemoveAt((int)argument2);
+			((IList)argument1).RemoveAt((int)argument2);
 			return null;
 		}
 	}
@@ -233,15 +234,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected object InternalSearch(Program program, ListValue list, object tempValue, int startIndex, int length, int incrementor)
+		protected object InternalSearch(Program program, IList list, object tempValue, int startIndex, int length, int incrementor)
 		{
 			if (length < 0)
 				throw new RuntimeException(RuntimeException.Codes.InvalidLength, ErrorSeverity.Application);
 			if (length == 0)
 				return -1;
 
-			int localStartIndex = Math.Max(Math.Min(startIndex, list.Count() - 1), 0);
-			int endIndex = Math.Max(Math.Min(startIndex + ((length - 1) * incrementor), list.Count() - 1), 0);
+			int localStartIndex = Math.Max(Math.Min(startIndex, list.Count - 1), 0);
+			int endIndex = Math.Max(Math.Min(startIndex + ((length - 1) * incrementor), list.Count - 1), 0);
 			
 			program.Stack.Push(tempValue);
 			try
@@ -293,8 +294,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			ListValue list = (ListValue)arguments[0];
-			return InternalSearch(program, list, arguments[1], 0, list.Count(), 1);
+			IList list = (IList)arguments[0];
+			return InternalSearch(program, list, arguments[1], 0, list.Count, 1);
 		}
 	}
 
@@ -308,8 +309,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			ListValue list = (ListValue)arguments[0];
-			return InternalSearch(program, list, arguments[1], (int)arguments[2], list.Count(), 1);
+			IList list = (IList)arguments[0];
+			return InternalSearch(program, list, arguments[1], (int)arguments[2], list.Count, 1);
 		}
 	}
 
@@ -323,7 +324,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			return InternalSearch(program, (ListValue)arguments[0], arguments[1], (int)arguments[2], (int)arguments[3], 1);
+			return InternalSearch(program, (IList)arguments[0], arguments[1], (int)arguments[2], (int)arguments[3], 1);
 		}
 	}
 
@@ -337,8 +338,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			ListValue list = (ListValue)arguments[0];
-			return InternalSearch(program, list, arguments[1], list.Count() - 1, list.Count(), -1);
+			IList list = (IList)arguments[0];
+			return InternalSearch(program, list, arguments[1], list.Count - 1, list.Count, -1);
 		}
 	}
 
@@ -352,8 +353,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			ListValue list = (ListValue)arguments[0];
-			return InternalSearch(program, list, arguments[1], (int)arguments[2], list.Count(), -1);
+			IList list = (IList)arguments[0];
+			return InternalSearch(program, list, arguments[1], (int)arguments[2], list.Count, -1);
 		}
 	}
 
@@ -367,7 +368,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			return InternalSearch(program, (ListValue)arguments[0], arguments[1], (int)arguments[2], (int)arguments[3], -1);
+			return InternalSearch(program, (IList)arguments[0], arguments[1], (int)arguments[2], (int)arguments[3], -1);
 		}
 	}
 
@@ -426,12 +427,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			ListValue list = (ListValue)argument1;
+			IList list = (IList)argument1;
 			int listIndex = -1;
 			program.Stack.Push(argument2);
 			try
 			{
-				for (int index = 0; index < list.Count(); index++)
+				for (int index = 0; index < list.Count; index++)
 				{
 					program.Stack.Push(list[index]);
 					try
@@ -454,7 +455,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.Stack.Pop();
 			}
 
-			((ListValue)argument1).RemoveAt(listIndex);
+			list.RemoveAt(listIndex);
 			return null;
 		}
 
@@ -525,17 +526,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			ListValue leftList = (ListValue)argument1;
-			ListValue rightList = (ListValue)argument2;
+			IList leftList = (IList)argument1;
+			IList rightList = (IList)argument2;
 			#if NILPROPOGATION
 			if ((leftList == null) || (rightList == null))
 				return null;
 			#endif
 			
-			bool listsEqual = leftList.Count() == rightList.Count();
+			bool listsEqual = leftList.Count == rightList.Count;
 			if (listsEqual)
 			{
-				for (int index = 0; index < leftList.Count(); index++)
+				for (int index = 0; index < leftList.Count; index++)
 				{
 					program.Stack.Push(leftList[index]);
 					try
@@ -587,6 +588,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public const string DefaultColumnName = "value";
 		public const string DefaultSequenceName = "sequence";
+
+		private bool _isListOfRows = false;
 		
 		public override void DetermineDataType(Plan plan)
 		{
@@ -599,6 +602,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (listType.ElementType is Schema.RowType)
 			{
 				// If given a list of rows, use the row's columns for the table
+				_isListOfRows = true;
 				foreach (Schema.Column column in ((Schema.RowType)listType.ElementType).Columns)
 					DataType.Columns.Add(column.Copy());
 			}
@@ -652,11 +656,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				result.Open();
 				
-				using (ListValue listValue = Nodes[0].Execute(program) as ListValue)
+				IList listValue = Nodes[0].Execute(program) as IList;
+				try
 				{
-					if (listValue.DataType.ElementType is Schema.RowType)
+					if (_isListOfRows)
 					{
-						for (int index = 0; index < listValue.Count(); index++)
+						for (int index = 0; index < listValue.Count; index++)
 						{
 							Row row = new Row(program.ValueManager, DataType.RowType);
 							(listValue[index] as Row).CopyTo(row);
@@ -666,7 +671,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					else
 					{
-						for (int index = 0; index < listValue.Count(); index++)
+						for (int index = 0; index < listValue.Count; index++)
 						{
 							Row row = new Row(program.ValueManager, DataType.RowType);
 							row[0] = listValue[index];
@@ -674,6 +679,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							result.Insert(row);
 						}
 					}
+				}
+				finally
+				{
+					if (listValue is IDisposable)
+						((IDisposable)listValue).Dispose();
 				}
 				
 				result.First();
