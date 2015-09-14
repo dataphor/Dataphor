@@ -1,17 +1,14 @@
 /*
-	TODO: Reintroduce RealSQL to allow SQL queries against a D4 server
-	TODO: DAE.ClassName in the compiler to indicate that the object is natively represented as a managed class
-	TODO: DAE.ClassName defaults to the type name, with namespace defaulted to parent, recursively
-	TODO: Reintroduce scalar parent type to support inheritance
-	TODO: Default representation in the create type statement
-	TODO: Classes use conveyor of parent, recursively
-	TODO: ObjectSelectorNode, ObjectPropertyReadNode, ObjectPropertyWriteNode
-	TODO: FHIRObjectConveyor
-	TODO: Support IList as ListValue...
 	TODO: Nest/Unnest, Wrap/Unwrap (w/ update support)
 	TODO: Restrict optimization, at the very least for strict seek and through joins
 	TODO: Conversion (possibly implicit) between tuple types and scalar types
 	TODO: Conversion (possibly implicit) between lists and tables
 	TODO: Generate FHIR type descriptions?
+	TODO: It would be awesome if we could just use .NET types everywhere, instead of having DataValue wrappers....
 */
+
+create operator GenerateTypes() : String class "FHIR.Core.GenerateTypesNode";
+
+ExecuteScript("FHIR.Core", "Types.Core");
+ExecuteScript("FHIR.Core", "Types.Generated");
 

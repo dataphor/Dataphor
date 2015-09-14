@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" name="FHIR.Device" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+	<files.filereference filename="Alphora.Dataphor.FHIR.Device.dll" isassembly="True" />
+	<libraries.libraryreference name="FHIR.Core" version="*" />
+</library>

@@ -1,0 +1,7 @@
+// TODO: Investigate using ITable and IRow to get native representation as a row....
+// TODO: Support insert/update/delete, without transactions
+// TODO: Support order translation
+// TODO: Support restrict translation - critical as many FHIR servers will not support unfiltered access to resources
+// TODO: Support joins via includes?
+// TODO: Transaction support using batches (requires local transaction cache of values....)
+

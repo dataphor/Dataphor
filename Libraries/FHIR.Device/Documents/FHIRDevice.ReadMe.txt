@@ -1,0 +1,15 @@
+This readme provides an example declaration of a FHIR device.
+
+create device FHIRTestDevice
+	reconciliation { mode = { none }, master = device }
+	class "FHIRDevice"
+	attributes
+	{
+		"Endpoint" = "https://fhir.sandboxcernerpowerchart.com/may2015/open/d075cf8b-3261-481d-97e5-ba6c48d3b41f/"
+		//"Endpoint" = "http://wildfhir.aegis.net/fhir2"
+		//"Endpoint" = "https://navhealth-test.apigee.net/api/fhir/" // Needs OAuth2
+		//"Endpoint" = "https://argonaut.aegis.net/fhir2"
+	};
+	
+Reconcile("FHIRTestDevice");
+

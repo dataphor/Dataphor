@@ -1,2 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" name="FHIR.Core" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE" />
+<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" name="FHIR.Core" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+	<files.filereference filename="Alphora.Dataphor.FHIR.Core.dll" isassembly="True" />
+	<files.filereference filename="Hl7.Fhir.Core.dll" isassembly="False" />
+	<files.filereference filename="Newtonsoft.Json.dll" isassembly="False" />
+</library>
