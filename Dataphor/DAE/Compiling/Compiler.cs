@@ -6445,7 +6445,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 															localPlan.AttachDependency(objectValue);
 													}
 
-													PlanNode blockNode = BindOperatorBlock(localPlan, operatorValue, CompileOperatorBlock(localPlan, operatorValue, new Parser().ParseStatement(operatorValue.BodyText, null))); //AOperator.Block.BlockNode.EmitStatement(EmitMode.ForCopy)));
+													PlanNode blockNode = BindOperatorBlock(localPlan, operatorValue, CompileOperatorBlock(localPlan, operatorValue, operatorValue.BodyText != null ? new Parser().ParseStatement(operatorValue.BodyText, null) : operatorValue.Block.BlockNode.EmitStatement(EmitMode.ForCopy)));
 													localPlan.CheckCompiled();
 													operatorValue.Block.BlockNode = blockNode;
 													operatorValue.DetermineRemotable(plan.CatalogDeviceSession);
