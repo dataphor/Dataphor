@@ -258,37 +258,40 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 			return metaData;
 		}
 		
-		public static MetaData ExtractTags(Tags tags, string qualifier, string pageType, string referenceType)
+		public static MetaData ExtractTags(MetaData givenMetaData, string qualifier, string pageType, string referenceType)
 		{
 			MetaData metaData = new MetaData();
-			string pageTypeReferenceTypeQualifier = String.Format("Frontend.{0}.{1}.{2}", pageType, referenceType, qualifier);
-			string cardinalityReferenceTypeQualifier = String.Format("Frontend.{0}.{1}.{2}", GetPageTypeCardinality(pageType), referenceType, qualifier);
-			string referenceTypeQualifier = String.Format("Frontend.{0}.{1}", referenceType, qualifier);
-			string pageTypeQualifier = String.Format("Frontend.{0}.{1}", pageType, qualifier);
-			string cardinalityQualifier = String.Format("Frontend.{0}.{1}", GetPageTypeCardinality(pageType), qualifier);
-			string localQualifier = String.Format("Frontend.{0}", qualifier);
-			#if USEHASHTABLEFORTAGS
-			foreach (Tag tag in ATags)
-			{
-			#else
-			Tag tag;
-			for (int index = 0; index < tags.Count; index++)
-			{
-				tag = tags[index];
-			#endif
-				if (tag.Name.IndexOf(pageTypeReferenceTypeQualifier) == 0)
-					metaData.Tags.AddOrUpdate(String.Format("Frontend.{0}.{1}{2}", pageType, referenceType, tag.Name.Substring(pageTypeReferenceTypeQualifier.Length)), tag.Value); 
-				else if (tag.Name.IndexOf(cardinalityReferenceTypeQualifier) == 0)
-					metaData.Tags.AddOrUpdate(String.Format("Frontend.{0}.{1}{2}", GetPageTypeCardinality(pageType), referenceType, tag.Name.Substring(cardinalityReferenceTypeQualifier.Length)), tag.Value);
-				else if (tag.Name.IndexOf(referenceTypeQualifier) == 0)
-					metaData.Tags.AddOrUpdate(String.Format("Frontend.{0}{1}", referenceType, tag.Name.Substring(referenceTypeQualifier.Length)), tag.Value);
-				else if (tag.Name.IndexOf(pageTypeQualifier) == 0)
-					metaData.Tags.AddOrUpdate(String.Format("Frontend.{0}{1}", pageType, tag.Name.Substring(pageTypeQualifier.Length)), tag.Value);
-				else if (tag.Name.IndexOf(cardinalityQualifier) == 0)
-					metaData.Tags.AddOrUpdate(String.Format("Frontend.{0}{1}", GetPageTypeCardinality(pageType), tag.Name.Substring(cardinalityQualifier.Length)), tag.Value);
-				else if (tag.Name.IndexOf(localQualifier) == 0)
-					metaData.Tags.AddOrUpdate(String.Format("Frontend{0}", tag.Name.Substring(localQualifier.Length)), tag.Value);
-			}
+            if (givenMetaData != null && givenMetaData.HasTags())
+            {
+			    string pageTypeReferenceTypeQualifier = String.Format("Frontend.{0}.{1}.{2}", pageType, referenceType, qualifier);
+			    string cardinalityReferenceTypeQualifier = String.Format("Frontend.{0}.{1}.{2}", GetPageTypeCardinality(pageType), referenceType, qualifier);
+			    string referenceTypeQualifier = String.Format("Frontend.{0}.{1}", referenceType, qualifier);
+			    string pageTypeQualifier = String.Format("Frontend.{0}.{1}", pageType, qualifier);
+			    string cardinalityQualifier = String.Format("Frontend.{0}.{1}", GetPageTypeCardinality(pageType), qualifier);
+			    string localQualifier = String.Format("Frontend.{0}", qualifier);
+			    #if USEHASHTABLEFORTAGS
+			    foreach (Tag tag in tags)
+			    {
+			    #else
+			    Tag tag;
+			    for (int index = 0; index < givenMetaData.Tags.Count; index++)
+			    {
+				    tag = givenMetaData.Tags[index];
+			    #endif
+				    if (tag.Name.IndexOf(pageTypeReferenceTypeQualifier) == 0)
+					    metaData.Tags.AddOrUpdate(String.Format("Frontend.{0}.{1}{2}", pageType, referenceType, tag.Name.Substring(pageTypeReferenceTypeQualifier.Length)), tag.Value); 
+				    else if (tag.Name.IndexOf(cardinalityReferenceTypeQualifier) == 0)
+					    metaData.Tags.AddOrUpdate(String.Format("Frontend.{0}.{1}{2}", GetPageTypeCardinality(pageType), referenceType, tag.Name.Substring(cardinalityReferenceTypeQualifier.Length)), tag.Value);
+				    else if (tag.Name.IndexOf(referenceTypeQualifier) == 0)
+					    metaData.Tags.AddOrUpdate(String.Format("Frontend.{0}{1}", referenceType, tag.Name.Substring(referenceTypeQualifier.Length)), tag.Value);
+				    else if (tag.Name.IndexOf(pageTypeQualifier) == 0)
+					    metaData.Tags.AddOrUpdate(String.Format("Frontend.{0}{1}", pageType, tag.Name.Substring(pageTypeQualifier.Length)), tag.Value);
+				    else if (tag.Name.IndexOf(cardinalityQualifier) == 0)
+					    metaData.Tags.AddOrUpdate(String.Format("Frontend.{0}{1}", GetPageTypeCardinality(pageType), tag.Name.Substring(cardinalityQualifier.Length)), tag.Value);
+				    else if (tag.Name.IndexOf(localQualifier) == 0)
+					    metaData.Tags.AddOrUpdate(String.Format("Frontend{0}", tag.Name.Substring(localQualifier.Length)), tag.Value);
+			    }
+            }
 			return metaData;
 		}
 		

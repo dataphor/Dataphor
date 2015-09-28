@@ -479,7 +479,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 				EnsureGroups(lookupGroupName, titleSeed, pageType, readOnly);
 				GroupElement groupElement = _rootElement.FindElement(lookupGroupName) as GroupElement;
 
-				MetaData groupMetaData = DerivationUtility.ExtractTags(reference.Reference.MetaData.Tags, groupElement.ElementType, pageType, reference.ReferenceType.ToString());
+				MetaData groupMetaData = DerivationUtility.ExtractTags(reference.Reference.MetaData, groupElement.ElementType, pageType, reference.ReferenceType.ToString());
 				PrepareElement(groupElement, groupMetaData, reference.Reference.MetaData, titleSeed, pageType, reference.ReferenceType.ToString(), readOnly);
 			}
 			LookupColumnElement lookupGroup = new LookupColumnElement(String.Format("{0}Column{1}_Lookup", _derivationInfo.MainSourceName, column.ElaboratedName));
@@ -504,7 +504,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 			if (column.ReadOnly || readOnly || Convert.ToBoolean(DerivationUtility.GetTag(column.Column.MetaData, "ReadOnly", pageType, "False")))
 				lookupGroup.Properties.AddOrUpdate("ReadOnly", "True");
 
-			MetaData metaData = DerivationUtility.ExtractTags(reference.Reference.MetaData.Tags, lookupGroup.ElementType, pageType, reference.ReferenceType.ToString());
+			MetaData metaData = DerivationUtility.ExtractTags(reference.Reference.MetaData, lookupGroup.ElementType, pageType, reference.ReferenceType.ToString());
 			PrepareElement(lookupGroup, metaData, reference.Reference.MetaData, titleSeed, pageType, reference.ReferenceType.ToString(), readOnly);
 
 			if (!Boolean.Parse(DerivationUtility.GetTag(metaData, "Visible", pageType, "True")))
@@ -554,7 +554,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 
 					CreateContainerElement(lookupGroupElement, _derivationInfo.ElaboratedExpression.Groups[lookupGroupName], titleSeed, pageType, readOnly);
 
-					MetaData metaData = DerivationUtility.ExtractTags(reference.Reference.MetaData.Tags, lookupGroupElement.ElementType, pageType, reference.ReferenceType.ToString());
+					MetaData metaData = DerivationUtility.ExtractTags(reference.Reference.MetaData, lookupGroupElement.ElementType, pageType, reference.ReferenceType.ToString());
 					PrepareElement(lookupGroupElement, metaData, reference.Reference.MetaData, titleSeed, pageType, reference.ReferenceType.ToString(), readOnly);
 
 					lookupGroupElement.Properties.SafeAdd(new Tag("Source", _derivationInfo.MainSourceName));

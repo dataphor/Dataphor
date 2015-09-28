@@ -1099,7 +1099,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 			MetaData modifiers = 
 				DerivationUtility.ExtractTags
 				(
-					reference.Reference.MetaData.Tags, 
+					reference.Reference.MetaData, 
 					"Modifier", 						
 					((reference.ReferenceType == ReferenceType.Lookup) || (reference.ReferenceType == ReferenceType.Parent)) 
 						? reference.SourceElaboratedTableVar.PageType 
@@ -1439,7 +1439,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 				_groupMetaData = 
 					DerivationUtility.ExtractTags
 					(
-						_reference.MetaData.Tags, 
+						_reference.MetaData, 
 						"Group", 
 						((_referenceType == ReferenceType.Lookup) || (_referenceType == ReferenceType.Parent)) ? 
 							sourceTable.PageType :
