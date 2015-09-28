@@ -1973,13 +1973,17 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	
 	public class InsertOperation : Operation
 	{
-		public InsertOperation(ApplicationTransaction transaction, TableVar tableVar, NativeRow row) : base(transaction, tableVar)
+		public InsertOperation(ApplicationTransaction transaction, TableVar tableVar, NativeRow row, BitArray valueFlags) : base(transaction, tableVar)
 		{
 			_row = row;
+			_valueFlags = valueFlags;
 		}
 		
 		private NativeRow _row;
 		public NativeRow Row { get { return _row; } }
+
+		private BitArray _valueFlags;
+		public BitArray ValueFlags { get { return _valueFlags; } }
 		
 		public override void Apply(Program program)
 		{
@@ -1988,7 +1992,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				Row row = new Row(program.ValueManager, TableMap.RowType, _row);
 				try
 				{
-					TableMap.RetrieveNode.Insert(program, null, row, TableMap.ValueFlags, false);
+					TableMap.RetrieveNode.Insert(program, null, row, _valueFlags, false);
 				}
 				finally
 				{
@@ -2023,10 +2027,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	
 	public class UpdateOperation : Operation
 	{
-		public UpdateOperation(ApplicationTransaction transaction, TableVar tableVar, NativeRow oldRow, NativeRow newRow) : base(transaction, tableVar)
+		public UpdateOperation(ApplicationTransaction transaction, TableVar tableVar, NativeRow oldRow, NativeRow newRow, BitArray valueFlags) : base(transaction, tableVar)
 		{
 			_oldRow = oldRow;
 			_newRow = newRow;
+			_valueFlags = valueFlags;
 		}
 
 		private NativeRow _oldRow;
@@ -2034,6 +2039,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		
 		private NativeRow _newRow; 
 		public NativeRow NewRow { get { return _newRow; } }
+
+		private BitArray _valueFlags;
+		public BitArray ValueFlags { get { return _valueFlags; } }
 
 		public override void Apply(Program program)
 		{
@@ -2045,7 +2053,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					Row newRow = new Row(program.ValueManager, TableMap.RowType, _newRow);
 					try
 					{
-						TableMap.RetrieveNode.Update(program, oldRow, newRow, null, true, false);
+						TableMap.RetrieveNode.Update(program, oldRow, newRow, _valueFlags, true, false);
 					}
 					finally
 					{
@@ -2070,7 +2078,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					Row newRow = new Row(program.ValueManager, TableMap.RowType, _newRow);
 					try
 					{
-						TableMap.RetrieveNode.Update(program, newRow, oldRow, null, false, true);
+						TableMap.RetrieveNode.Update(program, newRow, oldRow, _valueFlags, false, true);
 					}
 					finally
 					{
@@ -2380,7 +2388,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					// If this is the deleted table var for a table map, do not log the operation as part of the application transaction
 					if (!tableVar.IsDeletedTable)
 					{
-						operation = new InsertOperation(Transaction, tableVar, (NativeRow)row.CopyNative());
+						operation = new InsertOperation(Transaction, tableVar, (NativeRow)row.CopyNative(), valueFlags);
 						Transaction.Operations.Add(operation);
 					}
 				}
@@ -2400,7 +2408,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 			if (!InTransaction || !ServerProcess.CurrentTransaction.InRollback)
 			{			
-				UpdateOperation operation = new UpdateOperation(Transaction, tableVar, (NativeRow)oldRow.CopyNative(), (NativeRow)newRow.CopyNative());
+				UpdateOperation operation = new UpdateOperation(Transaction, tableVar, (NativeRow)oldRow.CopyNative(), (NativeRow)newRow.CopyNative(), valueFlags);
 				Transaction.Operations.Add(operation);
 				if (InTransaction && !ServerProcess.NonLogged)
 					_transactions.CurrentTransaction().Operations.Add(operation);
