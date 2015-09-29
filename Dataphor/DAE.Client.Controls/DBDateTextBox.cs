@@ -111,19 +111,16 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private string InternalConvertDateTimeToString(DateTime dateTime)
 		{
-			if (EditByCell)
-				return 
-                    dateTime.TimeOfDay.Ticks == 0 ? 
-                        _hideDate ? String.Empty : dateTime.ToString(ShortDatePattern) 
-                        : dateTime.ToString
-                        (
-                            String.Format
-                            (
-                                "{0} {1}", 
-                                _hideDate ? String.Empty : ShortDatePattern, 
-                                _hideTime ? String.Empty : LongTimePattern
-                            ).Trim()
-                        );
+			if (_hideDate || _hideTime)
+			{
+				return
+					String.Format
+					(
+						"{0} {1}",
+						_hideDate ? String.Empty : ShortDatePattern,
+						_hideTime ? String.Empty : LongTimePattern
+					).Trim();
+			}
 			else
 				return dateTime.ToString("G");
 		}
@@ -288,6 +285,14 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
+		protected override bool IsInputKey(Keys key)
+		{
+			if (key == Keys.Up || key == Keys.Down)
+				return true;
+			else
+				return base.IsInputKey(key);
+		}
+
 		private bool CheckValidKey(char key)
 		{
 			string firstCell = String.Empty, secondCell = String.Empty, thirdCell = String.Empty;
@@ -445,9 +450,17 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			SelectionStart = Text.Length;
 		}
 
+		private String StripTime(string text)
+		{
+			var indexOfTime = text.IndexOfAny(new char[] { ' ', 'T' });
+			if (indexOfTime >= 0)
+				return text.Substring(0, indexOfTime);
+			return text;
+		}
+
 		private void ParseDateCells(string text, ref string firstCell, ref string secondCell, ref string thirdCell)
 		{
-			string[] dateStrings = text.Split(DateSeparator.ToCharArray());
+			string[] dateStrings = StripTime(text).Split(DateSeparator.ToCharArray());
 			firstCell = dateStrings[0];
 			if (dateStrings.Length > 1)
 				secondCell = dateStrings[1];
