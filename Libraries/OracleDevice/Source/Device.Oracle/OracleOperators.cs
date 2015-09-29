@@ -273,10 +273,20 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleMathUtility
     {
+		public static Expression Mod(Expression expression, Expression moduloExpression)
+		{
+			return new CallExpression("MOD", new[] { expression, moduloExpression });
+		}
+
         public static Expression Truncate(Expression expression)
         {
-            return new CallExpression("TRUNC", new[] {expression, new ValueExpression(0)});
+            return new CallExpression("TRUNC", new[] { expression, new ValueExpression(0) });
         }
+
+		public static Expression Round(Expression expression)
+		{
+			return new CallExpression("ROUND", new[] { expression });
+		}
 
         public static Expression Frac(Expression expression, Expression expressionCopy)
             // note that it takes two different refrences to the same value
@@ -287,87 +297,71 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleTimeSpanUtility
     {
-        //LReturnVal := TRUNC(DAE_Frac(ATimeSpan / 10000000) * 1000);
+		//LReturnVal := TRUNC(MOD(ATimeSpan, TicksPerSecond) / TicksPerMillisecond);
         public static Expression ReadMillisecond(Expression tempValue)
         {
-            return
-                OracleMathUtility.Truncate
-                    (
-                    new BinaryExpression
-                        (
-                        OracleMathUtility.Frac
-                            (
-                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(10000000)),
-                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(10000000))
-                            ),
-                        "iMultiplication",
-                        new ValueExpression(1000)
-                        )
-                    );
+			return 
+				OracleMathUtility.Truncate
+				(
+					new BinaryExpression
+					(
+						OracleMathUtility.Mod(tempValue, new ValueExpression(TimeSpan.TicksPerSecond)), 
+						"iDivision", 
+						new ValueExpression(TimeSpan.TicksPerMillisecond)
+					)
+				);
         }
 
         public static Expression ReadSecond(Expression tempValue)
         {
-            //LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (10000000 * 60)) * 60);
-            return
-                OracleMathUtility.Truncate
-                    (
-                    new BinaryExpression
-                        (
-                        OracleMathUtility.Frac
-                            (
-                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(600000000)),
-                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(600000000))
-                            ),
-                        "iMultiplication",
-                        new ValueExpression(60)
-                        )
-                    );
+			//LReturnVal := TRUNC(MOD(ATimeSpan, TicksPerMinute) / TicksPerSecond);
+			return 
+				OracleMathUtility.Truncate
+				(
+					new BinaryExpression
+					(
+						OracleMathUtility.Mod(tempValue, new ValueExpression(TimeSpan.TicksPerMinute)), 
+						"iDivision", 
+						new ValueExpression(TimeSpan.TicksPerSecond)
+					)
+				);
         }
 
         public static Expression ReadMinute(Expression tempValue)
         {
-            //LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (600000000 * 60)) * 60);
-            return
-                OracleMathUtility.Truncate
-                    (
-                    new BinaryExpression
-                        (
-                        OracleMathUtility.Frac
-                            (
-                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(36000000000)),
-                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(36000000000))
-                            ),
-                        "iMultiplication",
-                        new ValueExpression(60)
-                        )
-                    );
+			//LReturnVal := TRUNC(MOD(ATimeSpan, TicksPerHour) / TicksPerMinute);
+			return 
+				OracleMathUtility.Truncate
+				(
+					new BinaryExpression
+					(
+						OracleMathUtility.Mod(tempValue, new ValueExpression(TimeSpan.TicksPerHour)), 
+						"iDivision", 
+						new ValueExpression(TimeSpan.TicksPerMinute)
+					)
+				);
         }
 
         public static Expression ReadHour(Expression tempValue)
         {
-            //LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (36000000000 * 24)) * 24);
-            return
-                OracleMathUtility.Truncate
-                    (
-                    new BinaryExpression
-                        (
-                        OracleMathUtility.Frac
-                            (
-                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(864000000000)),
-                            new BinaryExpression(tempValue, "iDivision", new ValueExpression(864000000000))
-                            ),
-                        "iMultiplication",
-                        new ValueExpression(24)
-                        )
-                    );
+			//LReturnVal := TRUNC(MOD(ATimeSpan, TicksPerDay) / TicksPerHour)
+			return 
+				OracleMathUtility.Truncate
+				(
+					new BinaryExpression
+					(
+						OracleMathUtility.Mod(tempValue, new ValueExpression(TimeSpan.TicksPerDay)), 
+						"iDivision", 
+						new ValueExpression(TimeSpan.TicksPerHour)
+					)
+				);
         }
 
         public static Expression ReadDay(Expression tempValue)
         {
-            //LReturnVal := TRUNC(ATimeSpan / 864000000000);
+            //LReturnVal := TRUNC(ATimeSpan / TicksPerDay);
             return
-                OracleMathUtility.Truncate(new BinaryExpression(tempValue, "iDivision", new ValueExpression(864000000000)));
+                OracleMathUtility.Truncate(new BinaryExpression(tempValue, "iDivision", new ValueExpression(TimeSpan.TicksPerDay)));
         }
     }
 
