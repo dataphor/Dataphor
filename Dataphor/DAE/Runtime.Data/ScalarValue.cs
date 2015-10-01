@@ -123,7 +123,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				Stream stream = OpenStream();
 				try
 				{
-					Conveyor conveyor = Manager.GetConveyor(DataType);
+					IConveyor conveyor = Manager.GetConveyor(DataType);
 					if (conveyor.IsStreaming)
 						return conveyor.Read(stream);
 					else
@@ -151,7 +151,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					try
 					{
 						stream.SetLength(0);
-						Conveyor conveyor = Manager.GetConveyor(DataType);
+						IConveyor conveyor = Manager.GetConveyor(DataType);
 						if (conveyor.IsStreaming)
 							conveyor.Write(value, stream);
 						else
@@ -711,7 +711,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 					else
 					{
-						Streams.Conveyor conveyor = Manager.GetConveyor(DataType);
+						Streams.IConveyor conveyor = Manager.GetConveyor(DataType);
 						if (conveyor.IsStreaming)
 						{
 							_writeStream = new MemoryStream(64);
@@ -754,7 +754,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 					else
 					{
-						Streams.Conveyor conveyor = Manager.GetConveyor(DataType);
+						Streams.IConveyor conveyor = Manager.GetConveyor(DataType);
 						if (conveyor.IsStreaming)
 						{
 							_writeStream.Position = 0;
@@ -802,7 +802,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 					else
 					{
-						Streams.Conveyor conveyor = Manager.GetConveyor(DataType);
+						Streams.IConveyor conveyor = Manager.GetConveyor(DataType);
 						if (conveyor.IsStreaming)
 						{
 							Stream stream = new MemoryStream(buffer, offset, buffer.Length - offset, false, true);

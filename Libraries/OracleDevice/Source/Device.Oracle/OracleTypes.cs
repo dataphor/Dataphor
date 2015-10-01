@@ -346,7 +346,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 				string tempValue = reader.ReadToEnd();
 				if (tempValue == " ")
 					tempValue = String.Empty;
-				Conveyor conveyor = manager.GetConveyor(ScalarType);
+				IConveyor conveyor = manager.GetConveyor(ScalarType);
 				var localStream = new MemoryStream(conveyor.GetSize(tempValue));
 				localStream.SetLength(localStream.GetBuffer().Length);
 				conveyor.Write(tempValue, localStream.GetBuffer(), 0);

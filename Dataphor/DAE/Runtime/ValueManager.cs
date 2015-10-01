@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 	{
 		Schema.DataTypes DataTypes { get; }
 		IStreamManager StreamManager { get; }
-		Conveyor GetConveyor(Schema.ScalarType AScalarType);
+		IConveyor GetConveyor(Schema.ScalarType AScalarType);
 		Schema.IDataType CompileTypeSpecifier(string ATypeSpecifier);
 		Schema.Order FindClusteringOrder(Schema.TableVar ATableVar);
 		Schema.Order OrderFromKey(Schema.Key AKey);
@@ -60,14 +60,14 @@ namespace Alphora.Dataphor.DAE.Runtime
 		
 		public IStreamManager StreamManager { get { return (IStreamManager)_serverProcessInterface; } }
 		
-		private Dictionary<string, Conveyor> _conveyors = new Dictionary<string, Conveyor>();
+		private Dictionary<string, IConveyor> _conveyors = new Dictionary<string, IConveyor>();
 		
-		public Conveyor GetConveyor(Schema.ScalarType scalarType)
+		public IConveyor GetConveyor(Schema.ScalarType scalarType)
 		{
-			Conveyor conveyor;
+			IConveyor conveyor;
 			if (!_conveyors.TryGetValue(scalarType.Name, out conveyor))
 			{
-				conveyor = (Conveyor)_serverProcessInterface.CreateObject(scalarType.ClassDefinition, null);
+				conveyor = (IConveyor)_serverProcessInterface.CreateObject(scalarType.ClassDefinition, null);
 				_conveyors.Add(scalarType.Name, conveyor);
 			}
 			return conveyor;

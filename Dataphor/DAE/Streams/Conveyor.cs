@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.DAE.Streams
     /// although it is not strictly necessary to do so (physical access could occur in instruction implementations, but is not recommended)
     /// The intent of the Conveyor is to provide a single access point for host language access to Dataphor values.
     /// </remarks>
-    public abstract class Conveyor : Object //, IConveyor
+    public abstract class Conveyor : IConveyor
     {
 		public Conveyor() {}
 

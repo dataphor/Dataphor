@@ -89,7 +89,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				offset++;
 				
 				int rowSize;
-				Streams.Conveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+				Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 				
 				int32Conveyor.Write(_rowList.Count, buffer, offset);
 				offset += sizeof(int);
@@ -112,7 +112,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			_table.Truncate(Manager);
 			
-			Streams.Conveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+			Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 			
 			if (buffer[offset] != 0)
 			{

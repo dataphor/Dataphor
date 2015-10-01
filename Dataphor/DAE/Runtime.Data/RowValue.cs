@@ -152,7 +152,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				Stream stream;
 				StreamID streamID;
 				Schema.ScalarType scalarType;
-				Streams.Conveyor conveyor;
+				Streams.IConveyor conveyor;
 				DataValue element;
 				int elementSize;
 				for (int index = 0; index < _writeList.Length; index++)
@@ -248,16 +248,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				offset++;
 					
 				#if USEDATATYPESINNATIVEROW
-				Streams.Conveyor stringConveyor = null;
+				Streams.IConveyor stringConveyor = null;
 				#endif
-				Streams.Conveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
-				Streams.Conveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+				Streams.IConveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
+				Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 
 				Stream stream;
 				StreamID streamID;
 				int elementSize;
 				Schema.ScalarType scalarType;
-				Streams.Conveyor conveyor;
+				Streams.IConveyor conveyor;
 				DataValue element;
 				for (int index = 0; index < _writeList.Length; index++)
 				{
@@ -415,18 +415,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				offset++;
 					
 				#if USEDATATYPESINNATIVEROW
-				Streams.Conveyor stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
+				Streams.IConveyor stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
 				string dataTypeName;
 				Schema.IDataType dataType;
 				#endif
-				Streams.Conveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
-				Streams.Conveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+				Streams.IConveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
+				Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 
 				Stream stream;
 				StreamID streamID;
 				int elementSize;
 				Schema.ScalarType scalarType;
-				Streams.Conveyor conveyor;
+				Streams.IConveyor conveyor;
 				for (int index = 0; index < DataType.Columns.Count; index++)
 				{
 					byte valueIndicator = buffer[offset];

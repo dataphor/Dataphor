@@ -844,7 +844,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			using (StreamReader LReader = new StreamReader(AStream))
 			{
 				string LValue = LReader.ReadToEnd();
-				Streams.Conveyor LConveyor = AManager.GetConveyor(ScalarType);
+				Streams.IConveyor LConveyor = AManager.GetConveyor(ScalarType);
 				MemoryStream LStream = new MemoryStream(LConveyor.GetSize(LValue));
 				LStream.SetLength(LStream.GetBuffer().Length);
 				LConveyor.Write(LValue, LStream.GetBuffer(), 0);

@@ -277,7 +277,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 							else
 							{
-								Streams.Conveyor conveyor = Manager.GetConveyor(scalarType);
+								Streams.IConveyor conveyor = Manager.GetConveyor(scalarType);
 								if (conveyor.IsStreaming)
 								{
 									stream = new MemoryStream(64);
@@ -319,9 +319,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			buffer[offset] = (byte)(expandStreams ? 0 : 1); // Write the expanded streams indicator
 			offset++;
 				
-			Streams.Conveyor stringConveyor = null;
-			Streams.Conveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
-			Streams.Conveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+			Streams.IConveyor stringConveyor = null;
+			Streams.IConveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
+			Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 			int32Conveyor.Write(Count(), buffer, offset); // Write the number of elements in the list
 			offset += sizeof(int);
 
@@ -329,7 +329,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			StreamID streamID;
 			int elementSize;
 			Schema.ScalarType scalarType;
-			Streams.Conveyor conveyor;
+			Streams.IConveyor conveyor;
 			DataValue element;
 			for (int index = 0; index < _writeList.Length; index++)
 			{
@@ -470,9 +470,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					bool expandStreams = buffer[offset] != 0; // Read the exapnded streams indicator
 					offset++;
 						
-					Streams.Conveyor stringConveyor = null;
-					Streams.Conveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
-					Streams.Conveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+					Streams.IConveyor stringConveyor = null;
+					Streams.IConveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
+					Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 					int count = (int)int32Conveyor.Read(buffer, offset); // Read the number of elements in the list
 					offset += sizeof(int);
 
@@ -482,7 +482,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					string dataTypeName;
 					Schema.IDataType dataType;
 					Schema.ScalarType scalarType;
-					Streams.Conveyor conveyor;
+					Streams.IConveyor conveyor;
 					for (int index = 0; index < count; index++)
 					{
 						byte valueIndicator = buffer[offset];
