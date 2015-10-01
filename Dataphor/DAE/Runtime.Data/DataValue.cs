@@ -491,7 +491,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// <summary>Returns the host representation of the given physical value.</summary>
 		public static IDataValue FromPhysical(IValueManager manager, Schema.IDataType dataType, byte[] buffer, int offset)
 		{
-			Schema.ScalarType scalarType = dataType as Schema.ScalarType;
+			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
 			if (scalarType != null)
 			{
 				Scalar scalar = new Scalar(manager, scalarType, null);
@@ -540,7 +540,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (tempValue == null)
 				return tempValue;
 				
-			Schema.ScalarType scalarType = dataType as Schema.ScalarType;
+			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
 			if (scalarType != null)
 			{
 				if (tempValue is StreamID)
@@ -618,7 +618,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (tempValue == null)
 				return;
 
-			Schema.ScalarType scalarType = dataType as Schema.ScalarType;
+			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
 			if (scalarType != null)
 			{
 				if (tempValue is StreamID)

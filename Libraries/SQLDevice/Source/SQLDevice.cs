@@ -507,7 +507,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				var rowType = (Schema.IRowType)planNode.DataType;
 				for (var index = 0; index < rowType.Columns.Count; index++)
 				{
-					if (rowType.Columns[index].DataType is ScalarType)
+					if (rowType.Columns[index].DataType is IScalarType)
 					{
 						rowDeviceNode.MappedTypes.Add((SQLScalarType)ResolveDeviceScalarType(devicePlan.Plan, (ScalarType)rowType.Columns[index].DataType));
 					}
@@ -3489,7 +3489,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							IServerExpressionPlan plan = ((IServerProcess)ServerProcess).PrepareExpression(executeStatementExpression, null);
 							try
 							{
-								executeStatement = ((Scalar)plan.Evaluate(null)).AsString;
+								executeStatement = ((IScalar)plan.Evaluate(null)).AsString;
 							}
 							finally
 							{
@@ -5006,7 +5006,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				if (inIndex >= 0)
 				{
 					//if (AInValues.HasValue(LInIndex))
-					//	LValue = (Scalar)AInValues[LInIndex];
+					//	LValue = (IScalar)AInValues[LInIndex];
 
 					if (!inRowType.Columns[inIndex].DataType.Equals(valueType))
 					{
@@ -5025,7 +5025,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						sourceNode = Compiler.Upcast(plan, sourceNode, valueType);
 						conversionNodes[inIndex] = sourceNode;
 							
-						//LValue = (Scalar)Compiler.Upcast(AProcess.Plan, LSourceNode, LValueType).Execute(AProcess).Value;
+						//LValue = (IScalar)Compiler.Upcast(AProcess.Plan, LSourceNode, LValueType).Execute(AProcess).Value;
 					}
 				}
 				

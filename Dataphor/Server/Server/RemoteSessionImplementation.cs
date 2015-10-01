@@ -205,7 +205,7 @@ namespace Alphora.Dataphor.DAE.Server
 			NativeMarshal.SetDataOutputParams(ServerProcess, paramsValue, localParamsValue);
 		}
 		
-		public override DataValue Evaluate(string expression, DataParams paramsValue)
+		public override IDataValue Evaluate(string expression, DataParams paramsValue)
 		{
 			NativeParam[] localParamsValue = NativeMarshal.DataParamsToNativeParams(ServerProcess, paramsValue);
 			NativeResult result = _nativeCLISession.Execute(expression, localParamsValue);

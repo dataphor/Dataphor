@@ -1323,7 +1323,7 @@ namespace Alphora.Dataphor.DAE.Client
 			InternalInitializeRow(targetRow);
 		}
 		
-		protected internal void ChangeColumn(DataField field, Scalar value)
+		protected internal void ChangeColumn(DataField field, IScalar value)
 		{
 			Edit();
 			Row activeRow = _buffer[_activeOffset].Row;
@@ -2452,12 +2452,12 @@ namespace Alphora.Dataphor.DAE.Client
 		/// The validate event is invoked first, followed by the change event. If an exception is thrown during the 
 		/// validation event, the field will not be set to the new value. However, if an exception is thrown during
 		/// the change event, the field will still be set to the new value.</remarks>
-		public Scalar Value
+		public IScalar Value
 		{
 			get
 			{
 				CheckHasValue();
-				return (Scalar)_dataSet.ActiveRow.GetValue(_columnIndex);
+				return (IScalar)_dataSet.ActiveRow.GetValue(_columnIndex);
 			}
 			set
 			{
@@ -2471,22 +2471,22 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary>Retrieves the old value for this field during a change or validate event.</summary>
 		/// <remarks>This value is only available during a change or validate event. A ClientException exception will be
 		/// thrown if this property is accessed at any other time.</remarks>
-		public Scalar OldValue
+		public IScalar OldValue
 		{
 			get
 			{
-				return (Scalar)_dataSet.OldRow.GetValue(_columnIndex);
+				return (IScalar)_dataSet.OldRow.GetValue(_columnIndex);
 			}
 		}
 
 		/// <summary>Retrieves the original value for this field prior to any changes made during the edit.</summary>
 		/// <remarks>This value is only available when the dataset is in edit state. A ClientException exception will be
 		/// thrown if this property is accessed at any other time.</remarks>		
-		public Scalar OriginalValue
+		public IScalar OriginalValue
 		{
 			get
 			{
-				return (Scalar)_dataSet.OriginalRow.GetValue(_columnIndex);
+				return (IScalar)_dataSet.OriginalRow.GetValue(_columnIndex);
 			}
 		}
 		

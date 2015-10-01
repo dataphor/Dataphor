@@ -1200,7 +1200,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
 			if (APlanNode.Nodes[0].IsLiteral)
-				return LDevicePlan.Device.TranslateExpression(LDevicePlan, new ValueNode(new Scalar(LDevicePlan.Plan.ServerProcess, LDevicePlan.Plan.Catalog.DataTypes.SystemIString, ((Scalar)APlanNode.Nodes[0].Execute(ADevicePlan.Plan.ServerProcess).Value).ToString())), false);
+				return LDevicePlan.Device.TranslateExpression(LDevicePlan, new ValueNode(new Scalar(LDevicePlan.Plan.ServerProcess, LDevicePlan.Plan.Catalog.DataTypes.SystemIString, ((IScalar)APlanNode.Nodes[0].Execute(ADevicePlan.Plan.ServerProcess).Value).ToString())), false);
 			else
 				return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
 		}
@@ -1214,7 +1214,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
 			if (APlanNode.Nodes[1].IsLiteral)
-				return LDevicePlan.Device.TranslateExpression(LDevicePlan, new ValueNode(new Scalar(LDevicePlan.Plan.ServerProcess, LDevicePlan.Plan.Catalog.DataTypes.SystemIString, ((Scalar)APlanNode.Nodes[1].Execute(ADevicePlan.Plan.ServerProcess).Value).ToString())), false);
+				return LDevicePlan.Device.TranslateExpression(LDevicePlan, new ValueNode(new Scalar(LDevicePlan.Plan.ServerProcess, LDevicePlan.Plan.Catalog.DataTypes.SystemIString, ((IScalar)APlanNode.Nodes[1].Execute(ADevicePlan.Plan.ServerProcess).Value).ToString())), false);
 			else
 				return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
 		}

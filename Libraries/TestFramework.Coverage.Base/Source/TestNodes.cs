@@ -746,10 +746,10 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			List<string> LUnknownCodes = new List<string>();
-			string LAssemblyFileName = ((Scalar)AArguments[0].Value).ToString();
+			string LAssemblyFileName = ((IScalar)AArguments[0].Value).ToString();
 			if (!Path.IsPathRooted(LAssemblyFileName))
 				LAssemblyFileName = Path.Combine(Application.StartupPath, LAssemblyFileName);
-			string LExceptionClassName = ((Scalar)AArguments[1].Value).ToString();
+			string LExceptionClassName = ((IScalar)AArguments[1].Value).ToString();
 			Assembly LAssembly = Assembly.LoadFrom(LAssemblyFileName);
 			Type LExceptionClass = LAssembly.GetType(LExceptionClassName);
 			Type LCodesEnum = LExceptionClass.GetNestedType("Codes");
@@ -819,7 +819,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 							FDataVars[0].Value = LIndexKey[LIndex];
 							FDataVars[1].Value = LCompareKey[LIndex];
 							DataVar LResultVar = FKey.Columns[LIndex].Sort.CompareNode.InternalExecute(AProcess, FDataVars);
-							AResult = ((Scalar)LResultVar.Value).ToInt32();
+							AResult = ((IScalar)LResultVar.Value).ToInt32();
 						}
 						else if (LIndexKey.HasValue(LIndex))
 						{
@@ -889,10 +889,10 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			bool LTestOverflow = false;
 			if (AArguments.Length == 4)
 			{
-				LFanout = ((Scalar)AArguments[0].Value).ToInt32();
-				LCapacity = ((Scalar)AArguments[1].Value).ToInt32();
-				LRowCount = ((Scalar)AArguments[2].Value).ToInt32();
-				LTestOverflow = ((Scalar)AArguments[3].Value).ToBoolean();
+				LFanout = ((IScalar)AArguments[0].Value).ToInt32();
+				LCapacity = ((IScalar)AArguments[1].Value).ToInt32();
+				LRowCount = ((IScalar)AArguments[2].Value).ToInt32();
+				LTestOverflow = ((IScalar)AArguments[3].Value).ToBoolean();
 			}
 
 			Schema.RowType LKeyType = new Schema.RowType();
@@ -1179,10 +1179,10 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			bool LTestOverflow = false;
 			if (AArguments.Length == 4)
 			{
-				LFanout = ((Scalar)AArguments[0].Value).ToInt32();
-				LCapacity = ((Scalar)AArguments[1].Value).ToInt32();
-				LRowCount = ((Scalar)AArguments[2].Value).ToInt32();
-					LTestOverflow = ((Scalar)AArguments[3].Value).ToBoolean();
+				LFanout = ((IScalar)AArguments[0].Value).ToInt32();
+				LCapacity = ((IScalar)AArguments[1].Value).ToInt32();
+				LRowCount = ((IScalar)AArguments[2].Value).ToInt32();
+					LTestOverflow = ((IScalar)AArguments[3].Value).ToBoolean();
 			}
 			
 			int LFirstKeyValue = (LRowCount / 4);
@@ -1739,7 +1739,7 @@ drop table Testing;
 ////			{
 ////				using (DataVar LLeftValue = AProcess.Stack.Pop())
 ////				{
-////					AProcess.Stack.Push(new DataVar(Schema.IDataType.SystemInteger, Scalar.FromInt32(((Scalar)LLeftValue.Value).ToInt32() * ((Scalar)LRightValue.Value).ToInt32())));
+////					AProcess.Stack.Push(new DataVar(Schema.IDataType.SystemInteger, Scalar.FromInt32(((IScalar)LLeftValue.Value).ToInt32() * ((Scalar)LRightValue.Value).ToInt32())));
 ////				}
 ////			}
 //		}
@@ -1761,7 +1761,7 @@ drop table Testing;
 //		
 //		private TestDataVar MultiplyWithScalarDataVars(ServerProcess AProcess, TestDataVar ALeftValue, TestDataVar ARightValue)
 //		{
-//			return new TestDataVar(AProcess.DataTypes.SystemInteger, Scalar.FromInt32(AProcess, ((Scalar)ALeftValue.Value).ToInt32() * ((Scalar)ARightValue.Value).ToInt32()));
+//			return new TestDataVar(AProcess.DataTypes.SystemInteger, Scalar.FromInt32(AProcess, ((IScalar)ALeftValue.Value).ToInt32() * ((Scalar)ARightValue.Value).ToInt32()));
 //		}
 //		
 //		private void TestCallingWithObjectDataVars(ServerProcess AProcess)
@@ -1859,7 +1859,7 @@ drop table Testing;
 //		
 //		public override object InternalExecute(Program AProgram, object[] AArguments)
 //		{
-//			int ACount = ((Scalar)AArguments[0].Value).ToInt32();
+//			int ACount = ((IScalar)AArguments[0].Value).ToInt32();
 //
 //			// Get Timing for passing the arguments as parameters
 //			DateTime LStartTime = DateTime.Now;
@@ -1915,7 +1915,7 @@ drop table Testing;
 //	{
 //		public override object InternalExecute(Program AProgram, object[] AArguments)
 //		{
-//			int LCount = ((Scalar)AArguments[0].Value).ToInt32();
+//			int LCount = ((IScalar)AArguments[0].Value).ToInt32();
 //			
 //			List LList = new List();
 //			for (int LIndex = 0; LIndex < 1000; LIndex++)

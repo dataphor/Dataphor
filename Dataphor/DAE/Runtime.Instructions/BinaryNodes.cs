@@ -46,7 +46,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 			
-			Scalar scalar = (Scalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument1);
+			IScalar scalar = (IScalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument1);
 			if (scalar.IsNative)
 				return scalar.AsByteArray.Length;
 			else
@@ -96,13 +96,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (argument1 is StreamID)
 					leftStream = program.StreamManager.Open((StreamID)argument1, LockMode.Exclusive);
 				else
-					leftStream = ((Scalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument1)).OpenStream();
+					leftStream = ((IScalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument1)).OpenStream();
 				try
 				{
 					if (argument2 is StreamID)
 						rightStream = program.StreamManager.Open((StreamID)argument2, LockMode.Exclusive);
 					else
-						rightStream = ((Scalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument2)).OpenStream();
+						rightStream = ((IScalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument2)).OpenStream();
 					try
 					{
 						#if USESTREAMLENGTHWHENCOMPARINGSTREAMS
@@ -170,7 +170,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 
-			Scalar scalar = (Scalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument1);
+			IScalar scalar = (IScalar)DataValue.FromNative(program.ValueManager, Nodes[0].DataType, argument1);
 			if (scalar.IsNative)
 				return scalar.AsBase64String;
 			else

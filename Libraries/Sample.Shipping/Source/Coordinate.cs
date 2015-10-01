@@ -106,7 +106,7 @@ namespace Alphora.Shipping
 				return new DataVar(FDataType);
 			else
 			{
-				Scalar LDegree = (Scalar)AArguments[0].Value;
+				IScalar LDegree = (IScalar)AArguments[0].Value;
 				return new DataVar(FDataType, Scalar.FromInt32(AProcess, CoordinateUtility.GetDegrees(((DegreeConveyor)LDegree.Conveyor).GetValue(LDegree))));
 			}
 		}
@@ -121,9 +121,9 @@ namespace Alphora.Shipping
 				return new DataVar(FDataType);
 			else
 			{
-				Scalar LDegree = (Scalar)AArguments[0].Value;
+				IScalar LDegree = (IScalar)AArguments[0].Value;
 				decimal LValue = ((DegreeConveyor)LDegree.Conveyor).GetValue(LDegree);
-				return CoordinateUtility.GetDegree(((Scalar)AArguments[1].Value).ToInt32(), CoordinateUtility.GetMinutes(LValue), CoordinateUtility.GetSeconds(LValue))));
+				return CoordinateUtility.GetDegree(((IScalar)AArguments[1].Value).ToInt32(), CoordinateUtility.GetMinutes(LValue), CoordinateUtility.GetSeconds(LValue))));
 			}
 		}
 	}
@@ -137,7 +137,7 @@ namespace Alphora.Shipping
 				return new DataVar(FDataType);
 			else
 			{
-				Scalar LDegree = (Scalar)AArguments[0].Value;
+				IScalar LDegree = (IScalar)AArguments[0].Value;
 				return new DataVar(FDataType, Scalar.FromInt32(AProcess, CoordinateUtility.GetMinutes(((DegreeConveyor)LDegree.Conveyor).GetValue(LDegree))));
 			}
 		}
@@ -152,7 +152,7 @@ namespace Alphora.Shipping
 				return new DataVar(FDataType);
 			else
 			{
-				Scalar LDegree = (Scalar)AArguments[0].Value;
+				IScalar LDegree = (IScalar)AArguments[0].Value;
 				decimal LValue = ((DegreeConveyor)LDegree.Conveyor).GetValue(LDegree);
 				return CoordinateUtility.GetDegree(CoordinateUtility.GetDegrees(LValue), ((Scalar)AArguments[1].Value).ToInt32(), CoordinateUtility.GetSeconds(LValue))));
 			}
@@ -168,7 +168,7 @@ namespace Alphora.Shipping
 				return new DataVar(FDataType);
 			else
 			{
-				Scalar LDegree = (Scalar)AArguments[0].Value;
+				IScalar LDegree = (IScalar)AArguments[0].Value;
 				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, CoordinateUtility.GetSeconds(((DegreeConveyor)LDegree.Conveyor).GetValue(LDegree))));
 			}
 		}
@@ -183,9 +183,9 @@ namespace Alphora.Shipping
 				return new DataVar(FDataType);
 			else
 			{
-				Scalar LDegree = (Scalar)AArguments[0].Value;
+				IScalar LDegree = (IScalar)AArguments[0].Value;
 				decimal LValue = ((DegreeConveyor)LDegree.Conveyor).GetValue(LDegree);
-				return CoordinateUtility.GetDegree(CoordinateUtility.GetDegrees(LValue), CoordinateUtility.GetMinutes(LValue), ((Scalar)AArguments[1].Value).ToDecimal())));
+				return CoordinateUtility.GetDegree(CoordinateUtility.GetDegrees(LValue), CoordinateUtility.GetMinutes(LValue), ((IScalar)AArguments[1].Value).ToDecimal())));
 			}
 		}
 	}
@@ -198,7 +198,7 @@ namespace Alphora.Shipping
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
-				return ((Scalar)AArguments[0].Value).ToDecimal()));
+				return ((IScalar)AArguments[0].Value).ToDecimal()));
 		}
 	}
 	
@@ -211,7 +211,7 @@ namespace Alphora.Shipping
 				return new DataVar(FDataType);
 			else
 			{
-				Scalar LDegree = (Scalar)AArguments[0].Value;
+				Scalar LDegree = (IScalar)AArguments[0].Value;
 				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, ((DegreeConveyor)LDegree.Conveyor).GetValue(LDegree)));
 			}
 		}
@@ -225,7 +225,7 @@ namespace Alphora.Shipping
 			if (AArguments[1].Value == null)
 				return new DataVar(FDataType);
 			else
-				return ((Scalar)AArguments[1].Value).ToDecimal()));
+				return ((IScalar)AArguments[1].Value).ToDecimal()));
 		}
 	}
 */
@@ -311,7 +311,7 @@ namespace Alphora.Shipping
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, ((Scalar)AArguments[0].Value).ToDecimal()));
+				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, ((IScalar)AArguments[0].Value).ToDecimal()));
 		}
 	}
 	
@@ -323,7 +323,7 @@ namespace Alphora.Shipping
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, ((Scalar)AArguments[0].Value).ToDecimal()));
+				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, ((IScalar)AArguments[0].Value).ToDecimal()));
 		}
 	}
 	
@@ -335,7 +335,7 @@ namespace Alphora.Shipping
 			if (AArguments[1].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, ((Scalar)AArguments[1].Value).ToDecimal()));
+				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, ((IScalar)AArguments[1].Value).ToDecimal()));
 		}
 	}
 	
@@ -347,7 +347,7 @@ namespace Alphora.Shipping
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, CoordinateUtility.KMToMiles(((Scalar)AArguments[0].Value).ToDecimal())));
+				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, CoordinateUtility.KMToMiles(((IScalar)AArguments[0].Value).ToDecimal())));
 		}
 	}
 	
@@ -359,7 +359,7 @@ namespace Alphora.Shipping
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, CoordinateUtility.MilesToKM(((Scalar)AArguments[0].Value).ToDecimal())));
+				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, CoordinateUtility.MilesToKM(((IScalar)AArguments[0].Value).ToDecimal())));
 		}
 	}
 	
@@ -371,7 +371,7 @@ namespace Alphora.Shipping
 			if (AArguments[1].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, CoordinateUtility.KMToMiles(((Scalar)AArguments[1].Value).ToDecimal())));
+				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, CoordinateUtility.KMToMiles(((IScalar)AArguments[1].Value).ToDecimal())));
 		}
 	}
 	
@@ -384,8 +384,8 @@ namespace Alphora.Shipping
 				return new DataVar(FDataType);
 			else
 			{
-				Scalar LValue1 = (Scalar)AArguments[0].Value;
-				Scalar LValue2 = (Scalar)AArguments[1].Value;
+				Scalar LValue1 = (IScalar)AArguments[0].Value;
+				Scalar LValue2 = (IScalar)AArguments[1].Value;
 				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, CoordinateUtility.CalculateDistance(((CoordinateConveyor)LValue1.Conveyor).GetValue(LValue1), ((CoordinateConveyor)LValue2.Conveyor).GetValue(LValue2))));
 			}
 		}
@@ -399,7 +399,7 @@ namespace Alphora.Shipping
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
-				return ((Scalar)AArguments[0].Value).ToDecimal()));
+				return ((IScalar)AArguments[0].Value).ToDecimal()));
 		}
 	}
 	
@@ -412,7 +412,7 @@ namespace Alphora.Shipping
 				return new DataVar(FDataType);
 			else
 			{
-				return ((Scalar)AArguments[0].Value).ToDecimal()));
+				return ((IScalar)AArguments[0].Value).ToDecimal()));
 			}
 		}
 	}
@@ -425,7 +425,7 @@ namespace Alphora.Shipping
 			if (AArguments[1].Value == null)
 				return new DataVar(FDataType);
 			else
-				return ((Scalar)AArguments[1].Value).ToDecimal()));
+				return ((IScalar)AArguments[1].Value).ToDecimal()));
 		}
 	}
 	
@@ -437,7 +437,7 @@ namespace Alphora.Shipping
 			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, (((Scalar)AArguments[0].Value).ToDecimal() / ((Scalar)AArguments[1].Value).ToDecimal()) * 100m));
+				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, (((IScalar)AArguments[0].Value).ToDecimal() / ((Scalar)AArguments[1].Value).ToDecimal()) * 100m));
 		}
 	}
 	
@@ -449,7 +449,7 @@ namespace Alphora.Shipping
 			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, ((Scalar)AArguments[0].Value).ToDecimal() * (((Scalar)AArguments[1].Value).ToDecimal() / 100m)));
+				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, ((IScalar)AArguments[0].Value).ToDecimal() * (((Scalar)AArguments[1].Value).ToDecimal() / 100m)));
 		}
 	}
 	
@@ -461,7 +461,7 @@ namespace Alphora.Shipping
 			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, (((Scalar)AArguments[0].Value).ToDecimal() / 100m) * ((Scalar)AArguments[1].Value).ToDecimal()));
+				return new DataVar(FDataType, Scalar.FromDecimal(AProcess, (((IScalar)AArguments[0].Value).ToDecimal() / 100m) * ((Scalar)AArguments[1].Value).ToDecimal()));
 		}
 	}
 	
@@ -473,7 +473,7 @@ namespace Alphora.Shipping
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
-				return ((Scalar)AArguments[0].Value).ToDecimal()));
+				return ((IScalar)AArguments[0].Value).ToDecimal()));
 		}
 	}
 	
@@ -486,7 +486,7 @@ namespace Alphora.Shipping
 				return new DataVar(FDataType);
 			else
 			{
-				return ((Scalar)AArguments[0].Value).ToDecimal()));
+				return ((IScalar)AArguments[0].Value).ToDecimal()));
 			}
 		}
 	}
@@ -499,7 +499,7 @@ namespace Alphora.Shipping
 			if (AArguments[1].Value == null)
 				return new DataVar(FDataType);
 			else
-				return ((Scalar)AArguments[1].Value).ToDecimal()));
+				return ((IScalar)AArguments[1].Value).ToDecimal()));
 		}
 	}
 */

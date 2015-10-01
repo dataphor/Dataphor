@@ -151,7 +151,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				_elementWriteList = new DataValue[DataType.Columns.Count]; // list for saving host representations of values between the GetPhysicalSize and WriteToPhysical calls
 				Stream stream;
 				StreamID streamID;
-				Schema.ScalarType scalarType;
+				Schema.IScalarType scalarType;
 				Streams.IConveyor conveyor;
 				IDataValue element;
 				int elementSize;
@@ -172,9 +172,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						LSize += sizeof(int) + LElementSize;
 						*/
 						#if USEDATATYPESINNATIVEROW
-						scalarType = _row.DataTypes[index] as Schema.ScalarType;
+						scalarType = _row.DataTypes[index] as Schema.IScalarType;
 						#else
-						scalarType = DataType.Columns[index].DataType as Schema.ScalarType;
+						scalarType = DataType.Columns[index].DataType as Schema.IScalarType;
 						#endif
 						if ((scalarType != null) && !scalarType.IsCompound)
 						{
@@ -256,7 +256,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				Stream stream;
 				StreamID streamID;
 				int elementSize;
-				Schema.ScalarType scalarType;
+				Schema.IScalarType scalarType;
 				Streams.IConveyor conveyor;
 				IDataValue element;
 				for (int index = 0; index < _writeList.Length; index++)
@@ -269,9 +269,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					else
 					{
 						#if USEDATATYPESINNATIVEROW
-						scalarType = _row.DataTypes[index] as Schema.ScalarType;
+						scalarType = _row.DataTypes[index] as Schema.IScalarType;
 						#else
-						scalarType = DataType.Columns[index].DataType as Schema.ScalarType;
+						scalarType = DataType.Columns[index].DataType as Schema.IScalarType;
 						#endif
 						if ((scalarType != null) && !scalarType.IsCompound)
 						{
@@ -425,7 +425,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				Stream stream;
 				StreamID streamID;
 				int elementSize;
-				Schema.ScalarType scalarType;
+				Schema.IScalarType scalarType;
 				Streams.IConveyor conveyor;
 				for (int index = 0; index < DataType.Columns.Count; index++)
 				{
@@ -449,7 +449,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						break;
 						
 						case 2 : // native standard value
-							scalarType = DataType.Columns[index].DataType as Schema.ScalarType;
+							scalarType = DataType.Columns[index].DataType as Schema.IScalarType;
 							if ((scalarType != null) && !scalarType.IsCompound)
 							{
 								conveyor = Manager.GetConveyor(scalarType);
@@ -492,7 +492,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						break;
 						
 						case 3 : // non-native standard value
-							scalarType = DataType.Columns[index].DataType as Schema.ScalarType;
+							scalarType = DataType.Columns[index].DataType as Schema.IScalarType;
 							if (scalarType != null)
 							{
 								if (expandStreams)
@@ -529,7 +529,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							dataTypeName = (string)stringConveyor.Read(buffer, offset);
 							dataType = Manager.CompileTypeSpecifier(dataTypeName);
 							offset += stringConveyor.GetSize(dataTypeName);
-							scalarType = dataType as Schema.ScalarType;
+							scalarType = dataType as Schema.IScalarType;
 							if ((scalarType != null) && !scalarType.IsCompound)
 							{
 								conveyor = Manager.GetConveyor(scalarType);
@@ -573,7 +573,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							dataTypeName = (string)stringConveyor.Read(buffer, offset);
 							dataType = Manager.CompileTypeSpecifier(dataTypeName);
 							offset += stringConveyor.GetSize(dataTypeName);
-							scalarType = dataType as Schema.ScalarType;
+							scalarType = dataType as Schema.IScalarType;
 							if (scalarType != null)
 							{
 								if (expandStreams)

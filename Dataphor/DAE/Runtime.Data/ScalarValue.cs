@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// <remarks>
 	/// The host representation will wrap either a native representation of the value, or a stream representation of the value.
 	/// </remarks>
-	public class Scalar : DataValue
+	public class Scalar : DataValue, IScalar
 	{
 		public Scalar(IValueManager manager, Schema.IScalarType dataType, object tempValue) : base(manager, dataType)
 		{
@@ -49,7 +49,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		private StreamID _streamID;
 		private object _value;
 
-		public new Schema.ScalarType DataType { get { return (Schema.ScalarType)base.DataType; } }
+		public new Schema.IScalarType DataType { get { return (Schema.ScalarType)base.DataType; } }
 
 		public override bool IsNative { get { return _isNative; } }
 

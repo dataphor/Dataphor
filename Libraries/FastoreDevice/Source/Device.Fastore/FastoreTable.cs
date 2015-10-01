@@ -47,10 +47,10 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
 		protected string MapTypeNames(IDataType dataType)
 		{
-			if (!(dataType is ScalarType))
+			if (!(dataType is IScalarType))
 				throw new Exception(String.Format("Fastore only supports scalar column types; {0} is not supported.", dataType.Name));
 
-			var scalar = (ScalarType)dataType;
+			var scalar = (IScalarType)dataType;
 
 			switch (scalar.NativeType.Name)
 			{
@@ -65,7 +65,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 
 		private bool RowIDCandidateType(IDataType dataType)
 		{
-			return dataType is ScalarType && ((ScalarType)dataType).NativeType.IsValueType;
+			return dataType is IScalarType && ((IScalarType)dataType).NativeType.IsValueType;
 		}
 
 		protected void EnsureColumns()

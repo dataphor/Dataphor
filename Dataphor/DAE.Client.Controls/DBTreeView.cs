@@ -565,7 +565,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 										row.CopyTo(key);
 										columnIndex = row.DataType.Columns.IndexOf(ColumnName);
 										if (row.HasValue(columnIndex))
-											text = ((Scalar)row.GetValue(columnIndex)).AsDisplayString;
+											text = ((IScalar)row.GetValue(columnIndex)).AsDisplayString;
 										else
 											text = NoValueText;
 									}
@@ -607,9 +607,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				{
 					compareValue = String.Empty;
 					if (key1.HasValue(key2.DataType.Columns[index].Name))
-						compareValue = ((Scalar)key1.GetValue(key2.DataType.Columns[index].Name)).AsDisplayString;
+						compareValue = ((IScalar)key1.GetValue(key2.DataType.Columns[index].Name)).AsDisplayString;
 					
-					if (((Scalar)key2.GetValue(index)).AsDisplayString != compareValue)
+					if (((IScalar)key2.GetValue(index)).AsDisplayString != compareValue)
 						return false;
 				}
 				return true;
@@ -801,9 +801,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				{
 					compareValue = String.Empty;
 					if (key.HasValue(_key.DataType.Columns[index].Name))
-						compareValue = ((Scalar)key.GetValue(_key.DataType.Columns[index].Name)).AsDisplayString;
+						compareValue = ((IScalar)key.GetValue(_key.DataType.Columns[index].Name)).AsDisplayString;
 					
-					if (((Scalar)_key.GetValue(index)).AsDisplayString != compareValue)
+					if (((IScalar)_key.GetValue(index)).AsDisplayString != compareValue)
 						return false;
 				}
 				return true;
@@ -899,7 +899,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 							if (columnIndex < 0)
 								throw new ControlsException(ControlsException.Codes.DataColumnNotFound, DBTreeView.ColumnName);
 							if (row.HasValue(columnIndex))
-								text = ((Scalar)row.GetValue(columnIndex)).AsDisplayString;
+								text = ((IScalar)row.GetValue(columnIndex)).AsDisplayString;
 							else
 								text = DBTreeView.NoValueText;
 								

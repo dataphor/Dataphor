@@ -55,7 +55,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public abstract void Execute(string statement, DataParams paramsValue);
 		
-		public abstract DataValue Evaluate(string expression, DataParams paramsValue);
+		public abstract IDataValue Evaluate(string expression, DataParams paramsValue);
 		
 		public abstract Schema.TableVar PrepareTableVar(Plan plan, string expression, DataParams paramsValue);
     }

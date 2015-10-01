@@ -1252,7 +1252,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 					IDataValue result = plan.Evaluate(paramsValue);
 					UpdateRowFromParams(outParams, paramsValue);
-					Scalar scalar = result as Scalar;
+					IScalar scalar = result as IScalar;
 					return scalar == null ? result : scalar.AsNative;
 				}
 				finally
@@ -1338,10 +1338,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Row outRow = arguments.Length >= 4 ? (Row)arguments[3] : null;
 			
 			DataParams paramsValue = SystemEvaluateNode.ParamsFromRows(program, inRow, outRow);
-			DataValue dataValue = program.RemoteConnect(serverLink).Evaluate(expression, paramsValue);
+			IDataValue dataValue = program.RemoteConnect(serverLink).Evaluate(expression, paramsValue);
 			SystemEvaluateNode.UpdateRowFromParams(outRow, paramsValue);
 			
-			return dataValue.IsNil ? null : (dataValue is Scalar ? dataValue.AsNative : dataValue);
+			return dataValue.IsNil ? null : (dataValue is IScalar ? dataValue.AsNative : dataValue);
 		}
 	}
 	
@@ -2184,7 +2184,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((dataType.Equals(program.DataTypes.SystemScalar)) || (dataType.Equals(program.DataTypes.SystemGeneric)))
 				return true;
 				
-			Schema.ScalarType scalarType = dataType as Schema.ScalarType;
+			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
 			if (scalarType != null)
 			{
 				if (scalarType.IsCompound)

@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
         {
             using 
 			(
-				DAE.Runtime.Data.Scalar script = 
+				DAE.Runtime.Data.IScalar script = 
 					Dataphoria.FrontendSession.Pipe.RequestDocument
 					(
 						String.Format

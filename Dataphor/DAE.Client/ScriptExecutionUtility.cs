@@ -152,7 +152,7 @@ namespace Alphora.Dataphor.DAE.Client
 					else if (LPlan.DataType is DAE.Schema.IListType)
 						ResultsFromList((ListValue)value, LResult);
 					else if (LPlan.DataType is DAE.Schema.IScalarType)
-						LResult.Append(((Scalar)value).AsDisplayString);
+						LResult.Append(((IScalar)value).AsDisplayString);
 					else
 						LResult.Append(String.Format("<Unknown Result Type: {0}>", LPlan.DataType.Name));
 				LResult.Append("\r\n");

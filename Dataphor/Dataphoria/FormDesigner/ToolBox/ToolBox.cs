@@ -326,7 +326,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
         {
             try
             {
-                using (DataValue imageData = FrontendSession.Pipe.RequestDocument(imageExpression))
+                using (IDataValue imageData = FrontendSession.Pipe.RequestDocument(imageExpression))
                 {
                     var streamCopy = new MemoryStream();
                     Stream stream = imageData.OpenStream();

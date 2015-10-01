@@ -1190,6 +1190,17 @@ namespace Alphora.Dataphor.DAE.Schema
 		ScalarTypeConstraints Constraints { get; }
 		ScalarTypes ParentTypes { get; }
 		Type NativeType { get; }
+		Representations Representations { get; }
+		ClassDefinition ClassDefinition { get; set; }
+		bool IsCompound { get; set; }
+		Schema.IRowType CompoundRowType { get; set; }
+		bool IsLike(IDataType dataType);
+
+		bool HasRepresentation(NativeAccessor nativeAccessor);
+		bool HasRepresentation(NativeAccessor nativeAccessor, bool explicitValue);
+		Schema.Representation FindRepresentation(NativeAccessor nativeAccessor);
+		Schema.Representation FindRepresentation(NativeAccessor nativeAccessor, bool explicitValue);
+		Schema.Representation GetRepresentation(NativeAccessor nativeAccessor);
     }
     
 	/// <remarks> Implements the representation of scalar data types. </remarks>
@@ -1247,9 +1258,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		// IsCompound
 		// Indicates whether the native representation for this type is multi-property and system-provided
-		public bool IsCompound;
+		public bool IsCompound { get; set; }
 		
-		public Schema.IRowType CompoundRowType;
+		public Schema.IRowType CompoundRowType { get; set; }
 		
 		public void ValidateChildObjectName(string name)
 		{

@@ -1065,7 +1065,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			IServerExpressionPlan plan = process.PrepareExpression(documentExpression, null);
 			try
 			{
-				using (Scalar scalar = (Scalar)plan.Evaluate(null))
+				using (IScalar scalar = (IScalar)plan.Evaluate(null))
 				{
 					string document = scalar.AsString;
 					try

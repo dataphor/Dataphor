@@ -183,7 +183,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			if (stringValue != null && stringValue.Token == DAE.Language.TokenType.String)
 				return (string)stringValue.Value;
 			else
-				using (DAE.Runtime.Data.Scalar scalar = Pipe.RequestDocument(document))
+				using (DAE.Runtime.Data.IScalar scalar = Pipe.RequestDocument(document))
 				{
 					return scalar.AsString;
 				}

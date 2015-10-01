@@ -270,6 +270,7 @@
     <Compile Include="Runtime.Data\IndexException.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime.Data\IScalar.cs" />
     <Compile Include="Runtime.Data\JoinTables.cs">
       <SubType>Code</SubType>
     </Compile>

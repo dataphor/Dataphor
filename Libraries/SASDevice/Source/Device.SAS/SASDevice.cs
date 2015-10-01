@@ -393,7 +393,7 @@ order by libname, memname, indxname, indxpos
 
 						if (AOldRow.HasValue(LColumn.Name))
 						
-							LFilter.AppendFormat("[{0}] = {1}", Device.ToSQLIdentifier(LColumn), LBuilder.ToLiteral((Scalar)AOldRow[LColumn.Name]));
+							LFilter.AppendFormat("[{0}] = {1}", Device.ToSQLIdentifier(LColumn), LBuilder.ToLiteral((IScalar)AOldRow[LColumn.Name]));
 						else
 							throw new RuntimeException(RuntimeException.Codes.OptimisticConcurrencyCheckRowNotFound);
 					}
@@ -466,7 +466,7 @@ order by libname, memname, indxname, indxpos
 							LFilter.Append(" and ");
 
 						if (ARow.HasValue(LColumn.Name))
-							LFilter.AppendFormat("[{0}] = {1}", Device.ToSQLIdentifier(LColumn), LBuilder.ToLiteral((Scalar)ARow[LColumn.Name]));
+							LFilter.AppendFormat("[{0}] = {1}", Device.ToSQLIdentifier(LColumn), LBuilder.ToLiteral((IScalar)ARow[LColumn.Name]));
 						else
 							throw new RuntimeException(RuntimeException.Codes.OptimisticConcurrencyCheckRowNotFound);
 					}

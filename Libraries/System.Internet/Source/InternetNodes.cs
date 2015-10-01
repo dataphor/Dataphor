@@ -328,8 +328,8 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			}
 
 			// Write any default namespace changes
-			Scalar defaultValue =
-				(Scalar)((IServerProcess)program.ServerProcess).Evaluate
+			IScalar defaultValue =
+				(IScalar)((IServerProcess)program.ServerProcess).Evaluate
 				(
 					"URI from row from (XMLDefaultNamespace where Element_ID = AElementID)",
 					paramsValue
@@ -438,7 +438,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			DataParams paramsValue = new DataParams();
 			paramsValue.Add(DataParam.Create(program.ServerProcess, "ADocumentID", (Guid)arguments[0]));
 			Guid rootElementID =
-				((Scalar)
+				((IScalar)
 					((IServerProcess)program.ServerProcess).Evaluate
 					(
 						"Root_Element_ID from row from (XMLDocument where ID = ADocumentID)",

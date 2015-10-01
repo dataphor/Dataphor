@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public override string LoadData()
 		{
-			using (DAE.Runtime.Data.Scalar scalar = Dataphoria.FrontendSession.Pipe.RequestDocument(String.Format(".Frontend.Load('{0}', '{1}')", DAE.Schema.Object.EnsureRooted(LibraryName), DAE.Schema.Object.EnsureRooted(DocumentName))))
+			using (DAE.Runtime.Data.IScalar scalar = Dataphoria.FrontendSession.Pipe.RequestDocument(String.Format(".Frontend.Load('{0}', '{1}')", DAE.Schema.Object.EnsureRooted(LibraryName), DAE.Schema.Object.EnsureRooted(DocumentName))))
 			{
 				return scalar.AsString;
 			}
@@ -91,7 +91,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public override void LoadData(Stream data)
 		{
-			using (DAE.Runtime.Data.Scalar scalar = Dataphoria.FrontendSession.Pipe.RequestDocument(String.Format(".Frontend.LoadBinary('{0}', '{1}')", DAE.Schema.Object.EnsureRooted(LibraryName), DAE.Schema.Object.EnsureRooted(DocumentName))))
+			using (DAE.Runtime.Data.IScalar scalar = Dataphoria.FrontendSession.Pipe.RequestDocument(String.Format(".Frontend.LoadBinary('{0}', '{1}')", DAE.Schema.Object.EnsureRooted(LibraryName), DAE.Schema.Object.EnsureRooted(DocumentName))))
 			{
 				data.Position = 0;
 				Stream stream = scalar.OpenStream();

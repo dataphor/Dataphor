@@ -102,7 +102,7 @@ namespace Alphora.Dataphor.Dataphoria
 			
 			ResetSelectedProcess();
 			
-			if (((Scalar)Dataphoria.EvaluateQuery("exists(.System.Debug.GetBreakpoints())")).AsBoolean)
+			if (((IScalar)Dataphoria.EvaluateQuery("exists(.System.Debug.GetBreakpoints())")).AsBoolean)
 				RefreshBreakpoints();
 		}
 

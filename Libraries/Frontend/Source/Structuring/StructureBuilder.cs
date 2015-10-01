@@ -150,7 +150,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 		
 		protected virtual string GetDefaultElementType(Schema.IDataType dataType, string pageType)
 		{
-			Schema.ScalarType scalarType = dataType as Schema.ScalarType;
+			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
 			
 			if (scalarType != null)
 			{
@@ -705,7 +705,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 
 		protected override string GetDefaultElementType(Schema.IDataType dataType, string pageType)
 		{
-			Schema.ScalarType scalarType = dataType as Schema.ScalarType;
+			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
 			if (scalarType != null)
 			{
 				if (scalarType.NativeType == DAE.Runtime.Data.NativeAccessors.AsBoolean.NativeType)

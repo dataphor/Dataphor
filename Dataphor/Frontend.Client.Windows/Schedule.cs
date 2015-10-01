@@ -301,17 +301,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					var item =
 						new ScheduleAppointmentData
 						{
-							Date = ((Scalar)row.GetValue(_appointmentDateColumn)).AsDateTime,
-							StartTime = ((Scalar)row.GetValue(_appointmentStartTimeColumn)).AsDateTime,
-							EndTime = ((Scalar)row.GetValue(_appointmentEndTimeColumn)).AsDateTime,
-							Description = ((Scalar)row.GetValue(_appointmentDescriptionColumn)).AsString,
-							Group = (String.IsNullOrEmpty(_appointmentGroupColumn) ? null : ((Scalar)row.GetValue(_appointmentGroupColumn)).AsNative),
+							Date = ((IScalar)row.GetValue(_appointmentDateColumn)).AsDateTime,
+							StartTime = ((IScalar)row.GetValue(_appointmentStartTimeColumn)).AsDateTime,
+							EndTime = ((IScalar)row.GetValue(_appointmentEndTimeColumn)).AsDateTime,
+							Description = ((IScalar)row.GetValue(_appointmentDescriptionColumn)).AsString,
+							Group = (String.IsNullOrEmpty(_appointmentGroupColumn) ? null : ((IScalar)row.GetValue(_appointmentGroupColumn)).AsNative),
 							Image = (String.IsNullOrEmpty(_appointmentImageColumn) || !row.HasValue(_appointmentImageColumn) 
 								? null 
-								: LoadImage((Scalar)row.GetValue(_appointmentImageColumn))),
+								: LoadImage((IScalar)row.GetValue(_appointmentImageColumn))),
 							BackgroundColor = (String.IsNullOrEmpty(_appointmentBackgroundColorColumn) || !row.HasValue(_appointmentBackgroundColorColumn)
 								? String.Empty
-								: ((Scalar)row.GetValue(_appointmentBackgroundColorColumn)).AsString)
+								: ((IScalar)row.GetValue(_appointmentBackgroundColorColumn)).AsString)
 						};
 					items[i] = item;
 					if (i == _appointmentSourceLink.ActiveOffset)
@@ -332,7 +332,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// Appointment Image Loading
 		
-		private ImageSource LoadImage(Scalar value)
+		private ImageSource LoadImage(IScalar value)
 		{
 			Stream stream = value.OpenStream();
 			try
@@ -550,11 +550,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					(
 						new ScheduleShiftData
 						{
-							Date = ((Scalar)row.GetValue(_shiftDateColumn)).AsDateTime,
-							StartTime = ((Scalar)row.GetValue(_shiftStartTimeColumn)).AsDateTime,
-							EndTime = ((Scalar)row.GetValue(_shiftEndTimeColumn)).AsDateTime,
-							Description = ((Scalar)row.GetValue(_shiftDescriptionColumn)).AsString,
-							Group = (String.IsNullOrEmpty(_shiftGroupColumn) ? null : ((Scalar)row.GetValue(_shiftGroupColumn)).AsNative),
+							Date = ((IScalar)row.GetValue(_shiftDateColumn)).AsDateTime,
+							StartTime = ((IScalar)row.GetValue(_shiftStartTimeColumn)).AsDateTime,
+							EndTime = ((IScalar)row.GetValue(_shiftEndTimeColumn)).AsDateTime,
+							Description = ((IScalar)row.GetValue(_shiftDescriptionColumn)).AsString,
+							Group = (String.IsNullOrEmpty(_shiftGroupColumn) ? null : ((IScalar)row.GetValue(_shiftGroupColumn)).AsNative),
 							HighlightInterval = 
 							(
 								String.IsNullOrEmpty(_shiftHighlightIntervalColumn) 
@@ -562,7 +562,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 									: 
 									(
 										row.HasValue(_shiftHighlightIntervalColumn) 
-											? ((Scalar)row.GetValue(_shiftHighlightIntervalColumn)).AsInt32
+											? ((IScalar)row.GetValue(_shiftHighlightIntervalColumn)).AsInt32
 											: (int?)null
 									)
 							)
@@ -705,17 +705,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				for (int i = 0; i <= _groupSourceLink.LastOffset; i++)
 				{
 					var row = _groupSourceLink.Buffer(i);
-					if (String.IsNullOrEmpty(_groupConditionColumn) || ((Scalar)row.GetValue(_groupConditionColumn)).AsBoolean)
+					if (String.IsNullOrEmpty(_groupConditionColumn) || ((IScalar)row.GetValue(_groupConditionColumn)).AsBoolean)
 						data.Add
 						(
 							new ScheduleGroupData
 							{
-								Group = (row.HasValue(_groupColumn) ? ((Scalar)row.GetValue(_groupColumn)).AsNative : null),
+								Group = (row.HasValue(_groupColumn) ? ((IScalar)row.GetValue(_groupColumn)).AsNative : null),
 								Description = 
 								(
 									String.IsNullOrEmpty(_groupDescriptionColumn) 
 										? null 
-										: (row.HasValue(_groupDescriptionColumn) ? ((Scalar)row.GetValue(_groupDescriptionColumn)).AsString : null)
+										: (row.HasValue(_groupDescriptionColumn) ? ((IScalar)row.GetValue(_groupDescriptionColumn)).AsString : null)
 								),
 							}
 						);

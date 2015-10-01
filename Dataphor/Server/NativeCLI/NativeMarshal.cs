@@ -120,7 +120,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		
 		public static string DataTypeToDataTypeName(Schema.DataTypes dataTypes, IDataType dataType)
 		{
-			ScalarType scalarType = dataType as ScalarType;
+			IScalarType scalarType = dataType as IScalarType;
 			if (scalarType != null)
 				return ScalarTypeToDataTypeName(dataTypes, scalarType);
 
@@ -171,7 +171,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			throw new NotSupportedException("Non-scalar-valued attributes are not supported.");
 		}
 		
-		public static string ScalarTypeToDataTypeName(Schema.DataTypes dataTypes, ScalarType scalarType)
+		public static string ScalarTypeToDataTypeName(Schema.DataTypes dataTypes, IScalarType scalarType)
 		{
 			if (scalarType.NativeType == NativeAccessors.AsBoolean.NativeType) return "Boolean";
 			if (scalarType.NativeType == NativeAccessors.AsByte.NativeType) return "Byte";
@@ -245,7 +245,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			return tableVar;
 		}
 		
-		public static DataValue NativeValueToDataValue(ServerProcess process, NativeValue nativeValue)
+		public static IDataValue NativeValueToDataValue(ServerProcess process, NativeValue nativeValue)
 		{
 			NativeScalarValue nativeScalar = nativeValue as NativeScalarValue;
 			if (nativeScalar != null)
@@ -359,7 +359,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 
 		public static NativeValue DataTypeToNativeValue(IServerProcess process, IDataType dataType)
 		{
-			ScalarType scalarType = dataType as ScalarType;
+			IScalarType scalarType = dataType as IScalarType;
 			if (scalarType != null)
 			{
 				NativeScalarValue nativeScalar = new NativeScalarValue();
@@ -398,7 +398,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			if (dataValue == null)
 				return null;
 
-			Scalar scalar = dataValue as Scalar;
+			IScalar scalar = dataValue as IScalar;
 			if (scalar != null)
 			{
 				NativeScalarValue nativeScalar = new NativeScalarValue();
@@ -541,7 +541,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 
 		public static NativeValue DataParamToNativeValue(IServerProcess process, DataParam dataParam)
 		{
-			var scalarType = dataParam.DataType as ScalarType;
+			var scalarType = dataParam.DataType as IScalarType;
 			if (scalarType != null)
 			{
 				NativeScalarValue nativeScalar = new NativeScalarValue();
@@ -631,7 +631,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 							nativeParam.Name, 
 							value.DataType, 
 							NativeCLIUtility.NativeModifierToModifier(nativeParam.Modifier), 
-							value.IsNil ? null : (value is Scalar ? value.AsNative : value)
+							value.IsNil ? null : (value is IScalar ? value.AsNative : value)
 						);
 					dataParams.Add(dataParam);
 				}

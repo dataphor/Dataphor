@@ -92,7 +92,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			AGenerator.Emit(OpCodes.Neg);
 			AGenerator.Emit(OpCodes.Conv_I2); // According to the docs this isnt necessary?
 			AGenerator.Emit(OpCodes.Box, typeof(Int16));
-			AGenerator.Emit(OpCodes.Newobj, typeof(Scalar).GetConstructor(new Type[] { typeof(ServerProcess), typeof(Schema.ScalarType), typeof(object) }));
+			AGenerator.Emit(OpCodes.Newobj, typeof(IScalar).GetConstructor(new Type[] { typeof(ServerProcess), typeof(Schema.ScalarType), typeof(object) }));
 			
 			AGenerator.MarkLabel(LCreateResult);
 			
