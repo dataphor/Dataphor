@@ -159,7 +159,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return (Capabilities & capability) != 0;
 		}
 		
-		public DataValue Evaluate(DataParams paramsValue)
+		public IDataValue Evaluate(DataParams paramsValue)
 		{
 			RemoteParamData localParamsValue = _process.DataParamsToRemoteParamData(paramsValue);
 			byte[] result = _plan.Evaluate(ref localParamsValue, out _programStatistics, _process.GetProcessCallInfo());

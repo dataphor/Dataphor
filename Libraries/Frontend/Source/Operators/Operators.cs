@@ -399,7 +399,7 @@ namespace Alphora.Dataphor.Frontend.Server
 	{
 		public override object InternalExecute(Program program, object[] arguments)
 		{
-			DataValue tempValue = arguments[0] as DataValue;
+			IDataValue tempValue = arguments[0] as IDataValue;
 			if (tempValue == null)
 				tempValue = DataValue.FromNative(program.ValueManager, arguments[0]);
 

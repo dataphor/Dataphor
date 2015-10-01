@@ -94,7 +94,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 						{
 							if (options != NativeExecutionOptions.SchemaOnly)
 							{
-								using (DataValue tempValue = expressionPlan.Evaluate(dataParams))
+								using (IDataValue tempValue = expressionPlan.Evaluate(dataParams))
 								{
 									result.Value = NativeMarshal.DataValueToNativeValue(_process, tempValue);
 								}

@@ -1250,7 +1250,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if ((IsLiteral && !localNode.IsLiteral) || (IsFunctional && !localNode.IsFunctional) || (IsDeterministic && !localNode.IsDeterministic) || (IsRepeatable && !localNode.IsRepeatable) || (!IsNilable && localNode.IsNilable))
 						throw new RuntimeException(RuntimeException.Codes.InvalidCharacteristicOverride, PlanNode.CharacteristicsToString(this), PlanNode.CharacteristicsToString(localNode));
 					
-					DataValue result = plan.Evaluate(paramsValue);
+					IDataValue result = plan.Evaluate(paramsValue);
 					UpdateRowFromParams(outParams, paramsValue);
 					Scalar scalar = result as Scalar;
 					return scalar == null ? result : scalar.AsNative;

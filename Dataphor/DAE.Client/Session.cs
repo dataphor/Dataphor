@@ -782,25 +782,25 @@ namespace Alphora.Dataphor.DAE.Client
 		#region EvaluateRaw
 		
 		/// <summary> Evaluates the given expression using the utility process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(string expression)
+		public DAE.Runtime.Data.IDataValue EvaluateRaw(string expression)
 		{
 			return EvaluateRaw(null, expression, (DAE.Runtime.DataParams)null);
 		}
 
 		/// <summary>Evaluates the given expression on the given process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess process, string expression)
+		public DAE.Runtime.Data.IDataValue EvaluateRaw(IServerProcess process, string expression)
 		{
 			return EvaluateRaw(process, expression, (DAE.Runtime.DataParams)null);
 		}
 
 		/// <summary>Evaluates the given expression using the utility process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(string expression, DAE.Runtime.DataParams paramsValue)
+		public DAE.Runtime.Data.IDataValue EvaluateRaw(string expression, DAE.Runtime.DataParams paramsValue)
 		{
 			return EvaluateRaw(null, expression, paramsValue);
 		}
 
 		/// <summary>Evaluates the given expression using the given process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
+		public DAE.Runtime.Data.IDataValue EvaluateRaw(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
 		{
 			CheckActive();
 
@@ -819,13 +819,13 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 		
 		/// <summary>Evaluates the given expression using the utility process and the given parameter values (auto numbered A0..An-1) and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(string expression, params object[] paramsValue)
+		public DAE.Runtime.Data.IDataValue EvaluateRaw(string expression, params object[] paramsValue)
 		{
 			return EvaluateRaw(null, expression, paramsValue);
 		}
 
 		/// <summary>Evaluates the given expression on the given process using the given parameter values (auto numbered A0..An-1) and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess process, string expression, params object[] paramsValue)
+		public DAE.Runtime.Data.IDataValue EvaluateRaw(IServerProcess process, string expression, params object[] paramsValue)
 		{
 			if (process == null)
 				process = UtilityProcess;
@@ -834,7 +834,7 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 
 		/// <summary>Evaluates the given expression on the given process using the given parameter names and values and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
+		public DAE.Runtime.Data.IDataValue EvaluateRaw(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
 		{
 			if (process == null)
 				process = UtilityProcess;

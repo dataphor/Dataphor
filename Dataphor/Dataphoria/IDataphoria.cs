@@ -51,9 +51,9 @@ namespace Alphora.Dataphor.Dataphoria
 
         void CloseCursor(IServerCursor ACursor);
 
-        DataValue EvaluateQuery(string AQuery);
+        IDataValue EvaluateQuery(string AQuery);
 
-        DataValue EvaluateQuery(string AQuery, DataParams AParams);
+        IDataValue EvaluateQuery(string AQuery, DataParams AParams);
 
         void ExecuteScript(string AScript);
 

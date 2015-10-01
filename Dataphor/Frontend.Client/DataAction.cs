@@ -376,7 +376,7 @@ namespace Alphora.Dataphor.Frontend.Client
 						try
 						{
 							errors.AddRange(plan.Messages);
-							using (DataValue dataValue = plan.Evaluate(localParamsValue))
+							using (IDataValue dataValue = plan.Evaluate(localParamsValue))
 								result = dataValue == null ? false : (bool)dataValue.AsNative;
 						}
 						finally

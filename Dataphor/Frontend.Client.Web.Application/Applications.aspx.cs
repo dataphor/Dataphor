@@ -39,7 +39,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web.Application
 			// Look to see if there is only one application to choose from
 			if ((applicationID == null) || (applicationID == String.Empty))
 			{
-				DAE.Runtime.Data.DataValue iD = _webSession.Evaluate("if Count(Applications) = 1 then Applications[].ID else String(nil)");
+				DAE.Runtime.Data.IDataValue iD = _webSession.Evaluate("if Count(Applications) = 1 then Applications[].ID else String(nil)");
 				if ((iD != null) && !iD.IsNil)
 					applicationID = ((DAE.Runtime.Data.Scalar)iD).AsString;
 			}

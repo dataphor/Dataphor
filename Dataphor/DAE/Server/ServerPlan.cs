@@ -256,7 +256,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public DataValue Evaluate(DataParams paramsValue)
+		public IDataValue Evaluate(DataParams paramsValue)
 		{
 			Exception exception = null;
 			int nestingLevel = _process.BeginTransactionalCall();

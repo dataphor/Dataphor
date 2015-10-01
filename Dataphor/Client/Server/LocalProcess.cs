@@ -445,7 +445,7 @@ namespace Alphora.Dataphor.DAE.Server
 			((LocalExpressionPlan)plan).Dispose();
 		}
 		
-		public DataValue Evaluate(string expression, DataParams paramsValue)
+		public IDataValue Evaluate(string expression, DataParams paramsValue)
 		{
 			#if USECOLLAPSEDEVALUATECALLS
 			#if LOGCACHEEVENTS

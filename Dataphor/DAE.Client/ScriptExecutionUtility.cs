@@ -142,7 +142,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			else
 			{
-				DataValue value = LPlan.Evaluate(null);
+				IDataValue value = LPlan.Evaluate(null);
 				rowCount = -1; // row count not applicable
 				if ((value == null) || value.IsNil)
 					LResult.Append(Strings.Get("NoValue"));

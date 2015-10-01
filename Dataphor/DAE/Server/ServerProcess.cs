@@ -1001,7 +1001,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// Evaluate
-		public DataValue Evaluate(string expression, DataParams paramsValue)
+		public IDataValue Evaluate(string expression, DataParams paramsValue)
 		{
 			IServerExpressionPlan plan = PrepareExpression(expression, paramsValue);
 			try

@@ -266,6 +266,7 @@
     <Compile Include="Runtime.Data\ExtendTable.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime.Data\IDataValue.cs" />
     <Compile Include="Runtime.Data\IndexException.cs">
       <SubType>Code</SubType>
     </Compile>

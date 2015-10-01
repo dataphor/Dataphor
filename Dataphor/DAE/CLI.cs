@@ -450,7 +450,7 @@ namespace Alphora.Dataphor.DAE
         /// and unpreparing the plan.  It is provided for convenience if multiple evaluation
         /// of the prepared expression is not necessary.
         /// </remarks>
-		DataValue Evaluate(string AExpression, DataParams AParams);
+		IDataValue Evaluate(string AExpression, DataParams AParams);
 		
         /// <summary>Opens a server-side cursor based on the prepared statement this plan represents.</summary>        
         /// <param name='AExpression'>A single table-valued expression to be retrieved.</param>
@@ -711,7 +711,7 @@ namespace Alphora.Dataphor.DAE
     public interface IServerExpressionPlan : IServerPlan, IServerCursorBehavior
     {
 		/// <summary> Evaluates the expression and returns the result. </summary>
-		DataValue Evaluate(DataParams AParams);
+		IDataValue Evaluate(DataParams AParams);
 		
         /// <summary> Opens a server-side cursor based on the prepared statement this plan represents. </summary>        
         /// <returns> An <see cref="IServerCursor"/> instance for the prepared statement. </returns>

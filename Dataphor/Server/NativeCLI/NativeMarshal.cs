@@ -393,7 +393,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			throw new NotSupportedException(String.Format("Values of type \"{0}\" are not supported.", dataType.Name));
 		}
 		
-		public static NativeValue DataValueToNativeValue(IServerProcess process, DataValue dataValue)
+		public static NativeValue DataValueToNativeValue(IServerProcess process, IDataValue dataValue)
 		{
 			if (dataValue == null)
 				return null;

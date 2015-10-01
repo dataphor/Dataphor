@@ -75,7 +75,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// All values have a data type and are associated with some process in the system.
 	/// The host representation is an active wrapper for the native representation of some value.
 	/// </remarks>
-	public abstract class DataValue : System.Object, IDisposable //, IDisposableNotify
+	public abstract class DataValue : IDataValue, IDisposable //, IDisposableNotify
 	{
 		public DataValue(IValueManager manager, Schema.IDataType dataType) : base()
 		{
@@ -115,8 +115,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected virtual void Dispose(bool disposing) { }
 
+		private bool _valuesOwned = true;
 		/// <summary>Indicates whether disposal of the value should deallocate any resources associated with the value.</summary>
-		public bool ValuesOwned = true;
+		public bool ValuesOwned { get { return _valuesOwned; } set { _valuesOwned = value; } }
 
 		/// <summary>Indicates whether or not this value is initialized.</summary>
 		public abstract bool IsNil { get; }
@@ -206,7 +207,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		/// <summary>Copies the native representation of this value and returns the host representation as the given type.</summary>
-		public DataValue CopyAs(Schema.IDataType dataType)
+		public IDataValue CopyAs(Schema.IDataType dataType)
 		{
 			// This code is duplicated in the Copy and FromNative methods for performance...
 			object tempValue = CopyNativeAs(dataType);
@@ -254,7 +255,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, dataType == null ? "<null>" : dataType.GetType().Name);
 		}
 		
-		public DataValue Copy()
+		public IDataValue Copy()
 		{
 			// This code is duplicated in the FromNative and CopyAs methods for performance...
 			object tempValue = CopyNative();
@@ -374,7 +375,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return manager.DataTypes.SystemScalar;
 		}
 		
-		public static DataValue FromNative(IValueManager manager, object tempValue)
+		public static IDataValue FromNative(IValueManager manager, object tempValue)
 		{
 			if (tempValue == null)
 				return new Scalar(manager, manager.DataTypes.SystemScalar, null);
@@ -386,7 +387,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		/// <summary>Returns the host representation of the given native value.  This is a by-reference operation.</summary>		
-		public static DataValue FromNative(IValueManager manager, Schema.IDataType dataType, object tempValue)
+		public static IDataValue FromNative(IValueManager manager, Schema.IDataType dataType, object tempValue)
 		{
 			// This code is duplicated in the Copy method and the FromNative overloads for performance
 			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
@@ -422,7 +423,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		/// <summary>Returns the host representation of the given native value.  This is a by-reference operation.</summary>		
-		public static DataValue FromNativeRow(IValueManager manager, Schema.IRowType rowType, NativeRow nativeRow, int nativeRowIndex)
+		public static IDataValue FromNativeRow(IValueManager manager, Schema.IRowType rowType, NativeRow nativeRow, int nativeRowIndex)
 		{
 			// This code is duplicated in the Copy method and the FromNative overloads for performance
 			#if USEDATATYPESINNATIVEROW
@@ -457,7 +458,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		/// <summary>Returns the host representation of the given native value.  This is a by-reference operation.</summary>		
-		public static DataValue FromNativeList(IValueManager manager, Schema.IListType listType, NativeList nativeList, int nativeListIndex)
+		public static IDataValue FromNativeList(IValueManager manager, Schema.IListType listType, NativeList nativeList, int nativeListIndex)
 		{
 			// This code is duplicated in the Copy method and the FromNative overloads for performance
 			Schema.IDataType dataType = nativeList.DataTypes[nativeListIndex];
@@ -488,7 +489,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		/// <summary>Returns the host representation of the given physical value.</summary>
-		public static DataValue FromPhysical(IValueManager manager, Schema.IDataType dataType, byte[] buffer, int offset)
+		public static IDataValue FromPhysical(IValueManager manager, Schema.IDataType dataType, byte[] buffer, int offset)
 		{
 			Schema.ScalarType scalarType = dataType as Schema.ScalarType;
 			if (scalarType != null)
@@ -629,7 +630,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				return;
 			}
 			
-			using (DataValue dataValue = DataValue.FromNative(manager, dataType, tempValue))
+			using (IDataValue dataValue = DataValue.FromNative(manager, dataType, tempValue))
 			{
 				dataValue.ValuesOwned = true;
 			}
@@ -637,7 +638,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public static object CopyValue(IValueManager manager, object value)
 		{
-			DataValue dataValue = value as DataValue;
+			IDataValue dataValue = value as IDataValue;
 			if (dataValue != null)
 				return dataValue.Copy();
 				
@@ -687,7 +688,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public static void DisposeValue(IValueManager manager, object tempValue)
 		{
-			DataValue localTempValue = tempValue as DataValue;
+			IDataValue localTempValue = tempValue as IDataValue;
 			if (localTempValue != null)
 			{
 				localTempValue.Dispose();

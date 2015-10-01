@@ -187,7 +187,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public override bool IsNil { get { return _list == null; } }
 		
 		private object[] _writeList;
-		private DataValue[] _elementWriteList;
+		private IDataValue[] _elementWriteList;
 		
 		/*
 			List Value Format ->
@@ -239,7 +239,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				Stream stream;
 				StreamID streamID;
 				Schema.ScalarType scalarType;
-				DataValue element;
+				IDataValue element;
 				int elementSize;
 				for (int index = 0; index < _writeList.Length; index++)
 				{
@@ -330,7 +330,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			int elementSize;
 			Schema.ScalarType scalarType;
 			Streams.IConveyor conveyor;
-			DataValue element;
+			IDataValue element;
 			for (int index = 0; index < _writeList.Length; index++)
 			{
 				if (_list.Values[index] == null)
@@ -528,7 +528,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									elementSize = (int)int32Conveyor.Read(buffer, offset);
 									offset += sizeof(int);
 									_list.DataTypes.Add(DataType.ElementType);
-									using (DataValue tempValue = DataValue.FromPhysical(Manager, DataType.ElementType, buffer, offset))
+									using (IDataValue tempValue = DataValue.FromPhysical(Manager, DataType.ElementType, buffer, offset))
 									{
 										_list.Values.Add(tempValue.AsNative);
 										tempValue.ValuesOwned = false;
@@ -597,7 +597,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									elementSize = (int)int32Conveyor.Read(buffer, offset);
 									offset += sizeof(int);
 									_list.DataTypes.Add(dataType);
-									using (DataValue tempValue = DataValue.FromPhysical(Manager, dataType, buffer, offset))
+									using (IDataValue tempValue = DataValue.FromPhysical(Manager, dataType, buffer, offset))
 									{
 										_list.Values.Add(tempValue.AsNative);
 										tempValue.ValuesOwned = false;
@@ -643,7 +643,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public DataValue GetValue(int index)
+		public IDataValue GetValue(int index)
 		{
 			return FromNativeList(Manager, DataType, _list, index);
 		}

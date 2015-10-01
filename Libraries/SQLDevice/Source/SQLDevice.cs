@@ -5087,7 +5087,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return parameters;
 		}
 		
-		private static void SetValueNode(PlanNode planNode, DataValue tempValue)
+		private static void SetValueNode(PlanNode planNode, IDataValue tempValue)
 		{
 			if (planNode is ValueNode)
 				((ValueNode)planNode).Value = tempValue.IsNil ? null : tempValue.AsNative;

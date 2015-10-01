@@ -154,7 +154,7 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				DataParams localParamsValue = _process.RemoteParamDataToDataParams(paramsValue);
-				DataValue tempValue = ServerExpressionPlan.Evaluate(localParamsValue);
+				IDataValue tempValue = ServerExpressionPlan.Evaluate(localParamsValue);
 				_process.DataParamsToRemoteParamData(localParamsValue, ref paramsValue);
 				executeTime = ServerExpressionPlan.ProgramStatistics;
 				if (tempValue == null)

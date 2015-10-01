@@ -34,7 +34,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		bool OrderIncludesOrder(Schema.Order AIncludingOrder, Schema.Order AIncludedOrder);
 		Schema.Sort GetUniqueSort(Schema.IDataType ADataType);
 		int EvaluateSort(Schema.OrderColumn AOrderColumn, object AIndexValue, object ACompareValue);
-		DataValue GetAsDataValue(Schema.Representation ARepresentation, object AValue);
+		IDataValue GetAsDataValue(Schema.Representation ARepresentation, object AValue);
 		object GetAsNative(Schema.Representation ARepresentation, object AValue);
 		object SetAsNative(Schema.Representation ARepresentation, object AValue, object ANewValue);
 	}
@@ -158,7 +158,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 			}
         }
         
-        public DataValue GetAsDataValue(Schema.Representation representation, object tempValue)
+        public IDataValue GetAsDataValue(Schema.Representation representation, object tempValue)
         {
 			EnsureReadNode(_plan, representation);
 			Program program = _serverProcess.ExecutingProgram;

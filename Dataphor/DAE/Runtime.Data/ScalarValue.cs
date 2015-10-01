@@ -695,7 +695,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		private Stream _writeStream; // saves the write stream between the GetPhysicalSize and WriteToPhysical calls
-		private DataValue _writeValue; // saves the row instantiated to write the compound value if this is a compound scalar
+		private IDataValue _writeValue; // saves the row instantiated to write the compound value if this is a compound scalar
 		
 		public override int GetPhysicalSize(bool expandStreams)
 		{

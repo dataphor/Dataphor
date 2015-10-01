@@ -327,22 +327,22 @@ namespace Alphora.Dataphor.Frontend.Client
 			Execute(process, statement, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramsValue));
 		}
 
-		public DAE.Runtime.Data.DataValue Evaluate(string expression)
+		public DAE.Runtime.Data.IDataValue Evaluate(string expression)
 		{
 			return Evaluate(null, expression, (DAE.Runtime.DataParams)null);
 		}
 
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess process, string expression)
+		public DAE.Runtime.Data.IDataValue Evaluate(IServerProcess process, string expression)
 		{
 			return Evaluate(process, expression, (DAE.Runtime.DataParams)null);
 		}
 
-		public DAE.Runtime.Data.DataValue Evaluate(string expression, DAE.Runtime.DataParams paramsValue)
+		public DAE.Runtime.Data.IDataValue Evaluate(string expression, DAE.Runtime.DataParams paramsValue)
 		{
 			return Evaluate(null, expression, paramsValue);
 		}
 
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
+		public DAE.Runtime.Data.IDataValue Evaluate(IServerProcess process, string expression, DAE.Runtime.DataParams paramsValue)
 		{
 			if (process == null)
 				process = DataSession.UtilityProcess;
@@ -363,13 +363,13 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 
 		/// <summary>Evaluates the given expression using the given parameter values (auto numbered A0..An-1).</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(string expression, params object[] paramsValue)
+		public DAE.Runtime.Data.IDataValue Evaluate(string expression, params object[] paramsValue)
 		{
 			return Evaluate(null, expression, paramsValue);
 		}										  
 
 		/// <summary>Evaluates the given expression on the given process and using the given parameter values (auto numbered A0..An-1).</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess process, string expression, params object[] paramsValue)
+		public DAE.Runtime.Data.IDataValue Evaluate(IServerProcess process, string expression, params object[] paramsValue)
 		{
 			if (process == null)
 				process = DataSession.UtilityProcess;
@@ -378,7 +378,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 
 		/// <summary>Evaluates the given expression on the given process and using the given parameter names and values.</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
+		public DAE.Runtime.Data.IDataValue Evaluate(IServerProcess process, string expression, string[] paramNames, object[] paramsValue)
 		{
 			if (process == null)
 				process = DataSession.UtilityProcess;
@@ -446,19 +446,19 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateWith(Guid iD, string expression)
+		public DAE.Runtime.Data.IDataValue EvaluateWith(Guid iD, string expression)
 		{
 			return EvaluateWith(null, iD, expression, (DAE.Runtime.DataParams)null);
 		}
 		
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateWith(Guid iD, string expression, DAE.Runtime.DataParams paramsValue)
+		public DAE.Runtime.Data.IDataValue EvaluateWith(Guid iD, string expression, DAE.Runtime.DataParams paramsValue)
 		{
 			return EvaluateWith(null, iD, expression, paramsValue);
 		}
 		
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateWith(IServerProcess process, Guid iD, string expression, DAE.Runtime.DataParams paramsValue)
+		public DAE.Runtime.Data.IDataValue EvaluateWith(IServerProcess process, Guid iD, string expression, DAE.Runtime.DataParams paramsValue)
 		{
 			if (process == null)
 				process = DataSession.UtilityProcess;
@@ -474,14 +474,14 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 		
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateWith(Guid iD, string expression, params object[] paramsValue)
+		public DAE.Runtime.Data.IDataValue EvaluateWith(Guid iD, string expression, params object[] paramsValue)
 		{
 			IServerProcess process = DataSession.UtilityProcess;
 			return EvaluateWith(process, iD, expression, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramsValue));
 		}
 		
 		/// <summary>Evaluates the given expression enlisted within the given application transaction.</summary>
-		public DAE.Runtime.Data.DataValue EvaluateWith(Guid iD, string expression, string[] paramNames, object[] paramsValue)
+		public DAE.Runtime.Data.IDataValue EvaluateWith(Guid iD, string expression, string[] paramNames, object[] paramsValue)
 		{
 			IServerProcess process = DataSession.UtilityProcess;
 			return EvaluateWith(process, iD, expression, DAE.Client.DataSession.DataParamsFromNativeParams(process, paramsValue));

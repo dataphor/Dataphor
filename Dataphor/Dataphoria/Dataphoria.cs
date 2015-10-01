@@ -1286,19 +1286,19 @@ namespace Alphora.Dataphor.Dataphoria
 			_utilityProcess.UnprepareExpression(plan);
 		}
 
-		public DAE.Runtime.Data.DataValue EvaluateQuery(string query)
+		public DAE.Runtime.Data.IDataValue EvaluateQuery(string query)
 		{
 			return EvaluateQuery(query, null);
 		}
 
-		public DAE.Runtime.Data.DataValue EvaluateQuery(string query, DAE.Runtime.DataParams paramsValue)
+		public DAE.Runtime.Data.IDataValue EvaluateQuery(string query, DAE.Runtime.DataParams paramsValue)
 		{
 			Cursor oldCursor = Cursor.Current;
 			Cursor.Current = Cursors.WaitCursor;
 			try
 			{
 				var plan = _utilityProcess.PrepareExpression(query, paramsValue);
-				DAE.Runtime.Data.DataValue result;
+				DAE.Runtime.Data.IDataValue result;
 				try
 				{
 					result = plan.Evaluate(paramsValue);

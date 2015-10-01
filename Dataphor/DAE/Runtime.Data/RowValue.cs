@@ -103,7 +103,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		private object[] _writeList;
-		private DataValue[] _elementWriteList;
+		private IDataValue[] _elementWriteList;
 
 		/*
 			Row Value Format ->
@@ -153,7 +153,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				StreamID streamID;
 				Schema.ScalarType scalarType;
 				Streams.IConveyor conveyor;
-				DataValue element;
+				IDataValue element;
 				int elementSize;
 				for (int index = 0; index < _writeList.Length; index++)
 				{
@@ -258,7 +258,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				int elementSize;
 				Schema.ScalarType scalarType;
 				Streams.IConveyor conveyor;
-				DataValue element;
+				IDataValue element;
 				for (int index = 0; index < _writeList.Length; index++)
 				{
 					if (_row.Values[index] == null)
@@ -482,7 +482,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								#if USEDATATYPESINNATIVEROW
 								_row.DataTypes[index] = DataType.Columns[index].DataType;
 								#endif
-								using (DataValue tempValue = DataValue.FromPhysical(Manager, DataType.Columns[index].DataType, buffer, offset))
+								using (IDataValue tempValue = DataValue.FromPhysical(Manager, DataType.Columns[index].DataType, buffer, offset))
 								{
 									_row.Values[index] = tempValue.AsNative;
 									tempValue.ValuesOwned = false;
@@ -556,7 +556,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								elementSize = (int)int32Conveyor.Read(buffer, offset);
 								offset += sizeof(int);
 								_row.DataTypes[index] = dataType;
-								using (DataValue tempValue = DataValue.FromPhysical(Manager, dataType, buffer, offset))
+								using (IDataValue tempValue = DataValue.FromPhysical(Manager, dataType, buffer, offset))
 								{
 									_row.Values[index] = tempValue.AsNative;
 									tempValue.ValuesOwned = false;
@@ -623,12 +623,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		/// <summary>This is a by-reference access of the value, changes made to the resulting DataValue will be refelected in the actual row.</summary>
-		public DataValue GetValue(int index)
+		public IDataValue GetValue(int index)
 		{
 			return FromNativeRow(Manager, DataType, _row, index);
 		}
 		
-		public void SetValue(int index, DataValue tempValue)
+		public void SetValue(int index, IDataValue tempValue)
 		{
 			this[index] = tempValue;
 		}
@@ -667,7 +667,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					DataValue.DisposeNative(Manager, DataType.Columns[AIndex].DataType, FRow.Values[AIndex]);
 					#endif
 					
-				DataValue tempValue = value as DataValue;
+				IDataValue tempValue = value as IDataValue;
 				if (tempValue != null)
 				{
 					#if USEDATATYPESINNATIVEROW
@@ -742,12 +742,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			set { this[GetIndexOfColumn(columnName)] = value; }
 		}
 		
-		public DataValue GetValue(string columnName)
+		public IDataValue GetValue(string columnName)
 		{
 			return GetValue(GetIndexOfColumn(columnName));
 		}
 		
-		public void SetValue(string columnName, DataValue tempValue)
+		public void SetValue(string columnName, IDataValue tempValue)
 		{
 			SetValue(GetIndexOfColumn(columnName), tempValue);
 		}
