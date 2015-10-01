@@ -87,7 +87,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			_scan.Open();
 		}
 		
-		protected override void InternalSelect(Row row)
+		protected override void InternalSelect(IRow row)
 		{
 			_scan.GetRow(row);
 		}
@@ -122,37 +122,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return _scan.Prior();
 		}
 
-        protected override Row InternalGetBookmark()
+        protected override IRow InternalGetBookmark()
         {
 			return _scan.GetKey();
         }
 
-		protected override bool InternalGotoBookmark(Row bookmark, bool forward)
+		protected override bool InternalGotoBookmark(IRow bookmark, bool forward)
         {
 			return _scan.FindKey(bookmark);
         }
         
-        protected override int InternalCompareBookmarks(Row bookmark1, Row bookmark2)
+        protected override int InternalCompareBookmarks(IRow bookmark1, IRow bookmark2)
         {
 			return _scan.CompareKeys(bookmark1, bookmark2);
         }
 
-        protected override Row InternalGetKey()
+        protected override IRow InternalGetKey()
         {
 			return _scan.GetKey();
         }
         
-        protected override bool InternalFindKey(Row row, bool forward)
+        protected override bool InternalFindKey(IRow row, bool forward)
         {
 			return _scan.FindKey(row);
         }
         
-        protected override void InternalFindNearest(Row row)
+        protected override void InternalFindNearest(IRow row)
         {
 			_scan.FindNearest(row);
         }
         
-        protected override bool InternalRefresh(Row row)
+        protected override bool InternalRefresh(IRow row)
         {					
 			if (row == null)
 				row = Select();	 
@@ -290,12 +290,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         public object ContextVar { get { return _contextVar; } }
 
         // Origin
-        protected Row _origin;
-        public Row Origin { get { return _origin; } }
+        protected IRow _origin;
+        public IRow Origin { get { return _origin; } }
         
         // OrderKey
-        protected Row _orderKey;
-        public Row OrderKey
+        protected IRow _orderKey;
+        public IRow OrderKey
         {
             get
             {
@@ -325,8 +325,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
         
         // UniqueKey
-        protected Row _uniqueKey;
-        public Row UniqueKey
+        protected IRow _uniqueKey;
+        public IRow UniqueKey
         {
             get
             {
@@ -355,12 +355,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
                 }
         }
         
-        protected Row BuildOrderKeyRow()
+        protected IRow BuildOrderKeyRow()
         {
 			return new Row(_browseTable.Manager, new Schema.RowType(_browseTable.Order.Columns));
         }
         
-        protected Row BuildUniqueKeyRow()
+        protected IRow BuildUniqueKeyRow()
         {
 			Schema.RowType rowType = new Schema.RowType(_browseTable.Order.Columns);
 			return new Row(_browseTable.Manager, rowType);
@@ -403,7 +403,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         protected BrowseTable _browseTable;
         public BrowseTable BrowseTable { get { return _browseTable; } }
         
-        protected Row _row;
+        protected IRow _row;
     }
     
     public class BrowseTableList : DisposableList<BrowseTableItem>
@@ -529,7 +529,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
         
         // Must be called with the original stack
-        protected BrowseTableItem CreateTable(Row origin, bool forward, bool inclusive)
+        protected BrowseTableItem CreateTable(IRow origin, bool forward, bool inclusive)
         {
 			// Prepare the context variable to contain the origin value (0 if this is an unanchored set)
 			object contextVar;
@@ -608,7 +608,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
         
         // Must be called with the original stack
-        protected BrowseTableItem FindTable(Row origin, bool forward, bool inclusive)
+        protected BrowseTableItem FindTable(IRow origin, bool forward, bool inclusive)
         {
             foreach (BrowseTableItem table in _tables)
             {
@@ -646,7 +646,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
 
 		// Must be called with the original stack        
-        protected BrowseTableItem GetTable(Row origin, bool forward, bool inclusive)
+        protected BrowseTableItem GetTable(IRow origin, bool forward, bool inclusive)
         {
             BrowseTableItem result = FindTable(origin, forward, inclusive);
             if (result == null)
@@ -687,7 +687,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	        _tables.Add(GetTable());
         }
         
-        protected override bool InternalRefresh(Row row)
+        protected override bool InternalRefresh(IRow row)
         {					
 			if (row == null)
 				row = Select();
@@ -708,7 +708,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
         }
 
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
 			EnterTableContext(TopTable);
 			try
@@ -722,7 +722,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
 
 		// Must be called with the original stack        
-        protected void SwapReader(Row origin, bool forward, bool inclusive)
+        protected void SwapReader(IRow origin, bool forward, bool inclusive)
         {
 			BrowseTableItem item = GetTable(origin, forward, inclusive);
 			_tables.Add(item);
@@ -740,13 +740,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         // Must be called with the original stack
         protected void SwapReader(bool forward)
         {
-			Row origin = null;
+			IRow origin = null;
 			try
 			{
 				EnterTableContext(TopTable);
 				try
 				{
-					origin = TopTable.Origin != null ? (Row)TopTable.Origin.Copy() : null;
+					origin = TopTable.Origin != null ? (IRow)TopTable.Origin.Copy() : null;
 				}
 				finally
 				{
@@ -801,7 +801,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						}
 						else
 						{
-							Row origin = TopTable.OrderKey != null ? (Row)TopTable.OrderKey.Copy() : TopTable.Origin != null ? (Row)TopTable.Origin.Copy() : null;
+							IRow origin = TopTable.OrderKey != null ? (IRow)TopTable.OrderKey.Copy() : TopTable.Origin != null ? (IRow)TopTable.Origin.Copy() : null;
 							try
 							{
 								ExitTableContext(TopTable);
@@ -874,22 +874,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             _tables.Add(item);
         }
         
-        protected override Row InternalGetBookmark()
+        protected override IRow InternalGetBookmark()
         {
 			return InternalGetKey();
         }
 
-		protected override bool InternalGotoBookmark(Row bookmark, bool forward)
+		protected override bool InternalGotoBookmark(IRow bookmark, bool forward)
         {
             return InternalFindKey(bookmark, forward);
         }
         
-        protected override int InternalCompareBookmarks(Row bookmark1, Row bookmark2)
+        protected override int InternalCompareBookmarks(IRow bookmark1, IRow bookmark2)
         {
 			return CompareKeys(bookmark1, bookmark2);
         }
         
-		public int CompareKeys(Row indexKey, Row compareKey)
+		public int CompareKeys(IRow indexKey, IRow compareKey)
         {
 			int result = 0;
 			for (int index = 0; index < indexKey.DataType.Columns.Count; index++)
@@ -944,12 +944,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return result;
         }
         
-        protected override Row InternalGetKey()
+        protected override IRow InternalGetKey()
         {
 			EnterTableContext(TopTable);
 			try
 			{
-				return (Row)TopTable.OrderKey.Copy();
+				return (IRow)TopTable.OrderKey.Copy();
 			}
 			finally
 			{
@@ -957,9 +957,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
         }
 
-		protected override bool InternalFindKey(Row row, bool forward)
+		protected override bool InternalFindKey(IRow row, bool forward)
         {
-			Row localRow = EnsureKeyRow(row);
+			IRow localRow = EnsureKeyRow(row);
 			try
 			{
 				bool tableCreated = false;
@@ -1002,9 +1002,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
         }
         
-        protected override void InternalFindNearest(Row row)
+        protected override void InternalFindNearest(IRow row)
         {
-			Row localRow = EnsurePartialKeyRow(row);
+			IRow localRow = EnsurePartialKeyRow(row);
 			try
 			{
 				if (localRow != null)

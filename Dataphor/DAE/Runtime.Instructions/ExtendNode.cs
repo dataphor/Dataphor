@@ -320,7 +320,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
+		protected override bool InternalDefault(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
 			bool changed = false;
 			if ((columnName == String.Empty) || (SourceNode.DataType.Columns.ContainsName(columnName)))
@@ -328,7 +328,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return InternalInternalChange(newRow, columnName, program, true) || changed;
 		}
 		
-		protected bool InternalInternalChange(Row row, string columnName, Program program, bool isDefault)
+		protected bool InternalInternalChange(IRow row, string columnName, Program program, bool isDefault)
 		{
 			bool changed = false;
 			PushRow(program, row);
@@ -361,7 +361,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
+		protected override bool InternalChange(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
 			bool changed = false;
 			if ((columnName == String.Empty) || (SourceNode.DataType.Columns.ContainsName(columnName)))
@@ -369,14 +369,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return InternalInternalChange(newRow, columnName, program, false) || changed;
 		}
 		
-		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
+		protected override bool InternalValidate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
 			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
 				return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 			return false;
 		}
 		
-		public override void JoinApplicationTransaction(Program program, Row row)
+		public override void JoinApplicationTransaction(Program program, IRow row)
 		{
 			// Exclude any columns from AKey which were included by this node
 			Schema.RowType rowType = new Schema.RowType();

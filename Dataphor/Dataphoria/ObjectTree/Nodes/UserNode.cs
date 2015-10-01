@@ -67,7 +67,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return ".System.Users over { ID }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.IRow row)
 		{
 			return new UserNode((string)row["ID"]);
 		}
@@ -95,7 +95,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return String.Format("ID = '{0}'", Text);
 		}
 
-		public override bool IsEqual(DAE.Runtime.Data.Row row)
+		public override bool IsEqual(DAE.Runtime.Data.IRow row)
 		{
 			return (string)row["ID"] == Text;
 		}

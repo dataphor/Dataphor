@@ -42,7 +42,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return null;
 		}
 		
-		protected abstract BaseNode CreateChildNode(DAE.Runtime.Data.Row row);
+		protected abstract BaseNode CreateChildNode(DAE.Runtime.Data.IRow row);
 
         protected override void InternalReconcileChildren()
         {
@@ -66,7 +66,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
  		/// <summary> Finds the first node using the specified row. </summary>
 		/// <returns> The matching node reference or null (if not found). </returns>
-		public BaseNode FindByKey(DAE.Runtime.Data.Row row)
+		public BaseNode FindByKey(DAE.Runtime.Data.IRow row)
 		{
 			ItemNode itemNode;
 			foreach (TreeNode node in Nodes)
@@ -109,7 +109,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 				AddBaseNode(node);
 		}
 		
-		protected virtual void ReconcileNode(BaseNode node, DAE.Runtime.Data.Row row)
+		protected virtual void ReconcileNode(BaseNode node, DAE.Runtime.Data.IRow row)
 		{
 			// Stub for node-level reconciliation
 		}
@@ -182,7 +182,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		public abstract string GetFilter();
 
-		public abstract bool IsEqual(DAE.Runtime.Data.Row row);
+		public abstract bool IsEqual(DAE.Runtime.Data.IRow row);
 
 		public virtual void View()
 		{
@@ -403,7 +403,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			}
 		}
 
-		public override bool IsEqual(DAE.Runtime.Data.Row row)
+		public override bool IsEqual(DAE.Runtime.Data.IRow row)
 		{
 			return ((string)row["Name"] == _objectName);
 		}

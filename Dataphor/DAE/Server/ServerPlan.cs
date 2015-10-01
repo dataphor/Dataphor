@@ -359,13 +359,13 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		Schema.Catalog IServerExpressionPlan.Catalog { get { return _plan.PlanCatalog; } }
 		
-		public Row RequestRow()
+		public IRow RequestRow()
 		{
 			CheckCompiled();
 			return new Row(_process.ValueManager, SourceNode.DataType.RowType);
 		}
 		
-		public void ReleaseRow(Row row)
+		public void ReleaseRow(IRow row)
 		{
 			CheckCompiled();
 			row.Dispose();

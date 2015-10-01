@@ -108,7 +108,7 @@ namespace Alphora.Dataphor.Dataphoria
 			if (Dataphoria.Debugger.IsStarted)
 			{
 				// Save old postion
-				Row old = null;
+				IRow old = null;
 				if (FDebugProcessDataView.Active && !FDebugProcessDataView.IsEmpty())
 					old = FDebugProcessDataView.ActiveRow;
 					

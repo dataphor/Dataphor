@@ -493,7 +493,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 				throw new DeviceException(DeviceException.Codes.InvalidExecuteRequest, Device.Name, planNode.ToString());
 		}
 		
-		protected override void InternalInsertRow(Program program, Schema.TableVar table, Row row, BitArray valueFlags)
+		protected override void InternalInsertRow(Program program, Schema.TableVar table, IRow row, BitArray valueFlags)
 		{
 			NativeTable localTable = GetTables(table.Scope)[table];
 			
@@ -504,25 +504,25 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 
 			#if USEMEMORYDEVICETRANSACTIONS
 			if (InTransaction && !ServerProcess.NonLogged && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new DeleteOperation(ATable, (Row)ARow.Copy()));
+				Transactions.CurrentTransaction().Operations.Add(new DeleteOperation(ATable, (IRow)ARow.Copy()));
 			#endif
 		}
 		
-		protected override void InternalUpdateRow(Program program, Schema.TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
+		protected override void InternalUpdateRow(Program program, Schema.TableVar table, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			GetTables(table.Scope)[table].Update(ServerProcess.ValueManager, oldRow, newRow);
 			#if USEMEMORYDEVICETRANSACTIONS
 			if (InTransaction && !ServerProcess.NonLogged && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new UpdateOperation(ATable, (Row)ANewRow.Copy(), (Row)AOldRow.Copy()));
+				Transactions.CurrentTransaction().Operations.Add(new UpdateOperation(ATable, (IRow)ANewRow.Copy(), (IRow)AOldRow.Copy()));
 			#endif
 		}
 		
-		protected override void InternalDeleteRow(Program program, Schema.TableVar table, Row row)
+		protected override void InternalDeleteRow(Program program, Schema.TableVar table, IRow row)
 		{
 			GetTables(table.Scope)[table].Delete(ServerProcess.ValueManager, row);
 			#if USEMEMORYDEVICETRANSACTIONS
 			if (InTransaction && !ServerProcess.NonLogged && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new InsertOperation(ATable, (Row)ARow.Copy()));
+				Transactions.CurrentTransaction().Operations.Add(new InsertOperation(ATable, (IRow)ARow.Copy()));
 			#endif
 		}
 	}

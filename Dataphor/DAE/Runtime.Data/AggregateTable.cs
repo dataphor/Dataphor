@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         public new AggregateNode Node { get { return (AggregateNode)_node; } }
         
 		protected Table _sourceTable;
-		protected Row _sourceRow;
+		protected IRow _sourceRow;
         
         protected override void InternalOpen()
         {
@@ -55,7 +55,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			_sourceTable.Reset();
         }
         
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
 			_sourceTable.Select(_sourceRow);
 			_sourceRow.CopyTo(row);
@@ -116,37 +116,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			_sourceTable.First();
         }
         
-        protected override Row InternalGetBookmark()
+        protected override IRow InternalGetBookmark()
         {
 			return _sourceTable.GetBookmark();
         }
 
-		protected override bool InternalGotoBookmark(Row bookmark, bool forward)
+		protected override bool InternalGotoBookmark(IRow bookmark, bool forward)
         {
 			return _sourceTable.GotoBookmark(bookmark, forward);
         }
         
-        protected override int InternalCompareBookmarks(Row bookmark1, Row bookmark2)
+        protected override int InternalCompareBookmarks(IRow bookmark1, IRow bookmark2)
         {
 			return _sourceTable.CompareBookmarks(bookmark1, bookmark2);
         }
 
-        protected override Row InternalGetKey()
+        protected override IRow InternalGetKey()
         {
 			return _sourceTable.GetKey();
         }
 
-		protected override bool InternalFindKey(Row row, bool forward)
+		protected override bool InternalFindKey(IRow row, bool forward)
         {
 			return _sourceTable.FindKey(row, forward);
         }
         
-        protected override void InternalFindNearest(Row row)
+        protected override void InternalFindNearest(IRow row)
         {
 			_sourceTable.FindNearest(row);
         }
         
-        protected override bool InternalRefresh(Row row)
+        protected override bool InternalRefresh(IRow row)
         {					
 			return _sourceTable.Refresh(row);
         }

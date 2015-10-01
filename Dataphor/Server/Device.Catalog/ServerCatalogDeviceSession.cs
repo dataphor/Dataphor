@@ -135,7 +135,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public void PopulateStoreCounters(Table table, Row row)
+		public void PopulateStoreCounters(Table table, IRow row)
 		{
 			SQLStoreCounter counter;
 			for (int index = 0; index < Device.Store.Counters.Count; index++)
@@ -611,7 +611,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Libraries
 		
-		protected void InsertLibrary(Program program, Schema.TableVar tableVar, Row row)
+		protected void InsertLibrary(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			SystemCreateLibraryNode.CreateLibrary
 			(
@@ -628,7 +628,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			);
 		}
 
-		protected void UpdateLibrary(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateLibrary(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			string AOldName = (string)oldRow[0];
 			string ANewName = (string)newRow[0];
@@ -638,17 +638,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			SystemSetLibraryDescriptorNode.SetLibraryDefaultDeviceName(program, Schema.Object.EnsureRooted(ANewName), (string)newRow[3], false);
 		}
 
-		protected void DeleteLibrary(Program program, Schema.TableVar tableVar, Row row)
+		protected void DeleteLibrary(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			LibraryUtility.DropLibrary(program, Schema.Object.EnsureRooted((string)row[0]), true);
 		}
 
-		protected void InsertLibraryRequisite(Program program, Schema.TableVar tableVar, Row row)
+		protected void InsertLibraryRequisite(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			SystemSetLibraryDescriptorNode.AddLibraryRequisite(program, Schema.Object.EnsureRooted((string)row[0]), new LibraryReference((string)row[1], (VersionNumber)row[2]));
 		}
 
-		protected void UpdateLibraryRequisite(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateLibraryRequisite(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			if (String.Compare((string)oldRow[0], (string)newRow[0]) != 0)
 			{
@@ -665,17 +665,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				);
 		}
 
-		protected void DeleteLibraryRequisite(Program program, Schema.TableVar tableVar, Row row)
+		protected void DeleteLibraryRequisite(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			SystemSetLibraryDescriptorNode.RemoveLibraryRequisite(program, Schema.Object.EnsureRooted((string)row[0]), new LibraryReference((string)row[1], (VersionNumber)row[2]));
 		}
 
-		protected void InsertLibrarySetting(Program program, Schema.TableVar tableVar, Row row)
+		protected void InsertLibrarySetting(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			SystemSetLibraryDescriptorNode.AddLibrarySetting(program, Schema.Object.EnsureRooted((string)row[0]), new Tag((string)row[1], (string)row[2]));
 		}
 
-		protected void UpdateLibrarySetting(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateLibrarySetting(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			if (String.Compare((string)oldRow[0], (string)newRow[0]) != 0)
 			{
@@ -692,17 +692,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				);
 		}
 
-		protected void DeleteLibrarySetting(Program program, Schema.TableVar tableVar, Row row)
+		protected void DeleteLibrarySetting(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			SystemSetLibraryDescriptorNode.RemoveLibrarySetting(program, Schema.Object.EnsureRooted((string)row[0]), new Tag((string)row[1], (string)row[2]));
 		}
 
-		protected void InsertLibraryFile(Program program, Schema.TableVar tableVar, Row row)
+		protected void InsertLibraryFile(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			SystemSetLibraryDescriptorNode.AddLibraryFile(program, Schema.Object.EnsureRooted((string)row[0]), new FileReference((string)row[1], (bool)row[2]));
 		}
 		
-		protected void UpdateLibraryFile(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateLibraryFile(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			if 
 			(
@@ -716,28 +716,28 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected void DeleteLibraryFile(Program program, Schema.TableVar tableVar, Row row)
+		protected void DeleteLibraryFile(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			SystemSetLibraryDescriptorNode.RemoveLibraryFile(program, Schema.Object.EnsureRooted((string)row[0]), new FileReference((string)row[1], (bool)row[2]));
 		}
 		
-		protected void InsertLibraryFileEnvironment(Program program, Schema.TableVar tableVar, Row row)
+		protected void InsertLibraryFileEnvironment(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			SystemSetLibraryDescriptorNode.AddLibraryFileEnvironment(program, Schema.Object.EnsureRooted((string)row[0]), (string)row[1], (string)row[2]);
 		}
 		
-		protected void UpdateLibraryFileEnvironment(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateLibraryFileEnvironment(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			SystemSetLibraryDescriptorNode.RemoveLibraryFileEnvironment(program, Schema.Object.EnsureRooted((string)oldRow[0]), (string)oldRow[1], (string)oldRow[2]);
 			SystemSetLibraryDescriptorNode.AddLibraryFileEnvironment(program, Schema.Object.EnsureRooted((string)newRow[0]), (string)newRow[1], (string)newRow[2]);
 		}
 		
-		protected void DeleteLibraryFileEnvironment(Program program, Schema.TableVar tableVar, Row row)
+		protected void DeleteLibraryFileEnvironment(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			SystemSetLibraryDescriptorNode.RemoveLibraryFileEnvironment(program, Schema.Object.EnsureRooted((string)row[0]), (string)row[1], (string)row[2]);
 		}
 
-		protected internal void SelectLibraryVersions(Program program, NativeTable nativeTable, Row row)
+		protected internal void SelectLibraryVersions(Program program, NativeTable nativeTable, IRow row)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -758,7 +758,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected void InsertLibraryVersion(Program program, Schema.TableVar tableVar, Row row)
+		protected void InsertLibraryVersion(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -771,7 +771,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected void UpdateLibraryVersion(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateLibraryVersion(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -790,7 +790,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected void DeleteLibraryVersion(Program program, Schema.TableVar tableVar, Row row)
+		protected void DeleteLibraryVersion(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -803,7 +803,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected internal void SelectLibraryOwners(Program program, NativeTable nativeTable, Row row)
+		protected internal void SelectLibraryOwners(Program program, NativeTable nativeTable, IRow row)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -824,7 +824,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected void InsertLibraryOwner(Program program, Schema.TableVar tableVar, Row row)
+		protected void InsertLibraryOwner(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -837,7 +837,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected void UpdateLibraryOwner(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateLibraryOwner(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -856,7 +856,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected void DeleteLibraryOwner(Program program, Schema.TableVar tableVar, Row row)
+		protected void DeleteLibraryOwner(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -922,7 +922,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		protected override void InternalInsertRow(Program program, Schema.TableVar tableVar, Row row, BitArray valueFlags)
+		protected override void InternalInsertRow(Program program, Schema.TableVar tableVar, IRow row, BitArray valueFlags)
 		{
 			switch (tableVar.Name)
 			{
@@ -941,7 +941,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			base.InternalInsertRow(program, tableVar, row, valueFlags);
 		}
 		
-		private void LibraryUpdateRow(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
+		private void LibraryUpdateRow(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			switch (tableVar.Name)
 			{
@@ -955,7 +955,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		protected override void InternalDeleteRow(Program program, Schema.TableVar tableVar, Row row)
+		protected override void InternalDeleteRow(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			switch (tableVar.Name)
 			{
@@ -2483,7 +2483,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			
 		#region Updates
 
-		protected override void InternalUpdateRow(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
+		protected override void InternalUpdateRow(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			switch (tableVar.Name)
 			{
@@ -2495,7 +2495,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			base.InternalUpdateRow(program, tableVar, oldRow, newRow, valueFlags);
 		}
 
-		protected void UpdateServerSettings(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateServerSettings(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			if ((bool)oldRow["LogErrors"] ^ (bool)newRow["LogErrors"])
 				ServerProcess.ServerSession.Server.LogErrors = (bool)newRow["LogErrors"];
@@ -2515,7 +2515,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			SaveServerSettings(ServerProcess.ServerSession.Server);
 		}
 
-		protected void UpdateSessions(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateSessions(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			ServerSession session = ServerProcess.ServerSession.Server.Sessions.GetSession((int)newRow["ID"]);
 
@@ -2553,7 +2553,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				session.SessionInfo.ShouldElaborate = (bool)newRow["ShouldElaborate"];
 		}
 
-		protected void UpdateProcesses(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateProcesses(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			ServerSession session = ServerProcess.ServerSession.Server.Sessions.GetSession((int)newRow["Session_ID"]);
 

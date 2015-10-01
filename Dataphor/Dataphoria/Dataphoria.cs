@@ -727,7 +727,7 @@ namespace Alphora.Dataphor.Dataphoria
 			IServerCursor cursor = OpenCursor(String.Format("DocumentTypeDefaultDesigners where DocumentType_ID = '{0}' join Designers by ID = Default_Designer_ID over {{ ID, ClassName }}", documentTypeID));
 			try
 			{
-				DAE.Runtime.Data.Row row = cursor.Plan.RequestRow();
+				DAE.Runtime.Data.IRow row = cursor.Plan.RequestRow();
 				try
 				{
 					if (!cursor.Next())
@@ -999,7 +999,7 @@ namespace Alphora.Dataphor.Dataphoria
 			IServerCursor cursor = OpenCursor("DocumentTypes over { ID, Description }");
 			try
 			{
-				DAE.Runtime.Data.Row row = cursor.Plan.RequestRow();
+				DAE.Runtime.Data.IRow row = cursor.Plan.RequestRow();
 				try
 				{
 					while (cursor.Next())
@@ -1034,7 +1034,7 @@ namespace Alphora.Dataphor.Dataphoria
 				);
 			try
 			{
-				DAE.Runtime.Data.Row row = cursor.Plan.RequestRow();
+				DAE.Runtime.Data.IRow row = cursor.Plan.RequestRow();
 				try
 				{
 					while (cursor.Next())
@@ -1230,13 +1230,13 @@ namespace Alphora.Dataphor.Dataphoria
 			return OpenCursor(query, null);
 		}
 
-        public void Execute(string query, DAE.Runtime.DataParams paramsValue, Action<DAE.Runtime.Data.Row> action)
+        public void Execute(string query, DAE.Runtime.DataParams paramsValue, Action<DAE.Runtime.Data.IRow> action)
         {
             IServerCursor cursor = this.OpenCursor(query, paramsValue);
             
             try
             {
-                DAE.Runtime.Data.Row row = cursor.Plan.RequestRow();
+                DAE.Runtime.Data.IRow row = cursor.Plan.RequestRow();
                 try
                 {
                     while (cursor.Next())

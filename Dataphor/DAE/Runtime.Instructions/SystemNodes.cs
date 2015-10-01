@@ -819,7 +819,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return true;
 			#endif
 
-			return !(((Row)argument1).HasValue((string)argument2));
+			return !(((IRow)argument1).HasValue((string)argument2));
 		}
 	}
 
@@ -854,7 +854,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return false;
 			#endif
 
-			return (((Row)argument1).HasValue((string)argument2));
+			return (((IRow)argument1).HasValue((string)argument2));
 		}
 	}
 
@@ -1146,7 +1146,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ExecuteScript(process, program, node, script, null, null, locator);
 		}
 
-		public static void ExecuteScript(ServerProcess process, Program program, PlanNode node, string script, Row inParams, Row outParams, DebugLocator locator)
+		public static void ExecuteScript(ServerProcess process, Program program, PlanNode node, string script, IRow inParams, IRow outParams, DebugLocator locator)
 		{
 			DataParams paramsValue = SystemEvaluateNode.ParamsFromRows(program, inParams, outParams);
 			process.PushProcessLocals();
@@ -1179,8 +1179,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					program,
 					this,
 					(string)arguments[1],
-					arguments.Length >= 3 ? (Row)arguments[2] : null,
-					arguments.Length >= 4 ? (Row)arguments[3] : null,
+					arguments.Length >= 3 ? (IRow)arguments[2] : null,
+					arguments.Length >= 4 ? (IRow)arguments[3] : null,
 					null
 				);
 			else
@@ -1190,8 +1190,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					program,
 					this,
 					(string)arguments[0],
-					arguments.Length >= 2 ? (Row)arguments[1] : null,
-					arguments.Length >= 3 ? (Row)arguments[2] : null,
+					arguments.Length >= 2 ? (IRow)arguments[1] : null,
+					arguments.Length >= 3 ? (IRow)arguments[2] : null,
 					null
 				);
 			return null;
@@ -1206,7 +1206,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator Evaluate(const AProcessID : Integer, const AExpression : String, const AInParams : row, var AOutParams : row) : generic;</remarks>
 	public class SystemEvaluateNode : InstructionNode
 	{
-		public static DataParams ParamsFromRows(Program program, Row inParams, Row outParams)
+		public static DataParams ParamsFromRows(Program program, IRow inParams, IRow outParams)
 		{
 			DataParams paramsValue = new DataParams();
 			int outIndex;
@@ -1227,14 +1227,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return paramsValue;
 		}
 
-		public static void UpdateRowFromParams(Row outParams, DataParams paramsValue)
+		public static void UpdateRowFromParams(IRow outParams, DataParams paramsValue)
 		{
 			if (outParams != null)
 				for (int index = 0; index < outParams.DataType.Columns.Count; index++)
 					outParams[index] = paramsValue[paramsValue.IndexOf(outParams.DataType.Columns[index].Name)].Value;
 		}
 		
-		private object Evaluate(ServerProcess process, Program program, PlanNode node, string expression, Row inParams, Row outParams)
+		private object Evaluate(ServerProcess process, Program program, PlanNode node, string expression, IRow inParams, IRow outParams)
 		{
 			DataParams paramsValue = ParamsFromRows(program, inParams, outParams);
 			
@@ -1276,8 +1276,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						program,
 						this,
 						(string)arguments[1],
-						arguments.Length >= 3 ? (Row)arguments[2] : null,
-						arguments.Length >= 4 ? (Row)arguments[3] : null
+						arguments.Length >= 3 ? (IRow)arguments[2] : null,
+						arguments.Length >= 4 ? (IRow)arguments[3] : null
 					);
 			else
 				return 
@@ -1287,8 +1287,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						program,
 						this,
 						(string)arguments[0], 
-						arguments.Length >= 2 ? (Row)arguments[1] : null, 
-						arguments.Length >= 3 ? (Row)arguments[2] : null
+						arguments.Length >= 2 ? (IRow)arguments[1] : null, 
+						arguments.Length >= 3 ? (IRow)arguments[2] : null
 					);
 		}
 	}
@@ -1308,8 +1308,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			string statement = (string)arguments[1];
 			
-			Row inRow = arguments.Length >= 3 ? (Row)arguments[2] : null;
-			Row outRow = arguments.Length >= 4 ? (Row)arguments[3] : null;
+			IRow inRow = arguments.Length >= 3 ? (IRow)arguments[2] : null;
+			IRow outRow = arguments.Length >= 4 ? (IRow)arguments[3] : null;
 			
 			DataParams paramsValue = SystemEvaluateNode.ParamsFromRows(program, inRow, outRow);
 			program.RemoteConnect(serverLink).Execute(statement, paramsValue);
@@ -1334,8 +1334,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			string expression = (string)arguments[1];
 
-			Row inRow = arguments.Length >= 3 ? (Row)arguments[2] : null;
-			Row outRow = arguments.Length >= 4 ? (Row)arguments[3] : null;
+			IRow inRow = arguments.Length >= 3 ? (IRow)arguments[2] : null;
+			IRow outRow = arguments.Length >= 4 ? (IRow)arguments[3] : null;
 			
 			DataParams paramsValue = SystemEvaluateNode.ParamsFromRows(program, inRow, outRow);
 			IDataValue dataValue = program.RemoteConnect(serverLink).Evaluate(expression, paramsValue);
@@ -1355,7 +1355,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ExecuteScript(process, program, node, stringValue, sessionInfo, null, null);
 		}
 		
-		public static void ExecuteScript(ServerProcess process, Program program, PlanNode node, string script, SessionInfo sessionInfo, Row inParams, Row outParams)
+		public static void ExecuteScript(ServerProcess process, Program program, PlanNode node, string script, SessionInfo sessionInfo, IRow inParams, IRow outParams)
 		{
 			IServerSession session = ((IServer)process.ServerSession.Server).Connect(sessionInfo);
 			try
@@ -1385,8 +1385,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				this,
 				(string)arguments[0], 
 				new SessionInfo((string)arguments[1], (string)arguments[2], program.Plan.CurrentLibrary.Name),
-				arguments.Length >= 4 ? (Row)arguments[3] : null,
-				arguments.Length >= 5 ? (Row)arguments[4] : null
+				arguments.Length >= 4 ? (IRow)arguments[3] : null,
+				arguments.Length >= 5 ? (IRow)arguments[4] : null
 			);
 			return null;
 		}
@@ -1426,7 +1426,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		private void ExecuteAsync(IServerProcess process, Program program, string script, Row inParams, bool shouldCleanup)
+		private void ExecuteAsync(IServerProcess process, Program program, string script, IRow inParams, bool shouldCleanup)
 		{
 			IServerScript localScript = process.PrepareScript(script);
 			((ServerScript)localScript).ShouldCleanupProcess = shouldCleanup;
@@ -1442,7 +1442,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					program.ServerProcess.ServerSession.Processes.GetProcess((int)arguments[0]),
 					program,
 					(string)arguments[1],
-					arguments.Length >= 3 ? (Row)arguments[2] : null,
+					arguments.Length >= 3 ? (IRow)arguments[2] : null,
 					false
 				);
 			else
@@ -1451,7 +1451,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					((IServerSession)program.ServerProcess.ServerSession).StartProcess(new ProcessInfo(program.ServerProcess.ServerSession.SessionInfo)),
 					program,
 					(string)arguments[0],
-					arguments.Length >= 2 ? (Row)arguments[1] : null,
+					arguments.Length >= 2 ? (IRow)arguments[1] : null,
 					true
 				);
 			return null;
@@ -1476,7 +1476,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_done = true;
 		}
 		
-		private void ExecuteWithTimeout(IServerProcess process, Program program, string script, int timeout, Row inParams, Row outParams)
+		private void ExecuteWithTimeout(IServerProcess process, Program program, string script, int timeout, IRow inParams, IRow outParams)
 		{
 			_done = false;
 			DataParams paramsValue = SystemEvaluateNode.ParamsFromRows(program, inParams, outParams);
@@ -1505,8 +1505,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					program,
 					(string)arguments[1],
 					(int)arguments[2],
-					arguments.Length >= 4 ? (Row)arguments[3] : null,
-					arguments.Length >= 5 ? (Row)arguments[4] : null
+					arguments.Length >= 4 ? (IRow)arguments[3] : null,
+					arguments.Length >= 5 ? (IRow)arguments[4] : null
 				);
 			else
 				ExecuteWithTimeout
@@ -1515,8 +1515,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					program,
 					(string)arguments[0],
 					(int)arguments[1],
-					arguments.Length >= 3 ? (Row)arguments[2] : null,
-					arguments.Length >= 4 ? (Row)arguments[3] : null
+					arguments.Length >= 3 ? (IRow)arguments[2] : null,
+					arguments.Length >= 4 ? (IRow)arguments[3] : null
 				);
 			return null;
 		}

@@ -185,8 +185,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			{
 				RowEqualNode node = new RowEqualNode();
-				node.Nodes.Add(new ValueNode(((Row)leftValue).DataType, leftValue));
-				node.Nodes.Add(new ValueNode(((Row)rightValue).DataType, rightValue));
+				node.Nodes.Add(new ValueNode(((IRow)leftValue).DataType, leftValue));
+				node.Nodes.Add(new ValueNode(((IRow)rightValue).DataType, rightValue));
 				node.DetermineDataType(program.Plan);
 				return node.Execute(program);
 			}

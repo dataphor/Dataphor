@@ -663,8 +663,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						for (int index = 0; index < listValue.Count; index++)
 						{
-							Row row = new Row(program.ValueManager, DataType.RowType);
-							(listValue[index] as Row).CopyTo(row);
+							IRow row = new Row(program.ValueManager, DataType.RowType);
+							(listValue[index] as IRow).CopyTo(row);
 							row[DataType.RowType.Columns.Count - 1] = index;
 							result.Insert(row);
 						}
@@ -719,7 +719,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected Row CursorSelect(Program program, Cursor cursor)
+		protected IRow CursorSelect(Program program, Cursor cursor)
 		{
 			cursor.SwitchContext(program);
 			try

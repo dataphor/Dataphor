@@ -322,7 +322,7 @@ namespace Alphora.Dataphor.DAE.Server
 			_plan._programStatisticsCached = false;
 		}
 
-        public Row Select()
+        public IRow Select()
         {
 			Row row = new Row(_plan._process.ValueManager, ((Schema.TableType)_plan.DataType).RowType);
 			try
@@ -337,7 +337,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return row;
 		}
 		
-		private void SourceSelect(Row row)
+		private void SourceSelect(IRow row)
 		{
 			RemoteRowHeader header = new RemoteRowHeader();
 			header.Columns = new string[row.DataType.Columns.Count];
@@ -355,7 +355,7 @@ namespace Alphora.Dataphor.DAE.Server
 				throw new RuntimeException(RuntimeException.Codes.NoCurrentRow);
 		}
 		
-		private void BufferSelect(Row row)
+		private void BufferSelect(IRow row)
 		{
 			//BufferCheckNotOnCrack();
 
@@ -364,7 +364,7 @@ namespace Alphora.Dataphor.DAE.Server
 			_buffer[_bufferIndex].Row.CopyTo(row);
 		}
 		
-        public void Select(Row row)
+        public void Select(IRow row)
         {
 			if (BufferActive())
 				BufferSelect(row);
@@ -531,12 +531,12 @@ namespace Alphora.Dataphor.DAE.Server
 			return BOF() && EOF();
 		}
 		
-		public void Insert(Row row)
+		public void Insert(IRow row)
 		{
 			Insert(row, null);
 		}
 		
-        public void Insert(Row row, BitArray valueFlags)
+        public void Insert(IRow row, BitArray valueFlags)
         {
 			RemoteRow localRow = new RemoteRow();
 			_plan._process.EnsureOverflowReleased(row);
@@ -554,12 +554,12 @@ namespace Alphora.Dataphor.DAE.Server
 			SetBufferDirection(BufferDirection.Backward);
 		}
 		
-		public void Update(Row row)
+		public void Update(IRow row)
 		{
 			Update(row, null);
 		}
 
-        public void Update(Row row, BitArray valueFlags)
+        public void Update(IRow row, BitArray valueFlags)
         {
             //RemoteRow localRow = new RemoteRow();
             //_plan._process.EnsureOverflowReleased(row);
@@ -769,7 +769,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public Schema.Order Order { get { return _plan.Order; } }
 		
-        public Row GetKey()
+        public IRow GetKey()
         {
 			RemoteRow key = _cursor.GetKey(_plan._process.GetProcessCallInfo());
 			_plan._programStatisticsCached = false;
@@ -783,7 +783,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return row;
 		}
 		
-        public bool FindKey(Row key)
+        public bool FindKey(IRow key)
         {
 			RemoteRow localKey = new RemoteRow();
 			_plan._process.EnsureOverflowConsistent(key);
@@ -802,7 +802,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return gotoData.Success;
 		}
 		
-        public void FindNearest(Row key)
+        public void FindNearest(IRow key)
         {
 			if (BufferActive())
 				ClearBuffer();
@@ -819,7 +819,7 @@ namespace Alphora.Dataphor.DAE.Server
 			_plan._programStatisticsCached = false;
 		}
 		
-        public bool Refresh(Row row)
+        public bool Refresh(IRow row)
         {
 			if (BufferActive())
 				ClearBuffer();
@@ -850,7 +850,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		// Copies the values from source row to the given target row, without using stream referencing
 		// ASourceRow and ATargetRow must be of equivalent row types.
-		protected void MarshalRow(Row sourceRow, Row targetRow)
+		protected void MarshalRow(IRow sourceRow, IRow targetRow)
 		{
 			for (int index = 0; index < sourceRow.DataType.Columns.Count; index++)
 				if (sourceRow.HasValue(index))
@@ -887,12 +887,12 @@ namespace Alphora.Dataphor.DAE.Server
         /// <summary>Requests the default values for a new row in the cursor.</summary>        
         /// <param name='row'>A <see cref="Row"/> to be filled in with default values.</param>
         /// <returns>A boolean value indicating whether any change was made to <paramref name="row"/>.</returns>
-        public bool Default(Row row, string columnName)
+        public bool Default(IRow row, string columnName)
         {
 			if ((_internalProcess != null) && TableVar.IsDefaultCallRemotable(columnName))
 			{
 				// create a new row based on FInternalProcess, and copy the data from 
-				Row localRow = row;
+				IRow localRow = row;
 				if (row.HasNonNativeValues())
 				{
 					localRow = new Row(_internalProcess.ValueManager, row.DataType);
@@ -936,20 +936,20 @@ namespace Alphora.Dataphor.DAE.Server
         /// <param name='newRow'>A <see cref="Row"/> containing the changed values for the row.</param>
         /// <param name='columnName'>The name of the column which changed in <paramref name="newRow"/>.  If empty, the change affected more than one column.</param>
         /// <returns>A boolean value indicating whether any change was made to <paramref name="newRow"/>.</returns>
-        public bool Change(Row oldRow, Row newRow, string columnName)
+        public bool Change(IRow oldRow, IRow newRow, string columnName)
         {
 			// if the table level change is remotable and the named column is remotable or no column is named and all columns are remotable
 				// the change can be evaluated locally, otherwise a remote call is required
 			if ((_internalProcess != null) && TableVar.IsChangeCallRemotable(columnName))
 			{
-				Row localOldRow = oldRow;
+				IRow localOldRow = oldRow;
 				if (oldRow.HasNonNativeValues())
 				{
 					localOldRow = new Row(_internalProcess.ValueManager, oldRow.DataType);
 					MarshalRow(oldRow, localOldRow);
 				}
 				
-				Row localNewRow = newRow;
+				IRow localNewRow = newRow;
 				if (newRow.HasNonNativeValues())
 				{
 					localNewRow = new Row(_internalProcess.ValueManager, newRow.DataType);
@@ -998,18 +998,18 @@ namespace Alphora.Dataphor.DAE.Server
         /// <param name='newRow'>A <see cref="Row"/> containing the changed values for the row.</param>
         /// <param name='columnName'>The name of the column which changed in <paramref name="newRow"/>.  If empty, the change affected more than one column.</param>
         /// <returns>A boolean value indicating whether any change was made to <paramref name="newRow"/>.</returns>
-        public bool Validate(Row oldRow, Row newRow, string columnName)
+        public bool Validate(IRow oldRow, IRow newRow, string columnName)
         {
 			if ((_internalProcess != null) && TableVar.IsValidateCallRemotable(columnName))
 			{
-				Row localOldRow = oldRow;
+				IRow localOldRow = oldRow;
 				if ((oldRow != null) && oldRow.HasNonNativeValues())
 				{
 					localOldRow = new Row(_internalProcess.ValueManager, oldRow.DataType);
 					MarshalRow(oldRow, localOldRow);
 				}
 				
-				Row localNewRow = newRow;
+				IRow localNewRow = newRow;
 				if (newRow.HasNonNativeValues())
 				{
 					localNewRow = new Row(_internalProcess.ValueManager, newRow.DataType);

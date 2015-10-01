@@ -56,7 +56,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
         }
         
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
             _sourceTable.Select(row);
         }
@@ -444,7 +444,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Open();
         }
         
-        protected override bool InternalRefresh(Row row)
+        protected override bool InternalRefresh(IRow row)
         {
 			InternalReset();
 			if (row != null)
@@ -483,7 +483,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							// navigate to the first key that is greater than the search key
 							while (!_sourceTable.EOF())
 							{
-								Row currentKey = _sourceTable.GetKey();
+								IRow currentKey = _sourceTable.GetKey();
 								try
 								{
 									if (CompareKeys(currentKey, _firstKey) > 0)
@@ -507,7 +507,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 							while (!_sourceTable.BOF())
 							{
-								Row currentKey = _sourceTable.GetKey();
+								IRow currentKey = _sourceTable.GetKey();
 								try
 								{
 									if (CompareKeys(currentKey, _firstKey) < 0)
@@ -541,7 +541,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						{
 							while (!_sourceTable.BOF())
 							{
-								Row currentKey = _sourceTable.GetKey();
+								IRow currentKey = _sourceTable.GetKey();
 								try
 								{
 									if (CompareKeys(currentKey, _firstKey) > 0)
@@ -565,7 +565,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 							while (!_sourceTable.EOF())
 							{
-								Row currentKey = _sourceTable.GetKey();
+								IRow currentKey = _sourceTable.GetKey();
 								try
 								{
 									if (CompareKeys(currentKey, _firstKey) < 0)
@@ -614,7 +614,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						{
 							while (!_sourceTable.BOF())
 							{
-								Row currentKey = _sourceTable.GetKey();
+								IRow currentKey = _sourceTable.GetKey();
 								try
 								{
 									if (CompareKeys(currentKey, _lastKey) < 0)
@@ -638,7 +638,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 							while (!_sourceTable.EOF())
 							{
-								Row currentKey = _sourceTable.GetKey();
+								IRow currentKey = _sourceTable.GetKey();
 								try
 								{
 									if (CompareKeys(currentKey, _lastKey) > 0)
@@ -667,7 +667,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						{
 							while (!_sourceTable.EOF())
 							{
-								Row currentKey = _sourceTable.GetKey();
+								IRow currentKey = _sourceTable.GetKey();
 								try
 								{
 									if (CompareKeys(currentKey, _lastKey) < 0)
@@ -691,7 +691,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								
 							while (!_sourceTable.BOF())
 							{
-								Row currentKey = _sourceTable.GetKey();
+								IRow currentKey = _sourceTable.GetKey();
 								try
 								{
 									if (CompareKeys(currentKey, _lastKey) > 0)
@@ -729,7 +729,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return result;
         }
         
-        protected int CompareKeys(Row key1, Row key2)
+        protected int CompareKeys(IRow key1, IRow key2)
         {
 			int result = 0;
 			for (int index = 0; index < Node.Order.Columns.Count; index++)
@@ -753,12 +753,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return result;
         }
         
-        protected bool IsGreater(Row key1, Row key2, bool isExclusive)
+        protected bool IsGreater(IRow key1, IRow key2, bool isExclusive)
         {
 			return CompareKeys(key1, key2) >= (isExclusive ? 0 : 1);
         }
         
-		protected bool IsLess(Row key1, Row key2, bool isExclusive)
+		protected bool IsLess(IRow key1, IRow key2, bool isExclusive)
 		{
 			return CompareKeys(key1, key2) <= (isExclusive ? 0 : -1);
 		}
@@ -767,7 +767,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         {
 			if (!_eOF && (_lastKey != null) && !_sourceTable.BOF())
 			{
-				Row key = _sourceTable.GetKey();
+				IRow key = _sourceTable.GetKey();
 				try
 				{
 					_eOF = IsGreater(key, _lastKey, _isLastKeyExclusive);
@@ -783,7 +783,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         {
 			if (!_bOF && (_firstKey != null) && !_sourceTable.EOF())
 			{
-				Row key = _sourceTable.GetKey();
+				IRow key = _sourceTable.GetKey();
 				try
 				{
 					_bOF = IsLess(key, _firstKey, _isFirstKeyExclusive);
@@ -867,16 +867,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return false;
         }
         
-        protected override Row InternalGetKey()
+        protected override IRow InternalGetKey()
         {
 			return _sourceTable.GetKey();
         }
 
-		protected override bool InternalFindKey(Row key, bool forward)
+		protected override bool InternalFindKey(IRow key, bool forward)
         {
 			if (!_isContradiction)
 			{
-				Row localKey = EnsureKeyRow(key);
+				IRow localKey = EnsureKeyRow(key);
 				try
 				{
 					if ((_firstKey != null) && IsLess(localKey, _firstKey, _isFirstKeyExclusive))
@@ -905,11 +905,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				return false;
         }
         
-        protected override void InternalFindNearest(Row key)
+        protected override void InternalFindNearest(IRow key)
         {
 			if (!_isContradiction)
 			{
-				Row localKey = EnsurePartialKeyRow(key);
+				IRow localKey = EnsurePartialKeyRow(key);
 				try
 				{
 					if (localKey != null)

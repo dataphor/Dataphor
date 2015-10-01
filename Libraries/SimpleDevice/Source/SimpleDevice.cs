@@ -246,7 +246,7 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 								int length = StreamUtility.ReadInteger(stream);
 								byte[] rowValue = new byte[length];
 								stream.Read(rowValue, 0, rowValue.Length);
-								Row row = (Row)DataValue.FromPhysical(process.ValueManager, nativeTable.RowType, rowValue, 0);
+								IRow row = (IRow)DataValue.FromPhysical(process.ValueManager, nativeTable.RowType, rowValue, 0);
 								try
 								{
 									nativeTable.Insert(process.ValueManager, row);
@@ -332,19 +332,19 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 			return result;
 		}
 		
-		protected override void InternalInsertRow(Program program, Schema.TableVar tableVar, Row row, BitArray valueFlags)
+		protected override void InternalInsertRow(Program program, Schema.TableVar tableVar, IRow row, BitArray valueFlags)
 		{
 			base.InternalInsertRow(program, tableVar, row, valueFlags);
 			Device.Headers[tableVar].TimeStamp += 1;
 		}
 		
-		protected override void InternalUpdateRow(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
+		protected override void InternalUpdateRow(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			base.InternalUpdateRow(program, tableVar, oldRow, newRow, valueFlags);
 			Device.Headers[tableVar].TimeStamp += 1;
 		}
 		
-		protected override void InternalDeleteRow(Program program, Schema.TableVar tableVar, Row row)
+		protected override void InternalDeleteRow(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			base.InternalDeleteRow(program, tableVar, row);
 			Device.Headers[tableVar].TimeStamp += 1;

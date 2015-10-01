@@ -89,7 +89,7 @@ namespace Alphora.Dataphor.DAE.Server
 	
 	public class LoadingContexts : List<LoadingContext> { }
 	
-	internal class Bookmarks : Dictionary<Guid, Row>
+	internal class Bookmarks : Dictionary<Guid, IRow>
 	{
 	}
 	

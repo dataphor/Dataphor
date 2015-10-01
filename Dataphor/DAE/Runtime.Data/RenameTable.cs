@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         public new RenameNode Node { get { return (RenameNode)_node; } }
         
 		protected Table _sourceTable;
-		protected Row _sourceRow;
+		protected IRow _sourceRow;
 		protected Schema.RowType _keyRowType;
         
         protected override void InternalOpen()
@@ -56,7 +56,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             _sourceTable.Reset();
         }
         
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
 			// alternative rename algorithm could construct a row of the source type first
 			_sourceTable.Select(_sourceRow);
@@ -103,9 +103,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			_sourceTable.First();
         }
         
-        protected override Row InternalGetKey()
+        protected override IRow InternalGetKey()
         {
-			Row key = _sourceTable.GetKey();
+			IRow key = _sourceTable.GetKey();
 			try
 			{
 				if (_keyRowType == null)
@@ -126,7 +126,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
         }
         
-        protected Row BuildSourceKey(Row key)
+        protected Row BuildSourceKey(IRow key)
         {
 			Schema.RowType rowType = new Schema.RowType();
 			for (int index = 0; index < key.DataType.Columns.Count; index++)
@@ -138,9 +138,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return localKey;
         }
 
-		protected override bool InternalRefresh(Row key)
+		protected override bool InternalRefresh(IRow key)
 		{
-			Row row = BuildSourceKey(key);
+			IRow row = BuildSourceKey(key);
 			try
 			{
 				return _sourceTable.Refresh(row);
@@ -151,9 +151,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		protected override bool InternalFindKey(Row key, bool forward)
+		protected override bool InternalFindKey(IRow key, bool forward)
         {
-			Row localKey = BuildSourceKey(key);
+			IRow localKey = BuildSourceKey(key);
 			try
 			{
 				return _sourceTable.FindKey(localKey, forward);
@@ -165,9 +165,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				
         }
         
-        protected override void InternalFindNearest(Row key)
+        protected override void InternalFindNearest(IRow key)
         {
-			Row localKey = BuildSourceKey(key);
+			IRow localKey = BuildSourceKey(key);
 			try
 			{
 				_sourceTable.FindNearest(localKey);

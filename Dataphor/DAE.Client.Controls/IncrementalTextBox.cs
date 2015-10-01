@@ -20,7 +20,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			UpdateBackColor();
 		}
 
-		public bool ExtractValue(DAE.Runtime.Data.Row row)
+		public bool ExtractValue(DAE.Runtime.Data.IRow row)
 		{
 			try
 			{
@@ -37,7 +37,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		public void InjectValue(DAE.Runtime.Data.Row row, bool overwrite)
+		public void InjectValue(DAE.Runtime.Data.IRow row, bool overwrite)
 		{
 			if (overwrite)
 			{

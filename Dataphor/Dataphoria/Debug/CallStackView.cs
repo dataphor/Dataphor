@@ -65,7 +65,7 @@ namespace Alphora.Dataphor.Dataphoria
 			if (_dataphoria.Debugger.IsPaused && _dataphoria.Debugger.SelectedProcessID >= 0)
 			{
 				// Save old postion
-				Row old = null;
+				IRow old = null;
 				if (FCallStackDataView.Active && !FCallStackDataView.IsEmpty())
 					old = FCallStackDataView.ActiveRow;
 

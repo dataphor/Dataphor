@@ -47,7 +47,7 @@ using System.Collections.Generic;
 	
 	public class InsertOperation : Operation
 	{
-		public InsertOperation(TableVar tableVar, Row row, BitArray valueFlags) : base(tableVar)
+		public InsertOperation(TableVar tableVar, IRow row, BitArray valueFlags) : base(tableVar)
 		{
 			_row = row;
 			_valueFlags = valueFlags;
@@ -64,8 +64,8 @@ using System.Collections.Generic;
 			base.Dispose(disposing);
 		}
 		
-		private Row _row;
-		public Row Row { get { return _row; } }
+		private IRow _row;
+		public IRow Row { get { return _row; } }
 		
 		private BitArray _valueFlags;
 		public BitArray ValueFlags { get { return _valueFlags; } }
@@ -73,7 +73,7 @@ using System.Collections.Generic;
 	
 	public class UpdateOperation : Operation
 	{
-		public UpdateOperation(TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags) : base(tableVar)
+		public UpdateOperation(TableVar tableVar, IRow oldRow, IRow newRow, BitArray valueFlags) : base(tableVar)
 		{
 			_oldRow = oldRow;
 			_newRow = newRow;
@@ -97,11 +97,11 @@ using System.Collections.Generic;
 			base.Dispose(disposing);
 		}
 		
-		private Row _oldRow;
-		public Row OldRow { get { return _oldRow; } }
+		private IRow _oldRow;
+		public IRow OldRow { get { return _oldRow; } }
 		
-		private Row _newRow; 
-		public Row NewRow { get { return _newRow; } }
+		private IRow _newRow; 
+		public IRow NewRow { get { return _newRow; } }
 		
 		private BitArray _valueFlags;
 		public BitArray ValueFlags { get { return _valueFlags; } }
@@ -109,7 +109,7 @@ using System.Collections.Generic;
 	
 	public class DeleteOperation : Operation
 	{
-		public DeleteOperation(TableVar tableVar, Row row) : base(tableVar)
+		public DeleteOperation(TableVar tableVar, IRow row) : base(tableVar)
 		{
 			_row = row;
 		}
@@ -125,7 +125,7 @@ using System.Collections.Generic;
 			base.Dispose(disposing);
 		}
 		
-		private Row _row;
-		public Row Row { get { return _row; } }
+		private IRow _row;
+		public IRow Row { get { return _row; } }
 	}
 }

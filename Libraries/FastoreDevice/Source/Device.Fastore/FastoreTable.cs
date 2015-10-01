@@ -183,7 +183,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			}
 		}
 
-		public void Insert(IValueManager manager, Row row, Database db)
+		public void Insert(IValueManager manager, IRow row, Database db)
 		{
 			if (row.HasValue(0))
 			{
@@ -193,25 +193,25 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			}
 		}
 
-		public void Update(IValueManager manager, Row oldrow, Row newrow, Database db)
+		public void Update(IValueManager manager, IRow oldRow, IRow newRow, Database db)
 		{
-			if (oldrow.HasValue(0))
+			if (oldRow.HasValue(0))
 			{
-				var id = oldrow[0];
+				var id = oldRow[0];
 				for (int i = 0; i < _columns.Length; i++)
 				{
 					db.Exclude(_columns, id);
 				}
 			}
 
-			if (newrow.HasValue(0))
+			if (newRow.HasValue(0))
 			{
-				object[] items = ((NativeRow)newrow.AsNative).Values;
+				object[] items = ((NativeRow)newRow.AsNative).Values;
 				db.Include(_columns, items[0], items);
 			}
 		}
 
-		public void Delete(IValueManager manager, Row row, Database db)
+		public void Delete(IValueManager manager, IRow row, Database db)
 		{
 			//If no value at zero, no ID (Based on our wrong assumptions)
 			if (row.HasValue(0))

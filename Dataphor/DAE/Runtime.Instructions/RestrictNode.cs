@@ -902,7 +902,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Validate
-		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
+		protected override bool InternalValidate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
 			if (_enforcePredicate && (columnName == String.Empty))
 			{

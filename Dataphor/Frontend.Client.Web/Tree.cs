@@ -244,7 +244,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			}
 		}
 
-		protected internal IServerCursor OpenChildCursor(DAE.Runtime.Data.Row key)
+		protected internal IServerCursor OpenChildCursor(DAE.Runtime.Data.IRow key)
 		{
 			PrepareChildPlan();
 			SetParams(key);
@@ -278,7 +278,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			}
 		}
 		
-		protected  internal IServerCursor OpenParentCursor(DAE.Runtime.Data.Row key)
+		protected  internal IServerCursor OpenParentCursor(DAE.Runtime.Data.IRow key)
 		{
 			PrepareParentPlan();
 			SetParams(key);
@@ -327,7 +327,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			}
 		}
 		
-		protected void SetParams(DAE.Runtime.Data.Row key)
+		protected void SetParams(DAE.Runtime.Data.IRow key)
 		{
 			for (int index = 0; index < Source.DataView.Order.Columns.Count; index++)
 				if (key.HasValue(index))
@@ -360,7 +360,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				IServerCursor cursor = _rootPlan.Open(_rootParams);
 				try
 				{
-					DAE.Runtime.Data.Row key;
+					DAE.Runtime.Data.IRow key;
 					int columnIndex;
 					string text;
 					while (cursor.Next())
@@ -368,7 +368,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 						key = new DAE.Runtime.Data.Row(_process.ValueManager, new DAE.Schema.RowType(Source.DataView.Order.Columns));
 						try
 						{
-							using (DAE.Runtime.Data.Row row = cursor.Select())
+							using (DAE.Runtime.Data.IRow row = cursor.Select())
 							{
 								row.CopyTo(key);
 								columnIndex = row.DataType.Columns.IndexOf(ColumnName);
@@ -398,7 +398,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			}
 		}
 
-		protected internal TreeNode FindChild(DAE.Runtime.Data.Row childKey)
+		protected internal TreeNode FindChild(DAE.Runtime.Data.IRow childKey)
 		{
 			foreach (TreeNode node in Nodes)
 			{
@@ -408,7 +408,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			return null;
 		}
 
-		protected internal TreeNode Search(DAE.Runtime.Data.Row childKey)
+		protected internal TreeNode Search(DAE.Runtime.Data.IRow childKey)
 		{
 			TreeNode result = FindChild(childKey);
 			if (result == null)
@@ -421,7 +421,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			return result;
 		}
 
-		private bool KeysEqual(DAE.Runtime.Data.Row key1, DAE.Runtime.Data.Row key2)
+		private bool KeysEqual(DAE.Runtime.Data.IRow key1, DAE.Runtime.Data.IRow key2)
 		{
 			if (key2.DataType.Equals(key1.DataType))
 			{
@@ -444,7 +444,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				return false;
 		}
 
-		protected void BuildParentPath(DAE.Runtime.Data.Row key, ArrayList path)
+		protected void BuildParentPath(DAE.Runtime.Data.IRow key, ArrayList path)
 		{
 			foreach (DAE.Runtime.Data.Row localKey in path)
 			{
@@ -458,7 +458,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				if (cursor.Next())
 				{
 					key = new DAE.Runtime.Data.Row(_process.ValueManager, new RowType(Source.DataView.Order.Columns));
-					using (DAE.Runtime.Data.Row selected = cursor.Select())
+					using (DAE.Runtime.Data.IRow selected = cursor.Select())
 						selected.CopyTo(key);
 				}
 				else
@@ -479,7 +479,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		private bool _selecting;
 
 		/// <summary> Sets the selected node of the tree. Builds children as needed.</summary>
-		protected internal void SelectNode(DAE.Runtime.Data.Row key)
+		protected internal void SelectNode(DAE.Runtime.Data.IRow key)
 		{
 			TreeNode node = Search(key);
 			if (node == null)
@@ -588,7 +588,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 	public class TreeNode : Disposable
 	{
-		public TreeNode(Tree tree, string text, DAE.Runtime.Data.Row key, int depth, TreeNode parent)
+		public TreeNode(Tree tree, string text, DAE.Runtime.Data.IRow key, int depth, TreeNode parent)
 		{
 			_iD = Session.GenerateID();
 			_buttonID = Session.GenerateID();
@@ -654,8 +654,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		// Key
 
 		/// <summary> This Key is used by FindKey when it is selected. Not Parent/Child relationship. </summary>
-		private DAE.Runtime.Data.Row _key;
-		public DAE.Runtime.Data.Row Key { get { return _key; } }
+		private DAE.Runtime.Data.IRow _key;
+		public DAE.Runtime.Data.IRow Key { get { return _key; } }
 
 		// Nodes
 
@@ -663,7 +663,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		public TreeNodes Nodes { get { return _nodes; } }
 
 		/// <summary> Returns a child node matching the key (non reflectively or recursively). </summary>
-		public TreeNode FindChild(DAE.Runtime.Data.Row key)
+		public TreeNode FindChild(DAE.Runtime.Data.IRow key)
 		{
 			foreach (TreeNode node in Nodes)
 			{
@@ -674,7 +674,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		}
 
 		/// <summary> Returns this node or any child node matching the key (recursively). </summary>
-		public TreeNode Search(DAE.Runtime.Data.Row key)
+		public TreeNode Search(DAE.Runtime.Data.IRow key)
 		{
 			if (IsRow(key))
 				return this;
@@ -749,7 +749,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 					key = new DAE.Runtime.Data.Row(Tree.Process.ValueManager, new RowType(Tree.Source.DataView.Order.Columns));
 					try
 					{
-						using (DAE.Runtime.Data.Row row = cursor.Select())
+						using (DAE.Runtime.Data.IRow row = cursor.Select())
 						{
 							row.CopyTo(key);
 							columnIndex = row.DataType.Columns.IndexOf(Tree.ColumnName);
@@ -777,7 +777,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		}
 
 		/// <summary> True if this node is the row(has the key). </summary>
-		public bool IsRow(DAE.Runtime.Data.Row key)
+		public bool IsRow(DAE.Runtime.Data.IRow key)
 		{
 			if (_key.DataType.Equals(key.DataType))
 			{

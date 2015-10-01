@@ -3961,8 +3961,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		}
 
 		// InsertRow
-		protected virtual void InternalVerifyInsertStatement(TableVar table, Row row, InsertStatement statement) {}
-        protected override void InternalInsertRow(Program program, TableVar table, Row row, BitArray valueFlags)
+		protected virtual void InternalVerifyInsertStatement(TableVar table, IRow row, InsertStatement statement) {}
+        protected override void InternalInsertRow(Program program, TableVar table, IRow row, BitArray valueFlags)
         {
 			SQLConnectionHeader header = RequestConnection(false);
 			try
@@ -4057,8 +4057,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
         }
         
         // UpdateRow
-        protected virtual void InternalVerifyUpdateStatement(TableVar table, Row oldRow, Row newRow, UpdateStatement statement) {}
-        protected override void InternalUpdateRow(Program program, TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
+        protected virtual void InternalVerifyUpdateStatement(TableVar table, IRow oldRow, IRow newRow, UpdateStatement statement) {}
+        protected override void InternalUpdateRow(Program program, TableVar table, IRow oldRow, IRow newRow, BitArray valueFlags)
         {
 			UpdateStatement statement = new UpdateStatement();
 			statement.UpdateClause = new UpdateClause();
@@ -4157,8 +4157,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
         }
         
         // DeleteRow
-        protected virtual void InternalVerifyDeleteStatement(TableVar table, Row row, DeleteStatement statement) {}
-        protected override void InternalDeleteRow(Program program, TableVar table, Row row)
+        protected virtual void InternalVerifyDeleteStatement(TableVar table, IRow row, DeleteStatement statement) {}
+        protected override void InternalDeleteRow(Program program, TableVar table, IRow row)
         {
 			DeleteStatement statement = new DeleteStatement();
 			statement.DeleteClause = new DeleteClause();
@@ -4717,7 +4717,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		
 		// Returns a SQLCommand for accessing the deferred read data for the given column index.  
 		// The deferred column is guaranteed to be the last column in the Cursor opened from the command.
-		private void GetDeferredStatement(Row key, int columnIndex, out string statement, out SQLParameters parameters)
+		private void GetDeferredStatement(IRow key, int columnIndex, out string statement, out SQLParameters parameters)
 		{
 			parameters = new SQLParameters();
 			parameters.AddRange(_parameters);
@@ -4804,7 +4804,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
 		
-		protected void InternalSelect(Row row, bool allowDeferred)
+		protected void InternalSelect(IRow row, bool allowDeferred)
 		{
 			for (int index = 0; index < row.DataType.Columns.Count; index++)
 			{
@@ -4849,12 +4849,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
 		
-		protected override void InternalSelect(Row row)
+		protected override void InternalSelect(IRow row)
 		{
 			InternalSelect(row, true);
 		}
 		
-		protected override Row InternalGetKey()
+		protected override IRow InternalGetKey()
 		{
 			Row row = new Row(Manager, new RowType(Program.FindClusteringKey(Node.TableVar).Columns));
 			InternalSelect(row, false);
@@ -5095,7 +5095,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				SetValueNode(planNode.Nodes[0], tempValue);
 		}
 		
-		public static void GetParameters(Program program, SQLDevice device, SQLParameters parameters, Row inValues, PlanNode[] conversionNodes)
+		public static void GetParameters(Program program, SQLDevice device, SQLParameters parameters, IRow inValues, PlanNode[] conversionNodes)
 		{
 			for (int index = 0; index < parameters.Count; index++)
 			{
@@ -5127,7 +5127,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
 		
-		public static void SetParameters(Program program, SQLDevice device, SQLParameters parameters, Row outValues)
+		public static void SetParameters(Program program, SQLDevice device, SQLParameters parameters, IRow outValues)
 		{
 			for (int index = 0; index < parameters.Count; index++)
 				switch (parameters[index].Direction)
@@ -5155,26 +5155,26 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			{
 				string deviceName = String.Empty;
 				string statement = String.Empty;
-				Row inValues = null;
-				Row outValues = null;
+				IRow inValues = null;
+				IRow outValues = null;
 				
 				if (Operator.Operands[0].DataType.Is(Compiler.ResolveCatalogIdentifier(program.Plan, "System.Name") as IDataType))
 				{
 					deviceName = (string)arguments[0];
 					statement = (string)arguments[1];
 					if (arguments.Length >= 3)
-						inValues = (Row)arguments[2];
+						inValues = (IRow)arguments[2];
 					if (arguments.Length == 4)
-						outValues = (Row)arguments[3];
+						outValues = (IRow)arguments[3];
 				}
 				else
 				{
 					deviceName = program.Plan.DefaultDeviceName;
 					statement = (string)arguments[0];
 					if (arguments.Length >= 2)
-						inValues = (Row)arguments[1];
+						inValues = (IRow)arguments[1];
 					if (arguments.Length == 3)
-						outValues = (Row)arguments[2];
+						outValues = (IRow)arguments[2];
 				}
 
 				SQLDevice sQLDevice = SQLDeviceUtility.ResolveSQLDevice(program.Plan, deviceName);
@@ -5491,24 +5491,24 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			long startTicks = TimingUtility.CurrentTicks;
 			try
 			{
-				Row inValues = null;
-				Row outValues = null;
+				IRow inValues = null;
+				IRow outValues = null;
 				
 				if (Nodes[0].DataType.Is(Compiler.ResolveCatalogIdentifier(program.Plan, "System.Name", true) as IDataType))
 				{
 					if ((Nodes.Count >= 3) && (Nodes[2].DataType is Schema.IRowType))
-						inValues = (Row)Nodes[2].Execute(program);
+						inValues = (IRow)Nodes[2].Execute(program);
 					
 					if ((Nodes.Count >= 4) && (Nodes[3].DataType is Schema.IRowType))
-						outValues = (Row)Nodes[3].Execute(program);
+						outValues = (IRow)Nodes[3].Execute(program);
 				}
 				else
 				{
 					if ((Nodes.Count >= 2) && (Nodes[1].DataType is Schema.IRowType))
-						inValues = (Row)Nodes[1].Execute(program);
+						inValues = (IRow)Nodes[1].Execute(program);
 						
 					if ((Nodes.Count == 3) && (Nodes[2].DataType is Schema.IRowType))
-						outValues = (Row)Nodes[2].Execute(program);
+						outValues = (IRow)Nodes[2].Execute(program);
 				}
 
 				SQLDeviceSession deviceSession = program.DeviceConnect(_sQLDevice) as SQLDeviceSession;				

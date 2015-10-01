@@ -33,7 +33,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program, object[] arguments)
 		{
 			var result = Activator.CreateInstance(_classType);
-			var row = arguments[0] as Row;
+			var row = arguments[0] as IRow;
 			if (row != null)
 			{
 				for (int i = 0; i < row.DataType.Columns.Count; i++)

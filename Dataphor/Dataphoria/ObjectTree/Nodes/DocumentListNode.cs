@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
             return paramsValue;
         }
 
-        protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
+        protected override BaseNode CreateChildNode(DAE.Runtime.Data.IRow row)
         {
             string name = (string)row["Main.Name"];
             string type = (string)row["Type_ID"];

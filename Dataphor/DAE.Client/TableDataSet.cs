@@ -283,7 +283,7 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 		
 		/// <summary> Initializes row values with default data. </summary>
-		protected override void InternalInitializeRow(Row row)
+		protected override void InternalInitializeRow(IRow row)
 		{
 			Process.BeginTransaction(IsolationLevel);
 			try
@@ -305,7 +305,7 @@ namespace Alphora.Dataphor.DAE.Client
 								detailField = Fields[_detailKey.Columns[index].Name];
 								if (field.HasValue())
 								{
-									Row saveOldRow = _oldRow;
+									IRow saveOldRow = _oldRow;
 									_oldRow = originalRow;
 									try
 									{						
@@ -377,7 +377,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				if (Active)
 				{
-					using (Row row = RememberActive())
+					using (IRow row = RememberActive())
 					{
 						_order = value;
 						CursorSetChanged(row, true);

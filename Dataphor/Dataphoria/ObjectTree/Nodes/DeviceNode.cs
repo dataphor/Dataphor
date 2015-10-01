@@ -25,7 +25,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return ".System.Devices " + SchemaListFilter + " over { Name, ReconciliationMode }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.IRow row)
 		{
 			return new DeviceNode(this, (string)row["Name"], (DAE.Language.D4.ReconcileMode)Enum.Parse(typeof(DAE.Language.D4.ReconcileMode), (string)row["ReconciliationMode"], true));
 		}

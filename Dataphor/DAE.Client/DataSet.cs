@@ -112,15 +112,15 @@ namespace Alphora.Dataphor.DAE.Client
 
 		/// <summary> The actively selected row of the DataSet's buffer. </summary>
 		[Browsable(false)]
-		public Row ActiveRow { get { return _buffer[_activeOffset].Row; } }
+		public IRow ActiveRow { get { return _buffer[_activeOffset].Row; } }
 		
 		/// <summary> Tracks whether the values for each column in the active row have been modified. </summary>
 		protected internal BitArray _valueFlags;
 		
-		protected Row _originalRow;
+		protected IRow _originalRow;
 		/// <summary> Tracks the original row during an edit. </summary>
 		/// <remarks> The original values for a row can only be accessed when the dataset is in edit state. </remarks>
-		protected internal Row OriginalRow
+		protected internal IRow OriginalRow
 		{
 			get
 			{
@@ -130,10 +130,10 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		protected Row _oldRow;
+		protected IRow _oldRow;
 		/// <summary> The old row for the current row changed event. </summary>
 		/// <remarks> This property can only be accessed during change events for the field and dataset. </remarks>
-		protected internal Row OldRow
+		protected internal IRow OldRow
 		{
 			get
 			{
@@ -156,17 +156,17 @@ namespace Alphora.Dataphor.DAE.Client
 			get { return _endOffset; }
 		}
 
-		protected Row RememberActive()
+		protected IRow RememberActive()
 		{
 			if (_activeOffset <= _endOffset)
-				return (Row)_buffer[_activeOffset].Row.Copy();
+				return (IRow)_buffer[_activeOffset].Row.Copy();
 			else
 				return null;
 		}
 
 		private void SaveOriginalRow()
 		{
-			Row row = RememberActive();
+			IRow row = RememberActive();
 			if (row != null)
 				_originalRow = row;
 			else
@@ -479,7 +479,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		/// <summary> Reactivates the buffer, optionally from a row. </summary>
 		/// <param name="row"> An optional row indicating a row to sync to. </param>
-		private void Resume(Row row)
+		private void Resume(IRow row)
 		{
 			if (row != null)
 				FindNearest(row);
@@ -596,7 +596,7 @@ namespace Alphora.Dataphor.DAE.Client
 		// Navigable
 		protected abstract bool InternalNext();
 		protected abstract void InternalLast();
-		protected abstract void InternalSelect(Row row);
+		protected abstract void InternalSelect(IRow row);
 		protected abstract void InternalReset();
 		protected abstract bool InternalGetBOF();
 		protected abstract bool InternalGetEOF();
@@ -612,15 +612,15 @@ namespace Alphora.Dataphor.DAE.Client
 		protected abstract void InternalDisposeBookmarks(Guid[] bookmarks);
 		
 		// Searchable
-		protected abstract void InternalRefresh(Row row);
-		protected abstract Row InternalGetKey();
-		protected abstract bool InternalFindKey(Row key);
-		protected abstract void InternalFindNearest(Row key);
+		protected abstract void InternalRefresh(IRow row);
+		protected abstract IRow InternalGetKey();
+		protected abstract bool InternalFindKey(IRow key);
+		protected abstract void InternalFindNearest(IRow key);
 
 		// Updateable
 		protected virtual void InternalEdit() {}
 		protected virtual void InternalInsertAppend() {}
-		protected virtual void InternalInitializeRow(Row row)
+		protected virtual void InternalInitializeRow(IRow row)
 		{
 			InternalDefault(row);
 		}
@@ -636,24 +636,24 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 		}
 
-		protected virtual void InternalDefault(Row row)
+		protected virtual void InternalDefault(IRow row)
 		{
 			DoDefault();
 		}
 		
-		protected virtual bool InternalColumnChanging(DataField field, Row oldRow, Row newRow)
+		protected virtual bool InternalColumnChanging(DataField field, IRow oldRow, IRow newRow)
 		{
 			DoRowChanging(field);
 			return true;
 		}
 		
-		protected virtual bool InternalColumnChanged(DataField field, Row oldRow, Row newRow)
+		protected virtual bool InternalColumnChanged(DataField field, IRow oldRow, IRow newRow)
 		{
 			DoRowChanged(field);
 			return true;
 		}
 		
-		protected virtual void InternalChangeColumn(DataField field, Row oldRow, Row newRow)
+		protected virtual void InternalChangeColumn(DataField field, IRow oldRow, IRow newRow)
 		{
 			try
 			{
@@ -671,9 +671,9 @@ namespace Alphora.Dataphor.DAE.Client
 			InternalColumnChanged(field, oldRow, newRow);
 		}
 		
-		protected abstract void InternalPost(Row row);
+		protected abstract void InternalPost(IRow row);
 		protected abstract void InternalDelete();
-		protected abstract void InternalCursorSetChanged(Row row, bool reprepare);
+		protected abstract void InternalCursorSetChanged(IRow row, bool reprepare);
 
 		#endregion
 		
@@ -917,7 +917,7 @@ namespace Alphora.Dataphor.DAE.Client
 				throw new ClientException(ClientException.Codes.Active);
 		}
 
-		protected void CursorSetChanged(Row row, bool reprepare)
+		protected void CursorSetChanged(IRow row, bool reprepare)
 		{
 			if (State != DataSetState.Inactive)
 			{
@@ -1185,7 +1185,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		/// <summary> Refreshes the data to a specified row. </summary>
 		/// <remarks> Any outstanding Insert or Edit will first be posted. </remarks>
-		public void Refresh(Row row)
+		public void Refresh(IRow row)
 		{
 			EnsureBrowseState();
 			try
@@ -1318,7 +1318,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		protected void InitializeRow(int rowIndex)
 		{
-			Row targetRow = _buffer[rowIndex].Row;
+			IRow targetRow = _buffer[rowIndex].Row;
 			targetRow.ClearValues();
 			InternalInitializeRow(targetRow);
 		}
@@ -1326,8 +1326,8 @@ namespace Alphora.Dataphor.DAE.Client
 		protected internal void ChangeColumn(DataField field, IScalar value)
 		{
 			Edit();
-			Row activeRow = _buffer[_activeOffset].Row;
-			Row saveOldRow = _oldRow;
+			IRow activeRow = _buffer[_activeOffset].Row;
+			IRow saveOldRow = _oldRow;
 			_oldRow = new Row(activeRow.Manager, activeRow.DataType);
 			try
 			{
@@ -2110,7 +2110,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		/// <summary> Gets a row representing a key for the active row. </summary>
 		/// <returns> A row containing key information.  It is the callers responsability to Dispose this row when it is no longer required. </returns>
-		public Row GetKey()
+		public IRow GetKey()
 		{
 			EnsureBrowseState();
 			CheckNotEmpty();
@@ -2124,7 +2124,7 @@ namespace Alphora.Dataphor.DAE.Client
 		///		True if the row was located and navigation occurred.  If this method returns false, indicating that the 
 		///		specified key was not located, then the active row will not have changed from before the call. 
 		///	</returns>
-		public bool FindKey(Row key)
+		public bool FindKey(IRow key)
 		{
 			EnsureBrowseState();
 			try
@@ -2139,7 +2139,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		/// <summary> Navigates the DataSet to the row nearest the specified key or partial key. </summary>
 		/// <param name="key"> A full or partial row containing search criteria for the current order. </param>
-		public void FindNearest(Row key)
+		public void FindNearest(IRow key)
 		{
 			EnsureBrowseState();
 			try
@@ -2197,7 +2197,7 @@ namespace Alphora.Dataphor.DAE.Client
 		internal class DataSetRow : Disposable
 		{
 			public DataSetRow() : base(){}
-			public DataSetRow(Row row, RowFlag rowFlag, Guid bookmark)
+			public DataSetRow(IRow row, RowFlag rowFlag, Guid bookmark)
 			{
 				_row = row;
 				_rowFlag = rowFlag;
@@ -2213,8 +2213,8 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 			}
 			
-			private Row _row;
-			public Row Row
+			private IRow _row;
+			public IRow Row
 			{
 				get { return _row; }
 				set 
@@ -3110,7 +3110,7 @@ namespace Alphora.Dataphor.DAE.Client
 		///		Do not attempt to access this if the link is not <see cref="Active"/>.  Do not modify 
 		///		the buffer rows in any way, use them only to read data. 
 		///	</remarks>
-		public DAE.Runtime.Data.Row Buffer(int index)
+		public DAE.Runtime.Data.IRow Buffer(int index)
 		{
 			return DataSet._buffer[index + _firstOffset].Row;
 		}

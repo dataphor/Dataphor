@@ -420,7 +420,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 				return nativeList;
 			}
 			
-			Row row = dataValue as Row;
+			IRow row = dataValue as IRow;
 			if (row != null)
 			{
 				NativeRowValue nativeRow = new NativeRowValue();
@@ -463,7 +463,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 
 					while (table.Next())
 					{
-						using (Row currentRow = table.Select())
+						using (IRow currentRow = table.Select())
 						{
 							object[] nativeRow = new object[nativeTable.Columns.Length];
 							for (int index = 0; index < nativeTable.Columns.Length; index++)
@@ -509,7 +509,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 				
 			List<object[]> nativeRows = new List<object[]>();
 			
-			Row currentRow = cursor.Plan.RequestRow();
+			IRow currentRow = cursor.Plan.RequestRow();
 			try
 			{
 				bool[] valueTypes = new bool[nativeTable.Columns.Length];
@@ -567,7 +567,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			var rowType = dataParam.DataType as IRowType;
 			if (rowType != null)
 			{
-				var rowValue = dataParam.Value as Row;
+				var rowValue = dataParam.Value as IRow;
 				NativeRowValue nativeRow = new NativeRowValue();
 				nativeRow.Columns = ColumnsToNativeColumns(process.DataTypes, rowType.Columns);
 
@@ -598,7 +598,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 
 				while (tableValue.Next())
 				{
-					using (Row currentRow = tableValue.Select())
+					using (IRow currentRow = tableValue.Select())
 					{
 						object[] nativeRow = new object[nativeTable.Columns.Length];
 						for (int index = 0; index < nativeTable.Columns.Length; index++)

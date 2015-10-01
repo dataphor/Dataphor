@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return ".System.ScalarTypes " + SchemaListFilter + " over { Name }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.IRow row)
 		{
 			return new ScalarTypeNode(this, (string)row["Name"]);
 		}

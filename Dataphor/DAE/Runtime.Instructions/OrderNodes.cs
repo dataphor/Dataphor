@@ -228,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return SourceNode.Execute(program);
 		}
 		
-		public override void JoinApplicationTransaction(Program program, Row row)
+		public override void JoinApplicationTransaction(Program program, IRow row)
 		{
 			if (_sequenceColumnIndex >= 0)
 			{

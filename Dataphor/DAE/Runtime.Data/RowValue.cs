@@ -57,7 +57,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// Used in conjunction with the CellValueStream, provides transparent variable length
 	/// value storage in a fixed length buffer.
 	/// </remarks>    
-	public class Row : DataValue
+	public class Row : DataValue, IRow
 	{
 		public Row(IValueManager manager, Schema.IRowType dataType) : base(manager, dataType)
 		{
@@ -865,7 +865,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public void CopyTo(Row row)
+		public void CopyTo(IRow row)
 		{
 			int columnIndex;
 			for (int index = 0; index < DataType.Columns.Count; index++)

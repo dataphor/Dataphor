@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         public new RedefineNode Node { get { return (RedefineNode)_node; } }
         
 		protected Table _sourceTable;
-		protected Row _sourceRow;
+		protected IRow _sourceRow;
         
         protected override void InternalOpen()
         {
@@ -64,7 +64,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             _sourceTable.Reset();
         }
         
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
             _sourceTable.Select(_sourceRow);
 

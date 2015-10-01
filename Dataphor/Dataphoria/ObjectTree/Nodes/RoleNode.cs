@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return ".System.Roles " + SchemaListFilter + " over { Name }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.IRow row)
 		{
 			return new RoleNode(this, (string)row["Name"]);
 		}

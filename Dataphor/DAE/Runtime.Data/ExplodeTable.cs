@@ -34,8 +34,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		// For every cursor but the root, this stack will contain the parent row variable for that cursor.
 		protected Stack _parentRows;
 		
-		protected Row _sourceRow;
-		protected Row _targetRow;
+		protected IRow _sourceRow;
+		protected IRow _targetRow;
 		protected Schema.TableType _tableType;
 		protected Schema.BaseTableVar _tableVar;
 		protected Schema.Order _sequenceOrder;
@@ -46,7 +46,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		protected int _sequenceColumnIndex = -1;
 		protected bool _empty;
 		
-		protected Row NewParentRow(Row currentRow)
+		protected IRow NewParentRow(IRow currentRow)
 		{
 			#if USENAMEDROWVARIABLES
 			Row row = new Row(Manager, currentRow.DataType);
@@ -57,7 +57,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return row;
 		}
 		
-		protected void PushSourceTable(Row currentRow)
+		protected void PushSourceTable(IRow currentRow)
 		{
 			if (currentRow == null)
 			{
@@ -71,7 +71,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			else
 			{
 				// Otherwise, use the given row to build a parent row and open a new cursor for the child expression with that row to parameterize it
-				Row parentRow = NewParentRow(currentRow);
+				IRow parentRow = NewParentRow(currentRow);
 				Program.Stack.Push(parentRow);
 				try
 				{
@@ -100,7 +100,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			Table table = (Table)_sourceTables.Pop();
 			if (table != _rootTable)
-				((Row)_parentRows.Pop()).Dispose();
+				((IRow)_parentRows.Pop()).Dispose();
 			else
 				_rootTable = null;
 
@@ -261,7 +261,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return true;
 		}
 		
-		protected override void InternalSelect(Row row)
+		protected override void InternalSelect(IRow row)
 		{
 			_scan.GetRow(row);
 		}

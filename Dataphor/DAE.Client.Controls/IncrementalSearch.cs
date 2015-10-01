@@ -1310,10 +1310,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		/// <summary> Sets (or clears) the value on the given row for the associated column from the current value of the control </summary>
 		/// <returns> True if the value was able to be extracted.  False if there was a problem. </returns>
-		bool ExtractValue(DAE.Runtime.Data.Row ARow);
+		bool ExtractValue(DAE.Runtime.Data.IRow ARow);
 
 		/// <summary> Provides feedback from the search (the nearest match) to the control. </summary>
-		void InjectValue(DAE.Runtime.Data.Row ARow, bool AOverwrite);
+		void InjectValue(DAE.Runtime.Data.IRow ARow, bool AOverwrite);
 
 		/// <summary> The name of the column with which this control is associated. </summary>
 		string ColumnName { get; set; }

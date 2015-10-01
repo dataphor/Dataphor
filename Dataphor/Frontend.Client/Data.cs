@@ -1681,19 +1681,19 @@ namespace Alphora.Dataphor.Frontend.Client
 			DataView.Last();
 		}
 		
-		public Row GetKey()
+		public DAE.Runtime.Data.IRow GetKey()
 		{
 			CheckEnabled();
 			return DataView.GetKey();
 		}
 		
-		public bool FindKey(Row key)
+		public bool FindKey(DAE.Runtime.Data.IRow key)
 		{
 			CheckEnabled();
 			return DataView.FindKey(key);
 		}
 		
-		public void FindNearest(Row key)
+		public void FindNearest(DAE.Runtime.Data.IRow key)
 		{
 			CheckEnabled();
 			DataView.FindNearest(key);

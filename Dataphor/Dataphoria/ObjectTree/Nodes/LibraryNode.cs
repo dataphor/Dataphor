@@ -85,7 +85,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			Refresh();
 		}
 
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.IRow row)
 		{
 			LibraryNode node = new LibraryNode(this, (string)row["Main.Name"]);
 			if (row.DataType.Columns.ContainsName("Main.IsLoaded"))
@@ -93,7 +93,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return node;
 		}
 
-		private void UpdateNode(LibraryNode node, DAE.Runtime.Data.Row row)
+		private void UpdateNode(LibraryNode node, DAE.Runtime.Data.IRow row)
 		{
 			node.Registered = (bool)row["Main.IsLoaded"];
 			node.CanLoad = true; //(bool)ARow["Main.CanLoad"];
@@ -154,7 +154,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			get { return BuildMode.OnExpand; }
 		}
 
-		public override bool IsEqual(DAE.Runtime.Data.Row row)
+		public override bool IsEqual(DAE.Runtime.Data.IRow row)
 		{
 			return ((string)row["Main.Name"] == _libraryName);
 		}
@@ -377,7 +377,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 						);
 					try
 					{
-						using (DAE.Runtime.Data.Row row = cursor.Plan.RequestRow())
+						using (DAE.Runtime.Data.IRow row = cursor.Plan.RequestRow())
 						{
 							while (cursor.Next())
 							{
@@ -481,7 +481,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 						);
 					try
 					{
-						using (DAE.Runtime.Data.Row row = cursor.Plan.RequestRow())
+						using (DAE.Runtime.Data.IRow row = cursor.Plan.RequestRow())
 						{
 							while (cursor.Next())
 							{

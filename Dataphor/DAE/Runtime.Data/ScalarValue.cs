@@ -794,7 +794,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				{
 					if (DataType.IsCompound)
 					{
-						using (Row row = (Row)DataValue.FromPhysical(Manager, DataType.CompoundRowType, buffer, offset))
+						using (IRow row = (IRow)DataValue.FromPhysical(Manager, DataType.CompoundRowType, buffer, offset))
 						{
 							Value = row.AsNative;
 							row.ValuesOwned = false;

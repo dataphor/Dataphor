@@ -343,7 +343,7 @@ namespace Alphora.Dataphor.DAE.Server
 			IServerCursor cursor = localProcess.OpenCursor("select Devices { ID }", null);
 			try
 			{
-				using (Row row = cursor.Plan.RequestRow())
+				using (IRow row = cursor.Plan.RequestRow())
 				{
 					while (cursor.Next())
 					{
@@ -374,7 +374,7 @@ namespace Alphora.Dataphor.DAE.Server
 			cursor = localProcess.OpenCursor("select Users { ID }", null);
 			try
 			{
-				using (Row row = cursor.Plan.RequestRow())
+				using (IRow row = cursor.Plan.RequestRow())
 				{
 					while (cursor.Next())
 					{
@@ -407,7 +407,7 @@ namespace Alphora.Dataphor.DAE.Server
 			cursor = localProcess.OpenCursor("select DeviceUsers join (Devices { ID Device_ID, Name Device_Name }) { User_ID, Device_ID }", null);
 			try
 			{
-				using (Row row = cursor.Plan.RequestRow())
+				using (IRow row = cursor.Plan.RequestRow())
 				{
 					while (cursor.Next())
 					{
@@ -431,7 +431,7 @@ namespace Alphora.Dataphor.DAE.Server
 			cursor = localProcess.OpenCursor("select UserRoles where Role_Name <> 'System.User'", null);
 			try
 			{
-				using (Row row = cursor.Plan.RequestRow())
+				using (IRow row = cursor.Plan.RequestRow())
 				{
 					while (cursor.Next())
 					{
@@ -453,7 +453,7 @@ namespace Alphora.Dataphor.DAE.Server
 			cursor = localProcess.OpenCursor("select UserRightAssignments", null);
 			try
 			{
-				using (Row row = cursor.Plan.RequestRow())
+				using (IRow row = cursor.Plan.RequestRow())
 				{
 					while (cursor.Next())
 					{

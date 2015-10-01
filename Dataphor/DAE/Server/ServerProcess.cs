@@ -1116,17 +1116,17 @@ namespace Alphora.Dataphor.DAE.Server
 		internal ServerTransaction CurrentTransaction { get { return _transactions.CurrentTransaction(); } }
 		internal ServerTransaction RootTransaction { get { return _transactions.RootTransaction(); } }
 		
-		internal void AddInsertTableVarCheck(Schema.TableVar tableVar, Row row)
+		internal void AddInsertTableVarCheck(Schema.TableVar tableVar, IRow row)
 		{
 			_transactions.AddInsertTableVarCheck(tableVar, row);
 		}
 		
-		internal void AddUpdateTableVarCheck(Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
+		internal void AddUpdateTableVarCheck(Schema.TableVar tableVar, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			_transactions.AddUpdateTableVarCheck(tableVar, oldRow, newRow, valueFlags);
 		}
 		
-		internal void AddDeleteTableVarCheck(Schema.TableVar tableVar, Row row)
+		internal void AddDeleteTableVarCheck(Schema.TableVar tableVar, IRow row)
 		{
 			_transactions.AddDeleteTableVarCheck(tableVar, row);
 		}

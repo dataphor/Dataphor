@@ -1210,12 +1210,12 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		
 		public new FrontendDevice Device { get { return (FrontendDevice)base.Device; } }
 		
-		protected void PopulateDocuments(Program program, NativeTable nativeTable, Row row)
+		protected void PopulateDocuments(Program program, NativeTable nativeTable, IRow row)
 		{
 			Device.EnsureLibrariesLoaded(program);
 		}
 		
-		protected void PopulateDocumentTypes(Program program, NativeTable nativeTable, Row row)
+		protected void PopulateDocumentTypes(Program program, NativeTable nativeTable, IRow row)
 		{
 			if (Device.DocumentTypesBufferTimeStamp < Device.DocumentTypesTimeStamp)
 			{
@@ -1231,7 +1231,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void PopulateDesigners(Program program, NativeTable nativeTable, Row row)
+		protected void PopulateDesigners(Program program, NativeTable nativeTable, IRow row)
 		{
 			if (Device.DesignersBufferTimeStamp < Device.DesignersTimeStamp)
 			{
@@ -1247,7 +1247,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void PopulateDocumentTypeDesigners(Program program, NativeTable nativeTable, Row row)
+		protected void PopulateDocumentTypeDesigners(Program program, NativeTable nativeTable, IRow row)
 		{
 			if (Device.DocumentTypeDesignersBufferTimeStamp < Device.DocumentTypesTimeStamp)
 			{
@@ -1313,7 +1313,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			return result;
 		}
 		
-		protected void InsertDocumentType(Schema.TableVar tableVar, Row row)
+		protected void InsertDocumentType(Schema.TableVar tableVar, IRow row)
 		{
 			DocumentType documentType = new DocumentType();
 			documentType.ID = (string)row["ID"];
@@ -1331,7 +1331,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void UpdateDocumentType(Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateDocumentType(Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			Device.AcquireDirectoryLock();
 			try
@@ -1349,7 +1349,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void DeleteDocumentType(Schema.TableVar tableVar, Row row)
+		protected void DeleteDocumentType(Schema.TableVar tableVar, IRow row)
 		{
 			Device.AcquireDirectoryLock();
 			try
@@ -1364,7 +1364,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void InsertDesigner(Schema.TableVar tableVar, Row row)
+		protected void InsertDesigner(Schema.TableVar tableVar, IRow row)
 		{
 			Designer designer = new Designer();
 			designer.ID = (string)row["ID"];
@@ -1382,7 +1382,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void UpdateDesigner(Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateDesigner(Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			Device.AcquireDirectoryLock();
 			try
@@ -1404,7 +1404,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void DeleteDesigner(Schema.TableVar tableVar, Row row)
+		protected void DeleteDesigner(Schema.TableVar tableVar, IRow row)
 		{
 			Device.AcquireDirectoryLock();
 			try
@@ -1421,7 +1421,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void InsertDocumentTypeDesigner(Schema.TableVar tableVar, Row row)
+		protected void InsertDocumentTypeDesigner(Schema.TableVar tableVar, IRow row)
 		{
 			Device.AcquireDirectoryLock();
 			try
@@ -1437,7 +1437,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void UpdateDocumentTypeDesigner(Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateDocumentTypeDesigner(Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			Device.AcquireDirectoryLock();
 			try
@@ -1456,7 +1456,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void DeleteDocumentTypeDesigner(Schema.TableVar tableVar, Row row)
+		protected void DeleteDocumentTypeDesigner(Schema.TableVar tableVar, IRow row)
 		{
 			Device.AcquireDirectoryLock();
 			try
@@ -1477,7 +1477,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			FrontendServer.GetFrontendServer(ServerProcess.ServerSession.Server).ClearDerivationCache();
 		}
 
-		protected void InsertDocument(Program program, Schema.TableVar tableVar, Row row)
+		protected void InsertDocument(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			Device.CreateDocument
 			(
@@ -1489,7 +1489,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			);
 		}
 		
-		protected void UpdateDocument(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow)
+		protected void UpdateDocument(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow)
 		{
 			string oldLibraryName = (string)oldRow["Library_Name"];
 			string newLibraryName = (string)newRow["Library_Name"];
@@ -1511,7 +1511,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 				);
 		}
 		
-		protected void DeleteDocument(Program program, Schema.TableVar tableVar, Row row)
+		protected void DeleteDocument(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			Device.DeleteDocument
 			(
@@ -1522,7 +1522,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			);
 		}
 
-		protected override void InternalInsertRow(Program program, Schema.TableVar tableVar, Row row, BitArray valueFlags)
+		protected override void InternalInsertRow(Program program, Schema.TableVar tableVar, IRow row, BitArray valueFlags)
 		{
 			switch (tableVar.Name)
 			{
@@ -1535,7 +1535,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			base.InternalInsertRow(program, tableVar, row, valueFlags);
 		}
 		
-		protected override void InternalUpdateRow(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
+		protected override void InternalUpdateRow(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			switch (tableVar.Name)
 			{
@@ -1548,7 +1548,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			base.InternalUpdateRow(program, tableVar, oldRow, newRow, valueFlags);
 		}
 		
-		protected override void InternalDeleteRow(Program program, Schema.TableVar tableVar, Row row)
+		protected override void InternalDeleteRow(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			switch (tableVar.Name)
 			{

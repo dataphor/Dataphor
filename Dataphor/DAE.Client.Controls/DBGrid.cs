@@ -1054,7 +1054,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				using (Graphics graphics = CreateGraphics())
 				{
 					int lastOffset = _link.LastOffset;
-					DAEData.Row row;
+					DAEData.IRow row;
 					
 					for (int i = _link.ActiveOffset; i >= 0; i--)
 					{
@@ -1231,7 +1231,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			Graphics graphics,
 			GridColumn column,
 			Rectangle cellRect,
-			DAEData.Row row, 
+			DAEData.IRow row, 
 			bool isSelected,
 			Pen linePen,
 			int rowIndex
@@ -1290,7 +1290,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			return maxHeight;
 		}
 
-		private int GetMaxNaturalHeight(DAEData.Row row, Graphics graphics)
+		private int GetMaxNaturalHeight(DAEData.IRow row, Graphics graphics)
 		{
 			int naturalRowHeight;
 			int maxRowHeight = _minRowHeight;
@@ -1318,7 +1318,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// <summary> Measures the height of a row in pixels. </summary>
 		/// <param name="row"></param>
 		/// <returns> The height of a row in pixels. </returns>
-		protected int MeasureRowHeight(DAEData.Row row, Graphics graphics)
+		protected int MeasureRowHeight(DAEData.IRow row, Graphics graphics)
 		{
 			int minRowHeight = GetMinRowHeight();
 			int maxRowHeight = GetMaxRowHeight();
@@ -1374,7 +1374,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 								}
 								if (rect.IntersectsWith(gridRow.ClientRectangle))
 								{
-									DAEData.Row row = gridRow.Row;
+									DAEData.IRow row = gridRow.Row;
 									foreach (HeaderColumn headerColumn in _header)
 									{
 										cellRect.X = headerColumn.Offset;
@@ -2697,14 +2697,14 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 	internal class GridRow
 	{
-		internal GridRow(DAEData.Row row, Rectangle clientRect)
+		internal GridRow(DAEData.IRow row, Rectangle clientRect)
 		{
 			_row = row;
 			_clientRectangle = clientRect;
 		}
 
-		private DAEData.Row _row;
-		public DAEData.Row Row { get { return _row; } }
+		private DAEData.IRow _row;
+		public DAEData.IRow Row { get { return _row; } }
 
 		private Rectangle _clientRectangle;
 		public Rectangle ClientRectangle

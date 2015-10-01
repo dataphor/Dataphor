@@ -156,7 +156,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				IServerCursor cursor = DataSession.OpenCursor(GetLibraryFilesExpression, paramsValue);
 				try
 				{
-					using (DAE.Runtime.Data.Row row = cursor.Plan.RequestRow())
+					using (DAE.Runtime.Data.IRow row = cursor.Plan.RequestRow())
 					{
 						#if !SILVERLIGHT
 						bool shouldLoad;

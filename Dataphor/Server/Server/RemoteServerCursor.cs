@@ -469,7 +469,7 @@ namespace Alphora.Dataphor.DAE.Server
 			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				Row key = _serverCursor.GetKey();
+				IRow key = _serverCursor.GetKey();
 				RemoteRow row = new RemoteRow();
 				row.Header = new RemoteRowHeader();
 				row.Header.Columns = new string[key.DataType.Columns.Count];

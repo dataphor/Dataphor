@@ -1895,7 +1895,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// Execute
 		public override object InternalExecute(Program program)
 		{
-			Row row = (Row)program.Stack[Location];
+			IRow row = (IRow)program.Stack[Location];
 			#if NILPROPOGATION
 			if ((row == null) || row.IsNil)
 				return null;

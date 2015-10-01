@@ -95,13 +95,13 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// Render
 
-		public virtual void RenderCell(HtmlTextWriter writer, DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
+		public virtual void RenderCell(HtmlTextWriter writer, DAE.Runtime.Data.IRow currentRow, bool isActiveRow, int rowIndex)
 		{
 			if (GetVisible())
 				InternalRenderCell(writer, currentRow, isActiveRow, rowIndex);
 		}
 
-		public abstract void InternalRenderCell(HtmlTextWriter writer, DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex);
+		public abstract void InternalRenderCell(HtmlTextWriter writer, DAE.Runtime.Data.IRow currentRow, bool isActiveRow, int rowIndex);
 
 		public virtual void RenderHeader(HtmlTextWriter writer) 
 		{
@@ -152,7 +152,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				return base.GetTitle();
 		}
 
-		protected virtual string GetClass(DAE.Runtime.Data.Row currentRow, bool isActiveRow)
+		protected virtual string GetClass(DAE.Runtime.Data.IRow currentRow, bool isActiveRow)
 		{
 			string classValue;
 			if (isActiveRow)
@@ -329,7 +329,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			set { _verticalText = value; }
 		}
 
-		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
+		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.IRow currentRow, bool isActiveRow, int rowIndex)
 		{
 			string tempValue;
 			if ((ColumnName == String.Empty) || !currentRow.HasValue(ColumnName))
@@ -425,7 +425,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// GridColumn
 
-		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
+		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.IRow currentRow, bool isActiveRow, int rowIndex)
 		{
 			string classValue;
 			if (isActiveRow)
@@ -497,7 +497,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// GridColumn
 
-		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
+		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.IRow currentRow, bool isActiveRow, int rowIndex)
 		{
 			writer.AddAttribute(HtmlTextWriterAttribute.Class, GetClass(currentRow, isActiveRow));
 			writer.RenderBeginTag(HtmlTextWriterTag.Td);
@@ -516,7 +516,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			string rowIndex = context.Request.QueryString["RowIndex"];
 			if ((rowIndex != String.Empty) && (ColumnName != String.Empty))
 			{
-				DAE.Runtime.Data.Row row = ParentGrid.DataLink.Buffer(Int32.Parse(rowIndex));
+				DAE.Runtime.Data.IRow row = ParentGrid.DataLink.Buffer(Int32.Parse(rowIndex));
 				if ((row != null) && row.HasValue(ColumnName))
 					using (Stream source = row.GetValue(ColumnName).OpenStream())
 					{
@@ -602,7 +602,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			return false;
 		}
 
-		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
+		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.IRow currentRow, bool isActiveRow, int rowIndex)
 		{
 			bool hasValue = currentRow.HasValue(ColumnName);
 			bool tempValue = false;
@@ -705,7 +705,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// GridColumn
 
-		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.Row currentRow, bool isActiveRow, int rowIndex)
+		public override void InternalRenderCell(HtmlTextWriter writer, Alphora.Dataphor.DAE.Runtime.Data.IRow currentRow, bool isActiveRow, int rowIndex)
 		{
 			string classValue;
 			if (isActiveRow)
@@ -739,7 +739,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			writer.RenderEndTag();
 		}
 
-		protected virtual void SequenceChange(DAE.Runtime.Data.Row fromRow, DAE.Runtime.Data.Row toRow, bool above)
+		protected virtual void SequenceChange(DAE.Runtime.Data.IRow fromRow, DAE.Runtime.Data.IRow toRow, bool above)
 		{
 			SequenceColumnUtility.SequenceChange(HostNode.Session, ParentGrid.Source, _shouldEnlist, fromRow, toRow, above, _script);
 		}
@@ -778,7 +778,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 						string posY = context.Request.QueryString["Y"];
 						if (posY != null)
 						{
-							DAE.Runtime.Data.Row target = ParentGrid.DataLink.Buffer(Int32.Parse(rowIndex));
+							DAE.Runtime.Data.IRow target = ParentGrid.DataLink.Buffer(Int32.Parse(rowIndex));
 							SequenceChange(_movingRow, target, Int32.Parse(posY) < 10);
 						}
 					}
@@ -991,7 +991,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			// Rows
 
 			bool current;
-			DAE.Runtime.Data.Row currentRow;
+			DAE.Runtime.Data.IRow currentRow;
 			int count = _dataLink.LastOffset + 1;
 			for (int rowIndex = 0; rowIndex < count; rowIndex++) 
 			{

@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         public new AdornNode Node { get { return (AdornNode)_node; } }
         
 		protected Table _sourceTable;
-		protected Row _sourceRow;
+		protected IRow _sourceRow;
 		protected bool _bOF;
         
         protected override void InternalOpen()
@@ -66,7 +66,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             _bOF = true;
         }
         
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
             _sourceTable.Select(row);
         }

@@ -312,8 +312,8 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			paramsValue.Add(DataParam.Create(program.ServerProcess, "AElementID", elementID));
 			using 
 			(
-				Row element = 
-					(Row)((IServerProcess)program.ServerProcess).Evaluate
+				IRow element = 
+					(IRow)((IServerProcess)program.ServerProcess).Evaluate
 					(
 						"row from (XMLElement where ID = AElementID)",
 						paramsValue
@@ -348,7 +348,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			{
 				while (aliases.Next())
 				{
-					using (Row row = aliases.Select())
+					using (IRow row = aliases.Select())
 						writer.WriteAttributeString("xmlns:" + (string)row["NamespaceAlias"], (string)row["URI"]);
 				}
 			}
@@ -368,7 +368,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			{
 				while (attributes.Next())
 				{
-					using (Row row = attributes.Select())
+					using (IRow row = attributes.Select())
 					{
 						string alias = (string)row["NamespaceAlias"];
 						if (alias != String.Empty)
@@ -403,7 +403,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			{
 				while (children.Next())
 				{
-					using (Row row = children.Select())
+					using (IRow row = children.Select())
 					{
 						if (row.HasValue("Content_Element_ID"))	// Content
 						{

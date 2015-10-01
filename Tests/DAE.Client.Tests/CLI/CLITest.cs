@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests.CLI
 					var LCounter = 0;
 					while (LCursor.Next())
 					{
-						using (Row LRow = LCursor.Select())
+						using (IRow LRow = LCursor.Select())
 						{
 							LCounter += (int)LRow[0];
 						}
@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests.CLI
 
 					while (LCursor.Next())
 					{
-						using (Row LRow = LCursor.Select())
+						using (IRow LRow = LCursor.Select())
 						{
 							LCounter++;
 							if (LCounter != (int)LRow[0])
@@ -54,13 +54,13 @@ namespace Alphora.Dataphor.DAE.Client.Tests.CLI
 					LCursor.Next();
 					LCursor.Next();
 					
-					using (Row LRow = LCursor.Select())
+					using (IRow LRow = LCursor.Select())
 					{
 						LRow[0] = -1;
 						LCursor.Update(LRow);
 					}
 					
-					using (Row LRow = LCursor.Select())
+					using (IRow LRow = LCursor.Select())
 					{
 						if ((int)LRow[0] != -1)
 							throw new Exception("Update failed");
@@ -68,7 +68,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests.CLI
 					
 					LCursor.Delete();
 					
-					using (Row LRow = LCursor.Select())
+					using (IRow LRow = LCursor.Select())
 					{
 						if ((int)LRow[0] != 1)
 							throw new Exception("Delete failed");
@@ -77,7 +77,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests.CLI
 						LCursor.Insert(LRow);
 					}
 					
-					using (Row LRow = LCursor.Select())
+					using (IRow LRow = LCursor.Select())
 					{
 						if ((int)LRow[0] != 2)
 							throw new Exception("Insert failed");
@@ -89,7 +89,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests.CLI
 					
 					while (LCursor.Next())
 					{
-						using (Row LRow = LCursor.Select())
+						using (IRow LRow = LCursor.Select())
 						{
 							LCounter++;
 							if (LCounter == 5)
@@ -100,7 +100,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests.CLI
 					if (!LCursor.GotoBookmark(LBookmark, true))
 						throw new Exception("GotoBookmark failed");
 						
-					using (Row LRow = LCursor.Select())
+					using (IRow LRow = LCursor.Select())
 					{
 						if ((int)LRow[0] != 5)
 							throw new Exception("GotoBookmark failed");
@@ -123,7 +123,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests.CLI
 					var LCounter = 0;
 					while (LCursor.Next())
 					{
-						using (Row LRow = LCursor.Select())
+						using (IRow LRow = LCursor.Select())
 						{
 							LCounter += (int)LRow[0];
 						}
@@ -137,7 +137,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests.CLI
 
 					while (LCursor.Next())
 					{
-						using (Row LRow = LCursor.Select())
+						using (IRow LRow = LCursor.Select())
 						{
 							LCounter++;
 							if (LCounter != (int)LRow[0])

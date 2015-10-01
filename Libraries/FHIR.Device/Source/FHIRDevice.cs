@@ -250,7 +250,7 @@ namespace Aphora.Dataphor.FHIR.Device
 			return base.InternalExecute(program, planNode);
 		}
 		
-		protected override void InternalInsertRow(Program program, Schema.TableVar table, Row row, BitArray valueFlags)
+		protected override void InternalInsertRow(Program program, Schema.TableVar table, IRow row, BitArray valueFlags)
 		{
 			base.InternalInsertRow(program, table, row, valueFlags);
 			// TODO: Log the operation so it can be performed during the commit
@@ -259,14 +259,14 @@ namespace Aphora.Dataphor.FHIR.Device
 			// Must use a POST to allow the server to assign the Id, in that case the Location header of the response will contain the newly assigned Id
 		}
 
-		protected override void InternalUpdateRow(Program program, Schema.TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
+		protected override void InternalUpdateRow(Program program, Schema.TableVar table, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			// TODO: Log the operation so it can be performed during the commit
 			base.InternalUpdateRow(program, table, oldRow, newRow, valueFlags);
 			// PUT, w/ ETag header equal to oldRow.meta.version
 		}
 
-		protected override void InternalDeleteRow(Program program, Schema.TableVar table, Row row)
+		protected override void InternalDeleteRow(Program program, Schema.TableVar table, IRow row)
 		{
 			// TODO: Log the operation so it can be performed during the commit
 			base.InternalDeleteRow(program, table, row);
@@ -416,12 +416,12 @@ namespace Aphora.Dataphor.FHIR.Device
 			get { return CursorType.Dynamic; }
 		}
 
-		protected override bool InternalRefresh(Row row)
+		protected override bool InternalRefresh(IRow row)
 		{
 			return base.InternalRefresh(row);
 		}
 
-		protected override void InternalSelect(Row row)
+		protected override void InternalSelect(IRow row)
 		{
 			// TODO: Will column order in this row always be guaranteed... if so we could avoid the lookup, but...
 			// Return a row containing the values for the current resource in the bundle

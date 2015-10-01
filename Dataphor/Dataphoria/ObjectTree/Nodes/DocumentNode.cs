@@ -42,7 +42,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			Text = String.Format("{0}  [{1}]", _documentName, _documentType);
 		}
 
-		public override bool IsEqual(DAE.Runtime.Data.Row row)
+		public override bool IsEqual(DAE.Runtime.Data.IRow row)
 		{
 			return ((string)row["Main.Name"] == _documentName) && ((string)row["Main.Type_ID"] == _documentType);
 		}

@@ -236,28 +236,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return expression;
 		}
 		
-		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
+		protected override bool InternalDefault(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
 			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
 				return base.InternalDefault(program, oldRow, newRow, valueFlags, columnName, isDescending);
 			return false;
 		}
 		
-		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
+		protected override bool InternalChange(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
 			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
 				return base.InternalChange(program, oldRow, newRow, valueFlags, columnName);
 			return false;
 		}
 		
-		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
+		protected override bool InternalValidate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
 			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
 				return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 			return false;
 		}
 		
-		public override void JoinApplicationTransaction(Program program, Row row)
+		public override void JoinApplicationTransaction(Program program, IRow row)
 		{
 			// Exclude any columns from AKey which were included by this node
 			Schema.RowType rowType = new Schema.RowType();

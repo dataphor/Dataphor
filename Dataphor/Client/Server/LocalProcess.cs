@@ -306,7 +306,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		public void EnsureOverflowConsistent(Row row)
+		public void EnsureOverflowConsistent(IRow row)
 		{
 			List<StreamID> list = new List<StreamID>();
 			for (int index = 0; index < row.DataType.Columns.Count; index++)
@@ -316,7 +316,7 @@ namespace Alphora.Dataphor.DAE.Server
 			_streamManager.FlushStreams(list.ToArray());
 		}
 
-		public void EnsureOverflowReleased(Row row)
+		public void EnsureOverflowReleased(IRow row)
 		{
 			List<StreamID> list = new List<StreamID>();
 			for (int index = 0; index < row.DataType.Columns.Count; index++)

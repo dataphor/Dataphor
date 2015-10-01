@@ -430,7 +430,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return (SQLConnection)ServerProcess.CreateObject(LClassDefinition, new object[]{LConnectionString});
 		}
 		
-		protected override void InternalVerifyInsertStatement(TableVar ATable, Row ARow, InsertStatement AStatement) 
+		protected override void InternalVerifyInsertStatement(TableVar ATable, IRow ARow, InsertStatement AStatement) 
 		{
 			SelectExpression LSelectExpression = AStatement.Values as SelectExpression;
 			if (LSelectExpression != null)

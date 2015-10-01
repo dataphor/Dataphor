@@ -384,7 +384,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 				cursor.Table.CheckCapability(CursorCapability.Updateable);
-				cursor.Table.Insert((Row)arguments[1]);
+				cursor.Table.Insert((IRow)arguments[1]);
 			}
 			finally
 			{
@@ -404,7 +404,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 				cursor.Table.CheckCapability(CursorCapability.Updateable);
-				cursor.Table.Update((Row)arguments[1]);
+				cursor.Table.Update((IRow)arguments[1]);
 			}
 			finally
 			{
@@ -445,7 +445,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 				Table table = cursor.Table;
-				Row row = (Row)arguments[1];
+				IRow row = (IRow)arguments[1];
 				string columnName = arguments.Length == 3 ? (string)arguments[2] : String.Empty;
 				return table.Node.Default(program, null, row, null, columnName);
 			}
@@ -467,8 +467,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 				Table table = cursor.Table;
-				Row oldRow = (Row)arguments[1];
-				Row newRow = (Row)arguments[2];
+				IRow oldRow = (IRow)arguments[1];
+				IRow newRow = (IRow)arguments[2];
 				string columnName = arguments.Length == 4 ? (string)arguments[3] : String.Empty;
 				return table.Node.Change(program, oldRow, newRow, null, columnName);
 			}
@@ -490,8 +490,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 				Table table = cursor.Table;
-				Row oldRow = (Row)arguments[1];
-				Row newRow = (Row)arguments[2];
+				IRow oldRow = (IRow)arguments[1];
+				IRow newRow = (IRow)arguments[2];
 				string columnName = arguments.Length == 4 ? (string)arguments[3] : String.Empty;
 				return table.Node.Validate(program, oldRow, newRow, null, columnName);
 			}
@@ -536,7 +536,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			cursor.SwitchContext(program);
 			try
 			{
-				return cursor.Table.FindKey((Row)arguments[1]);
+				return cursor.Table.FindKey((IRow)arguments[1]);
 			}
 			finally
 			{
@@ -554,7 +554,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			cursor.SwitchContext(program);
 			try
 			{
-				cursor.Table.FindNearest((Row)arguments[1]);
+				cursor.Table.FindNearest((IRow)arguments[1]);
 				return null;
 			}
 			finally
@@ -577,7 +577,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (arguments.Length == 1)
 					cursor.Table.Refresh(null);
 				else
-					cursor.Table.Refresh((Row)arguments[1]);
+					cursor.Table.Refresh((IRow)arguments[1]);
 				return null;
 			}
 			finally
@@ -633,7 +633,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			cursor.SwitchContext(program);
 			try
 			{
-				return cursor.Table.GotoBookmark((Row)arguments[1]);
+				return cursor.Table.GotoBookmark((IRow)arguments[1]);
 			}
 			finally
 			{
@@ -651,7 +651,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			cursor.SwitchContext(program);
 			try
 			{
-				return cursor.Table.CompareBookmarks((Row)arguments[1], (Row)arguments[1]);
+				return cursor.Table.CompareBookmarks((IRow)arguments[1], (IRow)arguments[1]);
 			}
 			finally
 			{

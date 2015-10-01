@@ -561,7 +561,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void InternalValidateColumnConstraints(Row row, Schema.TableVarColumn column, Program program)
+		protected void InternalValidateColumnConstraints(IRow row, Schema.TableVarColumn column, Program program)
 		{
 			program.Stack.Push(row[column.Name]);
 			try
@@ -576,7 +576,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Validate
-		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
+		protected override bool InternalValidate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
 			if (columnName == String.Empty)
 			{
@@ -604,7 +604,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 		}
 		
-		protected bool InternalDefaultColumn(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
+		protected bool InternalDefaultColumn(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
 			int columnIndex = TableVar.Columns.IndexOfName(columnName);
 			for (int index = 0; index < _expressions.Count; index++)
@@ -622,7 +622,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Default
-		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
+		protected override bool InternalDefault(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
 			bool changed = false;
 
@@ -638,7 +638,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return changed;
 		}
 
-		public override void JoinApplicationTransaction(Program program, Row row)
+		public override void JoinApplicationTransaction(Program program, IRow row)
 		{
 			// Safe to pass null for AOldRow only if AIsDescending is false
 			InternalDefault(program, null, row, null, String.Empty, false);

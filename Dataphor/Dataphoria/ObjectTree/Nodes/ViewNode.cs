@@ -25,7 +25,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return ".System.DerivedTableVars " + SchemaListFilter + " over { Name }";
 		}
 
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.IRow row)
 		{
 			return new ViewNode(this, (string)row["Name"]);
 		}

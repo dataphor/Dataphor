@@ -152,7 +152,7 @@ namespace Alphora.Dataphor.DAE.Client
 			return false;
 		}
 		
-		protected override bool InternalColumnChanging(DataField field, Row oldRow, Row newRow)
+		protected override bool InternalColumnChanging(DataField field, IRow oldRow, IRow newRow)
 		{
 			base.InternalColumnChanging(field, oldRow, newRow);
 			if (GetEditCursor().Validate(oldRow, newRow, field.ColumnName))
@@ -163,7 +163,7 @@ namespace Alphora.Dataphor.DAE.Client
 			return false;
 		}
 
-		protected override bool InternalColumnChanged(DataField field, Row oldRow, Row newRow)
+		protected override bool InternalColumnChanged(DataField field, IRow oldRow, IRow newRow)
 		{
 			if (GetEditCursor().Change(oldRow, newRow, field.ColumnName))
 			{
@@ -174,7 +174,7 @@ namespace Alphora.Dataphor.DAE.Client
 				return base.InternalColumnChanged(field, oldRow, newRow);
 		}
 		
-		protected override void InternalChangeColumn(DataField field, Row oldRow, Row newRow)
+		protected override void InternalChangeColumn(DataField field, IRow oldRow, IRow newRow)
 		{
 			Process.BeginTransaction(IsolationLevel);
 			try
@@ -198,7 +198,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		protected override void InternalDefault(Row row)
+		protected override void InternalDefault(IRow row)
 		{
 			base.InternalDefault(row);
 			if (GetEditCursor().Default(row, String.Empty))
@@ -346,7 +346,7 @@ namespace Alphora.Dataphor.DAE.Client
 				{
 					if (Active)
 					{
-						using (Row row = RememberActive())
+						using (IRow row = RememberActive())
 						{
 							_useBrowse = value; 
 							CursorSetChanged(row, true);
@@ -373,7 +373,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				if (Active)
 				{
-					using (Row row = RememberActive())
+					using (IRow row = RememberActive())
 					{
 						string oldFilter = _filter;
 						_filter = (value == null ? String.Empty : value);
@@ -871,7 +871,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if (!IsApplicationTransactionClient && UseApplicationTransactions && (_openState == DataSetState.Browse))
 			{
-				using (Row row = RememberActive())
+				using (IRow row = RememberActive())
 				{
 					if (_applicationTransactionID == Guid.Empty)
 						_applicationTransactionID = BeginApplicationTransaction(isInsert);
@@ -1060,7 +1060,7 @@ namespace Alphora.Dataphor.DAE.Client
 				);
 		}
 		
-		protected override void InternalPost(Row row)
+		protected override void InternalPost(IRow row)
 		{
 			base.InternalPost(row);
 			
@@ -1074,20 +1074,20 @@ namespace Alphora.Dataphor.DAE.Client
 				InternalRefresh(row);
 		}
 
-		private DAE.Runtime.DataParams GetParamsFromRow(Row row, string prefix)
+		private DAE.Runtime.DataParams GetParamsFromRow(IRow row, string prefix)
 		{
 			DAE.Runtime.DataParams paramsValue = new DAE.Runtime.DataParams();
 			GetParamsFromRow(row, paramsValue, prefix);
 			return paramsValue;
 		}
 
-		private static void GetParamsFromRow(Row row, DAE.Runtime.DataParams LParams, string prefix)
+		private static void GetParamsFromRow(IRow row, DAE.Runtime.DataParams LParams, string prefix)
 		{
 			for (int index = 0; index < row.DataType.Columns.Count; index++)
 				LParams.Add(new DAE.Runtime.DataParam(prefix + row.DataType.Columns[index].Name, row.DataType.Columns[index].DataType, Modifier.In, row[index]));
 		}
 		
-		protected override void InternalInsert(Row row)
+		protected override void InternalInsert(IRow row)
 		{
 			if (_insertStatement == String.Empty)
 				base.InternalInsert(row);
@@ -1106,7 +1106,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		protected override void InternalUpdate(Row row)
+		protected override void InternalUpdate(IRow row)
 		{
 			if (_updateStatement == String.Empty)
 				base.InternalUpdate(row);

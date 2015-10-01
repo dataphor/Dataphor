@@ -391,12 +391,12 @@ namespace Alphora.Dataphor.DAE.Server
 			throw new ServerException(ServerException.Codes.Unsupported);
 		}
 		
-		public Row RequestRow()
+		public IRow RequestRow()
 		{
 			return new Row(_process.ValueManager, TableVar.DataType.RowType);
 		}
 		
-		public void ReleaseRow(Row row)
+		public void ReleaseRow(IRow row)
 		{
 			row.Dispose();
 		}

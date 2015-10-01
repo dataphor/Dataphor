@@ -141,17 +141,17 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private ServerHandlers _handlers = new ServerHandlers();
 		
-		public void AddInsertHandler(Schema.TableVarEventHandler handler, Row row)
+		public void AddInsertHandler(Schema.TableVarEventHandler handler, IRow row)
 		{
 			_handlers.Add(new ServerInsertHandler(handler, row));
 		}
 		
-		public void AddUpdateHandler(Schema.TableVarEventHandler handler, Row oldRow, Row newRow)
+		public void AddUpdateHandler(Schema.TableVarEventHandler handler, IRow oldRow, IRow newRow)
 		{
 			_handlers.Add(new ServerUpdateHandler(handler, oldRow, newRow));
 		}
 		
-		public void AddDeleteHandler(Schema.TableVarEventHandler handler, Row row)
+		public void AddDeleteHandler(Schema.TableVarEventHandler handler, IRow row)
 		{
 			_handlers.Add(new ServerDeleteHandler(handler, row));
 		}
@@ -257,17 +257,17 @@ namespace Alphora.Dataphor.DAE.Server
 			return serverTableVar;
 		}
 
-		public void AddInsertTableVarCheck(Schema.TableVar tableVar, Row row)
+		public void AddInsertTableVarCheck(Schema.TableVar tableVar, IRow row)
 		{
 			EnsureServerTableVar(tableVar).AddInsertTableVarCheck(Count - 1, row);
 		}
 		
-		public void AddUpdateTableVarCheck(Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
+		public void AddUpdateTableVarCheck(Schema.TableVar tableVar, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			EnsureServerTableVar(tableVar).AddUpdateTableVarCheck(Count - 1, oldRow, newRow, valueFlags);
 		}
 		
-		public void AddDeleteTableVarCheck(Schema.TableVar tableVar, Row row)
+		public void AddDeleteTableVarCheck(Schema.TableVar tableVar, IRow row)
 		{
 			EnsureServerTableVar(tableVar).AddDeleteTableVarCheck(Count - 1, row);
 		}
@@ -540,7 +540,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		private void CopyKeyValues(Row sourceRow, Row targetRow)
+		private void CopyKeyValues(IRow sourceRow, IRow targetRow)
 		{
 			int columnIndex;
 			for (int index = 0; index < _checkTableKey.Columns.Count; index++)
@@ -561,7 +561,7 @@ namespace Alphora.Dataphor.DAE.Server
 				try
 				{
 					cursor.Next();
-					Row row = _plan.RequestRow();
+					IRow row = _plan.RequestRow();
 					try
 					{
 						while (!cursor.EOF())
@@ -592,7 +592,7 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				cursor.Next();
-				Row row = _transactionPlan.RequestRow();
+				IRow row = _transactionPlan.RequestRow();
 				try
 				{
 					while (!cursor.EOF())
@@ -758,14 +758,14 @@ namespace Alphora.Dataphor.DAE.Server
 			DropCheckTable();
 		}
 		
-		public void AddInsertTableVarCheck(int transactionIndex, Row row)
+		public void AddInsertTableVarCheck(int transactionIndex, IRow row)
 		{
 			PrepareCheckTable();
 			if (_newRowType == null)
 				_newRowType = row.DataType;
 
 			// Log ARow as an insert transition.
-			Row checkRow = _plan.RequestRow();
+			IRow checkRow = _plan.RequestRow();
 			try
 			{
 				IServerCursor cursor = _plan.Open(null);
@@ -807,7 +807,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		#if INCLUDEKEYVALUECOMPARISON
-		private bool KeyValuesDifferent(Row oldRow, Row newRow)
+		private bool KeyValuesDifferent(IRow oldRow, IRow newRow)
 		{
 			_checkKeyEqualityProgram.Stack.PushWindow(0);
 			try
@@ -843,7 +843,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		#endif
 		
-		public void AddUpdateTableVarCheck(int transactionIndex, Row oldRow, Row newRow, BitArray valueFlags)
+		public void AddUpdateTableVarCheck(int transactionIndex, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			PrepareCheckTable();
 			if (_oldRowType == null)
@@ -869,17 +869,17 @@ namespace Alphora.Dataphor.DAE.Server
 					// If there is an existing insert transition check for AOldRow, delete it and log ANewRow as an insert transition.
 					// If there is an existing update transition check for AOldRow, delete it and log AOldRow from the existing check and ANewRow from the new check as an update transition.
 					// Else log AOldRow, ANewRow as an update transition.
-					Row checkRow = _plan.RequestRow();
+					IRow checkRow = _plan.RequestRow();
 					try
 					{
 						// delete <check table name> where <key names> = <old key values>;
 						CopyKeyValues(oldRow, checkRow);
 						if (cursor.FindKey(checkRow))
 						{
-							using (Row row = cursor.Select())
+							using (IRow row = cursor.Select())
 							{
 								if (row.HasValue(_oldRowColumnName))
-									oldRow = (Row)row[_oldRowColumnName];
+									oldRow = (IRow)row[_oldRowColumnName];
 								else
 									oldRow = null;
 							}
@@ -911,7 +911,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public void AddDeleteTableVarCheck(int transactionIndex, Row row)
+		public void AddDeleteTableVarCheck(int transactionIndex, IRow row)
 		{
 			PrepareCheckTable();
 			if (_oldRowType == null)
@@ -922,17 +922,17 @@ namespace Alphora.Dataphor.DAE.Server
 				// If there is an existing insert transition for ARow, delete it and don't log anything.
 				// If there is an existing update transition for ARow, delete it and log AOldRow from the update transition as a delete transition.
 				// Else log ARow as a delete transition.
-				Row checkRow = _plan.RequestRow();
+				IRow checkRow = _plan.RequestRow();
 				try
 				{
 					// delete <check table name> where <key names> = <key values>;
 					CopyKeyValues(row, checkRow);
 					if (cursor.FindKey(checkRow))
 					{
-						using (Row localRow = cursor.Select())
+						using (IRow localRow = cursor.Select())
 						{
 							if (localRow.HasValue(_oldRowColumnName))
-								row = (Row)localRow[_oldRowColumnName];
+								row = (IRow)localRow[_oldRowColumnName];
 							else
 								row = null;
 						}
@@ -964,7 +964,7 @@ namespace Alphora.Dataphor.DAE.Server
 			IServerCursor cursor = _transactionPlan.Open(GetTransactionParams(transactionIndex));
 			try
 			{
-				Row checkRow = _transactionPlan.RequestRow();
+				IRow checkRow = _transactionPlan.RequestRow();
 				try
 				{
 					while (cursor.Next())
@@ -974,7 +974,7 @@ namespace Alphora.Dataphor.DAE.Server
 						{
 							case Keywords.Insert :
 							{
-								Row row = (Row)checkRow[_newRowColumnName];
+								IRow row = (IRow)checkRow[_newRowColumnName];
 								try
 								{
 									program.Stack.Push(row);
@@ -996,13 +996,13 @@ namespace Alphora.Dataphor.DAE.Server
 							
 							case Keywords.Update :
 							{
-								Row oldRow = (Row)checkRow[_oldRowColumnName];
+								IRow oldRow = (IRow)checkRow[_oldRowColumnName];
 								try
 								{
 									program.Stack.Push(oldRow);
 									try
 									{
-										Row newRow = (Row)checkRow[_newRowColumnName];
+										IRow newRow = (IRow)checkRow[_newRowColumnName];
 										try
 										{
 											program.Stack.Push(newRow);
@@ -1034,7 +1034,7 @@ namespace Alphora.Dataphor.DAE.Server
 							
 							case Keywords.Delete :
 							{
-								Row row = (Row)checkRow[_oldRowColumnName];
+								IRow row = (IRow)checkRow[_oldRowColumnName];
 								try
 								{
 									program.Stack.Push(row);
@@ -1073,7 +1073,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				case Schema.Transition.Insert :
 				{
-					Row newRow = new Row(program.ValueManager, this.TableVar.DataType.RowType, (NativeRow)((Row)program.Stack.Peek(0)).AsNative);
+					Row newRow = new Row(program.ValueManager, this.TableVar.DataType.RowType, (NativeRow)((IRow)program.Stack.Peek(0)).AsNative);
 					try
 					{
 						program.Stack.Push(newRow);
@@ -1101,7 +1101,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 				case Schema.Transition.Update :
 				{
-					Row newRow = new Row(program.ValueManager, this.TableVar.DataType.RowType, (NativeRow)((Row)program.Stack.Peek(0)).AsNative);
+					Row newRow = new Row(program.ValueManager, this.TableVar.DataType.RowType, (NativeRow)((IRow)program.Stack.Peek(0)).AsNative);
 					try
 					{
 						program.Stack.Push(newRow);
@@ -1357,7 +1357,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// TODO: This will need to be reviewed for potential caching issues under constraint alteration
-		public void AddInsertTableVarCheck(int transactionIndex, Row row)
+		public void AddInsertTableVarCheck(int transactionIndex, IRow row)
 		{
 			DetermineConstraintKeys();
 			foreach (var key in _insertConstraints.Keys)
@@ -1366,7 +1366,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public void AddUpdateTableVarCheck(int transactionIndex, Row oldRow, Row newRow, BitArray valueFlags)
+		public void AddUpdateTableVarCheck(int transactionIndex, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			DetermineConstraintKeys();
 			foreach (var key in _updateConstraints.GetKeys(valueFlags))
@@ -1375,7 +1375,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public void AddDeleteTableVarCheck(int transactionIndex, Row row)
+		public void AddDeleteTableVarCheck(int transactionIndex, IRow row)
 		{
 			DetermineConstraintKeys();
 			foreach (var key in _deleteConstraints.Keys)
@@ -1430,7 +1430,7 @@ namespace Alphora.Dataphor.DAE.Server
 	
 	public class ServerInsertHandler : ServerHandler
 	{
-		public ServerInsertHandler(Schema.TableVarEventHandler handler, Row row) : base(handler)
+		public ServerInsertHandler(Schema.TableVarEventHandler handler, IRow row) : base(handler)
 		{
 			_newRowType = row.DataType;
 			NativeRow = (NativeRow)row.CopyNative();
@@ -1471,7 +1471,7 @@ namespace Alphora.Dataphor.DAE.Server
 	
 	public class ServerUpdateHandler : ServerHandler
 	{
-		public ServerUpdateHandler(Schema.TableVarEventHandler handler, Row oldRow, Row newRow) : base(handler)
+		public ServerUpdateHandler(Schema.TableVarEventHandler handler, IRow oldRow, IRow newRow) : base(handler)
 		{
 			_newRowType = newRow.DataType;
 			_oldRowType = oldRow.DataType;
@@ -1537,7 +1537,7 @@ namespace Alphora.Dataphor.DAE.Server
 	
 	public class ServerDeleteHandler : ServerHandler
 	{
-		public ServerDeleteHandler(Schema.TableVarEventHandler handler, Row row) : base(handler)
+		public ServerDeleteHandler(Schema.TableVarEventHandler handler, IRow row) : base(handler)
 		{
 			_oldRowType = row.DataType;
 			NativeRow = (NativeRow)row.CopyNative();

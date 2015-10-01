@@ -127,7 +127,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return result;
         }
         
-        protected int CompareKeys(Row key1, Row key2)
+        protected int CompareKeys(IRow key1, IRow key2)
         {
 			int result = 0;
 			for (int index = 0; index < Node.JoinOrder.Columns.Count; index++)
@@ -171,7 +171,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	{
 		public SemiTable(SemiTableNode node, Program program) : base(node, program) {}
 		
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
 			_leftTable.Select(row);
         }
@@ -321,7 +321,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public new JoinNode Node { get { return (JoinNode)_node; } }
 
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
 			_leftTable.Select(row);
 			_rightTable.Select(row);
@@ -589,7 +589,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
 			base.InternalSelect(row);
 			OuterJoinNode outerJoinNode = Node as OuterJoinNode;
@@ -881,7 +881,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (_rightTable.BOF() || _rightTable.EOF())
 				return false;
 				
-			Row currentKey = _rightTable.GetKey();
+			IRow currentKey = _rightTable.GetKey();
 			try
 			{
 				return CompareKeys(currentKey, _rightRow) == 0;
@@ -1006,7 +1006,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (_leftTable.BOF() || _leftTable.EOF())
 				return false;
 				
-			Row currentKey = _leftTable.GetKey();
+			IRow currentKey = _leftTable.GetKey();
 			try
 			{
 				return CompareKeys(currentKey, _leftRow) == 0;
@@ -1144,7 +1144,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		public new LeftOuterJoinNode Node { get { return (LeftOuterJoinNode)_node; } }
         
-		protected override void InternalSelect(Row row)
+		protected override void InternalSelect(IRow row)
         {
 			_leftTable.Select(row);
 			if (Node.RowExistsColumnIndex >= 0)
@@ -1514,7 +1514,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (_rightTable.BOF() || _rightTable.EOF())
 				return false;
 				
-			Row currentKey = _rightTable.GetKey();
+			IRow currentKey = _rightTable.GetKey();
 			try
 			{
 				return CompareKeys(currentKey, _rightRow) == 0;
@@ -1648,7 +1648,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
         public new RightOuterJoinNode Node { get { return (RightOuterJoinNode)_node; } }
         
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
 			_rightTable.Select(row);
 			if (Node.RowExistsColumnIndex >= 0)
@@ -2298,7 +2298,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (_leftTable.BOF() || _leftTable.EOF())
 				return false;
 				
-			Row currentKey = _leftTable.GetKey();
+			IRow currentKey = _leftTable.GetKey();
 			try
 			{
 				return CompareKeys(currentKey, _leftRow) == 0;

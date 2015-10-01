@@ -244,7 +244,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		protected virtual void FieldChanged(DataLink dataLink, DataSet dataSet, DataField field)
 		{
 			if (dataLink.Active && !_link.Modified && !dataSet.IsEmpty() && IsSetup())
-				using (Row key = dataSet.GetKey())
+				using (IRow key = dataSet.GetKey())
 				{
 					SelectNode(key);
 				}
@@ -283,7 +283,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			{
 				if ((field != null) && (field.ColumnName == ColumnName))
 				{
-					using (Row key = dataSet.GetKey())
+					using (IRow key = dataSet.GetKey())
 					{
 						DBTreeNode node = FindNode(key);
 						if (node != null)
@@ -320,7 +320,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		}
 
 		/// <summary> Returns a root DBTreeNode given its key. </summary>
-		protected DBTreeNode FindChild(Row key)
+		protected DBTreeNode FindChild(IRow key)
 		{
 			foreach (DBTreeNode node in Nodes)
 				if (node.KeyEquals(key))
@@ -329,7 +329,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		}
 
 		/// <summary> Returns a tree node given a key, recursive. </summary>
-		protected internal DBTreeNode FindNode(Row key)
+		protected internal DBTreeNode FindNode(IRow key)
 		{
 			DBTreeNode result = null;
 			foreach (DBTreeNode node in Nodes)
@@ -453,7 +453,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 		
-		protected  internal IServerCursor OpenParentCursor(Row key)
+		protected  internal IServerCursor OpenParentCursor(IRow key)
 		{
 			PrepareParentPlan();
 			SetParams(key);
@@ -499,7 +499,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 		
-		protected void SetParams(Row key)
+		protected void SetParams(IRow key)
 		{
 			for (int index = 0; index < ((TableDataSet)_link.DataSet).Order.Columns.Count; index++)
 				if (key.HasValue(index))
@@ -560,7 +560,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 								key = new Row(_process.ValueManager, new Schema.RowType(((TableDataSet)_link.DataSet).Order.Columns));
 								try
 								{
-									using (Row row = cursor.Select())
+									using (IRow row = cursor.Select())
 									{
 										row.CopyTo(key);
 										columnIndex = row.DataType.Columns.IndexOf(ColumnName);
@@ -598,7 +598,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// <summary> True when the DataView causes the treeview to change the selected node.</summary>
 		protected bool DataSettingSelected { get { return _dataSettingSelected; } }
 
-		private bool CompareKeys(Row key1, Row key2)
+		private bool CompareKeys(IRow key1, IRow key2)
 		{
 			if (key2.DataType.Equals(key1.DataType))
 			{
@@ -617,9 +617,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			return false;
 		}
 
-		protected void BuildParentPath(Row key, ArrayList path)
+		protected void BuildParentPath(IRow key, ArrayList path)
 		{
-			foreach (Row localKey in path)
+			foreach (IRow localKey in path)
 			{
 				if (CompareKeys(key, localKey))
 					throw new ControlsException(ControlsException.Codes.TreeViewInfiniteLoop);
@@ -650,7 +650,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		
 		private bool _selecting;
 
-		protected void SelectNode(Row key)
+		protected void SelectNode(IRow key)
 		{
 			if (_findingKey || (_link.DataSet.State == DataSetState.Insert) || ((SelectedNode != null) && ((DBTreeNode)SelectedNode).KeyEquals(key)))
 				return;
@@ -665,7 +665,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				else
 				{
 					ArrayList path = new ArrayList();
-					BuildParentPath((Row)key.Copy(), path);
+					BuildParentPath((IRow)key.Copy(), path);
 					try
 					{
 						BeginUpdate();
@@ -675,7 +675,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 							{
 								if (index == path.Count - 1)
 								{
-									node = FindChild((Row)path[index]);
+									node = FindChild((IRow)path[index]);
 									if ((node == null) && !_selecting)
 									{
 										UpdateTree();
@@ -692,7 +692,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 									}
 								}
 								else
-									node = node.FindChild((Row)path[index]);
+									node = node.FindChild((IRow)path[index]);
 
 								if (node == null)
 									throw new ControlsException(ControlsException.Codes.TreeViewUnconnected);
@@ -711,7 +711,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 					finally
 					{
 						for (int index = 0; index < path.Count; index++)
-							((Row)path[index]).Dispose();
+							((IRow)path[index]).Dispose();
 					}
 				}
 			}
@@ -792,7 +792,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		public int Depth { get { return Parent != null ? ((DBTreeNode)Parent).Depth + 1 : 0; } }
 
 		/// <summary> True if the key for this node is the same as the given key. </summary>
-		public bool KeyEquals(Row key)
+		public bool KeyEquals(IRow key)
 		{
 			if (_key.DataType.Equals(key.DataType))
 			{
@@ -812,7 +812,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		}
 
 		/// <summary> Returns the immediate child that matches the key. </summary>
-		public DBTreeNode FindChild(Row key)
+		public DBTreeNode FindChild(IRow key)
 		{
 			foreach (DBTreeNode node in Nodes)
 				if (node.KeyEquals(key))
@@ -821,7 +821,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		}
 		
 		/// <summary> Returns this node or any child, recursively, matching the key. </summary>
-		public DBTreeNode FindNode(Row key)
+		public DBTreeNode FindNode(IRow key)
 		{
 			DBTreeNode result = null;
 			if (KeyEquals(key))
@@ -843,7 +843,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			DataField field = dataSet.Fields[DBTreeView.ColumnName];
 			Text = field.HasValue() ? field.AsDisplayString : DBTreeView.NoValueText;
 			Text = Text.Trim();
-			using (Row key = DBTreeView.Source.DataSet.GetKey())
+			using (IRow key = DBTreeView.Source.DataSet.GetKey())
 			{
 				_key.ClearValues();
 				key.CopyTo(_key);
@@ -892,7 +892,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 					key = new Row(DBTreeView._process.ValueManager, new Schema.RowType(((TableDataSet)DBTreeView.Source.DataSet).Order.Columns));
 					try
 					{
-						using (Row row = cursor.Select())
+						using (IRow row = cursor.Select())
 						{
 							row.CopyTo(key);
 							columnIndex = row.DataType.Columns.IndexOf(DBTreeView.ColumnName);

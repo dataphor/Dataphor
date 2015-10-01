@@ -43,7 +43,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				01-05 -> Number of rows
 				06-XX -> N row values written using Row physical representation
 		*/
-		private List<Row> _rowList;
+		private List<IRow> _rowList;
 		private List<int> _sizeList;
 		
 		public override int GetPhysicalSize(bool expandStreams)
@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (!IsNil)
 			{
 				size += sizeof(int);
-				_rowList = new List<Row>();
+				_rowList = new List<IRow>();
 				_sizeList = new List<int>();
 				
 				Table table = OpenCursor();
@@ -61,7 +61,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				{
 					while (table.Next())
 					{
-						Row row = table.Select();
+						IRow row = table.Select();
 						int rowSize = row.GetPhysicalSize(expandStreams);
 						size += rowSize;
 						_rowList.Add(row);
@@ -99,7 +99,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					rowSize = (int)_sizeList[index];
 					int32Conveyor.Write(rowSize, buffer, offset);
 					offset += sizeof(int);
-					Row row = _rowList[index];
+					IRow row = _rowList[index];
 					row.WriteToPhysical(buffer, offset, expandStreams);
 					offset += rowSize;
 					row.ValuesOwned = false;
@@ -125,7 +125,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				{
 					rowSize = (int)int32Conveyor.Read(buffer, offset);
 					offset += sizeof(int);
-					using (Row row = (Row)DataValue.FromPhysical(Manager, _table.RowType, buffer, offset))
+					using (IRow row = (IRow)DataValue.FromPhysical(Manager, _table.RowType, buffer, offset))
 					{
 						_table.Insert(Manager, row);
 					}
@@ -149,7 +149,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				scan.Open();
 				while (scan.Next())
 				{
-					using (Row row = scan.GetRow())
+					using (IRow row = scan.GetRow())
 					{
 						newTable.Insert(Manager, row);
 					}
@@ -307,8 +307,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
       
         // Select
-        protected abstract void InternalSelect(Row row);
-        public void Select(Row row)
+        protected abstract void InternalSelect(IRow row);
+        public void Select(IRow row)
         {
 			#if SAFETABLES
             CheckActive();
@@ -317,9 +317,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             InternalSelect(row);
         }
 
-        public Row Select()
+        public IRow Select()
         {
-			Row row = new Row(Manager, DataType.RowType);
+			IRow row = new Row(Manager, DataType.RowType);
 			try
 			{
 				Select(row);
@@ -421,12 +421,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         // Bookmarkable
 
-		protected virtual Row InternalGetBookmark()
+		protected virtual IRow InternalGetBookmark()
         {
             throw new RuntimeException(RuntimeException.Codes.NotBookmarkable);
         }
         
-        public Row GetBookmark()
+        public IRow GetBookmark()
         {
 			#if SAFETABLES
             CheckActive();
@@ -436,12 +436,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return InternalGetBookmark();
         }
 
-		protected virtual bool InternalGotoBookmark(Row bookmark, bool forward)
+		protected virtual bool InternalGotoBookmark(IRow bookmark, bool forward)
         {
             throw new RuntimeException(RuntimeException.Codes.NotBookmarkable);
         }
 
-		public bool GotoBookmark(Row bookmark, bool forward)
+		public bool GotoBookmark(IRow bookmark, bool forward)
 		{
 			#if SAFETABLES
             CheckActive();
@@ -450,17 +450,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return InternalGotoBookmark(bookmark, forward);
 		}
 
-		public bool GotoBookmark(Row bookmark)
+		public bool GotoBookmark(IRow bookmark)
         {
 			return GotoBookmark(bookmark, true);
         }
         
-        protected virtual int InternalCompareBookmarks(Row bokmark1, Row bookmark2)
+        protected virtual int InternalCompareBookmarks(IRow bokmark1, IRow bookmark2)
         {
             throw new RuntimeException(RuntimeException.Codes.NotBookmarkable);
         }
         
-        public int CompareBookmarks(Row bookmark1, Row bookmark2)
+        public int CompareBookmarks(IRow bookmark1, IRow bookmark2)
         {
 			#if SAFETABLES
             CheckActive();
@@ -487,12 +487,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             }
         }
         
-        protected virtual Row InternalGetKey()
+        protected virtual IRow InternalGetKey()
         {
             throw new RuntimeException(RuntimeException.Codes.NotSearchable);
         }
         
-        public Row GetKey()
+        public IRow GetKey()
         {
 			#if SAFETABLES
             CheckActive();
@@ -502,7 +502,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             return InternalGetKey();
         }
         
-        protected virtual bool InternalFindKey(Row row, bool forward)
+        protected virtual bool InternalFindKey(IRow row, bool forward)
         {
             throw new RuntimeException(RuntimeException.Codes.NotSearchable);
         }
@@ -512,13 +512,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		///	The row must be a superset of the current order key of the table.
 		/// Returns true if successful, false otherwise.
 		/// </summary>        
-        public bool FindKey(Row row)
+        public bool FindKey(IRow row)
         {
 			return FindKey(row, true);
         }
 
 		/// <param name="forward"> Provides a hint about the intended direction for bi-directionally navigable cursors. </param>
-		public bool FindKey(Row row, bool forward)
+		public bool FindKey(IRow row, bool forward)
 		{
 			#if SAFETABLES
             CheckActive();
@@ -527,7 +527,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return InternalFindKey(row, forward);
 		}
         
-        protected virtual void InternalFindNearest(Row row)
+        protected virtual void InternalFindNearest(IRow row)
         {
             throw new RuntimeException(RuntimeException.Codes.NotSearchable);
         }
@@ -542,7 +542,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         /// value.  If a row cannot be constructed meeting this criteria, the
         /// FindNearest will fail.
         /// </summary>
-        public void FindNearest(Row row)
+        public void FindNearest(IRow row)
         {
 			#if SAFETABLES
             CheckActive();
@@ -551,12 +551,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             InternalFindNearest(row);
         }
         
-        protected virtual bool InternalRefresh(Row row)
+        protected virtual bool InternalRefresh(IRow row)
         {
             throw new RuntimeException(RuntimeException.Codes.NotSearchable);
         }
         
-        public bool Refresh(Row row)
+        public bool Refresh(IRow row)
         {
 			#if SAFETABLES
             CheckActive();
@@ -565,7 +565,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             return InternalRefresh(row);
         }
         
-        public bool OptimisticRefresh(Row row)
+        public bool OptimisticRefresh(IRow row)
         {
             if (Supports(CursorCapability.Searchable))
 				return Refresh(row);
@@ -592,14 +592,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
         
 		// Updateable        
-		protected virtual void InternalInsert(Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
+		protected virtual void InternalInsert(IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			Node.Insert(Program, oldRow, newRow, valueFlags, uncheckedValue);
 			if (CursorType == CursorType.Dynamic)
 				OptimisticRefresh(newRow);
 		}
         
-        public void Insert(Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
+        public void Insert(IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
         {
 			#if SAFETABLES
             CheckActive();
@@ -608,7 +608,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             InternalInsert(oldRow, newRow, valueFlags, uncheckedValue);
         }
         
-        public void Insert(Row row)
+        public void Insert(IRow row)
         {
 			BitArray valueFlags = new BitArray(row.DataType.Columns.Count);
 			for (int index = 0; index < valueFlags.Length; index++)
@@ -616,9 +616,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Insert(null, row, valueFlags, false);
         }
         
-		protected virtual void InternalUpdate(Row row, BitArray valueFlags, bool uncheckedValue)
+		protected virtual void InternalUpdate(IRow row, BitArray valueFlags, bool uncheckedValue)
 		{
-			using (Row localRow = Select())
+			using (IRow localRow = Select())
 			{
 				Node.Update(Program, localRow, row, valueFlags, Isolation != CursorIsolation.Isolated, uncheckedValue);
 				if (CursorType == CursorType.Dynamic)
@@ -629,7 +629,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
         
-        public void Update(Row row, BitArray valueFlags, bool uncheckedValue)
+        public void Update(IRow row, BitArray valueFlags, bool uncheckedValue)
         {
 			#if SAFETABLES
             CheckActive();
@@ -639,7 +639,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             InternalUpdate(row, valueFlags, uncheckedValue);
         }
         
-        public void Update(Row row)
+        public void Update(IRow row)
         {
 			BitArray valueFlags = new BitArray(row.DataType.Columns.Count);
 			for (int index = 0; index < valueFlags.Length; index++)
@@ -649,7 +649,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
 		protected virtual void InternalDelete(bool uncheckedValue)
 		{
-			using (Row row = Select())
+			using (IRow row = Select())
 			{
 				Node.Delete(Program, row, Isolation != CursorIsolation.Isolated, uncheckedValue);
 				if (CursorType == CursorType.Dynamic)
@@ -751,7 +751,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
 
 		///<summary>Returns true if the given key has the same number of columns in the same order as the node order key.</summary>
-        protected bool IsKeyRow(Row key)
+        protected bool IsKeyRow(IRow key)
         {
 			Schema.Order order = Order;
 			if (key.DataType.Columns.Count != order.Columns.Count)
@@ -765,7 +765,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
 
 		///<summary>Returns true if the given key has the same or fewer columns in the same order as the node order key, and once any column is null, the rest of the columns are also null.</summary>        
-        protected bool IsPartialKeyRow(Row key)
+        protected bool IsPartialKeyRow(IRow key)
         {
 			bool isNull = false;
 			Schema.Order order = Order;
@@ -790,7 +790,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         ///	Returns a row that is guaranteed to contain the same columns in the same order as the node order.  
         /// If the given row does not satisfy this requirement, a row of the proper row type is created and the values from the given row are copied into it.
         /// </summary>
-        protected Row EnsureKeyRow(Row key)
+        protected IRow EnsureKeyRow(IRow key)
         {
 			if (IsKeyRow(key))
 				return key;
@@ -821,7 +821,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// requirement, a row of the proper row type is created and the values from the given row are copied into it.
 		/// If no such row can be created, null is returned.
 		/// </summary>
-        protected Row EnsurePartialKeyRow(Row key)
+        protected IRow EnsurePartialKeyRow(IRow key)
         {
 			if (IsPartialKeyRow(key))
 				return key;
@@ -927,7 +927,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			_scan.Reset();
 		}
 		
-		protected override void InternalSelect(Row row)
+		protected override void InternalSelect(IRow row)
 		{
 			_scan.GetRow(row);
 		}
@@ -964,17 +964,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		// Bookmarkable
 
-		protected override Row InternalGetBookmark()
+		protected override IRow InternalGetBookmark()
 		{
 			return _scan.GetKey();
 		}
 
-		protected override bool InternalGotoBookmark(Row bookmark, bool forward)
+		protected override bool InternalGotoBookmark(IRow bookmark, bool forward)
 		{
 			return _scan.FindKey(bookmark);
 		}
         
-		protected override int InternalCompareBookmarks(Row bookmark1, Row bookmark2)
+		protected override int InternalCompareBookmarks(IRow bookmark1, IRow bookmark2)
 		{
 			return _scan.CompareKeys(bookmark1, bookmark2);
 		}
@@ -986,22 +986,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return _key;
 		}
 		
-		protected override Row InternalGetKey()
+		protected override IRow InternalGetKey()
 		{
 			return _scan.GetKey();
 		}
 
-		protected override bool InternalFindKey(Row key, bool forward)
+		protected override bool InternalFindKey(IRow key, bool forward)
 		{
 			return _scan.FindKey(key);
 		}
 		
-		protected override void InternalFindNearest(Row key)
+		protected override void InternalFindNearest(IRow key)
 		{
 			_scan.FindNearest(key);
 		}
 		
-		protected override bool InternalRefresh(Row key)
+		protected override bool InternalRefresh(IRow key)
 		{
 			return _scan.FindNearest(key);
 		}
@@ -1018,16 +1018,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		// Updatable
-		protected override void InternalInsert(Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
+		protected override void InternalInsert(IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			_nativeTable.Insert(Manager, newRow);
 			if (CursorType == CursorType.Dynamic)
 				Refresh(newRow);
 		}
 		
-		protected override void InternalUpdate(Row row, BitArray valueFlags, bool uncheckedValue)
+		protected override void InternalUpdate(IRow row, BitArray valueFlags, bool uncheckedValue)
 		{
-			using (Row localRow = Select())
+			using (IRow localRow = Select())
 			{
 				_nativeTable.Update(Manager, localRow, row);
 				if (CursorType == CursorType.Dynamic)
@@ -1040,7 +1040,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override void InternalDelete(bool uncheckedValue)
 		{
-			using (Row row = Select())
+			using (IRow row = Select())
 			{
 				_nativeTable.Delete(Manager, row);
 				if (CursorType == CursorType.Dynamic)

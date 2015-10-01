@@ -94,7 +94,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             }
         }
         
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
 			_sourceTable.Select(_sourceRow);
 			_sourceRow.CopyTo(row);

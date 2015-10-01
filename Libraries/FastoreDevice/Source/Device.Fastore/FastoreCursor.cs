@@ -138,7 +138,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 ClearBuffer();
         }
 
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
             if (BufferActive())
                 BufferSelect(row);
@@ -149,7 +149,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             }
         }
 
-        private void BufferSelect(Row row)
+        private void BufferSelect(IRow row)
         {
 			// TODO: This needs to be aware that row may not be of an equivalent type
             object[] managedRow = _buffer[_bufferIndex].Values;            
@@ -346,7 +346,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			}
         }
 
-        protected override bool InternalFindKey(Row row, bool forward)
+        protected override bool InternalFindKey(IRow row, bool forward)
         {
 			var keyRow = EnsureKeyRow(row);
 			try
@@ -370,14 +370,14 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			}
         }
 
-        protected override Row InternalGetKey()
+        protected override IRow InternalGetKey()
         {
             Row row = new Row(Manager, new RowType(Key.Columns));
             InternalSelect(row);
             return row;
         }
 
-        protected override bool InternalRefresh(Row row)
+        protected override bool InternalRefresh(IRow row)
         {
             InternalReset();
             if (row != null)
@@ -395,7 +395,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             return Key;
         }
 
-        protected override void InternalFindNearest(Row row)
+        protected override void InternalFindNearest(IRow row)
         {
 			var keyRow = EnsurePartialKeyRow(row);
 			try
@@ -416,7 +416,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 			}
         }
 
-        protected override void InternalInsert(Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
+        protected override void InternalInsert(IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
         {
             object[] nrow = ((NativeRow)newRow.AsNative).Values;
 
@@ -428,7 +428,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
                 ClearBuffer();
         }
 
-        protected override void InternalUpdate(Row row, BitArray valueFlags, bool uncheckedValue)
+        protected override void InternalUpdate(IRow row, BitArray valueFlags, bool uncheckedValue)
         {
             object id = _buffer[_bufferIndex].ID;
             object[] nrow = ((NativeRow)row.AsNative).Values;

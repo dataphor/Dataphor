@@ -63,7 +63,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			_scan.Reset();
 		}
 		
-		protected override void InternalSelect(Row row)
+		protected override void InternalSelect(IRow row)
 		{
 			_scan.GetRow(row);
 		}
@@ -100,17 +100,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		// Bookmarkable
 
-		protected override Row InternalGetBookmark()
+		protected override IRow InternalGetBookmark()
 		{
 			return _scan.GetKey();
 		}
 
-		protected override bool InternalGotoBookmark(Row bookmark, bool forward)
+		protected override bool InternalGotoBookmark(IRow bookmark, bool forward)
 		{
 			return _scan.FindKey(bookmark);
 		}
         
-		protected override int InternalCompareBookmarks(Row bookmark1, Row bookmark2)
+		protected override int InternalCompareBookmarks(IRow bookmark1, IRow bookmark2)
 		{
 			return _scan.CompareKeys(bookmark1, bookmark2);
 		}
@@ -122,32 +122,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return _key;
 		}
 		
-		protected override Row InternalGetKey()
+		protected override IRow InternalGetKey()
 		{
 			return _scan.GetKey();
 		}
 
-		protected override bool InternalFindKey(Row key, bool forward)
+		protected override bool InternalFindKey(IRow key, bool forward)
 		{
 			return _scan.FindKey(key);
 		}
 		
-		protected override void InternalFindNearest(Row key)
+		protected override void InternalFindNearest(IRow key)
 		{
 			_scan.FindNearest(key);
 		}
 		
-		protected override bool InternalRefresh(Row key)
+		protected override bool InternalRefresh(IRow key)
 		{
 			return _scan.FindNearest(key);
 		}
 
-		protected override void InternalInsert(Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
+		protected override void InternalInsert(IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			_nativeTable.Insert(Manager, newRow);
 		}
 		
-		protected override void InternalUpdate(Row row, BitArray valueFlags, bool uncheckedValue)
+		protected override void InternalUpdate(IRow row, BitArray valueFlags, bool uncheckedValue)
 		{
 			_nativeTable.Update(Manager, Select(), row);
 		}

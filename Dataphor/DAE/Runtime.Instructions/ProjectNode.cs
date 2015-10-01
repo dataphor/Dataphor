@@ -246,16 +246,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Change
-		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
+		protected override bool InternalChange(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
 			if (PropagateChange)
 			{
 				// select the current row from the base node using the given row
-				Row sourceRow = new Row(program.ValueManager, SourceNode.DataType.RowType);
+				IRow sourceRow = new Row(program.ValueManager, SourceNode.DataType.RowType);
 				try
 				{
 					newRow.CopyTo(sourceRow);
-					Row currentRow = null;
+					IRow currentRow = null;
 					if (!program.ServerProcess.ServerSession.Server.IsEngine)
 						currentRow = SourceNode.Select(program, sourceRow);
 					try
@@ -288,7 +288,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 
-		public override void JoinApplicationTransaction(Program program, Row row) 
+		public override void JoinApplicationTransaction(Program program, IRow row) 
 		{
 			Schema.RowType rowType = new Schema.RowType();
 			

@@ -222,7 +222,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
+		protected override bool InternalDefault(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
 			if (isDescending)
 			{
@@ -241,7 +241,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
-		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
+		protected override bool InternalChange(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
 			bool changed = false;
 			if (PropagateChangeLeft)
@@ -251,7 +251,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return changed;
 		}
 		
-		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
+		protected override bool InternalValidate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
 			if (isDescending)
 			{
@@ -265,7 +265,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
-		protected void InternalInsertLeft(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
+		protected void InternalInsertLeft(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsertLeft)
 			{
@@ -278,7 +278,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					using (Row leftRow = new Row(program.ValueManager, LeftNode.DataType.RowType))
 					{
 						newRow.CopyTo(leftRow);
-						using (Row currentRow = LeftNode.Select(program, leftRow))
+						using (IRow currentRow = LeftNode.Select(program, leftRow))
 						{
 							if (currentRow != null)
 							{
@@ -293,7 +293,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void InternalInsertRight(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
+		protected void InternalInsertRight(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsertRight)
 			{
@@ -306,7 +306,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					using (Row rightRow = new Row(program.ValueManager, RightNode.DataType.RowType))
 					{
 						newRow.CopyTo(rightRow);
-						using (Row currentRow = RightNode.Select(program, rightRow))
+						using (IRow currentRow = RightNode.Select(program, rightRow))
 						{
 							if (currentRow != null)
 							{
@@ -321,7 +321,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
+		protected override void InternalExecuteInsert(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			// Attempt to insert the row in the left node.
 			if ((PropagateInsertLeft != PropagateAction.False) && (PropagateInsertRight != PropagateAction.False) && EnforcePredicate)
@@ -358,7 +358,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
+		protected override void InternalExecuteUpdate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateUpdateLeft && PropagateUpdateRight && EnforcePredicate)
 			{
@@ -367,7 +367,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					if (PropagateUpdateLeft)
 					{
-						using (Row leftRow = LeftNode.FullSelect(program, oldRow))
+						using (IRow leftRow = LeftNode.FullSelect(program, oldRow))
 						{
 							if (leftRow != null)
 								LeftNode.Delete(program, oldRow, checkConcurrency, uncheckedValue);
@@ -383,7 +383,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						if (PropagateUpdateRight)
 						{
-							using (Row rightRow = RightNode.FullSelect(program, oldRow))
+							using (IRow rightRow = RightNode.FullSelect(program, oldRow))
 							{
 								if (rightRow != null)
 									RightNode.Delete(program, oldRow, checkConcurrency, uncheckedValue);
@@ -401,7 +401,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					if (PropagateUpdateRight)
 					{
-						using (Row rightRow = RightNode.FullSelect(program, oldRow))
+						using (IRow rightRow = RightNode.FullSelect(program, oldRow))
 						{
 							if (rightRow != null)
 								RightNode.Delete(program, oldRow, checkConcurrency, uncheckedValue);
@@ -426,24 +426,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
+		protected override void InternalExecuteDelete(Program program, IRow row, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateDeleteLeft)
-				using (Row leftRow = LeftNode.FullSelect(program, row))
+				using (IRow leftRow = LeftNode.FullSelect(program, row))
 				{
 					if (leftRow != null)
 						LeftNode.Delete(program, row, checkConcurrency, uncheckedValue);
 				}
 
 			if (PropagateDeleteRight)
-				using (Row rightRow = RightNode.FullSelect(program, row))
+				using (IRow rightRow = RightNode.FullSelect(program, row))
 				{
 					if (rightRow != null)
 						RightNode.Delete(program, row, checkConcurrency, uncheckedValue);
 				}
 		}
 		
-		public override void JoinApplicationTransaction(Program program, Row row)
+		public override void JoinApplicationTransaction(Program program, IRow row)
 		{
 			LeftNode.JoinApplicationTransaction(program, row);
 			RightNode.JoinApplicationTransaction(program, row);

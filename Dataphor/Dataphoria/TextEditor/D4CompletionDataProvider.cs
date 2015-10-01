@@ -130,7 +130,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             return completionList.ToArray();
         }
 
-        private void AddTableVarToCompletionList(string query, HashSet<ICompletionData> completionList, Func<Row,int> getImageIndex)
+        private void AddTableVarToCompletionList(string query, HashSet<ICompletionData> completionList, Func<IRow,int> getImageIndex)
         {
             _dataphoria.Execute(query, null, ARow =>
             {
@@ -145,7 +145,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             });
         }
 
-        private void AddToOperatorToCompletionList(string query, HashSet<ICompletionData> completionList, Func<Row, int> getImageIndex)
+        private void AddToOperatorToCompletionList(string query, HashSet<ICompletionData> completionList, Func<IRow, int> getImageIndex)
         {
             _dataphoria.Execute(query, null, ARow =>
             {

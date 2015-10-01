@@ -952,7 +952,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					{
 						while (cursor.Next())
 						{
-							using (Row row = cursor.Select())
+							using (IRow row = cursor.Select())
 							{
 								serverCatalog.Add(process.CatalogDeviceSession.ResolveCatalogObject((int)row[0]));
 							}
@@ -1855,12 +1855,12 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         
         // Row level operations are provided as implementation details only, not exposed through the Dataphor language.
-        protected virtual void InternalInsertRow(Program program, TableVar table, Row row, BitArray valueFlags)
+        protected virtual void InternalInsertRow(Program program, TableVar table, IRow row, BitArray valueFlags)
         {
 			throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, DeviceCapability.RowLevelInsert, Device.Name);
         }
 
-        public void InsertRow(Program program, TableVar table, Row row, BitArray valueFlags)
+        public void InsertRow(Program program, TableVar table, IRow row, BitArray valueFlags)
         {
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
@@ -1876,15 +1876,15 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 
 			if (!ServerProcess.NonLogged && ((!Device.SupportsTransactions && (Transactions.Count == 1)) || (!Device.SupportsNestedTransactions && (Transactions.Count > 1))) && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new DeleteOperation(table, (Row)row.Copy()));
+				Transactions.CurrentTransaction().Operations.Add(new DeleteOperation(table, (IRow)row.Copy()));
         }
         
-        protected virtual void InternalUpdateRow(Program program, TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
+        protected virtual void InternalUpdateRow(Program program, TableVar table, IRow oldRow, IRow newRow, BitArray valueFlags)
         {
 			throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, DeviceCapability.RowLevelUpdate, Device.Name);
         }
         
-        public void UpdateRow(Program program, TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
+        public void UpdateRow(Program program, TableVar table, IRow oldRow, IRow newRow, BitArray valueFlags)
         {
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
@@ -1900,15 +1900,15 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 
 			if (!ServerProcess.NonLogged && ((!Device.SupportsTransactions && (Transactions.Count == 1)) || (!Device.SupportsNestedTransactions && (Transactions.Count > 1))) && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new UpdateOperation(table, (Row)newRow.Copy(), (Row)oldRow.Copy(), valueFlags));
+				Transactions.CurrentTransaction().Operations.Add(new UpdateOperation(table, (IRow)newRow.Copy(), (IRow)oldRow.Copy(), valueFlags));
         }
         
-        protected virtual void InternalDeleteRow(Program program, TableVar table, Row row)
+        protected virtual void InternalDeleteRow(Program program, TableVar table, IRow row)
         {
 			throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, DeviceCapability.RowLevelDelete, Device.Name);
 		}
         
-        public void DeleteRow(Program program, TableVar table, Row row)
+        public void DeleteRow(Program program, TableVar table, IRow row)
         {
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
@@ -1923,7 +1923,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 
 			if (!ServerProcess.NonLogged && ((!Device.SupportsTransactions && (Transactions.Count == 1)) || (!Device.SupportsNestedTransactions && (Transactions.Count > 1))) && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new InsertOperation(table, (Row)row.Copy(), null));
+				Transactions.CurrentTransaction().Operations.Add(new InsertOperation(table, (IRow)row.Copy(), null));
         }
     }
 

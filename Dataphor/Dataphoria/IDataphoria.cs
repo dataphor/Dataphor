@@ -45,7 +45,7 @@ namespace Alphora.Dataphor.Dataphoria
 
         IServerCursor OpenCursor(string AQuery);
 
-        void Execute(string AQuery, DataParams AParams, Action<DAE.Runtime.Data.Row> AAction);
+        void Execute(string AQuery, DataParams AParams, Action<DAE.Runtime.Data.IRow> AAction);
 
         IServerCursor OpenCursor(String AQuery, DataParams AParams);
 

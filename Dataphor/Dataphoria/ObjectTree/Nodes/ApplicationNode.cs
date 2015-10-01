@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return ".Frontend.Applications rename Main";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.IRow row)
 		{
 			return new ApplicationNode(this, (string)row["Main.ID"], (string)row["Main.Description"]);
 		}
@@ -136,7 +136,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		private string _iD;
 		public string ID { get { return _iD; } set { _iD = value; } }
 
-		public override bool IsEqual(DAE.Runtime.Data.Row row)
+		public override bool IsEqual(DAE.Runtime.Data.IRow row)
 		{
 			return ((string)row["Main.ID"] == _iD);
 		}

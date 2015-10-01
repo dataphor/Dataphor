@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	public class Scan : Disposable
 	{
 		/// <remarks> Scan range keys are inclusive. </remarks>		
-		public Scan(IValueManager manager, NativeTable table, NativeRowTree accessPath, ScanDirection direction, Row firstKey, Row lastKey)
+		public Scan(IValueManager manager, NativeTable table, NativeRowTree accessPath, ScanDirection direction, IRow firstKey, IRow lastKey)
 		{
 			_manager = manager;
 			_table = table;
@@ -40,8 +40,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		private NativeTable _table;
 		private NativeRowTree _accessPath;
 		private ScanDirection _direction;
-		private Row _firstKey;
-		private Row _lastKey;
+		private IRow _firstKey;
+		private IRow _lastKey;
 		private bool _bOF;
 		private bool _eOF;
 		private RowTreeNode _indexNode;
@@ -402,14 +402,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return _eOF;
 		}
 		
-		public Row GetRow()
+		public IRow GetRow()
 		{
 			Row row = new Row(_manager, _table.RowType);
 			GetRow(row);
 			return row;
 		}
 		
-		private bool IsSubset(Row row, NativeRowTree index)
+		private bool IsSubset(IRow row, NativeRowTree index)
 		{
 			foreach (Schema.Column column in row.DataType.Columns)
 				if (!index.KeyRowType.Columns.ContainsName(column.Name) && !index.DataRowType.Columns.Contains(column.Name))
@@ -417,7 +417,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return true;
 		}
 		
-		public void GetRow(Row row)
+		public void GetRow(IRow row)
 		{
 			#if SAFETABLES
 			CheckActive();
@@ -480,7 +480,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public Row GetKey()
+		public IRow GetKey()
 		{
 			#if SAFETABLES
 			CheckActive();
@@ -489,7 +489,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return new Row(_manager, _accessPath.KeyRowType, _indexNode.Node.Keys[_entryNumber]);
 		}
 		
-		public Row GetData()
+		public IRow GetData()
 		{
 			#if SAFETABLES
 			CheckActive();
@@ -498,9 +498,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return new Row(_manager, _accessPath.DataRowType, _indexNode.Node.Keys[_entryNumber]);
 		}
 		
-		private Row EnsureKeyRow(Row key)
+		private IRow EnsureKeyRow(IRow key)
 		{
-			Row localKey = key;
+			IRow localKey = key;
 			bool isKeyRow = key.DataType.Columns.Count <= _accessPath.KeyRowType.Columns.Count;
 			for (int index = 0; index < _accessPath.KeyRowType.Columns.Count; index++)
 			{
@@ -525,14 +525,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return localKey;
 		}
 		
-		public bool FindKey(Row key)
+		public bool FindKey(IRow key)
 		{
 			#if SAFETABLES
 			CheckActive();
 			#endif
 			int entryNumber;
 			RowTreeNode indexNode;
-			Row localKey = EnsureKeyRow(key);
+			IRow localKey = EnsureKeyRow(key);
 			try
 			{
 				if (_firstKey != null)
@@ -568,14 +568,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public bool FindNearest(Row key)
+		public bool FindNearest(IRow key)
 		{
 			#if SAFETABLES
 			CheckActive();
 			#endif
 			int entryNumber;
 			RowTreeNode indexNode;
-			Row localKey = EnsureKeyRow(key);
+			IRow localKey = EnsureKeyRow(key);
 			try
 			{
 				if (_firstKey != null)
@@ -629,7 +629,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 
 		/// <remarks>The keys passed to this function must be of the same row type as the key for the accesspath for the scan</remarks>		
-		public int CompareKeys(Row key1, Row key2)
+		public int CompareKeys(IRow key1, IRow key2)
 		{
 			#if SAFETABLES
 			CheckActive();

@@ -596,7 +596,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					scan.Open();
 					while (scan.Next())
 					{
-						using (Row row = scan.GetRow())
+						using (IRow row = scan.GetRow())
 						{
 							newTable.Insert(manager, row);
 						}

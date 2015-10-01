@@ -148,7 +148,7 @@ namespace Alphora.Dataphor.DAE.Client
 					LResult.Append(Strings.Get("NoValue"));
 				else
 					if (LPlan.DataType is DAE.Schema.IRowType)
-						ResultsFromRow((Row)value, LResult);
+						ResultsFromRow((IRow)value, LResult);
 					else if (LPlan.DataType is DAE.Schema.IListType)
 						ResultsFromList((ListValue)value, LResult);
 					else if (LPlan.DataType is DAE.Schema.IScalarType)
@@ -234,7 +234,7 @@ namespace Alphora.Dataphor.DAE.Client
 			return result;
 		}
 
-		private static void ReadRow(DAE.Runtime.Data.Row row, ResultColumn[] LTarget)
+		private static void ReadRow(DAE.Runtime.Data.IRow row, ResultColumn[] LTarget)
 		{
 			for (int columnIndex = 0; columnIndex < row.DataType.Columns.Count; columnIndex++)
 			{
@@ -316,7 +316,7 @@ namespace Alphora.Dataphor.DAE.Client
 			return rowCount;
 		}
 
-		private static void ResultsFromRow(Row row, StringBuilder results)
+		private static void ResultsFromRow(IRow row, StringBuilder results)
 		{
 			ResultColumn[] resultColumns = BuildResultColumns(row.DataType);
 			ReadRow(row, resultColumns);

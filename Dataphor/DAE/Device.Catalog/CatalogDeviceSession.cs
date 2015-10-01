@@ -1514,7 +1514,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Updates
 				
-		protected override void InternalInsertRow(Program program, Schema.TableVar tableVar, Row row, BitArray valueFlags)
+		protected override void InternalInsertRow(Program program, Schema.TableVar tableVar, IRow row, BitArray valueFlags)
 		{
 			switch (tableVar.Name)
 			{
@@ -1524,7 +1524,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			base.InternalInsertRow(program, tableVar, row, valueFlags);
 		}
 		
-		protected override void InternalUpdateRow(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
+		protected override void InternalUpdateRow(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			switch (tableVar.Name)
 			{
@@ -1534,7 +1534,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			base.InternalUpdateRow(program, tableVar, oldRow, newRow, valueFlags);
 		}
 		
-		protected override void InternalDeleteRow(Program program, Schema.TableVar tableVar, Row row)
+		protected override void InternalDeleteRow(Program program, Schema.TableVar tableVar, IRow row)
 		{
 			switch (tableVar.Name)
 			{

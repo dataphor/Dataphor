@@ -58,7 +58,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	public interface IWebGridColumn : IGridColumn
 	{
 		void RenderHeader(HtmlTextWriter AWriter);
-		void RenderCell(HtmlTextWriter AWriter, DAE.Runtime.Data.Row ACurrentRow, bool AIsCurrentRow, int ARowIndex);
+		void RenderCell(HtmlTextWriter AWriter, DAE.Runtime.Data.IRow ACurrentRow, bool AIsCurrentRow, int ARowIndex);
 	}
 
 	public interface IWebNotebookPage : IBaseNotebookPage, IWebElement

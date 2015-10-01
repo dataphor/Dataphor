@@ -275,7 +275,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			object result;
-			Row sourceRow = (Row)Nodes[0].Execute(program);
+			IRow sourceRow = (IRow)Nodes[0].Execute(program);
 			#if NILPROPOGATION
 			if ((sourceRow == null) || sourceRow.IsNil)
 				return null;
@@ -454,7 +454,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program)
 		{
-			Row sourceRow = (Row)Nodes[0].Execute(program);
+			IRow sourceRow = (IRow)Nodes[0].Execute(program);
 			#if NILPROPOGATION
 			if ((sourceRow == null) || sourceRow.IsNil)
 				return null;
@@ -613,7 +613,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program, object argument)
 		{
-			Row sourceRow = (Row)argument;
+			IRow sourceRow = (IRow)argument;
 			#if NILPROPOGATION
 			if ((sourceRow == null) || sourceRow.IsNil)
 				return null;
@@ -778,8 +778,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Row result = new Row(program.ValueManager, DataType);
 			try
 			{
-				((Row)argument1).CopyTo(result);
-				((Row)argument2).CopyTo(result);
+				((IRow)argument1).CopyTo(result);
+				((IRow)argument2).CopyTo(result);
 				return result;
 			}
 			catch
@@ -834,7 +834,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Row row = new Row(program.ValueManager, DataType);
 			try
 			{
-				((Row)argument).CopyTo(row);
+				((IRow)argument).CopyTo(row);
 				return row;
 			}
 			catch

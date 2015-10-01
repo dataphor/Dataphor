@@ -91,7 +91,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             _hasLastCompareRow = false;
         }
         
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
 			_sourceTable.Select(row);
         }

@@ -58,7 +58,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			_bOF = true;
         }
         
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
 			_leftTable.Select(row);
         }

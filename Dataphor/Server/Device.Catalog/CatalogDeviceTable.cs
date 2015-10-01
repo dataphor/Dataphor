@@ -127,7 +127,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return tempValue;
 		}
 
-		protected override void InternalSelect(Row row)
+		protected override void InternalSelect(IRow row)
 		{
 			for (int index = 0; index < row.DataType.Columns.Count; index++)
 			{

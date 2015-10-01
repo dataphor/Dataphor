@@ -399,7 +399,7 @@ namespace Alphora.Dataphor.DAE.Client
 			return ParamNamespace + columnName.Replace(".", "_");
 		}
 
-		protected override void InternalCursorSetChanged(Row row, bool reprepare)
+		protected override void InternalCursorSetChanged(IRow row, bool reprepare)
 		{
 			if (reprepare)
 			{
@@ -525,7 +525,7 @@ namespace Alphora.Dataphor.DAE.Client
 			_cursor.Reset();
 		}
 
-		protected override void InternalRefresh(Row row)
+		protected override void InternalRefresh(IRow row)
 		{
 			_cursor.Refresh(row);
 		}
@@ -550,7 +550,7 @@ namespace Alphora.Dataphor.DAE.Client
 			return _cursor.Prior();
 		}
 
-		protected override void InternalSelect(Row row)
+		protected override void InternalSelect(IRow row)
 		{
 			_cursor.Select(row);
 		}
@@ -585,27 +585,27 @@ namespace Alphora.Dataphor.DAE.Client
 			_cursor.DisposeBookmarks(bookmarks);
 		}
 
-		protected override Row InternalGetKey()
+		protected override IRow InternalGetKey()
 		{
 			return _cursor.GetKey();
 		}
 
-		protected override bool InternalFindKey(Row key)
+		protected override bool InternalFindKey(IRow key)
 		{
 			return _cursor.FindKey(key);
 		}
 
-		protected override void InternalFindNearest(Row key)
+		protected override void InternalFindNearest(IRow key)
 		{
 			_cursor.FindNearest(key);
 		}
 		
-		protected virtual void InternalInsert(Row row)
+		protected virtual void InternalInsert(IRow row)
 		{
 			GetEditCursor().Insert(row, _valueFlags);
 		}
 		
-		protected virtual void InternalUpdate(Row row)
+		protected virtual void InternalUpdate(IRow row)
 		{
 			GetEditCursor().Update(row, _valueFlags);
 		}
@@ -625,7 +625,7 @@ namespace Alphora.Dataphor.DAE.Client
 			_process.CommitTransaction();
 		}
 		
-		protected override void InternalPost(Row row)
+		protected override void InternalPost(IRow row)
 		{
 			// TODO: Test to ensure Optimistic concurrency check.
 			bool updateSucceeded = false;
@@ -909,7 +909,7 @@ namespace Alphora.Dataphor.DAE.Client
 					return true;
 			}
 			
-			public Row Select()
+			public IRow Select()
 			{
 				if (_cursor != null)
 					return _cursor.Select();
@@ -917,7 +917,7 @@ namespace Alphora.Dataphor.DAE.Client
 					return null;
 			}
 			
-			public void Select(Row row)
+			public void Select(IRow row)
 			{
 				if (_cursor != null)
 					_cursor.Select(row);
@@ -985,7 +985,7 @@ namespace Alphora.Dataphor.DAE.Client
 				} 
 			}
 			
-			public Row GetKey()
+			public IRow GetKey()
 			{
 				if (_cursor != null)
 					return _cursor.GetKey();
@@ -993,7 +993,7 @@ namespace Alphora.Dataphor.DAE.Client
 					return null;
 			}
 			
-			public bool FindKey(Row key)
+			public bool FindKey(IRow key)
 			{
 				if (_cursor != null)
 					return _cursor.FindKey(key);
@@ -1001,13 +1001,13 @@ namespace Alphora.Dataphor.DAE.Client
 					return false;
 			}
 			
-			public void FindNearest(Row key)
+			public void FindNearest(IRow key)
 			{
 				if (_cursor != null)
 					_cursor.FindNearest(key);
 			}
 			
-			public bool Refresh(Row row)
+			public bool Refresh(IRow row)
 			{
 				if (_cursor != null)
 					return _cursor.Refresh(row);
@@ -1015,7 +1015,7 @@ namespace Alphora.Dataphor.DAE.Client
 					return false;
 			}
 			
-			public void Insert(Row row, BitArray valueFlags)
+			public void Insert(IRow row, BitArray valueFlags)
 			{
 				if (_cursor != null)
 					_cursor.Insert(row, valueFlags);
@@ -1026,7 +1026,7 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 			}
 			
-			public void Update(Row row, BitArray valueFlags)
+			public void Update(IRow row, BitArray valueFlags)
 			{
 				if (_cursor != null)
 					_cursor.Update(row, valueFlags);
@@ -1046,7 +1046,7 @@ namespace Alphora.Dataphor.DAE.Client
 					return 0;
 			}
 			
-			public bool Default(Row row, string columnName)
+			public bool Default(IRow row, string columnName)
 			{
 				if (_cursor != null)
 					return _cursor.Default(row, columnName);
@@ -1057,7 +1057,7 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 			}
 			
-			public bool Change(Row oldRow, Row newRow, string columnName)
+			public bool Change(IRow oldRow, IRow newRow, string columnName)
 			{
 				if (_cursor != null)
 					return _cursor.Change(oldRow, newRow, columnName);
@@ -1068,7 +1068,7 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 			}
 			
-			public bool Validate(Row oldRow, Row newRow, string columnName)
+			public bool Validate(IRow oldRow, IRow newRow, string columnName)
 			{
 				if (_cursor != null)
 					return _cursor.Validate(oldRow, newRow, columnName);

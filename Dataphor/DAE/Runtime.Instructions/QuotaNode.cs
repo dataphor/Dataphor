@@ -239,14 +239,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}								  
 		}
 		
-		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
+		protected override bool InternalDefault(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
 			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
 				return base.InternalDefault(program, oldRow, newRow, valueFlags, columnName, isDescending);
 			return false;
 		}
 		
-		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
+		protected override bool InternalChange(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
 			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
 				return base.InternalChange(program, oldRow, newRow, valueFlags, columnName);
@@ -281,7 +281,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar.ShouldValidate = _tableVar.ShouldValidate || _enforcePredicate;
 		}
 
-		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
+		protected override bool InternalValidate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
 			if (_enforcePredicate && (columnName == String.Empty))
 			{

@@ -1394,7 +1394,7 @@ drop table Testing;
 						int counter = 0;
 						while (cursor.Next())
 						{
-							Row row = cursor.Select();
+							IRow row = cursor.Select();
 							try
 							{
 								bookmarks[counter] = cursor.GetBookmark();
@@ -1475,7 +1475,7 @@ drop table Testing;
 							newRow[2] = TestUtility.RandomName();
 							newRow[3] = TestUtility.RandomPhone();
 							cursor.Insert(newRow);
-							Row selectRow = cursor.Select();
+							IRow selectRow = cursor.Select();
 							try
 							{
 								if ((int)selectRow[0] != (int)newRow[0])
@@ -1489,7 +1489,7 @@ drop table Testing;
 								if ((int)selectRow[1] != (int)newRow[1])
 									throw new TestException("Update failed");
 			
-								Row oldRow = cursor.GetKey();						
+								IRow oldRow = cursor.GetKey();						
 								try
 								{
 									cursor.Delete();
@@ -1948,7 +1948,7 @@ drop table Testing;
 	{
 		protected abstract void InternalTest(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode);
 		
-		protected bool RowsSame(Program program, Row row, Row expectedRow, PlanNode rowEqualNode)
+		protected bool RowsSame(Program program, IRow row, Row expectedRow, PlanNode rowEqualNode)
 		{
 			program.Stack.Push(row);
 			try
@@ -2150,7 +2150,7 @@ drop table Testing;
 		protected void TestSearchable(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
 		{
 			bool first = true;
-			Row firstKey = null;
+			IRow firstKey = null;
 			expectedTable.Reset();
 			while (expectedTable.Next())
 			{

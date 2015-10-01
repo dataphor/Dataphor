@@ -93,7 +93,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 					NativeTable nativeTable = new NativeTable(program.ValueManager, tableVar);
 					while (cursor.Next())
 					{
-						using (Row row = cursor.Select())
+						using (IRow row = cursor.Select())
 						{	
 							nativeTable.Insert(program.ValueManager, row);
 						}
@@ -223,7 +223,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			var insertStatement = new InsertStatement(new IdentifierExpression("ARow"), new IdentifierExpression(tableVar.Name));
 			var statement = new D4TextEmitter().Emit(insertStatement);
 			var dataParams = new DataParams();
-			var row = (Row)arguments[1];
+			var row = (IRow)arguments[1];
 			dataParams.Add(new DataParam("ARow", row.DataType, Modifier.In, row));
 
 			RESTUtilities.Execute(program, statement, dataParams);
@@ -245,7 +245,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			var updateStatement = new UpdateStatement();
 			updateStatement.Target = new IdentifierExpression(tableVar.Name);
 
-			var row = (Row)arguments[2];
+			var row = (IRow)arguments[2];
 			for (int i = 0; i < row.DataType.Columns.Count; i++)
 				updateStatement.Columns.Add(new UpdateColumnExpression(new IdentifierExpression(row.DataType.Columns[i].Name), new IdentifierExpression(Schema.Object.Qualify(row.DataType.Columns[i].Name, "ARow"))));
 
@@ -275,7 +275,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			var updateStatement = new UpdateStatement();
 			updateStatement.Target = new IdentifierExpression(tableVar.Name);
 
-			var row = (Row)arguments[2];
+			var row = (IRow)arguments[2];
 			for (int i = 0; i < row.DataType.Columns.Count; i++)
 				updateStatement.Columns.Add(new UpdateColumnExpression(new IdentifierExpression(row.DataType.Columns[i].Name), new IdentifierExpression(Schema.Object.Qualify(row.DataType.Columns[i].Name, "ARow"))));
 

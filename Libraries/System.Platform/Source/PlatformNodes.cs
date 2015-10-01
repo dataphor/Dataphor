@@ -562,7 +562,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				bool redirectErrors = true;
 				if (arguments.Length > 2)
 				{
-					Row settings = (Row)arguments[2];
+					IRow settings = (IRow)arguments[2];
 					if (settings != null)
 					{
 						if (settings.HasValue("WorkingDirectory"))
@@ -578,7 +578,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 					}
 					if (arguments.Length > 3)
 					{
-						settings = (Row)arguments[3];
+						settings = (IRow)arguments[3];
 						if (settings != null)
 						{
 							if (settings.HasValue("UserName"))

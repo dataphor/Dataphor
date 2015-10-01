@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return ".System.Operators " + SchemaListFilter + " { Name, OperatorName + Signature DisplayName, Locator, Line, LinePos }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.IRow row)
 		{
 			return new OperatorNode(this, (string)row["Name"], (string)row["DisplayName"], new DebugLocator((string)row["Locator"], (int)row["Line"], (int)row["LinePos"]));
 		}

@@ -175,7 +175,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             }
         }
 
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
             if (BufferActive())
                 BufferSelect(row);
@@ -186,7 +186,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             }
         }
 
-        private void BufferSelect(Row row)
+        private void BufferSelect(IRow row)
         {
             var bufferrow = _buffer[_bufferIndex];
             bufferrow.CopyTo(row);
@@ -262,7 +262,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             GetGroup(true, ScanDirection.Forward);
         }
 
-        protected override bool InternalFindKey(Row row, bool forward)
+        protected override bool InternalFindKey(IRow row, bool forward)
         {
             ClearBuffer();
             var result = _nestedTable.FindKey(row, forward);
@@ -275,7 +275,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             return result;
         }
 
-        protected override Row InternalGetKey()
+        protected override IRow InternalGetKey()
         {
             if (!BufferActive())
                 GetGroup(false, ScanDirection.Forward);
@@ -286,7 +286,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             return row;
         }
 
-        protected override bool InternalRefresh(Row row)
+        protected override bool InternalRefresh(IRow row)
         {
             InternalReset();
             if (row != null)
@@ -306,7 +306,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             return order;
         }
 
-        protected override void InternalFindNearest(Row row)
+        protected override void InternalFindNearest(IRow row)
         {
             ClearBuffer();
             _nestedTable.FindNearest(row);
@@ -314,7 +314,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
             SeekBuffer(row);
         }     
 
-        protected void SeekBuffer(Row row)
+        protected void SeekBuffer(IRow row)
         {
             //Find matching value;
             if (_buffer.Count > 0)
@@ -348,7 +348,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         }
     }
 
-    class RowComparer : IComparer<Row>
+    class RowComparer : IComparer<IRow>
     {
         public RowComparer(OrderColumn column, IValueManager manager)
         {
@@ -359,7 +359,7 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
         private OrderColumn _order;
         private IValueManager _manager;
 
-        public int Compare(Row x, Row y)
+        public int Compare(IRow x, IRow y)
         {
             return _manager.EvaluateSort(_order, x[_order.Column.Name], y[_order.Column.Name]);
         }

@@ -256,7 +256,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 		protected bool InternalGotoBookmark(Guid bookmark, bool forward)
 		{
-			Row row;
+			IRow row;
 			if (!_bookmarks.TryGetValue(bookmark, out row))
 				throw new ServerException(ServerException.Codes.InvalidBookmark, bookmark);
 			return _sourceTable.GotoBookmark(_bookmarks[bookmark], forward);
@@ -269,7 +269,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 		protected void InternalDisposeBookmark(Guid bookmark)
 		{
-			Row internalBookmark = null;
+			IRow internalBookmark = null;
 			_bookmarks.TryGetValue(bookmark, out internalBookmark);
 			_bookmarks.Remove(bookmark);
 			if (internalBookmark != null)
@@ -436,7 +436,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public Row Select()
+		public IRow Select()
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -463,7 +463,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void Select(Row row)
+		public void Select(IRow row)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -661,7 +661,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public Schema.Order Order { get { return _sourceTable.Order; } }
 		
-		public Row GetKey()
+		public IRow GetKey()
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -688,7 +688,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public bool FindKey(Row key)
+		public bool FindKey(IRow key)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -715,7 +715,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void FindNearest(Row key)
+		public void FindNearest(IRow key)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -736,7 +736,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public bool Refresh(Row row)
+		public bool Refresh(IRow row)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -763,12 +763,12 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void Insert(Row row)
+		public void Insert(IRow row)
 		{
 			Insert(row, null);
 		}
 		
-		public void Insert(Row row, BitArray valueFlags)
+		public void Insert(IRow row, BitArray valueFlags)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -790,12 +790,12 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void Update(Row row)
+		public void Update(IRow row)
 		{
 			Update(row, null);
 		}
 		
-		public void Update(Row row, BitArray valueFlags)
+		public void Update(IRow row, BitArray valueFlags)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -888,7 +888,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public bool Default(Row row, string columnName)
+		public bool Default(IRow row, string columnName)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -915,7 +915,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public bool Change(Row oldRow, Row newRow, string columnName)
+		public bool Change(IRow oldRow, IRow newRow, string columnName)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -942,7 +942,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public bool Validate(Row oldRow, Row newRow, string columnName)
+		public bool Validate(IRow oldRow, IRow newRow, string columnName)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -1007,7 +1007,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// Fetch
-		public int Fetch(Row[] rows, Guid[] bookmarks, int count, bool skipCurrent, out CursorGetFlags flags)
+		public int Fetch(IRow[] rows, Guid[] bookmarks, int count, bool skipCurrent, out CursorGetFlags flags)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -1199,7 +1199,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public bool FindKey(Row key, out CursorGetFlags flags)
+		public bool FindKey(IRow key, out CursorGetFlags flags)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -1228,7 +1228,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void FindNearest(Row key, out CursorGetFlags flags)
+		public void FindNearest(IRow key, out CursorGetFlags flags)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
@@ -1256,7 +1256,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public bool Refresh(Row row, out CursorGetFlags flags)
+		public bool Refresh(IRow row, out CursorGetFlags flags)
 		{
 			Exception exception = null;
 			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();

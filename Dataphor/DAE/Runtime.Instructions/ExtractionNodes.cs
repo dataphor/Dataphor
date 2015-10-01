@@ -86,7 +86,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				table.Open();
 				if (table.Next())
 				{
-					Row row = table.Select();
+					IRow row = table.Select();
 					try
 					{
 						if (table.Next())
@@ -207,7 +207,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					table.Open();
 					if (table.Next())
 					{
-						Row row = table.Select();
+						IRow row = table.Select();
 						try
 						{
 							if (table.Next())
@@ -245,7 +245,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			else
 			{
-				Row row = (Row)objectValue;
+				IRow row = (IRow)objectValue;
 				try
 				{
 					#if USECOLUMNLOCATIONBINDING

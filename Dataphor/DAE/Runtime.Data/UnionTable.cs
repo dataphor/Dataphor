@@ -28,7 +28,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
 		protected Table _leftTable;
 		protected Table _rightTable;
-		protected Row _sourceRow;
+		protected IRow _sourceRow;
 		protected NativeTable _buffer;
 		protected Scan _scan;
         
@@ -129,7 +129,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			_scan.Open();
         }
         
-        protected override void InternalSelect(Row row)
+        protected override void InternalSelect(IRow row)
         {
 			_scan.GetRow(row);
         }

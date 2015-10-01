@@ -203,9 +203,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		#if USEINTERNALID
-		private void IndexInsert(IValueManager manager, NativeRowTree index, Row row, Guid internalID)
+		private void IndexInsert(IValueManager manager, NativeRowTree index, IRow row, Guid internalID)
 		#else
-		private void IndexInsert(IValueManager AManager, NativeRowTree AIndex, Row ARow)
+		private void IndexInsert(IValueManager manager, NativeRowTree index, IRow row)
 		#endif
 		{
 			int columnIndex;
@@ -265,7 +265,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		/// <summary>Inserts the given row into all the indexes of the table value.</summary>
 		/// <param name="row">The given row must conform to the structure of the table value.</param>
-		public void Insert(IValueManager manager, Row row)
+		public void Insert(IValueManager manager, IRow row)
 		{
 			// Insert the row into all indexes
 			#if USEINTERNALID
@@ -274,15 +274,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			foreach (NativeRowTree index in NonClusteredIndexes)
 				IndexInsert(manager, index, row, internalID);
 			#else
-			IndexInsert(AManager, ClusteredIndex, ARow);
+			IndexInsert(manager, ClusteredIndex, row);
 			foreach (NativeRowTree index in NonClusteredIndexes)
-				IndexInsert(AManager, index, ARow);
+				IndexInsert(manager, index, row);
 			#endif
 			
 			_rowCount++;
 		}
 		
-		private Row GetIndexData(IValueManager manager, Schema.RowType rowType, Row[] sourceRows)
+		private Row GetIndexData(IValueManager manager, Schema.IRowType rowType, IRow[] sourceRows)
 		{
 			Row row = new Row(manager, rowType);
 			try
@@ -319,7 +319,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		private bool GetIsIndexAffected(Schema.RowType rowType, Row row)
+		private bool GetIsIndexAffected(Schema.IRowType rowType, IRow row)
 		{
 			foreach (Schema.Column column in rowType.Columns)
 				if (row.DataType.Columns.ContainsName(column.Name))
@@ -327,9 +327,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return false;
 		}
 		
-		public bool HasRow(IValueManager manager, Row row)
+		public bool HasRow(IValueManager manager, IRow row)
 		{
-			Row key = GetIndexData(manager, ClusteredIndex.KeyRowType, new Row[]{row});
+			IRow key = GetIndexData(manager, ClusteredIndex.KeyRowType, new IRow[]{row});
 			try
 			{
 				using (RowTreeSearchPath searchPath = new RowTreeSearchPath())
@@ -344,10 +344,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public void Update(IValueManager manager, Row oldRow, Row newRow)
+		public void Update(IValueManager manager, IRow oldRow, IRow newRow)
 		{
 			// AOldRow must have at least the columns of the clustered index key
-			Row oldClusteredKey = GetIndexData(manager, ClusteredIndex.KeyRowType, new Row[]{oldRow});
+			Row oldClusteredKey = GetIndexData(manager, ClusteredIndex.KeyRowType, new IRow[]{oldRow});
 			try
 			{
 				bool isClusteredIndexKeyAffected = GetIsIndexAffected(ClusteredIndex.KeyRowType, newRow);
@@ -383,10 +383,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 										try
 										{
 											if (isIndexAffected)
-												newIndexKey = GetIndexData(manager, tree.KeyRowType, new Row[]{newRow, oldClusteredKey, oldClusteredData});
+												newIndexKey = GetIndexData(manager, tree.KeyRowType, new IRow[]{newRow, oldClusteredKey, oldClusteredData});
 												
 											if (isClusteredIndexKeyAffected)
-												newIndexData = GetIndexData(manager, tree.DataRowType, new Row[]{newRow, oldClusteredKey, oldClusteredData});
+												newIndexData = GetIndexData(manager, tree.DataRowType, new IRow[]{newRow, oldClusteredKey, oldClusteredData});
 												
 											if (isIndexAffected && isClusteredIndexKeyAffected)
 											{
@@ -422,10 +422,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 							
 							if (isClusteredIndexKeyAffected)
-								newClusteredKey = GetIndexData(manager, ClusteredIndex.KeyRowType, new Row[]{newRow, oldClusteredKey, oldClusteredData});
+								newClusteredKey = GetIndexData(manager, ClusteredIndex.KeyRowType, new IRow[]{newRow, oldClusteredKey, oldClusteredData});
 								
 							if (isClusteredIndexDataAffected)
-								newClusteredData = GetIndexData(manager, ClusteredIndex.DataRowType, new Row[]{newRow, oldClusteredData});
+								newClusteredData = GetIndexData(manager, ClusteredIndex.DataRowType, new IRow[]{newRow, oldClusteredData});
 						}
 						finally
 						{
@@ -465,10 +465,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public void Delete(IValueManager manager, Row row)
+		public void Delete(IValueManager manager, IRow row)
 		{
 			// Delete the row from all indexes
-			Row clusteredKey = GetIndexData(manager, ClusteredIndex.KeyRowType, new Row[]{row});
+			Row clusteredKey = GetIndexData(manager, ClusteredIndex.KeyRowType, new IRow[]{row});
 			try
 			{
 				using (RowTreeSearchPath searchPath = new RowTreeSearchPath())
@@ -483,7 +483,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					{
 						foreach (NativeRowTree bufferIndex in NonClusteredIndexes)
 						{
-							Row key = GetIndexData(manager, bufferIndex.KeyRowType, new Row[]{clusteredKey, clusteredData});
+							Row key = GetIndexData(manager, bufferIndex.KeyRowType, new IRow[]{clusteredKey, clusteredData});
 							try
 							{
 								bufferIndex.Delete(manager, (NativeRow)key.AsNative);

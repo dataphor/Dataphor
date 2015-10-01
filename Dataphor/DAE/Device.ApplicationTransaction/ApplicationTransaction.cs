@@ -2347,7 +2347,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				return base.InternalExecute(program, planNode);
 		}
 
-		protected override void InternalInsertRow(Program program, TableVar tableVar, Row row, BitArray valueFlags)
+		protected override void InternalInsertRow(Program program, TableVar tableVar, IRow row, BitArray valueFlags)
 		{
 			InsertOperation operation = null;
 			if (Transaction.IsPopulatingSource)
@@ -2398,7 +2398,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				_transactions.CurrentTransaction().Operations.Add(operation);
 		}
 		
-		protected override void InternalUpdateRow(Program program, TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
+		protected override void InternalUpdateRow(Program program, TableVar tableVar, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			if (Transaction.Closed)
 				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed);
@@ -2417,7 +2417,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
-		protected void LogDeletedRow(Program program, TableVar tableVar, Row row)
+		protected void LogDeletedRow(Program program, TableVar tableVar, IRow row)
 		{
 			TableMap tableMap = GetTableMap(tableVar);
 			Row localRow = new Row(program.ValueManager, tableVar.DataType.RowType, (NativeRow)row.AsNative);
@@ -2440,7 +2440,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
-		protected override void InternalDeleteRow(Program program, TableVar tableVar, Row row)
+		protected override void InternalDeleteRow(Program program, TableVar tableVar, IRow row)
 		{
 			if (Transaction.Closed)
 				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed, Transaction.ID);

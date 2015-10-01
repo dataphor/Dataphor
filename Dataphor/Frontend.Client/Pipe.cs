@@ -151,7 +151,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				data = new byte[length];
 				stream.Read(data, 0, length);
 			}
-			using (DAE.Runtime.Data.Row row = ((DAE.Runtime.Data.Row)DataValue.FromPhysical(process.GetServerProcess().ValueManager, GetCacheRowType(process), data, 0)))	// Uses GetServerProcess() as an optimization because this row is to remain local
+			using (DAE.Runtime.Data.IRow row = ((DAE.Runtime.Data.IRow)DataValue.FromPhysical(process.GetServerProcess().ValueManager, GetCacheRowType(process), data, 0)))	// Uses GetServerProcess() as an optimization because this row is to remain local
 			{
 				return (IScalar)row.GetValue("Value").Copy();
 			}

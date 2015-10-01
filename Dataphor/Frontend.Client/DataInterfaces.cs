@@ -126,17 +126,17 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Returns a <see cref="Row"/> that uniquely identifies 
 		/// the current row in the result set.
 		/// </summary> <doc/>
-		Row GetKey();
+		DAE.Runtime.Data.IRow GetKey();
 		
 		/// <summary> Positions the source on the row matching the row given 
 		/// in ARow. Returns true if a row is found, false otherwise. 
 		/// If a row is not found, the source position is not changed.
 		/// </summary> <doc/>
-		bool FindKey(Row AKey);
+		bool FindKey(DAE.Runtime.Data.IRow AKey);
 		
 		/// <summary> Positions the source on the row most closely matching 
 		/// the row given in ARow.</summary> <doc/>
-		void FindNearest(Row AKey);
+		void FindNearest(DAE.Runtime.Data.IRow AKey);
 		
 		/// <summary> Refreshes the result set, repositioning the source 
 		/// on the current row if possible.

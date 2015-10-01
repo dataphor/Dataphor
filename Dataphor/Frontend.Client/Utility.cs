@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	
 	public sealed class SequenceColumnUtility
 	{
-		public static void SequenceChange(Client.Session session, ISource source, bool shouldEnlist, DAE.Runtime.Data.Row fromRow, DAE.Runtime.Data.Row toRow, bool above, string script)
+		public static void SequenceChange(Client.Session session, ISource source, bool shouldEnlist, DAE.Runtime.Data.IRow fromRow, DAE.Runtime.Data.IRow toRow, bool above, string script)
 		{
 			if (!String.IsNullOrEmpty(script) && source != null)
 			{

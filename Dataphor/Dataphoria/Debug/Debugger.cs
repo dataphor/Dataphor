@@ -75,7 +75,7 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			if (_dataphoria.IsConnected)
 			{
-				var debugger = _dataphoria.EvaluateQuery("(.System.Debug.GetDebuggers() where Session_ID = SessionID())[]") as Row;
+				var debugger = _dataphoria.EvaluateQuery("(.System.Debug.GetDebuggers() where Session_ID = SessionID())[]") as IRow;
 				if (debugger != null)
 					InternalInitializeState((bool)debugger["IsPaused"], (bool)debugger["BreakOnException"], (bool)debugger["BreakOnStart"]);
 				else
@@ -318,7 +318,7 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				ClearSelectedError();
 				int candidateID = -1;
-				Row row = null;
+				IRow row = null;
 				while (processes.Next())
 				{
 					if (row == null)
@@ -402,7 +402,7 @@ namespace Alphora.Dataphor.Dataphoria
 			if (_selectedProcessID >= 0)
 			{
 				DebugLocator location = null;
-				var window = _dataphoria.EvaluateQuery(String.Format("(.System.Debug.GetCallStack({0}) where Index = {1})[]", _selectedProcessID, _selectedCallStackIndex)) as Row;
+				var window = _dataphoria.EvaluateQuery(String.Format("(.System.Debug.GetCallStack({0}) where Index = {1})[]", _selectedProcessID, _selectedCallStackIndex)) as IRow;
 				if (window != null)
 				{
 				    location = 
@@ -491,7 +491,7 @@ namespace Alphora.Dataphor.Dataphoria
 					var breakpoints = _dataphoria.OpenCursor(".System.Debug.GetBreakpoints()");
 					try
 					{
-						Row row = null;
+						IRow row = null;
 						while (breakpoints.Next())
 						{
 							if (row == null)

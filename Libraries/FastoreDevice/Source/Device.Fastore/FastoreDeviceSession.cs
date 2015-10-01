@@ -163,17 +163,17 @@ namespace Alphora.Dataphor.DAE.Device.Fastore
 		}
 
 		//Row level operations. Called from base class which calls internal functions.
-		protected override void InternalInsertRow(Program program, Schema.TableVar table, Row row, BitArray valueFlags)
+		protected override void InternalInsertRow(Program program, Schema.TableVar table, IRow row, BitArray valueFlags)
 		{
 			GetTables(table.Scope)[table].Insert(ServerProcess.ValueManager, row, _db);
 		}
 
-		protected override void InternalUpdateRow(Program program, Schema.TableVar table, Row oldRow, Row newRow, BitArray valueFlags)
+		protected override void InternalUpdateRow(Program program, Schema.TableVar table, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			GetTables(table.Scope)[table].Update(ServerProcess.ValueManager, oldRow, newRow, _db);
 		}
 
-		protected override void InternalDeleteRow(Program program, Schema.TableVar table, Row row)
+		protected override void InternalDeleteRow(Program program, Schema.TableVar table, IRow row)
 		{
 			GetTables(table.Scope)[table].Delete(ServerProcess.ValueManager, row, _db);
 		}

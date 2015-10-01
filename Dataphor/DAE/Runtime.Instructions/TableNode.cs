@@ -1279,11 +1279,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// of columns in the type is the same, where this is not necessarily true for row types
 		/// which are Equal.
 		/// </remarks>
-		public virtual Row PrepareNewRow(Program program, Row oldRow, Row newRow, ref BitArray valueFlags)
+		public virtual IRow PrepareNewRow(Program program, IRow oldRow, IRow newRow, ref BitArray valueFlags)
 		{
 			if (!newRow.DataType.Columns.Equivalent(DataType.Columns))
 			{
-				Row row = new Row(program.ValueManager, DataType.RowType);
+				IRow row = new Row(program.ValueManager, DataType.RowType);
 				BitArray localValueFlags = valueFlags != null ? new BitArray(row.DataType.Columns.Count) : null;
 				int columnIndex;
 				for (int index = 0; index < row.DataType.Columns.Count; index++)
@@ -1317,7 +1317,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return newRow;
 		}
 		
-		public void PushRow(Program program, Row row)
+		public void PushRow(Program program, IRow row)
 		{
 			if (row != null)
 			{
@@ -1328,7 +1328,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.Stack.Push(null);
 		}
 		
-		public void PushNewRow(Program program, Row row)
+		public void PushNewRow(Program program, IRow row)
 		{
 			#if USENAMEDROWVARIABLES
 			Row localRow = new Row(program.ValueManager, DataType.RowType, (NativeRow)row.AsNative);
@@ -1338,7 +1338,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack.Push(localRow);
 		}
 		
-		public void PushOldRow(Program program, Row row)
+		public void PushOldRow(Program program, IRow row)
 		{
 			#if USENAMEDROWVARIABLES
 			Row oldRow = new Row(program.ValueManager, DataType.RowType, (NativeRow)row.AsNative);
@@ -1350,7 +1350,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public void PopRow(Program program)
 		{
-			Row localRow = (Row)program.Stack.Pop();
+			IRow localRow = (IRow)program.Stack.Pop();
 			if (localRow != null)
 				localRow.Dispose();
 		}
@@ -1360,7 +1360,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// Select restricts the result set based on the clustering key of the node, whereas FullSelect restricts
 		/// the result set based on all columns declared of a type that has an equality operator defined.
 		/// </remarks>
-		public Row Select(Program program, Row row)
+		public IRow Select(Program program, IRow row)
 		{
 			// Symbols will only be null if this node is not bound
 			// The node will not be bound if it is functioning in a local server context evaluating change proposals in the client
@@ -1386,9 +1386,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 
-		public List<Row> SelectAll(Program program, Row row)
+		public List<IRow> SelectAll(Program program, IRow row)
 		{
-			var result = new List<Row>();
+			var result = new List<IRow>();
 
 			// Symbols will only be null if this node is not bound
 			// The node will not be bound if it is functioning in a local server context evaluating change proposals in the client
@@ -1418,7 +1418,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// Select restricts the result set based on the clustering key of the node, whereas FullSelect restricts
 		/// the result set based on all columns declared of a type that has an equality operator defined.
 		/// </remarks>
-		public Row FullSelect(Program program, Row row)
+		public IRow FullSelect(Program program, IRow row)
 		{
 			// Symbols will only be null if this node is not bound
 			// The node will not be bound if it is functioning in a local server context evaluating change proposals in the client
@@ -1456,7 +1456,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// but ACurrentRow will always be a row type with the same heading as the table type
 		/// for this node.
 		/// </remarks>
-		protected void CheckConcurrency(Program program, Row oldRow, Row currentRow)
+		protected void CheckConcurrency(Program program, IRow oldRow, IRow currentRow)
 		{
 			#if !USENATIVECONCURRENCYCOMPARE
 			EnsureConcurrencyNodes(AProcess);
@@ -1524,7 +1524,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// stronger than Equality in that the order of columns in the type is the same, 
 		/// where this is not necessarily true for row types which are Equal.
 		/// </remarks>
-		public virtual Row PrepareOldRow(Program program, Row row, bool checkConcurrency)
+		public virtual IRow PrepareOldRow(Program program, IRow row, bool checkConcurrency)
 		{
 			if ((checkConcurrency && ShouldCheckConcurrency) || !row.DataType.Columns.Equivalent(DataType.Columns))
 			{
@@ -1536,7 +1536,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					row.CopyTo(selectRow);
 					if (((checkConcurrency && ShouldCheckConcurrency) || selectRow.DataType.Columns.IsProperSupersetOf(row.DataType.Columns)) && !program.ServerProcess.ServerSession.Server.IsEngine)
 					{
-						Row localRow = Select(program, selectRow);
+						IRow localRow = Select(program, selectRow);
 						if (localRow != null)
 						{
 							if (checkConcurrency && ShouldCheckConcurrency)
@@ -1572,10 +1572,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 
 		// If AValueFlags are specified, they indicate whether or not each column of ANewRow was specified as part of the insert.
-		public virtual void Insert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
+		public virtual void Insert(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			Row newPreparedRow;
-			Row oldPreparedRow = null;
+			IRow newPreparedRow;
+			IRow oldPreparedRow = null;
 			if (oldRow != null)
 				oldPreparedRow = PrepareOldRow(program, oldRow, false);
 			try
@@ -1610,7 +1610,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected internal bool BeforeInsert(Program program, Row row, BitArray valueFlags)
+		protected internal bool BeforeInsert(Program program, IRow row, BitArray valueFlags)
 		{
 			#if USEPROPOSALEVENTS
 			DoBeforeInsert(ARow, AProgram);
@@ -1676,12 +1676,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return perform;
 		}
 		
-		protected internal void ExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
+		protected internal void ExecuteInsert(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			InternalExecuteInsert(program, oldRow, newRow, valueFlags, uncheckedValue);
 		}
 		
-		protected internal void AfterInsert(Program program, Row row, BitArray valueFlags)
+		protected internal void AfterInsert(Program program, IRow row, BitArray valueFlags)
 		{
 			if (TableVar.HasHandlers(EventType.AfterInsert))
 			{
@@ -1702,10 +1702,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 		
-		public virtual void Update(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
+		public virtual void Update(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
-			Row newPreparedRow;
-			Row oldPreparedRow = PrepareOldRow(program, oldRow, checkConcurrency);
+			IRow newPreparedRow;
+			IRow oldPreparedRow = PrepareOldRow(program, oldRow, checkConcurrency);
 			try
 			{
 				newPreparedRow = PrepareNewRow(program, oldPreparedRow, newRow, ref valueFlags);
@@ -1735,7 +1735,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected internal bool BeforeUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags)
+		protected internal bool BeforeUpdate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			#if USEPROPOSALEVENTS
 			DoBeforeUpdate(AOldRow, ANewRow, AProgram);
@@ -1816,12 +1816,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return perform;
 		}
 		
-		protected internal void ExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
+		protected internal void ExecuteUpdate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 			InternalExecuteUpdate(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 		}
 		
-		protected internal void AfterUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags)
+		protected internal void AfterUpdate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags)
 		{
 			if (TableVar.HasHandlers(EventType.AfterUpdate))
 			{
@@ -1851,9 +1851,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 		
-		public virtual void Delete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
+		public virtual void Delete(Program program, IRow row, bool checkConcurrency, bool uncheckedValue)
 		{
-			Row preparedRow = PrepareOldRow(program, row, false);
+			IRow preparedRow = PrepareOldRow(program, row, false);
 			try
 			{
 				if (uncheckedValue || BeforeDelete(program, preparedRow))
@@ -1870,7 +1870,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected internal bool BeforeDelete(Program program, Row row)
+		protected internal bool BeforeDelete(Program program, IRow row)
 		{
 			#if USEPROPOSALEVENTS
 			DoBeforeDelete(ARow, AProgram);
@@ -1919,12 +1919,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return perform;
 		}
 		
-		protected internal void ExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
+		protected internal void ExecuteDelete(Program program, IRow row, bool checkConcurrency, bool uncheckedValue)
 		{
 			InternalExecuteDelete(program, row, checkConcurrency, uncheckedValue);
 		}
 		
-		protected internal void AfterDelete(Program program, Row row)
+		protected internal void AfterDelete(Program program, IRow row)
 		{
 			if (TableVar.HasHandlers(EventType.AfterDelete))
 			{
@@ -1952,15 +1952,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return _tableVar.ShouldValidate || _tableVar.Columns[_tableVar.Columns.IndexOfName(columnName)].ShouldValidate;
 		}
 		
-		public virtual bool Validate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
+		public virtual bool Validate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
 			if (ShouldValidate(columnName))
 			{
-				Row oldPreparedRow = oldRow == null ? null : PrepareOldRow(program, oldRow, false);
+				IRow oldPreparedRow = oldRow == null ? null : PrepareOldRow(program, oldRow, false);
 				try
 				{
 					BitArray localValueFlags = valueFlags;
-					Row newPreparedRow = PrepareNewRow(program, oldRow, newRow, ref localValueFlags);
+					IRow newPreparedRow = PrepareNewRow(program, oldRow, newRow, ref localValueFlags);
 					try
 					{
 						bool changed = PreparedValidate(program, oldPreparedRow, newPreparedRow, valueFlags, columnName, true, true);
@@ -1984,7 +1984,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
-		protected bool PreparedValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
+		protected bool PreparedValidate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
 			#if USEPROPOSALEVENTS
 			DoValidateRow(ANewRow, AColumnName, AProgram);
@@ -2008,7 +2008,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return changed;
 		}
 		
-		protected bool InternalPreparedValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool isDescending, bool isProposable)
+		protected bool InternalPreparedValidate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool isDescending, bool isProposable)
 		{
 			// Given AOldRow and ANewRow, propagate a validate if necessary based on the difference between the row values
 			#if !USENATIVECONCURRENCYCOMPARE
@@ -2085,15 +2085,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return _tableVar.ShouldChange || _tableVar.Columns[_tableVar.Columns.IndexOfName(columnName)].ShouldChange;
 		}
 		
-		public virtual bool Change(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
+		public virtual bool Change(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
 			if (ShouldChange(columnName))
 			{
-				Row oldPreparedRow = PrepareOldRow(program, oldRow, false);
+				IRow oldPreparedRow = PrepareOldRow(program, oldRow, false);
 				try
 				{
 					BitArray localValueFlags = valueFlags;
-					Row newPreparedRow = PrepareNewRow(program, oldRow, newRow, ref localValueFlags);
+					IRow newPreparedRow = PrepareNewRow(program, oldRow, newRow, ref localValueFlags);
 					try
 					{
 						#if USEPROPOSALEVENTS
@@ -2138,11 +2138,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return _tableVar.ShouldDefault || _tableVar.Columns[_tableVar.Columns.IndexOfName(columnName)].ShouldDefault;
 		}
 		
-		public virtual bool Default(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
+		public virtual bool Default(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
 			if (ShouldDefault(columnName))
 			{
-				Row tempRow;
+				IRow tempRow;
 				BitArray localValueFlags = null;
 				if (oldRow == null)
 					tempRow = new Row(program.ValueManager, DataType.RowType);
@@ -2150,7 +2150,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					tempRow = PrepareNewRow(program, null, oldRow, ref localValueFlags);
 				try
 				{
-					Row localNewRow = PrepareNewRow(program, null, newRow, ref valueFlags);
+					IRow localNewRow = PrepareNewRow(program, null, newRow, ref valueFlags);
 					try
 					{
 						bool changed = PreparedDefault(program, tempRow, localNewRow, valueFlags, columnName, true);
@@ -2174,9 +2174,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
-		protected bool PreparedDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
+		protected bool PreparedDefault(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			Row localOldRow;
+			IRow localOldRow;
 			if ((oldRow == null) && isDescending)
 				localOldRow = new Row(program.ValueManager, DataType.RowType);
 			else
@@ -2198,7 +2198,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// DefaultColumns
-		public static bool DefaultColumns(Program program, Schema.TableVar tableVar, Row row, BitArray valueFlags, string columnName)
+		public static bool DefaultColumns(Program program, Schema.TableVar tableVar, IRow row, BitArray valueFlags, string columnName)
 		{
 			if (columnName != String.Empty)
 				return DefaultColumn(program, tableVar, row, valueFlags, columnName);
@@ -2212,7 +2212,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// DefaultColumn
-		public static bool DefaultColumn(Program program, Schema.TableVar tableVar, Row row, BitArray valueFlags, string columnName)
+		public static bool DefaultColumn(Program program, Schema.TableVar tableVar, IRow row, BitArray valueFlags, string columnName)
 		{
 			int rowIndex = row.DataType.Columns.IndexOfName(columnName);
 			if (rowIndex >= 0)
@@ -2317,7 +2317,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// ChangeColumns
-		public static bool ChangeColumns(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
+		public static bool ChangeColumns(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
 			if (columnName != String.Empty)
 			{
@@ -2339,7 +2339,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								
 							if (changed && (!Object.ReferenceEquals(newRow, program.Stack.Peek(0))))
 							{
-								Row row = (Row)program.Stack.Peek(0);
+								IRow row = (IRow)program.Stack.Peek(0);
 								row.CopyTo(newRow);
 								row.ValuesOwned = false;
 								row.Dispose();
@@ -2423,7 +2423,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									changed = true;
 									if (!Object.ReferenceEquals(newRow, program.Stack.Peek(0)))
 									{
-										Row row = (Row)program.Stack.Peek(0);
+										IRow row = (IRow)program.Stack.Peek(0);
 										row.CopyTo(newRow);
 										row.ValuesOwned = false;
 										row.Dispose();
@@ -2516,7 +2516,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// ValidateColumns
-		public static bool ValidateColumns(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
+		public static bool ValidateColumns(Program program, Schema.TableVar tableVar, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
 			if (columnName != String.Empty)
 			{
@@ -2756,10 +2756,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected virtual void ValidateInsertConstraints(Program program)
 		{
 			if (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints())
-				program.ServerProcess.AddInsertTableVarCheck(TableVar, (Row)program.Stack.Peek(0));
+				program.ServerProcess.AddInsertTableVarCheck(TableVar, (IRow)program.Stack.Peek(0));
 
 			#if !USENAMEDROWVARIABLES
-			PushRow(AProgram, (Row)AProgram.Stack.Peek(0));
+			PushRow(AProgram, (IRow)AProgram.Stack.Peek(0));
 			try
 			#endif		
 			{	
@@ -2799,10 +2799,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected virtual void ValidateUpdateConstraints(Program program, BitArray valueFlags)
 		{
 			if (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints(valueFlags, Schema.Transition.Update))
-				program.ServerProcess.AddUpdateTableVarCheck(TableVar, (Row)program.Stack.Peek(1), (Row)program.Stack.Peek(0), valueFlags);
+				program.ServerProcess.AddUpdateTableVarCheck(TableVar, (IRow)program.Stack.Peek(1), (IRow)program.Stack.Peek(0), valueFlags);
 			
 			#if !USENAMEDROWVARIABLES
-			PushRow(AProgram, (Row)AProgram.Stack.Peek(0));
+			PushRow(AProgram, (IRow)program.Stack.Peek(0));
 			try
 			#endif
 			{
@@ -2842,7 +2842,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected virtual void ValidateDeleteConstraints(Program program)
 		{
 			if (program.ServerProcess.InTransaction && TableVar.HasDeferredConstraints())
-				program.ServerProcess.AddDeleteTableVarCheck(TableVar, (Row)program.Stack.Peek(0));
+				program.ServerProcess.AddDeleteTableVarCheck(TableVar, (IRow)program.Stack.Peek(0));
 
 			if (TableVar.HasDeleteConstraints())
 				foreach (Schema.Constraint constraint in TableVar.DeleteConstraints)
@@ -2874,9 +2874,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								if (handler.IsDeferred && program.ServerProcess.InTransaction)
 									switch (eventType)
 									{
-										case EventType.AfterInsert : program.ServerProcess.CurrentTransaction.AddInsertHandler(handler, (Row)program.Stack.Peek(0)); invoked = true; break;
-										case EventType.AfterUpdate : program.ServerProcess.CurrentTransaction.AddUpdateHandler(handler, (Row)program.Stack.Peek(1), (Row)program.Stack.Peek(0)); invoked = true; break;
-										case EventType.AfterDelete : program.ServerProcess.CurrentTransaction.AddDeleteHandler(handler, (Row)program.Stack.Peek(0)); invoked = true; break;
+										case EventType.AfterInsert : program.ServerProcess.CurrentTransaction.AddInsertHandler(handler, (IRow)program.Stack.Peek(0)); invoked = true; break;
+										case EventType.AfterUpdate : program.ServerProcess.CurrentTransaction.AddUpdateHandler(handler, (IRow)program.Stack.Peek(1), (IRow)program.Stack.Peek(0)); invoked = true; break;
+										case EventType.AfterDelete : program.ServerProcess.CurrentTransaction.AddDeleteHandler(handler, (IRow)program.Stack.Peek(0)); invoked = true; break;
 										default : break; // only after handlers should be deferred to transaction commit
 									}
 
@@ -2913,7 +2913,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// ExecuteValidateHandlers prepares the stack and executes each handler associated with the validate event
-		protected virtual bool ExecuteValidateHandlers(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
+		protected virtual bool ExecuteValidateHandlers(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
 			if (TableVar.HasHandlers(EventType.Validate))
 			{
@@ -2970,7 +2970,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// ExecuteDefaultHandlers prepares the stack and executes each handler associated with the default event
-		protected virtual bool ExecuteDefaultHandlers(Program program, Row row, BitArray valueFlags, string columnName)
+		protected virtual bool ExecuteDefaultHandlers(Program program, IRow row, BitArray valueFlags, string columnName)
 		{
 			if (TableVar.HasHandlers(EventType.Default))
 			{
@@ -3019,7 +3019,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
-		protected virtual bool ExecuteChangeHandlers(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
+		protected virtual bool ExecuteChangeHandlers(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
 			if (TableVar.HasHandlers(EventType.Change))
 			{
@@ -3125,7 +3125,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
         // Insert
-        protected virtual void ExecuteDeviceInsert(Program program, Row row)
+        protected virtual void ExecuteDeviceInsert(Program program, IRow row)
         {
 			CheckModifySupported();
 			EnsureModifyNodes(program.Plan);
@@ -3159,7 +3159,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         }
         
 		// Update
-		protected virtual void ExecuteDeviceUpdate(Program program, Row oldRow, Row newRow)
+		protected virtual void ExecuteDeviceUpdate(Program program, IRow oldRow, IRow newRow)
 		{
 			CheckModifySupported();
 			EnsureModifyNodes(program.Plan);
@@ -3211,7 +3211,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
         
 		// Delete
-		protected virtual void ExecuteDeviceDelete(Program program, Row row)
+		protected virtual void ExecuteDeviceDelete(Program program, IRow row)
 		{
 			CheckModifySupported();
 			EnsureModifyNodes(program.Plan);
@@ -3227,30 +3227,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
         
-		protected virtual void InternalBeforeInsert(Program program, Row row, BitArray valueFlags) {}
-		protected virtual void InternalAfterInsert(Program program, Row row, BitArray valueFlags) {}
-		protected virtual void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
+		protected virtual void InternalBeforeInsert(Program program, IRow row, BitArray valueFlags) {}
+		protected virtual void InternalAfterInsert(Program program, IRow row, BitArray valueFlags) {}
+		protected virtual void InternalExecuteInsert(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			throw new RuntimeException(RuntimeException.Codes.UnableToPerformInsert);
 		}
 
-		protected virtual void InternalBeforeUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags) {}
-		protected virtual void InternalAfterUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags) {}
-		protected virtual void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
+		protected virtual void InternalBeforeUpdate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags) {}
+		protected virtual void InternalAfterUpdate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags) {}
+		protected virtual void InternalExecuteUpdate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 			throw new RuntimeException(RuntimeException.Codes.UnableToPerformUpdate);
 		}
 		
-		protected virtual void InternalBeforeDelete(Program program, Row row) {}
-		protected virtual void InternalAfterDelete(Program program, Row row) {}
-		protected virtual void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
+		protected virtual void InternalBeforeDelete(Program program, IRow row) {}
+		protected virtual void InternalAfterDelete(Program program, IRow row) {}
+		protected virtual void InternalExecuteDelete(Program program, IRow row, bool checkConcurrency, bool uncheckedValue)
 		{
 			throw new RuntimeException(RuntimeException.Codes.UnableToPerformDelete);
 		}
 		
-		protected virtual bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable) { return false; }
-		protected virtual bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending) { return false; }
-		protected virtual bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName) { return false; }
+		protected virtual bool InternalValidate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable) { return false; }
+		protected virtual bool InternalDefault(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending) { return false; }
+		protected virtual bool InternalChange(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName) { return false; }
 		
 		// PopulateNode
 		protected TableNode _populateNode;
@@ -3291,7 +3291,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ApplicationTransactionUtility.JoinExpression(program, _populateNode, this);
 		}
 		
-		public virtual void JoinApplicationTransaction(Program program, Row row) {}
+		public virtual void JoinApplicationTransaction(Program program,IRow row) {}
 
 		#region ShowPlan
 

@@ -421,7 +421,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 		
-		private RowSelectorExpressionBase EmitRowSelector(Program program, Row row)
+		private RowSelectorExpressionBase EmitRowSelector(Program program, IRow row)
 		{
 			DAE.Language.D4.RowSelectorExpressionBase selector = row.DataType is Schema.RowType ? (RowSelectorExpressionBase)new RowSelectorExpression() : new EntrySelectorExpression();
 			for (int index = 0; index < row.DataType.Columns.Count; index++)

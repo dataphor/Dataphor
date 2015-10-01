@@ -690,21 +690,21 @@ namespace Alphora.Dataphor.DAE
         /// <param name='ARow'>A <see cref="Row"/> to be filled in with default values.</param>
 		/// <param name='AColumnName'>The name of the column to default in <paramref name="ABuffer"/>.  If empty, the default is being requested for the full row.</param>
 		/// <returns>A boolean value indicating whether any column was defaulted in <paramref name="ARow"/>.</returns>
-        bool Default(Row ARow, string AColumnName);
+        bool Default(IRow ARow, string AColumnName);
         
         /// <summary>Ensures that the given row is valid.</summary>
         /// <param name='AOldRow'>A <see cref="Row"/> containing the values of the row before the change. May be null if this is a table-level validate.</param>
         /// <param name='ANewRow'>A <see cref="Row"/> containing the changed values.</param>
         /// <param name='AColumnName'>The name of the column which changed in <paramref name="ANewRow"/>.  If empty, the change affected more than one column.</param>
         /// <returns>A boolean value indicating whether any column was changed in <paramref name="ANewRow"/>.</returns>
-        bool Validate(Row AOldRow, Row ANewRow, string AColumnName);
+        bool Validate(IRow AOldRow, IRow ANewRow, string AColumnName);
         
         /// <summary>Requests the affect of a change to the given row.</summary>
         /// <param name='AOldRow'>A <see cref="Row"/> containing the values of the row before the change.</param>
         /// <param name='ANewRow'>A <see cref="Row"/> containing the changed row.</param>
         /// <param name='AColumnName'>The name of the column which changed in <paramref name="ANewRow"/>.  If empty, the change affected more than one column.</param>
         /// <returns>A boolean value indicating whether any column was changed in <paramref name="ANewRow"/>.</returns>
-        bool Change(Row AOldRow, Row ANewRow, string AColumnName);
+        bool Change(IRow AOldRow, IRow ANewRow, string AColumnName);
     }
 
     /// <summary> An expression plan interface. </summary>
@@ -737,10 +737,10 @@ namespace Alphora.Dataphor.DAE
         Statement EmitStatement();
         
         /// <summary> Returns a row for use in selecting from the cursor for this plan. </summary>
-        Row RequestRow();
+        IRow RequestRow();
         
         /// <summary> Releases a row previously requested with RequestRow. </summary>
-        void ReleaseRow(Row ARow);
+        void ReleaseRow(IRow ARow);
     }
     
 	[Flags]
@@ -958,7 +958,7 @@ namespace Alphora.Dataphor.DAE
 		///	Use this overload if you do not have a prepared row to select the data into.
 		///	</remarks>
 		///	<returns> A newly constructed <see cref="Row"/> containing the data for the current row of the cursor. </returns>
-        Row Select();
+        IRow Select();
 
 		/// <summary> Selects the values from the current row of the cursor into an existing <see cref="Row"/>. </summary>
 		/// <remarks>
@@ -969,7 +969,7 @@ namespace Alphora.Dataphor.DAE
 		///	into. This is preferable if you are selecting multiple rows from the cursor.</para>
 		///	</remarks>
 		/// <param name="ARow"> The prepared <see cref="Row"/> to retrieve the data values into. </param>
-        void Select(Row ARow);
+        void Select(IRow ARow);
         
         // BackwardsNavigable
 
@@ -1024,21 +1024,21 @@ namespace Alphora.Dataphor.DAE
 
 		/// <summary> Retrieves the key value for the current position of the cursor. </summary>
 		/// <remarks> The cursor must be Searchable. </remarks>
-		Row GetKey();
+		IRow GetKey();
 
 		/// <summary> Situates the cursor on the row identified by the specified key value. </summary>
 		/// <remarks> The cursor must be Searchable. </remarks>
 		/// <returns> True if the key was successfully located. </returns>
-        bool FindKey(Row AKey);
+        bool FindKey(IRow AKey);
 
 		/// <summary> Situates the cursor on the nearest row to the specified key value. </summary>
 		/// <remarks> The cursor must be Searchable. </remarks>
-		void FindNearest(Row AKey);
+		void FindNearest(IRow AKey);
 
 		/// <summary> Performs a refresh operation combined with a <see cref="FindKey"/>. </summary>
 		/// <remarks> The cursor must be Searchable. </remarks>
 		/// <returns> True if the cursor is positioned on the given row, false otherwise. </returns>
-		bool Refresh(Row ARow);
+		bool Refresh(IRow ARow);
 
 		// Updateable
 
@@ -1048,13 +1048,13 @@ namespace Alphora.Dataphor.DAE
 		///		The cursor must support Updateable to perform this operation.
         ///     </para>
 		///	</remarks>
-		void Insert(Row ARow);
+		void Insert(IRow ARow);
 		
 		/// <summary> Inserts the given row into the cursor. </summary>
 		/// <remarks>
 		///		Value flags, if specified, indicates which columns of the row have values set.
 		/// </remarks>
-		void Insert(Row ARow, BitArray AValueFlags);
+		void Insert(IRow ARow, BitArray AValueFlags);
 
 		/// <summary> Updates the row where the cursor is currently situated. </summary>
 		/// <remarks>
@@ -1063,13 +1063,13 @@ namespace Alphora.Dataphor.DAE
 		///		The cursor must support Updateable to perform this operation.
 		///		</para>
 		///	</remarks>
-		void Update(Row ARow);
+		void Update(IRow ARow);
 		
 		/// <summary> Updates the current row of the cursor with the given values. </summary>
 		/// <remarks>
 		///		Value flags, if specified, indicates which columns of the row are being changed.
 		/// </remarks>
-		void Update(Row ARow, BitArray AValueFlags);
+		void Update(IRow ARow, BitArray AValueFlags);
 
 		/// <summary> Deletes the row where the cursor is currently situated. </summary>
 		/// <remarks>
