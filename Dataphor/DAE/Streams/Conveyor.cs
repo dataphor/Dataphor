@@ -465,7 +465,7 @@ namespace Alphora.Dataphor.DAE.Streams
 	{
 		public BOPObjectConveyor() : base() {}
 		
-		public override bool IsStreaming { get { return base.IsStreaming; } }
+		public override bool IsStreaming { get { return true; } }
 		
 		private Serializer _serializer = new Serializer();
 		private Deserializer _deserializer = new Deserializer();
