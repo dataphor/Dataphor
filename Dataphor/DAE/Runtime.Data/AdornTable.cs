@@ -26,13 +26,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         public new AdornNode Node { get { return (AdornNode)_node; } }
         
-		protected Table _sourceTable;
+		protected ITable _sourceTable;
 		protected IRow _sourceRow;
 		protected bool _bOF;
         
         protected override void InternalOpen()
         {
-			_sourceTable = (Table)Node.Nodes[0].Execute(Program);
+			_sourceTable = (ITable)Node.Nodes[0].Execute(Program);
 			try
 			{
 				_sourceRow = new Row(Manager, _sourceTable.DataType.RowType);

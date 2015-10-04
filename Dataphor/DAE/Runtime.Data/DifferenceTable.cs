@@ -26,14 +26,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         public new DifferenceNode Node { get { return (DifferenceNode)_node; } }
         
-		protected Table _leftTable;
-		protected Table _rightTable;
+		protected ITable _leftTable;
+		protected ITable _rightTable;
 		protected bool _bOF;
         
         protected override void InternalOpen()
         {
-			_leftTable = (Table)Node.Nodes[0].Execute(Program);
-			_rightTable = (Table)Node.Nodes[1].Execute(Program);
+			_leftTable = (ITable)Node.Nodes[0].Execute(Program);
+			_rightTable = (ITable)Node.Nodes[1].Execute(Program);
 			_bOF = true;
         }
         

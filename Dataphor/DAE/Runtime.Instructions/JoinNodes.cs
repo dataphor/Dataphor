@@ -2093,7 +2093,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected IRow SelectLeftRow(Program program)
 		{
 			EnsureLeftSelectNode(program.Plan);
-			using (Table table = (Table)_leftSelectNode.Execute(program))
+			using (ITable table = (ITable)_leftSelectNode.Execute(program))
 			{
 				table.Open();
 				if (table.Next())
@@ -2106,7 +2106,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected bool SelectLeftRow(Program program, IRow row)
 		{
 			EnsureLeftSelectNode(program.Plan);
-			using (Table table = (Table)_leftSelectNode.Execute(program))
+			using (ITable table = (ITable)_leftSelectNode.Execute(program))
 			{
 				table.Open();
 				if (table.Next())
@@ -2121,7 +2121,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected IRow SelectRightRow(Program program)
 		{
 			EnsureRightSelectNode(program.Plan);
-			using (Table table = (Table)_rightSelectNode.Execute(program))
+			using (ITable table = (ITable)_rightSelectNode.Execute(program))
 			{
 				table.Open();
 				if (table.Next())
@@ -2134,7 +2134,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected bool SelectRightRow(Program program, IRow row)
 		{
 			EnsureRightSelectNode(program.Plan);
-			using (Table table = (Table)_rightSelectNode.Execute(program))
+			using (ITable table = (ITable)_rightSelectNode.Execute(program))
 			{
 				table.Open();
 				if (table.Next())
@@ -3497,7 +3497,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (!program.ServerProcess.ServerSession.Server.IsEngine && RetrieveRight)
 						{
 							EnsureRightSelectNode(program.Plan);
-							using (Table table = _rightSelectNode.Execute(program) as Table)
+							using (ITable table = (ITable)_rightSelectNode.Execute(program))
 							{
 								table.Open();
 								if (table.Next())
@@ -4493,7 +4493,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							if (!program.ServerProcess.ServerSession.Server.IsEngine && RetrieveLeft)
 							{
 								EnsureLeftSelectNode(program.Plan);
-								using (Table table = _leftSelectNode.Execute(program) as Table)
+								using (ITable table = (ITable)_leftSelectNode.Execute(program))
 								{
 									table.Open();
 									if (table.Next())

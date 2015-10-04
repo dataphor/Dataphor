@@ -228,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				transaction.BeginPopulateSource(program.ServerProcess);
 				try
 				{
-					using (Table table = (Table)populateNode.Execute(program))
+					using (ITable table = (ITable)populateNode.Execute(program))
 					{
 						Row row = new Row(program.ValueManager, table.DataType.RowType);
 						try

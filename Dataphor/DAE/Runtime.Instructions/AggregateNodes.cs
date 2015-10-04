@@ -188,7 +188,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack.PushWindow(0, this, Operator.Locator);
 			try
 			{
-				Table table = null;
+				ITable table = null;
 				try
 				{
 					program.Stack.Push(null); // result
@@ -225,7 +225,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							#endif
 								if (table == null)
 								{
-									table = (Table)Nodes[0].Execute(program);
+									table = (ITable)Nodes[0].Execute(program);
 									table.Open();
 								}
 

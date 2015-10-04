@@ -20,12 +20,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         public new ExtendNode Node { get { return (ExtendNode)_node; } }
         
-		protected Table _sourceTable;
+		protected ITable _sourceTable;
 		protected IRow _sourceRow;
         
         protected override void InternalOpen()
         {
-			_sourceTable = Node.Nodes[0].Execute(Program) as Table;
+			_sourceTable = (ITable)Node.Nodes[0].Execute(Program);
 			try
 			{
 				_sourceRow = new Row(Manager, _sourceTable.DataType.RowType);

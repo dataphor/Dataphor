@@ -41,7 +41,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		protected Schema.Order _sequenceOrder;
 		protected NativeTable _buffer;
 		protected Scan _scan;
-		protected Table _rootTable;
+		protected ITable _rootTable;
 		protected int _sequence;
 		protected int _sequenceColumnIndex = -1;
 		protected bool _empty;
@@ -62,7 +62,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (currentRow == null)
 			{
 				// Open the root expression, if it is not empty, save it on the cursor stack
-				_rootTable = (Table)Node.Nodes[1].Execute(Program);
+				_rootTable = (ITable)Node.Nodes[1].Execute(Program);
 				if (!_rootTable.IsEmpty())
 					_sourceTables.Push(_rootTable);
 				else
@@ -75,7 +75,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				Program.Stack.Push(parentRow);
 				try
 				{
-					Table table = (Table)Node.Nodes[2].Execute(Program);
+					ITable table = (ITable)Node.Nodes[2].Execute(Program);
 					
 					// If it is not empty, save it on the cursor stack, and save the parent row on the parent row stack
 					if (!table.IsEmpty())
@@ -98,7 +98,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected void PopSourceTable()
 		{
-			Table table = (Table)_sourceTables.Pop();
+			ITable table = (ITable)_sourceTables.Pop();
 			if (table != _rootTable)
 				((IRow)_parentRows.Pop()).Dispose();
 			else
@@ -204,11 +204,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			if (!_scan.Next())
 			{
-				Table table;
+				ITable table;
 				while (_sourceTables.Count > 0)
 				{
 					// Retrieve the current cursor to be iterated
-					table = (Table)_sourceTables[0];
+					table = (ITable)_sourceTables[0];
 					bool contextPopped = false;
 					bool contextPushed = false;
 					if (_sourceTables.Count > 1)

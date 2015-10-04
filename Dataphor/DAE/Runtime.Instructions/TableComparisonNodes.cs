@@ -142,7 +142,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected bool IsSubset(Program program, Table leftTable, Table rightTable)
+		protected bool IsSubset(Program program, ITable leftTable, ITable rightTable)
 		{
 			Row leftRow = new Row(program.ValueManager, LeftTableNode.DataType.RowType);
 			try
@@ -204,7 +204,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected bool IsSuperset(Program program, Table leftTable, Table rightTable)
+		protected bool IsSuperset(Program program, ITable leftTable, ITable rightTable)
 		{
 			Row leftRow = new Row(program.ValueManager, LeftTableNode.DataType.RowType);
 			try
@@ -280,9 +280,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program program)
 		{
-			using (Table leftTable = (Table)Nodes[0].Execute(program))
+			using (ITable leftTable = (ITable)Nodes[0].Execute(program))
 			{
-				using (Table rightTable = (Table)Nodes[1].Execute(program))
+				using (ITable rightTable = (ITable)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
 					if ((leftTable == null) || (rightTable == null))
@@ -302,9 +302,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program program)
 		{
-			using (Table leftTable = (Table)Nodes[0].Execute(program))
+			using (ITable leftTable = (ITable)Nodes[0].Execute(program))
 			{
-				using (Table rightTable = (Table)Nodes[1].Execute(program))
+				using (ITable rightTable = (ITable)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
 					if ((leftTable == null) || (rightTable == null))
@@ -325,9 +325,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program program)
 		{
-			using (Table leftTable = (Table)Nodes[0].Execute(program))
+			using (ITable leftTable = (ITable)Nodes[0].Execute(program))
 			{
-				using (Table rightTable = (Table)Nodes[1].Execute(program))
+				using (ITable rightTable = (ITable)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
 					if ((leftTable == null) || (rightTable == null))
@@ -348,9 +348,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program program)
 		{
-			using (Table leftTable = (Table)Nodes[0].Execute(program))
+			using (ITable leftTable = (ITable)Nodes[0].Execute(program))
 			{
-				using (Table rightTable = (Table)Nodes[1].Execute(program))
+				using (ITable rightTable = (ITable)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
 					if ((leftTable == null) || (rightTable == null))
@@ -371,9 +371,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program program)
 		{
-			using (Table leftTable = (Table)Nodes[0].Execute(program))
+			using (ITable leftTable = (ITable)Nodes[0].Execute(program))
 			{
-				using (Table rightTable = (Table)Nodes[1].Execute(program))
+				using (ITable rightTable = (ITable)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
 					if ((leftTable == null) || (rightTable == null))
@@ -394,9 +394,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program program)
 		{
-			using (Table leftTable = (Table)Nodes[0].Execute(program))
+			using (ITable leftTable = (ITable)Nodes[0].Execute(program))
 			{
-				using (Table rightTable = (Table)Nodes[1].Execute(program))
+				using (ITable rightTable = (ITable)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
 					if ((leftTable == null) || (rightTable == null))

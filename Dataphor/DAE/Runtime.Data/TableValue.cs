@@ -56,7 +56,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				_rowList = new List<IRow>();
 				_sizeList = new List<int>();
 				
-				Table table = OpenCursor();
+				ITable table = OpenCursor();
 				try
 				{
 					while (table.Next())
@@ -134,7 +134,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public override Table OpenCursor()
+		public override ITable OpenCursor()
 		{
 			Table table = new TableScan(Manager, _table, Manager.FindClusteringOrder(_table.TableVar), ScanDirection.Forward, null, null);
 			table.Open();
@@ -160,7 +160,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	}
 	
     /// <remarks> Table </remarks>
-    public abstract class Table : DataValue
+    public abstract class Table : DataValue, ITable
     {        
 		protected Table(IValueManager manager, Schema.ITableType tableType) : base(manager, tableType) { }
 		
@@ -740,7 +740,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			throw new NotSupportedException();
 		}
 		
-		public override Table OpenCursor()
+		public override ITable OpenCursor()
 		{
 			throw new NotSupportedException();
 		}

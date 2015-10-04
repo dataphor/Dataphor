@@ -24,12 +24,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         public new RestrictNode Node { get { return (RestrictNode)_node; } }
 		
-		protected Table _sourceTable;
-		protected Row _sourceRow;
+		protected ITable _sourceTable;
+		protected IRow _sourceRow;
         
         protected override void InternalOpen()
         {
-			_sourceTable = (Table)Node.Nodes[0].Execute(Program);
+			_sourceTable = (ITable)Node.Nodes[0].Execute(Program);
 			try
 			{
 				_sourceRow = new Row(Manager, _sourceTable.DataType.RowType);
@@ -148,8 +148,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		protected bool _bOF;
 		protected bool _eOF;
 
-		protected Row _firstKey;
-		protected Row _lastKey;
+		protected IRow _firstKey;
+		protected IRow _lastKey;
 
 		protected bool _isFirstKeyExclusive;
 		protected bool _isLastKeyExclusive;

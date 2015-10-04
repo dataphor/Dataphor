@@ -446,7 +446,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 					dataValue = scan;
 				}
 
-				Table table = dataValue as Table;
+				ITable table = dataValue as ITable;
 				if (table != null)
 				{
 					NativeTableValue nativeTable = new NativeTableValue();
@@ -583,7 +583,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			var tableType = dataParam.DataType as ITableType;
 			if (tableType != null)
 			{
-				var tableValue = dataParam.Value as Table;
+				var tableValue = dataParam.Value as ITable;
 				NativeTableValue nativeTable = new NativeTableValue();
 				nativeTable.Columns = ColumnsToNativeColumns(process.DataTypes, tableType.Columns);
 

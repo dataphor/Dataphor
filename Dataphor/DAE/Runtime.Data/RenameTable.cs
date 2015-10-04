@@ -26,13 +26,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         public new RenameNode Node { get { return (RenameNode)_node; } }
         
-		protected Table _sourceTable;
+		protected ITable _sourceTable;
 		protected IRow _sourceRow;
 		protected Schema.RowType _keyRowType;
         
         protected override void InternalOpen()
         {
-			_sourceTable = (Table)Node.Nodes[0].Execute(Program);
+			_sourceTable = (ITable)Node.Nodes[0].Execute(Program);
 			_sourceRow = new Row(Manager, _sourceTable.DataType.RowType);
         }
         

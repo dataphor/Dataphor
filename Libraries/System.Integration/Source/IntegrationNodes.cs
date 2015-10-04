@@ -151,7 +151,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 								Stack oldSourceContext = sourceProgram.SwitchContext(program.Stack);
 								try
 								{
-									Table source = (Table)sourceTable.Execute(sourceProgram);
+									ITable source = (ITable)sourceTable.Execute(sourceProgram);
 									try
 									{
 										source.Open();

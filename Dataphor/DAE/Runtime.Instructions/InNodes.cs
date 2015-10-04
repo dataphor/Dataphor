@@ -142,7 +142,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			Table table = (Table)argument2;
+			ITable table = (ITable)argument2;
 			#if NILPROPOGATION
 			if ((table == null) || (argument1 == null))
 				return null;

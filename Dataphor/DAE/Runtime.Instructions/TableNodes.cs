@@ -529,7 +529,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					using (IRow row = (IRow)source)
 					{
-						using (Table targetTable = (Table)target)
+						using (ITable targetTable = (ITable)target)
 						{
 							if (InsertedUpdate)
 							{
@@ -588,11 +588,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				else
 				{
-					using (Table sourceTable = ((Table)source))
+					using (ITable sourceTable = ((ITable)source))
 					{
 						using (Row row = new Row(program.ValueManager, sourceTable.DataType.RowType))
 						{
-							using (Table targetTable = ((Table)target))
+							using (ITable targetTable = ((ITable)target))
 							{
 								// TODO: Make sure LSource is static if it is referenced by the expression of LTarget
 								if (InsertedUpdate)
@@ -840,7 +840,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				// Open a table for the expression
 				// for each row in the table, update the value of each column to the given expression
-				using (Table table = (Table)Nodes[0].Execute(program))
+				using (ITable table = (ITable)Nodes[0].Execute(program))
 				{
 					Row oldRow = new Row(program.ValueManager, table.DataType.RowType);
 					try
@@ -1187,7 +1187,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				// Open a table for the expression
 				// delete all the rows
-				using (Table table = (Table)Nodes[0].Execute(program))
+				using (ITable table = (ITable)Nodes[0].Execute(program))
 				{
 					if (table.Next())
 					{
@@ -1346,7 +1346,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public override object InternalExecute(Program program)
 		{	
-			Table table = SourceNode.Execute(program) as Table;
+			ITable table = (ITable)SourceNode.Execute(program);
 			table.Open();
 			try
 			{

@@ -125,7 +125,7 @@ namespace Alphora.Dataphor.DAE.Server
 		protected PlanNode SourceNode { get { return _plan.SourceNode; } }
 		
 		protected DataParams _params;
-		protected Table _sourceTable;
+		protected ITable _sourceTable;
 		protected Schema.IRowType _sourceRowType;
 		public Schema.IRowType SourceRowType { get { return _sourceRowType; } }
 		
@@ -144,7 +144,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 				CursorNode cursorNode = _plan.CursorNode;
 				//LCursorNode.EnsureApplicationTransactionJoined(FPlan.ServerProcess);
-				_sourceTable = (Table)_plan.CursorNode.SourceNode.Execute(_program);
+				_sourceTable = (ITable)_plan.CursorNode.SourceNode.Execute(_program);
 				_sourceTable.Open();
 				_sourceRowType = _sourceTable.DataType.RowType;
 				

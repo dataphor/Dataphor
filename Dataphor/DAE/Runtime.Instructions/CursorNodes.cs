@@ -217,7 +217,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program)
 		{
-			return new CursorValue(program.ValueManager, CursorType, program.CursorManager.CreateCursor((Table)Nodes[0].Execute(program)));
+			return new CursorValue(program.ValueManager, CursorType, program.CursorManager.CreateCursor((ITable)Nodes[0].Execute(program)));
 		}
 		
 		public override Statement EmitStatement(EmitMode mode)
@@ -444,7 +444,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			cursor.SwitchContext(program);
 			try
 			{
-				Table table = cursor.Table;
+				ITable table = cursor.Table;
 				IRow row = (IRow)arguments[1];
 				string columnName = arguments.Length == 3 ? (string)arguments[2] : String.Empty;
 				return table.Node.Default(program, null, row, null, columnName);
@@ -466,7 +466,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			cursor.SwitchContext(program);
 			try
 			{
-				Table table = cursor.Table;
+				ITable table = cursor.Table;
 				IRow oldRow = (IRow)arguments[1];
 				IRow newRow = (IRow)arguments[2];
 				string columnName = arguments.Length == 4 ? (string)arguments[3] : String.Empty;
@@ -489,7 +489,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			cursor.SwitchContext(program);
 			try
 			{
-				Table table = cursor.Table;
+				ITable table = cursor.Table;
 				IRow oldRow = (IRow)arguments[1];
 				IRow newRow = (IRow)arguments[2];
 				string columnName = arguments.Length == 4 ? (string)arguments[3] : String.Empty;

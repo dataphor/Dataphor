@@ -201,7 +201,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			throw new RuntimeException(RuntimeException.Codes.UnableToProvideStreamAccess, DataType.Name);
 		}
 		
-		public virtual Table OpenCursor()
+		public virtual ITable OpenCursor()
 		{
 			throw new RuntimeException(RuntimeException.Codes.UnableToProvideCursorAccess, DataType.Name);
 		}

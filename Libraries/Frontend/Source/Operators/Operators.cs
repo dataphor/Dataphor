@@ -471,7 +471,7 @@ namespace Alphora.Dataphor.Frontend.Server
 		public override object InternalExecute(Program program)
 		{
 			string environment = (string)Nodes[0].Execute(program);
-			using (Table libraries = (Table)Nodes[1].Execute(program))
+			using (ITable libraries = (ITable)Nodes[1].Execute(program))
 			{
 				LocalTable result = new LocalTable(this, program);
 				try

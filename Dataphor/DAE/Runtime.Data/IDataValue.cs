@@ -29,7 +29,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		void WriteToPhysical(Stream stream, bool expandStreams);
 		Stream OpenStream();
 		Stream OpenStream(string representationName);
-		Table OpenCursor();
+		ITable OpenCursor();
 		IDataValue CopyAs(Schema.IDataType dataType);
 		IDataValue Copy();
 		object Copy(IValueManager manager);

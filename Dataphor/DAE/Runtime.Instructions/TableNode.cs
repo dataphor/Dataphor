@@ -1370,7 +1370,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.Stack.Push(row);
 				try
 				{
-					using (Table table = (Table)_selectNode.Execute(program))
+					using (ITable table = (ITable)_selectNode.Execute(program))
 					{
 						if (table.Next())
 							return table.Select();
@@ -1398,7 +1398,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.Stack.Push(row);
 				try
 				{
-					using (Table table = (Table)_selectAllNode.Execute(program))
+					using (ITable table = (ITable)_selectAllNode.Execute(program))
 					{
 						while (table.Next())
 							result.Add(table.Select());
@@ -1428,7 +1428,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.Stack.Push(row);
 				try
 				{
-					using (Table table = (Table)_fullSelectNode.Execute(program))
+					using (ITable table = (ITable)_fullSelectNode.Execute(program))
 					{
 						if (table.Next())
 							return table.Select();

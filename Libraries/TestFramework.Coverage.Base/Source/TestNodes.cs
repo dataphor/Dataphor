@@ -1946,9 +1946,9 @@ drop table Testing;
 	// operator TestNext(const AExpression : String, const AExpectedExpression : String) : Boolean
 	public abstract class TestCursorNode : InstructionNode
 	{
-		protected abstract void InternalTest(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode);
+		protected abstract void InternalTest(Program program, ITable table, ITable expectedTable, IRow row, IRow expectedRow, PlanNode rowEqualNode);
 		
-		protected bool RowsSame(Program program, IRow row, Row expectedRow, PlanNode rowEqualNode)
+		protected bool RowsSame(Program program, IRow row, IRow expectedRow, PlanNode rowEqualNode)
 		{
 			program.Stack.Push(row);
 			try
@@ -1987,11 +1987,11 @@ drop table Testing;
 			string AExpression = (string)arguments[0];
 			string AExpectedExpression = (string)arguments[1];
 			CursorNode node = (CursorNode)Compiler.Compile(program.Plan, AExpression, true);
-			Table table = (Table)node.SourceNode.Execute(program);
+			ITable table = (ITable)node.SourceNode.Execute(program);
 			try
 			{
 				CursorNode expectedNode = (CursorNode)Compiler.Compile(program.Plan, AExpectedExpression, true);
-				Table expectedTable = (Table)expectedNode.SourceNode.Execute(program);
+				ITable expectedTable = (ITable)expectedNode.SourceNode.Execute(program);
 				try
 				{
 					Row row = new Row(program.ValueManager, table.DataType.CreateRowType());
@@ -2052,7 +2052,7 @@ drop table Testing;
 		}
 
 		// Opens the cursor, walks through it, resets it, calls last, resets it and walks through it again.
-		protected void TestNavigable(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
+		protected void TestNavigable(Program program, ITable table, ITable expectedTable, IRow row, IRow expectedRow, PlanNode rowEqualNode)
 		{
 			if (!table.BOF())
 				throw new TestException("BOF() failed.");
@@ -2107,7 +2107,7 @@ drop table Testing;
 
 		// Calls last and walks backwards through it, walks forward through it, then calls first and walks forward through it again.
 		// Expects ATable and AExpectedTable to be on the EOF crack
-		protected void TestBackwardsNavigable(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
+		protected void TestBackwardsNavigable(Program program, ITable table, ITable expectedTable, IRow row, IRow expectedRow, PlanNode rowEqualNode)
 		{
 			if (!table.EOF())
 				throw new TestException("EOF() failed.");
@@ -2147,7 +2147,7 @@ drop table Testing;
 				throw new TestException("First() failed.");
 		}
 		
-		protected void TestSearchable(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
+		protected void TestSearchable(Program program, ITable table, ITable expectedTable, IRow row, IRow expectedRow, PlanNode rowEqualNode)
 		{
 			bool first = true;
 			IRow firstKey = null;
@@ -2206,7 +2206,7 @@ drop table Testing;
 	
 	public class TestNavigableNode : TestCursorNode
 	{
-		protected override void InternalTest(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
+		protected override void InternalTest(Program program, ITable table, ITable expectedTable, IRow row, IRow expectedRow, PlanNode rowEqualNode)
 		{
 			TestNavigable(program, table, expectedTable, row, expectedRow, rowEqualNode);
 		}
@@ -2214,7 +2214,7 @@ drop table Testing;
 
 	public class TestBackwardsNavigableNode : TestCursorNode
 	{
-		protected override void InternalTest(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
+		protected override void InternalTest(Program program, ITable table, ITable expectedTable, IRow row, IRow expectedRow, PlanNode rowEqualNode)
 		{
 			TestNavigable(program, table, expectedTable, row, expectedRow, rowEqualNode);
 			TestBackwardsNavigable(program, table, expectedTable, row, expectedRow, rowEqualNode);
@@ -2223,7 +2223,7 @@ drop table Testing;
 
 	public class TestSearchableNode : TestCursorNode
 	{
-		protected override void InternalTest(Program program, Table table, Table expectedTable, Row row, Row expectedRow, PlanNode rowEqualNode)
+		protected override void InternalTest(Program program, ITable table, ITable expectedTable, IRow row, IRow expectedRow, PlanNode rowEqualNode)
 		{
 			TestNavigable(program, table, expectedTable, row, expectedRow, rowEqualNode);
 			TestBackwardsNavigable(program, table, expectedTable, row, expectedRow, rowEqualNode);

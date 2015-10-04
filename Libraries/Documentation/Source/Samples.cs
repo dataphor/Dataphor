@@ -75,7 +75,7 @@ namespace DocSamples
 			// goal is to walk through the expression and extract metadata from the catalog for each item
 		}
 
-		protected virtual void ProcessTable(ServerProcess process, string templateName, string outputFileName, Table table)
+		protected virtual void ProcessTable(ServerProcess process, string templateName, string outputFileName, ITable table)
 		{
 			// ServerProcess is the connection to the Server and context of what is going on in this layer
 			IRow row;
@@ -131,7 +131,7 @@ namespace DocSamples
 			}
 		}
 
-		protected virtual void WriteData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, IRow row)
+		protected virtual void WriteData(ServerProcess process, string filepath, StreamWriter outputFile, ITable table, IRow row)
 		{
 			// non-formatted output is name \n comment \n\n
 
@@ -166,7 +166,7 @@ namespace DocSamples
 			outputFile.WriteLine("</AlphoraTopics>");
 		}
 
-		protected virtual void WriteTopicXMLData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, IRow row)
+		protected virtual void WriteTopicXMLData(ServerProcess process, string filepath, StreamWriter outputFile, ITable table, IRow row)
 		{
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
 			Schema.Object objectValue = process.Catalog.Objects[(string)row["Name"]];
@@ -198,7 +198,7 @@ namespace DocSamples
 			outputFile.WriteLine("</sect1>");
 		}
 
-		protected virtual void WriteDocbookData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, IRow row)
+		protected virtual void WriteDocbookData(ServerProcess process, string filepath, StreamWriter outputFile, ITable table, IRow row)
 		{
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
 			Schema.Object objectValue = process.Catalog.Objects[(string)row["Name"]];
@@ -240,7 +240,7 @@ namespace DocSamples
 	/// </summary>
 	public class DocOperator : DocCatalogObject
 	{
-		protected override void WriteData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, IRow row)
+		protected override void WriteData(ServerProcess process, string filepath, StreamWriter outputFile, ITable table, IRow row)
 		{
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
 			Schema.Object objectValue = process.Catalog.Objects[(string)row["Name"]];
@@ -258,7 +258,7 @@ namespace DocSamples
 			//}
 		}
 
-		protected override void WriteTopicXMLData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, IRow row)
+		protected override void WriteTopicXMLData(ServerProcess process, string filepath, StreamWriter outputFile, ITable table, IRow row)
 		{
 			
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];			
@@ -308,7 +308,7 @@ namespace DocSamples
 			outputFile.WriteLine("</AlphoraDoc>");
 		}
 
-		protected void WriteTopicFile(ServerProcess process, string filepath, StreamWriter outputFile, Table table, IRow row)
+		protected void WriteTopicFile(ServerProcess process, string filepath, StreamWriter outputFile, ITable table, IRow row)
 		{
 			D4TextEmitter Emitter = new D4TextEmitter();
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
@@ -394,7 +394,7 @@ namespace DocSamples
 				return(objectValue.Name);
 		}
 
-		protected override void WriteDocbookData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, IRow row)
+		protected override void WriteDocbookData(ServerProcess process, string filepath, StreamWriter outputFile, ITable table, IRow row)
 		{
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
 			var names = new List<String>();
@@ -436,7 +436,7 @@ namespace DocSamples
 			}
 		}
 
-		protected void WriteDocbookDeclarations(ServerProcess process, StreamWriter outputFile, Table table, Schema.Object objectValue)
+		protected void WriteDocbookDeclarations(ServerProcess process, StreamWriter outputFile, ITable table, Schema.Object objectValue)
 		{
 			// walk the table until the name of the object no longer matches, place the syntax in the outputfile for each overload
 			IRow row;

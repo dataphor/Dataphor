@@ -441,7 +441,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			TableSelectorExpressionBase selector = node.SourceNode.DataType is Schema.TableType ? (TableSelectorExpressionBase)new TableSelectorExpression() : new PresentationSelectorExpression();
 			selector.TypeSpecifier = node.SourceNode.DataType.EmitSpecifier(EmitMode.ForCopy);
 			selector.Keys.Add(program.FindClusteringKey(node.SourceNode.TableVar).EmitStatement(EmitMode.ForCopy));
-			Table table = (Table)node.SourceNode.Execute(program);
+			ITable table = (ITable)node.SourceNode.Execute(program);
 			try
 			{
 				Row row = new Row(program.ValueManager, table.DataType.RowType);

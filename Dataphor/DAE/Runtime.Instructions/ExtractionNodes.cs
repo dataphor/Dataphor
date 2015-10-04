@@ -76,7 +76,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program)
 		{
-			Table table = Nodes[0].Execute(program) as Table;
+			ITable table = (ITable)Nodes[0].Execute(program);
 			#if NILPROPOGATION
 			if ((table == null))
 				return null;
@@ -199,7 +199,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 
-			Table table = objectValue as Table;
+			ITable table = objectValue as ITable;
 			if (table != null)
 			{
 				try
@@ -295,7 +295,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program)
 		{
-			Table table = Nodes[0].Execute(program) as Table;
+			ITable table = Nodes[0].Execute(program) as ITable;
 			#if NILPROPOGATION
 			if (table == null)
 				return null;

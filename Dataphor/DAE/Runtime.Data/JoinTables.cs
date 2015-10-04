@@ -26,16 +26,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public new ConditionedTableNode Node { get { return (ConditionedTableNode)_node; } }
 
-		protected Table _leftTable;
-		protected Table _rightTable;
-		protected Row _leftRow;
-		protected Row _rightRow;
+		protected ITable _leftTable;
+		protected ITable _rightTable;
+		protected IRow _leftRow;
+		protected IRow _rightRow;
 
         protected override void InternalOpen()
         {
-			_leftTable = (Table)Node.Nodes[0].Execute(Program);
+			_leftTable = (ITable)Node.Nodes[0].Execute(Program);
 			_leftRow = new Row(Manager, new Schema.RowType(Node.LeftKey.Columns));
-			_rightTable = (Table)Node.Nodes[1].Execute(Program);
+			_rightTable = (ITable)Node.Nodes[1].Execute(Program);
 			_rightRow = new Row(Manager, new Schema.RowType(Node.RightKey.Columns));
         }
         

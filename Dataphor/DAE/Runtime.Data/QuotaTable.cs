@@ -28,17 +28,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public new QuotaNode Node { get { return (QuotaNode)_node; } }
 		
-		protected Table _sourceTable;
+		protected ITable _sourceTable;
 		protected int _sourceCount;
 		protected int _sourceCounter;
-		protected Row _sourceRow;
-		protected Row _compareRow;
-		protected Row _lastCompareRow;
+		protected IRow _sourceRow;
+		protected IRow _compareRow;
+		protected IRow _lastCompareRow;
 		protected bool _hasLastCompareRow;
 		
         protected override void InternalOpen()
         {
-			_sourceTable = (Table)Node.Nodes[0].Execute(Program);
+			_sourceTable = (ITable)Node.Nodes[0].Execute(Program);
 			try
 			{
 				_compareRow = new Row(Manager, new Schema.RowType(Node.Order.Columns));

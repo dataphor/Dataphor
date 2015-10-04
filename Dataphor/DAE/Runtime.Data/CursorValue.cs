@@ -71,7 +71,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// Cursors
     public class Cursor : Disposable
     {
-		protected internal Cursor(CursorManager manager, int iD, Table table) : base()
+		protected internal Cursor(CursorManager manager, int iD, ITable table) : base()
 		{
 			_iD = iD;
 			_table = table;
@@ -129,8 +129,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public int ID { get { return _iD; } }
 		
 		// Table
-		protected Table _table;
-		public Table Table { get { return _table; } }
+		protected ITable _table;
+		public ITable Table { get { return _table; } }
 		
 		// Manager
 		protected CursorManager _manager;
@@ -175,7 +175,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public int CreateCursor(Table table)
+		public int CreateCursor(ITable table)
 		{
 			table.Open(); // JIC
 			_nextCursorID++;

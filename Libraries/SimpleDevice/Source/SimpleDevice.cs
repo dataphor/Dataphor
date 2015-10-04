@@ -175,7 +175,7 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 						program.Start(null);
 						try
 						{
-							Table table = program.Code.Execute(program) as Table;
+							ITable table = (ITable)program.Code.Execute(program);
 							try
 							{
 								table.Open();

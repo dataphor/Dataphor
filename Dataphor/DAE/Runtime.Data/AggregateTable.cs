@@ -26,12 +26,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         public new AggregateNode Node { get { return (AggregateNode)_node; } }
         
-		protected Table _sourceTable;
+		protected ITable _sourceTable;
 		protected IRow _sourceRow;
         
         protected override void InternalOpen()
         {
-			_sourceTable = (Table)Node.Nodes[0].Execute(Program);
+			_sourceTable = (ITable)Node.Nodes[0].Execute(Program);
 			_sourceRow = new Row(Manager, _sourceTable.DataType.RowType);
         }
         

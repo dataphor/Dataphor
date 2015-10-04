@@ -272,6 +272,7 @@
     </Compile>
     <Compile Include="Runtime.Data\IRow.cs" />
     <Compile Include="Runtime.Data\IScalar.cs" />
+    <Compile Include="Runtime.Data\ITable.cs" />
     <Compile Include="Runtime.Data\JoinTables.cs">
       <SubType>Code</SubType>
     </Compile>

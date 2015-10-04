@@ -175,7 +175,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		protected override void PopulateTable()
 		{
-			using (Table table = (Table)Node.Nodes[0].Execute(Program))
+			using (ITable table = (ITable)Node.Nodes[0].Execute(Program))
 			{
 				Row row = new Row(Manager, DataType.RowType);
 				try
@@ -206,7 +206,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		protected override void PopulateTable()
 		{
-			using (Table table = (Table)Node.Nodes[0].Execute(Program))
+			using (ITable table = (ITable)Node.Nodes[0].Execute(Program))
 			{
 				Row row = new Row(Manager, DataType.RowType);
 				try
@@ -234,7 +234,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     public class BrowseTableItem : Disposable
     {
         // constructor
-        protected internal BrowseTableItem(BrowseTable browseTable, Table table, object contextVar, Row origin, bool forward, bool inclusive)
+        protected internal BrowseTableItem(BrowseTable browseTable, ITable table, object contextVar, IRow origin, bool forward, bool inclusive)
         {
 			_browseTable = browseTable;
             _table = table;
@@ -282,8 +282,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
 
         // Table
-        protected Table _table;
-        public Table Table { get { return _table; } }
+        protected ITable _table;
+        public ITable Table { get { return _table; } }
         
         // ContextVar
         protected object _contextVar;
@@ -594,7 +594,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					new BrowseTableItem
 					(
 						this, 
-						(Table)browseVariantNode.Execute(Program),
+						(ITable)browseVariantNode.Execute(Program),
 						contextVar,
 						localOrigin, 
 						forward, 

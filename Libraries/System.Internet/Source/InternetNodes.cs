@@ -117,7 +117,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			string result;
 			
 			string uRL = (string)arguments[0];
-			Table fields = (Table)arguments[1];
+			ITable fields = (ITable)arguments[1];
 
 			// Build the URL encoding for the body
 			StringBuilder body = new StringBuilder();

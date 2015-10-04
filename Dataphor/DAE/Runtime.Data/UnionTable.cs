@@ -26,8 +26,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         public new UnionNode Node { get { return (UnionNode)_node; } }
         
-		protected Table _leftTable;
-		protected Table _rightTable;
+		protected ITable _leftTable;
+		protected ITable _rightTable;
 		protected IRow _sourceRow;
 		protected NativeTable _buffer;
 		protected Scan _scan;
@@ -35,10 +35,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         protected override void InternalOpen()
         {
 			_sourceRow = new Row(Manager, Node.DataType.RowType);
-			_leftTable = Node.Nodes[0].Execute(Program) as Table;
+			_leftTable = (ITable)Node.Nodes[0].Execute(Program);
 			try
 			{
-				_rightTable = Node.Nodes[1].Execute(Program) as Table;
+				_rightTable = (ITable)Node.Nodes[1].Execute(Program);
 			}
 			catch
 			{
