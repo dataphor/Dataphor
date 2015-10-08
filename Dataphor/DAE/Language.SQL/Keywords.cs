@@ -80,9 +80,6 @@ namespace Alphora.Dataphor.DAE.Language.SQL
         public const string All = "all";
         public const string Asc = "asc";
         public const string Desc = "desc";
-        public const string Nulls = "nulls";
-        public const string First = "first";
-        public const string Last = "last";
         public const string Into = "into";
         public const string Set = "set";
         public const string Primary = "primary";

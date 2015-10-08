@@ -27,19 +27,7 @@ namespace Alphora.Dataphor.DAE.Language.TSQL
 				base.EmitBinaryExpression(expression);
 		}
 
-		protected override void EmitOrderFieldExpression(SQL.OrderFieldExpression orderFieldExpression)
-		{
-			// Normally we would explicitly say we want nulls sorted before/after
-			// regular values when doing ascending/descending respectively,
-			// however this is MS SQL Server's default behavior, and since that
-			// DBMS doesn't support the ISO standard syntax (see parent class),
-			// and since doing it explicitly with alternate syntax for
-			// MS SQL Server would likely mean it would not use indexes / be slow,
-			// we will for now leave the implicit behavior to be used.
-			EmitQualifiedFieldExpression(orderFieldExpression);
-			AppendFormat(" {0}", orderFieldExpression.Ascending ? SQL.Keywords.Asc : SQL.Keywords.Desc);
-		}
-
+		
 		protected override void EmitTableSpecifier(SQL.TableSpecifier tableSpecifier)
 		{
 			base.EmitTableSpecifier(tableSpecifier);
