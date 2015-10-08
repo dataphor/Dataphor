@@ -1516,9 +1516,19 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false)
 							),
 							new ValueExpression(-1)
-						)
+						),
+						new CaseItemExpression
+						(
+							new BinaryExpression
+							(
+								localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
+								"iGreater",
+								localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false)
+							),
+							new ValueExpression(1)
+						),
 					},
-					new CaseElseExpression(new ValueExpression(1))
+					new CaseElseExpression(new ValueExpression(null, TokenType.Nil))
 				);
 		}
 	}
