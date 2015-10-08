@@ -665,7 +665,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				else
 				{
 					ArrayList path = new ArrayList();
-					BuildParentPath((IRow)key.Copy(), path);
+					BuildParentPath((IRow)DataValue.Copy(key), path);
 					try
 					{
 						BeginUpdate();

@@ -2388,7 +2388,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					// If this is the deleted table var for a table map, do not log the operation as part of the application transaction
 					if (!tableVar.IsDeletedTable)
 					{
-						operation = new InsertOperation(Transaction, tableVar, (NativeRow)row.CopyNative(), valueFlags);
+						operation = new InsertOperation(Transaction, tableVar, (NativeRow)DataValue.CopyNative(row), valueFlags);
 						Transaction.Operations.Add(operation);
 					}
 				}
@@ -2408,7 +2408,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 			if (!InTransaction || !ServerProcess.CurrentTransaction.InRollback)
 			{			
-				UpdateOperation operation = new UpdateOperation(Transaction, tableVar, (NativeRow)oldRow.CopyNative(), (NativeRow)newRow.CopyNative(), valueFlags);
+				UpdateOperation operation = new UpdateOperation(Transaction, tableVar, (NativeRow)DataValue.CopyNative(oldRow), (NativeRow)DataValue.CopyNative(newRow), valueFlags);
 				Transaction.Operations.Add(operation);
 				if (InTransaction && !ServerProcess.NonLogged)
 					_transactions.CurrentTransaction().Operations.Add(operation);
@@ -2450,7 +2450,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			
 			if (!InTransaction || !ServerProcess.CurrentTransaction.InRollback)
 			{
-				DeleteOperation operation = new DeleteOperation(Transaction, tableVar, (NativeRow)row.CopyNative());
+				DeleteOperation operation = new DeleteOperation(Transaction, tableVar, (NativeRow)DataValue.CopyNative(row));
 				Transaction.Operations.Add(operation);
 				if (InTransaction && !ServerProcess.NonLogged)
 					_transactions.CurrentTransaction().Operations.Add(operation);

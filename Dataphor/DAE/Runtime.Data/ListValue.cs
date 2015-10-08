@@ -149,8 +149,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return _values.GetEnumerator();
 		}
 	}
+
+	public interface IListValue : IDataValue, IList
+	{
+		new Schema.IListType DataType { get; }
+	}
 	
-	public class ListValue : DataValue, IList
+	public class ListValue : DataValue, IListValue
 	{
 		public ListValue(IValueManager manager, Schema.IListType dataType) : base(manager, dataType) 
 		{
@@ -186,463 +191,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public override bool IsNil { get { return _list == null; } }
 		
-		private object[] _writeList;
-		private IDataValue[] _elementWriteList;
-		
-		/*
-			List Value Format ->
-			
-				00 -> 0 - Indicates that the list is nil, no data follows 1 - Indicates that the list is non-nil, data follows as specified
-				01 -> 0 - Indicates that non-native values are stored as a StreamID 1 - Indicates non-native values are stored inline
-				02-05 -> Number of elements in the list
-				06-XX -> N List Elements
-				
-			List Element Format ->
-
-				There are five possibilities for an element ->			
-					Nil Native
-					Nil Non-Native (StreamID.Null)
-					Standard Native
-					Standard Non-Native
-					Specialized Native
-					Specialized Non-Native
-				
-					For non-native values, the value will be expanded or not dependending on the expanded setting for the list value
-
-				00	-> 0 - 5
-					0 if the list contains a native nil for this element - no data follows
-					1 if the list contains a non-native nil for this element - no data follows
-					2 if the list contains a native value of the element type of the list
-						01-04 -> The length of the physical representation of this value
-						05-XX -> The physical representation of this value
-					3 if the list contains a non-native value of the element type of the list
-						01-04 -> The length of the physical representation of this value
-						05-XX -> The physical representation of this value (expanded based on the expanded setting for the list value)
-					4 if the list contains a native value of some specialization of the element type of the list
-						01-XX -> The data type name of this value, stored using a StringConveyor
-						XX+1-XX+4 -> The length of the physical representation of this value
-						XX+5-YY -> The physical representation of this value
-					5 if the list contains a non-native value of some specialization of the element type of the list
-						01-XX -> The data type name of this value, stored using a StringConveyor
-						XX+1-XX+4 -> The lnegth of the physical representation of this value
-						XX+5-YY -> The physical representation of this value (expanded based on the expanded setting for the list value)
-		*/
-
-		public override int GetPhysicalSize(bool expandStreams)
-		{
-			int size = 1; // write the value indicator
-			if (!IsNil)
-			{
-				size += sizeof(int) + 1; // write the extended streams indicator and the number of elements in the list
-				_writeList = new object[Count()]; // list for saving the sizes or streams of each element in the list
-				_elementWriteList = new DataValue[Count()]; // list for saving host representations of values between the GetPhysicalSize and WriteToPhysical calls
-				Stream stream;
-				StreamID streamID;
-				Schema.IScalarType scalarType;
-				IDataValue element;
-				int elementSize;
-				for (int index = 0; index < _writeList.Length; index++)
-				{
-					size += sizeof(byte); // write a value indicator
-					if (_list.Values[index] != null)
-					{
-						if (!DataType.ElementType.Equals(_list.DataTypes[index]))
-							size += Manager.GetConveyor(Manager.DataTypes.SystemString).GetSize(_list.DataTypes[index].Name); // write the name of the data type of the value
-							
-						scalarType = _list.DataTypes[index] as Schema.IScalarType;
-						if ((scalarType != null) && !scalarType.IsCompound)
-						{
-							if (_list.Values[index] is StreamID)
-							{
-								// If this is a non-native scalar
-								streamID = (StreamID)_list.Values[index];
-								if (expandStreams)
-								{
-									if (streamID != StreamID.Null)
-									{
-										stream = Manager.StreamManager.Open((StreamID)_list.Values[index], LockMode.Exclusive);
-										_writeList[index] = stream;
-										size += sizeof(int) + (int)stream.Length;
-									}
-								}
-								else
-								{
-									if (streamID != StreamID.Null)
-									{
-										elementSize = StreamID.CSizeOf;
-										_writeList[index] = elementSize;
-										size += elementSize;
-									}
-								}
-							}
-							else
-							{
-								Streams.IConveyor conveyor = Manager.GetConveyor(scalarType);
-								if (conveyor.IsStreaming)
-								{
-									stream = new MemoryStream(64);
-									_writeList[index] = stream;
-									conveyor.Write(_list.Values[index], stream);
-									stream.Position = 0;
-									size += sizeof(int) + (int)stream.Length;
-								}
-								else
-								{
-									elementSize = conveyor.GetSize(_list.Values[index]);
-									_writeList[index] = elementSize;
-									size += sizeof(int) + elementSize;;
-								}
-							}
-						}
-						else
-						{
-							element = DataValue.FromNativeList(Manager, DataType, _list, index);
-							_elementWriteList[index] = element;
-							elementSize = element.GetPhysicalSize(expandStreams);
-							_writeList[index] = elementSize;
-							size += sizeof(int) + elementSize;
-						}						
-					}
-				}
-			}
-			return size;
-		}
-		
-		public override void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
-		{
-			if (_writeList == null)
-				throw new RuntimeException(RuntimeException.Codes.UnpreparedWriteToPhysicalCall);
-				
-			buffer[offset] = (byte)(IsNil ? 0 : 1); // Write the value indicator
-			offset++;
-				
-			buffer[offset] = (byte)(expandStreams ? 0 : 1); // Write the expanded streams indicator
-			offset++;
-				
-			Streams.IConveyor stringConveyor = null;
-			Streams.IConveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
-			Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
-			int32Conveyor.Write(Count(), buffer, offset); // Write the number of elements in the list
-			offset += sizeof(int);
-
-			Stream stream;
-			StreamID streamID;
-			int elementSize;
-			Schema.IScalarType scalarType;
-			Streams.IConveyor conveyor;
-			IDataValue element;
-			for (int index = 0; index < _writeList.Length; index++)
-			{
-				if (_list.Values[index] == null)
-				{
-					buffer[offset] = (byte)0; // Write the native nil indicator
-					offset++;
-				}
-				else
-				{
-					scalarType = _list.DataTypes[index] as Schema.IScalarType;
-					if ((scalarType != null) && !scalarType.IsCompound)
-					{
-						if (_list.Values[index] is StreamID)
-						{
-							// If this is a non-native scalar
-							streamID = (StreamID)_list.Values[index];
-							if (streamID == StreamID.Null)
-							{
-								buffer[offset] = (byte)1; // Write the non-native nil indicator
-								offset++;
-							}
-							else
-							{
-								if (DataType.ElementType.Equals(_list.DataTypes[index]))
-								{
-									buffer[offset] = (byte)3; // Write the native standard value indicator
-									offset++;
-								}
-								else
-								{
-									buffer[offset] = (byte)5; // Write the native specialized value indicator
-									offset++;
-									if (stringConveyor == null)
-										stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
-									elementSize = stringConveyor.GetSize(_list.DataTypes[index].Name);
-									stringConveyor.Write(_list.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
-									offset += elementSize;
-								}
-								
-								if (expandStreams)
-								{
-									stream = (Stream)_writeList[index];
-									int32Conveyor.Write(Convert.ToInt32(stream.Length), buffer, offset);
-									offset += sizeof(int);
-									stream.Read(buffer, offset, (int)stream.Length);
-									offset += (int)stream.Length;
-								}
-								else
-								{
-									int64Conveyor.Write(streamID.Value, buffer, offset);
-									offset += sizeof(long);
-								}
-							}
-						}
-						else
-						{
-							if (DataType.ElementType.Equals(_list.DataTypes[index]))
-							{
-								buffer[offset] = (byte)2; // Write the native standard value indicator
-								offset++;
-							}
-							else
-							{
-								buffer[offset] = (byte)4; // Write the native specialized value indicator
-								offset++;
-								if (stringConveyor == null)
-									stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
-								elementSize = stringConveyor.GetSize(_list.DataTypes[index].Name);
-								stringConveyor.Write(_list.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
-								offset += elementSize;
-							}
-
-							conveyor = Manager.GetConveyor(scalarType);
-							if (conveyor.IsStreaming)
-							{
-								stream = (Stream)_writeList[index];
-								int32Conveyor.Write(Convert.ToInt32(stream.Length), buffer, offset); // Write the length of the value
-								offset += sizeof(int);
-								stream.Read(buffer, offset, (int)stream.Length); // Write the value of this scalar
-								offset += (int)stream.Length;
-							}
-							else
-							{
-								elementSize = (int)_writeList[index]; // Write the length of the value
-								int32Conveyor.Write(elementSize, buffer, offset);
-								offset += sizeof(int);
-								conveyor.Write(_list.Values[index], buffer, offset); // Write the value of this scalar
-								offset += elementSize;
-							}
-						}
-					}
-					else
-					{
-						if (DataType.ElementType.Equals(_list.DataTypes[index]))
-						{
-							buffer[offset] = (byte)2; // Write the native standard value indicator
-							offset++;
-						}
-						else
-						{
-							buffer[offset] = (byte)4; // Write the native specialized value indicator
-							offset++;
-							if (stringConveyor == null)
-								stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
-							elementSize = stringConveyor.GetSize(_list.DataTypes[index].Name);
-							stringConveyor.Write(_list.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
-							offset += elementSize;
-						}
-
-						element = _elementWriteList[index];
-						elementSize = (int)_writeList[index];
-						int32Conveyor.Write(elementSize, buffer, offset);
-						offset += sizeof(int);
-						element.WriteToPhysical(buffer, offset, expandStreams); // Write the physical representation of the value;
-						offset += elementSize;
-						element.Dispose();
-					}
-				}
-			}
-		}
-
-		public override void ReadFromPhysical(byte[] buffer, int offset)
-		{
-			Clear(); // Clear the current value of the list
-			
-			if (buffer[offset] == 0)
-			{
-				_list = null;
-			}
-			else
-			{
-				_list = new NativeList();
-				if (buffer[offset] != 0)
-				{
-					offset++;
-
-					bool expandStreams = buffer[offset] != 0; // Read the exapnded streams indicator
-					offset++;
-						
-					Streams.IConveyor stringConveyor = null;
-					Streams.IConveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
-					Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
-					int count = (int)int32Conveyor.Read(buffer, offset); // Read the number of elements in the list
-					offset += sizeof(int);
-
-					Stream stream;
-					StreamID streamID;
-					int elementSize;
-					string dataTypeName;
-					Schema.IDataType dataType;
-					Schema.IScalarType scalarType;
-					Streams.IConveyor conveyor;
-					for (int index = 0; index < count; index++)
-					{
-						byte valueIndicator = buffer[offset];
-						offset++;
-						
-						switch (valueIndicator)
-						{
-							case 0 : // native nil
-								_list.DataTypes.Add(DataType.ElementType);
-								_list.Values.Add(null);
-							break;
-							
-							case 1 : // non-native nil
-								_list.DataTypes.Add(DataType.ElementType);
-								_list.Values.Add(StreamID.Null);
-							break;
-							
-							case 2 : // native standard value
-								scalarType = DataType.ElementType as Schema.IScalarType;
-								if ((scalarType != null) && !scalarType.IsCompound)
-								{
-									conveyor = Manager.GetConveyor(scalarType);
-									if (conveyor.IsStreaming)
-									{
-										elementSize = (int)int32Conveyor.Read(buffer, offset);
-										offset += sizeof(int);
-										stream = new MemoryStream(buffer, offset, elementSize, false, true);
-										_list.DataTypes.Add(DataType.ElementType);
-										_list.Values.Add(conveyor.Read(stream));
-										offset += elementSize;
-									}
-									else
-									{
-										elementSize = (int)int32Conveyor.Read(buffer, offset);
-										offset += sizeof(int);
-										_list.DataTypes.Add(DataType.ElementType);
-										_list.Values.Add(conveyor.Read(buffer, offset));
-										offset += elementSize;
-									}
-								}
-								else
-								{
-									elementSize = (int)int32Conveyor.Read(buffer, offset);
-									offset += sizeof(int);
-									_list.DataTypes.Add(DataType.ElementType);
-									using (IDataValue tempValue = DataValue.FromPhysical(Manager, DataType.ElementType, buffer, offset))
-									{
-										_list.Values.Add(tempValue.AsNative);
-										tempValue.ValuesOwned = false;
-									}
-									offset += elementSize;
-								}
-							break;
-							
-							case 3 : // non-native standard value
-								scalarType = DataType.ElementType as Schema.IScalarType;
-								if (scalarType != null)
-								{
-									if (expandStreams)
-									{
-										elementSize = (int)int32Conveyor.Read(buffer, offset);
-										offset += sizeof(int);
-										streamID = Manager.StreamManager.Allocate();
-										stream = Manager.StreamManager.Open(streamID, LockMode.Exclusive);
-										stream.Write(buffer, offset, elementSize);
-										stream.Close();
-										_list.DataTypes.Add(scalarType);
-										_list.Values.Add(streamID);
-										offset += elementSize;
-									}
-									else
-									{
-										_list.DataTypes.Add(scalarType);
-										_list.Values.Add(int64Conveyor.Read(buffer, offset));
-										offset += sizeof(long);
-									}
-								}
-								else
-								{
-									// non-scalar values cannot be non-native
-								}
-							break;
-							
-							case 4 : // native specialized value
-								dataTypeName = (string)stringConveyor.Read(buffer, offset);
-								dataType = Manager.CompileTypeSpecifier(dataTypeName);
-								offset += stringConveyor.GetSize(dataTypeName);
-								scalarType = dataType as Schema.IScalarType;
-								if ((scalarType != null) && !scalarType.IsCompound)
-								{
-									conveyor = Manager.GetConveyor(scalarType);
-									if (conveyor.IsStreaming)
-									{
-										elementSize = (int)int32Conveyor.Read(buffer, offset);
-										offset += sizeof(int);
-										stream = new MemoryStream(buffer, offset, elementSize, false, true);
-										_list.DataTypes.Add(scalarType);
-										_list.Values.Add(conveyor.Read(stream));
-										offset += elementSize;
-									}
-									else
-									{
-										elementSize = (int)int32Conveyor.Read(buffer, offset);
-										offset += sizeof(int);
-										_list.DataTypes.Add(DataType.ElementType);
-										_list.Values.Add(conveyor.Read(buffer, offset));
-										offset += elementSize;
-									}
-								}
-								else
-								{
-									elementSize = (int)int32Conveyor.Read(buffer, offset);
-									offset += sizeof(int);
-									_list.DataTypes.Add(dataType);
-									using (IDataValue tempValue = DataValue.FromPhysical(Manager, dataType, buffer, offset))
-									{
-										_list.Values.Add(tempValue.AsNative);
-										tempValue.ValuesOwned = false;
-									}
-									offset += elementSize;
-								}
-							break;
-							
-							case 5 : // non-native specialized value
-								dataTypeName = (string)stringConveyor.Read(buffer, offset);
-								dataType = Manager.CompileTypeSpecifier(dataTypeName);
-								offset += stringConveyor.GetSize(dataTypeName);
-								scalarType = dataType as Schema.IScalarType;
-								if (scalarType != null)
-								{
-									if (expandStreams)
-									{
-										elementSize = (int)int32Conveyor.Read(buffer, offset);
-										offset += sizeof(int);
-										streamID = Manager.StreamManager.Allocate();
-										stream = Manager.StreamManager.Open(streamID, LockMode.Exclusive);
-										stream.Write(buffer, offset, elementSize);
-										stream.Close();
-										_list.DataTypes.Add(scalarType);
-										_list.Values.Add(streamID);
-										offset += elementSize;
-									}
-									else
-									{
-										_list.DataTypes.Add(scalarType);
-										_list.Values.Add(int64Conveyor.Read(buffer, offset));
-										offset += sizeof(long);
-									}
-								}
-								else
-								{
-									// non-scalar values cannot be non-native
-								}
-							break;
-						}
-					}
-				}
-			}
-		}
-		
 		public IDataValue GetValue(int index)
 		{
 			return FromNativeList(Manager, DataType, _list, index);
@@ -669,7 +217,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				if (tempValue != null)
 				{
 					_list.DataTypes[index] = tempValue.DataType;
-					_list.Values[index] = tempValue.CopyNative();
+					_list.Values[index] = DataValue.CopyNative(tempValue);
 				}
 				else
 				{
@@ -694,7 +242,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (localTempValue != null)
 			{
 				_list.DataTypes.Add(localTempValue.DataType);
-				_list.Values.Add(localTempValue.CopyNative());
+				_list.Values.Add(DataValue.CopyNative(localTempValue));
 			}
 			else
 			{
@@ -710,7 +258,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (localTempValue != null)
 			{
 				_list.DataTypes.Insert(index, localTempValue.DataType);
-				_list.Values.Insert(index, localTempValue.CopyNative());
+				_list.Values.Insert(index, DataValue.CopyNative(localTempValue));
 			}
 			else
 			{
@@ -743,17 +291,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			for (int index = 0; index < Count(); index++)
 				list.Add((T)this[index]);
 			return list;
-		}
-
-		public override object CopyNativeAs(Schema.IDataType dataType)
-		{
-			NativeList newList = new NativeList();
-			for (int index = 0; index < _list.DataTypes.Count; index++)
-			{
-				newList.DataTypes.Add(_list.DataTypes[index]);
-				newList.Values.Add(DataValue.CopyNative(Manager, _list.DataTypes[index], _list.Values[index]));
-			}
-			return newList;
 		}
 
 		public override string ToString()
@@ -852,6 +389,488 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			throw new NotImplementedException();
+		}
+
+		private class ListWriteContext : IWriteContext
+		{
+			public int Size { get; set; }
+			public object[] WriteList;
+			public IDataValue[] ElementWriteList;
+		}
+
+		public static object CopyNativeAs(IListValue list, Schema.IDataType dataType)
+		{
+			var _list = (NativeList)list.AsNative;
+			NativeList newList = new NativeList();
+			for (int index = 0; index < _list.DataTypes.Count; index++)
+			{
+				newList.DataTypes.Add(_list.DataTypes[index]);
+				newList.Values.Add(DataValue.CopyNative(list.Manager, _list.DataTypes[index], _list.Values[index]));
+			}
+			return newList;
+		}
+
+		/*
+			List Value Format ->
+			
+				00 -> 0 - Indicates that the list is nil, no data follows 1 - Indicates that the list is non-nil, data follows as specified
+				01 -> 0 - Indicates that non-native values are stored as a StreamID 1 - Indicates non-native values are stored inline
+				02-05 -> Number of elements in the list
+				06-XX -> N List Elements
+				
+			List Element Format ->
+
+				There are five possibilities for an element ->			
+					Nil Native
+					Nil Non-Native (StreamID.Null)
+					Standard Native
+					Standard Non-Native
+					Specialized Native
+					Specialized Non-Native
+				
+					For non-native values, the value will be expanded or not dependending on the expanded setting for the list value
+
+				00	-> 0 - 5
+					0 if the list contains a native nil for this element - no data follows
+					1 if the list contains a non-native nil for this element - no data follows
+					2 if the list contains a native value of the element type of the list
+						01-04 -> The length of the physical representation of this value
+						05-XX -> The physical representation of this value
+					3 if the list contains a non-native value of the element type of the list
+						01-04 -> The length of the physical representation of this value
+						05-XX -> The physical representation of this value (expanded based on the expanded setting for the list value)
+					4 if the list contains a native value of some specialization of the element type of the list
+						01-XX -> The data type name of this value, stored using a StringConveyor
+						XX+1-XX+4 -> The length of the physical representation of this value
+						XX+5-YY -> The physical representation of this value
+					5 if the list contains a non-native value of some specialization of the element type of the list
+						01-XX -> The data type name of this value, stored using a StringConveyor
+						XX+1-XX+4 -> The lnegth of the physical representation of this value
+						XX+5-YY -> The physical representation of this value (expanded based on the expanded setting for the list value)
+		*/
+
+		public static IWriteContext GetPhysicalSize(IListValue list, bool expandStreams)
+		{
+			int size = 1; // write the value indicator
+			object[] _writeList = null;
+			IDataValue[] _elementWriteList = null;
+			if (!list.IsNil)
+			{
+				size += sizeof(int) + 1; // write the extended streams indicator and the number of elements in the list
+				NativeList _list = (NativeList)list.AsNative;
+				_writeList = new object[list.Count]; // list for saving the sizes or streams of each element in the list
+				_elementWriteList = new DataValue[list.Count]; // list for saving host representations of values between the GetPhysicalSize and WriteToPhysical calls
+				Stream stream;
+				StreamID streamID;
+				Schema.IScalarType scalarType;
+				IDataValue element;
+				int elementSize;
+				for (int index = 0; index < _writeList.Length; index++)
+				{
+					size += sizeof(byte); // write a value indicator
+					if (_list.Values[index] != null)
+					{
+						if (!list.DataType.ElementType.Equals(_list.DataTypes[index]))
+							size += list.Manager.GetConveyor(list.Manager.DataTypes.SystemString).GetSize(_list.DataTypes[index].Name); // write the name of the data type of the value
+							
+						scalarType = _list.DataTypes[index] as Schema.IScalarType;
+						if ((scalarType != null) && !scalarType.IsCompound)
+						{
+							if (_list.Values[index] is StreamID)
+							{
+								// If this is a non-native scalar
+								streamID = (StreamID)_list.Values[index];
+								if (expandStreams)
+								{
+									if (streamID != StreamID.Null)
+									{
+										stream = list.Manager.StreamManager.Open((StreamID)_list.Values[index], LockMode.Exclusive);
+										_writeList[index] = stream;
+										size += sizeof(int) + (int)stream.Length;
+									}
+								}
+								else
+								{
+									if (streamID != StreamID.Null)
+									{
+										elementSize = StreamID.CSizeOf;
+										_writeList[index] = elementSize;
+										size += elementSize;
+									}
+								}
+							}
+							else
+							{
+								Streams.IConveyor conveyor = list.Manager.GetConveyor(scalarType);
+								if (conveyor.IsStreaming)
+								{
+									stream = new MemoryStream(64);
+									_writeList[index] = stream;
+									conveyor.Write(_list.Values[index], stream);
+									stream.Position = 0;
+									size += sizeof(int) + (int)stream.Length;
+								}
+								else
+								{
+									elementSize = conveyor.GetSize(_list.Values[index]);
+									_writeList[index] = elementSize;
+									size += sizeof(int) + elementSize;;
+								}
+							}
+						}
+						else
+						{
+							element = DataValue.FromNativeList(list.Manager, list.DataType, _list, index);
+							_elementWriteList[index] = element;
+							var elementContext = DataValue.GetPhysicalSize(element, expandStreams);
+							_writeList[index] = elementContext;
+							size += sizeof(int) + elementContext.Size;
+						}						
+					}
+				}
+			}
+
+			return new ListWriteContext { Size = size, WriteList = _writeList, ElementWriteList = _elementWriteList };
+		}
+		
+		public static void WriteToPhysical(IListValue list, IWriteContext context, byte[] buffer, int offset, bool expandStreams)
+		{
+			var listContext = context as ListWriteContext;
+			if (listContext == null)
+				throw new RuntimeException(RuntimeException.Codes.UnpreparedWriteToPhysicalCall);
+				
+			buffer[offset] = (byte)(list.IsNil ? 0 : 1); // Write the value indicator
+			offset++;
+				
+			buffer[offset] = (byte)(expandStreams ? 0 : 1); // Write the expanded streams indicator
+			offset++;
+				
+			Streams.IConveyor stringConveyor = null;
+			Streams.IConveyor int64Conveyor = list.Manager.GetConveyor(list.Manager.DataTypes.SystemLong);
+			Streams.IConveyor int32Conveyor = list.Manager.GetConveyor(list.Manager.DataTypes.SystemInteger);
+			int32Conveyor.Write(list.Count, buffer, offset); // Write the number of elements in the list
+			offset += sizeof(int);
+
+			Stream stream;
+			StreamID streamID;
+			int elementSize;
+			Schema.IScalarType scalarType;
+			Streams.IConveyor conveyor;
+			IDataValue element;
+			var _list = (NativeList)list.AsNative;
+			for (int index = 0; index < listContext.WriteList.Length; index++)
+			{
+				if (_list.Values[index] == null)
+				{
+					buffer[offset] = (byte)0; // Write the native nil indicator
+					offset++;
+				}
+				else
+				{
+					scalarType = _list.DataTypes[index] as Schema.IScalarType;
+					if ((scalarType != null) && !scalarType.IsCompound)
+					{
+						if (_list.Values[index] is StreamID)
+						{
+							// If this is a non-native scalar
+							streamID = (StreamID)_list.Values[index];
+							if (streamID == StreamID.Null)
+							{
+								buffer[offset] = (byte)1; // Write the non-native nil indicator
+								offset++;
+							}
+							else
+							{
+								if (list.DataType.ElementType.Equals(_list.DataTypes[index]))
+								{
+									buffer[offset] = (byte)3; // Write the native standard value indicator
+									offset++;
+								}
+								else
+								{
+									buffer[offset] = (byte)5; // Write the native specialized value indicator
+									offset++;
+									if (stringConveyor == null)
+										stringConveyor = list.Manager.GetConveyor(list.Manager.DataTypes.SystemString);
+									elementSize = stringConveyor.GetSize(_list.DataTypes[index].Name);
+									stringConveyor.Write(_list.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
+									offset += elementSize;
+								}
+								
+								if (expandStreams)
+								{
+									stream = (Stream)listContext.WriteList[index];
+									int32Conveyor.Write(Convert.ToInt32(stream.Length), buffer, offset);
+									offset += sizeof(int);
+									stream.Read(buffer, offset, (int)stream.Length);
+									offset += (int)stream.Length;
+								}
+								else
+								{
+									int64Conveyor.Write(streamID.Value, buffer, offset);
+									offset += sizeof(long);
+								}
+							}
+						}
+						else
+						{
+							if (list.DataType.ElementType.Equals(_list.DataTypes[index]))
+							{
+								buffer[offset] = (byte)2; // Write the native standard value indicator
+								offset++;
+							}
+							else
+							{
+								buffer[offset] = (byte)4; // Write the native specialized value indicator
+								offset++;
+								if (stringConveyor == null)
+									stringConveyor = list.Manager.GetConveyor(list.Manager.DataTypes.SystemString);
+								elementSize = stringConveyor.GetSize(_list.DataTypes[index].Name);
+								stringConveyor.Write(_list.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
+								offset += elementSize;
+							}
+
+							conveyor = list.Manager.GetConveyor(scalarType);
+							if (conveyor.IsStreaming)
+							{
+								stream = (Stream)listContext.WriteList[index];
+								int32Conveyor.Write(Convert.ToInt32(stream.Length), buffer, offset); // Write the length of the value
+								offset += sizeof(int);
+								stream.Read(buffer, offset, (int)stream.Length); // Write the value of this scalar
+								offset += (int)stream.Length;
+							}
+							else
+							{
+								elementSize = (int)listContext.WriteList[index]; // Write the length of the value
+								int32Conveyor.Write(elementSize, buffer, offset);
+								offset += sizeof(int);
+								conveyor.Write(_list.Values[index], buffer, offset); // Write the value of this scalar
+								offset += elementSize;
+							}
+						}
+					}
+					else
+					{
+						if (list.DataType.ElementType.Equals(_list.DataTypes[index]))
+						{
+							buffer[offset] = (byte)2; // Write the native standard value indicator
+							offset++;
+						}
+						else
+						{
+							buffer[offset] = (byte)4; // Write the native specialized value indicator
+							offset++;
+							if (stringConveyor == null)
+								stringConveyor = list.Manager.GetConveyor(list.Manager.DataTypes.SystemString);
+							elementSize = stringConveyor.GetSize(_list.DataTypes[index].Name);
+							stringConveyor.Write(_list.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
+							offset += elementSize;
+						}
+
+						element = listContext.ElementWriteList[index];
+						var elementContext = (IWriteContext)listContext.WriteList[index];
+						elementSize = elementContext.Size;
+						int32Conveyor.Write(elementSize, buffer, offset);
+						offset += sizeof(int);
+						DataValue.WriteToPhysical(element, elementContext, buffer, offset, expandStreams); // Write the physical representation of the value;
+						offset += elementSize;
+						element.Dispose();
+					}
+				}
+			}
+		}
+
+		public static void ReadFromPhysical(IListValue list, byte[] buffer, int offset)
+		{
+			list.Clear(); // Clear the current value of the list
+			
+			if (buffer[offset] == 0)
+			{
+				list.AsNative = null;
+			}
+			else
+			{
+				var _list = new NativeList();
+				if (buffer[offset] != 0)
+				{
+					offset++;
+
+					bool expandStreams = buffer[offset] != 0; // Read the exapnded streams indicator
+					offset++;
+						
+					Streams.IConveyor stringConveyor = null;
+					Streams.IConveyor int64Conveyor = list.Manager.GetConveyor(list.Manager.DataTypes.SystemLong);
+					Streams.IConveyor int32Conveyor = list.Manager.GetConveyor(list.Manager.DataTypes.SystemInteger);
+					int count = (int)int32Conveyor.Read(buffer, offset); // Read the number of elements in the list
+					offset += sizeof(int);
+
+					Stream stream;
+					StreamID streamID;
+					int elementSize;
+					string dataTypeName;
+					Schema.IDataType dataType;
+					Schema.IScalarType scalarType;
+					Streams.IConveyor conveyor;
+					for (int index = 0; index < count; index++)
+					{
+						byte valueIndicator = buffer[offset];
+						offset++;
+						
+						switch (valueIndicator)
+						{
+							case 0 : // native nil
+								_list.DataTypes.Add(list.DataType.ElementType);
+								_list.Values.Add(null);
+							break;
+							
+							case 1 : // non-native nil
+								_list.DataTypes.Add(list.DataType.ElementType);
+								_list.Values.Add(StreamID.Null);
+							break;
+							
+							case 2 : // native standard value
+								scalarType = list.DataType.ElementType as Schema.IScalarType;
+								if ((scalarType != null) && !scalarType.IsCompound)
+								{
+									conveyor = list.Manager.GetConveyor(scalarType);
+									if (conveyor.IsStreaming)
+									{
+										elementSize = (int)int32Conveyor.Read(buffer, offset);
+										offset += sizeof(int);
+										stream = new MemoryStream(buffer, offset, elementSize, false, true);
+										_list.DataTypes.Add(list.DataType.ElementType);
+										_list.Values.Add(conveyor.Read(stream));
+										offset += elementSize;
+									}
+									else
+									{
+										elementSize = (int)int32Conveyor.Read(buffer, offset);
+										offset += sizeof(int);
+										_list.DataTypes.Add(list.DataType.ElementType);
+										_list.Values.Add(conveyor.Read(buffer, offset));
+										offset += elementSize;
+									}
+								}
+								else
+								{
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									_list.DataTypes.Add(list.DataType.ElementType);
+									using (IDataValue tempValue = DataValue.FromPhysical(list.Manager, list.DataType.ElementType, buffer, offset))
+									{
+										_list.Values.Add(tempValue.AsNative);
+										tempValue.ValuesOwned = false;
+									}
+									offset += elementSize;
+								}
+							break;
+							
+							case 3 : // non-native standard value
+								scalarType = list.DataType.ElementType as Schema.IScalarType;
+								if (scalarType != null)
+								{
+									if (expandStreams)
+									{
+										elementSize = (int)int32Conveyor.Read(buffer, offset);
+										offset += sizeof(int);
+										streamID = list.Manager.StreamManager.Allocate();
+										stream = list.Manager.StreamManager.Open(streamID, LockMode.Exclusive);
+										stream.Write(buffer, offset, elementSize);
+										stream.Close();
+										_list.DataTypes.Add(scalarType);
+										_list.Values.Add(streamID);
+										offset += elementSize;
+									}
+									else
+									{
+										_list.DataTypes.Add(scalarType);
+										_list.Values.Add(int64Conveyor.Read(buffer, offset));
+										offset += sizeof(long);
+									}
+								}
+								else
+								{
+									// non-scalar values cannot be non-native
+								}
+							break;
+							
+							case 4 : // native specialized value
+								dataTypeName = (string)stringConveyor.Read(buffer, offset);
+								dataType = list.Manager.CompileTypeSpecifier(dataTypeName);
+								offset += stringConveyor.GetSize(dataTypeName);
+								scalarType = dataType as Schema.IScalarType;
+								if ((scalarType != null) && !scalarType.IsCompound)
+								{
+									conveyor = list.Manager.GetConveyor(scalarType);
+									if (conveyor.IsStreaming)
+									{
+										elementSize = (int)int32Conveyor.Read(buffer, offset);
+										offset += sizeof(int);
+										stream = new MemoryStream(buffer, offset, elementSize, false, true);
+										_list.DataTypes.Add(scalarType);
+										_list.Values.Add(conveyor.Read(stream));
+										offset += elementSize;
+									}
+									else
+									{
+										elementSize = (int)int32Conveyor.Read(buffer, offset);
+										offset += sizeof(int);
+										_list.DataTypes.Add(list.DataType.ElementType);
+										_list.Values.Add(conveyor.Read(buffer, offset));
+										offset += elementSize;
+									}
+								}
+								else
+								{
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									_list.DataTypes.Add(dataType);
+									using (IDataValue tempValue = DataValue.FromPhysical(list.Manager, dataType, buffer, offset))
+									{
+										_list.Values.Add(tempValue.AsNative);
+										tempValue.ValuesOwned = false;
+									}
+									offset += elementSize;
+								}
+							break;
+							
+							case 5 : // non-native specialized value
+								dataTypeName = (string)stringConveyor.Read(buffer, offset);
+								dataType = list.Manager.CompileTypeSpecifier(dataTypeName);
+								offset += stringConveyor.GetSize(dataTypeName);
+								scalarType = dataType as Schema.IScalarType;
+								if (scalarType != null)
+								{
+									if (expandStreams)
+									{
+										elementSize = (int)int32Conveyor.Read(buffer, offset);
+										offset += sizeof(int);
+										streamID = list.Manager.StreamManager.Allocate();
+										stream = list.Manager.StreamManager.Open(streamID, LockMode.Exclusive);
+										stream.Write(buffer, offset, elementSize);
+										stream.Close();
+										_list.DataTypes.Add(scalarType);
+										_list.Values.Add(streamID);
+										offset += elementSize;
+									}
+									else
+									{
+										_list.DataTypes.Add(scalarType);
+										_list.Values.Add(int64Conveyor.Read(buffer, offset));
+										offset += sizeof(long);
+									}
+								}
+								else
+								{
+									// non-scalar values cannot be non-native
+								}
+							break;
+						}
+					}
+				}
+
+				list.AsNative = _list;
+			}
 		}
 	}
 }

@@ -21,19 +21,5 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		bool IsNative { get; }
 		object AsNative { get; set; }
 		byte[] AsPhysical { get; set; }
-		bool IsPhysicalStreaming { get; }
-		int GetPhysicalSize(bool expandStreams);
-		void ReadFromPhysical(byte[] buffer, int offset);
-		void WriteToPhysical(byte[] buffer, int offset, bool expandStreams);
-		void ReadFromPhysical(Stream stream);
-		void WriteToPhysical(Stream stream, bool expandStreams);
-		Stream OpenStream();
-		Stream OpenStream(string representationName);
-		ITable OpenCursor();
-		IDataValue CopyAs(Schema.IDataType dataType);
-		IDataValue Copy();
-		object Copy(IValueManager manager);
-		object CopyNativeAs(Schema.IDataType dataType);
-		object CopyNative();
 	}
 }

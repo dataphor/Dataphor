@@ -9,7 +9,38 @@ using System.IO;
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
 	using Alphora.Dataphor.DAE.Streams;
-	
+
+	/// <summary>
+	/// Provides native representation of a scalar that does not map directly to a .NET type
+	/// </summary>
+	/// <typeparam name="T">The underlying .NET type</typeparam>
+	public struct Scalar<T>
+	{
+		public Scalar(string typeName, T value)
+		{
+			TypeName = typeName;
+			Value = value;
+		}
+
+		public string TypeName { get; set; }
+		public T Value { get; set; }
+	}
+
+	/// <summary>
+	/// Provides native representation of a compound scalar type.
+	/// </summary>
+	public class CompoundScalar
+	{
+		public CompoundScalar(Schema.IScalarType scalarType, NativeRow value)
+        {
+			ScalarType = scalarType;
+			Value = value;
+		}
+
+		public Schema.IScalarType ScalarType { get; set; }
+		public NativeRow Value { get; set; }
+	}
+
 	/// <summary>Provides the host representation for scalar values in the DAE.</summary>
 	/// <remarks>
 	/// The host representation will wrap either a native representation of the value, or a stream representation of the value.
@@ -694,151 +725,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			set { AsByteArray = Convert.FromBase64String(value); }
 		}
 		
-		private Stream _writeStream; // saves the write stream between the GetPhysicalSize and WriteToPhysical calls
-		private IDataValue _writeValue; // saves the row instantiated to write the compound value if this is a compound scalar
-		
-		public override int GetPhysicalSize(bool expandStreams)
-		{
-			int size = 1; // Scalar header
-			if (!IsNil)
-			{
-				if (IsNative)
-				{
-					if (DataType.IsCompound)
-					{
-						_writeValue = DataValue.FromNative(Manager, DataType.CompoundRowType, Value);
-						return size + _writeValue.GetPhysicalSize(expandStreams);
-					}
-					else
-					{
-						Streams.IConveyor conveyor = Manager.GetConveyor(DataType);
-						if (conveyor.IsStreaming)
-						{
-							_writeStream = new MemoryStream(64);
-							conveyor.Write(Value, _writeStream);
-							return size + (int)_writeStream.Length;
-						}
-						return size + conveyor.GetSize(Value);
-					}
-				}
-					
-				if (expandStreams)
-				{
-					_writeStream = Manager.StreamManager.Open(StreamID, LockMode.Exclusive);
-					return size + (int)_writeStream.Length;
-				}
-
-				return size + StreamID.CSizeOf;
-			}
-			return size;
-		}
-
-		public override void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
-		{
-			// Write scalar header
-			byte header = (byte)(IsNil ? 0 : 1);
-			header |= (byte)(IsNative ? 2 : 0);
-			header |= (byte)(expandStreams ? 4 : 0);
-			buffer[offset] = header;
-			offset++;
-
-			if (!IsNil)
-			{
-				if (IsNative)
-				{
-					if (DataType.IsCompound)
-					{
-						_writeValue.WriteToPhysical(buffer, offset, expandStreams);
-						_writeValue.Dispose();
-						_writeValue = null;
-					}
-					else
-					{
-						Streams.IConveyor conveyor = Manager.GetConveyor(DataType);
-						if (conveyor.IsStreaming)
-						{
-							_writeStream.Position = 0;
-							_writeStream.Read(buffer, offset, (int)_writeStream.Length);
-							_writeStream.Close();
-						}
-						else
-							conveyor.Write(Value, buffer, offset);
-					}
-				}
-				else
-				{
-					if (expandStreams)
-					{
-						_writeStream.Position = 0;
-						_writeStream.Read(buffer, offset, (int)_writeStream.Length);
-						_writeStream.Close();
-					}
-					else
-						((StreamID)Value).Write(buffer, offset);
-				}
-			}
-		}
-
-		public override void ReadFromPhysical(byte[] buffer, int offset)
-		{
-			// Clear current value
-			if (ValuesOwned && !IsNative && (StreamID != StreamID.Null))
-				Manager.StreamManager.Deallocate(StreamID);
-
-			// Read scalar header
-			byte header = buffer[offset];
-			offset++;
-			if ((header & 1) != 0) // if not nil
-			{
-				if ((header & 2) != 0)
-				{
-					if (DataType.IsCompound)
-					{
-						using (IRow row = (IRow)DataValue.FromPhysical(Manager, DataType.CompoundRowType, buffer, offset))
-						{
-							Value = row.AsNative;
-							row.ValuesOwned = false;
-						}
-					}
-					else
-					{
-						Streams.IConveyor conveyor = Manager.GetConveyor(DataType);
-						if (conveyor.IsStreaming)
-						{
-							Stream stream = new MemoryStream(buffer, offset, buffer.Length - offset, false, true);
-							Value = conveyor.Read(stream);
-							stream.Close();
-						}
-						else
-						{
-							Value = conveyor.Read(buffer, offset);
-						}
-					}
-				}
-				else
-				{
-					if ((header & 4) != 0) // if expanded form
-					{
-						Value = Manager.StreamManager.Allocate();
-						Stream stream = Manager.StreamManager.Open(StreamID, LockMode.Exclusive);
-						stream.Write(buffer, offset, buffer.Length - offset);
-						stream.Close();
-					}
-					else
-						Value = StreamID.Read(buffer, offset);
-				}
-			}
-			else
-			{
-				if ((header & 2) != 0)
-					Value = null;
-				else
-					Value = StreamID.Null;
-			}
-		}
-						
 		/// <summary>Opens a stream to read the data for this value. If this instance is native, the stream will be read only.</summary>
-		public override Stream OpenStream()
+		public Stream OpenStream()
 		{
 			if (IsNative)
 			{
@@ -851,33 +739,193 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return Manager.StreamManager.Open(StreamID, LockMode.Exclusive);
 		}
 		
-		public override Stream OpenStream(string representationName)
+		public Stream OpenStream(string representationName)
 		{
-			return Manager.GetAsDataValue(DataType.Representations[representationName], AsNative).OpenStream();
-		}
-
-		public override object CopyNativeAs(Schema.IDataType dataType)
-		{
-			if (IsNative)
-			{
-				ICloneable cloneable = Value as ICloneable;
-				if (cloneable != null)
-					return cloneable.Clone();
-					
-				if (DataType.IsCompound)
-					return DataValue.CopyNative(Manager, DataType.CompoundRowType, Value);
-					
-				return Value;
-			}
-
-			if (StreamID == StreamID.Null)
-				return StreamID;
-			return Manager.StreamManager.Reference(StreamID);
+			return ((IScalar)Manager.GetAsDataValue(DataType.Representations[representationName], AsNative)).OpenStream();
 		}
 
 		public override string ToString()
 		{
 			return AsDisplayString;
+		}
+
+		private class ScalarWriteContext : IWriteContext
+		{
+			public int Size { get; set; }
+			public Stream WriteStream { get; set; }
+			public IDataValue WriteValue { get; set; }
+			public IWriteContext WriteContext { get; set; }
+		}
+
+		public static object CopyNativeAs(IScalar scalar, Schema.IDataType dataType)
+		{
+			if (scalar.IsNative)
+			{
+				ICloneable cloneable = scalar.AsNative as ICloneable;
+				if (cloneable != null)
+					return cloneable.Clone();
+					
+				if (scalar.DataType.IsCompound)
+					return new CompoundScalar(scalar.DataType, (NativeRow)DataValue.CopyNative(scalar.Manager, scalar.DataType.CompoundRowType, ((CompoundScalar)scalar.AsNative).Value));
+					
+				return scalar.AsNative;
+			}
+
+			if (scalar.StreamID == StreamID.Null)
+				return scalar.StreamID;
+
+			return scalar.Manager.StreamManager.Reference(scalar.StreamID);
+		}
+
+		public static IWriteContext GetPhysicalSize(IScalar scalar, bool expandStreams)
+		{
+			int size = 1; // Scalar header
+			Stream _writeStream; // saves the write stream between the GetPhysicalSize and WriteToPhysical calls
+			IDataValue _writeValue; // saves the row instantiated to write the compound value if this is a compound scalar
+			IWriteContext _writeContext; // saves the write context between the GetPhysicalSize and WriteToPhyhsical calls
+		
+			if (!scalar.IsNil)
+			{
+				if (scalar.IsNative)
+				{
+					if (scalar.DataType.IsCompound)
+					{
+						_writeValue = DataValue.FromNative(scalar.Manager, scalar.DataType.CompoundRowType, ((CompoundScalar)scalar.AsNative).Value);
+						_writeContext = Row.GetPhysicalSize((IRow)_writeValue, expandStreams);
+						return new ScalarWriteContext { Size = size + _writeContext.Size, WriteValue = _writeValue, WriteContext = _writeContext };
+					}
+					else
+					{
+						Streams.IConveyor conveyor = scalar.Manager.GetConveyor(scalar.DataType);
+						if (conveyor.IsStreaming)
+						{
+							_writeStream = new MemoryStream(64);
+							conveyor.Write(scalar.AsNative, _writeStream);
+							return new ScalarWriteContext { Size = size + (int)_writeStream.Length, WriteStream = _writeStream };
+						}
+
+						return new ScalarWriteContext { Size = size + conveyor.GetSize(scalar.AsNative) };
+					}
+				}
+					
+				if (expandStreams)
+				{
+					_writeStream = scalar.Manager.StreamManager.Open(scalar.StreamID, LockMode.Exclusive);
+					return new ScalarWriteContext { Size = size + (int)_writeStream.Length, WriteStream = _writeStream };
+				}
+
+				return new ScalarWriteContext { Size = size + StreamID.CSizeOf };
+			}
+
+			return new ScalarWriteContext { Size = size };
+		}
+
+		public static void WriteToPhysical(IScalar scalar, IWriteContext context, byte[] buffer, int offset, bool expandStreams)
+		{
+			var scalarContext = context as ScalarWriteContext;
+			if (scalarContext == null)
+				throw new RuntimeException(RuntimeException.Codes.UnpreparedWriteToPhysicalCall);
+
+			// Write scalar header
+			byte header = (byte)(scalar.IsNil ? 0 : 1);
+			header |= (byte)(scalar.IsNative ? 2 : 0);
+			header |= (byte)(expandStreams ? 4 : 0);
+			buffer[offset] = header;
+			offset++;
+
+			if (!scalar.IsNil)
+			{
+				if (scalar.IsNative)
+				{
+					if (scalar.DataType.IsCompound)
+					{
+						DataValue.WriteToPhysical(scalarContext.WriteValue, scalarContext.WriteContext, buffer, offset, expandStreams);
+						scalarContext.WriteValue.Dispose();
+						scalarContext.WriteValue = null;
+					}
+					else
+					{
+						Streams.IConveyor conveyor = scalar.Manager.GetConveyor(scalar.DataType);
+						if (conveyor.IsStreaming)
+						{
+							scalarContext.WriteStream.Position = 0;
+							scalarContext.WriteStream.Read(buffer, offset, (int)scalarContext.WriteStream.Length);
+							scalarContext.WriteStream.Close();
+						}
+						else
+							conveyor.Write(scalar.AsNative, buffer, offset);
+					}
+				}
+				else
+				{
+					if (expandStreams)
+					{
+						scalarContext.WriteStream.Position = 0;
+						scalarContext.WriteStream.Read(buffer, offset, (int)scalarContext.WriteStream.Length);
+						scalarContext.WriteStream.Close();
+					}
+					else
+						scalar.StreamID.Write(buffer, offset);
+				}
+			}
+		}
+
+		public static void ReadFromPhysical(IScalar scalar, byte[] buffer, int offset)
+		{
+			// Clear current value
+			if (scalar.ValuesOwned && !scalar.IsNative && (scalar.StreamID != StreamID.Null))
+				scalar.Manager.StreamManager.Deallocate(scalar.StreamID);
+
+			// Read scalar header
+			byte header = buffer[offset];
+			offset++;
+			if ((header & 1) != 0) // if not nil
+			{
+				if ((header & 2) != 0)
+				{
+					if (scalar.DataType.IsCompound)
+					{
+						using (IRow row = (IRow)DataValue.FromPhysical(scalar.Manager, scalar.DataType.CompoundRowType, buffer, offset))
+						{
+							scalar.AsNative = new CompoundScalar(scalar.DataType, (NativeRow)row.AsNative);
+							row.ValuesOwned = false;
+						}
+					}
+					else
+					{
+						Streams.IConveyor conveyor = scalar.Manager.GetConveyor(scalar.DataType);
+						if (conveyor.IsStreaming)
+						{
+							Stream stream = new MemoryStream(buffer, offset, buffer.Length - offset, false, true);
+							scalar.AsNative = conveyor.Read(stream);
+							stream.Close();
+						}
+						else
+						{
+							scalar.AsNative = conveyor.Read(buffer, offset);
+						}
+					}
+				}
+				else
+				{
+					if ((header & 4) != 0) // if expanded form
+					{
+						scalar.StreamID = scalar.Manager.StreamManager.Allocate();
+						Stream stream = scalar.Manager.StreamManager.Open(scalar.StreamID, LockMode.Exclusive);
+						stream.Write(buffer, offset, buffer.Length - offset);
+						stream.Close();
+					}
+					else
+						scalar.StreamID = StreamID.Read(buffer, offset);
+				}
+			}
+			else
+			{
+				if ((header & 2) != 0)
+					scalar.AsNative = null;
+				else
+					scalar.StreamID = StreamID.Null;
+			}
 		}
 	}
 	

@@ -1876,7 +1876,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 
 			if (!ServerProcess.NonLogged && ((!Device.SupportsTransactions && (Transactions.Count == 1)) || (!Device.SupportsNestedTransactions && (Transactions.Count > 1))) && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new DeleteOperation(table, (IRow)row.Copy()));
+				Transactions.CurrentTransaction().Operations.Add(new DeleteOperation(table, (IRow)DataValue.Copy(row)));
         }
         
         protected virtual void InternalUpdateRow(Program program, TableVar table, IRow oldRow, IRow newRow, BitArray valueFlags)
@@ -1900,7 +1900,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 
 			if (!ServerProcess.NonLogged && ((!Device.SupportsTransactions && (Transactions.Count == 1)) || (!Device.SupportsNestedTransactions && (Transactions.Count > 1))) && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new UpdateOperation(table, (IRow)newRow.Copy(), (IRow)oldRow.Copy(), valueFlags));
+				Transactions.CurrentTransaction().Operations.Add(new UpdateOperation(table, (IRow)DataValue.Copy(newRow), (IRow)DataValue.Copy(oldRow), valueFlags));
         }
         
         protected virtual void InternalDeleteRow(Program program, TableVar table, IRow row)
@@ -1923,7 +1923,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 
 			if (!ServerProcess.NonLogged && ((!Device.SupportsTransactions && (Transactions.Count == 1)) || (!Device.SupportsNestedTransactions && (Transactions.Count > 1))) && !ServerProcess.CurrentTransaction.InRollback)
-				Transactions.CurrentTransaction().Operations.Add(new InsertOperation(table, (IRow)row.Copy(), null));
+				Transactions.CurrentTransaction().Operations.Add(new InsertOperation(table, (IRow)DataValue.Copy(row), null));
         }
     }
 

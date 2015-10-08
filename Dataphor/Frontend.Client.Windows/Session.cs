@@ -391,7 +391,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 						// Load the default form icon
 						if (row.HasValue("IconImage"))
-							using (Stream iconStream = row.GetValue("IconImage").OpenStream())
+							using (Stream iconStream = ((DAE.Runtime.Data.IScalar)row.GetValue("IconImage")).OpenStream())
 							{
 								Bitmap bitmap = System.Drawing.Image.FromStream(iconStream) as Bitmap;
 								if (bitmap != null)
@@ -823,7 +823,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					if (!(bool)row["CRCMatches"])
 					{
 						Directory.CreateDirectory(Path.GetDirectoryName(_fileName));
-						using (Stream sourceStream = row.GetValue("Value").OpenStream())
+						using (Stream sourceStream = ((DAE.Runtime.Data.IScalar)row.GetValue("Value")).OpenStream())
 							using (FileStream targetStream = new FileStream(_fileName, FileMode.Create, FileAccess.Write))
 								StreamUtility.CopyStream(sourceStream, targetStream);
 					}

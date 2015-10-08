@@ -611,6 +611,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     }
 
 	// ValidatingScalarSelectorNode
+	// This selector will always and only be used if the conveyor for the type is also the ScalarConveyor<T>
 	public class ValidatingScalarSelectorNode : UnaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1)
@@ -620,7 +621,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, null);
 			#endif
 
-			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, DataValue.CopyValue(program.ValueManager, argument1));
+			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, ValueUtility.ConstructNativeScalar((Schema.ScalarType)DataType, argument1));
 		}
 	}
     
@@ -663,6 +664,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
     }
 
+    // ValidatingScalarReadAccessorNode
+    public class ValidatingScalarReadAccessorNode : UnaryInstructionNode
+    {
+		public Schema.ScalarType SourceType { get; set; }
+
+		public ValidatingScalarReadAccessorNode() : base()
+		{
+			IsOrderPreserving = true;
+		}
+
+		public override void DetermineDataType(Plan plan)
+		{
+			base.DetermineDataType(plan);
+			SourceType = (Schema.ScalarType)Nodes[0].DataType;
+		}
+
+		public override void DetermineCharacteristics(Plan plan)
+		{
+			base.DetermineCharacteristics(plan);
+			IsOrderPreserving = true;
+		}
+		
+		public override object InternalExecute(Program program, object argument1)
+		{
+			#if NILPROPOGATION
+			if (argument1 == null)
+				return null;
+			#endif
+
+			return ValueUtility.GetNativeValue(SourceType, argument1);
+		}
+    }
+    
 	// ValidatingScalarWriteAccessorNode
 	public class ValidatingScalarWriteAccessorNode : BinaryInstructionNode
 	{
@@ -673,7 +707,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, null);
 			#endif
 			
-			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, DataValue.CopyValue(program.ValueManager, argument2));
+			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, ValueUtility.ConstructNativeScalar((Schema.ScalarType)DataType, argument2));
 		}
 	}
     
@@ -693,7 +727,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			for (int index = 0; index < rowType.Columns.Count; index++)
 				row[index] = arguments[index];
 
-			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, row.AsNative);
+			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, new CompoundScalar((Schema.ScalarType)DataType, (NativeRow)row.AsNative));
 		}
     }
     
@@ -725,15 +759,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			
 			if (_dataType is Schema.IScalarType)
-				return DataValue.CopyValue(program.ValueManager, ((NativeRow)argument1).Values[_propertyIndex]);
-			return 
-				DataValue.FromNativeRow
+				return DataValue.CopyValue(program.ValueManager, ((CompoundScalar)argument1).Value.Values[_propertyIndex]);
+
+			return
+				DataValue.Copy
 				(
-					program.ValueManager, 
-					((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, 
-					(NativeRow)argument1, 
-					_propertyIndex
-				).Copy(program.ValueManager);
+					DataValue.FromNativeRow
+					(
+						program.ValueManager, 
+						((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, 
+						((CompoundScalar)argument1).Value, 
+						_propertyIndex
+					)
+				);
 		}
     }
     
@@ -760,17 +798,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (argument1 == null || argument2 == null)
+			if (argument1 == null)
 				return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, null);
 			#endif
 			
-			NativeRow result = (NativeRow)DataValue.CopyValue(program.ValueManager, argument1);
-			using (Row row = new Row(program.ValueManager, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, result))
+			NativeRow result = (NativeRow)DataValue.CopyValue(program.ValueManager, ((CompoundScalar)argument1).Value);
+			Schema.ScalarType scalarType = (Schema.ScalarType)Nodes[0].DataType;
+			using (Row row = new Row(program.ValueManager, scalarType.CompoundRowType, result))
 			{
 				row[_propertyIndex] = argument2;
 			}
 
-			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, result);
+			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, new CompoundScalar(scalarType, result));
 		}
     }
     

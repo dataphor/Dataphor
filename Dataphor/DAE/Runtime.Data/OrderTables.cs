@@ -746,7 +746,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				EnterTableContext(TopTable);
 				try
 				{
-					origin = TopTable.Origin != null ? (IRow)TopTable.Origin.Copy() : null;
+					origin = TopTable.Origin != null ? (IRow)DataValue.Copy(TopTable.Origin) : null;
 				}
 				finally
 				{
@@ -801,7 +801,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						}
 						else
 						{
-							IRow origin = TopTable.OrderKey != null ? (IRow)TopTable.OrderKey.Copy() : TopTable.Origin != null ? (IRow)TopTable.Origin.Copy() : null;
+							IRow origin = TopTable.OrderKey != null ? (IRow)DataValue.Copy(TopTable.OrderKey) : TopTable.Origin != null ? (IRow)DataValue.Copy(TopTable.Origin) : null;
 							try
 							{
 								ExitTableContext(TopTable);
@@ -949,7 +949,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			EnterTableContext(TopTable);
 			try
 			{
-				return (IRow)TopTable.OrderKey.Copy();
+				return (IRow)DataValue.Copy(TopTable.OrderKey);
 			}
 			finally
 			{

@@ -266,6 +266,7 @@
     <Compile Include="Runtime.Data\ExtendTable.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime.Data\ICursor.cs" />
     <Compile Include="Runtime.Data\IDataValue.cs" />
     <Compile Include="Runtime.Data\IndexException.cs">
       <SubType>Code</SubType>
@@ -273,6 +274,7 @@
     <Compile Include="Runtime.Data\IRow.cs" />
     <Compile Include="Runtime.Data\IScalar.cs" />
     <Compile Include="Runtime.Data\ITable.cs" />
+    <Compile Include="Runtime.Data\IWriteContext.cs" />
     <Compile Include="Runtime.Data\JoinTables.cs">
       <SubType>Code</SubType>
     </Compile>

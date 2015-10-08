@@ -159,7 +159,7 @@ namespace Alphora.Dataphor.DAE.Client
 		protected IRow RememberActive()
 		{
 			if (_activeOffset <= _endOffset)
-				return (IRow)_buffer[_activeOffset].Row.Copy();
+				return (IRow)DataValue.Copy(_buffer[_activeOffset].Row);
 			else
 				return null;
 		}

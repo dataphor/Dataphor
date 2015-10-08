@@ -485,14 +485,14 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (node == null)
 			{
 				ArrayList path = new ArrayList();
-				BuildParentPath((DAE.Runtime.Data.Row)key.Copy(), path);
+				BuildParentPath((DAE.Runtime.Data.IRow)DataValue.Copy(key), path);
 				try
 				{
 					for (int index = path.Count - 1; index >= 0; index--)
 					{
 						if (index == path.Count - 1)
 						{
-							node = FindChild((DAE.Runtime.Data.Row)path[index]);
+							node = FindChild((DAE.Runtime.Data.IRow)path[index]);
 							if ((node == null) && !_selecting)
 							{
 								BuildTree();

@@ -1,0 +1,28 @@
+/*
+	Class Types Test Script
+	Reintroducing type inheritance to support use of class types defined in the host implementation language
+*/
+
+//* Create "abstract" class type (i.e. type with no representations)
+
+create type AbstractObject is { Object };
+drop type AbstractObject;
+
+create type BaseClass is { Object }
+{
+	representation BaseClass 
+	{
+		Id : Integer
+	}
+};
+
+select BaseClass(1);
+
+select BaseClass(1);
+
+create type DescendentClass is { BaseClass }
+{
+	X : Integer,
+	Y : Integer
+};
+

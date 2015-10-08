@@ -5,6 +5,7 @@
 */
 using System;
 using System.IO;
+using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.DAE.Streams
 {
@@ -42,5 +43,11 @@ namespace Alphora.Dataphor.DAE.Streams
 		/// Writes the physical representation of the value given by tempValue into the given stream.
 		/// </summary>
 		void Write(object tempValue, Stream stream);
+	}
+
+	public interface INativeScalarConveyor
+	{
+		string SourceTypeName { get; set; }
+		IConveyor Conveyor { get; set; }
 	}
 }

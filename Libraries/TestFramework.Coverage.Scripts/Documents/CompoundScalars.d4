@@ -1,0 +1,28 @@
+/*
+	Compound Scalar Tests
+*/
+
+drop type Point;
+create type Point 
+{ 
+	representation Point { X : Integer, Y : Integer }, 
+	representation AsDisplayString 
+	{ 
+		AsDisplayString : String 
+			read "Point { X: " + value.X.ToString() + ", Y: " + value.Y.ToString() + " }"
+			write begin raise Error("Cannot write via the AsDisplayString representation."); end
+	}
+		selector begin raise Error("Cannot write via the AsDisplayString representation."); end
+};
+
+var P := Point(1, 2);
+select P;
+select P.X;
+select P.Y;
+
+select Point(1, 2) = Point(1, 2);
+select Point(1, 2) = Point(1, 3);
+
+
+
+

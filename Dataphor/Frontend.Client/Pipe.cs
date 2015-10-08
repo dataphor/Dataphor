@@ -153,7 +153,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 			using (DAE.Runtime.Data.IRow row = ((DAE.Runtime.Data.IRow)DataValue.FromPhysical(process.GetServerProcess().ValueManager, GetCacheRowType(process), data, 0)))	// Uses GetServerProcess() as an optimization because this row is to remain local
 			{
-				return (IScalar)row.GetValue("Value").Copy();
+				return (IScalar)DataValue.Copy(row.GetValue("Value"));
 			}
 		}
 
@@ -165,8 +165,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				using (DAE.Runtime.Data.Row row = new DAE.Runtime.Data.Row(process.ValueManager, GetCacheRowType(process)))
 				{
 					row["Value"] = value;
-					bytes = new byte[row.GetPhysicalSize(true)];
-					row.WriteToPhysical(bytes, 0, true);
+					bytes = row.AsPhysical;
 				}
 				StreamUtility.WriteInteger(targetStream, bytes.Length);
 				targetStream.Write(bytes, 0, bytes.Length);
@@ -242,7 +241,7 @@ namespace Alphora.Dataphor.Frontend.Client
 						using (DAE.Runtime.Data.Scalar value = row.GetValue("Value") as DAE.Runtime.Data.Scalar)
 						{
 							SaveToCache(document, process, value, (uint)(int)row["ActualCRC32"]);
-							result = (DAE.Runtime.Data.Scalar)value.Copy();
+							result = (DAE.Runtime.Data.Scalar)DataValue.Copy(value);
 						}
 					}
 				}

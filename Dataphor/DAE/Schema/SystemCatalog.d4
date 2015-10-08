@@ -543,7 +543,7 @@ alter device Catalog { create operator iRestrict(table, Boolean) class "System.C
 // Security types
 create type UserID like String
 {
-	constraint LengthValid Length(value.Value) <= 255
+	constraint LengthValid Length(value) <= 255
 }
 	tags 
 	{ 
@@ -557,7 +557,7 @@ create type UserID like String
 /*
 create type GroupName like String
 {
-	constraint LengthValid Length(value.Value) <= 255
+	constraint LengthValid Length(value) <= 255
 }
 	tags 
 	{ 

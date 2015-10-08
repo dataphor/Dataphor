@@ -35,7 +35,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				_table = (NativeTable)value; 
 			} 
 		}
-		
+
+		private class TableWriteContext : IWriteContext
+		{
+			public int Size { get; set; }
+			public List<IRow> RowList;
+			public List<IWriteContext> ContextList;
+		}
+
+		public static object CopyNativeAs(TableValue table, Schema.IDataType dataType)
+		{
+			var _table = (NativeTable)table.AsNative;
+			NativeTable newTable = new NativeTable(table.Manager, _table.TableVar);
+			using (Scan scan = new Scan(table.Manager, _table, _table.ClusteredIndex, ScanDirection.Forward, null, null))
+			{
+				scan.Open();
+				while (scan.Next())
+				{
+					using (IRow row = scan.GetRow())
+					{
+						newTable.Insert(table.Manager, row);
+					}
+				}
+			}
+
+			return newTable;
+		}
+
 		/*
 			Physical representation format ->
 			
@@ -43,76 +69,82 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				01-05 -> Number of rows
 				06-XX -> N row values written using Row physical representation
 		*/
-		private List<IRow> _rowList;
-		private List<int> _sizeList;
 		
-		public override int GetPhysicalSize(bool expandStreams)
+		public static IWriteContext GetPhysicalSize(TableValue table, bool expandStreams)
 		{
 			int size = 1;
+			List<IRow> _rowList = null;
+			List<IWriteContext> _contextList = null;
 			
-			if (!IsNil)
+			if (!table.IsNil)
 			{
 				size += sizeof(int);
 				_rowList = new List<IRow>();
-				_sizeList = new List<int>();
-				
-				ITable table = OpenCursor();
+				_contextList = new List<IWriteContext>();
+
+				var _table = (NativeTable)table.AsNative;
+				ITable cursor = new TableScan(table.Manager, _table, table.Manager.FindClusteringOrder(_table.TableVar), ScanDirection.Forward, null, null);
 				try
 				{
-					while (table.Next())
+					while (cursor.Next())
 					{
-						IRow row = table.Select();
-						int rowSize = row.GetPhysicalSize(expandStreams);
-						size += rowSize;
+						IRow row = cursor.Select();
+						var rowContext = Row.GetPhysicalSize(row, expandStreams);
+						size += rowContext.Size;
 						_rowList.Add(row);
-						_sizeList.Add(rowSize);
+						_contextList.Add(rowContext);
 					}
 				}
 				finally
 				{
-					table.Dispose();
+					cursor.Dispose();
 				}
 				
 				size += sizeof(int) * _rowList.Count;
 			}
 			
-			return size;
+			return new TableWriteContext { Size = size, RowList = _rowList, ContextList = _contextList };
 		}
 
-		public override void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
+		public static void WriteToPhysical(TableValue table, IWriteContext context, byte[] buffer, int offset, bool expandStreams)
 		{
-			if (IsNil)
+			var tableContext = context as TableWriteContext;
+			if (tableContext == null)
+				throw new RuntimeException(RuntimeException.Codes.UnpreparedWriteToPhysicalCall);
+				
+			if (table.IsNil)
 				buffer[offset] = 0;
 			else
 			{
 				buffer[offset] = 1;
 				offset++;
 				
-				int rowSize;
-				Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+				IWriteContext rowContext;
+				Streams.IConveyor int32Conveyor = table.Manager.GetConveyor(table.Manager.DataTypes.SystemInteger);
 				
-				int32Conveyor.Write(_rowList.Count, buffer, offset);
+				int32Conveyor.Write(tableContext.RowList.Count, buffer, offset);
 				offset += sizeof(int);
 				
-				for (int index = 0; index < _rowList.Count; index++)
+				for (int index = 0; index < tableContext.RowList.Count; index++)
 				{
-					rowSize = (int)_sizeList[index];
-					int32Conveyor.Write(rowSize, buffer, offset);
+					rowContext = tableContext.ContextList[index];
+					int32Conveyor.Write(rowContext.Size, buffer, offset);
 					offset += sizeof(int);
-					IRow row = _rowList[index];
-					row.WriteToPhysical(buffer, offset, expandStreams);
-					offset += rowSize;
+					IRow row = tableContext.RowList[index];
+					Row.WriteToPhysical(row, rowContext, buffer, offset, expandStreams);
+					offset += rowContext.Size;
 					row.ValuesOwned = false;
 					row.Dispose();
 				}
 			}
 		}
 		
-		public override void ReadFromPhysical(byte[] buffer, int offset)
+		public static void ReadFromPhysical(TableValue table, byte[] buffer, int offset)
 		{
-			_table.Truncate(Manager);
+			var _table = (NativeTable)table.AsNative;
+			_table.Truncate(table.Manager);
 			
-			Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+			Streams.IConveyor int32Conveyor = table.Manager.GetConveyor(table.Manager.DataTypes.SystemInteger);
 			
 			if (buffer[offset] != 0)
 			{
@@ -125,37 +157,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				{
 					rowSize = (int)int32Conveyor.Read(buffer, offset);
 					offset += sizeof(int);
-					using (IRow row = (IRow)DataValue.FromPhysical(Manager, _table.RowType, buffer, offset))
+					using (IRow row = (IRow)DataValue.FromPhysical(table.Manager, _table.RowType, buffer, offset))
 					{
-						_table.Insert(Manager, row);
+						_table.Insert(table.Manager, row);
 					}
 					offset += rowSize;
 				}
 			}
-		}
-
-		public override ITable OpenCursor()
-		{
-			Table table = new TableScan(Manager, _table, Manager.FindClusteringOrder(_table.TableVar), ScanDirection.Forward, null, null);
-			table.Open();
-			return table;
-		}
-		
-		public override object CopyNativeAs(Schema.IDataType dataType)
-		{
-			NativeTable newTable = new NativeTable(Manager, _table.TableVar);
-			using (Scan scan = new Scan(Manager, _table, _table.ClusteredIndex, ScanDirection.Forward, null, null))
-			{
-				scan.Open();
-				while (scan.Next())
-				{
-					using (IRow row = scan.GetRow())
-					{
-						newTable.Insert(Manager, row);
-					}
-				}
-			}
-			return newTable;
 		}
 	}
 	
@@ -725,31 +733,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			set { throw new NotSupportedException(); } 
 		}
 		
-		public override int GetPhysicalSize(bool expandStreams)
-		{
-			throw new NotSupportedException();
-		}
-
-		public override void ReadFromPhysical(byte[] buffer, int offset)
-		{
-			throw new NotSupportedException();
-		}
-
-		public override void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
-		{
-			throw new NotSupportedException();
-		}
+		//public override ITable OpenCursor()
+		//{
+		//	throw new NotSupportedException();
+		//}
 		
-		public override ITable OpenCursor()
-		{
-			throw new NotSupportedException();
-		}
-		
-        public override object CopyNativeAs(Schema.IDataType dataType)
-        {
-			throw new NotSupportedException();
-        }
-
 		///<summary>Returns true if the given key has the same number of columns in the same order as the node order key.</summary>
         protected bool IsKeyRow(IRow key)
         {

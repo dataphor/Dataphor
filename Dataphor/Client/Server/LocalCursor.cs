@@ -858,7 +858,7 @@ namespace Alphora.Dataphor.DAE.Server
 					if (sourceRow.HasNonNativeValue(index))
 					{
 						Scalar scalar = new Scalar(targetRow.Manager, (Schema.ScalarType)sourceRow.DataType.Columns[index].DataType);
-						Stream sourceStream = sourceRow.GetValue(index).OpenStream();
+						Stream sourceStream = ((IScalar)sourceRow.GetValue(index)).OpenStream();
 						try
 						{
 							Stream targetStream = scalar.OpenStream();

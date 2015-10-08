@@ -51,7 +51,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			object objectValue = Activator.CreateInstance(CreateType(session, classDefinition), actualParameters);
 
 			foreach (ClassAttributeDefinition attribute in classDefinition.Attributes)
-				SetProperty(objectValue, attribute.AttributeName, attribute.AttributeValue);
+				if (!attribute.AttributeName.StartsWith("@"))
+					SetProperty(objectValue, attribute.AttributeName, attribute.AttributeValue);
 			return objectValue;
 		}
 		
@@ -62,7 +63,21 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			string className = classValue.ClassName;
 			try
 			{
-				return Type.GetType(className, true);
+				var type = Type.GetType(className, true);
+
+				if (type.ContainsGenericParameters)
+				{
+					var typeParameters = type.GetGenericArguments();
+					var typeArguments = new Type[typeParameters.Length];
+					for (int i = 0; i < typeParameters.Length; i++)
+					{
+						typeArguments[i] = Type.GetType(classDefinition.Attributes[String.Format("@{0}", i + 1)].AttributeValue, true);
+					}
+
+					type = type.MakeGenericType(typeArguments);
+				}
+
+				return type;
 			}
 			catch (Exception E)
 			{

@@ -423,7 +423,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		public override long GetBytes(int index, long sourceOffset, byte[] target, int targetOffset, int count)
 		{
-			Stream stream = InternalRow.GetValue(index).OpenStream();
+			Stream stream = ((IScalar)InternalRow.GetValue(index)).OpenStream();
 			try
 			{
 				stream.Position = sourceOffset;

@@ -16,6 +16,7 @@ using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.Frontend.Client.Web
 {
@@ -518,7 +519,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			{
 				DAE.Runtime.Data.IRow row = ParentGrid.DataLink.Buffer(Int32.Parse(rowIndex));
 				if ((row != null) && row.HasValue(ColumnName))
-					using (Stream source = row.GetValue(ColumnName).OpenStream())
+					using (Stream source = ((DAE.Runtime.Data.IScalar)row.GetValue(ColumnName)).OpenStream())
 					{
 						StreamUtility.CopyStream(source, stream);
 					}
@@ -753,7 +754,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			set { _shouldEnlist = value; }
 		}
 
-		private DAE.Runtime.Data.Row _movingRow = null;
+		private DAE.Runtime.Data.IRow _movingRow = null;
 
 		private void CancelMove()
 		{
@@ -784,7 +785,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 					}
 					else
 					{
-						_movingRow = (DAE.Runtime.Data.Row)ParentGrid.DataLink.Buffer(Int32.Parse(rowIndex)).Copy();
+						_movingRow = (DAE.Runtime.Data.IRow)DAE.Runtime.Data.DataValue.Copy(ParentGrid.DataLink.Buffer(Int32.Parse(rowIndex)));
 						return true;
 					}
 				}

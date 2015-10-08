@@ -231,7 +231,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					plan.Symbols.Push(new Symbol(String.Empty, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
+					plan.Symbols.Push(new Symbol(Keywords.Right, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
 					#else
 					Schema.RowType rightRowType = new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right);
 					APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
@@ -320,8 +320,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			object leftValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, leftVar);
-			object rightValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, rightVar);
+			object leftValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, ((CompoundScalar)leftVar).Value);
+			object rightValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, ((CompoundScalar)rightVar).Value);
 			program.Stack.Push(leftValue);
 			try
 			{

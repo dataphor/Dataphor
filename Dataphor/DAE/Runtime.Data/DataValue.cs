@@ -133,101 +133,152 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{ 
 			get
 			{
-				if (IsPhysicalStreaming)
-				{
-					MemoryStream stream = new MemoryStream(64);
-					WriteToPhysical(stream, false);
-					return stream.GetBuffer();
-				}
-				else
-				{
-					byte[] tempValue = new byte[GetPhysicalSize(false)];
-					WriteToPhysical(tempValue, 0, false);
-					return tempValue;
-				}
+				var context = GetPhysicalSize(this, false);
+				byte[] tempValue = new byte[context.Size];
+				WriteToPhysical(this, context, tempValue, 0, false);
+				return tempValue;
 			} 
 			set
 			{
-				if (IsPhysicalStreaming)
-				{
-					MemoryStream stream = new MemoryStream(value, 0, value.Length, false, true);
-					ReadFromPhysical(stream);
-				}
-				else
-					ReadFromPhysical(value, 0);
+				ReadFromPhysical(this, value, 0);
 			}
 		}
 
-		/// <summary>Indicates whether or not the conveyor for values of this type uses streams to read/write.  If this is false, the conveyor will use byte arrays.</summary>
-		public virtual bool IsPhysicalStreaming { get { return false; } }
-		
 		/// <summary>Returns the number of bytes required to store the physical representation of this value.</summary>
-		public virtual int GetPhysicalSize(bool expandStreams)
+		public static IWriteContext GetPhysicalSize(IDataValue value, bool expandStreams)
 		{
+			var scalar = value as IScalar;
+			if (scalar != null)
+				return Scalar.GetPhysicalSize(scalar, expandStreams);
+
+			var row = value as IRow;
+			if (row != null)
+				return Row.GetPhysicalSize(row, expandStreams);
+
+			var table = value as TableValue;
+			if (table != null)
+				return TableValue.GetPhysicalSize(table, expandStreams);
+
+			var list = value as IListValue;
+			if (list != null)
+				return ListValue.GetPhysicalSize(list, expandStreams);
+
+			var cursor = value as ICursor;
+			if (cursor != null)
+				return CursorValue.GetPhysicalSize(cursor, expandStreams);
+
 			throw new NotSupportedException();
 		}
-		
+
 		/// <summary>Writes the physical representation of this value into the byte array given in ABuffer, beginning at the offset given by offset.</summary>		
-		public virtual void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
+		public static void WriteToPhysical(IDataValue value, IWriteContext context, byte[] buffer, int offset, bool expandStreams)
 		{
+			var scalar = value as IScalar;
+			if (scalar != null)
+			{
+				Scalar.WriteToPhysical(scalar, context, buffer, offset, expandStreams);
+				return;
+			}
+
+			var row = value as IRow;
+			if (row != null)
+			{
+				Row.WriteToPhysical(row, context, buffer, offset, expandStreams);
+				return;
+			}
+
+			var table = value as TableValue;
+			if (table != null)
+			{
+				TableValue.WriteToPhysical(table, context, buffer, offset, expandStreams);
+				return;
+			}
+
+			var list = value as IListValue;
+			if (list != null)
+			{
+				ListValue.WriteToPhysical(list, context, buffer, offset, expandStreams);
+				return;
+			}
+
+			var cursor = value as ICursor;
+			if (cursor != null)
+			{
+				CursorValue.WriteToPhysical(cursor, context, buffer, offset, expandStreams);
+				return;
+			}
+
 			throw new NotSupportedException();
 		}
-		
-		/// <summary>Writes the physical representation of this value into the stream given in AStream.</summary>
-		public virtual void WriteToPhysical(Stream stream, bool expandStreams)
-		{
-			throw new NotSupportedException();
-		}
-		
+
 		/// <summary>Sets the native representation of this value by reading the physical representation from the byte array given in ABuffer, beginning at the offset given by offset.</summary>
-		public virtual void ReadFromPhysical(byte[] buffer, int offset)
+		public static void ReadFromPhysical(IDataValue value, byte[] buffer, int offset)
 		{
+			var scalar = value as IScalar;
+			if (scalar != null)
+			{
+				Scalar.ReadFromPhysical(scalar, buffer, offset);
+				return;
+			}
+
+			var row = value as IRow;
+			if (row != null)
+			{
+				Row.ReadFromPhysical(row, buffer, offset);
+				return;
+			}
+
+			var table = value as TableValue;
+			if (table != null)
+			{
+				TableValue.ReadFromPhysical(table, buffer, offset);
+				return;
+			}
+
+			var list = value as IListValue;
+			if (list != null)
+			{
+				ListValue.ReadFromPhysical(list, buffer, offset);
+				return;
+			}
+
+			var cursor = value as ICursor;
+			if (cursor != null)
+			{
+				CursorValue.ReadFromPhysical(cursor, buffer, offset);
+				return;
+			}
+
 			throw new NotSupportedException();
 		}
-		
-		/// <summary>Sets the native representation of this value by reading the physical representation from the stream given in AStream.</summary>
-		public virtual void ReadFromPhysical(Stream stream)
+
+		public static IDataValue Copy(IDataValue dataValue)
 		{
-			throw new NotSupportedException();
-		}
-		
-		public virtual Stream OpenStream()
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToProvideStreamAccess, DataType.Name);
-		}
-		
-		public virtual Stream OpenStream(string representationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToProvideStreamAccess, DataType.Name);
-		}
-		
-		public virtual ITable OpenCursor()
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToProvideCursorAccess, DataType.Name);
+            return CopyAs(dataValue, dataValue.DataType);
 		}
 		
 		/// <summary>Copies the native representation of this value and returns the host representation as the given type.</summary>
-		public IDataValue CopyAs(Schema.IDataType dataType)
+		public static IDataValue CopyAs(IDataValue dataValue, Schema.IDataType dataType)
 		{
 			// This code is duplicated in the Copy and FromNative methods for performance...
-			object tempValue = CopyNativeAs(dataType);
+			object tempValue = CopyNativeAs(dataValue, dataType);
 
 			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
 			if (scalarType != null)
 			{
 				if (tempValue is StreamID)
 				{
-					Scalar scalar = new Scalar(Manager, scalarType, (StreamID)tempValue);
+					Scalar scalar = new Scalar(dataValue.Manager, scalarType, (StreamID)tempValue);
 					scalar.ValuesOwned = true;
 					return scalar;
 				}
-				return new Scalar(Manager, scalarType, tempValue);
+				return new Scalar(dataValue.Manager, scalarType, tempValue);
 			}
 				
 			Schema.IRowType rowType = dataType as Schema.IRowType;
 			if (rowType != null)
 			{
-				Row row = new Row(Manager, rowType, (NativeRow)tempValue);
+				Row row = new Row(dataValue.Manager, rowType, (NativeRow)tempValue);
 				row.ValuesOwned = true;
 				return row;
 			}
@@ -235,7 +286,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.IListType listType = dataType as Schema.IListType;
 			if (listType != null)
 			{
-				ListValue list = new ListValue(Manager, listType, (NativeList)tempValue);
+				ListValue list = new ListValue(dataValue.Manager, listType, (NativeList)tempValue);
 				list.ValuesOwned = true;
 				return list;
 			}
@@ -243,121 +294,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ITableType tableType = dataType as Schema.ITableType;
 			if (tableType != null)
 			{
-				TableValue table = new TableValue(Manager, (NativeTable)tempValue);
+				TableValue table = new TableValue(dataValue.Manager, (NativeTable)tempValue);
 				table.ValuesOwned = true;
 				return table;
 			}
 				
 			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
 			if (cursorType != null)
-				return new CursorValue(Manager, cursorType, (int)tempValue);
+				return new CursorValue(dataValue.Manager, cursorType, (int)tempValue);
 				
 			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, dataType == null ? "<null>" : dataType.GetType().Name);
 		}
-		
-		public IDataValue Copy()
-		{
-			// This code is duplicated in the FromNative and CopyAs methods for performance...
-			object tempValue = CopyNative();
-			Schema.IScalarType scalarType = DataType as Schema.IScalarType;
 
-			if (scalarType != null)
-			{
-				if (tempValue is StreamID)
-				{
-					Scalar scalar = new Scalar(Manager, scalarType, (StreamID)tempValue);
-					scalar.ValuesOwned = true;
-					return scalar;
-				}
-				return new Scalar(Manager, scalarType, tempValue);
-			}
-				
-			Schema.IRowType rowType = DataType as Schema.IRowType;
-			if (rowType != null)
-			{
-				Row row = new Row(Manager, rowType, (NativeRow)tempValue);
-				row.ValuesOwned = true;
-				return row;
-			}
-			
-			Schema.IListType listType = DataType as Schema.IListType;
-			if (listType != null)
-			{
-				ListValue list = new ListValue(Manager, listType, (NativeList)tempValue);
-				list.ValuesOwned = true;
-				return list;
-			}
-				
-			Schema.ITableType tableType = DataType as Schema.ITableType;
-			if (tableType != null)
-			{
-				TableValue table = new TableValue(Manager, (NativeTable)tempValue);
-				table.ValuesOwned = true;
-				return table;
-			}
-				
-			Schema.ICursorType cursorType = DataType as Schema.ICursorType;
-			if (cursorType != null)
-				return new CursorValue(Manager, cursorType, (int)tempValue);
-				
-			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, DataType == null ? "<null>" : DataType.GetType().Name);
-		}
+        public static object CopyNative(IDataValue dataValue)
+        {
+            return CopyNativeAs(dataValue, dataValue.DataType);
+        }
 		
-		public object Copy(IValueManager manager)
+		public static object CopyNativeAs(IDataValue value, Schema.IDataType dataType)
 		{
-			// This code is duplicated in the FromNative and CopyAs methods for performance...
-			object tempValue = CopyNative();
+			var scalar = value as IScalar;
+			if (scalar != null)
+				return Scalar.CopyNativeAs(scalar, dataType);
 
-			Schema.IScalarType scalarType = DataType as Schema.IScalarType;
-			if (scalarType != null)
-			{
-				if (tempValue is StreamID)
-				{
-					Scalar scalar = new Scalar(manager, scalarType, (StreamID)tempValue);
-					scalar.ValuesOwned = true;
-					return scalar;
-				}
-				return new Scalar(manager, scalarType, tempValue);
-			}
-				
-			Schema.IRowType rowType = DataType as Schema.IRowType;
-			if (rowType != null)
-			{
-				Row row = new Row(manager, rowType, (NativeRow)tempValue);
-				row.ValuesOwned = true;
-				return row;
-			}
-			
-			Schema.IListType listType = DataType as Schema.IListType;
-			if (listType != null)
-			{
-				ListValue list = new ListValue(manager, listType, (NativeList)tempValue);
-				list.ValuesOwned = true;
-				return list;
-			}
-				
-			Schema.ITableType tableType = DataType as Schema.ITableType;
-			if (tableType != null)
-			{
-				TableValue table = new TableValue(manager, (NativeTable)tempValue);
-				table.ValuesOwned = true;
-				return table;
-			}
-				
-			Schema.ICursorType cursorType = DataType as Schema.ICursorType;
-			if (cursorType != null)
-				return new CursorValue(manager, cursorType, (int)tempValue);
-				
-			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, DataType == null ? "<null>" : DataType.GetType().Name);
+			var row = value as IRow;
+			if (row != null)
+				return Row.CopyNativeAs(row, dataType);
+
+			var table = value as TableValue;
+			if (table != null)
+				return TableValue.CopyNativeAs(table, dataType);
+
+			var list = value as IListValue;
+			if (list != null)
+				return ListValue.CopyNativeAs(list, dataType);
+
+			var cursor = value as ICursor;
+			if (cursor != null)
+				return CursorValue.CopyNativeAs(cursor, dataType);
+
+			throw new NotSupportedException();
 		}
-		
-		public abstract object CopyNativeAs(Schema.IDataType dataType);
-		
-		public object CopyNative()
-		{
-			return CopyNativeAs(DataType);
-		}
-		
+
 		public static Schema.IScalarType NativeTypeToScalarType(IValueManager manager, Type type)
 		{
 			if (type == NativeAccessors.AsBoolean.NativeType) return manager.DataTypes.SystemBoolean;
@@ -495,7 +473,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (scalarType != null)
 			{
 				Scalar scalar = new Scalar(manager, scalarType, null);
-				scalar.ReadFromPhysical(buffer, offset);
+				Scalar.ReadFromPhysical(scalar, buffer, offset);
 				return scalar;
 			}
 			
@@ -503,7 +481,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (rowType != null)
 			{
 				Row row = new Row(manager, rowType);
-				row.ReadFromPhysical(buffer, offset);
+				Row.ReadFromPhysical(row, buffer, offset);
 				return row;
 			}
 			
@@ -511,7 +489,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (listType != null)
 			{
 				ListValue list = new ListValue(manager, listType);
-				list.ReadFromPhysical(buffer, offset);
+				ListValue.ReadFromPhysical(list, buffer, offset);
 				return list;
 			}
 			
@@ -519,7 +497,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (tableType != null)
 			{
 				TableValue table = new TableValue(manager, null);
-				table.ReadFromPhysical(buffer, offset);
+				TableValue.ReadFromPhysical(table, buffer, offset);
 				return table;
 			}
 			
@@ -527,7 +505,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (cursorType != null)
 			{
 				CursorValue cursor = new CursorValue(manager, cursorType, -1);
-				cursor.ReadFromPhysical(buffer, offset);
+				CursorValue.ReadFromPhysical(cursor, buffer, offset);
 				return cursor;
 			}
 
@@ -551,7 +529,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return cloneable.Clone();
 					
 				if (scalarType.IsCompound)
-					return CopyNative(manager, scalarType.CompoundRowType, tempValue);
+				{
+					CompoundScalar compoundScalar = (CompoundScalar)tempValue;
+					return new CompoundScalar(compoundScalar.ScalarType, (NativeRow)CopyNative(manager, scalarType.CompoundRowType, compoundScalar.Value));
+				}
 					
 				return tempValue;
 			}
@@ -625,7 +606,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					manager.StreamManager.Deallocate((StreamID)tempValue);
 					
 				if (scalarType.IsCompound)
-					DisposeNative(manager, scalarType.CompoundRowType, tempValue);
+					DisposeNative(manager, scalarType.CompoundRowType, ((CompoundScalar)tempValue).Value);
 
 				return;
 			}
@@ -640,7 +621,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			IDataValue dataValue = value as IDataValue;
 			if (dataValue != null)
-				return dataValue.Copy();
+				return DataValue.Copy(dataValue);
 				
 			ICloneable cloneable = value as ICloneable;
 			if (cloneable != null)

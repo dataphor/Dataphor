@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.DAE.Streams
 		{
 			throw new NotSupportedException();
 		}
-		
+
 		/// <summary>Writes the physical representation of AValue into the buffer given by ABuffer beginning at the offset given by offset</summary>		
 		public virtual void Write(object tempValue, byte[] buffer, int offset)
 		{
@@ -496,6 +496,42 @@ namespace Alphora.Dataphor.DAE.Streams
 		{
 			byte[] localTempValue = (byte[])tempValue;
 			stream.Write(localTempValue, 0, localTempValue.Length);
+		}
+	}
+
+	public class ScalarConveyor<T> : Conveyor, INativeScalarConveyor
+	{
+		public ScalarConveyor() : base() {}
+
+		public string TypeName { get; set; }
+		public string SourceTypeName { get; set; }
+		public IConveyor Conveyor { get; set; }
+
+		public override bool IsStreaming { get { return Conveyor.IsStreaming; } }
+
+		public override int GetSize(object tempValue)
+		{
+			return Conveyor.GetSize(((Scalar<T>)tempValue).Value);
+		}
+
+		public override object Read(byte[] buffer, int offset)
+		{
+			return new Scalar<T>(TypeName, (T)Conveyor.Read(buffer, offset));
+		}
+
+		public override void Write(object tempValue, byte[] buffer, int offset)
+		{
+			Conveyor.Write(((Scalar<T>)tempValue).Value, buffer, offset);
+		}
+
+		public override object Read(Stream stream)
+		{
+			return new Scalar<T>(TypeName, (T)Conveyor.Read(stream));
+		}
+
+		public override void Write(object tempValue, Stream stream)
+		{
+			Conveyor.Write(((Scalar<T>)tempValue).Value, stream);
 		}
 	}
 }

@@ -51,7 +51,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public BitArray ModifiedFlags;
 	}
-	
+
 	/// <remarks>
 	/// Provides a fixed length buffer for cell values with overflow management built in.
 	/// Used in conjunction with the CellValueStream, provides transparent variable length
@@ -99,512 +99,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				if (_row != null)
 					ClearValues();
 				_row = (NativeRow)value; 
-			}
-		}
-		
-		private object[] _writeList;
-		private IDataValue[] _elementWriteList;
-
-		/*
-			Row Value Format ->
-			
-				00 -> 0 - Indicates that non-native values are stored as a StreamID 1 - Indicates non-native values are stored inline
-				01-XX -> Value for each attribute in the row
-				
-			Row Attribute Format ->
-
-				There are five possibilities for an attribute ->			
-					Nil Native
-					Nil Non-Native (StreamID.Null)
-					Standard Native
-					Standard Non-Native
-					Specialized Native
-					Specialized Non-Native
-				
-					For non-native values, the value will be expanded or not dependending on the expanded setting for the row value
-
-				00	-> 0 - 5
-					0 if the row contains a native nil for this attribute - no data follows
-					1 if the row contains a non-native nil for this attribute - no data follows
-					2 if the row contains a native value of the data type of the attribute
-						01-04 -> Length of the physical representation of this value
-						05-XX -> The physical representation of this value
-					3 if the row contains a non-native value of the data type of the attribute
-						01-04 -> Length of the physical representation of this value
-						05-XX -> The physical representation of this value (expanded based on the expanded setting for the list value)
-					4 if the row contains a native value of some specialization of the data type of the attribute
-						01-XX -> The data type name of this value, stored using a StringConveyor
-						XX+1-XX+5 -> The length of the physical representation of this value
-						XX+6-YY -> The physical representation of this value
-					5 if the row contains a non-native value of some specialization of the data type of the attribute
-						01-XX -> The data type name of this value, stored using a StringConveyor
-						XX+1-XX+5 -> The length of the physical representation of this value
-						XX+6-YY -> The physical representation of this value (expanded based on the expanded setting for the list value)
-		*/
-		public override int GetPhysicalSize(bool expandStreams)
-		{
-			int size = 1; // write the value indicator
-			if (!IsNil)
-			{
-				size += 1; // write the extended streams indicator
-				_writeList = new object[DataType.Columns.Count]; // list for saving the sizes or streams of each attribute in the row
-				_elementWriteList = new DataValue[DataType.Columns.Count]; // list for saving host representations of values between the GetPhysicalSize and WriteToPhysical calls
-				Stream stream;
-				StreamID streamID;
-				Schema.IScalarType scalarType;
-				Streams.IConveyor conveyor;
-				IDataValue element;
-				int elementSize;
-				for (int index = 0; index < _writeList.Length; index++)
-				{
-					size += sizeof(byte); // write a value indicator
-					if (_row.Values[index] != null)
-					{
-						#if USEDATATYPESINNATIVEROW
-						if (!DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
-							size += Manager.GetConveyor(Manager.DataTypes.SystemString).GetSize(_row.DataTypes[index].Name); // write the name of the data type of the value
-						#endif
-						/*							
-						LElement = DataValue.FromNativeRow(Manager, DataType, FRow, LIndex);
-						FElementWriteList[LIndex] = LElement;
-						LElementSize = LElement.GetPhysicalSize(AExpandStreams);
-						FWriteList[LIndex] = LElementSize;
-						LSize += sizeof(int) + LElementSize;
-						*/
-						#if USEDATATYPESINNATIVEROW
-						scalarType = _row.DataTypes[index] as Schema.IScalarType;
-						#else
-						scalarType = DataType.Columns[index].DataType as Schema.IScalarType;
-						#endif
-						if ((scalarType != null) && !scalarType.IsCompound)
-						{
-							if (_row.Values[index] is StreamID)
-							{
-								// If this is a non-native scalar
-								streamID = (StreamID)_row.Values[index];
-								if (expandStreams)
-								{
-									if (streamID != StreamID.Null)
-									{
-										stream = Manager.StreamManager.Open((StreamID)_row.Values[index], LockMode.Exclusive);
-										_writeList[index] = stream;
-										size += sizeof(int) + (int)stream.Length;
-									}
-								}
-								else
-								{
-									if (streamID != StreamID.Null)
-									{
-										elementSize = sizeof(long);
-										_writeList[index] = elementSize;
-										size += elementSize;
-									}
-								}
-							}
-							else
-							{
-								conveyor = Manager.GetConveyor(scalarType);
-								if (conveyor.IsStreaming)
-								{
-									stream = new MemoryStream(64);
-									_writeList[index] = stream;
-									conveyor.Write(_row.Values[index], stream);
-									stream.Position = 0;
-									size += sizeof(int) + (int)stream.Length;
-								}
-								else
-								{
-									elementSize = conveyor.GetSize(_row.Values[index]);
-									_writeList[index] = elementSize;
-									size += sizeof(int) + elementSize;;
-								}
-							}
-						}
-						else
-						{
-							element = DataValue.FromNativeRow(Manager, DataType, _row, index);
-							_elementWriteList[index] = element;
-							elementSize = element.GetPhysicalSize(expandStreams);
-							_writeList[index] = elementSize;
-							size += sizeof(int) + elementSize;
-						}						
-					}
-				}
-			}
-			return size;
-		}
-		
-		public override void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
-		{
-			if (_writeList == null)
-				throw new RuntimeException(RuntimeException.Codes.UnpreparedWriteToPhysicalCall);
-				
-			buffer[offset] = (byte)(IsNil ? 0 : 1); // Write the value indicator
-			offset++;
-			
-			if (!IsNil)
-			{
-				buffer[offset] = (byte)(expandStreams ? 1 : 0); // Write the expanded streams indicator
-				offset++;
-					
-				#if USEDATATYPESINNATIVEROW
-				Streams.IConveyor stringConveyor = null;
-				#endif
-				Streams.IConveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
-				Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
-
-				Stream stream;
-				StreamID streamID;
-				int elementSize;
-				Schema.IScalarType scalarType;
-				Streams.IConveyor conveyor;
-				IDataValue element;
-				for (int index = 0; index < _writeList.Length; index++)
-				{
-					if (_row.Values[index] == null)
-					{
-						buffer[offset] = (byte)0; // Write the native nil indicator
-						offset++;
-					}
-					else
-					{
-						#if USEDATATYPESINNATIVEROW
-						scalarType = _row.DataTypes[index] as Schema.IScalarType;
-						#else
-						scalarType = DataType.Columns[index].DataType as Schema.IScalarType;
-						#endif
-						if ((scalarType != null) && !scalarType.IsCompound)
-						{
-							if (_row.Values[index] is StreamID)
-							{
-								// If this is a non-native scalar
-								streamID = (StreamID)_row.Values[index];
-								if (streamID == StreamID.Null)
-								{
-									buffer[offset] = (byte)1; // Write the non-native nil indicator
-									offset++;
-								}
-								else
-								{
-									#if USEDATATYPESINNATIVEROW
-									if (DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
-									{
-									#endif
-										buffer[offset] = (byte)3; // Write the native standard value indicator
-										offset++;
-									#if USEDATATYPESINNATIVEROW
-									}
-									else
-									{
-										buffer[offset] = (byte)5; // Write the native specialized value indicator
-										offset++;
-										if (stringConveyor == null)
-											stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
-										elementSize = stringConveyor.GetSize(_row.DataTypes[index].Name);
-										stringConveyor.Write(_row.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
-										offset += elementSize;
-									}
-									#endif
-									
-									if (expandStreams)
-									{
-										stream = (Stream)_writeList[index];
-										int32Conveyor.Write(Convert.ToInt32(stream.Length), buffer, offset);
-										offset += sizeof(int);
-										stream.Read(buffer, offset, (int)stream.Length);
-										offset += (int)stream.Length;
-										stream.Close();
-									}
-									else
-									{
-										int64Conveyor.Write((long)streamID.Value, buffer, offset);
-										offset += sizeof(long);
-									}
-								}
-							}
-							else
-							{
-								#if USEDATATYPESINNATIVEROW
-								if (DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
-								{
-								#endif
-									buffer[offset] = (byte)2; // Write the native standard value indicator
-									offset++;
-								#if USEDATATYPESINNATIVEROW
-								}
-								else
-								{
-									buffer[offset] = (byte)4; // Write the native specialized value indicator
-									offset++;
-									if (stringConveyor == null)
-										stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
-									elementSize = stringConveyor.GetSize(_row.DataTypes[index].Name);
-									stringConveyor.Write(_row.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
-									offset += elementSize;
-								}
-								#endif
-
-								conveyor = Manager.GetConveyor(scalarType);
-								if (conveyor.IsStreaming)
-								{
-									stream = (Stream)_writeList[index];
-									int32Conveyor.Write(Convert.ToInt32(stream.Length), buffer, offset); // Write the length of the value
-									offset += sizeof(int);
-									stream.Read(buffer, offset, (int)stream.Length); // Write the value of this scalar
-									offset += (int)stream.Length;
-								}
-								else
-								{
-									elementSize = (int)_writeList[index]; // Write the length of the value
-									int32Conveyor.Write(elementSize, buffer, offset);
-									offset += sizeof(int);
-									conveyor.Write(_row.Values[index], buffer, offset); // Write the value of this scalar
-									offset += elementSize;
-								}
-							}
-						}
-						else
-						{
-							#if USEDATATYPESINNATIVEROW
-							if (DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
-							{
-							#endif
-								buffer[offset] = (byte)2; // Write the native standard value indicator
-								offset++;
-							#if USEDATATYPESINNATIVEROW
-							}
-							else
-							{
-								buffer[offset] = (byte)4; // Write the native specialized value indicator
-								offset++;
-								if (stringConveyor == null)
-									stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
-								elementSize = stringConveyor.GetSize(_row.DataTypes[index].Name);
-								stringConveyor.Write(_row.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
-								offset += elementSize;
-							}
-							#endif
-
-							element = _elementWriteList[index];
-							elementSize = (int)_writeList[index];
-							int32Conveyor.Write(elementSize, buffer, offset);
-							offset += sizeof(int);
-							element.WriteToPhysical(buffer, offset, expandStreams); // Write the physical representation of the value;
-							offset += elementSize;
-							element.Dispose();
-						}
-					}
-				}
-			}
-		}
-
-		public override void ReadFromPhysical(byte[] buffer, int offset)
-		{
-			ClearValues(); // Clear the current value of the row
-			
-			if (buffer[offset] == 0)
-			{
-				_row = null;
-			}
-			else
-			{
-				_row = new NativeRow(DataType.Columns.Count);
-				offset++;
-			
-				bool expandStreams = buffer[offset] != 0; // Read the exapnded streams indicator
-				offset++;
-					
-				#if USEDATATYPESINNATIVEROW
-				Streams.IConveyor stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
-				string dataTypeName;
-				Schema.IDataType dataType;
-				#endif
-				Streams.IConveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
-				Streams.IConveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
-
-				Stream stream;
-				StreamID streamID;
-				int elementSize;
-				Schema.IScalarType scalarType;
-				Streams.IConveyor conveyor;
-				for (int index = 0; index < DataType.Columns.Count; index++)
-				{
-					byte valueIndicator = buffer[offset];
-					offset++;
-					
-					switch (valueIndicator)
-					{
-						case 0 : // native nil
-							#if USEDATATYPESINNATIVEROW
-							_row.DataTypes[index] = DataType.Columns[index].DataType;
-							#endif
-							_row.Values[index] = null;
-						break;
-						
-						case 1 : // non-native nil
-							#if USEDATATYPESINNATIVEROW
-							_row.DataTypes[index] = DataType.Columns[index].DataType;
-							#endif
-							_row.Values[index] = StreamID.Null;
-						break;
-						
-						case 2 : // native standard value
-							scalarType = DataType.Columns[index].DataType as Schema.IScalarType;
-							if ((scalarType != null) && !scalarType.IsCompound)
-							{
-								conveyor = Manager.GetConveyor(scalarType);
-								if (conveyor.IsStreaming)
-								{
-									elementSize = (int)int32Conveyor.Read(buffer, offset);
-									offset += sizeof(int);
-									stream = new MemoryStream(buffer, offset, elementSize, false, true);
-									#if USEDATATYPESINNATIVEROW
-									_row.DataTypes[index] = DataType.Columns[index].DataType;
-									#endif
-									_row.Values[index] = conveyor.Read(stream);
-									offset += elementSize;
-								}
-								else
-								{
-									elementSize = (int)int32Conveyor.Read(buffer, offset);
-									offset += sizeof(int);
-									#if USEDATATYPESINNATIVEROW
-									_row.DataTypes[index] = DataType.Columns[index].DataType;
-									#endif
-									_row.Values[index] = conveyor.Read(buffer, offset);
-									offset += elementSize;
-								}
-							}
-							else
-							{
-								elementSize = (int)int32Conveyor.Read(buffer, offset);
-								offset += sizeof(int);
-								#if USEDATATYPESINNATIVEROW
-								_row.DataTypes[index] = DataType.Columns[index].DataType;
-								#endif
-								using (IDataValue tempValue = DataValue.FromPhysical(Manager, DataType.Columns[index].DataType, buffer, offset))
-								{
-									_row.Values[index] = tempValue.AsNative;
-									tempValue.ValuesOwned = false;
-								}
-								offset += elementSize;
-							}
-						break;
-						
-						case 3 : // non-native standard value
-							scalarType = DataType.Columns[index].DataType as Schema.IScalarType;
-							if (scalarType != null)
-							{
-								if (expandStreams)
-								{
-									elementSize = (int)int32Conveyor.Read(buffer, offset);
-									offset += sizeof(int);
-									streamID = Manager.StreamManager.Allocate();
-									stream = Manager.StreamManager.Open(streamID, LockMode.Exclusive);
-									stream.Write(buffer, offset, elementSize);
-									stream.Close();
-									#if USEDATATYPESINNATIVEROW
-									_row.DataTypes[index] = scalarType;
-									#endif
-									_row.Values[index] = streamID;
-									offset += elementSize;
-								}
-								else
-								{
-									#if USEDATATYPESINNATIVEROW
-									_row.DataTypes[index] = scalarType;
-									#endif
-									_row.Values[index] = new StreamID(Convert.ToUInt64(int64Conveyor.Read(buffer, offset)));
-									offset += sizeof(long);
-								}
-							}
-							else
-							{
-								// non-scalar values cannot be non-native
-							}
-						break;
-						
-						case 4 : // native specialized value
-							#if USEDATATYPESINNATIVEROW
-							dataTypeName = (string)stringConveyor.Read(buffer, offset);
-							dataType = Manager.CompileTypeSpecifier(dataTypeName);
-							offset += stringConveyor.GetSize(dataTypeName);
-							scalarType = dataType as Schema.IScalarType;
-							if ((scalarType != null) && !scalarType.IsCompound)
-							{
-								conveyor = Manager.GetConveyor(scalarType);
-								if (conveyor.IsStreaming)
-								{
-									elementSize = (int)int32Conveyor.Read(buffer, offset);
-									offset += sizeof(int);
-									stream = new MemoryStream(buffer, offset, elementSize, false, true);
-									_row.DataTypes[index] = scalarType;
-									_row.Values[index] = conveyor.Read(stream);
-									offset += elementSize;
-								}
-								else
-								{
-									elementSize = (int)int32Conveyor.Read(buffer, offset);
-									offset += sizeof(int);
-									_row.DataTypes[index] = scalarType;
-									_row.Values[index] = conveyor.Read(buffer, offset);
-									offset += elementSize;
-								}
-							}
-							else
-							{
-								elementSize = (int)int32Conveyor.Read(buffer, offset);
-								offset += sizeof(int);
-								_row.DataTypes[index] = dataType;
-								using (IDataValue tempValue = DataValue.FromPhysical(Manager, dataType, buffer, offset))
-								{
-									_row.Values[index] = tempValue.AsNative;
-									tempValue.ValuesOwned = false;
-								}
-								offset += elementSize;
-							}
-						break;
-							#else
-							throw new NotSupportedException("Specialized data types in rows are not supported");
-							#endif
-						
-						case 5 : // non-native specialized value
-							#if USEDATATYPESINNATIVEROW
-							dataTypeName = (string)stringConveyor.Read(buffer, offset);
-							dataType = Manager.CompileTypeSpecifier(dataTypeName);
-							offset += stringConveyor.GetSize(dataTypeName);
-							scalarType = dataType as Schema.IScalarType;
-							if (scalarType != null)
-							{
-								if (expandStreams)
-								{
-									elementSize = (int)int32Conveyor.Read(buffer, offset);
-									offset += sizeof(int);
-									streamID = Manager.StreamManager.Allocate();
-									stream = Manager.StreamManager.Open(streamID, LockMode.Exclusive);
-									stream.Write(buffer, offset, elementSize);
-									stream.Close();
-									_row.DataTypes[index] = scalarType;
-									_row.Values[index] = streamID;
-									offset += elementSize;
-								}
-								else
-								{
-									_row.DataTypes[index] = scalarType;
-									_row.Values[index] = new StreamID(Convert.ToUInt64(int64Conveyor.Read(buffer, offset)));
-									offset += sizeof(long);
-								}
-							}
-							else
-							{
-								// non-scalar values cannot be non-native
-							}
-						break;
-							#else
-							throw new NotSupportedException("Specialized data types in rows are not supported");
-							#endif
-					}
-				}
 			}
 		}
 		
@@ -673,7 +167,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					#if USEDATATYPESINNATIVEROW
 					_row.DataTypes[index] = tempValue.DataType;
 					#endif
-					_row.Values[index] = tempValue.CopyNative();
+					_row.Values[index] = DataValue.CopyNative(tempValue);
 				}
 				else if (value != null)
 				{
@@ -826,45 +320,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return valueFlags;
 		}
 		
-		public override object CopyNativeAs(Schema.IDataType dataType)
-		{
-			if (_row == null)
-				return null;
-				
-			if (Object.ReferenceEquals(DataType, dataType))
-			{
-				NativeRow newRow = new NativeRow(DataType.Columns.Count);
-				if (_row != null)
-					for (int index = 0; index < DataType.Columns.Count; index++)
-					{
-						#if USEDATATYPESINNATIVEROW
-						newRow.DataTypes[index] = _row.DataTypes[index];
-						newRow.Values[index] = CopyNative(Manager, _row.DataTypes[index], _row.Values[index]);
-						#else
-						newRow.Values[index] = CopyNative(Manager, DataType.Columns[index].DataType, FRow.Values[index]);
-						#endif
-					}
-				return newRow;
-			}
-			else
-			{
-				NativeRow newRow = new NativeRow(DataType.Columns.Count);
-				Schema.IRowType newRowType = (Schema.IRowType)dataType;
-				if (_row != null)
-					for (int index = 0; index < DataType.Columns.Count; index++)
-					{
-						int newIndex = newRowType.Columns.IndexOfName(DataType.Columns[index].Name);
-						#if USEDATATYPESINNATIVEROW
-						newRow.DataTypes[newIndex] = _row.DataTypes[index];
-						newRow.Values[newIndex] = CopyNative(Manager, _row.DataTypes[index], _row.Values[index]);
-						#else
-						newRow.Values[newIndex] = CopyNative(Manager, DataType.Columns[index].DataType, FRow.Values[index]);
-						#endif
-					}
-				return newRow;
-			}
-		}
-
 		public void CopyTo(IRow row)
 		{
 			int columnIndex;
@@ -893,6 +348,564 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				result.Append(" ");
 			result.Append("}");
 			return result.ToString();
+		}
+
+		private class RowWriteContext : IWriteContext
+		{
+			public int Size { get; set; }
+			public object[] WriteList;
+			public IDataValue[] ElementWriteList;
+		}
+
+		public static object CopyNativeAs(IRow row, Schema.IDataType dataType)
+		{
+			var _row = (NativeRow)row.AsNative;
+			if (_row == null)
+				return null;
+				
+			if (Object.ReferenceEquals(row.DataType, dataType))
+			{
+				NativeRow newRow = new NativeRow(row.DataType.Columns.Count);
+				if (_row != null)
+					for (int index = 0; index < row.DataType.Columns.Count; index++)
+					{
+						#if USEDATATYPESINNATIVEROW
+						newRow.DataTypes[index] = _row.DataTypes[index];
+						newRow.Values[index] = DataValue.CopyNative(row.Manager, _row.DataTypes[index], _row.Values[index]);
+						#else
+						newRow.Values[index] = DataValue.CopyNative(row.Manager, row.DataType.Columns[index].DataType, _row.Values[index]);
+						#endif
+					}
+				return newRow;
+			}
+			else
+			{
+				NativeRow newRow = new NativeRow(row.DataType.Columns.Count);
+				Schema.IRowType newRowType = (Schema.IRowType)dataType;
+				if (_row != null)
+					for (int index = 0; index < row.DataType.Columns.Count; index++)
+					{
+						int newIndex = newRowType.Columns.IndexOfName(row.DataType.Columns[index].Name);
+						#if USEDATATYPESINNATIVEROW
+						newRow.DataTypes[newIndex] = _row.DataTypes[index];
+						newRow.Values[newIndex] = DataValue.CopyNative(row.Manager, _row.DataTypes[index], _row.Values[index]);
+						#else
+						newRow.Values[newIndex] = DataValue.CopyNative(row.Manager, row.DataType.Columns[index].DataType, _row.Values[index]);
+						#endif
+					}
+				return newRow;
+			}
+		}
+
+		/*
+			Row Value Format ->
+			
+				00 -> 0 - Indicates that non-native values are stored as a StreamID 1 - Indicates non-native values are stored inline
+				01-XX -> Value for each attribute in the row
+				
+			Row Attribute Format ->
+
+				There are five possibilities for an attribute ->			
+					Nil Native
+					Nil Non-Native (StreamID.Null)
+					Standard Native
+					Standard Non-Native
+					Specialized Native
+					Specialized Non-Native
+				
+					For non-native values, the value will be expanded or not dependending on the expanded setting for the row value
+
+				00	-> 0 - 5
+					0 if the row contains a native nil for this attribute - no data follows
+					1 if the row contains a non-native nil for this attribute - no data follows
+					2 if the row contains a native value of the data type of the attribute
+						01-04 -> Length of the physical representation of this value
+						05-XX -> The physical representation of this value
+					3 if the row contains a non-native value of the data type of the attribute
+						01-04 -> Length of the physical representation of this value
+						05-XX -> The physical representation of this value (expanded based on the expanded setting for the list value)
+					4 if the row contains a native value of some specialization of the data type of the attribute
+						01-XX -> The data type name of this value, stored using a StringConveyor
+						XX+1-XX+5 -> The length of the physical representation of this value
+						XX+6-YY -> The physical representation of this value
+					5 if the row contains a non-native value of some specialization of the data type of the attribute
+						01-XX -> The data type name of this value, stored using a StringConveyor
+						XX+1-XX+5 -> The length of the physical representation of this value
+						XX+6-YY -> The physical representation of this value (expanded based on the expanded setting for the list value)
+		*/
+		public static IWriteContext GetPhysicalSize(IRow row, bool expandStreams)
+		{
+			int size = 1; // write the value indicator
+			object[] _writeList = null;
+			IDataValue[] _elementWriteList = null;
+			if (!row.IsNil)
+			{
+				size += 1; // write the extended streams indicator
+				_writeList = new object[row.DataType.Columns.Count]; // list for saving the sizes or streams of each attribute in the row
+				_elementWriteList = new IDataValue[row.DataType.Columns.Count]; // list for saving host representations of values between the GetPhysicalSize and WriteToPhysical calls
+				var _row = (NativeRow)row.AsNative;
+				Stream stream;
+				StreamID streamID;
+				Schema.IScalarType scalarType;
+				Streams.IConveyor conveyor;
+				IDataValue element;
+				int elementSize;
+				for (int index = 0; index < _writeList.Length; index++)
+				{
+					size += sizeof(byte); // write a value indicator
+					if (_row.Values[index] != null)
+					{
+						#if USEDATATYPESINNATIVEROW
+						if (!row.DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
+							size += row.Manager.GetConveyor(row.Manager.DataTypes.SystemString).GetSize(_row.DataTypes[index].Name); // write the name of the data type of the value
+						#endif
+						/*							
+						LElement = DataValue.FromNativeRow(Manager, DataType, FRow, LIndex);
+						FElementWriteList[LIndex] = LElement;
+						LElementSize = LElement.GetPhysicalSize(AExpandStreams);
+						FWriteList[LIndex] = LElementSize;
+						LSize += sizeof(int) + LElementSize;
+						*/
+						#if USEDATATYPESINNATIVEROW
+						scalarType = _row.DataTypes[index] as Schema.IScalarType;
+						#else
+						scalarType = DataType.Columns[index].DataType as Schema.IScalarType;
+						#endif
+						if ((scalarType != null) && !scalarType.IsCompound)
+						{
+							if (_row.Values[index] is StreamID)
+							{
+								// If this is a non-native scalar
+								streamID = (StreamID)_row.Values[index];
+								if (expandStreams)
+								{
+									if (streamID != StreamID.Null)
+									{
+										stream = row.Manager.StreamManager.Open((StreamID)_row.Values[index], LockMode.Exclusive);
+										_writeList[index] = stream;
+										size += sizeof(int) + (int)stream.Length;
+									}
+								}
+								else
+								{
+									if (streamID != StreamID.Null)
+									{
+										elementSize = sizeof(long);
+										_writeList[index] = elementSize;
+										size += elementSize;
+									}
+								}
+							}
+							else
+							{
+								conveyor = row.Manager.GetConveyor(scalarType);
+								if (conveyor.IsStreaming)
+								{
+									stream = new MemoryStream(64);
+									_writeList[index] = stream;
+									conveyor.Write(_row.Values[index], stream);
+									stream.Position = 0;
+									size += sizeof(int) + (int)stream.Length;
+								}
+								else
+								{
+									elementSize = conveyor.GetSize(_row.Values[index]);
+									_writeList[index] = elementSize;
+									size += sizeof(int) + elementSize;;
+								}
+							}
+						}
+						else
+						{
+							element = DataValue.FromNativeRow(row.Manager, row.DataType, _row, index);
+							_elementWriteList[index] = element;
+							var elementContext = DataValue.GetPhysicalSize(element, expandStreams);
+							_writeList[index] = elementContext;
+							size += sizeof(int) + elementContext.Size;
+						}						
+					}
+				}
+			}
+			return new RowWriteContext { Size = size, WriteList = _writeList, ElementWriteList = _elementWriteList };
+		}
+		
+		public static void WriteToPhysical(IRow row, IWriteContext context, byte[] buffer, int offset, bool expandStreams)
+		{
+			var rowContext = context as RowWriteContext;
+			if (rowContext == null)
+				throw new RuntimeException(RuntimeException.Codes.UnpreparedWriteToPhysicalCall);
+				
+			buffer[offset] = (byte)(row.IsNil ? 0 : 1); // Write the value indicator
+			offset++;
+			
+			if (!row.IsNil)
+			{
+				var _row = (NativeRow)row.AsNative;
+				buffer[offset] = (byte)(expandStreams ? 1 : 0); // Write the expanded streams indicator
+				offset++;
+					
+				#if USEDATATYPESINNATIVEROW
+				Streams.IConveyor stringConveyor = null;
+				#endif
+				Streams.IConveyor int64Conveyor = row.Manager.GetConveyor(row.Manager.DataTypes.SystemLong);
+				Streams.IConveyor int32Conveyor = row.Manager.GetConveyor(row.Manager.DataTypes.SystemInteger);
+
+				Stream stream;
+				StreamID streamID;
+				int elementSize;
+				Schema.IScalarType scalarType;
+				Streams.IConveyor conveyor;
+				IDataValue element;
+				for (int index = 0; index < rowContext.WriteList.Length; index++)
+				{
+					if (_row.Values[index] == null)
+					{
+						buffer[offset] = (byte)0; // Write the native nil indicator
+						offset++;
+					}
+					else
+					{
+						#if USEDATATYPESINNATIVEROW
+						scalarType = _row.DataTypes[index] as Schema.IScalarType;
+						#else
+						scalarType = DataType.Columns[index].DataType as Schema.IScalarType;
+						#endif
+						if ((scalarType != null) && !scalarType.IsCompound)
+						{
+							if (_row.Values[index] is StreamID)
+							{
+								// If this is a non-native scalar
+								streamID = (StreamID)_row.Values[index];
+								if (streamID == StreamID.Null)
+								{
+									buffer[offset] = (byte)1; // Write the non-native nil indicator
+									offset++;
+								}
+								else
+								{
+									#if USEDATATYPESINNATIVEROW
+									if (row.DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
+									{
+									#endif
+										buffer[offset] = (byte)3; // Write the native standard value indicator
+										offset++;
+									#if USEDATATYPESINNATIVEROW
+									}
+									else
+									{
+										buffer[offset] = (byte)5; // Write the native specialized value indicator
+										offset++;
+										if (stringConveyor == null)
+											stringConveyor = row.Manager.GetConveyor(row.Manager.DataTypes.SystemString);
+										elementSize = stringConveyor.GetSize(_row.DataTypes[index].Name);
+										stringConveyor.Write(_row.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
+										offset += elementSize;
+									}
+									#endif
+									
+									if (expandStreams)
+									{
+										stream = (Stream)rowContext.WriteList[index];
+										int32Conveyor.Write(Convert.ToInt32(stream.Length), buffer, offset);
+										offset += sizeof(int);
+										stream.Read(buffer, offset, (int)stream.Length);
+										offset += (int)stream.Length;
+										stream.Close();
+									}
+									else
+									{
+										int64Conveyor.Write((long)streamID.Value, buffer, offset);
+										offset += sizeof(long);
+									}
+								}
+							}
+							else
+							{
+								#if USEDATATYPESINNATIVEROW
+								if (row.DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
+								{
+								#endif
+									buffer[offset] = (byte)2; // Write the native standard value indicator
+									offset++;
+								#if USEDATATYPESINNATIVEROW
+								}
+								else
+								{
+									buffer[offset] = (byte)4; // Write the native specialized value indicator
+									offset++;
+									if (stringConveyor == null)
+										stringConveyor = row.Manager.GetConveyor(row.Manager.DataTypes.SystemString);
+									elementSize = stringConveyor.GetSize(_row.DataTypes[index].Name);
+									stringConveyor.Write(_row.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
+									offset += elementSize;
+								}
+								#endif
+
+								conveyor = row.Manager.GetConveyor(scalarType);
+								if (conveyor.IsStreaming)
+								{
+									stream = (Stream)rowContext.WriteList[index];
+									int32Conveyor.Write(Convert.ToInt32(stream.Length), buffer, offset); // Write the length of the value
+									offset += sizeof(int);
+									stream.Read(buffer, offset, (int)stream.Length); // Write the value of this scalar
+									offset += (int)stream.Length;
+								}
+								else
+								{
+									elementSize = (int)rowContext.WriteList[index]; // Write the length of the value
+									int32Conveyor.Write(elementSize, buffer, offset);
+									offset += sizeof(int);
+									conveyor.Write(_row.Values[index], buffer, offset); // Write the value of this scalar
+									offset += elementSize;
+								}
+							}
+						}
+						else
+						{
+							#if USEDATATYPESINNATIVEROW
+							if (row.DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
+							{
+							#endif
+								buffer[offset] = (byte)2; // Write the native standard value indicator
+								offset++;
+							#if USEDATATYPESINNATIVEROW
+							}
+							else
+							{
+								buffer[offset] = (byte)4; // Write the native specialized value indicator
+								offset++;
+								if (stringConveyor == null)
+									stringConveyor = row.Manager.GetConveyor(row.Manager.DataTypes.SystemString);
+								elementSize = stringConveyor.GetSize(_row.DataTypes[index].Name);
+								stringConveyor.Write(_row.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
+								offset += elementSize;
+							}
+							#endif
+
+							element = rowContext.ElementWriteList[index];
+							var elementContext = (IWriteContext)rowContext.WriteList[index];
+							elementSize = elementContext.Size;
+							int32Conveyor.Write(elementSize, buffer, offset);
+							offset += sizeof(int);
+							DataValue.WriteToPhysical(element, elementContext, buffer, offset, expandStreams); // Write the physical representation of the value;
+							offset += elementSize;
+							element.Dispose();
+						}
+					}
+				}
+			}
+		}
+
+		public static void ReadFromPhysical(IRow row, byte[] buffer, int offset)
+		{
+			row.ClearValues(); // Clear the current value of the row
+			
+			if (buffer[offset] == 0)
+			{
+				row.AsNative = null;
+			}
+			else
+			{
+				var _row = new NativeRow(row.DataType.Columns.Count);
+				offset++;
+			
+				bool expandStreams = buffer[offset] != 0; // Read the exapnded streams indicator
+				offset++;
+					
+				#if USEDATATYPESINNATIVEROW
+				Streams.IConveyor stringConveyor = row.Manager.GetConveyor(row.Manager.DataTypes.SystemString);
+				string dataTypeName;
+				Schema.IDataType dataType;
+				#endif
+				Streams.IConveyor int64Conveyor = row.Manager.GetConveyor(row.Manager.DataTypes.SystemLong);
+				Streams.IConveyor int32Conveyor = row.Manager.GetConveyor(row.Manager.DataTypes.SystemInteger);
+
+				Stream stream;
+				StreamID streamID;
+				int elementSize;
+				Schema.IScalarType scalarType;
+				Streams.IConveyor conveyor;
+				for (int index = 0; index < row.DataType.Columns.Count; index++)
+				{
+					byte valueIndicator = buffer[offset];
+					offset++;
+					
+					switch (valueIndicator)
+					{
+						case 0 : // native nil
+							#if USEDATATYPESINNATIVEROW
+							_row.DataTypes[index] = row.DataType.Columns[index].DataType;
+							#endif
+							_row.Values[index] = null;
+						break;
+						
+						case 1 : // non-native nil
+							#if USEDATATYPESINNATIVEROW
+							_row.DataTypes[index] = row.DataType.Columns[index].DataType;
+							#endif
+							_row.Values[index] = StreamID.Null;
+						break;
+						
+						case 2 : // native standard value
+							scalarType = row.DataType.Columns[index].DataType as Schema.IScalarType;
+							if ((scalarType != null) && !scalarType.IsCompound)
+							{
+								conveyor = row.Manager.GetConveyor(scalarType);
+								if (conveyor.IsStreaming)
+								{
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									stream = new MemoryStream(buffer, offset, elementSize, false, true);
+									#if USEDATATYPESINNATIVEROW
+									_row.DataTypes[index] = row.DataType.Columns[index].DataType;
+									#endif
+									_row.Values[index] = conveyor.Read(stream);
+									offset += elementSize;
+								}
+								else
+								{
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									#if USEDATATYPESINNATIVEROW
+									_row.DataTypes[index] = row.DataType.Columns[index].DataType;
+									#endif
+									_row.Values[index] = conveyor.Read(buffer, offset);
+									offset += elementSize;
+								}
+							}
+							else
+							{
+								elementSize = (int)int32Conveyor.Read(buffer, offset);
+								offset += sizeof(int);
+								#if USEDATATYPESINNATIVEROW
+								_row.DataTypes[index] = row.DataType.Columns[index].DataType;
+								#endif
+								using (IDataValue tempValue = DataValue.FromPhysical(row.Manager, row.DataType.Columns[index].DataType, buffer, offset))
+								{
+									_row.Values[index] = tempValue.AsNative;
+									tempValue.ValuesOwned = false;
+								}
+								offset += elementSize;
+							}
+						break;
+						
+						case 3 : // non-native standard value
+							scalarType = row.DataType.Columns[index].DataType as Schema.IScalarType;
+							if (scalarType != null)
+							{
+								if (expandStreams)
+								{
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									streamID = row.Manager.StreamManager.Allocate();
+									stream = row.Manager.StreamManager.Open(streamID, LockMode.Exclusive);
+									stream.Write(buffer, offset, elementSize);
+									stream.Close();
+									#if USEDATATYPESINNATIVEROW
+									_row.DataTypes[index] = scalarType;
+									#endif
+									_row.Values[index] = streamID;
+									offset += elementSize;
+								}
+								else
+								{
+									#if USEDATATYPESINNATIVEROW
+									_row.DataTypes[index] = scalarType;
+									#endif
+									_row.Values[index] = new StreamID(Convert.ToUInt64(int64Conveyor.Read(buffer, offset)));
+									offset += sizeof(long);
+								}
+							}
+							else
+							{
+								// non-scalar values cannot be non-native
+							}
+						break;
+						
+						case 4 : // native specialized value
+							#if USEDATATYPESINNATIVEROW
+							dataTypeName = (string)stringConveyor.Read(buffer, offset);
+							dataType = row.Manager.CompileTypeSpecifier(dataTypeName);
+							offset += stringConveyor.GetSize(dataTypeName);
+							scalarType = dataType as Schema.IScalarType;
+							if ((scalarType != null) && !scalarType.IsCompound)
+							{
+								conveyor = row.Manager.GetConveyor(scalarType);
+								if (conveyor.IsStreaming)
+								{
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									stream = new MemoryStream(buffer, offset, elementSize, false, true);
+									_row.DataTypes[index] = scalarType;
+									_row.Values[index] = conveyor.Read(stream);
+									offset += elementSize;
+								}
+								else
+								{
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									_row.DataTypes[index] = scalarType;
+									_row.Values[index] = conveyor.Read(buffer, offset);
+									offset += elementSize;
+								}
+							}
+							else
+							{
+								elementSize = (int)int32Conveyor.Read(buffer, offset);
+								offset += sizeof(int);
+								_row.DataTypes[index] = dataType;
+								using (IDataValue tempValue = DataValue.FromPhysical(row.Manager, dataType, buffer, offset))
+								{
+									_row.Values[index] = tempValue.AsNative;
+									tempValue.ValuesOwned = false;
+								}
+								offset += elementSize;
+							}
+						break;
+							#else
+							throw new NotSupportedException("Specialized data types in rows are not supported");
+							#endif
+						
+						case 5 : // non-native specialized value
+							#if USEDATATYPESINNATIVEROW
+							dataTypeName = (string)stringConveyor.Read(buffer, offset);
+							dataType = row.Manager.CompileTypeSpecifier(dataTypeName);
+							offset += stringConveyor.GetSize(dataTypeName);
+							scalarType = dataType as Schema.IScalarType;
+							if (scalarType != null)
+							{
+								if (expandStreams)
+								{
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									streamID = row.Manager.StreamManager.Allocate();
+									stream = row.Manager.StreamManager.Open(streamID, LockMode.Exclusive);
+									stream.Write(buffer, offset, elementSize);
+									stream.Close();
+									_row.DataTypes[index] = scalarType;
+									_row.Values[index] = streamID;
+									offset += elementSize;
+								}
+								else
+								{
+									_row.DataTypes[index] = scalarType;
+									_row.Values[index] = new StreamID(Convert.ToUInt64(int64Conveyor.Read(buffer, offset)));
+									offset += sizeof(long);
+								}
+							}
+							else
+							{
+								// non-scalar values cannot be non-native
+							}
+						break;
+							#else
+							throw new NotSupportedException("Specialized data types in rows are not supported");
+							#endif
+					}
+				}
+
+				row.AsNative = _row;
+			}
 		}
 	}
 }

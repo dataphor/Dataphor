@@ -68,6 +68,9 @@ namespace Alphora.Dataphor.DAE.Runtime
 			if (!_conveyors.TryGetValue(scalarType.Name, out conveyor))
 			{
 				conveyor = (IConveyor)_serverProcessInterface.CreateObject(scalarType.ClassDefinition, null);
+				var nativeConveyor = conveyor as INativeScalarConveyor;
+				if (nativeConveyor != null)
+					nativeConveyor.Conveyor = GetConveyor((Schema.IScalarType)CompileTypeSpecifier(nativeConveyor.SourceTypeName));
 				_conveyors.Add(scalarType.Name, conveyor);
 			}
 			return conveyor;

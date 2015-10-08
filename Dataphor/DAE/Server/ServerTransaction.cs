@@ -1433,7 +1433,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public ServerInsertHandler(Schema.TableVarEventHandler handler, IRow row) : base(handler)
 		{
 			_newRowType = row.DataType;
-			NativeRow = (NativeRow)row.CopyNative();
+			NativeRow = (NativeRow)DataValue.CopyNative(row);
 		}
 		
 		public NativeRow NativeRow;
@@ -1475,8 +1475,8 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			_newRowType = newRow.DataType;
 			_oldRowType = oldRow.DataType;
-			OldNativeRow = (NativeRow)oldRow.CopyNative();
-			NewNativeRow = (NativeRow)newRow.CopyNative();
+			OldNativeRow = (NativeRow)DataValue.CopyNative(oldRow);
+			NewNativeRow = (NativeRow)DataValue.CopyNative(newRow);
 		}
 		
 		public NativeRow OldNativeRow;
@@ -1540,7 +1540,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public ServerDeleteHandler(Schema.TableVarEventHandler handler, IRow row) : base(handler)
 		{
 			_oldRowType = row.DataType;
-			NativeRow = (NativeRow)row.CopyNative();
+			NativeRow = (NativeRow)DataValue.CopyNative(row);
 		}
 		
 		public NativeRow NativeRow;

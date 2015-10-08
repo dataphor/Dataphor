@@ -7,7 +7,7 @@ using System;
 
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
-	public class CursorValue : DataValue
+	public class CursorValue : DataValue, ICursor
 	{
 		public CursorValue(IValueManager manager, Schema.ICursorType cursorType, int iD) : base(manager, cursorType)
 		{
@@ -16,6 +16,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		private int _iD;
 		public int ID { get { return _iD; } }
+
+		public new Schema.ICursorType DataType { get { return (Schema.ICursorType)base.DataType; } }
 		
 		public override object AsNative
 		{
@@ -25,46 +27,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public override bool IsNil { get { return false; } }
 
-		public override int GetPhysicalSize(bool expandStreams)
+		internal class CursorWriteContext : IWriteContext
 		{
-			return sizeof(int);
+			public int Size { get; set; }
 		}
 
-		#if USE_UNSAFE 
-
-		public unsafe override void WriteToPhysical(byte[] ABuffer, int offset, bool AExpandStreams)
+		public static object CopyNativeAs(ICursor cursor, Schema.IDataType dataType)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[offset]))
-			{
-				*((int*)LBufferPtr) = FID;
-			}
-		}
-		
-		public unsafe override void ReadFromPhysical(byte[] ABuffer, int offset)
-		{
-			fixed (byte* LBufferPtr = &(ABuffer[offset]))
-			{
-				FID = *((int*)LBufferPtr);
-			}
+			return cursor.ID;
 		}
 
-		#else
-
-		public override void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
+		public static IWriteContext GetPhysicalSize(ICursor cursor, bool expandStreams)
 		{
-			ByteArrayUtility.WriteInt32(buffer, offset, _iD);
+			return new CursorWriteContext { Size = sizeof(int) };
 		}
 
-		public override void ReadFromPhysical(byte[] buffer, int offset)
+		public static void WriteToPhysical(ICursor cursor, IWriteContext context, byte[] buffer, int offset, bool expandStreams)
 		{
-			_iD = ByteArrayUtility.ReadInt32(buffer, offset);
+			ByteArrayUtility.WriteInt32(buffer, offset, cursor.ID);
 		}
 
-		#endif
-		
-		public override object CopyNativeAs(Schema.IDataType dataType)
+		public static void ReadFromPhysical(ICursor cursor, byte[] buffer, int offset)
 		{
-			return _iD;
+			cursor.AsNative = ByteArrayUtility.ReadInt32(buffer, offset);
 		}
 	}
 

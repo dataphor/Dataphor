@@ -403,19 +403,7 @@ namespace Alphora.Dataphor.Frontend.Server
 			if (tempValue == null)
 				tempValue = DataValue.FromNative(program.ValueManager, arguments[0]);
 
-			if (tempValue.IsPhysicalStreaming)
-			{
-				using (Stream stream = tempValue.OpenStream())
-				{
-					return (int)CRC32Utility.GetCRC32(stream);
-				}
-			}
-			else
-			{
-				byte[] physical = new byte[tempValue.GetPhysicalSize(true)];
-				tempValue.WriteToPhysical(physical, 0, true);
-				return (int)CRC32Utility.GetCRC32(physical);
-			}
+			return (int)CRC32Utility.GetCRC32(tempValue.AsPhysical);
 		}
 	}
 	

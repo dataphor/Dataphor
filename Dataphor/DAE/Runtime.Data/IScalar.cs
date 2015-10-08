@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Alphora.Dataphor.DAE.Streams;
@@ -16,6 +17,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	{
 		new Schema.IScalarType DataType { get; }
 		StreamID StreamID { get; set; }
+		Stream OpenStream();
+		Stream OpenStream(string representationName);
 		bool AsBoolean { get; set; }
 		bool GetAsBoolean(string representationName);
 		void SetAsBoolean(string representationName, bool value);

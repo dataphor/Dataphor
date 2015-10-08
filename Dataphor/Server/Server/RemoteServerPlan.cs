@@ -161,7 +161,7 @@ namespace Alphora.Dataphor.DAE.Server
 					return null;
 				if (ServerExpressionPlan.DataType.Equivalent(tempValue.DataType))
 					return tempValue.AsPhysical;
-				return tempValue.CopyAs(ServerExpressionPlan.DataType).AsPhysical;
+				return DataValue.CopyAs(tempValue, ServerExpressionPlan.DataType).AsPhysical;
 			}
 			catch (Exception E)
 			{

@@ -6968,7 +6968,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			if ((value == null) || !(value is DAEData.DataValue))
 				return DBGrid.DefaultRowHeight;
 			Image image;
-			Stream stream = ((DAEData.DataValue)value).OpenStream();
+			Stream stream = ((DAEData.IScalar)value).OpenStream();
 			try
 			{
 				MemoryStream copyStream = new MemoryStream();
@@ -7003,7 +7003,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				int columnIndex = ColumnIndex(Link);
 				if (row.HasValue(columnIndex))
 				{
-					Stream stream = row.GetValue(columnIndex).OpenStream();
+					Stream stream = ((DAEData.IScalar)row.GetValue(columnIndex)).OpenStream();
 					try
 					{
 						MemoryStream copyStream = new MemoryStream();

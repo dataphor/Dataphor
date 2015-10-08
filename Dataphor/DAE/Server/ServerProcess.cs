@@ -1707,6 +1707,11 @@ namespace Alphora.Dataphor.DAE.Server
 		// ExecutionSyncHandle is used to synchronize server-level execution management services involving the executing thread of the process
 		private object _executionSyncHandle = new System.Object();
 		public object ExecutionSyncHandle { get { return _executionSyncHandle; } }
+
+		// Tracks the current process for the executing thread
+		[ThreadStatic]
+		private static ServerProcess _current;
+		public static ServerProcess Current { get { return _current; } }
 		
 		// StopError is used to indicate that a system level stop error has occurred on the process, and all transactions should be rolled back
 		private bool _stopError = false;
@@ -1746,6 +1751,7 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						_executingThread = System.Threading.Thread.CurrentThread;
 						_isAborted = false;
+						_current = this;
 						//FExecutingThread.ApartmentState = ApartmentState.STA; // This had no effect, the ADO thread lock is still occurring
 						ThreadUtility.SetThreadName(_executingThread, String.Format("ServerProcess {0}", _processID.ToString()));
 					}
@@ -1769,6 +1775,7 @@ namespace Alphora.Dataphor.DAE.Server
 							{
 								ThreadUtility.SetThreadName(_executingThread, null);
 								_executingThread = null;
+								_current = null;
 							}
 						}
 						finally

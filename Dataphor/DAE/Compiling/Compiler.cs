@@ -4748,8 +4748,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 								selectorBlock.ClassDefinition = DefaultSelector();
 							
 								// Use the native representation of the single simple scalar property
-								scalarType.ClassDefinition = (ClassDefinition)((Schema.ScalarType)representation.Properties[0].DataType).ClassDefinition.Clone();
-								scalarType.NativeType = ((Schema.ScalarType)representation.Properties[0].DataType).NativeType;
+								var sourceScalarType = (Schema.ScalarType)representation.Properties[0].DataType;
+								scalarType.NativeType = ConstructNativeScalarType(sourceScalarType.NativeType);
+								scalarType.ClassDefinition = NativeScalarConveyor(sourceScalarType, scalarType.Name);
 							}
 							else
 							{
@@ -4805,6 +4806,26 @@ namespace Alphora.Dataphor.DAE.Compiling
 				plan.PopCreationObject();
 			}
 		}
+
+		protected static Type ConstructNativeScalarType(Type nativeType)
+		{
+			return typeof(Scalar<>).MakeGenericType(nativeType);
+		}
+
+		protected static ClassDefinition NativeScalarConveyor(Schema.ScalarType sourceScalarType, string typeName)
+		{
+			return 
+				new ClassDefinition
+				(
+					"System.ScalarConveyor`1", 
+					new ClassAttributeDefinition[] 
+					{ 
+						new ClassAttributeDefinition("SourceTypeName", sourceScalarType.Name), 
+						new ClassAttributeDefinition("TypeName", typeName), 
+						new ClassAttributeDefinition("@1", sourceScalarType.NativeType.AssemblyQualifiedName) 
+					}
+				);
+		}
 		
 		protected static ClassDefinition DefaultSelector()
 		{
@@ -4823,7 +4844,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		protected static ClassDefinition DefaultReadAccessor()
 		{
-			return new ClassDefinition("System.ScalarReadAccessorNode");
+			return new ClassDefinition("System.ValidatingScalarReadAccessorNode");
 		}
 		
 		protected static ClassDefinition DefaultCompoundReadAccessor(string propertyName)
@@ -5074,13 +5095,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 				// Build an equality operator using the CompoundScalarEqualNode
 			if (!scalarType.IsCompound)
 			{
-				Schema.ScalarType componentType = (Schema.ScalarType)FindSystemRepresentation(scalarType).Properties[0].DataType;
+				Schema.Property componentProperty = FindSystemRepresentation(scalarType).Properties[0];
+				Schema.ScalarType componentType = (Schema.ScalarType)componentProperty.DataType;
 				PlanNode[] arguments = new PlanNode[]{new ValueNode(componentType, null), new ValueNode(componentType, null)};
 
 				PlanNode planNode = Compiler.EmitCallNode(plan, Instructions.Equal, arguments, false, true);
 				if (planNode != null)
 				{
-					Schema.Operator componentOperator = ((InstructionNodeBase)planNode).Operator;
+					//Schema.Operator componentOperator = ((InstructionNodeBase)planNode).Operator;
 					Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(Instructions.Equal, scalarType.Library.Name));
 					operatorValue.IsGenerated = true;
 					operatorValue.Generator = scalarType;
@@ -5098,11 +5120,19 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 						plan.AttachDependency(plan.DataTypes.SystemBoolean);
 						plan.AttachDependency(scalarType);
-						
-						if (componentOperator.Block.ClassDefinition != null)
-							operatorValue.Block.ClassDefinition = (ClassDefinition)componentOperator.Block.ClassDefinition;
-						else
-							operatorValue.Block.BlockNode = componentOperator.Block.BlockNode;
+
+						Statement equalityBlock = 
+							new AssignmentStatement
+							(
+								new IdentifierExpression(Keywords.Result), 
+								new BinaryExpression
+								(
+									new QualifierExpression(new IdentifierExpression("ALeftValue"), new IdentifierExpression(componentProperty.Name)), 
+									Instructions.Equal, 
+									new QualifierExpression(new IdentifierExpression("ARightValue"), new IdentifierExpression(componentProperty.Name))
+								)
+							);
+						operatorValue.Block.BlockNode = BindOperatorBlock(plan, operatorValue, CompileOperatorBlock(plan, operatorValue, equalityBlock));
 						plan.PlanCatalog.Add(operatorValue);
 						plan.Catalog.OperatorResolutionCache.Clear(operatorValue.OperatorName);
 						scalarType.EqualityOperator = operatorValue;
@@ -5135,10 +5165,19 @@ namespace Alphora.Dataphor.DAE.Compiling
 						plan.AttachDependency(plan.DataTypes.SystemInteger);
 						plan.AttachDependency(scalarType);
 						
-						if (componentOperator.Block.ClassDefinition != null)
-							operatorValue.Block.ClassDefinition = (ClassDefinition)componentOperator.Block.ClassDefinition;
-						else
-							operatorValue.Block.BlockNode = componentOperator.Block.BlockNode;
+						Statement comparisonBlock = 
+							new AssignmentStatement
+							(
+								new IdentifierExpression(Keywords.Result), 
+								new BinaryExpression
+								(
+									new QualifierExpression(new IdentifierExpression("ALeftValue"), new IdentifierExpression(componentProperty.Name)), 
+									Instructions.Compare, 
+									new QualifierExpression(new IdentifierExpression("ARightValue"), new IdentifierExpression(componentProperty.Name))
+								)
+							);
+
+						operatorValue.Block.BlockNode = BindOperatorBlock(plan, operatorValue, CompileOperatorBlock(plan, operatorValue, comparisonBlock));
 						plan.PlanCatalog.Add(operatorValue);
 						plan.Catalog.OperatorResolutionCache.Clear(operatorValue.OperatorName);
 						scalarType.ComparisonOperator = operatorValue;

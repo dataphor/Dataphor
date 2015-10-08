@@ -15,6 +15,16 @@ namespace Alphora.Dataphor.DAE.Runtime
 	
 	public static class ValueUtility
 	{
+		public static object ConstructNativeScalar(Schema.ScalarType type, object tempValue)
+		{
+			return Activator.CreateInstance(type.NativeType, type.Name, tempValue);
+		}
+
+		public static object GetNativeValue(Schema.ScalarType type, object tempValue)
+		{
+			return type.NativeType.GetProperty("Value").GetValue(tempValue, null);
+		}
+
 		public static object ValidateValue(Program program, Schema.ScalarType type, object tempValue)
 		{
 			return ValidateValue(program, type, tempValue, null);
