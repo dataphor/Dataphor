@@ -1566,6 +1566,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					else
 						fieldExpression.FieldName = rangeVarColumn.Alias == String.Empty ? rangeVarColumn.ColumnName : rangeVarColumn.Alias;
 					fieldExpression.Ascending = column.Ascending;
+					if (false)  // TODO: Consult localDevicePlan or some such.
+					{
+						fieldExpression.NullsFirst = column.Ascending;
+					}
 					statement.OrderClause.Columns.Add(fieldExpression);
 				}
 			}
