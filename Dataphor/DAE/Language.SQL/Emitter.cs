@@ -178,7 +178,7 @@ namespace Alphora.Dataphor.DAE.Language.SQL
 			AppendFormat(" {0}", orderFieldExpression.Ascending ? Keywords.Asc : Keywords.Desc);
 			if (orderFieldExpression.NullsFirst != null)
 			{
-				AppendFormat(" {0} {1}", Keywords.Nulls, orderFieldExpression.NullsFirst ? Keywords.First : Keywords.Last);
+				AppendFormat(" {0} {1}", Keywords.Nulls, (bool)orderFieldExpression.NullsFirst ? Keywords.First : Keywords.Last);
 			}
 		}
 		

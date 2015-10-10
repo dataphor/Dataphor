@@ -45,6 +45,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
         {
             UseStatementTerminator = false;
             SupportsNestedCorrelation = false;
+            SupportsOrderByNullsFirstLast = true;
             IsOrderByInContext = false;
         }
 
