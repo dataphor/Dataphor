@@ -344,6 +344,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 					if (_link.Modified)
 						return true;
 					break;
+
+				case Keys.Control | Keys.Back:
+				case Keys.Control | Keys.Space:
+					return false;
 			}
 			return base.IsInputKey(keyData);
 		}
