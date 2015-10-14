@@ -599,10 +599,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, renameColumn.ColumnName);
 						else if (renameColumnIndex == index)
 						{
+							if (columnAdded)
+								throw new CompilerException(CompilerException.Codes.DuplicateRenameColumn, renameColumn.ColumnName);
+
 							column = new Schema.Column(renameColumn.ColumnAlias, SourceRowType.Columns[index].DataType);
 							DataType.Columns.Add(column);
 							columnAdded = true;
-							break;
 						}
 					}
 					if (!columnAdded)
