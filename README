@@ -1,0 +1,39 @@
+Dataphor
+README
+=================
+
+This directory contains the source code distribution of Dataphor.
+
+Dataphor is an open source application development platform designed to
+streamline the process of designing, developing, and maintaining software
+applications.  Dataphor is not just another set of application framework
+components, or yet another take on building applications using today's
+common patterns, such as MVC/MVP; Dataphor re-approaches the problem from a
+fresh perspective, building from first principles.
+
+See https://github.com/DBCG/Dataphor for the newest source code.  For more
+information look at our web site located at http://dataphor.org.
+
+INSTALLATION
+
+To get started with running Dataphor as a developer, using its Dataphoria
+IDE, open Dataphor/Dataphor.sln in MS Visual Studio 2013 or another
+suitable environment, and select Dataphoria as the startup project to run.
+
+The file Documentation/Dataphor.chm has the main documentation as it
+exists, though this is somewhat out of date.
+
+While Dataphor is mainly used in production as a federation of SQL DBMSs
+such as MS SQL Server, Oracle, and Postgres, it also has its own built-in
+database engine called 'MemoryDevice' or 'SimpleDevice' respectively, and
+so you can start off using Dataphor without needing to first install any
+external dependencies.
+
+TROUBLESHOOTING
+
+If Dataphoria fails after startup with an error message citing a missing
+DLL or such, try using "Rebuild Solution" rather than "Build Solution" in
+MS Visual Studio as that is more reliable for making sure all the parts of
+Dataphor have been compiled and are not missing.
+
+Further documentation is pending.
