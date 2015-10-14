@@ -41,6 +41,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
         public PostgreSQLDevice(int iD, string name)
             : base(iD, name)
         {
+            SupportsOrderByNullsFirstLast = true;
             IsOrderByInContext = false;
             // T-SQL allows items in the order by list to reference the column aliases used in the query
             UseParametersForCursors = true;
