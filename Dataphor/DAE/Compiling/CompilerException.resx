@@ -682,4 +682,7 @@
   <data name="105288" xml:space="preserve">
     <value>Conveyor for type "{0}" is ambiguous between "{1}" and "{2}".</value>
   </data>
+  <data name="105289" xml:space="preserve">
+    <value>Column "{0}" has already been renamed.</value>
+  </data>
 </root>

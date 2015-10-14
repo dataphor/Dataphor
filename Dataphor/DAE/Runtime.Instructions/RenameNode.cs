@@ -120,12 +120,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, renameColumn.ColumnName);
 						else if (renameColumnIndex == index)
 						{
+							if (columnAdded)
+								throw new CompilerException(CompilerException.Codes.DuplicateRenameColumn, renameColumn.ColumnName);
+
 							column = SourceTableVar.Columns[index].InheritAndRename(renameColumn.ColumnAlias);
 							column.MergeMetaData(renameColumn.MetaData);
 							DataType.Columns.Add(column.Column);
 							TableVar.Columns.Add(column);
 							columnAdded = true;
-							break;
 						}
 					}
 					if (!columnAdded)

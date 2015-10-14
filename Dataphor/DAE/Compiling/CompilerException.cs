@@ -596,8 +596,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 			/// <summary>Error code 105287: "Custom message may only reference global table variables for database-wide and transition constraints."</summary>
 			NonRemotableCustomConstraintMessage = 105287,
 
-			/// <summary>Error code 105388: "Conveyor for type "{0}" is ambiguous between "{1}" and "{2}"."</summary>
+			/// <summary>Error code 105288: "Conveyor for type "{0}" is ambiguous between "{1}" and "{2}"."</summary>
 			AmbiguousConveyor = 105288,
+
+			/// <summary>Error code 105289: "Column "{0}" has already been renamed."</summary>
+			DuplicateRenameColumn = 105289
 		}
 		
 		// Resource manager for this exception class
