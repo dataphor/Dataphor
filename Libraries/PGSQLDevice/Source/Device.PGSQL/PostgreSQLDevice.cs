@@ -29,7 +29,10 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
         protected string _database = "postgres"; // default to stock 'postgres' database
         protected string _port = "5432";
 
-        private int _majorVersion = 9004; // default to Postgresql 9.4 (pending detection)
+        // TODO: The major version for Postgres needs to reflect its first
+        // 2 integers; eg, 9.4 is a major version with its own file format,
+        // while 9 is simply a marketing umbrella not suitable for our purposes.
+        private int _majorVersion = 9; // default to Postgresql 9 (pending detection)
         protected string _server = "127.0.0.1"; // default to localhost
         protected bool _shouldDetermineVersion = false;
         protected bool _shouldEnsureDatabase = true;
@@ -190,7 +193,6 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     var rawVersion = (string) cursor[0];
 					version  = rawVersion.Split(' ')[1];                    	                        
 
-                    // TODO: Correct following to be: major = 1000*firstNum+secondNum
                     if (version.Length > 0)
                         _majorVersion = Convert.ToInt32(version.Substring(0, version.IndexOf('.')));
                 }
