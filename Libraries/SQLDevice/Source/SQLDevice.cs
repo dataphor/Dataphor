@@ -325,6 +325,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			set { _supportsOrderByExpressions = value; }
 		}
 
+		// True if the device supports the ISO standard syntax "NULLS FIRST/LAST" in the order by clause
+		private bool _supportsOrderByNullsFirstLast = false;
+		public bool SupportsOrderByNullsFirstLast
+		{
+			get { return _supportsOrderByNullsFirstLast; }
+			set { _supportsOrderByNullsFirstLast = value; }
+		}
+
 		// True if the order by clause is processed as part of the query context 
 		// If this is false the order must be specified in terms of the result set columns, rather than the range variable columns within the query
 		private bool _isOrderByInContext = true;
@@ -1566,6 +1574,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					else
 						fieldExpression.FieldName = rangeVarColumn.Alias == String.Empty ? rangeVarColumn.ColumnName : rangeVarColumn.Alias;
 					fieldExpression.Ascending = column.Ascending;
+					if (SupportsOrderByNullsFirstLast)
+					{
+						fieldExpression.NullsFirst = column.Ascending;
+					}
 					statement.OrderClause.Columns.Add(fieldExpression);
 				}
 			}

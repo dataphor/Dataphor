@@ -26,11 +26,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
         public static string CCreateDatabase =
             @"create database ""{0}""";
         
-        protected string _database = String.Empty;
+        protected string _database = "postgres"; // default to stock 'postgres' database
         protected string _port = "5432";
 
+        // TODO: The major version for Postgres needs to reflect its first
+        // 2 integers; eg, 9.4 is a major version with its own file format,
+        // while 9 is simply a marketing umbrella not suitable for our purposes.
         private int _majorVersion = 9; // default to Postgresql 9 (pending detection)
-        protected string _server = String.Empty;
+        protected string _server = "127.0.0.1"; // default to localhost
         protected bool _shouldDetermineVersion = false;
         protected bool _shouldEnsureDatabase = true;
         protected bool _shouldEnsureOperators = true;
@@ -41,6 +44,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
         public PostgreSQLDevice(int iD, string name)
             : base(iD, name)
         {
+            SupportsOrderByNullsFirstLast = true;
             IsOrderByInContext = false;
             // T-SQL allows items in the order by list to reference the column aliases used in the query
             UseParametersForCursors = true;

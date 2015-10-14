@@ -176,6 +176,10 @@ namespace Alphora.Dataphor.DAE.Language.SQL
 		{
 			EmitQualifiedFieldExpression(orderFieldExpression);
 			AppendFormat(" {0}", orderFieldExpression.Ascending ? Keywords.Asc : Keywords.Desc);
+			if (orderFieldExpression.NullsFirst != null)
+			{
+				AppendFormat(" {0} {1}", Keywords.Nulls, (bool)orderFieldExpression.NullsFirst ? Keywords.First : Keywords.Last);
+			}
 		}
 		
 		protected virtual void EmitIdentifier(string identifier)

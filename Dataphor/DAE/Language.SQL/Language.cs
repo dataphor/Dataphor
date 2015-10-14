@@ -172,11 +172,13 @@ namespace Alphora.Dataphor.DAE.Language.SQL
         public OrderFieldExpression() : base()
         {
             _ascending = true;
+            _nullsFirst = null;
         }
         
-        public OrderFieldExpression(string fieldName, string tableAlias, bool ascending) : base(fieldName, tableAlias)
+        public OrderFieldExpression(string fieldName, string tableAlias, bool ascending, bool? nullsFirst) : base(fieldName, tableAlias)
         {
 			_ascending = ascending;
+			_nullsFirst = nullsFirst;
         }
         
         // Ascending
@@ -185,6 +187,14 @@ namespace Alphora.Dataphor.DAE.Language.SQL
         {
             get { return _ascending; }
             set { _ascending = value; }
+        }
+
+        // NullsFirst
+        protected bool? _nullsFirst;
+        public bool? NullsFirst
+        {
+            get { return _nullsFirst; }
+            set { _nullsFirst = value; }
         }
     }
 
