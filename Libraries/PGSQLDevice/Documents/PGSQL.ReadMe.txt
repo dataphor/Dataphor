@@ -1,0 +1,46 @@
+The PGSQL Device provided with Dataphor provides a device 
+for communicating with PostgreSQL versions 8.3 thru 9.4.
+
+===============================================
+
+EXAMPLES
+
+This is the simplest use case that defaults to using a Postgres server on
+the localhost, authenticating with the stock user "postgres", and
+connecting to the stock database "postgres".  Simply installing the
+Postgres server+client software on the localhost is enough prerequisite for
+it to work.
+
+	create device PGSQLTestDevice
+		reconciliation { mode = { command }, master = device }
+		class "PostgreSQLDevice";
+
+	CreateDeviceUser("System", "PGSQLTestDevice", "postgres", "the_password");
+	CreateDeviceUser("Admin", "PGSQLTestDevice", "postgres", "the_password");
+
+	EnsureDeviceStarted("PGSQLTestDevice");
+
+This is the more general use case where the used Postgres server may be on
+any host, and we may be connecting as any user to any database.
+
+	create device PGSQLTestDevice
+		reconciliation { mode = { command }, master = device }
+		class "PostgreSQLDevice"
+		attributes
+		{
+			"Server" = "my.http.domain.or.ip",
+			"Database" = "my_database_name"
+		};
+
+	CreateDeviceUser("System", "PGSQLTestDevice", "my_username", "the_password");
+	CreateDeviceUser("Admin", "PGSQLTestDevice", "my_username", "the_password");
+
+	EnsureDeviceStarted("PGSQLTestDevice");
+
+In these examples:
+ The name of the device is "PGSQLTestDevice".
+ The reconciliation mode is "command".
+ The reconciliation master is "device".
+ The class is "PostgreSQLDevice"
+
+More documentation may be pending.
