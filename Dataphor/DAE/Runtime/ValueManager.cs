@@ -27,6 +27,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		Schema.DataTypes DataTypes { get; }
 		IStreamManager StreamManager { get; }
 		IConveyor GetConveyor(Schema.IScalarType AScalarType);
+		Schema.IDataType NativeTypeToDataType(Type ANativeType);
 		Schema.IDataType CompileTypeSpecifier(string ATypeSpecifier);
 		Schema.Order FindClusteringOrder(Schema.TableVar ATableVar);
 		Schema.Order OrderFromKey(Schema.Key AKey);
@@ -74,6 +75,79 @@ namespace Alphora.Dataphor.DAE.Runtime
 				_conveyors.Add(scalarType.Name, conveyor);
 			}
 			return conveyor;
+		}
+
+		private Dictionary<Type, Schema.IDataType> _nativeTypeMap = new Dictionary<Type, Schema.IDataType>();
+
+		public Schema.IDataType DetermineDataType(object nativeValue)
+		{
+			if (nativeValue == null) return DataTypes.SystemGeneric;
+
+			var nativeType = nativeValue.GetType();
+
+			return NativeTypeToDataType(nativeType);
+		}
+
+		public Schema.IDataType NativeTypeToDataType(Type nativeType)
+		{
+			Schema.IDataType resultType;
+			if (!_nativeTypeMap.TryGetValue(nativeType, out resultType))
+			{
+				resultType = LookupType(nativeType);
+				_nativeTypeMap.Add(nativeType, resultType);
+			}
+			return resultType;
+		}
+
+		private Schema.IDataType LookupType(Type type)
+		{
+			// Fast lookup for the known native types
+			//if (type == NativeAccessors.AsBoolean.NativeType) return DataTypes.SystemBoolean;
+			//if (type == NativeAccessors.AsByte.NativeType) return DataTypes.SystemByte;
+			//if (type == NativeAccessors.AsByteArray.NativeType) return DataTypes.SystemBinary;
+			//if (type == NativeAccessors.AsDateTime.NativeType) return DataTypes.SystemDateTime;
+			//if (type == NativeAccessors.AsDecimal.NativeType) return DataTypes.SystemDecimal;
+			//if (type == NativeAccessors.AsException.NativeType) return DataTypes.SystemError;
+			//if (type == NativeAccessors.AsGuid.NativeType) return DataTypes.SystemGuid;
+			//if (type == NativeAccessors.AsInt16.NativeType) return DataTypes.SystemShort;
+			//if (type == NativeAccessors.AsInt32.NativeType) return DataTypes.SystemInteger;
+			//if (type == NativeAccessors.AsInt64.NativeType) return DataTypes.SystemLong;
+			//if (type == NativeAccessors.AsString.NativeType) return DataTypes.SystemString;
+			//if (type == NativeAccessors.AsTimeSpan.NativeType) return DataTypes.SystemTimeSpan;
+
+
+			// Catalog lookup for any scalar type
+			var resultType = DataTypes.FindScalarType(type);
+			if (resultType != null)
+			{
+				return resultType;
+			}
+
+			var nativeListType = type.GetInterface("IList`1");
+			if (nativeListType != null)
+			{
+				var elementType = nativeListType.GetGenericArguments()[0];
+				return new ListType(LookupType(elementType));
+			}
+
+			if (type.GetInterface("IList") != null)
+			{
+				return new ListType(DataTypes.SystemGeneric);
+			}
+
+			// The type is a generated row type
+			if (type.GetInterface("INativeRow") != null)
+			{
+				return type.GetProperty("RowType", System.Reflection.BindingFlags.Static).GetValue(null, null) as Schema.IRowType;
+			}
+
+			// The type is a generated table type
+			if (type.GetInterface("INativeTable") != null)
+			{
+				throw new NotImplementedException();
+			}
+
+			return DataTypes.SystemGeneric;
 		}
 		
 		public Schema.IDataType CompileTypeSpecifier(string typeSpecifier)

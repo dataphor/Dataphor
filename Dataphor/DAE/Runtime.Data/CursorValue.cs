@@ -7,22 +7,36 @@ using System;
 
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
+	public struct NativeCursor
+	{
+		public NativeCursor(Schema.ICursorType cursorType, int id)
+		{
+			CursorType = cursorType;
+			ID = id;
+		}
+
+		public Schema.ICursorType CursorType { get; }
+
+		public int ID { get; }
+	}
+
 	public class CursorValue : DataValue, ICursor
 	{
 		public CursorValue(IValueManager manager, Schema.ICursorType cursorType, int iD) : base(manager, cursorType)
 		{
-			_iD = iD;
+			_nativeCursor = new NativeCursor(cursorType, iD);
 		}
-		
-		private int _iD;
-		public int ID { get { return _iD; } }
 
+		private NativeCursor _nativeCursor;
+
+		public int ID { get { return _nativeCursor.ID; } }
+		
 		public new Schema.ICursorType DataType { get { return (Schema.ICursorType)base.DataType; } }
 		
 		public override object AsNative
 		{
-			get { return _iD; }
-			set { _iD = (int)value; }
+			get { return _nativeCursor; }
+			set { _nativeCursor = (NativeCursor)value; }
 		}
 		
 		public override bool IsNil { get { return false; } }
@@ -34,7 +48,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		public static object CopyNativeAs(ICursor cursor, Schema.IDataType dataType)
 		{
-			return cursor.ID;
+			return new NativeCursor(cursor.DataType, cursor.ID);
 		}
 
 		public static IWriteContext GetPhysicalSize(ICursor cursor, bool expandStreams)
@@ -49,7 +63,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		public static void ReadFromPhysical(ICursor cursor, byte[] buffer, int offset)
 		{
-			cursor.AsNative = ByteArrayUtility.ReadInt32(buffer, offset);
+			cursor.AsNative = new NativeCursor(cursor.DataType, ByteArrayUtility.ReadInt32(buffer, offset));
 		}
 	}
 

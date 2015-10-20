@@ -336,23 +336,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			throw new NotSupportedException();
 		}
 
-		public static Schema.IScalarType NativeTypeToScalarType(IValueManager manager, Type type)
-		{
-			if (type == NativeAccessors.AsBoolean.NativeType) return manager.DataTypes.SystemBoolean;
-			if (type == NativeAccessors.AsByte.NativeType) return manager.DataTypes.SystemByte;
-			if (type == NativeAccessors.AsByteArray.NativeType) return manager.DataTypes.SystemBinary;
-			if (type == NativeAccessors.AsDateTime.NativeType) return manager.DataTypes.SystemDateTime;
-			if (type == NativeAccessors.AsDecimal.NativeType) return manager.DataTypes.SystemDecimal;
-			if (type == NativeAccessors.AsException.NativeType) return manager.DataTypes.SystemError;
-			if (type == NativeAccessors.AsGuid.NativeType) return manager.DataTypes.SystemGuid;
-			if (type == NativeAccessors.AsInt16.NativeType) return manager.DataTypes.SystemShort;
-			if (type == NativeAccessors.AsInt32.NativeType) return manager.DataTypes.SystemInteger;
-			if (type == NativeAccessors.AsInt64.NativeType) return manager.DataTypes.SystemLong;
-			if (type == NativeAccessors.AsString.NativeType) return manager.DataTypes.SystemString;
-			if (type == NativeAccessors.AsTimeSpan.NativeType) return manager.DataTypes.SystemTimeSpan;
-			return manager.DataTypes.SystemScalar;
-		}
-		
 		public static IDataValue FromNative(IValueManager manager, object tempValue)
 		{
 			if (tempValue == null)
@@ -361,7 +344,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (tempValue is StreamID)
 				return new Scalar(manager, manager.DataTypes.SystemScalar, (StreamID)tempValue);
 				
-			return new Scalar(manager, NativeTypeToScalarType(manager, tempValue.GetType()), tempValue);
+			return new Scalar(manager, (Schema.IScalarType)manager.NativeTypeToDataType(tempValue.GetType()), tempValue);
 		}
 		
 		/// <summary>Returns the host representation of the given native value.  This is a by-reference operation.</summary>		
@@ -374,7 +357,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				if (tempValue is StreamID)
 					return new Scalar(manager, scalarType, (StreamID)tempValue);
 				if (scalarType.IsGeneric)
-					return new Scalar(manager, NativeTypeToScalarType(manager, tempValue.GetType()), tempValue);
+					return new Scalar(manager, (Schema.IScalarType)manager.NativeTypeToDataType(tempValue.GetType()), tempValue);
 				return new Scalar(manager, scalarType, tempValue);
 			}
 				
@@ -438,6 +421,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// <summary>Returns the host representation of the given native value.  This is a by-reference operation.</summary>		
 		public static IDataValue FromNativeList(IValueManager manager, Schema.IListType listType, NativeList nativeList, int nativeListIndex)
 		{
+			// TODO: Use the runtime type of the item in the native list to determine what kind of value to return
+			//var nativeValue = nativeList[nativeListIndex];
+
+			// If the runtime type is IList
+			// If the runtime type is NativeRow
+			// If the runtime type is NativeTable
+			// If the runtime type is NativeCursor
+			// Else the type is scalar
+
 			// This code is duplicated in the Copy method and the FromNative overloads for performance
 			Schema.IDataType dataType = nativeList.DataTypes[nativeListIndex];
 			if (dataType == null)
