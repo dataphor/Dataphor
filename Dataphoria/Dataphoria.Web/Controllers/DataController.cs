@@ -17,6 +17,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 		[HttpGet, Route("{table}")]
 		public JToken Get(string table)
 		{
+			// Libraries/Qualifiers?
 			// Filter?
 			// Order By?
 			// Project?

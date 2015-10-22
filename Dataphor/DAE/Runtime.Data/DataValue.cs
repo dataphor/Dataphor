@@ -243,7 +243,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ITableType tableType = dataType as Schema.ITableType;
 			if (tableType != null)
 			{
-				TableValue table = new TableValue(Manager, (NativeTable)tempValue);
+				TableValue table = new TableValue(Manager, tableType, (NativeTable)tempValue);
 				table.ValuesOwned = true;
 				return table;
 			}
@@ -291,7 +291,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ITableType tableType = DataType as Schema.ITableType;
 			if (tableType != null)
 			{
-				TableValue table = new TableValue(Manager, (NativeTable)tempValue);
+				TableValue table = new TableValue(Manager, tableType, (NativeTable)tempValue);
 				table.ValuesOwned = true;
 				return table;
 			}
@@ -339,7 +339,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ITableType tableType = DataType as Schema.ITableType;
 			if (tableType != null)
 			{
-				TableValue table = new TableValue(manager, (NativeTable)tempValue);
+				TableValue table = new TableValue(manager, tableType, (NativeTable)tempValue);
 				table.ValuesOwned = true;
 				return table;
 			}
@@ -413,7 +413,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				
 			Schema.ITableType tableType = dataType as Schema.ITableType;
 			if (tableType != null)
-				return new TableValue(manager, (NativeTable)tempValue);
+				return new TableValue(manager, tableType, (NativeTable)tempValue);
 				
 			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
 			if (cursorType != null)
@@ -448,7 +448,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				
 			Schema.ITableType tableType = dataType as Schema.ITableType;
 			if (tableType != null)
-				return new TableValue(manager, (NativeTable)nativeRow.Values[nativeRowIndex]);
+				return new TableValue(manager, tableType, (NativeTable)nativeRow.Values[nativeRowIndex]);
 				
 			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
 			if (cursorType != null)
@@ -479,7 +479,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				
 			Schema.ITableType tableType = dataType as Schema.ITableType;
 			if (tableType != null)
-				return new TableValue(manager, (NativeTable)nativeList.Values[nativeListIndex]);
+				return new TableValue(manager, tableType, (NativeTable)nativeList.Values[nativeListIndex]);
 				
 			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
 			if (cursorType != null)
@@ -518,7 +518,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ITableType tableType = dataType as Schema.ITableType;
 			if (tableType != null)
 			{
-				TableValue table = new TableValue(manager, null);
+				TableValue table = new TableValue(manager, tableType, null);
 				table.ReadFromPhysical(buffer, offset);
 				return table;
 			}
@@ -683,6 +683,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				return newList;
 			}
 
+			NativeTable nativeTable = value as NativeTable;
+			if (nativeTable != null)
+			{
+				return CopyNative(manager, nativeTable.TableType, nativeTable);
+			}
+
 			return value;
 		}
 		
@@ -714,6 +720,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				for (int index = 0; index < nativeList.Values.Count; index++)
 					DisposeValue(manager, nativeList.Values[index]);
+			}
+
+			NativeTable nativeTable = tempValue as NativeTable;
+			if (nativeTable != null)
+			{
+				DisposeNative(manager, nativeTable.TableType, nativeTable);
 			}
 		}
 		

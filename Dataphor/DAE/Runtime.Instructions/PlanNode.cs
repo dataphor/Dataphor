@@ -174,13 +174,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return (_characteristics & IsOrderPreservingFlag) != 0; }
 			set { if (value) _characteristics |= IsOrderPreservingFlag; else _characteristics &= NotIsOrderPreservingFlag; }
 		}
-		
+
+		public bool IsContextLiteral(int location)
+		{
+			return IsContextLiteral(location, null);
+		}
+
 		// IsContextLiteral (see the sargability discussion in RestrictNode.cs for a description of this characteristic)
-		public virtual bool IsContextLiteral(int location)
+		public virtual bool IsContextLiteral(int location, IList<string> columnReferences)
 		{
 			if (_nodes != null)
 				for (int index = 0; index < Nodes.Count; index++)
-					if (!Nodes[index].IsContextLiteral(location))
+					if (!Nodes[index].IsContextLiteral(location, columnReferences))
 						return false;
 			return true;
 		}

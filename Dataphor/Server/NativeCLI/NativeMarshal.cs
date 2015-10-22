@@ -283,7 +283,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			if (nativeTable != null)
 			{
 				NativeTable internalTable = new NativeTable(process.ValueManager, NativeTableToTableVar(process, nativeTable));
-				TableValue table = new TableValue(process.ValueManager, internalTable); 
+				TableValue table = new TableValue(process.ValueManager, internalTable.TableType, internalTable); 
 				if (nativeTable.Rows == null)
 					table.AsNative = null;
 				else

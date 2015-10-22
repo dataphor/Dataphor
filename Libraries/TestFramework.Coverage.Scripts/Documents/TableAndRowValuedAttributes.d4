@@ -1,0 +1,172 @@
+/*
+	TableAndRowValuedAttributes
+*/
+
+create table Employee
+{
+	ID : Integer,
+	Name : String,
+	key { ID }
+};
+
+create table EmployeeAddress
+{
+	EmployeeID : Integer,
+	Lines : list(String),
+	City : String,
+	State : String,
+	Zip : String,
+	key { EmployeeID },
+	reference EmployeeAddress_Employee { EmployeeID } references Employee { ID }
+};
+
+create table EmployeePhone
+{
+	EmployeeID : Integer,
+	Phone : String,
+	key { EmployeeID, Phone },
+	reference EmployeePhone_Employee { EmployeeID } references Employee { ID }
+};
+
+insert row { 1 ID, "Joe" Name } into Employee;
+insert row { 1 EmployeeID, { "123 Spinning Ave" } Lines, "Orem" City, "UT" State, "89408" Zip } into EmployeeAddress;
+insert row { 1 EmployeeID, "123-4567" Phone } into EmployeePhone;
+insert row { 1 EmployeeID, "456-7890" Phone } into EmployeePhone;
+	
+create view EmployeeView
+	Employee 
+	{ 
+		ID, 
+		Name, 
+		((EmployeeAddress where EmployeeID = ID { Lines, City, State, Zip })[]) Address, 
+		(EmployeePhone where EmployeeID = ID { Phone }) Phones
+	};
+
+// Complete insert
+insert row { 2 ID, "John" Name, row { { "123 Erewhon" } Lines, "Orem" City, "UT" State, "94085" Zip } Address, table { row { "123-3456" Phone }, row { "456-4567" Phone } } Phones }
+	into EmployeeView;
+
+if Employee <> table { row { 1 ID, "Joe" Name }, row { 2 ID, "John" Name } } then
+	raise Error("Employee insert through EmployeeView failed");
+	
+if EmployeeAddress <> table { row { 1 EmployeeID, { "123 Spinning Ave" } Lines, "Orem" City, "UT" State, "89408" Zip }, row { 2 EmployeeID, { "123 Erewhon" } Lines, "Orem" City, "UT" State, "94085" Zip } } then
+	raise Error("EmployeeAddress insert through EmployeeView failed");
+
+if EmployeePhone <> table { row { 1 EmployeeID, "123-4567" Phone }, row { 1 EmployeeID, "456-7890" Phone }, row { 2 EmployeeID, "123-3456" Phone }, row { 2 EmployeeID, "456-4567" Phone } } then
+	raise Error("EmployeePhone insert through EmployeeView failed"); 
+
+// Insert w/ nulls
+insert row { 3 ID, "Bob" Name, nil Address, nil Phones } into EmployeeView;
+
+if Employee <> table { row { 1 ID, "Joe" Name }, row { 2 ID, "John" Name }, row { 3 ID, "Bob" Name } } then
+	raise Error("Employee insert w/ nulls through EmployeeView failed");
+	
+if EmployeeAddress <> table { row { 1 EmployeeID, { "123 Spinning Ave" } Lines, "Orem" City, "UT" State, "89408" Zip }, row { 2 EmployeeID, { "123 Erewhon" } Lines, "Orem" City, "UT" State, "94085" Zip } } then
+	raise Error("EmployeeAddress insert w/ nulls through EmployeeView failed");
+
+if EmployeePhone <> table { row { 1 EmployeeID, "123-4567" Phone }, row { 1 EmployeeID, "456-7890" Phone }, row { 2 EmployeeID, "123-3456" Phone }, row { 2 EmployeeID, "456-4567" Phone } } then
+	raise Error("EmployeePhone insert w/ nulls through EmployeeView failed"); 
+
+// Complete delete
+delete EmployeeView where ID = 2;
+
+if Employee <> table { row { 1 ID, "Joe" Name }, row { 3 ID, "Bob" Name } } then
+	raise Error("Employee delete through EmployeeView failed");
+	
+if EmployeeAddress <> table { row { 1 EmployeeID, { "123 Spinning Ave" } Lines, "Orem" City, "UT" State, "89408" Zip } } then
+	raise Error("EmployeeAddress delete through EmployeeView failed");
+
+if EmployeePhone <> table { row { 1 EmployeeID, "123-4567" Phone }, row { 1 EmployeeID, "456-7890" Phone } } then
+	raise Error("EmployeePhone delete through EmployeeView failed"); 
+
+// Delete w/ nulls
+delete EmployeeView where ID = 3;
+
+if Employee <> table { row { 1 ID, "Joe" Name } } then
+	raise Error("Employee delete w/ nulls through EmployeeView failed");
+	
+if EmployeeAddress <> table { row { 1 EmployeeID, { "123 Spinning Ave" } Lines, "Orem" City, "UT" State, "89408" Zip } } then
+	raise Error("EmployeeAddress delete w/ nulls through EmployeeView failed");
+
+if EmployeePhone <> table { row { 1 EmployeeID, "123-4567" Phone }, row { 1 EmployeeID, "456-7890" Phone } } then
+	raise Error("EmployeePhone delete w/ nulls through EmployeeView failed"); 
+
+insert row { 2 ID, "John" Name, row { { "123 Erewhon" } Lines, "Orem" City, "UT" State, "94085" Zip } Address, table { row { "123-3456" Phone }, row { "456-4567" Phone } } Phones }
+	into EmployeeView;
+
+// Non-key update of Employee
+update EmployeeView set { Name := "Johnson" } where ID = 2;
+
+if Employee <> table { row { 1 ID, "Joe" Name }, row { 2 ID, "Johnson" Name } } then
+	raise Error("Employee non-key update through EmployeeView failed");
+	
+if EmployeeAddress <> table { row { 1 EmployeeID, { "123 Spinning Ave" } Lines, "Orem" City, "UT" State, "89408" Zip }, row { 2 EmployeeID, { "123 Erewhon" } Lines, "Orem" City, "UT" State, "94085" Zip } } then
+	raise Error("EmployeeAddress insert through EmployeeView failed");
+
+if EmployeePhone <> table { row { 1 EmployeeID, "123-4567" Phone }, row { 1 EmployeeID, "456-7890" Phone }, row { 2 EmployeeID, "123-3456" Phone }, row { 2 EmployeeID, "456-4567" Phone } } then
+	raise Error("EmployeePhone insert through EmployeeView failed"); 
+
+// Update to nil
+update EmployeeView set { Address := nil, Phones := nil } where ID = 2;
+
+if EmployeeAddress <> table { row { 1 EmployeeID, { "123 Spinning Ave" } Lines, "Orem" City, "UT" State, "89408" Zip } } then
+	raise Error("EmployeeAddress update to nil through EmployeeView failed");
+
+if EmployeePhone <> table { row { 1 EmployeeID, "123-4567" Phone }, row { 1 EmployeeID, "456-7890" Phone } } then
+	raise Error("EmployeePhone update to nil through EmployeeView failed"); 
+
+// Update from nil
+update EmployeeView 
+	set 
+	{ 
+		Address := row { { "123 Erewhon" } Lines, "Orem" City, "UT" State, "94085" Zip }, 
+		Phones := table { row { "123-3456" Phone }, row { "456-4567" Phone } } 
+	}
+	where ID = 2;
+	
+if EmployeeAddress <> table { row { 1 EmployeeID, { "123 Spinning Ave" } Lines, "Orem" City, "UT" State, "89408" Zip }, row { 2 EmployeeID, { "123 Erewhon" } Lines, "Orem" City, "UT" State, "94085" Zip } } then
+	raise Error("EmployeeAddress update from nil through EmployeeView failed");
+
+if EmployeePhone <> table { row { 1 EmployeeID, "123-4567" Phone }, row { 1 EmployeeID, "456-7890" Phone }, row { 2 EmployeeID, "123-3456" Phone }, row { 2 EmployeeID, "456-4567" Phone } } then
+	raise Error("EmployeePhone update from nil through EmployeeView failed"); 
+
+// Non-Key Update
+update EmployeeView 
+	set { Address := row { { "12345 Erewhon" } Lines, "Orem" City, "UT" State, "94085" Zip } }
+	where ID = 2;
+
+if EmployeeAddress <> table { row { 1 EmployeeID, { "123 Spinning Ave" } Lines, "Orem" City, "UT" State, "89408" Zip }, row { 2 EmployeeID, { "12345 Erewhon" } Lines, "Orem" City, "UT" State, "94085" Zip } } then
+	raise Error("EmployeeAddress non-key update through EmployeeView failed");
+
+// Key Update
+update EmployeeView
+	set { Phones := table { row { "123-3457" Phone }, row { "456-4568" Phone } } }
+	where ID = 2;
+	
+if EmployeePhone <> table { row { 1 EmployeeID, "123-4567" Phone }, row { 1 EmployeeID, "456-7890" Phone }, row { 2 EmployeeID, "123-3457" Phone }, row { 2 EmployeeID, "456-4568" Phone } } then
+	raise Error("EmployeePhone key update through EmployeeView failed"); 
+
+// Insert/Update/Delete
+update EmployeeView
+	set { Phones := table { row { "123-3456" Phone }, row { "123-3457" Phone }, row { "456-5468" Phone } } }
+	where ID = 2;
+
+if EmployeePhone <> table { row { 1 EmployeeID, "123-4567" Phone }, row { 1 EmployeeID, "456-7890" Phone }, row { 2 EmployeeID, "123-3456" Phone }, row { 2 EmployeeID, "123-3457" Phone }, row { 2 EmployeeID, "456-5468" Phone } } then
+	raise Error("EmployeePhone insert/update/delete through EmployeeView failed"); 
+
+// Key update of Employee
+update EmployeeView set { ID := 3 } where ID = 2;
+
+if Employee <> table { row { 1 ID, "Joe" Name }, row { 3 ID, "Johnson" Name } } then
+	raise Error("Employee key update through EmployeeView failed");
+
+if EmployeeAddress <> table { row { 1 EmployeeID, { "123 Spinning Ave" } Lines, "Orem" City, "UT" State, "89408" Zip }, row { 3 EmployeeID, { "12345 Erewhon" } Lines, "Orem" City, "UT" State, "94085" Zip } } then
+	raise Error("Employee key update propagation to EmployeeAdress through EmployeeView failed");
+
+if EmployeePhone <> table { row { 1 EmployeeID, "123-4567" Phone }, row { 1 EmployeeID, "456-7890" Phone }, row { 3 EmployeeID, "123-3456" Phone }, row { 3 EmployeeID, "123-3457" Phone }, row { 3 EmployeeID, "456-5468" Phone } } then
+	raise Error("EmployeePhone insert/update/delete through EmployeeView failed"); 
+
+drop view EmployeeView;
+drop table EmployeePhone;
+drop table EmployeeAddress;
+drop table Employee;

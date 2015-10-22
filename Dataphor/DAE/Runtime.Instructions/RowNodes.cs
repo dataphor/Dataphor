@@ -324,12 +324,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override bool IsContextLiteral(int location)
+		public override bool IsContextLiteral(int location, IList<string> columnReferences)
 		{
-			if (!Nodes[0].IsContextLiteral(location))
+			if (!Nodes[0].IsContextLiteral(location, columnReferences))
 				return false;
 			for (int index = 1; index < Nodes.Count; index++)
-				if (!Nodes[index].IsContextLiteral(location + 1))
+				if (!Nodes[index].IsContextLiteral(location + 1, columnReferences))
 					return false;
 			return true;
 		}
@@ -516,12 +516,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override bool IsContextLiteral(int location)
+		public override bool IsContextLiteral(int location, IList<string> columnReferences)
 		{
-			if (!Nodes[0].IsContextLiteral(location))
+			if (!Nodes[0].IsContextLiteral(location, columnReferences))
 				return false;
 			for (int index = 1; index < Nodes.Count; index++)
-				if (!Nodes[index].IsContextLiteral(location + 1))
+				if (!Nodes[index].IsContextLiteral(location + 1, columnReferences))
 					return false;
 			return true;
 		}

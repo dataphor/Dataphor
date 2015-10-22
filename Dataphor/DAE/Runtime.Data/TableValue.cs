@@ -13,15 +13,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 	using System.Collections.Generic;
-	
+	using System.Text;
+
 	public class TableValue : DataValue
 	{
-		public TableValue(IValueManager manager, NativeTable table) : base(manager, table.TableType)
+		public TableValue(IValueManager manager, Schema.ITableType tableType, NativeTable table) : base(manager, tableType)
 		{	
 			_table = table;
 		}
 		
 		private NativeTable _table;
+
+        public new Schema.ITableType DataType { get { return (Schema.ITableType)base.DataType; } }
 		
 		public override bool IsNil { get { return _table == null; } }
 		
@@ -156,6 +159,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
 			}
 			return newTable;
+		}
+
+		public override string ToString()
+		{
+			StringBuilder result = new StringBuilder();
+			result.Append("table { ");
+
+			using (Scan scan = new Scan(Manager, _table, _table.ClusteredIndex, ScanDirection.Forward, null, null))
+			{
+				scan.Open();
+				int rowCount = 0;
+				while (scan.Next())
+				{
+					if (rowCount >= 1)
+						result.Append(", ");
+
+					if (rowCount > 10)
+					{
+						result.Append("...");
+						break;
+					}
+
+					using (IRow row = scan.GetRow())
+					{
+						result.Append(row.ToString());
+					}
+
+					rowCount++;
+				}
+
+				if (rowCount > 0)
+					result.Append(" ");
+			}
+
+			result.Append("}");
+			return result.ToString();
 		}
 	}
 	
@@ -742,12 +781,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public override ITable OpenCursor()
 		{
-			throw new NotSupportedException();
+			return this;
 		}
 		
         public override object CopyNativeAs(Schema.IDataType dataType)
         {
-			throw new NotSupportedException();
+			// We need to construct a new TableVar here because otherwise the native table
+			// will be constructed with the keys inferred for the source, resulting in
+			// incorrect access plans (see Defect #33978 for more).
+			Schema.ResultTableVar tableVar = new Schema.ResultTableVar(Node);
+			tableVar.Owner = Program.Plan.User;
+			tableVar.EnsureTableVarColumns();
+			Program.EnsureKey(tableVar);
+
+			if (!Active)
+				Open();
+			else
+				Reset();
+
+			NativeTable nativeTable = new NativeTable(Manager, tableVar);
+			while (Next())
+			{
+				using (IRow row = Select())
+				{	
+					nativeTable.Insert(Manager, row);
+				}
+			}
+
+			return nativeTable;
         }
 
 		///<summary>Returns true if the given key has the same number of columns in the same order as the node order key.</summary>

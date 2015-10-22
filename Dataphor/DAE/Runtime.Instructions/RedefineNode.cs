@@ -5,7 +5,7 @@
 */
 #define UseReferenceDerivation
 #define UseElaborable
-	
+
 using System;
 using System.Text;
 using System.Threading;
@@ -15,12 +15,13 @@ using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Compiling.Visitors;
-using Alphora.Dataphor.DAE.Server;	
+using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -382,12 +383,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 
-		public override bool IsContextLiteral(int location)
+		public override bool IsContextLiteral(int location, IList<string> columnReferences)
 		{
-			if (!Nodes[0].IsContextLiteral(location))
+			if (!Nodes[0].IsContextLiteral(location, columnReferences))
 				return false;
 			for (int index = 1; index < Nodes.Count; index++)
-				if (!Nodes[index].IsContextLiteral(location + 1))
+				if (!Nodes[index].IsContextLiteral(location + 1, columnReferences))
 					return false;
 			return true;
 		}

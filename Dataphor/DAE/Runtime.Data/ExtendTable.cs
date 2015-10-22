@@ -73,9 +73,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					if (columnIndex >= 0)
 					{
 						object objectValue = Node.Nodes[index].Execute(Program);
-						if (row.DataType.Columns[columnIndex].DataType is Schema.ScalarType)
-							objectValue = ValueUtility.ValidateValue(Program, (Schema.ScalarType)row.DataType.Columns[columnIndex].DataType, objectValue);
-						row[columnIndex] = objectValue;
+						try
+						{
+							if (row.DataType.Columns[columnIndex].DataType is Schema.ScalarType)
+								objectValue = ValueUtility.ValidateValue(Program, (Schema.ScalarType)row.DataType.Columns[columnIndex].DataType, objectValue);
+							row[columnIndex] = objectValue;
+						}
+						finally
+						{
+							DataValue.DisposeValue(Program.ValueManager, objectValue);
+						}
 					}
 				}
             }

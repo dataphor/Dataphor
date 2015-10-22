@@ -98,7 +98,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 							nativeTable.Insert(program.ValueManager, row);
 						}
 					}
-					return new TableValue(program.ValueManager, nativeTable);
+					return new TableValue(program.ValueManager, nativeTable.TableType, nativeTable);
 				}
 				finally
 				{

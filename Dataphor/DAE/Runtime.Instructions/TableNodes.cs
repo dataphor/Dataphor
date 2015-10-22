@@ -1350,23 +1350,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			table.Open();
 			try
 			{
-				// We need to construct a new TableVar here because otherwise the native table
-				// will be constructed with the keys inferred for the source, resulting in
-				// incorrect access plans (see Defect #33978 for more).
-				Schema.ResultTableVar tableVar = new Schema.ResultTableVar(SourceNode);
-				tableVar.Owner = program.Plan.User;
-				tableVar.EnsureTableVarColumns();
-				program.EnsureKey(tableVar);
-				
-				NativeTable nativeTable = new NativeTable(program.ValueManager, tableVar);
-				while (table.Next())
-				{
-					using (IRow row = table.Select())
-					{	
-						nativeTable.Insert(program.ValueManager, row);
-					}
-				}
-				return new TableValue(program.ValueManager, nativeTable);
+				return new TableValue(program.ValueManager, table.DataType, (NativeTable)table.CopyNative());
 			}
 			finally
 			{

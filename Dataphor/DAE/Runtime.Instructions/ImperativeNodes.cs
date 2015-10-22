@@ -10,7 +10,7 @@
 // TODO: don't push frames unless it is necessary
 // TODO: optimize application transaction calls in the CallNode
 
-using System; 
+using System;
 using System.Text;
 using System.Threading;
 using System.Reflection;
@@ -28,6 +28,7 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -1779,7 +1780,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			writer.WriteAttributeString("ByReference", Convert.ToString(ByReference));
 		}
 
-		public override bool IsContextLiteral(int location)
+		public override bool IsContextLiteral(int location, IList<string> columnReferences)
 		{
 			if (Location == location)
 				return false;
@@ -1924,10 +1925,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			writer.WriteAttributeString("StackIndex", Location.ToString());
 		}
 
-		public override bool IsContextLiteral(int location)
+		public override bool IsContextLiteral(int location, IList<string> columnReferences)
 		{
 			if (Location == location)
+			{
+				if (columnReferences != null)
+					columnReferences.Add(_identifier);
 				return false;
+			}
+
 			return true;
 		}
 

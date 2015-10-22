@@ -5,7 +5,7 @@
 */
 #define UseReferenceDerivation
 #define UseElaborable
-	
+
 using System;
 using System.Text;
 using System.Threading;
@@ -16,12 +16,13 @@ using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Compiling.Visitors;
-using Alphora.Dataphor.DAE.Server;	
+using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using System.Linq;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -100,12 +101,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 											plan.AttachDependency(objectValue);
 										}
 
+									bool isUpdatable = planNode is TableNode || planNode is ExtractRowNode;
+
 									newColumn = 
 										new Schema.TableVarColumn
 										(
 											new Schema.Column(column.ColumnAlias, planNode.DataType),
 											column.MetaData, 
-											Schema.TableVarColumnType.Virtual
+											isUpdatable ? Schema.TableVarColumnType.Stored : Schema.TableVarColumnType.Virtual
 										);
 
 									newColumn.IsNilable = planNode.IsNilable;
@@ -118,6 +121,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									string columnName = String.Empty;
 									if (IsColumnReferencing(planNode, ref columnName))
 									{
+										// TODO: In theory we could allow updatability through an IsColumnReferencing add column as well
 										Schema.TableVarColumn referencedColumn = TableVar.Columns[columnName];
 										if (SourceTableVar.Keys.IsKeyColumnName(referencedColumn.Name))
 										{
@@ -217,6 +221,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return IsColumnReferencing(node.Nodes[0], ref columnName);
 			else
 				return false;
+		}
+
+		protected bool ReferencesUpdatedColumn(PlanNode node, BitArray valueFlags)
+		{
+			IList<string> columnReferences = new List<string>();
+			if (!node.IsContextLiteral(0, columnReferences))
+			{
+				// If we cannot tell which column was referenced (variable level reference)
+				// Or we cannot tell what columns were updated (no value flags)
+				// Or any column references were to columns that were updated
+				if (columnReferences.Count == 0 || valueFlags == null || (columnReferences.Select(c => DataType.Columns.IndexOfName(c)).Any(i => i >= 0 && i < _extendColumnOffset && valueFlags[i])))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 		
 		public override void DetermineCursorBehavior(Plan plan)
@@ -376,6 +397,438 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
+		// Insert
+		protected override void InternalExecuteInsert(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
+		{
+			base.InternalExecuteInsert(program, oldRow, newRow, valueFlags, uncheckedValue);
+
+			if (PropagateInsert != PropagateAction.False)
+			{
+				PushRow(program, newRow);
+				try
+				{
+					int columnIndex;
+					for (int index = 1; index < Nodes.Count; index++)
+					{
+						Schema.TableVarColumn column = TableVar.Columns[_extendColumnOffset + index - 1];
+						if (!column.IsComputed)
+						{
+							columnIndex = newRow.DataType.Columns.IndexOfName(column.Column.Name);
+							if (columnIndex >= 0)
+							{
+								TableNode tableNode = Nodes[index] as TableNode;
+								if (tableNode == null)
+								{
+									ExtractRowNode extractRowNode = Nodes[index] as ExtractRowNode;
+									if (extractRowNode != null)
+									{
+										tableNode = (TableNode)extractRowNode.Nodes[0];
+									}
+								}
+
+								if (tableNode == null)
+									throw new RuntimeException(RuntimeException.Codes.InternalError, "Could not determine update path for extend column.");
+
+								IDataValue newValue = newRow.GetValue(columnIndex);
+								if (!newValue.IsNil)
+								{
+									IRow newRowValue = newValue as IRow;
+									if (newRowValue != null)
+									{
+										PerformInsert(program, tableNode, null, newRowValue, null, uncheckedValue);
+									}
+									else
+									{
+										TableValue newTableValue = (TableValue)newValue;
+										using (ITable newTableCursor = newTableValue.OpenCursor())
+										{
+											while (newTableCursor.Next())
+											{
+												using (IRow newTableCursorRow = newTableCursor.Select())
+												{
+													PerformInsert(program, tableNode, null, newTableCursorRow, null, uncheckedValue);
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				finally
+				{
+					PopRow(program);
+				}
+			}
+		}
+
+		private void PerformInsert(Program program, TableNode tableNode, IRow oldRow, IRow newRow, BitArray valueFlags, bool uncheckedValue)
+		{
+			switch (PropagateInsert)
+			{
+				case PropagateAction.True:
+					tableNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
+					break;
+
+				case PropagateAction.Ensure:
+				case PropagateAction.Ignore:
+					using (Row sourceRow = new Row(program.ValueManager, tableNode.DataType.RowType))
+					{
+						newRow.CopyTo(sourceRow);
+						using (IRow currentRow = tableNode.Select(program, sourceRow))
+						{
+							if (currentRow != null)
+							{
+								if (PropagateInsert == PropagateAction.Ensure)
+									tableNode.Update(program, currentRow, newRow, valueFlags, false, uncheckedValue);
+							}
+							else
+								tableNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
+						}
+					}
+					break;
+			}
+		}
+		
+		// Update
+		protected override void InternalExecuteUpdate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
+		{
+			base.InternalExecuteUpdate(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
+
+			if (PropagateUpdate)
+			{
+				int columnIndex;
+				for (int index = 1; index < Nodes.Count; index++)
+				{
+					Schema.TableVarColumn column = TableVar.Columns[_extendColumnOffset + index - 1];
+					if (column.ColumnType == Schema.TableVarColumnType.Stored)
+					{
+						columnIndex = newRow.DataType.Columns.IndexOfName(column.Column.Name);
+						if (columnIndex >= 0)
+						{
+							TableNode tableNode = Nodes[index] as TableNode;
+							if (tableNode == null)
+							{
+								ExtractRowNode extractRowNode = Nodes[index] as ExtractRowNode;
+								if (extractRowNode != null)
+								{
+									tableNode = (TableNode)extractRowNode.Nodes[0];
+								}
+							}
+
+							if (tableNode == null)
+								throw new RuntimeException(RuntimeException.Codes.InternalError, "Could not determine update path for extend column.");
+
+							bool referencesUpdatedColumn = ReferencesUpdatedColumn(tableNode, valueFlags);
+
+							// If the value is a row
+								// If the newValue is nil
+									// If the oldValue is not nil
+										// delete the table node
+								// else
+									// If the oldValue is nil
+										// insert the row
+									// else
+										// update the row
+
+							// If the value is a table
+								// If the newValue is nil
+									// If the oldValue is not nil
+										// delete all rows
+								// else
+									// If the oldValue is nil
+										// insert all rows
+									// else
+										// foreach row in oldvalue
+											// if there is a corresponding row in new value by the clustering key
+												// update the row
+											// else
+												// delete the row
+										// for each row in newvalue
+											// if there is no corresponding row in old value by the clustering key
+												// insert the row
+
+							if (column.DataType is Schema.IRowType)
+							{
+								IRow oldValue = (IRow)oldRow.GetValue(columnIndex);
+								IRow newValue = (IRow)newRow.GetValue(columnIndex);
+								if (newValue.IsNil)
+								{
+									if (!oldValue.IsNil)
+									{
+										PushRow(program, oldRow);
+										try
+										{
+											tableNode.Delete(program, oldValue, checkConcurrency, uncheckedValue);
+										}
+										finally
+										{
+											PopRow(program);
+										}
+									}
+								}
+								else
+								{
+									if (oldValue.IsNil)
+									{
+										PushRow(program, newRow);
+										try
+										{
+											tableNode.Insert(program, null, newValue, null, uncheckedValue);
+										}
+										finally
+										{
+											PopRow(program);
+										}
+									}
+									else
+									{
+										if (referencesUpdatedColumn)
+										{
+											PushRow(program, oldRow);
+											try
+											{
+												tableNode.Delete(program, oldValue, checkConcurrency, uncheckedValue);
+											}
+											finally
+											{
+												PopRow(program);
+											}
+
+											PushRow(program, newRow);
+											try
+											{
+												tableNode.Insert(program, null, newValue, null, uncheckedValue);
+											}
+											finally
+											{
+												PopRow(program);
+											}
+										}
+										else
+										{
+											PushRow(program, newRow);
+											try
+											{
+												tableNode.Update(program, oldValue, newValue, null, checkConcurrency, uncheckedValue);
+											}
+											finally
+											{
+												PopRow(program);
+											}
+										}
+									}
+								}
+							}
+							else
+							{
+								TableValue oldValue = (TableValue)oldRow.GetValue(columnIndex);
+								TableValue newValue = (TableValue)newRow.GetValue(columnIndex);
+
+								if (newValue.IsNil)
+								{
+									if (!oldValue.IsNil)
+									{
+										PushRow(program, oldRow);
+										try
+										{
+											using (ITable oldValueCursor = oldValue.OpenCursor())
+											{
+												while (oldValueCursor.Next())
+												{
+													using (IRow oldValueCursorRow = oldValueCursor.Select())
+													{
+														tableNode.Delete(program, oldValueCursorRow, checkConcurrency, uncheckedValue);
+													}
+												}
+											}
+										}
+										finally
+										{
+											PopRow(program);
+										}
+									}
+								}
+								else
+								{
+									if (referencesUpdatedColumn)
+									{
+										PushRow(program, oldRow);
+										try
+										{
+											using (ITable oldValueCursor = oldValue.OpenCursor())
+											{
+												while (oldValueCursor.Next())
+												{
+													using (IRow oldValueCursorRow = oldValueCursor.Select())
+													{
+														tableNode.Delete(program, oldValueCursorRow, checkConcurrency, uncheckedValue);
+													}
+												}
+											}
+										}
+										finally
+										{
+											PopRow(program);
+										}
+
+										PushRow(program, newRow);
+										try
+										{
+											using (ITable newValueCursor = newValue.OpenCursor())
+											{
+												while (newValueCursor.Next())
+												{
+													using (IRow newValueCursorRow = newValueCursor.Select())
+													{
+														tableNode.Insert(program, null, newValueCursorRow, null, uncheckedValue);
+													}
+												}
+											}
+										}
+										finally
+										{
+											PopRow(program);
+										}
+									}
+									else
+									{
+										PushRow(program, newRow);
+										try
+										{
+											if (oldValue.IsNil)
+											{
+												using (ITable newValueCursor = newValue.OpenCursor())
+												{
+													while (newValueCursor.Next())
+													{
+														using (IRow newValueCursorRow = newValueCursor.Select())
+														{
+															tableNode.Insert(program, null, newValueCursorRow, null, uncheckedValue);
+														}
+													}
+												}
+											}
+											else
+											{
+												using (ITable oldValueCursor = oldValue.OpenCursor())
+												{
+													using (ITable newValueCursor = newValue.OpenCursor())
+													{
+														while (oldValueCursor.Next())
+														{
+															using (IRow oldValueCursorRow = oldValueCursor.Select())
+															{
+																if (newValueCursor.FindKey(oldValueCursorRow))
+																{
+																	using (IRow newValueCursorRow = newValueCursor.Select())
+																	{
+																		tableNode.Update(program, oldValueCursorRow, newValueCursorRow, null, checkConcurrency, uncheckedValue);
+																	}
+																}
+																else
+																{
+																	tableNode.Delete(program, oldValueCursorRow, checkConcurrency, uncheckedValue);
+																}
+															}
+														}
+
+														newValueCursor.Reset();
+
+														while (newValueCursor.Next())
+														{
+															using (IRow newValueCursorRow = newValueCursor.Select())
+															{
+																if (!oldValueCursor.FindKey(newValueCursorRow))
+																{
+																	tableNode.Insert(program, null, newValueCursorRow, null, uncheckedValue);
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+										finally
+										{
+											PopRow(program);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		// Delete
+		protected override void InternalExecuteDelete(Program program, IRow row, bool checkConcurrency, bool uncheckedValue)
+		{
+			base.InternalExecuteDelete(program, row, checkConcurrency, uncheckedValue);
+
+			if (PropagateDelete)
+			{
+				PushRow(program, row);
+				try
+				{
+					int columnIndex;
+					for (int index = 1; index < Nodes.Count; index++)
+					{
+						Schema.TableVarColumn column = TableVar.Columns[_extendColumnOffset + index - 1];
+						if (!column.IsComputed)
+						{
+							columnIndex = row.DataType.Columns.IndexOfName(column.Column.Name);
+							if (columnIndex >= 0)
+							{
+								TableNode tableNode = Nodes[index] as TableNode;
+								if (tableNode == null)
+								{
+									ExtractRowNode extractRowNode = Nodes[index] as ExtractRowNode;
+									if (extractRowNode != null)
+									{
+										tableNode = (TableNode)extractRowNode.Nodes[0];
+									}
+								}
+
+								if (tableNode == null)
+									throw new RuntimeException(RuntimeException.Codes.InternalError, "Could not determine update path for extend column.");
+
+								IDataValue oldValue = row.GetValue(columnIndex);
+								if (!oldValue.IsNil)
+								{
+									IRow oldRowValue = oldValue as IRow;
+									if (oldRowValue != null)
+									{
+										tableNode.Delete(program, oldRowValue, checkConcurrency, uncheckedValue);
+									}
+									else
+									{
+										TableValue oldTableValue = (TableValue)oldValue;
+										using (ITable oldTableCursor = oldTableValue.OpenCursor())
+										{
+											while (oldTableCursor.Next())
+											{
+												using (IRow oldTableCursorRow = oldTableCursor.Select())
+												{
+													tableNode.Delete(program, oldTableCursorRow, checkConcurrency, uncheckedValue);
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				finally
+				{
+					PopRow(program);
+				}
+			}
+		}
+		
 		public override void JoinApplicationTransaction(Program program, IRow row)
 		{
 			// Exclude any columns from AKey which were included by this node
@@ -396,12 +849,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override bool IsContextLiteral(int location)
+		public override bool IsContextLiteral(int location, IList<string> columnReferences)
 		{
-			if (!Nodes[0].IsContextLiteral(location))
+			if (!Nodes[0].IsContextLiteral(location, columnReferences))
 				return false;
 			for (int index = 1; index < Nodes.Count; index++)
-				if (!Nodes[index].IsContextLiteral(location + 1))
+				if (!Nodes[index].IsContextLiteral(location + 1, columnReferences))
 					return false;
 			return true;
 		}

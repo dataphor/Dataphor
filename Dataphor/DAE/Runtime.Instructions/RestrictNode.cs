@@ -19,12 +19,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Compiling.Visitors;
-	using Alphora.Dataphor.DAE.Server;	
+	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Schema = Alphora.Dataphor.DAE.Schema;
+	using System.Collections.Generic;
 
 	/*
 		Context literal ->
@@ -60,7 +61,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			reference a column of the current row, and the other operand be a context literal expression with respect to the current row.
 			
 	*/
-	
+
 	public class ColumnCondition : System.Object
 	{
 		public ColumnCondition(PlanNode columnReference, string instruction, PlanNode argument) : base()
@@ -922,12 +923,58 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 		}
-		
-		public override bool IsContextLiteral(int location)
+
+		protected override bool InternalDefault(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			if (!Nodes[0].IsContextLiteral(location))
+			bool changed = false;
+			if (columnName == String.Empty)
+			{
+				PushRow(program, newRow);
+				try
+				{
+					// The condition contains only equal comparisons against all the columns of some key
+					// foreach condition
+						// foreach column condition
+							// if the instruction is equal
+								// if the newRow has no value for the column
+									// set it to the evaluation of the argument
+					for (int index = 0; index < _conditions.Count; index++)
+					{
+						int rowIndex = newRow.DataType.Columns.IndexOfName(_conditions[index].Column.Name);
+						if (rowIndex >= 0)
+						{
+							for (int columnIndex = 0; columnIndex < _conditions[index].Count; columnIndex++)
+							{
+								if (_conditions[index][columnIndex].Instruction == Instructions.Equal)
+								{
+									if (!newRow.HasValue(rowIndex) && ((valueFlags == null) || !valueFlags[rowIndex]))
+									{
+										newRow[rowIndex] = _conditions[index][columnIndex].Argument.Execute(program);
+										changed = true;
+										if (valueFlags != null)
+										{
+											valueFlags[rowIndex] = true;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				finally
+				{
+					PopRow(program);
+				}
+			}
+
+			return base.InternalDefault(program, oldRow, newRow, valueFlags, columnName, isDescending) || changed;
+		}
+
+		public override bool IsContextLiteral(int location, IList<string> columnReferences)
+		{
+			if (!Nodes[0].IsContextLiteral(location, columnReferences))
 				return false;
-			return Nodes[1].IsContextLiteral(location + 1);
+			return Nodes[1].IsContextLiteral(location + 1, columnReferences);
 		}
     }
 }
