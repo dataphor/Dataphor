@@ -1441,6 +1441,7 @@ begin
 		DefaultUseDTC : Boolean,
 		DefaultUseImplicitTransactions : Boolean,
 		Language : String,
+		FetchCount : Integer,
 		DefaultMaxStackDepth : Integer,
 		DefaultMaxCallDepth : Integer,
 		UsePlanCache : Boolean,

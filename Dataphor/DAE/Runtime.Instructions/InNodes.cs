@@ -101,6 +101,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator iIn(AEntry : entry, APresentation : presentation) : boolean;
 	public class InTableNode : BinaryInstructionNode
 	{
+		public InTableNode()
+		{
+			ExpectsTableValues = false;
+		}
+
 		private PlanNode _equalNode;
 		public PlanNode EqualNode
 		{

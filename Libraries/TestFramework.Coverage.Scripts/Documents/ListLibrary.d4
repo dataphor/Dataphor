@@ -107,18 +107,16 @@ begin
 	LList.Clear();
 end;
 
-/*
-// TODO: Known issue - lists of lists, tables, or presentations
 begin
 	// Table lists
 	var LList : list(table { ID : Integer }) := { table { row { 1 ID } }, table { row { 2 ID } }, table { row { 3 ID } } };
 	
 	if LList <> { table { row { 1 ID } }, table { row { 2 ID } }, table { row { 3 ID } } } then
 		raise Error('List selector or comparison failed.');
-	
+
 	if not(table { row { 1 ID } } in LList) then
 		raise Error('Positive list membership failed.');
-		
+
 	if (table { row { 5 ID } } in LList) then
 		raise Error('Negative list membership failed.');
 		
@@ -131,7 +129,7 @@ begin
 	if LList.IndexOf(table { row { 1 ID } }) <> 0 then
 		raise Error('List IndexOf failed.');
 		
-	LList.Add(entry { 5 ID });
+	LList.Add(table { row { 5 ID } });
 	if LList[3] <> table { row { 5 ID } } then
 		raise Error('List Add failed.');
 
@@ -149,49 +147,6 @@ begin
 	
 	LList.Clear();
 end;
-
-begin
-	// presentation lists
-	var LList : list(presentation { ID : Integer }) := { presentation { entry { 1 ID } }, presentation { entry { 2 ID } }, presentation { entry { 3 ID } } };
-	
-	if LList <> { presentation { entry { 1 ID } }, presentation { entry { 2 ID } }, presentation { entry { 3 ID } } } then
-		raise Error('List selector or comparison failed.');
-	
-	if not(presentation { entry { 1 ID } } in LList) then
-		raise Error('Positive list membership failed.');
-		
-	if (presentation { entry { 5 ID } } in LList) then
-		raise Error('Negative list membership failed.');
-		
-	if LList[0] <> presentation { entry { 1 ID } } then
-		raise Error('List indexer failed.');
-		
-	if LList.Count() <> 3 then
-		raise Error('List Count failed.');
-	
-	if LList.IndexOf(presentation { entry { 1 ID } }) <> 0 then
-		raise Error('List IndexOf failed.');
-		
-	LList.Add(entry { 5 ID });
-	if LList[3] <> presentation { entry { 5 ID } } then
-		raise Error('List Add failed.');
-
-	LList.Insert(presentation { entry { 4 ID } }, 3);
-	if LList[3] <> presentation { entry { 4 ID } } then
-		raise Error('List Insert failed.');
-		
-	LList.Remove(presentation { entry { 3 ID } });
-	if LList[3] <> presentation { entry { 5 ID } } then
-		raise Error('List Remove failed.');
-		
-	LList.RemoveAt(2);
-	if LList[2] <> presentation { entry { 5 ID } } then
-		raise Error('List RemoveAt failed.');
-	
-	LList.Clear();
-end;
-
-*/
 
 create operator Test() : list(Integer)
 begin

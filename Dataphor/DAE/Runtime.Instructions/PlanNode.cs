@@ -96,6 +96,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public const ushort NotShouldSupportModifyFlag = 0xDFFF;
 		public const ushort ShouldCheckConcurrencyFlag = 0x4000;
 		public const ushort NotShouldCheckConcurrencyFlag = 0xBFFF;
+		public const ushort ExpectsTableValuesFlag = 0x8000;
+		public const ushort NotExpectsTableValuesFlag = 0x7FFF;
 
 		public PlanNode() : base()
 		{
@@ -173,6 +175,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			get { return (_characteristics & IsOrderPreservingFlag) != 0; }
 			set { if (value) _characteristics |= IsOrderPreservingFlag; else _characteristics &= NotIsOrderPreservingFlag; }
+		}
+
+		// ExpectsTableValues
+		public bool ExpectsTableValues
+		{
+			get { return (_characteristics & ExpectsTableValuesFlag) != 0; }
+			set { if (value) _characteristics |= ExpectsTableValuesFlag; else _characteristics &= NotExpectsTableValuesFlag; }
 		}
 
 		public bool IsContextLiteral(int location)

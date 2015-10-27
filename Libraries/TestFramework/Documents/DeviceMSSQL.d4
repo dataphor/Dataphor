@@ -8,7 +8,7 @@ create device TestingDevice
 class "MSSQLDevice.MSSQLDevice"
 	attributes
 {
-	"ServerName" = "MYNOCK\MYNOCK",
+	"ServerName" = "localhost",
 	"DatabaseName" = "DataphorTests",
 	"ConnectionClass" = "Connection.MSSQLConnection",
 	"UseIntegratedSecurity" = "True"

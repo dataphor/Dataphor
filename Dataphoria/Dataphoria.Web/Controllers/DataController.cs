@@ -12,8 +12,8 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
 	[RoutePrefix("data")]
 	[EnableCors("*", "*", "*")]
-    public class DataController : ApiController
-    {
+	public class DataController : ApiController
+	{
 		[HttpGet, Route("{table}")]
 		public JToken Get(string table)
 		{
@@ -25,8 +25,8 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 			// Includes?
 			// Paging?
 			// Functions?
-            var result = ProcessorInstance.Instance.Evaluate(String.Format("select Get('{0}')", table), null);
-            return JsonInterop.NativeResultToJson((NativeResult)result);
+			var result = ProcessorInstance.Instance.Evaluate(String.Format("select Get('{0}')", table), null);
+			return JsonInterop.NativeResultToJson((NativeResult)result);
 		}
 
 		[HttpGet, Route("{table}/{key}")]
@@ -64,5 +64,5 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 		{
 			ProcessorInstance.Instance.Evaluate(String.Format("Delete('{0}', '{1}')", table, key), null);
 		}
-    }
+	}
 }

@@ -144,6 +144,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	//  Extract(table{}, ColumnName): scalar
 	public class ExtractColumnNode : PlanNode
 	{		
+		public ExtractColumnNode()
+		{
+			ExpectsTableValues = false;
+		}
+
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			IsLiteral = true;
@@ -287,6 +292,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator iExists(table) : bool
     public class ExistsNode : InstructionNodeBase
     {
+		public ExistsNode()
+		{
+			ExpectsTableValues = false;
+		}
+
 		public override void DetermineDataType(Plan plan)
 		{
 			DetermineModifiers(plan);
@@ -295,7 +305,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program)
 		{
-			ITable table = Nodes[0].Execute(program) as ITable;
+			ITable table = (ITable)Nodes[0].Execute(program);
 			#if NILPROPOGATION
 			if (table == null)
 				return null;

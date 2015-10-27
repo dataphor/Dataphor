@@ -224,6 +224,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public TableNode() : base() 
 		{
 			IsBreakable = false; // TODO: Debug table nodes? 
+			ExpectsTableValues = false;
 		}
 		
 		protected Schema.TableVarColumn CopyTableVarColumn(Schema.TableVarColumn column)

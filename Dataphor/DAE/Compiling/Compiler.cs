@@ -11893,13 +11893,28 @@ namespace Alphora.Dataphor.DAE.Compiling
 				PlanNode argumentNode = arguments[index];
 				if (argumentNode.DataType is Schema.ITableType)
 				{
-					if (operatorValue.Block.ClassDefinition != null)
+					// The previous definition for this notion used whether or not the operator was host-implemented.
+					// This proved inadequate because a ValueInListNode, for example, expects to be given table-valued arguments,
+					// but is a host-implemented operator. This characteristic was introduced to more accurately model the requirement
+					// and is set in various node constructors as appropriate. This should produce the same behavior, but if not,
+					// the commented out code here can be used to revert to the old behavior and detect the scenario that is causing an issue.
+					// Note also that treating tables as a different type from table values would potentially yield a cleaner solution. This
+					// was not done initially to prevent what is effectively a physical implementation detail from showing through to the
+					// logical model, but there is likely a cleaner way to achieve the same result using types.
+					//if (operatorValue.Block.ClassDefinition != null)
+					if (!node.ExpectsTableValues)
 					{
+						//if (node.ExpectsTableValues)
+							//throw new InvalidOperationException("Invalid ExpectsTableValues value");
+
 						// This is a host-implemented operator and should be given table nodes
 						argumentNode = EnsureTableNode(plan, argumentNode);
 					}
 					else
 					{
+						//if (!node.ExpectsTableValues)
+							//throw new InvalidOperationException("Invalid ExpectsTableValues value");
+
 						// This is a D4-implemented operator and should not be given table nodes
 						argumentNode = EnsureTableValueNode(plan, argumentNode);
 					}

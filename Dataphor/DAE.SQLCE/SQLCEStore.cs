@@ -34,8 +34,10 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 				string databaseFileName = (string)builder["Data Source"];
 				if (!File.Exists(databaseFileName))
 				{
-					SqlCeEngine engine = new SqlCeEngine(ConnectionString);
-					engine.CreateDatabase();
+					using (SqlCeEngine engine = new SqlCeEngine(ConnectionString))
+					{
+						engine.CreateDatabase();
+					}
 				}
 			}
 		}

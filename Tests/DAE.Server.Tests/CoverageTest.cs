@@ -111,5 +111,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test] public void ExecuteOperatorText() { ExecuteScript("Coverage.Scripts", "OperatorText"); }
 		[Test] public void ExecuteDeferredConstraintChecking() { ExecuteScript("Coverage.Scripts", "DeferredConstraintChecking"); }
 		[Test] public void ExecuteSystemCatalogOperators() { ExecuteScript("Coverage.Scripts", "SystemCatalogOperators"); }
+		[Test] public void ExecuteTestAdornedConstraints() { ExecuteScript("Coverage.Scripts", "TestAdornedConstraints"); }
+		[Test] public void ExecuteTestSargabilityWithConversion() { ExecuteScript("Coverage.Scripts", "TestSargabilityWithConversion"); }
+		[Test] public void ExecuteTableAndRowValuedAttributes() { ExecuteScript("Coverage.Scripts", "TableAndRowValuedAttributes"); }
 	}
 }

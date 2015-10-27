@@ -28,6 +28,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
 	public abstract class TableComparisonNode : InstructionNode
 	{
+		public TableComparisonNode()
+		{
+			ExpectsTableValues = false;
+		}
+
 		protected PlanNode _rowEqualNode;
 		
 		public override void DetermineDataType(Plan plan)

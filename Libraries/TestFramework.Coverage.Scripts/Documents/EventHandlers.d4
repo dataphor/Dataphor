@@ -510,6 +510,8 @@ if not exists (TestAfterDeleteTable where ID = 1) then
 
 if exists (TestTable where ID = 1) then
 	raise Error("TestTable after delete handlers failed.");
+	
+
 
 // Default / Validate / Change
 begin
@@ -542,10 +544,9 @@ begin
 		if (LRow.TestValue) <> "ABC" then
 			raise Error("Cursor.Default() for TestValue failed.");
 			
-		update LRow set { TestType := "ABCDEF" };
-		
 		var LErrorHit : Boolean := false;
 		try
+			update LRow set { TestType := "ABCDEF" };
 			LCursor.Validate(LRow, var LRow);
 		except
 			LErrorHit := true;

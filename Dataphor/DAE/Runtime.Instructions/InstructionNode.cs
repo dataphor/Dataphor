@@ -43,6 +43,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// InstructionNodes are by default not breakable (because for 99% of instructions this would be the
 			// equivalent of breaking into the multiplication instruction in the processor, for example.
 			//IsBreakable = true;
+			ExpectsTableValues = true;
         }
         
 		// Operator

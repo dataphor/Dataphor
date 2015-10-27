@@ -1412,7 +1412,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program)
 		{
-			TableScan table = new TableValueScan(this, Nodes[0].Execute(program) as TableValue);
+			TableScan table = new TableValueScan(this, (TableValue)Nodes[0].Execute(program));
 			table.Open();
 			return table;
 		}
