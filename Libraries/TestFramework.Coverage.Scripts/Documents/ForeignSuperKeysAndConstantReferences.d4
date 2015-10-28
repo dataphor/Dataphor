@@ -1,0 +1,91 @@
+/*
+	Investigating Foreign Superkey and Constant References
+	
+*/
+
+/*
+	Current Foreign Key Support
+*/
+
+create table A { Id : Integer, key { Id } };
+
+create table B { AId : Integer, key { AId } };
+
+create reference B_A B { AId } references A { Id };
+
+/*
+	General equivalent catalog constraint for a reference (simplified)
+*/
+create constraint B_A not exists (B { AId Id } minus A { Id })
+
+/*
+	Transition constraints used to enforce reference constraint (simplified)
+*/
+alter table A
+{
+	create transition constraint B_A_Target
+		on update old.Id = new.Id or not exists (B where AId = old.Id)
+		on delete not exists (B where AId = old.Id)
+};
+
+alter table B 
+{ 
+	create transition constraint B_A_Source
+		on insert exists (A where Id = AId)
+		on update old.AId = new.AId or exists (A where Id = new.AId)
+};
+
+/* Disjoint subclassing */
+create table S { Id : Integer, key { Id } };
+
+create table A { SId : Integer, key { SId } };
+create reference A_S A { SId } references S { Id };
+
+create table B { SId : Integer, key { SId } };
+create reference B_S B { SId } references S { Id };
+
+create table C { SId : Integer, key { SId } };
+create reference C_S C { SId } references S { Id };
+
+create constraint S_Inclusive
+	not exists ((S { Id }) minus ((A { SId }) union (B { SId }) union (C { SId })));
+	
+create constraint A_B_C_Exclusive
+	not exists ((A { SId }) join (B { SId }) join (C { SId }));
+	
+/* Foreign Super Keys and Constant References */
+create table S 
+{
+	Id : Integer, 
+	TypeId : String { constraint TypeIdValid (value in { 'A', 'B', 'C' }) }, 
+	key { Id }
+};
+
+create table A 
+{ 
+	SId : Integer, 
+	STypeId : String { default 'A', constraint STypeIDValid (value = 'A') }, 
+	key { SId },
+	reference A_S { SId, STypeId } references S { Id, TypeId }
+};
+
+create table B 
+{ 
+	SId : Integer, 
+	STypeId : String { default 'B', constraint STypeIDValid (value = 'B') },
+	key { SId },
+	reference B_S { SId, STypeId } references S { Id, TypeId }
+};
+
+create table C 
+{ 
+	SId : Integer, 
+	STypeId : String { default 'C', constraint STypeIDValid (value = 'C') }, 
+	key { SId },
+	reference C_S { SId, STypeId } references S { Id, TypeId }
+};
+
+
+
+
+create table TestName { Id : Integer, Name : String, key { Id } };

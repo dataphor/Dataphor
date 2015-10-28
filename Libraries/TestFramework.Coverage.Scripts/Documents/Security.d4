@@ -1,0 +1,18 @@
+/*
+	Right grants survive an object drop...
+	
+*/
+
+create role TestRole;
+
+create view TestView (table { row { 1 Id, "Blah" Name } });
+
+grant usage on TestView to role TestRole;
+
+select RoleHasRight("General.TestRole", "General.TestViewSelect");
+
+drop view TestView;
+
+create view TestView (table { row { 1 Id, "Blah" Name } });
+
+select RoleHasRight("General.TestRole", "General.TestViewSelect");

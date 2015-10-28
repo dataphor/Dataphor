@@ -1,0 +1,12 @@
+/*
+	Conditionals
+*/
+
+// TODO: These should all compile to type String, but they are all Generic, except the last one, which is String.
+// TODO: The ternary also is not translated to SQL?
+raise Error("Fix this");
+select table { row { 1 ID, if true then nil else "" Value } };
+select table { row { 1 ID, if true then "" else nil Value } };
+select table { row { 1 ID, case when true then nil else "" end Value } };
+select table { row { 1 ID, case when true then "" else nil end Value } };
+
