@@ -197,3 +197,40 @@ end;
 SafeDrop('TestConcat()');
 
 drop table Test;
+
+// TODO: Support this operator generically:
+// With type inference would be really cool, but...
+// This would be really cool to just build a generic operator that could do this, rather than having to do it with aggregates...	
+
+create aggregate operator ToList(AValue : generic) : list(generic)
+	initialization
+	begin
+		result := list(generic) { };
+	end
+	
+	aggregation
+	begin
+		result.Add(AValue);
+	end
+	
+	finalization
+	begin
+	end
+	
+	static tags { DAE.IsNilable = "True", DAE.IsOrderDependent = "True" };
+
+select 
+	table 
+	{ 
+		row { 1 X, 1 Y }, 
+		row { 1 X, 2 Y }, 
+		row { 1 X, 3 Y }, 
+		row { 2 X, 1 Y }, 
+		row { 2 X, 2 Y }, 
+		row { 2 X, 3 Y }, 
+		row { 3 X, 1 Y }, 
+		row { 3 X, 2 Y }, 
+		row { 3 X, 3 Y } 
+	}
+	group by { X } add { ToList(Y order by { Y }) Ys };
+
