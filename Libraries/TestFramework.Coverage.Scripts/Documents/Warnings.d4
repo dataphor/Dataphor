@@ -1,0 +1,18 @@
+// Warnings
+
+// TODO: Change this behavior to only throw this warning if the expression has no side-effects.
+
+//When running...
+
+var LStringList := list(System.String){};
+LStringList.Add("Test");
+
+//... the second statement yields following warning:
+
+// "Possibly incorrect use of expression as a statement."
+
+//Although this second statement returns a value (the index of the newly inserted element), 
+//this warning seems inappropriate since the variable LStringList also is updated.
+
+raise Error("TODO: Change warning behavior to only issue incorrect use of expression if the expression is functional");
+
