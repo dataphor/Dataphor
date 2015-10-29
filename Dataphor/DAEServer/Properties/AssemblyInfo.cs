@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Alphora")]
 [assembly: AssemblyProduct("DAEServer")]
-[assembly: AssemblyCopyright("Copyright © Alphora 2010")]
+[assembly: AssemblyCopyright("Copyright © Alphora 2010-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -27,7 +27,7 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("a2119196-476b-484c-8b97-4635ea543e87")]
 
-[assembly: AssemblyVersion("3.0.*")]
+[assembly: AssemblyVersion("3.1.*")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 

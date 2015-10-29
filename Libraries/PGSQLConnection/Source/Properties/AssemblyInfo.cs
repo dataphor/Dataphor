@@ -13,9 +13,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Alphora Dataphor - DAE PostgreSQL Connection")]
 [assembly: AssemblyDescription("Implementation for connection to SQL-based DBMSs through the ADO.NET Oracle Provider")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("DAE.Connection.PGSQL")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2009")]
+[assembly: AssemblyCompany("Alphora")]
+[assembly: AssemblyProduct("Dataphor")]
+[assembly: AssemblyCopyright("© Copyright 2009-2015 Alphora")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: Alphora.Dataphor.DAE.Server.DAERegister("Alphora.Dataphor.DAE.Connection.PGSQL.DAERegister")]
@@ -38,7 +38,7 @@ using System.Runtime.InteropServices;
 // Puede especificar todos los valores o establecer como predeterminados los números de versión de compilación y de revisión 
 // mediante el asterisco ('*'), como se muestra a continuación:
 
-[assembly: AssemblyVersion("3.0.*")]
+[assembly: AssemblyVersion("3.1.*")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 

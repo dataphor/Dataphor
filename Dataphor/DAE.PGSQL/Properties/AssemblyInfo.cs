@@ -10,12 +10,12 @@ using System.Runtime.InteropServices;
 // La información general sobre un ensamblado se controla mediante el siguiente 
 // conjunto de atributos. Cambie estos atributos para modificar la información
 // asociada con un ensamblado.
-[assembly: AssemblyTitle("DAE.PGSQL")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Alphora Dataphor - PGSQL Store Support")]
+[assembly: AssemblyDescription("Provides the implementation of a PostgreSQL store for use by the DAE.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Alphora")]
 [assembly: AssemblyProduct("Dataphor")]
-[assembly: AssemblyCopyright("Copyright © Alphora 2009")]
+[assembly: AssemblyCopyright("Copyright © Alphora 2009-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -37,7 +37,7 @@ using System.Runtime.InteropServices;
 // Puede especificar todos los valores o establecer como predeterminados los números de versión de compilación y de revisión 
 // mediante el asterisco ('*'), como se muestra a continuación:
 
-[assembly: AssemblyVersion("3.0.*")]
+[assembly: AssemblyVersion("3.1.*")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 
