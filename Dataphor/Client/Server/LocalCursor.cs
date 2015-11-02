@@ -457,6 +457,39 @@ namespace Alphora.Dataphor.DAE.Server
 			return moveData.Flags == CursorGetFlags.None;
 		}
 
+		private void GotoBookmarkIndex(int index, bool forward)
+		{
+			if (!SourceGotoBookmark(_buffer[index].Bookmark, forward))
+				throw new ServerException(ServerException.Codes.CursorSyncError);
+		}		
+		
+		protected bool SyncSource(bool forward)
+		{
+			if (_sourceCursorIndex != _bufferIndex)
+			{
+				_sourceCursorIndex = _bufferIndex;
+				if (_bufferIndex == -1)
+				{
+					if (_buffer.Count > 0)
+						GotoBookmarkIndex(0, false);
+					return SourcePrior();
+				}
+				else if (_bufferIndex == _buffer.Count)
+				{
+					if (_buffer.Count > 0)
+						GotoBookmarkIndex(_buffer.Count - 1, true);
+					return SourceNext();
+				}
+				else
+				{
+					GotoBookmarkIndex(_bufferIndex, forward);
+					return true;
+				}
+			}
+			else
+				return true;
+		}
+		
         public bool Next()
         {
 			SetBufferDirection(BufferDirection.Forward);
@@ -467,15 +500,16 @@ namespace Alphora.Dataphor.DAE.Server
 					
 				if (_bufferIndex >= _buffer.Count - 1)
 				{
-					if (SourceEOF())
+					if (_bufferIndex == _sourceCursorIndex - 1 && SourceEOF())
 					{
 						_bufferIndex++;
 						return false;
 					}
 
+					bool synced = SyncSource(true);
 					ClearBuffer();
 					SourceFetch(false, true);
-					return !EOF();
+					return synced && !EOF();
 				}
 				_bufferIndex++;
 				return true;
@@ -561,31 +595,35 @@ namespace Alphora.Dataphor.DAE.Server
 
         public void Update(IRow row, BitArray valueFlags)
         {
-            //RemoteRow localRow = new RemoteRow();
-            //_plan._process.EnsureOverflowReleased(row);
-            //localRow.Header = new RemoteRowHeader();
-            //localRow.Header.Columns = new string[row.DataType.Columns.Count];
-            //for (int index = 0; index < row.DataType.Columns.Count; index++)
-            //    localRow.Header.Columns[index] = row.DataType.Columns[index].Name;
-            //localRow.Body = new RemoteRowBody();
-            //localRow.Body.Data = row.AsPhysical;
-            //_cursor.Update(localRow, valueFlags, _plan._process.GetProcessCallInfo());
-            //_flagsCached = false;
-            //_plan._programStatisticsCached = false;
-            //if (BufferActive())
-            //    ClearBuffer();
-            //SetBufferDirection(BufferDirection.Backward);
-        }
+			RemoteRow localRow = new RemoteRow();
+			_plan._process.EnsureOverflowReleased(row);
+			localRow.Header = new RemoteRowHeader();
+			localRow.Header.Columns = new string[row.DataType.Columns.Count];
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
+				localRow.Header.Columns[index] = row.DataType.Columns[index].Name;
+			localRow.Body = new RemoteRowBody();
+			localRow.Body.Data = row.AsPhysical;
+			if (BufferActive())
+				SyncSource(true);
+			_cursor.Update(localRow, valueFlags, _plan._process.GetProcessCallInfo());
+			_flagsCached = false;
+			_plan._programStatisticsCached = false;
+			if (BufferActive())
+				ClearBuffer();
+			SetBufferDirection(BufferDirection.Backward);
+		}
 
         public void Delete()
         {
-            //_cursor.Delete(_plan._process.GetProcessCallInfo());
-            //_flagsCached = false;
-            //_plan._programStatisticsCached = false;
-            //if (BufferActive())
-            //    ClearBuffer();
-            //SetBufferDirection(BufferDirection.Backward);
-        }
+			if (BufferActive())
+				SyncSource(true);
+			_cursor.Delete(_plan._process.GetProcessCallInfo());
+			_flagsCached = false;
+			_plan._programStatisticsCached = false;
+			if (BufferActive())
+				ClearBuffer();
+			SetBufferDirection(BufferDirection.Backward);
+		}
 		
 		protected void SourceFirst()
 		{
