@@ -261,6 +261,20 @@ namespace Alphora.Dataphor.BOP
 			}
 		}
 
+		private Dictionary<Type, MemberInfo[]> memberCache = new Dictionary<Type, MemberInfo[]>();
+
+		private MemberInfo[] GetMembers(Type type)
+		{
+			MemberInfo[] members;
+			if (!memberCache.TryGetValue(type, out members))
+			{
+				members = type.FindMembers(MemberTypes.Property | MemberTypes.Field, BindingFlags.Instance | BindingFlags.Public, null, null).OrderBy(mi => mi.Name).ToArray();
+				memberCache.Add(type, members);
+			}
+
+			return members;
+		}
+
 		/// <summary> Writes all of the members for the given instance to the specified XML element. </summary>
 		private void WriteMembers(string nameQualifier, XElement node, object instance, Type type)
 		{
@@ -273,7 +287,7 @@ namespace Alphora.Dataphor.BOP
 			PublishMethod publishMethod;
 			object tempValue;
 
-			foreach (MemberInfo member in type.FindMembers(MemberTypes.Property | MemberTypes.Field, BindingFlags.Instance | BindingFlags.Public, null, null))
+			foreach (MemberInfo member in GetMembers(type))
 			{
 				try
 				{
