@@ -657,15 +657,16 @@ namespace Alphora.Dataphor.DAE.Server
 
 				if (_bufferIndex <= 0)
 				{
-					if (SourceBOF())
+					if (_bufferIndex == _sourceCursorIndex + 1 && SourceBOF())
 					{
 						_bufferIndex--;
 						return false;
 					}
 
+					bool synced = SyncSource(false);
 					ClearBuffer();
 					SourceFetch(false, true);
-					return !BOF();
+					return synced && !BOF();
 				}
 				_bufferIndex--;
 				return true;
@@ -809,6 +810,8 @@ namespace Alphora.Dataphor.DAE.Server
 		
         public IRow GetKey()
         {
+			if (BufferActive())
+				SyncSource(true);
 			RemoteRow key = _cursor.GetKey(_plan._process.GetProcessCallInfo());
 			_plan._programStatisticsCached = false;
 			Row row;
