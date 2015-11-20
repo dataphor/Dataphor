@@ -622,6 +622,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								(table.OrderKey != null) &&
 								(table.Forward == forward) &&
 								(table.Inclusive == inclusive) &&
+								(origin.DataType.Columns.Count == table.OrderKey.DataType.Columns.Count) &&
 								(CompareKeys(origin, table.OrderKey) == 0)
 							) ||
 							(
