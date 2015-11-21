@@ -1747,9 +1747,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				
 				// Clear the operator name resolution cache
 				Device.OperatorNameCache.Clear(objectValue.Name);
+
+				ClearCachedRightAssignments(objectValue.GetRights());
 			}
 		}
 		
+		protected void ClearCachedRightAssignments(string[] rightNames)
+		{
+			foreach (Schema.User user in Device.UsersCache.Values)
+				user.ClearCachedRightAssignments(rightNames);
+		}
+
 		#endregion
 		
 		#region Catalog object

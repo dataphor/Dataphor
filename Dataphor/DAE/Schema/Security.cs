@@ -340,6 +340,17 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (_rightsCache != null)
 				_rightsCache.Remove(rightName);
 		}
+
+		public void ClearCachedRightAssignments(string[] rightNames)
+		{
+			if (_rightsCache != null)
+			{
+				for (int i = 0; i < rightNames.Length; i++)
+				{
+					_rightsCache.Remove(rightNames[i]);
+				}
+			}
+		}
 		
 		public void ClearCachedRightAssignments()
 		{
