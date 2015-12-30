@@ -312,6 +312,11 @@ if not exists (select * from sysdatabases where name = '{0}')
             }
         }
 
+		protected override string TooManyRowsOperator()
+		{
+			return "dbo.DAE_TooManyRows";
+		}
+
         protected override DeviceSession InternalConnect(ServerProcess serverProcess,
                                                          DeviceSessionInfo deviceSessionInfo)
         {

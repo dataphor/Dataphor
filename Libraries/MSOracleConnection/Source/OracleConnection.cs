@@ -47,6 +47,13 @@ namespace Alphora.Dataphor.DAE.Connection.Oracle
 
 		protected override Exception InternalWrapException(Exception exception, string statement)
 		{
+			Oracle.OracleException oracleException = exception as Oracle.OracleException;
+			if (oracleException != null)
+			{
+				if (oracleException.Code == 1422)
+					return new Runtime.RuntimeException(Runtime.RuntimeException.Codes.InvalidRowExtractorExpression);
+			}
+
 			// Wrap all exceptions coming back with a simple Exception so that it crosses the boundary.
 			return new ConnectionException(ConnectionException.Codes.SQLException, ErrorSeverity.Application, new Exception(exception.Message), statement);
 		}

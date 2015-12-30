@@ -421,6 +421,8 @@ namespace Alphora.Dataphor.DAE.Runtime
 			/// <summary>Error code 104238: "Maximum call depth ({0}) has been exceeded."</summary>
 			CallOverflow = 104238,
 			
+			/// <summary>Error code 104239: "Row extractor expression must reference a table expression with at most one row.  Use a restriction or quota query to limit the number of rows in the source table expression."</summary>
+			InvalidRowExtractorExpression = 104239,
 		}
 
 		// Resource manager for this exception class

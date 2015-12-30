@@ -376,3 +376,10 @@ create or replace function DAE_DateTimeSelector7(AYear in int, AMonth in int, AD
 		LReturnVal := to_Date((AYear * 10000000000 + AMonth * 100000000 + ADay * 1000000 + AHour * 10000 + AMinute * 100 + ASecond), 'yyyy mm dd hh24 mi ss');
 		return LReturnVal;
 	end;
+\
+create or replace function DAE_TooManyRows(ADummy in int) 
+	return int is
+	begin
+		raise TOO_MANY_ROWS;
+	end;
+\

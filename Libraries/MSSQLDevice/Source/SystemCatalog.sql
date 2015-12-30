@@ -922,3 +922,11 @@ go
 grant execute on DAE_StringToVersionNumber to public
 go
 
+create function DAE_TooManyRows(@dummy int) returns int as
+begin
+	return cast('Row extractor expression must reference a table expression with at most one row.  Use a restriction or quota query to limit the number of rows in the source table expression.' as int);
+end;
+go
+
+grant execute on DAE_TooManyRows to public
+go

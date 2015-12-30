@@ -90,7 +90,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					try
 					{
 						if (table.Next())
-							throw new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression);
+							throw new RuntimeException(RuntimeException.Codes.InvalidRowExtractorExpression);
 						return row;
 					}
 					catch
@@ -216,7 +216,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						try
 						{
 							if (table.Next())
-								throw new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression);
+								throw new RuntimeException(RuntimeException.Codes.InvalidRowExtractorExpression);
 							#if USECOLUMNLOCATIONBINDING
 							if (row.HasValue(Location))
 								return row[Location].AsNative;
