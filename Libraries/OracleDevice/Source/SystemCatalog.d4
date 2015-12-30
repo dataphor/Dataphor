@@ -723,12 +723,12 @@ begin
         create operator System.StartsWith(System.String, System.String) static tags {{ Storage.TranslationString = "case when Instr({{0}}, {{1}}) = 1 then 1 else 0 end", DAE.IsSystem = "true" }},
         create operator System.IsUpper(System.String, System.Integer) static tags {{ DAE.IsSystem = "true", Storage.TranslationString = "case when substr({{0}}, {{1}} + 1, 1) = upper(substr({{0}}, {{1}} + 1, 1)) then 1 else 0 end" }}, 
 		create operator System.IsLower(System.String, System.Integer) static tags {{ DAE.IsSystem = "true", Storage.TranslationString = "case when substr({{0}}, {{1}}, 1) = lower(substr({{0}}, {{1}}, 1)) then 1 else 0 end" }}, 
-		create operator System.IsDigit(System.String, System.Integer) static tags {{ Storage.TranslationString = "case when substring({{0}}, {{1}} + 1, 1) like '[0-9]' then 1 else 0 end", DAE.IsSystem = "true" }},
-		create operator System.IsDigit(System.String) static tags {{ Storage.TranslationString = "case when {{0}} like '%[^0-9]%' then 0 else 1 end", DAE.IsSystem = "true" }},
-		create operator System.IsLetter(System.String, System.Integer) static tags {{ Storage.TranslationString = "case when substring({{0}}, {{1}} + 1, 1) like '[a-zA-Z]' then 1 else 0 end", DAE.IsSystem = "true" }},
-		create operator System.IsLetter(System.String) static tags {{ Storage.TranslationString = "case when {{0}} like '%[^a-zA-Z]%' then 0 else 1 end", DAE.IsSystem = "true" }},
-		create operator System.IsLetterOrDigit(System.String, System.Integer) static tags {{ Storage.TranslationString = "case when substring({{0}}, {{1}} + 1, 1) like '[0-9a-zA-Z]' then 1 else 0 end", DAE.IsSystem = "true" }},
-		create operator System.IsLetterOrDigit(System.String) static tags {{ Storage.TranslationString = "case when {{0}} like '%[^0-9a-zA-Z]%' then 0 else 1 end", DAE.IsSystem = "true" }}
+		create operator System.IsDigit(System.String, System.Integer) static tags {{ Storage.TranslationString = "case when regexp_like(substr({{0}}, {{1}} + 1, 1), '[0-9]') then 1 else 0 end", DAE.IsSystem = "true" }},
+		create operator System.IsDigit(System.String) static tags {{ Storage.TranslationString = "case when regexp_like({{0}}, '.*[^0-9].*') then 0 else 1 end", DAE.IsSystem = "true" }},
+		create operator System.IsLetter(System.String, System.Integer) static tags {{ Storage.TranslationString = "case when regexp_like(substr({{0}}, {{1}} + 1, 1), '[a-zA-Z]') then 1 else 0 end", DAE.IsSystem = "true" }},
+		create operator System.IsLetter(System.String) static tags {{ Storage.TranslationString = "case when regexp_like({{0}}, '.*[^a-zA-Z].*') then 0 else 1 end", DAE.IsSystem = "true" }},
+		create operator System.IsLetterOrDigit(System.String, System.Integer) static tags {{ Storage.TranslationString = "case when regexp_like(substr({{0}}, {{1}} + 1, 1), '[0-9a-zA-Z]') then 1 else 0 end", DAE.IsSystem = "true" }},
+		create operator System.IsLetterOrDigit(System.String) static tags {{ Storage.TranslationString = "case when regexp_like({{0}}, '.*[^0-9a-zA-Z].*') then 0 else 1 end", DAE.IsSystem = "true" }}
 		   
        
 	}};
