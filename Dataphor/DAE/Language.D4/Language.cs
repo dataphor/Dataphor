@@ -11,16 +11,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
-	using Alphora.Dataphor.DAE.Language;
-    
-    /*
-        Class Hierarchy ->
+	using Language;
+	
+	/*
+		Class Hierarchy ->
 
 			System.Object
 				|- MetaData
 				|- AlterMetaData
 				|- Tag
-				        
+						
 			Language.Statement
 				|- ExpressionStatement
 				|- VariableStatement
@@ -220,11 +220,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				|	|	|- OuterJoinExpression
 				|	|	|	|- LeftOuterJoinExpression
 				|	|	|	|- RightOuterJoinExpression
-        
-    */
-    
-    public enum EmitMode 
-    { 
+		
+	*/
+	
+	public enum EmitMode 
+	{ 
 		/// <summary>ForCopy indicates that the emission is to be used to make a copy of the object.</summary>
 		ForCopy, 
 		
@@ -235,55 +235,55 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		ForRemote
 	}
 
-    /// <remarks>The IdentifierExpression descendents are only used by the CLI to provide a more detailed ParseTree when requested.</remarks>
-    public class TableIdentifierExpression : IdentifierExpression
-    {
+	/// <remarks>The IdentifierExpression descendents are only used by the CLI to provide a more detailed ParseTree when requested.</remarks>
+	public class TableIdentifierExpression : IdentifierExpression
+	{
 		public TableIdentifierExpression() : base(){}
 		public TableIdentifierExpression(string identifier) : base(identifier){}
-    }
-    
-    public class ColumnIdentifierExpression : IdentifierExpression
-    {
+	}
+	
+	public class ColumnIdentifierExpression : IdentifierExpression
+	{
 		public ColumnIdentifierExpression() : base(){}
 		public ColumnIdentifierExpression(string identifier) : base(identifier){}
-    }
-    
-    public class ServerIdentifierExpression : IdentifierExpression
-    {
+	}
+	
+	public class ServerIdentifierExpression : IdentifierExpression
+	{
 		public ServerIdentifierExpression() : base(){}
 		public ServerIdentifierExpression(string identifier) : base(identifier){}
-    }
-    
-    public class VariableIdentifierExpression : IdentifierExpression
-    {
+	}
+	
+	public class VariableIdentifierExpression : IdentifierExpression
+	{
 		public VariableIdentifierExpression() : base(){}
 		public VariableIdentifierExpression(string identifier) : base(identifier){}
-    }
-    
+	}
+	
 	public abstract class D4Statement : Statement{}
 
-    public abstract class D4DMLStatement : D4Statement {}
+	public abstract class D4DMLStatement : D4Statement {}
 
 	// Verified against DataphorMachine - BTR - 11/24/2001
-    public class SelectStatement : D4DMLStatement
-    {
+	public class SelectStatement : D4DMLStatement
+	{
 		public SelectStatement() : base(){}
 		public SelectStatement(CursorDefinition cursorDefinition) : base()
 		{
 			_cursorDefinition = cursorDefinition;
 		}
 		
-        // CursorDefinition
-        protected CursorDefinition _cursorDefinition;
-        public CursorDefinition CursorDefinition
-        {
-            get { return _cursorDefinition; }
-            set { _cursorDefinition = value; }
-        }
-    }
-    
-    public class InsertStatement : D4DMLStatement
-    {
+		// CursorDefinition
+		protected CursorDefinition _cursorDefinition;
+		public CursorDefinition CursorDefinition
+		{
+			get { return _cursorDefinition; }
+			set { _cursorDefinition = value; }
+		}
+	}
+	
+	public class InsertStatement : D4DMLStatement
+	{
 		public InsertStatement() : base(){}
 		public InsertStatement(Expression sourceExpression, Expression target) : base()
 		{
@@ -291,25 +291,25 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_target = target;
 		}
 		
-        // SourceExpression
-        protected Expression _sourceExpression;
-        public Expression SourceExpression
-        {
-            get { return _sourceExpression; }
-            set { _sourceExpression = value; }
-        }
-        
-        // Target
-        protected Expression _target;
-        public Expression Target
-        {
+		// SourceExpression
+		protected Expression _sourceExpression;
+		public Expression SourceExpression
+		{
+			get { return _sourceExpression; }
+			set { _sourceExpression = value; }
+		}
+		
+		// Target
+		protected Expression _target;
+		public Expression Target
+		{
 			get { return _target; }
 			set { _target = value; }
-        }
-    }
-    
-    public class UpdateColumnExpression : Expression
-    {
+		}
+	}
+	
+	public class UpdateColumnExpression : Expression
+	{
 		public UpdateColumnExpression() : base(){}
 		public UpdateColumnExpression(Expression target, Expression expression) : base()
 		{
@@ -317,25 +317,25 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Expression = expression;
 		}
 		
-        // Target
-        protected Expression _target;
-        public Expression Target
-        {
-            get { return _target; }
-            set { _target = value; }
-        }
+		// Target
+		protected Expression _target;
+		public Expression Target
+		{
+			get { return _target; }
+			set { _target = value; }
+		}
 
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-    }
-    
-    public class UpdateColumnExpressions : Expressions
-    {
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+	}
+	
+	public class UpdateColumnExpressions : Expressions
+	{
 		protected override void Validate(object item)
 		{
 			if (!(item is UpdateColumnExpression))
@@ -348,10 +348,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return (UpdateColumnExpression)base[index]; }
 			set { base[index] = value; }
 		}
-    }
-    
-    public class UpdateStatement : D4DMLStatement
-    {
+	}
+	
+	public class UpdateStatement : D4DMLStatement
+	{
 		public UpdateStatement() : base(){}
 		public UpdateStatement(Expression target)
 		{
@@ -371,46 +371,46 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_condition = condition;
 		}
 		
-        // Target
-        protected Expression _target;
-        public Expression Target
-        {
+		// Target
+		protected Expression _target;
+		public Expression Target
+		{
 			get { return _target; }
 			set { _target = value; }
-        }
-        
-        // Columns
-        protected UpdateColumnExpressions _columns = new UpdateColumnExpressions();
-        public UpdateColumnExpressions Columns { get { return _columns; } }
-        
-        // Condition
-        protected Expression _condition;
-        public Expression Condition
-        {
+		}
+		
+		// Columns
+		protected UpdateColumnExpressions _columns = new UpdateColumnExpressions();
+		public UpdateColumnExpressions Columns { get { return _columns; } }
+		
+		// Condition
+		protected Expression _condition;
+		public Expression Condition
+		{
 			get { return _condition; }
 			set { _condition = value; }
 		}
-    }
-    
-    public class DeleteStatement : D4DMLStatement
-    {
+	}
+	
+	public class DeleteStatement : D4DMLStatement
+	{
 		public DeleteStatement() : base(){}
 		public DeleteStatement(Expression target) : base()
 		{
 			_target = target;
 		}
 		
-        // Target
-        protected Expression _target;
-        public Expression Target
-        {
+		// Target
+		protected Expression _target;
+		public Expression Target
+		{
 			get { return _target; }
 			set { _target = value; }
-        }
-    }
-    
-    public class RestrictExpression : Expression
-    {
+		}
+	}
+	
+	public class RestrictExpression : Expression
+	{
 		public RestrictExpression() : base(){}
 		public RestrictExpression(Expression expression, Expression condition)
 		{
@@ -418,25 +418,25 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_condition = condition;
 		}
 		
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
 
-        // Condition
-        protected Expression _condition;
-        public Expression Condition
-        {
-            get { return _condition; }
-            set { _condition = value; }
-        }
-    }
+		// Condition
+		protected Expression _condition;
+		public Expression Condition
+		{
+			get { return _condition; }
+			set { _condition = value; }
+		}
+	}
 
-    public class OnExpression : Expression
-    {		
+	public class OnExpression : Expression
+	{		
 		public OnExpression() : base(){}
 		public OnExpression(Expression expression, string serverName)
 		{
@@ -444,25 +444,25 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_serverName = serverName;
 		}
 		
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
 
-        // ServerName
-        protected string _serverName = String.Empty;
-        public string ServerName
-        {
-            get { return _serverName; }
-            set { _serverName = value == null ? String.Empty : value; }
-        }
-    }
-    
-    public class AsExpression : Expression
-    {
+		// ServerName
+		protected string _serverName = String.Empty;
+		public string ServerName
+		{
+			get { return _serverName; }
+			set { _serverName = value == null ? String.Empty : value; }
+		}
+	}
+	
+	public class AsExpression : Expression
+	{
 		public AsExpression() : base(){}
 		public AsExpression(Expression expression, TypeSpecifier typeSpecifier) : base()
 		{
@@ -470,25 +470,25 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_typeSpecifier = typeSpecifier;
 		}
 		
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
 
-        // TypeSpecifier
-        protected TypeSpecifier _typeSpecifier;
-        public TypeSpecifier TypeSpecifier
-        {
+		// TypeSpecifier
+		protected TypeSpecifier _typeSpecifier;
+		public TypeSpecifier TypeSpecifier
+		{
 			get { return _typeSpecifier; }
 			set { _typeSpecifier = value; }
-        }
-    }
-    
-    public class IsExpression : Expression
-    {
+		}
+	}
+	
+	public class IsExpression : Expression
+	{
 		public IsExpression() : base(){}
 		public IsExpression(Expression expression, TypeSpecifier typeSpecifier) : base()
 		{
@@ -496,25 +496,25 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_typeSpecifier = typeSpecifier;
 		}
 		
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
 
-        // TypeSpecifier
-        protected TypeSpecifier _typeSpecifier;
-        public TypeSpecifier TypeSpecifier
-        {
+		// TypeSpecifier
+		protected TypeSpecifier _typeSpecifier;
+		public TypeSpecifier TypeSpecifier
+		{
 			get { return _typeSpecifier; }
 			set { _typeSpecifier = value; }
-        }
-    }
-    
-    public class ColumnExpression : Expression
-    {
+		}
+	}
+	
+	public class ColumnExpression : Expression
+	{
 		public ColumnExpression() : base(){}
 		public ColumnExpression(string columnName) : base()
 		{
@@ -528,8 +528,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _columnName; }
 			set { _columnName = value == null ? String.Empty : value; }
 		}
-    }
-    
+	}
+	
 	public class ColumnExpressions : Expressions
 	{
 		protected override void Validate(object item)
@@ -545,33 +545,33 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class ProjectExpression : Expression
-    {
-        public ProjectExpression() : base() {}
-        public ProjectExpression(Expression expression, string[] columnNames) : base()
-        {
+	{
+		public ProjectExpression() : base() {}
+		public ProjectExpression(Expression expression, string[] columnNames) : base()
+		{
 			_expression = expression;
 			for (int index = 0; index < columnNames.Length; index++)
 				_columns.Add(new ColumnExpression(columnNames[index]));
-        }
-        
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-        
-        // Columns
-        protected ColumnExpressions _columns = new ColumnExpressions();
-        public ColumnExpressions Columns { get { return _columns; } }
-    }
+		}
+		
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		// Columns
+		protected ColumnExpressions _columns = new ColumnExpressions();
+		public ColumnExpressions Columns { get { return _columns; } }
+	}
 
 	#if CALCULESQUE    
-    public class NamedExpression : Expression
-    {
+	public class NamedExpression : Expression
+	{
 		public NamedExpression() : base() {}
 		public NamedExpression(Expression AExpression, string AName) : base()
 		{
@@ -579,13 +579,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FName = AName;
 		}
 
-        // Expression
-        protected Expression FExpression;
-        public Expression Expression
-        {
-            get { return FExpression; }
-            set { FExpression = value; }
-        }
+		// Expression
+		protected Expression FExpression;
+		public Expression Expression
+		{
+			get { return FExpression; }
+			set { FExpression = value; }
+		}
 
 		// Name
 		protected string FName = String.Empty;
@@ -594,11 +594,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return FName; }
 			set { FName = value == null ? String.Empty : value; }
 		}
-    }
-    #endif
-    
-    public class NamedColumnExpression : Expression, IMetaData
-    {
+	}
+	#endif
+	
+	public class NamedColumnExpression : Expression, IMetaData
+	{
 		public NamedColumnExpression() : base(){}
 		public NamedColumnExpression(Expression expression, string columnAlias) : base()
 		{
@@ -613,13 +613,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_metaData = metaData;
 		}
 		
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
 
 		// ColumnAlias
 		protected string _columnAlias = String.Empty;
@@ -628,16 +628,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _columnAlias; }
 			set { _columnAlias = value == null ? String.Empty : value; }
 		}
-        
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
-    }
-    
+		}
+	}
+	
 	public class NamedColumnExpressions : Expressions
 	{
 		protected override void Validate(object item)
@@ -653,9 +653,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class ExtendExpression : Expression
-    {
+	{
 		public ExtendExpression() : base(){}
 		public ExtendExpression(Expression expression) : base()
 		{
@@ -668,21 +668,21 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_expressions.AddRange(expressions);
 		}
 
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-        
-        // Expressions
-        protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
-        public NamedColumnExpressions Expressions { get { return _expressions; } }
-    }
-    
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		// Expressions
+		protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
+		public NamedColumnExpressions Expressions { get { return _expressions; } }
+	}
+	
 	public class SpecifyExpression : Expression
-    {
+	{
 		public SpecifyExpression() : base(){}
 		public SpecifyExpression(Expression expression) : base()
 		{
@@ -695,48 +695,48 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_expressions.AddRange(expressions);
 		}
 
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-        
-        // Expressions
-        protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
-        public NamedColumnExpressions Expressions { get { return _expressions; } }
-    }
-    
-    public class ListSelectorExpression : Expression
-    {
-        public ListSelectorExpression() : base(){}
-        public ListSelectorExpression(Expression[] expressions) : base()
-        {
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		// Expressions
+		protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
+		public NamedColumnExpressions Expressions { get { return _expressions; } }
+	}
+	
+	public class ListSelectorExpression : Expression
+	{
+		public ListSelectorExpression() : base(){}
+		public ListSelectorExpression(Expression[] expressions) : base()
+		{
 			_expressions.AddRange(expressions);
-        }
-        
-        public ListSelectorExpression(TypeSpecifier typeSpecifier, Expression[] expressions) : base()
-        {
+		}
+		
+		public ListSelectorExpression(TypeSpecifier typeSpecifier, Expression[] expressions) : base()
+		{
 			_typeSpecifier = typeSpecifier;
 			_expressions.AddRange(expressions);
-        }
-        
-        // TypeSpecifier
-        protected TypeSpecifier _typeSpecifier;
-        public TypeSpecifier TypeSpecifier
-        {
+		}
+		
+		// TypeSpecifier
+		protected TypeSpecifier _typeSpecifier;
+		public TypeSpecifier TypeSpecifier
+		{
 			get { return _typeSpecifier; }
 			set { _typeSpecifier = value; }
-        }
+		}
 
-        // Expressions
-        protected Expressions _expressions = new Expressions();
-        public Expressions Expressions { get { return _expressions; } }
-    }
-    
-    public class CursorDefinition : Expression
-    {
+		// Expressions
+		protected Expressions _expressions = new Expressions();
+		public Expressions Expressions { get { return _expressions; } }
+	}
+	
+	public class CursorDefinition : Expression
+	{
 		public CursorDefinition() : base(){}
 		public CursorDefinition(Expression expression) : base()
 		{
@@ -798,27 +798,27 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _cursorType; }
 			set { _cursorType = value; }
 		}
-    }
-    
-    public class CursorSelectorExpression : Expression
-    {
-        public CursorSelectorExpression() : base(){}
-        public CursorSelectorExpression(CursorDefinition cursorDefinition) : base()
-        {
+	}
+	
+	public class CursorSelectorExpression : Expression
+	{
+		public CursorSelectorExpression() : base(){}
+		public CursorSelectorExpression(CursorDefinition cursorDefinition) : base()
+		{
 			_cursorDefinition = cursorDefinition;
-        }
+		}
 
-        // CursorDefinition
-        protected CursorDefinition _cursorDefinition;
-        public CursorDefinition CursorDefinition
-        {
-            get { return _cursorDefinition; }
-            set { _cursorDefinition = value; }
-        }
-    }
-    
-    public class ForEachStatement : Statement 
-    {
+		// CursorDefinition
+		protected CursorDefinition _cursorDefinition;
+		public CursorDefinition CursorDefinition
+		{
+			get { return _cursorDefinition; }
+			set { _cursorDefinition = value; }
+		}
+	}
+	
+	public class ForEachStatement : Statement 
+	{
 		protected bool _isAllocation;
 		/// <summary>Indicates whether the variable exists in the current stack window, or should be allocated by the statement</summary>
 		public bool IsAllocation
@@ -850,10 +850,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _statement; }
 			set { _statement = value; }
 		}
-    }
-    
-    public class ColumnExtractorExpression : Expression
-    {		
+	}
+	
+	public class ColumnExtractorExpression : Expression
+	{		
 		public ColumnExtractorExpression() : base(){}
 		public ColumnExtractorExpression(string columnName, Expression expression) : base()
 		{
@@ -871,21 +871,21 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _expression = value; }
 		}
 
-        // HasByClause
-        protected bool _hasByClause;
-        public bool HasByClause
-        {
+		// HasByClause
+		protected bool _hasByClause;
+		public bool HasByClause
+		{
 			get { return _hasByClause; }
 			set { _hasByClause = value; }
 		}
-        
-        // OrderColumns
-        protected OrderColumnDefinitions _orderColumns = new OrderColumnDefinitions();
-        public OrderColumnDefinitions OrderColumns { get { return _orderColumns; } }
+		
+		// OrderColumns
+		protected OrderColumnDefinitions _orderColumns = new OrderColumnDefinitions();
+		public OrderColumnDefinitions OrderColumns { get { return _orderColumns; } }
 	}
-    
-    public class RowExtractorExpressionBase : Expression
-    {
+	
+	public class RowExtractorExpressionBase : Expression
+	{
 		public RowExtractorExpressionBase() : base(){}
 		public RowExtractorExpressionBase(Expression expression) : base()
 		{
@@ -898,55 +898,55 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _expression; }
 			set { _expression = value; }
 		}
-    }
-    
-    public class RowExtractorExpression : RowExtractorExpressionBase
-    {
+	}
+	
+	public class RowExtractorExpression : RowExtractorExpressionBase
+	{
 		public RowExtractorExpression() : base(){}
 		public RowExtractorExpression(Expression expression) : base(expression){}
-    }
-    
-    public class EntryExtractorExpression : RowExtractorExpressionBase
-    {
+	}
+	
+	public class EntryExtractorExpression : RowExtractorExpressionBase
+	{
 		public EntryExtractorExpression() : base(){}
 		public EntryExtractorExpression(Expression expression) : base(expression){}
-    }
-    
-    public class RowSelectorExpressionBase : Expression
-    {
+	}
+	
+	public class RowSelectorExpressionBase : Expression
+	{
 		public RowSelectorExpressionBase() : base(){}
 		public RowSelectorExpressionBase(NamedColumnExpression[] expressions) : base()
 		{
 			_expressions.AddRange(expressions);
 		}
 
-        // TypeSpecifier
-        protected TypeSpecifier _typeSpecifier;
-        public TypeSpecifier TypeSpecifier
-        {
+		// TypeSpecifier
+		protected TypeSpecifier _typeSpecifier;
+		public TypeSpecifier TypeSpecifier
+		{
 			get { return _typeSpecifier; }
 			set { _typeSpecifier = value; }
 		}
 
-        // Expressions
-        protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
-        public NamedColumnExpressions Expressions { get { return _expressions; } }
-    }
-    
-    public class RowSelectorExpression : RowSelectorExpressionBase
-    {
+		// Expressions
+		protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
+		public NamedColumnExpressions Expressions { get { return _expressions; } }
+	}
+	
+	public class RowSelectorExpression : RowSelectorExpressionBase
+	{
 		public RowSelectorExpression() : base(){}
 		public RowSelectorExpression(NamedColumnExpression[] columns) : base(columns){}
-    }
-    
-    public class EntrySelectorExpression : RowSelectorExpressionBase
-    {
+	}
+	
+	public class EntrySelectorExpression : RowSelectorExpressionBase
+	{
 		public EntrySelectorExpression() : base(){}
 		public EntrySelectorExpression(NamedColumnExpression[] columns) : base(columns){}
-    }
-    
-    public class TableSelectorExpressionBase : Expression
-    {
+	}
+	
+	public class TableSelectorExpressionBase : Expression
+	{
 		public TableSelectorExpressionBase() : base(){}
 		public TableSelectorExpressionBase(Expression[] expressions) : base()
 		{
@@ -959,39 +959,39 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_keys.AddRange(keyDefinitions);
 		}
 		
-        // TypeSpecifier
-        protected TypeSpecifier _typeSpecifier;
-        public TypeSpecifier TypeSpecifier
-        {
+		// TypeSpecifier
+		protected TypeSpecifier _typeSpecifier;
+		public TypeSpecifier TypeSpecifier
+		{
 			get { return _typeSpecifier; }
 			set { _typeSpecifier = value; }
 		}
 
-        // Expressions
-        protected Expressions _expressions = new Expressions();
-        public Expressions Expressions { get { return _expressions; } }
-        
-        // Keys
-        protected KeyDefinitions _keys = new KeyDefinitions();
-        public KeyDefinitions Keys { get { return _keys; } }
-    }
-    
+		// Expressions
+		protected Expressions _expressions = new Expressions();
+		public Expressions Expressions { get { return _expressions; } }
+		
+		// Keys
+		protected KeyDefinitions _keys = new KeyDefinitions();
+		public KeyDefinitions Keys { get { return _keys; } }
+	}
+	
 	public class TableSelectorExpression : TableSelectorExpressionBase
-    {
+	{
 		public TableSelectorExpression() : base(){}
 		public TableSelectorExpression(Expression[] expressions) : base(expressions){}
 		public TableSelectorExpression(Expression[] expressions, KeyDefinition[] keys) : base(expressions, keys){}
-    }
-    
+	}
+	
 	public class PresentationSelectorExpression : TableSelectorExpressionBase
-    {
+	{
 		public PresentationSelectorExpression() : base(){}
 		public PresentationSelectorExpression(Expression[] expressions) : base(expressions){}
 		public PresentationSelectorExpression(Expression[] expressions, KeyDefinition[] keys) : base(expressions, keys){}
-    }
-    
-    public class RenameColumnExpression : Expression, IMetaData
-    {
+	}
+	
+	public class RenameColumnExpression : Expression, IMetaData
+	{
 		public RenameColumnExpression() : base(){}
 		public RenameColumnExpression(string columnName, string columnAlias) : base()
 		{
@@ -1021,16 +1021,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _columnAlias; }
 			set { _columnAlias = value == null ? String.Empty : value; }
 		}
-        
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
-    }
-    
+		}
+	}
+	
 	public class RenameColumnExpressions : Expressions
 	{
 		protected override void Validate(object item)
@@ -1046,9 +1046,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class RenameExpression : Expression
-    {
+	{
 		public RenameExpression() : base(){}
 		public RenameExpression(Expression expression, RenameColumnExpression[] columns) : base()
 		{
@@ -1056,21 +1056,21 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_expressions.AddRange(columns);
 		}
 		
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-        
-        // Expressions
-        protected RenameColumnExpressions _expressions = new RenameColumnExpressions();
-        public RenameColumnExpressions Expressions { get { return _expressions; } }
-    }
-    
-    public class RenameAllExpression : Expression, IMetaData
-    {
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		// Expressions
+		protected RenameColumnExpressions _expressions = new RenameColumnExpressions();
+		public RenameColumnExpressions Expressions { get { return _expressions; } }
+	}
+	
+	public class RenameAllExpression : Expression, IMetaData
+	{
 		public RenameAllExpression() : base(){}
 		public RenameAllExpression(Expression expression, string identifier) : base()
 		{
@@ -1085,33 +1085,33 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			MetaData = _metaData;
 		}
 
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
 
-        // Identifier
-        protected string _identifier = String.Empty;
-        public string Identifier
-        {
-            get { return _identifier; }
-            set { _identifier = value == null ? String.Empty : value; }
-        }
-        
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// Identifier
+		protected string _identifier = String.Empty;
+		public string Identifier
+		{
+			get { return _identifier; }
+			set { _identifier = value == null ? String.Empty : value; }
+		}
+		
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
-    }
-    
-    public class AdornColumnExpression : Expression, IMetaData, IAlterMetaData
-    {
+		}
+	}
+	
+	public class AdornColumnExpression : Expression, IMetaData, IAlterMetaData
+	{
 		// ColumnName
 		protected string _columnName = String.Empty;
 		public string ColumnName
@@ -1159,23 +1159,23 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _constraints = value; }
 		}
 		
-        // MetaData
-        protected MetaData _metaData;
+		// MetaData
+		protected MetaData _metaData;
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public MetaData MetaData
-        {
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
-        
+		}
+		
 		protected AlterMetaData _alterMetaData;
 		public AlterMetaData AlterMetaData
 		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
 		}
-    }
-    
+	}
+	
 	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.AdornColumnExpressionEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class AdornColumnExpressions : Expressions
 	{
@@ -1206,62 +1206,62 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_dropReferences = new DropReferenceDefinitions();
 		}
 
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-        
-        // Expressions
-        protected AdornColumnExpressions _expressions = new AdornColumnExpressions();
-        public AdornColumnExpressions Expressions { get { return _expressions; } }
-        
-        // Constraints
-        protected CreateConstraintDefinitions _constraints = new CreateConstraintDefinitions();
-        public CreateConstraintDefinitions Constraints { get { return _constraints; } }
-        
-        // Orders
-        protected OrderDefinitions _orders = new OrderDefinitions();
-        public OrderDefinitions Orders { get { return _orders; } }
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		// Expressions
+		protected AdornColumnExpressions _expressions = new AdornColumnExpressions();
+		public AdornColumnExpressions Expressions { get { return _expressions; } }
+		
+		// Constraints
+		protected CreateConstraintDefinitions _constraints = new CreateConstraintDefinitions();
+		public CreateConstraintDefinitions Constraints { get { return _constraints; } }
+		
+		// Orders
+		protected OrderDefinitions _orders = new OrderDefinitions();
+		public OrderDefinitions Orders { get { return _orders; } }
 
-        // AlterOrders
-        protected AlterOrderDefinitions _alterOrders = new AlterOrderDefinitions();
-        public AlterOrderDefinitions AlterOrders { get { return _alterOrders; } }
+		// AlterOrders
+		protected AlterOrderDefinitions _alterOrders = new AlterOrderDefinitions();
+		public AlterOrderDefinitions AlterOrders { get { return _alterOrders; } }
 
-        // DropOrders
-        protected DropOrderDefinitions _dropOrders = new DropOrderDefinitions();
-        public DropOrderDefinitions DropOrders { get { return _dropOrders; } }
+		// DropOrders
+		protected DropOrderDefinitions _dropOrders = new DropOrderDefinitions();
+		public DropOrderDefinitions DropOrders { get { return _dropOrders; } }
 
-        // Keys
-        protected KeyDefinitions _keys = new KeyDefinitions();
-        public KeyDefinitions Keys { get { return _keys; } }
-        
-        // AlterKeys
-        protected AlterKeyDefinitions _alterKeys = new AlterKeyDefinitions();
-        public AlterKeyDefinitions AlterKeys { get { return _alterKeys; } }
+		// Keys
+		protected KeyDefinitions _keys = new KeyDefinitions();
+		public KeyDefinitions Keys { get { return _keys; } }
+		
+		// AlterKeys
+		protected AlterKeyDefinitions _alterKeys = new AlterKeyDefinitions();
+		public AlterKeyDefinitions AlterKeys { get { return _alterKeys; } }
 
-        // DropKeys
-        protected DropKeyDefinitions _dropKeys = new DropKeyDefinitions();
-        public DropKeyDefinitions DropKeys { get { return _dropKeys; } }
+		// DropKeys
+		protected DropKeyDefinitions _dropKeys = new DropKeyDefinitions();
+		public DropKeyDefinitions DropKeys { get { return _dropKeys; } }
 
 		// References
 		protected ReferenceDefinitions _references = new ReferenceDefinitions();
 		public ReferenceDefinitions References { get { return _references; } }
 
-        // AlterReferences
-        protected AlterReferenceDefinitions _alterReferences = new AlterReferenceDefinitions();
-        public AlterReferenceDefinitions AlterReferences { get { return _alterReferences; } }
+		// AlterReferences
+		protected AlterReferenceDefinitions _alterReferences = new AlterReferenceDefinitions();
+		public AlterReferenceDefinitions AlterReferences { get { return _alterReferences; } }
 
-        // DropReferences
-        protected DropReferenceDefinitions _dropReferences = new DropReferenceDefinitions();
-        public DropReferenceDefinitions DropReferences { get { return _dropReferences; } }
+		// DropReferences
+		protected DropReferenceDefinitions _dropReferences = new DropReferenceDefinitions();
+		public DropReferenceDefinitions DropReferences { get { return _dropReferences; } }
 
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
 		}
@@ -1273,63 +1273,63 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _alterMetaData = value; }
 		}
 	}
-    
+	
 	public class RedefineExpression : Expression
 	{
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-        
-        // Expressions
-        protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
-        public NamedColumnExpressions Expressions { get { return _expressions; } }
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		// Expressions
+		protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
+		public NamedColumnExpressions Expressions { get { return _expressions; } }
 	}
-    
+	
 	public class RemoveExpression : Expression
-    {
-        public RemoveExpression() : base(){}
-        public RemoveExpression(Expression expression, ColumnExpression[] columns)
-        {
+	{
+		public RemoveExpression() : base(){}
+		public RemoveExpression(Expression expression, ColumnExpression[] columns)
+		{
 			Expression = expression;
 			_columns.AddRange(columns);
-        }
-        
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-        
-        // Columns
-        protected ColumnExpressions _columns = new ColumnExpressions();
-        public ColumnExpressions Columns { get { return _columns; } }
-    }
-    
-    public class AggregateColumnExpression : Expression, IMetaData
-    {
-        public AggregateColumnExpression() : base(){}
+		}
+		
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		// Columns
+		protected ColumnExpressions _columns = new ColumnExpressions();
+		public ColumnExpressions Columns { get { return _columns; } }
+	}
+	
+	public class AggregateColumnExpression : Expression, IMetaData
+	{
+		public AggregateColumnExpression() : base(){}
 
-        // AggregateOperator
-        protected string _aggregateOperator = String.Empty;
-        public string AggregateOperator
-        {
-            get { return _aggregateOperator; }
-            set { _aggregateOperator = value == null ? String.Empty : value; }
-        }
-        
-        // Distinct
-        protected bool _distinct;
-        public bool Distinct
-        {
+		// AggregateOperator
+		protected string _aggregateOperator = String.Empty;
+		public string AggregateOperator
+		{
+			get { return _aggregateOperator; }
+			set { _aggregateOperator = value == null ? String.Empty : value; }
+		}
+		
+		// Distinct
+		protected bool _distinct;
+		public bool Distinct
+		{
 			get { return _distinct; }
 			set { _distinct = value; }
-        }
+		}
 
 		#if ALLOWARBITRARYAGGREGATEEXPRESSIONS
 		// Arguments
@@ -1337,39 +1337,39 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public Expressions Arguments { get { return _arguments; } }
 		#endif
 
-        // Columns
-        protected ColumnExpressions _columns = new ColumnExpressions();
-        public ColumnExpressions Columns { get { return _columns; } }
+		// Columns
+		protected ColumnExpressions _columns = new ColumnExpressions();
+		public ColumnExpressions Columns { get { return _columns; } }
 
-        // HasByClause
-        protected bool _hasByClause;
-        public bool HasByClause
-        {
+		// HasByClause
+		protected bool _hasByClause;
+		public bool HasByClause
+		{
 			get { return _hasByClause; }
 			set { _hasByClause = value; }
 		}
-        
-        // OrderColumns
-        protected OrderColumnDefinitions _orderColumns = new OrderColumnDefinitions();
-        public OrderColumnDefinitions OrderColumns { get { return _orderColumns; } }
+		
+		// OrderColumns
+		protected OrderColumnDefinitions _orderColumns = new OrderColumnDefinitions();
+		public OrderColumnDefinitions OrderColumns { get { return _orderColumns; } }
 
-        // ColumnAlias
-        protected string _columnAlias = String.Empty;
-        public string ColumnAlias
-        {
-            get { return _columnAlias; }
-            set { _columnAlias = value == null ? String.Empty : value; }
-        }
-        
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// ColumnAlias
+		protected string _columnAlias = String.Empty;
+		public string ColumnAlias
+		{
+			get { return _columnAlias; }
+			set { _columnAlias = value == null ? String.Empty : value; }
+		}
+		
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
-    }
-    
+		}
+	}
+	
 	public class AggregateColumnExpressions : Expressions
 	{
 		protected override void Validate(object item)
@@ -1385,58 +1385,58 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class AggregateExpression : Expression
-    {
-        public AggregateExpression() : base(){}
-        public AggregateExpression(Expression expression, ColumnExpression[] byColumns, AggregateColumnExpression[] computeColumns) : base()
-        {
+	{
+		public AggregateExpression() : base(){}
+		public AggregateExpression(Expression expression, ColumnExpression[] byColumns, AggregateColumnExpression[] computeColumns) : base()
+		{
 			_expression = expression;
 			_byColumns.AddRange(byColumns);
 			_computeColumns.AddRange(computeColumns);
-        }
-        
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-        
-        // ByColumns
-        protected ColumnExpressions _byColumns = new ColumnExpressions();
-        public ColumnExpressions ByColumns { get { return _byColumns; } }
-        
-        // ComputeColumns
-        protected AggregateColumnExpressions _computeColumns = new AggregateColumnExpressions();
-        public AggregateColumnExpressions ComputeColumns { get { return _computeColumns; } }
-    }
-    
+		}
+		
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		// ByColumns
+		protected ColumnExpressions _byColumns = new ColumnExpressions();
+		public ColumnExpressions ByColumns { get { return _byColumns; } }
+		
+		// ComputeColumns
+		protected AggregateColumnExpressions _computeColumns = new AggregateColumnExpressions();
+		public AggregateColumnExpressions ComputeColumns { get { return _computeColumns; } }
+	}
+	
 	public abstract class BaseOrderExpression : Expression
-    {
-        public BaseOrderExpression() : base(){}
-        public BaseOrderExpression(Expression expression, OrderColumnDefinition[] columns) : base()
-        {
+	{
+		public BaseOrderExpression() : base(){}
+		public BaseOrderExpression(Expression expression, OrderColumnDefinition[] columns) : base()
+		{
 			_expression = expression;
-            _columns.AddRange(columns);
-        }
-        
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-        
-        // Columns
-        protected OrderColumnDefinitions _columns = new OrderColumnDefinitions();
-        public OrderColumnDefinitions Columns { get { return _columns; } }
-    }
-    
-    public class OrderExpression : BaseOrderExpression
-    {
+			_columns.AddRange(columns);
+		}
+		
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		// Columns
+		protected OrderColumnDefinitions _columns = new OrderColumnDefinitions();
+		public OrderColumnDefinitions Columns { get { return _columns; } }
+	}
+	
+	public class OrderExpression : BaseOrderExpression
+	{
 		public OrderExpression() : base() {}
 		public OrderExpression(Expression expression, OrderColumnDefinition[] columns) : base()
 		{
@@ -1450,18 +1450,18 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
 		
 		// SequenceColumn
-        protected IncludeColumnExpression _sequenceColumn;
-        public IncludeColumnExpression SequenceColumn
-        {
+		protected IncludeColumnExpression _sequenceColumn;
+		public IncludeColumnExpression SequenceColumn
+		{
 			get { return _sequenceColumn; }
 			set { _sequenceColumn = value; }
-        }
-    }
-    
-    public class BrowseExpression : BaseOrderExpression{}
-    
-    public class D4IndexerExpression : IndexerExpression
-    {
+		}
+	}
+	
+	public class BrowseExpression : BaseOrderExpression{}
+	
+	public class D4IndexerExpression : IndexerExpression
+	{
 		protected bool _hasByClause;
 		public bool HasByClause
 		{
@@ -1471,66 +1471,66 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
 		protected KeyColumnDefinitions _byClause = new KeyColumnDefinitions();
 		public KeyColumnDefinitions ByClause { get { return _byClause; } }
-    }
-    
-    public class QuotaExpression : Expression
-    {
-        public QuotaExpression() : base(){}
-        public QuotaExpression(Expression expression, Expression quota, OrderColumnDefinition[] columns) : base()
-        {
+	}
+	
+	public class QuotaExpression : Expression
+	{
+		public QuotaExpression() : base(){}
+		public QuotaExpression(Expression expression, Expression quota, OrderColumnDefinition[] columns) : base()
+		{
 			_expression = expression;
 			_quota = quota;
 			_columns.AddRange(columns);
-        }
+		}
 
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-        
-        // Quota
-        protected Expression _quota;
-        public Expression Quota
-        {
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		// Quota
+		protected Expression _quota;
+		public Expression Quota
+		{
 			get { return _quota; }
 			set { _quota = value; }
-        }
-        
-        // HasByClause
-        protected bool _hasByClause;
-        public bool HasByClause
-        {
+		}
+		
+		// HasByClause
+		protected bool _hasByClause;
+		public bool HasByClause
+		{
 			get { return _hasByClause; }
 			set { _hasByClause = value; }
 		}
-        
-        // Columns
-        protected OrderColumnDefinitions _columns = new OrderColumnDefinitions();
-        public OrderColumnDefinitions Columns { get { return _columns; } }
-    }
-    
-    public class ExplodeColumnExpression : Expression
-    {
-        public ExplodeColumnExpression() : base(){}
-        public ExplodeColumnExpression(string columnName) : base()
-        {
-            _columnName = columnName;
-        }
-        
-        // ColumnName
-        protected string _columnName = String.Empty;
-        public string ColumnName
-        {
-            get { return _columnName; }
-            set { _columnName = value == null ? String.Empty : value; }
-        }
-    }
-    
-    public class IncludeColumnExpression : Expression, IMetaData
-    {
+		
+		// Columns
+		protected OrderColumnDefinitions _columns = new OrderColumnDefinitions();
+		public OrderColumnDefinitions Columns { get { return _columns; } }
+	}
+	
+	public class ExplodeColumnExpression : Expression
+	{
+		public ExplodeColumnExpression() : base(){}
+		public ExplodeColumnExpression(string columnName) : base()
+		{
+			_columnName = columnName;
+		}
+		
+		// ColumnName
+		protected string _columnName = String.Empty;
+		public string ColumnName
+		{
+			get { return _columnName; }
+			set { _columnName = value == null ? String.Empty : value; }
+		}
+	}
+	
+	public class IncludeColumnExpression : Expression, IMetaData
+	{
 		public IncludeColumnExpression() : base(){}
 		public IncludeColumnExpression(string columnAlias) : base()
 		{
@@ -1550,81 +1550,81 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _columnAlias; }
 			set { _columnAlias = value == null ? String.Empty : value; }
 		}
-        
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
-    }
-    
-    public class ExplodeExpression : Expression
-    {
-        public ExplodeExpression() : base(){}
-        public ExplodeExpression(Expression expression, Expression byExpression, Expression rootExpression) : base()
-        {
+		}
+	}
+	
+	public class ExplodeExpression : Expression
+	{
+		public ExplodeExpression() : base(){}
+		public ExplodeExpression(Expression expression, Expression byExpression, Expression rootExpression) : base()
+		{
 			_expression = expression;
 			_byExpression = byExpression;
 			_rootExpression = rootExpression;
-        }
-        
-        // Expression
-        protected Expression _expression;
-        public Expression Expression
-        {
-            get { return _expression; }
-            set { _expression = value; }
-        }
-        
-        // ByExpression
-        protected Expression _byExpression;
-        public Expression ByExpression
-        {
-            get { return _byExpression; }
-            set { _byExpression = value; }
-        }
-        
-        // RootExpression
-        protected Expression _rootExpression;
-        public Expression RootExpression
-        {
-            get { return _rootExpression; }
-            set { _rootExpression = value; }
-        }
-        
-        // HasOrderByClause
-        protected bool _hasOrderByClause;
-        public bool HasOrderByClause
-        {
+		}
+		
+		// Expression
+		protected Expression _expression;
+		public Expression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		// ByExpression
+		protected Expression _byExpression;
+		public Expression ByExpression
+		{
+			get { return _byExpression; }
+			set { _byExpression = value; }
+		}
+		
+		// RootExpression
+		protected Expression _rootExpression;
+		public Expression RootExpression
+		{
+			get { return _rootExpression; }
+			set { _rootExpression = value; }
+		}
+		
+		// HasOrderByClause
+		protected bool _hasOrderByClause;
+		public bool HasOrderByClause
+		{
 			get { return _hasOrderByClause; }
 			set { _hasOrderByClause = value; }
 		}
-        
-        // OrderColumns
-        protected OrderColumnDefinitions _orderColumns = new OrderColumnDefinitions();
-        public OrderColumnDefinitions OrderColumns { get { return _orderColumns; } }
+		
+		// OrderColumns
+		protected OrderColumnDefinitions _orderColumns = new OrderColumnDefinitions();
+		public OrderColumnDefinitions OrderColumns { get { return _orderColumns; } }
 
-        // LevelColumn
-        protected IncludeColumnExpression _levelColumn;
-        public IncludeColumnExpression LevelColumn
-        {
-            get { return _levelColumn; }
-            set { _levelColumn = value; }
-        }
+		// LevelColumn
+		protected IncludeColumnExpression _levelColumn;
+		public IncludeColumnExpression LevelColumn
+		{
+			get { return _levelColumn; }
+			set { _levelColumn = value; }
+		}
 
-        // SequenceColumn
-        protected IncludeColumnExpression _sequenceColumn;
-        public IncludeColumnExpression SequenceColumn
-        {
-            get { return _sequenceColumn; }
-            set { _sequenceColumn = value; }
-        }
-    }
-    
-    public abstract class BinaryTableExpression : Expression
-    {
+		// SequenceColumn
+		protected IncludeColumnExpression _sequenceColumn;
+		public IncludeColumnExpression SequenceColumn
+		{
+			get { return _sequenceColumn; }
+			set { _sequenceColumn = value; }
+		}
+	}
+	
+	public abstract class BinaryTableExpression : Expression
+	{
 		public BinaryTableExpression() : base(){}
 		public BinaryTableExpression(Expression leftExpression, Expression rightExpression)
 		{
@@ -1632,85 +1632,85 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_rightExpression = rightExpression;
 		}
 		
-        // LeftExpression
-        protected Expression _leftExpression;
-        public Expression LeftExpression
-        {
-            get { return _leftExpression; }
-            set { _leftExpression = value; }
-        }
-        
-        // RightExpression
-        protected Expression _rightExpression;
-        public Expression RightExpression
-        {
-            get { return _rightExpression; }
-            set { _rightExpression = value; }
-        }
-    }
-    
-    public class UnionExpression : BinaryTableExpression
-    {
+		// LeftExpression
+		protected Expression _leftExpression;
+		public Expression LeftExpression
+		{
+			get { return _leftExpression; }
+			set { _leftExpression = value; }
+		}
+		
+		// RightExpression
+		protected Expression _rightExpression;
+		public Expression RightExpression
+		{
+			get { return _rightExpression; }
+			set { _rightExpression = value; }
+		}
+	}
+	
+	public class UnionExpression : BinaryTableExpression
+	{
 		public UnionExpression() : base(){}
 		public UnionExpression(Expression leftExpression, Expression rightExpression)
 		{
 			_leftExpression = leftExpression;
 			_rightExpression = rightExpression;
 		}
-    }
-    
-    public class IntersectExpression : BinaryTableExpression
-    {
+	}
+	
+	public class IntersectExpression : BinaryTableExpression
+	{
 		public IntersectExpression() : base(){}
 		public IntersectExpression(Expression leftExpression, Expression rightExpression)
 		{
 			_leftExpression = leftExpression;
 			_rightExpression = rightExpression;
 		}
-    }
-    
-    public class DifferenceExpression : BinaryTableExpression
-    {
+	}
+	
+	public class DifferenceExpression : BinaryTableExpression
+	{
 		public DifferenceExpression() : base(){}
 		public DifferenceExpression(Expression leftExpression, Expression rightExpression)
 		{
 			_leftExpression = leftExpression;
 			_rightExpression = rightExpression;
 		}
-    }
-    
-    public class ProductExpression : BinaryTableExpression
-    {
+	}
+	
+	public class ProductExpression : BinaryTableExpression
+	{
 		public ProductExpression() : base(){}
 		public ProductExpression(Expression leftExpression, Expression rightExpression)
 		{
 			_leftExpression = leftExpression;
 			_rightExpression = rightExpression;
 		}
-    }
-    
-    public class DivideExpression : BinaryTableExpression
-    {
+	}
+	
+	public class DivideExpression : BinaryTableExpression
+	{
 		public DivideExpression() : base(){}
 		public DivideExpression(Expression leftExpression, Expression rightExpression)
 		{
 			_leftExpression = leftExpression;
 			_rightExpression = rightExpression;
 		}
-    }
-    
-    public class ConditionedBinaryTableExpression : BinaryTableExpression
-    {
+	}
+	
+	public class ConditionedBinaryTableExpression : BinaryTableExpression
+	{
 		private Expression _condition;
 		public Expression Condition
 		{
 			get { return _condition; }
 			set { _condition = value; }
 		}
-    }
-    
-    public class HavingExpression : ConditionedBinaryTableExpression
-    {
+	}
+	
+	public class HavingExpression : ConditionedBinaryTableExpression
+	{
 		public HavingExpression() : base() { }
 		public HavingExpression(Expression leftExpression, Expression rightExpression, Expression condition)
 		{
@@ -1718,10 +1718,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			RightExpression = rightExpression;
 			Condition = condition;
 		}
-    }
-    
-    public class WithoutExpression : ConditionedBinaryTableExpression
-    {
+	}
+	
+	public class WithoutExpression : ConditionedBinaryTableExpression
+	{
 		public WithoutExpression() : base() { }
 		public WithoutExpression(Expression leftExpression, Expression rightExpression, Expression condition)
 		{
@@ -1729,13 +1729,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			RightExpression = rightExpression;
 			Condition = condition;
 		}
-    }
-    
+	}
+	
 	public enum JoinCardinality { OneToOne, OneToMany, ManyToOne, ManyToMany }
 		
-    public abstract class JoinExpression : ConditionedBinaryTableExpression
-    {
-        // IsLookup
+	public abstract class JoinExpression : ConditionedBinaryTableExpression
+	{
+		// IsLookup
 		protected bool _isLookup;
 		public bool IsLookup
 		{
@@ -1758,137 +1758,137 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _isDetailLookup; }
 			set { _isDetailLookup = value; }
 		}
-    }
-    
-    public class InnerJoinExpression : JoinExpression{}
-    
-    public abstract class OuterJoinExpression : JoinExpression
-    {
+	}
+	
+	public class InnerJoinExpression : JoinExpression{}
+	
+	public abstract class OuterJoinExpression : JoinExpression
+	{
 		public OuterJoinExpression() : base(){}
 		
-        // RowExistsColumn
-        protected IncludeColumnExpression _rowExistsColumn;
-        public IncludeColumnExpression RowExistsColumn
-        {
-            get { return _rowExistsColumn; }
-            set { _rowExistsColumn = value; }
-        }
-    }
-    
-    public class LeftOuterJoinExpression : OuterJoinExpression{}
-    
-    public class RightOuterJoinExpression : OuterJoinExpression{}
+		// RowExistsColumn
+		protected IncludeColumnExpression _rowExistsColumn;
+		public IncludeColumnExpression RowExistsColumn
+		{
+			get { return _rowExistsColumn; }
+			set { _rowExistsColumn = value; }
+		}
+	}
+	
+	public class LeftOuterJoinExpression : OuterJoinExpression{}
+	
+	public class RightOuterJoinExpression : OuterJoinExpression{}
 
 	#if USEGREATDIVIDE
-    // this is actually a "great" divide, a ternary table operator
-    public class DivideExpression : TableExpression
-    {
-        public const string CTableExpressionContainer = @"Divide expression ""{0}"" may only contain table expressions";
-        public const string CTernaryTableExpressionContainer = @"Divide expression ""{0}"" may only contain three table expressions";
-        public const string CDividendMustBeSetFirst = "Dividend must be set first";
-        public const string CDividendAndDivisorMustBeSetFirst = "Dividend and divisor must be set first";
-        
-        protected override void ChildValidate(object ASender, object AItem)
-        {
-            if (!(AItem is TableExpression))
-                throw new LanguageException(LanguageException.Codes.TableExpressionContainer);
-            if ((FDividend != null) && (FDivisor != null) && (FMediator != null))
-                throw new LanguageException(LanguageException.Codes.TernaryTableExpressionContainer);
-            base.ChildValidate(ASender, AItem);
-        }
-        
-        protected override void ChildAdding(object ASender, object AItem)
-        {
-            base.ChildAdding(ASender, AItem);
-            if (FDividend != null)
-                FDividend = (TableExpression)AItem;
-            else if (FDivisor != null)
-                FDivisor = (TableExpression)AItem;
-            else if (FMediator != null)
-                FMediator = (TableExpression)AItem;
-        }
-        
-        protected override void ChildRemoving(object ASender, object AItem)
-        {
-            if (AItem == FDividend)
-                FDividend = null;
-            else if (AItem == FDivisor)
-                FDivisor = null;
-            else if (AItem == FMediator)
-                FMediator = null;
-            base.ChildRemoving(ASender, AItem);
-        }
-        
-        public override void Process(Machine AMachine)
-        {
-            if (FDividend == null)
-                throw new LanguageException(LanguageException.Codes.TableExpressionExpected);
-            if (FDivisor == null)
-                throw new LanguageException(LanguageException.Codes.TableExpressionExpected);
-            if (FMediator == null)
-                throw new LanguageException(LanguageException.Codes.TableExpressionExpected);
-            AMachine.Push(FDividend);
-            AMachine.Push(FDivisor);
-            AMachine.Push(FMediator);
-            AMachine.Execute("iDivide");
-        }
-        
-        // Dividend
-        protected TableExpression FDividend;
-        public TableExpression Dividend
-        {
-            get
-            {
-                return FDividend;
-            }
-            set
-            {
-                if (FDividend != null)
-                    FDividend.Parent = null;
-                if (value != null)
-                    value.Parent = this;
-            }
-        }
-        
-        // Divisor
-        protected TableExpression FDivisor;
-        public TableExpression Divisor
-        {
-            get
-            {
-                return FDivisor;
-            }
-            set
-            {
-                if (FDividend == null)
-                    throw new LanguageException(LanguageException.Codes.DividendMustBeSetFirst);
-                if (FDivisor != null)
-                    FDivisor.Parent = null;
-                if (value != null)
-                    value.Parent = this;
-            }
-        }
-        
-        // Mediator
-        protected TableExpression FMediator;
-        public TableExpression Mediator
-        {
-            get
-            {
-                return FMediator;
-            }
-            set
-            {
-                if ((FDividend == null) || (FDivisor == null))
-                    throw new LanguageException(LanguageException.Codes.DividendAndDivisorMustBeSetFirst);
-                if (FMediator != null)
-                    FMediator.Parent = null;
-                if (value != null)
-                    value.Parent = this;
-            }
-        }
-    }
-    #endif
+	// this is actually a "great" divide, a ternary table operator
+	public class DivideExpression : TableExpression
+	{
+		public const string CTableExpressionContainer = @"Divide expression ""{0}"" may only contain table expressions";
+		public const string CTernaryTableExpressionContainer = @"Divide expression ""{0}"" may only contain three table expressions";
+		public const string CDividendMustBeSetFirst = "Dividend must be set first";
+		public const string CDividendAndDivisorMustBeSetFirst = "Dividend and divisor must be set first";
+		
+		protected override void ChildValidate(object ASender, object AItem)
+		{
+			if (!(AItem is TableExpression))
+				throw new LanguageException(LanguageException.Codes.TableExpressionContainer);
+			if ((FDividend != null) && (FDivisor != null) && (FMediator != null))
+				throw new LanguageException(LanguageException.Codes.TernaryTableExpressionContainer);
+			base.ChildValidate(ASender, AItem);
+		}
+		
+		protected override void ChildAdding(object ASender, object AItem)
+		{
+			base.ChildAdding(ASender, AItem);
+			if (FDividend != null)
+				FDividend = (TableExpression)AItem;
+			else if (FDivisor != null)
+				FDivisor = (TableExpression)AItem;
+			else if (FMediator != null)
+				FMediator = (TableExpression)AItem;
+		}
+		
+		protected override void ChildRemoving(object ASender, object AItem)
+		{
+			if (AItem == FDividend)
+				FDividend = null;
+			else if (AItem == FDivisor)
+				FDivisor = null;
+			else if (AItem == FMediator)
+				FMediator = null;
+			base.ChildRemoving(ASender, AItem);
+		}
+		
+		public override void Process(Machine AMachine)
+		{
+			if (FDividend == null)
+				throw new LanguageException(LanguageException.Codes.TableExpressionExpected);
+			if (FDivisor == null)
+				throw new LanguageException(LanguageException.Codes.TableExpressionExpected);
+			if (FMediator == null)
+				throw new LanguageException(LanguageException.Codes.TableExpressionExpected);
+			AMachine.Push(FDividend);
+			AMachine.Push(FDivisor);
+			AMachine.Push(FMediator);
+			AMachine.Execute("iDivide");
+		}
+		
+		// Dividend
+		protected TableExpression FDividend;
+		public TableExpression Dividend
+		{
+			get
+			{
+				return FDividend;
+			}
+			set
+			{
+				if (FDividend != null)
+					FDividend.Parent = null;
+				if (value != null)
+					value.Parent = this;
+			}
+		}
+		
+		// Divisor
+		protected TableExpression FDivisor;
+		public TableExpression Divisor
+		{
+			get
+			{
+				return FDivisor;
+			}
+			set
+			{
+				if (FDividend == null)
+					throw new LanguageException(LanguageException.Codes.DividendMustBeSetFirst);
+				if (FDivisor != null)
+					FDivisor.Parent = null;
+				if (value != null)
+					value.Parent = this;
+			}
+		}
+		
+		// Mediator
+		protected TableExpression FMediator;
+		public TableExpression Mediator
+		{
+			get
+			{
+				return FMediator;
+			}
+			set
+			{
+				if ((FDividend == null) || (FDivisor == null))
+					throw new LanguageException(LanguageException.Codes.DividendAndDivisorMustBeSetFirst);
+				if (FMediator != null)
+					FMediator.Parent = null;
+				if (value != null)
+					value.Parent = this;
+			}
+		}
+	}
+	#endif
 
 	public class VariableStatement : Statement
 	{
@@ -2007,13 +2007,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		protected OrderDefinitions _orders = new OrderDefinitions();
 		public OrderDefinitions Orders { get { return _orders; } }
 
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 
 	public class CreateTableStatement : CreateTableVarStatement
@@ -2153,13 +2153,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _writeAccessorBlock = value; }
 		}
 		
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class PropertyDefinitions : Statements
@@ -2207,13 +2207,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _writeAccessorBlock = value; }
 		}
 
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterPropertyDefinitions : Statements
@@ -2309,13 +2309,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _selectorAccessorBlock = value; }
 		}
 
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class RepresentationDefinitions : Statements
@@ -2372,13 +2372,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _selectorAccessorBlock = value; }
 		}
 
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterRepresentationDefinitions : Statements
@@ -2452,14 +2452,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _isGenerated; }
 			set { _isGenerated = value; }
 		}
-        
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class SpecialDefinitions : Statements
@@ -2490,7 +2490,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return IndexOf(name) >= 0;
 		}
 	}
-    
+	
 	public class AlterSpecialDefinition : SpecialDefinitionBase, IAlterMetaData
 	{
 		// Value
@@ -2501,13 +2501,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _value = value; }
 		}
 
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterSpecialDefinitions : Statements
@@ -2525,7 +2525,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class DropSpecialDefinition : SpecialDefinitionBase
 	{
 		public DropSpecialDefinition() : base() {}
@@ -2547,9 +2547,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
-    public class ScalarTypeNameDefinition : D4Statement
-    {
+	
+	public class ScalarTypeNameDefinition : D4Statement
+	{
 		public ScalarTypeNameDefinition() : base() {}
 		public ScalarTypeNameDefinition(string scalarTypeName) : base()
 		{
@@ -2563,8 +2563,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _scalarTypeName; }
 			set { _scalarTypeName = value == null ? String.Empty : value; }
 		}
-    }
-    
+	}
+	
 	public class ScalarTypeNameDefinitions : Statements
 	{
 		protected override void Validate(object item)
@@ -2645,14 +2645,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _classDefinition; }
 			set { _classDefinition = value; }
 		}
-        
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class CreateReferenceStatement : ReferenceDefinition
@@ -2725,13 +2725,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _source = value; }
 		}
 		
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public abstract class CreateOperatorStatementBase : D4Statement, IMetaData
@@ -2796,13 +2796,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _isOverride = value; }
 		}
 
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class CreateOperatorStatement : CreateOperatorStatementBase
@@ -2865,13 +2865,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _operatorSpecifier = value; }
 		}
 		
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterOperatorStatement : AlterOperatorStatementBase
@@ -2932,13 +2932,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
 */
 		
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class AlterServerStatement : D4Statement, IAlterMetaData
@@ -2977,13 +2977,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
 */
 		
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public abstract class DeviceMapItem : D4Statement{}
@@ -3030,13 +3030,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _classDefinition = value; }
 		}
 
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class DeviceScalarTypeMaps : Statements
@@ -3065,13 +3065,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _alterClassDefinition = value; }
 		}
 
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterDeviceScalarTypeMaps : Statements
@@ -3129,13 +3129,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _classDefinition = value; }
 		}
 
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class DeviceOperatorMaps : Statements
@@ -3164,13 +3164,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _alterClassDefinition = value; }
 		}
 
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 
 	public class AlterDeviceOperatorMaps : Statements
@@ -3256,13 +3256,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		private IndexDefinitions _indexDefinitions = new IndexDefinitions();
 		public IndexDefinitions IndexDefinitions { get { return _indexDefinitions; } }
 
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class DeviceStoreDefinitions : Statements
@@ -3327,13 +3327,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		private DropIndexDefinitions _dropIndexDefinitions = new DropIndexDefinitions();
 		public DropIndexDefinitions DropIndexDefinitions { get { return _dropIndexDefinitions; } }
 
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 
 	public class AlterDeviceStoreDefinitions : Statements
@@ -3379,13 +3379,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class IndexDefinition : IndexDefinitionBase, IMetaData
 	{
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class IndexDefinitions : Statements
@@ -3403,16 +3403,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class AlterIndexDefinition : IndexDefinitionBase, IAlterMetaData
 	{
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterIndexDefinitions : Statements
@@ -3430,7 +3430,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class DropIndexDefinition : IndexDefinitionBase{}
 	
 	public class DropIndexDefinitions : Statements
@@ -3448,7 +3448,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class IndexColumnDefinition : ColumnDefinitionBase
 	{
 		public IndexColumnDefinition() : base(){}
@@ -3583,14 +3583,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _classDefinition; }
 			set { _classDefinition = value; }
 		}
-        
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class AlterDeviceStatement : D4Statement, IAlterMetaData
@@ -3654,14 +3654,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _alterClassDefinition; }
 			set { _alterClassDefinition = value; }
 		}
-        
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 
 	public abstract class AlterTableVarStatement : D4Statement, IAlterMetaData
@@ -3722,13 +3722,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		private DropConstraintDefinitions _dropConstraints = new DropConstraintDefinitions();
 		public DropConstraintDefinitions DropConstraints { get { return _dropConstraints; } }
 
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterTableStatement : AlterTableVarStatement
@@ -3809,14 +3809,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _alterClassDefinition; }
 			set { _alterClassDefinition = value; }
 		}
-        
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class ColumnDefinitionBase : D4Statement
@@ -3882,13 +3882,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _isNilable = value; } 
 		}
 		
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class ColumnDefinitions : Statements
@@ -3906,7 +3906,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class AlterColumnDefinition : ColumnDefinitionBase, IAlterMetaData
 	{
 		// TypeSpecifier
@@ -3953,13 +3953,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _isNilable = value; }
 		}
 
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterColumnDefinitions : Statements
@@ -3977,7 +3977,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class DropColumnDefinition : ColumnDefinitionBase
 	{
 		public DropColumnDefinition() : base() { }
@@ -3999,7 +3999,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class KeyColumnDefinition : ColumnDefinitionBase
 	{
 		public KeyColumnDefinition() : base(){}
@@ -4021,7 +4021,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class ReferenceColumnDefinition : ColumnDefinitionBase
 	{
 		public ReferenceColumnDefinition() : base(){}
@@ -4043,7 +4043,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class OrderColumnDefinition : ColumnDefinitionBase
 	{
 		public OrderColumnDefinition() : base(){}
@@ -4116,17 +4116,17 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public KeyColumnDefinitions Columns {  get { return _columns; } }
 	}
 
-    [Editor("Alphora.Dataphor.DAE.Client.Controls.Design.KeyEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
+	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.KeyEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class KeyDefinition : KeyDefinitionBase, IMetaData
 	{
-        // MetaData
-        protected MetaData _metaData;
+		// MetaData
+		protected MetaData _metaData;
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
-        public MetaData MetaData
-        {
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.KeyDefinitionsEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
@@ -4148,13 +4148,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class AlterKeyDefinition : KeyDefinitionBase, IAlterMetaData
 	{
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterKeyDefinitions : Statements
@@ -4201,7 +4201,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _referenceName = value == null ? String.Empty : value; }
 		}
 	}
-    
+	
 	public class ReferenceDefinition : ReferenceDefinitionBase, IMetaData
 	{
 		// constructor
@@ -4221,14 +4221,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _referencesDefinition; }
 			set { _referencesDefinition = value; }
 		}
-        
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class ReferenceDefinitions : Statements
@@ -4249,13 +4249,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class AlterReferenceDefinition : ReferenceDefinitionBase, IAlterMetaData
 	{
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterReferenceDefinitions : Statements
@@ -4293,7 +4293,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	}
 	
 	public enum ReferenceAction {Require, Cascade, Clear, Set}
-    
+	
 	public class ReferencesDefinition : D4Statement
 	{
 		// constructor
@@ -4349,13 +4349,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.OrderEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class OrderDefinition : OrderDefinitionBase, IMetaData
 	{
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.OrderDefinitionsEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
@@ -4374,16 +4374,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class AlterOrderDefinition : OrderDefinitionBase, IAlterMetaData
 	{
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterOrderDefinitions : Statements
@@ -4401,7 +4401,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class DropOrderDefinition : OrderDefinitionBase{}
 	
 	public class DropOrderDefinitions : Statements
@@ -4419,7 +4419,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public abstract class ConstraintDefinitionBase : D4Statement
 	{
 		// ConstraintName
@@ -4452,15 +4452,15 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _isGenerated; }
 			set { _isGenerated = value; }
 		}
-        
-        // MetaData
-        protected MetaData _metaData;
+		
+		// MetaData
+		protected MetaData _metaData;
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
-        public MetaData MetaData
-        {
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class ConstraintDefinition : CreateConstraintDefinition
@@ -4510,7 +4510,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					Expression = value == String.Empty ? null : StringToExpression(value);
 			}
 		}
-   	}
+	}
 	
 	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.ConstraintsEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class ConstraintDefinitions : Statements
@@ -4541,7 +4541,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return IndexOf(name) >= 0;
 		}
 	}
-    
+	
 	public class CreateConstraintDefinitions : Statements
 	{
 		protected override void Validate(object item)
@@ -4557,7 +4557,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class CreateConstraintStatement : ConstraintDefinition
 	{
 		// IsSession
@@ -4600,13 +4600,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class AlterConstraintDefinitionBase : ConstraintDefinitionBase, IAlterMetaData
 	{
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class AlterConstraintDefinitions : Statements
@@ -4699,7 +4699,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _onDelete = value; }
 		}
 	}
-    
+	
 	public class DropConstraintDefinition : ConstraintDefinitionBase
 	{
 		public DropConstraintDefinition() : base(){}
@@ -4767,13 +4767,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _isNarrowing = value; }
 		}
 
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class DropConversionStatement : D4Statement
@@ -4805,13 +4805,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _roleName = value; }
 		}
 
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class AlterRoleStatement : D4Statement, IAlterMetaData
@@ -4882,14 +4882,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _expression; }
 			set { _expression = value; }
 		}
-        
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class CreateSortStatement : SortDefinition
@@ -5008,7 +5008,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _isGenerated; }
 			set { _isGenerated = value; }
 		}
-        
+		
 		private string ExpressionToString(Expression expression)
 		{
 			if (expression == null)
@@ -5039,15 +5039,15 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					Expression = value == String.Empty ? null : StringToExpression(value);
 			}
 		}
-        
-        // MetaData
-        protected MetaData _metaData;
+		
+		// MetaData
+		protected MetaData _metaData;
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public MetaData MetaData
-        {
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 
 	public class AlterDefaultDefinition : DefaultDefinitionBase, IAlterMetaData
@@ -5059,14 +5059,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _expression; }
 			set { _expression = value; }
 		}
-        
-        // AlterMetaData
-        protected AlterMetaData _alterMetaData;
-        public AlterMetaData AlterMetaData
-        {
+		
+		// AlterMetaData
+		protected AlterMetaData _alterMetaData;
+		public AlterMetaData AlterMetaData
+		{
 			get { return _alterMetaData; }
 			set { _alterMetaData = value; }
-        }
+		}
 	}
 	
 	public class DropDefaultDefinition : DefaultDefinitionBase{}
@@ -5176,7 +5176,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return -1;
 		}
 	}
-    
+	
 	public class ClassAttributeDefinition : D4Statement
 	{
 		// constructor
@@ -5227,7 +5227,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class NamedTypeSpecifier : D4Statement
 	{
 		// Identifier
@@ -5262,7 +5262,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { base[index] = value; }
 		}
 	}
-    
+	
 	public class FormalParameter : NamedTypeSpecifier
 	{
 		protected Modifier _modifier;
@@ -5602,13 +5602,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _isGenerated = value; }
 		}
 
-        // MetaData
-        protected MetaData _metaData;
-        public MetaData MetaData
-        {
+		// MetaData
+		protected MetaData _metaData;
+		public MetaData MetaData
+		{
 			get { return _metaData; }
 			set { _metaData = value; }
-        }
+		}
 	}
 	
 	public class InvokeStatement : AttachStatementBase
@@ -5620,8 +5620,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
 	public class DetachStatement : AttachStatementBase {}
 	
-    public class RightSpecifier : D4Statement
-    {
+	public class RightSpecifier : D4Statement
+	{
 		public RightSpecifier() : base() {}
 		public RightSpecifier(string rightName) : base()
 		{
@@ -5635,8 +5635,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return _rightName; }
 			set { _rightName = value == null ? String.Empty : value; }
 		}
-    }
-    
+	}
+	
 	public class RightSpecifiers : Statements
 	{
 		protected override void Validate(object item)

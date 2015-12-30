@@ -4,6 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 #define UseReferenceDerivation
+#define UseElaborable
 	
 using System;
 using System.Text;
@@ -75,7 +76,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Order = CopyOrder(LeftNode.Order);
 
 			#if UseReferenceDerivation
-			CopyReferences(plan, LeftTableVar);
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
+				CopyReferences(plan, LeftTableVar);
 			#endif
 			
 			#if UseScannedDifference
