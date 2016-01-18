@@ -1,4 +1,4 @@
-call "%vs120comntools%..\..\VC\vcvarsall.bat"
+call "%vs140comntools%..\..\VC\vcvarsall.bat"
 
 msbuild Dataphor.proj /p:Configuration=Release /t:Rebuild
 
