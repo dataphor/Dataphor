@@ -13932,7 +13932,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return EmitProjectNode(plan, expression, sourceNode, columns, false);
 		}
 
-		// Source BNF -> <table expression> aggregate [by <column list>] compute {<aggregate column list>}
+		// Source BNF -> <table expression> group [by <column list>] add {<aggregate expression list>}
 		//
 		// operator iAggregate(table{}) : table{}
 		//

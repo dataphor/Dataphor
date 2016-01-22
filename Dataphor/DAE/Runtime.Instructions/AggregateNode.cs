@@ -143,8 +143,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							plan.Symbols.Push(new Symbol(String.Empty, plan.DataTypes.SystemScalar));
 						try
 						{
-							// Walk LSourceNode (assuming an n-length list of unary table operators) until FSourceNode is found
-							// Insert a restriction between it and a recompile of FSourceNode (to account for possible context changes)
+							// Walk sourceNode (assuming an n-length list of unary table operators) until _sourceNode is found
+							// Insert a restriction between it and a recompile of _sourceNode (to account for possible context changes)
 							
 							if (sourceNode == _sourceNode)
 								sourceNode = Compiler.EmitRestrictNode(plan, Compiler.CompileExpression(plan, (Expression)_sourceNode.EmitStatement(EmitMode.ForCopy)), Compiler.BuildRowEqualExpression(plan, sourceRowType.Columns, rowType.Columns));

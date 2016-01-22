@@ -438,7 +438,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
 	/*
 		<expression> group [by <column list>] add { <aggregate expression list> };
-		
+
 		select <column list>, <aggregate expression list>
 			from <expression>
 			group by <column list>
@@ -467,7 +467,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			Statement statement = localDevicePlan.Device.TranslateExpression(localDevicePlan, aggregateNode.OriginalSourceNode, false);
 			if (localDevicePlan.IsSupported)
 			{
-				SelectExpression selectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)aggregateNode.OriginalSourceNode).TableVar, statement, true);
+				SelectExpression selectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)aggregateNode.OriginalSourceNode).TableVar, statement, false); // true);
 				statement = selectExpression;
 
 				string nestingReason = String.Empty;
