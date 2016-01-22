@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Common.WCF
 {
@@ -33,6 +34,9 @@ namespace Alphora.Common.WCF
 			_descriptor = descriptor;
 
 			_channelFactory = new ChannelFactory<TChannel>(descriptor.Binding, descriptor.EndpointAddress);
+
+			DataphorServiceUtility.ServiceEndpointHook(_channelFactory.Endpoint);
+
 			_channelFactory.Open();
 		}
 

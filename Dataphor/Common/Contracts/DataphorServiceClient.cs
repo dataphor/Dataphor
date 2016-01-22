@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 			: this
 			(
 				DataphorServiceUtility.GetBinding(), 
-				new EndpointAddress(endpointURI)
+				new EndpointAddress(endpointURI, DataphorServiceUtility.BuildEndpointIdentityCall())
 			)
 		{
 		}

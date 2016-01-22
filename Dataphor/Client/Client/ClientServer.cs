@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using System.ServiceModel.Description;
 
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Contracts;
@@ -159,7 +160,7 @@ namespace Alphora.Dataphor.DAE.Client
 							new ChannelFactory<IClientDataphorService>
 							(
 								DataphorServiceUtility.GetBinding(), 
-								new EndpointAddress(uri)
+								new EndpointAddress(uri, DataphorServiceUtility.BuildEndpointIdentityCall())
 							);
 					}
 					else
@@ -168,10 +169,16 @@ namespace Alphora.Dataphor.DAE.Client
 							new ChannelFactory<IClientDataphorService>
 							(
 								DataphorServiceUtility.GetBinding(), 
-								new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(_hostName, _overridePortNumber, _instanceName))
+								new EndpointAddress
+								(
+									new Uri(DataphorServiceUtility.BuildInstanceURI(_hostName, _overridePortNumber, _instanceName)), 
+									DataphorServiceUtility.BuildEndpointIdentityCall()
+								)
 							);
 					}
 				}
+
+				DataphorServiceUtility.ServiceEndpointHook(_channelFactory.Endpoint);
 			}
 		}
 		
