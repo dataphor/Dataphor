@@ -1631,9 +1631,16 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					else
 						fieldExpression.FieldName = rangeVarColumn.Alias == String.Empty ? rangeVarColumn.ColumnName : rangeVarColumn.Alias;
 					fieldExpression.Ascending = column.Ascending;
-					if (SupportsOrderByNullsFirstLast)
+					// NOTE: Only include the NULLS FIRST/LAST clause if it is required by the underlying system; it has significant performance implications
+					if (column.Column.IsNilable)
 					{
-						fieldExpression.NullsFirst = column.Ascending;
+						// TODO: Respect the IncludeNils option in the order column
+						// TODO: Use the system-level NullSortBehavior to determine whether data coming from this device will be sorted differently
+						// TODO: If different behavior is required and the underlying system doesn't support it (or we don't want to use the underlying system's built-in support for performance reasons) add a buffer for nulls to the device cursor
+						if (SupportsOrderByNullsFirstLast)
+						{
+							fieldExpression.NullsFirst = column.Ascending;
+						}
 					}
 					statement.OrderClause.Columns.Add(fieldExpression);
 				}
