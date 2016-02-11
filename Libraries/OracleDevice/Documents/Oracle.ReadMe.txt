@@ -94,8 +94,13 @@ For more information on Oracle National Language Support, refer to the Oracle do
 
 <HT> Jon Heggland for the research on this issue.
 
+
+
+
+
+
 To set up Oracle 11g on a VM and be able to access it from your host, 
-you need to set up a static ip, turn off your firewall and change your listener.ora and tnsnames.org found here:
+you need to set up a static ip, edit your firewall(https://docs.oracle.com/cd/E11882_01/win.112/e10845/config.htm#NTQRF158) and change your listener.ora and tnsnames.org found here:
 C:\app\username\product\11.2.0\dbhome_1\NETWORK\ADMIN
 
 listener.ora:
