@@ -212,7 +212,31 @@ if exists (Xor where not(IsEquivalent(Left xor Right, Result))) then
 	
 if exists (Xor where not(IsEquivalent((Left and not Right) or (not Left and Right), Result))) then
 	raise Error("Xor expansion failed");
+	
+/*
+	Implies (not(p) or q
+*/
 
+create table Implies { Left : Boolean nil, Right : Boolean nil, Result : Boolean nil, key { Left, Right } };
+
+insert
+	table
+	{
+		row { true Left, true Right, true Result },
+		row { true Left, false Right, false Result },
+		row { true Left, nil Right, nil Result },
+		row { false Left, true Right, true Result },
+		row { false Left, false Right, true Result },
+		row { false Left, nil Right, true Result },
+		row { nil Left, true Right, true Result },
+		row { nil Left, false Right, nil Result },
+		row { nil Left, nil Right, nil Result }
+	}
+	into Implies;
+	
+if exists (Implies where not(IsEquivalent(not(Left) or Right, Result))) then
+	raise Error("Implies failed");
+	
 /*	
 	Identity
 		p and true = p
