@@ -795,7 +795,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DataType.Columns.Add(new Schema.Column("Column_ID", plan.DataTypes.SystemInteger));
 			DataType.Columns.Add(new Schema.Column("Column_Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("Ascending", plan.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("IncludeNils", plan.DataTypes.SystemBoolean));
 			DataType.Columns.Add(new Schema.Column("IsDefaultSort", plan.DataTypes.SystemBoolean));
 			DataType.Columns.Add(new Schema.Column("Sort", plan.DataTypes.SystemString));
 
@@ -837,9 +836,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							row[2] = column.Column.ID;
 							row[3] = column.Column.Name;
 							row[4] = column.Ascending;
-							row[5] = column.IncludeNils;
-							row[6] = column.IsDefaultSort;
-							row[7] = column.IsDefaultSort ? null : column.Sort.CompareNode.SafeEmitStatementAsString(true);
+							row[5] = column.IsDefaultSort;
+							row[6] = column.IsDefaultSort ? null : column.Sort.CompareNode.SafeEmitStatementAsString(true);
 							result.Insert(row);
 						}
 					}

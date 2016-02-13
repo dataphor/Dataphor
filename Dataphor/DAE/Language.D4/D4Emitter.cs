@@ -1197,7 +1197,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			{
 				if (index > 0)
 					EmitListSeparator();
-				EmitOrderColumnDefinition(expression.Columns[index]);
+				EmitBrowseColumnDefinition(expression.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
 			DecreaseIndent();
@@ -3645,6 +3645,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				EmitKeyColumnDefinition((KeyColumnDefinition)statement);
 			else if (statement is ReferenceColumnDefinition)
 				EmitReferenceColumnDefinition((ReferenceColumnDefinition)statement);
+			else if (statement is BrowseColumnDefinition)
+				EmitBrowseColumnDefinition((BrowseColumnDefinition)statement);
 			else if (statement is OrderColumnDefinition)
 				EmitOrderColumnDefinition((OrderColumnDefinition)statement);
 			else
@@ -3820,7 +3822,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Append(" ");
 			}
 			AppendFormat("{0}", statement.Ascending ? Keywords.Asc : Keywords.Desc);
-			if (statement.IncludeNils)
+		}
+
+		protected virtual void EmitBrowseColumnDefinition(OrderColumnDefinition statement)
+		{
+			EmitOrderColumnDefinition(statement);
+			BrowseColumnDefinition browseStatement = statement as BrowseColumnDefinition;
+			if (browseStatement != null && browseStatement.IncludeNils)
 				AppendFormat(" {0} {1}", Keywords.Include, Keywords.Nil);
 		}
 		

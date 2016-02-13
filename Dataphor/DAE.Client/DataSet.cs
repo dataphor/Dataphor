@@ -2072,7 +2072,8 @@ namespace Alphora.Dataphor.DAE.Client
 					result.Append(column.Column.Name);
 					if (!column.Ascending)
 						result.AppendFormat(" {0}", Keywords.Asc);
-					if (column.IncludeNils)
+					Schema.BrowseColumn browseColumn = column as Schema.BrowseColumn;
+					if (browseColumn != null && browseColumn.IncludeNils)
 						result.AppendFormat(" {0} {1}", Keywords.Include, Keywords.Nil);
 				}
 			return result.ToString();
@@ -2088,21 +2089,27 @@ namespace Alphora.Dataphor.DAE.Client
 				if (trimmed != String.Empty)
 				{
 					string[] items = item.Split(' ');
-					Schema.OrderColumn orderColumn = new Schema.OrderColumn(new Schema.TableVarColumn(new Schema.Column(items[0], null)), true, false);
-					
+					Schema.TableVarColumn tableVarColumn = new Schema.TableVarColumn(new Schema.Column(items[0], null));
+					bool ascending = true;
+					bool isBrowse = false;
+					bool includeNils = false;
+
 					if (items.Length > 1)
 					{
 						switch (items[1])
 						{
-							case Keywords.Desc : orderColumn.Ascending = false; break;
-							case Keywords.Include : orderColumn.IncludeNils = true; break;
+							case Keywords.Desc : ascending = false; break;
+							case Keywords.Include : isBrowse = true; includeNils = true; break;
 						}
 					}
 					
 					if ((items.Length > 2) && (items[2] == Keywords.Include))
-						orderColumn.IncludeNils = true;
-					
-					result.Columns.Add(orderColumn);
+					{
+						isBrowse = true;
+						includeNils = true;
+					}
+
+					result.Columns.Add(isBrowse ? new Schema.BrowseColumn(tableVarColumn, ascending, includeNils) : new Schema.OrderColumn(tableVarColumn, ascending));
 				}
 			}
 			return result;

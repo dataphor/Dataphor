@@ -93,6 +93,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				|	|	|- KeyColumnDefinition
 				|	|	|- ReferenceColumnDefinition
 				|	|	|- OrderColumnDefinition
+				|	|	|	|- BrowseColumnDefinition
 				|	|	|- IndexColumnDefinition
 				|	|- KeyDefinitionBase
 				|	|	|- KeyDefinition
@@ -1415,12 +1416,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public abstract class BaseOrderExpression : Expression
 	{
-		public BaseOrderExpression() : base(){}
-		public BaseOrderExpression(Expression expression, OrderColumnDefinition[] columns) : base()
-		{
-			_expression = expression;
-			_columns.AddRange(columns);
-		}
+		public BaseOrderExpression() : base() {}
 		
 		// Expression
 		protected Expression _expression;
@@ -1437,7 +1433,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class OrderExpression : BaseOrderExpression
 	{
-		public OrderExpression() : base() {}
+		public OrderExpression() : base() { }
 		public OrderExpression(Expression expression, OrderColumnDefinition[] columns) : base()
 		{
 			Expression = expression;
@@ -1458,7 +1454,20 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
 	}
 	
-	public class BrowseExpression : BaseOrderExpression{}
+	public class BrowseExpression : BaseOrderExpression
+	{
+		public BrowseExpression() : base() { }
+		public BrowseExpression(Expression expression, OrderColumnDefinition[] columns) : base()
+		{
+			Expression = expression;
+			Columns.AddRange(columns);
+		}
+		public BrowseExpression(Expression expression, OrderColumnDefinitions columns) : base()
+		{
+			Expression = expression;
+			Columns.AddRange(columns);
+		}
+	}
 	
 	public class D4IndexerExpression : IndexerExpression
 	{
@@ -4058,31 +4067,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			_sort = sort;
 		}
 		
-		public OrderColumnDefinition(string columnName, bool ascending, bool includeNils) : base(columnName)
-		{
-			_ascending = ascending;
-			_includeNils = includeNils;
-		}
-		
-		public OrderColumnDefinition(string columnName, bool ascending, bool includeNils, SortDefinition sort) : base(columnName)
-		{
-			_ascending = ascending;
-			_includeNils = includeNils;
-			_sort = sort;
-		}
-		
 		protected bool _ascending = true;
 		public bool Ascending
 		{
 			get { return _ascending; }
 			set { _ascending = value; }
-		}
-		
-		protected bool _includeNils = false;
-		public bool IncludeNils
-		{
-			get { return _includeNils; }
-			set { _includeNils = value; }
 		}
 		
 		protected SortDefinition _sort;
@@ -4106,6 +4095,35 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			get { return (OrderColumnDefinition)base[index]; }
 			set { base[index] = value; }
+		}
+	}
+
+	public class BrowseColumnDefinition : OrderColumnDefinition
+	{
+		public BrowseColumnDefinition() : base(){}
+		public BrowseColumnDefinition(string columnName, bool ascending) : base(columnName, ascending)
+		{
+		}
+		
+		public BrowseColumnDefinition(string columnName, bool ascending, SortDefinition sort) : base(columnName, ascending, sort)
+		{
+		}
+		
+		public BrowseColumnDefinition(string columnName, bool ascending, bool includeNils) : base(columnName, ascending)
+		{
+			_includeNils = includeNils;
+		}
+		
+		public BrowseColumnDefinition(string columnName, bool ascending, bool includeNils, SortDefinition sort) : base(columnName, ascending, sort)
+		{
+			_includeNils = includeNils;
+		}
+		
+		protected bool _includeNils = false;
+		public bool IncludeNils
+		{
+			get { return _includeNils; }
+			set { _includeNils = value; }
 		}
 	}
 	

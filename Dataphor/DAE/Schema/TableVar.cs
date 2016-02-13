@@ -817,15 +817,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			_ascending = ascending;
 		}
 		
-		public OrderColumn(TableVarColumn column, bool ascending, bool includeNils) : base()
-		{
-			Column = column;
-			_ascending = ascending;
-			_includeNils = includeNils;
-		}
-		
 		// Compare expression for this column in the order
-		private Sort _sort;
+		protected Sort _sort;
 		public Sort Sort
 		{
 			get { return _sort; }
@@ -833,7 +826,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// IsDefaultSort
-		private bool _isDefaultSort = true;
+		protected bool _isDefaultSort = true;
 		public bool IsDefaultSort
 		{
 			get { return _isDefaultSort; }
@@ -857,23 +850,15 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { _ascending = value; }
 		}
 		
-		// IncludeNils
-		protected bool _includeNils;
-		public bool IncludeNils
-		{
-			get { return _includeNils; }
-			set { _includeNils = value; }
-		}
-
 		// ICloneable
 		public virtual object Clone()
 		{
-			return new OrderColumn(_column, _ascending, _includeNils);
+			return new OrderColumn(_column, _ascending);
 		}
 		
-		public object Clone(bool reverse)
+		public virtual object Clone(bool reverse)
 		{
-			return new OrderColumn(_column, reverse ? !_ascending : _ascending, _includeNils);
+			return new OrderColumn(_column, reverse ? !_ascending : _ascending);
 		}
 		
 		public override string ToString()
@@ -883,14 +868,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (!IsDefaultSort)
 				stringValue.AppendFormat("{0} {1} ", Keywords.Sort, _sort.CompareNode.EmitStatementAsString());
 			stringValue.Append(_ascending ? Keywords.Asc : Keywords.Desc);
-			if (_includeNils)
-				stringValue.AppendFormat(" {0} {1}", Keywords.Include, Keywords.Nil);
 			return stringValue.ToString();
 		}
 		
-		public Statement EmitStatement(EmitMode mode)
+		public virtual Statement EmitStatement(EmitMode mode)
 		{
-			OrderColumnDefinition definition = new OrderColumnDefinition(Schema.Object.EnsureRooted(Column.Name), Ascending, IncludeNils);
+			OrderColumnDefinition definition = new OrderColumnDefinition(Schema.Object.EnsureRooted(Column.Name), Ascending);
 			if (!IsDefaultSort)
 				definition.Sort = _sort.EmitDefinition(mode);
 			return definition;
@@ -903,22 +886,84 @@ namespace Alphora.Dataphor.DAE.Schema
 				result ^= _sort.CompareNode.EmitStatementAsString().GetHashCode();
 			if (_ascending)
 				result = (result << 1) | (result >> 31);
-			if (_includeNils)
-				result = (result << 2) | (result >> 30);
 			return result;
 		}
 
-		public bool Equivalent(OrderColumn orderColumn)
+		public virtual bool Equivalent(OrderColumn orderColumn)
 		{
 			return 
 				(orderColumn != null) 
 					&& (orderColumn.Column.Name == Column.Name) 
 					&& (orderColumn.Ascending == _ascending) 
-					//&& (AOrderColumn.IncludeNils == FIncludeNils) // Should be here, but can't be yet (breaks existing code, and doesn't actually do anything in the physical layer yet, so doesn't matter)
 					&& ((orderColumn.Sort == null) == (_sort == null))
 					&& ((orderColumn.Sort == null) || orderColumn.Sort.Equivalent(_sort));
 		}
     }
+
+	public class BrowseColumn : OrderColumn
+	{
+		public BrowseColumn() : base() {}
+		public BrowseColumn(TableVarColumn column, bool ascending) : base(column, ascending) {}
+		public BrowseColumn(TableVarColumn column, bool ascending, bool includeNils) : base(column, ascending)
+		{
+			_includeNils = includeNils;
+		}
+		
+		// IncludeNils
+		protected bool _includeNils;
+		public bool IncludeNils
+		{
+			get { return _includeNils; }
+			set { _includeNils = value; }
+		}
+
+		// ICloneable
+		public override object Clone()
+		{
+			return new BrowseColumn(_column, _ascending, _includeNils);
+		}
+		
+		public override object Clone(bool reverse)
+		{
+			return new BrowseColumn(_column, reverse ? !_ascending : _ascending, _includeNils);
+		}
+		
+		public override string ToString()
+		{
+			StringBuilder stringValue = new StringBuilder(base.ToString());
+			if (_includeNils)
+				stringValue.AppendFormat(" {0} {1}", Keywords.Include, Keywords.Nil);
+			return stringValue.ToString();
+		}
+		
+		public override Statement EmitStatement(EmitMode mode)
+		{
+			BrowseColumnDefinition definition = new BrowseColumnDefinition(Schema.Object.EnsureRooted(Column.Name), Ascending, IncludeNils);
+			if (!IsDefaultSort)
+				definition.Sort = _sort.EmitDefinition(mode);
+			return definition;
+		}
+
+		public override int GetHashCode()
+		{
+			int result = base.GetHashCode();
+			if (_includeNils)
+				result = (result << 2) | (result >> 30);
+			return result;
+		}
+
+		public override bool Equivalent(OrderColumn orderColumn)
+		{
+			return
+				(orderColumn != null) 
+					&& (orderColumn is BrowseColumn)
+					&& (orderColumn.Column.Name == Column.Name) 
+					&& (orderColumn.Ascending == _ascending) 
+					&& (((BrowseColumn)orderColumn).IncludeNils == _includeNils)
+					&& ((orderColumn.Sort == null) == (_sort == null))
+					&& ((orderColumn.Sort == null) || orderColumn.Sort.Equivalent(_sort));
+		}
+	}
 
 	public class OrderColumns : System.Object, IList<OrderColumn>
     {
@@ -1140,7 +1185,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			for (int index = 0; index < order.Columns.Count; index++)
 			{
 				column = order.Columns[index];
-				newOrderColumn = new OrderColumn(column.Column, column.Ascending, column.IncludeNils);
+				newOrderColumn = new OrderColumn(column.Column, column.Ascending);
 				newOrderColumn.Sort = column.Sort;
 				newOrderColumn.IsDefaultSort = column.IsDefaultSort;
 				_columns.Add(newOrderColumn);
@@ -1154,7 +1199,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			for (int index = 0; index < order.Columns.Count; index++)
 			{
 				column = order.Columns[index];
-				newOrderColumn = new OrderColumn(column.Column, reverse ? !column.Ascending : column.Ascending, column.IncludeNils);
+				newOrderColumn = new OrderColumn(column.Column, reverse ? !column.Ascending : column.Ascending);
 				newOrderColumn.Sort = column.Sort;
 				newOrderColumn.IsDefaultSort = column.IsDefaultSort;
 				_columns.Add(newOrderColumn);
@@ -1164,7 +1209,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public Order(Key key) : base(String.Empty)
 		{
 			for (int index = 0; index < key.Columns.Count; index++)
-				_columns.Add(new OrderColumn(key.Columns[index], true, true));
+				_columns.Add(new OrderColumn(key.Columns[index], true));
 		}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Order"), DisplayName); } }
@@ -2588,7 +2633,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				for (int index = 0; index < order.Columns.Count; index++)
 				{
 					orderColumn = order.Columns[index];
-					newOrderColumn = new Schema.OrderColumn(Columns[orderColumn.Column], orderColumn.Ascending, orderColumn.IncludeNils);
+					newOrderColumn = new Schema.OrderColumn(Columns[orderColumn.Column], orderColumn.Ascending);
 					newOrderColumn.Sort = orderColumn.Sort;
 					newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
 					newOrder.Columns.Add(newOrderColumn);

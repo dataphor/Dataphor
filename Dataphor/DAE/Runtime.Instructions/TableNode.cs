@@ -367,7 +367,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			for (int index = 0; index < order.Columns.Count; index++)
 			{
 				orderColumn = order.Columns[index];
-				newOrderColumn = new Schema.OrderColumn(TableVar.Columns[orderColumn.Column], orderColumn.Ascending, orderColumn.IncludeNils);
+				newOrderColumn = new Schema.OrderColumn(TableVar.Columns[orderColumn.Column], orderColumn.Ascending);
 				newOrderColumn.Sort = orderColumn.Sort;
 				newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
 				Error.AssertWarn(newOrderColumn.Sort != null, "Sort is null");

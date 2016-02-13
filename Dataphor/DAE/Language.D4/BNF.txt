@@ -316,7 +316,7 @@ The same conventions found in the The Third Manifesto are used here, namely:
 
 	<browse clause> ::=
 		browse by 
-			"{"<order column definition commalist>"}"
+			"{"<browse column definition commalist>"}"
 			[<language modifiers>]
 
 	<quota clause> ::=
@@ -583,7 +583,10 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		order "{"<order column definition commalist>"}" <metadata>
 
 	<order column definition> ::=
-		<column name> [sort <expression>] [asc | desc] [(include | exclude) nil]
+		<column name> [sort <expression>] [asc | desc]
+
+	<browse column definition> ::=
+		<order column definition> [(include | exclude) nil]
 
 	<class definition> ::=
 		class <class name> [<attributes>]

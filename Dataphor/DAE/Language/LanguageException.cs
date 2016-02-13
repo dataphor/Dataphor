@@ -360,7 +360,13 @@ namespace Alphora.Dataphor.DAE.Language
 			AmbiguousModifierReference = 107212,
 			
 			/// <summary>Error code 107213: "Class definition already contains a definition for the attribute "{0}"."</summary>
-			DuplicateAttributeDefinition = 107213
+			DuplicateAttributeDefinition = 107213,
+
+			/// <summary>Error code 107214: "BrowseColumnDefinition container."</summary>
+			BrowseColumnDefinitionContainer = 107214,
+
+			/// <summary>Error code 107215: "BrowseDefinition container."</summary>
+			BrowseDefinitionContainer = 107215,
 		}
 
 		// Resource manager for this exception class

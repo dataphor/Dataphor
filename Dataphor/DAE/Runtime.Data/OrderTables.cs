@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			for (int index = 0; index < Node.Order.Columns.Count; index++)
 			{
 				orderColumn = Node.Order.Columns[index];
-				newOrderColumn = new Schema.OrderColumn(tableVar.Columns[orderColumn.Column], orderColumn.Ascending, orderColumn.IncludeNils);
+				newOrderColumn = new Schema.OrderColumn(tableVar.Columns[orderColumn.Column], orderColumn.Ascending);
 				newOrderColumn.Sort = orderColumn.Sort;
 				newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
 				order.Columns.Add(newOrderColumn);

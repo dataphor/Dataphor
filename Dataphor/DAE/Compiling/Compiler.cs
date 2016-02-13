@@ -3236,7 +3236,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 			Schema.OrderColumn column;
 			foreach (OrderColumnDefinition orderColumn in columns)
 			{
-				column = new Schema.OrderColumn(tableVar.Columns[orderColumn.ColumnName], orderColumn.Ascending, orderColumn.IncludeNils);
+				BrowseColumnDefinition browseColumn = orderColumn as BrowseColumnDefinition;
+				column = browseColumn == null 
+					? new Schema.OrderColumn(tableVar.Columns[orderColumn.ColumnName], orderColumn.Ascending)
+					: new Schema.BrowseColumn(tableVar.Columns[orderColumn.ColumnName], orderColumn.Ascending, browseColumn.IncludeNils);
 				if (orderColumn.Sort != null)
 				{
 					column.Sort = CompileSortDefinition(plan, column.Column.DataType, orderColumn.Sort, false);
@@ -3311,7 +3314,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			for (int index = 0; index < columns.Count; index++)
 			{
 				column = columns[index];
-				orderColumn = new Schema.OrderColumn(column, true, true);
+				orderColumn = new Schema.OrderColumn(column, true);
 				if (column.DataType is Schema.ScalarType)
 					orderColumn.Sort = GetUniqueSort(plan, column.DataType);
 				else

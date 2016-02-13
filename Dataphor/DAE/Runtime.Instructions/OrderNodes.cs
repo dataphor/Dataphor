@@ -99,7 +99,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			for (int index = 0; index < _requestedOrder.Columns.Count; index++)
 			{
 				column = _requestedOrder.Columns[index];
-				newColumn = new Schema.OrderColumn(TableVar.Columns[column.Column], column.Ascending, column.IncludeNils);
+				newColumn = new Schema.OrderColumn(TableVar.Columns[column.Column], column.Ascending);
 				newColumn.Sort = column.Sort;
 				newColumn.IsDefaultSort = column.IsDefaultSort;
 				Error.AssertWarn(newColumn.Sort != null, "Sort is null");
@@ -441,8 +441,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					instruction, 
 					new IdentifierExpression(Schema.Object.Qualify(column.Column.Name, Keywords.Origin))
 				);
-				
-			if (column.Column.IsNilable && column.IncludeNils)
+			
+			Schema.BrowseColumn browseColumn = column as Schema.BrowseColumn;
+			if (column.Column.IsNilable && browseColumn != null && browseColumn.IncludeNils)
 			{
 				switch (instruction)
 				{
@@ -526,8 +527,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					instruction, 
 					Compiler.EmitIdentifierNode(plan, Schema.Object.Qualify(column.Column.Name, Keywords.Origin))
 				);
-				
-			if (column.Column.IsNilable && column.IncludeNils)
+
+			Schema.BrowseColumn browseColumn = column as Schema.BrowseColumn;
+			if (column.Column.IsNilable && browseColumn != null && browseColumn.IncludeNils)
 			{
 				switch (instruction)
 				{
@@ -754,7 +756,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				);
 			
 			for (int index = originIndex + 1; index < order.Columns.Count; index++)
-				if (order.Columns[index].Column.IsNilable && !order.Columns[index].IncludeNils)
+			{
+				Schema.BrowseColumn browseColumn = order.Columns[index] as Schema.BrowseColumn;
+				if (order.Columns[index].Column.IsNilable && (browseColumn == null || !browseColumn.IncludeNils))
 					expression = 
 						AppendExpression
 						(
@@ -762,6 +766,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							Instructions.And, 
 							EmitBrowseNilExpression(order.Columns[index].Column, false)
 						);
+			}
 
 			return expression;
 		}
@@ -793,7 +798,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				);
 			
 			for (int index = originIndex + 1; index < order.Columns.Count; index++)
-				if (order.Columns[index].Column.IsNilable && !order.Columns[index].IncludeNils)
+			{
+				Schema.BrowseColumn browseColumn = order.Columns[index] as Schema.BrowseColumn;
+				if (order.Columns[index].Column.IsNilable && (browseColumn == null || !browseColumn.IncludeNils))
 					node = 
 						Compiler.AppendNode
 						(
@@ -802,6 +809,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							Instructions.And, 
 							EmitBrowseNilNode(plan, order.Columns[index].Column, false)
 						);
+			}
+
 			return node;
 		}
 
@@ -825,8 +834,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							EmitBrowseOriginExpression(order, forward, inclusive, orderIndex)
 						);
 				else
+				{
 					#if USEINCLUDENILSWITHBROWSE
-					if (order.Columns[orderIndex].Column.IsNilable && !order.Columns[orderIndex].IncludeNils)
+					Schema.BrowseColumn browseColumn = order.Columns[orderIndex] as Schema.BrowseColumn;
+					if (order.Columns[orderIndex].Column.IsNilable && (browseColumn == null || !browseColumn.IncludeNils))
 					#endif
 					{
 						expression = 
@@ -837,6 +848,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								EmitBrowseNilExpression(order.Columns[orderIndex].Column, false)
 							);
 					}
+				}
 			}
 
 			if (expression == null)
@@ -879,8 +891,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							EmitBrowseOriginNode(plan, order, forward, inclusive, orderIndex)
 						);
 				else
+				{
 					#if USEINCLUDENILSWITHBROWSE
-					if (order.Columns[orderIndex].Column.IsNilable && !order.Columns[orderIndex].IncludeNils)
+					Schema.BrowseColumn browseColumn = order.Columns[orderIndex] as Schema.BrowseColumn;
+					if (order.Columns[orderIndex].Column.IsNilable && (browseColumn == null || !browseColumn.IncludeNils))
 					#endif
 					{
 						node = 
@@ -892,6 +906,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								EmitBrowseNilNode(plan, order.Columns[orderIndex].Column, false)
 							);
 					}
+				}
 			}
 
 			if (node == null)
@@ -921,7 +936,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			Schema.Order originOrder = new Schema.Order();
 			for (int index = 0; index <= originIndex; index++)
-				originOrder.Columns.Add(new Schema.OrderColumn(Order.Columns[index].Column, Order.Columns[index].Ascending, Order.Columns[index].IncludeNils));
+			{
+				Schema.OrderColumn orderColumn = Order.Columns[index];
+				Schema.BrowseColumn browseColumn = orderColumn as Schema.BrowseColumn;
+				if (browseColumn == null)
+					originOrder.Columns.Add(new Schema.OrderColumn(orderColumn.Column, orderColumn.Ascending));
+				else
+					originOrder.Columns.Add(new Schema.BrowseColumn(orderColumn.Column, orderColumn.Ascending, browseColumn.IncludeNils));
+			}
 			Schema.IRowType origin = new Schema.RowType(originOrder.Columns, Keywords.Origin);
 			//plan.PushCursorContext(new CursorContext(CursorType, CursorCapabilities & ~(CursorCapability.BackwardsNavigable | CursorCapability.Bookmarkable | CursorCapability.Searchable | CursorCapability.Countable), CursorIsolation));
 			//try

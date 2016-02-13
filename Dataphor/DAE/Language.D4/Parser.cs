@@ -163,7 +163,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			{
 				try
 				{
-					return OrderDefinition();
+					return BrowseDefinition();
 				}
 				catch (Exception E)
 				{
@@ -2931,7 +2931,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			BNF:
 			<browse clause> ::=
 				browse by 
-					"{"<order column definition commalist>"}"
+					"{"<browse column definition commalist>"}"
 					[<language modifiers>]
 		*/        
 		protected BrowseExpression BrowseClause(Expression expression)
@@ -2941,7 +2941,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			browseExpression.SetPosition(_lexer);
 			browseExpression.Expression = expression;
 			_lexer.NextToken().CheckSymbol(Keywords.By);
-			OrderColumnDefinitionList(browseExpression.Columns);
+			BrowseColumnDefinitionList(browseExpression.Columns);
 			LanguageModifiers(browseExpression);
 			browseExpression.SetEndPosition(_lexer);
 			return browseExpression;
@@ -4611,7 +4611,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			} while (true);
 		}
 
-		/*                     
+		/*
 			BNF:
 			<order definition> ::=
 				order "{"<order column definition commalist>"}" <metadata>
@@ -4626,8 +4626,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			definition.SetEndPosition(_lexer);
 			return definition;
 		}
-		
+
 		protected void OrderColumnDefinitionList(OrderColumnDefinitions columns)
+		{
+			OrderColumnDefinitionList(columns, false);
+		}
+		
+		protected void OrderColumnDefinitionList(OrderColumnDefinitions columns, bool allowBrowse)
 		{
 			_lexer.NextToken().CheckSymbol(Keywords.BeginList);
 			if (_lexer.PeekTokenSymbol(1) == Keywords.EndList)
@@ -4635,7 +4640,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			else
 				do
 				{
-					columns.Add(OrderColumnDefinition());
+					columns.Add(OrderColumnDefinition(allowBrowse));
 					switch (_lexer.NextToken().AsSymbol)
 					{
 						case Keywords.ListSeparator: break;
@@ -4645,14 +4650,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				} while (true);
 		}
 
-		/*        
-			BNF:
-			<order column definition> ::=
-				<column name> [sort <expression>] [asc | desc] [(include | exclude) nil]
-		*/
-		protected OrderColumnDefinition OrderColumnDefinition()
+		protected void ParseOrderColumnDefinition(OrderColumnDefinition column)
 		{
-			OrderColumnDefinition column = new OrderColumnDefinition();
 			column.ColumnName = QualifiedIdentifier();
 			column.SetPosition(_lexer);
 
@@ -4665,7 +4664,82 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				case Keywords.Desc: column.Ascending = false; goto case Keywords.Asc;
 				case Keywords.Asc: _lexer.NextToken(); break;
 			}
-			
+		}
+
+		/*
+			BNF:
+			<order column definition> ::=
+				<column name> [sort <expression>] [asc | desc]
+		*/
+		protected OrderColumnDefinition OrderColumnDefinition(bool allowBrowse)
+		{
+			OrderColumnDefinition column = new OrderColumnDefinition();
+			ParseOrderColumnDefinition(column);
+
+			bool isBrowse = false;
+			bool includeNils = false;
+			switch (_lexer.PeekTokenSymbol(1))
+			{
+				case Keywords.Include: isBrowse = true; includeNils = true; goto case Keywords.Exclude;
+				case Keywords.Exclude: _lexer.NextToken(); _lexer.NextToken().CheckType(TokenType.Nil); break;
+			}
+
+			// If we are not in an actual browse context, allow the phrase for backwards compatibility, but ignore it
+			// TODO: Possibly issue a deprecation warning here?
+			if (isBrowse && allowBrowse)
+			{
+				BrowseColumnDefinition browseColumn = new BrowseColumnDefinition(column.ColumnName, column.Ascending, includeNils, column.Sort);
+				browseColumn.SetLineInfo(column.LineInfo);
+				return browseColumn;
+			}
+
+			return column;
+		}
+
+		protected OrderColumnDefinition OrderColumnDefinition()
+		{
+			return OrderColumnDefinition(false);
+		}
+
+		// NOTE: This is only used from the frontend where an order definition must support both order and browse functionality
+		protected OrderDefinition BrowseDefinition()
+		{
+			OrderDefinition definition = new OrderDefinition();
+			_lexer.NextToken().CheckSymbol(Keywords.Order);
+			definition.SetPosition(_lexer);
+			OrderColumnDefinitionList(definition.Columns, true);
+			MetaData(definition);
+			definition.SetEndPosition(_lexer);
+			return definition;
+		}
+		
+		protected void BrowseColumnDefinitionList(OrderColumnDefinitions columns)
+		{
+			_lexer.NextToken().CheckSymbol(Keywords.BeginList);
+			if (_lexer.PeekTokenSymbol(1) == Keywords.EndList)
+				_lexer.NextToken();
+			else
+				do
+				{
+					columns.Add(BrowseColumnDefinition());
+					switch (_lexer.NextToken().AsSymbol)
+					{
+						case Keywords.ListSeparator: break;
+						case Keywords.EndList: return;
+						default: throw new ParserException(ParserException.Codes.ListTerminatorExpected);
+					}
+				} while (true);
+		}
+
+		/*
+			<browse column definition> ::=
+				<order column definition> [(include | exclude) nil]
+		*/
+		protected BrowseColumnDefinition BrowseColumnDefinition()
+		{
+			BrowseColumnDefinition column = new BrowseColumnDefinition();
+			ParseOrderColumnDefinition(column);
+
 			column.IncludeNils = false;
 			switch (_lexer.PeekTokenSymbol(1))
 			{

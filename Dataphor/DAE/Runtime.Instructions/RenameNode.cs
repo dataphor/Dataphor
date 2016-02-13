@@ -64,8 +64,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						new Schema.OrderColumn
 						(
 							TableVar.Columns[SourceTableVar.Columns.IndexOfName(orderColumn.Column.Name)],
-							orderColumn.Ascending,
-							orderColumn.IncludeNils
+							orderColumn.Ascending
 						);
 					newOrderColumn.Sort = orderColumn.Sort;
 					newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;
@@ -170,8 +169,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						new Schema.OrderColumn
 						(
 							TableVar.Columns[SourceTableVar.Columns.IndexOfName(orderColumn.Column.Name)],
-							orderColumn.Ascending,
-							orderColumn.IncludeNils
+							orderColumn.Ascending
 						);
 					newOrderColumn.Sort = orderColumn.Sort;
 					newOrderColumn.IsDefaultSort = orderColumn.IsDefaultSort;

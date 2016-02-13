@@ -526,10 +526,13 @@ namespace Alphora.Dataphor.DAE.Client
 				{
 					browseExpression = new BrowseExpression();
 					foreach (Schema.OrderColumn column in _order.Columns)
+					{
+						Schema.BrowseColumn browseColumn = column as Schema.BrowseColumn;
 						if (column.IsDefaultSort)
-							browseExpression.Columns.Add(new OrderColumnDefinition(column.Column.Name, column.Ascending, column.IncludeNils));
+							browseExpression.Columns.Add(new BrowseColumnDefinition(column.Column.Name, column.Ascending, browseColumn != null ? browseColumn.IncludeNils : false));
 						else
-							browseExpression.Columns.Add(new OrderColumnDefinition(column.Column.Name, column.Ascending, column.IncludeNils, column.Sort.EmitDefinition(EmitMode.ForCopy)));
+							browseExpression.Columns.Add(new BrowseColumnDefinition(column.Column.Name, column.Ascending, browseColumn != null ? browseColumn.IncludeNils : false, column.Sort.EmitDefinition(EmitMode.ForCopy)));
+					}
 					browseExpression.Expression = expression;
 					expression = browseExpression;
 				}
@@ -538,9 +541,9 @@ namespace Alphora.Dataphor.DAE.Client
 					orderExpression = new OrderExpression();
 					foreach (Schema.OrderColumn column in _order.Columns)
 						if (column.IsDefaultSort)
-							orderExpression.Columns.Add(new OrderColumnDefinition(column.Column.Name, column.Ascending, column.IncludeNils));
+							orderExpression.Columns.Add(new OrderColumnDefinition(column.Column.Name, column.Ascending));
 						else
-							orderExpression.Columns.Add(new OrderColumnDefinition(column.Column.Name, column.Ascending, column.IncludeNils, column.Sort.EmitDefinition(EmitMode.ForCopy)));
+							orderExpression.Columns.Add(new OrderColumnDefinition(column.Column.Name, column.Ascending, column.Sort.EmitDefinition(EmitMode.ForCopy)));
 					orderExpression.Expression = expression;
 					expression = orderExpression;
 				}

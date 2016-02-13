@@ -403,7 +403,13 @@ namespace Alphora.Dataphor.DAE.Client
 				OrderDefinition orderDefinition = _parser.ParseOrderDefinition(order);
 				Schema.Order localOrder = new Schema.Order();
 				foreach (OrderColumnDefinition column in orderDefinition.Columns)
-					localOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[column.ColumnName], column.Ascending, column.IncludeNils));
+				{
+					BrowseColumnDefinition browseColumn = column as BrowseColumnDefinition;
+					if (browseColumn != null)
+						localOrder.Columns.Add(new Schema.BrowseColumn(TableVar.Columns[column.ColumnName], column.Ascending, browseColumn.IncludeNils));
+					else
+						localOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[column.ColumnName], column.Ascending));
+				}
 				return localOrder;
 			}
 		}
@@ -464,7 +470,13 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			Schema.Order localOrder = new Schema.Order(order.MetaData);
 			foreach (OrderColumnDefinition column in order.Columns)
-				localOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[column.ColumnName], column.Ascending, column.IncludeNils));
+			{
+				BrowseColumnDefinition browseColumn = column as BrowseColumnDefinition;
+				if (browseColumn == null)
+					localOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[column.ColumnName], column.Ascending));
+				else
+					localOrder.Columns.Add(new Schema.BrowseColumn(TableVar.Columns[column.ColumnName], column.Ascending, browseColumn.IncludeNils));
+			}
 			return localOrder;
 		}
 		
