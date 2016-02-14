@@ -515,17 +515,20 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				{
 					localDevicePlan.CurrentQueryContext().ResetReferenceFlags();
 					Expression expression = localDevicePlan.Device.TranslateExpression(localDevicePlan, aggregateNode.Nodes[(index - aggregateNode.AggregateColumnOffset) + 1], false);
-					FindAggregateCallExpression(expression).IsDistinct = aggregateNode.ComputeColumns[index - aggregateNode.AggregateColumnOffset].Distinct;
-					SQLRangeVarColumn rangeVarColumn = 
-						new SQLRangeVarColumn
-						(
-							tableVar.Columns[index],
-							expression,
-							localDevicePlan.Device.ToSQLIdentifier(tableVar.Columns[index])
-						);
-					rangeVarColumn.ReferenceFlags = localDevicePlan.CurrentQueryContext().ReferenceFlags | SQLReferenceFlags.HasAggregateExpressions;
-					localDevicePlan.CurrentQueryContext().AddedColumns.Add(rangeVarColumn);
-					selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
+					if (localDevicePlan.IsSupported)
+					{
+						FindAggregateCallExpression(expression).IsDistinct = aggregateNode.ComputeColumns[index - aggregateNode.AggregateColumnOffset].Distinct;
+						SQLRangeVarColumn rangeVarColumn = 
+							new SQLRangeVarColumn
+							(
+								tableVar.Columns[index],
+								expression,
+								localDevicePlan.Device.ToSQLIdentifier(tableVar.Columns[index])
+							);
+						rangeVarColumn.ReferenceFlags = localDevicePlan.CurrentQueryContext().ReferenceFlags | SQLReferenceFlags.HasAggregateExpressions;
+						localDevicePlan.CurrentQueryContext().AddedColumns.Add(rangeVarColumn);
+						selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
+					}
 				}
 			}
 			

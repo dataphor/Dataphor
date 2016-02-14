@@ -38,20 +38,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public ExtractRowNode() : base()
 		{
 		}
+
+		private bool _isSingleton;
+		public bool IsSingleton { get { return _isSingleton; } }
 		
 		public override void DetermineDataType(Plan plan)
 		{
 			DetermineModifiers(plan);
 			TableNode sourceNode = (TableNode)Nodes[0];
-			bool hasEmptyKey = false;
+			_isSingleton = false;
 			foreach (Schema.Key key in sourceNode.TableVar.Keys)
 				if (key.Columns.Count == 0)
 				{
-					hasEmptyKey = true;
+					_isSingleton = true;
 					break;
 				}
 			
-			if (!hasEmptyKey && !plan.SuppressWarnings && !plan.InTypeOfContext)
+			if (!_isSingleton && !plan.SuppressWarnings && !plan.InTypeOfContext)
 				plan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression, CompilerErrorLevel.Warning, plan.CurrentStatement()));
 			_dataType = sourceNode.TableVar.DataType.RowType;
 		}

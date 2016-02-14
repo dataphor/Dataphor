@@ -1015,7 +1015,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			return "DAE_TooManyRows";
 		}
-        
+
 		protected virtual Statement TranslateExtractRowNode(SQLDevicePlan devicePlan, ExtractRowNode node)
 		{
 			// Row extraction cannot be supported unless each column in the row being extracted has a map for equality comparison. Otherwise, the SQL Server
@@ -1028,61 +1028,69 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					return new CallExpression();
 				}
 
-			// Row extraction is translated as the expression, plus a where clause that counts the result and calls DAE_TooManyRows if the count is > 1
+			// If the indexer is based on a key, Row extraction is translated as the expression
+			// Otherwise, row extraction is translated as the expression, plus a where clause that counts the result and calls DAE_TooManyRows if the count is > 1
 			// DAE_TooManyRows throws a TOO_MANY_ROWS exception, which is caught by the SQL Device and converted to an Application 105199, just as if it had been evaluated by the DAE
 			// Note that in the case of MSSQL Server, the error is thrown by attempting to cast the message to an int.
 
-			Expression countExpression = TranslateExpression(devicePlan, node.Nodes[0], false);
-			SelectExpression countSelectExpression = NestQueryExpression(devicePlan, ((TableNode)node.Nodes[0]).TableVar, countExpression);
-
-			countSelectExpression.SelectClause = new SelectClause();
-			AggregateCallExpression countCallExpression = new AggregateCallExpression();
-			countCallExpression.Identifier = "Count";
-			countCallExpression.Expressions.Add(new QualifiedFieldExpression("*"));
-			countSelectExpression.SelectClause.Columns.Add(new ColumnExpression(countCallExpression));
-
-			Expression extractionCondition =
-				new BinaryExpression
-				(
-					new CaseExpression
-					(
-						new CaseItemExpression[]
-						{
-							new CaseItemExpression
-							(
-								new BinaryExpression
-								(
-									countSelectExpression,
-									"iGreater",
-									new ValueExpression(1)
-								),
-								new CallExpression(TooManyRowsOperator(), new Expression[] { new ValueExpression(1) })
-							)
-						},
-						new CaseElseExpression(new ValueExpression(1))
-					),
-					"iEqual",
-					new ValueExpression(1)
-				);
-
-			// Reset the query context and retranslate the source
-			devicePlan.PopQueryContext();
-			devicePlan.PushQueryContext();
-
-			Expression sourceExpression = TranslateExpression(devicePlan, node.Nodes[0], false);
-			SelectExpression selectExpression = EnsureUnarySelectExpression(devicePlan, ((TableNode)node.Nodes[0]).TableVar, sourceExpression, false);
-
-			if (selectExpression.WhereClause == null)
-				selectExpression.WhereClause = new WhereClause();
-
-			if (selectExpression.WhereClause.Expression == null)
-				selectExpression.WhereClause.Expression = extractionCondition;
+			if (node.IsSingleton)
+			{
+				return TranslateExpression(devicePlan, node.Nodes[0], false);
+			}
 			else
-				selectExpression.WhereClause.Expression = new BinaryExpression(selectExpression.WhereClause.Expression, "iAnd", extractionCondition);
+			{
+				Expression countExpression = TranslateExpression(devicePlan, node.Nodes[0], false);
+				SelectExpression countSelectExpression = NestQueryExpression(devicePlan, ((TableNode)node.Nodes[0]).TableVar, countExpression);
 
-			return selectExpression;
+				countSelectExpression.SelectClause = new SelectClause();
+				AggregateCallExpression countCallExpression = new AggregateCallExpression();
+				countCallExpression.Identifier = "Count";
+				countCallExpression.Expressions.Add(new QualifiedFieldExpression("*"));
+				countSelectExpression.SelectClause.Columns.Add(new ColumnExpression(countCallExpression));
+
+				Expression extractionCondition =
+					new BinaryExpression
+					(
+						new CaseExpression
+						(
+							new CaseItemExpression[]
+							{
+								new CaseItemExpression
+								(
+									new BinaryExpression
+									(
+										countSelectExpression,
+										"iGreater",
+										new ValueExpression(1)
+									),
+									new CallExpression(TooManyRowsOperator(), new Expression[] { new ValueExpression(1) })
+								)
+							},
+							new CaseElseExpression(new ValueExpression(1))
+						),
+						"iEqual",
+						new ValueExpression(1)
+					);
+
+				// Reset the query context and retranslate the source
+				devicePlan.PopQueryContext();
+				devicePlan.PushQueryContext();
+
+				Expression sourceExpression = TranslateExpression(devicePlan, node.Nodes[0], false);
+				SelectExpression selectExpression = EnsureUnarySelectExpression(devicePlan, ((TableNode)node.Nodes[0]).TableVar, sourceExpression, false);
+
+				if (selectExpression.WhereClause == null)
+					selectExpression.WhereClause = new WhereClause();
+
+				if (selectExpression.WhereClause.Expression == null)
+					selectExpression.WhereClause.Expression = extractionCondition;
+				else
+					selectExpression.WhereClause.Expression = new BinaryExpression(selectExpression.WhereClause.Expression, "iAnd", extractionCondition);
+
+				return selectExpression;
+			}
 		}
-        
+
 		protected virtual Statement TranslateValueNode(SQLDevicePlan devicePlan, ValueNode node)
 		{
 			if (node.DataType.IsGeneric && ((node.Value == null) || (node.Value == DBNull.Value)))	
@@ -1094,7 +1102,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			return new CastExpression((Expression)Translate(devicePlan, node.Nodes[0]), ((SQLScalarType)devicePlan.Device.ResolveDeviceScalarType(devicePlan.Plan, (Schema.ScalarType)node.DataType)).ParameterDomainName());
 		}
-        
+
 		public virtual Expression TranslateExpression(SQLDevicePlan devicePlan, PlanNode node, bool isBooleanContext)
 		{
 			devicePlan.EnterContext(isBooleanContext);
