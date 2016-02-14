@@ -1,0 +1,75 @@
+<project SchemaVersion="1.3">
+    <assemblies>
+        <assembly location=".\DAE.Client\..\bin\Alphora.Dataphor.DAE.Client.dll" documentation=".\DAE.Client\DaeClient.xml" />
+        <assembly location=".\..\Libraries\PGSQLConnection\Source\..\Alphora.Dataphor.DAE.Connection.PGSQL.dll" documentation="" />
+        <assembly location=".\D4Runner\..\bin\D4Runner.exe" documentation="" />
+        <assembly location=".\Frontend.Client.Web.Application\bin\Alphora.Dataphor.Frontend.Client.Web.Application.dll" documentation="" />
+        <assembly location=".\Frontend.Client.Web\..\bin\Alphora.Dataphor.Frontend.Client.Web.dll" documentation="" />
+        <assembly location=".\DAE.MSSQL\..\bin\Alphora.Dataphor.DAE.MSSQL.dll" documentation="" />
+        <assembly location=".\DAEServer\..\bin\DAEServer.exe" documentation="" />
+        <assembly location=".\DAE\..\bin\Alphora.Dataphor.DAE.dll" documentation=".\DAE\DAE.xml" />
+        <assembly location=".\..\Libraries\Sample.Shipping\Source\..\Alphora.Shipping.dll" documentation="" />
+        <assembly location=".\..\Libraries\PGSQLDevice\Source\..\AlphoraPGSQLDevice.dll" documentation="" />
+        <assembly location=".\Base.Windows\..\bin\Alphora.Dataphor.Windows.dll" documentation="" />
+        <assembly location=".\..\Libraries\ODBCConnection\Source\..\Alphora.Dataphor.DAE.Connection.ODBC.dll" documentation=".\..\Libraries\ODBCConnection\Source\DAEConnectionODBC.xml" />
+        <assembly location=".\Language.SQL\bin\Release\Language.SQL.dll" documentation="" />
+        <assembly location=".\DAE.Service.ConfigurationUtility\..\bin\DAEConfigUtil.exe" documentation=".\DAE.Service.ConfigurationUtility\DAEServiceConfigurationUtility.xml" />
+        <assembly location=".\..\Dataphoria\Dataphoria.Coordination\bin\Release\Dataphoria.Coordination.dll" documentation="" />
+        <assembly location=".\DAE.Service\..\bin\DAEService.exe" documentation=".\DAE.Service\DAEService.xml" />
+        <assembly location=".\..\Libraries\OracleDevice\Source\..\AlphoraOracleDevice.dll" documentation=".\..\Libraries\OracleDevice\Source\DAEDeviceOracle.xml" />
+        <assembly location=".\..\Dataphoria\Dataphoria.Web.Client\bin\Dataphoria.Web.Client.dll" documentation="" />
+        <assembly location=".\..\Tests\DAE.Server.Tests\bin\Release\DAE.Server.Tests.dll" documentation="" />
+        <assembly location=".\..\Libraries\Frontend\Source\..\Alphora.Dataphor.Frontend.Server.dll" documentation=".\..\Libraries\Frontend\Source\FrontendServer.xml" />
+        <assembly location=".\DAE.SQLite\..\bin\Alphora.Dataphor.DAE.SQLite.dll" documentation="" />
+        <assembly location=".\..\Libraries\System.Internet\Source\..\System.Internet.dll" documentation=".\..\Libraries\System.Internet\Source\SystemInternet.xml" />
+        <assembly location=".\..\Libraries\FHIR.Core\Source\bin\Release\Alphora.Dataphor.FHIR.Core.dll" documentation="" />
+        <assembly location=".\..\Tests\Common.Tests\bin\Release\Common.Tests.dll" documentation="" />
+        <assembly location=".\..\Libraries\SQLDevice\Source\..\Alphora.Dataphor.DAE.Device.SQL.dll" documentation=".\..\Libraries\SQLDevice\Source\DAEDeviceSQL.xml" />
+        <assembly location=".\..\Libraries\LinterDevice\Source\..\AlphoraLinterDevice.dll" documentation=".\..\Libraries\LinterDevice\Source\DAEDeviceLinter.xml" />
+        <assembly location=".\..\Libraries\DB2Device\Source\..\AlphoraDB2Device.dll" documentation=".\..\Libraries\DB2Device\Source\DAEDeviceDB2.xml" />
+        <assembly location=".\..\Libraries\System.Integration\Source\..\System.Integration.dll" documentation="" />
+        <assembly location=".\Frontend.Client.WPF\..\bin\Alphora.Dataphor.Frontend.Client.WPF" documentation=".\Frontend.Client.WPF\FrontendWPFClient.XML" />
+        <assembly location=".\Frontend.Client.Windows\..\bin\Alphora.Dataphor.Frontend.Client.Windows.dll" documentation=".\Frontend.Client.Windows\FrontendClientWindows.xml" />
+        <assembly location=".\..\Libraries\Connection\Source\..\Alphora.Dataphor.DAE.Connection.dll" documentation=".\..\Libraries\Connection\Source\DAEConnection.xml" />
+        <assembly location=".\Client\..\bin\AlphoraDataphorClient.dll" documentation="" />
+        <assembly location=".\..\Dataphoria\Dataphoria.Coordination.Common\bin\Release\Dataphoria.Coordination.Common.dll" documentation="" />
+        <assembly location=".\..\Dataphoria\Dataphoria.Instancer\bin\Release\Dataphoria.Instancer.exe" documentation="" />
+        <assembly location=".\..\Tests\DAE.Client.Tests\bin\Release\DAE.Client.Tests.dll" documentation="" />
+        <assembly location=".\..\Libraries\FHIR.Device\Source\bin\Release\Alphora.Dataphor.FHIR.Device.dll" documentation="" />
+        <assembly location=".\DAE.SQLCE\..\bin\Alphora.Dataphor.DAE.SQLCE.dll" documentation="" />
+        <assembly location=".\Frontend.Client.Browser\bin\Frontend.Client.Browser.dll" documentation="" />
+        <assembly location=".\..\Libraries\SASDevice\Source\..\AlphoraSASDevice.dll" documentation="" />
+        <assembly location=".\Frontend.Client\..\bin\Alphora.Dataphor.Frontend.Client.dll" documentation=".\Frontend.Client\FrontendClient.xml" />
+        <assembly location=".\Frontend.Client.Windows.Executable\..\bin\WindowsClient.exe" documentation=".\Frontend.Client.Windows.Executable\FrontendClientWindowsExecutable.xml" />
+        <assembly location=".\Base\..\bin\Alphora.Dataphor.dll" documentation=".\Base\Base.xml" />
+        <assembly location=".\..\Dataphoria\Dataphoria.Web\bin\Dataphoria.Web.dll" documentation="" />
+        <assembly location=".\..\Dataphoria\Dataphoria.Instancing\bin\Release\Dataphoria.Instancing.dll" documentation="" />
+        <assembly location=".\DAE.Client.Provider\..\bin\Alphora.Dataphor.DAE.Client.Provider.dll" documentation=".\DAE.Client.Provider\DaeClientProvider.xml" />
+        <assembly location=".\..\Libraries\MySQLDevice\Source\..\AlphoraMySQLDevice.dll" documentation=".\..\Libraries\MySQLDevice\Source\DAEDeviceMySQL.xml" />
+        <assembly location=".\..\Libraries\SimpleDevice\Source\..\Alphora.Dataphor.DAE.Device.Simple.dll" documentation=".\..\Libraries\SimpleDevice\Source\DAEDeviceSimple.XML" />
+        <assembly location=".\DAE.NativeCLI\..\bin\Alphora.Dataphor.DAE.NativeCLI.dll" documentation="" />
+        <assembly location=".\..\Libraries\System.Platform\Source\..\System.Platform.dll" documentation="" />
+        <assembly location=".\..\Dataphoria\Dataphoria.Instancing.Common\bin\Release\Dataphoria.Instancing.Common.dll" documentation="" />
+        <assembly location=".\..\Libraries\ADOConnection\Source\..\Alphora.Dataphor.DAE.Connection.ADO.dll" documentation=".\..\Libraries\ADOConnection\Source\DAEConnectionADO.xml" />
+        <assembly location=".\Common\..\bin\AlphoraDataphorCommon.dll" documentation="" />
+        <assembly location=".\..\Libraries\TestFramework.Coverage.Base\Source\bin\Release\Alphora.Dataphor.DAE.Diagnostics.dll" documentation="" />
+        <assembly location=".\..\Libraries\Documentation\Source\..\DocSamples.dll" documentation="" />
+        <assembly location=".\..\Libraries\MSSQLDevice\Source\..\AlphoraMSSQLDevice.dll" documentation=".\..\Libraries\MSSQLDevice\Source\DAEDeviceMSSQL.xml" />
+        <assembly location=".\Dataphoria\..\bin\Dataphoria.exe" documentation="" />
+        <assembly location=".\DAE.PGSQL\..\bin\Alphora.Dataphor.DAE.PGSQL.dll" documentation="" />
+        <assembly location=".\DAE.Client.Controls\..\bin\Alphora.Dataphor.DAE.Client.Controls.dll" documentation=".\DAE.Client.Controls\DaeClientControls.xml" />
+        <assembly location=".\..\Libraries\MSOracleConnection\Source\..\Alphora.Dataphor.DAE.Connection.Oracle.dll" documentation=".\..\Libraries\MSOracleConnection\Source\DAEConnectionOracle.xml" />
+        <assembly location=".\..\Dataphoria\Dataphoria.Processing\bin\Release\Dataphoria.Processing.dll" documentation="" />
+        <assembly location=".\..\Libraries\FastoreDevice\Source\..\AlphoraFastoreDevice.dll" documentation="" />
+        <assembly location=".\Server\..\bin\AlphoraDataphorServer.dll" documentation="" />
+    </assemblies>
+    <documenters>
+        <documenter name="MSDN">
+            <property name="OutputDirectory" value=".\doc\" />
+            <property name="HtmlHelpName" value="Documentation" />
+            <property name="Title" value="An NDoc3 Documented Class Library" />
+            <property name="SdkDocVersion" value="SDK_v3_5" />
+            <property name="SdkDocVersionString" value="VS.90" />
+        </documenter>
+    </documenters>
+</project>
