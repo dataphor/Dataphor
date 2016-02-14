@@ -9,6 +9,7 @@
 using System;
 using System.ServiceModel.Channels;
 using System.ServiceModel;
+using System.ServiceModel.Description;
 
 namespace Alphora.Dataphor.DAE.Contracts
 {
@@ -60,9 +61,31 @@ namespace Alphora.Dataphor.DAE.Contracts
 	
 		public const int MaxMessageLength = 2147483647;
 
-		public static Func<Binding> BuildBindingCall = BuildBinding;
+		public static Func<Binding> BuildBindingCall = DefaultBuildBinding;
+		public static Func<EndpointIdentity> BuildEndpointIdentityCall = DefaultBuildEndpointIdentity;
+		public static Action<ServiceEndpoint> ServiceEndpointHook = DefaultServiceEndpointHook;
 
-		private static Binding BuildBinding()
+		private static void DefaultServiceEndpointHook(ServiceEndpoint endpoint)
+		{
+			// - Does nothing
+		}
+
+		private static EndpointIdentity DefaultBuildEndpointIdentity()
+		{
+			return null;
+		}
+
+		public static void RevertHooksToDefault()
+		{
+			lock(_syncHandle)
+			{
+				BuildBindingCall = DefaultBuildBinding;
+				BuildEndpointIdentityCall = DefaultBuildEndpointIdentity;
+				ServiceEndpointHook = DefaultServiceEndpointHook;
+			}
+		}
+
+		private static Binding DefaultBuildBinding()
 		{
 			var messageEncodingElement = new BinaryMessageEncodingBindingElement();
 			#if !SILVERLIGHT

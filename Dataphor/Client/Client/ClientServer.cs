@@ -13,6 +13,7 @@ using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Contracts;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Listener;
+using System.ServiceModel.Description;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -159,7 +160,7 @@ namespace Alphora.Dataphor.DAE.Client
 							new ChannelFactory<IClientDataphorService>
 							(
 								DataphorServiceUtility.GetBinding(), 
-								new EndpointAddress(uri)
+								new EndpointAddress(uri, DataphorServiceUtility.BuildEndpointIdentityCall())
 							);
 					}
 					else
@@ -168,10 +169,13 @@ namespace Alphora.Dataphor.DAE.Client
 							new ChannelFactory<IClientDataphorService>
 							(
 								DataphorServiceUtility.GetBinding(), 
-								new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(_hostName, _overridePortNumber, _instanceName))
+								new EndpointAddress(new Uri(DataphorServiceUtility.BuildInstanceURI(_hostName, _overridePortNumber, _instanceName)),
+									DataphorServiceUtility.BuildEndpointIdentityCall())
 							);
 					}
 				}
+
+				DataphorServiceUtility.ServiceEndpointHook(_channelFactory.Endpoint);
 			}
 		}
 		
