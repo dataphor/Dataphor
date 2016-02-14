@@ -3647,33 +3647,20 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static void CompileCreateTableVarStatement(Plan plan, CreateTableVarStatement statement, CreateTableVarNode node, BlockNode blockNode)
 		{
-			ApplicationTransaction transaction = null;
-			if (plan.ApplicationTransactionID != Guid.Empty)
-				transaction = plan.GetApplicationTransaction();
+			plan.PushGlobalContext();
 			try
 			{
-				if (transaction != null)
-					transaction.PushGlobalContext();
-				try
-				{
-					CompileTableVarKeys(plan, node.TableVar, statement.Keys);
-					CompileTableVarOrders(plan, node.TableVar, statement.Orders);
-					if ((node.TableVar is Schema.BaseTableVar) && (!plan.InLoadingContext()))
-						((Schema.BaseTableVar)node.TableVar).Device.CheckSupported(plan, node.TableVar);
-					CompileTableVarConstraints(plan, node.TableVar, statement.Constraints);
-					if (!plan.IsEngine)
-						CompileTableVarKeyConstraints(plan, node.TableVar);
-				}
-				finally
-				{
-					if (transaction != null)
-						transaction.PopGlobalContext();
-				}
+				CompileTableVarKeys(plan, node.TableVar, statement.Keys);
+				CompileTableVarOrders(plan, node.TableVar, statement.Orders);
+				if ((node.TableVar is Schema.BaseTableVar) && (!plan.InLoadingContext()))
+					((Schema.BaseTableVar)node.TableVar).Device.CheckSupported(plan, node.TableVar);
+				CompileTableVarConstraints(plan, node.TableVar, statement.Constraints);
+				if (!plan.IsEngine)
+					CompileTableVarKeyConstraints(plan, node.TableVar);
 			}
 			finally
 			{
-				if (transaction != null)
-					Monitor.Exit(transaction);
+				plan.PopGlobalContext();
 			}
 			
 			CreateReferenceStatement localStatement;
@@ -4370,59 +4357,49 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 				try
 				{
-					ApplicationTransaction transaction = null;
-					if (!view.IsATObject && (plan.ApplicationTransactionID != Guid.Empty))
-						transaction = plan.GetApplicationTransaction();
+					bool isATObject = view.IsATObject;
+					if (!isATObject)
+						plan.PushGlobalContext();
 					try
 					{
-						if (transaction != null)
-							transaction.PushGlobalContext();
+						Plan localPlan = new Plan(plan.ServerProcess);
 						try
 						{
-							Plan localPlan = new Plan(plan.ServerProcess);
+							localPlan.PushATCreationContext();
 							try
 							{
-								localPlan.PushATCreationContext();
+								localPlan.PushSecurityContext(new SecurityContext(view.Owner));
 								try
 								{
-									localPlan.PushSecurityContext(new SecurityContext(view.Owner));
-									try
-									{
-										#if USEORIGINALEXPRESSION
-										PlanNode planNode = CompileExpression(localPlan, AView.OriginalExpression);
-										#else
-										PlanNode planNode = CompileExpression(localPlan, view.InvocationExpression);
-										#endif
-										localPlan.CheckCompiled();
-										planNode = EnsureTableNode(localPlan, planNode);
-										view.CopyReferences((TableNode)planNode);
-										view.ShouldReinferReferences = false;
-									}
-									finally
-									{
-										localPlan.PopSecurityContext();
-									}
+									#if USEORIGINALEXPRESSION
+									PlanNode planNode = CompileExpression(localPlan, AView.OriginalExpression);
+									#else
+									PlanNode planNode = CompileExpression(localPlan, view.InvocationExpression);
+									#endif
+									localPlan.CheckCompiled();
+									planNode = EnsureTableNode(localPlan, planNode);
+									view.CopyReferences((TableNode)planNode);
+									view.ShouldReinferReferences = false;
 								}
 								finally
 								{
-									localPlan.PopATCreationContext();
+									localPlan.PopSecurityContext();
 								}
 							}
 							finally
 							{
-								localPlan.Dispose();
+								localPlan.PopATCreationContext();
 							}
 						}
 						finally
 						{
-							if (transaction != null)
-								transaction.PopGlobalContext();
+							localPlan.Dispose();
 						}
 					}
 					finally
 					{
-						if (transaction != null)
-							Monitor.Exit(transaction);
+						if (!isATObject)
+							plan.PopGlobalContext();
 					}
 				}
 				catch
@@ -6393,114 +6370,104 @@ namespace Alphora.Dataphor.DAE.Compiling
 				operatorValue.ShouldRecompile = false;
 				try
 				{
-					ApplicationTransaction transaction = null;
-					if (!operatorValue.IsATObject && (plan.ApplicationTransactionID != Guid.Empty))
-						transaction = plan.GetApplicationTransaction();
+					bool isATObject = operatorValue.IsATObject;
+					if (!isATObject)
+						plan.PushGlobalContext();
 					try
 					{
-						if (transaction != null)
-							transaction.PushGlobalContext();
-						try
+						if (operatorValue.Block.ClassDefinition == null)
 						{
-							if (operatorValue.Block.ClassDefinition == null)
-							{
-								operatorValue.Dependencies.Clear();
-								operatorValue.IsBuiltin = Instructions.Contains(Schema.Object.Unqualify(operatorValue.OperatorName));
+							operatorValue.Dependencies.Clear();
+							operatorValue.IsBuiltin = Instructions.Contains(Schema.Object.Unqualify(operatorValue.OperatorName));
 
-								Plan localPlan = new Plan(plan.ServerProcess);
+							Plan localPlan = new Plan(plan.ServerProcess);
+							try
+							{
+								localPlan.PushATCreationContext();
 								try
 								{
-									localPlan.PushATCreationContext();
+									localPlan.PushCreationObject(operatorValue);
 									try
 									{
-										localPlan.PushCreationObject(operatorValue);
+										localPlan.PushStatementContext(new StatementContext(StatementType.Select));
 										try
 										{
-											localPlan.PushStatementContext(new StatementContext(StatementType.Select));
+											localPlan.PushSecurityContext(new SecurityContext(operatorValue.Owner));
 											try
 											{
-												localPlan.PushSecurityContext(new SecurityContext(operatorValue.Owner));
-												try
+												// Report dependencies for the signature and return types
+												if (operatorValue.DeclarationText != null)
 												{
-													// Report dependencies for the signature and return types
-													if (operatorValue.DeclarationText != null)
-													{
-														Parser parser = new Parser();
-														CreateOperatorStatement statement = parser.ParseOperatorDeclaration(operatorValue.DeclarationText);
+													Parser parser = new Parser();
+													CreateOperatorStatement statement = parser.ParseOperatorDeclaration(operatorValue.DeclarationText);
 
-														foreach (FormalParameter formalParameter in statement.FormalParameters)
-															CompileTypeSpecifier(localPlan, formalParameter.TypeSpecifier, true);
+													foreach (FormalParameter formalParameter in statement.FormalParameters)
+														CompileTypeSpecifier(localPlan, formalParameter.TypeSpecifier, true);
 
-														if (statement.ReturnType != null)
-															CompileTypeSpecifier(localPlan, statement.ReturnType, true);
-													}
-													else
-													{
-														Schema.Catalog dependencies = new Schema.Catalog();
-														foreach (Schema.Operand operand in operatorValue.Operands)
-															operand.DataType.IncludeDependencies(plan.CatalogDeviceSession, plan.Catalog, dependencies, EmitMode.ForCopy);
-														if (operatorValue.ReturnDataType != null)
-															operatorValue.ReturnDataType.IncludeDependencies(plan.CatalogDeviceSession, plan.Catalog, dependencies, EmitMode.ForCopy);
-														foreach (Schema.Object objectValue in dependencies)
-															localPlan.AttachDependency(objectValue);
-													}
+													if (statement.ReturnType != null)
+														CompileTypeSpecifier(localPlan, statement.ReturnType, true);
+												}
+												else
+												{
+													Schema.Catalog dependencies = new Schema.Catalog();
+													foreach (Schema.Operand operand in operatorValue.Operands)
+														operand.DataType.IncludeDependencies(plan.CatalogDeviceSession, plan.Catalog, dependencies, EmitMode.ForCopy);
+													if (operatorValue.ReturnDataType != null)
+														operatorValue.ReturnDataType.IncludeDependencies(plan.CatalogDeviceSession, plan.Catalog, dependencies, EmitMode.ForCopy);
+													foreach (Schema.Object objectValue in dependencies)
+														localPlan.AttachDependency(objectValue);
+												}
 
-													PlanNode blockNode = BindOperatorBlock(localPlan, operatorValue, CompileOperatorBlock(localPlan, operatorValue, operatorValue.BodyText != null ? new Parser().ParseStatement(operatorValue.BodyText, null) : operatorValue.Block.BlockNode.EmitStatement(EmitMode.ForCopy)));
-													localPlan.CheckCompiled();
-													operatorValue.Block.BlockNode = blockNode;
-													operatorValue.DetermineRemotable(plan.CatalogDeviceSession);
+												PlanNode blockNode = BindOperatorBlock(localPlan, operatorValue, CompileOperatorBlock(localPlan, operatorValue, operatorValue.BodyText != null ? new Parser().ParseStatement(operatorValue.BodyText, null) : operatorValue.Block.BlockNode.EmitStatement(EmitMode.ForCopy)));
+												localPlan.CheckCompiled();
+												operatorValue.Block.BlockNode = blockNode;
+												operatorValue.DetermineRemotable(plan.CatalogDeviceSession);
 
-													operatorValue.IsRemotable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsRemotable", operatorValue.IsRemotable.ToString()));
-													operatorValue.IsLiteral = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsLiteral", operatorValue.IsLiteral.ToString()));
-													operatorValue.IsFunctional = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsFunctional", operatorValue.IsFunctional.ToString()));
-													operatorValue.IsDeterministic = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsDeterministic", operatorValue.IsDeterministic.ToString()));
-													operatorValue.IsRepeatable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsRepeatable", operatorValue.IsRepeatable.ToString()));
-													operatorValue.IsNilable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsNilable", operatorValue.IsNilable.ToString()));
+												operatorValue.IsRemotable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsRemotable", operatorValue.IsRemotable.ToString()));
+												operatorValue.IsLiteral = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsLiteral", operatorValue.IsLiteral.ToString()));
+												operatorValue.IsFunctional = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsFunctional", operatorValue.IsFunctional.ToString()));
+												operatorValue.IsDeterministic = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsDeterministic", operatorValue.IsDeterministic.ToString()));
+												operatorValue.IsRepeatable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsRepeatable", operatorValue.IsRepeatable.ToString()));
+												operatorValue.IsNilable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsNilable", operatorValue.IsNilable.ToString()));
 													
-													if (!operatorValue.IsRepeatable && operatorValue.IsDeterministic)
-														operatorValue.IsDeterministic = false;
-													if (!operatorValue.IsDeterministic && operatorValue.IsLiteral)
-														operatorValue.IsLiteral = false;
+												if (!operatorValue.IsRepeatable && operatorValue.IsDeterministic)
+													operatorValue.IsDeterministic = false;
+												if (!operatorValue.IsDeterministic && operatorValue.IsLiteral)
+													operatorValue.IsLiteral = false;
 
-													plan.CatalogDeviceSession.UpdateCatalogObject(operatorValue);
-												}
-												finally
-												{
-													localPlan.PopSecurityContext();
-												}
+												plan.CatalogDeviceSession.UpdateCatalogObject(operatorValue);
 											}
 											finally
 											{
-												localPlan.PopStatementContext();
+												localPlan.PopSecurityContext();
 											}
 										}
 										finally
 										{
-											localPlan.PopCreationObject();
+											localPlan.PopStatementContext();
 										}
 									}
 									finally
 									{
-										localPlan.PopATCreationContext();
+										localPlan.PopCreationObject();
 									}
 								}
 								finally
 								{
-									plan.Messages.AddRange(localPlan.Messages);
-									localPlan.Dispose();
+									localPlan.PopATCreationContext();
 								}
 							}
-						}
-						finally
-						{
-							if (transaction != null)
-								transaction.PopGlobalContext();
+							finally
+							{
+								plan.Messages.AddRange(localPlan.Messages);
+								localPlan.Dispose();
+							}
 						}
 					}
 					finally
 					{
-						if (transaction != null)
-							Monitor.Exit(transaction);
+						if (!isATObject)
+							plan.PopGlobalContext();
 					}
 				}
 				catch
@@ -6830,144 +6797,86 @@ namespace Alphora.Dataphor.DAE.Compiling
 			//APlan.AcquireCatalogLock(AOperator, LockMode.Exclusive);
 			try
 			{
-				ApplicationTransaction transaction = null;
-				if (!operatorValue.IsATObject && (plan.ApplicationTransactionID != Guid.Empty))
-					transaction = plan.GetApplicationTransaction();
+				bool isATObject = operatorValue.IsATObject;
+				if (!isATObject)
+					plan.PushGlobalContext();
 				try
 				{
-					if (transaction != null)
-						transaction.PushGlobalContext();
+					PlanNode saveInitializationNode = operatorValue.Initialization.BlockNode;
+					int saveInitializationDisplacement = operatorValue.Initialization.StackDisplacement;
+					PlanNode saveAggregationNode = operatorValue.Aggregation.BlockNode;
+					PlanNode saveFinalizationNode = operatorValue.Finalization.BlockNode;
+					operatorValue.Dependencies.Clear();
+					operatorValue.IsBuiltin = Instructions.Contains(Schema.Object.Unqualify(operatorValue.OperatorName));
+					Plan localPlan = new Plan(plan.ServerProcess);
 					try
 					{
-						PlanNode saveInitializationNode = operatorValue.Initialization.BlockNode;
-						int saveInitializationDisplacement = operatorValue.Initialization.StackDisplacement;
-						PlanNode saveAggregationNode = operatorValue.Aggregation.BlockNode;
-						PlanNode saveFinalizationNode = operatorValue.Finalization.BlockNode;
-						operatorValue.Dependencies.Clear();
-						operatorValue.IsBuiltin = Instructions.Contains(Schema.Object.Unqualify(operatorValue.OperatorName));
-						Plan localPlan = new Plan(plan.ServerProcess);
+						localPlan.PushATCreationContext();
 						try
 						{
-							localPlan.PushATCreationContext();
+							localPlan.PushCreationObject(operatorValue);
 							try
 							{
-								localPlan.PushCreationObject(operatorValue);
+								localPlan.PushStatementContext(new StatementContext(StatementType.Select));
 								try
 								{
-									localPlan.PushStatementContext(new StatementContext(StatementType.Select));
+									localPlan.PushSecurityContext(new SecurityContext(operatorValue.Owner));
 									try
 									{
-										localPlan.PushSecurityContext(new SecurityContext(operatorValue.Owner));
+										// Report dependencies for the signature and return types
+										if (operatorValue.DeclarationText != null)
+										{
+											CreateAggregateOperatorStatement statement = new Parser().ParseAggregateOperatorDeclaration(operatorValue.DeclarationText);
+
+											foreach (FormalParameter formalParameter in statement.FormalParameters)
+												CompileTypeSpecifier(localPlan, formalParameter.TypeSpecifier, true);
+
+											if (statement.ReturnType != null)
+												CompileTypeSpecifier(localPlan, statement.ReturnType, true);
+										}
+										else
+										{
+											Schema.Catalog dependencies = new Schema.Catalog();
+											foreach (Schema.Operand operand in operatorValue.Operands)
+												operand.DataType.IncludeDependencies(plan.CatalogDeviceSession, plan.Catalog, dependencies, EmitMode.ForCopy);
+											if (operatorValue.ReturnDataType != null)
+												operatorValue.ReturnDataType.IncludeDependencies(plan.CatalogDeviceSession, plan.Catalog, dependencies, EmitMode.ForCopy);
+											foreach (Schema.Object objectValue in dependencies)
+												localPlan.AttachDependency(objectValue);
+										}
+
+										int initializationDisplacement = 0;
+
+										localPlan.Symbols.PushWindow(0);
 										try
 										{
-											// Report dependencies for the signature and return types
-											if (operatorValue.DeclarationText != null)
-											{
-												CreateAggregateOperatorStatement statement = new Parser().ParseAggregateOperatorDeclaration(operatorValue.DeclarationText);
-
-												foreach (FormalParameter formalParameter in statement.FormalParameters)
-													CompileTypeSpecifier(localPlan, formalParameter.TypeSpecifier, true);
-
-												if (statement.ReturnType != null)
-													CompileTypeSpecifier(localPlan, statement.ReturnType, true);
-											}
-											else
-											{
-												Schema.Catalog dependencies = new Schema.Catalog();
-												foreach (Schema.Operand operand in operatorValue.Operands)
-													operand.DataType.IncludeDependencies(plan.CatalogDeviceSession, plan.Catalog, dependencies, EmitMode.ForCopy);
-												if (operatorValue.ReturnDataType != null)
-													operatorValue.ReturnDataType.IncludeDependencies(plan.CatalogDeviceSession, plan.Catalog, dependencies, EmitMode.ForCopy);
-												foreach (Schema.Object objectValue in dependencies)
-													localPlan.AttachDependency(objectValue);
-											}
-
-											int initializationDisplacement = 0;
-
-											localPlan.Symbols.PushWindow(0);
-											try
-											{
-												Symbol resultVar = new Symbol(Keywords.Result, operatorValue.ReturnDataType);
-												localPlan.Symbols.Push(resultVar);
+											Symbol resultVar = new Symbol(Keywords.Result, operatorValue.ReturnDataType);
+											localPlan.Symbols.Push(resultVar);
 												
-												if (operatorValue.Initialization.ClassDefinition == null)
+											if (operatorValue.Initialization.ClassDefinition == null)
+											{
+												LineInfo saveCompilingOffset = new LineInfo(localPlan.CompilingOffset);
+												localPlan.CompilingOffset.Line = -(operatorValue.Initialization.LineInfo.Line - 1);
+												localPlan.CompilingOffset.LinePos = 0;
+												try
 												{
-													LineInfo saveCompilingOffset = new LineInfo(localPlan.CompilingOffset);
-													localPlan.CompilingOffset.Line = -(operatorValue.Initialization.LineInfo.Line - 1);
-													localPlan.CompilingOffset.LinePos = 0;
-													try
-													{
-														int symbolCount = localPlan.Symbols.Count;
-														operatorValue.Initialization.BlockNode = CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.InitializationText, null)); //AOperator.Initialization.BlockNode.EmitStatement(EmitMode.ForCopy)); 
-														initializationDisplacement = localPlan.Symbols.Count - symbolCount;
-													}
-													finally
-													{
-														localPlan.CompilingOffset.SetFromLineInfo(saveCompilingOffset);
-
-													}
+													int symbolCount = localPlan.Symbols.Count;
+													operatorValue.Initialization.BlockNode = CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.InitializationText, null)); //AOperator.Initialization.BlockNode.EmitStatement(EmitMode.ForCopy)); 
+													initializationDisplacement = localPlan.Symbols.Count - symbolCount;
 												}
+												finally
+												{
+													localPlan.CompilingOffset.SetFromLineInfo(saveCompilingOffset);
+
+												}
+											}
 				
-												if (operatorValue.Aggregation.ClassDefinition == null)
-												{
-													LineInfo saveCompilingOffset = new LineInfo(localPlan.CompilingOffset);
-													localPlan.CompilingOffset.Line = -(operatorValue.Aggregation.LineInfo.Line - 1);
-													localPlan.CompilingOffset.LinePos = 0;
-													try
-													{
-														localPlan.Symbols.PushFrame();
-														try
-														{
-															foreach (Schema.Operand operand in operatorValue.Operands)
-																localPlan.Symbols.Push(new Symbol(operand.Name, operand.DataType, operand.Modifier == Modifier.Const));
-
-															operatorValue.Aggregation.BlockNode = CompileDeallocateFrameVariablesNode(localPlan, CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.AggregationText, null))); //AOperator.Aggregation.BlockNode.EmitStatement(EmitMode.ForCopy)));
-														}
-														finally
-														{
-															localPlan.Symbols.PopFrame();
-														}
-													}
-													finally
-													{
-														localPlan.CompilingOffset.SetFromLineInfo(saveCompilingOffset);
-
-													}
-												}
-
-												if (operatorValue.Finalization.ClassDefinition == null)
-												{
-													LineInfo saveCompilingOffset = new LineInfo(localPlan.CompilingOffset);
-													localPlan.CompilingOffset.Line = -(operatorValue.Finalization.LineInfo.Line - 1);
-													localPlan.CompilingOffset.LinePos = 0;
-													try
-													{
-														operatorValue.Finalization.BlockNode = CompileDeallocateVariablesNode(localPlan, CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.FinalizationText, null)), resultVar); //AOperator.Finalization.BlockNode.EmitStatement(EmitMode.ForCopy)), LResultVar);
-													}
-													finally
-													{
-														localPlan.CompilingOffset.SetFromLineInfo(saveCompilingOffset);
-
-													}
-												}
-											}
-											finally
+											if (operatorValue.Aggregation.ClassDefinition == null)
 											{
-												localPlan.Symbols.PopWindow();
-											}
-
-											BindAggregateOperatorBlock(plan, operatorValue);
-
-											/*
-											localPlan.Symbols.PushWindow(0);
-											try
-											{
-												localPlan.Symbols.Push(new Symbol(Keywords.Result, operatorValue.ReturnDataType));
-
-												if (operatorValue.Initialization.ClassDefinition == null)
-													initializationNode = OptimizeNode(localPlan, initializationNode, false);
-												
-												if (operatorValue.Aggregation.ClassDefinition == null)
+												LineInfo saveCompilingOffset = new LineInfo(localPlan.CompilingOffset);
+												localPlan.CompilingOffset.Line = -(operatorValue.Aggregation.LineInfo.Line - 1);
+												localPlan.CompilingOffset.LinePos = 0;
+												try
 												{
 													localPlan.Symbols.PushFrame();
 													try
@@ -6975,83 +6884,131 @@ namespace Alphora.Dataphor.DAE.Compiling
 														foreach (Schema.Operand operand in operatorValue.Operands)
 															localPlan.Symbols.Push(new Symbol(operand.Name, operand.DataType, operand.Modifier == Modifier.Const));
 
-														aggregationNode = OptimizeNode(localPlan, aggregationNode, false);
+														operatorValue.Aggregation.BlockNode = CompileDeallocateFrameVariablesNode(localPlan, CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.AggregationText, null))); //AOperator.Aggregation.BlockNode.EmitStatement(EmitMode.ForCopy)));
 													}
 													finally
 													{
 														localPlan.Symbols.PopFrame();
 													}
 												}
+												finally
+												{
+													localPlan.CompilingOffset.SetFromLineInfo(saveCompilingOffset);
 
-												if (operatorValue.Finalization.ClassDefinition == null)
-													finalizationNode = OptimizeNode(localPlan, finalizationNode, false);
+												}
 											}
-											finally
+
+											if (operatorValue.Finalization.ClassDefinition == null)
 											{
-												localPlan.Symbols.PopWindow();
+												LineInfo saveCompilingOffset = new LineInfo(localPlan.CompilingOffset);
+												localPlan.CompilingOffset.Line = -(operatorValue.Finalization.LineInfo.Line - 1);
+												localPlan.CompilingOffset.LinePos = 0;
+												try
+												{
+													operatorValue.Finalization.BlockNode = CompileDeallocateVariablesNode(localPlan, CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.FinalizationText, null)), resultVar); //AOperator.Finalization.BlockNode.EmitStatement(EmitMode.ForCopy)), LResultVar);
+												}
+												finally
+												{
+													localPlan.CompilingOffset.SetFromLineInfo(saveCompilingOffset);
+
+												}
 											}
-											*/
-
-											localPlan.CheckCompiled();
-
-											if (operatorValue.Initialization.BlockNode != null)
-											{
-												operatorValue.Initialization.StackDisplacement = initializationDisplacement;
-											}
-											
-											operatorValue.DetermineRemotable(plan.CatalogDeviceSession);
-											operatorValue.IsRemotable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsRemotable", operatorValue.IsRemotable.ToString()));
-											operatorValue.IsLiteral = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsLiteral", operatorValue.IsLiteral.ToString()));
-											operatorValue.IsFunctional = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsFunctional", operatorValue.IsFunctional.ToString()));
-											operatorValue.IsDeterministic = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsDeterministic", operatorValue.IsDeterministic.ToString()));
-											operatorValue.IsRepeatable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsRepeatable", operatorValue.IsRepeatable.ToString()));
-											operatorValue.IsNilable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsNilable", operatorValue.IsNilable.ToString()));
-											
-											if (!operatorValue.IsRepeatable && operatorValue.IsDeterministic)
-												operatorValue.IsDeterministic = false;
-											if (!operatorValue.IsDeterministic && operatorValue.IsLiteral)
-												operatorValue.IsLiteral = false;
-
-											plan.CatalogDeviceSession.UpdateCatalogObject(operatorValue);
 										}
 										finally
 										{
-											localPlan.PopSecurityContext();
+											localPlan.Symbols.PopWindow();
 										}
+
+										BindAggregateOperatorBlock(plan, operatorValue);
+
+										/*
+										localPlan.Symbols.PushWindow(0);
+										try
+										{
+											localPlan.Symbols.Push(new Symbol(Keywords.Result, operatorValue.ReturnDataType));
+
+											if (operatorValue.Initialization.ClassDefinition == null)
+												initializationNode = OptimizeNode(localPlan, initializationNode, false);
+												
+											if (operatorValue.Aggregation.ClassDefinition == null)
+											{
+												localPlan.Symbols.PushFrame();
+												try
+												{
+													foreach (Schema.Operand operand in operatorValue.Operands)
+														localPlan.Symbols.Push(new Symbol(operand.Name, operand.DataType, operand.Modifier == Modifier.Const));
+
+													aggregationNode = OptimizeNode(localPlan, aggregationNode, false);
+												}
+												finally
+												{
+													localPlan.Symbols.PopFrame();
+												}
+											}
+
+											if (operatorValue.Finalization.ClassDefinition == null)
+												finalizationNode = OptimizeNode(localPlan, finalizationNode, false);
+										}
+										finally
+										{
+											localPlan.Symbols.PopWindow();
+										}
+										*/
+
+										localPlan.CheckCompiled();
+
+										if (operatorValue.Initialization.BlockNode != null)
+										{
+											operatorValue.Initialization.StackDisplacement = initializationDisplacement;
+										}
+											
+										operatorValue.DetermineRemotable(plan.CatalogDeviceSession);
+										operatorValue.IsRemotable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsRemotable", operatorValue.IsRemotable.ToString()));
+										operatorValue.IsLiteral = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsLiteral", operatorValue.IsLiteral.ToString()));
+										operatorValue.IsFunctional = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsFunctional", operatorValue.IsFunctional.ToString()));
+										operatorValue.IsDeterministic = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsDeterministic", operatorValue.IsDeterministic.ToString()));
+										operatorValue.IsRepeatable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsRepeatable", operatorValue.IsRepeatable.ToString()));
+										operatorValue.IsNilable = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsNilable", operatorValue.IsNilable.ToString()));
+											
+										if (!operatorValue.IsRepeatable && operatorValue.IsDeterministic)
+											operatorValue.IsDeterministic = false;
+										if (!operatorValue.IsDeterministic && operatorValue.IsLiteral)
+											operatorValue.IsLiteral = false;
+
+										plan.CatalogDeviceSession.UpdateCatalogObject(operatorValue);
 									}
 									finally
 									{
-										localPlan.PopStatementContext();
+										localPlan.PopSecurityContext();
 									}
 								}
 								finally
 								{
-									localPlan.PopCreationObject();
+									localPlan.PopStatementContext();
 								}
 							}
 							finally
 							{
-								localPlan.PopATCreationContext();
+								localPlan.PopCreationObject();
 							}
 						}
 						finally
 						{
-							plan.Messages.AddRange(localPlan.Messages);
-							localPlan.Dispose();
+							localPlan.PopATCreationContext();
 						}
-
-						operatorValue.ShouldRecompile = false;
 					}
 					finally
 					{
-						if (transaction != null)
-							transaction.PopGlobalContext();
+						plan.Messages.AddRange(localPlan.Messages);
+						localPlan.Dispose();
 					}
+
+					operatorValue.ShouldRecompile = false;
 				}
 				finally
 				{
-					if (transaction != null)
-						Monitor.Exit(transaction);
+					if (!isATObject)
+						plan.PopGlobalContext();
 				}
 			}
 			finally
@@ -14199,52 +14156,39 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			if ((sourceNode.Order == null) || !searchOrder.Equivalent(sourceNode.Order) || !sourceNode.Supports(CursorCapability.Searchable))
 			{
-				ApplicationTransaction transaction = null;
-				if (plan.ApplicationTransactionID != Guid.Empty)
-					transaction = plan.GetApplicationTransaction();
+				plan.PushGlobalContext();
 				try
 				{
-					if (transaction != null)
-						transaction.PushGlobalContext();
+					plan.PushCursorContext(new CursorContext(sourceNode.CursorType, sourceNode.CursorCapabilities | CursorCapability.Searchable, sourceNode.CursorIsolation));
 					try
 					{
-						plan.PushCursorContext(new CursorContext(sourceNode.CursorType, sourceNode.CursorCapabilities | CursorCapability.Searchable, sourceNode.CursorIsolation));
-						try
+						BaseOrderNode node = Compiler.EmitOrderNode(plan, sourceNode, searchOrder, true) as BaseOrderNode;
+						node.InferPopulateNode(plan); // The A/T populate node, if any, should be used from the source node for the order
+						node.DeterminePotentialDevice(plan);
+						node.DetermineDevice(plan); // doesn't call binding because the source for the order is already bound, only needs to determine the device for the newly created order node.
+						node.DetermineAccessPath(plan);
+						if (!node.Supports(CursorCapability.Searchable))
 						{
-							BaseOrderNode node = Compiler.EmitOrderNode(plan, sourceNode, searchOrder, true) as BaseOrderNode;
-							node.InferPopulateNode(plan); // The A/T populate node, if any, should be used from the source node for the order
+							if (node.DeviceSupported)
+								node = Compiler.EmitBrowseNode(plan, sourceNode, searchOrder, true) as BaseOrderNode;
+							else
+								node = Compiler.EmitCopyNode(plan, sourceNode, searchOrder) as BaseOrderNode;
+							node.InferPopulateNode(plan);
 							node.DeterminePotentialDevice(plan);
-							node.DetermineDevice(plan); // doesn't call binding because the source for the order is already bound, only needs to determine the device for the newly created order node.
+							node.DetermineDevice(plan);
 							node.DetermineAccessPath(plan);
-							if (!node.Supports(CursorCapability.Searchable))
-							{
-								if (node.DeviceSupported)
-									node = Compiler.EmitBrowseNode(plan, sourceNode, searchOrder, true) as BaseOrderNode;
-								else
-									node = Compiler.EmitCopyNode(plan, sourceNode, searchOrder) as BaseOrderNode;
-								node.InferPopulateNode(plan);
-								node.DeterminePotentialDevice(plan);
-								node.DetermineDevice(plan);
-								node.DetermineAccessPath(plan);
-							}
+						}
 							
-							return node;
-						}
-						finally
-						{
-							plan.PopCursorContext();
-						}
+						return node;
 					}
 					finally
 					{
-						if (transaction != null)
-							transaction.PopGlobalContext();
+						plan.PopCursorContext();
 					}
 				}
 				finally
 				{
-					if (transaction != null)
-						Monitor.Exit(transaction);
+					plan.PopGlobalContext();
 				}
 			}
 			return sourceNode;

@@ -1161,49 +1161,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.ServerProcess.IsInsert = false;
 				try
 				{
-					ApplicationTransaction transaction = null;
-					if ((program.ServerProcess.ApplicationTransactionID != Guid.Empty) && !Operator.ShouldTranslate)
-						transaction = program.ServerProcess.GetApplicationTransaction();
+					if (!Operator.ShouldTranslate)
+						program.ServerProcess.PushGlobalContext();
 					try
 					{
-						if (transaction != null)
-							transaction.PushGlobalContext();
+						// Prepare the result
+						if (_allocateResultNode != null)
+							_allocateResultNode.Execute(program);
+
+						// Record the stack depth
+						int stackDepth = program.Stack.Count;
+
 						try
 						{
-							// Prepare the result
-							if (_allocateResultNode != null)
-								_allocateResultNode.Execute(program);
-
-							// Record the stack depth
-							int stackDepth = program.Stack.Count;
-
-							try
-							{
-								Operator.Block.BlockNode.Execute(program);
-							}
-							catch (ExitError){}
-							
-							// Pass any var arguments back out to the instruction
-							for (int index = 0; index < Operator.Operands.Count; index++)
-								if (Operator.Operands[index].Modifier == Modifier.Var)
-									arguments[index] = program.Stack[program.Stack.Count - stackDepth + (Operator.Operands.Count + (_allocateResultNode != null ? 1 : 0) - 1 - index)];
-							
-							// Return the result
-							if (_allocateResultNode != null)
-								return program.Stack[program.Stack.Count - stackDepth];
-
-							return null;
+							Operator.Block.BlockNode.Execute(program);
 						}
-						finally
-						{
-							if (transaction != null)
-								transaction.PopGlobalContext();
-						}
+						catch (ExitError){}
+							
+						// Pass any var arguments back out to the instruction
+						for (int index = 0; index < Operator.Operands.Count; index++)
+							if (Operator.Operands[index].Modifier == Modifier.Var)
+								arguments[index] = program.Stack[program.Stack.Count - stackDepth + (Operator.Operands.Count + (_allocateResultNode != null ? 1 : 0) - 1 - index)];
+							
+						// Return the result
+						if (_allocateResultNode != null)
+							return program.Stack[program.Stack.Count - stackDepth];
+
+						return null;
 					}
 					finally
 					{
-						if (transaction != null)
-							Monitor.Exit(transaction);
+						if (!Operator.ShouldTranslate)
+							program.ServerProcess.PopGlobalContext();
 					}
 				}
 				finally

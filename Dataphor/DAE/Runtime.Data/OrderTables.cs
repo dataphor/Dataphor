@@ -557,28 +557,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				if (!Node.HasBrowseVariant(originIndex, forward, localInclusive))
 				{
-					if (Program.ServerProcess.ApplicationTransactionID != Guid.Empty)
+					Program.ServerProcess.PushGlobalContext();
+					try
 					{
-						ApplicationTransaction transaction = Program.ServerProcess.GetApplicationTransaction();
-						try
-						{
-							transaction.PushGlobalContext();
-							try
-							{
-								Node.CompileBrowseVariant(Program, originIndex, forward, localInclusive);
-							}
-							finally
-							{
-								transaction.PopGlobalContext();
-							}
-						}
-						finally
-						{
-							Monitor.Exit(transaction);
-						}
-					}
-					else
 						Node.CompileBrowseVariant(Program, originIndex, forward, localInclusive);
+					}
+					finally
+					{
+						Program.ServerProcess.PopGlobalContext();
+					}
 				}
 			}
 		

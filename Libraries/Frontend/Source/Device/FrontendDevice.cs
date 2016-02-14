@@ -213,27 +213,14 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		
 		public static Schema.TableVar GetDocumentsTableVar(Plan plan)
 		{
-			ApplicationTransaction transaction = null;
-			if (plan.ApplicationTransactionID != Guid.Empty)
-				transaction = plan.GetApplicationTransaction();
+			plan.PushGlobalContext();
 			try
 			{
-				if (transaction != null)
-					transaction.PushGlobalContext();
-				try
-				{
-					return (Schema.TableVar)Compiler.ResolveCatalogIdentifier(plan, DocumentsTableVarName, true);
-				}
-				finally
-				{
-					if (transaction != null)
-						transaction.PopGlobalContext();
-				}
+				return (Schema.TableVar)Compiler.ResolveCatalogIdentifier(plan, DocumentsTableVarName, true);
 			}
 			finally
 			{
-				if (transaction != null)
-					Monitor.Exit(transaction);
+				plan.PopGlobalContext();
 			}
 		}
 

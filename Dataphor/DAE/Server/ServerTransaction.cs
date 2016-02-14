@@ -435,53 +435,40 @@ namespace Alphora.Dataphor.DAE.Server
 				builder.AppendFormat("{0} {1}", Keywords.ListSeparator, key.Columns[index].Name);
 			builder.Append("} };");
 
-			ApplicationTransaction transaction = null;
-			if (Process.ApplicationTransactionID != Guid.Empty)
-				transaction = Process.GetApplicationTransaction();
+			Process.PushGlobalContext();
 			try
 			{
-				if (transaction != null)
-					transaction.PushGlobalContext();
+				bool saveUsePlanCache = Process.ServerSession.SessionInfo.UsePlanCache;
+				Process.ServerSession.SessionInfo.UsePlanCache = false;
 				try
 				{
-					bool saveUsePlanCache = Process.ServerSession.SessionInfo.UsePlanCache;
-					Process.ServerSession.SessionInfo.UsePlanCache = false;
+					// Push a loading context to prevent the DDL from being logged.
+					Process.PushLoadingContext(new LoadingContext(Process.ServerSession.User, true));
 					try
 					{
-						// Push a loading context to prevent the DDL from being logged.
-						Process.PushLoadingContext(new LoadingContext(Process.ServerSession.User, true));
+						IServerStatementPlan plan = ((IServerProcess)Process).PrepareStatement(builder.ToString(), null);
 						try
 						{
-							IServerStatementPlan plan = ((IServerProcess)Process).PrepareStatement(builder.ToString(), null);
-							try
-							{
-								plan.Execute(null);
-							}
-							finally
-							{
-								((IServerProcess)Process).UnprepareStatement(plan);
-							}
+							plan.Execute(null);
 						}
 						finally
 						{
-							Process.PopLoadingContext();
+							((IServerProcess)Process).UnprepareStatement(plan);
 						}
 					}
 					finally
 					{
-						Process.ServerSession.SessionInfo.UsePlanCache = saveUsePlanCache;
+						Process.PopLoadingContext();
 					}
 				}
 				finally
 				{
-					if (transaction != null)
-						transaction.PopGlobalContext();
+					Process.ServerSession.SessionInfo.UsePlanCache = saveUsePlanCache;
 				}
 			}
 			finally
 			{
-				if (transaction != null)
-					Monitor.Exit(transaction);
+				Process.PopGlobalContext();
 			}
 			
 			Schema.SessionObject sessionObject = (Schema.SessionObject)Process.ServerSession.SessionObjects[_checkTableName];
@@ -624,40 +611,27 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private void OpenCheckTable()
 		{
-			ApplicationTransaction transaction = null;
-			if (Process.ApplicationTransactionID != Guid.Empty)
-				transaction = Process.GetApplicationTransaction();
+			Process.PushGlobalContext();
 			try
 			{
-				if (transaction != null)
-					transaction.PushGlobalContext();
+				bool saveUsePlanCache = Process.ServerSession.SessionInfo.UsePlanCache;
+				Process.ServerSession.SessionInfo.UsePlanCache = false;
 				try
 				{
-					bool saveUsePlanCache = Process.ServerSession.SessionInfo.UsePlanCache;
-					Process.ServerSession.SessionInfo.UsePlanCache = false;
-					try
-					{
-						_plan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} capabilities {{ navigable, searchable, updateable }} type dynamic;", _checkTableName), null);
-						_transactionParams = new DataParams();
-						_transactionParam = new DataParam("ATransactionIndex", Process.DataTypes.SystemInteger, Modifier.In, 0);
-						_transactionParams.Add(_transactionParam);
-						_transactionPlan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} where {1} = ATransactionIndex capabilities {{ navigable, searchable, updateable }} type dynamic;", _checkTableName, _transactionIndexColumnName), _transactionParams);
-					}
-					finally
-					{
-						Process.ServerSession.SessionInfo.UsePlanCache = saveUsePlanCache;
-					}
+					_plan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} capabilities {{ navigable, searchable, updateable }} type dynamic;", _checkTableName), null);
+					_transactionParams = new DataParams();
+					_transactionParam = new DataParam("ATransactionIndex", Process.DataTypes.SystemInteger, Modifier.In, 0);
+					_transactionParams.Add(_transactionParam);
+					_transactionPlan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} where {1} = ATransactionIndex capabilities {{ navigable, searchable, updateable }} type dynamic;", _checkTableName, _transactionIndexColumnName), _transactionParams);
 				}
 				finally
 				{
-					if (transaction != null)
-						transaction.PopGlobalContext();
+					Process.ServerSession.SessionInfo.UsePlanCache = saveUsePlanCache;
 				}
 			}
 			finally
 			{
-				if (transaction != null)
-					Monitor.Exit(transaction);
+				Process.PopGlobalContext();
 			}
 		}
 		
@@ -680,56 +654,43 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if (_checkTable != null)
 			{
-				ApplicationTransaction transaction = null;
-				if (Process.ApplicationTransactionID != Guid.Empty)
-					transaction = Process.GetApplicationTransaction();
+				Process.PushGlobalContext();
 				try
 				{
-					if (transaction != null)
-						transaction.PushGlobalContext();
+					Plan plan = new Plan(Process);
 					try
 					{
-						Plan plan = new Plan(Process);
+						plan.EnterTimeStampSafeContext();
 						try
 						{
-							plan.EnterTimeStampSafeContext();
+							// Push a loading context to prevent the DDL from being logged.
+							Process.PushLoadingContext(new LoadingContext(Process.ServerSession.User, true));
 							try
 							{
-								// Push a loading context to prevent the DDL from being logged.
-								Process.PushLoadingContext(new LoadingContext(Process.ServerSession.User, true));
-								try
-								{
-									PlanNode planNode = Compiler.Compile(plan, new DropTableStatement(_checkTableName));
-									plan.CheckCompiled();
-									Program program = new Program(Process);
-									program.Code = planNode;
-									program.Execute(null);
-								}
-								finally
-								{
-									Process.PopLoadingContext();
-								}
+								PlanNode planNode = Compiler.Compile(plan, new DropTableStatement(_checkTableName));
+								plan.CheckCompiled();
+								Program program = new Program(Process);
+								program.Code = planNode;
+								program.Execute(null);
 							}
 							finally
 							{
-								plan.ExitTimeStampSafeContext();
+								Process.PopLoadingContext();
 							}
 						}
 						finally
 						{
-							plan.Dispose();
+							plan.ExitTimeStampSafeContext();
 						}
 					}
 					finally
 					{
-						if (transaction != null)
-							transaction.PopGlobalContext();
+						plan.Dispose();
 					}
 				}
 				finally
 				{
-					if (transaction != null)
-						Monitor.Exit(transaction);
+					Process.PopGlobalContext();
 				}
 			}
 		}

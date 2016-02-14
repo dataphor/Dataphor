@@ -1355,12 +1355,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ServerProcess.EnterTimeStampSafeContext();
 				try
 				{
-					ApplicationTransaction.ApplicationTransaction aT = null;
-					if (!isATObject && (ServerProcess.ApplicationTransactionID != Guid.Empty))
-					{
-						aT = ServerProcess.GetApplicationTransaction();
-						aT.PushGlobalContext();
-					}
+					if (!isATObject)
+						ServerProcess.PushGlobalContext();
 					try
 					{
 						ParserMessages parserMessages = new ParserMessages();
@@ -1412,11 +1408,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 					finally
 					{
-						if (aT != null)
-						{
-							aT.PopGlobalContext();
-							Monitor.Exit(aT);
-						}
+						if (!isATObject)
+							ServerProcess.PopGlobalContext();
 					}
 				}
 				finally

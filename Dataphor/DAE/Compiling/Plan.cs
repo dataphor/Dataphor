@@ -474,6 +474,17 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			return _serverProcess.InLoadingContext();
 		}
+
+		// GlobalContext
+		public void PushGlobalContext()
+		{
+			_serverProcess.PushGlobalContext();
+		}
+
+		public void PopGlobalContext()
+		{
+			_serverProcess.PopGlobalContext();
+		}
 		
 		// A Temporary catalog where catalog objects are registered during compilation
 		protected Schema.Catalog _planCatalog;

@@ -754,30 +754,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (!(((TableNode)Nodes[0]).CursorType == CursorType.Static))
 				{
 					Nodes[0] = Compiler.EmitCopyNode(plan, (TableNode)Nodes[0]);
-					ApplicationTransaction transaction = null;
-					if (plan.ApplicationTransactionID != Guid.Empty)
-						transaction = plan.GetApplicationTransaction();
+					plan.PushGlobalContext();
 					try
 					{
-						if (transaction != null)
-							transaction.PushGlobalContext();
-						try
-						{
-							((TableNode)Nodes[0]).InferPopulateNode(plan);
-							Nodes[0].DeterminePotentialDevice(plan);
-							Nodes[0].DetermineDevice(plan);
-							Nodes[0].DetermineAccessPath(plan);
-						}
-						finally
-						{
-							if (transaction != null)
-								transaction.PopGlobalContext();
-						}
+						((TableNode)Nodes[0]).InferPopulateNode(plan);
+						Nodes[0].DeterminePotentialDevice(plan);
+						Nodes[0].DetermineDevice(plan);
+						Nodes[0].DetermineAccessPath(plan);
 					}
 					finally
 					{
-						if (transaction != null)
-							Monitor.Exit(transaction);
+						plan.PopGlobalContext();
 					}
 				}
 			}
@@ -1127,30 +1114,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (!(((TableNode)Nodes[0]).CursorType == CursorType.Static))
 				{
 					Nodes[0] = Compiler.EmitCopyNode(plan, (TableNode)Nodes[0]);
-					ApplicationTransaction transaction = null;
-					if (plan.ApplicationTransactionID != Guid.Empty)
-						transaction = plan.GetApplicationTransaction();
+					plan.PushGlobalContext();
 					try
 					{
-						if (transaction != null)
-							transaction.PushGlobalContext();
-						try
-						{
-							((TableNode)Nodes[0]).InferPopulateNode(plan);
-							Nodes[0].DeterminePotentialDevice(plan);
-							Nodes[0].DetermineDevice(plan);
-							Nodes[0].DetermineAccessPath(plan);
-						}
-						finally
-						{
-							if (transaction != null)
-								transaction.PopGlobalContext();
-						}
+						((TableNode)Nodes[0]).InferPopulateNode(plan);
+						Nodes[0].DeterminePotentialDevice(plan);
+						Nodes[0].DetermineDevice(plan);
+						Nodes[0].DetermineAccessPath(plan);
 					}
 					finally
 					{
-						if (transaction != null)
-							Monitor.Exit(transaction);
+						plan.PopGlobalContext();
 					}
 				}
 			}
@@ -2022,6 +1996,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							insertStatement,
 							null
 						);
+
 					ApplicationTransaction transaction = plan.GetApplicationTransaction();
 					try
 					{

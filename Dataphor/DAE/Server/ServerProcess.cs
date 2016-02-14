@@ -2023,6 +2023,29 @@ namespace Alphora.Dataphor.DAE.Server
 			return null;
 		}
 
+		// Global Context
+		private System.Collections.Generic.Stack<ApplicationTransaction> _applicationTransactions = new System.Collections.Generic.Stack<ApplicationTransaction>();
+		public void PushGlobalContext()
+		{
+			ApplicationTransaction transaction = null;
+			if (ApplicationTransactionID != Guid.Empty)
+			{
+				transaction = GetApplicationTransaction();
+				transaction.PushGlobalContext();
+				_applicationTransactions.Push(transaction);
+			}
+		}
+
+		public void PopGlobalContext()
+		{
+			if (_applicationTransactions.Count > 0)
+			{
+				ApplicationTransaction transaction = _applicationTransactions.Pop();
+				transaction.PopGlobalContext();
+				Monitor.Exit(transaction);
+			}
+		}
+
 		private int _reconciliationDisabledCount = 0;
 		public void DisableReconciliation()
 		{

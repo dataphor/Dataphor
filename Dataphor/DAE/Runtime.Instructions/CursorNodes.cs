@@ -99,17 +99,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			plan.PushCursorContext(_cursorContext);
 			try
 			{
-				ApplicationTransaction transaction = null;
-				if (plan.ApplicationTransactionID != Guid.Empty)
-					transaction = plan.GetApplicationTransaction();
+				plan.PushGlobalContext();
 				try
 				{
-					if (transaction != null)
-						transaction.PushGlobalContext();
-					try
+					// if the requested cursor type is static, ensure that is the case
+					if ((plan.CursorContext.CursorType == DAE.CursorType.Static) && (sourceNode.CursorType != DAE.CursorType.Static))
 					{
-						// if the requested cursor type is static, ensure that is the case
-						if ((plan.CursorContext.CursorType == DAE.CursorType.Static) && (sourceNode.CursorType != DAE.CursorType.Static))
+						sourceNode = (TableNode)Compiler.EmitCopyNode(plan, sourceNode);
+						sourceNode.InferPopulateNode(plan);
+						sourceNode.DeterminePotentialDevice(plan);
+						sourceNode.DetermineDevice(plan);
+						sourceNode.DetermineAccessPath(plan);
+					}
+							
+					// Navigable
+					if ((plan.CursorContext.CursorCapabilities & CursorCapability.Navigable) != 0)
+						sourceNode.CheckCapability(CursorCapability.Navigable);
+							
+					// If the cursor is requested countable, it must be satisfied by a copy node
+					if ((plan.CursorContext.CursorCapabilities & CursorCapability.Countable) != 0)
+					{
+						if (!sourceNode.Supports(CursorCapability.Countable))
 						{
 							sourceNode = (TableNode)Compiler.EmitCopyNode(plan, sourceNode);
 							sourceNode.InferPopulateNode(plan);
@@ -117,59 +127,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							sourceNode.DetermineDevice(plan);
 							sourceNode.DetermineAccessPath(plan);
 						}
-							
-						// Navigable
-						if ((plan.CursorContext.CursorCapabilities & CursorCapability.Navigable) != 0)
-							sourceNode.CheckCapability(CursorCapability.Navigable);
-							
-						// If the cursor is requested countable, it must be satisfied by a copy node
-						if ((plan.CursorContext.CursorCapabilities & CursorCapability.Countable) != 0)
-						{
-							if (!sourceNode.Supports(CursorCapability.Countable))
-							{
-								sourceNode = (TableNode)Compiler.EmitCopyNode(plan, sourceNode);
-								sourceNode.InferPopulateNode(plan);
-								sourceNode.DeterminePotentialDevice(plan);
-								sourceNode.DetermineDevice(plan);
-								sourceNode.DetermineAccessPath(plan);
-							}
-						}
-
-						// BackwardsNavigable
-						// Bookmarkable
-						// Searchable
-						if
-							(
-								(((plan.CursorContext.CursorCapabilities & CursorCapability.BackwardsNavigable) != 0) && !sourceNode.Supports(CursorCapability.BackwardsNavigable)) ||
-								(((plan.CursorContext.CursorCapabilities & CursorCapability.Bookmarkable) != 0) && !sourceNode.Supports(CursorCapability.Bookmarkable)) ||
-								(((plan.CursorContext.CursorCapabilities & CursorCapability.Searchable) != 0) && !sourceNode.Supports(CursorCapability.Searchable))
-							)
-						{
-							sourceNode = (TableNode)Compiler.EmitBrowseNode(plan, sourceNode, true);
-							sourceNode.InferPopulateNode(plan);
-							sourceNode.DeterminePotentialDevice(plan);
-							sourceNode.DetermineDevice(plan);
-							sourceNode.DetermineAccessPath(plan);
-						}
-
-						// Updateable
-						if ((plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) != 0)
-							sourceNode.CheckCapability(CursorCapability.Updateable);
-
-						// Truncateable
-						if ((plan.CursorContext.CursorCapabilities & CursorCapability.Truncateable) != 0)
-							sourceNode.CheckCapability(CursorCapability.Truncateable);
 					}
-					finally
+
+					// BackwardsNavigable
+					// Bookmarkable
+					// Searchable
+					if
+						(
+							(((plan.CursorContext.CursorCapabilities & CursorCapability.BackwardsNavigable) != 0) && !sourceNode.Supports(CursorCapability.BackwardsNavigable)) ||
+							(((plan.CursorContext.CursorCapabilities & CursorCapability.Bookmarkable) != 0) && !sourceNode.Supports(CursorCapability.Bookmarkable)) ||
+							(((plan.CursorContext.CursorCapabilities & CursorCapability.Searchable) != 0) && !sourceNode.Supports(CursorCapability.Searchable))
+						)
 					{
-						if (transaction != null)
-							transaction.PopGlobalContext();
+						sourceNode = (TableNode)Compiler.EmitBrowseNode(plan, sourceNode, true);
+						sourceNode.InferPopulateNode(plan);
+						sourceNode.DeterminePotentialDevice(plan);
+						sourceNode.DetermineDevice(plan);
+						sourceNode.DetermineAccessPath(plan);
 					}
+
+					// Updateable
+					if ((plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) != 0)
+						sourceNode.CheckCapability(CursorCapability.Updateable);
+
+					// Truncateable
+					if ((plan.CursorContext.CursorCapabilities & CursorCapability.Truncateable) != 0)
+						sourceNode.CheckCapability(CursorCapability.Truncateable);
 				}
 				finally
 				{
-					if (transaction != null)
-						Monitor.Exit(transaction);
+					plan.PopGlobalContext();
 				}
 			}
 			finally

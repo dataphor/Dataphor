@@ -697,26 +697,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			if (_populateNode != null)
 			{
-				ApplicationTransaction transaction = plan.GetApplicationTransaction();
+				plan.PushGlobalContext();
 				try
 				{
-					transaction.PushGlobalContext();
-					try
-					{
-						#if USEVISIT
-						_populateNode = (TableNode)visitor.Visit(plan, _populateNode);
-						#else
-						_populateNode.BindingTraversal(plan, visitor);
-						#endif
-					}
-					finally
-					{
-						transaction.PopGlobalContext();
-					}
+					#if USEVISIT
+					_populateNode = (TableNode)visitor.Visit(plan, _populateNode);
+					#else
+					_populateNode.BindingTraversal(plan, visitor);
+					#endif
 				}
 				finally
 				{
-					Monitor.Exit(transaction);
+					plan.PopGlobalContext();
 				}
 			}
 		}
@@ -864,111 +856,98 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected PlanNode CompileSelectNode(Program program, bool fullSelect, bool outsideAT)
 		{
-			ApplicationTransaction transaction = null;
-			if (program.ServerProcess.ApplicationTransactionID != Guid.Empty)
-				transaction = program.ServerProcess.GetApplicationTransaction();
+			Plan plan = new Plan(program.ServerProcess);
 			try
 			{
-				if (transaction != null)
-					transaction.PushGlobalContext();
+				plan.PushGlobalContext();
 				try
 				{
-					Plan plan = new Plan(program.ServerProcess);
+					plan.PushATCreationContext();
 					try
 					{
-						plan.PushATCreationContext();
+						PushSymbols(plan, _symbols);
 						try
 						{
-							PushSymbols(plan, _symbols);
+							// Generate a select statement for use in optimistic concurrency checks
+							plan.EnterRowContext();
 							try
 							{
-								// Generate a select statement for use in optimistic concurrency checks
-								plan.EnterRowContext();
+								plan.Symbols.Push(new Symbol("ASelectRow", DataType.RowType));
 								try
 								{
-									plan.Symbols.Push(new Symbol("ASelectRow", DataType.RowType));
+									plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable | (CursorCapabilities & CursorCapability.Updateable), ((CursorCapabilities & CursorCapability.Updateable) != 0) ? CursorIsolation.Isolated : CursorIsolation.None));
 									try
 									{
-										plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable | (CursorCapabilities & CursorCapability.Updateable), ((CursorCapabilities & CursorCapability.Updateable) != 0) ? CursorIsolation.Isolated : CursorIsolation.None));
+										if (TableVar.Owner != null)
+											plan.PushSecurityContext(new SecurityContext(TableVar.Owner));
 										try
 										{
-											if (TableVar.Owner != null)
-												plan.PushSecurityContext(new SecurityContext(TableVar.Owner));
-											try
+											Schema.Columns columns;
+											if (fullSelect)
+												columns = DataType.RowType.Columns;
+											else
 											{
-												Schema.Columns columns;
-												if (fullSelect)
-													columns = DataType.RowType.Columns;
-												else
-												{
-													columns = new Schema.Columns();
-													Schema.Key key = Compiler.FindClusteringKey(plan, TableVar);
-													foreach (Schema.TableVarColumn column in key.Columns)
-														columns.Add(column.Column);
-												}
-												return
-													Compiler.Compile
+												columns = new Schema.Columns();
+												Schema.Key key = Compiler.FindClusteringKey(plan, TableVar);
+												foreach (Schema.TableVarColumn column in key.Columns)
+													columns.Add(column.Column);
+											}
+											return
+												Compiler.Compile
+												(
+													plan,
+													new RestrictExpression
 													(
-														plan,
-														new RestrictExpression
+														GetExpression(outsideAT),
+														Compiler.BuildOptimisticRowEqualExpression
 														(
-															GetExpression(outsideAT),
-															Compiler.BuildOptimisticRowEqualExpression
-															(
-																plan, 
-																"",
-																"ASelectRow",
-																columns
-															)
+															plan, 
+															"",
+															"ASelectRow",
+															columns
 														)
-													);
-											}
-											finally
-											{
-												if (TableVar.Owner != null)
-													plan.PopSecurityContext();
-											}
+													)
+												);
 										}
 										finally
 										{
-											plan.PopCursorContext();
+											if (TableVar.Owner != null)
+												plan.PopSecurityContext();
 										}
 									}
 									finally
 									{
-										plan.Symbols.Pop();
+										plan.PopCursorContext();
 									}
 								}
 								finally
 								{
-									plan.ExitRowContext();
+									plan.Symbols.Pop();
 								}
 							}
 							finally
 							{
-								PopSymbols(plan, _symbols);
+								plan.ExitRowContext();
 							}
 						}
 						finally
 						{
-							plan.PopATCreationContext();
+							PopSymbols(plan, _symbols);
 						}
 					}
 					finally
 					{
-						plan.Dispose();
+						plan.PopATCreationContext();
 					}
 				}
 				finally
 				{
-					if (transaction != null)
-						transaction.PopGlobalContext();
+					plan.PopGlobalContext();
 				}
 			}
 			finally
 			{
-				if (transaction != null)
-					Monitor.Exit(transaction);
+				plan.Dispose();
 			}
 		}
 		

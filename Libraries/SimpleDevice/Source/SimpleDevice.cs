@@ -170,44 +170,52 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 					plan.PushSecurityContext(new SecurityContext(tableVar.Owner));
 					try
 					{
-						Program program = new Program(process);
-						program.Code = Compiler.Compile(plan, new IdentifierExpression(tableVar.Name), true).ExtractNode<BaseTableVarNode>();
-						program.Start(null);
+						plan.PushGlobalContext();
 						try
 						{
-							ITable table = (ITable)program.Code.Execute(program);
+							Program program = new Program(process);
+							program.Code = Compiler.Compile(plan, new IdentifierExpression(tableVar.Name), true).ExtractNode<BaseTableVarNode>();
+							program.Start(null);
 							try
 							{
-								table.Open();
-								Row row = new Row(program.ValueManager, tableVar.DataType.CreateRowType());
+								ITable table = (ITable)program.Code.Execute(program);
 								try
 								{
-									string fileName = GetTableVarFileName(tableVar);
-									FileUtility.EnsureWriteable(fileName);
-									using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+									table.Open();
+									Row row = new Row(program.ValueManager, tableVar.DataType.CreateRowType());
+									try
 									{
-										while (table.Next())
+										string fileName = GetTableVarFileName(tableVar);
+										FileUtility.EnsureWriteable(fileName);
+										using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
 										{
-											table.Select(row);
-											byte[] rowValue = row.AsPhysical;
-											StreamUtility.WriteInteger(stream, rowValue.Length);
-											stream.Write(rowValue, 0, rowValue.Length);
+											while (table.Next())
+											{
+												table.Select(row);
+												byte[] rowValue = row.AsPhysical;
+												StreamUtility.WriteInteger(stream, rowValue.Length);
+												stream.Write(rowValue, 0, rowValue.Length);
+											}
 										}
+									}
+									finally
+									{
+										row.Dispose();
 									}
 								}
 								finally
 								{
-									row.Dispose();
+									table.Dispose();
 								}
 							}
 							finally
 							{
-								table.Dispose();
+								program.Stop(null);
 							}
 						}
 						finally
 						{
-							program.Stop(null);
+							plan.PopGlobalContext();
 						}
 					}
 					finally
