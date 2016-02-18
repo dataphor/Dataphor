@@ -10,5 +10,8 @@
 create operator GenerateTypes() : String class "FHIR.Core.GenerateTypesNode";
 
 ExecuteScript("FHIR.Core", "Types.Core");
+
+//select GenerateTypes()
+
 ExecuteScript("FHIR.Core", "Types.Generated");
 
