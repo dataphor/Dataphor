@@ -5,13 +5,14 @@
 */
 using System;
 using System.Reflection;
-	
+
 using Alphora.Dataphor;
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using Hl7.Fhir.Model;
+using Newtonsoft.Json.Linq;
 
 namespace Alphora.Dataphor.FHIR.Core
 {
@@ -37,7 +38,29 @@ namespace Alphora.Dataphor.FHIR.Core
 			classes.Add(new SettingsItem("FHIR.Core.FHIRAsXMLSelectorNode", typeof(FHIRAsXMLSelectorNode).AssemblyQualifiedName));
 			classes.Add(new SettingsItem("FHIR.Core.FHIRAsXMLReadAccessorNode", typeof(FHIRAsXMLReadAccessorNode).AssemblyQualifiedName));
 			classes.Add(new SettingsItem("FHIR.Core.FHIRAsXMLWriteAccessorNode", typeof(FHIRAsXMLWriteAccessorNode).AssemblyQualifiedName));
-			
+
+			classes.Add(new SettingsItem("FHIR.Core.SatisfiesSearchParamNode", typeof(SatisfiesSearchParamNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.CurrentNode", typeof(NilaryCurrentNode).AssemblyQualifiedName));
+
+			classes.Add(new SettingsItem("Newtonsoft.Json.Linq.JObject", typeof(JObject).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.JSONObjectConveyor", typeof(JSONObjectConveyor).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicSelectorNode", typeof(DynamicSelectorNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicContentSelectorNode", typeof(DynamicContentSelectorNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicContentReadAccessorNode", typeof(DynamicContentReadAccessorNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicContentWriteAccessorNode", typeof(DynamicContentWriteAccessorNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicGetNode", typeof(DynamicGetNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicSetNode", typeof(DynamicSetNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicToListNode", typeof(DynamicToListNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicToBooleanNode", typeof(DynamicToBooleanNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicToByteNode", typeof(DynamicToByteNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicToShortNode", typeof(DynamicToShortNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicToIntegerNode", typeof(DynamicToIntegerNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicToLongNode", typeof(DynamicToLongNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicToStringNode", typeof(DynamicToStringNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicToDecimalNode", typeof(DynamicToDecimalNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicToTimeSpanNode", typeof(DynamicToTimeSpanNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicToDateTimeNode", typeof(DynamicToDateTimeNode).AssemblyQualifiedName));
+
 			return classes;
 		}
 	}

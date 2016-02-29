@@ -57,31 +57,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 				}
 
-				plan.EnterRowContext();
+				plan.Symbols.PushWindow(0);
 				try
 				{
-					#if USENAMEDROWVARIABLES
-					plan.Symbols.Push(new Symbol(Keywords.Left, (Schema.RowType)Nodes[0].DataType));
-					#else
-					Schema.RowType leftRowType = new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left);
-					APlan.Symbols.Push(new Symbol(String.Empty, leftRowType));
-					#endif
+					plan.EnterRowContext();
 					try
 					{
 						#if USENAMEDROWVARIABLES
-						plan.Symbols.Push(new Symbol(Keywords.Right, (Schema.RowType)Nodes[1].DataType));
+						plan.Symbols.Push(new Symbol(Keywords.Left, (Schema.RowType)Nodes[0].DataType));
 						#else
-						Schema.RowType rightRowType = new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right);
-						APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
+						Schema.RowType leftRowType = new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left);
+						APlan.Symbols.Push(new Symbol(String.Empty, leftRowType));
 						#endif
 						try
 						{
-							_comparisonNode = 
-								#if USENAMEDROWVARIABLES
-								Compiler.CompileExpression(plan, Compiler.BuildRowEqualExpression(plan, Keywords.Left, Keywords.Right, ((Schema.RowType)Nodes[0].DataType).Columns, ((Schema.RowType)Nodes[1].DataType).Columns));
-								#else
-								Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, leftRowType.Columns, rightRowType.Columns));
-								#endif
+							#if USENAMEDROWVARIABLES
+							plan.Symbols.Push(new Symbol(Keywords.Right, (Schema.RowType)Nodes[1].DataType));
+							#else
+							Schema.RowType rightRowType = new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right);
+							APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
+							#endif
+							try
+							{
+								_comparisonNode = 
+									#if USENAMEDROWVARIABLES
+									Compiler.CompileExpression(plan, Compiler.BuildRowEqualExpression(plan, Keywords.Left, Keywords.Right, ((Schema.RowType)Nodes[0].DataType).Columns, ((Schema.RowType)Nodes[1].DataType).Columns));
+									#else
+									Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, leftRowType.Columns, rightRowType.Columns));
+									#endif
+							}
+							finally
+							{
+								plan.Symbols.Pop();
+							}
 						}
 						finally
 						{
@@ -90,12 +98,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						plan.Symbols.Pop();
+						plan.ExitRowContext();
 					}
 				}
 				finally
 				{
-					plan.ExitRowContext();
+					plan.Symbols.PopWindow();
 				}
 			}
 		}
@@ -111,28 +119,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			if (_comparisonNode != null)
 			{
-				plan.EnterRowContext();
+				plan.Symbols.PushWindow(0);
 				try
 				{
-					#if USENAMEDROWVARIABLES
-					plan.Symbols.Push(new Symbol(Keywords.Left, (Schema.RowType)Nodes[0].DataType));
-					#else
-					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left)));
-					#endif
+					plan.EnterRowContext();
 					try
 					{
 						#if USENAMEDROWVARIABLES
-						plan.Symbols.Push(new Symbol(Keywords.Right, (Schema.RowType)Nodes[1].DataType));
+						plan.Symbols.Push(new Symbol(Keywords.Left, (Schema.RowType)Nodes[0].DataType));
 						#else
-						APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right)));
+						APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left)));
 						#endif
 						try
 						{
-							#if USEVISIT
-							_comparisonNode = visitor.Visit(plan, _comparisonNode);
+							#if USENAMEDROWVARIABLES
+							plan.Symbols.Push(new Symbol(Keywords.Right, (Schema.RowType)Nodes[1].DataType));
 							#else
-							_comparisonNode.BindingTraversal(plan, visitor);
+							APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right)));
 							#endif
+							try
+							{
+								#if USEVISIT
+								_comparisonNode = visitor.Visit(plan, _comparisonNode);
+								#else
+								_comparisonNode.BindingTraversal(plan, visitor);
+								#endif
+							}
+							finally
+							{
+								plan.Symbols.Pop();
+							}
 						}
 						finally
 						{
@@ -141,12 +157,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						plan.Symbols.Pop();
+						plan.ExitRowContext();
 					}
 				}
 				finally
 				{
-					plan.ExitRowContext();
+					plan.Symbols.PopWindow();
 				}
 			}
 		}
@@ -164,13 +180,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			if (_comparisonNode != null)
 			{
-				program.Stack.Push(leftValue);
+				program.Stack.PushWindow(0);
 				try
 				{
-					program.Stack.Push(rightValue);
+					program.Stack.Push(leftValue);
 					try
 					{
-						return _comparisonNode.Execute(program);
+						program.Stack.Push(rightValue);
+						try
+						{
+							return _comparisonNode.Execute(program);
+						}
+						finally
+						{
+							program.Stack.Pop();
+						}
 					}
 					finally
 					{
@@ -179,7 +203,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					program.Stack.Pop();
+					program.Stack.PopWindow();
 				}
 			}
 			else
@@ -219,31 +243,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 
-			plan.EnterRowContext();
+			plan.Symbols.PushWindow(0);
 			try
 			{
-				#if USENAMEDROWVARIABLES
-				plan.Symbols.Push(new Symbol(Keywords.Left, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType));
-				#else
-				Schema.RowType leftRowType = new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left);
-				APlan.Symbols.Push(new Symbol(String.Empty, leftRowType));
-				#endif
+				plan.EnterRowContext();
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					plan.Symbols.Push(new Symbol(String.Empty, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
+					plan.Symbols.Push(new Symbol(Keywords.Left, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType));
 					#else
-					Schema.RowType rightRowType = new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right);
-					APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
+					Schema.RowType leftRowType = new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left);
+					APlan.Symbols.Push(new Symbol(String.Empty, leftRowType));
 					#endif
 					try
 					{
-						_comparisonNode = 
-							#if USENAMEDROWVARIABLES
-							Compiler.CompileExpression(plan, Compiler.BuildRowEqualExpression(plan, Keywords.Left, Keywords.Right, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns));
-							#else
-							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, leftRowType.Columns, rightRowType.Columns));
-							#endif
+						#if USENAMEDROWVARIABLES
+						plan.Symbols.Push(new Symbol(String.Empty, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
+						#else
+						Schema.RowType rightRowType = new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right);
+						APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
+						#endif
+						try
+						{
+							_comparisonNode = 
+								#if USENAMEDROWVARIABLES
+								Compiler.CompileExpression(plan, Compiler.BuildRowEqualExpression(plan, Keywords.Left, Keywords.Right, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns));
+								#else
+								Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, leftRowType.Columns, rightRowType.Columns));
+								#endif
+						}
+						finally
+						{
+							plan.Symbols.Pop();
+						}
 					}
 					finally
 					{
@@ -252,12 +284,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					plan.Symbols.Pop();
+					plan.ExitRowContext();
 				}
 			}
 			finally
 			{
-				plan.ExitRowContext();
+				plan.Symbols.PopWindow();
 			}
 		}
 
@@ -270,28 +302,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Nodes[0].BindingTraversal(plan, visitor);
 			Nodes[1].BindingTraversal(plan, visitor);
 			#endif
-			plan.EnterRowContext();
+			plan.Symbols.PushWindow(0);
 			try
 			{
-				#if USENAMEDROWVARIABLES
-				plan.Symbols.Push(new Symbol(Keywords.Left, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType));
-				#else
-				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left)));
-				#endif
+				plan.EnterRowContext();
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					plan.Symbols.Push(new Symbol(Keywords.Right, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
+					plan.Symbols.Push(new Symbol(Keywords.Left, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType));
 					#else
-					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right)));
+					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left)));
 					#endif
 					try
 					{
-						#if USEVISIT
-						_comparisonNode = visitor.Visit(plan, _comparisonNode);
+						#if USENAMEDROWVARIABLES
+						plan.Symbols.Push(new Symbol(Keywords.Right, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
 						#else
-						_comparisonNode.BindingTraversal(plan, visitor);
+						APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right)));
 						#endif
+						try
+						{
+							#if USEVISIT
+							_comparisonNode = visitor.Visit(plan, _comparisonNode);
+							#else
+							_comparisonNode.BindingTraversal(plan, visitor);
+							#endif
+						}
+						finally
+						{
+							plan.Symbols.Pop();
+						}
 					}
 					finally
 					{
@@ -300,12 +340,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					plan.Symbols.Pop();
+					plan.ExitRowContext();
 				}
 			}
 			finally
 			{
-				plan.ExitRowContext();
+				plan.Symbols.PopWindow();
 			}
 		}
 		
@@ -322,13 +362,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			object leftValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, leftVar);
 			object rightValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, rightVar);
-			program.Stack.Push(leftValue);
+			program.Stack.PushWindow(0);
 			try
 			{
-				program.Stack.Push(rightValue);
+				program.Stack.Push(leftValue);
 				try
 				{
-					return _comparisonNode.Execute(program);
+					program.Stack.Push(rightValue);
+					try
+					{
+						return _comparisonNode.Execute(program);
+					}
+					finally
+					{
+						program.Stack.Pop();
+					}
 				}
 				finally
 				{
@@ -337,7 +385,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				program.Stack.Pop();
+				program.Stack.PopWindow();
 			}
 		}
 	}

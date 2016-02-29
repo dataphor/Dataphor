@@ -14466,7 +14466,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			renameExpression.LinePos = localExpression.LinePos;
 			renameExpressions.Add(renameExpression);
 		}
-		
+
 		public static PlanNode CompileSpecifyExpression(Plan plan, SpecifyExpression expression)
 		{
 			PlanNode node = null;

@@ -109,6 +109,56 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 		}
 	}
 
+	// operator HTTP(const AVerb : String, const AURL : String, const AHeaders : table { Header : String, Value : String }, const ABody : String) : String
+	public class HTTPNode : InstructionNode
+	{
+		public override object InternalExecute(Program program, object[] arguments)
+		{
+			string result;
+			
+			string verb = (string)arguments[0];
+			string uRL = (string)arguments[1];
+			TableValue headersTable = (TableValue)arguments[2];
+			ITable headers = headersTable != null ? headersTable.OpenCursor() : null;
+			string body = (string)arguments[3];
+
+			// Prepare the request
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uRL);
+			request.Method = verb;
+			request.ProtocolVersion = new Version(1, 1);
+			request.KeepAlive = false;
+
+			if (headers != null)
+			{
+				using (Row row = new Row(program.ValueManager, headers.DataType.RowType))
+				{
+					while (headers.Next())
+					{
+						headers.Select(row);
+
+						request.Headers[(HttpRequestHeader)Enum.Parse(typeof(HttpRequestHeader), (string)row["Header"])] = (string)row["Value"];
+					}
+				}
+			}
+
+			// Write the body
+			if (!String.IsNullOrEmpty(body))
+				using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
+					writer.Write(body);
+
+			// Get and read the response
+			HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+			using (Stream responseStream = response.GetResponseStream())
+			{
+				StreamReader reader = new StreamReader(responseStream);
+				result = reader.ReadToEnd();
+				reader.Close();
+			}
+
+			return result;
+		}
+	}
+
 	// operator PostHTTP(const AURL : String, AFields : table { FieldName : String, Value : String }) : String
 	public class PostHTTPNode : InstructionNode
 	{
@@ -117,7 +167,8 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			string result;
 			
 			string uRL = (string)arguments[0];
-			ITable fields = (ITable)arguments[1];
+			TableValue fieldsTable = (TableValue)arguments[1];
+			ITable fields = fieldsTable.OpenCursor();
 
 			// Build the URL encoding for the body
 			StringBuilder body = new StringBuilder();

@@ -621,7 +621,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					
 				if ((indexKey.Values[index] != null) && (compareKey.Values[index] != null))
 				{
-					result = manager.EvaluateSort(Key.Columns[index], indexKey.Values[index], compareKey.Values[index]);
+					if (indexKeyRowType.Columns[index].DataType is Schema.ScalarType)
+						result = manager.EvaluateSort(Key.Columns[index], indexKey.Values[index], compareKey.Values[index]);
+					else
+					{
+						using (var indexValue = DataValue.FromNative(manager, indexKey.DataTypes[index], indexKey.Values[index]))
+						{
+							using (var compareValue = DataValue.FromNative(manager, compareKey.DataTypes[index], compareKey.Values[index]))
+							{
+								result = manager.EvaluateSort(Key.Columns[index], indexValue, compareValue);
+							}
+						}
+					}
 				}
 				else if (indexKey.Values[index] != null)
 				{

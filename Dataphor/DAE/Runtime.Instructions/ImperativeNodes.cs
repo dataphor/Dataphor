@@ -29,6 +29,7 @@ using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -412,7 +413,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			else
 			{
-				ListValue tempValue = (ListValue)Nodes[0].Execute(program);
+				IList tempValue = (IList)Nodes[0].Execute(program);
 				if (tempValue != null)
 				{
 					try
@@ -425,7 +426,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						
 						try
 						{
-							for (int index = 0; index < tempValue.Count(); index++)
+							for (int index = 0; index < tempValue.Count; index++)
 							{
 								try
 								{

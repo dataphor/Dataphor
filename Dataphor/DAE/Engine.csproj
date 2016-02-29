@@ -338,6 +338,7 @@
     <Compile Include="Runtime.Data\TableValue.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime.Data\TypeExtensions.cs" />
     <Compile Include="Runtime.Data\UnionTable.cs">
       <SubType>Code</SubType>
     </Compile>
