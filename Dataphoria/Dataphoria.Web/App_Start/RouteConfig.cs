@@ -19,11 +19,11 @@ namespace Alphora.Dataphor.Dataphoria.Web
 				defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
 			);
 
-			routes.MapRoute(
-				name: "Data",
-				url: "{controller}/{table}/{id}",
-				defaults: new { controller = "Data", action = "Get", id = UrlParameter.Optional }
-			);
+			//routes.MapRoute(
+			//	name: "Data",
+			//	url: "{controller}/{table}/{id}",
+			//	defaults: new { controller = "Data", action = "Get", id = UrlParameter.Optional }
+			//);
 		}
 	}
 }

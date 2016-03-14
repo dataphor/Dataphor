@@ -19,6 +19,20 @@ using Newtonsoft.Json.Linq;
 
 namespace Alphora.Dataphor.FHIR.Core
 {
+	/// <remarks> operator iEqual(Dynamic, Dynamic) : bool </remarks>
+	public class DynamicEqualNode : BinaryInstructionNode
+	{
+		public override object InternalExecute(Program program, object argument1, object argument2)
+		{
+			#if NILPROPOGATION
+			if (argument1 == null || argument2 == null)
+				return null;
+			else
+			#endif
+				return JToken.DeepEquals((JToken)argument1, (JToken)argument2);
+		}
+	}
+
 	// operator FHIR.Dynamic(const ARow : row { Content : String }) : FHIR.Dynamic
 	public class DynamicContentSelectorNode : UnaryInstructionNode
 	{

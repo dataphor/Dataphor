@@ -29,13 +29,15 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 				var practitionerSearch = searchparams.Parameters.FirstOrDefault(p => p.Item1.ToLower() == "practitioner");
 				if (patientSearch != null)
 				{
-					var result = ProcessorInstance.Instance.Evaluate(String.Format("select GetPatientAppointments('{0}')", patientSearch.Item2), null);
-					return JsonInterop.NativeResultToJson((NativeResult)result);
+					var appointments = ProcessorInstance.Instance.Evaluate(String.Format("select GetPatientAppointments('{0}')", patientSearch.Item2), null);
+					return JToken.Parse(FhirSerializer.SerializeToJson(ToBundle((NativeResult)appointments)));
+					//return JsonInterop.NativeResultToJson((NativeResult)result);
 				}
 				else if (practitionerSearch != null)
 				{
-					var result = ProcessorInstance.Instance.Evaluate(String.Format("select GetPractitionerAppointments('{0}')", practitionerSearch.Item2), null);
-					return JsonInterop.NativeResultToJson((NativeResult)result);
+					var appointments = ProcessorInstance.Instance.Evaluate(String.Format("select GetPractitionerAppointments('{0}')", practitionerSearch.Item2), null);
+					return JToken.Parse(FhirSerializer.SerializeToJson(ToBundle((NativeResult)appointments)));
+					//return JsonInterop.NativeResultToJson((NativeResult)result);
 				}
 				else
 				{
@@ -46,6 +48,25 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 			{
 				return FhirSerializer.SerializeToJson(Error(String.Format("Searching is not currently supported for resources of type {0}.", type)));
 			}
+		}
+
+		private Bundle ToBundle(NativeResult resources)
+		{
+			var resourceList = resources.Value as NativeListValue;
+			if (resourceList != null)
+			{
+				var result = new Bundle();
+				result.Type = Bundle.BundleType.Searchset;
+				result.Total = resourceList.Elements.Length;
+				foreach (var resource in resourceList.Elements)
+				{
+					result.AddResourceEntry(((NativeScalarValue)resource).Value as Resource, null);
+				}
+
+				return result;
+			}
+
+			throw new InvalidOperationException("Expected a list of resources.");
 		}
 
 		private OperationOutcome Error(string errorMessage)

@@ -44,6 +44,7 @@ namespace Alphora.Dataphor.FHIR.Core
 
 			classes.Add(new SettingsItem("Newtonsoft.Json.Linq.JObject", typeof(JObject).AssemblyQualifiedName));
 			classes.Add(new SettingsItem("FHIR.Core.JSONObjectConveyor", typeof(JSONObjectConveyor).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicEqualNode", typeof(DynamicEqualNode).AssemblyQualifiedName));
 			classes.Add(new SettingsItem("FHIR.Core.DynamicSelectorNode", typeof(DynamicSelectorNode).AssemblyQualifiedName));
 			classes.Add(new SettingsItem("FHIR.Core.DynamicContentSelectorNode", typeof(DynamicContentSelectorNode).AssemblyQualifiedName));
 			classes.Add(new SettingsItem("FHIR.Core.DynamicContentReadAccessorNode", typeof(DynamicContentReadAccessorNode).AssemblyQualifiedName));

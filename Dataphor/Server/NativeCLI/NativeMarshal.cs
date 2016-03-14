@@ -173,6 +173,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		
 		public static string ScalarTypeToDataTypeName(Schema.DataTypes dataTypes, IScalarType scalarType)
 		{
+			if (scalarType.IsClassType) return scalarType.FromClassDefinition.ClassName;
 			if (scalarType.NativeType == NativeAccessors.AsBoolean.NativeType) return "Boolean";
 			if (scalarType.NativeType == NativeAccessors.AsByte.NativeType) return "Byte";
 			if (scalarType.NativeType == NativeAccessors.AsByteArray.NativeType) return "Byte[]";

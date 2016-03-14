@@ -22,7 +22,8 @@ create type Dynamic from class "Newtonsoft.Json.Linq.JObject"
 }
 	class "FHIR.Core.JSONObjectConveyor"
 	static tags { DAE.AsString = "AsString", DAE.AsDisplayString = "AsDisplayString" };
-	
+
+create operator iEqual(const ALeft : Dynamic, const ARight : Dynamic) : Boolean class "FHIR.Core.DynamicEqualNode";	
 create operator Dynamic(const AContent : String) : Dynamic class "FHIR.Core.DynamicSelectorNode";
 create operator Get(const ADynamic : Dynamic, const AKey : scalar) : Dynamic class "FHIR.Core.DynamicGetNode";
 create operator Set(const ADynamic : Dynamic, const AKey : scalar, const AValue : Dynamic) : Dynamic class "FHIR.Core.DynamicSetNode";
