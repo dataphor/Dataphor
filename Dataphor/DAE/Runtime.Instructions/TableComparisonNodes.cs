@@ -57,31 +57,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 
-			plan.EnterRowContext();
+			plan.Symbols.PushWindow(0);
 			try
 			{
-				#if USENAMEDROWVARIABLES
-				plan.Symbols.Push(new Symbol(Keywords.Left, LeftTableNode.DataType.RowType));
-				#else
-				Schema.IRowType leftRowType = LeftTableNode.DataType.CreateRowType(Keywords.Left);
-				APlan.Symbols.Push(new Symbol(String.Empty, leftRowType));
-				#endif
+				plan.EnterRowContext();
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					plan.Symbols.Push(new Symbol(Keywords.Right, RightTableNode.DataType.RowType));
+					plan.Symbols.Push(new Symbol(Keywords.Left, LeftTableNode.DataType.RowType));
 					#else
-					Schema.IRowType rightRowType = RightTableNode.DataType.CreateRowType(Keywords.Right);
-					APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
+					Schema.IRowType leftRowType = LeftTableNode.DataType.CreateRowType(Keywords.Left);
+					APlan.Symbols.Push(new Symbol(String.Empty, leftRowType));
 					#endif
 					try
 					{
-						_rowEqualNode = 
-							#if USENAMEDROWVARIABLES
-							Compiler.CompileExpression(plan, Compiler.BuildRowEqualExpression(plan, Keywords.Left, Keywords.Right, LeftTableNode.TableVar.Columns, RightTableNode.TableVar.Columns));
-							#else
-							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, leftRowType.Columns, rightRowType.Columns));
-							#endif
+						#if USENAMEDROWVARIABLES
+						plan.Symbols.Push(new Symbol(Keywords.Right, RightTableNode.DataType.RowType));
+						#else
+						Schema.IRowType rightRowType = RightTableNode.DataType.CreateRowType(Keywords.Right);
+						APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
+						#endif
+						try
+						{
+							_rowEqualNode = 
+								#if USENAMEDROWVARIABLES
+								Compiler.CompileExpression(plan, Compiler.BuildRowEqualExpression(plan, Keywords.Left, Keywords.Right, LeftTableNode.TableVar.Columns, RightTableNode.TableVar.Columns));
+								#else
+								Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, leftRowType.Columns, rightRowType.Columns));
+								#endif
+						}
+						finally
+						{
+							plan.Symbols.Pop();
+						}
 					}
 					finally
 					{
@@ -90,12 +98,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					plan.Symbols.Pop();
+					plan.ExitRowContext();
 				}
 			}
 			finally
 			{
-				plan.ExitRowContext();
+				plan.Symbols.PopWindow();
 			}
 		}
 		
@@ -108,28 +116,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			LeftTableNode.BindingTraversal(plan, visitor);
 			RightTableNode.BindingTraversal(plan, visitor);
 			#endif
-			plan.EnterRowContext();
+			plan.Symbols.PushWindow(0);
 			try
 			{
-				#if USENAMEDROWVARIABLES
-				plan.Symbols.Push(new Symbol(Keywords.Left, LeftTableNode.DataType.RowType));
-				#else
-				APlan.Symbols.Push(new Symbol(String.Empty, LeftTableNode.DataType.CreateRowType(Keywords.Left)));
-				#endif
+				plan.EnterRowContext();
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					plan.Symbols.Push(new Symbol(Keywords.Right, RightTableNode.DataType.RowType));
+					plan.Symbols.Push(new Symbol(Keywords.Left, LeftTableNode.DataType.RowType));
 					#else
-					APlan.Symbols.Push(new Symbol(String.Empty, RightTableNode.DataType.CreateRowType(Keywords.Right)));
+					APlan.Symbols.Push(new Symbol(String.Empty, LeftTableNode.DataType.CreateRowType(Keywords.Left)));
 					#endif
 					try
 					{
-						#if USEVISIT
-						_rowEqualNode = visitor.Visit(plan, _rowEqualNode);
+						#if USENAMEDROWVARIABLES
+						plan.Symbols.Push(new Symbol(Keywords.Right, RightTableNode.DataType.RowType));
 						#else
-						RowEqualNode.BindingTraversal(plan, visitor);
+						APlan.Symbols.Push(new Symbol(String.Empty, RightTableNode.DataType.CreateRowType(Keywords.Right)));
 						#endif
+						try
+						{
+							#if USEVISIT
+							_rowEqualNode = visitor.Visit(plan, _rowEqualNode);
+							#else
+							RowEqualNode.BindingTraversal(plan, visitor);
+							#endif
+						}
+						finally
+						{
+							plan.Symbols.Pop();
+						}
 					}
 					finally
 					{
@@ -138,12 +154,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					plan.Symbols.Pop();
+					plan.ExitRowContext();
 				}
 			}
 			finally
 			{
-				plan.ExitRowContext();
+				plan.Symbols.PopWindow();
 			}
 		}
 
@@ -170,17 +186,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						while (rightTable.Next())
 						{
 							rightTable.Select(rightRow);
-							program.Stack.Push(leftRow);
+							program.Stack.PushWindow(0);
 							try
 							{
-								program.Stack.Push(rightRow);
+								program.Stack.Push(leftRow);
 								try
 								{
-									object result = RowEqualNode.Execute(program);
-									if ((result != null) && (bool)result)
+									program.Stack.Push(rightRow);
+									try
 									{
-										hasRow = true;
-										break;
+										object result = RowEqualNode.Execute(program);
+										if ((result != null) && (bool)result)
+										{
+											hasRow = true;
+											break;
+										}
+									}
+									finally
+									{
+										program.Stack.Pop();
 									}
 								}
 								finally
@@ -190,7 +214,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							finally
 							{
-								program.Stack.Pop();
+								program.Stack.PopWindow();
 							}
 						}
 						if (!hasRow)
@@ -232,17 +256,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						while (leftTable.Next())
 						{
 							leftTable.Select(leftRow);
-							program.Stack.Push(leftRow);
+							program.Stack.PushWindow(0);
 							try
 							{
-								program.Stack.Push(rightRow);
+								program.Stack.Push(leftRow);
 								try
 								{
-									object result = RowEqualNode.Execute(program);
-									if ((result != null) && (bool)result)
+									program.Stack.Push(rightRow);
+									try
 									{
-										hasRow = true;
-										break;
+										object result = RowEqualNode.Execute(program);
+										if ((result != null) && (bool)result)
+										{
+											hasRow = true;
+											break;
+										}
+									}
+									finally
+									{
+										program.Stack.Pop();
 									}
 								}
 								finally
@@ -252,7 +284,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							finally
 							{
-								program.Stack.Pop();
+								program.Stack.PopWindow();
 							}
 						}
 						if (!hasRow)

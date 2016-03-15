@@ -59,14 +59,19 @@ namespace Aphora.Dataphor.FHIR.Device
 		protected override DevicePlanNode InternalPrepare(Schema.DevicePlan plan, PlanNode planNode)
 		{
 			// return a DevicePlanNode appropriate for execution of the given node
-			BaseTableVarNode baseTableVarNode = planNode as BaseTableVarNode;
-			if (baseTableVarNode != null)
+			TableNode tableNode = planNode as TableNode;
+			if (tableNode != null)
 			{
-				var fhirTableNode = new FHIRDeviceTableNode(baseTableVarNode);
-				fhirTableNode.ResourceType = MetaData.GetTag(baseTableVarNode.TableVar.MetaData, "FHIR.ResourceType", Schema.Object.Unqualify(baseTableVarNode.TableVar.Name));
-				return fhirTableNode;
-			}
+				var fhirTableNode = new FHIRDeviceTableNode(tableNode);
+				fhirTableNode.Prepare(plan);
+				if (plan.IsSupported)
+				{
+					return fhirTableNode;
+				}
 
+				return null;
+			}
+			
 			CreateTableNode createTableNode = planNode as CreateTableNode;
 			if (createTableNode != null)
 			{
@@ -146,14 +151,16 @@ namespace Aphora.Dataphor.FHIR.Device
 
 			// Add columns for the default representation
 			var representation = Compiler.FindDefaultRepresentation(d4Type);
-
-			// And columns for each property of the default representation
-			foreach (var property in representation.Properties)
+			if (representation != null)
 			{
-				var column = new Schema.Column(property.Name, property.DataType);
-				var tableVarColumn = new Schema.TableVarColumn(column);
-				tableVar.DataType.Columns.Add(column);
-				tableVar.Columns.Add(tableVarColumn);
+				// And columns for each property of the default representation
+				foreach (var property in representation.Properties)
+				{
+					var column = new Schema.Column(property.Name, property.DataType);
+					var tableVarColumn = new Schema.TableVarColumn(column);
+					tableVar.DataType.Columns.Add(column);
+					tableVar.Columns.Add(tableVarColumn);
+				}
 			}
 
 			tableVar.AddDependency(d4Type);
@@ -194,6 +201,84 @@ namespace Aphora.Dataphor.FHIR.Device
 
 		private SearchParams _searchParams = new SearchParams();
 		public SearchParams SearchParams { get { return _searchParams; } }
+
+		public void Prepare(Schema.DevicePlan plan)
+		{
+			InternalPrepare(plan, Node);
+		}
+
+		private bool IsSearchParamColumn(Schema.TableVarColumn column)
+		{
+			if (column.Name == "Id")
+			{
+				// The Id is always supported for all resources, and corresponds to a simple GET/{id}
+				return true;
+			}
+
+			switch (ResourceType)
+			{
+				// TODO: Have to figure this out...
+				case "Appointment":
+					switch (column.Name)
+					{
+						case "Patient": return true;
+						case "Practitioner": return true;
+						default: return false;
+					}
+				default: return false;
+			}
+		}
+
+		private void InternalPrepare(Schema.DevicePlan plan, TableNode planNode)
+		{
+			RestrictNode restrictNode = planNode as RestrictNode;
+			if (restrictNode != null)
+			{
+				// Prepare the source
+				InternalPrepare(plan, restrictNode.SourceNode);
+
+				if (plan.IsSupported)
+				{
+					if (restrictNode.IsSeekable)
+					{
+						// TODO: If this is a seek to the Id and there is more than one search parameter, this should not be supported
+						// TODO: Many FHIR servers don't support wide open queries, so if something isn't filtered, we would need to be able to indicate (warning maybe?) that the query will likely not return any data (maybe even an error, although some systems do support it).
+						// Verify that each condition corresponds to a known search parameter for this resource
+						foreach (ColumnConditions columnConditions in restrictNode.Conditions)
+						{
+							if (!IsSearchParamColumn(columnConditions.Column))
+							{
+								plan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format("Service does not support restriction by {0}.", columnConditions.Column.Name)));
+								plan.IsSupported = false;
+								break;
+							}
+						}
+					}
+					else if (restrictNode.Nodes[1] is SatisfiesSearchParamNode)
+					{
+						plan.IsSupported = true;
+					}
+					else
+					{
+						plan.TranslationMessages.Add(new Schema.TranslationMessage("Service does not support arbitrary restriction."));
+						plan.IsSupported = false;
+					}
+				}
+
+				return;
+			}
+
+			BaseTableVarNode baseTableVarNode = planNode as BaseTableVarNode;
+			if (baseTableVarNode != null)
+			{
+				ResourceType = MetaData.GetTag(baseTableVarNode.TableVar.MetaData, "FHIR.ResourceType", Schema.Object.Unqualify(baseTableVarNode.TableVar.Name));
+				return;
+			}
+
+			plan.TranslationMessages.Add(new Schema.TranslationMessage("Service does not support arbitrary queries."));
+			plan.IsSupported = false;
+			return;
+		}
 	}
 
 	public class FHIRDeviceSession : Schema.DeviceSession
@@ -222,10 +307,10 @@ namespace Aphora.Dataphor.FHIR.Device
 
 		protected override object InternalExecute(Program program, PlanNode planNode)
 		{
-            if (planNode.DeviceNode == null)
-            {
-                throw new DeviceException(DeviceException.Codes.UnpreparedDevicePlan, ErrorSeverity.System);
-            }
+			if (planNode.DeviceNode == null)
+			{
+				throw new DeviceException(DeviceException.Codes.UnpreparedDevicePlan, ErrorSeverity.System);
+			}
 
 			var fhirTableNode = planNode.DeviceNode as FHIRDeviceTableNode;
 			if (fhirTableNode != null)
@@ -308,46 +393,115 @@ namespace Aphora.Dataphor.FHIR.Device
 		private List<Resource> _resources;
 		private Type _fhirResourceType;
 		private int _currentIndex;
+		private SearchParams _searchParams;
+		private string _idValue;
 
 		private void InitializeResourceType()
 		{
 			_fhirResourceType = _program.Catalog.ClassLoader.CreateType(_program.CatalogDeviceSession, new ClassDefinition(String.Format("Hl7.Fhir.Model.{0}", _fhirTableNode.ResourceType)));
 		}
 
+		private string GetSearchParamName(Schema.TableVarColumn column)
+		{
+			return column.Name;
+		}
+
+		private string GetSearchParamValue(ColumnCondition columnCondition)
+		{
+			var result = columnCondition.Argument.Execute(_program);
+			if (result != null)
+				return result.ToString();
+			return null;
+		}
+
+		private void InitializeSearchParams()
+		{
+			_searchParams = new SearchParams();
+			// Ignoring the search params on the plan for now, create search params for this execution here
+			var restrictNode = _fhirTableNode.Node as RestrictNode;
+			if (restrictNode != null)
+			{
+				// TODO: Generalize the stack offset here, this is safe because we know the only scenario we support is restriction of a base table var
+				_program.Stack.Push(null);
+				try
+				{
+					if (restrictNode.IsSeekable)
+					{
+						// Verify that each condition corresponds to a known search parameter for this resource
+						foreach (ColumnConditions columnConditions in restrictNode.Conditions)
+						{
+							// A seekable condition will only have one column condition
+							var searchParamName = GetSearchParamName(columnConditions.Column);
+							var searchValue = GetSearchParamValue(columnConditions[0]);
+							if (searchParamName == "Id")
+							{
+								_idValue = searchValue;
+							}
+							else
+							{
+								_searchParams.Add(GetSearchParamName(columnConditions.Column), GetSearchParamValue(columnConditions[0]));
+							}
+						}
+					}
+					else
+					{
+						var searchParamNode = restrictNode.Nodes[1] as SatisfiesSearchParamNode;
+						if (searchParamNode != null)
+						{
+							_searchParams.Add((string)searchParamNode.Nodes[1].Execute(_program), (string)searchParamNode.Nodes[2].Execute(_program));
+						}
+					}
+				}
+				finally
+				{
+					_program.Stack.Pop();
+				}
+			}
+		}
+
 		private void OpenBundle(Bundle bundle)
 		{
 			_bundle = bundle;
 			_resources = new List<Resource>();
-			foreach (var entry in _bundle.Entry)
+			if (_bundle != null)
 			{
-				if (!entry.IsDeleted() && (entry.Search == null || entry.Search.Mode == Bundle.SearchEntryMode.Match) && entry.Resource.TypeName == _fhirTableNode.ResourceType)
+				foreach (var entry in _bundle.Entry)
 				{
-					_resources.Add(entry.Resource);
+					if (!entry.IsDeleted() && (entry.Search == null || entry.Search.Mode == Bundle.SearchEntryMode.Match) && entry.Resource.TypeName == _fhirTableNode.ResourceType)
+					{
+						_resources.Add(entry.Resource);
+					}
 				}
 			}
 		}
 
 		private bool FirstPage()
 		{
-			if (_bundle.FirstLink != null)
+			if (_bundle != null)
 			{
-				OpenBundle(_deviceSession.Client.Continue(_bundle, PageDirection.First));
+				if (_bundle.FirstLink != null)
+				{
+					OpenBundle(_deviceSession.Client.Continue(_bundle, PageDirection.First));
+				}
+				else
+				{
+					// Same as initial open...
+					OpenBundle(_deviceSession.Client.Search(_fhirTableNode.SearchParams, _fhirTableNode.ResourceType));
+				}
+				return true;
 			}
-			else
-			{
-				// Same as initial open...
-				OpenBundle(_deviceSession.Client.Search(_fhirTableNode.SearchParams, _fhirTableNode.ResourceType));
-			}
-
-			return true;
+			return false;
 		}
 
 		private bool LastPage()
 		{
-			if (_bundle.LastLink != null)
+			if (_bundle != null)
 			{
-				OpenBundle(_deviceSession.Client.Continue(_bundle, PageDirection.Last));
-				return true;
+				if (_bundle.LastLink != null)
+				{
+					OpenBundle(_deviceSession.Client.Continue(_bundle, PageDirection.Last));
+					return true;
+				}
 			}
 
 			return false;
@@ -357,10 +511,13 @@ namespace Aphora.Dataphor.FHIR.Device
 		{
 			// TODO: How to tell when we hit the last page and we shouldn't be able to go next?
 			// Working hypothesis: If there is a next link, we can go next...
-			if (_bundle.NextLink != null)
+			if (_bundle != null)
 			{
-				OpenBundle(_deviceSession.Client.Continue(_bundle, PageDirection.Next));
-				return true;
+				if (_bundle.NextLink != null)
+				{
+					OpenBundle(_deviceSession.Client.Continue(_bundle, PageDirection.Next));
+					return true;
+				}
 			}
 
 			return false;
@@ -369,10 +526,13 @@ namespace Aphora.Dataphor.FHIR.Device
 		private bool PriorPage()
 		{
 			// TODO: How to tell when we hit the first page and we shouldn't be able to go prior?
-			if (_bundle.PreviousLink != null)
+			if (_bundle != null)
 			{
-				OpenBundle(_deviceSession.Client.Continue(_bundle, PageDirection.Previous));
-				return true;
+				if (_bundle.PreviousLink != null)
+				{
+					OpenBundle(_deviceSession.Client.Continue(_bundle, PageDirection.Previous));
+					return true;
+				}
 			}
 
 			return false;
@@ -380,20 +540,41 @@ namespace Aphora.Dataphor.FHIR.Device
 
 		private bool IsFirstPage()
 		{
-			// TODO: This is not a good way to do this...
-			return (_bundle.FirstLink == _bundle.SelfLink);
+			if (_bundle != null)
+			{
+				// TODO: This is not a good way to do this...
+				return (_bundle.FirstLink == _bundle.SelfLink);
+			}
+
+			return true;
 		}
 
 		private bool IsLastPage()
 		{
-			// TODO: This is not a good way to do this...
-			return (_bundle.LastLink == _bundle.SelfLink);
+			if (_bundle != null)
+			{
+				// TODO: This is not a good way to do this...
+				return (_bundle.LastLink == _bundle.SelfLink);
+			}
+
+			return true;
 		}
 
 		protected override void InternalOpen()
 		{
 			InitializeResourceType();
-			OpenBundle(_deviceSession.Client.Search(_fhirTableNode.SearchParams, _fhirTableNode.ResourceType));
+			InitializeSearchParams();
+
+			// If the search is seekable on the key column, issue as a simple GET/{id}
+			if (!String.IsNullOrEmpty(_idValue))
+			{
+				OpenBundle(_deviceSession.Client.SearchById(_fhirTableNode.ResourceType, _idValue));
+			}
+			else
+			{
+				OpenBundle(_deviceSession.Client.Search(_searchParams, _fhirTableNode.ResourceType));
+			}
+
 			_currentIndex = -1; // Set to the BOF crack
 		}
 

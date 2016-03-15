@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<library xmlns:bop="www.alphora.com/schemas/bop" assembliesasstring="" defaultdevicename="" generatorid="-1" isgenerated="False" isremotable="True" issystem="False" librariesasstring="" name="General" settings="" version="*" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+	<libraries.libraryreference name="System" version="*" />
+</library>

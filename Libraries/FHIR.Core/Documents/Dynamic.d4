@@ -1,0 +1,42 @@
+/*
+	Dynamic object support
+*/
+
+//drop type Dynamic;
+create type Dynamic from class "Newtonsoft.Json.Linq.JObject" 
+{
+	representation Dynamic 
+	{ 
+		Content : String 
+			read class "FHIR.Core.DynamicContentReadAccessorNode"
+			write class "FHIR.Core.DynamicContentWriteAccessorNode"
+	} class "FHIR.Core.DynamicContentSelectorNode",
+	representation AsString { AsString : String read class "System.ObjectAsStringReadAccessorNode" }
+//	representation AsDisplayString { AsDisplayString : String read class "FHIRCore.FHIRBaseDisplayString" }//,
+//	representation AsJSON
+//	{
+//		AsJSON : String 
+//			read class "FHIRCore.ObjectAsJSONReadAccessorNode"
+//			write class "FHIRCore.ObjectAsJSONWriteAccessorNode"
+//	} class "FHIRCore.ObjectAsJSONSelectorNode"
+}
+	class "FHIR.Core.JSONObjectConveyor"
+	static tags { DAE.AsString = "AsString", DAE.AsDisplayString = "AsDisplayString" };
+
+create operator iEqual(const ALeft : Dynamic, const ARight : Dynamic) : Boolean class "FHIR.Core.DynamicEqualNode";	
+create operator Dynamic(const AContent : String) : Dynamic class "FHIR.Core.DynamicSelectorNode";
+create operator Get(const ADynamic : Dynamic, const AKey : scalar) : Dynamic class "FHIR.Core.DynamicGetNode";
+create operator Set(const ADynamic : Dynamic, const AKey : scalar, const AValue : Dynamic) : Dynamic class "FHIR.Core.DynamicSetNode";
+create operator ToList(const AContent : Dynamic) : list(Dynamic) class "FHIR.Core.DynamicToListNode";
+create operator ToBoolean(const AContent : Dynamic) : Boolean class "FHIR.Core.DynamicToBooleanNode";
+create operator ToByte(const AContent : Dynamic) : Byte class "FHIR.Core.DynamicToByteNode";
+create operator ToShort(const AContent : Dynamic) : Short class "FHIR.Core.DynamicToShortNode";
+create operator ToInteger(const AContent : Dynamic) : Integer class "FHIR.Core.DynamicToIntegerNode";
+create operator ToLong(const AContent : Dynamic) : Long class "FHIR.Core.DynamicToLongNode";
+create operator ToDecimal(const AContent : Dynamic) : Decimal class "FHIR.Core.DynamicToDecimalNode";
+//create operator ToMoney(const AContent : Dynamic) : Money class "FHIR.Core.DynamicToMoneyNode";
+create operator ToString(const AContent : Dynamic) : String class "FHIR.Core.DynamicToStringNode";
+create operator ToTimeSpan(const AContent : Dynamic) : TimeSpan class "FHIR.Core.DynamicToTimeSpanNode";
+create operator ToDateTime(const AContent : Dynamic) : DateTime class "FHIR.Core.DynamicToDateTimeNode";
+//create operator ToDate(const AContent : Dynamic) : Date class "FHIR.Core.DynamicToDateNode";
+//create operator ToTime(const AContent : Dynamic) : Time class "FHIR.Core.DynamicToTimeNode";

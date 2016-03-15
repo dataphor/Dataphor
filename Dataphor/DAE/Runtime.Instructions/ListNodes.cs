@@ -703,7 +703,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override void DetermineDataType(Plan plan)
 		{
-			_dataType = new Schema.ListType(((Schema.CursorType)Nodes[0].DataType).TableType.RowType);
+			if (Nodes[0].DataType is Schema.CursorType)
+			{
+				_dataType = new Schema.ListType(((Schema.CursorType)Nodes[0].DataType).TableType.RowType);
+			}
+			else
+			{
+				_dataType = new Schema.ListType(((Schema.ITableType)Nodes[0].DataType).RowType);
+			}
 		}
 		
 		protected bool CursorNext(Program program, Cursor cursor)
@@ -734,18 +741,44 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public override object InternalExecute(Program program)
 		{
-			Cursor cursor = program.CursorManager.GetCursor(((CursorValue)Nodes[0].Execute(program)).ID);
-			try
+			if (Nodes[0].DataType is Schema.CursorType)
 			{
-				ListValue listValue = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
-				while (CursorNext(program, cursor))
-					listValue.Add(CursorSelect(program, cursor));
+				Cursor cursor = program.CursorManager.GetCursor(((CursorValue)Nodes[0].Execute(program)).ID);
+				try
+				{
+					ListValue listValue = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
+					while (CursorNext(program, cursor))
+						listValue.Add(CursorSelect(program, cursor));
 
-				return listValue;
+					return listValue;
+				}
+				finally
+				{
+					program.CursorManager.CloseCursor(cursor.ID);
+				}
 			}
-			finally
+			else
 			{
-				program.CursorManager.CloseCursor(cursor.ID);
+				var source = Nodes[0].Execute(program);
+				var sourceTable = source as ITable;
+				if (sourceTable == null)
+					sourceTable = ((TableValue)source).OpenCursor();
+
+				try
+				{
+					ListValue listValue = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
+					while (sourceTable.Next())
+					{
+						listValue.Add(sourceTable.Select());
+					}
+					return listValue;
+				}
+				finally
+				{
+					sourceTable.Close();
+					if (source is TableValue)
+						((TableValue)source).Dispose();
+				}
 			}
 		}
 	}

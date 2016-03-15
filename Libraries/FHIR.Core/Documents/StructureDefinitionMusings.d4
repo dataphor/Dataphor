@@ -1,0 +1,4 @@
+select Dynamic(LoadDocument("FHIR.Core", "Patient_StructureDefinition_DSTU2")) = Dynamic(LoadDocument("FHIR.Core", "Patient_StructureDefinition_Dev"))
+
+select Dynamic(LoadDocument("FHIR.Core", "Patient_StructureDefinition_DSTU2")) = Dynamic(LoadDocument("FHIR.Core", "Patient_StructureDefinition_DSTU2"))
+

@@ -796,6 +796,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		private Conditions _conditions;
+		/// <summary>Sargable conditions for the restriction.</summary>
+		public Conditions Conditions { get { return _conditions; } }
 
 		private Conditions _closedConditions;
 		/// <summary>Conditions where both sides of the range are specified.</summary>

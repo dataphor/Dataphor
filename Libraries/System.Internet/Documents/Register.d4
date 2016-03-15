@@ -65,6 +65,10 @@ grant usage on URLDecode(String) to role User;
 create operator PostHTTP(const AURL : String, AFields : table { FieldName : String, Value : String }) : String
 	class "System.Internet.PostHTTPNode" static tags { DAE.IsRemotable = "False"};
 grant usage on PostHTTP(String, table { FieldName : String, Value : String }) to role User;
+
+create operator HTTP(const AVerb : String, const AURL : String, const AHeaders : table { Header : String, Value : String }, const ABody : String) : String
+	class "System.Internet.HTTPNode" static tags { DAE.IsRemotable = "False" };
+grant usage on HTTP(String, String, table { Header : String, Value : String }, String) to role User;
 	
 /* XML Support */
 

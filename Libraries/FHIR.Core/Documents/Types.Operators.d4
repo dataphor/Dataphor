@@ -1,0 +1,68 @@
+
+//drop operator .FHIR.Core.Coding.iEqual(Coding, Coding);
+create operator Coding.iEqual(const ALeft : Coding, const ARight : Coding) : Boolean
+begin
+	result := 
+		(ALeft.System.IsNil() and ARight.System.IsNil() or ALeft.System = ARight.System)
+			and (ALeft.Version.IsNil() and ARight.Version.IsNil() or ALeft.Version = ARight.Version)
+			and (ALeft.Code.IsNil() and ARight.Code.IsNil() or ALeft.Code = ARight.Code);
+end;
+
+create operator Coding.iLess(const ALeft : Coding, const ARight : Coding) : Boolean
+begin
+	result := 
+		ALeft.System < ARight.System
+			or ALeft.Version < ARight.Version
+			or ALeft.Code < ARight.Code;
+end;
+			
+
+//drop operator .FHIR.Core.CodeableConcept.iEqual(CodeableConcept, CodeableConcept);
+create operator CodeableConcept.iEqual(const ALeft : CodeableConcept, const ARight : CodeableConcept) : Boolean
+begin
+	result :=
+		(ALeft.Coding.IsNil() and ARight.Coding.IsNil() or ALeft.Coding = ARight.Coding)
+			and (ALeft.Text.IsNil() and ARight.Text.IsNil() or ALeft.Text = ARight.Text);
+end;
+
+create operator CodeableConcept.iLess(const ALeft : CodeableConcept, const ARight : CodeableConcept) : Boolean
+begin
+	result :=
+		ALeft.Text < ARight.Text;
+end;
+
+create operator ResourceReference.iEqual(const ALeft : ResourceReference, const ARight : ResourceReference) : Boolean
+begin
+	result :=
+		ALeft.Reference = ARight.Reference;
+end;
+
+create operator ResourceReference.iLess(const ALeft : ResourceReference, const ARight : ResourceReference) : Boolean
+begin
+	result :=
+		ALeft.Reference < ARight.Reference;
+end;
+
+create operator Appointment.ParticipantComponent.iEqual(const ALeft : Appointment.ParticipantComponent, const ARight : Appointment.ParticipantComponent) : Boolean
+begin
+	result :=
+		ALeft.Actor = ARight.Actor;
+end;
+
+create operator Appointment.ParticipantComponent.iLess(const ALeft : Appointment.ParticipantComponent, const ARight : Appointment.ParticipantComponent) : Boolean
+begin
+	result :=
+		ALeft.Actor < ARight.Actor;
+end;
+
+create operator Appointment.iEqual(const ALeft : Appointment, const ARight : Appointment) : Boolean
+begin
+	result :=
+		ALeft.Id = ARight.Id;
+end;
+
+create operator Appointment.iLess(const ALeft : Appointment, const ARight : Appointment) : Boolean
+begin
+	result :=
+		ALeft.Id < ARight.Id;
+end;

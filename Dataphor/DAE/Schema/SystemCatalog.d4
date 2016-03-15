@@ -78,6 +78,7 @@ begin
 	create operator ToTime(const AValue : String) : Time class "System.StringToTimeNode";
 	create operator ToGuid(const AValue : String) : Guid class "System.StringToGuidNode";
 	create operator ToList(const AValue : cursor) : list class "System.TableToListNode";
+	create operator ToList(const AValue : table) : list class "System.TableToListNode";
 	create operator ToTable(const AValue : list) : table class "System.ListToTableNode";
 	create operator ToTable(const AValue : list, const AColumnName : Name) : table class "System.ListToTableNode";
 	create operator ToTable(const AValue : list, const AColumnName : Name, const ASequenceName : Name) : table class "System.ListToTableNode";
@@ -2660,6 +2661,7 @@ begin
 	grant usage on ToInteger(Short) to role User;                                                                                        
 	grant usage on ToInteger(String) to role User;                                                                                       
 	grant usage on ToList(cursor) to role User;                                                                                                 
+	grant usage on ToList(table) to role User;
 	grant usage on ToLong(Boolean) to role User;                                                                                         
 	grant usage on ToLong(Byte) to role User;                                                                                            
 	grant usage on ToLong(Decimal) to role User;                                                                                         

@@ -1194,6 +1194,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		ClassDefinition ClassDefinition { get; set; }
 		bool IsCompound { get; set; }
 		Schema.IRowType CompoundRowType { get; set; }
+		bool IsClassType { get; set; }
+		ClassDefinition FromClassDefinition { get; set; }
 		bool IsLike(IDataType dataType);
 
 		bool HasRepresentation(NativeAccessor nativeAccessor);
@@ -1830,25 +1832,27 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (!targetCatalog.Contains(Name))
 			{
 				base.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
-				
-				targetCatalog.Add(this);
-			
-				if ((Default != null) && ((mode != EmitMode.ForRemote) || Default.IsRemotable))
-					Default.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
-					
-				foreach (Constraint constraint in Constraints)
-					if ((mode != EmitMode.ForRemote) || constraint.IsRemotable)
-						constraint.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
-						
-				foreach (Representation representation in Representations)
-					representation.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
-					
-				if (_isSpecialOperator != null)
-					_isSpecialOperator.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 
-				foreach (Special special in Specials)
-					special.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+				if (!targetCatalog.Contains(Name))
+				{
+					targetCatalog.Add(this);
+			
+					if ((Default != null) && ((mode != EmitMode.ForRemote) || Default.IsRemotable))
+						Default.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 					
+					foreach (Constraint constraint in Constraints)
+						if ((mode != EmitMode.ForRemote) || constraint.IsRemotable)
+							constraint.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+						
+					foreach (Representation representation in Representations)
+						representation.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+					
+					if (_isSpecialOperator != null)
+						_isSpecialOperator.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+
+					foreach (Special special in Specials)
+						special.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+				}
 			}
         }
 
