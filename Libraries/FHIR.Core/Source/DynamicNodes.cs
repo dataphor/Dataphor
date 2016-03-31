@@ -16,11 +16,13 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Schema;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace Alphora.Dataphor.FHIR.Core
 {
-	/// <remarks> operator iEqual(Dynamic, Dynamic) : bool </remarks>
-	public class DynamicEqualNode : BinaryInstructionNode
+
+    /// <remarks> operator iEqual(Dynamic, Dynamic) : bool </remarks>
+    public class DynamicEqualNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -245,9 +247,31 @@ namespace Alphora.Dataphor.FHIR.Core
 			#if NILPROPOGATION
 			if (argument1 == null)
 				return null;
-			#endif
+            Type t = argument1.GetType();
+            RegexOptions options = RegexOptions.None;
+            Regex regex = new Regex("[ ]{2,}", options);
+            if (t.Equals(typeof(JArray)))
+            {
+                JArray argument = (JArray)argument1;
+                String str = "";
+                for (int i = 0; i < argument.Count; i++)
+                {
+                    str += argument[i].ToString();
+                }
+                str = str.Replace(Environment.NewLine, "");
+                str = regex.Replace(str, " ");
+                return str;
+            }else if (t.Equals(typeof(JObject)))
+            {
+                JObject argument = (JObject)argument1;
+                String str = argument.ToString();
+                str = str.Replace(Environment.NewLine, "");
+                str = regex.Replace(str, " ");
+                return str;
+            }
 
-			return (string)((JValue)argument1);
+            #endif
+            return (string)((JValue)argument1);
 		}
 	}
 
