@@ -350,6 +350,13 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						int extendColumnIndex = 1;
 						for (int index = extendNode.ExtendColumnOffset; index < extendNode.DataType.Columns.Count; index++)
 						{
+							if (!(extendNode.Nodes[extendColumnIndex].DataType is Schema.ScalarType))
+							{
+								localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the device does not support non-scalar-valued attributes for column ""{0}"".", extendNode.DataType.Columns[index].Name), planNode));
+								localDevicePlan.IsSupported = false;
+								break;
+							}
+
 							localDevicePlan.CurrentQueryContext().ResetReferenceFlags();
 							SQLRangeVarColumn rangeVarColumn = 
 								new SQLRangeVarColumn
