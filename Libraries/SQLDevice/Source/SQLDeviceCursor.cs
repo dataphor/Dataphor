@@ -3,6 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+//#define USEINCLUSIVEMULTIPLEX // Controls whether an inclusive or exclusive restriction is used to reposition the cursor when multiplexing on a connection
+
 namespace Alphora.Dataphor.DAE.Device.SQL
 {
 	using System;
@@ -192,8 +195,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						_cursor = _command.Open(_cursorType, _isolationLevel);
 						try
 						{
+							#if USEINCLUSIVEMULTIPLEX
 							if (_buffer.Count > 0)
 								_cursor.Next();
+							#endif
 							connectionHeader.DeviceCursor = this;
 						}
 						catch
@@ -380,6 +385,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					
 					if (_statement.OrderClause.Columns[keyIndex].Ascending)
 					{
+						#if USEINCLUSIVEMULTIPLEX
 						if (keyIndex == (_keyIndexes.Length - 1))
 							columnExpression =
 								new BinaryExpression
@@ -394,6 +400,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 									)
 								);
 						else
+						#endif
 							columnExpression =
 								new BinaryExpression
 								(
@@ -414,6 +421,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					}
 					else
 					{
+						#if USEINCLUSIVEMULTIPLEX
 						if (keyIndex == (_keyIndexes.Length - 1))
 							columnExpression =
 								new BinaryExpression
@@ -423,11 +431,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 									new BinaryExpression
 									(
 										_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].Expression,
-										"iInclusiveLess", 
+										"iInclusiveLess",
 										new QueryParameterExpression(_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].ColumnAlias)
 									)
 								);
 						else
+						#endif
 							columnExpression =
 								new BinaryExpression
 								(
@@ -524,7 +533,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						_keyParameters[index].Literal = _keyTypes[index].ToLiteral(DeviceSession.ServerProcess.ValueManager, scalar);
 					}
 		}
-		
+
 		private void EnsureConnection()
 		{
 			if (_connection == null)
