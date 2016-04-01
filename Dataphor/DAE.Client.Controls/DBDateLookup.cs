@@ -178,7 +178,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		public DateTime DateTime
 		{
-			get { return _calendar.SelectionEnd; }
+			get { return _calendar.SelectionStart; }
 			set { _calendar.SetDate(value); }
 		}
 

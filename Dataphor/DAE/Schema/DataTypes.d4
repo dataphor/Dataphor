@@ -316,6 +316,10 @@ create type DateTime
 	{ 
 		Catalog.Comment = "System Date Time", 
 		DAE.AsString = "AsString" 
+		// Could potentially set these...
+		//dynamic Frontend.DateTimeBox.HideTime = "false",
+		//dynamic Frontend.Width = "20"
+
 	};
 	
 create type Date
