@@ -341,7 +341,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							else if (currentChildDevice != childDevice)
 							{
 								NoDevice = true;
-								break;
 							}
 						}
 					}
