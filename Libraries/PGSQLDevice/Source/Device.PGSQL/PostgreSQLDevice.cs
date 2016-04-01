@@ -512,12 +512,12 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 				);
         }
 
-        public override SelectStatement TranslateOrder(DevicePlan devicePlan, TableNode node, SelectStatement statement)
+        public override SelectStatement TranslateOrder(DevicePlan devicePlan, TableNode node, SelectStatement statement, bool inContextOrderBy)
         {
             if (statement.Modifiers == null)
                 statement.Modifiers = new LanguageModifiers();
             statement.Modifiers.Add(new LanguageModifier("OptimizerHints", "option (fast 1)"));
-            return base.TranslateOrder(devicePlan, node, statement);
+            return base.TranslateOrder(devicePlan, node, statement, inContextOrderBy);
         }
     }    
     

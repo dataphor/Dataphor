@@ -2098,7 +2098,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 				else
 				{
 					SelectStatement selectStatement = new SelectStatement();
-					selectStatement = devicePlan.Device.TranslateOrder(devicePlan, sourceNode, selectStatement);
+					selectStatement = devicePlan.Device.TranslateOrder(devicePlan, sourceNode, selectStatement, true);
 					ace.OrderClause = selectStatement.OrderClause;
 				}
 			}

@@ -601,7 +601,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							
 							if (planNode is TableNode)
 							{
-								devicePlan.DevicePlanNode.Statement = TranslateOrder(devicePlan, (TableNode)planNode, (SelectStatement)devicePlan.DevicePlanNode.Statement);
+								devicePlan.DevicePlanNode.Statement = TranslateOrder(devicePlan, (TableNode)planNode, (SelectStatement)devicePlan.DevicePlanNode.Statement, false);
 								((TableSQLDevicePlanNode)devicePlan.DevicePlanNode).IsAggregate = devicePlan.CurrentQueryContext().IsAggregate;
 								if (!devicePlan.IsSupported)
 									return null;
@@ -1604,7 +1604,15 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return statement;
 		}
         
-		public virtual SelectStatement TranslateOrder(DevicePlan devicePlan, TableNode node, SelectStatement statement)
+        /// <summary>
+        /// Translates an order by clause based on the Order of the given node
+        /// </summary>
+        /// <param name="devicePlan">The device plan being translated</param>
+        /// <param name="node">The node providing the definition of the order</param>
+        /// <param name="statement">The current translated select statement</param>
+        /// <param name="inContextOrderBy">Indicates that this is an order by in an expression context and is therefore allowed to reference range variables, regardless of the device OrderByInContext setting.</param>
+        /// <returns>A select statement with an appropriate order by clause</returns>
+		public virtual SelectStatement TranslateOrder(DevicePlan devicePlan, TableNode node, SelectStatement statement, bool inContextOrderBy)
 		{
 			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
 			if ((node.Order != null) && (node.Order.Columns.Count > 0))
@@ -1629,12 +1637,24 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 					OrderFieldExpression fieldExpression = new OrderFieldExpression();
 					rangeVarColumn = localDevicePlan.GetRangeVarColumn(column.Column.Name, true);
-					if (IsOrderByInContext)
+					if (IsOrderByInContext || inContextOrderBy)
 					{
 						if (rangeVarColumn.Expression != null)
-							Error.Fail("Expressions in the order by clause are not implemented.");
-						fieldExpression.FieldName = rangeVarColumn.ColumnName;
-						fieldExpression.TableAlias = rangeVarColumn.TableAlias;
+						{
+							QualifiedFieldExpression qualifiedFieldExpression = rangeVarColumn.Expression as QualifiedFieldExpression;
+							if (qualifiedFieldExpression == null)
+							{
+								throw new NotImplementedException("Expressions within an order by are not implemented.");
+							}
+
+							fieldExpression.FieldName = qualifiedFieldExpression.FieldName;
+							fieldExpression.TableAlias = qualifiedFieldExpression.TableAlias;
+						}
+						else
+						{
+							fieldExpression.FieldName = rangeVarColumn.ColumnName;
+							fieldExpression.TableAlias = rangeVarColumn.TableAlias;
+						}
 					}
 					else
 						fieldExpression.FieldName = rangeVarColumn.Alias == String.Empty ? rangeVarColumn.ColumnName : rangeVarColumn.Alias;
