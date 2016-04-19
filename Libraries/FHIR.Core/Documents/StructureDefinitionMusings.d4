@@ -3,8 +3,6 @@ var DSTU2URL := "http://hl7.org/fhir/DSTU2/";
 var DevURL := "http://hl7.org/fhir/2016May/";
 var output := "C:\Users\jacob\Desktop\Qicore.csv";
 
-
-
 var DiffList := list(String) {};
 DiffList.Add("Resource,ElementPath,Attribute,ModifiedCode,OldValue,NewValue");
 
@@ -21,16 +19,16 @@ foreach var resourceURL in resources do
 begin
 	var DSTU2Structure := Dynamic(HTTP("GET", DSTU2URL + resourceURL +".profile.json", nil, nil));
 	var DSTU2StructureElements :=  DSTU2Structure.Get("snapshot").Get("element").ToList();
-	
+
 	var DevStructure := Dynamic(HTTP("GET", DevURL + resourceURL +".profile.json", nil, nil));
 	var DevStructureElements := DevStructure.Get("snapshot").Get("element").ToList();
-	
+
 	var resource := DSTU2Structure.Get("id").ToString();
-	
+
 	//Find elements only in DSTU2 and add them to DiffList
 	var found := false;
 	foreach var DSTU2Element in DSTU2StructureElements do 
-	begin
+ 	begin
 		foreach var DevElement in DevStructureElements do 
 		begin
 			if DSTU2Element.Get("path") = DevElement.Get("path") then found := true;
@@ -39,7 +37,7 @@ begin
 			DiffList.Add(resource + "," + DSTU2Element.Get("path").ToString() + ", ,Removed, , ");
 		found := false;
 	end;
-	
+
 	//Find elements only in Dev and add them to DiffList
 	found := false;
 	foreach var DevElement in DevStructureElements do 
@@ -107,4 +105,4 @@ var fileName := FileName(output);
 if FileExists(fileName) = false then
 	CreateFile(fileName);
 	
-SaveTextFile(fileName, FileStr);
+SaveTextFile(fileName, FileStr); 
