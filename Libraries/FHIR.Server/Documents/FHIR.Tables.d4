@@ -1,0 +1,100 @@
+//* Table: Resource
+// drop table FHIR.Server.Resources
+create table
+	Resources
+	{
+		Id : String,
+		Type : String,
+		Content : FHIR.Core.Base,
+		Number : String, //* searchable field
+		Date : String, //* searchable field
+		String : String, //* searchable field
+		Token : String, //* searchable field
+		Reference : String, //* searchable field
+		Composite : String, //* searchable field
+		Quantity	: String, //* searchable field
+		Uri : String, //* searchable field
+		key { Id }
+	};
+grant usage on Resources to role User;
+
+//* Table: Patients
+create table
+	Patients
+	{
+		ResourceId : String,
+		Active : String { nil }, //* searchable field
+		Address : String { nil }, //* searchable field
+		AddressCity : String { nil }, //* searchable field
+		AddressCountry : String { nil }, //* searchable field
+		AddressPostalCode : Zip { nil }, //* searchable field
+		AddressState : StateID { nil }, //* searchable field
+		AddressUse : String { nil }, //* searchable field
+		AnimalBreed : Description { nil }, //* searchable field
+		AnimalSpecies : Description { nil }, //* searchable field
+		Birthdate : String { nil }, //* searchable field
+		CareProvider : Description { nil }, //* searchable field
+		DeathDate : String { nil }, //* searchable field
+		Deceased : String { nil }, //* searchable field
+		Email : String { nil }, //* searchable field
+		Family : ProperName { nil }, //* searchable field
+		Gender : String { nil }, //* searchable field
+		Given : ProperName { nil }, //* searchable field
+		Identifier : Description { nil }, //* searchable field
+		Language : Description { nil }, //* searchable field
+		Link : String { nil }, //* searchable field
+		Name : ProperName { nil }, //* searchable field
+		Organization : String { nil }, //* searchable field
+		Phone : Phone { nil }, //* searchable field
+		Phonetic : String { nil }, //* searchable field
+		Telecom : String { nil }, //* searchable field
+		key { ResourceId }
+	};
+grant usage on Patients to role User;
+
+// drop view FHIR.Server.FHIRServerPatientView
+create view FHIRServerPatientView
+	(Patients rename Patient)
+		join (Resources rename Resource) by Patient.ResourceId = Resource.Id
+	{
+		Resource.Id ResourceId,
+		Resource.Type ResourceType,
+		Resource.Content ResourceContent,
+		Resource.Number ResourceNumber,
+		Resource.Date ResourceDate,
+		Resource.String ResourceString,
+		Resource.Token ResourceToken,
+		Resource.Reference ResourceReference,
+		Resource.Composite ResourceComposite,
+		Resource.Quantity ResourceQuantity,
+		Resource.Uri ResourceUri,
+		Patient.Active PatientActive,
+		Patient.Address PatientAddress,
+		Patient.AddressCity PatientAddressCity,
+		Patient.AddressCountry PatientAddressCountry,
+		Patient.AddressPostalCode PatientAddressPostalCode,
+		Patient.AddressState PatientAddressState,
+		Patient.AddressUse PatientAddressUse,
+		Patient.AnimalBreed PatientAnimalBreed,
+		Patient.AnimalSpecies PatientAnimalSpecies,
+		Patient.Birthdate PatientBirthdate,
+		Patient.CareProvider PatientCareProvider,
+		Patient.DeathDate PatientDeathDate,
+		Patient.Deceased PatientDeceased,
+		Patient.Email PatientEmail,
+		Patient.Family PatientFamily,
+		Patient.Gender PatientGender,
+		Patient.Given PatientGiven,
+		Patient.Identifier PatientIdentifier,
+		Patient.Language PatientLanguage,
+		Patient.Link PatientLink,
+		Patient.Name PatientName,
+		Patient.Organization PatientOrganization,
+		Patient.Phone PatientPhone,
+		Patient.Phonetic PatientPhonetic,
+		Patient.Telecom PatientTelecom
+	}
+	where ResourceType = 'Patient';
+grant usage on FHIRServerPatientView to role User;	
+
+select FHIRServerPatientView

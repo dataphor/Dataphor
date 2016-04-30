@@ -1,0 +1,218 @@
+var LPeriod := Period
+(
+	row
+	{
+		"2016-04-01" StartElement,
+		"2016-04-01" Start,
+		"2016-05-01" EndElement,
+		"2016-05-01" End
+	}
+);
+
+var P := Patient
+(
+	row
+	{
+		Identifier
+		(
+			row
+			{
+				"UseElement" UseElement,
+				//"Use" Use,
+				//Type : CodeableConcept,
+				"SystemElement" SystemElement,
+				//System : String,
+				"ValueElement" ValueElement,
+				"Value" Value,
+				LPeriod Period,
+				ResourceReference
+				(
+					row
+					{
+						"ReferenceElement" ReferenceElement,
+						"Reference" Reference,
+						"DisplayElement" DisplayElement,
+						"Display" Display,
+						"Url" Url
+					}
+				) Assigner
+			}
+		) Identifier,
+		true ActiveElement,
+		true Active,
+		HumanName
+		(
+			row
+			{
+				"Use" UseElement,
+				//"Use" Use,
+				"TextElement" TextElement,
+				"Text" Text,
+				//FamilyElement : list(FHIRString),
+				//{ "Family1", "Family2" } Family,
+				//GivenElement : list(FHIRString),
+				//Given : list(String),
+				//PrefixElement : list(FHIRString),
+				//Prefix : list(String),
+				//SuffixElement : list(FHIRString),
+				//Suffix : list(String),
+				LPeriod Period
+			}
+		) Name,
+		ContactPoint
+		(
+			row
+			{
+				"SystemElement" SystemElement,
+				//"System" System,
+				"ValueElement" ValueElement,
+				"Value" Value,
+				"UseElement" UseElement,
+				//"Use" Use,
+				1 RankElement,
+				1 Rank,
+				LPeriod Period
+			}
+		) Telecom,
+		"GenderElement" GenderElement,
+		"Male" Gender,
+		"1977-04-13" BirthDateElement,
+		"1977-04-13" BirthDate,
+		false Deceased,
+		Address
+		(
+			row
+			{
+				"UseElement" UseElement,
+				//Use : String,
+				"TypeElement" TypeElement,
+				//Type : String,
+				"TextElement" TextElement,
+				"Text" Text,
+				//LineElement : list(FHIRString),
+				//Line : list(String),
+				"CityElement" CityElement,
+				"City" City,
+				"DistrictElement" DistrictElement,
+				"District" District,
+				"StateElement" StateElement,
+				"State" State,
+				"PostalCodeElement" PostalCodeElement,
+				"PostalCode" PostalCode,
+				"CountryElement" CountryElement,
+				"Country" Country,
+				LPeriod Period
+			}
+		) Address,
+		CodeableConcept
+		(
+			row
+			{
+				Coding
+				(
+					row
+					{
+						"SystemElement" SystemElement,
+						//System : String,
+						"VersionElement" VersionElement,
+						"Version" Version,
+						"CodeElement" CodeElement,
+						"Code" Code,
+						"DisplayElement" DisplayElement,
+						"Display" Display,
+						true UserSelectedElement,
+						true UserSelected
+					}
+				) Coding,
+				"TextElement" TextElement,
+				"Text" Text
+			}
+		) MaritalStatus,
+		false MultipleBirth
+		//Photo : list(Attachment),
+		//Contact : list(Patient.ContactComponent),
+		//Animal : Patient.AnimalComponent,
+		//Communication : list(Patient.CommunicationComponent),
+		//CareProvider : list(ResourceReference),
+		//ManagingOrganization : ResourceReference,
+		//Link : list(Patient.LinkComponent)
+	}
+);
+
+/*
+//* Table: Resources
+insert table
+{
+	row
+	{
+		'1' Id,
+		'Patient' Type,
+		P Content,
+		'1' Number,
+		Date().AsString Date,
+		'String' String,
+		'Token' Token,
+		'Reference' Reference,
+		'Composite' Composite,
+		'1' Quantity,
+		'www.blah.com' Uri
+	},
+	row
+	{
+		'2' Id,
+		'Patient' Type,
+		P Content,
+		'2' Number,
+		Date().AsString Date,
+		'String2' String,
+		'Token2' Token,
+		'Reference2' Reference,
+		'Composite2' Composite,
+		'2' Quantity,
+		'www.blah2.com' Uri
+	}
+} into Resources;
+
+//* Table: Patients
+insert table
+{
+	row
+	{
+		'1' ResourceId,
+		'true' Active,
+		'123 Address' Address,
+		'SomeCity' AddressCity,
+		'USA' AddressCountry,
+		'99999' AddressPostalCode,
+		'UT' AddressState,
+		Date(1977, 4, 13).AsString Birthdate,
+		'false' Deceased,
+		'kninsa@gmail.com' Email,
+		'Rose' Family,
+		'M' Gender,
+		'Bobby' Given,
+		'en' Language,
+		'Bobby Rose' Name,
+		'801-347-0002' Phone
+	},
+	row
+	{
+		'2' ResourceId,
+		'true' Active,
+		'123 Address' Address,
+		'SomeCity' AddressCity,
+		'USA' AddressCountry,
+		'99999' AddressPostalCode,
+		'UT' AddressState,
+		Date(1971, 3, 30).AsString Birthdate,
+		'false' Deceased,
+		'shemrose@gmail.com' Email,
+		'Rose' Family,
+		'F' Gender,
+		'Sherri' Given,
+		'en' Language,
+		'Sherri Rose' Name,
+		'801-857-9286' Phone
+	}
+} into Patients
+*/

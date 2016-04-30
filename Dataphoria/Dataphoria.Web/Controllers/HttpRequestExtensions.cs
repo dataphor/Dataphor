@@ -2,14 +2,14 @@
 	From the Furore Spark FHIR Server implementation
 */
 
+using Alphora.Dataphor.DAE.NativeCLI;
+using Hl7.Fhir.Rest;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
-using Hl7.Fhir.Rest;
 
 namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
@@ -77,6 +77,18 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 				list.Add(new Tuple<string, string>(pair.Key, pair.Value));
 			}
 			return list;
+		}
+
+		public static IEnumerable<KeyValuePair<string, object>> NativeListedParameters(this HttpRequestMessage request)
+		{
+			IEnumerable<KeyValuePair<string, string>> queryPairs = request.GetQueryNameValuePairs();
+			var parameters = new Dictionary<string, object>();
+			foreach (var pair in queryPairs)
+			{
+				parameters.Add(String.Format("A{0}", pair.Key), pair.Value);
+			}
+
+			return parameters;
 		}
 
 		public static SearchParams GetSearchParams(this HttpRequestMessage request)

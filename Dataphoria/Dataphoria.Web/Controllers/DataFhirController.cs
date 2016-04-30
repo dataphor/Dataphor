@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.Http.Cors;
-using Alphora.Dataphor.DAE.NativeCLI;
+﻿using Alphora.Dataphor.DAE.NativeCLI;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Linq;
+using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
@@ -16,8 +14,8 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 	[EnableCors("*", "*", "*")]
 	public class DataFhirController : ApiController
 	{
-		[HttpGet, Route("{type}")]
-		public JToken Search(string type)
+		[HttpGet, Route("{type}/{blah}")]
+		public JToken OldSearch(string type)
 		{
 			var searchparams = Request.GetSearchParams();
 			//int pagesize = Request.GetIntParameter(FhirParameter.COUNT) ?? Const.DEFAULT_PAGE_SIZE;
@@ -84,11 +82,29 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 		}
 
 		[HttpPost, Route("{type}/_search")]
-		public JToken SearchWithOperator(string type)
+		public JToken OldSearchWithOperator(string type)
 		{
 			// todo: get tupled parameters from post.
-			return Search(type);
+			return OldSearch(type);
 		}
+
+		[HttpGet, Route("{type}")]
+		public string Search(string type)
+		{
+			var searchParameters = Request.NativeListedParameters();
+			var whereClause = ProcessorInstance.Instance.BuildWhereClause(searchParameters);
+
+			switch (type)
+			{
+				case "patient":
+					var rows = ProcessorInstance.Instance.Evaluate(string.Format("select FHIR.Server.FHIRServerPatientView {0}", whereClause), searchParameters);
+					var result = JsonConvert.SerializeObject(((NativeTableValue)((NativeResult)rows).Value).Rows);
+					return result;
+				default:
+					return null;
+					
+			}
+        }
 
 		//[HttpGet, Route("{table}")]
 		//public JToken Get(string table)

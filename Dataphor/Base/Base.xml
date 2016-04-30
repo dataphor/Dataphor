@@ -1,0 +1,1048 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Alphora.Dataphor</name>
+    </assembly>
+    <members>
+        <member name="T:Alphora.Dataphor.AssemblyNameUtility">
+            <summary>
+            Utility class to perform assembly name parsing.
+            </summary>
+            <remarks>
+            The Silverlight Framework has prevented us from running
+            Assembly.GetName() or using the AssemblyName constructor
+            that would perform AssemblyName parsing, so this utility
+            class performs those security critical tasks.
+            </remarks>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.PublishDefaultListAttribute">
+            <summary>
+            	Use on a class or struct to identify a List property
+            	as the default parent.
+            </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.PublishDefaultConstructorAttribute">
+            <summary>
+            	Use on a class or struct to identify the constructor to 
+            	call when deserializing.
+            </summary>
+            <remarks>
+            	The constructor's parameters should be labeled with the
+            	<see cref="T:Alphora.Dataphor.BOP.PublishSourceAttribute"></see> so the values for the
+            	parameters can be determined.
+            </remarks>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.PublishSourceAttribute">
+            <summary>
+            	Use on parameters of the "default" constructor (as specified by
+            	<see cref="T:Alphora.Dataphor.BOP.PublishDefaultConstructorAttribute"/>) to identify
+            	which member is associated with this parameter for persistance.
+            </summary>
+            <remarks>
+            	The referenced member may be read-only because it will not be
+            	written to.  The referenced member must be flagged with the
+            	PublishAttribute.
+            </remarks>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.PublishNameAttribute">
+            <summary>
+            	Use on a class or struct to denote the member to use to identify the object
+            	uniquely within it's parent.
+            </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.DefaultValueMemberAttribute">
+            <summary> Used on a member to identify another member that can be invoked to determine the default for this member. </summary>
+            <remarks> This attribute cannot be used for properties that are deserialized as arguments for a constructor. </remarks>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.PublishAsAttribute">
+            <summary>
+            	Use on a class or struct to denote what the class should be written out as when published.
+            	Usually used to make an object serialize as something that it was derived from.
+            </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.PublishMethod">
+            <summary>
+            	Used by <see cref="T:Alphora.Dataphor.BOP.PublishAttribute"/> to specify the method of	persistance.
+            </summary>
+            <remarks>
+            	None - Does no persistence
+            	Value - Persist the value or reference as a single attribute.
+            	Inline - Persist the value or reference as a child.
+            	List - Persist each item in the IList Inline.
+            </remarks>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.PublishAttribute">
+            <summary>
+            	Use on a value, reference or List property to identify
+            	it for persistance.
+            </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.Deserializer">
+            <summary> Basic Object Persistence (BOP) Deserializer. </summary>
+            <remarks> 
+            	This class is not thread safe.  The Deserialize methods should be executed synchronously.
+            </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Deserializer.Deserialize(System.IO.Stream,System.Object)">
+            <summary> Initializes or creates an instance of an object from a BOP serialized stream. </summary>
+            <param name="instance"> Instance to initialize.  If null, a new instance is created. </param>
+            <returns> A new object instance, or the object passed as AInstance </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Deserializer.Deserialize(System.String,System.Object)">
+            <summary> Initializes or creates an instance of an object from a BOP serialized string. </summary>
+            <param name="instance"> Instance to initialize.  If null, a new instance is created. </param>
+            <returns> A new object instance, or the object passed as AInstance </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Deserializer.Deserialize(System.Xml.Linq.XDocument,System.Object)">
+            <summary> Initializes or creates an instance of an object from a BOP serialized XML document. </summary>
+            <param name="instance"> Instance to initialize.  If null, a new instance is created. </param>
+            <returns> A new object instance, or the object passed as AInstance </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Deserializer.GetClassType(System.String,System.String)">
+            <summary> Constructs a class type from a name and optionally a namespace/assembly. </summary>
+            <remarks> The namespace may also include an assembly name (after a comma). </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Deserializer.GetReference(System.String,System.Object,System.Reflection.MemberInfo)">
+            <summary> Resolve an instance reference. </summary>
+            <remarks> If AInstance or AMember are null than fixups will not be performed if the reference is not found. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Deserializer.GetNameMemberInfo(System.Type)">
+            <summary> Gets the MemberInfo for the name member of the specified type. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Deserializer.AttributeToValue(System.String,System.Type,System.Object,System.Reflection.MemberInfo)">
+            <summary> Reads a property value (value type or reference) from the string. </summary>
+            <remarks> If AInstance and AMember are null, than fixups will not be performed for references. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Deserializer.ReadAttributeDefault(System.Reflection.MemberInfo,System.Object)">
+            <summary> Reads the default value for a type's member. </summary>
+            <remarks> Throws if no default is provided. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Deserializer.FindMemberInstance(System.Object,System.String@)">
+            <summary> Finds the instance for a specific member. </summary>
+            <remarks> 
+            	Names with dot qualifiers are resolved to their unqualified names by finding 
+            	a by-reference member for each qualifier for each instance.
+            </remarks>
+            <param name="LNamePath"> Pass the fully qualified name and get the simple name back. </param>
+            <returns> The instance containing the member named the simple (unqualified) name. </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Deserializer.ConstructInstance(System.String,System.Type,System.Xml.Linq.XElement)">
+            <summary> Constructs a new instance given a specified type and signature. </summary>
+            <remarks> 
+            	Any constructor arguments are loaded from the specified XML node.  
+            	The specified node may be altered by this method.  (clone it first if you do not want it affected)
+            </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Deserializer.ReadObject(System.Xml.Linq.XElement,System.Object)">
+            <summary> Deserializes an instance from a node. </summary>
+            <param name="node"> The XML node.  This node will not be affected by this method. </param>
+            <param name="instance"> An optional instance to deserialize "into". </param>
+            <returns> The instance that was passed by AInstance or was constructed if null was passed. </returns>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.Persistence">
+            <summary> Base class for serializer and deserializer. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Persistence.GetDefaultListMemberName(System.Reflection.MemberInfo)">
+            <summary> Determines the name of the member that is the default list for the type. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Persistence.GetNameMemberName(System.Reflection.MemberInfo)">
+            <summary> Determines the member name that is designated as the bop:name for the type. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Persistence.GetElementName(System.Type)">
+            <summary> Determines the element text to use when writing the specified type. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Persistence.GetMemberType(System.Xml.Linq.XElement,System.Reflection.MemberInfo)">
+            <summary> Gets the type of the member from the name/namespace of the XML element. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Persistence.XNamesEqual(System.Xml.Linq.XName,System.Xml.Linq.XName)">
+            <summary> Performs a case sensitive comparison on the namespace name, and a case insensitive comparison on the local name. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.IBOPSerializationEvents">
+            <summary> Events to customize object when serialzed and deserialized. </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.ReferenceNotFound">
+            <summary>Error code 101100: "A referenced object ({0}) is not found."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.ExpectingSingleAttribute">
+            <summary>Error code 101101: "Multiple attributes found.  Expecting single attribute ({0})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.InvalidElementName">
+            <summary>Error code 101102: "Type ({0}) does not have a designated name.  Use the [PublishName] attribute to specify the type's name."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.InvalidAttribute">
+            <summary>Error code 101103: "Invalid attribute name ({0})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.ConstructorArgumentRefNotFound">
+            <summary>Error code 101105: "A constructor's argument source ({0}) is not found in type ({1})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.DefaultListNotFound">
+            <summary>Error code 101106: "A list name was not specified, and no default list is identified for type ({0})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.UnableToConstruct">
+            <summary>Error code 101107: "Unable to construct instance of type ({0})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.DefaultConstructorNotFound">
+            <summary>Error code 101108: "A constructor matching the default constructor signature ({0}) is not found."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.InvalidNode">
+            <summary>Error code 101109: "Invalid DILX document node ({0})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.DocumentElementRequired">
+            <summary>Error code 101110: "'document' element is required in a DILX document."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.DocumentElementLast">
+            <summary>Error code 101111: "'document' element must be the last element in a DILX document."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.DefaultNotSpecified">
+            <summary>Error code 101112: "Document requests that property ({0}) of type ({1}) is to be set to its default, but no [DefaultValue] attribute is specified for the property."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.ConstructorArgumentRefNotSpecified">
+            <summary>Error code 101113: "Constructor argument source ({0}) is not specified in type ({1}).  [PublishSource] attribute is missing for the constructor's argument." </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.DelegatesNotSupported">
+            <summary>Error code 101114: "Serialization/Deserialization of delegate (event) types is not supported."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.BOPException.Codes.TypeNameMismatch">
+            <summary>Error code 101115: "Warning: The read element type name ({0}) doesn't match the instance's class name ({1})."</summary>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.DilxDocument">
+            <summary> Represents a DILX Document. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.DilxDocument.Read(System.IO.Stream)">
+            <summary> Reads the DILX document from a stream containing the XML. </summary>
+            <remarks> The document is cleared first. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.DilxDocument.Write(System.IO.Stream)">
+            <summary> Writes the DILX document to a stream in an XML format. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.DilxDocument.Clear">
+            <summary> Clears the DILX document.</summary>
+        </member>
+        <member name="P:Alphora.Dataphor.BOP.DilxDocument.Content">
+            <summary> The embedded DIL document Content. </summary>
+        </member>
+        <member name="P:Alphora.Dataphor.BOP.DilxDocument.Ancestors">
+            <summary> Collection of ancestor document expressions. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.Ancestors">
+            <summary> DilxDocument Ancestor Collection </summary>
+            <remarks> Maintains a list of ancestor document expressions. </remarks>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.Inheritance">
+            <summary>
+               IBOP (Inherited Basic Object Persistence) provides services to Diff and Merge the
+               differences of two BOP XML documents/streams.
+               Diff
+                 extracts the differences between two BOP XML streams and writes them out to 
+                 another stream.
+               Merge
+                 combines a base BOP XML document with the changes stored in a Diff stream.
+            </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Inheritance.AddAttr(System.Xml.Linq.XDocument,System.Xml.Linq.XElement@,System.Xml.Linq.XName,System.Xml.Linq.XName,System.String)">
+            <summary> Adds an attribute to a node. </summary>
+            <remarks> If the node is null, creates a new node using the ADoc.CreateNode() method. </remarks>
+            <param name="doc"> document to provide context for createting a node </param>
+            <param name="ANode"> reference to a node </param>
+            <param name="ANodeName"> name for the node, if it is created </param>
+            <param name="ANodeNamespaceURI"> namespace uri for the node, if it is careated </param>
+            <param name="attrName"> name of the attribute to add to the node </param>
+            <param name="attrValue"> value for the added attribute </param>
+            <param name="ANameSpace"> namespace URI for the attribute creation </param>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Inheritance.CopyNode(System.Xml.Linq.XDocument,System.Xml.Linq.XElement,System.Boolean)">
+            <summary> Copies an element using ADoc to provide the context of the copy. </summary>
+            <param name="doc"> XDocument used to create/host the new node </param>
+            <param name="ANode"> XElement to copy </param>
+            <param name="deep"> Whether to copy the node's elements as well as attributes </param>
+            <returns> A copy of ANode in the context of ADoc </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Inheritance.DiffAttrs(System.Xml.Linq.XDocument,System.Xml.Linq.XElement,System.Xml.Linq.XElement,System.Xml.Linq.XElement@)">
+            <summary> Compares the Modified node's atributes to those of the Original node. </summary>
+            <remarks> Copies the differences, using AModifiedNode, into ADiffNode. </remarks>
+            <param name="diffDoc"> document used to provide context for the DiffNode </param>
+            <param name="AModifiedNode"> node that the Original should look like after a merge operation </param>
+            <param name="AOriginalNode"> node describing the initial state of the node</param>
+            <param name="ADiffNode"> node describing the operations required to make the Original node into the Modified </param>
+            <returns> ADiffNode </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Inheritance.FindNode(System.Xml.Linq.XElement,System.Xml.Linq.XElement,System.Int32@)">
+            <summary> Finds an element based on the bop:name attribute of AModifiedNode. </summary>
+            <param name="AModifiedNode"> a selected node in the Modified document </param>
+            <param name="AOriginalNode"> a "parent-level" node in which to search for a match to AModifiedNode </param>
+            <param name="position"> the position of the node inside the parent </param>
+            <returns> a OriginalNode's child matching AModifiedNode, or null </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Inheritance.IsResolvable(System.Xml.Linq.XElement)">
+            <summary> Test for minimal compliance of attributes against the requirements used in FindNode() </summary>
+            <param name="node"> the node to test for having attributes to use in FindNode() </param>
+            <returns> True if the node is the root element of the document or it has a name. </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Inheritance.DiffNode(System.Xml.Linq.XElement,System.Xml.Linq.XElement,System.Xml.Linq.XElement,System.Xml.Linq.XElement,System.Xml.Linq.XDocument)">
+            <summary>
+            	Compares the attributes and children of a node for operations required to
+            	apply to the OriginalNode in a merge operation to make it into the ModifiedNode.
+            </summary>
+            <param name="modifiedNode"> node representing what AOriginalNode should look like after a merge </param>
+            <param name="originalNode"> node in its "originating" state </param>
+            <param name="resultNode"> node containing the operations required to merge AOriginalNode to AModifiedNode.  The "parent" node. </param>
+            <param name="AResultDoc"> the diff result document </param>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Inheritance.Diff(System.Xml.Linq.XDocument,System.Xml.Linq.XDocument)">
+            <summary>
+            	Compares all the nodes, their chldren and attributes to determine what operations
+            	are required to transform the Original document into the Modified document through a
+            	merge operation.
+            </summary>
+            <param name="original"> the "parent" document for inheritance </param>
+            <param name="modified"> the "derived" document </param>
+            <returns> a document containing only the differences between the two documents </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Inheritance.MergeAttrs(System.Xml.Linq.XDocument,System.Xml.Linq.XElement,System.Xml.Linq.XElement@,System.Boolean)">
+            <summary>
+            	Applies the differences from the diff document to transform the Original document to
+            	the Modified document it was compared against.
+            </summary>
+            <param name="doc"> the Original document, used to provide contex for created attributes </param>
+            <param name="modifiedNode"> the node resulting from a diff operation </param>
+            <param name="originalNode"> the node to be transformed in the merge </param>
+            <param name="ignoreName"> whether to ignore the name difference in the merge operation </param>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Inheritance.MergeNode(System.Xml.Linq.XElement@,System.Xml.Linq.XElement,System.Xml.Linq.XDocument)">
+            <summary>
+            	Applies the differences in the ModifiedNode to the OriginalNode to transform the
+            	Original document.
+            </summary>
+            <param name="originalNode"> node to transform through the merge operation </param>
+            <param name="modifiedNode"> node containing the differences to apply </param>
+            <param name="doc"> the Original document used to provide context for created nodes </param>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Inheritance.Merge(System.Xml.Linq.XDocument,System.Xml.Linq.XDocument)">
+            <summary>
+            	Applies differences to the Original document transforming it to a descendant document.
+            </summary>
+            <param name="original"> document to be transformed through the merge operation </param>
+            <param name="diff"> a "diff" document containing the differences to apply </param>
+            <returns> The Original document transformed by the application of the differences </returns>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.Serializer">
+            <summary> Basic Object Persistence (BOP) Serializer. </summary>
+            <remarks> 
+            	This class is not thread safe.  The Serialize methods should be executed synchronously.
+            </remarks>
+        </member>
+        <member name="F:Alphora.Dataphor.BOP.Serializer.RemoveReferencesToObjectsNotSerialized">
+            <summary> Set to false to keep references to objects which will not exist in the serialized XML. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Serializer.Serialize(System.IO.Stream,System.Object)">
+            <summary> Stores an instance of an object as an XML stream. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Serializer.Serialize(System.Xml.Linq.XDocument,System.Object)">
+            <summary> Stores an instance of an object as an XML document. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Serializer.GetElementNamespace(System.Type)">
+            <summary> Determines the element namespace to use when writing the specified type. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Serializer.ShouldPersist(System.Reflection.MemberInfo,System.Object,System.Object)">
+            <summary> Determines if the specified property should be serialized. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Serializer.WriteValue(System.Xml.Linq.XName,System.Xml.Linq.XElement,System.Reflection.MemberInfo,System.Object,System.Object)">
+            <summary> Writes a member value to an XML attribute. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Serializer.BuildConstructorParamSources(System.Type)">
+            <summary> Builds a list of names of the specified type's members that are arguments to the constructor. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Serializer.GetPublishMethod(System.Reflection.MemberInfo,System.Collections.Generic.List{System.String})">
+            <summary> Determines what publish method to use for the specified member. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Serializer.AppendQualifier(System.String,System.String)">
+            <summary> Appends a name qualifier to another name. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Serializer.CreateElement(System.Xml.Linq.XContainer,System.String,System.Type)">
+            <summary> Creates an appends a new XML element. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Serializer.ReferenceToString(System.Object,System.Boolean@)">
+            <summary> Determines an attribute string for the given instance reference. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Serializer.WriteMembers(System.String,System.Xml.Linq.XElement,System.Object,System.Type)">
+            <summary> Writes all of the members for the given instance to the specified XML element. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.Settings">
+            <summary> Managages a collection of Name/Value configuration setting. </summary>
+        </member>
+        <member name="P:Alphora.Dataphor.BOP.Settings.Item(System.String)">
+            <summary> Accesses the raw string configuration items by name. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Settings.GetSetting(System.String,System.Type,System.Object)">
+            <summary> Reads a setting value from the configuration settings. </summary>
+            <param name="settingName"> Name of the value to find. </param>
+            <param name="type"> The type to convert the value to. </param>
+            <param name="defaultValue"> If the value is not found or it is empty, this default value is returned. </param>
+            <returns> The setting, converted to the specified type. </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Settings.SetSetting(System.String,System.Object)">
+            <summary> Writes a setting value into the configuration settings </summary>
+            <param name="settingName"> Name of the value to find. </param>
+            <param name="tempValue"> The value to convert and write. </param>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Settings.AttemptLoadSettings(System.String)">
+            <summary> Loads the configuration settings from file if the file exists. </summary>
+            <remarks> Fatal errors will throw an exception.  Non-fatal errors will be reported in the ErrorList result. </remarks>
+            <returns> An ErrorList collection of exceptions that occurred during loading.  Null if no errors. </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Settings.LoadSettings(System.String)">
+            <summary> Loads the configuration settings from file if the file exists. </summary>
+            <remarks> Throws on any error </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.BOP.Settings.SaveSettings(System.String)">
+            <summary> Saves the current configuration settings.</summary>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.SettingsList">
+            <summary> Maintains a name/value collection of strings. </summary>
+            <remarks> Used by the <see cref="T:Alphora.Dataphor.BOP.Settings">Settings</see> class. </remarks>
+        </member>
+        <member name="T:Alphora.Dataphor.BOP.SettingsItem">
+            <summary> Maintains a name/value string pair. </summary>
+            <remarks> Used by the <see cref="T:Alphora.Dataphor.BOP.SettingsList"/>. </remarks>
+        </member>
+        <member name="P:Alphora.Dataphor.ProperFraction.Percent">
+            <summary> Fraction represented as a percentage. </summary>
+        </member>
+        <member name="P:Alphora.Dataphor.ProperFraction.Decimal">
+            <summary> Decimal form of the fraction (between 0 and 1). </summary>
+        </member>
+        <member name="P:Alphora.Dataphor.ProperFraction.Value">
+            <summary> Number between 0 and (2^32 - 1) internally representing the proper fraction. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.IDisposableNotify">
+            <remarks>Provides an interface to receive notification when an object has been dispose.</remarks>	
+        </member>
+        <member name="E:Alphora.Dataphor.IDisposableNotify.Disposed">
+            <summary>Event to notify objects that this object has been disposed.</summary>
+        </member>
+        <member name="T:Alphora.Dataphor.Disposable">
+            <summary>Provides the base implementation for <see cref="T:System.IDisposable"/> and <see cref="T:Alphora.Dataphor.IDisposableNotify"/>. </summary>
+            <seealso cref="T:System.IDisposable"/>
+        </member>
+        <member name="E:Alphora.Dataphor.Disposable.Disposed">
+            <summary> <c>Disposed</c> is invoked when this object is Disposed </summary>
+            <seealso cref="T:Alphora.Dataphor.IDisposableNotify"/>
+        </member>
+        <member name="M:Alphora.Dataphor.Disposable.Dispose">
+            <summary> Disposes the object. </summary>
+            <seealso cref="T:System.IDisposable"/>
+        </member>
+        <member name="M:Alphora.Dataphor.Disposable.Dispose(System.Boolean)">
+            <summary> Virtual dispose method allows descendents to perform cleanup. </summary>
+            <remarks> Notifies other objects of the disposal. </remarks>
+            <param name="disposing"> True if being called from Dispose() instead of finallizer. </param>
+        </member>
+        <member name="T:Alphora.Dataphor.ErrorList">
+            <summary> ErrorList is a list of exceptions that can be thrown in aggregate. </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.UnableToSetProperty">
+            <summary>Error code 100100: "Unable to set property ({0})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.MemberNotFound">
+            <summary>Error code 100101: "Member ({0}) not found for class ({1}).  Overloaded and indexed properties are not supported."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.ExpectingSingleAttribute">
+            <summary>Error code 100102: "Multiple attributes found.  Expecting single attribute ({0})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.DefaultConstructorNotFound">
+            <summary>Error code 100103: "A constructor matching the default constructor signature ({0}) is not found."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.CannotAddNull">
+            <summary>Error code 100104: "This list does not allow null items."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.Duplicate">
+            <summary>Error code 100115: "Duplicate value inserted ({0})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.IndexOutOfBounds">
+            <summary>Error code 100116: "List index out of bounds ({0}).  Valid range is (0-{1})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.InsertNotSupported">
+            <summary>Error code 100119: "Objects cannot be inserted into a hash table, use the Add method instead."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.ObjectAtIndexNotFound">
+            <summary>Error code 100120: "Object at index ({0}) not found."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.MinimumSize">
+            <summary>Error code 100121: "Size must be at least two (2)."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.FinalizerInvoked">
+            <summary>Error code 100122: "Finalizer invoked."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.ExceptionsOnly">
+            <summary>Error code 100123: "Only 'Exception' based instances can be added to the errors list.  Attempted to add a ({0})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.StackEmpty">
+            <summary>Error code 100124: "Stack empty."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.StackOverflow">
+            <summary>Error code 100125: "Maximum stack depth ({0}) has been exceeded."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.InvalidStackIndex">
+            <summary>Error code 100126: "Stack index out of range ({0})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.StackDepthExceedsNewSetting">
+            <summary>Error code 100127: "Stack depth ({0}) already exceeds new setting ({1})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.CallDepthExceedsNewSetting">
+            <summary>Error code 100128: "Call depth ({0}) alread exceeds new setting ({1})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.CallStackOverflow">
+            <summary>Error code 100129: "Maximum call stack depth ({0}) has been exceeded."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.CannotConvertNull">
+            <summary>Error code 100130: "Cannot convert a null reference."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.CannotConvertFromString">
+            <summary>Error code 100131: "Cannot convert type ({0}) from string."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.CannotConvertToString">
+            <summary>Error code 100132: "Cannot convert to string from type ({0})."</summary>
+        </member>
+        <member name="F:Alphora.Dataphor.BaseException.Codes.ClassNotFound">
+            <summary>Error code 100133: "Class ({0}) not found."</summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BaseList`1.Add(`0)">
+            <summary> Adds an item to the end of the list. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BaseList`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary> Adds a collection of items to the list. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BaseList`1.Insert(System.Int32,`0)">
+            <summary> Inserts an item into the list. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.BaseList`1.SafeRemove(`0)">
+            <summary>Removes AValue if it is found in the list, does nothing otherwise.</summary>		
+        </member>
+        <member name="M:Alphora.Dataphor.BaseList`1.Move(System.Int32,System.Int32)">
+            <summary> Changes the index of an item. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.List">
+            <summary>
+            	<c>List</c> of objects and provides internal null checking.
+            </summary>
+            <remarks>
+            	<c>List</c> can optionally disallow null items.
+            </remarks>
+        </member>
+        <member name="P:Alphora.Dataphor.List.AllowNulls">
+            <summary> <c>AllowNulls</c> determines whether the list can contain null references. </summary>
+            <remarks>
+            	If this property is changes while items are in the list, the items 
+            	are validated.
+            </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.List.Validate(System.Object)">
+            <summary> Overrides the validation to check the nullability of the item. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList.#ctor(System.Boolean,System.Boolean)">
+            <summary> Allows the initialization of the ItemsOwned and AllowNulls properties. </summary>
+            <param name="itemsOwned"> See <see cref="P:Alphora.Dataphor.DisposableList.ItemsOwned"/> </param>
+            <param name="allowNulls"> See <see cref="P:Alphora.Dataphor.List.AllowNulls"/> </param>
+        </member>
+        <member name="P:Alphora.Dataphor.DisposableList.ItemsOwned">
+            <summary>
+            	ItemsOwned controls whether or not the List "owns" the contained items.  
+            	"Owns" means that if the item supports the IDisposable interface, the will be
+            	disposed when the list is disposed or when an item is removed.  
+            </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList.ItemDispose(System.Object,System.EventArgs)">
+            <summary> <c>ItemDispose</c> is called by contained items when they are disposed. </summary>
+            <remarks>
+            	This method simply removes the item from the list.  <c>ItemDispose</c> is 
+            	only called if the item is not disposed by this list.
+            </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList.Adding(System.Object,System.Int32)">
+            <remarks> Hooks the Disposed event of the item if the item implements IDisposable. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList.Removing(System.Object,System.Int32)">
+            <remarks> If the item is owned, it is disposed. </remarks>
+        </member>
+        <member name="E:Alphora.Dataphor.DisposableList.Disposed">
+            <summary> IDisposable implementation </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList.Dispose">
+            <summary> IDisposable implementation </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList.Disown(System.Object)">
+            <summary> Removes the specified object without disposing it. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList.DisownAt(System.Int32)">
+            <summary> Removes the specified object index without disposing it. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.HashtableList`2">
+            <summary> A Dictionary descendent which implements the IList interface. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.ByteArrayUtility">
+            <summary> Reading native types to and from byte arrays. </summary>
+            <remarks> The read portions of this utility could conceivably be replaced with calls to BinConverter, 
+             but there are extra bounds checks done by BitConverter that are avoided here. </remarks>
+        </member>
+        <member name="F:Alphora.Dataphor.CRC32Utility.CCRC32Lookup">
+            <summary> CRC32 Lookup Table (for performance). </summary>
+            <remarks> This table is based on the polynomial: 0xEDB88320. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.CRC32Utility.GetCRC32(System.IO.Stream)">
+            <summary> Calculates a 32 bit Cyclic Redundancy Check hash for the given stream. </summary>
+            <remarks> 
+            	The stream passed to this operator will be read byte at a time, so it should be buffered 
+            	in some manner.  FileStreams are an example of an already buffered stream; if you are 
+            	passing an unbuffered stream, you should wrap the stream in a BufferedStream.  If you
+            	wish to perform the CRC on only a portion of the stream, use a WrapperStream to limit
+            	the bounds of this operation.
+            </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.CRC32Utility.GetCRC32(System.Byte[])">
+            <summary> Calculates a 32 bit Cyclic Redundancy Check hash for the given byte array. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.CRC32Utility.GetAmendedCRC32(System.UInt32,System.Byte[])">
+            <summary> Computes a CRC32 given an existing CRC32 value and amended data in a byte array. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.CRC32Utility.GetCRC32(System.Byte[],System.Int32,System.Int32)">
+            <summary> Calculates a 32 bit Cyclic Redundancy Check hash for a range within the given byte array. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.CRC32Utility.GetAmendedCRC32(System.UInt32,System.Byte[],System.Int32,System.Int32)">
+            <summary> Computes a CRC32 given an existing CRC32 value and amended data in a byte array. </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:Alphora.Dataphor.DisposableList`1.ItemsOwned" -->
+        <member name="E:Alphora.Dataphor.DisposableList`1.Disposed">
+            <summary> IDisposable implementation </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList`1.Dispose">
+            <summary> IDisposable implementation </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList`1.ItemDispose(System.Object,System.EventArgs)">
+            <summary> <c>ItemDispose</c> is called by contained items when they are disposed. </summary>
+            <remarks>
+            	This method simply removes the item from the list.  <c>ItemDispose</c> is 
+            	only called if the item is not disposed by this list.
+            </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList`1.Adding(`0,System.Int32)">
+            <remarks> Hooks the Disposed event of the item if the item implements IDisposableNotify. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList`1.Removing(`0,System.Int32)">
+            <remarks> If the item is owned, it is disposed. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList`1.Disown(`0)">
+            <summary> Removes the specified object without disposing it. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.DisposableList`1.DisownAt(System.Int32)">
+            <summary> Removes the specified object index without disposing it. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.Error">
+            <summary> Error handling routines. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.Error.Warn(System.String,System.Object[])">
+            <summary> Warns the developer of a non-critical condition. </summary>
+            <remarks> Warn is only called if DEBUG is defined. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.Error.Fail(System.String,System.Object[])">
+            <summary> Throws an "internal error" assertion exception for an unexpected critical condition. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.Error.AssertWarn(System.Boolean,System.String,System.Object[])">
+            <summary> Warns the developer of a non-critical condition. </summary>
+            <remarks> AssertWarn is only called if DEBUG is defined. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.Error.AssertFail(System.Boolean,System.String,System.Object[])">
+            <summary> Throws an "internal error" assertion exception for an unexpected critical condition. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.Error.DebugAssertFail(System.Boolean,System.String,System.Object[])">
+            <summary> Throws an "internal error" assertion exception for an unexpected critical condition. </summary>
+            <remarks> DebugAssertFail is only called if DEBUG is defined. </remarks>
+        </member>
+        <member name="T:Alphora.Dataphor.ExceptionUtility">
+            <summary> Sundry exception related utilitary routines. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ExceptionUtility.BriefDescription(System.Exception)">
+            <summary> Builds a string containing a brief description of a given exception. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ExceptionUtility.DetailedDescription(System.Exception)">
+            <summary> Builds a string containing a detailed description of a given exception. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.FixedSizeCache`2">
+            <summary> Fixed size cache list. </summary>
+            <remarks> Currently implemented as a LRU (Least Recently Used) algorithm. </remarks>
+            Note: this class uses the convention of prefixing methods where synchronization is a concern with "Syn".
+            The premise is: a method prefixed with "Syn" can only be called by another method prefixed with "Syn"
+            or within a protected block.
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.#ctor(System.Int32)">
+            <param name="size"> The size of the cache (in entries). </param>
+        </member>
+        <member name="F:Alphora.Dataphor.FixedSizeCache`2._logicalTime">
+            <summary> Logical time used to track recency of Entry usage. </summary>
+            <remarks> Incremented with each Entry access (logical clock).  This may roll over. Note that this does not necessarily 
+            indicate the relative index of a Entry in the LRU chain because there are multiple insertion points into the LRU. </remarks>
+        </member>
+        <member name="P:Alphora.Dataphor.FixedSizeCache`2.Count">
+            <summary> The number of cache entries. </summary>
+        </member>
+        <member name="P:Alphora.Dataphor.FixedSizeCache`2.Settings">
+            <summary> Gets or sets the settings for the cache. </summary>
+            <remarks> Changing these settings will not affect the current state of the cache, but will be used for subsequent operations. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.DefaultSettings">
+            <summary> Sets or resets the cache's settings to their defaults. </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.FixedSizeCache`2._cacheLatch">
+            <summary> Latch used to protect the LRU chain as well as the FFrames table. </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.FixedSizeCache`2._lRUHead">
+            <summary> Pointer to the head of the LRU chain. </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.FixedSizeCache`2._lRUCutoff">
+            <summary> Pointer to the cuttoff point within the LRU chain. </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.FixedSizeCache`2._lRUTail">
+            <summary> Pointer to the tail of the LRU chain. </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.FixedSizeCache`2._lRUPreCutoffCount">
+            <summary> The number of entries that occur before (exclusive of) the cutoff entry. </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.FixedSizeCache`2._lRUCount">
+            <summary> The total number of entries in the LRU chain. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.SynInitializeLRU(Alphora.Dataphor.FixedSizeCache{`0,`1}.Entry)">
+            <summary> Initializes the list. </summary>
+            <remarks> Locks-> Expects: FCacheLatch </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.SynDetach(Alphora.Dataphor.FixedSizeCache{`0,`1}.Entry)">
+            <summary> Detaches the Entry from the list. </summary>
+            <remarks> Locks-> Expects: FCacheLatch </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.SynPlaceAtHead(Alphora.Dataphor.FixedSizeCache{`0,`1}.Entry)">
+            <summary> Places the entry at the head of the LRU chain. </summary>
+            <remarks> Locks-> Expects: FCacheLatch </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.SynPlaceAtCutoff(Alphora.Dataphor.FixedSizeCache{`0,`1}.Entry)">
+            <summary> Places the entry at the cutoff point of the LRU chain. </summary>
+            <remarks> Locks-> Expects: FCacheLatch </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.SynLRURemove(Alphora.Dataphor.FixedSizeCache{`0,`1}.Entry)">
+            <summary> Removes the specified entry from the FLU chain. </summary>
+            <remarks> Locks-> Expects: FCacheLatch </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.SynAdjustEntryCount(System.Int32,System.Boolean)">
+            <summary> Maintains the total and cutoff LRU counts. </summary>
+            <remarks> Locks-> Expects: FCacheLatch </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.SynUpdateCutoff">
+            <summary> Shifts the cutoff point to the point configured in the settings. </summary>
+            <remarks> Locks-> Expects: FCacheLatch </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.SynShiftCutoff(System.Int32)">
+            <summary> Adjusts the cutoff point by the given delta. </summary>
+            <remarks> This method assumes that the given delta will not adjust the cutoff point off of 
+            the edge of the list.
+            Locks-> Expects: FCacheLatch </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.SynLRUClear">
+            <summary> Clears the LRU. </summary>
+            <remarks> Locks-> Expects: FCacheLatch </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.Reference(`0,`1)">
+            <summary> Submits a reference to the cache to be added or reprioritized. </summary>
+            <param name="value"> The item to be added to the cache. </param>
+            <returns> The value that was removed because the available size was completely allocated, or null if no item was removed. </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.System#Collections#Generic#IEnumerable{System#Collections#Generic#KeyValuePair{TKey,TValue}}#GetEnumerator">
+            <remarks> Avoid this overload as it must allocate a KeyValuePair for each result. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.Add(`0,`1)">
+            <summary> Adds the specified key/value to the cache. </summary>
+            <remarks> Note that this may remove another item.  To determine what item is removed upon 
+            entry, use Reference rather than Add. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.Remove(`0)">
+            <summary> Removes the specified key from the cache. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.Clear">
+            <summary> Clears the cache of all entries. </summary>
+        </member>
+        <member name="P:Alphora.Dataphor.FixedSizeCache`2.Values">
+            <remarks> Unimplemented. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.FixedSizeCache`2.SubtractTime(System.Int32,System.Int32)">
+            <summary> Subtracts one logical time from another accounting for rollover. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.Set`1">
+            <summary> Hash table based unique set. </summary>
+            <remarks> Useful for quick insertion, removal, and inclusion queries. </remarks>
+        </member>
+        <member name="T:Alphora.Dataphor.TraversalMode">
+            <summary>
+            Defines the traversal mode used in determining an object's size.
+            </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.TraversalMode.Shallow">
+            <summary>
+            Considers only the object's size.
+            </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.TraversalMode.Default">
+            <summary>
+            Deep, with the exception that the presence of a ReferenceAttribute will prevent traversal into that member.
+            </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.TraversalMode.Deep">
+            <summary>
+            Considers the object, and all object's reachable from the object.
+            </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.ReferenceAttribute">
+            <summary>
+            When used on a field, indicates that the field contains a reference and should not be traversed to determine the size of the instance.
+            </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.MemoryUtility">
+            <summary>
+            Provides static methods for investigating the run-time size in bytes of instances.
+            </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.MemoryUtility.SizeOf(System.Type)">
+            <summary>
+            Returns the estimated allocation size in bytes of an object of the given type.
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Alphora.Dataphor.MemoryUtility.IsSimpleType(System.Type)">
+            <summary>
+            Returns true if the given type is a simple type (built-in .NET type such as bool, byte, or int), false otherwise.
+            </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.NonNullList`1">
+            <summary>
+            Provides a generic list class that does not allow nulls.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="T:Alphora.Dataphor.NotifyingBaseList`1">
+            <summary> A generic list that publishes a change event. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.TemporaryStream">
+            <summary> A non-persistant stream that overflows to a file when it grows sufficiently. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.IndexList">
+            <summary> Well performing, in-memory sorted list. </summary>
+            <remarks> Implementation is a basic B+Tree with two-peer delete merging. 
+            This structure is not thread-safe. </remarks>
+        </member>
+        <member name="P:Alphora.Dataphor.IndexList.Count">
+            <summary> Total number of entries in the index. </summary>
+        </member>
+        <member name="P:Alphora.Dataphor.IndexList.DataNodeCount">
+            <summary> Number of data nodes allocated for the entire index. </summary>
+        </member>
+        <member name="P:Alphora.Dataphor.IndexList.RoutingNodeCount">
+            <summary> Number of routing nodes allocated for the entire index. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.IndexList.Find(System.IComparable,System.Boolean,System.Object@)">
+            <summary> Finds the nearest entry to the given key (in the specified direction). </summary>
+            <returns> True if an exact match was found. </returns>
+        </member>
+        <member name="M:Alphora.Dataphor.IndexList.Node.Search(System.Int32,System.IComparable,System.Int32@)">
+            <summary>
+            Performs a binary search among the entries in this node for the given key.  Will always return an
+            entry index in AIndex, which is the index of the entry that was found if the method returns true,
+            otherwise it is the index where the key should be inserted if the method returns false.
+            </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.IndexList.Node.Clear(Alphora.Dataphor.IndexList)">
+            <summary> Quickly relinquishes all of the nodes (recursively). </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.IndexList.Node.AppendTo(Alphora.Dataphor.IndexList.Node,System.Int32)">
+            <summary> Adds the first ACount nodes from this node to the end of the given node. </summary>
+            <remarks> No range checking is done. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.IndexList.Node.PrependTo(Alphora.Dataphor.IndexList.Node)">
+            <summary> Adds the nodes from this node to the beginning on the given node. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.IndexList.RoutingNode.CopyHalf(Alphora.Dataphor.IndexList.RoutingNode)">
+            <summary> Initializes this node to contain the upper half of nodes from the given node (and removes them from the given one). </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.IndexList.DataNode.CopyHalf(Alphora.Dataphor.IndexList.DataNode)">
+            <summary> Initializes this node to contain the upper half of entires from the given node (and removes them from the given one). </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.Token">
+            <summary>
+            Defines a Token used by the ResolveReference method to provide the root instance of a given reference.
+            </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.GetMemberType(System.Reflection.MemberInfo)">
+            <summary> Gets the Type of the property or field member. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.SetMemberValue(System.Reflection.MemberInfo,System.Object,System.Object)">
+            <summary> Sets a property or field member of the specified instance to the specified value. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.SetInstanceMember(System.Object,System.String,System.String)">
+            <summary> Sets the member of the given instance to the given string value. </summary>
+            <remarks> Sets the member using the converter for the member's type. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.FindSimpleMember(System.Type,System.String)">
+            <summary> Finds an appropriate field, property, or method member with no parameters. </summary>
+            <remarks> Throws if a qualifying member is not found. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.GetAttribute(System.Reflection.ICustomAttributeProvider,System.Type)">
+            <summary> Gets a single attribute for a type based on the attribute class type. </summary>
+            <remarks> Returns null if not found.  Throws if more than one instance of the specified attribute appears. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.FindConstructor(System.String,System.Type)">
+            <summary> Finds a constructor for a type based on the provided signature. </summary>
+            <remarks> Throws if not found. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.StringToValue(System.String,System.Type)">
+            <summary> Converts a string value type to the .NET value based on the provided type. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.ValueToString(System.Object,System.Type)">
+            <summary> Converts a .NET value to a string based on the provided type. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.GetMemberValue(System.Reflection.MemberInfo,System.Object)">
+            <summary> Gets a field, property, or simple method's value for a particular instance. </summary>
+        </member>
+        <member name="F:Alphora.Dataphor.ReflectionUtility._assemblyByName">
+            <summary> Internal dictionary of assembly references by weak (short) name. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.EnsureAssemblyByName">
+            <summary> Ensures that the internal dictionary is populated with the set of initially loaded assemblies. </summary>
+            <remarks> Under Silverlight, this call must be made on the main thread. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.TryGetAssemblyByName(System.String,System.Reflection.Assembly@)">
+            <summary> Attempts to locate an assembly by weak (short) name. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.RegisterAssembly(System.Reflection.Assembly)">
+            <summary> Registers an assembly for resolution by weak (short) name. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.CreateInstance(System.String,System.String,System.String)">
+            <summary> Creates a new instance using the given name components. </summary>
+            <remarks> If the given assembly name is weak (short), an attempt will be made 
+            to find a strong name in the registered assemblies for it. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.GetType(System.String,System.Reflection.Assembly)">
+            <summary> Locates a type, using the given assembly if no assembly name is provided. </summary>
+            <remarks> If an assembly name is given and it is short, an attempt will be made 
+            to find a full name in the registered assemblies for it. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.GetType(System.String)">
+            <summary> Locates a type, using the calling assembly if no assembly name is provided. </summary>
+            <remarks> If an assembly name is given and it is short, an attempt will be made 
+            to find a full name in the registered assemblies for it. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.GetType(System.String,System.String,System.String)">
+            <summary> Locates a type using the given name components. </summary>
+            <remarks> If the given assembly name is short, an attempt will be made 
+            to find a full name in the registered assemblies for it. </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ReflectionUtility.GetType(System.String,System.String)">
+            <summary> Locates a type using the given name components. </summary>
+            <remarks> If the given assembly name is short, an attempt will be made 
+            to find a full name in the registered assemblies for it. </remarks>
+        </member>
+        <member name="T:Alphora.Dataphor.StreamUtility">
+            <summary> Sundry stream methods. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.StreamUtility.CopyStream(System.IO.Stream,System.IO.Stream)">
+            <summary> Copies remainder of one stream to another stream. </summary>
+            <param name="source"> Stream to copy from.  Copying begins at the current position. </param>
+            <param name="target">
+            	The destination stream for copying.  The copied contents are placed beginning at 
+            	the current position.
+            </param>
+        </member>
+        <member name="M:Alphora.Dataphor.StreamUtility.CopyStream(System.IO.Stream,System.IO.Stream,System.Int64)">
+            <summary> Copies specified number of bytes from one stream to another stream. </summary>
+            <param name="source"> Stream to copy from.  Copying begins at the current position. </param>
+            <param name="target"> The destination stream for copying.  The copied contents are placed beginning at the current position. </param>
+            <param name="count"> The number of bytes to copy. </param>
+        </member>
+        <member name="M:Alphora.Dataphor.StreamUtility.CopyStream(System.IO.MemoryStream,System.IO.Stream)">
+            <summary> CopyStream optimized for MemoryStream as source. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.StreamUtility.CopyStream(System.IO.MemoryStream,System.IO.Stream,System.Int32)">
+            <summary> CopyStream optimized for MemoryStream as source. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.StreamUtility.CopyStream(System.IO.Stream,System.IO.MemoryStream)">
+            <summary> CopyStream optimized for MemoryStream as target. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.StreamUtility.CopyStream(System.IO.Stream,System.IO.MemoryStream,System.Int32)">
+            <summary> CopyStream optimized for MemoryStream as target. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.StreamUtility.CopyStream(System.IO.MemoryStream,System.IO.MemoryStream)">
+            <summary> CopyStream optimized for MemoryStream as source and target. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.StreamUtility.StreamsEqual(System.IO.Stream,System.IO.Stream)">
+            <summary> Returns true if the two provided streams are identical in content. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.StreamUtility.SaveDictionary(System.IO.Stream,System.Collections.IDictionary)">
+            <summary> Saves a dictionary containing both string key and value entries to a stream as XML. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.StreamUtility.LoadDictionary(System.IO.Stream,System.Collections.IDictionary,System.Type,System.Type)">
+            <summary> Loads a dictionary containing both string key and value entries from a stream containing XML. </summary>
+        </member>
+        <member name="T:Alphora.Dataphor.StreamBase">
+            <summary> Base class which simplifies the creation of a typical stream descendent. </summary>
+            <remarks>
+            The following members must be implemented in descendent classes:
+            	long Length { get; }
+            	void SetLength(long ALength);
+            	long Position { get; set; }
+            	int Read(byte[] ABuffer, int offset, int ACount);
+            	void Write(byte[] ABuffer, int offset, int ACount);
+            </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ThreadUtility.SetThreadName(System.Threading.Thread,System.String)">
+            <summary> HACK: This sets a thread's name working around the perf and write-once issues. </summary>
+            <remarks> This method is only called if the DEBUG conditional is set.  The name argument is of type object so that it can be reset back to the initial null state. </remarks>
+        </member>
+        <member name="T:Alphora.Dataphor.ValidatingBaseList`1">
+            <summary>
+            Provides a generic list class that supports validation and notification behavior through virtual methods.
+            </summary>
+            <remarks>
+            The base implementation performs no validation or notification.
+            </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ValidatingBaseList`1.Validate(`0)">
+            <summary> Validate is called before an item is added or set in a List </summary>
+            <remarks>
+            	Override and throw an exception in order to perform item validation for
+            	the list.
+            </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ValidatingBaseList`1.Adding(`0,System.Int32)">
+            <summary> Adding is called when an item is added to the list. </summary>
+            <remarks>
+            	This should NOT be used for validation, but is a good place to put 
+            	code that interacts with items in the list.  
+            </remarks>
+        </member>
+        <member name="M:Alphora.Dataphor.ValidatingBaseList`1.Removing(`0,System.Int32)">
+            <summary> Removing is called when an item is being removed from the List. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ValidatingBaseList`1.Removed(`0,System.Int32)">
+            <summary> Removed is call <i>after</i> an item as been removed from the list. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ValidatingBaseList`1.Add(`0)">
+            <summary> Adds an item to the end of the list. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ValidatingBaseList`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary> Adds a collection of items to the list. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ValidatingBaseList`1.Insert(System.Int32,`0)">
+            <summary> Inserts an item into the list. </summary>
+        </member>
+        <member name="M:Alphora.Dataphor.ValidatingBaseList`1.SafeRemove(`0)">
+            <summary>Removes AValue if it is found in the list, does nothing otherwise.</summary>		
+        </member>
+        <member name="M:Alphora.Dataphor.ValidatingBaseList`1.Move(System.Int32,System.Int32)">
+            <summary> Changes the index of an item. </summary>
+        </member>
+    </members>
+</doc>

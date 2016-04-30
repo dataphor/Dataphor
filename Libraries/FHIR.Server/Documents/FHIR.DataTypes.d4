@@ -1,0 +1,68 @@
+//* Type: ProperName
+// Person or organization name
+create type ProperName like String
+{
+	constraint LengthValid Length(value) <= 50
+}
+static tags { Storage.Length = "50" };
+grant usage on ProperName to role User;
+
+//* Type: Description
+// Generic description type
+create type Description like String
+{
+	constraint LengthValid Length(value) <= 50
+}
+static tags { Storage.Length = "50" };
+grant usage on Description to role User;
+
+//* Type: Phone
+// Phone
+create type Phone like String
+{
+	constraint LengthValid (Length(value) <= 20)
+}
+static tags { Storage.Length = "20" };
+grant usage on Phone to role User;
+
+//* Type: StateID
+// ID type for state codes, 2 digit alphanumeric code
+create type StateID like String
+{
+	constraint StateIDValid (Length(value) = 2)
+}
+	tags { Frontend.Title = "State", Frontend.Width = "4" }
+	static tags { Storage.Length = "2" };
+grant usage on StateID to role User;
+
+// Operator: StateIDUpper(StateID)
+create operator StateIDUpper(var AStateID : StateID) : Boolean
+begin
+	result := false;
+	if not(IsUpper(AStateID)) then
+	begin
+		AStateID := Upper(AStateID);
+		result := true; // AStateID has been changed
+	end;
+end;
+attach operator StateIDUpper to StateID on validate;
+
+//* Operator: IsZipCode(String)
+create operator IsZipCode(const AString : String) : Boolean
+begin
+	result := (AString.Length() = 5) or (AString.Length() = 10 and AString.IndexOf('-') = 5);
+end;
+
+// Type: Zip
+// Zip code type, 5-4 numeric code
+create type Zip like String
+{
+	constraint ZipCodeValid IsZipCode(value)
+}
+	tags 
+	{ 
+		Frontend.Title = "Zip Code",
+		Frontend.Width = "10" 
+	}
+	static tags { Storage.Length = "10" };
+grant usage on Zip to role User;
