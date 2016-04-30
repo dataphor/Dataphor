@@ -515,7 +515,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			bool includeDependents = arguments.Length > 1 ? (bool)arguments[1] : true;
 			bool includeObject = arguments.Length > 2 ? (bool)arguments[2] : true;
 		
-			return emitter.Emit(program.Catalog.EmitDropStatement(program.CatalogDeviceSession, new string[] { objectValue.Name }, String.Empty, true, true, includeDependents, includeObject));
+			// Do not include generated objects in the drop script, they will be dropped automatically when the generating object is dropped
+			return emitter.Emit(program.Catalog.EmitDropStatement(program.CatalogDeviceSession, new string[] { objectValue.Name }, String.Empty, false, false, includeDependents, includeObject));
 		}
     }
     
