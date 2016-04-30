@@ -651,6 +651,15 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <para>Default: empty string</para></value>
 		string Script { get; set; }
 
+		/// <summary>
+		/// A document expression that returns a script used to display a form
+		/// </summary>
+		/// <remarks> The expression is expected to result in a script of the selected language. </remarks>
+		/// <example>
+		/// Load('Application.Example','CSharpScript')
+		/// </example>
+		string ScriptDocument { get; set; }
+
 		/// <summary> When true, the script will be compiled with debug information. </summary> <doc/>
 		/// <value><para>Boolean: True|False</para>
 		/// <para>Default: False</para></value>

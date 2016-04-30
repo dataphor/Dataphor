@@ -97,6 +97,26 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 
+		// ScriptDocument
+		private string _scriptDocument = String.Empty;
+		// TODO: Detect changes to the document and invalidate results
+		[Description("A Document expression returning a form interface to be shown. Note that the ScriptAction does not detect changes made to the document once it has been successfully compiled. If you change the document, you must invalidate the cached compiled assembly by changing the value of the document expression.")]
+		[DefaultValue("")]
+		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", "System.Drawing.Design.UITypeEditor,System.Drawing")]
+		[DocumentExpressionOperator("Load")]
+		public string ScriptDocument
+		{
+			get { return _scriptDocument; }
+			set
+			{
+				if (_scriptDocument != value)
+				{
+					_scriptDocument = (value == null ? String.Empty : value);
+					InvalidateResults();
+				}
+			}
+		}
+
 		// CompileWithDebug
 		private bool _compileWithDebug = false;
 		[Description("When true, the script will be compiled with debug information.")]
@@ -194,13 +214,28 @@ namespace Alphora.Dataphor.Frontend.Client
 			_referencedAssemblies = null;
 			_sourceCode = null;
 		}
+
+		private bool HasScript()
+		{
+			return _script != String.Empty || _scriptDocument != String.Empty;
+		}
+
+		private string GetScript()
+		{
+			if (_scriptDocument != String.Empty)
+			{
+				return HostNode.Pipe.RequestDocument(_scriptDocument).AsString;
+			}
+			
+			return _script;
+		}
 		
 		private void BuildSourceCode()
 		{
 			string unit;
 			string classValue;
 			string execute;
-			PreprocessScript(_script, out unit, out classValue, out execute);
+			PreprocessScript(GetScript(), out unit, out classValue, out execute);
 			string template;
 
 			switch (_language)
@@ -400,7 +435,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
-			if (_script != String.Empty)
+			if (HasScript())
 			{
 				Assembly assembly = GetCompiledAssembly();
 				ScriptBase script = CreateScript(assembly);

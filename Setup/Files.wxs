@@ -15,6 +15,7 @@
       <ComponentRef Id="DataphoriaWebFiles" />
       <ComponentRef Id="id_DataphoriaWeb_bin2613107663Component" />
       <ComponentRef Id="id_DataphoriaWeb_Content3510533076Component" />
+      <ComponentRef Id="id_id_DataphoriaWeb_Content3510533076_images3175091575Component" />
       <ComponentRef Id="id_id_DataphoriaWeb_Content3510533076_themes4052339036Component" />
       <ComponentRef Id="id_oriaWeb_Content3510533076_themes4052339036_base2115806773Component" />
       <ComponentRef Id="id_10533076_themes4052339036_base2115806773_images2362282791Component" />
@@ -41,14 +42,9 @@
       <ComponentRef Id="id_id_Libraries_FastoreDevice4112357421_Documents850073264Component" />
       <ComponentRef Id="id_Libraries_FHIR_Core4144233956Component" />
       <ComponentRef Id="id_id_Libraries_FHIR_Core4144233956_Documents1889503434Component" />
-      <ComponentRef Id="id_id_Libraries_FHIR_Core4144233956_Source724406783Component" />
-      <ComponentRef Id="id_braries_FHIR_Core4144233956_Source724406783_bin4206635383Component" />
-      <ComponentRef Id="id_44233956_Source724406783_bin4206635383_Release717119073Component" />
       <ComponentRef Id="id_Libraries_FHIR_Device3112708977Component" />
       <ComponentRef Id="id_id_Libraries_FHIR_Device3112708977_Documents2618565795Component" />
-      <ComponentRef Id="id_id_Libraries_FHIR_Device3112708977_Source1199999073Component" />
-      <ComponentRef Id="id_ries_FHIR_Device3112708977_Source1199999073_bin2360291233Component" />
-      <ComponentRef Id="id_12708977_Source1199999073_bin2360291233_Release2090437150Component" />
+      <ComponentRef Id="id_Libraries_FHIR_Server298957873Component" />
       <ComponentRef Id="id_Libraries_Frontend1031778052Component" />
       <ComponentRef Id="id_id_Libraries_Frontend1031778052_Documents2904503939Component" />
       <ComponentRef Id="id_Libraries_General517306114Component" />
@@ -200,6 +196,8 @@
               <File Id="id_Bin_FrontendWPFClient_XML1581093059" Name="FrontendWPFClient.XML" Source="..\Deploy\Dataphor\FrontendWPFClient.XML" />
               <File Id="id_Bin_ICSharpCode_TextEditor_dll18034394" Name="ICSharpCode.TextEditor.dll" Source="..\Deploy\Dataphor\ICSharpCode.TextEditor.dll" />
               <File Id="id_Bin_Mono_Security_dll2212888799" Name="Mono.Security.dll" Source="..\Deploy\Dataphor\Mono.Security.dll" />
+              <File Id="id_Bin_Newtonsoft_Json_dll633771607" Name="Newtonsoft.Json.dll" Source="..\Deploy\Dataphor\Newtonsoft.Json.dll" />
+              <File Id="id_Bin_Newtonsoft_Json_xml633837131" Name="Newtonsoft.Json.xml" Source="..\Deploy\Dataphor\Newtonsoft.Json.xml" />
               <File Id="id_Bin_Npgsql_dll4000207817" Name="Npgsql.dll" Source="..\Deploy\Dataphor\Npgsql.dll" />
               <File Id="id_Bin_Result_Mode_xshd61593310" Name="Result-Mode.xshd" Source="..\Deploy\Dataphor\Result-Mode.xshd" />
               <File Id="id_Bin_SQL_xshd59345082" Name="SQL.xshd" Source="..\Deploy\Dataphor\SQL.xshd" />
@@ -213,7 +211,7 @@
               <File Id="id_Bin_WindowsClient_exe_manifest3223727855" Name="WindowsClient.exe.manifest" Source="..\Deploy\Dataphor\WindowsClient.exe.manifest" />
             </Component>
             <Directory Id="id_Bin_amd643605458458" Name="amd64">
-              <Component Id="id_Bin_amd643605458458Component" Guid="e9b20f34-e404-453f-9d3e-38438358c4e6" DiskId="1">
+              <Component Id="id_Bin_amd643605458458Component" Guid="c40700ed-96e2-43c5-8dd3-8a8570510760" DiskId="1">
                 <File Id="id_id_Bin_amd643605458458_sqlceca40_dll1852534765" Name="sqlceca40.dll" Source="..\Deploy\Dataphor\amd64\sqlceca40.dll" />
                 <File Id="id_id_Bin_amd643605458458_sqlcecompact40_dll3571826659" Name="sqlcecompact40.dll" Source="..\Deploy\Dataphor\amd64\sqlcecompact40.dll" />
                 <File Id="id_id_Bin_amd643605458458_sqlceer40EN_dll1039203776" Name="sqlceer40EN.dll" Source="..\Deploy\Dataphor\amd64\sqlceer40EN.dll" />
@@ -223,7 +221,7 @@
               </Component>
             </Directory>
             <Directory Id="id_Bin_x863305420528" Name="x86">
-              <Component Id="id_Bin_x863305420528Component" Guid="4bcbd6ec-0bd6-4623-8a82-a028e4e03641" DiskId="1">
+              <Component Id="id_Bin_x863305420528Component" Guid="8ddd7cff-73dc-4a64-b280-586e1faf6368" DiskId="1">
                 <File Id="id_id_Bin_x863305420528_sqlceca40_dll2754390720" Name="sqlceca40.dll" Source="..\Deploy\Dataphor\x86\sqlceca40.dll" />
                 <File Id="id_id_Bin_x863305420528_sqlcecompact40_dll3608442204" Name="sqlcecompact40.dll" Source="..\Deploy\Dataphor\x86\sqlcecompact40.dll" />
                 <File Id="id_id_Bin_x863305420528_sqlceer40EN_dll2022011031" Name="sqlceer40EN.dll" Source="..\Deploy\Dataphor\x86\sqlceer40EN.dll" />
@@ -238,61 +236,61 @@
               <CreateFolder />
             </Component>
             <Directory Id="id_Libraries_ADOConnection1291453725" Name="ADOConnection">
-              <Component Id="id_Libraries_ADOConnection1291453725Component" Guid="55f474b2-171c-4eed-a034-ded124a7efcc" DiskId="1">
+              <Component Id="id_Libraries_ADOConnection1291453725Component" Guid="44514741-b8f9-4a93-b78f-991363228125" DiskId="1">
                 <File Id="id_aries_ADOConnection1291453725_ADOConnection_d4l4099784454" Name="ADOConnection.d4l" Source="..\Deploy\Libraries\ADOConnection\ADOConnection.d4l" />
                 <File Id="id_id_Libraries_ADOConnection1291453725_adodb_dll3934119762" Name="adodb.dll" Source="..\Deploy\Libraries\ADOConnection\adodb.dll" />
                 <File Id="id_453725_Alphora_Dataphor_DAE_Connection_ADO_dll604286195" Name="Alphora.Dataphor.DAE.Connection.ADO.dll" Source="..\Deploy\Libraries\ADOConnection\Alphora.Dataphor.DAE.Connection.ADO.dll" />
               </Component>
             </Directory>
             <Directory Id="id_Libraries_Connection1400898439" Name="Connection">
-              <Component Id="id_Libraries_Connection1400898439Component" Guid="d4e7de57-6984-4155-bad2-169c4f81dcbd" DiskId="1">
+              <Component Id="id_Libraries_Connection1400898439Component" Guid="e367bafb-cdf5-4774-8f0c-6b139f0abc85" DiskId="1">
                 <File Id="id_1400898439_Alphora_Dataphor_DAE_Connection_dll758123990" Name="Alphora.Dataphor.DAE.Connection.dll" Source="..\Deploy\Libraries\Connection\Alphora.Dataphor.DAE.Connection.dll" />
                 <File Id="id__Libraries_Connection1400898439_Connection_d4l799142988" Name="Connection.d4l" Source="..\Deploy\Libraries\Connection\Connection.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_Connection1400898439_Documents2370184294" Name="Documents">
-                <Component Id="id_id_Libraries_Connection1400898439_Documents2370184294Component" Guid="a1a237de-7669-479d-9b26-5043d2e1265c" DiskId="1">
+                <Component Id="id_id_Libraries_Connection1400898439_Documents2370184294Component" Guid="d6cccc8f-74d9-41d2-bfae-1dbbd021b8b2" DiskId="1">
                   <File Id="id_ction1400898439_Documents2370184294_Register_d44166751134" Name="Register.d4" Source="..\Deploy\Libraries\Connection\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_DB2400Connection110120862" Name="DB2400Connection">
-              <Component Id="id_Libraries_DB2400Connection110120862Component" Guid="e193e7e0-7436-46cb-a83c-9638b145ac33" DiskId="1">
+              <Component Id="id_Libraries_DB2400Connection110120862Component" Guid="2460a845-a1ad-4c9f-b313-d377fd97cb30" DiskId="1">
                 <File Id="id__DB2400Connection110120862_DB2400Connection_d4l2641650100" Name="DB2400Connection.d4l" Source="..\Deploy\Libraries\DB2400Connection\DB2400Connection.d4l" />
               </Component>
               <Directory Id="id_d_Libraries_DB2400Connection110120862_Documents3206164915" Name="Documents">
-                <Component Id="id_d_Libraries_DB2400Connection110120862_Documents3206164915Component" Guid="38fbb56b-55e2-40aa-82ce-971df91ef372" DiskId="1">
+                <Component Id="id_d_Libraries_DB2400Connection110120862_Documents3206164915Component" Guid="4dae4adf-b34a-44b8-b866-36c94eb78b2b" DiskId="1">
                   <File Id="id_ection110120862_Documents3206164915_Register_d42030697070" Name="Register.d4" Source="..\Deploy\Libraries\DB2400Connection\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_DB2Connection3838437910" Name="DB2Connection">
-              <Component Id="id_Libraries_DB2Connection3838437910Component" Guid="e1f454cf-c069-4673-805e-380e727cd3a9" DiskId="1">
+              <Component Id="id_Libraries_DB2Connection3838437910Component" Guid="965daa5a-05d6-4e5a-8a34-ce200fb978c9" DiskId="1">
                 <File Id="id_ries_DB2Connection3838437910_DB2Connection_d4l915722382" Name="DB2Connection.d4l" Source="..\Deploy\Libraries\DB2Connection\DB2Connection.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_DB2Connection3838437910_Documents3813957871" Name="Documents">
-                <Component Id="id_id_Libraries_DB2Connection3838437910_Documents3813957871Component" Guid="6df2ee5a-71fa-4fbe-81ab-584b72e12ec4" DiskId="1">
+                <Component Id="id_id_Libraries_DB2Connection3838437910_Documents3813957871Component" Guid="05f9d27d-dd69-4b80-bd2a-532ad89809fe" DiskId="1">
                   <File Id="id_tion3838437910_Documents3813957871_Register_d4337065544" Name="Register.d4" Source="..\Deploy\Libraries\DB2Connection\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_DB2Device2999573455" Name="DB2Device">
-              <Component Id="id_Libraries_DB2Device2999573455Component" Guid="586d9b9c-7aaf-49a1-9e09-4e0030efda99" DiskId="1">
+              <Component Id="id_Libraries_DB2Device2999573455Component" Guid="68c384a4-9503-4268-a393-a6bf0c87711e" DiskId="1">
                 <File Id="id_raries_DB2Device2999573455_AlphoraDB2Device_dll1719173459" Name="AlphoraDB2Device.dll" Source="..\Deploy\Libraries\DB2Device\AlphoraDB2Device.dll" />
                 <File Id="id_id_Libraries_DB2Device2999573455_DB2Device_d4l2907129287" Name="DB2Device.d4l" Source="..\Deploy\Libraries\DB2Device\DB2Device.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_DB2Device2999573455_Documents3135960310" Name="Documents">
-                <Component Id="id_id_Libraries_DB2Device2999573455_Documents3135960310Component" Guid="c7b98543-2989-4b18-8ad6-e58a2121270e" DiskId="1">
+                <Component Id="id_id_Libraries_DB2Device2999573455_Documents3135960310Component" Guid="52c260a2-f3a4-4e00-9e45-04aeaa431dd4" DiskId="1">
                   <File Id="id_999573455_Documents3135960310_DB2400_ReadMe_txt1702310088" Name="DB2400.ReadMe.txt" Source="..\Deploy\Libraries\DB2Device\Documents\DB2400.ReadMe.txt" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Documentation3755803507" Name="Documentation">
-              <Component Id="id_Libraries_Documentation3755803507Component" Guid="28532404-b7d6-4077-bc36-e52ed18358e5" DiskId="1">
+              <Component Id="id_Libraries_Documentation3755803507Component" Guid="f203e868-492a-4dcc-a0fc-fe070ffdb3a4" DiskId="1">
                 <File Id="id_ibraries_Documentation3755803507_DocSamples_dll2108695758" Name="DocSamples.dll" Source="..\Deploy\Libraries\Documentation\DocSamples.dll" />
                 <File Id="id_ries_Documentation3755803507_Documentation_d4l328931573" Name="Documentation.d4l" Source="..\Deploy\Libraries\Documentation\Documentation.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_Documentation3755803507_Documents575650394" Name="Documents">
-                <Component Id="id_id_Libraries_Documentation3755803507_Documents575650394Component" Guid="e944bcbd-38f7-4dfa-a89f-7af3727c31ec" DiskId="1">
+                <Component Id="id_id_Libraries_Documentation3755803507_Documents575650394Component" Guid="7f207f9f-049c-449b-b417-50eced1db4f0" DiskId="1">
                   <File Id="id_ntation3755803507_Documents575650394_DocLib_doc2323300774" Name="DocLib.doc" Source="..\Deploy\Libraries\Documentation\Documents\DocLib.doc" />
                   <File Id="id_on3755803507_Documents575650394_DocLibraries_d44171954008" Name="DocLibraries.d4" Source="..\Deploy\Libraries\Documentation\Documents\DocLibraries.d4" />
                   <File Id="id_n3755803507_Documents575650394_Documentation_d41219372367" Name="Documentation.d4" Source="..\Deploy\Libraries\Documentation\Documents\Documentation.d4" />
@@ -302,7 +300,7 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_FastoreDevice4112357421" Name="FastoreDevice">
-              <Component Id="id_Libraries_FastoreDevice4112357421Component" Guid="c4b26dc8-4cc4-4b30-9098-0932ffcfd75f" DiskId="1">
+              <Component Id="id_Libraries_FastoreDevice4112357421Component" Guid="bea18cfa-273f-4252-9684-d75d05873aa1" DiskId="1">
                 <File Id="id_toreDevice4112357421_AlphoraDataphorClient_dll662994667" Name="AlphoraDataphorClient.dll" Source="..\Deploy\Libraries\FastoreDevice\AlphoraDataphorClient.dll" />
                 <File Id="id_storeDevice4112357421_AlphoraFastoreDevice_dll210903941" Name="AlphoraFastoreDevice.dll" Source="..\Deploy\Libraries\FastoreDevice\AlphoraFastoreDevice.dll" />
                 <File Id="id_ries_FastoreDevice4112357421_Fastore_Client_dll1922202033" Name="Fastore.Client.dll" Source="..\Deploy\Libraries\FastoreDevice\Fastore.Client.dll" />
@@ -311,13 +309,13 @@
                 <File Id="id_d_Libraries_FastoreDevice4112357421_Thrift_dll458483731" Name="Thrift.dll" Source="..\Deploy\Libraries\FastoreDevice\Thrift.dll" />
               </Component>
               <Directory Id="id_id_Libraries_FastoreDevice4112357421_Documents850073264" Name="Documents">
-                <Component Id="id_id_Libraries_FastoreDevice4112357421_Documents850073264Component" Guid="6ff264bc-0e37-4a75-ab6e-4e76c9d466be" DiskId="1">
+                <Component Id="id_id_Libraries_FastoreDevice4112357421_Documents850073264Component" Guid="222227d8-b142-4e6c-814c-6e93a267a6b0" DiskId="1">
                   <File Id="id_Device4112357421_Documents850073264_Register_d42976098907" Name="Register.d4" Source="..\Deploy\Libraries\FastoreDevice\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_FHIR_Core4144233956" Name="FHIR.Core">
-              <Component Id="id_Libraries_FHIR_Core4144233956Component" Guid="62c9e0eb-4f5f-442d-9df3-dde12939fd89" DiskId="1">
+              <Component Id="id_Libraries_FHIR_Core4144233956Component" Guid="fbbe681c-3a0a-461d-81c7-6149eb836778" DiskId="1">
                 <File Id="id_es_FHIR_Core4144233956_Alphora_Dataphor_DAE_dll4245481323" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\FHIR.Core\Alphora.Dataphor.DAE.dll" />
                 <File Id="id_re4144233956_Alphora_Dataphor_DAE_NativeCLI_dll1194012536" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Libraries\FHIR.Core\Alphora.Dataphor.DAE.NativeCLI.dll" />
                 <File Id="id_raries_FHIR_Core4144233956_Alphora_Dataphor_dll3866765168" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\FHIR.Core\Alphora.Dataphor.dll" />
@@ -327,42 +325,29 @@
                 <File Id="id_s_FHIR_Core4144233956_AlphoraDataphorServer_dll3689390146" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\FHIR.Core\AlphoraDataphorServer.dll" />
                 <File Id="id_id_Libraries_FHIR_Core4144233956_FHIR_Core_d4l567557512" Name="FHIR.Core.d4l" Source="..\Deploy\Libraries\FHIR.Core\FHIR.Core.d4l" />
                 <File Id="id_Libraries_FHIR_Core4144233956_Hl7_Fhir_Core_dll3817001480" Name="Hl7.Fhir.Core.dll" Source="..\Deploy\Libraries\FHIR.Core\Hl7.Fhir.Core.dll" />
+                <File Id="id_ies_FHIR_Core4144233956_Hl7_Fhir_DSTU2_Core_dll1471310499" Name="Hl7.Fhir.DSTU2.Core.dll" Source="..\Deploy\Libraries\FHIR.Core\Hl7.Fhir.DSTU2.Core.dll" />
                 <File Id="id_braries_FHIR_Core4144233956_Newtonsoft_Json_dll3447936155" Name="Newtonsoft.Json.dll" Source="..\Deploy\Libraries\FHIR.Core\Newtonsoft.Json.dll" />
               </Component>
               <Directory Id="id_id_Libraries_FHIR_Core4144233956_Documents1889503434" Name="Documents">
-                <Component Id="id_id_Libraries_FHIR_Core4144233956_Documents1889503434Component" Guid="7d481efe-d4a4-47a7-a4aa-0a35e0e79b85" DiskId="1">
+                <Component Id="id_id_Libraries_FHIR_Core4144233956_Documents1889503434Component" Guid="75f87359-6899-4a75-92bf-0b109ee531d4" DiskId="1">
+                  <File Id="id_R_Core4144233956_Documents1889503434_Dynamic_d42551718035" Name="Dynamic.d4" Source="..\Deploy\Libraries\FHIR.Core\Documents\Dynamic.d4" />
+                  <File Id="id_144233956_Documents1889503434_DynamicMusings_d42156008546" Name="DynamicMusings.d4" Source="..\Deploy\Libraries\FHIR.Core\Documents\DynamicMusings.d4" />
+                  <File Id="id_e4144233956_Documents1889503434_FHIR_ReadMe_txt3351217588" Name="FHIR.ReadMe.txt" Source="..\Deploy\Libraries\FHIR.Core\Documents\FHIR.ReadMe.txt" />
+                  <File Id="id_s1889503434_Patient_StructureDefinition_Dev_txt3012317643" Name="Patient_StructureDefinition_Dev.txt" Source="..\Deploy\Libraries\FHIR.Core\Documents\Patient_StructureDefinition_Dev.txt" />
+                  <File Id="id_89503434_Patient_StructureDefinition_DSTU2_txt915784498" Name="Patient_StructureDefinition_DSTU2.txt" Source="..\Deploy\Libraries\FHIR.Core\Documents\Patient_StructureDefinition_DSTU2.txt" />
+                  <File Id="id__FHIR_Core4144233956_Documents1889503434_QDM_d42205291940" Name="QDM.d4" Source="..\Deploy\Libraries\FHIR.Core\Documents\QDM.d4" />
                   <File Id="id__Core4144233956_Documents1889503434_Register_d44237476828" Name="Register.d4" Source="..\Deploy\Libraries\FHIR.Core\Documents\Register.d4" />
+                  <File Id="id_IR_Core4144233956_Documents1889503434_Search_d42971054669" Name="Search.d4" Source="..\Deploy\Libraries\FHIR.Core\Documents\Search.d4" />
+                  <File Id="id_cuments1889503434_StructureDefinitionMusings_d43235590265" Name="StructureDefinitionMusings.d4" Source="..\Deploy\Libraries\FHIR.Core\Documents\StructureDefinitionMusings.d4" />
                   <File Id="id_ore4144233956_Documents1889503434_Types_Core_d41694393839" Name="Types.Core.d4" Source="..\Deploy\Libraries\FHIR.Core\Documents\Types.Core.d4" />
                   <File Id="id_44233956_Documents1889503434_Types_Generated_d41226543516" Name="Types.Generated.d4" Source="..\Deploy\Libraries\FHIR.Core\Documents\Types.Generated.d4" />
+                  <File Id="id_44233956_Documents1889503434_Types_Operators_d43914324205" Name="Types.Operators.d4" Source="..\Deploy\Libraries\FHIR.Core\Documents\Types.Operators.d4" />
                   <File Id="id_ments1889503434_UpdatesToSupportNestUnnest_d421772239" Name="UpdatesToSupportNestUnnest.d4" Source="..\Deploy\Libraries\FHIR.Core\Documents\UpdatesToSupportNestUnnest.d4" />
                 </Component>
               </Directory>
-              <Directory Id="id_id_Libraries_FHIR_Core4144233956_Source724406783" Name="Source">
-                <Component Id="id_id_Libraries_FHIR_Core4144233956_Source724406783Component" Guid="38a0c470-4b87-4983-98ae-f10ec1323933" DiskId="1">
-                  <CreateFolder />
-                </Component>
-                <Directory Id="id_braries_FHIR_Core4144233956_Source724406783_bin4206635383" Name="bin">
-                  <Component Id="id_braries_FHIR_Core4144233956_Source724406783_bin4206635383Component" Guid="dfc1672e-cb9a-4f0d-af38-8802bf5b2fd8" DiskId="1">
-                    <CreateFolder />
-                  </Component>
-                  <Directory Id="id_44233956_Source724406783_bin4206635383_Release717119073" Name="Release">
-                    <Component Id="id_44233956_Source724406783_bin4206635383_Release717119073Component" Guid="9897502a-da64-4a1d-86f9-1ed6a270e6cd" DiskId="1">
-                      <File Id="id_5383_Release717119073_Alphora_Dataphor_DAE_dll866098920" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\FHIR.Core\Source\bin\Release\Alphora.Dataphor.DAE.dll" />
-                      <File Id="id_ase717119073_Alphora_Dataphor_DAE_NativeCLI_dll3227843947" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Libraries\FHIR.Core\Source\bin\Release\Alphora.Dataphor.DAE.NativeCLI.dll" />
-                      <File Id="id_206635383_Release717119073_Alphora_Dataphor_dll1246473621" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\FHIR.Core\Source\bin\Release\Alphora.Dataphor.dll" />
-                      <File Id="id_elease717119073_Alphora_Dataphor_FHIR_Core_dll942664088" Name="Alphora.Dataphor.FHIR.Core.dll" Source="..\Deploy\Libraries\FHIR.Core\Source\bin\Release\Alphora.Dataphor.FHIR.Core.dll" />
-                      <File Id="id_3_Release717119073_Alphora_Dataphor_Windows_dll2730972685" Name="Alphora.Dataphor.Windows.dll" Source="..\Deploy\Libraries\FHIR.Core\Source\bin\Release\Alphora.Dataphor.Windows.dll" />
-                      <File Id="id_5383_Release717119073_AlphoraDataphorCommon_dll3404068989" Name="AlphoraDataphorCommon.dll" Source="..\Deploy\Libraries\FHIR.Core\Source\bin\Release\AlphoraDataphorCommon.dll" />
-                      <File Id="id_5383_Release717119073_AlphoraDataphorServer_dll4135731102" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\FHIR.Core\Source\bin\Release\AlphoraDataphorServer.dll" />
-                      <File Id="id_4206635383_Release717119073_Hl7_Fhir_Core_dll86415560" Name="Hl7.Fhir.Core.dll" Source="..\Deploy\Libraries\FHIR.Core\Source\bin\Release\Hl7.Fhir.Core.dll" />
-                      <File Id="id_206635383_Release717119073_Newtonsoft_Json_dll101237233" Name="Newtonsoft.Json.dll" Source="..\Deploy\Libraries\FHIR.Core\Source\bin\Release\Newtonsoft.Json.dll" />
-                    </Component>
-                  </Directory>
-                </Directory>
-              </Directory>
             </Directory>
             <Directory Id="id_Libraries_FHIR_Device3112708977" Name="FHIR.Device">
-              <Component Id="id_Libraries_FHIR_Device3112708977Component" Guid="efcadcff-53e4-49c5-991a-002ddd8eddf3" DiskId="1">
+              <Component Id="id_Libraries_FHIR_Device3112708977Component" Guid="9ed3b788-30bc-4a2f-80d8-4bb109071d06" DiskId="1">
                 <File Id="id_e3112708977_Alphora_Dataphor_DAE_Connection_dll1002405600" Name="Alphora.Dataphor.DAE.Connection.dll" Source="..\Deploy\Libraries\FHIR.Device\Alphora.Dataphor.DAE.Connection.dll" />
                 <File Id="id__FHIR_Device3112708977_Alphora_Dataphor_DAE_dll2229448504" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\FHIR.Device\Alphora.Dataphor.DAE.dll" />
                 <File Id="id_ies_FHIR_Device3112708977_Alphora_Dataphor_dll465734375" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\FHIR.Device\Alphora.Dataphor.dll" />
@@ -370,43 +355,35 @@
                 <File Id="id_vice3112708977_Alphora_Dataphor_FHIR_Device_dll1280712423" Name="Alphora.Dataphor.FHIR.Device.dll" Source="..\Deploy\Libraries\FHIR.Device\Alphora.Dataphor.FHIR.Device.dll" />
                 <File Id="id_ibraries_FHIR_Device3112708977_FHIR_Device_d4l770523368" Name="FHIR.Device.d4l" Source="..\Deploy\Libraries\FHIR.Device\FHIR.Device.d4l" />
                 <File Id="id_braries_FHIR_Device3112708977_Hl7_Fhir_Core_dll3744217815" Name="Hl7.Fhir.Core.dll" Source="..\Deploy\Libraries\FHIR.Device\Hl7.Fhir.Core.dll" />
+                <File Id="id_s_FHIR_Device3112708977_Hl7_Fhir_DSTU2_Core_dll1342751291" Name="Hl7.Fhir.DSTU2.Core.dll" Source="..\Deploy\Libraries\FHIR.Device\Hl7.Fhir.DSTU2.Core.dll" />
                 <File Id="id_aries_FHIR_Device3112708977_Newtonsoft_Json_dll4085836844" Name="Newtonsoft.Json.dll" Source="..\Deploy\Libraries\FHIR.Device\Newtonsoft.Json.dll" />
               </Component>
               <Directory Id="id_id_Libraries_FHIR_Device3112708977_Documents2618565795" Name="Documents">
-                <Component Id="id_id_Libraries_FHIR_Device3112708977_Documents2618565795Component" Guid="6a8ab112-c1f1-40a5-ab46-2d4daf70d7d7" DiskId="1">
+                <Component Id="id_id_Libraries_FHIR_Device3112708977_Documents2618565795Component" Guid="7b8bdb02-d44c-407d-abce-06628c4dd5f4" DiskId="1">
                   <File Id="id_08977_Documents2618565795_FHIRDevice_ReadMe_txt4145424305" Name="FHIRDevice.ReadMe.txt" Source="..\Deploy\Libraries\FHIR.Device\Documents\FHIRDevice.ReadMe.txt" />
                   <File Id="id_evice3112708977_Documents2618565795_Register_d44103185811" Name="Register.d4" Source="..\Deploy\Libraries\FHIR.Device\Documents\Register.d4" />
                 </Component>
               </Directory>
-              <Directory Id="id_id_Libraries_FHIR_Device3112708977_Source1199999073" Name="Source">
-                <Component Id="id_id_Libraries_FHIR_Device3112708977_Source1199999073Component" Guid="f329edc9-6cb8-436a-9267-684883afb0de" DiskId="1">
-                  <CreateFolder />
-                </Component>
-                <Directory Id="id_ries_FHIR_Device3112708977_Source1199999073_bin2360291233" Name="bin">
-                  <Component Id="id_ries_FHIR_Device3112708977_Source1199999073_bin2360291233Component" Guid="6da18040-ca8b-42fa-ac11-288043162ac8" DiskId="1">
-                    <CreateFolder />
-                  </Component>
-                  <Directory Id="id_12708977_Source1199999073_bin2360291233_Release2090437150" Name="Release">
-                    <Component Id="id_12708977_Source1199999073_bin2360291233_Release2090437150Component" Guid="6bbfa981-da88-438c-80d8-cb0177448b45" DiskId="1">
-                      <File Id="id_e2090437150_Alphora_Dataphor_DAE_Connection_dll2770780518" Name="Alphora.Dataphor.DAE.Connection.dll" Source="..\Deploy\Libraries\FHIR.Device\Source\bin\Release\Alphora.Dataphor.DAE.Connection.dll" />
-                      <File Id="id_1233_Release2090437150_Alphora_Dataphor_DAE_dll2106210928" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\FHIR.Device\Source\bin\Release\Alphora.Dataphor.DAE.dll" />
-                      <File Id="id_0291233_Release2090437150_Alphora_Dataphor_dll999971515" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\FHIR.Device\Source\bin\Release\Alphora.Dataphor.dll" />
-                      <File Id="id_elease2090437150_Alphora_Dataphor_FHIR_Core_dll4011669138" Name="Alphora.Dataphor.FHIR.Core.dll" Source="..\Deploy\Libraries\FHIR.Device\Source\bin\Release\Alphora.Dataphor.FHIR.Core.dll" />
-                      <File Id="id_ease2090437150_Alphora_Dataphor_FHIR_Device_dll1207391755" Name="Alphora.Dataphor.FHIR.Device.dll" Source="..\Deploy\Libraries\FHIR.Device\Source\bin\Release\Alphora.Dataphor.FHIR.Device.dll" />
-                      <File Id="id_n2360291233_Release2090437150_Hl7_Fhir_Core_dll1529966772" Name="Hl7.Fhir.Core.dll" Source="..\Deploy\Libraries\FHIR.Device\Source\bin\Release\Hl7.Fhir.Core.dll" />
-                      <File Id="id_60291233_Release2090437150_Newtonsoft_Json_dll486949543" Name="Newtonsoft.Json.dll" Source="..\Deploy\Libraries\FHIR.Device\Source\bin\Release\Newtonsoft.Json.dll" />
-                    </Component>
-                  </Directory>
-                </Directory>
-              </Directory>
+            </Directory>
+            <Directory Id="id_Libraries_FHIR_Server298957873" Name="FHIR.Server">
+              <Component Id="id_Libraries_FHIR_Server298957873Component" Guid="6de1f423-23bf-479f-9b60-cbff9347bbdd" DiskId="1">
+                <File Id="id_er298957873_Alphora_Dataphor_DAE_Connection_dll2946688479" Name="Alphora.Dataphor.DAE.Connection.dll" Source="..\Deploy\Libraries\FHIR.Server\Alphora.Dataphor.DAE.Connection.dll" />
+                <File Id="id_er298957873_Alphora_Dataphor_DAE_Device_SQL_dll1267690208" Name="Alphora.Dataphor.DAE.Device.SQL.dll" Source="..\Deploy\Libraries\FHIR.Server\Alphora.Dataphor.DAE.Device.SQL.dll" />
+                <File Id="id_s_FHIR_Server298957873_Alphora_Dataphor_DAE_dll1254578289" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\FHIR.Server\Alphora.Dataphor.DAE.dll" />
+                <File Id="id_aries_FHIR_Server298957873_Alphora_Dataphor_dll3061975661" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\FHIR.Server\Alphora.Dataphor.dll" />
+                <File Id="id_erver298957873_Alphora_Dataphor_FHIR_Server_dll1015497092" Name="Alphora.Dataphor.FHIR.Server.dll" Source="..\Deploy\Libraries\FHIR.Server\Alphora.Dataphor.FHIR.Server.dll" />
+                <File Id="id_es_FHIR_Server298957873_Hl7_Fhir_DSTU2_Core_dll1466050078" Name="Hl7.Fhir.DSTU2.Core.dll" Source="..\Deploy\Libraries\FHIR.Server\Hl7.Fhir.DSTU2.Core.dll" />
+                <File Id="id_raries_FHIR_Server298957873_Newtonsoft_Json_dll3314082434" Name="Newtonsoft.Json.dll" Source="..\Deploy\Libraries\FHIR.Server\Newtonsoft.Json.dll" />
+                <File Id="id_raries_FHIR_Server298957873_System_Net_Http_dll4050999869" Name="System.Net.Http.dll" Source="..\Deploy\Libraries\FHIR.Server\System.Net.Http.dll" />
+              </Component>
             </Directory>
             <Directory Id="id_Libraries_Frontend1031778052" Name="Frontend">
-              <Component Id="id_Libraries_Frontend1031778052Component" Guid="c2836c81-4074-4c48-97c0-56500e5375c8" DiskId="1">
+              <Component Id="id_Libraries_Frontend1031778052Component" Guid="b713ce72-7cd0-46b6-9bca-ec3674ede397" DiskId="1">
                 <File Id="id_031778052_Alphora_Dataphor_Frontend_Server_dll190163650" Name="Alphora.Dataphor.Frontend.Server.dll" Source="..\Deploy\Libraries\Frontend\Alphora.Dataphor.Frontend.Server.dll" />
                 <File Id="id_id_Libraries_Frontend1031778052_Frontend_d4l4136765618" Name="Frontend.d4l" Source="..\Deploy\Libraries\Frontend\Frontend.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_Frontend1031778052_Documents2904503939" Name="Documents">
-                <Component Id="id_id_Libraries_Frontend1031778052_Documents2904503939Component" Guid="90058654-9278-4d19-bc14-10b805e88647" DiskId="1">
+                <Component Id="id_id_Libraries_Frontend1031778052_Documents2904503939Component" Guid="ab88cd5e-f37d-42e0-8dd3-18b870ba3e12" DiskId="1">
                   <File Id="id_052_Documents2904503939_DerivedFormLauncher_dfd2203376170" Name="DerivedFormLauncher.dfd" Source="..\Deploy\Libraries\Frontend\Documents\DerivedFormLauncher.dfd" />
                   <File Id="id_cuments2904503939_DocumentExpressionEditor_dfd403294921" Name="DocumentExpressionEditor.dfd" Source="..\Deploy\Libraries\Frontend\Documents\DocumentExpressionEditor.dfd" />
                   <File Id="id_31778052_Documents2904503939_DropDependents_dfd1065331944" Name="DropDependents.dfd" Source="..\Deploy\Libraries\Frontend\Documents\DropDependents.dfd" />
@@ -477,68 +454,68 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_General517306114" Name="General">
-              <Component Id="id_Libraries_General517306114Component" Guid="d21f44b0-0236-4d94-a0f8-8a3d10856d71" DiskId="1">
+              <Component Id="id_Libraries_General517306114Component" Guid="678a2eda-ff09-4ab8-bd17-a976afcbf5d2" DiskId="1">
                 <File Id="id_id_Libraries_General517306114_General_d4l98876310" Name="General.d4l" Source="..\Deploy\Libraries\General\General.d4l" />
               </Component>
             </Directory>
             <Directory Id="id_Libraries_LinterDevice955345679" Name="LinterDevice">
-              <Component Id="id_Libraries_LinterDevice955345679Component" Guid="06b4c87d-e252-46e5-8c68-bae09dae2eff" DiskId="1">
+              <Component Id="id_Libraries_LinterDevice955345679Component" Guid="e82e07eb-1fa8-4adc-9ea6-c023a99963f2" DiskId="1">
                 <File Id="id_s_LinterDevice955345679_AlphoraLinterDevice_dll2822755140" Name="AlphoraLinterDevice.dll" Source="..\Deploy\Libraries\LinterDevice\AlphoraLinterDevice.dll" />
                 <File Id="id_ibraries_LinterDevice955345679_LinterDevice_d4l1891815283" Name="LinterDevice.d4l" Source="..\Deploy\Libraries\LinterDevice\LinterDevice.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_LinterDevice955345679_Documents4113856191" Name="Documents">
-                <Component Id="id_id_Libraries_LinterDevice955345679_Documents4113856191Component" Guid="f9823c56-51fb-4aba-8a4f-fdc979e1c303" DiskId="1">
+                <Component Id="id_id_Libraries_LinterDevice955345679_Documents4113856191Component" Guid="48d072ba-b3e9-4f69-9d69-e2c71ba102a7" DiskId="1">
                   <File Id="id_955345679_Documents4113856191_Linter_ReadMe_txt2617461656" Name="Linter.ReadMe.txt" Source="..\Deploy\Libraries\LinterDevice\Documents\Linter.ReadMe.txt" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_MSOracleConnection141249537" Name="MSOracleConnection">
-              <Component Id="id_Libraries_MSOracleConnection141249537Component" Guid="188156ae-0b8b-4924-8681-1190adb6d13e" DiskId="1">
+              <Component Id="id_Libraries_MSOracleConnection141249537Component" Guid="f3b77a8b-b824-4554-9732-a47492e25bbd" DiskId="1">
                 <File Id="id_9537_Alphora_Dataphor_DAE_Connection_Oracle_dll1395600517" Name="Alphora.Dataphor.DAE.Connection.Oracle.dll" Source="..\Deploy\Libraries\MSOracleConnection\Alphora.Dataphor.DAE.Connection.Oracle.dll" />
                 <File Id="id_racleConnection141249537_MSOracleConnection_d4l1197280019" Name="MSOracleConnection.d4l" Source="..\Deploy\Libraries\MSOracleConnection\MSOracleConnection.d4l" />
               </Component>
             </Directory>
             <Directory Id="id_Libraries_MSSQLDevice2730893094" Name="MSSQLDevice">
-              <Component Id="id_Libraries_MSSQLDevice2730893094Component" Guid="5428875f-f05e-4afd-b5d5-7dc41681b499" DiskId="1">
+              <Component Id="id_Libraries_MSSQLDevice2730893094Component" Guid="d2b8846b-83cd-4c6c-b305-558969da11bf" DiskId="1">
                 <File Id="id_es_MSSQLDevice2730893094_AlphoraMSSQLDevice_dll3983952161" Name="AlphoraMSSQLDevice.dll" Source="..\Deploy\Libraries\MSSQLDevice\AlphoraMSSQLDevice.dll" />
                 <File Id="id_Libraries_MSSQLDevice2730893094_MSSQLDevice_d4l3910966892" Name="MSSQLDevice.d4l" Source="..\Deploy\Libraries\MSSQLDevice\MSSQLDevice.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_MSSQLDevice2730893094_Documents4228555475" Name="Documents">
-                <Component Id="id_id_Libraries_MSSQLDevice2730893094_Documents4228555475Component" Guid="09a0309e-c663-4f19-84df-b8456762a4a5" DiskId="1">
+                <Component Id="id_id_Libraries_MSSQLDevice2730893094_Documents4228555475Component" Guid="f514cf21-94c7-497e-a5fb-28bef4f854c2" DiskId="1">
                   <File Id="id_2730893094_Documents4228555475_MSSQL_ReadMe_txt2066504306" Name="MSSQL.ReadMe.txt" Source="..\Deploy\Libraries\MSSQLDevice\Documents\MSSQL.ReadMe.txt" />
                   <File Id="id_vice2730893094_Documents4228555475_Register_d4336668225" Name="Register.d4" Source="..\Deploy\Libraries\MSSQLDevice\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_MySQLDevice2969801665" Name="MySQLDevice">
-              <Component Id="id_Libraries_MySQLDevice2969801665Component" Guid="d0e661ba-db51-4daf-ac0e-1b70765beb1a" DiskId="1">
+              <Component Id="id_Libraries_MySQLDevice2969801665Component" Guid="ba69a514-3bc3-44e8-8bfa-9cdbcfbcd862" DiskId="1">
                 <File Id="id_es_MySQLDevice2969801665_AlphoraMySQLDevice_dll3003722274" Name="AlphoraMySQLDevice.dll" Source="..\Deploy\Libraries\MySQLDevice\AlphoraMySQLDevice.dll" />
               </Component>
             </Directory>
             <Directory Id="id_Libraries_ODBCConnection1872597462" Name="ODBCConnection">
-              <Component Id="id_Libraries_ODBCConnection1872597462Component" Guid="33b0a832-1dcd-419d-966e-d682a15470c6" DiskId="1">
+              <Component Id="id_Libraries_ODBCConnection1872597462Component" Guid="a0478da5-560e-4853-8159-78d2a0fb771a" DiskId="1">
                 <File Id="id_597462_Alphora_Dataphor_DAE_Connection_ODBC_dll3919032347" Name="Alphora.Dataphor.DAE.Connection.ODBC.dll" Source="..\Deploy\Libraries\ODBCConnection\Alphora.Dataphor.DAE.Connection.ODBC.dll" />
                 <File Id="id_ies_ODBCConnection1872597462_ODBCConnection_d4l1653428480" Name="ODBCConnection.d4l" Source="..\Deploy\Libraries\ODBCConnection\ODBCConnection.d4l" />
               </Component>
             </Directory>
             <Directory Id="id_Libraries_OracleConnection3764006986" Name="OracleConnection">
-              <Component Id="id_Libraries_OracleConnection3764006986Component" Guid="8b9c584f-03b2-4d96-a00e-a2d3d4e5a814" DiskId="1">
+              <Component Id="id_Libraries_OracleConnection3764006986Component" Guid="1b08f02a-603c-41e3-9f07-71ec9549b2df" DiskId="1">
                 <File Id="id_OracleConnection3764006986_OracleConnection_d4l1984092815" Name="OracleConnection.d4l" Source="..\Deploy\Libraries\OracleConnection\OracleConnection.d4l" />
               </Component>
             </Directory>
             <Directory Id="id_Libraries_OracleDevice3658745109" Name="OracleDevice">
-              <Component Id="id_Libraries_OracleDevice3658745109Component" Guid="254c89a3-a2dd-47e9-8a7b-dba7c1a3da93" DiskId="1">
+              <Component Id="id_Libraries_OracleDevice3658745109Component" Guid="ceeb94ba-7ab2-4864-a089-38ccb42fa1bb" DiskId="1">
                 <File Id="id_OracleDevice3658745109_AlphoraOracleDevice_dll163965713" Name="AlphoraOracleDevice.dll" Source="..\Deploy\Libraries\OracleDevice\AlphoraOracleDevice.dll" />
                 <File Id="id_braries_OracleDevice3658745109_OracleDevice_d4l2427523274" Name="OracleDevice.d4l" Source="..\Deploy\Libraries\OracleDevice\OracleDevice.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_OracleDevice3658745109_Documents3023411194" Name="Documents">
-                <Component Id="id_id_Libraries_OracleDevice3658745109_Documents3023411194Component" Guid="5bcb0a91-4348-46a8-8152-2c8cda72a86f" DiskId="1">
+                <Component Id="id_id_Libraries_OracleDevice3658745109_Documents3023411194Component" Guid="aef2f9f9-270e-4993-9be7-41427e4d9e91" DiskId="1">
                   <File Id="id_658745109_Documents3023411194_Oracle_ReadMe_txt3334251532" Name="Oracle.ReadMe.txt" Source="..\Deploy\Libraries\OracleDevice\Documents\Oracle.ReadMe.txt" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_PGSQLConnection3149163474" Name="PGSQLConnection">
-              <Component Id="id_Libraries_PGSQLConnection3149163474Component" Guid="10480bb2-3cf4-41ae-ae5b-594c9a97cd12" DiskId="1">
+              <Component Id="id_Libraries_PGSQLConnection3149163474Component" Guid="a01e670c-599f-478b-b541-3a70c4deab2f" DiskId="1">
                 <File Id="id_63474_Alphora_Dataphor_DAE_Connection_PGSQL_dll2593634166" Name="Alphora.Dataphor.DAE.Connection.PGSQL.dll" Source="..\Deploy\Libraries\PGSQLConnection\Alphora.Dataphor.DAE.Connection.PGSQL.dll" />
                 <File Id="id_es_PGSQLConnection3149163474_Mono_Security_dll468719532" Name="Mono.Security.dll" Source="..\Deploy\Libraries\PGSQLConnection\Mono.Security.dll" />
                 <File Id="id__Libraries_PGSQLConnection3149163474_Npgsql_dll2026126400" Name="Npgsql.dll" Source="..\Deploy\Libraries\PGSQLConnection\Npgsql.dll" />
@@ -546,33 +523,33 @@
               </Component>
             </Directory>
             <Directory Id="id_Libraries_PGSQLDevice1220521522" Name="PGSQLDevice">
-              <Component Id="id_Libraries_PGSQLDevice1220521522Component" Guid="afc3c61f-18b3-4c6c-9db5-d2302d70aa8f" DiskId="1">
+              <Component Id="id_Libraries_PGSQLDevice1220521522Component" Guid="d1037151-89fb-46cd-a1d9-f08449bd457e" DiskId="1">
                 <File Id="id_es_PGSQLDevice1220521522_AlphoraPGSQLDevice_dll3100308896" Name="AlphoraPGSQLDevice.dll" Source="..\Deploy\Libraries\PGSQLDevice\AlphoraPGSQLDevice.dll" />
                 <File Id="id_Libraries_PGSQLDevice1220521522_PGSQLDevice_d4l3627839113" Name="PGSQLDevice.d4l" Source="..\Deploy\Libraries\PGSQLDevice\PGSQLDevice.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_PGSQLDevice1220521522_Documents4291618824" Name="Documents">
-                <Component Id="id_id_Libraries_PGSQLDevice1220521522_Documents4291618824Component" Guid="93e3dd12-33ba-45df-b0cd-4c3b8361a699" DiskId="1">
+                <Component Id="id_id_Libraries_PGSQLDevice1220521522_Documents4291618824Component" Guid="315f8a02-5d71-4128-bd7e-d059b5f33e98" DiskId="1">
                   <File Id="id_1220521522_Documents4291618824_PGSQL_ReadMe_txt3096091180" Name="PGSQL.ReadMe.txt" Source="..\Deploy\Libraries\PGSQLDevice\Documents\PGSQL.ReadMe.txt" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_Common22142657" Name="Sample.Common">
-              <Component Id="id_Libraries_Sample_Common22142657Component" Guid="af5b9948-8870-46df-a1fb-ba37f45b6501" DiskId="1">
+              <Component Id="id_Libraries_Sample_Common22142657Component" Guid="300e9b56-b44c-4fc6-9241-8649d65f0571" DiskId="1">
                 <File Id="id_braries_Sample_Common22142657_Sample_Common_d4l3101765262" Name="Sample.Common.d4l" Source="..\Deploy\Libraries\Sample.Common\Sample.Common.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_Sample_Common22142657_Documents193674646" Name="Documents">
-                <Component Id="id_id_Libraries_Sample_Common22142657_Documents193674646Component" Guid="0369fde4-a4f3-452d-8ee7-0733c0406dd5" DiskId="1">
+                <Component Id="id_id_Libraries_Sample_Common22142657_Documents193674646Component" Guid="d8134bc9-e893-4bc0-ab2e-3bd06abf4ee8" DiskId="1">
                   <File Id="id_n22142657_Documents193674646_D4LanguageTour_d4473362661" Name="D4LanguageTour.d4" Source="..\Deploy\Libraries\Sample.Common\Documents\D4LanguageTour.d4" />
                   <File Id="id_e_Common22142657_Documents193674646_Register_d42998563409" Name="Register.d4" Source="..\Deploy\Libraries\Sample.Common\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_Components328584319" Name="Sample.Components">
-              <Component Id="id_Libraries_Sample_Components328584319Component" Guid="8cb845be-7a28-4693-ae42-9a86807f3d28" DiskId="1">
+              <Component Id="id_Libraries_Sample_Components328584319Component" Guid="0ccf3fd2-41bb-403c-b039-07d2efef1e4b" DiskId="1">
                 <File Id="id_mple_Components328584319_Sample_Components_d4l613736769" Name="Sample.Components.d4l" Source="..\Deploy\Libraries\Sample.Components\Sample.Components.d4l" />
               </Component>
               <Directory Id="id__Libraries_Sample_Components328584319_Documents1078395167" Name="Documents">
-                <Component Id="id__Libraries_Sample_Components328584319_Documents1078395167Component" Guid="58099a54-6c7f-414f-9789-b568908d6dcd" DiskId="1">
+                <Component Id="id__Libraries_Sample_Components328584319_Documents1078395167Component" Guid="70029ac7-63cd-4cca-a236-6e4d5b188a19" DiskId="1">
                   <File Id="id_ponents328584319_Documents1078395167_Country_d43706888832" Name="Country.d4" Source="..\Deploy\Libraries\Sample.Components\Documents\Country.d4" />
                   <File Id="id_nents328584319_Documents1078395167_Sample01_dfd2494231907" Name="Sample01.dfd" Source="..\Deploy\Libraries\Sample.Components\Documents\Sample01.dfd" />
                   <File Id="id_s328584319_Documents1078395167_Sample01Docs_dfd4188756161" Name="Sample01Docs.dfd" Source="..\Deploy\Libraries\Sample.Components\Documents\Sample01Docs.dfd" />
@@ -617,11 +594,11 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_Demo148086478" Name="Sample.Demo">
-              <Component Id="id_Libraries_Sample_Demo148086478Component" Guid="860513c0-6d2d-4e47-a033-c836f58f0b61" DiskId="1">
+              <Component Id="id_Libraries_Sample_Demo148086478Component" Guid="7abf0373-6bd0-49ca-b5a1-2039d49e9427" DiskId="1">
                 <File Id="id_Libraries_Sample_Demo148086478_Sample_Demo_d4l656535323" Name="Sample.Demo.d4l" Source="..\Deploy\Libraries\Sample.Demo\Sample.Demo.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_Sample_Demo148086478_Documents4112101175" Name="Documents">
-                <Component Id="id_id_Libraries_Sample_Demo148086478_Documents4112101175Component" Guid="b2a32488-5dbb-4230-b57f-fd55fa390d10" DiskId="1">
+                <Component Id="id_id_Libraries_Sample_Demo148086478_Documents4112101175Component" Guid="91d39dfd-a869-4d25-a0b0-039a4dcfe279" DiskId="1">
                   <File Id="id_ample_Demo148086478_Documents4112101175_Base_d41031752440" Name="Base.d4" Source="..\Deploy\Libraries\Sample.Demo\Documents\Base.d4" />
                   <File Id="id_mo148086478_Documents4112101175_Constraints_d4157491484" Name="Constraints.d4" Source="..\Deploy\Libraries\Sample.Demo\Documents\Constraints.d4" />
                   <File Id="id_86478_Documents4112101175_CreateApplication_d4733365869" Name="CreateApplication.d4" Source="..\Deploy\Libraries\Sample.Demo\Documents\CreateApplication.d4" />
@@ -639,22 +616,22 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_DetailAdd1637543256" Name="Sample.DetailAdd">
-              <Component Id="id_Libraries_Sample_DetailAdd1637543256Component" Guid="bee8e5e5-d9a8-458a-87dc-7ecebf64a7b1" DiskId="1">
+              <Component Id="id_Libraries_Sample_DetailAdd1637543256Component" Guid="a03e9664-7ef2-452e-9ff5-8dcb11d61209" DiskId="1">
                 <File Id="id_Sample_DetailAdd1637543256_Sample_DetailAdd_d4l2889171760" Name="Sample.DetailAdd.d4l" Source="..\Deploy\Libraries\Sample.DetailAdd\Sample.DetailAdd.d4l" />
               </Component>
               <Directory Id="id__Libraries_Sample_DetailAdd1637543256_Documents2276937698" Name="Documents">
-                <Component Id="id__Libraries_Sample_DetailAdd1637543256_Documents2276937698Component" Guid="06a6c507-55a9-4059-bb6a-08b606c7d945" DiskId="1">
+                <Component Id="id__Libraries_Sample_DetailAdd1637543256_Documents2276937698Component" Guid="53da7364-27b7-4c2f-938f-9e96c04713d6" DiskId="1">
                   <File Id="id_637543256_Documents2276937698_DetailBrowse_dfdx2008829164" Name="DetailBrowse.dfdx" Source="..\Deploy\Libraries\Sample.DetailAdd\Documents\DetailBrowse.dfdx" />
                   <File Id="id_ilAdd1637543256_Documents2276937698_Register_d41341401550" Name="Register.d4" Source="..\Deploy\Libraries\Sample.DetailAdd\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_Forms1841619758" Name="Sample.Forms">
-              <Component Id="id_Libraries_Sample_Forms1841619758Component" Guid="b93a3bff-c96c-4fb6-ade3-8e64cabc5a12" DiskId="1">
+              <Component Id="id_Libraries_Sample_Forms1841619758Component" Guid="2abc4382-d27e-4c7c-9f6e-986679f59aea" DiskId="1">
                 <File Id="id_braries_Sample_Forms1841619758_Sample_Forms_d4l1502590476" Name="Sample.Forms.d4l" Source="..\Deploy\Libraries\Sample.Forms\Sample.Forms.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_Sample_Forms1841619758_Documents1364094619" Name="Documents">
-                <Component Id="id_id_Libraries_Sample_Forms1841619758_Documents1364094619Component" Guid="64aeeb4c-d102-4e25-ba9c-20ef882e14c6" DiskId="1">
+                <Component Id="id_id_Libraries_Sample_Forms1841619758_Documents1364094619Component" Guid="0e3c5829-3d34-4100-98da-7082da0181e7" DiskId="1">
                   <File Id="id_841619758_Documents1364094619_CustomerAdd_dfdx387211291" Name="CustomerAdd.dfdx" Source="..\Deploy\Libraries\Sample.Forms\Documents\CustomerAdd.dfdx" />
                   <File Id="id_841619758_Documents1364094619_CustomerEdit_dfdx2835680336" Name="CustomerEdit.dfdx" Source="..\Deploy\Libraries\Sample.Forms\Documents\CustomerEdit.dfdx" />
                   <File Id="id_1841619758_Documents1364094619_CustomerRow_dfd613886919" Name="CustomerRow.dfd" Source="..\Deploy\Libraries\Sample.Forms\Documents\CustomerRow.dfd" />
@@ -663,11 +640,11 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_Forum1841750854" Name="Sample.Forum">
-              <Component Id="id_Libraries_Sample_Forum1841750854Component" Guid="35f3c62c-2803-4782-a25f-6ba3a9a5e344" DiskId="1">
+              <Component Id="id_Libraries_Sample_Forum1841750854Component" Guid="0e4d6304-0995-452e-b595-bf22ee8b63c0" DiskId="1">
                 <File Id="id_braries_Sample_Forum1841750854_Sample_Forum_d4l2833125515" Name="Sample.Forum.d4l" Source="..\Deploy\Libraries\Sample.Forum\Sample.Forum.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_Sample_Forum1841750854_Documents3348513805" Name="Documents">
-                <Component Id="id_id_Libraries_Sample_Forum1841750854_Documents3348513805Component" Guid="c90c9437-6629-4727-9c68-67e8bb32b918" DiskId="1">
+                <Component Id="id_id_Libraries_Sample_Forum1841750854_Documents3348513805Component" Guid="293ece89-e38a-4a37-a704-3eac7b2359c0" DiskId="1">
                   <File Id="id_Forum1841750854_Documents3348513805_Alphora_ico1776019810" Name="Alphora.ico" Source="..\Deploy\Libraries\Sample.Forum\Documents\Alphora.ico" />
                   <File Id="id_1841750854_Documents3348513805_ForumManager_dfd3493758032" Name="ForumManager.dfd" Source="..\Deploy\Libraries\Sample.Forum\Documents\ForumManager.dfd" />
                   <File Id="id_Forum1841750854_Documents3348513805_Register_d41733367299" Name="Register.d4" Source="..\Deploy\Libraries\Sample.Forum\Documents\Register.d4" />
@@ -676,31 +653,31 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_IssueTracker1004375048" Name="Sample.IssueTracker">
-              <Component Id="id_Libraries_Sample_IssueTracker1004375048Component" Guid="edef3b96-b261-4f41-bda3-8a60f72b0d9e" DiskId="1">
+              <Component Id="id_Libraries_Sample_IssueTracker1004375048Component" Guid="fe3b2060-7601-4a4c-8580-29ce50ea8e68" DiskId="1">
                 <File Id="id_IssueTracker1004375048_Sample_IssueTracker_d4l395505212" Name="Sample.IssueTracker.d4l" Source="..\Deploy\Libraries\Sample.IssueTracker\Sample.IssueTracker.d4l" />
               </Component>
               <Directory Id="id_braries_Sample_IssueTracker1004375048_Documents2493621205" Name="Documents">
-                <Component Id="id_braries_Sample_IssueTracker1004375048_Documents2493621205Component" Guid="9b9e415c-14be-46de-9e3f-2fec7196c4c6" DiskId="1">
+                <Component Id="id_braries_Sample_IssueTracker1004375048_Documents2493621205Component" Guid="9a1a46fa-2eb7-4c56-9111-e6344e6b679b" DiskId="1">
                   <File Id="id_acker1004375048_Documents2493621205_Register_d43979981797" Name="Register.d4" Source="..\Deploy\Libraries\Sample.IssueTracker\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_Pubs496887962" Name="Sample.Pubs">
-              <Component Id="id_Libraries_Sample_Pubs496887962Component" Guid="f14233bb-1a22-4990-b0df-f1c947b3f636" DiskId="1">
+              <Component Id="id_Libraries_Sample_Pubs496887962Component" Guid="09aeae02-d391-489d-9b36-71ea04fdc03a" DiskId="1">
                 <File Id="id_Libraries_Sample_Pubs496887962_Sample_Pubs_d4l737428076" Name="Sample.Pubs.d4l" Source="..\Deploy\Libraries\Sample.Pubs\Sample.Pubs.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_Sample_Pubs496887962_Documents1512038446" Name="Documents">
-                <Component Id="id_id_Libraries_Sample_Pubs496887962_Documents1512038446Component" Guid="7fec4514-843f-4baa-8628-e7d70929f495" DiskId="1">
+                <Component Id="id_id_Libraries_Sample_Pubs496887962_Documents1512038446Component" Guid="cc82d1c6-d5cc-4fc0-bf03-bf7ca8cb3f33" DiskId="1">
                   <File Id="id_e_Pubs496887962_Documents1512038446_Register_d44018423172" Name="Register.d4" Source="..\Deploy\Libraries\Sample.Pubs\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_Rental1118174146" Name="Sample.Rental">
-              <Component Id="id_Libraries_Sample_Rental1118174146Component" Guid="415804d5-7a33-43d5-8b9c-236f2f5a8c49" DiskId="1">
+              <Component Id="id_Libraries_Sample_Rental1118174146Component" Guid="81db24ba-854e-458a-8317-b82cb0dbcee0" DiskId="1">
                 <File Id="id_aries_Sample_Rental1118174146_Sample_Rental_d4l1564172813" Name="Sample.Rental.d4l" Source="..\Deploy\Libraries\Sample.Rental\Sample.Rental.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_Sample_Rental1118174146_Documents886552551" Name="Documents">
-                <Component Id="id_id_Libraries_Sample_Rental1118174146_Documents886552551Component" Guid="5cb8de81-5a1f-41be-a759-ee15ec1344d2" DiskId="1">
+                <Component Id="id_id_Libraries_Sample_Rental1118174146_Documents886552551Component" Guid="feef5f1a-e45f-43d0-b98a-1b884effd88e" DiskId="1">
                   <File Id="id_al1118174146_Documents886552551_AccountTable_d43948401214" Name="AccountTable.d4" Source="..\Deploy\Libraries\Sample.Rental\Documents\AccountTable.d4" />
                   <File Id="id_ntal1118174146_Documents886552551_ActorTable_d42001494843" Name="ActorTable.d4" Source="..\Deploy\Libraries\Sample.Rental\Documents\ActorTable.d4" />
                   <File Id="id_8174146_Documents886552551_AddRentalOperator_d43873302789" Name="AddRentalOperator.d4" Source="..\Deploy\Libraries\Sample.Rental\Documents\AddRentalOperator.d4" />
@@ -731,11 +708,11 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_ScriptAction1149707785" Name="Sample.ScriptAction">
-              <Component Id="id_Libraries_Sample_ScriptAction1149707785Component" Guid="53d3bddb-263c-4668-a358-a8563e08af54" DiskId="1">
+              <Component Id="id_Libraries_Sample_ScriptAction1149707785Component" Guid="0ae90039-7ecd-485a-aed6-0eb96dcb1ae5" DiskId="1">
                 <File Id="id__ScriptAction1149707785_Sample_ScriptAction_d4l4026880089" Name="Sample.ScriptAction.d4l" Source="..\Deploy\Libraries\Sample.ScriptAction\Sample.ScriptAction.d4l" />
               </Component>
               <Directory Id="id_braries_Sample_ScriptAction1149707785_Documents1019621485" Name="Documents">
-                <Component Id="id_braries_Sample_ScriptAction1149707785_Documents1019621485Component" Guid="82eacac7-2104-444c-80c3-c50460084cbb" DiskId="1">
+                <Component Id="id_braries_Sample_ScriptAction1149707785_Documents1019621485Component" Guid="f0f32b25-3424-45ad-bab2-f081cb1a7911" DiskId="1">
                   <File Id="id_on1149707785_Documents1019621485_BCLAccess_dfd579610739" Name="BCLAccess.dfd" Source="..\Deploy\Libraries\Sample.ScriptAction\Documents\BCLAccess.dfd" />
                   <File Id="id_ion1149707785_Documents1019621485_Register_d494387938" Name="Register.d4" Source="..\Deploy\Libraries\Sample.ScriptAction\Documents\Register.d4" />
                   <File Id="id_07785_Documents1019621485_Windows_NodeTypes_dnt3663248196" Name="Windows.NodeTypes.dnt" Source="..\Deploy\Libraries\Sample.ScriptAction\Documents\Windows.NodeTypes.dnt" />
@@ -743,22 +720,22 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_SendEmail1760125277" Name="Sample.SendEmail">
-              <Component Id="id_Libraries_Sample_SendEmail1760125277Component" Guid="af725941-f615-4cd0-918f-7d03236b0178" DiskId="1">
+              <Component Id="id_Libraries_Sample_SendEmail1760125277Component" Guid="222a6d66-f6b8-4357-980b-f839e7f59146" DiskId="1">
                 <File Id="id_Sample_SendEmail1760125277_Sample_SendEmail_d4l3563956941" Name="Sample.SendEmail.d4l" Source="..\Deploy\Libraries\Sample.SendEmail\Sample.SendEmail.d4l" />
               </Component>
               <Directory Id="id__Libraries_Sample_SendEmail1760125277_Documents2527298629" Name="Documents">
-                <Component Id="id__Libraries_Sample_SendEmail1760125277_Documents2527298629Component" Guid="0aaaf6db-cb6b-443d-8738-b4b365863a76" DiskId="1">
+                <Component Id="id__Libraries_Sample_SendEmail1760125277_Documents2527298629Component" Guid="240bd29e-cb0f-49e7-83e4-5554f3f560a9" DiskId="1">
                   <File Id="id_Email1760125277_Documents2527298629_Register_d43611867680" Name="Register.d4" Source="..\Deploy\Libraries\Sample.SendEmail\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Sample_Shipping1146050186" Name="Sample.Shipping">
-              <Component Id="id_Libraries_Sample_Shipping1146050186Component" Guid="6b4734ff-d492-4268-aaf3-4bef3f328996" DiskId="1">
+              <Component Id="id_Libraries_Sample_Shipping1146050186Component" Guid="d92c045f-81b6-4212-9237-15ef80b6b94e" DiskId="1">
                 <File Id="id_Sample_Shipping1146050186_Alphora_Shipping_dll882620166" Name="Alphora.Shipping.dll" Source="..\Deploy\Libraries\Sample.Shipping\Alphora.Shipping.dll" />
                 <File Id="id_s_Sample_Shipping1146050186_Sample_Shipping_d4l3051184625" Name="Sample.Shipping.d4l" Source="..\Deploy\Libraries\Sample.Shipping\Sample.Shipping.d4l" />
               </Component>
               <Directory Id="id__Libraries_Sample_Shipping1146050186_Documents695789260" Name="Documents">
-                <Component Id="id__Libraries_Sample_Shipping1146050186_Documents695789260Component" Guid="1289a4d1-6240-4319-b73c-e5b8daca1f78" DiskId="1">
+                <Component Id="id__Libraries_Sample_Shipping1146050186_Documents695789260Component" Guid="738c7ff5-8133-4a28-8e72-e96d5e69d5c9" DiskId="1">
                   <File Id="id_ipping1146050186_Documents695789260_Alphora_ico2138796725" Name="Alphora.ico" Source="..\Deploy\Libraries\Sample.Shipping\Documents\Alphora.ico" />
                   <File Id="id_50186_Documents695789260_BrowseInvoiceItem_dfdx2277281458" Name="BrowseInvoiceItem.dfdx" Source="..\Deploy\Libraries\Sample.Shipping\Documents\BrowseInvoiceItem.dfdx" />
                   <File Id="id_6_Documents695789260_ContactCategoriesEdit_dfdx4250372690" Name="ContactCategoriesEdit.dfdx" Source="..\Deploy\Libraries\Sample.Shipping\Documents\ContactCategoriesEdit.dfdx" />
@@ -807,22 +784,22 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_SASDevice2661239699" Name="SASDevice">
-              <Component Id="id_Libraries_SASDevice2661239699Component" Guid="119e64dc-683a-4efc-9d39-ce937d51473f" DiskId="1">
+              <Component Id="id_Libraries_SASDevice2661239699Component" Guid="9861a7c3-3de6-429b-831e-70b99cee59a8" DiskId="1">
                 <File Id="id_aries_SASDevice2661239699_AlphoraSASDevice_dll311001617" Name="AlphoraSASDevice.dll" Source="..\Deploy\Libraries\SASDevice\AlphoraSASDevice.dll" />
                 <File Id="id_id_Libraries_SASDevice2661239699_SASDevice_d4l346978306" Name="SASDevice.d4l" Source="..\Deploy\Libraries\SASDevice\SASDevice.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_SASDevice2661239699_Documents2861636253" Name="Documents">
-                <Component Id="id_id_Libraries_SASDevice2661239699_Documents2861636253Component" Guid="b91471e3-4100-4f57-a465-0de7213c8a2d" DiskId="1">
+                <Component Id="id_id_Libraries_SASDevice2661239699_Documents2861636253Component" Guid="72910c0c-e7c4-4659-81b9-efe679eb9229" DiskId="1">
                   <File Id="id_ce2661239699_Documents2861636253_SAS_ReadMe_txt3737201133" Name="SAS.ReadMe.txt" Source="..\Deploy\Libraries\SASDevice\Documents\SAS.ReadMe.txt" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_Security2076879673" Name="Security">
-              <Component Id="id_Libraries_Security2076879673Component" Guid="256ba02a-9e2a-4c15-885e-e178a6c5b1fe" DiskId="1">
+              <Component Id="id_Libraries_Security2076879673Component" Guid="078c6435-7e32-4590-837b-9cab29d94958" DiskId="1">
                 <File Id="id_id_Libraries_Security2076879673_Security_d4l17070369" Name="Security.d4l" Source="..\Deploy\Libraries\Security\Security.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_Security2076879673_Documents3803615424" Name="Documents">
-                <Component Id="id_id_Libraries_Security2076879673_Documents3803615424Component" Guid="a0d2050c-62c2-496b-a17b-970e967e8c37" DiskId="1">
+                <Component Id="id_id_Libraries_Security2076879673_Documents3803615424Component" Guid="c5207db9-2064-4ea1-a392-8c39c4bbc0c4" DiskId="1">
                   <File Id="id_y2076879673_Documents3803615424_EntryPoints_txt3589359102" Name="EntryPoints.txt" Source="..\Deploy\Libraries\Security\Documents\EntryPoints.txt" />
                   <File Id="id__Documents3803615424_GroupDeviceUserBrowse_dfdx2603061660" Name="GroupDeviceUserBrowse.dfdx" Source="..\Deploy\Libraries\Security\Documents\GroupDeviceUserBrowse.dfdx" />
                   <File Id="id_y2076879673_Documents3803615424_GroupManage_dfd2189020292" Name="GroupManage.dfd" Source="..\Deploy\Libraries\Security\Documents\GroupManage.dfd" />
@@ -841,79 +818,79 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_SimpleDevice4284243998" Name="SimpleDevice">
-              <Component Id="id_Libraries_SimpleDevice4284243998Component" Guid="d0e925ed-98a2-4222-b912-19c742a7dc7c" DiskId="1">
+              <Component Id="id_Libraries_SimpleDevice4284243998Component" Guid="25163e03-bd5e-47c8-8000-e45330838869" DiskId="1">
                 <File Id="id_84243998_Alphora_Dataphor_DAE_Device_Simple_dll3995459398" Name="Alphora.Dataphor.DAE.Device.Simple.dll" Source="..\Deploy\Libraries\SimpleDevice\Alphora.Dataphor.DAE.Device.Simple.dll" />
                 <File Id="id_braries_SimpleDevice4284243998_SimpleDevice_d4l1695489534" Name="SimpleDevice.d4l" Source="..\Deploy\Libraries\SimpleDevice\SimpleDevice.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_SimpleDevice4284243998_Documents2846635053" Name="Documents">
-                <Component Id="id_id_Libraries_SimpleDevice4284243998_Documents2846635053Component" Guid="ad186159-5ab0-4e55-8486-e0c628272bb3" DiskId="1">
+                <Component Id="id_id_Libraries_SimpleDevice4284243998_Documents2846635053Component" Guid="27fad2b8-9993-4a32-adf1-0355d90308b6" DiskId="1">
                   <File Id="id_uments2846635053_Memory_SimpleDevice_ReadMe_txt2512528024" Name="Memory_SimpleDevice.ReadMe.txt" Source="..\Deploy\Libraries\SimpleDevice\Documents\Memory_SimpleDevice.ReadMe.txt" />
                   <File Id="id_evice4284243998_Documents2846635053_Register_d43883967922" Name="Register.d4" Source="..\Deploy\Libraries\SimpleDevice\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_SQLDevice3886678749" Name="SQLDevice">
-              <Component Id="id_Libraries_SQLDevice3886678749Component" Guid="55f78f08-17ca-4383-a06e-7ef9260bf7c0" DiskId="1">
+              <Component Id="id_Libraries_SQLDevice3886678749Component" Guid="7263c9d8-86e9-45cd-91f6-c5ca9c7f08bf" DiskId="1">
                 <File Id="id_3886678749_Alphora_Dataphor_DAE_Device_SQL_dll782612705" Name="Alphora.Dataphor.DAE.Device.SQL.dll" Source="..\Deploy\Libraries\SQLDevice\Alphora.Dataphor.DAE.Device.SQL.dll" />
                 <File Id="id_id_Libraries_SQLDevice3886678749_SQLDevice_d4l2293663553" Name="SQLDevice.d4l" Source="..\Deploy\Libraries\SQLDevice\SQLDevice.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_SQLDevice3886678749_Documents127762544" Name="Documents">
-                <Component Id="id_id_Libraries_SQLDevice3886678749_Documents127762544Component" Guid="0f678e7f-58fc-40e7-8f3a-e9b94e9c11c1" DiskId="1">
+                <Component Id="id_id_Libraries_SQLDevice3886678749_Documents127762544Component" Guid="397dce1a-853f-4070-baad-fc602b848b7a" DiskId="1">
                   <File Id="id_Device3886678749_Documents127762544_Register_d43753535450" Name="Register.d4" Source="..\Deploy\Libraries\SQLDevice\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_System_Integration2509663724" Name="System.Integration">
-              <Component Id="id_Libraries_System_Integration2509663724Component" Guid="744a0c31-3f10-4568-88d0-7ddb61c71cac" DiskId="1">
+              <Component Id="id_Libraries_System_Integration2509663724Component" Guid="bc40cb39-cc19-4bfb-ab03-14d6500199aa" DiskId="1">
                 <File Id="id_em_Integration2509663724_System_Integration_d4l3884851057" Name="System.Integration.d4l" Source="..\Deploy\Libraries\System.Integration\System.Integration.d4l" />
                 <File Id="id_em_Integration2509663724_System_Integration_dll3508417721" Name="System.Integration.dll" Source="..\Deploy\Libraries\System.Integration\System.Integration.dll" />
               </Component>
               <Directory Id="id_ibraries_System_Integration2509663724_Documents1872045114" Name="Documents">
-                <Component Id="id_ibraries_System_Integration2509663724_Documents1872045114Component" Guid="d3d8aa60-6c2a-4fe2-9e81-fd3025e8af4b" DiskId="1">
+                <Component Id="id_ibraries_System_Integration2509663724_Documents1872045114Component" Guid="48a1b877-08fb-44b2-8b98-10577ef58bf8" DiskId="1">
                   <File Id="id_ation2509663724_Documents1872045114_Register_d42531628119" Name="Register.d4" Source="..\Deploy\Libraries\System.Integration\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_System_Internet3727958425" Name="System.Internet">
-              <Component Id="id_Libraries_System_Internet3727958425Component" Guid="97d1b7bf-d873-4cf0-b628-ec018594f3b7" DiskId="1">
+              <Component Id="id_Libraries_System_Internet3727958425Component" Guid="5b0f1dc0-79a4-42d6-849f-328631216bd5" DiskId="1">
                 <File Id="id_s_System_Internet3727958425_System_Internet_d4l3484079286" Name="System.Internet.d4l" Source="..\Deploy\Libraries\System.Internet\System.Internet.d4l" />
                 <File Id="id_s_System_Internet3727958425_System_Internet_dll3484079198" Name="System.Internet.dll" Source="..\Deploy\Libraries\System.Internet\System.Internet.dll" />
               </Component>
               <Directory Id="id_d_Libraries_System_Internet3727958425_Documents3369751963" Name="Documents">
-                <Component Id="id_d_Libraries_System_Internet3727958425_Documents3369751963Component" Guid="aa9c4773-d382-484d-a803-f7f4f7da837c" DiskId="1">
+                <Component Id="id_d_Libraries_System_Internet3727958425_Documents3369751963Component" Guid="27dc2551-7c3c-45c4-8d3c-5e1e98b616ff" DiskId="1">
                   <File Id="id_ernet3727958425_Documents3369751963_Register_d44142948770" Name="Register.d4" Source="..\Deploy\Libraries\System.Internet\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_System_Platform3998496482" Name="System.Platform">
-              <Component Id="id_Libraries_System_Platform3998496482Component" Guid="77839130-a3d7-4c85-a84b-e3f2186f46af" DiskId="1">
+              <Component Id="id_Libraries_System_Platform3998496482Component" Guid="63e4bba4-4574-465b-b277-1aeb0e1f7160" DiskId="1">
                 <File Id="id_s_System_Platform3998496482_System_Platform_d4l2544822210" Name="System.Platform.d4l" Source="..\Deploy\Libraries\System.Platform\System.Platform.d4l" />
                 <File Id="id_s_System_Platform3998496482_System_Platform_dll2544822170" Name="System.Platform.dll" Source="..\Deploy\Libraries\System.Platform\System.Platform.dll" />
               </Component>
               <Directory Id="id_d_Libraries_System_Platform3998496482_Documents2884736526" Name="Documents">
-                <Component Id="id_d_Libraries_System_Platform3998496482_Documents2884736526Component" Guid="e8e0150f-f007-4474-b863-abf19aeab4be" DiskId="1">
+                <Component Id="id_d_Libraries_System_Platform3998496482_Documents2884736526Component" Guid="97b55fc5-a420-4607-b408-186d99f00045" DiskId="1">
                   <File Id="id_tform3998496482_Documents2884736526_Register_d42684795204" Name="Register.d4" Source="..\Deploy\Libraries\System.Platform\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_TestFramework_Controls2507418042" Name="TestFramework.Controls">
-              <Component Id="id_Libraries_TestFramework_Controls2507418042Component" Guid="a88a33cc-9df6-4294-b25b-15c23847ce98" DiskId="1">
+              <Component Id="id_Libraries_TestFramework_Controls2507418042Component" Guid="cba75ede-4921-47bf-963d-e1bc6b2c9f83" DiskId="1">
                 <File Id="id__Controls2507418042_TestFramework_Controls_d4l166137277" Name="TestFramework.Controls.d4l" Source="..\Deploy\Libraries\TestFramework.Controls\TestFramework.Controls.d4l" />
               </Component>
               <Directory Id="id_ries_TestFramework_Controls2507418042_Documents1422047336" Name="Documents">
-                <Component Id="id_ries_TestFramework_Controls2507418042_Documents1422047336Component" Guid="07c5b9bb-1615-4687-b8a7-c01a8167af33" DiskId="1">
+                <Component Id="id_ries_TestFramework_Controls2507418042_Documents1422047336Component" Guid="e53161ed-718c-432c-ba77-9807af8251ea" DiskId="1">
                   <File Id="id_ls2507418042_Documents1422047336_FullLookup_dfd1923299336" Name="FullLookup.dfd" Source="..\Deploy\Libraries\TestFramework.Controls\Documents\FullLookup.dfd" />
                   <File Id="id_trols2507418042_Documents1422047336_Register_d44031903850" Name="Register.d4" Source="..\Deploy\Libraries\TestFramework.Controls\Documents\Register.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_TestFramework_Coverage_Base3865322486" Name="TestFramework.Coverage.Base">
-              <Component Id="id_Libraries_TestFramework_Coverage_Base3865322486Component" Guid="23d05aa7-429d-4fb6-a523-dc8ffdc8cbd3" DiskId="1">
+              <Component Id="id_Libraries_TestFramework_Coverage_Base3865322486Component" Guid="09a689a0-9e86-45ce-b2f0-4cd7acec95e4" DiskId="1">
                 <File Id="id_3865322486_Alphora_Dataphor_DAE_Diagnostics_dll3495017990" Name="Alphora.Dataphor.DAE.Diagnostics.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.DAE.Diagnostics.dll" />
                 <File Id="id__Base3865322486_TestFramework_Coverage_Base_d4l1079682216" Name="TestFramework.Coverage.Base.d4l" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\TestFramework.Coverage.Base.d4l" />
               </Component>
               <Directory Id="id_TestFramework_Coverage_Base3865322486_Documents1659443247" Name="Documents">
-                <Component Id="id_TestFramework_Coverage_Base3865322486_Documents1659443247Component" Guid="d8d4d677-72f3-4c91-a9e2-78428a58b49f" DiskId="1">
+                <Component Id="id_TestFramework_Coverage_Base3865322486_Documents1659443247Component" Guid="1c17bf70-3d29-4e0d-9ee3-1009f2e82346" DiskId="1">
                   <File Id="id_e3865322486_Documents1659443247_All_Coverage_d41951114987" Name="All.Coverage.d4" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Documents\All.Coverage.d4" />
                   <File Id="id_486_Documents1659443247_CreateTableFunctions_d41388608229" Name="CreateTableFunctions.d4" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Documents\CreateTableFunctions.d4" />
                   <File Id="id_ge_Base3865322486_Documents1659443247_Device_d42101156414" Name="Device.d4" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Documents\Device.d4" />
@@ -928,15 +905,15 @@
                 </Component>
               </Directory>
               <Directory Id="id_s_TestFramework_Coverage_Base3865322486_Source855709954" Name="Source">
-                <Component Id="id_s_TestFramework_Coverage_Base3865322486_Source855709954Component" Guid="479bd40c-8334-4ac6-883e-7ed231d8ced3" DiskId="1">
+                <Component Id="id_s_TestFramework_Coverage_Base3865322486_Source855709954Component" Guid="44f0c041-20d7-4d8f-bf1c-4735d365144d" DiskId="1">
                   <CreateFolder />
                 </Component>
                 <Directory Id="id_ork_Coverage_Base3865322486_Source855709954_bin1660858407" Name="bin">
-                  <Component Id="id_ork_Coverage_Base3865322486_Source855709954_bin1660858407Component" Guid="2f299fc8-4033-42c0-ad3c-8b2bb31e1235" DiskId="1">
+                  <Component Id="id_ork_Coverage_Base3865322486_Source855709954_bin1660858407Component" Guid="108f66f2-8473-42ac-8882-ab774babefba" DiskId="1">
                     <CreateFolder />
                   </Component>
                   <Directory Id="id_865322486_Source855709954_bin1660858407_Release2009629491" Name="Release">
-                    <Component Id="id_865322486_Source855709954_bin1660858407_Release2009629491Component" Guid="29569503-1bdf-4e83-ae6e-6d0ace8c9850" DiskId="1">
+                    <Component Id="id_865322486_Source855709954_bin1660858407_Release2009629491Component" Guid="9a29e7d9-fdc1-4938-8aa7-7fd2d0881c55" DiskId="1">
                       <File Id="id_2009629491_Alphora_Dataphor_DAE_Diagnostics_dll2788477477" Name="Alphora.Dataphor.DAE.Diagnostics.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Source\bin\Release\Alphora.Dataphor.DAE.Diagnostics.dll" />
                     </Component>
                   </Directory>
@@ -944,11 +921,11 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_TestFramework_Coverage_Devices349667441" Name="TestFramework.Coverage.Devices">
-              <Component Id="id_Libraries_TestFramework_Coverage_Devices349667441Component" Guid="7d1c3035-4204-4fcc-9231-77918d11b287" DiskId="1">
+              <Component Id="id_Libraries_TestFramework_Coverage_Devices349667441Component" Guid="258ed623-01da-4002-8b96-c625376dc53c" DiskId="1">
                 <File Id="id_ces349667441_TestFramework_Coverage_Devices_d4l1452706617" Name="TestFramework.Coverage.Devices.d4l" Source="..\Deploy\Libraries\TestFramework.Coverage.Devices\TestFramework.Coverage.Devices.d4l" />
               </Component>
               <Directory Id="id_tFramework_Coverage_Devices349667441_Documents136393989" Name="Documents">
-                <Component Id="id_tFramework_Coverage_Devices349667441_Documents136393989Component" Guid="a0c42259-59d3-4d3d-8d1b-459cae3997ef" DiskId="1">
+                <Component Id="id_tFramework_Coverage_Devices349667441_Documents136393989Component" Guid="ca0fbf78-3062-4016-9618-24c60f03a55a" DiskId="1">
                   <File Id="id_67441_Documents136393989_DateTimeSubtraction_d44231085487" Name="DateTimeSubtraction.d4" Source="..\Deploy\Libraries\TestFramework.Coverage.Devices\Documents\DateTimeSubtraction.d4" />
                   <File Id="id_49667441_Documents136393989_InsertDeviceCase_d42389648795" Name="InsertDeviceCase.d4" Source="..\Deploy\Libraries\TestFramework.Coverage.Devices\Documents\InsertDeviceCase.d4" />
                   <File Id="id_441_Documents136393989_InsertDeviceCaseData_d4906760636" Name="InsertDeviceCaseData.d4" Source="..\Deploy\Libraries\TestFramework.Coverage.Devices\Documents\InsertDeviceCaseData.d4" />
@@ -964,11 +941,11 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_TestFramework_Coverage_Scripts2116673862" Name="TestFramework.Coverage.Scripts">
-              <Component Id="id_Libraries_TestFramework_Coverage_Scripts2116673862Component" Guid="4ee5ae94-db1f-4dc0-948f-00efd1b9553a" DiskId="1">
+              <Component Id="id_Libraries_TestFramework_Coverage_Scripts2116673862Component" Guid="b0246355-cca1-48ad-9b0d-9f82c7d5be4f" DiskId="1">
                 <File Id="id_ts2116673862_TestFramework_Coverage_Scripts_d4l3722675665" Name="TestFramework.Coverage.Scripts.d4l" Source="..\Deploy\Libraries\TestFramework.Coverage.Scripts\TestFramework.Coverage.Scripts.d4l" />
               </Component>
               <Directory Id="id_Framework_Coverage_Scripts2116673862_Documents726541182" Name="Documents">
-                <Component Id="id_Framework_Coverage_Scripts2116673862_Documents726541182Component" Guid="e0686a72-bb7f-48cb-9131-2bc173612939" DiskId="1">
+                <Component Id="id_Framework_Coverage_Scripts2116673862_Documents726541182Component" Guid="b0335334-b83f-40ff-9c23-795a532e643c" DiskId="1">
                   <File Id="id_673862_Documents726541182_AggregateOperators_d43945651896" Name="AggregateOperators.d4" Source="..\Deploy\Libraries\TestFramework.Coverage.Scripts\Documents\AggregateOperators.d4" />
                   <File Id="id_ipts2116673862_Documents726541182_Aggregates_d42098885074" Name="Aggregates.d4" Source="..\Deploy\Libraries\TestFramework.Coverage.Scripts\Documents\Aggregates.d4" />
                   <File Id="id__Documents726541182_ApplicationTransactions_d4351265628" Name="ApplicationTransactions.d4" Source="..\Deploy\Libraries\TestFramework.Coverage.Scripts\Documents\ApplicationTransactions.d4" />
@@ -1107,26 +1084,26 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_TestFramework_Coverage1936669013" Name="TestFramework.Coverage">
-              <Component Id="id_Libraries_TestFramework_Coverage1936669013Component" Guid="bbf99aeb-2861-4707-b8f9-553e2a1bd520" DiskId="1">
+              <Component Id="id_Libraries_TestFramework_Coverage1936669013Component" Guid="f468b365-181d-40f8-8908-2dd5e0250f3c" DiskId="1">
                 <File Id="id_k_Coverage1936669013_TestFramework_Coverage_d4l3955183269" Name="TestFramework.Coverage.d4l" Source="..\Deploy\Libraries\TestFramework.Coverage\TestFramework.Coverage.d4l" />
               </Component>
               <Directory Id="id_Libraries_TestFramework_Coverage1936669013_Base1209532968" Name="Base">
-                <Component Id="id_Libraries_TestFramework_Coverage1936669013_Base1209532968Component" Guid="ab5c8435-4233-4a2b-a214-03cd082a8bae" DiskId="1">
+                <Component Id="id_Libraries_TestFramework_Coverage1936669013_Base1209532968Component" Guid="e8e4e4c0-6017-47ea-b1e2-c1a99e1e6228" DiskId="1">
                   <CreateFolder />
                 </Component>
               </Directory>
               <Directory Id="id_raries_TestFramework_Coverage1936669013_Devices3747475031" Name="Devices">
-                <Component Id="id_raries_TestFramework_Coverage1936669013_Devices3747475031Component" Guid="767f349b-ee55-4066-8b2a-8ded0ae080cd" DiskId="1">
+                <Component Id="id_raries_TestFramework_Coverage1936669013_Devices3747475031Component" Guid="be22de2a-8487-4b00-b3fb-bc3eef2d1311" DiskId="1">
                   <CreateFolder />
                 </Component>
               </Directory>
               <Directory Id="id_aries_TestFramework_Coverage1936669013_Scripts237392451" Name="Scripts">
-                <Component Id="id_aries_TestFramework_Coverage1936669013_Scripts237392451Component" Guid="70b2e6cd-5a5b-4dad-bf00-c26e1ffb1976" DiskId="1">
+                <Component Id="id_aries_TestFramework_Coverage1936669013_Scripts237392451Component" Guid="ac3bcd79-e737-4e7b-af69-9dc6da83dad3" DiskId="1">
                   <CreateFolder />
                 </Component>
               </Directory>
               <Directory Id="id_ries_TestFramework_Coverage1936669013_Documents1870272871" Name="Documents">
-                <Component Id="id_ries_TestFramework_Coverage1936669013_Documents1870272871Component" Guid="d2276a8d-050a-4e9e-afc7-4c040f293d91" DiskId="1">
+                <Component Id="id_ries_TestFramework_Coverage1936669013_Documents1870272871Component" Guid="edff457e-963b-4a6c-9577-d7c54636200b" DiskId="1">
                   <File Id="id_13_Documents1870272871_CaseResultsExtended_dfdx4244592772" Name="CaseResultsExtended.dfdx" Source="..\Deploy\Libraries\TestFramework.Coverage\Documents\CaseResultsExtended.dfdx" />
                   <File Id="id_erage1936669013_Documents1870272871_Cases_dfdx646941264" Name="Cases.dfdx" Source="..\Deploy\Libraries\TestFramework.Coverage\Documents\Cases.dfdx" />
                   <File Id="id_3_Documents1870272871_ChooseDeviceInstance_dfdx1021638537" Name="ChooseDeviceInstance.dfdx" Source="..\Deploy\Libraries\TestFramework.Coverage\Documents\ChooseDeviceInstance.dfdx" />
@@ -1138,52 +1115,52 @@
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_TestFramework_StressTest2522645301" Name="TestFramework.StressTest">
-              <Component Id="id_Libraries_TestFramework_StressTest2522645301Component" Guid="f5cd2b92-ffc4-4f69-aae8-152c3fd8c282" DiskId="1">
+              <Component Id="id_Libraries_TestFramework_StressTest2522645301Component" Guid="5b214044-d252-4b0b-a030-6f8592f81b3a" DiskId="1">
                 <File Id="id_ressTest2522645301_TestFramework_StressTest_d4l2343236705" Name="TestFramework.StressTest.d4l" Source="..\Deploy\Libraries\TestFramework.StressTest\TestFramework.StressTest.d4l" />
               </Component>
               <Directory Id="id_es_TestFramework_StressTest2522645301_Documents1540227831" Name="Documents">
-                <Component Id="id_es_TestFramework_StressTest2522645301_Documents1540227831Component" Guid="cb86b505-ee92-438e-bc32-a81e3ac2c465" DiskId="1">
+                <Component Id="id_es_TestFramework_StressTest2522645301_Documents1540227831Component" Guid="240845e4-6ab0-45d9-9d3b-1ef13e9b9208" DiskId="1">
                   <File Id="id_est2522645301_Documents1540227831_Register_d456857857" Name="Register.d4" Source="..\Deploy\Libraries\TestFramework.StressTest\Documents\Register.d4" />
                   <File Id="id_essTest2522645301_Documents1540227831_Tables_d41739180401" Name="Tables.d4" Source="..\Deploy\Libraries\TestFramework.StressTest\Documents\Tables.d4" />
                 </Component>
               </Directory>
             </Directory>
             <Directory Id="id_Libraries_TestFramework3828734558" Name="TestFramework">
-              <Component Id="id_Libraries_TestFramework3828734558Component" Guid="20190309-bad5-4f0a-a4cf-6947cced13bf" DiskId="1">
+              <Component Id="id_Libraries_TestFramework3828734558Component" Guid="807bb423-64dd-4dd2-9ffb-4a0deb381410" DiskId="1">
                 <File Id="id_ries_TestFramework3828734558_TestFramework_d4l945443658" Name="TestFramework.d4l" Source="..\Deploy\Libraries\TestFramework\TestFramework.d4l" />
               </Component>
               <Directory Id="id_id_Libraries_TestFramework3828734558_Controls996846595" Name="Controls">
-                <Component Id="id_id_Libraries_TestFramework3828734558_Controls996846595Component" Guid="b53e94ac-518f-4ea2-998e-ac686c98e61c" DiskId="1">
+                <Component Id="id_id_Libraries_TestFramework3828734558_Controls996846595Component" Guid="9e3a8ec6-6bd0-41ba-9f20-2ba949cd7d1a" DiskId="1">
                   <CreateFolder />
                 </Component>
               </Directory>
               <Directory Id="id_Libraries_TestFramework3828734558_Coverage_Base1445538788" Name="Coverage.Base">
-                <Component Id="id_Libraries_TestFramework3828734558_Coverage_Base1445538788Component" Guid="9434082d-a4e8-42ac-a13e-99a96bedadab" DiskId="1">
+                <Component Id="id_Libraries_TestFramework3828734558_Coverage_Base1445538788Component" Guid="fd3fcb0f-d0cf-46a9-812d-4d14e18f3970" DiskId="1">
                   <CreateFolder />
                 </Component>
               </Directory>
               <Directory Id="id_raries_TestFramework3828734558_Coverage_Devices2945814231" Name="Coverage.Devices">
-                <Component Id="id_raries_TestFramework3828734558_Coverage_Devices2945814231Component" Guid="c7ba6425-f559-451d-8fba-a7c6ea0900b3" DiskId="1">
+                <Component Id="id_raries_TestFramework3828734558_Coverage_Devices2945814231Component" Guid="dfb79922-7841-4a27-a9a6-3580c95e3498" DiskId="1">
                   <CreateFolder />
                 </Component>
               </Directory>
               <Directory Id="id_aries_TestFramework3828734558_Coverage_Scripts280778895" Name="Coverage.Scripts">
-                <Component Id="id_aries_TestFramework3828734558_Coverage_Scripts280778895Component" Guid="5171d3c1-f021-403b-a8c5-6209fc6d807c" DiskId="1">
+                <Component Id="id_aries_TestFramework3828734558_Coverage_Scripts280778895Component" Guid="78129753-d4fa-4ea0-9aaf-3f132190bfcb" DiskId="1">
                   <CreateFolder />
                 </Component>
               </Directory>
               <Directory Id="id_id_Libraries_TestFramework3828734558_Coverage593567764" Name="Coverage">
-                <Component Id="id_id_Libraries_TestFramework3828734558_Coverage593567764Component" Guid="aa893672-2765-46a8-a639-3539db98c5f1" DiskId="1">
+                <Component Id="id_id_Libraries_TestFramework3828734558_Coverage593567764Component" Guid="7cbc83ed-8084-4ba2-925c-9f20b3a5a0ec" DiskId="1">
                   <CreateFolder />
                 </Component>
               </Directory>
               <Directory Id="id_id_Libraries_TestFramework3828734558_StressTest3148982644" Name="StressTest">
-                <Component Id="id_id_Libraries_TestFramework3828734558_StressTest3148982644Component" Guid="87eef74b-e642-437c-a1b6-bb7cab50340a" DiskId="1">
+                <Component Id="id_id_Libraries_TestFramework3828734558_StressTest3148982644Component" Guid="bff54209-3e75-4a66-9331-af3a9c6b0c37" DiskId="1">
                   <CreateFolder />
                 </Component>
               </Directory>
               <Directory Id="id_id_Libraries_TestFramework3828734558_Documents3606966399" Name="Documents">
-                <Component Id="id_id_Libraries_TestFramework3828734558_Documents3606966399Component" Guid="f4cf1106-b3a6-444e-8be6-6606ecb156c6" DiskId="1">
+                <Component Id="id_id_Libraries_TestFramework3828734558_Documents3606966399Component" Guid="fda7e710-fe6c-4326-a73d-d5d0d33e5875" DiskId="1">
                   <File Id="id_work3828734558_Documents3606966399_DataTypes_d43086535969" Name="DataTypes.d4" Source="..\Deploy\Libraries\TestFramework\Documents\DataTypes.d4" />
                   <File Id="id_28734558_Documents3606966399_DataTypesMSSQL_d4871567892" Name="DataTypesMSSQL.d4" Source="..\Deploy\Libraries\TestFramework\Documents\DataTypesMSSQL.d4" />
                   <File Id="id_amework3828734558_Documents3606966399_Device_d43773476509" Name="Device.d4" Source="..\Deploy\Libraries\TestFramework\Documents\Device.d4" />
@@ -1208,7 +1185,7 @@
               <File Id="id_WebClient_Web_config2768856328" Name="Web.config" Source="..\Deploy\WebClient\Web.config" />
             </Component>
             <Directory Id="id_WebClient_bin518237386" Name="bin">
-              <Component Id="id_WebClient_bin518237386Component" Guid="aad34054-a6db-407f-9f5c-774d540de82b" DiskId="1">
+              <Component Id="id_WebClient_bin518237386Component" Guid="e094b23f-64b6-4def-9d2b-01dc9981afef" DiskId="1">
                 <File Id="id_237386_Alphora_Dataphor_DAE_Client_Controls_dll2810259232" Name="Alphora.Dataphor.DAE.Client.Controls.dll" Source="..\Deploy\WebClient\bin\Alphora.Dataphor.DAE.Client.Controls.dll" />
                 <File Id="id_nt_bin518237386_Alphora_Dataphor_DAE_Client_dll1395386343" Name="Alphora.Dataphor.DAE.Client.dll" Source="..\Deploy\WebClient\bin\Alphora.Dataphor.DAE.Client.dll" />
                 <File Id="id_WebClient_bin518237386_Alphora_Dataphor_DAE_dll2141613324" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\WebClient\bin\Alphora.Dataphor.DAE.dll" />
@@ -1224,7 +1201,7 @@
               </Component>
             </Directory>
             <Directory Id="id_WebClient_images2220116929" Name="images">
-              <Component Id="id_WebClient_images2220116929Component" Guid="7b7043a5-f70a-483c-a5ee-d8f036f9352c" DiskId="1">
+              <Component Id="id_WebClient_images2220116929Component" Guid="df440dac-8c71-4d85-87c2-07b49b59feaa" DiskId="1">
                 <File Id="id_id_WebClient_images2220116929_cal_gif2909735884" Name="cal.gif" Source="..\Deploy\WebClient\images\cal.gif" />
                 <File Id="id_id_WebClient_images2220116929_collapse_png4159768123" Name="collapse.png" Source="..\Deploy\WebClient\images\collapse.png" />
                 <File Id="id_ient_images2220116929_DataphorFrontendLogo_gif826500816" Name="DataphorFrontendLogo.gif" Source="..\Deploy\WebClient\images\DataphorFrontendLogo.gif" />
@@ -1258,7 +1235,7 @@
               <File Id="id_DataphoriaWeb_Web_Config1250237597" Name="Web.Config" Source="..\Deploy\Dataphoria.Web\Web.Config" />
             </Component>
             <Directory Id="id_DataphoriaWeb_bin2613107663" Name="bin">
-              <Component Id="id_DataphoriaWeb_bin2613107663Component" Guid="abe41cfd-dfe2-4a57-b212-88c10c24c0ba" DiskId="1">
+              <Component Id="id_DataphoriaWeb_bin2613107663Component" Guid="59a362cd-645b-45d9-bc0f-9fbc109785c6" DiskId="1">
                 <File Id="id_horiaWeb_bin2613107663_Alphora_Dataphor_DAE_dll3315663471" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Dataphoria.Web\bin\Alphora.Dataphor.DAE.dll" />
                 <File Id="id_n2613107663_Alphora_Dataphor_DAE_NativeCLI_dll764405368" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Dataphoria.Web\bin\Alphora.Dataphor.DAE.NativeCLI.dll" />
                 <File Id="id_b_bin2613107663_Alphora_Dataphor_DAE_SQLCE_dll800498584" Name="Alphora.Dataphor.DAE.SQLCE.dll" Source="..\Deploy\Dataphoria.Web\bin\Alphora.Dataphor.DAE.SQLCE.dll" />
@@ -1271,6 +1248,7 @@
                 <File Id="id__DataphoriaWeb_bin2613107663_Dataphoria_Web_dll2766491561" Name="Dataphoria.Web.dll" Source="..\Deploy\Dataphoria.Web\bin\Dataphoria.Web.dll" />
                 <File Id="id_ataphoriaWeb_bin2613107663_EntityFramework_dll478837260" Name="EntityFramework.dll" Source="..\Deploy\Dataphoria.Web\bin\EntityFramework.dll" />
                 <File Id="id_Web_bin2613107663_EntityFramework_SqlServer_dll2594604973" Name="EntityFramework.SqlServer.dll" Source="..\Deploy\Dataphoria.Web\bin\EntityFramework.SqlServer.dll" />
+                <File Id="id_horiaWeb_bin2613107663_Hl7_Fhir_DSTU2_Core_dll544646330" Name="Hl7.Fhir.DSTU2.Core.dll" Source="..\Deploy\Dataphoria.Web\bin\Hl7.Fhir.DSTU2.Core.dll" />
                 <File Id="id_2613107663_Microsoft_AspNet_Identity_Core_dll87556922" Name="Microsoft.AspNet.Identity.Core.dll" Source="..\Deploy\Dataphoria.Web\bin\Microsoft.AspNet.Identity.Core.dll" />
                 <File Id="id__Microsoft_AspNet_Identity_EntityFramework_dll473995838" Name="Microsoft.AspNet.Identity.EntityFramework.dll" Source="..\Deploy\Dataphoria.Web\bin\Microsoft.AspNet.Identity.EntityFramework.dll" />
                 <File Id="id_in2613107663_Microsoft_AspNet_Identity_Owin_dll3888330126" Name="Microsoft.AspNet.Identity.Owin.dll" Source="..\Deploy\Dataphoria.Web\bin\Microsoft.AspNet.Identity.Owin.dll" />
@@ -1310,17 +1288,25 @@
               </Component>
             </Directory>
             <Directory Id="id_DataphoriaWeb_Content3510533076" Name="Content">
-              <Component Id="id_DataphoriaWeb_Content3510533076Component" Guid="93011ddf-2dfc-42d4-90f4-8e30c6a2e71b" DiskId="1">
+              <Component Id="id_DataphoriaWeb_Content3510533076Component" Guid="2edfc24d-dd6b-43d1-bcac-3ff46a36c5e7" DiskId="1">
+                <File Id="id_aWeb_Content3510533076_bootstrap_responsive_css1747522567" Name="bootstrap-responsive.css" Source="..\Deploy\Dataphoria.Web\Content\bootstrap-responsive.css" />
+                <File Id="id_Content3510533076_bootstrap_responsive_min_css354414397" Name="bootstrap-responsive.min.css" Source="..\Deploy\Dataphoria.Web\Content\bootstrap-responsive.min.css" />
                 <File Id="id__DataphoriaWeb_Content3510533076_bootstrap_css744796881" Name="bootstrap.css" Source="..\Deploy\Dataphoria.Web\Content\bootstrap.css" />
                 <File Id="id_aphoriaWeb_Content3510533076_bootstrap_min_css985872641" Name="bootstrap.min.css" Source="..\Deploy\Dataphoria.Web\Content\bootstrap.min.css" />
                 <File Id="id_id_DataphoriaWeb_Content3510533076_Site_css1538909627" Name="Site.css" Source="..\Deploy\Dataphoria.Web\Content\Site.css" />
               </Component>
+              <Directory Id="id_id_DataphoriaWeb_Content3510533076_images3175091575" Name="images">
+                <Component Id="id_id_DataphoriaWeb_Content3510533076_images3175091575Component" Guid="2bc3bf32-0479-4df8-b585-321713493bd9" DiskId="1">
+                  <File Id="id_images3175091575_glyphicons_halflings_white_png1598954373" Name="glyphicons-halflings-white.png" Source="..\Deploy\Dataphoria.Web\Content\images\glyphicons-halflings-white.png" />
+                  <File Id="id_3076_images3175091575_glyphicons_halflings_png684046920" Name="glyphicons-halflings.png" Source="..\Deploy\Dataphoria.Web\Content\images\glyphicons-halflings.png" />
+                </Component>
+              </Directory>
               <Directory Id="id_id_DataphoriaWeb_Content3510533076_themes4052339036" Name="themes">
-                <Component Id="id_id_DataphoriaWeb_Content3510533076_themes4052339036Component" Guid="fe6b84bf-c468-4961-8f7a-f6cb0da18799" DiskId="1">
+                <Component Id="id_id_DataphoriaWeb_Content3510533076_themes4052339036Component" Guid="9d6ce2ab-1a99-431c-a0f9-251d8721fb2a" DiskId="1">
                   <CreateFolder />
                 </Component>
                 <Directory Id="id_oriaWeb_Content3510533076_themes4052339036_base2115806773" Name="base">
-                  <Component Id="id_oriaWeb_Content3510533076_themes4052339036_base2115806773Component" Guid="326c35ca-4b77-440f-9779-5e90221bd803" DiskId="1">
+                  <Component Id="id_oriaWeb_Content3510533076_themes4052339036_base2115806773Component" Guid="42c9dc27-a7e9-49d1-afea-8bec5959274c" DiskId="1">
                     <File Id="id__themes4052339036_base2115806773_accordion_css101457282" Name="accordion.css" Source="..\Deploy\Dataphoria.Web\Content\themes\base\accordion.css" />
                     <File Id="id_0533076_themes4052339036_base2115806773_all_css1411985388" Name="all.css" Source="..\Deploy\Dataphoria.Web\Content\themes\base\all.css" />
                     <File Id="id_hemes4052339036_base2115806773_autocomplete_css4057696536" Name="autocomplete.css" Source="..\Deploy\Dataphoria.Web\Content\themes\base\autocomplete.css" />
@@ -1343,7 +1329,7 @@
                     <File Id="id_076_themes4052339036_base2115806773_tooltip_css1127485843" Name="tooltip.css" Source="..\Deploy\Dataphoria.Web\Content\themes\base\tooltip.css" />
                   </Component>
                   <Directory Id="id_10533076_themes4052339036_base2115806773_images2362282791" Name="images">
-                    <Component Id="id_10533076_themes4052339036_base2115806773_images2362282791Component" Guid="a0e51543-e879-4dcc-8e61-d5a8f9d4e536" DiskId="1">
+                    <Component Id="id_10533076_themes4052339036_base2115806773_images2362282791Component" Guid="97c03172-34e6-4938-ba1a-9c982486ba23" DiskId="1">
                       <File Id="id_images2362282791_ui_bg_flat_0_aaaaaa_40x100_png2962261547" Name="ui-bg_flat_0_aaaaaa_40x100.png" Source="..\Deploy\Dataphoria.Web\Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
                       <File Id="id_mages2362282791_ui_bg_flat_75_ffffff_40x100_png3225728378" Name="ui-bg_flat_75_ffffff_40x100.png" Source="..\Deploy\Dataphoria.Web\Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
                       <File Id="id_ages2362282791_ui_bg_glass_55_fbf9ee_1x400_png522604210" Name="ui-bg_glass_55_fbf9ee_1x400.png" Source="..\Deploy\Dataphoria.Web\Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
@@ -1363,7 +1349,7 @@
               </Directory>
             </Directory>
             <Directory Id="id_DataphoriaWeb_Images3279349156" Name="Images">
-              <Component Id="id_DataphoriaWeb_Images3279349156Component" Guid="de17270c-4fd4-4715-bc8e-15c6abbfdad7" DiskId="1">
+              <Component Id="id_DataphoriaWeb_Images3279349156Component" Guid="eff619d1-2f6d-4a8e-bcaf-4cb0e312cb66" DiskId="1">
                 <File Id="id_id_DataphoriaWeb_Images3279349156_accent_png27311916" Name="accent.png" Source="..\Deploy\Dataphoria.Web\Images\accent.png" />
                 <File Id="id_id_DataphoriaWeb_Images3279349156_bullet_png2560517555" Name="bullet.png" Source="..\Deploy\Dataphoria.Web\Images\bullet.png" />
                 <File Id="id_d_DataphoriaWeb_Images3279349156_heroAccent_png1409946079" Name="heroAccent.png" Source="..\Deploy\Dataphoria.Web\Images\heroAccent.png" />
@@ -1381,7 +1367,7 @@
               </Component>
             </Directory>
             <Directory Id="id_DataphoriaWeb_Scripts3036647220" Name="Scripts">
-              <Component Id="id_DataphoriaWeb_Scripts3036647220Component" Guid="f3d14d68-d81e-4d56-bed7-8b52ed6192ab" DiskId="1">
+              <Component Id="id_DataphoriaWeb_Scripts3036647220Component" Guid="01d67603-6369-4c98-8c44-aa602b021a60" DiskId="1">
                 <File Id="id_id_DataphoriaWeb_Scripts3036647220_bootstrap_js2994966991" Name="bootstrap.js" Source="..\Deploy\Dataphoria.Web\Scripts\bootstrap.js" />
                 <File Id="id_taphoriaWeb_Scripts3036647220_bootstrap_min_js554384969" Name="bootstrap.min.js" Source="..\Deploy\Dataphoria.Web\Scripts\bootstrap.min.js" />
                 <File Id="id_Scripts3036647220_jquery_1_10_2_intellisense_js3803361212" Name="jquery-1.10.2.intellisense.js" Source="..\Deploy\Dataphoria.Web\Scripts\jquery-1.10.2.intellisense.js" />
@@ -1395,6 +1381,8 @@
                 <File Id="id_riaWeb_Scripts3036647220_jquery_validate_min_js1454009123" Name="jquery.validate.min.js" Source="..\Deploy\Dataphoria.Web\Scripts\jquery.validate.min.js" />
                 <File Id="id_cripts3036647220_jquery_validate_unobtrusive_js2310447742" Name="jquery.validate.unobtrusive.js" Source="..\Deploy\Dataphoria.Web\Scripts\jquery.validate.unobtrusive.js" />
                 <File Id="id_ts3036647220_jquery_validate_unobtrusive_min_js2656819902" Name="jquery.validate.unobtrusive.min.js" Source="..\Deploy\Dataphoria.Web\Scripts\jquery.validate.unobtrusive.min.js" />
+                <File Id="id_iaWeb_Scripts3036647220_knockout_2_2_1_debug_js3550919366" Name="knockout-2.2.1.debug.js" Source="..\Deploy\Dataphoria.Web\Scripts\knockout-2.2.1.debug.js" />
+                <File Id="id_taphoriaWeb_Scripts3036647220_knockout_2_2_1_js3182856965" Name="knockout-2.2.1.js" Source="..\Deploy\Dataphoria.Web\Scripts\knockout-2.2.1.js" />
                 <File Id="id_aphoriaWeb_Scripts3036647220_modernizr_2_6_2_js2826677019" Name="modernizr-2.6.2.js" Source="..\Deploy\Dataphoria.Web\Scripts\modernizr-2.6.2.js" />
                 <File Id="id_id_DataphoriaWeb_Scripts3036647220_respond_js510504305" Name="respond.js" Source="..\Deploy\Dataphoria.Web\Scripts\respond.js" />
                 <File Id="id__DataphoriaWeb_Scripts3036647220_respond_min_js1010443753" Name="respond.min.js" Source="..\Deploy\Dataphoria.Web\Scripts\respond.min.js" />
@@ -1402,17 +1390,17 @@
               </Component>
             </Directory>
             <Directory Id="id_DataphoriaWeb_Views704614627" Name="Views">
-              <Component Id="id_DataphoriaWeb_Views704614627Component" Guid="e906e103-546f-4b3e-b545-415142c6a413" DiskId="1">
+              <Component Id="id_DataphoriaWeb_Views704614627Component" Guid="7e1954cb-e1af-4ad9-80a3-bec5e56e9eaa" DiskId="1">
                 <File Id="id_id_DataphoriaWeb_Views704614627_Web_config2659901940" Name="Web.config" Source="..\Deploy\Dataphoria.Web\Views\Web.config" />
                 <File Id="id__DataphoriaWeb_Views704614627__ViewStart_cshtml1457673592" Name="_ViewStart.cshtml" Source="..\Deploy\Dataphoria.Web\Views\_ViewStart.cshtml" />
               </Component>
               <Directory Id="id_id_DataphoriaWeb_Views704614627_Home913193793" Name="Home">
-                <Component Id="id_id_DataphoriaWeb_Views704614627_Home913193793Component" Guid="c0ec8119-1ed8-4436-bf3a-a12efec20e8e" DiskId="1">
+                <Component Id="id_id_DataphoriaWeb_Views704614627_Home913193793Component" Guid="9ce597b7-3d78-47e0-86a8-225dddc86867" DiskId="1">
                   <File Id="id_iaWeb_Views704614627_Home913193793_Index_cshtml2158898836" Name="Index.cshtml" Source="..\Deploy\Dataphoria.Web\Views\Home\Index.cshtml" />
                 </Component>
               </Directory>
               <Directory Id="id_id_DataphoriaWeb_Views704614627_Shared3203777485" Name="Shared">
-                <Component Id="id_id_DataphoriaWeb_Views704614627_Shared3203777485Component" Guid="b6d5363e-87a2-4a5a-857f-22aa5e29fab6" DiskId="1">
+                <Component Id="id_id_DataphoriaWeb_Views704614627_Shared3203777485Component" Guid="2c748e82-56d7-4138-b303-cc8fa5269e25" DiskId="1">
                   <File Id="id_eb_Views704614627_Shared3203777485_Error_cshtml3389957630" Name="Error.cshtml" Source="..\Deploy\Dataphoria.Web\Views\Shared\Error.cshtml" />
                   <File Id="id__Views704614627_Shared3203777485__Layout_cshtml3194569763" Name="_Layout.cshtml" Source="..\Deploy\Dataphoria.Web\Views\Shared\_Layout.cshtml" />
                 </Component>
