@@ -98,6 +98,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return value;
 		}
 
+		private static Type ResolveInstantiableListType(Type type)
+		{
+			if (type.IsInterface || type.IsAbstract)
+			{
+				if (type.IsGenericType)
+				{
+					return typeof(List<>).MakeGenericType(type.GetGenericArguments()[0]);
+				}
+			}
+
+			return type;
+		}
+
 		public static void SetHostProperty(object instance, PropertyInfo property, object value)
 		{
 			if (value != null && !property.PropertyType.IsAssignableFrom(value.GetType()))
@@ -161,7 +174,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					if (property.CanWrite)
 					{
 						// If the target property supports assignment, we construct a new list of the type of the property, and perform the assignment
-						targetListValue = Activator.CreateInstance(property.PropertyType) as IList;
+						targetListValue = Activator.CreateInstance(ResolveInstantiableListType(property.PropertyType)) as IList;
 						if (targetListValue == null)
 							throw new RuntimeException(RuntimeException.Codes.InternalError, String.Format("Unexpected type for target property: {0}", property.PropertyType.FullName));
 					}
@@ -180,6 +193,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 					if (property.CanWrite)
 						property.SetValue(instance, targetListValue, null);
+				}
+				else
+				{
+					throw new RuntimeException(RuntimeException.Codes.InternalError, String.Format("Cannot assign source value of type {0} to property {1} of type {2}.", value.GetType().Name, property.Name, property.PropertyType.Name));
 				}
 			}
 			else

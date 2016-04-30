@@ -17,39 +17,39 @@ var P := Patient
 		(
 			row
 			{
-				"UseElement" UseElement,
-				//"Use" Use,
+				//"UseElement" UseElement,
+				"official" Use,
 				//Type : CodeableConcept,
-				"SystemElement" SystemElement,
+				//"SystemElement" SystemElement,
 				//System : String,
-				"ValueElement" ValueElement,
+				//"ValueElement" ValueElement,
 				"Value" Value,
-				LPeriod Period,
-				ResourceReference
-				(
-					row
-					{
-						"ReferenceElement" ReferenceElement,
-						"Reference" Reference,
-						"DisplayElement" DisplayElement,
-						"Display" Display,
-						"Url" Url
-					}
-				) Assigner
+				LPeriod Period//,
+//				ResourceReference
+//				(
+//					row
+//					{
+//						"ReferenceElement" ReferenceElement,
+//						"Reference" Reference,
+//						"DisplayElement" DisplayElement,
+//						"Display" Display,
+//						"Url" Url
+//					}
+//				) Assigner
 			}
 		) Identifier,
-		true ActiveElement,
+		//true ActiveElement,
 		true Active,
 		HumanName
 		(
 			row
 			{
-				"Use" UseElement,
-				//"Use" Use,
-				"TextElement" TextElement,
+				//"Use" UseElement,
+				"official" Use,
+				//"TextElement" TextElement,
 				"Text" Text,
 				//FamilyElement : list(FHIRString),
-				//{ "Family1", "Family2" } Family,
+				{ "Family1", "Family2" } Family,
 				//GivenElement : list(FHIRString),
 				//Given : list(String),
 				//PrefixElement : list(FHIRString),
@@ -138,6 +138,8 @@ var P := Patient
 		//Link : list(Patient.LinkComponent)
 	}
 );
+
+select P.Identifier;
 
 /*
 //* Table: Resources
