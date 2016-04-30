@@ -3718,7 +3718,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// constructs a transition constraint as follows:
 		// transition constraint Key<column names>
 			// on insert not exists (<table name> where <column names> = <new.column names>) 
-			// on update (<old.column names> = <new.column names>) or not exists (<table name> where <column names> = <new.column names>)
+			// on update if (<old.column names> = <new.column names>) then true else not exists (<table name> where <column names> = <new.column names>)
 			// tags { DAE.Message = "'The table <table name> already has a row with <column names> ' + <new.column names>.AsString + ' [and...] .'" }
 		public static Schema.TransitionConstraint CompileKeyConstraint(Plan plan, Schema.TableVar tableVar, Schema.Key key)
 		{
@@ -3785,7 +3785,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				);
 				
 			definition.OnUpdateExpression =
-				new BinaryExpression
+				new IfExpression
 				(
 					#if USENAMEDROWVARIABLES
 					BuildRowEqualExpression
@@ -3806,7 +3806,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						isNilable
 					),
 					#endif
-					Instructions.Or,
+					new ValueExpression(true),
 					new UnaryExpression
 					(
 						Instructions.Not, 
@@ -4345,7 +4345,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							if (!saveReferences.Contains(reference))
 							{
 								saveReferences.Add(reference);
-				}
+							}
 						}
 					}
 
@@ -7320,7 +7320,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// Used by all reference types.
 		//
 		// on insert into A ->
-		//		[IsNil(AValues) or] [IsSpecial(AValues) or] exists(B where BKeys = AValues)
+		//		[if [IsNil(AValues) or] [IsSpecial(AValues) or] then true else] exists(B where BKeys = AValues)
 		public static void CompileSourceInsertConstraintNodeForReference(Plan plan, Schema.Reference reference, Schema.TransitionConstraint constraint)
 		{
 			plan.EnterRowContext();
@@ -7344,8 +7344,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 							(reference.SourceKey.Columns[index].DataType is Schema.ScalarType) 
 								&& (((Schema.ScalarType)reference.SourceKey.Columns[index].DataType).Specials.Count > 0);
 					}
-					
-					PlanNode node = 
+
+					PlanNode testNode =
 						AppendNode
 						(
 							plan,
@@ -7355,45 +7355,45 @@ namespace Alphora.Dataphor.DAE.Compiling
 							EmitKeyIsNilNode(APlan, rowType.Columns, isNilable),
 							#endif
 							Instructions.Or,
-							AppendNode
+							#if USENAMEDROWVARIABLES
+							EmitKeyIsSpecialNode(plan, Keywords.New, rowType.Columns, hasSpecials)
+							#else
+							EmitKeyIsSpecialNode(APlan, rowType.Columns, hasSpecials)
+							#endif
+						);
+
+					PlanNode existsNode =
+						EmitUnaryNode
+						(
+							plan, 
+							Instructions.Exists, 
+							EmitRestrictNode
 							(
 								plan,
+								EmitTableVarNode(plan, reference.TargetTable), 
 								#if USENAMEDROWVARIABLES
-								EmitKeyIsSpecialNode(plan, Keywords.New, rowType.Columns, hasSpecials),
-								#else
-								EmitKeyIsSpecialNode(APlan, rowType.Columns, hasSpecials),
-								#endif
-								Instructions.Or,
-								EmitUnaryNode
+								BuildKeyEqualExpression
 								(
-									plan, 
-									Instructions.Exists, 
-									EmitRestrictNode
-									(
-										plan,
-										EmitTableVarNode(plan, reference.TargetTable), 
-										#if USENAMEDROWVARIABLES
-										BuildKeyEqualExpression
-										(
-											plan,
-											String.Empty,
-											Keywords.New,
-											reference.TargetKey.Columns,
-											reference.SourceKey.Columns
-										)
-										#else
-										BuildKeyEqualExpression
-										(
-											APlan,
-											new Schema.RowType(AReference.TargetKey.Columns).Columns, 
-											rowType.Columns
-										)
-										#endif
-									)
+									plan,
+									String.Empty,
+									Keywords.New,
+									reference.TargetKey.Columns,
+									reference.SourceKey.Columns
 								)
+								#else
+								BuildKeyEqualExpression
+								(
+									APlan,
+									new Schema.RowType(AReference.TargetKey.Columns).Columns, 
+									rowType.Columns
+								)
+								#endif
 							)
 						);
 						
+					PlanNode node = 
+						testNode == null ? existsNode : EmitConditionNode(plan, testNode, new ValueNode(plan.DataTypes.SystemBoolean, true), existsNode);
+
 					constraint.OnInsertNode = OptimizeNode(plan, node);
 					constraint.OnInsertViolationMessageNode = CompileTransitionConstraintViolationMessageNode(plan, constraint, Schema.Transition.Insert, null);
 				}
@@ -7412,7 +7412,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// Used by all reference types.
 		//
 		// on update of A ->
-		//		IsNil(NewAValues) or IsSpecial(NewAValues) or (OldAValues = NewAValues) or (exists(B where BKeys = NewAValues))
+		//		if IsNil(NewAValues) or IsSpecial(NewAValues) or (OldAValues = NewAValues) then true else (exists(B where BKeys = NewAValues))
 		public static void CompileSourceUpdateConstraintNodeForReference(Plan plan, Schema.Reference reference, Schema.TransitionConstraint constraint)
 		{
 			plan.EnterRowContext();
@@ -7455,7 +7455,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						PlanNode equalNode = CompileExpression(APlan, BuildKeyEqualExpression(APlan, oldSourceRowType.Columns, newSourceRowType.Columns));
 						#endif
 
-						PlanNode node = 
+						PlanNode testNode = 
 							AppendNode
 							(
 								plan,
@@ -7474,41 +7474,40 @@ namespace Alphora.Dataphor.DAE.Compiling
 									EmitKeyIsSpecialNode(APlan, newSourceRowType.Columns, hasSpecials),
 									#endif
 									Instructions.Or,
-									AppendNode
-									(
-										plan,
-										equalNode,
-										Instructions.Or,
-										EmitUnaryNode
-										(
-											plan, 
-											Instructions.Exists, 
-											EmitRestrictNode
-											(
-												plan, 
-												EmitTableVarNode(plan, reference.TargetTable), 
-												#if USENAMEDROWVARIABLES
-												BuildKeyEqualExpression
-												(
-													plan,
-													String.Empty,
-													Keywords.New,
-													reference.TargetKey.Columns,
-													reference.SourceKey.Columns
-												)
-												#else
-												BuildKeyEqualExpression
-												(
-													APlan,
-													new Schema.RowType(AReference.TargetKey.Columns).Columns, 
-													newSourceRowType.Columns
-												)
-												#endif
-											)
-										)
-									)
+									equalNode
 								)
 							);
+
+						PlanNode existsNode =
+							EmitUnaryNode
+							(
+								plan, 
+								Instructions.Exists, 
+								EmitRestrictNode
+								(
+									plan, 
+									EmitTableVarNode(plan, reference.TargetTable), 
+									#if USENAMEDROWVARIABLES
+									BuildKeyEqualExpression
+									(
+										plan,
+										String.Empty,
+										Keywords.New,
+										reference.TargetKey.Columns,
+										reference.SourceKey.Columns
+									)
+									#else
+									BuildKeyEqualExpression
+									(
+										APlan,
+										new Schema.RowType(AReference.TargetKey.Columns).Columns, 
+										newSourceRowType.Columns
+									)
+									#endif
+								)
+							);
+
+						PlanNode node = testNode == null ? existsNode : EmitConditionNode(plan, testNode, new ValueNode(plan.DataTypes.SystemBoolean, true), existsNode);
 
 						constraint.OnUpdateNode = OptimizeNode(plan, node);
 						constraint.OnUpdateViolationMessageNode = CompileTransitionConstraintViolationMessageNode(plan, constraint, Schema.Transition.Update, null);
@@ -7572,7 +7571,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// Used exclusively by the Require reference type.
 		//		
 		// on update of B ->
-		//		(OldBValues = NewBValues) or (not(exists(A where AKeys = OldBValues)))
+		//		if (OldBValues = NewBValues) then true else (not(exists(A where AKeys = OldBValues)))
 		public static void CompileTargetUpdateConstraintNodeForReference(Plan plan, Schema.Reference reference, Schema.TransitionConstraint constraint)
 		{
 			plan.EnterRowContext();
@@ -7606,11 +7605,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 						#endif
 						
 						PlanNode node = 
-							EmitBinaryNode
+							EmitConditionNode
 							(
 								plan, 
 								equalNode, 
-								Instructions.Or, 
+								new ValueNode(plan.DataTypes.SystemBoolean, true), 
 								EmitUnaryNode
 								(
 									plan, 
@@ -14062,7 +14061,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static PlanNode AppendNode(Plan plan, PlanNode leftNode, string instruction, PlanNode rightNode)
 		{
-			return (leftNode != null) ? EmitBinaryNode(plan, leftNode, instruction, rightNode) : rightNode;
+			return (leftNode != null) ? ((rightNode != null) ? EmitBinaryNode(plan, leftNode, instruction, rightNode) : leftNode) : rightNode;
 		}
 		
 		public static PlanNode EmitBrowseNode(Plan plan, TableNode sourceNode, bool isAccelerator)
