@@ -3693,7 +3693,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static string GetCustomMessageForKey(Plan plan, Schema.TableVar tableVar, Schema.TableVarColumnsBase columns)
 		{
 			StringBuilder message = new StringBuilder();
-			message.AppendFormat("'The table {0} already has a row with ", Schema.Object.Unqualify(tableVar.DisplayName));
+			message.AppendFormat("'The table {0} already has a row with ", MetaData.GetTag(tableVar.MetaData, "Frontend.Singular.Title", "Frontend.Title", Schema.Object.Unqualify(tableVar.DisplayName)));
 			Schema.ScalarType scalarType;
 			Schema.Representation representation;
 			
@@ -3701,7 +3701,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			{
 				if (index > 0)
 					message.Append(" and ");
-				message.AppendFormat("{0} ", columns[index].Name);
+				message.AppendFormat("{0} ", MetaData.GetTag(tableVar.Columns[columns[index].Name].MetaData, "Frontend.Title", columns[index].Name));
 				scalarType = (Schema.ScalarType)columns[index].DataType;
 				representation = scalarType.FindRepresentation(NativeAccessors.AsDisplayString);
 				bool isString = scalarType.NativeType == NativeAccessors.AsDisplayString.NativeType;
@@ -7240,7 +7240,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static string GetCustomMessageForSourceReference(Plan plan, Schema.Reference reference)
 		{
 			StringBuilder message = new StringBuilder();
-			message.AppendFormat("'The table {0} does not have a row with ", Schema.Object.Unqualify(reference.TargetTable.DisplayName));
+			message.AppendFormat("'The table {0} does not have a row with ", MetaData.GetTag(reference.TargetTable.MetaData, "Frontend.Singular.Title", "Frontend.Title", Schema.Object.Unqualify(reference.TargetTable.DisplayName)));
 			Schema.ScalarType scalarType;
 			Schema.Representation representation;
 			
@@ -7248,7 +7248,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			{
 				if (index > 0)
 					message.Append(" and ");
-				message.AppendFormat("{0} ", reference.TargetKey.Columns[index].Name);
+				message.AppendFormat("{0} ", MetaData.GetTag(reference.TargetTable.Columns[reference.TargetKey.Columns[index].Name].MetaData, "Frontend.Title", reference.TargetKey.Columns[index].Name));
 				scalarType = (Schema.ScalarType)reference.TargetKey.Columns[index].DataType;
 				representation = scalarType.FindRepresentation(NativeAccessors.AsDisplayString);
 				bool isString = scalarType.NativeType == NativeAccessors.AsDisplayString.NativeType;
@@ -7266,7 +7266,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static string GetCustomMessageForTargetReference(Plan plan, Schema.Reference reference)
 		{
 			StringBuilder message = new StringBuilder();
-			message.AppendFormat("'The table {0} has rows with ", Schema.Object.Unqualify(reference.SourceTable.DisplayName));
+			message.AppendFormat("'The table {0} has rows with ", MetaData.GetTag(reference.SourceTable.MetaData, "Frontend.Singular.Title", "Frontend.Title", Schema.Object.Unqualify(reference.SourceTable.DisplayName)));
 			Schema.ScalarType scalarType;
 			Schema.Representation representation;
 			
@@ -7274,7 +7274,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			{
 				if (index > 0)
 					message.Append(" and ");
-				message.AppendFormat("{0} ", reference.SourceKey.Columns[index].Name);
+				message.AppendFormat("{0} ", MetaData.GetTag(reference.SourceTable.Columns[reference.SourceKey.Columns[index].Name].MetaData, "Frontend.Title", reference.SourceKey.Columns[index].Name));
 				scalarType = (Schema.ScalarType)reference.SourceKey.Columns[index].DataType;
 				representation = scalarType.FindRepresentation(NativeAccessors.AsDisplayString);
 				bool isString = scalarType.NativeType == NativeAccessors.AsDisplayString.NativeType;

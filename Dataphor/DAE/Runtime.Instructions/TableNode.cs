@@ -2636,7 +2636,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								}
 
 								if (!newRow.HasValue(rowIndex) && !isProposable && (tableVar is Schema.BaseTableVar) && !column.IsNilable)
-									throw new RuntimeException(RuntimeException.Codes.ColumnValueRequired, ErrorSeverity.User, column.Name);
+									throw new RuntimeException(RuntimeException.Codes.ColumnValueRequired, ErrorSeverity.User, MetaData.GetTag(column.MetaData, "Frontend.Title", column.Name));
 							}
 						}
 						return changed;
