@@ -13,6 +13,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using LinqEx = System.Linq.Expressions;
 
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
@@ -101,6 +102,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public PlanNode() : base()
 		{
+			ExecuteDelegate = InternalExecute;
  		}
 
 		// Use a ushort because an enum will be an integer
@@ -620,8 +622,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		#endregion
 
+		#region Expression Emission
+
+		public virtual LinqEx.Expression EmitExpression(Plan plan, LinqEx.ParameterExpression program)
+		{
+			return LinqEx.Expression.Constant(null);
+		}
+
+		public Func<Program, object> EmitExecute(Plan plan)
+		{
+			var program = LinqEx.Expression.Parameter(typeof(Program), "program");
+			var ex = EmitExpression(plan, program);
+			return LinqEx.Expression.Lambda<Func<Program, object>>(ex, program).Compile();
+		}
+
+		public void CompileExecuteDelegate(Plan plan)
+		{
+			ExecuteDelegate = EmitExecute(plan);
+		}
+
+		#endregion
+
 		#region Execution
-		
+
 		public bool IsBreakable
 		{
 			get { return (_characteristics & IsBreakableFlag) == IsBreakableFlag; }
@@ -652,7 +675,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				InternalBeforeExecute(program);
 				if (DeviceSupported)
 					return program.DeviceExecute(_device, this);
-				return InternalExecute(program);
+				return ExecuteDelegate(program);
+				//return InternalExecute(program);
 
 			#if WRAPRUNTIMEEXCEPTIONS
 			}
@@ -720,6 +744,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
         public abstract object InternalExecute(Program program);
+
+		private Func<Program, object> ExecuteDelegate;
 
 		#endregion
         

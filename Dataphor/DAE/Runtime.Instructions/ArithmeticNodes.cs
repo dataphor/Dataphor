@@ -7,9 +7,10 @@
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using System; 
+	using System;
 	using System.Reflection;
 	using System.Reflection.Emit;
+	using LinqEx = System.Linq.Expressions;
 
 	using Alphora.Dataphor.DAE;
 	using Alphora.Dataphor.DAE.Server;
@@ -21,85 +22,105 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Device.Catalog;
 	using Schema = Alphora.Dataphor.DAE.Schema;
+	using Compiling;
+	using System.Collections.Generic;
 
-	#if UseUnsignedIntegers	
+#if UseUnsignedIntegers
 	/// <remarks> operator iNegate(sbyte) : sbyte </remarks>
     public class SByteNegateNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument == null)
 				return null;
 			else
-			#endif
+#endif
 				return (sbyte)-(sbyte)AArgument;
 			
 		}
     }
-    #endif
-    
+#endif
+
 	/// <remarks> operator iNegate(short) : short </remarks>
-    public class ShortNegateNode : UnaryInstructionNode
+	public class ShortNegateNode : UnaryInstructionNode
     {
 		public ShortNegateNode() : base()
 		{
 		}
 
-/*
-		protected override void EmitInstructionIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath, LocalBuilder AArguments)
+		/*
+				protected override void EmitInstructionIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath, LocalBuilder AArguments)
+				{
+					Label LNil = AGenerator.DefineLabel();
+					Label LNotNil = AGenerator.DefineLabel();
+					Label LCreateResult = AGenerator.DefineLabel();
+
+					LocalBuilder LThis = EmitThis(APlan, AGenerator, AExecutePath);
+					LocalBuilder LValue = AGenerator.DeclareLocal(typeof(DataValue));
+
+					AGenerator.Emit(OpCodes.Ldloc, LThis);
+					AGenerator.Emit(OpCodes.Ldfld, typeof(PlanNode).GetField("FDataType", BindingFlags.Instance | BindingFlags.NonPublic));
+
+					AGenerator.Emit(OpCodes.Ldloc, AArguments);
+					AGenerator.Emit(OpCodes.Ldc_I4_0);
+					AGenerator.Emit(OpCodes.Ldelem_Ref, typeof(DataVar));
+					AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
+					AGenerator.Emit(OpCodes.Stloc, LValue);
+
+					AGenerator.Emit(OpCodes.Ldloc, LValue);
+					AGenerator.Emit(OpCodes.Brfalse, LNil);
+
+					AGenerator.Emit(OpCodes.Ldloc, LValue);
+					AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("IsNil").GetGetMethod());
+					AGenerator.Emit(OpCodes.Brfalse, LNil);
+
+					AGenerator.Emit(OpCodes.Br, LNotNil);
+
+					AGenerator.MarkLabel(LNil);
+
+					AGenerator.Emit(OpCodes.Ldnull);
+					AGenerator.Emit(OpCodes.Br, LCreateResult);
+
+					AGenerator.MarkLabel(LNotNil);
+
+					AGenerator.Emit(OpCodes.Ldarg_1);
+					AGenerator.Emit(OpCodes.Ldloc, LThis);
+					AGenerator.Emit(OpCodes.Ldfld, typeof(PlanNode).GetField("FDataType", BindingFlags.Instance | BindingFlags.NonPublic));
+					AGenerator.Emit(OpCodes.Castclass, typeof(Schema.ScalarType));
+
+					AGenerator.Emit(OpCodes.Ldloc, LValue);
+					AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("AsInt16").GetGetMethod());
+
+					AGenerator.Emit(OpCodes.Neg);
+					AGenerator.Emit(OpCodes.Conv_I2); // According to the docs this isnt necessary?
+					AGenerator.Emit(OpCodes.Box, typeof(Int16));
+					AGenerator.Emit(OpCodes.Newobj, typeof(IScalar).GetConstructor(new Type[] { typeof(ServerProcess), typeof(Schema.ScalarType), typeof(object) }));
+
+					AGenerator.MarkLabel(LCreateResult);
+
+					AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(Schema.IDataType), typeof(DataValue) }));
+				}
+		*/
+
+		public override LinqEx.Expression EmitExpression(Plan plan, System.Linq.Expressions.ParameterExpression program)
 		{
-			Label LNil = AGenerator.DefineLabel();
-			Label LNotNil = AGenerator.DefineLabel();
-			Label LCreateResult = AGenerator.DefineLabel();
-			
-			LocalBuilder LThis = EmitThis(APlan, AGenerator, AExecutePath);
-			LocalBuilder LValue = AGenerator.DeclareLocal(typeof(DataValue));
-			
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(PlanNode).GetField("FDataType", BindingFlags.Instance | BindingFlags.NonPublic));
-			
-			AGenerator.Emit(OpCodes.Ldloc, AArguments);
-			AGenerator.Emit(OpCodes.Ldc_I4_0);
-			AGenerator.Emit(OpCodes.Ldelem_Ref, typeof(DataVar));
-			AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-			AGenerator.Emit(OpCodes.Stloc, LValue);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LValue);
-			AGenerator.Emit(OpCodes.Brfalse, LNil);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LValue);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("IsNil").GetGetMethod());
-			AGenerator.Emit(OpCodes.Brfalse, LNil);
-			
-			AGenerator.Emit(OpCodes.Br, LNotNil);
-			
-			AGenerator.MarkLabel(LNil);
-			
-			AGenerator.Emit(OpCodes.Ldnull);
-			AGenerator.Emit(OpCodes.Br, LCreateResult);
-			
-			AGenerator.MarkLabel(LNotNil);
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(PlanNode).GetField("FDataType", BindingFlags.Instance | BindingFlags.NonPublic));
-			AGenerator.Emit(OpCodes.Castclass, typeof(Schema.ScalarType));
-			
-			AGenerator.Emit(OpCodes.Ldloc, LValue);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("AsInt16").GetGetMethod());
-			
-			AGenerator.Emit(OpCodes.Neg);
-			AGenerator.Emit(OpCodes.Conv_I2); // According to the docs this isnt necessary?
-			AGenerator.Emit(OpCodes.Box, typeof(Int16));
-			AGenerator.Emit(OpCodes.Newobj, typeof(IScalar).GetConstructor(new Type[] { typeof(ServerProcess), typeof(Schema.ScalarType), typeof(object) }));
-			
-			AGenerator.MarkLabel(LCreateResult);
-			
-			AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(Schema.IDataType), typeof(DataValue) }));
+			var argumentExpression = Nodes[0].EmitExpression(plan, program);
+			var argument = LinqEx.Expression.Parameter(typeof(object), "argument");
+			var argumentInvocation = LinqEx.Expression.Invoke(argumentExpression);
+			var result = LinqEx.Expression.Parameter(typeof(object), "result");
+			var ifExpression = 
+				LinqEx.Expression.IfThenElse
+				(
+					LinqEx.Expression.Equal(argument, LinqEx.Expression.Constant(null)), 
+					LinqEx.Expression.Assign(result, LinqEx.Expression.Constant(null)), 
+					LinqEx.Expression.Convert(LinqEx.Expression.Negate(LinqEx.Expression.Convert(argument, typeof(short))), typeof(short))
+				);
+			var block = LinqEx.Expression.Block(typeof(object), new List<LinqEx.ParameterExpression>() { argument, result }, LinqEx.Expression.Assign(argument, argumentInvocation), ifExpression); 
+			return block;
+			//return base.EmitExpression(plan, program);
 		}
-*/
-		
+
 		public override object InternalExecute(Program program, object argument)
 		{
 			#if NILPROPOGATION
