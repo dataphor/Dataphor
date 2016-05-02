@@ -732,7 +732,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 		}
 
-		private static PlanNode OptimizeNode(Plan plan, PlanNode planNode)
+		public static PlanNode OptimizeNode(Plan plan, PlanNode planNode)
 		{
 			try
 			{
