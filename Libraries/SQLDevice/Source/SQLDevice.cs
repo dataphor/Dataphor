@@ -1779,15 +1779,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 									plan.Plan.Symbols.Push(localDevicePlan.Plan.Symbols.Peek(index));
 								try
 								{
-									// TODO: This should be using a Compile call directly instead of CompileExpression and OptimizeNode...
 									PlanNode node = Compiler.CompileExpression(plan.Plan, new D4.Parser(true).ParseExpression(instructionNode.EmitStatementAsString()));
-									node = Compiler.OptimizeNode(plan.Plan, node);
-									#if USEVISIT
-									//var visitor = new PlanNodeVisitor();
-									//node = visitor.Visit(plan.Plan, node);
-									#else
-									//node.BindingTraversal(plan.Plan, null); // Don't use the compiler bind here because we already know a determine device call on the top level node will fail
-									#endif
+									// Perform binding on the children, but not on the root
+									// A binding on the root would result in another attempt to support this expression, but we already know it's not supported, and
+									// the device associative code would kick in again, resulting in stack overflow
+									foreach (var childNode in node.Nodes)
+										Compiler.OptimizeNode(plan.Plan, childNode);
 									planNode.CouldSupport = true; // Set this to indicate that support could be provided if it would be beneficial to do so
 									return FromScalar(localDevicePlan, node);
 								}
