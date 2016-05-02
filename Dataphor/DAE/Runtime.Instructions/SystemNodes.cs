@@ -1252,8 +1252,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 					IDataValue result = plan.Evaluate(paramsValue);
 					UpdateRowFromParams(outParams, paramsValue);
-					IScalar scalar = result as IScalar;
-					return scalar == null ? result : scalar.AsNative;
+					return result.IsNil ? null : (result is IScalar ? result.AsNative : result);
 				}
 				finally
 				{
