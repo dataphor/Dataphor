@@ -1252,7 +1252,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 					IDataValue result = plan.Evaluate(paramsValue);
 					UpdateRowFromParams(outParams, paramsValue);
-					return result.IsNil ? null : (result is IScalar ? result.AsNative : result);
+					return (result == null || result.IsNil) ? null : (result is IScalar ? result.AsNative : result);
 				}
 				finally
 				{
@@ -1340,7 +1340,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IDataValue dataValue = program.RemoteConnect(serverLink).Evaluate(expression, paramsValue);
 			SystemEvaluateNode.UpdateRowFromParams(outRow, paramsValue);
 			
-			return dataValue.IsNil ? null : (dataValue is IScalar ? dataValue.AsNative : dataValue);
+			return (dataValue == null || dataValue.IsNil) ? null : (dataValue is IScalar ? dataValue.AsNative : dataValue);
 		}
 	}
 	
