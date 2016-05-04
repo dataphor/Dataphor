@@ -232,19 +232,16 @@ if not exists (select * from sysdatabases where name = '{0}')
                 var deviceSession = (SQLDeviceSession) Connect(process, process.ServerSession.SessionInfo);
                 try
                 {
-                    SQLCursor cursor = deviceSession.Connection.Open("exec xp_msver");
+                    SQLCursor cursor = deviceSession.Connection.Open("select serverproperty('productversion')");
                     try
                     {
                         string version = String.Empty;
-                        while (cursor.Next())
-                            if (Convert.ToString(cursor[1]) == "ProductVersion")
-                            {
-                                version = Convert.ToString(cursor[3]);
-                                break;
-                            }
-
-                        if (version.Length > 0)
-                            _majorVersion = Convert.ToInt32(version.Substring(0, version.IndexOf('.')));
+                        if (cursor.Next())
+                        {
+                            version = Convert.ToString(cursor[0]);
+                            if (version.Length > 0)
+                                _majorVersion = Convert.ToInt32(version.Substring(0, version.IndexOf('.')));
+                        }
                     }
                     finally
                     {
