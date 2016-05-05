@@ -2,219 +2,207 @@ var LPeriod := Period
 (
 	row
 	{
-		"2016-04-01" StartElement,
 		"2016-04-01" Start,
-		"2016-05-01" EndElement,
 		"2016-05-01" End
 	}
 );
-
-var P := Patient
+var LCodeableConcept := CodeableConcept
 (
 	row
 	{
-		Identifier
-		(
-			row
-			{
-				//"UseElement" UseElement,
-				"official" Use,
-				//Type : CodeableConcept,
-				//"SystemElement" SystemElement,
-				//System : String,
-				//"ValueElement" ValueElement,
-				"Value" Value,
-				LPeriod Period//,
-//				ResourceReference
-//				(
-//					row
-//					{
-//						"ReferenceElement" ReferenceElement,
-//						"Reference" Reference,
-//						"DisplayElement" DisplayElement,
-//						"Display" Display,
-//						"Url" Url
-//					}
-//				) Assigner
-			}
-		) Identifier,
-		//true ActiveElement,
-		true Active,
-		HumanName
-		(
-			row
-			{
-				//"Use" UseElement,
-				"official" Use,
-				//"TextElement" TextElement,
-				"Text" Text,
-				//FamilyElement : list(FHIRString),
-				{ "Family1", "Family2" } Family,
-				//GivenElement : list(FHIRString),
-				//Given : list(String),
-				//PrefixElement : list(FHIRString),
-				//Prefix : list(String),
-				//SuffixElement : list(FHIRString),
-				//Suffix : list(String),
-				LPeriod Period
-			}
-		) Name,
-		ContactPoint
-		(
-			row
-			{
-				"SystemElement" SystemElement,
-				//"System" System,
-				"ValueElement" ValueElement,
-				"Value" Value,
-				"UseElement" UseElement,
-				//"Use" Use,
-				1 RankElement,
-				1 Rank,
-				LPeriod Period
-			}
-		) Telecom,
-		"GenderElement" GenderElement,
-		"Male" Gender,
-		"1977-04-13" BirthDateElement,
-		"1977-04-13" BirthDate,
-		false Deceased,
-		Address
-		(
-			row
-			{
-				"UseElement" UseElement,
-				//Use : String,
-				"TypeElement" TypeElement,
-				//Type : String,
-				"TextElement" TextElement,
-				"Text" Text,
-				//LineElement : list(FHIRString),
-				//Line : list(String),
-				"CityElement" CityElement,
-				"City" City,
-				"DistrictElement" DistrictElement,
-				"District" District,
-				"StateElement" StateElement,
-				"State" State,
-				"PostalCodeElement" PostalCodeElement,
-				"PostalCode" PostalCode,
-				"CountryElement" CountryElement,
-				"Country" Country,
-				LPeriod Period
-			}
-		) Address,
-		CodeableConcept
-		(
-			row
-			{
-				Coding
-				(
-					row
-					{
-						"SystemElement" SystemElement,
-						//System : String,
-						"VersionElement" VersionElement,
-						"Version" Version,
-						"CodeElement" CodeElement,
-						"Code" Code,
-						"DisplayElement" DisplayElement,
-						"Display" Display,
-						true UserSelectedElement,
-						true UserSelected
-					}
-				) Coding,
-				"TextElement" TextElement,
-				"Text" Text
-			}
-		) MaritalStatus,
-		false MultipleBirth
-		//Photo : list(Attachment),
-		//Contact : list(Patient.ContactComponent),
-		//Animal : Patient.AnimalComponent,
-		//Communication : list(Patient.CommunicationComponent),
-		//CareProvider : list(ResourceReference),
-		//ManagingOrganization : ResourceReference,
-		//Link : list(Patient.LinkComponent)
+		{
+			Coding
+			(
+				row
+				{
+					"www.dataphorfhir.com" System,
+					"Version" Version,
+					"Code" Code,
+					"Display" Display,
+					true UserSelected
+				}
+			) 
+		} Coding,
+		"Text" Text
+	}
+);
+var LResourceReference := ResourceReference
+(
+	row
+	{
+		"Reference" Reference,
+		"Display" Display
 	}
 );
 
-select P.Identifier;
+var LNamePrefix := { "", "", "Father", "Trapper", "", "", "", "", "", "" };
+var LNameGiven := { "Hawkeye", "Max", "Francis", "John", "Henry", "Frank", "Radar", "B.J.", "Sherman", "Charles" };
+var LNameFamily := { "Pierce", "Klinger", "Mulcahy", "McIntyre", "Blake", "Burns", "O'Reilly", "Hunnicutt", "Potter", "Winchester" };
+var LNameSuffix := { "", "", "", "", "", "", "", "", "", "III" };
+var LAddressLine := { "123 Main", "186 State", "198 Main", "186 Pleasant", "156 State Rd", "1987 Test Dr", "854 Data Ave", "348 Korea St", "9851 War Cir", "6185 Idea Rd" };
+var LAddressCity := { "Crabapple Cove", "Toledo", "Philadelphia", "Boston", "Bloomington", "Fort Wayne", "Ottumwa", "Mill Valley", "Hannibal", "Boston" };
+var LAddressDistrict := { "", "", "", "", "", "", "", "", "", "" };
+var LAddressState := { "ME", "OH", "PA", "MA", "IL", "IN", "IA", "CA", "MO", "MA" };
+var LAddressPostalCode := { "11111", "22222", "33333", "44444", "55555", "66666", "77777", "88888", "99999", "00000" };
+var LAddressCountry := { "USA", "USA", "USA", "USA", "USA", "USA", "USA", "USA", "USA", "USA" };
+var LBirthdate := { "1979-04-13", "1980-05-21", "1960-01-25", "1991-09-12", "1981-10-05", "1971-08-30", "1977-01-13", "1988-11-15", "1988-08-20", "1979-04-29" };
+var LPhone := { "123-456-7890", "465-846-8461", "015-831-4864", "000-418-6548", "111-645-9841", "222-165-9485", "333-168-3151", "444-195-4985", "555-191-9841", "666-196-1454" };
+var LEmail := { "pierce@mash.com", "klinger@mash.com", "mulcahy@mash.com", "mcintyre@mash.com", "blake@mash.com", "burns@mash.com", "oreilly@mash.com", "hunnicutt@mash.com", "potter@mash.com", "winchester@mash.com" };
 
-/*
-//* Table: Resources
-insert table
-{
-	row
+for var i := 0 to 9 do
+begin
+	var LHumanName := HumanName
+	(
+		row
+		{
+			"official" Use,
+			"Text" Text,
+			{ LNameFamily[i] } Family,
+			{ LNameGiven[i] } Given,
+			{ LNamePrefix[i] } Prefix,
+			{ LNameSuffix[i] } Suffix,
+			LPeriod Period
+		}
+	);
+	var LContactPoint := ContactPoint
+	(
+		row
+		{
+			"phone" System,
+			LPhone[i] Value,
+			"home" Use,
+			1 Rank,
+			LPeriod Period
+		}
+	);
+	var LAddress := Address
+	(
+		row
+		{
+			"home" Use,
+			"physical" Type,
+			"Address Text" Text,
+			{ LAddressLine[i] } Line,
+			LAddressCity[i] City,
+			LAddressDistrict[i] District,
+			LAddressState[i] State,
+			LAddressPostalCode[i] PostalCode,
+			LAddressCountry[i] Country,
+			LPeriod Period
+		}
+	);
+	
+	var P := Patient
+	(
+		row
+		{
+			{
+				Identifier
+				(
+					row
+					{
+						"official" Use,
+						LCodeableConcept Type,
+						"namespace" System,
+						(i + 1).ToString() Value,
+						LPeriod Period,
+						LResourceReference Assigner
+					}
+				) 
+			} Identifier,
+			true Active,
+			{ LHumanName } Name,
+			{ LContactPoint } Telecom,
+			"Male" Gender,
+			LBirthdate[i] BirthDate,
+			FHIRBoolean(row { false Value }) Deceased,
+			{ LAddress } Address,
+			LCodeableConcept MaritalStatus,
+			FHIRBoolean(row { false Value }) MultipleBirth,
+			//Photo : list(Attachment),
+			{
+				Patient.ContactComponent
+				(
+					row
+					{
+						{ LCodeableConcept } Relationship,
+						LHumanName Name,
+						{ LContactPoint } Telecom,
+						LAddress Address,
+						"Male" Gender,
+						LResourceReference Organization,
+						LPeriod Period
+					}
+				)
+			} Contact,
+			//Animal : Patient.AnimalComponent,
+			{
+				Patient.CommunicationComponent
+				(
+					row
+					{
+						LCodeableConcept Language,
+						true Preferred
+					}
+				)
+			} Communication,
+			{
+				LResourceReference
+			} CareProvider,
+			LResourceReference ManagingOrganization,
+			{
+				Patient.LinkComponent
+				(
+					row
+					{
+						LResourceReference Other,
+						"seealso" Type
+					}
+				)
+			} Link
+		}
+	);
+	
+	//* Table: Resources
+	insert table
 	{
-		'1' Id,
-		'Patient' Type,
-		P Content,
-		'1' Number,
-		Date().AsString Date,
-		'String' String,
-		'Token' Token,
-		'Reference' Reference,
-		'Composite' Composite,
-		'1' Quantity,
-		'www.blah.com' Uri
-	},
-	row
+		row
+		{
+			(i + 1).ToString() Id,
+			'Patient' Type,
+			P Content,
+			'1' Number,
+			Date().AsString Date,
+			'String' String,
+			'Token' Token,
+			'Reference' Reference,
+			'Composite' Composite,
+			'1' Quantity,
+			'www.dataphorfhir.com' Uri
+		}
+	} into Resources;
+	
+	//* Table: Patients
+	insert table
 	{
-		'2' Id,
-		'Patient' Type,
-		P Content,
-		'2' Number,
-		Date().AsString Date,
-		'String2' String,
-		'Token2' Token,
-		'Reference2' Reference,
-		'Composite2' Composite,
-		'2' Quantity,
-		'www.blah2.com' Uri
-	}
-} into Resources;
-
-//* Table: Patients
-insert table
-{
-	row
-	{
-		'1' ResourceId,
-		'true' Active,
-		'123 Address' Address,
-		'SomeCity' AddressCity,
-		'USA' AddressCountry,
-		'99999' AddressPostalCode,
-		'UT' AddressState,
-		Date(1977, 4, 13).AsString Birthdate,
-		'false' Deceased,
-		'kninsa@gmail.com' Email,
-		'Rose' Family,
-		'M' Gender,
-		'Bobby' Given,
-		'en' Language,
-		'Bobby Rose' Name,
-		'801-347-0002' Phone
-	},
-	row
-	{
-		'2' ResourceId,
-		'true' Active,
-		'123 Address' Address,
-		'SomeCity' AddressCity,
-		'USA' AddressCountry,
-		'99999' AddressPostalCode,
-		'UT' AddressState,
-		Date(1971, 3, 30).AsString Birthdate,
-		'false' Deceased,
-		'shemrose@gmail.com' Email,
-		'Rose' Family,
-		'F' Gender,
-		'Sherri' Given,
-		'en' Language,
-		'Sherri Rose' Name,
-		'801-857-9286' Phone
-	}
-} into Patients
-*/
+		row
+		{
+			(i + 1).ToString() ResourceId,
+			'true' Active,
+			LAddressLine[i] Address,
+			LAddressCity[i] AddressCity,
+			LAddressCountry[i] AddressCountry,
+			LAddressPostalCode[i] AddressPostalCode,
+			LAddressState[i] AddressState,
+			LBirthdate[i] Birthdate,
+			'false' Deceased,
+			LEmail[i] Email,
+			LNameFamily[i] Family,
+			'M' Gender,
+			LNameGiven[i] Given,
+			'en' Language,
+			LNameGiven[i] + ' ' + LNameFamily[i] Name,
+			LPhone[i] Phone
+		}
+	} into Patients;
+end;

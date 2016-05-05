@@ -1,9 +1,12 @@
 ﻿using Alphora.Dataphor.DAE.NativeCLI;
+using Alphora.Dataphor.Dataphoria.Web.Extensions;
+using Alphora.Dataphor.Dataphoria.Web.Models.DataFhir;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Cors;
@@ -89,7 +92,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 		}
 
 		[HttpGet, Route("{type}")]
-		public string Search(string type)
+		public FhirResponse Search(string type)
 		{
 			var searchParameters = Request.NativeListedParameters();
 			var whereClause = ProcessorInstance.Instance.BuildWhereClause(searchParameters);
@@ -97,9 +100,19 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 			switch (type)
 			{
 				case "patient":
-					var rows = ProcessorInstance.Instance.Evaluate(string.Format("select FHIR.Server.FHIRServerPatientView {0}", whereClause), searchParameters);
-					var result = JsonConvert.SerializeObject(((NativeTableValue)((NativeResult)rows).Value).Rows);
-					return result;
+					var d4Result = ProcessorInstance.Instance.Evaluate(string.Format("select FHIR.Server.FHIRServerPatientView {0}", whereClause), searchParameters);
+					var rows = ((NativeTableValue)((NativeResult)d4Result).Value).Rows;
+					// TODO: [2] is the column that returns the JSON manifestation of the content.  But that's a hack -- need to find a better way to identify that column
+					var patients = rows.Select(r => r[2]);
+
+					var bundle = new Bundle();
+					foreach (var patient in patients)
+					{
+						var convertedPatient = (Patient)patient;
+						bundle.AddResourceEntry(convertedPatient, new Uri("patient/" + convertedPatient.Id, UriKind.Relative).ToString());
+					}
+
+					return Respond.WithBundle(bundle);
 				default:
 					return null;
 					

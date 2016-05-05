@@ -10,12 +10,15 @@ create device PGSQLFHIRDevice
 	class "PostgreSQLDevice"
 	attributes
 	{
-		"Server" = "dataphorfhir.c4xrrem9krur.us-west-2.rds.amazonaws.com",
+		//"Server" = "dataphorfhir.c4xrrem9krur.us-west-2.rds.amazonaws.com",
+		"Server" = "localhost",
 		"Database" = "DataphorFHIR"
 	};
 
-CreateDeviceUser("System", "PGSQLFHIRDevice", "administrator", "DCGeverm0re");
-CreateDeviceUser("Admin", "PGSQLFHIRDevice", "administrator", "DCGeverm0re");
+//CreateDeviceUser("System", "PGSQLFHIRDevice", "administrator", "DCGeverm0re");
+//CreateDeviceUser("Admin", "PGSQLFHIRDevice", "administrator", "DCGeverm0re");
+CreateDeviceUser("System", "PGSQLFHIRDevice", "fhir", "fhir");
+CreateDeviceUser("Admin", "PGSQLFHIRDevice", "fhir", "fhir");
 EnsureDeviceStarted("PGSQLFHIRDevice");
 alter device PGSQLFHIRDevice
 {
@@ -26,4 +29,4 @@ SetDefaultDeviceName("PGSQLFHIRDevice");
 ExecuteScript("FHIR.Server", "FHIR.DataTypes");
 ExecuteScript("FHIR.Server", "FHIR.Tables");
 ExecuteScript("FHIR.Server", "FHIR.Operators");
-//ExecuteScript("FHIR.Server", "FHIR.TestData");
+ExecuteScript("FHIR.Server", "FHIR.TestData");
