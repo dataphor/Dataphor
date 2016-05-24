@@ -417,8 +417,8 @@ namespace Alphora.Dataphor.DAE.Runtime
 					new DebugLocator
 					(
 						((RuntimeStackWindow)_stack.CurrentStackWindow).Locator, 
-						planNode == null ? -1 : (afterNode ? planNode.EndLine : planNode.Line), 
-						planNode == null ? -1 : ((afterNode && planNode.Line != planNode.EndLine) ? planNode.EndLinePos : planNode.LinePos)
+						planNode == null ? -1 : (afterNode && planNode.EndLine >= 0 ? planNode.EndLine : planNode.Line), 
+						planNode == null ? -1 : ((afterNode && planNode.Line != planNode.EndLine && planNode.EndLinePos >= 0) ? planNode.EndLinePos : planNode.LinePos)
 					);
 			}
 			catch (Exception E)
