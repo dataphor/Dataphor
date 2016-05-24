@@ -33,13 +33,13 @@ namespace Alphora.Dataphor.DAE.Compiling
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	// TODO: Scan isolation levels...
-    // TODO: table nesting operators
+	// TODO: table nesting operators
 	// TODO: Expression Transformation Optimization Engine
 	// TODO: Concurrency, Security, and Transaction Management
-    // TODO: Allow aggregate operator invocation on one-column tables, defaulting to that column for the aggregation
+	// TODO: Allow aggregate operator invocation on one-column tables, defaulting to that column for the aggregation
 	// TODO: Implement specialization and generalization by constraint
 	// TODO: Reflection and full support for generic parameters
-    // TODO: Preprocessor Directives (Conditional Compilation)
+	// TODO: Preprocessor Directives (Conditional Compilation)
 	// TODO: aliases... { named row or table headers }
 	// TODO: in operator resolved incorrectly (value in { 'YES', 'NO' } )
 	// TODO: Fussy / Rogue / Breakpoint nodes (UniqueRequired, UniqueDestroyed)
@@ -57,7 +57,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 	// TODO: Create Event Handler statement
 	// TODO: Create Event statement
 
-    /*
+	/*
 		Decomposition ->
 			Resolution of all operators and verification of syntactic correctness
 			
@@ -85,9 +85,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 			update v set {c.x := c.x + 5};
 			updatenode
 				table : DataValue(Node, APlan)
-    */
-    
-    /*
+	*/
+	
+	/*
 		Armstrongs Axioms ->
 		
 			A -> A
@@ -267,7 +267,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			DetermineDevice
 			DetermineCursorBehavior
 			DetermineModifyBinding
-	*/    
+	*/	
 	[Flags]
 	public enum NameBindingFlags { Local = 1, Global = 2, Default = 3 }
 	
@@ -620,13 +620,13 @@ namespace Alphora.Dataphor.DAE.Compiling
 			// Prepare the stack for compilation with the given context
 			if (paramsValue != null)
 				foreach (DataParam param in paramsValue)
-                {
+				{
 					plan.Symbols.Push(new Symbol(param.Name, param.DataType));
-                    Schema.Catalog dependencies = new Schema.Catalog();
-                    param.DataType.IncludeDependencies(plan.CatalogDeviceSession, plan.Catalog, dependencies, EmitMode.ForCopy);
-                    foreach (var dependency in dependencies)
-                        plan.AttachDependency(dependency);
-                }
+					Schema.Catalog dependencies = new Schema.Catalog();
+					param.DataType.IncludeDependencies(plan.CatalogDeviceSession, plan.Catalog, dependencies, EmitMode.ForCopy);
+					foreach (var dependency in dependencies)
+						plan.AttachDependency(dependency);
+				}
 			
 			PlanNode node = null;
 			plan.PushSourceContext(sourceContext);
@@ -787,22 +787,22 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		//private static PlanNode OptimizeNode(Plan plan, PlanNode planNode)
 		//{
-		//    try
-		//    {
-		//        if (plan.ShouldEmitIL)
-		//            planNode.EmitIL(plan, false);
+		//	try
+		//	{
+		//		if (plan.ShouldEmitIL)
+		//			planNode.EmitIL(plan, false);
 
-		//        if (!plan.IsEngine)
-		//        {
-		//            planNode = BindingTraversal(plan, planNode, new DetermineAccessPathVisitor());
-		//        }
-		//    }
-		//    catch (Exception exception)
-		//    {
-		//        plan.Messages.Add(exception);
-		//    }
+		//		if (!plan.IsEngine)
+		//		{
+		//			planNode = BindingTraversal(plan, planNode, new DetermineAccessPathVisitor());
+		//		}
+		//	}
+		//	catch (Exception exception)
+		//	{
+		//		plan.Messages.Add(exception);
+		//	}
 
-		//    return planNode;
+		//	return planNode;
 		//}
 		
 		//private static PlanNode Bind(Plan plan, PlanNode planNode)
@@ -829,11 +829,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 		//private static PlanNode OptimizeNode(Plan plan, PlanNode planNode)
 		//{
-		//    planNode = ChunkNode(plan, planNode);
-		//    //planNode = OptimizeNode(plan, planNode);
-		//    // At this point the binding step is superfluous, the optimize pass should take care of it.
-		//    //planNode = BindNode(plan, planNode);
-		//    return planNode;
+		//	planNode = ChunkNode(plan, planNode);
+		//	//planNode = OptimizeNode(plan, planNode);
+		//	// At this point the binding step is superfluous, the optimize pass should take care of it.
+		//	//planNode = BindNode(plan, planNode);
+		//	return planNode;
 		//}
 
 		#if USESTATEMENTENTRIES		
@@ -1033,7 +1033,13 @@ namespace Alphora.Dataphor.DAE.Compiling
 			{
 				try
 				{
-					return InternalCompileStatement(plan, statement);
+					var result = InternalCompileStatement(plan, statement);
+					if (result.LineInfo == null)
+					{
+						result.Line = statement.Line;
+						result.LinePos = statement.LinePos;
+					}
+					return result;
 				}
 				catch (Exception exception)
 				{
@@ -2336,7 +2342,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					}
 				}
 				
-				return node;                                     
+				return node;									 
 			}
 		}
 		
@@ -2871,10 +2877,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (affectedKey != null)
 				{
 					//begin
-					//    var LV := T where <condition> { <old column list>, <new column list> };
-					//    delete with { Unchecked = "True" } T where <condition>;
-					//    insert with { InsertedUpdate = "True", UpdateColumnNames = "<column names semicolon list>" }
-					//        LV into T; // rename new add { <old column list> };
+					//	var LV := T where <condition> { <old column list>, <new column list> };
+					//	delete with { Unchecked = "True" } T where <condition>;
+					//	insert with { InsertedUpdate = "True", UpdateColumnNames = "<column names semicolon list>" }
+					//		LV into T; // rename new add { <old column list> };
 					//end;
 					
 					DelimitedBlock block = new DelimitedBlock();
@@ -9510,11 +9516,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		//public static void AcquireDependentLocks(Plan APlan, Schema.Object AObject, LockMode AMode)
 		//{
-		//    #if USECATALOGLOCKS
-		//    APlan.AcquireCatalogLock(AObject, AMode);
-		//    for (int LIndex = 0; LIndex < AObject.Dependents.Count; LIndex++)
-		//        AcquireDependentLocks(APlan, AObject.Dependents.GetObjectForIndex(APlan.Catalog, LIndex), AMode);
-		//    #endif
+		//	#if USECATALOGLOCKS
+		//	APlan.AcquireCatalogLock(AObject, AMode);
+		//	for (int LIndex = 0; LIndex < AObject.Dependents.Count; LIndex++)
+		//		AcquireDependentLocks(APlan, AObject.Dependents.GetObjectForIndex(APlan.Catalog, LIndex), AMode);
+		//	#endif
 		//}
 		
 		public static PlanNode CompileCreateConversionStatement(Plan plan, Statement statement)
@@ -11005,6 +11011,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 					if (!isStatementContext && (result.DataType == null))
 						throw new CompilerException(CompilerException.Codes.ExpressionExpected, expression);
 
+					if (result.LineInfo == null)
+					{
+						result.Line = expression.Line;
+						result.LinePos = expression.LinePos;
+					}
 					return result;
 				}
 				catch (CompilerException exception)
@@ -12245,8 +12256,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 			
 			if (listType == null)
 				listType = new Schema.ListType(new Schema.GenericType());
-			
-			return 
+
+			return
 				EmitListNode
 				(
 					plan, 
@@ -12965,7 +12976,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static PlanNode CompileCursorSelectorExpression(Plan plan, CursorSelectorExpression expression)
 		{
 			PlanNode node = CompileCursorDefinition(plan, expression.CursorDefinition);
-            if (!(node is CursorNode))
+			if (!(node is CursorNode))
 				throw new CompilerException(CompilerException.Codes.TableExpressionExpected, expression);
 			return node;
 		}
@@ -14071,7 +14082,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			else
 				return EmitBrowseNode(plan, sourceNode, sourceNode.Order, isAccelerator);
 		}
-        
+		
 		public static PlanNode EmitBrowseNode(Plan plan, TableNode sourceNode, Schema.Key key, bool isAccelerator)
 		{
 			return EmitBrowseNode(plan, sourceNode, key, null, isAccelerator);
