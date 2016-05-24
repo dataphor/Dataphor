@@ -15,6 +15,7 @@ using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Device.SQL;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
+using Microsoft.SqlServer.Types;
 
 namespace Alphora.Dataphor.DAE.Device.MSSQL
 {
@@ -41,24 +42,27 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
             Money		|	money															|	MSSQLMoney
             Guid		|	uniqueidentifier												|	MSSQLGuid
             String		|	varchar(Storage.Length)											|	SQLString
-            Binary		|	image															|	MSSQLBinary
+            Graphic		|	image															|	MSSQLGraphic
+            Binary		|	varchar(max)													|	MSSQLBinary
             SQLText		|	text															|	MSSQLText
             MSSQLBinary |	binary(Storage.Length)											|	MSSQLMSSQLBinary
+            Geography	|	geography           											|	MSSQLGeography
+            Geometry	|	geometry               											|	MSSQLGeometry
 
     */
 
 	// TODO: Support for date and time:
-		// The current mapping for System.Date uses MSSQLDate, which uses a native representation in the target system as datetime
-		// The current mapping for System.Time uses MSSQLTime, which uses a native representation in the target system as datetime
-		// We need a solution that would use the new date and time types, as well as potentially maintain functionality for systems that still use the datetime type
-		// For now, if the underlying system uses a date/time type, the reconciliation will accept that type as a valid type mapping for System.Date/System.Time
+	// The current mapping for System.Date uses MSSQLDate, which uses a native representation in the target system as datetime
+	// The current mapping for System.Time uses MSSQLTime, which uses a native representation in the target system as datetime
+	// We need a solution that would use the new date and time types, as well as potentially maintain functionality for systems that still use the datetime type
+	// For now, if the underlying system uses a date/time type, the reconciliation will accept that type as a valid type mapping for System.Date/System.Time
 
 	// TODO: Support for datetime2
-		// The new datetime2 type is still a datetime, but has greater scale and precision, so we need an MSSQLDateTime2 mapping to support it
+	// The new datetime2 type is still a datetime, but has greater scale and precision, so we need an MSSQLDateTime2 mapping to support it
 
 	// TODO: Support for datetimeoffset type
-		// We should look at supporting this type directly in D4? There is a C# DateTimeOffset type as well
-		// We should actually just change our DateTime to use DateTimeOffset (exposing a timezone offset property), although I'm not sure how that would map in other systems
+	// We should look at supporting this type directly in D4? There is a C# DateTimeOffset type as well
+	// We should actually just change our DateTime to use DateTimeOffset (exposing a timezone offset property), although I'm not sure how that would map in other systems
 
 	// TODO: Support for varchar(max) and varbinary(max)
 	// TODO: Support for xml type?
@@ -446,10 +450,82 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{
-			return "image";
+			return "varbinary(max)";
 		}
 	}
 
+	/// <summary>
+	/// MSSQL type : geography
+	/// D4 type : Binary
+	/// </summary>
+	public class MSSQLGeography : SQLBinary
+	{
+		public MSSQLGeography(int AID, string AName) : base(AID, AName) { }
+
+		//public MSSQLGeography(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
+		//public MSSQLGeography(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
+
+		protected override string InternalNativeDomainName(MetaData AMetaData)
+		{
+			return "geography";
+		}
+
+		public override object ToScalar(IValueManager AManager, object AValue)
+		{
+			return ((SqlGeography)AValue).Serialize().Value;
+		}
+
+		public override object FromScalar(IValueManager AManager, object AValue)
+		{
+			var b = new System.Data.SqlTypes.SqlBytes((byte[])AValue);
+			return SqlGeography.Deserialize(b); ;
+		}
+
+		public override string ToLiteral(IValueManager AManager, object AValue)
+		{
+			if (AValue == null)
+				return String.Format("cast(null as {0})", DomainName());
+
+			return String.Format("cast(convert(varbinary(max), '{0}', 1) as {1}", Convert.ToBase64String(GetNativeValue(AManager, AValue)), DomainName());
+		}
+	}
+
+	/// <summary>
+	/// MSSQL type : geometry
+	/// D4 type : Binary
+	/// </summary>
+	public class MSSQLGeometry : SQLBinary
+	{
+		public MSSQLGeometry(int AID, string AName) : base(AID, AName) { }
+
+		//public MSSQLGeometry(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
+		//public MSSQLGeometry(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
+
+		protected override string InternalNativeDomainName(MetaData AMetaData)
+		{
+			return "geometry";
+		}
+
+		public override object ToScalar(IValueManager AManager, object AValue)
+		{
+			return ((SqlGeometry)AValue).Serialize().Value;
+		}
+
+		public override object FromScalar(IValueManager AManager, object AValue)
+		{
+			var b = new System.Data.SqlTypes.SqlBytes((byte[])AValue);
+			return SqlGeometry.Deserialize(b); ;
+		}
+
+		public override string ToLiteral(IValueManager AManager, object AValue)
+		{
+			if (AValue == null)
+				return String.Format("cast(null as {0})", DomainName());
+
+			return String.Format("cast(convert(varbinary(max), '{0}', 1) as {1}", Convert.ToBase64String(GetNativeValue(AManager, AValue)), DomainName());
+		}
+	}
+	
 	/// <summary>
 	/// MSSQL type : image
 	/// D4 type : Graphic

@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<library xmlns:bop="www.alphora.com/schemas/bop" assembliesasstring="" defaultdevicename="" generatorid="-1" isgenerated="False" isremotable="True" issystem="False" librariesasstring="" name="System.Geo" settings="" version="3.0.0.*" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+	<files.filereference filename="System.Geo.dll" isassembly="True" />
+</library>
