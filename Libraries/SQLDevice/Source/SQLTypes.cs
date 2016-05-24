@@ -873,7 +873,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		
 		public SQLBinary(int AID, string AName) : base(AID, AName) {}
 		
-		private byte[] GetNativeValue(IValueManager AManager, object AValue)
+		protected byte[] GetNativeValue(IValueManager AManager, object AValue)
 		{
 			if (AValue is byte[])
 				return (byte[])AValue;
