@@ -411,7 +411,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					for (int index = 1; index < Nodes.Count; index++)
 					{
 						Schema.TableVarColumn column = TableVar.Columns[_extendColumnOffset + index - 1];
-						if (!column.IsComputed)
+						if (column.ColumnType == Schema.TableVarColumnType.Stored)
 						{
 							columnIndex = newRow.DataType.Columns.IndexOfName(column.Column.Name);
 							if (columnIndex >= 0)
@@ -777,7 +777,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					for (int index = 1; index < Nodes.Count; index++)
 					{
 						Schema.TableVarColumn column = TableVar.Columns[_extendColumnOffset + index - 1];
-						if (!column.IsComputed)
+						if (column.ColumnType == Schema.TableVarColumnType.Stored)
 						{
 							columnIndex = row.DataType.Columns.IndexOfName(column.Column.Name);
 							if (columnIndex >= 0)
