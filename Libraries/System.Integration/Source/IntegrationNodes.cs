@@ -20,6 +20,12 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 	// operator Insert(ASource : table, ATarget : table) : String
 	public class InsertNode : InstructionNodeBase
 	{
+		public InsertNode()
+		{
+			// Prevent arguments from being converted to values
+			ExpectsTableValues = false;
+		}
+
 		public override object InternalExecute(Program program)
 		{
 			return
@@ -69,6 +75,12 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 	// operator Copy(ASource : table, ATarget : table) : String
 	public class CopyTablesNode : InstructionNodeBase
 	{
+		public CopyTablesNode()
+		{
+			// Prevent arguments from being converted to values
+			ExpectsTableValues = false;
+		}
+
 		public override object InternalExecute(Program program)
 		{
 			string AKeyColumnNames = Nodes.Count > 2 ? (string)Nodes[2].Execute(program) : null;
