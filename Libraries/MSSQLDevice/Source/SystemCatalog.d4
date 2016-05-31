@@ -197,6 +197,7 @@ begin
 				 
 		create type System.Binary class "MSSQLDevice.MSSQLBinary" static tags {{ DAE.IsSystem = "true" }},
 		create operator System.Binary(System.String) static tags {{ Storage.TranslationString = "Convert(varbinary, {{0}})", DAE.IsSystem = "true" }}, 
+
 		create type System.Graphic class "MSSQLDevice.MSSQLGraphic" static tags {{ DAE.IsSystem = "true" }},
 		create operator System.Graphic(System.String) class "SQLDevice.SQLScalarSelector" static tags {{ DAE.IsSystem = "true" }}, 
 		 
@@ -204,6 +205,12 @@ begin
 		create operator SQLDevice.MSSQLBinary.AsBinary(System.Binary) class "SQLDevice.SQLScalarSelector" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator SQLDevice.MSSQLBinary.ReadAsBinary(SQLDevice.MSSQLBinary) class "SQLDevice.SQLScalarReadAccessor" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator SQLDevice.MSSQLBinary.WriteAsBinary(SQLDevice.MSSQLBinary, System.Binary) class "SQLDevice.SQLScalarWriteAccessor" static tags {{ DAE.IsSystem = "true" }}, 
+
+		create type System.Geo.Geography class "MSSQLDevice.MSSQLGeography" static tags {{ DAE.IsSystem = "true" }},
+		create operator System.Geo.Geography(System.String) static tags {{ Storage.TranslationString = "cast(convert(varbinary(max), '{{0}}', 1) as geography", DAE.IsSystem = "true" }}, 
+
+		create type System.Geo.Geometry class "MSSQLDevice.MSSQLGeometry" static tags {{ DAE.IsSystem = "true" }},
+		create operator System.Geo.Geometry(System.String) static tags {{ Storage.TranslationString = "cast(convert(varbinary(max), '{{0}}', 1) as Geometry", DAE.IsSystem = "true" }}, 
 
 		create type System.Guid class "MSSQLDevice.MSSQLGuid" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.Guid(System.String) class "SQLDevice.SQLScalarSelector" static tags {{ DAE.IsSystem = "true" }}, 

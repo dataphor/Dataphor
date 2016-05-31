@@ -381,6 +381,8 @@ if not exists (select * from sysdatabases where name = '{0}')
                 case "timestamp":
 				case "date": // 2008 (majorVersion >= 10)
 				case "time": // 2008
+                case "geography":
+                case "geometry":
 				//case "datetime2": // 2008
 				//case "datetimeoffset": // 2008
                     return true;
@@ -449,8 +451,12 @@ if not exists (select * from sysdatabases where name = '{0}')
                 case "varbinary":
                     metaData.Tags.Add(new Tag("Storage.Length", length.ToString()));
                     return plan.DataTypes.SystemBinary;
-                case "image":
-                    return plan.DataTypes.SystemBinary;
+                case "geography":
+					return (ScalarType)plan.Catalog["System.Geo.Geography"];
+                case "geometry":
+					return (ScalarType)plan.Catalog["System.Geo.Geometry"];
+				case "image":
+                    return plan.DataTypes.SystemGraphic;
                 default:
                     throw new SQLException(SQLException.Codes.UnsupportedImportType, domainName);
             }
@@ -491,7 +497,8 @@ if not exists (select * from sysdatabases where name = '{0}')
 											join sysusers as su on so.uid = su.uid
 											join syscolumns as sc on sc.id = so.id 
 											join systypes as st on st.xusertype = sc.xusertype
-											join systypes as snt on st.xtype = snt.xusertype
+											join systypes as snt on snt.xusertype = 
+												case when st.xusertype > 256 then st.xtype else st.xusertype end
 										where (so.xtype = 'U' or so.xtype = 'V')
 											and OBJECTPROPERTY(so.id, 'IsMSShipped') = 0
 											{0}

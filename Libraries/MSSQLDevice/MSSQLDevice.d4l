@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<library xmlns:bop="www.alphora.com/schemas/bop" version="3.0.0.0" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" name="MSSQLDevice" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+<library xmlns:bop="www.alphora.com/schemas/bop" assembliesasstring="" defaultdevicename="" generatorid="-1" isgenerated="False" isremotable="True" issystem="False" librariesasstring="" name="MSSQLDevice" settings="" version="3.0.0.0" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
 	<files.filereference filename="AlphoraMSSQLDevice.dll" isassembly="True" />
 	<libraries.libraryreference name="System" version="*" />
 	<libraries.libraryreference name="SQLDevice" version="*" />
+	<libraries.libraryreference name="System.Geo" version="*" />
 </library>
