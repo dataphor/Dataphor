@@ -192,6 +192,26 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			}
 		}
 
+		// Filter
+
+		private string _filter = String.Empty;
+		[DefaultValue("")]
+		[Description("Filter to apply to the main source of the target frame.")]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor", "System.Drawing.Design.UITypeEditor,System.Drawing")]
+		[DAE.Client.Design.EditorDocumentType("d4")]
+		public string Filter
+		{
+			get { return _filter; }
+			set 
+			{
+				if (_filter != value)
+				{
+					_filter = value;
+					UpdateFrameInterfaceNode(Active);
+				}
+			}
+		}
+
 		protected void UpdateFrameInterfaceNode(bool build)
 		{
 			if (_frameInterfaceNode != null)
@@ -233,6 +253,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 						host.Load(_document, _frameInterfaceNode);
 						if (_sourceLink != null)
 							_sourceLink.TargetSource = _frameInterfaceNode.MainSource;
+						if (_frameInterfaceNode.MainSource != null && !String.IsNullOrEmpty(_filter))
+							_frameInterfaceNode.MainSource.Filter = _filter;
 						host.Open(!Active);
 						if (Active)
 							BroadcastEvent(new FormShownEvent());
