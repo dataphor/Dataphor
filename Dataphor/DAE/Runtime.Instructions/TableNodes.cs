@@ -1822,8 +1822,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_potentialDevice = ((Schema.BaseTableVar)_tableVar).Device;
 			else
 				throw new CompilerException(CompilerException.Codes.InvalidRetrieveTarget, plan.CurrentStatement());
+			NoDevice = !ShouldSupport || _potentialDevice == null;
 		}
-		
+
 		public override void DetermineDevice(Plan plan)
 		{
 			if (_potentialDevice != null)
