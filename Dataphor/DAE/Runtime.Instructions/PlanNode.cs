@@ -326,12 +326,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				for (int index = 0; index < _nodes.Count; index++)
 				{
-					_nodes[index].DeterminePotentialDevice(plan);
+					var node = _nodes[index];
+					node.DeterminePotentialDevice(plan);
 
-					NoDevice = NoDevice || _nodes[index].NoDevice;
+					NoDevice = NoDevice || node.NoDevice;
 					if (!NoDevice)
 					{
-						childDevice = _nodes[index].PotentialDevice;
+						childDevice = node.PotentialDevice;
 						if (childDevice != null)
 						{
 							if (currentChildDevice == null)
