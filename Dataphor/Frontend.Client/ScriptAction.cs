@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Text;
 using Microsoft.CSharp;
 using Microsoft.VisualBasic;
+using System.Linq;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -127,6 +128,23 @@ namespace Alphora.Dataphor.Frontend.Client
 			set { _compileWithDebug = value; }
 		}
 
+		private string _references = "";
+		[Description("Set of assembly references to use when compiling the dynamic script.  One fully qualified assembly name per line.")]
+		[DefaultValue("")]
+		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		public string References
+		{
+			get { return _references; }
+			set
+			{
+				if (_references != value)
+				{
+					_references = (value == null ? String.Empty : value);
+					InvalidateResults();
+				}
+			}
+		}
+
 		private static void PreprocessScript(string script, out string unit, out string classValue, out string execute)
 		{
 			// TODO: Put in lexor in for pre-processor (for comment/string support)
@@ -176,14 +194,12 @@ namespace Alphora.Dataphor.Frontend.Client
 			return LName.Name + ".dll";
 		}
 		
-		private static string[] GetReferencedAssemblyNames(Assembly assembly)
+		private string[] GetReferencedAssemblyNames(Assembly assembly)
 		{
-			AssemblyName[] referencedAssemblies = assembly.GetReferencedAssemblies();
-			string[] result = new string[referencedAssemblies.Length + 1];
-			for (int i = 0; i < referencedAssemblies.Length; i++)
-				result[i] = Assembly.Load(referencedAssemblies[i]).Location;
-			result[result.Length - 1] = assembly.Location;
-			return result;
+			return assembly.GetReferencedAssemblies().Select(a => Assembly.Load(a).Location)
+				.Concat(References.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).Select(a => Assembly.Load(a).Location))
+				.Concat(new[] { assembly.Location })
+				.ToArray();
 		}
 		
 		private void AddReferencedAssemblies(List<string> assemblies, Assembly assembly)
@@ -198,7 +214,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			string assemblyName;
 			foreach (NodeTypeEntry entry in HostNode.Session.NodeTypeTable.Entries)
 			{
-				assemblyName = Assembly.Load(entry.Assembly, null).Location;
+				assemblyName = Assembly.Load(entry.Assembly).Location;
 				if (!assemblies.Contains(assemblyName))
 					assemblies.Add(assemblyName);
 			}

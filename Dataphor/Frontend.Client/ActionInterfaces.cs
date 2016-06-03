@@ -660,6 +660,10 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// </example>
 		string ScriptDocument { get; set; }
 
+		/// <summary>Set of assembly references to use when compiling the dynamic script.  One fully qualified assembly name per line. </summary>
+		string References { get; set; }
+		
+		
 		/// <summary> When true, the script will be compiled with debug information. </summary> <doc/>
 		/// <value><para>Boolean: True|False</para>
 		/// <para>Default: False</para></value>
