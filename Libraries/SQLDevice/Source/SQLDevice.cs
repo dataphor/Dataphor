@@ -5313,6 +5313,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row, var AOutValues : row, const ATableType : String, const AKeyInfo : String) : table
     public class SQLQueryNode : TableNode
     {
+		public SQLQueryNode()
+		{
+			ShouldSupport = false;
+		}
+
 		public override void DetermineDataType(Plan plan)
 		{
 			DetermineModifiers(plan);
