@@ -1055,6 +1055,12 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <para>Default: empty string</para></value>
 		string Document { get; set; }
 
+		/// <summary> Filter (string expression) to apply to the main source 
+		/// of the target form. </summary> <doc/>
+		/// <value> <para>String:</para>
+		/// <para>Default: empty string</para></value>
+		string Filter { get; set; }
+
 		/// <summary> The text used for the menu in which sub menus of this frame are added. </summary> <doc/>
 		/// <value> <para>String</para>
 		/// <para>Default: empty string</para></value>
