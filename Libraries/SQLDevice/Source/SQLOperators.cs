@@ -509,13 +509,27 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 				localDevicePlan.CurrentQueryContext().IsAggregate = true;			
 				selectExpression.SelectClause = new SelectClause();
+				var groupByColumns = new SQLRangeVarColumns();
 				for (int index = 0; index < aggregateNode.AggregateColumnOffset; index++)
 				{
 					SQLRangeVarColumn groupByColumn = localDevicePlan.GetRangeVarColumn(tableVar.Columns[index].Name, true);
+					groupByColumns.Add(groupByColumn);
 					selectExpression.SelectClause.Columns.Add(groupByColumn.GetColumnExpression());
 					if (selectExpression.GroupClause == null)
 						selectExpression.GroupClause = new GroupClause();
 					selectExpression.GroupClause.Columns.Add(groupByColumn.GetExpression());
+				}
+
+				var addedColumns = new SQLRangeVarColumns();
+
+				// Preserve added columns that appear in the group by clause
+				foreach (var addedColumn in localDevicePlan.CurrentQueryContext().AddedColumns)
+				{
+					var groupByColumnIndex = groupByColumns.IndexOf(addedColumn.TableVarColumn.Name);
+					if (groupByColumnIndex >= 0)
+					{
+						addedColumns.Add(addedColumn);
+					}
 				}
 
 				for (int index = aggregateNode.AggregateColumnOffset; index < aggregateNode.DataType.Columns.Count; index++)
@@ -533,10 +547,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								localDevicePlan.Device.ToSQLIdentifier(tableVar.Columns[index])
 							);
 						rangeVarColumn.ReferenceFlags = localDevicePlan.CurrentQueryContext().ReferenceFlags | SQLReferenceFlags.HasAggregateExpressions;
-						localDevicePlan.CurrentQueryContext().AddedColumns.Add(rangeVarColumn);
+						addedColumns.Add(rangeVarColumn);
 						selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
 					}
 				}
+
+				// Replace added columns (except those in the group by) because they can no longer be referenced within this query context
+				localDevicePlan.CurrentQueryContext().AddedColumns.Clear();
+				localDevicePlan.CurrentQueryContext().AddedColumns.AddRange(addedColumns);
 			}
 			
 			return statement;
