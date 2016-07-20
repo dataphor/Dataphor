@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<library xmlns:bop="www.alphora.com/schemas/bop" version="3.0.0.0" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" name="CacheDevice" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+	<files.filereference filename="AlphoraCacheSQLDevice.dll" isassembly="True" />
+	<libraries.libraryreference name="System" version="*" />
+	<libraries.libraryreference name="SQLDevice" version="*" />
+</library>

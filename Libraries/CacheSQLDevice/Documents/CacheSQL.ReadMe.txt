@@ -1,0 +1,37 @@
+The MSSQLDevice provided with Dataphor provides a device for 
+communicating with Microsoft SQL Server, versions 7.0 and 
+2000. The device is also capable of communicating with the 
+Microsoft Desktop Engine (MSDE).
+
+===============================================
+
+EXAMPLE:
+
+create device MSSQLTestDevice
+	reconciliation { mode = { command }, master = device }
+	class "MSSQLDevice"
+	attributes
+	{
+		"ServerName" = ".",
+		"UseIntegratedSecurity" = "True", // set to false or remove to use SQL Server Authentication
+		"DatabaseName" = "Northwind"
+	};
+
+In this example:
+ The name of the device is "MSSQLTestDevice".
+ The reconciliation mode is "command".
+ The reconciliation master is "device".
+ The class is "MSSQLDevice".
+ The data will be stored on the MS SQL server running on the local machine.
+ Windows authentication will be used to authenticate the connection. 
+ The name of the database on the MS SQL server will be Northwind.
+
+If "UseIntegratedSecurity" is removed or set to false then it is necessary
+to map MS SQL Server users to Dataphor users such as:
+	
+	CreateDeviceUser("System", "MSSQLTestDevice", "sa", "SomePassword");
+	CreateDeviceUser("Admin", "MSSQLTestDevice", "sa", "SomePassword");
+
+
+For more information refer to documentation in the 
+Dataphor Reference under Libraries, MSSQLDevice.
