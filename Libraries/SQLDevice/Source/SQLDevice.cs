@@ -2321,9 +2321,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return columnTitle.ToString();
 		}
 		
-		protected string GetServerTableName(Plan plan, Catalog serverCatalog, string deviceTableName)
+		protected string GetServerTableName(Plan plan, Catalog serverCatalog, string deviceSchemaName, string deviceTableName)
 		{
-			string serverTableName = FromSQLIdentifier(deviceTableName);
+			string serverTableName = Schema == String.Empty || Schema != deviceSchemaName
+				? Object.Qualify(FromSQLIdentifier(deviceTableName), FromSQLIdentifier(deviceSchemaName))
+				: FromSQLIdentifier(deviceTableName);
 			List<string> names = new List<string>();
 			int index = serverCatalog.IndexOf(serverTableName, names);
 			if ((index >= 0) && (serverCatalog[index].Library != null) && (D4.MetaData.GetTag(serverCatalog[index].MetaData, "Storage.Name", deviceTableName) == deviceTableName))
@@ -2379,6 +2381,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				try
 				{
 					string tableName = String.Empty;
+					string schemaName = String.Empty;
 					BaseTableVar localTableVar = null;
 					BaseTableVar existingTableVar = null;
 					Objects columns = new Objects();
@@ -2389,17 +2392,18 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						{
 							ConfigureTableVar(plan, localTableVar, columns, deviceCatalog);
 
+							schemaName = (string)cursor[0];
 							tableName = (string)cursor[1];
 							
 							// Search for a table with this name unqualified in the server catalog
 							string tableTitle = (string)cursor[4];
-							localTableVar = new BaseTableVar(GetServerTableName(plan, serverCatalog, tableName), null);
+							localTableVar = new BaseTableVar(GetServerTableName(plan, serverCatalog, schemaName, tableName), null);
 							localTableVar.Owner = plan.User;
 							localTableVar.Library = plan.CurrentLibrary;
 							localTableVar.Device = this;
 							localTableVar.MetaData = new D4.MetaData();
 							localTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Name", tableName, true));
-							localTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Schema", (string)cursor[0], true));
+							localTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Schema", schemaName, true));
 							
 							// if this table is already present in the server catalog, use StorageNames to map the columns
 							int existingTableIndex = serverCatalog.IndexOfName(localTableVar.Name);
@@ -2504,6 +2508,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				SQLCursor cursor = ((SQLDeviceSession)plan.DeviceConnect(this)).Connection.Open(deviceIndexesExpression);
 				try
 				{
+					string schemaName = String.Empty;
 					string tableName = String.Empty;
 					string indexName = String.Empty;
 					BaseTableVar localTableVar = null;
@@ -2525,8 +2530,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								order = null;
 							}
 							
+							schemaName = (string)cursor[0];
 							tableName = (string)cursor[1];
-							localTableVar = (BaseTableVar)deviceCatalog[GetServerTableName(plan, serverCatalog, tableName)];
+							localTableVar = (BaseTableVar)deviceCatalog[GetServerTableName(plan, serverCatalog, schemaName, tableName)];
 							indexName = (string)cursor[2];
 							D4.MetaData metaData = new D4.MetaData();
 							metaData.Tags.Add(new D4.Tag("Storage.Name", indexName, true));
@@ -2561,7 +2567,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						{
 							columnIndex = ColumnIndexFromNativeColumnName(localTableVar, (string)cursor[3]);
 							if (columnIndex >= 0)
-								key.Columns.Add(localTableVar.Columns[columnIndex]);
+							{
+								if (!key.Columns.Contains(localTableVar.Columns[columnIndex]))
+									key.Columns.Add(localTableVar.Columns[columnIndex]);
+							}
 							else
 								shouldIncludeIndex = false;
 						}
@@ -2573,7 +2582,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								orderColumn = new OrderColumn(localTableVar.Columns[columnIndex], Convert.ToInt32(cursor[6]) == 0);
 								orderColumn.Sort = Compiler.GetSort(plan, orderColumn.Column.DataType);
 								orderColumn.IsDefaultSort = true;
-								order.Columns.Add(orderColumn);
+								if (!order.Columns.Contains(orderColumn)) // TODO: Log this as a warning at least
+									order.Columns.Add(orderColumn);
 							}
 							else
 								shouldIncludeIndex = false;
@@ -2637,8 +2647,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							}
 							
 							constraintName = (string)cursor[1];
-							string sourceTableName = GetServerTableName(plan, serverCatalog, (string)cursor[3]);
-							string targetTableName = GetServerTableName(plan, serverCatalog, (string)cursor[6]);
+							string sourceTableName = GetServerTableName(plan, serverCatalog, (string)cursor[2], (string)cursor[3]);
+							string targetTableName = GetServerTableName(plan, serverCatalog, (string)cursor[5], (string)cursor[6]);
 							if (deviceCatalog.Contains(sourceTableName))
 								sourceTableVar = (TableVar)deviceCatalog[sourceTableName];
 							else
