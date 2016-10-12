@@ -43,7 +43,8 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 				throw new NotSupportedException("List parameters are not yet supported.");
 
 			// Otherwise, send it through as a row
-			return ObjectToNativeValue(value);
+			//return ObjectToNativeValue(value);
+			return new NativeScalarValue { Value = value, DataTypeName = value != null ? value.GetType().Name : "Object" };
 		}
 
 		private static NativeValue ObjectToNativeValue(object value)

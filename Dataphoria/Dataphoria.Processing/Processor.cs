@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Alphora.Dataphor.DAE;
+﻿using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.NativeCLI;
 using Alphora.Dataphor.DAE.Server;
-using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Alphora.Dataphor.Dataphoria.Processing
 {
@@ -101,7 +97,7 @@ namespace Alphora.Dataphor.Dataphoria.Processing
 
 			foreach (var parameter in paramaters)
 			{
-				result += String.Format(" and {0} = {1}", parameter.Key.Substring(1), parameter.Key);
+				result += string.Format(" and {0} = {1}", parameter.Key.Substring(1), parameter.Key);
 			}
 
 			return result;

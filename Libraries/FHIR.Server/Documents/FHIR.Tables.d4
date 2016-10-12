@@ -52,6 +52,7 @@ create table
 	};
 grant usage on Patients to role User;
 
+
 // drop view FHIR.Server.FHIRServerPatientView
 create view FHIRServerPatientView
 	(Patients rename Patient)
