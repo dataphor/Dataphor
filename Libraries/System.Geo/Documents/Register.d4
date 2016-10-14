@@ -1,0 +1,8 @@
+create type Geometry like System.Binary tags { Frontend.Grid.ElementType = "TextColumn" };
+grant usage on Geometry to role User;
+
+create type Geography like System.Binary tags { Frontend.Grid.ElementType = "TextColumn" };
+grant usage on Geography to role User;
+
+// TODO: possreps for all the common representations
+// TODO: all the pretty little geometry and geography operators
