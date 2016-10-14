@@ -682,10 +682,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(Program program, object[] arguments)
 		{
+			// BTR - 2016-08-16 -> Nil propagation should not affect a compound scalar selector like this, it's perfectly legitimate for a compound scalar to have null properties.
 			#if NILPROPOGATION
-			for (int index = 0; index < arguments.Length; index++)
-				if (arguments[index] == null)
-					return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, null);
+			//for (int index = 0; index < arguments.Length; index++)
+			//	if (arguments[index] == null)
+			//		return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, null);
 			#endif
 			
 			Schema.IRowType rowType = ((Schema.ScalarType)_dataType).CompoundRowType;
@@ -759,8 +760,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
+			// BTR 2016-08-16 -> Same as the selector, it's valid for a property of a compound scalar to be null
 			#if NILPROPOGATION
-			if (argument1 == null || argument2 == null)
+			if (argument1 == null) // || argument2 == null)
 				return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, null);
 			#endif
 			
