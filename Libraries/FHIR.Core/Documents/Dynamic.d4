@@ -26,6 +26,7 @@ create type Dynamic from class "Newtonsoft.Json.Linq.JObject"
 create operator iEqual(const ALeft : Dynamic, const ARight : Dynamic) : Boolean class "FHIR.Core.DynamicEqualNode";	
 create operator Dynamic(const AContent : String) : Dynamic class "FHIR.Core.DynamicSelectorNode";
 create operator Get(const ADynamic : Dynamic, const AKey : scalar) : Dynamic class "FHIR.Core.DynamicGetNode";
+create operator GetType(const ADynamic : Dynamic) : String class "FHIR.Core.DynamicGetTypeNode";
 create operator Set(const ADynamic : Dynamic, const AKey : scalar, const AValue : Dynamic) : Dynamic class "FHIR.Core.DynamicSetNode";
 create operator ToList(const AContent : Dynamic) : list(Dynamic) class "FHIR.Core.DynamicToListNode";
 create operator ToBoolean(const AContent : Dynamic) : Boolean class "FHIR.Core.DynamicToBooleanNode";

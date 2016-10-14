@@ -1,0 +1,33 @@
+//* Device: TestCacheDevice
+//drop device TestCacheDevice;
+create device TestCacheDevice
+	reconciliation { mode = { command }, master = device }
+	class "CacheSQLDevice"
+		attributes
+		{
+			"ServerName" = "localhost",
+			"DatabaseName" = "SAMPLES",
+			"Port" = "1972"
+		};
+
+CreateDeviceUser("System", "TestCacheDevice", "Test", "test");
+CreateDeviceUser("Admin", "TestCacheDevice", "Test", "test");
+//CreateDeviceUser("System", "TestCacheDevice", "_SYSTEM", "secret");
+//CreateDeviceUser("Admin", "TestCacheDevice", "_SYSTEM", "secret");
+
+alter device TestCacheDevice alter reconciliation { mode = { none } }
+alter table Sample.USZipCode { create key { ID } }
+
+select SQLQuery(Name("TestCacheDevice"), "select * from INFORMATION_SCHEMA.TABLES");
+select SQLQuery(Name("TestCacheDevice"), "select * from %SYS.%DICTIONARY.CacheClassName");
+select AvailableTables("TestCacheDevice");
+select DeviceReconciliationScript("TestCacheDevice");
+select Reconcile(Name("TestCacheDevice"));
+select Aviation.Aircraft;
+select Sample.USZipCode
+select Sessions
+
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_SYS.OBJECTS");
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_SYS.COLUMNS");
+
+select Aviation.Aircraft;

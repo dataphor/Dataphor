@@ -1,0 +1,67 @@
+Overview ->
+	The CacheSQLDevice provides SQL-based integration with the InterSystems Cache DBMS.
+	This device was developed against the Evaluation version of Cache:
+	Cache for Windows (x86-64) 2016.1.1 (Build 108U_SU) Thu Jul 7 2016 09:32:36 EDT
+
+Connectivity ->
+	Uses the CacheClient wrapped in the Cache.Connection library by default.
+	The Cache system must have the %Service_callin enabled. See the Cache documentation for more
+	The InterSystems.Data.CacheClient.dll seems to be the only required dependency (all the rest is E/F related)
+	
+Security ->
+	Dataphor Users are mapped to Cache users following the standard approach for all devices.
+
+Syntax ->
+	Cache SQL is very similar to T-SQL and has many features to support compatibility with and migration from MSSQL.
+	However, there are enough features that it does not support, or supports slightly differently to warrant its own device.
+	This device was based on the MSSQLDevice, with the primary initial differences being:
+		Addition of a PortNumber property to support the port number aspect of connectivity
+		Difference device reconciliation expressions, see reconciliation for more detail
+
+Reconciliation ->
+	Cache supports an SQL-based access mode to its underlying structures, but it does not seem to have a complete exposure of
+	the data dictionary for that access. What exposure it does have is loosely based on the MSSQL (or perhaps Sybase) system
+	tables, but it is incomplete:
+		- Incomplete exposure of indexes, many indexes don't have column information, there may be assumptions here that would help resolve some of it
+		- No support for indicating a descending index (not sure if this is an underlying limitation, or just a limitation of the exposure)
+		- No support for foreign keys
+		- No declaration of columns for primary keys (again, there may be some assumptions that we could take advantage of, but the tables don't report indexes for keys in general)
+	Another option is to use the connectivity layer's schema information, which appears to work well except for
+		- loss of typing information, the underlying database type is mapped to C# (could augment with the catalog tables though)
+		- Key declaration is incorrect, the reported key information appears to be derived from the base table(s) involved in the query, 
+			but the impact of operations is not accounted for and the result is incorrect key information. This may not matter for schema mining though
+	Note that if the target system has multiple schemas within the database (aka namespace), the Schema property of the device can be set to 
+		have the reconciliation only deal with tables in that schema. Otherwise, the schema name will be used as a qualifier to refer to the table in Dataphor.
+
+Transactions ->
+	Cache does not support the Serializable isolation level, and will throw an exception if it is used
+	Cache also does not really support read committed or repeatable read:
+		A delete, even in an uncommitted transaction, will always be visible
+		Aggregate operations (including distinct) will always be based on the raw data, regardless of transactions
+	This means that in general, read uncommitted is the only isolation level that Cache reliably supports
+
+Example ->
+
+//* Device: TestCacheDevice
+//drop device TestCacheDevice;
+create device TestCacheDevice
+	reconciliation { mode = { command }, master = device }
+	class "CacheSQLDevice"
+		attributes
+		{
+			"ServerName" = "localhost",
+			"DatabaseName" = "SAMPLES",
+			"PortNumber" = "1972"
+		};
+
+CreateDeviceUser("System", "TestCacheDevice", "_SYSTEM", "secret");
+CreateDeviceUser("Admin", "TestCacheDevice", "_SYSTEM", "secret");
+
+In this example:
+ The name of the device is "TestCacheDevice".
+ The reconciliation mode is "command".
+ The reconciliation master is "device".
+ The class is "CacheSQLDevice".
+ The data will be stored on the InterSystems Cache device running on the local machine.
+ The _SYSTEM user will be used to authenticate the connection.
+ The DatabaseName is equivalent to "Namespace" in Cache.
