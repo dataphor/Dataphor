@@ -50,6 +50,7 @@ namespace Alphora.Dataphor.FHIR.Core
 			classes.Add(new SettingsItem("FHIR.Core.DynamicContentReadAccessorNode", typeof(DynamicContentReadAccessorNode).AssemblyQualifiedName));
 			classes.Add(new SettingsItem("FHIR.Core.DynamicContentWriteAccessorNode", typeof(DynamicContentWriteAccessorNode).AssemblyQualifiedName));
 			classes.Add(new SettingsItem("FHIR.Core.DynamicGetNode", typeof(DynamicGetNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("FHIR.Core.DynamicGetTypeNode", typeof(DynamicGetTypeNode).AssemblyQualifiedName));
 			classes.Add(new SettingsItem("FHIR.Core.DynamicSetNode", typeof(DynamicSetNode).AssemblyQualifiedName));
 			classes.Add(new SettingsItem("FHIR.Core.DynamicToListNode", typeof(DynamicToListNode).AssemblyQualifiedName));
 			classes.Add(new SettingsItem("FHIR.Core.DynamicToBooleanNode", typeof(DynamicToBooleanNode).AssemblyQualifiedName));

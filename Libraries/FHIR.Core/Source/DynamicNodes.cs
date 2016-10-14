@@ -109,6 +109,20 @@ namespace Alphora.Dataphor.FHIR.Core
 		}
 	}
 
+	// operator GetType(const AInstance : Dynamic) : String
+	public class DynamicGetTypeNode: UnaryInstructionNode
+	{
+		public override object InternalExecute(Program program, object argument)
+		{
+			#if NILPROPOGATION
+			if (argument == null)
+				return null;
+			#endif
+
+			return ((JToken)argument).Type.ToString();
+		}
+	}
+
 	// operator Set(const AInstance : Dynamic, const AKey : scalar, const AValue : Dynamic) : Dynamic
 	public class DynamicSetNode : TernaryInstructionNode
 	{
