@@ -1,0 +1,18 @@
+create table Encounter 
+{ 
+	id : Integer, 
+	typeCode : String nil, 
+	admissionDateTime : DateTime nil, 
+	diagnosis : String nil, 
+	dischargeDateTime : DateTime nil, 
+	dischargeStatus : String nil, 
+	facilityLocation : String nil, 
+	facilityLocationArrivalDateTime : DateTime nil, 
+	facilityLocationDepartureDateTime : DateTime nil, 
+	lengthOfStay : Integer nil, 
+	negationRationale : String nil, 
+	principalDiagnosis : String nil, 
+	reason : String nil, 
+	key { id } 
+};
+

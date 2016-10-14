@@ -1,0 +1,143 @@
+drop table EncounterPerformed;
+drop table EncounterActive;
+drop type Quantity;
+drop type DateTimeInterval;
+drop type Code;
+drop type Id;
+
+create type Id like String;
+create type Code
+{
+	representation Code
+	{
+		code: String,
+		display: String,
+		system: String,
+		version: String
+	},
+	representation AsString
+	{
+		AsString : String
+			read value.system + '|' + value.code
+			write begin raise Error('AsString cannot be used to write Code values'); end
+	} selector begin raise Error('AsString cannot be used to select Code values'); end
+};
+
+create type DateTimeInterval
+{
+	representation DateTimeInterval
+	{
+		low: DateTime,
+		high: DateTime,
+		lowClosed: Boolean,
+		highClosed: Boolean
+	},
+	representation AsString
+	{
+		AsString : String
+			read (if value.lowClosed then '[' else '(') + IfNil(value.low.AsString, '<no value>')
+				+ ', ' + IfNil(value.high.AsString, '<no value>') + (if value.highClosed then ']' else ')')
+			write begin raise Error('AsString cannot be used to write DateTimeInterval values'); end
+	} selector begin raise Error('AsString cannot be used to select DateTimeInterval values'); end
+};
+
+create type Quantity
+{
+	representation Quantity
+	{
+		value: Decimal,
+		unit: String
+	},
+	representation AsString
+	{
+		AsString : String
+			read value.value.AsString + ' ''' + value.unit + ''''
+			write begin raise Error('AsString cannot be used to write Quantity values'); end
+	} selector begin raise Error('AsString cannot be used to select Quantity values'); end
+};
+
+create table EncounterActive
+{
+	id: Id,
+	code: Code,
+	relevantPeriod: DateTimeInterval,
+	reason: Code nil,
+	facilityLocation: Code nil,
+	locationPeriod: DateTimeInterval nil,
+	lengthOfStay: Quantity nil,
+	key { id }
+};
+
+insert row { 
+	'ENC-0001' id, 
+	Code('4525004', 'Emergency department patient visit (procedure)', 'SNOMED-CT', '2015-09') code,
+	DateTimeInterval(DateTime(2015, 2, 5, 13, 30), nil, true, true) relevantPeriod,
+	Code('5704005', 'Acute myocardial infarction (disorder)', 'SNOMED-CT', '2015-09') reason,
+	nil facilityLocation,
+	nil locationPeriod,
+	nil lengthOfStay
+}
+	into EncounterActive;
+
+//select EncounterActive;
+
+create table EncounterPerformed
+{
+	id: Id,
+	code: Code,
+	relevantPeriod: DateTimeInterval,
+	admissionSource: Code nil,
+	diagnosis: Code nil,
+	dischargeStatus: Code nil,
+	facilityLocation: Code nil,
+	locationPeriod: DateTimeInterval nil,
+	lengthOfStay: Quantity nil,
+	negationRationale: Code nil,
+	principalDiagnosis: Code nil,
+	reason: Code nil,
+	key { id }	
+};
+
+select DateTime(2015, 2, 8, 10, 45) - DateTime(2015, 2, 5, 13, 30);
+
+insert row { 
+	'ENC-0001' id, 
+	Code('4525004', 'Emergency department patient visit (procedure)', 'SNOMED-CT', '2015-09') code,
+	DateTimeInterval(DateTime(2015, 2, 5, 13, 30), DateTime(2015, 2, 8, 10, 45), true, true) relevantPeriod,
+	nil admissionSource,
+	Code('57054005', 'Acute myocardial infarction (disorder)', 'SNOMED-CT', '2015-09') diagnosis,
+	Code('434781000124105', 'Discharge to acute care hospital (procedure)', 'SNOMED-CT', '2015-09') dischargeStatus,
+	nil facilityLocation,
+	nil locationPeriod,
+	Quantity(2, 'days') lengthOfStay,
+	nil negationRationale,
+	nil principalDiagnosis,
+	Code('57054005', 'Acute myocardial infarction (disorder)', 'SNOMED-CT', '2015-09') reason
+}
+	into EncounterPerformed;
+
+select EncounterActive
+select EncounterPerformed
+
+select 12 div 2
+select 12 mod 2
+
+select 2 + 5 * 10
+select Round(5.55, 1)
+select Floor(-5.5)
+select Floor(5.5)
+select Truncate(5.5)
+select Truncate(-5.5)
+select Ceiling(-5.5)
+select Ceiling(5.5)
+
+select 25.0 ** 0.5
+select 5 ** 2
+select 25 ** 0.5
+select Log(25, 5)
+select Log(5, 25)
+select Ln(10)
+select Exp(2.30258509299405)
+select Power(25.0, 0.5)
+select Exp(10)
+select Log(25, 5)
