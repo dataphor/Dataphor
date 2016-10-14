@@ -10,7 +10,7 @@ namespace Alphora.Dataphor.DAE.Connection.Cache
 {
 	public class CacheConnectionStringBuilder : ConnectionStringBuilder
 	{
-		public const string CDefaultPort = "1972";
+		//public const string CDefaultPort = "1972";
 
 		public CacheConnectionStringBuilder()
 		{
@@ -20,17 +20,17 @@ namespace Alphora.Dataphor.DAE.Connection.Cache
 			_legend.AddOrUpdate("Password", "Password");
 		}
 
-		private string _port = CDefaultPort;
-		public string Port
-		{
-			get { return _port; }
-			set { _port = value; }
-		}
+		//private string _port = CDefaultPort;
+		//public string Port
+		//{
+		//	get { return _port; }
+		//	set { _port = value; }
+		//}
 
 		public override Tags Map(Tags tags)
 		{
 			Tags localTags = base.Map(tags);
-			localTags.AddOrUpdate("Port", Port);
+			//localTags.AddOrUpdate("Port", Port);
 			return localTags;
 		}
 	}

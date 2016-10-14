@@ -1,0 +1,172 @@
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.objects")
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.columns")
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.users")
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.types")
+select SQLQuery(Name("TestCacheDevice"), "
+select 
+		so.""schema"" as TableSchema,
+		so.name as TableName, 
+		sc.name as ColumnName, 
+		sc.colid as OrdinalPosition,
+		so.name as TableTitle, 
+		sc.name as ColumnTitle, 
+		snt.name as NativeDomainName, 
+		st.usertype as DomainName,
+		convert(integer, sc.length) as Length,
+		convert(bit, 0) as IsNullable,
+		case when snt.name in ('%Library.Text', '%Library.BinaryStream') then 1 else 0 end as IsDeferred
+	from %TSQL_sys.objects as so
+		join %TSQL_sys.columns as sc on sc.id = so.id 
+		join %TSQL_sys.types as st on st.usertype = sc.usertype
+		join %TSQL_sys.types as snt on st.usertype = snt.name
+	where (so.type = 'U' or so.type = 'V')
+		--{0}
+	order by so.""schema"", so.name, sc.colid
+", "key { TableSchema, TableName, ColumnName }");
+
+
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.indexes")
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.keys")
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.""constraints""")
+select SQLQuery(Name("TestCacheDevice"), "
+select 
+		TableSchema,
+		TableName,
+		IndexName,
+		ColumnName,
+		OrdinalPosition,
+		IsUnique,
+		IsDescending
+	from
+	(
+		select		
+				so.""schema"" as TableSchema,
+				so.name as TableName, 
+				si.name as IndexName, 
+				Coalesce(sc1.name, sc2.name, sc3.name, sc4.name, sc5.name, sc6.name, sc7.name, sc8.name) as ColumnName, 
+				Coalesce
+				(
+					case when sk1.id is null then null else 1 end,
+					case when sk2.id is null then null else 2 end,
+					case when sk3.id is null then null else 3 end,
+					case when sk4.id is null then null else 4 end,
+					case when sk5.id is null then null else 5 end,
+					case when sk6.id is null then null else 6 end,
+					case when sk7.id is null then null else 7 end,
+					case when sk8.id is null then null else 8 end
+				) OrdinalPosition,
+				case when (si.status # 4) > 1 then 1 else 0 end IsUnique,
+				0 as IsDescending
+			from %TSQL_sys.objects as so
+				join %TSQL_sys.indexes as si on si.id = so.id
+				left join %TSQL_sys.keys sk1 on si.id = sk1.id
+					left join %TSQL_sys.columns sc1 on sc1.id = so.id and sc1.colid = sk1.key1
+				left join %TSQL_sys.keys sk2 on si.id = sk2.id
+					left join %TSQL_sys.columns sc2 on sc2.id = so.id and sc2.colid = sk2.key2
+				left join %TSQL_sys.keys sk3 on si.id = sk3.id
+					left join %TSQL_sys.columns sc3 on sc3.id = so.id and sc3.colid = sk3.key3
+				left join %TSQL_sys.keys sk4 on si.id = sk4.id
+					left join %TSQL_sys.columns sc4 on sc4.id = so.id and sc4.colid = sk4.key4
+				left join %TSQL_sys.keys sk5 on si.id = sk5.id
+					left join %TSQL_sys.columns sc5 on sc5.id = so.id and sc5.colid = sk5.key5
+				left join %TSQL_sys.keys sk6 on si.id = sk6.id
+					left join %TSQL_sys.columns sc6 on sc6.id = so.id and sc6.colid = sk6.key6
+				left join %TSQL_sys.keys sk7 on si.id = sk7.id
+					left join %TSQL_sys.columns sc7 on sc7.id = so.id and sc7.colid = sk7.key7
+				left join %TSQL_sys.keys sk8 on si.id = sk8.id
+					left join %TSQL_sys.columns sc8 on sc8.id = so.id and sc8.colid = sk8.key8
+			where (so.type = 'U' or so.type = 'V')
+				--{1}
+				--{2}
+			--order by so.""schema"", so.name, si.indid, sik.keyno
+	) T
+	where ColumnName is not null
+	order by TableSchema, TableName, IndexName, OrdinalPosition
+");
+,
+    IsMSSQL70
+        ? "0 as IsDescending"
+        : "INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') as IsDescending",
+    IsMSSQL70
+        ? String.Empty
+        : "and INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') is not null",
+    tableVar == null
+        ? String.Empty
+        : String.Format("and so.name = '{0}'", ToSQLIdentifier(tableVar))
+
+
+select SQLQuery(Name("TestCacheDevice"), "
+		select		
+				so.""schema"" as TableSchema,
+				so.name as TableName, 
+				si.name as IndexName,
+				case when (si.status # 4) > 1 then 1 else 0 end IsUnique,
+				0 as IsDescending
+			from %TSQL_sys.objects as so
+				join %TSQL_sys.indexes as si on si.id = so.id
+				left join %TSQL_sys.objects as sno on sno.name = si.name
+				left join %TSQL_sys.""constraints"" as sn on sn.constrid = sno.id
+			where (so.type = 'U' or so.type = 'V')
+			order by so.""schema"", so.name, si.name
+", "key { TableSchema, TableName, IndexName, IsUnique, IsDescending }");
+
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.""constraints""");
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.objects where id = 85");
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.keys where constr_id = 188");
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.columns");
+select SQLQuery(Name("TestCacheDevice"), "select * from %TSQL_sys.keys");
+select SQLQuery(Name("TestCacheDevice"), "
+select 
+		TableSchema,
+		TableName,
+		IndexName,
+		ColumnName,
+		OrdinalPosition,
+		IsUnique,
+		IsDescending
+	from
+	(
+		select		
+				so.""schema"" as TableSchema,
+				so.name as TableName, 
+				si.name as IndexName, 
+				Coalesce(sc1.name, sc2.name, sc3.name, sc4.name, sc5.name, sc6.name, sc7.name, sc8.name) as ColumnName, 
+				Coalesce
+				(
+					case when sk1.id is null then null else 1 end,
+					case when sk2.id is null then null else 2 end,
+					case when sk3.id is null then null else 3 end,
+					case when sk4.id is null then null else 4 end,
+					case when sk5.id is null then null else 5 end,
+					case when sk6.id is null then null else 6 end,
+					case when sk7.id is null then null else 7 end,
+					case when sk8.id is null then null else 8 end
+				) OrdinalPosition,
+				case when (si.status # 4) > 1 then 1 else 0 end IsUnique,
+				0 as IsDescending
+			from %TSQL_sys.""constraints"" as so
+				join %TSQL_sys.indexes as si on si.id = so.id
+				left join %TSQL_sys.keys sk1 on si.id = sk1.id
+					left join %TSQL_sys.columns sc1 on sc1.id = so.id and sc1.colid = sk1.key1
+				left join %TSQL_sys.keys sk2 on si.id = sk2.id
+					left join %TSQL_sys.columns sc2 on sc2.id = so.id and sc2.colid = sk2.key2
+				left join %TSQL_sys.keys sk3 on si.id = sk3.id
+					left join %TSQL_sys.columns sc3 on sc3.id = so.id and sc3.colid = sk3.key3
+				left join %TSQL_sys.keys sk4 on si.id = sk4.id
+					left join %TSQL_sys.columns sc4 on sc4.id = so.id and sc4.colid = sk4.key4
+				left join %TSQL_sys.keys sk5 on si.id = sk5.id
+					left join %TSQL_sys.columns sc5 on sc5.id = so.id and sc5.colid = sk5.key5
+				left join %TSQL_sys.keys sk6 on si.id = sk6.id
+					left join %TSQL_sys.columns sc6 on sc6.id = so.id and sc6.colid = sk6.key6
+				left join %TSQL_sys.keys sk7 on si.id = sk7.id
+					left join %TSQL_sys.columns sc7 on sc7.id = so.id and sc7.colid = sk7.key7
+				left join %TSQL_sys.keys sk8 on si.id = sk8.id
+					left join %TSQL_sys.columns sc8 on sc8.id = so.id and sc8.colid = sk8.key8
+			where (so.type = 'U' or so.type = 'V')
+				--{1}
+				--{2}
+			--order by so.""schema"", so.name, si.indid, sik.keyno
+	) T
+	where ColumnName is not null
+	order by TableSchema, TableName, IndexName, OrdinalPosition
+");

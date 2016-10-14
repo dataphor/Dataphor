@@ -19,16 +19,24 @@ using Alphora.Dataphor.DAE.Server;
 using ColumnExpression = Alphora.Dataphor.DAE.Language.SQL.ColumnExpression;
 
 /*
+	Overview ->
+		The CacheSQLDevice provides SQL-based integration with the InterSystems Cache DBMS.
+		This device was developed against the Evaluation version of Cache:
+		Cache for Windows (x86-64) 2016.1.1 (Build 108U_SU) Thu Jul 7 2016 09:32:36 EDT
+
 	Connectivity ->
 		Uses the CacheClient wrapped in the Cache.Connection library by default.
 		The Cache system must have the %Service_callin enabled. See the Cache documentation for more
 		The InterSystems.Data.CacheClient.dll seems to be the only required dependency (all the rest is E/F related)
 
+	Security ->
+		Dataphor Users are mapped to Cache users following the standard approach for all devices.
+
 	Syntax ->
 		Cache SQL is very similar to T-SQL and has many features to support compatibility with and migration from MSSQL.
 		However, there are enough features that it does not support, or supports slightly differently to warrant its own device.
 		This device was based on the MSSQLDevice, with the primary initial differences being:
-			Addition of a PortNumber property to support the port number aspect of connectivity
+			Addition of a Port property to support the port number aspect of connectivity
 			Difference device reconciliation expressions, see reconciliation for more detail
 
 	Reconciliation ->
@@ -43,6 +51,9 @@ using ColumnExpression = Alphora.Dataphor.DAE.Language.SQL.ColumnExpression;
 			- loss of typing information, the underlying database type is mapped to C# (could augment with the catalog tables though)
 			- Key declaration is incorrect, the reported key information appears to be derived from the base table(s) involved in the query, 
 				but the impact of operations is not accounted for and the result is incorrect key information. This may not matter for schema mining though
+		Note that if the target system has multiple schemas within the database (aka namespace), the Schema property of the device can be set to 
+			have the reconciliation only deal with tables in that schema. Otherwise, the schema name will be used as a qualifier to refer to the table in Dataphor.
+		I just found an INFORMATION_SCHEMA schema that appears to be an ANSI-standard implementation, will look at that to see if it provides better catalog exposure.
 
 	Transactions ->
 		Cache does not support the Serializable isolation level, and will throw an exception if it is used
@@ -66,7 +77,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 		protected string _applicationName = "Dataphor Server";
 		protected string _databaseName = String.Empty;
 		protected string _serverName = String.Empty;
-		protected string _portNumber = "1972";
+		protected string _port = "1972";
 
 		public CacheSQLDevice(int iD, string name) : base(iD, name)
 		{
@@ -96,10 +107,10 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 			set { _applicationName = value == null ? "Dataphor Server" : value; }
 		}
 
-		public string PortNumber
+		public string Port
 		{
-			get { return _portNumber; }
-			set { _portNumber = value == null ? "1972" : value; }
+			get { return _port; }
+			set { _port = value == null ? "1972" : value; }
 		}
 
 		protected override void SetMaxIdentifierLength()
@@ -435,7 +446,7 @@ select
 			tags.AddOrUpdate("ServerName", Device.ServerName);
 			tags.AddOrUpdate("DatabaseName", Device.DatabaseName);
 			tags.AddOrUpdate("ApplicationName", Device.ApplicationName);
-			tags.AddOrUpdate("PortNumber", Device.PortNumber);
+			tags.AddOrUpdate("Port", Device.Port);
 			tags.AddOrUpdate("UserName", DeviceSessionInfo.UserName);
 			tags.AddOrUpdate("Password", DeviceSessionInfo.Password);
 

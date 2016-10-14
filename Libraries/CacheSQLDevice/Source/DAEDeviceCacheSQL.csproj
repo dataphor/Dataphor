@@ -24,7 +24,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -46,22 +46,27 @@
     <ProjectReference Include="..\..\..\Dataphor\Base\Base.csproj">
       <Project>{6ec1f378-510b-48d0-8d00-e36bef214766}</Project>
       <Name>Base</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\DAE\Engine.csproj">
       <Project>{8fa5fa37-dc03-4e24-900b-aa863ca9650f}</Project>
       <Name>Engine</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\Server\Server.csproj">
       <Project>{1db01c91-3f92-4094-a8ae-1f7ff01f2e1b}</Project>
       <Name>Server</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">
       <Project>{8cbb779f-64d4-455f-9e4f-70719408a7ca}</Project>
       <Name>DAE.Connection</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\SQLDevice\Source\DAE.Device.SQL.csproj">
       <Project>{13a5d21c-63c4-4c56-97f4-6d921c4ba373}</Project>
       <Name>DAE.Device.SQL</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
