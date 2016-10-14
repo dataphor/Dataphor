@@ -1,0 +1,28 @@
+active	token	Whether the patient record is active	Patient.active
+address	string	An address in any kind of address/part of the patient	Patient.address
+address-city	string	A city specified in an address	Patient.address.city
+address-country	string	A country specified in an address	Patient.address.country
+address-postalcode	string	A postalCode specified in an address	Patient.address.postalCode
+address-state	string	A state specified in an address	Patient.address.state
+address-use	token	A use code specified in an address	Patient.address.use
+animal-breed	token	The breed for animal patients	Patient.animal.breed
+animal-species	token	The species for animal patients	Patient.animal.species
+birthdate	date	The patient's date of birth	Patient.birthDate
+careprovider	reference	Patient's nominated care provider, could be a care manager, not the organization that manages the record	Patient.careProvider
+(Organization, Practitioner)
+deathdate	date	The date of death has been provided and satisfies this search value	Patient.deceasedDateTime
+deceased	token	This patient has been marked as deceased, or as a death date entered	Patient.deceased[x]
+email	token	A value in an email contact	Patient.telecom(system=email)
+family	string	A portion of the family name of the patient	Patient.name.family
+gender	token	Gender of the patient	Patient.gender
+given	string	A portion of the given name of the patient	Patient.name.given
+identifier	token	A patient identifier	Patient.identifier
+language	token	Language code (irrespective of use value)	Patient.communication.language
+link	reference	All patients linked to the given patient	Patient.link.other
+(Patient)
+name	string	A portion of either family or given name of the patient	Patient.name
+organization	reference	The organization at which this person is a patient	Patient.managingOrganization
+(Organization)
+phone	token	A value in a phone contact	Patient.telecom(system=phone)
+phonetic	string	A portion of either family or given name using some kind of phonetic matching algorithm	Patient.name
+telecom	token	The value in any kind of telecom details of the patient	Patient.telecom

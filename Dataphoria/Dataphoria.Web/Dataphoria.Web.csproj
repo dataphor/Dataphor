@@ -56,6 +56,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dataphor\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
+    <Reference Include="System.Security" />
     <Reference Include="System.Web.Cors">
       <HintPath>..\..\Dataphor\packages\Microsoft.AspNet.Cors.5.2.3\lib\net45\System.Web.Cors.dll</HintPath>
     </Reference>
@@ -215,15 +216,51 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\DataController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\HttpRequestExtensions.cs" />
     <Compile Include="Controllers\QueryController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Controllers\DataFhirController.cs" />
+    <Compile Include="ExceptionHandling\FhirGlobalExceptionHandler.cs" />
+    <Compile Include="Extensions\HttpConfigurationFhirExtensions.cs" />
+    <Compile Include="Extensions\HttpHeadersExtension.cs" />
+    <Compile Include="Extensions\HttpRequestFhirExtensions.cs" />
+    <Compile Include="Filters\FhirExceptionFilter.cs" />
+    <Compile Include="Formatters\BinaryFhirFormatter.cs" />
+    <Compile Include="Formatters\FhirMediaTypeFormatter.cs" />
+    <Compile Include="Formatters\HtmlFhirFormatter.cs" />
+    <Compile Include="Formatters\JsonFhirFormatter.cs" />
+    <Compile Include="Formatters\XmlFhirFormatter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Handlers\FhirErrorMessageHandler.cs" />
+    <Compile Include="Handlers\FhirResponseHandler.cs" />
+    <Compile Include="Handlers\MediaTypeHandler.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Extensions\BundleExtensions.cs" />
+    <Compile Include="Models\DataFhir\Const.cs" />
+    <Compile Include="ExceptionHandling\DataFhirException.cs" />
+    <Compile Include="Models\DataFhir\ElementQuery.cs" />
+    <Compile Include="ExceptionHandling\Error.cs" />
+    <Compile Include="Models\DataFhir\ETag.cs" />
+    <Compile Include="ExceptionHandling\ExceptionResponseMessageFactory.cs" />
+    <Compile Include="Models\DataFhir\FhirMediaType.cs" />
+    <Compile Include="Models\DataFhir\FhirResponse.cs" />
+    <Compile Include="ExceptionHandling\IExceptionResponseMessageFactory.cs" />
+    <Compile Include="Models\DataFhir\IGenerator.cs" />
+    <Compile Include="Models\DataFhir\ILocalHost.cs" />
+    <Compile Include="Models\DataFhir\Interaction.cs" />
+    <Compile Include="Extensions\InteractionExtensions.cs" />
+    <Compile Include="Models\DataFhir\Key.cs" />
+    <Compile Include="Extensions\KeyExtensions.cs" />
+    <Compile Include="Models\DataFhir\KeyKind.cs" />
+    <Compile Include="Extensions\LocalhostExtensions.cs" />
+    <Compile Include="Extensions\OperationOutcomeExtensions.cs" />
+    <Compile Include="Models\DataFhir\Respond.cs" />
+    <Compile Include="Models\DataFhir\SingleLocalHost.cs" />
+    <Compile Include="Resources.Designer.cs" />
+    <Compile Include="Utilities\UriHelper.cs" />
+    <Compile Include="Utilities\XmlSignatureHelper.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="App_Code\ProcessorInstance.cs">
       <SubType>Code</SubType>
@@ -235,12 +272,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
-    <Content Include="Content\bootstrap-responsive.css" />
-    <Content Include="Content\bootstrap-responsive.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
-    <Content Include="Content\images\glyphicons-halflings-white.png" />
-    <Content Include="Content\images\glyphicons-halflings.png" />
     <Content Include="Content\themes\base\accordion.css" />
     <Content Include="Content\themes\base\all.css" />
     <Content Include="Content\themes\base\autocomplete.css" />
@@ -321,8 +354,6 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
-    <Content Include="Scripts\knockout-2.2.1.debug.js" />
-    <Content Include="Scripts\knockout-2.2.1.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
@@ -345,6 +376,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Content\images\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

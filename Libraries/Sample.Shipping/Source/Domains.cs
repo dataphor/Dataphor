@@ -46,13 +46,13 @@ namespace Alphora.Shipping
 
 		public string CoordinateToString(Coordinate coordinate)
 		{
-			return String.Format("{0:F6}/{1:F6}", coordinate.Latitude, coordinate.Longitude);
+			return string.Format("{0:F6}/{1:F6}", coordinate.Latitude, coordinate.Longitude);
 		}
 		
 		public Coordinate StringToCoordinate(string tempValue)
 		{
 			int index = tempValue.IndexOf('/');
-			return new Coordinate(Decimal.Parse(tempValue.Substring(0, index)), Decimal.Parse(tempValue.Substring(index + 1, tempValue.Length - (index + 1))));
+			return new Coordinate(decimal.Parse(tempValue.Substring(0, index)), decimal.Parse(tempValue.Substring(index + 1, tempValue.Length - (index + 1))));
 		}
     }
 }

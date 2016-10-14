@@ -1,0 +1,208 @@
+var LPeriod := Period
+(
+	row
+	{
+		"2016-04-01" Start,
+		"2016-05-01" End
+	}
+);
+var LCodeableConcept := CodeableConcept
+(
+	row
+	{
+		{
+			Coding
+			(
+				row
+				{
+					"www.dataphorfhir.com" System,
+					"Version" Version,
+					"Code" Code,
+					"Display" Display,
+					true UserSelected
+				}
+			) 
+		} Coding,
+		"Text" Text
+	}
+);
+var LResourceReference := ResourceReference
+(
+	row
+	{
+		"Reference" Reference,
+		"Display" Display
+	}
+);
+
+var LNamePrefix := { "", "", "Father", "Trapper", "", "", "", "", "", "" };
+var LNameGiven := { "Hawkeye", "Max", "Francis", "John", "Henry", "Frank", "Radar", "B.J.", "Sherman", "Charles" };
+var LNameFamily := { "Pierce", "Klinger", "Mulcahy", "McIntyre", "Blake", "Burns", "O'Reilly", "Hunnicutt", "Potter", "Winchester" };
+var LNameSuffix := { "", "", "", "", "", "", "", "", "", "III" };
+var LAddressLine := { "123 Main", "186 State", "198 Main", "186 Pleasant", "156 State Rd", "1987 Test Dr", "854 Data Ave", "348 Korea St", "9851 War Cir", "6185 Idea Rd" };
+var LAddressCity := { "Crabapple Cove", "Toledo", "Philadelphia", "Boston", "Bloomington", "Fort Wayne", "Ottumwa", "Mill Valley", "Hannibal", "Boston" };
+var LAddressDistrict := { "", "", "", "", "", "", "", "", "", "" };
+var LAddressState := { "ME", "OH", "PA", "MA", "IL", "IN", "IA", "CA", "MO", "MA" };
+var LAddressPostalCode := { "11111", "22222", "33333", "44444", "55555", "66666", "77777", "88888", "99999", "00000" };
+var LAddressCountry := { "USA", "USA", "USA", "USA", "USA", "USA", "USA", "USA", "USA", "USA" };
+var LBirthdate := { "1979-04-13", "1980-05-21", "1960-01-25", "1991-09-12", "1981-10-05", "1971-08-30", "1977-01-13", "1988-11-15", "1988-08-20", "1979-04-29" };
+var LPhone := { "123-456-7890", "465-846-8461", "015-831-4864", "000-418-6548", "111-645-9841", "222-165-9485", "333-168-3151", "444-195-4985", "555-191-9841", "666-196-1454" };
+var LEmail := { "pierce@mash.com", "klinger@mash.com", "mulcahy@mash.com", "mcintyre@mash.com", "blake@mash.com", "burns@mash.com", "oreilly@mash.com", "hunnicutt@mash.com", "potter@mash.com", "winchester@mash.com" };
+
+for var i := 0 to 9 do
+begin
+	var LHumanName := HumanName
+	(
+		row
+		{
+			"official" Use,
+			"Text" Text,
+			{ LNameFamily[i] } Family,
+			{ LNameGiven[i] } Given,
+			{ LNamePrefix[i] } Prefix,
+			{ LNameSuffix[i] } Suffix,
+			LPeriod Period
+		}
+	);
+	var LContactPoint := ContactPoint
+	(
+		row
+		{
+			"phone" System,
+			LPhone[i] Value,
+			"home" Use,
+			1 Rank,
+			LPeriod Period
+		}
+	);
+	var LAddress := Address
+	(
+		row
+		{
+			"home" Use,
+			"physical" Type,
+			"Address Text" Text,
+			{ LAddressLine[i] } Line,
+			LAddressCity[i] City,
+			LAddressDistrict[i] District,
+			LAddressState[i] State,
+			LAddressPostalCode[i] PostalCode,
+			LAddressCountry[i] Country,
+			LPeriod Period
+		}
+	);
+	
+	var P := Patient
+	(
+		row
+		{
+			{
+				Identifier
+				(
+					row
+					{
+						"official" Use,
+						LCodeableConcept Type,
+						"namespace" System,
+						(i + 1).ToString() Value,
+						LPeriod Period,
+						LResourceReference Assigner
+					}
+				) 
+			} Identifier,
+			true Active,
+			{ LHumanName } Name,
+			{ LContactPoint } Telecom,
+			"Male" Gender,
+			LBirthdate[i] BirthDate,
+			FHIRBoolean(row { false Value }) Deceased,
+			{ LAddress } Address,
+			LCodeableConcept MaritalStatus,
+			FHIRBoolean(row { false Value }) MultipleBirth,
+			//Photo : list(Attachment),
+			{
+				Patient.ContactComponent
+				(
+					row
+					{
+						{ LCodeableConcept } Relationship,
+						LHumanName Name,
+						{ LContactPoint } Telecom,
+						LAddress Address,
+						"Male" Gender,
+						LResourceReference Organization,
+						LPeriod Period
+					}
+				)
+			} Contact,
+			//Animal : Patient.AnimalComponent,
+			{
+				Patient.CommunicationComponent
+				(
+					row
+					{
+						LCodeableConcept Language,
+						true Preferred
+					}
+				)
+			} Communication,
+			{
+				LResourceReference
+			} CareProvider,
+			LResourceReference ManagingOrganization,
+			{
+				Patient.LinkComponent
+				(
+					row
+					{
+						LResourceReference Other,
+						"seealso" Type
+					}
+				)
+			} Link
+		}
+	);
+	
+	//* Table: Resources
+	insert table
+	{
+		row
+		{
+			(i + 1).ToString() Id,
+			'Patient' Type,
+			P Content,
+			'1' Number,
+			Date().AsString Date,
+			'String' String,
+			'Token' Token,
+			'Reference' Reference,
+			'Composite' Composite,
+			'1' Quantity,
+			'www.dataphorfhir.com' Uri
+		}
+	} into Resources;
+	
+	//* Table: Patients
+	insert table
+	{
+		row
+		{
+			(i + 1).ToString() ResourceId,
+			'true' Active,
+			LAddressLine[i] Address,
+			LAddressCity[i] AddressCity,
+			LAddressCountry[i] AddressCountry,
+			LAddressPostalCode[i] AddressPostalCode,
+			LAddressState[i] AddressState,
+			LBirthdate[i] Birthdate,
+			'false' Deceased,
+			LEmail[i] Email,
+			LNameFamily[i] Family,
+			'M' Gender,
+			LNameGiven[i] Given,
+			'en' Language,
+			LNameGiven[i] + ' ' + LNameFamily[i] Name,
+			LPhone[i] Phone
+		}
+	} into Patients;
+end;

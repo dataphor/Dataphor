@@ -1,0 +1,32 @@
+/*
+	TODO: Register a SimpleDevice
+	TODO: Create a table for Resources, with Content field to store the resource, and searchable fields
+	TODO: Create a table for Patients, that extends Resources with additional searchable fields
+	TODO: Create a view for Patients (with a distinctly unique name) so that the Processor Instance can find it
+	TODO: Create an operator that inserts into the view, and strips the searchable fields out of the Resource
+*/
+create device PGSQLFHIRDevice
+	reconciliation { mode = { command }, master = device }
+	class "PostgreSQLDevice"
+	attributes
+	{
+		//"Server" = "dataphorfhir.c4xrrem9krur.us-west-2.rds.amazonaws.com",
+		"Server" = "localhost",
+		"Database" = "DataphorFHIR"
+	};
+
+//CreateDeviceUser("System", "PGSQLFHIRDevice", "administrator", "DCGeverm0re");
+//CreateDeviceUser("Admin", "PGSQLFHIRDevice", "administrator", "DCGeverm0re");
+CreateDeviceUser("System", "PGSQLFHIRDevice", "fhir", "fhir");
+CreateDeviceUser("Admin", "PGSQLFHIRDevice", "fhir", "fhir");
+EnsureDeviceStarted("PGSQLFHIRDevice");
+alter device PGSQLFHIRDevice
+{
+	create type FHIR.Core.Base class "FHIRServer.SQLResource"
+};
+SetDefaultDeviceName("PGSQLFHIRDevice");
+	
+ExecuteScript("FHIR.Server", "FHIR.DataTypes");
+ExecuteScript("FHIR.Server", "FHIR.Tables");
+ExecuteScript("FHIR.Server", "FHIR.Operators");
+ExecuteScript("FHIR.Server", "FHIR.TestData");

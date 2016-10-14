@@ -1,20 +1,15 @@
-﻿/*
-	From the Furore Spark FHIR Server implementation
-*/
-
+﻿using Hl7.Fhir.Rest;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
-using Hl7.Fhir.Rest;
 
-namespace Alphora.Dataphor.Dataphoria.Web.Controllers
+namespace Alphora.Dataphor.Dataphoria.Web.Extensions
 {
 	public static class HttpRequestExtensions
 	{
+
 		public static bool Exists(this HttpHeaders headers, string key)
 		{
 			IEnumerable<string> values;
@@ -25,14 +20,14 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 			else return false;
 
 		}
-		
+
 		public static void Replace(this HttpHeaders headers, string header, string value)
 		{
 			//if (headers.Exists(header)) 
 			headers.Remove(header);
 			headers.Add(header, value);
 		}
-		
+
 		public static string Value(this HttpHeaders headers, string key)
 		{
 			IEnumerable<string> values;
@@ -42,7 +37,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 			}
 			else return null;
 		}
-		
+
 		public static void ReplaceHeader(this HttpRequestMessage request, string header, string value)
 		{
 			request.Headers.Replace(header, value);
@@ -57,7 +52,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 			}
 			else return null;
 		}
-		
+
 		public static string GetParameter(this HttpRequestMessage request, string key)
 		{
 			foreach (var param in request.GetQueryNameValuePairs())
@@ -81,10 +76,31 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 
 		public static SearchParams GetSearchParams(this HttpRequestMessage request)
 		{
-			var parameters = request.TupledParameters();
+			var parameters = request.TupledParameters().Where(tp => tp.Item1 != "_format");
 			UriParamList actualParameters = new UriParamList(parameters);
 			var searchCommand = SearchParams.FromUriParamList(parameters);
 			return searchCommand;
+		}
+
+		public static IEnumerable<KeyValuePair<string, object>> NativeListedParameters(this HttpRequestMessage request)
+		{
+			IEnumerable<KeyValuePair<string, string>> queryPairs = request.GetQueryNameValuePairs();
+			var parameters = new Dictionary<string, object>();
+			foreach (var pair in queryPairs.Where(p => !p.Key.StartsWith("_")))
+			{
+				parameters.Add(String.Format("A{0}", pair.Key), pair.Value);
+			}
+
+			return parameters;
+		}
+	}
+
+	public static class HttpHeadersFhirExtensions
+	{
+		public static bool IsSummary(this HttpHeaders headers)
+		{
+			string summary = headers.Value("_summary");
+			return (summary != null) ? summary.ToLower() == "true" : false;
 		}
 	}
 }

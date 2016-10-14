@@ -201,16 +201,18 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="NotifyAction.cs" />
+    <Compile Include="NotifyAction.cs">
+      <SubType>Actions</SubType>
+    </Compile>
     <Compile Include="BaseElement.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ClipboardAction.cs" />
-    <Compile Include="Container.cs">
-      <SubType>Component</SubType>
+    <Compile Include="ClipboardAction.cs">
+      <SubType>Actions</SubType>
     </Compile>
+    <Compile Include="Container.cs" />
     <Compile Include="DataElement.cs">
-      <SubType>Code</SubType>
+      <SubType>Data Controls</SubType>
     </Compile>
     <Compile Include="DocumentExpression.cs">
       <SubType>Code</SubType>
@@ -222,15 +224,16 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Exposed.cs">
-      <SubType>Code</SubType>
+      <SubType>Non Visual</SubType>
     </Compile>
     <Compile Include="File.cs">
-      <SubType>Code</SubType>
+      <SubType>Data Controls</SubType>
     </Compile>
     <Compile Include="Form.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FormAction.cs">
+      <SubType>Actions</SubType>
     </Compile>
     <Compile Include="Forms\ApplicationListForm.cs">
       <SubType>Form</SubType>
@@ -275,7 +278,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Frame.cs">
-      <SubType>Code</SubType>
+      <SubType>Static Controls</SubType>
     </Compile>
     <Compile Include="General.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -283,7 +286,7 @@
       <DependentUpon>General.resx</DependentUpon>
     </Compile>
     <Compile Include="Grid.cs">
-      <SubType>Code</SubType>
+      <SubType>Data Controls</SubType>
     </Compile>
     <Compile Include="Interface.cs">
       <SubType>Code</SubType>
@@ -292,20 +295,22 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Menu.cs">
-      <SubType>Code</SubType>
+      <SubType>Non Visual</SubType>
     </Compile>
     <Compile Include="NativeMethods.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Notebook.cs">
-      <SubType>Component</SubType>
+      <SubType>Static Controls</SubType>
     </Compile>
     <Compile Include="Panel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Schedule.cs" />
+    <Compile Include="Schedule.cs">
+      <SubType>Data Controls</SubType>
+    </Compile>
     <Compile Include="Search.cs">
-      <SubType>Code</SubType>
+      <SubType>Data Controls</SubType>
     </Compile>
     <Compile Include="Session.cs">
       <SubType>Code</SubType>
@@ -314,7 +319,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="StaticElement.cs">
-      <SubType>Component</SubType>
+      <SubType>Static Controls</SubType>
     </Compile>
     <Compile Include="Strings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -322,7 +327,7 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
     <Compile Include="TextBox.cs">
-      <SubType>Code</SubType>
+      <SubType>Data Controls</SubType>
     </Compile>
     <Compile Include="TextEditor\DBTextEdit.cs">
       <SubType>UserControl</SubType>
@@ -333,12 +338,14 @@
     <Compile Include="TextEditor\TextEdit.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TextEditor\TextEditor.cs" />
+    <Compile Include="TextEditor\TextEditor.cs">
+      <SubType>Data Controls</SubType>
+    </Compile>
     <Compile Include="Theme.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Tree.cs">
-      <SubType>Code</SubType>
+      <SubType>Data Controls</SubType>
     </Compile>
     <Compile Include="UnsafeNativeMethods.cs">
       <SubType>Code</SubType>

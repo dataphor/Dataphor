@@ -169,9 +169,7 @@
     <Compile Include="DBFileForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DBGrid.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="DBGrid.cs" />
     <Compile Include="DBImageAspect.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -196,15 +194,11 @@
     <Compile Include="DBTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Design\AdornExpressionDesigner.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Design\AdornExpressionDesigner.cs" />
     <Compile Include="Design\DesignException.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Design\Editor.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Design\Editor.cs" />
     <Compile Include="Design\MultiLineEditForm.cs">
       <SubType>Form</SubType>
     </Compile>
