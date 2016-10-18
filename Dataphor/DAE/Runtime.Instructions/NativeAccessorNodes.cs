@@ -7,22 +7,15 @@
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using System; 
-	using System.Reflection;
+	using System;
 
 	using Alphora.Dataphor.DAE;
-	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.DAE.Language;
-	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Alphora.Dataphor.DAE.Runtime.Instructions;
-	using Alphora.Dataphor.DAE.Device.Catalog;
-	using Schema = Alphora.Dataphor.DAE.Schema;
+	using Sigil;
 
-    // BooleanAsStringSelectorNode
-    public class BooleanAsStringSelectorNode : UnaryInstructionNode
+	// BooleanAsStringSelectorNode
+	public class BooleanAsStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -32,10 +25,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToBoolean((string)argument1);
 		}
-    }
-    
-    // BooleanAsStringReadAccessorNode
-    public class BooleanAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(System.Convert).GetMethod("ToBoolean", new[] { typeof(string) }));
+		}
+	}
+
+	// BooleanAsStringReadAccessorNode
+	public class BooleanAsStringReadAccessorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -45,10 +45,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return ((bool)argument1).ToString().ToLower();
 		}
-    }
-    
-    // BooleanAsStringWriteAccessorNode
-    public class BooleanAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(bool).GetMethod("ToString", new Type[0]));
+			m.IL.CallVirtual(typeof(string).GetMethod("ToLower", new[] { typeof(string) }));
+		}
+	}
+
+	// BooleanAsStringWriteAccessorNode
+	public class BooleanAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -58,10 +69,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToBoolean((string)argument2);
 		}
-    }   
 
-    // BooleanAsDisplayStringSelectorNode
-    public class BooleanAsDisplayStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(System.Convert).GetMethod("ToBoolean", new[] { typeof(string) }));
+		}
+	}
+
+	// BooleanAsDisplayStringSelectorNode
+	public class BooleanAsDisplayStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -71,10 +92,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToBoolean((string)argument1);
 		}
-    }
-    
-    // BooleanAsDisplayStringReadAccessorNode
-    public class BooleanAsDisplayStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(System.Convert).GetMethod("ToBoolean", new[] { typeof(string) }));
+		}
+	}
+
+	// BooleanAsDisplayStringReadAccessorNode
+	public class BooleanAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -84,10 +112,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return ((bool)argument1).ToString();
 		}
-    }
-    
-    // BooleanAsDisplayStringWriteAccessorNode
-    public class BooleanAsDisplayStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(bool).GetMethod("ToString", new Type[0]));
+		}
+	}
+
+	// BooleanAsDisplayStringWriteAccessorNode
+	public class BooleanAsDisplayStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -97,10 +135,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToBoolean((string)argument2);
 		}
-    }   
 
-    // ByteAsStringSelectorNode
-    public class ByteAsStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(System.Convert).GetMethod("ToBoolean", new[] { typeof(string) }));
+		}
+	}
+
+	// ByteAsStringSelectorNode
+	public class ByteAsStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -110,10 +158,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToByte((string)argument1);
 		}
-    }
-    
-    // ByteAsStringReadAccessorNode
-    public class ByteAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(System.Convert).GetMethod("ToByte", new[] { typeof(string) }));
+		}
+	}
+
+	// ByteAsStringReadAccessorNode
+	public class ByteAsStringReadAccessorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -123,10 +181,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return ((byte)argument1).ToString();
 		}
-    }
-    
-    // ByteAsStringWriteAccessorNode
-    public class ByteAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(byte).GetMethod("ToString", new Type[0]));
+		}
+	}
+
+	// ByteAsStringWriteAccessorNode
+	public class ByteAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -136,10 +204,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToByte((string)argument2);
 		}
-    }   
 
-    // ShortAsStringSelectorNode
-    public class ShortAsStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(System.Convert).GetMethod("ToByte", new[] { typeof(string) }));
+		}
+	}
+
+	// ShortAsStringSelectorNode
+	public class ShortAsStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -149,10 +227,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToInt16((string)argument1);
 		}
-    }
-    
-    // ShortAsStringReadAccessorNode
-    public class ShortAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(System.Convert).GetMethod("ToInt16", new[] { typeof(string) }));
+		}
+	}
+
+	// ShortAsStringReadAccessorNode
+	public class ShortAsStringReadAccessorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -162,10 +247,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return ((short)argument1).ToString();
 		}
-    }
-    
-    // ShortAsStringWriteAccessorNode
-    public class ShortAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(short).GetMethod("ToString", new Type[0]));
+		}
+	}
+
+	// ShortAsStringWriteAccessorNode
+	public class ShortAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -175,10 +270,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToInt16((string)argument2);
 		}
-    }   
 
-    // IntegerAsStringSelectorNode
-    public class IntegerAsStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(System.Convert).GetMethod("ToInt16", new[] { typeof(string) }));
+		}
+	}
+
+	// IntegerAsStringSelectorNode
+	public class IntegerAsStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -188,10 +293,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToInt32((string)argument1);
 		}
-    }
-    
-    // IntegerAsStringReadAccessorNode
-    public class IntegerAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(System.Convert).GetMethod("ToInt32", new[] { typeof(string) }));
+		}
+	}
+
+	// IntegerAsStringReadAccessorNode
+	public class IntegerAsStringReadAccessorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -201,10 +313,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return ((int)argument1).ToString();
 		}
-    }
-    
-    // IntegerAsStringWriteAccessorNode
-    public class IntegerAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(int).GetMethod("ToString", new Type[0]));
+		}
+	}
+
+	// IntegerAsStringWriteAccessorNode
+	public class IntegerAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -214,10 +336,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToInt32((string)argument2);
 		}
-    }   
 
-    // LongAsStringSelectorNode
-    public class LongAsStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(System.Convert).GetMethod("ToInt32", new[] { typeof(string) }));
+		}
+	}
+
+	// LongAsStringSelectorNode
+	public class LongAsStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -227,10 +359,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToInt64((string)argument1);
 		}
-    }
-    
-    // LongAsStringReadAccessorNode
-    public class LongAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(System.Convert).GetMethod("ToInt64", new[] { typeof(string) }));
+		}
+	}
+
+	// LongAsStringReadAccessorNode
+	public class LongAsStringReadAccessorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -240,10 +379,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return ((long)argument1).ToString();
 		}
-    }
-    
-    // LongAsStringWriteAccessorNode
-    public class LongAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(long).GetMethod("ToString", new Type[0]));
+		}
+	}
+
+	// LongAsStringWriteAccessorNode
+	public class LongAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -253,10 +402,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToInt64((string)argument2);
 		}
-    }   
 
-    // DecimalAsStringSelectorNode
-    public class DecimalAsStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(System.Convert).GetMethod("ToInt64", new[] { typeof(string) }));
+		}
+	}
+
+	// DecimalAsStringSelectorNode
+	public class DecimalAsStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -266,10 +425,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToDecimal((string)argument1);
 		}
-    }
-    
-    // DecimalAsStringReadAccessorNode
-    public class DecimalAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(System.Convert).GetMethod("ToDecimal", new[] { typeof(string) }));
+		}
+	}
+
+	// DecimalAsStringReadAccessorNode
+	public class DecimalAsStringReadAccessorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -279,10 +445,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return ((decimal)argument1).ToString();
 		}
-    }
-    
-    // DecimalAsStringWriteAccessorNode
-    public class DecimalAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(decimal).GetMethod("ToString", new Type[0]));
+		}
+	}
+
+	// DecimalAsStringWriteAccessorNode
+	public class DecimalAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -292,10 +468,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Convert.ToDecimal((string)argument2);
 		}
-    }   
 
-    // GuidAsStringSelectorNode
-    public class GuidAsStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(System.Convert).GetMethod("ToDecimal", new[] { typeof(string) }));
+		}
+	}
+
+	// GuidAsStringSelectorNode
+	public class GuidAsStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -305,10 +491,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return new Guid((string)argument1);
 		}
-    }
-    
-    // GuidAsStringReadAccessorNode
-    public class GuidAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.NewObject(typeof(Guid).GetConstructor(new[] { typeof(string) }));
+		}
+	}
+
+	// GuidAsStringReadAccessorNode
+	public class GuidAsStringReadAccessorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -318,10 +511,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return ((Guid)argument1).ToString();
 		}
-    }
-    
-    // GuidAsStringWriteAccessorNode
-    public class GuidAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Guid).GetMethod("ToString", new[] { typeof(string) }));
+		}
+	}
+
+	// GuidAsStringWriteAccessorNode
+	public class GuidAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -331,10 +531,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return new Guid((string)argument2);
 		}
-    }   
 
-    // MoneyAsStringSelectorNode
-    public class MoneyAsStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.NewObject(typeof(Guid).GetConstructor(new[] { typeof(string) }));
+		}
+	}
+
+	// MoneyAsStringSelectorNode
+	public class MoneyAsStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -344,36 +554,70 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Decimal.Parse((string)argument1, System.Globalization.NumberStyles.Currency);
 		}
-    }
-    
-    // MoneyAsStringReadAccessorNode
-    public class MoneyAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant((int)System.Globalization.NumberStyles.Currency);
+			m.IL.Call(typeof(Decimal).GetMethod("Parse", new[] { typeof(string), typeof(System.Globalization.NumberStyles) }));
+		}
+	}
+
+	// MoneyAsStringReadAccessorNode
+	public class MoneyAsStringReadAccessorNode : UnaryInstructionNode
     {
+		private const string FormatString = "F";
+
 		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (argument1 == null)
 				return null;
 			#endif
-			return ((decimal)argument1).ToString("F");
+			return ((decimal)argument1).ToString(FormatString);
 		}
-    }
-    
-    // MoneyAsDisplayStringReadAccessorNode
-    public class MoneyAsDisplayStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadConstant(FormatString);
+			m.IL.Call(typeof(decimal).GetMethod("ToString", new[] { typeof(string) }));
+		}
+	}
+
+	// MoneyAsDisplayStringReadAccessorNode
+	public class MoneyAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
+		private const string FormatString = "C";
+
 		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (argument1 == null)
 				return null;
 			#endif
-			return ((decimal)argument1).ToString("C");
+			return ((decimal)argument1).ToString(FormatString);
 		}
-    }
-    
-    // MoneyAsStringWriteAccessorNode
-    public class MoneyAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadConstant(FormatString);
+			m.IL.Call(typeof(decimal).GetMethod("ToString", new[] { typeof(string) }));
+		}
+	}
+
+	// MoneyAsStringWriteAccessorNode
+	public class MoneyAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -383,10 +627,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return Decimal.Parse((string)argument2, System.Globalization.NumberStyles.Currency);
 		}
-    }   
 
-    // DateTimeAsStringSelectorNode
-    public class DateTimeAsStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.LoadConstant((int)System.Globalization.NumberStyles.Currency);
+			m.IL.Call(typeof(Decimal).GetMethod("Parse", new[] { typeof(string), typeof(System.Globalization.NumberStyles) }));
+		}
+	}
+
+	// DateTimeAsStringSelectorNode
+	public class DateTimeAsStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -396,23 +651,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return DateTime.Parse((string)argument1);
 		}
-    }
-    
-    // DateTimeAsStringReadAccessorNode
-    public class DateTimeAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("Parse", new[] { typeof(string) }));
+		}
+	}
+
+	// DateTimeAsStringReadAccessorNode
+	public class DateTimeAsStringReadAccessorNode : UnaryInstructionNode
     {
+		private const string FormatString = "G";
+
 		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (argument1 == null)
 				return null;
 			#endif
-			return ((DateTime)argument1).ToString("G");
+			return ((DateTime)argument1).ToString(FormatString);
 		}
-    }
-    
-    // DateTimeAsStringWriteAccessorNode
-    public class DateTimeAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadConstant(FormatString);
+			m.IL.Call(typeof(DateTime).GetMethod("ToString", new[] { typeof(string) }));
+		}
+	}
+
+	// DateTimeAsStringWriteAccessorNode
+	public class DateTimeAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -422,10 +697,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return DateTime.Parse((string)argument2);
 		}
-    }   
 
-    // DateAsStringSelectorNode
-    public class DateAsStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(DateTime).GetMethod("Parse", new[] { typeof(string) }));
+		}
+	}
+
+	// DateAsStringSelectorNode
+	public class DateAsStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -435,23 +720,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return DateTime.Parse((string)argument1).Date;
 		}
-    }
-    
-    // DateAsStringReadAccessorNode
-    public class DateAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("Parse", new[] { typeof(string) }));
+			var dateTimeLocal = m.StoreLocal(typeof(DateTime));
+			m.IL.LoadLocalAddress(dateTimeLocal);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Date", new Type[0]));
+		}
+	}
+
+	// DateAsStringReadAccessorNode
+	public class DateAsStringReadAccessorNode : UnaryInstructionNode
     {
+		private const string FormatString = "d";
+
 		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (argument1 == null)
 				return null;
 			#endif
-			return ((DateTime)argument1).ToString("d");
+			return ((DateTime)argument1).ToString(FormatString);
 		}
-    }
-    
-    // DateAsStringWriteAccessorNode
-    public class DateAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadConstant(FormatString);
+			m.IL.Call(typeof(DateTime).GetMethod("ToString", new[] { typeof(string) }));
+		}
+	}
+
+	// DateAsStringWriteAccessorNode
+	public class DateAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -461,21 +769,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return DateTime.Parse((string)argument2).Date;
 		}
-    }   
 
-    // TimeSpanAsStringSelectorNode
-    public class TimeSpanAsStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(DateTime).GetMethod("Parse", new[] { typeof(string) }));
+			var dateTimeLocal = m.StoreLocal(typeof(DateTime));
+			m.IL.LoadLocalAddress(dateTimeLocal);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Date", new Type[0]));
+		}
+	}
+
+	// TimeSpanAsStringSelectorNode
+	public class TimeSpanAsStringSelectorNode : UnaryInstructionNode
     {
 		public static TimeSpan StringToTimeSpan(string value)
 		{
-			try
-			{
-				return TimeSpan.Parse(value);
-			}
-			catch
-			{
+			TimeSpan result;
+			if (!TimeSpan.TryParse(value, out result))
 				return CustomParse(value);
-			}
+			return result;
 		}
 
 		public static TimeSpan CustomParse(string value)
@@ -760,10 +1077,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return StringToTimeSpan((string)argument1);
 		}
-    }
-    
-    // TimeSpanAsStringReadAccessorNode
-    public class TimeSpanAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpanAsStringSelectorNode).GetMethod("StringToTimeSpan", new[] { typeof(string) }));
+		}
+	}
+
+	// TimeSpanAsStringReadAccessorNode
+	public class TimeSpanAsStringReadAccessorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -773,10 +1097,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return TimeSpanAsStringSelectorNode.TimeSpanToString(((TimeSpan)argument1));
 		}
-    }
-    
-    // TimeSpanAsStringWriteAccessorNode
-    public class TimeSpanAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpanAsStringSelectorNode).GetMethod("TimeSpanToString", new[] { typeof(TimeSpan) }));
+		}
+	}
+
+	// TimeSpanAsStringWriteAccessorNode
+	public class TimeSpanAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -786,10 +1117,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return TimeSpanAsStringSelectorNode.StringToTimeSpan((string)argument2);
 		}
-    }   
 
-    // TimeAsStringSelectorNode
-    public class TimeAsStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(TimeSpanAsStringSelectorNode).GetMethod("StringToTimeSpan", new[] { typeof(string) }));
+		}
+	}
+
+	// TimeAsStringSelectorNode
+	public class TimeAsStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -799,23 +1140,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return new DateTime(DateTime.Parse((string)argument1).TimeOfDay.Ticks);
 		}
-    }
-    
-    // TimeAsStringReadAccessorNode
-    public class TimeAsStringReadAccessorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("Parse", new[] { typeof(string) }));
+			var dateTimeLocal = m.StoreLocal(typeof(DateTime));
+			m.IL.LoadLocalAddress(dateTimeLocal);
+			m.IL.Call(typeof(DateTime).GetMethod("get_TimeOfDay", new Type[0]));
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Ticks", new Type[0]));
+			m.IL.NewObject(typeof(DateTime).GetConstructor(new[] { typeof(long) }));
+		}
+	}
+
+	// TimeAsStringReadAccessorNode
+	public class TimeAsStringReadAccessorNode : UnaryInstructionNode
     {
+		private const string FormatString = "T";
+
 		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (argument1 == null)
 				return null;
 			#endif
-			return ((DateTime)argument1).ToString("T");
+			return ((DateTime)argument1).ToString(FormatString);
 		}
-    }
-    
-    // TimeAsStringWriteAccessorNode
-    public class TimeAsStringWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadConstant(FormatString);
+			m.IL.Call(typeof(DateTime).GetMethod("ToString", new[] { typeof(string) }));
+		}
+	}
+
+	// TimeAsStringWriteAccessorNode
+	public class TimeAsStringWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -825,10 +1191,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			return new DateTime(DateTime.Parse((string)argument2).TimeOfDay.Ticks);
 		}
-    }   
 
-    // BinaryAsDisplayStringSelectorNode
-    public class BinaryAsDisplayStringSelectorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(DateTime).GetMethod("Parse", new[] { typeof(string) }));
+			var dateTimeLocal = m.StoreLocal(typeof(DateTime));
+			m.IL.LoadLocalAddress(dateTimeLocal);
+			m.IL.Call(typeof(DateTime).GetMethod("get_TimeOfDay", new Type[0]));
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Ticks", new Type[0]));
+			m.IL.NewObject(typeof(DateTime).GetConstructor(new[] { typeof(long) }));
+		}
+	}
+
+	// BinaryAsDisplayStringSelectorNode
+	public class BinaryAsDisplayStringSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{

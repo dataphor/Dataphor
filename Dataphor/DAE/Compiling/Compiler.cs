@@ -769,6 +769,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 					#else
 					BindingTraversal(plan, planNode, new DetermineAccessPathVisitor());
 					#endif
+
+                    planNode.Prepare();
 				}
 			}
 			catch (Exception exception)
@@ -1258,7 +1260,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			plan.EnterLoop();
 			try
 			{
-				node.Nodes.Add(CompileFrameNode(plan, localStatement.Statement));
+				node.Nodes.Add(CompileStatement(plan, localStatement.Statement));
 			}
 			finally
 			{
@@ -1654,17 +1656,20 @@ namespace Alphora.Dataphor.DAE.Compiling
 				int index = ResolveVariableIdentifier(plan, context.Identifier, out columnIndex, context.Names);
 				if (index >= 0)
 				{
+					PlanNode result;
 					if (columnIndex >= 0)
 					{
 						Schema.IRowType rowType = (Schema.IRowType)plan.Symbols[index].DataType;
 						#if USECOLUMNLOCATIONBINDING
-						return new StackColumnReferenceNode(rowType.Columns[columnIndex].Name, rowType.Columns[columnIndex].DataType, index, columnIndex);
+						result = new StackColumnReferenceNode(rowType.Columns[columnIndex].Name, rowType.Columns[columnIndex].DataType, index, columnIndex);
 						#else
-						return new StackColumnReferenceNode(Schema.Object.IsRooted(context.Identifier) ? context.Identifier : Schema.Object.EnsureRooted(rowType.Columns[columnIndex].Name), rowType.Columns[columnIndex].DataType, index);
+						result = new StackColumnReferenceNode(Schema.Object.IsRooted(context.Identifier) ? context.Identifier : Schema.Object.EnsureRooted(rowType.Columns[columnIndex].Name), rowType.Columns[columnIndex].DataType, index);
 						#endif
 					}
-						
-					return new StackReferenceNode(Schema.Object.IsRooted(context.Identifier) ? context.Identifier : Schema.Object.EnsureRooted(plan.Symbols[index].Name), plan.Symbols[index].DataType, index);
+					else
+						result = new StackReferenceNode(Schema.Object.IsRooted(context.Identifier) ? context.Identifier : Schema.Object.EnsureRooted(plan.Symbols[index].Name), plan.Symbols[index].DataType, index);
+					result.DetermineCharacteristics(plan);
+					return result;
 				}
 			}
 			

@@ -107,7 +107,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return _isDisposable; }
 			set { _isDisposable = value; }
 		}
-		
+
+		public Type NativeType => typeof(Runtime.Data.ListValue);
+
 		public override bool Equals(object objectValue)
 		{
 			return (objectValue is IDataType) && Equals((IDataType)objectValue);

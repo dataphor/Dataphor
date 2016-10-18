@@ -18,8 +18,9 @@ using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Compiling.Visitors;
-using Alphora.Dataphor.DAE.Server;	
+using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using System.Linq;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -99,10 +100,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public const ushort ExpectsTableValuesFlag = 0x8000;
 		public const ushort NotExpectsTableValuesFlag = 0x7FFF;
 
-		public PlanNode() : base()
-		{
- 		}
-
 		// Use a ushort because an enum will be an integer
 		protected ushort _characteristics = IsLiteralFlag | IsFunctionalFlag | IsDeterministicFlag | IsRepeatableFlag | ShouldSupportFlag | ShouldSupportModifyFlag;
 		
@@ -119,6 +116,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		public int NodeCount { get { return _nodes == null ? 0 : _nodes.Count; } }
+
+		public PlanNode()
+		{
+			// TODO: remove this once all nodes are prepared before execution
+
+			//// Prepare temporary execution shim that ensures that the node is prepared
+			Func<Program, object> executor = null;
+			executor =
+				p =>
+				{
+					if (Execute == executor)
+						Prepare();
+					return Execute(p);
+				};
+			Execute = executor;
+		}
 
         #region Characteristics
 
@@ -628,32 +641,44 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return (_characteristics & IsBreakableFlag) == IsBreakableFlag; }
 			set { if (value) _characteristics |= IsBreakableFlag; else _characteristics &= NotIsBreakableFlag; }
 		}
-		
+
+		/// <summary> The physical type when not nillable. </summary>
+        public virtual Type NativeType
+        {
+            get
+            {
+                return DataType?.NativeType ?? typeof(object);
+            }
+        }
+
+		/// <summary> The natural type or the boxed type if the native type should be boxed. </summary>
+		public Type PhysicalType
+		{
+			get 
+			{
+				var nativeType = NativeType;
+				return IsNilable && nativeType.IsValueType ? typeof(object) : nativeType; 
+			}
+		}
+
 		public object TestExecute(Program program)
 		{
 			return Nodes[0].Execute(program);
 		}
-		
+
 		// BeforeExecute        
-        protected virtual void InternalBeforeExecute(Program program) { }
-        
-		public object Execute(Program program)
+		protected Action<Program> InternalBeforeExecute;
+
+		public Func<Program, object> Execute;
+
+        public object WrapRuntimeExceptions(Program program, Func<Program, object> execute)
 		{
 			#if WRAPRUNTIMEEXCEPTIONS
 			try
 			{
 			#endif
 
-				if (IsBreakable)
-					program.Yield(this, false);
-				else
-					program.CheckAborted();
-
-				// TODO: Compile this call, the TableNode is the only node that uses this hook
-				InternalBeforeExecute(program);
-				if (DeviceSupported)
-					return program.DeviceExecute(_device, this);
-				return InternalExecute(program);
+				return execute(program);
 
 			#if WRAPRUNTIMEEXCEPTIONS
 			}
@@ -719,8 +744,218 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			#endif
 		}
-		
-        public abstract object InternalExecute(Program program);
+
+		public object DefaultExecute(Program program)
+		{
+			if (IsBreakable)
+				program.Yield(this, false);
+			else
+				program.CheckAborted();
+
+			InternalBeforeExecute?.Invoke(program);
+			if (DeviceSupported)
+				return program.DeviceExecute(_device, this);
+			return InternalExecute(program);
+		}
+
+		public void Prepare()
+		{
+			Func<Program, object> innerExecute;
+			if (ShouldEmitIL())
+			{
+				var emitter = GetEmitter();
+				Func<Program, object> func = EmitMethod(emitter);
+				#if (DEBUG)
+				innerExecute = p =>
+				{
+					try
+					{
+						return func(p);
+					}
+					catch (InvalidProgramException)
+					{
+						emitter.SaveAssembly(); // Dump the assembly if this is a problem with the IL
+						throw;
+					}
+				};
+				#else
+				innerExecute = p => func(p);
+				#endif
+			}
+			else
+			{
+				innerExecute = DefaultExecute;
+				foreach (var node in Nodes)
+					node.Prepare();
+			}
+			Execute = p => WrapRuntimeExceptions(p, innerExecute);
+		}
+
+		private bool ShouldEmitIL()
+		{
+            return CanEmitIL && !DeviceSupported
+                // Only emit IL if at least one sub-node also emits IL
+                && (Nodes.Count == 0 || Nodes.Any(n => n.CanEmitIL));
+        }
+
+		public abstract object InternalExecute(Program program);
+
+        #endregion
+
+        #region IL Emission
+
+		/*
+			Native IL emission is accomplished as part of the Prepare step, by recursively passing a NativeEmitter 
+			object which contains an IL emitter.  Each node is responsible for overridding the InternalEmitIL 
+			method if that node supports native emission, which is controlled by overriding the CanEmitIL propery.
+
+			There are three modes in which data values are represented:
+			* Object - this is the traditional mode used by PlanNode execution, where the value is held in boxed 
+				form (if a value type) and up-cast as an object.  Values are assumed to be in this form coming 
+				from calls into legacy execution, and are returned as this form by entry points into native 
+				execution.  Values are also represented in the Dataphor stack and passed into helper functions
+				such as disposal in this form.
+			* Native - this is the unboxed (if applicable) and down-cast representation of data, used when 
+				invoking native operations against the value(s).
+			* Physical - the native type if the node is not IsNillable, otherwise a boxed representation so as to
+				hold the nilability of the value.  This is the form in which IL emitting nodes assume values are 
+				between recursive calls.  In other words, a given node which has nilable arguments must deal with
+				the nilability of those arguments in the transition into native reprentations, then, after 
+				performing the node's operation, must re-box the value if the node is nilable before returning.
+
+			There are helper functions in NativeEmitter to assist with these transitions.
+
+			InstructionNodeBase
+
+			For nodes with standard nil propagation (i.e. any nil arguments means nil result) InstructionNodeBase 
+			automatically performs the effort of evaluating arguments, checking their for nil values, and ensuring
+			that the result is properly boxed or not.  Operators with special nil semantics can override the 
+			default behavior in whole or in part.
+
+			There are two main ways to provide native execution using InstructionNodeBase:
+			1. Override CanEmitIL and override EmitInstructionOperation - data are given either through the IL
+				stack (the default), or, if the ArgumentEmissionStyle method is overridden, by IL local variables
+				representing the physical or native values.
+			2. Implement a method called StaticExecute - these methods are assumed to take native values and by
+				default, return a native value.  If the result is nilable, the IsNilable flag must match the 
+				situation and EmitPostInstruction must be overridden to not call base, thus eliminating what 
+				would be a 2nd attempt to transition from native to physical modes.
+		*/
+
+		// TODO: IL debugging
+
+        private Func<Program, object> EmitMethod(NativeEmitter emitter)
+        {
+            var method = emitter.CreateMethod();
+
+            EmitILWithChecks(method);
+
+            method.PhysicalToObject(this);
+
+            if (method.IL.IsReachable)
+				method.IL.Return();
+
+            return method.CreateDelegate();
+        }
+
+        public NativeEmitter GetEmitter()
+		{
+			return new NativeEmitter(GetType().Name + "_" + GetHashCode());
+		}
+
+		public virtual void EmitILWithChecks(NativeMethod m)
+		{
+			// TODO: pull out all Get... reflection calls into static fields
+
+			if (IsBreakable)
+			{
+				m.LoadProgram();    // program
+                m.LoadStatic(this);
+				m.IL.LoadConstant(0);    // false
+				m.IL.CallVirtual(typeof(Program).GetMethod("Yield", new[] { typeof(PlanNode), typeof(bool) }));
+			}
+			else
+			{
+				m.AbortCheck();
+			}
+
+			if (InternalBeforeExecute != null)
+			{
+                m.LoadStatic(this);
+				m.IL.LoadField(typeof(PlanNode).GetField("InternalBeforeExecute"));
+				m.LoadProgram();    // program
+				m.IL.CallVirtual(typeof(Action<Program>).GetMethod("Invoke"));
+			}
+
+			
+			EmitIL(m);
+		}
+
+		protected void EmitValidatedAssignment(NativeMethod m, Action emitValue, int nodeIndex)
+		{
+			if (Nodes[nodeIndex].DataType is Schema.ScalarType)
+			{
+				m.LoadProgram();
+                m.LoadStatic(this);
+				m.NodesN(nodeIndex);
+				m.IL.CallVirtual(typeof(PlanNode).GetMethod("get_DataType"));
+				m.IL.CastClass(typeof(Schema.ScalarType));
+				emitValue();
+				m.IL.Call(typeof(ValueUtility).GetMethod("ValidateValue", new[] { typeof(Program), typeof(Schema.ScalarType), typeof(object) }));
+			}
+			else
+				emitValue();
+		}
+
+        /// <summary> Emits a given subnode or an invocation of execute if the node can't emit native code. </summary>
+        /// <param name="forceObject"> If true, will attempt to box or keep boxed the result value even if it isn't nilable. </param>
+		public void EmitSubNodeN(int nodeIndex, NativeMethod m, bool forceObject = false)
+		{
+			var planNode = Nodes[nodeIndex];
+			m.Node(planNode, forceObject);
+		}
+
+        public virtual bool CanEmitIL { get { return false; } }
+
+        public virtual bool RequiresEmptyStack { get { return false; } }
+
+        public void EmitIL(NativeMethod m)
+        {
+            if (RequiresEmptyStack)
+            {
+                var stack = m.IL.Stack;
+                if (stack.Length > 0)
+                {
+                    // Spill the stack
+                    var locals = stack.Select(s => m.IL.DeclareLocal(s.First(), initializeReused: false)).ToArray();
+                    for (int i = 0; i < locals.Length; ++i)
+                        m.IL.StoreLocal(locals[i]);
+
+                    InternalEmitIL(m);
+
+                    // Spill result
+                    var newLocal = m.IL.DeclareLocal(PhysicalType, initializeReused: false);
+                    m.IL.StoreLocal(newLocal);
+
+                    // Reconstruct stack with result on top
+                    for (int i = locals.Length - 1; i >= 0; --i)
+                        m.IL.LoadLocal(locals[i]);
+                    m.IL.LoadLocal(newLocal);
+
+                    // Release locals for reuse
+                    foreach (var local in locals)
+                        local.Dispose();
+
+                    return;
+                }
+            }
+            InternalEmitIL(m);
+        }
+
+		public virtual void InternalEmitIL(NativeMethod m) 
+		{
+			throw new NotImplementedException(GetType().Name + ".EmitIL is not implemented.");
+		}
 
 		#endregion
         
@@ -789,6 +1024,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			writer.WriteAttributeString("DeviceSupported", Convert.ToString(DeviceSupported));
 			if (DeviceSupported)
 				writer.WriteAttributeString("Device", _device.DisplayName);
+            writer.WriteAttributeString("ShouldEmitIL", Convert.ToString(CanEmitIL));
 			writer.WriteAttributeString("CouldSupport", Convert.ToString(CouldSupport));
 			writer.WriteAttributeString("ShouldSupport", Convert.ToString(ShouldSupport));
 			writer.WriteAttributeString("IgnoreUnsupported", Convert.ToString(IgnoreUnsupported));

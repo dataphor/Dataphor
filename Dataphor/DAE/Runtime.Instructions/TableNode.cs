@@ -225,6 +225,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			IsBreakable = false; // TODO: Debug table nodes? 
 			ExpectsTableValues = false;
+			InternalBeforeExecute = BeforeExecute;
 		}
 		
 		protected Schema.TableVarColumn CopyTableVarColumn(Schema.TableVarColumn column)
@@ -3265,7 +3266,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public virtual void InferPopulateNode(Plan plan) { }
 
-		protected override void InternalBeforeExecute(Program program)
+		private void BeforeExecute(Program program)
 		{
 			if ((_populateNode != null) && !program.ServerProcess.IsInsert)
 				ApplicationTransactionUtility.JoinExpression(program, _populateNode, this);

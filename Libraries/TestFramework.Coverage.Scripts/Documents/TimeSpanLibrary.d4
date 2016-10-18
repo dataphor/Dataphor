@@ -3,7 +3,7 @@
 //  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 // System Library
 
-
+SafeDrop('TimeSpanTest');
 create table TimeSpanTest
 {
 	ID: Integer,

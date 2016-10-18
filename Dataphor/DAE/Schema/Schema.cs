@@ -1303,7 +1303,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				{
 					return _items[index];
 				}
-				catch (IndexOutOfRangeException e)
+				catch (IndexOutOfRangeException)
 				{
 					throw new SchemaException(SchemaException.Codes.IndexOutOfRange, index);
 				}

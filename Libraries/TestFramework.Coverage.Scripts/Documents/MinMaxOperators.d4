@@ -404,6 +404,7 @@ begin
 end;
 
 //* Mapped into a device
+SafeDrop('TestMinMax');
 create table TestMinMax
 {
 	Case : Integer,

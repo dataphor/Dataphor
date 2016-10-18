@@ -11,11 +11,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
 	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Compiling.Visitors;
-	using Alphora.Dataphor.DAE.Server;	
-	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Schema = Alphora.Dataphor.DAE.Schema;
+	using Sigil;
+	using System.Linq;
 
 	// TODO: Nil handling in aggregate operators
 
@@ -32,8 +30,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return new TimeSpan((long)argument);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(long) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.Milliseconds(AMilliseconds : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanMillisecondsSelectorNode : UnaryInstructionNode
 	{
@@ -46,8 +51,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return TimeSpan.FromMilliseconds((double)(decimal)argument);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromMilliseconds", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.Seconds(ASeconds : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanSecondsSelectorNode : UnaryInstructionNode
 	{
@@ -60,8 +73,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return TimeSpan.FromSeconds((double)(decimal)argument);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromSeconds", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.Minutes(AMinutes : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanMinutesSelectorNode : UnaryInstructionNode
 	{
@@ -74,8 +95,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return TimeSpan.FromMinutes((double)(decimal)argument);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromMinutes", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.Hours(AMinutes : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanHoursSelectorNode : UnaryInstructionNode
 	{
@@ -88,8 +117,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return TimeSpan.FromHours((double)(decimal)argument);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromHours", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.Days(ADays : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanDaysSelectorNode : UnaryInstructionNode
 	{
@@ -102,9 +139,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return TimeSpan.FromDays((double)(decimal)argument);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromDays", new[] { typeof(double) }));
+		}
 	}
-	
-	/// <remarks>operator System.TimeSpan.TimeSpan(ADays : Integer, AHours : Integer, AMinutes : Integer, ASeconds : Integer, AMilliseconds : Integer) : TimeSpan;</remarks>
+
+	/// <remarks>operator System.TimeSpan.TimeSpan(ADays : Integer, AHours : Integer, AMinutes : Integer, ASeconds : Integer, AMilliseconds : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanMillisecondsSelectorNode : InstructionNode
 	{
 		public override object InternalExecute(Program program, object[] arguments)
@@ -130,8 +175,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(int)arguments[3]
 					).Add(TimeSpan.FromTicks((long)(TimeSpan.TicksPerMillisecond * (double)(decimal)arguments[4])));
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.LoadLocal(arguments[2]);
+			m.IL.LoadLocal(arguments[3]);
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int) }));
+			m.NativeToAddress(typeof(TimeSpan));
+			m.IL.LoadLocal(arguments[4]);
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.LoadConstant((double)TimeSpan.TicksPerMillisecond);
+			m.IL.Multiply();
+			m.IL.Convert<long>();
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromTicks", new[] { typeof(long) }));
+			m.IL.Call(typeof(TimeSpan).GetMethod("Add", new[] { typeof(TimeSpan) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpan(ADays : Integer, AHours : Integer, AMinutes : Integer, ASeconds : Integer) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanSecondsSelectorNode : InstructionNode
 	{
@@ -154,12 +220,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(int)arguments[0],
 						(int)arguments[1],
 						(int)arguments[2],
-						(int)arguments[3],
-						0
+						(int)arguments[3]
 					);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpan(ADays : Integer, AHours : Integer, AMinutes : Integer) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanMinutesSelectorNode : TernaryInstructionNode
 	{
@@ -181,12 +253,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(int)argument1,
 						(int)argument2,
 						(int)argument3,
-						0,
 						0
 					);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant(0);
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpan(ADays : Integer, AHours : Integer) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanHoursSelectorNode : BinaryInstructionNode
 	{
@@ -207,12 +286,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(int)argument1,
 						(int)argument2,
 						0,
-						0,
 						0
 					);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant(0);
+			m.IL.LoadConstant(0);
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpan(ADays : Integer) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanDaysSelectorNode : UnaryInstructionNode
 	{
@@ -236,6 +323,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						0
 					);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant(0);
+			m.IL.LoadConstant(0);
+			m.IL.LoadConstant(0);
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int) }));
+		}
 	}
 
 	// TimeSpan Accessors
@@ -251,8 +348,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((TimeSpan)argument).Ticks;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Ticks", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TicksWriteTicks(AValue : TimeSpan, ATicks : Long) : TimeSpan;</remarks>
 	public class SystemTimeSpanTicksWriteTicksNode : BinaryInstructionNode
 	{
@@ -265,8 +372,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return new TimeSpan((long)argument2);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override bool ShouldIgnoreArgument(PlanNode node)
+		{
+			return node == Nodes[0];
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(long) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.MillisecondsReadMilliseconds(AValue : TimeSpan) : Decimal;</remarks>
 	public class SystemTimeSpanMillisecondsReadMillisecondsNode : UnaryInstructionNode
 	{
@@ -279,22 +398,49 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)((TimeSpan)argument).TotalMilliseconds;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_TotalMilliseconds", new Type[0]));
+			m.IL.Call(typeof(Decimal).GetMethod("op_Explicit", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.MillisecondsWriteMilliseconds(AValue : TimeSpan, AMilliseconds : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanMillisecondsWriteMillisecondsNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if ((argument2 == null))
+			if (argument2 == null)
 				return null;
 			else
 			#endif
 				return TimeSpan.FromTicks((long)((decimal)argument2 * TimeSpan.TicksPerMillisecond));
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override bool ShouldIgnoreArgument(PlanNode node)
+		{
+			return node == Nodes[0];
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant((int)TimeSpan.TicksPerMillisecond);
+			m.IL.NewObject(typeof(Decimal).GetConstructor(new[] { typeof(int) }));
+			m.IL.Call(typeof(Decimal).GetMethod("op_Multiply", new[] { typeof(decimal), typeof(decimal) }));
+			m.IL.Call(MethodInfoStatics.DecimalToInt64Conversion);
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromTicks", new[] { typeof(long) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.SecondsReadSeconds(AValue : TimeSpan) : Decimal;</remarks>
 	public class SystemTimeSpanSecondsReadSecondsNode : UnaryInstructionNode
 	{
@@ -307,22 +453,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)((TimeSpan)argument).TotalSeconds;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_TotalSeconds", new Type[0]));
+			m.IL.Call(typeof(Decimal).GetMethod("op_Explicit", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.SecondsWriteSeconds(AValue : TimeSpan, ASeconds : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanSecondsWriteSecondsNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if ((argument2 == null))
+			if (argument2 == null)
 				return null;
 			else
 			#endif
 				return TimeSpan.FromSeconds((double)(decimal)argument2);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override bool ShouldIgnoreArgument(PlanNode node)
+		{
+			return node == Nodes[0];
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromSeconds", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.MinutesReadMinutes(AValue : TimeSpan) : Decimal;</remarks>
 	public class SystemTimeSpanMinutesReadMinutesNode : UnaryInstructionNode
 	{
@@ -335,22 +505,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)((TimeSpan)argument).TotalMinutes;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_TotalMinutes", new Type[0]));
+			m.IL.Call(typeof(Decimal).GetMethod("op_Explicit", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.MinutesWriteMinutes(AValue : TimeSpan, AMinutes : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanMinutesWriteMinutesNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if ((argument2 == null))
+			if (argument2 == null)
 				return null;
 			else
 			#endif
 				return TimeSpan.FromMinutes((double)(decimal)argument2);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override bool ShouldIgnoreArgument(PlanNode node)
+		{
+			return node == Nodes[0];
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromMinutes", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.HoursReadHours(AValue : TimeSpan) : Decimal;</remarks>
 	public class SystemTimeSpanHoursReadHoursNode : UnaryInstructionNode
 	{
@@ -363,22 +557,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)((TimeSpan)argument).TotalHours;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_TotalHours", new Type[0]));
+			m.IL.Call(typeof(Decimal).GetMethod("op_Explicit", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.HoursWriteHours(AValue : TimeSpan, AHours : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanHoursWriteHoursNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if ((argument2 == null))
+			if (argument2 == null)
 				return null;
 			else
 			#endif
 				return TimeSpan.FromHours((double)(decimal)argument2);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override bool ShouldIgnoreArgument(PlanNode node)
+		{
+			return node == Nodes[0];
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromHours", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.DaysReadDays(AValue : TimeSpan) : Decimal;</remarks>
 	public class SystemTimeSpanDaysReadDaysNode : UnaryInstructionNode
 	{
@@ -391,22 +609,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)((TimeSpan)argument).TotalDays;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_TotalDays", new Type[0]));
+			m.IL.Call(typeof(Decimal).GetMethod("op_Explicit", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.DaysWriteDays(AValue : TimeSpan, ADays : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanDaysWriteDaysNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if ((argument2 == null))
+			if (argument2 == null)
 				return null;
 			else
 			#endif
 				return TimeSpan.FromDays((double)(decimal)argument2);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override bool ShouldIgnoreArgument(PlanNode node)
+		{
+			return node == Nodes[0];
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromDays", new[] { typeof(double) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpanReadDay(AValue : TimeSpan) : Integer;</remarks>
 	public class SystemTimeSpanTimeSpanReadDayNode : UnaryInstructionNode
 	{
@@ -419,8 +661,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((TimeSpan)argument).Days;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Days", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpanWriteDay(AValue : TimeSpan, ADay : Integer) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanWriteDayNode : BinaryInstructionNode
 	{
@@ -431,21 +683,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				TimeSpan timeSpan = (TimeSpan)argument1;
-				return 
-					new TimeSpan
-					(
-						timeSpan.Ticks +
-							(
-								((int)argument2 - timeSpan.Days) * 
-								TimeSpan.TicksPerDay
-							)
-					);
-			}
+				return StaticExecute((TimeSpan)argument1, (int)argument2);
+		}
+
+		public static TimeSpan StaticExecute(TimeSpan timeSpan, int day)
+		{
+			return new TimeSpan
+				(
+					timeSpan.Ticks +
+						(
+							(day - timeSpan.Days) *
+							TimeSpan.TicksPerDay
+						)
+				);
 		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpanReadHour(AValue : TimeSpan) : Integer;</remarks>
 	public class SystemTimeSpanTimeSpanReadHourNode : UnaryInstructionNode
 	{
@@ -458,8 +711,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((TimeSpan)argument).Hours;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Hours", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpanWriteHour(AValue : TimeSpan, AHour : Integer) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanWriteHourNode : BinaryInstructionNode
 	{
@@ -470,21 +733,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				TimeSpan timeSpan = (TimeSpan)argument1;
-				return 
-					new TimeSpan
-					(
-						timeSpan.Ticks +
-							(
-								((int)argument2 - timeSpan.Hours) * 
-								TimeSpan.TicksPerHour
-							)
-					);
-			}
+				return StaticExecute((TimeSpan)argument1, (int)argument2);
+		}
+
+		public static TimeSpan StaticExecute(TimeSpan timeSpan, int hour)
+		{
+			return new TimeSpan
+				(
+					timeSpan.Ticks +
+						(
+							(hour - timeSpan.Hours) *
+							TimeSpan.TicksPerHour
+						)
+				);
 		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpanReadMinute(AValue : TimeSpan) : Integer;</remarks>
 	public class SystemTimeSpanTimeSpanReadMinuteNode : UnaryInstructionNode
 	{
@@ -497,8 +761,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((TimeSpan)argument).Minutes;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Minutes", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpanWriteMinute(AValue : TimeSpan, AMinute : Integer) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanWriteMinuteNode : BinaryInstructionNode
 	{
@@ -509,21 +783,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				TimeSpan timeSpan = (TimeSpan)argument1;
-				return 
-					new TimeSpan
-					(
-						timeSpan.Ticks +
-							(
-								((int)argument2 - timeSpan.Minutes) * 
-								TimeSpan.TicksPerMinute
-							)
-					);
-			}
+				return StaticExecute((TimeSpan)argument1, (int)argument2);
+		}
+
+		public static TimeSpan StaticExecute(TimeSpan timeSpan, int minute)
+		{
+			return new TimeSpan
+				(
+					timeSpan.Ticks +
+						(
+							(minute - timeSpan.Minutes) *
+							TimeSpan.TicksPerMinute
+						)
+				);
 		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpanReadSecond(AValue : TimeSpan) : Integer;</remarks>
 	public class SystemTimeSpanTimeSpanReadSecondNode : UnaryInstructionNode
 	{
@@ -536,8 +811,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((TimeSpan)argument).Seconds;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Seconds", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpanWriteSecond(AValue : TimeSpan, ASecond : Integer) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanWriteSecondNode : BinaryInstructionNode
 	{
@@ -548,21 +833,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				TimeSpan timeSpan = (TimeSpan)argument1;
-				return 
-					new TimeSpan
-					(
-						timeSpan.Ticks +
-							(
-								((int)argument2 - timeSpan.Seconds) * 
-								TimeSpan.TicksPerSecond
-							)
-					);
-			}
+				return StaticExecute((TimeSpan)argument1, (int)argument2);
+		}
+
+		public static TimeSpan StaticExecute(TimeSpan timeSpan, int second)
+		{
+			return new TimeSpan
+				(
+					timeSpan.Ticks +
+						(
+							(second - timeSpan.Seconds) *
+							TimeSpan.TicksPerSecond
+						)
+				);
 		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpanReadMillisecond(AValue : TimeSpan) : Decimal;</remarks>
 	public class SystemTimeSpanTimeSpanReadMillisecondNode : UnaryInstructionNode
 	{
@@ -573,10 +859,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return ((TimeSpan)argument).Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond;
+				return StaticExecute((TimeSpan)argument);
+		}
+
+		public static decimal StaticExecute(TimeSpan argument1)
+		{
+			return argument1.Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond;
 		}
 	}
-	
+
 	/// <remarks>operator System.TimeSpan.TimeSpanWriteMillisecond(AValue : TimeSpan, AMillisecond : Decimal) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanWriteMillisecondNode : BinaryInstructionNode
 	{
@@ -587,15 +878,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return 
-					new TimeSpan
+				return StaticExecute((TimeSpan)argument1, (decimal)argument2);
+		}
+
+		public static TimeSpan StaticExecute(TimeSpan timeSpan, decimal millisecond)
+		{
+			return new TimeSpan
+				(
+					(long)
 					(
-						(long)
-						(
-							(((TimeSpan)argument1).Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
-							((decimal)argument2 * TimeSpan.TicksPerMillisecond)
-						)					
-					);
+						(timeSpan.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
+						millisecond * TimeSpan.TicksPerMillisecond
+					)
+				);
 		}
 	}
 
@@ -610,13 +905,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				long ticks = (long)argument;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
-			}
+				return StaticExecute((long)argument);
+		}
+
+		public static DateTime StaticExecute(long ticks)
+		{
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
 		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTime(AYears : Integer, AMonths : Integer, ADays : Integer, AHours : Integer, AMinutes : Integer, ASeconds : Integer, AMilliseconds : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeSelectorNode : InstructionNode
 	{
@@ -644,11 +941,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(int)arguments[2],
 						(int)arguments[3],
 						(int)arguments[4],
-						(int)arguments[5]
-					).AddTicks((long)((decimal)arguments[6] * TimeSpan.TicksPerMillisecond));
+						(int)arguments[5],
+						(int)arguments[6]
+					);
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.NewObject(typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) }));
 		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTime(AYears : Integer, AMonths : Integer, ADays : Integer, AHours : Integer, AMinutes : Integer, ASeconds : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeSecondsSelectorNode : InstructionNode
 	{
@@ -677,6 +982,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(int)arguments[4],
 						(int)arguments[5]
 					);
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.NewObject(typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) }));
 		}
 	}
 	
@@ -709,6 +1021,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						0
 					);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant(0);
+			m.IL.LoadConstant(0);
+			m.IL.NewObject(typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) }));
+		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTime(AYears : Integer, AMonths : Integer, ADays : Integer) : DateTime;</remarks>
@@ -734,8 +1055,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(int)arguments[2]
 					);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.NewObject(typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int) }));
+		}
 	}
-	
+
 	// Explicit Cast Operators
 	/// <remarks>operator System.DateTime.DateTime(ATimeSpan : TimeSpan) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeNode : UnaryInstructionNode
@@ -747,10 +1075,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				long ticks = ((TimeSpan)argument).Ticks;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
-			}
+				return StaticExecute((TimeSpan)argument);
+		}
+
+		public static DateTime StaticExecute(TimeSpan timeSpan)
+		{
+			long ticks = timeSpan.Ticks;
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
 		}
 	}
 
@@ -767,25 +1098,49 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Ticks;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Ticks", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.TicksWriteTicks(AValue : DateTime, ATicks : Long) : DateTime;</remarks>
 	public class SystemDateTimeTicksWriteTicksNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if ((argument2 == null))
+			if (argument2 == null)
 				return null;
 			else
 			#endif
-			{
-				long ticks = (long)argument2;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
-			}
+				return StaticExecute((long)argument2);
+		}
+
+		public static DateTime StaticExecute(long ticks)
+		{
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override bool ShouldIgnoreArgument(PlanNode node)
+		{
+			return node == Nodes[0];
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			EmitCallStaticExecute(m);
 		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeReadYear(AValue : DateTime) : Integer;</remarks>
 	public class SystemDateTimeDateTimeReadYearNode : UnaryInstructionNode
 	{
@@ -798,8 +1153,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Year;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Year", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeWriteYear(AValue : DateTime, AYear : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeWriteYearNode : BinaryInstructionNode
 	{
@@ -810,19 +1175,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime dateTime = (DateTime)argument1;
-				return 
-					new DateTime
-					(
-						(int)argument2, 
-						dateTime.Month, 
-						dateTime.Day
-					).AddTicks(dateTime.TimeOfDay.Ticks);
-			}
+				return StaticExecute((DateTime)argument1, (int)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime dateTime, int year)
+		{
+			return new DateTime
+				(
+					year,
+					dateTime.Month,
+					dateTime.Day
+				).AddTicks(dateTime.TimeOfDay.Ticks);
 		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeReadMonth(AValue : DateTime) : Integer;</remarks>
 	public class SystemDateTimeDateTimeReadMonthNode : UnaryInstructionNode
 	{
@@ -835,8 +1201,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Month;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Month", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeWriteMonth(AValue : DateTime, AMonth : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeWriteMonthNode : BinaryInstructionNode
 	{
@@ -847,19 +1223,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime dateTime = (DateTime)argument1;
-				return 
-					new DateTime
-					(
-						dateTime.Year,
-						(int)argument2, 
-						dateTime.Day
-					).AddTicks(dateTime.TimeOfDay.Ticks);
-			}
+				return StaticExecute((DateTime)argument1, (int)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime dateTime, int month)
+		{
+			return new DateTime
+				(
+					dateTime.Year,
+					month,
+					dateTime.Day
+				).AddTicks(dateTime.TimeOfDay.Ticks);
 		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeReadDay(AValue : DateTime) : Integer;</remarks>
 	public class SystemDateTimeDateTimeReadDayNode : UnaryInstructionNode
 	{
@@ -872,8 +1249,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Day;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Day", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeWriteDay(AValue : DateTime, ADay : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeWriteDayNode : BinaryInstructionNode
 	{
@@ -884,19 +1271,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime dateTime = (DateTime)argument1;
-				return 
-					new DateTime
-					(
-						dateTime.Year,
-						dateTime.Month, 
-						(int)argument2
-					).AddTicks(dateTime.TimeOfDay.Ticks);
-			}
+				return StaticExecute((DateTime)argument1, (int)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime dateTime, int day)
+		{
+			return new DateTime
+				(
+					dateTime.Year,
+					dateTime.Month,
+					day
+				).AddTicks(dateTime.TimeOfDay.Ticks);
 		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeReadHour(AValue : DateTime) : Integer;</remarks>
 	public class SystemDateTimeDateTimeReadHourNode : UnaryInstructionNode
 	{
@@ -909,8 +1297,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Hour;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Hour", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeWriteHour(AValue : DateTime, AHour : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeWriteHourNode : BinaryInstructionNode
 	{
@@ -921,21 +1319,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime dateTime = (DateTime)argument1;
-				return 
-					new DateTime
-					(
-						dateTime.Ticks +
-							(
-								((int)argument2 - dateTime.Hour) * 
-								TimeSpan.TicksPerHour
-							)
-					);
-			}
+				return StaticExecute((DateTime)argument1, (int)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime dateTime, int hour)
+		{
+			return new DateTime
+				(
+					dateTime.Ticks +
+						(
+							(hour - dateTime.Hour) *
+							TimeSpan.TicksPerHour
+						)
+				);
 		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeReadMinute(AValue : DateTime) : Integer;</remarks>
 	public class SystemDateTimeDateTimeReadMinuteNode : UnaryInstructionNode
 	{
@@ -948,8 +1347,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Minute;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Minute", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeWriteMinute(AValue : DateTime, AMinute : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeWriteMinuteNode : BinaryInstructionNode
 	{
@@ -960,21 +1369,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime dateTime = (DateTime)argument1;
-				return 
-					new DateTime
-					(
-						dateTime.Ticks +
-							(
-								((int)argument2 - dateTime.Minute) *
-								TimeSpan.TicksPerMinute
-							)
-					);
-			}
+				return StaticExecute((DateTime)argument1, (int)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime dateTime, int minute)
+		{
+			return new DateTime
+				(
+					dateTime.Ticks +
+						(
+							(minute - dateTime.Minute) *
+							TimeSpan.TicksPerMinute
+						)
+				);
 		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeReadSecond(AValue : DateTime) : Integer;</remarks>
 	public class SystemDateTimeDateTimeReadSecondNode : UnaryInstructionNode
 	{
@@ -987,8 +1397,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Second;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Second", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeWriteSecond(AValue : DateTime, ASecond : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeWriteSecondNode : BinaryInstructionNode
 	{
@@ -999,21 +1419,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime dateTime = (DateTime)argument1;
-				return 
-					new DateTime
-					(
-						dateTime.Ticks +
-							(
-								((int)argument2 - dateTime.Second) *
-								TimeSpan.TicksPerSecond
-							)
-					);
-			}
+				return StaticExecute((DateTime)argument1, (int)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime dateTime, int second)
+		{
+			return new DateTime
+				(
+					dateTime.Ticks +
+						(
+							(second - dateTime.Second) *
+							TimeSpan.TicksPerSecond
+						)
+				);
 		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeReadMillisecond(AValue : DateTime) : Decimal;</remarks>
 	public class SystemDateTimeDateTimeReadMillisecondNode : UnaryInstructionNode
 	{
@@ -1024,10 +1445,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return ((DateTime)argument).Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond;
+				return StaticExecute((DateTime)argument);
+		}
+
+		public static decimal StaticExecute(DateTime dateTime)
+		{
+			return dateTime.Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond;
 		}
 	}
-	
+
 	/// <remarks>operator System.DateTime.DateTimeWriteMillisecond(AValue : DateTime, AMillisecond : Decimal) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeWriteMillisecondNode : BinaryInstructionNode
 	{
@@ -1038,18 +1464,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime dateTime = (DateTime)argument1;
-				return 
-					new DateTime
-					(
-						(dateTime.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
-						(long)((decimal)argument2 * TimeSpan.TicksPerMillisecond)
-					);
-			}
+				return ExecuteStatic((DateTime)argument1, (decimal)argument2);
+		}
+
+		public static DateTime ExecuteStatic(DateTime dateTime, decimal millisecond)
+		{
+			return new DateTime
+				(
+					(dateTime.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
+					(long)(millisecond * TimeSpan.TicksPerMillisecond)
+				);
 		}
 	}
-	
+
 	/// <remarks>operator System.Date.Ticks(ATicks : Long) : Date;</remarks>
 	public class SystemDateTicksSelectorNode : UnaryInstructionNode
 	{
@@ -1060,10 +1487,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				long ticks = (long)argument;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerDay));
-			}
+				return StaticExecute((long)argument);
+		}
+
+		public static DateTime StaticExecute(long ticks)
+		{
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerDay));
 		}
 	}
 
@@ -1079,22 +1508,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Ticks;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Ticks", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.Date.TicksWriteTicks(AValue : Date, ATicks : Long) : Date;</remarks>
 	public class SystemDateTicksWriteTicksNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if ((argument2 == null))
+			if (argument2 == null)
 				return null;
 			else
 			#endif
-			{
-				long ticks = (long)argument2;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerDay));
-			}
+				return StaticExecute((long)argument2);
+		}
+
+		public static DateTime StaticExecute(long ticks)
+		{
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerDay));
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override bool ShouldIgnoreArgument(PlanNode node)
+		{
+			return node == Nodes[0];
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			EmitCallStaticExecute(m);
 		}
 	}
 
@@ -1108,14 +1561,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				long ticks = (long)argument % TimeSpan.TicksPerDay;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
-			}
+				return StaticExecute((long)argument);
+		}
+
+		public static DateTime StaticExecute(long ticks)
+		{
+			long timeTicks = ticks % TimeSpan.TicksPerDay;
+			return new DateTime(timeTicks - (timeTicks % TimeSpan.TicksPerSecond));
 		}
 	}
 
-	/// <remarks>operator System.Time.Time(AHours : Integer, AMinutes : Integer, ASeconds : Integer, AMilliseconds : Integer) : Time;</remarks>
+	/// <remarks>operator System.Time.Time(AHours : Integer, AMinutes : Integer, ASeconds : Integer, AMilliseconds : Decimal) : Time;</remarks>
 	public class SystemTimeTimeMillisecondsSelectorNode : InstructionNode
 	{
 		public override object InternalExecute(Program program, object[] arguments)
@@ -1140,10 +1596,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(int)arguments[0],
 						(int)arguments[1],
 						(int)arguments[2]
-					).AddTicks((long)((decimal)arguments[3] * TimeSpan.TicksPerMillisecond));
+					).Add(TimeSpan.FromTicks((long)(TimeSpan.TicksPerMillisecond * (double)(decimal)arguments[3])));
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant(1);
+			m.IL.LoadConstant(1);
+			m.IL.LoadConstant(1);
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.LoadLocal(arguments[2]);
+			m.IL.NewObject(typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) }));
+			m.NativeToAddress(typeof(DateTime));
+			m.IL.LoadLocal(arguments[3]);
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.LoadConstant((double)TimeSpan.TicksPerMillisecond);
+			m.IL.Multiply();
+			m.IL.Convert<long>();
+			m.IL.Call(typeof(TimeSpan).GetMethod("FromTicks", new[] { typeof(long) }));
+			m.IL.Call(typeof(DateTime).GetMethod("Add", new[] { typeof(TimeSpan) }));
 		}
 	}
-	
+
 	/// <remarks>operator System.Time.Time(AHours : Integer, AMinutes : Integer, ASeconds : Integer) : Time;</remarks>
 	public class SystemTimeTimeSecondsSelectorNode : TernaryInstructionNode
 	{
@@ -1171,8 +1650,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						0
 					);
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant(1);
+			m.IL.LoadConstant(1);
+			m.IL.LoadConstant(1);
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.LoadLocal(arguments[2]);
+			m.IL.LoadConstant(0);
+			m.IL.NewObject(typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) }));
+		}
 	}
-	
+
 	/// <remarks>operator System.Time.Time(AHours : Integer, AMinutes : Integer) : Time;</remarks>
 	public class SystemTimeTimeMinutesSelectorNode : BinaryInstructionNode
 	{
@@ -1199,8 +1694,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						0
 					);
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant(1);
+			m.IL.LoadConstant(1);
+			m.IL.LoadConstant(1);
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.LoadConstant(0);
+			m.IL.LoadConstant(0);
+			m.IL.NewObject(typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) }));
+		}
 	}
-	
+
 	// Time Accessors
 	/// <remarks>operator System.Time.TicksReadTicks(AValue : Time) : Long;</remarks>
 	public class SystemTimeTicksReadTicksNode : UnaryInstructionNode
@@ -1214,25 +1725,50 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Ticks;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Ticks", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.Time.TicksWriteTicks(AValue : Time, ATicks : Long) : Time;</remarks>
 	public class SystemTimeTicksWriteTicksNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if ((argument2 == null))
+			if (argument2 == null)
 				return null;
 			else
 			#endif
-			{
-				long ticks = (long)argument2 % TimeSpan.TicksPerDay;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
-			}
+				return StaticExecute((long)argument2);
+		}
+
+		public static DateTime StaticExecute(long ticks)
+		{
+			long timeTicks = ticks % TimeSpan.TicksPerDay;
+			return new DateTime(timeTicks - (timeTicks % TimeSpan.TicksPerSecond));
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override bool ShouldIgnoreArgument(PlanNode node)
+		{
+			return node == Nodes[0];
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			EmitCallStaticExecute(m);
 		}
 	}
-	
+
 	/// <remarks>operator System.Time.TimeReadHour(AValue : Time) : Integer;</remarks>
 	public class SystemTimeTimeReadHourNode : UnaryInstructionNode
 	{
@@ -1245,8 +1781,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Hour;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Hour", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.Time.TimeWriteHour(AValue : Time, AHour : Integer) : Time;</remarks>
 	public class SystemTimeTimeWriteHourNode : BinaryInstructionNode
 	{
@@ -1257,21 +1803,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime time = (DateTime)argument1;
-				return 
-					new DateTime
-					(
-						time.Ticks +
-							(
-								((int)argument2 - time.Hour) *
-								TimeSpan.TicksPerHour
-							)
-					);
-			}
+				return StaticExecute((DateTime)argument1, (int)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime time, int hour)
+		{
+			return new DateTime
+				(
+					time.Ticks +
+						(
+							(hour - time.Hour) *
+							TimeSpan.TicksPerHour
+						)
+				);
 		}
 	}
-	
+
 	/// <remarks>operator System.Time.TimeReadMinute(AValue : Time) : Integer;</remarks>
 	public class SystemTimeTimeReadMinuteNode : UnaryInstructionNode
 	{
@@ -1284,8 +1831,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Minute;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Minute", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.Time.TimeWriteMinute(AValue : Time, AMinute : Integer) : Time;</remarks>
 	public class SystemTimeTimeWriteMinuteNode : BinaryInstructionNode
 	{
@@ -1296,21 +1853,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime time = (DateTime)argument1;
-				return 
-					new DateTime
-					(
-						time.Ticks +
-							(
-								((int)argument2 - time.Minute) *
-								TimeSpan.TicksPerMinute
-							)
-					);
-			}
+				return StaticExecute((DateTime)argument1, (int)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime time, int minute)
+		{
+			return new DateTime
+				(
+					time.Ticks +
+						(
+							(minute - time.Minute) *
+							TimeSpan.TicksPerMinute
+						)
+				);
 		}
 	}
-	
+
 	/// <remarks>operator System.Time.TimeReadSecond(AValue : Time) : Integer;</remarks>
 	public class SystemTimeTimeReadSecondNode : UnaryInstructionNode
 	{
@@ -1323,8 +1881,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Second;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Second", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator System.Time.TimeWriteSecond(AValue : Time, ASecond : Integer) : Time;</remarks>
 	public class SystemTimeTimeWriteSecondNode : BinaryInstructionNode
 	{
@@ -1335,21 +1903,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime time = (DateTime)argument1;
-				return 
-					new DateTime
-					(
-						time.Ticks +
-							(
-								((int)argument2 - time.Second) *
-								TimeSpan.TicksPerSecond
-							)
-					);
-			}
+				return StaticExecute((DateTime)argument1, (int)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime time, int second)
+		{
+			return new DateTime
+				(
+					time.Ticks +
+						(
+							(second - time.Second) *
+							TimeSpan.TicksPerSecond
+						)
+				);
 		}
 	}
-	
+
 	/// <remarks>operator System.Time.TimeReadMillisecond(AValue : Time) : Decimal;</remarks>
 	public class SystemTimeTimeReadMillisecondNode : UnaryInstructionNode
 	{
@@ -1360,10 +1929,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return ((DateTime)argument).Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond;
+				return StaticExecute((DateTime)argument);
+		}
+
+		public static decimal StaticExecute(DateTime time)
+		{
+			return time.Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond;
 		}
 	}
-	
+
 	/// <remarks>operator System.Time.TimeWriteMillisecond(AValue : Time, AMillisecond : Decimal) : Time;</remarks>
 	public class SystemTimeTimeWriteMillisecondNode : BinaryInstructionNode
 	{
@@ -1374,15 +1948,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime time = (DateTime)argument1;
-				return 
-					new DateTime
-					(
-						(time.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
-						(long)((decimal)argument2 * TimeSpan.TicksPerMillisecond)
-					);
-			}
+				return StaticExecute((DateTime)argument1, (decimal)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime time, decimal millisecond)
+		{
+			return new DateTime
+				(
+					(time.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
+					(long)(millisecond * TimeSpan.TicksPerMillisecond)
+				);
 		}
 	}
 
@@ -1399,6 +1974,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return TimeSpanAsStringSelectorNode.StringToTimeSpan((String)argument);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpanAsStringSelectorNode).GetMethod("StringToTimeSpan", new[] { typeof(string) }));
+		}
 	}
 
 	/// <remarks>operator ToDateTime(AString : string) : DateTime;</remarks>
@@ -1411,10 +1993,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				long ticks = DateTime.Parse((String)argument).Ticks;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
-			}
+				return StaticExecute((String)argument);
+		}
+
+		public static DateTime StaticExecute(string ticksString)
+		{
+			long ticks = DateTime.Parse(ticksString).Ticks;
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
 		}
 	}
 
@@ -1428,10 +2013,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return DateTime.Parse((String)argument).Date;
+				return DateTime.Parse((string)argument).Date;
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("Parse", new[] { typeof(string) }));
+			var dateTimeLocal = m.StoreLocal(typeof(DateTime));
+			m.IL.LoadLocalAddress(dateTimeLocal);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Date", new Type[0]));
 		}
 	}
-	
+
 	/// <remarks>operator ToTime(AString : string) : Time;</remarks>
 	public class StringToTimeNode : UnaryInstructionNode
 	{
@@ -1442,10 +2037,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				long ticks = DateTime.Parse("1/1/0001 " + (String)argument).Ticks;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
-			}
+				return StaticExecute((String)argument);
+		}
+
+		public static DateTime StaticExecute(string argument1)
+		{
+			// TODO: the following isn't globalization-proof; should not depend on locale-specific date formatting
+			long ticks = DateTime.Parse("1/1/0001 " + argument1).Ticks;
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
 		}
 	}
 
@@ -1461,11 +2060,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return TimeSpanAsStringSelectorNode.TimeSpanToString((TimeSpan)argument);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpanAsStringSelectorNode).GetMethod("TimeSpanToString", new[] { typeof(TimeSpan) }));
+		}
 	}
-	
+
 	/// <remarks>operator ToString(ADateTime : DateTime) : String;</remarks>
 	public class DateTimeToStringNode : UnaryInstructionNode
 	{
+		private const string FormatString = "G";
+
 		public override object InternalExecute(Program program, object argument)
 		{
 			#if NILPROPOGATION
@@ -1473,13 +2081,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return ((DateTime)argument).ToString("G");
+				return ((DateTime)argument).ToString(FormatString);
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadConstant(FormatString);
+			m.IL.Call(typeof(DateTime).GetMethod("ToString", new[] { typeof(string) }));
 		}
 	}
-	
+
 	/// <remarks>operator ToString(ATime : Time) : String;</remarks>
 	public class TimeToStringNode : UnaryInstructionNode
 	{
+		private const string FormatString = "T";
+
 		public override object InternalExecute(Program program, object argument)
 		{
 			#if NILPROPOGATION
@@ -1487,13 +2108,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return ((DateTime)argument).ToString("T");
+				return ((DateTime)argument).ToString(FormatString);
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadConstant(FormatString);
+			m.IL.Call(typeof(DateTime).GetMethod("ToString", new[] { typeof(string) }));
 		}
 	}
 
 	/// <remarks>operator ToString(ADate : Date) : String;</remarks>
 	public class DateToStringNode : UnaryInstructionNode
 	{
+		private const string FormatString = "d";
+
 		public override object InternalExecute(Program program, object argument)
 		{
 			#if NILPROPOGATION
@@ -1501,10 +2135,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return ((DateTime)argument).ToString("d");
+				return ((DateTime)argument).ToString(FormatString);
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadConstant(FormatString);
+			m.IL.Call(typeof(DateTime).GetMethod("ToString", new[] { typeof(string) }));
 		}
 	}
-	
+
 	/// <remarks>operator DatePart(ADateTime : DateTime) : DateTime;</remarks>
 	public class DatePartNode : UnaryInstructionNode
 	{
@@ -1517,8 +2162,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument).Date;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Date", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator TimePart(ADateTime : DateTime) : DateTime;</remarks>
 	public class TimePartNode : UnaryInstructionNode
 	{
@@ -1529,7 +2184,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return new DateTime(((DateTime)argument).TimeOfDay.Ticks);
+				return StaticExecute((DateTime)argument);
+		}
+
+		public static DateTime StaticExecute(DateTime argument1)
+		{
+			return new DateTime(argument1.TimeOfDay.Ticks);
 		}
 	}
 
@@ -1539,6 +2199,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object NilaryInternalExecute(Program program)
 		{
+			return StaticExecute(program);
+		}
+
+		public static DateTime StaticExecute(Program program)
+		{
 			long ticks;
 			if (program.ServerProcess.InTransaction)
 				ticks = program.ServerProcess.RootTransaction.StartTime.Ticks;
@@ -1546,30 +2211,56 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ticks = DateTime.Now.Ticks;
 			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.LoadProgram();
+			EmitCallStaticExecute(m);
+		}
 	}
-	
+
 	/// <remarks>operator ActualDateTime() : DateTime;</remarks>
 	public class ActualDateTimeNode : NilaryInstructionNode
 	{
 		public override object NilaryInternalExecute(Program program)
 		{
+			return StaticExecute();
+		}
+
+		public static DateTime StaticExecute()
+		{
 			long ticks = DateTime.Now.Ticks;
 			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
 		}
 	}
-	
+
 	/// <remarks>operator Date() : Date;</remarks>
 	public class DateNode : NilaryInstructionNode
 	{
 		public override object NilaryInternalExecute(Program program)
+		{
+			return StaticExecute(program);
+		}
+
+		public static DateTime StaticExecute(Program program)
 		{
 			if (program.ServerProcess.InTransaction)
 				return program.ServerProcess.RootTransaction.StartTime.Date;
 			else
 				return DateTime.Today;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.LoadProgram();
+			EmitCallStaticExecute(m);
+		}
 	}
-	
+
 	/// <remarks>operator ActualDate() : Date;</remarks>
 	public class ActualDateNode : NilaryInstructionNode
 	{
@@ -1577,12 +2268,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			return DateTime.Today;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("get_Today", new Type[0]));
+		}
 	}
-	
+
 	/// <remarks>operator Time() : Time; </remarks>
 	public class TimeNode : NilaryInstructionNode
 	{
 		public override object NilaryInternalExecute(Program program)
+		{
+			return StaticExecute(program);
+		}
+
+		public static DateTime StaticExecute(Program program)
 		{
 			long ticks;
 			if (program.ServerProcess.InTransaction)
@@ -1591,12 +2294,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ticks = DateTime.Now.Ticks;
 			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.LoadProgram();
+			EmitCallStaticExecute(m);
+		}
 	}
 
 	/// <remarks>operator ActualTime() : Time; </remarks>
 	public class ActualTimeNode : NilaryInstructionNode
 	{
 		public override object NilaryInternalExecute(Program program)
+		{
+			return StaticExecute();
+		}
+
+		public static DateTime StaticExecute()
 		{
 			long ticks = DateTime.Now.Ticks;
 			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
@@ -1615,6 +2331,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (int)((DateTime)argument).DayOfWeek;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_DayOfWeek", new Type[0]));
+		}
 	}
 
 	/// <remarks>operator DayOfYear(ADateTime : DateTime) : Integer;</remarks>
@@ -1628,6 +2354,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return ((DateTime)argument).DayOfYear;
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_DayOfYear", new Type[0]));
 		}
 	}
 
@@ -1643,6 +2379,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return DateTime.DaysInMonth((int)argument1, (int)argument2);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("DaysInMonth", new[] { typeof(int), typeof(int) }));
+		}
 	}
 
 	/// <remarks>operator IsLeapYear(AYear : Integer) : Boolean;</remarks>
@@ -1657,8 +2400,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return DateTime.IsLeapYear((int)argument);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("IsLeapYear", new[] { typeof(int) }));
+		}
 	}
-	
+
 	/// <remarks>operator Duration(ATimeSpan : TimeSpan) : TimeSpan;</remarks>
 	public class DurationNode : UnaryInstructionNode
 	{
@@ -1670,6 +2420,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return ((TimeSpan)argument).Duration();
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Duration", new Type[0]));
 		}
 	}
 
@@ -1685,8 +2445,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument1).AddMonths((int)argument2);
 		}
-	}	
-	
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(DateTime).GetMethod("AddMonths", new[] { typeof(int) }));
+		}
+	}
+
 	/// <remarks>operator MonthsBetween(AStartDateTime : DateTime, AEndDateTime : DateTime) : Integer;</remarks>
 	public class DateTimeMonthsBetweenNode : BinaryInstructionNode
 	{
@@ -1697,14 +2468,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				DateTime startDate = (DateTime)argument1;
-				DateTime endDate = (DateTime)argument2;
-				return ((endDate.Year - startDate.Year) * 12) + (endDate.Month - startDate.Month);
-			}
+				return StaticExecute((DateTime)argument1, (DateTime)argument2);
+		}
+
+		public static int StaticExecute(DateTime startDate, DateTime endDate)
+		{
+			return ((endDate.Year - startDate.Year) * 12) + (endDate.Month - startDate.Month);
 		}
 	}
-	
+
 	/// <remarks>operator AddYears(ADateTime : DateTime, AYears : integer) : DateTime;</remarks>
 	public class DateTimeAddYearsNode : BinaryInstructionNode
 	{
@@ -1716,6 +2488,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return ((DateTime)argument1).AddYears((int)argument2);
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(DateTime).GetMethod("AddYears", new[] { typeof(int) }));
 		}
 	}
 
@@ -1735,8 +2518,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return (endDate.Year - startDate.Year);
 			}
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[1]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Year", new Type[0]));
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Year", new Type[0]));
+			m.IL.Subtract();
+		}
 	}
-	
+
 	/// <remarks>operator AddMonths(ADate : Date, AMonths : integer) : Date;</remarks>
 	public class DateAddMonthsNode : BinaryInstructionNode
 	{
@@ -1749,8 +2545,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return ((DateTime)argument1).AddMonths((int)argument2);
 		}
-	}	
-	
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(DateTime).GetMethod("AddMonths", new[] { typeof(int) }));
+		}
+	}
+
 	/// <remarks>operator AddYears(ADate : Date, AYears : integer) : Date;</remarks>
 	public class DateAddYearsNode : BinaryInstructionNode
 	{
@@ -1762,6 +2569,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return ((DateTime)argument1).AddYears((int)argument2);
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Call(typeof(DateTime).GetMethod("AddYears", new[] { typeof(int) }));
 		}
 	}
 
@@ -1778,8 +2596,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return -(TimeSpan)argument;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpan).GetMethod("op_UnaryNegation", new[] { typeof(TimeSpan) }));
+		}
 	}
-	
+
 	/// <remarks>operator iAddition(ALeftValue : TimeSpan, ARightValue : TimeSpan) : TimeSpan;</remarks>
 	public class TimeSpanAdditionNode : BinaryInstructionNode
 	{
@@ -1792,8 +2617,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (TimeSpan)argument1 + (TimeSpan)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpan).GetMethod("op_Addition", new[] { typeof(TimeSpan), typeof(TimeSpan) }));
+		}
 	}
-	
+
 	/// <remarks>operator iAddition(ALeftValue : DateTime, ARightValue : TimeSpan) : DateTime;</remarks>
 	public class DateTimeTimeSpanAdditionNode : BinaryInstructionNode
 	{
@@ -1804,13 +2636,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				long ticks = ((DateTime)argument1).Ticks + ((TimeSpan)argument2).Ticks;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
-			}
+				return StaticExecute((DateTime)argument1, (TimeSpan)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime dateTime, TimeSpan timeSpan)
+		{
+			long ticks = dateTime.Ticks + timeSpan.Ticks;
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
 		}
 	}
-	
+
 	/// <remarks>operator iAddition(ALeftValue : Date, ARightValue : TimeSpan) : Date;</remarks>
 	public class DateTimeSpanAdditionNode : BinaryInstructionNode
 	{
@@ -1821,13 +2656,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				long ticks = ((DateTime)argument1).Ticks + ((TimeSpan)argument2).Ticks;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerDay));
-			}
+				return StaticExecute((DateTime)argument1, (TimeSpan)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime dateTime, TimeSpan timeSpan)
+		{
+			long ticks = dateTime.Ticks + timeSpan.Ticks;
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerDay));
 		}
 	}
-	
+
 	/// <remarks>operator iAddition(ALeftValue : Time, ARightValue : TimeSpan) : DateTime;</remarks>
 	public class TimeTimeSpanAdditionNode : BinaryInstructionNode
 	{
@@ -1838,13 +2676,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				long ticks = (((DateTime)argument1).Ticks + ((TimeSpan)argument2).Ticks) % TimeSpan.TicksPerDay;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
-			}
+				return StaticExecute((DateTime)argument1, (TimeSpan)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime time, TimeSpan timeSpan)
+		{
+			long ticks = (time.Ticks + timeSpan.Ticks) % TimeSpan.TicksPerDay;
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
 		}
 	}
-	
+
 	/// <remarks>operator iSubtraction(ALeftValue : TimeSpan, ARightValue : TimeSpan) : TimeSpan;</remarks>
 	public class TimeSpanSubtractionNode : BinaryInstructionNode
 	{
@@ -1857,8 +2698,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (TimeSpan)argument1 - (TimeSpan)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpan).GetMethod("op_Subtraction", new[] { typeof(TimeSpan), typeof(TimeSpan) }));
+		}
 	}
-	
+
 	/// <remarks>operator iSubtraction(ALeftValue : DateTime, ARightValue : DateTime) : TimeSpan;</remarks>
 	public class DateTimeSubtractionNode : BinaryInstructionNode
 	{
@@ -1871,8 +2719,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return new TimeSpan(((DateTime)argument1).Ticks - ((DateTime)argument2).Ticks);
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			SubtractDateTimes(m, arguments);
+		}
+
+		public static void SubtractDateTimes(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Ticks", new Type[0]));
+			m.IL.LoadLocalAddress(arguments[1]);
+			m.IL.Call(typeof(DateTime).GetMethod("get_Ticks", new Type[0]));
+			m.IL.Subtract();
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(long) }));
+		}
 	}
-	
+
 	/// <remarks>operator iSubtraction(ALeftValue : Date, ARightValue : Date) : TimeSpan;</remarks>
 	public class DateSubtractionNode : BinaryInstructionNode
 	{
@@ -1885,8 +2752,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return new TimeSpan(((DateTime)argument1).Ticks - ((DateTime)argument2).Ticks);
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			DateTimeSubtractionNode.SubtractDateTimes(m, arguments);
+		}
 	}
-	
+
 	/// <remarks>operator iSubtraction(ALeftValue : Time, ARightValue : Time) : TimeSpan;</remarks>
 	public class TimeSubtractionNode : BinaryInstructionNode
 	{
@@ -1899,8 +2775,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return new TimeSpan(((DateTime)argument1).Ticks - ((DateTime)argument2).Ticks);
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			DateTimeSubtractionNode.SubtractDateTimes(m, arguments);
+		}
 	}
-	
+
 	/// <remarks>operator iSubtraction(ALeftValue : DateTime, ARightValue : TimeSpan) : DateTime;</remarks>
 	public class DateTimeTimeSpanSubtractionNode : BinaryInstructionNode
 	{
@@ -1911,13 +2796,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				long ticks = ((DateTime)argument1).Ticks - ((TimeSpan)argument2).Ticks;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
-			}
+				return StaticExecute((DateTime)argument1, (TimeSpan)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime dateTime, TimeSpan timeSpan)
+		{
+			long ticks = dateTime.Ticks - timeSpan.Ticks;
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
 		}
 	}
-	
+
 	/// <remarks>operator iSubtraction(ALeftValue : Date, ARightValue : TimeSpan) : Date;</remarks>
 	public class DateTimeSpanSubtractionNode : BinaryInstructionNode
 	{
@@ -1933,8 +2821,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return new DateTime(ticks - (ticks % TimeSpan.TicksPerDay));
 			}
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTimeTimeSpanSubtractionNode).GetMethod("StaticExecute"));
+		}
 	}
-	
+
 	/// <remarks>operator iSubtraction(ALeftValue : Time, ARightValue : TimeSpan) : DateTime;</remarks>
 	public class TimeTimeSpanSubtractionNode : BinaryInstructionNode
 	{
@@ -1945,13 +2840,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-			{
-				long ticks = ((((DateTime)argument1).Ticks + TimeSpan.TicksPerDay) - (((TimeSpan)argument2).Ticks % TimeSpan.TicksPerDay)) % TimeSpan.TicksPerDay;
-				return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
-			}
+				return StaticExecute((DateTime)argument1, (TimeSpan)argument2);
+		}
+
+		public static DateTime StaticExecute(DateTime time, TimeSpan timeSpan)
+		{
+			long ticks = ((time.Ticks + TimeSpan.TicksPerDay) - (timeSpan.Ticks % TimeSpan.TicksPerDay)) % TimeSpan.TicksPerDay;
+			return new DateTime(ticks - (ticks % TimeSpan.TicksPerSecond));
 		}
 	}
-	
+
 	/// <remarks>operator iMultiplication(ALeftValue : TimeSpan, ARightValue : Integer) : TimeSpan;</remarks>
 	public class TimeSpanIntegerMultiplicationNode : BinaryInstructionNode
 	{
@@ -1964,8 +2862,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return new TimeSpan(((TimeSpan)argument1).Ticks * (int)argument2);
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Ticks", new Type[0]));
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Convert<long>();
+			m.IL.Multiply();
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(long) }));
+		}
 	}
-	
+
 	/// <remarks>operator iMultiplication(ALeftValue : Integer, ARightValue : TimeSpan) : DateTime;</remarks>
 	public class IntegerTimeSpanMultiplicationNode : BinaryInstructionNode
 	{
@@ -1978,8 +2890,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return new TimeSpan((int)argument1 * ((TimeSpan)argument2).Ticks);
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.Convert<long>();
+			m.IL.LoadLocalAddress(arguments[1]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Ticks", new Type[0]));
+			m.IL.Multiply();
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(long) }));
+		}
 	}
-	
+
 	/// <remarks>operator iMultiplication(ALeftValue : TimeSpan, ARightValue : Decimal) : TimeSpan;</remarks>
 	public class TimeSpanDecimalMultiplicationNode : BinaryInstructionNode
 	{
@@ -1990,10 +2916,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return new TimeSpan(Convert.ToInt64(((TimeSpan)argument1).Ticks * (decimal)argument2));
+				return StaticExecute((TimeSpan)argument1, (decimal)argument2);
+		}
+
+		public static TimeSpan StaticExecute(TimeSpan timeSpan, decimal factor)
+		{
+			return new TimeSpan(Convert.ToInt64(timeSpan.Ticks * factor));
 		}
 	}
-	
+
 	/// <remarks>operator iMultiplication(ALeftValue : Decimal, ARightValue : TimeSpan) : DateTime;</remarks>
 	public class DecimalTimeSpanMultiplicationNode : BinaryInstructionNode
 	{
@@ -2004,10 +2935,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return new TimeSpan(Convert.ToInt64((decimal)argument1 * ((TimeSpan)argument2).Ticks));
+				return StaticExecute((decimal)argument1, (TimeSpan)argument2);
+		}
+
+		public static TimeSpan StaticExecute(decimal factor, TimeSpan timeSpan)
+		{
+			return new TimeSpan(Convert.ToInt64(factor * timeSpan.Ticks));
 		}
 	}
-	
+
 	/// <remarks>operator iDivision(ALeftValue : TimeSpan, ARightValue : Integer) : TimeSpan;</remarks>
 	public class TimeSpanIntegerDivisionNode : BinaryInstructionNode
 	{
@@ -2020,8 +2956,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return new TimeSpan(((TimeSpan)argument1).Ticks / (int)argument2);
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Ticks", new Type[0]));
+			m.IL.LoadLocal(arguments[1]);
+			m.IL.Convert<long>();
+			m.IL.Divide();
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(long) }));
+		}
 	}
-	
+
 	/// <remarks>operator iDivision(ALeftValue : Integer, ARightValue : TimeSpan) : TimeSpan;</remarks>
 	public class IntegerTimeSpanDivisionNode : BinaryInstructionNode
 	{
@@ -2034,8 +2984,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return new TimeSpan((int)argument1 / ((TimeSpan)argument2).Ticks);
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.Convert<long>();
+			m.IL.LoadLocalAddress(arguments[1]);
+			m.IL.Call(typeof(TimeSpan).GetMethod("get_Ticks", new Type[0]));
+			m.IL.Divide();
+			m.IL.NewObject(typeof(TimeSpan).GetConstructor(new[] { typeof(long) }));
+		}
 	}
-	
+
 	/// <remarks>operator iDivision(ALeftValue : TimeSpan, ARightValue : Decimal) : TimeSpan;</remarks>
 	public class TimeSpanDecimalDivisionNode : BinaryInstructionNode
 	{
@@ -2046,10 +3010,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return new TimeSpan(Convert.ToInt64(((TimeSpan)argument1).Ticks / (decimal)argument2));
+				return StaticExecute((TimeSpan)argument1, (decimal)argument2);
+		}
+
+		public static TimeSpan StaticExecute(TimeSpan left, decimal right)
+		{
+			return new TimeSpan(Convert.ToInt64(left.Ticks / right));
 		}
 	}
-	
+
 	/// <remarks>operator iDivision(ALeftValue : Decimal, ARightValue : TimeSpan) : TimeSpan;</remarks>
 	public class DecimalTimeSpanDivisionNode : BinaryInstructionNode
 	{
@@ -2060,10 +3029,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return new TimeSpan(Convert.ToInt64((decimal)argument1 / ((TimeSpan)argument2).Ticks));
+				return StaticExecute((decimal)argument1, (TimeSpan)argument2);
+		}
+
+		public static TimeSpan StaticExecute(decimal left, TimeSpan right)
+		{
+			return new TimeSpan(Convert.ToInt64(left / right.Ticks));
 		}
 	}
-	
+
 	/// <remarks>operator iDivision(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Decimal;</remarks>
 	public class TimeSpanTimeSpanDivisionNode : BinaryInstructionNode
 	{
@@ -2074,10 +3048,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return (decimal)((TimeSpan)argument1).Ticks / (decimal)((TimeSpan)argument2).Ticks;
+				return StaticExecute((TimeSpan)argument1, (TimeSpan)argument2);
+		}
+
+		public static decimal StaticExecute(TimeSpan left, TimeSpan right)
+		{
+			return (decimal)left.Ticks / right.Ticks;
 		}
 	}
-	
+
 	/// <remarks>operator iEqual(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
 	public class TimeSpanEqualNode : BinaryInstructionNode
 	{
@@ -2090,8 +3069,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (TimeSpan)argument1 == (TimeSpan)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpan).GetMethod("op_Equality", new[] { typeof(TimeSpan), typeof(TimeSpan) }));
+		}
 	}
-	
+
 	public class DateTimeEqualNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2103,8 +3089,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 == (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_Equality", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	public class DateEqualNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2116,8 +3109,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 == (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_Equality", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	public class TimeEqualNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2129,8 +3129,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 == (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_Equality", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	/// <remarks>operator iNotEqual(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
 	public class TimeSpanNotEqualNode : BinaryInstructionNode
 	{
@@ -2143,8 +3150,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (TimeSpan)argument1 != (TimeSpan)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpan).GetMethod("op_Inequality", new[] { typeof(TimeSpan), typeof(TimeSpan) }));
+		}
 	}
-	
+
 	public class DateTimeNotEqualNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2156,8 +3170,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 != (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_Inequality", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	public class DateNotEqualNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2169,8 +3190,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 != (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_Inequality", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	public class TimeNotEqualNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2182,8 +3210,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 != (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_Inequality", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	/// <remarks>operator iGreater(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
 	public class TimeSpanGreaterNode : BinaryInstructionNode
 	{
@@ -2196,8 +3231,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (TimeSpan)argument1 > (TimeSpan)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpan).GetMethod("op_GreaterThan", new[] { typeof(TimeSpan), typeof(TimeSpan) }));
+		}
 	}
-	
+
 	public class DateTimeGreaterNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2209,8 +3251,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 > (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_GreaterThan", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	public class DateGreaterNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2222,8 +3271,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 > (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_GreaterThan", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	public class TimeGreaterNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2235,8 +3291,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 > (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_GreaterThan", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	/// <remarks>operator iInclusiveGreater(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
 	public class TimeSpanInclusiveGreaterNode : BinaryInstructionNode
 	{
@@ -2249,8 +3312,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (TimeSpan)argument1 >= (TimeSpan)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpan).GetMethod("op_GreaterThanOrEqual", new[] { typeof(TimeSpan), typeof(TimeSpan) }));
+		}
 	}
-	
+
 	public class DateTimeInclusiveGreaterNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2262,8 +3332,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 >= (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_GreaterThanOrEqual", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	public class DateInclusiveGreaterNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2275,8 +3352,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 >= (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_GreaterThanOrEqual", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	public class TimeInclusiveGreaterNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2288,8 +3372,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 >= (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_GreaterThanOrEqual", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	/// <remarks>operator iLess(ALeftValue : DateTime, ARightValue : DateTime) : Boolean;</remarks>
 	public class DateTimeLessNode : BinaryInstructionNode
 	{
@@ -2302,8 +3393,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 < (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_LessThan", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	/// <remarks>operator iLess(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
 	public class TimeSpanLessNode : BinaryInstructionNode
 	{
@@ -2315,6 +3413,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return (TimeSpan)argument1 < (TimeSpan)argument2;
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpan).GetMethod("op_LessThan", new[] { typeof(TimeSpan), typeof(TimeSpan) }));
 		}
 	}
 
@@ -2329,8 +3434,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 < (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_LessThan", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	public class TimeLessNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program program, object argument1, object argument2)
@@ -2342,8 +3454,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 < (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_LessThan", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
-	
+
 	/// <remarks>operator iInclusiveLess(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
 	public class TimeSpanInclusiveLessNode : BinaryInstructionNode
 	{
@@ -2355,6 +3474,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return (TimeSpan)argument1 <= (TimeSpan)argument2;
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(TimeSpan).GetMethod("op_LessThanOrEqual", new[] { typeof(TimeSpan), typeof(TimeSpan) }));
 		}
 	}
 
@@ -2369,6 +3495,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 <= (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_LessThanOrEqual", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
 
 	public class DateInclusiveLessNode : BinaryInstructionNode
@@ -2381,6 +3514,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return (DateTime)argument1 <= (DateTime)argument2;
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_LessThanOrEqual", new[] { typeof(DateTime), typeof(DateTime) }));
 		}
 	}
 
@@ -2395,6 +3535,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (DateTime)argument1 <= (DateTime)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(DateTime).GetMethod("op_LessThanOrEqual", new[] { typeof(DateTime), typeof(DateTime) }));
+		}
 	}
 
 	public class TimeSpanInitializationNode : PlanNode
@@ -2404,8 +3551,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack[0] = null;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.SetStackItem(0, () => m.IL.LoadNull());
+			m.IL.LoadNull();
+		}
 	}
-    
+
 	public class DateTimeInitializationNode : PlanNode
 	{
 		public override object InternalExecute(Program program)
@@ -2413,8 +3568,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack[0] = null;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.SetStackItem(0, () => m.IL.LoadNull());
+			m.IL.LoadNull();
+		}
 	}
-    
+
 	public class DateInitializationNode : PlanNode
 	{
 		public override object InternalExecute(Program program)
@@ -2422,8 +3585,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack[0] = null;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.SetStackItem(0, () => m.IL.LoadNull());
+			m.IL.LoadNull();
+		}
 	}
-    
+
 	public class TimeSpanSumAggregationNode : PlanNode
 	{
 		public override object InternalExecute(Program program)
@@ -2444,14 +3615,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack[0] = null;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.SetStackItem(0, () => m.IL.LoadNull());
+			m.IL.LoadNull();
+		}
 	}
-	
+
 	public class DateTimeMinInitializationNode : PlanNode
 	{
 		public override object InternalExecute(Program program)
 		{
 			program.Stack[0] = null;
 			return null;
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.SetStackItem(0, () => m.IL.LoadNull());
+			m.IL.LoadNull();
 		}
 	}
 
@@ -2462,6 +3649,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack[0] = null;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.SetStackItem(0, () => m.IL.LoadNull());
+			m.IL.LoadNull();
+		}
 	}
 
 	public class DateMinInitializationNode : PlanNode
@@ -2471,8 +3666,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack[0] = null;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.SetStackItem(0, () => m.IL.LoadNull());
+			m.IL.LoadNull();
+		}
 	}
-	
+
 	public class TimeSpanMinAggregationNode : PlanNode
 	{
 		public override object InternalExecute(Program program)
@@ -2524,8 +3727,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack[0] = null;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.SetStackItem(0, () => m.IL.LoadNull());
+			m.IL.LoadNull();
+		}
 	}
-	
+
 	public class DateTimeMaxInitializationNode : PlanNode
 	{
 		public override object InternalExecute(Program program)
@@ -2533,8 +3744,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack[0] = null;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.SetStackItem(0, () => m.IL.LoadNull());
+			m.IL.LoadNull();
+		}
 	}
-	
+
 	public class TimeMaxInitializationNode : PlanNode
 	{
 		public override object InternalExecute(Program program)
@@ -2542,8 +3761,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack[0] = null;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.SetStackItem(0, () => m.IL.LoadNull());
+			m.IL.LoadNull();
+		}
 	}
-	
+
 	public class DateMaxInitializationNode : PlanNode
 	{
 		public override object InternalExecute(Program program)
@@ -2551,8 +3778,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack[0] = null;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.SetStackItem(0, () => m.IL.LoadNull());
+			m.IL.LoadNull();
+		}
 	}
-	
+
 	public class TimeSpanMaxAggregationNode : PlanNode
 	{
 		public override object InternalExecute(Program program)

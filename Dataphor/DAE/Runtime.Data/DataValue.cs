@@ -728,17 +728,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				DisposeNative(manager, nativeTable.TableType, nativeTable);
 			}
 		}
-		
-		/// <summary>
-		/// Compares two native values directly.
-		/// </summary>
-		/// <remarks>
-		/// The method expects both values to be non-null.
-		/// The method uses direct comparison, it does not attempt to invoke the D4 equality operator for the values.
-		/// Note that this method expects that neither argument is null.
-		/// </remarks>
-		/// <returns>True if the values are equal, false otherwise.</returns>
-		public static bool NativeValuesEqual(IValueManager manager, object LOldValue, object LCurrentValue)
+
+        public static bool ShouldDispose(Schema.IDataType type)
+        {
+            // TODO: Dispose in fewer cases such as native rows with no disposable contents
+            var nativeType = (type as Schema.IScalarType)?.NativeType ?? typeof(object);
+            return !nativeType.IsValueType && nativeType != typeof(string);
+        }
+
+        /// <summary>
+        /// Compares two native values directly.
+        /// </summary>
+        /// <remarks>
+        /// The method expects both values to be non-null.
+        /// The method uses direct comparison, it does not attempt to invoke the D4 equality operator for the values.
+        /// Note that this method expects that neither argument is null.
+        /// </remarks>
+        /// <returns>True if the values are equal, false otherwise.</returns>
+        public static bool NativeValuesEqual(IValueManager manager, object LOldValue, object LCurrentValue)
 		{
 			if (((LOldValue is StreamID) || (LOldValue is byte[])) && ((LCurrentValue is StreamID) || (LCurrentValue is byte[])))
 			{

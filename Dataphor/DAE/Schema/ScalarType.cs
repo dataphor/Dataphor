@@ -1189,7 +1189,6 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		ScalarTypeConstraints Constraints { get; }
 		ScalarTypes ParentTypes { get; }
-		Type NativeType { get; }
 		Representations Representations { get; }
 		ClassDefinition ClassDefinition { get; set; }
 		bool IsCompound { get; set; }

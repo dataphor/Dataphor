@@ -156,7 +156,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		// Columns
 		private Columns _columns;
 		public Columns Columns { get { return _columns; } }
-		
+
+		public Type NativeType => typeof(object);
+
 		protected void EmitColumns(EmitMode mode, TableTypeSpecifier specifier)
 		{
 			NamedTypeSpecifier columnSpecifier;

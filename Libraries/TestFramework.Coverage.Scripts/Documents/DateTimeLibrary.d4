@@ -5,7 +5,7 @@
 
 // DateTime tests
 
-
+SafeDrop('DateTimeTest');
 create table DateTimeTest
 {
 	ID: Integer,

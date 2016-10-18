@@ -166,7 +166,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 		}
-		
+
+		public override void DetermineCharacteristics(Plan plan)
+		{
+			base.DetermineCharacteristics(plan);
+			IsNilable = _comparisonNode.IsNilable;
+		}
+
 		public override object InternalExecute(Program program, object[] arguments) { return null; }
 		public override object InternalExecute(Program program)
 		{

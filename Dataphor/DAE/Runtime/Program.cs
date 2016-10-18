@@ -12,20 +12,20 @@ using System.Text;
 
 namespace Alphora.Dataphor.DAE.Runtime
 {
-	using Alphora.Dataphor.DAE.Language;
-	using Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Compiling;
-	using Alphora.Dataphor.DAE.Debug;
-	using Alphora.Dataphor.DAE.Device.Catalog;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Alphora.Dataphor.DAE.Runtime.Instructions;
+    using Alphora.Dataphor.DAE.Language;
+    using Alphora.Dataphor.DAE.Language.D4;
+    using Alphora.Dataphor.DAE.Compiling;
+    using Alphora.Dataphor.DAE.Debug;
+    using Alphora.Dataphor.DAE.Device.Catalog;
+    using Alphora.Dataphor.DAE.Server;
+    using Alphora.Dataphor.DAE.Streams;
+    using Alphora.Dataphor.DAE.Runtime.Data;
+    using Alphora.Dataphor.DAE.Runtime.Instructions;
 
-	/// <summary>
-	/// Represents the run-time aspects of a compiled D4 program.
-	/// </summary>
-	public class Program
+    /// <summary>
+    /// Represents the run-time aspects of a compiled D4 program.
+    /// </summary>
+    public class Program
 	{
 		public Program(ServerProcess process) : this(process, Guid.NewGuid()) { }
 		public Program(ServerProcess process, Guid iD)

@@ -8,64 +8,160 @@ begin
   var LBoolean1: Boolean, LBoolean2: Boolean;
   
   LBoolean1 := false;
+  if false <> false then
+    raise Error('Boolean literal comparison failed');
+
   if LBoolean1 <> false then
-    raise Error("Boolean assignment from literal failed");
+    raise Error('Boolean assignment from literal failed');
     
   LBoolean2 := LBoolean1;
   if LBoolean2 <> false then
-    raise Error("Boolean assignment from variable failed");
+    raise Error('Boolean assignment from variable failed');
     
   LBoolean1 := true;
   if LBoolean2 <> false then
-    raise Error("Boolean assignment is not by value");
+    raise Error('Boolean assignment is not by value');
     
+  if true <> not(false) then
+    raise Error('Boolean literal not failed');
+
   LBoolean2 := not(LBoolean2);
   if LBoolean2 <> true then
-    raise Error("Boolean not failed");
+    raise Error('Boolean not failed');
     
   LBoolean1 := true;
   LBoolean2 := false;
+  if not(true <> false) then
+    raise Error('Boolean literal or failed');
+
   if not(LBoolean1 or LBoolean2) then
-    raise Error("Boolean or failed, arguments unequal");
+    raise Error('Boolean or failed, arguments unequal');
+
+  if not(LBoolean1 or false) then
+    raise Error('Boolean or with literal failed, arguments unequal');
     
+  if not(true xor false) then
+    raise Error('Boolean literal xor failed');
+
   if not(LBoolean1 xor LBoolean2) then
-    raise Error("Boolean xor failed, arguments unequal");
+    raise Error('Boolean xor failed, arguments unequal');
     
+  if not(LBoolean1 xor false) then
+    raise Error('Boolean xor with literal failed, arguments unequal');
+    
+  if false and true then
+    raise Error('Boolean literal and failed, arguments unequal');
+
   if LBoolean1 and LBoolean2 then
-    raise Error("Boolean and failed, arguments unequal");
+    raise Error('Boolean and failed, arguments unequal');
     
+  if false and true then
+    raise Error('Boolean and failed, arguments unequal');
+
   LBoolean2 := true;
+  if not(true or true) then
+    raise Error('Boolean literal or failed, arguments equal');
+
   if not(LBoolean1 or LBoolean2) then
-    raise Error("Boolean or failed, arguments equal");
+    raise Error('Boolean or failed, arguments equal');
     
+  if not(LBoolean1 or true) then
+    raise Error('Boolean or with literal failed, arguments equal');
+
+  if true xor true then
+    raise Error('Boolean literal xor failed, arguments equal');
+
   if LBoolean1 xor LBoolean2 then
-    raise Error("Boolean xor failed, arguments equal");
+    raise Error('Boolean xor failed, arguments equal');
+
+  if LBoolean1 xor true then
+    raise Error('Boolean xor with literal failed, arguments equal');
      
+  if not(true and true) then
+    raise Error('Boolean literal and failed, arguments equal');
+
   if not(LBoolean1 and LBoolean2) then
-    raise Error("Boolean and failed, arguments equal");
+    raise Error('Boolean and failed, arguments equal');
+    
+  if not(LBoolean1 and true) then
+    raise Error('Boolean and with literal failed, arguments equal');
     
   LBoolean1 := false;
   LBoolean2 := true;
+  if false > true then
+    raise Error('Boolean literal greater than failed');
+
   if LBoolean1 > LBoolean2 then
-    raise Error("Boolean greater than failed");
+    raise Error('Boolean greater than failed');
+    
+  if LBoolean1 > true then
+    raise Error('Boolean with literal greater than failed');
+
+  if false >= true then
+    raise Error('Boolean literal inclusive greater than failed, arguments unequal');
     
   if LBoolean1 >= LBoolean2 then
-    raise Error("Boolean inclusive greater than failed, arguments unequal");
+    raise Error('Boolean inclusive greater than failed, arguments unequal');
+    
+  if LBoolean1 >= true then
+    raise Error('Boolean inclusive greater with literal than failed, arguments unequal');
+    
+  if true < false then
+    raise Error('Boolean literal less than failed');
     
   if LBoolean2 < LBoolean1 then
-    raise Error("Boolean less than failed");
+    raise Error('Boolean less than failed');
     
+  if LBoolean2 < false then
+    raise Error('Boolean less with literal than failed');
+    
+  if true <= false then
+    raise Error('Boolean literal inclusive less than failed, arguments unequal');
+     
   if LBoolean2 <= LBoolean1 then
-    raise Error("Boolean inclusive less than failed, arguments unequal");
+    raise Error('Boolean inclusive less than failed, arguments unequal');
+     
+  if LBoolean2 <= false then
+    raise Error('Boolean inclusive less with literal than failed, arguments unequal');
+
+  if (false ?= true) > 11 then
+    raise Error('Boolean literal compare failed, arguments equal');
+
+  if (LBoolean1 ?= LBoolean2) > 11 then
+    raise Error('Boolean compare failed, arguments equal');
+
+  if (LBoolean1 ?= true) > -1 then
+    raise Error('Boolean compare with literal failed, arguments equal');
+
+  if (LBoolean2 ?= LBoolean1) < 1 then
+    raise Error('Boolean compare failed, arguments equal');
      
   LBoolean2 := false;
-  if not(LBoolean1 >= LBoolean2) then
-    raise Error("Boolean inclusive greater than failed, arguments equal");
+  if not(false >= false) then
+    raise Error('Boolean literal inclusive greater than failed, arguments equal');
 
-  if not(LBoolean1 <= LBoolean2) then
-    raise Error("Boolean inclusive less than failed, arguments equal");
+  if not(LBoolean1 >= LBoolean2) then
+    raise Error('Boolean inclusive greater than failed, arguments equal');
+
+  if not(LBoolean1 >= false) then
+    raise Error('Boolean inclusive greater with literal than failed, arguments equal');
+
+  if not(false <= false) then
+    raise Error('Boolean literal inclusive less than failed, arguments equal');
     
+  if not(LBoolean1 <= LBoolean2) then
+    raise Error('Boolean inclusive less than failed, arguments equal');
+    
+  if not(LBoolean1 <= false) then
+    raise Error('Boolean inclusive less with literal than failed, arguments equal');
+    
+  if (false ?= false) <> 0 then
+    raise Error('Boolean literal compare failed, arguments equal');
+
   if (LBoolean1 ?= LBoolean2) <> 0 then
-    raise Error("Boolean compare failed, arguments equal");
+    raise Error('Boolean compare failed, arguments equal');
+
+  if (LBoolean1 ?= false) <> 0 then
+    raise Error('Boolean compare with literal failed, arguments equal');
 end;
 

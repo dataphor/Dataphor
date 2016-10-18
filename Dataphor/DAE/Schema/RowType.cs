@@ -117,42 +117,44 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { _isDisposable = value; }
 		}
 
-		#if NATIVEROW
-/*
-		public unsafe int GetByteSize(object AValue)
-		{
-			checked
-			{
-				Row LValue = AValue as Row;
-				object LColumnValue;
-				IDataValue LDataValue;
-				if (LValue != null)
+		public Type NativeType => typeof(Runtime.Data.IRow);
+
+#if NATIVEROW
+		/*
+				public unsafe int GetByteSize(object AValue)
 				{
-					int LSize = 2 * MathUtility.IntegerCeilingDivide(Columns.Count, 8);
-					// return the size required to store the physical representation of the row in bytes
-					for (int LIndex = 0; LIndex < Columns.Count; LIndex++)
+					checked
 					{
-						if (LValue.HasValue(LIndex))
+						Row LValue = AValue as Row;
+						object LColumnValue;
+						IDataValue LDataValue;
+						if (LValue != null)
 						{
-							LColumnValue = LValue.GetValue(LIndex);
-							LDataValue = LColumnValue as LDataValue;
-							if (LDataValue != null)
+							int LSize = 2 * MathUtility.IntegerCeilingDivide(Columns.Count, 8);
+							// return the size required to store the physical representation of the row in bytes
+							for (int LIndex = 0; LIndex < Columns.Count; LIndex++)
 							{
-								LSize += LDataValue.DataType.GetByteSize(LDataValue);
-								break;
+								if (LValue.HasValue(LIndex))
+								{
+									LColumnValue = LValue.GetValue(LIndex);
+									LDataValue = LColumnValue as LDataValue;
+									if (LDataValue != null)
+									{
+										LSize += LDataValue.DataType.GetByteSize(LDataValue);
+										break;
+									}
+
+									LSize += System.Runtime.InteropServices.Marshal.SizeOf(LColumnValue);
+									break;
+								}
 							}
-							
-							LSize += System.Runtime.InteropServices.Marshal.SizeOf(LColumnValue);
-							break;
+							return LSize;
 						}
+						return 0;
 					}
-					return LSize;
 				}
-				return 0;
-			}
-		}
-*/
-		#else
+		*/
+#else
 		public int StaticByteSize
 		{
 			get
@@ -167,8 +169,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 			set { }
 		}
-		#endif
-		
+#endif
+
 		protected void EmitColumns(EmitMode mode, RowTypeSpecifier specifier)
 		{
 			NamedTypeSpecifier columnSpecifier;

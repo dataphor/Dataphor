@@ -19,6 +19,9 @@ using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using System.Linq;
+using System.Collections.Generic;
+using Sigil;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -203,6 +206,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		// TODO: This should be compiled and added as cleanup nodes
 		// TODO: Handle var arguments for more than just stack references
+		// TODO: Native emission
 		protected void CleanupOperand(Program program, Schema.SignatureElement signatureElement, PlanNode argumentNode, object argumentValue)
 		{
 			switch (signatureElement.Modifier)
@@ -218,7 +222,356 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				break;
 			}
 		}
-		
+
+        public virtual ArgumentEmissionStyle ArgumentEmissionStyle
+        {
+            get { return ArgumentEmissionStyle.NativeOnStack; }
+        }
+
+		public override bool CanEmitIL => FindStaticExecuteMethod() != null;
+
+		public override bool RequiresEmptyStack 
+        { 
+            get { return ShouldCleanupOperands(); } 
+        }
+
+        public override void InternalEmitIL(NativeMethod m)
+		{
+			Sigil.Label nullLabel = null;
+
+			var cleanupOperands = ShouldCleanupOperands();
+			ExceptionBlock cleanupBlock = null;
+			if (cleanupOperands)
+				cleanupBlock = m.IL.BeginExceptionBlock();
+			// TODO: Capture only arguments that need cleanup
+
+			/* 
+				Strategies:
+				1. PhysicalInLocals - Capture each agrument in physical form into locals and pass locals.
+				2. NativeInLocals - Convert each argument into native form, capture into locals, and pass locals.
+				3. NativeOnStack - Convert each argument into native form, and leave on stack.
+			*/
+
+			var physicalArguments = cleanupOperands || ArgumentEmissionStyle == ArgumentEmissionStyle.PhysicalInLocals || IsNilable
+				? new Local[Nodes.Count]
+				: null;
+			var nativeArguments = ArgumentEmissionStyle == ArgumentEmissionStyle.NativeInLocals || IsNilable
+				? new Local[Nodes.Count]
+				: null;
+
+			for (var i = 0; i < Nodes.Count; ++i)
+			{
+				var node = Nodes[i];
+
+				EmitArgument(m, i);
+
+				if (physicalArguments != null)
+					physicalArguments[i] = m.StoreLocal(node.PhysicalType);
+
+				if (ArgumentEmissionStyle != ArgumentEmissionStyle.PhysicalInLocals && !ShouldIgnoreArgument(node))
+				{
+					if (physicalArguments != null)
+						m.IL.LoadLocal(physicalArguments[i]);
+
+					// Perform nil check                
+					if (node.IsNilable && IsNilable)
+					{
+						if (nullLabel == null)
+							nullLabel = m.IL.DefineLabel();
+						m.IL.BranchIfFalse(nullLabel);
+						m.IL.LoadLocal(physicalArguments[i]);
+					}
+
+					m.PhysicalToNative(node);
+
+					if (nativeArguments != null)
+					{
+						nativeArguments[i] = m.StoreLocal(node.NativeType);
+
+						if (ArgumentEmissionStyle == ArgumentEmissionStyle.NativeOnStack && !IsNilable)
+						{
+							m.IL.LoadLocal(nativeArguments[i]);
+							EmitPostArgument(m, i);
+						}
+					}
+					else
+						EmitPostArgument(m, i);
+				}
+			}
+
+			if (ArgumentEmissionStyle == ArgumentEmissionStyle.NativeOnStack && IsNilable)
+				for (var i = 0; i < Nodes.Count; ++i)
+					if (nativeArguments[i] != null)
+					{
+						m.IL.LoadLocal(nativeArguments[i]);
+						EmitPostArgument(m, i);
+					}
+
+			EmitInstruction(m, () => EmitInstructionOperation(m,
+				ArgumentEmissionStyle == ArgumentEmissionStyle.PhysicalInLocals ? physicalArguments
+					: ArgumentEmissionStyle == ArgumentEmissionStyle.NativeInLocals ? nativeArguments
+					: null
+			));
+
+			EmitPostInstruction(m);
+
+			if (nullLabel != null)
+			{
+				var endLabel = m.IL.DefineLabel();
+				m.IL.Branch(endLabel);
+				m.IL.MarkLabel(nullLabel);
+				m.IL.LoadNull();
+				m.IL.MarkLabel(endLabel);
+				m.IL.Nop();
+			}
+
+			if (cleanupOperands)
+			{
+				var result = m.StoreLocal(PhysicalType);
+				var cleanupFinally = m.IL.BeginFinallyBlock(cleanupBlock);
+				for (var i = 0; i < physicalArguments.Length; ++i)
+					EmitCleanupOperand(m, physicalArguments[i], i);
+				m.IL.EndFinallyBlock(cleanupFinally);
+				m.IL.EndExceptionBlock(cleanupBlock);
+				m.IL.LoadLocal(result);
+				result.Dispose();
+			}
+
+			// Free up locals to be reused
+			DisposeArguments(physicalArguments);
+			DisposeArguments(nativeArguments);
+		}
+
+		protected virtual bool ShouldIgnoreArgument(PlanNode node)
+		{
+			return false;
+		}
+
+		private static void DisposeArguments(Local[] arguments)
+		{
+			if (arguments != null)
+				foreach (var argument in arguments)
+					argument?.Dispose();
+		}
+
+		protected virtual void EmitInstruction(NativeMethod m, Action emit)
+		{
+			emit();
+		}
+
+		/// <summary> Overridden to emit the instruction specific operator for the arguments already on the stack. </summary>
+		/// <param name="arguments"> Local variables for each argument.  Arguments will only be present ArgumentEmissionStyle is NativeInLocals or PhysicalInLocals. </param>
+		protected virtual void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			var staticExecute = FindStaticExecuteMethod();
+			if (staticExecute != null)
+				m.IL.Call(staticExecute);
+			else
+				throw new NotImplementedException(GetType().Name + ".EmitInstructionOperation is not implemented.");
+		}
+
+		private MethodInfo FindStaticExecuteMethod()
+		{
+			return GetType().GetMethod("StaticExecute", GetExecuteSignature().ToArray());
+		}
+
+		protected virtual IEnumerable<Type> GetExecuteSignature() 
+			=> Nodes.Where(n => !ShouldIgnoreArgument(n)).Select(n => n.NativeType);
+
+		protected virtual void EmitPostInstruction(NativeMethod m)
+        {
+			var staticExecute = FindStaticExecuteMethod();
+			if (staticExecute == null || staticExecute.ReturnType != typeof(object))
+				m.NativeToPhysical(this);
+        }
+
+        protected virtual void EmitArgument(NativeMethod m, int index)
+        {
+            EmitSubNodeN(index, m);
+        }
+
+		protected virtual void EmitPostArgument(NativeMethod m, int index)
+		{
+		}
+
+		protected void EmitCleanupOperand(NativeMethod m, Local argument, int paramIndex)
+		{
+            m.LoadStatic(this);
+			m.IL.CastClass(typeof(InstructionNodeBase));
+            m.LoadProgram();
+			m.IL.CallVirtual(typeof(InstructionNodeBase).GetMethod("get_Operator"));
+			m.IL.CallVirtual(typeof(Schema.Operator).GetMethod("get_Signature"));
+			m.IL.LoadConstant(paramIndex);
+			m.IL.CallVirtual(typeof(Schema.Signature).GetMethod("get_Item"));
+            m.LoadStatic(this);
+            m.NodesN(paramIndex);
+			m.IL.LoadLocal(argument);
+			m.PhysicalToObject(Nodes[paramIndex]);
+			m.IL.CallVirtual(typeof(InstructionNodeBase).GetMethod("CleanupOperand", new[] { typeof(Program), typeof(Schema.SignatureElement), typeof(PlanNode), typeof(object) }));
+		}
+
+		protected void EmitValidatedCopy(NativeMethod m)
+		{
+			var nullLabel = m.IL.DefineLabel();
+			var endLabel = m.IL.DefineLabel();
+
+			EmitSubNodeN(0, m, true);
+			var valueLocal = m.StoreLocal(typeof(object));
+			m.IL.LoadLocal(valueLocal);
+			m.IL.BranchIfFalse(nullLabel);
+
+			EmitValidatedAssignment(m, () => m.CopyValue(() => m.IL.LoadLocal(valueLocal)), 0);
+			m.IL.Branch(endLabel);
+
+			m.IL.MarkLabel(nullLabel);
+			EmitValidatedAssignment(m, () => m.IL.LoadNull(), 0);
+
+			m.IL.MarkLabel(endLabel);
+			m.IL.Nop();
+		}
+
+		protected void EmitCallStaticExecute(NativeMethod m)
+		{
+			m.IL.Call(FindStaticExecuteMethod());
+		}
+
+		protected void EmitMinMax(NativeMethod m, Local[] arguments, Action emitComparer)
+		{
+			System.Diagnostics.Debug.Assert(ArgumentEmissionStyle == ArgumentEmissionStyle.PhysicalInLocals);
+
+			var nullLabel = m.IL.DefineLabel();
+			var valueLabel = m.IL.DefineLabel();
+			var lessLabel = m.IL.DefineLabel();
+			var rightDecides = m.IL.DefineLabel();
+			var endLabel = m.IL.DefineLabel();
+
+			m.IL.LoadLocal(arguments[0]);
+			if (Nodes[0].IsNilable)
+			{
+				m.IL.BranchIfFalse(rightDecides);
+				m.IL.LoadLocal(arguments[0]);
+				m.IL.UnboxAny(Nodes[0].NativeType);
+			}
+
+			m.IL.LoadLocal(arguments[1]);
+			if (Nodes[1].IsNilable)
+			{
+				m.IL.BranchIfFalse(valueLabel);	// left value already on stack
+				m.IL.LoadLocal(arguments[1]);
+				m.IL.UnboxAny(Nodes[1].NativeType);
+			}
+
+			emitComparer();
+			m.IL.BranchIfFalse(lessLabel);
+
+			m.IL.LoadLocal(arguments[0]);
+			if (Nodes[0].IsNilable)
+				m.IL.UnboxAny(Nodes[0].NativeType);
+			m.IL.Branch(valueLabel);
+
+			m.IL.MarkLabel(lessLabel);
+			m.IL.LoadLocal(arguments[1]);
+			if (Nodes[1].IsNilable)
+				m.IL.UnboxAny(Nodes[1].NativeType);
+			m.IL.Branch(valueLabel);
+
+			m.IL.MarkLabel(rightDecides);
+			m.IL.LoadLocal(arguments[1]);
+			if (Nodes[1].IsNilable)
+			{
+				m.IL.BranchIfFalse(nullLabel);
+				m.IL.LoadLocal(arguments[1]);
+				m.IL.UnboxAny(Nodes[1].NativeType);
+			}
+
+			if (IsNilable)
+			{
+				m.IL.Branch(valueLabel);
+				m.IL.MarkLabel(nullLabel);
+				m.IL.LoadNull();
+				m.IL.Branch(endLabel);
+			}
+
+			m.IL.MarkLabel(valueLabel);
+			m.NativeToPhysical(this);
+
+			m.IL.MarkLabel(endLabel);
+			m.IL.Nop();
+		}
+
+		protected void EmitBetween(NativeMethod m, Local[] arguments, Action emitLTE, Action emitGTE)
+		{
+			System.Diagnostics.Debug.Assert(ArgumentEmissionStyle == ArgumentEmissionStyle.NativeInLocals);
+
+			// tempValue >= lowerBound
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.LoadLocal(arguments[1]);
+			emitGTE();
+
+			// tempValue <= upperBound
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.LoadLocal(arguments[2]);
+			emitLTE();
+
+			m.IL.And();
+		}
+
+		protected void EmitIntBetween(NativeMethod m, Local[] arguments)
+		{
+			EmitBetween(m, arguments,
+				() =>
+				{
+					m.IL.CompareGreaterThan();
+					m.Not();
+				},
+				() =>
+				{
+					m.IL.CompareLessThan();
+					m.Not();
+				}
+			);
+		}
+
+		protected void EmitCompareBetween(NativeMethod m, Local[] arguments, Type type)
+		{
+			EmitBetween(m, arguments,
+				() =>
+				{
+					m.IL.Call(type.GetMethod("CompareTo", new[] { type }));
+					m.IL.LoadConstant(0);
+					m.IL.CompareLessThan();
+					m.Not();
+				},
+				() =>
+				{
+					m.IL.Call(type.GetMethod("CompareTo", new[] { type }));
+					m.IL.LoadConstant(0);
+					m.IL.CompareGreaterThan();
+					m.Not();
+				}
+			);
+		}
+
+		protected bool ShouldCleanupOperands()
+		{
+			if (Operator == null)
+				return false;
+
+			for (var i = 0; i < Operator.Signature.Count; ++i)
+			{
+				var nativeType = (Operator.Signature[i].DataType as Schema.IScalarType)?.NativeType ?? null;
+
+				var modifier = Operator.Signature[i].Modifier;
+				if (
+					(
+						modifier == Modifier.In && (nativeType == null || typeof(IDisposable).IsAssignableFrom(nativeType))
+					) || modifier == Modifier.Var
+				)
+					return true;
+			}
+			return false;
+		}
+
 		public override string Category
 		{
 			get { return "Instruction"; }
@@ -263,9 +616,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			#endif
 		}
-	}
-	
-	public abstract class UnaryInstructionNode : InstructionNodeBase
+    }
+
+    public abstract class UnaryInstructionNode : InstructionNodeBase
 	{
 		public abstract object InternalExecute(Program program, object argument1);
 		
@@ -303,9 +656,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				#endif
 			}
 		}
-	}
-	
-	public abstract class BinaryInstructionNode : InstructionNodeBase
+    }
+
+    public abstract class BinaryInstructionNode : InstructionNodeBase
 	{
 		public abstract object InternalExecute(Program program, object argument1, object argument2);
 		
@@ -348,7 +701,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 	}
-	
+
 	public abstract class TernaryInstructionNode : InstructionNodeBase
 	{
 		public abstract object InternalExecute(Program program, object argument1, object argument2, object argument3);
@@ -393,9 +746,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				#endif
 			}
 		}
-	}
-	
-	public abstract class InstructionNode : InstructionNodeBase
+    }
+
+    public abstract class InstructionNode : InstructionNodeBase
 	{
 		public abstract object InternalExecute(Program program, object[] arguments);
 
@@ -435,6 +788,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					for (int index = 0; index < FCleanupNodes.Count; index++)
 						FCleanupNodes[index].Execute(AProgram);
 				#endif
+			}
+		}
+
+		public override bool RequiresEmptyStack { get { return base.RequiresEmptyStack || IsBreakable; } }
+
+		protected override void EmitInstruction(NativeMethod m, Action emit)
+		{
+			ExceptionBlock windowBlock = null;
+			if (IsBreakable)
+			{
+				m.GetStack();
+				m.IL.LoadConstant(0);
+				m.IL.CallVirtual(typeof(Stack).GetMethod("PushWindow", new[] { typeof(int) }));
+				windowBlock = m.IL.BeginExceptionBlock();
+			}
+			base.EmitInstruction(m, emit);
+			if (IsBreakable)
+			{
+				var resultLocal = m.StoreLocal(PhysicalType);
+				var windowFinally = m.IL.BeginFinallyBlock(windowBlock);
+				m.GetStack();
+				m.IL.CallVirtual(typeof(Stack).GetMethod("PopWindow", new Type[0]));
+				m.IL.EndFinallyBlock(windowFinally);
+				m.IL.EndExceptionBlock(windowBlock);
+				m.IL.LoadLocal(resultLocal);
+				resultLocal.Dispose();
 			}
 		}
 	}
