@@ -5,16 +5,12 @@
 */
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Runtime
 {
 	using Alphora.Dataphor.DAE.Language;
-	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Alphora.Dataphor.DAE.Runtime.Instructions;
 
-    public class DataParam : object
+	public class DataParam : object
     {
 		public DataParam(string name, Schema.IDataType dataType, Modifier modifier, object tempValue)
 		{
