@@ -8834,7 +8834,15 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			plan.EnsureDeviceStarted(device);
 			Schema.Representation representation = FindSystemRepresentation(scalarType);
-			return (representation != null) && (representation.Properties.Count == 1) && (representation.Properties[0].DataType is Schema.ScalarType) && (device.ResolveDeviceScalarType(plan, (Schema.ScalarType)representation.Properties[0].DataType) != null);
+			return 
+				(representation != null) 
+					&& (representation.Properties.Count == 1) 
+					&& (representation.Properties[0].DataType is Schema.ScalarType) 
+					&& 
+					(
+						(device.ResolveDeviceScalarType(plan, (Schema.ScalarType)representation.Properties[0].DataType) != null)
+							|| CouldGenerateDeviceScalarTypeMap(plan, device, (Schema.ScalarType)representation.Properties[0].DataType)
+					);
 		}
 		
 		public static Schema.DeviceScalarType CompileDeviceScalarTypeMap(Plan plan, Schema.Device device, DeviceScalarTypeMap deviceScalarTypeMap)

@@ -387,21 +387,33 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		
 		protected virtual void SetMaxIdentifierLength() {}
 
+		protected void GenerateDeviceScalarTypeMap(Plan plan, Schema.ScalarType scalarType)
+		{
+			var systemRepresentation = Compiler.FindSystemRepresentation(scalarType);
+			var basedOnType = (Schema.ScalarType)systemRepresentation.Properties[0].DataType;
+			if (ResolveDeviceScalarType(plan, basedOnType) == null)
+			{
+				GenerateDeviceScalarTypeMap(plan, basedOnType);
+			}
+
+			D4.AlterDeviceStatement statement = new D4.AlterDeviceStatement();
+			statement.DeviceName = Name;
+			// BTR 1/18/2007 -> This really should be being marked as generated, however doing so
+			// changes the dependency reporting for scalar type maps, and causes some catalog dependency errors,
+			// so I cannot justify making this change in this version. Perhaps at some point, but not now...
+			statement.CreateDeviceScalarTypeMaps.Add(new D4.DeviceScalarTypeMap(scalarType.Name));
+			plan.ExecuteNode(Compiler.Compile(plan, statement));
+		}
+
 		// verify that all types in the given table are mapped into this device
         public override void CheckSupported(Plan plan, TableVar tableVar)
         {
 			// verify that the types of all columns have type maps
 			foreach (Schema.Column column in tableVar.DataType.Columns)
 				if (!(column.DataType is Schema.ScalarType) || (ResolveDeviceScalarType(plan, (Schema.ScalarType)column.DataType) == null))
-					if (Compiler.CouldGenerateDeviceScalarTypeMap(plan, this, (Schema.ScalarType)column.DataType))
+					if (column.DataType is Schema.ScalarType && Compiler.CouldGenerateDeviceScalarTypeMap(plan, this, (Schema.ScalarType)column.DataType))
 					{
-						D4.AlterDeviceStatement statement = new D4.AlterDeviceStatement();
-						statement.DeviceName = Name;
-						// BTR 1/18/2007 -> This really should be being marked as generated, however doing so
-						// changes the dependency reporting for scalar type maps, and causes some catalog dependency errors,
-						// so I cannot justify making this change in this version. Perhaps at some point, but not now...
-						statement.CreateDeviceScalarTypeMaps.Add(new D4.DeviceScalarTypeMap(column.DataType.Name));
-						plan.ExecuteNode(Compiler.Compile(plan, statement));
+						GenerateDeviceScalarTypeMap(plan, (Schema.ScalarType)column.DataType);
 						ResolveDeviceScalarType(plan, (Schema.ScalarType)column.DataType); // Reresolve to attach a dependency to the generated map
 					}
 					else
