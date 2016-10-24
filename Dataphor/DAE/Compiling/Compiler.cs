@@ -7255,7 +7255,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (index > 0)
 					message.Append(" and ");
 				message.AppendFormat("{0} ", MetaData.GetTag(reference.TargetTable.Columns[reference.TargetKey.Columns[index].Name].MetaData, "Frontend.Title", reference.TargetKey.Columns[index].Name));
-				scalarType = (Schema.ScalarType)reference.TargetKey.Columns[index].DataType;
+				scalarType = (Schema.ScalarType)reference.SourceKey.Columns[index].DataType;
 				representation = scalarType.FindRepresentation(NativeAccessors.AsDisplayString);
 				bool isString = scalarType.NativeType == NativeAccessors.AsDisplayString.NativeType;
 				if (isString)
@@ -7281,7 +7281,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (index > 0)
 					message.Append(" and ");
 				message.AppendFormat("{0} ", MetaData.GetTag(reference.SourceTable.Columns[reference.SourceKey.Columns[index].Name].MetaData, "Frontend.Title", reference.SourceKey.Columns[index].Name));
-				scalarType = (Schema.ScalarType)reference.SourceKey.Columns[index].DataType;
+				scalarType = (Schema.ScalarType)reference.TargetKey.Columns[index].DataType;
 				representation = scalarType.FindRepresentation(NativeAccessors.AsDisplayString);
 				bool isString = scalarType.NativeType == NativeAccessors.AsDisplayString.NativeType;
 				if (isString)
