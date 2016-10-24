@@ -1579,7 +1579,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public override void DetermineDevice(Plan plan)
 		{
-			base.DetermineDevice(plan);
+			_device = _tableVar.Device;
 			DeviceSupported = false;
 		}
 		
