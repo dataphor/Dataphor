@@ -50,15 +50,73 @@ namespace Alphora.Dataphor.DAE.Connection
 
 		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			return new SqlConnection(connectionString);
+			SqlConnection connection = new SqlConnection(connectionString);
+			//connection.InfoMessage += Connection_InfoMessage;
+			return connection;
 		}
+
+		//private void Connection_InfoMessage(object sender, SqlInfoMessageEventArgs e)
+		//{
+		//	foreach (SqlError error in e.Errors)
+		//	{
+		//		if (IsTransactionFailure(error.Number))
+		//		{
+		//			_transactionFailure = true;
+		//		}
+		//	}
+		//}
+
+		//protected override void Dispose(bool disposing)
+		//{
+		//	if (_connection != null)
+		//	{
+		//		((SqlConnection)_connection).InfoMessage -= Connection_InfoMessage;
+		//	}
+
+		//	base.Dispose(disposing);
+		//}
 
 		protected override SQLCommand InternalCreateCommand()
 		{
 			return new MSSQLCommand(this, CreateDbCommand());
 		}
 
+		protected bool IsZombied(IDbTransaction transaction)
+		{
+			return (bool)transaction.GetType().GetProperty("IsZombied", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(transaction, null);
+		}
+
+		protected override void InternalCommitTransaction()
+		{
+			// If it's zombied, don't do anything, otherwise, commit
+			if (!IsZombied(_transaction))
+			{
+				base.InternalCommitTransaction();
+			}
+		}
+
+		protected override void InternalRollbackTransaction()
+		{
+			// If it's zombied, don't do anything, otherwise, rollback
+			if (!IsZombied(_transaction))
+			{
+				base.InternalRollbackTransaction();
+			}
+		}
+
 		#region Exception Wrapping
+
+		// There is in general no way to know just based on the error severity whether or not a given error will result in the transaction being rolled back
+		// We could make the determination exhaustive in the below list, but that would be fragile.
+		// There is apparently some way to know because the underlying transaction indicates it is "Zombied", but according to this blog post:
+		// https://blogs.msdn.microsoft.com/sqlserverfaq/2011/05/11/errors-raised-with-severitylevel-16-may-cause-transactions-into-doomed-state/
+		// And this documentation article:
+		// https://msdn.microsoft.com/en-us/library/ms189797.aspx
+		// The only way to know reliably is to test the XACT_STATE() function after the call. We're already chatty enough, so I don't want to do that,
+		// and based on the profile, that's not what's happening in the underlying SqlConnection either. Maybe they've cataloged the set and marked it zombied, or 
+		// maybe they have some undocumented way of getting that information.
+		// I've tried listening to the InfoMessage for 3998 too, which is the message the server is supposed to send back whenever it does this, but it doesn't work, don't know why.
+		// So... the solution is to test the IsZombied flag of the transaction prior to a commit or rollback. On a commit, that should produce a failure, on a rollback, it should just ignore it.
 
 		protected override bool IsTransactionFailure(Exception exception)
 		{
@@ -81,6 +139,8 @@ namespace Alphora.Dataphor.DAE.Connection
 					return true; // Process was chosen as deadlock victim
 				case 3928:
 					return true; // The marked transaction failed
+				case 3998:
+					return true; // Uncommittable transaction is detected at the end of the batch. The transaction is rolled back.
 				case 8650:
 					return true; // Intra-query parallelism caused server command to deadlock
 				case 8901:
