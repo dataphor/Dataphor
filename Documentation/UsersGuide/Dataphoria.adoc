@@ -1,0 +1,69 @@
+= Dataphoria
+:author: Alphora
+:doctype: book
+
+:icons:
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+. link:Aliases.adoc[Aliases]
+. link:DataphorExplorer.adoc[Dataphor Explorer]
+. link:DocumentsAndDesigners.adoc[Documents and Designers]
+
+[[DUGP1Dataphoria-Introduction]]
+== Introduction
+
+The Dataphoria environment provides access to all the capabilities and
+functionality of the Dataphor product. As such this discussion will be
+lengthy and involved. The discussion will be driven largely from the
+standpoint of covering all the topics, rather than a sequential
+exposition of the concepts involved. It will center largely on usability
+issues, rather than design topics or development concerns. Topics are
+discussed as they are encountered in the tour, and the interested reader
+is referred to other areas of the documentation for more detailed
+coverage of each concept. For a complete discussion of how to use the
+Dataphor product from a development standpoint, refer to the Dataphor
+Developer's Guide.
+
+[[DUGP1Dataphoria-Introduction-Environment]]
+=== Environment
+
+The following screen capture displays the default state of the IDE on
+startup:
+
+image::../Images/Dataphoria.bmp[Dataphoria Client]
+
+There are three main interfaces in the Dataphoria IDE: the Dataphor
+Explorer, the designer surface, and the messages view.
+
+The Dataphor Explorer provides a visual interface for managing the
+various aspects of a Dataphor Server, from application development to
+administration.
+
+The designer surface is the main interface for creating, viewing, and
+interacting with documents in libraries in the Dataphor Server.
+
+The messages window provides a common view of all error messages and
+warnings from the various designers in the Dataphor IDE. Compiler errors
+from D4 scripts, as well as serialization warnings from Dataphor forms
+are all displayed here.
+
+In addition to these main interfaces, the Dataphor IDE exposes various
+interfaces through the main menu. These include launching new designers,
+opening files from disk, and setting configuration options for the IDE.
+
+The help menu allows access to the Dataphor Help Collection, which
+includes this manual as well as the Dataphor Developer's Guide, and the
+Dataphor Reference. An about box displaying the version of the Dataphor
+platform is available from this menu.
+
+Context-sensitive help is available throughout the Dataphoria IDE by
+pressing F1.
+
+All the windows in the IDE use a common docking and layout mechanism
+which allows the windows to be docked to the Dataphor IDE. While docked,
+each window can be pinned in place, or unpinned, allowing the window to
+slide out of view while it is not being used. While unpinned, hovering
+the mouse over the window's "handle" will cause it to slide back into
+view.

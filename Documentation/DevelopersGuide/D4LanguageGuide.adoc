@@ -1,0 +1,24 @@
+= D4 Language Guide
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+. link:D4Introduction.adoc[Introduction]
+. link:D4ScriptsAndExecution.adoc[Scripts and Execution]
+. link:D4LexicalElements.adoc[Lexical Elements]
+. link:D4LanguageElements.adoc[Language Elements]
+. link:D4Catalog.adoc[Catalog Elements]
+. link:D4DataManipulation.adoc[Data Manipulation]
+. link:D4TableOperators.adoc[Table Operators]
+. link:D4ImperativeStatements.adoc[Imperative Statements]
+. link:D4ComparisonWithSQL.adoc[Comparison with SQL]
+
+[[D4LG]]
+== Summary
+
+This part introduces the D4 language and discusses its intentions and
+usage. It provides a complete reference guide for the language, as well
+as discussions of common programming topics, and a comparison with SQL.

@@ -1,0 +1,560 @@
+= The Space Between the Data
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGTheSpaceBetweentheData]]
+== Summary
+
+One of the most complex and time-consuming tasks in any application
+involves coordinating the interaction between the frontend applications
+and the database server. Because of the disconnected nature of the data
+entry forms in an application, and the transaction-oriented processing
+capabilities of traditional database management systems, large portions
+of application-specific code must be devoted to managing the potential
+concurrency and resource contention issues surrounding common
+user interface and application logic processing tasks.
+
+In addition, because traditional database management systems typically
+provide little or no services for extending the business rules
+enforcement they provide to the client applications, many of these
+validations and processes must be duplicated in client-side code, giving
+rise to additional development and maintenance effort.
+
+One of the primary goals of the Dataphor product is the elimination of
+this disconnect, and provisions for a platform that exposes the business
+rules enforcement capabilities of the server to the frontend client. By
+exposing these services, and providing a data access layer that is aware
+of them, most, if not all, of this development effort can be eliminated,
+both in the development and maintenance cycles.
+
+This chapter discusses the three main services that the Dataphor Server
+Call-Level Interface exposes above and beyond traditional DBMSs:
+Navigational Access, Application Transactions, and Proposables.
+Navigational Access provides a mechanism for enabling what appears to be
+indexed-sequential access to relational data, while minimizing the
+performance and concurrency impact that such access would typically
+require. Application Transactions provide a mechanism for building batch
+data entry processes that enforce database level constraints, while
+simultaneously managing concurrency issues and minimizing resource
+contention. And finally, Proposables provide services for proposing data
+modifications without actually performing them, allowing client
+applications to actively participate in business rules enforcement, and
+eliminating the need to duplicate the logic already defined in the
+application schema on the server.
+
+[[DDGTheSpaceBetweentheData-NavigationalAccess]]
+== Navigational Access
+
+Searching and navigation user interfaces make up a large part of any
+application. Almost every process will involve some kind of browse style
+user interface to allow the user to select information for data entry,
+or manipulation. Moreover, for the vast majority of these interfaces,
+the most intuitive approach from the user's perspective is simply to
+provide a searchable list of the rows available.
+
+However, this approach can cause problems when dealing a relational data
+store. Traditional DBMSs are typically optimized to produce the entire
+query result as quickly as possible. This results in queries such as
+"Show me the list of all customers" being evaluated in their entirety to
+avoid resource contention. Of course, in a browse style interface, the
+query is more precisely stated "Show me the first few customers, and let
+me retrieve more if desired." footnote:[Resource contention in this
+scenario is eliminated by requesting the cursor in _browse_ isolation,
+meaning that the cursor will not take locks on data that it reads.
+Because the data is only being read, there is no danger of
+inconsistency.]
+
+This is precisely what the *browse* clause of a cursor definition in D4
+does. Rather than assume that all the rows of a given query will be
+retrieved, the Dataphor Server assumes that only those rows that have
+actually been requested will be retrieved. If the client application
+never requests more rows, the Dataphor Server simply closes the cursor
+without requesting any additional information from the target system.
+
+When the *browse* clause is used to specify the desired ordering of a
+result set, the Dataphor Server actually transforms the query internally
+to retrieve only the rows that are necessary. For example, if the user
+searches for the value "Smi" in the Name column of the Employee table,
+the Dataphor Server retrieves the first few rows that are greater than
+or equal to the given value, and the first few rows that are less than
+the value. These rows are returned to the client application for
+display.
+
+The resulting user interface displays the result set as though all the
+rows were present at all times, when in reality, only those rows
+required to maintain that illusion are retrieved. The grid displaying
+the result set becomes a kind of "sliding window" ranging over the rows
+in the result set.
+
+Be aware that by default, the *browse* clause functions not only as an
+order specification, but as a quasi-restriction, excluding rows that do
+not have values for the columns of the order. This behavior is provided
+as an optimization, because many systems perform better if rows
+containing nulls are not included in the result set. If a cursor with a
+*browse* clause results in an unexpected empty set, this is likely the
+cause. This behavior can be specified explicitly using the *include nil*
+clause of the order specification.
+
+In addition, the *browse* clause requires that the order specification
+be a superset of some key of the result set. This requirement is
+enforced to ensure that the searchable capabilities of the result set
+are always available, and any given row can always be guaranteed to be
+addressable. The compiler will ensure that the order specification meets
+this requirement by automatically appending columns as necessary.
+
+There is a caveat with this behavior, however, in that if the compiler
+appends a key column on to the order specification, the target system
+may not select the index if it does not include the additional column or
+columns. For example, when searching by Name in the Employee table, the
+compiler will append the ID column to ensure addressability of rows
+within the result set. If the Employee table in the target system has a
+non-unique index on Name only, it may not be used to satisfy the queries
+given by the Dataphor Server, depending on how the target system decides
+to perform the query footnote:[This usually only happens when the table
+in question has an extremely large number of rows (over 1,000,000), and
+the target system decides that, based on the distribution of values
+within the index pages, a table scan would be more efficient than a
+ranged index scan.]. In cases such as this, defining the index on the
+target system to include both Name and ID will eliminate the problem.
+
+[[DDGTheSpaceBetweentheData-ApplicationTransactions]]
+== Application Transactions
+
+A constant problem encountered in developing applications involves
+building data entry forms for structures which participate in database
+level integrity constraints. The simplest example of the problem is that
+of a master/detail relationship, where in order for a row to exist in a
+detail table, such as EmployeePhone, a row must exist in the master
+table first, such as Employee.
+
+A typical user interface for entering an Employee row involves an edit
+for the columns of the Employee row itself, with an embedded browse for
+the EmployeePhone rows associated with the employee. The problem arises
+as soon as the user attempts to post the first EmployeePhone row while
+still in the process of entering the Employee row. Because of the
+reference constraint defined between EmployeePhone and Employee, the
+database server will reject the modification.
+
+Application Transactions provide a generic and transparent solution to
+this problem. By performing the data entry in an isolated scratch pad,
+the Dataphor Server allows all the pertinent information about the
+employee to be entered. The batch is then posted to the database as a
+single transaction once the main data entry form has been accepted.
+
+In effect, application transactions are long-running, optimistically
+concurrent transactions. The Dataphor Server manages the scratch pad
+buffers that are used to enter the data, and manages posting the
+application transaction back to the actual database. By using the Data
+Access Layer, this is all done transparently.
+
+This section discusses application transactions, how the CLI exposes
+them, and how the actual implementation manages process participation in
+them.
+
+[[DDGTheSpaceBetweentheData-ApplicationTransactions-Management]]
+=== Application Transactions
+
+Application transaction management is accomplished by exposing several
+calls through the CLI. These calls are:
+
+* BeginApplicationTransaction
+* JoinApplicationTransaction
+* LeaveApplicationTransaction
+* PrepareApplicationTransaction
+* CommitApplicationTransaction
+* RollbackApplicationTransaction
+
+Application transactions are managed by the session level of the CLI.
+Any number of processes may participate in a given application
+transaction, but all those processes must be on the same session.
+Closing a session implicitly rolls back any active application
+transactions.
+
+Calling BeginApplicationTransaction starts a new application transaction
+in the current session, and optionally joins the current process to the
+application transaction. The result of this call is the application
+transaction __id__, which is a GUID generated by the Dataphor Server to
+identify the application transaction. All subsequent management calls
+must use this id to refer to the application transaction.
+
+Calling JoinApplicationTransaction joins the current process to the
+specified application transaction. A process may only participate in one
+application transaction at any given time. The process can join the
+application transaction in _insert_ mode, which controls whether or not
+data from referenced table variables is copied into the application
+transaction.
+
+Calling LeaveApplicationTransaction causes the current process to leave
+the application transaction in which it is participating. Leaving an
+application transaction does not end the application transaction.
+
+Calling PrepareApplicationTransaction posts the effects of the
+application transaction to the actual database, but does not commit the
+application transaction. This call is exposed to allow the application
+transaction to participate in a two-phase commit protocol with a
+standard database transaction.
+
+Calling CommitApplicationTransaction prepares the application
+transaction if necessary, and ends the application transaction, freeing
+up the resources allocated to the application transaction.
+
+Calling RollbackApplicationTransaction undoes the effects of the
+application transaction on the global database if it has been prepared,
+and ends the application transaction, freeing up the resources allocated
+to the application transaction.
+
+All these management functions are handled transparently by the Data
+Access layer of the Dataphor platform. By setting the
+UseApplicationTransactions property of the Source component, all data
+modifications performed by the Source are protected within an
+application transaction.
+
+The default value for this property is true, and its value can also be
+controlled using the Frontend.UseApplicationTransactions tag.
+
+[[DDGTheSpaceBetweentheData-ApplicationTransactions-Translation]]
+=== Translation
+
+When a process is joined to an application transaction, all calls on
+that process are _translated_ into the application transaction space.
+This means that statements referencing table variables, and possibly
+other schema objects, in the database are actually executed against the
+scratch pad tables and objects created in the application transaction
+space.
+
+As table variables and other schema objects are encountered within
+statements on the joined process, replicas of the referenced schema
+objects are created in a temporary buffer space set aside for the
+application transaction. If the application transaction was joined in
+insert mode, no data is copied into these temporary buffers from the
+actual database. Otherwise, the data from the database that is
+referenced by the statement being translated is copied into the
+application transaction as well.
+
+All subsequent references to objects that have been translated are
+executed against the scratch pad replicas, rather than the actual
+database. As data modifications are performed against these tables, they
+are logged by the application transaction. When the application
+transaction is posted, this log is replayed against the actual tables in
+the database. Optimistic concurrency checks are performed during this
+replay to guarantee that updates from other users are not lost.
+
+The result is a transparent batch update process that allows database
+level constraints to be temporarily violated during the data entry
+process, without requiring long-running pessimistic transactions.
+
+There are three types of schema objects that will be translated into an
+application transaction space as they are encountered: table variables,
+operators, and event handlers.
+
+[[DDGTableVariables]]
+==== Tables and Views
+
+Whenever table variables are referenced within application transactions,
+the table variable is translated into the application transaction
+context. This translation occurs transparently, and the resulting copy
+is an exact replica of the source table variable, except that no
+database-level constraints are created on the copy, and only event
+handlers that should be translated are attached.
+
+If the process joined the application transaction in insert mode, no
+data is copied into the application transaction replica. Otherwise, any
+data that is visible within the expression referencing the table
+variable is copied into the application transaction.
+
+In addition, if the table variable is encountered within the right side
+of a *left lookup* operator, or some other scenario in which the update
+semantics will not cause a propagation to the table variable in
+question, then the table variable will not be translated into the
+application transaction space. This avoids unnecessarily creating
+application transaction copies of table variables and data that could
+not be updated by the process.
+
+One important exception to this is called a __detail lookup__, and
+occurs whenever a reference to another table involves some portion of
+the key of the source table variable. By default, a *left lookup*
+operator is considered a detail lookup if the columns over which the
+join is performed form a proper superset of any non-empty key of the
+left input to the operator. This behavior can be changed using the
+IsDetailLookup modifier.
+
+The translation of a table variable into an application transaction
+context can be prevented by setting the DAE.ShouldTranslate tag to
+false. Note that session-specific table variables may be translated as
+well as global table variables.
+
+[[DDGOperators]]
+==== Operators
+
+Whenever operators are encountered within an application transaction,
+the operator is translated into the application transaction context.
+This translation occurs transparently, and the resulting copy is an
+exact replica of the source operator. Table variables and operators
+encountered within the translated operator are also translated into the
+application transaction context, recursively.
+
+By default, operators that are encountered are translated if they are
+not host-implemented, and they update table variables in the database.
+To change this behavior, use the DAE.ShouldTranslate tag. Note that
+session-specific operators may be translated as well as global
+operators.
+
+The translation of an operator into an application transaction context
+can be prevented by setting the DAE.ShouldTranslate tag to false.
+
+[[DDGEventHandlers]]
+==== Event Handlers
+
+Event handlers are translated into an application transaction context as
+a result of being attached to table variables that are being translated.
+If an event handler is to be translated, the operator being attached may
+or may not be translated into the application transaction context as
+well, depending on the characteristics of the operator.
+
+If a given event handler is invoked within an application transaction,
+it will not be invoked during playback of the application transaction.
+For example, if an audit event handler is attached to the Customer
+table, and an application transaction involving that table causes the
+event handler to be invoked, the event handler will not be invoked when
+the application transaction is committed and the actual Customer table
+is updated.
+
+By default, all event handlers except _after_ table event handlers are
+translated into the application transaction context. To change this
+behavior, use the DAE.ShouldTranslate tag. If an event handler is
+translated, but the operator to be invoked is not, the invocation will
+essentially occur outside the application transaction footnote:[Unless
+the operator performs some dynamic execution that subsequently re-enters
+the application transaction at run-time.].
+
+It is important to note in connection with event handlers that recording
+and playback of the application transaction is occurring at the base
+table variable level. This means that even though a particular insert
+may have occurred against a derived table variable within the
+application transaction, only the effects on the base table variables
+involved in the derived table variable definition are being recorded. As
+a result, any event handlers that are attached to derived table
+variables that were affected during the application transaction will not
+be invoked during the commit phase.
+
+[[DDGTheSpaceBetweentheData-ApplicationTransactions-Enlistment]]
+=== Enlistment
+
+Enlistment is a Data Access Layer function that involves determining if
+and when a given Source should participate in an application
+transaction. This determination follows the master/detail relationships
+between sources. When a Source begins an application transaction as a
+result of entering insert or edit state, it is considered an
+__application transaction server__. Detail Sources of a Source acting as
+an application transaction server are considered _application
+transaction clients_ if they enlist in the application transaction
+managed by the server.
+
+For a given Source, the application transaction server is determined by
+following the master/detail relationships to their root Source. By
+default, a detail Source will enlist only if the intersection of the
+columns of the master/detail relationship with some key of the master
+Source is non-empty. In other words, if the detail relationship involves
+some key of the master Source. This behavior can be changed using the
+ShouldEnlist property of the detail Source.
+
+[[DDGTheSpaceBetweentheData-ApplicationTransactions-Committing]]
+=== Committing
+
+Committing an application transaction involves playing back all the
+recorded operations that occurred from any process involved in the
+application transaction, in the order in which they occurred. When an
+application transaction is committed from the Frontend by a Source
+component acting as an application transaction server, this process is
+done using a two-phase commit to coordinate the commit of the
+application transaction with the commit of the transaction posting the
+contents of the Source.
+
+The prepare phase of the commit is where the play back of the
+application transaction actually occurs. Each operation is performed
+against the global database exactly as it was against the application
+transaction context, with the exception that any event handlers that
+were invoked within the application transaction context are not invoked
+during play back.
+
+Because the play back is occurring within a database transaction, any
+database level constraints present on the actual database table
+variables will be checked only when the database transaction commits. If
+any validation checks fail here, the play back transaction is rolled
+back, and the application transaction is left open. The user can then
+take any necessary steps to correct the problem, and try the commit
+again.
+
+Because other users may have modified the data in the global database
+during the application transaction, the play back is done using
+optimistic concurrency checks. When an update from the application
+transaction is played back into the global database, the original data
+from the updated row is compared with the current values of the row in
+the global database. If any values are different, an error is raised
+indicated that an optimistic concurrency check has failed.
+
+[[DDGTheSpaceBetweentheData-Proposables]]
+== Proposables
+
+Proposables provide client applications with the ability to actively
+participate in the business-rules enforcement of the Dataphor Server,
+without the need for any client-specific logic. This capability
+completely eliminates the need to duplicate validation logic in the
+client application.
+
+The Dataphor Server allows complex business-rules to be expressed and
+enforced declaratively, and the proposables interfaces allow this
+enforcement to be distributed to client applications without developer
+intervention. Once a business-rule is declared in the application
+schema, the client applications work in conjunction with the Dataphor
+Server to ensure that it is enforced.
+
+There are three different proposable interfaces: Validate, Default,
+Change. All of the interfaces are performed as row-level calls, with an
+optional column name specifying a single column within the row that has
+been affected.
+
+The result of each call is a boolean value indicating whether or not the
+values of any column within ARow have been changed. This return value is
+used by the Dataphor Server as an optimization to avoid recopying the
+row values if no changes have been made.
+
+The proposable calls propagate through table expressions in the same way
+that modification statements do, with each operator managing how the
+propagation should occur. For a detailed description of how this
+propagation occurs, refer to the view updatability discussion in the
+Derived Table Variables section of the
+<<RepresentingData.adoc#DDGRepresentingDataWithTablesandViews, Representing Data With Tables and Views>>
+chapter of the Logical Application Design part of this guide.
+
+Note that even though the logic for proposables is defined in the
+application schema and housed in the Dataphor Server, the proposable
+call may actually occur completely client-side. This is accomplished
+transparently by taking advantage of the compiler determined _remotable_
+characteristic. Remotable operators and expressions are evaluable in
+isolation, meaning that they make no reference to table variables in the
+global database. Because of this, all the logic can be downloaded to the
+client as part of the structural description of the result set, allowing
+the proposable calls to be executed without the need for a network
+round-trip.
+
+[[DDGTheSpaceBetweentheData-Proposables-Validate]]
+=== Validate
+
+The Validate proposable allows proposed changes to a given row to be
+validated. If the values of the proposed row violate any business-rule
+defined by the application schema, the same error message that would be
+displayed by actually attempting the modification is returned.
+
+The syntax of the Validate CLI call is:
+
+....
+bool Validate(Row AOldRow, Row ANewRow, string AColumnName);
+....
+
+The Validate proposable call evaluates all column and data type level
+constraints and all validate event handlers. It does not evaluate row
+level constraints, transition constraints, or database level
+constraints. The evaluations take place in the following order:
+
+Table level validate event handlers are evaluated.
+
+Column level validate event handlers are evaluated.
+
+Column level constraints are evaluated.
+
+Scalar type level validate event handlers are evaluated.
+
+Scalar type level constraints are evaluated.
+
+Any violation encountered immediately stops processing of the Validate
+proposable call and raises an error. The error message is constructed
+based on the constraint that has been violated, using the DAE.Message
+and DAE.SimpleMessage tags when specified.
+
+The result of the Validate call will be true if any event handler
+modified the actual values of any columns in the row. Note that this
+result indicates that the value of some column has changed, not
+necessarily the column specified by AColumnName.
+
+[[DDGTheSpaceBetweentheData-Proposables-Default]]
+=== Default
+
+The Default proposable allows the default values for a given row to be
+requested. After the call, the resulting row is populated with the
+default values for each column, or for the specific column given by
+AColumnName.
+
+The syntax of the Default CLI call is:
+
+....
+bool Default(Row ARow, string AColumnName);
+....
+
+The Default proposable call evaluates all column and data type level
+defaults and all default event handlers. The evaluations take place in
+the following order:
+
+Table level default event handlers are evaluated.
+
+Column level default event handlers are evaluated.
+
+Column level defaults are evaluated.
+
+Scalar type level default event handlers are evaluated.
+
+Scalar type level defaults are evaluated.
+
+Once a default value has been determined for a particular column,
+processing stops for that column.
+
+The result of the Default call will be true if the value of any column
+within the row has been changed. As with the Validate call, this result
+indicates that the value of some column has changed, not necessarily the
+column specified by AColumnName.
+
+[[DDGTheSpaceBetweentheData-Proposables-Change]]
+=== Change
+
+The Change proposable is somewhat different in kind from the Validate
+and Default proposables in that the Change will only be called through
+the CLI. The Default proposable is used to determine the default values
+for newly inserted rows, and the Validate proposable is used to validate
+constraints for inserted and updated rows.
+
+Because of this difference, the Change proposable is uniquely suited for
+handling change logic that should occur during data entry. For example,
+if the value of the ZipCode column is set, the City and State_ID columns
+could be set based on the ZipCode table using the Change proposable.
+
+The Change proposable is also responsible for looking up the values of
+the columns of the right side of a join operator when the values of the
+left join key columns are changed.
+
+The syntax of the Change CLI call is:
+
+....
+bool Change(Row AOldRow, Row ANewRow, string AColumnName);
+....
+
+The Change proposable call evaluates all change event handlers. The
+evaluations take place in the following order:
+
+Table level change event handlers are evaluated.
+
+Column level change event handlers are evaluated.
+
+Scalar type level change event handlers are evaluated.
+
+Only an error will stop the processing of a Change proposable call. Once
+an event handler has indicated that a change has occurred, the result of
+the overall call will be true, regardless of the results of processing
+subsequent event handlers.
+
+As with the other proposable calls, a result of true indicates that the
+value of some column has changed, not necessarily the column specified
+by AColumnName.

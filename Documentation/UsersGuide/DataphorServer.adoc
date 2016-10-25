@@ -1,0 +1,247 @@
+= Dataphor Server
+:author: Alphora
+:doctype: book
+
+:icons:
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DUGP1ProductTour-DataphorServer]]
+== Introduction
+
+The core of the Dataphor technology is a Data Access Engine called the
+Dataphor Server. This component is a virtual Database Management System
+(DBMS) that provides a mapping layer between the presentation layer, and
+the physical persistence and manipulation of the data. A running
+Dataphor Server is called a Dataphor Server __instance__, and can be
+hosted within a Microsoft Windows Service, or directly within a .NET
+application domain.
+
+Dataphor ServerRolesIn providing the services necessary to enable AAD,
+the Dataphor Server plays many different roles that have traditionally
+been filled by independent software systems. Some of these roles
+include:
+
+* Database Management System
+* Application Server
+* Business Rules Engine
+* Metadata Repository
+* Integration Server
+
+As a Database Management System, the Dataphor Server is responsible for
+providing concurrent and efficient access to the persistent data stored
+for an application.
+
+As an Application Server, the Dataphor Server fulfills presentation
+layer requests such as form definitions, presentation layer value
+translations and other presentation layer logic requests.
+
+As a Business Rules Engine, the Dataphor Server is responsible for
+ensuring that no data manipulation requests result in the violation of a
+business rule. The Dataphor Server also ensures that business processes
+are carried out in response to events that may occur during data
+modifications.
+
+As a Metadata Repository, the Dataphor Server provides capabilities for
+adorning application schemas with information such as presentation layer
+descriptions, or catalog documentation. This metadata is then made
+available to clients of the Dataphor Server in the same way that any
+other data is exposed.
+
+As an Integration Server, the Dataphor Server allows multiple existing
+systems to be integrated using a common data access and management
+paradigm. In this role, the Dataphor Server functions as a distributed
+query processor and distributed transaction manager.
+
+By providing all these services in a single, integrated platform, the
+Dataphor Server provides an excellent environment for declarative
+application development. These services and capabilities are exposed in
+layers of enabling technologies that successively provide higher and
+higher levels of abstraction, and therefore automation, of the
+development process.
+
+[[DUGP1ProductTour-DataphorServer-DataphorApplications]]
+== Dataphor Applications
+
+In general, a database application is a data (or business) model, together with the information about
+how it is to be presented and maintained. The business model is all the data and process logic of
+interest to a particular enterprise or entity organized in a useful manner. This business model is
+then manipulated and analyzed by users of the database application. One key goal of the Dataphor
+product is to centralize the definition of the business model, and extend it with enough information
+to make the process of presentation as automatic as possible. In a Dataphor application, this
+extended business model is called the application schema.
+
+Developing a Dataphor application involves designing the application schema, and describing it to
+the Dataphor Server. This description is expressed in a programming language called D4. This
+language is a full-featured programming language that includes complete data management and
+manipulation functionality, as well as capabilities for describing and managing the application
+schema.
+
+[[DUGP1ComponentsofaDataphorApplication]]
+=== Components of a Dataphor Application
+
+The various components of an Application Schema can be loosely grouped
+into the following categories:
+
+* Structure
+* Business Rules
+* Process Logic
+* Metadata
+* Presentation Layer
+* Physical Layer
+
+The structural elements of a Dataphor Application constitute the core of
+the data model. They include the data types, tables and views that are
+used to describe the data involved with the model.
+
+The business rules in a Dataphor Application determine the legal values
+of data in the database. Business rules ensure that the data conforms to
+the requirements for the applications. These include everything from
+simple constraints that enforce valid values for the columns of tables,
+to referential integrity constraints and other multi-table constraints,
+to complex stimulus-response rules invoked in response to events
+occurring within the system.
+
+Application processes that involve sequences of actions to be taken, or
+work-flows, are modelled with process logic in a Dataphor application
+schema. These elements consist of pre-compiled statements of D4 that
+accomplish some task, and can be invoked either by the users of the
+application, or as the result of a stimulus-response rule.
+
+Metadata in a Dataphor Application allows application-specific
+information to be attached to the data model. This includes presentation
+layer information such as titles for user interface elements, as well as
+hints for controlling how user interfaces should be built from the
+application schema.
+
+The presentation layer elements of a Dataphor Application describe the
+user interfaces required to manipulate the data in the data model.
+Because the Dataphor platform enables a high level of automation, the
+majority of the user interfaces required by the presentation layer can
+be built as needed based on the information contained in the application
+schema.
+
+In order to persist the data described by the application schema, the
+elements of the physical layer describe the mapping between the
+structural elements of the application schema and the tables and views
+in external database systems that actually persist the data.
+
+[[DUGP1ImplementationofaDataphorApplication]]
+=== Implementation of a Dataphor Application
+
+he concrete implementation of a Dataphor Application involves
+describing all the components discussed in the previous section in a
+running Dataphor Server instance. Application schemas in the Dataphor
+Server are exposed using the following concepts:
+
+* Catalog
+* Libraries
+* Documents
+
+The catalog of a Dataphor Server contains the definitions for all the
+objects in the data model. These objects include data types, tables,
+views, business rules, process logic, security roles, and storage
+devices. In addition, the catalog contains any metadata associated with
+these objects.
+
+Libraries within a Dataphor Server provide a logical grouping for
+catalog objects. They are a deployment unit for application schemas, and
+allow the architecture of a Dataphor Application to be segmented into
+manageable units of related schema elements. Many of the capabilities
+provided by the Dataphor platform are built as libraries such as
+Frontend and MSSQLDevice. In addition to utilizing various system
+libraries, a typical Dataphor Application will consist of several
+interrelated libraries.
+
+Dataphor libraries also contain various documents that essentially
+constitute the "source code" for the library. These include D4 scripts
+that are used to "install" the application by constructing the initial
+state of the catalog, as well as user interface definitions and
+customizations stored as Dataphor Form Documents.
+
+[[DUGP1ProductTour-DataphorServer-DataAccessLayer]]
+== Data Access Layer (DAL)
+
+At the lowest level, all communication with the Dataphor Server is
+performed through the Call-Level Interface (CLI). Although developers
+can communicate directly with the Dataphor Server through this CLI, it
+is usually advantageous to utilize the high-level Data Access Components
+(DAC) provided with Dataphor.
+
+The Data Access Components are a set of components and controls built in
+Microsoft C# that provide a high-level wrapper for communication with
+the Dataphor Server. They manage client-side buffering and state
+management, as well as data-binding to visual controls such as text
+boxes and grids. These components form the basis for connectivity in the
+Windows and Web clients, as well as the forms layer in Windows-based
+applications like Dataphoria or the Windows Client.
+
+[[DUGP1ProductTour-DataphorServer-HostingaDataphorServer]]
+== Hosting a Dataphor Server
+
+The Dataphor Server can be hosted in a Microsoft Windows Service, or
+within a .NET application domain, typically within the Dataphoria IDE.
+
+When running as a Microsoft Windows Service, the Dataphor Server can be
+started and stopped from the Windows service control manager (services
+snap-in), or by using the Dataphor Service Configuration Utility.
+
+The Dataphor Service Configuration Utility is a .NET application for
+configuring and maintaining the Dataphor Service instance on a
+particular machine. It provides interfaces to stop and start the
+Dataphor service as well as change configuration options for the
+service.
+
+[[DUGP1ProductTour-DataphorServer-DeploymentScenarios]]
+== Deploying a Dataphor Application
+
+ecause the Dataphor Server is essentially "middleware", it can be
+deployed in a variety of different scenarios. Conceptually, a Dataphor
+deployment consists of the following roles:
+
+* Dataphor Server
+* Storage Device(s)
+* Web Client Server (optional)
+* Windows Client
+
+In the simplest deployment scenario, all these components can be run on
+the same physical machine. In the most demanding enterprise
+environments, each of these roles can be filled by a load-balanced,
+fault-tolerant cluster of machines. Due to the flexibility of the
+architecture, Dataphor Applications can be scaled anywhere in-between
+these two extremes as necessary.
+
+A typical development scenario consists of:
+
+* Storage system such as Microsoft SQL Server running on the development
+machine, or a development server.
+* Dataphor Server running in-process within a Dataphoria IDE running on
+the development machine.
+
+Of course there are other issues such as versioning and source control
+that must be taken into account in a development scenario, especially
+when considering a team development environment. These and other
+development issues are discussed at length in the Dataphor Developer's
+Guide.
+
+A typical client-server deployment scenario consists of:
+
+* Dataphor Server running as a service on the "Server" machine.
+* Storage system such as Microsoft SQL Server running on the "Server"
+machine.
+* Dataphor Windows Client installed on each "Client" machine accessing
+the "Server".
+
+In order to provide a web-based client in this scenario, the Web Client
+Server can be deployed on the "Server" machine.
+
+A typical n-tier deployment scenario consists of:
+
+* Dataphor Server running as a service on a dedicated machine or
+cluster.
+* Storage system running on a dedicated machine or cluster.
+* Web Client Server running on a dedicated machine or cluster.
+
+These example scenarios illustrate the typical software and hardware
+environment for a Dataphor Application.

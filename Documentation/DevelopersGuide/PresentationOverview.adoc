@@ -1,0 +1,680 @@
+= Overview
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGOverview]]
+== Summary
+
+From the user's perspective, a Dataphor application
+consists of a set of user interfaces that display information and accept
+input. The presentation layer of the Dataphor platform contains the
+architecture and services that provide these user interfaces. It is
+comprised of several layers of technology that enable successively
+higher levels of user interface automation, raising the level of
+abstraction at which user interfaces can be described and executed. This
+chapter introduces each of these layers in terms of the overall
+architecture of the Dataphor Frontend.
+
+Architecturally, the Frontend is divided into two main categories: the
+Frontend Server, and the Frontend Clients. The Frontend Server provides
+the services required by the presentation layer such as user interface
+derivation and document retrieval. The Frontend Clients then use these
+services to produce the presentation layer of a Dataphor application.
+
+The Data Access Layer provides the bridge between the Dataphor Server
+and the Frontend Clients. The services of the Frontend Server are
+accessed through this layer using a set of components called the Data
+Access Components (DAC).
+
+The Forms Layer consists of the components and controls that make up the
+user interfaces in a Dataphor application. These forms are defined as
+documents and stored within the libraries of the application.
+Effectively, the Forms layer enables a client-independent Rapid
+Application Development (RAD) paradigm that can be used to build forms
+either manually using a traditional forms designer, or dynamically by
+invoking the user interface derivation services of the Frontend Server.
+
+Lastly, the Frontend Clients bring all the capabilities and services of
+the Frontend Server, Data Access, and Forms Layers together to present
+the end-user with the actual application. Each Frontend Client is
+responsible for displaying the application in a different platform such
+as Microsoft Windows, or over the World-Wide Web.
+
+The following sections will introduce each of these layers, and discuss
+the preliminaries necessary to begin building the presentation layer of
+the Shipping application.
+
+== Frontend Server
+
+The Frontend Server is actually a library within the Dataphor Server
+called Frontend. This library extends the concept of a library within
+the Dataphor Server to include __documents__, and introduces several
+operators for producing user interface descriptions called _forms_ based
+on the application schema.
+
+=== Documents
+
+Documents are the logical equivalent of _files_ in a traditional
+development environment. They are used to house the various products of
+the development process including database creation scripts, and form
+definitions. They are centrally located within the libraries that
+comprise the application.
+
+Dataphor Form Documents (DFDs) provide the mechanism for persistence of
+a statically defined Dataphor form. These documents are saved within the
+libraries of an application, and can be loaded through the pipe
+available on the session, or directly from the CLI using the
+Frontend.Form operator.
+
+Note that the Frontend.Form operator does not interpret the form
+definition, it simply returns the form definition as a string value. The
+Frontend Session's pipe services are used to translate the resulting
+form definition into an appropriate presentation layer representation of
+the form. This process is known as __deserialization__.
+
+During the process of deserialization, as component types are
+encountered, the system must be able to determine what class of
+component to create. This decision is made based on the NodeTypes table
+loaded by the Frontend Session. This table is loaded by aggregating the
+component type definition documents (DNT) for the appropriate client
+from each library in the application, tracing library dependencies
+recursively. Each entry in this component types table specifies a .NET
+Framework type to be used whenever a given component is to be created.
+Although this type is not required to be client-specific, it can be.
+
+For example, the Source entry specifies that the Frontend.Client.Source
+.NET type be used to represent Source components. This entry is made for
+both the Windows and Web clients. However, the TextBox entry specifies a
+completely different class for the Windows client than for the Web. This
+is because in the Windows client, the TextBox corresponds with a Windows
+edit control, while in the Web client, a control rendering an <INPUT>
+tag is used.
+
+=== Derivation
+
+One of the primary goals of the Dataphor platform is to provide
+applications with as much insulation as possible from structural changes
+in the database. In order to achieve this goal the application must be,
+as much as possible, defined by the structure of the database. The
+Frontend library provides the process of _derivation_ to enable this.
+
+Internally, the process of user interface derivation is divided into two
+main steps: __elaboration__, and __derivation__. Elaboration consists of
+constructing an extended query based on a given query expression, and
+the relationship between the given expression and other table variables
+in the database. Derivation is in turn divided into three main steps:
+__structuring__, __layout__, and __production__.
+
+Structuring in derivation is the process of constructing user interface
+controls for each column in the query, and grouping those controls as
+appropriate for the context of each column. Layout consists of
+determining the visual layout of the controls and groups constructed
+during the structuring process. And finally, production consists of
+actually building the form definition based on the controls and visual
+layout determined by the previous steps.
+
+The input to the derivation process is called the derivation __seed__,
+and consists of the expression for which a user interface is to be
+derived, the form type, or type of user interface, an optional set of
+master and detail key names, and an indicator to determine whether or
+not elaboration should be performed.
+
+During the derivation process, the engine uses metadata tags associated
+with the various structural definitions produced by the compiler. For
+example, when determining the title for a particular derived
+user interface, the derivation engine searches for the Frontend.Title
+tag on the result set definition. If found, the value of this tag is
+used as the title, otherwise, the unqualified name of the table, or the
+expression itself is used as the title.
+
+==== Queries as User Interface
+
+Because of the high degree of logical data independence afforded by the
+D4 language and the Dataphor query processor, the results of any
+table-valued expression can be completely described, both in terms of
+the structure of the table variable itself, as well as the relationship
+of that table variable with the rest of the database.
+
+The derivation engine uses the concept of _form types_ to differentiate
+between the various types of user interfaces that can be derived.
+Generally, these form types break down into two different categories:
+_plural_ user interfaces, and _singular_ user interfaces.
+
+Plural user interfaces are used primarily to expose searching and
+navigation capabilities, and are capable of displaying the result set
+for a particular table or expression. Singular user interfaces display
+only a single row at any given time, and are used for adding, editing,
+or viewing the information for a given entity.
+
+The following table details the form types exposed by the derivation
+engine:
+
+[cols=",,",options="header",]
+|=======================================================================
+|Form Type |Cardinality |Produces a User-Interface for
+|Browse |Plural |Navigation, Searching and Management
+
+|List |Plural |Navigation and Searching
+
+|Add |Singular |Adding a new row
+
+|Edit |Singular |Editing an existing row
+
+|Delete |Singular |Viewing an existing row as a delete confirmation
+
+|View |Singular |Viewing an existing row (read only)
+
+|Preview |Singular |Previewing a corresponding row as an embedded group
+within another user interface
+|=======================================================================
+
+Note that user interfaces do not necessarily correspond one-to-one with
+form definitions. User-interfaces can be embedded within controls in
+other forms, allowing user interface definitions to be used as building
+blocks for assembling complex forms with multiple entities exposed. For
+example, the Customer edit may have a page control containing browses
+for ContactEmail and ContactPhone.
+
+In the sections that follow, the various components of the structural
+definition of the result set of a query are considered, and how that
+information is used by the derivation process.
+
+===== Columns
+
+Each column in the result set will correspond with a single control in
+the resulting user interface definition. By default the data type of the
+column is used to determine the type of control to be used, and the
+title of the control is the unqualified name of the column.
+
+Barring other considerations such as derivation tags and grouping based
+on reference participation, the order of the controls displayed in the
+user interface is determined by the order in which the columns appear in
+the result set.
+
+Because the result is being presented within the data access layer,
+defaults, constraints, and event handlers defined on the column or its
+data type are exposed as behavior within the user interface. This is
+accomplished using the proposable interfaces. Although these interfaces
+are discussed in more detail later in this part, it is worth noting that
+defaults, constraints, and event handlers defined at the column and data
+type levels will be acted on immediately within the user interface.
+
+For example, if a user attempts to enter an invalid value for a
+particular column, the error message is displayed immediately, rather
+than waiting for the entire row to be completed. This affords a more
+intuitive user interface, and is one reason for declaring constraints as
+locally as possible. In other words, even though a given column level
+constraint could be expressed in terms of a row level constraint, doing
+so would mean that validation of the column value would not take place
+until the user attempted to post the entire row, rather than immediately
+upon entering the invalid value.
+
+===== Keys and Orders
+
+Keys and orders of the result set, whether inferred by the compiler or
+explicitly defined on table variables, will be exposed in the derived
+user interface as possible orderings for the result set. By default, the
+derivation process will select the clustering key to order the result
+set in the user interface. While the notion of a clustering key is an
+admittedly physical consideration, the reason for the selection is that
+the clustering key is most likely to be supported by a physical index,
+and therefore most likely to perform acceptably when presented in a
+browsing interface.
+
+The clustering key is determined by first searching the keys for the
+Storage.IsClustered tag. If no key is marked with this storage tag, the
+compiler selects the key with the fewest number of columns as the
+clustering key. Note that this same clustering key determination is used
+when determining a clustering key in the physical storage layer.
+
+In order to allow the user to select a specified ordering for the result
+set, the order must be specified as a possible ordering, either with a
+key or an order, within the result set. This requirement allows the
+developer to control what orderings and searches are allowed for a given
+result set. In this way, developers can ensure that requests for
+ordering correspond with actual indexes in the storage layer.
+
+==== Elaboration
+
+Elaboration is the process of extending a given query based on the
+relationships between that query and the other table variables in the
+database. Elaboration is accomplished by tracing references in the
+database, using the cardinality of the reference to determine whether
+the reference should be followed, and how it should be included in the
+resulting elaborated query.
+
+Elaboration is an optional step, as indicated by the Elaborate component
+of the derivation seed. If elaboration is not used, not only will the
+initial query be unaffected, but the relationships between the query and
+the rest of the database will not be exposed on the resulting
+user interface, neither in user interface controls, nor through menu and
+tool bar items.
+
+The relationship of the query with other objects in the database is
+determined by examining the set of references in the result set. These
+references may be inferred by the compiler, or explicitly defined on
+table variables in the database. In either case, the cardinality of each
+reference is used to determine how it should be exposed in the
+user interface.
+
+By far the most important input to the elaboration process is the
+structural information inferred by the compiler about the result set.
+For development purposes, this information can be retrieved in text form
+using the link:O-System.Diagnostics.ShowPlan.html[ShowPlan] operator.
+
+Reference information is used in two different ways by the derivation
+process: first, to extend the expression to be used to provide the
+result set for the user interface, and second, in building
+user interface controls, menu items, and tool bars to allow the user to
+navigate to related information in the database from the derived
+user interface.
+
+The fact that references must target keys gives rise to two different
+cardinalities for references: one-to-one, and one-to-many. A one-to-one
+reference not only targets a key, but originates in a key as well,
+allowing only one row from the source table variable to reference any
+given row of the target table variable. A one-to-many reference targets
+a key, but does not originate in one, allowing multiple rows of the
+source table variable to reference any given row of the target table
+variable.
+
+By considering both cardinalities of references from the perspective of
+the source or target table variable, we have four distinct types of
+references:
+
+* Parent Reference
++
+Parent
++
+A parent reference is a one-to-one reference, viewed from the
+perspective of the source table variable. From this perspective the
+target table variable is the _parent_ of the source table variable. In
+this type of reference, a corresponding row in the parent table variable
+must exist.
+* Extension Reference
++
+Extension
++
+An extension reference is a one-to-one reference, viewed from the
+perspective of the target table variable. From this perspective the
+source table variable represents _extension_ information. In this type
+of reference, a corresponding row in the extension table variable may or
+may not exist.
+* Lookup Reference
++
+Lookup
++
+A lookup reference is a one-to-many reference, viewed from the
+perspective of the source table variable. From this perspective, the
+target table variable forms a _lookup_ table from which valid values for
+the columns participating in the reference in the source table variable
+may be selected. In this type of reference, a corresponding row in the
+lookup table variable must exist.
+* Detail Reference
++
+Detail
++
+A detail reference is a one-to-many reference, viewed from the
+perspective of the target table variable. From this perspective, the
+source table variable represents _detail_ information. In this type of
+reference, a corresponding set of rows in the detail table variable may
+or may not exist.
+
+A detailed discussion of how each reference is considered during the
+elaboration process is deferred until
+<<FormAutomation.adoc#DDGTheAutomationofForms, The Automation of Forms>>.
+
+== Data Access Layer
+
+The Frontend Clients begin where the Dataphor Server ends, namely at the
+Call-Level Interface (CLI), or the low-level set of APIs that expose the
+services and functionality of the Dataphor Server. All commands and data
+retrieval requests, whether they are ad-hoc queries from Dataphoria, or
+application requests to retrieve or manipulate data, ultimately pass
+through the CLI.
+
+The Data Access Layer is built directly on top of the CLI, and groups
+all the functionality required by the presentation layer into a set of
+easy to use components called the Data Access Components (DAC). These
+components are then used by the forms and controls within the
+application to manage data retrieval and manipulation.
+
+In addition to the traditional cursor-style access exposed by the
+Dataphor CLI, the Dataphor Server exposes several services that are
+targeted directly at enabling Automated Application Development. Three
+of the most important of these are: Navigational Access, Proposable
+Interfaces, and Application Transactions.
+
+Navigational Access is concerned with enabling efficient, scalable
+access to relational datasets of any size. Using this technology,
+Dataphor applications can expose the data in any application in an
+intuitive, searchable manner without the need for developer intervention
+or complex "filter-down" style user interfaces.
+
+Proposable Interfaces are provided to enable the application to
+participate in the business-rules enforcement of the Dataphor Server. By
+utilizing these services, a Dataphor application can efficiently and
+transparently enforce data integrity while the user is entering data,
+rather than waiting for the server to reject any invalid information.
+
+Application Transactions enable the application to perform data
+manipulation even in the presence of complex multi-table integrity
+constraints without requiring data to be entered in a particular order,
+or using pessimistic transactions. The resulting user interfaces
+naturally manage concurrency issues and minimize resource contention.
+
+Each of these services will be discussed in detail in
+<<SpaceBetweenData.adoc#DDGTheSpaceBetweentheData, The Space Between the Data>>.
+
+== Forms
+
+The Forms which make use of the Data Access Layer are defined in terms
+of component hierarchies that describe not only the layout and visual
+controls of the user interface, but the behavior of the form, and it's
+connection to other parts of the application. These form definitions are
+represented as Dataphor Form Documents (DFDs) and stored within the
+various libraries that make up the application. Each Frontend Client is
+responsible for retrieving the document definitions through the Data
+Access Layer, and constructing an appropriate component hierarchy
+representing that form.
+
+In addition to static form definitions stored as documents, the Dataphor
+platform allows form definitions to be dynamically manufactured using a
+process called __derivation__. This process uses the operators exposed
+by the Frontend Server to produce form definitions based entirely on the
+application schema.
+
+Whether produced statically or dynamically, form definitions can be
+customized using the same visual designer that is used to create static
+forms. Customizations to forms are produced using a process called
+__visual inheritance__. These customizations are then saved as a
+Customized Dataphor Form Document (DFDX) and become available in the
+same way as other form definitions within the application.
+
+Form definitions within the Dataphor framework are represented as XML
+documents corresponding to the component hierarchy defining the form.
+Each component corresponds with an element in the XML document, with the
+attributes of the component corresponding to the various properties of
+the component in the form. The XML schema used to describe these
+documents is called Dataphor user-Interface Language (DIL).
+
+=== Components and Controls
+
+Forms are the fundamental unit of user interface in a Dataphor
+application. Forms are made up of groups of user interface controls that
+provide the mechanisms for the user to interact with the data in the
+database, as well as the application itself. In this respect, forms in a
+Dataphor application are very similar to the forms in a classic
+RAD-style application. In the RAD paradigm, forms are collections of
+software components that are each responsible for a particular common
+behavior. Groups of these components are "glued" together using a visual
+forms designer, and any form-specific application code is attached to
+various events occurring within the components.
+
+RAD development is productive precisely because of the amount of re-use
+that is gained by relegating automatable application tasks to components
+within the forms. The Dataphor platform makes use of this paradigm, but
+separates the form definitions from the client applications, resulting
+in client-independent form definitions. This abstraction allows the same
+form definition to be used from a Microsoft Windows based machine, over
+the Web, or any other platform that has a Dataphor Frontend Client.
+
+This section introduces the underlying architecture and components of
+the forms within a Dataphor application. This discussion focuses mainly
+on describing the various controls and techniques that are available for
+defining forms. Although complete applications can be built from scratch
+using a traditional RAD approach, the vast majority of Dataphor forms
+will be derived, rather than manually constructed. The process of
+deriving forms, however, can be understood more clearly as the
+automation of the RAD-style development techniques presented here.
+
+==== Components
+
+All Dataphor forms are described as a hierarchy of __components__. The
+base component introduces the services necessary for each component to
+participate within the structure of a form definition. Each component
+may be either visual or non-visual. The visual components, also called
+__controls__, actually have some visible representation within the form,
+while non-visual components handle behind-the-scenes interaction such as
+data access or command processing.
+
+Each type of component is responsible for a different task within the
+overall form. For example, a Source component is used to handle
+communication with the Dataphor Server for a single query and its
+corresponding result set. A TextBox control may then be attached to the
+Source in order to expose a particular column within that result set. A
+Grid control may be used to display a navigable view of the result set.
+
+If the particular behavior required by the application is not
+represented by some existing component, the Dataphor platform can be
+easily extended with new components and controls to provide whatever
+functionality is necessary. In addition, there are programmable
+components such as the ScriptAction and DataScriptAction that allow
+custom behavior to be written directly into the application.
+
+Each component has an __owner__, which is the owner of the component
+within the hierarchy. Owners are responsible for the cleanup of
+components that they own. This ownership hierarchy is also used to
+broadcast component events within the form. Each visual element, or
+control, in the form also has a _parent_ property that determines the
+visual containership of the control within the form.
+
+Forms are actually hosts for user interfaces, in that a given
+user interface may appear hosted within a particular form, or within a
+frame within a control of another form. When a user interface is
+embedded within another, the containership hierarchy can be followed to
+its root from any component within the embedded user interface to access
+the parent form.
+
+Note that although the components themselves are instances of classes,
+their behavior is modeled exclusively in terms of interfaces (in the
+formal .NET sense of the word). For example, the basic behavior for all
+components is described by the .NET interface INode. The base class that
+implements this interface is called a Node. The reason for the exclusive
+use of interfaces is so that different implementations of a given
+component can be provided without affecting code written against the
+interfaces. This allows each Frontend client to provide different
+implementations of the same behavior. For this reason, whenever
+components are accessed within scripts, the interfaces should be used
+exclusively, guaranteeing that a given script will execute regardless of
+the actual Frontend client in which it runs.
+
+==== Actions
+
+Actions are specific types of components that perform some operation
+within the form. Actions are an abstraction that is used to model the
+commands that are available within any given user interface. These
+commands can be triggered from various sources such as buttons, menu
+items, pop-ups, and so on. In addition, actions can be attached to
+various events that occur on other components within the form, or
+executed directly using scripting.
+
+==== Controls
+
+Controls are the base component type for all visual controls within a
+Dataphor form. These controls are grouped into container controls such
+as rows, columns, and groups, to provide layout functionality within the
+form. Note that the layout in a Dataphor form is relative, rather than
+absolute. In other words, all layout is handled by containership, rather
+than position in a form-based coordinate system. This layout mechanism
+allows for a much greater degree of flexibility in interpreting form
+definitions in the consuming client, enabling much better cross-client
+support.
+
+==== Data Access
+
+Data access within the presentation layer is provided by Source
+components. Each source is implicitly connected to the Dataphor Server
+using the Frontend session for the application. The source and session
+together completely expose the functionality of the Dataphor Server
+within Dataphor applications. The various data-aware controls of the
+form connect to Source components to display and manipulate the data in
+the database.
+
+==== Scripting
+
+In addition to providing behavior based on existing form components, the
+Dataphor platform supports application-specific behavior using both
+client-side and server-side scripting.
+
+Client-side scripting is accomplished using the ScriptAction component,
+using either C# or VB. The script action specifies a block of
+client-side code to be executed. This block of code has access to all
+the components within the form by name, as well as several implicit
+variables allowing direct access to the host form and interfaces.
+
+Server-side scripting is accomplished using the DataScriptAction
+component. This component allows a D4 script to be executed on the
+Dataphor Server. In addition, the D4 script can be parameterized using
+DataArgument components connected to sources in the form.
+
+=== Form Behavior
+
+All forms within a Dataphor application share common characteristics and
+behaviors, including the _state_ of the form, and whether the form is
+__modal__.
+
+When a form is waiting for user input, it is in _accept-reject_ state.
+This state is indicated by the Accept and Reject buttons available on
+the toolbar. When not in this state, these buttons are replaced by a
+standard Close button.
+
+In addition to form state, a Dataphor Form may be __modal__, indicating
+the form from which the user interface was launched is not accessible
+until the child user interface is closed. This is called _child modal_
+because only the launching form is inaccessible. Other forms in the
+application can still be reached, allowing multiple "threads" of
+execution within the same application.
+
+All this behavior can be controlled explicitly using the various
+properties of a ShowFormAction. In addition, this action allows data in
+the child form to be filtered by the calling form, using either the
+Filter property, or by setting up a master/detail relationship using the
+Detail link type.
+
+=== Document Expressions
+
+In addition to static document definitions, documents can be constructed
+dynamically using operators available in the D4 language. Whenever a
+document reference is required within a form definition in the Frontend,
+a _document expression_ is used to specify the document reference. This
+can be as simple as the invocation of a Frontend.Load operator that
+simply loads the definition of a static form document directly from a
+library, or it can be as complex as the actual form document embedded in
+the expression. For example, the following program listing is a valid
+document expression:
+
+....
+"<interface/>"
+....
+
+Typically, a document expression is one of the following:
+
+* Frontend.Form(<library name>, <document name>)
++
+This operator allows both static and customized form documents to be
+loaded. If the document specified is a customized form document, the
+customization will be expanded and applied, and the final, customized
+form document will be returned, ready for deserialization in the
+Frontend.
+* Frontend.Image(<library name>, <document name>)
++
+This operator allows documents containing graphic data such as images
+and icons to be loaded using streams.
+* Frontend.Derive(<expression>, <pagetype>, <master key names>, <detail
+key names>, <elaborate>)
++
+This operator invokes the Frontend Server process of user interface
+derivation based on the given expression. For more information on the
+usage and functioning of this operator, refer to
+<<FormAutomation.adoc#DDGTheAutomationofForms, The Automation of Forms>> later in this
+part.
+
+For a more complete listing of the available document manipulation
+operators, refer to the Frontend Library reference.
+
+=== Visual Inheritance
+
+Visual inheritance allows new forms to be constructed by starting with
+an existing form definition, and then customizing the definition either
+by changing existing properties, or adding new components, or both. The
+customized form definition is saved only in terms of the differences
+from the base form.
+
+For example, the following document listing shows a simple Dataphor form
+definition:
+
+....
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+    <column bop:name="Column">
+        <statictext text="Hello World!" bop:name="StaticText" />
+    </column>
+</interface>
+....
+
+And this document listing shows a customization to that form definition:
+
+....
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+    <ancestor document=".Frontend.Form('General', 'HelloWorld')" />
+ <document>
+        <interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop">
+            <column bop:name="Column">
+                <statictext bop:name="StaticText" text="Custom Hello World!" />
+            </column>
+        </interface>
+    </document>
+</dilx>
+....
+
+Note that components that have been introduced in ancestor documents can
+not be deleted in a customization. Only the properties of these
+components may be changed. However, components can be moved to different
+containers, and they can be made invisible using the Visible property.
+
+Note also that visual inheritance allows multiple ancestors to be
+specified. Each additional ancestor is applied as a customization to the
+form definition, and then the final customization is applied. In this
+way, behavior and visual representations from multiple ancestor forms
+can be combined into a single form definition, allowing a much greater
+degree of flexibility.
+
+For example, the following two document listings show another static
+document, and a modified customization that uses two separate ancestors.
+The resulting form has both the StaticText from the initial Hello World
+document, and the Trigger and ScriptAction from the second Hello World
+document:
+
+....
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+ <column bop:name="Column">
+        <trigger action="ScriptAction" bop:name="Trigger" />
+ </column>
+    <scriptaction
+        script="Trigger.Text = &quot;Dynamic Hello World&quot;;"
+        text="Hello World!" bop:name="ScriptAction"
+    />
+</interface>
+....
+
+....
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+    <ancestor document=".Frontend.Form('General', 'HelloWorld')" />
+    <ancestor document=".Frontend.Form('General', 'HelloWorldButton')" />
+    <document>
+        <interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop">
+            <column bop:name="Column">
+                <statictext bop:name="StaticText" text="Custom Hello World!" />
+            </column>
+        </interface>
+    </document>
+</dilx>
+....

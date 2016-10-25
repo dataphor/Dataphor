@@ -1,0 +1,307 @@
+= Using Dataphor Forms
+:author: Alphora
+:doctype: book
+
+:icons:
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DUGP1UsingDataphorApplications-Forms]]
+== Summary
+
+Dataphor Applications consist of a collection of user interfaces called
+__forms__. These forms generally fall into three different categories:
+
+* Dashboards
++
+Dashboard forms provide access to various functions of the application.
+Most applications will begin with a dashboard, or main form, that
+provides various starting points for the application.
+* Browses
++
+Browse forms display a list of items such as employees or accounts.
+Browse forms typically allow searching and the ability to manage the
+list of items by adding, editing, viewing, and deleting items.
+* Views
++
+View forms display a single item and any related data such as a single
+employee record. View forms can be used to add a new item, as well as
+edit or view an existing item.
+
+Of course, these are only general categories. Often, the actual forms in
+an application will play multiple roles at once.
+
+[[DUGP1UsingDataphorApplications-Forms-ComponentsofaForm]]
+== Form Components
+
+Regardless of the roles being played, all the forms in a Dataphor
+Application have certain characteristics in common. The following screen
+capture displays the main form for a simple application:
+
+image::../Images/SampleApplicationMainForm.bmp[Sample Application - Main Form]
+
+The topmost section of the form is called the __title bar__. On the left
+side of the title bar, the form's icon is displayed. Single clicking the
+icon shows the _system menu_ for the form. This menu exposes
+capabilities such as minimizing the form, maximizing it and closing it.
+Double-clicking the form's icon will also close the form.
+
+Next along the title bar is the title, or _caption_ of the form. This
+caption will typically contain text describing the action that is being
+performed by the form, for example Add Contact or Browse Organizations.
+
+On the right side of the title bar, the form has three buttons for
+minimizing, maximizing or restoring, and closing the form, respectively.
+
+Note that the title bar is a feature of forms in the Windows Client
+because each form is a _window_ in the Microsoft Windows Environment.
+
+Immediately below the title bar is the _menu bar_ containing the
+available menu commands. All forms will have a Form menu that contains
+form management commands. Most forms will have additional menu items
+such as navigation or view menus.
+
+Below the menu bar, each form has a _tool bar_ that exposes commonly
+used commands as tool bar buttons.
+
+The bottommost section of the form is called the __status bar__. The
+status bar will typically display hints or other information about the
+current state of the form. On the left side of the status bar is a panel
+which displays a description of the currently selected control. The
+right side of the status bar displays a message about navigating through
+the form.
+
+The rest of the area within the form is called the _client area_ and
+contains the main contents of the form. This will typically be filled
+with __controls__, or user interface elements such as text boxes and
+buttons.
+
+Surrounding the entire form is a thin margin called the __border__. When
+hovering the mouse over the border, the cursor will change to indicate
+that the border can be dragged to resize the window.
+
+[[DUGP1UsingDataphorApplications-Forms-NavigatingForms]]
+== Form Navigation
+
+When a form is initially displayed, the first control on the form is
+currently selected, or __focused__. The focused control is the one that
+will receive keyboard input. Focusing a control can be accomplished
+simply by clicking on it with the mouse. Advancing focus to the next
+control is done by pressing the Tab or Enter key.
+
+Within a Dataphor Application, each form can be in one of two modes. If
+the form is waiting for user input, or the data on the form is modified,
+the form is in _accept-reject_ mode. While in this mode, the buttons
+available on the tool bar will be Accept and Reject instead of Close.
+Accepting the form will accept any outstanding changes and close the
+form. Rejecting the form will cancel the changes and close the form.
+Note that the accelerator Alt+C will close the form in both modes,
+corresponding to the Accept in accept-reject mode. The Esc key will also
+close the form in both modes, corresponding to the Reject in
+accept-reject mode.
+
+The right side of the status bar at the bottom of the form will display
+a key combination to perform some common action on the form, such as
+advancing to the next control, or accepting the form.
+
+In addition to the basic controls for editing values, forms can include
+organizational controls such as a __group__, or a __page control__.
+Groups provide a visual grouping of a set of controls and do not have
+any special behavior.
+
+Page controls allow multiple user interfaces to be embedded into a
+single space using tabs to allow for the selection of the embedded
+user interfaces. The following screen capture provides an example of
+this type of control:
+
+image::../Images/SampleApplicationAddPerson.bmp[Sample Application - Add Person]
+
+This form shows a group for the address, as well as a page control
+displaying phone numbers, associated organizations, websites, and email
+addresses. Each embedded user interface can be selected by clicking on a
+tab in the page control. While focused on a control within a tab, the
+page control can be navigated using Ctrl+Tab to select the next tab, and
+Ctrl+Shift+Tab to select the previous tab.
+
+[[DUGP1UsingDataphorApplications-Forms-Singular-PluralForms]]
+== Using Browse Forms
+
+Browse forms enable navigation of items, incremental searching for a
+specific item, and management including adding, editing, and deleting
+items. The following screen capture displays a simple browse form:
+
+image::../Images/SampleApplicationBrowsePersonPhoneType.bmp[Sample Application - Browse Person - Phone Type]
+
+[[DUGNavigation]]
+=== Navigation
+
+The grid control provides basic navigation of a list of items. The
+currently selected row in the grid is indicated by the highlighted row.
+In addition to navigating the grid with the mouse using the scroll bar
+on the right side of the grid, the following keystrokes can be used to
+perform navigation:
+
+[cols=",",options="header",]
+|================================================
+|Key |Action
+|Home |Navigates to the beginning of the list.
+|PgUp |Scrolls the grid one page up.
+|Up Arrow |Moves the selected row one row up.
+|Down Arrow |Moves the selected row one row down.
+|PgDn |Scrolls the grid one page down.
+|End |Navigates to the end of the list.
+|================================================
+
+All these keystrokes are available when the grid is the focused control.
+In addition, the PgUp, PgDn, Up Arrow and Down Arrow keystrokes can be
+used when the search control above the grid is focused.
+
+The browse form also introduces a Navigation menu that contains First,
+Prior, Next, and Last commands, as well as a Refresh command that can be
+used to refresh the contents of the grid.
+
+As the screen capture above shows, the grid column titles display a
+direction indicator that shows the direction of the order of the rows in
+the grid. Clicking on the grid column title will sort the rows of the
+grid by that column. Note that this functionality is only available if
+the application allows sorting the contents of the grid by that specific
+column. Clicking on a grid column title that is already sorted will
+reverse the sort order, and the direction indicator will change
+accordingly.
+
+[[DUGSearch]]
+=== Search
+
+Directly above the grid is a _search_ control, that can be used to
+incrementally search for a specific item in the list by the search
+criteria. The search criteria is the same as the sort order used to
+display the list. The lookup button on the far right side of the search
+control displays the list of available sort orders. The following screen
+capture shows a typical order browse:
+
+image::../Images/SampleApplicationPersonPhoneTypeOrderBrowse.bmp[Sample Application - Browse Order - Person Phone Type]
+
+When the search control is focused, the list can be searched by typing
+in the desired criteria:
+
+image::../Images/SampleApplicationBrowsePersonPhoneTypeSearch.bmp[Sample Application - Browse Person - Phone Type - Search]
+
+The search control waits until the criteria has been entered, and then
+searches the list for the first row that matches the given search
+criteria. If a match is found, the unspecified portion of the matching
+value is added to the end of the entered search criteria and
+highlighted. Continuing to type will replace the highlighted portion of
+the criteria and continue the search.
+
+Note that although this example illustrates searching based on a single
+value, the search control allows for multiple-value searches as well.
+
+Pressing Enter anywhere on the browse form will execute the _default
+action_ for the form. If the browse form is in accept-reject state, this
+will accept the form. Otherwise, the default action will edit the
+currently selected row.
+
+Pressing Esc anywhere on the browse form will close the form. If the
+form is in accept-reject state, this is equivalent to pressing the
+Reject button.
+
+[[DUGManagement]]
+=== Management
+
+In addition to searching and navigation, browse forms will typically
+allow the list of items to be edited. The following buttons are usually
+available on the panel to the right of the grid control:
+
+[cols=",",options="header",]
+|=======================================================================
+|Command |Action
+|Add |Displays a form for adding a new item.
+
+|Edit |Displays a form for editing the current item.
+
+|Delete |Displays a confirm delete form, and deletes the item if
+accepted.
+
+|View |Displays a read-only view of the current item.
+|=======================================================================
+
+[[DUGP1UsingDataphorApplications-Forms-Browse-to-EditPattern]]
+== Browse-to-Edit Pattern
+Pattern
+
+By clearly defining the role of each type of form in an application, the
+overall flow through the user interfaces follows an intuitive and
+flexible pattern called __browse-to-edit__. As the name indicates, the
+pattern begins with a browse form, and all editing of the items
+displayed is done using a form built expressly for adding, editing, or
+viewing.
+
+In addition, the add, edit, view, and delete forms that manage the data
+manipulation from the browse are shown __modally__. This means that the
+original browse form that launched the edit form cannot be reached until
+the edit form is closed, either accepted or rejected. This does not mean
+that other browse forms in the application that are already open cannot
+be reached, only that the browse form that launched the edit form is
+hidden. This allows multiple "threads" to be run within a single
+application.
+
+[[DUGP1UsingDataphorApplications-Forms-WhatFormsMean]]
+== Common Patterns
+
+Typically, each form will correspond with some type of data in the
+application such as an employee record. The various forms in the
+application will present different perspectives of the data. Regardless
+of the perspective, each type of data in the application may be related
+to other types of data, for example employees have email addresses, work
+in departments, and perform tasks.
+
+These relationships can be loosely categorized as:
+
+* Details
+* Extensions
+* Parents/Lookups
+
+[[DUGP1Details]]
+=== Details
+
+A _detail_ is a "has many" relationship. For example an employee may
+have multiple email addresses or phone numbers. The Details menu will be
+available whenever there are detail relationships that can be followed.
+For example, when viewing the employee form, the details menu will
+contain a menu item to allow the list of email addresses for the
+employee to be displayed.
+
+Note that if an email address is added from the detail browse, the
+employee does not need to be specified as it can be obtained from the
+employee form that was used to launch the detail.
+
+[[DUGP1Extensions]]
+=== Extensions
+
+An _extension_ is a "has one" relationship. The Extensions menu will be
+available whenever there are extension relationships that can be
+followed. For example, when viewing the employee form, the extensions
+menu will contain a menu item to allow the address of the employee to be
+displayed, and possibly edited.
+
+As with the detail relationships, the information about how the
+extension is related to the launching form is automatically maintained
+by the application.
+
+[[DUGP1Parents-Lookups]]
+=== Parents/Lookups
+
+_Lookup_ relationships indicate a category or type. For example, a phone
+number has a phone number type. The phone number type is a list of
+values for the type of each phone number. For example, "home" or
+"mobile" phone number. The View menu will be available whenever there
+are parent or lookup relationships that can be followed. For example,
+when viewing a phone number, the view menu will contain a menu item to
+allow the phone number type of the phone number to be displayed.
+
+Note that the category of a relationship is a matter of perspective
+within the application. For example, from the perspective of a phone
+number type, the phone numbers of that type are a detail. Typically, a
+Dataphor Application will allow relationships to be viewed from any
+perspective.

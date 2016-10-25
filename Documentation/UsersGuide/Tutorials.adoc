@@ -1,0 +1,242 @@
+= Tutorials
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+== Summary
+
+.Tutorial libraries bundled with Dataphoria software
+. link:Tutorial_MovieRental.adoc[Movie Rental]
+. link:Tutorial_BookPublishing.adoc[Book Publishing (with Pubs sample database)]
+. link:Tutorial_FrontendComponents.adoc[Frontend Components]
+
+[[Alphora.Dataphor.Keys]]
+== Editor Shortcut Keys
+
+Shortcut Keys
+
+Keys, Shortcut
+
+The editor has the following commands and associated shortcut keys:
+
+=== EDITING
+
+[width="100%",cols="25%,25%,50%",options="header",]
+|=======================================================================
+|Command |Shortcut |Description
+|Cursor Left |Left |Moves the cursor left one character.
+
+|Cursor Right |Right |Moves the cursor right one character.
+
+|Cursor Up |Up |Moves the cursor up one line.
+
+|Cursor Down |Down |Moves the cursor down one line.
+
+|Start of Line |Home |Moves the cursor to beginning of line.
+
+|End of Line |End |Moves the cursor to end of line.
+
+|Cursor Word Left |Ctrl+Left |Moves the cursor left one word.
+
+|Cursor Home |Ctrl+Home |Moves the cursor to the beginning of the text.
+
+|Cursor End |Ctrl+End |Moves the cursor to the end of the text.
+
+|Start of Text/Line |Alt+Home |Moves the cursor to the beginning of the
+text.
+
+|Page Up |PageUp |Scrolls the view up one page.
+
+|Page Down |PageDown |Scrolls the view down one page.
+
+|Scroll Up |Ctrl+Up |Scrolls the view up one line.
+
+|Scroll Down |Ctrl+Down |Scrolls the view down one line.
+
+|Delete |Delete |Deletes the current character or selected text.
+
+|Delete Word Right |Ctrl+Delete |Deletes from the cursor to the start of
+the next word.
+
+|Delete Word Left |Ctrl+Delete |Deletes from the cursor to the start of
+the current word.
+
+|Delete To Line End |Ctrl+Shift+Delete |Deletes from the cursor to the
+end of the current line.
+
+|Delete Line |Ctrl+L |Deletes the current line.
+
+|Find... |Ctrl+F |Searches for a given text string within the contents
+of the designer.
+
+|Find & Replace... |Ctrl+H |Replaces a given text string with another.
+
+|Find Next |F3 |Repeats the last find operation.
+
+|Goto Matching Brace |Ctrl+B |Moves cursor to the matching brace.
+
+|Toggle Edit Mode |Insert |Toggles between insert and overtype.
+
+|Undo |Ctrl+Z or Alt+BkSp |Delete |Undoes the last keystroke.
+
+|Redo |Ctrl+Y |Delete |Repeates the last keystroke.
+
+|Split Window |Ctrl+Shift+1 |Split the editor window. Allowes two
+locations of the same text to be viewed/edited at the same time.
+|=======================================================================
+
+=== SELECTION/BLOCK
+
+NOTE: Blocks are delimited using `//*` (slash slash asterisk). On end of the
+block can be delimited by the beginning or the end of the text.
+
+[width="100%",cols="25%,25%,50%",options="header",]
+|=======================================================================
+|Command |Shortcut |Description
+|Select Character Left |Shift+Left |Selects the next character to the
+left.
+
+|Select Character Right |Shift+Right |Selects the next character to the
+right.
+
+|Select Line Up |Shift+Up |Selects from the current cursor position to
+the same position one line up.
+
+|Select Line Down |Shift+Down |Selects from the current cursor position
+to the same position one line down.
+
+|Select Page Up |Shift+PageUp |Selects from the current cursor position
+one page up.
+
+|Select Page Down |Shift+PageDown |Selects from the current cursor
+position one page down.
+
+|Select to Beginning of Line |Shift+Home |Selects from the current
+cursor position to the beginning of the current line.
+
+|Select to End of Line |Shift+End |Selects from the current cursor
+position to the end of the current line.
+
+|Select to Beginning of Text |Ctrl+Shift+Home |Selects from the current
+cursor position to the beginning of the text.
+
+|Select to End of Text |Ctrl+Shift+End |Selects from the current cursor
+position to the end of the text.
+
+|Toggle Block Delimiter |Ctrl+Shift+/ |Insert/remove a block delimiter
+at the beginning of the current line.
+
+|Previous Block |Ctrl+, |Move cursor to pevious block delimiter.
+
+|Next Block |Ctrl+. |Move cursor to next block delimiter.
+
+|Select to Previous Block |Ctrl+Shift+, |Select from the current cursor
+location to the pevious block delimiter.
+
+|Select to Next Block |Ctrl+Shift+. |Select from the current cursor
+location to the next block delimiter.
+
+|Select Block |Ctrl+D |Selects the current block.
+
+|Select All |Ctrl+A |Selects all the text.
+
+|Clear Selection |ESC |Clears (deselects) all selections.
+
+|Cut |Ctrl+X or Shift+Delete |Removes the currently selected text and
+places it on the clipboard.
+
+|Copy |Ctrl+C or Ctrl+Insert |Copies the currently selected text to the
+clipboard.
+
+|Paste |Ctrl+V or Shift+Insert |Pastes the current contents of the
+clipboard at the current cursor location.
+|=======================================================================
+
+=== OPEN/SAVE/PRINT/CLOSE
+
+[width="100%",cols="25%,25%,50%",options="header",]
+|=======================================================================
+|Command |Shortcut |Description
+|New... |Ctrl+N |Open editor for new item.
+
+|Open... |Ctrl+O |Open existing file/document.
+
+|Open with... |Ctrl+W |Open existing file/document and query which
+editor to use.
+
+|Save |Ctrl+S |Save changes in current editor.
+
+|Save All |Ctrl+Shift+S |Save changes in all editors.
+
+|Save... |Ctrl+S |Saves the contents of the current editor.
+
+|Save As File... |Ctrl+Shift+F |Saves the contents of the current editor
+as a physical file.
+
+|Save As Document... |Ctrl+Shift+D |Saves the contents of the current
+editor as a document.
+
+|Print |Ctrl+P |Print the contents of the current editor.
+
+|Close |Ctrl+F4 |Closes the current editor, prompting to save if the
+contents of the editor have been modified.
+
+|Exit |Alt+F4 |Close and exit Dataphoria.
+
+|Show Explorer |F12 |Display the Dataphore Explorer pane.
+
+|Lanch Form... |F6 |Lanch a derived form.
+|=======================================================================
+
+=== D4 SCRIPTS
+
+[width="100%",cols="25%,25%,50%",options="header",]
+|=======================================================================
+|Command |Shortcut |Description
+|Execute all/selection |Ctrl+E |Executes the currently selected script,
+or the entire script if nothing is selected.
+
+|Execute Current Line |Ctrl+Shift+E |Executes the script on the current
+line.
+
+|Prepare |Ctrl+R |Checks the currently selected text, or the entire
+script if no text is selected, for syntactic and semantic correctness by
+compiling the script without executing it.
+
+|Inject |Ctrl+I |Executes InjectUpgrade( System.LibraryName(), `AScript`
+) ,where `AScript` is the currently selected script, or the entire
+script if nothing is selected.
+
+|Toggle Comment |Ctrl+/ |Comments or Uncomments the current line or
+selection.
+
+|Show Results |F7 |Show the Results pane.
+|=======================================================================
+
+=== DATAPHOR FUNCTIONS
+
+[width="100%",cols="25%,25%,50%",options="header",]
+|=======================================================================
+|Command |Shortcut |Description
+|Inject As Upgrade |Ctrl+I |Injects the currently selected text, or the
+entire script if no text is selected, as an upgrade in the current
+library.
+|=======================================================================
+
+=== BOOKMARKS
+
+[width="100%",cols="25%,25%,50%",options="header",]
+|=======================================================================
+|Command |Shortcut |Description
+|Goto Previous Bookmark |Alt+Up or BrowserBack |Repositions cursor to
+the previous bookmarked line.
+
+|Goto Next Bookmark |Alt+Down or BrowserForward |Repositions cursor to
+the next bookmarked line.
+
+|Toggle Bookmark |Alt+Left BrowserStop |Set/Remove bookmark from the
+current line.
+|=======================================================================

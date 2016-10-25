@@ -1,0 +1,49 @@
+= Dataphoria
+:author: Alphora
+:doctype: book
+
+:icons:
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DUGP1ProductTour-Dataphoria]]
+== Summary
+
+Dataphoria is an Integrated Development Environment (IDE) for the
+Dataphor platform. Dataphoria connects with instances of the Dataphor
+Server for administration, and can host an in-process Dataphor Server
+instance for testing and development. The environment provides
+user interfaces for building and maintaining the application schema, as
+well as a visual forms designer for building and customizing
+presentation layer forms.
+
+Dataphoria provides a hierarchical representation of the catalog
+of a Dataphor Server instance. This view, called the Dataphor Explorer,
+is used to navigate and manage the objects in the catalog.
+User-interfaces are provided to manage various aspects of the Dataphor
+Server such as library and document management; application
+installation, upgrading, and configuration; and security management.
+
+Dataphoria exposes the document system introduced by the
+Frontend Server in much the same way that an operating system shell
+provides a frontend for the file system. The IDE includes various
+_designers_ for use in creating and manipulating documents, as well as
+user interfaces for managing documents such as moving, renaming, and
+deleting documents.
+
+Dataphoria also enables ad-hoc query capabilities using the D4
+Script Editor. Arbitrary statements can be executed against the Dataphor
+Server, and if desired, the results of those operations displayed within
+the IDE.
+
+Applications can be installed, configured and tested using the
+Dataphoria IDE. A special version of the Windows Client can be launched
+directly from the IDE to enable testing, as well as on-the-fly
+development.
+
+It is worth noting that the Dataphoria IDE is itself a Dataphor Frontend
+Client, and the majority of the user interfaces exposed in the IDE are
+derived from the system catalog of the Dataphor Server.
+
+<<Dataphoria.adoc#DUGP1Dataphoria-Introduction, Full Dataphoria documentation>>

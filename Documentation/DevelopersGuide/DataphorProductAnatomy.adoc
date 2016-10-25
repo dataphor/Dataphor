@@ -1,0 +1,702 @@
+= Dataphor Product Anatomy
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGDataphorProductAnatomy]]
+== Summary
+
+This chapter introduces the Dataphor product, and discusses how it
+enables automated application development.
+
+[[DDGDataphorProductAnatomy-Overview]]
+== Overview
+
+The Dataphor product is an application development platform based on the
+declarative approach using the relational model. It consists of the
+following major components:
+
+[horizontal]
+Dataphor Server:: The core of the Dataphor product that exposes all
+the services and capabilities required to enable automated application
+development.
+Frontend Server:: A set of services exposed as a library in the
+Dataphor Server that the Frontend Clients can utilize to enable
+automated application development.
+Frontend Clients:: A set of "thin" clients designed to consume
+Dataphor applications.
+Dataphoria:: An Integrated Development Environment (IDE) for building,
+administering and maintaining Dataphor applications.
+
+[[DDGDataphorProductAnatomy-DataphorServer]]
+== Dataphor Server
+
+The Dataphor Server is designed to enable automated application
+development. In order to achieve this goal, the Dataphor Server plays
+two major roles. Firstly, it acts as an insulating layer between the
+application and the data storage systems it uses. Secondly, it acts as
+an environment for declarative application development by providing the
+services and capabilities discussed in the previous chapters. In both of
+these roles, the Dataphor Server is used by the application in much the
+same way that a traditional DBMS is used.
+
+The Dataphor Server functions as a DBMS in that it must coordinate
+requests from multiple users to access the same data. Ensuring that each
+user request is fulfilled efficiently and correctly is a highly
+non-trivial task. In order to accomplish the process, the functionality
+of the Dataphor Server is divided into subsystems:
+
+* Manager
+* Catalog
+* Compiler
+* Query Processor
+* Storage Integrator
+
+Each subsystem is responsible for a specific set of tasks in the overall
+system. The Manager coordinates the interaction between the different
+subsystems. The Catalog is the repository for the data structures which
+the Dataphor Server can access. The Compiler is responsible for
+translating user requests into efficient executable plans, which the
+Query Processor is then responsible for executing. The Storage
+Integrator provides the abstraction layer through which all data in the
+Dataphor Server is accessed.
+
+Collectively, these subsystems reside in a .NET Framework application
+domain hosted within an operating system process. This is known as a
+Dataphor Server _instance_ and represents a single Dataphor Server
+providing data management services for a single database. Note that,
+like a traditional DBMS, the Dataphor Server can host multiple
+applications within a single instance.
+
+A Dataphor Server instance can be hosted within any .NET Framework
+application, or within a Windows Service. For more information on
+configuring the Dataphor Server as a Windows Service, see the Dataphor
+User's Guide.
+
+[[DDGDataphorProductAnatomy-DataphorServer-Manager]]
+=== Manager
+
+The Manager controls the interaction between all the subsystems of the
+Dataphor Server. It manages running processes, routes user requests, and
+coordinates the actions of the different storage systems with which the
+Dataphor Server communicates. The tasks of the manager are divided into
+layers as follows:
+
+* Server
+* Session
+* Process
+* Plan
+* Cursor
+
+The manager exposes the functionality of the Dataphor Server at these
+different layers through the Call-Level Interface (CLI), an Application
+Programming Interface (API) designed specifically for use with the
+Dataphor Server. The CLI is a set of .NET Framework interfaces which
+allow programmatic access to the functionality of the Dataphor Server.
+Each layer of the manager architecture has a corresponding level in the
+CLI which exposes the functionality associated at that level.
+
+All the functionality and capabilities of the Dataphor Server are
+exposed through a data access language called D4. This language provides
+the interface to the logical model of the system, and is the main
+application development language for Dataphor applications. It is an
+imperative language in the syntactic style of Pascal, extended to
+include all the functionality of a database management language. In
+particular, it is a relationally complete language based on the
+relational algebra. For a complete discussion of the D4 language, see
+the D4 Language Guide in this manual.
+
+The CLI is the lowest level of access to the Dataphor Server. On top of
+the CLI, higher-level access mechanisms are available such as the
+Dataphor Data Access Components (DAC). For complete references for the
+CLI and the DAC, refer to the Dataphor Reference.
+
+Briefly, the server level controls all the global tasks such as system
+configuration and startup. The session manages the tasks associated with
+each user such as user configuration and starting and stopping
+processes. The process is the basic level of execution in the Dataphor
+Server, and coordinates the actions of the compiler and query processor
+to fulfill requests from the user. The plan manages tasks associated
+with prepared statements such as structural and metadata description and
+cursor requests. And finally, the cursor level manages tasks associated
+with the retrieval of results. Each of these levels are discussed in
+detail in the CLI discussion in the Presentation Layer part of this
+manual.
+
+[[DDGDataphorProductAnatomy-DataphorServer-Catalog]]
+=== Catalog
+
+The catalog of the Dataphor Server is the central repository for the
+application schema, or the description of the structure of the database.
+The catalog also contains such items as compiled operators, storage
+device descriptions, and security information. All this information is
+used by the various subsystems to provide the functionality exposed by
+the Dataphor Server. For example, the manager uses the catalog to ensure
+that a given connection request is made by a valid user of the system;
+the compiler uses the catalog to ensure that a given statement
+references valid objects in the database; and so on.
+
+The catalog is exposed through D4 as a set of tables containing rows
+which describe the current contents of the catalog. For example, there
+is a table variable called System.Operators which has a row for every
+operator in the system. For a complete description of the system
+catalog, refer to the System Library Reference in the Dataphor
+Reference.
+
+Catalog objects can be created, altered, and dropped through the use of
+Data Definition Language (DDL) statements of the D4 language. For a
+complete description of each of these statements, refer to the D4
+Language Guide in this manual.
+
+Each object in the catalog can have _metadata_ associated with it, which
+is additional information that is ignored by the logical model. Metadata
+is used by specific applications to provide extra information about each
+object. For example, the Frontend uses a tag called Frontend.Title to
+determine the presentation layer description for a corresponding
+user interface element.
+
+The entire catalog is divided into units called libraries. Every catalog
+object is contained within some library. Libraries provide the
+fundamental deployment unit for Dataphor applications. They also form a
+unit of dependency tracking, in that the objects contained within a
+library cannot reference objects in other libraries unless the library
+they are in depends on the library containing the object being
+referenced.
+
+The Dataphor Server catalog contains the following types of objects:
+
+* Libraries
+* Scalar Types
+* Tables
+* Views
+* Constraints
+* References
+* Operators
+* Devices
+* Users
+* Roles
+* Rights
+* Event Handlers
+* Conversions
+* Sorts
+
+For more information on each of these types of objects, see the
+<<D4Catalog.adoc#D4LGCatalogElements, Catalog Elements>> section of the D4
+Language Guide in this manual.
+
+For more information on using these elements to construct a Dataphor
+Application, refer to the <<LogicalApplicationDesign#DDGLogicalApplicationDesign.adoc, Logical Application Design]>>
+part of this manual.
+
+For more information on the security system of the Dataphor Server,
+refer to the <<../UsersGuide/Security.adoc#DUGP3Security, Security>> chapter of the Dataphor
+User's Guide.
+
+[[DDGDataphorProductAnatomy-DataphorServer-Compiler]]
+=== Compiler
+
+The compiler subsystem is responsible for ensuring the syntactic and
+semantic correctness of a given user request, and for producing an
+executable plan to fulfill that request. User requests are made in terms
+of D4, the native language of the Dataphor Server
+
+The compilation process is divided up into the following phases:
+
+* Lexical Analysis
+* Syntactic Analysis
+* Semantic Analysis
+* Optimization
+* Binding
+
+The output from one phase functions as the input to the next phase of
+the process. The input to the lexical analysis phase is the user request
+as a string of characters, and the output from the binding phase is a
+compiled plan ready for execution in the query processor.
+
+The lexical analysis phase is concerned with transforming a given string
+of characters into a sequence of tokens. This phase is also responsible
+for removing comments and whitespace from the input stream.
+
+The syntactic analysis phase is concerned with ensuring that a given
+stream of tokens forms a correct statement of the language. This process
+is handled by the parser. The output of this phase is a syntactically
+correct representation of the user request.
+
+The semantic analysis phase is concerned with ensuring that a given user
+request is meaningful. This phase involves resolving identifiers and
+operator invocations, and performing type checking. During this phase,
+the compiler makes use of the catalog to perform identifier and operator
+resolution. The output of this phase is a direct translation of the user
+request into instructions for use in the query processor. This is a
+preliminary version of the plan that has not been bound to actual
+storage locations yet, but it is guaranteed to be semantically correct.
+Once the compiler reaches this phase, the user request is known to be a
+correct program of D4.
+
+The optimization phase is concerned with high-level transformations to
+the user request in an attempt to produce a more efficient execution
+plan. For example, if a user request contains a restrict followed
+immediately by a restrict, the two restricts can be combined into one
+without changing the semantics of the statement, and yielding better
+performance.
+
+The binding phase is concerned with access-path determination, and
+device selection. Device selection is done through a process called
+query chunking, in which the processor instructions are considered from
+the retrieval steps up. At each step of the query, the devices involved
+are asked to prepare an equivalent execution. If a device is capable of
+performing a particular step of the query, it is assigned to do so.
+Otherwise, the Dataphor Server must process the query. Access-path
+determination is concerned with finding an efficient method to access
+the actual data. This involves such tactics as using an index to process
+a given restriction or recognizing that a join could be done more
+efficiently by sorting both sides prior to performing the join.
+
+Once all these phases of the compilation process have occurred, the plan
+is ready for actual execution within the query processor. The type of
+the result, if any, is known, and the request is known to be a
+semantically valid program of D4 instructions. Of course, this does not
+mean that run-time errors cannot occur, only that the system understands
+the request and is ready to attempt to perform it.
+
+The various inference mechanisms of the Dataphor Server are all
+implemented in the compiler. Type inference is the most basic form of
+inference, and involves determining the result type of an expression. In
+addition, if the expression is table-valued, the compiler must infer
+structural information about the result such as keys, orders,
+constraints, defaults, references, metadata, and so on. The compiler
+also determines the various characteristics of the statement or
+expression, which determines whether or not it is valid in a given
+context. For a more complete discussion of the inference mechanisms of
+the D4 language, see the D4 Language Guide in this manual.
+
+[[DDGDataphorProductAnatomy-DataphorServer-QueryProcessor]]
+=== Query Processor
+
+The query processor is responsible for actually performing the
+operations requested by users. A compiled plan in the Dataphor Server
+consists of a hierarchical representation of the action to be performed.
+Each operation is a node in the tree, and the children of any given node
+are the operands to the operation. For a typical query, this means that
+the leaves of the tree end in retrieval from devices, and the root of
+the tree is the result. For table operations, each node in this tree is
+actually a cursor which performs the requested operation. In this way,
+results are only materialized as they are requested. This approach to
+query processing is called _pipelining_ and means that if the results of
+a query are never requested, i.e., the cursor is never stepped through,
+the results may never be materialized (of course, they will be
+materialized if required, for example if an operation requires sorted
+input and no index exists to satisfy the required order, but the
+Dataphor Server will only materialize intermediate results when
+necessary).
+
+Query updatability is also implemented using this approach. When a data
+modification request is made on the cursor, it is propagated through
+each node of the plan.
+
+[[DDGDataphorProductAnatomy-DataphorServer-StorageIntegrator]]
+=== Storage Integrator
+
+The Storage Integrator (SI) utilizes an architecture called Storage
+Integration Architecture (SIA) and is concerned with providing an
+abstraction layer through which all data can be retrieved and
+manipulated. Data from this layer is presented to the Dataphor Server in
+the form of cursors, so the SI can take over the execution of a node in
+the tree of a query plan at any point. This replacement forms the basis
+of the query distribution capabilities of the Dataphor Server, resulting
+in seamless access and manipulation capabilities to disparate sources.
+
+Because the SIA is abstracting other DBMSs, the division of tasks in the
+architecture closely mirrors that of a typical DBMS. Like the Dataphor
+Server itself, the functionality is layered into a hierarchy as follows:
+
+* Device
+* Device Session
+* Device Plan
+* Device Cursor
+
+The central abstraction mechanism of the SIA is the __device__. A device
+manages the instance level configuration and settings of a storage
+system with which the Dataphor Server can communicate. A device is also
+responsible for providing translation services between instructions of
+D4 and the appropriate instructions for the target system.
+
+Each process in the Dataphor Server can communicate with any number of
+devices, and each device can support multiple requests from different
+processes. This relationship is managed by the process using a __device
+session__. Each process will have one device session for each device
+with which it must communicate. This device session coordinates
+transaction management between the Dataphor Server and the target
+system, and allows for requests coming in from the process to be
+prepared against the device.
+
+Preparing a request from the Dataphor Server results in a __device
+plan__. Just as in the Dataphor Server, a device plan is ready for
+execution within the device. For SQL devices, this means that the
+requested instructions of D4 have been translated into an equivalent
+statement of SQL. If the device does not support the requested
+operation, the compiler binds that step of the query to the Dataphor
+Server, rather than to the device.
+
+Once a request has been prepared, it can be executed against the device.
+If the request is a statement, the action is executed. Otherwise the
+operation opens a _device cursor_ ranging over the result set produced
+by the device. This can either be returned directly to the CLI if the
+device was capable of performing the entire query, or it can be used as
+an argument to the next operation in the query processor. In either
+case, a cursor is used, so the pipelined approach is still maintained,
+at least by the Dataphor Server.
+
+Manipulation is also propagated to devices where possible. Note that the
+chunking of a query for retrieval may be done at a different level than
+for update. For example, a device may be able to process a join, but not
+be able to update through it.
+
+The translation process that occurs is specific to each device, however
+there are certain common facilities which can be provided to ease the
+task. For instance, every device must be capable of producing data in a
+format compatible with the types of the Dataphor Server. This gives rise
+to a mapping layer between the device and the data types in the catalog.
+For each scalar type that the device supports, a _scalar type map_ is
+specified on the device. This scalar type map implements the translation
+of values of a given type to and from the device representation of the
+value and the host representation of the value within the Dataphor
+Server.
+
+In addition, each device may be capable of performing many of the
+operators in the Dataphor Server. Again, this is facilitated by a
+mapping layer between the device and the operators in the catalog. For
+each operator which the device supports, an _operator map_ is provided
+which handles the task of translating a given statement of D4 into the
+appropriate commands for the target system. Note that the existence of
+an operator map does not alone constitute support for a query containing
+the operator. The decision to support a particular query is based on
+several factors, of which supporting the operators and types referenced
+by the expression are only two.
+
+Each device may also provide a mapping between users of D4 and users of
+the target system. This is accomplished using a __device user__. Device
+users can be created and manipulated using system provided operators in
+the Dataphor Server, or the visual security management interfaces
+exposed by Dataphoria. If no device user is specified, the Dataphor
+Server will use the credentials specified on the device itself. If no
+configuration is specified on the device, the Dataphor Server will use
+the credentials of the D4 user.
+
+The result of this process is that both data access and data
+manipulation across devices is made completely transparent to users of
+the Dataphor Server. True logical data independence is achieved, as the
+results of any query, and hence any view, can be retrieved and updated
+without regard to the actual location of the data. A view can be defined
+which joins the data from a Microsoft SQL Server and an Oracle Server,
+and the view still behaves as if it were a single base table.
+
+In addition, because the Dataphor Server itself is capable of processing
+the results of any expression of the relational algebra, any given query
+will always execute. This is true regardless of the level of relational
+support provided by the devices involved.
+
+For more information on creating and manipulating devices, refer to the
+<<D4Catalog.adoc#D4LGCatalogElements, Catalog Elements>>
+chapter of the D4 Language Guide in this manual.
+
+[[DDGDataphorProductAnatomy-DataphorServer-AutomatedApplicationDevelopmentServices]]
+=== Automated Application Development Services
+
+In addition to the services and capabilities of a traditional database
+management system, the Dataphor Server exposes various services aimed at
+enabling automated application development. These include:
+
+* Query and View Updatability
+* Advanced Business-Rule Enforcement
+* Metadata Services
+* Application Transactions
+* Navigational Access
+* Proposable Interfaces
+
+[[DDGQueryandViewUpdatability]]
+==== Query and View Updatability
+
+The Dataphor Server allows for updates against arbitrarily complex
+expressions (queries and views). The golden rule for updatability within
+the Dataphor Server is as follows:
+
+"No update operation must ever be allowed to leave any [table] in a
+state that violates its own predicate." [3]
+
+This updatability is possible because of the type inference mechanism.
+The result of this updatability is that the data consumer does not need
+to know the details of a given view. To a consumer, the Dataphor Server
+appears as a set of table variables, which all behave the same way
+whether they are declared as tables or views. This achieves a high
+degree of logical data independence, and allows the developer of the
+application schema to rearrange the logical model internally, without
+affecting the consumer's external view of that model.
+
+[[DDGAdvancedBusiness-RuleEnforcement]]
+==== Advanced Business Rule Enforcement
+
+
+Integrity constraints constitute the "business rules" of an application,
+and are an essential part of the application schema. The Dataphor Server
+provides the ability to easily declare such constraints at different
+levels of the schema. Constraints can be declared that enforce rules for
+the entire database, down to rules that affect only a single column or
+data type. Declarative database-wide integrity constraints allow
+advanced rules to be easily expressed that would ordinarily require
+multiple "triggers" to be written, if they could be enforced at all.
+
+[[DDGMetadataServices]]
+==== Metadata Services
+
+The schema of a Dataphor application can be adorned with additional
+application-specific information called metadata. These additional
+attributes are then made available with the structure of the result set
+of any query and can be used by the application for whatever purpose
+desired.
+
+The Frontend Services utilize this metadata, along with other structural
+information exposed by the application schema to enable the process of
+user interface derivation. The metadata can be used to provide hints to
+the derivation process such as what the title of a given column should
+be, or whether or not to include a reference as an embedded detail on a
+particular user interface.
+
+Metadata is also inferred by the compiler through expressions of the D4
+language. The type inference mechanisms of the D4 compiler have been
+extended to include metadata inference, as well as other structural
+information such as defaults, constraints, orders and so on.
+
+[[DDGApplicationTransactions]]
+==== Application Transactions
+
+In addition to typical pessimistic transaction support, the Dataphor
+Server features Application Transactions, which are a type of
+optimistically concurrent transaction where concurrency control is not
+required, and consistency is checked at the time of commit. Application
+transactions are managed at the session level and can be joined by
+multiple processes within the same Dataphor Server.
+
+A common problem encountered when writing applications is dealing with
+data entry and modification in a database containing complex rules. For
+example, a master/detail relationship (one-to-many) between tables
+enforced by a referential integrity constraint is common in application
+schemas. In many cases, a master row may not be "complete" until the
+appropriate detail rows are in place. Because of the integrity
+constraint, the master row must be present in the database before the
+detail rows.
+
+Typical transaction support allows the rows to be entered simultaneously
+(although it should be noted that not all SQL-based DBMS products
+support this), but because transaction concurrency is handled
+pessimistically (i.e. by locking resources), transactions must be kept
+as short as possible to minimize resource contention.
+
+For this reason, most applications do not solve this user interface
+problem using transaction support. Rather, it is typically handled by
+the developer within the presentation layer. Even with the aid of
+development tools that help developers accomplish the tasks of caching,
+this caching is an unnecessary burden, and is not a general solution.
+Hard-coded caching only works for the manipulation patterns anticipated
+by the developer. Application Transactions handle these problems in a
+general way, without requiring additional effort by the developer.
+
+An application transaction is a managed buffer that mirrors exactly the
+application schema, with the exception of the constraints that would
+cause problems in the user interfaces, namely any constraint that
+involves more than one table. All the structural information available
+in the application schema is visible as part of the application
+transaction. And because the management of application transactions is
+automatically handled by the data access layer of the Dataphor clients,
+the entire process is transparent.
+
+[[DDGNavigationalAccess]]
+==== Navigational Access
+
+One of the most difficult problems in any database application is the
+presentation of a natural and intuitive search. The Dataphor Server
+solves this problem by providing navigational access to data using its
+_browse_ capability. Using *browse* instead of *order* as part of the
+cursor definition provides this navigational access.
+
+Cursor operations such as backwards navigation and searching can be
+performed efficiently against relational and indexed-access data sources
+when using a browse based cursor. As the browse cursor is navigated and
+searched, the query processor opens cursors internally based on
+appropriately transformed expressions. For example, when the user
+searches for the name "Karl", the underlying expression is modified to
+return all rows greater than or equal to the search criteria. This type
+of access is enabled against expressions of arbitrary complexity, not
+just simple table expressions.
+
+Because of the this navigational access, user interfaces can be built
+based on browse cursors that are easy and efficient to search and
+navigate. The developer is not concerned with fetching data subsets, and
+the end user can see what they perceive as the entire table. In reality,
+only the data actually being presented is retrieved from the Dataphor
+Server.
+
+[[DDGProposableInterfaces]]
+==== Proposable Interfaces
+
+The Dataphor Server is capable of answering questions about modification
+operations that are about to be performed. During data entry processes,
+rows are built a column at a time as the user enters data. The Dataphor
+Server provides a set of _proposable_ interfaces that allow the
+application to perform intermediate processing while this data entry is
+occurring. There are three types of proposable questions.
+
+* *Default* is designed to provide the initial state for a newly
+inserted row. When applications begin the process of data entry, this
+interface can be used to determine the default values for the columns of
+the table such as a new surrogate identifier for the row.
+* *Validate* is designed to provide a mechanism for immediate value
+validation on a column level. As values are entered, this interface can
+be used to determine whether they would violate any constraint of the
+column or data type.
+* *Change* is designed to provide a mechanism for displaying the
+predicted results of an operation. After a value has been entered, this
+interface can be used to request the affects of the change on the rest
+of the row, such as a calculated column.
+
+[[DDGDataphorProductAnatomy-FrontendServer]]
+== Frontend Server
+
+The Frontend Server is a set of services built as a library in D4 and
+housed within the Dataphor Server. These services are primarily
+concerned with the presentation layer of a Dataphor application. The
+Frontend Server provides _document_ support, query elaboration
+capabilities, user interface derivation services, and application entry
+points.
+
+[[DDGDataphorProductAnatomy-FrontendServer-FrontendLibraryExtensions]]
+=== Frontend Library Extensions
+
+The Frontend Server extends the concept of a library in the Dataphor
+Server to include the notion of a __document__. A document is the
+logical manifestation of an operating system file. Each document resides
+within a specific library, and has a name, which must be unique within
+that library. Documents are of some specific document type, and that
+type governs how the various Frontend services will deal with the
+document.
+
+The Frontend Server exposes an API for dealing with documents. Standard
+I/O functionality is available for loading and saving documents, as well
+as other, more specialized functionality.
+
+[[DDGDataphorProductAnatomy-FrontendServer-FrontendForms]]
+=== Frontend Forms
+
+One important type of document is a Dataphor Form Document. These
+documents contain the complete description of a presentation layer
+user interface. These documents can be built manually, or the Frontend
+Server can be used to derive them automatically. In either case, the
+Frontend Server provides the ability to customize these forms through
+the use of __visual form inheritance__.
+
+This process allows forms to be based on existing forms, and then
+modified for a specific use. These modifications can include the
+rearrangement of controls on the form, the modification of properties of
+the various elements on the form, and even the addition of new elements
+to the form. These modifications are then saved in a Customized Dataphor
+Form Document, which saves only the difference between the original form
+and the customization. When a customization is based on a derived
+user interface, this allows the customization to be made without
+impacting the dynamic nature of the application.
+
+[[DDGDataphorProductAnatomy-FrontendServer-User-InterfaceDerivation]]
+=== User Interface Derivation
+
+The Frontend Server also exposes an API for automatically producing
+Dataphor Form Documents based on the application schema. Various types
+of interfaces can be produced, for example, a _Browse_ interface for a
+given table can be produced, which will provide a table-level
+user interface to the data in the table. Row-level user interfaces can
+also be produced.
+
+The user interface derivation process by default also includes
+references to other tables and views in the database. These references
+are exposed appropriately on the derived user interface. For example,
+when browsing the employees table, the employee phones table could
+appear as an item on the _Details_ menu of the resulting user interface.
+
+In addition to the default behavior provided by the Frontend Server, the
+derivation can be controlled through the use of metadata in the
+application schema. For example, the _Frontend.Embedded_ tag can be used
+to indicate that a given reference should be embedded into the
+user interface for a given table. This allows the user interfaces to be
+tailored to an application's specific requirements, while still allowing
+those user interfaces to be derived.
+
+[[DDGDataphorProductAnatomy-FrontendClients]]
+== Frontend Clients
+
+The Dataphor platform utilizes a generic user interface description
+language to allow clients based on different platforms to consume the
+same application. In this way, Dataphor applications can be defined one
+time, and deployed on multiple platforms.
+
+Both clients expose use the concept of an _alias_ to manage connection
+information with a specific Dataphor Server instance. The alias
+specifies the server instance, manages authentication information, and
+contains session-specific settings required to connect to a Dataphor
+Server. Each client exposes a set of interfaces for visually managing
+these aliases.
+
+Once a connection is established, the clients then provide an interface
+to select an application from the list of applications deployed on that
+Dataphor Server instance. This process can be bypassed, if desired.
+
+Each client communicates with the Dataphor Server using the Data Access
+Layer, requests the user interfaces described by the application, and
+manages the interaction with the user. Because of the services and
+capabilities exposed by the Dataphor Server, these processes can be
+completely automated. The resulting clients provide a rich
+user interface experience that is defined entirely within the
+centralized application schema.
+
+The Dataphor product ships with a Windows and Web Client, but the
+architecture is designed to be extensible, and other clients could be
+easily developed for environments like PDA's and cell phones.
+
+[[DDGDataphorProductAnatomy-Dataphoria]]
+== Dataphoria
+
+Dataphoria is an Integrated Development Environment for building
+Dataphor Applications. It provides a visual interface to perform various
+administrative functions in the Dataphor Server, as well as a
+hierarchical representation of the catalog, visual forms designer, and
+integrated ad-hoc query support.
+
+For more information on using Dataphoria, refer to the Dataphor User's
+Guide.
+
+[[DDGDataphorProductAnatomy-Conclusions]]
+== Conclusions
+
+Application development is an extremely complex and multi-faceted
+problem. Software developers today are faced with the challenge of
+building applications faster, better, and cheaper, all at the same time.
+While there is no "Silver Bullet", raising the level of abstraction at
+which applications are built will dramatically reduce the complexity of
+the problems, and allow developers to focus on the core issues of an
+application, rather than the tedious and mundane issues of day-to-day
+development.
+
+The Dataphor product provides an extremely flexible platform for
+application development. The features of the product are exposed as
+layers of enabling technologies that can each be used to achieve higher
+and higher levels of automated application development. The product was
+built from the ground up with extensibility in mind, so that even if the
+platform does not immediately support a desired capability, that support
+could be provided by systems developers extending the platform. The
+result is a truly revolutionary next-generation development platform
+that will continue to evolve with the ever-increasing complexity of
+application development.
+
+The remainder of this manual is devoted to explaining how to take
+advantage of the features exposed by the Dataphor product in order to
+realize the full potential of automated application development.

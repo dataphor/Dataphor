@@ -1,0 +1,498 @@
+= Application Development Concepts
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGApplicationDevelopmentConcepts]]
+== Summary
+
+This chapter discusses how the declarative approach can be applied to
+application development by utilizing the logical model exposed by a
+relational database management system. It describes how this approach
+addresses the issues discussed in the <<ApplicationDevelopmentConsiderations.adoc#DDGApplicationDevelopmentConsiderations, Application
+Development Considerations>> chapter of this part, and how a declarative
+platform provides a foundation for Automated Application Development
+(AAD).
+
+[[DDGApplicationDevelopmentConcepts-Schema]]
+== Application Schema
+
+The logical model presented by a relational database management system
+allows for the complete definition of the structural components of any
+application. It allows for the definition of data types, operators,
+tables, views, and business-rules that together constitute the schema
+(or business model) of the application, and completely model the
+structure of the data, the integrity constraints to be enforced, as well
+as any process logic specific to the application. Collectively, this
+declarative definition of the application is called the __application
+schema__.
+
+[[DDGApplicationDevelopmentConcepts-Schema-DataTypes]]
+=== Data Types
+
+Data types provide the fundamental unit of data representation within
+the logical model. They allow the developer to describe the types of
+data of interest to the application. Of course, the database system
+provides some basic data types such as strings and integers, but it
+should also allow for the definition of new data types of arbitrary
+complexity. For example, if the application must deal with spatial data,
+a coordinate type could be introduced to model geographic coordinates.
+
+Conceptually, a data type is a set of values. These values have various
+kinds of representations such as the physical representation of the
+value that is internal to the system, and the logical representation of
+the value that is exposed in the application schema. This distinction
+allows the implementation, or physical representation, of values to be
+changed without affecting the usage of the value in the application
+schema. An ideal platform would allow not only for the definition of
+data types, but the description of the various representations of values
+of those types as well.
+
+Once a data type is available in the schema of an application, that data
+type can be used anywhere within the application. It can serve as the
+type of a column in a table or view, it can be used within the
+definition of an operator as the declared type of a local variable, and
+it can also be used as the declared type of a parameter to an operator.
+By defining a data type, the application developer allows the system to
+model values of the type in question.
+
+[[DDGApplicationDevelopmentConcepts-Schema-Operators]]
+=== Operators
+
+Operators allow the developer to define and reuse the behavior of the
+application. Conceptually, an operator is just a predefined set of steps
+to be taken. Once defined, an operator can be invoked from anywhere
+within the application. From an imperative programming standpoint,
+operators provide an abstraction over statements and expressions of the
+language, meaning that anywhere statements and expressions can appear,
+operator invocations can appear in their place.
+
+For example, a distance operator could be defined to determine the
+distance between two coordinates. The entire application can then make
+use of the distance calculation, simply by invoking the operator.
+Whether in a restriction clause in a view definition, or deep within the
+processing logic of the application, the same operator can be used.
+
+Operators generally come in two varieties, those that return values, and
+those that do not. Some languages make the distinction explicit by
+defining functions as operators that return values, and procedures as
+operators that do not. Others simply introduce a special _void_ type to
+indicate that a given operator does not return a value. In either case,
+the concept is the same.
+
+Operators are also allowed to take parameters, and can optionally update
+the values of those parameters (if the parameter is a variable, of
+course). Operators can take any number of parameters, including none,
+and those parameters are allowed to be of any type. The result of an
+operator, if any, is also allowed to be of any type.
+
+Some operators are generally considered part of the language definition.
+These are generally called _built-in_ operators and include such
+functions as + and -.
+
+Because operators can appear anywhere statements and expressions can
+appear, they can be used to define other elements of the application
+schema. For example, operators can reference other operators, constraint
+and view definitions can invoke operators, and so on. Using operators,
+the developer can completely describe the required behavior of any
+application.
+
+[[DDGApplicationDevelopmentConcepts-Schema-TablesAndViews]]
+=== Tables and Views
+
+Tables and views (or derived tables) provide the fundamental unit of
+structure within the logical model. Tables and views are both __relation
+variables__, differing only in how they are defined. A table is defined
+in terms of the columns it contains, while a view is defined in terms of
+some relational expression. Once defined, tables and views behave the
+same. They are interchangeable, meaning that anywhere a reference to a
+table can appear, a reference to a view can appear. In particular, this
+is true of data modification statements.
+
+This feature of a relational system is called _logical data
+independence_ and is one of the key enabling factors in automated
+application development. In particular, it means that the client
+portions of the application can always deal with data in the database in
+the same way. Whether that data is defined in terms of a base table, or
+an arbitrarily complex view, the application will always see a relation.
+This uniformity of data access allows much of the presentation layer to
+be completely automated.
+
+As an example of logical data independence, consider a simple contact
+management application. Suppose the applications contains a customer
+table with a column for the associated region such as _East Coast_ or
+__West Coast__. A view of east coast customers can be created using a
+simple restriction. The resulting view behaves exactly the same as the
+actual customer table, except that only east coast customers are
+available.
+
+[[DDGApplicationDevelopmentConcepts-Schema-BusinessRules]]
+=== Business Rules
+
+Business rules allow the developer to declaratively specify the meaning
+of the data in the model. Once the system knows what business-rules must
+be enforced, it is responsible for rejecting any modifications that
+would violate those rules.
+
+Business-rules generally come in two varieties: constraints, and
+stimulus-response rules. Constraints specify some condition that must
+always hold, while stimulus-response rules allow the system to take
+action in response to some event such as a data modification.
+
+[[DDGConstraints]]
+==== Constraints
+
+Constraints generally take the form of some expression that must
+evaluate to true. Constraints can be placed on data types, as well as on
+the database as a whole. For practical reasons, database constraints can
+be declared at many different levels. The following list illustrates
+these possibilities:
+
+* Type Constraints
+* Column Constraints
+* Row Constraints
+* Table Constraints
+* Transition Constraints
+* Database Constraints
+
+Type constraints are concerned with defining the set of valid values of
+a given data type. For example, the SSN type could ensure that values of
+type SSN have 9 digits, with dashes in the appropriate places.
+
+Column constraints are concerned with defining the set of valid values
+for a given column. Of course, this constraint is in addition to the
+implicit constraint defined by the data type of the column.
+
+Row constraints allow the developer to specify constraints that are
+concerned with multiple columns in a single row. For example, the ToDate
+must be greater than the FromDate.
+
+Table constraints define the valid values for a particular table. A
+common example of a table constraint is a _key_ constraint, indicating
+that no two rows in the same table may have the same values for the
+columns in the key.
+
+Transition constraints define the valid _transitions_ for data in the
+database. For example, a person's marital status may change from
+_married_ to __divorced__, but not from _married_ to __single__.
+
+Database constraints allow rules to be enforced that involve multiple
+tables in the database. A common example of a database constraint is a
+_referential integrity_ constraint, indicating that every row in one
+table must have a corresponding row in another table.
+
+The majority of business-rules are constraints, and a system which
+allowed for the declarative enforcement of all these types of
+constraints would eliminate a significant amount of development effort.
+Rather than enforcing these rules on a case-by-case basis within the
+presentation layer, the system would simply ensure that no modification
+is allowed that would violate any declared rule. The result is that the
+presentation layer can be developed without regard for enforcing
+integrity.
+
+[[DDGStimulus-ResponseRules]]
+==== Stimulus-Response Rules
+
+Stimulus-Response rules allow the developer to participate in the
+decisions to be made when modifications occur in the system. For
+example, an inventory control system could automatically place an order
+whenever the in-stock quantity of an item falls below a certain level.
+
+[[DDGApplicationDevelopmentConcepts-Schema-Metadata]]
+=== Metadata
+
+In addition to these elements of the logical model, the schema of a
+given application could be extended with additional data about the data
+or __metadata__. These attributes (or __tags__) would allow
+application-specific information to be associated with any level of the
+application schema. For example, a phone number data type could include
+a metadata tag indicating that the display title for columns of this
+type is __Phone #__.
+
+By associating this metadata directly with the application schema it
+becomes available anywhere within the application, rather than tucked
+away in the definition of various forms in the presentation layer. This
+centralization improves the maintenance cycle as well. For example, if
+the title is supposed to be __Phone #/Ext__, the change can be made one
+time in the application schema, and the presentation layer would react
+to the change appropriately.
+
+This association with the application schema would also allow the
+relational system's type inference mechanism to be extended to include
+metadata inference. For example, the metadata associated with a column
+definition in a table could be inferred through any view that involved
+that column.
+
+[[DDGApplicationDevelopmentConcepts-Presentation]]
+== Presentation
+
+The presentation layer of any application is responsible for interaction
+with the users. It must provide services to allow users to enter,
+retrieve and maintain data, and perform the processes involved in the
+application. In short, it must provide a consistent and intuitive
+interface to the schema of the application.
+
+Many of the most difficult and tedious issues in application development
+arise in this layer. The presentation layer is responsible for
+retrieving the data from the database, presenting it to the user,
+allowing the user to interact with the data, and then updating the data
+in the database. In general, this process presents many difficult
+challenges. However, by layering the solution on top of the relational
+model and building on existing rapid application development techniques,
+a highly automated solution can be achieved.
+
+[[DDGApplicationDevelopmentConcepts-Presentation-DataAccessLayer]]
+=== Data Access LayerPresentationData Access LayerData Access Layer
+
+The first layer that must be automated is the data access layer. This is
+often called push/pull code, because it involves pulling data out of the
+database, changing or presenting it in some way, and then pushing it
+back into the database. This process necessarily involves the
+transformation of data from the values that the system understands, into
+a format suitable for presentation purposes, and back again. It also
+involves buffering the data in the client while it is being presented to
+or manipulated by users, and maintaining various state such as whether
+or not the data is being edited, the position within the result set, and
+so on.
+
+[[DDGRepresentations]]
+==== Representations
+
+Recall that the logical model provides for the definition of
+representations of types. This mechanism provides an excellent solution
+for the presentation layer, in that the display representation of a
+particular type of value can be defined in the application schema. If
+the client consuming the data is aware of the concept of a
+representation, an appropriate representation can be selected for use in
+the presentation layer. It could even download the code to translate
+values to and from the display representation to the client so that the
+development could remain on the server, while the transformation
+actually takes place on the client.
+
+For example, suppose the coordinate type exposes a string representation
+suitable for presentation layer usage. The logic required to transform a
+string to and from a coordinate value is contained within the definition
+of the representation. The client could simply access this definition
+and use it to perform the required translation. The user sees a
+presentation layer representation of the coordinate value such as __100
+10' 5.4"__, and is allowed to enter a coordinate value using the same
+format.
+
+Because the implementation for the representation is housed centrally
+with the application schema, changing the presentation layer format is
+simply a matter of updating the definition of the representation. The
+automated presentation layer reacts to the change appropriately.
+
+[[DDGTable-LevelAccess]]
+==== Table-Level Access
+
+Because the logical model exposes data as tables, all presentation and
+manipulation can be accomplished through a table-level access mechanism.
+One possible mechanism for this interaction is known as a __cursor__. A
+cursor provides a row-level interface for accessing the data from an
+arbitrary result set. Cursors expose navigational functionality such as
+moving to the next row, and support retrieving the currently selected
+row. In addition, a cursor could expose functionality for searching and
+updating data.
+
+One distinct advantage of using cursors over other potential data access
+mechanisms is that they provide a __relative__, rather than an
+_absolute_ positioning mechanism. This allows the client to deal with
+result sets of arbitrary size, and enables more general searching and
+buffering mechanisms. These in turn allow more of the data access layer
+to be automated within the client framework.
+
+[[DDGClient-ServerInteraction]]
+==== Client-Server Interaction
+
+In addition to these basic services, the data access layer of a
+declarative platform could provide extensive mechanisms for interaction
+between the client and the server. The application schema exposes a
+tremendous amount of detail about the data. What it should look like,
+how it should be displayed, what other data is related, default values,
+business-rules, and so on. Clearly, any application that deals with such
+a model should, as much as possible, be based on the structures of the
+application schema.
+
+In order to enable more automation in the clients, the data access layer
+could expose services for server participation in client interfaces. For
+example, when inserting a new row, the client could ask the server to
+provide default values for any columns in the table. Validation rules
+could also be checked in this way, enabling a much more sophisticated
+user interface, without additional developer effort. The data access
+layer could automatically invoke these services when necessary.
+
+[[DDGApplicationDevelopmentConcepts-Presentation-EnforcingBusiness-Rules]]
+=== Enforcing Business Rules
+
+Even a moderately complex application will likely include business-rules
+that span table variables in the database. For example, an employee
+cannot belong to a department that does not exist, and so on. However,
+these types of constraints necessarily involve some mechanism for
+deferred constraint checking, usually transactions. The constraints are
+allowed to be violated within the transaction, and then checked at
+transaction commit. If the constraint is violated, the transaction is
+rolled-back, and an error is raised.
+
+While this approach to enforcement works when developing server-side
+logic, the data entry patterns produced by the natural navigation of the
+relationships in the database tend to violate these types of
+constraints. For example, when entering an employee, an item in the list
+of phone numbers for the employee is "posted" through the data access
+layer while the employee itself is still being "inserted" in the client
+interface. This leads to a constraint violation, and the developer is
+usually left to resolve the problem in client-side code.
+
+In a declarative system, the system could determine which constraints
+would be violated by such a transaction, and provide an optimistically
+concurrent transaction to buffer the input of the data until all data is
+present, then utilize a standard transaction to post the entire batch.
+If the data access layer then exposed these services, the clients could
+automatically take advantage of them, all without developer
+intervention.
+
+[[DDGApplicationDevelopmentConcepts-Presentation-SearchInterfaces]]
+=== Search Interfaces
+
+One of the most difficult interfaces in any application is the generic
+search. For example, provide the user with the ability to locate an
+arbitrary contact by name or SSN within the entire organization. If the
+contact table contains millions of rows, this becomes a non-trivial
+task, usually resolved by filtering on a case-by-case basis within the
+presentation layer.
+
+If the data access layer provided a mechanisms for relative positioning
+of the cursor, and sufficient services for searching within the result
+set, then the clients could provide a "sliding window" over a given
+result set, ordered by some criteria. The client and server could work
+together to ensure that only the data the client actually requested was
+retrieved (not the whole table). This solution not only provides the
+end-user with an intuitive incremental search, but utilizes network and
+database resources efficiently and scales well both in terms of users
+and data volume, all without developer intervention.
+
+[[DDGApplicationDevelopmentConcepts-Presentation-User-InterfaceDerivation]]
+=== User-Interface Derivation
+
+If all these services could be provided generically for arbitrary
+perspectives of the application schema, then the benefits of logical
+data independence can be applied not only to expressions and statements
+within the server-side process logic, but to the user interfaces
+produced in the presentation layer consuming the application schema. In
+other words, the declarative approach, if properly realized, enables the
+automation of user interfaces based on the definitions contained within
+the application schema.
+
+In it's simplest form, user interface derivation involves analyzing the
+structure and metadata of a given result set, and producing a
+user interface based on that structure. Note that due to the type and
+metadata inference mechanisms of the relational system, this process
+will work for _arbitrary_ expressions, not just base tables.
+
+In addition to these basic elements, the system could analyze the
+relationship of a given result set with the structures in the
+application schema, and provide appropriate user interface elements for
+navigating the relationships of the application schema. For example,
+because the employee types table is referenced by the type column of the
+employee table, the resulting user interface could provide a lookup into
+the employee types table, simply based on the existence of the reference
+constraint. Again, because of type inference, this process will work for
+arbitrary expressions, not just base tables. A view of the employees
+table will still be aware of the lookup to the employee types table.
+
+Ideally, this process will produce a complete and intuitive
+user interface for manipulating the application schema. However, there
+may be cases where the resulting user interfaces will not meet the
+requirements of the application. In order to address this issue, the
+declarative system must provide mechanisms for steering this process.
+Such mechanisms may include the use of metadata in the appropriate
+places in the application schema, customizing the appearance of the
+resulting interfaces, or, in the most extreme cases, departing from the
+process entirely and reverting to manually building user interfaces. If
+the platform is layered properly, then the services enabled by the data
+access layer will still be available when customizing derived
+user interfaces or building user interfaces manually.
+
+Additionally, as new user interface patterns are encountered, the system
+could be extended to handle them in future applications, resulting in
+continual improvement of user interface automation as the system
+evolves.
+
+[[DDGApplicationDevelopmentConcepts-PhysicalRealization]]
+== Physical Realization
+
+In addition to the application schema and presentation layers, any
+application must ultimately run in some production environment. These
+environments often change rapidly, forcing changes in the applications.
+By utilizing a platform based on the declarative approach, the
+application can be defined one time. Changes in the software
+environments can be handled by the system, rather than the application.
+To redeploy the application onto a new platform, only the system must
+change, not each application built on that system.
+
+Physical realization also involves potential integration problems. Data
+required by the application may already be housed in existing external
+sources, and the costs of migrating the data and associated logic may be
+prohibitive. The platform must provide the ability to treat data in the
+same way regardless of where it is located, or what type of system it is
+housed within. This would result in a high degree of physical data
+independence, which would allow data from any source to be consumed by
+clients of the system. This physical data independence would also allow
+an existing application to be redeployed onto a completely different
+storage system with little or no modification.
+
+[[DDGApplicationDevelopmentConcepts-Development]]
+== Development
+
+In addition to the benefits already discussed in the previous sections,
+the declarative approach provides several benefits related to the
+development process itself. These benefits are chiefly due to the high
+degree of physical and logical data independence that are achieved by
+such a system. Some of these benefits include:
+
+[horizontal]
+Productivity:: Because the system can automate large portions of the development
+process, the obvious initial benefit is development time. Both
+development time and maintenance time are dramatically reduced.
+Developers can spend more time solving the actual problems presented by
+the application, rather than wrestling with the details of the
+implementation.
+Deployment:: Deployment of an application based on a declarative platform is simply a
+matter of deploying the definition of the application to the system.
+Maintenance:: The centralized schema and automated user interface derivation features
+of the system allow changes to the application schema to be made without
+necessarily having to make the corresponding changes to the presentation
+layer. The applications simply react to the change. These changes could
+be automatically coordinated with the physical layer as well.
+Training:: Due to platform independence, the software environment of the
+application can change without the need to re-train developers on the
+new software environment. They still utilize the same conceptual
+environment exposed by the system.
+
+It is worth pointing out that the declarative approach is by no means a
+panacea. It is not a "silver bullet" that will automatically develop
+applications. It is a layer of abstraction over existing development
+methodologies that allows applications to be implemented at a higher
+conceptual level. In other words, there is no substitute for good
+architecture, and care must be taken to express the model completely and
+accurately within a given declarative framework. The goal of the
+declarative approach is to simplify the implementation of a given
+architecture by encapsulating whenever possible the details of that
+implementation within the system.
+
+[[DDGApplicationDevelopmentConcepts-Conclusions]]
+== Conclusions
+
+This chapter has focused on how the declarative approach to application
+development can be utilized to solve many of the issues faced in
+software development. As with any large systems software, the ideal
+declarative platform is a moving target. However, the evolution of
+application development depends on taking steps towards a more
+declarative paradigm. Once the platform exists, it will continue to
+improve as optimizations are made, and new application development
+patterns are formalized and automated. In other words, it is a platform
+that evolves to handle new situations, rather than re-inventing
+solutions to problems that have already been solved.

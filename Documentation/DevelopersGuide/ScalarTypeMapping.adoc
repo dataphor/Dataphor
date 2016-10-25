@@ -1,0 +1,211 @@
+= Scalar Type Mapping
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGScalarTypeMapping]]
+== Summary
+
+In order to allow values of types defined in the logical model, the SIA
+incorporates the concept of a _scalar type map_ that provides value
+translation to and from the native representation of a scalar value
+within the Dataphor Server, and the device representation of that value
+in a given target system.
+
+Each device has a set of type maps that indicate which D4 types are
+supported by the device. For the SQL-based devices that ship with the
+Dataphor product, the system-defined types such as System.Integer and
+System.String are already mapped as part of the creation of the device.
+
+In addition, the type mapping for user-defined types with a
+system-provided native representation based on a mapped type is
+automatically provided as necessary. As such, for most applications,
+type mapping can be largely ignored. However, in some cases,
+user-defined types will have host-implemented native representations,
+requiring a host-implemented type map as well. This chapter discusses
+how scalar type maps work, and what is involved in their creation and
+usage.
+
+It should be noted that there are some gray areas with respect to type
+mapping due to the extremely diverse nature of representation of values
+within different systems. A scalar type map is really a mathematical
+function that relates the values in one domain to the values in another.
+In a perfect world, the domains on both sides would have the same number
+of values, and there would be a unique one-to-one correlation between
+the domains.
+
+In reality, the domains often have differing sets of values, and the
+task of the scalar type map designer is to find the __best fit__. For
+some types, such as a four-byte integer, the type map is uniquely
+one-to-one. For other types, such as DateTime, the range of possible
+values is so dramatically different from one system to the next that a
+perfect fit becomes impossible. In these scenarios, the notion of
+_acceptable range_ is used to attempt to guarantee functionality under a
+given set of values. In the case of DateTime, this range is from January
+1, 1900 00:00:00.0, to December 31, 2100 23:23:59.0, accurate to the
+second.
+
+Of course this range is well below the actual range of a DateTime value
+within the Dataphor Server, but it represents a kind of least common
+denominator among all target systems, and is based on the assumption
+that all conceivable systems will at least be able to provide support
+for this range of values. What acceptable range really defines is the
+minimum level of support required for a given target system. Of course,
+some systems provide much larger ranges for date time values, and the
+notion of acceptable range does _not_ limit the set of values that can
+be represented on a given target system. It merely specifies a target
+level of support in order to guarantee functionality across devices.
+
+Where appropriate, the acceptable ranges for various types are
+documented with the type in the various library references.
+
+[[DDGScalarTypeMapping-DeviceRepresentations]]
+== Device Representations
+
+The device representation for a scalar type is the representation of
+values of that type within the target system. Scalar type maps provide
+translation services to and from the native representation in the
+Dataphor Server and this device representation.
+
+Like the native representation, the device representation is expressed
+in terms of a .NET CLR type. This representation is used when
+communicating through the CLI of the target system.
+
+For the SQL-based devices, type maps for the system-defined types have
+already been provided. The following table lists the base SQL type maps
+provided as registered classes in the SQLDevice library:
+
+[cols=",,",options="header",]
+|======================================================
+|D4 Data Type |Common SQL Data Type |Translation Class
+|System.Boolean |INTEGER (0 or 1) |SQLDevice.SQLBoolean
+|System.Byte |SMALLINT |SQLDevice.SQLByte
+|System.Short |SMALLINT |SQLDevice.SQLShort
+|System.Integer |INTEGER |SQLDevice.SQLInteger
+|System.Long |BIGINT |SQLDevice.SQLLong
+|System.Decimal |DECIMAL(P, S) |SQLDevice.SQLDecimal
+|System.DateTime |DATETIME |SQLDevice.SQLDateTime
+|System.Date |DATE |SQLDevice.SQLDate
+|System.Time |TIME |SQLDevice.SQLTime
+|System.TimeSpan |BIGINT |SQLDevice.SQLTimeSpan
+|System.Money |DECIMAL(28, 8) |SQLDevice.SQLMoney
+|System.Guid |CHAR(24) |SQLDevice.SQLGuid
+|System.String |VARCHAR(L) |SQLDevice.SQLString
+|SQLDevice.SQLText |CLOB |SQLDevice.SQLText
+|System.Binary |BLOB |SQLDevice.SQLBinary
+|System.Graphic |BLOB |SQLDevice.SQLGraphic
+|======================================================
+
+[[DDGScalarTypeMapping-SimpleTypeMaps]]
+== Simple Type Maps
+
+For simple scalar types, the Dataphor Server can usually provide an
+appropriate type mapping automatically. When a table variable containing
+a column of an unmapped scalar type, the Dataphor Server will search for
+the type map of the native representation of the type. If one is found,
+the translation handler for that type is used to construct the type
+mapping for the new type.
+
+For example, consider the following create table statement:
+
+....
+create table Invoice
+{
+    ID : InvoiceID { default InvoiceID(GetNextGenerator("Shipping.Invoice.ID")) }
+        tags { Frontend.ReadOnly = "true" },
+    Location_ID : LocationID,
+    User_ID : UserID { default System.UserID() },
+    Date : Date { default Date() },
+    Status_ID : InvoiceStatusID { default InvoiceStatusID("NEW") },
+    key { ID }
+};
+....
+
+When the Dataphor Server attempts to map the table into the Shipping
+device, if the InvoiceID type map did not exist, the Dataphor Server
+would provide a map based on the System.Integer type mapping already
+present, because InvoiceID is defined *like* System.Integer.
+
+Similarly, in the following type map statement, the Dataphor Server
+determines the translation handler to be used based on the definition of
+the scalar type:
+
+....
+alter device Shipping { create type InvoiceID };
+....
+
+For the InvoiceID type, the type map is fairly straightforward because
+the type specifier on the target system has no parameters. In contrast,
+string-like types use the VARCHAR type on the target systems, and have
+the potential to specify a length parameter as part of the type
+specifier. This length parameter is taken from the value of the
+Storage.Length tag.
+
+The Storage.Length tag is taken from the metadata associated with the
+scalar type map. If the tag is not found on the type map, it is taken
+from the metadata associated with the scalar type itself. Note that when
+the Dataphor Server constructs a type map automatically, it does not
+infer metadata from the source type map. For example, consider the
+following type definition:
+
+....
+create type Phone like String
+{
+    constraint LengthValid (Length(value) <= 20)
+}
+    tags { Frontend.Title = "Phone #", Frontend.Width = "15" }
+    static tags { Storage.Length = "20" };
+....
+
+Even though the System.String type specifies a Storage.Length tag, the
+value of that tag is overridden by the Phone type itself. When the
+Dataphor Server constructs a scalar type map for the Phone type, it will
+be based on the translation handler used for the System.String type, but
+that translation handler will use the Storage.Length tag from the Phone
+type definition.
+
+In addition, the Storage.Length tag can be specified on the type map
+directly. For example:
+
+....
+alter device Shipping { create type Phone tags { Storage.Length = "20" } };
+....
+
+The Storage.Length tag specified here will effectively override the
+Storage.Length tag specified on the type definition.
+
+To explicitly specify the translation handler, the registered class to
+be used can be specified as part of the type map definition. For
+example, consider the following statement:
+
+....
+alter device Shipping { create type Degree class "SQLDevice.SQLDecimal" };
+....
+
+[[DDGScalarTypeMapping-Host-ImplementedTypeMaps]]
+== Host-Implemented Type Maps
+
+In addition to the type maps provided by the SQL devices, developers can
+build custom scalar type maps for use in mapping more complex types into
+target system. The Coordinate type in the Shipping application utilizes
+a custom scalar type map. The map is provided as a registered class in
+the Shipping library. footnote:[The source code for this map can be
+found in the Source subdirectory of the Shipping library directory in
+the file Domains.cs.].
+
+The following D4 statement uses the SQLCoordinate registered class to
+create the scalar type map for the Coordinate type:
+
+....
+alter device Shipping { create type Coordinate class "Shipping.SQLCoordinate" };
+....
+
+For more information on building host-implemented scalar type maps,
+refer to the Dataphor Extender's Development Kit.
+
+For more information on the library registration process, refer to the
+<<WorkingWithLibraries.adoc#DDGWorkingWithLibraries, Working with Libraries>>
+chapter of the Logical Application Design part of this guide.

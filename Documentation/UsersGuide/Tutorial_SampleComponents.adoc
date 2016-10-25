@@ -1,0 +1,115 @@
+= Sample Frontend Components
+:author: Alphora
+:doctype: book
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+== Summary
+
+The following sample components are available in the Sample.Components
+library:
+
+* BlockAction - Sample07
+* CallAction - Sample07
+* CheckBox - Sample09
+* CheckBoxColumn - Sample03
+* Choice - Sample09
+* ClearNextRequestAction - Sample06
+* Column - Sample01
+* CustomFilter - Sample07
+* DataArgument - Sample08
+* DataScriptAction - Sample08
+* DateTimeBox - Sample10
+* EditFilterAction - Sample07
+* Exposed - Sample02
+* FindAction - Sample01
+* FormAction - Sample06
+* Frame - Sample10
+* FullLookup - Sample04
+* Grid - Sample03
+* Group - Sample01
+* HelpAciton - Sample02
+* HtmlBox - Sample05
+* Image - Sample03
+* ImageColumn - Sample03
+* LookupAction - Sample04
+* Menu - Sample02
+* Notebook - Sample10
+* NotebookFramePage - Sample01
+* NotebookPage - Sample10
+* NumericTextBox - Sample09
+* QuickLookup - Sample04
+* Row - Sample01
+* ScriptAction - Sample07
+* Search - Sample07
+* SearchColumn - Sample07
+* SequenceColumn - Sample06
+* SetNextRequestAction - Sample06
+* SetPropertyAction - Sample01
+* ShowFormAction - Sample06
+* ShowLinkAction - Sample05
+* Source - Sample01
+* SourceAction - Sample08
+* StaticImage - Sample03
+* StaticText - Sample08
+* Text - Sample08
+* TextBox - Sample01
+* TextColumn - Sample03
+* Timer - Sample10
+* Tree
++
+(Multi-Table Hierarchy) - Sample11MTH
++
+(Single-Table Hierarchy) - Sample11STH
++
+
+NOTE: See Tree/Explode in the next section.
+
+* Trigger - Sample01
+* TriggerColumn - Sample03
+
+= Tree/Explode
+
+The Tree control is used to display the structure of the data in a tree
+format. The sample shown in Sample11STH and Sample11MTH in the
+Sample.Components library will help explain the use of this control.
+
+The explode operator allows hierarchical queries to be expressed. In the
+samples explode is used to extract only a portion of the data starting
+at a specific point or root.
+
+
+NOTE: The Tree control is capable of displaying hierarchies with more than one
+root.
+
+== Technical Terms
+
+[horizontal]
+Hierarchy::
+  A method of relating pieces of information, nodes, to each other in a
+  parent-child relationship. Each node can have no parent or one parent,
+  each parent can have none to many children. A node with no parent is
+  called a root.
+  +
+  Every node in the hierarchy consisting of a single root is reachable
+  from any other by following the relationship in either direction, but
+  there is no way of coming back to a particular node by always
+  following the relationship in the same direction.
+
+Root::
+  The starting node of a hierarchy.
+
+Parent::
+  A node in its superior relationship to another node.
+
+Child::
+  A node in its subordanant relationship to another node.
+
+== Libraries/Files Used
+
+=== Sample.Components library
+
+[horizontal]
+Sample11STH:: Sample of a hierarchy using a single table.
+Sample11MTH:: Sample of a hierarchy using two tables.

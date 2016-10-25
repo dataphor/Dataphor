@@ -1,0 +1,777 @@
+= Form Automation
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGTheAutomationofForms]]
+== Summary
+
+Now that we have seen the end-result of Dataphor development, we will
+delve a little deeper into the process of user interface derivation. By
+default, the user interfaces produced by this process are quite usable,
+and in general need little modification. However, in order to provide
+the flexibility to produce any kind of user interface, the derivation
+process can be guided at every step.
+
+This chapter discusses the process of derivation in detail and how it
+can be tailored for specific scenarios through the use of metadata tags.
+These tags can be used at a number of different points during the
+derivation process to steer almost every aspect of a given
+user interface derivation.
+
+[[DDGTheAutomationofForms-GuidingDerivation]]
+== Guiding Derivation
+
+The derivation engine looks for metadata tags at each step of the
+process, allowing the developer to specify what the resulting
+user interface should look like, without the need to duplicate schema in
+manual form definitions. Form definitions inherently contain information
+about the application schema such as column names, data types, and
+references. By completely deriving form definitions from the application
+schema, the duplication of this information is entirely avoided. Using
+derivation, as the application schema changes, so do the resulting
+user interfaces.
+
+Because metadata is inferred by the compiler, defining the
+Frontend.Title tag on a base table variable will introduce the tag to
+any expression involving that table variable. In order to prevent this
+inference from occurring for a specific tag, the *static* keyword can be
+used to indicate that the compiler should not infer the tag through
+expressions.
+
+To introduce metadata into an expression at any point, the *adorn*
+operator can be used. This allows derived table variables to be used as
+the basis for form definitions within the application.
+
+Whenever the derivation engine is searching for a specific tag, the
+following sequence of steps is used:
+
+The tag name qualified with the form type is used, i.e.
+Frontend.Add.Title
+
+The tag name qualified with the cardinality of the form type is used,
+i.e. Frontend.Singular.Title
+
+The tag name itself is used, i.e. Frontend.Title
+
+The default value for the tag is used
+
+In some cases, the derivation engine will also search for reference type
+specific tags. In these cases, the following steps are used to find the
+tag value:
+
+The tag name qualified with the form type and reference type is used,
+i.e. Frontend.Add.Detail.Title
+
+The tag name qualified with the cardinality of the form type and the
+reference type is used, i.e. Frontend.Singular.Detail.Title
+
+The tag name qualified with the form type is used, i.e.
+Frontend.Add.Title
+
+The tag name qualified with the cardinality of the form type is used,
+i.e. Frontend.Singular.Title
+
+The tag name qualified with the reference type is used, i.e.
+Frontend.Detail.Title
+
+The tag name itself is used, i.e. Frontend.Title
+
+The default value for the tag is used
+
+In addition, the derivation engine makes use of _extraction contexts_
+which allow subsets of metadata to be specified by qualifying each tag
+with a particular qualifier. For example, within the metadata for a
+table, the metadata for a group can be specified by qualifying each tag
+with the qualifier Group.<group name>. All the tags specified within
+this context are extracted by removing the extraction qualifier and
+applying the unqualified tags to the object in question. The derivation
+engine recognizes the following extraction contexts:
+
+* Group.<group name>
++
+When building groups, metadata that should apply to the group is
+extracted from the table-level metadata for the derivation using this
+extraction context. Note that backslashes (\) within <group name> will
+be replaced with qualifiers (.).
+* RowExists
++
+When constructing the row exists column for an extension reference, the
+derivation engine will use the RowExists extraction context to extract
+metadata from the reference metadata.
+* Modifier
++
+When building the *left join* expression to embed parent, lookup, and
+extension references into an expression, elaboration will use the
+Modifier extraction context to extract modifiers from the reference
+metadata.
+* Group
++
+When building the group for an embedded parent or lookup reference, the
+derivation engine will use the Group extraction context to extract
+metadata that should apply to the group from the reference metadata.
+* Grid
++
+When building the Grid control for a plural user interface, the
+derivation engine will use the Grid extraction context to extract
+metadata that should apply to the grid from the table-level metadata for
+the derivation.
++
+When building grid columns for the Grid control in a plural
+user interface, the derivation engine will use the Grid extraction
+context to extract metadata that should apply to the grid column from
+the column metadata.
+* Interface
++
+When building the root form interface for a user interface, the
+derivation engine will use the Interface extraction context to extract
+metadata that should apply to the interface. This context is called
+Interface rather than FormInterface because FormInterface is only one
+type of root interface node; FrameInterface is another.
++
+This extraction context is useful for setting properties of the
+interface, such as HelpKeyword and IconImage.
+* Search
++
+When building the Search control for a plural user interface, the
+derivation engine will use the Search extraction context to extract
+metadata that should apply to the search from the table-level metadata
+for the derivation.
++
+When building search columns for the Search control in a plural
+user interface, the derivation engine will use the Search extraction
+context to extract metadata that should apply to the search column from
+the column metadata.
+* Source
++
+Properties of the main Source component for a user interface can be set
+by the Source extraction context, such as IsReadOnly as
+RefreshAfterPost.
+* <element type>
++
+When building column-level controls, the derivation engine will use the
+<element type> extraction context to retrieve metadata that should be
+passed through derivation directly to the control as properties in the
+resulting form definition. This works not only directly on columns but
+anywhere that a control will be built by the derivation engine.
+
+The following sections will consider in detail what tags are available
+for guiding the process of derivation at each step.
+
+[[DDGTheAutomationofForms-GuidingDerivation-Elaboration]]
+=== Elaboration
+
+As discussed previously, elaboration consists of extending the
+derivation expression with related information from the database. This
+is done based on the references that are available to and from the
+derivation expression.
+
+Recall that we distinguish four types of references, depending on the
+cardinality of the reference, and the perspective of the reference with
+respect to the query in the derivation seed:
+
+* Parent
+* Lookup
+* Extension
+* Detail
+
+In the following sections, the effect of each type of reference on the
+user interface derivation process is considered in detail. Note that if
+elaboration is not used, these effects will not be seen in the resulting
+user interface.
+
+==== Parent/Lookup References
+
+For the purposes of user interface derivation, parent and lookup
+references are both treated as lookups. The columns of the query that
+participate in the reference are placed in a group, and a lookup control
+is used to allow the column values to be set. If there is only one
+column participating in the reference and it is visible in the
+user interface, a QuickLookup control will be used. Otherwise, a
+FullLookup control will be used, with each column value displayed within
+the full lookup control using the normal control for the column. The
+Frontend.UseFullLookup tag can be used to force derivation to use a
+FullLookup control.
+
+Tags that should affect the lookup group can be passed through the
+reference using the Group extraction context. For example, to set the
+caption of the lookup group, use the tag Frontend.Group.Caption on the
+reference.
+
+The Modifier extraction context can be used to pass language modifiers
+through derivation to apply to the *join* operator used to embed the
+reference in the expression. For example, to specify that a given left
+join should be a detail lookup, use the tag
+Frontend.Modifier.IsDetailLookup.
+
+Elaboration continues by considering the target table variable of the
+parent or lookup reference as the starting point for another
+elaboration. This sub-elaboration is slightly different in that
+references are not automatically included in the elaboration. The
+Frontend.Elaborate tag must be explicitly set to true either on the
+parent or lookup reference, or on the target table variable itself in
+order to force elaboration to occur for the target table variable. In
+addition, the Frontend.Include tag must be explicitly set to true for
+every reference associated with the target table variable that should be
+followed for the sub-elaboration. This feature is particularly useful if
+the meaningful definition of a target table variable is contained within
+some other table, and the derivation should always include the other
+table variable in derived user interfaces.
+
+By default, parent and lookup references are considered __embedded__,
+meaning they are to be included in the expression, as well as the
+user interface. This behavior can be changed by setting the
+Frontend.Embedded tag. Parent or lookup references are included in the
+expression using the *left lookup* operator. The right argument to this
+operator is a projection of the parent or lookup table variable over the
+_included_ columns. By default, only the key columns of the table are
+included, but this can be changed using the Frontend.Include tag. Note
+that the Preview form type is used when embedding the parent or lookup
+table. If the embedding results only in the key columns of the
+reference, the expression is not modified, as the left lookup would not
+bring any new columns into the result set.
+
+In addition to producing lookup controls within the user interface,
+parent and lookup references appear on the View menu. Each reference is
+displayed as a single menu item, allowing the corresponding row in the
+lookup table variable to be viewed.
+
+The name of this menu item is selected using the following steps:
+
+If the title of the reference is specified (using the Frontend.Title
+tag), it is used.
+
+If the title of the parent/lookup table variable is specified (using the
+Frontend.Title tag), it is used.
+
+Otherwise, the unqualified name of the parent/lookup table variable is
+used.
+
+Note that for the purposes of user interface, it may be desirable to
+show a parent reference as a join, rather than a lookup. In this case,
+the desired effect can be achieved by using the join expression as the
+derivation query.
+
+==== Extension References
+
+Extension references represent additional information about an entity
+that may or may not be present. By default, extension references show up
+only as menu items in the Extensions menu. Each reference is displayed
+as a single menu item, allowing the extended information to be edited.
+
+The name of the menu item is selected using the following steps:
+
+If the title of the reference is specified (using the Frontend.Title
+tag), it is used.
+
+If the title of the extension table variable is specified (using the
+Frontend.Title tag), it is used.
+
+Otherwise, the unqualified name of the extension table variable is used.
+
+Extension references can be included in the user interface itself as
+well by setting the Frontend.Embedded tag to True. This results in the
+columns of the extension table being included in the result set, as well
+as an additional column that indicates whether the extension row exists.
+This embedding is accomplished by extending the expression using a *left
+join* operator with an include clause to bring in the row exists
+indicator.
+
+As with parent and lookup references, the Modifier extraction context
+can be used to pass language modifiers to the *join* operator used to
+embed the reference in the expression. For example, to specify that a
+given left join should be a detail lookup, use the tag
+Frontend.Modifier.IsDetailLookup.
+
+Metadata tags that should affect the row exists column can be added to
+the reference definition using the RowExists. extraction context. All
+tags appearing on the reference and matching the qualifier, either
+explicitly or with the form type qualifier will be added to the include
+clause of the extension. For example, to set the title of the row exists
+indicator from the reference, the tag Frontend.RowExists.Title could be
+used.
+
+==== Detail References
+
+Detail references represent additional information about an entity that
+may have multiple corresponding rows in the detail table variable. By
+default, detail references show up only as menu items in the Details
+menu. Each reference is displayed as a single menu item, allowing the
+detail information to be displayed using a browse.
+
+The name of the menu item is selected using the following steps:
+
+If the title of the reference is specified (using the Frontend.Title
+tag), it is used.
+
+If the title of the detail table variable is specified (using the
+Frontend.Title tag), it is used.
+
+Otherwise, the unqualified name of the detail table variable is used.
+
+Detail references can also be included in the user interface itself by
+setting the Frontend.Embedded tag to True. This results in a browse of
+the detail table being embedded in the user interface directly. Because
+detail references have a different cardinality than the result set of
+the user interface being derived, they are not embedded into the
+derivation expression, only into the user interface.
+
+==== Guiding Elaboration
+
+This section discusses the various metadata tags that can be placed on
+references to control the process of elaboration.
+
+===== Frontend.Embedded
+
+The Frontend.Embedded tag is used to control whether or not a given
+reference is included in the resulting user interface, either by
+directly including the reference in the expression (in the case of
+parent, lookup, and extension references), or by embedding a plural
+user interface for the reference (in the case of detail references).
+
+By default, the value of the Frontend.Embedded tag is true for parent
+and lookup references, and false for extension and detail references.
+
+===== Frontend.Include
+
+The Frontend.Include tag is used in two different ways by elaboration:
+first, to indicate which columns of a given table variable should be
+included in the result set, and second, to control whether or not a
+given reference should be included in the resulting user interface.
+
+For determining the set of columns to be included in the result, the
+default value is false for the Preview form type. When including columns
+from a lookup table variable, the Preview form type is used, and by
+default, no columns are included. For all other form types, the default
+value is true, resulting in all columns included in the result set.
+
+For determining whether or not a given reference should be included in
+elaboration, the default value is true, but this determination is also
+subject to the following conditions:
+
+* The user requesting the derivation must have select rights for the
+table variable that will be included by the reference.
+* The reference must not be the _inclusion_ reference used to arrive at
+this derivation request.
+* The reference must not be a directly circular reference.
+* All the columns of the reference must be included in the result set.
+
+If any of these conditions are not met, the reference will not be
+included in the elaboration. The inclusion reference for a given
+derivation is the source or target reference of the derivation
+expression that has the same keys as the detail key names specified as
+part of the derivation seed. A reference is directly circular if it is
+sourced or targeted in the same table variable under consideration.
+
+Note that an included reference may or may not be embedded in the
+user interface, but that an excluded reference will not appear anywhere
+on the resulting user interface. In other words, the Embedded tag
+controls whether the reference is included as part of the data, while
+the Include tag determines whether the reference is considered by
+derivation at all.
+
+As noted in the discussion of parent and lookup references, the
+Frontend.Include tag can be used in conjunction with the
+Frontend.Elaborate tag to extend the elaboration process to the
+references associated with the target of a parent or lookup reference.
+
+===== Frontend.Priority
+
+The Frontend.Priority tag is used to control the order in which
+references encountered in the structural definition of the result set
+are considered by elaboration. The default value for this tag is 0, with
+negative numbers indicating lower priority, meaning they will appear
+sooner in the user interface than items with higher priority.
+
+[[DDGBuildingtheExpression]]
+==== Building the Expression
+
+As a final step in the elaboration process, the derivation engine
+actually produces the full cursor definition to be used to produce the
+result set for the interface. By default, the cursor definition will
+include an order specification based on the default order determined for
+the derivation expression. This default order is determined using the
+following steps:
+
+The set of orders inferred from the elaborated expression is searched
+for an order with the Frontend.IsDefault tag specified. The first order
+found with this tag set to true is used.
+
+The set of keys inferred from the elaborated expression is searched for
+a key with the Frontend.IsDefault tag specified. The first key found
+with this tag set to true is used to construct an order specification.
+
+The clustering key for the elaborated expression is used to construct an
+order specification. If all the columns of the key are visible, as
+determined by the Frontend.Visible tag, the resulting order is used.
+
+The first key for which all the columns of the key are visible, as
+determined by the Frontend.Visible tag, is used to construct an order
+specification.
+
+The first order for which all the columns of the order are visible, as
+determined by the Frontend.Visible tag, and the order itself is visible,
+is used to order the result set.
+
+Otherwise, the order of the result set is undefined, and left up to the
+Dataphor Server.
+
+[[DDGTheAutomationofForms-GuidingDerivation-Structuring]]
+=== Structuring
+
+The primary function of structuring is to construct the definitions for
+the controls that will be used to display each column in the
+user interface, and place those controls in the appropriate groups, as
+defined by derivation tags, or by inclusion from a parent or lookup
+reference.
+
+There are three main structures that are built by the structuring step,
+depending on the type of user interface being derived: singular
+structures, plural structures, and search structures.
+
+[[DDGRowStructuring]]
+==== Singular Structuring
+
+The singular structure builder constructs a singular user interface with
+a visual control for each visible column in the result set. By default,
+the type of control constructed is based on the native representation of
+the data type of the column, according to the following table:
+
+[cols=",",options="header",]
+|=========================================================
+|Native Representation (.NET Framework type) |Control Type
+|Boolean |CheckBox
+|DateTime |DateTimeBox
+|Decimal |NumericTextBox
+|Int64 |NumericTextBox
+|Int32 |NumericTextBox
+|Int16 |NumericTextBox
+|Byte |NumericTextBox
+|All others |TextBox
+|=========================================================
+
+The Frontend.ElementType tag specified on the column can be used to
+control the control type for the column.
+
+When a column is included in the result set by a parent or lookup
+reference, that column is placed in a group within the resulting
+user interface. The title of this group is the title of the reference.
+In addition to determining the group for the column, the reference may
+determine the control to be used to display the column. For example, if
+the column participates in the key of the reference, it will be used to
+lookup the corresponding row from the lookup table. If the column is the
+only column in the reference, a QuickLookup control will be used.
+Otherwise, a FullLookup control will be used, with all columns
+participating in the reference, or included by the reference, contained
+within the FullLookup.
+
+The control type used to perform the lookup can be specified on the
+reference metadata with the Frontend.ElementType tag. In addition, the
+Frontend.UseFullLookup tag can be specified on the reference to indicate
+that a full lookup control should be used, regardless of whether a
+QuickLookup could be used. Note that this tag cannot be used to force a
+multi-column lookup to use a quick lookup, only to force a single-column
+lookup to use a full lookup.
+
+[[DDGTableStructuring]]
+==== Plural Structuring
+
+The plural structure builder constructs a plural user interface with a
+single grid control for displaying the entire result set, and a grid
+column for each visible column in the result set. By default, the type
+of grid column control constructed is based on the native representation
+of the data type of the column, according to the following table:
+
+[cols=",",options="header",]
+|=========================================================
+|Native Representation (.NET Framework type) |Control Type
+|Boolean |CheckBoxColumn
+|All others |TextColumn
+|=========================================================
+
+The control type of the grid control can be controlled using the
+Frontend.Grid.ElementType tag specified on the derivation expression.
+The control type of each column within the grid can be controlled using
+the Frontend.Grid.ElementType tag specified on the column.
+
+The title for the columns within the grid that are included as a result
+of parent or lookup references is based on the title of the reference,
+and the title of the column. The tag Frontend.IncludeGroupTitle
+specified on the reference can be used to indicate that the reference
+title should not be included when constructing the title for the
+control.
+
+[[DDGSearchStructuring]]
+==== Search Structuring
+
+The search structure builder constructs a search control, with search
+columns for every visible column in the result set that participates in
+a key or order of the result set. By default, the type of search column
+control constructed is a SearchColumn.
+
+The control type of the search control can be controlled using the
+Frontend.Search.ElementType tag specified on the derivation expression.
+The control type of each column within the search can be controlled
+using the Frontend.Search.ElementType tag specified on the column.
+
+[[DDGBuildingtheControls]]
+==== Building the Controls
+
+In addition to determining the visibility of a particular column, and
+the control type used to represent it, tags can be used to set all the
+properties of the control constructed. There are several common
+properties that are specifically looked for by the derivation engine, as
+well as extraction contexts that can be used to set properties directly.
+The following table lists the specific tags that are used to construct
+all controls:
+
+[cols=",,",options="header",]
+|=======================================================================
+|Tag Name |Context |Description
+|Title |Singular, Plural, Search |Specifies the title of the control.
+Note that in a table or search structure builder, the title will be
+prepended with the title of the reference responsible for the inclusion
+of the column, if any.
+
+|Caption |Singular, Plural, Search |Specifies the caption of the
+control, allowing the reference title of the inclusion reference to be
+overridden. If specified, the caption will be used unaffected.
+
+|Hint |Singular, Plural, Search |Specifies the hint of the control. The
+hint provides a more detailed description of the control for the user.
+
+|Width |Singular, Plural, Search |Specifies the display width (in
+characters) of the control. The default value for this tag is twenty
+(20) characters.
+
+|ReadOnly |Singular |Specifies whether or not the control should be read
+only. The default value for this tag is based on whether the column in
+the result set is read only. This tag cannot be used to specify that a
+read only column be marked editable, only that an editable column be
+marked read only.
+|=======================================================================
+
+In addition to these common properties, the derivation engine will
+search for tags prefixed with the control type name, and pass these tags
+directly as properties to the control definition. For example, in order
+to set the Height property of a TextBox control, the tag
+Frontend.TextBox.Height can be used.
+
+For column controls in singular structure builders, the control type is
+used as the tag prefix for determining the extraction context. Note that
+the form type may still be used as a qualifier for these extraction
+contexts. For example, to specify that the height of a text box is
+different for an add form, the tag Frontend.Add.TextBox.Height can be
+used.
+
+For column controls in plural structure builders, the Grid qualifier can
+be used to specify that a tag applies only to the control used to
+display the column within a grid. For example, to specify the width of a
+column within a grid, the tag Frontend.Grid.Width can be used.
+Properties can also be passed through these extraction contexts. For
+example, to specify that a check box column should not be read only, the
+tag Frontend.Grid.CheckBoxColumn.ReadOnly can be used.
+
+For column controls in search structure builders, the Search qualifier
+can be used to specify that a tag applies only to the control used to
+display the column within a search control.
+
+[[DDGBuildingtheGroups]]
+==== Building the Groups
+
+In addition to constructing the control definitions for each visual
+component of the derived user interface, structuring is responsible for
+building the group definitions, and determining which group each control
+belongs to. For the table and singular structure builders, this grouping
+only affects the ordering of the columns, but for the singular structure
+builder, the grouping affects the visual containership within the
+resulting form definition.
+
+The group for each column may be specified using the Frontend.Group tag.
+Note that the value of this tag is used as the default name of the group
+control constructed in the derived user interface. Whenever a new group
+definition is encountered in a column, the structure builder constructs
+a new group control to represent it.
+
+The name of the group should conform to the same rules for identifiers
+in the D4 language, with the exception that the backslash character (\)
+is allowed to specify group hierarchies. For example, the value
+CustomerInfo\Address would result in a group named CustomerInfo.Address
+contained within a group named CustomerInfo.
+
+As with other types of controls, the various properties of the group
+definition may be controlled using tags. For groups, these tags are
+specified on the derivation expression, and each tag is qualified by the
+name of the group, with backslashes (\) replaced with qualifiers (.).
+
+[[DDGTheAutomationofForms-GuidingDerivation-Layout]]
+=== Layout
+
+The layout step of the derivation process involves determining the
+visual layout of the controls and groups built by the structuring step.
+By default, singular derivation simply produces a top to bottom display
+of all the columns in the result set. Apart from specifying column
+ordering in the grid of a plural user interface, layout only applies to
+singular user interfaces.
+
+The layout process is based on the notion of __flow__. Controls flow
+either horizontally or vertically, which translates directly to the
+container in which they are placed, Row controls for horizontal flow,
+and Column controls for vertical flow. By default, controls flow
+vertically.
+
+The following table lists the tags that affect the layout process:
+
+[cols=",,",options="header",]
+|=======================================================================
+|Tag |Value |Description
+|Flow |Default | Vertical | Horizontal |Sets the flow for the layout of
+controls after this control. Defaults to Default.
+
+|FlowBreak |True | False |Introduces a temporary flow break, causing the
+next control to flow opposite to the current flow. Defaults to False.
+
+|Break |True | False |Begins a new container based on the current flow,
+Column for vertical flow, Row for horizontal flow. Defaults to False.
+
+|Priority |<integer> |Determines the visual order of the control within
+the group. Note that this priority applies within the group in which the
+control was placed during structuring. The default value for this tag is
+0. Negative numbers indicate lower priority, meaning the item will
+appear in the user interface before items with higher priority.
+|=======================================================================
+
+[[DDGTheAutomationofForms-GuidingDerivation-Production]]
+=== Production
+
+The production step is concerned with actually producing the form
+definition based on the output of the structuring and layout steps. The
+actual output of this step is simply an XML document describing the
+components of the form definition.
+
+[[DDGBuildingtheUser-Interface]]
+==== Building the User Interface
+
+The caption of the user interface is constructed based on the following
+procedure:
+
+If the Frontend.Caption tag is specified at the expression level, it is
+used directly.
+
+If the Frontend.Title tag is specified at the expression level, it is
+used to construct the caption using the form type of the derivation
+seed. For example: Add Customer.
+
+If the expression is a single table variable reference, the unqualified
+name of the table variable is used to construct the caption, along with
+the form type of the derivation seed.
+
+Otherwise, the expression itself is used to construct the caption, along
+with the form type of the derivation seed.
+
+In addition to the component definitions for the visual controls of the
+user interface, the production step is responsible for describing the
+Source component that will be used to actually communicate with the
+Dataphor Server instance and retrieve and manipulate data. The
+expression for this source is set to the result of the elaboration
+process. The following tags are also available for setting various
+properties of the Source that is constructed in this step:
+
+[cols=",,",options="header",]
+|=======================================================================
+|Tag |Value |Description
+|UseBrowse |True | False |Indicates whether the source should use a
+*browse* or *order* clause in its cursor definition. Defaults to True.
+
+|UseApplicationTransactions |True | False |Indicates whether the source
+should participate in and coordinate application transactions. Defaults
+to True.
+
+|ShouldEnlist |Default | True | False |Indicates whether the source
+should enlist in application transactions begun by mastering sources,
+recursively. Defaults to Default
+
+|ReadOnly |True | False |Indicates that the source should be read only,
+and an updatable cursor should not be requested. Defaults to False.
+|=======================================================================
+
+Tags that are qualified with Source will also be used to set properties
+of the Source directly. For example, to set the RequestedIsolation
+property of the Source directly, the tag
+Frontend.Source.RequestedIsolation could be used.
+
+[[DDGBuildingtheMenuandToolbarActions]]
+==== Building the Menu and Toolbar Actions
+
+If elaboration is performed, the resulting user interface will include
+not only the visual representation of the result set, but actions for
+navigating to related information within the database, based on the
+references involved. Depending on the type of reference being exposed,
+the actions will be placed on different menus, and possibly exposed on
+the tool bar as well. The following tags can be specified on the
+references in question to control this behavior:
+
+[cols=",,",options="header",]
+|=======================================================================
+|Tag |Value |Description
+|Visible |True | False |Indicates whether the action should appear on a
+menu within the derived user interface. The actual menu on which it
+appears is determined by the reference type. Defaults to True.
+
+|Exposed |True | False |Indicates whether the action will be exposed on
+the tool bar. Defaults to False.
+
+|Secure |Hidden | Disabled | Visible |Indicates how the action should be
+exposed if the action cannot be performed due to security restrictions.
+Hidden, the default, indicates that the action should not be visible in
+the resulting user interface. Disabled indicates that the action should
+be visible, but disabled. Visible indicates that the action should
+appear normally, allowing the user to receive a security error if the
+action is executed.
+|=======================================================================
+
+The title for these actions is taken from the reference title.
+
+[[DDGBuildingDocumentReferences]]
+==== Building Document References
+
+Throughout the derivation process, whenever a document expression is
+required, such as the document for a lookup table, or the add form for a
+browse, roughly the same process is used to determine what document
+should be used. The following steps outline this process:
+
+If the document expression is producing a plural form, the
+Frontend.UseList tag is used to indicate whether a Browse or List form
+should be constructed. Browse forms allow editing, while List forms are
+read only. Although context-specific, the default form type is usually
+Browse.
+
+If the Frontend.Document tag is specified, it is used as the document
+reference. The form type determined above is used to search for this
+tag.
+
+The form type is then used to search for the following tags:
+
+* Frontend.Query
+* Frontend.MasterKeyNames
+* Frontend.DetailKeyNames
+* Frontend.Elaborate
+
+The values of these tags are then used to construct the document
+expression.
+
+Note that if the document expression is being constructed as a result of
+a reference, the source or target table variable of the reference will
+be used to search for tags if they are not defined on the reference
+directly. For example, when constructing the document expression for a
+detail reference, if the Frontend.Query tag is not specified on the
+reference, the source table variable will be searched.
+
+Note also that for the special case of constructing Add, Edit, Delete,
+and View commands for the Browse user interface, the Document tag will
+only be used if it is explicitly qualified, i.e. Frontend.Add.Document
+will be used as the document reference for the Add action, but
+Frontend.Document would not be used.

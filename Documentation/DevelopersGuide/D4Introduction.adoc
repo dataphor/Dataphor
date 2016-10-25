@@ -1,0 +1,173 @@
+= Introduction
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[D4LGIntroduction]]
+== Summary
+
+D4 provides a powerful set of data manipulation capabilities, as well as
+a rich type system for describing even the most complex data. D4 also
+supports a full complement of flow control constructs, including
+exception handling, to provide a complete development language with data
+manipulation capabilities. Using D4, the impedance mismatch that
+traditionally exists between the database access language and the host
+programming language is eliminated, enabling a single data access and
+development paradigm.
+
+[[D4LGIntroduction-PurposeoftheD4Language]]
+== Purpose of the D4 Language
+
+The Dataphor Server uses a simple, yet powerful data access and
+manipulation language called D4. All manipulation of the application
+schema and its data are done using this language. There are three broad
+categories of statements in D4: Structural, Manipulative, and
+Imperative.
+
+* *Structural statements* (also called Data Definition Language (DDL))
+manipulate the definition of the data model. These are used to describe
+the structure of the data to be stored. These include statements like
+create, drop, and alter.
+* *Manipulative statements* (also called Data Manipulation Language
+(DML)) manipulate the actual data in the database. These are used to
+insert, update and delete data in the database, as well as retrieve it
+for presentation and analysis.
+* *Imperative statements* provide the framework for execution in D4.
+These statements include variable declaration and assignment, flow
+control, and exception handling.
+
+D4 is a relationally complete language based on the relational algebra.
+The syntax of the language is designed to allow the developer to express
+queries naturally and easily.
+
+[[D4LGIntroduction-SyntacticConventions]]
+== Syntactic Conventions
+
+Production RulesGrammarTerminalsNon-TerminalsThis language guide uses a
+variation of Extended Backus-Naur Form (EBNF) to describe the syntax of
+D4. The variations facilitate the expression of list structures which
+are common in the language. EBNF is made up of three types of elements:
+terminals, non-terminals, and symbols. These elements are used to create
+__production rules__. The set of production rules describing the
+language is called the __grammar__. Each non-terminal in the grammar
+must have an associated production rule.
+
+Non-terminals in EBNF are delimited by angle brackets (< and >). The
+identifier inside the angle brackets is the name of the non-terminal.
+
+Symbols are used to indicate how terminals and non-terminals are grouped
+together. The following symbols are used in EBNF:
+
+* Pipe (|)
++
+The pipe is used to indicate an exclusive or. For example the sequence a
+| b means that the result could be a or b but not both.
+* Parentheses (( and ))
++
+Parentheses are used to force a grouping within the sequence. For
+example the sequence a (b | c) produces the strings ab or ac, while the
+sequence (a b) | c produces the strings ab or c.
+* Brackets ([ and ])
++
+Brackets are used to indicate that a given sequence is optional. For
+example a [ b ] means that the result could be a or ab.
+* Braces (\{ and })
++
+Braces are used to indicate that a given sequence may appear as many
+times as desired, including none. For example a \{ b } means that the
+result could be a, or ab, or abb, etc.,.
+* Double Quotes (")
++
+Double quotes are used to indicate that a character that would normally
+be a symbol should be treated as a terminal. For example a "\{" b "}"
+means that the result should be a \{ b }.
+
+Every other character in EBNF is a terminal. Terminals should appear in
+the result exactly as written in the production rules.
+
+Production rules consist of a non-terminal followed by the symbol ::=
+(which can be read: __is defined as__) and then a sequence of characters
+consisting of terminals, non-terminals, and symbols. Non-terminals
+appearing in the body of a production rule may be replaced with the body
+of the production rule corresponding to the name of the non-terminal.
+This process is repeated until there are no non-terminals in the string,
+and a valid sentence of the language is formed.
+
+For example, consider the following simple grammar:
+
+....
+<identifier> ::=
+    ( _ | <letter> ) { _ | <digit> | <letter> }
+....
+
+The non-terminals <letter> and <digit> have the obvious interpretation.
+This production rule indicates that an <identifier> is defined as an
+underscore or a letter, followed by any number of characters that can be
+an underscore, a digit, or a letter. The following strings are valid
+words in the language described by this grammar:
+
+....
+_Identifier
+_2222222
+My_Identifier
+Foo
+....
+
+While the following strings are not words in the language described by
+this grammar:
+
+....
+12345
+Ident#12
+....
+
+In addition to basic EBNF, the notation used in the guide has the
+following extensions:
+
+* Lists
++
+The word _list_ appearing at the end of the name of a non-terminal
+indicates the existence of an implicit production rule given by:
++
+....
+<XYZ list> ::= { <XYZ> }
+....
+* Comma separated lists
++
+The word _commalist_ appearing at the end of the name of a non-terminal
+indicates the existence of an implicit production rule given by:
++
+....
+<XYZ commalist> ::= [ <XYZ> {, <XYZ> } ]
+....
+* Semi-colon separated lists
++
+The word _semicolonlist_ appearing at the end of the name of a
+non-terminal indicates the existence of an implicit production rule
+given by:
++
+....
+<XYZ semicolonlist> ::= [ <XYZ> {; <XYZ> } ]
+....
+* Non-empty lists
++
+The word _ne_ appearing at the beginning of the name of a non-terminal
+with the word __list__, __commalist__, or _semicolonlist_ appearing at
+the end of the non-terminal indicates the existence of an implicit
+production rule given by:
++
+....
+<ne XYZ list> ::= <XYZ> { <XYZ> }
+<ne XYZ commalist> ::= <XYZ> {, <XYZ> }
+<ne XYZ semicolonglist> ::= <XYZ> {; <XYZ> }
+....
+
+These extensions are the same as those used in reference [3].
+
+The BNF fragments included in this language guide are somewhat modified
+in order to facilitate presentation. For a complete BNF reference, refer
+to the
+<<D4LanguageGrammar.adoc#DRBnfDiagrams, D4 BNF Language Diagrams>>.

@@ -1,0 +1,56 @@
+= Dataphor Frontend
+:author: Alphora
+:doctype: book
+
+:icons:
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DUGP1ProductTour-DataphorFrontend]]
+== Summary
+
+The Dataphor Frontend builds on the foundation provided by the Dataphor
+Server to provide automated user interface support. The Frontend
+technologies enable Automated Application Development by dramatically
+reducing user interface development time, allowing applications to be
+built and maintained more quickly and easily.
+
+The Frontend clients are "thin", in that there is no
+application-specific code in the client. All presentation layer
+definitions reside in either dynamically created user interfaces or form
+definitions contained within documents on the Dataphor Server. The
+result is a rich client with all the deployment and maintenance
+characteristics of a web-based solution.
+
+[[DUGP1ProductTour-DataphorFrontend-FrontendServer]]
+== Frontend Server
+
+The Frontend Server is a library of services within the Dataphor Server
+which exposes the user interface derivation capabilities of the Dataphor
+product. It also introduces the concepts of _documents_ and
+_applications_ into the Dataphor Server.
+
+Derivation is the process of using the information in the application
+schema to dynamically create user interfaces for the presentation layer
+of an application. The rules used in derivation embody several years of
+usable user interface design. The first forms are navigation-centric, or
+browse forms, useful for selecting an individual row representing a
+single item. Secondary forms are data-centric, useful for reviewing
+and/or editing the data representing a single item.
+
+The Frontend Server exposes the process of derivation to the clients of
+the Dataphor application for the manipulation and presentation of the
+business model. These user interfaces are based not only on the
+definitions of the data structures within the business model, but on the
+relationships between those structures. This means that not only are the
+basic forms of an application automatable, but navigation through the
+business model from any perspective is also enabled.
+
+Often, complete applications can be built by simply utilizing the
+dynamic user interface derivation and customization capabilities of the
+Frontend Server. Dataphor Frontend Clients request user interface
+descriptions (or Dataphor user-Interface Language (DIL) documents) from
+the Dataphor Server in much the same way that a web browser requests
+HTML documents. This gives a Dataphor Application the same deployment
+and maintenance characteristics as an n-tier web solution.

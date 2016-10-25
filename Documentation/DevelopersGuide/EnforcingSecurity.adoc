@@ -1,0 +1,136 @@
+= Enforcing Security
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGEnforcingSecurity]]
+== Summary
+
+This chapter discusses the Dataphor security model from a development
+perspective. It covers the basic concepts involved in the security
+model, and the mechanisms designed for use by application developers to
+expose security management points to application administrators.
+
+[[DDGEnforcingSecurity-DataphorSecurityModel]]
+== Dataphor Security Model
+
+The Dataphor Security Model consists of the following three primitives:
+
+* Rights
+* Roles
+* Users
+
+Rights form the basic unit of permission for
+granting or revoking access to particular areas of a Dataphor
+application schema. Any capability that needs to be protected from a
+security standpoint should have an associated Right.
+
+Roles provide a mechanism for managing groups of
+right assignments, and form the basis of security management in a
+Dataphor application schema.
+
+Users provide the basic mechanism for authentication
+and authorization within a Dataphor Server. Each user is assigned a
+unique UserID, and given a user-specified password.
+
+In addition to these basic elements, objects in the D4 catalog are _owned_ by a specific
+user. By default, this is the user that created the object, but
+ownership can be transferred with the security API.
+
+Each object in the catalog has an associated set of rights that are automatically created
+and maintained to protect access to the various operations available on
+that object such as alteration, execution, or manipulation. All these
+rights are implicitly granted to the object owner.
+
+Users can have any number of __right assignments__. Each right assignment indicates whether a given
+user is granted or revoked a specific right.
+
+Roles are sets of right assignments that can then be assigned all at
+once to a particular user. Roles are catalog objects that are defined
+with a library by the developer of the application.
+
+Each user can be a member of any number of roles. As a member of a given
+role, the user has all the right assignments associated with that role.
+Note that in the event of conflicting right assignments, the most
+restrictive right assignment of any role is used.
+
+When a specific right is requested, the following steps are taken to discover whether the
+right is granted or revoked:
+
+* If the user has an explicit assignment for the right, the right is
+granted or revoked according to the right assignment.
+* If the roles which the user is a member of have an explicit assignment
+for the right, the right is granted or revoked according to the most
+restrictive right assignment of any role.
+* If the user is the owner of the right, or the catalog object the right
+is associated with, the right is considered granted.
+
+For more detailed information on the Dataphor Security Model, refer to the
+<<../UsersGuide/Security.adoc#DUGP3Security, Security>> chapter in the Dataphor User's Guide.
+
+[[DDGEnforcingSecurity-DesigningForSecurity]]
+== Designing For Security
+
+Rights and roles are catalog objects, belonging to a specific library
+and owned by some user of the Dataphor Server. Users, on the other hand,
+are global to the Dataphor Server, and are managed by the administrator
+of the server instance. As such, applications should make no assumptions
+about the users that will be available on a given system. Security from
+the developer's perspective is a matter of ensuring that the appropriate
+rights and roles are available to the administrator to enforce security
+simply and effectively.
+
+Ideally, the administrator of a Dataphor application should not need to
+deal with managing specific right assignments to users. Rather, the
+administrator should be concerned with managing the users of the
+Dataphor Server, and with associating roles with those users.
+
+This architecture leads to several important guidelines for developing
+secure and manageable applications with Dataphor:
+
+* Create roles for every anticipated usage pattern of the application.
+* Rights for every object should be granted to some role.
+* Roles should be intuitive and clearly named.
+* Roles should be as flat as possible, with as little overlap in
+functionality as possible.
+
+[[DDGEnforcingSecurity-SecurityintheShippingApplication]]
+== Security in the Shipping Application
+
+In this section we describe the security implementation in place in the
+Shipping Application as an example of using the security features of the
+Dataphor platform. Recall from the requirements for the application that
+there are three main categories of users: Management, Customer Service,
+and Inventory Clerk.
+
+Management users are responsible for managing other users, and
+maintaining their access rights to the application. Fortunately, this
+role is already handled by the Dataphor Security library. The Security
+library provides user interfaces for administering security in a
+Dataphor Server, and exposes the SecurityUser role. Any user that is a
+member of this role will have access to all the objects required to use
+the user interfaces exposed in the Security library.
+
+To handle Customer Service users, the Shipping Application introduces
+the CustomerService role. This role is granted access to table variables
+such as CustomerDetail and SaleOrderEntry, as well as select access to
+Location and ItemType.
+
+For the Inventory Clerk users, the Shipping Application introduces the
+InventoryClerk role, which is granted access to table variables such as
+VendorDetail and PurchaseOrder. Inventory clerks are also given access
+to the Location and ItemType tables so that they can manage inventory
+and par levels.
+
+In addition, the Shipping application defines the ShippingUser role,
+which is granted access to all the common areas of the system. This role
+is used to prevent overlap among the other roles.
+
+By defining these roles, the application developer has identified the
+areas of the application that can be configured from a security
+standpoint. These roles can then be used by Dataphor Server
+Administrators to deploy secure applications with very little
+configuration involved.

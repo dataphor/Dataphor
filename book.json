@@ -1,0 +1,21 @@
+{
+    "title": "Dataphor",
+    "description": "Open-source application development platform designed to allow more declarative software development",
+    "root": "./Documentation",
+    "language": "en",
+    "gitbook": ">= 3.0.0",
+    "plugins": [
+        "navigator",
+        "expandable-chapters-small",
+        "addcssjs",
+        "theme-api"
+    ],
+    "pluginsConfig": {
+      "addcssjs": {
+          "js": ["Documentation/Scripts/scroll-to-hash.js"]
+        },
+      "theme-api": {
+          "theme": "dark"
+        }
+    }
+}

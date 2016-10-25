@@ -1,0 +1,111 @@
+= Applications
+:author: Alphora
+:doctype: book
+
+:icons:
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DUGP1Dataphoria-DataphorExplorer-Applications]]
+== Summary
+
+The applications node is the root node for all applications. Each
+configured application in the Dataphor Server will have an application
+node that is a child of this node. The root applications node simply
+allows for the addition of a new application, as well as a refresh
+command for refreshing the list of applications.
+
+Each application node exposes functionality for managing the properties
+of the application, deleting the application, and starting the
+application.
+
+A Dataphor application consists of a set of required libraries, a
+starting document, and various configuration settings which control
+general behavior characteristics of the application and the Frontend
+Clients running it.
+
+[[DUGP1CreatingaNewApplication]]
+== Creating a New Application
+
+By right-clicking on the applications node and selecting the Add...
+command, users can create a new application. The following screen
+capture displays the application edit form:
+
+image::../Images/DataphorExplorerApplicationEdit.bmp[Editing a Dataphor Explorer application]
+
+The Description is the user-visible description of the application. When
+a Frontend Client connects to a Dataphor Server, the descriptions of the
+available applications are displayed, and the user selects which
+application to run.
+
+The Start Document is the entry point for the application. It is the
+first user interface that the user running the application will see. All
+the functionality required by the application should be available from
+this starting point. Once the user closes this main form, the
+application is closed and the Frontend Client shuts down.
+
+Another way to create an application is by simply dragging a Dataphor
+Form document from the documents node of a library, or a Table node from
+the Tables node, and dropping it on the applications node. The
+application edit interface will be displayed with the Start Document set
+to the document expression required to load the form, or browse the
+table, and the library it is in as a required library of the
+application.
+
+[[DUGP1WindowsClientSettings]]
+=== Windows Client Settings
+
+Applications can also configure certain general settings about the
+behavior of the Microsoft Windows Frontend Client. These settings are
+available from the Extensions | Windows Client Application Settings
+command. The following screen capture shows the result of selecting this
+command:
+
+image::../Images/DataphorExplorerWindowsClientSettingsEdit.bmp[Editing Dataphor Explorer Windows Client Settings]
+
+The Theme Document is a D4 expression that specifies a theme document.
+Windows themes allow the look and feel of the Windows Client to be
+changed. For more information on Windows themes, see the
+<<../DevelopersGuide/../DevelopersGuide/PresentationLayer.adoc#DDGPresentationLayer, Presentation Layer>> part of the Dataphor
+Developer's Guide.
+
+The Default Form Icon Image is a D4 expression that specifies an icon
+image to be used as the icon for all the forms in the application.
+
+Document Cache SizeThe Document Cache Size controls the size of the
+document caching system built into the Windows Client. Whenever a
+document is requested in the Frontend Client, the cache is checked to
+see if an appropriate version of the document has already been
+downloaded to the client. If so, that version of the document is used
+rather than requesting it from the server.
+
+The default size for the document cache is 800 documents. Setting the
+cache size to 0 disables the cache. Each application creates and
+maintains a different document cache.
+
+Image Cache SizeThe Image Cache Size controls the size of the image
+caching system built into the Windows Client. Whenever an image is
+requested in the Frontend Client, the cache is checked to see if the
+image has already been downloaded to the client. If so, that image is
+used rather than requesting it from the server. The default size for
+this cache is 60 images. Setting the cache size to 0 disables the cache.
+
+The difference between the two caches is that the document cache still
+requires a network round-trip. The document request is still made, but
+the version of the document in the cache is sent with the document
+request. If the version of the document on the server is the same, the
+server does not send the document with the response, and the client
+retrieves the document from the cache.
+
+In the image cache, no network round trip is required. If the image has
+already been downloaded, it will be used. Because this cache is not
+transparent (i.e. changes made to images on the server that have already
+been requested by the client will not be re-requested), this cache does
+not survive the application session. When the application is re-started,
+the image cache will be rebuilt as images are downloaded.
+
+The document cache, on the other hand, is completely transparent and
+does survive the application session. When the application is
+re-started, the same document cache is used from the last application
+session.

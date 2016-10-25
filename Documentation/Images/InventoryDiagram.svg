@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 20.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1"
+	 id="Layer_1" shape-rendering="geometricPrecision" image-rendering="optimizeQuality" text-rendering="geometricPrecision"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 120 160"
+	 style="enable-background:new 0 0 120 160;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill:#1F1A17;}
+	.st2{font-family:'Arial-BoldMT';}
+	.st3{font-size:9.9998px;}
+	.st4{font-family:'MyriadPro-Regular';}
+	.st5{fill:none;stroke:#1F1A17;stroke-width:0.6945;}
+</style>
+<rect class="st0" width="120" height="160"/>
+<g id="Layer_x0020_1">
+	<g id="_175747464">
+		<text id="_138282480" transform="matrix(1 0 0 1 44.4001 27.5416)" class="st1 st2 st3">ItemType</text>
+		<text id="_138009296" transform="matrix(1 0 0 1 44.4001 40.9821)" class="st1 st4 st3">ID</text>
+		<text id="_138009296_1_" transform="matrix(1 0 0 1 44.4001 52.1535)" class="st1 st4 st3">Description</text>
+		<rect id="_138072624" x="32.4" y="17" class="st5" width="72" height="39"/>
+		<line id="_137031416" class="st5" x1="32.4" y1="31.1" x2="104.4" y2="31.1"/>
+		<text id="_138276872" transform="matrix(1 0 0 1 37.404 42.9694)" class="st1 st4 st3">*</text>
+	</g>
+	<text transform="matrix(1 0 0 1 44.7082 80.4347)" class="st1 st2 st3">LocationItem</text>
+	<text transform="matrix(1 0 0 1 44.7082 93.8742)" class="st1 st4 st3">Location_ID</text>
+	<text transform="matrix(1 0 0 1 44.7082 105.0455)" class="st1 st4 st3">ItemType_ID</text>
+	<text transform="matrix(1 0 0 1 44.7082 116.2169)" class="st1 st4 st3">Par</text>
+	<text transform="matrix(1 0 0 1 44.7082 127.3883)" class="st1 st4 st3">OnHand</text>
+	<text transform="matrix(1 0 0 1 44.7082 138.5592)" class="st1 st4 st3">OnOrder</text>
+	<text transform="matrix(1 0 0 1 44.7082 149.7306)" class="st1 st4 st3">OnPurchase</text>
+	<rect x="32.7" y="69.9" class="st5" width="78.8" height="83.7"/>
+	<line class="st5" x1="32.7" y1="84" x2="111.5" y2="84"/>
+	<text transform="matrix(1 0 0 1 37.863 95.861)" class="st1 st4 st3">*</text>
+	<text transform="matrix(1 0 0 1 37.9441 106.9201)" class="st1 st4 st3">*</text>
+	<g>
+		<path class="st1" d="M10.5,91.2l0.3-0.3h21.6v0.5H10.7L10.5,91.2z M10.7,91.5h-0.3v-0.3L10.7,91.5z M11,10.4v80.8h-0.5V10.4H11z
+			 M8.1,10.8L10.7,6l2.6,4.8H8.1z"/>
+	</g>
+	<g>
+		<path class="st1" d="M17.7,100.8l0.3-0.3h14.4v0.5H17.9L17.7,100.8z M17.9,101.1h-0.3v-0.3L17.9,101.1z M17.9,35.8l0.3,0.3v64.8
+			h-0.5V36L17.9,35.8L17.9,35.8z M17.7,36v-0.3H18L17.7,36z M28,36.3H18v-0.5h10V36.3z M27.6,33.4l4.8,2.6l-4.8,2.6L27.6,33.4
+			L27.6,33.4z"/>
+	</g>
+</g>
+</svg>

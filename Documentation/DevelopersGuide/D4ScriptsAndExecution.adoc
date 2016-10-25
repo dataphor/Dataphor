@@ -1,0 +1,105 @@
+= Scripts and Execution
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[D4LGScriptsandExecution]]
+== Summary
+
+Formally, a D4 script is any string of characters that can be formed
+using the production rules of the D4 grammar. Informally, it is a set of
+instructions that tell the Dataphor Server to perform a particular task
+or set of tasks. A script can be as simple as a single operator
+invocation that does not return a result, or it can be an entire
+sequence of complicated instructions.
+
+Each script is broken down by the compiler into a set of batches. Each
+top-level statement in the script is considered a separate batch, and is
+compiled and executed separately. Each batch is either a statement, i.e.
+it has no return value, or an expression that returns a value. The
+<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement, *select*>>
+keyword is used to indicate that the results of a given expression should be returned.
+
+The syntax for a D4 script is:
+
+....
+<script> ::=
+    <statement semicolonlist>
+....
+
+Note that the semi-colon in a script is a statement separator. A
+detailed description of the <statement> production rule is given in
+<<D4LanguageElements.adoc#D4LGLanguageElements-Statements, Statements>>.
+
+[[D4LGScriptsandExecution-Connectivity]]
+== Connectivity
+
+Communication with the Dataphor Server is accomplished through the
+Call-Level Interface. Connectivity with the server is established by
+opening a session. This session represents the user context for all
+subsequent operations against the Dataphor Server.
+
+[[D4LGScriptsandExecution-ErrorHandling]]
+== Error Handling
+
+The D4 language has built-in facilities for dealing with exception
+conditions that arise during program execution. These facilities are
+based on a system-provided type called
+link:T-System.Error.html[System.Error]. Values of this type contain
+various information about the error that occurred such as the error code
+and the text of the error message. All errors in the D4 language have an
+associated __severity__. The possible severities are:
+
+* Environment
+* System
+* Application
+* User
+
+An error with an _environment_ severity indicates that some failure has
+occurred in the hardware or software environment of the Dataphor Server,
+for example a disk crash, or operating system failure.
+
+The _system_ severity indicates that there is a problem with the
+Dataphor Server, usually indicating a defect in the software.
+
+The _application_ severity level indicates that a problem has occurred
+which should be correctable by the developer or administrator of the
+application such as a syntax error or catalog problem.
+
+A _user_ severity level indicates that some error has occurred that
+should be correctable by the user of the application such as an
+integrity constraint violation, or process logic error.
+
+Note that in addition to run-time errors, the D4 compiler will report
+syntactic or semantic errors. These errors fall into three general
+categories, all of which are reported at the application severity level:
+
+[horizontal]
+Lexical Errors:: These errors indicate that the lexical analyzer could not correctly
+tokenize the input stream.
+Syntax Errors:: An error indicating that the given statement is not a valid statement of
+the D4 language.
+Compiler Errors:: An error indicating that some error condition was encountered during the
+compilation process.
+
+Compiler errors do not necessarily indicate a fatal exception. There are
+three levels of compiler errors:
+
+[horizontal]
+Warning:: These indicate that the compiler has detected a condition that may
+result in a run-time error, or in unexpected behavior. They do not
+prevent compilation and the resulting statement is still a valid
+executable plan.
+Non-Fatal:: These indicate that the compiler encountered a semantic error such as a
+type mismatch or unknown identifier, but that the compilation process
+can continue on the next statement. If any non-fatal errors are
+encountered, the resulting statement is not a valid executable plan.
+Fatal:: These indicate that the compiler encountered an error condition and
+could not continue compiling the given statement or set of statements.
+
+For more information on the error-handling capabilities of the D4
+language, refer to
+<<D4ImperativeStatements.adoc#D4LGImperativeStatements-ExceptionHandling, Exception Handling>>.

@@ -1,0 +1,103 @@
+image::../Images/Dataphor-Logo.gif[Dataphor Logo]
+
+= Developer's Guide
+:author: Alphora
+:doctype: book
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+.Sections
+. link:Introduction.adoc[Introduction]
+. link:LogicalApplicationDesign.adoc[Logical Application Design]
+. link:PresentationLayer.adoc[Presentation Layer]
+. link:PhysicalRealization.adoc[Physical Realization]
+. link:D4LanguageGuide.adoc[D4 Language Guide]
+
+
+== Summary
+
+The Dataphor Developer's Guide discusses the declarative approach to
+application development as a solution to many of the technical problems
+associated with producing software. It is primarily intended to be read
+by software engineers; however, much of the material is
+pertinent for application and database administrators as well,
+particularly the discussions in Part I.
+
+Part I is a general introduction to the motivation and foundation of the
+Dataphor product. It discusses the declarative approach to application
+development, and provides an architectural overview of the Dataphor
+product.
+
+Part II discusses logical application design using the declarative
+approach. It describes in detail the conceptual level of the Dataphor
+product, including the D4 language, and how it can best be utilized to
+achieve the benefits of the declarative approach.
+
+Part III discusses the presentation layer of the Dataphor product,
+including facilities for traditional Rapid Application Development (RAD)
+as well as describing the Automated Application Development (AAD)
+paradigm.
+
+Part IV discusses the physical realization of a Dataphor application. It
+provides in-depth discussion of the Storage Integration Architecture
+(SIA) which provides the mapping between the logical description of the
+application and the physical implementation of that application.
+
+Part V is the D4 Language Guide, which provides a complete description
+of the syntax and semantics of the D4 language.
+
+== Type Conventions
+
+This section describes the type conventions used in this manual.
+
+[cols=",",options="header",]
+|=======================================================================
+|Description |Example
+|Regular text |D4 provides a powerful set of data manipulation
+capabilities, as well as a rich type system for describing even the most
+complex data.
+
+|Code block with *bold* denoting keywords a|
+....
+create table Employee { ID : Integer, Name : String, key { ID } };
+....
+
+|inline code with *bold* denoting keywords |Any given value has a type
+associated with it, for example, *table* \{ *row* \{ 5 ID } } is a table
+value with type *table* \{ ID : System.Integer }.
+
+|Keywords (also used in code blocks) |*select*
+
+|Introduction of new terms. |_physical representation_
+
+|Dataphor Identifiers |`System.Abs` returns the Absolute value
+(nonnegative) of a given value.
+
+|Keyboard Keys |F1
+
+|Key Combinations |Ctrl+C
+
+|Buttons in the interfaces |Add...
+
+|Commands or Executable files |`DAEService.exe`
+
+|Parameters for Executable files |`/i`
+|=======================================================================
+
+== Legal
+
+Information in this Dataphor Documentation is subject to change without notice.
+No part of this document may be reproduced by any means or for any purpose without the express written permission of
+Alphora.
+The software described in this document is furnished under a license agreement and may be used or copied only in
+accordance with the terms of the license agreement.
+
+----
+Copyright © 2016 Alphora
+----
+All rights reserved.
+
+Dataphor ® is a registered trademark of Alphora.
+The trademarks referenced in this document are the property of their respective owners and used in reference to their
+products.

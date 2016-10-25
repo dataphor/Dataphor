@@ -1,0 +1,162 @@
+= Process Defaults
+:author: Alphora
+:doctype: book
+
+:icons:
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DUGP1ProcessDefaults]]
+== Introduction
+
+The session configuration information provides several properties which
+control the default settings for processes started on the session. Once
+the session is connected, changing these settings has no effect.
+
+[[DUGP1DefaultIsolationLevel]]
+== DefaultIsolationLevel
+
+The DefaultIsolationLevel property determines the default setting for
+the isolation level of processes started on this session. This in turn
+determines the isolation level for transactions started on the process
+when no isolation level is specified with the begin transaction call.
+The following table lists the available isolation levels.
+
+[cols=",",options="header",]
+|=======================================================================
+|Isolation Level |Description
+|Browse |Also called __read uncommitted__, this isolation level allows
+the transaction to read uncommitted data from other transactions. The
+transaction will take exclusive locks on data that it writes.
+
+|Cursor Stability |Also called __read committed__, this isolation level
+will read only committed data from other transactions. The transaction
+will take exclusive locks on data that it writes.
+
+|Isolated |Also called __serializable__, this isolation level guarantees
+repeatable reads. The transaction will take exclusive locks on data that
+it writes.
+|=======================================================================
+
+These isolation levels balance concurrency with contention. The browse
+isolation level has low contention, but is subject to certain update
+anomalies resulting from the interaction of other transactions. The
+higher the isolation level, the better the isolation from other
+transactions, but the more contention a transaction running at that
+isolation level will cause.
+
+The default setting for this value is Isolated. However, the Frontend
+Clients use Browse isolation when it is known that the statement to be
+executed will not update any information. For example, scrolling through
+data in a browse interface uses Browse isolation. When data modification
+statements are executed, the Frontend Clients will use the Isolated
+level. In addition, the Frontend Clients use optimistic concurrency
+checks to ensure that data that has been read while in browse isolation
+has not been changed by other transactions since it was read.
+
+The default isolation level for a session can be set using the
+SetDefaultIsolationLevel operator. The current value for the setting can
+be retrieved from the Sessions system table.
+
+The default isolation level for a process can be set using the
+SetIsolationLevel operator. The current value for the setting can be
+retrieved from the Processes system table.
+
+For more information on concurrency and transaction isolation levels,
+refer to the
+<<../DevelopersGuide/DatabaseManagementConcepts.adoc#DDGP1TransactionManagement, Transaction Management>>
+chapter of the Introduction part of the Dataphor Developer's Guide.
+
+[[DUGP1DefaultMaxCallDepth]]
+== DefaultMaxCallDepth
+
+The DefaultMaxCallDepth property determines the default maximum call
+depth for processes started on this session. The Dataphor Server
+attempts to prevent runaway recursion by limiting the maximum call depth
+on any given process.
+
+The default maximum call depth for a session can be set using the
+SetDefaultMaxCallDepth operator. The current value for the setting can
+be retrieved from the Sessions system table.
+
+The maximum call depth for the current process can be set using the
+SetMaxCallDepth operator. The current value for the setting can be
+retrieved from the Processes system table.
+
+The default value for this property is 1024.
+
+[[DUGP1DefaultMaxStackDepth]]
+== DefaultMaxStackDepth
+
+The DefaultMaxStackDepth property determines the default maximum stack
+depth for processes started on this session. The Dataphor Server stack
+is a logical stack, meaning that the depth is determined strictly by the
+number of items on the stack, not by their relative sizes. This property
+prevents a process from overrunning due to recursive calls.
+
+The default maximum stack depth for a session can be set using the
+SetDefaultMaxStackDepth operator. The current value for the setting can
+be retrieved from the Sessions system table.
+
+The maximum stack depth for the current process can be set using the
+SetMaxStackDepth operator. The current value for the setting can be
+retrieved from the Processes system table.
+
+The default value for this property is 32767.
+
+[[DUGP1DefaultUseDTC]]
+== DefaultUseDTC
+
+The DefaultUseDTC property determines the default UseDTC setting for
+processes started on this session. This setting in turn determines
+whether or not the Microsoft Distributed Transaction Coordinator (DTC)
+will be used to coordinate distributed transactions on the process.
+
+Because of the Dataphor Server's open-ended storage architecture,
+transactions must be coordinated with each system involved in a given
+operation. This type of transaction is known as a __distributed
+transaction__. The Dataphor Server can function as a distributed
+transaction coordinator, or it can employ the services of the Microsoft
+Distributed Transaction Coordinator (MSDTC), based on the value of this
+setting.
+
+The default value for this property is false. It is an error to attempt
+to use the Distributed Transaction Coordinator if the platform is not
+Microsoft Windows 2000 or later.
+
+For more information on transaction management in the Dataphor Server,
+refer to the
+<<../DevelopersGuide/ModelingProcessLogic.adoc#DDGModelingProcessLogic-TransactionManagement, Transaction Management>>
+section of the Modeling Process Logic chapter of the Logical
+Application Design part of the Dataphor Developer's Guide.
+
+[[DUGP1DefaultUseImplicitTransactions]]
+== DefaultUseImplicitTransactions
+
+The DefaultUseImplicitTransactions property determines the default
+UseImplicitTransactions setting for processes started on this session.
+This setting in turn determines whether calls made through the CLI
+boundary will start an implicit transaction if one is not started on the
+process.
+
+If UseImplicitTransactions is true, every call that crosses the CLI
+boundary will ensure that if no transaction is currently in progress on
+the process, then one is started. When the call returns, if any
+unhandled exceptions occurred, the implicit transaction is rolled back,
+otherwise it is committed. Note that any nested transactions started
+during the call are rolled back or committed as well. This behavior is
+called __transactional call protocol__.
+
+The DefaultUseImplicitTransactions setting can be configured using the
+SetDefaultUseImplicitTransactions operator. The current value can be
+retrieved from the Sessions system table.
+
+The UseImplicitTransactions setting can be configured using the
+SetUseImplicitTransactions operator. The current value can be retrieved
+from the Processes system table.
+
+The default value for this property is true. Note that this property
+only affects calls that cross the CLI boundary, so setting it within a
+statement block will have no affect on subsequent statements within that
+block.

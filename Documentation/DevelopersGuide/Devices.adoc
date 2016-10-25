@@ -1,0 +1,484 @@
+= Devices
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGDevices]]
+== Summary
+
+The first step to be taken in mapping a logical application schema onto
+a target system is to construct the device in the Dataphor Server that
+will model the target system.
+
+This chapter discusses the various devices available for the Dataphor
+platform, and how they can be used to provide persistence for Dataphor
+applications.
+
+[[DDGDevices-AvailableDevices]]
+== Available Devices
+
+The Dataphor Server provides several devices as shown in the following
+list:
+
+* Memory Device
++
+The memory device provides in-memory storage. Data stored in this device
+is not persisted to disk.
+* Simple Device
++
+The simple device provides basic persistence for tables in the Dataphor
+Server. Although the device is transactional, concurrency is enforced
+with exclusive table access. As a result, this device is intended for
+single-user applications with low data volume.
+* Microsoft SQL Server
++
+This device provides full integration with Microsoft SQL Server.
+* Oracle
++
+This device provides full integration with the Oracle database system.
+* DB2
++
+This device provides full integration with the IBM DB2 Universal DBMS.
+It is also capable of providing full integration with the IBM DB2/400
+DBMS, by setting the Product attribute of the device.
+* Generic SQL
++
+This device provides a starting point for building Device interfaces to
+other SQL based database systems.
+
+Additionally, developers can provide custom devices to enable access to
+any data store. Each device must provide at least forward only cursor
+access to the data. If the device is updatable, it must also be capable
+of executing update statements, or of accepting row-level update
+commands.
+
+As more devices are built, they will be included with the product. Check
+the Alphora website at www.alphora.com for the latest information on
+available devices.
+
+For more information on building custom devices, refer to the Dataphor
+Device Development Kit, available from the Alphora website.
+
+[[DDGDevices-AvailableDevices-MemoryDevice]]
+=== Memory Device
+
+The memory device provides a mechanism for storing data in-memory.
+Storage is not persistent (meaning that it will not survive a restart of
+the Dataphor Server), but the device does provide full transactional
+support, and minimal concurrency protection.
+
+The Temp system device is a memory device used by the internal query
+processor to materialize intermediate results, and store process- and
+session-scoped table variables. The Storage.Scope tag can be used to
+specify the scope for the storage of a table variable.
+
+Regardless of the scope of the table variable, the definition of the
+type and structure of the table variable is the same for the all scopes.
+However, the contents of the table variable will vary based on the
+scope. For database-scoped table variables (the default), the same
+storage is provided for all sessions and processes. For session-scoped
+table variables, a different storage space is provided for each session,
+and similarly for process-scoped table variables, a different storage
+space is provided for each process.
+
+Session- and process-scoped table variables are useful for providing
+data storage that may be unique to a particular user-session or form.
+For example, session-scoped table variables can be used to store session
+context such as shopping cart information, while process-scoped table
+variables can be used to store form-specific information such as the
+current contents of a filter.
+
+In addition to these tasks, the memory device is ideally suited for
+prototyping and initial development. The memory device requires no
+scalar type mappings, and will support any table variable that can be
+described in D4, even when user-defined types are involved.
+
+The memory device does not support any operation other than base table
+retrieval and ordering, so no operator mappings are required. Note that
+this does not mean that queries involving operators other than retrieval
+and ordering cannot be evaluated, it simply means that the query
+processor will perform the operations, not the device.
+
+For more information on using the memory device, refer to the
+<<../DataphorReference.adoc#DRSystemLibrary, System Library Reference>>.
+
+[[DDGDevices-AvailableDevices-SimpleDevice]]
+=== Simple Device
+
+The simple device is a memory device that has been extended to provide
+basic persistence using a file for each table stored in the device. The
+directory used can be specified as part of the device definition, but
+defaults to the Data subdirectory of the Dataphor Server runtime
+directory.
+
+As with the memory device, the simple device does support transactions,
+but concurrency is implemented via exclusive table-level locks, so the
+device is not intended to support multi-user applications.
+
+The simple device requires no scalar type mappings, and will support any
+table variable that can be described in D4, even when user-defined types
+are involved.
+
+The simple device does not support any operation other than base table
+retrieval and ordering, so no operator mappings are required. Note that
+this does not mean that queries involving operators other than retrieval
+and ordering cannot be evaluated, it simply means that the query
+processor will perform the operations, not the device.
+
+For more information on using the simple device, refer to the
+link:DRSimpleDeviceLibrary.html[Simple Device Library Reference].
+
+[[DDGDevices-AvailableDevices-SQLDevices]]
+=== SQL Devices
+
+The Dataphor toolset includes several devices designed to support
+various commercial SQL-based DBMSs. The common aspects of supporting
+these systems are handled by the base SQL device, introduced in the
+SQLDevice library. The base SQL device does not contain any actual
+devices, but provides services and host-implementations that other
+devices utilize.
+
+Note that while this device could be said to support the ANSI standard
+version of SQL, this is not entirely correct. No system implements the
+standard completely, and each system deviates from the standard enough
+to prevent the construction of a single device capable of supporting all
+SQL systems. As a result, the SQL that is common among the different
+systems is only the portion that they all implement the same way. For
+this reason, we choose to call the SQL support implemented by the base
+device __Common SQL__.
+
+Common SQL support is provided by extending the infrastructure of the
+Dataphor Server to support the different aspects of an SQL-based DBMS.
+This involves extending language support, providing data type and
+language translation services, and providing a connectivity layer which
+the Dataphor Server can use to communicate with these systems. The
+actual base SQL device then coordinates the use of these layers to
+provide the framework for supporting specific SQL-based systems.
+
+[[DDGSQLLanguage]]
+==== SQL Language
+
+In order to understand how the SQL devices provide translation for the
+D4 statements, it is important to understand how the Dataphor Server
+transforms commands written in D4 into query plans ready for execution
+within the D4 processor.
+
+This process is generally called compilation, and within the Dataphor
+Server, it is comprised of four basic steps:
+
+1.  Lexical Analysis (also called __lexing__)
+2.  Syntactic Analysis (also called __parsing__)
+3.  Semantic Analysis (also called __compiling__)
+4.  Access Path Determination (also called __binding__)
+
+The first step, lexical analysis, is concerned with transforming the
+statements given by the user into a sequence of _tokens_ that can be
+easily consumed by the next phase. This process is concerned with
+recognizing keywords and symbols of the language.
+
+The second step, syntactic analysis, is concerned with verifying that
+the syntax, or structure, of the statement is a valid construct of the
+language. The product of this step is called __abstract syntax tree__,
+and is a conceptual representation of the statement that can be easily
+consumed by the next phase.
+
+The third step, semantic analysis, is concerned with verifying that all
+the identifiers and operator invocations called for in the statement are
+valid. This phase ensures that identifiers within the statement refer to
+known objects in the catalog, and that the arguments to each operator
+invocation are of the appropriate type. The product of this step is an
+__execution plan__, which must then be _bound_ to actual data access
+paths in order to be executed.
+
+The fourth step, access path determination, is when the device binding
+actually occurs. The chunking algorithm described above is used to
+determine which devices are involved in a particular query, and where
+the processing boundaries will be placed. It is important to note that
+each device is actually a compiler in and of itself, producing an
+execution plan for use in generating the statement to be given to the
+target system.
+
+The process of preparing a given statement or expression branch for
+execution on a target system is actually the reverse of the first three
+steps outlined above. The device analyzes the execution plan prepared by
+the Dataphor Server, and produces an abstract syntax tree representing
+an SQL statement to perform the required operation. This representation
+is then given to an _emitter_ which produces a string ready to be passed
+to the target system.
+
+The elements of an abstract syntax tree are described using a __document
+object model__. This model provides a hierarchical representation of the
+statement to be executed. Each language has a unique document object
+model containing the appropriate elements for the representation of that
+language. The SQL device introduces the common elements of the document
+object model required for representing Common SQL, and each specific SQL
+device introduces the variants necessary to represent the dialectic
+differences for each target system.
+
+Each device also introduces an emitter for use in transforming abstract
+syntax trees into actual strings of the appropriate dialect. In this
+way, each device is capable of precisely describing the specific dialect
+of SQL that is used by a given system, both in terms of the semantic and
+syntactic differences from Common SQL.
+
+[[DDGSQLConnectivity]]
+==== SQL Connectivity
+
+Common SQL support introduces a connectivity layer for handling
+communication with different SQL-based DBMSs. This layer abstractly
+describes the behaviors required by the Common SQL device, and its
+descendants. Specific implementations of connectivity layers are then
+provided to communicate with the different data access methodologies
+available for existing systems.
+
+The Dataphor toolset provides several implementations of this
+connectivity layer. These wrap common data access technologies, and
+expose them to the SQL devices. In addition, new data access
+technologies can easily be exposed by providing an SQL Connectivity
+implementation. The following table lists the available implementations
+as of the preparation of this document. More may be made available in
+the future as necessary.
+
+[cols=",",options="header",]
+|=======================================================================
+|Data Access Technology |SQL Connectivity Connection Class
+|ADO |ADOConnection.ADOConnection
+
+|ADO.NET Provider for Microsoft SQL Server |SQLDevice.MSSQLConnection
+
+|ADO.NET Provider for OLE DB |SQLDevice.OLEDBConnection
+
+|ADO.NET Provider for ODBC |ODBCConnection.ODBCConnection
+
+|Microsoft ADO.NET Provider for Oracle
+|MSOracleConnection.OracleConnection
+
+|IBM ADO.NET Data Provider for DB2 |DB2Connection.DB2Connection
+|=======================================================================
+
+The connectivity layer for the base SQL device handles most of the tasks
+involved in connecting to the target systems. These tasks include basic
+connectivity, transaction coordination, and connection management.
+
+For more information on a specific connectivity implementation, refer to
+the reference documentation for the library containing the
+implementation.
+
+[[DDGP2BasicConnectivity]]
+===== Basic Connectivity
+
+Basic communications with the target system are handled by an SQL
+connectivity implementation. The connectivity implementation to be used
+is specified by the value of the ConnectionClass attribute, which
+specifies the registered class to be used. Once a connectivity
+implementation has been selected, the device must connect to the target
+system using an appropriate set of connection parameters.
+
+All SQL-based connectivity implementations use the concept of a
+_connection string_ to specify connection information. A connection
+string is a set of name-value pairs called __connection parameters__.
+Each connection parameter specifies some aspect of connecting to the
+target system such as ServerName or UserID. Each device registers a set
+of _connection string builder_ classes that can be used to build
+connection strings for the device based on the set of connection
+parameters available.
+
+Each connectivity implementation and device combination uses some
+connection string builder to build the appropriate connection string. By
+default, each device specifies the correct connectivity implementation
+and connection string builder. If a custom connectivity implementation
+or connection string builder is desired, they can be specified using the
+ConnectionClass and ConnectionStringBuilderClass attributes of the
+device class definition, respectively.
+
+Each SQL device also provides an attribute called ConnectionParameters
+which can be used to specify additional configuration parameters for the
+device. Device users may also specify configuration parameters for the
+device. All these parameters are used by the connection string builder
+to generate the appropriate connection string for the target system.
+
+The following procedure is used to gather all the name-value pairs to be
+used to construct the connection string:
+
+The device adds any device-specific parameters such as ServerName or
+DatabaseName.
+
+The connection string builder maps any connection parameters to new
+names, for example, the parameter ServerName may be mapped to the Data
+Source parameter for an ODBCConnection.
+
+Any connection parameters specified in the ConnectionParameters
+attribute are added.
+
+Any connection parameters specified on the device user mapping are
+added.
+
+The resulting set of connection parameters is used to construct a
+semi-colon delimited list of name=value pairs, and this becomes the
+connection string for the any connections to the target system.
+
+[[DDGP2ConnectionMultiplexing]]
+===== Connection Multiplexing
+
+Transactions in the Dataphor Server are associated with a running
+process. Because of this, device sessions are also associated with a
+given process. If a transaction is in progress in the Dataphor Server, a
+transaction must be in progress with the target system as well. This is
+known as _transaction coordination_ and is managed by the process from
+the Dataphor Server.
+
+In order for this transaction coordination to work, the Dataphor Server
+requires that a device session be capable of responding to transactional
+requests, even if cursors are open against the device. In addition, the
+Dataphor Server requires that the device session be able to open
+multiple cursors within the same transaction. For SQL-based systems,
+these requirements pose a non-trivial implementation problem, as
+transactions are usually restricted to the communications session, and
+transactions cannot be started and stopped independent of cursor
+lifetimes. The base SQL device solves these problems with a mechanism
+called __connection multiplexing__.
+
+Connection multiplexing is the process by which a pool (possibly one) of
+connections to a given target system is shared among multiple task
+requests against the device session. The device session manages
+connection multiplexing using two pools of connections: a _browse_ pool,
+and an _execute_ pool.
+
+The browse pool is used for connections which are known to be readonly
+and have an isolation level of browse. All actions performed on
+connections in the browse pool are done within a browse transaction
+which allows the read of uncommitted data. Because the connections in
+the browse pool do not have to participate in the same transaction, new
+browse connections can be added as needed.
+
+The execute pool is used for connections which may update data, or have
+an isolation level higher than browse. All connections in the execute
+pool participate in the same transaction against the target system. If
+the target system supports multiple connections in a single transaction,
+the execute pool can contain multiple connections, otherwise the execute
+pool will only contain a single connection.
+
+As requests are made against the device session, they are either
+readonly browse requests, in which case the browse pool is used to
+process the request, or they are possibly write requests which must be
+processed by the execute pool. If all connections in the execute pool
+are currently busy, the first connection in the pool is released, and
+then moved to the back of the pool. The released connection can then be
+used to service the request.
+
+When connections are released, the cursor is still managed by the
+Dataphor Server, which is responsible for collecting enough state to
+resume the operation from the point where the connection was released.
+The device cursor maintains a working buffer of the data being read from
+any given connection. When the connection is released, the device cursor
+will read from the working buffer until more data must be fetched. At
+this point, the device cursor requests a connection from the device
+session, and begins fetching data from the first row after the last row
+in its working buffer.
+
+In this way, a single transactional connection to the target system can
+be utilized by multiple requests coming in from the Dataphor Server. The
+value of the ConnectionBufferSize attribute of the device definition
+determines the number of rows to keep in the working buffer of each
+device cursor.
+
+[[DDGDevices-CreatingtheDevice]]
+== Creating the Device
+
+The Shipping application is built to use the MSSQLDevice. The following
+statement illustrates the creation of this device and the user mappings
+associated with it:
+
+....
+create device Shipping
+    reconciliation { mode = { command }, master = device }
+    class "MSSQLDevice.MSSQLDevice"
+        attributes
+        {
+            "ServerName" = ".",
+            "DatabaseName" = "Shipping",
+            "UseQualifiedNames" = "true"
+        };
+
+CreateDeviceUser("Admin", Name("Shipping"), "sa", "");
+CreateDeviceUser("System", Name("Shipping"), "sa", "");
+....
+
+This script creates the Shipping device, and the device user mappings
+for the System and Admin users. The System user mapping is required to
+enable the Dataphor Server system process to log into the device during
+startup and shutdown processing. The Admin user mapping is required to
+allow the Admin user to access the data in the device. In addition to
+credentials, device user mappings can be used to specify additional
+connection parameters that should only be used by a particular user.
+
+Note that the authentication information for the device can also be
+specified using the UserID and Password attributes of the device class
+definition.
+
+[[DDGDevices-CreatingtheDevice-DefaultDevice]]
+=== Default Device
+
+In addition to creating the Shipping device, the Shipping library
+specifies that the device is to be used as the default device for the
+library. This is specified on the library edit form, or by invoking the
+SetDefaultDeviceName operator.
+
+For a given session, the default device is the first unambiguously
+specified default device name encountered in a breadth first traversal
+of the library dependency graph above the current library for the
+session.
+
+Whenever a base table variable is created without specifying a device,
+the default device name is used to determine where the table should be
+stored. The default device name for the System library is Temp, meaning
+that if no default device name is specified anywhere in the dependency
+graph for the current library, the Temp device will be the ultimate
+default.
+
+The default device is also used to determine which device should be
+checked when an automatic reconciliation is triggered. If a given
+variable reference is not found within the catalog, and there is a
+default device specified for the current session, and that device has
+automatic reconciliation turned on, then a reconciliation with the
+unknown identifier will be attempted. If a table is found in that device
+matching the identifier, it is reconciled into the Dataphor Server
+catalog.
+
+By using default devices for libraries, table definitions can be built
+independently of the device definitions in which they are stored. This
+allows libraries to be re-created in different devices simply by
+changing the default device name of the library footnote:[Obviously
+changing the default device name of a library will have no effect on
+existing table definitions. The new setting will only be used for
+subsequent create table statements.]
+
+[[DDGDevices-CreatingtheDevice-ReconciliationMode]]
+=== Reconciliation Mode
+
+In the Shipping application create device statement, the reconciliation
+mode for the device is set to command. This means that any Data
+Definition Language (DDL) statements (**create**, **alter**, or *drop*
+statements) involving the device will be translated and executed against
+the target system.
+
+The reconciliation mode can be altered at any time. By setting the
+reconciliation mode to none, all subsequent DDL statements involving the
+device will have no effect on the target system.
+
+Once the library has been registered and all tables have been created on
+the target system, the reconciliation mode can be turned off, and the
+library can be unregistered and re-registered without affecting the
+tables, or data, in the target system. This can be useful in the later
+stages of development when no base table variable changes are being
+made. Rather than attempting to reconcile a given change using *alter*
+statements against the schema, the entire library can be re-created
+without affecting the target system.
+
+Note also that while loading and unloading (during Startup or Shutdown,
+or in response to a LoadLibrary or UnloadLibrary call), all devices will
+ignore DDL commands, regardless of their respective reconciliation
+settings.

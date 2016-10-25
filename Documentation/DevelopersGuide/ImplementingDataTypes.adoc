@@ -1,0 +1,687 @@
+= Implementing Data Types
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGImplementingDataTypes]]
+== Summary
+
+This chapter discusses the use and implementation of data types in a
+Dataphor application. Although the D4 language supports several
+categories of types including table, row, list, and others, this chapter
+discusses scalar types specifically.
+
+Scalar types in D4 provide a mechanism for describing the types of data
+to be used by an application. Not only do they model values within the
+logical model, but they provide for the definition of presentation layer
+behavior of values, as well as mappings into various devices. This
+discussion will focus mainly on building types within the logical model,
+but be aware that types not only define logical behavior, but external
+and internal behavior as well.
+
+Various examples throughout the discussion are all taken from the
+Schema.DataTypes d4 document in the Sample.Shipping library. For the
+complete definition of all the types used in the Shipping application,
+refer to this document.
+
+[[DDGImplementingDataTypes-Representations]]
+== Representations
+
+Scalar types in D4 have many different __representations__, falling into
+the following general categories:
+
+Logical, or possible representations:: Logical representations provide the conceptual representations for
+values of the type.
+Native representation:: The native representation determines the internal representation for
+values of the type.
+Physical representation:: The physical representation is used to encode values of the type as a
+string of bits.
+Device representations:: Device representations are used to encode values of the type for the
+various storage devices used by the Dataphor Server.
+Frontend, or presentation layer representations:: Frontend representations are used to display and retrieve values of the
+type in the presentation layer.
+
+Each scalar type must have at least one logical representation, and may
+have several, depending on the usage requirements of the type. For
+example, most of the system types have at least two representations, and
+some, such as DateTime, have several. Note that a representation must be
+capable of completely representing all values of the type. Only the
+logical representations of a type can be accessed within D4.
+
+Each logical representation is made up of at least one, and possibly
+several components called __properties__. Each property has a name and a
+type. The name of each property is required to be unique across all
+logical representations of the type. The type of each property is
+allowed to be any type, including non-scalar types such as rows and
+lists.
+
+Each logical representation has a _selector_ operator for constructing
+values of the type, and read and write _accessors_ for retrieving and
+setting the various properties of the representation. The implementation
+for these operators is specified as part of the definition of the
+representation, and can be written directly in D4, or _host-implemented_
+(provided by a .NET CLR class within the query processor). For some
+representations, these implementations can be provided automatically by
+the compiler. For a complete discussion of how the compiler chooses a
+system representation, refer to the
+<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes-PossibleRepresentations, Logical Representations>>
+discussion in the D4 Language Guide.
+
+At least one representation must be host-implemented, whether that
+implementation is system- or user-provided. Whenever possible, the
+compiler will provide host implementations for a representation.
+However, only one representation implementation can be system-provided,
+and this representation determines the native and physical
+representations for the type.
+
+If the native representation for a type is simple and system-provided,
+then the device representation for the type will be system-provided as
+well. Otherwise, a scalar type map will have to be provided to determine
+the device representation. For more information on scalar type maps,
+refer to the <<ScalarTypeMapping.adoc#DDGScalarTypeMapping, Scalar Type Maps>> discussion
+in the Physical Realization part of this guide.
+
+For Frontend representations, the Dataphor Server utilizes __native
+accessors__. A native accessor is an operator that can be called from
+within the Dataphor Server, or through the Call-Level Interface (CLI).
+These operators are used by the presentation layer to convert values of
+the type to and from a format suitable for display or manipulation
+within the Frontend. Note that Frontend representations are also logical
+representations available within D4. For more information on native
+accessors, refer to the <<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes-NativeAccessors, Native Accessors>>
+discussion in the D4 Language Guide.
+
+[[DDGImplementingDataTypes-SimpleTypes]]
+== Simple Types
+
+We begin by constructing the simplest possible type, consisting of a
+single representation with a single property. The following example
+shows the ContactID type definition:
+
+....
+create type ContactID
+{
+    representation ContactID { Value : Integer }
+};
+....
+
+After executing this statement, the ContactID type is available for use
+anywhere within D4. It can serve as the type for variables, columns in
+tables, and parameters to operators.
+
+In addition to the type itself, the compiler generated several operators
+including a selector, read and write accessors, and comparison
+operators:
+
+....
+// selector
+create operator ContactID(const Value : Integer);
+
+// read accessor
+create operator ContactID.ReadValue(const Value : ContactID);
+
+// write accessor
+create operator ContactID.WriteValue(const value : ContactID, const Value : Integer);
+....
+
+The Value property can also be accessed using a dot (.) qualifier. The
+following program listing provides several examples of the use of this
+new type:
+
+....
+begin
+    // selector
+    var LContactID := ContactID(1);
+
+    // write accessor
+    LContactID.Value := 2;
+
+    // read accessor
+    var LInteger := LContactID.Value;
+
+    // equality operator
+    var LEqual := LContactID = ContactID(LInteger);
+
+    // special comparer
+    var LIsSpecial := IsSpecial(LContactID);
+end;
+....
+
+In addition, the native representation, physical representation, and
+device representations for this type are all system-provided.
+
+[[DDGImplementingDataTypes-ImplicitConversions]]
+== Implicit Conversions
+
+The D4 language makes no distinction between types defined by the system
+and user-defined types. The ContactID type defined in the previous
+section can be used anywhere a scalar type can be used. However, D4
+provides _transitive implicit conversions_ to facilitate usage of the
+new type. For example, the following statement is invalid:
+
+....
+var LContactID : ContactID := 1;
+....
+
+This is because the declared type of the variable LContactID is
+ContactID, and the compiler has no way to convert the Integer value 1 to
+a value of type ContactID. Implicit conversions provide the compiler
+with this information.
+
+Implicit conversions can be designated as narrowing, or widening. A
+narrowing conversion is one that converts a value from a larger set of
+values to an equivalent value in a smaller set of values. By contrast a
+widening conversion converts a value to a larger set of values. In other
+words, a narrowing conversion is one which may lose information or
+produce a run-time error if the value being converted is not a valid
+value in the target type. A widening conversion is one which is
+guaranteed not to produce a run-time error or lose information. For this
+reason, widening conversions are favored by the compiler when searching
+for a suitable implicit conversion path.
+
+The following example illustrates the creation of both narrowing and
+widening conversions for the ContactID type to and from Integer:
+
+....
+create conversion Integer to ContactID
+    using ContactID narrowing;
+create conversion ContactID to Integer
+    using ContactID.ReadValue widening;
+....
+
+With these definitions in place, the initial example in this section can
+now be executed, and the compiler will convert the Integer value 1 to a
+value of type ContactID using the ContactID(Integer) selector.
+
+Because this style of type definition is so common, D4 provides a *like*
+clause as part of the type definition as a shorthand for the declaration
+of simple types such as ContactID. The following example depicts an
+equivalent definition of the ContactID type using a *like* clause:
+
+....
+create type ContactID like Integer;
+....
+
+Using this syntax, the ContactID type is created with a representation
+named ContactID, with a single property of type Integer named Value. In
+addition, representations are created based on any representation of the
+like type with an explicitly specified native accessor. In this case,
+the AsString representation of the Integer type is used to create an
+AsString for the ContactID type.
+
+While implicit conversions and the *like* syntax make defining and
+utilizing new types extremely easy, it should be noted that some type
+safety is lost if they are used. For example, given the following
+additional type definition:
+
+....
+create type InvoiceID like Integer;
+....
+
+the following statement is valid:
+
+....
+begin
+    var LContactID := ContactID(1);
+    var LInvoiceID := InvoiceID(1);
+    // comparison of ContactID and InvoiceID
+    var LEqual := LContactID = LInvoiceID;
+end;
+....
+
+This is because a conversion exists from both ContactID and InvoiceID to
+type Integer, so the compiler will widen both operands in order to
+fulfill the request.
+
+[[DDGImplementingDataTypes-RepresentingUnits]]
+== Representing Units
+
+One use for different representations of a type is as a mechanism for
+exposing the same value in different units. For example, when building a
+type for distances, representations can be provided for both miles and
+kilometers. The Shipping application makes use of this feature in the
+Distance type:
+
+....
+create type Distance
+{
+    representation Miles { Miles : Decimal },
+    representation Kilometers
+    {
+        Kilometers : Decimal
+            read value.Miles * 1.609
+            write Miles(Kilometers * 0.621)
+    } selector Miles(Kilometers * 0.621)
+};
+....
+
+In this example, the Miles representation is selected as the physical
+representation, and the Kilometers representation is implemented in
+terms of the Miles representation. Either selector can be used to
+construct a Distance value, and either representation is available from
+any Distance value using the appropriate accessors.
+
+Note that the definition of the Kilometers selector is the same as the
+definition for the Kilometers property write accessor. These definitions
+will only be the same for representations with a single property.
+
+Using representations in this way allows unit conversion to be
+implemented within the type definition, eliminating the possibility of
+accidentally comparing miles with kilometers.
+
+[[DDGImplementingDataTypes-CompoundTypes]]
+== Compound Types
+
+Scalar type representations in D4 can contain any number of properties
+of any type. An example of such a type in the system library is the
+DateTime type. The default representation DateTime for this type has
+properties for the year, month, day, hour, minute, and second components
+of DateTime values. It should be noted that although the DateTime
+representation of the DateTime type is sometimes referred to as the
+default representation because its name matches the name of the type,
+the logical model makes no distinction between this and other
+representations of the type. As with all scalar types, all
+representations are equally accessible from any DateTime value.
+
+As with simple types, there are many different possibilities for
+implementing compound types footnote:[While we do use the terms simple
+and compound when referring to scalar types, it should be noted that the
+terms are only useful with respect to the implementation of types within
+the Dataphor Server. Firstly, because the simple vs. compound
+distinction really applies to representations, not types because a given
+type may have both simple and compound representations. Secondly,
+because the logical model makes no distinction among scalar types based
+on the relative complexity of the type.] in D4. The simplest approach is
+to define the system-provided representation as a simple representation
+based on a supported type, and then use that representation to provide
+D4-implementations for the selectors and accessors of the other
+representations. This approach allows the type definition to take
+advantage of existing native, physical, and device representations. For
+example, the following program listing shows the type definition for the
+Degree type in the Shipping application:
+
+....
+create type Degree
+{
+    representation Degrees { Degrees : Decimal },
+    representation Degree
+    {
+        DegreesPart : Integer
+            read GetDegreesPart(value.Degrees)
+            write
+                    Degrees(SetDegreesPart(value.Degrees, DegreesPart)),
+        MinutesPart : Integer
+            read GetMinutesPart(value.Degrees)
+            write
+                Degrees(SetMinutesPart(value.Degrees, MinutesPart)),
+        SecondsPart : Decimal
+            read GetSecondsPart(value.Degrees)
+            write
+                Degrees(SetSecondsPart(value.Degrees, SecondsPart))
+    } selector
+                Degrees(GetDegrees(DegreesPart, MinutesPart, SecondsPart)),
+    representation AsString
+    {
+        AsString : String
+            read DegreesToString(value.Degrees)
+            write Degrees(StringToDegrees(AsString))
+    } selector Degrees(StringToDegrees(AsString))
+};
+....
+
+Notice that the D4 implementations for the selectors and accessors of
+the Degree and AsString representations make use of D4 operators such as
+GetDegreesPart(Decimal) : Integer. The definitions for these operators
+can be found in the Schema.DataTypes script in the Sample.Shipping
+library.
+
+Another approach is to allow the compiler to provide the system
+representation for the compound representation. In this case, the native
+and physical representations can be provided, but the device
+representations must be host-implemented. Still another approach
+involves providing the host implementation for the compound
+representation, allowing complete control over the native, physical, and
+device representations. For examples of these approaches, refer to the
+section on host implementation of types and operators in this chapter.
+
+[[DDGImplementingDataTypes-TypeConstraints]]
+== Type Constraints
+
+Almost all type definitions will include at least one _constraint_
+definition. Scalar types are allowed to specify multiple constraints to
+allow the error messages associated with violating a constraint to be
+more specific. All constraints defined on the type are validated for
+every assignment to a variable of that type, including local variable
+and column assignments. Scalar type constraints are used to define the
+set of valid values for the type.
+
+The following example shows the definition for the Description type:
+
+....
+create type Description like String
+{
+    constraint LengthValid Length(value) <= 50
+        tags
+        {
+            DAE.SimpleMessage =
+                "Description cannot be more than 50 characters."
+        }
+}
+    tags { Frontend.Width = "30" }
+    static tags { Storage.Length = "50" };
+....
+
+Note that the type definition includes metadata for specifying
+presentation and storage layer behaviors, and also includes a custom
+message to be displayed when the constraint is violated. The
+DAE.SimpleMessage tag allows a static message to be displayed, while the
+DAE.Message tag allows dynamic messages to be constructed as a D4
+string-valued expression that is evaluated with the value being
+validated. For example, the following tag definition could be used to
+provide the invalid value as part of the error message: DAE.Message =
+"'Description ""' + value + '"" is too long.'".
+
+For more complex type constraints, previously defined operators can be
+invoked within the constraint expression. As with all constraints, the
+resulting expression must be boolean-valued, functional, and
+deterministic. For type constraints, the added restriction is included
+that the expression must not reference any tables or views within the
+database.
+
+The following program listing shows the definition of the ZipCode type:
+
+....
+create operator IsZipCode(const AString : String) : Boolean
+begin
+    result :=
+        (AString.Length() = 5)
+            or
+            (
+                AString.Length() = 10
+                    and AString.IndexOf('-') = 5
+            );
+end;
+
+create type Zip like String
+{
+    constraint ZipCodeValid IsZipCode(value)
+}
+    tags { Frontend.Width = "10" }
+    static tags { Storage.Length = "10" };
+....
+
+Note that because the constraint expression can be evaluated without
+referencing the state of the database, the definition of the constraint
+will be transparently downloaded to the Frontend client and evaluated
+there, avoiding unnecessary network round trips during user input.
+
+[[DDGImplementingDataTypes-Defaults]]
+== Defaults
+
+Each type definition in D4 can include an optional _default_ definition
+that specifies a value to be used when one is not supplied as part of a
+variable definition or insert statement. The default is allowed to be
+non-deterministic, and reference global database state. This allows
+defaults to be used to implement auto-incrementing identifiers. The
+following example illustrates the use of a type-level default:
+
+....
+create type CreatedOnDateTime like DateTime
+{
+    default DateTime()
+} tags { Frontend.Title = "Created On" };
+....
+
+[[DDGImplementingDataTypes-Specials]]
+== Specials
+
+A _special_ is a mechanism for representing missing information within a
+particular type. Each type is allowed to have any number of specials
+defined. Each special singles out a value of the type as special in
+terms of the meaning of the value within the application. Each special
+definition causes the creation of a special selector, and a special
+comparer for use in manipulating the special values.
+
+Special values are also considered satisfying values for the purpose of
+reference constraint enforcement.
+
+An example of the use of a special is provided by the VersionNumber
+system-defined data type. This data type models a four-part version
+number with Major, Minor, Revision, and Build numbers. The following
+code listing shows a simplified definition for this type:
+
+....
+create type VersionNumber
+{
+    representation VersionNumber
+    {
+        Major : Integer,
+        Minor : Integer,
+        Revision : Integer,
+        Build : Integer
+    },
+    special Undefined VersionNumber(-1, -1, -1, -1)
+};
+....
+
+The special definition designates the VersionNumber value with all
+components equal to -1 as Undefined. This definition causes the
+following additional operators to be defined:
+
+....
+// Special Selector
+create operator VersionNumberUndefined() : VersionNumber;
+
+// Special Comparer
+create operator IsUndefined(const AValue : VersionNumber) : Boolean;
+
+// Generic Special Comparer
+create operator IsSpecial(const AValue : VersionNumber) : Boolean;
+....
+
+The special selector VersionNumberUndefined returns the value of the
+special Undefined. The special comparer returns true if the given
+VersionNumber value is equal to the Undefined special, and the generic
+special comparer returns true if the given VersionNumber value is equal
+to any special value of the VersionNumber type.
+
+Note that in order for specials to work properly as a solution for
+missing information, they must _not_ be considered as some sort of
+default value for the type. A special value should be introduced that is
+outside the domain of normal values for the type in question. For
+example, the following type definition would not correctly model the
+Unknown salary:
+
+....
+create type Salary like Money
+{
+    special Unknown $0
+};
+....
+
+The reason this does not work from the logical perspective is that the
+value $0 is a valid value for the Salary type. In order to function
+reasonably as a special value, the special should be an additional value
+included in the type, over and above the normal set of values available.
+
+[[DDGImplementingDataTypes-Operators]]
+== Operators
+
+Operators in D4 allow the behavior of an application to be modeled. In
+order to be used within D4, each data type must have an equality
+operator defined, and will usually have a relative comparison operator
+defined where appropriate. If the native representation for a given type
+is system-provided, then the compiler will also provide equality and
+comparison operations based on the native representation. Otherwise,
+these operators must be supplied with the type definition.
+
+In addition to fundamental operations like equality and relative
+comparison, operators in D4 can be used to provide application-specific
+behavior for types. In the Shipping example, the geographical
+coordinates of store and vendor locations are used to compute distances
+and shipping rates. For each of these types of values, data types are
+defined to ensure that the values are represented correctly within the
+application. Operators are then provided to manipulate values of these
+types to produce the desired shipping distance and cost.
+
+The following example illustrates some of these operators:
+
+....
+create operator Distance
+(
+    const AFrom : Coordinate,
+    const ATo : Coordinate
+) : Distance
+begin
+    result :=
+        Kilometers
+        (
+            (
+                (
+                    ((ATo.Latitude.Degrees - AFrom.Latitude.Degrees) ** 2) +
+                    ((ATo.Longitude.Degrees - AFrom.Longitude.Degrees) ** 2)
+                ) **
+                0.5
+            ) /
+            0.008987
+        );
+end;
+
+create operator iMultiplication
+(
+    const ADistance : Distance,
+    const ARate : ShippingRate
+) : Money
+begin
+    result := ADistance.Miles * ARate.Rate;
+end;
+....
+
+For more information on defining and using operators, refer to the
+<<ModelingProcessLogic.adoc#DDGModelingProcessLogic, Modeling Process Logic>> chapter.
+
+[[DDGImplementingDataTypes-EventHandlers]]
+= Event Handlers
+
+An _event handler_ is an operator that has been attached to a specific
+event occurring within the system. The Dataphor Server provides three
+kinds of events for scalar types: __default__, __change__, and
+__validate__. These event handlers can be used to implement special
+purpose behavior that is not captured by the declarative statements
+available in D4. For example, the following type definition used in the
+Shipping example ensures that values of type StateID are always
+uppercase, without requiring the user to ensure that this is the case:
+
+....
+create type StateID like String
+{
+    constraint StateIDValid (Length(value) = 2)
+}
+    tags { Frontend.Title = "State", Frontend.Width = "4" }
+    static tags { Storage.Length = "2" };
+
+create operator StateIDUpper(var AStateID : StateID) : Boolean
+begin
+    result := false;
+    if not(IsUpper(AStateID)) then
+    begin
+        AStateID := Upper(AStateID);
+        result := true;   // AStateID has been changed
+    end;
+end;
+attach operator StateIDUpper to StateID on validate;
+....
+
+[[DDGImplementingDataTypes-Host-ImplementedTypesandOperators]]
+= Host-implemented Types and Operators
+
+In addition to allowing the system to provide the implementations for a
+given type, the type definition can include class definitions that
+specify host-implementations for the various representations, selectors,
+and accessors of a given type. This is most often done to control the
+native and physical representations for compound types. In the Shipping
+example, the Coordinate data type is host-implemented. The following
+program listing shows the definition of the Coordinate type:
+
+....
+create type Coordinate
+{
+    representation Coordinate
+    {
+        Latitude : Degree
+            read class "Shipping.LatitudeReadAccessor"
+            write class "Shipping.LatitudeWriteAccessor",
+        Longitude : Degree
+            read class "Shipping.LongitudeReadAccessor"
+            write class "Shipping.LongitudeWriteAccessor"
+    } class "Shipping.CoordinateSelector", representation AsString
+    {
+        AsString : String
+            read value.Latitude.AsString + "/" + value.Longitude.AsString
+            write
+                Coordinate
+                (
+                    Degree.AsString(AsString.SubString(0, AsString.IndexOf("/"))),
+                    Degree.AsString(AsString.SubString(AsString.IndexOf("/") + 1))
+                )
+    }
+        selector
+            Coordinate
+            (
+                Degree.AsString(AsString.SubString(0, AsString.IndexOf("/"))),
+                Degree.AsString(AsString.SubString(AsString.IndexOf("/") + 1))
+            )
+} class "Shipping.CoordinateConveyor"
+    tags { Storage.Length = "45" };
+....
+
+In addition to providing the host-implementation for types and
+representations, the D4 language allows for host-implementation of
+operators. In the Shipping example, the comparison operator for the
+Coordinate type is a host-implemented operator.
+
+....
+create operator iCompare
+(
+    const ACoordinate1 : Coordinate,
+    const ACoordinate2 : Coordinate
+) : Integer
+    class "Shipping.CoordinateCompare";
+....
+
+These classes are defined in a .NET assembly footnote:[A .NET assembly
+is roughly equivalent to the concept of a _dynamic link library_ in
+traditional Windows-based programming.] which is registered with the
+Dataphor Server as part of the registration of the Shipping library. The
+project source for the assembly is available in the Source sub-directory
+of the Shipping library directory. The source project includes the
+following files:
+
+* Shipping.csproj - Microsoft Visual C# Project File
+* AssemblyInfo.cs - Contains assembly level attribute definitions.
+* Coordinate.cs - Contains the implementation classes for the Coordinate
+data types and operators.
+* Domains.cs - Contains the SQL device mapping for the coordinate data
+type.
+* Register.cs - Contains the Dataphor registration implementation for
+the assembly.
+
+These files are compiled into a .NET assembly, which is then placed
+directly in the Shipping library directory. The assembly is then
+referenced as a library file in the definition of the Shipping library,
+and marked to be registered as an assembly. When the library loads, any
+files referenced are copied into the Dataphor Server run-time directory.
+Any file marked to be registered as an assembly is then loaded into the
+Dataphor Server application domain, and searched for the
+DAERegisterAttribute. The AssemblyInfo.cs file contains this entry, and
+specifies that the Alphora.Shipping.DAERegister class should be used to
+perform the registration. This class is responsible for returning to the
+Dataphor Server a list of the available host implementations, and the
+class alias for each. The classes returned are then registered with
+Dataphor Server, and can be referenced in any class definition from D4.
+
+For more information on the implementations in the Shipping library,
+refer to the source code for each host-implementation class.

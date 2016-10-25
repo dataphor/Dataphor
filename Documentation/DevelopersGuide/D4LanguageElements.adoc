@@ -1,0 +1,1557 @@
+= Language Elements
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[D4LGLanguageElements]]
+== Summary
+
+The D4 language is built from six fundamental elements. These elements
+provide the building blocks for all the functionality of the D4
+language.
+
+* Types
+* Values
+* Variables
+* Operators
+* Expressions
+* Statements
+
+The following sections discuss each element in detail.
+
+[[D4LGLanguageElements-Types]]
+== Types
+
+Data types provide a mechanism for describing classes of values and
+allow the compiler to verify the correctness of operations against those
+values. D4 is a strongly typed language, meaning that every variable,
+value, and argument has a type, and only values of the appropriate type
+may be used in a given context. For example, only values of type
+System.Integer can be assigned to a variable of declared type
+System.Integer.
+
+A type is a named set of values. Any given value has a type associated
+with it, for example, 1 is a value of type System.Integer, and `*table*
+{ *row* { 5 ID } }` is a table value with type `*table* { ID :
+System.Integer }`. There are several different categories of types, each
+of which describes a specific kind of value. D4 supports the following
+categories of types: Scalar, Row, Table, List, and Cursor.
+
+Types are specified in D4 using __type specifiers__. Type specifiers
+have the following syntax:
+
+....
+<type specifier> ::=
+    generic |
+    <scalar type specifier> |
+    <row type specifier> |
+    <table type specifier> |
+    <list type specifier> |
+    <cursor type specifier> |
+    <typeof type specifier>
+
+<typeof type specifier> ::=
+    typeof"("<expression>")"
+....
+
+Generic types allow operators to take as arguments values of some
+category of type. For example, an operator may be able to operate on any
+scalar value. The generic scalar type System.Scalar allows such an
+operator to be defined. This type is specified using the keyword
+*scalar* as the type specifier. For information on how to specify the
+generic type for each category of type, see the section for that type
+category. The keyword *generic* can be used to specify that an operator
+may take as argument a value of any type.
+
+The *typeof* system operator can be used to select the type of an
+arbitrary expression.
+
+[[D4LGLanguageElements-Types-SystemDataTypes]]
+=== System Data Types
+
+The descriptions of the date and time types make use of the concept of a
+__tick__. A tick is a length of time equal to 100 nanoseconds. The
+internal representation sof the date and time data types all use a
+64-bit integer representing a number of ticks.
+
+The following scalar data types are made available by the Dataphor
+Server:
+
+<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes, System.Scalar>>::
+System.Scalar is the set of all possible scalar values. The type
+constraint for scalar is simply **true**. All scalar types are defined
+as some subset of the values in the scalar type.
+link:T-System.Decimal.html[System.Decimal]:: System.Decimal is the set of all possible decimal numbers. Values of
+this type are represented physically by a 96-bit signed scaled integer,
+so in practice, the available values are negative
+79,228,162,514,264,337,593,543,950,335 (-2^96^-1) through positive
+79,228,162,514,264,337,593,543,950,335 (2^96^-1).
+link:T-System.Long.html[System.Long]:: System.Long is the set of all integer values in the range negative
+9,223,372,036,854,775,808 (-2^63^) through positive
+9,223,372,036,854,775,807 (2^63^-1). The physical representation for
+values of this type is a signed 64-bit integer.
+link:T-System.Integer.html[System.Integer]:: is the set of all integer
+values in the range negative 2,147,483,648 (-2^31^) through positive
+2,147,483,647 (2^31^-1). The physical representation for values of this
+type is a signed 32-bit integer.
+link:T-System.Short.html[System.Short]:: System.Short is the set of all integer values in the range negative
+32768 (-2^15^) through positive 32767 (2^15^-1). The physical
+representation for values of this type is a signed 16-bit integer.
+link:T-System.Byte.html[System.Byte]:: System.Byte is the set of all integer values in the range 0 through
+positive 255 (2^8^-1). The physical representation for values of this
+type is an unsigned 8-bit integer.
+link:T-System.Boolean.html[System.Boolean]:: System.Boolean consists of the truth values *true* and **false**.
+link:T-System.String.html[System.String]:: System.String is the set of all character strings. The physical
+representation for values of this type is a Unicode string with a
+maximum length of 2^31^-1. The comparison operators for this type are
+defined case-sensitively.
+link:T-System.Guid.html[System.Guid]::System.Guid is the set of all possible Globally Unique Identifiers
+(GUIDs). The physical representation for values of this type is a
+128-bit unsigned integer. The operator NewGuid() generates a new
+globally unique identifier.
+link:T-System.TimeSpan.html[System.TimeSpan]:: System.TimeSpan is the set of all possible lengths of time. The physical
+representation for values of this type is a 64-bit signed integer
+representing the number of ticks in the time value. This means that the
+range of values for this type is from negative 10675199 days, 2 hours,
+48 minutes, 5.4775808 seconds through positive 10675199 days, 2 hours,
+48 minutes, 5.4775807 seconds. The granularity for values of this type
+is one tick.
+link:T-System.DateTime.html[System.DateTime]::System.DateTime is the set of all possible dates, with a time component
+specified, from a fixed point. The physical representation for values of
+this type is a 64-bit signed integer representing the number of ticks
+since 12:00 midnight, January 1, 1 C.E. (Common Era) in the Gregorian
+calendar. This means that the range of values for this type is from
+12:00:00 midnight, January 1, 0001 C.E. to 11:59:59 P.M., December 31,
+9999 C.E. The granularity for values of this type is 1 second.
+footnote:[When mapping date and time values into other systems, this
+range is sometimes considerably reduced. In order to allow for
+consistent use of date and time values within D4, the concept of
+_acceptable range_ is introduced as a guideline. All devices that ship
+with the Dataphor product are capable of storing values within the
+acceptable ranges for these types. For more information on acceptable
+range, see <<ScalarTypeMapping.adoc#DDGScalarTypeMapping, Scalar Type Mapping>>.]
+link:T-System.Date.html[System.Date]::System.Date is the set of all possible dates from a fixed point. The
+physical representation for values of this type is a 64-bit signed
+integer representing the number of ticks since January 1, 1 C.E. (Common
+Era) in the Gregorian calendar. This means that the range of values for
+this type is from January 1, 0001 C.E. to December 31, 9999 C.E.
+link:T-System.Time.html[System.Time]:: System.Time is the set of all possible times. The physical
+representation for values of this type is a 64-bit signed integer
+representing the number of ticks since 12:00 midnight. This means that
+the range of values for this type is from 12:00:00 midnight to 11:59:59
+P.M. The granularity for values of this type is 1 second.
+link:T-System.Money.html[System.Money]:: System.Money is the set of all monetary values in the range negative
+$79,228,162,514,264,337,593,543,950,335 (-$2^96^-1) through positive
+$79,228,162,514,264,337,593,543,950,335 ($2^96^-1). The physical
+representation for values of this type is 96-bit signed scaled integer.
+link:T-System.Binary.html[System.Binary]:: System.Binary is the set of all byte streams of data with length less
+than or equal to 2,147,483,647 (2^31^-1).
+link:T-System.Error.html[System.Error]:: System.Error is the set of all error values. Values of this type are
+used to implement the exception-handling mechanisms of D4.
+
+[[D4LGLanguageElements-Types-TypeConversions]]
+=== Type Conversions
+
+A conversion operator is a unary operator which converts a value from
+one type to another. For example, the operator ToString(Integer)
+converts a given integer value into the string represntation of that
+value. In order to facilitate the definition of new types while re-using
+the operators defined for existing types, the D4 language allows for the
+definition of __implicit conversions__. An implicit conversion specifies
+that values of some type are implicitly convertable to values of another
+type. For more information on implicit conversions, refer to
+<<D4Catalog.adoc#D4LGCatalogElements-Conversions, Conversions>>.
+
+The following matrix describes the validity and availabity of conversion
+operators. The presence of an E indicates the existence of an operator
+of the form ToXXX(AValue : YYY) where XXX represents the name of the
+data type across the table, and YYY represents the name of the data type
+down the table, which can be used to perform the desired conversion. The
+presence of a W indicates that a widening conversion operator exists,
+and that the compiler will implicitly perform the conversion as needed.
+The presence of an N indicates that a narrowing conversion operator
+exists, and that the compiler will implicitly perform the conversion as
+needed. Note that this table only identifies the default conversions.
+New operators and implicit conversions may be defined to change this
+behavior.
+
+[cols=",,,,,,,,,,,,,",]
+|=======================================================================
+|From\To |Boolean |Byte |Short |Integer |Long |Decimal |Money |String
+|DateTime |Date |Time |TimeSpan |Guid
+
+|Boolean |N/A |E |E |E |E |- |- |E |- |- |- |- |-
+
+|Byte |E |N/A |W |W |E |- |- |E |- |- |- |- |-
+
+|Short |E |N |N/A |W |E |- |- |E |- |- |- |- |-
+
+|Integer |E |N |N |N/A |W |W |E |E |- |- |- |- |-
+
+|Long |E |E |E |N |N/A |W |E |E |- |- |- |- |-
+
+|Decimal |- |- |- |E |E |N/A |E |E |- |- |- |- |-
+
+|Money |- |- |- |E |E |E |N/A |E |- |- |- |- |-
+
+|String |E |E |E |E |E |E |E |N/A |E |E |E |E |E
+
+|DateTime |- |- |- |- |- |- |- |E |N/A |E |- |- |-
+
+|Date |- |- |- |- |- |- |- |E |W |N/A |- |- |-
+
+|Time |- |- |- |- |- |- |- |E |- |- |N/A |- |-
+
+|TimeSpan |- |- |- |- |- |- |- |E |- |- |- |N/A |-
+
+|Guid |- |- |- |- |- |- |- |E |- |- |- |- |N/A
+|=======================================================================
+
+[[D4LGLanguageElements-Types-ScalarTypes]]
+=== Scalar Types
+
+Scalar types provide a mechanism for defining and manipulating the basic
+units of data in D4. Scalar types are types with no user-visible
+components. This is in contrast to a table type, for example, in which
+the structure of the value is evident, namely the columns of the table.
+In other words, scalar types are _atomic_ or __encapsulated__. Note that
+the term _encapsulated_ is really synonymous with _scalar_ and as such
+we do not make use of it.
+
+Type SpecifiersScalar Type SpecifierScalar type specifiers have the
+following syntax:
+
+....
+<scalar type specifier> ::=
+    [generic] scalar | <scalar type name>
+....
+
+The *scalar* keyword as a type specifier indicates the generic scalar
+type System.Scalar. The generic scalar type consists of all possible
+scalar values. Any given scalar value will be of some specific scalar
+type.
+
+*See Also*
+
+<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes, Scalar Types>> |
+<<../DataphorReference.adoc#DRSystemLibrary-ScalarTypes, Dataphor Reference, Scalar Types>>
+
+[[D4LGLanguageElements-Types-RowTypes]]
+=== Row Types
+
+Row types describe values that are sets of named values. A row type has
+a _heading_ which describes the columns of the row. Each column has a
+unique name and an associated type.
+
+Type SpecifiersRow Type SpecifierRow type specifiers have the following
+syntax:
+
+....
+<row type specifier> ::=
+    [generic] row["{"<named type specifier commalist>"}"]
+
+<named type specifier> ::=
+    <qualified identifier> : <type specifier>
+....
+
+The type specifier *row* indicates the generic row type System.Row. The
+generic row type consists of all possible row values. Any given row
+value will be of some specific row type.
+
+*See Also*
+
+<<D4LGLanguageElements-Values-RowValues, Row Values>>
+
+[[D4LGLanguageElements-Types-TableTypes]]
+=== Table Types
+
+Table types provide a mechanism for describing table values, the basic
+unit of persistence in D4. A table type has a _heading_ which describes
+the columns of the table. Each column has a unique name and an
+associated type.
+
+Type SpecifiersTable Type SpecifierTable type specifiers have the
+following syntax:
+
+....
+<table type specifier> ::=
+    [generic] table["{"<named type specifier commalist>"}"]
+
+<named type specifier> ::=
+    <qualified identifier> : <type specifier>
+....
+
+The type specifier *table* indicates the generic table type
+System.Table. The generic table type consists of all possible table
+values. Any given table value will be of some specific table type.
+
+*See Also*
+
+<<D4LGLanguageElements-Values-TableValues, Table Values>> |
+<<D4Catalog.adoc#D4LGCatalogElements-TableVariables, Table Variables>>
+
+[[D4LGLanguageElements-Types-ListTypes]]
+=== List Types
+
+List types provide a mechanism for describing arbitrary dynamic-length
+lists of values of the same type.
+
+Type SpecifiersList Type SpecifierList type specifiers have the
+following syntax:
+
+....
+<list type specifier> ::=
+    [generic] list["("<type specifier>")"]
+....
+
+The type specifier *list* indicates the generic list type System.List.
+The generic list type consists of all possible list values. Any given
+list value will be of some specific list type.
+
+*See Also*
+
+<<D4LGLanguageElements-Values-ListValues, List Values>> |
+<<D4LGLanguageElements-Expressions-IndexerExpression, Indexer Expressions>>
+
+[[D4LGLanguageElements-Types-CursorTypes]]
+=== Cursor Types
+
+Cursor types provide a mechanism for dealing with the results of a table
+expression a row at a time. Cursor types deal with a specific table
+type.
+
+Type SpecifiersCursor Type SpecifierCursor type specifiers have the
+following syntax:
+
+....
+<cursor type specifier> ::=
+    [generic] cursor["("<type specifier>")"]
+....
+
+The type specifier *cursor* indicates the generic cursor type
+System.Cursor. The generic cursor type consists of all possible cursor
+values. Any given cursor value will be of some specific cursor type.
+
+*See Also*
+
+<<D4LGLanguageElements-Values-CursorValues, Cursor Values>> |
+<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement-CursorType, Cursor Type>>
+
+[[D4LGLanguageElements-Values]]
+== Values
+
+A _value_ is an individual constant that has no location in time or
+space [3]. A value cannot be updated. Values may be as simple as the
+integer constant 3, or as complex as a list of table values. Values are
+the mechanism for data representation in D4.
+
+Values are introduced into D4 expressions and statements through the use
+of special operators called __<<D4Catalog.adoc#D4LGSelector, selectors>>__.
+<<D4LexicalElements.adoc#D4LGLexicalElements-ParserLiterals, Parser Literals>>
+are a kind of built-in selector for certain system data types. For example, the
+parser literal 1 is a selector for the System.Integer value 1.
+Similarly, *row* \{ 5 ID } is a selector for the row value containing a
+column named ID with the System.Integer value 5.
+
+SelectorsNon-scalar selectors in D4 have the following syntax:
+
+....
+<selector> ::=
+    <row selector> |
+    <table selector> |
+    <list selector> |
+    <cursor selector>
+....
+
+[[D4LGLanguageElements-Values-ScalarValues]]
+=== Scalar Values
+
+A scalar value is a value with no user-visible components. The type of
+any scalar value is a scalar type, specifically. Some possible scalar
+values include 5, "String Value" or DateTime(2002, 8, 29). In each case,
+the value described is an atomic value, in that it cannot be broken down
+into smaller components without ceasing to be a value of the type in
+question. For a detailed discussion of scalar values, see the discussion
+in the Catalog Elements chapter on
+<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes, Scalar Types>>.
+
+*See Also*
+
+<<D4LGLanguageElements-Types-ScalarTypes, Scalar Types>>
+
+[[D4LGLanguageElements-Values-RowValues]]
+=== Row Values
+
+A row value is a set of named columns, each with a specified type. The
+type of a row value is a row type. Each column in the row type has a
+corresponding value in the row value of the type specified by the
+column.
+
+If a type specifier is not provided for the row selector, the type of
+the row is based on the types of all the columns in the row selector. If
+a type specifier is provided, then the expressions given provide values
+for the specified columns of the row. Any columns of the row that do not
+have a value provided will be set to nil.
+
+Row SelectorSelectorsRow SelectorRow selectors have the following
+syntax:
+
+....
+<row selector> ::=
+    row
+        [of (("{"<named type specifier commalist>"}") | <typeof type specifier>)]
+        "{"<named expression term commalist>"}"
+
+<named type specifier> ::=
+    <qualified identifier> : <type specifier>
+
+<named expression term> ::=
+    <expression term> <column name> <metadata>
+
+<column name> ::=
+    <qualified identifier>
+....
+
+For a detailed description of the <type specifier> production rule see
+<<D4LGLanguageElements-Types, Types>>
+
+For a detailed description of the <expression term> production rule see
+<<D4LGLanguageElements-Expressions, Expressions>>.
+
+The following example illustrates the use of the row selector:
+
+....
+select row { 53 Age, "Green" EyeColor };
+select row of { Age : Integer, EyeColor : String } { };
+....
+
+For more information on using row values in D4, see
+<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingRows, Using Rows>>.
+
+*See Also*
+
+<<D4LGLanguageElements-Types-RowTypes, Row Types>>
+
+[[D4LGLanguageElements-Values-TableValues]]
+=== Table Values
+
+Table values are sets of row values, where each row is of the same type.
+The heading of the table type is a set of uniquely named columns and the
+types on which they are defined. All rows within a table value must have
+the same heading as the table type. Note that a table value is a set of
+row values, meaning that no two rows in the table are ever permitted to
+have the same value for all columns. In practice, this constraint is
+usually enforced by defining a key on some subset of the columns in the
+table. If a key constraint is not defined in the table selector, or
+create table statement, the key defaults to all columns in the table
+footnote:[More precisely, the key is created for all columns of the
+table that are defined on types for which a comparison operator is
+defined.].
+
+If the optional type specifier clause is not provided as part of the
+table selector expression, the type of the resulting table value will be
+inferred from the type of the first row expression in the table
+selector. Once the type of the table selector has been specified, either
+with the of clause, or by inference from the first row expression, the
+names of columns in subsequent row selectors may be omitted as a
+shorthand. Of course, if names are not specified, the expressions in the
+row selector must appear in the same order as the heading for the table.
+If names are specified for the expressions in a particular row selector,
+then the columns may appear in any order.
+
+Table SelectorSelectorsTable SelectorTable selectors have the following
+syntax:
+
+....
+<table selector> ::=
+    table
+        [of (("{"<named type specifier commalist>"}") | <typeof type specifier>)]
+        "{"<table selector item commalist>"}"
+
+<named type specifier> ::=
+    <qualified identifier> : <type specifier>
+
+<table selector item> ::=
+    <expression> |
+    <key definition>
+....
+
+For a detailed description of the <type specifier> production rule see
+<<D4LGLanguageElements-Types, Types>>
+
+For a detailed description of the <expression> production rule see
+
+<<D4LGLanguageElements-Expressions, Expressions>>.
+
+For a detailed description of the <key definition> production rule see
+<<D4Catalog.adoc#D4LGKeys, Keys>>.
+
+The following example illustrates the use of the table selector:
+
+....
+select table
+{
+    row { 3.14d DecimalNumber },
+    row { 2.3d },
+    row { 2.7d }
+};
+
+select table of { DecimalNumber : Decimal } { };
+....
+
+For more information on using table values in D4, see
+<<D4TableOperators.adoc#D4LGTableExpressions, Table Operators>>.
+
+*See Also*
+
+<<D4LGLanguageElements-Types-TableTypes, Table Types>>
+
+[[D4LGLanguageElements-Values-ListValues]]
+=== List Values
+
+List values are lists of values of the same type. Each item in the list
+is addressable through an indexer by its ordinal position in the list.
+Lists are allowed to contain duplicate values.
+
+List SelectorSelectorsList SelectorList selectors have the following
+syntax:
+
+....
+<list selector> ::=
+    [<list type specifier>]"{"<expression>"}"
+....
+
+For a detailed description of the <expression> production rule see
+<<D4LGLanguageElements-Expressions, Expressions>>
+
+For more information on using list values in D4, see
+<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingLists, Using Lists>>.
+
+*See Also*
+
+<<D4LGLanguageElements-Types-ListTypes, List Types>> |
+<<D4LGLanguageElements-Expressions-IndexerExpression, Indexer Expressions>>
+
+[[D4LGLanguageElements-Values-CursorValues]]
+=== Cursor Values
+
+Cursor values are values that provide row-at-a-time cursor style access
+to table values. Selecting a cursor value allocates system resources
+that must be released by calling link:O-System.Close.html[Close()] on
+the cursor. For a detailed description of the operators available for
+cursors, see
+<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, Using Cursors>>.
+
+Cursor SelectorSelectorsCursor SelectorCursor selectors have the
+following syntax:
+
+....
+<cursor selector> ::=
+    cursor"("<cursor definition>")"
+....
+
+For a detailed description of the <cursor definition> production rule
+see the select statement syntax in
+<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement, Select Statement>>.
+
+For more information on using cursor values in D4, see
+<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, Using Cursors>>.
+
+*See Also*
+
+<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, Cursor>> |
+<<D4LGLanguageElements-Expressions-IndexerExpression, Indexer Expressions>>
+
+[[D4LGLanguageElements-Variables]]
+== Variables
+
+A variable is a container for an appearance of a value [3]. Variables do
+have location in space and time, and the value of any given variable at
+any given point can change. This is not to say that the value changed,
+but that the variable contains a different value.
+
+Variables are declared to be of some type, and this type determines what
+values the variable can contain. For example, a variable of declared
+type System.Integer can only contain values that are of type
+System.Integer. This is enforced by the compiler.
+
+An important point about variables in a database management system is
+that tables are variables. The type of such a variable is a table type,
+and the value at any given point is a table value of that same type.
+Conceptually then, all the manipulative operators of the language such
+as **insert**, **update**, and *delete* are just shorthands for some
+equivalent assignment statement. Tables might then more appropriately
+have been called
+__<<D4Catalog.adoc#D4LGCatalogElements-TableVariables, table variables>>__
+, and indeed we refer to them as such throughout the
+documentation, but for reasons of brevity and familiarity in the
+language, we chose the more traditional name **table**.
+
+<<D4ImperativeStatements.adoc#D4LGImperativeStatements-Variables-VariableDeclarationStatement, Variable declaration>>
+in D4 has the following syntax:
+
+....
+<variable declaration statement> ::=
+    var <ne variable definition commalist>
+
+<variable definition> ::=
+    <qualified identifier> [: <type specifier>] [:= <expression>]
+....
+
+The optional <expression> specifies an initial value for the variable.
+If no initial value is specified, the type of the variable is used to
+determine a default value for the variable. If no default value is
+specified as part of the type definition, the variable is said to be
+_uninitialized_ or __<<D4LGNilSemantics, nil>>__.
+
+Note that the <type specifier> in a <variable definition> is optional if
+an initial value is given. In this case, the type of the variable is
+defined to be the result type of the initial value. For example, the
+statement:
+
+....
+var LInteger := 5;
+....
+
+declares a variable of type System.Integer named LInteger and assigns it
+the integer value 5.
+
+For a detailed description of the <qualified identifier> production rule
+see <<D4LexicalElements.adoc#D4LGLexicalElements-Identifiers, Identifiers>>.
+
+For a detailed description of the <type specifier> production rule see
+<<D4LGLanguageElements-Types, Types>>.
+
+For a detailed description of the <expression> production rule see
+<<D4LGLanguageElements-Expressions, Expressions>>.
+
+*See Also*
+
+<<D4ImperativeStatements.adoc#D4LGImperativeStatements-Variables, Variables>>
+
+[[D4LGLanguageElements-Operators]]
+== Operators
+
+D4 operators are executable, pre-compiled subroutines. They may be
+explicitly called, invoked using a built-in operator such as +, or
+attached to events caused by actions such as data manipulation.
+
+The Dataphor Server provides extensive libraries for performing basic
+manipulation of values of the system data types. These operators are
+covered in detail in the various library references in the Dataphor
+Reference. These operators are known as _system-provided_ operators, but
+the distinction has no affect on functionality.
+
+A given D4 operator may be built-in, such as the + operator. This means
+that the operator is recognized by the parser and the invocation has
+special syntax. With very few exceptions, such as the *where* operator,
+a parser-recognized invocation has an equivalent standard invocation.
+For example, the following invocations are equivalent:
+
+....
+5 + 5
+iAddition(5, 5)
+....
+
+A given D4 operator may be host-implemented (or external). This
+indicates that the implementation of the operator is not a block of D4
+statements, but an external routine referenced via a class definition.
+
+Like <<D4LGLanguageElements-Expressions, expressions>>, every D4
+operator has the following
+characteristicsCharacteristicsOperatorOperatorCharacteristics which
+determine its behavior within the Dataphor Server:
+
+Literal:: A _literal_ operator is one which does not reference global state, i.e.
+it does not reference any table variable in the database. In other
+words, a literal operator is one which could be evaluated at
+compile-time.
+Functional:: A _functional_ operator is one which does not change global state, i.e.
+it does not update any table variable in the database. Functional
+operators are required in certain contexts such as constraint
+expressions.
+Deterministic:: A _deterministic_ operator is one which always returns the same value
+for the same set of inputs. Deterministic operators are required in
+certain contexts such as constraint expressions.
+Repeatable:: A _repeatable_ operator is one which always returns the same value for
+the same set of inputs within the same transaction context. Note that if
+an operator is deterministic, it is also repeatable, but that a
+non-deterministic operator may or may not be repeatable. For example,
+both DateTime() and Random() are non-deterministic operators, but
+DateTime() is repeatable within a given transaction (in other words,
+when invoked within a transaction DateTime() will always return the
+start time of the transaction) whereas Random() will in general return a
+different value on successive invocations within a transaction.
++
+As with deterministic operators, repeatable operators are required in
+certain contexts such as restriction conditions.
+Nilable:: A _nilable_ operator is one which may return a
+__<<D4LGNilSemantics, nil>>__, or no value, at run-time.
+Order-Dependent:: An _order-dependent_ aggregate operator is one whose semantics depend on
+the order in which the rows of the input are aggregated. If an aggregate
+operator is marked order-dependent, the compile will issue a warning if
+the actual argument to that operator is not well-ordered (ordered by at
+least a key).
+Order Preserving:: An _order preserving_ operator is one which preserves the ordering
+semantics of the value. Formally, a unary operator O with argument type
+Ta and result type Tr is order preserving if for every pair of values V1
+and V2 of type Ta for which the expression V1 >= V2 evaluates to true,
+the expression O(V1) >= O(V2) also evaluates to true.
+
+*See Also*
+
+<<D4Catalog.adoc#D4LGCatalogElements-Operators, Catalog Elements, Operators>>
+
+[[D4LGLanguageElements-Statements]]
+== Statements
+
+A statement is the fundamental unit of execution in D4. All statements
+of D4 fall into three basic categories:
+
+* Data Definition Language (DDL)
+* Data Manipulation Language (DML)
+* Imperative
+
+Data Definition Language statements are concerned with describing the
+structure of the database. They allow for the creation, alteration, and
+destruction of catalog level objects. These statements are discussed in
+<<D4Catalog.adoc#D4LGCatalogElements, Catalog Elements>>.
+
+Data Manipulation Language statements allow for the retrieval and
+modification of the data in the database. These include **select**,
+**insert**, **update**, and **delete**, and are discussed in
+<<D4DataManipulation.adoc#D4LGDataManipulation, Data Manipulation>>.
+
+Imperative statements provide the execution framework for the D4
+language. These statements provide functionality such as variable
+declaration, flow control, and exception handling. These statements are
+discussed in detail in <<D4ImperativeStatements.adoc#D4LGImperativeStatements, Imperative>>.
+
+Statements in D4 have the following syntax:
+
+....
+<statement> ::=
+    <dml statement> |
+    <ddl statement> |
+    <imperative statement>
+....
+
+For a detailed description of the <ddl statement> production rule see
+<<D4Catalog.adoc#D4LGCatalogElements, Catalog Elements>>.
+
+For a detailed description of the <dml statement> production rule see
+<<D4DataManipulation.adoc#D4LGDataManipulation, Data Manipulation>>.
+
+For a detailed description of the <imperative statement> production rule
+see <<D4ImperativeStatements.adoc#D4LGImperativeStatements, Imperative Statements>>.
+
+[[D4LGLanguageElements-Expressions]]
+== Expressions
+
+A D4 expression is a statement that returns a result. This includes
+<<D4LexicalElements.adoc#D4LGLexicalElements-ParserLiterals, parser literals>>
+and <<D4LGOperatorInvocation, operator invocations>>. The result of
+evaluating any given expression is either a value or
+__<<D4LGNilSemantics, nil>>__. Expressions are built according to
+the <<D4LGLanguageElements-Expressions, [<expression> production rule]>>. The following are examples of valid D4 expressions.
+
+....
+5
+6 * 42
+true and not (Length(MyName) = 0)
+....
+
+Just like <<D4LGLanguageElements-Operators, operators>>, every D4
+expression has the following
+characteristicsCharacteristicsExpressionExpressionCharacteristics which
+determine its behavior within the Dataphor Server:
+
+[horizontal]
+Literal:: An expression is _literal_ if it consists entirely of parser literals
+and literal operator invocations. As noted before, a literal expression
+can be evaluated at compile-time. The type and value of literals is
+fixed for all time [3]. Any given invocation is literal if its arguments
+(if any) are all literals in turn [3]. Clearly, any expression which
+references any table variables in the database is not literal.
++
+The following are some examples of expressions, some of which are
+literal:
++
+....
+Days(720500d) // literal
+-5231 // literal
+Length(MyString) // not literal
+Error("Error: " + AMessage) // not literal
+....
+Functional:: An expression is _functional_ if it makes no change to any table
+variables in the database, and makes no calls to non-functional
+operators.
+Deterministic:: An expression is _deterministic_ if it makes no calls to
+non-deterministic operators.
+Repeatable:: An expression is _repeatable_ if it makes no calls to non-repeatable
+operators.
+Nilable:: An expression is _nilable_ if it may result in a
+__<<D4LGNilSemantics, nil>>__. In general, expressions are nilable
+if they make calls to nilable operators, contain references to nilable
+columns, or contain the *nil* reserved word. Some operators such as
+IsNil will never result in a nil.
+Order Preserving:: An expression is _order-preserving_ if it preserves the comparison
+semantics of the value of its argument. In general, an expression is
+order-preserving if it consists entirely of context-literal expressions
+and invocations of order-preserving operators.
+
+These characteristics are fixed by the compiler and are determined by
+the elements of the expression. For example, an expression containing an
+invocation of a non-deterministic operator is itself non-deterministic.
+
+D4 expressions have the following syntax:
+
+....
+<expression> ::=
+    <modified expression term> <table operator clause list>
+
+<modified expression term> ::=
+    <expression term> [<language modifiers>]
+
+<expression term> ::=
+    <binary expression> <ternary or type operator clause list>
+
+<ternary or type operator clause> ::=
+    <between clause> |
+    <type operator clause>
+....
+
+For a detailed description of the <table operator clause> production
+rule see <<D4TableOperators.adoc#D4LGTableExpressions, Table Operators>>.
+
+[[D4LGNilSemantics]]
+=== Nil Semantics
+
+Evaluating any given expression may result in __nil__. Nil is a
+placeholder indicating that evaluation of the expression did not return
+a value. The reserved word *nil* can be used within an expression to
+produce this placeholder. The compiler-defined nilable characteristic is
+used to determine whether or not a given expression could result in a
+nil at run-time.
+
+In general, most operators will result in a nil if any of their
+arguments are nil. For specific information on the nil-handling
+characteristics of an operator, refer to the documentation for that
+operator. The following operators are specifically included for handling
+nil results:
+
+* link:O-System.IsNil.html[IsNil(**generic**) : Boolean]
++
+Returns true if the result of evaluating the given expression is nil,
+false otherwise.
+* link:O-System.IfNil.html[IfNil(**generic**, **generic**) : *generic*]
++
+Returns the result of evaluating the first expression if the result is
+not nil, otherwise returns the result of evaluating the second
+expression.
+
+Note that while IsNil is guaranteed to return a value, IfNil could still
+return a nil if the second expression is nilable.
+
+Nils may be introduced by the following elements within a given
+expression:
+
+* Explicit reference via the *nil* reserved word.
+* Reference to a nilable column of a table or row.
+* Reference to an uninitialized variable.
+* Invocation of an aggregate operator other than Count on an empty set.
+* Invocation of a row extractor on an empty set.
+* Invocation of a column extractor on a row-valued expression that
+evaluates to nil.
+
+When nils are used as the arguments to comparison operators (=, <>, <,
+>, <=, >=, and ?=) the result is not true or false, but nil, even if
+both arguments are nil. In other words, the result of evaluating the
+expression *nil* = *nil* is nil.
+
+When performing row-level comparisons, if both rows have no value for
+the same columns, the columns are considered equal. In other words,
+column equality between rows is defined as: (IsNil(**left**.**value**)
+and IsNil(**right**.**value**)) or (**left**.**value** =
+**right**.**value**).
+
+This definition of row equality in the presence of nils is used
+throughout D4 whenever row comparison is required:
+
+* Key constraint expressions
+* Reference constraints
+* Projection (**over** and **remove**)
+* Union (**union**)
+* Difference (**minus**)
+* Aggregation (**group**)
+
+When nils are encountered in table level operations such as **where**,
+they are considered equivalent to false. When constraint expressions
+evaluate to nil, the constraint is considered satisfied.
+
+When nils are used as the arguments to logical operators (**and**,
+**or**, and **not**) the result depends on the operator invoked, as
+shown in the following tables.
+
+The following table displays the results of evaluating **and**:
+
+[cols=",,,",options="header",]
+|==================================
+|*and* |*true* |*nil* |*false*
+|*true* |*true* |*nil* |*false*
+|*nil* |*nil* |*nil* |*false*
+|*false* |*false* |*false* |*false*
+|==================================
+
+The following table displays the results of evaluating **or**:
+
+[cols=",,,",options="header",]
+|===============================
+|*or* |*true* |*nil* |*false*
+|*true* |*true* |*true* |*true*
+|*nil* |*true* |*nil* |*nil*
+|*false* |*true* |*nil* |*false*
+|===============================
+
+The following table displays the results of evaluating **not**:
+
+[cols=",",options="header",]
+|================
+|Argument |Result
+|*true* |*false*
+|*nil* |*nil*
+|*false* |*true*
+|================
+
+*See Also*
+
+link:O-System.IfNil.html[IfNil - Nil-Handling Operator] |
+link:O-System.IsNil.html[IsNil - Nil-Handling Operator]
+
+[[D4LGLanguageElements-Expressions-OperatorPrecedence]]
+=== Operator Precedence
+
+Because many of the built-in operators in D4 are in-fix or post-fix
+operators, operator precedence must be used to determine the order of
+operations. Operators with a higher precedence will take arguments
+before operators with a lower precedence. For example, the expression 2
++ 2 * 4 is evaluated as 2 + (2 * 4) because multiplication has a higher
+precedence than addition. Operators with the same precedence are
+left-associative, except for exponentiation, which is right-associative.
+For example, the expression 2 ** 3 ** 2 is evaluated as 2 ** (3 ** 2),
+but 100 / 2 / 10 is evaluated as (100 / 2) / 10. Order of operation and
+associativity in an expression can always be forced using parentheses ((
+and )).
+
+The following table lists the built-in operators of D4 in order of
+precedence from highest to lowest:
+
+[cols=",",options="header",]
+|=======================================================================
+|Operator(s) |Description
+|. [] |Qualifier or Indexer
+
+|~ +(unary) -(unary) *not exists* |Unary
+
+|** |Exponentiation
+
+|* / *div mod* |Multiplicative
+
+|+ - |Additive
+
+|= <> < > <= >= ?= |Comparison
+
+|^ & | << >> |Bitwise Binary
+
+|*and* |Logical And
+
+|*in or xor like matches between is as* |Logical Binary or Ternary or
+Type Operator
+
+|*where over remove add rename \{} group return explode adorn redefine
+union minus intersect join times having without* |Relational
+|=======================================================================
+
+[[D4LGLanguageElements-Expressions-LanguageModifiers]]
+=== Language Modifiers
+
+Language modifiers in D4 allow for developer input to the compilation
+process. They are basically compile-time arguments to the statement or
+expression on which they appear. The following table describes the
+available modifiers and the contexts in which they are available:
+
+[cols=",,",options="header",]
+|=======================================================================
+|Modifier |Context |Description
+|ShouldSupport |Any expression |Indicates whether or not the Dataphor
+Server should attempt to provide support for the expression on any
+device.
+
+|IgnoreUnsupported |Any expression |Indicates that the compiler should
+suppress warnings that the given expression is unsupported on any
+device.
+
+|IsLiteral |Any expression |Overrides the literal characteristic
+inferred by the compiler.
+
+|IsFunctional |Any expression |Overrides the functional characteristic
+inferred by the compiler.
+
+|IsDeterministic |Any expression |Overrides the deterministic
+characteristic inferred by the compiler.
+
+|IsRepeatable |Any expression |Overrides the repeatable characteristic
+inferred by the compiler.
+
+|IsNilable |Any expression |Overrides the nilable characteristic
+inferred by the compiler.
+
+|ShouldCheckConcurrency |Any table-valued expression |Indicates whether
+the query processor should check concurrency at this level. Note that
+this is only a switch for use in turning off a concurrency check. It
+cannot force a concurrency check where the compiler has decided that one
+is not necessary due to isolation levels and other factors.
+
+|[(Left | Right).]ShouldTranslate |Any table-valued expression
+|Indicates whether or not the expression should be translated into an
+application transaction context.
+
+|[(Left | Right).]Propagate(Insert | Update | Delete) |Any table-valued
+expression |Indicates whether or not the specified modification (Insert,
+Update, or Delete) should be propagated. These modifiers can be used to
+control view update semantics.
+
+|[(Left | Right).]Propagate(Default | Validate | Change) |Any
+table-valued expression |Indicates whether or not the specified
+propsable (Default, Validate, or Change) should be propagated. These
+modifiers can be used to control view proposable semantics.
+
+|EnforcePredicate |Any where, minus, union, return, or join expression.
+|Indicates whether the predicate of the resulting view should be
+enforced for data modifications.
+
+|IsTimes |Any natural join |Indicates that the natural join is intended
+to be performed without common columns and suppresses the warning that
+the compiler would otherwise give.
+
+|Retrieve(Left | Right) |Any join, natural or conditioned, inner or
+outer |Indicates whether a change to the left join key columns should
+cause the right side to be retrieved, and vice versa.
+
+|Clear(Left | Right) |Any join, natural or conditioned, inner or outer
+|Indicates whether the absence of a row in the database corresponding to
+the new values for the left join key columns should clear the right side
+of the join, and vice versa.
+
+|Coordinate(Left | Right) |Any join, natural or conditioned, inner or
+outer |Indicates whether a change in the left join key columns should
+set the values for the right join key columns, and vice versa.
+
+|UpdateLeftToRight |Any join, natural or conditioned, inner or outer
+|Indicates whether a data modification should be performed on the left
+side first. By default, this is determined based on the cardinality of
+the join.
+
+|(Any | All)Of |Any outer join, natural or conditioned |Determines what
+columns in the outer side of the join constitute the existence of a row
+in that side. Row existence is defined as having a value for any column
+in the AnyOf modifier, and all columns in the AllOf modifier, if
+specified. By default, the AnyOf modifier is set to all non-join-key
+columns in the outer side, and the AllOf modifier is empty.
+|=======================================================================
+
+The syntax for language modifiers in D4 is:
+
+....
+<language modifiers> ::=
+ with "{"<ne language modifier commalist>"}"
+
+<language modifier> ::=
+    <language modifier name> = <language modifier value>
+
+<language modifier name> ::=
+    <qualified identifier>
+
+<language modifier value> ::=
+    <string>
+....
+
+[[D4LGLanguageElements-Expressions-BetweenClause]]
+== Between Clause
+
+The *between* operator is a ternary operator which allows a value to be
+tested against a range of values of the same type. The expression is
+logically equivalent to inclusive comparisons against the bounds of the
+range. For example:
+
+....
+A between B and C
+....
+
+is logically equivalent to:
+
+....
+A >= B and A <= C
+....
+
+The D4 compiler substitutes invocations of the between operator for the
+equivalent inclusive comparison operator invocations.
+
+The between clause in D4 has the following syntax:
+
+....
+<between clause> ::=
+    between <arithmetic expression> and <arithmetic expression>
+....
+
+....
+select Employee where Name between "Je" and "Jo";
+....
+
+....
+ID Name
+-- ----
+4  Jeff
+6  Jeff
+1  Jim
+....
+
+[[D4LGLanguageElements-Expressions-TypeOperatorClause]]
+=== Type Operator Clause
+
+Type operators allow for run-time type testing to be performed. These
+operators are system-provided and cannot be overloaded.
+
+The type operator clause in D4 has the following syntax:
+
+....
+<type operator clause> ::=
+    <type operator> <type specifier>
+
+<type operator> ::=
+    is | as
+....
+
+The *is* operator returns a boolean value indicating whether the given
+value is of the provided type. If the type of the given value is equal
+to the provided type the invocation returns true, otherwise it returns
+false.
+
+The *as* operator casts the given value to the provided type. An
+invocation of *as* will fail at run-time if the given value is not of
+the provided type, i.e. if an invocation of *is* would return false. The
+value returned from an *as* invocation is guaranteed to be of the
+provided type.
+
+For a detailed description of the <type specifier> production rule see
+<<D4LGLanguageElements-Types, Types>>.
+
+[[D4LGLanguageElements-Expressions-BinaryExpression]]
+=== Binary Expression
+
+Binary expressions in D4 have the following syntax:
+
+....
+<binary expression> ::=
+    <arithmetic expression> {<binary operator> <arithmetic expression>}
+
+<binary operator> ::=
+    and | or | xor | like | matches | in
+    ^ | & | "|" | "<<" | ">>" |
+    = | "<>" | "<" | ">" | "<=" | ">=" | ?=
+....
+
+These operators are system-provided for the system data types where
+appropriate, but may be overloaded for other types by using the operator
+name given by the following table:
+
+[cols=",",options="header",]
+|===========================================================
+|Symbol |Operator Name
+|*and* |link:O-System.iAnd.html[iAnd]
+|*or* |link:O-System.iOr.html[iOr]
+|*xor* |link:O-System.iXor.html[iXor]
+|*like* |link:O-System.iLike.html[iLike]
+|*matches* |link:O-System.iMatches.html[iMatches]
+|*in* |link:O-System.iIn.html[link:O-System.iIn.html[iIn]]
+|^ |link:O-System.iBitwiseXor.html[iBitwiseXor]
+|& |link:O-System.iBitwiseAnd.html[iBitwiseAnd]
+|| |link:O-System.iBitwiseOr.html[iBitwiseOr]
+|<< |link:O-System.iShiftLeft.html[iShiftLeft]
+|>> |link:O-System.iShiftRight.html[iShiftRight]
+|= |link:O-System.iEqual.html[iEqual]
+|<> |link:O-System.iNotEqual.html[iNotEqual]
+|< |link:O-System.iLess.html[iLess]
+|> |link:O-System.iGreater.html[iGreater]
+|<= |link:O-System.iInclusiveLess.html[iInclusiveLess]
+|>= |link:O-System.iInclusiveGreater.html[iInclusiveGreater]
+|?= |link:O-System.iCompare.html[iCompare]
+|===========================================================
+
+Comparison OperatorsResolutionFor the comparison operators (=, <>, <, >,
+<=, >=, and ?=) the compiler will attempt to resolve the operators as
+closely as possible. All types must have an equal comparison defined.
+From this, the compiler can provide a not equal comparison operator
+using the logical not. In addition to the equal operator, if a less
+operator is provided, the compiler can provide the rest of the
+comparison operators.
+
+The iCompare operator (?=) is shorthand for a compare operation defined
+to be equivalent to a conditional expression:
+
+....
+A ?= B
+....
+
+is logically equivalent to:
+
+....
+if A = B then 0 else if A < B then -1 else 1
+....
+
+If a given type only has a compare operator defined, the compiler will
+provide equivalent formulations of the rest of the comparison operators
+using invocations of the compare operator.
+
+[[D4LGLanguageElements-Expressions-ArithmeticExpression]]
+=== Arithmetic Expression
+
+Arithmetic expressions in D4 have the following syntax:
+
+....
+<arithmetic expression> ::=
+    <unary expression> {<arithmetic operator> <unary expression>}
+
+<arithmetic operator> ::=
+    + | - | * | / | div | mod | **
+....
+
+These operators are system-provided for the system data types where
+appropriate, but may be overloaded for other types by using the operator
+name given by the following table:
+
+[cols=",",options="header",]
+|======================================================
+|Symbol |Operator Name
+|+ |link:O-System.iAddition.html[iAddition]
+|- |link:O-System.iSubtraction.html[iSubtraction]
+|* |link:O-System.iMultiplication.html[iMultiplication]
+|/ |link:O-System.iDivision.html[iDivision]
+|*div* |link:O-System.iDiv.html[iDiv]
+|*mod* |link:O-System.iMod.html[iMod]
+|** |link:O-System.iPower.html[iPower]
+|======================================================
+
+[[D4LGLanguageElements-Expressions-UnaryExpression]]
+=== Unary Expression
+
+Unary expressions in D4 have the following syntax:
+
+....
+<unary expression> ::=
+    {<unary operator>} <qualified factor>
+
+<unary operator> ::=
+    + | - | ~ | not | exists
+....
+
+These operators (except for unary plus (+) which is eliminated by the
+parser) are system-provided for the system data types where appropriate,
+but may be overloaded for other types by using the operator name given
+by the following table:
+
+[cols=",",options="header",]
+|==============================================
+|Symbol |Operator Name
+|- |link:O-System.iNegate.html[iNegate]
+|~ |link:O-System.iBitwiseNot.html[iBitwiseNot]
+|*not* |link:O-System.iNot.html[iNot]
+|*exists* |link:O-System.iExists.html[iExists]
+|==============================================
+
+[[D4LGLanguageElements-Expressions-QualifierExpression]]
+=== Qualified Expression
+
+Qualifier expressions in D4 have the following syntax:
+
+....
+<qualified factor> ::=
+    <factor>{(.<qualifier expression>) | <indexer expression>}
+
+<qualifier expression> ::=
+    <identifier>["("<actual parameter commalist>")"][.<qualifier expression>]
+....
+
+The qualifier operator in D4 is a system-provided operator and cannot be
+overloaded. It serves the following functions:
+
+* Namespace qualifier
+* Property accessor
+* Operator invocation
+* Column Extractor
+
+For a description of how the qualifier behaves for the purposes of
+namespace resolution, refer to
+<<D4LexicalElements.adoc#D4LGLexicalElements-Identifiers, Identifiers>>.
+
+If the target of the qualifier is a scalar-valued expression, the
+qualifier can be used to access the properties of any logical
+representation of that type. This type of property access can be an
+expression or an assignment target, depending on which side of an
+assignment statement it appears. For a complete description of logical
+representations and property accessors, refer to
+<<D4Catalog.adoc#D4LGCatalogElements, Scalar Types>>.
+
+==== Dot Invocation
+
+If the qualifier is an unresolved operator invocation, the compiler will
+attempt to resolve the invocation again, passing the qualifier target as
+the first argument of the invocation. If this resolution fails, the
+compiler will attempt to resolve the invocation with the qualifier
+target as a *var* argument. In this way, the qualifier enables
+object-oriented style "method" invocation.
+
+....
+// Standard invocation
+Length(LString);
+Length(ServerSettings[].Name);
+Length("Alphora");
+Length(ToString(DateTime()));
+
+// Dot invocation
+LString.Length();
+ServerSettings[].Name.Length();
+"Alphora".Length();
+DateTime().ToString().Length();
+....
+
+==== Column Extractor
+
+If the target of the qualifier is a row-valued expression, the qualifier
+can be used to access the values of any column of the row.
+
+....
+select row { "Alphora" Company, "Dataphor" Product }.Company;
+
+create table Contact
+{
+ Name : String,
+ Phone : String,
+ key { Name }
+};
+
+begin
+ var LRow := row { "Bob" Name, "555-2222" Phone };
+ Contact := table { row { LRow.Name Name, "123-" + LRow.Phone Phone } };
+end;
+
+select Contact;
+
+drop table Contact;
+....
+
+....
+Alphora
+
+Name Phone
+---- ------------
+Bob  123-555-2222
+....
+
+[[D4LGLanguageElements-Expressions-IndexerExpression]]
+=== Indexer Expression
+
+Indexer expressions in D4 have the following syntax:
+
+....
+<indexer expression> ::=
+    "["<expression term commalist> [by "{"<column name commalist>"}"]"]"
+
+<column name> ::=
+    <qualified identifier>
+....
+
+Indexer expressions provide a mechanism for array-style access. The
+link:O-System.iIndexer.html[`System.iIndexer`] operator is overloaded
+for tables, lists, and strings, but may be overloaded for other types
+using the operator name iIndexer.
+
+For table-valued expressions, this operator is known as a
+__table-indexer__, and is the only context in which the optional by
+clause is valid. A table-indexer provides the ability to extract a
+specified row from a table-valued expression, based on the given index
+terms. If the by clause is not specified, the index terms will be used
+to resolve a key based on the number and type of the index terms. The
+compiler uses the same process as operator overload resolution to
+resolve the key. In other words, the compiler will attempt to resolve to
+the key that can be reached with the least narrowing, shortest
+conversion path from the index terms.
+
+Note that the compiler will try all permutations of the given index
+terms when attempting to resolve a key in a table-indexer. This process
+removes any dependence on the order of terms in the table-indexer, but
+is potentially expensive for large numbers of terms. For this reason,
+the compiler requires a by clause for table-indexers with more than 5
+terms.
+
+When a by clause is specified, the index terms will be matched to the
+columns in the by clause in the order they appear in the table-indexer.
+
+If the by clause is specified, but the columns do not form a superset of
+some key of the source expression, the compiler will issue a warning
+stating that the expression may return multiple rows at run-time. Note
+that the empty table-indexer ([]) is valid, and results in a "pure" row
+extractor.
+
+The source expression for a table-indexer is required to have at most
+one row. If the expression evaluates to a table with more than one row,
+an error will be thrown at run-time. If the compiler detects that the
+expression could return more than one row, a warning will be issued. If
+the source expression does not return any rows, the result of the
+table-indexer will be **nil**. Note that a subsequent column extractor
+on this result will also evaluate to nil.
+
+The following listing provides several examples of the table-indexer
+expression:
+
+....
+begin
+    var LTable : table { ID : Integer } := table { row { 1 ID } };
+    var LRow : row { ID : Integer } := LTable[];
+    insert table { row { 2 ID } } into LTable;
+    // the next statement is an error because the row to be extracted cannot be determined
+    LRow := LTable[];
+end;
+....
+
+The following example returns the HostName for the current session:
+
+....
+select Sessions[SessionID()].HostName;
+....
+
+The same expression using the optional by clause:
+
+....
+select Sessions[SessionID() by { ID }].HostName;
+....
+
+See link:O-System.iIndexer.html[`System.iIndexer`] for information and
+examples of the use of an indexer with strings and lists.
+
+[[D4LGLanguageElements-Expressions-Factor]]
+=== Factor
+
+Factors in D4 have the following syntax:
+
+....
+<factor> ::=
+    ("("<expression>")") |
+    <parser literal> |
+    <identifier> |
+    <operator invocation> |
+    <selector> |
+    (parent <qualified identifier>) |
+    <conditional expression>
+....
+
+[[D4LGOperatorInvocation]]
+==== Operator Invocation
+
+Operator invocation in D4 uses parentheses to delimit the argument list,
+and commas to separate arguments within the list. The arguments in a
+given call expression must appear in the order they are defined in the
+operator definition for the operator being invoked. The operator name,
+together with the names of the types for the arguments in the order they
+are defined, is known as the _operator signature_ and is used by the
+compiler to perform operator resolution. The operator most closely
+matching the call signature is used.
+
+Each <<D4Catalog.adoc#D4LGCatalogElements-Operators, operand>> in the signature
+of an operator has an associated modifier. If this modifier is **var**,
+the call must use the *var* keyword to pass the argument in the
+invocation. This helps to ensure that operator invocations which can
+have side effects are clearly marked in the invocation.
+
+For stand alone aggregate operator invocations, the
+<aggregate actual parameter> is used to specify the target column, or
+columns, of the invocation. In addition, the syntax provides for the
+possibility of order-dependent aggregate operator invocations. For a
+complete description of aggregate operators, refer to the
+<<D4Catalog.adoc#D4LGCatalogElements-Operators-AggregateOperators, Aggregate Operators>>
+discussion in this guide.
+
+Operator invocations in D4 have the following syntax:
+
+....
+<operator invocation> ::=
+    <identifier>"("<actual parameter commalist>")"
+
+<actual parameter> ::=
+    <modified actual parameter> | <aggregate actual parameter>
+
+<modified actual parameter> ::=
+    [var] <expression>
+
+<aggregate actual parameter> ::=
+    (<column name> | ("{"<column name commalist>"}"))
+        from
+        <expression>
+        [order by "{"<order column definition commalist>"}"]
+....
+
+[[D4LGConditionalExpression]]
+==== Conditional Expression
+
+Conditional expressions are a kind of inline function in that they are
+equivalent to writing an operator that uses branching.
+
+There are two types of conditional expressions in D4, the
+_<<D4ImperativeStatements.adoc#D4LGIfStatement, if>> expression_
+and the __<<D4ImperativeStatements.adoc#D4LGCaseStatement, case>> expression__.
+
+These operators are system-provided and cannot be overloaded.
+
+Conditional expressions in D4 have the following syntax:
+
+....
+<conditional expression> ::=
+    <if expression> |
+    <case expression>
+
+<if expression> ::=
+    if <expression term> then <expression term> else <expression term>
+
+<case expression> ::=
+    case [<expression>]
+        <ne case expression item list>
+        else <expression>
+    end
+
+<case expression item> ::=
+    when <expression> then <expression>
+....
+
+If the condition evaluates to true, the result of the if expression is
+the result of evaluating the first expression. If the condition
+evaluates to false or nil, the result of the if expression is the result
+of evaluating the second expression. Note that both expressions are
+required to return values of compatible types.
+
+Case expressions are shorthand for iterated if expressions. There are
+two flavors of the case expression, one in which a single expression is
+used as the comparison target for each case item, and one in which no
+comparison target is given, rather each case item condition is a boolean
+comparison in itself. In both versions of the expression, the final
+unsatisfied condition is given by the else expression, and the results
+of all case items and the else expression must return values of
+compatible types.
+
+*See Also*
+
+<<D4ImperativeStatements.adoc#D4LGCaseStatement, case statement>> |
+<<D4ImperativeStatements.adoc#D4LGIfStatement, if statement>> |
+<<D4LGLanguageElements-Expressions, Expressions>>

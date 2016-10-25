@@ -1,0 +1,24 @@
+= Using Dataphor Applications
+:author: Alphora
+:doctype: book
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+.Sections
+. link:StartingDataphorApplications.adoc[Starting a Dataphor Application]
+. link:UsingDataphorForms.adoc[Using Dataphor Forms]
+. link:UsingDataphorControls.adoc[Using Dataphor Controls (UI Components)]
+
+[[DUGP1UsingDataphorApplications]]
+== Summary
+
+This chapter discusses the Dataphor Frontend Clients that provide the
+user interface for Dataphor Applications. Dataphor applications
+typically have at least a Microsoft Windows user interface, and a Web
+user interface. Regardless of the style of user interface, the overall
+look-and-feel of the application is the same.
+
+This chapter is intended to be read by anyone using a Dataphor
+application. No prior knowledge of the Dataphor platform is assumed in
+the material covered.

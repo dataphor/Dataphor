@@ -1,0 +1,17 @@
+= Frontend Components
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DRDilIntroduction]]
+== Summary
+
+This section documents the front-end, user-visible interfaces in Dataphor.
+
+=== Under construction
+
+NOTE: We're migrating our documentation to the wild, worldwide world of Github.
+Please check back later or http://dataphor.org/DocumentationOverview.ashx[visit our documentation archives] right now.

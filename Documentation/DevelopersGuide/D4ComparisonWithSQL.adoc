@@ -1,0 +1,1233 @@
+= Comparison With SQL
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[D4LGComparisonWithSQL]]
+== Summary
+
+This section provides a comparison between the D4 and SQL languages. For
+users familiar with SQL, this section provides a quick-start to D4, as
+it explains how the constructs of SQL are expressed in D4. In addition,
+this section highlights many of the important features of the D4
+language which are not available in SQL. This section has the following
+basic outline:
+
+* Introduction
++
+This section provides a brief overview of the two languages and provides
+a high-level comparison.
+* Common SQL
++
+This section introduces a hypothetical SQL dialect called Common SQL.
+This language will provide a concrete syntax that can be used to
+demonstrate and explain the differences between SQL and D4.
+* Vendor Dialects
++
+This section introduces several of the more popular dialects of SQL, and
+highlights the idiosynchrasies of each.
+* Mapping an SQL Query Into D4
++
+This section describes how each component of an SQL query can be mapped
+into D4 operators.
+* Data Management Differences
++
+This section describes some of the fundamental differences between the
+way the two languages deal with data.
+
+Note: This section is _not_ intended for users who are not familiar with
+SQL. If the reader does not already know SQL fairly well, he or she
+would do better not to read this section.
+
+[[D4LGComparisonWithSQL-Introduction]]
+== Introduction
+
+SQL was first developed as a prototype interface for use with the System
+R project from IBM. As such, it was never intended to be a production
+language for use in real applications. It was designed to be _some_
+interface for a relational prototype that would serve to convince the
+world that relational database management was a viable technology [6].
+
+D4, on the other hand, was built from the very beginning as a solution
+to everyday data management problems faced by application developers. It
+is especially significant that the designers of D4 have extensive
+backgrounds in database application development using SQL-based DBMSs.
+The entire Dataphor product evolved from a set of in-house software
+development tools used to develop commercial applications. The logical
+model for the D4 language is based on The Third Manifesto, by C. J. Date
+and Hugh Darwen. The syntax of D4 is based largely on Pascal and
+Tutorial D, a hypothetical syntax used in The Third Manifesto as a
+vehicle for describing the concepts. D4 is an 'Industrial D' as
+described in The Third Manifesto.
+
+In addition, SQL was designed as a 'database sublanguage.' It was
+intended to be used from 3GL programming environments as a means of
+retrieving and manipulating data in the database. As such, it had no
+facilities for imperative programming. This implies that application
+development is done in one language, while data manipulation is done in
+another. This disparity of language environments is called __impedance
+mismatch__.
+
+D4 is really just an imperative programming language where one of the
+types of data that can be described is a table. As a result,
+applications can be developed entirely in D4, with no resulting
+impedance mismatch.
+
+The following table briefly lists some of the ways in which D4 differs
+from SQL (the standard as well as the major implementations of that
+standard):
+
+[cols=",",options="header",]
+|=======================================================================
+|D4 |SQL
+|Uses the relational algebra |Mixed calculus and algebra
+
+|Tables are sets of rows |Tables are allowed to contain duplicates.
+
+|Highly orthogonal (easy to learn and use) |Complex rules and exceptions
+
+|Intrinsic imperative language |Proprietary extensions to support
+imperative programming
+|=======================================================================
+
+In addition to the syntactic differences between the two languages,
+there are numerous features of D4 that are not supported by, or are
+poorly implemented in SQL such as user-defined types, user-defined
+functions, user-defined aggregate functions, exception-handling,
+user-defined relational operators, updatable views, support for quota
+queries, etc.,. There are numerous criticisms of SQL in the literature,
+and we will not endeavour to repeat them here, except as it pertains to
+the functionality being described. The interested reader is referred to
+the References section of this manual.
+
+[[D4LGComparisonWithSQL-CommonSQL]]
+== Common SQL
+
+In order to illustrate the differences between SQL and D4, we must agree
+on a common dialect of SQL to perform the comparison. Because the
+standard version of SQL has never been completely implemented, we use
+the __lowest common denominator__, or that portion of the language that
+all the various dialects support in some form or another. We call this
+hypothetical language __Common SQL__. Note that Common SQL does not
+exist, even in principle, as even when two dialects support a common
+feature set, they may have different syntax for the same feature. As
+such, we make no claim that this dialect is standard in any way, or that
+it could be used to communicate with any actual DBMS. It is merely a
+pedagogical tool for use in demonstrating the differences between the
+de-facto standard SQL and D4.
+
+Firstly, we make explicit the fact that we will only be discussing the
+data manipulation language statements of SQL. In practice, the Dataphor
+Server must also communicate using data definition language (and the
+syntactic variations here are even more profound than for DML), but here
+we will only concern ourselves with the data manipulation aspects of
+each language.
+
+Secondly, we assume that we will only be discussing single statements.
+The rules for grouping statements into execution blocks also differ for
+each dialect and DBMS, and so we will only be concerned with the effects
+of a single data manipulation language statement.
+
+In order to describe the Common SQL language, we will use a modified
+version of Extended Backus-Naur Form (EBNF) notation. For a complete
+description of this notation, refer to
+<<D4Introduction.adoc#D4LGIntroduction-SyntacticConventions, Syntactic Conventions>>.
+
+Here then is the syntax for the data manipulation language statement in
+Common SQL:
+
+....
+<dml statement> ::=
+    <select statement> |
+    <insert statement> |
+    <update statement> |
+    <delete statement>
+....
+
+[[D4LGComparisonWithSQL-CommonSQL-SelectStatement]]
+=== Select Statement
+
+The bulk of our discussion will center around the select statement, as
+the mapping for the modification statements is relatively
+straightforward.
+
+The select statement in <<D4LGComparisonWithSQL-CommonSQL, CommonSQL>>
+has the following syntax:
+
+....
+<select statement> ::=
+    <query expression>
+    [<order by clause>]
+
+<query expression> ::=
+    <select expression> {<table operator clause>}
+
+<select expression> ::=
+    select (* | <column expression commalist>)
+        <from clause>
+        [<where clause>]
+        [<group by clause>]
+        [<having clause>]
+
+<column expression> ::=
+    <expression> [as <column alias>]
+
+<from clause> ::=
+    from <table specifier> [<join clause list>]
+
+<where clause> ::=
+    where <conditional expression>
+
+<group by clause> ::=
+    group by <expression commalist>
+
+<having clause> ::=
+    having <conditional expression>
+
+<table specifier> ::=
+    <table identifier> | "("<query expression>")" [as <table alias>]
+
+<join clause> ::=
+    [cross | inner | ((left | right) [outer])] join
+     <table specifier> [on <conditional expression>]
+
+<table operator clause> ::=
+    ((union | intersect | except) [all]) <select expression>
+
+<order by clause> ::=
+    order by <order column expression commalist>
+
+<order column expression> ::=
+    <column identifier> [asc | desc]
+....
+
+The syntax is relatively straightforward, and most dialects can be
+described with only slight modifications. This statement covers all the
+major operations available in commercial SQL-based DBMSs today. Note
+that we chose the ANSI standard version of the join clause, rather than
+the <table specifier commalist> flavor common in many implementations.
+
+[[D4LGQueryExpression]]
+==== Query Expression
+
+The <query expression> production specifies a <select expression>
+followed by any number of <table operator clause> productions. We refer
+to these as _union-compatible_ operators, because both operands for each
+operator are required to have the same number of columns, and
+assignment-compatible data types for each column, left-to-right.
+
+[[D4LGSelectExpression]]
+==== Select Expression
+
+The <select expression> production is the bulk of the SQL syntax. This
+is the familiar *select...from...where* construct. The
+<column expression commalist> specifies the columns to be preserved in
+the result set. The wildcard * indicates that all columns of the result
+should be preserved. The <column expression> production includes an
+optional as clause which indicates what the column should be named in
+the final result.
+
+[[D4LGFromClause]]
+==== From Clause
+
+The <from clause> is required and specifies the initial table from which
+the result should be gathered. Note that the <table specifier> is
+allowed to be a <query expression> in itself. This is known as a _nested
+from_ and is only supported by some systems. We choose to support it in
+<<D4LGComparisonWithSQL-CommonSQL, Common SQL>> because it is an
+_extremely_ useful extension to SQL. Indeed, without it, SQL is not
+relationally complete.
+
+[[D4LGJoinClause]]
+==== Join Clause
+
+The <join clause> is optional and specifies an additional table to bring
+in to the query. The various qualifiers in the join clause specify the
+type of join to be done, and an optional <conditional expression> is
+used to indicate how inner and outer joins are to be performed. Note
+here again that the <table specifier> is allowed to be a
+<query expression>, and that only a handful of systems support this type
+of nesting. Even among those that do, there is inconsistency about the
+types of expressions that are allowed to be nested.
+
+[[D4LGWhereClause]]
+==== Where Clause
+
+The <where clause> is optional and specifies a filter that is applied to
+the rows in the result. Only rows for which the expression specified by
+<conditional expression> evaluates to true appear in the result. Values
+of columns for the row being processed are accessible within the
+expression by name. Note that references to column aliases are not
+allowed, only columns of actual tables in the query can be referenced.
+This limitation can be worked around using a nested from, which is one
+of the reasons it is so useful.
+
+[[D4LGGroupByClause]]
+==== By Clause
+
+The <group by clause> is optional, so long as the
+<column expression commalist> contains no aggregate operator
+invocations, or contains only aggregate operator invocations. If there
+is a mixture of aggregate and non-aggregate expressions, the group by
+clause must specify all the non-aggregate expressions.
+
+[[D4LGHavingClause]]
+==== Having Clause
+
+The <having clause> is optional, and specifies a filter that is applied
+to the rows in the result after any aggregation in the query. As with
+the <where clause>, references to column aliases are not allowed, but
+references to the aggregate operator invocations are.
+
+[[D4LGOrderByClause]]
+==== By Clause
+
+The <order by clause> is optional, and specifies an overall ordering for
+the result.
+
+[[D4LGComparisonWithSQL-CommonSQL-InsertStatement]]
+=== Insert Statement
+
+The insert statement in SQL allows a row or rows to be inserted into a
+given table variable. The insert statement in
+<<D4LGComparisonWithSQL-CommonSQL, Common SQL>> has the following
+syntax:
+
+....
+<insert statement> ::=
+    insert into <table name>"("<column name commalist>")"
+        (<values clause> | <query expression>)
+
+<values clause> ::=
+    values "("<expression commalist>")"
+....
+
+[[D4LGComparisonWithSQL-CommonSQL-UpdateStatement]]
+=== Update Statement
+
+The update statement in SQL allows the data in a given table variable to
+be updated. The update statement in
+<<D4LGComparisonWithSQL-CommonSQL, Common SQL>> has the following
+syntax:
+
+....
+<update statement> ::=
+    update <table name>
+        set <update column expression colmmalist>
+        [<where clause>]
+....
+
+[[D4LGComparisonWithSQL-CommonSQL-DeleteStatement]]
+=== Delete Statement
+
+The delete statement in SQL allows the data in a given table variable to
+be deleted. The delete statement in
+<<D4LGComparisonWithSQL-CommonSQL, Common SQL>> has the following
+syntax:
+
+....
+<delete statement> ::=
+    delete <table name>
+        [<where clause>]
+....
+
+[[D4LGComparisonWithSQL-VendorDialects]]
+== Vendor Dialects
+
+There are probably more dialects of SQL than there are programming
+languages. Each DBMS has its own definition of what the language is,
+what features it supports, how it manages data, and what the syntax of
+specific statements is. This section discusses a few of the more
+pervasive implementations, and how they differ from
+<<D4LGComparisonWithSQL-CommonSQL, Common SQL>>, and from each
+other.
+
+Note that the differences outlined here are mainly syntactic in nature.
+When the semantics of the different languages are considered as well,
+the problems of finding a common language become almost unmanageable.
+For this comparison we largely ignore these issues, but be aware that
+the Dataphor Server is dealing with them underneath.
+
+[[D4LGComparisonWithSQL-VendorDialects-Transact-SQL]]
+=== Transact-SQL
+
+Microsoft SQL Server uses a dialect of SQL called Transact-SQL or T-SQL.
+This dialect is very similar to Common SQL except that it supports both
+flavors of join specification in the from clause, and it has no support
+for the intersect and except operators. Intersect is not necessary
+because it is a special case of join, but except is a critical operator,
+and the lack of support for it is a serious drawback of this dialect.
+
+A peculiarity of this dialect is the way in which outer joins are
+specified when the <table specifier commalist> style of from clause is
+used. The outer join is specified by using a special comparison operator
+when defining the join in the where clause. The symbol *= is used for
+left joins, while =* is used for right joins. There are also some
+associated restrictions with using these operators, but we chose to
+avoid the syntax entirely and so do not discuss them here.
+
+Another difference is the treatment of the wildcard (*) in the
+<column expression commalist>. T-SQL allows table qualifiers on the
+wildcard to indicate that all the columns of a particular table are to
+be included in the result. While this is a useful extension, we did not
+chose to support in Common SQL, as it is not necessary.
+
+The <from clause> in T-SQL is optional, in which case the statement is
+based on the table with one row, and only the columns specified in the
+<column expression commalist>. While this is also a useful extension, it
+is not as general as allowing table and row selectors. As such we chose
+not to support it in Common SQL.
+
+Nested froms are allowed in T-SQL, but there is a problem with certain
+constructs in which the nested expression can only reference columns in
+the outer query to two levels of nesting. Incidentally, Sybase SQL also
+suffers from this problem, which is not surprising, given the history of
+the two systems.
+
+[[D4LGComparisonWithSQL-VendorDialects-OracleSQL]]
+=== Oracle SQL
+
+Oracle database systems use a dialect of SQL called Oracle SQL,
+appropriately enough. This dialect differs mostly in its support for the
+<from clause>. Prior to version 9i, The dialect only supports the
+<table specifier commalist> flavor, and has some severe limitations on
+the usage of nested from. As of 9i, the ANSI standard join specification
+is supported.
+
+This dialect also has a peculiar way of specifying outer joins it the
+<table specifier commalist> is used. This is done by using the (+)
+symbol next to the name of the column within the table which is to be
+the outer table. While we did not find the same restrictions on usage as
+T-SQL has, we find the syntax clumsy and counter-intuitive.
+
+Nested froms are allowed in Oracle SQL, but the nested expression may
+not reference columns in the main query. This is in violation of Core
+SQL as specified by the ANSI-SQL 1999 standard, and is a major drawback
+of this dialect.
+
+[[D4LGComparisonWithSQL-VendorDialects-DB2SQL]]
+=== DB2 SQL
+
+DB2 database systems use a dialect of SQL which we will call DB2 SQL.
+This dialect is very similar to Common SQL, and does not require much
+modification to represent. It is worth noting that the dialect does
+suffer from a nested from anomaly as well.
+
+Nested froms are allowed in DB2 SQL, but the nested expression may not
+reference columns in the main query unless the keyword *TABLE* is
+specified as part of the nested from definition. This seems to be a
+general solution to the problem, and so it is little more than a
+peculiarity.
+
+[[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4]]
+== Mapping an SQL Query
+Into D4Mapping an SQL Query Into D4
+
+In order to show how an arbitrary SQL statement can be expressed in D4,
+it is useful to have a sample database definition to work with. The
+sample is given in D4, but the syntax is similar to SQL and the
+semantics should be clear:
+
+....
+create table Employee
+{
+    ID : Integer,
+    Name : String,
+    key { ID }
+};
+
+insert
+    table
+    {
+        row { 1 ID, "Joe" Name },
+        row { 2, "John" },
+        row { 3, "Josh" },
+        row { 4, "Jeff" },
+        row { 5, "Jake" },
+        row { 6, "Jeff" }
+    }
+    into Employee;
+
+create table Manager
+{
+    Employee_ID : Integer,
+    Manager_ID : Integer,
+    key { Employee_ID },
+    reference Manager_Employee { Employee_ID } references Employee { ID },
+    reference Manager_Manager { Manager_ID } references Employee { ID }
+};
+
+insert
+    table
+    {
+        row { 2 Employee_ID, 1 Manager_ID },
+        row { 3 Employee_ID, 1 Manager_ID },
+        row { 4 Employee_ID, 2 Manager_ID },
+        row { 6 Employee_ID, 2 Manager_ID },
+        row { 5 Employee_ID, 4 Manager_ID }
+    }
+    into Manager;
+
+create table Department
+{
+    ID : Integer,
+    Description : String,
+    key { ID }
+};
+
+insert
+    table
+    {
+        row { 1 ID, 'Development' Description },
+        row { 2 ID, 'Support' Description },
+        row { 3 ID, 'Testing' Description }
+    }
+    into Department;
+
+create table EmployeeDepartment
+{
+    Employee_ID : Integer,
+    Department_ID : Integer,
+    key { Employee_ID },
+    reference EmployeeDepartment_Employee { Employee_ID } references Employee { ID },
+    reference EmployeeDepartment_Department { Department_ID } references Department { ID }
+};
+
+insert
+    table
+    {
+        row { 1 Employee_ID, 1 Department_ID },
+        row { 2 Employee_ID, 1 Department_ID },
+        row { 3 Employee_ID, 2 Department_ID },
+        row { 4 Employee_ID, 2 Department_ID },
+        row { 5 Employee_ID, 3 Department_ID }
+    }
+    into EmployeeDepartment;
+
+create table EmployeePhone
+{
+    Employee_ID : Integer,
+    Phone : String,
+    key { ID, Phone },
+    reference EmployeePhone_Employee { Employee_ID } references Employee { ID }
+};
+
+EmployeePhone :=
+    table
+    {
+        row { 1 Employee_ID, "555-1234" Phone },
+        row { 1 Employee_ID, "555-1000" Phone },
+        row { 2 Employee_ID, "555-4321" Phone },
+        row { 4 Employee_ID, "555-4444" Phone },
+        row { 5 Employee_ID, "555-5678" Phone }
+    };
+....
+
+[[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-DataRetrieval]]
+=== Data Retrieval
+
+We begin by mapping basic data retrieval. Suppose we are asked 'Get IDs
+and Names of all employees.' This simple query can be answered using the
+SQL statement:
+
+....
+select * from Employee
+....
+
+This is the simplest select statement possible in Common SQL and
+indicates that all the columns and all the rows of the Employee table
+should be included in the result. Notice that we have not done any
+manipulation to the result, in other words, no operators have been
+invoked. We have simply referenced the name of a table variable within
+an expression.
+
+If this is true, why the '* **from**' portion of the query? Clearly it
+is an artifact of the rigid structure required of SQL statements. By
+contrast, the equivalent D4 statement:
+
+....
+select Employee;
+....
+
+This is the simplest select statement possible in D4 and is precisely
+what we wanted, all the columns and all the rows of the Employee table,
+without any extra artifacts. The point is, because we invoked no
+operators, no extra information needs to be specified, the reference to
+the table variable is enough. While this may not seem like much right
+now, keep in mind this is the simplest select statement possible. As the
+statements become more complex, these differences will become more and
+more apparent.
+
+Also note that unlike SQL, the keyword
+<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement, select>>
+in D4 is only part of the statement, it is not part of the expression.
+
+[[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-TheWhereClause]]
+=== The Where Clause
+
+Next, we consider a simple restriction. Suppose we are asked 'Get the
+IDs and Names of Employees whose ID is greater than 3.' In SQL, we have:
+
+....
+select * from Employee where ID > 3;
+....
+
+The <where clause> applies a filter to the result. Only rows for which
+the specified conditional expression evaluates to true are included in
+the result. In D4, the equivalent query is:
+
+....
+select Employee where ID > 3;
+....
+
+The <<D4TableOperators.adoc#D4LGTableExpressions-Where, where>> operator in D4
+performs the same type of filtering on the result.
+
+[[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-UnravelingtheColumnList]]
+=== Unraveling the Column List
+
+The column list in an SQL query is actually performing four distinct
+operations in the query: projection, extension, renaming, and part of
+aggregation. In this section, we consider the first of these,
+projection. Suppose we are asked 'Get the Names of Employees.' In SQL we
+would write:
+
+....
+select distinct Name from Employee
+....
+
+The projection step indicates that only the Name column from the
+Employee table should appear in the result.
+
+The equivalent statement in D4 is:
+
+....
+select Employee over { Name };
+....
+
+Projection in D4 is always done using one of two operators,
+<<D4TableOperators.adoc#D4LGTableExpressions-OverandRemove, over>> and
+<<D4TableOperators.adoc#D4LGTableExpressions-OverandRemove, remove>>. Over allows
+the desired columns to be specified, while remove allows the unwanted
+columns to be specified. Thus an alternative formulation of the query
+is:
+
+....
+select Employee remove { ID };
+....
+
+There is another important difference between the SQL version of
+projection, and the projection of D4: the elimination of duplicates. In
+the SQL version of the query, we had to specify *distinct* in order to
+tell the system that duplicates should be eliminated from the result. In
+D4, the result is never allowed to contain duplicates, so no *distinct*
+keyword is required.
+
+[[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-AddingColumns]]
+=== Adding Columns
+
+Next we consider the effect of columns defined in terms of expressions.
+Suppose we are asked 'Get IDs, and Names of all employees, together with
+the length of the name for each employee.' In SQL, we would write:
+
+....
+select ID, Name, Length(Name) from Employee
+....
+
+This query illustrates the second of the four tasks specified in the
+<<D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-UnravelingtheColumnList, column list>>,
+that of extension. In SQL, an expression is allowed to define the value for a
+given column in the result.
+
+The equivalent statement in D4 is:
+
+....
+select Employee add { Length(Name) NameLength };
+....
+
+The <<D4TableOperators.adoc#D4LGTableExpressions-Add, add>> operator of D4 allows
+columns to be added to the result. The values for the new columns are
+given by the expressions in the add clause.
+
+An important point can be illustrated by asking a simple question about
+the result of the SQL version of the query: What is the name of the
+column containing the length of the name of each employee? The answer
+is, it is undefined. The SQL syntax does not force the column to be
+named, and without a name, it cannot be referenced by anything else in
+the query. This fact has severe implications when we attempt to use
+queries of this type in more complex expressions of SQL. By contrast, in
+the D4 version, the name is specified as part of the definition of the
+column, so the problem is completely avoided.
+
+[[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-RenamingColumns]]
+=== Renaming Columns
+
+Next we discuss the renaming of columns in a result. Suppose we want the
+Name column in the result to be called LastName. In SQL we write:
+
+....
+select ID, Name as LastName from Employee
+....
+
+This query illustrates the third of the four tasks being specified by
+the <<D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-UnravelingtheColumnList, column list>>,
+that of renaming columns. The optional *as* keyword is used to
+specify a new name for the given column.
+
+In D4, the equivalent query is:
+
+....
+select Employee rename { Name LastName };
+....
+
+The <<D4TableOperators.adoc#D4LGTableExpressions-Rename, rename>> operator of D4
+allows the names of the columns in a result to be changed. This operator
+has no effect on the values of the columns in the result.
+
+To illustrate a point about the names of columns in the result, consider
+the following SQL query:
+
+....
+select ID, Name, Name from Employee
+....
+
+This query is perfectly legal in SQL, but the result has the same name
+for two columns. Again, we are faced with the problem that the column
+cannot be referenced by anything else in the query. In D4, all the
+columns of a given result must be unique, so again, the problem is
+completely avoided.
+
+[[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-TheGroupByandHavingClauses]]
+=== The Group By and Having Clauses
+
+Now we consider queries in which columns in the result are defined with
+aggregate expressions. Suppose we are asked 'Get the number of
+employees.' In SQL we write:
+
+....
+select Count(*) from Employee
+....
+
+This invokes the aggregate operator Count(*) on the Employee table.
+
+In D4, the equivalent query is:
+
+....
+select Employee group add { Count() EmployeeCount };
+....
+
+On the surface the SQL version of the query looks very similar to the
+extend operator, but in reality, the task is completely different, and
+is the fourth task specified in the
+<<D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-UnravelingtheColumnList, column list>>,
+that of <<D4TableOperators.adoc#D4LGTableExpressions-Aggregate, aggregation>>.
+Actually, the task is split between the expressions in the column list,
+and the group by clause, a fact which serves to complicate matters even
+further.
+
+By changing the query slightly to 'Get the names of employees together
+with the number of employees that have that name' we get the new
+statement:
+
+....
+select Name, Count(*)
+    from Employee
+    group by Name
+....
+
+In D4, the equivalent query is:
+
+....
+select Employee
+    group by { Name } add { Count() EmployeeCount };
+....
+
+In the SQL version of the query, because the column list includes both
+aggregate and non-aggregate expressions, we are forced to use the group
+by clause to express the desired grouping. In SQL, the task of
+specifying an aggregation is split between the select list where the
+columns to be computed are specified, and the group by clause, where the
+grouping columns are specified. In D4, the group operator allows the
+grouping columns to be specified directly. This is followed immediately
+by the specification of the aggregates to compute.
+
+Note that the group by in SQL is not allowed to reference aliases. With
+that in mind, consider the following two equivalent SQL queries:
+
+....
+select ID / 2, Count(*)
+    from Employee
+    group by ID / 2
+....
+
+....
+select ID / 2, Count(*)
+    from Employee
+    group by ID * 0.5
+....
+
+Clearly, these two queries are equivalent, but one is a legal SQL query,
+and the other is not. Because the group by clause must contain at least
+the non-aggregate columns in the select list, we are forced to write out
+the expression multiple times, and we cannot use what are clearly
+equivalent formulations of the expression. In D4, this query becomes:
+
+....
+select Employee
+    add { ID / 2 HalfID }
+    group by { HalfID } add { Count() EmployeeCount };
+....
+
+Note that the actual task of computing the expression to be grouped on
+is relegated to the <<D4TableOperators.adoc#D4LGTableExpressions-Add, add>> operator,
+rather than intermixed with the
+<<D4TableOperators.adoc#D4LGTableExpressions-Aggregate, group>> operator. By cleanly
+separating the tasks involved, the complexity of the language is
+reduced, while the power is increased.
+
+To pursue this example further, suppose we only want rows in the result
+for which the EmployeeCount is greater than one. In SQL, the query
+becomes:
+
+....
+select ID / 2, Count(*)
+    from Employee
+    group by ID / 2
+    having Count(*) > 1
+....
+
+The addition of the having clause allows us to filter the result based
+on the values computed for aggregate expressions in the select list.
+Again, column aliases cannot be referenced, so we are forced to write
+out the same aggregate expression (with the same restrictions on usage,
+namely it must be syntactically the same expression, not semantically)
+in order to express the desired filter. In D4, the equivalent query is:
+
+....
+select Employee
+    add { ID / 2 HalfID }
+    group by { HalfID } add { Count() EmployeeCount }
+    where EmployeeCount > 1;
+....
+
+There is no need to introduce a new concept for filtering, we already
+have that functionality in the
+<<D4TableOperators.adoc#D4LGTableExpressions-Where, where>> operator. Because D4 is an
+algebra, the result of any operator can be used as an argument to the
+next operator. This allows us to simply add another where referencing
+the EmployeeCount column.
+
+[[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-TheFromandJoinClauses]]
+=== The From and Join Clauses
+
+With the column list completely unraveled, we now turn our attention to
+the from clause. Up till now, we have been using a very simple from
+clause in all our queries: *from* Employee. In SQL, the from clause is
+allowed to contain any number of references to tables together with the
+specification of how those tables should be brought together in the
+result. Suppose we are asked 'Get IDs, Names and Phone Numbers of all
+Employees.' The information to satisfy this query is in two different
+tables, Employee and EmployeePhone. In SQL, we use a join and write:
+
+....
+select *
+    from Employee
+        join EmployeePhone on ID = Employee_ID
+....
+
+This query references the Employee table, then joins it to the
+EmployeePhone table using the relationship ID = Employee_ID. This type
+of join is also called an inner join, and the keyword *inner* may even
+be specified in the join clause. We can further categorize this type of
+join as an equi-join, meaning that the condition specified to perform
+the join consists only of equality comparisons between columns in
+opposite tables of the join, and that all such comparisons are required
+to be true in order for a match to appear in the result (in other words,
+only the *and* operator is used between column equality comparisons).
+
+In D4, the equivalent query is:
+
+....
+select Employee
+    join EmployeePhone by ID = Employee_ID;
+....
+
+Note again the disappearance of the '* **from**' portion of the query.
+Because no projection is being performed, it is simply not specified.
+Note also that in D4 there is no *inner* keyword.
+
+To illustrate the next kind of
+<<D4TableOperators.adoc#D4LGTableExpressions-Join, join>>, suppose we are asked 'Get all
+possible combinations of two employees.' In SQL we write:
+
+....
+select *
+    from Employee
+        cross join Employee
+....
+
+This is known as the cross-product, or
+<<D4TableOperators.adoc#D4LGTableExpressions-Times, times>> operator, and specifies
+that for each row in the left table and each row in the right table a
+row should appear in the result that is the concatenation of both rows.
+Note that we now have two of each column in the result, and are faced
+with another naming problem. In order to solve this problem in SQL, we
+can make use of the concept of __table aliases__. By rewriting the query
+as:
+
+....
+select *
+    from Employee E1
+        cross join Employee E2
+....
+
+we can now uniquely reference all the columns in the result.
+
+In D4, the first query would be:
+
+....
+select Employee times Employee;
+....
+
+but this would fail with a compile-time error stating that duplicate
+names exist in the result. In order to express the query, we can make
+use of the rename operator:
+
+....
+select (Employee rename { ID E1.ID, Name E1.Name })
+    times (Employee rename { ID E2.ID, Name E2.Name });
+....
+
+Clearly this involves an excessive amount of renaming, so D4 introduces
+a variant of the <<D4TableOperators.adoc#D4LGTableExpressions-Rename, rename>>
+operator that works for all the columns in a table. Using this operator
+we can rewrite the query as:
+
+....
+select (Employee rename E1) times (Employee rename E2);
+....
+
+and obtain an equivalent result.
+
+The next kind of join possible in the join clause is called an
+<<D4TableOperators.adoc#D4LGTableExpressions-OuterJoin, outer join>>. There are three
+different flavors of outer join in SQL: left, right, and full. Suppose
+we are asked 'Get IDs and Names of all employees together with the
+PhoneNumbers of those employees, if they have one.' In SQL we write:
+
+....
+select *
+    from Employee
+        left join EmloyeePhone on ID = Employee_ID
+....
+
+This query indicates that a join should be performed between Employee
+and EmployeePhone, but that if a given Employee row has no match, it
+should be included in the result with nulls for the columns of
+EmployeePhone.
+
+In D4, the equivalent query is:
+
+....
+select Employee left join EmployeePhone by ID = Employee_ID;
+....
+
+The right join simply specifies the right table as the one that should
+have unmatched rows included, and a full join states that both sides
+should have unmatched rows included. D4 supports the right join, with
+the <<D4TableOperators.adoc#D4LGTableExpressions-OuterJoin, right join>> operator, but
+does not support the full join operator, as it is rarely used, and is
+only shorthand for the union of the left and right joins.
+
+An important difference between the join operators of SQL and D4 is that
+in D4, all joins are required to be
+<<D4TableOperators.adoc#D4LGTableExpressions-Join-NaturalJoins, equi-joins>>. To see why
+this is so, we must first show that any join can be expressed using a
+combination of cross-product and restrict:
+
+....
+select Employee join EmployeePhone by ID = Employee_ID
+....
+
+is logically equivalent to:
+
+....
+select Employee cross join EmployeePhone where ID = Employee_ID
+....
+
+This means that any non-equi join such as:
+
+....
+select Employee join EmployeePhone by ID > Employee_ID
+....
+
+can always be expressed using the equivalent cross-product and
+restriction, so we do not lose any expressive power by restricting joins
+to be equi-joins. However, we do gain the benefit that the cardinality
+of any join is always well-defined, which has implications for the key
+inference mechanism of D4. For this reason, all joins in D4 are required
+to be equi-joins.
+
+[[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-TheTableOperatorClause]]
+=== The Table Operator Clause
+
+Union CompatibleNow that we have described the <select expression>, we
+discuss the <table operator clause>, which allows complete select
+expressions to be used as arguments to the
+_<<D4LGQueryExpression, union-compatible>>_ binary table
+operators: union, intersection and difference. Two tables in SQL are
+union-compatible if they have the same number of columns, and the
+columns have assignment-compatible data types, from left to right (i.e.
+the first column in the left table is the same type as the first column
+in the right table, and so on).
+
+First, we consider the union operator. Suppose we are asked 'Get the IDs
+of all employees that have phones or that have managers.' In SQL we
+write:
+
+....
+select ID
+    from Employee
+        join EmployeePhone by ID = Employee_ID
+union
+select ID
+    from Employee
+        join Manager by ID = Employee_ID
+....
+
+This query uses the union operator to combine the ID column from each
+portion of the query into a single result. A row will appear in the
+result of a union if it appears in the left table or the right table, or
+both.
+
+The equivalent query in D4 is:
+
+....
+select
+    (Employee join EmployeePhone by ID = Employee_ID)
+    union
+    (Employee join Manager by ID = Employee_ID);
+....
+
+There is an important difference between the two operators. In SQL, the
+union clause is allowed to include an optional *all* which indicates
+that duplicates should not be eliminated from the result. If a given row
+appears in both the left and right sides of the union, it will appear
+twice in the result. In D4, duplicates are never allowed, so no such
+option is available for the <<D4TableOperators.adoc#D4LGTableExpressions-Union, union>>
+operator.
+
+Next, we consider the intersect operator. If we change our query to 'Get
+the IDs of all employees that have phones and that have managers' then
+the SQL becomes:
+
+....
+select ID
+    from Employee
+        join EmployeePhone by ID = Employee_ID
+intersect
+select ID
+    from Employee
+        join Manager by ID = Employee_ID
+....
+
+This query uses the *intersect* operator to compute the desired result.
+A row will appear in the result of an intersect if it appears in the
+left table and the right table.
+
+The equivalent query in D4 is:
+
+....
+select
+    (Employee join EmployeePhone by ID = Employee_ID)
+    intersect
+    (Employee join Manager by ID = Employee_ID);
+....
+
+Again, note that the SQL version of the operator includes an optional
+*all* which specifies that duplicates should not be eliminated from the
+result. D4 has no such option for the
+<<D4TableOperators.adoc#D4LGTableExpressions-Intersect, intersect>> operator.
+
+Finally, the difference operator. If we change our query to 'Get the IDs
+of all employees that have phones and do not have managers' then the SQL
+becomes:
+
+....
+select ID
+    from Employee
+        join EmployeePhone by ID = Employee_ID
+except
+select ID
+    from Employee
+        join Manager by ID = Employee_ID
+....
+
+This query uses the difference operator to remove the ID for any
+employee that has a manager from the result. A row will only appear in
+the result of a difference if it appears in the left table and not the
+right table.
+
+The equivalent query in D4 is:
+
+....
+select
+    (Employee join EmployeePhone by ID = Employee_ID)
+    minus
+    (Employee join Manager by ID = Employee_ID);
+....
+
+Once again, the SQL version of the operator includes the *all* keyword
+which specifies that duplicate elimination should not occur. D4 has no
+counterpart for this version of the difference operator,
+<<D4TableOperators.adoc#D4LGTableExpressions-Minus, minus>>.
+
+[[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-TheOrderByClause]]
+=== The Order By Clause
+
+The order by clause in D4 maps in a fairly straightforward way into D4.
+For example, suppose we are asked 'Get the IDs and Names of all
+Employees ordered by Name alphabetically. In SQL we write:
+
+....
+select ID, Name
+    from Employee
+    order by Name
+....
+
+The equivalent statement in D4 is:
+
+....
+select Employee order by { Name };
+....
+
+In both languages, the order by is not part of the expression, rather it
+is part of the specification of how the result should be returned. In
+other words, the <<D4Catalog.adoc#D4LGOrders, order>> by clause in D4 is not an
+operator, it is part of the select statement.
+
+[[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-DataModificationStatements]]
+=== Data Modification Statements
+
+The syntax for the
+<<D4DataManipulation.adoc#D4LGDataManipulation-InsertStatement, insert>>,
+<<D4DataManipulation.adoc#D4LGDataManipulation-UpdateStatement, update>>, and
+<<D4DataManipulation.adoc#D4LGDataManipulation-DeleteStatement, delete>>
+statements in SQL and D4 is very similar, even identical in some respects,
+so the mapping is relatively straightforward. There are some important logical
+differences between the semantics of the operators, particularly for the
+insert and update.
+
+First, we discuss the
+<<D4DataManipulation.adoc#D4LGDataManipulation-InsertStatement, insert>> statement.
+Suppose we want to add a new employee into the list of Employees. In
+SQL, we have:
+
+....
+insert into Employee(ID, Name) values(7, "Jake")
+....
+
+This example illustrates the use of the first variation of the insert
+statement in SQL, that of inserting a single row. Suppose we want to
+insert the results of some query. In SQL, we have:
+
+....
+insert into Employee(ID, Name) select ID + 6, Name from Employee
+....
+
+In D4, the equivalent statements are:
+
+....
+insert table { row { 7 ID, "Jake" Name } } into Employee;
+....
+
+and
+
+....
+insert Employee redefine { ID := ID + 6 } into Employee;
+....
+
+Note: the <<D4TableOperators.adoc#D4LGTableExpressions-Redefine, redefine>> operator
+is shorthand for an equivalent *add-rename-remove* operation.
+
+Several important points should be made about the above statements:
+
+* Left-to-right ordering
++
+In the SQL versions of the statements, the left-to-right order of the
+<values clause> in the single row insert, and the <query expression> in
+the multiple row insert is important. By contrast, D4 attaches no
+significance to the order of the columns in the statement. For example:
++
+....
+insert table { row { "Jake" Name, 7 ID } } into Employee
+....
++
+has the same effect because the columns are matched by name, not by
+position in the result.
+* Order of specification
++
+In Common SQL, the insert target is specified first. In english, the
+insert statement could be rendered 'insert into this table, that data.'
+In D4, the data to be inserted is specified first, rendering the english
+equivalent as 'insert this data into that table.'
+* Restrictions on target
++
+In Common SQL, the insert target must be a table variable name. In D4,
+the insert target is allowed to be an arbitrary table-valued expression,
+i.e. the expression could consist of joins, projections, restrictions,
+etc.,.
+
+Next, we discuss the
+<<D4DataManipulation.adoc#D4LGDataManipulation-UpdateStatement, update>> statement.
+Suppose we discover that the employee with ID 6 is really named 'John'.
+In SQL, we would write:
+
+....
+update Employee set Name = 'John' where ID = 6
+....
+
+The equivalent statement in D4 is:
+
+....
+update Employee set { Name := 'John' } where ID = 6;
+....
+
+While the two statements are very similar in structure, there are some
+important differences:
+
+* Assignment operator
++
+The D4 version of the statement uses the assignment operator
+<<D4ImperativeStatements.adoc#D4LGImperativeStatements-Variables-AssignmentStatement, :=>>
+to indicate that this is indeed an assignment statement. The current value
+of the variable is being replaced by a new value.
+* Restrictions on target
++
+As with the insert statement, the D4 update statement allows the target
+to be an arbitrary table-valued expression, rather than requiring it to
+be the name of a table variable as in SQL.
+
+Finally, the link:O-System.Delete.html[delete] statement. Suppose we
+decide to remove the employee with ID 7 from the list of employees. In
+SQL, we have:
+
+....
+delete Employee where ID = 7
+....
+
+The equivalent statement in D4 is:
+
+....
+delete Employee where ID = 7;
+....
+
+The important difference between the two statements lies in the
+specification of the target. As with the other modification operators in
+D4, the delete statement is allowed to target an arbitrary table-valued
+expression. In fact, the where clause is not part of the syntax of the
+delete statement in D4, rather it is part of the table expression to be
+deleted.

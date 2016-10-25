@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 20.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1"
+	 id="Layer_1" shape-rendering="geometricPrecision" image-rendering="optimizeQuality" text-rendering="geometricPrecision"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 216 180"
+	 style="enable-background:new 0 0 216 180;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill:#1F1A17;}
+	.st2{font-family:'Arial-BoldMT';}
+	.st3{font-size:9.9998px;}
+	.st4{font-family:'MyriadPro-Regular';}
+	.st5{fill:none;stroke:#1F1A17;stroke-width:0.6945;}
+	.st6{font-size:9.9995px;}
+</style>
+<rect class="st0" width="216" height="180"/>
+<rect class="st0" width="216" height="180"/>
+<g id="Layer_x0020_1">
+	<g id="_176293808">
+		<text id="_176302744" transform="matrix(1 0 0 1 147.3428 90.0371)" class="st1 st2 st3">Location</text>
+		<text id="_176299688" transform="matrix(1 0 0 1 147.3428 103.4771)" class="st1 st4 st3">ID</text>
+		<text id="_176299688_1_" transform="matrix(1 0 0 1 147.3428 114.6479)" class="st1 st4 st3">Name</text>
+		<text id="_176299688_2_" transform="matrix(1 0 0 1 147.3428 125.8193)" class="st1 st4 st3">Phone</text>
+		<text id="_176299688_3_" transform="matrix(1 0 0 1 147.3428 136.9907)" class="st1 st4 st3">Street</text>
+		<text id="_176299688_4_" transform="matrix(1 0 0 1 147.3428 148.1626)" class="st1 st4 st3">City</text>
+		<text id="_176299688_5_" transform="matrix(1 0 0 1 147.3428 159.333)" class="st1 st4 st3">State_ID</text>
+		<text id="_176299688_6_" transform="matrix(1 0 0 1 147.3428 170.5049)" class="st1 st4 st3">ZipCode</text>
+		<rect id="_176299216" x="135.3" y="79.5" class="st5" width="72" height="96"/>
+		<line id="_176298600" class="st5" x1="135.3" y1="93.6" x2="207.3" y2="93.6"/>
+		<text id="_176294168" transform="matrix(1 0 0 1 140.3477 105.4644)" class="st1 st4 st3">*</text>
+	</g>
+	<g id="_176082536">
+		<text id="_176289392" transform="matrix(1 0 0 1 51.4731 18.23)" class="st1 st2 st6">State</text>
+		<text id="_176285168" transform="matrix(1 0 0 1 51.4731 31.6699)" class="st1 st4 st6">ID</text>
+		<text id="_176285168_1_" transform="matrix(1 0 0 1 51.4731 42.8413)" class="st1 st4 st6">Name</text>
+		<rect id="_176284560" x="39.3" y="7.9" class="st5" width="72" height="40.6"/>
+		<line id="_176283944" class="st5" x1="39.5" y1="21.8" x2="111.5" y2="21.8"/>
+		<text id="_176082896" transform="matrix(1 0 0 1 44.4775 33.6572)" class="st1 st4 st6">*</text>
+	</g>
+	<g id="_176068376">
+		<text id="_176075928" transform="matrix(1 0 0 1 51.5918 90.0073)" class="st1 st2 st6">ZipCode</text>
+		<text id="_176072872" transform="matrix(1 0 0 1 51.5918 103.4468)" class="st1 st4 st6">ZipCode</text>
+		<text id="_176072872_1_" transform="matrix(1 0 0 1 51.5918 114.6182)" class="st1 st4 st6">City</text>
+		<text id="_176072872_2_" transform="matrix(1 0 0 1 51.5918 125.79)" class="st1 st4 st6">State_ID</text>
+		<text id="_176072872_3_" transform="matrix(1 0 0 1 51.5918 136.9614)" class="st1 st4 st6">Coordinate</text>
+		<rect id="_176072560" x="39.4" y="79.6" class="st5" width="72" height="62.2"/>
+		<line id="_176072096" class="st5" x1="39.6" y1="93.6" x2="111.6" y2="93.6"/>
+		<text id="_176068736" transform="matrix(1 0 0 1 44.5957 105.4341)" class="st1 st4 st6">*</text>
+	</g>
+	<g>
+		<path class="st1" d="M19.7,122.7l0.3-0.3h19.2v0.5H19.9C19.9,123,19.7,122.7,19.7,122.7z M19.9,123h-0.3v-0.3L19.9,123z
+			 M19.9,26.5l0.3,0.3v96h-0.5v-96L19.9,26.5z M19.7,26.7v-0.3H20L19.7,26.7z M34.7,27H19.9v-0.5h14.8V27z M34.3,24.1l4.8,2.6
+			l-4.8,2.6V24.1z"/>
+	</g>
+	<g>
+		<path class="st1" d="M10.1,156.3l0.3-0.3h124.8v0.5H10.3C10.3,156.6,10.1,156.3,10.1,156.3z M10.3,156.6h-0.2v-0.3L10.3,156.6z
+			 M10.3,26.5l0.3,0.3v129.6h-0.5V26.7L10.3,26.5z M10.1,26.7v-0.3h0.3L10.1,26.7z M34.7,27H10.3v-0.5h24.4V27z M34.3,24.1l4.8,2.6
+			l-4.8,2.6V24.1z"/>
+	</g>
+	<g>
+		<path class="st1" d="M26.9,168.3l0.3-0.3h108v0.5h-108C27.1,168.6,26.9,168.3,26.9,168.3z M27.1,168.6h-0.3v-0.3L27.1,168.6z
+			 M27.1,98.5l0.3,0.3v69.6h-0.5V98.7L27.1,98.5z M26.9,98.7v-0.3h0.3L26.9,98.7z M34.7,99h-7.6v-0.5h7.6V99z M34.3,96.1l4.8,2.6
+			l-4.8,2.6V96.1L34.3,96.1z"/>
+	</g>
+</g>
+</svg>

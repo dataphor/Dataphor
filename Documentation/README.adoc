@@ -1,0 +1,33 @@
+= Dataphor
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+== Summary
+
+Welcome to Dataphor's documentation suite.
+
+We've divided our documentation into three main categories:
+
+[horizontal]
+link:UsersGuide/UsersGuide.adoc[User's Guide]:: Introduces Dataphor and provides usage guidance.
++
+This Guide provides the following:
++
+* An overview of the motivation behind Dataphor
++
+* A Dataphor platform introduction, covering the anatomy of a Dataphor application and providing tutorials
++
+* A section on using applications built with Dataphor, including Dataphor Server administration
+link:DevelopersGuide/DevelopersGuide.adoc[Developer's Guide]::
+Discusses the declarative approach employed in Dataphor as a solution to many of the technical problems
+associated with producing software.
++
+It is primarily intended to be read by software engineers; however, much of the material is
+pertinent for application and database administrators as well.
+link:DataphorReference/DataphorReference.adoc[Dataphor Reference]::
+Dataphor Reference documents the Dataphor product, including the Call-Level Interface (CLI), Dataphor Frontend, Tags, documentation for all the libraries that ship with the Dataphor product, as
+well as class references for using Dataphor's Data Access Layers (DAL) from a Microsoft .NET language such as C#.

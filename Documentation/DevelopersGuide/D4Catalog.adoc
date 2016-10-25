@@ -1,0 +1,3102 @@
+= Catalog Elements
+:author: Alphora
+:doctype: book
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[D4LGCatalogElements]]
+== Summary
+
+The Catalog is the repository of globally scoped objects within the
+Dataphor Server. It contains the tables, views, business rules
+(<<D4LGCatalogElements-Constraints, constraints>>) and other items
+that constitute the database schema. The Catalog is also called the the
+Data Dictionary. The Dataphor Server uses the Catalog to describe the
+application schema which represents the core of the database
+application.
+
+Catalog objects are partitioned into logical groups called
+__<<D4LGCatalogElements-Libraries, Libraries>>__. These libraries
+function as a deployment and dependency tracking unit for Dataphor
+applications. All objects in the catalog belong to a library. For a
+complete disucssion of libraries, refer to the
+<<WorkingWithLibraries.adoc#DDGWorkingWithLibraries, Working with Libraries>>
+chapter in the Logical Application Design part of this guide.
+
+Session-Specific ObjectsObjectsSession-SpecificThe D4 language also
+supports the declaration of session-specific objects. These objects are
+visible only within the session in which they are created, and are
+implicitly dropped when the session is disconnected. A session-specific
+object with the same name as a catalog object will effectively hide the
+catalog object within that session. Session-specific objects are allowed
+to reference objects in the global catalog, but objects in the global
+catalog cannot reference session-specific objects. Operators, tables,
+views, references, and constraints can all be session-specific. Refer to
+the section for each of these types of objects for information on how to
+create and manage session-specific objects.
+
+Each type of catalog object has associated declarative syntax for
+creating, altering, or dropping objects in the catalog. Data definition
+language statements in D4 have the following syntax:
+
+....
+<ddl statement> ::=
+    <create statement> |
+    <alter statement> |
+    <drop statement> |
+    <attach statement> |
+    <invoke statement> |
+    <detach statement> |
+ <grant statement> |
+ <revoke statement> |
+    <revert statement>
+
+<create statement> ::=
+    <create table statement> |
+    <create view statement> |
+    <create constraint statement> |
+    <create reference statement> |
+    <create scalar type statement> |
+    <create operator statement> |
+    <create aggregate operator statement> |
+    <create device statement> |
+    <create sort statement> |
+    <create conversion statement> |
+    <create role statement> |
+    <create right statement>
+
+<alter statement> ::=
+    <alter table statement> |
+    <alter view statement> |
+    <alter constraint statement> |
+    <alter reference statement> |
+    <alter scalar type statement> |
+    <alter operator statement> |
+    <alter aggregate operator statement> |
+    <alter device statement> |
+    <alter sort statement> |
+    <alter role statement>
+
+<drop statement> ::=
+    <drop table statement> |
+    <drop view statement> |
+    <drop constraint statement> |
+    <drop reference statement> |
+    <drop scalar type statement> |
+    <drop operator statement> |
+    <drop aggregate operator statement> |
+    <drop device statement> |
+    <drop sort statement> |
+    <drop conversion statement> |
+    <drop role statement> |
+    <drop right statement>
+....
+
+See the topics for each type of catalog object for a complete
+description of the syntax for each DDL statement.
+
+For a complete description of the attach, invoke, and detach statements,
+see <<D4LGCatalogElements-EventHandlers, Event Handlers>>.
+
+For a complete description of the grant, revoke, and revert statements,
+see <<D4LGCatalogElements-Security, Security>>.
+
+[[D4LGCatalogElements-Objects]]
+== Objects
+
+All catalog objects have certain properties in common. The following
+list summarizes these common properties:
+
+* ID
++
+Each object has an associated ID of type System.Integer. This is a
+unique identifier assigned by the Dataphor Server which serves to
+identify the object.
+* Name
++
+Each object has an associated Name which serves as the user visible name
+of the object.
+* Dependencies
++
+The dependencies and dependents of each object are stored in the
+catalog, and used to ensure the validity of DDL statements.
+* Security
++
+Each object is owned by some user, and has an associated set of rights.
+* Metadata
++
+Each object has associated metadata which is used to store extra
+information about the object that does not pertain to the logical model,
+but to some other application such as a frontend client.
+* Characteristics
++
+Each object has associated characteristics such as whether or not the
+object is a system object, and so on. These characteristics are set by
+the system and cannot be changed.
+
+[[D4LGCatalogElements-Objects-Dependencies]]
+=== Dependencies
+
+The catalog tracks not only the objects, but the dependencies between
+the objects. For example, the ID column in the Employee table is defined
+in terms of the EmployeeID type, so the type is a __dependency__, or
+requirement, of the table. Conversely, the table is a _dependent_ of the
+type. Dependency tracking is used to ensure the consistency of the
+catalog. If a given object has dependents, it cannot be dropped without
+first dropping the dependents. Additionally, objects within libraries
+are only allowed to reference objects within the same library, or a
+required library.
+
+[[D4LGCatalogElements-Objects-Security]]
+=== Security
+
+Whenever a catalog object is created, the rights necessary to protect
+operations on that object are also created. For example, creating a
+table creates Select, Insert, Update, and Delete rights for the table,
+as well as Alter and Drop rights. The following table lists the rights
+created for each type of catalog object:
+
+[cols=",",options="header",]
+|=======================================================================
+|Catalog Object |Rights Created
+|Scalar Type |Alter, Drop
+
+|Operator |Alter, Drop, Execute
+
+|Table or View |Alter, Drop, Select, Insert, Update, Delete
+
+|Device |Alter, Drop, Read, Write, CreateStore, AlterStore, DropStore,
+Reconcile, MaintainUsers
+
+|Constraint |Alter, Drop
+
+|Reference |Alter, Drop
+|=======================================================================
+
+The created right is named by concatenating the name of the object with
+the name of the right. For example, a table name Employee will have a
+right named EmployeeSelect.
+
+Owner
+
+Each catalog object also has an __owner__, or the user that is
+responsible for the object. Initially, the owner is the user that
+created the object, but ownership can be changed with the
+link:O-System.SetObjectOwner.html[SetObjectOwner] operator. All rights
+for the object are implicitly granted to the owner of the object. For
+more information on catalog objects and security, see
+<<../UsersGuide/Security.adoc#DUGP3Security, Security>>.
+
+[[D4LGCatalogElements-Objects-Metadata]]
+=== Metadata
+
+Each of the objects in the catalog may have metadata associated with it.
+This metadata is application specific information that is irrelevant to
+the logical model, expressed as a set of named string values.
+
+There are several kinds of metadata in D4, such as:
+
+[horizontal]
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions, Tags>>::
+Tags are general purpose strings that are identified by a name.
+
+<<D4LGOrders, Orders>>:: Order information on a table variable (Table or View) is considered
+metadata because it is ignored within the logical model.
+
+<<D4LGCatalogElements-Objects-ClassDefinitions, Class Definitions>>:: Certain structures within the catalog reference host language (.NET
+Framework) implemented code. Again, the meaning of these references has
+no meaning within the logical model.
+
+Metadata in D4 has the following syntax:
+
+....
+<metadata> ::=
+    [<tags>]
+
+<tags> ::=
+    [static] tags "{"<ne tag definition commalist>"}"
+
+<tag definition> ::=
+    [static | dynamic] <tag name> = <string>
+
+<tag name> ::=
+    <qualified identifier>
+....
+
+Alter metadata in D4 has the following syntax:
+
+....
+<alter metadata> ::=
+    [alter tags "{"<alter tag definition commalist>"}"]
+
+<alter tag definition> ::=
+    (create <tag definition>) | (alter <tag definition>) | (drop <tag name>)
+....
+
+Metadata tags can be specified in most DDL statements. In addition, some
+operators such as <<D4TableOperators.adoc#D4LGTableExpressions-Adorn, adorn>> allow
+metadata to be added directly in an expression.
+
+Each metadata tag may be either _static_ or __dynamic__. Static metadata
+is associated only with the object on which it is defined. It is not
+inferred through expressions or inherited by other objects. Dynamic
+metadata tags are inferred through expressions and passed on to other
+objects when appropriate. For example, a static tag on a scalar type
+will not be inherited by a table variable column defined on that type.
+For a complete description of the metadata tags utilized by the
+different components of the Dataphor Server, refer to
+<<../DataphorReference/Tags.adoc#DRTags, Tags>>.
+
+[[D4LGCatalogElements-Objects-ClassDefinitions]]
+=== Class Definitions
+
+Class definitions are a specific type of metadata used within the
+catalog to describe structures in the host implementation.
+
+Class definitions in D4 have the following syntax:
+
+....
+<class definition> ::=
+    class <class name> [<attributes>]
+
+<class name> ::=
+    <string>
+
+<attributes> ::=
+    attributes "{"<ne attribute definition commalist>"}"
+
+<attribute definition> ::=
+    <attribute name> = <attribute value>
+
+<attribute name> ::=
+    <string>
+
+<attribute value> ::=
+    <string>
+....
+
+The <class name> is the name of a registered class registered with a
+library. Each <attribute name> corresponds to a property of that class,
+and the value of the property on the instance of the class constructed
+will be set to <attribute value>.
+
+Alter class definitions in D4 have the following syntax:
+
+....
+<alter class definition> ::=
+    alter class [<class name>] ["{"<alter attribute definition commalist>"}"]
+
+<alter attribute definition> ::=
+    (create <attribute definition>) |
+    (alter <attribute definition>) |
+    (drop <attribute name>)
+....
+
+Although altering host-implementation structures is allowed, whether or
+not the alteration is effective once the internal host-implementation
+structure has been constructed is determined by the host-implementation
+structure itself.
+
+These definitions are used throughout DDL statements to specify host
+implementation structures.
+
+[[D4LGCatalogElements-Security]]
+== Security
+
+Management of the security model in the Dataphor Server is accomplished
+using operators in the system library. These operators provide a
+complete API for creating
+<<../UsersGuide/Security.adoc#DUGP3SecurityPrimitives-Users, users>>, managing
+<<../UsersGuide/Security.adoc#DUGP3SecurityPrimitives-Roles, roles>>, and granting and
+revoking <<../UsersGuide/Security.adoc#DUGP3SecurityPrimitives-Rights, rights>>. As a
+shorthand, the D4 language includes several statements that provide a
+shorthand for the rights management portions of this API.
+
+The syntax of these statements is as follows:
+
+....
+<grant statement> ::=
+    grant <right specifier>
+    [on <catalog object specifier>]
+ to <security specifier>
+
+<revoke statement> ::=
+    revoke <right specifier>
+    [on <catalog object specifier>]
+    from <security specifier>
+
+<revert statement> ::=
+    revert <right specifier>
+    [on <catalog object specifier>]
+    for <security specifier>
+
+<right specifier> ::=
+    all | usage | "{"<right name commalist>"}"
+
+<right name> ::=
+    <qualified identifier>
+
+<catalog object specifier> ::=
+    <qualified identifier> | <operator specifier>
+
+<operator specifier> ::=
+    <operator name>"("<formal parameter specifier commalist>")"
+
+<security specifier> ::=
+    (user <user id>) |
+    (role <role name>)
+
+<user id> ::=
+    <string>
+
+<role name> ::=
+    <qualified identifier>
+....
+
+Right Assignments
+
+Rights management in the catalog is represented by __right
+assignments__. The grant and revoke statements create right assignments,
+either granted or revoked, respectively, while the revert statement
+deletes right assignments. Note that reverting a right does not
+necessarily revoke that right, it simply removes the right assignment so
+that the right is granted or revoked based on the other determining
+factors in the security model: object ownership and role membership.
+
+All three statements operate on a set of rights given by
+<right specifier> to a security context given by <security specifier>.
+The statements include an optional <catalog object specifier> that
+determines which catalog object the rights are associated with.
+
+The <right specifier> is a comma-separated list of right names. Note
+that because rights are catalog objects, their identifiers are
+case-sensitive. If the security statement includes a
+<catalog object specifier>, each right name in the <right specifier> is
+prepended with the name of the catalog object.
+
+The special purpose right specifiers *all* and *usage* allow groups of
+object rights to be specified. These specifiers are only valid when a
+catalog object specifier is used in the security statement.
+
+The *all* specifier indicates that all the rights associated with the
+given object are included in the security statement, while the *usage*
+specifier indicates that only the rights necessary to use the object,
+not to administer it be included. Usage rights will vary based on the
+type of object as follows:
+
+[cols=",",options="header",]
+|=======================================================================
+|Catalog Object |Rights Included
+|Scalar Type |Execute rights for all compiler-generated operators for
+the type, including selectors, accessors, special selectors and
+comparers, and comparison operators.
+
+|Operator |Execute
+
+|Table or View |Select, Insert, Update, Delete
+
+|Device |Read, Write
+
+|Constraint |None
+
+|Reference |None
+|=======================================================================
+
+The <catalog object specifier> is either the name of a catalog object,
+or an <operator specifier>, denoting a particular operator.
+
+The <security specifier> indicates that the right statement affects a
+user or role. Note that user identifiers are case-insensitive and
+specified as strings, while roles, because they are catalog objects, are
+named and specified by a case-sensitive <qualified identifier>.
+
+For a complete discussion of the security model in the Dataphor Server,
+refer to the <<../UsersGuide/Security.adoc#DUGP3Security, Security>> chapter in the Dataphor
+User's Guide.
+
+[[D4LGCatalogElements-ScalarTypes]]
+== Scalar Types
+
+A scalar type is a named set of values. Scalar types have no
+user-visible structure (also called __atomic__). They are the
+fundamental units of data description in the D4 language. Types provide
+the building blocks out of which all other data in the database is
+built. In addition to providing a complete set of system data types, D4
+allows for the creation of user-defined types of arbitrary complexity.
+
+Internally, each scalar type has a __physical representation__, and a
+__native representation__. Externally, each scalar type exposes _logical
+representations_ that allow the value to be manipulated in the logical
+model. Note that because the physical representation is internal to the
+query processor, it must be host-implemented. For most types, the
+compiler can provide a host-implementation for the physical
+representation.
+
+Translation between the physical representation and the native
+representation is accomplished through a host-implementation structure
+called a __conveyor__. This conveyor can be specified as part of the
+type definition, or system-provided.
+
+Each logical representation in the logical model may be singled out as a
+__native accessor__. A native accessor is a representation that can be
+used by the data acess layer to translate the value to and from a given
+native representation. By default, the Dataphor Server will attempt to
+select an appropriate logical representation for use as a native
+accessor when necessary. However, native accessors can also be specified
+as part of the type definition.
+
+For a complete discussion of system-provided representations, refer to
+the section on representations below.
+
+The create scalar type statement in D4 has the following syntax:
+
+....
+<create scalar type statement> ::=
+    create type <scalar type name>
+        [<like clause>]
+        ["{"<scalar type definition item commalist>"}"]
+        [<conveyor definition>]
+        <metadata>
+
+<scalar type name> ::=
+    <qualified identifier>
+
+<like clause> ::=
+    like <scalar type name>
+
+<scalar type definition item> ::=
+    <representation definition> |
+    <constraint definition> |
+    <default definition> |
+    <special definition>
+
+<conveyor definition> ::=
+    <class definition>
+....
+
+The alter scalar type statement in D4 has the following syntax:
+
+....
+<alter scalar type statement> ::=
+    alter type <scalar type name>
+        ["{"<alter scalar type definition item commalist>"}"]
+        <alter class definition>
+        <alter metadata>
+
+<alter scalar type definition item> ::=
+    <alter representation definition> |
+    <alter constraint definition> |
+    <alter default definition> |
+    <alter special definition>
+....
+
+The drop scalar type statement in D4 has the following syntax:
+
+....
+<drop scalar type statement> ::=
+    drop type <scalar type name>
+....
+
+These statements create, alter or drop a type named <scalar type name>
+with the characteristics given by the rest of the statements.
+Explanations for each of the specific portions of the statements follow.
+
+*See Also*
+<<D4LanguageElements.adoc#D4LGLanguageElements-Types, Language Elements, Types>> |
+<<D4LanguageElements.adoc#D4LGLanguageElements-Types-ScalarTypes, Scalar Types>>
+
+[[D4LGCatalogElements-ScalarTypes-Conveyors]]
+=== Conveyors
+
+The <class definition> given at the end of the
+<create scalar type statement> describes the host implementation class
+that will provide the physical representation for this type. This class
+is known as the _conveyor_ for the type. If no conveyor is specified,
+the system will provide a default conveyor based on the first
+representation encountered in the type definition that does not include
+implementations for the selector and accessors. This representation is
+said to be the _system-provided_ representation for the type. The
+physical representation of the scalar type is also said to be
+__system-provided__. A given scalar type may have only one
+system-provided representation. For more information on system-provided
+representations, refer to the representations discussion in the next
+section.
+
+The following table lists the conveyors for the system data types.
+
+[cols=",",options="header",]
+|=====================================================================
+|Scalar Type |Conveyor Class
+|link:T-System.Boolean.html[System.Boolean] |System.BooleanConveyor
+|link:T-System.Decimal.html[System.Decimal] |System.DecimalConveyor
+|link:T-System.Long.html[System.Long] |System.Int64Conveyor
+|link:T-System.Integer.html[System.Integer] |System.Int32Conveyor
+|link:T-System.Short.html[System.Short] |System.Int16Conveyor
+|link:T-System.Byte.html[System.Byte] |System.ByteConveyor
+|link:T-System.String.html[System.String] |System.StringConveyor
+|link:T-System.TimeSpan.html[System.TimeSpan] |System.TimeSpanConveyor
+|link:T-System.DateTime.html[System.DateTime] |System.DateTimeConveyor
+|link:T-System.Date.html[System.Date] |System.DateTimeConveyor
+|link:T-System.Time.html[System.Time] |System.DateTimeConveyor
+|link:T-System.Money.html[System.Money] |System.DecimalConveyor
+|link:T-System.Guid.html[System.Guid] |System.GuidConveyor
+|link:T-System.Binary.html[System.Binary] |System.ObjectConveyor
+|link:T-System.Error.html[System.Error] |System.ObjectConveyor
+|=====================================================================
+
+These conveyors are all registered in the System library.
+
+[[D4LGCatalogElements-ScalarTypes-PossibleRepresentations]]
+=== Logical Representations
+
+SelectorsAccessorsRead AccessorsWrite AccessorsEach scalar type has a
+set of __logical representations__. Each logical representation is a set
+of <name, data type> pairs called __properties__. For each
+representation, a _selector_ is provided which takes as arguments all
+the properties of the representation. For each property, a read and
+write _accessor_ is provided which allows for retrieval and manipulation
+of the individual components of the representation. It is important to
+note that the write accessor is only shorthand for the equivalent
+selector invocation. Values, by definition, are immutable.
+
+System-Provided RepresentationGiven any type definition, the compiler
+must be able to determine the physical representation. Although this
+information can be specified explicitly, the compiler is capable of
+providing the implementation based on a logical representation. The
+compiler will select the first representation encountered in the type
+definition that does not include implementations for the selector and
+accessors. This representation is then referred to as a
+__system-provided representation__, meaning that not only does it
+determine the physical representation of the type, but the
+implementations for the selector and accessors for the representation
+will be system-provided.
+
+Regardless of whether a given type has a system-provided representation,
+at least one representation must be host-implemented in order to access
+the physical representation of the value. A host-implemented
+representation is one for which the selector and accessors are
+host-implemented. Each of the other representations may be host- or
+D4-implemented, but the compiler will only provide default
+implementations for the system-provided representation.
+
+Note that a logical representation must be capable of representing all
+the values of a given scalar type. Indeed, if it were not, it would not
+be a logical representation for the scalar type.
+
+The definition of a scalar type may omit the definition of a
+representation if that scalar type is defined to be
+_<<D4LGCatalogElements-Conversions-LikeTypes, like>>_ some other
+scalar type. The
+<<D4LGCatalogElements-ScalarTypes, <like clause>>> is shorthand
+for a <representation definition> in terms of the like type, and the
+definition of implicit conversions to and from the like type. Like type
+definitions will be discussed with
+<<D4LGCatalogElements-Conversions, implicit conversions>> later in
+this guide.
+
+A logical representation definition in D4 has the following syntax:
+
+....
+<representation definition> ::=
+    representation <representation name>
+        "{"<ne property definition commalist>"}"
+        [<selector definition>]
+        <metadata>
+
+<representation name> ::=
+    <qualified identifier>
+
+<selector definition> ::=
+    <class definition> | (selector <accessor block>)
+
+<accessor block> ::=
+    <class definition> | <expression> | <block>
+....
+
+An alter logical representation definition in D4 has the following
+syntax:
+
+....
+<alter representation definition> ::=
+    (create <representation definition>) |
+    (
+        alter representation
+            <representation name>
+            ["{"<ne alter property definition commalist>"}"]
+            [<alter selector <alter acessor block>]
+            <alter metadata>
+    ) |
+    (drop representation <representation name>)
+
+<alter accessor block> ::=
+    <alter class definition> | <expression> | <block>
+....
+
+[[D4LGSelector]]
+==== Selector
+
+A _selector_ is a D4 operator that allows the values of a type to be
+selected based on values for the properties of that representation.
+
+The
+<<D4LGCatalogElements-ScalarTypes-PossibleRepresentations, <selector definition>>>
+for the representation defines the implementation of the selector
+operator. There are three possibilities. First, the
+<selector definition> may be omitted if this is the system-provided
+representation for the type. Second, the selector may be specified in
+terms of a
+<<D4LGCatalogElements-Objects-ClassDefinitions, <class definition>>>
+which designates a host implementation. Third, the selector may be
+written in D4 as either a simple
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>>, or a
+<<D4ImperativeStatements.adoc#D4LGImperativeStatements-BlocksandScoping, <block>>>.
+
+If the <selector definition> is omitted, the representation must be the
+system-provided representation for the type, meaning that this
+representation was used by the compiler to determine a system-provided
+conveyor, or physical representation for the type. If the representation
+has only one property and that property is of some simple scalar type,
+the system will use the class System.ScalarSelectorNode registered in
+the System library to provide the selector implementation. In this case,
+the type is said to be a _simple_ scalar type.
+
+If the representation has multiple properties, or the type of the single
+property is not a simple scalar type, the compiler will provide a
+compound selector using the class System.CompoundScalarSelectorNode. In
+this case, the type is said to be a _compound_ scalar type. Note that
+the distinction between simple and compound scalar types is only
+introduced to allow the compiler to provide default physical
+representations for scalar types. There is no logical difference between
+a simple and a compound scalar type, they behave the same in every
+respect in the logical model.
+
+If the
+<<D4CatalogElements-ScalarTypes-PossibleRepresentations, <accessor block>>>
+is a D4 expression or block, then the type must have at least one
+host-implemented representation. The selector and accessors for the
+host-implemented representation will be available within the D4 code
+implementing the selector. Note that the host-implemented representation
+may or may not be system-provided.
+
+The selector operator is built based on the accessor block determined
+above with the following header:
+
+....
+operator <type name>[.<representation name>]
+    (
+        const A<property name> : <property type>[, ...]
+    ) : <type>
+....
+
+The following example illustrates the use of the selector for the
+Seconds representation of the System.TimeSpan data type:
+
+....
+Seconds(100); // returns a TimeSpan value
+....
+
+[[D4LGProperties]]
+==== Properties
+
+Properties are the individual components of a logical representation.
+Each property is a <name, data type> pair that defines the component of
+the representation. Each property requires two special-purpose operators
+called accessors, one to read the value for the property, and one to
+write it.
+
+The <accessor block> for the read and write accessors define the
+implementation of these operators. As with selectors, there are three
+possibilities: system-provided, host-implemented, and D4-implemented. If
+the property is a component of the system-provided representation, the
+accessor blocks for the read and write accessors may be omitted, and the
+compiler will provide default implementations. If the accessor blocks
+are D4-implemented, there must be at least one host-implemented
+representation available, and the selector and accessors for that
+representation will be available.
+
+A property definition in D4 has the following syntax:
+
+....
+<property definition> ::=
+    <property name> : <type specifier>
+        [read <accessor block>]
+        [write <accessor block>]
+        <metadata>
+
+<property name> ::=
+    <qualified identifier>
+
+<accessor block> ::=
+    <class definition> | <expression> | <block>
+....
+
+An alter property definition in D4 has the following syntax:
+
+....
+<alter property definition> ::=
+    (create <property definition>) |
+    (
+        alter <property name>
+            [: <type specifier>]
+            [alter read <alter accessor block>]
+            [alter write <alter accessor block>]
+            <alter metadata>
+    ) |
+    (drop <property name>)
+
+<alter accessor block> ::=
+    <alter class definition> | <expression> | <block>
+....
+
+[[D4LGReadAccessor]]
+===== Read Accessor
+
+The read accessor is a special-purpose operator built by the compiler to
+allow read access to the given property.
+
+The <<D4LGProperties, read \<accessor block\>>> for the property
+defines the implementation of the read accessor. If no read accessor
+definition is provided, the representation must be the system-provided
+representation for the type, and the compiler will provide a default
+implementation. If the type is a simple scalar type, the system will use
+the class System.ScalarReadAccessorNode registered in the System library
+to provide the read accessor implementation. If the type is a compound
+scalar type, the system will use the class
+System.CompoundScalarReadAccessorNode.
+
+The read accessor is built based on the class definition determined
+above with the following header:
+
+....
+operator <type name>.Read<property name>
+    (
+        const value : <type>
+    ) : <property type>
+....
+
+The following example illustrates the use of a read accessor:
+
+....
+// sets LInteger to the value of the DaysPart property of a TimeSpan
+LInteger = LTimeSpan.DaysPart;
+....
+
+[[D4LGWriteAccessor]]
+===== Write Accessor
+
+The write accessor is a special-purpose operator built by the compiler
+to allow write access to the given property.
+
+The <<D4LGProperties, write \<accessor block\>>> for the property
+defines the implementation of the write accessor. If no write accessor
+definition is provided, the representation must be the system-provided
+representation for the type, and the compiler will provide a default
+implementation. If the type is a simple scalar type, the system will use
+the class System.ScalarWriteAccessorNode registered in the System
+library to provide the write accessor implementation. If the type is a
+compound scalar type, the system will use the class
+System.CompoundScalarWriteAccessorNode.
+
+The write accessor is built based on the class definition determined
+above with the following header:
+
+....
+operator <type name>.Write<property name>
+    (
+        const Avalue : <type>,
+        const A<property name> : <property type>
+    ) : <type>
+....
+
+The following example illustrates the use of a write accessor:
+
+....
+// sets the value of the DaysPart property of the LTimeSpan variable
+LTimeSpan.DaysPart := 100;
+....
+
+[[D4LGCatalogElements-ScalarTypes-NativeAccessors]]
+=== Native Accessors
+
+Native accessors provide a mechanism for translating to and from various
+native representations of the type. This mechanism is used by the data
+access layer to facilitate data entry and display in the presentation
+layer.
+
+A given logical representation can be explicitly specified as a native
+accessor using the metadata tag DAE.<native accessor name> on the
+representation. The value of this tag is the name of the logical
+representation that will serve as the given native accessor. The table
+below gives the names of the available native accessors, and their
+associated tag names.
+
+When the data access layer requests a value in terms of some native
+representation, the logical representations of the scalar type are
+searched for an appropriate representation to be used to perform the
+translation. The following sequence of steps is taken when performing
+this search:
+
+* If the required native representation is the same as the native
+representation of the type, that representation is used.
+* If a logical representation of the type is explicitly specified as the
+requested native representation, that representation is used.
+* If a logical representation matches the requested native
+representation, that representation is used.
+* If no logical representation can be found, the data access layer
+reports an error.
+
+The Dataphor Server defines the following native representations:
+
+[cols=",,",]
+|=======================================================================
+|link:Alphora.Dataphor.DAE.Client.DataFieldProperties.html[Native
+Accessor] |Native (.NET Framework)Type
+|<<D4LGCatalogElements-Objects-Metadata, Metadata Tag Name>>
+
+|AsBoolean |System.Boolean |DAE.AsBoolean
+
+|AsByte |System.Byte |DAE.AsByte
+
+|AsInt16 |System.Int16 |DAE.AsInt16
+
+|AsInt32 |System.Int32 |DAE.AsInt32
+
+|AsInt64 |System.Int64 |DAE.AsInt64
+
+|AsDecimal |System.Decimal |DAE.AsDecimal
+
+|AsString |System.String |DAE.AsString
+
+|AsDisplayString |System.String |DAE.AsDisplayString
+
+|AsDateTime |System.DateTime |DAE.AsDateTime
+
+|AsTimeSpan |System.TimeSpan |DAE.AsTimeSpan
+
+|AsGuid |System.Guid |DAE.AsGuid
+
+|AsException |System.Exception |DAE.AsException
+
+|AsByteArray |byte[] |DAE.AsByteArray
+|=======================================================================
+
+The AsString and AsDisplayString native accessors both translate to and
+from string values. However, the AsDisplayString native accessor is
+intended to provide a more cosmetic representation, while the AsString
+accessor provides a user-editable format for the value. For example, the
+AsString accessor for the System.Money type is simply the decimal value
+as a string, while the AsDisplayString accessor includes currency
+formatting.
+
+The following example illustrates the use of the native accessor
+metadata tags:
+
+....
+create type Money
+{
+    representation Money
+    {
+        Value : Decimal
+            read class "System.ScalarReadAccessorNode"
+            write class "System.ScalarWriteAccessorNode"
+    } class "System.ScalarSelectorNode",
+    representation AsString
+    {
+        AsString : String
+            read class "System.MoneyAsStringReadAccessorNode"
+            write class "System.MoneyAsStringWriteAccessorNode"
+    } class "System.MoneyAsStringSelectorNode",
+    representation AsDisplayString
+    {
+        AsDisplayString : String
+            read class "System.MoneyAsDisplayStringReadAccessorNode"
+            write class "System.MoneyAsStringWriteAccessorNode"
+    } class "System.MoneyAsStringSelectorNode"
+}
+    class "System.DecimalConveyor"
+    static tags
+    {
+        Catalog.Comment = "System Money",
+        DAE.AsString = "AsString",
+        DAE.AsDisplayString = "AsDisplayString"
+    };
+....
+
+[[D4LGCatalogElements-ScalarTypes-Defaults]]
+=== Defaults
+
+A scalar type may have a _default_ associated with it, which indicates
+what the default value for any variable of this type should be. This
+applies not only to columns in a table, but also to local variables
+declared through a variable declaration statement. The default must be a
+value of the type.
+
+A scalar type default definition in D4 has the following syntax:
+
+....
+<default definition> ::=
+    default <expression> <metadata>
+....
+
+An alter scalar type default definition in D4 has the following syntax:
+
+....
+<alter default definition> ::=
+    (create <default definition>) |
+    (alter default [<expression>] <alter metadata>) |
+    (drop default)
+....
+
+For a detailed description of the <expression> production rule see
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, Expressions>>.
+
+[[D4LGCatalogElements-ScalarTypes-TypeConstraints]]
+=== Type Constraints
+
+Scalar types in D4 are defined using constraints. A type constraint
+describes the set of legal values for the type. Constraints are enforced
+whenever a variable assignment is made, including local variables and
+column assignments. A given type may have any number of constraints
+associated with it. The Dataphor Server will verify that any value of
+the given type satisfies all the type constraints defined.
+
+If a constraint is violated (if the expression evaluates to false for
+some value), an error will be raised. Note that if the constraint
+expression evaluates to nil, the constraint is considered satisfied. The
+text of the error message can be specified using metadata on the
+constraint. If the tag
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-MessageorSimpleMessage, DAE.SimpleMessage>>
+appears on the constraint, the value of the tag will be used as the
+message of the error. If the tag
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-MessageorSimpleMessage, DAE.Message>>
+appears on the constraint, the value of the tag is a D4 expression that
+is evaluated in the same context as the validation (i.e. the expression
+will have access to the implicit *value* variable, which contains the
+value being validated). The expression is expected to return a value of
+type string that will be the text of the error. If no custom message is
+provided, a generic error will be given stating that the constraint has
+been violated. In either case, the
+<<../UsersGuide/DocumentsAndDesigners.adoc#DUGP1ErrorsandWarnings, severity>>
+of the error given will be __User__.
+
+A type constraint definition in D4 has the following syntax:
+
+....
+<constraint definition> ::=
+    constraint <constraint name> <expression> <metadata>
+
+<constraint name> ::=
+    <qualified identifier>
+....
+
+An alter type constraint definition in D4 has the following syntax:
+
+....
+<alter constraint definition> ::=
+    (create <constraint definition>) |
+    (alter constraint <constraint name> [<expression>] <alter metadata>) |
+    (drop constraint <constraint name>)
+....
+
+For a detailed description of the <expression> production rule see
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, Expressions>>.
+
+The expression specified must be boolean-valued,
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, functional>>, and
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, deterministic>>.
+In addition, the constraint expression is not allowed to reference global database
+state. The compiler enforces these requirements. Within the expression,
+the implicit variable *value* is available, which is the value being
+validated.
+
+[[D4LGCatalogElements-ScalarTypes-SpecialValues]]
+=== Specials
+
+A _special_ is a named value of the scalar type. Special values provide
+a mechanism for the application to designate a given value as
+significant in some way.
+
+Special definitions in D4 have the following syntax:
+
+....
+<special definition> ::=
+    special <special name> <expression> <metadata>
+
+<special name> ::=
+    <qualified identifier>
+....
+
+Alter special definitions in D4 have the following syntax:
+
+....
+<alter special definition> ::=
+    (create <special definition>) |
+    (alter special <special name> [<expression>] <alter metadata>) |
+    (drop special <special name>)
+....
+
+Special SelectorSpecial ComparerFor each special the compiler builds two
+special-purpose operators called the _special selector_ and the
+__special comparer__. The special selector has the heading:
+
+....
+operator <type name><special name>() : <type>
+....
+
+and returns the value of the special. The special comparer has the
+heading:
+
+....
+operator Is<special name>(const AValue : <type>) : Boolean
+....
+
+and returns true if the given value is equal to the value of the
+special, and false otherwise.
+
+In addition to the operators created for each special, each scalar type
+has an associated special comparer which is created even if there are no
+specials defined for the type. The scalar type special comparer has the
+heading:
+
+....
+operator IsSpecial(const AValue : <type>) : Boolean
+....
+
+and returns true if the given value is equal to the value of any special
+defined on the type, and false otherwise.
+
+[[D4LGCatalogElements-ScalarTypes-Metadata]]
+=== Metadata
+
+The <metadata> describes additional information that should be
+associated with this type. For more information on the tags available
+for use with scalar types, refer to <<../DataphorReference/Tags.adoc#DRTags, Tags>>.
+
+[[D4LGCatalogElements-ScalarTypes-Examples]]
+=== Examples
+
+The following examples illustrate the use of the create type statement:
+
+....
+create type ID like Integer;
+
+create type ShortID
+{
+    representation ShortID { ShortID : String },
+    constraint LengthValid
+        Length(value) <= 3
+        tags { DAE.SimpleMessage = "Short ID must be 3 characters or less" }
+};
+
+create operator InchesToString(const AInches : Decimal) : String
+begin
+    result := AInches.ToString() + '"';
+end;
+
+create operator StringToInches(const AString : String) : Decimal
+begin
+    result := AString.SubString(0, AString.IndexOf('"')).ToDecimal();
+end;
+
+create type Length
+{
+    // The compiler will use this representation to construct the physical representation
+    representation Inches { Inches : Decimal },
+
+    representation Feet
+    {
+        Feet : Decimal
+            read value.Inches / 12
+            write Inches(Feet * 12)
+    } selector Inches(Feet * 12),
+
+    representation Centimeters
+    {
+        Centimeters : Decimal
+            read value.Inches * 2.54
+            write Inches(Centimeters / 2.54)
+    } selector Inches(Centimeters / 2.54),
+
+    // The AsString representation will be used by the
+    // Frontend to display Length values and to
+    // allow the user to enter length values
+    representation AsString
+    {
+        AsString : String
+            read InchesToString(value.Inches)
+            write Inches(StringToInches(AsString))
+    } selector Inches(StringToInches(AsString))
+};
+....
+
+The following example illustrates the use of the alter type statement:
+
+....
+alter type ID alter tags { create Frontend.Width = "10" };
+
+alter type ShortID
+{
+    create default "",
+    create special Unknown ""
+};
+....
+
+The following example illustrates the use of the drop type statement:
+
+....
+drop type ID;
+....
+
+[[D4LGCatalogElements-TableVariables]]
+== Table Variables
+
+Table variables are the only global variables in the catalog. They
+represent the complete state of the database at any given point. There
+are two types of table variables, base and derived. Base table variables
+in D4 are called Tables, while derived table variables are called Views.
+Note that for convenience, the unqualified term table is often used to
+denote both base and derived table variables, especially when discussing
+properties that are common to both objects.
+
+[[D4LGCatalogElements-TableVariables-CommonCharacteristics]]
+=== Common Characteristics
+
+Table variables have several characteristics in common, including keys,
+orders, constraints, and references. These characteristics share common
+production rules in the grammar and so are discussed first.
+
+[[D4LGKeys]]
+==== Keys
+
+All table variables may have any number of associated keys. A _key_ is a
+subset of the columns of a table variable that constitutes a unique
+identifier for any row in the table. In other words, no two rows in the
+table have the same values for all the columns of any key of the table.
+When a table variable is declared, the keys of the table variable may
+also be declared. For derived table variables, the keys specified are in
+addition to those already inferred by the compiler.
+
+Note that keys do not imply any ordering or indexing, they only declare
+a unique constraint for the table variable. This uniqueness provides the
+logical addressing mechanism for all tables.
+
+All tables must have at least one key. If no keys are specified in the
+table declaration, all columns will be used as a key. Note that a key is
+not required to have any columns. A key with no columns effectively
+means the table may only contain one row.
+
+Key definitions in D4 have the following syntax:
+
+....
+<key definition> ::=
+    key "{"<column name commalist>"}" <metadata>
+
+<column name> ::=
+    <qualified identifier>
+....
+
+Alter key definitions in D4 have the following syntax:
+
+....
+<alter key definition> ::=
+    (create <key definition>) |
+    (alter key "{"<column name commalist>"}" <alter metadata>) |
+    (drop key "{"<column name commalist>"}")
+....
+
+Note that, as the alter syntax indicates, the columns in a key cannot be
+changed. The key must be dropped and re-created to effect a change of
+this type.
+
+In the presence of nilable columns, a key may be defined as either
+__sparse__, or __dense__. As discussed in the section on
+<<DocumentsAndDesigners.adoc#D4LGNilSemantics, Nil Semantics>>, for dense keys,
+the definition of row-equality is used to enforce key constraints. This
+means that for a single-column key, a nil in the key column may only
+appear in one row of the table. Sparse keys, by contrast enforce
+uniqueness only among the rows that have values specified for the
+columns of the key. Because a sparse key cannot be used as a logical
+addressing mechanism, there are restrictions on the usage of sparse keys
+in the query processor. In particular, sparse keys will not be used to
+ensure uniqueness for a *browse* operator, and may not be used to define
+clustered indexes in the storage layer. To specify that a given key is
+sparse, use the Storage.IsSparse tag on the key definition.
+
+[[D4LGOrders]]
+==== Orders
+
+All table variables may have any number of associated orders. An _order_
+is a possible ordering of the columns of a table. It is a kind of
+metadata that is used by consumers of data in the Dataphor Server and
+has no effect on the logical model. When a table variable is declared,
+the orders of the table variable may also be declared. For derived table
+variables, the orders specified are in addition to those already
+inferred by the compiler.
+
+Order definitions in D4 have the following syntax:
+
+....
+<order definition> ::=
+    order "{"<order column definition commalist>"}" <metadata>
+
+<order column definition> ::=
+    <column name> [sort <expression>] [asc | desc] [(include | exclude) nil]
+
+<column name> ::=
+    <qualified identifier>
+....
+
+Alter order definitions in D4 have the following syntax:
+
+....
+<alter order definition> ::=
+    (create <order definition>) |
+    (alter order "{"<order column definition commalist>"}" <alter metadata>) |
+    (drop order "{"<order column definition commalist>"}")
+....
+
+Note that, as the alter syntax indicates, the columns of an order cannot
+be changed. The order must be dropped and re-created to effect a change
+of this type.
+
+An order can consist of any subset of the columns of a table variable in
+any order. Each column can include an optional sort expression, and an
+optional ascending indicator. In addition, the column can specify
+whether or not to include rows with a <<DocumentsAndDesigners.adoc#D4LGNilSemantics, nil>>
+for the column in the result.
+
+The sort expression allows the order to use an arbitrary condition for
+sorting. The sort expression must be integer-valued,
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, functional>> and
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, deterministic>>.
+The expression has access to the implicit variables *left.value* and
+**right.value**, which are the values to be compared. The expression
+must return -1 if *left.value* is less than **right.value**, 0 if the
+two values are equal, and 1 if *left.value* is greater than
+**right.value**.
+
+The optional ascending indicator specifies whether this column should be
+sorted ascending or descending. If no ascending indicator is specified,
+ascending is assumed.
+
+[[D4LGRowConstraints]]
+==== Row Constraints
+
+All table variables may have any number of row constraints associated
+with them. Each row constraint is validated whenever any insert or
+update is made against the table variable. If a constraint is violated,
+i.e. if the expression evaluates to false for any row, the name of the
+constraint is used to construct an error message. If present on the
+constraint, the metadata tag
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-MessageorSimpleMessage, DAE.Message>>
+is also used to construct the error message.
+
+Row constraint definitions in D4 have the following syntax:
+
+....
+<row constraint definition> ::=
+    <constraint definition> |
+    <transition constraint definition>
+
+<constraint definition> ::=
+    constraint <constraint name> <expression> <metadata>
+
+<transition constraint definition> ::=
+    transition constraint <constraint name>
+        [on insert <expression>]
+        [on update <expression>]
+        [on delete <expression>]
+        <metadata>
+
+<constraint name> ::=
+    <qualified identifier>
+....
+
+Alter row constraint definitions in D4 have the following syntax:
+
+....
+<alter row constraint definition> ::=
+    (create <row constraint definition>) |
+    (alter constraint <constraint name> [<expression>] <alter metadata>) |
+    <alter transition constraint definition> |
+    (drop [transition] constraint <constraint name>)
+
+<alter transition constraint definition> ::=
+    alter transition constraint <constraint name>
+        [<alter transition constraint definition item>]
+        [<alter transition constraint definition item>]
+        [<alter transition constraint definition item>]
+        <alter metadata>
+
+<alter transition constraint definition item> ::=
+    (create on <transition> <expression>) |
+    (alter on <transition> <expression>) |
+    (drop on <transition>)
+
+<transition> ::=
+    insert | update | delete
+....
+
+As the syntax indicates, there are two types of row constraints:
+_simple_ constraints and _transition_ constraints.
+
+Simple constraints specify a condition that must hold for every row in
+the table. The constraint expression is required to be boolean-valued,
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, functional>> and
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, deterministic>>.
+The compiler enforces these requirements. Within the constraint expression,
+access to the columns of the row being validated is available by directly
+referencing the column names.
+
+Transition constraints specify a condition that must hold for some
+transition of a row within the table. The transition constraint may
+specify a condition that must hold for the __insert__, __update__, and
+_delete_ transition. The constraint expression in every case is required
+to be boolean-valued,
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, functional>> and
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, deterministic>>.
+The compiler enforces these requirements. Within an insert expression, access to the
+columns of the row being inserted is available by referencing the column
+names, prefixed with the new keyword. Within an update expression,
+access to the old values of the row being updated is available by
+referencing the column name, prefixed with the old keyword, and access
+to the new values of the row being updated is available by referencing
+the column name, prefixed with the new keyword. Within a delete
+expression, access to the values of the row being deleted is available
+by referencing the column name, prefixed with the old keyword.
+
+Both types of constraints are allowed to reference global catalog
+objects. In so doing, the constraint becomes a _deferred_ constraint
+check, meaning that it will not be checked until transaction commit.
+This behavior can be controlled using the
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-IsDeferred, DAE.IsDeferred>>
+tag in the constraint definition.
+
+For both row and transition constraints, if the constraint expression
+evaluates to nil, the constraint is considered satisfied.
+
+As with all constraints, the text of the error message can be specified
+using metadata on the constraint. If the tag
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-MessageorSimpleMessage, DAE.SimpleMessage>>
+appears on the constraint, the value of the tag will be used as the message of the error. If the tag
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-MessageorSimpleMessage, DAE.Message>>
+appears on the constraint, the value of the tag is a D4 expression that
+is evaluated in the same context as the validation. The expression is
+expected to return a value of type string that will be the text of the
+error. For transition constraints, the transition can be included in the
+tag name, indicating which transition violation the message is to be
+used with. For example, the tag DAE.Insert.SimpleMessage specifies the
+text of the message to be used if the insert transition of the
+constraint is violated. If no custom message is provided, a generic
+error will be given stating that the constraint has been violated. In
+either case, the
+<<../UsersGuide/DocumentsAndDesigners.adoc#DUGP1ErrorsandWarnings, severity>>
+of the error given will be __User__.
+
+[[D4LGReferences]]
+==== References
+
+All table variables can participate in any number of reference
+constraints. These references are allowed to be declared within a table
+variable declaration for convenience. This mechanism is only shorthand
+for the equivalent reference constraint definition. For a complete
+description of references, refer to <<D4LGCatalogElements-References, References>>.
+
+Reference definitions within table variable declarations in D4 have the
+following syntax:
+
+....
+<reference definition> ::=
+    reference <reference name>
+    "{"<column name commalist>"}"
+    <references definition>
+    <metadata>
+
+<reference name> ::=
+    <qualified identifier>
+....
+
+Alter reference definitions within table variable declarations in D4
+have the following syntax:
+
+....
+<alter reference definition> ::=
+    (create <reference definition>) |
+    (alter reference <reference name> <alter metadata>)
+    (drop <reference name>)
+....
+
+For a complete description of the <references definition> production
+rule, refer to <<D4LGCatalogElements-References, References>>.
+
+[[D4LGCatalogElements-TableVariables-Tables]]
+=== Tables
+
+Tables are base relation variables, that is, they represent sets of
+unordered rows, where each row contains a value for each of the columns
+defined by the table header. A table (variable) is the fundamental unit
+of data persistence in the catalog. Tables, combined with views, provide
+the mechanism for describing the data that is available in the
+application schema. Tables are defined in terms of the columns they
+contain.
+
+The create table statement in D4 has the following syntax:
+
+....
+<create table statement> ::=
+    create [session] table <table name>
+    [<device clause>]
+    (
+        (from <expression>) |
+        ("{"<table definition item commalist>"}")
+    )
+    <metadata>
+
+<table name> ::=
+    <qualified identifier>
+
+<device clause> ::=
+    in <device name>
+
+<device name> ::=
+    <qualified identifier>
+
+<table definition item> ::=
+    <column definition> |
+ <row constraint definition> |
+    <key definition> |
+ <reference definition> |
+    <order definition>
+....
+
+The alter table statement in D4 has the following syntax:
+
+....
+<alter table statement> ::=
+    alter table <table name>
+        ["{"<alter table definition item commalist>"}"]
+        <alter metadata>
+
+<alter table definition item> ::=
+    <alter column definition> |
+    <alter row constraint definition> |
+    <alter key definition> |
+    <alter reference definition> |
+    <alter order definition>
+....
+
+The drop table statement in D4 has the following syntax:
+
+....
+<drop table statement> ::=
+    drop table <table name>
+....
+
+These statements create, alter, or drop a base table variable named
+<table name> in the catalog. The optional *session* keyword indicates
+the table is visible only within the current session. A session-specific
+table will hide a global table with the same name.
+
+The <create table statement> includes an optional <device clause> which
+indicates that the table is persisted in the specified device. If no
+device is specified, the compiler will use the default device for the
+table variable. The default device is determined as described in
+<<D4LGCatalogElements-Libraries-DefaultDeviceResolution, Default Device Resolution>>.
+For more information on how the Dataphor Server maps
+table variables and operators into devices, see
+<<PhysicalRealization.adoc#DDGPhysicalRealization, Physical Realization>>.
+
+For a description of the <key definition>, <order definition>,
+<row constraint definition>, and <reference definition> production
+rules, see <<D4LGCatalogElements-TableVariables-CommonCharacteristics, Common Characteristics>>.
+
+*See Also*
+
+<<D4TableOperators.adoc#D4LGTableExpressions, Table Operators>>
+
+[[D4LGColumns]]
+==== Columns
+
+Base table variables are defined in terms of the columns, or attributes,
+that make up the table structure. Each column has a name that is unique
+within the table variable, a data type which describes the legal values
+for this column, and possibly a default and column constraints. Each
+column also includes a <nilable definition>, which indicates whether or
+not the column is allowed to be <<DocumentsAndDesigners.adoc#D4LGNilSemantics, nil>>,
+or have no value.
+
+Note that a table variable need not have any columns at all. There are
+exactly two table values with no columns:
+
+table { }:: The table value with no columns and no rows. The system table
+System.TableDum is a shorthand for this table selector.
+table { *row* { } }:: The table value with no columns and one row. The system table
+System.TableDee is a shorthand for this table selector.
+
+Column definitions within base table variable declarations in D4 have
+the following syntax:
+
+....
+<column definition> ::=
+    <column name> : <type specifier>
+        <nilable definition>
+        ["{"<ne column definition item commalist>"}"
+        <metadata>
+
+<column definition item> ::=
+    <default definition> |
+    <constraint definition> |
+    <nilable definition>
+
+<column name> ::=
+    <qualified identifier>
+
+<nilable definition> ::=
+    [[not] nil]
+....
+
+[[D4LGColumnDefault]]
+===== Column Default
+
+Each column in a table variable may have an associated default which is
+used to provide a value for the column if no value is specified through
+a given modification statement. A column level default will effectively
+override a scalar type level default.
+
+Column default definitions in D4 have the following syntax:
+
+....
+<default definition> ::=
+    default <expression> <metadata>
+
+<alter default definition> ::=
+    (create <default definition>) |
+    (alter default [<expression>] <alter metadata>) |
+    (drop default)
+....
+
+[[D4LGColumnConstraints]]
+===== Column Constraints
+
+Each column in a table variable may have any number of associated column
+constraints which are used to validate the data in any given data
+modification statement. Note that a column constraint is merely a
+special case of a row constraint, which is in turn a special case of a
+database-wide integrity constraint.
+
+If the constraint expression evaluates to nil, the constraint is
+considered satisfied.
+
+As with all constraints, the text of the error message can be specified
+using metadata on the constraint. If the tag
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-MessageorSimpleMessage, DAE.SimpleMessage>>
+appears on the constraint, the value of the tag will be used as the
+message of the error. If the tag
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-MessageorSimpleMessage, DAE.Message>>
+appears on the constraint, the value of the tag is a D4 expression that
+is evaluated in the same context as the validation. The expression is
+expected to return a value of type string that will be the text of the
+error. If no custom message is provided, a generic error will be given
+stating that the constraint has been violated. In either case, the
+<<../UsersGuide/DocumentsAndDesigners.adoc#DUGP1ErrorsandWarnings, severity>>
+of the error given will be __User__.
+
+Column constraints are validated in addition to scalar type level
+constraints.
+
+Column constraint definitions in D4 have the following syntax:
+
+....
+<constraint definition> ::=
+    constraint <constraint name> <expression> <metadata>
+
+<constraint name> ::=
+    <qualified identifier>
+....
+
+Alter column constraint definitions in D4 have the following syntax:
+
+....
+<alter constraint definition> ::=
+    (create <constraint definition>) |
+    (alter constraint <constraint name> [<expression>] <alter metadata>) |
+    (drop constraint <constraint name>)
+....
+
+The constraint expression must be boolean-valued,
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, functional>> and
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, deterministic>>.
+In addition, the constraint expression is not allowed to reference global database
+state. The compiler enforces these requirements. Within the constraint
+expression, the implicit variable *value* is available which represents
+the value being validated.
+
+[[D4LGExamples]]
+==== Examples
+
+The following examples illustrate the use of the create table statement:
+
+....
+create table Customer
+{
+    ID : Integer,
+    Name : String,
+    IsHappy : Boolean,
+    key { ID }
+};
+
+create table CustomerPhone
+{
+    Customer_ID : Integer,
+    PhoneType_ID : Integer { default 1 },
+    PhoneNumber : String
+    {
+        constraint PhoneLength Length(value) >= 7
+            tags { DAE.SimpleMessage = "Phone Number must be   at least 7 characters" }
+    } tags { Frontend.Title = "Phone Number" },
+    key  { Customer_ID, PhoneType_ID },
+    reference PhoneCustomer { Customer_ID } references Customer { ID }
+} tags { Frontend.Title = "Customer Phone" };
+....
+
+The following example illustrates the use of the alter table statement:
+
+....
+alter table CustomerPhone
+{
+    create column IsInternational : Boolean { default false },
+    create order { PhoneNumber, PhoneType_ID }
+} alter tags { alter Frontend.Title = "Customer Phone #" };
+....
+
+The following example illustrates the use of the drop table statement:
+
+....
+drop table CustomerPhone;
+....
+
+[[D4LGCatalogElements-TableVariables-Views]]
+=== Views
+
+Views are derived relation variables, that is, they are tables in the
+catalog that are defined in terms of an expression against other tables
+or views.
+
+Views can be modified with DML statements so long as the
+post-modification data satisfies the predicate of the view. The
+predicate of the view is, loosely speaking, the meaning of the result
+and is inferred from the defining expression of the view. For a
+discussion of updatability semantics for each operator, see
+<<D4TableOperators.adoc#D4LGTableExpressions, Table Operators>>.
+
+The create view statement in D4 has the following syntax:
+
+....
+<create view statement> ::=
+    create [session] view <view name>
+        <expression>
+        ["{"<ne view definition item commalist>"}"]
+        <metadata>
+
+<view name> ::=
+    <qualified identifier>
+
+<view definition item> ::=
+    <row constraint definition> |
+    <key definition> |
+    <reference definition> |
+    <order definition>
+....
+
+The alter view statement in D4 has the following syntax:
+
+....
+<alter view statement> ::=
+    alter view <view name>
+        ["{"<alter view definition item commalist>"}"
+        <alter metadata>
+
+<alter view definition item> ::=
+    <alter row constraint definition> |
+    <alter key definition> |
+    <alter reference definition> |
+    <alter order definition>
+....
+
+The drop view statement in D4 has the following syntax:
+
+....
+<drop view statement> ::=
+    drop view <view name>
+....
+
+These statements create, alter, and drop a view named <view name> in the
+catalog. The optional *session* keyword indicates that this view is
+visible only within the session in which it was created. A
+session-specific table will hide a global table with the same name.
+
+For a description of the <key definition>, <order definition>,
+<row constraint definition>, and <reference definition> production
+rules, see
+<<D4LGCatalogElements-TableVariables-CommonCharacteristics, Common Characteristics>>.
+
+Constraints and keys included in the definition of a view become part of
+the definition of the view. For example, if a constraint is included in
+the view declaration, it becomes a restriction in the view definition.
+Note that the base table remains unaffected by this constraint, the view
+simply excludes rows that violate the constraint, and a row that
+violates the constraint cannot be inserted into the view, but can be
+inserted into the base table.
+
+The following examples illustrate the use of the create view statement:
+
+....
+create view HappyDog
+    Dog where Bones > 15;
+
+create view Labrador
+    Dog
+    {
+        constraint OnlyLabs    Species = "Lab"
+    } tags { Frontend.Title = "Labs" };
+....
+
+The following example illustrates the use of the alter view statement to
+add a reference from a view:
+
+....
+alter view HappyDog { create reference HappyDog_Rainbow { Color }
+        references Rainbow { Color } };
+....
+
+The following example illustrates the use of the drop view statement:
+
+....
+drop view HappyDog;
+....
+
+[[D4LGCatalogElements-Constraints]]
+== Constraints
+
+A _constraint_ is a named boolean-valued expression that must evaluate
+to true. If a data manipulation is attempted which would violate the
+constraint, the modification is rejected. If the constraint expression
+evaluates to nil, the constraint is considered satisfied.
+
+As with all constraints, the text of the error message can be specified
+using metadata on the constraint. If the tag
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-MessageorSimpleMessage, DAE.SimpleMessage>>
+appears on the constraint, the value of the tag will be used as the
+message of the error. If the tag
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-MessageorSimpleMessage, DAE.Message>>
+appears on the constraint, the value of the tag is a D4 expression that
+is evaluated in the same context as the validation. The expression is
+expected to return a value of type string that will be the text of the
+error. If no custom message is provided, a generic error will be given
+stating that the constraint has been violated. In either case, the
+<<../UsersGuide/DocumentsAndDesigners.adoc#DUGP1ErrorsandWarnings, security>>
+of the error given will be __User__.
+
+The create constraint statement in D4 has the following syntax:
+
+....
+<create constraint statement> ::=
+    create [session] constraint <constraint name> <expression> <metadata>
+
+<constraint name> ::=
+    <qualified identifier>
+....
+
+The alter constraint statement in D4 has the following syntax:
+
+....
+<alter constraint statement> ::=
+    alter constraint <constraint name> [<expression>] <alter metadata>
+....
+
+The drop constraint statement in D4 has the following syntax:
+
+....
+<drop constraint statement> ::=
+    drop constraint <constraint name>
+....
+
+These statements create, alter, and drop a constraint named
+<constraint name> in the catalog. The optional *session* keyword
+indicates that this constraint is visible only within the session in
+which it was created. A session-specific constraint will hide a global
+constraint with the same name.
+
+The constraint expression is required to be boolean-valued,
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, functional>>, and
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, deterministic>>.
+The compiler enforces these requirements.
+
+The following example illustrates the use of the create constraint
+statement. The given constraint enforces that all cats have at least one
+life:
+
+....
+create constraint LivingCats
+    not exists
+    (
+        (Cat where IsAlive) join
+        ((Life group by { Cat_ID, ID } add { Count() Lives }) where Lives = 0)
+    );
+....
+
+The following example illustrates the use of the alter constraint
+statement. The new constraint enforces that all cats have at most nine
+lives:
+
+....
+alter constraint LivingCats
+    not exists ((Life group by { Cat_ID } add { Count() Lives }) where Lives > 9);
+....
+
+The following example illustrates the use of the drop constraint
+statement:
+
+....
+drop constraint LivingCats;
+....
+
+[[D4LGCatalogElements-References]]
+== References
+
+A _reference_ is a special case of a database-wide integrity constraint.
+A reference constraint enforces __referential integrity__. In other
+words, if a reference constraint is defined from a table variable Source
+to a table variable Target, then if a row appears in Source, it must
+have a matching row in Target. A reference constraint is considered
+satisfied if all the values of the reference columns of the row in
+Source are specials, or do not have a value (are nil). The equivalent
+database-wide integrity constraint for a given reference constraint is
+then:
+
+....
+// Reference constraint from Source(SourceColumn) to Target(TargetColumn)
+create constraint C
+    not exists
+    (
+        (Source where not(IsSpecial(SourceColumn)) over { SourceColumn }) minus
+        (Target over { TargetColumn } rename { TargetColumn SourceColumn })
+    );
+....
+
+References may also include specifications for actions to be taken when
+updates or deletes are made to the target table of the reference. The
+following list summarizes these actions:
+
+Require:: The require action indicates that the update or delete should be
+rejected if there are rows in the source table which reference the rows
+being modified. If no action is specified, this is the default.
+Cascade:: The cascade action indicates that the update or delete should be
+cascaded to the rows of the source table which reference the rows being
+modified. If the modification is an update, all rows referencing the old
+value are updated to reference the new value. If the modification is a
+delete, all rows referencing the deleted value are deleted.
+Clear:: The clear action indicates that rows in the source table which reference
+the rows being modified should be set to the special value for the
+scalar type of the column. The types for each column must have one and
+only one special defined in order to use this update action.
+Set:: The set action indicates that rows in the source table which reference
+the rows being modified should be set to the given expressions. Note
+that the values specified for these expressions must also satisfy the
+reference constraint.
+
+The create reference statement in D4 has the following syntax:
+
+....
+<create reference statement> ::=
+    create [session] reference <reference name>
+        <tablevar name> "{"<column name commalist>"}"
+        <references definition>
+        <metadata>
+
+<reference name> ::=
+    <qualified identifier>
+
+<tablevar name> ::=
+    <qualified identifier>
+
+<column name> ::=
+    <qualified identifier>
+
+<references definition> ::=
+    references <tablevar name> "{"<column name commalist>"}"
+    [update (require | cascade | clear | set "{"<expression commalist>"}")]
+    [delete (require | cascade | clear | set "{"<expression commalist>"}")]
+....
+
+The alter reference statement in D4 has the following syntax:
+
+....
+<alter reference statement> ::=
+    alter reference <reference name> <alter metadata>
+....
+
+The drop reference statement in D4 has the following syntax:
+
+....
+<drop reference statement> ::=
+    drop reference <reference name>
+....
+
+These statements create, alter, and drop a reference named
+<reference name> in the catalog. The optional *session* keyword
+indicates that this reference is visible only within the session in
+which it was created. A session-specific reference will hide a global
+reference with the same name.
+
+The target column names of a reference must form a key in the target
+table variable. The source column names of a reference may or may not
+form a key in the source table variable. This means there are two
+combinations for references, key-to-key references, and key-to-non-key
+references. Depending on whether a reference is viewed from the source
+or target table variable, this gives rise to four distinct types of
+references:
+
+Extension References:: An extension reference is one for which the columns of the reference
+form a key in both the source and target tables, and the reference is
+viewed from the target table. This is a one-to-zero-or-one relationship.
+Parent References::
+A parent reference is one for which the columns of the reference form a
+key in both the source and target tables, and the reference is viewed
+from the source table. This is a one-to-one relationship.
+Detail References:: A detail reference is one for which the columns of the reference form a
+key in the target table, but not the source table, and the reference is
+viewed from the target table. This is a one-to-many relationship.
+Lookup References:: A lookup reference is one for which the columns of the reference form a
+key in the target table, but not the source table, and the reference is
+viewed from the source table. This is a one-to-one relationship.
+
+This and other information is used by the Dataphor Frontend to determine
+how best to present and manipulate the data model. The Frontend
+dynamically derives the appropriate interface based on the relationships
+described by references.
+
+Note that references are allowed to target any number of columns in the
+target table variable, as long as the set of target columns completely
+includes at least one key of the target table variable.
+
+Reference definitions are allowed to reference derived table variables,
+not just base table variables. Note however that if the reference
+originates in or targets a derived table variable, the reference will be
+enforced with a database-wide constraint rather than a transition
+constraint defined in terms of a single row. This means that any
+operation that affects any table variable involved in the constraint
+(including table variables referenced by the derived table variable
+definitions, recursively) will cause the entire constraint to be
+checked. If the cardinality of either table variable is expected to be
+large, consider rewriting the reference constraint as a set of
+transition constraints on the table variables involved. The reference
+constraint can still be defined using the Storage.Enforced tag to
+prevent validation in order to allow the Frontend to take advantage of
+the information.
+
+References are also derived for table expressions through a process
+called __reference inference__. This process is part of _type inference_
+and means that not only are references known for the table variables on
+which they are declared, but expressions that reference those table
+variables as well. This process becomes exteremely important when a
+general solution to the problem of user interface derivation is
+approached. The solution provided by the Dataphor Server through
+reference inference is one of the main reasons for the advanced
+user interface derivation capabilities of the Frontend.
+
+The following example creates a referential integrity constraint between
+the Dog and Owner tables. This constraint ensures that there can be no
+row in the Dog table for which the value in the Owner_ID column does not
+appear in the ID column of the Owner table.
+
+....
+create reference Dog_Owner Dog { Owner_ID } references   Owner { ID };
+....
+
+The following example alters the metadata of the Dog_Owner reference.
+Only the metadata of a reference may be altered. In order to change
+another aspect of the reference constraint, it must be dropped and
+re-created.
+
+....
+alter reference Dog_Owner
+    alter tags { create Catalog.Comment = "Dog - Dog Owners", create Frontend.Exposed = "true" };
+....
+
+The following examples drop the Dog_Owner reference:
+
+....
+// drop the constraint using the drop reference syntax
+drop reference Dog_Owner;
+
+// drop the constraint by altering the source table variable
+alter table Dog { drop reference Dog_Owner };
+....
+
+[[D4LGCatalogElements-Operators]]
+== Operators
+
+An _operator_ is a pre-compiled piece of D4 code which optionally takes
+as operands a list of values, also called __inputs__, or __parameters__,
+and optionally returns a value of some type, also called __output__. For
+a description of operators as a language element in D4, refer to the
+Operators section of the Language Elements section of this guide.
+
+Each operator is allowed to take any number of __operands__. Each
+operand must have a unique name, and a data type. Each operand is
+available within the block of the operator as a variable with the same
+name and data type of the operand. Additionally, each operand includes a
+_modifier_ which tells the compiler how to handle values passed as the
+argument for this operand. The following table lists the available
+modifiers:
+
+in:: Indicates that the value passed as an argument to this operand is copied
+into the variable representing this operand within the operator. This is
+known as __pass-by-value__. If no modifier is specified for the operand,
+the operand is initially marked in as a default. This may change, as
+described in the next modifier.
+const::
+Indicates that the variable representing this operand may not be
+assigned to within the operator block. This is known as
+_pass-by-reference_ with the added restriction that the variable is read
+only within the operator. If the compiler detects that the variable for
+a given operand is unaffected within the operator block, it will
+automatically mark the operand const as an optimization.
+var:: Indicates that only variables may be passed as arguments to this
+operand, and that the affects of assignment to the variable representing
+this operand within the operator block will affect the variable passed
+as the argument. This is known as __pass-by-reference__. If an operand
+is marked **var**, the argument in a call must also be marked *var* in
+order to be passed to the operand. In other words, the modifier is part
+of the signature of the operator and affects the operator resolution
+process.
+
+The types of the operands to the operator, together with the modifiers,
+if any, are called the _signature_ of the operator. The signature is
+used to resolve which operator has been called in a given invocation.
+This process is called operator resolution.
+
+There are two types of operators in D4,
+<<D4LGCatalogElements-Operators-Operators, standard operators>>,
+and <<D4LGCatalogElements-Operators-AggregateOperators, aggregate operators>>.
+Aggregate operators are special-purpose operators which have
+certain restrictions on the operands and return values allowed in the
+signature, and a specialized calling convention which allows them to be
+used efficiently within aggregate operations in D4.
+
+When invoked within an application transaction, operators may be
+translated into the application transaction. By default, operators are
+translated into an application transaction if they are not
+host-implemented, access global state, and are not functional. To change
+the default behavior, use the
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-ShouldTranslate, DAE.ShouldTranslate>>
+tag on the create operator statement. Note also that if the operator is
+being invoked as an event handler, the attach statement may also specify
+a translation behavior using the
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-ShouldTranslate, DAE.ShouldTranslate>>
+tag.
+
+*See Also*
+
+<<D4LanguageElements.adoc#D4LGLanguageElements-Operators, Language Elements, Operators>>
+
+[[D4LGCatalogElements-Operators-OperatorResolution]]
+=== Operator Resolution
+
+Operator resolution in D4 is the process of resolving a given operator
+invocation to the implementation of an actual operator in the catalog.
+Each operator name in D4 is allowed to have any number of signatures
+specified. Each of these is called an __overload__, and allows the same
+operator name to be invoked with different numbers and types of
+arguments. This allows for more flexible operator definition within the
+language.
+
+The inputs to the operator resolution process are the name of the
+operator as specified in the invocation, and the __invocation
+signature__, or the number and types of each argument, together with any
+modifiers specified in the invocation. Note that the operator name in
+the invocation may be the unqualified name.
+
+Assignment-CompatibilityOperator resolution is based on the notion of
+__assignment-compatiblity__. A given type Ts is said to be
+assignment-compatible with type Tt if and only if any of the following
+conditions are true:
+
+* Ts and Tt are the same type.
+* Tt is a generic type matching the type category of Ts
+* An implicit conversion path from Ts to Tt exists.
+
+Note that if the *var* modifier is specified for a given parameter, it
+must also be specified in the argument, and implicit conversions are not
+allowed.
+
+The process begins by constructing a name resolution path, and
+performing a standard name resolution on the operator name. All
+potential name resolutions are considered, and searched for a compatible
+signature.
+
+The signature list for each potential name resolution is searched for a
+compatible signature. Only signatures with the same number of arguments
+are considered. If the type of each argument in the invocation signature
+is assignment-compatible with the type of the parameter in order, then
+the signature is compatible.
+
+The compiler will favor widening conversions when searching for
+conversion paths from the type of the argument to the type of the
+parameter. The signature with the least number of conversions required
+is selected as the best match. If multiple signature conversion paths
+are found with the same number of conversions required, the least
+narrowing conversion path is used. If multiple signature conversion
+paths have the same number of narrowing conversions, the call is
+considered ambiguous, and an error is returned.
+
+[[D4LGCatalogElements-Operators-Operators]]
+=== Creating Operators
+
+The create operator statement in D4 has the following syntax:
+
+....
+<create operator statement> ::=
+    create [session] operator
+        <operator name>
+        "("<formal parameter commalist>")"
+        [: <type specifier>]
+        (<class definition> | <block>)
+        <metadata>
+
+<operator name> ::=
+    <qualified identifier>
+
+<formal parameter> ::=
+    [<modifier>] <named type specifier>
+
+<modifier> ::=
+    [var | const]
+
+<named type specifier> ::=
+    <qualified identifier> : <type specifier>
+....
+
+The alter operator statement in D4 has the following syntax:
+
+....
+<alter operator statement> ::=
+    alter operator <operator name>"("<formal parameter specifier commalist>")"
+        [(<alter class definition> | <block>)]
+        <alter metadata>
+
+<formal parameter specifier> ::=
+    [<modifier>] <type specifier>
+....
+
+The drop operator statement in D4 has the following syntax:
+
+....
+<drop operator statement> ::=
+    drop operator <operator name>"("<formal parameter specifier commalist>")"
+....
+
+These statements create, alter, and drop an operator named
+<operator name> with operands given by
+<formal parameter specifier commalist> in the catalog. The operator
+optionally returns a value of the type given by <type specifier>. The
+implementation of the operator is specified by either the
+<class definition>, in which case the operator is a _host-implemented_
+operator, or the <block>, in which case the operator is a sequence of
+compiled D4 statements. The optional *session* keyword indicates that
+this operator is visible only within the session in which it was
+created. A session-specific operator will hide a global operator with
+the same name and signature.
+
+For a complete description of the <block> production rule, refer to
+<<D4ImperativeStatements.adoc#D4LGImperativeStatements, Imperative Statements>>.
+
+The following example illustrates the use of the create operator
+statement:
+
+....
+create operator Add(A : Integer, B : Integer) : Integer
+begin
+    result := A + B;
+end;
+....
+
+The following example illustrates the use of the alter operator
+statement:
+
+....
+alter operator Add(Integer, Integer)
+begin
+    var I : Integer;
+    result := A;
+    for I := 1 to B do
+        result := result + 1;
+    for I := -1 downto B do
+        result := result - 1;
+end;
+....
+
+The following example illustrates the use of the drop operator
+statement:
+
+....
+drop operator Add(Integer, Integer);
+....
+
+[[D4LGCatalogElements-Operators-AggregateOperators]]
+=== Aggregate Operators
+
+Aggregate operators make use of a specialized calling convention which
+can be used efficiently to implement aggregation in the Dataphor Server.
+If operands are defined they must not be marked with a modifier and the
+data type of the operands must correspond to the types of the values to
+be aggregated. The operator must return a value of some type, not
+necessarily the same type as the operands. For example, a Sum aggregate
+operator for integers must have the heading:
+
+....
+aggregate operator Sum(AValue : System.Integer) : System.Integer
+....
+
+*initialization* Block**aggregation** Block**finalization**
+BlockAggregate operators have three blocks, __initialization__,
+__finalization__, and __aggregation__. Each section is allowed to be a
+host-implemented operator, or a D4 statement block.
+
+The initialization section is called once before aggregation begins.
+This allows the operator to set up any local variables that will be used
+to compute the aggregation.
+
+The aggregation section is called once for each row in the table value
+being aggregated. The value for the target aggregation column for the
+row is available in this section as the value of the variable
+representing the single operand defined for the aggregate operator.
+
+The finalization section is called once after all the rows have been
+processed by the aggregation section. This allows the operator to
+perform any final computations required to compute the aggregate.
+
+Order-dependentAggregate OperatorsOrder-dependentBecause the order of
+aggregation within an aggregate operator may produce different results,
+depending on the aggregate operator, the D4 language allows aggregate
+operators to be marked as __order-dependent__. This indicates to the
+compiler that the aggregate operator will in general produce different
+results for different orderings of the input to the operator. For
+example, the Concat aggregate operator will produce entirely different
+results, depending on the order in which the rows of the input are
+processed.
+
+To specify whether or not an aggregate operator is order-dependent, use
+the DAE.IsOrderDependent tag in the metadata for the operator. If an
+aggregate operator is specified as order-dependent, the compiler will
+issue a warning if the input to that aggregate operator is not
+well-ordered (if the order of the rows in the input is not ordered by at
+least a key).
+
+The create aggregate operator statement in D4 has the following syntax:
+
+....
+<create aggregate operator statement> ::=
+    create [session] aggregate operator
+        <operator name>
+        "("<formal parameter commalist>")"
+        : <type specifier>
+        initialization (<class definition> | <block>)
+        aggregation (<class definition> | <block>)
+        finalization (<class definition> | <block>)
+        <metadata>
+
+<operator name> ::=
+    <qualified identifier>
+
+<named type specifier> ::=
+    <qualified identifier> : <type specifier>
+....
+
+The alter aggregate operator statement in D4 has the following syntax:
+
+....
+<alter aggregate operator statement> ::=
+    alter aggregate operator <operator name>"("<formal parameter specifier commalist>")"
+        [initialization (<alter class definition> | <block>)]
+        [aggregation (<alter class definition> | <block>)]
+        [finalization (<alter class definition> | <block>)]
+        <alter metadata>
+
+<formal parameter specifier> ::=
+    [<modifier>] <type specifier>
+....
+
+The drop aggregate operator statement in D4 has the following syntax:
+
+....
+<drop aggregate operator statement> ::=
+    drop aggregate operator <operator name>"("<formal parameter specifier commalist>")"
+....
+
+These statements create, alter, and drop an aggregate operator named
+<operator name> with operands given by
+<formal parameter specifier commalist> in the catalog. The aggregate
+operator must return a value of the type given by <type specifier>. The
+implementation of each section is specified by either the
+<class definition> in which case the section is __host-implemented__, or
+the <block>, in which case the section is a sequence of compiled D4
+statements. The optional *session* keyword indicates that this aggregate
+operator is visible only within the session in which it was created. A
+session-specific aggregate operator will hide a global aggregate
+operator with the same name and signature.
+
+For a complete description of the <block> production rule, refer to
+<<D4ImperativeStatements.adoc#D4LGImperativeStatements, Imperative Statements>>.
+
+Aggregate operators can be invoked in one of two ways. First, they can
+be invoked as part of the *add* clause of an *group* table operator.
+Second, they invoked stand-alone a scalar aggregate operator invocation.
+For a complete description of the *group* table operator, refer to the
+*<<D4TableOperators.adoc#D4LGTableExpressions-Aggregate, group>>* discussion in this
+guide.
+
+Outside the context of a
+*<<D4TableOperators.adoc#D4LGTableExpressions-Aggregate, group>>* operator, aggregate
+operators must be called using an scalar aggregate operator invocation.
+For example, to compute the sum of the values for a column Data of some
+table Integers, the following expression would be used:
+
+....
+Sum(Data from Integers)
+....
+
+Note that multiple columns may be specified by enclosing the column list
+in braces (\{ }). The aggregate operator is resolved based on the type
+of the column, or columns, being aggregated. If the operator resolved is
+not an aggregate operator, the compiler will raise an error.
+
+For a complete description of aggregate operator invocation syntax,
+refer to the <<D4LGOperatorInvocation.adoc#D4LGOperatorInvocation, operator invocations>>
+discussion in this guide.
+
+The following example creats an aggregate operator, and uses it in some
+simple aggregate expressions:
+
+....
+// aggregate operators
+create aggregate operator StdDev(AValue : Decimal) : Decimal
+    initialization
+        begin
+            var LSum : Decimal := 0d;
+            var LSumOfSquares : Decimal := 0d;
+            var LCount : Integer := 0;
+            result := 0d;
+        end
+    aggregation
+        begin
+            LSum := LSum + AValue;
+            LSumOfSquares := LSumOfSquares + (AValue ** 2d);
+            LCount := LCount + 1;
+        end
+    finalization
+        begin
+            result :=
+                (
+                    (
+                        (LSumOfSquares - ((LSum ** 2d) / ToDecimal(LCount))) /
+                        ToDecimal(LCount - 1)
+                    ) **
+                    0.5d
+                );
+        end;
+
+// Invocation through the table aggregate operator
+select
+    table { row { 0.1d DecimalValue },
+        row { 0.2d }, row { 0.3d },
+        row { 0.4d }, row { 0.5d } }
+        group add { StdDev(DecimalValue) Value_StdDev };
+
+// Stand-alone invocation
+select
+    StdDev
+    (
+        DecimalValue from
+        table
+        {
+            row { 0.1d DecimalValue },
+            row { 0.2d }
+        }
+    );
+....
+
+*See Also*
+
+<<D4TableOperators.adoc#D4LGTableExpressions-Aggregate, Aggregate>>
+
+[[D4LGCatalogElements-Devices]]
+== Device
+
+All data storage in the Dataphor Server is abstracted through the
+concept of a Device. The Dataphor Server not only uses devices to store
+data, it also offloads any query processing that is supported by the
+device. Because each data source is capable of different types of data
+manipulation, the internal device interface provides a mechanism for
+dynamically determining these capabilities for any given expression. The
+Dataphor Server then uses this information to distribute query
+processing among the different devices involved in the request. When the
+device on which the data resides cannot perform a particular operation,
+the query processor takes over and performs the query processing
+internally. The result is seamless access to disparate data sources.
+
+The storage systems represented by each device have their own internal
+catalog, which must be synchronized with the Dataphor Server in order to
+be utilized within D4. This process is known as __schema
+reconciliation__. Settings on each device control how this process
+occurs.
+
+Each device may have any number of associated type and operator mappings
+which control how catalog objects in the Dataphor Server map into the
+device.
+
+Each device may also have a mapping for each user in the Dataphor Server
+called a __device user__. This mapping contains the credentials to be
+used when communicating with the storage system represented by the
+device, as well as any user-specific settings for the device. These
+mappings are created through the use of system library operators.
+
+For a complete discussion of all these topics, refer to the
+<<StorageIntegrationArchitecture.adoc#DDGStorageIntegrationArchitecture, Storage Integration Architecture>>
+chapter in the Physical Realization part of this guide.
+
+The create device statement in D4 has the following syntax:
+
+....
+<create device statement> ::=
+    create device <device name>
+        ["{"<device map item commalist>"}"]
+        <reconciliation settings>
+        <class definition>
+        <metadata>
+
+<device name> ::=
+    <qualified identifier>
+
+<device map item> ::=
+    <device scalar type map> |
+    <device operator map>
+
+<device scalar type map> ::=
+    type <scalar type name> <class definition>
+
+<scalar type name> ::=
+    <qualified identifier>
+
+<device operator map> ::=
+    operator <operator specifier> <class definition>
+
+<operator specifier> ::=
+    <operator name>"("<formal parameter specifier commalist>")"
+
+<reconciliation settings> ::=
+    [reconciliation "{"<reconciliation settings item commalist>"}"]
+
+<reconciliation settings item> ::=
+    <reconciliation mode definition> |
+    <reconciliation master>
+
+<reconciliation mode definition> ::=
+    mode = "{"<reconciliation mode commalist>"}"
+
+<reconciliation mode> ::=
+    none |
+    startup |
+    command |
+    automatic
+
+<reconciliation master> ::=
+    master = (server | device | both)
+....
+
+The alter device statement in D4 has the following syntax:
+
+....
+<alter device statement> ::=
+    alter device <device name>
+        ["{"<alter device map item commalist>"}"]
+        <alter reconciliation settings>
+        <alter class definition>
+        <alter metadata>
+
+<alter reconciliation settings> ::=
+    [alter reconciliation "{"<reconciliation settings item commalist>"}"]
+
+<alter device map item> ::=
+    <alter device scalar type map> |
+    <alter device operator map>
+
+<alter device scalar type map> ::=
+    (create <device scalar type map>) |
+    (alter type <scalar type name> <alter class definition>) |
+    (drop type <scalar type name>)
+
+<alter device operator map> ::=
+    create <device operator map> |
+    alter operator <operator specifier> <alter class definition> |
+    drop operator <operator specifier>
+....
+
+The drop device statement in D4 has the following syntax:
+
+....
+<drop device statement> ::=
+    drop device <device name>
+....
+
+These statements create, alter, and drop a device named <device name> in
+the catalog.
+
+[[D4LGCatalogElements-EventHandlers]]
+== Event Handlers
+
+Event handlers are operators that have been attached to specific events
+in the system such as data modification, or proposable interface calls.
+Event handlers can be attached to events triggered at the scalar type
+level, the column level, or the table variable level. Each event has an
+associated signature which is used to invoke the attached operator. The
+signature of a handler must match the signature of the event to which it
+is attached.
+
+The following lists detail the available events for different types of
+catalog objects:
+
+Table Variable Level Events:
+
+Before Insert:: Occurs before the insert of a row in a table variable. The signature for
+this event handler is:
++
+....
+(var row { <heading> }, var Boolean)
+....
++
+The first parameter is set to the row value that is about to be
+inserted. Changes made to the value of this parameter within the body of
+the handler will affect the actual row being inserted. The second
+parameter indicates whether or not to perform the insert. By default,
+the value of this parameter is true, setting it to false within the body
+of the handler will stop propagation of the insert.
+
+After Insert:: Occurs after the insert of a row in a table variable. The signature for
+this event handler is:
++
+....
+(const row { <heading> })
+....
++
+The first parameter is set to the row value that was inserted. Note that
+if the handler is deferred, it will be invoked at transaction commit
+time, rather than immediately after the insert occurs.
+
+Before Update:: Occurs before the update of a row in a table variable. The signature for
+this event handler is:
++
+....
+(const row { <heading> }, var row { <heading> }, var Boolean)
+....
++
+The first parameter is set to the old row value being updated. The
+second parameter is set to the new row value being updated. Changes made
+to the value of the new parameter within the body of the handler will
+affect the actual row being updated. The third parameter indicates
+whether or not to perform the update. By default, the value of this
+parameter is true, setting it to false within the body of the handler
+will stop propagation of the update.
+
+After Update:: Occurs after the update of a row in a table variable. The signature for
+this event handler is:
++
+....
+(const row { <heading> }, const row { <heading> })
+....
++
+The first parameter is set to the old row value that was updated. The
+second parameter is set to the new row value that was updated. Note that
+if the handler is deferred, it will be invoked at transaction commit
+time, rather than immediately after the update occurs.
+
+Before Delete:: Occurs before the delete of a row in a table variable. The signature for
+this event handler is:
++
+....
+(const row { <heading> }, var Boolean)
+....
++
+The first parameter is set to the row value that is being deleted. The
+second parameter indicates whether or not to perform the delete. By
+default, the value of this parameter is true, setting it to false within
+the body of the handler will stop propagation of the delete.
+
+After Delete::
++
+Occurs after the delete of a row in a table variable. The signature for
+this event handler is:
++
+....
+(const row { <heading> })
+....
++
+The first parameter is set to the row value that was deleted. Note that
+if the hander is deferred, it will be invoked at transaction commit
+time, rather than immediately after the delete occurs.
+
+Default::
++
+Occurs during a _default_ proposable call. The signature for this event
+handler is:
++
+....
+(var row { <heading> }, const String)
+....
++
+The first parameter is set to the row value being defaulted. Changes
+made to the value of this parameter within the body of the handler will
+affect the resulting default row. The second parameter is set to the
+name of the column being defaulted, if any, and the empty string ("")
+otherwise. Note that the handler should return true if any change was
+made to the value of the first parameter.
+
+Change::
++
+Occurs during a _change_ proposable call. The signature for this event
+handler is:
++
+....
+(const row { <heading> }, var row { <heading> }, const String)
+....
++
+The first parameter is set to the old row value as it was prior to the
+change that caused the proposable call. The second parameter is set to
+the new row value. Changes made to the value of the new parameter within
+the body of the handler will affect the resulting changed row. The third
+parameter is set to the name of the column that was changed, if a single
+change caused the call, and the empty string ("") otherwise. Note that
+the handler should return true if any change was made to the value of
+the second parameter.
+
+Validate::
++
+Occurs during a validate proposable call. The signature for this event
+handler is:
++
+....
+(const row { <heading> }, var row { <heading> }, const String)
+....
++
+The first parameter is set to the old row value as it was prior to the
+change that caused the proposable call. The second parameter is set to
+the new row value. Changes made to the value of the new parameter within
+the body of the handler will affect the resulting validated row. The
+third parameter is set to the name of the column that was changed, if a
+single change caused the call, and the empty string ("") otherwise. Note
+that the handler should return true if any change was made to the value
+of the second parameter.
+
+Column Level Events:
+
+
+Default:: Occurs during a _default_ proposable call. The signature for this event
+handler is:
++
+....
+(var <column data type>)
+....
++
+The first parameter should be set to the desired default value within
+the body of the handler. The handler should return true if any change
+was made to the value of the first parameter.
+Change:: Occurs during a _change_ proposable call. The signature for this event
+handler is:
++
+....
+(const row { <heading> }, var row { <heading> })
+....
++
+The first parameter is set to the old row value as it was prior to the
+change that caused the proposable call. The second parameter is set to
+the new row value. Changes made to the value of the new parameter within
+the body of the handler will affect the resulting changed row. The
+handler should return true if any change was made to the value of the
+second parameter.
+
+Validate::
+Occurs during a _validate_ proposable call. The signature for this event
+handler is:
++
+....
+(const row { <heading> }, var row { <heading> })
+....
++
+The first parameter is set to the old row value as it was prior to the
+change that caused the proposable call. The second parameter is set to
+the new row value. Changes made to the value of the new parameter within
+the body of the handler will affect the resulting validated row. The
+handler should return true if any change was made to the value of the
+second parameter.
+
+Scalar Type Level Events:
+
+Default:: Occurs during a _default_ proposable call. The signature for this event
+handler is:
++
+....
+(var <scalar type>)
+....
++
+The first parameter should be set to the desired default value within
+the body of the handler. The handler should return true if any change
+was made to the value of the first parameter.
+
+Change:: Occurs during a _change_ proposable call. The signature for this event
+handler is:
++
+....
+(const <scalar type>, var <scalar type>)
+....
++
+The first parameter is set to the old value before the change that
+caused the proposable call. The second parameter is set to the new
+value. Changes made to the value of the new parameter within the body of
+the handler will affect the resulting changed value. The handler should
+return true if any change was made to the value of the second parameter.
+
+Validate:: Occurs during a _validate_ proposable call. The signature for this event
+handler is:
++
+....
+(const <scalar type>, var <scalar type>)
+....
++
+The first parameter is set to the old value before the change that
+caused the proposable call. The second parameter is set to the new
+value. Changes made to the value of the new parameter within the body of
+the handler will affect the resulting validated value. The handler
+should return true if any change was made to the value of the second
+parameter.
+
+If multiple operators are attached to the same event, the order in which
+the operators are invoked can be controlled by specifying that a given
+operator should be invoked before a given set of operators. This is
+accomplished with the optional _before_ clause of the attach statement,
+or with the invoke statement.
+
+D4 allows for the _after_ table-level event handlers to be deferred
+until transaction commit time. This allows the event handlers to be
+invoked only when all the effects of the transaction are known, thus
+simplifying the implementation of many types of business rules.
+
+By default, any after table-level event handler is deferred if the
+operator being invoked accesses global state. To change this behavior,
+the <<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-IsDeferred, DAE.IsDeferred>>
+tag can be specified with the attach statement.
+
+In addition, event handlers can be translated into an application
+transaction. By default, all event handlers except after table-level
+event handlers are translated into the application transaction. If a
+given event handler is invoked within an application transaction, it
+will not be invoked when the application transaction is committed. To
+disable application transaction translation of an event handler, use the
+<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-ShouldTranslate, DAE.ShouldTranslate>>
+tag on the attach statement. Note also that the operator being invoked
+may have a <<../DataphorReference/Tags.adoc#FTRTagsDescriptions-DAETags-ShouldTranslate, DAE.ShouldTranslate>>
+tag indicating whether the operator body should be translated into the
+application transaction.
+
+Event handlers are attached and detached using the DDL statements
+*attach* and **detach**.
+
+The attach statement in D4 has the following syntax:
+
+....
+<attach statement> ::=
+    attach [operator] <operator name>
+        to <event source specifier>
+        <event specifier clause>
+        [before "{"<ne operator name commalist>"}"]
+        <metadata>
+
+<event source specifier> ::=
+    <tablevar name> |
+    (<column name> in <tablevar name>) |
+    <scalar type name>
+
+<event specifier clause> ::=
+    on (<event specifier> | ("{"<ne event specifier commalist>"}"))
+
+<event specifier> ::=
+    ((before | after) (insert | update | delete)) |
+    (default | validate | change)
+....
+
+This statement attaches the operator specified by <operator name> to the
+event source specified by <event source specifier> and the event
+specified by <event specifier clause>. The <event source specifier> and
+<event specifier clause> are used to determine the signature for the
+operator to be invoked.
+
+The detach statement in D4 has the following syntax:
+
+....
+<detach statement> ::=
+    detach [operator] <operator name>
+        from <event source specifier>
+        <event specifier clause>
+....
+
+This statement detaches the operator specified by <operator name> from
+the event source specified by <event source specifier> and the event
+specified by <event specifier clause>.
+
+The order of invocation for a given event can be controlled with the
+invoke statement:
+
+....
+<invoke statement> ::=
+    invoke <operator name>
+        on <event source specifier>
+        <event specifier clause>
+        before "{"<ne operator name commalist>"}"
+....
+
+This statement causes the operator specified by <operator name> on the
+event source specified by <event source specifier> and the event
+specified by <event specifier clause> to be invoked before any operator
+attached to the same event with a name appearing in the
+<ne operator name commalist>.
+
+[[D4LGCatalogElements-Sorts]]
+== Sorts
+
+A _sort_ is associated with a scalar type definition and provides the
+default sort expression for columns defined on the given scalar type. A
+given scalar type may only have one sort associated with it. Note that
+this sort serves only as a default for ordering, and can always be
+changed for a given result set using the sort clause of the order column
+definition with an <<D4LGOrders, <order definition>>> or
+<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement, \<order clause\>>>.
+
+The create sort statement in D4 has the following syntax:
+
+....
+<create sort statement> ::=
+    create sort <scalar type name> using <expression>
+
+<scalar type name> ::=
+    <qualified identifier>
+....
+
+The alter sort statement in D4 has the following syntax:
+
+....
+<alter sort statement> ::=
+    alter sort <scalar type name> using <expression>
+....
+
+The drop sort statement in D4 has the following syntax:
+
+....
+<drop sort statement> ::=
+    drop sort <scalar type name>
+....
+
+These statements create, alter, and drop the sort for the scalar type
+given by <scalar type name> in the catalog.
+
+[[D4LGCatalogElements-Conversions]]
+== Conversions
+
+The D4 language supports the concept of implicit conversions. This
+allows values of a given type to be implicitly converted by the compiler
+to values of a target type. Implicit conversions must be explicitly
+specified by the type designer using the <create conversion statement>.
+Implicit conversions are transitive. For example if type A can be
+implicitly converted to type B and type B can be implicitly converted to
+type C, a value of type A can be used where a value of type C is
+required.
+
+Implicit conversions can be narrowing, or widening. A narrowing
+conversion is one which may produce a run-time error because the value
+being converted cannot be represented in the target type. For example,
+an attempt to convert the integer value 256 to a byte value will result
+in a run-time error. A widening conversion is one which is guaranteed to
+be safe, i.e. every value of the source type can be represented as a
+value in the target type. Converting a value of type Byte to a value of
+type Integer is a widening conversion. For more information on type
+conversion, narrowning, widening, and a table of available conversions,
+refer to <<D4LanguageElements.adoc#D4LGLanguageElements-Types-TypeConversions, Type Conversions>>.
+
+There are two cases where the compiler will attempt to determine a
+conversion path: assignment statements, and operator calls. Assignment
+statements include **insert**, **update**, and **delete**. In each case,
+the compiler will attempt to resolve the request using the
+least-narrowing, shortest conversion path from the source type to the
+target type. Note that a narrowing conversion may result in a run-time
+error if the value being converted is not a valid value of the target
+type. The compiler favors widening conversions over path-length when
+determining a conversion path between two types, and when determining an
+appropriate operator overload.
+
+The create conversion statement has the following syntax:
+
+....
+<create conversion statement> ::=
+        create conversion <source scalar type name>
+            to <target scalar type name> using <operator name>
+            [widening | narrowing] <metadata>
+
+<source scalar type name> ::=
+    <qualified identifier>
+
+<target scalar type name> ::=
+    <qualified identifier>
+
+<operator name> ::=
+    <qualified identifier>
+....
+
+This statement creates a conversion from <source scalar type name> to
+<target scalar type name> using the operator specified by
+<operator name>.
+
+The drop conversion statement has the following syntax:
+
+....
+<drop conversion statement> ::=
+    drop conversion <source scalar type name> to <target scalar type name> using <operator name>
+....
+
+This statement drops the conversion from <source scalar type name> to
+<target scalar type name> using the operator specified by
+<operator name>.
+
+[[D4LGCatalogElements-Conversions-LikeTypes]]
+=== Like Types
+
+The D4 language allows a <like clause> in the
+<create scalar type statement>. This clause indicates that the compiler
+should provide the basic representations of the type based on the like
+type, and that implicit conversions to and from the like type will be
+created.
+
+When a type is created _like_ another type, the compiler will perform
+the following steps:
+
+1.  The _like representation_ of the like is determined. The like
+representation for a type is the representation with a single property
+defined in terms of the like type. Clearly, if a type is not defined to
+be like another type, then it has no like representation.
+2.  If any logical representation of the like type that is not the like
+representation for that type has a single property defined in terms of
+the like type, the definition for that representation is added as the
+like representation for the new type.
+3.  The definition for each logical representation of the like type that
+is a native accessor is added to the new type.
+4.  If no like representation definition was added based on a
+representation of the like type, a new representation definition is
+added with a single property defined in terms of the like type. This
+representation will be named the unqualified name of the new type. If
+the new type definition already has a representation definition with the
+same name, the representation will be named As concatenated with the
+unqualified name of the like type. If the new type definition already
+has a representation definition with this name, the compiler will not
+attempt to construct a like representation for the new type.
+5.  If the like type has a default definition, and the new type
+definition does not include a default definition, the new type
+definition will be given the same default definition.
+6.  Each constraint of the like type that does not appear on the new
+type definition will become a constraint on the new type definition.
+7.  Each special of the like type that does not appear on the new type
+definition will become a special on the new type definition.
+8.  All metadata tags from the like type will be copied to the new type,
+with metadata tags on the new type definition overriding metadata tags
+from the like type.
+9.  Implicit conversions are created to and from the like type using the
+read accessor and selector of the like representation of the new type,
+respectively.
+
+The following create type statement:
+
+....
+create type ID like String;
+....
+
+is shorthand for:
+
+....
+create type ID
+{
+    representation ID { ID : String }
+};
+
+create conversion String to ID using ID narrowing;
+create conversion ID to String using ID.ReadID widening;
+....
+
+[[D4LGCatalogElements-Roles]]
+== Roles and Rights
+
+Roles and Rights are the application-level security primitives available
+in the Dataphor Server. Rights are the basic unit of permission, while
+roles are groups of right assignments that can be used to facilitate
+security administration. Roles are catalog level objects and therefore
+share the namespace with all other catalog objects. In contrast, Rights
+have a separate namespace, and are only required to be uniquely named
+within the set of rights.
+
+The security statements in D4 have the following syntax:
+
+....
+<create role statement> ::=
+    create role <role name> <metadata>
+
+<alter role statement> ::=
+    alter role <role name> <alter metadata>
+
+<drop role statement> ::=
+    drop role <role name>
+
+<create right statement> ::=
+    create right <right name>
+
+<drop right statement> ::=
+    drop right <right name>
+
+<role name> ::=
+    <qualified identifier>
+
+<right name> ::=
+    <qualified identifier>
+....
+
+The create role statement creates a role named <role name> with the
+metadata specified by <metadata>.
+
+The alter role statement alters the metadata for the role specified by
+<role name>.
+
+The drop role statement drops the role specified by <role name>. Any
+right assignments and user memberships for the role being dropped are
+implicitly removed by the drop role statement.
+
+The create right statement creates a right named <right name>. The right
+name must be unique among the existing rights in the system. The right
+created is owned by the user performing the create right statement. The
+owner of the right is implicitly granted the right, while other users
+must be explicitly granted the right.
+
+The drop right statement drops the right specified by <right name>.
+Rights that are implicitly created by the system to protect access to
+catalog objects cannot be dropped with a drop right statement. Any right
+assignments referencing the right being dropped are implicitly removed
+by the drop right statement.
+
+For more information on the security model of the Dataphor Server, refer
+to the Security discussions in the Dataphor User's Guide and the
+Dataphor Developer's Guide.

@@ -1,0 +1,313 @@
+= Operator Mapping
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGOperatorMapping]]
+== Summary
+
+Beyond basic data retrieval, many of the devices in the Dataphor product
+allow the target systems to be enlisted for use as query processors. The
+majority of the optimization tasks performed by the Dataphor query
+processor involve deciding where the various parts of a given expression
+will be evaluated.
+
+This flexibility allows the behavior of target systems to be modeled not
+only for the purpose of providing persistence, but in order to take
+advantage of the transactional and performance characteristics of those
+systems. The primary mechanism for describing the behavior of a target
+system is the __operator map__.
+
+Each device has a set of operator maps that indicate which D4 operators
+are supported by the device. Note that only operators which return a
+value are mapped. Each operator map is responsible for determining
+whether a given expression containing an invocation of that operator is
+supported by the device, and how that invocation should be translated in
+order to be understood by the target system.
+
+Operator maps can be as simple as the mapping for integer addition, or
+as complex as the *join* operator. For the SQL-based devices that ship
+with the Dataphor product, the system-defined operators that can be
+supported are already mapped. Support for additional operators can be
+provided relatively easily. This chapter discusses how operator maps
+work, and what is involved in their creation and usage.
+
+There are essentially four different methods for mapping operators into
+devices:
+
+* Map the operator using an existing translation handler.
+* Map the operator to a function call on the target system.
+* Map the operator as an in-lined expression in the target system
+dialect.
+* Map the operator using a custom host-implemented translation handler.
+
+The first three methods of mapping will be discussed in the following
+sections but one. The final method of operator mapping is beyond the
+scope of this documentation. For more information on this method of
+operator, consult the Dataphor Extender's Development Kit.
+
+[[DDGOperatorMapping-GenericOperatorMaps]]
+== Generic Operator Maps
+
+Common SQL support provides operator mapping classes for many of the D4
+system operators. In addition to support for specific operators, the SQL
+device introduces several general purpose translators that can be used
+without modification to handle most operator mappings.
+
+The following table describes these handlers:
+
+[cols=",",options="header",]
+|=======================================================================
+|Translation Handler |Functionality Provided
+|SQLScalarSelector |Provides a basic passthrough implementation, in
+other words, the operator mapped to this handler is skipped in the
+translation output. This is useful when the device representation for a
+particular data type is known to be the same as the device
+representation for the data type of the single scalar component of the
+representation for a given selector. For example, the type ID \{
+*representation* ID \{ Value : String } } would have the same device
+representation as String, and so a selector invocation ID("001") would
+effectively be translated to just the string literal "001".
+
+|SQLScalarReadAccessor |Provides a basic passthrough implementation for
+read accessors. To continue with the above example, the invocation in D4
+ID.Value could be translated by simply ignoring the read accessor.
+
+|SQLScalarWriteAccessor |Provides a basic passthrough implementation for
+write accessors. The D4 assignment to ID.Value can be translated to SQL
+by a replacement of the value if the representation has a single scalar
+component with the same device representation as the type itself.
+
+|SQLScalarIsSpecialOperator |Provides a basic implementation for the
+IsSpecial operators created for each domain. If a domain has no
+specials, this handler is appropriate, as it always emits 0 = 1 or
+false, in SQL.
+
+|SQLCallOperator |Provides a generic handler that is capable of invoking
+an operator in SQL. This handler has an attribute called OperatorName,
+set through the attributes in the class definition, which is used to
+construct the output. For example, if the operator name of the handler
+is Rand, and the handler is mapped to the D4 operator Random, the result
+of translating the D4 expression Random(5) is Rand(5). The call operator
+works with any number of operands for the operator being mapped. This is
+useful when the implementation for a specific operator in D4 is provided
+by a user-defined function in the target system.
+
+|SQLUserOperator |Provides a generic handler that allows the translated
+expression to be written directly. This handler has an attribute called
+TranslationString, set through the attributes in the class definition,
+or directly with the Storage.TranslationString tag of the operator map.
+The provided translation string may contain format markers to indicate
+where the translated expression for each argument is to be embedded. For
+example, given the translation string \{0} + \{1}, the D4 expression 1 +
+2 would be translated directly as 1 + 2.
+|=======================================================================
+
+[[DDGOperatorMapping-MappingOperatorswithExistingHandlers]]
+== Mapping Operators with Existing Handlers
+
+The SQL devices provide a large number of existing translation handlers
+to map the system-provided operators. In many cases, these mappings can
+be used as-is to map certain common operators. For example, in the
+Shipping application, the mapping for
+iMultiplication(ShippingRate,Â Distance) is provided by the following
+mapping:
+
+....
+alter device Shipping
+{
+    create operator iMultiplication(Distance, ShippingRate)
+        class "SQLDevice.SQLMultiplication"
+};
+....
+
+The advantage of using a dedicated translation handler such as this one
+is that the mapping is device-independent, at least among the SQL
+devices. Each device would be able to make use of this mapping, with any
+syntactic differences in the actual invocation of the operator being
+handled by the emitter of the specific device.
+
+[[DDGOperatorMapping-MappingOperatorsasFunctions]]
+== Mapping Operators as Functions
+
+To avoid having to create a host-implemented translation handler for
+each operator to be mapped, the SQL devices allow for a generic
+"call"-style mapping, which simply invokes the operator as a function
+call on the target system. The name of the function to be invoked is
+specified as part of the definition of the operator mapping. For
+example, the Distance operator is mapped using the following statement:
+
+....
+alter device Shipping
+{
+    create operator Distance(Coordinate, Coordinate)
+        class "SQLDevice.SQLCallOperator"
+            attributes { "OperatorName" = "dbo.Shipping_Distance" }
+}
+....
+
+[[DDGOperatorMapping-MappingOperatorsasExpressions]]
+== Mapping Operators as Expressions
+
+If creating functions in the target system is not an option, either for
+security reasons, or because the target system does not support
+functions, the operator mapping may be specified using an in-line
+expression. This method is accomplished specifying the
+Storage.TranslationString tag on the operator mapping:
+
+....
+alter device Shipping
+{
+    create operator iMultiplication(Distance, ShippingRate)
+        tags { Storage.TranslationString = "{0} * {1}" }
+};
+....
+
+This mapping specifies that the operator is mapped by inlining the given
+translation string, and replacing the parameter markers (\{0}) with the
+translated expression representing the argument specified by the index
+of the parameter marker.
+
+This method of mapping will work for most operators, but it will not
+work if the operator cannot be expressed in terms of a single
+expression. For example, the definition of the Factorial function
+requires the use of a *while* loop, and so cannot be expressed within a
+single expression. In these cases, a function mapping must be used.
+
+[[DDGOperatorMapping-MappingSelectorsandAccessors]]
+== Mapping Selectors and Accessors
+
+Selectors and accessors form a large part of the mappings required to
+support any given scalar type. Not only must the type map be provided in
+order to translate values to and from the device, but the accessors and
+selectors that appear within expressions referencing values of the type
+in D4 must be translated so that the expressions can be mapped into the
+target system.
+
+For most *like* types, this process is relatively straightforward, and
+the Dataphor Server will usually provide the mappings automatically. For
+relatively more complex types like the Degree or Coordinate types in the
+Shipping application, these mappings must be provided explicitly.
+
+To illustrate the process, we will consider the mapping of the Degree
+type, and all of its selectors and accessors. For reference, the
+following listing provides the complete definition of the degree type:
+
+....
+create type Degree
+{
+    representation Degrees { Degrees : Decimal },
+    representation Degree
+    {
+        DegreesPart : Integer
+            read GetDegreesPart(value.Degrees)
+            write Degrees(SetDegreesPart(value.Degrees, DegreesPart)),
+        MinutesPart : Integer
+            read GetMinutesPart(value.Degrees)
+            write Degrees(SetMinutesPart(value.Degrees, MinutesPart)),
+        SecondsPart : Decimal
+            read GetSecondsPart(value.Degrees)
+            write Degrees(SetSecondsPart(value.Degrees, SecondsPart))
+    } selector Degrees(GetDegrees(DegreesPart, MinutesPart, SecondsPart)),
+    representation AsString
+    {
+        AsString : String
+            read DegreesToString(value.Degrees)
+            write Degrees(StringToDegrees(AsString))
+    } selector Degrees(StringToDegrees(AsString))
+};
+....
+
+Note that the definitions of the various operators used by the selectors
+and accessors have been omitted here, but in order to support queries
+that involve these operators, operator maps will have to be provided for
+each one.
+
+Because the native representation of the type is Decimal, the type
+mapping itself is relatively straightforward, and is automatically
+provided by the Dataphor Server. For illustration, we list the generated
+mappings here:
+
+....
+alter device Shipping
+{
+    create type Degree class "SQLDevice.SQLDecimal",
+    create operator Degrees(Decimal) class "SQLDevice.SQLScalarSelector",
+    create operator Degrees.ReadDegrees(Degree) class "SQLDevice.SQLScalarReadAccessor",
+    create operator Degrees.WriteDegrees(Degree, Decimal) class "SQLDevice.SQLScalarWriteAccessor",
+    create operator iCompare(Degree, Degree) class "SQLDevice.SQLCompare",
+    create operator IsSpecial(Degree) class "SQLDevice.SQLScalarIsSpecialOperator"
+};
+....
+
+By default, each of these mappings will be provided by the Dataphor
+Server based on the native representation of Decimal, and the existing
+Decimal mappings for the device.
+
+However, the Degree representation is significantly more complex, and
+the mappings for this representation cannot be provided automatically.
+Briefly, the following listing shows the operators that must be mapped
+for this representation:
+
+....
+operator Degree(Integer, Integer, Decimal);
+operator ReadDegreesPart(Degree);
+operator WriteDegreesPart(Degree, Integer);
+operator ReadMinutesPart(Degree);
+operator WriteMinutesPart(Degree, Integer);
+operator ReadSecondsPart(Degree);
+operator WriteSecondsPart(Degree, Decimal);
+....
+
+In the Shipping application, each of these operator is mapped into the
+target system by creating a function on the target system, and using the
+SQLCallOperator translation handler to specify the mapping. For example,
+the following program listing shows the definition of the function used
+to handle the Degree selector:
+
+....
+create function Shipping_Degree
+(
+    @Degrees int,
+    @Minutes int,
+    @Seconds decimal(28, 8)
+) returns decimal(28, 8)
+begin
+    return @Degrees + (@Minutes / 60.0) + (@Seconds / 3600.0)
+end
+....
+
+This statement creates a function called Shipping_Degree in the target
+system. The following operator mapping then instructs the device that
+the Degree selector is mapped by invoking this function:
+
+....
+alter device Shipping
+{
+    create operator Degree(Integer, Integer, Decimal)
+        class "SQLDevice.SQLCallOperator"
+            attributes { "OperatorName" = "dbo.Shipping_Degree" }
+};
+....
+
+Alternatively, if functions cannot be created on the target system, the
+following mapping may be used for the Degree selector:
+
+....
+alter device Shipping
+{
+    create operator Degree(Integer, Integer, Decimal)
+        tags { Storage.TranslationString = "{0} + ({1} / 60.0) + ({2} / 3600.0)" }
+};
+....
+
+This mapping instructs the device that the Degree selector is mapped by
+directly inlining the expression given in the translation string,
+replacing the parameter markers (\{0}) with the translation for the
+expression specified by the index of the parameter marker. Note that the
+translation string is written directly in the dialect of the target
+system, so this method of operator mapping is not immune to dialectic
+differences among target systems.

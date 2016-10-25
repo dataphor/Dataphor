@@ -1,0 +1,129 @@
+image::../Images/Dataphor-Logo.gif[Dataphor Logo]
+
+User's Guide
+===========
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+The Dataphor User's Guide introduces the Dataphor product, and provides information on using the
+Dataphor product. The Guide provides an overview of the motivation behind Dataphor, introduces
+the Dataphor platform and the anatomy of a Dataphor application, then provides several tutorials.
+In addition, the guide provides a section on using applications built with Dataphor, and discusses
+administration of a Dataphor Server.
+
+== Using Dataphor
+
+.Sections
+. link:ProductTour.adoc[Product Tour]
+. link:Dataphoria.adoc[Dataphoria]
+. link:DataphorService.adoc[Dataphor Service]
+. link:Security.adoc[Security]
+. link:UsingDataphorApplications.adoc[Using Dataphor Applications]
+
+
+Application development in the software industry is a complex and multi-faceted problem.
+Software architects and engineers are faced with a multitude of issues ranging from performance
+and scalability to security and usability. Over the years, more and more of these issues have been
+resolved generally by implementing the solutions in server layer software.
+With each layer of
+automation, application development becomes more and more declarative, and less and less
+procedural.
+In other words, the developer simply states what is to be done, not how it should be
+accomplished.
+
+Dataphor represents a next step in that evolution from procedural to declarative development.
+The product is designed from the ground up to be a declarative development environment.
+This part of the Dataphor User's Guide provides an introduction to the Dataphor application development
+platform and the technologies it contains. It introduces each component of the product, and provides detailed information on using the product to develop, deploy, and maintain Dataphor
+applications.
+This part is organized as follows:
+
+[horizontal]
+link:ProductTour.adoc[Product Tour]:: Provides an overview of the entire Dataphor platform, and describes the concrete elements of
+the architecture.
+link:Dataphoria.adoc[Dataphoria]:: Covers Dataphoria, the Dataphor development environment.
+link:DataphorService.adoc[Dataphor Service]:: Discusses installation and administration of the Dataphor Service.
+link:Security.adoc[Security]:: Discusses the Dataphor Security Model from the Administrator's perspective.
+link:UsingDataphorApplications.adoc[Using Dataphor Applications]:: Contains an in-depth discussion on using Dataphor applications from the perspective of an
+end-user.
+
+The first four chapters are intended to be read by Dataphor developers and administrators, while the
+final chapter is intended to be read by anyone using a Dataphor application.
+
+****
+The Dataphor Platform is largely based on the concepts portrayed in *The Third Manifesto:
+Foundation for Future Database Systems* [3] by C. J. Date and Hugh Darwen. The book is the
+culmination of thirty years of research and development in the relational model, and brings together
+in one volume the current state of the art in relational theory. For a complete list of the references
+used in building the Dataphor Server, refer to the Notices and References section of this manual.
+Alphora gratefully acknowledges all those who have contributed time and energy to the computer
+science field in general, and the relational field in particular.
+****
+
+== Tutorials
+
+.Tutorial libraries included in Dataphoria
+. link:Tutorial_MovieRental.adoc[Movie Rental]
+. link:Tutorial_BookPublishing.adoc[Book Publishing (with Pubs sample database)]
+. link:Tutorial_FrontendComponents.adoc[Frontend Components]
+
+
+== Type Conventions
+
+This section describes the type conventions used in this manual.
+
+[cols=",",options="header",]
+|=======================================================================
+|Description |Example
+|Regular text |D4 provides a powerful set of data manipulation
+capabilities, as well as a rich type system for describing even the most
+complex data.
+
+|Code block with *bold* denoting keywords a|
+....
+create table Employee { ID : Integer, Name : String, key { ID } };
+....
+
+|inline code with *bold* denoting keywords |Any given value has a type
+associated with it, for example, *table* \{ *row* \{ 5 ID } } is a table
+value with type *table* \{ ID : System.Integer }.
+
+|Keywords (also used in code blocks) |*select*
+
+|Introduction of new terms. |_physical representation_
+
+|Dataphor Identifiers |`System.Abs` returns the Absolute value
+(nonnegative) of a given value.
+
+|Keyboard Keys |F1
+
+|Key Combinations |Ctrl+C
+
+|Buttons in the interfaces |Add...
+
+|Commands or Executable files |`DAEService.exe`
+
+|Parameters for Executable files |`/i`
+|=======================================================================
+
+== Legal
+
+Information in this Dataphor Documentation is subject to change without notice.
+No part of this document may be reproduced by any means or for any purpose without the express written permission of
+Alphora.
+The software described in this document is furnished under a license agreement and may be used or copied only in
+accordance with the terms of the license agreement.
+
+----
+Copyright © 2016 Alphora
+----
+
+All rights reserved.
+
+Dataphor ® is a registered trademark of Alphora.
+The trademarks referenced in this document are the property of their respective owners and used in reference to their
+products.

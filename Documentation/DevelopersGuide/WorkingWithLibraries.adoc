@@ -1,0 +1,222 @@
+= Working with Libraries
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGWorkingWithLibraries]]
+== Summary
+
+Libraries provide a mechanism for managing groups of catalog objects in
+the Dataphor Server. They also provide the fundamental deployment
+mechanism for Dataphor applications. A library in the Dataphor Server is
+defined as a named and versioned set of catalog objects, a set of
+library dependencies, a set of library files, and an optional
+registration script. A library may also specify a default device name to
+be used as the default storage device for table variables created in the
+library.
+
+Each session running within the Dataphor Server has a __current
+library__. This library can be specified as part of the session
+information given when connecting to the Dataphor Server, and can be
+controlled using the link:O-System.SetLibrary.html[SetLibrary] operator.
+The current library is used for several purposes in the Dataphor Server
+such as default device resolution,
+<<D4LGCatalogElements-Libraries-LibrariesandNamespaces, name resolution>>,
+and is the default library for all newly created objects.
+
+[[D4LGCatalogElements-Libraries]]
+== Status
+
+Available LibrariesRegistered LibrariesSuspect LibrariesEach library in
+the Dataphor Server is either
+<<../UsersGuide/DataphoriaLibraries.adoc#DUGP1Dataphoria-DataphorExplorer-Libraries, __available__, __registered__, or __suspect__>>.
+An available library is simply the definition of the library. A registered
+library is an active catalog repository in the Dataphor Server. A suspect
+library is one that has encountered some error while attempting to load the
+library. The Dataphor Server uses the catalog directory specified at startup to
+persist which libraries have been registered, and the catalog state for each
+library.
+
+[[DDGWorkingWithLibraries-Versioning]]
+== Versioning
+
+The version of a library is specified using the
+link:T-System.VersionNumber.html[System.VersionNumber] data type. By
+default, the version of a library is the special value
+link:T-System.VersionNumber.html[VersionNumberUndefined]. When a library
+is referenced as a dependency by another library, the version number may
+also be specified, allowing libraries to require not only other
+libraries, but specific versions of those libraries. The notion of
+version compatibility is used to allow library references to target any
+granularity of the version number desired. For example, a library could
+reference version 2.0.* of the System library, meaning that the library
+is compatible with any System library that has major version 2, and
+minor version 0.
+
+[[DDGWorkingWithLibraries-Files]]
+== Files
+
+A library specifies a set of files to be included with the library.
+These are files that will be copied into the run-time directory of the
+Dataphor Server, and optionally registered as an assembly. Libraries are
+the only mechanism for registering assemblies with the Dataphor Server.
+This allows libraries to function as extensibility packages. For
+example, the Frontend and SimpleDevice are libraries that extend the
+functionality of the Dataphor Server.
+
+[[DDGWorkingWithLibraries-DefaultDeviceResolution]]
+== Default Device Resolution
+
+The default device name for a library is used to specify the storage
+device for table variables created in the library if no storage device
+is specified as part of the create table statement. If the current
+library does not specify a default device name, the default device is
+the first unambiguously specified default device name in a breadth-first
+traversal of the library dependency graph above the current library.
+
+[[DDGWorkingWithLibraries-LibrariesandNamespaces]]
+== Libraries and Namespaces
+
+When an object is created within a library, it will be namespaced by the
+name of the library. For example, if the current library is General, the
+statement:
+
+....
+create table Employee { ID : Integer, Name : String, key { ID } };
+....
+
+will create a table called General.Employee. Identifier resolution in
+the D4 language then allows this table to be referenced by its
+unqualified name Employee, even if other libraries have a table with the
+same unqualified name. This process is called _name resolution_ and is
+somewhat analogous to the _namespace_ concept in some object-oriented
+languages.
+
+The current library, and the library dependency graph of the current
+library are used to create a __name resolution path__. This path
+consists of a series of steps, where each step is the set of libraries
+at the same depth in the dependency graph. The name resolution process
+then uses the names of the libraries in each step as a default namespace
+to attempt to resolve the identifier. The steps are considered in order
+from the first step, which contains only the name of the current
+library, to the root of the dependency graph.
+
+If a given identifier resolves to more than one name at any step of the
+name resolution path, the identifier is considered ambiguous, and an
+error is thrown. Otherwise, the name referenced in the first step in
+which the identifier resolves is returned as the resulting reference for
+the identifier. If the steps of the name resolution path are exhausted
+without resolving the identifier, the identifier is considered unknown
+and an error is thrown.
+
+[[DDGWorkingWithLibraries-Dependencies]]
+== Dependencies
+
+All catalog objects in the Dataphor Server are members of one and only
+one library. In order for an object to depend on another object it must
+either be in the same library as the object, or in some library that
+requires the library of the target object. For example in order for a
+table in library A to be referenced by a constraint in library B,
+library B must require library A.
+
+[[DDGWorkingWithLibraries-Settings]]
+== Settings
+
+Library settings provide a mechanism for associating information with a
+library definition. This information is then available to the library at
+any time, including during the registration process. This allows library
+settings to be used as configuration options for Dataphor libraries and
+applications.
+
+Library settings are stored as part of the definition of the library,
+and are available either by explicitly accessing the
+System.LibrarySettings catalog table, or by invoking the
+link:O-System.LibrarySetting.html[LibrarySetting] operator.
+
+[[DDGWorkingWithLibraries-LibraryImplementation]]
+== Library Implementation
+
+Physically, a library in the Dataphor Server is a file system directory
+accessible by the server instance. On startup, the Dataphor Server scans
+the configured library directories for available libraries. In addition,
+existing libraries can be made available within the Dataphor Server by
+attaching them to the server instance, either through the
+user interfaces available in the Dataphor Explorer, or using the library
+management operators in the system library. Available libraries may also
+be detached from the Dataphor Server, however if the library definition
+is within a library directory of the server, it will be available the
+next time the server instance is started.
+
+Each available library is listed in the system catalog. When a library
+is registered, the following sequence of steps is taken:
+
+* The Dataphor Server ensures that the required version of each
+requisite library is registered.
+* Each file listed in the library is copied into the run-time directory
+of the Dataphor Server. Copy errors are ignored so that assemblies that
+are already registered will not prevent the library from being
+registered. (Note that this means the Dataphor Server must be restarted
+to update assemblies which have been changed.)
+* Each file that is marked as an assembly is registered with the
+Dataphor Server.
+* The library is set as the current library for the session.
+* If there is a file called Documents\Register.d4 in the library
+directory, it is run as the registration script for the library.
+
+Registered libraries may also be unregistered, which is essentially the
+reverse of the registration process. Both registering and unregistering
+a library may be done with or without reconciliation. The reconciliation
+option controls the following behaviors:
+
+* Data Definition Language (DDL) Statements
+* Data Manipulation Language (DML) Statements
+* Constraint Validation
+
+If reconciliation is enabled, each of these items will issue the
+corresponding statements in mapped devices as normal. If reconciliation
+is disabled, communication with the mapped devices will not take place.
+For example, if a library contains a create table statement, registering
+with reconciliation will cause the corresponding create table statement
+statement to be issued against the device, while registering without
+reconciliation will only create the table definition in the Dataphor
+Server catalog.
+
+[[DDGWorkingWithLibraries-DeploymentandMaintenance]]
+== Deployment and Maintenance
+
+Deploying libraries is simply a matter of copying the entire contents of
+the library directory into one of the library directories of the target
+Dataphor Server, and registering the library. Adjustments for the target
+environment such as device and user settings should be made by the
+Dataphor Server Administrator prior to registering the library. Once the
+required set of libraries for a given application has been registered,
+an application can be created in the usual manner by the Dataphor
+Administrator.
+
+<<../UsersGuide/DataphoriaLibraries.adoc#DUGP1UpgradingLibraries, Upgrading libraries>>
+is accomplished by <<D4LGCatalogElements-Libraries-Versioning, versioning>> the
+library. Each library contains a set of upgrade scripts which, when
+applied in order to a given deployed library, will bring the deployment
+up to the current version of the library. Each change to the schema of a
+given library should be recorded as a DDL script, and injected into the
+library. Note that the library version must be specified to at least the
+revision number to track upgrades in this manner. Each injection will
+automatically increment the revision number of the library version, and
+save the injected script as an upgrade with that version number. The
+upgrade scripts are saved as d4 files in the Upgrades folder of the
+library. The new version of the library can then be copied into the
+Libraries directory of the target Dataphor Server.
+
+[[D4LGCatalogElements-SystemLibraries]]
+== System Libraries
+
+The Dataphor Server provides two system libraries: System and General.
+The System library contains all the catalog objects required to run the
+Dataphor Server including the system-provided data types and operators,
+host-implementation structures, and the system catalog tables. The
+General library is the default workspace for sessions that do not
+specify a current library. These libraries are owned by the system user,
+and cannot be modified or unregistered.

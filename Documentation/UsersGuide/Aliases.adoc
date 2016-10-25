@@ -1,0 +1,211 @@
+= Aliases
+:author: Alphora
+:doctype: book
+
+:icons:
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+. link:ProcessDefaults.adoc[Process Defaults]
+. link:ClientSideBufferingControls.adoc[Client-side Buffering Controls]
+
+[[DUGP1Dataphoria-Aliases]]
+== Introduction
+
+ll connections to a Dataphor Server begin with the process of selecting
+an __alias__. Aliases provide a named connection configuration for a
+Dataphor Server. They allow for the management of different connection
+configurations on a given client machine, or for different users on the
+machine. There are two types of aliases, __in-process__, and
+__out-of-process__.
+
+In-processIn-process aliases allow for the configuration of a complete
+Dataphor Server instance to be hosted within the client process.
+Typically, an in-process alias is used when connecting with Dataphoria
+in development scenarios.
+
+Out-of-processOut-of-process aliases allow for connection to an existing
+Dataphor Server instance. The instance can be hosted in a Windows
+Service, or an in-process instance in Dataphoria running on the same
+machine, or another machine on the network.
+
+Both types of aliases include session configuration information, which
+supplies the credentials for the user and governs the behavior of the
+session. Once the session has been established, changing these settings
+has no effect. The System library provides operators for manipulating
+the configuration settings of an open session where appropriate.
+
+Each alias is specified as either a machine-specific alias, or a
+user-specific alias. If a given user-specific alias has the same name as
+a machine-specific alias, the user-specific alias will be used.
+
+Dataphoria and the Frontend Clients provide the ability to select an
+alias using the Connect To Server dialog:
+image::../Images/DataphorServerLogin.bmp[Dataphoria Server Login]
+
+
+This interface provides for the selection and management of server
+aliases. It also functions as a login screen, allowing the default
+credentials specified in the alias to be given. Clicking Add... or
+Edit... displays the alias edit screen.
+
+image::../Images/DataphorServerAliasEdit.bmp[Dataphoria Server Alias Edit]
+
+[[DUGP1Dataphoria-Aliases-SessionInformation]]
+== Session Information
+
+The configuration information for a session is specified through a set
+of properties available on both types of aliases. Clicking the
+Advanced >> button on the alias edit screen provides access to these
+properties.
+
+[cols=",",options="header",]
+|=======================================================================
+|Property |Description
+|DefaultIsolationLevel |Determines the default isolation level setting
+for processes started on this session.
+
+|DefaultLibraryName |Determines the default library for the session. If
+specified, the current library for the session is initially set to this
+value.
+
+|DefaultMaxCallDepth |Determines the default maximum call depth for
+processes on this session. The default value is 1024.
+
+|DefaultMaxStackDepth |Determines the default maximum stack depth for
+processes on this session. The default value is 32767.
+
+|DefaultUseDTC |Determines the default UseDTC setting for processes
+started on this session. Defaults to false.
+
+|DefaultUseImplicitTransactions |Determines the default
+UseImplicitTransactions setting for processes started on this session.
+Defaults to true.
+
+|FetchAtOpen |Determines whether or not the CLI will fetch as part of
+the open call.
+
+|FetchCount |Determines the number of rows which will be buffered by the
+CLI. A FetchCount of 1 effectively disables row buffering.
+
+|Password |Password used to login to the Dataphor Server. The default
+login for the Dataphor Server is Admin with a blank password.
+
+|UsePlanCache |Determines whether or not to use the server plan cache on
+this session.
+
+|UserID |User ID used to login to the Dataphor Server. The default login
+for the Dataphor Server is Admin with a blank password.
+|=======================================================================
+
+[[DUGP1UserCredentials]]
+=== User Credentials
+
+The UserID and Password properties specify the security credentials used
+to login to the Dataphor Server. These are defaults for the server
+alias, and are overridden by the information provided by the connecting
+user in the Dataphor Server Login screen. These values are only used to
+connect if the alias is used explicitly by the client, bypassing the
+login screen.
+
+The default UserID and Password for a Dataphor Server instance is
+`Admin`, `blank`. Alphora recommends changing this default, and
+safeguarding the administrative password, as it allows a user complete
+access to a Dataphor Server.
+
+[[DUGP1DefaultLibraryName]]
+=== Default Library Name
+
+The DefaultLibraryName setting determines the initial current library
+for the session. Once the session has been established, changing this
+setting will have no effect. Setting the current library for a session
+is accomplished using the SetLibrary operator. The current library name
+for the current session can be retrieved using the LibraryName operator
+with no parameters.
+
+The current library is used to determine the _name resolution path_ for
+the session, which is used in the name resolution process. The current
+library is also the default container for newly created catalog objects.
+For more information on libraries in D4, refer to the
+<<../DevelopersGuide/WorkingWithLibraries.adoc#DDGWorkingWithLibraries, Working with Libraries>>
+chapter in the Logical Application Design part of the Dataphor Developer's Guide.
+
+The default value for this setting is blank, meaning that the Dataphor
+Server will select a suitable default current library. Typically, the
+Dataphor Server selects the General library for this purpose.
+
+[[DUGP1Dataphoria-Aliases-Out-Of-ProcessAliases]]
+== Out-Of-Process Aliases
+Aliases
+
+An out-of-process server alias indicates that the client will connect to
+an existing Dataphor Server instance. The Dataphor Server may be located
+in another process on the same machine, on another machine on the
+network, or even on the internet.
+
+image::../Images/DataphorServerAliasEdit.bmp[Dataphoria Server Alias Edit]
+
+The server alias for an out-of-process connection only needs to specify
+a host name, and a port number. The host name is the name of the machine
+on which the Dataphor Server is running, and the port number is the
+TCP/IP port on which the server is listening for connections. The port
+number for a Dataphor Server instance can be configured on the
+In-Process alias, or using the Service Configuration Utility when the
+instance is hosted within a Microsoft Windows Service. The default port
+number for a Dataphor Server instance is 8061.
+
+[[DUGP1Dataphoria-Aliases-In-ProcessAliases]]
+== In-Process Aliases
+
+An in-process server alias indicates that a new Dataphor Server instance
+should be hosted within the client process. This mechanism is typically
+used by Dataphoria to provide a convenient development environment, but
+can also be used in some advanced deployment scenarios.
+
+In addition to session configuration information, in-process aliases
+have several properties for server-level configuration:
+
+image::../Images/DataphorServerAliasEditInProcess.bmp[Dataphoria Server Alias Edit In Process]
+
+The port number setting specifies the TCP/IP port on which the new
+Dataphor Server instance will listen for connections. The default port
+number is 8061.
+
+The catalog directory setting specifies a directory that the Dataphor
+Server instance will use to save and load catalog information. If the
+catalog directory is unspecified, the Dataphor Server will create a
+Catalog directory in the executable directory of the instance.
+
+The library directory setting specifies the directory, or directories
+that the Dataphor Server instance will use to search for available
+libraries. Use semi-colons to delimit additional library directories.
+Each sub-directory of these directories with the appropriate files will
+be considered an available library in the Dataphor Server. If the
+catalog indicates that a given library was loaded when the server last
+started, the library will be loaded at startup. Note that libraries may
+be attached from any directory accessible by the Dataphor Server, these
+directories simply specify the default paths that will be searched to
+display available libraries.
+
+For more information on the System Catalog, refer to the
+<<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements, Catalog Elements>>
+chapter of the D4 Language Guide in the Dataphor Developer's Guide.
+For more information on Libraries, refer to the
+<<../DevelopersGuide/WorkingWithLibraries.adoc#DDGWorkingWithLibraries, Working with Libraries>>
+chapter in the Logical Application Design part of the Dataphor Developer's Guide.
+
+Tracing enabled indicates whether internal tracing of server events is
+enabled. Log errors indicates whether the Dataphor Server will log
+exceptions that are returned to clients across the CLI boundary.
+
+The Embedded option indicates whether or not this instance of the
+Dataphor Server will be available to other processes. If the Embedded
+option is set, the instance will only be available within the process
+creating the instance. Otherwise, the instance will be available for
+external connections, either from other processes running on the same
+machine, or remote processes running on different machines.
+
+The Catalog Store Database Name and Password indicate the name and
+authentication information for the file used to store the database
+catalog.

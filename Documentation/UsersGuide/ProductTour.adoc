@@ -1,0 +1,37 @@
+= Product Tour
+:author: Alphora
+:doctype: book
+
+:icons:
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+. link:ArchitecturalOverview.adoc[Architectural Overview]
+. link:DataphorServer.adoc[Dataphor Server]
+. link:DataphorFrontend.adoc[Dataphor Frontend]
+. link:DataphoriaSummary.adoc[Dataphoria]
+. link:FrontendClients.adoc[Frontend Clients]
+
+[[DUGP1ProductTour]]
+== Introduction
+
+In order to achieve a more declarative application development platform,
+Dataphor provides an environment for describing applications in terms of
+the core structures and logic required. These descriptions are called
+__application schemas__ and are stored and maintained
+centrally. These application schemas can then be mapped onto existing
+database systems to provide storage and integration capabilities, and
+consumed by Dataphor clients to provide the presentation layer of the
+application.
+
+This chapter provides an overview of what the Dataphor product is, and
+how it enables declarative development using the concept of an
+application schema. The first section provides an architectural overview
+of the product, introducing the components of the architecture. Each
+component is then considered in detail in the following sections.
+
+This chapter is intended to be read by Dataphor developers and
+administrators, and provides a big-picture overview of the entire
+product. No prior knowledge of the Dataphor platform is necessary to
+understand the material covered in this chapter.

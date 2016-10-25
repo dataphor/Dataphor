@@ -1,0 +1,580 @@
+= Storage Integration Architecture
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGStorageIntegrationArchitecture]]
+== Summary
+
+Information in todays enterprises is stored in an ever-increasing number
+of systems, from file-based data repositories, to SQL-based DBMSs, and
+everything in between. The Dataphor Server provides a single
+point-of-access for all these data sources through an abstraction called
+the Storage Integration Architecture (SIA).
+
+This architecture is based on the idea that fundamentally, all data may
+be represented within a single unified model, namely the relational
+model, and that access to any data source can be achieved by providing
+an open-ended architecture that can communicate with any given data
+source in whatever manner is appropriate.
+
+The central abstraction of this architecture is called a __device__, and
+represents a single instance of a data source. That data source may be
+as simple as a formatted text file, or as complex as a traditional
+SQL-based DBMS.
+
+The SIA uses the concept of a device to define all the interfaces that
+are required in order to enable not only access to the data, but to
+allow offloading of query processing tasks to target systems whenever
+possible. To enable this abstraction, the device architecture is layered
+in much the same way that the Call-Level Interface is, dividing the
+functionality into server, session, plan, and cursor layers.
+
+The server level of the architecture is concerned with describing the
+overall functionality of the device. This layer of the architecture
+supplies the level at which device-wide settings and behavior are
+implemented. Device sessions are obtained from this interface, with each
+process in the Dataphor Server obtaining a separate session for
+communicating with each device involved in a given transaction.
+
+The session level of the architecture models the connectivity and
+authentication capabilities of the target system, as well as the
+transaction management facilities. Each session participates in the same
+distributed transaction coordinated by the process running in the
+Dataphor Server. The session also provides the mechanism for executing
+commands and opening cursors against the target systems.
+
+The plan level of the architecture models statement execution against
+the target system. Each statement, or chunk of a statement, that can be
+supported by the target system is represented by a single plan within
+the Dataphor Server. The plan also provides facilities for opening a
+cursor against the result set of the statement, where appropriate.
+
+The cursor level of the architecture models retrieval of a result set
+from the target system. This level of the architecture implements the
+same interfaces required by cursors internally in the Dataphor Server.
+This allows devices to participate directly in the pipelined execution
+engine of the Dataphor Server. Moreover, device processing can be
+spawned at any point in the execution tree, allowing the Dataphor Server
+to offload as much processing as possible, while still guaranteeing that
+any expression will ultimately be evaluated correctly, regardless of
+where the data is physically located.
+
+[[DDGStorageIntegrationArchitecture-ObjectMaps]]
+== Object Maps
+
+To enable the complete mapping of constructs and expressions in the
+logical model, the SIA provides four basic types of maps:
+
+* Scalar Type Maps
+* Operator Maps
+* Table Maps
+* User Maps
+
+Scalar type maps provide value translation services to and from the
+target system. The scalar type map is responsible for translating values
+from the native representation of a value within the Dataphor Server to
+the device representation of the value within the target system, and
+vice versa. Scalar type maps will be discussed in detail in
+<<ScalarTypeMapping.adoc#DDGScalarTypeMapping, Scalar Type Mapping>>.
+
+Operator maps provide the translation services for operator invocations
+from D4 to the corresponding invocation within the target system. These
+mappings can be as simple as the mapping for basic arithmetic operators,
+or as complex as the *join* operator. In either case, the map is
+responsible not only for the translation of the invocation, but for
+deciding whether or not the invocation is supported by the target
+system. Operator maps will be discussed in detail in
+<<OperatorMapping.adoc#DDGOperatorMapping, Operator Mapping>>.
+
+Table maps provide the persistence mechanism of the Dataphor Server.
+Each base table variable in the Dataphor Server is mapped to some
+structure in the target system. Note that the structure may be a file, a
+registry key, or an SQL-based table or view definition.
+
+Typically, table mapping is done automatically using the default device
+for the current library. For example, in the Shipping application, the
+default device name in the Sample.Shipping library definition is set to
+Shipping. After the Shipping device is created, any global base table
+variable created in the Sample.Shipping library will be mapped into this
+device.
+
+User maps allow users created in the Dataphor Server to use a different
+set of credentials to connect to the target system. These maps can be
+configured on a per-user basis, allowing multiple users to use the same
+set of credentials to connect to a given system. If no user mapping is
+provided, the information configured on the device will be used. If no
+configuration is supplied on the device, the Dataphor Server user
+information will be used.
+
+When a new connection to a device must be established for the current
+process, the following sequence of steps is taken to determine which
+device user should be used:
+
+1.  If a device user mapping is set up for the current user explicitly,
+that device user is used.
+2.  If user configuration is provided on the device itself, that
+information is used.
+3.  Otherwise, the credentials for the current user are used.
+
+If the above process selects a device user, and the selected device user
+has explicitly specified connection parameters, these are used as
+overrides for any connection parameters specified by the device and
+connection string builder. For more information on how connection
+strings are built, refer to the section on
+<<Devices.adoc#DDGP2BasicConnectivity, Basic Connectivity>>.
+
+[[DDGP2ProcessorIntegration]]
+== Processor Integration
+
+When an operator invocation in D4 is processed by some device, it is the
+responsibility of that device to provide the results of the operation in
+terms the Dataphor Server can understand. Conversely, when modification
+to the data contained in a particular device is required, it is the
+responsibility of the device to translate the request for modification
+from the Dataphor Server into a form that can be consumed by the data
+store being modeled. The Storage Integration Architecture provides the
+framework for the solution to this problem.
+
+Processor integration occurs whenever the Dataphor Server requires data
+from some device, or whenever the data stored in some device needs to be
+updated to reflect the changes made by some statement in the Dataphor
+Server. The query chunking process determines where both of these
+integration points occur.
+
+This section first describes the retrieval integration, then the
+modification integration, and concludes with a description of how these
+integration points are determined by the compiler.
+
+[[DDGP2DataRetrieval]]
+=== Data Retrieval
+
+The execution of a prepared device plan provides an alternative
+execution path for the query processor to follow. The execution path can
+be thought of as leaving the query processor at the device execute, and
+re-entering when the device processing has completed. The results of the
+processing are returned using native representations, just like any
+other execution in the query processor. This allows device execution to
+completely replace query processing at any point in the expression,
+meaning that devices are not only capable of delivering data in the form
+of tables, but also scalar values, row values, etc.,.
+
+When non-table values are returned, device processing has generally
+completed, and the value returned is autonomous in the sense that the
+device session could be closed, without affecting the availability of
+the value. For table values, this is generally not the case. Just as in
+the Dataphor Server, device supported table values are materialized on
+demand using cursors. For this reason, a typical device will provide a
+cursor implementation to fulfill the interface requirements of a cursor
+in the Dataphor Server.
+
+[[DDGP2DataModification]]
+=== Data Modification
+
+In general, data modification can be supported by a given device at a
+different level than retrieval. This allows the query updatability
+capabilities of the Dataphor Server to be mapped onto devices which may
+not support the same functionality, without compromising the retrieval
+characteristics of the device.
+
+There are three mechanisms by which a device may perform data
+modifications:
+
+* Modification Statements
++
+Devices may be capable of executing complete insert, update, and delete
+statements.
+* Cursor Updates
++
+Devices may provide updatability through cursors.
+* Row Level Updates
++
+Devices may provide updatability through row level commands.
+
+The level at which data modifications are performed is determined by the
+device implementation.
+
+[[DDGP2QueryChunking3]]
+=== Query Chunking
+
+Query chunking is the process of determining exactly where a processor
+integration point will occur during the processing of a specific query.
+
+Basically, the process involves ensuring that a given branch of the
+executable tree can be entirely handled by a given device, and then
+requesting that the device prepare this portion of the expression. At
+this point, the device will either provide a prepared plan ready for
+execution in the device, or indicate that the requested operation cannot
+be performed by the device.
+
+The query chunking algorithm begins at the leaf nodes of the execution
+tree. A leaf node is either a base table variable retrieval, or some
+other node such as a literal value. For the base table variable
+retrieval, the node is assigned to be processed on the device
+responsible for storage of the base table variable. The device in
+question is required to support this operation. For other types of leaf
+nodes, no device is assigned, indicating the node is __device
+associative__.
+
+A device associative node is one for which the device can only be
+determined in the context of some other operation. For example,
+supporting an arbitrary scalar operation depends on which device, if
+any, is requested to support the operation. At the level of the
+operation itself, no device association is made, and only when the
+operation is requested within the context of some other operation that
+is associated with a given device can the device determination be made.
+
+For example, given the following D4 statement:
+
+....
+select Invoice where ID = 5;
+....
+
+The ShowPlan system operator can be used to display the execution plan
+chosen by the Dataphor Server:
+
+....
+select ShowPlan('select Invoice where ID = 5');
+....
+
+....
+8438: RestrictNode
+    Type:
+        table
+        {
+            ID : InvoiceID,
+            Location_ID : LocationID,
+            User_ID : UserID,
+            Date : Date,
+            Status_ID : InvoiceStatusID
+        }
+        key { }
+    Device: Shipping
+    8483: BaseTableVarNode
+        Type:
+            table
+            {
+                ID : InvoiceID,
+                Location_ID : LocationID,
+                User_ID : UserID,
+                Date : Date,
+                Status_ID : InvoiceStatusID
+            }
+            key { ID }
+        Device: Shipping
+    8424: IntegerEqualNode
+        Type: Boolean
+        No device
+        8423: ScalarReadAccessorNode
+            Type: Integer
+            No device
+            8421: StackColumnReferenceNode
+                Type: InvoiceID
+                No device
+                Column Name: ID Stack Index: 0
+        8419: ValueNode
+            Type: Integer
+            No device
+....
+
+The ValueNode representing the literal integer value 5 is a device
+associative node, because no device determination can be made by looking
+at the node in isolation. Only when the entire equality expression ID =
+5 is considered in the context of the *where* operator can the device
+determination be made.
+
+As the chunking process progresses, the devices are asked whether they
+support the operations involved at a higher and higher level until
+either the devices no longer support the operations involved, or the
+operation spans multiple devices. In either of these cases, processing
+is handled by the Dataphor Server.
+
+In order to determine whether or not a given branch of the execution
+tree is supported, the device is asked to prepare a device plan
+corresponding to the root node of the branch. This prepare step invokes
+the device compiler for translating the D4 instructions into equivalent
+instructions in the device. If the device compilation step is
+successful, the result is a prepared device plan ready for execution.
+Otherwise, the chunking algorithm stops, and the query processor is
+assigned to take over execution.
+
+This algorithm naturally produces an expression tree which is optimized
+to offload as much processing as possible to the devices involved. If
+only a single device is involved and all the operations are supported by
+that device, the entire tree is processed externally. Only when multiple
+devices are involved, or some operation is requested which a device
+cannot perform, does the Dataphor Server perform processing.
+
+[[DDGDisplayingSQLTranslationOutput]]
+==== Displaying SQL Translation Output
+
+The D4ToSQL operator registered by the SQLDevice library can be used to
+obtain the SQL for a statement that is completely supported by a given
+device:
+
+....
+select D4ToSQL('select Invoice where ID = 5');
+....
+
+....
+select
+        "T1"."ID" as "ID",
+        "T1"."Location_ID" as "Location_ID",
+        "T1"."User_ID" as "User_ID",
+        "T1"."Date" as "Date",
+        "T1"."Status_ID" as "Status_ID"
+    from "Sample__Shipping__Invoice" as "T1" (fastfirstrow)
+    where ("T1"."ID" = @P1);
+....
+
+[[DDGSupportWarnings]]
+==== Support Warnings
+
+In order to help ensure that queries are being offloaded whenever
+possible, the Dataphor Server will issue _unsupported_ warnings whenever
+the chunking process results in an execution plan that only involves a
+single device, but is not entirely supported on that device.
+
+For example, consider the following operator definition and D4 query:
+
+....
+create operator UnsupportedOperator(const AID : Integer) : Integer
+begin
+    result := AID;
+end;
+
+select Invoice add { UnsupportedOperator(ID) TempID };
+....
+
+The invocation of UnsupportedOperator within the *add* clause causes the
+compiler to issue a warning stating that the query was not supported
+because the device does not contain an operator map for
+UnsupportedOperator.
+
+To disable this warning, use the IgnoreUnsupported modifier:
+
+....
+select Invoice
+    add { UnsupportedOperator(ID) TempID }
+        with { IgnoreUnsupported = "true" };
+....
+
+[[DDGStorageIntegrationArchitecture-Reconciliation]]
+== Reconciliation
+
+Each system represented by a device has its own schema to describe the
+structures and data available within that system. The structure and
+contents of this schema will vary considerably with each system. For
+example, for a simple file-based device, the schema may consist of a
+file list and structural descriptors within the files themselves.
+
+Regardless of how the system structure is exposed, the device is
+responsible for transforming that structural information into terms that
+the Dataphor Server can understand. The device is also responsible for
+translating structural changes in the schema of the Dataphor Server to
+the target system.
+
+This synchronization of catalog between the Dataphor Server and the
+target systems involved is called __schema reconciliation__. Through
+this process, catalog information can be imported from, exported to, or
+reconciled with the catalog of each individual device.
+
+Reconciliation is the process of synchronization of structure between
+the Dataphor catalog and the device catalogs. The process can be
+automatic, or user-initiated. Each device has two settings which
+determine how and when reconciliation occurs, _reconciliation mode_ and
+__reconciliation master__.
+
+These settings can be specified as part of the device definition in the
+*create device* statement, or they can be set using the *alter device*
+statement. In addition, the reconciliation settings can be changed or
+viewed by right-clicking on a device in the Dataphor Explorer in
+Dataphoria.
+
+The reconciliation mode can be either none, or any combination of
+startup, command, and automatic.
+
+The reconciliation modes have the following meaning.
+
+* Startup indicates that the device should be reconciled when the
+Dataphor Server starts, or when the device is initially created.
+* Command indicates that Data Definition Language (DDL) commands
+(create, alter, and drop statements) executed against the Dataphor
+Server should be passed through to the device as well
+* Automatic indicates that tables should be verified and updated
+appropriately as they are encountered in Data Manipulation Language
+(DML) statements (select, insert, update, and delete statements)
+executed against the Dataphor Server.
+
+In addition to these reconciliation modes, the reconciliation process
+can be user-initiated with a call to the Reconcile operator. This
+operator takes a single System.Name argument that is the name of the
+device to be reconciled. The following example illustrates the use of
+this operator:
+
+....
+Reconcile(Name("MyDevice"));
+....
+
+The reconciliation master can be server, device, or both. Server
+indicates that the Dataphor Server is designated as the master copy of
+the catalog. Device indicates that the device is considered the master
+catalog, and both indicates that the catalogs should be reconciled from
+both directions.
+
+Reconciliation for a device proceeds as follows:
+
+1.  If the reconciliation master setting is server or both, each table
+in the DAE catalog is reconciled against the device. If a table does not
+exist in the device, it is created; otherwise, it is updated to match
+the table definition in the Dataphor Server.
+2.  If the reconciliation master setting is device or both, each table
+in the device catalog is reconciled against the Dataphor Server. If the
+table does not exist in the Dataphor Server, it is created; otherwise,
+it is updated to match the table definition in the device.
+
+Beyond this basic process, each device may provide specific
+reconciliation functionality.
+
+Catalog reconciliation for a table proceeds as follows:
+
+1.  If the Dataphor Server table is master, every column in the
+definition of the table within the Dataphor Server must appear in the
+definition of the table on the target system.
+2.  If the device table is master, every column in the definition of the
+table on the target system must appear in the definition of the table in
+the Dataphor Server.
+
+Tables imported into the Dataphor Server by this process will be named
+using the name of the table in the target system, namespace qualified
+with the name of the device. For example, if a device called Pubs is
+reconciled against the pubs sample database that ships with Microsoft
+SQL Server, the Dataphor Server will include a table called
+Pubs.authors.
+
+Data types for the columns of imported tables will be matched as closely
+as possible to the system-provided types of the Dataphor Server. If a
+data type cannot be reconciled, an appropriate error will be given.
+
+[[DDGStorageIntegrationArchitecture-Reconciliation-StorageTags]]
+=== Storage Tags
+
+The following table lists the metadata tags that can be used to control
+reconciliation and value translation in the SQL devices:
+
+[cols=",",options="header",]
+|=======================================================================
+|Tag Name |Meaning
+|Storage.Name |Indicates that the object on which it appears should be
+identified by the value of the tag when referenced within the device.
+
+|Storage.Schema |Indicates that the object on which it appears should be
+qualified by the value of the tag when referenced within the device.
+
+|Storage.Length |Indicates the storage length for translated domains.
+This tag is only used for the string types (System.String and like
+types) to indicate the length of the VARCHAR data type to be used.
+
+|Storage.Precision |Indicates the storage precision for exact numeric
+data in translated domains. This tag is only used for the System.Decimal
+type to indicate the precision of the DECIMAL data type to be used.
+
+|Storage.Scale |Indicates the storage scale for exact numeric data in
+translated domains. This tag is only used for the System.Decimal type to
+indicate the scale of the DECIMAL data type to be used.
+
+|Storage.Deferred |Indicates that the values for the column or domain on
+which it appears should be read entirely as overflow. If the value of
+this tag is true, the system will not retrieve values from this column
+when the table is selected, rather, the device will defer reading of the
+value for this column until it is actually read by the client
+application. At that point, a separate stream is used to read data for
+the column.
+
+|Storage.Enforced a|
+Indicates that the constraint on which it appears is enforced by some
+target system, and need not be enforced by the Dataphor Server. Setting
+this tag to true for a given constraint effectively disables enforcement
+of the constraint within the Dataphor Server.
+
+Note: This tag has been replaced by DAE.Enforce, with opposite semantics
+(i.e. a Storage.Enforced tag of true is equivalent to a DAE.Enforced tag
+of false.
+
+|Storage.IsClustered a|
+Indicates that the index used to support the key or order on which it
+appears should be built as the clustered index, or physical ordering,
+for the table variable. The actual implementation of clustered indexes
+varies depending on the target system.
+
+Note: This tag has been replaced by DAE.IsClustered.
+
+|Storage.IsSparse a|
+Indicates that the key on which it appears is a sparse key. Sparse keys
+enforce uniqueness only among the rows which have values specified for
+all columns of the key. Dense keys allow only one row to have no values
+for the columns of the key. Note that sparse keys cannot be used as an
+addressability mechanism.
+
+Note: This tag has been replaced by DAE.IsSparse
+
+|Storage.ShouldReconcile |Indicates whether or not the column, table,
+key, or order on which it appears should be reconciled with the target
+system.
+|=======================================================================
+
+[[DDGStorageIntegrationArchitecture-Reconciliation-ReconciliationintheSQLDevices]]
+=== Reconciliation in the SQL Devices
+
+Each SQL device is responsible for describing the contents of its system
+catalog to the Dataphor Server so that the reconciliation process can
+take place.
+
+The SQL devices use three different statements to describe the system
+catalog: the tables expression, the indexes expression, and the foreign
+keys expression. Each of these expressions returns a result set that
+lists the structural content of the system catalog. For a complete
+description of each of these expressions, refer to the SQLDevice library
+reference.
+
+The AvailableTables and AvailableReferences operators can be used to
+retrieve the set of tables or references currently available from a
+given SQL device. For example, the following program listing shows the
+output from the Shipping device:
+
+....
+Name                                                   StorageName
+------------------------------------------------------ --------------------------------------
+Sample.Shipping.Sample__Shipping__BidItem              Sample__Shipping__BidItem
+Sample.Shipping.Sample__Shipping__Contact              Sample__Shipping__Contact
+Sample.Shipping.Sample__Shipping__ContactAddress       Sample__Shipping__ContactAddress
+Sample.Shipping.Sample__Shipping__ContactAddressDuring Sample__Shipping__ContactAddressDuring
+Sample.Shipping.Sample__Shipping__ContactNameDuring    Sample__Shipping__ContactNameDuring
+Sample.Shipping.Sample__Shipping__ContactNotes         Sample__Shipping__ContactNotes
+Sample.Shipping.Sample__Shipping__ContactPhone         Sample__Shipping__ContactPhone
+Sample.Shipping.Sample__Shipping__ContactPhoneDuring   Sample__Shipping__ContactPhoneDuring
+Sample.Shipping.Sample__Shipping__Customer             Sample__Shipping__Customer
+Sample.Shipping.Sample__Shipping__CustomerPicture      Sample__Shipping__CustomerPicture
+Sample.Shipping.Sample__Shipping__Generators           Sample__Shipping__Generators
+Sample.Shipping.Sample__Shipping__Invoice              Sample__Shipping__Invoice
+Sample.Shipping.Sample__Shipping__InvoiceItem          Sample__Shipping__InvoiceItem
+Sample.Shipping.Sample__Shipping__InvoiceItemNumbers   Sample__Shipping__InvoiceItemNumbers
+Sample.Shipping.Sample__Shipping__InvoiceStatus        Sample__Shipping__InvoiceStatus
+Sample.Shipping.Sample__Shipping__ItemType             Sample__Shipping__ItemType
+Sample.Shipping.Sample__Shipping__Location             Sample__Shipping__Location
+Sample.Shipping.Sample__Shipping__LocationItem         Sample__Shipping__LocationItem
+Sample.Shipping.Sample__Shipping__PhoneType            Sample__Shipping__PhoneType
+Sample.Shipping.Sample__Shipping__PurchaseOrder        Sample__Shipping__PurchaseOrder
+Sample.Shipping.Sample__Shipping__SaleOrder            Sample__Shipping__SaleOrder
+Sample.Shipping.Sample__Shipping__State                Sample__Shipping__State
+Sample.Shipping.Sample__Shipping__Vendor               Sample__Shipping__Vendor
+Sample.Shipping.Sample__Shipping__VendorItemType       Sample__Shipping__VendorItemType
+Sample.Shipping.Sample__Shipping__ZipCode              Sample__Shipping__ZipCode
+....
+
+In addition to these result sets, the Reconcile operator itself, if used
+in a select statement, will return a list of the errors that occurred
+during the reconciliation process, if any.

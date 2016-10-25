@@ -1,0 +1,179 @@
+= Application Development Considerations
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGApplicationDevelopmentConsiderations]]
+== Summary
+
+This chapter examines many of the issues associated with application
+development and considers the declarative approach as a solution to
+these problems.
+
+[[DDGApplicationDevelopmentConsiderations-WhatisanApplication]]
+== What is an Application?
+
+In the most general terms, an application is simply a computer-based
+model of some aspect of the real world designed to solve a specific set
+of problems. Computing technology has given rise to an ever-increasing
+number of applications in almost every aspect of life, from the most
+mundane address books, to the information systems required to track the
+business processes of an entire enterprise. Regardless of the size or
+complexity of applications, they all have a common purpose: the
+manipulation, analysis, and persistence of data.
+
+[[DDGApplicationDevelopmentConsiderations-IdentifyingtheIssues]]
+== Identifying the Issues
+
+Given this general definition of an application, it is clear that data
+management plays a large role in any application. As such, every
+application must address at least some of the following issues:
+
+[horizontal]
+Persistence:: The data must be stored for an extended period of time.
+Integrity:: The data must be correct, according to some defined set of
+rules.
+Concurrency:: Coordinating read and change requests from multiple users.
+Scalability:: The application must scale in terms of number of users,
+volume of data, and data complexity.
+Performance:: Providing efficient access to the application data.
+Recovery:: Ensuring that the data can survive application and system
+failures.
+Security:: Preventing unauthorized access or manipulation of the
+application data.
+Reporting:: Providing general analysis and presentation of the
+application data to support decision making within the organization.
+Integration:: Allowing the application to interact with other software
+systems.
+Presentation:: Providing a user interface for entry and manipulation of
+the application data.
+
+In addition to these problems, the application will inevitably encounter
+change of some form:
+
+[horizontal]
+Requirements Change:: Modifying the application to fit new or changing
+business needs.
+Environment Change:: Reacting to changes in the hardware or software
+environment.
+
+In building applications that handle all these issues, we also encounter
+development process issues that must be addressed:
+
+[horizontal]
+Developer Productivity:: Ensuring maximum productivity of application
+team members.
+Developer Training:: Training team members on the platforms and
+technologies to be used.
+Application Quality:: Ensuring the application meets requirements and
+functionality.
+Deployment:: Providing installation and deployment for the
+application.
+Maintenance:: Providing a maintenance path for deployed applications.
+
+Clearly, application development in general is an extremely complex
+problem. The more complex the application, the more difficult the
+solution to these problems becomes. Fortunately, these solutions can,
+for the most part, be generally implemented in systems-level software
+that all applications can utilize. Many of these issues, such as
+persistence, concurrency, scalability, and others, are already addressed
+to varying degrees by existing systems; however, there are still many
+issues that arise when developing applications against these systems:
+
+[horizontal]
+Schema Duplication:: Presentation layers often duplicate the structures
+and logic already present in the database schema.
+Complex Business Rules:: Existing systems often do not provide
+effective support for complex business rules.
+Client-Side Enforcement of Business Rules - Presentation layers must
+provide initial enforcement of business rules.
+Client-Side Buffering:: Presentation layers must provide a mechanism
+for data retrieval, display, entry and translation.
+
+Traditionally, these problems have been resolved on a case-by-case basis
+within each application. The result is large amounts of
+application-specific code that is difficult to produce and maintain. If
+a general purpose solution to these issues can be found, it can be
+__automated__, just as many of the issues relating to data management
+have been automated by Database Management Systems (DBMSs).
+
+[[DDGApplicationDevelopmentConsiderations-WhatistheSolution]]
+== What is the Solution?
+
+Historically, application development has evolved over time by
+increasing the level of abstraction at which applications are built. For
+example, the very earliest programs were built with machine languages
+(First-Generation Languages or 1GLs). Application logic was developed
+directly in the language of the hardware. This was replaced by assembly
+languages (2GLs), and then again by compiled languages such as C and
+Pascal (3GLs), and so on. Each successive generation of languages hides
+the details and complexity of the levels below it. In this way,
+application development has become more and more __declarative__,
+meaning that we state simply _what_ is to be done, not _how_ it should
+be accomplished.
+
+Another example of this trend towards the declarative, rather than
+procedural approach is the evolution of database management
+technologies. The earliest systems dealt principally with sequential
+files. These were later replaced by indexed access (ISAM systems), then
+again by network and hierarchic systems, and eventually SQL-based
+systems. Each of these steps represents a higher level of abstraction.
+Rather than dealing with pointers and file I/O, application developers
+simply describe the structure of the data involved. The system, not the
+application, is responsible for performing the various data management
+tasks required.
+
+These examples illustrate the value of the declarative approach. By
+simply describing what is to be accomplished, the system is able to
+realize the implementation. This automation is enabled by framing the
+solution in general terms. For example, a compiler is able to translate
+programs into machine language because the programs are expressed in a
+formal system that the compiler understands. The database system is able
+to automate data management tasks because the data to be stored is
+described in a model that can capture the essence of the problem. In
+other words, if the solution to a given problem can be formalized, it
+can be automated: formalization enables automation.
+
+So what is the next step in this evolution towards declarative
+development? What mechanisms will enable further automation of
+application development? Clearly, the answer lies in the formalization
+of the concepts used in application development: an approach that allows
+applications to be expressed __declaratively__. This model must allow
+for the definition of any data, it must allow for arbitrary manipulation
+of that data, and it must allow rules about that data to be expressed.
+Ideally, this model would also be as simple as possible.
+
+A brief survey of the current computing landscape reveals a myriad of
+different technologies for automating various aspects of the application
+development process. From object-oriented programming techniques to
+SQL-based database design methodologies and everything in between. The
+more declarative of these approaches is found in current database
+systems. This is due to the model on which these systems are based, the
+Relational Model. Simply put, the Relational Model is mathematics
+applied to database management. The result is a simple and complete
+mechanism for describing and manipulating any data, as well as an
+excellent environment for declaratively enforcing rules about that data.
+It also provides various kinds of independence, such as logical and
+physical data independence. This independence is what enables the
+automation and declarativeness provided by these systems. If this same
+independence can be utilized to enable the declarative approach to
+application development, the resulting paradigm would provide a
+development platform that addressed many, if not all of the issues
+raised in the previous section.
+
+So the ideal solution is the declarative approach to application
+development. Specifically, that solution should be based on The
+Relational Model. In this way, the platform begins with a solid
+foundation for data management, and then builds on that foundation to
+provide various application development services such as the
+presentation layer. Throughout this manual, the resulting paradigm is
+called _automated application development_ and represents the next step
+in the evolution of application development technology beyond current
+_rapid application development_ or RAD. The next chapter discusses the
+data management foundation of the solution. The Application Development
+Concepts chapter then illustrates how a declarative solution based on
+the relational model addresses each of the issues discussed in this
+chapter.

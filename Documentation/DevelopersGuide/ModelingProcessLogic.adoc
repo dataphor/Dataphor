@@ -1,0 +1,1907 @@
+= Modeling Process Logic
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGModelingProcessLogic]]
+== Summary
+
+In addition to being a relationally complete data manipulation language,
+D4 provides a full imperative language for modeling the process logic of
+a given application. This chapter discusses the various imperative
+features of the D4 language such as flow control, structured exception
+handling, and operators.
+
+Note that although this chapter focuses on the imperative features of
+the D4 language, the Dataphor platform is a declarative development
+environment. In a traditional imperative language, the product of
+application development is an executable containing a "main" program
+loop. By contrast, the product of development in Dataphor is a set of
+application schema that model the problem domain, adorned with pieces of
+imperative code that run in response to events throughout the system,
+more like the _event-driven programming_ model of RAD paradigms.
+
+[[DDGModelingProcessLogic-LanguageElements]]
+== Language Elements
+
+As with any imperative language, the basic elements of the D4 language
+are types, values, variables, statements, expressions, and operators.
+
+Types have already been discussed in some detail, and so we simply
+repeat the definition here for completeness: types are named sets of
+values. Each type allows the developer to specify the valid domain of
+values for a given context within the language such as a variable, a
+column within a table, or the parameters of an operator.
+
+Every value, such as the integer value 5, has an associated type. The
+type of a given value is fixed by the compiler, and is used to guarantee
+at compile-time that every usage of the value within the language is
+valid within the context in which it appears. This is commonly referred
+to as __strong-typing__, and allows the compiler to verify the
+semantics, or meaning, of a given program.
+
+Variables provide the storage locations for values within the D4
+language. Variables can be as simple as a local variable of type
+Integer, and as complex as a base table variable within the global
+database. Every variable has a _scope_ which defines the lifetime and
+accessibility of the variable.
+
+Variables declared within local scopes, such as those delimited by
+**begin**..*end* blocks within D4, are valid only within that scope, or
+a nested scope. In addition, table variables can be defined within the
+global scope, or database, and also within the scope of the current
+session, by using the keyword *session* in the *create table* or *view*
+statement.
+
+Statements form the fundamental unit of execution within the D4
+language. Various statements are provided for performing basic tasks
+within the language such as variable declaration, structural definition,
+and so on. There are three basic categories of statements within D4:
+imperative statements, data manipulation language statements, and data
+definition language statements.
+
+Imperative statements are the basic statements such as assignment and
+flow control statements that form the basis of the imperative
+capabilities of the D4 language. These statements will be discussed in
+more detail in the following sections.
+
+Data manipulation language statements are the familiar **select**,
+**insert**, **update**, and *delete* statements that are used to
+retrieve and manipulate data in table variables.
+
+Data definition language statements are used to describe and maintain
+the various catalog structures available within D4. These are statements
+such as *create table* and **create operator**.
+
+Expressions are statements that return a value. Expressions can be as
+simple as a single literal value selector, or as complex as an arbitrary
+table-valued expression. An important point to be made is that any given
+expression in D4 can be combined with other expressions to produce
+larger expressions. These can then be further combined with other
+expressions and so on, allowing expressions of arbitrary complexity to
+be built within the language. This may seem like a trivial observation,
+but the degree to which this nesting of expressions is possible within a
+language has a direct impact on its flexibility and power.
+Traditionally, DBMS languages such as SQL have suffered from various
+limitations on the types of expressions that can appear in given
+contexts. One of the goals of the Dataphor Server is to insulate the
+developer as much as possible from these limitations in existing
+systems.
+
+Operators are pre-compiled sets of D4 statements that can be invoked
+from elsewhere within a D4 program. Each operator can take any number of
+parameters, each with a name and declared type, and can optionally
+return a value of some type. If a given operator does not return a
+value, it is considered a statement equivalent, and can be used anywhere
+that a statement is expected within D4. If an operator does return a
+value, it is considered an expression equivalent, and can be used
+anywhere that an expression is expected, so long as the return type of
+the operator is valid within the context in which it appears, of course.
+
+These basic elements provide the foundation for all the functionality
+and capabilities of the D4 language. The following sections discuss the
+various imperative statements and capabilities of the D4 language in
+more detail. The chapter concludes with an example of processing logic
+taken from the Shipping application.
+
+[[DDGModelingProcessLogic-ValuesandVariables]]
+== Values and Variables
+
+In addition to the scalar types discussed in the
+<<ImplementingDataTypes.adoc#DDGImplementingDataTypes, Implementing Data Types>>
+chapter, the D4 language provides the following categories of types:
+
+* Lists
+* Rows
+* Tables
+* Cursors
+
+Each of these type categories can be used to declare variables, select
+and manipulate values, and define operator parameters and result types.
+The following sections will discuss each of these types of values.
+
+[[DDGModelingProcessLogic-ValuesandVariables-UsingLists]]
+=== Using Lists
+
+This section describes how to use list selectors and the system-provided
+operators of the Dataphor Server to construct and manipulate list
+values.
+
+A list is an ordered collection of values of the same type. Values in
+the list are distinguishable by ordinal position. The list type
+specifies the type of values in the list. A list selector is used to
+construct a list value:
+
+....
+begin
+    var LList : list(Integer) := { 12, 13, 14, 15 };
+    // list type can be specified in the selector
+    LList := list(Integer) { };
+end;
+....
+
+The following operators are defined for lists:
+
+Comparison Operators:: The comparison operators link:O-System.iEqual.html[=] and
+link:O-System.iNotEqual.html[<>] are defined for list values. Two lists
+are equal if they are of the same type, have the same number of values,
+and the values in each list are equal by ordinal position:
++
+....
+begin
+    var LList1 := { 1, 2, 3 };
+    var LList2 := { 1, 2, 3 };
+    if not(LList1 = LList2) then
+        raise Error("Lists not equal");
+end;
+....
+Membership Operator:: The membership operator *link:O-System.iIn.html[in]* is defined for
+lists and returns true if the given value is in the specified list:
++
+....
+begin
+    var LList := { 1, 2, 3 };
+    if not(3 in LList) then
+        raise Error("3 is not in the list");
+end;
+....
+List Indexer:: The indexer operator (link:O-System.iIndexer.html[[]]) is defined for
+lists and allows the values of a list to be accessed by ordinal position
+within the list. Indexes are zero-based:
++
+....
+begin
+    var LList := { 1, 2, 3 };
+    if not(LList[0] = 1) then
+        raise Error("First item is not 1");
+end;
+....
+link:O-System.Count.html[Count]:: Returns the number of values in the given list.
+link:O-System.Clear.html[Clear]:: Removes all values from the specified list. The target list must be a
+list variable.
+link:O-System.iExtend.html[Add]:: Adds the specified value into the given list. The target list must be a
+list variable.
+link:O-System.Insert.html[Insert]:: Inserts the specified value in the given list at the desired location.
+The target list must be a list variable.
+link:O-System.iRemove.html[Remove]:: Removes the specified value from the given list. The target list must be
+a list variable.
+link:O-System.RemoveAt.html[RemoveAt]:: Removes the value at the specified location from the given list. The
+target list must be a list variable.
+link:O-System.IndexOf.html[IndexOf]:: Returns the index of the specified value within the given list. If the
+value is not in the list, -1 is returned.
+
+For more information on these operators, refer to
+link:O-System.ListOperators.html[List Operators].
+
+[[DDGModelingProcessLogic-ValuesandVariables-UsingRows]]
+=== Using Rows
+
+This section describes how to use row selectors and the system-provided
+operators of the Dataphor Server to construct and manipulate
+<<D4LanguageElements.adoc#D4LGLanguageElements-Values-RowValues, row values>>.
+
+A row is a set of named values called columns. The row type specifies
+the name and type of each column. A row selector is used to construct a
+value of a specified row type:
+
+....
+var LRow : row { ID : Integer } := row { 5 ID };
+....
+
+As the preceding example illustrates, variables are allowed to be of any
+<<D4LanguageElements.adoc#D4LGLanguageElements-Types-RowTypes, row type>>.
+Optionally, the type of the row can be specified as part of the row selector. In this
+case, the expressions in the row selector provide values for the columns
+of the row. For example, to define a row with nil for all columns, use a
+type specifier in the selector, but do not provide any expressions in
+the body of the selector:
+
+....
+var LRow := row of { ID : Integer } { };
+....
+
+When combined with the *typeof* type specifier, this can provide a
+useful shorthand. For example, within the body of a row-valued operator,
+the *result* can be initialized with an empty row with the following
+statement:
+
+....
+result := row of typeof(result) { };
+....
+
+The following operators are defined for row types:
+
+Comparison Operators:: The comparison operators link:O-System.iEqual.html[=] and
+link:O-System.iNotEqual.html[<>] are defined for row values. Two row
+values are equal if they are of the same row type and both rows have
+values for the same set of columns by name, and those values are equal.
+Column Extractor:: The column extraction operator . (dot) retrieves the value for a single
+column in the row. If the row does not have a value for the given
+column, the result is nil. If the row variable that is the target of the
+extraction does not have a value, the result of evaluating the
+extraction is also nil.
+Row Update:: Row <<D4DataManipulation.adoc#D4LGDataManipulation-UpdateStatement, update>> allows the
+values for specific columns within a given row to be changed. The target
+of a row update must be a variable:
++
+....
+begin
+    var LRow := row { 5 ID, "John" Name };
+    update LRow set { Name := "Jack" };
+end;
+....
+Row Project:: Row project (**link:O-System.iProject.html[over]**) returns a row with
+only the specified columns of the given row:
++
+....
+begin
+    var LRow1 := row { 5 ID, "John" Name };
+    var LRow2 := LRow1 over { ID };
+end;
+....
+Row Remove:: Row *link:O-System.iRemove.html[remove]* returns a row with the
+specified columns removed from the given row:
++
+....
+begin
+    var LRow1 := row { 5 ID, "John" Name };
+    var LRow2 := LRow1 remove { Name };
+end;
+....
+Row Add:: Row *link:O-System.iExtend.html[add]* allows columns to be added to a
+given row. The current values of the columns in the source row are
+available by column name within the expressions defining the new
+columns:
++
+....
+begin
+    var LRow1 := row { 5 ID };
+    var LRow2 := LRow1 add { "John" Name };
+end;
+....
+Row Redefine:: Row <<D4TableOperators.adoc#D4LGTableExpressions-Redefine, redefine>> allows columns
+of a given row to be redefined. The current values of the columns in the
+source row are available by column name within the expressions defining
+the new columns. Just as with table redefine, this operator is defined
+as a shorthand for adding a new column X, removing some column Y, and
+then renaming X to Y:
++
+....
+begin
+    var LRow1 := row { 5 ID, "John" Name };
+    LRow1 := LRow1 redefine { ID := 6 };
+
+    // equivalent
+    LRow1 :=
+        LRow1
+            add { 6 X }
+            remove { ID }
+            rename { X ID };
+end;
+....
+Row Rename:: Row *link:O-System.iRename.html[rename]* allows columns of a given row
+to be renamed. The values of the renamed columns are unaffected:
++
+....
+begin
+    var LRow1 :=   row { 5 ID, "John" Name };
+    var LRow2 := LRow1 rename { ID X, Name Y };
+end;
+....
+Row Specify:: Row specify allows the desired columns to be specified. Just as for
+table-valued expressions, this operator is shorthand for an
+extend-project-rename operation.
+Row Join:: Row *link:O-System.iJoin.html[join]* allows two rows to be joined
+together. If the two rows have common column names, the values for those
+columns in each row must be equal:
++
+....
+begin
+    var LRow1 :=   row { 5 ID, "John" Name };
+    var LRow2 :=   row { 5 ID, "Provo" City };
+    var LRow3 :=   row { 6 ID, "Orem" City };
+    var LRow4 : row { ID : Integer, Name : String, City : String };
+    LRow4 := LRow1 join LRow2;
+    LRow4 := LRow1 join LRow3; // this is an error
+end;
+....
+
+[[DDGModelingProcessLogic-ValuesandVariables-UsingTables]]
+=== Using Table Values
+
+In addition to global and session-specific table variables, D4 allows
+table types to be used in local table variable declarations, as well as
+parameter types. This section discusses the usage of table variables and
+values within the imperative context of the D4 language.
+
+Table values are sets of rows, each of the same type. A table type
+specifier is used to specify the names and types of each column in the
+table value. Table selectors are used to construct table values:
+
+....
+begin
+    var LTable : table { ID : Integer };
+    LTable := table { row { 1 ID }, row { 1 } };
+end;
+....
+
+Note that a table selector is simply a comma-delimited list of
+row-valued expressions, of which row selectors are just one variety. In
+other words, a table selector need not be constructed entirely from row
+selectors. For example:
+
+....
+insert
+    table {    RowValuedOperator(), LTable[1] }
+    into LTable2;
+....
+
+In addition, table selectors are simply another variety of table-valued
+expression, and can be used anywhere a table-value is required.
+
+As with all variable declaration statements, the type specifier is
+optional if an initializer is provided:
+
+....
+var LTable := table { row { 1 ID } };
+....
+
+When a type specifier is not given as part of a variable declaration
+statement, the compiler infers the type of the variable based on the
+type of the initializer expression.
+
+The various operators that can be performed on table values have already
+been discussed in detail in
+<<RepresentingData.adoc#DDGRepresentingDataWithTablesAndViews, Representing Data with Tables and Views>>.
+As mentioned previously, D4 also allows for the definition of local table
+variables, and for parameters and return values to be table-typed. There are
+several points to be made regarding this functionality.
+
+Chunking BoundaryFirst, local table variables are allocated within the
+query processor directly, rather than as part of a device. As such, they
+constitute a __chunking boundary__, or a point at which the distributed
+query mechanisms of the query processor must take over. Because data
+must be transferred into the query processor whenever a chunking
+boundary is crossed, care should be taken to avoid excessive data
+copying.
+
+Second, local table variables exhibit the same copy semantics that
+non-table variables do. They are values just like the integer value 5,
+and while the query processor is optimized to perform only the
+processing that is necessary, the results of a local table variable
+assignment will be materialized fully.
+
+Third, the mechanism for declaring local table variables does not allow
+for the definition of the other structural information associated with
+global and session-specific table variables. The only structural
+information that can be provided for local table variables is the
+heading information, or the names and types of each column in the table
+value. Specifically, keys, orders, metadata, constraints, references,
+etc.,. cannot be provided for local table variables footnote:[This is a
+byproduct of the syntax of the table type specifier in D4. Although it
+is strictly correct that the type specifier only specify the type (keys,
+constraints, and other structural information are part of the variable
+definition rather than the type definition) it has the unfortunate side
+effect of limiting the functionality of local table variables. We plan
+on addressing this problem in a future release of the product.].
+
+And finally, table operators in D4 are fully __pipelined__. This means
+that whenever possible, table operators evaluate a row-at-a-time as data
+is requested. User-defined table-valued operators, while allowed, cannot
+be optimized in this way if they are written in D4 footnote:[Although
+the details of this behavior are beyond the scope of this discussion, it
+suffices to say that the internal representation of the table value is
+different for pipelined execution, and that only host-implemented
+operators can access the pipelined representation of a table value.]. As
+a result, D4 implemented table-valued operators cannot be pipelined, and
+the results of the entire operation will be materialized on every
+invocation.
+
+[[DDGModelingProcessLogic-ValuesandVariables-UsingCursors]]
+=== Using Cursors
+
+This section describes the general usage of cursors in D4. Many of the
+operations dealing with cursors are operators in the System Library.
+These operators will be covered briefly. For a complete description of
+each operator, refer to link:O-System.CursorOperators.html[Cursor
+Operators].
+
+Cursors in the Dataphor Server allow navigational access to the results
+of a given table expression. A _cursor selector_ is used to declare and
+open a cursor. Declaring a cursor allocates server resources which must
+be released. This is done using the link:O-System.Close.html[Close]
+operator. Note that the resource protection block (**try**..**finally**)
+should always be used to ensure that a cursor is closed.
+
+Cursors in the Dataphor Server are "cracked", meaning that the cursor
+can be positioned before the first row (BOF), after the last row (EOF),
+or on some row. It is an error to attempt a read or update operation
+against a cursor that is positioned on a crack. The
+link:O-System.BOF.html[BOF] and link:O-System.EOF.html[EOF] operators
+return true if the cursor is positioned on the BOF or EOF crack,
+respectively. If both BOF and EOF are true, the cursor is ranging over
+an empty set.
+
+The functionality of a cursor is divided up into __capabilities__.
+Capabilities are requested as part of the cursor definition. For a
+complete description of
+<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement-CursorCapabilities, cursor capabilities>>
+and other cursor behaviors, refer to the D4 Language Guide discussion of the
+<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement, Select Statement>>.
+
+Once a cursor is open, all operations against it are done using the
+cursor operators:
+
+link:O-System.Select.html[Select]:: Select(**const** ACursor : **cursor**) : *row*
++
+Select(**const** ACursor : **cursor**, *var* ARow : **row**)
++
+Selects the current row from the cursor specified by ACursor. It is an
+error to call Select if either BOF or EOF is true.
++
+If no row is provided, the Select operator returns a row. Otherwise, the
+values of the given row will be set to the values of the current row in
+the cursor.
++
+The row specified by ARow need not conform to the heading for the table
+over which the cursor ranges. Columns are matched by name with the given
+row.
+link:O-System.Insert.html[Insert]:: Insert(**const** ACursor : **cursor**, *const* ARow : **row**)
++
+Inserts the row given by ARow into the cursor specified by ACursor. The
+position of the cursor after the insert is determined by the cursor type
+specified in the cursor definition. If the cursor is static, the newly
+inserted row will not be visible in the cursor and the position of the
+cursor is unaffected. If the cursor is dynamic, the newly inserted row
+will be visible, and the cursor will attempt to be positioned on the new
+row. If the cursor is searchable, the cursor will be positioned on the
+newly inserted row, otherwise, it will be positioned as though
+link:O-System.Reset.html[Reset] had been called.
++
+The row specified by ARow need not conform to the heading for the table
+over which the cursor ranges. Columns are matched by name with the given
+row.
+link:O-System.Update.html[Update]:: Update(**const** ACursor : **cursor**, *const* ARow : **row**)
++
+Updates the current row of the cursor specified by ACursor to the values
+given by ARow. It is an error to call Update if either BOF or EOF is
+true. The position of the cursor after the update is determined by the
+cursor type specified in the cursor definition. If the cursor is
+__static__, the update will not be visible in the cursor and the
+position of the cursor is unaffected. If the cursor is __dynamic__, the
+update will be visible, and the cursor will attempt to refresh to the
+updated row. If the cursor is searchable, the cursor will be positioned
+on the updated row, otherwise, it will be positioned as though a
+link:O-System.Reset.html[Reset] had been called.
++
+The row specified by ARow need not conform to the heading for the table
+over which the cursor ranges. Columns are matched by name with the given
+row.
+link:O-System.Delete.html[Delete]:: Delete(**const** ACursor : **cursor**)
++
+Deletes the current row of the cursor specified by ACursor. It is an
+error to call Delete if either BOF or EOF is true. The position of the
+cursor after the delete is determined by the cursor type specified in
+the cursor definition. If the cursor is static, the delete will not be
+visible in the cursor, and the position of the cursor is unaffected. If
+the cursor is dynamic, the delete will be visible in the cursor, and the
+cursor will attempt to be positioned as close as possible to the deleted
+row. If the cursor is searchable, the cursor will be positioned as
+though a FindNearest had been called on the deleted row. Otherwise, it
+will be positioned as though a link:O-System.Reset.html[Reset] had been
+called.
++
+The row specified by ARow need not conform to the heading for the table
+over which the cursor ranges. Columns are matched by name with the given
+row.
+link:O-System.BOF.html[BOF]:: BOF(**const** ACursor : **cursor**) : Boolean
++
+Returns true if the cursor specified by ACursor is positioned on the BOF
+crack, or before the first row in the result set, and false otherwise.
+link:O-System.EOF.html[EOF]:: EOF(**const** ACursor : **cursor**) : Boolean
++
+Returns true if the cursor specified by ACursor is positioned on the EOF
+crack, or after the last row in the result set, and false otherwise.
+link:O-System.First.html[First]:: First(**const** ACursor : **cursor**)
++
+Positions the cursor specified by ACursor on the BOF crack. BOF is
+guaranteed to be true after a call to First.
+link:O-System.Prior.html[Prior]:: Prior(**const** ACursor : **cursor**) : Boolean
++
+Navigates the cursor specified by ACursor to the prior row in the result
+set. If the navigation is successful, i.e. the cursor is positioned on a
+row, the operator returns true. Otherwise, the operator returns false.
+link:O-System.Next.html[Next]:: Next(**const** ACursor : **cursor**) : Boolean
++
+Navigates the cursor specified by ACursor to the next row in the result
+set. If the navigation is successful, i.e. the cursor is positioned on a
+row, the operator returns true. Otherwise, the operator returns false.
+link:O-System.Last.html[Last]:: Last(**const** ACursor : **cursor**)
++
+Positions the cursor specified by ACursor on the EOF crack.
+link:O-System.EOF.html[EOF] is guaranteed to be true after a call to
+Last.
+link:O-System.Reset.html[Reset]:: Reset(**const** ACursor : **cursor**)
++
+Refreshes the result set for the cursor specified by ACursor from the
+underlying database and positions the cursor on the BOF crack. Note that
+even a static cursor will be refreshed after a call to Reset.
+link:O-System.BOF.html[BOF] is guaranteed to be true after a call to
+Reset.
+link:O-System.GetKey.html[GetKey]:: GetKey(**const** ACursor : **cursor**) : *row*
++
+Gets the key value for the current row of the cursor specified by
+ACursor. This row can be used in subsequent calls to
+link:O-System.FindKey.html[FindKey] and
+link:O-System.FindNearest.html[FindNearest].
+link:O-System.FindKey.html[FindKey]:: FindKey(**const** ACursor : **cursor**, ARow : **row**) : Boolean
++
+Finds the key value given by ARow in the cursor specified by ACursor. If
+the find is successful, the operator returns true, indicating that the
+cursor is positioned on a row with a key value matching that specified
+by ARow. Otherwise, the operator returns false, and the position of the
+cursor is unaffected. Note that if the key value specified by ARow is a
+partial key, then the cursor is not guaranteed to be on any particular
+row within the set of rows matching the partial key.
+link:O-System.FindNearest.html[FindNearest]:: FindNearest(**const** ACursor : **cursor**, ARow : **row**)
++
+Finds the row most closely matching the key value given by ARow in the
+cursor specified by ACursor. No guarantees are made about the position
+of the cursor after a call to FindNearest. As specified for the FindKey
+operator, if the key value given by ARow is a partial key, then the
+cursor is not guaranteed to be on any particular row within the set of
+rows matching the partial key.
+link:O-System.Refresh.html[Refresh]:: Refresh(**const** ACursor : **cursor**, ARow : **row**)
++
+Refreshes the result set for the cursor specified by ACursor and
+attempts to position the cursor on the row given by ARow. This operator
+is conceptually equivalent to calling link:O-System.Reset.html[Reset]
+followed by link:O-System.FindNearest.html[FindNearest].
+link:O-System.GetBookmark.html[GetBookmark]:: GetBookmark(**const** ACursor : **cursor**) : *row*
++
+Gets a bookmark for the current row of the cursor specified by ACursor.
+This bookmark can then be used in subsequent calls to
+link:O-System.GotoBookmark.html[GotoBookmark] and
+link:O-System.CompareBookmarks.html[CompareBookmarks]. Note that the
+structure of the row returned by GetBookmark is implementation defined
+and not guaranteed to be meaningful. A bookmark is only guaranteed to be
+valid for the cursor from which it was retrieved.
+link:O-System.GotoBookmark.html[GotoBookmark]:: GotoBookmark(**const** ACursor : **cursor**, *const* ABookmark :
+**row**) : Boolean
++
+Positions the cursor specified by ACursor on the row corresponding to
+the bookmark given by ABookmark. This bookmark must have been previously
+retrieved with a call to link:O-System.GetBookmark.html[GetBookmark].
+The operator returns true if the bookmark is valid and the cursor is
+positioned on the correct row. The operator returns false if the
+bookmark is invalid, or the row could not be located. If the operator
+returns false, the position of the cursor is unaffected.
+link:O-System.CompareBookmarks.html[CompareBookmarks]:: CompareBookmarks(**const** ACursor : **cursor**, *const* ABookmark1 :
+**row**, *const* ABookmark2 : **row**) : Integer
++
+Compares the bookmarks given by ABookmark1 and ABookmark2 using the
+cursor specified by ACursor. The given bookmarks must have been
+previously retrieved with a call to
+link:O-System.GetBookmark.html[GetBookmark]. The operator returns -1 if
+ABookmark1 is less than ABookmark2, 0 if they are equal, and 1 if
+ABookmark1 is greater than ABookmark2.
+link:O-System.Close.html[Close]:: Close(**const** ACursor : **cursor**)
++
+Closes the cursor specified by ACursor and deallocates any associated
+resources. All cursors opened using a cursor selector must be closed
+with this operator.
+
+The following examples illustrate the use of cursors in D4:
+
+....
+// Use a cursor to build a list of names of objects in the system.
+begin
+    var LCursor : cursor(table { Name : Name }) :=
+        cursor(Objects over { Name });
+    var LNameList : String := "";
+    try
+        while LCursor.Next() do
+        begin
+            if LNameList.Length() > 0 then
+                LNameList := LNameList + ", ";
+            LNameList :=
+                LNameList + LCursor.Select().Name;
+        end;
+        if LNameList.Length() > 0 then
+            LNameList := LNameList + ".";
+        raise Error("Object Names: " + LNameList);
+    finally
+        LCursor.Close();
+    end;
+end;
+....
+
+....
+// Find a specific object name in the system.
+begin
+    var LCursor : cursor(table { Name : Name }) :=
+        cursor
+        (
+            Objects over { Name }
+                capabilities { Navigable, Searchable }
+        );
+    try
+        if not LCursor.FindKey(row { Name("System.Integer") Name }) then
+            raise Error("System.Integer data type not found");
+    finally
+        LCursor.Close();
+    end;
+end;
+....
+
+....
+// Find the closest match to a given name in the system
+begin
+    var LCursor : cursor(table { Name : Name }) :=
+        cursor
+        (
+            Objects over { Name }
+                capabilities { Navigable, Searchable }
+        );
+    try
+        LCursor.FindNearest(row { Name("System.FindKey") Name });
+        raise Error(LCursor.Select().Name);
+    finally
+        LCursor.Close();
+    end;
+end;
+....
+
+....
+// Use bookmarks to reposition the cursor
+begin
+    var LCursor : cursor(table { Name : Name }) :=
+        cursor
+        (
+            Objects over { Name }
+                capabilities { Navigable, Bookmarkable, Searchable }
+        );
+    try
+        LCursor.FindKey(row { Name("System.Integer") Name });
+        var LRow : row := LCursor.GetBookmark();
+        LCursor.First();
+        LCursor.GotoBookmark(LRow);
+    finally
+        LCursor.Close();
+    end;
+end;
+....
+
+[[DDGModelingProcessLogic-Operators]]
+== Operators
+
+Operators form the fundamental building blocks of any D4 program.
+Operators can be as simple as the definition of a multiplication
+operator for some type, or as complex as a payroll calculation or
+inventory adjustment. Operators can take any number of arguments
+(including zero) of any type, and can optionally return a value of any
+type. Note specifically that this includes table and row types.
+
+At this point we note that the term _operator_ in D4 applies generally.
+The language makes no distinction between functions, procedures,
+operators, subroutines, stored procedures, triggers, etc.,. The built-in
+addition operator (+) is just as much an operator as the user-defined
+UpdateInventory(...).
+
+Operators that do not return a value may be invoked anywhere that a
+statement may appear in the D4 language, including in particular the
+body of other operators. Operators that do return a value may be invoked
+anywhere that an expression may appear in the D4 language. Operators
+thus form the basis for abstracting over statements and expressions
+within D4.
+
+D4 operators can be written in D4, or host-implemented. For more
+information on host-implemented operators, refer to the
+<<ImplementingDataTypes.adoc#DDGImplementingDataTypes-Host-ImplementedTypesandOperators, Host-Implemented Types and Operators>>
+discussion in Implementing Data Types.
+
+[[DDGModelingProcessLogic-Operators-OperatorInvocation]]
+=== Operator Invocation
+
+Operators in D4 can be invoked in several ways. First, the built-in
+footnote:[A built-in operator is an operator that is recognized as a
+symbol of the language e.g. +, rather than as an identifier, e.g.
+Distance().] operators of the D4 language can be invoked using the
+parser-recognized symbol:
+
+....
+2 + 2
+....
+
+Second, an operator can be invoked using its name and passing the
+required number of arguments:
+
+....
+Distance(Coordinate(120.12, 87.6), Coordinate(110.13, 87.6));
+....
+
+Finally, an operator can be invoked using the dot (.) operator:
+
+....
+Coordinate(120.12, 87.6).Distance(Coordinate(110.13, 87.6));
+....
+
+This last style of invocation allows object-oriented style "method"
+invocation, and is provided as a syntactic convenience. In this style of
+invocation, the compiler searches for an overload of the operator using
+the left argument of the dot operator as the first argument. Note that
+any operator (with at least one parameter) can be invoked in this way.
+
+[[DDGModelingProcessLogic-Operators-OperatorPrecedence]]
+=== Operator Precedence
+
+Because D4 allows chains of in-fix footnote:[For completeness, the term
+in-fix refers to the syntactic style of placing the operator symbol
+between the arguments, e.g. 2 + 2. Note that the term applies mainly to
+binary built-in operators.] operators, operator precedence must be used
+to determine the order of operations performed. Of course, order of
+operation can always be explicitly specified using parentheses. For a
+complete discussion of operator precedence, refer to
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions-OperatorPrecedence, Operator Precedence>>
+in the D4 Language Guide.
+
+[[DDGModelingProcessLogic-Operators-OperatorResolution]]
+=== Operator Resolution
+
+D4 supports operator overloading, meaning that two operators may have
+the same name as long as they have different signatures. For example,
+the addition operator (+) in D4 is capable of adding two integers, as
+well as performing string concatenation. As the following listing shows,
+the syntax for each expression is the same:
+
+....
+1 + 1
+"H" + "ello"
+....
+
+Because of this, the compiler must be able to determine which overload
+is being called. This process is called __operator resolution__, and is
+done by comparing the number and types of the arguments in the
+invocation with the number and types of the arguments in each overload
+of the operator being called.
+
+During this process, the compiler will make use of implicit conversions
+in attempting to resolve a particular overload. If the compiler can
+unambiguously match a single overload signature with the calling
+signature, the resolution is successful and the appropriate operator is
+invoked. Otherwise, the compiler will report an error indicating why it
+was unable to produce a match.
+
+For a more in-depth discussion of operator resolution, refer to
+<<D4Catalog.adoc#D4LGCatalogElements-Operators-OperatorResolution, Operator Resolution>>
+in the D4 Language Guide.
+
+[[DDGModelingProcessLogic-Operators-AggregateOperators]]
+=== Aggregate Operators
+
+Aggregate operators are D4 operators that are defined with a special
+calling convention that allows them to be used to compute aggregates of
+table values. Each aggregate operator has three sections:
+__initialization__, __aggregation__, and __finalization__. The
+initialization section is executed one time at the beginning of the
+computation. The aggregation section is invoked once for each row of the
+table value being aggregated, with the values for the current row passed
+as the parameters defined in the signature of the aggregate operator.
+The finalization section is executed one time at the end of the
+computation to allow any final steps to be performed. Each of these
+sections may be written in D4 or host-implemented.
+
+Note that variables declared within the initialization section will be
+visible within the aggregation and finalization sections, but variables
+declared within the aggregation section will not be visible within the
+finalization section. In other words, the entire aggregate operator (all
+three sections inclusive) form a single outer scope, with the
+aggregation section forming its own nested scope.
+
+For a more in-depth discussion of aggregate operators, refer to
+<<D4Catalog.adoc#D4LGCatalogElements-Operators-AggregateOperators, Aggregate Operators>>
+in the D4 Language Guide.
+
+[[DDGModelingProcessLogic-FlowControl]]
+== Flow Control
+
+In an imperative language like D4, a program runs as a series of
+statements that execute sequentially. Each of these statements may be
+either a built-in D4 statement, or an invocation of some system or
+user-defined operator. Each operator is itself a series of D4
+statements, either built-in, or user-defined.
+
+In addition to statements like variable declaration or assignment
+statements, D4 provides various flow control statements that allow the
+path of execution within the program to be controlled. D4 provides two
+main varieties of flow control statements: branching statements, and
+looping statements.
+
+[[DDGModelingProcessLogic-FlowControl-BranchingConstructs]]
+=== Branching Statements
+
+Branching statements allow the selection of the next statement to be
+executed based on the evaluation of some condition. There are two
+different branching statements in D4: the *if* statement, and the *case*
+statement.
+
+The *if* statement provides a single condition to be evaluated, and
+determines the next statement to be executed based on the result of
+evaluating that condition. For example, the following D4 script
+illustrates the conditional execution of a single statement:
+
+....
+if exists (Location where ID = '001') then
+    update Location
+        set { Name := 'Location 001' }
+        where ID = '001';
+....
+
+The *if* statement also includes an optional *else* clause which allows
+an alternative statement to be executed. To continue with the previous
+example:
+
+....
+if exists (Location where ID = '001') then
+    update Location
+        set { Name := 'Location 001' }
+        where ID = '001'
+else
+    insert
+        table { row { '001' ID, 'Location 001' Name } }
+        into Location;
+....
+
+Note that in this example, there is no statement terminator preceding
+the *else* keyword. This is because the D4 language considers the entire
+*if..then..else* statement to be a single statement.
+
+The *case* statement allows a single statement from among a set of
+statements to be selected for execution, based on the evaluation of some
+condition. There are two flavors of the case statement, one in which a
+single value is tested against multiple values, and one in which
+multiple conditions are evaluated. Both flavors allow a default
+condition to be specified using the *else* keyword.
+
+The following program listing illustrates both of these statements:
+
+....
+case LShape
+    when 'Circle' then DrawCircle();
+    when 'Square' then DrawSquare();
+    else DrawLine();
+end;
+
+case
+    when LShape = 'Circle' then DrawCircle();
+    when LShape = 'Square' then DrawSquare();
+    else DrawLine();
+end;
+....
+
+Clearly, these two statements are logically equivalent. D4 provides both
+statements for convenience.
+
+[[DDGModelingProcessLogic-FlowControl-LoopingConstructs]]
+=== Looping Statements
+
+Looping statements allow a given statement to be executed multiple
+times. D4 provides five different looping statements: the *for* loop,
+the *while* loop, the *do..while* loop, the *repeat..until* loop, and a
+specialized *foreach* statement.
+
+The *for* loop allows a given statement to be executed a specified
+number of times:
+
+....
+for LIndex : Integer := 1 to 100 do
+    insert table { row { LIndex X } } into Points;
+....
+
+Note that the *for* loop allows for iterator variable declaration within
+the statement itself, or referencing an existing variable within the
+local scope. In addition, the *var* keyword can be used instead of a
+type specifier as follows:
+
+....
+for var LIndex := 1 to 100 do
+    insert table { row { LIndex X } } into Points;
+....
+
+In this case, the type of the variable LIndex is determined by the type
+of the range expressions.
+
+The *while* loop allows a statement to be executed as long as a
+specified condition remains true:
+
+....
+begin
+    var LIndex := 1;
+    while LIndex <= 100 do
+    begin
+        insert table { row { LIndex X } } into Points;
+        LIndex := LIndex + 1;
+    end;
+....
+
+The *do..while* loop introduces a scope within the *do* and *while*
+keywords, and allows a set of statements to be executed, with the test
+condition being evaluated after the statements are executed:
+
+....
+begin
+    var LIndex := 0;
+    do
+        LIndex := LIndex + 1;
+        insert table { row { LIndex X } } into Points;
+    while LIndex < 100;
+....
+
+The *repeat..until* loop also introduces a scope, and allows a set of
+statements to be executed _until_ the specified condition evaluates to
+true:
+
+....
+begin
+    var LIndex := 1;
+    repeat
+        insert table { row { LIndex X } } into Points;
+        LIndex := LIndex + 1;
+    until LIndex > 100;
+....
+
+The *foreach* statement is a specialized looping statement that works as
+a shorthand for an equivalent loop to iterate over the rows in a cursor,
+or the items in a list:
+
+....
+begin
+    var LTotal := 0;
+    foreach row in Points do
+        LTotal := LTotal + X;
+end;
+....
+
+Note that within the iteration block, the columns of the current row are
+available by name.
+
+Each of these loops can of course be expressed in terms of a simple
+while loop. D4 allows the various statements for convenience.
+
+Within all the loops, the *break* statement may be used to
+unconditionally terminate the loop in which the break is found, with
+execution resuming at the first statement immediately following the
+loop. The *continue* statement may also be used to exit the current
+iteration; the test condition is evaluated, and execution continues at
+the first statement in the loop if the condition is satisfied.
+
+Note that a *break* or *continue* statement will _not_ skip a finally
+block.
+
+[[DDGModelingProcessLogic-ExceptionHandling]]
+== Exception Handling
+
+Exception handling statements in D4 allow for errors that may occur at
+runtime to be handled within the program itself. D4 provides two
+different exception handling statements: the *try..except* statement,
+and the *try..finally* statement.
+
+Structured exception handling provides a vastly superior mechanism for
+handling error conditions within imperative programs. Without exception
+handling, the developer of an operator must provide some mechanism to
+indicate to the caller that an error condition has occurred. It is then
+up to the caller to check the return code of each invocation of an
+operator, resulting in large amounts of error-handling code for even the
+most trivial of operations.
+
+In contrast, structured exception handling allows the user of a
+particular operator to develop optimistically. In other words, code can
+be written assuming everything will work. If necessary, an error
+handling block can be introduced surrounding the code in question to
+handle any error conditions without affecting the regular program logic.
+
+Exception handling in D4 makes use of the system Error type to provide
+information about exceptions that occur within D4. The following program
+listing shows the definition of this type:
+
+....
+// System.Error
+create type Error
+{
+    representation Error
+    {
+        Severity : String,
+        Code : Integer,
+        Message : String,
+        InnerError : Error
+    }
+};
+....
+
+Each error value in D4 has a Severity, a Code, a Message, and an
+InnerError. The severity value for an error is one of User, Application,
+Environment, or System, and indicates the relative severity of the
+error.
+
+Each error is also assigned a code, which is a six-digit number
+representing both the source module of the error, as well as the
+specific code of the error. The first three digits correspond to the
+source module, such as the server subsystem, or the schema subsystem.
+For a complete list of these module codes, refer to the Error Code
+Source Reference.. Application defined error codes should always be
+between 500000 and 999999.
+
+The message for an error value contains the descriptive text of the
+exception that occurred, and the InnerError component provides access to
+another Error value that can be used to nest errors as they occur. Note
+that the InnerError component of an Error will be *nil* if no inner
+error is available.
+
+The *raise* statement is used to throw an exception from a D4 program.
+There are two contexts in which a *raise* can appear. First, as a raise
+statement, the keyword is used to raise an error directly, and must be
+followed by an expression of type Error. This is most often an
+invocation of the Error selector, but does not have to be.
+
+Second, within an exception handler, the *raise* keyword can be used
+stand-alone to re-raise the exception being handled.
+
+[[DDGModelingProcessLogic-ExceptionHandling-Try..Except]]
+=== Try..Except
+
+The *try..except* statement is used to execute a set of statements, and
+optionally handle any exception that is raised within those statements.
+The *except* clause can be used in two different ways. First, as a
+generic exception handler that traps any exception occurring. The
+keyword *raise* can be used within the exception handler portion of the
+statement to re-throw the exception:
+
+....
+try
+    insert table { row { '001' ID, 'Location 001' Name } } into Location;
+except
+    update Location set { Name := 'Location 001' } where ID = '001';
+    raise;
+end;
+....
+
+Second, the *except* clause may specify a parameterized handler so that
+the exception that occurred can be inspected within the exception
+handler:
+
+....
+try
+    insert table { row { '001' ID, 'Location 001' Name } } into Location;
+except
+    on E : Error do
+    begin
+        if E.Severity = 'User' then
+            update Location set { Name := 'Location 001' } where ID = '001'
+        else
+            raise E;
+    end;
+end;
+....
+
+[[DDGModelingProcessLogic-ExceptionHandling-Try..Finally]]
+=== Try..Finally
+
+The *try..finally* statement is used to protect a given resource,
+ensuring that a specific block of statements will be executed regardless
+of whether an exception is raised or not. Because this statement is most
+often used to protect resources, it is often called a __resource
+protection block__. The following example depicts the use of a
+*try..finally* statement:
+
+....
+begin
+    var LCursor := cursor(BaseTableVars { Name });
+    try
+        ...
+    finally
+        LCursor.Close();
+    end;
+end;
+....
+
+[[DDGModelingProcessLogic-TransactionManagement]]
+== Transaction Management
+
+As with any DBMS, the Dataphor Server must provide transaction
+management services to allow applications to guarantee the integrity and
+consistency of operations, especially in the presence of concurrent
+access, and system failures.
+
+To enable these capabilities, the Dataphor Server exposes two different
+kinds of transaction management services: first, traditional two-phase
+commit transaction management, and second, application transactions.
+
+For a complete discussion of transaction management issues, refer to
+<<DatabaseManagementConcepts.adoc#DDGP1TransactionManagement, Transaction Management>>
+in Part I of this guide.
+
+[[DDGModelingProcessLogic-TransactionManagement-TransactionManagementServices]]
+=== Transaction Management Services
+
+The Dataphor Server exposes basic transaction management services
+primarily through the Call-Level Interface, but the services are also
+available within the D4 language by calling transaction management
+operators. The following list details the available transaction
+management operators:
+
+BeginTransaction()::
+Begins a transaction on the current process at the default isolation
+level for the process.
+BeginTransaction(const AIsolationLevel : String)::
+Begins a transaction on the current process at the specified isolation
+level.
+PrepareTransaction()::
+Prepares the current transaction for commit by checking all deferred
+integrity constraints and invoking all deferred event handlers. This
+call will be invoked internally if not called prior to transaction
+commit. It is only exposed to allow the Dataphor Server to participate
+in two-phase commit distributed transactions.
+CommitTransaction():: Prepares the current transaction if necessary, and commits it.
+* RollbackTransaction()
++
+Rolls back the current transaction, undoing any data modifications that
+were performed during the transaction.
+InTransaction():: Indicates whether or not the current process is participating in any
+transactions.
+TransactionCount():: Returns the number of transactions currently active on the current
+process.
+
+After calling BeginTransaction(), the number of active transactions on
+the current process is increased by one. If a transaction is already in
+progress on the current process, this transaction is a __nested
+transaction__. Transactions can be nested to any degree, even if the
+target systems with which the Dataphor Server is communicating do not
+support nested transactions. In this case, the Dataphor Server will take
+over logging the nested transactions, while still taking advantage of
+the transaction management capabilities of the target system for the
+outer most transaction.
+
+After calling CommitTransaction() or RollbackTransaction(), the number
+of active transactions on the current process is decreased by one. Note
+that the scope of each transaction is the current process, and that, in
+general, multiple processes may be running for a single session.
+
+In addition to explicit transaction management, the Dataphor Server will
+implicitly manage transaction for calls crossing the CLI boundary. This
+is called Transactional Call Protocol, and effectively ensures that any
+call into the Dataphor Server is protected by a transaction. If the call
+succeeds, the implicit transaction is committed. If an error occurs, the
+implicit transaction is rolled back, and the error is returned to the
+caller. This behavior can be controlled with the UseImplicitTransactions
+setting either through the CLI, or by updating the System.Processes
+table directly.
+
+Because the Dataphor Server may be communicating with multiple devices
+on behalf of the current process, each of these devices must be enlisted
+in the transaction. This is called a _distributed transaction_ and is
+either coordinated by the Dataphor Server, or managed by the Microsoft
+Distributed Transaction Coordinator, depending on the value of the
+UseDTC setting for the current process. This setting may be changed
+through the CLI, or by updating the System.Processes table directly.
+
+Because transaction management is such an integral part of any
+application, the D4 language provides the *try..commit* statement as a
+convenient shorthand for protecting operations with transactions and
+structured exception handling. The following example depicts a typical
+use of this statement:
+
+....
+try
+    ProcessInvoices();
+commit;
+....
+
+This statement is equivalent to the following sequence of statements:
+
+....
+begin
+    BeginTransaction();
+    try
+        ProcessInvoices();
+        CommitTransaction();
+    except
+        RollbackTransaction();
+        raise;
+    end;
+end;
+....
+
+[[DDGModelingProcessLogic-TransactionManagement-ApplicationTransactionManagement]]
+=== Application Transaction Management
+
+In addition to traditional transaction management, the Dataphor Server
+exposes an application-targeted capability called __application
+transactions__. Essentially, these are long-running, optimistically
+concurrent transactions that are used by Dataphor Frontend Clients to
+enable data entry in the presence of the business rules being enforced
+on the server. For a complete discussion of application transactions,
+refer to
+<<SpaceBetweenData.adoc#DDGTheSpaceBetweentheData-ApplicationTransactions, Application Transactions>>
+in the Presentation Layer part of this guide.
+
+[[DDGModelingProcessLogic-Characteristics]]
+== Characteristics
+
+Every expression and operator within the D4 language has various
+characteristics that are inferred by the compiler. These characteristics
+govern the contexts in which a given expression or operator may be used,
+and help the optimizer perform expression transformations and make
+distributed query processing decisions. The following list itemizes
+these characteristics:
+
+* Literal
+* Remotable
+* Functional
+* Deterministic
+* Repeatable
+* Nilable
+* Context Literal
+* Order Preserving
+
+The following sections discuss each of these characteristics in detail.
+
+[[DDGModelingProcessLogic-Characteristics-Literal]]
+=== Literal
+
+Broadly speaking, a literal expression in D4 is one that can be
+evaluated at compile-time with the same results as an evaluation at
+run-time. For example, the integer literal 5 will always result in the
+integer value 5. Clearly, any expression that references a variable,
+regardless of scope, is not literal.
+
+An operator is considered literal if it makes no reference to global
+state. An operator invocation is literal if the operator is literal and
+all the arguments to the operator are literal. Of course, this
+definition applies recursively, meaning that literal expressions are
+allowed to be arbitrarily complex, so long as they do not reference any
+variables.
+
+Note that a local variable reference within an operator does not mean
+the operator is not literal, only a global variable reference will make
+an operator non-literal. For example, the following operator is literal:
+
+....
+create operator LiteralOperator(const AInteger : Integer) : Integer
+begin
+    var LValue := AInteger * 2;
+    result := LValue;
+end;
+....
+
+However, the following operator references a global table variable, and
+is therefore not literal:
+
+....
+create operator NonLiteralOperator() : Integer
+begin
+    result := Count(TableVars);
+end;
+....
+
+The optimizer uses the literal characteristic to determine whether or
+not it can evaluate a given branch of an expression, and examine the
+result at compile-time for use in determining access paths, or for
+parameterization during distributed query processing.
+
+The following examples illustrate various literal and non-literal
+expressions:
+
+....
+// literal
+// Integer selector invocation
+5;
+
+// non-literal
+// invocation of non-literal operator DateTime()
+DateTime();
+
+// literal
+// DateTime selector invocation with literal arguments
+Date(2004, 10, 20);
+....
+
+[[DDGModelingProcessLogic-Characteristics-Remotable]]
+=== Remotable
+
+The remotable characteristic allows the compiler to distinguish between
+objects and statements that reference global state (objects in the
+database), and ones that do not. Basically, an object or statement is
+remotable if it can be executed or evaluated without accessing any
+objects in the global catalog. Note that remotability is a
+characteristic not only of expressions and operator but of all catalog
+objects.
+
+The compiler uses the remotable characteristic to determine whether a
+particular operator invocation could take place within the presentation
+layer without accessing data on the server. This is used in the
+proposable interfaces to allow defaults, constraints, and other rules to
+be enforced by the presentation layer.
+
+When the presentation layer opens a data entry form for a table
+variable, for example, the first proposable call is the Default call,
+which determines the default values for each column in the new row. If
+the default definitions are remotable, they are downloaded to the
+Frontend client as part of the structure of the result set and evaluated
+there without the need for an additional network round-trip.
+
+[[DDGModelingProcessLogic-Characteristics-Functional]]
+=== Functional
+
+The functional characteristic indicates whether an operator or
+expression has changed global state, usually by executing a data
+modification statement.
+
+Certain contexts such as constraint definitions require functional
+expressions. This guarantees that the act of validating a constraint
+will not change the state of the database.
+
+An operator is functional if it does not change global state. In other
+words, an operator that changes data in the database, such as a call to
+GetNextGenerator(), is not functional. An expression is functional if it
+does not contain any invocations of non-functional operators.
+
+[[DDGModelingProcessLogic-Characteristics-Deterministic]]
+=== Deterministic
+
+The deterministic characteristic indicates whether successive
+evaluations of the expression will result in the same value.
+
+Certain contexts such as constraint definitions require deterministic
+expressions. This guarantees that once a constraint expression has been
+validated, it will be valid so long as the input remains the same.
+
+An operator is deterministic if it does not contain any invocations of
+non-deterministic operators. Likewise, an expression is deterministic if
+does not contain any invocations of non-deterministic operators.
+
+[[DDGModelingProcessLogic-Characteristics-Repeatable]]
+=== Repeatable
+
+The repeatable characteristic indicates whether successive evaluations
+of the expression within the same transactional context will result in
+the same value. Repeatable is a stronger notion than deterministic in
+that a given expression may be non-deterministic but repeatable.
+
+For example, DateTime() is non-deterministic, but it is repeatable
+because successive invocations within the same transactional context
+will return the same value, namely the start time of the transaction.
+GetNextGenerator(), however, is not repeatable. Every invocation of the
+operator, regardless of transactional context will return a different
+value.
+
+Clearly, if an expression is deterministic, it is by definition
+repeatable.
+
+The repeatable characteristic is used by the compiler to ensure that
+operations such as restriction are well-defined, and by the optimizer to
+make distributed query processing decisions.
+
+An operator is repeatable if it does not contain any invocations of
+non-repeatable operators. Likewise, an expression is repeatable if it
+does not contain any invocations of non-repeatable operators.
+
+[[DDGModelingProcessLogic-Characteristics-Nilable]]
+=== Nilable
+
+The nilable characteristic indicates whether a given expression or
+operator could evaluate to nil. Some expressions are nilable by
+definition, for example the *nil* keyword will always evaluate to nil,
+and is therefore nilable.
+
+Other expressions are nilable based on schema definitions. For example,
+referencing a column of a row within a table is nilable if the
+definition of that column is nilable.
+
+In general, an operator invocation is nilable if any of its arguments
+are nilable. For example, the following invocation of + is non-nilable:
+
+....
+1 + 1;
+....
+
+This is because the expressions involved are not nilable, therefore the
+result could not be nil. The following addition expression, however, is
+nilable:
+
+....
+begin
+    var LX := nil;
+    var LY := 2;
+    LX + LY;
+end;
+....
+
+This is because the expressions involved in the addition are variable
+references, which could contain a nil at run-time. The compiler
+therefore infers that the result of the addition could be nil.
+
+Some expressions are non-nilable by definition, for example the IsNil
+operator will always return **true**, or **false**, regardless of
+whether its arguments are nil.
+
+The nilable characteristic is used by the compiler and the query
+processor to perform various optimizations, and by the optimizer to
+determine whether given expression transformations are valid.
+
+[[DDGModelingProcessLogic-Characteristics-Order-Preserving]]
+=== Order-Preserving
+
+The order-preserving characteristic indicates whether a given operator
+preserves the order semantics of its arguments. For example, conversion
+from a Byte to an Integer is an order-preserving operation.
+
+The order-preserving characteristic is used by the compiler to determine
+whether or not a given expression affects the use of a particular
+ordering during access path determination.
+
+[[DDGModelingProcessLogic-Characteristics-OverridingInferredCharacteristics]]
+=== Overriding Inferred Characteristics
+
+In some cases, such as dynamic execution, it is not possible for the
+compiler to determine at compile-time the characteristics of a given
+expression or operator. In these cases, language modifiers can be used
+to override the inferred characteristics. Note that these should be used
+with extreme care, as incorrectly specifying the characteristics of an
+expression can lead to invalid optimization decisions by the compiler.
+
+Language Modifiers Characteristic ModifiersThe following table lists the
+language modifiers available for overriding characteristics within
+expressions:
+
+[cols=",",options="header",]
+|=======================================================================
+|Modifier |Description
+|IsLiteral |Overrides the inferred literal characteristic for the
+expression.
+
+|IsFunctional |Overrides the inferred functional characteristic for the
+expression.
+
+|IsDeterministic |Overrides the inferred deterministic characteristic
+for the expression.
+
+|IsRepeatable |Overrides the inferred repeatable characteristic for the
+expression.
+
+|IsNilable |Overrides the inferred nilable characteristic for the
+expression.
+|=======================================================================
+
+In addition to the ability to override the inferred characteristics for
+an expression, the inferred characteristics for an operator can be
+overridden using metadata tags. The following table lists tags available
+for overriding operator characteristics:
+
+[cols=",",options="header",]
+|=======================================================================
+|Tag |Description
+|DAE.IsRemotable |Overrides the inferred remotable characteristic for
+the operator.
+
+|DAE.IsLiteral |Overrides the inferred literal characteristic for the
+operator.
+
+|DAE.IsFunctional |Overrides the inferred functional characteristic for
+the operator.
+
+|DAE.IsDeterministic |Overrides the inferred deterministic
+characteristic for the operator.
+
+|DAE.IsRepeatable |Overrides the inferred repeatable characteristic for
+the operator.
+
+|DAE.IsNilable |Overrides the inferred nilable characteristic for the
+operator.
+
+|DAE.IsOrderPreserving |Overrides the inferred order-preserving
+characteristic for the operator.
+|=======================================================================
+
+The following example illustrates the use of language modifiers to set
+the characteristics of a dynamically evaluated expression:
+
+....
+create operator CurrentLocationID() : LocationID
+begin
+    result :=
+        (
+            Evaluate('CurrentLocation[].Location_ID')
+                with
+                {
+                    IsFunctional = "true",
+                    IsDeterministic = "true",
+                    IsRepeatable = "true"
+                }
+        )
+            as LocationID;
+end;
+....
+
+Note that for dynamic evaluation, the query processor will verify that
+the characteristics of the dynamic expression match the characteristics
+specified using the modifiers. In fact, this example is somewhat
+contrived, because the default characteristics for dynamically evaluated
+expressions are assumed to be: non-literal, functional, deterministic,
+repeatable, and nilable. For dynamic execution, however, the compiler
+assumes non-literal, non-functional, non-deterministic, non-repeatable,
+and non-remotable, and the characteristic overrides will not be verified
+at run-time.
+
+The following example depicts the use of a characteristic override to
+allow the creation of a positive time-based constraint:
+
+....
+alter table Contact
+{
+    alter column NameSince
+    {
+        create constraint IsValid
+            value <= (DateTime() with { IsDeterministic = "true" })
+    }
+};
+....
+
+Without the modifier, the compiler will disallow the creation of this
+constraint because it involves an invocation of the non-deterministic
+operator DateTime(). However, because the value is required to be less
+than or equal to the current date and time (an ever-increasing value),
+we can safely inform the compiler that once this expression evaluates to
+true for a given value, it will be true from that time forward. Note
+that the opposite formulation of this constraint (**value** >=
+DateTime()) is not valid, because at some point, the constraint will be
+violated by data that has already passed validation of the constraint
+footnote:[As an aside, we note that changing the value of the system
+clock to a date and time prior to the date and time of some existing row
+would also have the affect of invalidating previously validated data.
+However, this is something outside the control of the system and falls
+more in the category of outside tampering than logical constraint
+enforcement. For example, one could just as easily rearrange bits on the
+physical drive without the knowledge of the system in order to produce a
+violation of previously validated data.].
+
+For more information on dynamic execution, see the
+<<D4LGProgrammingTopics-DynamicExecution, Dynamic Execution>>
+section.
+
+[[D4LGProgrammingTopics-DynamicExecution]]
+== Dynamic Execution
+
+The Dataphor Server has system-provided operators which allow for the
+dynamic execution of D4 statements. The
+link:O-System.Execute.html[Execute] operator allows a given statement to
+be executed, the link:O-System.Evaluate.html[Evaluate] operator allows a
+given expression to be evaluated, while the
+link:O-System.Open.html[Open] operator allows a dynamic cursor to be
+declared and opened. The following example illustrates the use of these
+operators:
+
+....
+create table Data { ID : Integer, key { ID } };
+
+begin
+    var LData : Integer := 10;
+    Execute("insert table { row { " + LData.ToString() + " ID } } into Data;");
+end;
+
+select Evaluate('Data[10].ID') as Integer;
+
+begin
+    var LSum : Integer := 0;
+    var LCursor : cursor(table { ID : Integer }) :=
+        Open("Data") as cursor(table { ID : Integer });
+    try
+        while LCursor.Next() do
+            LSum := LSum + LCursor.Select().ID;
+    finally
+        LCursor.Close();
+    end;
+end;
+....
+
+Note that when dynamically executing and evaluating D4, the inference
+mechanisms of the compiler do not occur until runtime. As a result, the
+Dataphor Server cannot determine the actual characteristics of a given
+statement or expression. For a discussion of how to override these
+characteristics at compiler-time, refer to the
+<<D4LGProgrammingTopics-DynamicExecution, Dynamic Execution>> section.
+
+[[DDGModelingProcessLogic-Session-SpecificObjects]]
+== Session-specific Objects
+
+In addition to the global catalog, the Dataphor Server allows for
+session-specific objects to be created. These objects are visible only
+within the session in which they were created, and are automatically
+dropped when the session closes.
+
+The Dataphor Server allows for the creation of session-specific table
+variables, both base and derived, operators, and constraints, including
+references. Because the lifetime of these objects is limited to the
+current session, global catalog objects cannot reference
+session-specific catalog objects, but session-specific catalog objects
+can reference global objects.
+
+Other than the restrictions on dependencies mentioned above,
+session-specific objects behave exactly like their global counterparts.
+They can be used as seeds for user interface derivation in the Frontend,
+and they can participate in application transactions, just like global
+objects.
+
+To create a session-specific object, simply include the *session*
+keyword as part of the create statement. For example, the following
+statements create a session-specific table, and a session-specific
+reference from that table to the Location table:
+
+....
+create session table CurrentLocation
+{
+    Location_ID : LocationID,
+    key { }
+};
+
+create session reference CurrentLocation_Location
+    CurrentLocation { Location_ID }
+    references Location { ID }
+    tags { Frontend.Lookup.Title = "Current Location" };
+....
+
+Note that the default storage device for session-specific tables is
+always the in-memory system device Temp.
+
+The Shipping application uses the CurrentLocation session table to track
+which location a user is currently logged into. When creating an
+invoice, this location will be used as the location for the invoice.
+
+In order to retrieve the current location, the following operator is
+used:
+
+....
+//* Operator: CurrentLocationID()
+create operator CurrentLocationID() : LocationID
+begin
+    result :=
+            Evaluate('CurrentLocation[].Location_ID')
+            as LocationID;
+end;
+....
+
+Because the CurrentLocationID() operator is a global catalog object, the
+compiler will not allow it to reference the CurrentLocation session
+table. As a result, we must use dynamic evaluation to retrieve the
+current location for the current session.
+
+The declared result type of the Evaluate call is **generic**, because
+the compiler has no way of determining at compile-time the result type
+of a dynamically evaluated expression. We must therefore _cast_ the
+resulting value as the type we know it will be using the *as* operator.
+
+This operator can then be used to construct the views and operators for
+the order entry user interfaces. For a continued discussion of these
+interfaces, refer to
+<<PuttingItAllTogether.adoc#DDGPuttingItAllTogether-InvoiceManagement, Invoice Management>>
+in the Presentation Layer part of this guide.
+
+[[DDGModelingProcessLogic-InvoiceProcessingExample]]
+== Invoice Processing Example
+
+As with any inventory management system, the Shipping Application must
+maintain current inventory levels at each location in response to sales
+and purchase orders, and shipping and receiving events. This is handled
+in the Shipping Application with a series of operators and event
+handlers. This section describes each of these operators, and how they
+are exposed in the application.
+
+The first operator, UpdateInventory, is responsible for updating the
+various inventory level indicators at a particular location. The
+following program listing provides the definition of this operator:
+
+....
+create operator UpdateInventory
+(
+    const ALocationID : LocationID,
+    const AItemTypeID : ItemTypeID,
+    const ADeltaOnHand : Decimal,
+    const ADeltaOnPurchase : Decimal,
+    const ADeltaOnOrder : Decimal
+)
+begin
+    if exists
+        (
+            LocationItem
+                where Location_ID = ALocationID
+                    and ItemType_ID = AItemTypeID
+        ) then
+    begin
+        update LocationItem
+            set
+            {
+                OnHand := OnHand + ADeltaOnHand,
+                OnPurchase := OnPurchase + ADeltaOnPurchase,
+                OnOrder := OnOrder + ADeltaOnOrder
+            }
+            where Location_ID = ALocationID
+                and ItemType_ID = AItemTypeID;
+    end
+    else
+    begin
+        insert
+            table
+            {
+                row
+                {
+                    ALocationID Location_ID,
+                    AItemTypeID ItemType_ID,
+                    ADeltaOnHand OnHand,
+                    ADeltaOnPurchase OnPurchase,
+                    ADeltaOnOrder OnOrder
+                }
+            }
+            into LocationItem;
+    end;
+end;
+....
+
+This operator simply updates the OnHand, OnPurchase, and OnOrder levels
+for a given location (ALocationID) and a given item type (AItemTypeID).
+The creation of this operator dramatically simplifies the expression of
+the next operator, UpdateInvoice:
+
+....
+//* Operator: UpdateInvoice
+create operator UpdateInvoice
+(
+    const AOldRow : typeof(Invoice[]),
+    const ANewRow : typeof(Invoice[])
+)
+begin
+    if AOldRow.Status_ID <> ANewRow.Status_ID then
+    begin
+        var LRow : typeof(InvoiceItem[]);
+        var LIsPurchase :=
+            exists (PurchaseOrder where ID = ANewRow.ID);
+        var LIsComplete := ANewRow.Status_ID = "COM";
+
+        var LQuantity : Decimal;
+        var LCursor :=
+            cursor
+            (
+                InvoiceItem
+                    where Invoice_ID = ANewRow.ID
+            );
+        try
+            while LCursor.Next() do
+            begin
+                LRow := LCursor.Select();
+                LQuantity := LRow.Quantity;
+
+                if LIsComplete then
+                begin
+                    if LIsPurchase then
+                        // if this is a purchase order,
+                        // add LQuantity to OnHand,
+                        // and subtract it from OnPurchase
+                        UpdateInventory
+                        (
+                            ANewRow.Location_ID,
+                            LRow.ItemType_ID,
+                            LQuantity,
+                            -LQuantity,
+                            0
+                        )
+                    else
+                        // if this is a sales order,
+                        // subtract LQuantity from OnHand,
+                        // and subtract it from OnOrder
+                        UpdateInventory
+                        (
+                            ANewRow.Location_ID,
+                            LRow.ItemType_ID,
+                            -LQuantity,
+                            0,
+                            -LQuantity
+                        );
+                end
+                else
+                begin
+                    if LIsPurchase then
+                        // If this is a purchase order,
+                        // add LQuantity to OnPurchase
+                        UpdateInventory
+                        (
+                            ANewRow.Location_ID,
+                            LRow.ItemType_ID,
+                            0,
+                            LQuantity,
+                            0
+                        )
+                    else
+                        // If this is a sales order,
+                        // add LQuantity to OnOrder
+                        UpdateInventory
+                        (
+                            ANewRow.Location_ID,
+                            LRow.ItemType_ID,
+                            0,
+                            0,
+                            LQuantity
+                        );
+                end;
+            end;
+        finally
+            LCursor.Close();
+        end;
+    end;
+end;
+attach operator UpdateInvoice
+    to Invoice on after update;
+....
+
+This operator is attached as an event handler to the Invoice table. It
+responds to changes in the Status_ID of the invoice by updating
+inventory levels at each location as appropriate. The status of an
+invoice can be one of NEW, PRO, or COM (new, processed or complete). In
+addition, there is a transaction constraint in the Invoice table that
+prevents the status from moving backwards. The status of an invoice may
+only move from new to processed, to complete. These statuses correspond
+with placing an order, either from a customer via a sales order, or to a
+vendor via a purchase order, approving the order internally, and then
+either shipping the order to the customer, or receiving it from the
+vendor.
+
+When an invoice is processed, if it is a purchase order, the OnPurchase
+level for the item type is increased, otherwise the OnOrder level for
+the item type is increased. When an invoice is completed, if it is a
+purchase order, the OnPurchase level for the item type is decreased, and
+the OnHand level is increased. For a sales order, both the OnOrder and
+OnHand levels are decreased.
+
+Rather than allow the invoice status to be edited through a
+user interface, we simply provide an operator to perform the update, and
+then expose the operator in the presentation layer of the application.
+We will build the user interfaces that do this in Part III. The
+following listing shows the operators that perform the update:
+
+....
+//* Operator: ProcessInvoice
+create operator ProcessInvoice(const AInvoiceID : InvoiceID)
+begin
+    update Invoice
+        set { Status_ID := "PRO" }
+        where ID = AInvoiceID;
+end;
+
+//* Operator: CompleteInvoice
+create operator CompleteInvoice(const AInvoiceID : InvoiceID)
+begin
+    update Invoice
+        set { Status_ID := "COM" }
+        where ID = AInvoiceID;
+end;
+....

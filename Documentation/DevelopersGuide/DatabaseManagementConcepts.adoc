@@ -1,0 +1,562 @@
+= Database Management Concepts
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DDGDatabaseManagementConcepts]]
+== Summary
+
+This chapter provides an overview of the database management principles
+and techniques which form the foundation for the solution to many of the
+issues raised in the previous chapter. Understanding these principles is
+essential to understanding how a database system can help enable the
+declarative approach.
+
+Note: the material in this chapter is largely a summary of An
+Introduction to Database Systems by C. J. Date [1]. Readers are
+encouraged to study this work, as it covers the topics much more
+thoroughly. Even readers with some background in database theory should
+review the material in this chapter to be certain that the concepts are
+well understood.
+
+[[DDGP1DatabaseManagementSystems]]
+== Database Management Systems
+
+A Database Management System (DBMS) is a software system specifically
+designed to handle the class of problems that arise when software
+applications need to store and manipulate data. Any application that
+uses data inevitably encounters issues such as efficiently accessing and
+changing the data, dealing with concurrency, and ensuring the
+correctness, or integrity, of the data. This section describes the basic
+functionality that is desirable in database management systems in
+general.
+
+[[DDGP1Databases]]
+=== Databases
+
+A database is an organized collection of facts. A database can be as
+simple as the list of settings for a particular application, or as
+complex as all the data for an entire enterprise including payroll,
+sales, accounting, human resources, and other information.
+
+Regardless of the size or usage requirements of a given database, some
+fundamental characteristics emerge that are vital to the functionality
+of the application consuming the data. These include:
+
+[horizontal]
+Persistence:: The application must be able to ensure that the data in the
+database is available, or 'saved' to long-term storage.
+Efficiency:: The application must be able to provide efficient access to
+the data.
+Concurrency:: If multiple requests are made to the same data, the
+application must be able to ensure that the results of each operation
+are correct.
+Recovery:: If the application crashes, or the environment becomes
+unstable, the application must be able to guarantee that the database
+can be recovered.
+Integrity:: The application must always be able to guarantee that the
+data in the database is correct, or conforms to all the business rules
+described by the application.
+
+Rather than solving these issues specifically within each application,
+it makes sense to build a software system that can solve these issues
+generically, and then make use of that system as needed. In the next
+section, we examine the benefits of using such a system.
+
+[[DDGP1DatabaseSystems]]
+=== Database Systems
+
+Clearly we can gain numerous advantages by implementing a system which
+handles these issues generically. Among these are:
+
+[horizontal]
+Reusability:: The solutions to data management issues are often quite
+complex. By providing a generic solution one time, we are able to
+leverage development time and stability from a system designed
+specifically to handle these issues.
+Sharing:: Different applications can access the same database. For
+example, the human resources application and the payroll application may
+both share the same list of employees.
+Centralization:: By maintaining all the data for a particular
+enterprise in a single system, an enterprise can gain greater control
+over the data.
+Control:: Because all the data is in a central location, the database
+management system can manage issues like security and policy or business
+rules enforcement.
+Physical Data Independence:: Ideally, the database system will be capable of
+changing physical details about the database without affecting the
+applications that use it. This is known as Physical Data Independence
+(PDI) and is of critical importance in a database system.
+
+[[DDGP1LevelsinaDatabaseSystem]]
+=== Levels in a Database System
+
+In order to realize the objectives of a database management system, the
+architecture is layered to isolate the details of the system from the
+users of the system. This layering can loosely be categorized into three
+views of the system:
+
+Internal Level:: The _internal level_ (also called the physical level) is concerned with
+the physical storage of the data.
+External Level:: The _external level_ is concerned with the user's perception of the
+data.
+Conceptual Level:: The _conceptual level_ (also called the logical level) provides a level
+of indirection between the two.
+
+These three categories serve as a conceptual foundation for the
+architecture of a database system. In order to provide a basis for the
+design of these levels we make use of a data model, as described in the
+next section.
+
+[[DDGP1DataModels]]
+=== Data Models
+
+Firstly, we note that the term _data model_ has two distinct meanings.
+First, as a description of an abstraction for dealing with all data, and
+second, as a model of the particular data of interest to some
+organization. In this section we discuss the first of these definitions.
+
+"A data model is an abstract, self-contained, logical definition of the
+objects, operators, and so forth, that together constitute the abstract
+machine with which users interact. The objects allow us to model the
+structure of the data. The operators allow us to model its behavior."
+[1]
+
+The data model then allows us to describe the behavior of the system at
+the conceptual level. A user who understands the data model will
+understand how to interact with the system. The conceptual level is then
+concerned with mapping between the implementation of the model on the
+internal level, and the perception of the model on the external level.
+
+As an example, take a simple calculator. The external level is the
+keypad and numeric display, allowing the user to enter data, and view
+the results. The internal level is the actual electronic components
+which perform the processing. The conceptual level is basic arithmetic,
+which allows the user to communicate with the system to perform some
+task.
+
+Loosely speaking, a logical model can be viewed as a simulated or actual
+environment of rules. Rules (or axioms) can be combined to form other
+rules (or theorems) based on the established principles of the formal
+system. Computer software is a set of rules built within the formal
+system defined by the capabilities of the hardware. In this case, the
+hardware provides the physical implementation, while the software
+executes within the resulting logical model.
+
+Developing software that directly utilizes the logical model provided by
+the hardware is arduous and is prone to human error; so over the years,
+software engineers have built up layers of software to provide higher
+levels of abstraction. Today's high-level drawing programs, modeling
+tools, and programming languages provide highly abstracted, logical
+models aimed at enabling the user to accomplish more work with less
+effort. The hardware and software system that create an environment for
+a particular logical model is often called the physical implementation
+(or layer), because it directly or indirectly utilizes the hardware for
+its intended purposes. If the implementation is successful, i.e. it
+correctly abstracts the user from the physical implementation, the
+result is Physical Data Independence.
+
+Physical Data Independence (PDI) is a term that describes the degree to
+which the user of a logical model is insulated from the physical
+implementation and its accompanying limitations. It should be noted that
+because computers are finite, PDI will always be a matter of degree,
+rather than an absolute. On the other hand, if the user of a particular
+logical model encounters a physical limitation, the ideal logical design
+will have to be compromised.
+
+An important practical benefit of physical data independence is the idea
+of a __single-level store__. Because the physical location of the data
+being stored is transparent in the logical model, it does not matter to
+the user of the database whether the data resides on disk, in memory, or
+some other location. These details are handled by the system.
+
+[[DDGP1TheRelationalModelofData]]
+== Relational Model of Data
+
+Because a database management system should be able to solve the data
+management issues for a broad class of applications (ideally all
+applications), it should be capable of representing all data.
+Additionally, this should be accomplished as simply as possible.
+
+The relational model, introduced by E. F. Codd in reference [2],
+provides a data model which is perfectly suited to realizing these
+goals. It provides a simple, yet powerful framework within which all
+data can be described and manipulated. Loosely speaking, the relational
+model is a model in which data is represented as rows in tables, and
+operators are provided for manipulating these tables which also return
+tables. [1]
+
+Informally, the relational model can be described from three main
+viewpoints:
+
+* Structural Aspect
+* Manipulative Aspect
+* Integrity Aspect
+
+Each of these aspects will be covered in detail in the following
+sections.
+
+[[DDGP1StructuralAspect]]
+=== Structural Aspect
+
+The structural aspect of the relational model describes how data is
+represented, namely as relations (which are usually depicted as tables).
+The term _relation_ is basically the mathematical name for a table
+(speaking very loosely), and is the reason for the name _relational
+model_ (as an aside, the relational model is very definitely _not_ named
+for the idea of relationships between tables). Data in a relational
+database is represented by tables, and nothing but tables. This idea is
+known as _The Information Principle_ and is one reason for the
+simplicity and power of the relational model.
+
+A _relation_ can be defined informally as consisting of a heading and a
+body:
+
+* The _heading_ of a relation is a set of __attributes__, or
+__columns__, each of which has a unique name and a __data type__.
+* The _body_ of a relation is a _set_ of __tuples__, or __rows__, each
+with the same heading as the relation and containing a value for each
+attribute of that heading.
+
+There are several key observations which should be made in connection
+with this definition which are of critical importance in adhering to the
+relational model and have been largely ignored by existing products.
+
+Firstly, the body of a relation is a _set_ of tuples which, by
+definition, has no order and no duplicates. These two facts have
+important consequences for the relational algebra, which will be
+discussed in the next section.
+
+Secondly, the heading of a relation is a _set_ of attributes. Again, no
+order is assumed in the heading, and no duplicates are allowed.
+Additionally, no attribute is allowed to go unnamed, another fact which
+will turn out to be of crucial importance in the relational algebra.
+
+Thirdly, note that the attributes of a relation are defined on a type.
+This type is allowed to be any type whatsoever, including relation and
+tuple types.
+
+Lastly, the tuples of a relation contain a _value_ for each attribute of
+the heading.
+
+A relational database is then a database in which all the data is
+_perceived_ as relations (relation variables more precisely), and
+nothing but relations. Relations may be base or derived. A _base
+relation_ is a relation that is defined in terms of its attributes. A
+_derived relation_ (also called a __view__) is a relation that is
+defined in terms of a relation-valued expression that is allowed to
+reference other relations. Regardless of whether a relation is base or
+derived, it should appear the same to a user of the database. In other
+words, the user should not have to be aware of how a given relation is
+defined, only that it exists. This concept is known as _logical data
+independence_ and is one of the main factors in the ability of a data
+model to be transformed without affecting the applications which use it.
+
+Perhaps the most important idea in the relational model is that
+databases are a collection of facts. Each relation has a meaning or
+_predicate_ and the tuples in the relation correspond to true
+__propositions__. For example, the predicate of an employee relation
+might be: There is an employee identified by employee number _ID_ with
+name __Name__. The attributes of the relation correspond to
+_placeholders_ in the predicate. Each tuple in the relation then
+supplies values for the placeholders in the predicate, forming a true
+proposition. For example, the tuple <E100, 'John Smith'> in the employee
+relation forms the proposition: There is an employee identified by
+employee number _E100_ with name __John Smith__.
+
+The meaning, or predicate, of a given relation is not just an attribute
+of base relations. The predicate for a derived relation is inferred from
+the predicates of the relations involved in the defining expression. In
+this way, meaning is ascribed not only to the base relation variables in
+a given database, but also to the results of any query issued against
+the database.
+
+*A Note About Terminology:.*
+
+This section has introduced what appear to be duplicate terms for the
+familiar notions of tables, columns, and rows. The reason for this is
+that the relational model is a mathematical model, and the terms
+relation, attribute, and tuple are formal notions with very precise
+definitions. They are the formal _counterparts_ of the informal notions
+of tables, columns, and rows, respectively, and allow for clear and
+unambiguous usage within formal contexts. In an informal discussion such
+as this one, the various terms are often used interchangeably.
+
+[[DDGP1ManipulativeAspect]]
+=== Manipulative Aspect
+
+The manipulative aspect of the relational model describes how operators
+can be applied to relations to produce new relations. The operators of
+the relational algebra provide the means to perform these manipulations.
+It should be noted that the result of any relational operator is itself
+a relation. Because of this, the results of any operation can in turn be
+used as the arguments to some other operator. This concept is known as
+_closure_ and gives the relational algebra its expressive power. If a
+relational operator returns a value that does not fit the definition of
+a relation, closure is lost. The result is a decrease in expressive
+power, and a corresponding increase in complexity.
+
+The basic operators of the relational algebra are:
+
+* _project_
+* _restrict_
+* _union_
+* _difference_
+* _join_
+
+Three other operators (__intersection__, __product__, and __divide__)
+are usually considered as basic operators as well, but they are not
+primitive, and so will be discussed in the context of the other
+operators. The following discussion briefly describes each operator. For
+a full discussion of the operators of the relational algebra, refer to
+the D4 Language Guide in this manual.
+
+The _project_ operator takes as input a single relation, and removes a
+given set of columns. The result is a relation with a heading which is a
+subset of the heading of the input relation. Note that projection will
+eliminate duplicates, if necessary.
+
+The _restrict_ operator takes as input a single relation, and applies a
+condition, or filter, to the body of the relation. The result is a
+relation with the same heading, and the set of rows for which the
+condition evaluates to true.
+
+The _union_ operator takes as input two relations, both with the same
+heading, and returns a relation with the same heading as the input
+relations, and a body that includes the rows from both input relations,
+with duplicates eliminated.
+
+The _difference_ operator takes as input two relations, both with the
+same heading, and returns a relation with the same heading as the input
+relations, and a body that includes a row for each row that is in the
+first relation, but not the second.
+
+The _join_ operator takes as input two relations, not necessarily with
+the same heading, and returns a relation with a heading that is the
+union (with duplicates eliminated) of the headings of the input
+relations, and a body that contains a row for each combination of rows
+in the input relations where the given rows have the same value for the
+common columns of the input relations, if any. The _intersection_ and
+_product_ operators are both special cases of this operator. The
+_intersection_ is the case where the headings of the input relations
+have all columns in common, and the _product_ is the case where the
+headings of the input relations have no columns in common. This operator
+is also called the _natural join_ operator because it relies on the
+names of the columns in the headings to determine the join condition.
+Other forms of this operator exist, but are not important for present
+purposes.
+
+These five operators make up the core of the relational algebra.
+Together they constitute a complete system for deriving relation values.
+This notion is known as __relational completeness__. A language is said
+to be _relationally complete_ if it is at least as powerful as the
+algebra.
+
+These manipulative aspects of the relational model provide the basis for
+the power and simplicity of relational systems. The purpose of the
+relational algebra is to allow the writing of relational expressions
+[1]. These expressions can then be used in a variety of important tasks
+including data retrieval, data manipulation, integrity constraint
+definition, view definition, and so on.
+
+[[DDGP1IntegrityAspect]]
+=== Integrity Aspect
+
+The integrity aspect of the relational model is concerned with what the
+data in a database means. _Integrity_ refers to the accuracy or
+correctness of data in the database [1]. A _constraint_ is a
+truth-valued expression which must evaluate to true for the data in the
+database. There are two types of constraints in a database, _type
+constraints_ and __database constraints__. Type constraints are
+discussed as part of the Scalar Types topic later in this part. In this
+section we will be concerned with database constraints specifically.
+
+Integrity constraints, also called _business rules_ are used in a
+database to inform the system what conditions must be satisfied. For
+example, an employees database might have the constraint that all
+salaries must be in the range $15,000 to $150,000. Such a constraint is
+expressed as a truth-valued relational expression. For example:
+
+....
+not exists Employees where Salary < $15000 or Salary > $150000
+....
+
+Once the constraint has been declared, the system is responsible for
+enforcing it. Any modification statement which would cause this
+constraint to evaluate to false (or _violates_ the constraint) is
+rejected.
+
+It is important to note that the expression for a given constraint is
+allowed to be arbitrarily complex. For example:
+
+....
+not exists ((Employees over { ID }) join (Users over { ID }))
+....
+
+This constraint references multiple table variables in the system, and
+enforces the constraint that no employee is allowed to be a user, and
+vice-versa. Two types of integrity constraints are of such importance
+that they have their own declarative specification in most systems,
+including the Dataphor Server. They are _key_ constraints and
+_reference_ constraints.
+
+A key constraint enforces that some subset, not necessarily proper and
+possibly empty, of the columns of a given table variable must be unique
+for all rows in the table variable. For example, the Employees table
+could have an ID column that serves as the unique identifier for each
+employee. It is important to note that this is just a special case of a
+database wide integrity constraint. For example:
+
+....
+Count(Employees) = Count(Employees over { ID })
+....
+
+is an equivalent formulation of the constraint.
+
+A reference constraint (also called a __foreign key__) enforces that all
+the values of some set of columns in one table exist as values for some
+set of columns in another table. For example, the Employees table could
+have a Dept_ID column that is required to be a department in the
+Departments table. This type of constraint enforces what is known as
+__referential integrity__, a very common special case of integrity in
+general. This constraint is equivalent to the expression:
+
+....
+not exists ((Employees over { Dept_ID }) minus
+    (Departments over { ID } rename { ID Dept_ID }))
+....
+
+[[DDGP1TransactionManagement]]
+== Transaction Management
+
+_Transaction management_ is concerned with ensuring that users of a
+system can perform the operations they request as though they were the
+only user of the system, and without fear of system failure. A
+_transaction_ is the basic unit of work used in transaction management
+to accomplish these goals. Every transaction has the following
+fundamental properties, also known as the _ACID_ properties:
+
+* Atomicity: The transaction is a single unit of work, so it is either
+completed, or rolled back as a whole.
+* Consistency: The transaction is guaranteed to transform the database
+from one consistent state to another.
+* Isolation: The transaction is guaranteed to perform as though it was
+the only transaction running.
+* Durability: The effects of a committed transaction are guaranteed to
+be permanent, even in the event of a system failure.
+
+Ensuring that a transaction meets these requirements is a highly
+non-trivial undertaking. Any database application would ideally meet
+these requirements, but one written without the benefit of a DBMS with
+transaction support would be unlikely to do so. There are many complex
+and difficult issues to be addressed in transaction management.
+Thankfully, they can all be isolated and made transparent by the DBMS.
+Furthermore, because of The Information Principle, the relational model
+provides an ideal platform for implementing transaction support.
+
+[[DDGP1Atomicity]]
+=== Atomicity
+
+Atomicity means that the transaction is perceived as a single unit of
+work. The classic example is that of a bank transaction where one
+account is credited and another is debited. Clearly, both these updates
+must take place in order for the correct transformation to occur. By
+wrapping both updates inside a database transaction, the DBMS ensures
+that this is the case.
+
+[[DDGP1Consistency]]
+=== Consistency
+
+Consistency means that the transaction is guaranteed to transform the
+database from one consistent state to another. The DBMS ensures that the
+transaction does not violate any integrity constraints at commit time.
+If a violation is detected, the transaction is rolled back as a whole.
+
+[[DDGP1Isolation]]
+=== Isolation
+
+Isolation guarantees that the transaction runs as though it was the only
+transaction running on the system. This concept is also known as
+_concurrency_ and comes in two general flavors, _optimistic_ and
+__pessimistic__. Pessimistic concurrency ensures that a transaction is
+isolated by protecting all the resources involved in the transaction
+with __locks__. Optimistic concurrency does not take locks on
+transaction resources, rather it ensures that the data has not been
+changed by another transaction before it is modified. The vast majority
+of existing systems use pessimistic concurrency. Optimistic concurrency
+is used mainly by client applications to ensure concurrency without
+involving the DBMS footnote:[Of course, there are many different
+approaches to concurrency implementation. For simplicity, we do not
+discuss the various flavors and variations of optimistic and pessimistic
+concurrency control mechanisms in use today. These two categories are
+sufficient for our purposes.]. In this section, we discuss pessimistic
+concurrency.
+
+Isolation is usually achieved in transaction managers through the use of
+locking. The protocol a transaction uses to protect the resources it
+consumes determines the degree of isolation which is achieved by that
+transaction. There are three general kinds of problems which can occur
+as a result of transactions running concurrently:
+
+* _Lost update_
++
+A transaction T1 changes the salary for an employee E1 to $15000.
+Another transaction T2 changes the salary for the same employee E1 to
+$20000. If there is no control on updates, one or the other of these
+updates will be lost.
+* _Dirty read_
++
+A transaction T1 changes the salary for an employee E1 to $15000.
+Another transaction T2 then reads the salary value for employee E1. If
+T1 subsequently rolls back, then any work done by T2 based on the salary
+value for the employee could be wrong. Transaction T2's read of the
+salary value was a dirty read.
+* _Non-repeatable read_
++
+A transaction T1 reads the salary for an employee E1. Another
+transaction T2 then updates the salary value for that same employee, and
+then transaction T1 attempts to read the salary value again. Transaction
+T1's read is a non-repeatable read, because it receives different values
+for subsequent reads.
+
+Clearly these behaviors will cause problems if not prevented. In order
+to prevent these problems, there are four degrees of isolation:
+
+* Degree 0, or chaos. This isolation level is reserved for certain
+system level processes such as recovery.
+* Degree 1, or browse. This isolation level prevents lost updates.
+* Degree 2, or cursor stability. This isolation level prevents lost
+updates and no dirty reads.
+* Degree 3, or isolated. This isolation level prevents lost updates and
+ensures repeatable reads, which implies no dirty reads. This is the
+highest degree of isolation and provides complete isolation.
+
+These isolation levels allow users of the system to control what level
+of concurrency a given transaction should use. Isolation is achieved at
+the cost of concurrency, in other words, a completely isolated
+transaction takes locks on every resource it consumes, and therefore
+causes more contention. It has been shown that if all transactions run
+at least degree 1 isolation, then no transaction will violate the
+isolation of another. In other words, as long as all transactions run at
+browse or higher, each transaction is guaranteed to run at the isolation
+level it has selected [12].
+
+[[DDGP1Durability]]
+=== Durability
+
+Durability guarantees that if a transaction commits, its changes are
+made permanent. In the event of system or hardware failure, a database
+system must ensure that the data is correct, and that committed changes
+to the database are still available on system recovery.
+
+[[DDGP1Conclusion]]
+== Conclusion
+
+We have reviewed the fundamentals of database systems and the relational
+model. We have illustrated some of the benefits of using database
+systems in general, and relational systems in particular. Throughout the
+rest of this part, we will refer to the concepts covered in this chapter
+without explanation.

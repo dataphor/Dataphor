@@ -1,0 +1,660 @@
+= Data Manipulation
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[D4LGDataManipulation]]
+== Summary
+
+This section covers the data manipulation language statements available
+in the D4 language. These statements allow data in the database to be
+retrieved, stored, and changed.
+
+Data manipulation statements in D4 have the following syntax:
+
+....
+<dml statement> ::=
+    <select statement> |
+    <insert statement> |
+    <update statement> |
+    <delete statement>
+....
+
+It is important to note that these statements are set-at-a-time
+operations, meaning that they do not operate at a row level, rather on
+an entire table variable at once. Also note that conceptually each of
+the modification statements, **insert**, **update**, and **delete**, are
+shorthands for some equivalent relational assignment.
+
+The following sections consider each statement in detail.
+
+[[D4LGDataManipulation-SelectStatement]]
+== Select Statement
+
+The select statement allows for the retrieval of a specified table
+expression. The statement allows the result set to be ordered
+arbitrarily, and allows for the specification of
+<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, cursor>>
+level properties such as isolation level and cursor type. The select statement and the cursor selector both use
+the same <cursor definition> production rule to define their syntax.
+
+The purpose of the select statement in the D4 language is to provide a
+facility for parser-level recognition of statements that should return a
+result set. This is used by the Call-Level Interface (CLI) to determine
+whether a given batch should be executed or opened. Thus, a select
+statement should only be used to retrieve data through the CLI. For
+example:
+
+....
+Employee;
+....
+
+is a valid expression, but no data will be retrieved. On the other hand
+the results of the following query will be retrieved through the CLI:
+
+....
+select Employee;
+....
+
+....
+ID Name
+-- ----
+1  Joe
+2  John
+3  Josh
+4  Jeff
+5  Jake
+6  Jeff
+....
+
+The select statement in D4 has the following syntax:
+
+....
+<select statement> ::=
+    select <cursor definition>
+
+<cursor definition> ::=
+    <expression>
+    [<order clause> | <browse clause>]
+    [<cursor capabilities>]
+    [<cursor isolation>]
+    [<cursor type>]
+
+<order clause> ::=
+    order by
+        "{"<order column definition commalist>"}"
+        [<language modifiers>]
+
+<browse clause> ::=
+    browse by
+        "{"<order column definition commalist>"}"
+        [<language modifiers>]
+
+<order column definition> ::=
+    <column name> [sort <expression>] [asc | desc] [(include | exclude) nil]
+
+<column name> ::=
+    <qualified identifier>
+
+<cursor capabilities> ::=
+    capabilities "{"<cursor capability commalist>"}"
+
+<cursor capability> ::=
+    navigable |
+    backwardsnavigable |
+    bookmarkable |
+    searchable |
+    updateable |
+    truncateable |
+    countable
+
+<cursor isolation> ::=
+    isolation (none | browse | isolated)
+
+<cursor type> ::=
+    type (static | dynamic)
+....
+
+The basis of the cursor definition is a table expression specified by
+<expression>. For a detailed description of the <expression> production
+rule, refer to <<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, Expressions>>.
+For a complete description of the table operators avaialable in D4,
+refer to <<D4TableOperators.adoc#D4LGTableExpressions, Table Operators>>.
+
+[[D4LGDataManipulation-SelectStatement-OrderingTheResultSet]]
+=== Ordering the Result Set
+
+The result set for a <<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, cursor>> is ordered as
+specified by the <order clause> or <browse clause>. An _order_
+specification simply indicates the requested order for the result set,
+whereas a _browse_ specification indicates not only the requested order,
+but that _navigational access_ should be used to retrieve data from the
+cursor. A cursor using navigational access enables functionality such as
+searching and backwards scrolling by transparently transforming the
+expression actually used to retrieve the data. This type of access
+enables efficient searching and navigation through a cursor without
+requiring ad-hoc solutions to be developed in client applications.
+
+An order can consist of any subset of the columns of a table variable in
+any order. Each column can include an optional sort expression, and an
+optional ascending indicator. In addition, each column can indicate
+whether or not rows with nil for the column should be included in the
+result set. By default, rows with nils are excluded.
+
+The sort expression allows the order to use an arbitrary condition for
+sorting. The sort expression must be integer-valued, functional and
+deterministic. The expression has access to the implicit variables
+*left.value* and **right.value**, which are the values to be compared.
+The expression must return -1 if *left.value* is less than
+**right.value**, 0 if the two values are equal, and 1 if *left.value* is
+greater than **right.value**.
+
+The optional ascending indicator specifies whether this column should be
+sorted ascending or descending. If no ascending indicator is specified,
+ascending is assumed.
+
+The following example illustrates the use of the order clause:
+
+....
+select Employee order by { Name, ID desc };
+....
+
+....
+ID Name
+-- ----
+5  Jake
+6  Jeff
+4  Jeff
+1  Joe
+2  John
+3  Josh
+....
+
+[[D4LGDataManipulation-SelectStatement-CursorCapabilities]]
+=== Cursor Capabilities
+
+l<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, cursor>>
+capabilities describe the behaviors available for the cursor. These include
+items such as updatability, backwards navigation, searching, and bookmarking.
+The D4 language defines the following cursor capabilities:
+
+* Navigable
++
+Indicates that the cursor is capable of forward navigation through calls
+like Next and Last. Also indicates that the cursor supports data
+retrieval through the Select call. All cursors are guaranteed to support
+this level of functionality.
+* Backwards Navigable
++
+Indicates that the cursor is capable of backward navigation through
+calls like Prior and First.
+* Bookmarkable
++
+Indicates that the cursor is capable of bookmarking functionality, or
+remembering a location in the result set for quick location at a later
+time.
+* Searchable
++
+Indicates that the cursor is capable of performing searches through
+calls like FindKey and FindNearest. Note that the search must be made
+against the same columns that were used to order the result.
+* Updatable
++
+Indicates that the cursor supports updates through calls like Insert and
+Update.
+* Truncatable
++
+Indicates that the cursor supports truncation.
+* Countable
++
+Indicates that the cursor supports retrieving a count of the number of
+rows in the result.
+
+The cursor definition allows any combination of these capabilities to be
+requested. The Dataphor Server will attempt to provide a cursor with the
+requested capabilities. An error occurs if the requested capabilities
+cannot be provided. If no cursor capabilities are specified as part of
+the cursor definition, the default capabilities of Navigable will be
+requested. All cursors are guaranteed to support at least the Navigable
+capability.
+
+The following sections consider each cursor capability in detail. The
+functionality described in each section is available either as operators
+in the D4 language, or through the CLI directly.
+
+[[DDGP2Navigable]]
+==== Navigable
+
+Navigable indicates that the cursor supports basic navigational access.
+All cursors support this level of functionality.
+
+The following functionality is available for cursors supporting the
+Navigable category of behavior:
+
+[width="100%",cols="100%",options="header",]
+|=======================================================================
+|Operator |Description
+|Select |Retrieves the current row of the cursor. It is an error if
+either BOF or EOF is true.
+
+|Next |Advances the current position of the cursor by 1 row. If this
+moves past the last row in the result set, EOF will be true.
+
+|Last |Moves the current position of the cursor past the last row in the
+result set. EOF will always be true after a call to Last
+
+|BOF |Returns true if the current position of the cursor is before the
+first row in the result set. BOF will always be true when the cursor is
+first opened.
+
+|EOF |Returns true if the current position of the cursor is after the
+last row in the result set. EOF will only be true after the cursor is
+first opened if the cursor is empty.
+
+|IsEmpty |Returns true if there are no rows in the result set. This is
+equivalent to evaluating the expression BOF *and* EOF. This
+functionality is not exposed in D4.
+
+|Reset |Resets the cursor by requerying for the result set. This is
+equivalent to closing and re-opening the cursor.
+|=======================================================================
+
+[[DDGP2BackwardsNavigable]]
+==== Backwards Navigable
+
+Backwards Navigable indicates that the cursor supports backwards
+navigation.
+
+The following functionality is included in the Backwards Navigable
+category of behavior:
+
+[width="100%",cols="100%",options="header",]
+|=======================================================================
+|Operator |Description
+|Prior |Moves the current position of the cursor to the prior row. If
+this moves before the first row in the result set, BOF will be true.
+
+|First |Moves the current position of the cursor before the first row in
+the result set. BOF will always be true after a call to First.
+|=======================================================================
+
+[[DDGP2Bookmarkable]]
+==== Bookmarkable
+
+Bookmarkable indicates that the cursor supports navigation and location
+through the use of bookmarks. A bookmark is a system provided value
+which is like a handle to a specific position in the cursor. If a cursor
+supports bookmarks, this functionality can be used to remember certain
+locations within a cursor and return to them later. A bookmark is only
+valid for the cursor from which it was requested. All bookmarks are
+invalidated when the cursor closes. All bookmarks requested through the
+GetBookmark operator must be disposed using the DisposeBookmark call.
+
+Note that within D4, there is no reason to use the Bookmarkable cursor
+capability. It is exposed as an implementation mechanism for data access
+layer clients. If you request a Bookmarkable cursor within D4, it will
+be supported by the Searchable cursor capability described in the next
+section. For this reason, cursors declared within D4 should simply use
+the Searchable capability.
+
+[width="100%",cols="100%",options="header",]
+|=======================================================================
+|Operator |Description
+|GetBookmark |Retrieves a bookmark for the current position of the
+cursor which can be used in subsequent calls to other Bookmarkable
+methods for the same cursor. A bookmark obtained with GetBookmark must
+be released with a call to one of the DisposeBookmark methods.
+
+|GotoBookmark |Moves the current position of the cursor to the row
+identified by the given bookmark. The bookmark must have been obtained
+from a previous call to GetBookmark for this cursor.
+
+|CompareBookmarks |Compares two bookmarks and returns an integer value
+indicating the relative order of the bookmarks. If the first bookmark is
+less than the second, a -1 is returned. If the first bookmark is equal
+to the second, a 0 is returned. Otherwise, a 1 is returned. Both
+bookmarks must have been obtained from previous calls to GetBookmark for
+this cursor.
+
+|DisposeBookmark |Releases the given bookmark. The bookmark must have
+been obtained from a previous call to GetBookmark for this cursor. This
+functionality is not exposed in D4.
+
+|DisposeBookmarks |Releases each of the given bookmarks. All the
+bookmarks must have been obtained from previous calls to GetBookmark for
+this cursor. This functionality is not exposed in D4.
+|=======================================================================
+
+[[DDGP2Searchable]]
+==== Searchable
+
+Searchable indicates that the cursor supports searching based on the
+order of the rows within the result set. Searching must be done on a
+subset (not necessarily proper) of the columns that were used to order
+the result set.
+
+The following functionality is included in the Searchable category of
+behavior:
+
+[width="100%",cols="100%",options="header",]
+|=======================================================================
+|Operator |Description
+|Order |Describes the order of the rows in the result set. This
+functionality is not exposed in D4.
+
+|GetKey |Returns a row value with a column for each column in the order
+of the result set, with the values set to the values of the current row
+of the cursor. It is an error to request a key if either BOF or EOF is
+true.
+
+|FindKey |Attempts to position the cursor on the row matching the values
+in the given row value. Returns true if a matching row was found, and
+false otherwise.
+
+|FindNearest |Positions the cursor on the row most closely matching the
+values in the given row value.
+
+|Refresh |Refreshes the cursor by requerying for the underlying result
+set. If a row is given, attempts to position the cursor on that row,
+otherwise, attempts to maintain the current position of the cursor in
+the result set.
+|=======================================================================
+
+[[DDGP2Updatable]]
+==== Updatable
+
+Updatable indicates that the cursor is not readonly, i.e. data can be
+updated through the cursor. Whether or not the updates are visible
+through the cursor, and the position of the cursor after the updates are
+performed, is determined by the Cursor Type behavior.
+
+The following functionality is included in the Updateable category of
+behavior:
+
+[width="100%",cols="100%",options="header",]
+|=======================================================================
+|Operator |Description
+|Insert |Inserts the given row into the database through the cursor.
+This has the same effect as attempting to insert the row into a view
+defined by the expression used to generate the result set for the
+cursor.
+
+|Update |Updates the columns in the current row of the cursor to the
+values in the given row through the cursor. This has the same effect as
+attempting to update a view defined by the expression used to generate
+the result set for the cursor and restricted to the current row in the
+cursor.
+
+|Delete |Deletes the current row of the cursor. This has the same effect
+as attempting to delete the row from a view defined by the expression
+used to generate the result set for the cursor and restricted to the
+current row in the cursor.
+
+|Default |Requests the default values for columns in the result set for
+the cursor.
+
+|Change |Requests the effect of the given change to the columns of the
+current row of the result set for the cursor.
+
+|Validate |Validates the values in columns of the given row based on the
+columns of the result set for the cursor.
+|=======================================================================
+
+[[DDGP2Truncatable]]
+==== Truncatable
+
+Truncatable indicates that the result set may be completely deleted with
+a single call.
+
+The following functionality is included in the Truncateable category of
+behavior:
+
+[width="100%",cols="100%",options="header",]
+|=======================================================================
+|Operator |Description
+|Truncate |Deletes all the rows in the cursor. This functionality is not
+exposed in D4.
+|=======================================================================
+
+[[DDGP2Countable]]
+==== Countable
+
+Countable indicates that the cursor supports counting of the rows in the
+result set. Note that the result of counting the rows in the result set
+depends on the type of the cursor. Repeated invocations may not return
+the same result.
+
+The following functionality included in the Countable category of
+behavior:
+
+[width="100%",cols="100%",options="header",]
+|=======================================================================
+|Operator |Description
+|RowCount |Returns the number of rows in the result set. The results of
+this call are not guaranteed to be an accurate reflection of the current
+state of the database. If an accurate count is desired, use an aggregate
+query. This functionality is not exposed in D4.
+|=======================================================================
+
+[[D4LGDataManipulation-SelectStatement-CursorIsolation]]
+=== Cursor Isolation
+
+The isolation of a <<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, cursor>> determines how the
+cursor runs with respect to other active transactions in the system. The
+settings for this behavior correspond roughly to the isolation levels
+available for transaction processing.
+
+If no isolation level is specified as part of the cursor definition, the
+default cursor isolation level of None will be used.
+
+[width="100%",cols="100%",options="header",]
+|=======================================================================
+|Method |Description
+|None |Indicates that the cursor runs at the isolation level of the
+current transaction.
+
+|Browse |Indicates that the cursor should use optimistic concurrency
+control.
+
+|Isolated |Indicates that the cursor should use pessimistic concurrency
+control.
+|=======================================================================
+
+[[D4LGDataManipulation-SelectStatement-CursorType]]
+=== Cursor Type
+
+The type of a <<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, cursor>>
+determines how the cursor is materialized and how it behaves with respect to updates being made
+through the cursor, and by other users of the system. Cursors may be
+requested either static or dynamic.
+
+If no cursor type is specified as part of the cursor definition, the
+default cursor type of Dynamic will be used.
+
+[[D4LGStatic]]
+==== Static
+
+Indicates that the cursor is insensitive to updates made to the result
+set after the cursor has been opened.
+
+In a static cursor, updates made to rows in the result set, either by
+the user of the cursor, or updates that become visible based on the
+isolation level of the cursor from other transactions, are not visible.
+The result set is fully materialized on open, and no changes are made to
+this set. Note that calls like Reset and Refresh will necessarily
+require the data from the underlying database, and the result set will
+be refreshed at that point.
+
+[[D4LGDynamic]]
+==== Dynamic
+
+Indicates that the cursor is sensitive to updates made to rows in the
+result set after the cursor has been opened.
+
+In a dynamic cursor, updates made to rows in the result set, either by
+the user of the cursor, or from other transactions that become visible
+based on the isolation level of the cursor, are visible through the
+cursor. The result set is dynamically queried for as it is requested.
+Note that this is not a guarantee that updates made by other
+transactions will be visible, only that the system is not required to
+exclude them. Depending on how the query is processed, and how the
+devices performing the processing manipulate the rows in the result set,
+external updates may or may not be visible. However, a dynamic cursor
+does guarantee that updates made through the cursor are visible.
+
+[[D4LGDataManipulation-InsertStatement]]
+== Insert Statement
+
+The insert statement allows data to be inserted into a given table
+variable or expression.
+
+The insert statement in D4 has the following syntax:
+
+....
+<insert statement> ::=
+    insert [<language modifiers>] <source> into <target>
+
+<source> ::=
+    <expression>
+
+<target> ::=
+    <expression>
+....
+
+The insert must not violate any constraint of the database.
+
+The value specified by <source> must be assignment-compatible with the
+variable or expression given by <target>, with the exception that the
+source value need not include all the columns of the target value.
+Columns not specified in the insert are provided a default value if the
+corresponding column, or the scalar type of the column, of the target
+has a default specification.
+
+The expression given by <source> must be table-valued. In other words,
+the expression must return a table. In order to insert a single row, a
+table selector must be used to construct a table value.
+
+The variable or expression given by <target> need not be a table
+variable. The target can be a table expression of arbitrary complexity.
+In this case, the updatability mechanism for views is used to perform
+the insert. For more information on how modifications are made to views,
+refer to the documentation for each table operator in this guide.
+
+Note that the insert statement is essentially shorthand for an
+equivalent table variable assignment. For example:
+
+....
+insert A into B;
+....
+
+and
+
+....
+B := B union A;
+....
+
+are conceptually equivalent, with the exception that a duplicate row
+that would be rejected by the insert statement would not necessarily be
+rejected by the assignment statement. For example, if a given row to be
+inserted is already present in the target, the assignment statement will
+effectively ignore the insertion, whereas the insert statement will fail
+with a duplicate key violation.
+
+The following example illustrates the use of the D4 insert statement:
+
+....
+insert
+    table
+    {
+        row { "John Smith" Name }
+    }
+    into Customer;
+....
+
+[[D4LGDataManipulation-UpdateStatement]]
+== Update Statement
+
+The update statement allows the data in a given table variable or
+expression to be changed. The update statement will also work against
+row variables.
+
+The update statement in D4 has the following syntax:
+
+....
+<update statement> ::=
+    update [<language modifiers>] <expression>
+        set "{"<ne update column commalist>"}"
+        [where <expression term>]
+
+<update column> ::=
+    <target> := <expression term>
+
+<target> ::=
+    <expression>
+....
+
+The update must not violate any constraint of the database.
+
+The variable or expression given by
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>>
+need not be a table variable. The target can be a table expression of arbitrary
+complexity. In this case, the updatability mechanism for views is used
+to perform the update. For more information on how modifications are
+made to views, refer to the documentation for each table operator in
+this guide.
+
+The update target may also be a row variable. In this case the update is
+a row update, and the where clause may not be specified.
+
+The set clause specifies a list of columns to be updated in the target,
+and the new values for each column. The values given for each column
+must be assignment-compatible with the type of the column. The
+expression specifying the new value for each column can access the
+current values of the target row by name.
+
+The update statement includes an optional
+<<D4TableOperators.adoc#D4LGTableExpressions-Where, where>> specification that
+indicates which rows of the target expression are to be updated. It is
+an error to specify an update condition when the target is a row
+variable.
+
+The following example illustrates the use of the D4 update statement:
+
+....
+update Customer set { Name := "Sally Johnson" } where ID = 5;
+....
+
+[[D4LGDataManipulation-DeleteStatement]]
+== Delete
+
+The delete statement allows the data in a given table variable or
+expression to be removed.
+
+The delete statement in D4 has the following syntax:
+
+....
+<delete statement> ::=
+    delete [<language modifiers>] <expression>
+....
+
+The delete must not violate any constraint of the database.
+
+The variable or expression given by
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>>
+need not be a table variable. The target can be a table expression of arbitrary
+complexity. In this case, the updatability mechanism for views is used
+to perform the delete. For more information on how modifications are
+made to views, refer to the documentation for each table operator in
+this guide.
+
+The following examples illustrate the use of the D4 delete statement:
+
+....
+// deletes all employees with an ID greater than 3
+delete Employee where ID > 3;
+
+delete Employee; // deletes all employees
+....

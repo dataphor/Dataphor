@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 20.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1"
+	 id="Layer_1" shape-rendering="geometricPrecision" image-rendering="optimizeQuality" text-rendering="geometricPrecision"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 288 180"
+	 style="enable-background:new 0 0 288 180;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill:#1F1A17;}
+	.st2{font-family:'Arial-BoldMT';}
+	.st3{font-size:9.9998px;}
+	.st4{font-family:'MyriadPro-Regular';}
+	.st5{fill:none;stroke:#1F1A17;stroke-width:0.6945;}
+</style>
+<rect class="st0" width="288" height="180"/>
+<g id="Layer_x0020_1">
+	<g id="_176548832">
+		<text id="_176559008" transform="matrix(1 0 0 1 46.2549 27.5117)" class="st1 st2 st3">Contact</text>
+		<text id="_176554656" transform="matrix(1 0 0 1 46.2549 40.9517)" class="st1 st4 st3">ID</text>
+		<text id="_176554656_1_" transform="matrix(1 0 0 1 46.2549 52.123)" class="st1 st4 st3">Name</text>
+		<text id="_176554656_2_" transform="matrix(1 0 0 1 46.2549 63.2944)" class="st1 st4 st3">PhoneType_ID</text>
+		<rect id="_176554184" x="34.3" y="17" class="st5" width="82.9" height="51.3"/>
+		<line id="_176553568" class="st5" x1="34.3" y1="31.1" x2="117.1" y2="31.1"/>
+		<text id="_176549192" transform="matrix(1 0 0 1 39.2593 42.9385)" class="st1 st4 st3">*</text>
+	</g>
+	<g id="_176528392">
+		<g>
+			<text id="_176545376" transform="matrix(1 0 0 1 46.5723 89.5391)" class="st1 st2 st3">ContactCategory</text>
+			<text id="_176538920" transform="matrix(1 0 0 1 46.5723 102.9795)" class="st1 st4 st3">Contact_ID</text>
+			<text id="_176538920_1_" transform="matrix(1 0 0 1 46.5723 114.1509)" class="st1 st4 st3">Category_ID</text>
+			<rect id="_176538448" x="34.6" y="79" class="st5" width="101.4" height="40.1"/>
+			<line id="_176537832" class="st5" x1="34.6" y1="93.1" x2="136" y2="93.1"/>
+			<text id="_176533464" transform="matrix(1 0 0 1 39.5771 104.9668)" class="st1 st4 st3">*</text>
+		</g>
+		<text id="_176528752" transform="matrix(1 0 0 1 39.438 116.6826)" class="st1 st4 st3">*</text>
+	</g>
+	<g id="_176507472">
+		<text id="_176520800" transform="matrix(1 0 0 1 185.8037 89.4121)" class="st1 st2 st3">ContactAddress</text>
+		<text id="_176517776" transform="matrix(1 0 0 1 185.8037 102.8516)" class="st1 st4 st3">Contact_ID</text>
+		<text id="_176517776_1_" transform="matrix(1 0 0 1 185.8037 114.0229)" class="st1 st4 st3">Number</text>
+		<text id="_176517776_2_" transform="matrix(1 0 0 1 185.8037 125.1943)" class="st1 st4 st3">Street</text>
+		<text id="_176517776_3_" transform="matrix(1 0 0 1 185.8037 136.3652)" class="st1 st4 st3">City</text>
+		<text id="_176517776_4_" transform="matrix(1 0 0 1 185.8037 147.5366)" class="st1 st4 st3">State_ID</text>
+		<text id="_176517776_5_" transform="matrix(1 0 0 1 185.8037 158.708)" class="st1 st4 st3">ZipCode</text>
+		<rect id="_176517304" x="173.8" y="78.9" class="st5" width="95.4" height="84.5"/>
+		<line id="_176516688" class="st5" x1="173.8" y1="93" x2="269.2" y2="93"/>
+		<text id="_176512200" transform="matrix(1 0 0 1 178.8076 104.8389)" class="st1 st4 st3">*</text>
+		<text id="_176507832" transform="matrix(1 0 0 1 178.8076 115.8501)" class="st1 st4 st3">*</text>
+	</g>
+	<g id="_176492928">
+		<text id="_176504128" transform="matrix(1 0 0 1 184.8857 26.7837)" class="st1 st2 st3">Vendor</text>
+		<text id="_176497856" transform="matrix(1 0 0 1 184.8857 40.2236)" class="st1 st4 st3">ID</text>
+		<text id="_176497856_1_" transform="matrix(1 0 0 1 184.8857 51.395)" class="st1 st4 st3">Address</text>
+		<text id="_176497856_2_" transform="matrix(1 0 0 1 184.8857 62.5664)" class="st1 st4 st3">ShippingRate</text>
+		<rect id="_176497544" x="172.9" y="16.2" class="st5" width="82.9" height="51.3"/>
+		<line id="_176497080" class="st5" x1="172.9" y1="30.4" x2="255.8" y2="30.4"/>
+		<text id="_176493272" transform="matrix(1 0 0 1 177.8906 42.2109)" class="st1 st4 st3">*</text>
+	</g>
+	<g>
+		<path class="st1" d="M165.2,42.1l-0.2-0.4l7.7-6.7l0.3,0.4l-7.7,6.7C165.4,42,165.2,42.1,165.2,42.1z M165.4,42L165.4,42l-0.2,0.1
+			L165.4,42z M154,41.9l0.3-0.3h11v0.5h-11L154,41.9z M154,41.9v-0.3h0.3L154,41.9z M154.2,103.5l-0.3-0.3V41.9h0.5v61.4
+			L154.2,103.5z M154.2,103.5H154v-0.3L154.2,103.5z M163.9,103.5L163.9,103.5l-9.7,0V103h9.6L163.9,103.5z M163.9,103.5
+			L163.9,103.5L163.9,103.5L163.9,103.5z M169.9,100.9l-6.1,2.6l-0.2-0.5l6.1-2.6L169.9,100.9z M168.4,98.4l5.4,0.5l-3.4,4.3
+			L168.4,98.4z"/>
+	</g>
+	<line class="st5" x1="172.9" y1="48.1" x2="165.2" y2="41.9"/>
+	<g>
+		<path class="st1" d="M169.7,106.1l-6.1-2.6l0.2-0.5l6.1,2.6L169.7,106.1z M170.5,103.3l3.4,4.3l-5.4,0.5L170.5,103.3z"/>
+	</g>
+	<g>
+		<path class="st1" d="M19,98.9l0.3-0.3h15.3v0.5H19.3L19,98.9z M19.3,99.2H19v-0.3L19.3,99.2z M19.3,36.3l0.3,0.3v62.4H19V36.6
+			L19.3,36.3z M19,36.6v-0.3h0.3L19,36.6z M29.8,36.8H19.3v-0.5h10.5V36.8z M29.4,34l4.8,2.6l-4.8,2.6V34z"/>
+	</g>
+</g>
+</svg>

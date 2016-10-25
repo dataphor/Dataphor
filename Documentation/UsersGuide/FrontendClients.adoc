@@ -1,0 +1,52 @@
+= Frontend Clients
+:author: Alphora
+:doctype: book
+
+:icons:
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[DUGP1ProductTour-FrontendClients]]
+== Summary
+
+Dataphor Frontend Clients are responsible for two distinct functions.
+First, a Frontend Client manages the connectivity and data access for
+the presentation layer, and second, it processes Dataphor Form
+Documents, rendering them as user interfaces appropriate for the
+platform on which they are running.
+
+The connectivity and data access mechanisms are managed using the Data
+Access Layer exposed by the Dataphor Server. This involves managing
+connection state with the server, as well as data presentation and state
+management such as buffering, and editing data.
+
+The process of rendering user interfaces is specific to each client, but
+all the clients request Dataphor Form Documents from the Dataphor Server
+using the Document API exposed by the Frontend Server.
+
+Because the Dataphor Frontend Client architecture is designed to be
+consumed from multiple clients, the same application schema will be
+available on any general-purpose Dataphor Frontend Client.
+
+[[DUGP1ProductTour-FrontendClients-WindowsClient]]
+== Windows Client
+
+The Windows Client is a Windows executable program that communicates
+with the Dataphor Server to request user interface descriptions, and to
+retrieve and manipulate the data in the database. The Windows Client
+makes use of the Dataphor Data Access Components to provide access to
+the Dataphor Server. These components take full advantage of the
+application-targeted features exposed by the Dataphor Server.
+
+[[DUGP1ProductTour-FrontendClients-WebClient]]
+== Web Client
+
+The Web Client is an ASP.NET web application that provides HTML based
+user interface pages to browser clients. These pages are produced by
+combining the DIL documents retrieved from the Frontend Server with data
+from an instance of the Dataphor Server. The user interfaces produced
+are very similar to those provided by the Windows client because both
+clients consume the same user interface description. This also means
+that customizations to the user interface descriptions appear across
+clients.

@@ -1,0 +1,60 @@
+= Bibliography
+:author: Alphora
+:doctype: book
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+== Summary
+
+The following titles are used as references throughout the _Dataphor
+Combined Help Collection_:
+
+[bibliography]
+.References
+[1] _An Introduction to Database Systems_. 2000. C.J. Date. 7th Edition. Addison Wesley Longman.
+Reading, Massachusetts.
+
+[2] _A Relational Model for Large Shared Data Banks_. E. F.Codd. Communications of the ACM13. Tuesday, December 14, 2004
+1:46:43 PM. 377 - 387.
+
+[3] _Foundation for Future Database Systems_. The Third Manifesto. Second Edition. C.J. Date and Hugh Darwen. Addison Wesley Longman. Reading, Massachusetts 2000 Addison Wesley Longman, Inc. 0-201-70928-7.
+
+[4] _What Not How_. The Business Rules Approach to Application Development. 2000. C.J. Date. Addison Wesley Longman. Reading, Massachusetts.
+
+[5] _The Database Relational Model_. A Retrospective Review and Analysis. 2001. C.J. Date. Addison Wesley Longman. Reading, Massachusetts.
+
+[6] _Relational Database: Selected Writings_. 1986. C.J. Date. Addison Wesley Longman. Reading, Massachusetts.
+
+[7] _Relational Database Writings 1985-1989_. 1990. C.J. Date and Andrew Warden. Addison Wesley Longman. Reading, Massachusetts.
+
+[8] _Relational Database Writings 1989-1991_. 1992. C.J. Date and Hugh Darwen. Addison Wesley Longman. Reading, Massachusetts
+
+[9] _Relational Database Writings 1991-1994_. 1995. C.J. Date. Addison Wesley Longman. Reading, Massachusetts.
+
+[10] _Relational Database Writings 1994-1997_ 1998. C.J. Date, Hugh Darwen, and David McGoveran. Addison Wesley Longman. Reading, Massachusetts.
+
+[11] _Practical Issues in Database Management_. A Reference for the Thinking Practitioner. 2000. Fabian Pascal. Addison Wesley Longman. Reading, Massachusetts.
+
+[12] _Transaction Processing_. Concepts and Techniques. 1993. Jim Gray and Andreas Reuter. Morgan Kaufmann. San Francisco, California.
+
+[13] _Database Systems_. A Practical Approach to Design, Implementation, and Management. 1999. Second Edition. Thomas Connolly, Carolyn Begg, and Anne Strachan. Addison Wesley Longman. Reading, Massachusetts.
+
+[14] _Database Systems_. Design, Implementation, & Management. Fourth Edition. 2000.
+Peter Rob and Carlos Coronel. Course Technology. Cambridge, Massachusetts
+
+[15] _The Art of Computer Programming_. 1998. Vol. 3. Second Edition. Donald Knuth. Addison Wesley Longman. Reading, Massachusetts.
+
+[16] _Database System Implementation_. 2000. Hector Garcia-Molina, Jeffrey D. Ullman, and Jennifer Widom. Prentice Hall. Upper Saddle River, New Jersey.
+
+[17] _Updating Logical Databases_. 1990. Marianne Winslett. Cambridge University Press. New York, New York.
+
+[18] _Transactional COM+_. Building Scalable Applications. 2001. Tim Ewald. Addison Wesley. Reading, Massachusetts.
+
+[19] _Temporal Data and The Relational Model_. A Detailed Investigation into the Application of Interval and Relation Theory to the Problem of Temporal Database Management. 2003. C.J. Date, Hugh Darwen, and Nikos A. Lorentzos. Morgan Kaufmann. San Francisco, California.
+
+[20] _Multiple Assignment_. Practical Database Foundations Paper #5. 2004. C.J. Date. http://www.dbdebunk.com.
+
+[21] _The Logic of Business Rules_. Practical Database Foundations Paper #7. 2004. C.J. Date. http://www.dbdebunk.com.
+
+[22] _The Costly Illusion: Normalization, Integrity, & Performance_. Practical Database Foundations Paper #6. 2004. Fabian Pascal. http://www.dbdebunk.com.

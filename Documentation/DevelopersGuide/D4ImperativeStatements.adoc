@@ -1,0 +1,843 @@
+= Imperative Statements
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+[[D4LGImperativeStatements]]
+== Summary
+
+This section covers the imperative statements available in the D4
+language. These include variable declaration and assignment, flow
+control constructs, and exception handling statements.
+
+Imperative statements in D4 have the following syntax:
+
+....
+<imperative statement> ::=
+    <block> |
+    <expression> |
+    <variable declaration statement> |
+    <assignment statement> |
+    <exit statement> |
+    <if statement> |
+    <while statement> |
+    <do while statement> |
+    <for statement> |
+    <repeat statement> |
+    <break statement> |
+    <continue statement> |
+    <case statement> |
+    <try finally statement> |
+    <try except statement> |
+    <try commit statement> |
+    <raise statement>
+....
+
+The following sections cover each statement in detail.
+
+[[D4LGImperativeStatements-Variables]]
+== Variables
+
+There are two types of variables in D4, global, and local. Only table
+variables may be global, and are declared through the data definition
+language statements of D4. Local variables may be of any type, and are
+only valid for the scope in which they are declared. For more
+information on scoping, see the Blocks and Scoping section.
+
+[[D4LGImperativeStatements-Variables-VariableDeclarationStatement]]
+=== Variable Declaration Statement
+
+Variable declaration statements in D4 have the following syntax:
+
+....
+<variable declaration statement> ::=
+    var <ne variable definition commalist>
+
+<variable definition> ::=
+    <qualified identifier> [: <type specifier>] [:= <expression>]
+....
+
+Each <variable definition> includes an optional initialization
+expression which is the initial value for the variable. If no
+initialization expression is specified, the variable is assigned the
+default value for the type. If no default is specified, the variable is
+<<DocumentsAndDesigners.adoc#D4LGNilSemantics, nil>>, or has no value.
+
+The <<D4LanguageElements.adoc#D4LGLanguageElements-Types, <type specifier>>>
+is optional if and only if an initialization expression is specified. In this case,
+the compiler uses the type of the initialization expression to determine
+the type of the variable.
+
+[[D4LGImperativeStatements-Variables-AssignmentStatement]]
+=== Assignment Statement
+
+Assignment statements in D4 have the following syntax:
+
+....
+<assignment statement> ::=
+    <target> := <expression>
+
+<target> ::=
+    <expression>
+....
+
+The expression specified by <target> must be a valid assignment target.
+This includes properties of representations of scalar values, and
+updatable expressions like table expressions. The expression specified by
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>> must be
+_assignment-compatible_ with the assignment target. For a definition of
+assignment-compatibility, refer to the <<D4Catalog.adoc#D4LGCatalogElements-Operators-OperatorResolution, Operator Resolution>> discussion.
+
+[[D4LGImperativeStatements-BlocksandScoping]]
+== Blocks and Scoping
+
+Blocks are the primary means of establishing scope in D4. A _scope_
+defines the lifetime of variables within D4. Globally scoped variables
+are persisted with the database state, while locally scoped variables
+are only available within the scope in which they are defined.
+
+Local scopes may be nested to any level. Variables declared within a
+local scope must be uniquely named, but may hide variables declared in
+the global scope. Within a nested local scope, variables declared in
+parent scopes are visible.
+
+The following constructs also establish scope within their respective
+blocks:
+
+* <<D4LGDoWhileStatement, Do-while statement>>.
+* <<D4LGRepeatUntilStatement, Repeat-until statement>>.
+* <<D4LGImperativeStatements-ExceptionHandling-TryExceptStatement, Try-except statement>>,
+in both the try block, and each exception handler.
+* <<D4LGImperativeStatements-ExceptionHandling-TryFinallyStatement, Try-finally statements>>,
+in both the try block, and the finally block.
+
+Blocks in D4 have the following syntax:
+
+....
+<block> ::=
+    begin
+        <terminated statement list>
+    end
+....
+
+The following example illustrates the use of blocks in D4:
+
+....
+begin
+    var I : Integer := 1;
+    begin
+        var J : Integer := 5;
+        J := J + I; // I is visible;
+
+        // Global variables are visible
+        J := J + Count(System.Objects);
+    end;
+    I := I + 1; // J is out of scope
+end;
+....
+
+[[D4LGImperativeStatements-FlowControl]]
+== Flow Control
+
+Flow control statements allow control over the execution in a D4
+program. These include branching statements and looping statements.
+
+[[D4LGImperativeStatements-FlowControl-ExitStatement]]
+=== Exit Statement
+
+The exit statement unconditionally exits an operator. Control passes
+immediately back to the caller. If an exit statement is used within a
+try-finally, the finally block is executed.
+
+Exit statements in D4 have the following syntax:
+
+....
+<exit statement> ::=
+    exit
+....
+
+The following example illustrates the use of the exit statement:
+
+....
+create operator TestExit(var AValue : Integer)
+begin
+    if AValue < 0 then
+        exit;
+
+    /*
+       this statement will not be executed
+       if AValue is less than zero
+    */
+    AValue := AValue * 10;
+end;
+....
+
+[[D4LGImperativeStatements-FlowControl-BranchingStatements]]
+=== Branching Statements
+
+Branching statements allow for the conditional execution of different
+blocks of code based on a specified expression.
+
+[[D4LGIfStatement]]
+==== If Statement
+
+The if statement allows statements to be executed conditionally.
+
+If statements in D4 have the following syntax:
+
+....
+<if statement> ::=
+    if <expression> then
+        <statement>
+    [else <statement>]
+....
+
+The expression specified by
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>>
+must be boolean-valued. If the expression evaluates to true, the statement given
+by <<D4LanguageElements.adoc#D4LGLanguageElements-Statements, <statement>>> is executed.
+The if statement may include an optional else clause which specifies a
+statement to be executed if the expression evaluates to false or nil.
+Note that if an else clause is specified, it is part of the if
+statement, so the statement separator
+(<<D4LGScriptsandExecution.adoc#D4LGScriptsandExecution, ;>>)
+is invalid before the *else* keyword.
+
+The following example illustrates the use of the if statement:
+
+....
+if Count(System.Objects) = 0 then
+    raise Error("No objects defined in the system catalog")
+else
+    raise Error("Count of objects in the system is " +
+        Count(System.Objects).ToString());
+....
+
+*See Also*
+
+<<D4LanguageElements.adoc#D4LGConditionalExpression, if expression>>
+
+[[D4LGCaseStatement]]
+==== Case Statement
+
+Case statements allow the execution of a specific statement based on a
+list of conditions. Case statements are a syntactic shorthand for an
+iterated if statement.
+
+The case statement has two forms. One is based on an expression, one
+allows a conditional to be associated with each case item.
+
+In the first form, the case statement is based on an expression. Each
+case statement item contains a single expression which is compared
+against the case expression. If the case item expression is equal to the
+case expression, the statement associated with the item is selected.
+Each case item is compared with the case expression until a match is
+found. If no match is found, the default case item is selected.
+
+In the second form, the case statement is not based on an expression,
+rather, each case item contains a boolean-valued condition. The first
+case item for which the condition evaluates to true is selected. The
+default case item is selected if no case item expression evaluates to
+true.
+
+If no case item is selected the statement is effectively a no-op. Once a
+statement has been selected, it is executed, and control passes to the
+first statement following the case statement.
+
+Case statements in D4 have the following syntax:
+
+....
+<case statement> ::=
+    case [<expression>]
+        <ne case statement item list>
+        [else <terminated statement>]
+    end
+
+<case statement item> ::=
+    when <expression> then <terminated statement>
+....
+
+The following examples illustrate the use of the case statement in D4:
+
+....
+create operator DigitToWords(const ADigit : Integer) : String
+begin
+    case ADigit
+        when 0 then result := 'Zero';
+        when 1 then result := 'One';
+        when 2 then result := 'Two';
+        when 3 then result := 'Three';
+        when 4 then result := 'Four';
+        when 5 then result := 'Five';
+        when 6 then result := 'Six';
+        when 7 then result := 'Seven';
+        when 8 then result := 'Eight';
+        when 9 then result := 'Nine';
+        else
+            raise Error("Digit out of range: " + ADigit.ToString());
+    end;
+end;
+....
+
+....
+create operator DigitToWords(const ADigit : Integer) : String
+begin
+    case
+        when ADigit = 0 then result := 'Zero';
+        when ADigit = 1 then result := 'One';
+        when ADigit = 2 then result := 'Two';
+        when ADigit = 3 then result := 'Three';
+        when ADigit = 4 then result := 'Four';
+        when ADigit = 5 then result := 'Five';
+        when ADigit = 6 then result := 'Six';
+        when ADigit = 7 then result := 'Seven';
+        when ADigit = 8 then result := 'Eight';
+        when ADigit = 9 then result := 'Nine';
+        else
+            raise Error("Digit out of range: " + ADigit.ToString());
+    end;
+end;
+....
+
+*See Also*
+
+<<D4LanguageElements.adoc#D4LGConditionalExpression, case expression>>
+
+[[D4LGImperativeStatements-FlowControl-LoopingStatements]]
+=== Looping Statements
+
+Looping statements allow for a given statement to be executed multiple
+times. There are four types of looping statements in D4: the for
+statement, the while statement, the do-while statement, and the
+repeat-until statement.
+
+Note that all these looping constructs can be expressed in terms of a
+simple while loop. The variations are provided to allow the developer to
+build more readable statements, as each loop is appropriate for
+different scenarios.
+
+[[D4LGForStatement]]
+==== For Statement
+
+The for statement allows a given statement to be executed a specified
+number of times.
+
+For statements in D4 have the following syntax:
+
+....
+<for statement> ::=
+    for
+        [var] <qualified identifier> [: <type specifier>]
+        := <expression> (to | downto) <expression>
+        [step <expression>]
+        do <statement>
+....
+
+The for statement uses an __iteration control variable__, or ICV, to
+control statement iteration. The ICV may be an existing variable within
+the scope, or it may be declared by specifying the *var* keyword prior
+to the variable name, or the type of the variable within the for
+statement. If the *var* keyword is specified, the type specifier is
+optional.
+
+In all cases, the ICV must be initialized to the initial bound for the
+iteration. The final bound is then specified as well as the iteration
+direction. An optional step clause specifies the magnitude of the
+increment or decrement to the ICV. The for statement is a post-test
+loop, so the statement is run, then the ICV is tested against the final
+bound. The type of the variable used for the ICV must have addition or
+subtraction operators defined as appropriate, as well as the necessary
+comparison operators.
+
+Note that the boundary condition will be evaluated on every iteration.
+If this condition has side-effects, this may result in unexpected
+behavior.
+
+The following example illustrates the use of the for statement:
+
+....
+create table Data { ID : Integer, key { ID } };
+
+for I : Integer := 10 to 100 step 10 do
+    insert table { row { I ID } } into Data;
+
+select Data;
+....
+
+....
+ID
+---
+10
+20
+30
+40
+50
+60
+70
+80
+90
+100
+....
+
+*See Also*
+
+<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
+| <<D4LGBreakandContinue, Break and Continue>>
+
+
+[[D4LGWhileStatement]]
+==== While Statement
+
+The while statement allows a given statement to be executed as long as a
+specified condition is true. The while statement is a pre-test loop,
+meaning that the condition is checked, and then the statement is
+executed.
+
+While statements in D4 have the following syntax:
+
+....
+<while statement> ::=
+    while <expression> do <statement>
+....
+
+The expression specified by <expression> must be boolean-valued.
+
+The following example illustrates the use of the while statement:
+
+....
+begin
+    var I : Integer := 0;
+    while I < 20 do
+        I := I + 1;
+end;
+....
+
+*See Also*
+
+<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
+| <<D4LGBreakandContinue, Break and Continue>>
+
+[[D4LGDoWhileStatement]]
+==== Do While Statement
+
+The do-while statement allows a given block to be executed as long as a
+specified condition is true. The do-while statement is a post-test loop,
+meaning that the statement is executed, then the condition is tested.
+
+Do while statements in D4 have the following syntax:
+
+....
+<do while statement> ::=
+    do <terminated statement list> while <expression>
+....
+
+The expression specified by
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>>
+must be boolean-valued.
+
+The following example illustrates the use of the do-while statement:
+
+....
+begin
+    var I : Integer := 0;
+    do
+        I := I + 1;
+    while I < 20;
+end;
+....
+
+*See Also*
+
+<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
+| <<D4LGBreakandContinue, Break and Continue>>
+
+[[D4LGRepeatUntilStatement]]
+==== Repeat Until Statement
+
+The repeat-until statement allows a given block to be executed until a
+specified condition returns true. The repeat until is a post-test loop,
+meaning that the statement is executed, then the condition is tested.
+
+Repeat until statements in D4 have the following syntax:
+
+....
+<repeat statement> ::=
+    repeat <terminated statement list> until <condition>
+
+<condition> ::=
+    <expression>
+....
+
+The expression given by <condition> must be boolean-valued.
+
+The following example illustrates the use of the repeat-until statement:
+
+....
+begin
+    var I : Integer := 0;
+    repeat
+        I := I + 1;
+    until I >= 20;
+end;
+....
+
+*See Also*
+
+<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
+| <<D4LGBreakandContinue, Break and Continue>>
+
+[[D4LGForeachStatement]]
+==== Foreach Statement
+
+The foreach statement provides a convenient shorthand for performing
+cursor or list iteration operations.
+
+Foreach statements in D4 have the following syntax:
+
+....
+<for statement> ::=
+    foreach row | ([var] <qualified identifier>)
+        in <cursor definition>
+        do <statement>
+....
+
+The foreach statement is expanded by the compiler based on the result
+type of the iteration target expression. If the iteration target is a
+cursor-valued expression, the foreach statement is expanded into a
+cursor definition and the statement to be performed is placed inside a
+while loop iterating over each row in the result set of the cursor.
+Otherwise, the foreach statement is expanded into a list-style iteration
+using a for loop, an invocation of the Count operator, and an indexer
+expression within each iteration.
+
+....
+#if <cursor definition> is cursor valued ::=
+    begin
+        var LCursor := <expression>;
+        try
+            #if var is specified
+            var <qualified identifier> : typeof(LCursor.Select());
+            #end
+            while LCursor.Next() do
+            begin
+                #if <qualified identifier> is specified
+                <qualified identifier> := LCursor.Select();
+                #else
+                #stackpush LCursor.Select()
+                #end
+                <statement>;
+                #if <qualified identifier> is not specified
+                #stackpop
+                #end
+            end;
+        finally
+            LCursor.Close();
+        end;
+    end;
+#else
+    begin
+        #if var is specified
+        var <qualified identifier> : typeof(<expression>[0]);
+        #end
+        for var LIndex := 1 to <expression>.Count() do
+        begin
+            <qualified identifier> := <expression>[LIndex];
+            <statement>;
+        end;
+    end;
+#end
+....
+
+If the *row* keyword is used, the columns of the row will be available
+within <statement> as variables.
+
+The following examples illustrate the use of the foreach statement:
+
+....
+begin
+    var LTable := table of { X : Integer, Y : Integer } { };
+    for var LIndex := 1 to 100 do
+        insert table { row { LIndex X, 101 - LIndex Y } } into LTable;
+
+    var LSum := 0;
+    foreach row in LTable do
+        LSum := LSum + X;
+
+    LSum := 0;
+    foreach var LRow in LTable do
+        LSum := LSum + LRow.X;
+
+    LSum := 0;
+    var LRow : typeof(LTable[]);
+    foreach LRow in LTable do
+        LSum := LSum + LRow.X;
+end;
+
+begin
+    var LList := { "A", "B", "C", "D", "E" };
+
+    var LString := "";
+    foreach var LItem in LList do
+        LString := LString + LItem;
+
+    LString := "";
+    var LItem : String;
+    foreach LItem in LList do
+        LString := LString + LItem;
+end;
+....
+
+*See Also*
+
+<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
+| <<D4LGBreakandContinue, Break and Continue>>
+
+[[D4LGBreakandContinue]]
+==== Break and Continue
+
+Break and continue statements allow for fine grained control of loop
+iteration. The break statement breaks out of a given loop, passing
+control to the first statement after the loop. The continue statement
+jumps to the beginning of the next iteration, passing control to the
+beginning of the iterated statement.
+
+Break and continue statements in D4 have the following syntax:
+
+....
+<break statement> ::=
+    break
+
+<continue statement> ::=
+    continue
+....
+
+It is an error to use a break or continue statement outside of a looping
+construct.
+
+The following examples illustrate the use of the break and continue
+statements:
+
+....
+while true do
+    break;
+....
+
+....
+begin
+    var EvenSum : Integer := 0;
+    for I : Integer := 1 to 10 do
+        if I mod 2 = 0 then
+            EvenSum := EvenSum + I
+        else
+            continue;
+    raise Error("EvenSum: " + EvenSum.ToString());
+end;
+....
+
+*See Also*
+
+<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
+
+[[D4LGImperativeStatements-ExceptionHandling]]
+== Exception Handling
+
+Exception handling statements allow for the creation and handling of
+exceptions. An _exception_ is used in D4 to indicate that an error has
+occurred. By relegating error handling to specialized statement blocks,
+the main body of a given operation can be developed optimistically. Only
+if something goes wrong is the error handling code invoked.
+
+There are three types of error handling constructs in D4: the exception
+trap, the resource protection block, and the commit block. The
+<<D4LGImperativeStatements-ExceptionHandling-TryExceptStatement[exception trap]>>
+allows exceptions of a specific type to be handled, the
+<<D4LGImperativeStatements-ExceptionHandling-TryFinallyStatement, resource protection block>>
+ensures that a specified statement is always executed, even if an exception occurs, and the
+<<D4LGImperativeStatements-ExceptionHandling-TryCommitStatement, commit block>>
+is a shorthand for protecting a block of statements within a transaction.
+
+[[D4LGImperativeStatements-ExceptionHandling-RaiseStatement]]
+=== Raise Statement
+
+The raise statement is used to throw a new exception. Control
+immediately passes from the raise statement to the first exception
+handler. If no exception handler is encountered, execution stops and the
+error message is reported to the client application. Note that if an
+implicit transaction was started by the CLI, the exception will cause
+the transaction to be rolled back, including any nested transactions
+that were started within the implicit transaction.
+
+Raise statements in D4 have the following syntax:
+
+....
+<raise statement> ::=
+    raise [<expression>]
+....
+
+The link:T-System.Error.html[error value] given by
+<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>>
+must be error-valued. The expression is optional only if the raise is invoked
+within an exception handler, in which case the error being handled is
+re-raised.
+
+The following example illustrates the use of the raise statement:
+
+....
+if Count(TableVars) = 0 then
+    raise Error("No table variables declared.");
+....
+
+*See Also*
+
+<<D4LGImperativeStatements-ExceptionHandling, Exception Handling]>
+
+[[D4LGImperativeStatements-ExceptionHandling-TryExceptStatement]]
+=== Try Except Statement
+
+The try except statement acts as an exception filter, allowing the
+developer to trap for specific errors and take appropriate action.
+
+Try except statements in D4 have the following syntax:
+
+....
+<try except statement> ::=
+    try
+        <terminated statement list>
+    except
+        <terminated statement list> | <exception handler list>
+    end
+
+<exception handler> ::=
+    on [<exception variable> :] <type specifier> do
+        <terminated statement>
+
+<exception variable> ::=
+    <qualified identifier>
+....
+
+When an exception is raised within the try block, control immediately
+passes to the except block of the statement. If the except block is
+simply a list of statements, they are executed. If the except block is a
+list of exception handlers, the type of the exception is compared
+against each exception handler. Control is passed to the first exception
+handler matching the type of the exception. If no exception handler is
+found, control passes to the next try-except block in the program. This
+continues until an exception handler is found, or there are no
+containing try-except blocks, resulting in program termination.
+
+Once an exception handler has been found, the exception is considered
+handled, and control passes to the first statement following the
+try-except block. Within an except block, the raise statement may be
+used without an argument to indicate that the exception should be
+re-raised from the exception block.
+
+The following example illustrates the use of the try-except statement:
+
+....
+begin
+        BeginTransaction();
+        try
+            raise Error("An error has occurred");
+            CommitTransaction();
+        except
+        on LException : Error do
+        begin
+            RollbackTransaction();
+            raise;
+        end;
+    end;
+end;
+....
+
+*See Also*
+
+<<D4LGImperativeStatements-ExceptionHandling, Exception Handling>>
+
+[[D4LGImperativeStatements-ExceptionHandling-TryFinallyStatement]]
+=== Try Finally Statement
+
+The try finally statement in D4 allows a specified block of statements
+to be executed regardless of whether an exception occurs.
+
+Try finally statements in D4 have the following syntax:
+
+....
+<try finally statement> ::=
+    try
+        <terminated statement list>
+    finally
+        <terminated statement list>
+    end
+....
+
+If no exception occurs within the try block, the finally block is
+executed normally. If an exception occurs within the try block, control
+passes immediately to the first statement in the finally block. All
+statements in the finally block are executed, and then exception
+processing continues as described in the try-except statement.
+
+The following example illustrates the use of the try-finally statement:
+
+....
+begin
+    var LCursor : cursor(table { Name : Name });
+    LCursor := cursor(Objects over { Name });
+    try
+        // ... if an error occurs within this block
+        // the cursor will still be closed
+    finally
+        LCursor.Close();
+    end;
+end;
+....
+
+*See Also*
+
+<<D4LGImperativeStatements-ExceptionHandling, Exception Handling>>
+
+[[D4LGImperativeStatements-ExceptionHandling-TryCommitStatement]]
+=== Try Commit Statement
+
+The try commit statement in D4 protects a specified block of statements
+within a transaction.
+
+Try commit statements in D4 have the following syntax:
+
+....
+<try commit statement> ::=
+    try
+        <terminated statement lisst>
+    commit
+....
+
+The try commit statement is shorthand for an equivalent try except
+statement with transaction management calls. For example, the following
+statement:
+
+....
+try
+    insert table { row { 6 ID, 'Jacob' Name } } into Employee;
+commit;
+....
+
+Is equivalent to the following try except statement:
+
+....
+begin
+    BeginTransaction();
+    try
+        insert table { row { 6 ID, 'Jacob' Name } } into Employee;
+        CommitTransaction();
+    except
+        RollbackTransaction();
+        raise;
+    end;
+end;
+....
+
+*See Also*
+
+<<D4LGImperativeStatements-ExceptionHandling, Exception Handling>>

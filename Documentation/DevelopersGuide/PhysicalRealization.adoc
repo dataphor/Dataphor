@@ -1,0 +1,38 @@
+= Physical Realization
+:author: Alphora
+:doctype: book
+
+:data-uri:
+:lang: en
+:encoding: iso-8859-1
+
+. link:StorageIntegrationArchitecture.adoc[Storage Integration Architecture]
+. link:Devices.adoc[Devices]
+. link:ScalarTypeMapping.adoc[Scalar Type Mapping]
+. link:OperatorMapping.adoc[Operator Mapping]
+
+[[DDGPhysicalRealization]]
+== Summary
+
+Physical realization is the process of mapping a logical application
+schema onto one or more devices to provide persistent storage. The
+physical layer of the DBMS architecture is concerned with actually
+storing the information exposed by the application, and providing
+efficient, transactional access to that information.
+
+The Dataphor Server utilizes existing DBMSs as its physical, or
+internal, layer. In other words, the Dataphor Server uses SQL-based
+DBMSs as its file system. The internal layer of the Dataphor Product is
+based on an architecture called the Storage Integration Architecture
+(SIA).
+
+This part is devoted to explaining how the SIA works, and how it enables
+the homogeneous data access achieved by the Dataphor Server. It also
+discusses concepts and techniques for mapping logical application schema
+into physical devices.
+
+Although the SIA is capable of describing any storage system, the
+majority of the discussions in this part will focus on SQL-based devices
+in particular, as these form the bulk of the devices shipped with the
+Dataphor Product, and are generally more complex in nature than text or
+file-based devices.
