@@ -840,7 +840,8 @@ namespace Alphora.Dataphor.DAE.Server
 							using (IRow row = cursor.Select())
 							{
 								if (row.HasValue(_oldRowColumnName))
-									oldRow = (IRow)row[_oldRowColumnName];
+									// Have to take a copy here or the oldRow will be cleared when row is disposed
+									oldRow = (IRow)((IRow)row[_oldRowColumnName]).Copy();
 								else
 									oldRow = null;
 							}
@@ -893,7 +894,8 @@ namespace Alphora.Dataphor.DAE.Server
 						using (IRow localRow = cursor.Select())
 						{
 							if (localRow.HasValue(_oldRowColumnName))
-								row = (IRow)localRow[_oldRowColumnName];
+								// Have to take a copy here, or the value will be cleared when localRow is disposed
+								row = (IRow)((IRow)localRow[_oldRowColumnName]).Copy();
 							else
 								row = null;
 						}
