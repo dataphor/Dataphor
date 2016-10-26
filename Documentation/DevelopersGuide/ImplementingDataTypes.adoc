@@ -564,7 +564,7 @@ For more information on defining and using operators, refer to the
 <<ModelingProcessLogic.adoc#DDGModelingProcessLogic, Modeling Process Logic>> chapter.
 
 [[DDGImplementingDataTypes-EventHandlers]]
-= Event Handlers
+== Event Handlers
 
 An _event handler_ is an operator that has been attached to a specific
 event occurring within the system. The Dataphor Server provides three
@@ -596,7 +596,7 @@ attach operator StateIDUpper to StateID on validate;
 ....
 
 [[DDGImplementingDataTypes-Host-ImplementedTypesandOperators]]
-= Host-implemented Types and Operators
+== Host-implemented Types and Operators
 
 In addition to allowing the system to provide the implementations for a
 given type, the type definition can include class definitions that

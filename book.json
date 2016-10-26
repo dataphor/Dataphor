@@ -12,7 +12,7 @@
     ],
     "pluginsConfig": {
       "addcssjs": {
-          "js": ["Documentation/Scripts/scroll-to-hash.js"]
+          "js": ["Scripts/scroll-to-hash.js"]
         },
       "theme-api": {
           "theme": "dark"

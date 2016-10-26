@@ -17,11 +17,11 @@ application schema which represents the core of the database
 application.
 
 Catalog objects are partitioned into logical groups called
-__<<D4LGCatalogElements-Libraries, Libraries>>__. These libraries
+__<<Libraries, Libraries>>__. These libraries
 function as a deployment and dependency tracking unit for Dataphor
 applications. All objects in the catalog belong to a library. For a
-complete disucssion of libraries, refer to the
-<<WorkingWithLibraries.adoc#DDGWorkingWithLibraries, Working with Libraries>>
+complete discussion of libraries, refer to the
+<<WorkingWithLibraries.adoc#Summary, Working with Libraries>>
 chapter in the Logical Application Design part of this guide.
 
 Session-Specific ObjectsObjectsSession-SpecificThe D4 language also

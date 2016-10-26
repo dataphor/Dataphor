@@ -11,6 +11,9 @@
 [Dd]eploy
 [Mm][Ss][Ii][Ss]
 
+node_modules/
+_book/
+
 Sandbox
 Dataphor/packages
 /Dataphoria/Dataphoria.Web/Properties/PublishProfiles/Bobby.pubxml

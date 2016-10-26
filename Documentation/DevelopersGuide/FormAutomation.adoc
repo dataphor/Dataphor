@@ -1,7 +1,6 @@
 = Form Automation
 :author: Alphora
 :doctype: book
-
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
@@ -91,31 +90,21 @@ this context are extracted by removing the extraction qualifier and
 applying the unqualified tags to the object in question. The derivation
 engine recognizes the following extraction contexts:
 
-* Group.<group name>
-+
-When building groups, metadata that should apply to the group is
+Group.<group name>:: When building groups, metadata that should apply to the group is
 extracted from the table-level metadata for the derivation using this
 extraction context. Note that backslashes (\) within <group name> will
 be replaced with qualifiers (.).
-* RowExists
-+
-When constructing the row exists column for an extension reference, the
+RowExists:: When constructing the row exists column for an extension reference, the
 derivation engine will use the RowExists extraction context to extract
 metadata from the reference metadata.
-* Modifier
-+
-When building the *left join* expression to embed parent, lookup, and
+Modifier:: When building the *left join* expression to embed parent, lookup, and
 extension references into an expression, elaboration will use the
 Modifier extraction context to extract modifiers from the reference
 metadata.
-* Group
-+
-When building the group for an embedded parent or lookup reference, the
+Group:: When building the group for an embedded parent or lookup reference, the
 derivation engine will use the Group extraction context to extract
 metadata that should apply to the group from the reference metadata.
-* Grid
-+
-When building the Grid control for a plural user interface, the
+Grid:: When building the Grid control for a plural user interface, the
 derivation engine will use the Grid extraction context to extract
 metadata that should apply to the grid from the table-level metadata for
 the derivation.
@@ -124,9 +113,7 @@ When building grid columns for the Grid control in a plural
 user interface, the derivation engine will use the Grid extraction
 context to extract metadata that should apply to the grid column from
 the column metadata.
-* Interface
-+
-When building the root form interface for a user interface, the
+Interface:: When building the root form interface for a user interface, the
 derivation engine will use the Interface extraction context to extract
 metadata that should apply to the interface. This context is called
 Interface rather than FormInterface because FormInterface is only one
@@ -134,9 +121,7 @@ type of root interface node; FrameInterface is another.
 +
 This extraction context is useful for setting properties of the
 interface, such as HelpKeyword and IconImage.
-* Search
-+
-When building the Search control for a plural user interface, the
+Search:: When building the Search control for a plural user interface, the
 derivation engine will use the Search extraction context to extract
 metadata that should apply to the search from the table-level metadata
 for the derivation.
@@ -145,14 +130,10 @@ When building search columns for the Search control in a plural
 user interface, the derivation engine will use the Search extraction
 context to extract metadata that should apply to the search column from
 the column metadata.
-* Source
-+
-Properties of the main Source component for a user interface can be set
+Source:: Properties of the main Source component for a user interface can be set
 by the Source extraction context, such as IsReadOnly as
 RefreshAfterPost.
-* <element type>
-+
-When building column-level controls, the derivation engine will use the
+<element type>:: When building column-level controls, the derivation engine will use the
 <element type> extraction context to retrieve metadata that should be
 passed through derivation directly to the control as properties in the
 resulting form definition. This works not only directly on columns but

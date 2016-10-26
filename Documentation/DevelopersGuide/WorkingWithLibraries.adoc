@@ -24,13 +24,13 @@ information given when connecting to the Dataphor Server, and can be
 controlled using the link:O-System.SetLibrary.html[SetLibrary] operator.
 The current library is used for several purposes in the Dataphor Server
 such as default device resolution,
-<<D4LGCatalogElements-Libraries-LibrariesandNamespaces, name resolution>>,
+<<Libraries_and_Namespaces, name resolution>>,
 and is the default library for all newly created objects.
 
 [[D4LGCatalogElements-Libraries]]
 == Status
 
-Available LibrariesRegistered LibrariesSuspect LibrariesEach library in
+Each library in
 the Dataphor Server is either
 <<../UsersGuide/DataphoriaLibraries.adoc#DUGP1Dataphoria-DataphorExplorer-Libraries, __available__, __registered__, or __suspect__>>.
 An available library is simply the definition of the library. A registered

@@ -1,7 +1,6 @@
 = Overview
 :author: Alphora
 :doctype: book
-
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
@@ -86,8 +85,8 @@ recursively. Each entry in this component types table specifies a .NET
 Framework type to be used whenever a given component is to be created.
 Although this type is not required to be client-specific, it can be.
 
-For example, the Source entry specifies that the Frontend.Client.Source
-.NET type be used to represent Source components. This entry is made for
+For example, the Source entry specifies that the Frontend.Client.Source .NET
+type be used to represent Source components. This entry is made for
 both the Windows and Web clients. However, the TextBox entry specifies a
 completely different class for the Windows client than for the Web. This
 is because in the Windows client, the TextBox corresponds with a Windows
@@ -286,39 +285,23 @@ By considering both cardinalities of references from the perspective of
 the source or target table variable, we have four distinct types of
 references:
 
-* Parent Reference
-+
-Parent
-+
-A parent reference is a one-to-one reference, viewed from the
+Parent:: A parent reference is a one-to-one reference, viewed from the
 perspective of the source table variable. From this perspective the
 target table variable is the _parent_ of the source table variable. In
 this type of reference, a corresponding row in the parent table variable
 must exist.
-* Extension Reference
-+
-Extension
-+
-An extension reference is a one-to-one reference, viewed from the
+Extension:: An extension reference is a one-to-one reference, viewed from the
 perspective of the target table variable. From this perspective the
 source table variable represents _extension_ information. In this type
 of reference, a corresponding row in the extension table variable may or
 may not exist.
-* Lookup Reference
-+
-Lookup
-+
-A lookup reference is a one-to-many reference, viewed from the
+Lookup:: A lookup reference is a one-to-many reference, viewed from the
 perspective of the source table variable. From this perspective, the
 target table variable forms a _lookup_ table from which valid values for
 the columns participating in the reference in the source table variable
 may be selected. In this type of reference, a corresponding row in the
 lookup table variable must exist.
-* Detail Reference
-+
-Detail
-+
-A detail reference is a one-to-many reference, viewed from the
+Detail:: A detail reference is a one-to-many reference, viewed from the
 perspective of the target table variable. From this perspective, the
 source table variable represents _detail_ information. In this type of
 reference, a corresponding set of rows in the detail table variable may
@@ -574,21 +557,14 @@ document expression:
 
 Typically, a document expression is one of the following:
 
-* Frontend.Form(<library name>, <document name>)
-+
-This operator allows both static and customized form documents to be
+Frontend.Form(<library name>, <document name>):: This operator allows both static and customized form documents to be
 loaded. If the document specified is a customized form document, the
 customization will be expanded and applied, and the final, customized
 form document will be returned, ready for deserialization in the
 Frontend.
-* Frontend.Image(<library name>, <document name>)
-+
-This operator allows documents containing graphic data such as images
+Frontend.Image(<library name>, <document name>):: This operator allows documents containing graphic data such as images
 and icons to be loaded using streams.
-* Frontend.Derive(<expression>, <pagetype>, <master key names>, <detail
-key names>, <elaborate>)
-+
-This operator invokes the Frontend Server process of user interface
+Frontend.Derive(<expression>, <pagetype>, <master key names>, <detail key names>, <elaborate>):: This operator invokes the Frontend Server process of user interface
 derivation based on the given expression. For more information on the
 usage and functioning of this operator, refer to
 <<FormAutomation.adoc#DDGTheAutomationofForms, The Automation of Forms>> later in this

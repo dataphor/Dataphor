@@ -1,5 +1,4 @@
 = Dataphor
-
 :author: Alphora
 :doctype: chapter
 :data-uri:

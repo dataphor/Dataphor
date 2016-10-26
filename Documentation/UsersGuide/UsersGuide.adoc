@@ -1,14 +1,13 @@
-image::../Images/Dataphor-Logo.gif[Dataphor Logo]
-
-User's Guide
-===========
+= User's Guide
 :author: Alphora
 :doctype: book
-
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
 
+image::../Images/Dataphor-Logo.gif[Dataphor Logo]
+
+== Summary
 The Dataphor User's Guide introduces the Dataphor product, and provides information on using the
 Dataphor product. The Guide provides an overview of the motivation behind Dataphor, introduces
 the Dataphor platform and the anatomy of a Dataphor application, then provides several tutorials.

@@ -228,7 +228,7 @@ Auto Start options are grayed and cannot be selected. a|
 The Dataphor Service has not been installed.
 
 Install the Dataphor Service, see
-<<DUGP1InstallingtheServiceManually, Installing the Dataphor Service>>.
+<<Manual_Installation, Installing the Dataphor Service>>.
 
 |image:../Images/Stopped.gif[image,width=48,height=48] Dataphor clients
 cannot connect to the server. a|

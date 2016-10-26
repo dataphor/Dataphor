@@ -1,11 +1,11 @@
-image::../Images/Dataphor-Logo.gif[Dataphor Logo]
-
 = Developer's Guide
 :author: Alphora
 :doctype: book
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
+
+image::../Images/Dataphor-Logo.gif[Dataphor Logo]
 
 .Sections
 . link:Introduction.adoc[Introduction]
@@ -14,7 +14,7 @@ image::../Images/Dataphor-Logo.gif[Dataphor Logo]
 . link:PhysicalRealization.adoc[Physical Realization]
 . link:D4LanguageGuide.adoc[D4 Language Guide]
 
-
+[[DDG]]
 == Summary
 
 The Dataphor Developer's Guide discusses the declarative approach to

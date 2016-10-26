@@ -123,7 +123,7 @@ organization. In this section we discuss the first of these definitions.
 objects, operators, and so forth, that together constitute the abstract
 machine with which users interact. The objects allow us to model the
 structure of the data. The operators allow us to model its behavior."
-[1]
+\[1]
 
 The data model then allows us to describe the behavior of the system at
 the conceptual level. A user who understands the data model will
