@@ -1,8 +1,6 @@
 = Process Defaults
 :author: Alphora
 :doctype: book
-
-:icons:
 :data-uri:
 :lang: en
 :encoding: iso-8859-1

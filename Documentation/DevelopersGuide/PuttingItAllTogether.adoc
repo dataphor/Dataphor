@@ -1,7 +1,6 @@
 = Putting it all Together
 :author: Alphora
 :doctype: book
-
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
@@ -54,8 +53,7 @@ location.
 * Search user interface for finding a state.
 * Edit user interface for adding, editing, viewing, or deleting a state.
 * Search user interface for finding a zipcode.
-* Edit user interface for adding, editing, viewing, or deleting a
-zipcode.
+* Edit user interface for adding, editing, viewing, or deleting a zipcode.
 
 To answer the second question, consider the following add form based on
 the unadorned Location table footnote:[The document expression for the

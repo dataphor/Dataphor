@@ -557,14 +557,17 @@ document expression:
 
 Typically, a document expression is one of the following:
 
-Frontend.Form(<library name>, <document name>):: This operator allows both static and customized form documents to be
+Frontend.Form(<library name>, <document name>)::
+This operator allows both static and customized form documents to be
 loaded. If the document specified is a customized form document, the
 customization will be expanded and applied, and the final, customized
 form document will be returned, ready for deserialization in the
 Frontend.
-Frontend.Image(<library name>, <document name>):: This operator allows documents containing graphic data such as images
+Frontend.Image(<library name>, <document name>)::
+This operator allows documents containing graphic data such as images
 and icons to be loaded using streams.
-Frontend.Derive(<expression>, <pagetype>, <master key names>, <detail key names>, <elaborate>):: This operator invokes the Frontend Server process of user interface
+Frontend.Derive(<expression>, <pagetype>, <master key names>, <detail key names>, <elaborate>)::
+This operator invokes the Frontend Server process of user interface
 derivation based on the given expression. For more information on the
 usage and functioning of this operator, refer to
 <<FormAutomation.adoc#DDGTheAutomationofForms, The Automation of Forms>> later in this

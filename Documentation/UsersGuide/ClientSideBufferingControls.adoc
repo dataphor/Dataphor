@@ -1,16 +1,12 @@
 = Client-side Buffering Controls
 :author: Alphora
 :doctype: book
-
-:icons:
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
 
-
 [[DUGP1Client-SideBufferingControls]]
 == Introduction
-Buffering ControlsClient-Side Buffering Controls
 
 The CLI performs client-side buffering of result sets to minimize
 network round trips. There are two properties that control various

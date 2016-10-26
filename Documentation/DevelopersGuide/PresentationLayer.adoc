@@ -26,25 +26,17 @@ extensively.
 
 This part of the guide is organized as follows:
 
-* Overview
-+
-This chapter describes how Dataphor applications work from the Frontend
+Overview:: This chapter describes how Dataphor applications work from the Frontend
 perspective. It covers the various components of the architecture that
 enable the automated application development achieved by the platform,
 and covers the preliminaries necessary to begin building the
 presentation layer of a Dataphor application.
-* Putting It All Together
-+
-This chapter builds the presentation layer of the Shipping application
+Putting It All Together:: This chapter builds the presentation layer of the Shipping application
 from start to finish, providing an in-depth example of using the
 Dataphor platform to build a real-world application.
-* The Automation of Forms
-+
-This chapter discusses the process of user interface derivation in
+The Automation of Forms:: This chapter discusses the process of user interface derivation in
 detail, including how it can be controlled using metadata tags.
-* The Space Between the Data
-+
-This chapter discusses three important features of the Dataphor
+The Space Between the Data:: This chapter discusses three important features of the Dataphor
 platform: Navigational Access, Application Transactions, and Proposable
 Interfaces.
 
