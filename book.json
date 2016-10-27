@@ -16,6 +16,9 @@
         },
       "theme-api": {
           "theme": "dark"
+        },
+        "lunr": {
+            "maxIndexSize": 2000000
         }
     }
 }

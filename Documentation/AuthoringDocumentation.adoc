@@ -1,0 +1,55 @@
+= Documentation Instructions
+:author: Alphora
+:doctype: chapter
+:data-uri:
+:toc:
+:lang: en
+:encoding: iso-8859-1
+
+[[DocumentationInstructions]]
+== Summary
+
+This guide was written to inform any users looking to improve and/or alter Dataphor's documentation suite.
+
+Dataphor's documentation is written in http://asciidoc.org[Asciidoc], a more readable and modern superset of http://docbook.org[Docbook].
+
+This documentation is currently being hosted by http://gitbook.com[Gitbook], which automatically builds new documentation from `{root}/Documentation` in the Dataphor source and spits it out as HTML5.
+In other words, contributing to changes in the Dataphor source documentation will produce changes in the published documentation (on the `master` branch).
+
+== Authoring
+
+There are several ways of working with our documentation, all of them legitimate but some of them much more likely to confuse and annoy than others.
+
+First, you may use the http://gitbook.com[Gitbook] online editor for simple edits.
+It's fairly barebones but does not require any installation.
+You will, however, have to be added as a contributor to the project to make edits there.
+
+Alternatively, you may use the Gitbook editor, which functions similarly to Github's desktop client and provides https://en.wikipedia.org/wiki/WYSIWYG[WYSIWYG] features and other bells-and-whistles.
+This can be a mixed experience, as the current support for Asciidoc isn't as robust as that of Markdown--you're going to run into some unexpected behavior.
+
+(*Recommended*) Another alternative is to use one of the myriad text editors which offer community-authored extensions for Asciidoc previewing and syntax highlighting.
+For example, https://atom.io[Atom] has a https://atom.io/packages/asciidoc-assistant[suite of such tools].
+
+And for power users, https://toolchain.gitbook.com/setup.html[Gitbook offers a CLI] that you can use to locally compile your documentation from Dataphor's source (creating  `_book` folder on your local machine).
+The advantage of this solution is that you can output the build log as it occurs, allowing for debugging–The other solutions are black boxes.
+
+== Future Development
+
+It is hoped that Dataphor can develop and/or adapt automagical API documentation generation.
+At this point, references to legacy documentation in the Dataphor Reference book is included (as .html links) but is non-functional.
+
+Additionally, while many fundamentals have not changed in several years of development, Dataphor has gone through several major changes since the majority of its documentation was penned.
+If you notice any major changes which need to be made, please raise the issue in Github or submit a pull request if you have a solution.
+
+== Admonitions
+
+To avoid more misery in the world if possible, the following list of admonitions should preclude the most dire situations:
+
+* Any time you add a new `.adoc` document, be sure to include that document in the root `SUMMARY.adoc` file.
++
+WARNING: Failure to do so will result in the new file being treated as an asset (such as an image) and not as a converted (probably to HTML) .adoc file--it will be copied over but it will not be converted to the proper medium.
+
+* List nesting in Asciidoc is limited to *5* levels. If you have more than that, you'll have to do some consolidation.
+* While documentation is written with Asciidoc syntax, the actual parser being used is http://asciidoctor.org[Asciidoctor], a superset of Asciidoc that allows for a few nice tricks (such as links with anchors).
+To minimize confusion, you might want to refer to their http://asciidoctor.org/docs/asciidoc-writers-guide/[guides] over the Asciidoc guide.
+* Github will parse `.adoc` files on its own end, but you shouldn't rely on its interpretation–the published documentation parser is slightly different, and styles will vary between Github and the published documentation.
