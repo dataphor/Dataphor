@@ -394,6 +394,10 @@
       <Project>{788980f0-5a85-4f9a-9e6a-56746e7d37c7}</Project>
       <Name>DAE.SQLCE</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Dataphor\DAE\Engine.csproj">
+      <Project>{8fa5fa37-dc03-4e24-900b-aa863ca9650f}</Project>
+      <Name>Engine</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Processing\Dataphoria.Processing.csproj">
       <Project>{0abade9d-8700-4c29-acef-3ba3e6f3d757}</Project>
       <Name>Dataphoria.Processing</Name>

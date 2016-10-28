@@ -1,10 +1,9 @@
-﻿using Alphora.Dataphor.DAE.NativeCLI;
+﻿using Alphora.Dataphor.DAE.REST;
 using Alphora.Dataphor.Dataphoria.Web.Extensions;
 using Alphora.Dataphor.Dataphoria.Web.Models.DataFhir;
 using Hl7.Fhir.Model;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
@@ -74,19 +73,20 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 					break;
 				case "patient":
 					var d4Result = ProcessorInstance.Instance.Evaluate(string.Format("select FHIR.Server.FHIRServerPatientView {0}", whereClause), searchParameters);
-					var rows = ((NativeTableValue)((NativeResult)d4Result).Value).Rows;
-					// TODO: [2] is the column that returns the JSON manifestation of the content.  But that's a hack -- need to find a better way to identify that column
-					var patients = rows.Select(r => r[2]);
+					var rows = (IEnumerable<object>)((RESTResult)d4Result).Value;
 					
-					foreach (var patient in patients)
+					foreach (var row in rows)
 					{
+						// TODO: ["ResourceContent"] is the column that returns the JSON manifestation of the content.  But is that a hack??
+						var patient = ((Dictionary<string, object>)row)["ResourceContent"];
+
 						// this cast only works because we are functioning "in process"
 						// the NativeCLI doesn't *really* know how to serialize this object
 						var convertedPatient = (Patient)patient;
 						bundle.AddResourceEntry(convertedPatient, new Uri("patient/" + convertedPatient.Id, UriKind.Relative).ToString());
 					}
 
-					break;					
+					break;
 			}
 			return Respond.WithBundle(bundle);
 		}

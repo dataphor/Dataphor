@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Alphora.Dataphor.DAE.NativeCLI;
+﻿using Alphora.Dataphor.DAE.NativeCLI;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Dataphoria.Web
 {
@@ -12,22 +9,27 @@ namespace Alphora.Dataphor.Dataphoria.Web
 		public static Dictionary<string, object> JsonArgsToNative(JObject args)
 		{
 			// TODO: allow complex object to be passed
-
 			if (args != null && args.Count > 0)
 			{
 				var result = new Dictionary<string, object>(args.Count);
 				foreach (var p in args.Properties())
+				{
 					result.Add(p.Name, ((JValue)p.Value).Value);
+				}
 				return result;
 			}
 			else
+			{
 				return null;
+			}
 		}
 
 		public static JToken NativeToJson(object result)
 		{
 			if (result == null)
+			{
 				return new JValue((object)null);
+			}
 
 			var resultType = result.GetType();
 
@@ -36,8 +38,10 @@ namespace Alphora.Dataphor.Dataphoria.Web
 
         public static JToken NativeScalarValueToJson(NativeScalarValue value)
         {
-            if (value == null)
-                return new JValue((object)null);
+			if (value == null)
+			{
+				return new JValue((object)null);
+			}
 
             return JToken.FromObject(value.Value);
         }

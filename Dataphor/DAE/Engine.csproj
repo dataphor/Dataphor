@@ -245,6 +245,7 @@
     <Compile Include="Register.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="REST\RESTResult.cs" />
     <Compile Include="Runtime.Data\AdornTable.cs">
       <SubType>Code</SubType>
     </Compile>
