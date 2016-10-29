@@ -162,7 +162,7 @@ production rule given by:
 ....
 <ne XYZ list> ::= <XYZ> { <XYZ> }
 <ne XYZ commalist> ::= <XYZ> {, <XYZ> }
-<ne XYZ semicolonglist> ::= <XYZ> {; <XYZ> }
+<ne XYZ semicolonlist> ::= <XYZ> {; <XYZ> }
 ....
 
 These extensions are the same as those used in reference [3].
@@ -170,4 +170,4 @@ These extensions are the same as those used in reference [3].
 The BNF fragments included in this language guide are somewhat modified
 in order to facilitate presentation. For a complete BNF reference, refer
 to the
-<<D4LanguageGrammar.adoc#DRBnfDiagrams, D4 BNF Language Diagrams>>.
+<<../DataphorReference/D4LanguageGrammar.adoc#Summary, D4 BNF Language Diagrams>>.

@@ -63,7 +63,7 @@ retrieved from the Processes system table.
 
 For more information on concurrency and transaction isolation levels,
 refer to the
-<<../DevelopersGuide/DatabaseManagementConcepts.adoc#DDGP1TransactionManagement, Transaction Management>>
+<<../DevelopersGuide/DatabaseManagementConcepts.adoc#Transaction_Management, Transaction Management>>
 chapter of the Introduction part of the Dataphor Developer's Guide.
 
 [[DUGP1DefaultMaxCallDepth]]
@@ -125,7 +125,7 @@ Microsoft Windows 2000 or later.
 
 For more information on transaction management in the Dataphor Server,
 refer to the
-<<../DevelopersGuide/ModelingProcessLogic.adoc#DDGModelingProcessLogic-TransactionManagement, Transaction Management>>
+<<../DevelopersGuide/ModelingProcessLogic.adoc#Transaction_Management, Transaction Management>>
 section of the Modeling Process Logic chapter of the Logical
 Application Design part of the Dataphor Developer's Guide.
 

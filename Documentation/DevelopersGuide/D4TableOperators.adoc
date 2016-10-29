@@ -121,7 +121,7 @@ The where clause in D4 has the following syntax:
 ....
 
 The expression specified by
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression term>>>
+<<D4LanguageElements.adoc#Expressions, <expression term>>>
 must be boolean-valued. Within the expression, access to the values of the input
 row are available by column name.
 
@@ -436,7 +436,7 @@ The <aggregate expression> specifies the aggregate operator to be
 invoked. This can be a system-provided operator, or a user-defined
 operator, but it must be an aggregate operator. For a complete
 description of aggregate operators, refer to the
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-AggregateOperators, Aggregate Operators>>
+<<D4Catalog.adoc#Aggregate_Operators, Aggregate Operators>>
 discussion in this guide.
 
 With the exception of the Count, All, and Any operators, all the
@@ -461,7 +461,7 @@ the Dataphor System Library Reference.
 
 *See Also*
 
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-AggregateOperators, Aggregate Operators>>
+<<D4Catalog.adoc#Aggregate_Operators, Aggregate Operators>>
 
 [[D4LGTableExpressions-Quota]]
 == Quota
@@ -582,7 +582,7 @@ The explode clause in D4 has the following syntax:
 ....
 
 The expressions specified in the by clause and the
-<<D4TableOperators.adoc#D4LGTableExpressions-Where, where>>
+<<Restriction, where>>
 clause must be boolean-valued. The by clause specifies the explode condition,
 and the where clause specifies the root condition. Within the explode condition,
 the values of the current parent row are accessible by the name of the
@@ -876,7 +876,7 @@ The union clause in D4 has the following syntax:
 ....
 
 The expression given by
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression term>>>
+<<D4LanguageElements.adoc#Expressions, <expression term>>>
 must be table-valued. Both inputs to the *union* operation must be of the same
 table type.
 
@@ -946,7 +946,7 @@ inputs to the intersect operator must be of the same table type.
 
 Because *intersect* is a special case of **join**, it has the same
 semantics for type inference and updatability. For this information, see
-<<D4TableOperators.adoc#D4LGTableExpressions-Join, join>>
+<<Join, join>>
 
 The following example illustrates the use of the *intersect* operator:
 
@@ -963,8 +963,8 @@ ID Name
 
 *See Also*
 
-<<D4TableOperators.adoc#D4LGTableExpressions-Join, Join>> |
-<<D4TableOperators.adoc#D4LGTableExpressions-Times, Times>> |
+<<Join, Join>> |
+<<D4TableOperators.adoc#Times, Times>> |
 link:O-System.iJoin.html[Sytem.iJoin]
 
 [[D4LGTableExpressions-Minus]]
@@ -1021,7 +1021,7 @@ ID Name
 *See Also*
 
 link:O-System.iDifference.html[System.iDifference] |
-<<D4TableOperators.adoc#D4LGTableExpressions, Table Operators>>
+<<D4TableOperators.adoc#Summary, Table Operators>>
 
 [[D4LGTableExpressions-Times]]
 == Times
@@ -1043,7 +1043,7 @@ must have no column names in common.
 
 Because *times* is a special case of **join**, it has the same semantics
 for type inference and updatability. For this information, see
-<<D4LGTableExpressions-Join, join>>.
+<<Join, join>>.
 
 The following example illustrates the use of the *times* operator:
 
@@ -1089,7 +1089,7 @@ ID Name FirstName
 *See Also*
 
 link:O-System.iJoin.html[System.iJoin] |
-<<D4LGTableExpressions, Table Operators>>
+<<Summary, Table Operators>>
 
 [[D4LGTableExpressions-Join]]
 == Join
@@ -1243,7 +1243,7 @@ The conditioned join allows the join condition to be specified as part
 of the join. The input tables must have no column names in common.
 
 The expression specified within the by clause by
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression term>>>
+<<D4LanguageElements.adoc#Expressions, <expression term>>>
 must be boolean-valued and must specify an equi-join. These requirements are
 enforced by the compiler. Within the expression, the current values of
 both rows are accessible by column name.
@@ -1271,7 +1271,7 @@ E.ID   E.Name    EP.Phone
 *See Also*
 
 link:O-System.iJoin.html[System.iJoin] |
-<<D4LGTableExpressions, Table Operators>>
+<<Summary, Table Operators>>
 
 [[D4LGTableExpressions-OuterJoin]]
 == Outer Join
@@ -1333,7 +1333,7 @@ In addition, for conditioned joins only one column from each join
 condition will appear in any given key.
 
 Order and reference inference for an outer *join* is the same as for a
-standard <<D4LGTableExpressions-Join, join>>.
+standard <<Join, join>>.
 
 The optional *rowexists* column is used to indicate whether a row is an
 actual join match, or is included in the result because the *join* is
@@ -1442,7 +1442,7 @@ ID Name  Phone
 link:O-System.iJoin.html[System.iJoin] |
 link:O-System.iLeftJoin.html[System.iLeftJoin] |
 link:O-System.iRightJoin.html[System.iRightJoin] |
-<<D4LGTableExpressions, Table Operators>>
+<<Summary, Table Operators>>
 
 [[D4LGTableExpressions-Having]]
 == Semijoin
@@ -1539,7 +1539,7 @@ condition. The language modifier can be set to "true" or "false", with
 *See Also*
 
 link:O-System.iJoin.html[System.iHaving] |
-<<D4LGTableExpressions, Table Operators>>
+<<Summary, Table Operators>>
 
 [[D4LGTableExpressions-Without]]
 == Semiminus
@@ -1628,7 +1628,7 @@ condition. The language modifier can be set to "true" or "false", with
 *See Also*
 
 link:O-System.iWithout.html[System.iWithout] |
-<<D4LGTableExpressions, Table Operators>>
+<<Summary, Table Operators>>
 
 [[D4LGTableExpressions-ComparisonOperators]]
 == Comparison Operators

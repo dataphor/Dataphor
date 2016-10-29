@@ -67,7 +67,7 @@ representation, and can be written directly in D4, or _host-implemented_
 representations, these implementations can be provided automatically by
 the compiler. For a complete discussion of how the compiler chooses a
 system representation, refer to the
-<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes-PossibleRepresentations, Logical Representations>>
+<<D4Catalog.adoc#Logical_Representations, Logical Representations>>
 discussion in the D4 Language Guide.
 
 At least one representation must be host-implemented, whether that
@@ -91,7 +91,7 @@ These operators are used by the presentation layer to convert values of
 the type to and from a format suitable for display or manipulation
 within the Frontend. Note that Frontend representations are also logical
 representations available within D4. For more information on native
-accessors, refer to the <<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes-NativeAccessors, Native Accessors>>
+accessors, refer to the <<D4Catalog.adoc#Native_Accessors, Native Accessors>>
 discussion in the D4 Language Guide.
 
 [[DDGImplementingDataTypes-SimpleTypes]]
@@ -561,7 +561,7 @@ end;
 ....
 
 For more information on defining and using operators, refer to the
-<<ModelingProcessLogic.adoc#DDGModelingProcessLogic, Modeling Process Logic>> chapter.
+<<ModelingProcessLogic.adoc#Summary, Modeling Process Logic>> chapter.
 
 [[DDGImplementingDataTypes-EventHandlers]]
 == Event Handlers

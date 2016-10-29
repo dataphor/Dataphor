@@ -80,7 +80,7 @@ internal representation sof the date and time data types all use a
 The following scalar data types are made available by the Dataphor
 Server:
 
-<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes, System.Scalar>>::
+<<D4Catalog.adoc#Scalar_Types, System.Scalar>>::
 System.Scalar is the set of all possible scalar values. The type
 constraint for scalar is simply **true**. All scalar types are defined
 as some subset of the values in the scalar type.
@@ -163,7 +163,7 @@ the operators defined for existing types, the D4 language allows for the
 definition of __implicit conversions__. An implicit conversion specifies
 that values of some type are implicitly convertable to values of another
 type. For more information on implicit conversions, refer to
-<<D4Catalog.adoc#D4LGCatalogElements-Conversions, Conversions>>.
+<<D4Catalog.adoc#Conversions, Conversions>>.
 
 The following matrix describes the validity and availabity of conversion
 operators. The presence of an E indicates the existence of an operator
@@ -236,8 +236,8 @@ type.
 
 *See Also*
 
-<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes, Scalar Types>> |
-<<../DataphorReference.adoc#DRSystemLibrary-ScalarTypes, Dataphor Reference, Scalar Types>>
+<<D4Catalog.adoc#Scalar_Types, Scalar Types>> |
+<<../DataphorReference.adoc#Scalar_Types, Dataphor Reference, Scalar Types>>
 
 [[D4LGLanguageElements-Types-RowTypes]]
 === Row Types
@@ -263,7 +263,7 @@ value will be of some specific row type.
 
 *See Also*
 
-<<D4LGLanguageElements-Values-RowValues, Row Values>>
+<<Row_Values, Row Values>>
 
 [[D4LGLanguageElements-Types-TableTypes]]
 === Table Types
@@ -290,8 +290,8 @@ values. Any given table value will be of some specific table type.
 
 *See Also*
 
-<<D4LGLanguageElements-Values-TableValues, Table Values>> |
-<<D4Catalog.adoc#D4LGCatalogElements-TableVariables, Table Variables>>
+<<Table_Values, Table Values>> |
+<<D4Catalog.adoc#Table_Variables, Table Variables>>
 
 [[D4LGLanguageElements-Types-ListTypes]]
 === List Types
@@ -313,8 +313,8 @@ list value will be of some specific list type.
 
 *See Also*
 
-<<D4LGLanguageElements-Values-ListValues, List Values>> |
-<<D4LGLanguageElements-Expressions-IndexerExpression, Indexer Expressions>>
+<<List_Values, List Values>> |
+<<Indexer_Expression, Indexer Expressions>>
 
 [[D4LGLanguageElements-Types-CursorTypes]]
 === Cursor Types
@@ -337,8 +337,8 @@ values. Any given cursor value will be of some specific cursor type.
 
 *See Also*
 
-<<D4LGLanguageElements-Values-CursorValues, Cursor Values>> |
-<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement-CursorType, Cursor Type>>
+<<Cursor_Values, Cursor Values>> |
+<<D4DataManipulation.adoc#Cursor_Type, Cursor Type>>
 
 [[D4LGLanguageElements-Values]]
 == Values
@@ -349,8 +349,8 @@ integer constant 3, or as complex as a list of table values. Values are
 the mechanism for data representation in D4.
 
 Values are introduced into D4 expressions and statements through the use
-of special operators called __<<D4Catalog.adoc#D4LGSelector, selectors>>__.
-<<D4LexicalElements.adoc#D4LGLexicalElements-ParserLiterals, Parser Literals>>
+of special operators called __<<D4Catalog.adoc#Selector, selectors>>__.
+<<D4LexicalElements.adoc#Parser_Literals, Parser Literals>>
 are a kind of built-in selector for certain system data types. For example, the
 parser literal 1 is a selector for the System.Integer value 1.
 Similarly, *row* \{ 5 ID } is a selector for the row value containing a
@@ -376,11 +376,11 @@ the value described is an atomic value, in that it cannot be broken down
 into smaller components without ceasing to be a value of the type in
 question. For a detailed discussion of scalar values, see the discussion
 in the Catalog Elements chapter on
-<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes, Scalar Types>>.
+<<D4Catalog.adoc#Scalar_Types, Scalar Types>>.
 
 *See Also*
 
-<<D4LGLanguageElements-Types-ScalarTypes, Scalar Types>>
+<<Scalar_Types, Scalar Types>>
 
 [[D4LGLanguageElements-Values-RowValues]]
 === Row Values
@@ -416,10 +416,10 @@ syntax:
 ....
 
 For a detailed description of the <type specifier> production rule see
-<<D4LGLanguageElements-Types, Types>>
+<<Types, Types>>
 
 For a detailed description of the <expression term> production rule see
-<<D4LGLanguageElements-Expressions, Expressions>>.
+<<Expressions, Expressions>>.
 
 The following example illustrates the use of the row selector:
 
@@ -429,11 +429,11 @@ select row of { Age : Integer, EyeColor : String } { };
 ....
 
 For more information on using row values in D4, see
-<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingRows, Using Rows>>.
+<<ModelingProcessLogic.adoc#Using_Rows, Using Rows>>.
 
 *See Also*
 
-<<D4LGLanguageElements-Types-RowTypes, Row Types>>
+<<Row_Types, Row Types>>
 
 [[D4LGLanguageElements-Values-TableValues]]
 === Table Values
@@ -480,11 +480,11 @@ syntax:
 ....
 
 For a detailed description of the <type specifier> production rule see
-<<D4LGLanguageElements-Types, Types>>
+<<Types, Types>>
 
 For a detailed description of the <expression> production rule see
 
-<<D4LGLanguageElements-Expressions, Expressions>>.
+<<Expressions, Expressions>>.
 
 For a detailed description of the <key definition> production rule see
 <<D4Catalog.adoc#D4LGKeys, Keys>>.
@@ -503,11 +503,11 @@ select table of { DecimalNumber : Decimal } { };
 ....
 
 For more information on using table values in D4, see
-<<D4TableOperators.adoc#D4LGTableExpressions, Table Operators>>.
+<<D4TableOperators.adoc#Summary, Table Operators>>.
 
 *See Also*
 
-<<D4LGLanguageElements-Types-TableTypes, Table Types>>
+<<Table_Types, Table Types>>
 
 [[D4LGLanguageElements-Values-ListValues]]
 === List Values
@@ -525,15 +525,15 @@ syntax:
 ....
 
 For a detailed description of the <expression> production rule see
-<<D4LGLanguageElements-Expressions, Expressions>>
+<<Expressions, Expressions>>
 
 For more information on using list values in D4, see
-<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingLists, Using Lists>>.
+<<ModelingProcessLogic.adoc#Using_Lists, Using Lists>>.
 
 *See Also*
 
-<<D4LGLanguageElements-Types-ListTypes, List Types>> |
-<<D4LGLanguageElements-Expressions-IndexerExpression, Indexer Expressions>>
+<<List_Types, List Types>> |
+<<Indexer_Expression, Indexer Expressions>>
 
 [[D4LGLanguageElements-Values-CursorValues]]
 === Cursor Values
@@ -543,7 +543,7 @@ to table values. Selecting a cursor value allocates system resources
 that must be released by calling link:O-System.Close.html[Close()] on
 the cursor. For a detailed description of the operators available for
 cursors, see
-<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, Using Cursors>>.
+<<ModelingProcessLogic.adoc#Using_Cursors, Using Cursors>>.
 
 Cursor SelectorSelectorsCursor SelectorCursor selectors have the
 following syntax:
@@ -555,15 +555,15 @@ following syntax:
 
 For a detailed description of the <cursor definition> production rule
 see the select statement syntax in
-<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement, Select Statement>>.
+<<Select_Statement, Select Statement>>.
 
 For more information on using cursor values in D4, see
-<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, Using Cursors>>.
+<<ModelingProcessLogic.adoc#Using_Cursors, Using Cursors>>.
 
 *See Also*
 
-<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, Cursor>> |
-<<D4LGLanguageElements-Expressions-IndexerExpression, Indexer Expressions>>
+<<ModelingProcessLogic.adoc#Using_Cursors, Cursor>> |
+<<Indexer_Expression, Indexer Expressions>>
 
 [[D4LGLanguageElements-Variables]]
 == Variables
@@ -585,12 +585,12 @@ Conceptually then, all the manipulative operators of the language such
 as **insert**, **update**, and *delete* are just shorthands for some
 equivalent assignment statement. Tables might then more appropriately
 have been called
-__<<D4Catalog.adoc#D4LGCatalogElements-TableVariables, table variables>>__
+__<<D4Catalog.adoc#Table_Variables, table variables>>__
 , and indeed we refer to them as such throughout the
 documentation, but for reasons of brevity and familiarity in the
 language, we chose the more traditional name **table**.
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-Variables-VariableDeclarationStatement, Variable declaration>>
+<<D4ImperativeStatements.adoc#Variable_Declaration_Statement, Variable declaration>>
 in D4 has the following syntax:
 
 ....
@@ -605,7 +605,7 @@ The optional <expression> specifies an initial value for the variable.
 If no initial value is specified, the type of the variable is used to
 determine a default value for the variable. If no default value is
 specified as part of the type definition, the variable is said to be
-_uninitialized_ or __<<D4LGNilSemantics, nil>>__.
+_uninitialized_ or __<<Nil_Semantics, nil>>__.
 
 Note that the <type specifier> in a <variable definition> is optional if
 an initial value is given. In this case, the type of the variable is
@@ -620,17 +620,17 @@ declares a variable of type System.Integer named LInteger and assigns it
 the integer value 5.
 
 For a detailed description of the <qualified identifier> production rule
-see <<D4LexicalElements.adoc#D4LGLexicalElements-Identifiers, Identifiers>>.
+see <<D4LexicalElements.adoc#Identifiers, Identifiers>>.
 
 For a detailed description of the <type specifier> production rule see
-<<D4LGLanguageElements-Types, Types>>.
+<<Types, Types>>.
 
 For a detailed description of the <expression> production rule see
-<<D4LGLanguageElements-Expressions, Expressions>>.
+<<Expressions, Expressions>>.
 
 *See Also*
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-Variables, Variables>>
+<<D4ImperativeStatements.adoc#Variables, Variables>>
 
 [[D4LGLanguageElements-Operators]]
 == Operators
@@ -660,7 +660,7 @@ A given D4 operator may be host-implemented (or external). This
 indicates that the implementation of the operator is not a block of D4
 statements, but an external routine referenced via a class definition.
 
-Like <<D4LGLanguageElements-Expressions, expressions>>, every D4
+Like <<Expressions, expressions>>, every D4
 operator has the following
 characteristicsCharacteristicsOperatorOperatorCharacteristics which
 determine its behavior within the Dataphor Server:
@@ -689,7 +689,7 @@ different value on successive invocations within a transaction.
 As with deterministic operators, repeatable operators are required in
 certain contexts such as restriction conditions.
 Nilable:: A _nilable_ operator is one which may return a
-__<<D4LGNilSemantics, nil>>__, or no value, at run-time.
+__<<Nil_Semantics, nil>>__, or no value, at run-time.
 Order-Dependent:: An _order-dependent_ aggregate operator is one whose semantics depend on
 the order in which the rows of the input are aggregated. If an aggregate
 operator is marked order-dependent, the compile will issue a warning if
@@ -703,7 +703,7 @@ the expression O(V1) >= O(V2) also evaluates to true.
 
 *See Also*
 
-<<D4Catalog.adoc#D4LGCatalogElements-Operators, Catalog Elements, Operators>>
+<<D4Catalog.adoc#Operators, Catalog Elements, Operators>>
 
 [[D4LGLanguageElements-Statements]]
 == Statements
@@ -718,17 +718,17 @@ of D4 fall into three basic categories:
 Data Definition Language statements are concerned with describing the
 structure of the database. They allow for the creation, alteration, and
 destruction of catalog level objects. These statements are discussed in
-<<D4Catalog.adoc#D4LGCatalogElements, Catalog Elements>>.
+<<D4Catalog.adoc#Summary, Catalog Elements>>.
 
 Data Manipulation Language statements allow for the retrieval and
 modification of the data in the database. These include **select**,
 **insert**, **update**, and **delete**, and are discussed in
-<<D4DataManipulation.adoc#D4LGDataManipulation, Data Manipulation>>.
+<<D4DataManipulation.adoc#Summary, Data Manipulation>>.
 
 Imperative statements provide the execution framework for the D4
 language. These statements provide functionality such as variable
 declaration, flow control, and exception handling. These statements are
-discussed in detail in <<D4ImperativeStatements.adoc#D4LGImperativeStatements, Imperative>>.
+discussed in detail in <<D4ImperativeStatements.adoc#Summary, Imperative>>.
 
 Statements in D4 have the following syntax:
 
@@ -740,23 +740,23 @@ Statements in D4 have the following syntax:
 ....
 
 For a detailed description of the <ddl statement> production rule see
-<<D4Catalog.adoc#D4LGCatalogElements, Catalog Elements>>.
+<<D4Catalog.adoc#Summary, Catalog Elements>>.
 
 For a detailed description of the <dml statement> production rule see
-<<D4DataManipulation.adoc#D4LGDataManipulation, Data Manipulation>>.
+<<D4DataManipulation.adoc#Summary, Data Manipulation>>.
 
 For a detailed description of the <imperative statement> production rule
-see <<D4ImperativeStatements.adoc#D4LGImperativeStatements, Imperative Statements>>.
+see <<D4ImperativeStatements.adoc#Summary, Imperative Statements>>.
 
 [[D4LGLanguageElements-Expressions]]
 == Expressions
 
 A D4 expression is a statement that returns a result. This includes
-<<D4LexicalElements.adoc#D4LGLexicalElements-ParserLiterals, parser literals>>
-and <<D4LGOperatorInvocation, operator invocations>>. The result of
+<<Parser_Literals, parser literals>>
+and <<Operator_Invocation, operator invocations>>. The result of
 evaluating any given expression is either a value or
-__<<D4LGNilSemantics, nil>>__. Expressions are built according to
-the <<D4LGLanguageElements-Expressions, [<expression> production rule]>>. The following are examples of valid D4 expressions.
+__<<Nil_Semantics, nil>>__. Expressions are built according to
+the <expression> production rule. The following are examples of valid D4 expressions.
 
 ....
 5
@@ -764,7 +764,7 @@ the <<D4LGLanguageElements-Expressions, [<expression> production rule]>>. The fo
 true and not (Length(MyName) = 0)
 ....
 
-Just like <<D4LGLanguageElements-Operators, operators>>, every D4
+Just like <<Operators, operators>>, every D4
 expression has the following
 characteristicsCharacteristicsExpressionExpressionCharacteristics which
 determine its behavior within the Dataphor Server:
@@ -794,7 +794,7 @@ non-deterministic operators.
 Repeatable:: An expression is _repeatable_ if it makes no calls to non-repeatable
 operators.
 Nilable:: An expression is _nilable_ if it may result in a
-__<<D4LGNilSemantics, nil>>__. In general, expressions are nilable
+__<<Nil_Semantics, nil>>__. In general, expressions are nilable
 if they make calls to nilable operators, contain references to nilable
 columns, or contain the *nil* reserved word. Some operators such as
 IsNil will never result in a nil.
@@ -825,7 +825,7 @@ D4 expressions have the following syntax:
 ....
 
 For a detailed description of the <table operator clause> production
-rule see <<D4TableOperators.adoc#D4LGTableExpressions, Table Operators>>.
+rule see <<D4TableOperators.adoc#Summary, Table Operators>>.
 
 [[D4LGNilSemantics]]
 === Nil Semantics
@@ -1147,7 +1147,7 @@ value returned from an *as* invocation is guaranteed to be of the
 provided type.
 
 For a detailed description of the <type specifier> production rule see
-<<D4LGLanguageElements-Types, Types>>.
+<<Types, Types>>.
 
 [[D4LGLanguageElements-Expressions-BinaryExpression]]
 === Binary Expression
@@ -1295,7 +1295,7 @@ overloaded. It serves the following functions:
 
 For a description of how the qualifier behaves for the purposes of
 namespace resolution, refer to
-<<D4LexicalElements.adoc#D4LGLexicalElements-Identifiers, Identifiers>>.
+<<D4LexicalElements.adoc#Identifiers, Identifiers>>.
 
 If the target of the qualifier is a scalar-valued expression, the
 qualifier can be used to access the properties of any logical
@@ -1303,7 +1303,7 @@ representation of that type. This type of property access can be an
 expression or an assignment target, depending on which side of an
 assignment statement it appears. For a complete description of logical
 representations and property accessors, refer to
-<<D4Catalog.adoc#D4LGCatalogElements, Scalar Types>>.
+<<D4Catalog.adoc#Summary, Scalar Types>>.
 
 ==== Dot Invocation
 
@@ -1470,7 +1470,7 @@ are defined, is known as the _operator signature_ and is used by the
 compiler to perform operator resolution. The operator most closely
 matching the call signature is used.
 
-Each <<D4Catalog.adoc#D4LGCatalogElements-Operators, operand>> in the signature
+Each <<D4Catalog.adoc#Operators, operand>> in the signature
 of an operator has an associated modifier. If this modifier is **var**,
 the call must use the *var* keyword to pass the argument in the
 invocation. This helps to ensure that operator invocations which can
@@ -1481,7 +1481,7 @@ For stand alone aggregate operator invocations, the
 columns, of the invocation. In addition, the syntax provides for the
 possibility of order-dependent aggregate operator invocations. For a
 complete description of aggregate operators, refer to the
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-AggregateOperators, Aggregate Operators>>
+<<D4Catalog.adoc#Aggregate_Operators, Aggregate Operators>>
 discussion in this guide.
 
 Operator invocations in D4 have the following syntax:
@@ -1510,8 +1510,8 @@ Conditional expressions are a kind of inline function in that they are
 equivalent to writing an operator that uses branching.
 
 There are two types of conditional expressions in D4, the
-_<<D4ImperativeStatements.adoc#D4LGIfStatement, if>> expression_
-and the __<<D4ImperativeStatements.adoc#D4LGCaseStatement, case>> expression__.
+_<<D4ImperativeStatements.adoc#If_Statement, if>> expression_
+and the __<<D4ImperativeStatements.adoc#Case_Statement, case>> expression__.
 
 These operators are system-provided and cannot be overloaded.
 
@@ -1552,6 +1552,6 @@ compatible types.
 
 *See Also*
 
-<<D4ImperativeStatements.adoc#D4LGCaseStatement, case statement>> |
-<<D4ImperativeStatements.adoc#D4LGIfStatement, if statement>> |
-<<D4LGLanguageElements-Expressions, Expressions>>
+<<D4ImperativeStatements.adoc#Case_Statement, case statement>> |
+<<D4ImperativeStatements.adoc#If_Statement, if statement>> |
+<<Expressions, Expressions>>

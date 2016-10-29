@@ -14,7 +14,7 @@ The lexical elements of the D4 language allow special symbols (or
 tokens) in an input string to be recognized. These tokens help the
 parser determine the syntax of a given statement. A complete BNF
 reference for the D4 lexical analyzer can be found in
-<<D4LanguageGrammar.adoc#DRBnfDiagrams, D4 BNF Lanquage Diagrams>>.
+<<../DataphorReference/D4LanguageGrammar.adoc#Summary, D4 BNF Lanquage Diagrams>>.
 
 [[D4LGLexicalElements-Whitespace]]
 == Whitespace
@@ -76,323 +76,323 @@ all uses of a keyword.
 
 ***link:O-System.iAdorn.html[adorn]**,
 
-<<D4Catalog.adoc#D4LGCatalogElements-EventHandlers, after>>
+<<D4Catalog.adoc#Event_Handlers, after>>
 
 **link:O-System.iAggregate.html[aggregate]**,
 
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-AggregateOperators, aggregation>>
+<<D4Catalog.adoc#Aggregate_Operators, aggregation>>
 
 **link:O-System.All.html[all]**,
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, alter>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, alter>>
 
 ***link:O-System.iAnd.html[and]**,
 
-<<D4Catalog.adoc#D4LGCatalogElements-Security, apply>>
+<<D4Catalog.adoc#Security, apply>>
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions-TypeOperatorClause, as>>
+<<D4LanguageElements.adoc#Type_Operator_Clause, as>>
 
-<<D4Catalog.adoc#D4LGOrders, asc>>
+<<D4Catalog.adoc#Orders, asc>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-EventHandlers, attach>>
+<<D4Catalog.adoc#Event_Handlers, attach>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Objects-ClassDefinitions, attributes>>
+<<D4Catalog.adoc#Class_Definitions, attributes>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-EventHandlers, before>>
+<<D4Catalog.adoc#Event_Handlers, before>>
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-BlocksandScoping, begin>>
+<<D4ImperativeStatements.adoc#Blocks_and_Scoping, begin>>
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions-BetweenClause, between>>
+<<D4LanguageElements.adoc#Between_Clause, between>>
 
-<<D4ImperativeStatements.adoc#D4LGBreakandContinue, break>>
+<<D4ImperativeStatements.adoc#Break_and_Continue, break>>
 
 **link:O-System.iBrowse.html[browse]**,
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, by>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, by>>
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, capabilities>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, capabilities>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-References, cascade>>
+<<D4Catalog.adoc#References, cascade>>
 
-<<D4ImperativeStatements.adoc#D4LGCaseStatement, case>>
+<<D4ImperativeStatements.adoc#Case_Statement, case>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-EventHandlers, change>>
+<<D4Catalog.adoc#Event_Handlers, change>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Objects-ClassDefinitions, class>>
+<<D4Catalog.adoc#Class_Definitions, class>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-References, clear>>
+<<D4Catalog.adoc#References, clear>>
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, column>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, column>>
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-ExceptionHandling-TryCommitStatement, commit>>
+<<D4ImperativeStatements.adoc#Try_Commit_Statement, commit>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-Operators, const>>
+<<D4Catalog.adoc#Creating_Operators, const>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Constraints, constraint>>
+<<D4Catalog.adoc#Constraints, constraint>>
 
-<<D4ImperativeStatements.adoc#D4LGBreakandContinue, continue>>
+<<D4ImperativeStatements.adoc#Break_and_Continue, continue>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Conversions, conversion>>
+<<D4Catalog.adoc#Conversions, conversion>>
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, create>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, create>>
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Values-CursorValues, cursor>>
+<<D4LanguageElements.adoc#Cursor_Values, cursor>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes-Defaults, default>>
+<<D4Catalog.adoc#Defaults, default>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-References, delete>>
+<<D4Catalog.adoc#References, delete>>
 
-<<D4Catalog.adoc#D4LGOrders, desc>>
+<<D4Catalog.adoc#Orders, desc>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-EventHandlers, detach>>
+<<D4Catalog.adoc#Event_Handlers, detach>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Devices, device>>
+<<D4Catalog.adoc#Device, device>>
 
-*<<D4TableOperators.adoc#D4LGTableExpressions-Aggregate, distinct>>*
+<<D4TableOperators.adoc#Aggregate, distinct>>
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions-ArithmeticExpression, div>>
+<<D4LanguageElements.adoc#Arithmetic_Expression, div>>
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, divide>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, divide>>
 
-<<D4ImperativeStatements.adoc#D4LGDoWhileStatement, do>>
+<<D4ImperativeStatements.adoc#Do_While_Statement, do>>
 
-<<D4ImperativeStatements.adoc#D4LGForStatement, downto>>
+<<D4ImperativeStatements.adoc#For_Statement, downto>>
 
-<<D4Catalog.adoc#D4LGCatalogElements, drop>>
+<<D4Catalog.adoc#Summary, drop>>
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, dynamic>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, dynamic>>
 
-<<D4ImperativeStatements.adoc#D4LGIfStatement, else>>
+<<D4ImperativeStatements.adoc#If_Statement, else>>
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions-BetweenClause, end>>
+<<D4LanguageElements.adoc#Between_Clause, end>>
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-ExceptionHandling-TryExceptStatement, except>>
+<<D4ImperativeStatements.adoc#Try_Except_Statement, except>>
 
-<<D4Catalog.adoc#D4LGOrders, exclude>>
+<<D4Catalog.adoc#Orders, exclude>>
 
 ***link:O-System.iExists.html[exists]**
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-FlowControl-ExitStatement, exit>>
+<<D4ImperativeStatements.adoc#Exit_Statement, exit>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions, explode>>
+<<D4TableOperators.adoc#Summary, explode>>
 
-<<D4LGLexicalElements-ParserLiterals-BooleanParserLiterals, false>>
+<<Boolean, false>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-AggregateOperators, finalization>>
+<<D4Catalog.adoc#Aggregate_Operators, finalization>>
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-ExceptionHandling-TryFinallyStatement, finally>>
+<<D4ImperativeStatements.adoc#Try_Finally_Statement, finally>>
 
-<<D4ImperativeStatements.adoc#D4LGForStatement, for>>
+<<D4ImperativeStatements.adoc#For_Statement, for>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-RowExtractor, from>>
+<<D4TableOperators.adoc#Row_Extractor, from>>
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Types, generic>>
+<<D4LanguageElements.adoc#Types, generic>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Security, grant>>
+<<D4Catalog.adoc#Security, grant>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-Aggregate, group>>
+<<D4TableOperators.adoc#Aggregate, group>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-Having, having>>
+<<D4TableOperators.adoc#Semijoin, having>>
 
-<<D4ImperativeStatements.adoc#D4LGIfStatement, if>>
+<<D4ImperativeStatements.adoc#If_Statement, if>>
 
 ***link:O-System.iIn.html[in]**
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, include>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, include>>
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, index>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, index>>
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, indexes>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, indexes>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Security, inherited>>
+<<D4Catalog.adoc#Security, inherited>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-AggregateOperators, initialization>>
+<<D4Catalog.adoc#Aggregate_Operators, initialization>>
 
-<<D4DataManipulation.adoc#D4LGDataManipulation-InsertStatement, insert>>
+<<D4DataManipulation.adoc#Insert_Statement, insert>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions, intersect>>
+<<D4TableOperators.adoc#Summary, intersect>>
 
-<<D4DataManipulation.adoc#D4LGDataManipulation-InsertStatement, into>>
+<<D4DataManipulation.adoc#Insert_Statement, into>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-EventHandlers, invoke>>
+<<D4Catalog.adoc#Event_Handlers, invoke>>
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions-TypeOperatorClause, is>>
+<<D4LanguageElements.adoc#Type_Operator_Clause, is>>
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, isolation>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, isolation>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions, join>>
+<<D4TableOperators.adoc#Summary, join>>
 
-<<D4Catalog.adoc#D4LGKeys, keys>>
+<<D4Catalog.adoc#Keys, keys>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-OuterJoin, left>>
+<<D4TableOperators.adoc#Outer_Join, left>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-Explode, level>>
+<<D4TableOperators.adoc#Explode, level>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Conversions-LikeTypes, like>>
+<<D4Catalog.adoc#Like_Types, like>>
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Types-ListTypes, list>>
+<<D4LanguageElements.adoc#List_Types, list>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-Join, lookup>>
+<<D4TableOperators.adoc#Join, lookup>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Devices, master>>
+<<D4Catalog.adoc#Device, master>>
 
-***link:O-System.iMatches.html[matches]**
+**link:O-System.iMatches.html[matches]**
 
-<<D4TableOperators.adoc#D4LGTableExpressions, minus>>
+<<D4TableOperators.adoc#Summary, minus>>
 
-***link:O-System.iMod.html[mod]**
+**link:O-System.iMod.html[mod]**
 
-<<D4Catalog.adoc#D4LGCatalogElements-Devices, mode>>
+<<D4Catalog.adoc#Device, mode>>
 
 **modify**
 
-<<D4Catalog.adoc#D4LGCatalogElements-Conversions, narrowing>>
+<<D4Catalog.adoc#Conversions, narrowing>>
 
-<<D4Catalog.adoc#D4LGRowConstraints, new>>
+<<D4Catalog.adoc#Row_Constraints, new>>
 
-<<DocumentsAndDesigners.adoc#D4LGNilSemantics, nil>>
+<<D4LanguageElements.adoc#Nil_Semantics, nil>>
 
-***link:O-System.iNot.html[not]**
+**link:O-System.iNot.html[not]**
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Values-TableValues, of>>
+<<D4LanguageElements.adoc#Table_Values, of>>
 
-<<D4Catalog.adoc#D4LGRowConstraints, old>>
+<<D4Catalog.adoc#Row_Constraints, old>>
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-ExceptionHandling-TryExceptStatement, on>>
+<<D4ImperativeStatements.adoc#Try_Except_Statement, on>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-Operators, operator>>
+<<D4Catalog.adoc#Creating_Operators, operator>>
 
-***link:O-System.iOr.html[or]**
+**link:O-System.iOr.html[or]**
 
-<<D4Catalog.adoc#D4LGOrders, order>>
+<<D4Catalog.adoc#Orders, order>>
 
 origin
 
-<<D4TableOperators.adoc#D4LGTableExpressions, over>>
+<<D4TableOperators.adoc#Summary, over>>
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions-Factor, parent>>
+<<D4LanguageElements.adoc#Factor, parent>>
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-ExceptionHandling-RaiseStatement, raise>>
+<<D4ImperativeStatements.adoc#Raise_Statement, raise>>
 
-<<D4Catalog.adoc#D4LGProperties, read>>
+<<D4Catalog.adoc#Properties, read>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Devices, reconciliation>>
+<<D4Catalog.adoc#Device, reconciliation>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Security, recursively>>
+<<D4Catalog.adoc#Security, recursively>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions, redefine>>
+<<D4TableOperators.adoc#Summary, redefine>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-References, reference>>
+<<D4Catalog.adoc#References, reference>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-References, references>>
+<<D4Catalog.adoc#References, references>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions, remove>>
+<<D4TableOperators.adoc#Summary, remove>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions, rename>>
+<<D4TableOperators.adoc#Summary, rename>>
 
-<<D4LGLexicalElements.adoc#D4LGRepeatUntilStatement, repeat>>
+<<D4ImperativeStatements.adoc#Repeat_Until_Statement, repeat>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes-PossibleRepresentations, representation>>
+<<D4Catalog.adoc#Logical_Representations, representation>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-References, require>>
+<<D4Catalog.adoc#References, require>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-Operators, result>>
+<<D4Catalog.adoc#Creating_Operators, result>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-Quota, return>>
+<<D4TableOperators.adoc#Quota, return>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Security, revert>>
+<<D4Catalog.adoc#Security, revert>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Security, revoke>>
+<<D4Catalog.adoc#Security, revoke>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-OuterJoin, right>>
+<<D4TableOperators.adoc#Outer_Join, right>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Security, role>>
+<<D4Catalog.adoc#Security, role>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-RowExtractor, row>>
+<<D4TableOperators.adoc#Row_Extractor, row>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-OuterJoin, rowexists>>
+<<D4TableOperators.adoc#Outer_Join, rowexists>>
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Types-ScalarTypes, scalar>>
+<<D4LanguageElements.adoc#Scalar_Types, scalar>>
 
-<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement, select>>
+<<Select_Statement, select>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes-PossibleRepresentations, selector>>
+<<D4Catalog.adoc#Logical_Representations, selector>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-Explode, sequence>>
+<<D4TableOperators.adoc#Explode, sequence>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-Operators, session>>
+<<D4Catalog.adoc#Creating_Operators, session>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-References, set>>
+<<D4Catalog.adoc#References, set>>
 
-<<D4Catalog.adoc#D4LGOrders, sort>>
+<<D4Catalog.adoc#Orders, sort>>
 
 ***source**
 
-<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes-SpecialValues, special>>
+<<D4Catalog.adoc#Specials, special>>
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, static>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, static>>
 
-<<D4ImperativeStatements.adoc#D4LGForStatement, do>>
+<<D4ImperativeStatements.adoc#For_Statement, do>>
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, store>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, store>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions, table>>
+<<D4TableOperators.adoc#Summary, table>>
 
-<<../DataphorReference/D4LanguageGrammar.adoc#DRD4ParserBNF, tags>>
+<<../DataphorReference/D4LanguageGrammar.adoc#D4_Parser_BNF, tags>>
 
 ***target**
 
-<<D4ImperativeStatements.adoc#D4LGCaseStatement, then>>
+<<D4ImperativeStatements.adoc#Case_Statement, then>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions, times>>
+<<D4TableOperators.adoc#Summary, times>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Conversions, to>>
+<<D4Catalog.adoc#Conversions, to>>
 
-<<D4Catalog.adoc#D4LGRowConstraints, transition>>
+<<D4Catalog.adoc#Row_Constraints, transition>>
 
-<<D4LanguageGrammar.adoc#DRD4LexerBNF, true>>
+<<D4LanguageGrammar.adoc#D4_Lexer_BNF, true>>
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-ExceptionHandling, try>>
+<<D4ImperativeStatements.adoc#Exception_Handling, try>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes, type>>
+<<D4Catalog.adoc#Scalar_Types, type>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-ScalarTypes, typeof>>
+<<D4Catalog.adoc#Scalar_Types, typeof>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions, union>>
+<<D4TableOperators.adoc#Summary, union>>
 
-<<D4LGLexicalElements.adoc#D4LGRepeatUntilStatement, until>>
+<<D4ImperativeStatements.adoc#Repeat_Until_Statement, until>>
 
-<<D4DataManipulation.adoc#D4LGDataManipulation-UpdateStatement, update>>
+<<D4DataManipulation.adoc#Update_Statement, update>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Security, usage>>
+<<D4Catalog.adoc#Security, usage>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Security, user>>
+<<D4Catalog.adoc#Security, user>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Security, users>>
+<<D4Catalog.adoc#Security, users>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Sorts, using>>
+<<D4Catalog.adoc#Sorts, using>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-EventHandlers, validate>>
+<<D4Catalog.adoc#Event_Handlers, validate>>
 
 ***value**
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-Variables-VariableDeclarationStatement, var>>
+<<D4ImperativeStatements.adoc#Variable_Declaration_Statement, var>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-TableVariables-Views, view>>
+<<D4Catalog.adoc#Views, view>>
 
-<<D4ImperativeStatements.adoc#D4LGCaseStatement, when>>
+<<D4ImperativeStatements.adoc#Case_Statement, when>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions, where>>
+<<D4TableOperators.adoc#Summary, where>>
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-FlowControl-LoopingStatements, while>>
+<<D4ImperativeStatements.adoc#Looping_Statements, while>>
 
-<<D4Catalog.adoc#D4LGCatalogElements-Conversions, widening>>
+<<D4Catalog.adoc#Conversions, widening>>
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions-LanguageModifiers, with>>
+<<D4LanguageElements.adoc#Language_Modifiers, with>>
 
-<<D4TableOperators.adoc#D4LGTableExpressions-Without, without>>
+<<D4TableOperators.adoc#Semiminus, without>>
 
-<<D4Catalog.adoc#D4LGProperties, write>>
+<<D4Catalog.adoc#Properties, write>>
 
 ***link:O-System.iXor.html[xor]**
 
@@ -409,29 +409,29 @@ The following are parser-recognized symbols in D4.
 
 link:O-System.iSubtraction.html[-]
 
-<<D4LGLexicalElements-ParserLiterals-MoneyParserLiterals, $>>
+<<Money, $>>
 
 link:O-System.iBitwiseAnd.html[&]
 
-<<D4LGOperatorInvocation.adoc#D4LGOperatorInvocation, (>>
+<<D4LanguageElements.adoc#Operator_Invocation, (>>
 
-<<D4LGOperatorInvocation.adoc#D4LGOperatorInvocation, )>>
+<<D4LanguageElements.adoc#Operator_Invocation, )>>
 
 link:O-System.iMultiplication.html[*]
 
 link:O-System.iPower.html[**]
 
-<<D4LanguageGrammar.adoc#DRD4LexerBNF, ,>>
+<<D4LanguageGrammar.adoc#D4_Lexer_BNF, ,>>
 
-<<D4LGLexicalElements-Identifiers-QualifiedIdentifiers, .>>
+<<Qualified_Identifiers, .>>
 
 link:O-System.iDivision.html[/]
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Variables, :>>
+<<D4LanguageElements.adoc#Variables, :>>
 
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-Variables-AssignmentStatement, := >>
+<<D4ImperativeStatements.adoc#Assignment_Statement, := >>
 
-<<D4LGScriptsandExecution.adoc#D4LGScriptsandExecution, ;>>
+<<D4ScriptsAndExecution.adoc#Summary, ;>>
 
 link:O-System.iCompare.html[?=]
 
@@ -441,11 +441,11 @@ link:O-System.iIndexer.html[\]]
 
 link:O-System.iBitwiseXor.html[^^]
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Values-ListValues, {>>
+<<D4LanguageElements.adoc#List_Values, {>>
 
 link:O-System.iBitwiseOr.html[|]
 
-<<D4LanguageElements.adoc#D4LGLanguageElements-Values-ListValues, }>>
+<<D4LanguageElements.adoc#List_Values, }>>
 
 link:O-System.iBitwiseNot.html[~]
 

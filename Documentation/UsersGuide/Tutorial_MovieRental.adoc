@@ -15,19 +15,19 @@ your own applications.
 
 *Concepts*
 
-* <<DataphorServer.adoc#DUGP1ProductTour-DataphorServer, Connecting to a Dataphor Server>>
-* <<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements-Devices, Devices>>
-* <<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements-TableVariables, Tables>>
-* <<../DevelopersGuide/D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement, Queries (select)>>
-* <<../DataphorReference/Tags.adoc#DRTags, Tags>>
-* <<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements-References, References>> and <<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements-Constraints, Constraints>>
-* <<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements-Operators, Operators>>
-* <<D4LGScriptsandExecution.adoc#D4LGScriptsandExecution, D4 Scripts>> and C#/VB Scripts
+* <<DataphorServer.adoc#Introduction, Connecting to a Dataphor Server>>
+* <<../DevelopersGuide/D4Catalog.adoc#Device, Devices>>
+* <<../DevelopersGuide/D4Catalog.adoc#Table_Variables, Tables>>
+* <<../DevelopersGuide/D4DataManipulation.adoc#Select_Statement, Queries (select)>>
+* <<../DataphorReference/Tags.adoc#Summary, Tags>>
+* <<../DevelopersGuide/D4Catalog.adoc#References, References>> and <<../DevelopersGuide/D4Catalog.adoc#Constraints, Constraints>>
+* <<../DevelopersGuide/D4Catalog.adoc#Operators, Operators>>
+* <<D4ScriptsAndExecution.adoc#Summary, D4 Scripts>> and C#/VB Scripts
 
 *Technical Terms*
 
 [horizontal]
-<<UsingDataphorForms.adoc#DUGP1UsingDataphorApplications-Forms, Form>>:: A user interface to the application and data.
+<<UsingDataphorForms.adoc#Summary, Form>>:: A user interface to the application and data.
 link:dilrefAlphora.Dataphor.Frontend.Client.IFrame.html[Frame]:: An embedded user interface (form) as an element of a form.
 Component:: A Dataphor form component. e.g., Source
 Control:: A visible Dataphor form component. e.g., TextBox
@@ -62,12 +62,12 @@ If you are not using the "in-process" server, you will need to know the
 port number of the Dataphor Server when you try to connect to it from
 the Frontend Client and the Application Server.
 
-See <<Aliases.adoc#DUGP1Dataphoria-Aliases, Aliases>> for more information on
+See <<Aliases.adoc#Aliases, Aliases>> for more information on
 how to connect to the Dataphor Server with Dataphoria.
 
 Once you are connected the Dataphoria Integrated Design Environment
 (IDE) is displayed. See
-<<Dataphoria.adoc#DUGP1Dataphoria-Introduction-Environment, Environment>>
+<<Dataphoria.adoc#Environment, Environment>>
 for an explanation of this screen.
 
 == Developing the Movie Database
@@ -112,7 +112,7 @@ right click on Sample.Rental library, and select Register. The color and
 shape of the icon changes to show that the Sample.Rental library is now
 registered. The Green arrow shows that the library is the current
 library. For more about libraries see
-<<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements-Libraries, Libraries>>.
+<<../DevelopersGuide/WorkingWithLibraries.adoc#Status, Libraries>>.
 
 image::../Images/RentalTut001.png[Rental Tutorial - 1]
 
@@ -205,7 +205,7 @@ MSSQLDevice library to the Requisites.
 
 image::../Images/RentalTut001.2.png[Rental Tutorial - 1.2]
 
-The <<StorageIntegrationArchitecture.adoc#DDGStorageIntegrationArchitecture-Reconciliation, reconciliation>>
+The <<StorageIntegrationArchitecture.adoc#Reconciliation, reconciliation>>
 settings control how the Dataphor Server will reconcile its catalog with the
 tables in the Device. In this case it is saying that the target system should
 be considered the master copy of the schema and that the reconciliation
@@ -216,7 +216,7 @@ and the database name to connect to. Other attributes can also be
 specified.
 
 For more information on the options available when creating a device,
-see the various devices listed in <<../DataphorReference/Libraries.adoc#DRSystemLibrary, Libraries>>.
+see the various devices listed in <<../DataphorReference/Libraries.adoc#Summary, Libraries>>.
 
 After the MS SQL device is created CreateDeviceUser is called to tell
 the Dataphor Server what MS SQL account to use for each Dataphor Server
@@ -263,7 +263,7 @@ of the current library are searched breadth first until a default device
 is found. Ultimately, the System.Temp memory device will be used. The
 System.Temp device is created and maintained by the Dataphor Server. For
 more information about default devices, see
-<<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements-Libraries-DefaultDeviceResolution, Default Device Resolution>>.
+<<../DevelopersGuide/WorkingWithLibraries.adoc#Default_Device_Resolution, Default Device Resolution>>.
 
 Also, the SetDefaultDeviceName operator can be used to specify the
 default device. Do this now, so that for the rest of the tutorial you
@@ -359,7 +359,7 @@ Dataphor Server, such as the Frontend Clients and Servers, can use this
 metadata. In the case of the Frontend, metadata is used to control the
 way a form will look when it is derived from the tables and queries. For
 more information about metadata see
-<<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements-Objects-Metadata, Metadata>>.
+<<../DevelopersGuide/D4Catalog.adoc#Metadata, Metadata>>.
 
 Frontend tags can be specific or general. For example:
 
@@ -379,7 +379,7 @@ in the browse mode. When the user interface is in any other mode, ID
 will be visible.
 
 
-For more information about tags see <<../DataphorReference/Tags.adoc#FTRTagsDescriptions, Tags>>.
+For more information about tags see <<../DataphorReference/Tags.adoc#Summary, Tags>>.
 
 The Frontend.Width tag on the ID field indicates the display width of
 the field on forms. The Frontend.Preview.Include tag on the Genre column
@@ -616,7 +616,7 @@ statement use the *order by* clause of the *select* statement. Because
 tables are conceptually unordered, if the position were not retained as
 a column, then the insertion order would be lost. For a full explanation
 on why tables are conceptually unordered, see
-<<../DevelopersGuide/DatabaseManagementConcepts.adoc#DDGP1StructuralAspect, Structural Aspect>>.
+<<../DevelopersGuide/DatabaseManagementConcepts.adoc#Structural_Aspect, Structural Aspect>>.
 
 ....
 select MovieRating
@@ -741,7 +741,7 @@ reference constraint ensures that values of the Type column of the Movie
 table must be either a value within the ID column of the MovieType
 table, or be a value which has been marked **special**. For more
 information on special values see
-<<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements-ScalarTypes-SpecialValues, Special Values>>.
+<<../DevelopersGuide/D4Catalog.adoc#Specials, Special Values>>.
 
 Every row in the source table of the reference must either be set to a
 *special* or have a corresponding row in the target table for which the
@@ -773,7 +773,7 @@ reference describes a one to many or lookup/detail relationship. This
 information is used by the Dataphor Frontend to derive appropriate
 user interfaces for any given table, view, or even expression. For more
 information about references, see
-<<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements-References,References>>.
+<<../DevelopersGuide/D4Catalog.adoc#References, References>>.
 
 === Actor Table
 
@@ -1081,7 +1081,7 @@ engine to group them together in a group box, as shown:
 image::../Images/RentalTut008.png[Rental Tutorial - 8]
 
 ****
-For more information about Frontend tags see <<../DataphorReference/Tags.adoc#FTRTagsDescriptions-FrontendTags, Frontend Tags>>.
+For more information about Frontend tags see <<../DataphorReference/Tags.adoc#Frontend_Tags, Frontend Tags>>.
 ****
 
 Notice that the JoinedOn and Balance columns are both defaulted on a new
@@ -1091,7 +1091,7 @@ row. The client is able to ask the Dataphor Server what a default row
 The Address2 column type is followed by \{ *nil* }. This tells the
 Dataphor Server that the column is not required and can contain no data
 at all. For more information about the use of *nil* see
-<<../DevelopersGuide/D4LanguageElements.adoc#D4LGNilSemantics, Nil Semantics>>.
+<<../DevelopersGuide/D4LanguageElements.adoc#Nil_Semantics, Nil Semantics>>.
 
 The ID column is not visible on the add form (though it is still being
 generated with its default value), yet it is visible on the other forms.
@@ -1154,7 +1154,7 @@ referenced table's forms (which can further be restricted to specific
 forms). If the Detail was not specified, then from the referencing
 table's perspective (SaleItem), the referenced table (Sale) would be
 embedded. For more information about Frontend tags see
-<<../DataphorReference/Tags.adoc#FTRTagsDescriptions-FrontendTags, Frontend Tags>>.
+<<../DataphorReference/Tags.adoc#Frontend_Tags, Frontend Tags>>.
 
 === Rental Tables
 
@@ -1245,7 +1245,7 @@ attach operator AddRental to RentedVideo on after insert;
 ....
 
 For more information on operators see
-<<../DevelopersGuide/D4Catalog.adoc#D4LGCatalogElements-Operators, Operators>>.
+<<../DevelopersGuide/D4Catalog.adoc#Operators, Operators>>.
 
 A way to view the videos that are currently available would be useful.
 
@@ -1832,7 +1832,7 @@ Transaction that will be underway when the AddSale form is in use. The
 expression will give the Total of the the sale items and will be updated
 each time anything changes. For more information about Application
 Transactions see
-<<../DevelopersGuide/DatabaseManagementConcepts.adoc#DDGP1TransactionManagement, Transaction Management>>.
+<<../DevelopersGuide/DatabaseManagementConcepts.adoc#Transaction_Management, Transaction Management>>.
 
 Add a TextBox as a child of RootBrowseColumn and name it TotalTextBox.
 Set the Source property to TotalSource. Set the ColumnName property to
@@ -2050,7 +2050,7 @@ Transaction that the Add Sale form is running in, set the _EnlistWith_
 property to __Main__. By doing this, the changes to the _SaleItem_ and
 _Account_ tables will not be committed until the entire sale is
 completed. For more information about Application Transactions see
-<<../DevelopersGuide/DatabaseManagementConcepts.adoc#DDGP1TransactionManagement, Transaction Management>>.
+<<../DevelopersGuide/DatabaseManagementConcepts.adoc#Transaction_Management, Transaction Management>>.
 * Add a Non Visual _DataArgument_ as a child of _PayFeesOperatorScript_
 and name it __PayFeesData__. Set the _Columns_ property to Main.ID,
 Account.ID, Account.Balance and the _Source_ property to __Main__.

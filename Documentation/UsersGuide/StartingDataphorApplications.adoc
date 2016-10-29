@@ -39,7 +39,7 @@ Although this screen capture shows the Windows Client login form, the
 process for connecting with the Web Client is the same.
 
 For more information on configuring aliases, see the
-<<Aliases.adoc#DUGP1Dataphoria-Aliases, Aliases>>
+<<Aliases.adoc#Aliases, Aliases>>
 section of the Dataphoria chapter in the Using Dataphor part of the Dataphor
 User's Guide.
 

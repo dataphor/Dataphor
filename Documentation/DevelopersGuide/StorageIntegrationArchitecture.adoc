@@ -79,7 +79,7 @@ target system. The scalar type map is responsible for translating values
 from the native representation of a value within the Dataphor Server to
 the device representation of the value within the target system, and
 vice versa. Scalar type maps will be discussed in detail in
-<<ScalarTypeMapping.adoc#DDGScalarTypeMapping, Scalar Type Mapping>>.
+<<ScalarTypeMapping.adoc#Summary, Scalar Type Mapping>>.
 
 Operator maps provide the translation services for operator invocations
 from D4 to the corresponding invocation within the target system. These
@@ -88,7 +88,7 @@ or as complex as the *join* operator. In either case, the map is
 responsible not only for the translation of the invocation, but for
 deciding whether or not the invocation is supported by the target
 system. Operator maps will be discussed in detail in
-<<OperatorMapping.adoc#DDGOperatorMapping, Operator Mapping>>.
+<<OperatorMapping.adoc#Summary, Operator Mapping>>.
 
 Table maps provide the persistence mechanism of the Dataphor Server.
 Each base table variable in the Dataphor Server is mapped to some
@@ -125,7 +125,7 @@ has explicitly specified connection parameters, these are used as
 overrides for any connection parameters specified by the device and
 connection string builder. For more information on how connection
 strings are built, refer to the section on
-<<Devices.adoc#DDGP2BasicConnectivity, Basic Connectivity>>.
+<<Devices.adoc#Basic_Connectivity, Basic Connectivity>>.
 
 [[DDGP2ProcessorIntegration]]
 == Processor Integration

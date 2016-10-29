@@ -1,7 +1,6 @@
 = Application Development Concepts
 :author: Alphora
 :doctype: book
-
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
@@ -12,7 +11,7 @@
 This chapter discusses how the declarative approach can be applied to
 application development by utilizing the logical model exposed by a
 relational database management system. It describes how this approach
-addresses the issues discussed in the <<ApplicationDevelopmentConsiderations.adoc#DDGApplicationDevelopmentConsiderations, Application
+addresses the issues discussed in the <<ApplicationDevelopmentConsiderations.adoc#Summary, Application>>
 Development Considerations>> chapter of this part, and how a declarative
 platform provides a foundation for Automated Application Development
 (AAD).

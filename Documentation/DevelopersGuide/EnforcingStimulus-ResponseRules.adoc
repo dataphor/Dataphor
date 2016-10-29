@@ -211,7 +211,7 @@ One of the initial requirements of the Shipping application is that
 changes to demographic information be tracked for Customers and Vendors.
 The contact structures are specifically designed to handle this problem.
 For a complete discussion of the design aspects of this solution, refer
-to the <<DatabaseDesignTechniques.adoc#DDGDatabaseDesignTechniques, Database Design Techniques>> 
+to the <<DatabaseDesignTechniques.adoc#Summary, Database Design Techniques>> 
 chapter later in this part.
 
 The following diagram details the main Contact table, and the

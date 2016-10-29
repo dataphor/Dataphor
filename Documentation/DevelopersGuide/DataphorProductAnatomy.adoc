@@ -184,15 +184,15 @@ The Dataphor Server catalog contains the following types of objects:
 * Sorts
 
 For more information on each of these types of objects, see the
-<<D4Catalog.adoc#D4LGCatalogElements, Catalog Elements>> section of the D4
+<<D4Catalog.adoc#Summary, Catalog Elements>> section of the D4
 Language Guide in this manual.
 
 For more information on using these elements to construct a Dataphor
-Application, refer to the <<LogicalApplicationDesign#DDGLogicalApplicationDesign.adoc, Logical Application Design]>>
+Application, refer to the <<LogicalApplicationDesign.adoc#Summary, Logical Application Design]>>
 part of this manual.
 
 For more information on the security system of the Dataphor Server,
-refer to the <<../UsersGuide/Security.adoc#DUGP3Security, Security>> chapter of the Dataphor
+refer to the <<../UsersGuide/Security.adoc#Summary, Security>> chapter of the Dataphor
 User's Guide.
 
 [[DDGDataphorProductAnatomy-DataphorServer-Compiler]]
@@ -400,7 +400,7 @@ will always execute. This is true regardless of the level of relational
 support provided by the devices involved.
 
 For more information on creating and manipulating devices, refer to the
-<<D4Catalog.adoc#D4LGCatalogElements, Catalog Elements>>
+<<D4Catalog.adoc#Summary, Catalog Elements>>
 chapter of the D4 Language Guide in this manual.
 
 [[DDGDataphorProductAnatomy-DataphorServer-AutomatedApplicationDevelopmentServices]]

@@ -67,7 +67,7 @@ image::../Images/DataphorExplorerWindowsClientSettingsEdit.bmp[Editing Dataphor 
 The Theme Document is a D4 expression that specifies a theme document.
 Windows themes allow the look and feel of the Windows Client to be
 changed. For more information on Windows themes, see the
-<<../DevelopersGuide/../DevelopersGuide/PresentationLayer.adoc#DDGPresentationLayer, Presentation Layer>> part of the Dataphor
+<<../DevelopersGuide/../DevelopersGuide/PresentationLayer.adoc#Summary, Presentation Layer>> part of the Dataphor
 Developer's Guide.
 
 The Default Form Icon Image is a D4 expression that specifies an icon

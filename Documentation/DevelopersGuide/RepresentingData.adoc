@@ -125,7 +125,7 @@ favor of a default specified in the type definition. Any constraint
 definitions specified on the column are enforced in addition to any
 constraints defined in the type definition. Defaults and constraints
 will be discussed in more detail in the
-<<EnforcingBusinessRules.adoc#DDGEnforcingBusinessRulesDeclaratively, Enforcing Business Rules Declaratively>>
+<<EnforcingBusinessRules.adoc#Summary, Enforcing Business Rules Declaratively>>
 chapter.
 
 Column definitions also contain a nilability indicator that determines
@@ -209,7 +209,7 @@ perspective of the referenced table variable, the reference is called a
 __target reference__.
 
 Constraints and references will be discussed in more detail in the
-<<EnforcingBusinessRules.adoc#DDGEnforcingBusinessRulesDeclaratively, Enforcing Business Rules Declaratively>>
+<<EnforcingBusinessRules.adoc#Summary, Enforcing Business Rules Declaratively>>
 chapter.
 
 [[DDGRepresentingDatawithTablesandViews-TableOperators]]
@@ -267,7 +267,7 @@ Sample.Shipping library.
 
 Note that this discussion only includes the most common table operators.
 For a complete description of all the available table operators, refer
-to the <<D4TableOperators.adoc#D4LGTableExpressions, Table Operators>> chapter of the D4
+to the <<D4TableOperators.adoc#Summary, Table Operators>> chapter of the D4
 Language Guide.
 
 [[DDGRepresentingDatawithTablesandViews-TableOperators-CompilerInferenceMechanisms]]
@@ -317,7 +317,7 @@ has a result type of Integer. The result type of the expression is
 therefore Integer, and the type inference is complete.
 
 Characteristic inference will be discussed in more detail in the
-<<ModelingProcessLogic.adoc#DDGModelingProcessLogic, Modeling Process Logic>> chapter.
+<<ModelingProcessLogic.adoc#Summary, Modeling Process Logic>> chapter.
 
 For table operators, the process is somewhat more involved than for
 scalar operators, due to the amount of information that must be inferred
@@ -452,19 +452,19 @@ projection. The extension and rename operations are only included when
 necessary.
 
 For more information on the *over* and *remove* operators, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-OverandRemove, Over and Remove>> discussion
+<<D4TableOperators.adoc#Projection, Over and Remove>> discussion
 in the D4 Language Guide.
 
 For more information on the specify operator, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-Specify, Specify>> discussion in the D4
+<<D4TableOperators.adoc#Specify, Specify>> discussion in the D4
 Language Guide.
 
 For more information on the *rename* operator, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-Rename, Rename>> discussion in the D4
+<<D4TableOperators.adoc#Rename, Rename>> discussion in the D4
 Language Guide.
 
 For more information on the *add* operator, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-Add, Extension>> discussion in the D4
+<<D4TableOperators.adoc#Extension, Extension>> discussion in the D4
 Language Guide.
 
 [[DDGRepresentingDatawithTablesandViews-TableOperators-Restriction]]
@@ -546,7 +546,7 @@ select Location['01001'].Name
 ....
 
 For more information on the *where* operator, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-Where, Restriction>> discussion in the D4
+<<D4TableOperators.adoc#Restriction, Restriction>> discussion in the D4
 Language Guide.
 
 ==== Quota Queries
@@ -614,7 +614,7 @@ ID Location_ID User_ID Date      Status_ID
 ....
 
 For more information on the *return* operator, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-Quota, Quota>> discussion in the D4
+<<D4TableOperators.adoc#Quota, Quota>> discussion in the D4
 Language Guide.
 
 === Combining Rows From Multiple Tables
@@ -648,7 +648,7 @@ ID
 ....
 
 For more information on the *union* operator, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-Union, Union>> discussion in the D4
+<<D4TableOperators.adoc#Union, Union>> discussion in the D4
 Language Guide.
 
 ==== Difference
@@ -679,7 +679,7 @@ ID
 ....
 
 For more information on the *minus* operator, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-Minus, Minus>> discussion in the D4
+<<D4TableOperators.adoc#Minus, Minus>> discussion in the D4
 Language Guide.
 
 ==== Join
@@ -892,11 +892,11 @@ the Cartesian product of the keys of the inputs, or
 \{ ID, Contact_ID, Number }.
 
 For more information on the various *join* operators, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-Join, Join>> discussion in the D4 Language
+<<D4TableOperators.adoc#Join, Join>> discussion in the D4 Language
 Guide.
 
 For more information on outer joins specifically, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-OuterJoin, Outer Join>> discussion in the
+<<D4TableOperators.adoc#Outer_Join, Outer Join>> discussion in the
 D4 Language Guide.
 
 [[DDGRepresentingDatawithTablesandViews-TableOperators-Aggregation]]
@@ -934,7 +934,7 @@ Invoice_ID InvoiceTotal
 ....
 
 For more information on the *group* operator, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-Aggregate, Aggregate>> discussion in the D4
+<<D4TableOperators.adoc#Aggregate, Aggregate>> discussion in the D4
 Language Guide.
 
 The following aggregate operators are defined in the System library:
@@ -950,7 +950,7 @@ The following aggregate operators are defined in the System library:
 In addition D4 allows user-defined aggregate operators to be created
 using the *create aggregate operator* statement. For more information on
 creating aggregate operators, refer to
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-AggregateOperators, Aggregate Operators>>
+<<D4Catalog.adoc#Aggregate_Operators, Aggregate Operators>>
 in the D4 Language Guide.
 
 [[DDGRepresentingDatawithTablesandViews-TableOperators-Adorn]]
@@ -975,7 +975,7 @@ the Frontend. As such, discussion of this operator will be deferred to
 the next part.
 
 For more information on the *adorn* operator, refer to the
-<<D4TableOperators.adoc#D4LGTableExpressions-Adorn, Adorn>> discussion in the D4
+<<D4TableOperators.adoc#Adorn, Adorn>> discussion in the D4
 Language Guide.
 
 [[DDGRepresentingDatawithTablesandViews-TableOperators-Extraction]]
@@ -1012,11 +1012,11 @@ end;
 ....
 
 For more information on the table-indexer, refer to the
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions-IndexerExpression, Indexer Expression>>
+<<D4LanguageElements.adoc#Indexer_Expression, Indexer Expression>>
 discussion in the D4 Language Guide.
 
 For more information on the column extractor, refer to the
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions-QualifierExpression, Qualifier Expression>>
+<<D4LanguageElements.adoc#Qualified_Expression, Qualifier Expression>>
 discussion in the D4 Language Guide.
 
 [[DDGRepresentingDatawithTablesandViews-DerivedTableVariables]]
@@ -1126,7 +1126,7 @@ The Dataphor Server also supports completely redefining a given data
 modification statement using "instead-of" event handlers. These event
 handlers can completely take the place of a given data modification.
 These, and other types of event handlers will be discussed in the
-<<EnforcingStimulus-ResponseRules.adoc#DDGEnforcingStimulus-ResponseRules, Enforcing Stimulus-Response Rules>>
+<<EnforcingStimulus-ResponseRules.adoc#Summary, Enforcing Stimulus-Response Rules>>
 chapter.
 
 The following sections discuss the default update propagation rules for

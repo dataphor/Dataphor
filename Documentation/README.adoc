@@ -12,7 +12,6 @@ Welcome to Dataphor's documentation suite.
 We've divided our documentation into three main categories:
 
 [horizontal]
-link:UsersGuide/Dataphoria.adoc[Dataphoria]:: TEST
 link:UsersGuide/UsersGuide.adoc[User's Guide]:: Introduces Dataphor and provides usage guidance.
 +
 This Guide provides the following:

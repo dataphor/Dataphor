@@ -316,7 +316,7 @@ This form can also be displayed at any time by selecting the
 Launch Form... command from the *File* menu, or by pressing *F6*.
 
 For more information on query elaboration and user interface derivation,
-refer to the <<../DevelopersGuide/PresentationLayer.adoc#DDGPresentationLayer, Presentation Layer>> part of
+refer to the <<../DevelopersGuide/PresentationLayer.adoc#Summary, Presentation Layer>> part of
 the Dataphor Developer's Guide.
 
 [[DUGP1Devices]]

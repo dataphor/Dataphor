@@ -427,7 +427,7 @@ that modification statements do, with each operator managing how the
 propagation should occur. For a detailed description of how this
 propagation occurs, refer to the view updatability discussion in the
 Derived Table Variables section of the
-<<RepresentingData.adoc#DDGRepresentingDataWithTablesandViews, Representing Data With Tables and Views>>
+<<RepresentingData.adoc#Summary, Representing Data With Tables and Views>>
 chapter of the Logical Application Design part of this guide.
 
 Note that even though the logic for proposables is defined in the

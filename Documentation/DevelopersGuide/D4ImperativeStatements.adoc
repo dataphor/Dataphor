@@ -64,9 +64,9 @@ Each <variable definition> includes an optional initialization
 expression which is the initial value for the variable. If no
 initialization expression is specified, the variable is assigned the
 default value for the type. If no default is specified, the variable is
-<<DocumentsAndDesigners.adoc#D4LGNilSemantics, nil>>, or has no value.
+<<D4LanguageElements.adoc#Nil_Semantics, nil>>, or has no value.
 
-The <<D4LanguageElements.adoc#D4LGLanguageElements-Types, <type specifier>>>
+The <<D4LanguageElements.adoc#Types, <type specifier>>>
 is optional if and only if an initialization expression is specified. In this case,
 the compiler uses the type of the initialization expression to determine
 the type of the variable.
@@ -87,9 +87,9 @@ Assignment statements in D4 have the following syntax:
 The expression specified by <target> must be a valid assignment target.
 This includes properties of representations of scalar values, and
 updatable expressions like table expressions. The expression specified by
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>> must be
+<<D4LanguageElements.adoc#Expressions, <expression>>> must be
 _assignment-compatible_ with the assignment target. For a definition of
-assignment-compatibility, refer to the <<D4Catalog.adoc#D4LGCatalogElements-Operators-OperatorResolution, Operator Resolution>> discussion.
+assignment-compatibility, refer to the <<D4Catalog.adoc#Operator_Resolution, Operator Resolution>> discussion.
 
 [[D4LGImperativeStatements-BlocksandScoping]]
 == Blocks and Scoping
@@ -107,11 +107,11 @@ parent scopes are visible.
 The following constructs also establish scope within their respective
 blocks:
 
-* <<D4LGDoWhileStatement, Do-while statement>>.
-* <<D4LGRepeatUntilStatement, Repeat-until statement>>.
-* <<D4LGImperativeStatements-ExceptionHandling-TryExceptStatement, Try-except statement>>,
+* <<Do_While_Statement, Do-while statement>>.
+* <<Repeat_Until_Statement, Repeat-until statement>>.
+* <<Try_Except_Statement, Try-except statement>>,
 in both the try block, and each exception handler.
-* <<D4LGImperativeStatements-ExceptionHandling-TryFinallyStatement, Try-finally statements>>,
+* <<Try_Finally_Statement, Try-finally statements>>,
 in both the try block, and the finally block.
 
 Blocks in D4 have the following syntax:
@@ -196,14 +196,14 @@ If statements in D4 have the following syntax:
 ....
 
 The expression specified by
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>>
+<<D4LanguageElements.adoc#Expressions, <expression>>>
 must be boolean-valued. If the expression evaluates to true, the statement given
-by <<D4LanguageElements.adoc#D4LGLanguageElements-Statements, <statement>>> is executed.
+by <<D4LanguageElements.adoc#Statements, <statement>>> is executed.
 The if statement may include an optional else clause which specifies a
 statement to be executed if the expression evaluates to false or nil.
 Note that if an else clause is specified, it is part of the if
 statement, so the statement separator
-(<<D4LGScriptsandExecution.adoc#D4LGScriptsandExecution, ;>>)
+(<<D4ScriptsandExecution.adoc#Summary, ;>>)
 is invalid before the *else* keyword.
 
 The following example illustrates the use of the if statement:
@@ -218,7 +218,7 @@ else
 
 *See Also*
 
-<<D4LanguageElements.adoc#D4LGConditionalExpression, if expression>>
+<<D4LanguageElements.adoc#Conditional_Expression, if expression>>
 
 [[D4LGCaseStatement]]
 ==== Case Statement
@@ -304,7 +304,7 @@ end;
 
 *See Also*
 
-<<D4LanguageElements.adoc#D4LGConditionalExpression, case expression>>
+<<D4LanguageElements.adoc#Conditional_Expression, case expression>>
 
 [[D4LGImperativeStatements-FlowControl-LoopingStatements]]
 === Looping Statements
@@ -384,8 +384,8 @@ ID
 
 *See Also*
 
-<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
-| <<D4LGBreakandContinue, Break and Continue>>
+<<Looping_Statements, Looping Statements>>
+| <<Break_and_Continue, Break and Continue>>
 
 
 [[D4LGWhileStatement]]
@@ -417,8 +417,8 @@ end;
 
 *See Also*
 
-<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
-| <<D4LGBreakandContinue, Break and Continue>>
+<<Looping_Statements, Looping Statements>>
+| <<Break_and_Continue, Break and Continue>>
 
 [[D4LGDoWhileStatement]]
 ==== Do While Statement
@@ -435,7 +435,7 @@ Do while statements in D4 have the following syntax:
 ....
 
 The expression specified by
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>>
+<<D4LanguageElements.adoc#Expressions, <expression>>>
 must be boolean-valued.
 
 The following example illustrates the use of the do-while statement:
@@ -451,8 +451,8 @@ end;
 
 *See Also*
 
-<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
-| <<D4LGBreakandContinue, Break and Continue>>
+<<Looping_Statements, Looping Statements>>
+| <<Break_and_Continue, Break and Continue>>
 
 [[D4LGRepeatUntilStatement]]
 ==== Repeat Until Statement
@@ -486,8 +486,8 @@ end;
 
 *See Also*
 
-<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
-| <<D4LGBreakandContinue, Break and Continue>>
+<<Looping_Statements, Looping Statements>>
+| <<Break_and_Continue, Break and Continue>>
 
 [[D4LGForeachStatement]]
 ==== Foreach Statement
@@ -592,8 +592,8 @@ end;
 
 *See Also*
 
-<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
-| <<D4LGBreakandContinue, Break and Continue>>
+<<Looping_Statements, Looping Statements>>
+| <<Break_and_Continue, Break and Continue>>
 
 [[D4LGBreakandContinue]]
 ==== Break and Continue
@@ -639,7 +639,7 @@ end;
 
 *See Also*
 
-<<D4LGImperativeStatements-FlowControl-LoopingStatements, Looping Statements>>
+<<Looping_Statements, Looping Statements>>
 
 [[D4LGImperativeStatements-ExceptionHandling]]
 == Exception Handling
@@ -652,11 +652,11 @@ if something goes wrong is the error handling code invoked.
 
 There are three types of error handling constructs in D4: the exception
 trap, the resource protection block, and the commit block. The
-<<D4LGImperativeStatements-ExceptionHandling-TryExceptStatement[exception trap]>>
+<<Try_Except_Statement, exception trap>>
 allows exceptions of a specific type to be handled, the
-<<D4LGImperativeStatements-ExceptionHandling-TryFinallyStatement, resource protection block>>
+<<Try_Finally_Statement, resource protection block>>
 ensures that a specified statement is always executed, even if an exception occurs, and the
-<<D4LGImperativeStatements-ExceptionHandling-TryCommitStatement, commit block>>
+<<Try_Commit_Statement, commit block>>
 is a shorthand for protecting a block of statements within a transaction.
 
 [[D4LGImperativeStatements-ExceptionHandling-RaiseStatement]]
@@ -678,7 +678,7 @@ Raise statements in D4 have the following syntax:
 ....
 
 The link:T-System.Error.html[error value] given by
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>>
+<<D4LanguageElements.adoc#Expressions, <expression>>>
 must be error-valued. The expression is optional only if the raise is invoked
 within an exception handler, in which case the error being handled is
 re-raised.
@@ -692,7 +692,7 @@ if Count(TableVars) = 0 then
 
 *See Also*
 
-<<D4LGImperativeStatements-ExceptionHandling, Exception Handling]>
+<<Exception_Handling, Exception Handling>>
 
 [[D4LGImperativeStatements-ExceptionHandling-TryExceptStatement]]
 === Try Except Statement
@@ -754,7 +754,7 @@ end;
 
 *See Also*
 
-<<D4LGImperativeStatements-ExceptionHandling, Exception Handling>>
+<<Exception_Handling, Exception Handling>>
 
 [[D4LGImperativeStatements-ExceptionHandling-TryFinallyStatement]]
 === Try Finally Statement
@@ -796,7 +796,7 @@ end;
 
 *See Also*
 
-<<D4LGImperativeStatements-ExceptionHandling, Exception Handling>>
+<<Exception_Handling, Exception Handling>>
 
 [[D4LGImperativeStatements-ExceptionHandling-TryCommitStatement]]
 === Try Commit Statement
@@ -840,4 +840,4 @@ end;
 
 *See Also*
 
-<<D4LGImperativeStatements-ExceptionHandling, Exception Handling>>
+<<Exception_Handling, Exception Handling>>

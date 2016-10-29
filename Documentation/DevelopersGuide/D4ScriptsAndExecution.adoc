@@ -20,7 +20,7 @@ Each script is broken down by the compiler into a set of batches. Each
 top-level statement in the script is considered a separate batch, and is
 compiled and executed separately. Each batch is either a statement, i.e.
 it has no return value, or an expression that returns a value. The
-<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement, *select*>>
+<<Select_Statement, *select*>>
 keyword is used to indicate that the results of a given expression should be returned.
 
 The syntax for a D4 script is:
@@ -32,7 +32,7 @@ The syntax for a D4 script is:
 
 Note that the semi-colon in a script is a statement separator. A
 detailed description of the <statement> production rule is given in
-<<D4LanguageElements.adoc#D4LGLanguageElements-Statements, Statements>>.
+<<D4LanguageElements.adoc#Statements, Statements>>.
 
 [[D4LGScriptsandExecution-Connectivity]]
 == Connectivity
@@ -102,4 +102,4 @@ could not continue compiling the given statement or set of statements.
 
 For more information on the error-handling capabilities of the D4
 language, refer to
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-ExceptionHandling, Exception Handling>>.
+<<D4ImperativeStatements.adoc#Exception_Handling, Exception Handling>>.

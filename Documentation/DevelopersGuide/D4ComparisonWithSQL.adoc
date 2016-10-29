@@ -134,7 +134,7 @@ of a single data manipulation language statement.
 In order to describe the Common SQL language, we will use a modified
 version of Extended Backus-Naur Form (EBNF) notation. For a complete
 description of this notation, refer to
-<<D4Introduction.adoc#D4LGIntroduction-SyntacticConventions, Syntactic Conventions>>.
+<<D4Introduction.adoc#Syntactic_Conventions, Syntactic Conventions>>.
 
 Here then is the syntax for the data manipulation language statement in
 Common SQL:
@@ -154,7 +154,7 @@ The bulk of our discussion will center around the select statement, as
 the mapping for the modification statements is relatively
 straightforward.
 
-The select statement in <<D4LGComparisonWithSQL-CommonSQL, CommonSQL>>
+The select statement in <<Common_SQL, CommonSQL>>
 has the following syntax:
 
 ....
@@ -237,7 +237,7 @@ The <from clause> is required and specifies the initial table from which
 the result should be gathered. Note that the <table specifier> is
 allowed to be a <query expression> in itself. This is known as a _nested
 from_ and is only supported by some systems. We choose to support it in
-<<D4LGComparisonWithSQL-CommonSQL, Common SQL>> because it is an
+<<Common_SQL, Common SQL>> because it is an
 _extremely_ useful extension to SQL. Indeed, without it, SQL is not
 relationally complete.
 
@@ -293,7 +293,7 @@ the result.
 
 The insert statement in SQL allows a row or rows to be inserted into a
 given table variable. The insert statement in
-<<D4LGComparisonWithSQL-CommonSQL, Common SQL>> has the following
+<<Common_SQL, Common SQL>> has the following
 syntax:
 
 ....
@@ -310,7 +310,7 @@ syntax:
 
 The update statement in SQL allows the data in a given table variable to
 be updated. The update statement in
-<<D4LGComparisonWithSQL-CommonSQL, Common SQL>> has the following
+<<Common_SQL, Common SQL>> has the following
 syntax:
 
 ....
@@ -325,7 +325,7 @@ syntax:
 
 The delete statement in SQL allows the data in a given table variable to
 be deleted. The delete statement in
-<<D4LGComparisonWithSQL-CommonSQL, Common SQL>> has the following
+<<Common_SQL, Common SQL>> has the following
 syntax:
 
 ....
@@ -342,7 +342,7 @@ languages. Each DBMS has its own definition of what the language is,
 what features it supports, how it manages data, and what the syntax of
 specific statements is. This section discusses a few of the more
 pervasive implementations, and how they differ from
-<<D4LGComparisonWithSQL-CommonSQL, Common SQL>>, and from each
+<<Common_SQL, Common SQL>>, and from each
 other.
 
 Note that the differences outlined here are mainly syntactic in nature.
@@ -562,7 +562,7 @@ statements become more complex, these differences will become more and
 more apparent.
 
 Also note that unlike SQL, the keyword
-<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement, select>>
+<<Select_Statement, select>>
 in D4 is only part of the statement, it is not part of the expression.
 
 [[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-TheWhereClause]]
@@ -583,7 +583,7 @@ the result. In D4, the equivalent query is:
 select Employee where ID > 3;
 ....
 
-The <<D4TableOperators.adoc#D4LGTableExpressions-Where, where>> operator in D4
+The <<D4TableOperators.adoc#Restriction, where>> operator in D4
 performs the same type of filtering on the result.
 
 [[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-UnravelingtheColumnList]]
@@ -609,8 +609,8 @@ select Employee over { Name };
 ....
 
 Projection in D4 is always done using one of two operators,
-<<D4TableOperators.adoc#D4LGTableExpressions-OverandRemove, over>> and
-<<D4TableOperators.adoc#D4LGTableExpressions-OverandRemove, remove>>. Over allows
+<<D4TableOperators.adoc#Projection, over>> and
+<<D4TableOperators.adoc#Projection, remove>>. Over allows
 the desired columns to be specified, while remove allows the unwanted
 columns to be specified. Thus an alternative formulation of the query
 is:
@@ -638,7 +638,7 @@ select ID, Name, Length(Name) from Employee
 ....
 
 This query illustrates the second of the four tasks specified in the
-<<D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-UnravelingtheColumnList, column list>>,
+<<Unraveling_the_Column_List, column list>>,
 that of extension. In SQL, an expression is allowed to define the value for a
 given column in the result.
 
@@ -648,7 +648,7 @@ The equivalent statement in D4 is:
 select Employee add { Length(Name) NameLength };
 ....
 
-The <<D4TableOperators.adoc#D4LGTableExpressions-Add, add>> operator of D4 allows
+The <<D4TableOperators.adoc#Extension, add>> operator of D4 allows
 columns to be added to the result. The values for the new columns are
 given by the expressions in the add clause.
 
@@ -673,7 +673,7 @@ select ID, Name as LastName from Employee
 ....
 
 This query illustrates the third of the four tasks being specified by
-the <<D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-UnravelingtheColumnList, column list>>,
+the <<Unraveling_the_Column_List, column list>>,
 that of renaming columns. The optional *as* keyword is used to
 specify a new name for the given column.
 
@@ -683,7 +683,7 @@ In D4, the equivalent query is:
 select Employee rename { Name LastName };
 ....
 
-The <<D4TableOperators.adoc#D4LGTableExpressions-Rename, rename>> operator of D4
+The <<D4TableOperators.adoc#Rename, rename>> operator of D4
 allows the names of the columns in a result to be changed. This operator
 has no effect on the values of the columns in the result.
 
@@ -722,8 +722,8 @@ select Employee group add { Count() EmployeeCount };
 On the surface the SQL version of the query looks very similar to the
 extend operator, but in reality, the task is completely different, and
 is the fourth task specified in the
-<<D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-UnravelingtheColumnList, column list>>,
-that of <<D4TableOperators.adoc#D4LGTableExpressions-Aggregate, aggregation>>.
+<<Unraveling_the_Column_List, column list>>,
+that of <<D4TableOperators.adoc#Aggregate, aggregation>>.
 Actually, the task is split between the expressions in the column list,
 and the group by clause, a fact which serves to complicate matters even
 further.
@@ -782,9 +782,9 @@ select Employee
 ....
 
 Note that the actual task of computing the expression to be grouped on
-is relegated to the <<D4TableOperators.adoc#D4LGTableExpressions-Add, add>> operator,
+is relegated to the <<D4TableOperators.adoc#Extension, add>> operator,
 rather than intermixed with the
-<<D4TableOperators.adoc#D4LGTableExpressions-Aggregate, group>> operator. By cleanly
+<<D4TableOperators.adoc#Aggregate, group>> operator. By cleanly
 separating the tasks involved, the complexity of the language is
 reduced, while the power is increased.
 
@@ -815,7 +815,7 @@ select Employee
 
 There is no need to introduce a new concept for filtering, we already
 have that functionality in the
-<<D4TableOperators.adoc#D4LGTableExpressions-Where, where>> operator. Because D4 is an
+<<D4TableOperators.adoc#Restriction, where>> operator. Because D4 is an
 algebra, the result of any operator can be used as an argument to the
 next operator. This allows us to simply add another where referencing
 the EmployeeCount column.
@@ -860,7 +860,7 @@ Because no projection is being performed, it is simply not specified.
 Note also that in D4 there is no *inner* keyword.
 
 To illustrate the next kind of
-<<D4TableOperators.adoc#D4LGTableExpressions-Join, join>>, suppose we are asked 'Get all
+<<D4TableOperators.adoc#Join, join>>, suppose we are asked 'Get all
 possible combinations of two employees.' In SQL we write:
 
 ....
@@ -870,7 +870,7 @@ select *
 ....
 
 This is known as the cross-product, or
-<<D4TableOperators.adoc#D4LGTableExpressions-Times, times>> operator, and specifies
+<<D4TableOperators.adoc#Times, times>> operator, and specifies
 that for each row in the left table and each row in the right table a
 row should appear in the result that is the concatenation of both rows.
 Note that we now have two of each column in the result, and are faced
@@ -902,7 +902,7 @@ select (Employee rename { ID E1.ID, Name E1.Name })
 ....
 
 Clearly this involves an excessive amount of renaming, so D4 introduces
-a variant of the <<D4TableOperators.adoc#D4LGTableExpressions-Rename, rename>>
+a variant of the <<D4TableOperators.adoc#Rename, rename>>
 operator that works for all the columns in a table. Using this operator
 we can rewrite the query as:
 
@@ -913,7 +913,7 @@ select (Employee rename E1) times (Employee rename E2);
 and obtain an equivalent result.
 
 The next kind of join possible in the join clause is called an
-<<D4TableOperators.adoc#D4LGTableExpressions-OuterJoin, outer join>>. There are three
+<<D4TableOperators.adoc#Outer_Join, outer join>>. There are three
 different flavors of outer join in SQL: left, right, and full. Suppose
 we are asked 'Get IDs and Names of all employees together with the
 PhoneNumbers of those employees, if they have one.' In SQL we write:
@@ -938,13 +938,13 @@ select Employee left join EmployeePhone by ID = Employee_ID;
 The right join simply specifies the right table as the one that should
 have unmatched rows included, and a full join states that both sides
 should have unmatched rows included. D4 supports the right join, with
-the <<D4TableOperators.adoc#D4LGTableExpressions-OuterJoin, right join>> operator, but
+the <<D4TableOperators.adoc#Outer_Join, right join>> operator, but
 does not support the full join operator, as it is rarely used, and is
 only shorthand for the union of the left and right joins.
 
 An important difference between the join operators of SQL and D4 is that
 in D4, all joins are required to be
-<<D4TableOperators.adoc#D4LGTableExpressions-Join-NaturalJoins, equi-joins>>. To see why
+<<D4TableOperators.adoc#Natural_Join, equi-joins>>. To see why
 this is so, we must first show that any join can be expressed using a
 combination of cross-product and restrict:
 
@@ -977,7 +977,7 @@ to be equi-joins.
 Union CompatibleNow that we have described the <select expression>, we
 discuss the <table operator clause>, which allows complete select
 expressions to be used as arguments to the
-_<<D4LGQueryExpression, union-compatible>>_ binary table
+_<<Query_Expression, union-compatible>>_ binary table
 operators: union, intersection and difference. Two tables in SQL are
 union-compatible if they have the same number of columns, and the
 columns have assignment-compatible data types, from left to right (i.e.
@@ -1017,7 +1017,7 @@ union clause is allowed to include an optional *all* which indicates
 that duplicates should not be eliminated from the result. If a given row
 appears in both the left and right sides of the union, it will appear
 twice in the result. In D4, duplicates are never allowed, so no such
-option is available for the <<D4TableOperators.adoc#D4LGTableExpressions-Union, union>>
+option is available for the <<D4TableOperators.adoc#Union, union>>
 operator.
 
 Next, we consider the intersect operator. If we change our query to 'Get
@@ -1050,7 +1050,7 @@ select
 Again, note that the SQL version of the operator includes an optional
 *all* which specifies that duplicates should not be eliminated from the
 result. D4 has no such option for the
-<<D4TableOperators.adoc#D4LGTableExpressions-Intersect, intersect>> operator.
+<<D4TableOperators.adoc#Intersect, intersect>> operator.
 
 Finally, the difference operator. If we change our query to 'Get the IDs
 of all employees that have phones and do not have managers' then the SQL
@@ -1083,7 +1083,7 @@ select
 Once again, the SQL version of the operator includes the *all* keyword
 which specifies that duplicate elimination should not occur. D4 has no
 counterpart for this version of the difference operator,
-<<D4TableOperators.adoc#D4LGTableExpressions-Minus, minus>>.
+<<D4TableOperators.adoc#Minus, minus>>.
 
 [[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-TheOrderByClause]]
 === The Order By Clause
@@ -1106,23 +1106,23 @@ select Employee order by { Name };
 
 In both languages, the order by is not part of the expression, rather it
 is part of the specification of how the result should be returned. In
-other words, the <<D4Catalog.adoc#D4LGOrders, order>> by clause in D4 is not an
+other words, the <<D4Catalog.adoc#Orders, order>> by clause in D4 is not an
 operator, it is part of the select statement.
 
 [[D4LGComparisonWithSQL-MappinganSQLQueryIntoD4-DataModificationStatements]]
 === Data Modification Statements
 
 The syntax for the
-<<D4DataManipulation.adoc#D4LGDataManipulation-InsertStatement, insert>>,
-<<D4DataManipulation.adoc#D4LGDataManipulation-UpdateStatement, update>>, and
-<<D4DataManipulation.adoc#D4LGDataManipulation-DeleteStatement, delete>>
+<<D4DataManipulation.adoc#Insert_Statement, insert>>,
+<<D4DataManipulation.adoc#Update_Statement, update>>, and
+<<D4DataManipulation.adoc#Delete_Statement, delete>>
 statements in SQL and D4 is very similar, even identical in some respects,
 so the mapping is relatively straightforward. There are some important logical
 differences between the semantics of the operators, particularly for the
 insert and update.
 
 First, we discuss the
-<<D4DataManipulation.adoc#D4LGDataManipulation-InsertStatement, insert>> statement.
+<<D4DataManipulation.adoc#Insert_Statement, insert>> statement.
 Suppose we want to add a new employee into the list of Employees. In
 SQL, we have:
 
@@ -1150,7 +1150,7 @@ and
 insert Employee redefine { ID := ID + 6 } into Employee;
 ....
 
-Note: the <<D4TableOperators.adoc#D4LGTableExpressions-Redefine, redefine>> operator
+Note: the <<D4TableOperators.adoc#Redefine, redefine>> operator
 is shorthand for an equivalent *add-rename-remove* operation.
 
 Several important points should be made about the above statements:
@@ -1182,7 +1182,7 @@ i.e. the expression could consist of joins, projections, restrictions,
 etc.,.
 
 Next, we discuss the
-<<D4DataManipulation.adoc#D4LGDataManipulation-UpdateStatement, update>> statement.
+<<D4DataManipulation.adoc#Update_Statement, update>> statement.
 Suppose we discover that the employee with ID 6 is really named 'John'.
 In SQL, we would write:
 
@@ -1202,7 +1202,7 @@ important differences:
 * Assignment operator
 +
 The D4 version of the statement uses the assignment operator
-<<D4ImperativeStatements.adoc#D4LGImperativeStatements-Variables-AssignmentStatement, :=>>
+<<D4ImperativeStatements.adoc#Assignment_Statement, :=>>
 to indicate that this is indeed an assignment statement. The current value
 of the variable is being replaced by a new value.
 * Restrictions on target

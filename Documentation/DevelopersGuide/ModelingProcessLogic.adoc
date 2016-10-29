@@ -111,7 +111,7 @@ taken from the Shipping application.
 == Values and Variables
 
 In addition to the scalar types discussed in the
-<<ImplementingDataTypes.adoc#DDGImplementingDataTypes, Implementing Data Types>>
+<<ImplementingDataTypes.adoc#Summary, Implementing Data Types>>
 chapter, the D4 language provides the following categories of types:
 
 * Lists
@@ -201,7 +201,7 @@ link:O-System.ListOperators.html[List Operators].
 
 This section describes how to use row selectors and the system-provided
 operators of the Dataphor Server to construct and manipulate
-<<D4LanguageElements.adoc#D4LGLanguageElements-Values-RowValues, row values>>.
+<<D4LanguageElements.adoc#Row_Values, row values>>.
 
 A row is a set of named values called columns. The row type specifies
 the name and type of each column. A row selector is used to construct a
@@ -212,7 +212,7 @@ var LRow : row { ID : Integer } := row { 5 ID };
 ....
 
 As the preceding example illustrates, variables are allowed to be of any
-<<D4LanguageElements.adoc#D4LGLanguageElements-Types-RowTypes, row type>>.
+<<D4LanguageElements.adoc#Row_Types, row type>>.
 Optionally, the type of the row can be specified as part of the row selector. In this
 case, the expressions in the row selector provide values for the columns
 of the row. For example, to define a row with nil for all columns, use a
@@ -243,7 +243,7 @@ column in the row. If the row does not have a value for the given
 column, the result is nil. If the row variable that is the target of the
 extraction does not have a value, the result of evaluating the
 extraction is also nil.
-Row Update:: Row <<D4DataManipulation.adoc#D4LGDataManipulation-UpdateStatement, update>> allows the
+Row Update:: Row <<D4DataManipulation.adoc#Update_Statement, update>> allows the
 values for specific columns within a given row to be changed. The target
 of a row update must be a variable:
 +
@@ -282,7 +282,7 @@ begin
     var LRow2 := LRow1 add { "John" Name };
 end;
 ....
-Row Redefine:: Row <<D4TableOperators.adoc#D4LGTableExpressions-Redefine, redefine>> allows columns
+Row Redefine:: Row <<D4TableOperators.adoc#Redefine, redefine>> allows columns
 of a given row to be redefined. The current values of the columns in the
 source row are available by column name within the expressions defining
 the new columns. Just as with table redefine, this operator is defined
@@ -375,7 +375,7 @@ type of the initializer expression.
 
 The various operators that can be performed on table values have already
 been discussed in detail in
-<<RepresentingData.adoc#DDGRepresentingDataWithTablesAndViews, Representing Data with Tables and Views>>.
+<<RepresentingData.adoc#Summary, Representing Data with Tables and Views>>.
 As mentioned previously, D4 also allows for the definition of local table
 variables, and for parameters and return values to be table-typed. There are
 several points to be made regarding this functionality.
@@ -448,9 +448,9 @@ an empty set.
 The functionality of a cursor is divided up into __capabilities__.
 Capabilities are requested as part of the cursor definition. For a
 complete description of
-<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement-CursorCapabilities, cursor capabilities>>
+<<D4DataManipulation.adoc#Cursor_Capabilities, cursor capabilities>>
 and other cursor behaviors, refer to the D4 Language Guide discussion of the
-<<D4DataManipulation.adoc#D4LGDataManipulation-SelectStatement, Select Statement>>.
+<<Select_Statement, Select Statement>>.
 
 Once a cursor is open, all operations against it are done using the
 cursor operators:
@@ -720,7 +720,7 @@ within D4.
 
 D4 operators can be written in D4, or host-implemented. For more
 information on host-implemented operators, refer to the
-<<ImplementingDataTypes.adoc#DDGImplementingDataTypes-Host-ImplementedTypesandOperators, Host-Implemented Types and Operators>>
+<<ImplementingDataTypes.adoc#Host-implemented_Types_and_Operators, Host-Implemented Types and Operators>>
 discussion in Implementing Data Types.
 
 [[DDGModelingProcessLogic-Operators-OperatorInvocation]]
@@ -765,7 +765,7 @@ binary built-in operators.] operators, operator precedence must be used
 to determine the order of operations performed. Of course, order of
 operation can always be explicitly specified using parentheses. For a
 complete discussion of operator precedence, refer to
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions-OperatorPrecedence, Operator Precedence>>
+<<D4LanguageElements.adoc#Operator_Precedence, Operator Precedence>>
 in the D4 Language Guide.
 
 [[DDGModelingProcessLogic-Operators-OperatorResolution]]
@@ -796,7 +796,7 @@ invoked. Otherwise, the compiler will report an error indicating why it
 was unable to produce a match.
 
 For a more in-depth discussion of operator resolution, refer to
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-OperatorResolution, Operator Resolution>>
+<<D4Catalog.adoc#Operator_Resolution, Operator Resolution>>
 in the D4 Language Guide.
 
 [[DDGModelingProcessLogic-Operators-AggregateOperators]]
@@ -822,7 +822,7 @@ three sections inclusive) form a single outer scope, with the
 aggregation section forming its own nested scope.
 
 For a more in-depth discussion of aggregate operators, refer to
-<<D4Catalog.adoc#D4LGCatalogElements-Operators-AggregateOperators, Aggregate Operators>>
+<<D4Catalog.adoc#Aggregate_Operators, Aggregate Operators>>
 in the D4 Language Guide.
 
 [[DDGModelingProcessLogic-FlowControl]]
@@ -1140,7 +1140,7 @@ kinds of transaction management services: first, traditional two-phase
 commit transaction management, and second, application transactions.
 
 For a complete discussion of transaction management issues, refer to
-<<DatabaseManagementConcepts.adoc#DDGP1TransactionManagement, Transaction Management>>
+<<DatabaseManagementConcepts.adoc#Transaction_Management, Transaction Management>>
 in Part I of this guide.
 
 [[DDGModelingProcessLogic-TransactionManagement-TransactionManagementServices]]
@@ -1244,7 +1244,7 @@ concurrent transactions that are used by Dataphor Frontend Clients to
 enable data entry in the presence of the business rules being enforced
 on the server. For a complete discussion of application transactions,
 refer to
-<<SpaceBetweenData.adoc#DDGTheSpaceBetweentheData-ApplicationTransactions, Application Transactions>>
+<<SpaceBetweenData.adoc#Application_Transactions, Application Transactions>>
 in the Presentation Layer part of this guide.
 
 [[DDGModelingProcessLogic-Characteristics]]
@@ -1588,7 +1588,7 @@ physical drive without the knowledge of the system in order to produce a
 violation of previously validated data.].
 
 For more information on dynamic execution, see the
-<<D4LGProgrammingTopics-DynamicExecution, Dynamic Execution>>
+<<Dynamic_Execution, Dynamic Execution>>
 section.
 
 [[D4LGProgrammingTopics-DynamicExecution]]
@@ -1631,7 +1631,7 @@ mechanisms of the compiler do not occur until runtime. As a result, the
 Dataphor Server cannot determine the actual characteristics of a given
 statement or expression. For a discussion of how to override these
 characteristics at compiler-time, refer to the
-<<D4LGProgrammingTopics-DynamicExecution, Dynamic Execution>> section.
+<<Dynamic_Execution, Dynamic Execution>> section.
 
 [[DDGModelingProcessLogic-Session-SpecificObjects]]
 == Session-specific Objects
@@ -1705,7 +1705,7 @@ resulting value as the type we know it will be using the *as* operator.
 This operator can then be used to construct the views and operators for
 the order entry user interfaces. For a continued discussion of these
 interfaces, refer to
-<<PuttingItAllTogether.adoc#DDGPuttingItAllTogether-InvoiceManagement, Invoice Management>>
+<<PuttingItAllTogether.adoc#Invoice_Management, Invoice Management>>
 in the Presentation Layer part of this guide.
 
 [[DDGModelingProcessLogic-InvoiceProcessingExample]]

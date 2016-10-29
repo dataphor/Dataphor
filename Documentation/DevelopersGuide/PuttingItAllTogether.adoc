@@ -770,7 +770,7 @@ end
 ....
 
 For a more in-depth discussion of this operator, refer to the
-<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-Session-SpecificObjects, Session-specific Objects>>
+<<ModelingProcessLogic.adoc#Session-Specific_Objects, Session-specific Objects>>
 discussion in the Logical Application Design part of this
 guide. For this discussion, we remark only that the operator includes a
 DAE.ShouldTranslate tag instructing the Dataphor Server that this

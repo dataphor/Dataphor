@@ -37,7 +37,7 @@ The following sections consider each statement in detail.
 The select statement allows for the retrieval of a specified table
 expression. The statement allows the result set to be ordered
 arbitrarily, and allows for the specification of
-<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, cursor>>
+<<ModelingProcessLogic.adoc#Using_Cursors, cursor>>
 level properties such as isolation level and cursor type. The select statement and the cursor selector both use
 the same <cursor definition> production rule to define their syntax.
 
@@ -120,14 +120,14 @@ The select statement in D4 has the following syntax:
 
 The basis of the cursor definition is a table expression specified by
 <expression>. For a detailed description of the <expression> production
-rule, refer to <<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, Expressions>>.
+rule, refer to <<D4LanguageElements.adoc#Expressions, Expressions>>.
 For a complete description of the table operators avaialable in D4,
-refer to <<D4TableOperators.adoc#D4LGTableExpressions, Table Operators>>.
+refer to <<D4TableOperators.adoc#Summary, Table Operators>>.
 
 [[D4LGDataManipulation-SelectStatement-OrderingTheResultSet]]
 === Ordering the Result Set
 
-The result set for a <<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, cursor>> is ordered as
+The result set for a <<ModelingProcessLogic.adoc#Using_Cursors, cursor>> is ordered as
 specified by the <order clause> or <browse clause>. An _order_
 specification simply indicates the requested order for the result set,
 whereas a _browse_ specification indicates not only the requested order,
@@ -176,7 +176,7 @@ ID Name
 [[D4LGDataManipulation-SelectStatement-CursorCapabilities]]
 === Cursor Capabilities
 
-l<<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, cursor>>
+l<<ModelingProcessLogic.adoc#Using_Cursors, cursor>>
 capabilities describe the behaviors available for the cursor. These include
 items such as updatability, backwards navigation, searching, and bookmarking.
 The D4 language defines the following cursor capabilities:
@@ -442,7 +442,7 @@ query. This functionality is not exposed in D4.
 [[D4LGDataManipulation-SelectStatement-CursorIsolation]]
 === Cursor Isolation
 
-The isolation of a <<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, cursor>> determines how the
+The isolation of a <<ModelingProcessLogic.adoc#Using_Cursors, cursor>> determines how the
 cursor runs with respect to other active transactions in the system. The
 settings for this behavior correspond roughly to the isolation levels
 available for transaction processing.
@@ -466,7 +466,7 @@ control.
 [[D4LGDataManipulation-SelectStatement-CursorType]]
 === Cursor Type
 
-The type of a <<ModelingProcessLogic.adoc#DDGModelingProcessLogic-ValuesandVariables-UsingCursors, cursor>>
+The type of a <<ModelingProcessLogic.adoc#Using_Cursors, cursor>>
 determines how the cursor is materialized and how it behaves with respect to updates being made
 through the cursor, and by other users of the system. Cursors may be
 requested either static or dynamic.
@@ -599,7 +599,7 @@ The update statement in D4 has the following syntax:
 The update must not violate any constraint of the database.
 
 The variable or expression given by
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>>
+<<D4LanguageElements.adoc#Expressions, <expression>>>
 need not be a table variable. The target can be a table expression of arbitrary
 complexity. In this case, the updatability mechanism for views is used
 to perform the update. For more information on how modifications are
@@ -616,7 +616,7 @@ expression specifying the new value for each column can access the
 current values of the target row by name.
 
 The update statement includes an optional
-<<D4TableOperators.adoc#D4LGTableExpressions-Where, where>> specification that
+<<D4TableOperators.adoc#Restriction, where>> specification that
 indicates which rows of the target expression are to be updated. It is
 an error to specify an update condition when the target is a row
 variable.
@@ -628,7 +628,7 @@ update Customer set { Name := "Sally Johnson" } where ID = 5;
 ....
 
 [[D4LGDataManipulation-DeleteStatement]]
-== Delete
+== Delete Statement
 
 The delete statement allows the data in a given table variable or
 expression to be removed.
@@ -643,7 +643,7 @@ The delete statement in D4 has the following syntax:
 The delete must not violate any constraint of the database.
 
 The variable or expression given by
-<<D4LanguageElements.adoc#D4LGLanguageElements-Expressions, <expression>>>
+<<D4LanguageElements.adoc#Expressions, <expression>>>
 need not be a table variable. The target can be a table expression of arbitrary
 complexity. In this case, the updatability mechanism for views is used
 to perform the delete. For more information on how modifications are

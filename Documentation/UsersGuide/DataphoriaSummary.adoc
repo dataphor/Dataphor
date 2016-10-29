@@ -46,4 +46,4 @@ It is worth noting that the Dataphoria IDE is itself a Dataphor Frontend
 Client, and the majority of the user interfaces exposed in the IDE are
 derived from the system catalog of the Dataphor Server.
 
-<<Dataphoria.adoc#DUGP1Dataphoria-Introduction, Full Dataphoria documentation>>
+<<Dataphoria.adoc#Introduction, Full Dataphoria documentation>>

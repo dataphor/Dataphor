@@ -309,7 +309,7 @@ or may not exist.
 
 A detailed discussion of how each reference is considered during the
 elaboration process is deferred until
-<<FormAutomation.adoc#DDGTheAutomationofForms, The Automation of Forms>>.
+<<FormAutomation.adoc#Summary, The Automation of Forms>>.
 
 == Data Access Layer
 
@@ -351,7 +351,7 @@ or using pessimistic transactions. The resulting user interfaces
 naturally manage concurrency issues and minimize resource contention.
 
 Each of these services will be discussed in detail in
-<<SpaceBetweenData.adoc#DDGTheSpaceBetweentheData, The Space Between the Data>>.
+<<SpaceBetweenData.adoc#Summary, The Space Between the Data>>.
 
 == Forms
 
@@ -570,7 +570,7 @@ Frontend.Derive(<expression>, <pagetype>, <master key names>, <detail key names>
 This operator invokes the Frontend Server process of user interface
 derivation based on the given expression. For more information on the
 usage and functioning of this operator, refer to
-<<FormAutomation.adoc#DDGTheAutomationofForms, The Automation of Forms>> later in this
+<<FormAutomation.adoc#Summary, The Automation of Forms>> later in this
 part.
 
 For a more complete listing of the available document manipulation

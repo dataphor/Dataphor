@@ -207,5 +207,5 @@ For more information on building host-implemented scalar type maps,
 refer to the Dataphor Extender's Development Kit.
 
 For more information on the library registration process, refer to the
-<<WorkingWithLibraries.adoc#DDGWorkingWithLibraries, Working with Libraries>>
+<<WorkingWithLibraries.adoc#Summary, Working with Libraries>>
 chapter of the Logical Application Design part of this guide.
