@@ -11,8 +11,8 @@
 This chapter describes each Dataphor metadata tag.
 
 .Further reference
-<<../DevelopersGuide/D4Catalog.adoc#Metadata, Tags in Data Definition Language (DDL) statements>>
-<<../DevelopersGuide/D4TableOperators.adoc#Adorn, The Adorn Operator>>
+* <<../DevelopersGuide/D4Catalog.adoc#Metadata, Tags in Data Definition Language (DDL) statements>>
+* <<../DevelopersGuide/D4TableOperators.adoc#Adorn, The Adorn Operator>>
 
 [[FTRTagsDescriptions-DAETags]]
 == DAE Tags

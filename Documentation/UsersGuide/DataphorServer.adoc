@@ -18,10 +18,9 @@ Dataphor Server is called a Dataphor Server __instance__, and can be
 hosted within a Microsoft Windows Service, or directly within a .NET
 application domain.
 
-Dataphor ServerRolesIn providing the services necessary to enable AAD,
-the Dataphor Server plays many different roles that have traditionally
-been filled by independent software systems. Some of these roles
-include:
+In providing the services necessary to enable AAD, the Dataphor Server
+plays many different roles that have traditionally been filled by
+independent software systems. Some of these roles include:
 
 * Database Management System
 * Application Server
