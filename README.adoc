@@ -1,6 +1,6 @@
 = Dataphor
 :author: Alphora
-:doctype: chapter
+:doctype: book
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
