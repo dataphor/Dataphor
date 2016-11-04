@@ -22,9 +22,9 @@ based on security context.
 
 There are three basic primitives in the Dataphor security model:
 
-* Users
-* Rights
-* Roles
+* <<Users, Users>>
+* <<Rights, Rights>>
+* <<Roles, Roles>>
 
 In general, rights and roles will be defined by the application
 developer as part of the application. Ideally, roles will be made up of
@@ -64,33 +64,33 @@ were defined.
 The Dataphor Server defines the following system rights that are not
 associated with any catalog object:
 
-* System.CreateType - Protects invocation of the create type statement.
-* System.CreateTable - Protects invocation of the create table
+`System.CreateType`:: Protects invocation of the create type statement.
+`System.CreateTable`:: Protects invocation of the create table
 statement.
-* System.CreateView - Protects invocation of the create view statement.
-* System.CreateOperator - Protects invocation of the create operator and
+`System.CreateView`:: Protects invocation of the create view statement.
+`System.CreateOperator`:: Protects invocation of the create operator and
 create aggregate operator statements.
-* System.CreateDevice - Protects invocation of the create device
+`System.CreateDevice`:: Protects invocation of the create device
 statement.
-* System.CreateConstraint - Protects invocation of the create constraint
+`System.CreateConstraint`:: Protects invocation of the create constraint
 statement.
-* System.CreateReference - Protects invocation of the create reference
+`System.CreateReference`:: Protects invocation of the create reference
 statement.
-* System.CreateRole - Protects invocation of the create role statement.
-* System.CreateRight - Protects invocation of the create right
+`System.CreateRole`:: Protects invocation of the create role statement.
+`System.CreateRight`:: Protects invocation of the create right
 statement.
-* System.CreateReference - Protects invocation of the create reference
+`System.CreateReference`:: Protects invocation of the create reference
 statement.
-* System.CreateUser - Protects the creation of users.
-* System.AlterUser - Protects the administration of users.
-* System.DropUser - Protects the deletion of users.
-* System.MaintainSystemDeviceUsers - Protects maintenance of the system
+`System.CreateUser`:: Protects the creation of users.
+`System.AlterUser`:: Protects the administration of users.
+`System.DropUser`:: Protects the deletion of users.
+`System.MaintainSystemDeviceUsers`:: Protects maintenance of the system
 device user mapping for devices. Without this right, a user cannot
 specify the device-specific credentials for the system user for a given
 device.
-* System.MaintainUserSessions - Protects configuration of user sessions
+`System.MaintainUserSessions`:: Protects configuration of user sessions
 through the System.Sessions and System.Processes catalog tables.
-* System.HostImplementation - Protects the use of host implementation
+`System.HostImplementation`:: Protects the use of host implementation
 structures. Without this right, a user cannot specify that a given D4
 structure is implemented by a specified host implementation structure.
 
@@ -106,12 +106,12 @@ ownership.
 
 The Dataphor Server defines the following roles:
 
-* System.Admin
-* System.User
-* System.CatalogUser
-* Security.SecurityUser
-* Frontend.User
-* Frontend.Developer
+* `System.Admin`
+* `System.User`
+* `System.CatalogUser`
+* `Security.SecurityUser`
+* `Frontend.User`
+* `Frontend.Developer`
 
 [[DUGP3Security-SecurityManagement]]
 == Security Management
@@ -188,14 +188,14 @@ Whenever a catalog object is created in the DAE, an appropriate set of
 rights is also created to protect access to the object. The rights
 created for each object type are as follows:
 
-* Type - Alter, Drop
-* Operator - Alter, Drop, Execute
-* Table or View - Alter, Drop, Select, Insert, Update, Delete
-* Device - Alter, Drop, Read, Write, CreateStore, AlterStore, DropStore,
+Type:: Alter, Drop
+Operator:: Alter, Drop, Execute
+Table or View:: Alter, Drop, Select, Insert, Update, Delete
+Device:: Alter, Drop, Read, Write, CreateStore, AlterStore, DropStore,
 Reconcile, MaintainUsers
-* Constraint - Alter, Drop
-* Reference - Alter, Drop
-* Role - Alter, Drop
+Constraint:: Alter, Drop
+Reference:: Alter, Drop
+Role:: Alter, Drop
 
 The created right is named by concatenating the name of the object with
 the name of the right. For example, a table named Employee will have a

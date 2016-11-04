@@ -1,7 +1,6 @@
 = Introduction
 :author: Alphora
 :doctype: book
-
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
@@ -61,29 +60,19 @@ identifier inside the angle brackets is the name of the non-terminal.
 Symbols are used to indicate how terminals and non-terminals are grouped
 together. The following symbols are used in EBNF:
 
-* Pipe (|)
-+
-The pipe is used to indicate an exclusive or. For example the sequence a
-| b means that the result could be a or b but not both.
-* Parentheses (( and ))
-+
-Parentheses are used to force a grouping within the sequence. For
-example the sequence a (b | c) produces the strings ab or ac, while the
-sequence (a b) | c produces the strings ab or c.
-* Brackets ([ and ])
-+
-Brackets are used to indicate that a given sequence is optional. For
-example a [ b ] means that the result could be a or ab.
-* Braces (\{ and })
-+
-Braces are used to indicate that a given sequence may appear as many
-times as desired, including none. For example a \{ b } means that the
-result could be a, or ab, or abb, etc.,.
-* Double Quotes (")
-+
-Double quotes are used to indicate that a character that would normally
-be a symbol should be treated as a terminal. For example a "\{" b "}"
-means that the result should be a \{ b }.
+Pipe – `|`:: The pipe is used to indicate an exclusive or. For example, the sequence `a | b`
+means that the result could be `a` or `b` but not both.
+Parentheses – `(` and `)`:: Parentheses are used to force a grouping within the sequence. For
+example the sequence `a (b | c)` produces the strings `ab` or `ac`, while the
+sequence `(a b) | c` produces the strings `ab` or `c`.
+Brackets – `[` and `]`:: Brackets are used to indicate that a given sequence is optional. For
+example `a [ b ]` means that the result could be `a` or `ab`.
+Braces – `{` and `}`:: Braces are used to indicate that a given sequence may appear as many
+times as desired, including none. For example `a { b }` means that the
+result could be `a`, or `ab`, or `abb`, etc.
+Double Quotes – `"`:: Double quotes are used to indicate that a character that would normally
+be a symbol should be treated as a terminal. For example, `a "{" b "}"`
+means that the result should be `a { b }`.
 
 Every other character in EBNF is a terminal. Terminals should appear in
 the result exactly as written in the production rules.
@@ -127,34 +116,26 @@ Ident#12
 In addition to basic EBNF, the notation used in the guide has the
 following extensions:
 
-* Lists
-+
-The word _list_ appearing at the end of the name of a non-terminal
+Lists:: The word _list_ appearing at the end of the name of a non-terminal
 indicates the existence of an implicit production rule given by:
 +
 ....
 <XYZ list> ::= { <XYZ> }
 ....
-* Comma separated lists
-+
-The word _commalist_ appearing at the end of the name of a non-terminal
+Comma-separated lists:: The word _commalist_ appearing at the end of the name of a non-terminal
 indicates the existence of an implicit production rule given by:
 +
 ....
 <XYZ commalist> ::= [ <XYZ> {, <XYZ> } ]
 ....
-* Semi-colon separated lists
-+
-The word _semicolonlist_ appearing at the end of the name of a
+Semi-colon separated lists:: The word _semicolonlist_ appearing at the end of the name of a
 non-terminal indicates the existence of an implicit production rule
 given by:
 +
 ....
 <XYZ semicolonlist> ::= [ <XYZ> {; <XYZ> } ]
 ....
-* Non-empty lists
-+
-The word _ne_ appearing at the beginning of the name of a non-terminal
+Non-empty lists:: The word _ne_ appearing at the beginning of the name of a non-terminal
 with the word __list__, __commalist__, or _semicolonlist_ appearing at
 the end of the non-terminal indicates the existence of an implicit
 production rule given by:

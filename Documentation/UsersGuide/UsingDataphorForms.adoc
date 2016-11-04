@@ -13,19 +13,13 @@
 Dataphor Applications consist of a collection of user interfaces called
 __forms__. These forms generally fall into three different categories:
 
-* Dashboards
-+
-Dashboard forms provide access to various functions of the application.
+Dashboard:: Dashboard forms provide access to various functions of the application.
 Most applications will begin with a dashboard, or main form, that
 provides various starting points for the application.
-* Browses
-+
-Browse forms display a list of items such as employees or accounts.
+Browse:: Browse forms display a list of items such as employees or accounts.
 Browse forms typically allow searching and the ability to manage the
 list of items by adding, editing, viewing, and deleting items.
-* Views
-+
-View forms display a single item and any related data such as a single
+View:: View forms display a single item and any related data such as a single
 employee record. View forms can be used to add a new item, as well as
 edit or view an existing item.
 

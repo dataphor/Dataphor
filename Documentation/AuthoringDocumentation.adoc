@@ -41,6 +41,11 @@ At this point, references to legacy documentation in the Dataphor Reference book
 Additionally, while many fundamentals have not changed in several years of development, Dataphor has gone through several major changes since the majority of its documentation was penned.
 If you notice any major changes which need to be made, please raise the issue in Github or submit a pull request if you have a solution.
 
+== Advice
+
+* Everything listed as a level 2 item ( == ) in `GLOSSARY.adoc` will be matched to the content of each page in the documentation and subsequently linked back to its definition.
+In other words, terms you declare in the glossary will get underlined in the rest of the documentation. So be sure to add terms which are common but not too common. 
+
 == Admonitions
 
 To avoid more misery in the world if possible, the following list of admonitions should preclude the most dire situations:

@@ -14,9 +14,9 @@ For more information, check out our http://dataphor.org[website].
 [[Documentation]]
 == Documentation
 
-* link:Documentation/UsersGuide/UsersGuide.adoc[Dataphor User's Guide]
-* link:Documentation/DevelopersGuide/DevelopersGuide.adoc[Dataphor Developer's Guide]
-* link:Documentation/Reference/Reference.adoc[Dataphor Reference]
+* https://documentation.dataphor.com/UsersGuide/UsersGuide.html[Dataphor User's Guide]
+* https://documentation.dataphor.com/DevelopersGuide/DevelopersGuide.html[Dataphor Developer's Guide]
+* https://documentation.dataphor.com/DataphorReference/DataphorReference.html[Dataphor Reference]
 
 == Installation
 

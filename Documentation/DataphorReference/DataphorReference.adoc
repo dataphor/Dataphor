@@ -21,6 +21,7 @@ image::../Images/Dataphor-Logo.gif[Dataphor Logo]
 
 Dataphor Reference documents the Dataphor product, including the Call-Level Interface (CLI), Dataphor Frontend, Tags, documentation for all the libraries that ship with the Dataphor product, as
 well as class references for using Dataphor's Data Access Layers (DAL) from a Microsoft .NET language such as C#.
+
 == Legal
 
 Information in this Dataphor Documentation is subject to change without notice.

@@ -23,30 +23,18 @@ applications.
 The Dataphor Server provides several devices as shown in the following
 list:
 
-* Memory Device
-+
-The memory device provides in-memory storage. Data stored in this device
+Memory Device:: The memory device provides in-memory storage. Data stored in this device
 is not persisted to disk.
-* Simple Device
-+
-The simple device provides basic persistence for tables in the Dataphor
+Simple Device:: The simple device provides basic persistence for tables in the Dataphor
 Server. Although the device is transactional, concurrency is enforced
 with exclusive table access. As a result, this device is intended for
 single-user applications with low data volume.
-* Microsoft SQL Server
-+
-This device provides full integration with Microsoft SQL Server.
-* Oracle
-+
-This device provides full integration with the Oracle database system.
-* DB2
-+
-This device provides full integration with the IBM DB2 Universal DBMS.
+Microsoft SQL Server:: This device provides full integration with Microsoft SQL Server.
+Oracle:: This device provides full integration with the Oracle database system.
+DB2:: This device provides full integration with the IBM DB2 Universal DBMS.
 It is also capable of providing full integration with the IBM DB2/400
 DBMS, by setting the Product attribute of the device.
-* Generic SQL
-+
-This device provides a starting point for building Device interfaces to
+Generic SQL:: This device provides a starting point for building Device interfaces to
 other SQL based database systems.
 
 Additionally, developers can provide custom devices to enable access to
@@ -56,7 +44,7 @@ of executing update statements, or of accepting row-level update
 commands.
 
 As more devices are built, they will be included with the product. Check
-the Alphora website at www.alphora.com for the latest information on
+the Alphora website at http://www.alphora.com for the latest information on
 available devices.
 
 For more information on building custom devices, refer to the Dataphor

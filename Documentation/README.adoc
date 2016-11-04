@@ -7,7 +7,7 @@
 
 == Summary
 
-Welcome to Dataphor's documentation suite.
+Welcome to http://www.dataphor.com[Dataphor's] documentation suite.
 
 We've divided our documentation into three main categories:
 

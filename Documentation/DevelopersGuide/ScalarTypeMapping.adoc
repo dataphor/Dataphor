@@ -1,7 +1,6 @@
 = Scalar Type Mapping
 :author: Alphora
 :doctype: book
-
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
@@ -40,15 +39,15 @@ the domains.
 In reality, the domains often have differing sets of values, and the
 task of the scalar type map designer is to find the __best fit__. For
 some types, such as a four-byte integer, the type map is uniquely
-one-to-one. For other types, such as DateTime, the range of possible
+one-to-one. For other types, such as `DateTime`, the range of possible
 values is so dramatically different from one system to the next that a
 perfect fit becomes impossible. In these scenarios, the notion of
 _acceptable range_ is used to attempt to guarantee functionality under a
-given set of values. In the case of DateTime, this range is from January
-1, 1900 00:00:00.0, to December 31, 2100 23:23:59.0, accurate to the
+given set of values. In the case of `DateTime`, this range is from
+`January 1, 1900 00:00:00.0`, to `December 31, 2100 23:23:59.0`, accurate to the
 second.
 
-Of course this range is well below the actual range of a DateTime value
+Of course this range is well below the actual range of a `DateTime` value
 within the Dataphor Server, but it represents a kind of least common
 denominator among all target systems, and is based on the assumption
 that all conceivable systems will at least be able to provide support

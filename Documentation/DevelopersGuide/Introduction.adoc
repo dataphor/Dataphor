@@ -1,7 +1,6 @@
 = Introduction
 :author: Alphora
 :doctype: book
-
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
@@ -13,27 +12,19 @@
 
 == Summary
 
-This part of the Dataphor Developer's Guide provides an introduction to
-the Dataphor product from the perspective of an application developer.
+This part of the Dataphor Developer's Guide provides an introduction to Dataphor
+from the perspective of an application developer.
 It introduces all the terms, concepts, and technologies necessary to
-utilize the Dataphor product, and lays the groundwork for the
-declarative approach. The part is organized as follows:
+utilize Dataphor, and lays the groundwork for the declarative approach.
+The part is organized as follows:
 
-* Application Development Considerations
-+
-Discusses application development in general, the technical difficulties
+<<ApplicationDevelopmentConsiderations.adoc#Summary, Application Development Considerations>>:: Discusses application development in general, the technical difficulties
 associated with building applications, and the declarative approach to
 application development as a solution to these problems.
-* Database Management Concepts
-+
-Provides a survey of database theory and database management systems in
+<<DatabaseManagementConcepts.adoc#Summary, Database Management Concepts>>:: Provides a survey of database theory and database management systems in
 general.
-* Application Development Concepts
-+
-Discusses application development concepts in general and describes how
+<<ApplicationDevelopmentConcepts.adoc#Summary, Application Development Concepts>>:: Discusses application development concepts in general and describes how
 the declarative approach can be applied to automate the development
 process.
-* Dataphor Product Anatomy
-+
-Provides a brief description of Dataphor product anatomy, and how it
+<<DataphorProductAnatomy.adoc#Summary, Dataphor Product Anatomy>>:: Provides a brief description of Dataphor product anatomy, and how it
 enables the declarative approach.

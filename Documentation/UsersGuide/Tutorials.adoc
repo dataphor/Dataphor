@@ -1,14 +1,14 @@
 = Tutorials
 :author: Alphora
 :doctype: book
-
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
 
 == Summary
 
-.Tutorial libraries bundled with Dataphoria software
+The following tutorial libraries are bundled with Dataphoria:
+
 . link:Tutorial_MovieRental.adoc[Movie Rental]
 . link:Tutorial_BookPublishing.adoc[Book Publishing (with Pubs sample database)]
 . link:Tutorial_FrontendComponents.adoc[Frontend Components]
@@ -16,9 +16,6 @@
 [[Alphora.Dataphor.Keys]]
 == Editor Shortcut Keys
 
-Shortcut Keys
-
-Keys, Shortcut
 
 The editor has the following commands and associated shortcut keys:
 

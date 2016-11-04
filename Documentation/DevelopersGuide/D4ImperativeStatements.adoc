@@ -1,7 +1,6 @@
 = Imperative Statements
 :author: Alphora
 :doctype: book
-
 :data-uri:
 :lang: en
 :encoding: iso-8859-1

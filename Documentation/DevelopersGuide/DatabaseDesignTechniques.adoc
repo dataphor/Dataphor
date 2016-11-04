@@ -1431,18 +1431,14 @@ references listed in the bibliography section of this guide, the
 following list gives some excellent references for further study in
 database design principles and techniques:
 
-* Principle of Orthogonal Design
-+
-The Principle of Orthogonal Design basically states that within a given
+Principle of Orthogonal Design:: The Principle of Orthogonal Design basically states that within a given
 database, no two tables should have overlapping meanings. In other
 words, it should always be possible to determine in which table a given
 proposition should be placed, based on the predicate of the tables in
 the database. This principle is introduced in the paper A New Database
 Design Principle published in Relational Database Writings 1991-1994
 [9].
-* Principle of Cautious Design
-+
-The Principle of Cautious Design is a general guideline, not just for
+Principle of Cautious Design:: The Principle of Cautious Design is a general guideline, not just for
 database design, but for software development in general. Basically, the
 principle states that whenever we are faced with a choice between two
 designs, and the first design is upward compatible with the second (i.e.
@@ -1452,22 +1448,16 @@ implications of the second design are not yet known, the first design
 choice is recommended. This principle is discussed fully in the paper
 The Principle of Cautious Design published in Relational Database
 Writings 1989-1991 [8].
-* Database Design
-+
-Obviously, this topic is extremely broad, but a particularly concise and
+Database Design:: Obviously, this topic is extremely broad, but a particularly concise and
 insightful treatise on the subject can found in the paper titled A
 Practical Approach to Database Design by C. J. Date, published in
 Relational Database Selected Writings [6].
-* Normalization Theory
-+
-Perhaps the best introduction to normalization theory can be found in An
+Normalization Theory:: Perhaps the best introduction to normalization theory can be found in An
 Introduction to Database Systems [1]. In addition, several papers
 available from _www.dbdebunk.com_ discuss the various costs associated
 with denormalization. In particular The Costly Illusion: Normalization,
 Integrity, and Performance [22] provides an in-depth discussion of these
 issues.
-* Temporal Data
-+
-As mentioned in the section on temporal data, the book Temporal Data and
+Temporal Data:: As mentioned in the section on temporal data, the book Temporal Data and
 the Relational Model [19] provides an excellent treatment of this
 complex problem.

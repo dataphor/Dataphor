@@ -1,15 +1,12 @@
 = Starting Dataphor Applications
 :author: Alphora
 :doctype: book
-
-:icons:
 :data-uri:
 :lang: en
 :encoding: iso-8859-1
 
 [[DUGP1UsingDataphorApplications-StartingaDataphorApplication]]
 == Summary
-Dataphor ApplicationStarting a Dataphor Application
 
 The first step in running a Dataphor Application is to start the desired
 Frontend Client. This can be accomplished in a variety of ways,
@@ -74,12 +71,12 @@ image::../Images/WindowsClientShortcutProperties.bmp[Windows Client Properties -
 
 In the Target: text box, add the following to the end of the file name:
 
-* To automatically select the alias to use: -alias <alias name> where
-<alias name> is the name of the alias to be used. For example: -alias
-Remote
-* To automatically select the application to run: -application
-"<application id>" where <application id> is the application identifier
-for the application. For example: -application "Shipping"
+* Automatically select the alias to use: `-alias <alias name>`, where
+`<alias name>` is the name of the alias to be used. For example:
+`-alias Remote`
+* Automatically select the application to run: `-application "<application id>"`
+where `<application id>` is the application identifier
+for the application. For example: `-application "Shipping"`
 
 The application id is a unique identifier for the application on the
 server. To obtain this identifier for a specific application, consult
