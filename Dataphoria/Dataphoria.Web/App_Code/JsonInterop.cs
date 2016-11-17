@@ -1,5 +1,4 @@
-﻿using Alphora.Dataphor.DAE.NativeCLI;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Dataphoria.Web
@@ -24,127 +23,127 @@ namespace Alphora.Dataphor.Dataphoria.Web
 			}
 		}
 
-		public static JToken NativeToJson(object result)
-		{
-			if (result == null)
-			{
-				return new JValue((object)null);
-			}
+		//public static JToken NativeToJson(object result)
+		//{
+		//	if (result == null)
+		//	{
+		//		return new JValue((object)null);
+		//	}
 
-			var resultType = result.GetType();
+		//	var resultType = result.GetType();
 
-			return JToken.FromObject(result);
-		}
+		//	return JToken.FromObject(result);
+		//}
 
-        public static JToken NativeScalarValueToJson(NativeScalarValue value)
-        {
-			if (value == null)
-			{
-				return new JValue((object)null);
-			}
+  //      public static JToken NativeScalarValueToJson(NativeScalarValue value)
+  //      {
+		//	if (value == null)
+		//	{
+		//		return new JValue((object)null);
+		//	}
 
-            return JToken.FromObject(value.Value);
-        }
+  //          return JToken.FromObject(value.Value);
+  //      }
 
-        public static JToken NativeRowValueToJson(NativeRowValue value)
-        {
-            var result = new JObject();
+  //      public static JToken NativeRowValueToJson(NativeRowValue value)
+  //      {
+  //          var result = new JObject();
 
-            for (int i = 0; i < value.Columns.Length; i++)
-            {
-                result.Add(value.Columns[i].Name, NativeValueToJson(value.Values[i]));
-            }
+  //          for (int i = 0; i < value.Columns.Length; i++)
+  //          {
+  //              result.Add(value.Columns[i].Name, NativeValueToJson(value.Values[i]));
+  //          }
 
-            return result;
-        }
+  //          return result;
+  //      }
 
-        public static JToken NativeListValueToJson(NativeListValue value)
-        {
-            var result = new JArray();
+  //      public static JToken NativeListValueToJson(NativeListValue value)
+  //      {
+  //          var result = new JArray();
 
-            for (int i = 0; i < value.Elements.Length; i++)
-            {
-                result.Add(NativeValueToJson(value.Elements[i]));
-            }
+  //          for (int i = 0; i < value.Elements.Length; i++)
+  //          {
+  //              result.Add(NativeValueToJson(value.Elements[i]));
+  //          }
             
-            return result;
-        }
+  //          return result;
+  //      }
 
-        public static JToken UntypedNativeValueToJson(object value)
-        {
-            var row = value as NativeRowValue;
-            if (row != null)
-            {
-                return NativeRowValueToJson(row);
-            }
+  //      public static JToken UntypedNativeValueToJson(object value)
+  //      {
+  //          var row = value as NativeRowValue;
+  //          if (row != null)
+  //          {
+  //              return NativeRowValueToJson(row);
+  //          }
 
-            var list = value as NativeListValue;
-            if (list != null)
-            {
-                return NativeListValueToJson(list);
-            }
+  //          var list = value as NativeListValue;
+  //          if (list != null)
+  //          {
+  //              return NativeListValueToJson(list);
+  //          }
 
-            var table = value as NativeTableValue;
-            if (table != null)
-            {
-                return NativeTableValueToJson(table);
-            }
+  //          var table = value as NativeTableValue;
+  //          if (table != null)
+  //          {
+  //              return NativeTableValueToJson(table);
+  //          }
 
-            return NativeToJson(value);
-        }
+  //          return NativeToJson(value);
+  //      }
 
-        public static JToken NativeTableValueToJson(NativeTableValue value)
-        {
-            var result = new JArray();
+  //      public static JToken NativeTableValueToJson(NativeTableValue value)
+  //      {
+  //          var result = new JArray();
 
-            for (int r = 0; r < value.Rows.Length; r++)
-            {
-                var row = value.Rows[r];
-                var resultRow = new JObject();
+  //          for (int r = 0; r < value.Rows.Length; r++)
+  //          {
+  //              var row = value.Rows[r];
+  //              var resultRow = new JObject();
 
-                for (int c = 0; c < value.Columns.Length; c++)
-                {
-                    resultRow.Add(value.Columns[c].Name, UntypedNativeValueToJson(row[c]));
-                }
+  //              for (int c = 0; c < value.Columns.Length; c++)
+  //              {
+  //                  resultRow.Add(value.Columns[c].Name, UntypedNativeValueToJson(row[c]));
+  //              }
 
-                result.Add(resultRow);
-            }
+  //              result.Add(resultRow);
+  //          }
 
-            return result;
-        }
+  //          return result;
+  //      }
 
-        public static JToken NativeValueToJson(NativeValue value)
-        {
-            var scalar = value as NativeScalarValue;
-            if (scalar != null)
-            {
-                return NativeScalarValueToJson(scalar);
-            }
+  //      public static JToken NativeValueToJson(NativeValue value)
+  //      {
+  //          var scalar = value as NativeScalarValue;
+  //          if (scalar != null)
+  //          {
+  //              return NativeScalarValueToJson(scalar);
+  //          }
 
-            var row = value as NativeRowValue;
-            if (row != null)
-            {
-                return NativeRowValueToJson(row);
-            }
+  //          var row = value as NativeRowValue;
+  //          if (row != null)
+  //          {
+  //              return NativeRowValueToJson(row);
+  //          }
 
-            var list = value as NativeListValue;
-            if (list != null)
-            {
-                return NativeListValueToJson(list);
-            }
+  //          var list = value as NativeListValue;
+  //          if (list != null)
+  //          {
+  //              return NativeListValueToJson(list);
+  //          }
 
-            var table = value as NativeTableValue;
-            if (table != null)
-            {
-                return NativeTableValueToJson(table);
-            }
+  //          var table = value as NativeTableValue;
+  //          if (table != null)
+  //          {
+  //              return NativeTableValueToJson(table);
+  //          }
 
-			return null;
-        }
+		//	return null;
+  //      }
 
-        public static JToken NativeResultToJson(NativeResult result)
-        {
-            return NativeValueToJson(result.Value);
-        }
+  //      public static JToken NativeResultToJson(NativeResult result)
+  //      {
+  //          return NativeValueToJson(result.Value);
+  //      }
 	}
 }
