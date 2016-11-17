@@ -1,15 +1,11 @@
 ﻿using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.NativeCLI;
 using Alphora.Dataphor.DAE.REST;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Alphora.Dataphor.Dataphoria.Processing
 {
