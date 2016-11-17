@@ -49,10 +49,6 @@
       <Project>{6ec1f378-510b-48d0-8d00-e36bef214766}</Project>
       <Name>Base</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\DAE.NativeCLI\DAE.NativeCLI.csproj">
-      <Project>{7ccba92d-bb78-49e3-8c11-4cc29b173296}</Project>
-      <Name>DAE.NativeCLI</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\DAE.SQLCE\DAE.SQLCE.csproj">
       <Project>{788980f0-5a85-4f9a-9e6a-56746e7d37c7}</Project>
       <Name>DAE.SQLCE</Name>
