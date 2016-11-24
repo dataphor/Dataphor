@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<designerscontainer xmlns:bop="www.alphora.com/schemas/bop" xmlns="Alphora.Dataphor.Frontend.Server.Device,Alphora.Dataphor.Frontend.Server">
+	<designers.designer classname="Alphora.Dataphor.Dataphoria.TextEditor.D4Editor,Dataphoria" description="D4 Script Editor" id="D4" />
+	<designers.designer classname="Alphora.Dataphor.Dataphoria.TextEditor.D4Editor,Dataphoria" description="RealSQL Script Editor" id="SQL" />
+	<designers.designer classname="Alphora.Dataphor.Dataphoria.TextEditor.TextEditor,Dataphoria" description="Text Editor" id="Text" />
+	<designers.designer classname="Alphora.Dataphor.Dataphoria.TextEditor.TextEditor,Dataphoria" description="XML Editor" id="XML" />
+	<designers.designer classname="Alphora.Dataphor.Dataphoria.TextEditor.TextEditor,Dataphoria" description="VB.NET Script Editor" id="VB" />
+	<designers.designer classname="Alphora.Dataphor.Dataphoria.TextEditor.TextEditor,Dataphoria" description="C# Script Editor" id="CS" />
+	<designers.designer classname="Alphora.Dataphor.Dataphoria.FormDesigner.FormDesigner,Dataphoria" description="Form Designer" id="DFD" />
+	<designers.designer classname="Alphora.Dataphor.Dataphoria.FormDesigner.CustomFormDesigner,Dataphoria" description="Custom Form Designer" id="DFDX" />
+	<designers.designer classname="Alphora.Dataphor.Dataphoria.Analyzer.Analyzer,Dataphoria" description="Execution Plan Analyzer" id="ANY" />
+</designerscontainer>
