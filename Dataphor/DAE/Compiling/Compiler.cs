@@ -15162,34 +15162,45 @@ namespace Alphora.Dataphor.DAE.Compiling
 			try
 			{
 				bool isLookup = expression.IsLookup ? !Convert.ToBoolean(LanguageModifiers.GetModifier(expression.Modifiers, "IsDetailLookup", "false")) : expression.IsLookup;
-				bool shouldTranslate = Convert.ToBoolean(LanguageModifiers.GetModifier(expression.Modifiers, "Right.ShouldTranslate", (!isLookup).ToString()));
-				if ((transaction != null) && !shouldTranslate)
-					transaction.PushLookup();
+				bool isUpdateContext = plan.HasStatementContext && plan.StatementContext.StatementType != StatementType.Select;
+				if (isLookup && isUpdateContext)
+					plan.PushStatementContext(new StatementContext(StatementType.Select));
 				try
 				{
-					PlanNode rightNode = CompileExpression(plan, expression.RightExpression);
-					PlanNode resultNode = EmitInnerJoinNode(plan, leftNode, rightNode, expression);
-					JoinNode joinNode = resultNode as JoinNode;
-					if ((joinNode != null) && (transaction != null) && !shouldTranslate && joinNode.IsDetailLookup)
+					bool shouldTranslate = Convert.ToBoolean(LanguageModifiers.GetModifier(expression.Modifiers, "Right.ShouldTranslate", (!isLookup).ToString()));
+					if ((transaction != null) && !shouldTranslate)
+						transaction.PushLookup();
+					try
 					{
-						transaction.PopLookup();
-						try
+						PlanNode rightNode = CompileExpression(plan, expression.RightExpression);
+						PlanNode resultNode = EmitInnerJoinNode(plan, leftNode, rightNode, expression);
+						JoinNode joinNode = resultNode as JoinNode;
+						if ((joinNode != null) && (transaction != null) && !shouldTranslate && joinNode.IsDetailLookup)
 						{
-							rightNode = CompileExpression(plan, expression.RightExpression);
-							return EmitInnerJoinNode(plan, leftNode, rightNode, expression);
+							transaction.PopLookup();
+							try
+							{
+								rightNode = CompileExpression(plan, expression.RightExpression);
+								return EmitInnerJoinNode(plan, leftNode, rightNode, expression);
+							}
+							finally
+							{
+								transaction.PushLookup();
+							}
 						}
-						finally
-						{
-							transaction.PushLookup();
-						}
+						else
+							return resultNode;
 					}
-					else
-						return resultNode;
+					finally
+					{
+						if ((transaction != null) && !shouldTranslate)
+							transaction.PopLookup();
+					}
 				}
 				finally
 				{
-					if ((transaction != null) && !shouldTranslate)
-						transaction.PopLookup();
+					if (isLookup && isUpdateContext)
+						plan.PopStatementContext();
 				}
 			}
 			finally
@@ -15264,33 +15275,44 @@ namespace Alphora.Dataphor.DAE.Compiling
 			try
 			{
 				bool isLookup = expression.IsLookup ? !Convert.ToBoolean(LanguageModifiers.GetModifier(expression.Modifiers, "IsDetailLookup", "false")) : expression.IsLookup;
-				bool shouldTranslate = Convert.ToBoolean(LanguageModifiers.GetModifier(expression.Modifiers, "Right.ShouldTranslate", (!isLookup).ToString()));
-				if ((transaction != null) && !shouldTranslate)
-					transaction.PushLookup();
+				bool isUpdateContext = plan.HasStatementContext && plan.StatementContext.StatementType != StatementType.Select;
+				if (isLookup && isUpdateContext)
+					plan.PushStatementContext(new StatementContext(StatementType.Select));
 				try
 				{
-					PlanNode rightNode = CompileExpression(plan, expression.RightExpression);
-					LeftOuterJoinNode node = EmitLeftOuterJoinNode(plan, leftNode, rightNode, expression);
-					if ((transaction != null) && !shouldTranslate && node.IsDetailLookup)
+					bool shouldTranslate = Convert.ToBoolean(LanguageModifiers.GetModifier(expression.Modifiers, "Right.ShouldTranslate", (!isLookup).ToString()));
+					if ((transaction != null) && !shouldTranslate)
+						transaction.PushLookup();
+					try
 					{
-						transaction.PopLookup();
-						try
+						PlanNode rightNode = CompileExpression(plan, expression.RightExpression);
+						LeftOuterJoinNode node = EmitLeftOuterJoinNode(plan, leftNode, rightNode, expression);
+						if ((transaction != null) && !shouldTranslate && node.IsDetailLookup)
 						{
-							rightNode = CompileExpression(plan, expression.RightExpression);
-							return EmitLeftOuterJoinNode(plan, leftNode, rightNode, expression);
+							transaction.PopLookup();
+							try
+							{
+								rightNode = CompileExpression(plan, expression.RightExpression);
+								return EmitLeftOuterJoinNode(plan, leftNode, rightNode, expression);
+							}
+							finally
+							{
+								transaction.PushLookup();
+							}
 						}
-						finally
-						{
-							transaction.PushLookup();
-						}
+						else
+							return node;
 					}
-					else
-						return node;
+					finally
+					{
+						if ((transaction != null) && !shouldTranslate)
+							transaction.PopLookup();
+					}
 				}
 				finally
 				{
-					if ((transaction != null) && !shouldTranslate)
-						transaction.PopLookup();
+					if (isLookup && isUpdateContext)
+						plan.PopStatementContext();
 				}
 			}
 			finally
@@ -15337,33 +15359,44 @@ namespace Alphora.Dataphor.DAE.Compiling
 			try
 			{
 				bool isLookup = expression.IsLookup ? !Convert.ToBoolean(LanguageModifiers.GetModifier(expression.Modifiers, "IsDetailLookup", "false")) : expression.IsLookup;
-				bool shouldTranslate = Convert.ToBoolean(LanguageModifiers.GetModifier(expression.Modifiers, "Left.ShouldTranslate", (!isLookup).ToString()));
-				if ((transaction != null) && !shouldTranslate)
-					transaction.PushLookup();
+				bool isUpdateContext = plan.HasStatementContext && plan.StatementContext.StatementType != StatementType.Select;
+				if (isLookup && isUpdateContext)
+					plan.PushStatementContext(new StatementContext(StatementType.Select));
 				try
 				{
-					PlanNode leftNode = CompileExpression(plan, expression.LeftExpression);
-					RightOuterJoinNode node = EmitRightOuterJoinNode(plan, leftNode, rightNode, expression);
-					if ((transaction != null) && !shouldTranslate && node.IsDetailLookup)
+					bool shouldTranslate = Convert.ToBoolean(LanguageModifiers.GetModifier(expression.Modifiers, "Left.ShouldTranslate", (!isLookup).ToString()));
+					if ((transaction != null) && !shouldTranslate)
+						transaction.PushLookup();
+					try
 					{
-						transaction.PopLookup();
-						try
+						PlanNode leftNode = CompileExpression(plan, expression.LeftExpression);
+						RightOuterJoinNode node = EmitRightOuterJoinNode(plan, leftNode, rightNode, expression);
+						if ((transaction != null) && !shouldTranslate && node.IsDetailLookup)
 						{
-							leftNode = CompileExpression(plan, expression.LeftExpression);
-							return EmitRightOuterJoinNode(plan, leftNode, rightNode, expression);
+							transaction.PopLookup();
+							try
+							{
+								leftNode = CompileExpression(plan, expression.LeftExpression);
+								return EmitRightOuterJoinNode(plan, leftNode, rightNode, expression);
+							}
+							finally
+							{
+								transaction.PushLookup();
+							}
 						}
-						finally
-						{
-							transaction.PushLookup();
-						}
+						else
+							return node;
 					}
-					else
-						return node;
+					finally
+					{
+						if ((transaction != null) && !shouldTranslate)
+							transaction.PopLookup();
+					}
 				}
 				finally
 				{
-					if ((transaction != null) && !shouldTranslate)
-						transaction.PopLookup();
+					if (isLookup && isUpdateContext)
+						plan.PopStatementContext();
 				}
 			}
 			finally
