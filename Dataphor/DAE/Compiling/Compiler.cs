@@ -5938,7 +5938,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				Schema.IDataType type;
 				foreach (NamedTypeSpecifier column in ((RowTypeSpecifier)typeSpecifier).Columns)
 				{
-					type = CompileTypeSpecifier(plan, column.TypeSpecifier);
+					type = CompileTypeSpecifier(plan, column.TypeSpecifier, trackDependencies);
 					rowType.Columns.Add(new Schema.Column(column.Identifier, type));
 				}
 
@@ -5957,7 +5957,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				Schema.IDataType type;
 				foreach (NamedTypeSpecifier column in ((TableTypeSpecifier)typeSpecifier).Columns)
 				{
-					type = CompileTypeSpecifier(plan, column.TypeSpecifier);
+					type = CompileTypeSpecifier(plan, column.TypeSpecifier, trackDependencies);
 					tableType.Columns.Add(new Schema.Column(column.Identifier, type));
 				}
 
@@ -5972,7 +5972,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					return listType;
 				}
 				else
-					return new Schema.ListType(CompileTypeSpecifier(plan, ((ListTypeSpecifier)typeSpecifier).TypeSpecifier));
+					return new Schema.ListType(CompileTypeSpecifier(plan, ((ListTypeSpecifier)typeSpecifier).TypeSpecifier, trackDependencies));
 			}
 			else if (typeSpecifier is CursorTypeSpecifier)
 			{
@@ -5985,7 +5985,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 				else
 				{
-					Schema.IDataType type = CompileTypeSpecifier(plan, ((CursorTypeSpecifier)typeSpecifier).TypeSpecifier);
+					Schema.IDataType type = CompileTypeSpecifier(plan, ((CursorTypeSpecifier)typeSpecifier).TypeSpecifier, trackDependencies);
 					if (!(type is Schema.ITableType))
 						throw new CompilerException(CompilerException.Codes.TableTypeExpected, ((CursorTypeSpecifier)typeSpecifier).TypeSpecifier);
 					return new Schema.CursorType((Schema.ITableType)type);
