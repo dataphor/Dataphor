@@ -572,6 +572,7 @@
       <DependentUpon>CallStackView.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="Default Server Configurations\Processor\Log\Dataphor.log" />
     <None Include="Default Server Configurations\ServerConfigurations.config" />
     <None Include="Properties\app.manifest" />
     <None Include="TextEditor\Modes\CS-Mode.xshd">
@@ -622,7 +623,6 @@
     <Folder Include="Default Server Configurations\Processor\Catalog\" />
     <Folder Include="Default Server Configurations\Processor\Data\" />
     <Folder Include="Default Server Configurations\Processor\LibraryData\" />
-    <Folder Include="Default Server Configurations\Processor\Log\" />
     <Folder Include="Resources\" />
     <Folder Include="SchemaDesigner\" />
   </ItemGroup>
