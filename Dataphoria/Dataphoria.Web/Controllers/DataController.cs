@@ -3,6 +3,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
@@ -13,7 +15,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 	public class DataController : ApiController
 	{
 		[HttpGet, Route("{table}")]
-		public JToken Get(string table)
+		public HttpResponseMessage Get(string table)
 		{
 			// Libraries/Qualifiers?
 			// Filter?
@@ -24,7 +26,11 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 			// Paging?
 			// Functions?
 			var result = ProcessorInstance.Instance.Evaluate(string.Format("select Get('{0}')", table), null);
-			return JsonConvert.SerializeObject(((RESTResult)result).Value);
+			var temp = JsonConvert.SerializeObject(((RESTResult)result).Value);
+
+			var res = Request.CreateResponse(System.Net.HttpStatusCode.OK);
+			res.Content = new StringContent(temp, Encoding.UTF8, "application/json");
+			return res;
 		}
 
 		[HttpGet, Route("{table}/{key}")]
