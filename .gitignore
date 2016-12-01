@@ -14,3 +14,7 @@
 Sandbox
 Dataphor/packages
 /Dataphoria/Dataphoria.Web/Properties/PublishProfiles/Bobby.pubxml
+
+$RANDOM_SEED$
+node_modules/
+.vs/
