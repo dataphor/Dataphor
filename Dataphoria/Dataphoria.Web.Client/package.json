@@ -1,5 +1,5 @@
 {
-  "name": "Dataphoria.Web.Client",
+  "name": "Angular2Spa",
   "version": "0.0.0",
   "dependencies": {
     "@angular/common": "2.0.0",
@@ -38,7 +38,6 @@
     "webpack-externals-plugin": "^1.0.0",
     "webpack-hot-middleware": "^2.10.0",
     "webpack-merge": "^0.14.1",
-    "webpack-node-externals": "^1.4.3",
     "zone.js": "^0.6.21"
   }
 }

@@ -70,6 +70,6 @@
   },
 
   "tooling": {
-    "defaultNamespace": "Dataphoria.Web.Client"
+    "defaultNamespace": "Dataphoria.Web.Client.Test"
   }
 }

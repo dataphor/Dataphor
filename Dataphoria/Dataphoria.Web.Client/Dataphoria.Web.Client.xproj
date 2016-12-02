@@ -7,8 +7,8 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>2c3857d3-bbb9-4a25-b433-7a5043a0629e</ProjectGuid>
-    <RootNamespace>Dataphoria.Web.Client</RootNamespace>
+    <ProjectGuid>68f2fb73-153e-4636-8b31-ebf9806dafab</ProjectGuid>
+    <RootNamespace>Dataphoria.Web.Client.Test</RootNamespace>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup>

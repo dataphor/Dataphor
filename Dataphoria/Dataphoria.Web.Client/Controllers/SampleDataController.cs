@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Dataphoria.Web.Client.Controllers
+namespace Dataphoria.Web.Client.Test.Controllers
 {
     [Route("api/[controller]")]
     public class SampleDataController : Controller
