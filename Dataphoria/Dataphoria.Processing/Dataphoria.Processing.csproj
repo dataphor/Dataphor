@@ -59,7 +59,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Server\Server.csproj">
       <Project>{1db01c91-3f92-4094-a8ae-1f7ff01f2e1b}</Project>
-      <Name>Server %28Server\Server%29</Name>
+      <Name>Server</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
