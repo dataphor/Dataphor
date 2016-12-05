@@ -1,0 +1,28 @@
+create device PHINVADSTestDevice
+	reconciliation { mode = { none }, master = device }
+	class "PHINVADSDevice"
+	attributes
+	{
+		"Endpoint" = "http://phinvads.cdc.gov/vocabService/v2"
+	};
+	
+Reconcile("PHINVADSTestDevice");
+
+
+select Sources;
+select Sources return 1;
+select Count(Sources);
+select Sources where id = '0C3A84E5-679C-DD11-8A3F-00188B398520';
+
+select Authoritys
+select Sources
+select CodeSystems where oid = '2.16.840.1.113883.12.136'
+select ValueSets where code = 'PHVS_LabResult_Dengue'
+select ValueSets where oid = '2.16.840.1.114222.4.11.4025'
+select ValueSetVersions where valueSetOid = '2.16.840.1.114222.4.11.4025'
+select ValueSetConcepts where valueSetVersionId = '6E6EF270-DFE2-48A1-8B33-BFE5A67D0023'
+select ValueSetConcepts where SatisfiesSearchParam(Current(), 'valueSetOid', '2.16.840.1.114222.4.11.4025');
+
+select Count(CodeSystems);
+select Count(CodeSystems { oid })
+select ValueSets
