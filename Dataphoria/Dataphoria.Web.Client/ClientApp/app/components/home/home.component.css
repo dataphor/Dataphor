@@ -1,0 +1,175 @@
+﻿:host {
+    font-family: 'Segoe UI', Helvetica, Tahoma, Geneva, Verdana, sans-serif;
+    height: 100%;
+}
+
+[hidden] {
+    display: none;
+}
+
+body {
+    margin: 0;
+    height: 100%;
+}
+
+h1 {
+    font-size: 3em;
+}
+
+button {
+    margin:0;
+}
+
+#header {
+    height: 2em;
+    background-color: #2f2f2f;
+    color: #fff;
+}
+
+#header .title {
+    font-size: 1em;
+    line-height: 1em;
+    margin-left: 5px;
+    margin-right: 5px;
+    font-weight: 600;
+}
+
+
+#header .button {
+    background-color: #2196F3;
+    border: none;
+    color: white;
+    font-size: 1em;
+    padding: 5px 10px;
+}
+
+#header .button:hover {
+    cursor: pointer;
+}
+
+.resources {
+    background-color: #2196F3;
+    color: white;
+}
+
+.resources ul {
+    -webkit-margin-before: 0;
+    -webkit-margin-after: 0;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    -webkit-padding-start: 40px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    list-style: none;
+}
+
+.resources a {
+    color: white;
+}
+
+.resources a:hover {
+    color: #fdfdfd;
+}
+
+.editors {
+    border-bottom: 1px solid #efefef;
+}
+
+.input-window, .output-window {
+    min-height: 300px;
+    width:100%;
+    overflow: auto;
+}
+
+#input-section {
+    background: #ebebeb;
+    color: #333;
+}
+
+#input-section .row {
+    min-height: 100px;
+    border-bottom: 1px solid #efefef;
+}
+
+#input-section .title {
+    margin: 10px;
+}
+
+#input-section .button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    font-size: 1em;
+    padding: 5px 10px;
+}
+
+#input-section .button:hover {
+    cursor: pointer;
+}
+
+#input-section .button.running {
+    background-color: darkgrey;
+}
+
+#input-section .button.running:hover {
+    cursor: default;
+}
+
+#output-section {
+    background-color: #272822;
+    color: #F8F8F2;
+}
+
+#output-section .row {
+    min-height: 100px;
+    border-bottom: 1px solid #555651;
+}
+
+#output-section .title {
+    margin: 10px;
+}
+
+#output-section .button {
+    background-color: #2f2f2f;
+    border: none;
+    color: white;
+    font-size: 1em;
+    padding: 5px 10px;
+}
+
+#output-section .button:hover {
+    cursor: pointer;
+}
+
+#introduction {
+    text-align: center;
+    color: #333;
+    margin-bottom: 50px;
+}
+
+#introduction h1 {
+    font-size: 3em;
+}
+
+#select-engine, #select-fhir, #select-data, #select-patient {
+    margin: 10px;
+}
+
+#select-engine .title, #select-fhir .title, #select-data .title, #select-patient .title {
+    margin: 0;
+}
+
+#select-engine .link:hover, #select-fhir .link:hover, #select-data .link:hover, #select-patient .link:hover {
+    cursor: pointer;
+}
+
+#select-engine .link, #select-fhir .link, #select-data .link, #select-patient .link {
+    text-decoration: underline;
+    font-size: 0.75em;
+    width: 100%;
+}
+
+#select-engine .input, #select-fhir .input, #select-data .input, #select-patient .input  {
+    font-size: 0.75em;
+    width: 100%;
+}

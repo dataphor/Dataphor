@@ -58,7 +58,7 @@
 							? editor.getValue()
 							: editor.session.getTextRange(editor.getSelectionRange());
 
-					$.ajax('/Query/', {
+					$.ajax('/query/', {
 						accepts: 'application/json',
 						data: { e: query },
 						success: function (result, s, h) {
