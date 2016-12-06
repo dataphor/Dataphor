@@ -21,3 +21,8 @@ http://blog.stevensanderson.com/2016/10/04/angular2-template-for-visual-studio/[
 While most everything should work automatically, you will have to run `webpack --config webpack.config.vendor.js` from a command line at the root of the project where the webpack.config.js file is located. 
 NOTE: you must have installed webpack.
 
+== Installing Third-party Libraries
+
+Follow these instructions
+
+http://blog.stevensanderson.com/2016/10/04/angular2-template-for-visual-studio#adding-third-party-libraries

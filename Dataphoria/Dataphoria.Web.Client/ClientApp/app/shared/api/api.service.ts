@@ -27,15 +27,13 @@ export class APIService {
             .catch(this.handleError);
     }
 
-    post(query: string) {
+    post(query: Object) {
         let headers = new Headers({
             'Content-Type': 'application/json',
-            // TODO: Comment back in once we've added localhost to CORS on the service end'
-            // Reference: http://stackoverflow.com/questions/18234366/restful-webservice-how-to-set-headers-in-java-to-accept-xmlhttprequest-allowed
-            //'FHIR-Service' : fhirServiceUri
+            'Content-Length': '27'
         });
 
-        let uri = config.api.serviceBase + '/query/'
+        let uri = config.api.serviceBase + '/query'
             //+ encodeURI(query);
 
         return this.http
@@ -46,7 +44,11 @@ export class APIService {
     }
 
     private handleError(error: any) {
-        console.error('An error occurred', error);
-        return Promise.reject(error.message || error);
+        error = error.json();
+        var result = error.status + ': ' + error.statusText;
+        result += '\r\n';
+        result += error.responseText;
+        console.error(error);
+        return Promise.reject(error || error);
     }
 }

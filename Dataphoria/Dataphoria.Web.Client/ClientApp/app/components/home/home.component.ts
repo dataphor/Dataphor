@@ -1,4 +1,4 @@
-import { APIService } from '../../shared/index';
+import { APIService, IResponse, ResponseSingle, ResponseSet } from '../../shared/index';
 
 import { Component } from '@angular/core';
 
@@ -24,8 +24,7 @@ export class HomeComponent {
     // Input editor settings
     iText: string = `// Enter your D4 script here and press 'Run'
 // The results will be displayed on the console to the right
-
-`;
+select `;
     // Carries the latest value from input events
     iTextTemp: string;
     iOptions: any = { vScrollBarAlwaysVisible: true };
@@ -39,25 +38,45 @@ export class HomeComponent {
     // Stores last known value of text input window
     onInputChange(code) {
         this.iTextTemp = code;
-    }
+    };
 
     runScript() {
         this.oText = '';
         if (!this.running) {
             this.running = true;
             this._apiService
-                .post(this.iTextTemp)
+                .post({ value: this.iTextTemp })
                 .then(response => {
-                    this.oText += '\n' + response;
+                    let handledResponse = this.handleResponse(response);
+                    this.oText += handledResponse + '\r\n';
                     this.running = false;
                 })
                 .catch(error => {
-                    this.oText += '\n' + error;
+                    var result = error.status + ': ' + error.statusText;
+                    result += '\r\n';
+                    result += error.responseText;
+                    this.oText += result;
                     this.running = false;
-                    alert('Something went wrong:\n' + error);
                 });
         }
-    }
+    };
+
+    // TODO: Move to service
+    handleResponse(response: any): any {
+        let handledResponse = '';
+        let responseModel: IResponse; 
+        if (Array.isArray(response)) {
+            responseModel = new ResponseSet(response);
+            for (let r of response) {
+                handledResponse += JSON.stringify(r) + '\r\n';
+            }
+        }
+        else {
+            responseModel = new ResponseSingle(response);
+            handledResponse += JSON.stringify(responseModel) + '\r\n';
+        }
+        return handledResponse;
+    };
 
     clearOutput() {
         this.oText = '';

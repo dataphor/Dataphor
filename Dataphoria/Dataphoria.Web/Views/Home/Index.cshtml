@@ -38,11 +38,13 @@
 			resultEditor.getSession().setMode("ace/mode/javascript");
 			resultEditor.setShowPrintMargin(false);
 			resultEditor.setReadOnly(true);
+			resultEditor.getSession().setUseWrapMode(true);
 
 			var editor = ace.edit("requestEditor");
 			editor.setTheme("ace/theme/github");
 			editor.getSession().setMode("ace/mode/xquery");
 			editor.setShowPrintMargin(false);
+			
 			editor.commands.addCommand({
 				name: 'executeScript',
 				bindKey: { win: 'Ctrl-E', mac: 'Command-E' },
@@ -58,25 +60,57 @@
 							? editor.getValue()
 							: editor.session.getTextRange(editor.getSelectionRange());
 
-					$.ajax('/query/', {
-						accepts: 'application/json',
-						data: { e: query },
-						success: function (result, s, h) {
-							resultEditor.getSession().setMode("ace/mode/javascript");
-							resultEditor.setValue(h.responseText);
-						},
-						error: function (h, s, message) {
-							try {
-								resultEditor.getSession().setMode("ace/mode/text");
-								var response = JSON.parse(h.responseText)[0];
-								resultEditor.setValue(response.Message);
-								editor.gotoLine(response.Line + selectionLine, response.LinePos - 1, false);
-							}
-							catch (e) {
-								resultEditor.setValue(message + "\r\n" + h.responseText);
-							}
-						}
+					$.ajaxSetup({
+                        contentType: 'application/json'
 					});
+
+					var posting = $.post('/query/', JSON.stringify({ value: query }));
+				    
+					posting.done(function (data) {
+					    var result = '';
+					    data.forEach(function (item) {
+					        result += JSON.stringify(item) + '\r\n';
+					    });
+					    resultEditor.setValue(result);
+					});
+
+					posting.fail(function (data) {
+					    try {
+                            // TODO: Use responseJSON instead of responseText for better-formatted/more relevant error messages
+					        var result =  data.status + ': ' + data.statusText;
+					        result += '\r\n';
+					        result += data.responseText;
+					        resultEditor.setValue(result);
+					    }
+					    catch (e) {
+					        resultEditor.setValue(data);
+					    }
+					});
+
+					posting.always(function (data) {
+					    resultEditor.getSession().setMode("ace/mode/text");
+					});
+
+
+					//$.ajax('/query/', {
+					//	accepts: 'application/json',
+					//	data: { e: query },
+					//	success: function (result, s, h) {
+					//		resultEditor.getSession().setMode("ace/mode/javascript");
+					//		resultEditor.setValue(h.responseText);
+					//	},
+					//	error: function (h, s, message) {
+					//		try {
+					//			resultEditor.getSession().setMode("ace/mode/text");
+					//			var response = JSON.parse(h.responseText)[0];
+					//			resultEditor.setValue(response.Message);
+					//			editor.gotoLine(response.Line + selectionLine, response.LinePos - 1, false);
+					//		}
+					//		catch (e) {
+					//			resultEditor.setValue(message + "\r\n" + h.responseText);
+					//		}
+					//	}
+					//});
 				},
 				readOnly: false
 			});

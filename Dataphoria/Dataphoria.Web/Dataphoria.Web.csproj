@@ -238,6 +238,7 @@
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Extensions\BundleExtensions.cs" />
+    <Compile Include="Models\QueryModels.cs" />
     <Compile Include="Models\DataFhir\Const.cs" />
     <Compile Include="ExceptionHandling\DataFhirException.cs" />
     <Compile Include="Models\DataFhir\ElementQuery.cs" />
