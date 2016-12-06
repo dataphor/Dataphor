@@ -1,0 +1,4 @@
+create operator GenerateTypes() : String class "PHINVADS.Core.GenerateTypesNode";
+
+ExecuteScript("PHINVADS.Core", "Types.Generated");
+
