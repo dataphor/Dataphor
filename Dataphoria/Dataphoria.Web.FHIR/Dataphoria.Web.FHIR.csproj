@@ -255,11 +255,9 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\DataFhirController.cs" />
     <Compile Include="ExceptionHandling\DataFhirException.cs" />
@@ -299,7 +297,6 @@
     <Compile Include="Models\SingleLocalHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Extensions\LocalhostExtensions.cs" />
-    <Compile Include="Providers\ApplicationOAuthProvider.cs" />
     <Compile Include="Resources.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -322,6 +319,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\images\" />
+    <Folder Include="Providers\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -177,14 +177,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Code\JsonInterop.cs" />
-    <Compile Include="App_Code\JsonNetResult.cs" />
-    <Compile Include="App_Start\BundleConfig.cs" />
-    <Compile Include="App_Start\FilterConfig.cs" />
-    <Compile Include="App_Start\IdentityConfig.cs" />
-    <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="App_Start\Startup.Auth.cs" />
-    <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\HelpPage\ApiDescriptionExtensions.cs" />
     <Compile Include="Areas\HelpPage\App_Start\HelpPageConfig.cs" />
     <Compile Include="Areas\HelpPage\Controllers\HelpController.cs" />
@@ -218,95 +210,15 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\QueryController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
-    <Compile Include="Controllers\DataFhirController.cs" />
-    <Compile Include="ExceptionHandling\FhirGlobalExceptionHandler.cs" />
-    <Compile Include="Extensions\HttpConfigurationFhirExtensions.cs" />
-    <Compile Include="Extensions\HttpHeadersExtension.cs" />
-    <Compile Include="Extensions\HttpRequestFhirExtensions.cs" />
-    <Compile Include="Filters\FhirExceptionFilter.cs" />
-    <Compile Include="Formatters\BinaryFhirFormatter.cs" />
-    <Compile Include="Formatters\FhirMediaTypeFormatter.cs" />
-    <Compile Include="Formatters\HtmlFhirFormatter.cs" />
-    <Compile Include="Formatters\JsonFhirFormatter.cs" />
-    <Compile Include="Formatters\XmlFhirFormatter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Handlers\FhirErrorMessageHandler.cs" />
-    <Compile Include="Handlers\FhirResponseHandler.cs" />
-    <Compile Include="Handlers\MediaTypeHandler.cs" />
-    <Compile Include="Models\AccountBindingModels.cs" />
-    <Compile Include="Models\AccountViewModels.cs" />
-    <Compile Include="Extensions\BundleExtensions.cs" />
-    <Compile Include="Models\DataFhir\Const.cs" />
-    <Compile Include="ExceptionHandling\DataFhirException.cs" />
-    <Compile Include="Models\DataFhir\ElementQuery.cs" />
-    <Compile Include="ExceptionHandling\Error.cs" />
-    <Compile Include="Models\DataFhir\ETag.cs" />
-    <Compile Include="ExceptionHandling\ExceptionResponseMessageFactory.cs" />
-    <Compile Include="Models\DataFhir\FhirMediaType.cs" />
-    <Compile Include="Models\DataFhir\FhirResponse.cs" />
-    <Compile Include="ExceptionHandling\IExceptionResponseMessageFactory.cs" />
-    <Compile Include="Models\DataFhir\IGenerator.cs" />
-    <Compile Include="Models\DataFhir\ILocalHost.cs" />
-    <Compile Include="Models\DataFhir\Interaction.cs" />
-    <Compile Include="Extensions\InteractionExtensions.cs" />
-    <Compile Include="Models\DataFhir\Key.cs" />
-    <Compile Include="Extensions\KeyExtensions.cs" />
-    <Compile Include="Models\DataFhir\KeyKind.cs" />
-    <Compile Include="Extensions\LocalhostExtensions.cs" />
-    <Compile Include="Extensions\OperationOutcomeExtensions.cs" />
-    <Compile Include="Models\DataFhir\Respond.cs" />
-    <Compile Include="Models\DataFhir\SingleLocalHost.cs" />
     <Compile Include="Resources.Designer.cs" />
-    <Compile Include="Utilities\UriHelper.cs" />
-    <Compile Include="Utilities\XmlSignatureHelper.cs" />
-    <Compile Include="Models\IdentityModels.cs" />
-    <Compile Include="App_Code\ProcessorInstance.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Providers\ApplicationOAuthProvider.cs" />
     <Compile Include="Results\ChallengeResult.cs" />
-    <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
-    <Content Include="Content\bootstrap.css" />
-    <Content Include="Content\bootstrap.min.css" />
-    <Content Include="Content\themes\base\accordion.css" />
-    <Content Include="Content\themes\base\all.css" />
-    <Content Include="Content\themes\base\autocomplete.css" />
-    <Content Include="Content\themes\base\base.css" />
-    <Content Include="Content\themes\base\button.css" />
-    <Content Include="Content\themes\base\core.css" />
-    <Content Include="Content\themes\base\datepicker.css" />
-    <Content Include="Content\themes\base\dialog.css" />
-    <Content Include="Content\themes\base\draggable.css" />
-    <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
-    <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
-    <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
-    <Content Include="Content\themes\base\images\ui-bg_glass_65_ffffff_1x400.png" />
-    <Content Include="Content\themes\base\images\ui-bg_glass_75_dadada_1x400.png" />
-    <Content Include="Content\themes\base\images\ui-bg_glass_75_e6e6e6_1x400.png" />
-    <Content Include="Content\themes\base\images\ui-bg_glass_95_fef1ec_1x400.png" />
-    <Content Include="Content\themes\base\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
-    <Content Include="Content\themes\base\images\ui-icons_222222_256x240.png" />
-    <Content Include="Content\themes\base\images\ui-icons_2e83ff_256x240.png" />
-    <Content Include="Content\themes\base\images\ui-icons_454545_256x240.png" />
-    <Content Include="Content\themes\base\images\ui-icons_888888_256x240.png" />
-    <Content Include="Content\themes\base\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Content\themes\base\menu.css" />
-    <Content Include="Content\themes\base\progressbar.css" />
-    <Content Include="Content\themes\base\resizable.css" />
-    <Content Include="Content\themes\base\selectable.css" />
-    <Content Include="Content\themes\base\selectmenu.css" />
-    <Content Include="Content\themes\base\slider.css" />
-    <Content Include="Content\themes\base\sortable.css" />
-    <Content Include="Content\themes\base\spinner.css" />
-    <Content Include="Content\themes\base\tabs.css" />
-    <Content Include="Content\themes\base\theme.css" />
-    <Content Include="Content\themes\base\tooltip.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -365,7 +277,6 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="Areas\HelpPage\Views\_ViewStart.cshtml" />
-    <Content Include="Content\Site.css" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
@@ -375,8 +286,16 @@
     <Content Include="Scripts\jquery-1.10.2.min.map" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="App_Code\" />
     <Folder Include="App_Data\" />
-    <Folder Include="Content\images\" />
+    <Folder Include="App_Start\" />
+    <Folder Include="ExceptionHandling\" />
+    <Folder Include="Extensions\" />
+    <Folder Include="Filters\" />
+    <Folder Include="Formatters\" />
+    <Folder Include="Handlers\" />
+    <Folder Include="Models\" />
+    <Folder Include="Providers\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

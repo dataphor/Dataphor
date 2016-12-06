@@ -62,10 +62,6 @@
       <Project>{8cbb779f-64d4-455f-9e4f-70719408a7ca}</Project>
       <Name>DAE.Connection</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\PHINVADS.Core\Source\PHINVADS.Core.csproj">
-      <Project>{321cee79-57b4-4771-ae42-c1ea5f59de94}</Project>
-      <Name>PHINVADS.Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
