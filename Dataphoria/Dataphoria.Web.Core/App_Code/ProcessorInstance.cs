@@ -1,6 +1,6 @@
 ﻿using Alphora.Dataphor.Dataphoria.Processing;
 
-namespace Alphora.Dataphor.Dataphoria.Web
+namespace Alphora.Dataphor.Dataphoria.Web.Core
 {
 	public static class ProcessorInstance
     {
