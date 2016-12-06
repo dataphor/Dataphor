@@ -1,4 +1,4 @@
-﻿using Alphora.Dataphor.Dataphoria.Web.Models;
+﻿using Alphora.Dataphor.Dataphoria.Web.Core.Models;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Alphora.Dataphor.Dataphoria.Web.Providers
+namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Providers
 {
 	public class ApplicationOAuthProvider : OAuthAuthorizationServerProvider
     {
