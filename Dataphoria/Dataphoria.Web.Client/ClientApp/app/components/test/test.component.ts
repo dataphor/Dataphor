@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
     selector: 'test',
     template: require('./test.component.html'),
     styles: [require('./test.component.css')],
-    providers: [APIService]
+    providers: []
 })
 export class TestComponent {
     
