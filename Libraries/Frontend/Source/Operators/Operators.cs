@@ -7,6 +7,8 @@
 using System;
 using System.IO;
 using System.Xml;
+using System.Xml.Linq;
+using System.Linq;
 using System.Collections;
 
 using Alphora.Dataphor;
@@ -505,4 +507,44 @@ namespace Alphora.Dataphor.Frontend.Server
 			}
 		}
 	}
+
+    // operator Frontend.ToAngular(AForm : string) : string
+    public class ToAngularNode : UnaryInstructionNode
+    {
+        public override object InternalExecute(Program program, object argument1)
+        {
+            XDocument doc = XDocument.Parse((string)argument1);
+
+            //Remove namespace and prefixing and preappending ad4- to elements.
+            foreach (XElement XE in doc.Root.DescendantsAndSelf())
+            {
+                // Stripping the namespace by setting the name of the element to it's localname only
+                XE.Name = "d4-" + XE.Name.LocalName;
+                // replacing all attributes with attributes that are not namespaces and their names are set to only the localname
+                XE.ReplaceAttributes((from xattrib in XE.Attributes().Where(xa => !xa.IsNamespaceDeclaration) select new XAttribute(xattrib.Name.LocalName, xattrib.Value)));
+            }
+
+            //Fix Closing Tags
+            foreach (XElement childElement in
+            from x in doc.DescendantNodes().OfType<XElement>()
+            where x.IsEmpty
+            select x)
+            {
+                childElement.Value = "\r\n";
+                //Formatting purposes.
+                var indent = GetDepth(childElement);
+                for (int i = indent; i > 1; i--)
+                    childElement.Value += "  ";
+            }
+
+            var endval = doc.ToString();
+
+            return endval;
+        }
+
+        private int GetDepth(XElement element)
+        {
+            return element == null ? 0 : GetDepth(element.Parent) + 1;
+        }
+    }
 }

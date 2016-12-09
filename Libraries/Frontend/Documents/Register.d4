@@ -728,3 +728,8 @@ begin
 			);
 end;
 grant usage on ScriptApplication(Name) to role User;
+
+//* Operator: ToAngular
+create operator ToAngular(AForm : String) : String 
+class "Frontend.ToAngularNode";
+grant usage on ToAngular(String) to role User;
