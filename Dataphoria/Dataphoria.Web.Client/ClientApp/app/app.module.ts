@@ -5,6 +5,7 @@ import { UniversalModule } from 'angular2-universal';
 import { AceEditorDirective } from 'ng2-ace-editor';
 import { AppComponent } from './components/app/app.component'
 import { HomeComponent } from './components/home/home.component';
+import { TestComponent } from './components/test/test.component';
 import { SharedModule } from './shared/shared.module';
 
 @NgModule({
@@ -12,6 +13,7 @@ import { SharedModule } from './shared/shared.module';
     declarations: [
         AppComponent,
         HomeComponent,
+        TestComponent,
         AceEditorDirective
     ],
     imports: [
@@ -20,6 +22,7 @@ import { SharedModule } from './shared/shared.module';
         RouterModule.forRoot([
             { path: '', redirectTo: 'home', pathMatch: 'full' },
             { path: 'home', component: HomeComponent },
+            { path: 'test', component: TestComponent },
             { path: '**', redirectTo: 'home' }
         ]),
         SharedModule.forRoot()
