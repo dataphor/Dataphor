@@ -1,6 +1,7 @@
 //import { APIService, IResponse, ResponseSingle, ResponseSet } from '../../shared/index';
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { TestForm } from './form';
 
 @Component({
     selector: 'test',
@@ -8,7 +9,11 @@ import { Component } from '@angular/core';
     styles: [require('./test.component.css')],
     providers: []
 })
-export class TestComponent {
-    
+export class TestComponent implements OnInit {
+
+    ngOnInit() {
+
+    }
+
 
 }

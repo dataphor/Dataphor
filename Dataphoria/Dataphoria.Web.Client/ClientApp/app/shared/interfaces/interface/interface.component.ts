@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 
 @Component({
     selector: 'd4-interface',
@@ -24,17 +23,6 @@ export class InterfaceComponent implements OnInit {
             State: "Illinois",
             Zip: "60652"
         };
-    }
-    
-    form: FormGroup;
-    payLoad = '';
-
-    //constructor(private qcs: QuestionControlService) { }
-    //ngOnInit() {
-    //    this.form = this.qcs.toFormGroup(this.questions);
-    //}
-    onSubmit() {
-        this.payLoad = JSON.stringify(this.form.value);
     }
     
 

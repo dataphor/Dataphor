@@ -14,8 +14,8 @@ div {
 
 @font-face {
   font-family: 'Okomito';
-  src: url('./assets/fonts/Okomito-Medium.otf') format('opentype'), 
-       url('./assets/fonts/Okomito-Medium.ttf')  format('truetype')
+  src: url('../fonts/Okomito-Medium.otf') format('opentype'), 
+       url('../fonts/Okomito-Medium.ttf')  format('truetype')
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -53,9 +53,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #3c3c3c;
-  max-width: 1920px;
-  margin-left: auto;
-  margin-right: auto;
   background-color: #fff;
   line-height: 1.428571429;
 }
