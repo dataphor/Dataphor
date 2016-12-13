@@ -515,36 +515,50 @@ namespace Alphora.Dataphor.Frontend.Server
         {
             XDocument doc = XDocument.Parse((string)argument1);
 
-            //Remove namespace and prefixing and preappending ad4- to elements.
-            foreach (XElement XE in doc.Root.DescendantsAndSelf())
+            //Fixup CData Sections of document.
+            foreach (var cDataNode in doc.DescendantNodes().OfType<XCData>().ToList())
             {
-                // Stripping the namespace by setting the name of the element to it's localname only
-                XE.Name = "d4-" + XE.Name.LocalName;
-                // replacing all attributes with attributes that are not namespaces and their names are set to only the localname
-                XE.ReplaceAttributes((from xattrib in XE.Attributes().Where(xa => !xa.IsNamespaceDeclaration) select new XAttribute(xattrib.Name.LocalName, xattrib.Value)));
+                XDocument CDataDoc = XDocument.Parse(cDataNode.Value);
+                RemoveNameSpacePrefixing(CDataDoc, "CData-");
+                FixClosingTags(CDataDoc, true);
+                //Replaces XCData Node Value string with proper XElements data structure.
+                cDataNode.ReplaceWith(CDataDoc.Root);
             }
 
-            //Fix Closing Tags
-            foreach (XElement childElement in
-            from x in doc.DescendantNodes().OfType<XElement>()
-            where x.IsEmpty
-            select x)
-            {
-                childElement.Value = "\r\n";
-                //Formatting purposes.
-                var indent = GetDepth(childElement);
-                for (int i = indent; i > 1; i--)
-                    childElement.Value += "  ";
-            }
-
-            var endval = doc.ToString();
-
-            return endval;
+            //Fixup remaining document.
+            RemoveNameSpacePrefixing(doc, "d4-");
+            FixClosingTags(doc, false);
+            return doc.ToString();
         }
 
         private int GetDepth(XElement element)
         {
             return element == null ? 0 : GetDepth(element.Parent) + 1;
         }
+
+        private void RemoveNameSpacePrefixing(XDocument doc, string appender)
+        {
+            //Remove namespace and prefixing and preappending ad4- to elements.
+            foreach (XElement XE in doc.Root.DescendantsAndSelf())
+            {
+                // Stripping the namespace by setting the name of the element to it's localname only and appending text for name resolution.
+                XE.Name = appender + XE.Name.LocalName;
+                // replacing all attributes with attributes that are not namespaces and their names are set to only the localname
+                XE.ReplaceAttributes((from xattrib in XE.Attributes().Where(xa => !xa.IsNamespaceDeclaration) select new XAttribute(xattrib.Name.LocalName, xattrib.Value)));
+            }
+        }
+
+        private void FixClosingTags(XDocument doc, bool isCDataSection)
+        {
+            //Fix Closing Tags
+            foreach (XElement childElement in
+            from x in doc.DescendantNodes().OfType<XElement>()
+            where x.IsEmpty
+            select x)
+            {
+                childElement.Value = String.Empty;
+            }
+        }
+
     }
 }
