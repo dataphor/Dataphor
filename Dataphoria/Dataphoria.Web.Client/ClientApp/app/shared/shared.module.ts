@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule }   from '@angular/forms';
 
-import { ColumnComponent, InterfaceComponent, NumericTextboxComponent, TextboxComponent, APIService } from './index';
+import { APIService } from './index';
 
 /**
  * Do not specify providers for modules that might be imported by a lazy loaded module.
@@ -12,10 +12,10 @@ import { ColumnComponent, InterfaceComponent, NumericTextboxComponent, TextboxCo
 @NgModule({
     imports: [CommonModule, RouterModule, FormsModule],
     declarations: [
-        ColumnComponent, InterfaceComponent, NumericTextboxComponent, TextboxComponent
+        
     ],
     exports: [
-        ColumnComponent, InterfaceComponent, NumericTextboxComponent, TextboxComponent
+        
     ],
     providers: [APIService]
 })
