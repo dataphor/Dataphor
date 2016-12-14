@@ -1,6 +1,6 @@
 <div>
     <label *ngIf="title">{{title}}</label>
-    <input [ngModel]="model.name" type="text" />
-    {{model.name}}
+    <!--<input [(ngModel)]="entity[propertyName]" type="text" name="{{entity[propertyName]}}"/>-->
+    <input [(ngModel)]="model" type="text" name="{{name}}" />
 </div>
 

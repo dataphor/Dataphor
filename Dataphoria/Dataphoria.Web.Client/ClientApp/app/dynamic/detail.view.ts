@@ -5,6 +5,8 @@ import { OnChanges, SimpleChange, ComponentFactory } from '@angular/core';
 import { IHaveDynamicData, DynamicTypeBuilder } from './type.builder';
 import { DynamicFormBuilder } from './form.builder';
 
+import { TestForm } from '../test-form';
+
 @Component({
     selector: 'dynamic-detail',
     template: `
@@ -28,6 +30,9 @@ export class DynamicDetail implements AfterViewInit, OnChanges, OnDestroy, OnIni
     //    description: "A description of this Entity"
     //};
 
+    protected entity = TestForm.model.MainColumnMain;
+    protected template = TestForm.interface.value;
+
     // wee need Dynamic component builder
     constructor(
         protected typeBuilder: DynamicTypeBuilder,
@@ -46,7 +51,7 @@ export class DynamicDetail implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
         // NOTE: This is the diff
         //var template = this.templateBuilder.prepareTemplate(this.entity, useTextarea);
-        var template = this.formBuilder.prepareForm();
+        var template = this.formBuilder.prepareForm(this.entity, this.template);
 
 
         // here we get Factory (just compiled or from cache)

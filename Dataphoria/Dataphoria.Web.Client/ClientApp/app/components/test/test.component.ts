@@ -1,7 +1,6 @@
 //import { APIService, IResponse, ResponseSingle, ResponseSet } from '../../shared/index';
 
 import { Component, OnInit } from '@angular/core';
-import { TestForm } from './form';
 
 @Component({
     selector: 'test',

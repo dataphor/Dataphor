@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { TestForm } from '../../test-form';
 
 @Component({
     selector: 'd4-interface',
@@ -11,18 +12,24 @@ export class InterfaceComponent implements OnInit {
     @Input() title: string = '';
     @Input() name: string = '';
 
-    private model: Object;
-    
+    model: any = TestForm.model.MainColumnMain;
+
+    submitted = false;
+
+    onSubmit() {
+        this.submitted = true;
+
+    }
 
     ngOnInit() {
-        this.model = {
-            Name: 'Steve',
-            Phone: '5555555555',
-            Address: 'Scruff McGruff',
-            City: "Chicago",
-            State: "Illinois",
-            Zip: "60652"
-        };
+        //this.model = {
+        //    Name: 'Steve',
+        //    Phone: '5555555555',
+        //    Address: 'Scruff McGruff',
+        //    City: "Chicago",
+        //    State: "Illinois",
+        //    Zip: "60652"
+        //};
     }
     
 

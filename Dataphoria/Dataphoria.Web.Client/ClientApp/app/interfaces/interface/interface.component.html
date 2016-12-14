@@ -1,3 +1,18 @@
-<form (ngSubmit)="onSubmit()">
+<form [hidden]="submitted" (ngSubmit)="onSubmit()" #d4Form="ngForm">
     <ng-content></ng-content>
+    <button class="btn btn-default" (click)="onSubmit()">Submit</button>
 </form>
+
+{{model.Name}}
+
+<!--<div *ngFor="let prop of Object.keys(model)">
+   {{prop}}: {{model.prop}}
+</div>-->
+
+
+<div [hidden]="!submitted">
+    <h2>You submitted the following:</h2>
+     {{model.Name}}
+    <br>
+    <button class="btn btn-default" (click)="submitted=false">Edit</button>
+</div>

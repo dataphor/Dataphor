@@ -11,9 +11,10 @@ export class TextboxComponent {
     @Input() title: string = '';
     @Input() name: string = '';
 
-    model = {
-        name: this.name
-    };
+    @Input() public propertyName: string;
+    @Input() public entity: any;
+
+    
 
     OnSubmit() {
         

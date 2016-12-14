@@ -11,7 +11,4 @@ export class ColumnComponent {
     @Input() title: string;
     @Input() name: string;
 
-    @Input() public propertyName: string;
-    @Input() public entity: any;
-
 }

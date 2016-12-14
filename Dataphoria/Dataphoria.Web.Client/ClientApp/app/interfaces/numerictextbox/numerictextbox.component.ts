@@ -12,4 +12,7 @@ export class NumericTextboxComponent {
     @Input() name: string = '';
     @Input() nilifblank: string = '';
 
+    @Input() public propertyName: string;
+    @Input() public entity: any;
+
 }
