@@ -1,7 +1,10 @@
 ﻿import { Component, ComponentFactory, NgModule, Input, Injectable} from '@angular/core';
 import { JitCompiler } from '@angular/compiler';
 import { PartsModule } from '../parts/parts.module';
-import _ from "lodash";
+import { InterfacesModule } from '../interfaces/interfaces.module';
+
+import * as _ from 'lodash';
+
 
 export interface IHaveDynamicData { 
     entity: any;
@@ -63,8 +66,8 @@ protected createNewComponent (tmpl:string) {
     protected createComponentModule (componentType: any) {
         @NgModule({
             imports: [
-              PartsModule, // there are 'text-editor', 'string-editor'...
-              // InterfaceModule
+              //PartsModule, // there are 'text-editor', 'string-editor'...
+              InterfacesModule
             ],
             declarations: [
               componentType

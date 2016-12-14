@@ -1,15 +1,11 @@
-﻿// make all interfaces as one DYNAMIC_DIRECTIVES 
-import { forwardRef } from '@angular/core';
-//import { StringEditor } from './string';
-//import { TextEditor } from './text';
+﻿import { forwardRef } from '@angular/core';
 import { ColumnComponent, InterfaceComponent, NumericTextboxComponent, TextboxComponent } from './index';
 
 export const DYNAMIC_DIRECTIVES = [
-    //forwardRef(() => ColumnComponent),
-    //forwardRef(() => InterfaceComponent),
-    //forwardRef(() => NumericTextboxComponent),
-    //forwardRef(() => TextboxComponent),
-    //forwardRef(() => TextEditor)
+    forwardRef(() => ColumnComponent),
+    forwardRef(() => InterfaceComponent),
+    forwardRef(() => NumericTextboxComponent),
+    forwardRef(() => TextboxComponent),
 ];
 
 // module itself
@@ -23,12 +19,10 @@ import { FormsModule } from "@angular/forms";
         FormsModule
     ],
     declarations: [
-        //DYNAMIC_DIRECTIVES
-        ColumnComponent, InterfaceComponent, NumericTextboxComponent, TextboxComponent
+        DYNAMIC_DIRECTIVES
     ],
     exports: [
-        //DYNAMIC_DIRECTIVES,
-        ColumnComponent, InterfaceComponent, NumericTextboxComponent, TextboxComponent,
+        DYNAMIC_DIRECTIVES,
         CommonModule,
         FormsModule
     ]

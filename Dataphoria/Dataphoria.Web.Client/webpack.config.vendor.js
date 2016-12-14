@@ -31,7 +31,7 @@ module.exports = {
             'es6-promise',
             'flexboxgrid/dist/flexboxgrid.css',
             'jquery',
-            'lodash/lodash.min.js',
+            'lodash',
             'ng2-ace-editor',
             'zone.js',
         ]
