@@ -21,8 +21,11 @@ export class DynamicFormBuilder {
         //});
 
         //return template + "</form>";
-
-        return d4Interface;
+        let d4Form = "<d4-form>\r\n";
+        d4Form += d4Interface;
+        d4Form += "\r\n";
+        d4Form += "</d4-form>";
+        return d4Form;
 
     }
 

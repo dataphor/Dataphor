@@ -10,7 +10,7 @@ import { HomeComponent } from './components/home/home.component';
 import { TestComponent } from './components/test/test.component';
 
 import { DynamicModule } from './dynamic/dynamic.module';
-import { InterfacesModule } from './interfaces/interfaces.module';
+import { D4FormsModule } from './d4-forms/d4-forms.module';
 import { SharedModule } from './shared/shared.module';
 
 @NgModule({
@@ -34,7 +34,7 @@ import { SharedModule } from './shared/shared.module';
             { path: '**', redirectTo: 'home' }
         ]),
         DynamicModule.forRoot(),
-        InterfacesModule.forRoot(),
+        D4FormsModule.forRoot(),
         SharedModule.forRoot()
     ]
 })
