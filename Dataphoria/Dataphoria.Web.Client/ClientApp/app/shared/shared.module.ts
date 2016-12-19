@@ -1,23 +1,22 @@
 ﻿import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormsModule }   from '@angular/forms';
 
-import { APIService } from './index';
+import { APIService, UtilityService } from './index';
 
 /**
  * Do not specify providers for modules that might be imported by a lazy loaded module.
  */
 
 @NgModule({
-    imports: [CommonModule, RouterModule, FormsModule],
+    imports: [CommonModule, RouterModule],
     declarations: [
         
     ],
     exports: [
         
     ],
-    providers: [APIService]
+    providers: [APIService, UtilityService]
 })
 export class SharedModule {
     static forRoot(): ModuleWithProviders {

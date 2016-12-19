@@ -47,7 +47,7 @@ select `;
             this._apiService
                 .post({ value: this.iTextTemp })
                 .then(response => {
-                    let handledResponse = this.handleResponse(response);
+                    let handledResponse = this._apiService.handleResponse(response);
                     this.oText += handledResponse + '\r\n';
                     this.running = false;
                 })
@@ -59,23 +59,6 @@ select `;
                     this.running = false;
                 });
         }
-    };
-
-    // TODO: Move to service
-    handleResponse(response: any): any {
-        let handledResponse = '';
-        let responseModel: IResponse; 
-        if (Array.isArray(response)) {
-            responseModel = new ResponseSet(response);
-            for (let r of response) {
-                handledResponse += JSON.stringify(r) + '\r\n';
-            }
-        }
-        else {
-            responseModel = new ResponseSingle(response);
-            handledResponse += JSON.stringify(responseModel) + '\r\n';
-        }
-        return handledResponse;
     };
 
     clearOutput() {

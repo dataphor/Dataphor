@@ -1,12 +1,26 @@
 ﻿import { forwardRef } from '@angular/core';
-import { FormComponent, ColumnComponent, InterfaceComponent, NumericTextboxComponent, TextboxComponent } from './index';
+import {
+    ColumnComponent,
+    InterfaceComponent,
+    MenuComponent,
+    NumericTextboxComponent,
+    ShowFormActionComponent,
+    SourceComponent,
+    SourceActionComponent,
+    TextboxComponent,
+    FormComponent
+} from './index';
 
 export const DYNAMIC_DIRECTIVES = [
-    forwardRef(() => FormComponent),
     forwardRef(() => ColumnComponent),
     forwardRef(() => InterfaceComponent),
+    forwardRef(() => MenuComponent),
     forwardRef(() => NumericTextboxComponent),
+    forwardRef(() => ShowFormActionComponent),
+    forwardRef(() => SourceComponent),
+    forwardRef(() => SourceActionComponent),
     forwardRef(() => TextboxComponent),
+    forwardRef(() => FormComponent),
 ];
 
 // module itself

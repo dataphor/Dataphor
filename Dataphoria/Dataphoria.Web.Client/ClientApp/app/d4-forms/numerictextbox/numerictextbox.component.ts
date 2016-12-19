@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { FormControlContainer } from '../form.component';
 
 @Component({
@@ -8,40 +8,36 @@ import { FormControlContainer } from '../form.component';
     styles: [require('./numerictextbox.component.css')],
     providers: []
 })
-export class NumericTextboxComponent implements OnDestroy, OnInit{
-    
-    @Input() title: string = '';
+export class NumericTextboxComponent implements OnDestroy, OnInit {
+
     @Input() name: string = '';
+    @Input() title: string = '';
+    @Input() maxlength: number;
+    @Input() maxwidth: number;
     @Input() nilifblank: string = '';
+    @Input() width: number;
+    @Input() columnname: string = '';
+    @Input() source: string = '';
 
-    formGroup: FormGroup;
-    formControl: FormControl;
+    private controlId: string;
+    private formControl: FormControl;
 
-    private group: string;
-    private control: string;
-
-    constructor(private _parent: FormControlContainer) {
-
-        
-    }
+    constructor(private _form: FormControlContainer) {}
 
     ngOnInit() {
-        // TODO: Change template so we don't have to do this every time
-        let groupAndControl = this.name.split('.');
-        this.group = groupAndControl[0];
-        this.control = groupAndControl[1];
-
-        //this.formGroup = new FormGroup({
-        //    groupAndControl[0]: new FormControl()
-        //});
-        //this.formControl = groupAndControl[1];
-        this.formControl = new FormControl(this.control, null);
-        this._parent.addControl(this.control, this.formControl);
+        let sourceAndControl = this.columnname.split('.');
+        this.controlId = sourceAndControl[1];
+        
+        this.formControl = new FormControl(this.controlId, null);
+        if (this.source) {
+            this._form.addControl(this.controlId, this.formControl, this.source);
+        }
     }
 
     ngOnDestroy() {
-        this._parent.removeControl(this.control);
+        if (this.source) {
+            this._form.removeControl(this.controlId);
+        }
     }
-
 
 }

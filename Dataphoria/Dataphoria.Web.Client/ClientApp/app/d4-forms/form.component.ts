@@ -2,17 +2,16 @@
     Component, OnInit, ViewChildren, QueryList, OnDestroy, forwardRef, Injector
 } from '@angular/core';
 import {
-    FormControl,
-    FormGroup,
-    ControlContainer,
-    Validators,
-    FormGroupDirective
+    AbstractControl, FormControl, FormGroup, ControlContainer, Validators, FormGroupDirective
 } from '@angular/forms';
 
-
 export abstract class FormControlContainer {
-    abstract addControl(name: string, control: FormControl): void;
+    abstract getControl(name: string): AbstractControl | null;
+    abstract addSource(name: string, control: FormGroup): AbstractControl | null;
+    abstract updateGroup(name: string, control: AbstractControl, model: Object): void;
+    abstract addControl(name: string, control: FormControl, source: string): void;
     abstract removeControl(name: string): void;
+    abstract setMainSource(name: string): void;
 }
 
 export const formGroupContainerProvider: any = {
@@ -40,11 +39,43 @@ export class FormComponent implements FormControlContainer {
         console.log(this.form.value);
     }
 
-    addControl(name: string, control: FormControl): void {
-        this.form.addControl(name, control);
+    getControl(name: string): AbstractControl | null {
+        if (!this.form.contains(name)) return null;
+        else {
+            this.form.get(name)
+        }
+    }
+
+    addSource(name: string, control: FormGroup): AbstractControl | null {
+        if (!this.form.contains(name)) {
+            this.form.addControl(name, control);
+        }
+        return this.form.get(name);
+    }
+
+    // {"Main.ID":"Admin","Main.Name":"Administrator"}
+    // {"Main.ID":"System", "Main.Name":"System User" }
+    // Updates group with new values given in object
+    updateGroup(name: string, control: AbstractControl, model: Object): void {
+        control.patchValue(model);
+    }
+
+    addControl(name: string, control: FormControl, source: string): void {
+
+        //If the source has not been created yet, go ahead and create it
+        if (!this.form.contains(source)) {
+            this.form.addControl(source, new FormGroup({ control }));
+        } else {
+            this.form.addControl(name, control);
+        }
+        
     }
 
     removeControl(name: string): void {
         this.form.removeControl(name);
+    }
+
+    setMainSource(name: string): void {
+        // TODO: Set once we know how this translates to the web
     }
 }

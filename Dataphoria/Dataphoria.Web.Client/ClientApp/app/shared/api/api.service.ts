@@ -2,7 +2,7 @@
 import { Headers, Http, Response } from '@angular/http';
 import 'rxjs/add/operator/toPromise';
 import { config } from '../index';
-
+import { IResponse, ResponseSingle, ResponseSet } from './models';
 
 @Injectable()
 export class APIService {
@@ -42,6 +42,22 @@ export class APIService {
             .then(res => res.json())
             .catch(this.handleError);
     }
+
+    handleResponse(response: any): any {
+        let handledResponse = '';
+        let responseModel: IResponse;
+        if (Array.isArray(response)) {
+            responseModel = new ResponseSet(response);
+            for (let r of response) {
+                handledResponse += JSON.stringify(r) + '\r\n';
+            }
+        }
+        else {
+            responseModel = new ResponseSingle(response);
+            handledResponse += JSON.stringify(responseModel) + '\r\n';
+        }
+        return handledResponse;
+    };
 
     private handleError(error: any) {
         error = error.json();
