@@ -23,18 +23,18 @@ export class SourceComponent implements OnInit {
 
         let decodedSource = this._utilityService.decodeInline(this.expression);
 
-        let expression = 'select ' + this.expression;
+        let decodedQuery = 'select ' + decodedSource;
         this._apiService
-            .post({ value: this.expression })
+            .post({ value: decodedQuery })
             .then(response => {
-                let handledResponse = this._apiService.handleResponse(response);
-                console.log(handledResponse);
-                if (Array.isArray(handledResponse)) {
+                //let handledResponse = this._apiService.handleResponse(response);
+                console.log(response);
+                if (Array.isArray(response)) {
                     // Return first value from array of objects
-                    this._form.updateGroup(this.name, this.formGroup, handledResponse[0].value);
+                    this._form.updateGroup(this.name, this.formGroup, this._utilityService.getValueFromSourceValue(response[0]));
                 }
                 else {
-                    this._form.updateGroup(this.name, this.formGroup, handledResponse.value);
+                    this._form.updateGroup(this.name, this.formGroup, this._utilityService.getValueFromSourceValue(response));
                 }
             })
             .catch(error => {

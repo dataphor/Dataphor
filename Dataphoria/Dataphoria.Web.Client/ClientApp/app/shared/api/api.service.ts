@@ -29,8 +29,7 @@ export class APIService {
 
     post(query: Object) {
         let headers = new Headers({
-            'Content-Type': 'application/json',
-            'Content-Length': '27'
+            'Content-Type': 'application/json'
         });
 
         let uri = config.api.serviceBase + '/query'

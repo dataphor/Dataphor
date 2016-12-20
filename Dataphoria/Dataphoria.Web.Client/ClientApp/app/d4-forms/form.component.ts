@@ -42,7 +42,7 @@ export class FormComponent implements FormControlContainer {
     getControl(name: string): AbstractControl | null {
         if (!this.form.contains(name)) return null;
         else {
-            this.form.get(name)
+            return this.form.get(name);
         }
     }
 
@@ -66,7 +66,8 @@ export class FormComponent implements FormControlContainer {
         if (!this.form.contains(source)) {
             this.form.addControl(source, new FormGroup({ control }));
         } else {
-            this.form.addControl(name, control);
+            let group = this.getControl(source) as FormGroup;
+            group.addControl(name, control)
         }
         
     }
