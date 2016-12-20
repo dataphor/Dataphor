@@ -12,14 +12,22 @@ export class ShowFormActionComponent {
     @Input() text: string = '';
     @Input() document: string = '';
 
-    sourcelink = {
-        source: ''
-    };
+    //sourcelink = {
+    //    source: ''
+    //};
 
-    @Input() sourcelink.source = '';
+    //@Input() sourcelink.source = '';
+
+    @Input() sourcelink: Object = {
+        source: '',
+        masterkeynames: '',
+        detailkeynames: ''
+
+    }
     // TODO: Figure out how to map different sourcelinks to this
     // e.g., sourcelink.source, sourcelink.masterkeynames, etc.
     @Input() sourcelinktype: string = '';
+    @Input() sourcelinkrefresh: string = '';
     
     constructor(private _form: FormControlContainer) {
 
