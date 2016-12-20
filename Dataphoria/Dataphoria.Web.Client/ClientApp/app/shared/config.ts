@@ -2,7 +2,7 @@
 export const config = {
     api: {
         // local
-        'serviceBase': 'http://localhost:61989'
+        'serviceBase': 'http://localhost:23442'
         // development
         //'serviceBase': 'http://dataphoria.org/data'
         // production

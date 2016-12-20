@@ -1,0 +1,99 @@
+﻿@{ViewBag.Title = "D4 Query Page";}
+<style type="text/css" media="screen">
+	.editor { 
+        position: relative;
+        top: 0;
+        right: 0;
+		height: 400px;
+        width: 100%;
+		border: 1px solid black;
+		font-size: 14px;
+    }
+</style>
+<div id="body">
+
+    <aside>
+		<h3>Keys</h3>
+		<code><pre>Ctrl-E to execute</pre></code>
+		<h3><a href="https://github.com/DBCG/Dataphor/blob/master/Dataphor/DAE/Language.D4/BNF.txt" target="_blank">Syntax</a></h3>
+		<a href="http://dataphor.org" target="_blank">More information</a>
+		<code><pre>select table where condition</pre></code>
+		<h3>Schema</h3>
+		<code><pre><!-- TODO: Load schema --></pre></code>
+	</aside>	
+	
+	<article>
+        <h3>Request</h3>
+
+        <div id="requestEditor" class="editor">select </div>
+
+        <h3>Result</h3>
+
+        <div id="resultEditor" class="editor"></div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js" type="text/javascript" charset="utf-8"></script>
+		<script>
+			var resultEditor = ace.edit("resultEditor");
+			resultEditor.setTheme("ace/theme/xcode");
+			resultEditor.getSession().setMode("ace/mode/javascript");
+			resultEditor.setShowPrintMargin(false);
+			resultEditor.setReadOnly(true);
+
+			var editor = ace.edit("requestEditor");
+			editor.setTheme("ace/theme/github");
+			editor.getSession().setMode("ace/mode/xquery");
+			editor.setShowPrintMargin(false);
+			editor.commands.addCommand({
+				name: 'executeScript',
+				bindKey: { win: 'Ctrl-E', mac: 'Command-E' },
+				exec: function (editor) {
+
+					// Get the selection or all if nothing selected
+					var selectionLine =
+						editor.selection.isEmpty()
+							? 0
+							: editor.getSelectionRange().start.row;
+					var query =
+						editor.selection.isEmpty()
+							? editor.getValue()
+							: editor.session.getTextRange(editor.getSelectionRange());
+
+					$.ajaxSetup({
+					    contentType: 'application/json'
+					});
+
+					var posting = $.post('/query/', JSON.stringify({ value: query }));
+
+					posting.done(function (data) {
+					    var result = '';
+					    data.forEach(function (item) {
+					        result += JSON.stringify(item) + '\r\n';
+					    });
+					    resultEditor.setValue(result);
+					});
+
+					posting.fail(function (data) {
+					    try {
+					        // TODO: Use responseJSON instead of responseText for better-formatted/more relevant error messages
+					        var result = data.status + ': ' + data.statusText;
+					        result += '\r\n';
+					        result += data.responseText;
+					        resultEditor.setValue(result);
+					    }
+					    catch (e) {
+					        resultEditor.setValue(data);
+					    }
+					});
+
+					posting.always(function (data) {
+					    resultEditor.getSession().setMode("ace/mode/text");
+					});
+				},
+				readOnly: false
+			});
+			editor.selection.moveCursorLineEnd();
+			editor.focus();
+		</script>
+    </article>
+
+</div>
