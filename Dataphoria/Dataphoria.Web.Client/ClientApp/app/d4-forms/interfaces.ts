@@ -1,8 +1,8 @@
-﻿import { HelpKeywordBehavior, TitleAlignment, VerticalAlignment } from './models';
+﻿import { HelpKeywordBehavior, TitleAlignment, VerticalAlignment, TextAlignment } from './models';
 
 export interface IElement {
     Name: string,
-    UserData: Object,
+    UserData?: Object,
     Visible: boolean,
     Hint: string,
     MarginLeft: number,
@@ -12,11 +12,24 @@ export interface IElement {
     HelpKeyword: string
     HelpKeywordBehavior: HelpKeywordBehavior,
     HelpString: string
-}
+};
+
+// TODO: Implement INode Interface (non-visual, constructor-driven)
+
+export interface INode {
+    Active?: boolean,
+    Children?: Array<INode>, // simplified
+    HostNode?: INode,
+    Name: string,
+    Owner?: INode,
+    Parent?: INode,
+    Transitional?: boolean,
+    UserData?: Object
+};
 
 export interface ISource {
     Name: string,
-    UserData: Object,
+    UserData?: Object,
     WriteWhereClause: boolean,
     DataSource: string, // simplified
     DataView: string, // simplified
@@ -71,10 +84,14 @@ export interface ISource {
     RequestedIsolation: string // simplified
 }
 
+export interface ISourceReference {
+    Source: ISource;
+};
+
 export interface IAction {
     Enabled: boolean,
     Name: string,
-    UserData: Object,
+    UserData?: Object,
     // TODO: Create new Image Type
     LoadedImage: string,
     Text: string,
@@ -83,7 +100,11 @@ export interface IAction {
     BeforeExecute: IAction,
     AfterExecute: IAction,
     Visible: boolean
-}
+};
+
+export interface IReadOnly {
+    ReadOnly: boolean
+};
 
 export interface ITitledElement {
     ColumnName: string,
@@ -94,10 +115,45 @@ export interface ITitledElement {
     MarginBottom: number,
     HelpKeywordBehavior: HelpKeywordBehavior,
     Name: string,
-    UserData: Object,
+    UserData?: Object,
     ReadOnly: boolean,
     Source: ISource,
     VerticalAlignment: VerticalAlignment,
     Visible: boolean,
     TitleAlignment: TitleAlignment;
+};
+
+export interface IAlignedElement {
+    MaxWidth: number,
+    TextAlignment: TextAlignment,
+    Width: number
 }
+
+export interface IVerticalAlignedElement {
+    VerticalAlignment: VerticalAlignment
+};
+
+export interface IColumnElement {
+    ColumnName: string,
+    Title: string
+};
+
+export interface ITextBoxBase {
+    NilIfBlank: boolean
+};
+
+export interface ITextBox extends ITextBoxBase, IAlignedElement, ITitledElement, IColumnElement, IDataElement, IElement, INode, IVisual, ISourceReference, IReadOnly, IVerticalAlignedElement {
+    AcceptsReturn: boolean,
+    AcceptsTabs: boolean,
+    Height: number,
+    IsPassword: boolean,
+    MaxLength: number,
+    WordWrap: boolean
+};
+
+
+export interface IDataElement extends IElement, ISourceReference, IReadOnly {};
+
+export interface IVisual {
+    Visible: boolean
+};
