@@ -1,9 +1,6 @@
-﻿import {
-    Component, OnInit, ViewChildren, QueryList, OnDestroy, forwardRef, Injector
-} from '@angular/core';
-import {
-    AbstractControl, FormControl, FormGroup, ControlContainer, Validators, FormGroupDirective
-} from '@angular/forms';
+﻿import { Component, OnInit, ViewChildren, QueryList, OnDestroy, forwardRef, Injector } from '@angular/core';
+import { AbstractControl, FormControl, FormGroup, ControlContainer, Validators, FormGroupDirective } from '@angular/forms';
+import { ISource } from './interfaces';
 
 export abstract class FormControlContainer {
     abstract getControl(name: string): AbstractControl | null;
@@ -79,4 +76,9 @@ export class FormComponent implements FormControlContainer {
     setMainSource(name: string): void {
         // TODO: Set once we know how this translates to the web
     }
+
+    getSource(): ISource {
+
+    }
+
 }

@@ -1,9 +1,9 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { FormControlContainer } from '../form.component';
-import { HelpKeywordBehavior, TitleAlignment, TextAlignment, HorizontalAlignment, VerticalAlignment } from '../models';
+import { HelpKeywordBehavior, TitleAlignment, TextAlignment, HorizontalAlignment, VerticalAlignment, Source } from '../models';
 import {
-    ISource, ITextBoxBase, IAlignedElement, ITitledElement,
+    ITextBoxBase, IAlignedElement, ITitledElement,
     IColumnElement, IDataElement, IElement, INode, IVisual, ISourceReference, IReadOnly, IVerticalAlignedElement
 } from '../interfaces';
 
@@ -21,7 +21,7 @@ export class TextboxComponent
     // public instance properties
 
     @Input('acceptsreturn') AcceptsReturn: boolean = true;
-    @Input('acceptstabs') AcceptsTabs: boolean = false
+    @Input('acceptstabs') AcceptsTabs: boolean = false;
     @Input('height') Height: number = 1;
     @Input('ispassword') IsPassword: boolean = false;
     @Input('maxlength') MaxLength: number = -1;
@@ -46,7 +46,14 @@ export class TextboxComponent
     @Input('name') Name: string = ''; 
     @Input('userdata') UserData: Object = {}; // TODO: Figure out how to represent the C# Object here (because the JS object is obviously different)
     @Input('readonly') ReadOnly: boolean = false;
-    @Input('source') Source: ISource = null; // TODO: Figure out how to represent this -- looks like a string as it is placed in a DFD
+    //_source: ISource;
+    @Input('source') Source: ISourceReference = null;
+    //set Source(val: ISource) { // NOTE: In DFD's this is flattened to a simple string, though it is documented as an ISource
+    //    this._source = new Source(val.Name); // TODO: Figure this out (it won't work)
+    //}
+    //get Source() {
+    //    return this._source;
+    //}
     @Input('nilifblank') NilIfBlank: boolean = false;
     @Input('titlealignment') TitleAlignment: TitleAlignment = TitleAlignment.Top;
     @Input('verticalalignment') VerticalAlignment: VerticalAlignment = VerticalAlignment.Top;
@@ -63,7 +70,10 @@ export class TextboxComponent
 
         this.formControl = new FormControl(this.controlId, null);
         if (this.Source) {
-            this._form.addControl(this.controlId, this.formControl, this.Source);
+            this.Source = this._form.getSource();
+            this._form.addControl(this.controlId, this.formControl, this.Source.Name);
+            //get source
+            
         }
     }
 

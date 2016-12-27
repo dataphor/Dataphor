@@ -1,1 +1,4 @@
-﻿
+﻿:host([TextAlignment]="Left") { text-align: left; }
+:host([TextAlignment]="Right") { text-align: right; }
+:host([TextAlignment]="Center") { text-align: center; }
+
