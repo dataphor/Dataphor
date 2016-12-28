@@ -116,7 +116,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		/// <summary> Determines if a particular node is valid as a child of this one. </summary>
 		/// <remarks> 
-		///		Allows a descendant node to screen it's potential children.
+		///		Allows a descendant node to screen its potential children.
 		///		Should throw an exception if a submitted child should not be added as a child.
 		///		Should not assume the item will be added (See <see cref="AddChild"/>).
 		///		The default implementation throws an exception, disallowing the child object.
@@ -488,7 +488,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Called to add a node to the children. </summary>
 		/// <param name="value"> The node to be added. </param>
 		/// <param name="index"> The index of the node. </param>
-		/// <remarks> Also links the node to it's owner. </remarks>
+		/// <remarks> Also links the node to its owner. </remarks>
 		protected override void Adding(Node value, int index)
 		{
 			value.Owner = null;

@@ -2,7 +2,7 @@
 import { INode, ISource, IAction } from './interfaces';
 
 
-export class Source implements ISource, INode {
+export class Source extends Node implements ISource {
 
     Name: string;
     UserData: Object;
@@ -114,5 +114,11 @@ export class Source implements ISource, INode {
         this.CursorType: string; // simplified
         this.IsolationLevel: string; // simplified
         this.RequestedIsolation: string // simplified
+    }
+
+    protected Dispose(disposing: boolean) {
+        try {
+            super.Dispose(disposing);
+        }
     }
 }

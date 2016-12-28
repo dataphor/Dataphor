@@ -147,6 +147,12 @@ export abstract class NodeEvent {
 };
 
 // delegate
+//export interface NameChangeHandler {
+//    (ASender: Object, AOldName: string, ANewName: string): void
+//}
+
 export interface NameChangeHandler {
-    (ASender: object, AOldName: string, ANewName: string): void
+    ASender: Object,
+    AOldName: string,
+    ANewName: string
 }
