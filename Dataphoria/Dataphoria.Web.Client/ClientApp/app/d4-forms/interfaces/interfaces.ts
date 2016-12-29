@@ -1,4 +1,5 @@
-﻿import { IAction } from './action-interfaces';
+﻿import { EventEmitter } from '@angular/core';
+import { IAction } from './action-interfaces';
 import { IReadOnly, ISourceReferenceChild } from './data-interfaces';
 import { INode, IVisual, HorizontalAlignment, VerticalAlignment } from './element-interfaces';
 
@@ -76,28 +77,27 @@ export interface IHost extends INode {
     AfterOpen(): void,
     Close(): void,
     Document: string,
-    OnDocumentChanged: EventHandler, // event
+    OnDocumentChanged: EventEmitter<Object>, // event, TODO: Figure out event to emit for DocumentChanged
     Load(ADocument: string, AInstance: Object),
     LoadNext(AInstance: Object): INode 
 };
 
-export interface IChildCollection extends IList { // System.Collections.IList
+export interface IChildCollection extends Array<INode> { // System.Collections.IList
     // new INode this[int AIndex] { get; } // TODO: Figure out equivalent
     Disown(AItem: INode): void,
     DisownAt(AIndex: number): INode
 };
 
-export interface INode extends IDisposable, System.ComponentModel.IComponent { // TODO: Figure out equivalents
+export interface INode {
     Owner: INode,
     Parent: INode,
     Children: IChildCollection,
-    IsValidChild(AChild: INode): boolean,
-    IsValidChild(AChildType: Type): boolean, // TODO: Figure out System.Type
+    IsValidChild(AChild: INode, AChildType?: string): boolean,
     IsValidOwner(AOwner: INode): boolean,
-    IsValidOwner(AOwner: Type): boolean,
+    IsValidOwner(AOwner: string): boolean,
     HostNode: IHost,
-    FindParent(AType: Type): INode,
-    OnValidateName: NameChangeHandler, // event
+    FindParent(AType: string): INode,
+    OnValidateName: EventEmitter<NameChangeHandler>, // event
     GetNode(AName: string, AExcluding: INode): INode,
     GetNode(AName: string): INode,
     FindNode(AName: string): INode,

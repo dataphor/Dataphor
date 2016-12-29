@@ -273,17 +273,6 @@ export interface IUpdateHandler {
     EndUpdate(APerformLayout: boolean)
 };
 
-export interface INode {
-    Active?: boolean,
-    Children?: Array<INode>, // simplified
-    HostNode?: INode,
-    Name: string,
-    Owner?: INode,
-    Parent?: INode,
-    Transitional?: boolean,
-    UserData?: Object
-};
-
 export enum TitleAlignment {
     Top = 0,
     Left,

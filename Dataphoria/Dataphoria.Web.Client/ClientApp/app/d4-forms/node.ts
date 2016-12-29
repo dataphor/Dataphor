@@ -1,4 +1,4 @@
-﻿import { Input, EventEmitter } from '@angular/core';
+﻿import { EventEmitter } from '@angular/core';
 import { INode, ISource, IAction, IChildCollection, IHost, NameChangeHandler } from './interfaces';
 
 
@@ -9,8 +9,9 @@ export class Node implements INode {
         this._children = new ChildCollection(this);
     }
 
-    protected Dispose(disposing: boolean): void {
+    protected Dispose(disposing?: boolean): void {
         try {
+
             //base.Dispose(disposing)
         }
         finally {
@@ -22,8 +23,8 @@ export class Node implements INode {
     };
 
     private _userData: Object;
-    get(): Object { return this._userData; }
-    set(value: Object): void { this._userData = value; }
+    get UserData(): Object { return this._userData; }
+    set UserData(value: Object) { this._userData = value; }
 
     protected _owner: Node;
 
@@ -33,7 +34,7 @@ export class Node implements INode {
             if (this._owner != null)
                 this._owner.Children.Disown(this);
             if (value != null)
-                value.Children.Add(this);
+                value.Children.push(this);
         }
     }
 
@@ -48,15 +49,10 @@ export class Node implements INode {
     protected RemoveChild(child: INode): void { }
     protected ChildrenChanged(): void { }
 
-    IsValidChild(child: INode): boolean {
-        if (child == null) {
+    IsValidChild(child?: INode, childType?: string): boolean {
+        if (child == null || childType) {
             return false;
-        } else return this.IsValidChild(typeof child);
-    }
-
-    // child is typeof return value
-    IsValidChild(child: string): boolean {
-        return false;
+        } else return this.IsValidChild(null, typeof child);
     }
 
     IsValidOwner(ownerType: string) {
@@ -89,25 +85,14 @@ export class Node implements INode {
         return current as IHost;
     }
 
-    GetNode(name: string, excluding: INode): INode {
+    GetNode(name: string, excluding?: INode): INode {
         if ((this.Name != '') && (this.Name.toUpperCase() == name.toUpperCase()) && (excluding == this)) {
-            return this;
-        } else {
-            let result: INode;
-            for (let child: INode of this.Children) {
-                result = child.GetNode(name, excluding);
-                if (result != null) return result;
+            if ((excluding && excluding == this) || !excluding) {
+                return this;
             }
-        }
-        return null;
-    }
-
-    GetNode(name: string): INode {
-        if ((this.Name != '') && (this.Name.toUpperCase() == name.toUpperCase())) {
-            return this;
         } else {
             let result: INode;
-            for (let child: INode of this.Children) {
+            for (let child of this.Children) {
                 result = child.GetNode(name, excluding);
                 if (result != null) return result;
             }
@@ -151,6 +136,8 @@ export class Node implements INode {
     }
 
     //#region Activation/Deactivation
+
+    private _transitional: boolean;
 
     get Transitional(): boolean {
         return this._transitional;
@@ -263,13 +250,47 @@ export class Node implements INode {
 
     //#endregion
 
+    //#region Broadcast/Handle events
+
+    BroadcastEvent(eventValue: NodeEvent): void {
+        if (!eventValue.IsHandled) {
+            this.HandleEvent(eventValue);
+            if (!eventValue.IsHandled) {
+                eventValue.Handle(this);
+                if (!eventValue.IsHandled)
+                    for(let child of this.Children)
+                {
+                    child.BroadcastEvent(eventValue);
+                    if (eventValue.IsHandled)
+                        break;
+                }
+            }
+        }
+    }
+
+    HandleEvent(eventValue: NodeEvent): void { }
+
+    //#endregion
+
+    //#region IComponent
+
+    private _site: ISite;
+
+    get Site(): ISite {
+        return this._site;
+    }
+    set Site(value: ISite) {
+        this._site = value;
+    }
+
+    //#endregion
 
 };
 
-export class ChildCollection implements IChildCollection {
+export class ChildCollection extends Node implements IChildCollection {
 
     constructor(node: Node) {
-        //super(true);
+        super();
         this._node = node;
     }
 
@@ -280,6 +301,10 @@ export class ChildCollection implements IChildCollection {
         if (value.Active) {
             //throw new ClientException(ClientException.Codes.CannotAddActiveChild);
         }
+
+        //super.Adding(value, index);
+
+        this._node.AddChild(value);
     }
 
 };
