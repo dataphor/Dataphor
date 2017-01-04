@@ -1,18 +1,18 @@
 ﻿import { EventEmitter } from '@angular/core';
-import { INode, ISource, IAction, IChildCollection, IHost, NameChangeHandler } from './interfaces';
+import { INode, IChildCollection, IHost, INameChangeHandler } from './interfaces';
 
 
 export class Node implements INode {
 
     constructor() {
-        //super();
+        // super();
         this._children = new ChildCollection(this);
     }
 
     protected Dispose(disposing?: boolean): void {
         try {
 
-            //base.Dispose(disposing)
+            // base.Dispose(disposing)
         }
         finally {
             if (this._children != null) {
@@ -30,11 +30,13 @@ export class Node implements INode {
 
     get Owner(): INode { return this._owner; }
     set Owner(value: INode) {
-        if (this._owner != value) {
-            if (this._owner != null)
+        if (this._owner !== value) {
+            if (this._owner != null) {
                 this._owner.Children.Disown(this);
-            if (value != null)
+            }
+            if (value != null) {
                 value.Children.push(this);
+            }
         }
     }
 
@@ -52,10 +54,19 @@ export class Node implements INode {
     IsValidChild(child?: INode, childType?: string): boolean {
         if (child == null || childType) {
             return false;
-        } else return this.IsValidChild(null, typeof child);
+        } else {
+            return this.IsValidChild(null, typeof child);
+        };
     }
 
-    IsValidOwner(ownerType: string) {
+    IsValidOwner(owner: INode, ownerType: string): boolean {
+        if (owner == null) {
+            if (ownerType) {
+                return true;
+            } else {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -67,11 +78,11 @@ export class Node implements INode {
     FindParent(type: string): INode {
         if (this.Parent != null) {
             // TODO: Figure out equivalent to/write our own 'type' lib
-            //if (type.IsAssignableFrom(this.Parent.GetType()))
+            // if (type.IsAssignableFrom(this.Parent.GetType()))
             //    return this.Parent;
-            //else
+            // else
             //    return this.Parent.FindParent(type);
-            return this.Parent.FindParent(type)
+            return this.Parent.FindParent(type);
         } else {
             return null;
         }
@@ -80,21 +91,23 @@ export class Node implements INode {
     get HostNode(): IHost {
         let current: INode = this;
         while (current.Owner != null) {
-            current = current.Owner
+            current = current.Owner;
         }
         return current as IHost;
     }
 
     GetNode(name: string, excluding?: INode): INode {
-        if ((this.Name != '') && (this.Name.toUpperCase() == name.toUpperCase()) && (excluding == this)) {
-            if ((excluding && excluding == this) || !excluding) {
+        if ((this.Name !== '') && (this.Name.toUpperCase() === name.toUpperCase()) && (excluding === this)) {
+            if ((excluding && excluding === this) || !excluding) {
                 return this;
             }
         } else {
             let result: INode;
             for (let child of this.Children) {
                 result = child.GetNode(name, excluding);
-                if (result != null) return result;
+                if (result != null) {
+                    return result;
+                };
             }
         }
         return null;
@@ -103,25 +116,25 @@ export class Node implements INode {
     FindNode(name: string): INode {
         let result: INode = this.GetNode(name);
         if (result == null) {
-            //throw new ClientException(ClientException.Codes.NodeNotFound, name);
+            // throw new ClientException(ClientException.Codes.NodeNotFound, name);
         } else {
             return result;
         }
     }
 
-    //event
-    OnValidateName: EventEmitter<NameChangeHandler>;
+    // event
+    OnValidateName: EventEmitter<INameChangeHandler>;
 
     private _name: string = '';
 
-    get Name() { return this._name; }
+    get Name(): string { return this._name; }
     set Name(value: string) {
-        if (this._name != value) {
-            if (value.indexOf(' ') != -1) {
-                //throw new ClientException(ClientException.Codes.InvalidNodeName, value);
+        if (this._name !== value) {
+            if (value.indexOf(' ') !== -1) {
+                // throw new ClientException(ClientException.Codes.InvalidNodeName, value);
             }
             if (this.OnValidateName != null) {
-                let _nameChangeHandler: NameChangeHandler;
+                let _nameChangeHandler: INameChangeHandler;
                 _nameChangeHandler.ASender = this;
                 _nameChangeHandler.AOldName = this._name;
                 _nameChangeHandler.ANewName = value;
@@ -131,7 +144,7 @@ export class Node implements INode {
         }
     }
 
-    toString() {
+    toString():string {
         return this.Name;
     }
 
@@ -149,24 +162,24 @@ export class Node implements INode {
 
     protected CheckInactive(): void {
         if (this.Active) {
-            //throw new ClientException(ClientException.Codes.NodeActive);
+            // throw new ClientException(ClientException.Codes.NodeActive);
         }
     }
 
     protected CheckActive(): void {
         if (!this.Active) {
-            //throw new ClientException(ClientException.Codes.NodeActive);
+            // throw new ClientException(ClientException.Codes.NodeActive);
         }
     }
 
     protected Activate(): void {
-        for (let index = 0; index < this._children.length; index++) {
+        for (let index: number = 0; index < this._children.length; index++) {
             try {
                 // NOTE: Not sure why Activate needs to call ActivateAll on each node--
                 // Deactivate just calls Deactivate on each... 
                 this.Children[index].ActivateAll();
             } catch (exception) {
-                for (let undoIndex = index - 1; undoIndex >= 0; undoIndex--) {
+                for (let undoIndex: number = index - 1; undoIndex >= 0; undoIndex--) {
                     this.Children[undoIndex].this.Deactivate();
                 }
                 throw new Error;
@@ -175,56 +188,53 @@ export class Node implements INode {
     }
 
     protected AfterActivate(): void {
-        //errors: ErrorList = null;
+        // errors: ErrorList = null;
         for (let child of this.Children)
         {
             try {
                 child.AfterActivate();
-            }
-            catch (exception) {
-                //if (errors == null)
+            } catch (exception) {
+                // if (errors == null)
                 //    errors = new ErrorList();
-                //errors.Add(exception);
+                // errors.Add(exception);
             }
         }
-        //if (errors != null)
-            //this.HostNode.Session.ReportErrors(this.HostNode, errors);
+        // if (errors != null)
+            // this.HostNode.Session.ReportErrors(this.HostNode, errors);
     }
 
     protected Deactivate(): void {
         if (this.Children != null) {
-            //ErrorList errors = null;
+            // ErrorList errors = null;
             for (let child of this.Children)
             {
                 try {
                     child.Deactivate();
-                }
-                catch (exception) {
-                    //if (errors == null)
+                } catch (exception) {
+                    // if (errors == null)
                     //    errors = new ErrorList();
-                    //errors.Add(exception);
+                    // errors.Add(exception);
                 }
             }
-            //if (errors != null)
+            // if (errors != null)
             //    HostNode.Session.ReportErrors(HostNode, errors);
         }
     }
 
     protected BeforeDeactivate(): void {
         if (this.Children != null) {
-            //ErrorList errors = null;
+            // ErrorList errors = null;
             for (let child of this.Children)
             {
                 try {
                     child.BeforeDeactivate();
-                }
-                catch (exception) {
-                    //if (errors == null)
+                } catch (exception) {
+                    // if (errors == null)
                     //    errors = new ErrorList();
-                    //errors.Add(exception);
+                    // errors.Add(exception);
                 }
             }
-            //if (errors != null)
+            // if (errors != null)
             //    HostNode.Session.ReportErrors(HostNode, errors);
         }
     }
@@ -252,23 +262,24 @@ export class Node implements INode {
 
     //#region Broadcast/Handle events
 
-    BroadcastEvent(eventValue: NodeEvent): void {
+    BroadcastEvent(eventValue: INodeEvent): void {
         if (!eventValue.IsHandled) {
             this.HandleEvent(eventValue);
             if (!eventValue.IsHandled) {
                 eventValue.Handle(this);
-                if (!eventValue.IsHandled)
-                    for(let child of this.Children)
-                {
-                    child.BroadcastEvent(eventValue);
-                    if (eventValue.IsHandled)
-                        break;
+                if (!eventValue.IsHandled) {
+                    for (let child of this.Children) {
+                        child.BroadcastEvent(eventValue);
+                        if (eventValue.IsHandled) {
+                            break;
+                        }
+                    }
                 }
             }
         }
     }
 
-    HandleEvent(eventValue: NodeEvent): void { }
+    HandleEvent(eventValue: INodeEvent): void { }
 
     //#endregion
 
@@ -287,7 +298,7 @@ export class Node implements INode {
 
 };
 
-export class ChildCollection extends Node implements IChildCollection {
+export class ChildCollection extends DisposableList<node> implements IChildCollection {
 
     constructor(node: Node) {
         super();
@@ -299,10 +310,10 @@ export class ChildCollection extends Node implements IChildCollection {
     protected Adding(value: Node, index: number): void {
         value.Owner = null;
         if (value.Active) {
-            //throw new ClientException(ClientException.Codes.CannotAddActiveChild);
+            // throw new ClientException(ClientException.Codes.CannotAddActiveChild);
         }
 
-        //super.Adding(value, index);
+        // super.Adding(value, index);
 
         this._node.AddChild(value);
     }

@@ -89,7 +89,7 @@ namespace Alphora.Dataphor
 		/// <summary> Removing is called when an item is being removed from the List. </summary>
 		protected virtual void Removing(T tempValue, int index) { }
 
-		/// <summary> Removed is call <i>after</i> an item as been removed from the list. </summary>
+		/// <summary> Removed is called <i>after</i> an item as been removed from the list. </summary>
 		protected virtual void Removed(T tempValue, int index) { }
 		
 		/// <summary> Adds an item to the end of the list. </summary>
