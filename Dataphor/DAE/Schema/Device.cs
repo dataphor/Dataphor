@@ -27,15 +27,15 @@ using D4 = Alphora.Dataphor.DAE.Language.D4;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
-	[Flags]    
-    public enum DeviceCapability : byte 
-    { 
+	[Flags]
+	public enum DeviceCapability : byte 
+	{
 		RowLevelInsert = 1, 
 		RowLevelUpdate = 2, 
 		RowLevelDelete = 4, 
 		NonLoggedOperations = 8 
 	}
-    
+
 	[Flags]
 	public enum ReconcileOptions 
 	{ 
@@ -48,21 +48,13 @@ namespace Alphora.Dataphor.DAE.Schema
 		All = ShouldReconcileColumns | ShouldDropTables | ShouldDropColumns | ShouldDropKeys | ShouldDropOrders
 	}
 	
-    public class DevicePlan : Disposable
-    {
+	public class DevicePlan : System.Object
+	{
 		public DevicePlan(Plan plan, Device device, PlanNode planNode)
-		{   
+		{
 			_plan = plan;
 			_device = device;
 			_planNode = planNode;
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			_plan = null;
-			_device = null;
-			_planNode = null;
-			base.Dispose(disposing);
 		}
 
 		// Plan
@@ -77,7 +69,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		// PlanNode
 		[Reference]
-        private PlanNode _planNode;
+		private PlanNode _planNode;
 		public PlanNode Node { get { return _planNode; } }
 		
 		// IsSupported
@@ -92,9 +84,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		private TranslationMessages _translationMessages = new TranslationMessages();
 		public TranslationMessages TranslationMessages { get { return _translationMessages; } }
 	}
-    
-    public abstract class DeviceObject : Schema.CatalogObject
-    {
+
+	public abstract class DeviceObject : Schema.CatalogObject
+	{
 		public DeviceObject(int iD, string name) : base(iD, name)
 		{
 			IsRemotable = false;
@@ -850,7 +842,6 @@ namespace Alphora.Dataphor.DAE.Schema
         public void Unprepare(DevicePlan plan)
         {
 			InternalUnprepare(plan);
-			plan.Dispose();
         }
         
         // Translate

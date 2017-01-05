@@ -207,6 +207,19 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			return _serverProcess.DeviceConnect(device);
 		}
+
+		private void EnsurePrepared(PlanNode planNode)
+		{
+			// The determine device visitor clears prepared device nodes to reduce memory footprint
+			// (The resulting optimization is significant, on the order of 100MB for a large Dataphor application)
+			// However, since there are cases where subnodes are executed independently (e.g. during a default),
+			// we need to check that the node to be executed is prepared and prepare it if necessary.
+			if (planNode.DeviceNode == null)
+			{
+				_serverProcess.EnsureDeviceStarted(planNode.Device);
+				planNode.Device.Prepare(Plan, planNode);
+			}
+		}
 		
 		public object DeviceExecute(Schema.Device device, PlanNode planNode)
 		{	
@@ -215,6 +228,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
+					EnsurePrepared(planNode);
 					return DeviceConnect(device).Execute(this, planNode);
 				}
 				finally

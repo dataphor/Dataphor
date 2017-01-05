@@ -2010,24 +2010,22 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						AlterTableNode alterTableNode = new AlterTableNode();
 						using (Plan plan = new Plan(process))
 						{
-							using (SQLDevicePlan devicePlan = new SQLDevicePlan(plan, this, alterTableNode))
+							SQLDevicePlan devicePlan = new SQLDevicePlan(plan, this, alterTableNode);
+							int objectIndex = deviceCatalog.IndexOf(baseTableVar.Name);
+							if (objectIndex < 0)
+								batch.Statements.Add(TranslateCreateTable(devicePlan, baseTableVar));
+							else
 							{
-								int objectIndex = deviceCatalog.IndexOf(baseTableVar.Name);
-								if (objectIndex < 0)
-									batch.Statements.Add(TranslateCreateTable(devicePlan, baseTableVar));
-								else
+								// Compile and translate the D4.AlterTableStatement returned from ReconcileTable and add it to LBatch
+								bool reconciliationRequired;
+								D4.AlterTableStatement d4AlterTableStatement = ReconcileTable(plan, baseTableVar, (Schema.TableVar)deviceCatalog[objectIndex], options, out reconciliationRequired);
+								if (reconciliationRequired)
 								{
-									// Compile and translate the D4.AlterTableStatement returned from ReconcileTable and add it to LBatch
-									bool reconciliationRequired;
-									D4.AlterTableStatement d4AlterTableStatement = ReconcileTable(plan, baseTableVar, (Schema.TableVar)deviceCatalog[objectIndex], options, out reconciliationRequired);
-									if (reconciliationRequired)
-									{
-										alterTableNode.AlterTableStatement = d4AlterTableStatement;
-										alterTableNode.DeterminePotentialDevice(devicePlan.Plan);
-										alterTableNode.DetermineDevice(devicePlan.Plan);
-										alterTableNode.DetermineAccessPath(devicePlan.Plan);
-										batch.Statements.Add(TranslateAlterTableNode(devicePlan, alterTableNode));
-									}
+									alterTableNode.AlterTableStatement = d4AlterTableStatement;
+									alterTableNode.DeterminePotentialDevice(devicePlan.Plan);
+									alterTableNode.DetermineDevice(devicePlan.Plan);
+									alterTableNode.DetermineAccessPath(devicePlan.Plan);
+									batch.Statements.Add(TranslateAlterTableNode(devicePlan, alterTableNode));
 								}
 							}
 						}
@@ -2045,10 +2043,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						DropTableNode dropTableNode = new DropTableNode(baseTableVar);
 						using (Plan plan = new Plan(process))
 						{
-							using (SQLDevicePlan devicePlan = new SQLDevicePlan(plan, this, dropTableNode))
-							{
-								batch.Statements.Add(TranslateDropTableNode(devicePlan, new DropTableNode(baseTableVar)));
-							}
+							SQLDevicePlan devicePlan = new SQLDevicePlan(plan, this, dropTableNode);
+							batch.Statements.Add(TranslateDropTableNode(devicePlan, new DropTableNode(baseTableVar)));
 						}
 					}
 				}
@@ -2061,20 +2057,18 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			using (Plan plan = new Plan(process))
 			{
-				using (SQLDevicePlan devicePlan = new SQLDevicePlan(plan, this, null))
+				SQLDevicePlan devicePlan = new SQLDevicePlan(plan, this, null);
+				Statement statement = TranslateCreateTable(devicePlan, tableVar);
+				SQLDeviceSession deviceSession = (SQLDeviceSession)plan.DeviceConnect(this);
 				{
-					Statement statement = TranslateCreateTable(devicePlan, tableVar);
-					SQLDeviceSession deviceSession = (SQLDeviceSession)plan.DeviceConnect(this);
+					Batch batch = statement as Batch;
+					if (batch != null)
 					{
-						Batch batch = statement as Batch;
-						if (batch != null)
-						{
-							foreach (Statement singleStatement in batch.Statements)
-								deviceSession.Connection.Execute(Emitter.Emit(singleStatement));
-						}
-						else
-							deviceSession.Connection.Execute(Emitter.Emit(statement));
+						foreach (Statement singleStatement in batch.Statements)
+							deviceSession.Connection.Execute(Emitter.Emit(singleStatement));
 					}
+					else
+						deviceSession.Connection.Execute(Emitter.Emit(statement));
 				}
 			}
 		}
