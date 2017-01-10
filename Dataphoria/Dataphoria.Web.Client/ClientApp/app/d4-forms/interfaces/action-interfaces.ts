@@ -1,17 +1,19 @@
-﻿import { INode, ILookup, HelpKeywordBehavior } from './element-interfaces';
+﻿import { ILookup, HelpKeywordBehavior } from './element-interfaces';
 import { ISource } from './data-interfaces';
-import { ISourceLink, IEnableable, IBlockable } from './interfaces';
+import { INode, ISourceLink, IEnableable, IBlockable } from './interfaces';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { NotifyIcon } from '../action';
 
 export interface IAction extends INode, IEnableable {
-    OnTextChanged: EventHandler, // event
-    OnEnabledChanged: EventHandler, // event
-    OnHintChanged: EventHandler, // event
-    OnImageChanged: EventHandler, // event
-    OnVisibleChanged: EventHandler, // event
+    OnTextChanged$: BehaviorSubject<INode>, // event
+    OnEnabledChanged$: BehaviorSubject<INode>, // event
+    OnHintChanged$: BehaviorSubject<INode>, // event
+    OnImageChanged$: BehaviorSubject<INode>, // event
+    OnVisibleChanged$: BehaviorSubject<INode>, // event
     GetText(): string,
     GetDescription(): string,
     Execute(): void,
-    Execute(ASender: INode, AParams: EventParams): void,
+    Execute(ASender: INode, ATarget: INode): void,
     Text: string,
     Hint: string,
     Image: string,

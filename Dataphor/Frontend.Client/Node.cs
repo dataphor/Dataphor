@@ -60,7 +60,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		/// <remarks> This is non private so that ChildCollection.Adding can do it's work without recursing.  (<see cref="ChildCollection.Adding"/>)</remarks>
 		protected internal Node _owner;
-		/// <summary> The owner of a node is responsible for it's lifetime. </summary>
+		/// <summary> The owner of a node is responsible for its lifetime. </summary>
 		/// <remarks> 
 		///		The owner is usually the node's parent, but not necessarily.  For example, the ownership heirarchy 
 		///		is used to determine a frame interface's host, whereas the parent is typically another control. 

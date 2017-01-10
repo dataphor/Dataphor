@@ -60,6 +60,7 @@ export class Source extends Node implements ISource {
     RequestedIsolation: string // simplified
 
     constructor(_source: ISource) {
+        super();
         this.Name = _source.Name ? _source.Name : null;
         this.UserData = _source.UserData ? _source.UserData : Object;
         this.WriteWhereClause = _source.WriteWhereClause ? _source.WriteWhereClause : false;

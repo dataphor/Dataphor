@@ -1,8 +1,9 @@
 ﻿import { EventEmitter } from '@angular/core';
+import { IComponent, IDisposable } from './system-interfaces';
 import { IAction } from './action-interfaces';
 import { IReadOnly, ISourceReferenceChild } from './data-interfaces';
-import { INode, IVisual, HorizontalAlignment, VerticalAlignment } from './element-interfaces';
-
+import { IVisual, HorizontalAlignment, VerticalAlignment } from './element-interfaces';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export interface IMenu extends IActionNode { };
 
@@ -77,33 +78,34 @@ export interface IHost extends INode {
     AfterOpen(): void;
     Close(): void;
     Document: string;
-    OnDocumentChanged: EventEmitter<Object>; // event, TODO: Figure out event to emit for DocumentChanged
+    OnDocumentChanged$: BehaviorSubject<Object>; // event
     Load(ADocument: string, AInstance: Object): INode;
     LoadNext(AInstance: Object): INode;
 };
 
-export interface IChildCollection extends Array<INode> { // System.Collections.IList
-    // new INode this[int AIndex] { get; } // TODO: Figure out equivalent
+export interface IChildCollection {
+    // Sadly don't have collections as a non-property
+    new (node: INode);
     Disown(AItem: INode): void;
     DisownAt(AIndex: number): INode;
 };
 
-export interface INode {
+export interface INode extends IDisposable, IComponent {
     Owner: INode;
     Parent: INode;
-    Children: IChildCollection;
+    Children: Array<INode>;
     IsValidChild(AChild: INode, AChildType?: string): boolean;
     IsValidOwner(AOwner?: INode, AOwnerType?: string): boolean;
     HostNode: IHost;
     FindParent(AType: string): INode;
-    OnValidateName: EventEmitter<NameChangeHandler>; // event
+    OnValidateName: BehaviorSubject<string>; // event, rxjs
     GetNode(AName: string, AExcluding: INode): INode;
     GetNode(AName: string): INode;
     FindNode(AName: string): INode;
     Transitional: boolean;
     Active: boolean;
-    BroadcastEvent(AEvent: NodeEvent): void;
-    HandleEvent(AEvent: NodeEvent): void;
+    //BroadcastEvent(AEvent: NodeEvent): void;
+    //HandleEvent(AEvent: NodeEvent): void;
     Name: string;
     UserData: Object;
 };
@@ -112,8 +114,9 @@ export interface IModule { };
 
 // public delegate void NodeEventHandler(INode ANode, EventParams AParams);
 
+// Blocks changes until Node is finished changing
 export interface IBlockable extends INode {
-    OnCompleted: EventEmitter<NodeEventHandler>; // event
+    OnCompleted$: BehaviorSubject<INode>; // event
 };
 
 export interface IEnableable {
