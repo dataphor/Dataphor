@@ -104,8 +104,8 @@ export interface INode extends IDisposable, IComponent {
     FindNode(AName: string): INode;
     Transitional: boolean;
     Active: boolean;
-    //BroadcastEvent(AEvent: NodeEvent): void;
-    //HandleEvent(AEvent: NodeEvent): void;
+    BroadcastEvent(AEvent: NodeEvent): void;
+    HandleEvent(AEvent: NodeEvent): void;
     Name: string;
     UserData: Object;
 };

@@ -5,11 +5,11 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { NotifyIcon } from '../action';
 
 export interface IAction extends INode, IEnableable {
-    OnTextChanged$: BehaviorSubject<INode>, // event
-    OnEnabledChanged$: BehaviorSubject<INode>, // event
-    OnHintChanged$: BehaviorSubject<INode>, // event
-    OnImageChanged$: BehaviorSubject<INode>, // event
-    OnVisibleChanged$: BehaviorSubject<INode>, // event
+    OnTextChanged$: BehaviorSubject<string>, // event
+    OnEnabledChanged$: BehaviorSubject<boolean>, // event
+    OnHintChanged$: BehaviorSubject<string>, // event
+    OnImageChanged$: BehaviorSubject<string>, // event
+    OnVisibleChanged$: BehaviorSubject<boolean>, // event
     GetText(): string,
     GetDescription(): string,
     Execute(): void,

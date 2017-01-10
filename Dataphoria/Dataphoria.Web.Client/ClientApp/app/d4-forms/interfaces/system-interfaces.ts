@@ -25,6 +25,6 @@ export interface ISite extends IServiceProvider {
 
 export interface IComponent extends IDisposable {
     Site: ISite;
-    Disposed: BehaviorSubject<Object>
+    Disposed$: BehaviorSubject<Object>
 }
 
