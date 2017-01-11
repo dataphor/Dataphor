@@ -1,5 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web" ToolsVersion="15.0">
-
+﻿<Project Sdk="Microsoft.NET.Sdk.Web" ToolsVersion="15.0">
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <PreserveCompilationContext>true</PreserveCompilationContext>
@@ -7,13 +6,11 @@
     <OutputType>Exe</OutputType>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dotnet5.6;portable-net45+win8</PackageTargetFallback>
   </PropertyGroup>
-
   <ItemGroup>
     <Content Include="appsettings.json;ClientApp\dist\**\*;node_modules\**\*;Views\**\*;web.config;wwwroot\**\*">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App">
       <Version>1.0.1</Version>
@@ -58,23 +55,18 @@
       <Version>1.0.0</Version>
     </PackageReference>
   </ItemGroup>
-
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools">
       <Version>1.0.0-msbuild1-final</Version>
     </DotNetCliToolReference>
   </ItemGroup>
-
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
   </PropertyGroup>
-
   <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
     <Exec Command="npm install" />
     <Exec Command="node node_modules/webpack/bin/webpack.js --config webpack.config.vendor.js --env.prod" />
     <Exec Command="node node_modules/webpack/bin/webpack.js --env.prod" />
   </Target>
-
   <Target Name="PostpublishScript" AfterTargets="Publish" Condition=" '$(IsCrossTargetingBuild)' != 'true' " />
-
 </Project>

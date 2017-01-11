@@ -1,9 +1,9 @@
-﻿import { Node } from './node';
-import { INode, IAction, ILayoutDisableable, IBlockable } from './interfaces';
-import { KeyedCollection } from './system';
+﻿import { Node } from '../node';
+import { INode, IAction, ILayoutDisableable, IBlockable } from '../interfaces';
+import { KeyedCollection } from '../system';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 
 export enum NotifyIcon {
     None,
@@ -12,18 +12,40 @@ export enum NotifyIcon {
     Error
 }
 
-//export class EventParams extends KeyedCollection<Object> {
-//    constructor(parameters?: Array<Object>) {
-//        super();
-//        if (parameters) {
-//            for (let index: number = 0; index < parameters.length; index++) {
-//                if ((index % 2) != 0) {
-//                    super.Add(parameters[index - 1].toString(), parameters[index]);
-//                }
-//            }
-//        }
-//    }
-//}
+@Injectable()
+export class ActionService {
+
+    private actionDictionary: KeyedCollection<IAction> = new KeyedCollection<IAction>();
+
+    private _actionDictionarySubject$ = new BehaviorSubject<KeyedCollection<IAction>>(null);
+
+    
+
+
+
+    GetActionByName(actionName: string): IAction {
+        return this.actionDictionary.Item(actionName);
+    }
+
+    GetAllActions(): KeyedCollection<IAction> {
+        return this.actionDictionary;
+    }
+
+    AddAction(action: IAction): void {
+        this.actionDictionary.Add(action.Name, action);
+        this.NotifySubscribers();
+    }
+
+    GetActionDictionarySubject(): BehaviorSubject<KeyedCollection<IAction>> {
+        return this._actionDictionarySubject$;
+    }
+
+    NotifySubscribers(): void {
+        this._actionDictionarySubject$.next(this.actionDictionary);
+    }
+
+
+}
 
 export class Action extends Node implements IAction, OnDestroy {
 
@@ -315,14 +337,3 @@ export class Action extends Node implements IAction, OnDestroy {
 
 }
 
-export class BlockableAction extends Action implements IBlockable {
-
-    private _onCompleted = new BehaviorSubject<INode>(null);
-
-    OnCompleted$ = this._onCompleted.asObservable();
-
-    protected DoCompleted(node: INode): void {
-        this._onCompleted.next(node);
-    }
-
-}

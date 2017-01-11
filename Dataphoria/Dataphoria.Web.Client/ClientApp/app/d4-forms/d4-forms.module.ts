@@ -47,7 +47,9 @@ export class D4FormsModule {
     static forRoot() {
         return {
             ngModule: D4FormsModule,
-            providers: [], // not used here, but if singleton needed
+            providers: [
+                ActionService
+            ], // not used here, but if singleton needed
         };
     }
 }
