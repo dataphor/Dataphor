@@ -27,6 +27,7 @@ export const DYNAMIC_DIRECTIVES = [
 import { NgModule } from '@angular/core';
 import { CommonModule } from "@angular/common";
 import { ReactiveFormsModule } from "@angular/forms";
+import { InterfaceService } from './interface';
 
 @NgModule({
     imports: [
@@ -48,7 +49,7 @@ export class D4FormsModule {
         return {
             ngModule: D4FormsModule,
             providers: [
-                ActionService
+                InterfaceService
             ], // not used here, but if singleton needed
         };
     }
