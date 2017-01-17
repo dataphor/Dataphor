@@ -94,14 +94,14 @@ export interface INode extends IDisposable, IComponent {
     Owner: INode;
     Parent: INode;
     Children: Array<INode>;
-    IsValidChild(AChild: INode, AChildType?: string): boolean;
-    IsValidOwner(AOwner?: INode, AOwnerType?: string): boolean;
-    HostNode: IHost;
-    FindParent(AType: string): INode;
+    //IsValidChild(AChild: INode, AChildType?: string): boolean;
+    //IsValidOwner(AOwner?: INode, AOwnerType?: string): boolean;
+    Host: IHost;
+    //FindParent(AType: string): INode;
     OnValidateName: BehaviorSubject<string>; // event, rxjs
     GetNode(AName: string, AExcluding: INode): INode;
     GetNode(AName: string): INode;
-    FindNode(AName: string): INode;
+    //FindNode(AName: string): INode;
     Transitional: boolean;
     Active: boolean;
     BroadcastEvent(AEvent: NodeEvent): void;

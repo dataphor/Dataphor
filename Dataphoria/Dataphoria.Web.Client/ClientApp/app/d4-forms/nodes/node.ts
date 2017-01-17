@@ -1,42 +1,13 @@
-﻿import { Input, OnInit, OnDestroy, ViewChildren } from '@angular/core';
+﻿import { EventEmitter } from '@angular/core';
 import { INode, IChildCollection, IHost, INameChangeHandler, IUpdateHandler } from './interfaces';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { ArrayUtility, KeyedCollection } from './system';
-import { InterfaceService } from './interface';
-import { NodeService } from './nodes/index';
+import { ArrayUtility } from './system';
 
+export class Node implements INode {
 
-export class Node implements INode, OnInit {
-
-
-    private _name: string = '';
-    @Input('name')
-    get Name(): string { return this._name; }
-    set Name(value: string) {
-        if (this._name !== value) {
-            if (value.indexOf(' ') !== -1) {
-                // throw new ClientException(ClientException.Codes.InvalidNodeName, value);
-            }
-            this._name = value;
-        }
-    }
-    private _children: KeyedCollection<INode>;
-    get Children(): KeyedCollection<INode> {
-        return this._children;
-    }
-    set Children(value: KeyedCollection<INode>) {
-        this._children = value;
-    }
-
-    constructor(private _interfaceService: InterfaceService, private _nodeService: NodeService) {
-    }
-
-    ngOnInit() {
-        // Children add themselves to their parents as they are added 
-        //this._children = new KeyedCollection<INode>();
-        this.Parent = this._nodeService.GetParent(this);
-        this.Children = this._children;
-        this.Owner = this._nodeService.GetHost(this);
+    constructor() {
+        this._children = new Array<Node>(this);
+        //this._children = new ChildCollection(this);
     }
 
     //protected Dispose(disposing?: boolean): void {
@@ -71,106 +42,113 @@ export class Node implements INode, OnInit {
         }
     }
 
-    private _parent: INode;
-
     // NOTE: Virtual is the default in TS
-    get Parent(): INode {
-        return this._parent;
+    get Parent(): INode { return this._owner; }
+
+    private _children: Array<Node>;
+    //private _children: ChildCollection;
+
+    get Children(): Array<Node> { return this._children; }
+    //get Children(): ChildCollection { return this._children; }
+
+    protected AddChild(child: INode): void { }
+    protected RemoveChild(child: INode): void { }
+    protected ChildrenChanged(): void { }
+
+    IsValidChild(child?: INode, childType?: string): boolean {
+        if (child == null || childType) {
+            return false;
+        } else {
+            return this.IsValidChild(null, typeof child);
+        };
     }
-    set Parent(value: INode) {
-        this._parent = value;
+
+    IsValidOwner(owner: INode, ownerType: string): boolean {
+        if (owner == null) {
+            if (ownerType) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
-    
-    //protected AddChild(child: INode): void { }
-    //protected RemoveChild(child: INode): void { }
-    //protected ChildrenChanged(): void { }
 
-    //IsValidChild(child?: INode, childType?: string): boolean {
-    //    if (child == null || childType) {
-    //        return false;
-    //    } else {
-    //        return this.IsValidChild(null, typeof child);
-    //    };
-    //}
-
-    //IsValidOwner(owner: INode, ownerType: string): boolean {
-    //    if (owner == null) {
-    //        if (ownerType) {
-    //            return true;
-    //        } else {
-    //            return false;
-    //        }
-    //    }
-    //    return true;
-    //}
-
-    //protected InvalidChildError(child: INode): void {
-    //    // throw new ClientException(ClientException.Codes.InvalidChild, child.Name, child.GetType().ToString(), GetType().ToString());
-    //}
+    protected InvalidChildError(child: INode): void {
+        // throw new ClientException(ClientException.Codes.InvalidChild, child.Name, child.GetType().ToString(), GetType().ToString());
+    }
 
     // type is typeof return value
-    //FindParent(type: string): INode {
-    //    if (this.Parent != null) {
-    //        // TODO: Figure out equivalent to/write our own 'type' lib
-    //        // if (type.IsAssignableFrom(this.Parent.GetType()))
-    //        //    return this.Parent;
-    //        // else
-    //        //    return this.Parent.FindParent(type);
-    //        return this.Parent.FindParent(type);
-    //    } else {
-    //        return null;
-    //    }
-    //}
-
-    //get Host(): IHost {
-    //    let current: INode = this;
-    //    while (current.Owner != null) {
-    //        current = current.Owner;
-    //    }
-    //    return current as IHost;
-    //}
-
-    private _host: IHost;
-    get Host(): IHost {
-        return this._host;
-    }
-    set Host(value: IHost) {
-        this._host = value;
+    FindParent(type: string): INode {
+        if (this.Parent != null) {
+            // TODO: Figure out equivalent to/write our own 'type' lib
+            // if (type.IsAssignableFrom(this.Parent.GetType()))
+            //    return this.Parent;
+            // else
+            //    return this.Parent.FindParent(type);
+            return this.Parent.FindParent(type);
+        } else {
+            return null;
+        }
     }
 
+    get HostNode(): IHost {
+        let current: INode = this;
+        while (current.Owner != null) {
+            current = current.Owner;
+        }
+        return current as IHost;
+    }
 
-    //GetNode(name: string, excluding?: INode): INode {
-    //    if ((this.Name !== '') && (this.Name.toUpperCase() === name.toUpperCase()) && (excluding === this)) {
-    //        if ((excluding && excluding === this) || !excluding) {
-    //            return this;
-    //        }
-    //    } else {
-    //        let result: INode;
-    //        for (let child of this.Children) {
-    //            result = child.GetNode(name, excluding);
-    //            if (result != null) {
-    //                return result;
-    //            };
-    //        }
-    //    }
-    //    return null;
-    //}
+    GetNode(name: string, excluding?: INode): INode {
+        if ((this.Name !== '') && (this.Name.toUpperCase() === name.toUpperCase()) && (excluding === this)) {
+            if ((excluding && excluding === this) || !excluding) {
+                return this;
+            }
+        } else {
+            let result: INode;
+            for (let child of this.Children) {
+                result = child.GetNode(name, excluding);
+                if (result != null) {
+                    return result;
+                };
+            }
+        }
+        return null;
+    }
 
-    //FindNode(name: string): INode {
-    //    let result: INode = this.GetNode(name);
-    //    if (result == null) {
-    //        // throw new ClientException(ClientException.Codes.NodeNotFound, name);
-    //    } else {
-    //        return result;
-    //    }
-    //}
+    FindNode(name: string): INode {
+        let result: INode = this.GetNode(name);
+        if (result == null) {
+            // throw new ClientException(ClientException.Codes.NodeNotFound, name);
+        } else {
+            return result;
+        }
+    }
 
     // event
     OnValidateName: BehaviorSubject<string>;
 
-    
+    private _name: string = '';
 
-    toString(): string {
+    get Name(): string { return this._name; }
+    set Name(value: string) {
+        if (this._name !== value) {
+            if (value.indexOf(' ') !== -1) {
+                // throw new ClientException(ClientException.Codes.InvalidNodeName, value);
+            }
+            if (this.OnValidateName != null) {
+                //let _nameChangeHandler: INameChangeHandler;
+                //_nameChangeHandler.ASender = this;
+                //_nameChangeHandler.AOldName = this._name;
+                //_nameChangeHandler.ANewName = value;
+                this.OnValidateName.next(value);
+            }
+            this._name = value;
+        }
+    }
+
+    toString():string {
         return this.Name;
     }
 
@@ -324,9 +302,9 @@ export class Node implements INode, OnInit {
     //#region Ownership
     
 
-    //Remove(tempValue: INode): void {
-    //    this._children = ArrayUtility.Remove(tempValue, this._children);
-    //}
+    Remove(tempValue: INode): void {
+        this._children = ArrayUtility.Remove(tempValue, this._children);
+    }
 
     protected _disowning: boolean;
 

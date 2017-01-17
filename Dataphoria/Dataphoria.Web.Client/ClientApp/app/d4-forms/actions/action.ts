@@ -1,9 +1,12 @@
 ﻿import { Node } from '../node';
 import { INode, IAction, ILayoutDisableable, IBlockable } from '../interfaces';
 import { KeyedCollection } from '../system';
+import { NodeService } from '../nodes/index';
 import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Subscription';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Injectable, OnDestroy } from '@angular/core';
+import { InterfaceService } from '../interface';
+import { Component, Input, OnInit, OnDestroy, ViewChildren } from '@angular/core';
 
 export enum NotifyIcon {
     None,
@@ -12,42 +15,89 @@ export enum NotifyIcon {
     Error
 }
 
-@Injectable()
-export class ActionService {
 
-    private actionDictionary: KeyedCollection<IAction> = new KeyedCollection<IAction>();
+export class Action extends Node implements IAction, OnInit, OnDestroy {
 
-    private _actionDictionarySubject$ = new BehaviorSubject<KeyedCollection<IAction>>(null);
-
-    
-
-
-
-    GetActionByName(actionName: string): IAction {
-        return this.actionDictionary.Item(actionName);
+    constructor(private _interfaceService: InterfaceService, private _nodeService: NodeService) {
+        super(this._interfaceService, this._nodeService);
+        this.CheckExternals();
     }
 
-    GetAllActions(): KeyedCollection<IAction> {
-        return this.actionDictionary;
+    @Input('text') Text: string;
+    @Input('hint') Hint: string;
+    @Input('image') Image: string;
+    //@Input('beforeexecute') BeforeExecute: string;
+    private _beforeExecute: IAction;
+    @Input('beforeexecute')
+    get BeforeExecute(): IAction {
+        return this._beforeExecute;
+    }
+    set BeforeExecute(value: IAction) {
+        if (this._beforeExecute !== value) {
+            //if (this._beforeExecute !== null) {
+            //    this._beforeExecute.Disposed$.unsubscribe();
+            //}
+            this._beforeExecute = value;
+            if (this._beforeExecute !== null) {
+                this._beforeExecute.Disposed$ = new BehaviorSubject<Object>(null);
+            }
+
+        }
+    }
+    private _beforeExecuteLoaded: boolean = this.BeforeExecute ? false : true;
+    @Input('afterexecute') AfterExecute: string;
+    private _afterExecute: IAction;
+    private _afterExecuteLoaded: boolean = this.AfterExecute ? false : true;
+    @Input('visible') Visible: boolean;
+    @Input('enabled') Enabled: boolean;
+
+    // TODO: Figure out what to do with this 'User-Defined Scratchpad'
+    @Input('userdata') UserData: Object;
+
+    private _externalsLoaded: boolean = false;
+    private _actionDictionaryObserver: Subscription;
+
+
+    HandleActionDictionaryChange(): void {
+        console.log('Action Dictionary Changed');
+        if (this.AfterExecute) {
+            this._afterExecute = this._interfaceService.ActionService.GetActionByName(this.AfterExecute);
+        }
+        if (this.BeforeExecute) {
+            this._beforeExecute = this._interfaceService.ActionService.GetActionByName(this.BeforeExecute);
+        }
+        this.CheckExternals();
     }
 
-    AddAction(action: IAction): void {
-        this.actionDictionary.Add(action.Name, action);
-        this.NotifySubscribers();
+    ngOnInit() {
+        if (this.AfterExecute || this.BeforeExecute) {
+            this._actionDictionaryObserver = this._interfaceService.ActionService.GetActionDictionarySubject().subscribe({
+                next: (x) => {
+                    this.HandleActionDictionaryChange();
+                }
+            });
+        }
+        
     }
 
-    GetActionDictionarySubject(): BehaviorSubject<KeyedCollection<IAction>> {
-        return this._actionDictionarySubject$;
+    // check if referenced Actions have returned
+    CheckExternals(): void {
+        if (!this._afterExecuteLoaded) {
+            if (this._afterExecute) {
+                this._afterExecuteLoaded = true;
+            }
+        }
+        if (!this._beforeExecuteLoaded) {
+            if (this._beforeExecute) {
+                this._beforeExecuteLoaded = true;
+            }
+        }
+        if (this._afterExecuteLoaded && this._beforeExecuteLoaded) {
+            this._externalsLoaded = true;
+        }
     }
 
-    NotifySubscribers(): void {
-        this._actionDictionarySubject$.next(this.actionDictionary);
-    }
 
-
-}
-
-export class Action extends Node implements IAction, OnDestroy {
 
     Dispose(disposing: boolean): void {
         this.AfterExecute.Unsubscribe();
@@ -78,23 +128,7 @@ export class Action extends Node implements IAction, OnDestroy {
 
     InternalExecute(sender: INode, target: INode) { }
 
-    private _beforeExecute: IAction;
-
-    get BeforeExecute(): IAction {
-        return this._beforeExecute;
-    }
-    set BeforeExecute(value: IAction) {
-        if (this._beforeExecute !== value) {
-            if (this._beforeExecute !== null) {
-                this._beforeExecute.Disposed$.unsubscribe();
-            }
-            this._beforeExecute = value;
-            if (this._beforeExecute !== null) {
-                this._beforeExecute.Disposed$ = new BehaviorSubject<Object>(null);
-            }
-
-        }
-    }
+    
 
     private BeforeExecuteDisposed(sender: INode, target: INode): void {
         this.BeforeExecute = null;
@@ -326,8 +360,11 @@ export class Action extends Node implements IAction, OnDestroy {
     // TODO: Create API call--simple GetImage([body] params[]) sort of thing
     //private ImageRead(request: PipeRequest, pipe: Pipe): void {}
     //private ImageError(request: PipeRequest, pipe: Pipe, exception: Exception): void {}
-
+    
     ngOnDestroy() {
+        if (this._actionDictionaryObserver) {
+            this._actionDictionaryObserver.unsubscribe();
+        }
         this._textChangedObserver.unsubscribe();
         this._enabledChangedObserver.unsubscribe();
         this._hintChangedObserver.unsubscribe();

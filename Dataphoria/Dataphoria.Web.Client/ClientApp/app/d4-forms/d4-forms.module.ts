@@ -23,11 +23,11 @@ export const DYNAMIC_DIRECTIVES = [
     forwardRef(() => FormComponent),
 ];
 
-// module itself
 import { NgModule } from '@angular/core';
 import { CommonModule } from "@angular/common";
 import { ReactiveFormsModule } from "@angular/forms";
-import { InterfaceService } from './interface';
+import { InterfaceService } from './interface/index';
+import { NodeService } from './nodes/index';
 
 @NgModule({
     imports: [
@@ -49,8 +49,9 @@ export class D4FormsModule {
         return {
             ngModule: D4FormsModule,
             providers: [
-                InterfaceService
-            ], // not used here, but if singleton needed
+                InterfaceService,
+                NodeService
+            ], 
         };
     }
 }

@@ -1,9 +1,11 @@
-import { Component, Input } from '@angular/core';
-import { IAction } from '../../interfaces';
+import { Component, Input, OnInit, OnDestroy, ViewChildren } from '@angular/core';
+import { IAction, INode } from '../../interfaces';
 import { Action } from '../action';
-import { InterfaceService } from '../../interface';
+
+import { NodeService } from '../../nodes';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observer } from 'rxjs/Observer';
+//import { Observer } from 'rxjs/Observer';
+
 import { KeyedCollection } from '../../system';
 
 @Component({
@@ -11,41 +13,40 @@ import { KeyedCollection } from '../../system';
     template: require('./blockaction.component.html'),
     providers: []
 })
-export class BlockActionComponent {
+export class BlockActionComponent extends Action implements OnInit, OnDestroy {
     
     @Input('text') Text: string;
     @Input('hint') Hint: string;
     @Input('image') Image: string;
     @Input('beforeexecute') BeforeExecute: string;
     private _beforeExecute: IAction;
-    // TODO: Attach to Observable Action so we can guarantee we point to the right action
-    // set
+    private _beforeExecuteLoaded: boolean = this.BeforeExecute ? false : true;
     @Input('afterexecute') AfterExecute: string;
     private _afterExecute: IAction;
+    private _afterExecuteLoaded: boolean = this.AfterExecute ? false : true;
     @Input('visible') Visible: boolean;
     @Input('enabled') Enabled: boolean;
-    @Input('name') Name: string;
+    
     // TODO: Figure out what to do with this 'User-Defined Scratchpad'
     @Input('userdata') UserData: Object;
 
-    private _loadedExternals: boolean = false;
-    private _actionDictionaryObserver: Observer<KeyedCollection<IAction>>;
 
-    constructor(private _interfaceService: InterfaceService) {
-        this._actionDictionaryObserver = this._interfaceService.ActionService.GetActionDictionarySubject().subscribe({
-            next: (x) => { console.log('Enabled changed to ${ x }') }
-        });
+
+    // Common
+
+    //@ViewChildren(Node) private _children: KeyedCollection<INode>;
+    private _parent: INode;
+    //protected Owner: INode;
+    
+
+    constructor() {
+        super();
     }
 
+    
 
+    
 
-    // check if referenced Actions have returned
-    CheckExternals(): void {
-        if (!this._loadedExternals) {
-            if (this._afterExecute && this._beforeExecute) {
-                this._loadedExternals = true;
-            }
-        }
-    }
+    
 
 }

@@ -432,7 +432,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		#region Broadcast/Handle events
 
-		/// <remarks> The default behavior is to handle the event then propigate to any children. </remarks>
+		/// <remarks> The default behavior is to handle the event then propagate to any children. </remarks>
 		public virtual void BroadcastEvent(NodeEvent eventValue)
 		{
 			if (!eventValue.IsHandled)
