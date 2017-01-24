@@ -1630,6 +1630,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				EmitVariableStatement((VariableStatement)statement);
 			else if (statement is ExpressionStatement)
 				EmitExpressionStatement((ExpressionStatement)statement);
+			else if (statement is CursorSelectorExpression)
+				EmitCursorSelectorExpression((CursorSelectorExpression)statement);
 			else if (statement is IfStatement)
 				EmitIfStatement((IfStatement)statement);
 			else if (statement is DelimitedBlock)
