@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 
-namespace Dataphoria.Web.Client.Test
+namespace Dataphoria.Web.Client
 {
     public class Program
     {

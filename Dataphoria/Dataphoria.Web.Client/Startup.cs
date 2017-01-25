@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Dataphoria.Web.Client.Test
+namespace Dataphoria.Web.Client
 {
     public class Startup
     {

@@ -27,11 +27,8 @@ export class BlockAction extends Action implements IBlockable {
     protected BlockableExecute(action: IAction, target: IAction): void {
         let blockable: IBlockable = action as IBlockable;
         if (blockable !== null) {
-            blockable.OnCompletedObserver = this._completed$.subscribe({
-
-            });
+            blockable.OnCompletedObserver = this._completed$.subscribe(x => { });
         }
-
         action.Execute(this, target);
 
         if (blockable === null) {
@@ -39,6 +36,6 @@ export class BlockAction extends Action implements IBlockable {
         }
     }
 
-    protected DetachBlockable(blockable IBlockable)
+    //protected DetachBlockable(blockable IBlockable)
 
 }
