@@ -25,10 +25,10 @@ export class DynamicDetailComponent implements AfterViewInit, OnChanges, OnDestr
 
     // example entity ... to be received from other app parts
     // this is kind of candiate for @Input
-    //protected entity = {
-    //    code: "ABC123",
-    //    description: "A description of this Entity"
-    //};
+    // protected entity = {
+    //     code: "ABC123",
+    //     description: "A description of this Entity"
+    // };
 
     protected entity = TestForm.model.MainColumnMain;
     protected template = TestForm.interface.value;
@@ -41,7 +41,7 @@ export class DynamicDetailComponent implements AfterViewInit, OnChanges, OnDestr
 
     /** Get a Factory and create a component */
 
-    protected refreshContent(useTextarea: boolean = false) {
+    protected refreshContent(useTextarea = false) {
 
         if (this.componentRef) {
             this.componentRef.destroy();
@@ -50,7 +50,7 @@ export class DynamicDetailComponent implements AfterViewInit, OnChanges, OnDestr
         // here we get a TEMPLATE with dynamic content === TODO
 
         // NOTE: This is the diff
-        //var template = this.templateBuilder.prepareTemplate(this.entity, useTextarea);
+        // var template = this.templateBuilder.prepareTemplate(this.entity, useTextarea);
         const template = this.formBuilder.prepareForm(this.template);
 
 
@@ -65,10 +65,10 @@ export class DynamicDetailComponent implements AfterViewInit, OnChanges, OnDestr
 
                 // TODO: Figure out how to tie this in if necessary
                 // let's inject @Inputs to component instance
-                //let component = this.componentRef.instance;
+                // let component = this.componentRef.instance;
 
-                //component.entity = this.entity;
-                //...
+                // component.entity = this.entity;
+                // ...
             });
     }
 
@@ -82,7 +82,7 @@ export class DynamicDetailComponent implements AfterViewInit, OnChanges, OnDestr
         this.wasViewInitialized = true;
         this.refreshContent();
     }
-    // wasViewInitialized is an IMPORTANT switch 
+    // wasViewInitialized is an IMPORTANT switch
     // when this component would have its own changing @Input()
     // - then we have to wait till view is intialized - first OnChange is too soon
     public ngOnChanges(changes: { [key: string]: SimpleChange }): void {

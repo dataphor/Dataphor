@@ -6,21 +6,21 @@ export class DynamicFormBuilder {
     public prepareForm(d4Interface: any) {
 
 
-        //let properties = Object.keys(entity);
-        //let template = "<form >";
-        //let editorName = useTextarea
+        // let properties = Object.keys(entity);
+        // let template = "<form >";
+        // let editorName = useTextarea
         //    ? "text-editor"
         //    : "string-editor";
 
-        //properties.forEach((propertyName) => {
+        // properties.forEach((propertyName) => {
         //    template += `
         //  <${editorName}
         //      [propertyName]="'${propertyName}'"
         //      [entity]="entity"
         //  ></${editorName}>`;
-        //});
+        // });
 
-        //return template + "</form>";
+        // return template + "</form>";
         let d4Form = '<d4-form>\r\n';
         d4Form += d4Interface;
         d4Form += '\r\n';
@@ -28,5 +28,4 @@ export class DynamicFormBuilder {
         return d4Form;
 
     }
-
 }

@@ -31,8 +31,8 @@ import { SharedModule } from './shared/shared.module';
             { path: 'test', component: TestComponent },
             { path: '**', redirectTo: 'home' }
         ]),
-    //DynamicModule.forRoot(),
-    //D4FormsModule.forRoot(),
+    DynamicModule,
+    // D4FormsModule.forRoot(),
     SharedModule.forRoot()
   ],
   providers: [],
