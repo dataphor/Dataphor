@@ -8,7 +8,7 @@ import {
     SourceComponent,
     SourceActionComponent,
     TextboxComponent,
-    FormComponent
+    D4Component
 } from './index';
 
 export const DYNAMIC_DIRECTIVES = [
@@ -20,7 +20,7 @@ export const DYNAMIC_DIRECTIVES = [
     forwardRef(() => SourceComponent),
     forwardRef(() => SourceActionComponent),
     forwardRef(() => TextboxComponent),
-    forwardRef(() => FormComponent),
+    forwardRef(() => D4Component),
 ];
 
 import { NgModule } from '@angular/core';
@@ -43,11 +43,11 @@ import { NodeService } from './nodes/index';
         DYNAMIC_DIRECTIVES
     ]
 })
-export class D4FormsModule {
+export class D4Module {
 
     static forRoot() {
         return {
-            ngModule: D4FormsModule,
+            ngModule: D4Module,
             providers: [
                 InterfaceService,
                 NodeService

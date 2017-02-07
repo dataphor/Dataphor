@@ -1,6 +1,7 @@
-﻿import { Component, OnInit, ViewChildren, QueryList, OnDestroy, forwardRef, Injector } from '@angular/core';
+import { Component, OnInit, ViewChildren, QueryList, OnDestroy, forwardRef, Injector } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ControlContainer, Validators, FormGroupDirective } from '@angular/forms';
 import { ISource } from './interfaces';
+import { D4Service } from './d4.service';
 
 export abstract class FormControlContainer {
     abstract getControl(name: string): AbstractControl | null;
@@ -13,24 +14,10 @@ export abstract class FormControlContainer {
 
 export const formGroupContainerProvider: any = {
     provide: FormControlContainer,
-    useExisting: forwardRef(() => FormComponent)
+    useExisting: forwardRef(() => D4Component)
 };
 
-@Component({
-    selector: 'd4-form',
-    template: `
-    <form [formGroup]="form" novalidate>
-        <ng-content></ng-content>
-        <div>
-            <button type="button" (click)="onSubmit()">Submit</button>
-        </div>
-    </form>
-  `,
-    providers: [formGroupContainerProvider]
-})
-export class FormComponent implements FormControlContainer {
-
-    form = new FormGroup({});
+export class D4 implements FormControlContainer {
 
     onSubmit() {
         console.log(this.form.value);
@@ -80,5 +67,6 @@ export class FormComponent implements FormControlContainer {
     getSource(): ISource {
 
     }
+
 
 }

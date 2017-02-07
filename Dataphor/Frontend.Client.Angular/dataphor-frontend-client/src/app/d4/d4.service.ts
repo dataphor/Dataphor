@@ -1,10 +1,11 @@
 ﻿import { Injectable } from '@angular/core';
 import { ISource, IComponent } from './interfaces';
 import { Source } from './models';
-import { UtilityService, KeyedCollection } from './utility.service';
+import { UtilityService } from './utility.service';
+import { KeyedCollection } from './system';
 
 @Injectable()
-export class FormService {
+export class D4Service {
 
     SourceDictionary: KeyedCollection<ISource>;
 

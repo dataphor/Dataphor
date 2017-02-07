@@ -5,7 +5,6 @@ import { Injectable, OnDestroy } from '@angular/core';
 @Injectable()
 export class InterfaceService {
 
-
     private _actionService: ActionService;
     get ActionService(): ActionService {
         return this._actionService;
@@ -19,9 +18,8 @@ export class InterfaceService {
         return this._nodeService;
     }
     set NodeService(value: NodeService) {
-        this._NodeService = value;
+        this._nodeService = value;
     }
-
 
     constructor() {
         this._actionService = new ActionService();

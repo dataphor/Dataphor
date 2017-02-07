@@ -1,6 +1,5 @@
 ﻿import { Component, ComponentFactory, NgModule, Input, Injectable} from '@angular/core';
 import { JitCompiler } from '@angular/compiler';
-import { D4FormsModule } from '../d4-forms/d4-forms.module';
 
 import * as _ from 'lodash';
 

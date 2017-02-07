@@ -13,11 +13,11 @@ import { DynamicFormBuilder } from './form.builder';
     //declarations: [DynamicDetailComponent],
     //exports: [DynamicDetailComponent],
 })
-export class DynamicModule {
+export class DynamicTemplateModule {
 
     static forRoot() {
         return {
-            ngModule: DynamicModule,
+            ngModule: DynamicTemplateModule,
             providers: [ // singletons across the whole app
                 DynamicFormBuilder,
                 DynamicTypeBuilder
