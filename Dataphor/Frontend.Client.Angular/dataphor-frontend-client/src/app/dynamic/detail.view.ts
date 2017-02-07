@@ -8,12 +8,12 @@ import { DynamicFormBuilder } from './form.builder';
 import { TestForm } from '../test-form';
 
 @Component({
-    selector: 'dynamic-detail',
+    selector: 'd4-dynamic-detail',
     template: `
   <div #dynamicContentPlaceHolder></div>
 `,
 })
-export class DynamicDetail implements AfterViewInit, OnChanges, OnDestroy, OnInit {
+export class DynamicDetailComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
     // reference for a <div> with #dynamicContentPlaceHolder
     @ViewChild('dynamicContentPlaceHolder', { read: ViewContainerRef })
     protected dynamicComponentTarget: ViewContainerRef;
@@ -51,7 +51,7 @@ export class DynamicDetail implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
         // NOTE: This is the diff
         //var template = this.templateBuilder.prepareTemplate(this.entity, useTextarea);
-        var template = this.formBuilder.prepareForm(this.entity, this.template);
+        const template = this.formBuilder.prepareForm(this.template);
 
 
         // here we get Factory (just compiled or from cache)

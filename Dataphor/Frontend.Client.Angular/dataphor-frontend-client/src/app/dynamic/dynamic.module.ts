@@ -4,14 +4,14 @@ import { BrowserModule } from '@angular/platform-browser';
 import { D4FormsModule } from '../d4-forms/d4-forms.module';
 
 // detail stuff
-import { DynamicDetail } from './detail.view';
+import { DynamicDetailComponent } from './detail.view';
 import { DynamicTypeBuilder } from './type.builder';
 import { DynamicFormBuilder } from './form.builder';
 
 @NgModule({
     imports: [D4FormsModule],
-    declarations: [DynamicDetail],
-    exports: [DynamicDetail],
+    declarations: [DynamicDetailComponent],
+    exports: [DynamicDetailComponent],
 })
 
 export class DynamicModule {
