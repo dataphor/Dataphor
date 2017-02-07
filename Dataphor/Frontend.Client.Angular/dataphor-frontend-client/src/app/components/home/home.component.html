@@ -1,0 +1,18 @@
+<form #f="ngForm" id="form-wrapper">
+
+    <button class="button row center-md" [class.running]="running" (click)="runScript()" style="margin-bottom: 10px;">
+        <div class="self-center col-md-9">
+            {{ running ? 'Running...' : 'Run'}}
+        </div>
+        <i class="material-icons col-md-3" [hidden]="running">play_arrow</i>
+    </button>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="input-window" ace-editor [text]="iText" [mode]="'sql'" [options]="iOptions" [theme]="iTheme" [autoUpdateContent]="true" (textChanged)="onInputChange($event)"></div>
+        </div>
+        <div class="col-md-6">
+            <div class="output-window" ace-editor [text]="oText" [mode]="'sql'" [options]="oOptions" [readOnly]="oIsReadOnly" [autoUpdateContent]="true"></div>
+        </div>
+    </div>
+
+</form>
