@@ -1,12 +1,11 @@
-﻿import { Node } from '../node';
+﻿import { Component, Input, OnInit, OnDestroy, ViewChildren } from '@angular/core';
+import { Node, NodeService } from '../';
 import { INode, IAction, ILayoutDisableable, IBlockable } from '../interfaces';
-import { KeyedCollection } from '../system';
-import { NodeService } from '../nodes/index';
+import { KeyedCollection } from '../../system';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { InterfaceService } from '../interface';
-import { Component, Input, OnInit, OnDestroy, ViewChildren } from '@angular/core';
 
 export enum NotifyIcon {
     None,
@@ -15,20 +14,58 @@ export enum NotifyIcon {
     Error
 }
 
-
 export class Action extends Node implements IAction, OnInit, OnDestroy {
 
     constructor(private _interfaceService: InterfaceService, private _nodeService: NodeService) {
-        super(this._interfaceService, this._nodeService);
+        super(_interfaceService, _nodeService);
         this.CheckExternals();
     }
 
-    @Input('text') Text: string;
-    @Input('hint') Hint: string;
-    @Input('image') Image: string;
-    //@Input('beforeexecute') BeforeExecute: string;
+    ngOnInit() {
+        if (this.__afterExecute || this.__beforeExecute) {
+            this._actionDictionaryObserver = this._interfaceService.ActionService.GetActionDictionarySubject().subscribe({
+                next: (x) => {
+                    this.HandleActionDictionaryChange();
+                }
+            });
+        }
+        if (this.__beforeExecute) {
+            this._beforeExecute = this._interfaceService.ActionService.GetActionByName(this.__beforeExecute);
+        }
+        if (this.__afterExecute) {
+            this._afterExecute = this._interfaceService.ActionService.GetActionByName(this.__afterExecute);
+        }
+        
+    }
+
+    @Input('text') __text: string;
+
+    get Text(): string {
+        return this.__text;
+    }
+    set Text(value: string) {
+        if (this.__text !== value) {
+            this.__text = value;
+            this.TextChanged();
+        }
+    }
+
+    @Input('hint') __hint: string;
+    @Input('image') __image: string;
+    get Image(): string {
+        return this.__image;
+    }
+    set Image(value: string) {
+        if (this.__image !== value) {
+            this.__image = value;
+            if (this.Active) {
+                this.InternalUpdateImage();
+            }
+        }
+    }
+
+    @Input('beforeexecute') __beforeExecute: string;
     private _beforeExecute: IAction;
-    @Input('beforeexecute')
     get BeforeExecute(): IAction {
         return this._beforeExecute;
     }
@@ -45,18 +82,28 @@ export class Action extends Node implements IAction, OnInit, OnDestroy {
         }
     }
     private _beforeExecuteLoaded: boolean = this.BeforeExecute ? false : true;
-    @Input('afterexecute') AfterExecute: string;
+    
+    @Input('afterexecute') __afterExecute: string;
     private _afterExecute: IAction;
+
     private _afterExecuteLoaded: boolean = this.AfterExecute ? false : true;
-    @Input('visible') Visible: boolean;
-    @Input('enabled') Enabled: boolean;
+
+    @Input('visible') __visible: boolean;
+    @Input('enabled') __enabled: boolean;
+    get Enabled(): boolean {
+        return this.__enabled;
+    }
+    set Enabled(value: boolean) {
+        if (this.__enabled !== value) {
+            this.__enabled = value;  
+        }
+    }
 
     // TODO: Figure out what to do with this 'User-Defined Scratchpad'
     @Input('userdata') UserData: Object;
 
     private _externalsLoaded: boolean = false;
     private _actionDictionaryObserver: Subscription;
-
 
     HandleActionDictionaryChange(): void {
         console.log('Action Dictionary Changed');
@@ -67,17 +114,6 @@ export class Action extends Node implements IAction, OnInit, OnDestroy {
             this._beforeExecute = this._interfaceService.ActionService.GetActionByName(this.BeforeExecute);
         }
         this.CheckExternals();
-    }
-
-    ngOnInit() {
-        if (this.AfterExecute || this.BeforeExecute) {
-            this._actionDictionaryObserver = this._interfaceService.ActionService.GetActionDictionarySubject().subscribe({
-                next: (x) => {
-                    this.HandleActionDictionaryChange();
-                }
-            });
-        }
-        
     }
 
     // check if referenced Actions have returned
@@ -98,8 +134,9 @@ export class Action extends Node implements IAction, OnInit, OnDestroy {
     }
 
 
-
     Dispose(disposing: boolean): void {
+        this._actionDictionaryObserver.unsubscribe();
+
         this.AfterExecute.Unsubscribe();
         this.BeforeExecute.Unsubscribe();
         super.Dispose(disposing);
@@ -108,28 +145,16 @@ export class Action extends Node implements IAction, OnInit, OnDestroy {
     Execute(sender?: INode, target?: INode): void {
         if (sender && target) {
             if (this.GetEnabled()) {
-                // TODO: Figure out equivalent
-                //let layoutDisableable: ILayoutDisableable = super.FindParent(typeof ILayoutDisableable) as ILayoutDisableable;
-                //if (layoutDisableable !== null) {
-                //    layoutDisableable.DisableLayout();
-                //}
-                try {
-                    if (this.DoBeforeExecute(sender, target)) {
-                        this.FinishExecute(sender, target);
-                    }
-                } finally {
-                    //if (layoutDisableable !== null) {
-                    //    ILayoutDisableable.EnableLayout();
-                    //}
+                if (this.DoBeforeExecute(sender, target)) {
+                    this.FinishExecute(sender, target);
                 }
             }
         }
     }
 
+    // Override
     InternalExecute(sender: INode, target: INode) { }
-
     
-
     private BeforeExecuteDisposed(sender: INode, target: INode): void {
         this.BeforeExecute = null;
     }
@@ -164,8 +189,6 @@ export class Action extends Node implements IAction, OnInit, OnDestroy {
         this.DoAfterExecute(target);
     }
 
-    private _afterExecute: IAction;
-
     get AfterExecute(): IAction {
         return this._afterExecute;
     }
@@ -192,48 +215,24 @@ export class Action extends Node implements IAction, OnInit, OnDestroy {
     }
 
     private _textChangedObserver = this._textChanged$.subscribe({ next: (x) => { console.log('Text changed to ${ x }') }});
-    private _text: string = '';
-
-    get Text(): string {
-        return this._text;
-    }
-    set Text(value: string) {
-        if (this._text !== value) {
-            this._text = value;
-            this.TextChanged();
-        }
-    }
+    
 
     GetText(): string {
-        return this._text;
+        return this.__text;
     }
 
     GetDescription(): string {
-        return this._text.replace('.', '').replace('&', '');
+        return this.__text.replace('.', '').replace('&', '');
     }
 
     protected TextChanged(): void {
-        this._textChanged$.next(this._text);
-    }
-
-    private _enabled: boolean = true;
-
-    get Enabled(): boolean {
-        return this._enabled;
-    }
-    set Enabled(value: boolean) {
-        if (this._enabled !== value) {
-            this._enabled = value;
-            
-        }
+        this._textChanged$.next(this.__text);
     }
 
     private _actualEnabled: boolean;
 
     private _enabledChanged$ = new BehaviorSubject<boolean>(null);
-
     private _enabledChangedObserver = this._enabledChanged$.subscribe({ next: (x) => { console.log('Enabled changed to ${ x }') } });
-
     EnabledChanged(): void {
         let enabled: boolean = this.GetEnabled();
         if (this._actualEnabled !== enabled) {
@@ -244,7 +243,7 @@ export class Action extends Node implements IAction, OnInit, OnDestroy {
     }
 
     GetEnabled(): boolean {
-        return this._enabled;
+        return this.__enabled;
     }
 
     private _hintChanged$ = new BehaviorSubject<string>(null);
@@ -263,7 +262,7 @@ export class Action extends Node implements IAction, OnInit, OnDestroy {
     }
 
     private _visibleChanged$ = new BehaviorSubject<boolean>(null);
-    private _visibleChangedObserver = this._visibleChanged$.subscribe({ next: (x) => { console.log('Hint changed to ${ x }') } });
+    private _visibleChangedObserver = this._visibleChanged$.subscribe({ next: (x) => { console.log('Visible changed to ${ x }') } });
 
     private _visible: boolean = true;
 
@@ -302,18 +301,8 @@ export class Action extends Node implements IAction, OnInit, OnDestroy {
 
     private _imageChanged$ = new BehaviorSubject<Image>(null);
     private _imageChangedObserver = this._imageChanged$.subscribe({ next: (x) => { console.log('Hint changed to ${ x }') } });
-    private _image: string = '';
-    get Image(): string {
-        return this._image;
-    }
-    set Image(value: string) {
-        if (this._image !== value) {
-            this._image = value;
-            if (this.Active) {
-                this.InternalUpdateImage();
-            }
-        }
-    }
+    
+
 
     // TODO: Create means of taking image string and getting/displaying the image;
     private _loadedImage: Image;

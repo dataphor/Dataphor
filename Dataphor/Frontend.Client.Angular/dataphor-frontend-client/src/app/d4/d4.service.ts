@@ -1,6 +1,5 @@
 ﻿import { Injectable } from '@angular/core';
-import { ISource, IComponent } from './interfaces';
-import { Source } from './models';
+import { Source, ISource, IComponent } from './frontend';
 import { UtilityService } from './utility.service';
 import { KeyedCollection } from './system';
 

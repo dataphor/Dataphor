@@ -1,10 +1,15 @@
 ﻿import { Input, OnInit, OnDestroy, ViewChildren } from '@angular/core';
-import { INode, IChildCollection, IHost, INameChangeHandler, IUpdateHandler } from './interfaces';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { ArrayUtility, KeyedCollection } from './system';
-import { InterfaceService } from './interface';
-import { NodeService } from './nodes/index';
-
+import { ArrayUtility, KeyedCollection } from '../../';
+import { 
+    INode, 
+    IChildCollection,
+    IHost,
+    INameChangeHandler,
+    IUpdateHandler,
+    InterfaceService
+} from '../';
+import { NodeService } from './node.service';
 
 export class Node implements INode, OnInit {
 

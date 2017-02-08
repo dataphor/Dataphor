@@ -7,9 +7,12 @@ import {
     ShowFormActionComponent,
     SourceComponent,
     SourceActionComponent,
-    TextboxComponent,
+    TextboxComponent
+} from './frontend';
+
+import {
     D4Component
-} from './index';
+} from './';
 
 export const DYNAMIC_DIRECTIVES = [
     forwardRef(() => ColumnComponent),
@@ -26,8 +29,8 @@ export const DYNAMIC_DIRECTIVES = [
 import { NgModule } from '@angular/core';
 import { CommonModule } from "@angular/common";
 import { ReactiveFormsModule } from "@angular/forms";
-import { InterfaceService } from './interface/index';
-import { NodeService } from './nodes/index';
+
+import { InterfaceService, NodeService } from './frontend';
 
 @NgModule({
     imports: [

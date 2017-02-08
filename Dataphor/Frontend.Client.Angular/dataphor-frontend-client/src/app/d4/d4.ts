@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChildren, QueryList, OnDestroy, forwardRef, Injector } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ControlContainer, Validators, FormGroupDirective } from '@angular/forms';
-import { ISource } from './interfaces';
 import { D4Service } from './d4.service';
 
 export abstract class FormControlContainer {

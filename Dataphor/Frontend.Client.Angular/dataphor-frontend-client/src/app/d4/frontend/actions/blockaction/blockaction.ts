@@ -1,5 +1,5 @@
-﻿import { Action } from './action';
-import { IBlockable, INode, IAction } from '../interfaces';
+﻿import { Action } from '../';
+import { IBlockable, INode, IAction } from '../../';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export class BlockAction extends Action implements IBlockable {
@@ -11,6 +11,11 @@ export class BlockAction extends Action implements IBlockable {
             this.DetatchBlockable(x as IBlockable);
         }
     });
+    // DoCompleted
+    protected Complete(node: INode): void {
+        this._completed$.complete();
+    }
+
 
     private _disposed$ = new BehaviorSubject<INode>(null);
     private _disposedObserver = this._disposed$.subscribe({
@@ -20,9 +25,7 @@ export class BlockAction extends Action implements IBlockable {
         }
     });
 
-    protected DoCompleted(node: INode): void {
-        this._completed$.complete();
-    }
+    
 
     protected BlockableExecute(action: IAction, target: IAction): void {
         let blockable: IBlockable = action as IBlockable;
@@ -32,7 +35,7 @@ export class BlockAction extends Action implements IBlockable {
         action.Execute(this, target);
 
         if (blockable === null) {
-            this.DoCompleted(target);
+            this.Complete(target);
         }
     }
 

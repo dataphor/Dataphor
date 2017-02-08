@@ -1,6 +1,6 @@
-﻿import { Node } from '../node';
+﻿import { Node } from './node';
 import { INode, IHost } from '../interfaces/index';
-import { KeyedCollection } from '../system';
+import { KeyedCollection } from '../../system';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Injectable, OnDestroy } from '@angular/core';
 

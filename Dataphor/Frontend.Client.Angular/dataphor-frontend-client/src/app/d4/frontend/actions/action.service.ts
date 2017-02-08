@@ -1,6 +1,6 @@
 ﻿import { Node } from '../node';
 import { INode, IAction, ILayoutDisableable, IBlockable } from '../interfaces/index';
-import { KeyedCollection } from '../system';
+import { KeyedCollection } from '../../system';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Injectable, OnDestroy } from '@angular/core';
 
