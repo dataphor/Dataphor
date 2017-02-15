@@ -1,0 +1,102 @@
+// Patient Schema Musings:
+
+// Ignoring extensions on primitives for now...
+Resource {
+	id: Id,
+	meta: Meta,
+	implicitRules: Uri,
+	language: Code,
+	content: Text
+}
+
+DomainResource {
+	text: Narrative,
+}
+
+DomainResourceContained {
+	resourceId: Id,
+	containedResourceId: Id
+}
+
+DomainResourceExtension {
+	resourceId: Id,
+	url: Uri nil,
+	isModifier: Boolean,
+	value: scalar nil,
+}
+
+
+
+Patient {
+	active: Boolean nil,
+	gender: Code nil,
+	birthDate: Date nil,
+	deceased: Choice<Boolean, DateTime> nil,
+	martialStatus: CodeableConcept nil,
+	multioleBirth: Choice<Boolean, Integer> nil,
+}
+
+PatientIdentifier {
+	patientId: Id,
+	id: Id,
+	use: code nil,
+	type: CodeableConcept nil,
+	system: uri nil,
+	value: String nil,
+	period: Period nil,
+	assigner: Reference<Organization> nil,
+}
+
+PatientName {
+	patientId: Id,
+	id: Id,
+	use: Code nil,
+	text: String nil,
+	family: String nil,
+	given: List<String> nil,
+	prefix: List<String> nil,
+	suffix: List<String> nil,
+	period: Period nil,
+}
+
+PatientTelecom {
+}
+
+PatientAddress {
+}
+
+PatientPhoto {
+}
+
+PatientContact {
+}
+
+PatientGeneralPractitioner {
+	patientId: Id,
+	Id: Id,
+	organizationReference: Reference<Organization>,
+	practitionerReference: Reference<Practitioner>,
+}
+	
+PatientCommunication {
+}
+
+PatientLink {
+}
+
+
+
+Patients {
+	id: Id,
+	meta: Meta,
+	implicitRules: Uri,
+	language: Code,
+	identifier: List<Identifier> nil,
+	name: List<HumanName> nil,
+	active: Boolean nil,
+	gender: Code nil,
+	birthDate: Date nil,
+	deceased: Choice<Boolean, DateTime> nil,
+	martialStatus: CodeableConcept nil,
+	multioleBirth: Choice<Boolean, Integer> nil,
+}
