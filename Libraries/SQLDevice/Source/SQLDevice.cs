@@ -2394,7 +2394,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					
 					while (cursor.Next())
 					{
-						if (tableName != (string)cursor[1])
+						if (schemaName != (string)cursor[0] || tableName != (string)cursor[1])
 						{
 							ConfigureTableVar(plan, localTableVar, columns, deviceCatalog);
 
@@ -2526,7 +2526,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					
 					while (cursor.Next())
 					{
-						if (tableName != (string)cursor[1])
+						if (schemaName != (string)cursor[0] || tableName != (string)cursor[1])
 						{
 							if ((localTableVar != null) && shouldIncludeIndex)
 								AttachKeyOrOrder(plan, localTableVar, ref key, ref order);
@@ -2635,6 +2635,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				SQLCursor cursor = ((SQLDeviceSession)plan.DeviceConnect(this)).Connection.Open(deviceForeignKeysExpression);
 				try
 				{
+					string constraintSchema = String.Empty;
 					string constraintName = String.Empty;
 					TableVar sourceTableVar = null;
 					TableVar targetTableVar = null;
@@ -2644,7 +2645,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					
 					while (cursor.Next())
 					{
-						if (constraintName != (string)cursor[1])
+						if (constraintSchema != (string)cursor[0] || constraintName != (string)cursor[1])
 						{
 							if ((reference != null) && shouldIncludeReference)
 							{
@@ -2652,6 +2653,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								reference = null;
 							}
 							
+							constraintSchema = (string)cursor[0];
 							constraintName = (string)cursor[1];
 							string sourceTableName = GetServerTableName(plan, serverCatalog, (string)cursor[2], (string)cursor[3]);
 							string targetTableName = GetServerTableName(plan, serverCatalog, (string)cursor[5], (string)cursor[6]);

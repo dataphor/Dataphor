@@ -470,9 +470,9 @@ if not exists (select * from sysdatabases where name = '{0}')
                         base.GetDeviceTablesExpression(tableVar)
                     :
                         String.Format
+                        (
                             (
-                            (
-                                !IsAccess
+                                _majorVersion < 9
                                     ?
                                         @"
 									select 
@@ -496,14 +496,32 @@ if not exists (select * from sysdatabases where name = '{0}')
 											and OBJECTPROPERTY(so.id, 'IsMSShipped') = 0
 											{0}
 											{1}
-										order by so.name, sc.colid
+										order by su.name, so.name, sc.colid
 								"
                                     :
                                         @"
-									select
-											Name as TableSchema,
-											Name as TableName,
-											uhh column name
+									select 
+											ss.name as TableSchema,
+											so.name as TableName, 
+											sc.name as ColumnName, 
+											sc.column_id as OrdinalPosition,								
+											so.name as TableTitle, 
+											sc.name as ColumnTitle, 
+											snt.name as NativeDomainName, 
+											st.name as DomainName,
+											convert(integer, sc.max_length) as Length,
+											sc.is_nullable as IsNullable,
+											case when snt.name in ('text', 'ntext', 'image') then 1 else 0 end as IsDeferred
+										from sys.objects as so
+											join sys.schemas ss on so.schema_id = ss.schema_id
+											join sys.columns as sc on sc.object_id = so.object_id 
+											join sys.types as st on st.user_type_id = sc.user_type_id
+											join sys.types as snt on st.system_type_id = snt.system_type_id
+										where (so.type = 'U' or so.type = 'V')
+											and so.is_ms_shipped = 0
+											{0}
+											{1}
+										order by ss.name, so.name, sc.column_id
 
 								
 								"
@@ -513,8 +531,13 @@ if not exists (select * from sysdatabases where name = '{0}')
                                 : String.Format("and so.name = '{0}'", ToSQLIdentifier(tableVar)),
                             _shouldReconcileRowGUIDCol
                                 ? String.Empty
-                                : "and COLUMNPROPERTY(so.id, sc.name, 'IsRowGUIDCol') = 0"
-                            );
+                                : 
+								(
+									_majorVersion < 9 
+										? "and COLUMNPROPERTY(so.id, sc.name, 'IsRowGUIDCol') = 0"
+										: "and sc.is_rowguidcol = 0"
+								)
+                        );
         }
 
         protected override string GetDeviceIndexesExpression(TableVar tableVar)
@@ -524,41 +547,70 @@ if not exists (select * from sysdatabases where name = '{0}')
                     ?
                         base.GetDeviceIndexesExpression(tableVar)
                     :
-                        String.Format
-                            (
-                            @"
-							select 
-									su.name as TableSchema,
-									so.name as TableName, 
-									si.name as IndexName, 
-									sc.name as ColumnName, 
-									sik.keyno as OrdinalPosition,
-									INDEXPROPERTY(so.id, si.name, 'IsUnique') as IsUnique,
-									{0} /* if ServerVersion >= 8.0, otherwise 0 as IsDescending */
-								from sysobjects as so
-									join sysusers as su on so.uid = su.uid
-									join sysindexes as si on si.id = so.id
-									left join sysobjects as sno on sno.name = si.name
-									left join sysconstraints as sn on sn.constid = sno.id
-									join sysindexkeys as sik on sik.id = so.id and sik.indid = si.indid
-									join syscolumns as sc on sc.id = so.id and sc.colid = sik.colid
-								where (so.xtype = 'U' or so.xtype = 'V')
-									and OBJECTPROPERTY(so.id, 'isMSShipped') = 0
-									and INDEXPROPERTY(so.id, si.name, 'IsStatistics') = 0
-									{1} /* if ServerVersion >= 8.0, otherwise empty string */
-									{2}
-								order by so.name, si.indid, sik.keyno
-						",
-                            IsMSSQL70
-                                ? "0 as IsDescending"
-                                : "INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') as IsDescending",
-                            IsMSSQL70
-                                ? String.Empty
-                                : "and INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') is not null",
-                            tableVar == null
-                                ? String.Empty
-                                : String.Format("and so.name = '{0}'", ToSQLIdentifier(tableVar))
-                            );
+					(
+						_majorVersion < 9
+							?
+								String.Format
+								(
+									@"
+									select 
+											su.name as TableSchema,
+											so.name as TableName, 
+											si.name as IndexName, 
+											sc.name as ColumnName, 
+											sik.keyno as OrdinalPosition,
+											INDEXPROPERTY(so.id, si.name, 'IsUnique') as IsUnique,
+											{0} /* if ServerVersion >= 8.0, otherwise 0 as IsDescending */
+										from sysobjects as so
+											join sysusers as su on so.uid = su.uid
+											join sysindexes as si on si.id = so.id
+											join sysindexkeys as sik on sik.id = so.id and sik.indid = si.indid
+											join syscolumns as sc on sc.id = so.id and sc.colid = sik.colid
+										where (so.xtype = 'U' or so.xtype = 'V')
+											and OBJECTPROPERTY(so.id, 'isMSShipped') = 0
+											and INDEXPROPERTY(so.id, si.name, 'IsStatistics') = 0
+											{1} /* if ServerVersion >= 8.0, otherwise empty string */
+											{2}
+										order by su.name, so.name, si.indid, sik.keyno
+									",
+									IsMSSQL70
+										? "0 as IsDescending"
+										: "INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') as IsDescending",
+									IsMSSQL70
+										? String.Empty
+										: "and INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') is not null",
+									tableVar == null
+										? String.Empty
+										: String.Format("and so.name = '{0}'", ToSQLIdentifier(tableVar))
+								)
+							:
+								String.Format
+								(
+									@"
+									select 
+											ss.name as TableSchema,
+											so.name as TableName, 
+											si.name as IndexName, 
+											sc.name as ColumnName, 
+											sik.key_ordinal as OrdinalPosition,
+											si.is_unique IsUnique,
+											sik.is_descending_key IsDescending
+										from sys.objects as so
+											join sys.schemas as ss on so.schema_id = ss.schema_id
+											join sys.indexes as si on si.object_id = so.object_id
+											join sys.index_columns as sik on sik.object_id = so.object_id and sik.index_id = si.index_id
+											join sys.columns as sc on sc.object_id = so.object_id and sc.column_id = sik.column_id
+										where (so.type = 'U' or so.type = 'V')
+											and so.is_ms_shipped = 0
+											and INDEXPROPERTY(so.object_id, si.name, 'IsStatistics') = 0
+											{0}
+										order by ss.name, so.name, si.index_id, sik.key_ordinal
+									",
+									tableVar == null
+										? String.Empty
+										: String.Format("and so.name = '{0}'", ToSQLIdentifier(tableVar))
+								)
+					);
         }
 
         protected override string GetDeviceForeignKeysExpression(TableVar tableVar)
@@ -569,33 +621,61 @@ if not exists (select * from sysdatabases where name = '{0}')
                         base.GetDeviceForeignKeysExpression(tableVar)
                     :
                         String.Format
-                            (
-                            @"
-							select 
-									su.name as ConstraintSchema,
-									so.name as ConstraintName,
-									ssu.name as SourceTableSchema,
-									sso.name as SourceTableName,
-									ssc.name as SourceColumnName,
-									tsu.name as TargetTableSchema,
-									tso.name as TargetTableName,
-									tsc.name as TargetColumnName,
-									keyno OrdinalPosition
-								from sysforeignkeys as sfk
-									join sysobjects as so on sfk.constid = so.id
-									join sysusers as su on su.uid = so.uid
-									join sysobjects as sso on sfk.fkeyid = sso.id
-									join sysusers as ssu on ssu.uid = sso.uid
-									join syscolumns as ssc on ssc.colid = sfk.fkey and ssc.id = sfk.fkeyid
-									join sysobjects as tso on sfk.rkeyid = tso.id
-									join sysusers as tsu on tsu.uid = tso.uid
-									join syscolumns as tsc on tsc.colid = sfk.rkey and tsc.id = sfk.rkeyid
-								where 1 = 1
-									{0}
-								order by ConstraintSchema, ConstraintName, OrdinalPosition
-						",
-                            tableVar == null ? String.Empty : "and so.name = '" + ToSQLIdentifier(tableVar) + "'"
-                            );
+                        (
+							_majorVersion < 9
+								?
+									@"
+									select 
+											su.name as ConstraintSchema,
+											so.name as ConstraintName,
+											ssu.name as SourceTableSchema,
+											sso.name as SourceTableName,
+											ssc.name as SourceColumnName,
+											tsu.name as TargetTableSchema,
+											tso.name as TargetTableName,
+											tsc.name as TargetColumnName,
+											keyno OrdinalPosition
+										from sysforeignkeys as sfk
+											join sysobjects as so on sfk.constid = so.id
+											join sysusers as su on su.uid = so.uid
+											join sysobjects as sso on sfk.fkeyid = sso.id
+											join sysusers as ssu on ssu.uid = sso.uid
+											join syscolumns as ssc on ssc.colid = sfk.fkey and ssc.id = sfk.fkeyid
+											join sysobjects as tso on sfk.rkeyid = tso.id
+											join sysusers as tsu on tsu.uid = tso.uid
+											join syscolumns as tsc on tsc.colid = sfk.rkey and tsc.id = sfk.rkeyid
+										where 1 = 1
+											{0}
+										order by ConstraintSchema, ConstraintName, OrdinalPosition
+									"
+								:
+									@"
+									select 
+											ss.name as ConstraintSchema,
+											so.name as ConstraintName,
+											sss.name as SourceTableSchema,
+											sso.name as SourceTableName,
+											ssc.name as SourceColumnName,
+											tss.name as TargetTableSchema,
+											tso.name as TargetTableName,
+											tsc.name as TargetColumnName,
+											sfkc.constraint_column_id OrdinalPosition
+										from sys.foreign_keys as sfk
+											join sys.foreign_key_columns as sfkc on sfk.object_id = sfkc.constraint_object_id
+											join sys.objects as so on sfk.object_id = so.object_id
+											join sys.schemas as ss on ss.schema_id = so.schema_id
+											join sys.objects as sso on sfk.parent_object_id = sso.object_id
+											join sys.schemas as sss on sss.schema_id = sso.schema_id
+											join sys.columns as ssc on ssc.column_id = sfkc.parent_column_id and ssc.object_id = sfk.parent_object_id
+											join sys.objects as tso on sfk.referenced_object_id = tso.object_id
+											join sys.schemas as tss on tss.schema_id = tss.schema_id
+											join sys.columns as tsc on tsc.column_id = sfkc.referenced_column_id and tsc.object_id = sfk.referenced_object_id
+										where 1 = 1
+											{0}
+										order by ConstraintSchema, ConstraintName, OrdinalPosition
+									",
+                            tableVar == null ? String.Empty : "and sso.name = '" + ToSQLIdentifier(tableVar) + "'"
+                        );
         }
 
         public override void DetermineCursorBehavior(Plan plan, TableNode tableNode)
