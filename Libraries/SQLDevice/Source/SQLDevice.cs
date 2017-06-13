@@ -2720,7 +2720,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 			using (Plan plan = new Plan(process))
 			{
-				GetDeviceTables(plan, serverCatalog, catalog, tableVar);
+                // HACK: Initialize major version
+                SQLDeviceSession session = (SQLDeviceSession)plan.DeviceConnect(this);
+
+                GetDeviceTables(plan, serverCatalog, catalog, tableVar);
 				GetDeviceIndexes(plan, serverCatalog, catalog, tableVar);
 				GetDeviceForeignKeys(plan, serverCatalog, catalog, tableVar);
 				
