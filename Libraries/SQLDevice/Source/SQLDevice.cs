@@ -2408,8 +2408,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							localTableVar.Library = plan.CurrentLibrary;
 							localTableVar.Device = this;
 							localTableVar.MetaData = new D4.MetaData();
-							localTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Name", tableName, true));
-							localTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Schema", schemaName, true));
+							localTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Name", tableName, false, true));
+							localTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Schema", schemaName, false, true));
 							
 							// if this table is already present in the server catalog, use StorageNames to map the columns
 							int existingTableIndex = serverCatalog.IndexOfName(localTableVar.Name);
@@ -2541,7 +2541,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							localTableVar = (BaseTableVar)deviceCatalog[GetServerTableName(plan, serverCatalog, schemaName, tableName)];
 							indexName = (string)cursor[2];
 							D4.MetaData metaData = new D4.MetaData();
-							metaData.Tags.Add(new D4.Tag("Storage.Name", indexName, true));
+							metaData.Tags.Add(new D4.Tag("Storage.Name", indexName, false, true));
 							if (Convert.ToInt32(cursor[5]) != 0)
 								key = new Key(metaData);
 							else
@@ -2561,7 +2561,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 							indexName = (string)cursor[2];
 							D4.MetaData metaData = new D4.MetaData();
-							metaData.Tags.Add(new D4.Tag("Storage.Name", indexName, true));
+							metaData.Tags.Add(new D4.Tag("Storage.Name", indexName, false, true));
 							if (Convert.ToInt32(cursor[5]) != 0)
 								key = new Key(metaData);
 							else
@@ -2671,9 +2671,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							if (shouldIncludeReference)
 							{
 								D4.MetaData metaData = new D4.MetaData();
-								metaData.Tags.Add(new D4.Tag("Storage.Name", constraintName, true));
-								metaData.Tags.Add(new D4.Tag("Storage.Schema", (string)cursor[0], true));
-								metaData.Tags.Add(new D4.Tag("DAE.Enforced", "false", true));
+								metaData.Tags.Add(new D4.Tag("Storage.Name", constraintName, false, true));
+								metaData.Tags.Add(new D4.Tag("Storage.Schema", (string)cursor[0], false, true));
+								metaData.Tags.Add(new D4.Tag("DAE.Enforced", "false", false, true));
 								reference = new Schema.Reference(DAE.Schema.Object.Qualify(FromSQLIdentifier(constraintName), DAE.Schema.Object.Qualifier(sourceTableVar.Name)));
 								reference.MergeMetaData(metaData);
 								reference.Owner = plan.User;
