@@ -1002,6 +1002,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 						
 					program.Plan.CheckRight(device.GetRight(Schema.RightNames.Reconcile));
+					program.Plan.EnsureDeviceStarted(device);
 					ErrorList errorList;
 					if (Nodes.Count == 2)
 					{
