@@ -668,7 +668,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 											join sys.schemas as sss on sss.schema_id = sso.schema_id
 											join sys.columns as ssc on ssc.column_id = sfkc.parent_column_id and ssc.object_id = sfk.parent_object_id
 											join sys.objects as tso on sfk.referenced_object_id = tso.object_id
-											join sys.schemas as tss on tss.schema_id = tss.schema_id
+											join sys.schemas as tss on tso.schema_id = tss.schema_id
 											join sys.columns as tsc on tsc.column_id = sfkc.referenced_column_id and tsc.object_id = sfk.referenced_object_id
 										where 1 = 1
 											{0}
