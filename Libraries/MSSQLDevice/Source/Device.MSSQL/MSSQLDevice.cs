@@ -496,7 +496,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 											and OBJECTPROPERTY(so.id, 'IsMSShipped') = 0
 											{0}
 											{1}
-										order by so.name, sc.colid
+										order by su.name, so.name, sc.colid
 								"
                                     :
                                         @"
