@@ -57,7 +57,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Models
 
 		public static string GetContentType(Type type, ResourceFormat format)
 		{
-			if (typeof(Resource).IsAssignableFrom(type) || type == typeof(Resource))
+			if (typeof(Resource).IsAssignableFrom(type) || type == typeof(Resource) || type == typeof(FhirResponse))
 			{
 				switch (format)
 				{
