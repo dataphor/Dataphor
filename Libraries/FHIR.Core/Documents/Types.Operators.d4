@@ -66,3 +66,174 @@ begin
 	result :=
 		ALeft.Id < ARight.Id;
 end;
+
+// Primitive selectors
+create operator FHIRBoolean(Value: System.Boolean): FHIRBoolean
+begin
+  result := FHIRBoolean(row { Value Value });
+end
+	tags { DAE.IsOrderPreserving = "True" };
+	
+create operator FHIRBoolean.iEqual(ALeft: FHIRBoolean, ARight: FHIRBoolean) : Boolean
+begin
+  result := ALeft.Value = ARight.Value;
+end;
+
+create operator FHIRBoolean.iLess(ALeft: FHIRBoolean, ARight: FHIRBoolean) : Boolean
+begin
+  result := ALeft.Value < ARight.Value;
+end;
+
+create operator FHIRInteger(Value: System.Integer): FHIRInteger
+begin
+  result := FHIRInteger(row { Value Value });
+end
+  tags { DAE.IsOrderPreserving = "True" };
+  
+create operator FHIRInteger.iEqual(ALeft: FHIRInteger, ARight: FHIRInteger) : Boolean
+begin
+  result := ALeft.Value = ARight.Value;
+end;
+
+create operator FHIRInteger.iLess(ALeft: FHIRInteger, ARight: FHIRInteger) : Boolean
+begin
+  result := ALeft.Value < ARight.Value;
+end;
+
+create operator FHIRDecimal(Value: System.Decimal): FHIRDecimal
+begin
+  result := FHIRDecimal(row { Value Value });
+end
+  tags { DAE.IsOrderPreserving = "True" };
+
+create operator FHIRDecimal.iEqual(ALeft: FHIRDecimal, ARight: FHIRDecimal) : Boolean
+begin
+  result := ALeft.Value = ARight.Value;
+end;
+
+create operator FHIRDecimal.iLess(ALeft: FHIRDecimal, ARight: FHIRDecimal) : Boolean
+begin
+  result := ALeft.Value < ARight.Value;
+end;
+
+create operator FHIRString(Value: System.String): FHIRString
+begin
+  result := FHIRString(row { Value Value });
+end
+  tags { DAE.IsOrderPreserving = "True" };
+
+create operator FHIRString.iEqual(ALeft: FHIRString, ARight: FHIRString) : Boolean
+begin
+  result := ALeft.Value = ARight.Value;
+end;
+
+create operator FHIRString.iLess(ALeft: FHIRString, ARight: FHIRString) : Boolean
+begin
+  result := ALeft.Value < ARight.Value;
+end;
+
+create operator FHIRUri(Value: System.String): FHIRUri
+begin
+  result := FHIRUri(row { Value Value });
+end
+  tags { DAE.IsOrderPreserving = "True" };
+
+create operator FHIRUri.iEqual(ALeft: FHIRUri, ARight: FHIRUri) : Boolean
+begin
+  result := ALeft.Value = ARight.Value;
+end;
+
+create operator FHIRUri.iLess(ALeft: FHIRUri, ARight: FHIRUri) : Boolean
+begin
+  result := ALeft.Value < ARight.Value;
+end;
+
+create operator FHIRDateTime(Value: System.DateTime): FHIRDateTime
+begin
+  result := FHIRDateTime(row { Value Value });
+end
+  tags { DAE.IsOrderPreserving = "True" };
+
+create operator FHIRDateTime.iEqual(ALeft: FHIRDateTime, ARight: FHIRDateTime) : Boolean
+begin
+  result := ALeft.Value = ARight.Value;
+end;
+
+create operator FHIRDateTime.iLess(ALeft: FHIRDateTime, ARight: FHIRDateTime) : Boolean
+begin
+  result := ALeft.Value < ARight.Value;
+end;
+
+create operator FHIRDate(Value: System.Date): FHIRDate
+begin
+  result := FHIRDate(row { Value Value });
+end
+  tags { DAE.IsOrderPreserving = "True" };
+
+create operator FHIRDate.iEqual(ALeft: FHIRDate, ARight: FHIRDate) : Boolean
+begin
+  result := ALeft.Value = ARight.Value;
+end;
+
+create operator FHIRDate.iLess(ALeft: FHIRDate, ARight: FHIRDate) : Boolean
+begin
+  result := ALeft.Value < ARight.Value;
+end;
+
+//drop operator Id(String);
+create operator Id(Value: System.String): Id
+begin
+  result := Id(row { Value Value });
+end 
+	tags { DAE.IsOrderPreserving = "True" };
+
+create operator Id.iEqual(const ALeft : Id, const ARight : Id) : Boolean
+begin
+  result := ALeft.Value = ARight.Value;
+end;
+
+create operator Id.iLess(const ALeft : Id, const ARight : Id) : Boolean
+begin
+  result := ALeft.Value < ARight.Value;
+end;
+ 	
+create operator Code(Value: System.String): Code
+begin
+  result := Code(row { Value Value });
+end
+  tags { DAE.IsOrderPreserving = "True" };
+
+create operator Code.iEqual(const ALeft : Code, const ARight : Code) : Boolean
+begin
+  result := ALeft.Value = ARight.Value;
+end;
+
+create operator Code.iLess(const ALeft : Code, const ARight : Code) : Boolean
+begin
+  result := ALeft.Value < ARight.Value;
+end;
+ 	
+create operator Coding(Code: Code): Coding
+begin
+  result := Coding(row { Code Code });
+end;
+
+create operator Coding(Code: Code, System: FHIRUri): Coding
+begin
+	result := Coding(row { Code Code, System System });
+end;
+
+create operator Coding(Code: Code, System: FHIRUri, Display: FHIRString): Coding
+begin
+  result := Coding(row { Code Code, System System, Display Display });
+end;
+
+create operator CodeableConcept(Coding: Coding): CodeableConcept
+begin
+  result := CodeableConcept(row { list { Coding } Coding });
+end;
+
+create operator CodeableConcept(Coding: Coding, Text: FHIRString): CodeableConcept
+begin
+  result := CodeableConcept(row { list { Coding } Coding, Text Text });
+end;
