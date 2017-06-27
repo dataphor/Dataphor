@@ -1667,6 +1667,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsFunctional = true;
 			IsDeterministic = true;
 			IsRepeatable = true;
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
 		
@@ -1677,6 +1678,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsFunctional = true;
 			IsDeterministic = true;
 			IsRepeatable = true;
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
 	}

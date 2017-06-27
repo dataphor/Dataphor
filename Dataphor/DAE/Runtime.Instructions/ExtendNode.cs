@@ -209,6 +209,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return result;
 		}
 		
+		// The logic here uses unique preserving to support key inference, not the strictly stronger order preserving used for sargability
 		protected bool IsColumnReferencing(PlanNode node, ref string columnName)
 		{
 			StackColumnReferenceNode localNode = node as StackColumnReferenceNode;
@@ -217,7 +218,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				columnName = localNode.Identifier;
 				return true;
 			}
-			else if (node.IsOrderPreserving && (node.NodeCount == 1))
+			else if (node.IsUniquePreserving && (node.NodeCount == 1))
 				return IsColumnReferencing(node.Nodes[0], ref columnName);
 			else
 				return false;

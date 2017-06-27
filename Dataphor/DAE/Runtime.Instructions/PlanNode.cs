@@ -89,11 +89,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public const ushort NotShouldSupportFlag = 0xFBFF;
 		public const ushort IsBreakableFlag = 0x0800;
 		public const ushort NotIsBreakableFlag = 0xF7FF;
+		public const ushort IsUniquePreservingFlag = 0x2000;
+		public const ushort NotIsUniquePreservingFlag = 0xDFFF;
 
 		public const ushort ModifySupportedFlag = 0x1000;
 		public const ushort NotModifySupportedFlag = 0xEFFF;
-		public const ushort ShouldSupportModifyFlag = 0x2000;
-		public const ushort NotShouldSupportModifyFlag = 0xDFFF;
+		// Dropped this flag from characteristics to support the IsUniquePreserving attribute in PlanNode
+		//public const ushort ShouldSupportModifyFlag = 0x2000;
+		//public const ushort NotShouldSupportModifyFlag = 0xDFFF;
 		public const ushort ShouldCheckConcurrencyFlag = 0x4000;
 		public const ushort NotShouldCheckConcurrencyFlag = 0xBFFF;
 		public const ushort ExpectsTableValuesFlag = 0x8000;
@@ -104,7 +107,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
  		}
 
 		// Use a ushort because an enum will be an integer
-		protected ushort _characteristics = IsLiteralFlag | IsFunctionalFlag | IsDeterministicFlag | IsRepeatableFlag | ShouldSupportFlag | ShouldSupportModifyFlag;
+		protected ushort _characteristics = IsLiteralFlag | IsFunctionalFlag | IsDeterministicFlag | IsRepeatableFlag | ShouldSupportFlag; // | ShouldSupportModifyFlag;
 		
         // Nodes
         private PlanNodes _nodes;
@@ -168,6 +171,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			stringValue.AppendFormat(", {0}", node.IsRepeatable ? Strings.Get("Characteristics.Repeatable") : Strings.Get("Characteristics.NonRepeatable"));
 			stringValue.AppendFormat(", {0}", node.IsNilable ? Strings.Get("Characteristics.Nilable") : Strings.Get("Characteristics.NonNilable"));
 			return stringValue.ToString();
+		}
+
+		// IsUniquePreserving (see the sargability discussion in RestrictNode.cs for a description of this characteristic)
+		public bool IsUniquePreserving
+		{
+			get { return (_characteristics & IsUniquePreservingFlag) != 0; }
+			set { if (value) _characteristics |= IsUniquePreservingFlag; else _characteristics &= NotIsUniquePreservingFlag; }
 		}
 
 		// IsOrderPreserving (see the sargability discussion in RestrictNode.cs for a description of this characteristic)
@@ -826,6 +836,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			newNode.IsDeterministic = IsDeterministic;
 			newNode.IsRepeatable = IsRepeatable;
 			newNode.IsNilable = IsNilable;
+			newNode.IsUniquePreserving = IsUniquePreserving;
 			newNode.IsOrderPreserving = IsOrderPreserving;
 			newNode.Modifiers = _modifiers;
 			newNode.IgnoreUnsupported = IgnoreUnsupported;
