@@ -198,7 +198,7 @@
 
     <key>Comment Pattern</key>
     <string><![CDATA[(?xs:
-      (/\*.*\*/|//[^\n]*\n)
+      (/\*.*?\*/|//[^\n]*\n)
     )]]></string>
 
     <key>String Pattern</key>
