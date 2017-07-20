@@ -212,20 +212,20 @@ create operator Code.iLess(const ALeft : Code, const ARight : Code) : Boolean
 begin
   result := ALeft.Value < ARight.Value;
 end;
- 	
+
 create operator Coding(Code: Code): Coding
 begin
-  result := Coding(row { Code Code });
+  result := Coding(row { Code CodeElement });
 end;
 
 create operator Coding(Code: Code, System: FHIRUri): Coding
 begin
-	result := Coding(row { Code Code, System System });
+	result := Coding(row { Code CodeElement, System SystemElement });
 end;
 
 create operator Coding(Code: Code, System: FHIRUri, Display: FHIRString): Coding
 begin
-  result := Coding(row { Code Code, System System, Display Display });
+  result := Coding(row { Code CodeElement, System SystemElement, Display DisplayElement });
 end;
 
 create operator CodeableConcept(Coding: Coding): CodeableConcept
@@ -235,5 +235,5 @@ end;
 
 create operator CodeableConcept(Coding: Coding, Text: FHIRString): CodeableConcept
 begin
-  result := CodeableConcept(row { list { Coding } Coding, Text Text });
+  result := CodeableConcept(row { list { Coding } Coding, Text TextElement });
 end;
