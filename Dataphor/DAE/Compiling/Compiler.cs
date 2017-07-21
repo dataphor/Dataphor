@@ -2463,7 +2463,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 			DelimitedBlockNode blockNode = new DelimitedBlockNode();
 			blockNode.SetLineInfo(plan, statement.LineInfo);
-			VariableNode variableNode = new VariableNode(Schema.Object.GetUniqueName(), sourceNode.DataType);
+			VariableNode variableNode = new VariableNode(Schema.Object.GetUniqueName(), sourceNode.DataType.IsNil ? targetNode.DataType : sourceNode.DataType);
 			variableNode.SetLineInfo(plan, statement.LineInfo);
 			variableNode.Nodes.Add(sourceNode);
 			variableNode.DetermineCharacteristics(plan);
