@@ -12,7 +12,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 	using Alphora.Dataphor.DAE.Debug;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 
-	public class RuntimeException : DAEException, ILocatorException
+	public class RuntimeException : DAEException, ILocatorException, ICodeContextException
 	{
 		public enum Codes 
 		{
@@ -555,7 +555,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 			get { return _context; }
 			set { _context = value; }
 		}
-		
+
 		public bool HasContext()
 		{
 			return (_line > -1) || (_context != null);

@@ -667,6 +667,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (sourceContext != null && sourceContext.Locator != null)
 				plan.Messages.SetLocator(sourceContext.Locator);
 
+			// Add execution context to each exception
+			foreach (var message in plan.Messages)
+				AddExceptionContext(message, statement, paramsValue);
+
 			// Optimization and Chunking
 			//
 			// Phase I -
@@ -706,12 +710,28 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return node;
 		}
 
+		private static void AddExceptionContext(Exception exception, Statement statement, DataParams paramsValue)
+		{
+			if (exception is CompilerException compilerException)
+			{
+				try
+				{
+					compilerException.Context = new D4TextEmitter().Emit(statement);
+					// TODO: also add parameter information into exception for diagnostics
+				}
+				catch (Exception)
+				{
+					System.Diagnostics.Debugger.Break(); // Eat.  Don't let an emission bug spoil compilation  
+				}
+			}
+		}
+
 		//private static PlanNode Chunk(Plan plan, PlanNode planNode)
 		//{
 		//	return ChunkNode(plan, planNode);
 		//}
 
-		#if USEVISIT
+#if USEVISIT
 		private static PlanNode BindingTraversal(Plan plan, PlanNode planNode, PlanNodeVisitor visitor)
 		#else
 		private static void BindingTraversal(Plan plan, PlanNode planNode, PlanNodeVisitor visitor)
