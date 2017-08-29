@@ -15,7 +15,6 @@ ExecuteScript("FHIR.Core", "Types.Core");
 
 ExecuteScript("FHIR.Core", "Types.Generated");
 
-ExecuteScript("FHIR.Core", "Dynamic");
 ExecuteScript("FHIR.Core", "Search");
 
 ExecuteScript("FHIR.Core", "Structure.Definition");

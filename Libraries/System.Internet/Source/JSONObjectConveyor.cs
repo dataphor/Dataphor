@@ -12,7 +12,7 @@ using Alphora.Dataphor.DAE.Streams;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Alphora.Dataphor.FHIR.Core
+namespace Alphora.Dataphor.Libraries.System.Internet
 {
 	public class JSONObjectConveyor : Conveyor
 	{
