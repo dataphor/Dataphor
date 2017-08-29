@@ -24,7 +24,7 @@ begin
    result := temp;
 end;
 
-create operator Exists(resource: String, element1: FHIR.Core.Dynamic, element2: FHIR.Core.Dynamic , diffList: list(String), elementName: String): Boolean
+create operator Exists(resource: String, element1: System.Internet.Dynamic, element2: System.Internet.Dynamic, diffList: list(String), elementName: String): Boolean
 begin
 	var one := IsNil(element1.Get(elementName));
 	var two := IsNil(element2.Get(elementName));
@@ -65,14 +65,14 @@ begin
 end;
 
 
-create operator getDiff(resource: String, element1: FHIR.Core.Dynamic, element2: FHIR.Core.Dynamic , diffList: list(String), elementName: String)
+create operator getDiff(resource: String, element1: System.Internet.Dynamic, element2: System.Internet.Dynamic , diffList: list(String), elementName: String)
 begin
 	var att1 := '"' + Replace(element1.Get(elementName).ToString(), '"', "'") + '"';
 	var att2 := '"' + Replace(element2.Get(elementName).ToString(), '"', "'") + '"';
 	diffList.Add(resource + "," + element1.Get("path").ToString() + "," + elementName + ",Updated," + att1 + "," + att2); 
 end;
 
-create operator compare(resource: String, element1: FHIR.Core.Dynamic, element2: FHIR.Core.Dynamic , diffList: list(String), elementName: String)
+create operator compare(resource: String, element1: System.Internet.Dynamic, element2: System.Internet.Dynamic , diffList: list(String), elementName: String)
 begin
 	if Exists(resource, element1, element2, diffList, elementName) then
 	begin
