@@ -1,0 +1,5666 @@
+/*
+Types.Generated - Generated using the following statement:
+select GenerateTypes()
+*/
+
+
+create type Resource from class "Hl7.Fhir.Model.Resource" is { Base };
+create type Id from class "Hl7.Fhir.Model.Id" is { Element };
+alter type Id
+{
+	create representation Id
+	{
+		Value : String
+	}
+};
+create type Meta from class "Hl7.Fhir.Model.Meta" is { Element };
+create type Instant from class "Hl7.Fhir.Model.Instant" is { Element };
+alter type Instant
+{
+	create representation Instant
+	{
+		Value : DateTime
+	}
+};
+create type FHIRUri from class "Hl7.Fhir.Model.FhirUri" is { Element };
+alter type FHIRUri
+{
+	create representation FHIRUri
+	{
+		Value : String
+	}
+};
+create type Coding from class "Hl7.Fhir.Model.Coding" is { Element };
+create type FHIRString from class "Hl7.Fhir.Model.FhirString" is { Element };
+alter type FHIRString
+{
+	create representation FHIRString
+	{
+		Value : String
+	}
+};
+create type Code from class "Hl7.Fhir.Model.Code" is { Element };
+alter type Code
+{
+	create representation Code
+	{
+		Value : String
+	}
+};
+create type FHIRBoolean from class "Hl7.Fhir.Model.FhirBoolean" is { Element };
+alter type FHIRBoolean
+{
+	create representation FHIRBoolean
+	{
+		Value : Boolean
+	}
+};
+alter type Coding
+{
+	create representation Coding
+	{
+		SystemElement : FHIRUri, 
+		System : String, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		CodeElement : Code, 
+		Code : String, 
+		DisplayElement : FHIRString, 
+		Display : String, 
+		UserSelectedElement : FHIRBoolean, 
+		UserSelected : Boolean
+	}
+};
+alter type Meta
+{
+	create representation Meta
+	{
+		VersionIdElement : Id, 
+		VersionId : String, 
+		LastUpdatedElement : Instant, 
+		LastUpdated : DateTime, 
+		ProfileElement : list(FHIRUri), 
+		Profile : list(String), 
+		Security : list(Coding), 
+		Tag : list(Coding)
+	}
+};
+alter type Resource
+{
+	create representation Resource
+	{
+		IdElement : Id, 
+		Id : String, 
+		Meta : Meta, 
+		ImplicitRulesElement : FHIRUri, 
+		ImplicitRules : String, 
+		LanguageElement : Code, 
+		Language : String, 
+		ResourceBase : String, 
+		VersionId : String
+	}
+};
+create type Parameters from class "Hl7.Fhir.Model.Parameters" is { Resource };
+create type BackboneElement from class "Hl7.Fhir.Model.BackboneElement" is { Element };
+alter type BackboneElement
+{
+	create representation BackboneElement
+	{
+		ModifierExtension : list(Extension)
+	}
+};
+create type Parameters.ParameterComponent from class "Hl7.Fhir.Model.Parameters+ParameterComponent" is { BackboneElement };
+alter type Parameters.ParameterComponent
+{
+	create representation Parameters.ParameterComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Value : Element, 
+		Resource : Resource, 
+		Part : list(Parameters.ParameterComponent)
+	}
+};
+alter type Parameters
+{
+	create representation Parameters
+	{
+		Parameter : list(Parameters.ParameterComponent)
+	}
+};
+create type Query from class "Hl7.Fhir.Model.Query" is { Parameters };
+create type Bundle.EntryComponent from class "Hl7.Fhir.Model.Bundle+EntryComponent" is { BackboneElement };
+create type Bundle.LinkComponent from class "Hl7.Fhir.Model.Bundle+LinkComponent" is { BackboneElement };
+alter type Bundle.LinkComponent
+{
+	create representation Bundle.LinkComponent
+	{
+		RelationElement : FHIRString, 
+		Relation : String, 
+		UrlElement : FHIRUri, 
+		Url : String
+	}
+};
+create type Bundle.SearchComponent from class "Hl7.Fhir.Model.Bundle+SearchComponent" is { BackboneElement };
+create type FHIRDecimal from class "Hl7.Fhir.Model.FhirDecimal" is { Element };
+alter type FHIRDecimal
+{
+	create representation FHIRDecimal
+	{
+		Value : Decimal
+	}
+};
+alter type Bundle.SearchComponent
+{
+	create representation Bundle.SearchComponent
+	{
+		ModeElement : Code, 
+		Mode : String, 
+		ScoreElement : FHIRDecimal, 
+		Score : Decimal
+	}
+};
+create type Bundle.RequestComponent from class "Hl7.Fhir.Model.Bundle+RequestComponent" is { BackboneElement };
+alter type Bundle.RequestComponent
+{
+	create representation Bundle.RequestComponent
+	{
+		MethodElement : Code, 
+		Method : String, 
+		UrlElement : FHIRUri, 
+		Url : String, 
+		IfNoneMatchElement : FHIRString, 
+		IfNoneMatch : String, 
+		IfModifiedSinceElement : Instant, 
+		IfModifiedSince : DateTime, 
+		IfMatchElement : FHIRString, 
+		IfMatch : String, 
+		IfNoneExistElement : FHIRString, 
+		IfNoneExist : String
+	}
+};
+create type Bundle.ResponseComponent from class "Hl7.Fhir.Model.Bundle+ResponseComponent" is { BackboneElement };
+alter type Bundle.ResponseComponent
+{
+	create representation Bundle.ResponseComponent
+	{
+		StatusElement : FHIRString, 
+		Status : String, 
+		LocationElement : FHIRUri, 
+		Location : String, 
+		EtagElement : FHIRString, 
+		Etag : String, 
+		LastModifiedElement : Instant, 
+		LastModified : DateTime
+	}
+};
+alter type Bundle.EntryComponent
+{
+	create representation Bundle.EntryComponent
+	{
+		Base : String, 
+		Link : list(Bundle.LinkComponent), 
+		FullUrlElement : FHIRUri, 
+		FullUrl : String, 
+		Resource : Resource, 
+		Search : Bundle.SearchComponent, 
+		Request : Bundle.RequestComponent, 
+		Response : Bundle.ResponseComponent
+	}
+};
+create type ResourceEntry from class "Hl7.Fhir.Model.ResourceEntry" is { Bundle.EntryComponent };
+create type DomainResource from class "Hl7.Fhir.Model.DomainResource" is { Resource };
+create type Narrative from class "Hl7.Fhir.Model.Narrative" is { Element };
+alter type Narrative
+{
+	create representation Narrative
+	{
+		StatusElement : Code, 
+		Status : String, 
+		Div : String
+	}
+};
+alter type DomainResource
+{
+	create representation DomainResource
+	{
+		Text : Narrative, 
+		Contained : list(Resource), 
+		Extension : list(Extension), 
+		ModifierExtension : list(Extension)
+	}
+};
+create type Flag from class "Hl7.Fhir.Model.Flag" is { DomainResource };
+create type CodeableConcept from class "Hl7.Fhir.Model.CodeableConcept" is { Element };
+alter type CodeableConcept
+{
+	create representation CodeableConcept
+	{
+		Coding : list(Coding), 
+		TextElement : FHIRString, 
+		Text : String
+	}
+};
+create type Identifier from class "Hl7.Fhir.Model.Identifier" is { Element };
+create type Period from class "Hl7.Fhir.Model.Period" is { Element };
+create type FHIRDateTime from class "Hl7.Fhir.Model.FhirDateTime" is { Element };
+alter type FHIRDateTime
+{
+	create representation FHIRDateTime
+	{
+		Value : String
+	}
+};
+alter type Period
+{
+	create representation Period
+	{
+		StartElement : FHIRDateTime, 
+		Start : String, 
+		EndElement : FHIRDateTime, 
+		End : String
+	}
+};
+create type ResourceReference from class "Hl7.Fhir.Model.ResourceReference" is { Element };
+alter type ResourceReference
+{
+	create representation ResourceReference
+	{
+		ReferenceElement : FHIRString, 
+		Reference : String, 
+		DisplayElement : FHIRString, 
+		Display : String, 
+		Url : String
+	}
+};
+alter type Identifier
+{
+	create representation Identifier
+	{
+		UseElement : Code, 
+		Use : String, 
+		Type : CodeableConcept, 
+		SystemElement : FHIRUri, 
+		System : String, 
+		ValueElement : FHIRString, 
+		Value : String, 
+		Period : Period, 
+		Assigner : ResourceReference
+	}
+};
+alter type Flag
+{
+	create representation Flag
+	{
+		Note : CodeableConcept, 
+		Identifier : list(Identifier), 
+		Category : CodeableConcept, 
+		StatusElement : Code, 
+		Status : String, 
+		Period : Period, 
+		Subject : ResourceReference, 
+		Encounter : ResourceReference, 
+		Author : ResourceReference, 
+		Code : CodeableConcept
+	}
+};
+create type Alert from class "Hl7.Fhir.Model.Alert" is { Flag };
+create type Observation from class "Hl7.Fhir.Model.Observation" is { DomainResource };
+create type Observation.ReferenceRangeComponent from class "Hl7.Fhir.Model.Observation+ReferenceRangeComponent" is { BackboneElement };
+create type Quantity from class "Hl7.Fhir.Model.Quantity" is { Element };
+alter type Quantity
+{
+	create representation Quantity
+	{
+		ValueElement : FHIRDecimal, 
+		Value : Decimal, 
+		ComparatorElement : Code, 
+		Comparator : String, 
+		UnitElement : FHIRString, 
+		Unit : String, 
+		SystemElement : FHIRUri, 
+		System : String, 
+		CodeElement : Code, 
+		Code : String
+	}
+};
+create type SimpleQuantity from class "Hl7.Fhir.Model.SimpleQuantity" is { Quantity };
+create type Range from class "Hl7.Fhir.Model.Range" is { Element };
+alter type Range
+{
+	create representation Range
+	{
+		Low : SimpleQuantity, 
+		High : SimpleQuantity
+	}
+};
+alter type Observation.ReferenceRangeComponent
+{
+	create representation Observation.ReferenceRangeComponent
+	{
+		Low : SimpleQuantity, 
+		High : SimpleQuantity, 
+		Meaning : CodeableConcept, 
+		Age : Range, 
+		TextElement : FHIRString, 
+		Text : String
+	}
+};
+create type Observation.RelatedComponent from class "Hl7.Fhir.Model.Observation+RelatedComponent" is { BackboneElement };
+alter type Observation.RelatedComponent
+{
+	create representation Observation.RelatedComponent
+	{
+		TypeElement : Code, 
+		Type : String, 
+		Target : ResourceReference
+	}
+};
+create type Observation.ComponentComponent from class "Hl7.Fhir.Model.Observation+ComponentComponent" is { BackboneElement };
+alter type Observation.ComponentComponent
+{
+	create representation Observation.ComponentComponent
+	{
+		Code : CodeableConcept, 
+		Value : Element, 
+		DataAbsentReason : CodeableConcept, 
+		ReferenceRange : list(Observation.ReferenceRangeComponent)
+	}
+};
+alter type Observation
+{
+	create representation Observation
+	{
+		Name : CodeableConcept, 
+		Applies : FHIRDateTime, 
+		Identifier : list(Identifier), 
+		StatusElement : Code, 
+		Status : String, 
+		Category : CodeableConcept, 
+		Code : CodeableConcept, 
+		Subject : ResourceReference, 
+		Encounter : ResourceReference, 
+		Effective : Element, 
+		IssuedElement : Instant, 
+		Issued : DateTime, 
+		Performer : list(ResourceReference), 
+		Value : Element, 
+		DataAbsentReason : CodeableConcept, 
+		Interpretation : CodeableConcept, 
+		CommentsElement : FHIRString, 
+		Comments : String, 
+		BodySite : CodeableConcept, 
+		Method : CodeableConcept, 
+		Specimen : ResourceReference, 
+		Device : ResourceReference, 
+		ReferenceRange : list(Observation.ReferenceRangeComponent), 
+		Related : list(Observation.RelatedComponent), 
+		Component : list(Observation.ComponentComponent)
+	}
+};
+create type Binary from class "Hl7.Fhir.Model.Binary" is { Resource };
+create type Base64Binary from class "Hl7.Fhir.Model.Base64Binary" is { Element };
+alter type Base64Binary
+{
+	create representation Base64Binary
+	{
+		Value : Binary
+	}
+};
+alter type Binary
+{
+	create representation Binary
+	{
+		ContentTypeElement : Code, 
+		ContentType : String, 
+		ContentElement : Base64Binary, 
+		Content : Binary
+	}
+};
+create type Bundle from class "Hl7.Fhir.Model.Bundle" is { Resource };
+create type UnsignedInt from class "Hl7.Fhir.Model.UnsignedInt" is { Element };
+alter type UnsignedInt
+{
+	create representation UnsignedInt
+	{
+		Value : Integer
+	}
+};
+create type Signature from class "Hl7.Fhir.Model.Signature" is { Element };
+alter type Signature
+{
+	create representation Signature
+	{
+		Type : list(Coding), 
+		WhenElement : Instant, 
+		When : DateTime, 
+		Who : Element, 
+		ContentTypeElement : Code, 
+		ContentType : String, 
+		BlobElement : Base64Binary, 
+		Blob : Binary
+	}
+};
+alter type Bundle
+{
+	create representation Bundle
+	{
+		Base : String, 
+		SelfLink : String, 
+		FirstLink : String, 
+		PreviousLink : String, 
+		NextLink : String, 
+		LastLink : String, 
+		SearchLink : String, 
+		PredecessorVersionLink : String, 
+		Alternate : String, 
+		TypeElement : Code, 
+		Type : String, 
+		TotalElement : UnsignedInt, 
+		Total : Integer, 
+		Link : list(Bundle.LinkComponent), 
+		Entry : list(Bundle.EntryComponent), 
+		Signature : Signature
+	}
+};
+create type ConceptMap from class "Hl7.Fhir.Model.ConceptMap" is { DomainResource };
+create type ConceptMap.ContactComponent from class "Hl7.Fhir.Model.ConceptMap+ContactComponent" is { BackboneElement };
+create type ContactPoint from class "Hl7.Fhir.Model.ContactPoint" is { Element };
+create type PositiveInt from class "Hl7.Fhir.Model.PositiveInt" is { Element };
+alter type PositiveInt
+{
+	create representation PositiveInt
+	{
+		Value : Integer
+	}
+};
+alter type ContactPoint
+{
+	create representation ContactPoint
+	{
+		SystemElement : Code, 
+		System : String, 
+		ValueElement : FHIRString, 
+		Value : String, 
+		UseElement : Code, 
+		Use : String, 
+		RankElement : PositiveInt, 
+		Rank : Integer, 
+		Period : Period
+	}
+};
+alter type ConceptMap.ContactComponent
+{
+	create representation ConceptMap.ContactComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Telecom : list(ContactPoint)
+	}
+};
+create type ConceptMap.SourceElementComponent from class "Hl7.Fhir.Model.ConceptMap+SourceElementComponent" is { BackboneElement };
+create type ConceptMap.TargetElementComponent from class "Hl7.Fhir.Model.ConceptMap+TargetElementComponent" is { BackboneElement };
+create type ConceptMap.OtherElementComponent from class "Hl7.Fhir.Model.ConceptMap+OtherElementComponent" is { BackboneElement };
+alter type ConceptMap.OtherElementComponent
+{
+	create representation ConceptMap.OtherElementComponent
+	{
+		ElementElement : FHIRUri, 
+		Element : String, 
+		CodeSystemElement : FHIRUri, 
+		CodeSystem : String, 
+		CodeElement : FHIRString, 
+		Code : String
+	}
+};
+alter type ConceptMap.TargetElementComponent
+{
+	create representation ConceptMap.TargetElementComponent
+	{
+		CodeSystemElement : FHIRUri, 
+		CodeSystem : String, 
+		CodeElement : Code, 
+		Code : String, 
+		EquivalenceElement : Code, 
+		Equivalence : String, 
+		CommentsElement : FHIRString, 
+		Comments : String, 
+		DependsOn : list(ConceptMap.OtherElementComponent), 
+		Product : list(ConceptMap.OtherElementComponent)
+	}
+};
+alter type ConceptMap.SourceElementComponent
+{
+	create representation ConceptMap.SourceElementComponent
+	{
+		CodeSystemElement : FHIRUri, 
+		CodeSystem : String, 
+		CodeElement : Code, 
+		Code : String, 
+		Target : list(ConceptMap.TargetElementComponent)
+	}
+};
+alter type ConceptMap
+{
+	create representation ConceptMap
+	{
+		UrlElement : FHIRUri, 
+		Url : String, 
+		Identifier : Identifier, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		StatusElement : Code, 
+		Status : String, 
+		ExperimentalElement : FHIRBoolean, 
+		Experimental : Boolean, 
+		PublisherElement : FHIRString, 
+		Publisher : String, 
+		Contact : list(ConceptMap.ContactComponent), 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		UseContext : list(CodeableConcept), 
+		RequirementsElement : FHIRString, 
+		Requirements : String, 
+		CopyrightElement : FHIRString, 
+		Copyright : String, 
+		Source : Element, 
+		Target : Element, 
+		Element : list(ConceptMap.SourceElementComponent)
+	}
+};
+create type FHIRDate from class "Hl7.Fhir.Model.Date" is { Element };
+alter type FHIRDate
+{
+	create representation FHIRDate
+	{
+		Value : String
+	}
+};
+create type Account from class "Hl7.Fhir.Model.Account" is { DomainResource };
+create type Money from class "Hl7.Fhir.Model.Money" is { Quantity };
+alter type Account
+{
+	create representation Account
+	{
+		Identifier : list(Identifier), 
+		NameElement : FHIRString, 
+		Name : String, 
+		Type : CodeableConcept, 
+		StatusElement : Code, 
+		Status : String, 
+		ActivePeriod : Period, 
+		Currency : Coding, 
+		Balance : Money, 
+		CoveragePeriod : Period, 
+		Subject : ResourceReference, 
+		Owner : ResourceReference, 
+		DescriptionElement : FHIRString, 
+		Description : String
+	}
+};
+create type Annotation from class "Hl7.Fhir.Model.Annotation" is { Element };
+alter type Annotation
+{
+	create representation Annotation
+	{
+		Author : Element, 
+		TimeElement : FHIRDateTime, 
+		Time : String, 
+		TextElement : FHIRString, 
+		Text : String
+	}
+};
+create type Appointment from class "Hl7.Fhir.Model.Appointment" is { DomainResource };
+create type Appointment.ParticipantComponent from class "Hl7.Fhir.Model.Appointment+ParticipantComponent" is { BackboneElement };
+alter type Appointment.ParticipantComponent
+{
+	create representation Appointment.ParticipantComponent
+	{
+		Type : list(CodeableConcept), 
+		Actor : ResourceReference, 
+		RequiredElement : Code, 
+		Required : String, 
+		StatusElement : Code, 
+		Status : String
+	}
+};
+alter type Appointment
+{
+	create representation Appointment
+	{
+		Identifier : list(Identifier), 
+		StatusElement : Code, 
+		Status : String, 
+		Type : CodeableConcept, 
+		Reason : CodeableConcept, 
+		PriorityElement : UnsignedInt, 
+		Priority : Integer, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		StartElement : Instant, 
+		Start : DateTime, 
+		EndElement : Instant, 
+		End : DateTime, 
+		MinutesDurationElement : PositiveInt, 
+		MinutesDuration : Integer, 
+		Slot : list(ResourceReference), 
+		CommentElement : FHIRString, 
+		Comment : String, 
+		Participant : list(Appointment.ParticipantComponent)
+	}
+};
+create type AppointmentResponse from class "Hl7.Fhir.Model.AppointmentResponse" is { DomainResource };
+alter type AppointmentResponse
+{
+	create representation AppointmentResponse
+	{
+		Identifier : list(Identifier), 
+		Appointment : ResourceReference, 
+		StartElement : Instant, 
+		Start : DateTime, 
+		EndElement : Instant, 
+		End : DateTime, 
+		ParticipantType : list(CodeableConcept), 
+		Actor : ResourceReference, 
+		ParticipantStatus_Element : Code, 
+		ParticipantStatus_ : String, 
+		CommentElement : FHIRString, 
+		Comment : String
+	}
+};
+create type AuditEvent from class "Hl7.Fhir.Model.AuditEvent" is { DomainResource };
+create type AuditEvent.EventComponent from class "Hl7.Fhir.Model.AuditEvent+EventComponent" is { BackboneElement };
+alter type AuditEvent.EventComponent
+{
+	create representation AuditEvent.EventComponent
+	{
+		Type : Coding, 
+		Subtype : list(Coding), 
+		ActionElement : Code, 
+		Action : String, 
+		DateTimeElement : Instant, 
+		DateTime : DateTime, 
+		OutcomeElement : Code, 
+		Outcome : String, 
+		OutcomeDescElement : FHIRString, 
+		OutcomeDesc : String, 
+		PurposeOfEvent : list(Coding)
+	}
+};
+create type AuditEvent.ParticipantComponent from class "Hl7.Fhir.Model.AuditEvent+ParticipantComponent" is { BackboneElement };
+create type AuditEvent.NetworkComponent from class "Hl7.Fhir.Model.AuditEvent+NetworkComponent" is { BackboneElement };
+alter type AuditEvent.NetworkComponent
+{
+	create representation AuditEvent.NetworkComponent
+	{
+		AddressElement : FHIRString, 
+		Address : String, 
+		TypeElement : Code, 
+		Type : String
+	}
+};
+alter type AuditEvent.ParticipantComponent
+{
+	create representation AuditEvent.ParticipantComponent
+	{
+		Role : list(CodeableConcept), 
+		Reference : ResourceReference, 
+		UserId : Identifier, 
+		AltIdElement : FHIRString, 
+		AltId : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		RequestorElement : FHIRBoolean, 
+		Requestor : Boolean, 
+		Location : ResourceReference, 
+		PolicyElement : list(FHIRUri), 
+		Policy : list(String), 
+		Media : Coding, 
+		Network : AuditEvent.NetworkComponent, 
+		PurposeOfUse : list(Coding)
+	}
+};
+create type AuditEvent.SourceComponent from class "Hl7.Fhir.Model.AuditEvent+SourceComponent" is { BackboneElement };
+alter type AuditEvent.SourceComponent
+{
+	create representation AuditEvent.SourceComponent
+	{
+		SiteElement : FHIRString, 
+		Site : String, 
+		Identifier : Identifier, 
+		Type : list(Coding)
+	}
+};
+create type AuditEvent.ObjectComponent from class "Hl7.Fhir.Model.AuditEvent+ObjectComponent" is { BackboneElement };
+create type AuditEvent.DetailComponent from class "Hl7.Fhir.Model.AuditEvent+DetailComponent" is { BackboneElement };
+alter type AuditEvent.DetailComponent
+{
+	create representation AuditEvent.DetailComponent
+	{
+		TypeElement : FHIRString, 
+		Type : String, 
+		ValueElement : Base64Binary, 
+		Value : Binary
+	}
+};
+alter type AuditEvent.ObjectComponent
+{
+	create representation AuditEvent.ObjectComponent
+	{
+		Identifier : Identifier, 
+		Reference : ResourceReference, 
+		Type : Coding, 
+		Role : Coding, 
+		Lifecycle : Coding, 
+		SecurityLabel : list(Coding), 
+		NameElement : FHIRString, 
+		Name : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		QueryElement : Base64Binary, 
+		Query : Binary, 
+		Detail : list(AuditEvent.DetailComponent)
+	}
+};
+alter type AuditEvent
+{
+	create representation AuditEvent
+	{
+		Event : AuditEvent.EventComponent, 
+		Participant : list(AuditEvent.ParticipantComponent), 
+		Source : AuditEvent.SourceComponent, 
+		Object : list(AuditEvent.ObjectComponent)
+	}
+};
+create type Basic from class "Hl7.Fhir.Model.Basic" is { DomainResource };
+alter type Basic
+{
+	create representation Basic
+	{
+		Identifier : list(Identifier), 
+		Code : CodeableConcept, 
+		Subject : ResourceReference, 
+		Author : ResourceReference, 
+		CreatedElement : FHIRDate, 
+		Created : String
+	}
+};
+create type BodySite from class "Hl7.Fhir.Model.BodySite" is { DomainResource };
+create type Attachment from class "Hl7.Fhir.Model.Attachment" is { Element };
+alter type Attachment
+{
+	create representation Attachment
+	{
+		ContentTypeElement : Code, 
+		ContentType : String, 
+		LanguageElement : Code, 
+		Language : String, 
+		DataElement : Base64Binary, 
+		Data : Binary, 
+		UrlElement : FHIRUri, 
+		Url : String, 
+		SizeElement : UnsignedInt, 
+		Size : Integer, 
+		HashElement : Base64Binary, 
+		Hash : Binary, 
+		TitleElement : FHIRString, 
+		Title : String, 
+		CreationElement : FHIRDateTime, 
+		Creation : String
+	}
+};
+alter type BodySite
+{
+	create representation BodySite
+	{
+		Patient : ResourceReference, 
+		Identifier : list(Identifier), 
+		Code : CodeableConcept, 
+		Modifier : list(CodeableConcept), 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Image : list(Attachment)
+	}
+};
+create type Claim from class "Hl7.Fhir.Model.Claim" is { DomainResource };
+create type Claim.PayeeComponent from class "Hl7.Fhir.Model.Claim+PayeeComponent" is { BackboneElement };
+alter type Claim.PayeeComponent
+{
+	create representation Claim.PayeeComponent
+	{
+		Type : Coding, 
+		Provider : ResourceReference, 
+		Organization : ResourceReference, 
+		Person : ResourceReference
+	}
+};
+create type Claim.DiagnosisComponent from class "Hl7.Fhir.Model.Claim+DiagnosisComponent" is { BackboneElement };
+alter type Claim.DiagnosisComponent
+{
+	create representation Claim.DiagnosisComponent
+	{
+		SequenceElement : PositiveInt, 
+		Sequence : Integer, 
+		Diagnosis : Coding
+	}
+};
+create type Claim.CoverageComponent from class "Hl7.Fhir.Model.Claim+CoverageComponent" is { BackboneElement };
+alter type Claim.CoverageComponent
+{
+	create representation Claim.CoverageComponent
+	{
+		SequenceElement : PositiveInt, 
+		Sequence : Integer, 
+		FocalElement : FHIRBoolean, 
+		Focal : Boolean, 
+		Coverage : ResourceReference, 
+		BusinessArrangementElement : FHIRString, 
+		BusinessArrangement : String, 
+		Relationship : Coding, 
+		PreAuthRefElement : list(FHIRString), 
+		PreAuthRef : list(String), 
+		ClaimResponse : ResourceReference, 
+		OriginalRuleset : Coding
+	}
+};
+create type Claim.ItemsComponent from class "Hl7.Fhir.Model.Claim+ItemsComponent" is { BackboneElement };
+create type Claim.DetailComponent from class "Hl7.Fhir.Model.Claim+DetailComponent" is { BackboneElement };
+create type Claim.SubDetailComponent from class "Hl7.Fhir.Model.Claim+SubDetailComponent" is { BackboneElement };
+alter type Claim.SubDetailComponent
+{
+	create representation Claim.SubDetailComponent
+	{
+		SequenceElement : PositiveInt, 
+		Sequence : Integer, 
+		Type : Coding, 
+		Service : Coding, 
+		Quantity : SimpleQuantity, 
+		UnitPrice : Money, 
+		FactorElement : FHIRDecimal, 
+		Factor : Decimal, 
+		PointsElement : FHIRDecimal, 
+		Points : Decimal, 
+		Net : Money, 
+		Udi : Coding
+	}
+};
+alter type Claim.DetailComponent
+{
+	create representation Claim.DetailComponent
+	{
+		SequenceElement : PositiveInt, 
+		Sequence : Integer, 
+		Type : Coding, 
+		Service : Coding, 
+		Quantity : SimpleQuantity, 
+		UnitPrice : Money, 
+		FactorElement : FHIRDecimal, 
+		Factor : Decimal, 
+		PointsElement : FHIRDecimal, 
+		Points : Decimal, 
+		Net : Money, 
+		Udi : Coding, 
+		SubDetail : list(Claim.SubDetailComponent)
+	}
+};
+create type Claim.ProsthesisComponent from class "Hl7.Fhir.Model.Claim+ProsthesisComponent" is { BackboneElement };
+alter type Claim.ProsthesisComponent
+{
+	create representation Claim.ProsthesisComponent
+	{
+		InitialElement : FHIRBoolean, 
+		Initial : Boolean, 
+		PriorDateElement : FHIRDate, 
+		PriorDate : String, 
+		PriorMaterial : Coding
+	}
+};
+alter type Claim.ItemsComponent
+{
+	create representation Claim.ItemsComponent
+	{
+		SequenceElement : PositiveInt, 
+		Sequence : Integer, 
+		Type : Coding, 
+		Provider : ResourceReference, 
+		DiagnosisLinkIdElement : list(PositiveInt), 
+		DiagnosisLinkId : list(Integer), 
+		Service : Coding, 
+		ServiceDateElement : FHIRDate, 
+		ServiceDate : String, 
+		Quantity : SimpleQuantity, 
+		UnitPrice : Money, 
+		FactorElement : FHIRDecimal, 
+		Factor : Decimal, 
+		PointsElement : FHIRDecimal, 
+		Points : Decimal, 
+		Net : Money, 
+		Udi : Coding, 
+		BodySite : Coding, 
+		SubSite : list(Coding), 
+		Modifier : list(Coding), 
+		Detail : list(Claim.DetailComponent), 
+		Prosthesis : Claim.ProsthesisComponent
+	}
+};
+create type Claim.MissingTeethComponent from class "Hl7.Fhir.Model.Claim+MissingTeethComponent" is { BackboneElement };
+alter type Claim.MissingTeethComponent
+{
+	create representation Claim.MissingTeethComponent
+	{
+		Tooth : Coding, 
+		Reason : Coding, 
+		ExtractionDateElement : FHIRDate, 
+		ExtractionDate : String
+	}
+};
+alter type Claim
+{
+	create representation Claim
+	{
+		TypeElement : Code, 
+		Type : String, 
+		Identifier : list(Identifier), 
+		Ruleset : Coding, 
+		OriginalRuleset : Coding, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		Target : ResourceReference, 
+		Provider : ResourceReference, 
+		Organization : ResourceReference, 
+		Use_Element : Code, 
+		Use_ : String, 
+		Priority : Coding, 
+		FundsReserve : Coding, 
+		Enterer : ResourceReference, 
+		Facility : ResourceReference, 
+		Prescription : ResourceReference, 
+		OriginalPrescription : ResourceReference, 
+		Payee : Claim.PayeeComponent, 
+		Referral : ResourceReference, 
+		Diagnosis : list(Claim.DiagnosisComponent), 
+		Condition : list(Coding), 
+		Patient : ResourceReference, 
+		Coverage : list(Claim.CoverageComponent), 
+		Exception : list(Coding), 
+		SchoolElement : FHIRString, 
+		School : String, 
+		AccidentElement : FHIRDate, 
+		Accident : String, 
+		AccidentType : Coding, 
+		InterventionException : list(Coding), 
+		Item : list(Claim.ItemsComponent), 
+		AdditionalMaterials : list(Coding), 
+		MissingTeeth : list(Claim.MissingTeethComponent)
+	}
+};
+create type ClaimResponse from class "Hl7.Fhir.Model.ClaimResponse" is { DomainResource };
+create type ClaimResponse.ItemsComponent from class "Hl7.Fhir.Model.ClaimResponse+ItemsComponent" is { BackboneElement };
+create type ClaimResponse.ItemAdjudicationComponent from class "Hl7.Fhir.Model.ClaimResponse+ItemAdjudicationComponent" is { BackboneElement };
+alter type ClaimResponse.ItemAdjudicationComponent
+{
+	create representation ClaimResponse.ItemAdjudicationComponent
+	{
+		Code : Coding, 
+		Amount : Money, 
+		ValueElement : FHIRDecimal, 
+		Value : Decimal
+	}
+};
+create type ClaimResponse.ItemDetailComponent from class "Hl7.Fhir.Model.ClaimResponse+ItemDetailComponent" is { BackboneElement };
+create type ClaimResponse.DetailAdjudicationComponent from class "Hl7.Fhir.Model.ClaimResponse+DetailAdjudicationComponent" is { BackboneElement };
+alter type ClaimResponse.DetailAdjudicationComponent
+{
+	create representation ClaimResponse.DetailAdjudicationComponent
+	{
+		Code : Coding, 
+		Amount : Money, 
+		ValueElement : FHIRDecimal, 
+		Value : Decimal
+	}
+};
+create type ClaimResponse.SubDetailComponent from class "Hl7.Fhir.Model.ClaimResponse+SubDetailComponent" is { BackboneElement };
+create type ClaimResponse.SubdetailAdjudicationComponent from class "Hl7.Fhir.Model.ClaimResponse+SubdetailAdjudicationComponent" is { BackboneElement };
+alter type ClaimResponse.SubdetailAdjudicationComponent
+{
+	create representation ClaimResponse.SubdetailAdjudicationComponent
+	{
+		Code : Coding, 
+		Amount : Money, 
+		ValueElement : FHIRDecimal, 
+		Value : Decimal
+	}
+};
+alter type ClaimResponse.SubDetailComponent
+{
+	create representation ClaimResponse.SubDetailComponent
+	{
+		SequenceLinkIdElement : PositiveInt, 
+		SequenceLinkId : Integer, 
+		Adjudication : list(ClaimResponse.SubdetailAdjudicationComponent)
+	}
+};
+alter type ClaimResponse.ItemDetailComponent
+{
+	create representation ClaimResponse.ItemDetailComponent
+	{
+		SequenceLinkIdElement : PositiveInt, 
+		SequenceLinkId : Integer, 
+		Adjudication : list(ClaimResponse.DetailAdjudicationComponent), 
+		SubDetail : list(ClaimResponse.SubDetailComponent)
+	}
+};
+alter type ClaimResponse.ItemsComponent
+{
+	create representation ClaimResponse.ItemsComponent
+	{
+		SequenceLinkIdElement : PositiveInt, 
+		SequenceLinkId : Integer, 
+		NoteNumberElement : list(PositiveInt), 
+		NoteNumber : list(Integer), 
+		Adjudication : list(ClaimResponse.ItemAdjudicationComponent), 
+		Detail : list(ClaimResponse.ItemDetailComponent)
+	}
+};
+create type ClaimResponse.AddedItemComponent from class "Hl7.Fhir.Model.ClaimResponse+AddedItemComponent" is { BackboneElement };
+create type ClaimResponse.AddedItemAdjudicationComponent from class "Hl7.Fhir.Model.ClaimResponse+AddedItemAdjudicationComponent" is { BackboneElement };
+alter type ClaimResponse.AddedItemAdjudicationComponent
+{
+	create representation ClaimResponse.AddedItemAdjudicationComponent
+	{
+		Code : Coding, 
+		Amount : Money, 
+		ValueElement : FHIRDecimal, 
+		Value : Decimal
+	}
+};
+create type ClaimResponse.AddedItemsDetailComponent from class "Hl7.Fhir.Model.ClaimResponse+AddedItemsDetailComponent" is { BackboneElement };
+create type ClaimResponse.AddedItemDetailAdjudicationComponent from class "Hl7.Fhir.Model.ClaimResponse+AddedItemDetailAdjudicationComponent" is { BackboneElement };
+alter type ClaimResponse.AddedItemDetailAdjudicationComponent
+{
+	create representation ClaimResponse.AddedItemDetailAdjudicationComponent
+	{
+		Code : Coding, 
+		Amount : Money, 
+		ValueElement : FHIRDecimal, 
+		Value : Decimal
+	}
+};
+alter type ClaimResponse.AddedItemsDetailComponent
+{
+	create representation ClaimResponse.AddedItemsDetailComponent
+	{
+		Service : Coding, 
+		Fee : Money, 
+		Adjudication : list(ClaimResponse.AddedItemDetailAdjudicationComponent)
+	}
+};
+alter type ClaimResponse.AddedItemComponent
+{
+	create representation ClaimResponse.AddedItemComponent
+	{
+		SequenceLinkIdElement : list(PositiveInt), 
+		SequenceLinkId : list(Integer), 
+		Service : Coding, 
+		Fee : Money, 
+		NoteNumberLinkIdElement : list(PositiveInt), 
+		NoteNumberLinkId : list(Integer), 
+		Adjudication : list(ClaimResponse.AddedItemAdjudicationComponent), 
+		Detail : list(ClaimResponse.AddedItemsDetailComponent)
+	}
+};
+create type ClaimResponse.ErrorsComponent from class "Hl7.Fhir.Model.ClaimResponse+ErrorsComponent" is { BackboneElement };
+alter type ClaimResponse.ErrorsComponent
+{
+	create representation ClaimResponse.ErrorsComponent
+	{
+		SequenceLinkIdElement : PositiveInt, 
+		SequenceLinkId : Integer, 
+		DetailSequenceLinkIdElement : PositiveInt, 
+		DetailSequenceLinkId : Integer, 
+		SubdetailSequenceLinkIdElement : PositiveInt, 
+		SubdetailSequenceLinkId : Integer, 
+		Code : Coding
+	}
+};
+create type ClaimResponse.NotesComponent from class "Hl7.Fhir.Model.ClaimResponse+NotesComponent" is { BackboneElement };
+alter type ClaimResponse.NotesComponent
+{
+	create representation ClaimResponse.NotesComponent
+	{
+		NumberElement : PositiveInt, 
+		Number : Integer, 
+		Type : Coding, 
+		TextElement : FHIRString, 
+		Text : String
+	}
+};
+create type ClaimResponse.CoverageComponent from class "Hl7.Fhir.Model.ClaimResponse+CoverageComponent" is { BackboneElement };
+alter type ClaimResponse.CoverageComponent
+{
+	create representation ClaimResponse.CoverageComponent
+	{
+		SequenceElement : PositiveInt, 
+		Sequence : Integer, 
+		FocalElement : FHIRBoolean, 
+		Focal : Boolean, 
+		Coverage : ResourceReference, 
+		BusinessArrangementElement : FHIRString, 
+		BusinessArrangement : String, 
+		Relationship : Coding, 
+		PreAuthRefElement : list(FHIRString), 
+		PreAuthRef : list(String), 
+		ClaimResponse : ResourceReference, 
+		OriginalRuleset : Coding
+	}
+};
+alter type ClaimResponse
+{
+	create representation ClaimResponse
+	{
+		Identifier : list(Identifier), 
+		Request : ResourceReference, 
+		Ruleset : Coding, 
+		OriginalRuleset : Coding, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		Organization : ResourceReference, 
+		RequestProvider : ResourceReference, 
+		RequestOrganization : ResourceReference, 
+		OutcomeElement : Code, 
+		Outcome : String, 
+		DispositionElement : FHIRString, 
+		Disposition : String, 
+		PayeeType : Coding, 
+		Item : list(ClaimResponse.ItemsComponent), 
+		AddItem : list(ClaimResponse.AddedItemComponent), 
+		Error : list(ClaimResponse.ErrorsComponent), 
+		TotalCost : Money, 
+		UnallocDeductable : Money, 
+		TotalBenefit : Money, 
+		PaymentAdjustment : Money, 
+		PaymentAdjustmentReason : Coding, 
+		PaymentDateElement : FHIRDate, 
+		PaymentDate : String, 
+		PaymentAmount : Money, 
+		PaymentRef : Identifier, 
+		Reserved : Coding, 
+		Form : Coding, 
+		Note : list(ClaimResponse.NotesComponent), 
+		Coverage : list(ClaimResponse.CoverageComponent)
+	}
+};
+create type ClinicalImpression from class "Hl7.Fhir.Model.ClinicalImpression" is { DomainResource };
+create type ClinicalImpression.InvestigationsComponent from class "Hl7.Fhir.Model.ClinicalImpression+InvestigationsComponent" is { BackboneElement };
+alter type ClinicalImpression.InvestigationsComponent
+{
+	create representation ClinicalImpression.InvestigationsComponent
+	{
+		Code : CodeableConcept, 
+		Item : list(ResourceReference)
+	}
+};
+create type ClinicalImpression.FindingComponent from class "Hl7.Fhir.Model.ClinicalImpression+FindingComponent" is { BackboneElement };
+alter type ClinicalImpression.FindingComponent
+{
+	create representation ClinicalImpression.FindingComponent
+	{
+		Item : CodeableConcept, 
+		CauseElement : FHIRString, 
+		Cause : String
+	}
+};
+create type ClinicalImpression.RuledOutComponent from class "Hl7.Fhir.Model.ClinicalImpression+RuledOutComponent" is { BackboneElement };
+alter type ClinicalImpression.RuledOutComponent
+{
+	create representation ClinicalImpression.RuledOutComponent
+	{
+		Item : CodeableConcept, 
+		ReasonElement : FHIRString, 
+		Reason : String
+	}
+};
+alter type ClinicalImpression
+{
+	create representation ClinicalImpression
+	{
+		Patient : ResourceReference, 
+		Assessor : ResourceReference, 
+		StatusElement : Code, 
+		Status : String, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Previous : ResourceReference, 
+		Problem : list(ResourceReference), 
+		Trigger : Element, 
+		Investigations : list(ClinicalImpression.InvestigationsComponent), 
+		ProtocolElement : FHIRUri, 
+		Protocol : String, 
+		SummaryElement : FHIRString, 
+		Summary : String, 
+		Finding : list(ClinicalImpression.FindingComponent), 
+		Resolved : list(CodeableConcept), 
+		RuledOut : list(ClinicalImpression.RuledOutComponent), 
+		PrognosisElement : FHIRString, 
+		Prognosis : String, 
+		Plan : list(ResourceReference), 
+		Action : list(ResourceReference)
+	}
+};
+create type Communication from class "Hl7.Fhir.Model.Communication" is { DomainResource };
+create type Communication.PayloadComponent from class "Hl7.Fhir.Model.Communication+PayloadComponent" is { BackboneElement };
+alter type Communication.PayloadComponent
+{
+	create representation Communication.PayloadComponent
+	{
+		Content : Element
+	}
+};
+alter type Communication
+{
+	create representation Communication
+	{
+		Identifier : list(Identifier), 
+		Category : CodeableConcept, 
+		Sender : ResourceReference, 
+		Recipient : list(ResourceReference), 
+		Payload : list(Communication.PayloadComponent), 
+		Medium : list(CodeableConcept), 
+		StatusElement : Code, 
+		Status : String, 
+		Encounter : ResourceReference, 
+		SentElement : FHIRDateTime, 
+		Sent : String, 
+		ReceivedElement : FHIRDateTime, 
+		Received : String, 
+		Reason : list(CodeableConcept), 
+		Subject : ResourceReference, 
+		RequestDetail : ResourceReference
+	}
+};
+create type CommunicationRequest from class "Hl7.Fhir.Model.CommunicationRequest" is { DomainResource };
+create type CommunicationRequest.PayloadComponent from class "Hl7.Fhir.Model.CommunicationRequest+PayloadComponent" is { BackboneElement };
+alter type CommunicationRequest.PayloadComponent
+{
+	create representation CommunicationRequest.PayloadComponent
+	{
+		Content : Element
+	}
+};
+alter type CommunicationRequest
+{
+	create representation CommunicationRequest
+	{
+		Identifier : list(Identifier), 
+		Category : CodeableConcept, 
+		Sender : ResourceReference, 
+		Recipient : list(ResourceReference), 
+		Payload : list(CommunicationRequest.PayloadComponent), 
+		Medium : list(CodeableConcept), 
+		Requester : ResourceReference, 
+		StatusElement : Code, 
+		Status : String, 
+		Encounter : ResourceReference, 
+		Scheduled : Element, 
+		Reason : list(CodeableConcept), 
+		RequestedOnElement : FHIRDateTime, 
+		RequestedOn : String, 
+		Subject : ResourceReference, 
+		Priority : CodeableConcept
+	}
+};
+create type Contract from class "Hl7.Fhir.Model.Contract" is { DomainResource };
+create type Contract.ActorComponent from class "Hl7.Fhir.Model.Contract+ActorComponent" is { BackboneElement };
+alter type Contract.ActorComponent
+{
+	create representation Contract.ActorComponent
+	{
+		Entity : ResourceReference, 
+		Role : list(CodeableConcept)
+	}
+};
+create type Contract.ValuedItemComponent from class "Hl7.Fhir.Model.Contract+ValuedItemComponent" is { BackboneElement };
+alter type Contract.ValuedItemComponent
+{
+	create representation Contract.ValuedItemComponent
+	{
+		Entity : Element, 
+		Identifier : Identifier, 
+		EffectiveTimeElement : FHIRDateTime, 
+		EffectiveTime : String, 
+		Quantity : SimpleQuantity, 
+		UnitPrice : Money, 
+		FactorElement : FHIRDecimal, 
+		Factor : Decimal, 
+		PointsElement : FHIRDecimal, 
+		Points : Decimal, 
+		Net : Money
+	}
+};
+create type Contract.SignatoryComponent from class "Hl7.Fhir.Model.Contract+SignatoryComponent" is { BackboneElement };
+alter type Contract.SignatoryComponent
+{
+	create representation Contract.SignatoryComponent
+	{
+		Type : Coding, 
+		Party : ResourceReference, 
+		SignatureElement : FHIRString, 
+		Signature : String
+	}
+};
+create type Contract.TermComponent from class "Hl7.Fhir.Model.Contract+TermComponent" is { BackboneElement };
+create type Contract.TermActorComponent from class "Hl7.Fhir.Model.Contract+TermActorComponent" is { BackboneElement };
+alter type Contract.TermActorComponent
+{
+	create representation Contract.TermActorComponent
+	{
+		Entity : ResourceReference, 
+		Role : list(CodeableConcept)
+	}
+};
+create type Contract.TermValuedItemComponent from class "Hl7.Fhir.Model.Contract+TermValuedItemComponent" is { BackboneElement };
+alter type Contract.TermValuedItemComponent
+{
+	create representation Contract.TermValuedItemComponent
+	{
+		Entity : Element, 
+		Identifier : Identifier, 
+		EffectiveTimeElement : FHIRDateTime, 
+		EffectiveTime : String, 
+		Quantity : SimpleQuantity, 
+		UnitPrice : Money, 
+		FactorElement : FHIRDecimal, 
+		Factor : Decimal, 
+		PointsElement : FHIRDecimal, 
+		Points : Decimal, 
+		Net : Money
+	}
+};
+alter type Contract.TermComponent
+{
+	create representation Contract.TermComponent
+	{
+		Identifier : Identifier, 
+		IssuedElement : FHIRDateTime, 
+		Issued : String, 
+		Applies : Period, 
+		Type : CodeableConcept, 
+		SubType : CodeableConcept, 
+		Subject : ResourceReference, 
+		Action : list(CodeableConcept), 
+		ActionReason : list(CodeableConcept), 
+		Actor : list(Contract.TermActorComponent), 
+		TextElement : FHIRString, 
+		Text : String, 
+		ValuedItem : list(Contract.TermValuedItemComponent), 
+		Group : list(Contract.TermComponent)
+	}
+};
+create type Contract.FriendlyLanguageComponent from class "Hl7.Fhir.Model.Contract+FriendlyLanguageComponent" is { BackboneElement };
+alter type Contract.FriendlyLanguageComponent
+{
+	create representation Contract.FriendlyLanguageComponent
+	{
+		Content : Element
+	}
+};
+create type Contract.LegalLanguageComponent from class "Hl7.Fhir.Model.Contract+LegalLanguageComponent" is { BackboneElement };
+alter type Contract.LegalLanguageComponent
+{
+	create representation Contract.LegalLanguageComponent
+	{
+		Content : Element
+	}
+};
+create type Contract.ComputableLanguageComponent from class "Hl7.Fhir.Model.Contract+ComputableLanguageComponent" is { BackboneElement };
+alter type Contract.ComputableLanguageComponent
+{
+	create representation Contract.ComputableLanguageComponent
+	{
+		Content : Element
+	}
+};
+alter type Contract
+{
+	create representation Contract
+	{
+		Identifier : Identifier, 
+		IssuedElement : FHIRDateTime, 
+		Issued : String, 
+		Applies : Period, 
+		Subject : list(ResourceReference), 
+		Authority : list(ResourceReference), 
+		Domain : list(ResourceReference), 
+		Type : CodeableConcept, 
+		SubType : list(CodeableConcept), 
+		Action : list(CodeableConcept), 
+		ActionReason : list(CodeableConcept), 
+		Actor : list(Contract.ActorComponent), 
+		ValuedItem : list(Contract.ValuedItemComponent), 
+		Signer : list(Contract.SignatoryComponent), 
+		Term : list(Contract.TermComponent), 
+		Binding : Element, 
+		Friendly : list(Contract.FriendlyLanguageComponent), 
+		Legal : list(Contract.LegalLanguageComponent), 
+		Rule : list(Contract.ComputableLanguageComponent)
+	}
+};
+create type Coverage from class "Hl7.Fhir.Model.Coverage" is { DomainResource };
+alter type Coverage
+{
+	create representation Coverage
+	{
+		Issuer : ResourceReference, 
+		Bin : Identifier, 
+		Period : Period, 
+		Type : Coding, 
+		SubscriberId : Identifier, 
+		Identifier : list(Identifier), 
+		GroupElement : FHIRString, 
+		Group : String, 
+		PlanElement : FHIRString, 
+		Plan : String, 
+		SubPlanElement : FHIRString, 
+		SubPlan : String, 
+		DependentElement : PositiveInt, 
+		Dependent : Integer, 
+		SequenceElement : PositiveInt, 
+		Sequence : Integer, 
+		Subscriber : ResourceReference, 
+		Network : Identifier, 
+		Contract : list(ResourceReference)
+	}
+};
+create type DataElement from class "Hl7.Fhir.Model.DataElement" is { DomainResource };
+create type DataElement.ContactComponent from class "Hl7.Fhir.Model.DataElement+ContactComponent" is { BackboneElement };
+alter type DataElement.ContactComponent
+{
+	create representation DataElement.ContactComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Telecom : list(ContactPoint)
+	}
+};
+create type DataElement.MappingComponent from class "Hl7.Fhir.Model.DataElement+MappingComponent" is { BackboneElement };
+alter type DataElement.MappingComponent
+{
+	create representation DataElement.MappingComponent
+	{
+		IdentityElement : Id, 
+		Identity : String, 
+		UriElement : FHIRUri, 
+		Uri : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		CommentsElement : FHIRString, 
+		Comments : String
+	}
+};
+create type ElementDefinition from class "Hl7.Fhir.Model.ElementDefinition" is { Element };
+create type ElementDefinition.SlicingComponent from class "Hl7.Fhir.Model.ElementDefinition+SlicingComponent" is { Element };
+alter type ElementDefinition.SlicingComponent
+{
+	create representation ElementDefinition.SlicingComponent
+	{
+		DiscriminatorElement : list(FHIRString), 
+		Discriminator : list(String), 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		OrderedElement : FHIRBoolean, 
+		Ordered : Boolean, 
+		RulesElement : Code, 
+		Rules : String
+	}
+};
+create type Markdown from class "Hl7.Fhir.Model.Markdown" is { Element };
+alter type Markdown
+{
+	create representation Markdown
+	{
+		Value : String
+	}
+};
+create type FHIRInteger from class "Hl7.Fhir.Model.Integer" is { Element };
+alter type FHIRInteger
+{
+	create representation FHIRInteger
+	{
+		Value : Integer
+	}
+};
+create type ElementDefinition.BaseComponent from class "Hl7.Fhir.Model.ElementDefinition+BaseComponent" is { Element };
+alter type ElementDefinition.BaseComponent
+{
+	create representation ElementDefinition.BaseComponent
+	{
+		PathElement : FHIRString, 
+		Path : String, 
+		MinElement : FHIRInteger, 
+		Min : Integer, 
+		MaxElement : FHIRString, 
+		Max : String
+	}
+};
+create type ElementDefinition.TypeRefComponent from class "Hl7.Fhir.Model.ElementDefinition+TypeRefComponent" is { Element };
+alter type ElementDefinition.TypeRefComponent
+{
+	create representation ElementDefinition.TypeRefComponent
+	{
+		CodeElement : Code, 
+		Code : String, 
+		ProfileElement : list(FHIRUri), 
+		Profile : list(String), 
+		AggregationElement : list(Code), 
+		Aggregation : list(String)
+	}
+};
+create type ElementDefinition.ConstraintComponent from class "Hl7.Fhir.Model.ElementDefinition+ConstraintComponent" is { Element };
+alter type ElementDefinition.ConstraintComponent
+{
+	create representation ElementDefinition.ConstraintComponent
+	{
+		KeyElement : Id, 
+		Key : String, 
+		RequirementsElement : FHIRString, 
+		Requirements : String, 
+		SeverityElement : Code, 
+		Severity : String, 
+		HumanElement : FHIRString, 
+		Human : String, 
+		XpathElement : FHIRString, 
+		Xpath : String
+	}
+};
+create type ElementDefinition.BindingComponent from class "Hl7.Fhir.Model.ElementDefinition+BindingComponent" is { Element };
+alter type ElementDefinition.BindingComponent
+{
+	create representation ElementDefinition.BindingComponent
+	{
+		StrengthElement : Code, 
+		Strength : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		ValueSet : Element
+	}
+};
+create type ElementDefinition.MappingComponent from class "Hl7.Fhir.Model.ElementDefinition+MappingComponent" is { Element };
+alter type ElementDefinition.MappingComponent
+{
+	create representation ElementDefinition.MappingComponent
+	{
+		IdentityElement : Id, 
+		Identity : String, 
+		LanguageElement : Code, 
+		Language : String, 
+		MapElement : FHIRString, 
+		Map : String
+	}
+};
+alter type ElementDefinition
+{
+	create representation ElementDefinition
+	{
+		PathElement : FHIRString, 
+		Path : String, 
+		RepresentationElement : list(Code), 
+		Representation : list(String), 
+		NameElement : FHIRString, 
+		Name : String, 
+		LabelElement : FHIRString, 
+		Label : String, 
+		Code : list(Coding), 
+		Slicing : ElementDefinition.SlicingComponent, 
+		ShortElement : FHIRString, 
+		Short : String, 
+		DefinitionElement : Markdown, 
+		Definition : String, 
+		CommentsElement : Markdown, 
+		Comments : String, 
+		RequirementsElement : Markdown, 
+		Requirements : String, 
+		AliasElement : list(FHIRString), 
+		Alias : list(String), 
+		MinElement : FHIRInteger, 
+		Min : Integer, 
+		MaxElement : FHIRString, 
+		Max : String, 
+		Base : ElementDefinition.BaseComponent, 
+		Type : list(ElementDefinition.TypeRefComponent), 
+		NameReferenceElement : FHIRString, 
+		NameReference : String, 
+		DefaultValue : Element, 
+		MeaningWhenMissingElement : Markdown, 
+		MeaningWhenMissing : String, 
+		Fixed : Element, 
+		Pattern : Element, 
+		Example : Element, 
+		MinValue : Element, 
+		MaxValue : Element, 
+		MaxLengthElement : FHIRInteger, 
+		MaxLength : Integer, 
+		ConditionElement : list(Id), 
+		Condition : list(String), 
+		Constraint : list(ElementDefinition.ConstraintComponent), 
+		MustSupportElement : FHIRBoolean, 
+		MustSupport : Boolean, 
+		IsModifierElement : FHIRBoolean, 
+		IsModifier : Boolean, 
+		IsSummaryElement : FHIRBoolean, 
+		IsSummary : Boolean, 
+		Binding : ElementDefinition.BindingComponent, 
+		Mapping : list(ElementDefinition.MappingComponent)
+	}
+};
+alter type DataElement
+{
+	create representation DataElement
+	{
+		UrlElement : FHIRUri, 
+		Url : String, 
+		Identifier : list(Identifier), 
+		VersionElement : FHIRString, 
+		Version : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		StatusElement : Code, 
+		Status : String, 
+		ExperimentalElement : FHIRBoolean, 
+		Experimental : Boolean, 
+		PublisherElement : FHIRString, 
+		Publisher : String, 
+		Contact : list(DataElement.ContactComponent), 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		UseContext : list(CodeableConcept), 
+		CopyrightElement : FHIRString, 
+		Copyright : String, 
+		StringencyElement : Code, 
+		Stringency : String, 
+		Mapping : list(DataElement.MappingComponent), 
+		Element : list(ElementDefinition), 
+		Description : String, 
+		DescriptionElement : FHIRString
+	}
+};
+create type DetectedIssue from class "Hl7.Fhir.Model.DetectedIssue" is { DomainResource };
+create type DetectedIssue.MitigationComponent from class "Hl7.Fhir.Model.DetectedIssue+MitigationComponent" is { BackboneElement };
+alter type DetectedIssue.MitigationComponent
+{
+	create representation DetectedIssue.MitigationComponent
+	{
+		Action : CodeableConcept, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		Author : ResourceReference
+	}
+};
+alter type DetectedIssue
+{
+	create representation DetectedIssue
+	{
+		Patient : ResourceReference, 
+		Category : CodeableConcept, 
+		SeverityElement : Code, 
+		Severity : String, 
+		Implicated : list(ResourceReference), 
+		DetailElement : FHIRString, 
+		Detail : String, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		Author : ResourceReference, 
+		Identifier : Identifier, 
+		ReferenceElement : FHIRUri, 
+		Reference : String, 
+		Mitigation : list(DetectedIssue.MitigationComponent)
+	}
+};
+create type DeviceComponent from class "Hl7.Fhir.Model.DeviceComponent" is { DomainResource };
+create type DeviceComponent.ProductionSpecificationComponent from class "Hl7.Fhir.Model.DeviceComponent+ProductionSpecificationComponent" is { BackboneElement };
+alter type DeviceComponent.ProductionSpecificationComponent
+{
+	create representation DeviceComponent.ProductionSpecificationComponent
+	{
+		SpecType : CodeableConcept, 
+		ComponentId : Identifier, 
+		ProductionSpecElement : FHIRString, 
+		ProductionSpec : String
+	}
+};
+alter type DeviceComponent
+{
+	create representation DeviceComponent
+	{
+		Type : CodeableConcept, 
+		Identifier : Identifier, 
+		LastSystemChangeElement : Instant, 
+		LastSystemChange : DateTime, 
+		Source : ResourceReference, 
+		Parent : ResourceReference, 
+		OperationalStatus : list(CodeableConcept), 
+		ParameterGroup : CodeableConcept, 
+		MeasurementPrincipleElement : Code, 
+		MeasurementPrinciple : String, 
+		ProductionSpecification : list(DeviceComponent.ProductionSpecificationComponent), 
+		LanguageCode : CodeableConcept
+	}
+};
+create type DeviceMetric from class "Hl7.Fhir.Model.DeviceMetric" is { DomainResource };
+create type Timing from class "Hl7.Fhir.Model.Timing" is { Element };
+create type Timing.RepeatComponent from class "Hl7.Fhir.Model.Timing+RepeatComponent" is { Element };
+alter type Timing.RepeatComponent
+{
+	create representation Timing.RepeatComponent
+	{
+		Bounds : Element, 
+		CountElement : FHIRInteger, 
+		Count : Integer, 
+		DurationElement : FHIRDecimal, 
+		Duration : Decimal, 
+		DurationMaxElement : FHIRDecimal, 
+		DurationMax : Decimal, 
+		DurationUnitsElement : Code, 
+		DurationUnits : String, 
+		FrequencyElement : FHIRInteger, 
+		Frequency : Integer, 
+		FrequencyMaxElement : FHIRInteger, 
+		FrequencyMax : Integer, 
+		PeriodElement : FHIRDecimal, 
+		Period : Decimal, 
+		PeriodMaxElement : FHIRDecimal, 
+		PeriodMax : Decimal, 
+		PeriodUnitsElement : Code, 
+		PeriodUnits : String, 
+		WhenElement : Code, 
+		When : String
+	}
+};
+alter type Timing
+{
+	create representation Timing
+	{
+		EventElement : list(FHIRDateTime), 
+		Event : list(String), 
+		Repeat : Timing.RepeatComponent, 
+		Code : CodeableConcept
+	}
+};
+create type DeviceMetric.CalibrationComponent from class "Hl7.Fhir.Model.DeviceMetric+CalibrationComponent" is { BackboneElement };
+alter type DeviceMetric.CalibrationComponent
+{
+	create representation DeviceMetric.CalibrationComponent
+	{
+		TypeElement : Code, 
+		Type : String, 
+		StateElement : Code, 
+		State : String, 
+		TimeElement : Instant, 
+		Time : DateTime
+	}
+};
+alter type DeviceMetric
+{
+	create representation DeviceMetric
+	{
+		Type : CodeableConcept, 
+		Identifier : Identifier, 
+		Unit : CodeableConcept, 
+		Source : ResourceReference, 
+		Parent : ResourceReference, 
+		OperationalStatusElement : Code, 
+		OperationalStatus : String, 
+		ColorElement : Code, 
+		Color : String, 
+		CategoryElement : Code, 
+		Category : String, 
+		MeasurementPeriod : Timing, 
+		Calibration : list(DeviceMetric.CalibrationComponent)
+	}
+};
+create type DeviceUseRequest from class "Hl7.Fhir.Model.DeviceUseRequest" is { DomainResource };
+alter type DeviceUseRequest
+{
+	create representation DeviceUseRequest
+	{
+		BodySite : Element, 
+		StatusElement : Code, 
+		Status : String, 
+		Device : ResourceReference, 
+		Encounter : ResourceReference, 
+		Identifier : list(Identifier), 
+		Indication : list(CodeableConcept), 
+		NotesElement : list(FHIRString), 
+		Notes : list(String), 
+		PrnReason : list(CodeableConcept), 
+		OrderedOnElement : FHIRDateTime, 
+		OrderedOn : String, 
+		RecordedOnElement : FHIRDateTime, 
+		RecordedOn : String, 
+		Subject : ResourceReference, 
+		Timing : Element, 
+		PriorityElement : Code, 
+		Priority : String
+	}
+};
+create type DeviceUseStatement from class "Hl7.Fhir.Model.DeviceUseStatement" is { DomainResource };
+alter type DeviceUseStatement
+{
+	create representation DeviceUseStatement
+	{
+		BodySite : Element, 
+		WhenUsed : Period, 
+		Device : ResourceReference, 
+		Identifier : list(Identifier), 
+		Indication : list(CodeableConcept), 
+		NotesElement : list(FHIRString), 
+		Notes : list(String), 
+		RecordedOnElement : FHIRDateTime, 
+		RecordedOn : String, 
+		Subject : ResourceReference, 
+		Timing : Element
+	}
+};
+create type EligibilityRequest from class "Hl7.Fhir.Model.EligibilityRequest" is { DomainResource };
+alter type EligibilityRequest
+{
+	create representation EligibilityRequest
+	{
+		Identifier : list(Identifier), 
+		Ruleset : Coding, 
+		OriginalRuleset : Coding, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		Target : ResourceReference, 
+		Provider : ResourceReference, 
+		Organization : ResourceReference
+	}
+};
+create type EligibilityResponse from class "Hl7.Fhir.Model.EligibilityResponse" is { DomainResource };
+alter type EligibilityResponse
+{
+	create representation EligibilityResponse
+	{
+		Identifier : list(Identifier), 
+		Request : ResourceReference, 
+		OutcomeElement : Code, 
+		Outcome : String, 
+		DispositionElement : FHIRString, 
+		Disposition : String, 
+		Ruleset : Coding, 
+		OriginalRuleset : Coding, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		Organization : ResourceReference, 
+		RequestProvider : ResourceReference, 
+		RequestOrganization : ResourceReference
+	}
+};
+create type EnrollmentRequest from class "Hl7.Fhir.Model.EnrollmentRequest" is { DomainResource };
+alter type EnrollmentRequest
+{
+	create representation EnrollmentRequest
+	{
+		Identifier : list(Identifier), 
+		Ruleset : Coding, 
+		OriginalRuleset : Coding, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		Target : ResourceReference, 
+		Provider : ResourceReference, 
+		Organization : ResourceReference, 
+		Subject : ResourceReference, 
+		Coverage : ResourceReference, 
+		Relationship : Coding
+	}
+};
+create type EnrollmentResponse from class "Hl7.Fhir.Model.EnrollmentResponse" is { DomainResource };
+alter type EnrollmentResponse
+{
+	create representation EnrollmentResponse
+	{
+		Identifier : list(Identifier), 
+		Request : ResourceReference, 
+		OutcomeElement : Code, 
+		Outcome : String, 
+		DispositionElement : FHIRString, 
+		Disposition : String, 
+		Ruleset : Coding, 
+		OriginalRuleset : Coding, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		Organization : ResourceReference, 
+		RequestProvider : ResourceReference, 
+		RequestOrganization : ResourceReference
+	}
+};
+create type EpisodeOfCare from class "Hl7.Fhir.Model.EpisodeOfCare" is { DomainResource };
+create type EpisodeOfCare.StatusHistoryComponent from class "Hl7.Fhir.Model.EpisodeOfCare+StatusHistoryComponent" is { BackboneElement };
+alter type EpisodeOfCare.StatusHistoryComponent
+{
+	create representation EpisodeOfCare.StatusHistoryComponent
+	{
+		StatusElement : Code, 
+		Status : String, 
+		Period : Period
+	}
+};
+create type EpisodeOfCare.CareTeamComponent from class "Hl7.Fhir.Model.EpisodeOfCare+CareTeamComponent" is { BackboneElement };
+alter type EpisodeOfCare.CareTeamComponent
+{
+	create representation EpisodeOfCare.CareTeamComponent
+	{
+		Role : list(CodeableConcept), 
+		Period : Period, 
+		Member : ResourceReference
+	}
+};
+alter type EpisodeOfCare
+{
+	create representation EpisodeOfCare
+	{
+		Identifier : list(Identifier), 
+		StatusElement : Code, 
+		Status : String, 
+		StatusHistory : list(EpisodeOfCare.StatusHistoryComponent), 
+		Type : list(CodeableConcept), 
+		Condition : list(ResourceReference), 
+		Patient : ResourceReference, 
+		ManagingOrganization : ResourceReference, 
+		Period : Period, 
+		ReferralRequest : list(ResourceReference), 
+		CareManager : ResourceReference, 
+		CareTeam : list(EpisodeOfCare.CareTeamComponent)
+	}
+};
+create type ExplanationOfBenefit from class "Hl7.Fhir.Model.ExplanationOfBenefit" is { DomainResource };
+alter type ExplanationOfBenefit
+{
+	create representation ExplanationOfBenefit
+	{
+		Identifier : list(Identifier), 
+		Request : ResourceReference, 
+		OutcomeElement : Code, 
+		Outcome : String, 
+		DispositionElement : FHIRString, 
+		Disposition : String, 
+		Ruleset : Coding, 
+		OriginalRuleset : Coding, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		Organization : ResourceReference, 
+		RequestProvider : ResourceReference, 
+		RequestOrganization : ResourceReference
+	}
+};
+create type FamilyMemberHistory from class "Hl7.Fhir.Model.FamilyMemberHistory" is { DomainResource };
+create type FamilyMemberHistory.ConditionComponent from class "Hl7.Fhir.Model.FamilyMemberHistory+ConditionComponent" is { BackboneElement };
+alter type FamilyMemberHistory.ConditionComponent
+{
+	create representation FamilyMemberHistory.ConditionComponent
+	{
+		Code : CodeableConcept, 
+		Outcome : CodeableConcept, 
+		Onset : Element, 
+		Note : Annotation
+	}
+};
+alter type FamilyMemberHistory
+{
+	create representation FamilyMemberHistory
+	{
+		Identifier : list(Identifier), 
+		Patient : ResourceReference, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		StatusElement : Code, 
+		Status : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		Relationship : CodeableConcept, 
+		GenderElement : Code, 
+		Gender : String, 
+		Born : Element, 
+		Age : Element, 
+		Deceased : Element, 
+		Note : Annotation, 
+		Condition : list(FamilyMemberHistory.ConditionComponent)
+	}
+};
+create type Goal from class "Hl7.Fhir.Model.Goal" is { DomainResource };
+create type Goal.OutcomeComponent from class "Hl7.Fhir.Model.Goal+OutcomeComponent" is { BackboneElement };
+alter type Goal.OutcomeComponent
+{
+	create representation Goal.OutcomeComponent
+	{
+		Result : Element
+	}
+};
+alter type Goal
+{
+	create representation Goal
+	{
+		Identifier : list(Identifier), 
+		Subject : ResourceReference, 
+		Start : Element, 
+		Target : Element, 
+		Category : list(CodeableConcept), 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		StatusElement : Code, 
+		Status : String, 
+		StatusDateElement : FHIRDate, 
+		StatusDate : String, 
+		StatusReason : CodeableConcept, 
+		Author : ResourceReference, 
+		Priority : CodeableConcept, 
+		Addresses : list(ResourceReference), 
+		Note : list(Annotation), 
+		Outcome : list(Goal.OutcomeComponent)
+	}
+};
+create type HealthcareService from class "Hl7.Fhir.Model.HealthcareService" is { DomainResource };
+create type HealthcareService.ServiceTypeComponent from class "Hl7.Fhir.Model.HealthcareService+ServiceTypeComponent" is { BackboneElement };
+alter type HealthcareService.ServiceTypeComponent
+{
+	create representation HealthcareService.ServiceTypeComponent
+	{
+		Type : CodeableConcept, 
+		Specialty : list(CodeableConcept)
+	}
+};
+create type HealthcareService.AvailableTimeComponent from class "Hl7.Fhir.Model.HealthcareService+AvailableTimeComponent" is { BackboneElement };
+create type FHIRTime from class "Hl7.Fhir.Model.Time" is { Element };
+alter type FHIRTime
+{
+	create representation FHIRTime
+	{
+		Value : String
+	}
+};
+alter type HealthcareService.AvailableTimeComponent
+{
+	create representation HealthcareService.AvailableTimeComponent
+	{
+		DaysOfWeek_Element : list(Code), 
+		DaysOfWeek_ : list(String), 
+		AllDayElement : FHIRBoolean, 
+		AllDay : Boolean, 
+		AvailableStartTimeElement : FHIRTime, 
+		AvailableStartTime : String, 
+		AvailableEndTimeElement : FHIRTime, 
+		AvailableEndTime : String
+	}
+};
+create type HealthcareService.NotAvailableComponent from class "Hl7.Fhir.Model.HealthcareService+NotAvailableComponent" is { BackboneElement };
+alter type HealthcareService.NotAvailableComponent
+{
+	create representation HealthcareService.NotAvailableComponent
+	{
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		During : Period
+	}
+};
+alter type HealthcareService
+{
+	create representation HealthcareService
+	{
+		Identifier : list(Identifier), 
+		ProvidedBy : ResourceReference, 
+		ServiceCategory : CodeableConcept, 
+		ServiceType : list(HealthcareService.ServiceTypeComponent), 
+		Location : ResourceReference, 
+		ServiceNameElement : FHIRString, 
+		ServiceName : String, 
+		CommentElement : FHIRString, 
+		Comment : String, 
+		ExtraDetailsElement : FHIRString, 
+		ExtraDetails : String, 
+		Photo : Attachment, 
+		Telecom : list(ContactPoint), 
+		CoverageArea : list(ResourceReference), 
+		ServiceProvisionCode : list(CodeableConcept), 
+		Eligibility : CodeableConcept, 
+		EligibilityNoteElement : FHIRString, 
+		EligibilityNote : String, 
+		ProgramNameElement : list(FHIRString), 
+		ProgramName : list(String), 
+		Characteristic : list(CodeableConcept), 
+		ReferralMethod : list(CodeableConcept), 
+		PublicKeyElement : FHIRString, 
+		PublicKey : String, 
+		AppointmentRequiredElement : FHIRBoolean, 
+		AppointmentRequired : Boolean, 
+		AvailableTime : list(HealthcareService.AvailableTimeComponent), 
+		NotAvailable : list(HealthcareService.NotAvailableComponent), 
+		AvailabilityExceptionsElement : FHIRString, 
+		AvailabilityExceptions : String
+	}
+};
+create type ImagingObjectSelection from class "Hl7.Fhir.Model.ImagingObjectSelection" is { DomainResource };
+create type Oid from class "Hl7.Fhir.Model.Oid" is { Element };
+alter type Oid
+{
+	create representation Oid
+	{
+		Value : String
+	}
+};
+create type ImagingObjectSelection.StudyComponent from class "Hl7.Fhir.Model.ImagingObjectSelection+StudyComponent" is { BackboneElement };
+create type ImagingObjectSelection.SeriesComponent from class "Hl7.Fhir.Model.ImagingObjectSelection+SeriesComponent" is { BackboneElement };
+create type ImagingObjectSelection.InstanceComponent from class "Hl7.Fhir.Model.ImagingObjectSelection+InstanceComponent" is { BackboneElement };
+create type ImagingObjectSelection.FramesComponent from class "Hl7.Fhir.Model.ImagingObjectSelection+FramesComponent" is { BackboneElement };
+alter type ImagingObjectSelection.FramesComponent
+{
+	create representation ImagingObjectSelection.FramesComponent
+	{
+		FrameNumbersElement : list(UnsignedInt), 
+		FrameNumbers : list(Integer), 
+		UrlElement : FHIRUri, 
+		Url : String
+	}
+};
+alter type ImagingObjectSelection.InstanceComponent
+{
+	create representation ImagingObjectSelection.InstanceComponent
+	{
+		SopClassElement : Oid, 
+		SopClass : String, 
+		UidElement : Oid, 
+		Uid : String, 
+		UrlElement : FHIRUri, 
+		Url : String, 
+		Frames : list(ImagingObjectSelection.FramesComponent)
+	}
+};
+alter type ImagingObjectSelection.SeriesComponent
+{
+	create representation ImagingObjectSelection.SeriesComponent
+	{
+		UidElement : Oid, 
+		Uid : String, 
+		UrlElement : FHIRUri, 
+		Url : String, 
+		Instance : list(ImagingObjectSelection.InstanceComponent)
+	}
+};
+alter type ImagingObjectSelection.StudyComponent
+{
+	create representation ImagingObjectSelection.StudyComponent
+	{
+		UidElement : Oid, 
+		Uid : String, 
+		UrlElement : FHIRUri, 
+		Url : String, 
+		ImagingStudy : ResourceReference, 
+		Series : list(ImagingObjectSelection.SeriesComponent)
+	}
+};
+alter type ImagingObjectSelection
+{
+	create representation ImagingObjectSelection
+	{
+		UidElement : Oid, 
+		Uid : String, 
+		Patient : ResourceReference, 
+		Title : CodeableConcept, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Author : ResourceReference, 
+		AuthoringTimeElement : FHIRDateTime, 
+		AuthoringTime : String, 
+		Study : list(ImagingObjectSelection.StudyComponent)
+	}
+};
+create type ImplementationGuide from class "Hl7.Fhir.Model.ImplementationGuide" is { DomainResource };
+create type ImplementationGuide.ContactComponent from class "Hl7.Fhir.Model.ImplementationGuide+ContactComponent" is { BackboneElement };
+alter type ImplementationGuide.ContactComponent
+{
+	create representation ImplementationGuide.ContactComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Telecom : list(ContactPoint)
+	}
+};
+create type ImplementationGuide.DependencyComponent from class "Hl7.Fhir.Model.ImplementationGuide+DependencyComponent" is { BackboneElement };
+alter type ImplementationGuide.DependencyComponent
+{
+	create representation ImplementationGuide.DependencyComponent
+	{
+		TypeElement : Code, 
+		Type : String, 
+		UriElement : FHIRUri, 
+		Uri : String
+	}
+};
+create type ImplementationGuide.PackageComponent from class "Hl7.Fhir.Model.ImplementationGuide+PackageComponent" is { BackboneElement };
+create type ImplementationGuide.ResourceComponent from class "Hl7.Fhir.Model.ImplementationGuide+ResourceComponent" is { BackboneElement };
+alter type ImplementationGuide.ResourceComponent
+{
+	create representation ImplementationGuide.ResourceComponent
+	{
+		PurposeElement : Code, 
+		Purpose : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		AcronymElement : FHIRString, 
+		Acronym : String, 
+		Source : Element, 
+		ExampleFor : ResourceReference
+	}
+};
+alter type ImplementationGuide.PackageComponent
+{
+	create representation ImplementationGuide.PackageComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Resource : list(ImplementationGuide.ResourceComponent)
+	}
+};
+create type ImplementationGuide.GlobalComponent from class "Hl7.Fhir.Model.ImplementationGuide+GlobalComponent" is { BackboneElement };
+alter type ImplementationGuide.GlobalComponent
+{
+	create representation ImplementationGuide.GlobalComponent
+	{
+		TypeElement : Code, 
+		Type : String, 
+		Profile : ResourceReference
+	}
+};
+create type ImplementationGuide.PageComponent from class "Hl7.Fhir.Model.ImplementationGuide+PageComponent" is { BackboneElement };
+alter type ImplementationGuide.PageComponent
+{
+	create representation ImplementationGuide.PageComponent
+	{
+		SourceElement : FHIRUri, 
+		Source : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		KindElement : Code, 
+		Kind : String, 
+		TypeElement : list(Code), 
+		Type : list(String), 
+		PackageElement : list(FHIRString), 
+		Package : list(String), 
+		FormatElement : Code, 
+		Format : String, 
+		Page : list(ImplementationGuide.PageComponent)
+	}
+};
+alter type ImplementationGuide
+{
+	create representation ImplementationGuide
+	{
+		UrlElement : FHIRUri, 
+		Url : String, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		StatusElement : Code, 
+		Status : String, 
+		ExperimentalElement : FHIRBoolean, 
+		Experimental : Boolean, 
+		PublisherElement : FHIRString, 
+		Publisher : String, 
+		Contact : list(ImplementationGuide.ContactComponent), 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		UseContext : list(CodeableConcept), 
+		CopyrightElement : FHIRString, 
+		Copyright : String, 
+		FhirVersionElement : Id, 
+		FhirVersion : String, 
+		Dependency : list(ImplementationGuide.DependencyComponent), 
+		Package : list(ImplementationGuide.PackageComponent), 
+		Global : list(ImplementationGuide.GlobalComponent), 
+		BinaryElement : list(FHIRUri), 
+		Binary : list(String), 
+		Page : ImplementationGuide.PageComponent
+	}
+};
+create type MedicationOrder from class "Hl7.Fhir.Model.MedicationOrder" is { DomainResource };
+create type MedicationOrder.DosageInstructionComponent from class "Hl7.Fhir.Model.MedicationOrder+DosageInstructionComponent" is { BackboneElement };
+create type Ratio from class "Hl7.Fhir.Model.Ratio" is { Element };
+alter type Ratio
+{
+	create representation Ratio
+	{
+		Numerator : Quantity, 
+		Denominator : Quantity
+	}
+};
+alter type MedicationOrder.DosageInstructionComponent
+{
+	create representation MedicationOrder.DosageInstructionComponent
+	{
+		TextElement : FHIRString, 
+		Text : String, 
+		AdditionalInstructions : CodeableConcept, 
+		Timing : Timing, 
+		AsNeeded : Element, 
+		Site : Element, 
+		Route : CodeableConcept, 
+		Method : CodeableConcept, 
+		Dose : Element, 
+		Rate : Element, 
+		MaxDosePerPeriod : Ratio
+	}
+};
+create type MedicationOrder.DispenseRequestComponent from class "Hl7.Fhir.Model.MedicationOrder+DispenseRequestComponent" is { BackboneElement };
+create type Duration from class "Hl7.Fhir.Model.Duration" is { Quantity };
+alter type MedicationOrder.DispenseRequestComponent
+{
+	create representation MedicationOrder.DispenseRequestComponent
+	{
+		Medication : Element, 
+		ValidityPeriod : Period, 
+		NumberOfRepeatsAllowedElement : PositiveInt, 
+		NumberOfRepeatsAllowed : Integer, 
+		Quantity : SimpleQuantity, 
+		ExpectedSupplyDuration : Duration
+	}
+};
+create type MedicationOrder.SubstitutionComponent from class "Hl7.Fhir.Model.MedicationOrder+SubstitutionComponent" is { BackboneElement };
+alter type MedicationOrder.SubstitutionComponent
+{
+	create representation MedicationOrder.SubstitutionComponent
+	{
+		Type : CodeableConcept, 
+		Reason : CodeableConcept
+	}
+};
+alter type MedicationOrder
+{
+	create representation MedicationOrder
+	{
+		Identifier : list(Identifier), 
+		DateWrittenElement : FHIRDateTime, 
+		DateWritten : String, 
+		StatusElement : Code, 
+		Status : String, 
+		DateEndedElement : FHIRDateTime, 
+		DateEnded : String, 
+		ReasonEnded : CodeableConcept, 
+		Patient : ResourceReference, 
+		Prescriber : ResourceReference, 
+		Encounter : ResourceReference, 
+		Reason : Element, 
+		NoteElement : FHIRString, 
+		Note : String, 
+		Medication : Element, 
+		DosageInstruction : list(MedicationOrder.DosageInstructionComponent), 
+		DispenseRequest : MedicationOrder.DispenseRequestComponent, 
+		Substitution : MedicationOrder.SubstitutionComponent, 
+		PriorPrescription : ResourceReference
+	}
+};
+create type NamingSystem from class "Hl7.Fhir.Model.NamingSystem" is { DomainResource };
+create type NamingSystem.ContactComponent from class "Hl7.Fhir.Model.NamingSystem+ContactComponent" is { BackboneElement };
+alter type NamingSystem.ContactComponent
+{
+	create representation NamingSystem.ContactComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Telecom : list(ContactPoint)
+	}
+};
+create type NamingSystem.UniqueIdComponent from class "Hl7.Fhir.Model.NamingSystem+UniqueIdComponent" is { BackboneElement };
+alter type NamingSystem.UniqueIdComponent
+{
+	create representation NamingSystem.UniqueIdComponent
+	{
+		TypeElement : Code, 
+		Type : String, 
+		ValueElement : FHIRString, 
+		Value : String, 
+		PreferredElement : FHIRBoolean, 
+		Preferred : Boolean, 
+		Period : Period
+	}
+};
+alter type NamingSystem
+{
+	create representation NamingSystem
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		StatusElement : Code, 
+		Status : String, 
+		KindElement : Code, 
+		Kind : String, 
+		PublisherElement : FHIRString, 
+		Publisher : String, 
+		Contact : list(NamingSystem.ContactComponent), 
+		ResponsibleElement : FHIRString, 
+		Responsible : String, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		Type : CodeableConcept, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		UseContext : list(CodeableConcept), 
+		UsageElement : FHIRString, 
+		Usage : String, 
+		UniqueId : list(NamingSystem.UniqueIdComponent), 
+		ReplacedBy : ResourceReference, 
+		Experimental : Boolean, 
+		ExperimentalElement : FHIRBoolean, 
+		Url : String, 
+		UrlElement : FHIRUri
+	}
+};
+create type NutritionOrder from class "Hl7.Fhir.Model.NutritionOrder" is { DomainResource };
+create type NutritionOrder.OralDietComponent from class "Hl7.Fhir.Model.NutritionOrder+OralDietComponent" is { BackboneElement };
+create type NutritionOrder.NutrientComponent from class "Hl7.Fhir.Model.NutritionOrder+NutrientComponent" is { BackboneElement };
+alter type NutritionOrder.NutrientComponent
+{
+	create representation NutritionOrder.NutrientComponent
+	{
+		Modifier : CodeableConcept, 
+		Amount : SimpleQuantity
+	}
+};
+create type NutritionOrder.TextureComponent from class "Hl7.Fhir.Model.NutritionOrder+TextureComponent" is { BackboneElement };
+alter type NutritionOrder.TextureComponent
+{
+	create representation NutritionOrder.TextureComponent
+	{
+		Modifier : CodeableConcept, 
+		FoodType : CodeableConcept
+	}
+};
+alter type NutritionOrder.OralDietComponent
+{
+	create representation NutritionOrder.OralDietComponent
+	{
+		Type : list(CodeableConcept), 
+		Schedule : list(Timing), 
+		Nutrient : list(NutritionOrder.NutrientComponent), 
+		Texture : list(NutritionOrder.TextureComponent), 
+		FluidConsistencyType : list(CodeableConcept), 
+		InstructionElement : FHIRString, 
+		Instruction : String
+	}
+};
+create type NutritionOrder.SupplementComponent from class "Hl7.Fhir.Model.NutritionOrder+SupplementComponent" is { BackboneElement };
+alter type NutritionOrder.SupplementComponent
+{
+	create representation NutritionOrder.SupplementComponent
+	{
+		Type : CodeableConcept, 
+		ProductNameElement : FHIRString, 
+		ProductName : String, 
+		Schedule : list(Timing), 
+		Quantity : SimpleQuantity, 
+		InstructionElement : FHIRString, 
+		Instruction : String
+	}
+};
+create type NutritionOrder.EnteralFormulaComponent from class "Hl7.Fhir.Model.NutritionOrder+EnteralFormulaComponent" is { BackboneElement };
+create type NutritionOrder.AdministrationComponent from class "Hl7.Fhir.Model.NutritionOrder+AdministrationComponent" is { BackboneElement };
+alter type NutritionOrder.AdministrationComponent
+{
+	create representation NutritionOrder.AdministrationComponent
+	{
+		Schedule : Timing, 
+		Quantity : SimpleQuantity, 
+		Rate : Element
+	}
+};
+alter type NutritionOrder.EnteralFormulaComponent
+{
+	create representation NutritionOrder.EnteralFormulaComponent
+	{
+		BaseFormulaType : CodeableConcept, 
+		BaseFormulaProductNameElement : FHIRString, 
+		BaseFormulaProductName : String, 
+		AdditiveType : CodeableConcept, 
+		AdditiveProductNameElement : FHIRString, 
+		AdditiveProductName : String, 
+		CaloricDensity : SimpleQuantity, 
+		RouteofAdministration : CodeableConcept, 
+		Administration : list(NutritionOrder.AdministrationComponent), 
+		MaxVolumeToDeliver : SimpleQuantity, 
+		AdministrationInstructionElement : FHIRString, 
+		AdministrationInstruction : String
+	}
+};
+alter type NutritionOrder
+{
+	create representation NutritionOrder
+	{
+		Patient : ResourceReference, 
+		Orderer : ResourceReference, 
+		Identifier : list(Identifier), 
+		Encounter : ResourceReference, 
+		DateTimeElement : FHIRDateTime, 
+		DateTime : String, 
+		StatusElement : Code, 
+		Status : String, 
+		AllergyIntolerance : list(ResourceReference), 
+		FoodPreferenceModifier : list(CodeableConcept), 
+		ExcludeFoodModifier : list(CodeableConcept), 
+		OralDiet : NutritionOrder.OralDietComponent, 
+		Supplement : list(NutritionOrder.SupplementComponent), 
+		EnteralFormula : NutritionOrder.EnteralFormulaComponent
+	}
+};
+create type OperationDefinition from class "Hl7.Fhir.Model.OperationDefinition" is { DomainResource };
+create type OperationDefinition.ContactComponent from class "Hl7.Fhir.Model.OperationDefinition+ContactComponent" is { BackboneElement };
+alter type OperationDefinition.ContactComponent
+{
+	create representation OperationDefinition.ContactComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Telecom : list(ContactPoint)
+	}
+};
+create type OperationDefinition.ParameterComponent from class "Hl7.Fhir.Model.OperationDefinition+ParameterComponent" is { BackboneElement };
+create type OperationDefinition.BindingComponent from class "Hl7.Fhir.Model.OperationDefinition+BindingComponent" is { BackboneElement };
+alter type OperationDefinition.BindingComponent
+{
+	create representation OperationDefinition.BindingComponent
+	{
+		StrengthElement : Code, 
+		Strength : String, 
+		ValueSet : Element
+	}
+};
+alter type OperationDefinition.ParameterComponent
+{
+	create representation OperationDefinition.ParameterComponent
+	{
+		NameElement : Code, 
+		Name : String, 
+		UseElement : Code, 
+		Use : String, 
+		MinElement : FHIRInteger, 
+		Min : Integer, 
+		MaxElement : FHIRString, 
+		Max : String, 
+		DocumentationElement : FHIRString, 
+		Documentation : String, 
+		TypeElement : Code, 
+		Type : String, 
+		Profile : ResourceReference, 
+		Binding : OperationDefinition.BindingComponent, 
+		Part : list(OperationDefinition.ParameterComponent)
+	}
+};
+alter type OperationDefinition
+{
+	create representation OperationDefinition
+	{
+		UrlElement : FHIRUri, 
+		Url : String, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		StatusElement : Code, 
+		Status : String, 
+		KindElement : Code, 
+		Kind : String, 
+		ExperimentalElement : FHIRBoolean, 
+		Experimental : Boolean, 
+		PublisherElement : FHIRString, 
+		Publisher : String, 
+		Contact : list(OperationDefinition.ContactComponent), 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		RequirementsElement : FHIRString, 
+		Requirements : String, 
+		IdempotentElement : FHIRBoolean, 
+		Idempotent : Boolean, 
+		CodeElement : Code, 
+		Code : String, 
+		NotesElement : FHIRString, 
+		Notes : String, 
+		Base : ResourceReference, 
+		SystemElement : FHIRBoolean, 
+		System : Boolean, 
+		TypeElement : list(Code), 
+		Type : list(String), 
+		InstanceElement : FHIRBoolean, 
+		Instance : Boolean, 
+		Parameter : list(OperationDefinition.ParameterComponent), 
+		UseContext : list(CodeableConcept)
+	}
+};
+create type PaymentNotice from class "Hl7.Fhir.Model.PaymentNotice" is { DomainResource };
+alter type PaymentNotice
+{
+	create representation PaymentNotice
+	{
+		Identifier : list(Identifier), 
+		Ruleset : Coding, 
+		OriginalRuleset : Coding, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		Target : ResourceReference, 
+		Provider : ResourceReference, 
+		Organization : ResourceReference, 
+		Request : ResourceReference, 
+		Response : ResourceReference, 
+		PaymentStatus : Coding
+	}
+};
+create type PaymentReconciliation from class "Hl7.Fhir.Model.PaymentReconciliation" is { DomainResource };
+create type PaymentReconciliation.DetailsComponent from class "Hl7.Fhir.Model.PaymentReconciliation+DetailsComponent" is { BackboneElement };
+alter type PaymentReconciliation.DetailsComponent
+{
+	create representation PaymentReconciliation.DetailsComponent
+	{
+		Type : Coding, 
+		Request : ResourceReference, 
+		Responce : ResourceReference, 
+		Submitter : ResourceReference, 
+		Payee : ResourceReference, 
+		DateElement : FHIRDate, 
+		Date : String, 
+		Amount : Money
+	}
+};
+create type PaymentReconciliation.NotesComponent from class "Hl7.Fhir.Model.PaymentReconciliation+NotesComponent" is { BackboneElement };
+alter type PaymentReconciliation.NotesComponent
+{
+	create representation PaymentReconciliation.NotesComponent
+	{
+		Type : Coding, 
+		TextElement : FHIRString, 
+		Text : String
+	}
+};
+alter type PaymentReconciliation
+{
+	create representation PaymentReconciliation
+	{
+		Identifier : list(Identifier), 
+		Request : ResourceReference, 
+		OutcomeElement : Code, 
+		Outcome : String, 
+		DispositionElement : FHIRString, 
+		Disposition : String, 
+		Ruleset : Coding, 
+		OriginalRuleset : Coding, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		Period : Period, 
+		Organization : ResourceReference, 
+		RequestProvider : ResourceReference, 
+		RequestOrganization : ResourceReference, 
+		Detail : list(PaymentReconciliation.DetailsComponent), 
+		Form : Coding, 
+		Total : Money, 
+		Note : list(PaymentReconciliation.NotesComponent)
+	}
+};
+create type Person from class "Hl7.Fhir.Model.Person" is { DomainResource };
+create type HumanName from class "Hl7.Fhir.Model.HumanName" is { Element };
+alter type HumanName
+{
+	create representation HumanName
+	{
+		UseElement : Code, 
+		Use : String, 
+		TextElement : FHIRString, 
+		Text : String, 
+		FamilyElement : list(FHIRString), 
+		Family : list(String), 
+		GivenElement : list(FHIRString), 
+		Given : list(String), 
+		PrefixElement : list(FHIRString), 
+		Prefix : list(String), 
+		SuffixElement : list(FHIRString), 
+		Suffix : list(String), 
+		Period : Period
+	}
+};
+create type Address from class "Hl7.Fhir.Model.Address" is { Element };
+alter type Address
+{
+	create representation Address
+	{
+		UseElement : Code, 
+		Use : String, 
+		TypeElement : Code, 
+		Type : String, 
+		TextElement : FHIRString, 
+		Text : String, 
+		LineElement : list(FHIRString), 
+		Line : list(String), 
+		CityElement : FHIRString, 
+		City : String, 
+		DistrictElement : FHIRString, 
+		District : String, 
+		StateElement : FHIRString, 
+		State : String, 
+		PostalCodeElement : FHIRString, 
+		PostalCode : String, 
+		CountryElement : FHIRString, 
+		Country : String, 
+		Period : Period
+	}
+};
+create type Person.LinkComponent from class "Hl7.Fhir.Model.Person+LinkComponent" is { BackboneElement };
+alter type Person.LinkComponent
+{
+	create representation Person.LinkComponent
+	{
+		Target : ResourceReference, 
+		AssuranceElement : Code, 
+		Assurance : String
+	}
+};
+alter type Person
+{
+	create representation Person
+	{
+		Identifier : list(Identifier), 
+		Name : list(HumanName), 
+		Telecom : list(ContactPoint), 
+		GenderElement : Code, 
+		Gender : String, 
+		BirthDateElement : FHIRDate, 
+		BirthDate : String, 
+		Address : list(Address), 
+		Photo : Attachment, 
+		ManagingOrganization : ResourceReference, 
+		ActiveElement : FHIRBoolean, 
+		Active : Boolean, 
+		Link : list(Person.LinkComponent)
+	}
+};
+create type ProcedureRequest from class "Hl7.Fhir.Model.ProcedureRequest" is { DomainResource };
+alter type ProcedureRequest
+{
+	create representation ProcedureRequest
+	{
+		Identifier : list(Identifier), 
+		Subject : ResourceReference, 
+		Code : CodeableConcept, 
+		BodySite : list(CodeableConcept), 
+		Reason : Element, 
+		Scheduled : Element, 
+		Encounter : ResourceReference, 
+		Performer : ResourceReference, 
+		StatusElement : Code, 
+		Status : String, 
+		Notes : list(Annotation), 
+		AsNeeded : Element, 
+		OrderedOnElement : FHIRDateTime, 
+		OrderedOn : String, 
+		Orderer : ResourceReference, 
+		PriorityElement : Code, 
+		Priority : String
+	}
+};
+create type ProcessRequest from class "Hl7.Fhir.Model.ProcessRequest" is { DomainResource };
+create type ProcessRequest.ItemsComponent from class "Hl7.Fhir.Model.ProcessRequest+ItemsComponent" is { BackboneElement };
+alter type ProcessRequest.ItemsComponent
+{
+	create representation ProcessRequest.ItemsComponent
+	{
+		SequenceLinkIdElement : FHIRInteger, 
+		SequenceLinkId : Integer
+	}
+};
+alter type ProcessRequest
+{
+	create representation ProcessRequest
+	{
+		ActionElement : Code, 
+		Action : String, 
+		Identifier : list(Identifier), 
+		Ruleset : Coding, 
+		OriginalRuleset : Coding, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		Target : ResourceReference, 
+		Provider : ResourceReference, 
+		Organization : ResourceReference, 
+		Request : ResourceReference, 
+		Response : ResourceReference, 
+		NullifyElement : FHIRBoolean, 
+		Nullify : Boolean, 
+		ReferenceElement : FHIRString, 
+		Reference : String, 
+		Item : list(ProcessRequest.ItemsComponent), 
+		IncludeElement : list(FHIRString), 
+		Include : list(String), 
+		ExcludeElement : list(FHIRString), 
+		Exclude : list(String), 
+		Period : Period
+	}
+};
+create type ProcessResponse from class "Hl7.Fhir.Model.ProcessResponse" is { DomainResource };
+create type ProcessResponse.NotesComponent from class "Hl7.Fhir.Model.ProcessResponse+NotesComponent" is { BackboneElement };
+alter type ProcessResponse.NotesComponent
+{
+	create representation ProcessResponse.NotesComponent
+	{
+		Type : Coding, 
+		TextElement : FHIRString, 
+		Text : String
+	}
+};
+alter type ProcessResponse
+{
+	create representation ProcessResponse
+	{
+		Identifier : list(Identifier), 
+		Request : ResourceReference, 
+		Outcome : Coding, 
+		DispositionElement : FHIRString, 
+		Disposition : String, 
+		Ruleset : Coding, 
+		OriginalRuleset : Coding, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		Organization : ResourceReference, 
+		RequestProvider : ResourceReference, 
+		RequestOrganization : ResourceReference, 
+		Form : Coding, 
+		Notes : list(ProcessResponse.NotesComponent), 
+		Error : list(Coding)
+	}
+};
+create type QuestionnaireResponse from class "Hl7.Fhir.Model.QuestionnaireResponse" is { DomainResource };
+create type QuestionnaireResponse.GroupComponent from class "Hl7.Fhir.Model.QuestionnaireResponse+GroupComponent" is { BackboneElement };
+create type QuestionnaireResponse.QuestionComponent from class "Hl7.Fhir.Model.QuestionnaireResponse+QuestionComponent" is { BackboneElement };
+create type QuestionnaireResponse.AnswerComponent from class "Hl7.Fhir.Model.QuestionnaireResponse+AnswerComponent" is { BackboneElement };
+alter type QuestionnaireResponse.AnswerComponent
+{
+	create representation QuestionnaireResponse.AnswerComponent
+	{
+		Value : Element, 
+		Group : list(QuestionnaireResponse.GroupComponent)
+	}
+};
+alter type QuestionnaireResponse.QuestionComponent
+{
+	create representation QuestionnaireResponse.QuestionComponent
+	{
+		LinkIdElement : FHIRString, 
+		LinkId : String, 
+		TextElement : FHIRString, 
+		Text : String, 
+		Answer : list(QuestionnaireResponse.AnswerComponent)
+	}
+};
+alter type QuestionnaireResponse.GroupComponent
+{
+	create representation QuestionnaireResponse.GroupComponent
+	{
+		LinkIdElement : FHIRString, 
+		LinkId : String, 
+		TitleElement : FHIRString, 
+		Title : String, 
+		TextElement : FHIRString, 
+		Text : String, 
+		Subject : ResourceReference, 
+		Group : list(QuestionnaireResponse.GroupComponent), 
+		Question : list(QuestionnaireResponse.QuestionComponent)
+	}
+};
+alter type QuestionnaireResponse
+{
+	create representation QuestionnaireResponse
+	{
+		Identifier : Identifier, 
+		Questionnaire : ResourceReference, 
+		StatusElement : Code, 
+		Status : String, 
+		Subject : ResourceReference, 
+		Author : ResourceReference, 
+		AuthoredElement : FHIRDateTime, 
+		Authored : String, 
+		Source : ResourceReference, 
+		Encounter : ResourceReference, 
+		Group : QuestionnaireResponse.GroupComponent
+	}
+};
+create type ReferralRequest from class "Hl7.Fhir.Model.ReferralRequest" is { DomainResource };
+alter type ReferralRequest
+{
+	create representation ReferralRequest
+	{
+		StatusElement : Code, 
+		Status : String, 
+		Identifier : list(Identifier), 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		Type : CodeableConcept, 
+		Specialty : CodeableConcept, 
+		Priority : CodeableConcept, 
+		Patient : ResourceReference, 
+		Requester : ResourceReference, 
+		Recipient : list(ResourceReference), 
+		Encounter : ResourceReference, 
+		DateSentElement : FHIRDateTime, 
+		DateSent : String, 
+		Reason : CodeableConcept, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		ServiceRequested : list(CodeableConcept), 
+		SupportingInformation : list(ResourceReference), 
+		FulfillmentTime : Period
+	}
+};
+create type RiskAssessment from class "Hl7.Fhir.Model.RiskAssessment" is { DomainResource };
+create type RiskAssessment.PredictionComponent from class "Hl7.Fhir.Model.RiskAssessment+PredictionComponent" is { BackboneElement };
+alter type RiskAssessment.PredictionComponent
+{
+	create representation RiskAssessment.PredictionComponent
+	{
+		Outcome : CodeableConcept, 
+		Probability : Element, 
+		RelativeRiskElement : FHIRDecimal, 
+		RelativeRisk : Decimal, 
+		When : Element, 
+		RationaleElement : FHIRString, 
+		Rationale : String
+	}
+};
+alter type RiskAssessment
+{
+	create representation RiskAssessment
+	{
+		Subject : ResourceReference, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		Condition : ResourceReference, 
+		Encounter : ResourceReference, 
+		Performer : ResourceReference, 
+		Identifier : Identifier, 
+		Method : CodeableConcept, 
+		Basis : list(ResourceReference), 
+		Prediction : list(RiskAssessment.PredictionComponent), 
+		MitigationElement : FHIRString, 
+		Mitigation : String
+	}
+};
+create type Schedule from class "Hl7.Fhir.Model.Schedule" is { DomainResource };
+alter type Schedule
+{
+	create representation Schedule
+	{
+		Identifier : list(Identifier), 
+		Type : list(CodeableConcept), 
+		Actor : ResourceReference, 
+		PlanningHorizon : Period, 
+		CommentElement : FHIRString, 
+		Comment : String
+	}
+};
+create type SearchParameter from class "Hl7.Fhir.Model.SearchParameter" is { DomainResource };
+create type SearchParameter.ContactComponent from class "Hl7.Fhir.Model.SearchParameter+ContactComponent" is { BackboneElement };
+alter type SearchParameter.ContactComponent
+{
+	create representation SearchParameter.ContactComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Telecom : list(ContactPoint)
+	}
+};
+alter type SearchParameter
+{
+	create representation SearchParameter
+	{
+		UrlElement : FHIRUri, 
+		Url : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		StatusElement : Code, 
+		Status : String, 
+		ExperimentalElement : FHIRBoolean, 
+		Experimental : Boolean, 
+		PublisherElement : FHIRString, 
+		Publisher : String, 
+		Contact : list(SearchParameter.ContactComponent), 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		RequirementsElement : FHIRString, 
+		Requirements : String, 
+		CodeElement : Code, 
+		Code : String, 
+		BaseElement : Code, 
+		Base : String, 
+		TypeElement : Code, 
+		Type : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		XpathElement : FHIRString, 
+		Xpath : String, 
+		XpathUsageElement : Code, 
+		XpathUsage : String, 
+		TargetElement : list(Code), 
+		Target : list(String), 
+		UseContext : list(CodeableConcept)
+	}
+};
+create type Slot from class "Hl7.Fhir.Model.Slot" is { DomainResource };
+alter type Slot
+{
+	create representation Slot
+	{
+		Identifier : list(Identifier), 
+		Type : CodeableConcept, 
+		Schedule : ResourceReference, 
+		FreeBusyTypeElement : Code, 
+		FreeBusyType : String, 
+		StartElement : Instant, 
+		Start : DateTime, 
+		EndElement : Instant, 
+		End : DateTime, 
+		OverbookedElement : FHIRBoolean, 
+		Overbooked : Boolean, 
+		CommentElement : FHIRString, 
+		Comment : String
+	}
+};
+create type StructureDefinition from class "Hl7.Fhir.Model.StructureDefinition" is { DomainResource };
+create type StructureDefinition.ContactComponent from class "Hl7.Fhir.Model.StructureDefinition+ContactComponent" is { BackboneElement };
+alter type StructureDefinition.ContactComponent
+{
+	create representation StructureDefinition.ContactComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Telecom : list(ContactPoint)
+	}
+};
+create type StructureDefinition.MappingComponent from class "Hl7.Fhir.Model.StructureDefinition+MappingComponent" is { BackboneElement };
+alter type StructureDefinition.MappingComponent
+{
+	create representation StructureDefinition.MappingComponent
+	{
+		IdentityElement : Id, 
+		Identity : String, 
+		UriElement : FHIRUri, 
+		Uri : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		CommentsElement : FHIRString, 
+		Comments : String
+	}
+};
+create type StructureDefinition.SnapshotComponent from class "Hl7.Fhir.Model.StructureDefinition+SnapshotComponent" is { BackboneElement };
+alter type StructureDefinition.SnapshotComponent
+{
+	create representation StructureDefinition.SnapshotComponent
+	{
+		Element : list(ElementDefinition)
+	}
+};
+create type StructureDefinition.DifferentialComponent from class "Hl7.Fhir.Model.StructureDefinition+DifferentialComponent" is { BackboneElement };
+alter type StructureDefinition.DifferentialComponent
+{
+	create representation StructureDefinition.DifferentialComponent
+	{
+		Element : list(ElementDefinition)
+	}
+};
+alter type StructureDefinition
+{
+	create representation StructureDefinition
+	{
+		UrlElement : FHIRUri, 
+		Url : String, 
+		Identifier : list(Identifier), 
+		VersionElement : FHIRString, 
+		Version : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		DisplayElement : FHIRString, 
+		Display : String, 
+		StatusElement : Code, 
+		Status : String, 
+		ExperimentalElement : FHIRBoolean, 
+		Experimental : Boolean, 
+		PublisherElement : FHIRString, 
+		Publisher : String, 
+		Contact : list(StructureDefinition.ContactComponent), 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		UseContext : list(CodeableConcept), 
+		RequirementsElement : FHIRString, 
+		Requirements : String, 
+		CopyrightElement : FHIRString, 
+		Copyright : String, 
+		Code : list(Coding), 
+		FhirVersionElement : Id, 
+		FhirVersion : String, 
+		Mapping : list(StructureDefinition.MappingComponent), 
+		KindElement : Code, 
+		Kind : String, 
+		ConstrainedTypeElement : Code, 
+		ConstrainedType : String, 
+		AbstractElement : FHIRBoolean, 
+		Abstract : Boolean, 
+		ContextTypeElement : Code, 
+		ContextType : String, 
+		ContextElement : list(FHIRString), 
+		Context : list(String), 
+		BaseElement : FHIRUri, 
+		Base : String, 
+		Snapshot : StructureDefinition.SnapshotComponent, 
+		Differential : StructureDefinition.DifferentialComponent
+	}
+};
+create type Subscription from class "Hl7.Fhir.Model.Subscription" is { DomainResource };
+create type Subscription.ChannelComponent from class "Hl7.Fhir.Model.Subscription+ChannelComponent" is { BackboneElement };
+alter type Subscription.ChannelComponent
+{
+	create representation Subscription.ChannelComponent
+	{
+		TypeElement : Code, 
+		Type : String, 
+		EndpointElement : FHIRUri, 
+		Endpoint : String, 
+		PayloadElement : FHIRString, 
+		Payload : String, 
+		HeaderElement : FHIRString, 
+		Header : String
+	}
+};
+alter type Subscription
+{
+	create representation Subscription
+	{
+		CriteriaElement : FHIRString, 
+		Criteria : String, 
+		Contact : list(ContactPoint), 
+		ReasonElement : FHIRString, 
+		Reason : String, 
+		StatusElement : Code, 
+		Status : String, 
+		ErrorElement : FHIRString, 
+		Error : String, 
+		Channel : Subscription.ChannelComponent, 
+		EndElement : Instant, 
+		End : DateTime, 
+		Tag : list(Coding)
+	}
+};
+create type SupplyDelivery from class "Hl7.Fhir.Model.SupplyDelivery" is { DomainResource };
+alter type SupplyDelivery
+{
+	create representation SupplyDelivery
+	{
+		Identifier : Identifier, 
+		StatusElement : Code, 
+		Status : String, 
+		Patient : ResourceReference, 
+		Type : CodeableConcept, 
+		Quantity : SimpleQuantity, 
+		SuppliedItem : ResourceReference, 
+		Supplier : ResourceReference, 
+		WhenPrepared : Period, 
+		TimeElement : FHIRDateTime, 
+		Time : String, 
+		Destination : ResourceReference, 
+		Receiver : list(ResourceReference)
+	}
+};
+create type SupplyRequest from class "Hl7.Fhir.Model.SupplyRequest" is { DomainResource };
+create type SupplyRequest.WhenComponent from class "Hl7.Fhir.Model.SupplyRequest+WhenComponent" is { BackboneElement };
+alter type SupplyRequest.WhenComponent
+{
+	create representation SupplyRequest.WhenComponent
+	{
+		Code : CodeableConcept, 
+		Schedule : Timing
+	}
+};
+alter type SupplyRequest
+{
+	create representation SupplyRequest
+	{
+		Patient : ResourceReference, 
+		Source : ResourceReference, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		Identifier : Identifier, 
+		StatusElement : Code, 
+		Status : String, 
+		Kind : CodeableConcept, 
+		OrderedItem : ResourceReference, 
+		Supplier : list(ResourceReference), 
+		Reason : Element, 
+		When : SupplyRequest.WhenComponent
+	}
+};
+create type TestScript from class "Hl7.Fhir.Model.TestScript" is { DomainResource };
+create type TestScript.ContactComponent from class "Hl7.Fhir.Model.TestScript+ContactComponent" is { BackboneElement };
+alter type TestScript.ContactComponent
+{
+	create representation TestScript.ContactComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Telecom : list(ContactPoint)
+	}
+};
+create type TestScript.MetadataComponent from class "Hl7.Fhir.Model.TestScript+MetadataComponent" is { BackboneElement };
+create type TestScript.LinkComponent from class "Hl7.Fhir.Model.TestScript+LinkComponent" is { BackboneElement };
+alter type TestScript.LinkComponent
+{
+	create representation TestScript.LinkComponent
+	{
+		UrlElement : FHIRUri, 
+		Url : String, 
+		DescriptionElement : FHIRString, 
+		Description : String
+	}
+};
+create type TestScript.CapabilityComponent from class "Hl7.Fhir.Model.TestScript+CapabilityComponent" is { BackboneElement };
+alter type TestScript.CapabilityComponent
+{
+	create representation TestScript.CapabilityComponent
+	{
+		RequiredElement : FHIRBoolean, 
+		Required : Boolean, 
+		ValidatedElement : FHIRBoolean, 
+		Validated : Boolean, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		DestinationElement : FHIRInteger, 
+		Destination : Integer, 
+		LinkElement : list(FHIRUri), 
+		Link : list(String), 
+		Conformance : ResourceReference
+	}
+};
+alter type TestScript.MetadataComponent
+{
+	create representation TestScript.MetadataComponent
+	{
+		Link : list(TestScript.LinkComponent), 
+		Capability : list(TestScript.CapabilityComponent)
+	}
+};
+create type TestScript.FixtureComponent from class "Hl7.Fhir.Model.TestScript+FixtureComponent" is { BackboneElement };
+alter type TestScript.FixtureComponent
+{
+	create representation TestScript.FixtureComponent
+	{
+		AutocreateElement : FHIRBoolean, 
+		Autocreate : Boolean, 
+		AutodeleteElement : FHIRBoolean, 
+		Autodelete : Boolean, 
+		Resource : ResourceReference
+	}
+};
+create type TestScript.VariableComponent from class "Hl7.Fhir.Model.TestScript+VariableComponent" is { BackboneElement };
+alter type TestScript.VariableComponent
+{
+	create representation TestScript.VariableComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		HeaderFieldElement : FHIRString, 
+		HeaderField : String, 
+		PathElement : FHIRString, 
+		Path : String, 
+		SourceIdElement : Id, 
+		SourceId : String
+	}
+};
+create type TestScript.SetupComponent from class "Hl7.Fhir.Model.TestScript+SetupComponent" is { BackboneElement };
+create type TestScript.SetupActionComponent from class "Hl7.Fhir.Model.TestScript+SetupActionComponent" is { BackboneElement };
+create type TestScript.OperationComponent from class "Hl7.Fhir.Model.TestScript+OperationComponent" is { BackboneElement };
+create type TestScript.RequestHeaderComponent from class "Hl7.Fhir.Model.TestScript+RequestHeaderComponent" is { BackboneElement };
+alter type TestScript.RequestHeaderComponent
+{
+	create representation TestScript.RequestHeaderComponent
+	{
+		FieldElement : FHIRString, 
+		Field : String, 
+		ValueElement : FHIRString, 
+		Value : String
+	}
+};
+alter type TestScript.OperationComponent
+{
+	create representation TestScript.OperationComponent
+	{
+		Type : Coding, 
+		ResourceElement : Code, 
+		Resource : String, 
+		LabelElement : FHIRString, 
+		Label : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		AcceptElement : Code, 
+		Accept : String, 
+		ContentType_Element : Code, 
+		ContentType_ : String, 
+		DestinationElement : FHIRInteger, 
+		Destination : Integer, 
+		EncodeRequestUrlElement : FHIRBoolean, 
+		EncodeRequestUrl : Boolean, 
+		ParamsElement : FHIRString, 
+		Params : String, 
+		RequestHeader : list(TestScript.RequestHeaderComponent), 
+		ResponseIdElement : Id, 
+		ResponseId : String, 
+		SourceIdElement : Id, 
+		SourceId : String, 
+		TargetIdElement : Id, 
+		TargetId : String, 
+		UrlElement : FHIRString, 
+		Url : String
+	}
+};
+create type TestScript.AssertComponent from class "Hl7.Fhir.Model.TestScript+AssertComponent" is { BackboneElement };
+alter type TestScript.AssertComponent
+{
+	create representation TestScript.AssertComponent
+	{
+		LabelElement : FHIRString, 
+		Label : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		DirectionElement : Code, 
+		Direction : String, 
+		CompareToSourceIdElement : FHIRString, 
+		CompareToSourceId : String, 
+		CompareToSourcePathElement : FHIRString, 
+		CompareToSourcePath : String, 
+		ContentType_Element : Code, 
+		ContentType_ : String, 
+		HeaderFieldElement : FHIRString, 
+		HeaderField : String, 
+		MinimumIdElement : FHIRString, 
+		MinimumId : String, 
+		NavigationLinksElement : FHIRBoolean, 
+		NavigationLinks : Boolean, 
+		OperatorElement : Code, 
+		Operator : String, 
+		PathElement : FHIRString, 
+		Path : String, 
+		ResourceElement : Code, 
+		Resource : String, 
+		ResponseElement : Code, 
+		Response : String, 
+		ResponseCodeElement : FHIRString, 
+		ResponseCode : String, 
+		SourceIdElement : Id, 
+		SourceId : String, 
+		ValidateProfileIdElement : Id, 
+		ValidateProfileId : String, 
+		ValueElement : FHIRString, 
+		Value : String, 
+		WarningOnlyElement : FHIRBoolean, 
+		WarningOnly : Boolean
+	}
+};
+alter type TestScript.SetupActionComponent
+{
+	create representation TestScript.SetupActionComponent
+	{
+		Operation : TestScript.OperationComponent, 
+		Assert : TestScript.AssertComponent
+	}
+};
+alter type TestScript.SetupComponent
+{
+	create representation TestScript.SetupComponent
+	{
+		Metadata : TestScript.MetadataComponent, 
+		Action : list(TestScript.SetupActionComponent)
+	}
+};
+create type TestScript.TestComponent from class "Hl7.Fhir.Model.TestScript+TestComponent" is { BackboneElement };
+create type TestScript.TestActionComponent from class "Hl7.Fhir.Model.TestScript+TestActionComponent" is { BackboneElement };
+alter type TestScript.TestActionComponent
+{
+	create representation TestScript.TestActionComponent
+	{
+		Operation : TestScript.OperationComponent, 
+		Assert : TestScript.AssertComponent
+	}
+};
+alter type TestScript.TestComponent
+{
+	create representation TestScript.TestComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Metadata : TestScript.MetadataComponent, 
+		Action : list(TestScript.TestActionComponent)
+	}
+};
+create type TestScript.TeardownComponent from class "Hl7.Fhir.Model.TestScript+TeardownComponent" is { BackboneElement };
+create type TestScript.TearDownActionComponent from class "Hl7.Fhir.Model.TestScript+TearDownActionComponent" is { BackboneElement };
+alter type TestScript.TearDownActionComponent
+{
+	create representation TestScript.TearDownActionComponent
+	{
+		Operation : TestScript.OperationComponent
+	}
+};
+alter type TestScript.TeardownComponent
+{
+	create representation TestScript.TeardownComponent
+	{
+		Action : list(TestScript.TearDownActionComponent)
+	}
+};
+alter type TestScript
+{
+	create representation TestScript
+	{
+		UrlElement : FHIRUri, 
+		Url : String, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		StatusElement : Code, 
+		Status : String, 
+		Identifier : Identifier, 
+		ExperimentalElement : FHIRBoolean, 
+		Experimental : Boolean, 
+		PublisherElement : FHIRString, 
+		Publisher : String, 
+		Contact : list(TestScript.ContactComponent), 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		UseContext : list(CodeableConcept), 
+		RequirementsElement : FHIRString, 
+		Requirements : String, 
+		CopyrightElement : FHIRString, 
+		Copyright : String, 
+		Metadata : TestScript.MetadataComponent, 
+		MultiserverElement : FHIRBoolean, 
+		Multiserver : Boolean, 
+		Fixture : list(TestScript.FixtureComponent), 
+		Profile : list(ResourceReference), 
+		Variable : list(TestScript.VariableComponent), 
+		Setup : TestScript.SetupComponent, 
+		Test : list(TestScript.TestComponent), 
+		Teardown : TestScript.TeardownComponent
+	}
+};
+create type VisionPrescription from class "Hl7.Fhir.Model.VisionPrescription" is { DomainResource };
+create type VisionPrescription.DispenseComponent from class "Hl7.Fhir.Model.VisionPrescription+DispenseComponent" is { BackboneElement };
+alter type VisionPrescription.DispenseComponent
+{
+	create representation VisionPrescription.DispenseComponent
+	{
+		Product : Coding, 
+		EyeElement : Code, 
+		Eye : String, 
+		SphereElement : FHIRDecimal, 
+		Sphere : Decimal, 
+		CylinderElement : FHIRDecimal, 
+		Cylinder : Decimal, 
+		AxisElement : FHIRInteger, 
+		Axis : Integer, 
+		PrismElement : FHIRDecimal, 
+		Prism : Decimal, 
+		BaseElement : Code, 
+		Base : String, 
+		AddElement : FHIRDecimal, 
+		Add : Decimal, 
+		PowerElement : FHIRDecimal, 
+		Power : Decimal, 
+		BackCurveElement : FHIRDecimal, 
+		BackCurve : Decimal, 
+		DiameterElement : FHIRDecimal, 
+		Diameter : Decimal, 
+		Duration : SimpleQuantity, 
+		ColorElement : FHIRString, 
+		Color : String, 
+		BrandElement : FHIRString, 
+		Brand : String, 
+		NotesElement : FHIRString, 
+		Notes : String
+	}
+};
+alter type VisionPrescription
+{
+	create representation VisionPrescription
+	{
+		Identifier : list(Identifier), 
+		DateWrittenElement : FHIRDateTime, 
+		DateWritten : String, 
+		Patient : ResourceReference, 
+		Prescriber : ResourceReference, 
+		Encounter : ResourceReference, 
+		Reason : Element, 
+		Dispense : list(VisionPrescription.DispenseComponent)
+	}
+};
+create type ValueSet from class "Hl7.Fhir.Model.ValueSet" is { DomainResource };
+create type ValueSet.ContactComponent from class "Hl7.Fhir.Model.ValueSet+ContactComponent" is { BackboneElement };
+alter type ValueSet.ContactComponent
+{
+	create representation ValueSet.ContactComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Telecom : list(ContactPoint)
+	}
+};
+create type ValueSet.CodeSystemComponent from class "Hl7.Fhir.Model.ValueSet+CodeSystemComponent" is { BackboneElement };
+create type ValueSet.ConceptDefinitionComponent from class "Hl7.Fhir.Model.ValueSet+ConceptDefinitionComponent" is { BackboneElement };
+create type ValueSet.DesignationComponent from class "Hl7.Fhir.Model.ValueSet+DesignationComponent" is { BackboneElement };
+alter type ValueSet.DesignationComponent
+{
+	create representation ValueSet.DesignationComponent
+	{
+		LanguageElement : Code, 
+		Language : String, 
+		Use : Coding, 
+		ValueElement : FHIRString, 
+		Value : String
+	}
+};
+alter type ValueSet.ConceptDefinitionComponent
+{
+	create representation ValueSet.ConceptDefinitionComponent
+	{
+		CodeElement : Code, 
+		Code : String, 
+		AbstractElement : FHIRBoolean, 
+		Abstract : Boolean, 
+		DisplayElement : FHIRString, 
+		Display : String, 
+		DefinitionElement : FHIRString, 
+		Definition : String, 
+		Designation : list(ValueSet.DesignationComponent), 
+		Concept : list(ValueSet.ConceptDefinitionComponent)
+	}
+};
+alter type ValueSet.CodeSystemComponent
+{
+	create representation ValueSet.CodeSystemComponent
+	{
+		SystemElement : FHIRUri, 
+		System : String, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		CaseSensitiveElement : FHIRBoolean, 
+		CaseSensitive : Boolean, 
+		Concept : list(ValueSet.ConceptDefinitionComponent)
+	}
+};
+create type ValueSet.ComposeComponent from class "Hl7.Fhir.Model.ValueSet+ComposeComponent" is { BackboneElement };
+create type ValueSet.ConceptSetComponent from class "Hl7.Fhir.Model.ValueSet+ConceptSetComponent" is { BackboneElement };
+create type ValueSet.ConceptReferenceComponent from class "Hl7.Fhir.Model.ValueSet+ConceptReferenceComponent" is { BackboneElement };
+alter type ValueSet.ConceptReferenceComponent
+{
+	create representation ValueSet.ConceptReferenceComponent
+	{
+		CodeElement : Code, 
+		Code : String, 
+		DisplayElement : FHIRString, 
+		Display : String, 
+		Designation : list(ValueSet.DesignationComponent)
+	}
+};
+create type ValueSet.FilterComponent from class "Hl7.Fhir.Model.ValueSet+FilterComponent" is { BackboneElement };
+alter type ValueSet.FilterComponent
+{
+	create representation ValueSet.FilterComponent
+	{
+		PropertyElement : Code, 
+		Property : String, 
+		OpElement : Code, 
+		Op : String, 
+		ValueElement : Code, 
+		Value : String
+	}
+};
+alter type ValueSet.ConceptSetComponent
+{
+	create representation ValueSet.ConceptSetComponent
+	{
+		SystemElement : FHIRUri, 
+		System : String, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		Concept : list(ValueSet.ConceptReferenceComponent), 
+		Filter : list(ValueSet.FilterComponent)
+	}
+};
+alter type ValueSet.ComposeComponent
+{
+	create representation ValueSet.ComposeComponent
+	{
+		ImportElement : list(FHIRUri), 
+		Import : list(String), 
+		Include : list(ValueSet.ConceptSetComponent), 
+		Exclude : list(ValueSet.ConceptSetComponent)
+	}
+};
+create type ValueSet.ExpansionComponent from class "Hl7.Fhir.Model.ValueSet+ExpansionComponent" is { BackboneElement };
+create type ValueSet.ParameterComponent from class "Hl7.Fhir.Model.ValueSet+ParameterComponent" is { BackboneElement };
+alter type ValueSet.ParameterComponent
+{
+	create representation ValueSet.ParameterComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Value : Element
+	}
+};
+create type ValueSet.ContainsComponent from class "Hl7.Fhir.Model.ValueSet+ContainsComponent" is { BackboneElement };
+alter type ValueSet.ContainsComponent
+{
+	create representation ValueSet.ContainsComponent
+	{
+		SystemElement : FHIRUri, 
+		System : String, 
+		AbstractElement : FHIRBoolean, 
+		Abstract : Boolean, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		CodeElement : Code, 
+		Code : String, 
+		DisplayElement : FHIRString, 
+		Display : String, 
+		Contains : list(ValueSet.ContainsComponent)
+	}
+};
+alter type ValueSet.ExpansionComponent
+{
+	create representation ValueSet.ExpansionComponent
+	{
+		IdentifierElement : FHIRUri, 
+		Identifier : String, 
+		TimestampElement : FHIRDateTime, 
+		Timestamp : String, 
+		TotalElement : FHIRInteger, 
+		Total : Integer, 
+		OffsetElement : FHIRInteger, 
+		Offset : Integer, 
+		Parameter : list(ValueSet.ParameterComponent), 
+		Contains : list(ValueSet.ContainsComponent)
+	}
+};
+alter type ValueSet
+{
+	create representation ValueSet
+	{
+		UrlElement : FHIRUri, 
+		Url : String, 
+		Identifier : Identifier, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		StatusElement : Code, 
+		Status : String, 
+		ExperimentalElement : FHIRBoolean, 
+		Experimental : Boolean, 
+		PublisherElement : FHIRString, 
+		Publisher : String, 
+		Contact : list(ValueSet.ContactComponent), 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		LockedDateElement : FHIRDate, 
+		LockedDate : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		UseContext : list(CodeableConcept), 
+		ImmutableElement : FHIRBoolean, 
+		Immutable : Boolean, 
+		RequirementsElement : FHIRString, 
+		Requirements : String, 
+		CopyrightElement : FHIRString, 
+		Copyright : String, 
+		ExtensibleElement : FHIRBoolean, 
+		Extensible : Boolean, 
+		CodeSystem : ValueSet.CodeSystemComponent, 
+		Compose : ValueSet.ComposeComponent, 
+		Expansion : ValueSet.ExpansionComponent, 
+		Define : ValueSet.CodeSystemComponent
+	}
+};
+create type Conformance from class "Hl7.Fhir.Model.Conformance" is { DomainResource };
+create type Conformance.ContactComponent from class "Hl7.Fhir.Model.Conformance+ContactComponent" is { BackboneElement };
+alter type Conformance.ContactComponent
+{
+	create representation Conformance.ContactComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Telecom : list(ContactPoint)
+	}
+};
+create type Conformance.SoftwareComponent from class "Hl7.Fhir.Model.Conformance+SoftwareComponent" is { BackboneElement };
+alter type Conformance.SoftwareComponent
+{
+	create representation Conformance.SoftwareComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		ReleaseDateElement : FHIRDateTime, 
+		ReleaseDate : String
+	}
+};
+create type Conformance.ImplementationComponent from class "Hl7.Fhir.Model.Conformance+ImplementationComponent" is { BackboneElement };
+alter type Conformance.ImplementationComponent
+{
+	create representation Conformance.ImplementationComponent
+	{
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		UrlElement : FHIRUri, 
+		Url : String
+	}
+};
+create type Conformance.RestComponent from class "Hl7.Fhir.Model.Conformance+RestComponent" is { BackboneElement };
+create type Conformance.SecurityComponent from class "Hl7.Fhir.Model.Conformance+SecurityComponent" is { BackboneElement };
+create type Conformance.CertificateComponent from class "Hl7.Fhir.Model.Conformance+CertificateComponent" is { BackboneElement };
+alter type Conformance.CertificateComponent
+{
+	create representation Conformance.CertificateComponent
+	{
+		TypeElement : Code, 
+		Type : String, 
+		BlobElement : Base64Binary, 
+		Blob : Binary
+	}
+};
+alter type Conformance.SecurityComponent
+{
+	create representation Conformance.SecurityComponent
+	{
+		CorsElement : FHIRBoolean, 
+		Cors : Boolean, 
+		Service : list(CodeableConcept), 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Certificate : list(Conformance.CertificateComponent)
+	}
+};
+create type Conformance.ResourceComponent from class "Hl7.Fhir.Model.Conformance+ResourceComponent" is { BackboneElement };
+create type Conformance.ResourceInteractionComponent from class "Hl7.Fhir.Model.Conformance+ResourceInteractionComponent" is { BackboneElement };
+alter type Conformance.ResourceInteractionComponent
+{
+	create representation Conformance.ResourceInteractionComponent
+	{
+		CodeElement : Code, 
+		Code : String, 
+		DocumentationElement : FHIRString, 
+		Documentation : String
+	}
+};
+create type Conformance.SearchParamComponent from class "Hl7.Fhir.Model.Conformance+SearchParamComponent" is { BackboneElement };
+alter type Conformance.SearchParamComponent
+{
+	create representation Conformance.SearchParamComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		DefinitionElement : FHIRUri, 
+		Definition : String, 
+		TypeElement : Code, 
+		Type : String, 
+		DocumentationElement : FHIRString, 
+		Documentation : String, 
+		TargetElement : list(Code), 
+		Target : list(String), 
+		ModifierElement : list(Code), 
+		Modifier : list(String), 
+		ChainElement : list(FHIRString), 
+		Chain : list(String)
+	}
+};
+alter type Conformance.ResourceComponent
+{
+	create representation Conformance.ResourceComponent
+	{
+		TypeElement : Code, 
+		Type : String, 
+		Profile : ResourceReference, 
+		Interaction : list(Conformance.ResourceInteractionComponent), 
+		VersioningElement : Code, 
+		Versioning : String, 
+		ReadHistoryElement : FHIRBoolean, 
+		ReadHistory : Boolean, 
+		UpdateCreateElement : FHIRBoolean, 
+		UpdateCreate : Boolean, 
+		ConditionalCreateElement : FHIRBoolean, 
+		ConditionalCreate : Boolean, 
+		ConditionalUpdateElement : FHIRBoolean, 
+		ConditionalUpdate : Boolean, 
+		ConditionalDeleteElement : Code, 
+		ConditionalDelete : String, 
+		SearchIncludeElement : list(FHIRString), 
+		SearchInclude : list(String), 
+		SearchRevIncludeElement : list(FHIRString), 
+		SearchRevInclude : list(String), 
+		SearchParam : list(Conformance.SearchParamComponent)
+	}
+};
+create type Conformance.SystemInteractionComponent from class "Hl7.Fhir.Model.Conformance+SystemInteractionComponent" is { BackboneElement };
+alter type Conformance.SystemInteractionComponent
+{
+	create representation Conformance.SystemInteractionComponent
+	{
+		CodeElement : Code, 
+		Code : String, 
+		DocumentationElement : FHIRString, 
+		Documentation : String
+	}
+};
+create type Conformance.OperationComponent from class "Hl7.Fhir.Model.Conformance+OperationComponent" is { BackboneElement };
+alter type Conformance.OperationComponent
+{
+	create representation Conformance.OperationComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Definition : ResourceReference
+	}
+};
+alter type Conformance.RestComponent
+{
+	create representation Conformance.RestComponent
+	{
+		ModeElement : Code, 
+		Mode : String, 
+		DocumentationElement : FHIRString, 
+		Documentation : String, 
+		Security : Conformance.SecurityComponent, 
+		Resource : list(Conformance.ResourceComponent), 
+		Interaction : list(Conformance.SystemInteractionComponent), 
+		TransactionMode_Element : Code, 
+		TransactionMode_ : String, 
+		SearchParam : list(Conformance.SearchParamComponent), 
+		Operation : list(Conformance.OperationComponent), 
+		CompartmentElement : list(FHIRUri), 
+		Compartment : list(String)
+	}
+};
+create type Conformance.MessagingComponent from class "Hl7.Fhir.Model.Conformance+MessagingComponent" is { BackboneElement };
+create type Conformance.EndpointComponent from class "Hl7.Fhir.Model.Conformance+EndpointComponent" is { BackboneElement };
+alter type Conformance.EndpointComponent
+{
+	create representation Conformance.EndpointComponent
+	{
+		Protocol : Coding, 
+		AddressElement : FHIRUri, 
+		Address : String
+	}
+};
+create type Conformance.EventComponent from class "Hl7.Fhir.Model.Conformance+EventComponent" is { BackboneElement };
+alter type Conformance.EventComponent
+{
+	create representation Conformance.EventComponent
+	{
+		Code : Coding, 
+		CategoryElement : Code, 
+		Category : String, 
+		ModeElement : Code, 
+		Mode : String, 
+		FocusElement : Code, 
+		Focus : String, 
+		Request : ResourceReference, 
+		Response : ResourceReference, 
+		DocumentationElement : FHIRString, 
+		Documentation : String
+	}
+};
+alter type Conformance.MessagingComponent
+{
+	create representation Conformance.MessagingComponent
+	{
+		Endpoint : list(Conformance.EndpointComponent), 
+		ReliableCacheElement : UnsignedInt, 
+		ReliableCache : Integer, 
+		DocumentationElement : FHIRString, 
+		Documentation : String, 
+		Event : list(Conformance.EventComponent)
+	}
+};
+create type Conformance.DocumentComponent from class "Hl7.Fhir.Model.Conformance+DocumentComponent" is { BackboneElement };
+alter type Conformance.DocumentComponent
+{
+	create representation Conformance.DocumentComponent
+	{
+		ModeElement : Code, 
+		Mode : String, 
+		DocumentationElement : FHIRString, 
+		Documentation : String, 
+		Profile : ResourceReference
+	}
+};
+alter type Conformance
+{
+	create representation Conformance
+	{
+		UseContext : list(CodeableConcept), 
+		UrlElement : FHIRUri, 
+		Url : String, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		StatusElement : Code, 
+		Status : String, 
+		ExperimentalElement : FHIRBoolean, 
+		Experimental : Boolean, 
+		PublisherElement : FHIRString, 
+		Publisher : String, 
+		Contact : list(Conformance.ContactComponent), 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		RequirementsElement : FHIRString, 
+		Requirements : String, 
+		CopyrightElement : FHIRString, 
+		Copyright : String, 
+		KindElement : Code, 
+		Kind : String, 
+		Software : Conformance.SoftwareComponent, 
+		Implementation : Conformance.ImplementationComponent, 
+		FhirVersionElement : Id, 
+		FhirVersion : String, 
+		AcceptUnknownElement : Code, 
+		AcceptUnknown : String, 
+		FormatElement : list(Code), 
+		Format : list(String), 
+		Profile : list(ResourceReference), 
+		Rest : list(Conformance.RestComponent), 
+		Messaging : list(Conformance.MessagingComponent), 
+		Document : list(Conformance.DocumentComponent)
+	}
+};
+create type Age from class "Hl7.Fhir.Model.Age" is { Quantity };
+create type AllergyIntolerance from class "Hl7.Fhir.Model.AllergyIntolerance" is { DomainResource };
+create type AllergyIntolerance.ReactionComponent from class "Hl7.Fhir.Model.AllergyIntolerance+ReactionComponent" is { BackboneElement };
+alter type AllergyIntolerance.ReactionComponent
+{
+	create representation AllergyIntolerance.ReactionComponent
+	{
+		Substance : CodeableConcept, 
+		CertaintyElement : Code, 
+		Certainty : String, 
+		Manifestation : list(CodeableConcept), 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		OnsetElement : FHIRDateTime, 
+		Onset : String, 
+		SeverityElement : Code, 
+		Severity : String, 
+		ExposureRoute : CodeableConcept, 
+		Note : Annotation
+	}
+};
+alter type AllergyIntolerance
+{
+	create representation AllergyIntolerance
+	{
+		Identifier : list(Identifier), 
+		OnsetElement : FHIRDateTime, 
+		Onset : String, 
+		RecordedDateElement : FHIRDateTime, 
+		RecordedDate : String, 
+		Recorder : ResourceReference, 
+		Patient : ResourceReference, 
+		Reporter : ResourceReference, 
+		Substance : CodeableConcept, 
+		StatusElement : Code, 
+		Status : String, 
+		CriticalityElement : Code, 
+		Criticality : String, 
+		TypeElement : Code, 
+		Type : String, 
+		CategoryElement : Code, 
+		Category : String, 
+		LastOccurenceElement : FHIRDateTime, 
+		LastOccurence : String, 
+		Note : Annotation, 
+		Reaction : list(AllergyIntolerance.ReactionComponent)
+	}
+};
+create type CarePlan from class "Hl7.Fhir.Model.CarePlan" is { DomainResource };
+create type CarePlan.RelatedPlanComponent from class "Hl7.Fhir.Model.CarePlan+RelatedPlanComponent" is { BackboneElement };
+alter type CarePlan.RelatedPlanComponent
+{
+	create representation CarePlan.RelatedPlanComponent
+	{
+		CodeElement : Code, 
+		Code : String, 
+		Plan : ResourceReference
+	}
+};
+create type CarePlan.ParticipantComponent from class "Hl7.Fhir.Model.CarePlan+ParticipantComponent" is { BackboneElement };
+alter type CarePlan.ParticipantComponent
+{
+	create representation CarePlan.ParticipantComponent
+	{
+		Role : CodeableConcept, 
+		Member : ResourceReference
+	}
+};
+create type CarePlan.ActivityComponent from class "Hl7.Fhir.Model.CarePlan+ActivityComponent" is { BackboneElement };
+create type CarePlan.DetailComponent from class "Hl7.Fhir.Model.CarePlan+DetailComponent" is { BackboneElement };
+alter type CarePlan.DetailComponent
+{
+	create representation CarePlan.DetailComponent
+	{
+		Category : CodeableConcept, 
+		Code : CodeableConcept, 
+		ReasonCode : list(CodeableConcept), 
+		ReasonReference : list(ResourceReference), 
+		Goal : list(ResourceReference), 
+		StatusElement : Code, 
+		Status : String, 
+		StatusReason : CodeableConcept, 
+		ProhibitedElement : FHIRBoolean, 
+		Prohibited : Boolean, 
+		Scheduled : Element, 
+		Location : ResourceReference, 
+		Performer : list(ResourceReference), 
+		Product : Element, 
+		DailyAmount : SimpleQuantity, 
+		Quantity : SimpleQuantity, 
+		DescriptionElement : FHIRString, 
+		Description : String
+	}
+};
+alter type CarePlan.ActivityComponent
+{
+	create representation CarePlan.ActivityComponent
+	{
+		ActionResulting : list(ResourceReference), 
+		Progress : list(Annotation), 
+		Reference : ResourceReference, 
+		Detail : CarePlan.DetailComponent
+	}
+};
+alter type CarePlan
+{
+	create representation CarePlan
+	{
+		Identifier : list(Identifier), 
+		Subject : ResourceReference, 
+		StatusElement : Code, 
+		Status : String, 
+		Context : ResourceReference, 
+		Period : Period, 
+		Author : list(ResourceReference), 
+		ModifiedElement : FHIRDateTime, 
+		Modified : String, 
+		Category : list(CodeableConcept), 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Addresses : list(ResourceReference), 
+		Support : list(ResourceReference), 
+		RelatedPlan : list(CarePlan.RelatedPlanComponent), 
+		Participant : list(CarePlan.ParticipantComponent), 
+		Goal : list(ResourceReference), 
+		Activity : list(CarePlan.ActivityComponent), 
+		Note : Annotation
+	}
+};
+create type Composition from class "Hl7.Fhir.Model.Composition" is { DomainResource };
+create type Composition.AttesterComponent from class "Hl7.Fhir.Model.Composition+AttesterComponent" is { BackboneElement };
+alter type Composition.AttesterComponent
+{
+	create representation Composition.AttesterComponent
+	{
+		ModeElement : list(Code), 
+		Mode : list(String), 
+		TimeElement : FHIRDateTime, 
+		Time : String, 
+		Party : ResourceReference
+	}
+};
+create type Composition.EventComponent from class "Hl7.Fhir.Model.Composition+EventComponent" is { BackboneElement };
+alter type Composition.EventComponent
+{
+	create representation Composition.EventComponent
+	{
+		Code : list(CodeableConcept), 
+		Period : Period, 
+		Detail : list(ResourceReference)
+	}
+};
+create type Composition.SectionComponent from class "Hl7.Fhir.Model.Composition+SectionComponent" is { BackboneElement };
+alter type Composition.SectionComponent
+{
+	create representation Composition.SectionComponent
+	{
+		TitleElement : FHIRString, 
+		Title : String, 
+		Code : CodeableConcept, 
+		Text : Narrative, 
+		ModeElement : Code, 
+		Mode : String, 
+		OrderedBy : CodeableConcept, 
+		Entry : list(ResourceReference), 
+		EmptyReason : CodeableConcept, 
+		Section : list(Composition.SectionComponent)
+	}
+};
+alter type Composition
+{
+	create representation Composition
+	{
+		Identifier : Identifier, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		Type : CodeableConcept, 
+		Class : CodeableConcept, 
+		TitleElement : FHIRString, 
+		Title : String, 
+		StatusElement : Code, 
+		Status : String, 
+		ConfidentialityElement : Code, 
+		Confidentiality : String, 
+		Subject : ResourceReference, 
+		Author : list(ResourceReference), 
+		Attester : list(Composition.AttesterComponent), 
+		Custodian : ResourceReference, 
+		Event : list(Composition.EventComponent), 
+		Encounter : ResourceReference, 
+		Section : list(Composition.SectionComponent)
+	}
+};
+create type Condition from class "Hl7.Fhir.Model.Condition" is { DomainResource };
+create type Condition.StageComponent from class "Hl7.Fhir.Model.Condition+StageComponent" is { BackboneElement };
+alter type Condition.StageComponent
+{
+	create representation Condition.StageComponent
+	{
+		Summary : CodeableConcept, 
+		Assessment : list(ResourceReference)
+	}
+};
+create type Condition.EvidenceComponent from class "Hl7.Fhir.Model.Condition+EvidenceComponent" is { BackboneElement };
+alter type Condition.EvidenceComponent
+{
+	create representation Condition.EvidenceComponent
+	{
+		Code : CodeableConcept, 
+		Detail : list(ResourceReference)
+	}
+};
+alter type Condition
+{
+	create representation Condition
+	{
+		Identifier : list(Identifier), 
+		Patient : ResourceReference, 
+		Encounter : ResourceReference, 
+		Asserter : ResourceReference, 
+		DateRecordedElement : FHIRDate, 
+		DateRecorded : String, 
+		Code : CodeableConcept, 
+		Category : CodeableConcept, 
+		ClinicalStatusElement : Code, 
+		ClinicalStatus : String, 
+		VerificationStatusElement : Code, 
+		VerificationStatus : String, 
+		Severity : CodeableConcept, 
+		Onset : Element, 
+		Abatement : Element, 
+		Stage : Condition.StageComponent, 
+		Evidence : list(Condition.EvidenceComponent), 
+		BodySite : list(CodeableConcept), 
+		NotesElement : FHIRString, 
+		Notes : String
+	}
+};
+create type Count from class "Hl7.Fhir.Model.Count" is { Quantity };
+create type Device from class "Hl7.Fhir.Model.Device" is { DomainResource };
+alter type Device
+{
+	create representation Device
+	{
+		Identifier : list(Identifier), 
+		Type : CodeableConcept, 
+		Note : list(Annotation), 
+		StatusElement : Code, 
+		Status : String, 
+		ManufacturerElement : FHIRString, 
+		Manufacturer : String, 
+		ModelElement : FHIRString, 
+		Model : String, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		ManufactureDateElement : FHIRDateTime, 
+		ManufactureDate : String, 
+		ExpiryElement : FHIRDateTime, 
+		Expiry : String, 
+		UdiElement : FHIRString, 
+		Udi : String, 
+		LotNumberElement : FHIRString, 
+		LotNumber : String, 
+		Owner : ResourceReference, 
+		Location : ResourceReference, 
+		Patient : ResourceReference, 
+		Contact : list(ContactPoint), 
+		UrlElement : FHIRUri, 
+		Url : String
+	}
+};
+create type DiagnosticOrder from class "Hl7.Fhir.Model.DiagnosticOrder" is { DomainResource };
+create type DiagnosticOrder.EventComponent from class "Hl7.Fhir.Model.DiagnosticOrder+EventComponent" is { BackboneElement };
+alter type DiagnosticOrder.EventComponent
+{
+	create representation DiagnosticOrder.EventComponent
+	{
+		StatusElement : Code, 
+		Status : String, 
+		Description : CodeableConcept, 
+		DateTimeElement : FHIRDateTime, 
+		DateTime : String, 
+		Actor : ResourceReference
+	}
+};
+create type DiagnosticOrder.ItemComponent from class "Hl7.Fhir.Model.DiagnosticOrder+ItemComponent" is { BackboneElement };
+alter type DiagnosticOrder.ItemComponent
+{
+	create representation DiagnosticOrder.ItemComponent
+	{
+		Code : CodeableConcept, 
+		Specimen : list(ResourceReference), 
+		BodySite : CodeableConcept, 
+		StatusElement : Code, 
+		Status : String, 
+		Event : list(DiagnosticOrder.EventComponent)
+	}
+};
+alter type DiagnosticOrder
+{
+	create representation DiagnosticOrder
+	{
+		Subject : ResourceReference, 
+		Orderer : ResourceReference, 
+		Identifier : list(Identifier), 
+		Encounter : ResourceReference, 
+		Reason : list(CodeableConcept), 
+		SupportingInformation : list(ResourceReference), 
+		Specimen : list(ResourceReference), 
+		StatusElement : Code, 
+		Status : String, 
+		PriorityElement : Code, 
+		Priority : String, 
+		Event : list(DiagnosticOrder.EventComponent), 
+		Item : list(DiagnosticOrder.ItemComponent), 
+		Note : list(Annotation)
+	}
+};
+create type DiagnosticReport from class "Hl7.Fhir.Model.DiagnosticReport" is { DomainResource };
+create type DiagnosticReport.ImageComponent from class "Hl7.Fhir.Model.DiagnosticReport+ImageComponent" is { BackboneElement };
+alter type DiagnosticReport.ImageComponent
+{
+	create representation DiagnosticReport.ImageComponent
+	{
+		CommentElement : FHIRString, 
+		Comment : String, 
+		Link : ResourceReference
+	}
+};
+alter type DiagnosticReport
+{
+	create representation DiagnosticReport
+	{
+		Identifier : list(Identifier), 
+		StatusElement : Code, 
+		Status : String, 
+		Category : CodeableConcept, 
+		Code : CodeableConcept, 
+		Subject : ResourceReference, 
+		Encounter : ResourceReference, 
+		Effective : Element, 
+		IssuedElement : Instant, 
+		Issued : DateTime, 
+		Performer : ResourceReference, 
+		Request : list(ResourceReference), 
+		Specimen : list(ResourceReference), 
+		Result : list(ResourceReference), 
+		ImagingStudy : list(ResourceReference), 
+		Image : list(DiagnosticReport.ImageComponent), 
+		ConclusionElement : FHIRString, 
+		Conclusion : String, 
+		CodedDiagnosis : list(CodeableConcept), 
+		PresentedForm : list(Attachment)
+	}
+};
+create type Distance from class "Hl7.Fhir.Model.Distance" is { Quantity };
+create type DocumentManifest from class "Hl7.Fhir.Model.DocumentManifest" is { DomainResource };
+create type DocumentManifest.ContentComponent from class "Hl7.Fhir.Model.DocumentManifest+ContentComponent" is { BackboneElement };
+alter type DocumentManifest.ContentComponent
+{
+	create representation DocumentManifest.ContentComponent
+	{
+		P : Element
+	}
+};
+create type DocumentManifest.RelatedComponent from class "Hl7.Fhir.Model.DocumentManifest+RelatedComponent" is { BackboneElement };
+alter type DocumentManifest.RelatedComponent
+{
+	create representation DocumentManifest.RelatedComponent
+	{
+		Identifier : Identifier, 
+		Ref : ResourceReference
+	}
+};
+alter type DocumentManifest
+{
+	create representation DocumentManifest
+	{
+		MasterIdentifier : Identifier, 
+		Identifier : list(Identifier), 
+		Subject : ResourceReference, 
+		Recipient : list(ResourceReference), 
+		Type : CodeableConcept, 
+		Author : list(ResourceReference), 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		SourceElement : FHIRUri, 
+		Source : String, 
+		StatusElement : Code, 
+		Status : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Content : list(DocumentManifest.ContentComponent), 
+		Related : list(DocumentManifest.RelatedComponent)
+	}
+};
+create type DocumentReference from class "Hl7.Fhir.Model.DocumentReference" is { DomainResource };
+create type DocumentReference.RelatesToComponent from class "Hl7.Fhir.Model.DocumentReference+RelatesToComponent" is { BackboneElement };
+alter type DocumentReference.RelatesToComponent
+{
+	create representation DocumentReference.RelatesToComponent
+	{
+		CodeElement : Code, 
+		Code : String, 
+		Target : ResourceReference
+	}
+};
+create type DocumentReference.ContentComponent from class "Hl7.Fhir.Model.DocumentReference+ContentComponent" is { BackboneElement };
+alter type DocumentReference.ContentComponent
+{
+	create representation DocumentReference.ContentComponent
+	{
+		Attachment : Attachment, 
+		Format : list(Coding)
+	}
+};
+create type DocumentReference.ContextComponent from class "Hl7.Fhir.Model.DocumentReference+ContextComponent" is { BackboneElement };
+create type DocumentReference.RelatedComponent from class "Hl7.Fhir.Model.DocumentReference+RelatedComponent" is { BackboneElement };
+alter type DocumentReference.RelatedComponent
+{
+	create representation DocumentReference.RelatedComponent
+	{
+		Identifier : Identifier, 
+		Ref : ResourceReference
+	}
+};
+alter type DocumentReference.ContextComponent
+{
+	create representation DocumentReference.ContextComponent
+	{
+		Encounter : ResourceReference, 
+		Event : list(CodeableConcept), 
+		Period : Period, 
+		FacilityType : CodeableConcept, 
+		PracticeSetting : CodeableConcept, 
+		SourcePatientInfo : ResourceReference, 
+		Related : list(DocumentReference.RelatedComponent)
+	}
+};
+alter type DocumentReference
+{
+	create representation DocumentReference
+	{
+		MasterIdentifier : Identifier, 
+		Identifier : list(Identifier), 
+		Subject : ResourceReference, 
+		Type : CodeableConcept, 
+		Class : CodeableConcept, 
+		Author : list(ResourceReference), 
+		Custodian : ResourceReference, 
+		Authenticator : ResourceReference, 
+		CreatedElement : FHIRDateTime, 
+		Created : String, 
+		IndexedElement : Instant, 
+		Indexed : DateTime, 
+		StatusElement : Code, 
+		Status : String, 
+		DocStatus : CodeableConcept, 
+		RelatesTo : list(DocumentReference.RelatesToComponent), 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		SecurityLabel : list(CodeableConcept), 
+		Content : list(DocumentReference.ContentComponent), 
+		Context : DocumentReference.ContextComponent
+	}
+};
+create type Encounter from class "Hl7.Fhir.Model.Encounter" is { DomainResource };
+create type Encounter.StatusHistoryComponent from class "Hl7.Fhir.Model.Encounter+StatusHistoryComponent" is { BackboneElement };
+alter type Encounter.StatusHistoryComponent
+{
+	create representation Encounter.StatusHistoryComponent
+	{
+		StatusElement : Code, 
+		Status : String, 
+		Period : Period
+	}
+};
+create type Encounter.ParticipantComponent from class "Hl7.Fhir.Model.Encounter+ParticipantComponent" is { BackboneElement };
+alter type Encounter.ParticipantComponent
+{
+	create representation Encounter.ParticipantComponent
+	{
+		Type : list(CodeableConcept), 
+		Period : Period, 
+		Individual : ResourceReference
+	}
+};
+create type Encounter.HospitalizationComponent from class "Hl7.Fhir.Model.Encounter+HospitalizationComponent" is { BackboneElement };
+alter type Encounter.HospitalizationComponent
+{
+	create representation Encounter.HospitalizationComponent
+	{
+		PreAdmissionIdentifier : Identifier, 
+		Origin : ResourceReference, 
+		AdmitSource : CodeableConcept, 
+		AdmittingDiagnosis : list(ResourceReference), 
+		ReAdmission : CodeableConcept, 
+		DietPreference : list(CodeableConcept), 
+		SpecialCourtesy : list(CodeableConcept), 
+		SpecialArrangement : list(CodeableConcept), 
+		Destination : ResourceReference, 
+		DischargeDisposition : CodeableConcept, 
+		DischargeDiagnosis : list(ResourceReference)
+	}
+};
+create type Encounter.LocationComponent from class "Hl7.Fhir.Model.Encounter+LocationComponent" is { BackboneElement };
+alter type Encounter.LocationComponent
+{
+	create representation Encounter.LocationComponent
+	{
+		Location : ResourceReference, 
+		StatusElement : Code, 
+		Status : String, 
+		Period : Period
+	}
+};
+alter type Encounter
+{
+	create representation Encounter
+	{
+		Identifier : list(Identifier), 
+		StatusElement : Code, 
+		Status : String, 
+		StatusHistory : list(Encounter.StatusHistoryComponent), 
+		ClassElement : Code, 
+		Class : String, 
+		Type : list(CodeableConcept), 
+		Priority : CodeableConcept, 
+		Patient : ResourceReference, 
+		EpisodeOfCare : list(ResourceReference), 
+		IncomingReferral : list(ResourceReference), 
+		Participant : list(Encounter.ParticipantComponent), 
+		Appointment : ResourceReference, 
+		Period : Period, 
+		Length : Duration, 
+		Reason : list(CodeableConcept), 
+		Indication : list(ResourceReference), 
+		Hospitalization : Encounter.HospitalizationComponent, 
+		Location : list(Encounter.LocationComponent), 
+		ServiceProvider : ResourceReference, 
+		PartOf : ResourceReference
+	}
+};
+create type Group from class "Hl7.Fhir.Model.Group" is { DomainResource };
+create type Group.CharacteristicComponent from class "Hl7.Fhir.Model.Group+CharacteristicComponent" is { BackboneElement };
+alter type Group.CharacteristicComponent
+{
+	create representation Group.CharacteristicComponent
+	{
+		Code : CodeableConcept, 
+		Value : Element, 
+		ExcludeElement : FHIRBoolean, 
+		Exclude : Boolean, 
+		Period : Period
+	}
+};
+create type Group.MemberComponent from class "Hl7.Fhir.Model.Group+MemberComponent" is { BackboneElement };
+alter type Group.MemberComponent
+{
+	create representation Group.MemberComponent
+	{
+		Entity : ResourceReference, 
+		Period : Period, 
+		InactiveElement : FHIRBoolean, 
+		Inactive : Boolean
+	}
+};
+alter type Group
+{
+	create representation Group
+	{
+		Identifier : list(Identifier), 
+		TypeElement : Code, 
+		Type : String, 
+		ActualElement : FHIRBoolean, 
+		Actual : Boolean, 
+		Code : CodeableConcept, 
+		NameElement : FHIRString, 
+		Name : String, 
+		QuantityElement : UnsignedInt, 
+		Quantity : Integer, 
+		Characteristic : list(Group.CharacteristicComponent), 
+		Member : list(Group.MemberComponent)
+	}
+};
+create type ImagingStudy from class "Hl7.Fhir.Model.ImagingStudy" is { DomainResource };
+create type ImagingStudy.SeriesComponent from class "Hl7.Fhir.Model.ImagingStudy+SeriesComponent" is { BackboneElement };
+create type ImagingStudy.InstanceComponent from class "Hl7.Fhir.Model.ImagingStudy+InstanceComponent" is { BackboneElement };
+alter type ImagingStudy.InstanceComponent
+{
+	create representation ImagingStudy.InstanceComponent
+	{
+		NumberElement : UnsignedInt, 
+		Number : Integer, 
+		UidElement : Oid, 
+		Uid : String, 
+		SopClassElement : Oid, 
+		SopClass : String, 
+		TypeElement : FHIRString, 
+		Type : String, 
+		TitleElement : FHIRString, 
+		Title : String, 
+		Content : list(Attachment)
+	}
+};
+alter type ImagingStudy.SeriesComponent
+{
+	create representation ImagingStudy.SeriesComponent
+	{
+		NumberElement : UnsignedInt, 
+		Number : Integer, 
+		Modality : Coding, 
+		UidElement : Oid, 
+		Uid : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		NumberOfInstancesElement : UnsignedInt, 
+		NumberOfInstances : Integer, 
+		AvailabilityElement : Code, 
+		Availability : String, 
+		UrlElement : FHIRUri, 
+		Url : String, 
+		BodySite : Coding, 
+		Laterality : Coding, 
+		StartedElement : FHIRDateTime, 
+		Started : String, 
+		Instance : list(ImagingStudy.InstanceComponent)
+	}
+};
+alter type ImagingStudy
+{
+	create representation ImagingStudy
+	{
+		StartedElement : FHIRDateTime, 
+		Started : String, 
+		Patient : ResourceReference, 
+		UidElement : Oid, 
+		Uid : String, 
+		Accession : Identifier, 
+		Identifier : list(Identifier), 
+		Order : list(ResourceReference), 
+		ModalityList : list(Coding), 
+		Referrer : ResourceReference, 
+		AvailabilityElement : Code, 
+		Availability : String, 
+		UrlElement : FHIRUri, 
+		Url : String, 
+		NumberOfSeriesElement : UnsignedInt, 
+		NumberOfSeries : Integer, 
+		NumberOfInstancesElement : UnsignedInt, 
+		NumberOfInstances : Integer, 
+		Procedure : list(ResourceReference), 
+		Interpreter : ResourceReference, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Series : list(ImagingStudy.SeriesComponent)
+	}
+};
+create type Immunization from class "Hl7.Fhir.Model.Immunization" is { DomainResource };
+create type Immunization.ExplanationComponent from class "Hl7.Fhir.Model.Immunization+ExplanationComponent" is { BackboneElement };
+alter type Immunization.ExplanationComponent
+{
+	create representation Immunization.ExplanationComponent
+	{
+		Reason : list(CodeableConcept), 
+		ReasonNotGiven : list(CodeableConcept)
+	}
+};
+create type Immunization.ReactionComponent from class "Hl7.Fhir.Model.Immunization+ReactionComponent" is { BackboneElement };
+alter type Immunization.ReactionComponent
+{
+	create representation Immunization.ReactionComponent
+	{
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		Detail : ResourceReference, 
+		ReportedElement : FHIRBoolean, 
+		Reported : Boolean
+	}
+};
+create type Immunization.VaccinationProtocolComponent from class "Hl7.Fhir.Model.Immunization+VaccinationProtocolComponent" is { BackboneElement };
+alter type Immunization.VaccinationProtocolComponent
+{
+	create representation Immunization.VaccinationProtocolComponent
+	{
+		DoseSequenceElement : PositiveInt, 
+		DoseSequence : Integer, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Authority : ResourceReference, 
+		SeriesElement : FHIRString, 
+		Series : String, 
+		SeriesDosesElement : PositiveInt, 
+		SeriesDoses : Integer, 
+		TargetDisease : list(CodeableConcept), 
+		DoseStatus : CodeableConcept, 
+		DoseStatusReason : CodeableConcept
+	}
+};
+alter type Immunization
+{
+	create representation Immunization
+	{
+		Identifier : list(Identifier), 
+		StatusElement : Code, 
+		Status : String, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		VaccineCode : CodeableConcept, 
+		Patient : ResourceReference, 
+		WasNotGivenElement : FHIRBoolean, 
+		WasNotGiven : Boolean, 
+		ReportedElement : FHIRBoolean, 
+		Reported : Boolean, 
+		Performer : ResourceReference, 
+		Requester : ResourceReference, 
+		Encounter : ResourceReference, 
+		Manufacturer : ResourceReference, 
+		Location : ResourceReference, 
+		LotNumberElement : FHIRString, 
+		LotNumber : String, 
+		ExpirationDateElement : FHIRDate, 
+		ExpirationDate : String, 
+		Site : CodeableConcept, 
+		Route : CodeableConcept, 
+		DoseQuantity : SimpleQuantity, 
+		Note : list(Annotation), 
+		Explanation : Immunization.ExplanationComponent, 
+		Reaction : list(Immunization.ReactionComponent), 
+		VaccinationProtocol : list(Immunization.VaccinationProtocolComponent)
+	}
+};
+create type ImmunizationRecommendation from class "Hl7.Fhir.Model.ImmunizationRecommendation" is { DomainResource };
+create type ImmunizationRecommendation.RecommendationComponent from class "Hl7.Fhir.Model.ImmunizationRecommendation+RecommendationComponent" is { BackboneElement };
+create type ImmunizationRecommendation.DateCriterionComponent from class "Hl7.Fhir.Model.ImmunizationRecommendation+DateCriterionComponent" is { BackboneElement };
+alter type ImmunizationRecommendation.DateCriterionComponent
+{
+	create representation ImmunizationRecommendation.DateCriterionComponent
+	{
+		Code : CodeableConcept, 
+		ValueElement : FHIRDateTime, 
+		Value : String
+	}
+};
+create type ImmunizationRecommendation.ProtocolComponent from class "Hl7.Fhir.Model.ImmunizationRecommendation+ProtocolComponent" is { BackboneElement };
+alter type ImmunizationRecommendation.ProtocolComponent
+{
+	create representation ImmunizationRecommendation.ProtocolComponent
+	{
+		DoseSequenceElement : FHIRInteger, 
+		DoseSequence : Integer, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Authority : ResourceReference, 
+		SeriesElement : FHIRString, 
+		Series : String
+	}
+};
+alter type ImmunizationRecommendation.RecommendationComponent
+{
+	create representation ImmunizationRecommendation.RecommendationComponent
+	{
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		VaccineCode : CodeableConcept, 
+		DoseNumberElement : PositiveInt, 
+		DoseNumber : Integer, 
+		ForecastStatus : CodeableConcept, 
+		DateCriterion : list(ImmunizationRecommendation.DateCriterionComponent), 
+		Protocol : ImmunizationRecommendation.ProtocolComponent, 
+		SupportingImmunization : list(ResourceReference), 
+		SupportingPatientInformation : list(ResourceReference)
+	}
+};
+alter type ImmunizationRecommendation
+{
+	create representation ImmunizationRecommendation
+	{
+		Identifier : list(Identifier), 
+		Patient : ResourceReference, 
+		Recommendation : list(ImmunizationRecommendation.RecommendationComponent)
+	}
+};
+create type List from class "Hl7.Fhir.Model.List" is { DomainResource };
+create type List.EntryComponent from class "Hl7.Fhir.Model.List+EntryComponent" is { BackboneElement };
+alter type List.EntryComponent
+{
+	create representation List.EntryComponent
+	{
+		Flag : CodeableConcept, 
+		DeletedElement : FHIRBoolean, 
+		Deleted : Boolean, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		Item : ResourceReference
+	}
+};
+alter type List
+{
+	create representation List
+	{
+		Identifier : list(Identifier), 
+		TitleElement : FHIRString, 
+		Title : String, 
+		Code : CodeableConcept, 
+		Subject : ResourceReference, 
+		Source : ResourceReference, 
+		Encounter : ResourceReference, 
+		StatusElement : Code, 
+		Status : String, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		OrderedBy : CodeableConcept, 
+		ModeElement : Code, 
+		Mode : String, 
+		NoteElement : FHIRString, 
+		Note : String, 
+		Entry : list(List.EntryComponent), 
+		EmptyReason : CodeableConcept
+	}
+};
+create type Location from class "Hl7.Fhir.Model.Location" is { DomainResource };
+create type Location.PositionComponent from class "Hl7.Fhir.Model.Location+PositionComponent" is { BackboneElement };
+alter type Location.PositionComponent
+{
+	create representation Location.PositionComponent
+	{
+		LongitudeElement : FHIRDecimal, 
+		Longitude : Decimal, 
+		LatitudeElement : FHIRDecimal, 
+		Latitude : Decimal, 
+		AltitudeElement : FHIRDecimal, 
+		Altitude : Decimal
+	}
+};
+alter type Location
+{
+	create representation Location
+	{
+		Identifier : list(Identifier), 
+		StatusElement : Code, 
+		Status : String, 
+		NameElement : FHIRString, 
+		Name : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		ModeElement : Code, 
+		Mode : String, 
+		Type : CodeableConcept, 
+		Telecom : list(ContactPoint), 
+		Address : Address, 
+		PhysicalType : CodeableConcept, 
+		Position : Location.PositionComponent, 
+		ManagingOrganization : ResourceReference, 
+		PartOf : ResourceReference
+	}
+};
+create type Media from class "Hl7.Fhir.Model.Media" is { DomainResource };
+alter type Media
+{
+	create representation Media
+	{
+		TypeElement : Code, 
+		Type : String, 
+		Subtype : CodeableConcept, 
+		Identifier : list(Identifier), 
+		Subject : ResourceReference, 
+		Operator : ResourceReference, 
+		View : CodeableConcept, 
+		DeviceNameElement : FHIRString, 
+		DeviceName : String, 
+		HeightElement : PositiveInt, 
+		Height : Integer, 
+		WidthElement : PositiveInt, 
+		Width : Integer, 
+		FramesElement : PositiveInt, 
+		Frames : Integer, 
+		DurationElement : UnsignedInt, 
+		Duration : Integer, 
+		Content : Attachment
+	}
+};
+create type Medication from class "Hl7.Fhir.Model.Medication" is { DomainResource };
+create type Medication.ProductComponent from class "Hl7.Fhir.Model.Medication+ProductComponent" is { BackboneElement };
+create type Medication.IngredientComponent from class "Hl7.Fhir.Model.Medication+IngredientComponent" is { BackboneElement };
+alter type Medication.IngredientComponent
+{
+	create representation Medication.IngredientComponent
+	{
+		Item : ResourceReference, 
+		Amount : Ratio
+	}
+};
+create type Medication.BatchComponent from class "Hl7.Fhir.Model.Medication+BatchComponent" is { BackboneElement };
+alter type Medication.BatchComponent
+{
+	create representation Medication.BatchComponent
+	{
+		LotNumberElement : FHIRString, 
+		LotNumber : String, 
+		ExpirationDateElement : FHIRDateTime, 
+		ExpirationDate : String
+	}
+};
+alter type Medication.ProductComponent
+{
+	create representation Medication.ProductComponent
+	{
+		Form : CodeableConcept, 
+		Ingredient : list(Medication.IngredientComponent), 
+		Batch : list(Medication.BatchComponent)
+	}
+};
+create type Medication.PackageComponent from class "Hl7.Fhir.Model.Medication+PackageComponent" is { BackboneElement };
+create type Medication.ContentComponent from class "Hl7.Fhir.Model.Medication+ContentComponent" is { BackboneElement };
+alter type Medication.ContentComponent
+{
+	create representation Medication.ContentComponent
+	{
+		Item : ResourceReference, 
+		Amount : SimpleQuantity
+	}
+};
+alter type Medication.PackageComponent
+{
+	create representation Medication.PackageComponent
+	{
+		Container : CodeableConcept, 
+		Content : list(Medication.ContentComponent)
+	}
+};
+alter type Medication
+{
+	create representation Medication
+	{
+		Code : CodeableConcept, 
+		IsBrandElement : FHIRBoolean, 
+		IsBrand : Boolean, 
+		Manufacturer : ResourceReference, 
+		Product : Medication.ProductComponent, 
+		Package : Medication.PackageComponent
+	}
+};
+create type MedicationAdministration from class "Hl7.Fhir.Model.MedicationAdministration" is { DomainResource };
+create type MedicationAdministration.DosageComponent from class "Hl7.Fhir.Model.MedicationAdministration+DosageComponent" is { BackboneElement };
+alter type MedicationAdministration.DosageComponent
+{
+	create representation MedicationAdministration.DosageComponent
+	{
+		TextElement : FHIRString, 
+		Text : String, 
+		Site : Element, 
+		Route : CodeableConcept, 
+		Method : CodeableConcept, 
+		Quantity : SimpleQuantity, 
+		Rate : Element
+	}
+};
+alter type MedicationAdministration
+{
+	create representation MedicationAdministration
+	{
+		Identifier : list(Identifier), 
+		StatusElement : Code, 
+		Status : String, 
+		Patient : ResourceReference, 
+		Practitioner : ResourceReference, 
+		Encounter : ResourceReference, 
+		Prescription : ResourceReference, 
+		WasNotGivenElement : FHIRBoolean, 
+		WasNotGiven : Boolean, 
+		ReasonNotGiven : list(CodeableConcept), 
+		ReasonGiven : list(CodeableConcept), 
+		EffectiveTime : Element, 
+		Medication : Element, 
+		Device : list(ResourceReference), 
+		NoteElement : FHIRString, 
+		Note : String, 
+		Dosage : MedicationAdministration.DosageComponent
+	}
+};
+create type MedicationDispense from class "Hl7.Fhir.Model.MedicationDispense" is { DomainResource };
+create type MedicationDispense.DosageInstructionComponent from class "Hl7.Fhir.Model.MedicationDispense+DosageInstructionComponent" is { BackboneElement };
+alter type MedicationDispense.DosageInstructionComponent
+{
+	create representation MedicationDispense.DosageInstructionComponent
+	{
+		TextElement : FHIRString, 
+		Text : String, 
+		AdditionalInstructions : CodeableConcept, 
+		Timing : Timing, 
+		AsNeeded : Element, 
+		Site : Element, 
+		Route : CodeableConcept, 
+		Method : CodeableConcept, 
+		Dose : Element, 
+		Rate : Element, 
+		MaxDosePerPeriod : Ratio
+	}
+};
+create type MedicationDispense.SubstitutionComponent from class "Hl7.Fhir.Model.MedicationDispense+SubstitutionComponent" is { BackboneElement };
+alter type MedicationDispense.SubstitutionComponent
+{
+	create representation MedicationDispense.SubstitutionComponent
+	{
+		Type : CodeableConcept, 
+		Reason : list(CodeableConcept), 
+		ResponsibleParty : list(ResourceReference)
+	}
+};
+alter type MedicationDispense
+{
+	create representation MedicationDispense
+	{
+		Identifier : Identifier, 
+		StatusElement : Code, 
+		Status : String, 
+		Patient : ResourceReference, 
+		Dispenser : ResourceReference, 
+		AuthorizingPrescription : list(ResourceReference), 
+		Type : CodeableConcept, 
+		Quantity : SimpleQuantity, 
+		DaysSupply : SimpleQuantity, 
+		Medication : Element, 
+		WhenPreparedElement : FHIRDateTime, 
+		WhenPrepared : String, 
+		WhenHandedOverElement : FHIRDateTime, 
+		WhenHandedOver : String, 
+		Destination : ResourceReference, 
+		Receiver : list(ResourceReference), 
+		NoteElement : FHIRString, 
+		Note : String, 
+		DosageInstruction : list(MedicationDispense.DosageInstructionComponent), 
+		Substitution : MedicationDispense.SubstitutionComponent
+	}
+};
+create type MedicationStatement from class "Hl7.Fhir.Model.MedicationStatement" is { DomainResource };
+create type MedicationStatement.DosageComponent from class "Hl7.Fhir.Model.MedicationStatement+DosageComponent" is { BackboneElement };
+alter type MedicationStatement.DosageComponent
+{
+	create representation MedicationStatement.DosageComponent
+	{
+		TextElement : FHIRString, 
+		Text : String, 
+		Timing : Timing, 
+		AsNeeded : Element, 
+		Site : Element, 
+		Route : CodeableConcept, 
+		Method : CodeableConcept, 
+		Quantity : Element, 
+		Rate : Element, 
+		MaxDosePerPeriod : Ratio
+	}
+};
+alter type MedicationStatement
+{
+	create representation MedicationStatement
+	{
+		Identifier : list(Identifier), 
+		Patient : ResourceReference, 
+		InformationSource : ResourceReference, 
+		DateAssertedElement : FHIRDateTime, 
+		DateAsserted : String, 
+		StatusElement : Code, 
+		Status : String, 
+		WasNotTakenElement : FHIRBoolean, 
+		WasNotTaken : Boolean, 
+		ReasonNotTaken : list(CodeableConcept), 
+		ReasonForUse : Element, 
+		Effective : Element, 
+		NoteElement : FHIRString, 
+		Note : String, 
+		SupportingInformation : list(ResourceReference), 
+		Medication : Element, 
+		Dosage : list(MedicationStatement.DosageComponent)
+	}
+};
+create type MessageHeader from class "Hl7.Fhir.Model.MessageHeader" is { DomainResource };
+create type MessageHeader.ResponseComponent from class "Hl7.Fhir.Model.MessageHeader+ResponseComponent" is { BackboneElement };
+alter type MessageHeader.ResponseComponent
+{
+	create representation MessageHeader.ResponseComponent
+	{
+		IdentifierElement : Id, 
+		Identifier : String, 
+		CodeElement : Code, 
+		Code : String, 
+		Details : ResourceReference
+	}
+};
+create type MessageHeader.MessageSourceComponent from class "Hl7.Fhir.Model.MessageHeader+MessageSourceComponent" is { BackboneElement };
+alter type MessageHeader.MessageSourceComponent
+{
+	create representation MessageHeader.MessageSourceComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		SoftwareElement : FHIRString, 
+		Software : String, 
+		VersionElement : FHIRString, 
+		Version : String, 
+		Contact : ContactPoint, 
+		EndpointElement : FHIRUri, 
+		Endpoint : String
+	}
+};
+create type MessageHeader.MessageDestinationComponent from class "Hl7.Fhir.Model.MessageHeader+MessageDestinationComponent" is { BackboneElement };
+alter type MessageHeader.MessageDestinationComponent
+{
+	create representation MessageHeader.MessageDestinationComponent
+	{
+		NameElement : FHIRString, 
+		Name : String, 
+		Target : ResourceReference, 
+		EndpointElement : FHIRUri, 
+		Endpoint : String
+	}
+};
+alter type MessageHeader
+{
+	create representation MessageHeader
+	{
+		TimestampElement : Instant, 
+		Timestamp : DateTime, 
+		Event : Coding, 
+		Response : MessageHeader.ResponseComponent, 
+		Source : MessageHeader.MessageSourceComponent, 
+		Destination : list(MessageHeader.MessageDestinationComponent), 
+		Enterer : ResourceReference, 
+		Author : ResourceReference, 
+		Receiver : ResourceReference, 
+		Responsible : ResourceReference, 
+		Reason : CodeableConcept, 
+		Data : list(ResourceReference)
+	}
+};
+create type OperationOutcome from class "Hl7.Fhir.Model.OperationOutcome" is { DomainResource };
+create type OperationOutcome.IssueComponent from class "Hl7.Fhir.Model.OperationOutcome+IssueComponent" is { BackboneElement };
+alter type OperationOutcome.IssueComponent
+{
+	create representation OperationOutcome.IssueComponent
+	{
+		SeverityElement : Code, 
+		Severity : String, 
+		CodeElement : Code, 
+		Code : String, 
+		Details : CodeableConcept, 
+		DiagnosticsElement : FHIRString, 
+		Diagnostics : String, 
+		LocationElement : list(FHIRString), 
+		Location : list(String)
+	}
+};
+alter type OperationOutcome
+{
+	create representation OperationOutcome
+	{
+		Issue : list(OperationOutcome.IssueComponent)
+	}
+};
+create type Order from class "Hl7.Fhir.Model.Order" is { DomainResource };
+create type Order.WhenComponent from class "Hl7.Fhir.Model.Order+WhenComponent" is { BackboneElement };
+alter type Order.WhenComponent
+{
+	create representation Order.WhenComponent
+	{
+		Code : CodeableConcept, 
+		Schedule : Timing
+	}
+};
+alter type Order
+{
+	create representation Order
+	{
+		Identifier : list(Identifier), 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		Subject : ResourceReference, 
+		Source : ResourceReference, 
+		Target : ResourceReference, 
+		Reason : Element, 
+		When : Order.WhenComponent, 
+		Detail : list(ResourceReference)
+	}
+};
+create type OrderResponse from class "Hl7.Fhir.Model.OrderResponse" is { DomainResource };
+alter type OrderResponse
+{
+	create representation OrderResponse
+	{
+		Identifier : list(Identifier), 
+		Request : ResourceReference, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		Who : ResourceReference, 
+		OrderStatus_Element : Code, 
+		OrderStatus_ : String, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Fulfillment : list(ResourceReference)
+	}
+};
+create type Organization from class "Hl7.Fhir.Model.Organization" is { DomainResource };
+create type Organization.ContactComponent from class "Hl7.Fhir.Model.Organization+ContactComponent" is { BackboneElement };
+alter type Organization.ContactComponent
+{
+	create representation Organization.ContactComponent
+	{
+		Purpose : CodeableConcept, 
+		Name : HumanName, 
+		Telecom : list(ContactPoint), 
+		Address : Address
+	}
+};
+alter type Organization
+{
+	create representation Organization
+	{
+		Identifier : list(Identifier), 
+		ActiveElement : FHIRBoolean, 
+		Active : Boolean, 
+		Type : CodeableConcept, 
+		NameElement : FHIRString, 
+		Name : String, 
+		Telecom : list(ContactPoint), 
+		Address : list(Address), 
+		PartOf : ResourceReference, 
+		Contact : list(Organization.ContactComponent)
+	}
+};
+create type Patient from class "Hl7.Fhir.Model.Patient" is { DomainResource };
+create type Patient.ContactComponent from class "Hl7.Fhir.Model.Patient+ContactComponent" is { BackboneElement };
+alter type Patient.ContactComponent
+{
+	create representation Patient.ContactComponent
+	{
+		Relationship : list(CodeableConcept), 
+		Name : HumanName, 
+		Telecom : list(ContactPoint), 
+		Address : Address, 
+		GenderElement : Code, 
+		Gender : String, 
+		Organization : ResourceReference, 
+		Period : Period
+	}
+};
+create type Patient.AnimalComponent from class "Hl7.Fhir.Model.Patient+AnimalComponent" is { BackboneElement };
+alter type Patient.AnimalComponent
+{
+	create representation Patient.AnimalComponent
+	{
+		Species : CodeableConcept, 
+		Breed : CodeableConcept, 
+		GenderStatus : CodeableConcept
+	}
+};
+create type Patient.CommunicationComponent from class "Hl7.Fhir.Model.Patient+CommunicationComponent" is { BackboneElement };
+alter type Patient.CommunicationComponent
+{
+	create representation Patient.CommunicationComponent
+	{
+		Language : CodeableConcept, 
+		PreferredElement : FHIRBoolean, 
+		Preferred : Boolean
+	}
+};
+create type Patient.LinkComponent from class "Hl7.Fhir.Model.Patient+LinkComponent" is { BackboneElement };
+alter type Patient.LinkComponent
+{
+	create representation Patient.LinkComponent
+	{
+		Other : ResourceReference, 
+		TypeElement : Code, 
+		Type : String
+	}
+};
+alter type Patient
+{
+	create representation Patient
+	{
+		Identifier : list(Identifier), 
+		ActiveElement : FHIRBoolean, 
+		Active : Boolean, 
+		Name : list(HumanName), 
+		Telecom : list(ContactPoint), 
+		GenderElement : Code, 
+		Gender : String, 
+		BirthDateElement : FHIRDate, 
+		BirthDate : String, 
+		Deceased : Element, 
+		Address : list(Address), 
+		MaritalStatus : CodeableConcept, 
+		MultipleBirth : Element, 
+		Photo : list(Attachment), 
+		Contact : list(Patient.ContactComponent), 
+		Animal : Patient.AnimalComponent, 
+		Communication : list(Patient.CommunicationComponent), 
+		CareProvider : list(ResourceReference), 
+		ManagingOrganization : ResourceReference, 
+		Link : list(Patient.LinkComponent)
+	}
+};
+create type Practitioner from class "Hl7.Fhir.Model.Practitioner" is { DomainResource };
+create type Practitioner.PractitionerRoleComponent from class "Hl7.Fhir.Model.Practitioner+PractitionerRoleComponent" is { BackboneElement };
+alter type Practitioner.PractitionerRoleComponent
+{
+	create representation Practitioner.PractitionerRoleComponent
+	{
+		ManagingOrganization : ResourceReference, 
+		Role : CodeableConcept, 
+		Specialty : list(CodeableConcept), 
+		Period : Period, 
+		Location : list(ResourceReference), 
+		HealthcareService : list(ResourceReference)
+	}
+};
+create type Practitioner.QualificationComponent from class "Hl7.Fhir.Model.Practitioner+QualificationComponent" is { BackboneElement };
+alter type Practitioner.QualificationComponent
+{
+	create representation Practitioner.QualificationComponent
+	{
+		Identifier : list(Identifier), 
+		Code : CodeableConcept, 
+		Period : Period, 
+		Issuer : ResourceReference
+	}
+};
+alter type Practitioner
+{
+	create representation Practitioner
+	{
+		Identifier : list(Identifier), 
+		ActiveElement : FHIRBoolean, 
+		Active : Boolean, 
+		Name : HumanName, 
+		Telecom : list(ContactPoint), 
+		Address : list(Address), 
+		GenderElement : Code, 
+		Gender : String, 
+		BirthDateElement : FHIRDate, 
+		BirthDate : String, 
+		Photo : list(Attachment), 
+		PractitionerRole : list(Practitioner.PractitionerRoleComponent), 
+		Qualification : list(Practitioner.QualificationComponent), 
+		Communication : list(CodeableConcept)
+	}
+};
+create type Procedure from class "Hl7.Fhir.Model.Procedure" is { DomainResource };
+create type Procedure.PerformerComponent from class "Hl7.Fhir.Model.Procedure+PerformerComponent" is { BackboneElement };
+alter type Procedure.PerformerComponent
+{
+	create representation Procedure.PerformerComponent
+	{
+		Actor : ResourceReference, 
+		Role : CodeableConcept
+	}
+};
+create type Procedure.FocalDeviceComponent from class "Hl7.Fhir.Model.Procedure+FocalDeviceComponent" is { BackboneElement };
+alter type Procedure.FocalDeviceComponent
+{
+	create representation Procedure.FocalDeviceComponent
+	{
+		Action : CodeableConcept, 
+		Manipulated : ResourceReference
+	}
+};
+alter type Procedure
+{
+	create representation Procedure
+	{
+		Identifier : list(Identifier), 
+		Subject : ResourceReference, 
+		StatusElement : Code, 
+		Status : String, 
+		Category : CodeableConcept, 
+		Code : CodeableConcept, 
+		NotPerformedElement : FHIRBoolean, 
+		NotPerformed : Boolean, 
+		ReasonNotPerformed : list(CodeableConcept), 
+		BodySite : list(CodeableConcept), 
+		Reason : Element, 
+		Performer : list(Procedure.PerformerComponent), 
+		Performed : Element, 
+		Encounter : ResourceReference, 
+		Location : ResourceReference, 
+		Outcome : CodeableConcept, 
+		Report : list(ResourceReference), 
+		Complication : list(CodeableConcept), 
+		FollowUp : list(CodeableConcept), 
+		Request : ResourceReference, 
+		Notes : list(Annotation), 
+		FocalDevice : list(Procedure.FocalDeviceComponent), 
+		Used : list(ResourceReference)
+	}
+};
+create type Provenance from class "Hl7.Fhir.Model.Provenance" is { DomainResource };
+create type Provenance.AgentComponent from class "Hl7.Fhir.Model.Provenance+AgentComponent" is { BackboneElement };
+create type Provenance.RelatedAgentComponent from class "Hl7.Fhir.Model.Provenance+RelatedAgentComponent" is { BackboneElement };
+alter type Provenance.RelatedAgentComponent
+{
+	create representation Provenance.RelatedAgentComponent
+	{
+		Type : CodeableConcept, 
+		TargetElement : FHIRUri, 
+		Target : String
+	}
+};
+alter type Provenance.AgentComponent
+{
+	create representation Provenance.AgentComponent
+	{
+		Role : Coding, 
+		Actor : ResourceReference, 
+		UserId : Identifier, 
+		RelatedAgent : list(Provenance.RelatedAgentComponent)
+	}
+};
+create type Provenance.EntityComponent from class "Hl7.Fhir.Model.Provenance+EntityComponent" is { BackboneElement };
+alter type Provenance.EntityComponent
+{
+	create representation Provenance.EntityComponent
+	{
+		RoleElement : Code, 
+		Role : String, 
+		Type : Coding, 
+		ReferenceElement : FHIRUri, 
+		Reference : String, 
+		DisplayElement : FHIRString, 
+		Display : String, 
+		Agent : Provenance.AgentComponent
+	}
+};
+alter type Provenance
+{
+	create representation Provenance
+	{
+		Target : list(ResourceReference), 
+		Period : Period, 
+		RecordedElement : Instant, 
+		Recorded : DateTime, 
+		Reason : list(CodeableConcept), 
+		Activity : CodeableConcept, 
+		Location : ResourceReference, 
+		PolicyElement : list(FHIRUri), 
+		Policy : list(String), 
+		Agent : list(Provenance.AgentComponent), 
+		Entity : list(Provenance.EntityComponent), 
+		Signature : list(Signature)
+	}
+};
+create type Questionnaire from class "Hl7.Fhir.Model.Questionnaire" is { DomainResource };
+create type Questionnaire.GroupComponent from class "Hl7.Fhir.Model.Questionnaire+GroupComponent" is { BackboneElement };
+create type Questionnaire.QuestionComponent from class "Hl7.Fhir.Model.Questionnaire+QuestionComponent" is { BackboneElement };
+alter type Questionnaire.QuestionComponent
+{
+	create representation Questionnaire.QuestionComponent
+	{
+		LinkIdElement : FHIRString, 
+		LinkId : String, 
+		Concept : list(Coding), 
+		TextElement : FHIRString, 
+		Text : String, 
+		TypeElement : Code, 
+		Type : String, 
+		RequiredElement : FHIRBoolean, 
+		Required : Boolean, 
+		RepeatsElement : FHIRBoolean, 
+		Repeats : Boolean, 
+		Options : ResourceReference, 
+		Option : list(Coding), 
+		Group : list(Questionnaire.GroupComponent)
+	}
+};
+alter type Questionnaire.GroupComponent
+{
+	create representation Questionnaire.GroupComponent
+	{
+		LinkIdElement : FHIRString, 
+		LinkId : String, 
+		TitleElement : FHIRString, 
+		Title : String, 
+		Concept : list(Coding), 
+		TextElement : FHIRString, 
+		Text : String, 
+		RequiredElement : FHIRBoolean, 
+		Required : Boolean, 
+		RepeatsElement : FHIRBoolean, 
+		Repeats : Boolean, 
+		Group : list(Questionnaire.GroupComponent), 
+		Question : list(Questionnaire.QuestionComponent)
+	}
+};
+alter type Questionnaire
+{
+	create representation Questionnaire
+	{
+		Identifier : list(Identifier), 
+		VersionElement : FHIRString, 
+		Version : String, 
+		StatusElement : Code, 
+		Status : String, 
+		DateElement : FHIRDateTime, 
+		Date : String, 
+		PublisherElement : FHIRString, 
+		Publisher : String, 
+		Telecom : list(ContactPoint), 
+		SubjectTypeElement : list(Code), 
+		SubjectType : list(String), 
+		Group : Questionnaire.GroupComponent
+	}
+};
+create type RelatedPerson from class "Hl7.Fhir.Model.RelatedPerson" is { DomainResource };
+alter type RelatedPerson
+{
+	create representation RelatedPerson
+	{
+		Identifier : list(Identifier), 
+		Patient : ResourceReference, 
+		Relationship : CodeableConcept, 
+		Name : HumanName, 
+		Telecom : list(ContactPoint), 
+		GenderElement : Code, 
+		Gender : String, 
+		BirthDateElement : FHIRDate, 
+		BirthDate : String, 
+		Address : list(Address), 
+		Photo : list(Attachment), 
+		Period : Period
+	}
+};
+create type SampledData from class "Hl7.Fhir.Model.SampledData" is { Element };
+alter type SampledData
+{
+	create representation SampledData
+	{
+		Origin : SimpleQuantity, 
+		PeriodElement : FHIRDecimal, 
+		Period : Decimal, 
+		FactorElement : FHIRDecimal, 
+		Factor : Decimal, 
+		LowerLimitElement : FHIRDecimal, 
+		LowerLimit : Decimal, 
+		UpperLimitElement : FHIRDecimal, 
+		UpperLimit : Decimal, 
+		DimensionsElement : PositiveInt, 
+		Dimensions : Integer, 
+		DataElement : FHIRString, 
+		Data : String
+	}
+};
+create type Specimen from class "Hl7.Fhir.Model.Specimen" is { DomainResource };
+create type Specimen.CollectionComponent from class "Hl7.Fhir.Model.Specimen+CollectionComponent" is { BackboneElement };
+alter type Specimen.CollectionComponent
+{
+	create representation Specimen.CollectionComponent
+	{
+		Collector : ResourceReference, 
+		CommentElement : list(FHIRString), 
+		Comment : list(String), 
+		Collected : Element, 
+		Quantity : SimpleQuantity, 
+		Method : CodeableConcept, 
+		BodySite : CodeableConcept
+	}
+};
+create type Specimen.TreatmentComponent from class "Hl7.Fhir.Model.Specimen+TreatmentComponent" is { BackboneElement };
+alter type Specimen.TreatmentComponent
+{
+	create representation Specimen.TreatmentComponent
+	{
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Procedure : CodeableConcept, 
+		Additive : list(ResourceReference)
+	}
+};
+create type Specimen.ContainerComponent from class "Hl7.Fhir.Model.Specimen+ContainerComponent" is { BackboneElement };
+alter type Specimen.ContainerComponent
+{
+	create representation Specimen.ContainerComponent
+	{
+		Identifier : list(Identifier), 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Type : CodeableConcept, 
+		Capacity : SimpleQuantity, 
+		SpecimenQuantity : SimpleQuantity, 
+		Additive : Element
+	}
+};
+alter type Specimen
+{
+	create representation Specimen
+	{
+		Identifier : list(Identifier), 
+		StatusElement : Code, 
+		Status : String, 
+		Type : CodeableConcept, 
+		Parent : list(ResourceReference), 
+		Subject : ResourceReference, 
+		AccessionIdentifier : Identifier, 
+		ReceivedTimeElement : FHIRDateTime, 
+		ReceivedTime : String, 
+		Collection : Specimen.CollectionComponent, 
+		Treatment : list(Specimen.TreatmentComponent), 
+		Container : list(Specimen.ContainerComponent)
+	}
+};
+create type Substance from class "Hl7.Fhir.Model.Substance" is { DomainResource };
+create type Substance.InstanceComponent from class "Hl7.Fhir.Model.Substance+InstanceComponent" is { BackboneElement };
+alter type Substance.InstanceComponent
+{
+	create representation Substance.InstanceComponent
+	{
+		Identifier : Identifier, 
+		ExpiryElement : FHIRDateTime, 
+		Expiry : String, 
+		Quantity : SimpleQuantity
+	}
+};
+create type Substance.IngredientComponent from class "Hl7.Fhir.Model.Substance+IngredientComponent" is { BackboneElement };
+alter type Substance.IngredientComponent
+{
+	create representation Substance.IngredientComponent
+	{
+		Quantity : Ratio, 
+		Substance : ResourceReference
+	}
+};
+alter type Substance
+{
+	create representation Substance
+	{
+		Identifier : list(Identifier), 
+		Category : list(CodeableConcept), 
+		Code : CodeableConcept, 
+		DescriptionElement : FHIRString, 
+		Description : String, 
+		Instance : list(Substance.InstanceComponent), 
+		Ingredient : list(Substance.IngredientComponent)
+	}
+};
+create type Uuid from class "Hl7.Fhir.Model.Uuid" is { Element };
+alter type Uuid
+{
+	create representation Uuid
+	{
+		Value : String
+	}
+};
+//create type Primitive from class "Hl7.Fhir.Model.Primitive" is { Element };
+//create type Object from class "System.Object";
+//alter type Primitive
+//{
+	//create representation Primitive
+	//{
+		//ObjectValue : Object
+	//}
+//};
+
+
+

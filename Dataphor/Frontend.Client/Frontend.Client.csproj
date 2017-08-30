@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
     <ProductVersion>9.0.30729</ProductVersion>
@@ -27,7 +27,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -67,6 +67,7 @@
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>..\bin\</OutputPath>
@@ -89,6 +90,7 @@
     <WarningLevel>3</WarningLevel>
     <DebugType>none</DebugType>
     <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System">
@@ -165,10 +167,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Data.cs">
-      <SubType>Code</SubType>
+      <SubType>Non Visual</SubType>
     </Compile>
     <Compile Include="DataAction.cs">
-      <SubType>Code</SubType>
+      <SubType>Actions</SubType>
     </Compile>
     <Compile Include="DataInterfaces.cs">
       <SubType>Code</SubType>
@@ -180,7 +182,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FormAction.cs">
-      <SubType>Code</SubType>
+      <SubType>Actions</SubType>
     </Compile>
     <Compile Include="Host.cs">
       <SubType>Code</SubType>
@@ -190,7 +192,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="LookupAction.cs">
-      <SubType>Code</SubType>
+      <SubType>Actions</SubType>
     </Compile>
     <Compile Include="Module.cs">
       <SubType>Code</SubType>
@@ -213,7 +215,7 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
     <Compile Include="Timer.cs">
-      <SubType>Code</SubType>
+      <SubType>Non Visual</SubType>
     </Compile>
     <Compile Include="Utility.cs">
       <SubType>Code</SubType>
@@ -228,14 +230,22 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Action.Image.cs" />
+    <Compile Include="Action.Image.cs">
+      <SubType>Actions</SubType>
+    </Compile>
     <Compile Include="DesignerAttributes.cs" />
     <Compile Include="IDocumentCache.cs" />
     <Compile Include="ImageUtility.cs" />
     <Compile Include="LookupUtility.cs" />
-    <Compile Include="ScriptAction.cs" />
-    <Compile Include="SetPropertyAction.cs" />
-    <Compile Include="ShowLinkAction.cs" />
+    <Compile Include="ScriptAction.cs">
+      <SubType>Actions</SubType>
+    </Compile>
+    <Compile Include="SetPropertyAction.cs">
+      <SubType>Actions</SubType>
+    </Compile>
+    <Compile Include="ShowLinkAction.cs">
+      <SubType>Actions</SubType>
+    </Compile>
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>

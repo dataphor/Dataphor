@@ -1,0 +1,67 @@
+/*
+Types.Core - Defines Base, Element, and Extension types
+*/
+
+create type Base from class "Hl7.Fhir.Model.Base" 
+{
+	representation Base
+	{
+		TypeName : String,
+		UserData : table { Key : String, Value : generic } // , key { Key } } // Need to support key definition as part of table type
+	},
+	representation AsString { AsString : String read class "System.ObjectAsStringReadAccessorNode" },
+//	representation AsDisplayString { AsDisplayString : String read class "FHIRCore.FHIRBaseDisplayString" }//,
+	representation AsJSON
+	{
+		AsJSON : String 
+			read class "FHIR.Core.FHIRAsJSONReadAccessorNode"
+			write class "FHIR.Core.FHIRAsJSONWriteAccessorNode"
+	} class "FHIR.Core.FHIRAsJSONSelectorNode",
+	representation AsXML
+	{
+		AsXML : String
+			read class "FHIR.Core.FHIRAsXMLReadAccessorNode"
+			write class "FHIR.Core.FHIRAsXMLWriteAccessorNode"
+	} class "FHIR.Core.FHIRAsXMLSelectorNode"
+}
+	class "FHIR.Core.FHIRObjectConveyor"
+	static tags { DAE.AsString = "AsString", DAE.AsDisplayString = "AsDisplayString" };
+
+//select Operators where Library_Name = "FHIR.Core"
+	
+//select Base(nil as row);
+
+//drop type Base;
+	
+// Search for representations will need to be recursive up the parent scalar types
+// Which means parent scalar types will need to be declared (or at least specified)
+	
+//operator FHIR.Core.Base(const AValues : row) : FHIR.Core.Base;
+//operator FHIR.Core.Base.ReadAsString(const AValue : FHIR.Core.Base) : String;
+//operator FHIR.Core.Base.ReadAsDisplayString(const AValue : FHIR.Core.Base) : String;
+//operator FHIR.Core.Base.AsJSON(const AsJSON : String) : FHIR.Core.Base;
+//operator FHIR.Core.Base.ReadAsJSON(const AValue : FHIR.Core.Base) : String;
+//operator FHIR.Core.Base.WriteAsJSON(const AValue : FHIR.Core.Base, const AsJSON : String) : FHIR.Core.Base;
+
+create type Element from class "Hl7.Fhir.Model.Element" is { Base };
+
+// Search for conveyor will be recursive up the parent scalar types
+	
+create type Extension from class "Hl7.Fhir.Model.Extension" is { Element }
+{
+	representation Extension
+	{
+		Url : String,
+		Value : Element
+	}
+};
+	
+alter type Element
+{
+	create representation Element
+	{
+		ElementId : String,
+		Extension : list(Extension)
+	}
+};
+
