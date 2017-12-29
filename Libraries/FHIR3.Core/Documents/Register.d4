@@ -1,20 +1,14 @@
-/*
-	TODO: Nest/Unnest, Wrap/Unwrap (w/ update support)
-	TODO: Restrict optimization, at the very least for strict seek and through joins
-	TODO: Conversion (possibly implicit) between tuple types and scalar types
-	TODO: Conversion (possibly implicit) between lists and tables
-	TODO: Generate FHIR type descriptions?
-	TODO: It would be awesome if we could just use .NET types everywhere, instead of having DataValue wrappers....
-*/
 
-create operator GenerateTypes() : String class "FHIR.Core.GenerateTypesNode";
 
-ExecuteScript("FHIR.Core", "Types.Core");
+create operator GenerateTypes() : String class "FHIR3.Core.GenerateTypesNode";
+
+ExecuteScript("FHIR3.Core", "Types.Core");
 
 //select GenerateTypes()
 
-ExecuteScript("FHIR.Core", "Types.Generated");
+ExecuteScript("FHIR3.Core", "Types.Generated");
 
-ExecuteScript("FHIR.Core", "Search");
+ExecuteScript("FHIR3.Core", "Types.Operators");
 
-ExecuteScript("FHIR.Core", "Structure.Definition");
+//ExecuteScript("FHIR3.Core", "Search");
+

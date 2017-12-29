@@ -1,1 +1,1 @@
-FHIR Version: 0.90.4
+This library supports the DSTU2 version of FHIR 1.0.2.

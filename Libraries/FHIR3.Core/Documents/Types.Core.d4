@@ -14,17 +14,17 @@ create type Base from class "Hl7.Fhir.Model.Base"
 	representation AsJSON
 	{
 		AsJSON : String 
-			read class "FHIR.Core.FHIRAsJSONReadAccessorNode"
-			write class "FHIR.Core.FHIRAsJSONWriteAccessorNode"
-	} class "FHIR.Core.FHIRAsJSONSelectorNode",
+			read class "FHIR3.Core.FHIRAsJSONReadAccessorNode"
+			write class "FHIR3.Core.FHIRAsJSONWriteAccessorNode"
+	} class "FHIR3.Core.FHIRAsJSONSelectorNode",
 	representation AsXML
 	{
 		AsXML : String
-			read class "FHIR.Core.FHIRAsXMLReadAccessorNode"
-			write class "FHIR.Core.FHIRAsXMLWriteAccessorNode"
-	} class "FHIR.Core.FHIRAsXMLSelectorNode"
+			read class "FHIR3.Core.FHIRAsXMLReadAccessorNode"
+			write class "FHIR3.Core.FHIRAsXMLWriteAccessorNode"
+	} class "FHIR3.Core.FHIRAsXMLSelectorNode"
 }
-	class "FHIR.Core.FHIRObjectConveyor"
+	class "FHIR3.Core.FHIRObjectConveyor"
 	static tags { DAE.AsString = "AsString", DAE.AsDisplayString = "AsDisplayString" };
 
 //select Operators where Library_Name = "FHIR.Core"
