@@ -28,10 +28,10 @@ namespace Alphora.Dataphor.DAE.Server
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Streams;
 	using Schema = Alphora.Dataphor.DAE.Schema;
-	using Alphora.Dataphor.Windows;
 	using Alphora.Dataphor.BOP;
+    using Alphora.Dataphor.Windows;
 
-	public class Server : Engine
+    public class Server : Engine
 	{
 		// Do not localize
 		public const string DefaultLibraryDirectory = @"Libraries";
@@ -558,49 +558,49 @@ namespace Alphora.Dataphor.DAE.Server
 		private FileStream _logFile;
 		private StreamWriter _log;
 
-		public EventLogEntryType LogEntryTypeToEventLogEntryType(LogEntryType entryType)
-		{
-			switch (entryType)
-			{
-				case LogEntryType.Error : return EventLogEntryType.Error;
-				case LogEntryType.Warning : return EventLogEntryType.Warning;
-				default : return EventLogEntryType.Information;
-			}
-		}
+		//public EventLogEntryType LogEntryTypeToEventLogEntryType(LogEntryType entryType)
+		//{
+		//	switch (entryType)
+		//	{
+		//		case LogEntryType.Error : return EventLogEntryType.Error;
+		//		case LogEntryType.Warning : return EventLogEntryType.Warning;
+		//		default : return EventLogEntryType.Information;
+		//	}
+		//}
 		
 		public override void LogMessage(LogEntryType entryType, string description)
 		{
-			if (LoggingEnabled)
-			{
-				if (IsAdministrator() && (System.Environment.OSVersion.Platform == PlatformID.Win32NT))
-					try
-					{
-						EventLog.WriteEntry(ServerSourceName, String.Format("Server: {0}\r\n{1}", Name, description), LogEntryTypeToEventLogEntryType(entryType));
-					}
-					catch
-					{
-						// ignore an error writing to the event log (it's probably complaining that it's full)
-					}
+			//if (LoggingEnabled)
+			//{
+			//	if (IsAdministrator() && (System.Environment.OSVersion.Platform == PlatformID.Win32NT))
+			//		try
+			//		{
+			//			EventLog.WriteEntry(ServerSourceName, String.Format("Server: {0}\r\n{1}", Name, description), LogEntryTypeToEventLogEntryType(entryType));
+			//		}
+			//		catch
+			//		{
+			//			// ignore an error writing to the event log (it's probably complaining that it's full)
+			//		}
 
-				if (_log != null)
-				{
-					lock (_log)
-					{
-						_log.Write
-						(
-							String.Format
-							(
-								"{0} {1}{2}\r\n",
-								DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.ffff"),
-								(entryType == LogEntryType.Information) ?
-									String.Empty :
-									String.Format("{0}: ", entryType.ToString()),
-								description
-							)
-						);
-					}
-				}
-			}
+			//	if (_log != null)
+			//	{
+			//		lock (_log)
+			//		{
+			//			_log.Write
+			//			(
+			//				String.Format
+			//				(
+			//					"{0} {1}{2}\r\n",
+			//					DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.ffff"),
+			//					(entryType == LogEntryType.Information) ?
+			//						String.Empty :
+			//						String.Format("{0}: ", entryType.ToString()),
+			//					description
+			//				)
+			//			);
+			//		}
+			//	}
+			//}
 		}
 
 		protected override void StartLog()
@@ -609,8 +609,8 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (!IsEngine && IsAdministrator())
 				{
-					if (!EventLog.SourceExists(ServerSourceName))
-						EventLog.CreateEventSource(ServerSourceName, ServerLogName);
+					//if (!EventLog.SourceExists(ServerSourceName))
+					//	EventLog.CreateEventSource(ServerSourceName, ServerLogName);
 				}
 				try
 				{
@@ -629,13 +629,13 @@ namespace Alphora.Dataphor.DAE.Server
 
 		private bool IsAdministrator()
 		{
-			if (System.Environment.OSVersion.Platform == PlatformID.Win32NT)
-			{
-				WindowsIdentity wID = WindowsIdentity.GetCurrent();
-				WindowsPrincipal wP = new WindowsPrincipal(wID);
-				return wP.IsInRole(WindowsBuiltInRole.Administrator);
-			}
-			else
+			//if (System.Environment.OSVersion.Platform == PlatformID.Win32NT)
+			//{
+			//	WindowsIdentity wID = WindowsIdentity.GetCurrent();
+			//	WindowsPrincipal wP = new WindowsPrincipal(wID);
+			//	return wP.IsInRole(WindowsBuiltInRole.Administrator);
+			//}
+			//else
 				return (false); // Might not be Windows
 		}
 

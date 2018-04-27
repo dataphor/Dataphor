@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  dataphoria.web.api:
+    image: dataphoriawebapi
+    build:
+      context: .
+      dockerfile: Dataphoria.Web.API/Dockerfile

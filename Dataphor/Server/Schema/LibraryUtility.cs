@@ -11,11 +11,11 @@ using System.IO;
 using System.Reflection;
 
 using Alphora.Dataphor.BOP;
-using Alphora.Dataphor.Windows;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Schema
 {

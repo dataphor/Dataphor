@@ -6,13 +6,20 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>TRACE;DEBUG;USENATIVE;NATIVEROW;ACCUMULATOR;USEOBJECTVALIDATE;NILPROPOGATION;USEVISIT</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>TRACE;SIGNASSEMBLIES;USENATIVE;NATIVEROW;USEOBJECTVALIDATE;NILPROPOGATION;DISABLE_PERFORMANCE_COUNTERS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Runtime" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
+    <Compile Remove="Runtime.Data\Index.cs" />
+    <Compile Remove="Runtime.Data\Scan.cs" />
+    <Compile Remove="Runtime.Data\TestValues.cs" />
+    <Compile Remove="Runtime.Data\UnimplementedTableValues.cs" />
+    <Compile Remove="Runtime.Instructions\GeneratorNodes.cs" />
+    <Compile Remove="Runtime.Instructions\TestNodes.cs" />
+    <Compile Remove="Runtime\DataVar.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Base\Base.csproj" />
