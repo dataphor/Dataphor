@@ -160,6 +160,10 @@
       <Name>Engine</Name>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Server.DTC\Server.DTC.csproj">
+      <Project>{bac2c54e-2369-41aa-ad91-dff6e14c3e0b}</Project>
+      <Name>Server.DTC</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Server\Server.csproj">
       <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
       <Name>Server %28Server\Server%29</Name>
