@@ -4,6 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>false</Deterministic>
+    <AssemblyName>AlphoraDataphorCommon</AssemblyName>
+    <RootNamespace>Alphora.Dataphor.DAE</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DefineConstants>SIGNASSEMBLIES</DefineConstants>
