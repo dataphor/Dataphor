@@ -7,7 +7,6 @@ using System;
 using System.Text;
 using System.Collections;
 using System.Reflection;
-//using System.Runtime.Remoting.Messaging;
 
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
