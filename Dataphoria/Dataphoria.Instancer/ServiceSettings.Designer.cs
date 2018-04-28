@@ -12,7 +12,7 @@ namespace Alphora.Dataphor.Dataphoria.Instancer {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.6.0.0")]
     internal sealed partial class ServiceSettings : global::System.Configuration.ApplicationSettingsBase {
         
         private static ServiceSettings defaultInstance = ((ServiceSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new ServiceSettings())));

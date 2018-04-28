@@ -182,7 +182,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Web.FHIR", "..\D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Web.API", "..\Dataphoria\Dataphoria.Web.API\Dataphoria.Web.API.csproj", "{F2797B76-5D78-4810-83A9-01949B96BAB9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dataphoria.Web.Core", "..\Dataphoria\Dataphoria.Web.Core\Dataphoria.Web.Core.csproj", "{6009F17A-D960-449B-A96E-2D915AD743FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Web.Core", "..\Dataphoria\Dataphoria.Web.Core\Dataphoria.Web.Core.csproj", "{6009F17A-D960-449B-A96E-2D915AD743FD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHIR2.Core", "..\Libraries\FHIR2.Core\Source\FHIR2.Core.csproj", "{0529069C-4980-4F4E-9495-2ACA2D067E41}"
 EndProject
