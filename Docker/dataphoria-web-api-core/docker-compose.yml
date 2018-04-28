@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  dataphoria.web.api.core:
+    image: dataphoriawebapicore
+    build:
+      context: ../../Dataphoria/Dataphoria.Web.API.Core/

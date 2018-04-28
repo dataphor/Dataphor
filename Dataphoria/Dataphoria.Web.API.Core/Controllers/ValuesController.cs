@@ -13,7 +13,6 @@ namespace Dataphoria.Web.API.Controllers
     [Route("api/[controller]")]
     public class QueryController : Controller
     {
-        // GET api/values
         [HttpGet]
         public object Get(string e, string a = null)
         {
