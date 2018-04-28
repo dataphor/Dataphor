@@ -17,6 +17,7 @@
   <ItemGroup>
     <Compile Remove="Runtime.Data\Index.cs" />
     <Compile Remove="Runtime.Data\Scan.cs" />
+    <Compile Remove="Runtime.Data\TableBuffer.cs" />
     <Compile Remove="Runtime.Data\TestValues.cs" />
     <Compile Remove="Runtime.Data\UnimplementedTableValues.cs" />
     <Compile Remove="Runtime.Instructions\GeneratorNodes.cs" />
