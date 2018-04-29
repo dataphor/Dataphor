@@ -25,6 +25,18 @@
     <Compile Remove="Runtime\DataVar.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Debug\Debug.d4" />
+    <None Remove="Schema\DataTypes.d4" />
+    <None Remove="Schema\SQLDeviceMappings.d4" />
+    <None Remove="Schema\SystemCatalog.d4" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Debug\Debug.d4" />
+    <EmbeddedResource Include="Schema\DataTypes.d4" />
+    <EmbeddedResource Include="Schema\SQLDeviceMappings.d4" />
+    <EmbeddedResource Include="Schema\SystemCatalog.d4" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Base\Base.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\DAE.NativeCLI\DAE.NativeCLI.csproj" />

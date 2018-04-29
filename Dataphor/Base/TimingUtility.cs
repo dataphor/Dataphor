@@ -17,8 +17,8 @@ namespace Alphora.Dataphor
 #endif
 	public sealed class TimingUtility
 	{
-#if SILVERLIGHT
-		public static bool QueryPerformanceCounter(out long lpPerformanceCount)
+#if SILVERLIGHT || NETSTANDARD2_0
+        public static bool QueryPerformanceCounter(out long lpPerformanceCount)
 		{
 			lpPerformanceCount = Environment.TickCount;
 			return true;

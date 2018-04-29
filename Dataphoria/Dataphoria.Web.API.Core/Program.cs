@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Alphora.Dataphor.Dataphoria.Web.Core;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +15,7 @@ namespace Dataphoria.Web.API
     {
         public static void Main(string[] args)
         {
+            ProcessorInstance.Initialize();
             BuildWebHost(args).Run();
         }
 

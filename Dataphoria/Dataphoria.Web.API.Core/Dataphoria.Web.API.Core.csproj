@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Dataphoria\Dataphoria.Processing\Dataphoria.Processing.csproj" />
+    <ProjectReference Include="..\..\Dataphor\DAE.PGSQL\DAE.PGSQL.csproj" />
   </ItemGroup>
 
 </Project>

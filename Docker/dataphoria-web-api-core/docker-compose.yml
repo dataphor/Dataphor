@@ -5,3 +5,9 @@ services:
     image: dataphoriawebapicore
     build:
       context: ../../Dataphoria/Dataphoria.Web.API.Core/
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:alpine
+    restart: always

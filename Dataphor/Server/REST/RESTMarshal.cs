@@ -295,7 +295,8 @@ namespace Alphora.Dataphor.DAE.REST
 				case "time": return dataTypeValue.AsDateTime;
 				case "timespan": return dataTypeValue.AsTimeSpan;
 				default:
-					throw new ArgumentException(string.Format("Invalid native data type name: \"{0}\".", dataTypeName));
+                    return dataTypeValue.AsString;
+					//throw new ArgumentException(string.Format("Invalid native data type name: \"{0}\".", dataTypeName));
 			}
 		}
 	}

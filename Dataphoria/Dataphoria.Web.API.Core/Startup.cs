@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Alphora.Dataphor.Dataphoria.Web.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -36,9 +35,6 @@ namespace Dataphoria.Web.API
             }
 
             app.UseMvc();
-
-
-            ProcessorInstance.Initialize();
         }
     }
 }
