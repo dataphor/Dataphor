@@ -6,10 +6,10 @@
 
 using System;
 using System.Data;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 
-namespace Alphora.Dataphor.DAE.Connection
-{
+namespace Alphora.Dataphor.DAE.Connection{
+
     public class SQLiteCommand : DotNetCommand
     {
         public SQLiteCommand(SQLiteConnection connection, IDbCommand command) : base(connection, command) 
@@ -24,44 +24,44 @@ namespace Alphora.Dataphor.DAE.Connection
             for (int index = 0; index < _parameterIndexes.Length; index++)
             {
                 parameter = Parameters[_parameterIndexes[index]];
-                SQLiteParameter sQLiteParameter = (SQLiteParameter)_command.CreateParameter();
-                sQLiteParameter.ParameterName = String.Format("@{0}", parameter.Name);
+                SqliteParameter sqliteParameter = (SqliteParameter)_command.CreateParameter();
+                sqliteParameter.ParameterName = String.Format("@{0}", parameter.Name);
                 switch (parameter.Direction)
                 {
-                    case SQLDirection.Out : sQLiteParameter.Direction = System.Data.ParameterDirection.Output; break;
-                    case SQLDirection.InOut : sQLiteParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
-                    case SQLDirection.Result : sQLiteParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
-                    default : sQLiteParameter.Direction = System.Data.ParameterDirection.Input; break;
+                    case SQLDirection.Out : sqliteParameter.Direction = System.Data.ParameterDirection.Output; break;
+                    case SQLDirection.InOut : sqliteParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
+                    case SQLDirection.Result : sqliteParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
+                    default : sqliteParameter.Direction = System.Data.ParameterDirection.Input; break;
                 }
 
                 if (parameter.Type is SQLStringType)
                 {
-                    sQLiteParameter.DbType = DbType.String;
-                    sQLiteParameter.Size = ((SQLStringType)parameter.Type).Length;
+                    sqliteParameter.DbType = DbType.String;
+                    sqliteParameter.Size = ((SQLStringType)parameter.Type).Length;
                 }
                 else if (parameter.Type is SQLBooleanType)
                 {
-                    sQLiteParameter.DbType = DbType.Boolean;
+                    sqliteParameter.DbType = DbType.Boolean;
                 }
                 else if (parameter.Type is SQLByteArrayType)
                 {
-                    sQLiteParameter.DbType = DbType.Binary;
-                    sQLiteParameter.Size = ((SQLByteArrayType)parameter.Type).Length;
+                    sqliteParameter.DbType = DbType.Binary;
+                    sqliteParameter.Size = ((SQLByteArrayType)parameter.Type).Length;
                 }
                 else if (parameter.Type is SQLIntegerType)
                 {
                     switch (((SQLIntegerType)parameter.Type).ByteCount)
                     {
-                        case 1 : sQLiteParameter.DbType = DbType.Byte; break;
-                        case 2 : sQLiteParameter.DbType = DbType.Int16; break;
-                        case 8 : sQLiteParameter.DbType = DbType.Int64; break;
-                        default : sQLiteParameter.DbType = DbType.Int32; break;
+                        case 1 : sqliteParameter.DbType = DbType.Byte; break;
+                        case 2 : sqliteParameter.DbType = DbType.Int16; break;
+                        case 8 : sqliteParameter.DbType = DbType.Int64; break;
+                        default : sqliteParameter.DbType = DbType.Int32; break;
                     }
                 }
                 else if (parameter.Type is SQLNumericType)
                 {
                     SQLNumericType type = (SQLNumericType)parameter.Type;
-                    sQLiteParameter.DbType = DbType.Decimal;
+                    sqliteParameter.DbType = DbType.Decimal;
                     //LSQLiteParameter.Scale = LType.Scale;
                     //LSQLiteParameter.Precision = LType.Precision;
                 }
@@ -69,41 +69,41 @@ namespace Alphora.Dataphor.DAE.Connection
                 {
                     SQLFloatType type = (SQLFloatType)parameter.Type;
                     if (type.Width == 1)
-                        sQLiteParameter.DbType = DbType.Single;
+                        sqliteParameter.DbType = DbType.Single;
                     else
-                        sQLiteParameter.DbType = DbType.Double;
+                        sqliteParameter.DbType = DbType.Double;
                 }
                 else if (parameter.Type is SQLBinaryType)
                 {
-                    sQLiteParameter.DbType = DbType.Binary;
+                    sqliteParameter.DbType = DbType.Binary;
                 }
                 else if (parameter.Type is SQLTextType)
                 {
-                    sQLiteParameter.DbType = DbType.String;
+                    sqliteParameter.DbType = DbType.String;
                 }
                 else if (parameter.Type is SQLDateType)
                 {
-                    sQLiteParameter.DbType = DbType.Date;
+                    sqliteParameter.DbType = DbType.Date;
                 }
                 else if (parameter.Type is SQLTimeType)
                 {
-                    sQLiteParameter.DbType = DbType.Time;
+                    sqliteParameter.DbType = DbType.Time;
                 }
                 else if (parameter.Type is SQLDateTimeType)
                 {
-                    sQLiteParameter.DbType = DbType.DateTime;
+                    sqliteParameter.DbType = DbType.DateTime;
                 }
                 else if (parameter.Type is SQLGuidType)
                 {
-                    sQLiteParameter.DbType = DbType.Guid;
+                    sqliteParameter.DbType = DbType.Guid;
                 }
                 else if (parameter.Type is SQLMoneyType)
                 {
-                    sQLiteParameter.DbType = DbType.Currency;
+                    sqliteParameter.DbType = DbType.Currency;
                 }
                 else
                     throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
-                _command.Parameters.Add(sQLiteParameter);
+                _command.Parameters.Add(sqliteParameter);
             }
         }
     }

@@ -2,6 +2,10 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
+    "iis": {
+      "applicationUrl": "http://localhost/Dataphoria.Web.API.Core",
+      "sslPort": 0
+    },
     "iisExpress": {
       "applicationUrl": "http://localhost:13211/",
       "sslPort": 0
@@ -16,7 +20,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Dataphoria.Web.API": {
+    "Dataphoria.Web.API.Core": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "api/values",

@@ -6,7 +6,7 @@
 
 using System;
 using System.Data;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 
 namespace Alphora.Dataphor.DAE.Connection
 {
@@ -19,7 +19,7 @@ namespace Alphora.Dataphor.DAE.Connection
 		
 		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			return new System.Data.SQLite.SQLiteConnection(connectionString);
+			return new Microsoft.Data.Sqlite.SqliteConnection(connectionString);
 		}
 		
 		protected override SQLCommand InternalCreateCommand()
@@ -55,21 +55,21 @@ namespace Alphora.Dataphor.DAE.Connection
 		
 		protected override bool IsTransactionFailure(Exception exception)
 		{
-			SQLiteException localException = exception as SQLiteException;
+			SqliteException localException = exception as SqliteException;
 			if (localException != null)
 				return IsTransactionFailure(localException.ErrorCode);
 
 			return false;
 		}
 		
-		protected bool IsTransactionFailure(SQLiteErrorCode errorCode)
+		protected bool IsTransactionFailure(int errorCode)
 		{
 			return false;
 		}
 		
-		protected bool IsUserCorrectableError(SQLiteErrorCode errorCode)
+		protected bool IsUserCorrectableError(int errorCode)
 		{
-			return errorCode == SQLiteErrorCode.Constraint;
+            return errorCode == 19; //Constraint Error Code
 		}
 		
 		protected override Exception InternalWrapException(Exception exception, string statement)
@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.DAE.Connection
 		private ErrorSeverity GetExceptionSeverity(Exception exception)
 		{
 			// If the error code indicates an integrity constraint violation or other user-correctable message, severity is user, otherwise, severity is application
-			SQLiteException localException = exception as SQLiteException;
+			SqliteException localException = exception as SqliteException;
 			if (localException != null)
 			{
 				if (!IsUserCorrectableError(localException.ErrorCode))

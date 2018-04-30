@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <DockerComposeProjectPath>..\..\Docker\dataphoria-web-api-core\dataphoria-web-api-core.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
