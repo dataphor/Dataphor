@@ -40,6 +40,8 @@ namespace Alphora.Dataphor.DAE.Store.SQLite
 		{
 			if (tempValue is byte)
 				return ((byte)tempValue) == 1;
+            if (tempValue is long)
+                return Convert.ToInt32(tempValue);
 			return base.StoreToNativeValue(tempValue);
 		}
         

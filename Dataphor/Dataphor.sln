@@ -17,9 +17,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{0A17AB0B-3994-4D39-86B3-D34EDA7893F9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0C5BCC79-C673-4FA3-96BA-89A30215A6F5}"
-	ProjectSection(SolutionItems) = preProject
-		..\Tests\Dataphor.Tests.nunit = ..\Tests\Dataphor.Tests.nunit
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Silverlight", "Silverlight", "{FC515183-B412-4C67-BF18-1035E42E9C5B}"
 EndProject
@@ -51,7 +48,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client.Windows.Exe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D4Runner", "D4Runner\D4Runner.csproj", "{2F3DAD3F-69A0-43A0-91AA-C2DA75BBE435}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection", "..\Libraries\Connection\Source\DAE.Connection.csproj", "{8CBB779F-64D4-455F-9E4F-70719408A7CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAE.Connection", "..\Libraries\Connection\Source\DAE.Connection.csproj", "{8CBB779F-64D4-455F-9E4F-70719408A7CA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection.ADO", "..\Libraries\ADOConnection\Source\DAE.Connection.ADO.csproj", "{8CEBE5C2-DF26-4817-A917-5EB1C17FC2F3}"
 EndProject
@@ -105,9 +102,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.MSSQL", "DAE.MSSQL\DAE.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDevicePGSQL", "..\Libraries\PGSQLDevice\Source\DAEDevicePGSQL.csproj", "{40E33930-93EC-4371-97E1-D709B022132C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection.PGSQL", "..\Libraries\PGSQLConnection\Source\DAE.Connection.PGSQL.csproj", "{7887C79A-4A65-4F31-95C0-67C3558ADB6B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAE.Connection.PGSQL", "..\Libraries\PGSQLConnection\Source\DAE.Connection.PGSQL.csproj", "{7887C79A-4A65-4F31-95C0-67C3558ADB6B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.PGSQL", "DAE.PGSQL\DAE.PGSQL.csproj", "{DC264B9D-33EE-4827-B1D7-739FC321BE6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAE.PGSQL", "DAE.PGSQL\DAE.PGSQL.csproj", "{DC264B9D-33EE-4827-B1D7-739FC321BE6C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SilverlightDAE", "SilverlightDAE\SilverlightDAE.csproj", "{B190A64D-B46B-4C63-A217-1ABD2C97021A}"
 EndProject

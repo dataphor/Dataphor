@@ -1210,7 +1210,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			try
 			{
 				if (cursor.Next())
-					return new Schema.RightAssignment((string)cursor[1], (bool)cursor[2]);
+					return new Schema.RightAssignment((string)cursor[1], Convert.ToBoolean(cursor[2]));
 				return null;
 			}
 			finally
@@ -1411,7 +1411,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			try
 			{
 				if (cursor.Next())
-					return (bool)cursor[2];
+					return Convert.ToBoolean(cursor[2]);
 			}
 			finally
 			{
@@ -1438,7 +1438,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				{
 					if (roleRights.Next())
 					{
-						granted = (bool)roleRights[2];
+						granted = Convert.ToBoolean(roleRights[2]);
 						if (!granted)
 							return granted;
 					}
@@ -2128,11 +2128,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 							(string)cursor[15], // Script
 							(string)cursor[3], // DisplayName
 							(string)cursor[5], // ObjectType
-							(bool)cursor[6], // IsSystem
-							(bool)cursor[7], // IsRemotable
-							(bool)cursor[8], // IsGenerated
-							(bool)cursor[9], // IsATObject
-							(bool)cursor[10] // IsSessionObject
+							Convert.ToBoolean(cursor[6]), // IsSystem
+							Convert.ToBoolean(cursor[7]), // IsRemotable
+							Convert.ToBoolean(cursor[8]), // IsGenerated
+							Convert.ToBoolean(cursor[9]), // IsATObject
+							Convert.ToBoolean(cursor[10]) // IsSessionObject
 						);
 						
 				return null;
@@ -2173,11 +2173,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 								(string)objectValue[15], // Script
 								(string)objectValue[3], // DisplayName
 								(string)objectValue[5], // ObjectType
-								(bool)objectValue[6], // IsSystem
-								(bool)objectValue[7], // IsRemotable
-								(bool)objectValue[8], // IsGenerated
-								(bool)objectValue[9], // IsATObject
-								(bool)objectValue[10], // IsSessionObject
+								Convert.ToBoolean(objectValue[6]), // IsSystem
+								Convert.ToBoolean(objectValue[7]), // IsRemotable
+								Convert.ToBoolean(objectValue[8]), // IsGenerated
+								Convert.ToBoolean(objectValue[9]), // IsATObject
+								Convert.ToBoolean(objectValue[10]), // IsSessionObject
 								(int)objectValue[14] // GeneratorObjectID
 							);
 				}
@@ -2539,12 +2539,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 							(string)objects[2], // LibraryName,
 							(string)objects[3], // DisplayName,
 							(string)objects[5], // Type,
-							(bool)objects[6], // IsSystem,
-							(bool)objects[7], // IsRemotable,
-							(bool)objects[8], // IsGenerated,
-							(bool)objects[9], // IsATObject,
-							(bool)objects[10], // IsSessionObject,
-							(bool)objects[11], // IsPersistent,
+							Convert.ToBoolean(objects[6]), // IsSystem,
+							Convert.ToBoolean(objects[7]), // IsRemotable,
+							Convert.ToBoolean(objects[8]), // IsGenerated,
+							Convert.ToBoolean(objects[9]), // IsATObject,
+							Convert.ToBoolean(objects[10]), // IsSessionObject,
+							Convert.ToBoolean(objects[11]), // IsPersistent,
 							(int)objects[12], // CatalogObjectID,
 							(int)objects[13], // ParentObjectID
 							(int)objects[14] // GeneratorObjectID
@@ -2573,12 +2573,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 							(string)objects[15], // Script,
 							(string)objects[3], // DisplayName,
 							(string)objects[5], // Type,
-							(bool)objects[6], // IsSystem,
-							(bool)objects[7], // IsRemotable,
-							(bool)objects[8], // IsGenerated,
-							(bool)objects[9], // IsATObject,
-							(bool)objects[10], // IsSessionObject,
-							(bool)objects[11], // IsPersistent,
+							Convert.ToBoolean(objects[6]), // IsSystem,
+							Convert.ToBoolean(objects[7]), // IsRemotable,
+							Convert.ToBoolean(objects[8]), // IsGenerated,
+							Convert.ToBoolean(objects[9]), // IsATObject,
+							Convert.ToBoolean(objects[10]), // IsSessionObject,
+							Convert.ToBoolean(objects[11]), // IsPersistent,
 							(int)objects[12], // CatalogObjectID,
 							(int)objects[13], // ParentObjectID
 							(int)objects[14] // GeneratorObjectID
@@ -2610,12 +2610,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 							(string)objects[15], // Script,
 							(string)objects[3], // DisplayName,
 							(string)objects[5], // Type,
-							(bool)objects[6], // IsSystem,
-							(bool)objects[7], // IsRemotable,
-							(bool)objects[8], // IsGenerated,
-							(bool)objects[9], // IsATObject,
-							(bool)objects[10], // IsSessionObject,
-							(bool)objects[11], // IsPersistent,
+							Convert.ToBoolean(objects[6]), // IsSystem,
+							Convert.ToBoolean(objects[7]), // IsRemotable,
+							Convert.ToBoolean(objects[8]), // IsGenerated,
+							Convert.ToBoolean(objects[9]), // IsATObject,
+							Convert.ToBoolean(objects[10]), // IsSessionObject,
+							Convert.ToBoolean(objects[11]), // IsPersistent,
 							(int)objects[12], // CatalogObjectID,
 							(int)objects[13], // ParentObjectID
 							(int)objects[14] // GeneratorObjectID
@@ -2638,7 +2638,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				while (objects.Next())
 				{
-					if ((bool)objects[11])
+					if (Convert.ToBoolean(objects[11]))
 					{
 						headers.Add
 						(
@@ -2650,11 +2650,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 								(string)objects[15], // Script
 								(string)objects[3], // DisplayName
 								(string)objects[5], // ObjectType
-								(bool)objects[6], // IsSystem 
-								(bool)objects[7], // IsRemotable
-								(bool)objects[8], // IsGenerated
-								(bool)objects[9], // IsATObject
-								(bool)objects[10] // IsSessionObject
+								Convert.ToBoolean(objects[6]), // IsSystem 
+								Convert.ToBoolean(objects[7]), // IsRemotable
+								Convert.ToBoolean(objects[8]), // IsGenerated
+								Convert.ToBoolean(objects[9]), // IsATObject
+								Convert.ToBoolean(objects[10]) // IsSessionObject
 							)
 						);
 					}
@@ -2708,12 +2708,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				    var displayName = (string)objectValue[3];
 				    var description = (string)objectValue[4];
 				    var objectType = (string)objectValue[5];
-				    var isSystem = (bool)objectValue[6];
-				    var isRemotable = (bool)objectValue[7];
-				    var isGenerated = (bool)objectValue[8];
-				    var isATObject = (bool)objectValue[9];
-				    var isSessionObject = (bool)objectValue[10];
-				    var isPersistent = (bool)objectValue[11];
+				    var isSystem = Convert.ToBoolean(objectValue[6]);
+				    var isRemotable = Convert.ToBoolean(objectValue[7]);
+				    var isGenerated = Convert.ToBoolean(objectValue[8]);
+				    var isATObject = Convert.ToBoolean(objectValue[9]);
+				    var isSessionObject = Convert.ToBoolean(objectValue[10]);
+				    var isPersistent = Convert.ToBoolean(objectValue[11]);
 				    var catalogObjectID = (int)objectValue[12];
 				    var parentObjectID = (int)objectValue[13];
 				    var generatorObjectID = (int)objectValue[14];
@@ -2776,12 +2776,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 							(string)objectValue[3], // DisplayName
 							(string)objectValue[4], // Description
 							(string)objectValue[5], // ObjectType
-							(bool)objectValue[6], // IsSystem 
-							(bool)objectValue[7], // IsRemotable
-							(bool)objectValue[8], // IsGenerated
-							(bool)objectValue[9], // IsATObject
-							(bool)objectValue[10], // IsSessionObject
-							(bool)objectValue[11], // IsPersistent
+							Convert.ToBoolean(objectValue[6]), // IsSystem 
+							Convert.ToBoolean(objectValue[7]), // IsRemotable
+							Convert.ToBoolean(objectValue[8]), // IsGenerated
+							Convert.ToBoolean(objectValue[9]), // IsATObject
+							Convert.ToBoolean(objectValue[10]), // IsSessionObject
+							Convert.ToBoolean(objectValue[11]), // IsPersistent
 							(int)objectValue[12], // CatalogObjectID
 							(int)objectValue[13], // ParentObjectID,
 							(int)objectValue[14], // GeneratorObjectID,

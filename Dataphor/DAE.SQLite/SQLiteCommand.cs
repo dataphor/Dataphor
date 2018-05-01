@@ -16,7 +16,20 @@ namespace Alphora.Dataphor.DAE.Connection{
         {
             _useOrdinalBinding = true;
         }
-		
+
+        protected override void InternalPrepare()
+        {
+            // Have orphan transactions sometimes with this sqlite library.
+            if (_command != null && _command.Transaction != null)
+            {
+                if (_command.Transaction.Connection == null || !base.Connection.InTransaction)
+                {
+                    _command.Transaction.Dispose();
+                    _command.Transaction = null;
+                }
+            }
+        }
+
         protected override void PrepareParameters()
         {
             // Prepare parameters

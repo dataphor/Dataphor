@@ -83,12 +83,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 		
 		[Test]
-		public void SQLCECatalogRegressionTest()
-		{
-			CatalogRegressionTest(new SQLCEServerConfigurationManager());
-		}
-
-		[Test]
 		public void SQLiteCatalogRegressionTest()
 		{
 			CatalogRegressionTest(new SQLiteServerConfigurationManager());

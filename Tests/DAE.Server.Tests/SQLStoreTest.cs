@@ -10,8 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
-using System.Data.SqlServerCe;
-
 using NUnit.Framework;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
@@ -19,7 +17,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	using Alphora.Dataphor.DAE.Connection;
 	using Alphora.Dataphor.DAE.Store;
 	using Alphora.Dataphor.DAE.Store.MSSQL;
-	using Alphora.Dataphor.DAE.Store.SQLCE;
+    using Alphora.Dataphor.DAE.Store.SQLite;
 
     [TestFixture]
     public class SQLStoreTest
@@ -89,94 +87,95 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 		
 		[Test]
-		public void SQLCEReadAfterUpdateTest()
+		public void SqliteReadAfterUpdateTest()
 		{
-            SQLStore LSQLStore = new SQLCEStore();
-			LSQLStore.ConnectionString = @"Data Source=TestDatabase.sdf";
+            SQLStore LSQLStore = new SQLiteStore();
+			LSQLStore.ConnectionString = @"Data Source=TestDatabase";
 			LSQLStore.Initialize();
 			SQLStoreReadAfterUpdateTest(LSQLStore);
 		}		
 		
-		[Test]
-		public void SqlCeReadAfterUpdateTest()
-		{
-			SqlCeEngine LEngine = new SqlCeEngine(@"Data Source=TestDatabase.sdf");
-			if (!File.Exists("TestDatabase.sdf"))
-				LEngine.CreateDatabase();
+		//[Test]
+		//public void SqlCeReadAfterUpdateTest()
+		//{
+		//	SqlCeEngine LEngine = new SqlCeEngine(@"Data Source=TestDatabase");
+		//	if (!File.Exists("TestDatabase"))
+		//		LEngine.CreateDatabase();
 				
-			using (SqlCeConnection LConnection = new SqlCeConnection("Data Source=TestDatabase.sdf"))
-			{
-				LConnection.Open();
-				using (SqlCeCommand LCommand = LConnection.CreateCommand())
-				{
-					LCommand.CommandText = "select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'Test'";
-					if ((int)LCommand.ExecuteScalar() != 0)
-					{
-						LCommand.CommandText = "drop table Test";
-						LCommand.ExecuteNonQuery();
-					}
+		//	using (SqlCeConnection LConnection = new SqlCeConnection("Data Source=TestDatabase"))
+		//	{
+		//		LConnection.Open();
+		//		using (SqlCeCommand LCommand = LConnection.CreateCommand())
+		//		{
+		//			LCommand.CommandText = "select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'Test'";
+		//			if ((int)LCommand.ExecuteScalar() != 0)
+		//			{
+		//				LCommand.CommandText = "drop table Test";
+		//				LCommand.ExecuteNonQuery();
+		//			}
 					
-					LCommand.CommandText = "create table Test ( ID int not null, Name nvarchar(20), constraint PK_Test primary key ( ID ) )";
-					LCommand.ExecuteNonQuery();
+		//			LCommand.CommandText = "create table Test ( ID int not null, Name nvarchar(20), constraint PK_Test primary key ( ID ) )";
+		//			LCommand.ExecuteNonQuery();
 					
-					LCommand.CommandText = "insert into Test ( ID, Name ) values ( 1, 'Joe' )";
-					LCommand.ExecuteNonQuery();
-				}
+		//			LCommand.CommandText = "insert into Test ( ID, Name ) values ( 1, 'Joe' )";
+		//			LCommand.ExecuteNonQuery();
+		//		}
 				
-				using (SqlCeTransaction LTransaction = LConnection.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
-				{
-					try
-					{
-						using (SqlCeCommand LCommand = LConnection.CreateCommand())
-						{
-							LCommand.CommandType = System.Data.CommandType.TableDirect;
-							LCommand.CommandText = "Test";
-							LCommand.IndexName = "PK_Test";
-							LCommand.SetRange(DbRangeOptions.Default, null, null);
+		//		using (SqlCeTransaction LTransaction = LConnection.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+		//		{
+		//			try
+		//			{
+		//				using (SqlCeCommand LCommand = LConnection.CreateCommand())
+		//				{
+		//					LCommand.CommandType = System.Data.CommandType.TableDirect;
+		//					LCommand.CommandText = "Test";
+		//					LCommand.IndexName = "PK_Test";
+		//					LCommand.SetRange(DbRangeOptions.Default, null, null);
 							
-							using (SqlCeResultSet LResultSet = LCommand.ExecuteResultSet(ResultSetOptions.Scrollable | ResultSetOptions.Sensitive | ResultSetOptions.Updatable))
-							{
-								if (!LResultSet.Read())
-									throw new Exception("Expected row");
+		//					using (SqlCeResultSet LResultSet = LCommand.ExecuteResultSet(ResultSetOptions.Scrollable | ResultSetOptions.Sensitive | ResultSetOptions.Updatable))
+		//					{
+		//						if (!LResultSet.Read())
+		//							throw new Exception("Expected row");
 									
-								if ((string)LResultSet[1] != "Joe")
-									throw new Exception("Expected Joe row");
+		//						if ((string)LResultSet[1] != "Joe")
+		//							throw new Exception("Expected Joe row");
 									
-								LResultSet.SetValue(1, "Joes");
-								LResultSet.Update();
+		//						LResultSet.SetValue(1, "Joes");
+		//						LResultSet.Update();
 								
-								LResultSet.ReadFirst();
+		//						LResultSet.ReadFirst();
 								
-								//if (!LResultSet.Read())
-								//	throw new Exception("Expected row");
+		//						//if (!LResultSet.Read())
+		//						//	throw new Exception("Expected row");
 									
-								if ((string)LResultSet[1] != "Joes")
-									throw new Exception("Expected Joes row");
+		//						if ((string)LResultSet[1] != "Joes")
+		//							throw new Exception("Expected Joes row");
 									
-								LResultSet.SetValue(1, "Joe");
-								LResultSet.Update();
-							}
-						}
+		//						LResultSet.SetValue(1, "Joe");
+		//						LResultSet.Update();
+		//					}
+		//				}
 						
-						LTransaction.Commit(CommitMode.Immediate);
-					}
-					catch
-					{
-						LTransaction.Rollback();
-						throw;
-					}
-				}
+		//				LTransaction.Commit(CommitMode.Immediate);
+		//			}
+		//			catch
+		//			{
+		//				LTransaction.Rollback();
+		//				throw;
+		//			}
+		//		}
 				
-				using (SqlCeTransaction LTransaction = LConnection.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
-				{
-				}
-			}
-		}
+		//		using (SqlCeTransaction LTransaction = LConnection.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+		//		{
+		//		}
+		//	}
+		//}
 		
         [Test]        
-        public void SQLCEStoreTest()
+        public void SqliteStoreTest()
         {
-            SQLStore LSQLStore = new SQLCEStore();
+            SQLStore LSQLStore = new SQLiteStore();
+            // TODO: Where's the db for this?
             LSQLStore.ConnectionString = @"Data Source=E:\Users\Luxspes\Documents\Visual Studio 2008\SqlCE\MyDatabase1.sdf";
             SQLStoreConnection LConnection = LSQLStore.Connect();
             string ATableName = "TableTest";

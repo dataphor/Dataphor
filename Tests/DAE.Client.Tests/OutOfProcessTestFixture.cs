@@ -31,51 +31,51 @@ namespace Alphora.Dataphor.DAE.Client.Tests
 		private DataSession FDataSession;
 		protected DataSession DataSession { get { return FDataSession; } }
 
-		[OneTimeSetUp]
-		public void FixtureSetup()
-		{
-			InstanceManager.Load();
+		//[OneTimeSetUp]
+		//public void FixtureSetup()
+		//{
+		//	InstanceManager.Load();
 
-			FConfigurationManager = new SQLCEServerConfigurationManager();
-			FConfiguration = FConfigurationManager.GetTestConfiguration("TestOOPInstance");
+		//	FConfigurationManager = new MSSQLServerConfigurationManager();
+		//	FConfiguration = FConfigurationManager.GetTestConfiguration("TestOOPInstance");
 			
-			if (InstanceManager.Instances.HasInstance("TestOOPInstance"))
-				InstanceManager.Instances.Remove("TestOOPInstance");
+		//	if (InstanceManager.Instances.HasInstance("TestOOPInstance"))
+		//		InstanceManager.Instances.Remove("TestOOPInstance");
 			
-			InstanceManager.Instances.Add("TestOOPInstance", FConfiguration);
-			InstanceManager.Save();
+		//	InstanceManager.Instances.Add("TestOOPInstance", FConfiguration);
+		//	InstanceManager.Save();
 			
-			ProcessStartInfo LProcessStartInfo = new ProcessStartInfo();
-			LProcessStartInfo.FileName = Path.Combine(ServerConfigurationManager.GetInstallationDirectory(), "Dataphor\\bin\\DAEServer.exe");
-			LProcessStartInfo.WorkingDirectory = Path.GetDirectoryName(LProcessStartInfo.FileName);
-			LProcessStartInfo.Arguments = "-n \"TestOOPInstance\"";
-			LProcessStartInfo.UseShellExecute = false;
-			LProcessStartInfo.RedirectStandardInput = true;
-			FProcess = Process.Start(LProcessStartInfo);
+		//	ProcessStartInfo LProcessStartInfo = new ProcessStartInfo();
+		//	LProcessStartInfo.FileName = Path.Combine(ServerConfigurationManager.GetInstallationDirectory(), "Dataphor\\bin\\DAEServer.exe");
+		//	LProcessStartInfo.WorkingDirectory = Path.GetDirectoryName(LProcessStartInfo.FileName);
+		//	LProcessStartInfo.Arguments = "-n \"TestOOPInstance\"";
+		//	LProcessStartInfo.UseShellExecute = false;
+		//	LProcessStartInfo.RedirectStandardInput = true;
+		//	FProcess = Process.Start(LProcessStartInfo);
 			
-			// TODO: This should be a wait for the process, but WaitForInputIdle only works on GUI apps
-			//Thread.Sleep(10000);
+		//	// TODO: This should be a wait for the process, but WaitForInputIdle only works on GUI apps
+		//	//Thread.Sleep(10000);
 			
-			ConnectionAlias LAlias = new ConnectionAlias();
-			LAlias.Name = "TestOOPInstanceConnection";
-			LAlias.InstanceName = "TestOOPInstance";
+		//	ConnectionAlias LAlias = new ConnectionAlias();
+		//	LAlias.Name = "TestOOPInstanceConnection";
+		//	LAlias.InstanceName = "TestOOPInstance";
 			
-			int LRetryCount = 0;
-			while ((FDataSession == null) && (LRetryCount++ < 3))
-			{
-				Thread.Sleep(500);
-				try
-				{
-					FDataSession = new DataSession();
-					FDataSession.Alias = LAlias;
-					FDataSession.Open();
-				}
-				catch
-				{
-					FDataSession = null;
-				}
-			}
-		}
+		//	int LRetryCount = 0;
+		//	while ((FDataSession == null) && (LRetryCount++ < 3))
+		//	{
+		//		Thread.Sleep(500);
+		//		try
+		//		{
+		//			FDataSession = new DataSession();
+		//			FDataSession.Alias = LAlias;
+		//			FDataSession.Open();
+		//		}
+		//		catch
+		//		{
+		//			FDataSession = null;
+		//		}
+		//	}
+		//}
 		
 		[OneTimeTearDown]
 		public void FixtureTearDown()
