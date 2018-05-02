@@ -1,0 +1,12 @@
+create type Base from class "CQF.Model.Base" 
+{
+	representation AsString { AsString : String read class "System.ObjectAsStringReadAccessorNode" },
+	representation AsXML
+	{
+		AsXML : String
+			read class "CQF.Model.ModelAsXMLReadAccessorNode"
+			write class "CQF.Model.ModelAsXMLWriteAccessorNode"
+	} class "CQF.Model.ModelAsXMLSelectorNode"
+}
+	class "CQF.Model.ModelObjectConveyor"
+	static tags { DAE.AsString = "AsString", DAE.AsDisplayString = "AsDisplayString" };

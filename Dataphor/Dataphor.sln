@@ -188,6 +188,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHIR2.Core", "..\Libraries\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHIR3.Core", "..\Libraries\FHIR3.Core\Source\FHIR3.Core.csproj", "{A36433E8-3829-4F43-BAB4-CB994EF01D09}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CQF.Model", "..\Libraries\CQF.Model\Source\CQF.Model.csproj", "{8DD69DCF-95E3-4209-A09F-8668022DDE0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		BaseDebug|Any CPU = BaseDebug|Any CPU
@@ -1081,6 +1083,18 @@ Global
 		{A36433E8-3829-4F43-BAB4-CB994EF01D09}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A36433E8-3829-4F43-BAB4-CB994EF01D09}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{A36433E8-3829-4F43-BAB4-CB994EF01D09}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.BaseDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.BaseDebug|Any CPU.Build.0 = Debug|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.BaseDebug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.BaseDebug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1164,5 +1178,6 @@ Global
 		{6009F17A-D960-449B-A96E-2D915AD743FD} = {658579EE-4680-4E26-8BD7-6AB8C3B70252}
 		{0529069C-4980-4F4E-9495-2ACA2D067E41} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
 		{A36433E8-3829-4F43-BAB4-CB994EF01D09} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
+		{8DD69DCF-95E3-4209-A09F-8668022DDE0A} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
 	EndGlobalSection
 EndGlobal

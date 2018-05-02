@@ -1,0 +1,192 @@
+// Conformance Cache
+// Create and populates the temporary structures used by ModelInfo.Operators
+
+//* Table: StructureDefinitions
+SafeDrop("StructureDefinitions");
+create table StructureDefinitions in Temp from
+	Resource where Type = "StructureDefinition" { Id, (Content as StructureDefinition) StructureDefinition }
+
+//* Table: ImplementationGuides
+SafeDrop("ImplementationGuides");
+create table ImplementationGuides in Temp from
+	Resource where Type = "ImplementationGuide" { Id, (Content as ImplementationGuide) ImplementationGuide }
+
+//* Table: Models
+SafeDrop("Models");
+create table Models in Temp { Name : String, Url : String, key { Name } };
+
+// Create a model for the System model
+insert row { "System" Name, "urn:hl7-org:elm-types:r1" Url } into Models;
+
+// Create a model for the FHIR Model
+insert row { "FHIR" Name, "http://hl7.org/fhir" Url } into Models;
+
+// TODO: Figure out what's wrong with this profile:
+delete StructureDefinitions where Id = "elementdefinition-de";
+
+// TODO: Would be nice to use "Name" here, but it's not machine-friendly in these IGs
+//select ImplementationGuides { ImplementationGuide.Url Url, ImplementationGuide.Id Id }
+
+// Create a row for the US Core model
+insert row { "USCore" Name, "http://hl7.org/fhir/us/core" Url } into Models;
+
+// Create a row for the QI Core model
+insert row { "QICore" Name, "http://hl7.org/fhir/us/qicore" Url } into Models;
+
+//* Table: TypeInfos
+// Create a TypeInfos table to store TypeInfos already generated   	
+SafeDrop("TypeInfos");
+create table TypeInfos in Temp { Name : String, ModelName : String, Value : CQF.Model.TypeInfo, key { Name } };
+
+// Populate the System Model Info
+//select (CQF.Model.Base.AsXML(LoadDocument("CQF.Model", "SystemModelInfo")) as ModelInfo)
+insert
+//select 
+	ToTable(
+		foreach var typeInfo in (CQF.Model.Base.AsXML(LoadDocument("CQF.Model", "SystemModelInfo")) as ModelInfo).typeInfo do
+		  row { GetTypeName("System", typeInfo) Name, "System" ModelName, typeInfo Value }
+	)
+     adorn { key { Name } }
+     { Name, ModelName, Value }
+  into TypeInfos;
+
+// FHIR Primitives
+// base64Binary - value: xs:base64Binary
+// boolean - value: xs:boolean
+// code: string - value: xs:token
+// date - value: xs:date | xs:gYearMonth | xs:gYear
+// dateTime - value: xs:dateTime | xs:date | xs:gYearMonth | xs:gYear
+// decimal - value: xs:decimal
+// id: string - value: xs:string
+// instant - value: xs:dateTime
+// integer - value: xs:int
+// markdown: string - value: xs:string
+// oid: uri - value: xs:anyUri
+// positiveInt: integer - value: xs:positiveInteger
+// string - value: xs:string
+// time - value: xs:time
+// unsignedInt - value: xs:nonNegativeInteger
+// uri - value: xs:anyUri
+// uuid - value: xs:anyUri
+// xhtml - value: xhtml:div
+
+//* Table: PrimitiveTypeMappings
+// Define primitive mappings
+SafeDrop("PrimitiveTypeMappings");
+create table PrimitiveTypeMappings in Temp { SourceTypeName : String, TargetTypeName : String, key { SourceTypeName } };
+
+insert
+	table
+	{
+		row { "FHIR.base64Binary" SourceTypeName, "System.String" TargetTypeName },
+		row { "FHIR.boolean", "System.Boolean" },
+		row { "FHIR.code", "System.String" },
+		row { "FHIR.date", "System.DateTime" },
+		row { "FHIR.dateTime", "System.DateTime" },
+		row { "FHIR.decimal", "System.Decimal" },
+		row { "FHIR.id", "System.String" },
+		row { "FHIR.instant", "System.DateTime" },
+		row { "FHIR.integer", "System.Integer" },
+		row { "FHIR.markdown", "System.String" },
+		row { "FHIR.oid", "System.String" },
+		row { "FHIR.positiveInt", "System.Integer" },
+		row { "FHIR.string", "System.String" },
+		row { "FHIR.time", "System.Time" },
+		row { "FHIR.unsignedInt", "System.Integer" },
+		row { "FHIR.uri", "System.String" },
+		row { "FHIR.uuid", "System.String" },
+		row { "FHIR.xhtml", "System.String" }
+	}
+	into PrimitiveTypeMappings;
+
+//* Table: CQLTypeMappings
+// Define CQL type mappings	
+SafeDrop("CQLTypeMappings");
+create table CQLTypeMappings in Temp { SourceTypeName : String, TargetTypeName : String, key { SourceTypeName } };
+
+insert
+	table
+	{
+		row { "FHIR.base64Binary" SourceTypeName, "System.String" TargetTypeName },
+		row { "FHIR.boolean", "System.Boolean" },
+		row { "FHIR.code", "System.String" },
+		row { "FHIR.date", "System.DateTime" },
+		row { "FHIR.dateTime", "System.DateTime" },
+		row { "FHIR.decimal", "System.Decimal" },
+		row { "FHIR.id", "System.String" },
+		row { "FHIR.instant", "System.DateTime" },
+		row { "FHIR.integer", "System.Integer" },
+		row { "FHIR.markdown", "System.String" },
+		row { "FHIR.oid", "System.String" },
+		row { "FHIR.positiveInt", "System.Integer" },
+		row { "FHIR.string", "System.String" },
+		row { "FHIR.time", "System.Time" },
+		row { "FHIR.unsignedInt", "System.Integer" },
+		row { "FHIR.uri", "System.String" },
+		row { "FHIR.uuid", "System.String" },
+		row { "FHIR.xhtml", "System.String" },
+		row { "FHIR.Coding", "System.Code" },
+		row { "FHIR.CodeableConcept", "System.Concept" },
+		row { "FHIR.Period", "Interval<System.DateTime>" },
+		row { "FHIR.Range", "Interval<System.Quantity>" },
+		row { "FHIR.Quantity", "System.Quantity" },
+		row { "FHIR.Age", "System.Quantity" },
+		row { "FHIR.Distance", "System.Quantity" },
+		row { "FHIR.SimpleQuantity", "System.Quantity" },
+		row { "FHIR.Duration", "System.Quantity" },
+		row { "FHIR.Count", "System.Quantity" },
+		row { "FHIR.Money", "System.Quantity" }
+	}
+	into CQLTypeMappings;
+
+//* Table: PrimaryCodePaths
+// Define PrimaryCodePaths
+SafeDrop("PrimaryCodePaths");
+create table PrimaryCodePaths in Temp from
+	table of { ResourceType : System.String, PrimaryCodePath : System.String }
+	{
+		row { 'ActivityDefinition' ResourceType, 'topic' PrimaryCodePath }, 
+		row { 'AdverseEvent' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'AllergyIntolerance' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'Appointment' ResourceType, 'serviceType' PrimaryCodePath }, 
+		row { 'Basic' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'CarePlan' ResourceType, 'category' PrimaryCodePath }, 
+		row { 'Claim' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'ClinicalImpression' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'Communication' ResourceType, 'category' PrimaryCodePath }, 
+		row { 'CommunicationRequest' ResourceType, 'category' PrimaryCodePath }, 
+		row { 'Composition' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'Condition' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'Consent' ResourceType, 'category' PrimaryCodePath }, 
+		row { 'Coverage' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'DetectedIssue' ResourceType, 'category' PrimaryCodePath }, 
+		row { 'Device' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'DeviceMetric' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'DeviceRequest' ResourceType, 'codeCodeableConcept' PrimaryCodePath }, 
+		row { 'DiagnosticReport' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'Encounter' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'EpisodeOfCare' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'Flag' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'Goal' ResourceType, 'category' PrimaryCodePath }, 
+		row { 'HealthcareService' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'Immunization' ResourceType, 'vaccineCode' PrimaryCodePath }, 
+		row { 'Library' ResourceType, 'topic' PrimaryCodePath }, 
+		row { 'Measure' ResourceType, 'topic' PrimaryCodePath }, 
+		row { 'Medication' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'MedicationAdministration' ResourceType, 'medicationCodeableConcept' PrimaryCodePath }, 
+		row { 'MedicationDispense' ResourceType, 'medicationCodeableConcept' PrimaryCodePath }, 
+		row { 'MedicationRequest' ResourceType, 'medicationCodeableConcept' PrimaryCodePath }, 
+		row { 'MedicationStatement' ResourceType, 'medicationCodeableConcept' PrimaryCodePath }, 
+		row { 'Observation' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'Procedure' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'ProcedureRequest' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'ReferralRequest' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'RiskAssessment' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'Sequence' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'Specimen' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'Substance' ResourceType, 'code' PrimaryCodePath }, 
+		row { 'SupplyDelivery' ResourceType, 'type' PrimaryCodePath }, 
+		row { 'SupplyRequest' ResourceType, 'category' PrimaryCodePath }, 
+		row { 'Task' ResourceType, 'code' PrimaryCodePath }, 
+		key { .ResourceType }
+	};

@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <library xmlns:bop="www.alphora.com/schemas/bop" assembliesasstring="" defaultdevicename="PGSQLFHIRDevice" generatorid="-1" isgenerated="False" isremotable="True" issystem="False" librariesasstring="" name="FHIR.Server" settings="" version="*" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
 	<files.filereference filename="Alphora.Dataphor.FHIR.Server.dll" isassembly="True" />
-	<libraries.libraryreference name="FHIR.Core" version="*" />
 	<libraries.libraryreference name="PGSQLDevice" version="*" />
+	<libraries.libraryreference name="FHIR3.Core" version="*" />
+	<libraries.libraryreference name="System.Platform" version="*" />
+	<libraries.libraryreference name="CQF.Model" version="*" />
 </library>

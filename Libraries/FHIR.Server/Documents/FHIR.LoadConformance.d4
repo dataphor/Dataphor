@@ -1,0 +1,53 @@
+// Load Conformance Content
+// This script loads all conformance content for the base FHIR specification
+
+// delete Resource
+// delete ResourceHistory
+
+//* Operator: ImportBundle
+// Imports all the resources in the given bundle
+create operator ImportBundle(const ABundle : Bundle)
+begin
+  foreach var LEntry in ABundle.Entry do
+  begin
+    insert row { LEntry.Resource Content } into Resource;
+  end;
+end;
+
+//* Operator: ImportResource
+// Imports the given resource, if it's a bundle, imports all the entries, otherwise just imports the resource
+create operator ImportResource(const ABase : Base)
+begin
+  if ABase is Bundle then
+    ImportBundle(ABase as Bundle)
+  else
+    insert row { ABase as FHIR3.Core.Resource Content } into Resource;
+end;
+
+//* Operator: ImportResourceFromFile
+// Imports the given resource from a file
+create operator ImportResourceFromFile(const AFilePath : String)
+begin
+  ImportResource(Base.AsJSON(LoadTextFile(AFilePath)));
+end;
+
+//* Operator: ImportResourcesFromDirectory
+// Imports all resources from json files in the given directory
+create operator ImportResourcesFromDirectory(const ADirectory : String)
+begin
+  foreach var LFile in ListFiles(ADirectory, "*.json") do
+  begin
+    ImportResourceFromFile(LFile.Path);
+  end;
+end;
+
+// Load the FHIR Core Spec, version 3.0.1, Execution Time 33 seconds, 6509 resources (1107 duplicates)
+ImportResourcesFromDirectory("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\3.0.1");
+
+// Load the US-Core definitions, version 1.0.1, Execution Time 0.89 seconds, 53 resources
+ImportResourcesFromDirectory("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\US-Core\1.0.1");
+
+// Load the QI-Core definitions, version 2.0.0, Execution Time 1.4 seconds, 67 resources
+ImportResourcesFromDirectory("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\QI-Core\2.0.0");
+
+//select Resource group by { Type } add { Count() Number }

@@ -32932,10 +32932,10 @@ begin
 				var targetTypeName := elements.Get("-type").ToString();
 				var functionName := "To" + targetTypeName.SubString(targetTypeName.IndexOf(".") + 1);
 				
-				statements.Add("define function " + functionName + "(value " + sourceTypeName + "): value.value");
+				statements.Add("define function " + functionName + "(value FHIR." + sourceTypeName + "): value.value");
 
 				//<ns4:conversionInfo fromType="FHIR.string" toType="System.String" functionName="FHIRHelpers.ToString"/>
-				conversions.Add('<ns4:conversionInfo fromType="' + sourceTypeName + '" toType="' + targetTypeName + '" functionName="FHIRHelpers.' + functionName + '"/>');
+				conversions.Add('<ns4:conversionInfo fromType="FHIR.' + sourceTypeName + '" toType="' + targetTypeName + '" functionName="FHIRHelpers.' + functionName + '"/>');
 			end;
 		end;
 	end;
